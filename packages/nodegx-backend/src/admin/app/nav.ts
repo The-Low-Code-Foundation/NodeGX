@@ -8,6 +8,8 @@
  *   Executions → Runs · "Access" group split into People (Users, Roles,
  *   Sign-in) and Access (Permissions, API keys) · "Config" → Storage (Files)
  *   and Settings (Email, Backups) · "Ops" → Activity (Audit).
+ *   BMG-011: Settings grew Secrets, Search and Server (the three route
+ *   families the old page never showed); Audit is called Activity.
  */
 export interface NavEntry {
   id: string;
@@ -59,12 +61,15 @@ export const NAV: NavGroup[] = [
     label: 'Settings',
     entries: [
       { id: 'email', label: 'Email', feature: 'email' },
-      { id: 'backups', label: 'Backups', feature: 'backups' }
+      { id: 'backups', label: 'Backups', feature: 'backups' },
+      { id: 'secrets', label: 'Secrets', feature: 'secrets' },
+      { id: 'search', label: 'Search', feature: 'search' },
+      { id: 'server', label: 'Server', feature: 'ops' }
     ]
   },
   {
     label: 'Activity',
-    entries: [{ id: 'audit', label: 'Audit', feature: 'ops' }]
+    entries: [{ id: 'audit', label: 'Activity', feature: 'ops' }]
   }
 ];
 

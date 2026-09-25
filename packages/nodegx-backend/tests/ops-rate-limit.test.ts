@@ -275,8 +275,14 @@ describe('BAK-009 rate limiting over real sockets', () => {
     // first admin account, made with the credential — admin-gated, so `admin`)
     // and `POST _admin/login` (email + password presented — `auth`, beside
     // `login` and the document). Counted, not guessed — 93 → 94, 16 → 17.
+    // BMG-011 moved `admin` by 4: `GET admin/files` (the Storage page's list),
+    // `GET admin/files/uses` (which records point at the files shown),
+    // `DELETE admin/files/:name` (remove one from the page) and
+    // `GET admin/backups/archive` (an archive as a download). Reviewed and left
+    // in the `admin` budget: one person, one page, reads of bounded size and a
+    // download the page hands the browser. Counted, not guessed — 94 → 98.
     expect(counts).toEqual({
-      admin: 94,
+      admin: 98,
       auth: 17,
       data: 19,
       files: 4,

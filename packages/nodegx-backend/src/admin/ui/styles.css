@@ -2113,3 +2113,59 @@ pre.preview-pane.mono {
 a.btn {
   text-decoration: none;
 }
+
+/* ------------------------------------------------------ BMG-011: storage, backups, server -- */
+.kind-boxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 6px 14px;
+  margin: 6px 0 4px;
+}
+
+.kind-box {
+  align-items: flex-start;
+}
+
+.kind-box > span {
+  display: grid;
+  gap: 2px;
+}
+
+.uses-list {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.uses-list li {
+  margin: 2px 0;
+}
+
+table.files td.thumb-cell {
+  width: 44px;
+}
+
+table.files .uses-cell {
+  max-width: 260px;
+}
+
+.list-head {
+  color: var(--fg-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.rate-table {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.rate-table .list-row > input[type='number'] {
+  flex: 0 0 auto;
+}
+
+.blocked {
+  opacity: 0.55;
+  pointer-events: none;
+}

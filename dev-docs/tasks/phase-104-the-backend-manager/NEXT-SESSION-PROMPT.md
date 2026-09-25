@@ -1,11 +1,12 @@
 # P104 — next session
 
-**Written 2026-09-25 (end of s12).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
+**Written 2026-09-25 (end of s13).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
 BMG-001; s3 built and drove BMG-007 (API keys); s4 BMG-004 (Users, R3 disable); s5 BMG-002
 (Collections); s6 BMG-005 (Roles); s7 BMG-006 (Permissions); s8 BMG-008 (Triggers); s9 BMG-003
 (Schema) and filed **R6** (README §8) for Richard; s10 BMG-009 (Workflows and Runs); s11 BMG-010
-(Email and Sign-in); s12 built and drove **BMG-014** (the first admin is a person — Richard's ask that
-session: an email and a password on the first page load, backend access on the Users page).
+(Email and Sign-in); s12 BMG-014 (the first admin is a person); s13 built and drove **BMG-011**
+(Storage with a file browser, Backups with Restore… (R4), Secrets, Search, Server, Audit → Activity — and
+found that restore over HTTP never reconnected the running database).
 
 ## Where it stands
 
@@ -23,7 +24,8 @@ session: an email and a password on the first page load, backend access on the U
 | BMG-009 Workflows and Runs | ✅ s10 | ✅ headless, AC1–5, 34/34 checks (§6) | ✅ `fb56efbf` |
 | BMG-010 Email and Sign-in | ✅ s11 | ✅ headless, AC1–5 + 7, 42/42 checks (§6) | ✅ `1f84abdb` |
 | BMG-014 The first admin is a person | ✅ s12 | ✅ headless, AC1–3 + 6, 33/33 checks (§6) | ✅ `aad1a80c` |
-| BMG-011…012 | — | — | — |
+| BMG-011 Files, Backups, Ops | ✅ s13 | ✅ headless, AC1–9, 39/39 checks (§6) | ✅ s13 (hash in the commit line below) |
+| BMG-012 | — | — | — |
 | BMG-013 Richard drives | his | — | — |
 
 Built-but-undriven: 0. Built-but-uncommitted: 0. Check `git status -- packages/nodegx-backend/src/admin`
@@ -33,6 +35,11 @@ before believing that: a peer session may have touched it.
 browser: yes, behind the typed name · R5 filed · **R6 OPEN (s9): on a collection that already has records, a
 required field ASKS for a default (the engines require one) instead of AC5's "Required disables Default" — ask
 Richard in plain words whether that is the rule, or whether Required should be refused there.** All in README §8.
+
+**Gate readings (2026-09-25, s13):** `packages/nodegx-backend` `npm run typecheck` exit 0 (both configs); full backend
+`npx jest --maxWorkers=4`: **201 suites PASS, 1 skipped (`fed-003-live-cache`), 0 FAIL, 2433 tests, exit 0, 367 s** (2026-09-25, s13, after every change in this commit). Bundle 99,696 gzip (budget 160,000); route tally `admin: 98`
+(`GET admin/files`, `GET admin/files/uses`, `DELETE admin/files/:name`, `GET admin/backups/archive`), `auth: 17`. Drive
+`drives/bmg011/run.sh ac seed` 39/39. New specs: `tests/bmg-011-files-backups-ops.test.ts` 22, `tests/admin-app/storage-views.test.tsx` 24.
 
 **Gate readings (2026-09-25, s12):** `packages/nodegx-backend` `npm run typecheck` exit 0 (both configs); Full backend `npx jest --maxWorkers=4`: **199 suites PASS, 1 skipped (`fed-003-live-cache`), 0 FAIL, 2387 tests, exit 0, 348 s** (2026-09-25, s12, after every change in this commit; the first run had `hlt-024-exchange-roles` red because a session-issuing response must carry `roles` — both new responses now do, through a `rolesForUser` dep, and the scan's known list grew the two sites).
 Bundle 87,333 gzip (budget 160,000); route tally `admin: 94`, `auth: 17` (`POST _admin/setup`, `POST _admin/login`). Drive
@@ -56,6 +63,35 @@ route). Drive `drives/bmg003/run.sh ac seed` 41/41.
 🔴 A new `/admin/...` route still owes the tally line AND an `audit-actions.ts` entry (an action, or a
 `NOT_AUDITED` reason for a dry run); a POST a read-only admin should be able to make owes `readonly.ts` too.
 
+## What s13 settled (BMG-011)
+
+- 🔴 **Restore over HTTP never reconnected the running database.** `BackupManager.doRestore` replaced `data/local.db`
+  under the adapter's open handle: the process kept serving the OLD rows from the unlinked inode and every write after
+  the "restore" went where nothing would read it — self-healing on the next restart, invisible to every arm that
+  completes (a spec that restored into a CLEAN dir could not see it). Now `AdminBackupRoutes.restore` takes a
+  `PersistenceControl` from `service.ts`: `adapter.disconnect()` → unpack → `adapter.connect()` + `ensureSystemTables()`,
+  in `try/finally`. The adapter reopens the SAME path, so every holder of the facade sees the restored rows; the schema
+  manager is REMADE by `connect()`, which is why `SearchIndexer` now takes a getter. The spec reads the file back through
+  a SEPARATE `node:sqlite` connection (WAL: a plain read of `local.db` misses the bytes).
+- 🔴 **A thumbnail was cached under the preset's NAME** (`thumbs/<hash>/sm.bin`): editing `sm` served the old render
+  and the old ETag. The key and the ETag now carry name + size + fit. The jest spec MISSED it (a fresh preset name);
+  the drive found it because the page had rendered `sm` before the edit. A cache pinned by a spec that only ever
+  writes new keys pins nothing.
+- **The refused-kinds vocabulary is the sniffer's** (`fileKinds.ts` ⇄ `storage/sniff.ts` literals, held equal by the
+  spec). An upload is judged by its BYTES: a *Video* box would store `video/mp4` and match nothing. A custom type the
+  sniffer never produces is kept and labelled *never identified*.
+- **`GET /admin/files/uses?names=` is one walk per page**, never per row: every File-typed column of every user
+  collection, `select`ed, for the names shown. `DELETE /admin/files/:name` is 409 `FILE_IN_USE` naming the records;
+  `?clear=1` blanks the fields first. The public and admin deletes share `FileSubsystem.deleteStored`.
+- **An `<a href>` cannot send the credential**: images use a signed URL + `&thumb=sm`; an archive download is fetched
+  with the credential and handed to the browser as a blob. `GET /admin/backups/archive?file=` serves LISTED archives
+  only (`..` is 404 by name); restore likewise takes a listed `file`/`path`.
+- **Every ops section is read live** (`service.ts` getters, `logger.configure` on save, `applyCors` per request):
+  nothing on the Server page needs a restart. `putOps` refuses `queries` (§7).
+- **BMG-014 in a drive**: a fresh LOCKED backend shows the setup step on the first load; the drive makes the first admin
+  by `POST /_admin/setup` before navigating. CDP `DOM.setFileInputFiles` fires `change` itself.
+- The search wire is `POST /classes/:c {_method:'GET', search}` (FTS5), not a `$text` where-clause (that is a LIKE).
+
 ## What s12 settled (BMG-014)
 
 - **A session can BE the admin.** `resolvePrincipal` upgrades a session whose `_User` row carries `adminAccess` to
@@ -78,17 +114,21 @@ route). Drive `drives/bmg003/run.sh ac seed` 41/41.
 
 ## Do this, in order
 
-1. **BMG-011 Files, Backups, Ops.** Depends on 001, 008, R4 (yes: restore in the browser behind typing the
-   backend's name, back-up-first ticked). **`ScheduleBuilder` from s8 is the sweep/backup schedule control** — hand it
-   `preview={(cron) => api('POST', '/admin/triggers/preview', {cron})}` and it is done. Read `views/files.tsx`,
-   `views/backups.tsx`, `server/admin-files.ts`, `server/admin-backups.ts` (or wherever restore lives — grep
-   `admin/backups/restore`), `readonly.ts` (restore is NOT safe) first. Denied file types as categories, not a
-   MIME list (AC7-style: no comma field). The drive recipe is `drives/bmg010/run.sh` minus the SMTP sink.
-2. Then BMG-012 (which also deletes the editor's `serverOwnedColumns.ts`, its `panels/permissions/ruleVocabulary.ts`,
-   its `EmailPanel.tsx` (the template editor now lives on the page), AND its `cronGloss` in
-   `models/triggers/TriggerBackendClient.ts` with `TriggerFormFields.tsx` — the backend's `triggers/cronWords.ts` is
-   the one gloss; the editor's `workflowtriggernodes.test.ts` pins on `cronGloss` go with it). One commit per task,
-   a §6 *Built* with what each AC measured, shots in `shots/`, drives in `drives/<task>/`.
+1. **BMG-012 The editor lets go.** Read its task file first, then `git status` + `stat` on the editor files it names.
+   It deletes the editor's six backend panels and, with them: `serverOwnedColumns.ts`, `panels/permissions/
+   ruleVocabulary.ts`, `EmailPanel.tsx` (the template editor lives on the page), `cronGloss` in
+   `models/triggers/TriggerBackendClient.ts` with `TriggerFormFields.tsx` (the backend's `triggers/cronWords.ts` is the
+   one gloss; the editor's `workflowtriggernodes.test.ts` pins on `cronGloss` go with it), the Secrets panel
+   (`secretsPanelModel.ts` — ported to the page as `admin/app/secretsModel.ts` in s13) and the Search panel. The two
+   doors become deep links (`#/secrets`, `#/search`, `#/server`, `#/files`, `#/backups` exist now). 🔴 BMG-014's note
+   stands: `BackendManager.js openDashboard` hands `#token=` on EVERY open — once an account exists the editor could
+   open without it so the page asks for email + password. 🔴 The editor's `tests/databrowser/*.spec.ts` are what the
+   editor `test:ci` webpack typechecks — delete them with their panels, and run the editor gate (`test:ci`), not
+   only the backend's. One commit per task, a §6 *Built* with what each AC measured, shots in `shots/`.
+2. Then **BMG-013 Richard drives it** — his; write the prompt that hands him the six pages and the R6 question.
+3. Candidates left by s13 (BMG-011 §7): `queries` (the page cap) on the Server page is one line in `putOps` and a
+   card; a restore of a FOREIGN archive leaves `SecurityState`/`OpsState` in memory at their pre-restore values until
+   a restart (this backend's own archive has the same files) — say it on the dialog or reload those states too.
 
 ## What s11 settled
 

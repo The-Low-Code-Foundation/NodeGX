@@ -34,10 +34,13 @@ The nav groups the pages the way a person thinks about a backend: **Data**,
 | Automation | **Triggers** | List schedules/webhooks/db-change hooks with last-fired and last-result; enable, disable, fire now. |
 | Automation | **Workflows** | List WF-001 definitions and run them with a payload. |
 | Automation | **Runs** | The full run history — every function, trigger, workflow and backup run — with per-run detail: the failures first, then the steps. (Called *Executions* before phase 104.) |
-| Storage | **Files** | Upload limits, denied content types, the storage driver, thumbnail presets, the orphan sweep. |
+| Storage | **Files** | Browse what the app has stored (thumbnails, sizes, *used by* the record that points at each file), upload, download, delete — a delete refuses by name while a record uses the file and offers to clear the field. Below: the largest upload, how long a private link lives, the kinds refused as ticked categories (in the backend's own sniffer vocabulary) plus custom types, thumbnail presets as rows, and the clean-up on a schedule built with the schedule builder. |
 | Settings | **Email** | SMTP settings, verification policy, templates, and a real test send. |
-| Settings | **Backups** | Schedule and status, archive list, and "back up now". |
-| Activity | **Audit** | Who changed what, when, and from where. |
+| Settings | **Backups** | When (the schedule builder, a missed-run policy), keep (the last N, one a day for N days, one a week for N weeks), where, "back up now", the archives with **Download** and **Restore…** — restore asks for the backend's typed name with *Back up first* ticked, and blocks the page until the backend answers. |
+| Settings | **Secrets** | The values cloud functions read with a Secret node: add, set a new value, delete. Names only ever come back; a value is typed once. Variables set in the environment are listed beside them. |
+| Settings | **Search** | Per collection: searchable or not, which text fields, rebuild the index. |
+| Settings | **Server** | Who may call from a browser (any site, or named sites as chips, cookies), rate limits per kind of request, logging, the activity trail's retention, run history retention and *Compact now*, metrics. Each card saves alone and applies at once. |
+| Activity | **Activity** | Who changed what, when, and from where — the thing as a link (*Pets · permissions*, *editors · role*), the actor as a person or *API key: deploy*, the detail as a tree with the raw entry one click away. Filter by action · who · outcome · when. (Called *Audit* before BMG-011.) |
 
 Sections whose backing subsystem is not present in your build are **not
 rendered**. They never appear and then fail. Every list that is empty says what
@@ -53,6 +56,7 @@ The address bar is the page's state, so any page can be sent as a link:
 #/collections/Pet/new        a new record in it
 #/schema/Pet                 that collection's card
 #/users/<objectId>  #/roles/<name>  #/triggers/<id>  #/runs/<id>
+#/secrets  #/search  #/server  #/audit   the Settings pages and Activity
 ```
 
 `#/executions` still works and lands on Runs.
@@ -67,9 +71,13 @@ editor's own design tokens, copied into the page at build time.
 
 - **Author graphs.** Functions and workflows are edited in the editor. The
   dashboard shows what they did; it does not write them.
-- **Restore a backup.** The blessed recovery path is `nodegx-backend restore`
-  with the service stopped. A one-click restore of a live service is a footgun,
-  not a feature. (The route exists for automation; there is no button.)
+- **Restore without being asked twice.** Restore is a button (since BMG-011,
+  at Richard's ruling), but it is behind the backend's typed name, *Back up
+  first* is ticked by default, and the backend disconnects from its database
+  for the swap and reconnects to the restored one before it answers — so what
+  the page says was restored is what the next request reads. The CLI
+  `nodegx-backend restore` with the service stopped remains the path for a
+  backend you cannot reach in a browser.
 - **Manage more than one backend.** One dashboard per instance.
 
 ---

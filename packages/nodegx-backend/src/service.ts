@@ -554,7 +554,21 @@ export class BackendService {
       emailTokens: new EmailTokenStore(this.facade),
       auth: this.auth,
       ops: this.ops,
-      audit: this.audit
+      audit: this.audit,
+      // BMG-011: a restore from the manager swaps the database this process
+      // serves. The adapter reopens the SAME path, so every holder of the
+      // facade sees the restored rows; the schema manager is remade by
+      // `connect()`, which is why long-lived readers of it take a getter.
+      persistenceControl: {
+        pause: async () => {
+          if (this.persistence) await this.persistence.adapter.disconnect();
+        },
+        resume: async () => {
+          if (!this.persistence) return;
+          await this.persistence.adapter.connect();
+          this.ensureSystemTables();
+        }
+      }
     });
     const listen = await this.http.listen();
 

@@ -153,6 +153,13 @@ export function toWire(col: Column, value: unknown): unknown {
   return value;
 }
 
+/** A size in a person's units. */
+export function bytes(n: number): string {
+  if (n < 1024) return n + ' B';
+  if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+  return (n / 1024 / 1024).toFixed(1) + ' MB';
+}
+
 /** The display name of a stored file: the backend puts a unique prefix before what was uploaded. */
 export function fileLabel(name: string): string {
   const m = /^[0-9a-f]{8,}[-_](.+)$/i.exec(name);

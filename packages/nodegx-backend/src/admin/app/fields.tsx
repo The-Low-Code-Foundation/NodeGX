@@ -21,7 +21,7 @@ import { AclCard } from './composers/AclCard';
 import { KeyValueEditor, KvRow, objectFromRows, rowsFromObject } from './composers/KeyValueEditor';
 import { ListEditor } from './composers/ListEditor';
 import { Picker } from './composers/Picker';
-import { Column, fileLabel, isSystemField, plain, shortId, toLocalInput } from './format';
+import { Column, bytes, fileLabel, isSystemField, plain, shortId, toLocalInput } from './format';
 
 export type ItemType = 'text' | 'number' | 'boolean';
 
@@ -557,12 +557,6 @@ function GeoControl({ col, raw, onChange, disabled }: { col: Column; raw: GeoRaw
       {problem ? <span class="chips-problem">{problem}</span> : null}
     </div>
   );
-}
-
-function bytes(n: number): string {
-  if (n < 1024) return n + ' B';
-  if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
-  return (n / 1024 / 1024).toFixed(1) + ' MB';
 }
 
 /**

@@ -16,6 +16,7 @@
  */
 
 import * as crypto from 'crypto';
+import * as fs from 'fs';
 import * as path from 'path';
 
 import type { ExecutionHistory } from '../execution/ExecutionStore';
@@ -36,6 +37,7 @@ import { LocalDriver } from './LocalDriver';
 import { S3Driver } from './S3Driver';
 import type { StorageDriver } from './types';
 import { MetadataStore } from './MetadataStore';
+import type { FileRecord } from './MetadataStore';
 import { runOrphanSweep } from './orphanSweep';
 import { loadTransformer } from './transform';
 
@@ -291,6 +293,29 @@ export class FileSubsystem {
 
   setPresets(presets: Record<string, ThumbPreset>): void {
     this.config.update({ thumbnails: { presets } });
+  }
+
+  /**
+   * Where `FileRoutes` caches a file's rendered thumbnails, by content hash.
+   * One spelling, here, so the two deleters (the public route and BMG-011's
+   * admin route) invalidate the same directory.
+   */
+  thumbCacheDir(hash: string): string {
+    return path.join(this.deps.dataDir, 'files', 'thumbs', hash);
+  }
+
+  /**
+   * Remove a stored file: the blob, its metadata row, and its cached
+   * thumbnails (BMG-011). The one implementation behind `DELETE /files/:name`
+   * and `DELETE /admin/files/:name`; the callers decide WHO may, this decides
+   * WHAT goes. The cache goes last and best-effort: a leftover thumbnail is a
+   * few kilobytes nothing serves, a leftover row is an orphan the sweep reports.
+   */
+  async deleteStored(record: FileRecord): Promise<void> {
+    await this.driver.delete(record.key);
+    await this.metadata.deleteById(record.objectId);
+    const cacheDir = this.thumbCacheDir(record.hash);
+    if (fs.existsSync(cacheDir)) fs.rmSync(cacheDir, { recursive: true, force: true });
   }
 
   /** Run the sweep right now, outside the schedule (admin/MCP "run now"). */

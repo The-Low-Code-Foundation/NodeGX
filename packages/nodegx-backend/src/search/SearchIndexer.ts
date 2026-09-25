@@ -40,11 +40,20 @@ export class SearchCapabilityError extends Error {
 // adapter got described twice, differently.
 
 export class SearchIndexer {
-  private readonly schemaManager: IStorageSchema | null;
+  private readonly read: () => IStorageSchema | null;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(schemaManager: IStorageSchema | null) {
-    this.schemaManager = schemaManager || null;
+  /**
+   * Takes the schema manager, or a function that reads it. BMG-011: a restore
+   * over HTTP reconnects the adapter, which makes a NEW schema manager — an
+   * indexer that captured the old one at construction would drop and rebuild
+   * FTS tables on a closed database. Long-lived holders pass the getter.
+   */
+  constructor(schemaManager: IStorageSchema | null | (() => IStorageSchema | null)) {
+    this.read = typeof schemaManager === 'function' ? schemaManager : () => schemaManager;
+  }
+
+  private get schemaManager(): IStorageSchema | null {
+    return this.read() || null;
   }
 
   /** The BAK-008 "verify first" check, live: does THIS running engine have FTS5? */

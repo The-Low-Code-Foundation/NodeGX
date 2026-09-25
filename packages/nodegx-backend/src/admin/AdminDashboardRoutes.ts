@@ -132,6 +132,8 @@ export interface DashboardFeatures {
   auth: boolean;
   /** BAK-009: the `_Audit` trail and the operational config it lives beside. */
   ops: boolean;
+  /** BMG-011: cloud-function secrets (`/admin/secrets`) — names only, never values. */
+  secrets: boolean;
 }
 
 export interface AdminDashboardDeps {

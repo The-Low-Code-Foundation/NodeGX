@@ -71,6 +71,7 @@ import { AdminTriggerRoutes } from './admin-triggers';
 import { AdminWorkflowRoutes } from './admin-workflows';
 import { AdminEmailRoutes } from './admin-email';
 import { AdminBackupRoutes } from './admin-backups';
+import type { PersistenceControl } from './admin-backups';
 import { AdminFileRoutes } from './admin-files';
 import { AdminSearchRoutes } from './admin-search';
 import { ByobAdminRoutes } from './byob-admin';
@@ -312,6 +313,8 @@ export interface HttpServerDeps {
   ops: OpsState;
   /** The `_Audit` writer (BAK-009). */
   audit: AuditLog;
+  /** BMG-011: lets `POST /admin/backups/restore` swap the served database (see admin-backups.ts). */
+  persistenceControl?: PersistenceControl;
 }
 
 // ============================================================================
@@ -498,7 +501,7 @@ export class HttpServer {
     this.files = new FileRoutes(deps.options.dataDir, `http://127.0.0.1:${deps.options.port}`, deps.files);
     this.fileSubsystem = deps.files;
     this.executions = deps.executions;
-    this.adminFiles = new AdminFileRoutes(deps.files);
+    this.adminFiles = new AdminFileRoutes(deps.files, deps.facade);
     this.adminSecurity = new AdminSecurityRoutes(
       deps.security,
       deps.facade,
@@ -528,7 +531,8 @@ export class HttpServer {
     this.adminBackups = new AdminBackupRoutes({
       backups: deps.backups,
       facade: deps.facade,
-      dataDir: deps.options.dataDir
+      dataDir: deps.options.dataDir,
+      persistence: deps.persistenceControl
     });
     this.adminEmail = new AdminEmailRoutes(deps.emailConfig, deps.mailer);
     this.adminSearch = new AdminSearchRoutes(deps.search, deps.facade);
@@ -589,7 +593,10 @@ export class HttpServer {
       auth: Boolean(deps.auth && deps.facade.schemaManager),
       // The audit view needs somewhere for the rows to live; a build without a
       // schema manager cannot have the table, so it hides rather than 500s.
-      ops: Boolean(deps.facade.schemaManager)
+      ops: Boolean(deps.facade.schemaManager),
+      // BMG-011: the Secrets page. The store is the data dir's secrets.json,
+      // which every backend has — the route family is always registered.
+      secrets: true
     };
   }
 
@@ -1245,6 +1252,14 @@ export class HttpServer {
         access: { kind: 'admin' },
         handler: (ctx) => adminBackups.restore(ctx)
       },
+      // BMG-011: an archive as a download. A literal segment, so it can never
+      // be mistaken for `admin/backups/config` or `restore`.
+      {
+        method: 'GET',
+        pattern: 'admin/backups/archive',
+        access: { kind: 'admin' },
+        handler: (ctx) => adminBackups.download(ctx)
+      },
       {
         method: 'GET',
         pattern: 'admin/export/:collection',
@@ -1288,6 +1303,18 @@ export class HttpServer {
         pattern: 'admin/files/sweep',
         access: { kind: 'admin' },
         handler: (ctx) => adminFiles.runSweep(ctx)
+      },
+      // BMG-011: the Storage page's file browser. `uses` is registered before
+      // `:name` so the literal wins; `config` and `sweep` are not deletable
+      // because nothing stores a file under those names — and if something
+      // did, the delete would be of that file, which is the honest answer.
+      { method: 'GET', pattern: 'admin/files', access: { kind: 'admin' }, handler: (ctx) => adminFiles.list(ctx) },
+      { method: 'GET', pattern: 'admin/files/uses', access: { kind: 'admin' }, handler: (ctx) => adminFiles.uses(ctx) },
+      {
+        method: 'DELETE',
+        pattern: 'admin/files/:name',
+        access: { kind: 'admin' },
+        handler: (ctx) => adminFiles.remove(ctx)
       },
 
       // ---- Admin: the BAK-002 email surface --------------------------------

@@ -14,12 +14,25 @@
  *   POST   /admin/schema/diff         { source } -> diff against THIS backend
  *   POST   /admin/schema/apply        { source, allowDestructive } -> apply result
  *
- * Restore over HTTP swaps files under a running service; it is intended for a
- * quiesced backend (documented in the runbook). The CLI `restore` is the
- * blessed path (service stopped). We still expose it because the panel needs it.
+ * BMG-011 (R4: restore is a button in the browser, behind the backend's typed
+ * name). Restore over HTTP used to swap `data/local.db` under the running
+ * adapter's open handle: the process kept serving the OLD rows from the
+ * unlinked inode and every write after the "restore" went into a file nothing
+ * would ever read again. It now quiesces first — `persistence.pause()`
+ * disconnects the adapter, the archive is unpacked, `persistence.resume()`
+ * reconnects and re-ensures the system tables — so what the route answers is
+ * what the next request reads. Requests that arrive in between fail loudly
+ * against a closed adapter rather than reading torn state; the page blocks its
+ * own controls for the duration. Without a `persistence` dep (a harness that
+ * builds the routes bare) the old swap-only behaviour stands, and the response
+ * says `reconnected: false`.
+ *
+ *   GET    /admin/backups/archive?file=<name>   stream one listed archive (download)
  *
  * @module nodegx-backend/server/admin-backups
  */
+
+import * as fs from 'fs';
 
 import type { RequestContext } from './HttpServer';
 import type { IStorageFacade } from '@noodl/backend-contract';
@@ -38,10 +51,20 @@ import {
 } from '../backup/schema-migrate';
 import { HttpError, readJSONBody, sendJSON } from './http-util';
 
+/** BMG-011: how the service lets a restore swap the database it is serving. */
+export interface PersistenceControl {
+  /** Close the adapter's handle so the file can be replaced. */
+  pause(): Promise<void>;
+  /** Reopen the (new) file and re-ensure the system tables. */
+  resume(): Promise<void>;
+}
+
 export interface AdminBackupDeps {
   backups: BackupSubsystem;
   facade: IStorageFacade;
   dataDir: string;
+  /** Absent only in a harness that builds the routes without a service. */
+  persistence?: PersistenceControl;
 }
 
 /** `GET /admin/backups`. */
@@ -139,18 +162,58 @@ export class AdminBackupRoutes {
     } satisfies BackupRunResponse);
   }
 
+  /**
+   * `POST /admin/backups/restore {archive, safetySnapshot?}`. `archive` is a
+   * listed archive's `file` or its full `path`; anything else is 404 by name,
+   * so the route cannot be pointed at an arbitrary file on the box.
+   */
   async restore(ctx: RequestContext): Promise<void> {
     const body = await readJSONBody(ctx.req);
-    const archive = typeof body.archive === 'string' ? body.archive : '';
-    if (!archive) throw new HttpError(400, 'archive (path) is required');
-    const result = await asRefusal(() =>
-      this.deps.backups.manager.restore(archive, {
-        triggerType: 'manual',
-        source: 'admin restore',
-        safetySnapshot: body.safetySnapshot !== false
-      })
-    );
-    sendJSON(ctx.res, 200, { ok: true, ...result });
+    const asked = typeof body.archive === 'string' ? body.archive : '';
+    if (!asked) throw new HttpError(400, 'archive (a listed archive) is required');
+    const listed = this.listedArchive(asked);
+    if (!listed) throw new HttpError(404, `No archive "${asked}" in this backend's backups.`);
+    const safetySnapshot = body.safetySnapshot !== false;
+    const control = this.deps.persistence;
+    if (control) await control.pause();
+    let result;
+    try {
+      result = await asRefusal(() =>
+        this.deps.backups.manager.restore(listed.path, {
+          triggerType: 'manual',
+          source: 'admin restore',
+          safetySnapshot
+        })
+      );
+    } finally {
+      // Whatever happened on disk, the service must be serving SOMETHING
+      // again — the old file if the swap never happened, the archive if it did.
+      if (control) await control.resume();
+    }
+    ctx.audit({ archive: listed.file, safetyArchive: result.safetyArchive, reconnected: !!control });
+    sendJSON(ctx.res, 200, { ok: true, reconnected: !!control, ...result });
+  }
+
+  /** A listed archive by `file` or `path` — the only two spellings the routes accept. */
+  private listedArchive(asked: string): BackupListItem | null {
+    const items = this.deps.backups.manager.listBackups();
+    return items.find((b) => b.file === asked || b.path === asked) || null;
+  }
+
+  /** `GET /admin/backups/archive?file=<name>` — the bytes of one listed archive, as a download. */
+  download(ctx: RequestContext): void {
+    const asked = (ctx.query.file || '').trim();
+    if (!asked) throw new HttpError(400, 'file (a listed archive) is required');
+    const listed = this.listedArchive(asked);
+    if (!listed || !fs.existsSync(listed.path)) throw new HttpError(404, `No archive "${asked}" in this backend's backups.`);
+    const size = fs.statSync(listed.path).size;
+    ctx.res.writeHead(200, {
+      'Content-Type': 'application/octet-stream',
+      'Content-Length': size,
+      'Content-Disposition': `attachment; filename="${listed.file.replace(/[^\w.-]/g, '_')}"`,
+      'Cache-Control': 'no-store'
+    });
+    fs.createReadStream(listed.path).pipe(ctx.res);
   }
 
   async exportCollection(ctx: RequestContext): Promise<void> {

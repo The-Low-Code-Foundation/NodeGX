@@ -107,8 +107,12 @@ nodegx-backend restore /mnt/backups/backup-...ngxbackup.tar.gz --data-dir <dir>
 Restore refuses an archive whose engine does not match (no cross-engine restore
 is claimed) or whose hashes do not verify. The pre-restore safety snapshot is
 written to `<dataDir>/backups/pre-restore-…` so a bad restore is itself
-recoverable. `POST /admin/backups/restore` exists for a **quiesced** running
-backend, but the CLI (service stopped) is the blessed path.
+recoverable. `POST /admin/backups/restore` (the manager's **Restore…** button,
+BMG-011) takes a LISTED archive by file name, disconnects the running adapter,
+swaps the files, reconnects and re-ensures the system tables before it answers —
+requests that arrive during the swap fail rather than read torn state, and the
+page blocks its own controls for the duration. The CLI (service stopped) remains
+the path for a backend you cannot reach in a browser.
 
 ## Laptop → VPS (the blessed move)
 

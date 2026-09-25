@@ -232,7 +232,7 @@ config edits, and admin logins including the failures. Each entry has the
 actor, the origin address, the outcome (a *refused* change is recorded as a
 failure, not as nothing), and the request id that ties it to the access log.
 
-Read it in the dashboard under **Ops → Audit**, over HTTP:
+Read it in the manager under **Activity**, over HTTP:
 
 ```bash
 curl -s "$BACKEND/admin/audit?action=permissions.collection.update" \

@@ -19,6 +19,9 @@ import { RunsView } from './runs';
 import { FilesView } from './files';
 import { EmailView } from './email';
 import { BackupsView } from './backups';
+import { SecretsView } from './secrets';
+import { SearchView } from './search';
+import { ServerView } from './server';
 import { AuditView } from './audit';
 
 export interface ViewProps {
@@ -47,6 +50,9 @@ export const VIEWS: ViewDef[] = [
   { id: 'files', feature: 'files', component: FilesView },
   { id: 'email', feature: 'email', component: EmailView },
   { id: 'backups', feature: 'backups', component: BackupsView },
+  { id: 'secrets', feature: 'secrets', component: SecretsView },
+  { id: 'search', feature: 'search', component: SearchView },
+  { id: 'server', feature: 'ops', component: ServerView },
   { id: 'audit', feature: 'ops', component: AuditView }
 ];
 

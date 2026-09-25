@@ -1,0 +1,225 @@
+{
+  "checks": {
+    "setup: the first admin account exists (BMG-014)": {
+      "pass": true,
+      "detail": 201
+    },
+    "AC1: the Storage page opens empty, with a dropzone": {
+      "pass": true
+    },
+    "AC1: two files uploaded from the page list with their sizes": {
+      "pass": true,
+      "detail": "Showing 1–2 of 2"
+    },
+    "server: GET /admin/files answers the same two": {
+      "pass": true,
+      "detail": [
+        "note.txt",
+        "paws.png"
+      ]
+    },
+    "AC1: the image row shows a thumbnail served through a signed URL at the sm preset": {
+      "pass": true,
+      "detail": {
+        "src": "/files/f41a04b34d0707a2_paws.png?exp=1790357953&sig=8ac2df0ebe4cf4fef5e5516b25f0b4741416a166a757103f15a8d30498c02af3&thumb=sm",
+        "w": 48,
+        "h": 32,
+        "shown": true
+      }
+    },
+    "AC1: the Download link fetches the file byte-equal (no credential: a signed URL)": {
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "bytes": 2960,
+        "href": "/files/f41a04b34d0707a2_paws.png?exp=1790357953&sig=8ac2df0e"
+      }
+    },
+    "AC1: the referenced file says which record uses it, as a link to the record": {
+      "pass": true,
+      "detail": "Pet · 5e31dec2"
+    },
+    "AC1: the unreferenced file deletes from the page; the server lists one": {
+      "pass": true,
+      "detail": [
+        "paws.png"
+      ]
+    },
+    "AC1: the referenced file refuses with the record named and offers to clear the field": {
+      "pass": true,
+      "detail": "\"paws.png\" is in use\n\"paws.png\" is used by 1 record: Pet 5e31dec2-fe43-457a-b0d8-3f445c77fa92 (photo). Delete it anyway to clear those fields too.\nPet · 5e31dec2-fe43-457a-b0d8-3f445c77fa92 in photo\nK"
+    },
+    "server: the file is still there after Keep it": {
+      "pass": true
+    },
+    "AC2: a custom type that is not type/subtype is refused inline": {
+      "pass": true,
+      "detail": "A content type looks like image/png or application/pdf."
+    },
+    "AC2: ticking \"Executables and anything unrecognised\" stores its documented type; the custom type appends; both read back": {
+      "pass": true,
+      "detail": [
+        "application/octet-stream",
+        "application/x-msdownload"
+      ]
+    },
+    "AC2: after a reload the category is ticked and the custom type is a chip": {
+      "pass": true,
+      "detail": "application/x-msdownload (never identified)\n✕\nAdd type"
+    },
+    "AC3: presets edited on the page are what GET /admin/files/config returns": {
+      "pass": true,
+      "detail": {
+        "sm": {
+          "width": 12,
+          "height": 8,
+          "fit": "cover"
+        },
+        "md": {
+          "width": 256,
+          "height": 256,
+          "fit": "cover"
+        },
+        "lg": {
+          "width": 1024,
+          "height": 1024,
+          "fit": "contain"
+        }
+      }
+    },
+    "AC3: /files/:name?thumb=sm honours the edited preset (12×8)": {
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "w": 12,
+        "h": 8
+      }
+    },
+    "AC4: no cron text field — the clean-up schedule is the builder, and its sentence is the gloss": {
+      "pass": true,
+      "detail": "Every weekday at 04:30"
+    },
+    "AC4: the stored cron is one the scheduler accepts, armed, and the page sentence matches the shared gloss": {
+      "pass": true,
+      "detail": {
+        "cron": "30 4 * * 1,2,3,4,5",
+        "words": "Every weekday at 04:30",
+        "next": "2026-09-28T02:30:00.000Z"
+      }
+    },
+    "AC5: Back up now writes an archive the page lists": {
+      "pass": true,
+      "detail": [
+        "backup-2026-09-25T17-34-21-870Z-holsih.ngxbackup.tar.gz"
+      ]
+    },
+    "AC4: the backup schedule is stored as the builder’s cron, armed, no cron text field": {
+      "pass": true,
+      "detail": {
+        "enabled": true,
+        "cron": "15 2 * * *",
+        "missedFirePolicy": "skip"
+      }
+    },
+    "backups: keep is three numbers with a sentence, stored": {
+      "pass": true,
+      "detail": "Keeps the last 3, and one a day for 2 days."
+    },
+    "server: a record written after the backup reads back": {
+      "pass": true
+    },
+    "AC5 (R4): Restore waits for the backend’s typed name, with Back up first ticked": {
+      "pass": true,
+      "detail": {
+        "disabledBefore": true,
+        "ticked": true,
+        "disabledWrong": true,
+        "disabledRight": false
+      }
+    },
+    "AC5: the page blocks every control while the restore runs, then frees them": {
+      "pass": true,
+      "detail": {
+        "blockedDuring": true
+      }
+    },
+    "AC5: the record written after the backup is gone from the RUNNING backend": {
+      "pass": true
+    },
+    "AC5: the back-up-first archive exists beside the restored one": {
+      "pass": true,
+      "detail": [
+        "pre-restore-2026-09-25T17-34-24-370Z-azobfu.ngxbackup.tar.gz",
+        "backup-2026-09-25T17-34-21-870Z-holsih.ngxbackup.tar.gz"
+      ]
+    },
+    "server: backup.restore is on the trail with reconnected:true": {
+      "pass": true,
+      "detail": [
+        {
+          "archive": "backup-2026-09-25T17-34-21-870Z-holsih.ngxbackup.tar.gz",
+          "safetyArchive": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/4a643c18-4885-4455-b61d-a91c0e817fd5/scratchpad/bmg011/data/backups/pre-restore-2026-09-25T17-34-24-370Z-azobfu.ngxbackup.tar.gz",
+          "reconnected": true
+        }
+      ]
+    },
+    "server: a write after the restore lands and reads back": {
+      "pass": true
+    },
+    "AC6: the value is a password field; the name rule is inline; save enables with both": {
+      "pass": true
+    },
+    "AC6: the secret lists by name; the page never shows the value": {
+      "pass": true
+    },
+    "server: the value reached secrets.json under the functions namespace (what a Secret node reads)": {
+      "pass": true
+    },
+    "AC6: the value appears in no admin response (22 routes read)": {
+      "pass": true,
+      "detail": null
+    },
+    "AC6: nor anywhere in the page’s DOM after the dialog closed": {
+      "pass": true
+    },
+    "AC7: made searchable over bio from the page; a search answers on bio and not on name": {
+      "pass": true,
+      "detail": {
+        "indexed": "Pet\nsearchable\n2 records indexed\nRebuild index\nSave\nFields to search\nbio\n✕",
+        "hit": [
+          "Rex"
+        ]
+      }
+    },
+    "AC8: an origin without a scheme is refused inline; a pasted page URL keeps its origin; the preflight receives it": {
+      "pass": true,
+      "detail": {
+        "originProblem": "An origin starts with https:// (or http://localhost while you develop) — e.g. https://app.example.com",
+        "ops": {
+          "origins": [
+            "https://app.example.com"
+          ],
+          "credentials": false
+        }
+      }
+    },
+    "AC8: the activity-trail card saves alone and applies at once": {
+      "pass": true
+    },
+    "server: with limiting on, rate limits are a table of 7 kinds with two numbers each, no comma list": {
+      "pass": true
+    },
+    "Activity: entries read as words with the thing as a link — the file delete, the restore, the secret": {
+      "pass": true,
+      "detail": "Activity\n\nWho changed what, when, and from where — permissions, roles, keys, schema, backups, settings and sign-ins.\n\n+ Add condition\nrecording\nkept 45 days\nShowing 1–15 of 15\n‹ Newer\nOlder ›\nRefresh\nWhen\tWhat\tWho\tOn\tOutcome\t\n25/09/2026, 19:34:27\tops · config · update\tthe admin credential\tserver set"
+    },
+    "Activity: the filter is action · who · outcome · when, and asks the route by actorKind": {
+      "pass": true,
+      "detail": "http://127.0.0.1:8697/admin/audit?limit=100&offset=0&actorKind=apiKey"
+    },
+    "AC9: no comma-separated or cron text field on any of the six pages": {
+      "pass": true,
+      "detail": []
+    }
+  }
+}

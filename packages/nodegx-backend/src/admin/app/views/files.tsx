@@ -1,14 +1,22 @@
 /**
- * Files — upload limits, content-type policy, the storage driver, thumbnail
- * presets, and the orphan sweep (BAK-006). Ported as-is from the vanilla page
- * (BMG-001 §3.1); both forms re-read the server's values after every save,
- * exactly as the old page rebuilt its inputs.
+ * Storage — the files an app has stored, which kinds are allowed, how they
+ * are thumbnailed, and the clean-up (BMG-011 §3.1).
+ *
+ * The browser reads `GET /admin/files` (never `/api/_Files`); *used by* is
+ * one `GET /admin/files/uses` for the rows shown. A delete refuses by name
+ * while a record points at the file, and offers to clear those fields.
+ * Refused kinds are categories in the SNIFFER's vocabulary (`fileKinds.ts`)
+ * plus custom chips; the clean-up schedule is the `ScheduleBuilder`. No
+ * comma list and no cron text on this page (AC9).
  */
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 
-import { api, useSession } from '../api';
-import { cellText, when } from '../format';
-import { Card, Check, Chip, Field, Page, Row, Spacer, Sub, WriteBtn, fail, toast } from '../ui';
+import { ApiError, api, credentialHeaders, encode, session, useSession } from '../api';
+import { Chips, EmptyState, ListEditor, ScheduleBuilder, SchedulePreview } from '../composers';
+import { FILE_KINDS, RefusedKinds, denyListFrom, kindsFrom, mimeProblem, sniffable } from '../fileKinds';
+import { bytes, cellText, fileLabel, when } from '../format';
+import { href } from '../router';
+import { ActionCell, Btn, Card, Chip, Dialog, Field, Gap, Hint, Page, Row, Spacer, Sub, Switch, Table, WriteBtn, confirmSimple, fail, openModal, toast } from '../ui';
 import type { ViewProps } from './index';
 
 interface SweepReport {
@@ -19,13 +27,19 @@ interface SweepReport {
   deleted?: boolean;
 }
 
+interface Preset {
+  width: number;
+  height: number;
+  fit: string;
+}
+
 interface FilesConfig {
   maxUploadBytes?: number;
-  contentTypes?: { denyList?: string[] };
+  contentTypes?: { denyList?: string[]; allowList?: string[] | null };
   signedUrlTtlSeconds?: number;
-  thumbnails?: { presets?: Record<string, { width: number; height: number; fit: string }> };
+  thumbnails?: { presets?: Record<string, Preset> };
   orphanSweep?: { enabled?: boolean; cron?: string };
-  sweepStatus?: { lastReport?: SweepReport };
+  sweepStatus?: { lastReport?: SweepReport | null; nextRunAt?: string | null };
 }
 
 interface FilesData {
@@ -35,11 +49,46 @@ interface FilesData {
   config?: FilesConfig;
 }
 
+export interface FileRow {
+  name: string;
+  originalName: string;
+  size: number;
+  contentType: string;
+  createdAt: string;
+  owner: string | null;
+  private: boolean;
+  objectId: string;
+}
+
+export interface FileUse {
+  collection: string;
+  objectId: string;
+  field: string;
+}
+
+const PAGE = 50;
+
+/** The path and query of a URL the backend wrote on its own loopback address. */
+function samePath(url: string): string {
+  try {
+    const u = new URL(url, location.href);
+    return u.pathname + u.search;
+  } catch {
+    return url;
+  }
+}
+
+export function isImage(contentType: string): boolean {
+  return /^image\//.test(contentType);
+}
+
+const previewCron = (cron: string): Promise<SchedulePreview> => api<SchedulePreview>('POST', '/admin/triggers/preview', { cron, count: 5 });
+
 export function FilesView(_props: ViewProps) {
   const [data, setData] = useState<FilesData | null>(null);
   const [generation, setGeneration] = useState(0);
 
-  function load() {
+  function loadConfig() {
     api<FilesData>('GET', '/admin/files/config')
       .then((d) => {
         setData(d);
@@ -48,128 +97,468 @@ export function FilesView(_props: ViewProps) {
       .catch(fail);
   }
   useEffect(() => {
-    load();
+    loadConfig();
   }, []);
 
   const config = (data && data.config) || {};
   const presets = (config.thumbnails && config.thumbnails.presets) || {};
 
   return (
-    <Page title="Files" subtitle="Upload limits, content-type policy, the storage driver, thumbnail presets, and the orphan sweep (BAK-006).">
+    <Page title="Storage" subtitle="The files your app has stored, which kinds are allowed, how they are thumbnailed, and the clean-up.">
       {data ? (
         <div>
           <Row>
-            <Chip kind="accent">{'driver: ' + data.driverKind}</Chip>
+            <Chip kind="accent">{'stored ' + (data.driverKind === 's3' ? 'in S3' : 'on this machine')}</Chip>
             {data.transformsAvailable ? (
               <Chip kind="ok">thumbnails available</Chip>
             ) : (
-              <Chip kind="warn">{'thumbnails unavailable — ' + cellText(data.transformUnavailableReason)}</Chip>
+              <Chip kind="warn" title={cellText(data.transformUnavailableReason)}>
+                thumbnails unavailable on this backend
+              </Chip>
             )}
           </Row>
-          <LimitsCard key={'limits' + generation} config={config} reload={load} />
+          <Gap />
+          <Browser presets={presets} transforms={!!data.transformsAvailable} />
+          <h2>Settings</h2>
+          <LimitsCard key={'limits' + generation} config={config} reload={loadConfig} />
           <h2>Thumbnail presets</h2>
-          <Card>
-            <div>
-              {Object.keys(presets).map((name) => {
-                const p = presets[name];
-                return (
-                  <Row key={name}>
-                    <b>{name}</b>
-                    {p.width + '×' + p.height + ' (' + p.fit + ')'}
-                  </Row>
-                );
-              })}
-            </div>
-            <Sub style="margin-top:8px">
-              Named presets are public; arbitrary "?thumb=WxH" sizes are admin-only. Edit presets via the configure_backend_files MCP tool or the Backend Services panel.
-            </Sub>
-          </Card>
-          <h2>Orphan sweep</h2>
-          <SweepCard key={'sweep' + generation} config={config} reload={load} />
+          <PresetsCard key={'presets' + generation} presets={presets} reload={loadConfig} />
+          <h2>Clean-up</h2>
+          <SweepCard key={'sweep' + generation} config={config} reload={loadConfig} />
         </div>
       ) : null}
     </Page>
   );
 }
 
-/** Upload size, signed-URL TTL, and the denied content types. */
+// ----------------------------------------------------------- the browser --
+
+function Browser({ presets, transforms }: { presets: Record<string, Preset>; transforms: boolean }) {
+  const { readonly } = useSession();
+  const [rows, setRows] = useState<FileRow[] | null>(null);
+  const [count, setCount] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const [q, setQ] = useState('');
+  const [uses, setUses] = useState<Record<string, FileUse[]>>({});
+  const [signed, setSigned] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState(false);
+  const [over, setOver] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
+  const input = useRef<HTMLInputElement>(null);
+  const thumbPreset = presets.sm ? 'sm' : Object.keys(presets)[0] || '';
+
+  function load() {
+    api<{ files: FileRow[]; count: number }>('GET', '/admin/files?limit=' + PAGE + '&offset=' + offset + (q ? '&q=' + encode(q) : ''))
+      .then((d) => {
+        setRows(d.files);
+        setCount(d.count);
+        const names = d.files.map((f) => f.name);
+        if (names.length) {
+          api<{ uses: Record<string, FileUse[]> }>('GET', '/admin/files/uses?names=' + encode(names.join(',')))
+            .then((u) => setUses((prev) => ({ ...prev, ...u.uses })))
+            .catch(fail);
+        }
+        // An <img> cannot send the credential: a short-lived signed URL per image row.
+        for (const f of d.files) {
+          if (!isImage(f.contentType) || signed[f.name]) continue;
+          api<{ url: string }>('GET', '/files/' + encode(f.name) + '/sign')
+            .then((s) => setSigned((prev) => ({ ...prev, [f.name]: samePath(s.url) })))
+            .catch(() => undefined);
+        }
+      })
+      .catch(fail);
+  }
+  useEffect(load, [offset, q]);
+
+  const upload = async (file: File) => {
+    setBusy(true);
+    setProblem(null);
+    try {
+      const headers: Record<string, string> = { ...credentialHeaders(session.get().credential), 'content-type': file.type || 'application/octet-stream' };
+      const res = await fetch('/files/' + encode(file.name), { method: 'POST', headers, body: file });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) throw new Error((json && (json.error || json.message)) || 'HTTP ' + res.status);
+      toast('Uploaded ' + file.name + '.', 'ok');
+      setOffset(0);
+      load();
+    } catch (e) {
+      setProblem((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const pick = (files: FileList | null) => {
+    if (!files) return;
+    for (let i = 0; i < files.length; i++) upload(files[i]);
+  };
+
+  function remove(f: FileRow, clear: boolean) {
+    api('DELETE', '/admin/files/' + encode(f.name) + (clear ? '?clear=1' : ''))
+      .then(() => {
+        toast('Deleted ' + f.originalName + (clear ? ' and cleared its fields.' : '.'), 'ok');
+        load();
+      })
+      .catch((e) => {
+        if (e instanceof ApiError && e.status === 409) {
+          const used = uses[f.name] || [];
+          openModal((close) => (
+            <Dialog
+              title={'"' + f.originalName + '" is in use'}
+              autoFocus={false}
+              actions={
+                <>
+                  <Btn onClick={close}>Keep it</Btn>
+                  <WriteBtn
+                    kind="danger"
+                    onClick={() => {
+                      close();
+                      remove(f, true);
+                    }}
+                  >
+                    {'Delete anyway and clear ' + used.length + ' field' + (used.length === 1 ? '' : 's')}
+                  </WriteBtn>
+                </>
+              }
+            >
+              <div class="notice warn">{e.message}</div>
+              <ul class="uses-list">
+                {used.map((u) => (
+                  <li key={u.collection + u.objectId + u.field}>
+                    <a href={href('collections', u.collection, u.objectId)}>{u.collection + ' · ' + u.objectId}</a>
+                    <span class="hint">{' in ' + u.field}</span>
+                  </li>
+                ))}
+              </ul>
+            </Dialog>
+          ));
+          return;
+        }
+        fail(e);
+      });
+  }
+
+  const from = count ? offset + 1 : 0;
+  const to = Math.min(offset + PAGE, count);
+
+  return (
+    <Card>
+      <div
+        id="file-dropzone"
+        class={'dropzone' + (over ? ' over' : '')}
+        role="button"
+        tabIndex={0}
+        aria-label="Upload files"
+        onClick={() => !readonly && input.current && input.current.click()}
+        onKeyDown={(e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && input.current) {
+            e.preventDefault();
+            input.current.click();
+          }
+        }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setOver(true);
+        }}
+        onDragLeave={() => setOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setOver(false);
+          if (!readonly) pick(e.dataTransfer ? e.dataTransfer.files : null);
+        }}
+      >
+        <input ref={input} type="file" multiple hidden disabled={readonly} onChange={(e) => pick((e.currentTarget as HTMLInputElement).files)} />
+        {busy ? 'Uploading…' : readonly ? 'Uploads need full backend access.' : 'Drop files here, or click to choose'}
+        {problem ? <span class="chips-problem">{problem}</span> : null}
+      </div>
+      <Gap />
+      <Row>
+        <input type="search" id="files-search" placeholder="Find by name" value={q} onInput={(e) => { setQ((e.currentTarget as HTMLInputElement).value); setOffset(0); }} style="flex:1 1 200px" />
+        <span class="hint" id="files-count">
+          {count ? 'Showing ' + from + '–' + to + ' of ' + count : rows ? 'No files' : ''}
+        </span>
+        <Btn tiny disabled={offset === 0} onClick={() => setOffset(Math.max(0, offset - PAGE))}>
+          ‹ Newer
+        </Btn>
+        <Btn tiny disabled={to >= count} onClick={() => setOffset(offset + PAGE)}>
+          Older ›
+        </Btn>
+      </Row>
+      <Gap />
+      {rows ? (
+        <Table
+          class="files"
+          columns={['', 'File', 'Size', 'Kind', 'Uploaded', 'Used by', '']}
+          rows={rows}
+          renderRow={(f) => {
+            const used = uses[f.name];
+            const url = signed[f.name];
+            return (
+              <tr key={f.name} data-file={f.name}>
+                <td class="thumb-cell">
+                  {isImage(f.contentType) && url && transforms && thumbPreset ? (
+                    <img class="file-thumb" src={url + '&thumb=' + encode(thumbPreset)} alt="" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = 'none')} />
+                  ) : (
+                    <span class="file-icon" aria-hidden="true">
+                      ▤
+                    </span>
+                  )}
+                </td>
+                <td>
+                  <b>{f.originalName || fileLabel(f.name)}</b>
+                  {f.private ? <Chip kind="warn">private</Chip> : null}
+                </td>
+                <td>{bytes(f.size)}</td>
+                <td>
+                  <span class="chip type">{f.contentType}</span>
+                </td>
+                <td>{when(f.createdAt)}</td>
+                <td class="uses-cell">
+                  {used === undefined ? (
+                    <span class="hint">…</span>
+                  ) : used.length === 0 ? (
+                    <span class="hint">nothing</span>
+                  ) : (
+                    used.slice(0, 3).map((u, i) => (
+                      <span key={i}>
+                        {i ? ', ' : ''}
+                        <a href={href('collections', u.collection, u.objectId)} title={u.field}>
+                          {u.collection + ' · ' + u.objectId.slice(0, 8)}
+                        </a>
+                      </span>
+                    ))
+                  )}
+                  {used && used.length > 3 ? <span class="hint">{' +' + (used.length - 3) + ' more'}</span> : null}
+                </td>
+                <ActionCell>
+                  <a class="btn tiny" href={url || '/files/' + encode(f.name)} download={f.originalName || fileLabel(f.name)} target="_blank" rel="noopener" onClick={(e) => {
+                    if (url) return;
+                    e.preventDefault();
+                    api<{ url: string }>('GET', '/files/' + encode(f.name) + '/sign')
+                      .then((s) => {
+                        const a = document.createElement('a');
+                        a.href = samePath(s.url);
+                        a.download = f.originalName || fileLabel(f.name);
+                        a.rel = 'noopener';
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                      })
+                      .catch(fail);
+                  }}>
+                    Download
+                  </a>
+                  <WriteBtn tiny kind="danger" onClick={() => confirmSimple('Delete ' + (f.originalName || fileLabel(f.name)) + '?', used && used.length ? 'It is used by ' + used.length + ' record' + (used.length === 1 ? '' : 's') + '; the delete will ask before clearing them.' : 'No record points at it. The file is gone for good.', () => remove(f, false))}>
+                    Delete
+                  </WriteBtn>
+                </ActionCell>
+              </tr>
+            );
+          }}
+          empty={q ? <EmptyState>No file is called that.</EmptyState> : <EmptyState>Nothing stored yet. Drop a file above, or let your app upload one.</EmptyState>}
+        />
+      ) : null}
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------- limits --
+
+/** Upload size, signed-URL life, and the kinds this backend refuses. */
 function LimitsCard({ config, reload }: { config: FilesConfig; reload: () => void }) {
   const { readonly } = useSession();
   const [maxMb, setMaxMb] = useState(String(Math.round((config.maxUploadBytes || 0) / (1024 * 1024))));
-  const [denyList, setDenyList] = useState(((config.contentTypes && config.contentTypes.denyList) || []).join(', '));
   const [ttl, setTtl] = useState(String(config.signedUrlTtlSeconds || 300));
+  const [kinds, setKinds] = useState<RefusedKinds>(kindsFrom((config.contentTypes && config.contentTypes.denyList) || []));
 
-  function saveLimits() {
+  const toggle = (id: string, on: boolean) =>
+    setKinds((k) => ({ ...k, categories: on ? k.categories.concat(k.categories.indexOf(id) === -1 ? [id] : []) : k.categories.filter((c) => c !== id) }));
+
+  function save() {
     api('PUT', '/admin/files/config', {
       maxUploadBytes: Math.max(1, Number(maxMb) || 1) * 1024 * 1024,
-      contentTypes: {
-        denyList: denyList
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean)
-      },
+      contentTypes: { denyList: denyListFrom(kinds) },
       signedUrlTtlSeconds: Math.max(1, Number(ttl) || 300)
     })
       .then(() => {
-        toast('File limits saved.', 'ok');
+        toast('Storage settings saved.', 'ok');
         reload();
       })
       .catch(fail);
   }
 
   return (
-    <Card style="margin-top:12px">
+    <Card>
       <div class="grid2">
-        <Field label="Max upload size (MB)">
-          <input type="number" min="1" value={maxMb} disabled={readonly} onInput={(e) => setMaxMb((e.currentTarget as HTMLInputElement).value)} />
+        <Field label="Largest upload (MB)">
+          <input type="number" min="1" id="max-mb" value={maxMb} disabled={readonly} onInput={(e) => setMaxMb((e.currentTarget as HTMLInputElement).value)} />
         </Field>
-        <Field label="Signed URL TTL (seconds)">
-          <input type="number" min="1" value={ttl} disabled={readonly} onInput={(e) => setTtl((e.currentTarget as HTMLInputElement).value)} />
-        </Field>
-        <Field label="Denied content types (comma-separated)" style="grid-column:1/-1">
-          <input
-            type="text"
-            value={denyList}
-            placeholder="application/x-msdownload, ..."
-            disabled={readonly}
-            onInput={(e) => setDenyList((e.currentTarget as HTMLInputElement).value)}
-          />
+        <Field label="A private file's link stays open for (seconds)">
+          <input type="number" min="1" id="signed-ttl" value={ttl} disabled={readonly} onInput={(e) => setTtl((e.currentTarget as HTMLInputElement).value)} />
         </Field>
       </div>
+      <Gap />
+      <div class="field-head">
+        <b>Refuse these kinds</b>
+        <span class="hint">An upload is judged by its bytes, never by the name or the type the app claims.</span>
+      </div>
+      <div class="kind-boxes" id="kind-boxes">
+        {FILE_KINDS.map((k) => (
+          <label class="check kind-box" key={k.id}>
+            <input type="checkbox" value={k.id} checked={kinds.categories.indexOf(k.id) !== -1} disabled={readonly} onChange={(e) => toggle(k.id, (e.currentTarget as HTMLInputElement).checked)} />
+            <span>
+              <b>{k.label}</b>
+              <span class="sub">{k.line}</span>
+            </span>
+          </label>
+        ))}
+      </div>
+      <Gap h={8} />
+      <div class="field-head">
+        <b>Also refuse these types</b>
+        <span class="hint">One the backend can identify is refused; one it cannot is listed here and matches nothing.</span>
+      </div>
+      <div id="custom-types">
+        <Chips
+          items={kinds.custom}
+          onChange={(custom) => setKinds((k) => ({ ...k, custom }))}
+          validate={mimeProblem}
+          normalise={(t) => t.trim().toLowerCase()}
+          label={(t) => (sniffable(t) ? t : t + ' (never identified)')}
+          placeholder="application/x-msdownload"
+          addLabel="Add type"
+          disabled={readonly}
+        />
+      </div>
       <Row style="margin-top:12px">
-        <WriteBtn tiny kind="primary" onClick={saveLimits}>
-          Save limits
+        <WriteBtn tiny kind="primary" id="save-limits" onClick={save}>
+          Save settings
         </WriteBtn>
       </Row>
     </Card>
   );
 }
 
-/** The orphan sweep: its last report, run it now, and the schedule. */
+// --------------------------------------------------------------- presets --
+
+interface PresetRow {
+  name: string;
+  width: string;
+  height: string;
+  fit: string;
+}
+
+export function presetRows(presets: Record<string, Preset>): PresetRow[] {
+  return Object.keys(presets).map((name) => ({ name, width: String(presets[name].width), height: String(presets[name].height), fit: presets[name].fit || 'cover' }));
+}
+
+/** A sentence when the rows cannot be saved; null when they can. */
+export function presetsProblem(rows: PresetRow[]): string | null {
+  const seen = new Set<string>();
+  for (const r of rows) {
+    const name = r.name.trim();
+    if (!name) return 'Every preset needs a name.';
+    if (!/^[a-zA-Z0-9_-]+$/.test(name)) return 'A preset name is letters, digits, "_" or "-" (it goes in a URL: ?thumb=' + name + ').';
+    if (seen.has(name)) return 'Two presets are called "' + name + '".';
+    seen.add(name);
+    const w = Number(r.width);
+    const h = Number(r.height);
+    if (!(w > 0) || !(h > 0) || !Number.isInteger(w) || !Number.isInteger(h)) return '"' + name + '" needs a whole width and height in pixels.';
+  }
+  return null;
+}
+
+export function presetsFrom(rows: PresetRow[]): Record<string, Preset> {
+  const out: Record<string, Preset> = {};
+  for (const r of rows) out[r.name.trim()] = { width: Number(r.width), height: Number(r.height), fit: r.fit === 'contain' ? 'contain' : 'cover' };
+  return out;
+}
+
+function PresetsCard({ presets, reload }: { presets: Record<string, Preset>; reload: () => void }) {
+  const { readonly } = useSession();
+  const [rows, setRows] = useState<PresetRow[]>(presetRows(presets));
+  const problem = presetsProblem(rows);
+
+  function save() {
+    if (problem) {
+      fail(new Error(problem));
+      return;
+    }
+    api('PUT', '/admin/files/config', { thumbnails: { presets: presetsFrom(rows) } })
+      .then(() => {
+        toast('Thumbnail presets saved.', 'ok');
+        reload();
+      })
+      .catch(fail);
+  }
+
+  return (
+    <Card>
+      <Sub>A named preset is public: any app may ask for ?thumb=name. Sizes that are not a preset are admin-only.</Sub>
+      <Gap h={8} />
+      <ListEditor
+        id="presets"
+        rows={rows}
+        onChange={setRows}
+        blank={() => ({ name: '', width: '128', height: '128', fit: 'cover' })}
+        addLabel="Add preset"
+        disabled={readonly}
+        head={
+          <div class="list-row list-head">
+            <span style="flex:1 1 140px">Name</span>
+            <span style="width:80px">Width</span>
+            <span style="width:80px">Height</span>
+            <span style="width:110px">Fit</span>
+          </div>
+        }
+        renderRow={(r, update) => (
+          <>
+            <input type="text" value={r.name} placeholder="name" aria-label="Preset name" disabled={readonly} onInput={(e) => update({ ...r, name: (e.currentTarget as HTMLInputElement).value })} />
+            <input type="number" min="1" style="width:80px" value={r.width} aria-label="Width" disabled={readonly} onInput={(e) => update({ ...r, width: (e.currentTarget as HTMLInputElement).value })} />
+            <input type="number" min="1" style="width:80px" value={r.height} aria-label="Height" disabled={readonly} onInput={(e) => update({ ...r, height: (e.currentTarget as HTMLInputElement).value })} />
+            <select style="width:110px" value={r.fit} aria-label="Fit" disabled={readonly} onChange={(e) => update({ ...r, fit: (e.currentTarget as HTMLSelectElement).value })}>
+              <option value="cover">crop to fill</option>
+              <option value="contain">fit inside</option>
+            </select>
+          </>
+        )}
+      />
+      {problem ? <Hint>{problem}</Hint> : null}
+      <Row style="margin-top:12px">
+        <WriteBtn tiny kind="primary" id="save-presets" disabled={!!problem} onClick={save}>
+          Save presets
+        </WriteBtn>
+      </Row>
+    </Card>
+  );
+}
+
+// -------------------------------------------------------------- clean-up --
+
+/** The orphan sweep: its last report, run it now, and when it runs on its own. */
 function SweepCard({ config, reload }: { config: FilesConfig; reload: () => void }) {
   const { readonly } = useSession();
   const sweep = config.orphanSweep || { enabled: false, cron: '0 3 * * *' };
-  const [sweepEnabled, setSweepEnabled] = useState(!!sweep.enabled);
-  const [sweepCron, setSweepCron] = useState(cellText(sweep.cron));
+  const [enabled, setEnabled] = useState(!!sweep.enabled);
+  const [cron, setCron] = useState(cellText(sweep.cron) || '0 3 * * *');
   const status = config.sweepStatus || {};
   const lastReport = status.lastReport;
 
-  function saveSweepSchedule() {
-    api('PUT', '/admin/files/config', { orphanSweep: { enabled: sweepEnabled, cron: sweepCron.trim() } })
+  function saveSchedule() {
+    api('PUT', '/admin/files/config', { orphanSweep: { enabled, cron: cron.trim() } })
       .then(() => {
-        toast('Orphan-sweep schedule saved.', 'ok');
+        toast(enabled ? 'Clean-up scheduled.' : 'Clean-up schedule turned off.', 'ok');
         reload();
       })
       .catch(fail);
   }
 
   function runSweep(deleteOrphans: boolean) {
-    toast('Running the orphan sweep…');
+    toast('Looking for orphans…');
     api<{ report: SweepReport }>('POST', '/admin/files/sweep', { deleteOrphans })
       .then((result) => {
         const r = result.report;
         toast(
-          'Sweep done: ' + r.orphanBlobs.length + ' orphan blob(s), ' + r.orphanRows.length + ' orphan row(s)' + (r.deleted ? ' (orphan blobs deleted).' : ' (report only).'),
+          'Done: ' + r.orphanBlobs.length + ' file' + (r.orphanBlobs.length === 1 ? '' : 's') + ' no record knows about, ' + r.orphanRows.length + ' record' + (r.orphanRows.length === 1 ? '' : 's') + ' whose file is missing' + (r.deleted ? ' — the unknown files were deleted.' : '.'),
           'ok'
         );
         reload();
@@ -182,33 +571,34 @@ function SweepCard({ config, reload }: { config: FilesConfig; reload: () => void
       <Row>
         {lastReport ? (
           <Chip kind={lastReport.error ? 'bad' : lastReport.orphanBlobs.length || lastReport.orphanRows.length ? 'warn' : 'ok'}>
-            {'last swept ' + when(lastReport.at) + ' — ' + lastReport.orphanBlobs.length + ' orphan blob(s), ' + lastReport.orphanRows.length + ' orphan row(s)'}
+            {'last checked ' + when(lastReport.at) + ' — ' + lastReport.orphanBlobs.length + ' unknown file' + (lastReport.orphanBlobs.length === 1 ? '' : 's') + ', ' + lastReport.orphanRows.length + ' missing'}
           </Chip>
         ) : (
           <Chip>never run</Chip>
         )}
         <Spacer />
         <WriteBtn tiny onClick={() => runSweep(false)}>
-          Run now (report only)
+          Check now
         </WriteBtn>
-        <WriteBtn tiny kind="danger" onClick={() => runSweep(true)}>
-          Run now + delete orphan blobs
+        <WriteBtn tiny kind="danger" onClick={() => confirmSimple('Delete unknown files?', 'Files no record points at are deleted for good. Records whose file is missing are only reported.', () => runSweep(true), 'Check and delete')}>
+          Check now and delete unknown files
         </WriteBtn>
       </Row>
-      <Row style="margin-top:10px">
-        <Check checked={sweepEnabled} onChange={setSweepEnabled} disabled={readonly}>
-          Scheduled
-        </Check>
-        <Field label="Cron">
-          <input type="text" value={sweepCron} disabled={readonly} onInput={(e) => setSweepCron((e.currentTarget as HTMLInputElement).value)} />
-        </Field>
-        <WriteBtn tiny onClick={saveSweepSchedule}>
+      <Gap />
+      <Switch id="sweep-enabled" checked={enabled} onChange={setEnabled} disabled={readonly}>
+        Check on a schedule
+      </Switch>
+      <Sub>A scheduled check only reports — it never deletes. Records whose file went missing are a data problem for a person, never cleaned up on their own.</Sub>
+      {enabled ? (
+        <div class="when-body" id="sweep-schedule">
+          <ScheduleBuilder id="sweep-cron" value={cron} onChange={setCron} preview={previewCron} disabled={readonly} />
+        </div>
+      ) : null}
+      <Row style="margin-top:12px">
+        <WriteBtn tiny kind="primary" id="save-sweep" onClick={saveSchedule}>
           Save schedule
         </WriteBtn>
       </Row>
-      <Sub style="margin-top:8px">
-        Report-only by default: the schedule finds and reports orphans, it never auto-deletes. Orphan METADATA ROWS (a row whose blob went missing) are never auto-deleted either way — that is a data-integrity signal for a human.
-      </Sub>
     </Card>
   );
 }

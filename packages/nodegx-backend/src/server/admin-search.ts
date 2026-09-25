@@ -48,7 +48,7 @@ export class AdminSearchRoutes {
   constructor(search: SearchState, facade: IStorageFacade) {
     this.search = search;
     this.facade = facade;
-    this.indexer = new SearchIndexer(facade.schemaManager);
+    this.indexer = new SearchIndexer(() => facade.schemaManager);
   }
 
   getConfig(ctx: RequestContext): void {

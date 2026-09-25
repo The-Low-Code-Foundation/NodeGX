@@ -31,7 +31,7 @@ or via MCP (`get_backend_file_config` / `configure_backend_files`).
 | Setting | Default | Notes |
 |---|---|---|
 | Max upload size | 25 MB | Oversized uploads are rejected with `413` before the body is even fully read (declared `Content-Length` is checked first). |
-| Content-type deny list | empty | Refuse specific sniffed types outright (e.g. `application/x-msdownload`). |
+| Content-type deny list | empty | Refuse specific sniffed types outright (e.g. `application/x-msdownload`). The manager's Storage page offers these as ticked categories in the sniffer's own vocabulary plus custom types — a type the sniffer never produces is kept and labelled *never identified*, because it matches nothing. |
 | Content-type allow list | none (allow all) | When set, ONLY these sniffed types may be uploaded. |
 | Signed URL TTL | 300s | See "Private files" below. |
 
@@ -75,7 +75,10 @@ Three presets ship by default — `sm` (64×64, cover), `md` (256×256, cover),
 resize-anything DoS vector for the public internet; named presets are public.
 Results are cached on disk and served with a correct `ETag`/`Cache-Control`
 (`public, max-age=31536000, immutable` for public files; `private, no-store`
-for private ones) — a cache hit never touches the transform library.
+for private ones) — a cache hit never touches the transform library. The cache
+key carries the preset's size and fit as well as its name, so editing a preset
+on the manager's Storage page is honoured by the next request (before BMG-011
+the old render was served under the name for as long as the cache lived).
 
 ### The sharp caveat — read this before you rely on thumbnails
 
