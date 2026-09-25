@@ -18,7 +18,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { api, encode, useSession } from '../api';
 import { DangerAction, DangerZone, Drawer, EmptyState, KeyValueEditor, KvRow, Picker, ScheduleBuilder, SchedulePreview, objectFromRows, rowsFromObject } from '../composers';
 import { ago, when } from '../format';
-import { navigate } from '../router';
+import { hrefWith, navigate } from '../router';
 import { Btn, Chip, Field, Gap, Hint, Notice, Page, Row, Spacer, Switch, Table, WriteBtn, confirmSimple, copyText, fail, toast } from '../ui';
 import type { ViewProps } from './index';
 
@@ -554,6 +554,11 @@ function TriggerDrawer({ existing, overlapDefault, functions, workflows, collect
             Enabled
           </Switch>
           <Spacer />
+          {existing ? (
+            <Btn onClick={() => (location.hash = hrefWith('runs', [], { trigger: existing.id }))} title="Every run this trigger started, in Runs.">
+              Runs of this trigger
+            </Btn>
+          ) : null}
           {existing ? (
             <WriteBtn disabled={busy} onClick={runNow} title="Fire it once, now, whatever the schedule says. The run is recorded like any other.">
               Run now

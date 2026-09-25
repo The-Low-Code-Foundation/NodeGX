@@ -61,6 +61,7 @@ function checkReads(rule: StorageCheckDecl, column: string): boolean {
   return rule.field === column;
 }
 import { summariseModelCalls } from '../execution/modelCost';
+import { executionKind, isExecutionKind } from '../execution/kind';
 import {
   checkViolationToHttp,
   createErrorToHttp,
@@ -867,18 +868,38 @@ export class ByobAdminRoutes {
   // Executions: /executions*
   // ==========================================================================
 
+  /**
+   * `GET /executions` — the list, filtered.
+   *
+   * BMG-009 added the Runs page's rows: `kind` (workflow / function / backup /
+   * maintenance, derived from the record's metadata), `name` (contains),
+   * `trigger` (the registered trigger that started it), `since` / `until`
+   * (an instant, as ISO text or epoch ms; `startedAfter` / `startedBefore`
+   * remain as the ms spelling) and `minDurationMs`. A parameter the route
+   * cannot read is a 400 in words, not a silently unfiltered list. The answer
+   * stays a BARE ARRAY (`admin-dashboard.test.ts` names that seam); the page
+   * count rides the `X-Total-Count` header.
+   */
   listExecutions(res: http.ServerResponse, query: Record<string, string>): void {
-    const result = this.executions.list({
+    if (query.kind && !isExecutionKind(query.kind)) {
+      throw new HttpError(400, `"${query.kind}" is not a kind of run: workflow, function, backup or maintenance.`);
+    }
+    const q = {
       workflowId: query.workflowId || undefined,
       status: query.status || undefined,
       triggerType: query.triggerType || undefined,
       limit: query.limit ? parseInt(query.limit, 10) : undefined,
       offset: query.offset ? parseInt(query.offset, 10) : undefined,
-      startedAfter: query.startedAfter ? parseInt(query.startedAfter, 10) : undefined,
-      startedBefore: query.startedBefore ? parseInt(query.startedBefore, 10) : undefined,
+      startedAfter: instantParam('since', query.since) ?? (query.startedAfter ? parseInt(query.startedAfter, 10) : undefined),
+      startedBefore: instantParam('until', query.until) ?? (query.startedBefore ? parseInt(query.startedBefore, 10) : undefined),
       // PRD-002: `?capped=true` names the runs whose record hit a size bound.
-      capped: query.capped === 'true' ? true : query.capped === 'false' ? false : undefined
-    });
+      capped: query.capped === 'true' ? true : query.capped === 'false' ? false : undefined,
+      kind: isExecutionKind(query.kind) ? query.kind : undefined,
+      nameContains: query.name || undefined,
+      triggerId: query.trigger || undefined,
+      minDurationMs: query.minDurationMs ? numberParam('minDurationMs', query.minDurationMs) : undefined
+    };
+    const result = this.executions.list(q);
     /**
      * FED-003 §5.5 / FED-006 AC5 — the cost sentence on the LIST as well as on the row.
      *
@@ -889,9 +910,10 @@ export class ByobAdminRoutes {
      */
     const decorated = result.map((row) => {
       const modelCost = summariseModelCalls((row as { metadata?: unknown }).metadata);
-      return modelCost ? { ...row, modelCost } : row;
+      const kind = executionKind((row as { metadata?: unknown }).metadata);
+      return modelCost ? { ...row, kind, modelCost } : { ...row, kind };
     });
-    sendJSON(res, 200, decorated);
+    sendJSON(res, 200, decorated, { 'X-Total-Count': String(this.executions.count(q)) });
   }
 
   getExecution(res: http.ServerResponse, id: string): void {
@@ -900,6 +922,22 @@ export class ByobAdminRoutes {
     // FED-003 §3.4 — what the run spent on models, summed here rather than by each of the three
     // readers of this route. Derived, never stored: see `execution/modelCost.ts`.
     const modelCost = summariseModelCalls(result.metadata);
-    sendJSON(res, 200, modelCost ? { ...result, modelCost } : result);
+    const kind = executionKind(result.metadata);
+    sendJSON(res, 200, modelCost ? { ...result, kind, modelCost } : { ...result, kind });
   }
+}
+
+/** `since` / `until`: epoch ms, or anything `Date.parse` reads. Absent → undefined; unreadable → 400. */
+function instantParam(name: string, raw: string | undefined): number | undefined {
+  if (raw === undefined || raw === '') return undefined;
+  if (/^\d+$/.test(raw)) return parseInt(raw, 10);
+  const ms = Date.parse(raw);
+  if (isNaN(ms)) throw new HttpError(400, `"${name}" must be a date or a time in milliseconds, not "${raw}".`);
+  return ms;
+}
+
+function numberParam(name: string, raw: string): number {
+  const n = Number(raw);
+  if (raw.trim() === '' || isNaN(n) || n < 0) throw new HttpError(400, `"${name}" must be a number of milliseconds, not "${raw}".`);
+  return n;
 }

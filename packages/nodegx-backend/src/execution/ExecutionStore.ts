@@ -42,6 +42,7 @@ import { SqliteOperationalStore, SqlDatabase } from '../persistence/SqliteOperat
 import { PgOperationalStore } from '../persistence/PgOperationalStore';
 import { resolveStorageUrl } from '../persistence/createAdapter';
 import { BoundedExecutionLogger } from './BoundedExecutionLogger';
+import type { ExecutionKind } from './kind';
 import type { RecordBounds } from './record-bounds';
 
 // Bundled from noodl-viewer-cloud/src/execution-history by esbuild (test-time:
@@ -112,6 +113,11 @@ export interface ExecutionListQuery {
   startedBefore?: number;
   /** PRD-002: only runs whose record hit a bound (`true`), or only runs that did not (`false`). */
   capped?: boolean;
+  /** BMG-009 — the Runs page's rows; see `ExecutionQuery` in the cloud store. */
+  kind?: ExecutionKind;
+  nameContains?: string;
+  triggerId?: string;
+  minDurationMs?: number;
 }
 
 /** What one prune pass did, and which limit bound it (PRD-003 §3.2 — rule 3 of the phase). */
@@ -655,7 +661,28 @@ export class ExecutionHistory {
       offset: query.offset,
       startedAfter: query.startedAfter,
       startedBefore: query.startedBefore,
-      capped: query.capped
+      capped: query.capped,
+      kind: query.kind,
+      nameContains: query.nameContains,
+      triggerId: query.triggerId,
+      minDurationMs: query.minDurationMs
+    });
+  }
+
+  /** How many match, ignoring `limit`/`offset` — `GET /executions`'s `X-Total-Count` (BMG-009). */
+  count(query: ExecutionListQuery): number {
+    if (!this.store) return 0;
+    return this.store.countExecutions({
+      workflowId: query.workflowId,
+      status: query.status as WorkflowExecution['status'] | undefined,
+      triggerType: query.triggerType as WorkflowExecution['triggerType'] | undefined,
+      startedAfter: query.startedAfter,
+      startedBefore: query.startedBefore,
+      capped: query.capped,
+      kind: query.kind,
+      nameContains: query.nameContains,
+      triggerId: query.triggerId,
+      minDurationMs: query.minDurationMs
     });
   }
 

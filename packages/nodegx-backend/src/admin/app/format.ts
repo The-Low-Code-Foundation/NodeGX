@@ -228,8 +228,22 @@ export const EXECUTION_STATUSES = ['', 'running', 'success', 'error'];
 /** The affordance a run's status wears. `error` is the danger one. Red is for danger only. */
 export function executionStatusKind(value: string): string {
   if (value === 'success') return 'ok';
-  if (value === 'error') return 'bad';
+  if (value === 'error' || value === 'timed out') return 'bad';
   return 'warn';
+}
+
+/**
+ * BMG-009 AC3 — the word a run's status wears. The store knows three statuses
+ * (`EXECUTION_STATUSES`, which the filter offers, unchanged); the engine stamps
+ * WHY a run ended in `metadata` (`engineStatus: 'cancelled'`, `timedOut`), and a
+ * run someone stopped must say *cancelled*, not *error*.
+ */
+export function runStatusWord(record: unknown): string {
+  const rec = (record || {}) as Record<string, any>;
+  const m = (rec.metadata || {}) as Record<string, unknown>;
+  if (m.engineStatus === 'cancelled' || m.cancelled === true) return 'cancelled';
+  if (m.timedOut === true) return 'timed out';
+  return rec.status || '';
 }
 
 /** `StepStatus` is one longer: `skipped` is a branch the run did not take, not a fault. */

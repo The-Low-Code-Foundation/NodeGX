@@ -323,6 +323,7 @@ export class BackupManager {
         triggerType,
         triggerData: { operation: 'backup', source },
         metadata: {
+          kind: 'backup',
           backendId: this.deps.backendId,
           backendName: this.deps.backendName,
           operation: 'backup',
@@ -520,6 +521,7 @@ export class BackupManager {
         triggerType: options.triggerType || 'manual',
         triggerData: { operation: 'restore', archive: archivePath, target },
         metadata: {
+          kind: 'backup',
           backendId: this.deps.backendId,
           backendName: this.deps.backendName,
           operation: 'restore',

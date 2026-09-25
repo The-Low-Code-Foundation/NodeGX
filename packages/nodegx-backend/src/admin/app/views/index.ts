@@ -23,6 +23,8 @@ import { AuditView } from './audit';
 
 export interface ViewProps {
   params: string[];
+  /** The hash's query (`#/runs?trigger=<id>`), BMG-009. Absent in specs that mount a view bare. */
+  query?: Record<string, string>;
 }
 
 export interface ViewDef {

@@ -112,6 +112,11 @@ export interface ExecutionStep {
 }
 
 /**
+ * What kind of thing a run was, derived from its `metadata` (nodegx-backend BMG-009).
+ */
+export type ExecutionKind = 'workflow' | 'function' | 'backup' | 'maintenance';
+
+/**
  * Query parameters for filtering executions
  */
 export interface ExecutionQuery {
@@ -135,6 +140,26 @@ export interface ExecutionQuery {
    * only runs that did not. Omit for both. (nodegx-backend PRD-002.)
    */
   capped?: boolean;
+
+  /**
+   * nodegx-backend BMG-009 — the four filters the Runs page's rows ask, so "last night's failed
+   * runs of one function" is one query and not a page-side scan of everything.
+   *
+   * `kind` is DERIVED from `metadata` (see `executionKind` in nodegx-backend `execution/kind.ts`,
+   * and `KIND_SQL` here — the two must agree, and a spec holds them to it): `workflow` when the
+   * engine stamped `kind`, `backup` for a backup or restore, `maintenance` for a sweep, else
+   * `function`. Records written before the stamp existed are classified the same way.
+   */
+  kind?: ExecutionKind;
+
+  /** `workflow_name` contains this text (case-insensitive; `%` and `_` are literal). */
+  nameContains?: string;
+
+  /** Runs started by this registered trigger (`metadata.triggerId`). */
+  triggerId?: string;
+
+  /** Only runs that took at least this long. A run still going has no duration and is left out. */
+  minDurationMs?: number;
 
   /** Maximum number of results to return */
   limit?: number;

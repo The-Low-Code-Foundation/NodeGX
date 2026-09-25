@@ -1,0 +1,264 @@
+{
+  "checks": {
+    "AC5 the Workflows page has no textarea at rest": {
+      "pass": true
+    },
+    "the list: Greet · Nightly digest · Ping · Slow with their step counts": {
+      "pass": true,
+      "detail": [
+        [
+          "Nightly digest",
+          "1"
+        ],
+        [
+          "Greet",
+          "1"
+        ],
+        [
+          "Ping",
+          "1"
+        ],
+        [
+          "Slow",
+          "1"
+        ]
+      ]
+    },
+    "Last run: the seeded digest run is an error chip with a time; Greet has never run": {
+      "pass": true,
+      "detail": {
+        "digest": "error 25/09/2026, 15:08:12",
+        "greet": "never"
+      }
+    },
+    "AC5 no Run payload (JSON) anywhere on the page": {
+      "pass": true
+    },
+    "Run opens #/workflows/greet as a drawer titled \"Run Greet\"": {
+      "pass": true,
+      "detail": "Run Greet"
+    },
+    "AC1 the drawer opens with one row per name the steps read: \"name\"": {
+      "pass": true,
+      "detail": [
+        "name"
+      ]
+    },
+    "AC5 the drawer has no textarea": {
+      "pass": true
+    },
+    "Run lands on #/runs/<id> (the route answered 202 with the record id)": {
+      "pass": true,
+      "detail": "#/runs/exec_mugz80i19apcltdx"
+    },
+    "the page asked POST /admin/workflow-defs/greet/run": {
+      "pass": true,
+      "detail": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8697/admin/workflow-defs/greet/run"
+      }
+    },
+    "AC1 GET /executions/:id — the base input equals what was typed: {name:\"Ann\", count:3} (number), status success": {
+      "pass": true,
+      "detail": {
+        "body": {
+          "name": "Ann",
+          "count": 3
+        },
+        "status": "success",
+        "kind": "workflow"
+      }
+    },
+    "the record opened as the FED-007 dialog: the band says success, ran Greet": {
+      "pass": true,
+      "detail": "success\nran Greet\ntriggered by manual run of greet\nstarted 25/09/2026, 15:08:19\ntook 3 ms\nsteps 1"
+    },
+    "AC1 a workflow that reads nothing by name opens with an empty editor titled \"What each step starts with\"": {
+      "pass": true
+    },
+    "AC1 the key/value editor’s rows are the base input: {note:\"hi\"}": {
+      "pass": true,
+      "detail": {
+        "note": "hi"
+      }
+    },
+    "AC5 the Runs page has no textarea at rest": {
+      "pass": true
+    },
+    "the list opens with no filter rows and \"Showing 1–N of N\"": {
+      "pass": true,
+      "detail": "Showing 1–6 of 6"
+    },
+    "every row has a kind, a name, a status word: workflow/function per row": {
+      "pass": true,
+      "detail": [
+        [
+          "workflow",
+          "Ping",
+          "manual",
+          "success"
+        ],
+        [
+          "workflow",
+          "Greet",
+          "manual",
+          "success"
+        ],
+        [
+          "workflow",
+          "Ping",
+          "manual",
+          "success"
+        ],
+        [
+          "workflow",
+          "Nightly digest",
+          "manual",
+          "error"
+        ],
+        [
+          "workflow",
+          "Nightly digest",
+          "manual",
+          "error"
+        ],
+        [
+          "function",
+          "hello",
+          "Nightly hello",
+          "success"
+        ]
+      ]
+    },
+    "the function run’s Trigger cell names the trigger (\"Nightly hello\"), linked": {
+      "pass": true,
+      "detail": "Nightly hello"
+    },
+    "AC4 the status row offers exactly the store’s statuses (running, success, error) and a blank": {
+      "pass": true,
+      "detail": [
+        "",
+        "running",
+        "success",
+        "error"
+      ]
+    },
+    "the fields: status · kind · name · trigger · workflow · started · duration (s)": {
+      "pass": true,
+      "detail": [
+        "status",
+        "kind",
+        "name",
+        "trigger",
+        "workflow",
+        "started",
+        "duration (s)"
+      ]
+    },
+    "flat rows: no \"+ Add group\" and no and/or": {
+      "pass": true
+    },
+    "AC2 the page asked the route ONE query: status=error&name=digest&since=…&until=…": {
+      "pass": true,
+      "detail": "?name=digest&since=1789768800000&status=error&until=1790373599999&limit=50"
+    },
+    "AC2 the rows equal what the route returns for the same query: two Nightly digest errors, and the count says so": {
+      "pass": true,
+      "detail": {
+        "rows": [
+          [
+            "Nightly digest",
+            "error"
+          ],
+          [
+            "Nightly digest",
+            "error"
+          ]
+        ],
+        "route": [
+          [
+            "Nightly digest",
+            "error"
+          ],
+          [
+            "Nightly digest",
+            "error"
+          ]
+        ],
+        "total": "2",
+        "sentence": "Showing 1–2 of 2 where status is error and name contains digest and started is within the past 7 days"
+      }
+    },
+    "the sentence says the filter in words": {
+      "pass": true,
+      "detail": "Showing 1–2 of 2 where status is error and name contains digest and started is within the past 7 days"
+    },
+    "changing a row re-asks: status is success + name contains digest → no runs match": {
+      "pass": true,
+      "detail": "No runs where status is success and name contains digest and started is within the past 7 days"
+    },
+    "the trigger drawer has \"Runs of this trigger\"": {
+      "pass": true
+    },
+    "#/runs?trigger=<id>: the Runs page opens with \"trigger is Nightly hello\" filled, and only that trigger’s runs": {
+      "pass": true,
+      "detail": {
+        "trgHash": "#/runs?trigger=trg_mQqFR0OxSHeR",
+        "trgSel": "trg_mQqFR0OxSHeR",
+        "rows": [
+          [
+            "function",
+            "hello",
+            "Nightly hello"
+          ]
+        ]
+      }
+    },
+    "…and they are what GET /executions?trigger= answers": {
+      "pass": true,
+      "detail": 1
+    },
+    "Slow started (20 s wait) and the page landed on its record while it runs": {
+      "pass": true,
+      "detail": "running"
+    },
+    "the record dialog shows \"running\" and a \"Cancel the run\" button; the list behind it wears the live chip": {
+      "pass": true,
+      "detail": "live"
+    },
+    "Cancel asks first, in words, with the verb on the button": {
+      "pass": true
+    },
+    "AC3 the record says cancelled: status error with engineStatus \"cancelled\", the message says so": {
+      "pass": true,
+      "detail": {
+        "status": "error",
+        "engineStatus": "cancelled",
+        "errorMessage": "Workflow run was cancelled."
+      }
+    },
+    "AC3 in the list the Slow run wears \"cancelled\", not \"error\", and has no Cancel button any more": {
+      "pass": true,
+      "detail": [
+        "25/09/2026, 15:08:48",
+        "workflow",
+        "Slow",
+        "manual",
+        "cancelled",
+        "1961 ms",
+        "Detail"
+      ]
+    },
+    "nothing is running: no live chip": {
+      "pass": true
+    },
+    "Last run now: Greet success (linked to its record), Slow cancelled": {
+      "pass": true,
+      "detail": {
+        "greet": "success 25/09/2026, 15:08:19",
+        "greetHref": "#/runs/exec_mugz80i19apcltdx",
+        "slow": "cancelled 25/09/2026, 15:08:48"
+      }
+    }
+  }
+}

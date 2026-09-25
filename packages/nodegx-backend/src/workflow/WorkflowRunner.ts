@@ -753,6 +753,7 @@ export class WorkflowRunner {
         triggerType: trigger ? trigger.type : 'webhook',
         triggerData: scrubRequestForLogging(request || {}),
         metadata: {
+          kind: 'function',
           backendId: this.backendId,
           backendName: this.backendName,
           ...(trigger && trigger.source ? { triggerSource: trigger.source } : {}),

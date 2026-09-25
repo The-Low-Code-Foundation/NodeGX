@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'preact/hooks';
 
 import { api, encode } from '../api';
-import { Cond, FilterField, Group, OPS, WINDOWS, blankCond, opDef, withOp } from '../filters';
+import { Cond, FilterField, Group, OPS, WINDOWS, blankCond, fieldOps, opDef, withOp } from '../filters';
 import { PointerItem, pointerItem, searchRecords } from '../fields';
 import { Chips } from './Chips';
 import { Picker } from './Picker';
@@ -19,9 +19,14 @@ export interface FilterRowsProps {
   fields: FilterField[];
   /** Nesting depth; a group inside a group is as deep as it goes. */
   depth?: number;
+  /**
+   * BMG-009: rows joined by *and* only — no *or*, no groups — for a list whose
+   * route answers a flat query. What it cannot ask, it does not offer.
+   */
+  flat?: boolean;
 }
 
-export function FilterRows({ group, onChange, fields, depth = 0 }: FilterRowsProps) {
+export function FilterRows({ group, onChange, fields, depth = 0, flat = false }: FilterRowsProps) {
   if (!fields.length) return null;
   const set = (i: number, next: Cond | Group) => onChange({ ...group, items: group.items.map((x, j) => (j === i ? next : x)) });
   const remove = (i: number) => onChange({ ...group, items: group.items.filter((_, j) => j !== i) });
@@ -33,7 +38,7 @@ export function FilterRows({ group, onChange, fields, depth = 0 }: FilterRowsPro
           <span class="filter-conj">
             {i === 0 ? (
               depth ? '' : 'Where'
-            ) : i === 1 ? (
+            ) : i === 1 && !flat ? (
               <select aria-label="And or or" value={group.conj} onChange={(e) => onChange({ ...group, conj: (e.currentTarget as HTMLSelectElement).value as 'and' | 'or' })}>
                 <option value="and">and</option>
                 <option value="or">or</option>
@@ -56,7 +61,7 @@ export function FilterRows({ group, onChange, fields, depth = 0 }: FilterRowsPro
         <button type="button" class="btn tiny" onClick={() => add(blankCond(fields[0]))}>
           + Add condition
         </button>
-        {depth < 1 ? (
+        {depth < 1 && !flat ? (
           <button type="button" class="btn tiny" onClick={() => add({ kind: 'group', conj: group.conj === 'and' ? 'or' : 'and', items: [blankCond(fields[0])] })}>
             + Add group
           </button>
@@ -68,7 +73,8 @@ export function FilterRows({ group, onChange, fields, depth = 0 }: FilterRowsPro
 
 function CondRow({ cond, fields, onChange }: { cond: Cond; fields: FilterField[]; onChange: (c: Cond) => void }) {
   const field = fields.find((f) => f.name === cond.field) || fields[0];
-  const def = opDef(field.kind, cond.op) || OPS[field.kind][0];
+  const ops = fieldOps(field);
+  const def = opDef(field.kind, cond.op) || ops[0];
   const text = (key: 'value' | 'value2' | 'lat' | 'lng', label: string, type = 'text', placeholder?: string) => (
     <input
       type={type}
@@ -98,14 +104,24 @@ function CondRow({ cond, fields, onChange }: { cond: Cond; fields: FilterField[]
         ))}
       </select>
       <select aria-label="Operator" value={def.id} onChange={(e) => onChange(withOp(cond, field.kind, (e.currentTarget as HTMLSelectElement).value))}>
-        {OPS[field.kind].map((o) => (
+        {ops.map((o) => (
           <option key={o.id} value={o.id}>
             {o.label}
           </option>
         ))}
       </select>
       {def.arity === 'one' && field.kind === 'link' ? <LinkValue field={field} id={cond.value || ''} onPick={(id) => onChange({ ...cond, value: id })} /> : null}
-      {def.arity === 'one' && field.kind !== 'link' ? text('value', field.name + ' value', inputType, field.kind === 'list' ? 'an item' : undefined) : null}
+      {def.arity === 'one' && field.kind === 'choice' ? (
+        <select class="filter-value" aria-label={field.name + ' value'} value={cond.value || ''} onChange={(e) => onChange({ ...cond, value: (e.currentTarget as HTMLSelectElement).value })}>
+          <option value="">pick…</option>
+          {(field.options || []).map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      ) : null}
+      {def.arity === 'one' && field.kind !== 'link' && field.kind !== 'choice' ? text('value', field.name + ' value', inputType, field.kind === 'list' ? 'an item' : undefined) : null}
       {def.arity === 'two' ? (
         <>
           {text('value', field.name + ' from', inputType)}

@@ -30,7 +30,9 @@ const FIELDS: FilterField[] = [
   { name: 'owner', kind: 'link', targetClass: 'Person' },
   { name: 'tags', kind: 'list' },
   { name: 'at', kind: 'location' },
-  { name: 'createdAt', kind: 'date' }
+  { name: 'createdAt', kind: 'date' },
+  // BMG-009: a choice — a text with a fixed set of values, offered as a select and asked with `is` only.
+  { name: 'state', kind: 'choice', options: [{ value: 'open', label: 'Open' }, { value: 'closed', label: 'Closed' }] }
 ];
 
 const NOW = new Date();
@@ -43,9 +45,9 @@ type Row = Record<string, any>;
 
 /** The seeded Task rows, before the backend adds ids. `owner` is filled with a Person index. */
 const SEED: Row[] = [
-  { title: 'open', n: 1, done: true, due: day(0), owner: 0, tags: ['red', 'blue'], at: LONDON },
-  { title: 'open door', n: 5, done: false, due: day(-1), owner: 1, tags: ['redwood'], at: PARIS },
-  { title: 'closed', n: 10, done: true, due: day(-3), owner: 0, tags: [] },
+  { title: 'open', n: 1, done: true, due: day(0), owner: 0, tags: ['red', 'blue'], at: LONDON, state: 'open' },
+  { title: 'open door', n: 5, done: false, due: day(-1), owner: 1, tags: ['redwood'], at: PARIS, state: 'open' },
+  { title: 'closed', n: 10, done: true, due: day(-3), owner: 0, tags: [], state: 'closed' },
   { title: '', n: 0, due: day(-10), tags: ['blue'] },
   { title: 'a.b(c)', n: -2, done: false, due: day(-40) },
   { n: 7, due: day(1) },
@@ -100,6 +102,8 @@ function expected(row: Row, c: Cond): boolean {
       if (c.op === 'between') return x >= a && x <= Number(c.value2);
       break;
     }
+    case 'choice':
+      return !missing(v) && String(v) === c.value;
     case 'boolean':
       return c.op === 'yes' ? v === true : v !== true;
     case 'date': {
@@ -166,7 +170,8 @@ function everyOperator(person: string): Cond[] {
     c('tags', 'contains', { value: 'red' }),
     c('tags', 'empty'),
     c('at', 'near', { lat: String(LONDON.latitude), lng: String(LONDON.longitude), value: '10' }),
-    c('at', 'near', { lat: String(LONDON.latitude), lng: String(LONDON.longitude), value: '400' })
+    c('at', 'near', { lat: String(LONDON.latitude), lng: String(LONDON.longitude), value: '400' }),
+    c('state', 'is', { value: 'open' })
   ];
 }
 
@@ -264,7 +269,8 @@ describe('BMG-002 AC1 — each operator returns the right rows from a real backe
         { name: 'due', type: 'Date' },
         { name: 'owner', type: 'Pointer', targetClass: 'Person' },
         { name: 'tags', type: 'Array' },
-        { name: 'at', type: 'GeoPoint' }
+        { name: 'at', type: 'GeoPoint' },
+        { name: 'state', type: 'String' }
       ]
     });
     expect(made.status).toBeLessThan(300);

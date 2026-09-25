@@ -20,13 +20,20 @@
  *    by where the ends fall.
  */
 
-export type FilterKind = 'text' | 'number' | 'boolean' | 'date' | 'link' | 'list' | 'location';
+export type FilterKind = 'text' | 'number' | 'boolean' | 'date' | 'link' | 'list' | 'location' | 'choice';
 
 export interface FilterField {
   name: string;
   kind: FilterKind;
   /** A link's target collection. */
   targetClass?: string;
+  /** A choice's values, in the order they are offered (BMG-009: a run's status, kind, trigger). */
+  options?: Array<{ value: string; label: string }>;
+  /**
+   * The operators this field offers, when fewer than its kind's — a field a
+   * flat query answers with one operator must not offer the others.
+   */
+  ops?: string[];
 }
 
 export type Conj = 'and' | 'or';
@@ -99,8 +106,18 @@ export const OPS: Record<FilterKind, OpDef[]> = {
     { id: 'contains', label: 'contains', arity: 'one' },
     { id: 'empty', label: 'is empty', arity: 'none' }
   ],
-  location: [{ id: 'near', label: 'is within', arity: 'near' }]
+  location: [{ id: 'near', label: 'is within', arity: 'near' }],
+  choice: [{ id: 'is', label: 'is', arity: 'one' }]
 };
+
+/** The operators a field offers: its kind's, narrowed by its own `ops` when it has one. */
+export function fieldOps(field: FilterField): OpDef[] {
+  const all = OPS[field.kind];
+  if (!field.ops) return all;
+  // In the field's own order: the first one is what a new row starts with.
+  const kept = field.ops.map((id) => all.find((o) => o.id === id)).filter((o): o is OpDef => !!o);
+  return kept.length ? kept : all;
+}
 
 export const WINDOWS: Array<{ id: string; label: string }> = [
   { id: 'today', label: 'today' },
@@ -137,7 +154,7 @@ export function opDef(kind: FilterKind, op: string): OpDef | undefined {
 }
 
 export function blankCond(field: FilterField): Cond {
-  const op = OPS[field.kind][0];
+  const op = fieldOps(field)[0];
   const c: Cond = { kind: 'cond', field: field.name, op: op.id };
   return withSlots(c, op);
 }
@@ -145,6 +162,7 @@ export function blankCond(field: FilterField): Cond {
 /** A condition whose operator changed keeps what still fits and gets the slots the new one needs. */
 export function withOp(c: Cond, kind: FilterKind, op: string): Cond {
   const def = opDef(kind, op) || OPS[kind][0];
+  // A choice keeps its pick across the (one) operator; nothing else to carry.
   return withSlots({ kind: 'cond', field: c.field, op: def.id, value: def.arity === 'one' || def.arity === 'two' ? c.value : undefined }, def);
 }
 
@@ -167,13 +185,13 @@ function withSlots(c: Cond, def: OpDef): Cond {
 // ------------------------------------------------------------------ dates --
 
 /** Local midnight of a `YYYY-MM-DD`. */
-function midnight(day: string): Date {
+export function midnight(day: string): Date {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day);
   if (!m) throw new Error('"' + day + '" is not a date.');
   return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
 }
 
-function addDays(d: Date, n: number): Date {
+export function addDays(d: Date, n: number): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
 }
 
@@ -306,6 +324,9 @@ export function condWhere(c: Cond, fields: FilterField[], now: Date = new Date()
           }
         };
       }
+      break;
+    case 'choice':
+      if (c.op === 'is') return { [k]: { $eq: need(k, c.value) } };
       break;
   }
   throw new Error('"' + c.op + '" is not something ' + k + ' can be asked.');
@@ -470,6 +491,9 @@ function fieldCond(f: FilterField, raw: unknown, now: Date): Cond | null {
         }
       }
       return null;
+    case 'choice':
+      if (keys === '$eq' && typeof ops.$eq === 'string') return c('is', { value: ops.$eq });
+      return null;
     case 'location': {
       if (keys !== '$maxDistanceInKilometers,$nearSphere') return null;
       const p = ops.$nearSphere;
@@ -562,6 +586,7 @@ export function describeCond(c: Cond, fields: FilterField[], label?: (field: str
     default:
       if (f.kind === 'date') return c.field + ' ' + op + ' ' + prettyDay(c.value);
       if (f.kind === 'link' && label && c.value) return c.field + ' ' + op + ' ' + label(c.field, c.value);
+      if (f.kind === 'choice' && c.value) return c.field + ' ' + op + ' ' + ((f.options || []).find((o) => o.value === c.value) || { label: v }).label;
       return c.field + ' ' + op + ' ' + v;
   }
 }

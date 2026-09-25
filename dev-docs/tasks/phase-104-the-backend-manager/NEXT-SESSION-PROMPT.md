@@ -1,9 +1,9 @@
 # P104 — next session
 
-**Written 2026-09-25 (end of s9).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
+**Written 2026-09-25 (end of s10).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
 BMG-001; s3 built and drove BMG-007 (API keys); s4 BMG-004 (Users, R3 disable); s5 BMG-002
-(Collections); s6 BMG-005 (Roles); s7 BMG-006 (Permissions); s8 BMG-008 (Triggers); s9 built and
-drove BMG-003 (Schema) and filed **R6** (README §8) for Richard.
+(Collections); s6 BMG-005 (Roles); s7 BMG-006 (Permissions); s8 BMG-008 (Triggers); s9 BMG-003
+(Schema) and filed **R6** (README §8) for Richard; s10 built and drove BMG-009 (Workflows and Runs).
 
 ## Where it stands
 
@@ -18,7 +18,8 @@ drove BMG-003 (Schema) and filed **R6** (README §8) for Richard.
 | BMG-006 Permissions | ✅ s7 | ✅ headless, AC1–7, 37/37 checks (§6) | ✅ `806b53c5` |
 | BMG-008 Triggers | ✅ s8 | ✅ headless, AC1–8, 41/41 checks (§6) | ✅ `71b177a4` |
 | BMG-003 Schema | ✅ s9 | ✅ headless, AC1–8, 41/41 checks (§6) | ✅ `cb83fa7c` |
-| BMG-009…012 | — | — | — |
+| BMG-009 Workflows and Runs | ✅ s10 | ✅ headless, AC1–5, 34/34 checks (§6) | ✅ s10 (hash in the commit line below) |
+| BMG-010…012 | — | — | — |
 | BMG-013 Richard drives | his | — | — |
 
 Built-but-undriven: 0. Built-but-uncommitted: 0. Check `git status -- packages/nodegx-backend/src/admin`
@@ -28,6 +29,11 @@ before believing that: a peer session may have touched it.
 browser: yes, behind the typed name · R5 filed · **R6 OPEN (s9): on a collection that already has records, a
 required field ASKS for a default (the engines require one) instead of AC5's "Required disables Default" — ask
 Richard in plain words whether that is the rule, or whether Required should be refused there.** All in README §8.
+
+**Gate readings (2026-09-25, s10):** `packages/nodegx-backend` `npm run typecheck` exit 0 (both configs); full backend
+`npx jest --maxWorkers=4`: **196 suites PASS, 1 skipped (`fed-003-live-cache`), 0 FAIL, 2350 tests, exit 0, 346 s** (2026-09-25, s10, after every change in this commit). `noodl-viewer-cloud` `npx jest tests/execution-history.test.ts` 19/19 (its
+store's WHERE was refactored). Bundle 79,508 gzip (budget 160,000); route tally unchanged at `admin: 93` (BMG-009 added
+no route: `GET /executions` grew parameters, the run route grew `wait:false`). Drive `drives/bmg009/run.sh ac seed` 34/34.
 
 **Gate readings (2026-09-25, s9):** `packages/nodegx-backend` `npm run typecheck` exit 0 (both configs); `noodl-runtime`
 and `nodegx-backend-contract` `tsc --noEmit` exit 0. Full backend `npx jest --maxWorkers=4`: **194 suites PASS, 1 skipped
@@ -39,16 +45,48 @@ route). Drive `drives/bmg003/run.sh ac seed` 41/41.
 
 ## Do this, in order
 
-1. **BMG-009 Workflows and Runs.** Depends on 001, 002. Reuses `FilterRows` for runs; Runs should link a row
-   back to `#/triggers/<id>` from `metadata.triggerId`. Read `views/workflows.tsx` and `views/runs.tsx` first.
-2. Then BMG-010 (`drives/bmg005/smtp.mjs` is the mail sink),
-   BMG-011 (R4 yes; **`ScheduleBuilder` from s8 is the sweep/backup schedule control** — hand it
+1. **BMG-010 Email and Sign-in.** Depends on 001. `drives/bmg005/smtp.mjs` is the mail sink (invitations really
+   send through it — BMG-010's *Send me this* can be measured the same way). Read `views/email.tsx`,
+   `views/signin.tsx`, `server/admin-email.ts` (`PUT /admin/email/templates/:id`, `GET …/:id/preview`) and
+   `auth/` presets first; the placeholder list must be READ from the backend (AC3), the SMTP presets are a table
+   with a spec (AC1), the wizard's fixture equality is AC4. Origins are `Chips`; scopes are boxes from the preset.
+2. Then BMG-011 (R4 yes; **`ScheduleBuilder` from s8 is the sweep/backup schedule control** — hand it
    `preview={(cron) => api('POST', '/admin/triggers/preview', {cron})}` and it is done), BMG-012 (which
    also deletes the editor's `serverOwnedColumns.ts`, its `panels/permissions/ruleVocabulary.ts`, AND its
    `cronGloss` in `models/triggers/TriggerBackendClient.ts` with `TriggerFormFields.tsx` — the backend's
    `triggers/cronWords.ts` is the one gloss; the editor's `workflowtriggernodes.test.ts` pins on
    `cronGloss` go with it). One commit per task, a §6 *Built* with what each AC measured, shots in
    `shots/`, drives in `drives/<task>/`.
+
+## What s10 settled
+
+- **`GET /executions` is the Runs page's whole query language**: `status`, `kind`, `name` (contains), `trigger`
+  (`metadata.triggerId`), `workflowId`, `since`/`until` (ISO or ms), `minDurationMs`, `limit`/`offset`, and the
+  count in **`X-Total-Count`**; the body is still a bare array (do not envelope it — `admin-dashboard.test.ts`
+  reads the extraction out of the shipped bundle). `runsQuery` in `views/runs.tsx` is the page's translation;
+  the filter rows are **`FilterRows flat`** with a **`choice`** kind and per-field `ops` — what a flat route
+  cannot answer is not offered, and an *or* or a group is refused in words.
+- 🔴 **A run's `kind` is DERIVED from metadata** (`execution/kind.ts` `executionKind` ⇄ the store's `KIND_SQL`;
+  `bmg-009-runs.test.ts` holds them equal over old-shaped records). Every writer now stamps `metadata.kind`; a new
+  writer of executions owes the stamp AND a fixture in that spec.
+- **`wait:false` on the run route answers 202 with the record id** through FED-004's `onStarted`; the run goes on.
+  Read only off the envelope form (`{payload, wait}`); a bare body is the payload. With the history off there is no
+  id — the route waits and the page toasts the status instead of landing on a record.
+- **A hash can carry a query** (`#/runs?trigger=<id>`, `route.query`, `hrefWith`). 🔴 `App.tsx`'s legacy-id
+  normalisation compares `hashPath()`, not the raw hash — before that fix `#/runs?x=y` was "not `runs`" and the
+  query was replaced away.
+- **Cancelled is a word the engine stamps**, not a store status: `runStatusWord` reads `metadata.engineStatus` /
+  `timedOut`; `EXECUTION_STATUSES` (the filter's list) is unchanged. `lastRuns` on the workflow list carries
+  `engineStatus` for the same reason.
+- **Executions are not a collection**: the realtime stream cannot carry them, so *live* is a 5 s poll with a
+  chip while anything is `running` (§3 allowed it).
+- **No *Open in the editor***: the editor's `nodegx://` handler opens `noodl:import/http…` only. A workflow deep
+  link needs an editor-side handler first (a BMG-012 candidate, not this task's).
+- 🔴 **A `let` declared AFTER a Promise executor that assigns it is a TDZ throw** the typecheck cannot see
+  (`admin-workflows.ts run` — fixed before the spec ran; the spec would have caught it).
+- Drive: `drives/bmg009/run.sh ac seed` — Greet (a `return` of `$path body.name`), Ping (wait 1 ms), Slow (wait
+  20 s, for Cancel), Nightly digest (`stop` with `isError`), the function `hello` on a schedule trigger fired once.
+  `requests` (from `cdp.mjs`) is how AC2 read the page's own query and re-asked the route with it.
 
 ## What s9 settled
 
@@ -123,7 +161,7 @@ route). Drive `drives/bmg003/run.sh ac seed` 41/41.
 - A signed file URL was 403 at the route gate when `files.read` ≠ public — fixed (`signatureAdmits`).
 - The backend writes file URLs on its own loopback address; the page keeps only path + query.
 
-## How to drive a page (`drives/bmg003/` is the freshest recipe; `drives/bmg008/` has `pick`/`execFor`; `drives/bmg002/` more)
+## How to drive a page (`drives/bmg009/` is the freshest recipe — `requests` re-asked as the route's own query; `drives/bmg003/` next; `drives/bmg008/` has `pick`/`execFor`; `drives/bmg002/` more)
 
 `drives/bmg008/run.sh <label> [seed|keep] [script.mjs]`: a LOCKED `security.json` (devOpen false) in a
 scratch data dir, a deployed cloud function `hello` (`workflows/hello.workflow.json`) and a workflow
@@ -141,13 +179,14 @@ never the project's live backend; one heavy job at a time; tear down after.
 
 ## What to know about the app before touching a view
 
-- `views/<id>.tsx` exports one component taking `{ params }`; `views/index.ts` lists all fourteen,
-  and `nav.ts` says where each shows.
+- `views/<id>.tsx` exports one component taking `{ params, query? }` (`#/runs?trigger=x` → `query.trigger`);
+  `views/index.ts` lists all fourteen, and `nav.ts` says where each shows.
 - Data goes through `api()` (it throws the server's own sentence, and a 401 signs out). Every
   mutating button is `WriteBtn`; `toast`/`fail` report. Use `confirmSimple` (a plain ask) or
   `confirmDestructive` (type the name); `openModal((close) => <Dialog…/>)`; a `Drawer` for a thing
   the URL opens; `EmptyState` for every empty list.
-- **Reuse:** `filters.ts` + `FilterRows`; `fields.tsx` `FieldControl` and `RelationEditor`;
+- **Reuse:** `filters.ts` + `FilterRows` (`flat` for a route that answers *and* only; a `choice` field is a
+  select; `ops` narrows a field's operators); `apiFull` when a header matters; `fields.tsx` `FieldControl` and `RelationEditor`;
   `searchRecords`/`pointerItem`; `acl.ts` + `AclCard`; `format.ts` `displayValue`, `parseCsv`,
   `fileLabel`; `KeyValueEditor` (`rowsFromObject`/`objectFromRows`, typed); **`ScheduleBuilder`**
   (+ `schedule.ts`: `toCron`, `fromCron`, `scheduleProblem`); `Switch`; `DangerZone`/`DangerAction`.

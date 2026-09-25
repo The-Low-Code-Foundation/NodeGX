@@ -518,7 +518,10 @@ export class HttpServer {
     // a caller to pass a store pointed somewhere else.
     this.adminSecrets = new AdminSecretsRoutes(new SecretsStore(deps.options.dataDir));
     this.adminTriggers = new AdminTriggerRoutes(deps.triggers);
-    this.adminWorkflows = new AdminWorkflowRoutes(() => deps.workflows);
+    this.adminWorkflows = new AdminWorkflowRoutes(
+      () => deps.workflows,
+      () => deps.executions
+    );
     this.adminBackups = new AdminBackupRoutes({
       backups: deps.backups,
       facade: deps.facade,

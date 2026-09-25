@@ -58,6 +58,15 @@ export class ApiError extends Error {
 }
 
 export async function api<T = any>(method: string, path: string, body?: unknown, extraHeaders?: Record<string, string>): Promise<T> {
+  return (await apiFull<T>(method, path, body, extraHeaders)).body;
+}
+
+/**
+ * `api`, with the response headers beside the body — for the one list that
+ * pages by a header (`GET /executions` answers a bare array and its count in
+ * `X-Total-Count`, BMG-009). Same credential, same 401, same error sentence.
+ */
+export async function apiFull<T = any>(method: string, path: string, body?: unknown, extraHeaders?: Record<string, string>): Promise<{ body: T; headers: Headers }> {
   // `extraHeaders`: BMG-006's `If-Match` on the whole-config write; nothing else sends one.
   const headers: Record<string, string> = { ...(extraHeaders || {}) };
   const { token, whoami } = session.get();
@@ -78,7 +87,7 @@ export async function api<T = any>(method: string, path: string, body?: unknown,
     const message = (json && (json.error || json.message)) || 'HTTP ' + res.status;
     throw new ApiError(message, res.status);
   }
-  return json as T;
+  return { body: json as T, headers: res.headers };
 }
 
 export function encode(part: unknown): string {

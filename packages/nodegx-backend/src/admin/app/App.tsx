@@ -9,7 +9,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { live, signOut, submitCredential, useSession } from './api';
 import { useStore } from './store';
 import { visibleNav } from './nav';
-import { currentRoute, href, replaceRoute, useRoute } from './router';
+import { currentRoute, hashPath, href, replaceRoute, useRoute } from './router';
 import { toggleTheme, useTheme } from './theme';
 import { Btn, Chip, ModalHost, Notice, ToastHost } from './ui';
 import { VIEWS, findView } from './views';
@@ -92,7 +92,8 @@ function Shell() {
 
   // `#/executions` and friends: normalise the legacy id in the address bar.
   useEffect(() => {
-    const raw = (location.hash || '').replace(/^#\/?/, '').split('/')[0];
+    // BMG-009: `#/runs?trigger=x` — compare the path's first segment, never the query.
+    const raw = hashPath(location.hash).split('/')[0];
     const parsed = currentRoute();
     if (raw && parsed.view && raw !== parsed.view) replaceRoute(parsed.view, ...parsed.params);
   }, [route.view]);
@@ -121,7 +122,7 @@ function Shell() {
         {whoami.security && !whoami.security.enforced ? <DevOpenNotice /> : null}
         {whoami.firstRun ? <FirstRunNotice /> : null}
         {View ? (
-          <View key={allowed!.id} params={route.params} />
+          <View key={allowed!.id} params={route.params} query={route.query} />
         ) : groups.length ? null : (
           <Notice kind="bad">This backend reports no available admin sections.</Notice>
         )}

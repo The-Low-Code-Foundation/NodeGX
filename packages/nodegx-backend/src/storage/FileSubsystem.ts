@@ -103,7 +103,7 @@ class SweepScheduleDispatcher implements SchedulerDispatcher {
           workflowName: 'File orphan sweep',
           triggerType: 'schedule',
           triggerData: { source: input.source },
-          metadata: { backendId: this.backendId, backendName: this.backendName, operation: 'file-orphan-sweep' }
+          metadata: { kind: 'maintenance', backendId: this.backendId, backendName: this.backendName, operation: 'file-orphan-sweep' }
         });
       } catch {
         /* logging must never block the sweep */
@@ -138,7 +138,7 @@ class SweepScheduleDispatcher implements SchedulerDispatcher {
           workflowName: 'File orphan sweep (schedule)',
           triggerType: 'schedule',
           triggerData: input.triggerData,
-          metadata: { backendId: this.backendId, backendName: this.backendName, operation: 'file-orphan-sweep', triggerSource: input.source, rejected: true }
+          metadata: { kind: 'maintenance', backendId: this.backendId, backendName: this.backendName, operation: 'file-orphan-sweep', triggerSource: input.source, rejected: true }
         });
         logger.completeExecution(false, new Error(input.reason));
       } catch {
