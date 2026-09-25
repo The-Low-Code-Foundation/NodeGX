@@ -85,6 +85,58 @@ describe('Picker (BMG-001 §3.5.1)', () => {
     unmount(bare);
   });
 
+  // BMG-005 AC1 measured it: a person types "bo" and presses Enter inside the
+  // 150ms pause. Enter used to pick the first row of the PREVIOUS answer (the
+  // empty query's list, where ann is first) — the wrong person, added silently.
+  it('Enter pressed before the answer to what was typed waits for that answer', async () => {
+    const picked: Array<User | null> = [];
+    const root = mount(<Picker<User> fetch={fetcher([])} label={(u) => u.username} keyOf={(u) => u.objectId} value={null} onPick={(u) => picked.push(u)} />);
+    const input = q<HTMLInputElement>(root, 'input');
+    input.dispatchEvent(new window.FocusEvent('focus'));
+    await settle(220);
+    expect(qa(root, '.picker-row').length).toBe(3);
+    typeInto(input, 'bo');
+    press(input, 'Enter');
+    expect(picked).toEqual([]);
+    await settle(220);
+    expect(picked.map((u) => u && u.username)).toEqual(['bob']);
+    unmount(root);
+  });
+
+  it('openOnFocus={false}: focus alone opens nothing; typing does', async () => {
+    const calls: string[] = [];
+    const root = mount(<Picker<User> fetch={fetcher(calls)} label={(u) => u.username} keyOf={(u) => u.objectId} value={null} onPick={() => undefined} openOnFocus={false} />);
+    const input = q<HTMLInputElement>(root, 'input');
+    input.dispatchEvent(new window.FocusEvent('focus'));
+    await settle(220);
+    expect(qa(root, '.picker-list').length).toBe(0);
+    expect(calls).toEqual([]);
+    typeInto(input, 'bo');
+    await settle(220);
+    expect(qa(root, '.picker-row').map((r) => text(r.querySelector('.picker-label')))).toEqual(['bob']);
+    unmount(root);
+  });
+
+  it('createWhen: the create row appears only for a query it accepts', async () => {
+    const created: string[] = [];
+    const isEmail = (q: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(q);
+    const root = mount(
+      <Picker<User> fetch={fetcher([])} label={(u) => u.username} keyOf={(u) => u.objectId} value={null} onPick={() => undefined} onCreate={(q) => created.push(q)} createWhen={isEmail} />
+    );
+    const input = q<HTMLInputElement>(root, 'input');
+    typeInto(input, 'zel');
+    await settle(220);
+    expect(qa(root, '.picker-create').length).toBe(0);
+    expect(text(q(root, '.picker-empty'))).toBe('No match.');
+    press(input, 'Enter');
+    await settle(220);
+    expect(created).toEqual([]);
+    typeInto(input, 'zel@da.org');
+    await settle(220);
+    expect(qa(root, '.picker-create').length).toBe(1);
+    unmount(root);
+  });
+
   it('shows the picked value as its label, with a clear control', () => {
     const picked: Array<User | null> = [];
     const root = mount(<Picker<User> fetch={fetcher([])} label={(u) => u.username} keyOf={(u) => u.objectId} value={USERS[0]} onPick={(u) => picked.push(u)} />);

@@ -10,6 +10,7 @@
  *   DELETE /admin/permissions/functions/:name       back to the graph's own declaration
  *   POST   /admin/permissions/check                 dry-run a decision
  *   GET    /admin/roles          POST /admin/roles          DELETE /admin/roles/:name
+ *   PUT    /admin/roles/:name    its description (BMG-005)
  *   POST   /admin/roles/:name/users                 DELETE /admin/roles/:name/users/:userId
  *   GET    /admin/keys           POST /admin/keys           DELETE /admin/keys/:id (revoke)
  *   PUT    /admin/keys/:id       change scopes / actsAsUserId (BMG-007)
@@ -45,7 +46,7 @@ import {
   ruleAllows
 } from '../security/model';
 import { HttpError, readJSONBody, sendJSON } from './http-util';
-import { ROLE_NAME_RULE, RoleStore, isValidRoleName } from '../roles/RoleStore';
+import { ROLE_DESCRIPTION_MAX, ROLE_NAME_RULE, RoleStore, isValidRoleName } from '../roles/RoleStore';
 import type { RoleRecord } from '../roles/RoleStore';
 
 /**
@@ -57,6 +58,20 @@ import type { RoleRecord } from '../roles/RoleStore';
  * have exactly one answer.
  */
 export type { RoleRecord };
+
+/** How many members the role list names (BMG-005: "count + the first three names"). */
+const ROLE_NAMES_SHOWN = 3;
+
+/** A role description from a request body: trimmed text, or undefined for none. Refuses anything else in words. */
+function roleDescription(raw: unknown): string | undefined {
+  if (raw === undefined || raw === null) return undefined;
+  if (typeof raw !== 'string') throw new HttpError(400, 'A role description is a sentence of text.');
+  const text = raw.trim();
+  if (text.length > ROLE_DESCRIPTION_MAX) {
+    throw new HttpError(400, `A role description is at most ${ROLE_DESCRIPTION_MAX} characters; this one is ${text.length}.`);
+  }
+  return text || undefined;
+}
 
 export class AdminSecurityRoutes {
   private readonly security: SecurityState;
@@ -459,11 +474,33 @@ export class AdminSecurityRoutes {
     return new RoleStore(this.facade);
   }
 
+  /**
+   * Every role with its member ids, and (BMG-005) `names`: the first three
+   * members as a person reads them — a username, else an email — so the list
+   * can say who is in a role without the page fetching each id.
+   */
   async listRoles(ctx: RequestContext): Promise<void> {
     const store = this.roles;
-    const roles: (RoleRecord & { users: string[] })[] = [];
+    const roles: (RoleRecord & { users: string[]; names: string[] })[] = [];
+    const wanted = new Set<string>();
     for (const role of await store.list()) {
-      roles.push({ ...role, users: store.members(role) });
+      const users = store.members(role);
+      users.slice(0, ROLE_NAMES_SHOWN).forEach((id) => wanted.add(id));
+      roles.push({ ...role, users, names: [] });
+    }
+    const label: Record<string, string> = {};
+    if (wanted.size) {
+      const { results } = await this.facade.rawQueryAll('_User', { where: { objectId: { $in: Array.from(wanted) } } });
+      for (const u of results) {
+        const name = typeof u.username === 'string' && u.username ? u.username : typeof u.email === 'string' ? u.email : '';
+        if (name) label[u.objectId as string] = name;
+      }
+    }
+    for (const role of roles) {
+      role.names = role.users
+        .slice(0, ROLE_NAMES_SHOWN)
+        .map((id) => label[id])
+        .filter((n): n is string => !!n);
     }
     sendJSON(ctx.res, 200, { roles });
   }
@@ -477,9 +514,25 @@ export class AdminSecurityRoutes {
     if (await this.roles.find(name)) {
       throw new HttpError(400, `Role "${name}" already exists.`);
     }
-    ctx.audit({ role: name });
-    const role = await this.roles.create(name);
+    const description = roleDescription(body.description);
+    ctx.audit({ role: name, described: !!description });
+    const role = await this.roles.create(name, description);
     sendJSON(ctx.res, 201, { objectId: role.objectId, name });
+  }
+
+  /** `PUT /admin/roles/:name {description}` (BMG-005). The name is not editable: rules spell it. */
+  async updateRole(ctx: RequestContext): Promise<void> {
+    const role = await this.findRole(ctx.params.name);
+    const body = await readJSONBody(ctx.req);
+    for (const key of Object.keys(body)) {
+      if (key !== 'description') {
+        throw new HttpError(400, `Only a role's description can be changed here ("${key}" is not). A role's name is spelled into its permission rules.`);
+      }
+    }
+    const description = roleDescription(body.description) || '';
+    ctx.audit({ role: role.name, described: !!description });
+    await this.roles.describe(role, description);
+    sendJSON(ctx.res, 200, { name: role.name, description });
   }
 
   /** The named role, or a 404. `RoleStore.find` answers null instead. */

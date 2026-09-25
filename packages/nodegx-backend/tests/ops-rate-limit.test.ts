@@ -263,8 +263,11 @@ describe('BAK-009 rate limiting over real sockets', () => {
     // `admin/views/:collection/:name` (PUT, DELETE) — the Collections page's
     // saved views. Reviewed and left in the `admin` budget: a person saving a
     // way of looking at a table. Counted, not guessed — 88 → 91.
+    // BMG-005 moved `admin` by 1: `PUT admin/roles/:name`, the Roles page saying
+    // what a role is for. Reviewed and left in the `admin` budget: an operator
+    // editing one sentence on a role. Counted, not guessed — 91 → 92.
     expect(counts).toEqual({
-      admin: 91,
+      admin: 92,
       auth: 16,
       data: 19,
       files: 4,

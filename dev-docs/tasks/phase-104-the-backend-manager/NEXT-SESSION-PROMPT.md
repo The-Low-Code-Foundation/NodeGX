@@ -1,8 +1,8 @@
 # P104 — next session
 
-**Written 2026-09-25 (end of s5).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
+**Written 2026-09-25 (end of s6).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
 BMG-001; s3 built and drove BMG-007 (API keys); s4 built and drove BMG-004 (Users, R3 disable);
-s5 built and drove BMG-002 (Collections).
+s5 built and drove BMG-002 (Collections); s6 built and drove BMG-005 (Roles).
 
 ## Where it stands
 
@@ -12,8 +12,9 @@ s5 built and drove BMG-002 (Collections).
 | BMG-001 the shell | ✅ s2 | ✅ headless, AC1–8 (§6) | ✅ `b3a064e7` |
 | BMG-007 API keys | ✅ s3 | ✅ headless, AC1–7 (§6) | ✅ s3 |
 | BMG-004 Users | ✅ s4 | ✅ headless, AC1–9 (§6) | ✅ `6f69b64f` |
-| BMG-002 Collections | ✅ s5 | ✅ headless, AC1–9 (§6) | ✅ s5 (see `git log -1 -- packages/nodegx-backend/src/admin/app/filters.ts`) |
-| BMG-003, 005, 006, 008…012 | — | — | — |
+| BMG-002 Collections | ✅ s5 | ✅ headless, AC1–9 (§6) | ✅ `cff004a9` |
+| BMG-005 Roles | ✅ s6 | ✅ headless, AC1–6, 27/27 checks (§6) | ✅ s6 (see `git log -1 -- packages/nodegx-backend/src/admin/app/roleUses.ts`) |
+| BMG-003, 006, 008…012 | — | — | — |
 | BMG-013 Richard drives | his | — | — |
 
 Built-but-undriven: 0. Built-but-uncommitted: 0. Check `git status -- packages/nodegx-backend/src/admin`
@@ -22,25 +23,48 @@ before believing that: a peer session may have touched it.
 **Rulings:** R1 (a) Preact app · R2 the editor lets go · R3 disable a user: yes · R4 restore in the
 browser: yes, behind the typed name · R5 filed. All in README §4/§8, with the question each answered.
 
-**Gate readings (2026-09-25, s5, before the commit):** `packages/nodegx-backend` `npm run typecheck`
-exit 0. Full `npx jest` **exit 0**: 185 suites passed, 1 skipped; 2,176 tests passed. After the last
-UI edit: the admin-app, dashboard, bmg-002-*, ops-rate-limit and ops-audit specs, 11 suites,
-130/130. Bundle 53,039 gzip (level 9) of 160,000. Route tally now `admin: 91`.
+**Gate readings (2026-09-25, s6, before the commit):** `packages/nodegx-backend` `npm run typecheck` exit 0.
+Full `npx jest`: **186 suites PASS, 0 FAIL**. `fed-003-live-cache` skipped as always (it needs a live key).
+The run did not end on its own: `ac2-page-editor-drag-drive` (SBR-007) sat 20 min inside its write-storm arm with a
+Chrome renderer at 100% CPU, competing with the parallel workers, so I stopped my run by PID. Alone, with this
+change in, that file is **28/28, exit 0**, and the arm took about 2 min. Run it by itself if a full run stalls there.
+Bundle builds; route tally now `admin: 92`.
 🔴 A new `/admin/...` route still owes that tally line AND an `audit-actions.ts` entry
 (`ops-audit.test.ts` walks the live table for it).
 
 ## Do this, in order
 
-1. **BMG-005 Roles.** It depends on 001 and 004, both done. Roles have names, members are people
-   (picked with `Picker` over `/admin/users?q=`, as `AclCard` already does), and removing one uses
-   the existing `DELETE /admin/roles/:name/users/:userId`.
-2. Then BMG-006 (it reuses `FilterRows` and `filters.ts` for conditions), BMG-008, BMG-003,
-   BMG-009 (it reuses `FilterRows` for runs), BMG-010, BMG-011 (R4 yes), BMG-012 (which also
-   deletes the editor's `serverOwnedColumns.ts`; the backend's `users/accountColumns.ts` is the one
-   list, served on `whoami.accountColumns`). One commit per task, a §6 *Built* with what each AC
-   measured, shots in `shots/`, drives in `drives/<task>/`.
+1. **BMG-006 Permissions.** It depends on 001, 002 and 005, all done. Reuse three things built for
+   it: `app/roleUses.ts` (what a role can do, a pure function over the stored config; the matrix is
+   its inverse, so read the same shape), `FilterRows`/`filters.ts` for conditions, and the
+   editor's `ruleVocabulary.ts`, which the task says to port. When `#/permissions/functions`
+   exists, point `roleUses.useHref` at it for function rows. Today it sends them to
+   `#/permissions`.
+2. Then BMG-008, BMG-003, BMG-009 (it reuses `FilterRows` for runs), BMG-010, BMG-011 (R4 yes),
+   BMG-012 (which also deletes the editor's `serverOwnedColumns.ts`; the backend's
+   `users/accountColumns.ts` is the one list, served on `whoami.accountColumns`). One commit per
+   task, a §6 *Built* with what each AC measured, shots in `shots/`, drives in `drives/<task>/`.
 
-## What s5 settled, including where the handoff or the task was wrong
+## What s6 settled
+
+- **`Picker` had an Enter race.** It searches 150 ms after the last key. Enter picked from the rows
+  on screen, which answered the PREVIOUS query, so `bo`+Enter added `ann`. Enter now waits for the
+  answer to what was typed (`picker.test.tsx` pins it). Every page with a `Picker` had it.
+- `Picker` also gained `createWhen` (offer the create row only for a query it accepts) and
+  `openOnFocus={false}` (a drawer focuses its first control, and a list of everyone was covering
+  the drawer).
+- **Roles now carry a description** (`_Role.description`, the idempotent `addColumn`) and
+  `PUT /admin/roles/:name` changes only that. The name is not editable, because rules spell it.
+  Rename belongs to BMG-006 if anywhere.
+- `GET /admin/users?role=<name>` answers the members. `GET /admin/roles` answers `names` (the
+  first three) and `createdAt`.
+- The task's name rule said *"starts with a letter"*; the server does not enforce that, so the
+  page does not either.
+- **To drive invitations**, `drives/bmg005/smtp.mjs` is a 50-line SMTP sink, and the seed points
+  the backend's email at it and turns sign-in links on. BMG-010 (email) will want it.
+
+## What s5 settled
+, including where the handoff or the task was wrong
 
 - **The task said views live in "the backend's operational store".** That is the SQL store for
   idempotency keys. Views are operator state, so they are `views.json` in the data dir, beside
@@ -54,7 +78,7 @@ UI edit: the admin-app, dashboard, bmg-002-*, ops-rate-limit and ops-audit specs
 - The backend writes file URLs on its own loopback address. The page keeps only path + query
   (`fields.tsx samePath`). Anything else that renders a file URL in the browser needs the same.
 
-## How to drive a page (`drives/bmg002/` is the freshest recipe)
+## How to drive a page (`drives/bmg005/` is the freshest recipe; `drives/bmg002/` has more helpers)
 
 `drives/bmg002/run.sh <label> [seed|keep] [script.mjs]`: a LOCKED `security.json` (devOpen false;
 the default posture bypasses every key scope) in a scratch data dir, `dist/cli.js serve` on 8697

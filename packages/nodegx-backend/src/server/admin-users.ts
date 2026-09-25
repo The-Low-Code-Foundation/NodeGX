@@ -2,7 +2,7 @@
  * The accounts, administered (BMG-004): what the Users page of the served
  * backend manager stands on.
  *
- *   GET    /admin/users?q=&status=&limit=&skip=   people, with roles, sessions and custom fields
+ *   GET    /admin/users?q=&status=&role=&limit=&skip=   people, with roles, sessions and custom fields
  *   GET    /admin/users/:id                        one person
  *   GET    /admin/users/:id/identities             how they sign in (the same answer as /users/me/identities)
  *   POST   /admin/users                            create (or invite), with roles and fields
@@ -103,6 +103,18 @@ export class AdminUserRoutes {
     const q = str(ctx.query.q);
     const clauses: Record<string, unknown>[] = [];
     if (q) clauses.push({ $or: [{ username: { contains: q } }, { email: { contains: q } }] });
+    // BMG-005: the members of one role — the Roles page's table of people.
+    const roleName = str(ctx.query.role);
+    if (roleName) {
+      const role = await this.roles.find(roleName);
+      if (!role) throw new HttpError(404, `There is no role called "${roleName}".`);
+      const members = this.roles.members(role);
+      if (!members.length) {
+        sendJSON(ctx.res, 200, { users: [], total: 0, columns: this.customColumns() });
+        return;
+      }
+      clauses.push({ objectId: { $in: members } });
+    }
     if (ctx.query.status === 'disabled') clauses.push({ disabled: true });
     else if (ctx.query.status === 'unverified') clauses.push({ emailVerified: { $ne: true } });
     const where = clauses.length === 0 ? undefined : clauses.length === 1 ? clauses[0] : { $and: clauses };

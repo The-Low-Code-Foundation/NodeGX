@@ -952,6 +952,11 @@ export class BackendService {
         { name: 'users', type: 'Relation', targetClass: '_User' }
       ]
     });
+    // BMG-005: what a role is FOR, in the operator's words. The same idempotent
+    // ALTER as `_Session.expiresAt` above — `createTable` leaves an existing
+    // `_Role` alone, and without the column a description would be written into
+    // a table that has nowhere to keep it.
+    sm.addColumn('_Role', { name: 'description', type: 'String' });
     sm.createTable({
       name: '_ApiKey',
       columns: [

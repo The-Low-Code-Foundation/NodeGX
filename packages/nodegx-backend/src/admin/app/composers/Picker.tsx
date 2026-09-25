@@ -22,6 +22,14 @@ export interface PickerProps<T> {
   /** When set, a query with no exact match offers this row. */
   onCreate?: (query: string) => void;
   createLabel?: (query: string) => string;
+  /**
+   * Open the list when the input is focused (default). False: it opens on typing
+   * or ArrowDown — for a picker a drawer focuses on open, where a list of
+   * everyone would cover what the person opened the drawer to read.
+   */
+  openOnFocus?: boolean;
+  /** Offer the create row only for a query this accepts (an email address, say). Absent = any query. */
+  createWhen?: (query: string) => boolean;
   disabled?: boolean;
   autoFocus?: boolean;
   id?: string;
@@ -37,6 +45,10 @@ export function Picker<T>(props: PickerProps<T>) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const seq = useRef(0);
   const input = useRef<HTMLInputElement>(null);
+  /** The query `items` answers. Enter on any other query waits for its own answer. */
+  const answered = useRef<string | null>(null);
+  /** Enter was pressed before the answer to what was typed arrived (BMG-005 AC1). */
+  const pendingEnter = useRef(false);
 
   const search = (q: string) => {
     const mine = ++seq.current;
@@ -45,9 +57,14 @@ export function Picker<T>(props: PickerProps<T>) {
       .fetch(q)
       .then((found) => {
         if (mine !== seq.current) return;
+        answered.current = q;
         setItems(found);
         setActive(0);
         setLoading(false);
+        if (pendingEnter.current) {
+          pendingEnter.current = false;
+          chooseFirst(found, q);
+        }
       })
       .catch(() => {
         if (mine !== seq.current) return;
@@ -70,8 +87,19 @@ export function Picker<T>(props: PickerProps<T>) {
   }, []);
 
   const exact = items.some((i) => props.label(i).toLowerCase() === query.trim().toLowerCase());
-  const canCreate = !!props.onCreate && query.trim() !== '' && !exact && !loading;
+  const creatable = (q: string) => !!props.onCreate && q !== '' && (!props.createWhen || props.createWhen(q));
+  const canCreate = creatable(query.trim()) && !exact && !loading;
   const rows = items.length + (canCreate ? 1 : 0);
+
+  // The Enter that waited: the first row of the answer to what was typed, else
+  // its create row. Reads the answer it was handed, not state from before it.
+  const chooseFirst = (found: T[], q: string) => {
+    if (found.length) props.onPick(found[0]);
+    else if (props.onCreate && creatable(q.trim())) props.onCreate(q.trim());
+    else return;
+    setOpen(false);
+    setQuery('');
+  };
 
   const choose = (index: number) => {
     if (index < items.length) {
@@ -99,9 +127,13 @@ export function Picker<T>(props: PickerProps<T>) {
       setActive(rows ? (active - 1 + rows) % rows : 0);
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (rows) choose(active);
+      // The rows on screen answer an earlier query: picking from them would add
+      // whoever was first in THAT list. Wait for the answer to this one.
+      if (loading || answered.current !== query) pendingEnter.current = true;
+      else if (rows) choose(active);
     } else if (e.key === 'Escape') {
       e.preventDefault();
+      pendingEnter.current = false;
       setOpen(false);
     }
   };
@@ -132,7 +164,9 @@ export function Picker<T>(props: PickerProps<T>) {
         placeholder={props.placeholder || 'Type to search…'}
         disabled={props.disabled}
         value={query}
-        onFocus={() => setOpen(true)}
+        onFocus={() => {
+          if (props.openOnFocus !== false) setOpen(true);
+        }}
         onBlur={() => setTimeout(() => setOpen(false), 120)}
         onInput={(e) => {
           setQuery((e.currentTarget as HTMLInputElement).value);

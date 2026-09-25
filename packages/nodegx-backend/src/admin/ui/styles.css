@@ -1244,6 +1244,35 @@ tr.clickable {
   border-top: 0;
 }
 
+/* ------------------------------------------------------ Roles (BMG-005) -- */
+/* The first three members' initials, overlapping, beside the count. */
+.avatars {
+  display: inline-flex;
+}
+
+.avatars .avatar {
+  width: 24px;
+  height: 24px;
+  font-size: 11px;
+  border: 2px solid var(--bg-1);
+}
+
+.avatars .avatar + .avatar {
+  margin-left: -8px;
+}
+
+.role-uses {
+  margin: 0 0 8px;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+}
+
+.bulk-report {
+  display: grid;
+  gap: 2px;
+}
+
 /* ------------------------------------------------ Collections (BMG-002) -- */
 /* The filter said in rows; a group is indented under its and/or. */
 .filter-box {

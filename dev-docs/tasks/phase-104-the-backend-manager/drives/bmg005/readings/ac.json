@@ -1,0 +1,182 @@
+{
+  "checks": {
+    "list: editors says who and where, in words": {
+      "pass": true,
+      "detail": [
+        "editors\nPeople who change the catalogue",
+        "No one yet",
+        "2 collections · 1 function · 1 other rule",
+        "just now"
+      ]
+    },
+    "the row opens #/roles/editors in a drawer": {
+      "pass": true,
+      "detail": "#/roles/editors"
+    },
+    "AC1 typing \"an\" lists ann by name (with her email), nobody else": {
+      "pass": true,
+      "detail": [
+        "ann ann@example.com"
+      ]
+    },
+    "AC1 Enter adds her: GET /admin/users?role=editors": {
+      "pass": true,
+      "detail": [
+        "ann"
+      ]
+    },
+    "AC1 GET /admin/roles shows the membership": {
+      "pass": true,
+      "detail": [
+        "ann"
+      ]
+    },
+    "AC1 \"bo\"+Enter inside the pause adds bob (the race the spec pins)": {
+      "pass": true,
+      "detail": [
+        "ann",
+        "bob"
+      ]
+    },
+    "the drawer table shows both by name": {
+      "pass": true,
+      "detail": [
+        "ann",
+        "bob"
+      ]
+    },
+    "AC2 the confirmation asks in words": {
+      "pass": true,
+      "detail": "Remove bob from editors?\nTheir account stays. They stop being able to do what editors can do.\nCancel\nRemove"
+    },
+    "AC2 exactly bob went": {
+      "pass": true,
+      "detail": [
+        "ann"
+      ]
+    },
+    "AC2 bob’s account stays": {
+      "pass": true
+    },
+    "AC2 the last ✕ leaves an empty role that still exists": {
+      "pass": true,
+      "detail": []
+    },
+    "AC2 the drawer says so": {
+      "pass": true,
+      "detail": "MEMBERS (0)\n👤\nNo one is in editors yet.\nAdd people\nAdd several by email\nAdd them\nSomeone with an account is added. Anyo"
+    },
+    "AC3 the page reports \"3 added, 2 invited.\"": {
+      "pass": true,
+      "detail": "3 added, 2 invited."
+    },
+    "AC3 the server holds five memberships": {
+      "pass": true,
+      "detail": [
+        "cat",
+        "dave",
+        "eve",
+        "fay@example.com",
+        "gus@example.com"
+      ]
+    },
+    "AC3 the two unknown addresses became invited accounts with no password": {
+      "pass": true,
+      "detail": [
+        {
+          "email": "gus@example.com",
+          "hasPassword": false,
+          "roles": [
+            "editors"
+          ]
+        },
+        {
+          "email": "fay@example.com",
+          "hasPassword": false,
+          "roles": [
+            "editors"
+          ]
+        }
+      ]
+    },
+    "AC3 exactly two invitations reached the mail server, to fay and gus, each with a sign-in link": {
+      "pass": true,
+      "detail": {
+        "to": [
+          "<fay@example.com>",
+          "<gus@example.com>"
+        ],
+        "n": 2
+      }
+    },
+    "AC4 \"What editors can do\" is exactly the stored rules naming role:editors (read from security.json)": {
+      "pass": true,
+      "detail": {
+        "page": [
+          "Order: list",
+          "Pet: create, change",
+          "The sendInvoice function: call",
+          "Files: upload"
+        ],
+        "stored": [
+          "collections.Order.permissions.find",
+          "collections.Pet.permissions.create",
+          "collections.Pet.permissions.update",
+          "files.upload",
+          "functions.sendInvoice.call"
+        ]
+      }
+    },
+    "AC4 each collection row links to its permissions": {
+      "pass": true,
+      "detail": [
+        "#/permissions/Order",
+        "#/permissions/Pet",
+        "#/permissions",
+        "#/permissions"
+      ]
+    },
+    "New role: a space is refused as it is typed, in words, and Create waits": {
+      "pass": true,
+      "detail": "A role name cannot contain a space. Use letters, digits, - and _."
+    },
+    "New role: created with its description, and the page opens it": {
+      "pass": true,
+      "detail": "Staff on the late rota"
+    },
+    "a role nothing names says \"Nothing yet — give nightshift something in Permissions →\"": {
+      "pass": true,
+      "detail": "MEMBERS (0)\n👤\nNo one is in nightshift yet.\nAdd people\nAdd several by email\nAdd them\nSomeone with an account is added. Anyone else is sent an invitation and joins nightshift when the account is made.\nWHAT NIGHTSHIFT CAN DO\n\nNothing yet — give nightshift something in Permissions →\n\nA record can also "
+    },
+    "AC5 the warning counts the stored rules that will stop matching (security.json read independently)": {
+      "pass": true,
+      "detail": {
+        "n": 5,
+        "stored": 5,
+        "warning": "5 rules name editors (Order: list; Pet: create, change; The sendInvoice function: call; Files: upload) and will stop matching anyone. 5 people will no longer be in it; their accounts stay."
+      }
+    },
+    "AC5 and says how many people lose it": {
+      "pass": true,
+      "detail": "5 rules name editors (Order: list; Pet: create, change; The sendInvoice function: call; Files: upload) and will stop matching anyone. 5 people will no longer be in it; their accounts stay."
+    },
+    "AC5 the role is gone and the page is back on the list": {
+      "pass": true,
+      "detail": [
+        "billing",
+        "nightshift"
+      ]
+    },
+    "AC5 the rules were not rewritten (they now name no one, as the warning said)": {
+      "pass": true
+    },
+    "AC5 the five people still exist": {
+      "pass": true
+    },
+    "AC6 no objectId visible at any checkpoint (list, picker open, two members, after bulk, after delete)": {
+      "pass": true,
+      "detail": []
+    }
+  },
+  "pass": true
+}

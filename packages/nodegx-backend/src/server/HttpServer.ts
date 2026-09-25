@@ -1045,6 +1045,8 @@ export class HttpServer {
       },
       { method: 'GET', pattern: 'admin/roles', access: { kind: 'admin' }, handler: (ctx) => adminSec.listRoles(ctx) },
       { method: 'POST', pattern: 'admin/roles', access: { kind: 'admin' }, handler: (ctx) => adminSec.createRole(ctx) },
+      // BMG-005: a role's description, from the Roles page.
+      { method: 'PUT', pattern: 'admin/roles/:name', access: { kind: 'admin' }, handler: (ctx) => adminSec.updateRole(ctx) },
       {
         method: 'DELETE',
         pattern: 'admin/roles/:name',

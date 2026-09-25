@@ -29,6 +29,7 @@ const ACTIONS: Record<string, string> = {
   'PUT admin/permissions/functions/:name': 'permissions.function.update',
   'DELETE admin/permissions/functions/:name': 'permissions.function.delete',
   'POST admin/roles': 'role.create',
+  'PUT admin/roles/:name': 'role.update',
   'DELETE admin/roles/:name': 'role.delete',
   'POST admin/roles/:name/users': 'role.user.add',
   'DELETE admin/roles/:name/users/:userId': 'role.user.remove',
