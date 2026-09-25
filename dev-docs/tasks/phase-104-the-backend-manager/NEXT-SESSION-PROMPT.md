@@ -22,8 +22,10 @@ browser: yes, behind the typed name · R5 filed. All in README §4/§8 with the 
 **Gate readings (2026-09-25):** `packages/nodegx-backend` `npm run typecheck` exit 0; `npx jest
 tests/admin-app tests/admin-dashboard.test.ts tests/bmg-007-key-update.test.ts
 tests/brg-002-api-key-roundtrip.test.ts tests/ops-audit.test.ts tests/fed-005-mcp-acts-as.test.ts
-tests/feed-drive.test.ts` → 11 suites, 123/123; bundle 35,080 gzip of 160,000. The full `npm test`
-reading is in BMG-007's commit message.
+tests/feed-drive.test.ts` → 11 suites, 123/123; bundle 35,080 gzip of 160,000. Full `npx jest`:
+180 suites passed, 1 skipped, 1 red — `tests/ops-rate-limit.test.ts`'s reviewed route tally, which
+every new admin route moves by one (bumped with a review sentence in the follow-up commit). 🔴 A
+new `/admin/...` route in BMG-004 onward owes that tally line AND an `audit-actions.ts` entry.
 
 ## Do this, in order
 

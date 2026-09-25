@@ -127,6 +127,11 @@ functions; headless Chrome on 9333; readings in `drives/bmg007/readings/ac.json`
 | 7 | the drawer's only text field is *Name*; the rendered page (`#main` + drawer text) matches no `classes:` / `functions:` string |
 | §5 | *Last used* on sqlite: **just now** after Done and after Refresh; `lastUsedAt` in the route `2026-09-25T05:19:04Z`. Postgres not measured this session (no `DATABASE_URL` on this box). `no page errors` from the CDP console |
 
+**Full suite.** `npx jest` (whole package) after the commit: 180 passed, 1 skipped, **1 failed —
+`tests/ops-rate-limit.test.ts`**, the reviewed route tally (`admin: 80` → 81 for the new `PUT`).
+Re-run alone: still red, so not a flake; bumped with the review sentence the tally's convention
+asks for (PRD-003 and HLT-015 did the same). Follow-up commit.
+
 **Trap met.** The first AC7 reading was a false red: `document.body.textContent` includes the
 INLINED app bundle's own source (the page is one document), which contains `scopes.ts`. Measure
 `#main` and the drawer, never `body`, on this page.

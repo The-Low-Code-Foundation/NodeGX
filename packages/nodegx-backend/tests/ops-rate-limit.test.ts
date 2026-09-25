@@ -248,8 +248,13 @@ describe('BAK-009 rate limiting over real sockets', () => {
     // POSTs — so the redeem is a route of its own. `auth` like its GET, since
     // the pattern is one entry in AUTH_PATTERNS; the handler adds its own
     // stricter per-flow bucket on top, as every magic-link step does.
+    // BMG-007 moved `admin` by 1: `PUT /admin/keys/:id`, the API keys page
+    // changing what a key may do. Reviewed and left in the `admin` budget: an
+    // operator edits a key's scopes about as often as they create one, and the
+    // POST beside it already lives there. Counted, not guessed — it is the only
+    // admin pattern `getRouteTable()` gained since the HLT-015 reading.
     expect(counts).toEqual({
-      admin: 80,
+      admin: 81,
       auth: 16,
       data: 19,
       files: 4,
