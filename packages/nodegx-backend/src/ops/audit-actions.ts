@@ -39,6 +39,9 @@ const ACTIONS: Record<string, string> = {
   'PUT admin/users/:id': 'user.update',
   'DELETE admin/users/:id': 'user.delete',
   'DELETE admin/users/:id/sessions': 'user.sessions.revoke',
+  // BMG-014. The first admin account, made from the manager's setup step with
+  // the credential. Carries the new person's id; never the password.
+  'POST _admin/setup': 'admin.setup',
   // BMG-002. A saved view changes what everyone's Collections page offers.
   'PUT admin/views/:collection/:name': 'view.save',
   'DELETE admin/views/:collection/:name': 'view.delete',

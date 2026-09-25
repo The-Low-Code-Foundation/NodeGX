@@ -165,6 +165,9 @@ export interface RequestContext {
 function rateLimitKey(principal: Principal, ip: string): string {
   switch (principal.kind) {
     case 'admin':
+      // BMG-014: a person with backend access spends their own bucket, so one
+      // client's read-only dashboard cannot empty the operator's.
+      if (principal.userId) return `admin:${principal.readonly ? 'readonly:' : ''}${principal.userId}`;
       return principal.readonly ? 'admin:readonly' : 'admin';
     case 'apiKey':
       return `key:${principal.name}`;
@@ -533,7 +536,11 @@ export class HttpServer {
       ? new AdminDashboardRoutes({
           options: deps.options,
           security: deps.security,
-          features: () => this.dashboardFeatures(deps)
+          facade: deps.facade,
+          features: () => this.dashboardFeatures(deps),
+          rolesForUser: (userId) => deps.security.rolesForUser(userId),
+          // BMG-014: a refused password spends the same budget as a refused token.
+          recordAuthFailure: (ip) => this.authLimiter.recordFailure(ip)
         })
       : null;
     this.mcp = new McpRoutes({
@@ -1384,7 +1391,13 @@ export class HttpServer {
     const dashboard = this.dashboard;
     return [
       { method: 'GET', pattern: '_admin', access: { kind: 'public' }, handler: (ctx) => dashboard.serve(ctx) },
-      { method: 'GET', pattern: '_admin/whoami', access: { kind: 'admin' }, handler: (ctx) => dashboard.whoami(ctx) }
+      { method: 'GET', pattern: '_admin/whoami', access: { kind: 'admin' }, handler: (ctx) => dashboard.whoami(ctx) },
+      // BMG-014. `login` is public because a password is what it checks — it
+      // sits on the auth budget (rate-limit.ts) and its failures count against
+      // the same per-IP budget as a wrong token. `setup` is admin-gated: the
+      // credential (or a full admin) is the proof that makes the first account.
+      { method: 'POST', pattern: '_admin/login', access: { kind: 'public' }, handler: (ctx) => dashboard.login(ctx) },
+      { method: 'POST', pattern: '_admin/setup', access: { kind: 'admin' }, handler: (ctx) => dashboard.setup(ctx) }
     ];
   }
 
@@ -1611,8 +1624,11 @@ export class HttpServer {
   private recordAudit(res: http.ServerResponse, trace: RequestTrace): void {
     if (!trace.auditAction || !this.auditLog.enabled) return;
     const status = res.statusCode;
+    // BMG-014: a sign-in that was refused is `admin.login.failed`, the same
+    // entry a wrong credential writes — one action to search for either way.
+    const action = trace.auditAction === AUDIT_LOGIN_SUCCESS && status >= 400 ? AUDIT_LOGIN_FAILURE : trace.auditAction;
     void this.auditLog.record({
-      action: trace.auditAction,
+      action,
       actorKind: trace.principal,
       actor: trace.actor,
       target: trace.auditTarget,
@@ -1745,13 +1761,27 @@ export class HttpServer {
       }
     }
     trace.principal = principal.kind === 'admin' && principal.readonly ? 'admin:readonly' : principal.kind;
-    trace.actor = principal.kind === 'user' ? principal.userId : principal.kind === 'apiKey' ? principal.name : '';
+    // BMG-014: an admin who is a person is recorded as that person; the
+    // credential itself stays '' (there is no one to name).
+    trace.actor =
+      principal.kind === 'user'
+        ? principal.userId
+        : principal.kind === 'apiKey'
+          ? principal.name
+          : principal.kind === 'admin' && principal.userId
+            ? principal.userId
+            : '';
 
     // The dashboard proves a credential by reaching `_admin/whoami`; that call
     // is the login event there is to record.
     if (route.pattern === '_admin/whoami' && principal.kind === 'admin') {
       trace.auditAction = AUDIT_LOGIN_SUCCESS;
       trace.auditDetail = { readonly: Boolean(principal.readonly) };
+    } else if (route.pattern === '_admin/login' && method === 'POST') {
+      // BMG-014: the manager's email + password sign-in. The handler names the
+      // person through `ctx.audit({ actor })` on success; `recordAudit` turns a
+      // refused attempt into `admin.login.failed`, the entry an operator reads.
+      trace.auditAction = AUDIT_LOGIN_SUCCESS;
     } else {
       const action = auditActionFor(method, route.pattern);
       if (action) {
@@ -1879,7 +1909,12 @@ export class HttpServer {
       checkData: (collection, op) => this.assertDataAccess(principal, collection, op),
       stampCreate: (collection, data) => this.stampCreate(principal, collection, data),
       audit: (detail) => {
-        trace.auditDetail = { ...(trace.auditDetail || {}), ...detail };
+        // BMG-014: a handler that establishes WHO the caller is after the
+        // credential step (the manager's password login) names the actor here.
+        // Only an actor the credential step left blank can be named.
+        const { actor, ...rest } = detail;
+        if (typeof actor === 'string' && actor && !trace.actor) trace.actor = actor;
+        trace.auditDetail = { ...(trace.auditDetail || {}), ...rest };
       }
     };
     await route.handler(ctx);
@@ -2111,7 +2146,11 @@ export class HttpServer {
     // read back, which is a worse failure than the one the binding fixes
     // because it looks like data loss. `rulePrincipal` is the same mapping the
     // rule sites use, so "who is this?" has one answer.
-    const owner = rulePrincipal(principal);
+    // BMG-014: an admin who is a PERSON owns what they create in their own
+    // app, like any session — the bypass is about what they may read and
+    // write, not about whose row it is.
+    const owner =
+      principal.kind === 'admin' && principal.userId ? { kind: 'user' as const, userId: principal.userId } : rulePrincipal(principal);
     if (owner.kind === 'user' && this.security.creatorOwns(collection)) {
       const sm = this.facade.schemaManager;
       if (sm) {

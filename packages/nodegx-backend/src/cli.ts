@@ -366,7 +366,19 @@ async function runServe(options: Partial<BackendServiceOptions>, parentPid?: num
   // part of the feature, not a nicety.
   if (started.options.adminDashboard) {
     process.stdout.write(`[nodegx-backend] admin dashboard: ${started.listen.url}/_admin\n`);
-    if (started.security.adminTokenMintedThisStart) {
+    // BMG-014: the manager asks for an admin email and password on its first
+    // load, once it holds the credential — so the line an operator needs is
+    // where the credential is, and that the account comes next.
+    if (!started.security.hasAdminAccount) {
+      process.stdout.write(
+        `[nodegx-backend]   NO ADMIN ACCOUNT YET: open the manager and sign in with the admin credential — it then\n` +
+          `[nodegx-backend]   asks you to choose an admin email and password. The credential is in\n` +
+          `[nodegx-backend]   ${path.join(started.options.dataDir, 'secrets.json')} ("adminToken")` +
+          (started.security.adminTokenMintedThisStart
+            ? `, generated on this start;\n[nodegx-backend]   restart with --token <your-own-secret> to choose your own.\n`
+            : `.\n`)
+      );
+    } else if (started.security.adminTokenMintedThisStart) {
       process.stdout.write(
         `[nodegx-backend]   FIRST RUN: an admin credential was generated for this backend. Read it from\n` +
           `[nodegx-backend]   ${path.join(started.options.dataDir, 'secrets.json')} ("adminToken"), or restart with\n` +

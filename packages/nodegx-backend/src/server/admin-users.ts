@@ -32,7 +32,8 @@ import type { IStorageFacade } from '@noodl/backend-contract';
 
 import { RoleStore } from '../roles/RoleStore';
 import { SystemUsers } from '../users/SystemUsers';
-import { ACCOUNT_COLUMNS, isAccountDisabled, isVisibleAccountColumn } from '../users/accountColumns';
+import { ACCOUNT_COLUMNS, ADMIN_ACCESS_LEVELS, adminAccessOf, isAccountDisabled, isVisibleAccountColumn } from '../users/accountColumns';
+import type { AdminAccess } from '../users/accountColumns';
 import { isSessionExpired } from './users';
 import { HttpError, readJSONBody, sendJSON } from './http-util';
 import type { RequestContext } from './HttpServer';
@@ -65,10 +66,25 @@ export interface AdminUserRow extends Record<string, unknown> {
   /** When the newest live session began — a sign-in that has not been signed out of. */
   lastSessionAt: string | null;
   hasPassword: boolean;
+  /** BMG-014: whether this person can open the backend manager, and how. */
+  adminAccess: AdminAccess | null;
+}
+
+/** BMG-014: the sentences the access guards answer with. */
+export const OWN_ACCESS_MESSAGE = 'You cannot change your own backend access. Ask another full admin.';
+export function lastAdminMessage(name: string, what: string): string {
+  return `${name} is the only full admin of this backend, so they cannot be ${what}. Give someone else full access first.`;
 }
 
 const MAX_PAGE = 200;
 const SYSTEM_FIELDS = ['objectId', 'createdAt', 'updatedAt', 'ACL'];
+
+/** The name a guard's sentence uses: username, then email, then the id. */
+function personName(user: Record<string, unknown>): string {
+  if (typeof user.username === 'string' && user.username) return user.username;
+  if (typeof user.email === 'string' && user.email) return user.email;
+  return String(user.objectId);
+}
 
 function str(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined;
@@ -117,6 +133,8 @@ export class AdminUserRoutes {
     }
     if (ctx.query.status === 'disabled') clauses.push({ disabled: true });
     else if (ctx.query.status === 'unverified') clauses.push({ emailVerified: { $ne: true } });
+    // BMG-014: the people who can open the manager.
+    else if (ctx.query.status === 'admins') clauses.push({ adminAccess: { $in: ADMIN_ACCESS_LEVELS.slice() } });
     const where = clauses.length === 0 ? undefined : clauses.length === 1 ? clauses[0] : { $and: clauses };
 
     const limit = Math.min(Math.max(parseInt(ctx.query.limit || '50', 10) || 50, 1), MAX_PAGE);
@@ -210,14 +228,43 @@ export class AdminUserRoutes {
     const password = body.password === undefined ? undefined : str(body.password);
     if (body.password !== undefined && !password) throw new HttpError(400, 'A new password cannot be blank.');
 
-    const result = await this.system.handle({ op: 'update', userId, password, properties });
-    if (result.outcome !== 'done') {
-      throw new HttpError(result.code === 'user/already-exists' ? 409 : 400, result.error || 'The account was not changed.');
+    // BMG-014: backend access. Written here, directly — `SystemUsers` refuses
+    // the key by name so a graph can never write it — and guarded three ways:
+    // not your own, not the last full admin's, and only the two spellings.
+    let adminAccess: AdminAccess | null | undefined;
+    if (body.adminAccess !== undefined) {
+      const v = body.adminAccess;
+      if (v !== null && v !== 'full' && v !== 'readonly') {
+        throw new HttpError(400, 'adminAccess is "full", "readonly" or null (no access).');
+      }
+      adminAccess = v as AdminAccess | null;
+      if (ctx.principal.kind === 'admin' && ctx.principal.userId === userId) throw new HttpError(409, OWN_ACCESS_MESSAGE);
+      if (adminAccess !== 'full' && adminAccessOf(before) === 'full' && (await this.isLastFullAdmin(userId))) {
+        throw new HttpError(409, lastAdminMessage(personName(before), 'changed to less than full access'));
+      }
+    }
+    // The last full admin cannot be switched off either — a backend nobody can
+    // administer is the failure the guard exists for.
+    if (properties.disabled === true && adminAccessOf(before) === 'full' && (await this.isLastFullAdmin(userId))) {
+      throw new HttpError(409, lastAdminMessage(personName(before), 'disabled'));
+    }
+
+    let sessionsRevokedByUpdate = 0;
+    if (Object.keys(properties).length || password !== undefined) {
+      const result = await this.system.handle({ op: 'update', userId, password, properties });
+      if (result.outcome !== 'done') {
+        throw new HttpError(result.code === 'user/already-exists' ? 409 : 400, result.error || 'The account was not changed.');
+      }
+      sessionsRevokedByUpdate = result.sessionsRevoked || 0;
+    }
+    if (adminAccess !== undefined) {
+      await this.facade.rawSave('_User', userId, { adminAccess });
+      properties.adminAccess = adminAccess;
     }
 
     // R3 — switching sign-in off signs the person out everywhere, on the press.
     // (A password change already revoked them inside `SystemUsers.update`.)
-    let sessionsRevoked = result.sessionsRevoked || 0;
+    let sessionsRevoked = sessionsRevokedByUpdate;
     if (properties.disabled === true) sessionsRevoked += await this.revokeSessions(userId);
 
     ctx.audit({
@@ -233,7 +280,11 @@ export class AdminUserRoutes {
 
   async remove(ctx: RequestContext): Promise<void> {
     const userId = ctx.params.id;
-    await this.fetch(userId);
+    const before = await this.fetch(userId);
+    // BMG-014: see `update` — the last full admin stays.
+    if (adminAccessOf(before) === 'full' && (await this.isLastFullAdmin(userId))) {
+      throw new HttpError(409, lastAdminMessage(personName(before), 'deleted'));
+    }
     // Memberships and identities first: a junction row or an identity naming a
     // user who is gone is a role list with a ghost in it, and a provider sign-in
     // that resolves to an account it cannot fetch.
@@ -268,6 +319,12 @@ export class AdminUserRoutes {
     } catch {
       throw new HttpError(404, 'There is no such person on this backend.');
     }
+  }
+
+  /** BMG-014: is `userId` the only account with full backend access? */
+  private async isLastFullAdmin(userId: string): Promise<boolean> {
+    const { results } = await this.facade.rawQuery('_User', { where: { adminAccess: 'full' }, limit: 2 });
+    return results.length === 1 && results[0].objectId === userId;
   }
 
   private async revokeSessions(userId: string): Promise<number> {
@@ -341,7 +398,8 @@ export class AdminUserRoutes {
         roles: rolesOf[u.objectId as string] || [],
         sessions: (sessionsOf[u.objectId as string] || { n: 0 }).n,
         lastSessionAt: (sessionsOf[u.objectId as string] || { newest: null }).newest,
-        hasPassword: typeof u._hashed_password === 'string' && u._hashed_password.length > 0
+        hasPassword: typeof u._hashed_password === 'string' && u._hashed_password.length > 0,
+        adminAccess: adminAccessOf(u)
       };
       for (const [key, value] of Object.entries(u)) {
         if (key in row || !isVisibleAccountColumn(key) || key === 'ACL') continue;

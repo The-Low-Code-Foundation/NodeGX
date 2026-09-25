@@ -61,7 +61,8 @@ export function readonlyAdminMayCall(method: string, routePattern: string): bool
 export function readonlyRefusalMessage(method: string, routePattern: string): string {
   return (
     `Refused: this backend was reached with the READ-ONLY admin credential, which cannot perform ` +
-    `state-changing requests (${method} /${routePattern}). Use the full admin credential from the ` +
-    `backend's secrets.json ("adminToken") to make changes.`
+    `state-changing requests (${method} /${routePattern}). To make changes, sign in as a person with full ` +
+    `backend access (given on the Users page), or use the full admin credential from the backend's ` +
+    `secrets.json ("adminToken").`
   );
 }

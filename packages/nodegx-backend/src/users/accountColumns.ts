@@ -40,8 +40,37 @@ export const ACCOUNT_COLUMNS: Readonly<Record<string, string>> = Object.freeze({
   emailVerified: 'Set by the verification link, or by the Verified switch in the person’s Details.',
   password: 'Never stored as text. Set a new one from the person’s Sign-in section.',
   authData: 'Written by sign-in providers.',
-  disabled: 'Set by the Disable sign-in switch, which also signs the person out everywhere.'
+  disabled: 'Set by the Disable sign-in switch, which also signs the person out everywhere.',
+  adminAccess: 'Whether this person can open the backend manager. Set in the person’s Backend access section, by a full admin.'
 });
+
+/**
+ * BMG-014 — what a person may do in the backend manager, stored on their
+ * `_User` row as `adminAccess`. Absent (or anything else) is "no access".
+ *
+ *   - `full`: a session of theirs is the admin principal — every `/admin`
+ *     route, the manager, and (in their own app) every collection rule and row
+ *     ACL bypassed, exactly as the admin credential is.
+ *   - `readonly`: the same, carrying `readonly: true` — BAK-005's look-don't-
+ *     touch tier, refused every state-changing request by the dispatcher.
+ *
+ * A person's ROLES are a separate thing: the setup route puts the first admin
+ * in an `admin` role so the app's rules can name it, but the rule engine gives
+ * that role no special meaning. Access to the manager is this column alone.
+ */
+export type AdminAccess = 'full' | 'readonly';
+
+export const ADMIN_ACCESS_LEVELS: readonly AdminAccess[] = ['full', 'readonly'];
+
+/** The stored value, or null for no access. Only the two spellings count. */
+export function adminAccessOf(user: Record<string, unknown> | null | undefined): AdminAccess | null {
+  if (!user) return null;
+  const v = user.adminAccess;
+  return v === 'full' || v === 'readonly' ? v : null;
+}
+
+/** The name the setup route gives the first admin's role. Ordinary in every other way. */
+export const ADMIN_ROLE_NAME = 'admin';
 
 /** The sentence every refusing door answers with. */
 export const ACCOUNT_DISABLED_MESSAGE = 'This account is disabled.';
@@ -51,9 +80,12 @@ export const ACCOUNT_DISABLED_MESSAGE = 'This account is disabled.';
  * `PUT /users/:id`. `disabled` for the obvious reason; `emailVerified` because a
  * person who could set it on themselves would pass a `requireForLogin` policy
  * with an address they never proved (measured on the route before BMG-004: it
- * was written as sent).
+ * was written as sent). `adminAccess` (BMG-014) for the loudest reason of all:
+ * a signup that could write it would be a signup that makes itself the admin.
+ * BMG-014 also made `signup` strip this list — it used to spread every field
+ * it was sent into the row.
  */
-export const ADMIN_ONLY_USER_FIELDS: readonly string[] = ['disabled', 'emailVerified'];
+export const ADMIN_ONLY_USER_FIELDS: readonly string[] = ['disabled', 'emailVerified', 'adminAccess'];
 
 /** True only for an explicit `true`. Absent, null and false are all "enabled". */
 export function isAccountDisabled(user: Record<string, unknown> | null | undefined): boolean {

@@ -273,10 +273,13 @@ describe('HLT-024 the exchange carries the roles', () => {
       return out.sort((a, b) => a.site.localeCompare(b.site));
     }
 
-    it('the scan finds the four routes known to issue a session — so it is not blind', () => {
+    it('the scan finds the six routes known to issue a session — so it is not blind', () => {
       // 🔴 The known-firing arm. If a refactor renamed `sendJSON` or moved a
       // route, "every one carries roles" would pass on an empty list.
+      // BMG-014 added the manager's two: a password sign-in and the setup step.
       expect(sessionResponses().map((r) => r.site)).toEqual([
+        'admin/AdminDashboardRoutes.ts:login',
+        'admin/AdminDashboardRoutes.ts:setup',
         'server/oauth-routes.ts:exchange',
         'server/users.ts:login',
         'server/users.ts:me',

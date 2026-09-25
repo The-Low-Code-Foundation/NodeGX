@@ -62,7 +62,7 @@ export function verifyPassword(password: string, stored: string): boolean {
   }
 }
 
-function newSessionToken(): string {
+export function newSessionToken(): string {
   return 'r:' + crypto.randomBytes(24).toString('hex');
 }
 
@@ -282,6 +282,11 @@ export class UserRoutes {
 
     delete (rest as Record<string, unknown>).ACL;
     delete (rest as Record<string, unknown>)._method;
+    // BMG-014: the flags an administrator sets are never taken from a signup.
+    // Measured before this line existed: `...rest` below spread every field the
+    // caller sent into the row, so a signup could arrive verified, or — once
+    // the column existed — as the backend's admin.
+    for (const field of ADMIN_ONLY_USER_FIELDS) delete (rest as Record<string, unknown>)[field];
     const user = await this.facade.rawCreate('_User', {
       // ⚠️ **`emailVerified: false` is written here, and it is the close of a
       // defect BCN-006 could only half-fix from the client.**
@@ -301,8 +306,9 @@ export class UserRoutes {
       // already believes — `login` gates on `!user.emailVerified`, i.e. it has
       // been reading absent as false all along.
       //
-      // `...rest` first, deliberately: a caller that supplies the field (an
-      // admin-side import, say) outranks this default.
+      // `...rest` first, so a custom field a signup supplies is kept; the
+      // account flags were stripped from it above (BMG-014), so this default
+      // is what every signup gets.
       emailVerified: false,
       ...rest,
       username,

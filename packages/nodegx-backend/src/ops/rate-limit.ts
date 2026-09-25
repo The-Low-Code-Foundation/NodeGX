@@ -216,6 +216,9 @@ const AUTH_PATTERNS = new Set([
   // admin-credentialed and the dashboard polls it, so it belongs to the admin
   // budget. The login DOCUMENT is the guessable surface.
   '_admin',
+  // BMG-014: the manager's email + password sign-in. A credential is PRESENTED
+  // here, so it spends the auth budget like `login` does.
+  '_admin/login',
   'requestPasswordReset',
   'verificationEmailRequest',
   'apps/:appId/request_password_reset',

@@ -255,7 +255,7 @@ describe('BMG-006 Try as, and what is never drawn (AC5 words, AC6, AC7)', () => 
       const body = answers[url];
       return { status: body ? 200 : 404, json: async () => body || { error: 'no such route in this spec' } } as Response;
     }) as typeof fetch;
-    session.set({ token: 't', readonly: false });
+    session.set({ credential: { kind: 'token', value: 't' }, readonly: false });
     const root = mount(<PermissionsView params={['Pet']} />);
     for (let i = 0; i < 20 && !root.querySelector('#collection-matrix'); i++) await settle(20);
     const matrix = q(root, '#collection-matrix');

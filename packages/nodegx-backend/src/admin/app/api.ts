@@ -1,13 +1,26 @@
 /**
  * One client, one credential, one error convention — and the session.
  *
- * BAK-003's admin credential, unchanged: held as a bearer token in
- * `sessionStorage`, sent on every request. No dashboard session, no cookie, no
- * CSRF surface. The read-only tier is a second credential the server refuses
- * writes for; this file only remembers that it is the read-only one so buttons
- * can say so.
+ * Two kinds of credential, one slot (BMG-014):
+ *   - `token`: BAK-003's admin credential, sent as `Authorization: Bearer`.
+ *   - `session`: a `_Session` token for a PERSON with backend access, from
+ *     `POST /_admin/login` (email + password) or the setup step, sent as
+ *     `X-Parse-Session-Token` — the server resolves it to the admin principal.
+ * Either is held in `sessionStorage` (this tab), never a cookie, so there is
+ * still no CSRF surface. The read-only tier is whichever of the two the server
+ * says is read-only; this file only remembers that so buttons can say so.
  */
 import { createStore, useStore } from './store';
+
+export type Credential = { kind: 'token'; value: string } | { kind: 'session'; value: string };
+
+/** Who is signed in, when it is a person (`whoami.person`). */
+export interface DashboardPerson {
+  id: string;
+  username: string | null;
+  email: string | null;
+  access: 'full' | 'readonly';
+}
 
 export interface Whoami {
   ok: boolean;
@@ -15,6 +28,10 @@ export interface Whoami {
   backend: { id: string; name: string; host: string; port: number };
   security: { devOpen: boolean; enforced: boolean; hasReadonlyTier: boolean };
   firstRun: boolean;
+  /** BMG-014: the signed-in person, or null when the credential signed in. */
+  person: DashboardPerson | null;
+  /** BMG-014: some account has full backend access — the setup step is done. */
+  adminAccount: boolean;
   features: Record<string, boolean>;
   /**
    * BMG-004 AC7 — the `_User` columns only their own control writes, and why.
@@ -24,7 +41,7 @@ export interface Whoami {
 }
 
 export interface SessionState {
-  token: string | null;
+  credential: Credential | null;
   whoami: Whoami | null;
   readonly: boolean;
   features: Record<string, boolean>;
@@ -35,7 +52,7 @@ export interface SessionState {
 }
 
 export const session = createStore<SessionState>({
-  token: null,
+  credential: null,
   whoami: null,
   readonly: false,
   features: {},
@@ -48,6 +65,48 @@ export function useSession(): SessionState {
 }
 
 export const STORAGE_KEY = 'nodegx.admin.token';
+
+/** The header a credential travels in. The uploader (fields.tsx) uses it too. */
+export function credentialHeaders(credential: Credential | null): Record<string, string> {
+  if (!credential) return {};
+  return credential.kind === 'session' ? { 'x-parse-session-token': credential.value } : { authorization: 'Bearer ' + credential.value };
+}
+
+/** The query the SSE stream carries it in (EventSource cannot set headers). */
+export function liveQuery(credential: Credential | null): string {
+  if (!credential) return '';
+  return (credential.kind === 'session' ? 'token=' : 'authToken=') + encode(credential.value);
+}
+
+/** What was kept: the JSON form, or (from before BMG-014) a bare token. */
+export function parseStoredCredential(raw: string | null): Credential | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as { kind?: unknown; value?: unknown };
+    if (parsed && (parsed.kind === 'token' || parsed.kind === 'session') && typeof parsed.value === 'string' && parsed.value) {
+      return { kind: parsed.kind, value: parsed.value };
+    }
+  } catch {
+    /* a bare token */
+  }
+  return raw.charAt(0) === '{' ? null : { kind: 'token', value: raw };
+}
+
+function keep(credential: Credential): void {
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(credential));
+  } catch {
+    /* private mode */
+  }
+}
+
+function forget(): void {
+  try {
+    sessionStorage.removeItem(STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
 
 export class ApiError extends Error {
   status: number;
@@ -68,9 +127,8 @@ export async function api<T = any>(method: string, path: string, body?: unknown,
  */
 export async function apiFull<T = any>(method: string, path: string, body?: unknown, extraHeaders?: Record<string, string>): Promise<{ body: T; headers: Headers }> {
   // `extraHeaders`: BMG-006's `If-Match` on the whole-config write; nothing else sends one.
-  const headers: Record<string, string> = { ...(extraHeaders || {}) };
-  const { token, whoami } = session.get();
-  if (token) headers.authorization = 'Bearer ' + token;
+  const { credential, whoami } = session.get();
+  const headers: Record<string, string> = { ...credentialHeaders(credential), ...(extraHeaders || {}) };
   if (body !== undefined) headers['content-type'] = 'application/json';
   const res = await fetch(path, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined });
   const json = await res.json().catch(() => null);
@@ -78,7 +136,7 @@ export async function apiFull<T = any>(method: string, path: string, body?: unkn
     // Only tear down a session we actually had. The boot-time "is this backend
     // dev-open?" probe deliberately sends no credential, and its 401 is an
     // answer, not a failure.
-    if (whoami) signOut('The admin credential was rejected. Sign in again.');
+    if (whoami) signOut('Your sign-in was rejected. Sign in again.');
     throw new ApiError('Unauthorized', 401);
   }
   if (res.status >= 400) {
@@ -96,27 +154,24 @@ export function encode(part: unknown): string {
 
 // --------------------------------------------------------------- session --
 
-export async function signIn(token: string | null, remember: boolean): Promise<void> {
-  session.set({ token });
+export async function signIn(credential: Credential | null, remember: boolean): Promise<void> {
+  session.set({ credential });
   const data = await api<Whoami>('GET', '/_admin/whoami');
-  if (remember && token) {
-    try {
-      sessionStorage.setItem(STORAGE_KEY, token);
-    } catch {
-      /* private mode */
-    }
-  }
+  if (remember && credential) keep(credential);
   session.set({ whoami: data, readonly: !!data.readonly, features: data.features || {}, loginError: null, booting: false });
+}
+
+/** Re-ask `whoami` (after the setup step, or when the page needs the live answer). */
+export async function refreshWhoami(): Promise<Whoami> {
+  const data = await api<Whoami>('GET', '/_admin/whoami');
+  session.set({ whoami: data, readonly: !!data.readonly, features: data.features || {} });
+  return data;
 }
 
 export function signOut(message?: string | null): void {
   closeLive();
-  try {
-    sessionStorage.removeItem(STORAGE_KEY);
-  } catch {
-    /* ignore */
-  }
-  session.set({ token: null, whoami: null, readonly: false, features: {}, loginError: message || null, booting: false });
+  forget();
+  session.set({ credential: null, whoami: null, readonly: false, features: {}, loginError: message || null, booting: false });
 }
 
 /**
@@ -132,23 +187,19 @@ export function signOut(message?: string | null): void {
  */
 export async function bootSession(): Promise<void> {
   const handoff = /^#token=([^&]+)/.exec(location.hash || '');
-  let stored: string | null = null;
+  let stored: Credential | null = null;
   if (handoff) {
     try {
       history.replaceState(null, '', location.pathname + location.search);
     } catch {
       location.hash = '';
     }
-    stored = decodeURIComponent(handoff[1]);
-    try {
-      sessionStorage.setItem(STORAGE_KEY, stored);
-    } catch {
-      /* private mode */
-    }
+    stored = { kind: 'token', value: decodeURIComponent(handoff[1]) };
+    keep(stored);
   }
   if (!stored) {
     try {
-      stored = sessionStorage.getItem(STORAGE_KEY);
+      stored = parseStoredCredential(sessionStorage.getItem(STORAGE_KEY));
     } catch {
       stored = null;
     }
@@ -158,14 +209,10 @@ export async function bootSession(): Promise<void> {
       await signIn(stored, true);
       return;
     } catch {
-      try {
-        sessionStorage.removeItem(STORAGE_KEY);
-      } catch {
-        /* ignore */
-      }
+      forget();
     }
   }
-  session.set({ token: null });
+  session.set({ credential: null });
   try {
     await signIn(null, false);
   } catch {
@@ -173,16 +220,16 @@ export async function bootSession(): Promise<void> {
   }
 }
 
-/** The sign-in form's submit. Resolves on success; the error text is put on the form otherwise. */
+/** The credential box's submit. Resolves on success; the error text is put on the form otherwise. */
 export async function submitCredential(token: string, remember: boolean): Promise<boolean> {
   session.set({ loginError: null });
   try {
-    await signIn(token, remember);
+    await signIn({ kind: 'token', value: token }, remember);
     return true;
   } catch (e) {
     const err = e as ApiError;
     session.set({
-      token: null,
+      credential: null,
       loginError:
         err.status === 429
           ? err.message
@@ -190,6 +237,40 @@ export async function submitCredential(token: string, remember: boolean): Promis
     });
     return false;
   }
+}
+
+/**
+ * BMG-014: the email + password form's submit. `POST /_admin/login` answers a
+ * session for an account with backend access; the page then holds it like a
+ * token. The server's one refusal sentence is shown as it is.
+ */
+export async function submitPassword(email: string, password: string, remember: boolean): Promise<boolean> {
+  session.set({ loginError: null, credential: null });
+  try {
+    const res = await api<{ sessionToken: string }>('POST', '/_admin/login', { email, password });
+    await signIn({ kind: 'session', value: res.sessionToken }, remember);
+    return true;
+  } catch (e) {
+    const err = e as ApiError;
+    session.set({ credential: null, loginError: err.message === 'Unauthorized' ? 'That email and password were not accepted.' : err.message });
+    return false;
+  }
+}
+
+/**
+ * BMG-014: the setup step. Made with the credential the page holds; the answer
+ * is a session for the new person, which replaces the credential in this tab
+ * (kept if the credential was) — from here on the page is the person.
+ */
+export async function createAdminAccount(email: string, password: string): Promise<void> {
+  const res = await api<{ sessionToken: string }>('POST', '/_admin/setup', { email, password });
+  let remembered = false;
+  try {
+    remembered = !!sessionStorage.getItem(STORAGE_KEY);
+  } catch {
+    remembered = false;
+  }
+  await signIn({ kind: 'session', value: res.sessionToken }, remembered);
 }
 
 // ------------------------------------------------------------------ live --
@@ -204,9 +285,9 @@ let clientId: string | null = null;
 /** Live updates reuse BAK-001's SSE stream: the page is just another subscriber. */
 export function openLive(collection: string, onChange: () => void): void {
   closeLive();
-  const { token, features } = session.get();
+  const { credential, features } = session.get();
   if (!collection || !features.realtime) return;
-  const es = new EventSource('/realtime?authToken=' + encode(token || ''));
+  const es = new EventSource('/realtime?' + liveQuery(credential));
   source = es;
   live.set({ state: 'connecting', collection });
   es.addEventListener('connected', (e) => {

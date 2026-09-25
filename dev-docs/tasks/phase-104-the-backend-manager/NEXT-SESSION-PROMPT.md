@@ -1,10 +1,11 @@
 # P104 — next session
 
-**Written 2026-09-25 (end of s11).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
+**Written 2026-09-25 (end of s12).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
 BMG-001; s3 built and drove BMG-007 (API keys); s4 BMG-004 (Users, R3 disable); s5 BMG-002
 (Collections); s6 BMG-005 (Roles); s7 BMG-006 (Permissions); s8 BMG-008 (Triggers); s9 BMG-003
-(Schema) and filed **R6** (README §8) for Richard; s10 BMG-009 (Workflows and Runs); s11 built and
-drove BMG-010 (Email and Sign-in).
+(Schema) and filed **R6** (README §8) for Richard; s10 BMG-009 (Workflows and Runs); s11 BMG-010
+(Email and Sign-in); s12 built and drove **BMG-014** (the first admin is a person — Richard's ask that
+session: an email and a password on the first page load, backend access on the Users page).
 
 ## Where it stands
 
@@ -21,6 +22,7 @@ drove BMG-010 (Email and Sign-in).
 | BMG-003 Schema | ✅ s9 | ✅ headless, AC1–8, 41/41 checks (§6) | ✅ `cb83fa7c` |
 | BMG-009 Workflows and Runs | ✅ s10 | ✅ headless, AC1–5, 34/34 checks (§6) | ✅ `fb56efbf` |
 | BMG-010 Email and Sign-in | ✅ s11 | ✅ headless, AC1–5 + 7, 42/42 checks (§6) | ✅ `1f84abdb` |
+| BMG-014 The first admin is a person | ✅ s12 | ✅ headless, AC1–3 + 6, 33/33 checks (§6) | <<COMMIT>> |
 | BMG-011…012 | — | — | — |
 | BMG-013 Richard drives | his | — | — |
 
@@ -31,6 +33,10 @@ before believing that: a peer session may have touched it.
 browser: yes, behind the typed name · R5 filed · **R6 OPEN (s9): on a collection that already has records, a
 required field ASKS for a default (the engines require one) instead of AC5's "Required disables Default" — ask
 Richard in plain words whether that is the rule, or whether Required should be refused there.** All in README §8.
+
+**Gate readings (2026-09-25, s12):** `packages/nodegx-backend` `npm run typecheck` exit 0 (both configs); Full backend `npx jest --maxWorkers=4`: **199 suites PASS, 1 skipped (`fed-003-live-cache`), 0 FAIL, 2387 tests, exit 0, 348 s** (2026-09-25, s12, after every change in this commit; the first run had `hlt-024-exchange-roles` red because a session-issuing response must carry `roles` — both new responses now do, through a `rolesForUser` dep, and the scan's known list grew the two sites).
+Bundle 87,333 gzip (budget 160,000); route tally `admin: 94`, `auth: 17` (`POST _admin/setup`, `POST _admin/login`). Drive
+`drives/bmg014/run.sh ac seed` 33/33.
 
 **Gate readings (2026-09-25, s11):** `packages/nodegx-backend` `npm run typecheck` exit 0 (both configs); full backend
 `npx jest --maxWorkers=4`: **197 suites PASS, 1 FAIL, 1 skipped (`fed-003-live-cache`), 2375 tests, 335 s** (2026-09-25, s11) — the one FAIL was `tpl002-notifications` pinning the OLD not-configured sentence (*Backend Services panel*), repointed at the new one and 29/29 alone. Bundle 85,835 gzip (budget 160,000); route tally unchanged at `admin: 93` (BMG-010
@@ -49,6 +55,26 @@ and `nodegx-backend-contract` `tsc --noEmit` exit 0. Full backend `npx jest --ma
 route). Drive `drives/bmg003/run.sh ac seed` 41/41.
 🔴 A new `/admin/...` route still owes the tally line AND an `audit-actions.ts` entry (an action, or a
 `NOT_AUDITED` reason for a dry run); a POST a read-only admin should be able to make owes `readonly.ts` too.
+
+## What s12 settled (BMG-014)
+
+- **A session can BE the admin.** `resolvePrincipal` upgrades a session whose `_User` row carries `adminAccess` to
+  `{kind:'admin', userId, roles}` (`readonly:true` for `readonly`). Nothing else changed shape: every `kind === 'admin'`
+  gate, the read-only dispatcher refusal, CLP/ACL bypass — all apply to the person. The audit actor is their id;
+  `stampCreate` makes them owner of what they create. A bound API key acting as an admin person stays a user.
+- **`adminAccess` is written by exactly one route** (`PUT /admin/users/:id`) and the setup; `SystemUsers` refuses it by
+  name, signup and self-update strip it (`ADMIN_ONLY_USER_FIELDS`), `_User` is a system collection on the wire.
+- **Setup is admin-gated, not unauthenticated** — BAK-005-NOTES' refusal stands. The editor's `#token=` handoff is what
+  makes "the first page load asks for the account" true from the editor; on a server the operator pastes the printed
+  credential once. 409 for good after the first full-access account.
+- **Two credentials, one slot on the page** (`api.ts` `Credential`); the SSE stream takes `token=` for a session.
+- 🔴 **The tally moved twice** (`admin: 94`, `auth: 17`) — `_admin/login` is in `AUTH_PATTERNS` because a password is
+  presented there; `_admin/setup` is admin-gated and audited `admin.setup`.
+- 🔴 **Every open from the editor is the credential** (`BackendManager.js openDashboard` still hands `#token=`; a new tab
+  has an empty `sessionStorage`). BMG-012 candidate: the editor could log in as a person, or open without the token once
+  an account exists so the page asks for email + password.
+- The drive: `drives/bmg014/run.sh ac seed` — fresh LOCKED backend with `--readonly-token`, no SMTP; `BACKEND_LOG` is
+  handed to the script for the CLI lines. 🔴 zsh prefix trap again: every path derived from `$S` is resolved BEFORE `S=`.
 
 ## Do this, in order
 

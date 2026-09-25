@@ -49,7 +49,7 @@ export function Btn({ kind, tiny, children, class: cls, className, ...rest }: Bt
 export function WriteBtn(props: BtnProps) {
   const { readonly } = useSession();
   if (!readonly) return <Btn {...props} />;
-  return <Btn {...props} disabled title="The read-only admin credential cannot make changes." />;
+  return <Btn {...props} disabled title="Your access to this backend is read-only, so this cannot make changes." />;
 }
 
 export function Page({ title, subtitle, children }: { title: string; subtitle?: string; children?: ComponentChildren }) {

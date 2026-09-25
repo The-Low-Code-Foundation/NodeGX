@@ -24,7 +24,7 @@ import type * as http from 'http';
 import type { IStorageFacade } from '@noodl/backend-contract';
 import type { AclOption } from '../persistence/AdapterFacade';
 import { HttpError } from '../server/http-util';
-import { isAccountDisabled } from '../users/accountColumns';
+import { adminAccessOf, isAccountDisabled } from '../users/accountColumns';
 import {
   ADMIN_TOKEN_ENV,
   describeMissingSecret,
@@ -439,7 +439,15 @@ export class SecurityState {
       // BMG-004 (R3): see `UserRoutes.requireUser` — the same answer, 209.
       if (isAccountDisabled(user)) throw new HttpError(400, 'Invalid session token', 209);
       const userId = user.objectId as string;
-      return { kind: 'user', userId, roles: await this.rolesForUser(userId) };
+      const roles = await this.rolesForUser(userId);
+      // BMG-014: a person with backend access IS an admin, for every question
+      // this backend asks. Decided here, in the one place a session becomes a
+      // principal, so no gate has to know the column exists. The disabled check
+      // above runs first — a disabled admin is refused like any disabled account.
+      const access = adminAccessOf(user);
+      if (access === 'full') return { kind: 'admin', userId, roles };
+      if (access === 'readonly') return { kind: 'admin', readonly: true, userId, roles };
+      return { kind: 'user', userId, roles };
     }
 
     return { kind: 'anonymous' };

@@ -123,7 +123,9 @@ export const PROTECTED_PROPERTY_KEYS: Record<string, string> = {
   updatedAt: 'bookkeeping the backend owns',
   ACL: 'row-level access — a graph that could set this could grant a new account access to anything',
   password: 'use the Password port, so the value goes through the same hash the login route verifies against',
-  sessionToken: 'a session is not a property of a user, and these nodes never mint one'
+  sessionToken: 'a session is not a property of a user, and these nodes never mint one',
+  // BMG-014. The one column that turns a person into the backend's administrator.
+  adminAccess: 'access to the backend manager is given on its Users page by a full admin, never by a graph'
 };
 
 /** `_User` columns whose value the caller supplies through a dedicated port. */

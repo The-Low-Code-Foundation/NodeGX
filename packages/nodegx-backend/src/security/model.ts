@@ -30,8 +30,16 @@ export type Principal =
    * not of the route — the dispatcher refuses every state-changing request from
    * a read-only admin before any handler runs, so "look, don't touch" cannot be
    * defeated by finding an un-annotated route.
+   *
+   * BMG-014: an admin may be a PERSON. A session whose `_User` row carries
+   * `adminAccess` resolves to this kind with `userId` (and their `roles`, for
+   * the record) — `full` without `readonly`, `readonly` with it. Every gate
+   * that asks `kind === 'admin'` treats them exactly as the credential; what
+   * differs is that the audit actor is their id and a record they create in
+   * their own app is stamped with them as owner. Absent `userId` = the
+   * credential itself (`adminToken` / `adminReadonlyToken`).
    */
-  | { kind: 'admin'; readonly?: boolean }
+  | { kind: 'admin'; readonly?: boolean; userId?: string; roles?: string[] }
   /**
    * Named server-to-server credential; power comes only from its scopes —
    * unless it also carries `actsAs`, which can only ever take power away.

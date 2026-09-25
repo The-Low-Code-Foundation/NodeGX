@@ -228,7 +228,7 @@ describe('BMG-004 /admin/users', () => {
 
   it('AC7: the server-owned columns come from one list, and a generic write to one is refused', async () => {
     const who = await req<{ accountColumns: Record<string, string> }>('GET', '/_admin/whoami');
-    expect(Object.keys(who.json.accountColumns).sort()).toEqual(['authData', 'disabled', 'email', 'emailVerified', 'password', 'username']);
+    expect(Object.keys(who.json.accountColumns).sort()).toEqual(['adminAccess', 'authData', 'disabled', 'email', 'emailVerified', 'password', 'username']);
     const ann = (await req<{ users: Row[] }>('GET', '/admin/users?q=ann')).json.users[0];
     for (const key of ['email', 'emailVerified', 'disabled', 'username']) {
       const put = await req('PUT', `/admin/users/${ann.objectId}`, { properties: { [key]: 'x' } });

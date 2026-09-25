@@ -34,7 +34,20 @@ export interface Person {
   sessions: number;
   lastSessionAt: string | null;
   hasPassword: boolean;
+  /** BMG-014: can this person open the manager, and how. */
+  adminAccess: 'full' | 'readonly' | null;
   [field: string]: unknown;
+}
+
+/** BMG-014: the three answers to "can they open the backend manager?", in a person's words. */
+export const ACCESS_OPTIONS: ReadonlyArray<{ value: 'full' | 'readonly' | null; label: string; sub: string }> = [
+  { value: null, label: 'No access to the manager', sub: 'Signs in to your app only. Most people.' },
+  { value: 'readonly', label: 'Can look, not change', sub: 'Opens this manager and sees everything — every write is refused. For a client, or support.' },
+  { value: 'full', label: 'Full admin', sub: 'Everything, here and in your app: every rule lets them through.' }
+];
+
+export function accessWord(access: 'full' | 'readonly' | null | undefined): string | null {
+  return access === 'full' ? 'admin' : access === 'readonly' ? 'read-only admin' : null;
 }
 
 interface Identity {
@@ -45,7 +58,7 @@ interface Identity {
   lastLoginAt?: string;
 }
 
-type Status = '' | 'disabled' | 'unverified';
+type Status = '' | 'disabled' | 'unverified' | 'admins';
 
 const PAGE = 50;
 
@@ -141,6 +154,7 @@ export function UsersView({ params }: ViewProps) {
           <option value="">Everyone</option>
           <option value="disabled">Disabled</option>
           <option value="unverified">Email not verified</option>
+          <option value="admins">Backend admins</option>
         </select>
       </Row>
       <Gap />
@@ -170,6 +184,12 @@ export function UsersView({ params }: ViewProps) {
                       <>
                         {' '}
                         <Chip kind="bad">disabled</Chip>
+                      </>
+                    ) : null}
+                    {p.adminAccess ? (
+                      <>
+                        {' '}
+                        <Chip kind={p.adminAccess === 'full' ? 'accent' : 'warn'}>{accessWord(p.adminAccess)}</Chip>
                       </>
                     ) : null}
                     {p.email && p.email !== p.username ? <span class="hint">{p.email}</span> : null}
@@ -241,7 +261,7 @@ export function generatePassword(random: (n: number) => number = (n) => Math.flo
   return groups.join('-');
 }
 
-function cryptoRandom(n: number): number {
+export function cryptoRandom(n: number): number {
   const c = typeof crypto !== 'undefined' ? crypto : null;
   if (c && c.getRandomValues) {
     const buf = new Uint32Array(1);
@@ -557,6 +577,20 @@ function PersonDrawer({
       .catch(fail);
   }
 
+  function setAccess(level: 'full' | 'readonly' | null) {
+    if (!person || level === person.adminAccess) return;
+    if (level === 'full') {
+      confirmSimple(
+        'Make ' + name + ' a full admin',
+        name +
+          ' can then open this manager and change anything on it, and every rule in your app lets them through. Only another full admin can take it back.',
+        () => put({ adminAccess: 'full' }, name + ' is now a full admin.'),
+        'Make full admin'
+      );
+    } else if (level === 'readonly') put({ adminAccess: 'readonly' }, name + ' can now open the manager, and change nothing.');
+    else put({ adminAccess: null }, name + ' can no longer open the manager.');
+  }
+
   function setDisabled(on: boolean) {
     if (on) {
       confirmSimple(
@@ -669,6 +703,24 @@ function PersonDrawer({
             />
           </>
         ) : null}
+
+        <h3 class="drawer-section">Backend access</h3>
+        {whoami && whoami.person && whoami.person.id === id ? (
+          <Notice style="margin-bottom:8px">This is you. Another full admin can change your access; you cannot change your own.</Notice>
+        ) : null}
+        <div class="tiles access-tiles" role="radiogroup" aria-label="Backend access" title={owned.adminAccess}>
+          {ACCESS_OPTIONS.map((o) => {
+            const on = (person.adminAccess || null) === o.value;
+            const mine = !!(whoami && whoami.person && whoami.person.id === id);
+            return (
+              <label key={String(o.value)} class={'tile' + (on ? ' on' : '')}>
+                <input type="radio" name="admin-access" value={o.value || ''} checked={on} disabled={busy || mine} onChange={() => setAccess(o.value)} />
+                <b>{o.label}</b>
+                <span class="sub">{o.sub}</span>
+              </label>
+            );
+          })}
+        </div>
 
         <h3 class="drawer-section">Sign-in</h3>
         <p class="sub">

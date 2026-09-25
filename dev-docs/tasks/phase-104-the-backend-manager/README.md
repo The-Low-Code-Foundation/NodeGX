@@ -158,9 +158,10 @@ among the tabs.
 | **[BMG-008](BMG-008-TRIGGERS.md)** ✅ s8 | Triggers: authored here — the schedule builder (six modes, the sentence and next five runs from the server), webhooks with their URL and a secret shown once, changes on a collection as boxes, a payload as rows | 3 | 001 |
 | **[BMG-003](BMG-003-SCHEMA.md)** ✅ s9 | Schema: eleven kind tiles, per-kind options, rules the backend enforces (choice, max length, looks-like, whole numbers, bounds), drop a field behind the count and the typed name, rules in words, danger zone | 7 | 001 |
 | **[BMG-009](BMG-009-WORKFLOWS-AND-RUNS.md)** ✅ s10 | Workflows and Runs: run with a drawer of typed rows (prefilled with what the steps read), land on the record; runs found with flat filter rows over the route's own parameters, paged, live while running, cancel, *runs of this trigger* | 7 | 001, 002 |
-| **[BMG-010](BMG-010-EMAIL-AND-SIGN-IN.md)** | Email and Sign-in: template editor with placeholders and preview, SMTP presets, a provider wizard led by its callback URL, scopes as checkboxes, origins as chips | 7 | 001 |
+| **[BMG-010](BMG-010-EMAIL-AND-SIGN-IN.md)** ✅ s11 | Email and Sign-in: template editor with placeholders and preview, SMTP presets, a provider wizard led by its callback URL, scopes as checkboxes, origins as chips | 7 | 001 |
 | **[BMG-011](BMG-011-FILES-BACKUPS-OPS.md)** | Files, Backups, Settings: denied types as categories, the sweep and backup schedules, restore (R4), ops, secrets, search, a file browser | 3, 7 | 001, 008 (schedule builder), R4 |
 | **[BMG-012](BMG-012-THE-EDITOR-LETS-GO.md)** | The editor lets go: six panels removed, two doors become deep links | R2 | 001 (deep links), 003, 008 |
+| **[BMG-014](BMG-014-THE-FIRST-ADMIN-IS-A-PERSON.md)** ✅ s12 | The first admin is a person: an email and a password on the first page load, backend access (full / look-only) given on the Users page, the same account in the app's `admin` role | Richard, s12 | 001, 004 |
 | **[BMG-013](BMG-013-RICHARD-DRIVES-IT.md)** | Richard drives every tab as the person in §1 | — | all |
 
 ## 6. Candidates, not tasks

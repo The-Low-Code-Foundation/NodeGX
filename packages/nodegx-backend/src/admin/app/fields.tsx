@@ -16,7 +16,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 
 import { AclState, aclFromValue, aclToValue } from './acl';
-import { api, encode, session } from './api';
+import { api, credentialHeaders, encode, session } from './api';
 import { AclCard } from './composers/AclCard';
 import { KeyValueEditor, KvRow, objectFromRows, rowsFromObject } from './composers/KeyValueEditor';
 import { ListEditor } from './composers/ListEditor';
@@ -587,9 +587,7 @@ function FileControl({ col, raw, onChange, disabled }: { col: Column; raw: FileR
     setBusy(true);
     setProblem(null);
     try {
-      const headers: Record<string, string> = { 'content-type': file.type || 'application/octet-stream' };
-      const { token } = session.get();
-      if (token) headers.authorization = 'Bearer ' + token;
+      const headers: Record<string, string> = { ...credentialHeaders(session.get().credential), 'content-type': file.type || 'application/octet-stream' };
       const res = await fetch('/files/' + encode(file.name), { method: 'POST', headers, body: file });
       const json = await res.json().catch(() => null);
       if (res.status >= 400 || !json || !json.url) throw new Error((json && (json.error || json.message)) || 'The upload was refused (HTTP ' + res.status + ').');

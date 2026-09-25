@@ -643,6 +643,30 @@ td.actions {
   flex: 1;
 }
 
+/* The checkbox is an input too; without this it stretched across the row. */
+#login input[type='checkbox'] {
+  flex: none;
+}
+
+/* BMG-014: the credential box, folded under the email + password form; the setup step. */
+#login .login-alt {
+  margin-top: 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+#login .field {
+  display: flex;
+}
+
+#login.setup form {
+  width: min(460px, 100%);
+}
+
+.access-tiles .tile b {
+  font-size: 13px;
+}
+
 .hidden {
   display: none !important;
 }

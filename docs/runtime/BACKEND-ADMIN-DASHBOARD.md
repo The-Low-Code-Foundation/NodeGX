@@ -76,10 +76,18 @@ editor's own design tokens, copied into the page at build time.
 
 ## Signing in
 
-The credential is BAK-003's admin credential — the same one the editor and MCP
-use. There is no separate dashboard account.
+Two ways in, one form:
 
-Find it in the backend's data directory:
+- **As a person** — an email and a password. The account is an ordinary `_User`
+  row that carries **backend access** (`adminAccess`: *full* or *read-only*),
+  given on the Users page by a full admin. Its session is the admin principal
+  for every route, so the same account signs into your app (where it is in the
+  `admin` role the setup step made) and into the manager.
+- **With the admin credential** — BAK-003's `adminToken`, behind *Use the admin
+  credential instead*. It is what the editor, MCP and scripts hold; it is not
+  replaced by the account.
+
+Find the credential in the backend's data directory:
 
 ```
 <data-dir>/secrets.json   →   { "adminToken": "…" }      (mode 0600)
@@ -91,21 +99,28 @@ Or choose your own at start:
 nodegx-backend serve --data-dir /srv/nodegx --port 8577 --token "$(openssl rand -base64 32)"
 ```
 
-The dashboard holds the token in `sessionStorage` (this tab only, cleared when
-the tab closes) and sends it as `Authorization: Bearer …` on every request.
-There is no cookie and therefore no CSRF surface.
+The manager holds whichever you used in `sessionStorage` (this tab only,
+cleared when the tab closes) and sends it on every request — the credential as
+`Authorization: Bearer …`, a session as `X-Parse-Session-Token`. There is no
+cookie and therefore no CSRF surface. A refused password spends the same
+per-address failure budget as a refused token.
 
 ### First run
 
-Unlike Pocketbase, there is **no "create the first admin" page**, and this is
-deliberate. A NodeGX backend always has an admin credential by the time it can
-serve anything — it mints one on first start. An unauthenticated setup page on
-an already-provisioned backend is a takeover waiting to happen, so instead:
+The first time the manager is opened with the credential on a backend that has
+no admin account, it shows **Create your admin account** before anything else:
+an email and a password. That makes the account, gives it full backend access,
+puts it in the `admin` role, and signs you in as yourself. From the editor the
+page arrives already holding the credential, so the first load is that step.
 
-- the service prints the dashboard URL and, when the credential was auto-minted
-  on that start, exactly where to read it;
-- the dashboard shows a first-run banner saying the same, and how to replace it
-  with `--token`.
+This is not an unauthenticated setup page (which BAK-005-NOTES refused, and
+still does): `POST /_admin/setup` is admin-gated, so the credential — printed
+at start, minted before anything can be served — is the proof. Once a
+full-access account exists the route answers 409 for good; after that, access
+is given on the Users page.
+
+The CLI's startup lines say *NO ADMIN ACCOUNT YET* and where the credential is
+until the account exists.
 
 ### Dev-open backends
 
@@ -122,8 +137,14 @@ saying enforcement is off.
 
 ## Read-only access
 
-For support and demos: a second credential that can read everything the admin
-surface exposes and change nothing.
+For support, demos and clients who should see their data and change nothing.
+Two ways to give it:
+
+- **A person** — on the Users page, under *Backend access*, choose *Can look,
+  not change*. They sign in with their email and password and see everything;
+  every write is refused. No token to hand over.
+- **A second credential** that can read everything the admin surface exposes
+  and change nothing:
 
 ```sh
 nodegx-backend serve --data-dir /srv/nodegx \

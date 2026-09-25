@@ -106,6 +106,8 @@ export interface StartedService {
     adminTokenMintedThisStart: boolean;
     /** BAK-005: a read-only admin credential is provisioned. */
     hasReadonlyTier: boolean;
+    /** BMG-014: some account carries full backend access (the manager's setup step is done). */
+    hasAdminAccount: boolean;
   };
   /** BAK-008: full-text search status at this start. */
   search: {
@@ -699,7 +701,8 @@ export class BackendService {
         enforced: !this.security.devOpenActive,
         migratedThisStart: this.security.migratedThisStart,
         adminTokenMintedThisStart: this.security.adminTokenMintedThisStart,
-        hasReadonlyTier: this.security.adminReadonlyToken !== null
+        hasReadonlyTier: this.security.adminReadonlyToken !== null,
+        hasAdminAccount: await this.hasAdminAccount()
       },
       search: {
         fts5Available: searchIndexer.hasFts5(),
@@ -721,6 +724,22 @@ export class BackendService {
    *      wrong before: the hub was closed first, so SSE clients had their
    *      streams cut without the goodbye the hub knows how to send.
    */
+  /**
+   * BMG-014: does any account carry full backend access? Read once at start
+   * for the CLI's first-run lines; the manager asks `whoami` for the live
+   * answer. A failure to read is "no" — the lines then say to make one, which
+   * is the safe direction.
+   */
+  async hasAdminAccount(): Promise<boolean> {
+    if (!this.facade) return false;
+    try {
+      const { results } = await this.facade.rawQuery('_User', { where: { adminAccess: 'full' }, limit: 1 });
+      return results.length > 0;
+    } catch {
+      return false;
+    }
+  }
+
   async stop(): Promise<void> {
     if (this.triggers) {
       this.triggers.stop();
@@ -943,6 +962,11 @@ export class BackendService {
     // `where: { disabled: true }` on an older data dir is a SQL error rather
     // than an empty answer. Absent reads as enabled (accountColumns.ts).
     sm.addColumn('_User', { name: 'disabled', type: 'Boolean' });
+    // BMG-014: whether a person may open the backend manager ('full' |
+    // 'readonly'; absent = no). Same idempotent ALTER, same reason. The value
+    // is read by `SecurityState.resolvePrincipal` on every session, so the
+    // column has to exist on every data dir, old or new.
+    sm.addColumn('_User', { name: 'adminAccess', type: 'String' });
     // BAK-003: roles (flat; membership via the users Relation's junction
     // table) and API keys (hashed secrets, never recoverable).
     sm.createTable({

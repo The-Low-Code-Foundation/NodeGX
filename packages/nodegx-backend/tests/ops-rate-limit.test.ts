@@ -271,9 +271,13 @@ describe('BAK-009 rate limiting over real sockets', () => {
     // and left in the `admin` budget: it is asked on every change of a control
     // in one drawer, by one person, and answers from a bounded scan. Counted,
     // not guessed — 92 → 93.
+    // BMG-014 moved `admin` by 1 and `auth` by 1: `POST _admin/setup` (the
+    // first admin account, made with the credential — admin-gated, so `admin`)
+    // and `POST _admin/login` (email + password presented — `auth`, beside
+    // `login` and the document). Counted, not guessed — 93 → 94, 16 → 17.
     expect(counts).toEqual({
-      admin: 93,
-      auth: 16,
+      admin: 94,
+      auth: 17,
       data: 19,
       files: 4,
       functions: 1,
