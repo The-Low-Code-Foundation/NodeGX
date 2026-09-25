@@ -476,7 +476,10 @@ export class BackendService {
       executions: this.executions,
       backendId: this.options.backendId,
       backendName: this.options.backendName,
-      getSchema: () => (this.facade && this.facade.schemaManager ? this.facade.schemaManager.exportSchemas() : [])
+      getSchema: () => (this.facade && this.facade.schemaManager ? this.facade.schemaManager.exportSchemas() : []),
+      // BMG-015: archives can go to the files' bucket (read live — the files
+      // subsystem is built just below, and the bucket can change at runtime).
+      getBucket: () => (this.files ? this.files.bucketDriver() : null)
     });
 
     // 2.66 Files (BAK-006): metadata + storage driver + orphan-sweep scheduler,

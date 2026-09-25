@@ -34,6 +34,16 @@
  * makes "the restore row lands in the database that exists after the
  * restore" true rather than an accident of timing.
  *
+ * BMG-015: the destination can be the files' bucket. An archive is still
+ * assembled and written to a local file (a temp dir), then streamed into the
+ * bucket under the destination's prefix and the temp file removed; the
+ * listing reads the prefix, retention deletes from it, and a restore
+ * DOWNLOADS to a temp file first (`fetchArchive`) — the caller pauses the
+ * database only once the bytes are on disk, so a failed download leaves the
+ * running database untouched. `deps.getBucket` is how the manager reaches
+ * the bucket; without one (a harness, a CLI on a data dir with no bucket) an
+ * `s3` destination is a loud refusal, never a silent local write.
+ *
  * @module nodegx-backend/backup/BackupManager
  */
 
@@ -44,6 +54,7 @@ import * as path from 'path';
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { AuditLog } from '../ops/audit';
 import { logger } from '../ops/logger';
+import type { S3Driver } from '../storage/S3Driver';
 import type { BackupConfigStore, RetentionPolicy } from './config';
 import { snapshotDatabase, verifyDatabaseIntegrity } from './snapshot';
 import {
@@ -122,6 +133,12 @@ export interface BackupManagerDeps {
    * dispatcher.
    */
   openAudit?: (dataDir: string) => Promise<{ audit: AuditLog; close: () => Promise<void> }>;
+  /**
+   * BMG-015: the bucket this backend's files are connected to, read live (the
+   * Storage page can connect one after start). Null when files are local — an
+   * `s3` destination then refuses by sentence.
+   */
+  getBucket?: () => S3Driver | null;
 }
 
 /** Who/where a privileged call came from, for the `_Audit` row (BAK-009). */
@@ -156,10 +173,26 @@ export interface CreateBackupResult {
 
 export interface BackupListItem {
   file: string;
+  /** A local path, or `s3://<bucket>/<key>` for an archive in the bucket. */
   path: string;
   bytes: number;
   createdAt: string | null;
+  /** BMG-015: which store holds it. */
+  where: 'local' | 's3';
+  /** The object key, for an archive in the bucket. */
+  key?: string;
 }
+
+/** What `fetchArchive` hands a restore: the archive as a local file, and how to let go of it. */
+export interface FetchedArchive {
+  localPath: string;
+  /** Removes the temp copy (a no-op for a local archive). */
+  cleanup: () => void;
+}
+
+/** The sentence an `s3` destination is refused with when no bucket is connected. */
+export const NO_BUCKET_FOR_BACKUPS =
+  'Backups are set to go to a bucket, but this backend is not connected to one. Connect a bucket on the Storage page, or set backups back to this machine.';
 
 export interface RestoreOptions {
   /** Restore into this dataDir (defaults to the manager's dataDir). */
@@ -396,12 +429,28 @@ export class BackupManager {
     }
   }
 
+  /** The connected bucket, or a loud refusal (BMG-015). */
+  private requireBucket(): S3Driver {
+    const bucket = this.deps.getBucket ? this.deps.getBucket() : null;
+    if (!bucket) throw new Error(NO_BUCKET_FOR_BACKUPS);
+    return bucket;
+  }
+
+  /** The bucket destination when archives go there (and no local override was asked for), else null. */
+  private bucketDestination(destinationDir?: string): { bucket: S3Driver; prefix: string } | null {
+    if (destinationDir) return null;
+    const dest = this.deps.config.getDestination();
+    if (dest.type !== 's3') return null;
+    return { bucket: this.requireBucket(), prefix: dest.prefix };
+  }
+
   private async doCreate(at: Date, options: CreateBackupOptions): Promise<CreateBackupResult> {
     this.assertFileBackedStorage('backup');
-    const destDir = options.destinationDir || this.deps.config.getDestinationDir();
-    fs.mkdirSync(destDir, { recursive: true });
-
+    // BMG-015: to the bucket, the archive is assembled in the temp dir and streamed up from there.
+    const toBucket = this.bucketDestination(options.destinationDir);
     const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ngx-backup-'));
+    const destDir = options.destinationDir || (toBucket ? workDir : this.deps.config.getDestinationDir());
+    fs.mkdirSync(destDir, { recursive: true });
     try {
       // 1. Consistent DB snapshot (first — the consistency window the manifest
       //    documents starts here; files/config captured immediately after).
@@ -464,11 +513,19 @@ export class BackupManager {
       });
       const bytes = fs.statSync(archivePath).size;
 
+      // 2b. BMG-015: into the bucket, streamed; the local copy goes with the work dir.
+      let reportedPath = archivePath;
+      if (toBucket) {
+        const key = toBucket.prefix + path.basename(archivePath);
+        await toBucket.bucket.putFile(key, archivePath);
+        reportedPath = toBucket.bucket.urlFor(key);
+      }
+
       // 3. Retention.
       let deleted: string[] = [];
-      if (!options.skipRetention) deleted = this.applyRetention(destDir, at);
+      if (!options.skipRetention) deleted = await this.applyRetention(toBucket ? undefined : destDir, at);
 
-      return { archivePath, manifest, bytes, deleted };
+      return { archivePath: reportedPath, manifest, bytes, deleted };
     } finally {
       fs.rmSync(workDir, { recursive: true, force: true });
     }
@@ -478,7 +535,31 @@ export class BackupManager {
   // List / retention
   // --------------------------------------------------------------------------
 
-  listBackups(destinationDir?: string): BackupListItem[] {
+  /**
+   * The archives at the destination, newest first. With `destinationDir` (or a
+   * local destination) it is a directory read; with the bucket destination it
+   * is a listing of the prefix (BMG-015). Async since the bucket is.
+   */
+  async listBackups(destinationDir?: string): Promise<BackupListItem[]> {
+    const toBucket = this.bucketDestination(destinationDir);
+    if (toBucket) {
+      const items: BackupListItem[] = [];
+      for await (const o of toBucket.bucket.listObjects(toBucket.prefix)) {
+        if (!o.key.endsWith(ARCHIVE_EXT)) continue;
+        const file = o.key.slice(toBucket.prefix.length);
+        if (!file || file.includes('/')) continue; // only archives directly under the prefix
+        const date = parseStampFromName(file);
+        items.push({
+          file,
+          path: toBucket.bucket.urlFor(o.key),
+          key: o.key,
+          bytes: o.size,
+          createdAt: date ? date.toISOString() : o.lastModified,
+          where: 's3'
+        });
+      }
+      return items.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+    }
     const destDir = destinationDir || this.deps.config.getDestinationDir();
     let files: string[];
     try {
@@ -491,20 +572,50 @@ export class BackupManager {
       .map((f) => {
         const full = path.join(destDir, f);
         const date = parseStampFromName(f);
-        return { file: f, path: full, bytes: fs.statSync(full).size, createdAt: date ? date.toISOString() : null };
+        return { file: f, path: full, bytes: fs.statSync(full).size, createdAt: date ? date.toISOString() : null, where: 'local' as const };
       })
       .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
   }
 
-  applyRetention(destinationDir: string, now: Date = new Date()): string[] {
-    const items = this.listBackups(destinationDir)
+  /** Delete what the policy no longer keeps, where the archives are (a directory, or the bucket's prefix). */
+  async applyRetention(destinationDir?: string, now: Date = new Date()): Promise<string[]> {
+    const listed = await this.listBackups(destinationDir);
+    const items = listed
       .map((i) => ({ file: i.file, date: parseStampFromName(i.file) }))
       .filter((i): i is { file: string; date: Date } => i.date !== null);
     const toDelete = selectForDeletion(items, this.deps.config.getRetention(), now);
+    const byFile = new Map(listed.map((i) => [i.file, i]));
     for (const file of toDelete) {
-      fs.rmSync(path.join(destinationDir, file), { force: true });
+      const item = byFile.get(file);
+      if (item && item.where === 's3' && item.key) await this.requireBucket().delete(item.key);
+      else fs.rmSync(path.join(destinationDir || this.deps.config.getDestinationDir(), file), { force: true });
     }
     return toDelete;
+  }
+
+  /**
+   * BMG-015: the archive as a local file. A local one is itself; one in the
+   * bucket is downloaded to a temp file — BEFORE the caller pauses the
+   * database, so a failed download changes nothing that is running.
+   */
+  async fetchArchive(item: BackupListItem): Promise<FetchedArchive> {
+    if (item.where !== 's3') return { localPath: item.path, cleanup: () => undefined };
+    if (!item.key) throw new Error(`Archive "${item.file}" has no object key.`);
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ngx-restore-'));
+    const localPath = path.join(dir, item.file);
+    try {
+      await this.requireBucket().downloadTo(item.key, localPath);
+    } catch (e) {
+      fs.rmSync(dir, { recursive: true, force: true });
+      throw new Error(`Could not download "${item.file}" from the bucket: ${e instanceof Error ? e.message : String(e)}`);
+    }
+    return { localPath, cleanup: () => fs.rmSync(dir, { recursive: true, force: true }) };
+  }
+
+  /** The bytes of a listed archive, wherever it is (a download route pipes this). */
+  archiveStream(item: BackupListItem): NodeJS.ReadableStream {
+    if (item.where === 's3' && item.key) return this.requireBucket().createReadStream(item.key);
+    return fs.createReadStream(item.path);
   }
 
   // --------------------------------------------------------------------------
@@ -570,12 +681,17 @@ export class BackupManager {
     }
 
     // 2. Pre-restore safety snapshot of the CURRENT target (if it holds data).
+    //    BMG-015: into the configured destination when restoring this backend's
+    //    own data dir (so a bucket-backed backend's safety copy is in the bucket
+    //    beside the others, listed and restorable); a foreign target dir keeps
+    //    its own local `backups/`.
     let safetyArchive: string | null = null;
     const targetDb = path.join(target, 'data', 'local.db');
     const wantSafety = options.safetySnapshot !== false;
     if (wantSafety && fs.existsSync(targetDb)) {
+      const ownDir = path.resolve(target) === path.resolve(this.deps.dataDir);
       const safety = await this.doCreate(new Date(), {
-        destinationDir: path.join(target, 'backups'),
+        destinationDir: ownDir ? undefined : path.join(target, 'backups'),
         skipRetention: true,
         prefix: 'pre-restore'
       });

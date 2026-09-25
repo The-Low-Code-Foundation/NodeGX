@@ -11,6 +11,12 @@
  * for scheduled backups (`BackupSubsystem`'s module doc: "ONE scheduler
  * class, two consumers" — this makes it three, still one scheduler).
  *
+ * BMG-015: a backend can hold files in two stores at once (the local one and
+ * a bucket — switching never moves a blob), so the sweep takes every store
+ * and judges each `_Files` row against the store its `driver` column names.
+ * A row whose store is not connected (an `s3` row, no bucket) is an orphan
+ * row: its bytes may well exist, but nothing here can reach them.
+ *
  * @module nodegx-backend/storage/orphanSweep
  */
 
@@ -24,28 +30,45 @@ export interface SweepOptions {
   now?: () => Date;
 }
 
-export async function runOrphanSweep(driver: StorageDriver, metadata: MetadataStore, options: SweepOptions = {}): Promise<OrphanSweepReport> {
+export async function runOrphanSweep(
+  stores: StorageDriver | StorageDriver[],
+  metadata: MetadataStore,
+  options: SweepOptions = {}
+): Promise<OrphanSweepReport> {
   const now = options.now || (() => new Date());
+  const drivers = Array.isArray(stores) ? stores : [stores];
   try {
     const rows = await metadata.listAll();
-    const keyToRow = new Map<string, string>(); // key -> objectId
-    for (const row of rows) keyToRow.set(row.key, row.objectId);
+    // A row is identified by (store kind, key): the two stores' key spaces are independent.
+    const rowKeys = new Set<string>();
+    for (const row of rows) rowKeys.add(`${row.driver}:${row.key}`);
 
-    const blobKeys = new Set<string>();
-    for await (const key of driver.listKeys()) blobKeys.add(key);
+    const blobKeys = new Set<string>(); // `${kind}:${key}`
+    const known = new Set<string>();
+    for (const driver of drivers) {
+      known.add(driver.kind);
+      for await (const key of driver.listKeys()) blobKeys.add(`${driver.kind}:${key}`);
+    }
 
     const orphanBlobs: string[] = [];
-    for (const key of blobKeys) {
-      if (!keyToRow.has(key)) orphanBlobs.push(key);
+    const orphanPairs: Array<{ driver: StorageDriver; key: string }> = [];
+    for (const driver of drivers) {
+      for (const tagged of blobKeys) {
+        if (!tagged.startsWith(`${driver.kind}:`)) continue;
+        if (rowKeys.has(tagged)) continue;
+        const key = tagged.slice(driver.kind.length + 1);
+        orphanBlobs.push(key);
+        orphanPairs.push({ driver, key });
+      }
     }
     const orphanRows: string[] = [];
-    for (const [key, objectId] of keyToRow) {
-      if (!blobKeys.has(key)) orphanRows.push(objectId);
+    for (const row of rows) {
+      if (!known.has(row.driver) || !blobKeys.has(`${row.driver}:${row.key}`)) orphanRows.push(row.objectId);
     }
 
     let deleted = false;
     if (options.delete) {
-      for (const key of orphanBlobs) await driver.delete(key);
+      for (const { driver, key } of orphanPairs) await driver.delete(key);
       deleted = true;
     }
 

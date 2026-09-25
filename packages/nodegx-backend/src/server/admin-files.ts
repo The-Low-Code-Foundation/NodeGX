@@ -9,6 +9,14 @@
  *                               separate field — never echoed back)
  *   POST /admin/files/sweep     run the orphan sweep now (report-only unless
  *                               `deleteOrphans: true`)
+ *   POST /admin/files/config/test  BMG-015: *Test connection* — a throwaway
+ *                               driver over an UNSAVED bucket config (and the
+ *                               typed credentials) writes and removes a probe
+ *                               key; 200 with `ok:false` + the endpoint's own
+ *                               sentence when it cannot. Saving an `s3` driver
+ *                               runs the same probe first and refuses (400)
+ *                               with the sentence, so a typo in the endpoint is
+ *                               found by the save, never by the next upload.
  *
  * BMG-011 — the Storage page's file browser:
  *
@@ -29,7 +37,7 @@
 import type { IStorageFacade } from '@noodl/backend-contract';
 
 import type { RequestContext } from './HttpServer';
-import type { FileSubsystem } from '../storage/FileSubsystem';
+import type { FileSubsystem, S3Credentials, S3DriverConfigShape } from '../storage/FileSubsystem';
 import type { FileRecord } from '../storage/MetadataStore';
 import { FILES_COLLECTION } from '../storage/MetadataStore';
 import type { FileConfigPatch, FileStorageConfig, OrphanSweepReport } from '../storage/config';
@@ -100,9 +108,46 @@ export function fileListItem(record: FileRecord): FileListItem {
 export interface FileConfigResponse {
   config: FileStorageConfig;
   driverKind: string;
+  /** BMG-015: both halves of the bucket credential are stored. Never the values. */
+  s3CredentialsConfigured: boolean;
   /** Honest, not aspirational: `sharp` is an optionalDependency. */
   transformsAvailable: boolean;
   transformUnavailableReason?: string;
+}
+
+/** The 200 body of `POST /admin/files/config/test`. `ok:false` carries the endpoint's sentence. */
+export interface FileConfigTestResponse {
+  ok: boolean;
+  /** One sentence for a person, in both outcomes. */
+  words: string;
+  error?: string;
+}
+
+/** The sentence a save of an `s3` driver is refused with, prefixed to the endpoint's own. */
+export const BUCKET_NOT_SAVED = 'Not saved — the bucket could not be reached: ';
+
+/** The wire's `driver` for an `s3` save/test, validated to the shape the store accepts (or a 400 by sentence). */
+function s3DriverFromWire(raw: unknown): S3DriverConfigShape {
+  const d = (raw || {}) as Record<string, unknown>;
+  const endpoint = String(d.endpoint || '').trim();
+  const bucket = String(d.bucket || '').trim();
+  if (!endpoint || !bucket) throw new HttpError(400, 'an s3 driver requires endpoint and bucket');
+  if (!/^https?:\/\//.test(endpoint)) throw new HttpError(400, `The endpoint must start with http:// or https:// (got "${endpoint}").`);
+  try {
+    new URL(endpoint);
+  } catch {
+    throw new HttpError(400, `"${endpoint}" is not a URL.`);
+  }
+  return { type: 's3', endpoint, region: String(d.region || 'us-east-1').trim() || 'us-east-1', bucket, forcePathStyle: d.forcePathStyle !== false };
+}
+
+/** The typed credentials on the wire, or null when neither half was sent (keep the stored ones). */
+function credentialsFromWire(raw: unknown): S3Credentials | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const c = raw as Record<string, unknown>;
+  const accessKeyId = String(c.accessKeyId || '');
+  const secretAccessKey = String(c.secretAccessKey || '');
+  return accessKeyId || secretAccessKey ? { accessKeyId, secretAccessKey } : null;
 }
 
 /** The 200 body of `POST /admin/files/sweep`. */
@@ -219,6 +264,7 @@ export class AdminFileRoutes {
     sendJSON(ctx.res, 200, {
       config,
       driverKind: this.files.getDriver().kind,
+      s3CredentialsConfigured: this.files.s3CredentialsConfigured(),
       transformsAvailable: transform.available,
       transformUnavailableReason: transform.available ? undefined : transform.reason
     } satisfies FileConfigResponse);
@@ -233,11 +279,38 @@ export class AdminFileRoutes {
     const patch: FileConfigPatch = {};
     if (body.maxUploadBytes !== undefined) patch.maxUploadBytes = body.maxUploadBytes as number;
     if (body.contentTypes !== undefined) patch.contentTypes = body.contentTypes as FileConfigPatch['contentTypes'];
-    if (body.driver !== undefined) patch.driver = body.driver as FileConfigPatch['driver'];
     if (body.signedUrlTtlSeconds !== undefined) patch.signedUrlTtlSeconds = body.signedUrlTtlSeconds as number;
     if (body.thumbnails !== undefined) patch.thumbnails = body.thumbnails as FileConfigPatch['thumbnails'];
 
+    // BMG-015: a bucket is probed BEFORE it is saved. The driver on the wire is
+    // validated to the store's shape (the same sentence the store would use),
+    // then a throwaway driver over it — with the credentials typed in this
+    // request, else the stored ones — writes and removes a probe key. A refusal
+    // is 400 with the endpoint's own sentence and NOTHING is persisted: not
+    // the driver, not the credentials. New credentials for an ALREADY-s3
+    // backend are probed the same way against the stored driver.
+    const typedCredentials = credentialsFromWire(body.s3Credentials);
+    if (body.driver !== undefined) {
+      const raw = body.driver as { type?: string } | null;
+      if (raw && raw.type === 's3') {
+        const s3 = s3DriverFromWire(raw);
+        const probe = await this.files.probeBucket(s3, typedCredentials);
+        if (!probe.ok) throw new HttpError(400, BUCKET_NOT_SAVED + probe.error);
+        patch.driver = s3;
+      } else {
+        patch.driver = { type: 'local' };
+      }
+    } else if (typedCredentials) {
+      const current = this.files.config.get().driver;
+      if (current.type === 's3') {
+        const probe = await this.files.probeBucket(current, typedCredentials);
+        if (!probe.ok) throw new HttpError(400, BUCKET_NOT_SAVED + probe.error);
+      }
+    }
+
     try {
+      // Credentials first, so the driver built by the config update reads them.
+      if (typedCredentials) this.files.setS3Credentials(typedCredentials.accessKeyId, typedCredentials.secretAccessKey);
       if (Object.keys(patch).length) {
         this.files.updateConfig(patch);
       }
@@ -245,15 +318,35 @@ export class AdminFileRoutes {
         const s = body.orphanSweep as { enabled?: boolean; cron?: string } | null;
         this.files.setOrphanSweepSchedule(s ? { enabled: !!s.enabled, cron: String(s.cron || '') } : { enabled: false, cron: '0 3 * * *' });
       }
-      if (body.s3Credentials !== undefined) {
-        const creds = body.s3Credentials as { accessKeyId?: string; secretAccessKey?: string };
-        this.files.setS3Credentials(String(creds.accessKeyId || ''), String(creds.secretAccessKey || ''));
-      }
     } catch (e) {
       throw new HttpError(400, e instanceof Error ? e.message : String(e));
     }
 
     this.getConfig(ctx);
+  }
+
+  /**
+   * `POST /admin/files/config/test {driver, s3Credentials?}` — BMG-015's *Test
+   * connection*. Nothing is saved. A `local` driver has nothing to test and
+   * says so; an `s3` one is probed with the typed credentials (or the stored
+   * ones when the page left both fields blank).
+   */
+  async testConfig(ctx: RequestContext): Promise<void> {
+    const body = await readJSONBody(ctx.req);
+    const raw = body.driver as { type?: string } | undefined;
+    if (!raw || raw.type !== 's3') {
+      sendJSON(ctx.res, 200, { ok: true, words: 'Files stay on this machine; there is nothing to test.' } satisfies FileConfigTestResponse);
+      return;
+    }
+    const s3 = s3DriverFromWire(raw);
+    const probe = await this.files.probeBucket(s3, credentialsFromWire(body.s3Credentials));
+    sendJSON(
+      ctx.res,
+      200,
+      probe.ok
+        ? { ok: true, words: `Connected: a test file was written to "${s3.bucket}" at ${s3.endpoint} and removed again.` }
+        : { ok: false, words: probe.error || 'The bucket could not be reached.', error: probe.error }
+    );
   }
 
   async runSweep(ctx: RequestContext): Promise<void> {

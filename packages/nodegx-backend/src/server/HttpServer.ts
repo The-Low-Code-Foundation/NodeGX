@@ -530,6 +530,8 @@ export class HttpServer {
     );
     this.adminBackups = new AdminBackupRoutes({
       backups: deps.backups,
+      // BMG-015: backups share the files' bucket (one bucket, typed once).
+      getBucket: () => deps.files.bucketDriver(),
       facade: deps.facade,
       dataDir: deps.options.dataDir,
       persistence: deps.persistenceControl
@@ -1303,6 +1305,14 @@ export class HttpServer {
         pattern: 'admin/files/sweep',
         access: { kind: 'admin' },
         handler: (ctx) => adminFiles.runSweep(ctx)
+      },
+      // BMG-015: the Storage page's *Test connection* — a dry run over an
+      // unsaved bucket config (audit-actions.ts NOT_AUDITED).
+      {
+        method: 'POST',
+        pattern: 'admin/files/config/test',
+        access: { kind: 'admin' },
+        handler: (ctx) => adminFiles.testConfig(ctx)
       },
       // BMG-011: the Storage page's file browser. `uses` is registered before
       // `:name` so the literal wins; `config` and `sweep` are not deletable

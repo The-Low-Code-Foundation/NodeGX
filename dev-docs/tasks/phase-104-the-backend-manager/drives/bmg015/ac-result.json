@@ -1,0 +1,102 @@
+{
+  "checks": {
+    "setup: the first admin account exists (BMG-014)": {
+      "pass": true,
+      "detail": 201
+    },
+    "AC1: a fresh backend shows \"This machine\" chosen and \"stored on this machine\"": {
+      "pass": true,
+      "detail": true
+    },
+    "AC1: choosing the bucket tile opens the form; Save is off until a test passes; the secret is a password field": {
+      "pass": true
+    },
+    "AC1: a wrong key answers S3's own sentence and Save stays off": {
+      "pass": true,
+      "detail": "InvalidAccessKeyId: The Access Key Id you provided does not exist in our records. (HTTP 403)"
+    },
+    "AC1: editing after a test clears the result and Save goes off again": {
+      "pass": true
+    },
+    "AC1: the right key answers connected; Save is on; the probe key is gone from the bucket": {
+      "pass": true,
+      "detail": "Connected: a test file was written to \"puppy\" at http://127.0.0.1:9400 and removed again."
+    },
+    "AC1: after Save the server says s3, the key is configured, and the key is not in the answer": {
+      "pass": true,
+      "detail": {
+        "type": "s3",
+        "endpoint": "http://127.0.0.1:9400",
+        "region": "us-east-1",
+        "bucket": "puppy",
+        "forcePathStyle": true
+      }
+    },
+    "AC2: the upload after the switch is in the bucket (one object) and not on the disk (one local blob: the earlier file)": {
+      "pass": true,
+      "detail": {
+        "keys": [
+          "b3/a5/b3a5b663f2dcd5f8fcfcb40534ad237218c004051dd42aecefab29cad8a677f6-d11ea2c1"
+        ],
+        "local": 1
+      }
+    },
+    "AC2: the bucket file serves back byte-equal": {
+      "pass": true,
+      "detail": 200
+    },
+    "AC6: the file uploaded before the switch still serves, from this machine (the bucket saw no GET for it)": {
+      "pass": true,
+      "detail": 200
+    },
+    "AC3: with the bucket connected, the Backups page offers \"The bucket from the Storage page\" with its name": {
+      "pass": true
+    },
+    "AC3: after Save the sentence names the bucket": {
+      "pass": true
+    },
+    "AC3: Back up now writes the archive under backups/ in the bucket and lists it \"in the bucket\"": {
+      "pass": true,
+      "detail": {
+        "archives": [
+          "backups/backup-2026-09-25T21-04-25-503Z-efxmhf.ngxbackup.tar.gz"
+        ],
+        "row": "backup-2026-09-25T21-04-25-503Z-efxmhf.ngxbackup.tar.gzin the bucket\t25/09/2026, 23:04:25\t7.5 KB\tDownloadRestore…"
+      }
+    },
+    "AC3: Download streams the object byte-equal": {
+      "pass": true,
+      "detail": {
+        "bytes": 7716
+      }
+    },
+    "AC3: Restore from the bucket on the running backend — the later record is gone, the earlier stays, the safety copy is in the bucket": {
+      "pass": true,
+      "detail": {
+        "names": [
+          "Before the backup"
+        ],
+        "after": [
+          "backups/backup-2026-09-25T21-04-25-503Z-efxmhf.ngxbackup.tar.gz",
+          "backups/pre-restore-2026-09-25T21-04-25-967Z-pdketl.ngxbackup.tar.gz"
+        ]
+      }
+    },
+    "AC3: a write after the restore lands (the reconnect)": {
+      "pass": true,
+      "detail": 201
+    },
+    "AC4: keep the last 1 — a new backup leaves exactly one archive in the bucket": {
+      "pass": true,
+      "detail": [
+        "backups/backup-2026-09-25T21-04-26-991Z-rruaob.ngxbackup.tar.gz"
+      ]
+    },
+    "AC5: no admin read carries the secret": {
+      "pass": true
+    },
+    "AC5: the secret is not in the page either": {
+      "pass": true
+    }
+  }
+}

@@ -202,7 +202,9 @@ export class FileRoutes {
       return;
     }
 
-    const driver = this.subsystem.getDriver();
+    // BMG-015: the driver the row names, not the current one — a file uploaded
+    // before the switch to a bucket still lives on this machine.
+    const driver = this.subsystem.driverFor(record);
     ctx.res.writeHead(200, {
       'Content-Type': record.contentType,
       'Content-Length': record.size,
@@ -308,7 +310,7 @@ export class FileRoutes {
         });
         return;
       }
-      const source = await this.subsystem.getDriver().get(record.key);
+      const source = await this.subsystem.driverFor(record).get(record.key);
       try {
         const rendered = await renderThumbnail(source, record.contentType, spec);
         buffer = rendered.buffer;

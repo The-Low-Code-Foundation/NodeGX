@@ -31,6 +31,9 @@ import { BackendServiceOptions, resolveOptions } from './config';
 import { ExecutionHistory } from './execution/ExecutionStore';
 import { BackupConfigStore } from './backup/config';
 import { BackupAuditActor, BackupManager } from './backup/BackupManager';
+import { SecretsStore } from './config/SecretsStore';
+import { FileConfigStore } from './storage/config';
+import { buildBucketDriver } from './storage/FileSubsystem';
 import { ARCHIVE_EXT } from './backup/archive';
 import { AuditLog, ensureAuditTable } from './ops/audit';
 import { OpsState } from './ops/OpsState';
@@ -226,7 +229,11 @@ function cliBackupManager(options: Partial<BackendServiceOptions>): { manager: B
     backendName: resolved.backendName,
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     getSchema: () => require('./backup/schema-migrate').tablesFromDbFile(dbPath),
-    openAudit: (auditDataDir: string) => openCliAuditLog(auditDataDir, allowEphemeral)
+    openAudit: (auditDataDir: string) => openCliAuditLog(auditDataDir, allowEphemeral),
+    // BMG-015: the same bucket the served backend would use — files.json's
+    // driver + the `files` secrets — so `nodegx-backend backup` on a
+    // bucket-backed data dir lands beside the scheduled ones.
+    getBucket: () => buildBucketDriver(new FileConfigStore(dataDir).get().driver, new SecretsStore(dataDir))
   });
   return { manager, config, dataDir };
 }

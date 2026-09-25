@@ -106,12 +106,39 @@ backend keeps running — everything except `?thumb=` is unaffected.
 | `local` (default) | none | Blobs under `<dataDir>/files/blobs/`, hash-bucketed (`hh/hh/hash-random`). |
 | `s3` | `endpoint`, `region`, `bucket`, `forcePathStyle`; credentials separately | Any S3-compatible service — AWS S3, MinIO, and others. Signed with a from-scratch SigV4 implementation (no AWS SDK) — see BAK-006-NOTES for why and how it's verified. |
 
-Set the driver via `configure_backend_files` (MCP) or `PUT /admin/files/config`; S3
-credentials are set separately (`s3AccessKeyId`/`s3SecretAccessKey`) and are
-never echoed back by any read surface — same convention as the SMTP password.
-**Switching drivers does not migrate existing files** — that is a documented
-manual procedure (copy the blobs, update the `driver`/`key` on each `_Files`
-row), not a button, in v1.
+Set the driver on the backend manager's **Storage** page (*Where files are
+stored*: two tiles, this machine or an S3-compatible bucket — endpoint, region,
+bucket, path-style addressing, the key), via `configure_backend_files` (MCP), or
+`PUT /admin/files/config`. S3 credentials are set separately (`s3Credentials`
+on the wire, `s3AccessKeyId`/`s3SecretAccessKey` in the `files` namespace of
+`secrets.json`) and are never echoed back by any read surface — same convention
+as the SMTP password; `GET /admin/files/config` answers `s3CredentialsConfigured`
+and nothing more.
+
+**A bucket is tested before it is saved.** The page's **Test connection**
+(`POST /admin/files/config/test {driver, s3Credentials?}`, a dry run: nothing is
+stored) builds a throwaway driver over the unsaved details, does a `HEAD` on the
+bucket and a `PUT` + `DELETE` of one probe key, and answers the endpoint's own
+sentence when it refuses (*InvalidAccessKeyId: The Access Key Id you provided
+does not exist…*, *There is no bucket called "x" at …*, *Could not reach …*).
+Saving an `s3` driver runs the same probe first and refuses with `400 Not saved —
+the bucket could not be reached: …`, persisting neither the driver nor the key —
+so a typo in the endpoint is found by the save, never by the next upload.
+
+**Switching drivers does not migrate existing files**, and it does not have
+to: every `_Files` row records the `driver` that holds its blob, and a file is
+served, thumbnailed and deleted by *that* driver, not by whichever is current.
+The local store stays alive beside the bucket, so files uploaded before the
+switch keep serving from the machine; new uploads go to the bucket. Switching
+back to local while bucket-stored rows exist makes those files a loud sentence
+(*stored in a bucket this backend is no longer connected to*), not a 404 —
+reconnect the bucket and they serve again. The orphan sweep walks both stores
+and judges each row against its own. Moving blobs between stores is still a
+manual procedure (copy the blobs, update `driver`/`key` on each row), not a
+button.
+
+**The same bucket carries the backups** (`BACKUP-RESTORE.md`, *Archives in a
+bucket*): there is one set of details, typed once here.
 
 ## Orphan sweep
 

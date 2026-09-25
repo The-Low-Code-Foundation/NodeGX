@@ -8,6 +8,14 @@
  * Refused kinds are categories in the SNIFFER's vocabulary (`fileKinds.ts`)
  * plus custom chips; the clean-up schedule is the `ScheduleBuilder`. No
  * comma list and no cron text on this page (AC9).
+ *
+ * BMG-015: *Where files are stored* — two tiles, this machine or an
+ * S3-compatible bucket. The bucket's details are typed once here (the backups
+ * share them); **Test connection** asks `POST /admin/files/config/test` with
+ * the unsaved draft and *Save* stays disabled until the draft has tested OK
+ * (the server probes again on save and refuses with the endpoint's sentence,
+ * so the page cannot be the only guard). The key is write-only: the page
+ * shows *configured* / *not configured* from a boolean, never the value.
  */
 import { useEffect, useRef, useState } from 'preact/hooks';
 
@@ -33,8 +41,17 @@ interface Preset {
   fit: string;
 }
 
+interface DriverConfig {
+  type?: string;
+  endpoint?: string;
+  region?: string;
+  bucket?: string;
+  forcePathStyle?: boolean;
+}
+
 interface FilesConfig {
   maxUploadBytes?: number;
+  driver?: DriverConfig;
   contentTypes?: { denyList?: string[]; allowList?: string[] | null };
   signedUrlTtlSeconds?: number;
   thumbnails?: { presets?: Record<string, Preset> };
@@ -44,6 +61,7 @@ interface FilesConfig {
 
 interface FilesData {
   driverKind?: string;
+  s3CredentialsConfigured?: boolean;
   transformsAvailable?: boolean;
   transformUnavailableReason?: string;
   config?: FilesConfig;
@@ -119,6 +137,8 @@ export function FilesView(_props: ViewProps) {
           </Row>
           <Gap />
           <Browser presets={presets} transforms={!!data.transformsAvailable} />
+          <h2>Where files are stored</h2>
+          <WhereCard key={'where' + generation} config={config} credentialsConfigured={!!data.s3CredentialsConfigured} reload={loadConfig} />
           <h2>Settings</h2>
           <LimitsCard key={'limits' + generation} config={config} reload={loadConfig} />
           <h2>Thumbnail presets</h2>
@@ -357,6 +377,160 @@ function Browser({ presets, transforms }: { presets: Record<string, Preset>; tra
           empty={q ? <EmptyState>No file is called that.</EmptyState> : <EmptyState>Nothing stored yet. Drop a file above, or let your app upload one.</EmptyState>}
         />
       ) : null}
+    </Card>
+  );
+}
+
+// ----------------------------------------------------------------- where --
+
+/** The draft of the bucket card, as the page holds it. */
+export interface WhereDraft {
+  where: 'local' | 's3';
+  endpoint: string;
+  region: string;
+  bucket: string;
+  pathStyle: boolean;
+  accessKeyId: string;
+  secretAccessKey: string;
+}
+
+export function whereDraftFrom(config: FilesConfig): WhereDraft {
+  const d = config.driver || {};
+  return {
+    where: d.type === 's3' ? 's3' : 'local',
+    endpoint: d.endpoint || '',
+    region: d.region || 'us-east-1',
+    bucket: d.bucket || '',
+    pathStyle: d.forcePathStyle !== false,
+    accessKeyId: '',
+    secretAccessKey: ''
+  };
+}
+
+/** A sentence when the bucket draft cannot be tested or saved; null when it can. */
+export function whereProblem(d: WhereDraft, credentialsConfigured: boolean): string | null {
+  if (d.where !== 's3') return null;
+  if (!d.endpoint.trim()) return 'The bucket needs an endpoint (the address of the S3-compatible service).';
+  if (!/^https?:\/\//.test(d.endpoint.trim())) return 'The endpoint starts with https:// (or http:// for a service on this network).';
+  if (!d.bucket.trim()) return 'The bucket needs a name.';
+  const typedOne = !!d.accessKeyId || !!d.secretAccessKey;
+  if (typedOne && (!d.accessKeyId || !d.secretAccessKey)) return 'Type both the access key id and the secret access key.';
+  if (!typedOne && !credentialsConfigured) return 'The bucket needs an access key id and a secret access key.';
+  return null;
+}
+
+/** What the page sends for a draft, to test and to save. Blank credentials mean "keep the stored ones". */
+export function wherePayload(d: WhereDraft): Record<string, unknown> {
+  if (d.where !== 's3') return { driver: { type: 'local' } };
+  const body: Record<string, unknown> = {
+    driver: { type: 's3', endpoint: d.endpoint.trim(), region: d.region.trim() || 'us-east-1', bucket: d.bucket.trim(), forcePathStyle: d.pathStyle }
+  };
+  if (d.accessKeyId && d.secretAccessKey) body.s3Credentials = { accessKeyId: d.accessKeyId, secretAccessKey: d.secretAccessKey };
+  return body;
+}
+
+/** Where files are stored: this machine, or an S3-compatible bucket (BMG-015). */
+function WhereCard({ config, credentialsConfigured, reload }: { config: FilesConfig; credentialsConfigured: boolean; reload: () => void }) {
+  const { readonly } = useSession();
+  const [draft, setDraft] = useState<WhereDraft>(whereDraftFrom(config));
+  const [tested, setTested] = useState<{ ok: boolean; words: string } | null>(null);
+  const [testing, setTesting] = useState(false);
+  const problem = whereProblem(draft, credentialsConfigured);
+  const set = (patch: Partial<WhereDraft>) => {
+    setDraft((d) => ({ ...d, ...patch }));
+    setTested(null);
+  };
+  const canSave = draft.where === 'local' || (!!tested && tested.ok);
+
+  function test() {
+    if (problem) {
+      fail(new Error(problem));
+      return;
+    }
+    setTesting(true);
+    api<{ ok: boolean; words: string }>('POST', '/admin/files/config/test', wherePayload(draft))
+      .then((r) => setTested({ ok: !!r.ok, words: r.words }))
+      .catch((e) => setTested({ ok: false, words: (e as Error).message }))
+      .then(() => setTesting(false));
+  }
+
+  function save() {
+    if (problem) {
+      fail(new Error(problem));
+      return;
+    }
+    api('PUT', '/admin/files/config', wherePayload(draft))
+      .then(() => {
+        toast(draft.where === 's3' ? 'New uploads go to the bucket "' + draft.bucket.trim() + '".' : 'New uploads are stored on this machine.', 'ok');
+        reload();
+      })
+      .catch(fail);
+  }
+
+  const tile = (id: 'local' | 's3', label: string, line: string) => (
+    <label class={'tile' + (draft.where === id ? ' on' : '')}>
+      <input type="radio" name="where" value={id} checked={draft.where === id} disabled={readonly} onChange={() => set({ where: id })} />
+      <b>{label}</b>
+      <span class="sub">{line}</span>
+    </label>
+  );
+
+  return (
+    <Card id="where-card">
+      <div class="tiles" role="radiogroup" aria-label="Where files are stored">
+        {tile('local', 'This machine', "A folder beside the backend's data. Fine on a laptop; it fills a small server's disk.")}
+        {tile('s3', 'An S3-compatible bucket', 'AWS S3, MinIO, Backblaze, Cloudflare R2, Hetzner… Uploads and backup archives go there instead of the disk.')}
+      </div>
+      {draft.where === 's3' ? (
+        <div id="bucket-form">
+          <Gap h={8} />
+          <div class="grid2">
+            <Field label="Endpoint">
+              <input type="url" id="s3-endpoint" placeholder="https://s3.example.com" value={draft.endpoint} disabled={readonly} onInput={(e) => set({ endpoint: (e.currentTarget as HTMLInputElement).value })} />
+            </Field>
+            <Field label="Region">
+              <input type="text" id="s3-region" placeholder="us-east-1" value={draft.region} disabled={readonly} onInput={(e) => set({ region: (e.currentTarget as HTMLInputElement).value })} />
+            </Field>
+            <Field label="Bucket">
+              <input type="text" id="s3-bucket" placeholder="my-app-files" value={draft.bucket} disabled={readonly} onInput={(e) => set({ bucket: (e.currentTarget as HTMLInputElement).value })} />
+            </Field>
+          </div>
+          <Switch id="s3-path-style" checked={draft.pathStyle} onChange={(on) => set({ pathStyle: on })} disabled={readonly}>
+            Path-style addressing
+          </Switch>
+          <Sub>On for MinIO and most self-hosted services (the bucket is in the path). Off for AWS S3's own style (the bucket is in the hostname).</Sub>
+          <Gap h={8} />
+          <div class="field-head">
+            <b>Key</b>
+            {credentialsConfigured ? <Chip kind="ok">key: configured</Chip> : <Chip kind="warn">key: not configured</Chip>}
+            <span class="hint">{credentialsConfigured ? 'Leave both blank to keep the stored key. It is never shown.' : 'From your storage provider. Stored on this backend, never shown again.'}</span>
+          </div>
+          <div class="grid2">
+            <Field label="Access key id">
+              <input type="text" id="s3-access-key-id" autocomplete="off" value={draft.accessKeyId} disabled={readonly} onInput={(e) => set({ accessKeyId: (e.currentTarget as HTMLInputElement).value })} />
+            </Field>
+            <Field label="Secret access key">
+              <input type="password" id="s3-secret" autocomplete="new-password" value={draft.secretAccessKey} disabled={readonly} onInput={(e) => set({ secretAccessKey: (e.currentTarget as HTMLInputElement).value })} />
+            </Field>
+          </div>
+          {tested ? (
+            <div id="s3-test-result" class={'notice ' + (tested.ok ? 'ok' : 'bad')}>
+              {tested.words}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+      <Sub>Files already stored on this machine stay there until you move them; the backend keeps serving them from here. Switching changes where NEW uploads and backups go.</Sub>
+      <Row style="margin-top:12px">
+        {draft.where === 's3' ? (
+          <WriteBtn tiny id="s3-test" disabled={testing || !!problem} title={problem || undefined} onClick={test}>
+            {testing ? 'Testing…' : 'Test connection'}
+          </WriteBtn>
+        ) : null}
+        <WriteBtn tiny kind="primary" id="save-where" disabled={!canSave || !!problem} title={!canSave ? 'Test the connection first.' : problem || undefined} onClick={save}>
+          Save
+        </WriteBtn>
+      </Row>
     </Card>
   );
 }

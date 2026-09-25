@@ -192,6 +192,17 @@ docker compose exec backend node /app/cli.js backup --data-dir /data
 Scheduled backups, retention, off-box copies, and the restore runbook are in
 [BACKUP-RESTORE.md](../../packages/nodegx-backend/docs/BACKUP-RESTORE.md).
 
+**On a small VM, put uploads and archives in a bucket.** A backend that keeps
+every upload and every nightly archive on the same disk as its database fills
+that disk — and a full disk is the one failure that takes the database down
+with it. On the manager's **Storage** page choose *An S3-compatible bucket*
+(AWS S3, MinIO, Backblaze B2, Cloudflare R2, Hetzner Object Storage…), paste
+the endpoint, bucket and key, press **Test connection**, save; then on
+**Backups** choose *The bucket from the Storage page*. From then on new
+uploads and every archive land in the bucket, the VM's disk holds only the
+database, and a restore pulls the archive back down when you need it. Files
+uploaded before the switch stay where they were and keep serving.
+
 ## Troubleshooting
 
 **Packaging refuses: "the app bundle has `http://localhost:8577` baked in".**

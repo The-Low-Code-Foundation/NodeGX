@@ -136,7 +136,12 @@ const NOT_AUDITED: Record<string, string> = {
   // fires of an expression that is not saved, on every change of a control.
   // It stores nothing and arms nothing; the save that follows is trigger.create
   // or trigger.update, which ARE audited.
-  'POST admin/triggers/preview': 'dry run — changes nothing'
+  'POST admin/triggers/preview': 'dry run — changes nothing',
+  // BMG-015: the Storage page's *Test connection*. It builds a throwaway
+  // driver over the unsaved bucket details, writes and removes one probe key
+  // in the BUCKET, and persists nothing here. The save that follows is
+  // files.config.update, which IS audited (and refuses when this fails).
+  'POST admin/files/config/test': 'dry run — changes nothing'
 };
 
 /** Why a privileged route is exempt from the trail, or null if it is not exempt. */

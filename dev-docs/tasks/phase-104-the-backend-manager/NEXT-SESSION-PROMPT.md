@@ -1,13 +1,14 @@
 # P104 — next session
 
-**Written 2026-09-25 (end of s14).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
+**Written 2026-09-25 (end of s15).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
 BMG-001; s3 built and drove BMG-007 (API keys); s4 BMG-004 (Users, R3 disable); s5 BMG-002
 (Collections); s6 BMG-005 (Roles); s7 BMG-006 (Permissions); s8 BMG-008 (Triggers); s9 BMG-003
 (Schema) and filed **R6** (README §8) for Richard; s10 BMG-009 (Workflows and Runs); s11 BMG-010
 (Email and Sign-in); s12 BMG-014 (the first admin is a person); s13 BMG-011 (Storage, Backups with
-Restore…, Secrets, Search, Server, Activity); s14 built and drove **BMG-012** (the editor lets go: eight
-panels and 46 IPC proxies gone, the two doors are deep links into the manager, the canvas reads the
-backend's schedule words) and filed **BMG-015** (S3 for uploads AND backups, Richard's ask).
+Restore…, Secrets, Search, Server, Activity); s14 BMG-012 (the editor lets go) and filed BMG-015;
+s15 built and drove **BMG-015** (Storage off the disk: uploads AND backups in an S3-compatible bucket
+chosen on the page, tested before it is saved; files uploaded before the switch keep serving — the
+serve path had read the current driver; an S3 fake for specs and drives).
 
 ## Where it stands
 
@@ -27,7 +28,7 @@ backend's schedule words) and filed **BMG-015** (S3 for uploads AND backups, Ric
 | BMG-014 The first admin is a person | ✅ s12 | ✅ headless, AC1–3 + 6, 33/33 checks (§6) | ✅ `aad1a80c` |
 | BMG-011 Files, Backups, Ops | ✅ s13 | ✅ headless, AC1–9, 39/39 checks (§6) | ✅ `43efcd08` |
 | BMG-012 The editor lets go | ✅ s14 | ✅ headless, AC1–6, 15/15 page checks + 9 jest (§6) | ✅ `623a509f` |
-| BMG-015 Storage off the disk (S3) | — (filed s14) | — | — |
+| BMG-015 Storage off the disk (S3) | ✅ s15 | ✅ headless, AC1–6, 19/19 checks + 18 HTTP + 10 page (§6) | ⏳ s15 (see the commit line below) |
 | BMG-013 Richard drives | his | — | — |
 
 Built-but-undriven: 0. Built-but-uncommitted: 0. Check `git status -- packages/nodegx-backend/src/admin`
@@ -37,6 +38,13 @@ before believing that: a peer session may have touched it.
 browser: yes, behind the typed name · R5 filed · **R6 OPEN (s9): on a collection that already has records, a
 required field ASKS for a default (the engines require one) instead of AC5's "Required disables Default" — ask
 Richard in plain words whether that is the rule, or whether Required should be refused there.** All in README §8.
+
+**Gate readings (2026-09-25, s15):** backend `npm run typecheck` exit 0 (both configs). Full backend
+`npx jest --maxWorkers=4`: **204 suites PASS, 1 skipped (`fed-003-live-cache`), 0 FAIL, 2467 tests (16 skipped: the real-MinIO half of `storage-driver` and the rest of the known set), exit 0, 347 s** (2026-09-25, s15, after every change in this commit). Route tally `admin: 99` (`POST admin/files/config/test`), `auth: 17`.
+New specs: `tests/bmg-015-storage-off-the-disk.test.ts` 18 (over the S3 fake), `tests/admin-app/where-cards.test.tsx`
+10; the eleven suites the change touches (`storage-views`, `files-http`, `backup-*`, `bmg-011`, `admin-dashboard`,
+`ops-rate-limit`, `ops-audit`, `storage-driver`, `brg-008`) 143/143 + 7 env-gated skips. Drive
+`drives/bmg015/run.sh ac seed` 19/19 (`build` first: `bin/` runs `dist/`).
 
 **Gate readings (2026-09-25, s14):** editor `npx tsc --noEmit -p tsconfig.json` exit 0 (11 s; there is NO
 `npm run typecheck` in the editor — README §7 was wrong, corrected). Editor `npm run test:main --maxWorkers=4`:
@@ -71,6 +79,35 @@ and `nodegx-backend-contract` `tsc --noEmit` exit 0. Full backend `npx jest --ma
 route). Drive `drives/bmg003/run.sh ac seed` 41/41.
 🔴 A new `/admin/...` route still owes the tally line AND an `audit-actions.ts` entry (an action, or a
 `NOT_AUDITED` reason for a dry run); a POST a read-only admin should be able to make owes `readonly.ts` too.
+
+## What s15 settled (BMG-015)
+
+- **One bucket, typed once.** files.json's `driver` + the `files` secrets ARE the bucket; backups reuse them
+  (`BackupDestination {type:'s3', prefix:'backups/'}`). `buildBucketDriver` (`storage/FileSubsystem.ts`) is
+  the one builder; the subsystem, the CLI's backup manager and `BackupManagerDeps.getBucket` (read live) use it.
+  The Backups page's bucket tile is disabled until `GET /admin/backups` says `bucket.connected`.
+- 🔴 **The serve path read the CURRENT driver** (`FileRoutes.serve`, the thumbnail source, `deleteStored`):
+  every file uploaded before a switch would have been a 500. The local store is now ALWAYS alive beside the
+  bucket and `FileSubsystem.driverFor(record)` serves by the row's `driver`; `getDriver()` is where the NEXT
+  upload goes; `stores()` is what the sweep walks (rows judged against THEIR store, `kind:key`).
+- **A bucket is probed before it is saved**, server-side: `PUT /admin/files/config` with an `s3` driver runs
+  `probe()` (HEAD bucket → PUT + DELETE a probe key) and refuses 400 `BUCKET_NOT_SAVED + sentence`,
+  persisting nothing. `POST /admin/files/config/test` is the page's *Test connection* (tally 99,
+  `NOT_AUDITED`, not on `readonly.ts`). 🔴 A HEAD's refusal has NO body — the sentence comes from the PUT.
+- **Archives stream** (`S3Driver.putFile`: sha256 in one pass, the file piped in a second) and a restore
+  **downloads BEFORE `persistence.pause()`** (`BackupManager.fetchArchive`; 502 + sentence on failure, the
+  running database untouched). `listBackups`/`applyRetention` are ASYNC now (`where`, `key`). The safety copy
+  follows the destination when restoring the backend's own data dir.
+- 🔴 **A refusal left unread on a keep-alive socket corrupted the next request**: the old `streamGet` destroyed
+  its output on ≥400 without draining the body; the spec's restore then read a database missing its newest
+  row. Read the body, then destroy. (The task file §6 has the measurement.)
+- **The S3 fake** `tests/helpers/s3-fake.js` — one CommonJS file for the jest spec (`require`) and the drive
+  (`node … --port 9400`): path-style, ListObjectsV2 paged by 2, 403 `InvalidAccessKeyId` on a wrong key id,
+  404 `NoSuchBucket`, `failNextGets(n)`. `storage-driver.test.ts`'s real-MinIO half stays env-gated.
+- The old *Where archives are written* field moved from *Keep* to *Where archives go*; the Keep save no longer
+  sends `destination`. `BackupConfigStore.update` reads `{path}` with no type as local (MCP's shape).
+- Drive `drives/bmg015/run.sh ac seed` — the fake on 9400, backend 8697, Chrome 9333; `S3LOG` handed to the
+  script so AC6 can count the bucket's GETs; `bucketKeys()` lists the fake with a credential the fake accepts.
 
 ## What s14 settled (BMG-012)
 
@@ -148,17 +185,16 @@ route). Drive `drives/bmg003/run.sh ac seed` 41/41.
 
 ## Do this, in order
 
-1. **BMG-013 Richard drives it** — his. Write him the prompt: the fourteen pages, the three doors from
-   the editor (card button, *Add a field* on a Query Records node's table, *Add / Edit this trigger…* on the
-   canvas), and the **R6** question (README §8) in plain words. Nothing to build until he has driven.
-2. **BMG-015 Storage off the disk** (Richard, s14: *"otherwise file uploads and backups are going to be
-   choking the VM disk"*). Read its task file: the uploads S3 driver EXISTS and the wire can switch it;
-   the Storage page cannot, there is no *Test connection*, and backups are local-only
-   (`backup/config.ts:41`). Build the page card + test route first, then backups to the bucket. Measure
-   `StorageDriver` in `storage/types.ts` for a `list` operation before designing the archive listing.
-3. Candidates: BMG-012 §7 (open without the credential once an account exists — BMG-014's note);
-   BMG-011 §7 (`queries` on the Server page; a foreign-archive restore leaves `SecurityState`/`OpsState`
-   in memory until restart).
+1. **BMG-013 Richard drives it** — his. Every build task is ✅. Write him the prompt: the fourteen pages
+   (now with *Where files are stored* and *Where archives go*), the three doors from the editor (card
+   button, *Add a field* on a Query Records node's table, *Add / Edit this trigger…* on the canvas), and
+   the **R6** question (README §8) in plain words. To drive the bucket half for real he needs a MinIO
+   (`docker run -p 9000:9000 minio/minio server /data`) or any S3-compatible bucket — the repo's fake is
+   for specs. What he records becomes README §2 rows, built before the phase closes.
+2. Candidates, in the order they cost least: BMG-015 §7 (MCP `configure_backend_backups` wants
+   `destination.type`; a *Move files to the bucket* button); BMG-012 §7 (open without the credential
+   once an account exists — BMG-014's note); BMG-011 §7 (`queries` on the Server page; a foreign-archive
+   restore leaves `SecurityState`/`OpsState` in memory until restart).
 
 ## What s11 settled
 

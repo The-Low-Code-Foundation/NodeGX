@@ -281,8 +281,12 @@ describe('BAK-009 rate limiting over real sockets', () => {
     // `GET admin/backups/archive` (an archive as a download). Reviewed and left
     // in the `admin` budget: one person, one page, reads of bounded size and a
     // download the page hands the browser. Counted, not guessed — 94 → 98.
+    // BMG-015 moved `admin` by 1: `POST admin/files/config/test`, the Storage
+    // page's *Test connection* (a throwaway driver probes the bucket; nothing
+    // is saved). Reviewed and left in the `admin` budget: one person, one
+    // card, a press. Counted, not guessed — 98 → 99.
     expect(counts).toEqual({
-      admin: 98,
+      admin: 99,
       auth: 17,
       data: 19,
       files: 4,

@@ -1763,6 +1763,12 @@ label.check.implied {
   outline-offset: 1px;
 }
 
+/* BMG-015: a tile that cannot be chosen yet (the backups' bucket before one is connected). */
+.tile.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .tile .sub {
   margin: 0;
 }

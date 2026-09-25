@@ -12,6 +12,15 @@
  * `SecretsStore` (S3 credentials never live in the diffable files.json) — so
  * `FileRoutes` only ever sees a `StorageDriver`, never a driver-type branch.
  *
+ * BMG-015: two stores can hold files at once. Switching the driver never moves
+ * a blob (`BACKEND-FILES.md` §Drivers), so the local store stays alive beside
+ * the bucket and a file is served by the driver its `_Files` row names
+ * (`driverFor`), not by whichever is current — before this, a switch to the
+ * bucket made every file uploaded before it a 500. `getDriver()` is where the
+ * NEXT upload goes; `stores()` is everything the orphan sweep must walk;
+ * `bucketDriver()` is the bucket the backups share (one bucket, one set of
+ * credentials, typed once on the Storage page).
+ *
  * @module nodegx-backend/storage/FileSubsystem
  */
 
@@ -35,6 +44,7 @@ import { validateCron } from '../triggers/cron';
 import { FileConfigStore, DriverConfig, OrphanSweepSchedule, ThumbPreset } from './config';
 import { LocalDriver } from './LocalDriver';
 import { S3Driver } from './S3Driver';
+import type { S3ProbeResult } from './S3Driver';
 import type { StorageDriver } from './types';
 import { MetadataStore } from './MetadataStore';
 import type { FileRecord } from './MetadataStore';
@@ -43,6 +53,38 @@ import { loadTransformer } from './transform';
 
 export const FILE_SWEEP_TRIGGER_ID = '__file_orphan_sweep__';
 export const FILES_SECRETS_NAMESPACE = 'files';
+
+export type S3DriverConfigShape = Extract<DriverConfig, { type: 's3' }>;
+export interface S3Credentials {
+  accessKeyId: string;
+  secretAccessKey: string;
+}
+
+/** The stored bucket credentials (`files` namespace of secrets.json), or null when either half is missing. */
+export function storedS3Credentials(secrets: SecretsStore): S3Credentials | null {
+  const accessKeyId = secrets.get(FILES_SECRETS_NAMESPACE, 's3AccessKeyId') || '';
+  const secretAccessKey = secrets.get(FILES_SECRETS_NAMESPACE, 's3SecretAccessKey') || '';
+  return accessKeyId && secretAccessKey ? { accessKeyId, secretAccessKey } : null;
+}
+
+/**
+ * BMG-015: the bucket a data dir is connected to, or null when files.json says
+ * `local`. The ONE place a bucket driver is built — the service (through the
+ * subsystem) and the CLI's backup manager both come here, so the backups and
+ * the uploads can never disagree about which bucket.
+ */
+export function buildBucketDriver(driverConfig: DriverConfig, secrets: SecretsStore, credentials?: S3Credentials | null): S3Driver | null {
+  if (driverConfig.type !== 's3') return null;
+  const creds = credentials || storedS3Credentials(secrets) || { accessKeyId: '', secretAccessKey: '' };
+  return new S3Driver({
+    endpoint: driverConfig.endpoint,
+    region: driverConfig.region,
+    bucket: driverConfig.bucket,
+    forcePathStyle: driverConfig.forcePathStyle,
+    accessKeyId: creds.accessKeyId,
+    secretAccessKey: creds.secretAccessKey
+  });
+}
 
 /** Adapter: presents the orphan-sweep schedule as a schedule "trigger" to CronScheduler. */
 class SweepScheduleRegistry implements SchedulerRegistry {
@@ -88,7 +130,7 @@ class SweepScheduleRegistry implements SchedulerRegistry {
 /** Adapter: the scheduler's fire() runs a (report-only) sweep and records loudly. */
 class SweepScheduleDispatcher implements SchedulerDispatcher {
   constructor(
-    private readonly driver: () => StorageDriver,
+    private readonly stores: () => StorageDriver[],
     private readonly metadata: MetadataStore,
     private readonly config: FileConfigStore,
     private readonly executions: ExecutionHistory,
@@ -111,7 +153,7 @@ class SweepScheduleDispatcher implements SchedulerDispatcher {
         /* logging must never block the sweep */
       }
     }
-    const report = await runOrphanSweep(this.driver(), this.metadata, { delete: false });
+    const report = await runOrphanSweep(this.stores(), this.metadata, { delete: false });
     this.config.recordSweep(report);
     if (logger) {
       try {
@@ -167,6 +209,11 @@ export class FileSubsystem {
   readonly metadata: MetadataStore;
   private readonly deps: FileSubsystemDeps;
   private signingProvenance: SecretProvenance | null = null;
+  /** Always there: the store beside the data dir. Files uploaded before a switch to the bucket live here. */
+  private readonly local: LocalDriver;
+  /** The bucket, when files.json names one. Shared with the backups. */
+  private bucket: S3Driver | null = null;
+  /** Where the NEXT upload goes: the bucket when configured, else the local store. */
   private driver: StorageDriver;
   private readonly registry: SweepScheduleRegistry;
   private readonly scheduler: CronScheduler;
@@ -175,10 +222,12 @@ export class FileSubsystem {
     this.deps = deps;
     this.config = new FileConfigStore(deps.dataDir);
     this.metadata = new MetadataStore(deps.facade);
-    this.driver = this.buildDriver(this.config.get().driver);
+    this.local = new LocalDriver(path.join(deps.dataDir, 'files', 'blobs'));
+    this.driver = this.local;
+    this.applyDriver(this.config.get().driver);
     this.registry = new SweepScheduleRegistry(this.config);
     const dispatcher = new SweepScheduleDispatcher(
-      () => this.driver,
+      () => this.stores(),
       this.metadata,
       this.config,
       deps.executions,
@@ -188,24 +237,61 @@ export class FileSubsystem {
     this.scheduler = new CronScheduler({ registry: this.registry, dispatcher });
   }
 
-  private buildDriver(driverConfig: DriverConfig): StorageDriver {
-    if (driverConfig.type === 'local') {
-      return new LocalDriver(path.join(this.deps.dataDir, 'files', 'blobs'));
-    }
-    const accessKeyId = this.deps.secrets.get(FILES_SECRETS_NAMESPACE, 's3AccessKeyId') || '';
-    const secretAccessKey = this.deps.secrets.get(FILES_SECRETS_NAMESPACE, 's3SecretAccessKey') || '';
-    return new S3Driver({
-      endpoint: driverConfig.endpoint,
-      region: driverConfig.region,
-      bucket: driverConfig.bucket,
-      forcePathStyle: driverConfig.forcePathStyle,
-      accessKeyId,
-      secretAccessKey
-    });
+  /** (Re)build the bucket driver from a driver config + the stored credentials, and point the next upload at it. */
+  private applyDriver(driverConfig: DriverConfig): void {
+    this.bucket = buildBucketDriver(driverConfig, this.deps.secrets);
+    this.driver = this.bucket || this.local;
   }
 
+  /** Where the next upload goes. */
   getDriver(): StorageDriver {
     return this.driver;
+  }
+
+  /** The bucket this backend is connected to (files.json `driver.type === 's3'`), or null. Backups share it. */
+  bucketDriver(): S3Driver | null {
+    return this.bucket;
+  }
+
+  /** Every store that can hold a file right now — what the orphan sweep walks. */
+  stores(): StorageDriver[] {
+    return this.bucket ? [this.local, this.bucket] : [this.local];
+  }
+
+  /**
+   * The driver that holds THIS file: the one its `_Files` row names. A row
+   * that says `s3` while no bucket is connected is a loud error, not a 404 —
+   * the bytes exist, the backend just cannot reach them.
+   */
+  driverFor(record: Pick<FileRecord, 'driver' | 'storedName'>): StorageDriver {
+    if (record.driver === 's3') {
+      if (!this.bucket) {
+        throw new Error(
+          `"${record.storedName}" is stored in a bucket this backend is no longer connected to. Connect the bucket again on the Storage page to serve it.`
+        );
+      }
+      return this.bucket;
+    }
+    return this.local;
+  }
+
+  /** Both halves of the bucket credential are stored. Never the values. */
+  s3CredentialsConfigured(): boolean {
+    return storedS3Credentials(this.deps.secrets) !== null;
+  }
+
+  /**
+   * BMG-015: *Test connection*. A throwaway driver over `driverConfig` with
+   * `credentials` (the unsaved ones a person just typed) or the stored ones;
+   * nothing here is persisted.
+   */
+  probeBucket(driverConfig: S3DriverConfigShape, credentials?: S3Credentials | null): Promise<S3ProbeResult> {
+    const driver = buildBucketDriver(driverConfig, this.deps.secrets, credentials);
+    if (!driver) return Promise.resolve({ ok: false, error: 'No bucket to test.' });
+    if (!driver.hasCredentials()) {
+      return Promise.resolve({ ok: false, error: 'The bucket needs an access key id and a secret access key.' });
+    }
+    return driver.probe();
   }
 
   /**
@@ -270,14 +356,14 @@ export class FileSubsystem {
   setS3Credentials(accessKeyId: string, secretAccessKey: string): void {
     this.deps.secrets.set(FILES_SECRETS_NAMESPACE, 's3AccessKeyId', accessKeyId);
     this.deps.secrets.set(FILES_SECRETS_NAMESPACE, 's3SecretAccessKey', secretAccessKey);
-    this.driver = this.buildDriver(this.config.get().driver);
+    this.applyDriver(this.config.get().driver);
   }
 
   updateConfig(patch: Parameters<FileConfigStore['update']>[0]): ReturnType<FileConfigStore['update']> {
     const updated = this.config.update(patch);
     // A driver change (or its secrets changing via setS3Credentials) must take
     // effect immediately, not just on next restart.
-    this.driver = this.buildDriver(updated.driver);
+    this.applyDriver(updated.driver);
     this.reschedule();
     return updated;
   }
@@ -312,7 +398,7 @@ export class FileSubsystem {
    * few kilobytes nothing serves, a leftover row is an orphan the sweep reports.
    */
   async deleteStored(record: FileRecord): Promise<void> {
-    await this.driver.delete(record.key);
+    await this.driverFor(record).delete(record.key);
     await this.metadata.deleteById(record.objectId);
     const cacheDir = this.thumbCacheDir(record.hash);
     if (fs.existsSync(cacheDir)) fs.rmSync(cacheDir, { recursive: true, force: true });
@@ -320,7 +406,7 @@ export class FileSubsystem {
 
   /** Run the sweep right now, outside the schedule (admin/MCP "run now"). */
   async runSweepNow(deleteOrphans = false): Promise<ReturnType<typeof runOrphanSweep> extends Promise<infer R> ? R : never> {
-    const report = await runOrphanSweep(this.driver, this.metadata, { delete: deleteOrphans });
+    const report = await runOrphanSweep(this.stores(), this.metadata, { delete: deleteOrphans });
     this.config.recordSweep(report);
     return report;
   }
