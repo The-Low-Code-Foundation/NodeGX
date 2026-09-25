@@ -2,7 +2,7 @@
 
 **Opened 2026-09-24** (README R2, Richard's words at 18:16Z). **Depends on BMG-001 (deep links),
 BMG-003 (the *Add a field* door), BMG-008 (the triggers door), BMG-011 (Secrets and Search).**
-**Status: ✅ built and driven s14 (2026-09-25); §6.**
+**Status: ✅ built, driven and committed s14 (2026-09-25, `623a509f`); §6.**
 
 ## 1. The person sentence
 
