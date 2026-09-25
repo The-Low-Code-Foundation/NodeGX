@@ -17,7 +17,7 @@ drove BMG-003 (Schema) and filed **R6** (README §8) for Richard.
 | BMG-005 Roles | ✅ s6 | ✅ headless, AC1–6, 27/27 checks (§6) | ✅ `67de1ede` |
 | BMG-006 Permissions | ✅ s7 | ✅ headless, AC1–7, 37/37 checks (§6) | ✅ `806b53c5` |
 | BMG-008 Triggers | ✅ s8 | ✅ headless, AC1–8, 41/41 checks (§6) | ✅ `71b177a4` |
-| BMG-003 Schema | ✅ s9 | ✅ headless, AC1–8, 41/41 checks (§6) | ✅ s9 (see `git log -1 -- packages/nodegx-backend/src/admin/app/fieldKinds.ts`) |
+| BMG-003 Schema | ✅ s9 | ✅ headless, AC1–8, 41/41 checks (§6) | ✅ `cb83fa7c` |
 | BMG-009…012 | — | — | — |
 | BMG-013 Richard drives | his | — | — |
 
