@@ -1193,3 +1193,53 @@ tr.revoked td {
   word-break: break-all;
   user-select: all;
 }
+
+/* BMG-004 — Users: a person is a name with an initial, their email under it. */
+.users-search {
+  width: 240px;
+}
+
+tr.clickable {
+  cursor: pointer;
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.person-text {
+  display: grid;
+  gap: 1px;
+}
+
+.avatar {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--primary-bg);
+  color: var(--primary-fg);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.drawer-section {
+  margin: 20px 0 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg-muted);
+}
+
+.drawer-section:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}

@@ -48,6 +48,7 @@
  * @module nodegx-backend/admin/AdminDashboardRoutes
  */
 
+import { ACCOUNT_COLUMNS } from '../users/accountColumns';
 import * as crypto from 'crypto';
 
 import type { BackendServiceOptions } from '../config';
@@ -223,7 +224,13 @@ export class AdminDashboardRoutes {
        * it with `--token`.
        */
       firstRun: this.deps.security.adminTokenMintedThisStart,
-      features: this.deps.features()
+      features: this.deps.features(),
+      /**
+       * BMG-004 AC7 — the `_User` columns whose values only their own control
+       * writes, with the reason the page shows on hover. Served, not copied:
+       * the page has no list of its own (`users/accountColumns.ts`).
+       */
+      accountColumns: ACCOUNT_COLUMNS
     });
   }
 }

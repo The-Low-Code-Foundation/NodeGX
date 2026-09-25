@@ -24,6 +24,7 @@ import type * as http from 'http';
 import type { IStorageFacade } from '@noodl/backend-contract';
 import type { AclOption } from '../persistence/AdapterFacade';
 import { HttpError } from '../server/http-util';
+import { isAccountDisabled } from '../users/accountColumns';
 import {
   ADMIN_TOKEN_ENV,
   describeMissingSecret,
@@ -435,6 +436,8 @@ export class SecurityState {
       } catch {
         throw new HttpError(400, 'Invalid session token', 209);
       }
+      // BMG-004 (R3): see `UserRoutes.requireUser` — the same answer, 209.
+      if (isAccountDisabled(user)) throw new HttpError(400, 'Invalid session token', 209);
       const userId = user.objectId as string;
       return { kind: 'user', userId, roles: await this.rolesForUser(userId) };
     }
@@ -573,13 +576,20 @@ export class SecurityState {
    */
   private async actingUserFor(userId: string | null, keyName: string): Promise<ActingUser | null> {
     if (!userId) return null;
+    let user: Record<string, unknown>;
     try {
-      await this.deps.facade.rawFetch('_User', userId);
+      user = await this.deps.facade.rawFetch('_User', userId);
     } catch {
       throw new HttpError(
         401,
         `API key "${keyName}" acts as a user that no longer exists. Revoke the key, or re-create it bound to a user that does.`
       );
+    }
+    // BMG-004 (R3): a key bound to a person is that person's delegation, so
+    // disabling the person stops it too. Switching them back on restores it —
+    // nothing about the key changed.
+    if (isAccountDisabled(user)) {
+      throw new HttpError(401, `API key "${keyName}" acts as a user whose account is disabled.`);
     }
     return { userId, roles: await this.rolesForUser(userId) };
   }

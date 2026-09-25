@@ -476,15 +476,22 @@ describe('nodegx-backend HTTP surface', () => {
     expect(second.status).toBe(404);
   });
 
-  it('GET /admin/schema lists user tables but not system (_-prefixed) ones', async () => {
+  it('GET /admin/schema lists user tables and the accounts table, but no other system (_-prefixed) one', async () => {
     const { json } = await req<SchemaResponse>('GET', '/admin/schema');
     const names = json.tables.map((t) => t.name);
     // Regression guard for the SchemaManager LIKE-wildcard bug: an unescaped
     // `NOT LIKE '_%'` excluded EVERY table once a real engine ran.
     expect(names).toContain('Task');
     expect(names).toContain('Comment');
-    expect(names).not.toContain('_User');
-    expect(names).not.toContain('_Session');
+    // BMG-004: `_User` is listed on purpose — the Schema page adds fields to
+    // it — appended by the route, not by `listTables()`, and with the backend's
+    // own columns hidden. Every other system table stays off the listing.
+    expect(names.filter((n) => n.startsWith('_'))).toEqual(['_User']);
+    const accounts = json.tables.find((t) => t.name === '_User')!;
+    expect((accounts.columns as Array<{ name: string }>).map((c) => c.name)).not.toContain('_hashed_password');
+    // The BYOB listing is not the admin listing: its readers never asked for it.
+    const byob = await req<SchemaResponse>('GET', '/api/_schema');
+    expect(byob.json.tables.map((t) => t.name)).not.toContain('_User');
   });
 
   it('admin schema mutations: addColumn, renameColumn, deleteTable, export', async () => {

@@ -574,15 +574,9 @@ export class OAuthRoutes {
   private async tryIssueMagicLink(email: string, redirect: string | undefined): Promise<void> {
     if (!email || !email.includes('@')) return;
 
-    const config = this.deps.auth.config.magicLink;
-    if (!config.enabled) {
-      logger.warn('auth.magic-link-disabled', {
-        detail: 'A magic link was requested but magicLink.enabled is false in auth.json. No mail was sent.'
-      });
-      return;
-    }
-    if (!this.deps.emailConfig.isConfigured()) {
-      logger.warn('auth.magic-link-no-email', { detail: this.deps.emailConfig.notConfiguredReason() });
+    const off = this.magicLinkUnavailable();
+    if (off) {
+      logger.warn(off.event, { detail: off.reason });
       return;
     }
 
@@ -600,18 +594,53 @@ export class OAuthRoutes {
 
     const { results } = await this.deps.facade.rawQuery('_User', { where: { email }, limit: 1 });
     const user = results[0];
-    if (!user && !(config.allowSignup && this.deps.signupAllowedForAnonymous())) {
+    if (!user && !(this.deps.auth.config.magicLink.allowSignup && this.deps.signupAllowedForAnonymous())) {
       logger.warn('auth.magic-link-unknown-address', {
         detail: 'A magic link was requested for an unknown address and signup is not allowed. No mail was sent.'
       });
       return;
     }
 
+    const result = await this.sendMagicLink(email, user ? (user.objectId as string) : '', decision.url);
+    if (!result.success) logger.error('auth.magic-link-send-failed', { detail: result.error });
+  }
+
+  /**
+   * Why a magic link cannot be sent from this backend right now, or null.
+   * `event` is the log line the public route writes; `reason` is the sentence
+   * the admin invite answers with.
+   */
+  magicLinkUnavailable(): { event: string; reason: string } | null {
+    if (!this.deps.auth.config.magicLink.enabled) {
+      return {
+        event: 'auth.magic-link-disabled',
+        reason: 'Magic links are switched off on this backend. Turn them on under Sign-in, then invite again.'
+      };
+    }
+    if (!this.deps.emailConfig.isConfigured()) {
+      return { event: 'auth.magic-link-no-email', reason: this.deps.emailConfig.notConfiguredReason() || 'Email is not set up on this backend.' };
+    }
+    return null;
+  }
+
+  /**
+   * BMG-004 — the Users page's *Invite by email*. The account already exists
+   * (the admin route made it, with no password), so this is the send half of
+   * the public flow without its anti-enumeration silence: an administrator is
+   * told whether the mail went, because they are the one who has to act on it.
+   */
+  async sendInvite(userId: string, email: string): Promise<{ success: boolean; error?: string }> {
+    const off = this.magicLinkUnavailable();
+    if (off) return { success: false, error: off.reason };
+    const decision = resolveRedirect(DEFAULT_REDIRECT_PATH, this.baseUrl(), this.deps.auth.config.redirectAllowList);
+    if (!decision.ok) return { success: false, error: decision.reason };
+    return this.sendMagicLink(email, userId, decision.url);
+  }
+
+  private async sendMagicLink(email: string, userId: string, redirectUrl: string | undefined): Promise<{ success: boolean; error?: string }> {
+    const config = this.deps.auth.config.magicLink;
     const ttlMs = config.ttlMinutes > 0 ? config.ttlMinutes * 60_000 : MAGIC_LINK_DEFAULT_TTL_MS;
-    const token = await this.deps.tokens.issue(user ? (user.objectId as string) : '', 'magic', ttlMs, {
-      email,
-      redirectUrl: decision.url
-    });
+    const token = await this.deps.tokens.issue(userId, 'magic', ttlMs, { email, redirectUrl });
     const linkUrl = `${this.baseUrl()}/auth/magic-link/callback?token=${encodeURIComponent(token)}`;
 
     const rendered = renderTemplate(this.deps.emailConfig.effectiveTemplate('magicLink'), {
@@ -625,7 +654,7 @@ export class OAuthRoutes {
       text: rendered.text,
       html: rendered.html
     });
-    if (!result.success) logger.error('auth.magic-link-send-failed', { detail: result.error });
+    return { success: result.success, error: result.success ? undefined : String(result.error || 'The mail was not sent.') };
   }
 
   /**

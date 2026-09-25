@@ -32,6 +32,12 @@ const ACTIONS: Record<string, string> = {
   'DELETE admin/roles/:name': 'role.delete',
   'POST admin/roles/:name/users': 'role.user.add',
   'DELETE admin/roles/:name/users/:userId': 'role.user.remove',
+  // BMG-004. Who created, changed, disabled or deleted a person — and who
+  // signed them out. The entry carries the KEYS changed, never the values.
+  'POST admin/users': 'user.create',
+  'PUT admin/users/:id': 'user.update',
+  'DELETE admin/users/:id': 'user.delete',
+  'DELETE admin/users/:id/sessions': 'user.sessions.revoke',
   'POST admin/keys': 'apikey.create',
   // BMG-007. What a key may do changed — the entry an operator reads when a
   // script suddenly can (or cannot) write.

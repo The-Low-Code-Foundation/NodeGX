@@ -61,6 +61,7 @@ import { EmailTokenStore } from '../email/tokens';
 import type { AuthConfigState } from '../auth/AuthConfigState';
 import { OAuthRoutes } from './oauth-routes';
 import { AdminAuthRoutes } from './admin-auth';
+import { AdminUserRoutes } from './admin-users';
 import { AdminSecurityRoutes } from './admin-security';
 import { AdminSecretsRoutes } from './admin-secrets';
 import { SecretsStore } from '../config/SecretsStore';
@@ -399,6 +400,8 @@ export class HttpServer {
   /** PRD-003: the history itself, for `/admin/status`, the gauge and compaction. */
   private readonly executions: ExecutionHistory;
   private readonly adminSecurity: AdminSecurityRoutes;
+  /** BMG-004: the accounts, administered. */
+  private readonly adminUsers: AdminUserRoutes;
   /** CWF-009 slice 4: the `functions` secrets door, names out and values in. */
   private readonly adminSecrets: AdminSecretsRoutes;
   private readonly adminTriggers: AdminTriggerRoutes;
@@ -474,6 +477,16 @@ export class HttpServer {
       emailConfig: deps.emailConfig,
       callbackUrl: (providerId) => this.oauth.callbackUrl(providerId),
       getLocalUrl: () => this.localUrl()
+    });
+    this.adminUsers = new AdminUserRoutes({
+      facade: deps.facade,
+      sendInvite: (userId, email) => this.oauth.sendInvite(userId, email),
+      inviteUnavailable: () => {
+        const off = this.oauth.magicLinkUnavailable();
+        return off ? off.reason : null;
+      },
+      sendVerification: (user) => this.email.sendVerificationEmail(user),
+      listIdentities: (ctx, userId) => this.oauth.listIdentities(ctx, userId)
     });
     this.files = new FileRoutes(deps.options.dataDir, `http://127.0.0.1:${deps.options.port}`, deps.files);
     this.fileSubsystem = deps.files;
@@ -888,7 +901,7 @@ export class HttpServer {
 
       // ---- Admin -----------------------------------------------------------
       { method: 'GET', pattern: 'admin/status', access: { kind: 'admin' }, handler: (ctx) => this.adminStatus(ctx.res) },
-      { method: 'GET', pattern: 'admin/schema', access: { kind: 'admin' }, handler: (ctx) => byob.getSchema(ctx.res) },
+      { method: 'GET', pattern: 'admin/schema', access: { kind: 'admin' }, handler: (ctx) => byob.getSchema(ctx.res, true) },
       {
         method: 'POST',
         pattern: 'admin/schema',
@@ -1045,6 +1058,26 @@ export class HttpServer {
         pattern: 'admin/roles/:name/users/:userId',
         access: { kind: 'admin' },
         handler: (ctx) => adminSec.removeRoleUser(ctx)
+      },
+      // BMG-004 — the Users page. `admin/users/:id/sessions` before `:id` is
+      // not needed (the matcher compares segment counts), but it reads in the
+      // order a person meets them.
+      { method: 'GET', pattern: 'admin/users', access: { kind: 'admin' }, handler: (ctx) => this.adminUsers.list(ctx) },
+      { method: 'POST', pattern: 'admin/users', access: { kind: 'admin' }, handler: (ctx) => this.adminUsers.create(ctx) },
+      { method: 'GET', pattern: 'admin/users/:id', access: { kind: 'admin' }, handler: (ctx) => this.adminUsers.get(ctx) },
+      { method: 'PUT', pattern: 'admin/users/:id', access: { kind: 'admin' }, handler: (ctx) => this.adminUsers.update(ctx) },
+      { method: 'DELETE', pattern: 'admin/users/:id', access: { kind: 'admin' }, handler: (ctx) => this.adminUsers.remove(ctx) },
+      {
+        method: 'GET',
+        pattern: 'admin/users/:id/identities',
+        access: { kind: 'admin' },
+        handler: (ctx) => this.adminUsers.identities(ctx)
+      },
+      {
+        method: 'DELETE',
+        pattern: 'admin/users/:id/sessions',
+        access: { kind: 'admin' },
+        handler: (ctx) => this.adminUsers.signOutEverywhere(ctx)
       },
       { method: 'GET', pattern: 'admin/keys', access: { kind: 'admin' }, handler: (ctx) => adminSec.listKeys(ctx) },
       { method: 'POST', pattern: 'admin/keys', access: { kind: 'admin' }, handler: (ctx) => adminSec.createKey(ctx) },

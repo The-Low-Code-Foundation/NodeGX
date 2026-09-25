@@ -30,6 +30,7 @@ import type {
   StorageSupabaseExportOptions
 } from '@noodl/backend-contract';
 import { validateAclShape } from '../security/model';
+import { isVisibleAccountColumn } from '../users/accountColumns';
 import { summariseModelCalls } from '../execution/modelCost';
 import {
   checkViolationToHttp,
@@ -65,6 +66,42 @@ function parseJSON(value: string | undefined, name: string): Record<string, unkn
  *
  * `null`/`undefined` stay legal — that is how an ACL is cleared.
  */
+/**
+ * BMG-004 — what the BYOB door sends for a `_User` row. Measured before this
+ * existed: `GET /api/_User` handed the scrypt hash to the browser (the `/classes`
+ * door has always stripped it, `AdapterFacade.toWire`), and a `password` column
+ * — which only a BYOB write could have created, in plain text — came back as
+ * written. Neither is shown to anybody, admin or not.
+ */
+function forWire<T>(table: string, record: T): T {
+  if (table !== '_User' || !record || typeof record !== 'object') return record;
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(record as Record<string, unknown>)) {
+    if (isVisibleAccountColumn(key)) out[key] = value;
+  }
+  return out as T;
+}
+
+/**
+ * BMG-004 — a `_User` write that would store a password as text, or write the
+ * backend's own `_` columns. Refused rather than hashed here: the admin user
+ * routes are the door that hashes, revokes sessions on a change and audits it,
+ * and a second door doing half of that is how the two drift.
+ */
+function assertAccountWrite(table: string, data: Record<string, unknown> | undefined | null): void {
+  if (table !== '_User' || !data) return;
+  for (const key of Object.keys(data)) {
+    if (!isVisibleAccountColumn(key)) {
+      throw new HttpError(
+        400,
+        key === 'password'
+          ? 'A password is not written through /api/_User — it would be stored as text. Use PUT /admin/users/:id { password }, which hashes it.'
+          : `"${key}" is the backend's own column and cannot be written.`
+      );
+    }
+  }
+}
+
 function assertAclShape(data: Record<string, unknown> | undefined | null): void {
   if (!data || !Object.prototype.hasOwnProperty.call(data, 'ACL')) return;
   const error = validateAclShape(data.ACL);
@@ -191,7 +228,7 @@ export class ByobAdminRoutes {
     sendJSON(
       ctx.res,
       200,
-      { results, count: count !== undefined ? count : results.length },
+      { results: results.map((r) => forWire(ctx.params.table, r)), count: count !== undefined ? count : results.length },
       splitCapped(result).headers
     );
   }
@@ -199,7 +236,7 @@ export class ByobAdminRoutes {
   async fetch(ctx: RequestContext): Promise<void> {
     try {
       const record = await this.facade.rawFetch(ctx.params.table, ctx.params.id, ctx.acl('read'));
-      sendJSON(ctx.res, 200, record);
+      sendJSON(ctx.res, 200, forWire(ctx.params.table, record));
     } catch {
       throw new HttpError(404, 'Record not found');
     }
@@ -207,6 +244,7 @@ export class ByobAdminRoutes {
 
   async create(ctx: RequestContext): Promise<void> {
     const data = await readJSONBody(ctx.req);
+    assertAccountWrite(ctx.params.table, data);
     ctx.stampCreate(ctx.params.table, data);
     let record: Record<string, unknown>;
     try {
@@ -218,15 +256,16 @@ export class ByobAdminRoutes {
       // something a person can act on.
       throw createErrorToHttp(e, data, this.facade.schemaManager);
     }
-    sendJSON(ctx.res, 201, record);
+    sendJSON(ctx.res, 201, forWire(ctx.params.table, record));
   }
 
   async save(ctx: RequestContext): Promise<void> {
     const data = await readJSONBody(ctx.req);
     assertAclShape(data);
+    assertAccountWrite(ctx.params.table, data);
     try {
       const record = await this.facade.rawSave(ctx.params.table, ctx.params.id, data, ctx.acl('write'));
-      sendJSON(ctx.res, 200, record);
+      sendJSON(ctx.res, 200, forWire(ctx.params.table, record));
     } catch (e) {
       // FED-002: an edit refused by a unique index is a conflict, not a missing
       // row — the same distinction `classPut` draws.
@@ -281,13 +320,15 @@ export class ByobAdminRoutes {
           case 'create': {
             ctx.checkData(collection, clpOp);
             const data = (op.data as Record<string, unknown>) || {};
+            assertAccountWrite(collection, data);
             ctx.stampCreate(collection, data);
-            results.push(await this.facade.rawCreate(collection, data));
+            results.push(forWire(collection, await this.facade.rawCreate(collection, data)));
             break;
           }
           case 'save':
             ctx.checkData(collection, clpOp);
             assertAclShape(op.data as Record<string, unknown>);
+            assertAccountWrite(collection, op.data as Record<string, unknown>);
             await this.facade.rawSave(
               collection,
               op.objectId as string,
@@ -316,10 +357,19 @@ export class ByobAdminRoutes {
   // Schema: /api/_schema (BYOB-compat) + /admin/schema
   // ==========================================================================
 
-  getSchema(res: http.ServerResponse): void {
+  /**
+   * `withAccounts` — BMG-004, `/admin/schema` only. `listTables()` leaves out
+   * every `_`-prefixed table on purpose (the MCP tool surface and the Supabase
+   * export both lean on that), so the accounts table was missing from the page
+   * that is supposed to add fields to it. It is appended here, for the admin
+   * listing, with the backend's own columns hidden — and NOT on the BYOB
+   * `/api/_schema`, whose readers never asked for it.
+   */
+  getSchema(res: http.ServerResponse, withAccounts = false): void {
     const sm = this.facade.schemaManager;
     if (!sm) throw new HttpError(500, 'Schema manager not available');
     const tables: string[] = sm.listTables();
+    const accounts = withAccounts ? sm.getTableSchema('_User') : null;
     const schemas: { name: string; columns?: unknown[]; createdAt?: string }[] = sm.exportSchemas();
     sendJSON(res, 200, {
       tables: tables.map((name) => {
@@ -331,7 +381,19 @@ export class ByobAdminRoutes {
           ...this.indexesOf(name),
           ...this.checksOf(name)
         };
-      })
+      }).concat(
+        accounts
+          ? [
+              {
+                name: '_User',
+                columns: ((accounts.columns || []) as Array<{ name: string }>).filter((c) => isVisibleAccountColumn(c.name)),
+                createdAt: null,
+                ...this.indexesOf('_User'),
+                ...this.checksOf('_User')
+              }
+            ]
+          : []
+      )
     } satisfies SchemaResponse);
   }
 
@@ -340,9 +402,10 @@ export class ByobAdminRoutes {
     if (!sm) throw new HttpError(500, 'Schema manager not available');
     const schema = sm.getTableSchema(tableName);
     if (!schema) throw new HttpError(404, `No such table: ${tableName}`);
+    const columns = (schema.columns || []) as Array<{ name: string }>;
     sendJSON(res, 200, {
       name: tableName,
-      columns: schema.columns || [],
+      columns: tableName === '_User' ? columns.filter((c) => isVisibleAccountColumn(c.name)) : columns,
       ...this.indexesOf(tableName),
       ...this.checksOf(tableName)
     } satisfies TableSchemaResponse);

@@ -1,0 +1,145 @@
+{
+  "seededOldDoorRefused": 403,
+  "listHeads": [
+    "Person",
+    "Verified",
+    "Roles",
+    "Signed in",
+    "Joined"
+  ],
+  "listRows": [
+    [
+      "Ccatcat@example.org",
+      "not yet",
+      "",
+      "not signed in",
+      "just now"
+    ],
+    [
+      "Bbobbob@example.com",
+      "verified",
+      "editorsbilling",
+      "just now",
+      "just now"
+    ],
+    [
+      "Aannann@example.com",
+      "not yet",
+      "editors",
+      "just now · 2 devices",
+      "just now"
+    ]
+  ],
+  "ac9_rows": [
+    "Bbobbob@example.com"
+  ],
+  "ac1_headsAfterAdd": [
+    "Person",
+    "Verified",
+    "Roles",
+    "Signed in",
+    "Joined",
+    "phone"
+  ],
+  "ac1_hash": "#/users/969a4d80-f80e-420f-b176-2718faf5cdfb",
+  "ac1_drawerFieldLabels": [
+    "Username",
+    "Email",
+    "phone",
+    "Set a new password"
+  ],
+  "ac1_readBack": "+44 7700 900123",
+  "ac1_cellInList": "+44 7700 900123",
+  "ac7_titles": {
+    "username": "The sign-in name. Change it in the person’s Details, where a name somebody else has is refused.",
+    "email": "The address mail goes to. Change it in the person’s Details."
+  },
+  "ac7_whoamiKeys": [
+    "authData",
+    "disabled",
+    "email",
+    "emailVerified",
+    "password",
+    "username"
+  ],
+  "ac5_sessionsBefore": 2,
+  "ac5_confirmText": "Disable sign-in for annann is signed out everywhere and cannot sign in again — by password, sign-in link or provider — until you switch this back. Their account, records and roles stay as they are.CancelDisable sign-in",
+  "ac5_sessionsAfter": 0,
+  "ac5_loginWhileDisabled": {
+    "status": 403,
+    "error": "This account is disabled."
+  },
+  "ac5_drawerNotice": "Sign-in is disabled for ann.",
+  "ac5_filterDisabled": [
+    "Aann disabledann@example.com"
+  ],
+  "ac5_loginAfterReenable": 200,
+  "ac3_chipsBefore": [
+    "editors",
+    "billing"
+  ],
+  "ac3_chipsAfter": [
+    "editors"
+  ],
+  "ac3_server": {
+    "editors": true,
+    "billing": false
+  },
+  "ac6_before": 1,
+  "ac6_after": 0,
+  "ac6_drawerSays": "Not signed in anywhere.",
+  "ac2_hash": "#/users/new",
+  "ac2_generated": true,
+  "ac2_chipsInForm": [
+    "support",
+    "billing"
+  ],
+  "ac2_server": {
+    "support": true,
+    "billing": true,
+    "phone": "555-0100"
+  },
+  "ac2_drawerOpenedOnNew": true,
+  "ac2_loginNew": "the generated password is in the page only; login measured by the spec",
+  "ac4_inviteNotice": "An invitation is a magic sign-in link, and magic links are switched off on this backend. Turn them on under Sign-in, then come back.",
+  "ac4_sendDisabled": true,
+  "schema_card": {
+    "title": "Users",
+    "rows": [
+      {
+        "field": "objectId",
+        "locked": true
+      },
+      {
+        "field": "createdAt",
+        "locked": true
+      },
+      {
+        "field": "updatedAt",
+        "locked": true
+      },
+      {
+        "field": "username",
+        "locked": true
+      },
+      {
+        "field": "email",
+        "locked": true
+      },
+      {
+        "field": "disabled",
+        "locked": true
+      },
+      {
+        "field": "emailVerified",
+        "locked": true
+      },
+      {
+        "field": "phone",
+        "locked": false
+      }
+    ]
+  },
+  "collections_offersAccounts": false,
+  "ac8_leaks": []
+}

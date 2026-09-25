@@ -16,6 +16,11 @@ export interface Whoami {
   security: { devOpen: boolean; enforced: boolean; hasReadonlyTier: boolean };
   firstRun: boolean;
   features: Record<string, boolean>;
+  /**
+   * BMG-004 AC7 — the `_User` columns only their own control writes, and why.
+   * The backend's list (`users/accountColumns.ts`); this page keeps no copy.
+   */
+  accountColumns?: Record<string, string>;
 }
 
 export interface SessionState {

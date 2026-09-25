@@ -250,6 +250,24 @@ describeOrSkip('MCP backend permission tools (live backend)', () => {
     expect(bad.isError).toBe(true);
   });
 
+  // BMG-004 — "I cannot sign in" has a new answer: the account is disabled.
+  it('list_user_identities says whether the account itself lets them in', async () => {
+    const userId = await signup(backend.port, 'identity-probe');
+    const before = await call<{ account?: { disabled: boolean; hasPassword: boolean } }>(session, 'list_user_identities', { userId });
+    expect(before.isError).toBe(false);
+    expect(before.data.account).toEqual({ disabled: false, hasPassword: true });
+
+    const adminToken = JSON.parse(fs.readFileSync(path.join(backend.dataDir, 'secrets.json'), 'utf-8')).adminToken;
+    const put = await fetch(`http://127.0.0.1:${backend.port}/admin/users/${userId}`, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${adminToken}` },
+      body: JSON.stringify({ disabled: true })
+    });
+    expect(put.status).toBe(200);
+    const after = await call<{ account?: { disabled: boolean } }>(session, 'list_user_identities', { userId });
+    expect(after.data.account!.disabled).toBe(true);
+  });
+
   // WF-005 — the agent-authors-automation surface over MCP.
   it('enumerates, creates, toggles, and deletes triggers via MCP (SUB-008)', async () => {
     // Empty to begin with.

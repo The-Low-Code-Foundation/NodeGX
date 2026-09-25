@@ -43,7 +43,10 @@ export function CollectionsView({ params }: ViewProps) {
     api<{ tables?: Table[] }>('GET', '/admin/schema')
       .then((d) => {
         const map: Record<string, Table> = {};
-        (d.tables || []).forEach((t) => (map[t.name] = t));
+        // BMG-004: the accounts table is listed for the Schema page; its records
+        // are people, and people are edited on the Users page, whose writes hash
+        // a password and revoke sessions. Not a grid of raw rows here.
+        (d.tables || []).filter((t) => t.name.charAt(0) !== '_').forEach((t) => (map[t.name] = t));
         setSchema(map);
       })
       .catch(fail);

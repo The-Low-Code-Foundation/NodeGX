@@ -64,6 +64,7 @@ import * as crypto from 'crypto';
 
 import type { IStorageFacade } from '@noodl/backend-contract';
 import type { ProviderIdentity } from './oidc';
+import { ACCOUNT_DISABLED_MESSAGE, isAccountDisabled } from '../users/accountColumns';
 import type { IStorageSchema } from '@noodl/backend-contract';
 
 export const IDENTITY_COLLECTION = '_UserIdentity';
@@ -248,6 +249,9 @@ export class IdentityStore {
         user = null;
       }
       if (user) {
+        // BMG-004 (R3) — before any write: a sign-in attempt on a disabled
+        // account must not so much as touch its identity row.
+        if (isAccountDisabled(user)) throw new AuthLinkError('ACCOUNT_DISABLED', ACCOUNT_DISABLED_MESSAGE);
         await this.writeIdentity(existing.userId, identity, existing);
         return { userId: existing.userId, outcome: 'signed-in', notice: null };
       }
@@ -290,6 +294,12 @@ export class IdentityStore {
     }
 
     const userId = match.objectId as string;
+
+    // BMG-004 (R3) — before rules 4 and 5 write. Measured: with this check only
+    // after the linking rule, a magic link pressed for a disabled account ran
+    // rule 5 and WIPED its password, so switching the account back on left the
+    // person unable to sign in the way they always had.
+    if (isAccountDisabled(match)) throw new AuthLinkError('ACCOUNT_DISABLED', ACCOUNT_DISABLED_MESSAGE);
 
     // Rule 4 — both sides verified.
     if (isFlagSet(match.emailVerified)) {

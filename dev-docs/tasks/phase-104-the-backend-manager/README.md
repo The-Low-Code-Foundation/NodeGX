@@ -2,7 +2,7 @@
 
 **Scoped:** 2026-09-24, from Richard's read of the served admin dashboard (`/_admin`) after the s0
 hand-off ([BMG-000](BMG-000-THE-HAND-OFF.md)).
-**Status: 📋 OPEN — BMG-000 ✅, BMG-001 ✅ (s2, 2026-09-24: the page is a Preact app, fourteen views ported, composer kit specced), BMG-007 ✅ (s3, 2026-09-25: scope boxes, acts-as, the secret behind Copy, `PUT /admin/keys/:id`); R1/R3/R4 ruled (§8); BMG-004 next.**
+**Status: 📋 OPEN — BMG-000 ✅, BMG-001 ✅ (s2, 2026-09-24: the page is a Preact app, fourteen views ported, composer kit specced), BMG-007 ✅ (s3, 2026-09-25: scope boxes, acts-as, the secret behind Copy, `PUT /admin/keys/:id`), BMG-004 ✅ (s4, 2026-09-25: people not ids, `/admin/users`, *Disable sign-in*, four door defects fixed); R1/R3/R4 ruled (§8); BMG-002 next.**
 **Prefix: `BMG`.**
 
 > "Every single page in that backend page seems to be a bit shit at the moment. I think it's a bit
@@ -151,7 +151,7 @@ among the tabs.
 | **[BMG-000](BMG-000-THE-HAND-OFF.md)** ✅ built s0, committed s2 | The card hands over; Collections and Schema edit visually | — | — |
 | **[BMG-001](BMG-001-THE-SHELL.md)** ✅ s2 | The shell: one app, plain words, deep links, light and dark, empty states, and the composer kit (picker, chips, list editor, key/value editor, drawer, danger zone) | 8 | R1 (a) |
 | **[BMG-007](BMG-007-API-KEYS.md)** ✅ s3 | API keys: a scope picker, an acting user, the secret behind a copy button | 5 | 001 |
-| **[BMG-004](BMG-004-USERS.md)** | Users are a collection: custom fields, a user drawer, roles as chips, invite, reset, disable | 1 | 001, R3 |
+| **[BMG-004](BMG-004-USERS.md)** ✅ s4 | Users are a collection: custom fields, a user drawer, roles as chips, invite, reset, disable | 1 | 001, R3 |
 | **[BMG-002](BMG-002-COLLECTIONS.md)** | Collections: the filter row, sort, columns, saved views, typed editors for every field, the record's *who can see this* | 2 | 001 |
 | **[BMG-005](BMG-005-ROLES.md)** | Roles: a role page with named members, add by search or email, remove, what it unlocks | 6 | 001, 004 |
 | **[BMG-006](BMG-006-PERMISSIONS.md)** | Permissions: who × what per collection, defaults, signup, files, functions, templates, *try as* | 4 | 001, 002 (filter row), 005 |

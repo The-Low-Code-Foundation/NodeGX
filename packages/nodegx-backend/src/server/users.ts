@@ -31,6 +31,7 @@ import type { SecurityState } from '../security/state';
 import type { EmailConfigState } from '../email/EmailConfigState';
 import type { EmailRoutes } from './email-routes';
 import { HttpError, readJSONBody, sendJSON } from './http-util';
+import { ACCOUNT_DISABLED_MESSAGE, ADMIN_ONLY_USER_FIELDS, isAccountDisabled } from '../users/accountColumns';
 
 function safeLog(...args: unknown[]): void {
   try {
@@ -171,11 +172,17 @@ export class UserRoutes {
     if (!session) {
       throw new HttpError(400, 'Invalid session token', 209);
     }
+    let user: Record<string, unknown>;
     try {
-      return await this.facade.rawFetch('_User', session.userId as string);
+      user = await this.facade.rawFetch('_User', session.userId as string);
     } catch {
       throw new HttpError(400, 'Invalid session token', 209);
     }
+    // BMG-004 (R3). Disabling revokes the sessions, so this only meets a row
+    // minted in the gap between the two writes — answered as an invalid
+    // session, 209, because that is the code that makes the client drop it.
+    if (isAccountDisabled(user)) throw new HttpError(400, 'Invalid session token', 209);
+    return user;
   }
 
   /**
@@ -223,6 +230,13 @@ export class UserRoutes {
     if (!user || !verifyPassword(password, user._hashed_password as string)) {
       // Parse answers 404 with code 101 for a failed login.
       throw new HttpError(404, 'Invalid username/password.', 101);
+    }
+
+    // BMG-004 (R3). AFTER the password check, so "disabled" is only ever told
+    // to somebody who proved they hold the account — never an oracle for
+    // which usernames exist.
+    if (isAccountDisabled(user)) {
+      throw new HttpError(403, ACCOUNT_DISABLED_MESSAGE, 119);
     }
 
     // BAK-002 login policy: a backend can require a verified email before
@@ -359,6 +373,8 @@ export class UserRoutes {
     // reasonably believe it meant something. A field that cannot be trusted
     // must not be storable.
     delete body.roles;
+    // BMG-004: account flags an administrator sets, never the account itself.
+    for (const field of ADMIN_ONLY_USER_FIELDS) delete body[field];
     const passwordChanged = typeof body.password === 'string' && body.password;
     if (passwordChanged) {
       body._hashed_password = hashPassword(body.password as string);

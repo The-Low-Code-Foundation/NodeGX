@@ -21,14 +21,15 @@ interface Index {
   built?: boolean;
 }
 
-interface TableDef {
+export interface TableDef {
   name: string;
   columns?: Column[];
   indexes?: Index[];
 }
 
 export function SchemaView({ params }: ViewProps) {
-  const { readonly } = useSession();
+  const { readonly, whoami } = useSession();
+  const accountColumns = whoami ? whoami.accountColumns : undefined;
   const [tables, setTables] = useState<TableDef[] | null>(null);
   const names = tables ? tables.map((t) => t.name) : [];
   const wanted = params[0] || '';
@@ -65,7 +66,7 @@ export function SchemaView({ params }: ViewProps) {
         </EmptyState>
       ) : null}
       {(tables || []).map((t) => (
-        <TableCard key={t.name} t={t} names={names} readonly={readonly} hit={t.name === wanted} reload={load} />
+        <TableCard key={t.name} t={t} names={names} readonly={readonly} accountColumns={accountColumns} hit={t.name === wanted} reload={load} />
       ))}
     </Page>
   );
@@ -80,7 +81,21 @@ function TypeBadge({ col }: { col: Column }) {
   return <span class="chip type">{col.type + (pointy && col.targetClass ? ' → ' + col.targetClass : '')}</span>;
 }
 
-function TableCard({ t, names, readonly, hit, reload }: { t: TableDef; names: string[]; readonly: boolean; hit: boolean; reload: () => void }) {
+function TableCard({
+  t,
+  names,
+  readonly,
+  accountColumns,
+  hit,
+  reload
+}: {
+  t: TableDef;
+  names: string[];
+  readonly: boolean;
+  accountColumns: Record<string, string> | undefined;
+  hit: boolean;
+  reload: () => void;
+}) {
   const system = t.name.charAt(0) === '_';
   const columns = t.columns || [];
   const own = columns.filter((c) => !isSystemField(c.name));
@@ -118,13 +133,13 @@ function TableCard({ t, names, readonly, hit, reload }: { t: TableDef; names: st
   return (
     <div class={'card' + (hit ? ' hit' : '')} id={'schema-' + t.name}>
       <Row>
-        <Hi>{t.name}</Hi>
-        {system ? <Chip kind="warn">system</Chip> : null}
+        <Hi>{tableLabel(t.name)}</Hi>
+        {system ? <Chip kind="warn">{t.name === '_User' ? 'accounts' : 'system'}</Chip> : null}
         <Chip>{columns.length} field(s)</Chip>
         <Chip>{declaredCount(t)} index(es)</Chip>
         <Spacer />
-        <Btn tiny onClick={() => navigate('collections', t.name)}>
-          Open records
+        <Btn tiny onClick={() => (t.name === '_User' ? navigate('users') : navigate('collections', t.name))}>
+          {t.name === '_User' ? 'Open people' : 'Open records'}
         </Btn>
         <WriteBtn tiny onClick={addColumn}>
           Add field
@@ -143,7 +158,7 @@ function TableCard({ t, names, readonly, hit, reload }: { t: TableDef; names: st
         columns={['Field', 'Type', 'Required', 'Default']}
         rows={rows}
         renderRow={(c) => {
-          const owned = !!c.note || isServerOwned(t.name, c.name);
+          const owned = !!c.note || isServerOwned(t.name, c.name, accountColumns);
           const locked = owned || readonly;
           return (
             <tr key={c.name} class={owned ? 'sys' : undefined}>
@@ -283,7 +298,7 @@ function TypeTrigger({ t, c, reload }: { t: TableDef; c: Column; reload: () => v
             }
           >
             <p>
-              Values already stored in {t.name}.{c.name} are converted from {c.type} to {next}.
+              Values already stored in {tableLabel(t.name)}.{c.name} are converted from {c.type} to {next}.
             </p>
             <Notice kind="warn">A conversion can lose information: text that is not a number becomes 0, and a list or object turned into text stays text.</Notice>
           </Dialog>
@@ -356,7 +371,7 @@ export function FieldLineRow({ line, update, names, autoFocus }: { line: FieldLi
           <option value="">→ choose a collection</option>
           {names.map((n) => (
             <option key={n} value={n}>
-              → {n}
+              → {tableLabel(n)}
             </option>
           ))}
         </select>
@@ -451,7 +466,12 @@ function NewCollectionDialog({ names, close, onCreated }: { names: string[]; clo
   );
 }
 
-function AddFieldDialog({ t, names, close, onAdded }: { t: TableDef; names: string[]; close: () => void; onAdded: () => void }) {
+/** What a person calls a table: the accounts table is "Users"; `_User` is only the wire's name for it. */
+export function tableLabel(name: string): string {
+  return name === '_User' ? 'Users' : name;
+}
+
+export function AddFieldDialog({ t, names, close, onAdded }: { t: TableDef; names: string[]; close: () => void; onAdded: () => void }) {
   const [line, setLine] = useState<FieldLine>(blankLine());
   const [error, setError] = useState<string | null>(null);
   function add() {
@@ -465,14 +485,14 @@ function AddFieldDialog({ t, names, close, onAdded }: { t: TableDef; names: stri
     api('POST', '/admin/schema', { action: 'addColumn', table: t.name, column })
       .then(() => {
         close();
-        toast(column.name + ' added to ' + t.name + '.', 'ok');
+        toast(column.name + ' added to ' + tableLabel(t.name) + '.', 'ok');
         onAdded();
       })
       .catch((e) => setError((e as Error).message));
   }
   return (
     <Dialog
-      title={'Add a field to ' + t.name}
+      title={'Add a field to ' + tableLabel(t.name)}
       wide
       actions={
         <>
@@ -546,7 +566,7 @@ function IndexesDialog({ t, close, onApplied }: { t: TableDef; close: () => void
   );
   return (
     <Dialog
-      title={'Indexes on ' + t.name}
+      title={'Indexes on ' + tableLabel(t.name)}
       wide
       autoFocus={false}
       actions={

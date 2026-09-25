@@ -547,7 +547,7 @@ export function registerBackendReadTools(server: McpServer): void {
       description:
         'Which providers a given user can sign in with on a running backend, and whether they also have a ' +
         'password. Reads the `_UserIdentity` rows directly through the admin data surface. Useful when a user ' +
-        'reports "I cannot sign in" — an account with no password and no identity has no way in at all.',
+        'reports "I cannot sign in" — a disabled account, or one with no password and no identity, has no way in.',
       inputSchema: {
         backendId: z.string().optional(),
         userId: z.string().describe('The _User objectId')
@@ -557,7 +557,12 @@ export function registerBackendReadTools(server: McpServer): void {
       const client = await requireBackend(backendId);
       const where = encodeURIComponent(JSON.stringify({ userId }));
       const { json } = await client.request('GET', `/api/_UserIdentity?where=${where}`);
-      return jsonResult(json);
+      // BMG-004: whether the account itself lets them in — a disabled flag, and
+      // the password this description has always promised. `account` is absent
+      // (not false) on a backend older than `/admin/users`, which cannot say.
+      const person = await client.request('GET', `/admin/users/${encodeURIComponent(userId)}`, undefined, [404]);
+      const user = person.status === 200 && person.json ? (person.json as { user?: Record<string, unknown> }).user : undefined;
+      return jsonResult(user ? { ...(json as object), account: { disabled: user.disabled === true, hasPassword: user.hasPassword === true } } : json);
     })
   );
 }

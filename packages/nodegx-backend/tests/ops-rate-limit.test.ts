@@ -253,8 +253,14 @@ describe('BAK-009 rate limiting over real sockets', () => {
     // operator edits a key's scopes about as often as they create one, and the
     // POST beside it already lives there. Counted, not guessed — it is the only
     // admin pattern `getRouteTable()` gained since the HLT-015 reading.
+    // BMG-004 moved `admin` by 7: the Users page's `/admin/users` surface —
+    // GET and POST `admin/users`, GET/PUT/DELETE `admin/users/:id`, GET
+    // `admin/users/:id/identities`, DELETE `admin/users/:id/sessions`. Reviewed
+    // and left in the `admin` budget: a person administering accounts by hand,
+    // with the list and drawer reads a page makes. Counted, not guessed —
+    // 81 → 88, and seven is the number of patterns added.
     expect(counts).toEqual({
-      admin: 81,
+      admin: 88,
       auth: 16,
       data: 19,
       files: 4,

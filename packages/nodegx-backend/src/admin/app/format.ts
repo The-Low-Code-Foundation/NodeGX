@@ -61,8 +61,6 @@ export function shortId(id: unknown): string {
 export const COLUMN_TYPES = ['String', 'Number', 'Boolean', 'Date', 'Object', 'Array', 'Pointer', 'Relation', 'File', 'GeoPoint'];
 export const NAME_RULE = /^[a-zA-Z][a-zA-Z0-9_]*$/;
 export const RESERVED_COLUMNS = ['objectId', 'createdAt', 'updatedAt', 'ACL'];
-/** The accounts table's columns belong to the server: shown, never renamed or retyped. */
-export const ACCOUNT_OWNED = ['authData', 'email', 'username', 'emailVerified', 'password'];
 export const JSON_TYPES = ['Object', 'Array', 'ACL', 'File', 'GeoPoint'];
 
 /** Written by the backend on every record; never offered for editing. */
@@ -70,8 +68,13 @@ export function isSystemField(name: string): boolean {
   return name === 'objectId' || name === 'createdAt' || name === 'updatedAt';
 }
 
-export function isServerOwned(table: string, name: string): boolean {
-  return isSystemField(name) || (table === '_User' && ACCOUNT_OWNED.indexOf(name) !== -1);
+/**
+ * Shown, never renamed, retyped or written as a plain cell. `accountColumns` is
+ * the list `whoami` serves (BMG-004 AC7: one list, the backend's — this file
+ * keeps no copy); the caller passes `useSession().whoami.accountColumns`.
+ */
+export function isServerOwned(table: string, name: string, accountColumns: Record<string, string> | undefined): boolean {
+  return isSystemField(name) || (table === '_User' && !!accountColumns && Object.prototype.hasOwnProperty.call(accountColumns, name));
 }
 
 export function validName(name: string, taken: string[] | null, what: string): string | null {

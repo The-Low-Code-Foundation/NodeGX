@@ -71,6 +71,7 @@ import {
   AUDIT_SYSTEM_USER_UPDATE
 } from '../ops/audit-actions';
 import { hashPassword } from '../server/users';
+import { isAccountDisabled } from './accountColumns';
 
 /**
  * What a node asks for. One entry point with an `op` rather than four globals:
@@ -471,6 +472,8 @@ export class SystemUsers {
       // invalid rather than repaired: a verification must not write.
       return { outcome: 'unchanged', code: 'user/token-invalid', valid: false };
     }
+    // BMG-004 (R3): the same answer the HTTP doors give a disabled account.
+    if (isAccountDisabled(user)) return { outcome: 'unchanged', code: 'user/token-invalid', valid: false };
 
     return {
       outcome: 'done',

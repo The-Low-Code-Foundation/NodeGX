@@ -938,6 +938,11 @@ export class BackendService {
     // `addColumn` swallows "duplicate column name", so this is the idempotent
     // half of the same statement rather than a second policy.
     sm.addColumn('_Session', { name: 'expiresAt', type: 'Date' });
+    // BMG-004 (R3): an account that may not sign in. The same idempotent ALTER
+    // as the line above, for the same reason — and without it a
+    // `where: { disabled: true }` on an older data dir is a SQL error rather
+    // than an empty answer. Absent reads as enabled (accountColumns.ts).
+    sm.addColumn('_User', { name: 'disabled', type: 'Boolean' });
     // BAK-003: roles (flat; membership via the users Relation's junction
     // table) and API keys (hashed secrets, never recoverable).
     sm.createTable({

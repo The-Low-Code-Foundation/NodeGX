@@ -1,7 +1,7 @@
 # P104 — next session
 
-**Written 2026-09-25 (end of s3).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
-BMG-001; s3 built and drove BMG-007 (API keys).
+**Written 2026-09-25 (end of s4).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
+BMG-001; s3 built and drove BMG-007 (API keys); s4 built and drove BMG-004 (Users, R3 disable).
 
 ## Where it stands
 
@@ -10,7 +10,8 @@ BMG-001; s3 built and drove BMG-007 (API keys).
 | BMG-000 the hand-off | ✅ s0 | ✅ headless | ✅ `9b72fbaf` |
 | BMG-001 the shell | ✅ s2 | ✅ headless, AC1–8 (§6) | ✅ `b3a064e7` |
 | BMG-007 API keys | ✅ s3 | ✅ headless, AC1–7 (§6) | ✅ s3 (see `git log -1 -- packages/nodegx-backend/src/admin/app/scopes.ts`) |
-| BMG-002…006, 008…012 | — | — | — |
+| BMG-004 Users | ✅ s4 | ✅ headless, AC1–9 (§6) | ✅ s4 (see `git log -1 -- packages/nodegx-backend/src/server/admin-users.ts`) |
+| BMG-002, 003, 005, 006, 008…012 | — | — | — |
 | BMG-013 Richard drives | his | — | — |
 
 Built-but-undriven: 0. Built-but-uncommitted: 0 (check `git status -- packages/nodegx-backend/src/admin`
@@ -19,30 +20,27 @@ before believing this — a peer session may have touched it).
 **Rulings:** R1 (a) Preact app · R2 editor lets go · R3 disable a user: yes · R4 restore in the
 browser: yes, behind the typed name · R5 filed. All in README §4/§8 with the question each answered.
 
-**Gate readings (2026-09-25):** `packages/nodegx-backend` `npm run typecheck` exit 0; `npx jest
-tests/admin-app tests/admin-dashboard.test.ts tests/bmg-007-key-update.test.ts
-tests/brg-002-api-key-roundtrip.test.ts tests/ops-audit.test.ts tests/fed-005-mcp-acts-as.test.ts
-tests/feed-drive.test.ts` → 11 suites, 123/123; bundle 35,080 gzip of 160,000. Full `npx jest`:
-180 suites passed, 1 skipped, 1 red — `tests/ops-rate-limit.test.ts`'s reviewed route tally, which
-every new admin route moves by one (bumped with a review sentence in the follow-up commit). 🔴 A
-new `/admin/...` route in BMG-004 onward owes that tally line AND an `audit-actions.ts` entry.
+**Gate readings (2026-09-25, s4):** `packages/nodegx-backend` `npm run typecheck` exit 0; full `npx
+jest` exit 0 — 182 suites passed, 1 skipped, 2,129 tests passed; bundle 38,836 gzip of 160,000.
+Route tally now `admin: 88`. 🔴 A new `/admin/...` route still owes that tally line AND an
+`audit-actions.ts` entry (`ops-audit.test.ts` walks the live table for it).
 
 ## Do this, in order
 
-1. **BMG-004 Users** (R3 yes). Start with the finding in its §2: `GET /admin/schema` omits
-   `_User`; find out why in `byob-admin.ts` before building on the assumption that the Schema
-   page can add fields to it. The `disabled` flag is a backend change (users/, server/users.ts,
-   the login path, sessions revoked on the press) — measure the login path first. BMG-007's
-   `tests/bmg-007-key-update.test.ts` is the shape for a locked-backend route spec (the
-   `LOCKED` config; a dev-open backend bypasses key scopes and will bypass a user flag too until
-   you measure otherwise).
-2. Then BMG-002, BMG-005, BMG-006, BMG-008, BMG-003, BMG-009, BMG-010, BMG-011 (R4 yes), BMG-012.
+1. **BMG-002 Collections** — the grid BMG-004's custom `_User` columns are waiting on for in-cell
+   editing (today they edit in the drawer). Collections now hides `_`-prefixed tables because
+   `/admin/schema` lists `_User` (BMG-004 §6); keep it that way — people are edited where a
+   password is hashed.
+2. Then BMG-005, BMG-006, BMG-008, BMG-003, BMG-009, BMG-010, BMG-011 (R4 yes), BMG-012 (which
+   also deletes the editor's `serverOwnedColumns.ts` — the backend's `users/accountColumns.ts`
+   is now the one list, served on `whoami.accountColumns`).
    One commit per task, a §6 *Built* with what each AC measured, shots in `shots/`, drives in
    `drives/<task>/`.
 
-## How to drive a page (`drives/bmg007/` is the freshest recipe)
+## How to drive a page (`drives/bmg004/` is the freshest recipe)
 
-`drives/bmg007/run.sh <label> [seed] [script.mjs]` writes a LOCKED `security.json` into a scratch
+`drives/bmg004/run.sh <label> [seed] [script.mjs]` (people seeded through `/admin/users`, `signup:
+nobody`) and `drives/bmg007/run.sh` (keys) share a shape: each writes a LOCKED `security.json` into a scratch
 data dir (devOpen false — the default posture bypasses every key scope), starts `dist/cli.js
 serve` on 8697 with token `t0k`, seeds it (`seed.mjs`: Pet/Toy, ann and bob with a Pet each made
 under their OWN sessions so creator-owns ACLs are real, one key, one trigger), starts headless
@@ -71,6 +69,12 @@ a time; tear down after.
   a controlled composer under test (re-mount on change) and a clipboard stub.
 - `ugrep` (the default `grep` on this box) silently skips `HttpServer.ts` as binary: use
   `/usr/bin/grep` when a route "is not there".
+- People: never write `_User` through `/api/_User` — it refuses a password now and hides the hash;
+  `/admin/users` is the door (`SystemUsers` underneath). `format.ts isServerOwned` takes the
+  served `accountColumns` as an argument (format.ts stays pure). `tableLabel('_User')` is
+  *Users* — no page says `_User` to a person.
+- Anything that signs someone in must call `isAccountDisabled` BEFORE it writes (BMG-004 §6 row
+  4: a late check let rule 5 wipe a disabled account's password).
 
 ## Working-tree note
 
