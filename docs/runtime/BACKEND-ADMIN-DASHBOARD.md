@@ -55,11 +55,33 @@ The address bar is the page's state, so any page can be sent as a link:
 #/collections/Pet/<objectId> that record, open in its drawer
 #/collections/Pet/new        a new record in it
 #/schema/Pet                 that collection's card
+#/schema/Pet/new-field       that collection with the *Add a field* picker open
 #/users/<objectId>  #/roles/<name>  #/triggers/<id>  #/runs/<id>
+#/triggers/new               the new-trigger drawer
 #/secrets  #/search  #/server  #/audit   the Settings pages and Activity
 ```
 
 `#/executions` still works and lands on Runs.
+
+### From the editor
+
+The editor's Backend Services card manages *which* backend runs; everything
+inside it is this page (phase 104, BMG-012 — the editor's own schema, data,
+permissions, triggers, email, sign-in, search and secrets panels are gone).
+Three things in the editor open the page, all signed in through the same
+fragment hand-off:
+
+| In the editor | Opens |
+|---|---|
+| the local backend card's **Manage data & settings** | the home |
+| the property panel's **Add a field to <table>** on a Query Records / Create Record node whose table has no such field | `#/schema/<table>/new-field` |
+| the workflow canvas's **Add a trigger on …** / **Edit this trigger…** | `#/triggers/new` / `#/triggers/<id>` |
+
+The hand-off is `/_admin#token=<credential>&route=<encoded path>`: the main
+process resolves the admin credential and opens the browser, the page consumes
+the fragment at boot (scrubbing it from the address bar and history), signs in,
+and then sets the route. Only a plain path is accepted as a route (one leading
+`/`, no `#`); anything else opens the home, still signed in.
 
 ### Light and dark
 

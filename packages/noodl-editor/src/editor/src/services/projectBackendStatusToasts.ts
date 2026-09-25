@@ -69,7 +69,7 @@ export function intentFor(state: ProjectBackendState): ToastIntent {
         title: `${state.backendName || 'The project backend'} could not be started`,
         message:
           `${state.error || 'The backend service did not start.'}\n\n` +
-          'Data nodes and the Data Browser will not work until it is running.'
+          'Data nodes and the backend manager will not work until it is running.'
       };
     default:
       return { kind: 'none' };

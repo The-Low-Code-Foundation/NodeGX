@@ -12,7 +12,7 @@ own mail server), exactly like Pocketbase. The full design record is
 **With no SMTP configured, email-dependent flows fail loudly, not silently.**
 The password-reset and verification-request endpoints still answer success (so
 they can't be used to enumerate accounts) but nothing is sent — the failure is
-logged server-side. The **Send Email node** and the panel's **Send test email**
+logged server-side. The **Send Email node** and the Email page's **Send me this**
 button, in contrast, are admin-authenticated surfaces and report the exact
 reason ("Email is not configured for this backend: no SMTP host/port set…")
 so you notice the misconfiguration immediately, in the History Panel or the
@@ -21,7 +21,8 @@ then an honest failure.
 
 ## Setting it up
 
-In the editor: **Backend Services → (your local backend) → Email**.
+On the backend manager's **Email** page (from the editor: the local backend's card
+→ **Manage data & settings**; on a deployed backend, `/_admin`).
 
 | Field | What it is |
 |-------|------------|
@@ -73,7 +74,7 @@ cannot be used to check who has an account.
 ## Templates
 
 Two templates ship with sensible defaults: **Password Reset** and **Verify
-Email**. Edit them in the panel's Templates section (or via MCP —
+Email**. Edit them on the Email page's template drawer (or via MCP —
 `list_backend_email_templates` / `set_backend_email_template` /
 `reset_backend_email_template`) using `{{variable}}` interpolation:
 

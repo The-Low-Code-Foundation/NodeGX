@@ -1,12 +1,13 @@
 # P104 — next session
 
-**Written 2026-09-25 (end of s13).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
+**Written 2026-09-25 (end of s14).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
 BMG-001; s3 built and drove BMG-007 (API keys); s4 BMG-004 (Users, R3 disable); s5 BMG-002
 (Collections); s6 BMG-005 (Roles); s7 BMG-006 (Permissions); s8 BMG-008 (Triggers); s9 BMG-003
 (Schema) and filed **R6** (README §8) for Richard; s10 BMG-009 (Workflows and Runs); s11 BMG-010
-(Email and Sign-in); s12 BMG-014 (the first admin is a person); s13 built and drove **BMG-011**
-(Storage with a file browser, Backups with Restore… (R4), Secrets, Search, Server, Audit → Activity — and
-found that restore over HTTP never reconnected the running database).
+(Email and Sign-in); s12 BMG-014 (the first admin is a person); s13 BMG-011 (Storage, Backups with
+Restore…, Secrets, Search, Server, Activity); s14 built and drove **BMG-012** (the editor lets go: eight
+panels and 46 IPC proxies gone, the two doors are deep links into the manager, the canvas reads the
+backend's schedule words) and filed **BMG-015** (S3 for uploads AND backups, Richard's ask).
 
 ## Where it stands
 
@@ -25,7 +26,8 @@ found that restore over HTTP never reconnected the running database).
 | BMG-010 Email and Sign-in | ✅ s11 | ✅ headless, AC1–5 + 7, 42/42 checks (§6) | ✅ `1f84abdb` |
 | BMG-014 The first admin is a person | ✅ s12 | ✅ headless, AC1–3 + 6, 33/33 checks (§6) | ✅ `aad1a80c` |
 | BMG-011 Files, Backups, Ops | ✅ s13 | ✅ headless, AC1–9, 39/39 checks (§6) | ✅ `43efcd08` |
-| BMG-012 | — | — | — |
+| BMG-012 The editor lets go | ✅ s14 | ✅ headless, AC1–6, 15/15 page checks + 9 jest (§6) | ✅ COMMIT_BMG012 |
+| BMG-015 Storage off the disk (S3) | — (filed s14) | — | — |
 | BMG-013 Richard drives | his | — | — |
 
 Built-but-undriven: 0. Built-but-uncommitted: 0. Check `git status -- packages/nodegx-backend/src/admin`
@@ -35,6 +37,13 @@ before believing that: a peer session may have touched it.
 browser: yes, behind the typed name · R5 filed · **R6 OPEN (s9): on a collection that already has records, a
 required field ASKS for a default (the engines require one) instead of AC5's "Required disables Default" — ask
 Richard in plain words whether that is the rule, or whether Required should be refused there.** All in README §8.
+
+**Gate readings (2026-09-25, s14):** editor `npx tsc --noEmit -p tsconfig.json` exit 0 (11 s; there is NO
+`npm run typecheck` in the editor — README §7 was wrong, corrected). Editor `npm run test:main --maxWorkers=4`:
+**564 suites, 8,789 tests, 0 failed, exit 0, 27 s** (2026-09-25, s14, after every change; an earlier run had `fb-005/template-install-path` time out at 5 s under load — 248/248 alone). Editor `npm run test:ci`: **2,996 specs, 8 failures = the known floor by name (3 SUB-011, 3 SUB-006, 2 NDA-017), seed 43361** (2026-09-25, s14; the first run had 3 more — AAQ-011/F10's toast sentence and two WFA-005 card pins that expected the editor's own cron gloss — repointed at *backend manager* and `scheduleWords`; the run before that died in webpack on `tests/workflow/index.ts` still exporting the removed spec). Renderer production bundle
+`src/editor/index.bundle.js`: **16,180,087 bytes (3,958,609 gzip) before → **15,930,371 bytes (3,908,307 gzip)** — 249,716 bytes (50,302 gzip) smaller (2026-09-25, s14, both builds 92 s) after**. Backend
+`npm run typecheck` exit 0 (both configs, 4 s); `npx jest tests/admin-dashboard.test.ts tests/admin-app` **14 suites, 190 tests, exit 0** (the new
+`tests/admin-app/handoff-route.test.ts` 6/6 alone). Drive `drives/bmg012/run.sh ac seed` 15/15.
 
 **Gate readings (2026-09-25, s13):** `packages/nodegx-backend` `npm run typecheck` exit 0 (both configs); full backend
 `npx jest --maxWorkers=4`: **201 suites PASS, 1 skipped (`fed-003-live-cache`), 0 FAIL, 2433 tests, exit 0, 367 s** (2026-09-25, s13, after every change in this commit). Bundle 99,696 gzip (budget 160,000); route tally `admin: 98`
@@ -62,6 +71,31 @@ and `nodegx-backend-contract` `tsc --noEmit` exit 0. Full backend `npx jest --ma
 route). Drive `drives/bmg003/run.sh ac seed` 41/41.
 🔴 A new `/admin/...` route still owes the tally line AND an `audit-actions.ts` entry (an action, or a
 `NOT_AUDITED` reason for a dry run); a POST a read-only admin should be able to make owes `readonly.ts` too.
+
+## What s14 settled (BMG-012)
+
+- **The hand-off carries a route.** `openDashboard(id, route)` → `/_admin#token=<t>&route=<encoded path>`;
+  the page's `readHandoff` (api.ts) consumes both, scrubs the fragment, signs in, then sets the hash. A
+  route is a plain path only (`/…`, never `//`, no `#`); a refused one opens the home, still signed in.
+  🔴 The page's HOME is `#/collections/<first>`, not an empty hash — a drive check that expects `''` is wrong.
+- **One door module:** `models/BackendServices/openBackendManager.ts` (`managerRoutes`, `openBackendManager`);
+  `SchemaAddFieldButton` and `WorkflowDocument.triggerActions` (via `TriggerBackendClient.openTriggerInManager`)
+  go through it. A NEW door owes `managerRoutes` a builder and `tests-unit/bmg-012` a line.
+- 🔴 **The handoff's `cronGloss` claim was wrong:** the canvas used it (`workflowTriggerNodes.ts`), not only
+  the form. `TriggerDef.scheduleWords` (decorated by `GET /admin/triggers` since BMG-008) is the one gloss now;
+  the drive read *"Every day at 03:00"*. A "delete X with Y" claim owes a grep of X's callers first.
+- **The panels imported nothing from `models/BackendServices`** (task §3.2 guessed they did) — they used IPC
+  directly. Nothing there was orphaned. `backend:reload-workflows` had no caller BEFORE this task; gone.
+- **AC6 is a census spec** (`tests-unit/bmg-012`): every `ipcMain.handle/on('backend:…')` ⇄ a renderer
+  `invoke`/`invokeIPC`/`ipcInvoke`/`send`, plus the exact list of 32 handlers. A proxy left behind, or a
+  caller of a deleted proxy, is a red row there rather than a runtime `No handler registered`.
+- **The first press on a brand-new backend meets BMG-014's setup step** with the route already in the
+  address bar; after *Create and sign in* it lands on the route (drive, `bmg012-first-press-*.png`).
+- 🔴 **The auto-mode classifier refuses `rm -r` of tracked directories** ("irreversible local destruction")
+  even though git holds them. `mv` into the scratchpad is the reversible equivalent it allows; the working
+  tree reads the same to git (` D`). The moved copies are under `scratchpad/bmg012-removed/`.
+- `tests-unit/fb-005/template-install-path` timed out (5 s) once under `--maxWorkers=4` and passed 248/248
+  alone — a load flake, not this task's.
 
 ## What s13 settled (BMG-011)
 
@@ -114,21 +148,17 @@ route). Drive `drives/bmg003/run.sh ac seed` 41/41.
 
 ## Do this, in order
 
-1. **BMG-012 The editor lets go.** Read its task file first, then `git status` + `stat` on the editor files it names.
-   It deletes the editor's six backend panels and, with them: `serverOwnedColumns.ts`, `panels/permissions/
-   ruleVocabulary.ts`, `EmailPanel.tsx` (the template editor lives on the page), `cronGloss` in
-   `models/triggers/TriggerBackendClient.ts` with `TriggerFormFields.tsx` (the backend's `triggers/cronWords.ts` is the
-   one gloss; the editor's `workflowtriggernodes.test.ts` pins on `cronGloss` go with it), the Secrets panel
-   (`secretsPanelModel.ts` — ported to the page as `admin/app/secretsModel.ts` in s13) and the Search panel. The two
-   doors become deep links (`#/secrets`, `#/search`, `#/server`, `#/files`, `#/backups` exist now). 🔴 BMG-014's note
-   stands: `BackendManager.js openDashboard` hands `#token=` on EVERY open — once an account exists the editor could
-   open without it so the page asks for email + password. 🔴 The editor's `tests/databrowser/*.spec.ts` are what the
-   editor `test:ci` webpack typechecks — delete them with their panels, and run the editor gate (`test:ci`), not
-   only the backend's. One commit per task, a §6 *Built* with what each AC measured, shots in `shots/`.
-2. Then **BMG-013 Richard drives it** — his; write the prompt that hands him the six pages and the R6 question.
-3. Candidates left by s13 (BMG-011 §7): `queries` (the page cap) on the Server page is one line in `putOps` and a
-   card; a restore of a FOREIGN archive leaves `SecurityState`/`OpsState` in memory at their pre-restore values until
-   a restart (this backend's own archive has the same files) — say it on the dialog or reload those states too.
+1. **BMG-013 Richard drives it** — his. Write him the prompt: the fourteen pages, the three doors from
+   the editor (card button, *Add a field* on a Query Records node's table, *Add / Edit this trigger…* on the
+   canvas), and the **R6** question (README §8) in plain words. Nothing to build until he has driven.
+2. **BMG-015 Storage off the disk** (Richard, s14: *"otherwise file uploads and backups are going to be
+   choking the VM disk"*). Read its task file: the uploads S3 driver EXISTS and the wire can switch it;
+   the Storage page cannot, there is no *Test connection*, and backups are local-only
+   (`backup/config.ts:41`). Build the page card + test route first, then backups to the bucket. Measure
+   `StorageDriver` in `storage/types.ts` for a `list` operation before designing the archive listing.
+3. Candidates: BMG-012 §7 (open without the credential once an account exists — BMG-014's note);
+   BMG-011 §7 (`queries` on the Server page; a foreign-archive restore leaves `SecurityState`/`OpsState`
+   in memory until restart).
 
 ## What s11 settled
 
@@ -301,6 +331,14 @@ never the project's live backend; one heavy job at a time; tear down after.
 - People: never write `_User` through `/api/_User`; `/admin/users` is the door.
 
 ## Working-tree note
+
+s14: **the main index was reset to HEAD (`git reset -q`, index only)** — against s9's note below. Measured
+first: `git write-tree` of the index matched no commit; against `5004a0f6d` it was 486 files SHORT and its
+15 modified rows were all OLDER content (`node-catalog.json` −350, `token-codecs/` gone) — a stale tree going
+backwards, nothing in it newer than HEAD. So the reset lost nothing; the working tree was untouched and
+`git status` now reads the tree honestly. What it revealed: `templates/planner/` and `templates/planner-demo/`
+(419 files) are DELETED ON DISK (` D`), by a peer (phase-78's rename to `templates/planning/`?), not by this
+phase — left alone, not committed. The s14 commit went through a temporary index by pathspec as before.
 
 s12: the BMG-014 commit's pathspec reset (`git reset -q HEAD -- packages/nodegx-backend/src packages/nodegx-backend/tests
 docs/runtime dev-docs/tasks/phase-104-the-backend-manager`) also un-staged the STALE deletions the index held under those

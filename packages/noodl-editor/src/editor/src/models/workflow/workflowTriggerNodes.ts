@@ -24,7 +24,7 @@
 
 import { NodeGraphNode } from '@noodl-models/nodegraphmodel';
 
-import { cronGloss, TriggerDef, webhookUrl } from '../triggers/TriggerBackendClient';
+import { TriggerDef, webhookUrl } from '../triggers/TriggerBackendClient';
 import { LAYOUT_COLUMN_WIDTH, LAYOUT_ROW_HEIGHT } from './workflowLayout';
 import { isTriggerTypeName, PORT_FIRES, PORT_IN, triggerTypeFromTypeName, triggerTypeName } from './workflowNodeLibrary';
 
@@ -61,7 +61,8 @@ export function triggerSubLabel(trigger: TriggerDef | null): string {
 
   const parts: string[] = [];
   if (trigger.type === 'schedule' && trigger.schedule) {
-    parts.push('Schedule', cronGloss(trigger.schedule.cron) || trigger.schedule.cron);
+    // BMG-012: the backend's own words (`scheduleWords`, one gloss), else the cron as written.
+    parts.push('Schedule', trigger.scheduleWords || trigger.schedule.cron);
   } else if (trigger.type === 'webhook' && trigger.webhook) {
     parts.push('Webhook', `POST /${trigger.webhook.slug}`);
   } else if (trigger.type === 'db-change' && trigger.dbChange) {
@@ -111,7 +112,7 @@ export function triggerParameters(
   if (trigger.type === 'schedule' && trigger.schedule) {
     return {
       cron: trigger.schedule.cron,
-      when: cronGloss(trigger.schedule.cron) || 'no plain-English reading of this expression',
+      when: trigger.scheduleWords || 'no plain-English reading of this expression',
       nextFire: fmt(trigger.status.nextFireAt),
       missedFires:
         trigger.schedule.missedFirePolicy === 'skip'

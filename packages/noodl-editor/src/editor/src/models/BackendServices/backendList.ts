@@ -16,7 +16,7 @@
  * @module BackendServices/backendList
  */
 
-import { descriptorFor, isUsable, type BackendType } from '@noodl/backend-contract';
+import type { BackendType } from '@noodl/backend-contract';
 
 import { ENDPOINT_BACKEND_ID } from './activeBackend';
 import { BackendPreset, getPreset } from './presets';
@@ -163,7 +163,7 @@ function isEndpointActive(sources: BackendListSources): boolean {
  * then binds the project by writing `cloudservices`, so the same server appears
  * twice — as the endpoint the project points at, and as the process this editor
  * runs. Richard saw the endpoint one: *"'built in backend'… only edit or
- * disconnect"*, with the card that can open the Data Browser sitting beneath it
+ * disconnect"*, with the card that can open the backend manager sitting beneath it
  * looking like a different backend, and "Disconnect" reading as deletion.
  *
  * Two matches, in this order:
@@ -221,7 +221,7 @@ export function buildBackendList(sources: BackendListSources): BackendListEntry[
       security: securityFor('nodegx'),
       backendId: backend.id,
       // AAQ-002: the project points at this one. What the panel needs in order
-      // to show ONE card with both the badge and the Data Browser on it.
+      // to show ONE card with both the badge and the manager button on it.
       ...(isBound ? { isProjectEndpoint: true } : {})
     });
   }
@@ -273,64 +273,13 @@ export function buildBackendList(sources: BackendListSources): BackendListEntry[
 // ============================================================================
 // What an entry can do from here
 // ============================================================================
-
-export interface SurfaceAvailability {
-  isAvailable: boolean;
-  /** Present whenever it is not, because a disabled button with no sentence teaches nothing. */
-  reason?: string;
-}
-
-/** The four contract operations a record grid needs before it can be offered. */
-const BROWSE_OPERATIONS = ['data.query', 'data.create', 'data.save', 'data.delete'] as const;
-
-/**
- * Whether the Data Browser can be opened for this entry.
- *
- * ⚠️ **The spec's premise here is ahead of the code, and the honest answer is
- * narrower than "any backend whose adapter supports the browse operations".**
- *
- * The Data Browser does not speak HTTP at all. Every one of its calls is an
- * Electron IPC invoke — `backend:getSchema`, `backend:queryRecords`,
- * `backend:saveRecord` — answered in the main process by the manager that owns
- * the `nodegx-backend` child processes. There is no URL in it to repoint. So
- * generalising it needs *two* things that do not exist yet: BCN-004's REST
- * adapter, and a main-process route that hands an arbitrary backend handle to an
- * adapter instead of to a local process id. Reaching for the URL directly, which
- * is the shortcut available today, would re-create exactly the coupling this
- * phase is removing — the spec's own trap says so.
- *
- * What is implementable now, and what this does, is the phase's actual rule:
- * **anything a chosen backend cannot do is visible in the editor, with a
- * sentence saying why, before it is discovered at runtime.** Two gates, in this
- * order:
- *
- * 1. the capability descriptor — if the backend cannot do the four record
- *    operations, the answer is no and the reason is the descriptor's own; then
- * 2. the transport — if it can, but nothing in the editor can reach it yet, say
- *    that instead of showing a button that does nothing.
- *
- * When BCN-004 and the main-process route land, gate 2 loses cases and gate 1
- * stays exactly as it is.
- */
-export function dataBrowserAvailability(type: BackendType, kind: BackendListEntryKind): SurfaceAvailability {
-  const descriptor = descriptorFor(type);
-
-  for (const key of BROWSE_OPERATIONS) {
-    const capability = descriptor.capabilities[key];
-    if (!isUsable(capability)) {
-      return {
-        isAvailable: false,
-        reason: capability.state === 'supported' ? undefined : capability.reason
-      };
-    }
-  }
-
-  if (kind !== 'managed') {
-    return {
-      isAvailable: false,
-      reason: `Records on ${getPreset(type).displayName} are edited in its own admin, not from here. The editor can open the record grid for a backend it runs on this computer.`
-    };
-  }
-
-  return { isAvailable: true };
-}
+//
+// BMG-012: a record-grid availability gate lived here — two gates (the
+// contract's capability descriptor, then the transport) deciding whether a card
+// may open the editor's record grid, with a sentence for the cases it could not
+// (BCN-009). The record grid is gone: every NodeGX backend's records are edited
+// on its own manager page in the browser, opened from the local card's *Manage
+// data & settings*, and the manager's own sign-in decides who may. A foreign
+// backend (Directus, Supabase, …) was never reachable through that grid — the
+// gate's sentence said so — and its records are edited in its own admin, as
+// before. Deleted with the panel rather than left as a gate on nothing.

@@ -9,7 +9,7 @@
 
 import React, { useCallback } from 'react';
 
-import { BackendConfig, ConnectionStatus, dataBrowserAvailability, securityFor } from '@noodl-models/BackendServices';
+import { BackendConfig, ConnectionStatus, securityFor } from '@noodl-models/BackendServices';
 import { getPreset } from '@noodl-models/BackendServices/presets';
 
 import { Icon, IconName, IconSize } from '@noodl-core-ui/components/common/Icon';
@@ -70,30 +70,15 @@ export function BackendCard({
   const preset = getPreset(backend.type);
   const statusDisplay = getStatusDisplay(backend.status);
 
-  // BCN-009: the record grid is offered on every card now, and where it cannot
-  // be opened it says why rather than being absent — an absent button reads as
-  // "this backend has no data", which is the opposite of true. See
-  // `dataBrowserAvailability` for the two gates and why the transport one is
-  // still the binding constraint for anything but a locally-run backend.
-  const dataBrowser = dataBrowserAvailability(backend.type, 'external');
-
   // PNL-004: destructive actions belong behind the menu, not one mis-click away
   // from "Sync schema" in a row that used to scroll sideways.
   const handleShowMore = useCallback(() => {
+    // BMG-012: this menu carried a *Browse records* item that was always disabled
+    // for an external backend, with a sentence saying records live in that
+    // backend's own admin (BCN-009). The editor has no record grid any more —
+    // a NodeGX backend's records are edited on its manager page — so the item
+    // and its gate are gone rather than kept as a disabled promise.
     const items: (MenuDialogItem | 'divider')[] = [
-      // BCN-009: the record grid appears on every backend's menu, and where it
-      // cannot be opened it says why. Absent would read as "this backend has no
-      // records to browse", which is the opposite of true — the constraint is
-      // ours, not the backend's, and the sentence says so.
-      {
-        label: 'Browse records',
-        icon: IconName.Database,
-        isDisabled: !dataBrowser.isAvailable,
-        tooltip: dataBrowser.reason,
-        onClick: () => undefined,
-        testId: `open-data-${backend.id}`
-      },
-      'divider',
       {
         label: 'Delete backend',
         icon: IconName.Trash,
@@ -104,7 +89,7 @@ export function BackendCard({
     ];
 
     showContextMenuInPopup({ items, width: MenuDialogWidth.Default });
-  }, [backend.id, dataBrowser.isAvailable, dataBrowser.reason, onDelete]);
+  }, [backend.id, onDelete]);
 
   return (
     <div className={`${css.Root} ${isActive ? css.Active : ''}`} data-test={`backend-card-${backend.id}`}>

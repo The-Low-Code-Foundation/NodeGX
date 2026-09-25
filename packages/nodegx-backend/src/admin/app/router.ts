@@ -10,7 +10,8 @@
  *
  * Nothing is smuggled through module state between pages: a page reads its
  * route on load and on every `hashchange`, so any page can be sent as a link.
- * `#token=…` is the editor's hand-off and is consumed at boot, never routed.
+ * `#token=…` is the editor's hand-off and is consumed at boot, never routed;
+ * its `&route=` is the page it lands on (`api.ts readHandoff`, BMG-012).
  */
 import { useEffect, useState } from 'preact/hooks';
 

@@ -1,0 +1,79 @@
+{
+  "checks": {
+    "first press on a fresh backend: the setup step is what the person meets (BMG-014)": {
+      "pass": true,
+      "detail": {
+        "hash": "#/schema/Pet/new-field"
+      }
+    },
+    "first press: the route is already in the address bar, the credential is not": {
+      "pass": true,
+      "detail": "http://127.0.0.1:8697/_admin#/schema/Pet/new-field"
+    },
+    "first press: after Create and sign in the page lands on the route, picker open": {
+      "pass": true,
+      "detail": {
+        "hash": "#/schema/Pet/new-field",
+        "drawer": "Add a field to Pet\nWhat kind of thing does it hold?\n✕\nAa\nText\nwords, names, descriptions\nString\n#\nNu"
+      }
+    },
+    "AC2 the page lands on #/schema/Pet/new-field": {
+      "pass": true,
+      "detail": "#/schema/Pet/new-field"
+    },
+    "AC2 the credential is scrubbed from the address bar": {
+      "pass": true,
+      "detail": "http://127.0.0.1:8697/_admin#/schema/Pet/new-field"
+    },
+    "AC2 signed in: the Schema page is drawn, not a credential box": {
+      "pass": true,
+      "detail": "Schema\n\nYour collections and their fields. Click a field name to rename it, or its kind to change it.\n\nNew collection\nRe"
+    },
+    "AC2 the Add-a-field picker (the drawer) is open on Pet": {
+      "pass": true,
+      "detail": "Add a field to Pet\nWhat kind of thing does it hold?\n✕\nAa\nText\nwords, names, descriptions\nString\n#\nNumber\namounts, counts, prices\nNumber\n◐\nYes / No\na switch\nBool"
+    },
+    "AC3 the page lands on #/triggers/new": {
+      "pass": true,
+      "detail": "#/triggers/new"
+    },
+    "AC3 the new-trigger drawer is open": {
+      "pass": true,
+      "detail": "New trigger\n✕\nName\nWhat runs\nA function\nA workflow\nWhen\nOn a schedule\nEvery so often, at a time you pick.\nWhen called from outside\nAnother service posts to a UR"
+    },
+    "AC3 seed: a schedule trigger exists on the backend": {
+      "pass": true,
+      "detail": {
+        "status": 201,
+        "id": "trg_O2hd12_e-ugE"
+      }
+    },
+    "AC3 GET /admin/triggers decorates scheduleWords — the canvas card's one gloss": {
+      "pass": true,
+      "detail": "Every day at 03:00"
+    },
+    "AC3 the page lands on that trigger": {
+      "pass": true,
+      "detail": "#/triggers/trg_O2hd12_e-ugE"
+    },
+    "AC3 that trigger's drawer is open with its name": {
+      "pass": true,
+      "detail": "Nightly digest\nLast changed 25/09/2026, 21:44:07.\n✕\nName\nWhat runs\nA function\nA workflow\nhello\n✕\nnot deployed Nothing called hello is deployed on this backend. "
+    },
+    "refused route: the home (the first collection), signed in, nothing of the refused string kept": {
+      "pass": true,
+      "detail": {
+        "hash": "#/collections/Owner",
+        "href": "http://127.0.0.1:8697/_admin#/collections/Owner",
+        "main": "Collections\n\nFind records by saying it in rows, sort by a co"
+      }
+    },
+    "BMG-000 unchanged: a bare token opens the home, signed in": {
+      "pass": true,
+      "detail": {
+        "hash": "#/collections/Owner",
+        "main": "Collections\n\nFind records by saying it in rows, sort by a co"
+      }
+    }
+  }
+}

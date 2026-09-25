@@ -25,8 +25,8 @@ would be trivially bypassable.
 
 ## Limits and content-type policy
 
-Configure in the editor: **Backend Services → (your local backend) → Files**,
-or via MCP (`get_backend_file_config` / `configure_backend_files`).
+Configure on the backend manager's **Storage** page (from the editor: the local
+backend's card → **Manage data & settings**), or via MCP (`get_backend_file_config` / `configure_backend_files`).
 
 | Setting | Default | Notes |
 |---|---|---|
@@ -90,7 +90,7 @@ Thumbnails are rendered with [`sharp`](https://sharp.pixelplumbing.com/), a
   platform), `?thumb=` requests return an explicit **501** with the reason —
   never a silent skip, and never a pure-JS fallback resizer producing
   different bytes than sharp would.
-- `GET /admin/files/config` (and the panel/dashboard) report
+- `GET /admin/files/config` (and the manager's Storage page) report
   `transformsAvailable` honestly, so you find out from the config screen, not
   from a confusing 501 in production.
 
@@ -106,7 +106,7 @@ backend keeps running — everything except `?thumb=` is unaffected.
 | `local` (default) | none | Blobs under `<dataDir>/files/blobs/`, hash-bucketed (`hh/hh/hash-random`). |
 | `s3` | `endpoint`, `region`, `bucket`, `forcePathStyle`; credentials separately | Any S3-compatible service — AWS S3, MinIO, and others. Signed with a from-scratch SigV4 implementation (no AWS SDK) — see BAK-006-NOTES for why and how it's verified. |
 
-Set the driver via `configure_backend_files` (MCP) or the panel; S3
+Set the driver via `configure_backend_files` (MCP) or `PUT /admin/files/config`; S3
 credentials are set separately (`s3AccessKeyId`/`s3SecretAccessKey`) and are
 never echoed back by any read surface — same convention as the SMTP password.
 **Switching drivers does not migrate existing files** — that is a documented

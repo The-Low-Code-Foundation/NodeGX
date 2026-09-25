@@ -12,7 +12,6 @@ import classNames from 'classnames';
 import React, { useCallback, useState } from 'react';
 
 import { securityFor } from '@noodl-models/BackendServices';
-import { SidebarModel } from '@noodl-models/sidebar';
 import { getIpc } from '@noodl-utils/ipc';
 
 import { Icon, IconName, IconSize } from '@noodl-core-ui/components/common/Icon';
@@ -26,7 +25,6 @@ import { ToastLayer } from '../../../ToastLayer/ToastLayer';
 import { LocalBackendInfo } from '../hooks/useLocalBackends';
 import { SecurityDisclosure } from '../SecurityDisclosure/SecurityDisclosure';
 import { CloudFunctionsSection } from './CloudFunctionsSection';
-import { BACKEND_SERVICES_PANEL_ID, BackendSurfaceKind, openBackendSurface } from './backendSurfaces';
 import css from './LocalBackendCard.module.scss';
 
 export interface LocalBackendCardProps {
@@ -111,50 +109,6 @@ export function LocalBackendCard({
   const [isOperating, setIsOperating] = useState(false);
   const statusDisplay = getStatusDisplay(backend);
 
-  /**
-   * PNL-009: open a backend surface as a panel.
-   *
-   * This replaces seven `createPortal(…, document.body)` calls into a
-   * `position: fixed` overlay with an 85%-black scrim. The surface is now a
-   * registered (transient) panel, so it arrives with the rail still live, a
-   * header, `Escape`, and a remembered width — see `backendSurfaces.tsx` for why
-   * registration was chosen over an ad-hoc child of full mode.
-   *
-   * POL-005: this used to follow the open with `layout.openFull()`, which
-   * stretched an 860px-designed layout across the whole editor. All seven
-   * surfaces declare `defaultWidth: SURFACE_DEFAULT_WIDTH` (860) because that is
-   * the width the 900px modals they came from were laid out at, and full mode
-   * threw that away on every open.
-   *
-   * Richard reported it as "an extra X in the top right that just collapses the
-   * view", and then diagnosed it correctly himself: "the collapsed version looks
-   * perfect — maybe just make that the default and take away that weird
-   * collapsing X." The X was never an extra button. It is PNL-009's
-   * detached-panel bar, which renders only when `isDetached`, and it calls
-   * `dock()` — i.e. it took the panel back to the 860px the surfaces were built
-   * for. Dropping `openFull()` fixes both halves at once: the surfaces open at
-   * their designed width, and the bar stops existing because nothing on this
-   * path detaches any more.
-   *
-   * Float and full are still reachable from the panel header for a user who
-   * chooses them, and that path still gets the detached bar. That is coherent —
-   * what was wrong was arriving there without asking.
-   */
-  const openSurface = useCallback(
-    (kind: BackendSurfaceKind) => {
-      openBackendSurface(kind, {
-        backendId: backend.id,
-        backendName: backend.name,
-        isRunning: backend.running,
-        // No `dock()` here any more: this path never detaches, so docking on
-        // close was returning the panel to the mode it was already in. A user
-        // who chose full from the header keeps it, which is what they asked for.
-        onClose: () => SidebarModel.instance.switch(BACKEND_SERVICES_PANEL_ID)
-      });
-    },
-    [backend.id, backend.name, backend.running]
-  );
-
   const isEphemeral = backend.running && backend.persistence?.mode === 'ephemeral';
   const hasFailed = !backend.running && backend.persistence?.mode === 'failed';
   const failureMessage = backend.persistence?.error?.message;
@@ -194,6 +148,7 @@ export function LocalBackendCard({
 
   // Open the backend's web dashboard. The main process resolves the admin
   // credential and opens the browser, so the token never reaches this renderer.
+  // (`openBackendManager` is the same call with a route; the card opens the home.)
   const handleOpenManager = useCallback(async () => {
     try {
       await getIpc()?.invoke('backend:open-dashboard', backend.id);
@@ -226,21 +181,12 @@ export function LocalBackendCard({
       items.push('divider');
     }
 
-    if (backend.running) {
-      // Triggers, Email and Sign-in providers left this menu for the backend
-      // manager, which has all three. These two stay because it has neither.
-      items.push(
-        { label: 'Search', icon: IconName.Search, onClick: () => openSurface('search') },
-        // SB-015 §6.4a: the credentials a cloud function's Secret node reads.
-        // Until this entry existed, the only way to provision one was to
-        // hand-edit a mode-0600 secrets.json the editor never shows you.
-        { label: 'Secrets', icon: IconName.Setting, onClick: () => openSurface('secrets') }
-      );
-
-      if (onExport) {
-        items.push('divider');
-        items.push({ label: 'Export data…', icon: IconName.CloudDownload, onClick: onExport });
-      }
+    // BMG-012: Search and Secrets were the last two editor panels on this menu
+    // (Triggers, Email and Sign-in providers left it for the manager in
+    // BMG-000). The manager has both now (`#/search`, `#/secrets`), so the
+    // menu keeps only what is about the backend as a process.
+    if (backend.running && onExport) {
+      items.push({ label: 'Export data…', icon: IconName.CloudDownload, onClick: onExport });
     }
 
     // AAQ-002: the endpoint card's own action, on the card that now stands for
@@ -270,7 +216,7 @@ export function LocalBackendCard({
     });
 
     showContextMenuInPopup({ items, width: MenuDialogWidth.Default });
-  }, [backend.running, backend.id, onDelete, onRename, onDisconnect, onExport, openSurface]);
+  }, [backend.running, backend.id, onDelete, onRename, onDisconnect, onExport]);
 
   return (
     <div
@@ -486,11 +432,10 @@ export function LocalBackendCard({
         </div>
       </div>
 
-      {/* PNL-009: the eight full-screen surfaces used to be rendered from here
-          through `createPortal(…, document.body)` into a `position: fixed`
-          overlay with a hardcoded 85%-black scrim. They are registered panels
-          now and open in full mode — see `openSurface` above and
-          `backendSurfaces.tsx` for the reasoning. Nothing renders here. */}
+      {/* PNL-009 turned eight full-screen overlays into registered panels;
+          BMG-012 removed the panels: the backend manager in the browser is
+          the one surface for everything inside a backend. Nothing renders
+          here. */}
     </div>
   );
 }

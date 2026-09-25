@@ -177,16 +177,53 @@ export function signOut(message?: string | null): void {
 /**
  * Boot order, and why:
  *  0. The editor's "Manage data & settings" button hands the credential over in
- *     the fragment (`#token=…`). A fragment never reaches the server or its
- *     logs; it is scrubbed from the address bar and this history entry before
- *     anything else runs, then behaves exactly like a kept token.
+ *     the fragment (`#token=…`, optionally `&route=…` — the page to land on,
+ *     BMG-012). A fragment never reaches the server or its logs; it is scrubbed
+ *     from the address bar and this history entry before anything else runs,
+ *     then behaves exactly like a kept token.
  *  1. A token kept for this tab signs straight back in; a rejected one falls
  *     back to the form rather than looping.
  *  2. Otherwise probe with NO credential and expect a 401 (FH-024: dev-open no
  *     longer relaxes the admin gate). A backend that answers it has regressed.
  */
+export interface Handoff {
+  token: string;
+  /** A manager hash path to land on once signed in (`/schema/Pet/new-field`), or null. */
+  route: string | null;
+}
+
+/**
+ * Read the editor's hand-off out of a fragment (BMG-000, BMG-012).
+ *
+ *   #token=<credential>                            open on the home
+ *   #token=<credential>&route=%2Fschema%2FPet%2Fnew-field   open on that page
+ *
+ * The route is a path the router already understands (`parseHash`), sent by the
+ * editor's two doors — the property panel's *Add a field* and the canvas's
+ * *Add / Edit this trigger*. It is accepted only as a path: one leading `/`,
+ * never `//` (a host to a browser), and nothing after a `#`. Anything else is
+ * ignored and the page opens on its home, signed in — the credential is never
+ * refused because the route was odd.
+ */
+export function readHandoff(hash: string): Handoff | null {
+  const m = /^#token=([^&]+)(?:&(.*))?$/.exec(hash || '');
+  if (!m) return null;
+  let token = m[1];
+  try {
+    token = decodeURIComponent(token);
+  } catch {
+    /* an undecodable credential is presented as typed; the server refuses it */
+  }
+  let route: string | null = null;
+  if (m[2]) {
+    const raw = new URLSearchParams(m[2]).get('route') || '';
+    if (/^\/(?!\/)[^#\s]*$/.test(raw)) route = raw;
+  }
+  return { token, route };
+}
+
 export async function bootSession(): Promise<void> {
-  const handoff = /^#token=([^&]+)/.exec(location.hash || '');
+  const handoff = readHandoff(location.hash || '');
   let stored: Credential | null = null;
   if (handoff) {
     try {
@@ -194,8 +231,13 @@ export async function bootSession(): Promise<void> {
     } catch {
       location.hash = '';
     }
-    stored = { kind: 'token', value: decodeURIComponent(handoff[1]) };
+    stored = { kind: 'token', value: handoff.token };
     keep(stored);
+    // The route is set AFTER the fragment is scrubbed, so the address bar never
+    // shows the credential and the router (which ignores `token=`) sees a plain
+    // page path. `useRoute` listens for the change; a page that mounted on the
+    // home before this line re-routes.
+    if (handoff.route) location.hash = '#' + handoff.route;
   }
   if (!stored) {
     try {

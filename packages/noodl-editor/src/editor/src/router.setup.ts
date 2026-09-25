@@ -28,7 +28,6 @@ import { ComponentDiffDocumentProvider } from './views/documents/ComponentDiffDo
 import { EditorDocumentProvider } from './views/documents/EditorDocument';
 import { AiAuthoringPanel, AiAuthoringPanel_ID } from './views/panels/AiAuthoringPanel';
 import { BackendServicesPanel } from './views/panels/BackendServicesPanel/BackendServicesPanel';
-import { installBackendSurfacePanels } from './views/panels/BackendServicesPanel/LocalBackendCard/backendSurfaces';
 import { ComponentPortsComponent } from './views/panels/componentports';
 import { ComponentsPanel } from './views/panels/componentspanel';
 import { PANEL_TITLE } from './views/panels/ComponentsPanelNew/layersTab';
@@ -396,8 +395,8 @@ export function installSidePanel({ isLesson, lessonNeedsDatabase }: SetupEditorO
     name: 'Backend Services',
     // 🔴 TUT-005 — a lesson that grades against the database KEEPS this panel,
     // and it is the only lesson exception in the rail. `log-a-thing` step 1 is
-    // "create a collection called LogEntries", and the Schema and Data surfaces
-    // open from a local backend's card in here (`backendSurfaces.tsx`) and from
+    // "create a collection called LogEntries", and the way to the backend
+    // manager (the card's *Manage data & settings*, BMG-012) is in here and
     // nowhere else — so disabling it for every lesson made that step, and the
     // tutorial behind it, impossible to finish. `ensureLessonBackend` has
     // already created and bound the backend by the time a learner opens this,
@@ -410,11 +409,10 @@ export function installSidePanel({ isLesson, lessonNeedsDatabase }: SetupEditorO
     panel: BackendServicesPanel
   });
 
-  // PNL-009: Schema, Data, Access, Triggers, Email, Sign-in providers and
-  // Search. Transient, so they take no rail slot — they are opened from a local
-  // backend's card and land in full mode. They used to be `createPortal` calls
-  // into a fixed overlay; see `backendSurfaces.tsx` for what that cost.
-  installBackendSurfacePanels();
+  // BMG-012: the eight backend surfaces (schema, data, access, triggers, email,
+  // sign-in providers, search, secrets) that PNL-009 registered here as
+  // transient panels are gone. The backend manager in the browser is the one
+  // surface for everything inside a backend; the card opens it.
 
   // WFA-002: no longer experimental. It has a main-process handler, real data
   // from every running backend, and a working detail view — the flag was a

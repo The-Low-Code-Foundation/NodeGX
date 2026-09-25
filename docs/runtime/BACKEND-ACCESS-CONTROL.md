@@ -75,8 +75,8 @@ still set an explicit ACL when you need something other than private.
 
 ## Roles and API keys
 
-- **Roles** are flat (no nesting). Create them and assign users in the panel or
-  over MCP; reference them from CLPs and ACLs as `role:<name>`.
+- **Roles** are flat (no nesting). Create them and add members on the manager's
+  Roles page or over MCP; reference them from CLPs and ACLs as `role:<name>`.
 - **API keys** are for server-to-server callers (a cron job, a webhook sender).
   Scopes: `functions:<name>` / `functions:*` (call those functions),
   `classes:read` / `classes:write` / `classes:*` (data access, all

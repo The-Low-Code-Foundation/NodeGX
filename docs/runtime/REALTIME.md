@@ -3,7 +3,7 @@
 The NodeGX standalone backend (`nodegx-backend`) pushes live create/update/delete
 events to clients over **Server-Sent Events (SSE)**. This is what makes a NodeGX
 app feel alive: a record created in one browser appears in another without a
-refresh, the editor's Data Browser updates as functions write, and a Query Data
+refresh, the backend manager's Collections page updates as functions write, and a Query Data
 node with **Live** on re-queries automatically.
 
 > **Why SSE, not WebSocket?** SSE survives proxies and CDNs that mangle WebSocket
@@ -127,8 +127,9 @@ to seek).
 - **Query Data** node: turn on **Live** (NodeGX backends) and the node keeps its
   results current on its own — it opens a collection subscription and re-runs the
   query (debounced) whenever a record changes.
-- **Editor Data Browser**: rides the same stream, so it reflects writes from other
-  clients and cloud functions without a manual refresh.
+- **The backend manager's Collections page** (its **Live** toggle): rides the same
+  stream, so it reflects writes from other clients and cloud functions without a
+  manual refresh.
 
 ## Out of scope (by design)
 

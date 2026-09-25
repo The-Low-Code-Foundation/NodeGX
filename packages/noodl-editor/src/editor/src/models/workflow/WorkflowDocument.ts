@@ -26,15 +26,13 @@ import { WarningsModel } from '@noodl-models/warningsmodel';
 import { NodeGraphContextTmp } from '../../contexts/NodeGraphContext/NodeGraphContext';
 import { ComponentTemplates } from '../../views/panels/ComponentsPanelNew/ComponentTemplates';
 import { ToastLayer } from '../../views/ToastLayer/ToastLayer';
-import {
-  OPEN_TRIGGERS_SURFACE
-} from '../../views/panels/BackendServicesPanel/LocalBackendCard/backendSurfaces';
 import Model from '../../../../shared/model';
 import { EventDispatcher } from '../../../../shared/utils/EventDispatcher';
 import {
   deleteTrigger,
   fetchBackendEndpoint,
   listTriggers,
+  openTriggerInManager,
   setTriggerEnabled,
   TriggerDef,
   TRIGGERS_CHANGED,
@@ -622,16 +620,14 @@ export class WorkflowDocument extends Model {
    * where the label can name the backend it is about to change.
    */
   private triggerActions(nodeId: string): unknown[] {
-    // Adding one needs a form — type, cron or slug, scheme, target — and that
-    // form is the Triggers panel. The canvas asks for it rather than growing a
-    // second one on a Canvas2D surface that has no controls.
+    // Adding one needs a form — type, schedule or slug, scheme, target — and
+    // that form is the backend manager's Triggers page (BMG-012: the editor's
+    // own panel is gone). The canvas opens the manager at `#/triggers/new`
+    // rather than growing a second form on a Canvas2D surface that has no
+    // controls. A backend that is not running is the toast's sentence.
     const add = {
       label: `Add a trigger on ${this.ref.backendName}…`,
-      onClick: () =>
-        EventDispatcher.instance.emit(OPEN_TRIGGERS_SURFACE, {
-          backendId: this.ref.backendId,
-          backendName: this.ref.backendName
-        })
+      onClick: () => void this.openTriggerInManager()
     };
 
     const triggerId = triggerIdOfNode({ id: nodeId, typename: this.graph.findNodeWithId(nodeId)?.typename });
@@ -648,19 +644,15 @@ export class WorkflowDocument extends Model {
         /**
          * WFA-008: a door to the one form, not a second form.
          *
-         * The fields of a trigger are a target picker, a JSON payload box and a
-         * scheme dropdown, and the registry's refusals are three-line
-         * sentences — none of which a Canvas2D property row can hold. The panel
-         * has all of it already, so the canvas points at it, pre-pointed at this
-         * trigger. Reasoning in WFA-008-ASSESSMENT §1.
+         * The fields of a trigger are a target picker, a payload as typed rows
+         * and a scheme choice, and the registry's refusals are three-line
+         * sentences — none of which a Canvas2D property row can hold. The
+         * manager's Triggers page has all of it (BMG-008), so the canvas opens
+         * it at this trigger (`#/triggers/<id>`). Reasoning in
+         * WFA-008-ASSESSMENT §1; the page replaced the panel in BMG-012.
          */
         label: 'Edit this trigger…',
-        onClick: () =>
-          EventDispatcher.instance.emit(OPEN_TRIGGERS_SURFACE, {
-            backendId: this.ref.backendId,
-            backendName: this.ref.backendName,
-            editTriggerId: triggerId
-          })
+        onClick: () => void this.openTriggerInManager(triggerId)
       },
       {
         label: trigger.enabled ? 'Disable this trigger' : 'Enable this trigger',
@@ -682,6 +674,18 @@ export class WorkflowDocument extends Model {
    * failure this surface exists to prevent, and optimistically painting the
    * requested state is how that failure gets reintroduced.
    */
+  /**
+   * Open the backend manager's Triggers page — at a trigger, or at the new-trigger
+   * drawer. The manager is the one form (BMG-012).
+   */
+  async openTriggerInManager(triggerId?: string): Promise<void> {
+    try {
+      await openTriggerInManager(this.ref.backendId, triggerId);
+    } catch (e) {
+      ToastLayer.showError(`Could not open the backend manager: ${(e as Error).message}`);
+    }
+  }
+
   async setTriggerEnabled(triggerId: string, enabled: boolean): Promise<void> {
     await setTriggerEnabled(this.ref.backendId, triggerId, enabled);
     await this.refreshTriggers();
