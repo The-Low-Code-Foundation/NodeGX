@@ -28,7 +28,7 @@ serve path had read the current driver; an S3 fake for specs and drives).
 | BMG-014 The first admin is a person | ✅ s12 | ✅ headless, AC1–3 + 6, 33/33 checks (§6) | ✅ `aad1a80c` |
 | BMG-011 Files, Backups, Ops | ✅ s13 | ✅ headless, AC1–9, 39/39 checks (§6) | ✅ `43efcd08` |
 | BMG-012 The editor lets go | ✅ s14 | ✅ headless, AC1–6, 15/15 page checks + 9 jest (§6) | ✅ `623a509f` |
-| BMG-015 Storage off the disk (S3) | ✅ s15 | ✅ headless, AC1–6, 19/19 checks + 18 HTTP + 10 page (§6) | ⏳ s15 (see the commit line below) |
+| BMG-015 Storage off the disk (S3) | ✅ s15 | ✅ headless, AC1–6, 19/19 checks + 18 HTTP + 10 page (§6) | ✅ `eed691b3b` |
 | BMG-013 Richard drives | his | — | — |
 
 Built-but-undriven: 0. Built-but-uncommitted: 0. Check `git status -- packages/nodegx-backend/src/admin`
