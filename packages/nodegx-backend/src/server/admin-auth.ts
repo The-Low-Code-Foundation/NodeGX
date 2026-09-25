@@ -78,6 +78,12 @@ export class AdminAuthRoutes {
       },
       /** The presets a UI offers when adding a provider. Data, so the panel and the dashboard agree. */
       presets: PROVIDER_PRESETS,
+      /**
+       * The callback URL a provider NOT YET SAVED will have, with `{id}` where its id goes
+       * (BMG-010 §3.2 step 2: the wizard shows the URL to register before anything is stored).
+       * Built by the same function as every row's `callbackUrl`, so the two cannot disagree.
+       */
+      callbackUrlTemplate: this.deps.callbackUrl('ID').replace(/\/ID\/callback$/, '/{id}/callback'),
       baseUrl: {
         url: baseUrl.url,
         /**

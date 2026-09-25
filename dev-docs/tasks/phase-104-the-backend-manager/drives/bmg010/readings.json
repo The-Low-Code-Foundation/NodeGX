@@ -1,0 +1,250 @@
+{
+  "checks": {
+    "signin: the page warns that no base URL is set, before anything else": {
+      "pass": true,
+      "detail": "No baseUrl is configured for this backend, so callback URLs below use the local address. Set the Base URL in the Email section (it is the backend's one canonical public origin) before registering these URLs with a provider."
+    },
+    "AC7 signin: no textarea": {
+      "pass": true
+    },
+    "AC7 signin: no separated field": {
+      "pass": true,
+      "detail": []
+    },
+    "wizard opens at #/signin/new in a drawer, on step 1": {
+      "pass": true,
+      "detail": "1 Which"
+    },
+    "step 1: the tiles are Google · GitHub · Another OpenID Connect provider (the backend has no other preset)": {
+      "pass": true,
+      "detail": [
+        "Google",
+        "GitHub",
+        "Another OpenID Connect provider"
+      ]
+    },
+    "step 1: Google is picked and the button label is prefilled": {
+      "pass": true
+    },
+    "step 2: the callback URL is shown first, big, and equals the server’s template for \"google\"": {
+      "pass": true,
+      "detail": {
+        "cbShown": "http://127.0.0.1:8697/oauth/google/callback",
+        "expectedCb": "http://127.0.0.1:8697/oauth/google/callback"
+      }
+    },
+    "§5: with no base URL, the warning comes BEFORE the callback URL": {
+      "pass": true
+    },
+    "step 2: the steps are in Google’s own words and end at the client id and secret": {
+      "pass": true,
+      "detail": [
+        "Open Google Cloud → APIs & Services → Credentials.",
+        "Create credentials → OAuth client ID → application type Web application.",
+        "Under Authorised redirect URIs, press Add URI and paste the callback URL above.",
+        "Press Create and keep the Client ID and Client secret it shows for step 3."
+      ]
+    },
+    "step 2: a link to Google’s console, and a Copy button": {
+      "pass": true
+    },
+    "step 3: what we may read is two boxes — identity locked on, profile optional on; no scope field": {
+      "pass": true,
+      "detail": [
+        [
+          "Who they are and their email address (needed to sign in)",
+          true,
+          true
+        ],
+        [
+          "Their name and profile picture",
+          true,
+          false
+        ]
+      ]
+    },
+    "step 3: Add is disabled until the client id and secret are pasted": {
+      "pass": true,
+      "detail": true
+    },
+    "AC4: GET /admin/auth holds the record the old modal made for the google preset, scopes as an array; the secret set, never echoed": {
+      "pass": true,
+      "detail": {
+        "id": "google",
+        "kind": "oidc",
+        "displayName": "Google",
+        "enabled": true,
+        "clientId": "cid-123",
+        "issuer": "https://accounts.google.com",
+        "scopes": [
+          "openid",
+          "email",
+          "profile"
+        ],
+        "allowSignup": true
+      }
+    },
+    "after Add the drawer closes onto the list, which says enabled · ready": {
+      "pass": true,
+      "detail": "Google\ngoogle\n\tOpenID Connect\tenabledready\thttp://127.0.0.1:8697/oauth/google/callback\tCopy URLEditRemove"
+    },
+    "a not-ready provider says which step is missing": {
+      "pass": true,
+      "detail": "GitHub\ngithub\n\tGitHub\tenablednot ready\nMissing — Step 3: the client secret\n\thttp://127.0.0.1:8697/oauth/github/callback\tCopy URLEditRemove"
+    },
+    "Edit opens #/signin/github on step 3 with the client id kept and the secret \"(not set)\"": {
+      "pass": true
+    },
+    "AC5: \"example.com\" is refused inline with the fix in the sentence; no chip": {
+      "pass": true,
+      "detail": "An origin starts with https:// (or http://localhost while you develop) — e.g. https://example.com"
+    },
+    "AC5: a pasted page URL becomes its origin as a chip": {
+      "pass": true,
+      "detail": [
+        "https://app.example.com"
+      ]
+    },
+    "AC5: GET /admin/auth reads it back": {
+      "pass": true,
+      "detail": [
+        "https://app.example.com"
+      ]
+    },
+    "email: says it is NOT configured": {
+      "pass": true,
+      "detail": "Email is NOT configured: Email is not configured for this backend: no SMTP host/port set. Configure SMTP in the Backend Services panel (Email section) or via the backend admin API before this can send mail.. Sends fail loudly into execution records rather than queueing."
+    },
+    "AC7 email: no textarea on the page": {
+      "pass": true
+    },
+    "AC7 email: no separated field": {
+      "pass": true,
+      "detail": []
+    },
+    "AC1: the provider tiles": {
+      "pass": true,
+      "detail": [
+        "Gmail / Google Workspace",
+        "Resend",
+        "Postmark",
+        "Amazon SES",
+        "Mailgun",
+        "Brevo",
+        "Other"
+      ]
+    },
+    "AC1: Resend fills smtp.resend.com · 465 · TLS on, says the username is \"resend\" and the password an API key, links to where keys are made": {
+      "pass": true,
+      "detail": {
+        "host": "smtp.resend.com",
+        "port": "465",
+        "tls": true,
+        "hint": "Username: The word resend. Password: An API key from Resend. Make an API key ↗",
+        "link": "https://resend.com/api-keys"
+      }
+    },
+    "AC1: Gmail says an App password, not the Google password": {
+      "pass": true
+    },
+    "the policy switches sit under \"When someone signs up\"": {
+      "pass": true
+    },
+    "Save: the config route holds host · port · enabled · from · base URL": {
+      "pass": true,
+      "detail": {
+        "configured": true,
+        "smtp": {
+          "host": "127.0.0.1",
+          "port": 2526,
+          "secure": false,
+          "username": ""
+        }
+      }
+    },
+    "AC1: Send test email → one message in the sink, to me@drive.test": {
+      "pass": true,
+      "detail": {
+        "to": [
+          "<me@drive.test>"
+        ],
+        "subject": "Subject: NodeGX backend: test email"
+      }
+    },
+    "the card’s Edit opens #/email/verifyEmail in a drawer titled in words": {
+      "pass": true
+    },
+    "AC3: the chips are exactly the backend’s variables for this template (name and label)": {
+      "pass": true,
+      "detail": [
+        [
+          "appName",
+          "App name"
+        ],
+        [
+          "username",
+          "Username"
+        ],
+        [
+          "verifyUrl",
+          "Verification link"
+        ]
+      ]
+    },
+    "AC3: no chip for a name this template’s sender does not supply (expiresIn)": {
+      "pass": true
+    },
+    "AC3: clicking every chip drops its {{token}} into the body at the caret": {
+      "pass": true,
+      "detail": "{{appName}}{{username}}{{verifyUrl}}"
+    },
+    "AC3: every token renders as its sample in the server’s preview — none is empty": {
+      "pass": true,
+      "detail": "Your Appjane.doehttps://example.com/apps/demo/verify_email?username=jane.doe&token=SAMPLE"
+    },
+    "AC2: the preview pane is the server’s rendering of the unsaved draft": {
+      "pass": true,
+      "detail": {
+        "previewSubject": "Hello jane.doe from Your App",
+        "previewText": "Go here: https://example.com/apps/demo/verify_email?username=jane.doe&token=SAMPLE\n\nThanks."
+      }
+    },
+    "§5: the preview renders no HTML in the page (text nodes only)": {
+      "pass": true
+    },
+    "AC2: Send me this → the message in the sink carries the preview’s subject and body, UNSAVED": {
+      "pass": true,
+      "detail": {
+        "wireSubject": "Hello jane.doe from Your App",
+        "wireText": "Go here: https://example.com/apps/demo/verify_email?username=jane.doe&token=SAMPLE\n\nThanks."
+      }
+    },
+    "AC2: previewing and sending saved nothing": {
+      "pass": true
+    },
+    "AC2: Save → the route holds the subject and body; the card says edited": {
+      "pass": true,
+      "detail": {
+        "subject": "Hello {{username}} from {{appName}}",
+        "text": "Go here: {{verifyUrl}}\n\nThanks.",
+        "html": "<p>Hi {{username}},</p><p>Please confirm your email address for <strong>{{appName}}</strong> by clicking the link below:</p><p><a href=\"{{verifyUrl}}\">{{verifyUrl}}</a></p><p>If you didn't create this account, you can ignore this email.</p>"
+      }
+    },
+    "after Save the danger row offers Reset to default": {
+      "pass": true
+    },
+    "AC2: Reset → the shipped default is back and the card chip says default": {
+      "pass": true,
+      "detail": {
+        "cardChip": "default",
+        "subject": "Verify your email for {{appName}}"
+      }
+    },
+    "AC7 email, drawer open: the only textareas are the body and the HTML (prose), no separated field": {
+      "pass": true
+    },
+    "Edit HTML is behind a disclosure and shows the rendered HTML as source, not as a page": {
+      "pass": true
+    }
+  }
+}

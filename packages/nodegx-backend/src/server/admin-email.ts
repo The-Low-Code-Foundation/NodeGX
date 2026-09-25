@@ -6,8 +6,11 @@
  *   PUT  /admin/email/config              update config; optional `smtpPassword` field writes the secret
  *   POST /admin/email/test                send a test email NOW — throws loudly if unconfigured/failed
  *   GET  /admin/email/templates           the effective (default-merged) templates + which are overridden
+ *                                         + the variables each may use (BMG-010 AC3)
  *   PUT  /admin/email/templates/:id       set an override for one template
  *   DELETE /admin/email/templates/:id     revert one template to the shipped default
+ *   GET  /admin/email/templates/:id/preview[?subject&text&html]  rendered against sample variables; an
+ *                                         unsaved draft rides in the query (BMG-010 AC2)
  *
  * All admin-gated by the HttpServer dispatcher. The same surface backs the
  * editor's Email panel section AND the MCP tools — one model, two fronts,
@@ -24,10 +27,13 @@ import {
   DEFAULT_TEMPLATES,
   TEMPLATE_IDS,
   EmailTemplate,
+  TEMPLATE_VARIABLES,
   TemplateId,
+  TemplateVariable,
   isTemplateId,
   mergeTemplate,
-  renderTemplate
+  renderTemplate,
+  sampleVariables
 } from '../email/templates';
 import type { RequestContext } from './HttpServer';
 import { HttpError, readJSONBody, sendJSON } from './http-util';
@@ -41,6 +47,8 @@ export interface TemplateEntry {
   /** default merged with override — what actually gets sent. */
   effective: EmailTemplate;
   isOverridden: boolean;
+  /** The `{{names}}` this template's sender supplies — what a page may offer as chips (BMG-010 AC3). */
+  variables: TemplateVariable[];
 }
 
 export interface TemplateListResponse {
@@ -60,6 +68,15 @@ export interface TemplateMutationResponse {
 export interface TemplatePreviewResponse {
   id: TemplateId;
   preview: EmailTemplate;
+}
+
+/** `POST /admin/email/test`. `sent` is present when a template was sent (BMG-010 AC2: it equals the preview). */
+export interface TestSendResponse {
+  success: true;
+  retried: boolean;
+  baseUrlWarning: boolean;
+  template?: TemplateId;
+  sent?: EmailTemplate;
 }
 
 export class AdminEmailRoutes {
@@ -131,6 +148,25 @@ export class AdminEmailRoutes {
       throw new HttpError(503, this.emailConfig.notConfiguredReason());
     }
     const { usedFallback } = this.emailConfig.effectiveBaseUrl('');
+
+    // BMG-010 AC2 — *Send me this*: a template (with an unsaved draft over it),
+    // rendered against the SAME samples the preview route uses, so what lands
+    // in the inbox is what the preview pane showed. Same route, so the audit
+    // action and the read-only refusal it already has cover it.
+    if (body.template !== undefined) {
+      const id = body.template;
+      if (!isTemplateId(id)) {
+        throw new HttpError(404, `No such template: ${String(id)}. Known: ${TEMPLATE_IDS.join(', ')}`);
+      }
+      const rendered = renderTemplate(mergeTemplate(this.emailConfig.effectiveTemplate(id), draftFrom(body)), sampleVariables(id));
+      const result = await this.mailer.send({ to, subject: rendered.subject, text: rendered.text, html: rendered.html });
+      if (!result.success) {
+        throw new HttpError(502, result.error || 'Failed to send the test email.');
+      }
+      sendJSON(ctx.res, 200, { success: true, retried: Boolean(result.retried), baseUrlWarning: usedFallback, template: id, sent: rendered } satisfies TestSendResponse);
+      return;
+    }
+
     const result = await this.mailer.send({
       to,
       subject: 'NodeGX backend: test email',
@@ -141,7 +177,7 @@ export class AdminEmailRoutes {
     if (!result.success) {
       throw new HttpError(502, result.error || 'Failed to send test email.');
     }
-    sendJSON(ctx.res, 200, { success: true, retried: Boolean(result.retried), baseUrlWarning: usedFallback });
+    sendJSON(ctx.res, 200, { success: true, retried: Boolean(result.retried), baseUrlWarning: usedFallback } satisfies TestSendResponse);
   }
 
   // ==========================================================================
@@ -152,7 +188,7 @@ export class AdminEmailRoutes {
     const templates = TEMPLATE_IDS.map((id) => {
       const override = this.emailConfig.config.templates[id];
       const effective = this.emailConfig.effectiveTemplate(id);
-      return { id, default: DEFAULT_TEMPLATES[id], override: override || null, effective, isOverridden: Boolean(override) };
+      return { id, default: DEFAULT_TEMPLATES[id], override: override || null, effective, isOverridden: Boolean(override), variables: TEMPLATE_VARIABLES[id] };
     });
     sendJSON(ctx.res, 200, { templates } satisfies TemplateListResponse);
   }
@@ -193,19 +229,27 @@ export class AdminEmailRoutes {
     } satisfies TemplateMutationResponse);
   }
 
-  /** Preview a template rendered against sample variables — used by the panel, harmless without sending anything. */
+  /**
+   * Preview a template rendered against its sample variables — harmless, nothing is sent.
+   * An unsaved draft rides in the query (`?subject=&text=&html=`, BMG-010 AC2): a field given
+   * replaces the effective one under the same rule a save uses (blank falls back), so the
+   * pane shows exactly what *Save* would make the sender send.
+   */
   previewTemplate(ctx: RequestContext): void {
     const id = ctx.params.id;
     if (!isTemplateId(id)) {
       throw new HttpError(404, `No such template: ${id}. Known: ${TEMPLATE_IDS.join(', ')}`);
     }
-    const rendered = renderTemplate(this.emailConfig.effectiveTemplate(id), {
-      appName: 'Your App',
-      username: 'jane.doe',
-      resetUrl: 'https://example.com/apps/demo/request_password_reset?token=SAMPLE&username=jane.doe',
-      verifyUrl: 'https://example.com/apps/demo/verify_email?username=jane.doe&token=SAMPLE',
-      expiresIn: '1 hour'
-    });
+    const rendered = renderTemplate(mergeTemplate(this.emailConfig.effectiveTemplate(id), draftFrom(ctx.query)), sampleVariables(id));
     sendJSON(ctx.res, 200, { id, preview: rendered } satisfies TemplatePreviewResponse);
   }
+}
+
+/** The template fields a request carries (a query or a body): only the ones given, only as strings. */
+function draftFrom(source: Record<string, unknown>): Partial<EmailTemplate> {
+  const draft: Partial<EmailTemplate> = {};
+  if (typeof source.subject === 'string') draft.subject = source.subject;
+  if (typeof source.text === 'string') draft.text = source.text;
+  if (typeof source.html === 'string') draft.html = source.html;
+  return draft;
 }

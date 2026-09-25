@@ -233,8 +233,26 @@ describe('BAK-005 dashboard document (BMG-001: the shell, the bundle, the token 
     expect(bundle).not.toMatch(/\b(src|href)\s*[:=]\s*["'`]https?:/);
     const urls = Array.from(new Set(bundle.match(/https?:\/\/[^"'`\s)]*/g) || []));
     expect(urls.length).toBeGreaterThan(0);
-    const allowed = (u: string) => /^https?:\/\/www\.w3\.org\//.test(u) || /example\.com/.test(u) || u === 'https://accounts.google.com';
+    // BMG-010: the SMTP preset table (`app/smtpPresets.ts`) names where each provider issues its
+    // credential. They are `<a href target="_blank">` links a PERSON follows — never fetched, never a
+    // src — and this is the reviewed set. Adding one is a deliberate act: name it here.
+    const CREDENTIAL_PAGES = [
+      'https://myaccount.google.com/apppasswords',
+      'https://resend.com/api-keys',
+      'https://account.postmarkapp.com/servers',
+      'https://console.aws.amazon.com/ses/home#/smtp',
+      'https://app.mailgun.com/mailgun-cp/sending/domains',
+      'https://app.brevo.com/settings/keys/smtp'
+    ];
+    // A scheme with no host ("starts with https://", "Use https://.") or the loopback NAME ("http://localhost
+    // while you develop") is a word in a sentence about origins (BMG-010 AC5), not somewhere the page can reach.
+    const words = (u: string) => /^https?:\/\/\.?$/.test(u) || u === 'http://localhost';
+    const allowed = (u: string) =>
+      /^https?:\/\/www\.w3\.org\//.test(u) || /example\.com/.test(u) || u === 'https://accounts.google.com' || CREDENTIAL_PAGES.includes(u) || words(u);
     expect(urls.filter((u) => !allowed(u))).toEqual([]);
+    // …and the table names exactly that set, so neither list can grow without the other noticing.
+    const { SMTP_PRESETS } = require('../src/admin/app/smtpPresets') as typeof import('../src/admin/app/smtpPresets');
+    expect(SMTP_PRESETS.map((p) => p.credentialUrl).filter(Boolean).sort()).toEqual([...CREDENTIAL_PAGES].sort());
   });
 
   /**

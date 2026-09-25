@@ -1938,3 +1938,154 @@ pre.secret-box {
   gap: 8px;
   padding: 4px 0;
 }
+
+/* ---- BMG-010: email provider tiles, the template drawer, the sign-in wizard ---------------- */
+
+.tiles.providers {
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  margin-top: 6px;
+}
+
+.placeholder-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0;
+}
+
+.placeholder-bar button.chip {
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  border: 1px solid var(--border-control);
+}
+
+.placeholder-bar button.chip:hover:not([disabled]) {
+  background: var(--primary-bg);
+}
+
+.preview-pane {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+
+.preview-pane .preview-subject {
+  font-weight: 600;
+  color: var(--fg-hi);
+  margin-bottom: 6px;
+}
+
+.preview-pane pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font: inherit;
+  font-size: 13px;
+  color: var(--fg);
+}
+
+pre.preview-pane.mono {
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.template-card + .template-card {
+  margin-top: 8px;
+}
+
+.wizard-steps {
+  list-style: none;
+  display: flex;
+  gap: 6px;
+  padding: 0;
+  margin: 0 0 14px;
+}
+
+.wizard-steps li {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--fg-muted);
+  font-size: 12px;
+}
+
+.wizard-steps li button {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  cursor: pointer;
+  color: inherit;
+}
+
+.wizard-steps li button[disabled] {
+  cursor: default;
+}
+
+.wizard-steps li .num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-2);
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.wizard-steps li.current {
+  border-color: var(--primary);
+  color: var(--fg-hi);
+}
+
+.wizard-steps li.done {
+  color: var(--fg);
+}
+
+.wizard-steps li.done .num,
+.wizard-steps li.current .num {
+  background: var(--primary);
+  color: var(--primary-fg);
+}
+
+.wizard-step {
+  display: grid;
+  gap: 12px;
+}
+
+.callback-url {
+  font-size: 14px;
+  word-break: break-all;
+  user-select: all;
+}
+
+.wizard-list {
+  margin: 6px 0 0;
+  padding-left: 20px;
+}
+
+.wizard-list li {
+  margin: 4px 0;
+}
+
+.scope-boxes {
+  display: grid;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.step-missing {
+  margin-top: 4px;
+}
+
+a.btn {
+  text-decoration: none;
+}

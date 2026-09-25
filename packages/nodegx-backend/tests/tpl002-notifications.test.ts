@@ -444,13 +444,14 @@ describe('TPL-002 — telling people something was posted', () => {
 
     /**
      * 🔴 **The sentence is the product's own, verbatim.**
-     * `EmailConfigState.notConfiguredReason()` names the Backend Services panel,
-     * which is the one thing the moderator reading it has to go and open — and a
-     * sentence of the template's own here would drift out of date with it.
+     * `EmailConfigState.notConfiguredReason()` names the Email page of the backend
+     * manager (BMG-010; before it, the editor's Backend Services panel, which BMG-012
+     * deletes), which is the one thing the moderator reading it has to go and open — and
+     * a sentence of the template's own here would drift out of date with it.
      */
     test('AC3 — and the reason names what to do about it', () => {
       expect(unconfigured.error || '').toContain('Email is not configured for this backend');
-      expect(unconfigured.error || '').toContain('Backend Services panel');
+      expect(unconfigured.error || '').toContain('Email page of the backend manager');
     });
 
     /**

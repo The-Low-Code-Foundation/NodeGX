@@ -103,3 +103,64 @@ export function mergeTemplate(base: EmailTemplate, override?: Partial<EmailTempl
 export function isTemplateId(value: unknown): value is TemplateId {
   return typeof value === 'string' && (TEMPLATE_IDS as string[]).includes(value);
 }
+
+// ---------------------------------------------------------------- variables --
+
+/**
+ * One `{{name}}` a template may use, as a page offers it (BMG-010 AC3).
+ *
+ * THE list is here, beside the engine, because the page must never invent a
+ * name: a chip for a name the sender does not supply would render as an empty
+ * string (see `interpolate`). Each template's list is what its real caller
+ * passes — `email-routes.ts` (reset, verify), `oauth-routes.ts` (magic link) —
+ * and `bmg-010-email-signin.test.ts` pins the names per template. The Send
+ * Email node (`service.ts`) may add its own on top; those are the node's, not
+ * the template's, and are not offered here.
+ */
+export interface TemplateVariable {
+  /** The name inside the braces. */
+  name: string;
+  /** What a person reads on the chip. */
+  label: string;
+  /** What the preview and a test send render it as. */
+  sample: string;
+}
+
+const APP_NAME: TemplateVariable = { name: 'appName', label: 'App name', sample: 'Your App' };
+const USERNAME: TemplateVariable = { name: 'username', label: 'Username', sample: 'jane.doe' };
+
+export const TEMPLATE_VARIABLES: Record<TemplateId, TemplateVariable[]> = {
+  passwordReset: [
+    APP_NAME,
+    USERNAME,
+    { name: 'resetUrl', label: 'Reset link', sample: 'https://example.com/apps/demo/request_password_reset?token=SAMPLE&username=jane.doe' },
+    { name: 'expiresIn', label: 'How long the link lasts', sample: '1 hour' }
+  ],
+  verifyEmail: [
+    APP_NAME,
+    USERNAME,
+    { name: 'verifyUrl', label: 'Verification link', sample: 'https://example.com/apps/demo/verify_email?username=jane.doe&token=SAMPLE' }
+  ],
+  magicLink: [
+    APP_NAME,
+    { name: 'magicLinkUrl', label: 'Sign-in link', sample: 'https://example.com/auth/magic-link/callback?token=SAMPLE' },
+    { name: 'expiresIn', label: 'How long the link lasts', sample: '15 minutes' }
+  ]
+};
+
+/** The sample values a preview and a test send render with — the same set, so the two cannot differ (AC2). */
+export function sampleVariables(id: TemplateId): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const v of TEMPLATE_VARIABLES[id]) out[v.name] = v.sample;
+  return out;
+}
+
+/** Every `{{name}}` a piece of template text uses, once each, in order of first use. */
+export function templateTokens(text: string): string[] {
+  const seen: string[] = [];
+  text.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_m, key: string) => {
+    if (!seen.includes(key)) seen.push(key);
+    return '';
+  });
+  return seen;
+}

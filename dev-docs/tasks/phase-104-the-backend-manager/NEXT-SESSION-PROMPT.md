@@ -1,9 +1,10 @@
 # P104 — next session
 
-**Written 2026-09-25 (end of s10).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
+**Written 2026-09-25 (end of s11).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
 BMG-001; s3 built and drove BMG-007 (API keys); s4 BMG-004 (Users, R3 disable); s5 BMG-002
 (Collections); s6 BMG-005 (Roles); s7 BMG-006 (Permissions); s8 BMG-008 (Triggers); s9 BMG-003
-(Schema) and filed **R6** (README §8) for Richard; s10 built and drove BMG-009 (Workflows and Runs).
+(Schema) and filed **R6** (README §8) for Richard; s10 BMG-009 (Workflows and Runs); s11 built and
+drove BMG-010 (Email and Sign-in).
 
 ## Where it stands
 
@@ -19,7 +20,8 @@ BMG-001; s3 built and drove BMG-007 (API keys); s4 BMG-004 (Users, R3 disable); 
 | BMG-008 Triggers | ✅ s8 | ✅ headless, AC1–8, 41/41 checks (§6) | ✅ `71b177a4` |
 | BMG-003 Schema | ✅ s9 | ✅ headless, AC1–8, 41/41 checks (§6) | ✅ `cb83fa7c` |
 | BMG-009 Workflows and Runs | ✅ s10 | ✅ headless, AC1–5, 34/34 checks (§6) | ✅ `fb56efbf` |
-| BMG-010…012 | — | — | — |
+| BMG-010 Email and Sign-in | ✅ s11 | ✅ headless, AC1–5 + 7, 42/42 checks (§6) | ✅ COMMIT_HASH_S11 |
+| BMG-011…012 | — | — | — |
 | BMG-013 Richard drives | his | — | — |
 
 Built-but-undriven: 0. Built-but-uncommitted: 0. Check `git status -- packages/nodegx-backend/src/admin`
@@ -29,6 +31,11 @@ before believing that: a peer session may have touched it.
 browser: yes, behind the typed name · R5 filed · **R6 OPEN (s9): on a collection that already has records, a
 required field ASKS for a default (the engines require one) instead of AC5's "Required disables Default" — ask
 Richard in plain words whether that is the rule, or whether Required should be refused there.** All in README §8.
+
+**Gate readings (2026-09-25, s11):** `packages/nodegx-backend` `npm run typecheck` exit 0 (both configs); full backend
+`npx jest --maxWorkers=4`: **197 suites PASS, 1 FAIL, 1 skipped (`fed-003-live-cache`), 2375 tests, 335 s** (2026-09-25, s11) — the one FAIL was `tpl002-notifications` pinning the OLD not-configured sentence (*Backend Services panel*), repointed at the new one and 29/29 alone. Bundle 85,835 gzip (budget 160,000); route tally unchanged at `admin: 93` (BMG-010
+added no route: the templates list grew `variables`, the preview and the test send grew a draft, `GET /admin/auth` grew
+`callbackUrlTemplate`). Drive `drives/bmg010/run.sh ac seed` 42/42.
 
 **Gate readings (2026-09-25, s10):** `packages/nodegx-backend` `npm run typecheck` exit 0 (both configs); full backend
 `npx jest --maxWorkers=4`: **196 suites PASS, 1 skipped (`fed-003-live-cache`), 0 FAIL, 2350 tests, exit 0, 346 s** (2026-09-25, s10, after every change in this commit). `noodl-viewer-cloud` `npx jest tests/execution-history.test.ts` 19/19 (its
@@ -45,18 +52,46 @@ route). Drive `drives/bmg003/run.sh ac seed` 41/41.
 
 ## Do this, in order
 
-1. **BMG-010 Email and Sign-in.** Depends on 001. `drives/bmg005/smtp.mjs` is the mail sink (invitations really
-   send through it — BMG-010's *Send me this* can be measured the same way). Read `views/email.tsx`,
-   `views/signin.tsx`, `server/admin-email.ts` (`PUT /admin/email/templates/:id`, `GET …/:id/preview`) and
-   `auth/` presets first; the placeholder list must be READ from the backend (AC3), the SMTP presets are a table
-   with a spec (AC1), the wizard's fixture equality is AC4. Origins are `Chips`; scopes are boxes from the preset.
-2. Then BMG-011 (R4 yes; **`ScheduleBuilder` from s8 is the sweep/backup schedule control** — hand it
-   `preview={(cron) => api('POST', '/admin/triggers/preview', {cron})}` and it is done), BMG-012 (which
-   also deletes the editor's `serverOwnedColumns.ts`, its `panels/permissions/ruleVocabulary.ts`, AND its
-   `cronGloss` in `models/triggers/TriggerBackendClient.ts` with `TriggerFormFields.tsx` — the backend's
-   `triggers/cronWords.ts` is the one gloss; the editor's `workflowtriggernodes.test.ts` pins on
-   `cronGloss` go with it). One commit per task, a §6 *Built* with what each AC measured, shots in
-   `shots/`, drives in `drives/<task>/`.
+1. **BMG-011 Files, Backups, Ops.** Depends on 001, 008, R4 (yes: restore in the browser behind typing the
+   backend's name, back-up-first ticked). **`ScheduleBuilder` from s8 is the sweep/backup schedule control** — hand it
+   `preview={(cron) => api('POST', '/admin/triggers/preview', {cron})}` and it is done. Read `views/files.tsx`,
+   `views/backups.tsx`, `server/admin-files.ts`, `server/admin-backups.ts` (or wherever restore lives — grep
+   `admin/backups/restore`), `readonly.ts` (restore is NOT safe) first. Denied file types as categories, not a
+   MIME list (AC7-style: no comma field). The drive recipe is `drives/bmg010/run.sh` minus the SMTP sink.
+2. Then BMG-012 (which also deletes the editor's `serverOwnedColumns.ts`, its `panels/permissions/ruleVocabulary.ts`,
+   its `EmailPanel.tsx` (the template editor now lives on the page), AND its `cronGloss` in
+   `models/triggers/TriggerBackendClient.ts` with `TriggerFormFields.tsx` — the backend's `triggers/cronWords.ts` is
+   the one gloss; the editor's `workflowtriggernodes.test.ts` pins on `cronGloss` go with it). One commit per task,
+   a §6 *Built* with what each AC measured, shots in `shots/`, drives in `drives/<task>/`.
+
+## What s11 settled
+
+- **The placeholder list is the backend's** (`email/templates.ts` `TEMPLATE_VARIABLES`, served as `variables` on
+  `GET /admin/email/templates`). Each template's list is what its REAL sender passes — verifyEmail has no
+  `expiresIn` because `email-routes.ts` never supplies one — and `bmg-010-email-signin.test.ts` pins the names per
+  template. 🔴 A new template or a new variable in a sender owes this table a row, or the chip cannot exist.
+- **One sample set** (`sampleVariables`) renders the preview AND *Send me this*, so the two cannot differ (AC2).
+  The preview takes the unsaved draft in the QUERY (`?subject&text&html`; a blank field falls back like a save);
+  the test send takes `{template, …draft}` on the existing `POST /admin/email/test` — no new route, no new audit
+  action, and the read-only refusal it already has covers it.
+- 🔴 **The bundle's external-origin gate** (`admin-dashboard.test.ts` *references no external origin*) lists
+  every `https?://` in the bundle. The SMTP table's six credential pages are a REVIEWED allow-list in the test,
+  held equal to the table; a scheme-only fragment in a sentence (*starts with https://*, *http://localhost*) is
+  allowed as words. A new `<a href>` to an outside page owes that list a line.
+- **`callbackUrlTemplate`** on `GET /admin/auth` (`…/oauth/{id}/callback`, from the same function as each row's
+  URL) is how the wizard shows the URL to register before the provider exists.
+- **A scope is never typed**: `providerWizard.ts` `scopeBoxes` groups a preset's scopes into sentences (identity
+  locked, profile optional, GitHub identity); a scope no group knows becomes its own optional box, so a provider
+  written by hand or by an agent shows and keeps everything it asks for.
+- **Only three tiles**: `PROVIDER_PRESETS` has google, github, oidc. Microsoft/Apple are BMG-010 §7 candidates,
+  not tiles that would save a record that cannot sign in.
+- 🔴 **zsh prefix assignments apply left to right**: `S="$S/shots" … MAILBOX="$S/mailbox.jsonl"` on one command
+  line gives MAILBOX the shots path. Resolve the derived path into its own variable first (bmg005 did; bmg010 now
+  does).
+- 🔴 **SMTP bodies are quoted-printable with CRLF**: comparing the sink's message to the page's words needs
+  `=XX` and soft breaks decoded and CRLF → LF (`drives/bmg010/ac.mjs` `qp`/`plainPart`).
+- The drawer's `.wizard-steps li` innerText is *1\nWhich* (two spans) — normalise whitespace before comparing.
+- The `Chips` composer gained `normalise` (runs after `validate`; an origin from a pasted page URL).
 
 ## What s10 settled
 

@@ -14,6 +14,8 @@ export interface ChipsProps {
   onChange: (items: string[]) => void;
   /** Free-text add: returns a sentence when the text is not acceptable, null when it is. */
   validate?: (text: string) => string | null;
+  /** Free-text add: what is kept of an accepted text (an origin from a pasted page URL, BMG-010). Runs after `validate`. */
+  normalise?: (text: string) => string;
   /** Suggestion add: the picker's fetcher over strings. */
   suggest?: (query: string) => Promise<string[]>;
   placeholder?: string;
@@ -29,7 +31,7 @@ export function Chips(props: ChipsProps) {
   const [problem, setProblem] = useState<string | null>(null);
 
   const add = (raw: string) => {
-    const value = raw.trim();
+    let value = raw.trim();
     if (!value) return;
     if (props.validate) {
       const p = props.validate(value);
@@ -38,6 +40,7 @@ export function Chips(props: ChipsProps) {
         return;
       }
     }
+    if (props.normalise) value = props.normalise(value);
     setProblem(null);
     if (props.items.indexOf(value) !== -1) {
       setText('');
