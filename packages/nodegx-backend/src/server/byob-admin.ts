@@ -24,6 +24,7 @@ import type { WorkflowRunner } from '../workflow/WorkflowRunner';
 import type { RequestContext } from './HttpServer';
 import type { ClpOp } from '../security/model';
 import type {
+  StorageCheckDecl,
   StorageCheckStatus,
   StorageColumn,
   StorageIndexStatus,
@@ -31,6 +32,34 @@ import type {
 } from '@noodl/backend-contract';
 import { validateAclShape } from '../security/model';
 import { isVisibleAccountColumn } from '../users/accountColumns';
+
+/** The four columns every record carries; never a person's to drop. */
+const SYSTEM_FIELDS: readonly string[] = ['objectId', 'createdAt', 'updatedAt', 'ACL'];
+
+/**
+ * BMG-003: the engines' two sentences for "a NOT NULL column added over rows
+ * with nothing to fill it" — SQLite's at the DDL, PostgreSQL's at the queue —
+ * as one of ours, or null for any other error.
+ */
+function requiredNeedsDefault(e: unknown, table: string, column: StorageColumn | undefined): HttpError | null {
+  const message = e instanceof Error ? e.message : String(e);
+  if (!/Cannot add a NOT NULL column with default value NULL|contains null values/.test(message)) return null;
+  const name = column && column.name ? `"${column.name}"` : 'a required field';
+  return new HttpError(
+    400,
+    `${name} can be required only with a default here: "${table}" already has records, and they need a value in it. ` +
+      'Give it a default, or add it as optional.',
+    142,
+    { reason: 'required-needs-default', collection: table, field: column ? column.name : undefined }
+  );
+}
+
+/** Whether a declared check reads this column (BMG-003 — the drop refusal). */
+function checkReads(rule: StorageCheckDecl, column: string): boolean {
+  if ('exactlyOne' in rule) return rule.exactlyOne.includes(column);
+  if ('allOrNone' in rule) return rule.allOrNone.includes(column);
+  return rule.field === column;
+}
 import { summariseModelCalls } from '../execution/modelCost';
 import {
   checkViolationToHttp,
@@ -146,11 +175,14 @@ export interface TableSchemaResponse {
 /** `POST /admin/schema` — one of the five mutation actions. */
 export interface SchemaMutationResponse {
   success: boolean;
-  action: 'createTable' | 'addColumn' | 'renameColumn' | 'changeColumnType' | 'deleteTable' | 'setIndexes' | 'setChecks';
+  action: 'createTable' | 'addColumn' | 'renameColumn' | 'changeColumnType' | 'deleteTable' | 'setIndexes' | 'setChecks' | 'dropColumn';
   table: string;
   /** Present on createTable / deleteTable: whether the DDL actually ran. */
   created?: boolean;
   deleted?: boolean;
+  /** BMG-003 — dropColumn: whether the column was there to drop. */
+  dropped?: boolean;
+  column?: string;
   // ── changeColumnType (AAQ-002) ────────────────────────────────────────────
   /** Whether the column's type actually moved (false when it already matched). */
   changed?: boolean;
@@ -502,7 +534,17 @@ export class ByobAdminRoutes {
         return;
       }
       case 'addColumn':
-        sm.addColumn(table, body.column as StorageColumn);
+        // BMG-003: a required column over rows needs a default on both engines
+        // (SQLite refuses the DDL outright; PostgreSQL refuses it at the queue),
+        // and either refusal is the person's to act on — so it is 400 in words,
+        // and the queue is awaited here so it reaches the person who added the
+        // field rather than whoever writes the next record.
+        try {
+          sm.addColumn(table, body.column as StorageColumn);
+        } catch (e) {
+          throw requiredNeedsDefault(e, table, body.column as StorageColumn) || new HttpError(400, e instanceof Error ? e.message : String(e));
+        }
+        await this.awaitSchemaQueue(ctx, table, undefined, body.column as StorageColumn);
         sendJSON(res, 200, { success: true, action: 'addColumn', table } satisfies SchemaMutationResponse);
         return;
       case 'renameColumn':
@@ -515,6 +557,11 @@ export class ByobAdminRoutes {
         if (typeof sm.changeColumnType !== 'function') {
           throw new HttpError(501, 'This adapter cannot change a column type.');
         }
+        // BMG-003 §5: SQLite rebuilds a column by add-copy-DROP-rename, and a
+        // DROP COLUMN fails on a column a trigger or an index reads; a check that
+        // still parsed would then grade values of the wrong type anyway. Refuse
+        // in words, naming what to take away first, rather than relay the engine.
+        this.refuseIfInUse(table, body.column as string, 'change the type of');
         const result = sm.changeColumnType(table, body.column as string, body.type as string);
         sendJSON(res, 200, {
           success: true,
@@ -522,6 +569,35 @@ export class ByobAdminRoutes {
           table,
           ...result
         } satisfies SchemaMutationResponse);
+        return;
+      }
+      case 'dropColumn': {
+        // BMG-003 §3.3. Optional on the interface, like `deleteTable`.
+        if (typeof sm.dropColumn !== 'function') {
+          throw new HttpError(501, 'This adapter cannot drop a column.');
+        }
+        const column = body.column as string;
+        if (typeof column !== 'string' || !column) throw new HttpError(400, 'Say which column to drop.');
+        if (SYSTEM_FIELDS.includes(column)) {
+          throw new HttpError(400, `"${column}" is set by the backend on every record and cannot be dropped.`);
+        }
+        if (table === '_User' && !isVisibleAccountColumn(column)) {
+          throw new HttpError(400, `"${column}" is one of the backend's own account fields and cannot be dropped.`);
+        }
+        if (table === '_User' && (column === 'username' || column === 'email')) {
+          throw new HttpError(400, `"${column}" is how a person signs in and cannot be dropped.`);
+        }
+        this.refuseIfInUse(table, column, 'drop');
+        let dropped: boolean;
+        try {
+          dropped = sm.dropColumn(table, column);
+        } catch (e) {
+          const err = e as { code?: string; message?: string };
+          if (err && err.code === 'COLUMN_IN_USE') throw new HttpError(409, String(err.message));
+          throw new HttpError(400, e instanceof Error ? e.message : String(e));
+        }
+        ctx.audit({ droppedColumn: `${table}.${column}` });
+        sendJSON(res, 200, { success: true, action: 'dropColumn', table, column, dropped } satisfies SchemaMutationResponse);
         return;
       }
       case 'deleteTable': {
@@ -538,8 +614,35 @@ export class ByobAdminRoutes {
         throw new HttpError(
           400,
           `Unknown schema action: ${String(body.action)}. Expected one of createTable, addColumn, ` +
-            'renameColumn, changeColumnType, deleteTable, setIndexes, setChecks.'
+            'renameColumn, changeColumnType, dropColumn, deleteTable, setIndexes, setChecks.'
         );
+    }
+  }
+
+  /**
+   * BMG-003 — a column a declared index, a check or a search opt-in reads is
+   * refused for a drop or a type change, naming what reads it (AC4). The
+   * adapters refuse the same way; this is the sentence the page shows, and it
+   * runs first so the two engines answer identically.
+   *
+   * @private
+   */
+  private refuseIfInUse(table: string, column: string, verb: string): void {
+    const sm = this.facade.schemaManager;
+    if (!sm) return;
+    const indexes = typeof sm.indexStatus === 'function' ? sm.indexStatus(table) : [];
+    const index = indexes.find((i) => i.declared !== false && (i.fields || []).includes(column));
+    if (index) {
+      throw new HttpError(
+        409,
+        `Cannot ${verb} "${column}": the index ${index.name} (${(index.fields || []).join(', ')}${index.unique ? ', unique' : ''}) ` +
+          'reads it. Drop that index first.'
+      );
+    }
+    const checks = typeof sm.checkStatus === 'function' ? sm.checkStatus(table) : [];
+    const check = checks.find((c) => c.declared && checkReads(c.rule, column));
+    if (check) {
+      throw new HttpError(409, `Cannot ${verb} "${column}": the rule "${check.description}" reads it. Remove that rule first.`);
     }
   }
 
@@ -553,7 +656,7 @@ export class ByobAdminRoutes {
    *
    * @private
    */
-  private async awaitSchemaQueue(ctx: RequestContext, table: string, described?: Map<string, string>): Promise<void> {
+  private async awaitSchemaQueue(ctx: RequestContext, table: string, described?: Map<string, string>, column?: StorageColumn): Promise<void> {
     const sm = this.facade.schemaManager;
     const barrier = (sm as { barrier?: () => Promise<void> } | undefined)?.barrier;
     if (typeof barrier !== 'function') return;
@@ -561,6 +664,8 @@ export class ByobAdminRoutes {
       await barrier.call(sm);
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
+      const needsDefault = column ? requiredNeedsDefault(e, table, column) : null;
+      if (needsDefault) throw needsDefault;
       if (/UNIQUE constraint failed/.test(message)) {
         ctx.audit({ indexesRefused: { table, engine: 'postgres' } });
         throw new HttpError(

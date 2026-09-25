@@ -435,11 +435,27 @@ export class MigrationRefusal extends Error {
 // not: it has to mean the same on two engines.
 // =============================================================================
 
-/** One declared check, as `schema.json` carries it. Exactly one shape per entry. */
+/**
+ * One declared check, as `schema.json` carries it. Exactly one shape per entry.
+ *
+ * BMG-003 added the four single-field shapes a person reaches through the
+ * Schema page's field options: a *Choice* (`oneOf`), a text *max length*, a
+ * *looks like* an email address or a web address, and *whole numbers only*.
+ * Each is one key beside `field`, so a declaration says one thing.
+ */
 export type CheckDecl =
   | { exactlyOne: string[] }
   | { allOrNone: string[] }
-  | { field: string; min?: number; max?: number };
+  | { field: string; min?: number; max?: number }
+  | { field: string; oneOf: Array<string | number> }
+  | { field: string; maxLength: number }
+  | { field: string; looksLike: LooksLike }
+  | { field: string; whole: true };
+
+/** The two shapes `looksLike` knows. Both are `LIKE` patterns, so they mean the same on both engines. */
+export type LooksLike = 'email' | 'url';
+export const LOOKS_LIKE: readonly LooksLike[] = Object.freeze(['email', 'url']);
+const MAX_ONE_OF = 100;
 
 /** A declared check and whether the database enforces it. */
 export interface CheckStatus {
@@ -505,13 +521,56 @@ export function normalizeCheckDecls(raw: unknown): CheckDecl[] {
     if ('exactlyOne' in e) return { exactlyOne: fieldList('exactlyOne') };
     if ('allOrNone' in e) return { allOrNone: fieldList('allOrNone') };
     if ('field' in e) {
+      if (typeof e.field !== 'string' || !FIELD_NAME.test(e.field)) {
+        throw new Error(`${at}.field: ${JSON.stringify(e.field)} is not a valid property name`);
+      }
+      const only = (key: string): void => {
+        for (const k of keys) {
+          if (k !== 'field' && k !== key) throw new Error(`${at}: "${key}" takes no other keys (found ${keys.join(', ')})`);
+        }
+      };
+      if ('oneOf' in e) {
+        only('oneOf');
+        const v = e.oneOf;
+        if (!Array.isArray(v) || v.length < 1 || v.length > MAX_ONE_OF) {
+          throw new Error(`${at}.oneOf must list 1 to ${MAX_ONE_OF} values`);
+        }
+        for (const item of v) {
+          if (typeof item === 'string') {
+            if (!item.length) throw new Error(`${at}.oneOf: an empty string is not a value`);
+          } else if (typeof item !== 'number' || !Number.isFinite(item)) {
+            throw new Error(`${at}.oneOf: ${JSON.stringify(item)} is neither text nor a finite number`);
+          }
+        }
+        const kinds = new Set(v.map((item) => typeof item));
+        if (kinds.size > 1) throw new Error(`${at}.oneOf mixes text and numbers`);
+        if (new Set(v).size !== v.length) throw new Error(`${at}.oneOf lists the same value twice`);
+        return { field: e.field, oneOf: [...(v as Array<string | number>)] };
+      }
+      if ('maxLength' in e) {
+        only('maxLength');
+        const n = e.maxLength;
+        if (typeof n !== 'number' || !Number.isInteger(n) || n < 1) {
+          throw new Error(`${at}.maxLength must be a whole number of at least 1`);
+        }
+        return { field: e.field, maxLength: n };
+      }
+      if ('looksLike' in e) {
+        only('looksLike');
+        if (typeof e.looksLike !== 'string' || !LOOKS_LIKE.includes(e.looksLike as LooksLike)) {
+          throw new Error(`${at}.looksLike must be one of ${LOOKS_LIKE.join(', ')}`);
+        }
+        return { field: e.field, looksLike: e.looksLike as LooksLike };
+      }
+      if ('whole' in e) {
+        only('whole');
+        if (e.whole !== true) throw new Error(`${at}.whole can only be true`);
+        return { field: e.field, whole: true };
+      }
       for (const k of keys) {
         if (k !== 'field' && k !== 'min' && k !== 'max') {
           throw new Error(`${at}: unknown key "${k}" (a range takes field, min, max)`);
         }
-      }
-      if (typeof e.field !== 'string' || !FIELD_NAME.test(e.field)) {
-        throw new Error(`${at}.field: ${JSON.stringify(e.field)} is not a valid property name`);
       }
       const bound = (k: 'min' | 'max'): number | undefined => {
         if (e[k] === undefined) return undefined;
@@ -529,7 +588,8 @@ export function normalizeCheckDecls(raw: unknown): CheckDecl[] {
       return out;
     }
     throw new Error(
-      `${at}: expected { "exactlyOne": [...] }, { "allOrNone": [...] } or { "field", "min", "max" }` +
+      `${at}: expected { "exactlyOne": [...] }, { "allOrNone": [...] }, { "field", "min", "max" }, ` +
+        `{ "field", "oneOf": [...] }, { "field", "maxLength" }, { "field", "looksLike" } or { "field", "whole": true }` +
         (keys.length ? `, not an object with ${keys.map((k) => `"${k}"`).join(', ')}` : '')
     );
   });
@@ -542,14 +602,25 @@ export function checkFields(check: CheckDecl): string[] {
   return [check.field];
 }
 
+/** The word in a check's derived name that says which shape it is. */
+export function checkKind(check: CheckDecl): 'one' | 'all' | 'range' | 'oneof' | 'maxlen' | 'looks' | 'whole' {
+  if ('exactlyOne' in check) return 'one';
+  if ('allOrNone' in check) return 'all';
+  if ('oneOf' in check) return 'oneof';
+  if ('maxLength' in check) return 'maxlen';
+  if ('looksLike' in check) return 'looks';
+  if ('whole' in check) return 'whole';
+  return 'range';
+}
+
 /**
  * The derived name of a check. Never written by a person, like an index's, so
  * a check removed from `schema.json` has a name to drop. A range's bounds are
- * not in the name: changing them is the same rule, rebuilt.
+ * not in the name: changing them is the same rule, rebuilt — and neither are a
+ * choice's values or a max length, for the same reason.
  */
 export function checkName(tableName: string, check: CheckDecl): string {
-  const kind = 'exactlyOne' in check ? 'one' : 'allOrNone' in check ? 'all' : 'range';
-  return `chk_${sanitizeIdent(tableName)}_${kind}_${checkFields(check).map(sanitizeIdent).join('_')}`;
+  return `chk_${sanitizeIdent(tableName)}_${checkKind(check)}_${checkFields(check).map(sanitizeIdent).join('_')}`;
 }
 
 /** Whether two declarations are the same rule in every detail (a range's bounds included). */
@@ -576,12 +647,27 @@ export function checkChecksAgainstColumns(
         throw new Error(`Cannot check "${field}" on "${tableName}": the collection has no such property.`);
       }
     }
-    if ('field' in check && typeOf(check.field) !== 'Number') {
-      const has = typeOf(check.field);
+    if (!('field' in check)) continue;
+    const has = typeOf(check.field);
+    const said = has ? `a ${has}` : 'a property with no declared type';
+    const kind = checkKind(check);
+    if ((kind === 'range' || kind === 'whole') && has !== 'Number') {
       throw new Error(
-        `A range on "${tableName}" needs "${check.field}" to be a Number, and it is ` +
-          `${has ? `a ${has}` : 'a property with no declared type'}.`
+        `${kind === 'range' ? 'A range' : 'Whole numbers only'} on "${tableName}" needs "${check.field}" to be a Number, and it is ${said}.`
       );
+    }
+    if ((kind === 'maxlen' || kind === 'looks') && has !== 'String') {
+      throw new Error(
+        `${kind === 'maxlen' ? 'A max length' : 'Looks like'} on "${tableName}" needs "${check.field}" to be a String, and it is ${said}.`
+      );
+    }
+    if (kind === 'oneof' && 'oneOf' in check) {
+      const values = typeof check.oneOf[0] === 'number' ? 'Number' : 'String';
+      if (has !== values) {
+        throw new Error(
+          `A choice of ${values === 'Number' ? 'numbers' : 'words'} on "${tableName}" needs "${check.field}" to be a ${values}, and it is ${said}.`
+        );
+      }
     }
   }
 }
@@ -607,16 +693,82 @@ export function checkSQL(check: CheckDecl, prefix = ''): string {
     const all = (op: string) => check.allOrNone.map((f) => `${col(f)} IS ${op}NULL`).join(' AND ');
     return `((${all('')}) OR (${all('NOT ')}))`;
   }
+  const c = col(check.field);
+  if ('oneOf' in check) {
+    return `${c} IN (${check.oneOf.map((v) => (typeof v === 'number' ? String(v) : quoteLiteral(v))).join(', ')})`;
+  }
+  if ('maxLength' in check) return `length(${c}) <= ${check.maxLength}`;
+  if ('looksLike' in check) {
+    // Portable `LIKE`, not a regular expression: SQLite has no REGEXP function
+    // unless every connection registers one, and a trigger that names a missing
+    // function breaks every other reader of the file (backups, the survey).
+    if (check.looksLike === 'email') return `(${c} LIKE '%_@_%.__%' AND ${c} NOT LIKE '% %')`;
+    return `(${c} LIKE 'http://_%' OR ${c} LIKE 'https://_%')`;
+  }
+  if ('whole' in check) {
+    // CAST to an integer type rounds on PostgreSQL and truncates on SQLite; either
+    // way a non-integer never equals its cast, and an integer always does.
+    return `CAST(${c} AS BIGINT) = ${c}`;
+  }
   const parts: string[] = [];
-  if (check.min !== undefined) parts.push(`${col(check.field)} >= ${check.min}`);
-  if (check.max !== undefined) parts.push(`${col(check.field)} <= ${check.max}`);
+  if (check.min !== undefined) parts.push(`${c} >= ${check.min}`);
+  if (check.max !== undefined) parts.push(`${c} <= ${check.max}`);
   return `(${parts.join(' AND ')})`;
+}
+
+/**
+ * BMG-003 — thrown by `dropColumn` when something declared still reads the
+ * column. `code` is what `byob-admin` matches; the message is the sentence a
+ * person sees, and it names the thing to take away first.
+ */
+export class ColumnInUseError extends Error {
+  code = 'COLUMN_IN_USE';
+  constructor(message: string) {
+    super(message);
+    this.name = 'ColumnInUseError';
+  }
+}
+
+/**
+ * Refuse a drop while a declared index, a declared check or a search opt-in
+ * reads the column. Shared by both managers so the two engines refuse in the
+ * same words — PostgreSQL would otherwise drop an index silently and SQLite
+ * would refuse the DDL in its own.
+ */
+export function refuseColumnInUse(
+  tableName: string,
+  columnName: string,
+  indexes: Array<{ name: string; fields: string[] }>,
+  checks: CheckDecl[],
+  searchFields?: string[]
+): void {
+  const index = indexes.find((i) => i.fields.includes(columnName));
+  if (index) {
+    throw new ColumnInUseError(
+      `Cannot drop "${columnName}" from "${tableName}": the index ${index.name} (${index.fields.join(', ')}) reads it. Drop that index first.`
+    );
+  }
+  const check = checks.find((c) => checkFields(c).includes(columnName));
+  if (check) {
+    throw new ColumnInUseError(
+      `Cannot drop "${columnName}" from "${tableName}": the rule "${describeCheck(check)}" reads it. Remove that rule first.`
+    );
+  }
+  if (searchFields && searchFields.includes(columnName)) {
+    throw new ColumnInUseError(
+      `Cannot drop "${columnName}" from "${tableName}": full-text search indexes it. Take it out of the search fields first.`
+    );
+  }
 }
 
 /** A person's reading of a check. */
 export function describeCheck(check: CheckDecl): string {
   if ('exactlyOne' in check) return `exactly one of ${check.exactlyOne.join(', ')} is set`;
   if ('allOrNone' in check) return `${check.allOrNone.join(', ')} are all set or all empty`;
+  if ('oneOf' in check) return `${check.field} is one of ${check.oneOf.join(', ')}`;
+  if ('maxLength' in check) return `${check.field} is at most ${check.maxLength} character${check.maxLength === 1 ? '' : 's'}`;
+  if ('looksLike' in check) return `${check.field} looks like ${check.looksLike === 'email' ? 'an email address' : 'a web address'}`;
+  if ('whole' in check) return `${check.field} is a whole number`;
   if (check.min !== undefined && check.max !== undefined)
     return `${check.field} is between ${check.min} and ${check.max}`;
   if (check.min !== undefined) return `${check.field} is at least ${check.min}`;

@@ -1864,3 +1864,77 @@ pre.secret-box {
   display: grid;
   gap: 12px;
 }
+
+/* ---- BMG-003: the field-type picker, the kind badge, the rules list ------------------------ */
+
+.kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kind-icon {
+  display: inline-block;
+  min-width: 1.6em;
+  text-align: center;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.tiles.kinds {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  margin-top: 10px;
+}
+
+.tiles.kinds .tile {
+  position: relative;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+}
+
+.tiles.kinds .tile .kind-icon {
+  grid-row: 1 / span 3;
+  align-self: start;
+  font-size: 18px;
+  padding-top: 2px;
+}
+
+.tiles.kinds .tile .chip.type {
+  justify-self: start;
+}
+
+.kind-search {
+  width: 100%;
+}
+
+.kind-chosen {
+  margin-bottom: 12px;
+}
+
+.field-options {
+  display: grid;
+  gap: 12px;
+}
+
+.field-options div.field input.short {
+  width: 140px;
+}
+
+.rules {
+  margin-top: 10px;
+}
+
+.rules-list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.rule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}

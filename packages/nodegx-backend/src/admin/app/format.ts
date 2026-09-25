@@ -16,8 +16,19 @@ export interface Column {
   targetClass?: string;
   required?: boolean;
   defaultValue?: unknown;
+  /** BMG-003: one line a person wrote about the field; stored on the column, shown on the Schema page. */
+  description?: string;
   /** Schema page only: a system field's note. */
   note?: string;
+  // BMG-003 — derived on the page from the collection's declared checks
+  // (`withRules` in fieldKinds.ts); never sent back. A Choice renders as a
+  // select, a bounded number as a bounded input.
+  allowed?: Array<string | number>;
+  min?: number;
+  max?: number;
+  whole?: boolean;
+  maxLength?: number;
+  looksLike?: 'email' | 'url';
 }
 
 export function cellText(value: unknown): string {
@@ -63,6 +74,41 @@ export function shortId(id: unknown): string {
 export const COLUMN_TYPES = ['String', 'Number', 'Boolean', 'Date', 'Object', 'Array', 'Pointer', 'Relation', 'File', 'GeoPoint'];
 export const NAME_RULE = /^[a-zA-Z][a-zA-Z0-9_]*$/;
 export const RESERVED_COLUMNS = ['objectId', 'createdAt', 'updatedAt', 'ACL'];
+
+/**
+ * BMG-003 §5 — SQLite's reserved words, ported from the editor's
+ * `CreateTableModal` (which BMG-012 deletes). Every identifier is quoted in the
+ * DDL, so the engines would accept them; a person then has a collection called
+ * `Order` that every hand-written query and export trips over. Refused for
+ * collection AND field names, case-insensitively, as the editor did for tables.
+ */
+export const RESERVED_WORDS = [
+  'ABORT', 'ACTION', 'ADD', 'AFTER', 'ALL', 'ALTER', 'ANALYZE', 'AND', 'AS', 'ASC', 'ATTACH', 'AUTOINCREMENT',
+  'BEFORE', 'BEGIN', 'BETWEEN', 'BY', 'CASCADE', 'CASE', 'CAST', 'CHECK', 'COLLATE', 'COLUMN', 'COMMIT',
+  'CONFLICT', 'CONSTRAINT', 'CREATE', 'CROSS', 'CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP', 'DATABASE',
+  'DEFAULT', 'DEFERRABLE', 'DEFERRED', 'DELETE', 'DESC', 'DETACH', 'DISTINCT', 'DROP', 'EACH', 'ELSE', 'END',
+  'ESCAPE', 'EXCEPT', 'EXCLUSIVE', 'EXISTS', 'EXPLAIN', 'FAIL', 'FOR', 'FOREIGN', 'FROM', 'FULL', 'GLOB', 'GROUP',
+  'HAVING', 'IF', 'IGNORE', 'IMMEDIATE', 'IN', 'INDEX', 'INDEXED', 'INITIALLY', 'INNER', 'INSERT', 'INSTEAD',
+  'INTERSECT', 'INTO', 'IS', 'ISNULL', 'JOIN', 'KEY', 'LEFT', 'LIKE', 'LIMIT', 'MATCH', 'NATURAL', 'NO', 'NOT',
+  'NOTNULL', 'NULL', 'OF', 'OFFSET', 'ON', 'OR', 'ORDER', 'OUTER', 'PLAN', 'PRAGMA', 'PRIMARY', 'QUERY', 'RAISE',
+  'RECURSIVE', 'REFERENCES', 'REGEXP', 'REINDEX', 'RELEASE', 'RENAME', 'REPLACE', 'RESTRICT', 'RIGHT', 'ROLLBACK',
+  'ROW', 'SAVEPOINT', 'SELECT', 'SET', 'TABLE', 'TEMP', 'TEMPORARY', 'THEN', 'TO', 'TRANSACTION', 'TRIGGER',
+  'UNION', 'UNIQUE', 'UPDATE', 'USING', 'VACUUM', 'VALUES', 'VIEW', 'VIRTUAL', 'WHEN', 'WHERE', 'WITH', 'WITHOUT'
+];
+
+export function isReservedWord(name: string): boolean {
+  return RESERVED_WORDS.indexOf(name.toUpperCase()) !== -1;
+}
+
+/** A collection's name, or the sentence that refuses it (BMG-003 §5 ports the editor's rule). */
+export function validCollectionName(name: string, taken: string[]): string | null {
+  if (!name) return 'The collection needs a name.';
+  if (!NAME_RULE.test(name)) return 'A collection name starts with a letter, then letters, digits or _ only.';
+  if (name.length > 64) return 'A collection name is at most 64 characters.';
+  if (isReservedWord(name)) return '"' + name + '" is a word the database keeps for itself. Try ' + name + 's or My' + name + '.';
+  if (taken.indexOf(name) !== -1) return 'There is already a collection called ' + name + '.';
+  return null;
+}
 export const JSON_TYPES = ['Object', 'Array', 'ACL', 'File', 'GeoPoint'];
 
 /** Written by the backend on every record; never offered for editing. */
@@ -83,6 +129,8 @@ export function validName(name: string, taken: string[] | null, what: string): s
   if (!name) return what + ' needs a name.';
   if (!NAME_RULE.test(name)) return '"' + name + '": start with a letter, then letters, digits or _ only.';
   if (RESERVED_COLUMNS.indexOf(name) !== -1) return '"' + name + '" is reserved by the backend.';
+  if (name.length > 64) return '"' + name + '" is too long: at most 64 characters.';
+  if (isReservedWord(name)) return '"' + name + '" is a word the database keeps for itself. Try ' + name + 'Value or the' + name.charAt(0).toUpperCase() + name.slice(1) + '.';
   if (taken && taken.indexOf(name) !== -1) return 'There is already a field called "' + name + '".';
   return null;
 }

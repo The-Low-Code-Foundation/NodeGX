@@ -259,7 +259,9 @@ export function FieldControl({ col, raw, onChange, autoFocus, onCommit, onCancel
       return (
         <input
           type="number"
-          step="any"
+          step={col.whole ? 1 : 'any'}
+          min={col.min}
+          max={col.max}
           {...common}
           value={String(raw)}
           title="⌥↑ / ⌥↓ nudges by 10"
@@ -291,10 +293,34 @@ export function FieldControl({ col, raw, onChange, autoFocus, onCommit, onCancel
       return <AclCard state={(raw as AclRaw).acl} onChange={(acl) => onChange({ t: 'acl', acl })} disabled={disabled} />;
     default: {
       const text = String(raw);
+      // BMG-003 AC2: a Choice (a String with a one-of rule) is a select of its
+      // values, never a box a person can spell one wrong in.
+      if (col.allowed && col.allowed.length) {
+        const known = col.allowed.map(String).indexOf(text) !== -1 || text === '';
+        return (
+          <select {...common} value={text} onChange={(e) => onChange((e.currentTarget as HTMLSelectElement).value)}>
+            <option value="">— none —</option>
+            {col.allowed.map((v) => (
+              <option key={String(v)} value={String(v)}>
+                {String(v)}
+              </option>
+            ))}
+            {known ? null : <option value={text}>{text + ' (not one of the choices)'}</option>}
+          </select>
+        );
+      }
       if (text.indexOf('\n') !== -1 && !onCommit) {
         return <textarea id={id} disabled={disabled} autoFocus={autoFocus} rows={4} aria-label={col.name} value={text} onInput={(e) => onChange((e.currentTarget as HTMLTextAreaElement).value)} />;
       }
-      return <input type="text" {...common} value={text} onInput={(e) => onChange((e.currentTarget as HTMLInputElement).value)} />;
+      return (
+        <input
+          type={col.looksLike === 'email' ? 'email' : col.looksLike === 'url' ? 'url' : 'text'}
+          maxLength={col.maxLength}
+          {...common}
+          value={text}
+          onInput={(e) => onChange((e.currentTarget as HTMLInputElement).value)}
+        />
+      );
     }
   }
 }

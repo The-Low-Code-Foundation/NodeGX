@@ -30,9 +30,12 @@ import {
   MigrationRefusal,
   normalizeIndexDecls,
   POSTGRES_TYPE_MAP,
+  junctionTableName,
   quoteLiteral,
+  refuseColumnInUse,
   sameIndexSignature,
   sanitizeIdent,
+  SYSTEM_COLUMNS,
   TYPE_MAP,
   type BuiltIndex,
   type IndexDecl,
@@ -136,6 +139,20 @@ interface SupabaseExportOptions {
 /**
  * SchemaManager class
  */
+/**
+ * BMG-003: the cached schema is replaced, never mutated in place, after every
+ * change. `declaredProperties` memoises its derived map against the schema
+ * OBJECT (a WeakMap keyed by identity, per its own docstring: "SchemaManager
+ * replaces the cached object when a column is added"), and `addColumn` pushed
+ * into the same object — so a column added after any read of the collection
+ * had no declared type until restart: a max-length rule on it was refused as
+ * "a property with no declared type", and a Boolean written to it was not read
+ * back as one. A fresh object derives afresh.
+ */
+function freshSchema<T>(schema: T): T {
+  return JSON.parse(JSON.stringify(schema)) as T;
+}
+
 class SchemaManager {
   /**
    * Exposed as a static so a caller across the package edge (nodegx-backend
@@ -239,7 +256,7 @@ class SchemaManager {
       )
       .run(tableName, JSON.stringify(schema));
 
-    this._schemaCache.set(tableName, schema);
+    this._schemaCache.set(tableName, freshSchema(schema));
 
     // FED-002: the indexes the schema declares, applied to a table that is one
     // statement old and therefore empty — no unique declaration can be refused
@@ -261,6 +278,21 @@ class SchemaManager {
   addColumn(tableName: string, column: SchemaColumn): void {
     const colDef = this._columnToSQL(column);
     if (!colDef) {
+      // BMG-003: a Relation is a junction table, not a column. Before this it
+      // was dropped here — "Links" added to an existing collection did nothing,
+      // silently, on both engines. Now it is created and declared, exactly as
+      // `createTable` would have.
+      if (column.type === 'Relation' && column.targetClass) {
+        const schema = this.getTableSchema(tableName);
+        if (!schema) throw new Error(`Table "${tableName}" does not exist`);
+        if ((schema.columns || []).some((c) => c.name === column.name)) return;
+        this._createJunctionTable(tableName, column.name, column.targetClass);
+        schema.columns = (schema.columns || []).concat([column]);
+        this.db
+          .prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`)
+          .run(JSON.stringify(schema), tableName);
+        this._schemaCache.set(tableName, freshSchema(schema));
+      }
       return;
     }
 
@@ -275,7 +307,7 @@ class SchemaManager {
         this.db
           .prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`)
           .run(JSON.stringify(schema), tableName);
-        this._schemaCache.set(tableName, schema);
+        this._schemaCache.set(tableName, freshSchema(schema));
       }
     } catch (e) {
       // Column may already exist
@@ -283,6 +315,59 @@ class SchemaManager {
         throw e;
       }
     }
+  }
+
+  /**
+   * BMG-003 — drop a column. A Relation is a junction table, so that is what
+   * goes. A declared index, check or search opt-in that reads the column is a
+   * refusal (`code: 'COLUMN_IN_USE'`) naming it — SQLite's own DROP COLUMN
+   * would refuse a column an index or a trigger names, in its own words; this
+   * says the same thing in a person's, before any DDL, on both engines.
+   *
+   * @returns Whether there was a column to drop.
+   */
+  dropColumn(tableName: string, columnName: string): boolean {
+    const exists = this.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?").get(tableName);
+    if (!exists) throw new Error(`Table "${tableName}" does not exist`);
+    if (SYSTEM_COLUMNS.includes(columnName)) throw new Error(`Cannot drop "${columnName}": every record carries it.`);
+    const schema = this.getTableSchema(tableName);
+    const declared = ((schema && schema.columns) || []).find((c) => c.name === columnName);
+    const physical = this.tableColumns(tableName).has(columnName);
+    if (!declared && !physical) return false;
+
+    // The FTS sync trigger names every indexed column (`new."col"`), so it is
+    // the honest record of the search opt-in on this engine.
+    const fts = this.db
+      .prepare("SELECT sql FROM sqlite_master WHERE type = 'trigger' AND name = ?")
+      .get(`${tableName}_fts_ai`) as { sql?: string } | undefined;
+    const searched = fts && typeof fts.sql === 'string' && fts.sql.includes(escapeColumn(columnName)) ? [columnName] : undefined;
+    refuseColumnInUse(
+      tableName,
+      columnName,
+      this.declaredIndexes(tableName).map((i) => ({ name: this.indexName(tableName, i.fields, i.where), fields: i.fields })),
+      this.declaredChecks(tableName),
+      searched
+    );
+
+    const relation = !!declared && declared.type === 'Relation';
+    this.db.exec('SAVEPOINT nodegx_drop_column');
+    try {
+      if (relation) this.db.exec(`DROP TABLE IF EXISTS ${escapeTable(junctionTableName(tableName, columnName))}`);
+      else if (physical) this.db.exec(`ALTER TABLE ${escapeTable(tableName)} DROP COLUMN ${escapeColumn(columnName)}`);
+      if (schema && declared) {
+        schema.columns = (schema.columns || []).filter((c) => c !== declared);
+        this.db
+          .prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`)
+          .run(JSON.stringify(schema), tableName);
+        this._schemaCache.set(tableName, freshSchema(schema));
+      }
+      this.db.exec('RELEASE nodegx_drop_column');
+    } catch (e) {
+      this.db.exec('ROLLBACK TO nodegx_drop_column');
+      this.db.exec('RELEASE nodegx_drop_column');
+      throw e;
+    }
+    return true;
   }
 
   /**
@@ -351,7 +436,7 @@ class SchemaManager {
           this.db
             .prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`)
             .run(JSON.stringify(schema), tableName);
-          this._schemaCache.set(tableName, schema);
+          this._schemaCache.set(tableName, freshSchema(schema));
         }
       }
 
@@ -475,7 +560,7 @@ class SchemaManager {
     this.db
       .prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`)
       .run(JSON.stringify(schema), tableName);
-    this._schemaCache.set(tableName, schema);
+    this._schemaCache.set(tableName, freshSchema(schema));
 
     return { changed: true, from: oldType, rebuilt, convertedValues };
   }
@@ -496,7 +581,7 @@ class SchemaManager {
 
     if (row) {
       const schema = JSON.parse(row.schema);
-      this._schemaCache.set(tableName, schema);
+      this._schemaCache.set(tableName, freshSchema(schema));
       return schema;
     }
 
@@ -1366,7 +1451,7 @@ class SchemaManager {
          ON CONFLICT("name") DO UPDATE SET "schema" = excluded."schema", "updatedAt" = CURRENT_TIMESTAMP`
       )
       .run(tableName, JSON.stringify(schema));
-    this._schemaCache.set(tableName, schema);
+    this._schemaCache.set(tableName, freshSchema(schema));
   }
 
   // ===========================================================================
@@ -1515,7 +1600,7 @@ class SchemaManager {
          ON CONFLICT("name") DO UPDATE SET "schema" = excluded."schema", "updatedAt" = CURRENT_TIMESTAMP`
       )
       .run(tableName, JSON.stringify(schema));
-    this._schemaCache.set(tableName, schema);
+    this._schemaCache.set(tableName, freshSchema(schema));
   }
 
   // ===========================================================================

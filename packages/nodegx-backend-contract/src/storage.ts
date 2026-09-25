@@ -252,7 +252,15 @@ export interface StorageIndexReconcileReport {
 export type StorageCheckDecl =
   | { exactlyOne: string[] }
   | { allOrNone: string[] }
-  | { field: string; min?: number; max?: number };
+  | { field: string; min?: number; max?: number }
+  /** BMG-003: a *Choice* — the value is one of these (all text, or all numbers). */
+  | { field: string; oneOf: Array<string | number> }
+  /** BMG-003: a text field's max length, in characters. */
+  | { field: string; maxLength: number }
+  /** BMG-003: a text field that must look like an email address or a web address. */
+  | { field: string; looksLike: 'email' | 'url' }
+  /** BMG-003: a Number that must be a whole number. */
+  | { field: string; whole: true };
 
 /** A declared check and whether the database enforces it. */
 export interface StorageCheckStatus {
@@ -350,6 +358,13 @@ export interface IStorageSchema {
   ): { changed: boolean; from?: string; rebuilt?: boolean; convertedValues?: number };
   /** Optional: `backup/schema-migrate.ts` feature-detects it before calling. */
   deleteTable?(table: string): boolean;
+  /**
+   * BMG-003: drop a column (a Relation's junction table goes with it). Throws
+   * `code: 'COLUMN_IN_USE'` naming the declared index, check or search opt-in
+   * that reads the column — those are dropped first, on purpose, never
+   * silently with the column. Optional — `byob-admin.ts` answers 501 without it.
+   */
+  dropColumn?(table: string, column: string): boolean;
   /** `AdapterFacade.ts:355`; `byob-admin.ts`; `search/SearchIndexer.ts`. */
   getTableSchema(table: string): StorageTableSchema | null;
   /** `byob-admin.ts` (schema listing); `backup/dataio.ts`. */

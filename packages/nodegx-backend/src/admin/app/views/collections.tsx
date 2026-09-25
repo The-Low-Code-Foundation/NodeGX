@@ -13,6 +13,7 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { api, encode, openLive, closeLive, useSession } from '../api';
 import { AclCard, Drawer, EmptyState, FilterRows } from '../composers';
 import { FieldControl, Raw, RelationEditor, parseRaw, pointerItem, rawFrom } from '../fields';
+import { RuleStatus, withRules } from '../fieldKinds';
 import { Cond, FilterField, Group, blankCond, condWhere, describe, filterKind, fromWhere, toWhere } from '../filters';
 import { Column, csvCell, displayValue, guessType, isSystemField, parseCsv, plain, shortId, toWire } from '../format';
 import { navigate, replaceRoute } from '../router';
@@ -28,6 +29,8 @@ const SORTABLE = ['String', 'Number', 'Boolean', 'Date', 'Pointer'];
 interface Table {
   name: string;
   columns?: Column[];
+  /** BMG-003: the declared rules; folded into the columns by `withRules` on load. */
+  checks?: RuleStatus[];
 }
 
 interface SavedView {
@@ -142,7 +145,9 @@ export function CollectionsView({ params }: ViewProps) {
         // BMG-004: the accounts table is listed for the Schema page; its records
         // are people, and people are edited on the Users page, whose writes hash
         // a password and revoke sessions. Not a grid of raw rows here.
-        (d.tables || []).filter((t) => t.name.charAt(0) !== '_').forEach((t) => (map[t.name] = t));
+        (d.tables || [])
+          .filter((t) => t.name.charAt(0) !== '_')
+          .forEach((t) => (map[t.name] = { ...t, columns: withRules(t.columns || [], t.checks) }));
         setSchema(map);
       })
       .catch(fail);

@@ -1,8 +1,9 @@
 # P104 — next session
 
-**Written 2026-09-25 (end of s8).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
+**Written 2026-09-25 (end of s9).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
 BMG-001; s3 built and drove BMG-007 (API keys); s4 BMG-004 (Users, R3 disable); s5 BMG-002
-(Collections); s6 BMG-005 (Roles); s7 BMG-006 (Permissions); s8 built and drove BMG-008 (Triggers).
+(Collections); s6 BMG-005 (Roles); s7 BMG-006 (Permissions); s8 BMG-008 (Triggers); s9 built and
+drove BMG-003 (Schema) and filed **R6** (README §8) for Richard.
 
 ## Where it stands
 
@@ -15,30 +16,32 @@ BMG-001; s3 built and drove BMG-007 (API keys); s4 BMG-004 (Users, R3 disable); 
 | BMG-002 Collections | ✅ s5 | ✅ headless, AC1–9 (§6) | ✅ `cff004a9` |
 | BMG-005 Roles | ✅ s6 | ✅ headless, AC1–6, 27/27 checks (§6) | ✅ `67de1ede` |
 | BMG-006 Permissions | ✅ s7 | ✅ headless, AC1–7, 37/37 checks (§6) | ✅ `806b53c5` |
-| BMG-008 Triggers | ✅ s8 | ✅ headless, AC1–8, 41/41 checks (§6) | ✅ s8 (see `git log -1 -- packages/nodegx-backend/src/triggers/cronWords.ts`) |
-| BMG-003, 009…012 | — | — | — |
+| BMG-008 Triggers | ✅ s8 | ✅ headless, AC1–8, 41/41 checks (§6) | ✅ `71b177a4` |
+| BMG-003 Schema | ✅ s9 | ✅ headless, AC1–8, 41/41 checks (§6) | ✅ s9 (see `git log -1 -- packages/nodegx-backend/src/admin/app/fieldKinds.ts`) |
+| BMG-009…012 | — | — | — |
 | BMG-013 Richard drives | his | — | — |
 
 Built-but-undriven: 0. Built-but-uncommitted: 0. Check `git status -- packages/nodegx-backend/src/admin`
 before believing that: a peer session may have touched it.
 
 **Rulings:** R1 (a) Preact app · R2 the editor lets go · R3 disable a user: yes · R4 restore in the
-browser: yes, behind the typed name · R5 filed. All in README §4/§8, with the question each answered.
+browser: yes, behind the typed name · R5 filed · **R6 OPEN (s9): on a collection that already has records, a
+required field ASKS for a default (the engines require one) instead of AC5's "Required disables Default" — ask
+Richard in plain words whether that is the rule, or whether Required should be refused there.** All in README §8.
 
-**Gate readings (2026-09-25, s8):** `packages/nodegx-backend` `npm run typecheck` exit 0 (both configs). Full
-`npx jest --maxWorkers=4`: **192 suites PASS, 1 skipped (`fed-003-live-cache`), 0 FAIL, 2289 tests, exit 0, 394 s**. Bundle builds; route tally
-`admin: 93` (`POST admin/triggers/preview`, in `ops-rate-limit.test.ts` with its reason, `NOT_AUDITED` in
-`audit-actions.ts` as a dry run, and in `READONLY_SAFE_ROUTES`). Drive `drives/bmg008/run.sh ac seed` 41/41.
+**Gate readings (2026-09-25, s9):** `packages/nodegx-backend` `npm run typecheck` exit 0 (both configs); `noodl-runtime`
+and `nodegx-backend-contract` `tsc --noEmit` exit 0. Full backend `npx jest --maxWorkers=4`: **194 suites PASS, 1 skipped
+(`fed-003-live-cache`), 0 FAIL, 2327 tests, exit 0, 365 s**. Runtime `npx jest test/adapters` 328/328; contract `npx jest`
+199/199. Bundle 76,836 gzip (budget 160,000); route tally unchanged at `admin: 93` (dropColumn is an action on the existing
+route). Drive `drives/bmg003/run.sh ac seed` 41/41.
 🔴 A new `/admin/...` route still owes the tally line AND an `audit-actions.ts` entry (an action, or a
 `NOT_AUDITED` reason for a dry run); a POST a read-only admin should be able to make owes `readonly.ts` too.
 
 ## Do this, in order
 
-1. **BMG-003 Schema.** Depends on 001 only. A field-type picker, per-type options, allowed values, drop a
-   field, the relation dialog, checks, a danger zone. Reuse `FieldControl`/`fields.tsx` for defaults,
-   `Chips` for allowed values, `DangerZone` for drop/delete, `Switch` for every yes/no.
-2. Then BMG-009 (Workflows and Runs; it reuses `FilterRows` for runs — and Runs should link a row back to
-   `#/triggers/<id>` from `metadata.triggerId`), BMG-010 (`drives/bmg005/smtp.mjs` is the mail sink),
+1. **BMG-009 Workflows and Runs.** Depends on 001, 002. Reuses `FilterRows` for runs; Runs should link a row
+   back to `#/triggers/<id>` from `metadata.triggerId`. Read `views/workflows.tsx` and `views/runs.tsx` first.
+2. Then BMG-010 (`drives/bmg005/smtp.mjs` is the mail sink),
    BMG-011 (R4 yes; **`ScheduleBuilder` from s8 is the sweep/backup schedule control** — hand it
    `preview={(cron) => api('POST', '/admin/triggers/preview', {cron})}` and it is done), BMG-012 (which
    also deletes the editor's `serverOwnedColumns.ts`, its `panels/permissions/ruleVocabulary.ts`, AND its
@@ -46,6 +49,32 @@ browser: yes, behind the typed name · R5 filed. All in README §4/§8, with the
    `triggers/cronWords.ts` is the one gloss; the editor's `workflowtriggernodes.test.ts` pins on
    `cronGloss` go with it). One commit per task, a §6 *Built* with what each AC measured, shots in
    `shots/`, drives in `drives/<task>/`.
+
+## What s9 settled
+
+- **The storage's check shapes grew** (`schemaCommon.ts` `CheckDecl`): `{field, oneOf}` (a Choice), `{field,
+  maxLength}`, `{field, looksLike: 'email'|'url'}`, `{field, whole: true}`; the contract's `StorageCheckDecl`
+  matches. A *Choice* is a String plus a `oneOf` rule; the page reads it back as a Choice (`kindOf`). No custom
+  regex: SQLite has no REGEXP unless every connection registers one.
+- **`dropColumn` exists on both managers and the contract**; `POST /admin/schema {action:'dropColumn'}` (no new
+  route; tally 93). A column an index, a rule or the search opt-in reads is refused BY NAME (`COLUMN_IN_USE`);
+  the page's ✕ counts the records holding a value (`where={col:{$exists:true}}&count=1&limit=0`) and asks for
+  the typed name. `changeColumnType` is guarded the same way (§5).
+- 🔴 **Two adapter defects fixed:** `addColumn` with a Relation did nothing on either engine (now creates the
+  junction table + declares it); `declaredProperties` memoises by schema-object identity and the managers
+  mutated in place — every schema mutation now stores a fresh object (`freshSchema`). A spec that adds a column
+  must READ the collection first to see this class of bug.
+- **Required is `NOT NULL`, Default is a stored `DEFAULT`** on both engines (the DDL), not a write-path rule;
+  a DEFAULT backfills the rows already there; a missing required value is now 400 in words
+  (`requiredViolationToHttp`, `reason:'required'`). Adding a required column over rows needs a default (R6).
+- **`fieldKinds.ts` is the page's model** (the eleven `KINDS`, `withRules` → the record controls' `allowed`/
+  `min`/`max`/`whole`/`maxLength`/`looksLike`); `format.ts` `RESERVED_WORDS` (the editor's list, BMG-012
+  deletes the modal) refuses collection AND field names; `Column.description` is stored on the column.
+- Per-column File limits, a Date default of *now*, and *on delete* for links were NOT built: nothing enforces
+  them (an inert control teaches a lie). The Files page owns upload limits backend-wide.
+- The drive: `drives/bmg003/run.sh ac seed` (seed: Owner, Tag, Empty with 0 records, Pet with 2). Tiles are
+  `.drawer .tile input[value="<kind>"]`; options live under `#kind-options`; the confirm modal's button carries
+  the action's own label (*Delete collection*, *Empty*, *Drop*).
 
 ## What s8 settled
 
@@ -94,7 +123,7 @@ browser: yes, behind the typed name · R5 filed. All in README §4/§8, with the
 - A signed file URL was 403 at the route gate when `files.read` ≠ public — fixed (`signatureAdmits`).
 - The backend writes file URLs on its own loopback address; the page keeps only path + query.
 
-## How to drive a page (`drives/bmg008/` is the freshest recipe; `drives/bmg002/` has more helpers)
+## How to drive a page (`drives/bmg003/` is the freshest recipe; `drives/bmg008/` has `pick`/`execFor`; `drives/bmg002/` more)
 
 `drives/bmg008/run.sh <label> [seed|keep] [script.mjs]`: a LOCKED `security.json` (devOpen false) in a
 scratch data dir, a deployed cloud function `hello` (`workflows/hello.workflow.json`) and a workflow
@@ -133,6 +162,10 @@ never the project's live backend; one heavy job at a time; tear down after.
 
 ## Working-tree note
 
+🔴 **The main git index is STALE (s9):** `git status` shows the BMG-008 files as staged deletions and hundreds of
+`MM` rows because the index holds an old tree, not because anyone deleted anything (`git diff --cached --stat
+806b53c54` = 486 files). Everything is on disk. Commit through a temporary index by pathspec (memory:
+`commit-your-delta-through-a-temporary-index`); do NOT `git reset`/`checkout` the main index — a peer may own it.
 `git status` at the start of s8 showed modified `packages/nodegx-backend/tests/tpl008-*.test.ts`,
 `tests/helpers/todo-drive.ts` and two untracked `tpl008-recurring-*` specs (mtimes 23–24 Sep, phase-78's),
 plus the phase-78 docs and the staged phase-102 deletions from earlier sessions. None made by this phase;

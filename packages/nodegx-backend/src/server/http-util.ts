@@ -209,7 +209,26 @@ export function createErrorToHttp(e: unknown, values?: Record<string, unknown>, 
   const problem = QueryBuilder.clientObjectIdProblem(message);
   if (problem === 'taken') return new HttpError(409, message, 137);
   if (problem === 'invalid') return new HttpError(400, message);
-  return uniqueViolationToHttp(message, values) || checkViolationToHttp(message, schema) || e;
+  return uniqueViolationToHttp(message, values) || checkViolationToHttp(message, schema) || requiredViolationToHttp(message) || e;
+}
+
+/**
+ * BMG-003: a write refused because a required field (a `NOT NULL` column on
+ * either engine) was left empty. **400** with Parse's VALIDATION_ERROR (142)
+ * and the field named, because `NOT NULL constraint failed: Pet.name` is the
+ * engine's sentence, not a person's. `reason: 'required'` is the stable value.
+ */
+export function requiredViolationToHttp(message: string): HttpError | null {
+  const sqlite = /NOT NULL constraint failed: ([A-Za-z0-9_]+)\.([A-Za-z0-9_]+)/.exec(message);
+  const pg = /null value in column "([A-Za-z0-9_]+)" of relation "([A-Za-z0-9_]+)" violates not-null constraint/.exec(message);
+  const collection = sqlite ? sqlite[1] : pg ? pg[2] : null;
+  const field = sqlite ? sqlite[2] : pg ? pg[1] : null;
+  if (!collection || !field) return null;
+  return new HttpError(400, `"${field}" is required on "${collection}": every record must say it. The write was refused, and nothing was changed.`, 142, {
+    reason: 'required',
+    collection,
+    field
+  });
 }
 
 /** The one schema reader {@link checkViolationToHttp} needs, declared structurally. */

@@ -27,6 +27,22 @@ function hasCheckSupport(ctx: ConformanceContext): boolean {
   return typeof ctx.schema.reconcileChecks === 'function' && typeof ctx.schema.checkStatus === 'function';
 }
 
+/**
+ * The message a SCHEMA call throws with. `ctx.refused` is for the data plane
+ * (only an `AdapterRefusal` counts there); a schema manager refuses
+ * synchronously, and its `code: 'COLUMN_IN_USE'` is what BMG-003 pins.
+ */
+function thrownBy(fn: () => unknown): string {
+  try {
+    fn();
+  } catch (err) {
+    const e = err as { code?: string; message?: string };
+    if (e.code !== 'COLUMN_IN_USE') throw new Error(`refused with code ${String(e.code)}, not COLUMN_IN_USE: ${String(e.message)}`);
+    return String(e.message);
+  }
+  throw new Error('expected the call to be refused, and it succeeded');
+}
+
 export const schemaCases: readonly ConformanceCase[] = Object.freeze([
   {
     id: 'schema/create-table-then-list-it',
@@ -254,6 +270,48 @@ export const schemaCases: readonly ConformanceCase[] = Object.freeze([
         status.length === 2 && status.every((s) => s.built && s.declared),
         'checkStatus does not report both checks as built'
       );
+    }
+  },
+
+  {
+    id: 'schema/drop-column-removes-it-and-refuses-one-in-use',
+    area: 'schema',
+    pins: 'BMG-003: dropColumn removes the column from the schema and from reads; a column a declared index or check reads is refused by name, and nothing is dropped with it',
+    async run(ctx) {
+      if (typeof ctx.schema.dropColumn !== 'function') {
+        throw new Error('dropColumn is absent — declare this case unsupported (§3.4)');
+      }
+      const c = ctx.collection('Sch');
+      ctx.createTable(c, [
+        { name: 'title', type: 'String' },
+        { name: 'colour', type: 'String' },
+        { name: 'score', type: 'Number' }
+      ]);
+      const row = await ctx.create(c, { title: 'T', colour: 'red', score: 5 });
+
+      ok(ctx.schema.dropColumn(c, 'colour') === true, 'dropColumn did not report the drop');
+      const schema = ctx.schema.getTableSchema(c);
+      ok(!!schema && !(schema.columns || []).some((col) => col.name === 'colour'), 'the dropped column is still declared');
+      const back = await ctx.fetch(c, row.objectId as string);
+      ok(!('colour' in back), 'a read still carries the dropped column');
+      eq(back.title, 'T', 'dropping one column disturbed another');
+
+      if (hasIndexSupport(ctx)) {
+        ctx.schema.reconcileIndexes!(c, [{ fields: ['title'], unique: true }]);
+        const why = thrownBy(() => ctx.schema.dropColumn!(c, 'title'));
+        ok(/idx_/.test(why), `the refusal does not name the index: ${why}`);
+        ok((ctx.schema.getTableSchema(c)?.columns || []).some((col) => col.name === 'title'), 'a refused drop dropped the column anyway');
+      }
+      if (hasCheckSupport(ctx)) {
+        ctx.schema.reconcileChecks!(c, [{ field: 'score', min: 0 }]);
+        const why = thrownBy(() => ctx.schema.dropColumn!(c, 'score'));
+        ok(/score is at least 0/.test(why), `the refusal does not name the rule: ${why}`);
+        // With the rule gone, the drop goes through.
+        ctx.schema.reconcileChecks!(c, []);
+        ok(ctx.schema.dropColumn(c, 'score') === true, 'the drop was refused after the rule was removed');
+      }
+      const after = await ctx.fetch(c, row.objectId as string);
+      ok(!('score' in after) || !hasCheckSupport(ctx), 'a read still carries the second dropped column');
     }
   },
 

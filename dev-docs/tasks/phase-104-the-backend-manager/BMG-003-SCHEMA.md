@@ -1,7 +1,7 @@
 # BMG-003 — Schema: a field-type picker, per-type options, and a danger zone
 
 **Opened 2026-09-24** (README §2 row 7). **Depends on BMG-001.**
-**Status: 📋 not started.**
+**Status: ✅ built and driven s9, 2026-09-25 (§6). One finding for Richard: R6 in README §8.**
 
 ## 1. The person sentence
 
@@ -118,3 +118,85 @@ picker (BMG-012's *Add a field* door).
 - The MCP's `manage_schema`-family tools and `noodl-mcp`'s picker (memory: a NEW TYPE owes
   `noodl-mcp` + picker) see the storage types, not the tiles; no new storage type is added here,
   so nothing is owed — say so in §6 when built.
+
+## 6. Built (s9, 2026-09-25)
+
+**Where — storage (both engines, `noodl-runtime`):** `local-sql/schemaCommon.ts` `CheckDecl` gains the four
+single-field shapes the drawer declares — `{field, oneOf}` (a *Choice*), `{field, maxLength}`, `{field, looksLike:
+'email'|'url'}` (portable `LIKE` shapes, not a regular expression: SQLite has no REGEXP function unless every
+connection registers one, and a trigger naming a missing function breaks every other reader of the file — backups,
+the survey; so *custom pattern* from §3.2 is NOT offered), `{field, whole: true}` (`CAST(x AS BIGINT) = x`, the same
+answer on both engines); each named `chk_<T>_{oneof,maxlen,looks,whole}_<f>`, described in words, type-checked
+against the column (`checkChecksAgainstColumns`). **`dropColumn(table, column)`** on `SchemaManager` (SQLite `ALTER
+TABLE DROP COLUMN`, 3.50.4 bundled) and `PgSchemaManager` (queued `DROP COLUMN IF EXISTS`); a Relation drops its
+junction table; a column a declared index, a declared check or the search opt-in reads is refused with
+`code: 'COLUMN_IN_USE'` naming it (`refuseColumnInUse`, shared, so both engines say the same sentence — PostgreSQL
+would otherwise drop the index silently). `IStorageSchema.dropColumn?` in the contract; conformance case
+`schema/drop-column-removes-it-and-refuses-one-in-use` + its coverage row; both conformance suites green.
+**Two adapter defects found and fixed on the way:** (1) `addColumn` with a Relation returned before recording it on
+BOTH engines — *Links* added to an existing collection did nothing, silently, since the old page; now the junction
+table is created and the column declared. (2) `declaredProperties` memoises against the schema OBJECT and `addColumn`
+mutated that object in place, so a column added after any read of the collection had no declared type until
+restart (the drive found it: *"needs email to be a String, and it is a property with no declared type"*; a Boolean
+written to such a column was not read back as one either). Every schema mutation now stores a fresh object
+(`freshSchema`) on both engines; pinned in `SchemaManager.checks.test.js` and in the backend spec (a read before
+the adds).
+**Where — server:** `byob-admin.ts` `POST /admin/schema {action:'dropColumn', table, column}` (400 for the four
+system fields, `_User`'s sign-in columns and its server-owned account columns; 409 in words for a column in use;
+`{dropped}`; audited under `schema.mutate` with `droppedColumn`; no new route — tally stays 93); `refuseIfInUse`
+also guards **`changeColumnType`** (§5: SQLite rebuilds by add-copy-DROP-rename, which a trigger or index on the
+column refuses in its own words). `addColumn` now awaits the PostgreSQL queue and turns both engines' *"required
+column over rows without a default"* refusals into one sentence (400, `reason: 'required-needs-default'`);
+`http-util.ts` `requiredViolationToHttp` turns `NOT NULL constraint failed` / PostgreSQL's not-null violation into
+*"name" is required on "Pet": every record must say it* (400, code 142, `reason: 'required'`).
+**Where — app:** `fieldKinds.ts` (pure: the eleven `KINDS`, `kindOf`, `withRules` → the record controls,
+`FieldDraft`/`draftProblem`/`toColumn`/`toRules`/`mergeRules`, `defaultRule`), `format.ts` (`RESERVED_WORDS` ported
+from the editor's `CreateTableModal`, `validCollectionName`, `Column` carries `description` and the page-derived
+rule fields), `fields.tsx` (a Choice is a `<select>` of its values, with a stray stored value shown as *not one of
+the choices*; a bounded number gets `min`/`max`/`step`; looks-like sets the input type), `views/schema.tsx`
+(`KindPicker` tiles with search, `FieldOptions`, `AddFieldDrawer` bound to `#/schema/<t>/new-field`, `KindBadge`,
+`DropTrigger` ✕, the *Rules* list in words with ✕, `DangerZone` with *Empty collection* + *Delete collection*, the
+change-kind dialog with the count of records affected; `AddFieldDialog` kept for the Users page), `collections.tsx`
+folds the rules into the columns on load, `styles.css` `.tiles.kinds`, `.kind`, `.rules`.
+
+**Specs:** runtime `SchemaManager.checks.test.js` (+6: the four shapes refuse and admit on a real SQLite, the
+shapes that say nothing, a Choice the rows already break, the fresh-object pin), `SchemaManager.dropColumn.test.js`
+(6); backend `bmg-003-schema.test.ts` (10 × 2 engines: AC1 eleven types read back, AC2 400 with the rule, AC3
+unique + 409/137, AC4 drop / Relation / refusals by name / `_User` / system fields, §5 type change, required in
+words, the audit entry, the action list); `admin-app/schema-view.test.tsx` (18: the table, drafts, refusals,
+reserved words, AC2 control, AC5, AC6, AC7, AC8). **Drive:** `drives/bmg003/run.sh ac seed` — **41/41 checks, no
+page errors** (readings `drives/bmg003/readings.json`, shots `shots/bmg003-*.png`). **Gate:** three packages typecheck exit 0;
+full backend `npx jest --maxWorkers=4` 194 suites PASS, 1 skipped, 2327 tests, exit 0, 365 s; runtime adapters 328/328;
+contract 199/199; bundle 76,836 gzip.
+
+**What each AC measured:**
+1. Through the drawer, eleven fields on `Pet`; `GET /admin/schema/Pet` read back `String Number Boolean Date
+   String(+oneOf) Pointer→Owner Relation→Tag File GeoPoint Array Object`. Over sockets on both engines the same.
+2. `POST /api/Pet {status:'other'}` → 400/142 *This write breaks a rule of "Pet": status is one of open, closed*;
+   the record drawer on `#/collections/Pet/<id>` shows `status` as a select of `— none — / open / closed`, and
+   `age` as a number input bounded 0–30 in steps of 1.
+3. *Must be unique* on `email` → `idx_Pet_email` (unique, built) in the Indexes rows; a second `a@b.co` → 409/137.
+4. ✕ on `born` asked *No record holds a value in it*, then type `born` → gone. ✕ on `status` (a rule reads it) →
+   the toast *Cannot drop "status": the rule "status is one of open, closed" reads it. Remove that rule first.*;
+   the rule's ✕ in *Rules*, then the drop asked with the server's count (3: the Choice's default backfilled the
+   rows) and went through. `_User.email` → 400 *how a person signs in*; `email` in an index → 409 naming
+   `idx_Pet_email (email, unique)`. Both engines in the spec.
+5. On `Empty` (0 records): Required on → Default disabled, *A required field has no default: every record must say
+   it.* visible; the field enforced (*"code" is required on "Empty"*). On `Pet` (2 records): Required on → Default
+   ENABLED with *The 2 records already here get this value; new records must say it*, and Add without one refused
+   in words. See R6.
+6. The Pet header: `Open records / Add field / Indexes`, no red control; the danger zone: *Empty collection*
+   (asked with the count, refused until `Pet` typed, 0 left, fields kept) and *Delete collection* (refused with
+   `Empt`, deleted with `Empty`).
+7. `#/schema/Pet/new-field` on load → the drawer on eleven tiles; the search `pic` → one tile.
+8. The Yes / No default is two switches (`checkbox=on, checkbox=on`), the row says *Yes*, and `true`/`false`
+   appear nowhere in `#main`.
+
+**Not built, and why:** *custom pattern* (above); *File max size / allowed types* per column — nothing in the
+backend enforces a per-column limit (the Files settings are backend-wide), so a control here would be inert; *when
+the target is deleted: keep / clear* — the backend does nothing, so the Link sentence says so instead of offering a
+switch; a *Date* default of *now* — a stored `DEFAULT` takes a literal only, and the backend stamps
+`createdAt`/`updatedAt`, so Date offers no default. The relation "dialog" is the drawer's Link/Links step with the
+sentence *Each record links to one Owner / many Tags*. No storage type is added, so nothing is owed to `noodl-mcp`
+or its picker (§5). The editor's `CreateTableModal` reserved-word list is now also the page's (BMG-012 deletes
+the modal).

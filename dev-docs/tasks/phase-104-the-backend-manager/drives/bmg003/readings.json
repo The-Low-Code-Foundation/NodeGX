@@ -1,0 +1,319 @@
+{
+  "checks": {
+    "AC6 the Pet card header has Open records / Add field / Indexes and no red control": {
+      "pass": true,
+      "detail": [
+        "btn tiny:Open records",
+        "btn tiny:Add field",
+        "btn tiny:Indexes"
+      ]
+    },
+    "AC6 the danger zone holds Empty collection and Delete collection": {
+      "pass": true,
+      "detail": [
+        "Empty collection",
+        "Delete collection"
+      ]
+    },
+    "the card counts its records": {
+      "pass": true,
+      "detail": "Pet\n1 field(s)\n0 index(es)\n2 records\nOpen records\nAdd field\nIndexes"
+    },
+    "AC7 #/schema/Pet/new-field opens the drawer on eleven tiles": {
+      "pass": true,
+      "detail": [
+        "Text",
+        "Number",
+        "Yes / No",
+        "Date & time",
+        "Choice",
+        "Link",
+        "Links",
+        "Picture or file",
+        "Location",
+        "List",
+        "Anything"
+      ]
+    },
+    "the picker search narrows to Picture or file": {
+      "pass": true
+    },
+    "a Text field shows only Default / Max length / Must look like": {
+      "pass": true,
+      "detail": [
+        "Default",
+        "Max length",
+        "Must look like"
+      ]
+    },
+    "AC5 over 2 records, Required asks for a default: the Default box stays enabled and says why": {
+      "pass": true,
+      "detail": "Add a field to Pet\nText — words, names, descriptions\n✕\nAa\nText\n\nwords, names, descriptions\n\nString\nName\nLetters, digits and _ — this is the name app logic reads it by.\nDescription (optional)\nDefault\nThe 2 records already here get this value; new records must say it.\nMax length\nMust look like\nanythin"
+    },
+    "AC5 Add without a default is refused in words": {
+      "pass": true,
+      "detail": "A required field needs a default here, so the 2 records already in the collection get a value."
+    },
+    "AC1 Text → String": {
+      "pass": true
+    },
+    "AC3 Must be unique wrote a unique index the table route lists": {
+      "pass": true,
+      "detail": [
+        {
+          "name": "idx_Pet_email",
+          "fields": [
+            "email"
+          ],
+          "unique": true,
+          "order": "asc",
+          "built": true,
+          "declared": true
+        }
+      ]
+    },
+    "the max length and looks-like are rules the backend enforces": {
+      "pass": true,
+      "detail": [
+        {
+          "name": "chk_Pet_maxlen_email",
+          "rule": {
+            "field": "email",
+            "maxLength": 80
+          },
+          "description": "email is at most 80 characters",
+          "built": true,
+          "declared": true
+        },
+        {
+          "name": "chk_Pet_looks_email",
+          "rule": {
+            "field": "email",
+            "looksLike": "email"
+          },
+          "description": "email looks like an email address",
+          "built": true,
+          "declared": true
+        }
+      ]
+    },
+    "AC3 a duplicate is refused (409/137); a value that does not look like an email is refused with the rule": {
+      "pass": true,
+      "detail": {
+        "dupB": 409,
+        "badMail": "This write breaks a rule of \"Pet\": email looks like an email address. It was refused, and nothing was changed."
+      }
+    },
+    "AC1 Number → Number, with default 1": {
+      "pass": true
+    },
+    "a fraction and an out-of-range number are refused with the rule": {
+      "pass": true,
+      "detail": {
+        "half": "This write breaks a rule of \"Pet\": age is a whole number. It was refused, and nothing was changed.",
+        "big": "This write breaks a rule of \"Pet\": age is between 0 and 30. It was refused, and nothing was changed."
+      }
+    },
+    "AC8 a Yes / No default is two switches; nothing on the drawer takes the words true/false": {
+      "pass": true,
+      "detail": [
+        "checkbox=on",
+        "checkbox=on"
+      ]
+    },
+    "AC1 Yes / No → Boolean, default true": {
+      "pass": true
+    },
+    "AC8 the row says the default as Yes, and the kind as Yes / No with its Boolean badge": {
+      "pass": true,
+      "detail": [
+        "vaccinated",
+        "Text (String)\nNumber (Number)\nYes / No (Boolean)\nDate & time (Date)\nPicture or file (File)\nLocation (GeoPoint)\nList (Array)\nAnything (Object)",
+        "",
+        "Yes",
+        "✕"
+      ]
+    },
+    "AC8 the words true/false appear nowhere on the page": {
+      "pass": true
+    },
+    "AC1 Date & time → Date": {
+      "pass": true
+    },
+    "a Choice edits its values as chips": {
+      "pass": true,
+      "detail": [
+        "open",
+        "closed"
+      ]
+    },
+    "AC1 Choice → String + the one-of rule, default open": {
+      "pass": true,
+      "detail": [
+        {
+          "name": "chk_Pet_maxlen_email",
+          "rule": {
+            "field": "email",
+            "maxLength": 80
+          },
+          "description": "email is at most 80 characters",
+          "built": true,
+          "declared": true
+        },
+        {
+          "name": "chk_Pet_looks_email",
+          "rule": {
+            "field": "email",
+            "looksLike": "email"
+          },
+          "description": "email looks like an email address",
+          "built": true,
+          "declared": true
+        },
+        {
+          "name": "chk_Pet_range_age",
+          "rule": {
+            "field": "age",
+            "min": 0,
+            "max": 30
+          },
+          "description": "age is between 0 and 30",
+          "built": true,
+          "declared": true
+        },
+        {
+          "name": "chk_Pet_whole_age",
+          "rule": {
+            "field": "age",
+            "whole": true
+          },
+          "description": "age is a whole number",
+          "built": true,
+          "declared": true
+        },
+        {
+          "name": "chk_Pet_oneof_status",
+          "rule": {
+            "field": "status",
+            "oneOf": [
+              "open",
+              "closed"
+            ]
+          },
+          "description": "status is one of open, closed",
+          "built": true,
+          "declared": true
+        }
+      ]
+    },
+    "AC2 a record outside the choices is refused by the backend, 400 with the rule": {
+      "pass": true,
+      "detail": "This write breaks a rule of \"Pet\": status is one of open, closed. It was refused, and nothing was changed."
+    },
+    "the card lists its rules in words": {
+      "pass": true,
+      "detail": [
+        "email is at most 80 characters",
+        "email looks like an email address",
+        "age is between 0 and 30",
+        "age is a whole number",
+        "status is one of open, closed"
+      ]
+    },
+    "a Link says its sentence": {
+      "pass": true
+    },
+    "Links says its sentence": {
+      "pass": true
+    },
+    "AC1 Link → Pointer→Owner, Links → Relation→Tag, Picture or file → File, Location → GeoPoint, List → Array, Anything → Object": {
+      "pass": true,
+      "detail": {
+        "name": "String",
+        "email": "String",
+        "age": "Number",
+        "vaccinated": "Boolean",
+        "born": "Date",
+        "status": "String",
+        "owner": "Pointer→Owner",
+        "tags": "Relation→Tag",
+        "photo": "File",
+        "place": "GeoPoint",
+        "items": "Array",
+        "extra": "Object"
+      }
+    },
+    "AC2 the record drawer shows status as a select of the two choices": {
+      "pass": true,
+      "detail": [
+        "— none —",
+        "open",
+        "closed"
+      ]
+    },
+    "the record drawer bounds age to 0–30 in whole steps": {
+      "pass": true,
+      "detail": [
+        "number",
+        "0",
+        "30",
+        "1"
+      ]
+    },
+    "AC5 on an empty collection Required disables Default, with the reason visible": {
+      "pass": true
+    },
+    "the required field is enforced: a record without it is refused in words": {
+      "pass": true,
+      "detail": "\"code\" is required on \"Empty\": every record must say it. The write was refused, and nothing was changed."
+    },
+    "AC4 ✕ asks with the count: no record holds a value in born": {
+      "pass": true,
+      "detail": "Drop the field born\nNo record holds a value in it. App logic that reads \"born\" will break. A rule or an index that reads it must be removed first.\n\nType \"born\" to confirm. This cannot be undone.\n\nCancel\nDrop"
+    },
+    "AC4 the column is gone from the schema": {
+      "pass": true
+    },
+    "AC4 a column a rule reads is refused, naming the rule": {
+      "pass": true,
+      "detail": "Cannot drop \"status\": the rule \"status is one of open, closed\" reads it. Remove that rule first."
+    },
+    "AC4 the refused column is still there": {
+      "pass": true
+    },
+    "AC4 with the rule gone the ✕ asks with the count of records holding a value, equal to the server’s": {
+      "pass": true,
+      "detail": {
+        "countAsk": "Drop the field status\n3 records hold a value in it, and that value is lost. App logic that reads \"status\" will break. A rule or an index that reads it must be removed first.\n\nType \"status\" to confirm. This cannot be undone.\n\nCancel\nDrop",
+        "holding": 3
+      }
+    },
+    "AC4 the column dropped once its rule was removed": {
+      "pass": true
+    },
+    "AC4 _User.email is refused; a column in an index is refused naming the index": {
+      "pass": true,
+      "detail": {
+        "emailDrop": "\"email\" is how a person signs in and cannot be dropped.",
+        "indexedDrop": "Cannot drop \"email\": the index idx_Pet_email (email, unique) reads it. Drop that index first."
+      }
+    },
+    "AC6 Empty collection asks with the count and refuses until the name is typed": {
+      "pass": true,
+      "detail": "Empty collection Pet\n3 records in \"Pet\" are destroyed. The collection itself stays, with its fields.\n\nType \"Pet\" to confirm. This cannot be undone.\n\nCancel\nEmpty"
+    },
+    "AC6 Empty collection deleted every record and kept the fields": {
+      "pass": true,
+      "detail": {
+        "left": 0
+      }
+    },
+    "AC6 Delete collection refuses without the exact name": {
+      "pass": true
+    },
+    "AC6 with the name typed, the collection is deleted": {
+      "pass": true
+    }
+  },
+  "summary": "41/41"
+}

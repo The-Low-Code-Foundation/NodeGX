@@ -1,15 +1,45 @@
 /**
- * Schema — the collections and their fields. New collection as name + rows of
- * choices; rename in place; change type in place with a conversion warning;
- * indexes as rows of selects. `#/schema/<name>` scrolls to that card.
+ * Schema — the collections and their fields (BMG-003).
+ *
+ * A field is added by picking what kind of thing it holds — a tile with a name
+ * and one line — and then only seeing the choices that kind has (the drawer's
+ * second step). A field can be taken away (✕ on its row, behind the typed name
+ * and the count of records holding a value). The card lists its rules in words
+ * and ends in a danger zone: *Delete collection* and *Empty collection*, both
+ * behind the typed name. `#/schema/<name>` scrolls to the card;
+ * `#/schema/<name>/new-field` opens the picker.
+ *
+ * Rename and change-type stay in place; the change-type warning counts the
+ * records affected. New collection is still name + rows of choices.
  */
 import { useEffect, useRef, useState } from 'preact/hooks';
 
-import { api, useSession } from '../api';
-import { EmptyState, ListEditor } from '../composers';
-import { COLUMN_TYPES, Column, NAME_RULE, isServerOwned, isSystemField, validName } from '../format';
+import { api, encode, useSession } from '../api';
+import { Chips, DangerAction, DangerZone, Drawer, EmptyState, ListEditor } from '../composers';
+import { Column, isServerOwned, isSystemField, validCollectionName, validName } from '../format';
+import {
+  FieldDraft,
+  KINDS,
+  Kind,
+  KindId,
+  RuleStatus,
+  blankDraft,
+  defaultRule,
+  defaultWords,
+  draftProblem,
+  kindById,
+  kindOf,
+  mergeRules,
+  recordsWord,
+  rulesWithout,
+  searchKinds,
+  takesDefault,
+  takesUnique,
+  toColumn,
+  toRules
+} from '../fieldKinds';
 import { navigate } from '../router';
-import { Btn, Chip, Dialog, Gap, Hi, Hint, Notice, Page, Row, Spacer, Sub, Table, WriteBtn, confirmDestructive, fail, openModal, toast } from '../ui';
+import { Btn, Chip, Dialog, Field, Gap, Hi, Hint, Notice, Page, Row, Spacer, Sub, Switch, Table, WriteBtn, confirmDestructive, fail, openModal, toast } from '../ui';
 import type { ViewProps } from './index';
 
 interface Index {
@@ -25,6 +55,18 @@ export interface TableDef {
   name: string;
   columns?: Column[];
   indexes?: Index[];
+  checks?: RuleStatus[];
+}
+
+/** How many records a collection holds; `_User` is counted through its own door. */
+async function countRecords(table: string, where?: Record<string, unknown>): Promise<number> {
+  if (table === '_User') {
+    const d = await api<{ total?: number }>('GET', '/admin/users?limit=1');
+    return (d && d.total) || 0;
+  }
+  const q = '?count=1&limit=0' + (where ? '&where=' + encode(JSON.stringify(where)) : '');
+  const d = await api<{ count?: number }>('GET', '/api/' + encode(table) + q);
+  return (d && d.count) || 0;
 }
 
 export function SchemaView({ params }: ViewProps) {
@@ -33,6 +75,8 @@ export function SchemaView({ params }: ViewProps) {
   const [tables, setTables] = useState<TableDef[] | null>(null);
   const names = tables ? tables.map((t) => t.name) : [];
   const wanted = params[0] || '';
+  const adding = params[1] === 'new-field' ? wanted : '';
+  const addingTable = adding && tables ? tables.find((t) => t.name === adding) : undefined;
 
   function load() {
     api<{ tables?: TableDef[] }>('GET', '/admin/schema')
@@ -52,7 +96,7 @@ export function SchemaView({ params }: ViewProps) {
   }
 
   return (
-    <Page title="Schema" subtitle="Your collections and their fields. Click a field name to rename it, or its type to change it.">
+    <Page title="Schema" subtitle="Your collections and their fields. Click a field name to rename it, or its kind to change it.">
       <Row>
         <WriteBtn kind="primary" onClick={createTable}>
           New collection
@@ -68,6 +112,7 @@ export function SchemaView({ params }: ViewProps) {
       {(tables || []).map((t) => (
         <TableCard key={t.name} t={t} names={names} readonly={readonly} accountColumns={accountColumns} hit={t.name === wanted} reload={load} />
       ))}
+      {addingTable ? <AddFieldDrawer t={addingTable} names={names} onClose={() => navigate('schema', adding)} onAdded={load} /> : null}
     </Page>
   );
 }
@@ -76,12 +121,23 @@ function declaredCount(t: TableDef): number {
   return (t.indexes || []).filter((i) => i.declared !== false).length;
 }
 
-function TypeBadge({ col }: { col: Column }) {
+/** The kind in a person's words, with the storage name as a small badge for those who know it. */
+function KindBadge({ col, checks }: { col: Column; checks?: RuleStatus[] }) {
+  const kind = kindOf(col, checks);
   const pointy = col.type === 'Pointer' || col.type === 'Relation';
-  return <span class="chip type">{col.type + (pointy && col.targetClass ? ' → ' + col.targetClass : '')}</span>;
+  return (
+    <span class="kind">
+      <span class="kind-icon" aria-hidden="true">
+        {kind.icon}
+      </span>
+      {kind.label}
+      {pointy && col.targetClass ? ' → ' + tableLabel(col.targetClass) : ''}
+      <span class="chip type">{col.type}</span>
+    </span>
+  );
 }
 
-function TableCard({
+export function TableCard({
   t,
   names,
   readonly,
@@ -106,28 +162,46 @@ function TableCard({
   ];
   const rows: Column[] = system3.concat(own);
   const indexes = t.indexes || [];
+  const rules = (t.checks || []).filter((c) => c.declared);
+  const drift = (t.checks || []).filter((c) => !c.declared);
+  const [records, setRecords] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (system) return;
+    countRecords(t.name)
+      .then(setRecords)
+      .catch(() => setRecords(null));
+  }, [t.name, columns.length]);
 
   function addColumn() {
-    openModal((close) => <AddFieldDialog t={t} names={names} close={close} onAdded={reload} />);
+    navigate('schema', t.name, 'new-field');
   }
   function editIndexes() {
     openModal((close) => <IndexesDialog t={t} close={close} onApplied={reload} />);
   }
   function deleteTable() {
-    confirmDestructive(
-      'Delete collection ' + t.name,
-      'Every record in "' + t.name + '" is destroyed along with the collection. Permissions and triggers that reference it are NOT removed and will start failing.',
-      t.name,
-      () => {
-        api<{ deleted?: boolean }>('POST', '/admin/schema', { action: 'deleteTable', table: t.name })
-          .then((result) => {
-            if (result && result.deleted === false) toast('The backend reported that "' + t.name + '" was not deleted.', 'bad');
-            else toast('Collection "' + t.name + '" deleted.', 'ok');
-            reload();
-          })
-          .catch(fail);
-      }
-    );
+    api<{ deleted?: boolean }>('POST', '/admin/schema', { action: 'deleteTable', table: t.name })
+      .then((result) => {
+        if (result && result.deleted === false) toast('The backend reported that "' + t.name + '" was not deleted.', 'bad');
+        else toast('Collection "' + t.name + '" deleted.', 'ok');
+        reload();
+      })
+      .catch(fail);
+  }
+  function emptyTable() {
+    emptyCollection(t.name)
+      .then((n) => {
+        toast(recordsWord(n) + ' deleted from ' + t.name + '.', 'ok');
+        setRecords(0);
+      })
+      .catch(fail);
+  }
+  function removeRule(rule: RuleStatus) {
+    const next = rules.filter((r) => r.name !== rule.name).map((r) => r.rule);
+    api('POST', '/admin/schema', { action: 'setChecks', table: t.name, checks: next })
+      .then(() => toast('Rule removed: ' + rule.description + '.', 'ok'))
+      .catch(fail)
+      .then(reload);
   }
 
   return (
@@ -137,6 +211,7 @@ function TableCard({
         {system ? <Chip kind="warn">{t.name === '_User' ? 'accounts' : 'system'}</Chip> : null}
         <Chip>{columns.length} field(s)</Chip>
         <Chip>{declaredCount(t)} index(es)</Chip>
+        {records !== null ? <Chip>{recordsWord(records)}</Chip> : null}
         <Spacer />
         <Btn tiny onClick={() => (t.name === '_User' ? navigate('users') : navigate('collections', t.name))}>
           {t.name === '_User' ? 'Open people' : 'Open records'}
@@ -147,25 +222,25 @@ function TableCard({
         <WriteBtn tiny onClick={editIndexes}>
           Indexes
         </WriteBtn>
-        {system ? null : (
-          <WriteBtn tiny kind="danger" onClick={deleteTable}>
-            Delete collection
-          </WriteBtn>
-        )}
       </Row>
       <Gap h={8} />
       <Table
-        columns={['Field', 'Type', 'Required', 'Default']}
+        columns={['Field', 'Kind', 'Required', 'Default', '']}
         rows={rows}
         renderRow={(c) => {
           const owned = !!c.note || isServerOwned(t.name, c.name, accountColumns);
           const locked = owned || readonly;
+          const ruled = rules.some((r) => (r.rule.field ? r.rule.field === c.name : (r.rule.exactlyOne || r.rule.allOrNone || []).indexOf(c.name) !== -1));
           return (
             <tr key={c.name} class={owned ? 'sys' : undefined}>
-              <td>{locked ? c.name : <RenameTrigger t={t} c={c} reload={reload} />}</td>
-              <td>{locked || c.type === 'Relation' ? <TypeBadge col={c} /> : <TypeTrigger t={t} c={c} reload={reload} />}</td>
+              <td>
+                {locked ? c.name : <RenameTrigger t={t} c={c} reload={reload} />}
+                {c.description ? <div class="shy">{c.description}</div> : null}
+              </td>
+              <td>{locked || c.type === 'Relation' || ruled ? <KindBadge col={c} checks={t.checks} /> : <TypeTrigger t={t} c={c} reload={reload} />}</td>
               <td>{c.required ? '✓' : ''}</td>
-              <td class="shy">{c.note || (c.defaultValue !== undefined && c.defaultValue !== null ? String(c.defaultValue) : '')}</td>
+              <td class="shy">{c.note || defaultWords(c)}</td>
+              <td class="actions">{locked ? null : <DropTrigger t={t} c={c} reload={reload} />}</td>
             </tr>
           );
         }}
@@ -177,6 +252,33 @@ function TableCard({
             + Add a field
           </WriteBtn>
         </Row>
+      ) : null}
+      {rules.length || drift.length ? (
+        <div class="rules">
+          <div class="field-head">
+            <b>Rules</b>
+            <Hint>Every record must satisfy these; the backend refuses a write that breaks one.</Hint>
+          </div>
+          <ul class="rules-list">
+            {rules.map((r) => (
+              <li key={r.name} class="rule">
+                <span>{r.description}</span>
+                {r.built ? null : <Chip kind="bad">not enforced</Chip>}
+                {readonly ? null : (
+                  <button type="button" class="chip-x" aria-label={'Remove the rule: ' + r.description} title="Remove this rule" onClick={() => removeRule(r)}>
+                    ✕
+                  </button>
+                )}
+              </li>
+            ))}
+            {drift.map((r) => (
+              <li key={r.name} class="rule">
+                <span>{r.name}</span>
+                <Chip kind="warn">not declared</Chip>
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : null}
       {indexes.length ? (
         <>
@@ -196,7 +298,71 @@ function TableCard({
           />
         </>
       ) : null}
+      {system || readonly ? null : (
+        <DangerZone>
+          <DangerAction
+            label="Empty collection"
+            why={'Delete every record in ' + t.name + (records !== null ? ' (' + recordsWord(records) + ')' : '') + '. The fields, rules and indexes stay.'}
+            title={'Empty collection ' + t.name}
+            warning={(records !== null ? recordsWord(records) + ' in' : 'Every record in') + ' "' + t.name + '" ' + (records === 1 ? 'is' : 'are') + ' destroyed. The collection itself stays, with its fields.'}
+            expected={t.name}
+            onConfirm={emptyTable}
+            verb="Empty"
+          />
+          <DangerAction
+            label="Delete collection"
+            why={'Destroy ' + t.name + ' and every record in it. Permissions and triggers that name it are not removed and will start failing.'}
+            title={'Delete collection ' + t.name}
+            warning={'Every record in "' + t.name + '" is destroyed along with the collection. Permissions and triggers that reference it are NOT removed and will start failing.'}
+            expected={t.name}
+            onConfirm={deleteTable}
+          />
+        </DangerZone>
+      )}
     </div>
+  );
+}
+
+/** Delete every record, a page at a time, through the batch route. Answers how many went. */
+export async function emptyCollection(table: string): Promise<number> {
+  let total = 0;
+  for (let round = 0; round < 10000; round++) {
+    const page = await api<{ results?: Array<{ objectId: string }> }>('GET', '/api/' + encode(table) + '?limit=200&keys=objectId');
+    const ids = ((page && page.results) || []).map((r) => r.objectId).filter(Boolean);
+    if (!ids.length) return total;
+    await api('POST', '/api/_batch', { operations: ids.map((objectId) => ({ method: 'delete', collection: table, objectId })) });
+    total += ids.length;
+  }
+  return total;
+}
+
+/** ✕ on a field row: counts the records holding a value, then asks for the name. */
+function DropTrigger({ t, c, reload }: { t: TableDef; c: Column; reload: () => void }) {
+  const [busy, setBusy] = useState(false);
+  function ask() {
+    setBusy(true);
+    const count = t.name === '_User' ? Promise.resolve<number | null>(null) : countRecords(t.name, { [c.name]: { $exists: true } }).catch(() => null);
+    count.then((n) => {
+      setBusy(false);
+      const holding = n === null ? 'Records holding a value in it lose it.' : n === 0 ? 'No record holds a value in it.' : recordsWord(n) + ' hold' + (n === 1 ? 's' : '') + ' a value in it, and that value is lost.';
+      confirmDestructive(
+        'Drop the field ' + c.name,
+        holding + ' App logic that reads "' + c.name + '" will break. A rule or an index that reads it must be removed first.',
+        c.name,
+        () => {
+          api<{ dropped?: boolean }>('POST', '/admin/schema', { action: 'dropColumn', table: t.name, column: c.name })
+            .then((r) => toast(r && r.dropped === false ? '"' + c.name + '" was already gone.' : 'Dropped ' + c.name + ' from ' + tableLabel(t.name) + '.', 'ok'))
+            .catch(fail)
+            .then(reload);
+        },
+        'Drop'
+      );
+    });
+  }
+  return (
+    <button type="button" class="chip-x" aria-label={'Drop the field ' + c.name} title={'Drop ' + c.name} disabled={busy} onClick={ask}>
+      ✕
+    </button>
   );
 }
 
@@ -260,54 +426,65 @@ function RenameTrigger({ t, c, reload }: { t: TableDef; c: Column; reload: () =>
   );
 }
 
-/** The type badge, as a dropdown. Changing it converts what is stored, so it asks first. */
+/** The kinds a stored column can be changed to (no Choice: that is a rule, added from the drawer; no Links: a junction table). */
+const CHANGEABLE: Kind[] = KINDS.filter((k) => k.id !== 'choice' && k.id !== 'links');
+
+/** The kind, as a dropdown. Changing it converts what is stored, so it asks first — with the count of records affected. */
 function TypeTrigger({ t, c, reload }: { t: TableDef; c: Column; reload: () => void }) {
+  const current = kindOf(c, t.checks);
   return (
     <select
       class="inline-type"
-      title={'Change the type of ' + c.name}
-      aria-label={'Type of ' + c.name}
-      value={c.type}
+      title={'Change the kind of ' + c.name}
+      aria-label={'Kind of ' + c.name}
+      value={current.id}
       onChange={(e) => {
         const select = e.currentTarget as HTMLSelectElement;
-        const next = select.value;
-        select.value = c.type;
-        openModal((close) => (
-          <Dialog
-            title={'Change ' + c.name + ' to ' + next + '?'}
-            autoFocus={false}
-            actions={
-              <>
-                <Btn onClick={close}>Cancel</Btn>
-                <Btn
-                  kind="primary"
-                  onClick={() => {
-                    close();
-                    api<{ convertedValues?: number }>('POST', '/admin/schema', { action: 'changeColumnType', table: t.name, column: c.name, type: next })
-                      .then((r) => {
-                        const n = (r && r.convertedValues) || 0;
-                        toast(c.name + ' is now ' + next + (n ? ' — ' + n + ' stored value(s) converted.' : '.'), 'ok');
-                      })
-                      .catch(fail)
-                      .then(reload);
-                  }}
-                >
-                  Change type
-                </Btn>
-              </>
-            }
-          >
-            <p>
-              Values already stored in {tableLabel(t.name)}.{c.name} are converted from {c.type} to {next}.
-            </p>
-            <Notice kind="warn">A conversion can lose information: text that is not a number becomes 0, and a list or object turned into text stays text.</Notice>
-          </Dialog>
-        ));
+        const nextKind = kindById(select.value);
+        select.value = current.id;
+        const next = nextKind.storage;
+        if (next === c.type) return;
+        countRecords(t.name, { [c.name]: { $exists: true } })
+          .catch(() => null)
+          .then((n) =>
+            openModal((close) => (
+              <Dialog
+                title={'Change ' + c.name + ' to ' + nextKind.label + '?'}
+                autoFocus={false}
+                actions={
+                  <>
+                    <Btn onClick={close}>Cancel</Btn>
+                    <Btn
+                      kind="primary"
+                      onClick={() => {
+                        close();
+                        api<{ convertedValues?: number }>('POST', '/admin/schema', { action: 'changeColumnType', table: t.name, column: c.name, type: next })
+                          .then((r) => {
+                            const k = (r && r.convertedValues) || 0;
+                            toast(c.name + ' is now ' + nextKind.label + (k ? ' — ' + k + ' stored value(s) converted.' : '.'), 'ok');
+                          })
+                          .catch(fail)
+                          .then(reload);
+                      }}
+                    >
+                      Change kind
+                    </Btn>
+                  </>
+                }
+              >
+                <p>
+                  {n === null ? 'Values' : n === 0 ? 'No record holds a value yet; nothing is converted. Values' : recordsWord(n) + ' hold a value in ' + tableLabel(t.name) + '.' + c.name + ', and each one is converted. Values'} stored as{' '}
+                  {current.label} ({c.type}) become {nextKind.label} ({next}).
+                </p>
+                <Notice kind="warn">A conversion can lose information: text that is not a number becomes 0, and a list or object turned into text stays text.</Notice>
+              </Dialog>
+            ))
+          );
       }}
     >
-      {COLUMN_TYPES.filter((type) => !(type === 'Relation' || (type === 'Pointer' && c.type !== 'Pointer'))).map((type) => (
-        <option key={type} value={type}>
-          {type + (type === 'Pointer' && c.targetClass ? ' → ' + c.targetClass : '')}
+      {CHANGEABLE.filter((k) => !(k.id === 'link' && c.type !== 'Pointer')).map((k) => (
+        <option key={k.id} value={k.id}>
+          {k.label + ' (' + k.storage + ')' + (k.id === 'link' && c.targetClass ? ' → ' + c.targetClass : '')}
         </option>
       ))}
     </select>
@@ -315,6 +492,9 @@ function TypeTrigger({ t, c, reload }: { t: TableDef; c: Column; reload: () => v
 }
 
 // ------------------------------------------------------- field lines --
+// New collection: name + rows of choices (BMG-000). The kind select is the
+// tiles' names; Choice is added afterwards from the drawer, because it needs
+// its values.
 
 export interface FieldLine {
   name: string;
@@ -340,29 +520,32 @@ export function readLine(line: FieldLine, taken: string[]): Column {
   }
   if (line.required) column.required = true;
   const d = line.dflt.trim();
-  if (d && ['String', 'Number', 'Boolean'].indexOf(line.type) !== -1) {
+  // AC5: a required field has no default — every record must say it.
+  if (d && !line.required && ['String', 'Number', 'Boolean'].indexOf(line.type) !== -1) {
     if (line.type === 'Number') {
       if (isNaN(Number(d))) throw new Error(n + ': the default must be a number.');
       column.defaultValue = Number(d);
     } else if (line.type === 'Boolean') {
-      if (d !== 'true' && d !== 'false') throw new Error(n + ': the default must be true or false.');
-      column.defaultValue = d === 'true';
+      column.defaultValue = d === 'yes';
     } else column.defaultValue = d;
   }
   return column;
 }
 
-/** One editable line: name, type, what a Pointer points at, required, and a default. */
+const LINE_KINDS: Kind[] = KINDS.filter((k) => k.id !== 'choice');
+
+/** One editable line: name, kind, what a Link points at, required, and a default. */
 export function FieldLineRow({ line, update, names, autoFocus }: { line: FieldLine; update: (next: FieldLine) => void; names: string[]; autoFocus?: boolean }) {
   const pointy = line.type === 'Pointer' || line.type === 'Relation';
   const hasDefault = ['String', 'Number', 'Boolean'].indexOf(line.type) !== -1;
+  const why = 'A required field has no default: every record must say it.';
   return (
     <>
       <input type="text" placeholder="fieldName" aria-label="Field name" value={line.name} autoFocus={autoFocus} onInput={(e) => update({ ...line, name: (e.currentTarget as HTMLInputElement).value })} />
-      <select aria-label="Type" value={line.type} onChange={(e) => update({ ...line, type: (e.currentTarget as HTMLSelectElement).value })}>
-        {COLUMN_TYPES.map((x) => (
-          <option key={x} value={x}>
-            {x}
+      <select aria-label="Kind" value={line.type} onChange={(e) => update({ ...line, type: (e.currentTarget as HTMLSelectElement).value })}>
+        {LINE_KINDS.map((k) => (
+          <option key={k.id} value={k.storage}>
+            {k.label + ' (' + k.storage + ')'}
           </option>
         ))}
       </select>
@@ -381,18 +564,20 @@ export function FieldLineRow({ line, update, names, autoFocus }: { line: FieldLi
       </label>
       {hasDefault ? (
         line.type === 'Boolean' ? (
-          <select aria-label="Default" value={line.dflt} onChange={(e) => update({ ...line, dflt: (e.currentTarget as HTMLSelectElement).value })}>
-            <option value="">no default</option>
-            <option value="true">default: yes</option>
-            <option value="false">default: no</option>
+          <select aria-label="Default" value={line.required ? '' : line.dflt} disabled={line.required} title={line.required ? why : undefined} onChange={(e) => update({ ...line, dflt: (e.currentTarget as HTMLSelectElement).value })}>
+            <option value="">{line.required ? 'no default (required)' : 'no default'}</option>
+            <option value="yes">default: Yes</option>
+            <option value="no">default: No</option>
           </select>
         ) : (
           <input
             type={line.type === 'Number' ? 'number' : 'text'}
             step="any"
-            placeholder="default (optional)"
+            placeholder={line.required ? 'no default: every record must say it' : 'default (optional)'}
             aria-label="Default"
-            value={line.dflt}
+            title={line.required ? why : undefined}
+            disabled={line.required}
+            value={line.required ? '' : line.dflt}
             onInput={(e) => update({ ...line, dflt: (e.currentTarget as HTMLInputElement).value })}
           />
         )
@@ -405,13 +590,13 @@ function NewCollectionDialog({ names, close, onCreated }: { names: string[]; clo
   const [name, setName] = useState('');
   const [lines, setLines] = useState<FieldLine[]>([blankLine()]);
   const [error, setError] = useState<string | null>(null);
+  const nameProblem = name ? validCollectionName(name.trim(), names) : null;
   function create() {
     const tableName = name.trim();
     const columns: Column[] = [];
     try {
-      if (!tableName) throw new Error('The collection needs a name.');
-      if (!NAME_RULE.test(tableName)) throw new Error('A collection name starts with a letter, then letters, digits or _ only.');
-      if (names.indexOf(tableName) !== -1) throw new Error('There is already a collection called ' + tableName + '.');
+      const problem = validCollectionName(tableName, names);
+      if (problem) throw new Error(problem);
       lines.forEach((line) => {
         if (!line.name.trim()) return;
         columns.push(readLine(line, columns.map((c) => c.name)));
@@ -445,11 +630,12 @@ function NewCollectionDialog({ names, close, onCreated }: { names: string[]; clo
         <div class="field">
           <b>Name</b>
           <input type="text" placeholder="e.g. Products, Orders, Members" style="width:100%" aria-label="Collection name" value={name} onInput={(e) => setName((e.currentTarget as HTMLInputElement).value)} />
+          {nameProblem ? <div class="chips-problem">{nameProblem}</div> : null}
         </div>
         <Gap />
         <div class="field-head">
           <b>Fields</b>
-          <Hint>More can be added later. objectId, createdAt and updatedAt come for free.</Hint>
+          <Hint>More can be added later, and a Choice (one of a list) is added from the collection's card. objectId, createdAt and updatedAt come for free.</Hint>
         </div>
         <Gap h={8} />
         <ListEditor<FieldLine>
@@ -471,43 +657,273 @@ export function tableLabel(name: string): string {
   return name === '_User' ? 'Users' : name;
 }
 
+// ------------------------------------------------------- the drawer --
+
+/** The Users page's door (BMG-004): the same drawer, opened through the modal host. */
 export function AddFieldDialog({ t, names, close, onAdded }: { t: TableDef; names: string[]; close: () => void; onAdded: () => void }) {
-  const [line, setLine] = useState<FieldLine>(blankLine());
+  return <AddFieldDrawer t={t} names={names} onClose={close} onAdded={onAdded} />;
+}
+
+/** Step 1: the tiles. Controlled: says which kind was picked. */
+export function KindPicker({ onPick, autoFocus }: { onPick: (kind: KindId) => void; autoFocus?: boolean }) {
+  const [query, setQuery] = useState('');
+  const shown = searchKinds(query);
+  return (
+    <div class="kind-picker">
+      <input
+        type="text"
+        class="kind-search"
+        placeholder="What does it hold? e.g. a number, a link, a picture"
+        aria-label="Search kinds"
+        autoFocus={autoFocus}
+        value={query}
+        onInput={(e) => setQuery((e.currentTarget as HTMLInputElement).value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && shown.length === 1) {
+            e.preventDefault();
+            onPick(shown[0].id);
+          }
+        }}
+      />
+      <div class="tiles kinds" role="radiogroup" aria-label="Kind of field">
+        {shown.map((k) => (
+          <label class="tile" key={k.id}>
+            <input type="radio" name="kind" value={k.id} aria-label={k.label} onChange={() => onPick(k.id)} />
+            <span class="kind-icon" aria-hidden="true">
+              {k.icon}
+            </span>
+            <b>{k.label}</b>
+            <span class="sub">{k.line}</span>
+            <span class="chip type">{k.storage}</span>
+          </label>
+        ))}
+        {!shown.length ? <Hint>Nothing matches "{query}". Try text, number, date, link, picture.</Hint> : null}
+      </div>
+    </div>
+  );
+}
+
+/** Step 2: the options that kind has. Controlled and pure: what it shows is the draft, what it changes is the draft. */
+export function FieldOptions({ draft, update, names, taken, records }: { draft: FieldDraft; update: (next: FieldDraft) => void; names: string[]; taken: string[]; records: number }) {
+  const kind = kindById(draft.kind);
+  const nameProblem = draft.name ? validName(draft.name.trim(), taken, 'The field') : null;
+  const dRule = defaultRule(draft, records);
+  const set = (patch: Partial<FieldDraft>) => update({ ...draft, ...patch });
+  const text = (label: string, key: 'dflt' | 'maxLength' | 'min' | 'max' | 'description', extra: Record<string, unknown> = {}) => (
+    <Field label={label}>
+      <input type="text" aria-label={label} value={draft[key]} onInput={(e) => set({ [key]: (e.currentTarget as HTMLInputElement).value } as Partial<FieldDraft>)} {...extra} />
+    </Field>
+  );
+  return (
+    <div class="field-options">
+      <div class="field">
+        <b>Name</b>
+        <input type="text" placeholder="e.g. price, dueDate, ownerName" aria-label="Field name" autoFocus value={draft.name} onInput={(e) => set({ name: (e.currentTarget as HTMLInputElement).value })} />
+        {nameProblem ? <div class="chips-problem">{nameProblem}</div> : <Hint>Letters, digits and _ — this is the name app logic reads it by.</Hint>}
+      </div>
+      {text('Description (optional)', 'description', { placeholder: 'One line about what goes here' })}
+
+      <div class="when-body" id="kind-options">
+        {draft.kind === 'text' ? (
+          <>
+            <Field label="Default">
+              <input type="text" aria-label="Default" value={draft.dflt} disabled={dRule.disabled} placeholder={dRule.disabled ? 'no default' : 'optional'} onInput={(e) => set({ dflt: (e.currentTarget as HTMLInputElement).value })} />
+              {dRule.why ? <Hint>{dRule.why}</Hint> : null}
+            </Field>
+            <div class="field-line">
+              {text('Max length', 'maxLength', { type: 'number', min: 1, step: 1, placeholder: 'any', class: 'short' })}
+              <Field label="Must look like">
+                <select aria-label="Must look like" value={draft.looksLike} onChange={(e) => set({ looksLike: (e.currentTarget as HTMLSelectElement).value as FieldDraft['looksLike'] })}>
+                  <option value="">anything</option>
+                  <option value="email">an email address</option>
+                  <option value="url">a web address</option>
+                </select>
+              </Field>
+            </div>
+          </>
+        ) : null}
+        {draft.kind === 'number' ? (
+          <>
+            <Field label="Default">
+              <input type="number" step="any" aria-label="Default" value={draft.dflt} disabled={dRule.disabled} placeholder={dRule.disabled ? 'no default' : 'optional'} onInput={(e) => set({ dflt: (e.currentTarget as HTMLInputElement).value })} />
+              {dRule.why ? <Hint>{dRule.why}</Hint> : null}
+            </Field>
+            <div class="field-line">
+              {text('At least', 'min', { type: 'number', step: 'any', placeholder: 'no minimum', class: 'short' })}
+              {text('At most', 'max', { type: 'number', step: 'any', placeholder: 'no maximum', class: 'short' })}
+            </div>
+            <Switch checked={draft.whole} onChange={(v) => set({ whole: v })} label="Whole numbers only">
+              Whole numbers only
+            </Switch>
+          </>
+        ) : null}
+        {draft.kind === 'yesno' ? (
+          <>
+            <Switch checked={draft.boolDefaultSet} disabled={dRule.disabled} onChange={(v) => set({ boolDefaultSet: v })} label="Has a default">
+              New records start with a default
+            </Switch>
+            {draft.boolDefaultSet && !dRule.disabled ? (
+              <Switch checked={draft.boolDefault} onChange={(v) => set({ boolDefault: v })} label="Default value">
+                Default: {draft.boolDefault ? 'Yes' : 'No'}
+              </Switch>
+            ) : null}
+            {dRule.why ? <Hint>{dRule.why}</Hint> : null}
+          </>
+        ) : null}
+        {draft.kind === 'date' ? <Hint>No options. The backend stamps createdAt and updatedAt on every record for you.</Hint> : null}
+        {draft.kind === 'choice' ? (
+          <>
+            <Field label="The choices">
+              <Chips
+                id="choice-values"
+                items={draft.values}
+                onChange={(values) => set({ values, dflt: values.indexOf(draft.dflt) === -1 ? '' : draft.dflt })}
+                placeholder="Type a value and press Enter"
+                addLabel="Add"
+                validate={(v) => (v.length > 200 ? 'A choice is at most 200 characters.' : null)}
+              />
+            </Field>
+            <Field label="Default">
+              <select aria-label="Default" value={draft.dflt} disabled={dRule.disabled || !draft.values.length} onChange={(e) => set({ dflt: (e.currentTarget as HTMLSelectElement).value })}>
+                <option value="">no default</option>
+                {draft.values.map((v) => (
+                  <option key={v} value={v}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+              {dRule.why ? <Hint>{dRule.why}</Hint> : null}
+            </Field>
+          </>
+        ) : null}
+        {draft.kind === 'link' || draft.kind === 'links' ? (
+          <Field label="Points at">
+            <select aria-label="Points at" value={draft.target} onChange={(e) => set({ target: (e.currentTarget as HTMLSelectElement).value })}>
+              <option value="">choose a collection…</option>
+              {names.map((n) => (
+                <option key={n} value={n}>
+                  {tableLabel(n)}
+                </option>
+              ))}
+            </select>
+            {draft.target ? (
+              <Hint>
+                {draft.kind === 'link' ? 'Each record links to one ' + tableLabel(draft.target) + '.' : 'Each record links to many ' + tableLabel(draft.target) + '.'} When the {tableLabel(draft.target)} is deleted, the link stays and points at nothing.
+              </Hint>
+            ) : null}
+          </Field>
+        ) : null}
+        {draft.kind === 'file' ? <Hint>No options here. What can be uploaded, and how big, is set on the Files page for the whole backend.</Hint> : null}
+        {draft.kind === 'location' || draft.kind === 'list' || draft.kind === 'anything' ? <Hint>No options.</Hint> : null}
+      </div>
+
+      <div class="drawer-section">Rules</div>
+      <div class="when-body">
+        <Switch checked={draft.required} onChange={(v) => set({ required: v })} label="Required">
+          Required — every record must say it
+        </Switch>
+        {draft.required && records > 0 && takesDefault(draft.kind) ? <Hint>{recordsWord(records)} already here: give it a default so they have a value.</Hint> : null}
+        {draft.required && records > 0 && !takesDefault(draft.kind) ? <Notice kind="warn">A required {kind.label} can only be added while the collection is empty: the {recordsWord(records)} already here would have nothing in it.</Notice> : null}
+        {takesUnique(draft.kind) ? (
+          <Switch checked={draft.unique} onChange={(v) => set({ unique: v })} label="Must be unique">
+            Must be unique — no two records share a value
+          </Switch>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+/** The drawer: pick a kind, then its options; Add writes the column, its rules and its index. */
+export function AddFieldDrawer({ t, names, onClose, onAdded }: { t: TableDef; names: string[]; onClose: () => void; onAdded: () => void }) {
+  const [draft, setDraft] = useState<FieldDraft | null>(null);
+  const [records, setRecords] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const taken = (t.columns || []).map((c) => c.name);
+
+  useEffect(() => {
+    countRecords(t.name)
+      .then(setRecords)
+      .catch(() => setRecords(0));
+  }, [t.name]);
+
   function add() {
-    let column: Column;
-    try {
-      column = readLine(line, (t.columns || []).map((c) => c.name));
-    } catch (e) {
-      setError((e as Error).message);
+    if (!draft) return;
+    const problem = draftProblem(draft, { taken, collections: names, records });
+    if (problem) {
+      setError(problem);
       return;
     }
+    const column = toColumn(draft);
+    const mine = toRules(draft);
+    setBusy(true);
     api('POST', '/admin/schema', { action: 'addColumn', table: t.name, column })
+      .then(() => (mine.length ? api('POST', '/admin/schema', { action: 'setChecks', table: t.name, checks: mergeRules(t.checks, column.name, mine) }) : null))
+      .then(() =>
+        draft.unique
+          ? api('POST', '/admin/schema', {
+              action: 'setIndexes',
+              table: t.name,
+              indexes: (t.indexes || [])
+                .filter((i) => i.declared !== false)
+                .map((i): Index => ({ fields: i.fields, unique: i.unique, order: i.order }))
+                .concat([{ fields: [column.name], unique: true }])
+            })
+          : null
+      )
       .then(() => {
-        close();
         toast(column.name + ' added to ' + tableLabel(t.name) + '.', 'ok');
         onAdded();
+        onClose();
       })
-      .catch((e) => setError((e as Error).message));
+      .catch((e) => {
+        setBusy(false);
+        setError((e as Error).message);
+        onAdded();
+      });
   }
+
+  const kind = draft ? kindById(draft.kind) : null;
   return (
-    <Dialog
+    <Drawer
       title={'Add a field to ' + tableLabel(t.name)}
+      subtitle={draft && kind ? kind.label + ' — ' + kind.line : 'What kind of thing does it hold?'}
+      onClose={onClose}
       wide
-      actions={
+      footer={
         <>
-          <Btn onClick={close}>Cancel</Btn>
-          <Btn kind="primary" onClick={add}>
-            Add field
-          </Btn>
+          <Btn onClick={onClose}>Cancel</Btn>
+          {draft ? (
+            <>
+              <Btn onClick={() => setDraft(null)}>Change kind</Btn>
+              <WriteBtn kind="primary" disabled={busy} onClick={add}>
+                Add field
+              </WriteBtn>
+            </>
+          ) : null}
         </>
       }
     >
-      <div class="field-line" onInput={() => setError(null)}>
-        <FieldLineRow line={line} update={setLine} names={names} />
+      <div onInput={() => setError(null)}>
+        {!draft ? (
+          <KindPicker autoFocus onPick={(k) => setDraft(blankDraft(k))} />
+        ) : (
+          <>
+            <Row class="kind-chosen">
+              <span class="kind-icon" aria-hidden="true">
+                {kind!.icon}
+              </span>
+              <b>{kind!.label}</b>
+              <Sub style="margin:0">{kind!.line}</Sub>
+              <span class="chip type">{kind!.storage}</span>
+            </Row>
+            <FieldOptions draft={draft} update={setDraft} names={names} taken={taken} records={records} />
+          </>
+        )}
+        {error ? <Notice kind="bad" style="margin-top:12px">{error}</Notice> : null}
       </div>
-      {error ? <Notice kind="bad" style="margin-top:12px">{error}</Notice> : null}
-    </Dialog>
+    </Drawer>
   );
 }
 

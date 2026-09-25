@@ -181,6 +181,7 @@ export const ADAPTER_COVERAGE: { readonly [K in keyof IStorageAdapter]-?: Covera
 export const SCHEMA_COVERAGE: { readonly [K in keyof IStorageSchema]-?: CoverageEntry } = {
   createTable: { kind: 'cases', cases: ['schema/create-table-then-list-it'] },
   addColumn: { kind: 'cases', cases: ['schema/add-column-is-visible-to-reads'] },
+  dropColumn: { kind: 'cases', cases: ['schema/drop-column-removes-it-and-refuses-one-in-use'] },
   getTableSchema: {
     kind: 'cases',
     cases: ['schema/table-schema-reports-its-columns', 'schema/unknown-table-reports-null-not-an-empty-schema']

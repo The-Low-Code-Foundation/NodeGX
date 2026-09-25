@@ -76,6 +76,7 @@ import {
   declaredProperties,
   indexName,
   junctionTableName,
+  refuseColumnInUse,
   normalizeIndexDecls,
   POSTGRES_TYPE_MAP,
   sameIndexSignature,
@@ -193,6 +194,11 @@ export function parseIndexDef(
     if (i === 0 && fm[3] === 'DESC') order = 'desc';
   }
   return { name, unique: Boolean(m[1]), fields, order, partial: Boolean(m[4]) };
+}
+
+/** BMG-003: see the SQLite manager's `freshSchema` — the memo is keyed by object identity. */
+function freshSchema<T>(schema: T): T {
+  return JSON.parse(JSON.stringify(schema)) as T;
 }
 
 export class PgSchemaManager {
@@ -429,7 +435,13 @@ export class PgSchemaManager {
   addColumn(tableName: string, column: SchemaColumn): void {
     const st = this.s;
     if (!st.tables.has(tableName)) throw new Error(`no such table: ${tableName}`);
-    if (!TYPE_MAP[column.type]) return; // Relations and unknown types: not a column on either engine
+    if (!TYPE_MAP[column.type]) {
+      // BMG-003: a Relation is a junction table, not a column — created and
+      // declared here as `createTable` would, instead of dropped (see the
+      // SQLite manager's note). Unknown types are still not a column.
+      if (column.type === 'Relation' && column.targetClass) this.addRelationColumn(tableName, column);
+      return;
+    }
     const cols = st.columns.get(tableName)!;
     if (cols.has(column.name)) return; // "duplicate column name" — SQLite swallows it too
 
@@ -443,6 +455,9 @@ export class PgSchemaManager {
       schema.columns = schema.columns || [];
       schema.columns.push(column);
       recorded = true;
+      // A fresh object, so `declaredProperties`' identity-keyed memo derives
+      // afresh (see the SQLite manager's `freshSchema`).
+      st.schemas.set(tableName, freshSchema(schema));
     }
     const snapshot = schema ? JSON.stringify(schema) : null;
 
@@ -456,6 +471,106 @@ export class PgSchemaManager {
         cols.delete(column.name);
         if (recorded && schema && schema.columns) {
           schema.columns = schema.columns.filter((c) => c !== column);
+          st.schemas.set(tableName, schema);
+        }
+      }
+    );
+  }
+
+  /**
+   * BMG-003 — drop a column. A Relation is a junction table, so that is what
+   * goes; a declared index, check or search opt-in that reads the column is a
+   * refusal (`code: 'COLUMN_IN_USE'`) naming it, never a cascade: the index
+   * was declared on purpose, and PostgreSQL would otherwise drop it silently.
+   */
+  dropColumn(tableName: string, columnName: string): boolean {
+    const st = this.s;
+    if (!st.tables.has(tableName)) throw new Error(`Table "${tableName}" does not exist`);
+    if (SYSTEM_COLUMNS.includes(columnName)) throw new Error(`Cannot drop "${columnName}": every record carries it.`);
+    const schema = st.schemas.get(tableName);
+    const declared = ((schema && schema.columns) || []).find((c) => c.name === columnName);
+    const cols = st.columns.get(tableName) || new Set<string>();
+    if (!declared && !cols.has(columnName)) return false;
+    refuseColumnInUse(
+      tableName,
+      columnName,
+      this.declaredIndexes(tableName).map((i) => ({ name: this.indexName(tableName, i.fields, i.where), fields: i.fields })),
+      this.declaredChecks(tableName),
+      st.search.get(tableName)?.fields
+    );
+
+    const relation = declared && declared.type === 'Relation';
+    const junction = relation ? junctionTableName(tableName, columnName) : null;
+    const removed = {
+      column: declared,
+      hadColumn: cols.has(columnName),
+      junction: junction && st.tables.has(junction) ? { rel: st.relations.get(junction), own: st.owners.get(junction) } : null
+    };
+    if (schema && declared) {
+      schema.columns = (schema.columns || []).filter((c) => c !== declared);
+      st.schemas.set(tableName, freshSchema(schema));
+    }
+    cols.delete(columnName);
+    if (junction) {
+      st.tables.delete(junction);
+      st.relations.delete(junction);
+      st.owners.delete(junction);
+    }
+    const snapshot = schema ? JSON.stringify(schema) : null;
+
+    this.enqueue(
+      `dropColumn("${tableName}", "${columnName}")`,
+      async () => {
+        await this.pool.transaction(async (tx) => {
+          if (junction) await tx.run(`DROP TABLE IF EXISTS ${escapeTable(junction)}`);
+          else await tx.run(`ALTER TABLE ${escapeTable(tableName)} DROP COLUMN IF EXISTS ${escapeColumn(columnName)}`);
+          if (snapshot !== null) await tx.run(UPSERT_SCHEMA, [tableName, snapshot]);
+        });
+      },
+      () => {
+        if (schema && removed.column) {
+          schema.columns = [...(schema.columns || []), removed.column];
+          st.schemas.set(tableName, schema);
+        }
+        if (removed.hadColumn) cols.add(columnName);
+        if (junction && removed.junction) {
+          st.tables.add(junction);
+          if (removed.junction.rel) st.relations.set(junction, removed.junction.rel);
+          if (removed.junction.own) st.owners.set(junction, removed.junction.own);
+        }
+      }
+    );
+    return true;
+  }
+
+  /** `addColumn` for a Relation: the junction table plus the declaration. */
+  private addRelationColumn(tableName: string, column: SchemaColumn): void {
+    const st = this.s;
+    const schema = st.schemas.get(tableName);
+    if (schema && (schema.columns || []).some((c) => c.name === column.name)) return;
+    const junction = junctionTableName(tableName, column.name);
+    const create = !st.tables.has(junction);
+    if (create) this._junction(junction);
+    if (schema) {
+      schema.columns = [...(schema.columns || []), column];
+      st.schemas.set(tableName, freshSchema(schema));
+    }
+    const snapshot = schema ? JSON.stringify(schema) : null;
+    this.enqueue(
+      `addColumn("${tableName}", "${column.name}")`,
+      async () => {
+        if (create) await this.pool.run(junctionDDL(junction).join('\n'));
+        if (snapshot !== null) await this.pool.run(UPSERT_SCHEMA, [tableName, snapshot]);
+      },
+      () => {
+        if (schema) {
+          schema.columns = (schema.columns || []).filter((c) => c !== column);
+          st.schemas.set(tableName, schema);
+        }
+        if (create) {
+          st.tables.delete(junction);
+          st.relations.delete(junction);
+          st.owners.delete(junction);
         }
       }
     );
