@@ -12,6 +12,7 @@
  *   GET    /admin/roles          POST /admin/roles          DELETE /admin/roles/:name
  *   POST   /admin/roles/:name/users                 DELETE /admin/roles/:name/users/:userId
  *   GET    /admin/keys           POST /admin/keys           DELETE /admin/keys/:id (revoke)
+ *   PUT    /admin/keys/:id       change scopes / actsAsUserId (BMG-007)
  *
  * All admin-gated by the dispatcher. The same surface backs the editor panel
  * (via BackendManager IPC proxy), BAK-005's served dashboard, and the MCP
@@ -555,6 +556,43 @@ export class AdminSecurityRoutes {
     const { objectId, secret } = await this.security.createApiKey(name, body.scopes as string[], actsAsUserId);
     // The one and only time the secret is returned.
     sendJSON(ctx.res, 201, { objectId, name, scopes: body.scopes, actsAsUserId, secret });
+  }
+
+  /**
+   * `PUT /admin/keys/:id` — BMG-007. The API keys page edits a key's scopes
+   * (and the user it acts as) with the same checkboxes that created it, so a
+   * key whose job grew does not have to be revoked and re-pasted everywhere.
+   * Only the two mutable fields are accepted; the name and the secret are not
+   * edits, they are a new key.
+   */
+  async updateKey(ctx: RequestContext): Promise<void> {
+    const body = await readJSONBody(ctx.req);
+    const patch: { scopes?: string[]; actsAsUserId?: string | null } = {};
+    if (body.scopes !== undefined) {
+      const scopeError = validateScopes(body.scopes);
+      if (scopeError) throw new HttpError(400, scopeError);
+      patch.scopes = body.scopes as string[];
+    }
+    if (body.actsAsUserId !== undefined) {
+      const actsAsUserId = body.actsAsUserId === null ? null : String(body.actsAsUserId).trim();
+      if (actsAsUserId !== null) {
+        if (!actsAsUserId) throw new HttpError(400, 'actsAsUserId must be a non-empty user id, or null');
+        try {
+          await this.facade.rawFetch('_User', actsAsUserId);
+        } catch {
+          throw new HttpError(400, `No such user: ${actsAsUserId}`);
+        }
+      }
+      patch.actsAsUserId = actsAsUserId;
+    }
+    if (patch.scopes === undefined && patch.actsAsUserId === undefined) {
+      throw new HttpError(400, 'Nothing to change: send scopes, actsAsUserId, or both');
+    }
+    ctx.audit({ keyId: ctx.params.id, ...patch });
+    const result = await this.security.updateApiKey(ctx.params.id, patch);
+    if (result === 'missing') throw new HttpError(404, `No such key: ${ctx.params.id}`);
+    if (result === 'revoked') throw new HttpError(409, 'That key is revoked. A revoked key cannot be changed; make a new one.');
+    sendJSON(ctx.res, 200, { success: true, objectId: ctx.params.id, ...patch });
   }
 
   async revokeKey(ctx: RequestContext): Promise<void> {

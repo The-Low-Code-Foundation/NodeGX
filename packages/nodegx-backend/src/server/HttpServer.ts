@@ -1048,6 +1048,7 @@ export class HttpServer {
       },
       { method: 'GET', pattern: 'admin/keys', access: { kind: 'admin' }, handler: (ctx) => adminSec.listKeys(ctx) },
       { method: 'POST', pattern: 'admin/keys', access: { kind: 'admin' }, handler: (ctx) => adminSec.createKey(ctx) },
+      { method: 'PUT', pattern: 'admin/keys/:id', access: { kind: 'admin' }, handler: (ctx) => adminSec.updateKey(ctx) },
       {
         method: 'DELETE',
         pattern: 'admin/keys/:id',
@@ -1894,8 +1895,8 @@ export class HttpServer {
         throw new HttpError(
           403,
           'The master key is refused on /mcp on purpose. An MCP client gets a scoped API key, never the admin ' +
-            'credential: make one with POST /admin/keys (scopes like ["classes:read"], optionally bound to a user ' +
-            'with actsAsUserId) and send it as X-NodeGX-Api-Key.',
+            'credential: make one on the API keys page of the backend manager, or with POST /admin/keys (scopes like ' +
+            '["classes:read"], optionally bound to a user with actsAsUserId), and send it as X-NodeGX-Api-Key.',
           119
         );
       }

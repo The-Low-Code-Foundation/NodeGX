@@ -30,6 +30,27 @@ export function when(value: unknown): string {
   return isNaN(d.getTime()) ? String(value) : d.toLocaleString();
 }
 
+/**
+ * "3 min ago" for a column that answers "is anything still using this?" —
+ * a full timestamp is the right answer to a different question (`when`).
+ * Older than a month it falls back to the date, which is what a person would
+ * write.
+ */
+export function ago(value: unknown, now: number = Date.now()): string {
+  if (!value) return 'never';
+  const d = new Date(typeof value === 'number' ? value : String(value));
+  if (isNaN(d.getTime())) return String(value);
+  const s = Math.max(0, Math.round((now - d.getTime()) / 1000));
+  if (s < 45) return 'just now';
+  const m = Math.round(s / 60);
+  if (m < 60) return m + ' min ago';
+  const h = Math.round(m / 60);
+  if (h < 24) return h + (h === 1 ? ' hour ago' : ' hours ago');
+  const days = Math.round(h / 24);
+  if (days < 31) return days + (days === 1 ? ' day ago' : ' days ago');
+  return d.toLocaleDateString();
+}
+
 /** A UUID is noise in a grid; its first block is enough to tell rows apart. */
 export function shortId(id: unknown): string {
   return typeof id === 'string' && id.length > 12 ? id.slice(0, 8) + '…' : String(id);

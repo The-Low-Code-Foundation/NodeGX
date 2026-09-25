@@ -33,6 +33,9 @@ const ACTIONS: Record<string, string> = {
   'POST admin/roles/:name/users': 'role.user.add',
   'DELETE admin/roles/:name/users/:userId': 'role.user.remove',
   'POST admin/keys': 'apikey.create',
+  // BMG-007. What a key may do changed — the entry an operator reads when a
+  // script suddenly can (or cannot) write.
+  'PUT admin/keys/:id': 'apikey.update',
   'DELETE admin/keys/:id': 'apikey.revoke',
   // CWF-009. The entry records the NAME and never the value — the trail is a
   // queryable table, and a credential in one would defeat the point of a store

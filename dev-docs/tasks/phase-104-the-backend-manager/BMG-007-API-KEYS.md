@@ -1,7 +1,7 @@
 # BMG-007 — API keys: a scope picker, an acting user, the secret behind a copy button
 
 **Opened 2026-09-24** (README §2 row 5). **Depends on BMG-001.** The smallest tab task; first.
-**Status: 📋 not started.**
+**Status: ✅ built and driven (s3, 2026-09-25) — §6.**
 
 ## 1. The person sentence
 
@@ -68,3 +68,67 @@
 - The read-only admin may list keys but not create; the drawer's *Create* is a `writeButton`.
 - Last used comes from `lastUsedAt` (`:1785`); it is updated on use — measure that it is, on
   both stores.
+
+## 6. Built (s3, 2026-09-25)
+
+**What exists now.**
+- `src/admin/app/scopes.ts` — the ONLY place in the app that spells a scope string: `toScopes`
+  (boxes → the five shapes; read+write collapse to `classes:*`, *any* drops the named list),
+  `fromScopes` (a stored array → boxes; unknown strings are dropped, never shown as text),
+  `isEmptyChoice`, `describeScopes` (the list's chips: *read data*, *write data*, *any function*,
+  *3 functions*).
+- `views/keys.tsx` rewritten: list (Name · May do · Acts as · Last used relative, full time on
+  hover · Created · Status · Edit/Revoke), a `Drawer` the URL opens (`#/keys/new`,
+  `#/keys/<id>`), `ScopePicker` (two groups, a select-all each — *Data* is indeterminate when
+  one of the pair is ticked; *Functions*' select-all IS *call any function* and greys the named
+  list; a name a stored key carries that the backend no longer serves stays ticked and says
+  *not deployed any more*), *Acts as* radios + `Picker` over `/api/_User` with the one sentence
+  under it, and `SecretCard` (mono box, **Copy secret** → *Copied ✓*, the only-time notice, a
+  filled-in `curl` with `X-NodeGX-Api-Key` and the first non-system collection, **Copy the
+  command**). Done re-reads the list, because the key may already have been used while its
+  secret was on screen. A dev-open backend gets a warning notice on the page (see below).
+- Server: `PUT /admin/keys/:id` (`admin-security.ts updateKey`, `state.ts updateApiKey`) —
+  `scopes` and/or `actsAsUserId` (null clears); 400 on a bad scope / unknown user / empty
+  patch, 404 unknown key, **409 on a revoked key** (revocation stays final; the row hides Edit
+  too). Audit action `apikey.update` (`ops/audit-actions.ts`). The two hints (`HttpServer.ts`
+  `/mcp` refusal, `toolSurface.ts` no-tools sentence) now say *"make one on the API keys page
+  of the backend manager"*.
+- `format.ts ago()` (just now / n min / n hours / n days / date). `styles.css`: `.scope-*`,
+  `.secret-box`, `tr.revoked`, and radios exempted from the field's full-width input rule (they
+  rendered with the dot centred and the words pushed right — shot 1 of the first drive).
+
+**Measured, not in §2.** A **dev-open** backend bypasses key scopes wholesale: on the default
+posture a `classes:read` key got **201** on `POST /api/Pet`. The route spec's backend and the
+drive's are locked (`devOpen: false`, FED-005's config shape), and the page says so when
+`whoami.security.devOpen` is true, since a person ticking boxes on a dev-open backend would
+otherwise be ticking nothing.
+
+**Gate readings (2026-09-25).** `npm run typecheck` (both tsconfigs) exit 0. `npx jest
+tests/admin-app tests/admin-dashboard.test.ts tests/bmg-007-key-update.test.ts
+tests/brg-002-api-key-roundtrip.test.ts tests/ops-audit.test.ts tests/fed-005-mcp-acts-as.test.ts
+tests/feed-drive.test.ts` → 11 suites, **123/123**. Bundle **35,080 gzip** (109,068 raw) of the
+160,000 budget (was 32,538). New specs: `tests/admin-app/scopes.test.ts` (AC1, 64 combinations
+through the real `validateScopes`), `tests/admin-app/keys-view.test.tsx` (AC4, AC5, AC7 under
+jsdom + the source gate), `tests/bmg-007-key-update.test.ts` (AC6 over sockets: list, audit,
+the key obeys the new scopes; bind/unbind; the four refusals; read-only policy).
+
+**Drive** (`drives/bmg007/run.sh ac seed` — locked throwaway backend on 8697, seeded with Pet
+under ann and Pet under bob via their own sessions, one key made the old way, two configured
+functions; headless Chrome on 9333; readings in `drives/bmg007/readings/ac.json`; shots
+`shots/bmg007-*.png`):
+
+| AC | reading |
+|---|---|
+| 2 | *nightly report*, Read records only: `GET /api/Pet` **200**, `POST /api/Pet` **403** |
+| 3 | *ann laptop* acting as ann sees `["Milo"]`; the unbound read key sees `["Milo","Rex"]`; Acts-as column reads *ann* / *backend* |
+| 4 | route `["cleanup","sendInvoice"]` = page boxes `["cleanup","sendInvoice"]`; the jsdom spec covers the empty list (*No functions yet*) and *any* still working |
+| 5 | Copy → button says *Copied ✓*, `navigator.clipboard.readText()` **equals the secret**; after Done the secret is on neither the page nor `GET /admin/keys` |
+| 6 | Edit *reporting* (starts `[read ✓, write ☐]`), tick Write, Save → `GET /admin/keys` scopes `["classes:*"]`; audit `apikey.update` success with `{keyId, scopes, actsAsUserId: null}`; row chips *read data · write data* |
+| 7 | the drawer's only text field is *Name*; the rendered page (`#main` + drawer text) matches no `classes:` / `functions:` string |
+| §5 | *Last used* on sqlite: **just now** after Done and after Refresh; `lastUsedAt` in the route `2026-09-25T05:19:04Z`. Postgres not measured this session (no `DATABASE_URL` on this box). `no page errors` from the CDP console |
+
+**Trap met.** The first AC7 reading was a false red: `document.body.textContent` includes the
+INLINED app bundle's own source (the page is one document), which contains `scopes.ts`. Measure
+`#main` and the drawer, never `body`, on this page.
+
+**Out.** Expiry (README R5, filed). The Postgres `lastUsedAt` reading. A light-theme shot.

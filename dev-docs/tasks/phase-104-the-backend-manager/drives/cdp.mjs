@@ -18,6 +18,6 @@ const nav = async (url) => { await send('Page.navigate', { url }); await sleep(1
 const key = async (k) => { const code = { Enter: 13, Escape: 27, Tab: 9 }[k]; await send('Input.dispatchKeyEvent', { type: 'keyDown', key: k, windowsVirtualKeyCode: code }); await send('Input.dispatchKeyEvent', { type: 'keyUp', key: k, windowsVirtualKeyCode: code }); };
 const typeText = async (s) => send('Input.insertText', { text: s });
 const script = (await import(process.argv[2])).default;
-try { await script({ ev, shot, sleep, nav, key, typeText }); } catch (e) { console.log('FAILED:', e.message); }
+try { await script({ ev, shot, sleep, nav, key, typeText, send }); } catch (e) { console.log('FAILED:', e.message); }
 console.log(logs.length ? logs.join('\n') : 'no page errors');
 ws.close(); process.exit(0);

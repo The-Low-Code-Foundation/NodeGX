@@ -1031,7 +1031,7 @@ div.field b {
   font-family: var(--mono);
 }
 
-div.field input:not([type='checkbox']),
+div.field input:not([type='checkbox']):not([type='radio']),
 div.field select {
   width: 100%;
 }
@@ -1142,4 +1142,54 @@ table.grid th:last-child {
   right: 0;
   background: var(--bg-1);
   box-shadow: -1px 0 0 var(--border);
+}
+
+/* ------------------------------------------------- API keys (BMG-007) -- */
+/* Two groups of boxes with a select-all each; "any function" greys the named list. */
+.scope-groups {
+  display: grid;
+  gap: 10px;
+}
+
+.scope-group {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  background: var(--bg-1);
+}
+
+.scope-group .scope-all {
+  font-weight: 600;
+  color: var(--fg-hi);
+}
+
+.scope-list {
+  display: grid;
+  gap: 4px;
+  margin: 6px 0 2px 22px;
+}
+
+.scope-list.greyed {
+  opacity: 0.45;
+}
+
+.scope-indent {
+  display: grid;
+  gap: 6px;
+  margin: 6px 0 2px 22px;
+}
+
+tr.revoked td {
+  color: var(--fg-shy);
+}
+
+/* The one-time secret, and the example command that carries it. */
+.secret-box {
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  color: var(--fg-hi);
+  word-break: break-all;
+  user-select: all;
 }

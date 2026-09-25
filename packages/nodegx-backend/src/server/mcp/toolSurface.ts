@@ -369,7 +369,8 @@ function instructionsFor(tools: McpTool[], skipped: string[]): string {
     lines.push(
       'This NodeGX backend has no tools for the API key you connected with. The key is valid — it simply has no ' +
         'scope covering any collection or function here, or the user it acts as may not reach them. Ask whoever ' +
-        'issued the key for one with classes:read / classes:write / functions:<name> scopes.'
+        'issued the key for one with classes:read / classes:write / functions:<name> scopes, or make one on the ' +
+        'API keys page of the backend manager.'
     );
   } else {
     lines.push(

@@ -1,0 +1,89 @@
+{
+  "listBefore": [
+    [
+      "reporting",
+      "read data",
+      "backend",
+      "never",
+      "25/09/2026, 07:18:57",
+      "active",
+      "Edit Revoke"
+    ]
+  ],
+  "devOpenNoticeShown": false,
+  "routeFunctions": [
+    "cleanup",
+    "sendInvoice"
+  ],
+  "pageFunctions": [
+    "cleanup",
+    "sendInvoice"
+  ],
+  "ac4_listsMatch": true,
+  "ac7_textFieldsInDrawer": [
+    "What it is for — e.g. nightly report"
+  ],
+  "ac7_scopeStringOnPage": false,
+  "createDisabledWithNameAndRead": false,
+  "ac2_secretShown": true,
+  "ac2_exampleCommand": "curl -H \"X-NodeGX-Api-Key: ngxk_rOx2zqYgCjKmjMZdU36Qa5FGxu_QB-GrlpYrcjSGrwk\" http://127.0.0.1:8697/api/Pet",
+  "ac2_getPets": 200,
+  "ac2_postPets": 403,
+  "ac5_buttonSays": "Copied ✓",
+  "ac5_clipboard": "equals the secret",
+  "ac5_secretOnPageAfterDone": false,
+  "ac5_secretInKeysRoute": false,
+  "ac5_lastUsedCellAfterDone": "just now",
+  "lastUsedCellAfterRefresh": "just now",
+  "lastUsedAtInRoute": "2026-09-25T05:19:04.550Z",
+  "ac3_pickerRows": [
+    "ann"
+  ],
+  "ac3_picked": "ann",
+  "ac3_actingAsAnnSees": [
+    "Milo"
+  ],
+  "ac3_unboundKeySees": [
+    "Milo",
+    "Rex"
+  ],
+  "ac3_actsAsColumn": [
+    [
+      "reporting",
+      "backend"
+    ],
+    [
+      "nightly report",
+      "backend"
+    ],
+    [
+      "ann laptop",
+      "ann"
+    ]
+  ],
+  "ac6_editStartsWith": [
+    true,
+    false
+  ],
+  "ac6_scopesAfter": [
+    "classes:*"
+  ],
+  "ac6_auditEntries": [
+    {
+      "action": "apikey.update",
+      "outcome": "success",
+      "detail": {
+        "keyId": "d5f9b832-f580-4fa5-972b-4b3a86374483",
+        "scopes": [
+          "classes:*"
+        ],
+        "actsAsUserId": null
+      }
+    }
+  ],
+  "ac6_listChips": [
+    "read data",
+    "write data"
+  ],
+  "readKeyStillReads": 200
+}

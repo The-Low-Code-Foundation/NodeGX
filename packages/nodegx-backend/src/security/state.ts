@@ -667,6 +667,33 @@ export class SecurityState {
     }));
   }
 
+  /**
+   * BMG-007 — change what a key may do, or whom it acts as, after it exists.
+   *
+   * A revoked key is refused rather than quietly re-scoped: revocation is the
+   * one edit that must stay final, and a key that came back with new scopes
+   * would be a second key wearing the first one's audit trail. `actsAsUserId:
+   * null` clears the binding; the caller (the admin route) has already checked
+   * that a non-null id names a user, for the same reason `createKey` does.
+   */
+  async updateApiKey(
+    objectId: string,
+    patch: { scopes?: string[]; actsAsUserId?: string | null }
+  ): Promise<'ok' | 'missing' | 'revoked'> {
+    let row: Record<string, unknown>;
+    try {
+      row = await this.deps.facade.rawFetch('_ApiKey', objectId);
+    } catch {
+      return 'missing';
+    }
+    if (row.revoked) return 'revoked';
+    const data: Record<string, unknown> = {};
+    if (patch.scopes !== undefined) data.scopes = patch.scopes;
+    if (patch.actsAsUserId !== undefined) data.actsAsUserId = patch.actsAsUserId;
+    if (Object.keys(data).length) await this.deps.facade.rawSave('_ApiKey', objectId, data);
+    return 'ok';
+  }
+
   async revokeApiKey(objectId: string): Promise<boolean> {
     try {
       await this.deps.facade.rawSave('_ApiKey', objectId, { revoked: true });
