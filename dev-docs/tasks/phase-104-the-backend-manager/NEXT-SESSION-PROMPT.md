@@ -18,7 +18,7 @@ BMG-001; s3 built and drove BMG-007 (API keys); s4 BMG-004 (Users, R3 disable); 
 | BMG-006 Permissions | ✅ s7 | ✅ headless, AC1–7, 37/37 checks (§6) | ✅ `806b53c5` |
 | BMG-008 Triggers | ✅ s8 | ✅ headless, AC1–8, 41/41 checks (§6) | ✅ `71b177a4` |
 | BMG-003 Schema | ✅ s9 | ✅ headless, AC1–8, 41/41 checks (§6) | ✅ `cb83fa7c` |
-| BMG-009 Workflows and Runs | ✅ s10 | ✅ headless, AC1–5, 34/34 checks (§6) | ✅ s10 (hash in the commit line below) |
+| BMG-009 Workflows and Runs | ✅ s10 | ✅ headless, AC1–5, 34/34 checks (§6) | ✅ `fb56efbf` |
 | BMG-010…012 | — | — | — |
 | BMG-013 Richard drives | his | — | — |
 
