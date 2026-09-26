@@ -1,7 +1,7 @@
 # BMG-016 — The leftovers, before Richard drives
 
 **Opened and built s16, 2026-09-26.** Richard: *"let's finish phase 104"* — then, asked how, *"build
-the leftovers first"* (the drive, BMG-013, is his and comes after). **Status: ✅ built s16 (§6).**
+the leftovers first"* (the drive, BMG-013, is his and comes after). **Status: ✅ built, driven and committed s16 — `b3a53e37` (§6).**
 
 ## 1. What it is
 
