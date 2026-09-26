@@ -49,6 +49,8 @@ jobs:
       # (TPL-011 §3.6): the kit and its fonts, and one page authored through the MCP door.
       - name: Build the page kit and author the spike
         run: |
+          # The MCP door imports @nodegx/export, whose package points at its gitignored dist/.
+          npm run build --workspace @nodegx/export
           node library/modules/nightbook-kit/build.mjs
           npx ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-nightbook-spike.ts
 
