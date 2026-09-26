@@ -18,7 +18,37 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Authoring does not depend on the platform, and @nodegx/export (which the MCP door imports) does not
+  # build on Windows: its build.mjs runs execFileSync('npx', …), and npx is npx.cmd there (ENOENT,
+  # measured on windows-latest, run 36250068983). So the spike is authored and gated here, on Linux,
+  # and the Windows job takes the generated project.
+  spike:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - name: Build the page kit and author the spike
+        run: |
+          npm run build --workspace @nodegx/export
+          node library/modules/nightbook-kit/build.mjs
+          npx ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-nightbook-spike.ts
+
+      - name: Kit gate
+        working-directory: packages/noodl-mcp
+        run: npx jest tests/tpl011Kit.test.ts
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: spike-app
+          path: dev-docs/tasks/phase-78-the-templates/nightbook-desktop/spike-app
+          include-hidden-files: true
+          retention-days: 7
+
   windows:
+    needs: spike
     runs-on: windows-latest
     timeout-minutes: 60
     defaults:
@@ -47,16 +77,10 @@ jobs:
 
       # DESK-1 proved the shell with the todo list; the app inside is now the page-designer spike
       # (TPL-011 §3.6): the kit and its fonts, and one page authored through the MCP door.
-      - name: Build the page kit and author the spike
-        run: |
-          # The MCP door imports @nodegx/export, whose package points at its gitignored dist/.
-          npm run build --workspace @nodegx/export
-          node library/modules/nightbook-kit/build.mjs
-          npx ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-nightbook-spike.ts
-
-      - name: Kit gate
-        working-directory: packages/noodl-mcp
-        run: npx jest tests/tpl011Kit.test.ts
+      - uses: actions/download-artifact@v4
+        with:
+          name: spike-app
+          path: dev-docs/tasks/phase-78-the-templates/nightbook-desktop/spike-app
 
       - name: Assemble the app (export + backend + policy)
         run: node dev-docs/tasks/phase-78-the-templates/nightbook-desktop/build-app.js --project dev-docs/tasks/phase-78-the-templates/nightbook-desktop/spike-app
