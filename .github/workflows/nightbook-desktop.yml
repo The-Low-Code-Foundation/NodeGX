@@ -33,6 +33,8 @@ jobs:
       - name: Build the page kit and author the spike
         run: |
           npm run build --workspace @nodegx/export
+          # The door reads a project's kits through the gitignored dist/kit-extract.cjs (P78 D83).
+          npm run build --workspace @noodl/mcp
           node library/modules/nightbook-kit/build.mjs
           npx ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-nightbook-spike.ts
 

@@ -34,6 +34,7 @@ import * as path from 'path';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 
+import { resolveKitExtractEntry } from '../src/kitOverlay';
 import { createServer } from '../src/server';
 
 import { copyTree } from './templatePins';
@@ -390,6 +391,11 @@ export function installModules(projectDir: string): string[] {
 
 export async function buildSpike(): Promise<BuiltSpike> {
   process.env.NODEGX_RENDER_DISABLED = '1';
+  // 🔴 The door reads a project's kits through packages/noodl-mcp/dist/kit-extract.cjs, a gitignored build output.
+  // Without it every kit node is "Unknown node type … ensure the module is installed" — with the module installed
+  // (measured on a fresh CI runner, 2026-09-26; P78 D83). Say the real cause instead.
+  const extractor = resolveKitExtractEntry();
+  if (!extractor.entry) throw new Error(`the kit reader is not built (looked at ${extractor.probed.join(', ')}) — run: npm run build --workspace @noodl/mcp`);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tpl011-spike-'));
   writeSkeleton(dir);
   installModules(dir);
