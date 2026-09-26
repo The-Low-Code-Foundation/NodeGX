@@ -130,10 +130,13 @@ Twenty-two nodes. With Tier 3.11's three: **25 scheduled ⇒ ceiling 117 of 127 
 ### Not a target — re-ruled 2026-09-03 (§50), and every one of them must now be **badged**
 
 `Action Dispatcher` / `Action Handler`, `Optimistic Update`, `State History` / `State Snapshot` /
-`Undo / Redo`, `Parse CSV` / `To CSV`, `Pattern Extractor`, and `Sign In With` (until provider
+`Undo / Redo`, ~~`Parse CSV` / `To CSV`~~, `Pattern Extractor`, and `Sign In With` (until provider
 sign-in is a product decision).
 
-Ten nodes. The original list held twenty-two; the other twelve are in Tier 2.8 and 3.11 above.
+Ten nodes — **eight since 2026-09-26**: Richard reversed the parsers' exclusion (*"Can we not finish
+the code export nodes? If we had 100% coverage that would be a big deal"* — the whole list is now a
+target, §75), and `Parse CSV` / `To CSV` are **built in §75** beside `Parse XML` / `Parse Feed`, which
+his 2026-09-18 ruling had already scheduled. The original list held twenty-two; the other twelve are in Tier 2.8 and 3.11 above.
 🔴 **An exclusion is only honest if the person placing the node is told.** Nothing in the editor
 reads the ledger today (§50.2): the first a person hears is the pre-flight modal at export, which
 lists components with counts, not nodes. That is **EXP-013**, and it is the next first job — before
@@ -6671,7 +6674,8 @@ Richard, 2026-09-03: *"Let's do it"*, on this split —
   relation pair; Drag.
 - **Build, Tier 3.11, the transports**: Subscribe To Changes, Server-Sent Events, WebSocket.
 - **Out of scope, and badged**: Action Dispatcher, Action Handler, Optimistic Update, State History,
-  State Snapshot, Undo / Redo, Parse CSV, To CSV, Pattern Extractor, Sign In With.
+  State Snapshot, Undo / Redo, ~~Parse CSV, To CSV~~ (built §75, 2026-09-26 — the ruling reversed, see §3),
+  Pattern Extractor, Sign In With.
 - **EXP-013 before row 1**: *"we need to be super clear when someone is doing code export which
   nodes can't be exported and what will happen"* — a badge where the node is placed, the pre-flight
   naming nodes and what each refusal silences, and a plain verdict when the cascade is large:
@@ -10974,3 +10978,149 @@ Gates on this tree: **whole pkg jest 80 files (80 on disk) 3012/3012 exit 0** (1
   beside. Opens with pass 3. Owner NONE.
 - §71.5 #1 reworded (an Object's own `prop-*` under a wire — opens only with a write through the Object node). §69.4 #1 (the cascade sentence)
   unchanged — the next job. §71.5 (the hidden `Model2` port) unchanged — Richard's ruling.
+
+## §75 The four parsers — `Parse CSV`, `To CSV`, `Parse XML`, `Parse Feed` — built (session 100, 2026-09-26)
+
+**The ruling.** Richard, 2026-09-26: *"Can we not finish the code export nodes? If we had 100% coverage that would be a big deal"* —
+then *"rock out"*. That reverses the §50 exclusion for every remaining picker row (the ten of §50.3 are now targets), and it
+sits on his 2026-09-18 ruling that had already scheduled `Parse XML` / `Parse Feed` (*"I'll likely convert all nodes to code
+export"*). The picker read **118 of 130** at the start of the session; the twelve left were the §50.3 ten plus the two scheduled
+feed rows. This section builds the four parsers, the cheapest four by the runtime source they transcribe (200–450 lines each,
+every one a function of its inputs). **118 → 122 of 130 (90.8% → 93.8%).** `pickerCoverageFloor` raised in the same commit; the
+five pins moved.
+
+### §75.0 What was measured before a line of code
+
+- **The shape is Tier 2.7's, with one difference.** All four re-parse on every arrival (`_schedule` → `scheduleAfterInputsHaveUpdated`
+  → `_parse`) and hold nothing else, which is exactly a `util-call`: one pure call, arguments in port order, composable. The
+  difference is that every one of them has SEVERAL value outputs (three, two, three, ten), where the three small utilities have one.
+  `DATE_NODES` already answers that for `Date Parts` — the output port is a trailing literal selector on one call — so `UTIL_NODES`
+  gained `select: true` rather than the export gaining a kind. A new kind would have meant every walker in `plan.ts` and
+  `component.ts` (Tier 2.7's comment counts the sites; §59 found the ninth instance of the bare-render bug that way).
+- **`Pattern Extractor` is NOT this shape** and is deliberately not here. It is `Extract`-triggered with an outcome token
+  (`beginOutcome` / `reportOutcome`, ERG-001 §4) and two extra result pulses (`Found` / `Not Found`) — `Hash`'s shape (§59,
+  `crypto-call`), with seven value outputs and a third signal pair the crypto table has no slot for. It is the next row (§75.5).
+- **Two of the four are already committed to.** The ledger rows for `Parse XML` and `Parse Feed` read `scheduled —` (EXP-011 AC4's
+  second shape), and `Parse XML`'s row named the decision to take first: the node wraps a VENDORED dependency (`fast-xml-parser`,
+  FED-001 R1), so its translation has to decide whether an exported app ships a third-party parser or a transcription of one.
+  §75.2 takes it.
+- **The repeater accepts any expression whose static type ends in `[]`** (Pass 5 §4e, `exprTsType(expr).endsWith('[]')`), so a
+  parser's `items` needs a type, not a kind — and `listExprFields` answers `null` for an unknown source, which keeps every mapped
+  input and reads the rows as `any`. A feed's rows have a known shape (`FeedItem`, twelve fields), so that function gained a clause.
+- **The consumer whitelist on a named array** (`collectionReadEligible`'s `listReader`) admitted a For Each, the two transforms, a
+  mint and a Run Tasks — and nothing else, so `Array.items → To CSV.items` refused the ARRAY with *"its items output drives logic
+  this slice does not translate"*. §55.2's lesson exactly: an `items` wire into anything that reads a list through `resolveExpr`
+  is a read. `To CSV` joined the list.
+- **A parser's text port is a code editor** (`type: { name: 'string', codeeditor: 'text' }`), so a CSV or XML typed into the panel
+  reaches the IR as a `script` parameter, not a `literal` — and `literalParam` answers `undefined` for it. The §B rows, which build
+  the IR in memory with `literal(...)`, could not see this; the §C fixture on disk did, refusing every node with *"nothing is wired
+  into its text input and none is authored"*. `scriptParam` reads it where the port is the parser's required one.
+- **Pass 4c consumed the `items` wire before Pass 5 could.** `LOGIC_VALUE_OUTPUTS` is derived from `UTIL_NODES` (Tier 2.7's "first
+  opt-in site"), so a parser's `items` was a logic value output; a wire from it into a rendered For Each was consumed by 4c as a
+  binding to `people.items` — *"no rendered sink on For Each"* — and never reached §4e. The list outputs are filtered out of that
+  derivation; the scalar ones stay.
+- 🔴 **`feed.ts`'s identity ladder hashes with a NUL byte.** The §A differential disagreed on exactly one field of one fixture
+  (`no-identity.xml`, item 1, `id`: runtime `5d1e6a75`, transcription `f03d3695`). `hashId` matched; the ladder matched on every
+  screen; `od -c` on the source line showed `'` `\0` `'` — a literal U+0000 between the quotes, drawn as a space by the editor,
+  the terminal and this file. The interpreter hashes title + NUL + published. **FED-002's unique index keys on that id**, so a
+  transcription from a reading would have minted a different id for every item on the hash rung — and matched on every fixture
+  that has a guid, a link or an Atom id, which is all of them but one. The emitted module writes `'\u0000'` with the reason beside
+  it, and §A pins the runtime byte so a fix there reddens here rather than drifting one byte behind. Registered §75.5 #1.
+
+### §75.1 What is built
+
+**`src/emit/parseLib.ts` → `src/lib/parse.ts` in the app.** One module, four helpers, each answering one output port by its
+trailing selector: `parseCsv(text, hasHeader, delimiter, 'items' | 'count' | 'error')`, `toCsv(items, columns, delimiter,
+includeHeader, 'text' | 'count')`, `parseXml(text, attributePrefix, alwaysArray, trimValues, maxBytes, 'result' | 'error' |
+'errorCode')`, `parseFeed(text, maxBytes, <ten>)`. Typed overloads per selector (`any[] | undefined` for a list — the CSV rows'
+shape depends on Has Header, and the feed rows are typed inside the module only, so the emitted component never names a type it
+does not import; `number` for a count; `string` for the feed strings that are never absent; `unknown` wherever the value can be
+`undefined`, for `dateToString`'s single-placeholder reason). A one-entry memo per helper: a page reading three outputs of one
+node makes three calls and one parse. The transcription: `csv.ts` whole (the contiguity check, the BOM, the empty quoted cell,
+the unterminated-quote sentence verbatim), `parsecsv.ts` / `tocsv.ts`'s abstain and setters (`delimiter || ','`, `!!hasHeader`,
+a `stringlist` Columns split and trimmed, rows of cells cell for cell), `xml.ts` whole over `fast-xml-parser` with the
+interpreter's own option set (namespace prefixes KEPT, `parseTagValue: false`, the two hostile-construct refusals and the size
+gate with their sentences), `feed.ts` whole. Generated from a real `.ts` file typechecked under the exported app's strict options
+and graded by the differential before it became a string array. 🔴 The module's own header says the one divergence in plain words.
+
+**The plan (`plan.ts`).** `UTIL_NODES` gained four entries and three optional fields: `select` (the trailing selector),
+`signals` (the sentence a consumed `Changed` / `Failure` defers with — the date family's *"that pulse announces a
+recomputation"*, and for Failure *"read its Error output"*), `previous` (the divergence note, see below); `args` gained
+`required` (the port the node abstains without — unwired and unauthored, the read defers with `dateReadExpr`'s *"nothing is wired
+into its text input and none is authored, so the node never produces an answer"*). `utilReadExpr`: the selector appended; the
+`script` parameter read as the literal it is; the note filed. `exprTsType` and `maybeUndefinedExpr` per OUTPUT through
+`parseOutputTsType` / `utilCallMayBeUndefined` (one function `component.ts`'s `maybeUndefined` calls too, so the two cannot
+drift). `listReader` admits `To CSV`. `LOGIC_VALUE_OUTPUTS` leaves the list outputs to Pass 5.
+
+**The emitter (`component.ts`, `emitApp.ts`).** One `util-call` kind, two modules: the import line is split by helper (`../lib/parse`
+beside `../lib/util`, each only where something calls into it). `listExprFields` knows a feed's twelve fields, so a For Each over
+`parseFeed(..., 'items')` drops a mapped input the rows do not carry BY NAME (*"maps "mood" from field "mood", which the array it
+reads does not carry — dropped, reported"*) and keeps `title`. The repeater prints `((parseCsv(...)) ?? []).map((item, index) =>`
+— foreach.tsx's own "empty arrival clears the list", over the abstain's `undefined`. `withCoreDependency` generalised to
+`withDependencies`; `fast-xml-parser: 4.5.7` lands in the manifest exactly when a component calls `parseXml` or `parseFeed`.
+
+**The divergence, and where it is reported.** On a FAILED parse the interpreter keeps the previous successful answer on its value
+outputs beside the Error (*"Replaced only on a successful parse"*); a pure call has no previous answer, so Items is absent and
+Count is 0 beside the Error. Only a wire can deliver a second text, so the note is filed at a parse node whose required port is
+wired and nowhere else: *node sheet (net.noodl.ParseCSV) reads CSV from a wire — when a later arrival cannot be parsed the
+interpreter keeps the previous Items and Count beside the Error, and the exported call answers no Items and a Count of 0 beside
+it*. On a FIRST failure the two agree exactly (§A's grid includes one).
+
+### §75.2 The dependency decision
+
+`Parse XML`'s ledger row said to decide, before scheduling, whether an exported app ships a third-party parser or a transcription
+of one. Decided: **the parser, at the interpreter's pin.** Three reasons, in order. FED-001 R1 already put a hand-rolled scanner
+to Richard with the CSV precedent measured and he took the library, because entity expansion is a denial-of-service hole rather
+than a wrong answer; a transcription would be a SECOND XML parser, which is the thing the runtime's own `xml.ts` comment refuses
+(*"two parsers means two behaviours on the same file"*) and the thing this phase's differential tests exist to catch; and the
+measurement in that comment (4.5.7: one dependency, 230 KB unpacked; 5.x: six, 1.3 MB) is the version the exported app now pins —
+exact, not a caret. It is the first third-party dependency an emitted lib has declared (`Drag` transcribed `react-draggable`
+rather than depend on it, §63). `tests/helpers/typecheckApp.ts` resolves it for real: the virtual root walks up to the repo's
+`node_modules`, where the runtime's own copy is, and §C typechecks the whole app against `fxp.d.ts`. `parseCsv` / `toCsv` alone
+earn nothing — §B asserts the manifest both ways.
+
+### §75.3 The test — `tests/the-parsers.test.ts`, 25 rows, and the fixture
+
+**§A** loads the emitted module with a REAL `require` (the point of the dependency is one parser) and the runtime's `csv.ts`,
+`xml.ts`, `feed.ts` from source, and compares: 120 CSV cells (15 texts — the unterminated quote, `""`, a BOM, CRLF, a trailing
+newline, a short and a long row, a non-comma delimiter, a number — × 4 delimiters incl. cleared × 2 header settings), 16 To CSV
+shapes plus rows-of-cells and a round trip, every runtime XML and feed fixture plus six documents of my own (empty, blank, not
+XML, a DOCTYPE subset, a typed Atom title, over-size) × 3 option sets for XML and × 3 size limits for feeds, the abstains, the
+NUL-byte pin, and the per-output table against the catalog's value ports. **§B** on `cheer`: the count through the helper (the
+initialize defaults printed), items into the For Each (`text={item.text}`), a feed into the For Each (the drop by name), To CSV
+over the named array, the manifest earning and not earning the dependency, three selectors on one call, the wired-text note and
+its absence on a literal, and five refusals each by its sentence. **§C** `tests/fixtures/sheet-desk`: a CSV typed into Parse CSV
+→ one `PersonRow` per record + a Count; the same rows back through To CSV; a Parse XML's Error; a Parse Feed's Feed Title and
+Count — every helper called on one page, nothing refused, typechecked whole.
+
+### §75.4 The gate chain
+
+**On this tree, read off exit status.** `tests/the-parsers.test.ts` **25/25**. **Whole-package jest, first run: exit 1 — 13 files red,
+every one a pin or a golden this section moves and nothing else** (the eleven `pickerCoverageFloor` pins at 118, subscribe-to-changes F2's
+scheduled population of exactly the two feed rows, relation-verbs' use of `To CSV` as its untranslated-feeder example, and HLS-001's
+corpus golden: 49 → 50 projects, **49 `README.md` hashes moved and no `src/**` byte** — counted before the golden was touched, recorded in
+that test's header). Each moved; **the 14 files re-run together: 594/595, the one left being `sse.test.ts`'s floor pin, then 36/36**. Every
+other file was green in the whole-package run. **Package `tsc --noEmit` exit 0.** `export-ledger:check` OK — **180 types: 129 translated,
+33 deferred, 1 stubbed, 17 backend-only**. `export-ledger:picker --check` **holds at 122/130 (93.8%)**. `npm run build` (dist) rebuilt —
+the editor and the CLI read `dist/`. ⚠️ **Not run:** the editor `tsc` and `test:ci` — the box was carrying a peer's Chrome drive at load
+average 16–22 for the whole gate window, and one heavy job on a shared box is the rule. The new spec typechecks under ts-jest; what the
+editor's webpack pass would add is the editor tsconfig's dialect over the same file. Owed by the next session before it builds.
+
+### §75.5 What this leaves
+
+1. 🔴 **`feed.ts:365` holds a NUL byte where a space is drawn** (§75.0). Functionally deterministic and load-bearing (FED-002's
+   index keys on the id), so NOT changed here — changing the byte re-mints every hash-rung id on the next poll. But it is a hazard
+   in source that no reader can see: a reformat, a copy-paste or a "fix the odd character" edit silently changes stored ids. The
+   honest fix is to write it as `'\u0000'` in the runtime with the comment the emitted module carries, which changes no behaviour.
+   Product side, `noodl-runtime`. Owner NONE.
+2. **The eight rows left on the picker** (`export-ledger:picker`): `Pattern Extractor` (Hash's shape with seven value outputs and a
+   `Found` / `Not Found` pair — the next row), `Action Dispatcher` / `Action Handler` (~1,600 runtime lines), `State Snapshot` /
+   `State History` / `Undo / Redo` / `Optimistic Update` (~1,300 lines + `outcome.ts`), `Sign In With` (the backend HAS a GitHub
+   provider in `auth/github.ts` and the runtime's `RestAuthAdapter` implements `signInWithProvider` — the "waits on a provider
+   decision" reason in §48 is stale; what it needs is a drive of the redirect's return leg against the real backend).
+3. **Node coverage is not parameter coverage** (EXP-008's open question, restated because 100% is now in sight): §14.5 was the fourth
+   parameter gap found green behind a `translated` row. A 130/130 badge would still hide those. One session on a per-parameter
+   ledger check before the number is quoted as complete.
+4. `To CSV` over a `Parse CSV` with Has Header unticked writes rows of cells (the runtime's `isRowsOfCells`) — covered by §A but not
+   by a §B graph; and `Parse CSV` → `Array Filter` / `Array Map` (a transform over a parsed list) is untested in either direction.
+   Both are the existing paths composing; neither has a new clause. Owner NONE.

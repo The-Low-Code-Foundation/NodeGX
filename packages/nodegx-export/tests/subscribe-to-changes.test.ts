@@ -1009,7 +1009,7 @@ describe('§F the ledger', () => {
     const row = ledger.entries.find((e) => e.typeName === SUBSCRIBE_TO_CHANGES_TYPE)!;
     expect(row.exemption).toBeUndefined();
     expect(String(row.note)).toContain('useSubscribeToChanges');
-    expect(ledger.pickerCoverageFloor).toBe(118); // GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89)
+    expect(ledger.pickerCoverageFloor).toBe(122); // EXP-011 §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89)
     expect(ledger.$pickerCoverageFloorComment).toContain('117 after Tier 3.11 row 3 Subscribe To Changes');
   });
 
@@ -1028,25 +1028,24 @@ describe('§F the ledger', () => {
    * assertions the old name carried — "at least one deferral" and "the out-of-scope kind has a
    * population" — are unchanged.
    */
-  test('F2 every deferred entry is either a decision or one of the two scheduled commitments, and both badge kinds have a population', () => {
+  test('F2 every deferred entry is a decision — the two scheduled commitments were built (§75) — and the out-of-scope badge has a population', () => {
     const deferred = ledger.entries.filter((e) => e.status === 'deferred');
     expect(deferred.length).toBeGreaterThan(0);
 
+    // EXP-011 §75 (session 100) built Parse XML and Parse Feed, the two rows this pinned as `scheduled`
+    // since 2026-09-18. The population is empty again, and pinned empty: a vague backlog row filed as
+    // `scheduled` still fails here, and a translated row must not keep its commitment sentence.
     const scheduled = deferred.filter((e) => (e.exemption ?? '').startsWith('scheduled — ')).map((e) => e.typeName);
-    expect(scheduled).toEqual(['net.noodl.ParseFeed', 'net.noodl.ParseXML']);
+    expect(scheduled).toEqual([]);
+    for (const built of ['net.noodl.ParseFeed', 'net.noodl.ParseXML', 'net.noodl.ParseCSV', 'net.noodl.ToCSV']) {
+      expect(ledger.entries.find((e) => e.typeName === built)?.status).toBe('translated');
+      expect(exportBadgeOf(built)).toBeUndefined();
+    }
 
     const decisions = deferred.filter((e) => (e.exemption ?? '').startsWith('deliberately out of scope — '));
     expect(decisions.length).toBeGreaterThan(0);
     // Neither phrase is a backlog line, and a deferral has to be one or the other.
     expect(deferred.length).toBe(scheduled.length + decisions.length);
     expect(decisions.every((e) => exportBadgeOf(e.typeName)?.kind === 'out-of-scope')).toBe(true);
-
-    // The `scheduled` branch of `exportBadgeOf` had never had a row to run on until now — this is
-    // the first thing in the repository that exercises it.
-    const badge = exportBadgeOf('net.noodl.ParseFeed');
-    expect(badge?.kind).toBe('scheduled');
-    expect(badge?.label).toBe('Not exportable yet');
-    expect(badge?.reason.startsWith('scheduled')).toBe(false); // the phrase is stripped, not repeated
-    expect(badge?.reason).toContain('EXP-011 Tier 2.8');
   });
 });

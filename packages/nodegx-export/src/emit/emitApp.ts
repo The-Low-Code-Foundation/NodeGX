@@ -22,6 +22,7 @@ import { CloudServicesIR, ExportIR } from '../ir/types';
 import { emitComponent } from './component';
 import { DATE_LIB_PATH, dateLibSource } from './dateLib';
 import { UTIL_LIB_PATH, utilLibSource } from './utilLib';
+import { PARSE_DEPENDENCIES, PARSE_HELPERS_NEEDING_DEPENDENCY, PARSE_LIB_PATH, isParseHelper, parseLibSource } from './parseLib';
 import { ID_LIB_PATH, idLibSource } from './idLib';
 import { TIMER_LIB_PATH, timerLibSource } from './timerLib';
 import { ANIMATE_LIB_PATH, animateLibSource } from './animateLib';
@@ -260,8 +261,13 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
    * module rather than a section of `date.ts`: a project that formats a date should not ship the
    * string utilities, and neither module imports the other.
    */
-  if (utilHelpersUsed.size > 0) {
+  // EXP-011 §75. The parse helpers ride `utilHelpers` (one `util-call` kind) but live in their own module, on
+  // the same rule: a project that formats a string should not ship a CSV tokeniser and an XML parser.
+  if ([...utilHelpersUsed].some((fn) => !isParseHelper(fn))) {
     files[UTIL_LIB_PATH] = GENERATED_MODULE_TS + utilLibSource();
+  }
+  if ([...utilHelpersUsed].some(isParseHelper)) {
+    files[PARSE_LIB_PATH] = GENERATED_MODULE_TS + parseLibSource();
   }
   /**
    * `src/lib/id.ts` (EXP-011 §37) — the same rule one library over, and a third module rather
@@ -376,7 +382,12 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
     ([path, content]) => path !== 'package.json' && content.includes("from '@nodegx/core")
   );
   if (usesCore) {
-    files['package.json'] = withCoreDependency(files['package.json']);
+    files['package.json'] = withDependencies(files['package.json'], { '@nodegx/core': '^0.1.0' });
+  }
+  // EXP-011 §75. `fast-xml-parser` at the interpreter's pin, earned by a call into parseXml / parseFeed — the
+  // same rule: a dependency is computed from the output, never declared up front.
+  if ([...utilHelpersUsed].some((fn) => PARSE_HELPERS_NEEDING_DEPENDENCY.has(fn))) {
+    files['package.json'] = withDependencies(files['package.json'], PARSE_DEPENDENCIES);
   }
 
   /*
@@ -459,12 +470,11 @@ function moduleNotes(ir: ExportIR, project: ProjectPlan): string[] {
   return notes;
 }
 
-function withCoreDependency(packageJson: string): string {
+/** The manifest with `deps` added to its dependencies, the list kept sorted (EXP-011 §75 generalised `withCoreDependency`). */
+function withDependencies(packageJson: string, deps: Readonly<Record<string, string>>): string {
   const parsed = JSON.parse(packageJson);
   parsed.dependencies = Object.fromEntries(
-    [['@nodegx/core', '^0.1.0'], ...Object.entries(parsed.dependencies ?? {})].sort(([a], [b]) =>
-      a < b ? -1 : 1
-    )
+    [...Object.entries(deps), ...Object.entries(parsed.dependencies ?? {})].sort(([a], [b]) => (a < b ? -1 : 1))
   );
   return JSON.stringify(parsed, null, 2) + '\n';
 }

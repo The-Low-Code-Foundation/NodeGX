@@ -1,0 +1,70 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e7a1c4d2-5b3f-4e8d-9c1a-000000000102",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "personRow",
+      "type": "Group",
+      "label": "Person row",
+      "children": [
+        "nameText",
+        "teamText"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "sizeMode": "contentSize"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "nameText",
+      "type": "Text",
+      "label": "Name",
+      "parent": "personRow",
+      "parameters": {
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "teamText",
+      "type": "Text",
+      "label": "Team",
+      "parent": "personRow",
+      "parameters": {
+        "fontSize": "var(--text-sm)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "rowInputs",
+      "type": "Component Inputs",
+      "label": "Row properties",
+      "ports": [
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string",
+          "index": 0
+        },
+        {
+          "name": "team",
+          "plug": "output",
+          "type": "string",
+          "index": 1
+        }
+      ],
+      "x": 350,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "personRow"
+  ]
+}
