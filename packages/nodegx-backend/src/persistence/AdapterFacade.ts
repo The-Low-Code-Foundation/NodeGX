@@ -728,6 +728,11 @@ export class AdapterFacade implements IStorageFacade {
     const existing = await this.existingIds(collection, ids);
 
     const db = this.sqliteHandle();
+    // R6 (BMG-017): the insert below is not `create`, so it asks the adapter
+    // for the same required columns `create` names — the import refuses such a
+    // row by name before it gets here; this is the backstop for any other caller.
+    const requiredToName = (this.adapter as { requiredToName?: (c: string) => string[] }).requiredToName;
+    const required = typeof requiredToName === 'function' ? requiredToName.call(this.adapter, collection) : [];
     let created = 0;
     let updated = 0;
 
@@ -742,7 +747,7 @@ export class AdapterFacade implements IStorageFacade {
           updated++;
         } else {
           const id = row.objectId || crypto.randomUUID();
-          const { sql, params } = QueryBuilder.buildInsert({ collection, data: clean }, id);
+          const { sql, params } = QueryBuilder.buildInsert({ collection, data: clean, required }, id);
           db.prepare(sql).run(...params);
           created++;
         }

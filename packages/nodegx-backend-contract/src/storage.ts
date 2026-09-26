@@ -144,6 +144,12 @@ export interface StorageImportColumn {
   name: string;
   type?: string;
   targetClass?: string;
+  /**
+   * BMG-017: as the schema declares them — the import refuses a NEW row that
+   * leaves out a required field with no default (R6), naming the row.
+   */
+  required?: boolean;
+  defaultValue?: unknown;
 }
 
 /**

@@ -536,7 +536,7 @@ export class HttpServer {
       dataDir: deps.options.dataDir,
       persistence: deps.persistenceControl
     });
-    this.adminEmail = new AdminEmailRoutes(deps.emailConfig, deps.mailer);
+    this.adminEmail = new AdminEmailRoutes(deps.emailConfig, deps.mailer, () => ({ magicLinkTtlMinutes: deps.auth ? deps.auth.config.magicLink.ttlMinutes : undefined }));
     this.adminSearch = new AdminSearchRoutes(deps.search, deps.facade);
     this.dashboard = deps.options.adminDashboard
       ? new AdminDashboardRoutes({

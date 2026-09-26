@@ -19,7 +19,7 @@ import { ModalHost } from '../../src/admin/app/ui/modal';
 import { FILE_KINDS, denyListFrom, kindsFrom, mimeProblem } from '../../src/admin/app/fileKinds';
 import { canSaveSecret, describeDeleteOutcome, envNameForSecret, secretNameProblem } from '../../src/admin/app/secretsModel';
 import { actionWords, activityQuery, actorWords, targetWords } from '../../src/admin/app/activity';
-import { FilesView, presetsFrom, presetsProblem } from '../../src/admin/app/views/files';
+import { FilesView, presetsFrom, presetsProblem, sweepWords } from '../../src/admin/app/views/files';
 import { BackupsView, keepWords } from '../../src/admin/app/views/backups';
 import { SecretsView } from '../../src/admin/app/views/secrets';
 import { SearchView, textFields } from '../../src/admin/app/views/search';
@@ -538,5 +538,17 @@ describe('BMG-011 AC9 — no comma-separated or cron text field at rest', () => 
       expect({ id: el.id || el.placeholder, value: el.value }).not.toMatchObject({ value: expect.stringMatching(CRON) });
     }
     unmount(root);
+  });
+});
+
+describe('BMG-017 — the Clean-up sentence counts the files too new to judge', () => {
+  it('says what was deleted, and what was left alone because it may still be arriving', () => {
+    expect(sweepWords({ orphanBlobs: ['a'], orphanRows: [], tooNew: [], graceMinutes: 5, deleted: true })).toBe(
+      'Done: 1 file no record knows about, 0 records whose file is missing — the unknown files were deleted.'
+    );
+    expect(sweepWords({ orphanBlobs: [], orphanRows: ['r'], tooNew: ['x', 'y'], graceMinutes: 5, deleted: true })).toBe(
+      'Done: 0 files no record knows about, 1 record whose file is missing; 2 files are too new to judge — under 5 minutes old and perhaps still arriving — so they were left alone.'
+    );
+    expect(sweepWords({ orphanBlobs: [], orphanRows: [], tooNew: ['x'], graceMinutes: 5, deleted: false })).toMatch(/; 1 file is too new to judge — .* — so it was left alone\.$/);
   });
 });

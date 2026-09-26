@@ -22,6 +22,7 @@
  */
 
 import type { IStorageFacade, StorageImportColumn as ImportColumn } from '@noodl/backend-contract';
+import { requiredWithoutDefault, type SchemaColumn } from '@noodl/runtime/src/api/adapters/local-sql/schemaCommon';
 
 export type DataFormat = 'json' | 'csv';
 
@@ -313,12 +314,32 @@ export async function importCollection(
 
   // Effective type map: JSON schema (if any) overlaid on the target's schema.
   const typeMap = new Map<string, string>();
-  for (const c of await facade.getColumns(collection)) if (c.type) typeMap.set(c.name, c.type);
+  const targetColumns = await facade.getColumns(collection);
+  for (const c of targetColumns) if (c.type) typeMap.set(c.name, c.type);
   if (parsed.schemaColumns) for (const c of parsed.schemaColumns) if (c.type) typeMap.set(c.name, c.type);
   typeMap.set('ACL', 'Object');
 
   const rejected: ImportReject[] = [];
   const valid: { objectId?: string; data: Record<string, unknown> }[] = [];
+
+  // Classify created vs updated (read-only; safe in dry-run too).
+  //
+  // BRG-002 §3.1: this was one query per row. It is now one call for the whole
+  // import — which on SQLite is worth little (measured: see the task file) and
+  // on an out-of-process adapter is the difference between one round trip and
+  // ten thousand. BMG-017: it is read BEFORE the rows are judged, because a new
+  // row and an update are judged differently (below).
+  const existing = await facade.existingIds(
+    collection,
+    parsed.records.map((r) => r.objectId).filter((id): id is string => typeof id === 'string' && id.length > 0)
+  );
+
+  // R6 (BMG-017): a NEW row must name every required field that has no default
+  // — a field added over records with a one-time fill gave THEM a value, not
+  // the rows to come. The row is refused by name here, before the batch, so the
+  // rest import; below this the insert would refuse the whole batch (or, on
+  // SQLite without `buildInsert`'s guard, hand the row the fill).
+  const mustName = requiredWithoutDefault({ name: collection, columns: targetColumns as SchemaColumn[] });
 
   parsed.records.forEach((rec, idx) => {
     const errors: string[] = [];
@@ -338,20 +359,16 @@ export async function importCollection(
       else if (c.value !== null || !parsed.fromCsv) out[key] = c.value;
     }
 
+    if (!(objectId && existing.has(objectId))) {
+      for (const name of mustName) {
+        if (out[name] === undefined || out[name] === null) errors.push(`${name}: required, and this new row leaves it out`);
+      }
+    }
+
     if (errors.length > 0) rejected.push({ row: idx, objectId, errors });
     else valid.push({ objectId, data: out });
   });
 
-  // Classify created vs updated (read-only; safe in dry-run too).
-  //
-  // BRG-002 §3.1: this was one query per row. It is now one call for the whole
-  // import — which on SQLite is worth little (measured: see the task file) and
-  // on an out-of-process adapter is the difference between one round trip and
-  // ten thousand.
-  const existing = await facade.existingIds(
-    collection,
-    valid.map((v) => v.objectId).filter((id): id is string => !!id)
-  );
   let created = 0;
   let updated = 0;
   for (const v of valid) {

@@ -43,6 +43,12 @@ export interface OrphanSweepReport {
   orphanBlobs: string[];
   /** `_Files` rows whose blob is missing from the driver. */
   orphanRows: string[];
+  /**
+   * BMG-017: stored keys with no row that are younger than `graceMinutes` — an
+   * upload or a move may still be writing the row. Never deleted, never judged.
+   */
+  tooNew: string[];
+  graceMinutes: number;
   /** True only when a caller explicitly asked the sweep to delete (opt-in; default is report-only). */
   deleted: boolean;
   error?: string;

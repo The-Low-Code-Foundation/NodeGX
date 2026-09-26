@@ -148,10 +148,32 @@ export const TEMPLATE_VARIABLES: Record<TemplateId, TemplateVariable[]> = {
   ]
 };
 
+/**
+ * How long a magic link lasts, in the words the email says it — the real send
+ * (`oauth-routes.ts` `sendMagicLink`) and the samples below both call this, so
+ * the preview cannot say *15 minutes* while the email says 60 (BMG-017).
+ */
+export function magicLinkExpiresIn(ttlMinutes: number | undefined): string {
+  const n = typeof ttlMinutes === 'number' && ttlMinutes > 0 ? Math.round(ttlMinutes) : 15;
+  return n === 1 ? '1 minute' : `${n} minutes`;
+}
+
+/** The backend's own settings a sample must say rather than invent. */
+export interface SamplePolicy {
+  magicLinkTtlMinutes?: number;
+}
+
+/** A template's variables, with the samples the policy decides (the chips show these). */
+export function templateVariables(id: TemplateId, policy: SamplePolicy = {}): TemplateVariable[] {
+  return TEMPLATE_VARIABLES[id].map((v) =>
+    id === 'magicLink' && v.name === 'expiresIn' ? { ...v, sample: magicLinkExpiresIn(policy.magicLinkTtlMinutes) } : v
+  );
+}
+
 /** The sample values a preview and a test send render with — the same set, so the two cannot differ (AC2). */
-export function sampleVariables(id: TemplateId): Record<string, string> {
+export function sampleVariables(id: TemplateId, policy: SamplePolicy = {}): Record<string, string> {
   const out: Record<string, string> = {};
-  for (const v of TEMPLATE_VARIABLES[id]) out[v.name] = v.sample;
+  for (const v of templateVariables(id, policy)) out[v.name] = v.sample;
   return out;
 }
 

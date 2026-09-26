@@ -1629,7 +1629,8 @@ export function registerBackendWriteTools(server: McpServer): void {
         'Run a backend\'s file-storage orphan sweep immediately (BAK-006), outside its schedule: finds storage ' +
         'blobs with no metadata row (orphan blobs) and metadata rows whose blob is missing (orphan rows). ' +
         'REPORT-ONLY by default — pass deleteOrphans:true to actually delete orphan BLOBS (orphan ROWS are never ' +
-        'auto-deleted; a metadata row with a missing blob is a data-integrity signal for a human to look at).',
+        'auto-deleted; a metadata row with a missing blob is a data-integrity signal for a human to look at). ' +
+        'A blob under 5 minutes old may still be arriving: it is listed in tooNew and never deleted.',
       inputSchema: {
         backendId: z.string().optional(),
         deleteOrphans: z.boolean().optional().describe('Actually delete orphan blobs found by this run (default false: report only)')

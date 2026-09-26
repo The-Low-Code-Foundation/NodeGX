@@ -32,7 +32,34 @@ interface SweepReport {
   error?: unknown;
   orphanBlobs: unknown[];
   orphanRows: unknown[];
+  /** BMG-017: files with no record yet that are younger than the grace window — never judged. */
+  tooNew?: unknown[];
+  graceMinutes?: number;
   deleted?: boolean;
+}
+
+function plural(n: number, one: string, many: string): string {
+  return n + ' ' + (n === 1 ? one : many);
+}
+
+/**
+ * What *Check now* found, in one sentence. BMG-017: a file younger than the
+ * grace window may be an upload or a move still writing its record, so it is
+ * counted apart and never deleted — the sentence says so rather than letting
+ * a person wonder why a file they saw was left.
+ */
+export function sweepWords(r: SweepReport): string {
+  const tooNew = (r.tooNew || []).length;
+  return (
+    'Done: ' +
+    plural(r.orphanBlobs.length, 'file', 'files') +
+    ' no record knows about, ' +
+    plural(r.orphanRows.length, 'record', 'records') +
+    ' whose file is missing' +
+    (r.deleted && r.orphanBlobs.length ? ' — the unknown files were deleted' : '') +
+    (tooNew ? '; ' + plural(tooNew, 'file is', 'files are') + ' too new to judge — under ' + (r.graceMinutes || 5) + ' minutes old and perhaps still arriving — so ' + (tooNew === 1 ? 'it was' : 'they were') + ' left alone' : '') +
+    '.'
+  );
 }
 
 interface Preset {
@@ -825,10 +852,7 @@ function SweepCard({ config, reload }: { config: FilesConfig; reload: () => void
     api<{ report: SweepReport }>('POST', '/admin/files/sweep', { deleteOrphans })
       .then((result) => {
         const r = result.report;
-        toast(
-          'Done: ' + r.orphanBlobs.length + ' file' + (r.orphanBlobs.length === 1 ? '' : 's') + ' no record knows about, ' + r.orphanRows.length + ' record' + (r.orphanRows.length === 1 ? '' : 's') + ' whose file is missing' + (r.deleted ? ' — the unknown files were deleted.' : '.'),
-          'ok'
-        );
+        toast(sweepWords(r), 'ok');
         reload();
       })
       .catch(fail);
@@ -839,7 +863,7 @@ function SweepCard({ config, reload }: { config: FilesConfig; reload: () => void
       <Row>
         {lastReport ? (
           <Chip kind={lastReport.error ? 'bad' : lastReport.orphanBlobs.length || lastReport.orphanRows.length ? 'warn' : 'ok'}>
-            {'last checked ' + when(lastReport.at) + ' — ' + lastReport.orphanBlobs.length + ' unknown file' + (lastReport.orphanBlobs.length === 1 ? '' : 's') + ', ' + lastReport.orphanRows.length + ' missing'}
+            {'last checked ' + when(lastReport.at) + ' — ' + plural(lastReport.orphanBlobs.length, 'unknown file', 'unknown files') + ', ' + lastReport.orphanRows.length + ' missing' + ((lastReport.tooNew || []).length ? ', ' + (lastReport.tooNew || []).length + ' too new to judge' : '')}
           </Chip>
         ) : (
           <Chip>never run</Chip>

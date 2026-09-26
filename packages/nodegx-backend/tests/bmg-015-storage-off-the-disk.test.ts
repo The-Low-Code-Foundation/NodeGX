@@ -104,7 +104,7 @@ describe('BMG-015 storage off the disk', () => {
   let afterName = '';
 
   beforeAll(async () => {
-    fake = createS3Fake({ bucket: 'puppy', accessKeyId: KEY_ID });
+    fake = createS3Fake({ bucket: 'puppy', accessKeyId: KEY_ID, secretAccessKey: SECRET });
     endpoint = await fake.listen();
     dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'nodegx-bmg015-'));
     fs.writeFileSync(path.join(dataDir, 'security.json'), JSON.stringify(LOCKED));
@@ -260,16 +260,22 @@ describe('BMG-015 storage off the disk', () => {
       expect(clean.json.report.error).toBeUndefined();
       expect(clean.json.report.orphanBlobs).toEqual([]);
       expect(clean.json.report.orphanRows).toEqual([]);
-      fake.objects.set('ab/cd/stray-in-the-bucket', { body: Buffer.from('stray'), lastModified: new Date().toISOString() });
+      // BMG-017: an hour old (a younger blob may be an upload still writing its
+      // row), and the bucket's stray has the shape `put` writes (the sweep
+      // judges nothing else in a bucket it shares with the backups).
+      const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
+      const bucketStray = `ab/cd/abcd${'0'.repeat(60)}-0badf00d`;
+      fake.objects.set(bucketStray, { body: Buffer.from('stray'), lastModified: hourAgo.toISOString() });
       const strayDir = path.join(dataDir, 'files', 'blobs', 'ff', 'ee');
       fs.mkdirSync(strayDir, { recursive: true });
       fs.writeFileSync(path.join(strayDir, 'stray-on-disk'), 'stray');
+      fs.utimesSync(path.join(strayDir, 'stray-on-disk'), hourAgo, hourAgo);
       const found = await req<{ report: { orphanBlobs: string[]; orphanRows: string[] } }>('POST', '/admin/files/sweep', {});
-      expect(found.json.report.orphanBlobs.sort()).toEqual(['ab/cd/stray-in-the-bucket', 'ff/ee/stray-on-disk']);
+      expect(found.json.report.orphanBlobs.sort()).toEqual([bucketStray, 'ff/ee/stray-on-disk']);
       expect(found.json.report.orphanRows).toEqual([]);
       const deleted = await req<{ report: { orphanBlobs: string[]; deleted: boolean } }>('POST', '/admin/files/sweep', { deleteOrphans: true });
       expect(deleted.json.report.deleted).toBe(true);
-      expect(fake.objects.has('ab/cd/stray-in-the-bucket')).toBe(false);
+      expect(fake.objects.has(bucketStray)).toBe(false);
       expect(fs.existsSync(path.join(strayDir, 'stray-on-disk'))).toBe(false);
     });
 

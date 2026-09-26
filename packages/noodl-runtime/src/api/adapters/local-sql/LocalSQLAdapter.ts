@@ -1022,17 +1022,11 @@ class LocalSQLAdapter {
         }
       }
 
-      // R6: a required field left out is named as NULL, so the engine refuses
-      // it — a one-time fill sits on the column as its DDL default here, and
-      // would otherwise be written into every new record that forgot the field.
-      if (this.schemaManager) {
-        const missing = requiredWithoutDefault(this.schemaManager.getTableSchema(options.collection)).filter((n) => data[n] === undefined);
-        const present = missing.length ? this.schemaManager.tableColumns(options.collection) : null;
-        for (const name of missing) if (present && present.has(name)) data[name] = null;
-      }
-
       const recordId = hasClientId ? (requestedId as string) : generateUUID();
-      const { sql, params } = QueryBuilder.buildInsert({ collection: options.collection, data }, recordId);
+      const { sql, params } = QueryBuilder.buildInsert(
+        { collection: options.collection, data, required: this.requiredToName(options.collection) },
+        recordId
+      );
 
       this.db.prepare(sql).run(...params);
 
@@ -1334,6 +1328,21 @@ class LocalSQLAdapter {
    */
   getSchemaManager(): SchemaManager | null {
     return this.schemaManager;
+  }
+
+  /**
+   * R6: the required-without-default columns an insert into this collection
+   * must name — the ones the table physically has. `buildInsert` writes each
+   * one a record leaves out as NULL, so the engine refuses it rather than
+   * handing it the one-time fill SQLite keeps as the column's DDL default.
+   * `create` and the facade's import batch both ask here (BMG-017).
+   */
+  requiredToName(collection: string): string[] {
+    if (!this.schemaManager) return [];
+    const required = requiredWithoutDefault(this.schemaManager.getTableSchema(collection));
+    if (!required.length) return required;
+    const present = this.schemaManager.tableColumns(collection);
+    return required.filter((name) => present.has(name));
   }
 
   /**

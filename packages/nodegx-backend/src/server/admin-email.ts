@@ -27,13 +27,14 @@ import {
   DEFAULT_TEMPLATES,
   TEMPLATE_IDS,
   EmailTemplate,
-  TEMPLATE_VARIABLES,
+  SamplePolicy,
   TemplateId,
   TemplateVariable,
   isTemplateId,
   mergeTemplate,
   renderTemplate,
-  sampleVariables
+  sampleVariables,
+  templateVariables
 } from '../email/templates';
 import type { RequestContext } from './HttpServer';
 import { HttpError, readJSONBody, sendJSON } from './http-util';
@@ -82,10 +83,13 @@ export interface TestSendResponse {
 export class AdminEmailRoutes {
   private readonly emailConfig: EmailConfigState;
   private readonly mailer: Mailer;
+  /** BMG-017: the sign-in settings a sample says (the magic link's lifetime), read live. */
+  private readonly policy: () => SamplePolicy;
 
-  constructor(emailConfig: EmailConfigState, mailer: Mailer) {
+  constructor(emailConfig: EmailConfigState, mailer: Mailer, policy: () => SamplePolicy = () => ({})) {
     this.emailConfig = emailConfig;
     this.mailer = mailer;
+    this.policy = policy;
   }
 
   // ==========================================================================
@@ -158,7 +162,7 @@ export class AdminEmailRoutes {
       if (!isTemplateId(id)) {
         throw new HttpError(404, `No such template: ${String(id)}. Known: ${TEMPLATE_IDS.join(', ')}`);
       }
-      const rendered = renderTemplate(mergeTemplate(this.emailConfig.effectiveTemplate(id), draftFrom(body)), sampleVariables(id));
+      const rendered = renderTemplate(mergeTemplate(this.emailConfig.effectiveTemplate(id), draftFrom(body)), sampleVariables(id, this.policy()));
       const result = await this.mailer.send({ to, subject: rendered.subject, text: rendered.text, html: rendered.html });
       if (!result.success) {
         throw new HttpError(502, result.error || 'Failed to send the test email.');
@@ -188,7 +192,7 @@ export class AdminEmailRoutes {
     const templates = TEMPLATE_IDS.map((id) => {
       const override = this.emailConfig.config.templates[id];
       const effective = this.emailConfig.effectiveTemplate(id);
-      return { id, default: DEFAULT_TEMPLATES[id], override: override || null, effective, isOverridden: Boolean(override), variables: TEMPLATE_VARIABLES[id] };
+      return { id, default: DEFAULT_TEMPLATES[id], override: override || null, effective, isOverridden: Boolean(override), variables: templateVariables(id, this.policy()) };
     });
     sendJSON(ctx.res, 200, { templates } satisfies TemplateListResponse);
   }
@@ -240,7 +244,7 @@ export class AdminEmailRoutes {
     if (!isTemplateId(id)) {
       throw new HttpError(404, `No such template: ${id}. Known: ${TEMPLATE_IDS.join(', ')}`);
     }
-    const rendered = renderTemplate(mergeTemplate(this.emailConfig.effectiveTemplate(id), draftFrom(ctx.query)), sampleVariables(id));
+    const rendered = renderTemplate(mergeTemplate(this.emailConfig.effectiveTemplate(id), draftFrom(ctx.query)), sampleVariables(id, this.policy()));
     sendJSON(ctx.res, 200, { id, preview: rendered } satisfies TemplatePreviewResponse);
   }
 }

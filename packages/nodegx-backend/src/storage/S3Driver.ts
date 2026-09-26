@@ -39,7 +39,7 @@ import { PassThrough } from 'stream';
 import { pipeline } from 'stream/promises';
 import { URL } from 'url';
 
-import type { StorageDriver, StorageStat } from './types';
+import type { StorageDriver, StorageStat, StoredEntry } from './types';
 import { signAws4, sha256hex } from './sigv4';
 
 export interface S3DriverConfig {
@@ -356,7 +356,22 @@ export class S3Driver implements StorageDriver {
   }
 
   async *listKeys(): AsyncIterable<string> {
-    for await (const o of this.listObjects()) yield o.key;
+    for await (const entry of this.listEntries()) yield entry.key;
+  }
+
+  /**
+   * The FILE store's objects: only keys of the shape `put` writes. The bucket
+   * is shared — backup archives live under `backups/` (BMG-015), and a person
+   * may keep anything else in it — and the orphan sweep deletes what it lists
+   * without a row. It listed the whole bucket, so *Delete orphans* deleted
+   * every archive there (BMG-017).
+   */
+  async *listEntries(): AsyncIterable<StoredEntry> {
+    for await (const o of this.listObjects()) {
+      if (!isFileKey(o.key)) continue;
+      const modified = o.lastModified ? new Date(o.lastModified) : null;
+      yield { key: o.key, modified: modified && !Number.isNaN(modified.getTime()) ? modified : null };
+    }
   }
 
   /** BMG-015: ListObjectsV2 under `prefix` (every page), with each object's size and date. */
@@ -384,6 +399,11 @@ export class S3Driver implements StorageDriver {
       continuationToken = truncatedMatch && truncatedMatch[1] === 'true' && tokenMatch ? decodeXmlEntities(tokenMatch[1]) : undefined;
     } while (continuationToken);
   }
+}
+
+/** A key `put` could have written: `<2>/<2>/<hash>-<8 hex>`. An archive (`….tar.gz`) never is. */
+export function isFileKey(key: string): boolean {
+  return /^[^/]{2}\/[^/]{2}\/[^/]+-[0-9a-f]{8}$/.test(key);
 }
 
 function decodeXmlEntities(s: string): string {

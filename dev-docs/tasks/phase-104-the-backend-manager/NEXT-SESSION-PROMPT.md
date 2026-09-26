@@ -1,7 +1,8 @@
 # P104 — next session
 
-**Written 2026-09-26 (end of s16).** s16 got **R6** and **R7** ruled and built **BMG-016** (the leftovers — see
-*What s16 settled*); every build task is ✅ and the phase closes on Richard's own drive (BMG-013).
+**Written 2026-09-26 (end of s17).** s17 built and drove **BMG-017** (the defects before Richard drives — see
+*What s17 settled*): every build task is ✅ and the phase closes on Richard's own drive (BMG-013), which is his.
+s16 got **R6** and **R7** ruled and built **BMG-016** (the leftovers).
 
 **Earlier:** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
 BMG-001; s3 built and drove BMG-007 (API keys); s4 BMG-004 (Users, R3 disable); s5 BMG-002
@@ -11,7 +12,7 @@ BMG-001; s3 built and drove BMG-007 (API keys); s4 BMG-004 (Users, R3 disable); 
 Restore…, Secrets, Search, Server, Activity); s14 BMG-012 (the editor lets go) and filed BMG-015;
 s15 built and drove **BMG-015** (Storage off the disk: uploads AND backups in an S3-compatible bucket
 chosen on the page, tested before it is saved; files uploaded before the switch keep serving — the
-serve path had read the current driver; an S3 fake for specs and drives).
+serve path had read the current driver; an S3 fake for specs and drives). s16 built **BMG-016** (the leftovers, R6/R7) and filed BMG-017 at Richard's ask.
 
 ## Where it stands
 
@@ -33,6 +34,7 @@ serve path had read the current driver; an S3 fake for specs and drives).
 | BMG-012 The editor lets go | ✅ s14 | ✅ headless, AC1–6, 15/15 page checks + 9 jest (§6) | ✅ `623a509f` |
 | BMG-015 Storage off the disk (S3) | ✅ s15 | ✅ headless, AC1–6, 19/19 checks + 18 HTTP + 10 page (§6) | ✅ `eed691b3b` |
 | BMG-016 The leftovers (R6, R7, restore reload, page cap, move, MCP) | ✅ s16 | ✅ headless, 23/23 checks + jest (§6) | ✅ `b3a53e37` |
+| BMG-017 The defects before the drive | ✅ s17 | ✅ headless, 14/14 + 22 new jest (§7) | ✅ s17 (this commit) |
 | BMG-013 Richard drives | his | — | — |
 
 Built-but-undriven: 0. Built-but-uncommitted: 0. Check `git status -- packages/nodegx-backend/src/admin`
@@ -42,6 +44,12 @@ before believing that: a peer session may have touched it.
 browser: yes, behind the typed name · R5 filed · R6 (s16) over records a required field gets a ONE-TIME FILL, never
 a default · R7 (s16) the editor opens without the credential once an account exists; a person signs in once per
 browser. All in README §8, each with its question.
+
+**Gate readings (2026-09-26, s17, after every change in the BMG-017 commit):** backend `npm run typecheck` exit 0;
+contract `tsc --noEmit` exit 0; full backend `npx jest --maxWorkers=4` **212 PASS, 1 skipped, 2,512 tests, exit 0,
+551 s**; runtime `npx jest test/adapters` **328/328**; MCP `toolDisclosure` 18/18; `npm run build` exit 0 (dist
+rebuilt — the editor runs it); drive `drives/bmg017/run.sh ac seed` **14/14, no page errors**. Editor untouched
+(no editor file changed), so `test:main`/`test:ci` were not rerun.
 
 **Gate readings (2026-09-26, s16):** in BMG-016 §6 — backend full jest 207 PASS / 1 skipped, 2,489 tests, exit 0,
 363 s (the first run was exit 1 on `security-enforcement`'s walk meeting the admin burst — fixed in the spec);
@@ -87,6 +95,31 @@ and `nodegx-backend-contract` `tsc --noEmit` exit 0. Full backend `npx jest --ma
 route). Drive `drives/bmg003/run.sh ac seed` 41/41.
 🔴 A new `/admin/...` route still owes the tally line AND an `audit-actions.ts` entry (an action, or a
 `NOT_AUDITED` reason for a dry run); a POST a read-only admin should be able to make owes `readonly.ts` too.
+
+## What s17 settled (BMG-017)
+
+- 🔴 **The handoff's table had four real defects and one unproven — and missed the worst one.** The file sweep
+  listed the WHOLE bucket, which BMG-015 shares with the backup archives: *Delete orphans* deleted every archive
+  in the bucket. Found writing row 2's spec, not by the filing. The bucket's file listing is now only keys of
+  `put`'s shape (`S3Driver.isFileKey`). Memory: `a-deleting-sweep-over-a-shared-store-deletes-the-other-writers-keys`.
+- **The sweep's grace window** is `SWEEP_GRACE_MINUTES = 5` by the STORE's clock (`listEntries()`:
+  mtime / `LastModified`); young blobs are `tooNew` in the report (page toast + chip, MCP JSON), never deleted;
+  rows are re-read before deleting. 🔴 A spec that plants a stray must backdate it (`fs.utimesSync` / the fake's
+  `lastModified`) and give a bucket stray `put`'s shape — two older specs planted *now* and were repointed.
+- **R6's guard is ONE place:** `QueryBuilder.buildInsert({…, required})`, list from `LocalSQLAdapter.requiredToName`.
+  `bmg-017-import-required`'s census pins every `buildInsert` caller (a new SQLite caller must pass `required`;
+  PostgreSQL's two are `bare` because its default is dropped). The IMPORT refuses the row itself (before the
+  all-or-nothing batch), so the rest land — PostgreSQL had rolled the whole import back.
+- **`magicLinkExpiresIn(ttl)`** (`email/templates.ts`) is the one sentence for the send, the preview, *Send me this*
+  and the chip; `sampleVariables(id, policy)` / `templateVariables(id, policy)` take the live policy.
+- **The sign-in box** reads *Keep the credential in this tab (it is never kept longer)* once a credential is typed.
+- **Row 5 was fine:** virtual-hosted addressing passes connect/upload/serve/backup/restore against the fake with
+  `virtualHostedOnly` + signature checking. 🔴 **The S3 fake now VERIFIES SigV4 when handed `secretAccessKey`**
+  (CLI `--secret`, `--virtual-hosted`); without it, it still checks only the key id. A drive's hand-signed probe
+  (`Signature=x`, as `drives/bmg016` does) is refused under `--secret` — read the bucket through the backend.
+- Not proved: real AWS (TLS SNI is the endpoint host, the Host header the bucket's — AWS routes on Host; nobody has
+  pressed it against AWS). Keys with characters outside `[A-Za-z0-9-_.~/]` would be double-encoded in the signature
+  (`target()` encodes, `canonicalUri` encodes again) — every key the backend writes is hex, so it is latent only.
 
 ## What s16 settled (BMG-016)
 
@@ -208,14 +241,19 @@ route). Drive `drives/bmg003/run.sh ac seed` 41/41.
 
 ## Do this, in order
 
-1. **BMG-013 Richard drives it** — his, and the only thing left. His script is BMG-013 §2 (updated s16: the
-   one-time fill, *Move them to the bucket*, *How long a list can be*, the editor opening as him). Start the editor
-   from the CURRENT build (`packages/nodegx-backend/dist` was rebuilt s16 — the editor runs `dist/`). To drive the
+1. **BMG-013 Richard drives it** — his; nothing is left before it (BMG-017 ✅ s17). His script is BMG-013 §2
+   (updated s16: the one-time fill, *Move them to the bucket*, *How long a list can be*, the editor opening as him;
+   s17 adds nothing he must press, but *Import CSV* over a required field and *Check now and delete* now behave
+   differently — see BMG-017 §7). Start the editor from the CURRENT build (`packages/nodegx-backend/dist` rebuilt
+   s17 — the editor runs `dist/`). To drive the
    bucket half for real he needs a MinIO (`docker run -p 9000:9000 minio/minio server /data`) or any S3-compatible
    bucket — the repo's fake is for specs. What he records (WORTHY / NOT WORTHY per page, his words) becomes README §2
    rows, each built before the phase closes; then close the README status and the memory.
-2. If he wants more before driving: README §6 candidates (his pick), BMG-015 §7's `forcePathStyle: false` /
-   multipart / retries, moving files BACK from a bucket.
+2. If he wants more before driving: README §6 candidates (his pick), BMG-015 §7's multipart / retries, moving
+   files BACK from a bucket, a real-AWS check of virtual-hosted addressing (s17 proved it only against the fake).
+
+**Needs Richard (not a session's to decide):** the drive itself (BMG-013); whether 5 minutes is the right grace for
+*Delete orphans* (it is stated in the report and the toast, so he will see it).
 
 ## What s11 settled
 

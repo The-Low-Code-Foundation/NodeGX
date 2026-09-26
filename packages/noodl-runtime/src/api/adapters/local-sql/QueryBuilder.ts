@@ -1055,9 +1055,18 @@ export function checkConstraintProblem(message: string): { collection: string; c
 }
 
 /**
- * Build an INSERT query
+ * Build an INSERT query.
+ *
+ * `required` (BMG-017, R6): the columns a record must name itself, from
+ * `requiredWithoutDefault`. Each one the data leaves out is written as NULL, so
+ * the engine refuses the row — SQLite keeps a one-time fill as the column's DDL
+ * default, and would otherwise hand it to every new record that forgot the
+ * field. Every SQLite caller passes it; `bmg-017-import-required` is the census.
  */
-export function buildInsert(options: { collection: string; data: Record<string, unknown> }, id: string): BuiltQuery {
+export function buildInsert(
+  options: { collection: string; data: Record<string, unknown>; required?: string[] },
+  id: string
+): BuiltQuery {
   const params: unknown[] = [];
   const table = escapeTable(options.collection);
 
@@ -1066,6 +1075,7 @@ export function buildInsert(options: { collection: string; data: Record<string, 
   // the id it passed here — the row existed and the caller got `null` (SYN-003).
   const rest: Record<string, unknown> = { ...options.data };
   delete rest.objectId;
+  for (const name of options.required || []) if (rest[name] === undefined) rest[name] = null;
 
   const now = new Date().toISOString();
   const data: Record<string, unknown> = {

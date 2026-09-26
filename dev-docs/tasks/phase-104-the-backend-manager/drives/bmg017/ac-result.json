@@ -1,0 +1,126 @@
+{
+  "checks": {
+    "seed: the first admin account exists": {
+      "pass": true,
+      "detail": 201
+    },
+    "seed: owner is required, the one record there was filled once": {
+      "pass": true,
+      "detail": 200
+    },
+    "Row 1: the dry run says 1 will be added, 1 rejected, and names the row and the field": {
+      "pass": true,
+      "detail": "1 will be added, 1 rejected:\nRow 3: owner: required, and this new row leaves it out"
+    },
+    "Row 1: the import toast says 1 added, 1 rejected": {
+      "pass": true,
+      "detail": [
+        "1 added, 0 updated, 1 rejected."
+      ]
+    },
+    "Row 1: the server holds a (FILL, from before) and csv-named (Ann); the omitted row is not there and nothing new carries the fill": {
+      "pass": true,
+      "detail": [
+        [
+          "a",
+          "FILL"
+        ],
+        [
+          "csv-named",
+          "Ann"
+        ]
+      ]
+    },
+    "Row 2: the bucket connects (the fake checks every signature)": {
+      "pass": true,
+      "detail": {
+        "config": {
+          "version": 1,
+          "maxUploadBytes": 26214400,
+          "contentTypes": {
+            "allowList": null,
+            "denyList": []
+          },
+          "driver": {
+            "type": "s3",
+            "endpoint": "http://127.0.0.1:9400",
+            "region": "us-east-1",
+            "bucket": "puppy",
+            "forcePathStyle": true
+          },
+          "thumbnails": {
+            "presets": {
+              "sm": {
+                "width": 64,
+                "height": 64,
+                "fit": "cover"
+              },
+              "md": {
+                "width": 256,
+                "height": 256,
+                "fit": "cover"
+              },
+              "lg": {
+                "width": 1024,
+                "height": 1024,
+                "fit": "contain"
+              }
+            }
+          },
+          "signedUrlTtlSeconds": 300,
+          "orphanSweep": {
+            "enabled": false,
+            "cron": "0 3 * * *"
+          },
+          "sweepStatus": {
+            "lastReport": null,
+            "nextRunAt": null
+          }
+        },
+        "driverKind": "s3",
+        "s3CredentialsConfigured": true,
+        "transformsAvailable": true
+      }
+    },
+    "Row 2: an archive is in the bucket": {
+      "pass": true,
+      "detail": "s3://puppy/backups/backup-2026-09-26T11-25-33-403Z-ls5q8r.ngxbackup.tar.gz"
+    },
+    "Row 2: the toast says the old one was deleted and the young one was left alone": {
+      "pass": true,
+      "detail": "Done: 1 file no record knows about, 0 records whose file is missing — the unknown files were deleted; 1 file is too new to judge — under 5 minutes old and perhaps still arriving — so it was left alone."
+    },
+    "Row 2: the card’s chip counts the one too new to judge": {
+      "pass": true,
+      "detail": "last checked 26/09/2026, 13:25:37 — 1 unknown file, 0 missing, 1 too new to judge"
+    },
+    "Row 2: on disk — the old stray is gone, the young one is still there": {
+      "pass": true
+    },
+    "Row 2: the archive is still in the bucket": {
+      "pass": true,
+      "detail": [
+        "s3://puppy/backups/backup-2026-09-26T11-25-33-403Z-ls5q8r.ngxbackup.tar.gz"
+      ]
+    },
+    "Row 3: the server holds a 60-minute magic link": {
+      "pass": true,
+      "detail": 60
+    },
+    "Row 3: the Email page’s preview says 60 minutes, not 15": {
+      "pass": true,
+      "detail": "Your sign-in link for Your App\nOpen the link below to sign in to Your App:\n\nhttps://example.com/auth/magic-link/callback?token=SAMPLE\n\nThis link expires in 60 minutes and can only be used once. Anyone who has it can sign in with it, so don't forward it. If you didn't ask to sign in, you can ignore t"
+    },
+    "Row 4: a person is kept on this browser; the credential in this tab": {
+      "pass": true,
+      "detail": {
+        "personWords": "Keep me signed in on this browser",
+        "credentialWords": "Keep the credential in this tab (it is never kept longer)"
+      }
+    }
+  },
+  "summary": {
+    "passed": 14,
+    "total": 14
+  }
+}

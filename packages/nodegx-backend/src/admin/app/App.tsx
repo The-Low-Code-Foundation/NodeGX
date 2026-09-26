@@ -88,9 +88,11 @@ function Login({ error }: { error: string | null }) {
             Sign in
           </button>
         </div>
+        {/* BMG-017: the words follow the path the submit takes — a person is kept for this
+            browser, the credential only ever for this tab (api.ts `keep`). */}
         <label class="check" style="margin-top: 10px">
-          <input id="login-remember" type="checkbox" checked={remember} onChange={(e) => setRemember((e.currentTarget as HTMLInputElement).checked)} /> Keep me
-          signed in on this browser
+          <input id="login-remember" type="checkbox" checked={remember} onChange={(e) => setRemember((e.currentTarget as HTMLInputElement).checked)} />{' '}
+          {token.trim() ? 'Keep the credential in this tab (it is never kept longer)' : 'Keep me signed in on this browser'}
         </label>
         {error ? (
           <div id="login-error" class="notice bad" style="margin-top: 14px">

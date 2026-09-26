@@ -57,7 +57,7 @@ import type { EmailConfigState } from '../email/EmailConfigState';
 import type { Mailer } from '../email/Mailer';
 import type { EmailTokenStore } from '../email/tokens';
 import { MAGIC_LINK_DEFAULT_TTL_MS } from '../email/tokens';
-import { renderTemplate } from '../email/templates';
+import { magicLinkExpiresIn, renderTemplate } from '../email/templates';
 import { FlowStore } from '../auth/FlowStore';
 import { AuthLinkError, IdentityStore, isFlagSet, SignInResult } from '../auth/identities';
 import {
@@ -646,7 +646,7 @@ export class OAuthRoutes {
     const rendered = renderTemplate(this.deps.emailConfig.effectiveTemplate('magicLink'), {
       appName: this.deps.backendName,
       magicLinkUrl: linkUrl,
-      expiresIn: `${Math.round(ttlMs / 60_000)} minutes`
+      expiresIn: magicLinkExpiresIn(ttlMs / 60_000)
     });
     const result = await this.deps.mailer.send({
       to: email,
