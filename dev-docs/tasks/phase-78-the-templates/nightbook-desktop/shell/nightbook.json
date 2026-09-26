@@ -1,0 +1,10 @@
+{
+  "appId": "nightbook",
+  "name": "Nightbook",
+  "port": 47621,
+  "backups": {
+    "folderName": "Nightbook backups",
+    "cron": "0 19 * * *",
+    "retention": { "keepLast": 1, "keepDaily": 30, "keepWeekly": 0 }
+  }
+}

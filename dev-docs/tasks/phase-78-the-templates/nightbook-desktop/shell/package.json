@@ -1,0 +1,37 @@
+{
+  "name": "nightbook",
+  "productName": "Nightbook",
+  "version": "0.0.1",
+  "description": "Nightbook — the evening journal, on one tablet, with no internet (TPL-011).",
+  "author": "Digital Bricks",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test relay.test.js",
+    "dist:win": "electron-builder --win nsis --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "43.2.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "io.digitalbricks.nightbook",
+    "productName": "Nightbook",
+    "npmRebuild": false,
+    "files": ["main.js", "relay.js", "nightbook.json", "package.json"],
+    "extraResources": [
+      { "from": "build-output/app", "to": "app" },
+      { "from": "build-output/backend/cli.js", "to": "backend/cli.js" },
+      { "from": "build-output/policy", "to": "policy" }
+    ],
+    "directories": { "output": "dist" },
+    "win": { "target": "nsis" },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "Nightbook-Setup-${version}.${ext}"
+    }
+  }
+}

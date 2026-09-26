@@ -1,0 +1,92 @@
+name: Nightbook desktop (TPL-011 DESK-1)
+
+# The evening journal (TPL-011) as a Windows app: an Electron shell that runs its own
+# nodegx-backend, with no network. Builds the NSIS installer on Windows, installs it
+# silently on the runner, drives the INSTALLED app across two restarts plus a
+# fresh-home control, and uploads the installer and the drive's report.
+#
+# Source and rationale: dev-docs/tasks/phase-78-the-templates/nightbook-desktop/ and
+# TPL-011-DESKTOP-THE-JOURNAL-ON-WINDOWS.md. Unsigned by ruling D2.
+
+on:
+  push:
+    branches: [tpl011-desk1]
+  workflow_dispatch:
+
+concurrency:
+  group: nightbook-desktop
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - uses: ./.github/actions/setup
+
+      # The production viewer: nodegx-deploy refuses a development engine.
+      - name: Build viewer bundles
+        run: npm run build:editor:_viewer
+        env:
+          WORKSPACE_PATH: .
+
+      - name: Build the backend bundle and the deploy engine
+        run: |
+          npm --prefix packages/nodegx-backend run build
+          npm run build --workspace @noodl/preview
+
+      - name: Assemble the app (export + backend + policy)
+        run: node dev-docs/tasks/phase-78-the-templates/nightbook-desktop/build-app.js
+
+      - name: Relay specs
+        working-directory: dev-docs/tasks/phase-78-the-templates/nightbook-desktop/shell
+        run: |
+          npm ci --no-audit --no-fund
+          npm test
+
+      - name: Build the installer
+        working-directory: dev-docs/tasks/phase-78-the-templates/nightbook-desktop/shell
+        run: npm run dist:win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: Install it silently (per-user, no admin)
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem dev-docs/tasks/phase-78-the-templates/nightbook-desktop/shell/dist/Nightbook-Setup-*.exe | Select-Object -First 1
+          Start-Process -FilePath $setup.FullName -ArgumentList '/S' -Wait
+          Get-Process Nightbook -ErrorAction SilentlyContinue | Stop-Process -Force
+          $exe = Join-Path $env:LOCALAPPDATA 'Programs\nightbook\Nightbook.exe'
+          if (-not (Test-Path $exe)) { Get-ChildItem (Join-Path $env:LOCALAPPDATA 'Programs') -Recurse -Filter Nightbook.exe | Select-Object -First 3; throw "Nightbook.exe not at $exe" }
+          "NIGHTBOOK_EXE=$exe" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Drive the installed app (write, restart, read back, control)
+        run: node dev-docs/tasks/phase-78-the-templates/nightbook-desktop/drive-spike.js --exe "$NIGHTBOOK_EXE"
+        env:
+          NIGHTBOOK_DRIVE_REPORT: ${{ github.workspace }}/drive-report.json
+
+      - name: Collect
+        if: always()
+        run: |
+          mkdir -p out
+          cp dev-docs/tasks/phase-78-the-templates/nightbook-desktop/shell/dist/Nightbook-Setup-*.exe out/ || true
+          cp dev-docs/tasks/phase-78-the-templates/nightbook-desktop/shell/build-output/BUILD.json out/ || true
+          cp drive-report.json out/ || true
+
+      - name: Upload
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightbook-win32-x64-${{ github.sha }}
+          path: out
+          retention-days: 30
