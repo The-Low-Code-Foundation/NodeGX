@@ -16,6 +16,8 @@ export interface Column {
   targetClass?: string;
   required?: boolean;
   defaultValue?: unknown;
+  /** R6: sent with `addColumn` only — what the records already there get, once. Never declared. */
+  fillExisting?: unknown;
   /** BMG-003: one line a person wrote about the field; stored on the column, shown on the Schema page. */
   description?: string;
   /** Schema page only: a system field's note. */

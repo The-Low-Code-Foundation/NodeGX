@@ -348,6 +348,31 @@ export class SecurityState {
   }
 
   /** Dev-open is only ever active on a loopback bind (the interlock guarantees it). */
+  /**
+   * BMG-011 §7: re-read security.json after a restore unpacked the archive's
+   * copy over it. Validated exactly as at start; the live object is replaced
+   * IN PLACE (every reader holds `security.config`), so the next request is
+   * judged by the restored rules — and the next permissions edit writes over
+   * them rather than over the pre-restore ones it would otherwise still hold.
+   * A file that does not validate is refused: the live rules are written back
+   * over it (a backend must still start tomorrow) and the refusal is thrown.
+   */
+  reloadConfig(): void {
+    const configPath = path.join(this.deps.dataDir, SECURITY_FILE);
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      const errors = validateSecurityConfig(parsed);
+      if (errors.length > 0) throw new Error(`security.json is invalid: ${errors.join('; ')}.`);
+    } catch (e) {
+      this.save();
+      throw e;
+    }
+    const live = this.config as unknown as Record<string, unknown>;
+    for (const key of Object.keys(live)) delete live[key];
+    Object.assign(live, parsed);
+  }
+
   get devOpenActive(): boolean {
     return this.config.devOpen && this.deps.loopback;
   }

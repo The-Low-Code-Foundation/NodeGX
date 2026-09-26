@@ -73,6 +73,7 @@ import {
   type CheckDecl,
   type CheckReconcileReport,
   type CheckStatus,
+  declaredColumn,
   declaredProperties,
   indexName,
   junctionTableName,
@@ -446,14 +447,18 @@ export class PgSchemaManager {
     if (cols.has(column.name)) return; // "duplicate column name" — SQLite swallows it too
 
     const schema = st.schemas.get(tableName);
-    const def = columnToPostgres(schema || { name: tableName }, column);
+    // R6: a one-time fill is added as the default — the rows already there take
+    // it — and dropped in the same step, so no new record ever gets it.
+    const fill = column.fillExisting !== undefined;
+    const declared = declaredColumn(column);
+    const def = columnToPostgres(schema || { name: tableName }, fill ? { ...declared, defaultValue: column.fillExisting } : column);
     if (!def) return;
 
     cols.add(column.name);
     let recorded = false;
     if (schema) {
       schema.columns = schema.columns || [];
-      schema.columns.push(column);
+      schema.columns.push(declared);
       recorded = true;
       // A fresh object, so `declaredProperties`' identity-keyed memo derives
       // afresh (see the SQLite manager's `freshSchema`).
@@ -465,12 +470,13 @@ export class PgSchemaManager {
       `addColumn("${tableName}", "${column.name}")`,
       async () => {
         await this.pool.run(`ALTER TABLE ${escapeTable(tableName)} ADD COLUMN IF NOT EXISTS ${def}`);
+        if (fill) await this.pool.run(`ALTER TABLE ${escapeTable(tableName)} ALTER COLUMN ${escapeColumn(column.name)} DROP DEFAULT`);
         if (snapshot !== null) await this.pool.run(UPSERT_SCHEMA, [tableName, snapshot]);
       },
       () => {
         cols.delete(column.name);
         if (recorded && schema && schema.columns) {
-          schema.columns = schema.columns.filter((c) => c !== column);
+          schema.columns = schema.columns.filter((c) => c !== declared);
           st.schemas.set(tableName, schema);
         }
       }

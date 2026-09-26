@@ -88,6 +88,13 @@ export function keepWords(r: { keepLast?: number; keepDaily?: number; keepWeekly
   return 'Keeps ' + parts.join(', and ') + '.';
 }
 
+
+/** BMG-011 §7: what the page says when restored settings files were refused (the live ones stay until fixed). */
+export function restoreRefusedSentence(refused: Array<{ file: string; reason: string }>): string {
+  const names = refused.map((f) => f.file).join(', ');
+  return 'The data is restored, but ' + names + (refused.length === 1 ? ' was' : ' were') + ' not taken up: ' + refused[0].reason + ' The settings from before the restore stay in force.';
+}
+
 export function BackupsView(_props: ViewProps) {
   const { readonly, whoami } = useSession();
   const [data, setData] = useState<BackupsData | null>(null);
@@ -139,9 +146,15 @@ export function BackupsView(_props: ViewProps) {
 
   function restore(a: Archive, backUpFirst: boolean) {
     setRestoring(a.file);
-    api<{ ok: boolean; safetyArchive?: string | null; reconnected?: boolean }>('POST', '/admin/backups/restore', { archive: a.file, safetySnapshot: backUpFirst })
+    api<{ ok: boolean; safetyArchive?: string | null; reconnected?: boolean; settings?: { reloaded: string[]; refused: Array<{ file: string; reason: string }> } }>('POST', '/admin/backups/restore', {
+      archive: a.file,
+      safetySnapshot: backUpFirst
+    })
       .then((r) => {
         toast('Restored ' + a.file + (r.safetyArchive ? ' — the data from before is in ' + r.safetyArchive.split('/').pop() + '.' : '.'), 'ok');
+        // BMG-011 §7: a settings file the running backend could not take up keeps the settings from before the restore.
+        const refused = (r.settings && r.settings.refused) || [];
+        if (refused.length) toast(restoreRefusedSentence(refused), 'bad');
       })
       .catch(fail)
       .then(() => {

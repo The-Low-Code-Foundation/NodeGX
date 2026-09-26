@@ -694,11 +694,16 @@ class BackendManager {
 
   /**
    * Open the backend's own web dashboard (`/_admin`) in the default browser,
-   * already signed in — on its home, or on a page (BMG-012).
+   * on its home, or on a page (BMG-012).
    *
-   * The admin credential goes in the URL fragment, which the dashboard reads
-   * once and scrubs from the address bar. It is resolved here in the main
-   * process and handed straight to the OS, so the renderer never holds it.
+   * Until an admin ACCOUNT exists, the credential goes in the URL fragment,
+   * which the dashboard reads once and scrubs from the address bar — the first
+   * open is where it asks for the account (BMG-014). It is resolved here in the
+   * main process and handed straight to the OS, so the renderer never holds it.
+   * Once an account exists (`whoami.adminAccount`) the fragment carries only
+   * the route: the person signs in once per browser and the manager knows who
+   * they are (Richard, 2026-09-26). If the backend cannot say, the credential
+   * goes as before, so the button always opens something that works.
    *
    * `route` is a manager hash path (`/schema/Pet/new-field`, `/triggers/new`),
    * carried in the same fragment as `route=` so the page can land on it after
@@ -712,8 +717,15 @@ class BackendManager {
   async openDashboard(id, route) {
     const supervisor = this.requireRunning(id, 'open the backend manager');
     const token = supervisor.adminToken();
+    let account = false;
+    try {
+      const who = await supervisor.request('GET', '/_admin/whoami');
+      account = !!(who && who.adminAccount);
+    } catch (e) {
+      account = false;
+    }
     const parts = [];
-    if (token) parts.push(`token=${encodeURIComponent(token)}`);
+    if (token && !account) parts.push(`token=${encodeURIComponent(token)}`);
     if (typeof route === 'string' && /^\/(?!\/)[^#\s]*$/.test(route)) parts.push(`route=${encodeURIComponent(route)}`);
     const url = `${supervisor.endpoint}/_admin` + (parts.length ? `#${parts.join('&')}` : '');
     await shell.openExternal(url);

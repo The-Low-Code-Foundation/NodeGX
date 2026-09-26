@@ -1320,6 +1320,9 @@ export class HttpServer {
       // did, the delete would be of that file, which is the honest answer.
       { method: 'GET', pattern: 'admin/files', access: { kind: 'admin' }, handler: (ctx) => adminFiles.list(ctx) },
       { method: 'GET', pattern: 'admin/files/uses', access: { kind: 'admin' }, handler: (ctx) => adminFiles.uses(ctx) },
+      // BMG-015 §7: *Move files to the bucket* — the count and progress, and the press.
+      { method: 'GET', pattern: 'admin/files/move', access: { kind: 'admin' }, handler: (ctx) => adminFiles.moveStatus(ctx) },
+      { method: 'POST', pattern: 'admin/files/move', access: { kind: 'admin' }, handler: (ctx) => adminFiles.moveStart(ctx) },
       {
         method: 'DELETE',
         pattern: 'admin/files/:name',
@@ -2339,7 +2342,9 @@ export class HttpServer {
    */
   private async putOps(ctx: RequestContext): Promise<void> {
     const body = await readJSONBody(ctx.req);
-    const known = ['logging', 'rateLimit', 'cors', 'audit', 'executions', 'metrics'];
+    // `queries` (PRD-001's page cap) was validated by the model and refused here
+    // — the Server page could not set it (BMG-011 §7).
+    const known = ['logging', 'rateLimit', 'cors', 'audit', 'executions', 'queries', 'metrics'];
     const given = Object.keys(body).filter((k) => k !== 'version');
     if (given.length === 0 || given.some((k) => !known.includes(k))) {
       throw new HttpError(

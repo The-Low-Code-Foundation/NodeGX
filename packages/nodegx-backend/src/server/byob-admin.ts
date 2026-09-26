@@ -47,8 +47,8 @@ function requiredNeedsDefault(e: unknown, table: string, column: StorageColumn |
   const name = column && column.name ? `"${column.name}"` : 'a required field';
   return new HttpError(
     400,
-    `${name} can be required only with a default here: "${table}" already has records, and they need a value in it. ` +
-      'Give it a default, or add it as optional.',
+    `${name} can be required here only with a value for the records "${table}" already has: each of them needs one. ` +
+      'Say what they get (fillExisting — once, not a default), or add it as optional.',
     142,
     { reason: 'required-needs-default', collection: table, field: column ? column.name : undefined }
   );
@@ -535,8 +535,9 @@ export class ByobAdminRoutes {
         return;
       }
       case 'addColumn':
-        // BMG-003: a required column over rows needs a default on both engines
-        // (SQLite refuses the DDL outright; PostgreSQL refuses it at the queue),
+        // BMG-003: a required column over rows needs a value for them on both
+        // engines (SQLite refuses the DDL outright; PostgreSQL refuses it at the
+        // queue) — R6: `column.fillExisting`, written once, never a default —
         // and either refusal is the person's to act on — so it is 400 in words,
         // and the queue is awaited here so it reaches the person who added the
         // field rather than whoever writes the next record.

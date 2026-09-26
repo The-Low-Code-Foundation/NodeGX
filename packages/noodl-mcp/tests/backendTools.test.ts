@@ -522,6 +522,21 @@ describeOrSkip('MCP backend permission tools (live backend)', () => {
     });
   });
 
+  describe('BMG-015 backup destination', () => {
+    it('set_backend_backup_policy takes a local directory, and asks for the bucket by type — refused by sentence while none is connected', async () => {
+      const dir = path.join(os.tmpdir(), 'bmg015-mcp-archives-' + process.pid);
+      const local = await call<{ config: { destination: { type: string; path?: string } } }>(session, 'set_backend_backup_policy', { destination: { path: dir } });
+      expect(local.isError).toBe(false);
+      expect(local.data.config.destination).toEqual({ type: 'local', path: dir });
+      const res = (await session.client.callTool({ name: 'set_backend_backup_policy', arguments: { destination: { type: 's3' } } })) as {
+        isError?: boolean;
+        content: Array<{ text: string }>;
+      };
+      expect(res.isError).toBe(true);
+      expect(res.content[0].text).toContain('Connect a bucket on the Storage page first');
+    });
+  });
+
   describe('BAK-009 ops + audit tools', () => {
     it('reads the operational config, which is what explains a 429', async () => {
       const { isError, data } = await call<{

@@ -204,6 +204,11 @@ Activity filter's own query (`actorKind=apiKey`).
 
 ## 7. Candidates this task surfaced (§6 of the README)
 
+> **s16 (2026-09-26): the first two are built in [BMG-016](BMG-016-THE-LEFTOVERS.md).** The second was wrong in
+> one particular: `ops.json` is NOT in an archive (`BackupManager.ts` `CONFIG_FILES`); `security.json`,
+> `triggers.json`, `email.json`, `config-params.json` and `backups.json` are — and "a restore of THIS backend's
+> archive has the same files" was false for any archive older than the last settings change.
+
 - **The page cap on the Server page** — `queries.defaultLimit`/`maxLimit` (PRD-001) are validated by the model but
   `putOps`'s known list refuses the section. One line in `HttpServer.putOps` and a card.
 - **Restore of a foreign archive** — a restore re-ensures the system tables, but `security.json`/`ops.json` come from the

@@ -48,6 +48,7 @@ import {
 } from './config/SecretsStore';
 import { OpsState } from './ops/OpsState';
 import { logger } from './ops/logger';
+import type { SettingsReload } from './server/admin-backups';
 import { SecretValueScrubber } from './ops/log-scrub';
 import { AuditLog, ensureAuditTable } from './ops/audit';
 import { SystemUsers, SystemUserRequest, SystemUserResult } from './users/SystemUsers';
@@ -570,6 +571,7 @@ export class BackendService {
           if (!this.persistence) return;
           await this.persistence.adapter.connect();
           this.ensureSystemTables();
+          return this.reloadRestoredSettings();
         }
       }
     });
@@ -1052,6 +1054,45 @@ export class BackendService {
     // rules keep it off every front door, which is the point: what a person
     // opens is the node's `Conditional` port, not the bookkeeping behind it.
     ensureHttpCacheTable(sm);
+  }
+
+  /**
+   * BMG-011 §7: a restore unpacks the archive's `config/` over the data dir —
+   * security.json, triggers.json, email.json, backups.json (config-params.json
+   * is read per request already). Each was read ONCE at start, so the running
+   * backend went on enforcing the pre-restore permissions, firing the
+   * pre-restore schedules, and the next edit on any of those pages wrote the
+   * OLD settings back over the restored file. Each is re-read here with its
+   * own start-up validation; one that refuses keeps the live settings — written
+   * back over it, so the next start is not refused either — and is named in
+   * the answer, never a crash mid-restore.
+   */
+  private reloadRestoredSettings(): SettingsReload {
+    const out: SettingsReload = { reloaded: [], refused: [] };
+    const step = (file: string, run: () => void) => {
+      if (!fs.existsSync(path.join(this.options.dataDir, file))) return;
+      try {
+        run();
+        out.reloaded.push(file);
+      } catch (e) {
+        const reason = e instanceof Error ? e.message : String(e);
+        out.refused.push({ file, reason });
+        logger.warn('restore.settings-refused', { file, detail: reason });
+      }
+    };
+    step('security.json', () => this.security && this.security.reloadConfig());
+    step('triggers.json', () => {
+      if (!this.triggers) return;
+      this.triggers.registry.reload();
+      this.triggers.reschedule();
+    });
+    step('email.json', () => this.emailConfig && this.emailConfig.reload());
+    step('backups.json', () => {
+      if (!this.backups) return;
+      this.backups.config.reload();
+      this.backups.reschedule();
+    });
+    return out;
   }
 
   /**

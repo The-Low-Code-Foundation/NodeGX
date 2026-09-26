@@ -142,6 +142,10 @@ describe('BAK-003 enforcement (locked backend)', () => {
   beforeAll(async () => {
     dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'nodegx-sec-test-'));
     fs.writeFileSync(path.join(dataDir, 'security.json'), JSON.stringify(LOCKED_CONFIG));
+    // §7's walk sends one unauthenticated request per route; the `admin` class's burst is 100, and
+    // BMG-016 made the table's admin routes 101 — the walk met a 429 (the rate limiter, working)
+    // instead of the 401 it grades. This suite grades AUTHENTICATION; rate limits have their own.
+    fs.writeFileSync(path.join(dataDir, 'ops.json'), JSON.stringify({ version: 1, rateLimit: { enabled: false } }));
     fs.mkdirSync(path.join(dataDir, 'workflows'), { recursive: true });
     fs.writeFileSync(path.join(dataDir, 'workflows', 'main.workflow.json'), JSON.stringify(ECHO_WORKFLOW));
 

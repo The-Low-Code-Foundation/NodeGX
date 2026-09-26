@@ -24,6 +24,38 @@ export interface SchemaColumn {
   targetClass?: string;
   required?: boolean;
   defaultValue?: unknown;
+  /**
+   * BMG-003 R6: `addColumn` only — the value the rows ALREADY in the table get,
+   * once. It is not a default and it is never declared: a required field
+   * filled this way still refuses a new record that leaves it out.
+   */
+  fillExisting?: unknown;
+}
+
+/**
+ * R6: the column as it is declared — without the one-time fill, and without a
+ * default when a fill was given (the fill is what the old rows get, not what
+ * the new ones do).
+ */
+export function declaredColumn(column: SchemaColumn): SchemaColumn {
+  if (column.fillExisting === undefined) return column;
+  const declared = { ...column };
+  delete declared.fillExisting;
+  delete declared.defaultValue;
+  return declared;
+}
+
+/**
+ * R6: the columns a record must name itself — required, with no declared
+ * default. SQLite keeps a one-time fill as the column's DDL default (it has no
+ * `ALTER COLUMN … DROP DEFAULT`), so its insert names these as NULL when a
+ * record leaves them out, and the engine refuses it as it would any required
+ * field.
+ */
+export function requiredWithoutDefault(schema: TableSchema | null | undefined): string[] {
+  return ((schema && schema.columns) || [])
+    .filter((c) => c.required && c.defaultValue === undefined && c.type !== 'Relation')
+    .map((c) => c.name);
 }
 
 /** A collection's schema as tracked in the `_Schema` table. */

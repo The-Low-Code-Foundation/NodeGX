@@ -23,7 +23,8 @@ export default async ({ ev, sleep, nav, shot }) => {
   const exists = (sel) => ev(`!!document.querySelector(${J(sel)})`);
   const visible = (sel) => ev(`(function(){var e=document.querySelector(${J(sel)}); if(!e) return false; var r=e.getBoundingClientRect(); return r.width>0&&r.height>0})()`);
   const count = (sel) => ev(`document.querySelectorAll(${J(sel)}).length`);
-  const stored = () => ev(`sessionStorage.getItem('nodegx.admin.token')`);
+  // 2026-09-26 (Richard): a person's session is kept for the BROWSER (localStorage), the credential for the tab.
+  const stored = () => ev(`localStorage.getItem('nodegx.admin.person') || sessionStorage.getItem('nodegx.admin.token')`);
   const waitFor = async (fn, tries = 30, ms = 300) => {
     for (let i = 0; i < tries; i++) {
       const v = await fn();
@@ -78,7 +79,8 @@ export default async ({ ev, sleep, nav, shot }) => {
   ok('AC2: a wrong password gets the one sentence, on the form', /were not accepted/.test(await txt('#login-error')), await txt('#login-error'));
   await shot('bmg014-login-refused');
   await setVal('#login-password', 'first-admin-pw');
-  await click('#login-remember');
+  // Keep me signed in is ON by default now (a person is remembered in this browser); make sure, never toggle it off.
+  if (!(await ev(`document.querySelector('#login-remember').checked`))) await click('#login-remember');
   await clickText('#login-form button', 'Sign in');
   await waitFor(() => exists('#app'));
   ok('AC2: the right password signs the person in', (await exists('#app')) && (await txt('#person-chip')) === 'richard@example.com', await txt('#person-chip'));

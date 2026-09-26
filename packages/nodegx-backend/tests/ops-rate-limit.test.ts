@@ -285,8 +285,13 @@ describe('BAK-009 rate limiting over real sockets', () => {
     // page's *Test connection* (a throwaway driver probes the bucket; nothing
     // is saved). Reviewed and left in the `admin` budget: one person, one
     // card, a press. Counted, not guessed — 98 → 99.
+    // BMG-015 §7 moved `admin` by 2: `GET admin/files/move` (how many files are
+    // still on this machine, and the move's progress, polled by the Storage
+    // page while it runs) and `POST admin/files/move` (start it: one background
+    // job, a 409 while it runs). Reviewed and left in the `admin` budget: one
+    // person, one card, a poll a second while a move runs. Counted — 99 → 101.
     expect(counts).toEqual({
-      admin: 99,
+      admin: 101,
       auth: 17,
       data: 19,
       files: 4,

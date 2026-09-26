@@ -47,6 +47,7 @@ import { S3Driver } from './S3Driver';
 import type { S3ProbeResult } from './S3Driver';
 import type { StorageDriver } from './types';
 import { MetadataStore } from './MetadataStore';
+import { FileMover } from './moveToBucket';
 import type { FileRecord } from './MetadataStore';
 import { runOrphanSweep } from './orphanSweep';
 import { loadTransformer } from './transform';
@@ -207,6 +208,8 @@ export interface FileSubsystemDeps {
 export class FileSubsystem {
   readonly config: FileConfigStore;
   readonly metadata: MetadataStore;
+  /** BMG-015 §7: *Move files to the bucket* — the files uploaded before the bucket, moved in the background. */
+  readonly mover: FileMover;
   private readonly deps: FileSubsystemDeps;
   private signingProvenance: SecretProvenance | null = null;
   /** Always there: the store beside the data dir. Files uploaded before a switch to the bucket live here. */
@@ -225,6 +228,7 @@ export class FileSubsystem {
     this.local = new LocalDriver(path.join(deps.dataDir, 'files', 'blobs'));
     this.driver = this.local;
     this.applyDriver(this.config.get().driver);
+    this.mover = new FileMover({ facade: deps.facade, local: this.local, bucket: () => this.bucket });
     this.registry = new SweepScheduleRegistry(this.config);
     const dispatcher = new SweepScheduleDispatcher(
       () => this.stores(),
@@ -421,5 +425,6 @@ export class FileSubsystem {
 
   stop(): void {
     this.scheduler.stop();
+    this.mover.stop();
   }
 }

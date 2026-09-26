@@ -77,11 +77,18 @@ fragment hand-off:
 | the property panel's **Add a field to <table>** on a Query Records / Create Record node whose table has no such field | `#/schema/<table>/new-field` |
 | the workflow canvas's **Add a trigger on …** / **Edit this trigger…** | `#/triggers/new` / `#/triggers/<id>` |
 
-The hand-off is `/_admin#token=<credential>&route=<encoded path>`: the main
-process resolves the admin credential and opens the browser, the page consumes
-the fragment at boot (scrubbing it from the address bar and history), signs in,
-and then sets the route. Only a plain path is accepted as a route (one leading
-`/`, no `#`); anything else opens the home, still signed in.
+Until the backend has an admin **account**, the hand-off is
+`/_admin#token=<credential>&route=<encoded path>`: the main process resolves the
+admin credential and opens the browser, the page consumes the fragment at boot
+(scrubbing it from the address bar and history), signs in, and then sets the
+route — and that first open is where the page asks you to make the account.
+**Once an account exists** (`whoami.adminAccount`), the editor sends
+`/_admin#route=<encoded path>` with no credential: you sign in with your email
+and password once in that browser, every later open from the editor is already
+you, and *Activity* names you rather than *admin credential*. If the backend
+cannot say whether an account exists, the credential goes as before. Only a
+plain path is accepted as a route (one leading `/`, no `#`); anything else opens
+the home.
 
 ### Light and dark
 
@@ -129,8 +136,11 @@ Or choose your own at start:
 nodegx-backend serve --data-dir /srv/nodegx --port 8577 --token "$(openssl rand -base64 32)"
 ```
 
-The manager holds whichever you used in `sessionStorage` (this tab only,
-cleared when the tab closes) and sends it on every request — the credential as
+The manager holds the credential in `sessionStorage` (this tab only, cleared
+when the tab closes) and a person's session — *Keep me signed in on this
+browser*, on by default — in `localStorage`, so a sign-in outlives the tab until
+you sign out or the session expires; **Sign out** forgets it and ends the
+session on the server. Either is sent on every request — the credential as
 `Authorization: Bearer …`, a session as `X-Parse-Session-Token`. There is no
 cookie and therefore no CSRF surface. A refused password spends the same
 per-address failure budget as a refused token.

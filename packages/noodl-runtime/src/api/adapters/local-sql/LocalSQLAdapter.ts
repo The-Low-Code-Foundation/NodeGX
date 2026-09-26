@@ -10,7 +10,7 @@
 
 import { resolveEngine, type EngineDatabase, type ResolvedEngine } from './engine';
 import { registerSqlFunctions } from './sqlFunctions';
-import { declaredProperties, inferType } from './schemaCommon';
+import { declaredProperties, inferType, requiredWithoutDefault } from './schemaCommon';
 import type { AclContext } from './QueryBuilder';
 
 import EventEmitter = require('../../../events');
@@ -1020,6 +1020,15 @@ class LocalSQLAdapter {
             this.schemaManager.addColumn(options.collection, column);
           }
         }
+      }
+
+      // R6: a required field left out is named as NULL, so the engine refuses
+      // it — a one-time fill sits on the column as its DDL default here, and
+      // would otherwise be written into every new record that forgot the field.
+      if (this.schemaManager) {
+        const missing = requiredWithoutDefault(this.schemaManager.getTableSchema(options.collection)).filter((n) => data[n] === undefined);
+        const present = missing.length ? this.schemaManager.tableColumns(options.collection) : null;
+        for (const name of missing) if (present && present.has(name)) data[name] = null;
       }
 
       const recordId = hasClientId ? (requestedId as string) : generateUUID();

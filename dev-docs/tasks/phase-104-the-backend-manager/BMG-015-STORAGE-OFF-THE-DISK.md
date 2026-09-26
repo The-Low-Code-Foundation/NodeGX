@@ -159,6 +159,9 @@ drivers, `SELF-HOSTING.md` §Backups (the VM paragraph) and `BACKEND-ADMIN-DASHB
 
 ## 7. Left for a later task
 
+> **s16 (2026-09-26): the first two are built in [BMG-016](BMG-016-THE-LEFTOVERS.md)** — the move, and the MCP
+> tool, whose real name is `set_backend_backup_policy` (there is no `configure_backend_backups`).
+
 - **Moving blobs between stores** is still a manual procedure (§2, docs) — a *Move files to the bucket* button
   with progress is the obvious next ask once someone has a real backend to move.
 - **MCP `configure_backend_backups`** still types `destination: {path}` only; the wire accepts `{type:'s3'}` —

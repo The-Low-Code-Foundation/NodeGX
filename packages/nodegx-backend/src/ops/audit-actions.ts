@@ -96,6 +96,7 @@ const ACTIONS: Record<string, string> = {
   'DELETE admin/email/templates/:id': 'email.template.delete',
   'PUT admin/files/config': 'files.config.update',
   'POST admin/files/sweep': 'files.sweep',
+  'POST admin/files/move': 'files.move',
   // BMG-011. A stored file removed from the Storage page — with the records
   // whose fields were cleared, when the person chose to. The listing and the
   // uses lookup are reads.

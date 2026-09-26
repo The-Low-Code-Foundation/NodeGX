@@ -63,8 +63,18 @@ import { HttpError, readJSONBody, sendJSON } from './http-util';
 export interface PersistenceControl {
   /** Close the adapter's handle so the file can be replaced. */
   pause(): Promise<void>;
-  /** Reopen the (new) file and re-ensure the system tables. */
-  resume(): Promise<void>;
+  /**
+   * Reopen the (new) file, re-ensure the system tables, and re-read the
+   * settings files the archive's `config/` put back (BMG-011 §7) — answering
+   * which were taken up and which were refused, by file.
+   */
+  resume(): Promise<SettingsReload | void>;
+}
+
+/** BMG-011 §7: the restored settings files the running backend took up, and the ones it refused. */
+export interface SettingsReload {
+  reloaded: string[];
+  refused: Array<{ file: string; reason: string }>;
 }
 
 export interface AdminBackupDeps {
@@ -219,6 +229,7 @@ export class AdminBackupRoutes {
     const control = this.deps.persistence;
     if (control) await control.pause();
     let result;
+    let settings: SettingsReload | void = undefined;
     try {
       result = await asRefusal(() =>
         this.deps.backups.manager.restore(fetched.localPath, {
@@ -230,11 +241,17 @@ export class AdminBackupRoutes {
     } finally {
       // Whatever happened on disk, the service must be serving SOMETHING
       // again — the old file if the swap never happened, the archive if it did.
-      if (control) await control.resume();
+      if (control) settings = await control.resume();
       fetched.cleanup();
     }
-    ctx.audit({ archive: listed.file, safetyArchive: result.safetyArchive, reconnected: !!control, where: listed.where });
-    sendJSON(ctx.res, 200, { ok: true, reconnected: !!control, ...result, restoredFrom: listed.path });
+    ctx.audit({
+      archive: listed.file,
+      safetyArchive: result.safetyArchive,
+      reconnected: !!control,
+      where: listed.where,
+      ...(settings ? { settingsRefused: settings.refused.map((r) => r.file) } : {})
+    });
+    sendJSON(ctx.res, 200, { ok: true, reconnected: !!control, ...result, restoredFrom: listed.path, ...(settings ? { settings } : {}) });
   }
 
   /** A listed archive by `file` or `path` — the only two spellings the routes accept. */

@@ -50,6 +50,11 @@ describe('BMG-012 — reading the editor hand-off', () => {
     }
   });
 
+  it('once an account exists the editor sends the route alone — no credential (Richard, 2026-09-26)', () => {
+    expect(readHandoff('#route=' + encodeURIComponent('/schema/Pet/new-field'))).toEqual({ token: null, route: '/schema/Pet/new-field' });
+    expect(readHandoff('#route=' + encodeURIComponent('//evil.example'))).toEqual({ token: null, route: null });
+  });
+
   it('is not a hand-off when the fragment is a page', () => {
     expect(readHandoff('#/collections/Pet')).toBeNull();
     expect(readHandoff('')).toBeNull();

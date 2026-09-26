@@ -726,8 +726,8 @@ export function FieldOptions({ draft, update, names, taken, records }: { draft: 
       <div class="when-body" id="kind-options">
         {draft.kind === 'text' ? (
           <>
-            <Field label="Default">
-              <input type="text" aria-label="Default" value={draft.dflt} disabled={dRule.disabled} placeholder={dRule.disabled ? 'no default' : 'optional'} onInput={(e) => set({ dflt: (e.currentTarget as HTMLInputElement).value })} />
+            <Field label={dRule.label}>
+              <input type="text" aria-label={dRule.label} value={draft.dflt} disabled={dRule.disabled} placeholder={dRule.disabled ? 'no default' : 'optional'} onInput={(e) => set({ dflt: (e.currentTarget as HTMLInputElement).value })} />
               {dRule.why ? <Hint>{dRule.why}</Hint> : null}
             </Field>
             <div class="field-line">
@@ -744,8 +744,8 @@ export function FieldOptions({ draft, update, names, taken, records }: { draft: 
         ) : null}
         {draft.kind === 'number' ? (
           <>
-            <Field label="Default">
-              <input type="number" step="any" aria-label="Default" value={draft.dflt} disabled={dRule.disabled} placeholder={dRule.disabled ? 'no default' : 'optional'} onInput={(e) => set({ dflt: (e.currentTarget as HTMLInputElement).value })} />
+            <Field label={dRule.label}>
+              <input type="number" step="any" aria-label={dRule.label} value={draft.dflt} disabled={dRule.disabled} placeholder={dRule.disabled ? 'no default' : 'optional'} onInput={(e) => set({ dflt: (e.currentTarget as HTMLInputElement).value })} />
               {dRule.why ? <Hint>{dRule.why}</Hint> : null}
             </Field>
             <div class="field-line">
@@ -759,12 +759,12 @@ export function FieldOptions({ draft, update, names, taken, records }: { draft: 
         ) : null}
         {draft.kind === 'yesno' ? (
           <>
-            <Switch checked={draft.boolDefaultSet} disabled={dRule.disabled} onChange={(v) => set({ boolDefaultSet: v })} label="Has a default">
-              New records start with a default
+            <Switch checked={draft.boolDefaultSet} disabled={dRule.disabled} onChange={(v) => set({ boolDefaultSet: v })} label={dRule.fill ? dRule.label : 'Has a default'}>
+              {dRule.fill ? dRule.label + '…' : 'New records start with a default'}
             </Switch>
             {draft.boolDefaultSet && !dRule.disabled ? (
-              <Switch checked={draft.boolDefault} onChange={(v) => set({ boolDefault: v })} label="Default value">
-                Default: {draft.boolDefault ? 'Yes' : 'No'}
+              <Switch checked={draft.boolDefault} onChange={(v) => set({ boolDefault: v })} label={dRule.fill ? 'Fill value' : 'Default value'}>
+                {dRule.fill ? 'Fill with' : 'Default'}: {draft.boolDefault ? 'Yes' : 'No'}
               </Switch>
             ) : null}
             {dRule.why ? <Hint>{dRule.why}</Hint> : null}
@@ -783,9 +783,9 @@ export function FieldOptions({ draft, update, names, taken, records }: { draft: 
                 validate={(v) => (v.length > 200 ? 'A choice is at most 200 characters.' : null)}
               />
             </Field>
-            <Field label="Default">
-              <select aria-label="Default" value={draft.dflt} disabled={dRule.disabled || !draft.values.length} onChange={(e) => set({ dflt: (e.currentTarget as HTMLSelectElement).value })}>
-                <option value="">no default</option>
+            <Field label={dRule.label}>
+              <select aria-label={dRule.label} value={draft.dflt} disabled={dRule.disabled || !draft.values.length} onChange={(e) => set({ dflt: (e.currentTarget as HTMLSelectElement).value })}>
+                <option value="">{dRule.fill ? 'choose a value…' : 'no default'}</option>
                 {draft.values.map((v) => (
                   <option key={v} value={v}>
                     {v}
@@ -822,7 +822,7 @@ export function FieldOptions({ draft, update, names, taken, records }: { draft: 
         <Switch checked={draft.required} onChange={(v) => set({ required: v })} label="Required">
           Required — every record must say it
         </Switch>
-        {draft.required && records > 0 && takesDefault(draft.kind) ? <Hint>{recordsWord(records)} already here: give it a default so they have a value.</Hint> : null}
+        {draft.required && records > 0 && takesDefault(draft.kind) ? <Hint>{recordsWord(records)} already here: say what they get, once, in the box above. New records must say it themselves.</Hint> : null}
         {draft.required && records > 0 && !takesDefault(draft.kind) ? <Notice kind="warn">A required {kind.label} can only be added while the collection is empty: the {recordsWord(records)} already here would have nothing in it.</Notice> : null}
         {takesUnique(draft.kind) ? (
           <Switch checked={draft.unique} onChange={(v) => set({ unique: v })} label="Must be unique">
@@ -855,7 +855,7 @@ export function AddFieldDrawer({ t, names, onClose, onAdded }: { t: TableDef; na
       setError(problem);
       return;
     }
-    const column = toColumn(draft);
+    const column = toColumn(draft, records);
     const mine = toRules(draft);
     setBusy(true);
     api('POST', '/admin/schema', { action: 'addColumn', table: t.name, column })

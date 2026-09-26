@@ -1,7 +1,7 @@
 # BMG-003 — Schema: a field-type picker, per-type options, and a danger zone
 
 **Opened 2026-09-24** (README §2 row 7). **Depends on BMG-001.**
-**Status: ✅ built and driven s9, 2026-09-25 (§6). One finding for Richard: R6 in README §8.**
+**Status: ✅ built and driven s9, 2026-09-25 (§6). R6 ruled 2026-09-26 — a one-time fill, not a default; built in [BMG-016](BMG-016-THE-LEFTOVERS.md).**
 
 ## 1. The person sentence
 

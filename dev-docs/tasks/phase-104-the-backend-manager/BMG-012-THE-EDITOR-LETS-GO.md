@@ -164,6 +164,8 @@ Renderer production bundle (`webpack.renderer.production.js`, `src/editor/index.
 
 ## 7. Candidates left
 
+> **s16 (2026-09-26): the first is ruled (R7, *sign in once per browser*) and built in [BMG-016](BMG-016-THE-LEFTOVERS.md).**
+
 - **Open without the credential once an account exists** (BMG-014's note): every editor open still
   hands `#token=`; the page could be opened bare so it asks for email + password, or the editor could
   log in as a person. Not this task's (§3.1 says the hand-off is unchanged).

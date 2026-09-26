@@ -215,6 +215,35 @@ function engineSuite(engine: 'sqlite' | 'postgres', storageUrl: () => string | n
     expect(rows.map((r) => r.kind)).toEqual(['plain']);
   });
 
+  it('R6: a required field added over records fills THEM once — a new record without it is still refused', async () => {
+    expect((await admin({ action: 'createTable', table: 'Fill', columns: [{ name: 'name', type: 'String' }] })).status).toBe(200);
+    expect((await create('Fill', { name: 'a' })).status).toBe(201);
+    expect((await create('Fill', { name: 'b' })).status).toBe(201);
+    // An apostrophe: SQLite's DDL pasted a string default between quotes unescaped, and refused it.
+    const added = await admin({ action: 'addColumn', table: 'Fill', column: { name: 'owner', type: 'String', required: true, fillExisting: "O'Brien" } });
+    expect(added.status).toBe(200);
+    expect((await admin({ action: 'addColumn', table: 'Fill', column: { name: 'count', type: 'Number', required: true, fillExisting: 0 } })).status).toBe(200);
+    const rows = (await get<Body>(base, '/classes/Fill?order=name', adminHeaders(dataDir))).json.results as Body[];
+    expect(rows.map((r) => [r.name, r.owner, r.count])).toEqual([
+      ['a', "O'Brien", 0],
+      ['b', "O'Brien", 0]
+    ]);
+    // Declared as required with NO default: the fill is not what new records get.
+    const cols = new Map(((await table('Fill')).columns as Array<{ name: string; required?: boolean; defaultValue?: unknown; fillExisting?: unknown }>).map((c) => [c.name, c]));
+    expect(cols.get('owner')).toMatchObject({ required: true });
+    expect(cols.get('owner')?.defaultValue).toBeUndefined();
+    expect(cols.get('owner')?.fillExisting).toBeUndefined();
+    // The point of Required: leaving it out is refused, in words, naming the field.
+    const forgot = await create('Fill', { name: 'c', count: 1 });
+    expect(forgot.status).toBe(400);
+    expect(forgot.json).toMatchObject({ code: 142, reason: 'required', collection: 'Fill', field: 'owner' });
+    const said = await create('Fill', { name: 'c', owner: 'Ann', count: 1 });
+    expect(said.status).toBe(201);
+    // And the refusal of a bare required column over records now says what to send.
+    const bare = await admin({ action: 'addColumn', table: 'Fill', column: { name: 'kind', type: 'String', required: true } });
+    expect(bare.json.error).toMatch(/only with a value for the records "Fill" already has/);
+  });
+
   it('the drop is in the audit trail as schema.mutate with the column named', async () => {
     const audit = await get<AuditQueryResult>(base, '/admin/audit?action=schema.mutate&limit=50', adminHeaders(dataDir));
     expect(audit.status).toBe(200);

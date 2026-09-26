@@ -201,11 +201,13 @@ export function draftProblem(d: FieldDraft, ctx: DraftContext): string | null {
   const problem = validName(n, ctx.taken, 'The field');
   if (problem) return problem;
   const kind = kindById(d.kind);
+  // R6: over records, a required field's box is the one-time fill, and says so.
+  const box = d.required && ctx.records > 0 ? 'The fill value' : 'The default';
   if ((d.kind === 'link' || d.kind === 'links') && !d.target) return 'Choose the collection it points at.';
   if ((d.kind === 'link' || d.kind === 'links') && ctx.collections.indexOf(d.target) === -1) return 'There is no collection called ' + d.target + '.';
   if (d.kind === 'choice') {
     if (!d.values.length) return 'A choice needs at least one value.';
-    if (d.dflt && d.values.indexOf(d.dflt) === -1) return 'The default must be one of the choices.';
+    if (d.dflt && d.values.indexOf(d.dflt) === -1) return box + ' must be one of the choices.';
   }
   if (d.kind === 'number') {
     const lo = num(d.min);
@@ -214,23 +216,23 @@ export function draftProblem(d: FieldDraft, ctx: DraftContext): string | null {
     if (hi !== null && isNaN(hi)) return 'The maximum must be a number.';
     if (lo !== null && hi !== null && lo > hi) return 'The minimum is above the maximum.';
     const df = num(d.dflt);
-    if (df !== null && isNaN(df)) return 'The default must be a number.';
-    if (df !== null && d.whole && !Number.isInteger(df)) return 'The default must be a whole number.';
-    if (df !== null && lo !== null && df < lo) return 'The default is below the minimum.';
-    if (df !== null && hi !== null && df > hi) return 'The default is above the maximum.';
+    if (df !== null && isNaN(df)) return box + ' must be a number.';
+    if (df !== null && d.whole && !Number.isInteger(df)) return box + ' must be a whole number.';
+    if (df !== null && lo !== null && df < lo) return box + ' is below the minimum.';
+    if (df !== null && hi !== null && df > hi) return box + ' is above the maximum.';
     if (d.whole && lo !== null && !Number.isInteger(lo)) return 'With whole numbers only, the minimum is a whole number too.';
     if (d.whole && hi !== null && !Number.isInteger(hi)) return 'With whole numbers only, the maximum is a whole number too.';
   }
   if (d.kind === 'text') {
     const ml = num(d.maxLength);
     if (ml !== null && (isNaN(ml) || !Number.isInteger(ml) || ml < 1)) return 'The max length is a whole number of at least 1.';
-    if (ml !== null && d.dflt.length > ml) return 'The default is longer than the max length.';
+    if (ml !== null && d.dflt.length > ml) return box + ' is longer than the max length.';
   }
   if (d.required && ctx.records > 0 && !takesDefault(kind.id)) {
     return 'A required ' + kind.label + ' can only be added while the collection is empty: the ' + recordsWord(ctx.records) + ' already here would have nothing in it.';
   }
   if (d.required && ctx.records > 0 && !hasDefault(d)) {
-    return 'A required field needs a default here, so the ' + recordsWord(ctx.records) + ' already in the collection get a value.';
+    return 'Say what the ' + recordsWord(ctx.records) + ' already in the collection get: a required field needs a value in each of them.';
   }
   return null;
 }
@@ -240,16 +242,24 @@ export function recordsWord(n: number): string {
 }
 
 /**
- * AC5 — what the drawer says beside Default. With no records yet, a required
- * field has no default (every record must say it), so the control is disabled
- * with this reason. With records, the default is what those records get, so
- * it is asked for instead.
+ * AC5 — what the drawer says beside Default. A required field has no default
+ * (every record must say it), so the control is disabled with this reason.
+ * R6 (Richard, 2026-09-26): with records already there, the same box asks
+ * what THOSE records get — once. It is not a default: a new record that leaves
+ * the field out is still refused, which is the point of Required.
  */
-export function defaultRule(d: FieldDraft, records: number): { disabled: boolean; why: string } {
-  if (!takesDefault(d.kind)) return { disabled: true, why: '' };
-  if (!d.required) return { disabled: false, why: '' };
-  if (records > 0) return { disabled: false, why: 'The ' + recordsWord(records) + ' already here get this value; new records must say it.' };
-  return { disabled: true, why: 'A required field has no default: every record must say it.' };
+export function defaultRule(d: FieldDraft, records: number): { disabled: boolean; why: string; label: string; fill: boolean } {
+  if (!takesDefault(d.kind)) return { disabled: true, why: '', label: 'Default', fill: false };
+  if (!d.required) return { disabled: false, why: '', label: 'Default', fill: false };
+  if (records > 0) {
+    return {
+      disabled: false,
+      label: 'Fill the ' + recordsWord(records) + ' already here with',
+      why: 'Once, now. It is not a default: a new record without this field is refused.',
+      fill: true
+    };
+  }
+  return { disabled: true, why: 'A required field has no default: every record must say it.', label: 'Default', fill: false };
 }
 
 /** Whether the draft carries a default value. */
@@ -259,8 +269,12 @@ export function hasDefault(d: FieldDraft): boolean {
   return d.dflt.trim() !== '';
 }
 
-/** The column to send: `POST /admin/schema {action:'addColumn', column}`. */
-export function toColumn(d: FieldDraft): Column {
+/**
+ * The column to send: `POST /admin/schema {action:'addColumn', column}`. With
+ * `records` over a required field, the value in the box is the one-time fill
+ * (`fillExisting`), never `defaultValue` (R6).
+ */
+export function toColumn(d: FieldDraft, records = 0): Column {
   const kind = kindById(d.kind);
   const column: Column = { name: d.name.trim(), type: kind.storage };
   if (d.kind === 'link' || d.kind === 'links') column.targetClass = d.target;
@@ -273,6 +287,10 @@ export function toColumn(d: FieldDraft): Column {
     if (df !== null && !isNaN(df)) column.defaultValue = df;
   } else if (d.kind === 'text' || d.kind === 'choice') {
     if (d.dflt.trim()) column.defaultValue = d.dflt.trim();
+  }
+  if (d.required && records > 0 && column.defaultValue !== undefined) {
+    column.fillExisting = column.defaultValue;
+    delete column.defaultValue;
   }
   return column;
 }

@@ -139,6 +139,7 @@ export function FilesView(_props: ViewProps) {
           <Browser presets={presets} transforms={!!data.transformsAvailable} />
           <h2>Where files are stored</h2>
           <WhereCard key={'where' + generation} config={config} credentialsConfigured={!!data.s3CredentialsConfigured} reload={loadConfig} />
+          {data.driverKind === 's3' ? <MoveCard key={'move' + generation} /> : null}
           <h2>Settings</h2>
           <LimitsCard key={'limits' + generation} config={config} reload={loadConfig} />
           <h2>Thumbnail presets</h2>
@@ -531,6 +532,99 @@ function WhereCard({ config, credentialsConfigured, reload }: { config: FilesCon
           Save
         </WriteBtn>
       </Row>
+    </Card>
+  );
+}
+
+/** `GET /admin/files/move` (BMG-015 §7). */
+export interface MoveStatus {
+  onThisMachine: number;
+  bucketConnected: boolean;
+  progress: {
+    state: 'idle' | 'running' | 'done';
+    total: number;
+    moved: number;
+    bytes: number;
+    failed: Array<{ name: string; error: string }>;
+  };
+}
+
+/** What the move card says, from the route's answer alone. */
+export function moveWords(s: MoveStatus): string {
+  const p = s.progress;
+  const files = (n: number) => (n === 1 ? '1 file' : n + ' files');
+  if (p.state === 'running') return 'Moving ' + (p.moved + p.failed.length + 1 > p.total ? p.total : p.moved + p.failed.length + 1) + ' of ' + p.total + '… ' + bytes(p.bytes) + ' so far. The app keeps working while they move.';
+  const done = p.state === 'done' ? files(p.moved) + ' moved to the bucket' + (p.failed.length ? ', ' + files(p.failed.length) + ' left where ' + (p.failed.length === 1 ? 'it was' : 'they were') : '') + '. ' : '';
+  if (!s.onThisMachine) return done + 'Every file is in the bucket.';
+  return done + (s.onThisMachine === 1 ? '1 file is' : s.onThisMachine + ' files are') + ' still on this machine. They keep serving from here; new uploads go to the bucket.';
+}
+
+/** *Move files to the bucket* (BMG-015 §7): the files uploaded before the bucket, moved in the background with progress. */
+function MoveCard() {
+  const [status, setStatus] = useState<MoveStatus | null>(null);
+  const timer = useRef<number | null>(null);
+
+  function load() {
+    api<MoveStatus>('GET', '/admin/files/move')
+      .then((s) => {
+        setStatus(s);
+        if (s.progress.state === 'running') timer.current = window.setTimeout(load, 1000);
+        else if (timer.current !== null) timer.current = null;
+      })
+      .catch(fail);
+  }
+  useEffect(() => {
+    load();
+    return () => {
+      if (timer.current !== null) window.clearTimeout(timer.current);
+    };
+  }, []);
+
+  function start() {
+    api<MoveStatus>('POST', '/admin/files/move', {})
+      .then((s) => {
+        setStatus(s);
+        timer.current = window.setTimeout(load, 1000);
+      })
+      .catch(fail);
+  }
+
+  if (!status) return null;
+  const p = status.progress;
+  const running = p.state === 'running';
+  const n = status.onThisMachine;
+  return (
+    <Card id="move-card">
+      <div id="move-words">{moveWords(status)}</div>
+      {running ? <progress id="move-progress" style="width:100%" max={p.total || 1} value={p.moved + p.failed.length} /> : null}
+      {p.failed.length ? (
+        <ul id="move-failed" class="sub">
+          {p.failed.map((f) => (
+            <li key={f.name}>
+              {f.name ? <b>{f.name}</b> : null} {f.error}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {n > 0 && !running ? (
+        <Row style="margin-top:12px">
+          <WriteBtn
+            tiny
+            kind="primary"
+            id="move-start"
+            onClick={() =>
+              confirmSimple(
+                'Move ' + (n === 1 ? '1 file' : n + ' files') + ' to the bucket?',
+                'Each file is copied into the bucket, checked, and only then removed from this machine — a file that cannot be moved stays where it is and keeps working.',
+                start,
+                'Move'
+              )
+            }
+          >
+            Move them to the bucket
+          </WriteBtn>
+        </Row>
+      ) : null}
     </Card>
   );
 }

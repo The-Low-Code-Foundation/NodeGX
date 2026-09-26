@@ -16,6 +16,7 @@
 import { mount, unmount, change, click, settle, q, qa, text, typeInto } from './dom';
 
 import { session } from '../../src/admin/app/api';
+import { ModalHost } from '../../src/admin/app/ui/modal';
 import { FilesView, whereDraftFrom, wherePayload, whereProblem } from '../../src/admin/app/views/files';
 import { BackupsView, whereWords } from '../../src/admin/app/views/backups';
 
@@ -32,6 +33,7 @@ let credentialsConfigured = false;
 let testAnswer: { ok: boolean; words: string } = { ok: true, words: 'Connected: a test file was written to "puppy" at http://127.0.0.1:9400 and removed again.' };
 let bucket: { connected: boolean; name: string | null } = { connected: false, name: null };
 let destination: Record<string, unknown> = { type: 'local', path: '/data/backups' };
+let moveAnswers: unknown[] = [];
 
 function fakeFetch(input: string | URL | Request, init?: RequestInit): Promise<Response> {
   const url = String(input);
@@ -54,6 +56,7 @@ function fakeFetch(input: string | URL | Request, init?: RequestInit): Promise<R
   }
   if (p === '/admin/files') return answer(200, { count: 0, files: [] });
   if (p === '/admin/files/uses') return answer(200, { uses: {} });
+  if (p === '/admin/files/move') return answer(method === 'POST' ? 202 : 200, moveAnswers.length > 1 ? moveAnswers.shift() : moveAnswers[0]);
   if (p === '/admin/backups') {
     return answer(200, {
       config: { schedule: null, retention: { keepLast: 7, keepDaily: 0, keepWeekly: 0 }, destination, includeSecrets: false, status: {} },
@@ -84,6 +87,7 @@ beforeEach(() => {
   testAnswer = { ok: true, words: 'Connected: a test file was written to "puppy" at http://127.0.0.1:9400 and removed again.' };
   bucket = { connected: false, name: null };
   destination = { type: 'local', path: '/data/backups' };
+  moveAnswers = [];
 });
 
 const sent = (method: string, re: RegExp) => calls.filter((c) => c.method === method && re.test(c.url));
@@ -288,6 +292,51 @@ describe('the Backups page — where archives go', () => {
     await settle(20);
     expect(qa<HTMLInputElement>(root, 'input[name="backup-where"]')[1].checked).toBe(true);
     expect(text(root)).toContain('Archives live in the bucket "puppy" under backups/.');
+    unmount(root);
+  });
+});
+
+// ------------------------------------------------------------------ move --
+
+describe('the Storage page — Move files to the bucket (BMG-015 §7)', () => {
+  const progress = (over: Record<string, unknown>) => ({ state: 'idle', total: 0, moved: 0, bytes: 0, failed: [], ...over });
+
+  it('is not there while uploads go to this machine', async () => {
+    const root = mount(<FilesView params={[]} />);
+    await settle(20);
+    expect(root.querySelector('#move-card')).toBeNull();
+    expect(sent('GET', /\/admin\/files\/move$/)).toHaveLength(0);
+    unmount(root);
+  });
+
+  it('with the bucket in use: says how many are still here, asks, starts, shows progress, then what happened', async () => {
+    driver = { type: 's3', endpoint: 'http://127.0.0.1:9400', region: 'us-east-1', bucket: 'puppy', forcePathStyle: true };
+    credentialsConfigured = true;
+    moveAnswers = [
+      { onThisMachine: 2, bucketConnected: true, progress: progress({}) },
+      { onThisMachine: 2, bucketConnected: true, progress: progress({ state: 'running', total: 2 }) },
+      { onThisMachine: 0, bucketConnected: true, progress: progress({ state: 'done', total: 2, moved: 2, bytes: 100 }) }
+    ];
+    const root = mount(
+      <div>
+        <FilesView params={[]} />
+        <ModalHost />
+      </div>
+    );
+    await settle(20);
+    expect(text(q(root, '#move-words'))).toBe('2 files are still on this machine. They keep serving from here; new uploads go to the bucket.');
+    click(q(root, '#move-start'));
+    await settle();
+    expect(text(q(root, '.modal'))).toContain('Move 2 files to the bucket?');
+    click(qa(root, '.modal .foot button').find((b) => text(b).trim() === 'Move')!);
+    await settle(20);
+    expect(sent('POST', /\/admin\/files\/move$/)).toHaveLength(1);
+    expect(q<HTMLProgressElement>(root, '#move-progress').max).toBe(2);
+    expect(root.querySelector('#move-start')).toBeNull(); // no second press while it runs
+    await new Promise((r) => setTimeout(r, 1100));
+    await settle(20);
+    expect(text(q(root, '#move-words'))).toBe('2 files moved to the bucket. Every file is in the bucket.');
+    expect(root.querySelector('#move-progress')).toBeNull();
     unmount(root);
   });
 });

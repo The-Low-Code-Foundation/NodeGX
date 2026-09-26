@@ -42,6 +42,7 @@ interface OpsConfig {
   cors: { origins: string[]; credentials: boolean };
   audit: { enabled: boolean; retentionDays: number };
   executions: { retentionDays: number; idempotencyTtlHours: number; maxCount: number; maxValueBytes: number; maxRunBytes: number };
+  queries: { defaultLimit: number; maxLimit: number };
   metrics: { enabled: boolean; allowLoopback: boolean };
 }
 
@@ -92,6 +93,8 @@ export function ServerView(_props: ViewProps) {
           <AuditCard key={'audit' + generation} audit={config.audit} save={(v) => save('audit', v, 'Activity trail settings saved.')} />
           <h2>Run history</h2>
           <RunsCard key={'runs' + generation} executions={config.executions} save={(v) => save('executions', v, 'Run history settings saved.')} />
+          <h2>How long a list can be</h2>
+          <ListsCard key={'lists' + generation} queries={config.queries} save={(v) => save('queries', v, 'List lengths saved.')} />
           <h2>Metrics</h2>
           <MetricsCard key={'metrics' + generation} metrics={config.metrics} save={(v) => save('metrics', v, 'Metrics settings saved.')} />
         </div>
@@ -314,6 +317,41 @@ function RunsCard({ executions, save }: { executions: OpsConfig['executions']; s
         </WriteBtn>
         <WriteBtn tiny id="compact-now" disabled={compacting} onClick={() => confirmSimple('Compact the run history now?', 'The history file is rewritten without the space old runs left behind. Runs are kept; this only takes a moment.', compact, 'Compact')}>
           {compacting ? 'Compacting…' : 'Compact now'}
+        </WriteBtn>
+      </Row>
+    </Card>
+  );
+}
+
+/** The page cap's two numbers as a person reads them, or the sentence that refuses them. */
+export function listsProblem(defaultText: string, maxText: string): string | null {
+  const whole = (t: string) => /^\s*\d+\s*$/.test(t) && Number(t) >= 1;
+  if (!whole(defaultText)) return 'A list the app does not size needs a whole number of at least 1.';
+  if (!whole(maxText)) return 'The longest list needs a whole number of at least 1.';
+  if (Number(maxText) < Number(defaultText)) return 'The longest list cannot be shorter than the one the app gets without asking.';
+  return null;
+}
+
+function ListsCard({ queries, save }: { queries: OpsConfig['queries']; save: (v: OpsConfig['queries']) => void }) {
+  const { readonly } = useSession();
+  const [dflt, setDflt] = useState(String(queries.defaultLimit));
+  const [max, setMax] = useState(String(queries.maxLimit));
+  const problem = listsProblem(dflt, max);
+  return (
+    <Card>
+      <div class="grid2">
+        <Field label="When the app does not say how many (records)">
+          <input type="number" min="1" step="1" id="lists-default" value={dflt} disabled={readonly} onInput={(e) => setDflt((e.currentTarget as HTMLInputElement).value)} />
+        </Field>
+        <Field label="The most the app may ask for (records)">
+          <input type="number" min="1" step="1" id="lists-max" value={max} disabled={readonly} onInput={(e) => setMax((e.currentTarget as HTMLInputElement).value)} />
+        </Field>
+      </div>
+      <Sub>A query that forgot to say how many would otherwise read the whole collection. A list cut short tells the app so — nothing goes missing silently.</Sub>
+      {problem ? <div class="chips-problem" id="lists-problem">{problem}</div> : null}
+      <Row style="margin-top:12px">
+        <WriteBtn tiny kind="primary" id="save-lists" disabled={!!problem} onClick={() => save({ defaultLimit: Number(dflt), maxLimit: Number(max) })}>
+          Save
         </WriteBtn>
       </Row>
     </Card>

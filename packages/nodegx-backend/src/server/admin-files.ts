@@ -43,6 +43,7 @@ import { FILES_COLLECTION } from '../storage/MetadataStore';
 import type { FileConfigPatch, FileStorageConfig, OrphanSweepReport } from '../storage/config';
 import { isSystemCollection } from '../security/model';
 import { HttpError, readJSONBody, sendJSON } from './http-util';
+import { MOVE_ALREADY_RUNNING, type MoveProgress } from '../storage/moveToBucket';
 
 /** One row of `GET /admin/files`. The stored name is what a record's File value carries. */
 export interface FileListItem {
@@ -148,6 +149,13 @@ function credentialsFromWire(raw: unknown): S3Credentials | null {
   const accessKeyId = String(c.accessKeyId || '');
   const secretAccessKey = String(c.secretAccessKey || '');
   return accessKeyId || secretAccessKey ? { accessKeyId, secretAccessKey } : null;
+}
+
+/** `GET`/`POST /admin/files/move` (BMG-015 §7). */
+export interface FileMoveResponse {
+  onThisMachine: number;
+  bucketConnected: boolean;
+  progress: MoveProgress;
 }
 
 /** The 200 body of `POST /admin/files/sweep`. */
@@ -347,6 +355,35 @@ export class AdminFileRoutes {
         ? { ok: true, words: `Connected: a test file was written to "${s3.bucket}" at ${s3.endpoint} and removed again.` }
         : { ok: false, words: probe.error || 'The bucket could not be reached.', error: probe.error }
     );
+  }
+
+  /**
+   * BMG-015 §7: `GET /admin/files/move` — how many files are still on this
+   * machine, whether a bucket is there to take them, and the move's progress.
+   */
+  async moveStatus(ctx: RequestContext): Promise<void> {
+    sendJSON(ctx.res, 200, {
+      onThisMachine: await this.files.mover.onThisMachine(),
+      bucketConnected: !!this.files.bucketDriver(),
+      progress: this.files.mover.progress()
+    } satisfies FileMoveResponse);
+  }
+
+  /** `POST /admin/files/move` — start moving them. 202 with the progress; 409 while one runs; 400 with no bucket. */
+  async moveStart(ctx: RequestContext): Promise<void> {
+    let progress: MoveProgress;
+    try {
+      progress = this.files.mover.start();
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      throw new HttpError(message === MOVE_ALREADY_RUNNING ? 409 : 400, message);
+    }
+    ctx.audit({ onThisMachine: await this.files.mover.onThisMachine() });
+    sendJSON(ctx.res, 202, {
+      onThisMachine: await this.files.mover.onThisMachine(),
+      bucketConnected: true,
+      progress
+    } satisfies FileMoveResponse);
   }
 
   async runSweep(ctx: RequestContext): Promise<void> {

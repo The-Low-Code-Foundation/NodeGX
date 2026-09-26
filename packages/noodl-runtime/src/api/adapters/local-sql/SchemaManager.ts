@@ -24,6 +24,7 @@ import {
   type CheckDecl,
   type CheckReconcileReport,
   type CheckStatus,
+  declaredColumn,
   declaredProperties,
   describeWhere,
   indexName as sharedIndexName,
@@ -297,13 +298,18 @@ class SchemaManager {
     }
 
     try {
-      this.db.exec(`ALTER TABLE ${escapeTable(tableName)} ADD COLUMN ${colDef}`);
+      // R6: a one-time fill is, on this engine, the column's DDL default — the
+      // rows already there read it. It is not declared, and `create` names a
+      // required column without a declared default as NULL when a record leaves
+      // it out, so the fill never reaches a new record.
+      const ddl = column.fillExisting === undefined ? colDef : this._columnToSQL({ ...column, defaultValue: column.fillExisting });
+      this.db.exec(`ALTER TABLE ${escapeTable(tableName)} ADD COLUMN ${ddl}`);
 
       // Update schema tracking
       const schema = this.getTableSchema(tableName);
       if (schema) {
         schema.columns = schema.columns || [];
-        schema.columns.push(column);
+        schema.columns.push(declaredColumn(column));
         this.db
           .prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`)
           .run(JSON.stringify(schema), tableName);
@@ -1011,7 +1017,9 @@ class SchemaManager {
     }
     if (col.defaultValue !== undefined) {
       if (typeof col.defaultValue === 'string') {
-        def += ` DEFAULT '${col.defaultValue}'`;
+        // Quoted, not pasted: an apostrophe in a default ("O'Brien") ended the
+        // literal and the DDL refused.
+        def += ` DEFAULT ${quoteLiteral(col.defaultValue)}`;
       } else if (typeof col.defaultValue === 'boolean') {
         def += ` DEFAULT ${col.defaultValue ? 1 : 0}`;
       } else {

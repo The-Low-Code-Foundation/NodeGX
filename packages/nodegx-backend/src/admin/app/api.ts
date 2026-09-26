@@ -6,8 +6,11 @@
  *   - `session`: a `_Session` token for a PERSON with backend access, from
  *     `POST /_admin/login` (email + password) or the setup step, sent as
  *     `X-Parse-Session-Token` — the server resolves it to the admin principal.
- * Either is held in `sessionStorage` (this tab), never a cookie, so there is
- * still no CSRF surface. The read-only tier is whichever of the two the server
+ * Never a cookie, so there is still no CSRF surface. The credential is held
+ * in `sessionStorage` (this tab); a person's session in `localStorage` (this
+ * browser) — Richard, 2026-09-26: once an account exists the editor opens the
+ * manager WITHOUT the credential, and a person signs in once per browser, not
+ * once per open. Sign out ends that session on the server too. The read-only tier is whichever of the two the server
  * says is read-only; this file only remembers that so buttons can say so.
  */
 import { createStore, useStore } from './store';
@@ -65,6 +68,8 @@ export function useSession(): SessionState {
 }
 
 export const STORAGE_KEY = 'nodegx.admin.token';
+/** A person's session, kept for this browser (the credential never is). */
+export const PERSON_KEY = 'nodegx.admin.person';
 
 /** The header a credential travels in. The uploader (fields.tsx) uses it too. */
 export function credentialHeaders(credential: Credential | null): Record<string, string> {
@@ -94,7 +99,12 @@ export function parseStoredCredential(raw: string | null): Credential | null {
 
 function keep(credential: Credential): void {
   try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(credential));
+    if (credential.kind === 'session') {
+      localStorage.setItem(PERSON_KEY, JSON.stringify(credential));
+      sessionStorage.removeItem(STORAGE_KEY);
+    } else {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(credential));
+    }
   } catch {
     /* private mode */
   }
@@ -105,6 +115,27 @@ function forget(): void {
     sessionStorage.removeItem(STORAGE_KEY);
   } catch {
     /* ignore */
+  }
+  try {
+    localStorage.removeItem(PERSON_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+/** What this tab, then this browser, kept: the credential first (the editor's hand-off is newer), then a person's session. */
+function kept(): Credential | null {
+  try {
+    const tab = parseStoredCredential(sessionStorage.getItem(STORAGE_KEY));
+    if (tab) return tab;
+  } catch {
+    /* ignore */
+  }
+  try {
+    const person = parseStoredCredential(localStorage.getItem(PERSON_KEY));
+    return person && person.kind === 'session' ? person : null;
+  } catch {
+    return null;
   }
 }
 
@@ -170,6 +201,12 @@ export async function refreshWhoami(): Promise<Whoami> {
 
 export function signOut(message?: string | null): void {
   closeLive();
+  // A person's session outlives the tab now, so signing out ends it on the
+  // server as well; nobody waits on the answer (a 401 means it already ended).
+  const { credential } = session.get();
+  if (credential && credential.kind === 'session') {
+    fetch('/logout', { method: 'POST', headers: credentialHeaders(credential) }).catch(() => undefined);
+  }
   forget();
   session.set({ credential: null, whoami: null, readonly: false, features: {}, loginError: message || null, booting: false });
 }
@@ -187,7 +224,8 @@ export function signOut(message?: string | null): void {
  *     longer relaxes the admin gate). A backend that answers it has regressed.
  */
 export interface Handoff {
-  token: string;
+  /** The credential, or null: once an account exists the editor sends only the route (a person signs in). */
+  token: string | null;
   /** A manager hash path to land on once signed in (`/schema/Pet/new-field`), or null. */
   route: string | null;
 }
@@ -197,6 +235,7 @@ export interface Handoff {
  *
  *   #token=<credential>                            open on the home
  *   #token=<credential>&route=%2Fschema%2FPet%2Fnew-field   open on that page
+ *   #route=%2Fschema%2FPet%2Fnew-field                     sign in (or be signed in), then that page
  *
  * The route is a path the router already understands (`parseHash`), sent by the
  * editor's two doors — the property panel's *Add a field* and the canvas's
@@ -207,16 +246,21 @@ export interface Handoff {
  */
 export function readHandoff(hash: string): Handoff | null {
   const m = /^#token=([^&]+)(?:&(.*))?$/.exec(hash || '');
-  if (!m) return null;
-  let token = m[1];
-  try {
-    token = decodeURIComponent(token);
-  } catch {
-    /* an undecodable credential is presented as typed; the server refuses it */
+  const bare = !m && /^#route=/.test(hash || '') ? (hash || '').slice(1) : null;
+  if (!m && bare === null) return null;
+  let token: string | null = null;
+  if (m) {
+    token = m[1];
+    try {
+      token = decodeURIComponent(token);
+    } catch {
+      /* an undecodable credential is presented as typed; the server refuses it */
+    }
   }
   let route: string | null = null;
-  if (m[2]) {
-    const raw = new URLSearchParams(m[2]).get('route') || '';
+  const rest = m ? m[2] : bare;
+  if (rest) {
+    const raw = new URLSearchParams(rest).get('route') || '';
     if (/^\/(?!\/)[^#\s]*$/.test(raw)) route = raw;
   }
   return { token, route };
@@ -231,21 +275,17 @@ export async function bootSession(): Promise<void> {
     } catch {
       location.hash = '';
     }
-    stored = { kind: 'token', value: handoff.token };
-    keep(stored);
+    if (handoff.token) {
+      stored = { kind: 'token', value: handoff.token };
+      keep(stored);
+    }
     // The route is set AFTER the fragment is scrubbed, so the address bar never
     // shows the credential and the router (which ignores `token=`) sees a plain
     // page path. `useRoute` listens for the change; a page that mounted on the
     // home before this line re-routes.
     if (handoff.route) location.hash = '#' + handoff.route;
   }
-  if (!stored) {
-    try {
-      stored = parseStoredCredential(sessionStorage.getItem(STORAGE_KEY));
-    } catch {
-      stored = null;
-    }
-  }
+  if (!stored) stored = kept();
   if (stored) {
     try {
       await signIn(stored, true);
@@ -306,13 +346,9 @@ export async function submitPassword(email: string, password: string, remember: 
  */
 export async function createAdminAccount(email: string, password: string): Promise<void> {
   const res = await api<{ sessionToken: string }>('POST', '/_admin/setup', { email, password });
-  let remembered = false;
-  try {
-    remembered = !!sessionStorage.getItem(STORAGE_KEY);
-  } catch {
-    remembered = false;
-  }
-  await signIn({ kind: 'session', value: res.sessionToken }, remembered);
+  // Kept for this browser: the editor opens the manager without the credential
+  // from now on, and this is the sign-in it finds.
+  await signIn({ kind: 'session', value: res.sessionToken }, true);
 }
 
 // ------------------------------------------------------------------ live --

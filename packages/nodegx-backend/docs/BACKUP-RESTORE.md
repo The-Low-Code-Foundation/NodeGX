@@ -138,7 +138,14 @@ recoverable. `POST /admin/backups/restore` (the manager's **Restore…** button,
 BMG-011) takes a LISTED archive by file name, disconnects the running adapter,
 swaps the files, reconnects and re-ensures the system tables before it answers —
 requests that arrive during the swap fail rather than read torn state, and the
-page blocks its own controls for the duration. The CLI (service stopped) remains
+page blocks its own controls for the duration. It then re-reads the settings the
+archive put back — `security.json`, `triggers.json`, `email.json`, `backups.json`
+(`config-params.json` is read per request anyway) — so the running backend
+enforces the restored permissions and fires the restored schedules at once, and
+the next edit on those pages starts from them. A restored settings file that
+does not validate is refused: the settings from before the restore stay in
+force and are written back over it (so the next start is not refused either),
+and the answer (`settings: {reloaded, refused}`) and the page name it. The CLI (service stopped) remains
 the path for a backend you cannot reach in a browser.
 
 ## Laptop → VPS (the blessed move)

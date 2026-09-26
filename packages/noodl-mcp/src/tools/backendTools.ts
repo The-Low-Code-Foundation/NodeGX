@@ -1281,10 +1281,10 @@ export function registerBackendWriteTools(server: McpServer): void {
     {
       title: 'Set backend backup policy',
       description:
-        'Configure a running backend\'s backup policy (BAK-007): the schedule (cron; rides WF-005\'s scheduler), ' +
-        'retention (keepLast / keepDaily / keepWeekly), the local destination directory, and whether machine-local ' +
-        'secrets.json is included (OFF by default). Omitted fields keep their current value. An invalid cron is ' +
-        'rejected with the reason.',
+        'Configure a running backend\'s backup policy (BAK-007): the schedule (cron), retention (keepLast / ' +
+        'keepDaily / keepWeekly), where archives go (a local directory, or the files bucket), and whether ' +
+        'machine-local secrets.json is included (OFF by default). Omitted fields keep their current value. An ' +
+        'invalid cron is rejected with the reason.',
       inputSchema: {
         backendId: z.string().optional(),
         schedule: z
@@ -1303,7 +1303,16 @@ export function registerBackendWriteTools(server: McpServer): void {
             keepWeekly: z.number().optional()
           })
           .optional(),
-        destination: z.object({ path: z.string() }).optional().describe('Local directory for archives'),
+        destination: z
+          .union([
+            z.object({ type: z.literal('local').optional(), path: z.string() }),
+            z.object({ type: z.literal('s3'), prefix: z.string().optional() })
+          ])
+          .optional()
+          .describe(
+            "{path}: a local directory. {type:'s3'}: the bucket configure_backend_files connected (refused if none), " +
+              "under prefix (default 'backups/')"
+          ),
         includeSecrets: z.boolean().optional()
       }
     },

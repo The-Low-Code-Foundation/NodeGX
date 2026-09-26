@@ -80,10 +80,11 @@ export default async ({ ev, sleep, nav, shot, typeText }) => {
   await setVal('.drawer input[aria-label="Field name"]', 'email');
   await click('.drawer input[aria-label="Required"]');
   await sleep(200);
-  ok('AC5 over 2 records, Required asks for a default: the Default box stays enabled and says why', !(await attr('.drawer #kind-options input[aria-label="Default"]', 'disabled')) && /2 records already here get this value/.test(await txt('.drawer')), (await txt('.drawer')).slice(0, 300));
+  // R6 (Richard, 2026-09-26): over records the box is a ONE-TIME FILL, not a default (BMG-016).
+  ok('AC5/R6 over 2 records, Required turns the box into the one-time fill and says it is not a default', !(await attr('.drawer #kind-options input[aria-label="Fill the 2 records already here with"]', 'disabled')) && /It is not a default/.test(await txt('.drawer')), (await txt('.drawer')).slice(0, 300));
   await addField();
   const needsDefault = await txt('.drawer .notice.bad');
-  ok('AC5 Add without a default is refused in words', /needs a default here, so the 2 records already in the collection get a value/.test(needsDefault || ''), needsDefault);
+  ok('AC5/R6 Add without a fill is refused in words', /Say what the 2 records already in the collection get/.test(needsDefault || ''), needsDefault);
   await shot('bmg003-required-needs-default');
   await click('.drawer input[aria-label="Required"]');
   await sleep(150);

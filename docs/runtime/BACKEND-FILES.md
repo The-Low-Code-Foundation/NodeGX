@@ -133,9 +133,20 @@ switch keep serving from the machine; new uploads go to the bucket. Switching
 back to local while bucket-stored rows exist makes those files a loud sentence
 (*stored in a bucket this backend is no longer connected to*), not a 404 —
 reconnect the bucket and they serve again. The orphan sweep walks both stores
-and judges each row against its own. Moving blobs between stores is still a
-manual procedure (copy the blobs, update `driver`/`key` on each row), not a
-button.
+and judges each row against its own.
+
+**Moving the files already here into the bucket** is a button: once uploads go
+to the bucket, the Storage page says how many files are still on this machine
+and offers **Move them to the bucket** (`POST /admin/files/move`, progress on
+`GET /admin/files/move`; audited as `files.move`). It runs in the background, one
+file at a time: the bytes are copied into the bucket and checked, then the row is
+pointed at the bucket — only if it still names the local copy — and then the
+local copy is deleted. A file that cannot be moved (its bytes are gone, the
+bucket did not take all of them, the row changed meanwhile) stays where it was,
+still serving, and is named with a sentence; the worst a crash can leave is a
+copy no row points at, which the orphan sweep lists. Moving files *back* from a
+bucket to this machine is not a button: do it before disconnecting the bucket,
+by hand (copy the blobs, update `driver`/`key` on each row).
 
 **The same bucket carries the backups** (`BACKUP-RESTORE.md`, *Archives in a
 bucket*): there is one set of details, typed once here.

@@ -23,7 +23,7 @@ import { FilesView, presetsFrom, presetsProblem } from '../../src/admin/app/view
 import { BackupsView, keepWords } from '../../src/admin/app/views/backups';
 import { SecretsView } from '../../src/admin/app/views/secrets';
 import { SearchView, textFields } from '../../src/admin/app/views/search';
-import { ServerView, proxyProblem } from '../../src/admin/app/views/server';
+import { ServerView, listsProblem, proxyProblem } from '../../src/admin/app/views/server';
 import { AuditView } from '../../src/admin/app/views/audit';
 import { NAV } from '../../src/admin/app/nav';
 import { VIEWS } from '../../src/admin/app/views';
@@ -111,6 +111,7 @@ function fakeFetch(input: string | URL | Request, init?: RequestInit): Promise<R
         cors: { origins: ['*'], credentials: false },
         audit: { enabled: true, retentionDays: 90 },
         executions: { retentionDays: 30, idempotencyTtlHours: 24, maxCount: 10000, maxValueBytes: 51200, maxRunBytes: 8388608 },
+        queries: { defaultLimit: 1000, maxLimit: 10000 },
         metrics: { enabled: true, allowLoopback: true }
       }
     });
@@ -464,6 +465,28 @@ describe('BMG-011 Server page', () => {
     expect(sent('PUT', /\/admin\/ops$/)[0].body).toEqual({ cors: { origins: ['https://app.example.com'], credentials: false } });
     expect(qa(root, '#rate-table .list-row[data-class]').length).toBe(7);
     expect(text(q(root, '#metrics-url'))).toMatch(/\/metrics$/);
+    unmount(root);
+  });
+
+  it('§7: how long a list can be — two numbers in words, refused inline when upside down, saved as the queries section', async () => {
+    expect(listsProblem('1000', '10000')).toBeNull();
+    expect(listsProblem('0', '10')).toContain('at least 1');
+    expect(listsProblem('10', '2.5')).toContain('at least 1');
+    expect(listsProblem('50', '20')).toBe('The longest list cannot be shorter than the one the app gets without asking.');
+    const root = mount(<ServerView params={[]} />);
+    await settle(30);
+    expect(q<HTMLInputElement>(root, '#lists-default').value).toBe('1000');
+    typeInto(q<HTMLInputElement>(root, '#lists-max'), '500');
+    await settle();
+    expect(text(q(root, '#lists-problem'))).toContain('cannot be shorter');
+    expect(q<HTMLButtonElement>(root, '#save-lists').disabled).toBe(true);
+    typeInto(q<HTMLInputElement>(root, '#lists-max'), '5000');
+    typeInto(q<HTMLInputElement>(root, '#lists-default'), '200');
+    await settle();
+    expect(root.querySelector('#lists-problem')).toBeNull();
+    click(q(root, '#save-lists'));
+    await settle(20);
+    expect(sent('PUT', /\/admin\/ops$/).pop()!.body).toEqual({ queries: { defaultLimit: 200, maxLimit: 5000 } });
     unmount(root);
   });
 });

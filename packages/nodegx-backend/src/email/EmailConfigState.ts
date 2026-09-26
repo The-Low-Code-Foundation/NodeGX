@@ -188,6 +188,26 @@ export class EmailConfigState {
     atomicWriteJSON(path.join(this.dataDir, EMAIL_FILE), this.config);
   }
 
+  /**
+   * BMG-011 §7: re-read email.json (and the SMTP password) after a restore.
+   * A fresh instance does the reading, so the rules are the constructor's; the
+   * live config is replaced in place. An invalid file is refused: the live
+   * config is written back over it, and the refusal thrown.
+   */
+  reload(): void {
+    let fresh: EmailConfigState;
+    try {
+      fresh = new EmailConfigState(this.dataDir);
+    } catch (e) {
+      this.save();
+      throw e;
+    }
+    const live = this.config as unknown as Record<string, unknown>;
+    for (const key of Object.keys(live)) delete live[key];
+    Object.assign(live, fresh.config);
+    this.smtpPassword = fresh.smtpPassword;
+  }
+
   /** The plaintext SMTP password. Never serialized as part of `config` / never sent to the panel/MCP verbatim. */
   getSmtpPassword(): string {
     return this.smtpPassword;

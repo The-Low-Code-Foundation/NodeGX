@@ -28,12 +28,21 @@ On a copy of a real project's backend (never the live one; `cp -R` the data dir,
 6. **Triggers:** schedule a function *every weekday at 9*; read the next five runs; run it now;
    watch it in Runs. Make a webhook and paste its URL somewhere.
 7. **Schema:** add a *Choice* field with three values; try to save a record with a fourth;
-   drop a field; find *Delete collection*.
+   drop a field; find *Delete collection*. On a collection that has records, add a **required**
+   field: the box says *Fill the N records already here with* — fill them, then create a record
+   WITHOUT the field and see it refused (R6).
 8. **Email / Sign-in:** pick an SMTP preset; edit the welcome template and send it to yourself;
    start the Google wizard and stop at step 2.
-9. **Storage / Backups / Settings:** see your files; set the backup schedule; restore (R4);
-   set a secret; set an allowed origin.
-10. **From the editor:** *Add a field* on a Query Records node; *Manage data & settings*.
+9. **Storage / Backups / Settings:** see your files; set the backup schedule; restore (R4) — and
+   after a restore, check a permission you changed since that backup is back as it was;
+   set a secret; set an allowed origin; on Server, *How long a list can be*. With a bucket
+   (MinIO: `docker run -p 9000:9000 minio/minio server /data`, or any S3-compatible one): connect
+   it on Storage with *Test connection*, then **Move them to the bucket** and watch the progress;
+   send backups to the bucket on Backups.
+10. **From the editor:** *Add a field* on a Query Records node; *Manage data & settings*. Once you
+    have made your admin account, these open WITHOUT the machine key: sign in once with your
+    email and password, and every later open from the editor is already you (R7) — *Activity*
+    names you, not *admin credential*.
 
 ## 3. What he records
 
@@ -43,5 +52,4 @@ did it, and is built before the phase closes.
 
 ## 4. Rulings he owes before the drive
 
-README §4: **R1** (what the page is built from — gates the phase), **R3** (disable a user),
-**R4** (restore in the browser). Asked in plain words in the NEXT-SESSION-PROMPT.
+None. R1, R3, R4 (2026-09-24), R6 and R7 (2026-09-26) are ruled — README §8.

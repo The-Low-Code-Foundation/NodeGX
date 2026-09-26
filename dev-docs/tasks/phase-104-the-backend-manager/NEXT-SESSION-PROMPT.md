@@ -1,6 +1,9 @@
 # P104 — next session
 
-**Written 2026-09-25 (end of s15).** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
+**Written 2026-09-26 (end of s16).** s16 got **R6** and **R7** ruled and built **BMG-016** (the leftovers — see
+*What s16 settled*); every build task is ✅ and the phase closes on Richard's own drive (BMG-013).
+
+**Earlier:** s1 scoped; s2 committed BMG-000, got R1/R3/R4 ruled, built
 BMG-001; s3 built and drove BMG-007 (API keys); s4 BMG-004 (Users, R3 disable); s5 BMG-002
 (Collections); s6 BMG-005 (Roles); s7 BMG-006 (Permissions); s8 BMG-008 (Triggers); s9 BMG-003
 (Schema) and filed **R6** (README §8) for Richard; s10 BMG-009 (Workflows and Runs); s11 BMG-010
@@ -29,15 +32,20 @@ serve path had read the current driver; an S3 fake for specs and drives).
 | BMG-011 Files, Backups, Ops | ✅ s13 | ✅ headless, AC1–9, 39/39 checks (§6) | ✅ `43efcd08` |
 | BMG-012 The editor lets go | ✅ s14 | ✅ headless, AC1–6, 15/15 page checks + 9 jest (§6) | ✅ `623a509f` |
 | BMG-015 Storage off the disk (S3) | ✅ s15 | ✅ headless, AC1–6, 19/19 checks + 18 HTTP + 10 page (§6) | ✅ `eed691b3b` |
+| BMG-016 The leftovers (R6, R7, restore reload, page cap, move, MCP) | ✅ s16 | ✅ headless, 23/23 checks + jest (§6) | ✅ s16 |
 | BMG-013 Richard drives | his | — | — |
 
 Built-but-undriven: 0. Built-but-uncommitted: 0. Check `git status -- packages/nodegx-backend/src/admin`
 before believing that: a peer session may have touched it.
 
 **Rulings:** R1 (a) Preact app · R2 the editor lets go · R3 disable a user: yes · R4 restore in the
-browser: yes, behind the typed name · R5 filed · **R6 OPEN (s9): on a collection that already has records, a
-required field ASKS for a default (the engines require one) instead of AC5's "Required disables Default" — ask
-Richard in plain words whether that is the rule, or whether Required should be refused there.** All in README §8.
+browser: yes, behind the typed name · R5 filed · R6 (s16) over records a required field gets a ONE-TIME FILL, never
+a default · R7 (s16) the editor opens without the credential once an account exists; a person signs in once per
+browser. All in README §8, each with its question.
+
+**Gate readings (2026-09-26, s16):** in BMG-016 §6 — backend full jest 207 PASS / 1 skipped, 2,489 tests, exit 0,
+363 s (the first run was exit 1 on `security-enforcement`'s walk meeting the admin burst — fixed in the spec);
+runtime adapters 328/328; editor `test:main` 565 suites / 8,792 tests exit 0; tally `admin: 101`; drive 23/23.
 
 **Gate readings (2026-09-25, s15):** backend `npm run typecheck` exit 0 (both configs). Full backend
 `npx jest --maxWorkers=4`: **204 suites PASS, 1 skipped (`fed-003-live-cache`), 0 FAIL, 2467 tests (16 skipped: the real-MinIO half of `storage-driver` and the rest of the known set), exit 0, 347 s** (2026-09-25, s15, after every change in this commit). Route tally `admin: 99` (`POST admin/files/config/test`), `auth: 17`.
@@ -79,6 +87,21 @@ and `nodegx-backend-contract` `tsc --noEmit` exit 0. Full backend `npx jest --ma
 route). Drive `drives/bmg003/run.sh ac seed` 41/41.
 🔴 A new `/admin/...` route still owes the tally line AND an `audit-actions.ts` entry (an action, or a
 `NOT_AUDITED` reason for a dry run); a POST a read-only admin should be able to make owes `readonly.ts` too.
+
+## What s16 settled (BMG-016)
+
+- **R6 is a one-time fill.** `fillExisting` on the column (never declared). SQLite keeps it as the DDL default (no
+  `DROP DEFAULT` there), so `LocalSQLAdapter.create` names every required-without-default column a record omitted as
+  NULL; PostgreSQL drops the default in the same queued step. 🔴 SQLite pasted string defaults unquoted.
+- 🔴 **A restore never re-read the settings it restored** — security/triggers/email/backups.json were read once at
+  start: the restored backend enforced the OLD permissions and the next edit wrote them back. `resume()` →
+  `reloadRestoredSettings()`; a refused file is rewritten from the live settings (else the next start refuses).
+  `ops.json` is NOT in an archive (BMG-011 §7 was wrong about that).
+- **R7:** `openDashboard` asks `whoami.adminAccount`; with an account the link is `#route=` only. The page keeps a
+  person's session in `localStorage`, the credential per tab; *Sign out* `POST /logout`s.
+- The first full run's 429: `security-enforcement` §7 walks every route unauthenticated; admin routes passed the
+  `admin` burst of 100. Rate limits are off in that suite now. **A new admin route no longer trips it.**
+- ugrep treated `HttpServer.ts` as binary and found nothing — `grep -a`.
 
 ## What s15 settled (BMG-015)
 
@@ -185,16 +208,14 @@ route). Drive `drives/bmg003/run.sh ac seed` 41/41.
 
 ## Do this, in order
 
-1. **BMG-013 Richard drives it** — his. Every build task is ✅. Write him the prompt: the fourteen pages
-   (now with *Where files are stored* and *Where archives go*), the three doors from the editor (card
-   button, *Add a field* on a Query Records node's table, *Add / Edit this trigger…* on the canvas), and
-   the **R6** question (README §8) in plain words. To drive the bucket half for real he needs a MinIO
-   (`docker run -p 9000:9000 minio/minio server /data`) or any S3-compatible bucket — the repo's fake is
-   for specs. What he records becomes README §2 rows, built before the phase closes.
-2. Candidates, in the order they cost least: BMG-015 §7 (MCP `configure_backend_backups` wants
-   `destination.type`; a *Move files to the bucket* button); BMG-012 §7 (open without the credential
-   once an account exists — BMG-014's note); BMG-011 §7 (`queries` on the Server page; a foreign-archive
-   restore leaves `SecurityState`/`OpsState` in memory until restart).
+1. **BMG-013 Richard drives it** — his, and the only thing left. His script is BMG-013 §2 (updated s16: the
+   one-time fill, *Move them to the bucket*, *How long a list can be*, the editor opening as him). Start the editor
+   from the CURRENT build (`packages/nodegx-backend/dist` was rebuilt s16 — the editor runs `dist/`). To drive the
+   bucket half for real he needs a MinIO (`docker run -p 9000:9000 minio/minio server /data`) or any S3-compatible
+   bucket — the repo's fake is for specs. What he records (WORTHY / NOT WORTHY per page, his words) becomes README §2
+   rows, each built before the phase closes; then close the README status and the memory.
+2. If he wants more before driving: README §6 candidates (his pick), BMG-015 §7's `forcePathStyle: false` /
+   multipart / retries, moving files BACK from a bucket.
 
 ## What s11 settled
 

@@ -413,6 +413,36 @@ describe('BMG-011 files, backups and settings', () => {
       expect(trail.find((e) => e.outcome === 'success')?.detail).toMatchObject({ archive: archiveFile, reconnected: true });
     });
 
+    it('§7: the settings the archive carries are the ones the RUNNING backend enforces — and the next edit does not write the old ones back', async () => {
+      expect((await req('POST', '/classes/Open', { name: 'visible' })).status).toBe(201);
+      expect((await req('PUT', '/admin/permissions/collections/Open', { permissions: { find: 'public', get: 'public' } })).status).toBe(200);
+      const run = await req<{ archive: string }>('POST', '/admin/backups', {});
+      expect(run.status).toBe(200);
+      const archive = path.basename(run.json.archive);
+
+      // After the backup, Open is locked down: an anonymous read is refused.
+      expect((await req('PUT', '/admin/permissions/collections/Open', { permissions: { find: 'nobody', get: 'nobody' } })).status).toBe(200);
+      expect((await fetch(base + '/classes/Open')).status).toBeGreaterThanOrEqual(400);
+
+      const restored = await req<{ settings: { reloaded: string[]; refused: unknown[] } }>('POST', '/admin/backups/restore', { archive, safetySnapshot: false });
+      expect(restored.status).toBe(200);
+      expect(restored.json.settings.reloaded).toEqual(expect.arrayContaining(['security.json', 'backups.json']));
+      expect(restored.json.settings.refused).toEqual([]);
+
+      // The restored rule is live: anonymous reads work again, with no restart.
+      const anon = await fetch(base + '/classes/Open');
+      expect(anon.status).toBe(200);
+      expect(((await anon.json()) as { results: Array<{ name: string }> }).results.map((r) => r.name)).toEqual(['visible']);
+      const perms = await req<{ config: { collections: Record<string, { permissions: { find: unknown } }> } }>('GET', '/admin/permissions');
+      expect(perms.json.config.collections.Open.permissions.find).toBe('public');
+
+      // The next edit on the page merges into the RESTORED rules, not the pre-restore ones.
+      expect((await req('PUT', '/admin/permissions/collections/Other', { permissions: { find: 'public' } })).status).toBe(200);
+      const onDisk = JSON.parse(fs.readFileSync(path.join(dataDir, 'security.json'), 'utf-8'));
+      expect(onDisk.collections.Open.permissions.find).toBe('public');
+      expect(onDisk.collections.Other.permissions.find).toBe('public');
+    });
+
     it('the schema, the file metadata and search config survive the reconnect', async () => {
       const schema = await req<{ tables: Array<{ name: string }> }>('GET', '/admin/schema');
       expect(schema.json.tables.map((t) => t.name)).toContain('Pet');
@@ -524,6 +554,26 @@ describe('BMG-011 files, backups and settings', () => {
       expect((await req('PUT', '/admin/ops', { audit: { retentionDays: 1 } }, R)).status).toBe(403);
       const audit = await req<{ retentionDays: number }>('GET', '/admin/audit?limit=1');
       expect(audit.json.retentionDays).toBe(45);
+    });
+
+    it('§7: how long a list can be is set on the page, and a read that forgot to size itself gets that many, saying so', async () => {
+      for (const n of [1, 2, 3, 4]) expect((await req('POST', '/classes/Lists', { n })).status).toBe(201);
+      const put = await req<{ config: { queries: { defaultLimit: number; maxLimit: number } } }>('PUT', '/admin/ops', { queries: { defaultLimit: 2, maxLimit: 3 } });
+      expect(put.status).toBe(200);
+      expect(put.json.config.queries).toEqual({ defaultLimit: 2, maxLimit: 3 });
+      try {
+        const bare = await fetch(base + '/classes/Lists', { headers: T });
+        expect(((await bare.json()) as { results: unknown[] }).results).toHaveLength(2);
+        expect(bare.headers.get('x-nodegx-result-capped')).toBe('true');
+        const asked = await req<{ results: unknown[] }>('GET', '/classes/Lists?limit=10');
+        expect(asked.json.results).toHaveLength(3);
+        const upside = await req<{ error: string }>('PUT', '/admin/ops', { queries: { defaultLimit: 5, maxLimit: 3 } });
+        expect(upside.status).toBe(400);
+        expect(upside.json.error).toContain('queries.maxLimit must be >= queries.defaultLimit');
+        expect((await req('PUT', '/admin/ops', { queries: { defaultLimit: 1, maxLimit: 1 } }, R)).status).toBe(403);
+      } finally {
+        await req('PUT', '/admin/ops', { queries: { defaultLimit: 1000, maxLimit: 10_000 } });
+      }
     });
   });
 

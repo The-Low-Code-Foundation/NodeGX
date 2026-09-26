@@ -133,18 +133,41 @@ describe('FieldOptions (the drawer’s second step)', () => {
     l.done();
   });
 
-  it('AC5: Required disables Default with the reason visible; over records it asks for one instead', () => {
+  it('AC5: Required disables Default with the reason visible; R6: over records the box is a one-time fill, never a default', () => {
     const t = mountOptions({ ...blankDraft('text'), required: true });
     const dflt = q<HTMLInputElement>(t.root, '#kind-options input[aria-label="Default"]');
     expect(dflt.disabled).toBe(true);
     expect(text(t.root)).toContain('A required field has no default: every record must say it.');
     t.done();
     const over = mountOptions({ ...blankDraft('text'), required: true }, 3);
-    expect(q<HTMLInputElement>(over.root, '#kind-options input[aria-label="Default"]').disabled).toBe(false);
-    expect(text(over.root)).toContain('The 3 records already here get this value');
+    expect(qa(over.root, '#kind-options input[aria-label="Default"]')).toHaveLength(0);
+    expect(q<HTMLInputElement>(over.root, '#kind-options input[aria-label="Fill the 3 records already here with"]').disabled).toBe(false);
+    expect(text(over.root)).toContain('Once, now. It is not a default: a new record without this field is refused.');
+    expect(text(over.root)).toContain('3 records already here: say what they get, once, in the box above.');
     over.done();
-    expect(defaultRule({ ...blankDraft('number'), required: true }, 0)).toEqual({ disabled: true, why: 'A required field has no default: every record must say it.' });
-    expect(defaultRule({ ...blankDraft('number'), required: false }, 0)).toEqual({ disabled: false, why: '' });
+    expect(defaultRule({ ...blankDraft('number'), required: true }, 0)).toEqual({ disabled: true, why: 'A required field has no default: every record must say it.', label: 'Default', fill: false });
+    expect(defaultRule({ ...blankDraft('number'), required: false }, 0)).toEqual({ disabled: false, why: '', label: 'Default', fill: false });
+    expect(defaultRule({ ...blankDraft('number'), required: false }, 3)).toEqual({ disabled: false, why: '', label: 'Default', fill: false });
+    // R6 — what is SENT: over records the value is `fillExisting`, and no default is declared.
+    const filled = toColumn({ ...blankDraft('text'), name: 'phone', required: true, dflt: 'unknown' }, 3);
+    expect(filled).toMatchObject({ name: 'phone', required: true, fillExisting: 'unknown' });
+    expect(filled.defaultValue).toBeUndefined();
+    const yes = toColumn({ ...blankDraft('yesno'), name: 'ok', required: true, boolDefaultSet: true, boolDefault: false }, 3);
+    expect(yes.fillExisting).toBe(false);
+    expect(yes.defaultValue).toBeUndefined();
+    // Optional over records keeps a real default; required over none has none to send.
+    expect(toColumn({ ...blankDraft('text'), name: 'nick', dflt: 'x' }, 3)).toMatchObject({ defaultValue: 'x' });
+    expect(toColumn({ ...blankDraft('text'), name: 'nick', dflt: 'x' }, 3).fillExisting).toBeUndefined();
+  });
+
+  it('R6: the Yes / No and Choice fills say what they are', () => {
+    const y = mountOptions({ ...blankDraft('yesno'), required: true, boolDefaultSet: true, boolDefault: true }, 2);
+    expect(text(q(y.root, '#kind-options'))).toContain('Fill the 2 records already here with…');
+    expect(text(q(y.root, '#kind-options'))).toContain('Fill with: Yes');
+    y.done();
+    const c = mountOptions({ ...blankDraft('choice'), required: true, values: ['open', 'closed'] }, 2);
+    expect(qa(c.root, '#kind-options select[aria-label="Fill the 2 records already here with"] option').map((o) => text(o))).toEqual(['choose a value…', 'open', 'closed']);
+    c.done();
   });
 
   it('AC8: a Yes / No default is two switches, never a typed word', () => {
@@ -186,7 +209,8 @@ describe('the draft’s refusals, in words', () => {
     expect(draftProblem({ ...blankDraft('text'), name: 't', maxLength: '0' }, ctx)).toBe('The max length is a whole number of at least 1.');
     expect(draftProblem({ ...blankDraft('text'), name: 't', maxLength: '2', dflt: 'abc' }, ctx)).toBe('The default is longer than the max length.');
     expect(draftProblem({ ...blankDraft('text'), name: 't', required: true }, ctx)).toBeNull();
-    expect(draftProblem({ ...blankDraft('text'), name: 't', required: true }, { ...ctx, records: 2 })).toMatch(/needs a default here, so the 2 records already in the collection get a value/);
+    expect(draftProblem({ ...blankDraft('text'), name: 't', required: true }, { ...ctx, records: 2 })).toBe('Say what the 2 records already in the collection get: a required field needs a value in each of them.');
+    expect(draftProblem({ ...blankDraft('number'), name: 'n', required: true, min: '0', dflt: '-1' }, { ...ctx, records: 2 })).toBe('The fill value is below the minimum.');
     expect(draftProblem({ ...blankDraft('date'), name: 't', required: true }, { ...ctx, records: 2 })).toMatch(/only be added while the collection is empty/);
     expect(draftProblem({ ...blankDraft('text'), name: 't', required: true, dflt: 'x' }, { ...ctx, records: 2 })).toBeNull();
   });

@@ -39,7 +39,8 @@ function Login({ error }: { error: string | null }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [token, setToken] = useState('');
-  const [remember, setRemember] = useState(false);
+  // A person is remembered in this browser unless they say otherwise; the credential only ever for this tab.
+  const [remember, setRemember] = useState(true);
   const [busy, setBusy] = useState(false);
   return (
     <div id="login">
@@ -89,7 +90,7 @@ function Login({ error }: { error: string | null }) {
         </div>
         <label class="check" style="margin-top: 10px">
           <input id="login-remember" type="checkbox" checked={remember} onChange={(e) => setRemember((e.currentTarget as HTMLInputElement).checked)} /> Keep me
-          signed in on this tab
+          signed in on this browser
         </label>
         {error ? (
           <div id="login-error" class="notice bad" style="margin-top: 14px">

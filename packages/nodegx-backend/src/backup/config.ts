@@ -171,6 +171,16 @@ export class BackupConfigStore {
     return JSON.parse(JSON.stringify(this.config));
   }
 
+  /** BMG-011 §7: re-read backups.json after a restore. An invalid one is refused: the live policy is written back, the refusal thrown. */
+  reload(): void {
+    try {
+      this.config = this.load();
+    } catch (e) {
+      this.persist();
+      throw e;
+    }
+  }
+
   /** The local archive directory: the destination's when it is local, else the default `<dataDir>/backups`. */
   getDestinationDir(): string {
     return this.config.destination.type === 'local' ? this.config.destination.path : path.join(this.dataDir, 'backups');

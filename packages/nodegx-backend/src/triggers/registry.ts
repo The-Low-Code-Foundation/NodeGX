@@ -503,6 +503,20 @@ export class TriggerRegistry {
     this.load();
   }
 
+  /**
+   * BMG-011 §7: re-read triggers.json after a restore. `load` assigns only
+   * once the whole file validates; an invalid one is refused, the live
+   * triggers written back over it, and the refusal thrown.
+   */
+  reload(): void {
+    try {
+      this.load();
+    } catch (e) {
+      this.persist();
+      throw e;
+    }
+  }
+
   /** Load + validate triggers.json. An invalid file refuses to start (loud). */
   private load(): void {
     if (!fs.existsSync(this.filePath)) {
