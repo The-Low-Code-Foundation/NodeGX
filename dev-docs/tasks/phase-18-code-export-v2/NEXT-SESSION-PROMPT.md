@@ -1,5 +1,7 @@
 # Next session — session 100 (2026-09-26) BUILT §75: the four parsers (`Parse CSV`, `To CSV`, `Parse XML`, `Parse Feed`) — picker **118 → 122 of 130 (93.8%)**, the first move on the headline number since GAM-013. Richard's ruling this session: *"Can we not finish the code export nodes? If we had 100% coverage that would be a big deal"* — **every remaining picker row is a target now**; §50.3's exclusion list is reversed (EXP-011 §3 and §50.3 amended, §75.0).
 
+**Session 100's commit: `fcf68a1c7`** (feature); this handoff's own commit follows it.
+
 ## 🔴 Read this first — Richard, 2026-09-02: *"Stop fucking up the CPU."*
 
 One heavy job at a time on this 16 GB box. Session 100 ran single specs, ONE whole-package jest (13 files red, all pins/goldens this
