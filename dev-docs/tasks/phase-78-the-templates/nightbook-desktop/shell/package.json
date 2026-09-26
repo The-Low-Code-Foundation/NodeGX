@@ -8,7 +8,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "test": "node --test relay.test.js",
+    "test": "node --test relay.test.js policy.test.js",
     "dist:win": "electron-builder --win nsis --x64 --publish never"
   },
   "devDependencies": {
@@ -19,7 +19,7 @@
     "appId": "io.digitalbricks.nightbook",
     "productName": "Nightbook",
     "npmRebuild": false,
-    "files": ["main.js", "relay.js", "nightbook.json", "package.json"],
+    "files": ["main.js", "relay.js", "policy.js", "nightbook.json", "package.json"],
     "extraResources": [
       { "from": "build-output/app", "to": "app" },
       { "from": "build-output/backend/cli.js", "to": "backend/cli.js" },

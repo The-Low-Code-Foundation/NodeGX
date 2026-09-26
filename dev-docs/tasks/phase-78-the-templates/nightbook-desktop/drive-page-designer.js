@@ -14,6 +14,8 @@
  *                       "Saved on this tablet"; ONE JournalPage record, holding every item
  *   launch 2 (home A)   the page comes back: every item where it was, the words, the font, the photo
  *   launch 3 (home B)   CONTROL: a fresh home draws an empty page — so launch 2 read home A's disk
+ *   launch 4 (home U)   THE UPGRADE: a home 0.0.1 left behind (the todo list's rules in security.json)
+ *                       — a sticker is saved, and the old rules are kept beside the new ones
  *
  * Every launch gets its own NIGHTBOOK_HOME; nothing touches the real app data.
  */
@@ -283,7 +285,25 @@ async function main() {
   R.launch3Quit = await quit(app);
   await wait(1500);
 
-  const left = backendsFor(homeA).concat(backendsFor(homeB));
+  // ── launch 4: the upgrade, as the tablet has it ──
+  console.log('· launch 4 (home U: what 0.0.1 left behind)');
+  const homeU = path.join(scratch, 'U');
+  const bookU = path.join(homeU, 'userData', 'book');
+  fs.mkdirSync(bookU, { recursive: true });
+  const todoPolicy = path.join(__dirname, '..', '..', '..', '..', 'templates', 'todo-list', 'nodegx.security.json');
+  fs.copyFileSync(todoPolicy, path.join(bookU, 'security.json'));
+  app = await launch(homeU);
+  page = app.page;
+  await until('the page drawn', () => page.evaluate(`!!document.querySelector('.nb-stage')`), (v) => v === true, 60_000);
+  await press(page, '♥');
+  const upgraded = await until('saved or not', () => statusText(page), (t) => t.includes('Saved on this tablet') || t.includes('Not saved'), 15_000);
+  check('UPGRADE: over 0.0.1\'s rules, tonight\'s page is still saved', upgraded.includes('Saved on this tablet'), upgraded.match(/Saved on this tablet|Not saved[^\n]*/));
+  const keptOld = fs.readdirSync(bookU).filter((f) => /^security\.before-.*\.json$/.test(f));
+  check('…and the old rules are kept beside the new ones, not deleted', keptOld.length === 1 && JSON.parse(fs.readFileSync(path.join(bookU, keptOld[0]), 'utf8')).collections.Task, keptOld);
+  R.launch4Quit = await quit(app);
+  await wait(1500);
+
+  const left = backendsFor(homeA).concat(backendsFor(homeB), backendsFor(homeU));
   check('no backend outlives the app', left.length === 0, left);
 
   R.verdict = checks.every((c) => c.ok) ? 'PASS' : 'FAIL';

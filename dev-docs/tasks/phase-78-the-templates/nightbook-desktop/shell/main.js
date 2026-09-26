@@ -21,6 +21,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { createRelay } = require('./relay');
+const { adoptShippedPolicy } = require('./policy');
 const config = require('./nightbook.json');
 
 const T0 = Date.now();
@@ -97,6 +98,10 @@ function startBackend() {
   return new Promise((resolve, reject) => {
     fs.mkdirSync(DATA_DIR, { recursive: true });
     seedBackups();
+    // A new version's rules replace the old version's (policy.js says why); the old file is kept.
+    const adopted = adoptShippedPolicy({ shipped: path.join(POLICY_DIR, 'nodegx.security.json'), dataDir: DATA_DIR, version: app.getVersion() });
+    timings.policy = adopted.action;
+    if (adopted.action === 'replaced') log(`policy: this version ships new rules; the old ones are kept as ${adopted.keptAs}`);
 
     const args = [
       BACKEND_ENTRY,
