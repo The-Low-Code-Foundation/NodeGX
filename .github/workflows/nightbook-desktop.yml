@@ -1,4 +1,4 @@
-name: Nightbook desktop (TPL-011 DESK-1)
+name: Nightbook desktop (TPL-011)
 
 # The evening journal (TPL-011) as a Windows app: an Electron shell that runs its own
 # nodegx-backend, with no network. Builds the NSIS installer on Windows, installs it
@@ -45,8 +45,19 @@ jobs:
           npm --prefix packages/nodegx-backend run build
           npm run build --workspace @noodl/preview
 
+      # DESK-1 proved the shell with the todo list; the app inside is now the page-designer spike
+      # (TPL-011 §3.6): the kit and its fonts, and one page authored through the MCP door.
+      - name: Build the page kit and author the spike
+        run: |
+          node library/modules/nightbook-kit/build.mjs
+          npx ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-nightbook-spike.ts
+
+      - name: Kit gate
+        working-directory: packages/noodl-mcp
+        run: npx jest tests/tpl011Kit.test.ts
+
       - name: Assemble the app (export + backend + policy)
-        run: node dev-docs/tasks/phase-78-the-templates/nightbook-desktop/build-app.js
+        run: node dev-docs/tasks/phase-78-the-templates/nightbook-desktop/build-app.js --project dev-docs/tasks/phase-78-the-templates/nightbook-desktop/spike-app
 
       - name: Relay specs
         working-directory: dev-docs/tasks/phase-78-the-templates/nightbook-desktop/shell
@@ -70,8 +81,8 @@ jobs:
           if (-not (Test-Path $exe)) { Get-ChildItem (Join-Path $env:LOCALAPPDATA 'Programs') -Recurse -Filter Nightbook.exe | Select-Object -First 3; throw "Nightbook.exe not at $exe" }
           "NIGHTBOOK_EXE=$exe" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
-      - name: Drive the installed app (write, restart, read back, control)
-        run: node dev-docs/tasks/phase-78-the-templates/nightbook-desktop/drive-spike.js --exe "$NIGHTBOOK_EXE"
+      - name: Drive the installed app (decorate, restart, the page comes back, control)
+        run: node dev-docs/tasks/phase-78-the-templates/nightbook-desktop/drive-page-designer.js --exe "$NIGHTBOOK_EXE"
         env:
           NIGHTBOOK_DRIVE_REPORT: ${{ github.workspace }}/drive-report.json
 

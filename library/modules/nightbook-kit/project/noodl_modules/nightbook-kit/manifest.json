@@ -1,0 +1,6 @@
+{
+  "name": "Nightbook kit",
+  "main": "index.js",
+  "dependencies": [],
+  "nodeKitTypes": "1.0.0"
+}

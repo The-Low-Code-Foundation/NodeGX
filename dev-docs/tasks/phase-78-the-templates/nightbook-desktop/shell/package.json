@@ -1,7 +1,7 @@
 {
   "name": "nightbook",
   "productName": "Nightbook",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Nightbook — the evening journal, on one tablet, with no internet (TPL-011).",
   "author": "Digital Bricks",
   "private": true,
