@@ -34,7 +34,7 @@ serve path had read the current driver; an S3 fake for specs and drives). s16 bu
 | BMG-012 The editor lets go | ✅ s14 | ✅ headless, AC1–6, 15/15 page checks + 9 jest (§6) | ✅ `623a509f` |
 | BMG-015 Storage off the disk (S3) | ✅ s15 | ✅ headless, AC1–6, 19/19 checks + 18 HTTP + 10 page (§6) | ✅ `eed691b3b` |
 | BMG-016 The leftovers (R6, R7, restore reload, page cap, move, MCP) | ✅ s16 | ✅ headless, 23/23 checks + jest (§6) | ✅ `b3a53e37` |
-| BMG-017 The defects before the drive | ✅ s17 | ✅ headless, 14/14 + 22 new jest (§7) | ✅ s17 (this commit) |
+| BMG-017 The defects before the drive | ✅ s17 | ✅ headless, 14/14 + 22 new jest (§7) | ✅ `fa5dc90d` |
 | BMG-013 Richard drives | his | — | — |
 
 Built-but-undriven: 0. Built-but-uncommitted: 0. Check `git status -- packages/nodegx-backend/src/admin`
