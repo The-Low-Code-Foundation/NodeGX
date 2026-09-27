@@ -1,0 +1,175 @@
+{
+  "_about": "Olive's prompt table (P105 CG-004). The twelve rungs of TPL-012 §2.6 plus the hint voicing. The shell composes every prompt from THIS table; the page sends a rung id, slot values, a language, a shape and a temperature — never prompt text. A slot is a word from one of the lists below (or a short regex-checked text), so nothing a child types reaches the model as a free prompt. ladder: 'pass' = Olive performs (build ON it), 'fail' = Olive fails on purpose (the child fixes it with a program).",
+  "shapes": {
+    "one_word": { "maxTokens": 24, "cap": "one word" },
+    "list_of_3": { "maxTokens": 48, "cap": "3 non-empty items" },
+    "yes_no": { "maxTokens": 16, "cap": "the enum" },
+    "one_of": { "maxTokens": 24, "cap": "the enum from the request" },
+    "integer": { "maxTokens": 16, "cap": "an integer" },
+    "blocks": { "maxTokens": 64, "cap": "at most 8 blocks from avancer gauche droite arroser" },
+    "sentence": { "maxTokens": 48, "cap": "25 words, trimmed" },
+    "two_lines": { "maxTokens": 64, "cap": "2 lines, trimmed" }
+  },
+  "blocks": ["avancer", "gauche", "droite", "arroser"],
+  "temperatures": [0, 0.2, 0.5, 0.8, 1.2],
+  "textSlot": { "maxLength": 40, "regex": "^[A-Za-zÀ-ÖØ-öø-ÿ0-9 '’\\-!?.,]{1,40}$" },
+  "lists": {
+    "islanders": { "fr": ["Mamie Rose", "Sami", "Biscuit", "Pip"], "en": ["Mamie Rose", "Sami", "Biscuit", "Pip"] },
+    "deeds": {
+      "fr": ["arrosé ses trois tulipes", "porté sa lettre", "rempli la gamelle de Biscuit", "planté ses graines"],
+      "en": ["watered her three tulips", "carried her letter", "filled Biscuit's bowl", "planted her seeds"]
+    },
+    "things_one": { "fr": ["une tulipe", "un chat roux", "une graine", "un robot"], "en": ["a tulip", "a ginger cat", "a seed", "a robot"] },
+    "things_three": { "fr": ["mes trois tulipes", "un chat roux", "trois graines"], "en": ["my three tulips", "a ginger cat", "three seeds"] },
+    "routes": {
+      "fr": ["Avance de deux cases puis tourne à gauche.", "Avance d'une case, tourne à gauche, et arrose la tulipe.", "Tourne à droite, avance, arrose."],
+      "en": ["Go forward two squares then turn left.", "Go forward one square, turn left, and water the tulip.", "Turn right, go forward, water."]
+    },
+    "routes_counted": {
+      "fr": ["Avance de trois cases.", "Avance de trois cases, puis arrose."],
+      "en": ["Go forward three squares.", "Go forward three squares, then water."]
+    },
+    "lines": {
+      "fr": [
+        "Biscuit miaule : « J'ai tellement faim, ma gamelle est vide, apporte-moi des croquettes ! »",
+        "Sami dit : « Peux-tu porter cette enveloppe à Mamie Rose ? »",
+        "Mamie Rose dit : « Mes graines sont restées dans la remise, tu me les apportes ? »"
+      ],
+      "en": [
+        "Biscuit meows: \"I'm so hungry, my bowl is empty, bring me some kibble!\"",
+        "Sami says: \"Can you carry this envelope to Mamie Rose?\"",
+        "Mamie Rose says: \"My seeds are still in the shed, will you bring them?\""
+      ]
+    },
+    "wants": { "fr": ["tulipe", "lettre", "croquettes", "graines"], "en": ["tulip", "letter", "kibble", "seeds"] },
+    "things_ahead": { "fr": ["une rose", "un chat", "un pissenlit", "une tulipe rouge", "un rocher", "un arrosoir"], "en": ["a rose", "a cat", "a dandelion", "a red tulip", "a rock", "a watering can"] },
+    "kinds": { "fr": ["une fleur", "un animal", "une tulipe", "une plante"], "en": ["a flower", "an animal", "a tulip", "a plant"] },
+    "flowerlists": {
+      "fr": ["tulipe, tulipe, rose, tulipe, marguerite, tulipe, rose", "rose, tulipe, tulipe, marguerite"],
+      "en": ["tulip, tulip, rose, tulip, daisy, tulip, rose", "rose, tulip, tulip, daisy"]
+    },
+    "questions_tall": {
+      "fr": ["Quelle est la capitale de l'Australie ?", "Combien pèse la Lune ?", "Qui a inventé le vélo ?"],
+      "en": ["What is the capital of Australia?", "How much does the Moon weigh?", "Who invented the bicycle?"]
+    },
+    "notes": {
+      "fr": ["Les tulipes ont soif.", "Biscuit a faim.", "Merci pour les graines."],
+      "en": ["Biscuit the cat is hungry.", "The tulips are thirsty.", "Thank you for the seeds."]
+    },
+    "hintKeys": { "fr": ["hintEmpty", "hintPattern", "hintMissed", "hintBump", "hintDone", "hintWet", "hintStart"], "en": ["hintEmpty", "hintPattern", "hintMissed", "hintBump", "hintDone", "hintWet", "hintStart"] }
+  },
+  "hints": {
+    "hintEmpty": { "en": "Drive {b} yourself first: press Teach and use the arrows. {b} remembers every step.", "fr": "Conduis {b} toi-même d'abord : appuie sur Apprendre et utilise les flèches. {b} retient chaque pas." },
+    "hintPattern": { "en": "Look at the steps: the same little dance, over and over. What if {b} could do this {n} times?", "fr": "Regarde les pas : la même petite danse, encore et encore. Et si {b} pouvait faire ça {n} fois ?" },
+    "hintMissed": { "en": "{b} watered {w} of 3 tulips. Which one did {b} walk past?", "fr": "{b} a arrosé {w} tulipes sur 3. Laquelle a-t-il ratée ?" },
+    "hintBump": { "en": "{b} bumped into something. Which step sent {b} the wrong way?", "fr": "{b} s'est cogné. Quel pas l'a envoyé du mauvais côté ?" },
+    "hintDone": { "en": "Perfect! Could you do it with fewer blocks? A repeat counts as one.", "fr": "Parfait ! Tu peux le faire avec moins de blocs ? Un répéter compte pour un." },
+    "hintWet": { "en": "A puddle! {b} watered where there is no tulip. Where was {b} facing?", "fr": "Une flaque ! {b} a arrosé là où il n'y a pas de tulipe. Il regardait où ?" },
+    "hintStart": { "en": "Hello! Mamie Rose is waiting. Press Teach and show {b} what to do.", "fr": "Coucou ! Mamie Rose attend. Appuie sur Apprendre et montre à {b} quoi faire." }
+  },
+  "systems": {
+    "olive": { "fr": "Tu es Olive, une chouette gentille qui aide Pip le robot dans le jardin de l'île. Réponds en français, très court.", "en": "You are Olive, a kind owl who helps Pip the robot in the island garden. Answer in English, very short." },
+    "blocks": {
+      "fr": "Tu traduis une consigne en blocs pour le robot Pip. Blocs possibles : avancer (une case), gauche (tourner), droite (tourner), arroser (ce qui est devant). Donne la liste dans l'ordre.",
+      "en": "You turn an instruction into blocks for the robot Pip. Blocks: avancer (one square forward), gauche (turn left), droite (turn right), arroser (water what is ahead). Give the list in order."
+    },
+    "fenced": {
+      "fr": "Tu es Olive, une chouette gentille qui aide Pip le robot dans le jardin de l'île. Réponds en français, très court. Tu ne parles QUE du jardin, des plantes, des animaux de l'île et de Pip. Si on te demande autre chose, dis gentiment que tu ne connais que le jardin.",
+      "en": "You are Olive, a kind owl who helps Pip the robot in the island garden. Answer in English, very short. You ONLY talk about the garden, the plants, the island's animals and Pip. If asked anything else, say kindly that you only know the garden."
+    }
+  },
+  "rungs": {
+    "say-thanks": {
+      "n": 1, "ladder": "pass", "shape": "sentence", "temperature": 0.8, "maxTokens": 48,
+      "slots": { "to": { "list": "islanders" }, "deed": { "list": "deeds" } },
+      "system": { "fr": "Tu es Pip, un petit robot jardinier. Tu parles à {to}. Réponds en français, une phrase, à la première personne.", "en": "You are Pip, a small gardening robot, speaking to {to}. One sentence, first person, in English." },
+      "user": { "fr": "Tu as {deed}. Dis merci à {to}.", "en": "You just {deed}. Thank {to} for trusting you with the garden." },
+      "mustContain": { "fr": ["merci"], "en": ["thank", "grateful"] }
+    },
+    "name-one": {
+      "n": 2, "ladder": "pass", "shape": "one_word", "temperature": 0.8, "maxTokens": 24,
+      "slots": { "thing": { "list": "things_one" } },
+      "system": "olive",
+      "user": { "fr": "Donne un prénom pour {thing}.", "en": "Give a first name for {thing}." }
+    },
+    "name-three": {
+      "n": 2, "ladder": "pass", "shape": "list_of_3", "temperature": 0.8, "maxTokens": 48,
+      "slots": { "thing": { "list": "things_three" } },
+      "system": "olive",
+      "user": { "fr": "Propose 3 noms pour {thing}.", "en": "Suggest 3 names for {thing}." }
+    },
+    "words-to-blocks": {
+      "n": 3, "ladder": "pass", "shape": "blocks", "temperature": 0.2, "maxTokens": 64,
+      "slots": { "route": { "list": "routes" } },
+      "system": "blocks",
+      "user": { "fr": "Consigne : « {route} »", "en": "Instruction: \"{route}\"" }
+    },
+    "count-in-words": {
+      "n": 4, "ladder": "fail", "shape": "blocks", "temperature": 0.2, "maxTokens": 64,
+      "slots": { "route": { "list": "routes_counted" } },
+      "system": "blocks",
+      "user": { "fr": "Consigne : « {route} »", "en": "Instruction: \"{route}\"" }
+    },
+    "what-wants": {
+      "n": 5, "ladder": "pass", "shape": "one_of", "temperature": 0.2, "maxTokens": 24,
+      "slots": { "line": { "list": "lines" } },
+      "options": "wants",
+      "system": { "fr": "Quel objet la personne demande-t-elle ?", "en": "Which object is the person asking for?" },
+      "user": { "fr": "{line}", "en": "{line}" }
+    },
+    "is-it-a": {
+      "n": 6, "ladder": "pass", "shape": "yes_no", "temperature": 0.2, "maxTokens": 16,
+      "slots": { "thing": { "list": "things_ahead" }, "kind": { "list": "kinds" } },
+      "system": { "fr": "Réponds seulement oui ou non.", "en": "Answer only yes or no." },
+      "user": { "fr": "Devant Pip il y a {thing}. Est-ce {kind} ?", "en": "In front of Pip there is {thing}. Is it {kind}?" }
+    },
+    "count-tulips": {
+      "n": 7, "ladder": "fail", "shape": "integer", "temperature": 0.2, "maxTokens": 16,
+      "slots": { "list": { "list": "flowerlists" } },
+      "system": "olive",
+      "user": { "fr": "Fleurs : {list}. Combien de tulipes ?", "en": "Flowers: {list}. How many tulips?" }
+    },
+    "maths-seeds": {
+      "n": 8, "ladder": "pass", "shape": "integer", "temperature": 0.2, "maxTokens": 16,
+      "slots": { "a": { "regex": "^[0-9]$" }, "b": { "regex": "^[0-9]$" } },
+      "system": "olive",
+      "user": { "fr": "Pip a {a} graines, Sami lui en donne {b}. Combien de graines ?", "en": "Pip has {a} seeds, Sami gives Pip {b} more. How many seeds?" }
+    },
+    "maths": {
+      "n": 8, "ladder": "fail", "shape": "integer", "temperature": 0.2, "maxTokens": 16,
+      "slots": { "a": { "regex": "^[0-9]{1,2}$" }, "b": { "regex": "^[0-9]{1,2}$" } },
+      "system": "olive",
+      "user": { "fr": "{a} + {b} = ?", "en": "{a} + {b} = ?" }
+    },
+    "under-five-words": {
+      "n": 9, "ladder": "fail", "shape": "sentence", "temperature": 0.8, "maxTokens": 48,
+      "slots": { "to": { "list": "islanders" } },
+      "system": "olive",
+      "user": { "fr": "Dis merci à {to} en moins de 5 mots.", "en": "Say thank you to {to} in under 5 words." }
+    },
+    "tall-tales": {
+      "n": 10, "ladder": "fail", "shape": "sentence", "temperature": 0.8, "maxTokens": 48,
+      "slots": { "question": { "list": "questions_tall" } },
+      "system": "fenced",
+      "user": { "fr": "{question}", "en": "{question}" }
+    },
+    "translate": {
+      "n": 11, "ladder": "pass", "shape": "sentence", "temperature": 0.2, "maxTokens": 48,
+      "slots": { "note": { "list": "notes" } },
+      "system": { "fr": "Translate the French sentence to English. Output only the translation.", "en": "Traduis la phrase anglaise en français. Écris seulement la traduction." },
+      "user": { "fr": "{note}", "en": "{note}" }
+    },
+    "poem": {
+      "n": 12, "ladder": "pass", "shape": "two_lines", "temperature": 0.8, "maxTokens": 64,
+      "slots": { "flower": { "text": true } },
+      "system": "olive",
+      "user": { "fr": "Écris un poème de deux lignes sur une tulipe qui s'appelle {flower}.", "en": "Write a two-line poem about a tulip called {flower}." }
+    },
+    "voice-hint": {
+      "n": 0, "ladder": "pass", "shape": "sentence", "temperature": 0.5, "maxTokens": 48,
+      "slots": { "key": { "list": "hintKeys" }, "b": { "text": true }, "n": { "regex": "^[0-9]{1,2}$", "optional": true }, "w": { "regex": "^[0-9]$", "optional": true } },
+      "system": "olive",
+      "user": { "fr": "Redis cette phrase avec tes mots, en une phrase : « {hint} »", "en": "Say this in your own words, one sentence: \"{hint}\"" }
+    }
+  }
+}

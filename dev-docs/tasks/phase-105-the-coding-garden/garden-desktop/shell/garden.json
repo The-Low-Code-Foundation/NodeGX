@@ -1,0 +1,27 @@
+{
+  "appId": "garden",
+  "name": "Bot Garden",
+  "port": 47633,
+  "dataDirName": "island",
+  "doorPrefix": "/__garden/",
+  "header": "x-garden",
+  "policy": "nodegx.security.json",
+  "backups": {
+    "folderName": "Bot Garden backups",
+    "cron": "0 19 * * *",
+    "retention": { "keepLast": 1, "keepDaily": 30, "keepWeekly": 0 }
+  },
+  "model": {
+    "file": "Qwen3.5-0.8B-Q4_K_M.gguf",
+    "url": "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf",
+    "sha256": "bd258782e35f7f458f8aced1adc053e6e92e89bc735ba3be89d38a06121dc517",
+    "bytes": 532517120,
+    "licence": "Apache-2.0"
+  },
+  "olive": {
+    "timeoutMs": 12000,
+    "maxTokens": 64,
+    "contextSize": 1024,
+    "cpuThreads": 2
+  }
+}

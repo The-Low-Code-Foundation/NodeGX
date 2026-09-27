@@ -1,0 +1,57 @@
+{
+  "name": "garden-desktop",
+  "productName": "Bot Garden",
+  "version": "0.0.1",
+  "description": "Bot Garden — the coding garden on one tablet, with its own backend and its own owl, no internet (P105 CG-004). Forked from the Nightbook shell (TPL-011) and parameterised by garden.json.",
+  "author": "Digital Bricks",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test tests/*.test.js",
+    "test:contract": "node ../tests/olive-contract.mjs",
+    "dist:win": "electron-builder --win nsis --x64 --publish never",
+    "dist:mac": "electron-builder --mac dir --publish never"
+  },
+  "dependencies": {
+    "node-llama-cpp": "3.21.1"
+  },
+  "devDependencies": {
+    "electron": "43.2.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "io.digitalbricks.garden",
+    "productName": "Bot Garden",
+    "npmRebuild": false,
+    "files": [
+      "main.js", "relay.js", "policy.js", "fit.js", "copies.js", "owl.js", "olive-route.js", "olive-check.js", "olive-templates.json",
+      "exam.js", "timings.js", "model-check.js", "garden.json", "package.json",
+      "node_modules/**/*",
+      "!node_modules/@node-llama-cpp/*/bins/**/*.a",
+      "!node_modules/node-llama-cpp/llama/**"
+    ],
+    "asarUnpack": [
+      "node_modules/node-llama-cpp/bins/**/*",
+      "node_modules/node-llama-cpp/llama/localBuilds/**/*",
+      "node_modules/@node-llama-cpp/**/*"
+    ],
+    "extraResources": [
+      { "from": "build-output/app", "to": "app" },
+      { "from": "build-output/backend/cli.js", "to": "backend/cli.js" },
+      { "from": "build-output/policy", "to": "policy" },
+      { "from": "build-output/workflows", "to": "workflows" },
+      { "from": "build-output/model", "to": "model" },
+      { "from": "build-output/licenses", "to": "licenses" }
+    ],
+    "directories": { "output": "dist" },
+    "win": { "target": "nsis" },
+    "mac": { "target": "dir" },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "BotGarden-Setup-${version}.${ext}"
+    }
+  }
+}

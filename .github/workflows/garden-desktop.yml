@@ -1,0 +1,205 @@
+name: Bot Garden desktop (P105 CG-004)
+
+# The coding garden as a desktop app: an Electron shell that runs its own nodegx-backend and its own owl (Qwen3.5-0.8B
+# through node-llama-cpp in the main process), with no network. Modelled on nightbook-desktop.yml (TPL-011).
+#
+# shell   (Linux)   the shell's unit tests, then Olive's contract test against the REAL model on CPU (correctness, not
+#                   timing). The 532 MB GGUF is fetched by pinned URL + sha256 and cached on the sha.
+# windows           the NSIS installer, built and installed silently, the installed app driven (the upgrade drive:
+#                   v2 over a used v1 data dir; the wire watched). Waits for the garden template (CG-003):
+#                   `templates/bot-garden` — until then the job is skipped, not red.
+#
+# Prepared in lane C, session 1 (2026-09-27); the Windows job is unmeasured until the template exists.
+# Unsigned by ruling D2 (TPL-011-DESKTOP §9).
+
+on:
+  push:
+    branches: [p105-garden-desktop]
+  workflow_dispatch:
+
+concurrency:
+  group: garden-desktop
+  cancel-in-progress: true
+
+env:
+  GARDEN: dev-docs/tasks/phase-105-the-coding-garden/garden-desktop
+
+jobs:
+  shell:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      # The shell is NOT a workspace: its own lockfile, its own install (node-llama-cpp's postinstall picks the
+      # linux-x64 prebuilt binary; Electron's postinstall downloads its binary, cached below).
+      - name: Cache Electron binaries
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/electron
+          key: electron-${{ runner.os }}-${{ hashFiles(format('{0}/shell/package-lock.json', env.GARDEN)) }}
+
+      - name: Install the shell
+        working-directory: ${{ env.GARDEN }}/shell
+        run: npm ci --no-audit --no-fund
+
+      - name: Shell unit tests (AC1, AC3, AC4, AC6, AC7 — fake owl)
+        working-directory: ${{ env.GARDEN }}/shell
+        run: node --test tests/*.test.js
+
+      - name: Read the model's pin
+        id: pin
+        run: echo "sha=$(node -p "require('./$GARDEN/shell/garden.json').model.sha256")" >> "$GITHUB_OUTPUT"
+
+      # Cached on the sha256 alone: the file is immutable by definition, so the key never needs the OS or the lockfile.
+      - name: Cache the model
+        id: model
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.GARDEN }}/shell/build-output/model
+          key: gguf-${{ steps.pin.outputs.sha }}
+
+      - name: Fetch the model (pinned URL, sha256 verified)
+        if: steps.model.outputs.cache-hit != 'true'
+        run: node $GARDEN/fetch-model.mjs
+
+      - name: Verify the cached model
+        run: node $GARDEN/fetch-model.mjs --check
+
+      # A sampled model at temperature 0.2–1.2: the exam takes the majority of three per probe, and the readout's own bar
+      # was "most of the time". Measured on the Mac's CPU path (2026-09-27, lane C): 18–19 of 20 asserted probes per run,
+      # the reds moving between runs (P05 variety at 1.2, P07 one route). A lone red is run once more, as every gate here is.
+      - name: Olive's contract test on CPU (AC2, AC3, AC7 — the real model through the route)
+        run: |
+          node $GARDEN/tests/olive-contract.mjs --cpu --out contract-linux-cpu.json && exit 0
+          echo "::warning::contract test red once; running it again"
+          node $GARDEN/tests/olive-contract.mjs --cpu --out contract-linux-cpu.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: olive-contract-linux-${{ github.sha }}
+          path: contract-linux-cpu.json
+          retention-days: 30
+
+  windows:
+    needs: shell
+    runs-on: windows-latest
+    timeout-minutes: 75
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Is the garden template there yet? (CG-003)
+        id: template
+        run: |
+          if [ -f templates/bot-garden/nodegx.project.json ]; then echo "present=true" >> "$GITHUB_OUTPUT"; else echo "present=false" >> "$GITHUB_OUTPUT"; echo "::notice::templates/bot-garden is not there yet (CG-003); the installer job is skipped"; fi
+
+      - uses: actions/setup-python@v5
+        if: steps.template.outputs.present == 'true'
+        with:
+          python-version: '3.11'
+
+      - uses: ./.github/actions/setup
+        if: steps.template.outputs.present == 'true'
+
+      # The production viewer: nodegx-deploy refuses a development engine.
+      - name: Build viewer bundles
+        if: steps.template.outputs.present == 'true'
+        run: npm run build:editor:_viewer
+        env:
+          WORKSPACE_PATH: .
+
+      - name: Build the backend bundle and the deploy engine
+        if: steps.template.outputs.present == 'true'
+        run: |
+          npm --prefix packages/nodegx-backend run build
+          npm run build --workspace @noodl/preview
+
+      - name: Read the model's pin
+        if: steps.template.outputs.present == 'true'
+        id: pin
+        run: echo "sha=$(node -p "require('./$GARDEN/shell/garden.json').model.sha256")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache the model
+        if: steps.template.outputs.present == 'true'
+        id: model
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.GARDEN }}/shell/build-output/model
+          key: gguf-${{ steps.pin.outputs.sha }}
+
+      - name: Fetch the model
+        if: steps.template.outputs.present == 'true' && steps.model.outputs.cache-hit != 'true'
+        run: node $GARDEN/fetch-model.mjs
+
+      - name: Assemble the app (export + backend + policy + model + licences)
+        if: steps.template.outputs.present == 'true'
+        run: node $GARDEN/build-app.js --project templates/bot-garden
+
+      # `npm ci` HERE, on Windows: node-llama-cpp's postinstall installs @node-llama-cpp/win-x64 (the CPU-only prebuilt
+      # binary, AC5). The Mac's node_modules must never be copied to Windows.
+      - name: Install the shell and run its tests
+        if: steps.template.outputs.present == 'true'
+        working-directory: ${{ env.GARDEN }}/shell
+        run: |
+          npm ci --no-audit --no-fund
+          node --test tests/*.test.js
+
+      - name: Build the installer
+        if: steps.template.outputs.present == 'true'
+        working-directory: ${{ env.GARDEN }}/shell
+        run: npm run dist:win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: The native binary is outside the asar (AC5)
+        if: steps.template.outputs.present == 'true'
+        run: |
+          ls "$GARDEN"/shell/dist/win-unpacked/resources/app.asar.unpacked/node_modules/@node-llama-cpp/win-x64/bins/win-x64/ || (echo "::error::no unpacked win-x64 binary" && exit 1)
+          ls "$GARDEN"/shell/dist/win-unpacked/resources/model/ || (echo "::error::no model in extraResources" && exit 1)
+          ls "$GARDEN"/shell/dist/win-unpacked/resources/licenses/
+
+      - name: Install it silently (per-user, no admin)
+        if: steps.template.outputs.present == 'true'
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/dist/BotGarden-Setup-*.exe | Select-Object -First 1
+          Start-Process -FilePath $setup.FullName -ArgumentList '/S' -Wait
+          Get-Process 'Bot Garden' -ErrorAction SilentlyContinue | Stop-Process -Force
+          $exe = Join-Path $env:LOCALAPPDATA 'Programs\garden-desktop\Bot Garden.exe'
+          if (-not (Test-Path $exe)) { Get-ChildItem (Join-Path $env:LOCALAPPDATA 'Programs') -Recurse -Filter 'Bot Garden.exe' | Select-Object -First 3; throw "Bot Garden.exe not at $exe" }
+          "GARDEN_EXE=$exe" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      # AC8 (v2 over v1 keeps the island, the profiles, the exam; adopts the policy) and AC9 (the wire: 127.0.0.1 only).
+      # The installed app loads the model CPU-only on Windows (AC5): backend.log says "owl: loaded in N ms on cpu".
+      - name: Drive the installed app (upgrade + wire)
+        if: steps.template.outputs.present == 'true'
+        run: node $GARDEN/drive-upgrade.js --exe "$GARDEN_EXE"
+        env:
+          GARDEN_DRIVE_REPORT: ${{ github.workspace }}/drive-report.json
+
+      - name: Collect
+        if: always() && steps.template.outputs.present == 'true'
+        run: |
+          mkdir -p out
+          cp "$GARDEN"/shell/dist/BotGarden-Setup-*.exe out/ || true
+          cp "$GARDEN"/shell/build-output/BUILD.json out/ || true
+          cp drive-report.json out/ || true
+
+      - name: Upload
+        if: always() && steps.template.outputs.present == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: garden-win32-x64-${{ github.sha }}
+          path: out
+          retention-days: 30

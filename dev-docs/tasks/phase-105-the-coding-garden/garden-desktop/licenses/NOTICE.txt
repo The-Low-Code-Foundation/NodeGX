@@ -1,0 +1,16 @@
+Bot Garden ships, beside its own code, the following third-party work. The licence texts are in this folder.
+
+1. The owl's model: Qwen3.5-0.8B, quantised to Q4_K_M as a GGUF by Unsloth
+   (https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF, file Qwen3.5-0.8B-Q4_K_M.gguf, 532,517,120 bytes,
+   sha256 bd258782e35f7f458f8aced1adc053e6e92e89bc735ba3be89d38a06121dc517).
+   Copyright the Qwen team, Alibaba Cloud. Licensed under the Apache License, Version 2.0 — LICENSE-Apache-2.0.txt.
+   The model file is downloaded at build time and is not part of this repository.
+
+2. node-llama-cpp (https://github.com/withcatai/node-llama-cpp), copyright (c) 2023 Gilad S.
+   MIT License — LICENSE-node-llama-cpp.txt.
+
+3. llama.cpp / ggml (https://github.com/ggml-org/llama.cpp), copyright (c) 2023-2026 The ggml authors.
+   MIT License — LICENSE-llama.cpp.txt.
+
+Nothing in this app sends anything off the computer it runs on: the game, its backend and the model all live on
+127.0.0.1 (P105 CG-004 AC9).
