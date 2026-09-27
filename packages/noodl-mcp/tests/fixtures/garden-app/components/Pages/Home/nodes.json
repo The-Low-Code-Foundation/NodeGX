@@ -1,0 +1,30 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "nodes": [
+    { "id": "page", "type": "Page", "label": "Home", "parameters": { "title": "Home" }, "children": ["layout"] },
+    { "id": "layout", "type": "Group", "label": "Layout", "parent": "page", "children": ["marker", "wrapG", "wrapB", "wrapA"] },
+    { "id": "marker", "type": "Text", "label": "Marker", "parent": "layout", "parameters": { "text": "cg001 page drew" } },
+    { "id": "wrapG", "type": "Group", "label": "Garden wrap", "parent": "layout", "children": ["garden"] },
+    { "id": "garden", "type": "garden-kit.Garden", "label": "Garden", "parent": "wrapG", "parameters": { "stepMs": 380 } },
+    { "id": "wrapB", "type": "Group", "label": "Blocks wrap", "parent": "layout", "children": ["blocks"] },
+    { "id": "blocks", "type": "garden-kit.BlockList", "label": "Block List", "parent": "wrapB", "parameters": { "band": 2 } },
+    { "id": "wrapA", "type": "Group", "label": "Face wrap", "parent": "layout", "children": ["face"] },
+    { "id": "face", "type": "game-kit.Avatar", "label": "Face", "parent": "wrapA", "parameters": { "seed": "Ada", "size": 48 } },
+    { "id": "vMap", "type": "Variable2", "label": "map", "parameters": { "name": "map" } },
+    { "id": "vThings", "type": "Variable2", "label": "things", "parameters": { "name": "things" } },
+    { "id": "vRobots", "type": "Variable2", "label": "robots", "parameters": { "name": "robots" } },
+    { "id": "vBubble", "type": "Variable2", "label": "bubble", "parameters": { "name": "bubble" } },
+    { "id": "vStep", "type": "Variable2", "label": "stepMs", "parameters": { "name": "stepMs" } },
+    { "id": "vProgram", "type": "Variable2", "label": "program", "parameters": { "name": "program" } },
+    { "id": "vPalette", "type": "Variable2", "label": "palette", "parameters": { "name": "palette" } },
+    { "id": "vRunning", "type": "Variable2", "label": "runningId", "parameters": { "name": "runningId" } },
+    { "id": "vBand", "type": "Variable2", "label": "band", "parameters": { "name": "band" } },
+    { "id": "vLang", "type": "Variable2", "label": "language", "parameters": { "name": "language" } },
+    { "id": "vLocked", "type": "Variable2", "label": "locked", "parameters": { "name": "locked" } },
+    { "id": "vProgramOut", "type": "Variable2", "label": "programOut", "parameters": { "name": "programOut" } },
+    { "id": "vSelectedOut", "type": "Variable2", "label": "selectedOut", "parameters": { "name": "selectedOut" } }
+  ],
+  "visualRoots": ["page"]
+}

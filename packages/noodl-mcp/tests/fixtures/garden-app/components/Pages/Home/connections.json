@@ -1,0 +1,20 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "connections": [
+    { "fromId": "vMap", "fromProperty": "value", "toId": "garden", "toProperty": "map" },
+    { "fromId": "vThings", "fromProperty": "value", "toId": "garden", "toProperty": "things" },
+    { "fromId": "vRobots", "fromProperty": "value", "toId": "garden", "toProperty": "robots" },
+    { "fromId": "vBubble", "fromProperty": "value", "toId": "garden", "toProperty": "bubble" },
+    { "fromId": "vStep", "fromProperty": "value", "toId": "garden", "toProperty": "stepMs" },
+    { "fromId": "vProgram", "fromProperty": "value", "toId": "blocks", "toProperty": "program" },
+    { "fromId": "vPalette", "fromProperty": "value", "toId": "blocks", "toProperty": "palette" },
+    { "fromId": "vRunning", "fromProperty": "value", "toId": "blocks", "toProperty": "runningId" },
+    { "fromId": "vBand", "fromProperty": "value", "toId": "blocks", "toProperty": "band" },
+    { "fromId": "vLang", "fromProperty": "value", "toId": "blocks", "toProperty": "language" },
+    { "fromId": "vLocked", "fromProperty": "value", "toId": "blocks", "toProperty": "locked" },
+    { "fromId": "blocks", "fromProperty": "onProgram", "toId": "vProgramOut", "toProperty": "value" },
+    { "fromId": "blocks", "fromProperty": "onSelected", "toId": "vSelectedOut", "toProperty": "value" }
+  ]
+}

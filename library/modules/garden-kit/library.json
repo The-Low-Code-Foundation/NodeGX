@@ -1,0 +1,13 @@
+{
+  "label": "Garden Kit",
+  "description": "Two nodes for Bot Garden, no backend and no network: Block List (a nested, draggable block program a child edits with a finger, a pen or a mouse — tap a palette block to add, drag to move, tap the cross to remove, minus and plus on a repeat's count, a picker of garden words on an ask block; emits the program as JSON on every edit and glows the block the graph names) and Garden (a tile world from rows of characters and a legend, tulips dry or watered, puddles, letters, bowls, labels, and one or two robots that glide, turn, bump and speak; every sprite inline SVG). The kit draws; the engine decides.",
+  "type": "module",
+  "tags": [
+    "UI",
+    "Utility"
+  ],
+  "version": "1.0.0",
+  "minEditorVersion": "0.1.0",
+  "runtimeVersion": "2.7.0",
+  "icon": "icon.png"
+}

@@ -82,3 +82,63 @@ Reused, not rebuilt: `game-kit.Avatar` (the profile face), `game-kit.Sound` (bum
 D41 (a kit that works beside 33 modules can fail beside two), D53, the `Icon` component renders an
 empty span (draw SVG inline), `cdp click` hits the measuring ghost inside a Modal, a rendered surface can
 be behind a blocker (`elementFromPoint` before a press).
+
+## 7. Session 1 — what was built (lane A, 2026-09-27)
+
+**Built:** `library/modules/garden-kit/` — `src/kit.js` (1,262 lines, hand-written, the two React nodes of §2), `build.mjs`
+(game-kit's without the DiceBear bundle: banner + source verbatim, 67,702 bytes), `library.json`, `icon.png` (game-kit's,
+copied, said so in the README), `project/noodl_modules/garden-kit/{index.js, manifest.json, README.md, types/node-kit.d.ts}`.
+The gate `packages/noodl-mcp/tests/cg001GardenKit.test.ts` (19 specs) over the BUILT file in a bare `vm` (globals: `Noodl`,
+`React`, `console`, timers — no `window`, no `document`). The drive `scripts/devtools/drive-cg001-kit.js` and its two-module
+project `packages/noodl-mcp/tests/fixtures/garden-app/` (components only; the drive's `assemble` step copies both kits in).
+
+**The contract as typed** (the header of `src/kit.js`; CG-002's `cg002Scripts.ts` types the same words): blocks `{id, t, n?,
+body?, slots?}`, emitted as JSON TEXT in canonical key order (`id, t, n, body, slots`, slot keys sorted, whole counts 1–9, a
+40-character slot cap); palette entries `{id, kind, icon, label:{en,fr}, hasBody, hasCount, slots}`; map `{rows, legend}` with
+the mockup's legend by default (`G P W T R H F` → grass path water tree rock house bed); things `[{kind, x, y, watered?, full?,
+text?}]`; robots `[{x, y, d, colour, eyes, hat, name, bump?}]` with `d` 0–3 clockwise from up and `bump` a rising count.
+
+| AC | Status | Measured by | Numbers |
+|---|---|---|---|
+| 1 | ✅ measured (vm) · 🟡 two-module drive prepared | gate `AC1` ×3; `drive-cg001-kit.js` clause AC1 | names `['garden-kit.BlockList','garden-kit.Garden']`; built file ends with `src/kit.js` verbatim; assemble step measured: `modules: ["game-kit","garden-kit"]` |
+| 2 | ✅ measured | gate `AC2` ×3 | 20 seeded sequences (8–14 edits each) through `BlockList.program.{add,move,remove,setCount,setSlot}`: `emit(parse(emit(P))) === emit(P)` 20/20; drawn shape (order AND nesting, read off the markup) = program shape 20/20; 138 blocks, 24 containers exercised |
+| 3 | 🟡 prepared, drive pending | drive clauses AC3 ×4 | synthetic `PointerEvent`s with `pointerType` touch / pen / mouse; a 4th touch drag ending on the garden |
+| 4 | ✅ measured | gate `AC4` ×2 | `[fwd, repeat 3 {left, water}]`, the engine's id sequence `1 2 3 4 3 4 3 4`: step 7 (water, 3rd pass) → exactly 1 `data-run`, on id 4; 8/8 steps one glow; `''` and `99` glow none |
+| 5 | ✅ measured (markup + CSS) · 🟡 live switch in the drive | gate `AC5` ×2; drive clause AC5 | band 1 and band 2 markup identical once the root's band is masked; `.gd-band1 … .gd-n{font-size:11px}` vs `15px`; the drive marks the DOM node and reads it back after the switch |
+| 6 | ✅ cells + face floor measured · 🟡 pixels in the drive | gate `AC6` ×3; drive clauses AC6 ×4 | 8×6 → 48 cells `{grass 30, tree 3, house 1, bed 3, path 8, water 2, rock 1}`; 12×8 → 96; robot floor 56 px × face fraction 0.376 = **21 px** (a 12-column tile at 390 px would give 11 px) |
+| 7 | 🟡 prepared, drive pending | drive clauses AC7 ×12 (EN + FR), 10 screenshots | step Δx ≈ one tile, turn = a changed transform at the same place, bump = `data-bump="1"` + bubble, water = `.gd-wet` 1 / `.gd-dry` 2, puddle on cell (1,4) |
+| 8 | ✅ measured (markup) · 🟡 boxes in the drive | gate `AC8` ×2; drive clauses AC8 ×2 | two tiles: 2 sprites, `Pip`,`Bo`; one tile: `data-share` 0/1, `scale(.78)` at −90 %/−10 % ⇒ centres 0.8 box apart, a 0.02-box gap |
+| 9 | 🟡 prepared — a READOUT, not a pass | drive clause AC9 | 12×8, two robots, `Emulation.setCPUThrottlingRate 4`, 20 `Robots` writes, ms to the second `requestAnimationFrame`: p50 / p95 / max printed and written to `drive.json` |
+| 10 | ✅ measured | gate `AC10` ×2 | README names the mockup as the sprites' source, GPL-3.0, the borrowed icon, "nothing is fetched"; the built file has 0 of `fetch(`, `http://`, `https://`, `<img`, `url(`, `XMLHttpRequest`, `@import` beside 1+ `'svg'`/`viewBox` |
+
+**Runs:** `cd packages/noodl-mcp && npx jest tests/cg001GardenKit.test.ts` → `Tests: 19 passed, 19 total` (0.4 s). Control:
+`npx jest tests/tpl007GameKit.test.ts` → `47 passed, 47 total`.
+
+**Arms 9/9 killed** (each mutant applied to `src/kit.js`, rebuilt, the spec run, the source restored byte-identical): move into
+own body allowed (killed only after the spec gained a NON-ZERO-index probe — at index 0 the fallback put the block back where
+it was, a green-looking hole); count clamp removed; nesting rail flattened; glow on every block; ragged row not padded; emit not
+normalised; same-tile robots not offset; face floor 40 px; band-1 caption at 15 px.
+
+**The catalog (§4's last bullet, measured, not regenerated):** `packages/noodl-types/src/node-catalog.json` carries **0** kit
+entries (`grep -c game-kit` = 0) — by design, it is built from the built-in register only. Kit nodes arrive through the
+project-scoped overlay: the extractor bundle (`src/kitExtract/entry.js`, esbuilt) run over the assembled two-module project and
+`@nodegx/kit-catalog`'s `catalogNodesFromNodeLibrary` give **8 overlay nodes** (6 game-kit + 2 garden-kit), both garden nodes
+`inNodePicker: true`, `providedBy: "project-kit"`, `category: "Visual"`, every §2 port present (`palette program band language
+runningId locked` / `onProgram onChanged onSelected`; `map things robots bubble stepMs celebrate` / `onTileX onTileY onTileTapped
+onReady`), **0 collisions, 0 `kitDiagnostics`**. Nothing to regenerate.
+
+**The drive (prepared, not run; Chrome is the orchestrator's):**
+```
+node scripts/devtools/drive-cg001-kit.js assemble <project-dir>                       # fixture + both kits
+node packages/noodl-preview/dist/nodegx-deploy.cjs <project-dir> <deploy-dir> --allow-development-engine   # exits 0 even on refusal: check index.html's mtime
+node scripts/devtools/drive-cg001-kit.js <deploy-dir> --shots <dir> --json <file>     # 30 clauses, 14 screenshots, exit 0/1
+```
+The page feeds every kit port from a `Variable2` and the drive plays the engine through `Noodl.Variables.set(...)`; `Program`
+and `Selected` are written back into Variables the drive reads. Known unknowns the drive settles (each a FAIL line, not a
+crash): a synthetic `PointerEvent` reaching React's root listener (if not, real CDP input, and pen is out of reach); a wired
+`object` port fed JSON text from a Variable (the kit parses text either way).
+
+**Residuals:** drag-to-reorder (`dropAt`, `elementFromPoint`) is graded only by the drive — owner: the orchestrator's drive
+run · the band-1 "never a keyboard" rule is code (`s.text && band === 2`), not yet a spec: the picker opens on a tap, which
+needs state — owner: CG-003's page drive · `icon.png` is game-kit's — owner: CG-007 · the AC9 number on the real tablet —
+owner: CG-008 · the colour ports default to the mockup's hex, not tokens (no design system exists yet) — owner: CG-007.
