@@ -74,8 +74,13 @@ async function main() {
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'garden-upgrade-'));
   const homeA = path.join(scratch, 'A');
   const homeB = path.join(scratch, 'B');
-  // Policy A = the shipped one plus a marker; policy B = the shipped one. Different bytes, so 0.0.2 must adopt B.
-  const policyA = { ...readJson(SHIPPED_POLICY), _driveMarker: 'v1' };
+  // Policy A = the shipped one plus a marker collection; policy B = the shipped one. Different bytes, so 0.0.2 must
+  // adopt B. The marker is a LEGAL collection, not a private top-level key: the backend refuses a policy with an
+  // unknown top-level key (`unknown top-level key "_driveMarker"`, FATAL, exit 1) and the window never opens —
+  // the first run of this drive, 2026-09-27, 0 launches.
+  const shipped = readJson(SHIPPED_POLICY);
+  const policyA = { ...shipped, collections: { ...shipped.collections, DriveMarkerV1: shipped.collections.Task } };
+  const hasMarker = (file) => !!(readJson(file).collections || {}).DriveMarkerV1;
   const dirA = path.join(scratch, 'policy-A');
   const dirB = path.join(scratch, 'policy-B');
   fs.mkdirSync(dirA, { recursive: true });
@@ -105,7 +110,7 @@ async function main() {
   const d = data(homeA);
   R.disk1 = {
     database: fs.existsSync(path.join(d, 'data', 'local.db')),
-    policyInstalled: fs.existsSync(path.join(d, 'security.json')) && readJson(path.join(d, 'security.json'))._driveMarker === 'v1',
+    policyInstalled: fs.existsSync(path.join(d, 'security.json')) && hasMarker(path.join(d, 'security.json')),
     backupPolicy: fs.existsSync(path.join(d, 'backups.json')),
     examKept: fs.existsSync(path.join(d, 'olive-exam.json')),
     backendsLeftRunning: backendsFor(homeA),
@@ -130,9 +135,9 @@ async function main() {
   const kept = fs.readdirSync(d).filter((f) => /^security\.before-0\.0\.2-.*\.json$/.test(f));
   R.disk2 = {
     database: fs.existsSync(path.join(d, 'data', 'local.db')),
-    policyIsB: fs.existsSync(path.join(d, 'security.json')) && readJson(path.join(d, 'security.json'))._driveMarker === undefined,
+    policyIsB: fs.existsSync(path.join(d, 'security.json')) && !hasMarker(path.join(d, 'security.json')),
     oldPolicyKeptAs: kept,
-    oldPolicyIsA: kept.length === 1 && readJson(path.join(d, kept[0]))._driveMarker === 'v1',
+    oldPolicyIsA: kept.length === 1 && hasMarker(path.join(d, kept[0])),
     examKept: fs.existsSync(path.join(d, 'olive-exam.json')) && readJson(path.join(d, 'olive-exam.json')).at === R.launch1.examAt,
     launchLines: fs.readFileSync(path.join(homeA, 'userData', 'logs', 'timings.log'), 'utf8').trim().split('\n').map((l) => JSON.parse(l)).filter((l) => l.event === 'launch').map((l) => [l.version, l.policy]),
     backendsLeftRunning: backendsFor(homeA)

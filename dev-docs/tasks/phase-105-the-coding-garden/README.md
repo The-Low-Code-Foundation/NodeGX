@@ -1,8 +1,8 @@
 # Phase 105 — The coding garden: teach a robot, then tidy the lesson into a loop
 
 **Scoped:** 2026-09-27, from [TPL-012](../phase-78-the-templates/TPL-012-THE-CODING-GARDEN.md) (the
-scoping, the research, the mockup, the model readout). **Status: 📋 OPEN — nothing built. Start with
-[NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).** **Prefix: `CG`.**
+scoping, the research, the mockup, the model readout). **Status: 📋 session 1 done 2026-09-27 — CG-001 🟢, CG-002 🟢, CG-004 🟡 (the Electron control launch waits for an
+unlocked screen). Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).** **Prefix: `CG`.**
 
 > *"I'd like to scope out a new template app for my kids … learn 'Scratch' … like 'Autonauts' … a kind
 > of 'LLM call' step … a safe and fully offline LLM."* — Richard, 2026-09-27
@@ -62,10 +62,10 @@ ring-fenced moments this phase adds are in [CG-006](CG-006-THE-REQUESTS.md) §4.
 
 | Task | What | Depends on | Lane | Status |
 |---|---|---|---|---|
-| [CG-001 — the kit](CG-001-THE-KIT.md) | `garden-kit`: `Block List` (the program editor) and `Garden` (the tile world), React nodes, touch and pen | — | A | ⬜ |
-| [CG-002 — the engine](CG-002-THE-ENGINE.md) | interpreter, fold, hint table, save model, word table, request schema — Function scripts with a gate in both languages | — | B | ⬜ |
+| [CG-001 — the kit](CG-001-THE-KIT.md) | `garden-kit`: `Block List` (the program editor) and `Garden` (the tile world), React nodes, touch and pen | — | A | 🟢 s1: gate 20/20, drive 28/28, AC9 p95 29.9 ms Mac ×4 |
+| [CG-002 — the engine](CG-002-THE-ENGINE.md) | interpreter, fold, hint table, save model, word table, request schema — Function scripts with a gate in both languages | — | B | 🟢 s1: gate 97/97, arms 12/12; `template:garden` hook owed by 003 |
 | [CG-003 — the pages](CG-003-THE-PAGES.md) | Profiles, Island, Workshop, My robot, Skills, Grown-ups through the plan door; driven at 1368×912 and 390×844 | 001, 002 | A+B | ⬜ |
-| [CG-004 — the shell and the model](CG-004-THE-SHELL-AND-THE-MODEL.md) | the Nightbook shell forked; node-llama-cpp in the main process; `POST /__garden/olive` on the relay; the GGUF fetched at build; Olive's exam | — | C | ⬜ |
+| [CG-004 — the shell and the model](CG-004-THE-SHELL-AND-THE-MODEL.md) | the Nightbook shell forked; node-llama-cpp in the main process; `POST /__garden/olive` on the relay; the GGUF fetched at build; Olive's exam | — | C | 🟡 s1: shell 59/59, exam 19/20 real model, upgrade drive launches 1–2 measured; control launch + packaging blocked by a LOCKED SCREEN |
 | [CG-005 — Olive in the game](CG-005-OLIVE-IN-THE-GAME.md) | the `ask Olive` block family, the thinking state, written fallbacks, rungs gated by the exam, a stub Olive for drives | 002, 004 | B+C | ⬜ |
 | [CG-006 — the requests](CG-006-THE-REQUESTS.md) | the content: seven coding tricks as requests, twelve Olive rungs, the extra ring-fenced moments, islanders, rewards, FR/EN copy | 002 (005 for the Olive rungs) | B | ⬜ |
 | [CG-007 — the look](CG-007-THE-LOOK.md) | the mockup's look in one stylesheet, bundled fonts, the robot and sprites, rendered beside the artboards | 003 | A | ⬜ |

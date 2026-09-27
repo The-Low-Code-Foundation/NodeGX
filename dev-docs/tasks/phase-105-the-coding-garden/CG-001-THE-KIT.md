@@ -1,6 +1,6 @@
 # CG-001 — The kit: a program a child can hold, and a garden it runs in
 
-**Opened 2026-09-27**, scoped from TPL-012 §3. **Status: ⬜ not started.** Depends on nothing. Lane A.
+**Opened 2026-09-27**, scoped from TPL-012 §3. **Status: 🟢 built and driven, session 1 (2026-09-27) — AC1–AC10 measured (gate 20/20, drive 28/28 on the merged tree, screenshots looked at); AC9 is a Mac number, the tablet's is CG-008's.** Depends on nothing. Lane A.
 
 ## 1. The person sentence
 
@@ -175,3 +175,20 @@ The drive ran once the fixture's Router listed its page (`129775882`, the orches
 Gate after the fix-up: `cd packages/noodl-mcp && npx jest tests/cg001GardenKit.test.ts` → **20 passed, 20 total**; arms 11/11
 (two added: the grid override removed, the visor back to 28 × 16 — each killed by the new rows). The drive is prepared again
 (28 clauses, the LOOK clause added); the orchestrator re-runs it.
+
+### 7.2 The re-drive on the merged tree (orchestrator, 2026-09-27 20:32)
+
+`zsh drive-laneA.sh` on `cline-dev` at `17bd143dd` (the fix-up cherry-picked): assemble → deploy (`{"ok":true}`, fresh
+`index.html`) → drive. **28/28 clauses, exit 0, 0 console errors.** AC3 touch / pen / mouse all reorder and publish; the
+outside drop restores. AC6 faces: measured ≥ 20 px at all four viewport × map pairs (smaller side of the rotated visor).
+AC7 twelve clauses EN + FR. AC8 both. **AC9 second run: p50 27.3 / p95 29.9 / max 29.9 ms** (12×8, two robots, CPU ×4, 20
+samples) — consistent with the first run's 27.9 / 29.8 / 29.8.
+
+Screenshots looked at (`ac1-two-modules`, `ac7-water-fr`, `ac8-shared-tile`, `ac5-band1`): a checkered green grid, a sand
+path row, two water tiles, three beds with dry tulips that stand up pink when watered, three trees, a rock, a house; Pip
+and Bo on one tile side by side and labelled; "Glou glou !" in a bubble; band 1 draws icon-first blocks with a caption.
+The layout (blocks under the world, the avatar at the foot) is the drive fixture's, not the product's — CG-003 owns it.
+
+The first run was 0/27: the fixture's Router had no `pages`, the deployed page logged `[router/no-pages]` and drew
+nothing (`129775882`). A Router with no `pages` routes to nothing; the replay fixture's shape (`startPage` + `routes`)
+is the one to copy.

@@ -1,6 +1,6 @@
 # CG-004 — The shell and the model: Electron, a local backend, an owl in the main process
 
-**Opened 2026-09-27**, scoped from TPL-012 §2.4–§2.5 and briefing §3–§4, §C2. **Status: 🟡 built in session 1 (lane C, 2026-09-27) — AC1, AC3, AC4, AC6, AC7 measured; AC2 19/20 per run; AC5, AC8, AC9 prepared (§7). Was: ⬜ not
+**Opened 2026-09-27**, scoped from TPL-012 §2.4–§2.5 and briefing §3–§4, §C2. **Status: 🟡 built in session 1 (lane C, 2026-09-27) — AC1, AC3, AC4, AC6, AC7 measured; AC2 19/20 per run; AC8 measured for launches 1–2 on the Mac, the control launch and AC9's verdict blocked by a locked screen (§7.1); AC5 prepared. Was: ⬜ not
 started.** Depends on nothing. Lane C.
 
 ## 1. The person sentence
@@ -169,3 +169,39 @@ literal `</think>` in prose even with the block prefilled — stripped in `tidy`
 
 Nothing in a workspace package. New files only: `garden-desktop/**` (this folder), `.github/workflows/garden-desktop.yml`,
 this section. The root `package-lock.json` is untouched (0 lines of diff).
+
+### 7.1 The orchestrator's drive runs (2026-09-27, 20:35–21:25, on `cline-dev` after the cherry-pick)
+
+`drive-laneC.sh` steps 1–3 as predicted: `fetch-model --from` hard-linked the local GGUF, **sha256 MATCHES (432 ms)**;
+`build-app.js --project templates/todo-list` → `{"ok":true}`, the origin `http://127.0.0.1:47633` baked in; `node --test`
+**59/59**.
+
+**Step 4, the upgrade drive — three instrument faults found and fixed in `drive-upgrade.js` / `drive-lib.js`:**
+1. The seeded policy A carried a private top-level key `_driveMarker`; the real backend refuses it (`FATAL … unknown
+   top-level key "_driveMarker"`, exit 1), the shell showed its "couldn't open" box, and the window never served the origin:
+   0 launches. The marker is now a LEGAL collection (`collections.DriveMarkerV1`, a copy of `Task`).
+2. `launch()` now waits for the relay port and the CDP port to be free before spawning, and `quit()` waits for every
+   process of the shell's Electron binary to be gone (SIGKILL after 10 s) — a launcher can exit before its app.
+3. Both were necessary; neither was the blocker below.
+
+**What the drive then MEASURED (run at 19:03 UTC+2 local 21:03, home A, the model on Metal):** launch 1 → page drawn,
+`status.model = ready`, the exam ran on first launch, **15 rungs**, `examAt` set; disk after 0.0.1: `database`,
+`policyInstalled` (A), `backupPolicy`, `examKept` all **true**, `backendsLeftRunning []`; launch 2 (0.0.2, policy B) →
+`examKept` **true** (same `at`); disk after 0.0.2: `policyIsB` **true**, `oldPolicyKeptAs = ["security.before-0.0.2-…json"]`,
+`oldPolicyIsA` **true**, `launchLines = [["0.0.1","first"],["0.0.2","replaced"]]`, `backendsLeftRunning []`; the wire so far:
+`hosts = {"127.0.0.1": 141}` and nothing else. **AC8's substance (the island, the policy adoption, the exam survive an
+upgrade) is measured; AC9's clause held for launches 1–2.** The report is `scratchpad/cg004-drive/drive-upgrade.json`
+of session 1's orchestrator.
+
+**The blocker — measured, not inferred:** from ~21:04 local every Electron launch of this bundle, the shell and a
+three-line minimal `main.js` alike, logged `will-finish-launching` and never `ready` (no window, CDP bound, 0 % CPU);
+`screencapture` showed the wallpaper with no menu bar, and
+`ioreg -n Root -d1 -a | grep -A1 CGSSessionScreenIsLocked` read **`<true/>`**. **A GUI Electron app does not reach
+`ready` while the macOS session is locked.** Headless Chrome (the CG-001 drive) is unaffected. Six trials varied
+polling delay, `detached`, and stdio; none mattered. So launch 3 (the fresh-home control: `examAtDiffers`,
+`noOldPolicy`), step 5 (AC4 in Electron, no model) and step 6 (AC5 packaging) are **owed to the next session with the
+screen unlocked** — run `zsh <scratch>/laneC/drive-laneC.sh` steps 4–6, or `node garden-desktop/drive-upgrade.js`
+directly; check the lock state first.
+
+Residual for the drive, owner CG-008: `quit()` returns `code: 1` from `Browser.close` every time — the launcher's exit
+code, not the app's; the installed-app drive should read the app's own exit.

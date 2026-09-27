@@ -92,12 +92,59 @@ function killAll() {
   launched.clear();
 }
 
+
+/**
+ * Every process of THIS shell's Electron binary (main, GPU, renderers), by the binary's path. A quit that returns
+ * before they are gone leaves an instance alive, and a second copy of the same app bundle never reaches `ready`
+ * while the first lives: measured 2026-09-27 (launch 3 of the upgrade drive, then every launch after it, hung at
+ * `whenReady` with the CDP port bound and no first log line; a SIGKILL of the leftovers cured every one).
+ */
+function shellProcesses() {
+  if (process.platform === 'win32') return [];
+  const needle = path.join(SHELL, 'node_modules', 'electron', 'dist');
+  try {
+    const out = execFileSync('ps', ['-eo', 'pid=,command='], { encoding: 'utf8' });
+    return out
+      .split('\n')
+      .filter((l) => l.includes(needle))
+      .map((l) => Number(l.trim().split(/\s+/)[0]))
+      .filter((n) => Number.isFinite(n) && n !== process.pid);
+  } catch {
+    return [];
+  }
+}
+
+async function waitGone(label, ms = 10_000) {
+  const deadline = Date.now() + ms;
+  while (shellProcesses().length > 0 && Date.now() < deadline) await wait(250);
+  const left = shellProcesses();
+  if (left.length) {
+    for (const pid of left) {
+      try {
+        process.kill(pid, 'SIGKILL');
+      } catch {
+        /* gone */
+      }
+    }
+    await wait(500);
+    return { label, killed: left };
+  }
+  return { label, killed: [] };
+}
+
 async function launch(home, EXE, extraEnv = {}) {
   const env = { ...process.env, GARDEN_HOME: home, ...extraEnv };
   delete env.ELECTRON_RUN_AS_NODE;
   const cmd = EXE || path.join(SHELL, 'node_modules', '.bin', 'electron');
   const args = EXE ? [`--remote-debugging-port=${CDP_PORT}`] : ['.', `--remote-debugging-port=${CDP_PORT}`];
   const t0 = Date.now();
+  // The previous launch's app can outlive its launcher's exit by a second or two and still hold the relay's fixed
+  // origin port and the CDP port: a launch spawned into that window starts, cannot bind either, and never serves the
+  // origin (2026-09-27, launch 3 of the upgrade drive: Chromium wrote DevToolsActivePort, main.js wrote no log). So
+  // wait for both ports to be free first, bounded.
+  const leftovers = await waitGone('before launch', 2_000);
+  if (leftovers.killed.length) console.log(`  (killed ${leftovers.killed.length} leftover process(es) of the shell before launching)`);
+  await until('the relay and CDP ports free', async () => ({ relay: await portListening(config.port), cdp: await portListening(CDP_PORT) }), (p) => !p.relay && !p.cdp, 20_000);
   // Its own process group (not on Windows), so killAll can take the app with its launcher.
   const child = spawn(cmd, args, { cwd: SHELL, env, stdio: ['ignore', 'pipe', 'pipe'], detached: process.platform !== 'win32' });
   launched.add(child);
@@ -135,9 +182,14 @@ async function quit(app) {
     // fall through to the timeout below
   }
   const res = await Promise.race([exited, wait(15_000).then(() => null)]);
-  if (res) return { how: 'Browser.close', ...res };
+  if (res) {
+    const gone = await waitGone('after quit');
+    return { how: 'Browser.close', ...res, leftoversKilled: gone.killed.length };
+  }
   app.child.kill('SIGTERM');
-  return { how: 'SIGTERM after 15s', ...(await exited) };
+  const late = await exited;
+  const gone = await waitGone('after SIGTERM');
+  return { how: 'SIGTERM after 15s', ...late, leftoversKilled: gone.killed.length };
 }
 
 /**
@@ -178,4 +230,4 @@ function backendsFor(home) {
   return out.split(/\r?\n/).filter((l) => l.includes(path.join(home, 'userData', config.dataDirName)) && l.includes('cli.js'));
 }
 
-module.exports = { killAll, HERE, SHELL, config, ORIGIN, CDP_PORT, wait, until, connect, portListening, launch, quit, backendsFor, watchNetwork };
+module.exports = { killAll, shellProcesses, waitGone, HERE, SHELL, config, ORIGIN, CDP_PORT, wait, until, connect, portListening, launch, quit, backendsFor, watchNetwork };
