@@ -1,0 +1,13 @@
+special tokens: 1 1 | as text: 6
+## CPU2 thanks
+  [486ms] Merci Mamie. �
+  [623ms] Merci Mamie ! 🌿 Merci pour ton aide si tu peux. 😊
+  [631ms] Merci Mamie ! 🌿 Merci pour ton aide si tu peux. 😊
+## CPU2 yes/no
+  [507ms] { "reponse": "oui" }
+  [521ms] { "reponse": "oui" }
+  [459ms] { "reponse": "oui" }
+## CPU2 list3
+  [1019ms] { "noms": ["Le Petit Roux", "La Chouette Roux", "Le Ruchette Petit"] }
+  [851ms] { "noms": ["Rouge", "Violet", "Bleu"] }
+  [1252ms] { "noms": [ "Rouxette", "Oubea", "Motte"

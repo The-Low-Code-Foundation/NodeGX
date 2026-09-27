@@ -1,0 +1,649 @@
+<title>Bot Garden</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap">
+<style>
+:root{
+  --paper:#FFF7E8; --paper-2:#FFF0D3; --card:#FFFFFF; --ink:#2E2A3D; --ink-2:#6E6784; --line:#EBDFC4;
+  --leaf:#3FA66B; --leaf-2:#DDF3E4; --leaf-3:#BFE8CC; --soil:#C79A63; --sand:#F1DFB5; --pond:#7CC6F0; --pond-2:#4FA7DC;
+  --coral:#FF7A59; --sun:#FFD166; --violet:#8F6BFF; --violet-2:#EEE8FF;
+  --motion:#4C8DFF; --action:#3FA66B; --control:#FF9F1C; --ask:#8F6BFF; --ok:#3FA66B;
+  --bot:#FF7A59; --bot-eye:#2E2A3D;
+  --r:18px; --shadow:0 6px 18px rgba(72,52,20,.10);
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Nunito,system-ui,sans-serif;font-size:16px;line-height:1.45}
+h1,h2,h3{font-family:Fredoka,Nunito,sans-serif;font-weight:600;margin:0;text-wrap:balance;letter-spacing:.005em}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,[tabindex]:focus-visible,input:focus-visible{outline:3px solid var(--sky,#5FB4E8);outline-offset:2px}
+.wrap{max-width:1360px;margin:0 auto;padding:12px 16px 40px}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 14px;background:var(--card);border-radius:22px;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:10px;font-family:Fredoka,sans-serif;font-weight:700;font-size:24px}
+.brand svg{width:38px;height:38px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+.tab{padding:9px 14px;border-radius:999px;font-weight:800;color:var(--ink-2)}
+.tab[aria-selected="true"]{background:var(--leaf-2);color:var(--ink)}
+.seg{display:flex;background:var(--paper-2);border-radius:999px;padding:3px}
+.seg button{padding:6px 12px;border-radius:999px;font-weight:800;color:var(--ink-2);font-size:14px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.who{display:flex;align-items:center;gap:8px;font-weight:800}
+.who .av{width:34px;height:34px;border-radius:50%;background:var(--sun);display:grid;place-items:center}
+
+.screen[hidden]{display:none}
+.screen{margin-top:14px}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.head h1{font-size:34px}
+.head p{margin:2px 0 0;color:var(--ink-2);max-width:60ch}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--leaf)}
+
+/* ---------- workshop ---------- */
+.ws{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:16px;align-items:start}
+@media (max-width:980px){.ws{grid-template-columns:1fr}}
+.panel{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:14px}
+.task{display:flex;gap:14px;align-items:center;margin-bottom:12px}
+.task .face{width:56px;height:56px;border-radius:50%;background:var(--paper-2);display:grid;place-items:center;flex:none}
+.task .face svg{width:44px;height:44px}
+.task h2{font-size:22px}
+.task p{margin:0;color:var(--ink-2)}
+.tulips{margin-left:auto;display:flex;gap:6px;align-items:center;font-weight:800;color:var(--ink-2)}
+.tulips span.d{width:26px;height:26px;border-radius:50%;background:var(--paper-2);display:grid;place-items:center}
+.tulips span.d.on{background:#FFD9E2}
+
+.world{position:relative;width:100%;max-width:640px;margin:0 auto;aspect-ratio:8/6;border-radius:16px;overflow:hidden;background:var(--leaf-3);
+  display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(6,minmax(0,1fr));gap:0;border:4px solid #A8D9B4}
+.cell{position:relative;min-height:0;overflow:visible}
+.cell.G{background:linear-gradient(0deg,#BDE6C9,#C8EBD2)}
+.cell.G:nth-child(odd){background:linear-gradient(0deg,#B6E2C3,#C3E8CE)}
+.cell.P{background:var(--sand)}
+.cell.W{background:radial-gradient(circle at 40% 40%,#9AD6F5,#6ABBE6);border-radius:10px}
+.cell.F{background:var(--soil);border-radius:8px}
+.cell svg{position:absolute;inset:11%;width:78%;height:78%}
+.cell.F svg{transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .4s}
+.cell.F.dry svg{opacity:.55;filter:saturate(.3);transform:rotate(18deg) translateY(6%)}
+.puddle{position:absolute;inset:auto 12% 10% 12%;height:30%;border-radius:50%;background:rgba(124,198,240,.7);animation:pop .3s ease-out}
+@keyframes pop{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
+.bot{position:absolute;width:12.5%;height:16.666%;left:0;top:50%;transition:left .38s ease,top .38s ease,transform .3s ease;z-index:3;display:grid;place-items:center;pointer-events:none}
+.bot svg{width:86%;height:86%;overflow:visible}
+.bot.bump{animation:bump .35s}
+@keyframes bump{30%{transform:var(--rot) translateX(-8%)}60%{transform:var(--rot) translateX(6%)}}
+.bubble{position:absolute;z-index:5;background:#fff;border-radius:14px;padding:8px 12px;font-weight:800;font-size:14px;box-shadow:var(--shadow);max-width:230px;pointer-events:none;transform:translate(-30%,-115%)}
+.bubble:after{content:"";position:absolute;left:34%;bottom:-8px;border:8px solid transparent;border-top-color:#fff;border-bottom:0}
+.bubble.ai{background:var(--violet-2);color:#4A2FA6}
+.bubble.ai:after{border-top-color:var(--violet-2)}
+.bubble small{display:block;font-weight:700;color:var(--ink-2);font-size:11px}
+
+.pad{position:absolute;right:10px;bottom:10px;z-index:6;display:grid;grid-template-columns:repeat(3,54px);grid-template-rows:repeat(2,54px);gap:6px}
+.pad[hidden]{display:none}
+.pad button{background:#fff;border-radius:14px;box-shadow:0 4px 10px rgba(0,0,0,.15);font-size:22px;display:grid;place-items:center}
+.pad button:active{transform:scale(.94)}
+.pad .fwd{grid-column:2}
+.pad .l{grid-column:1;grid-row:2}.pad .r{grid-column:3;grid-row:2}.pad .w{grid-column:2;grid-row:2;background:#E4F4FF}
+.pad svg{width:26px;height:26px}
+.rec{position:absolute;left:10px;top:10px;z-index:6;background:#fff;border-radius:999px;padding:6px 12px;font-weight:800;font-size:14px;display:flex;gap:8px;align-items:center;box-shadow:var(--shadow)}
+.rec i{width:10px;height:10px;border-radius:50%;background:var(--coral);animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.2}}
+
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:999px;font-weight:800;font-size:16px;background:var(--paper-2);transition:transform .1s}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--leaf);color:#fff}
+.btn.teach{background:var(--coral);color:#fff}
+.btn.quiet{background:transparent;color:var(--ink-2)}
+.btn.ask{background:var(--violet);color:#fff}
+.btn svg{width:20px;height:20px}
+.btn[disabled]{opacity:.45;cursor:default}
+
+/* owl */
+.owl{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:start;margin-top:14px;background:var(--violet-2);border-radius:16px;padding:12px}
+.owl svg.o{width:64px;height:64px}
+.owl .say{font-weight:700}
+.owl .meta{font-size:12px;color:#6a5aa8;margin-top:4px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.owl .meta .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.think{display:inline-flex;gap:4px}.think b{width:8px;height:8px;border-radius:50%;background:#8F6BFF;animation:th 1s infinite}
+.think b:nth-child(2){animation-delay:.2s}.think b:nth-child(3){animation-delay:.4s}
+@keyframes th{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-5px);opacity:1}}
+
+/* script */
+.script h2{font-size:20px;display:flex;align-items:center;gap:8px}
+.script .count{margin-left:auto;font-size:13px;color:var(--ink-2);font-weight:800}
+.palette{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 12px;padding-bottom:12px;border-bottom:2px dashed var(--line)}
+.blk{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:12px;color:#fff;font-weight:800;font-size:15px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18);user-select:none}
+.blk svg{width:20px;height:20px;flex:none}
+.blk.motion{background:var(--motion)}.blk.action{background:var(--action)}.blk.control{background:var(--control)}.blk.ask{background:var(--ask)}
+.palette .blk{cursor:pointer}
+.palette .blk:hover{filter:brightness(1.06)}
+.band1 .blk{font-size:0;padding:10px 12px}.band1 .blk svg{width:24px;height:24px}
+.band1 .blk .n{font-size:15px}
+.prog{display:flex;flex-direction:column;gap:6px;min-height:120px}
+.prog .row{display:flex;align-items:center;gap:6px}
+.prog .blk{position:relative;cursor:pointer}
+.prog .blk.run{outline:3px solid var(--sun);outline-offset:2px;transform:scale(1.03)}
+.prog .blk .x{margin-left:4px;opacity:.7;font-size:13px}
+.prog .rep{border-radius:14px;background:#FFF0DA;padding:6px;display:flex;flex-direction:column;gap:6px;border:2px solid transparent}
+.prog .rep.sel{border-color:var(--control)}
+.prog .rep .hd{display:flex;align-items:center;gap:6px}
+.prog .rep .hd .blk{cursor:pointer}
+.prog .rep .body{margin-left:22px;display:flex;flex-direction:column;gap:6px;border-left:4px solid var(--control);padding-left:8px}
+.prog .rep .nctl{display:inline-flex;gap:2px;margin-left:2px}
+.prog .rep .nctl button{width:26px;height:26px;border-radius:8px;background:rgba(255,255,255,.35);color:#fff;font-weight:800}
+.empty{color:var(--ink-2);font-weight:700;padding:18px 10px;border:2px dashed var(--line);border-radius:14px;text-align:center}
+.tidy{margin-top:10px;background:#FFF4E0;border:2px solid #FFD9A3;border-radius:14px;padding:10px 12px;font-weight:700;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tidy[hidden]{display:none}
+.tidy .btn{padding:8px 14px;font-size:14px;background:var(--control);color:#fff}
+
+/* win */
+.win{position:absolute;inset:0;z-index:8;display:grid;place-items:center;background:rgba(255,247,232,.72);backdrop-filter:blur(2px)}
+.win[hidden]{display:none}
+.win .card{background:#fff;border-radius:22px;padding:22px 26px;box-shadow:var(--shadow);text-align:center;max-width:380px;animation:pop .35s cubic-bezier(.34,1.56,.64,1)}
+.win h3{font-size:26px}
+.win p{margin:6px 0 12px;color:var(--ink-2);font-weight:700}
+.reward{display:inline-flex;gap:8px;align-items:center;background:var(--paper-2);border-radius:999px;padding:8px 14px;font-weight:800;margin:4px}
+.reward.learn{background:#FFF0DA}
+
+/* ---------- island ---------- */
+.island{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px}
+@media (max-width:980px){.island{grid-template-columns:1fr}}
+.map{position:relative;width:100%;aspect-ratio:12/7;border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#9FD9F3,#7CC6F0);padding:5%}
+.land{position:absolute;inset:6% 5% 8% 5%;border-radius:46% 54% 42% 58%/50% 40% 60% 50%;background:#C8EBD2;box-shadow:inset 0 0 0 10px #B4E1C2,0 10px 0 #E9D9A8}
+.pin{position:absolute;display:grid;place-items:center;transform:translate(-50%,-50%)}
+.pin svg{width:100%;height:100%}
+.pin .lbl{position:absolute;top:100%;white-space:nowrap;background:#fff;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:800;box-shadow:var(--shadow)}
+.quests{display:flex;flex-direction:column;gap:10px}
+.quest{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;padding:12px;border-radius:16px;background:var(--card);box-shadow:var(--shadow);text-align:left;width:100%}
+.quest .face{width:52px;height:52px;border-radius:50%;background:var(--paper-2);display:grid;place-items:center}
+.quest .face svg{width:40px;height:40px}
+.quest h3{font-size:17px}
+.quest p{margin:2px 0 0;font-size:14px;color:var(--ink-2)}
+.quest .tag{font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px;color:#fff}
+.quest .tag.motion{background:var(--motion)}.quest .tag.control{background:var(--control)}.quest .tag.ask{background:var(--ask)}
+.quest.done{opacity:.7}
+.quest .go{font-weight:800;color:var(--leaf)}
+
+/* ---------- my robot ---------- */
+.robo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:820px){.robo{grid-template-columns:1fr}}
+.stage{background:linear-gradient(180deg,#FFF3DE,#FFE7BE);border-radius:22px;display:grid;place-items:center;aspect-ratio:1/1;max-height:520px;position:relative}
+.stage svg{width:62%;height:62%;overflow:visible}
+.opts h3{font-size:16px;margin:12px 0 8px}
+.sw{display:flex;gap:10px;flex-wrap:wrap}
+.sw button{width:44px;height:44px;border-radius:50%;box-shadow:inset 0 -4px 0 rgba(0,0,0,.15)}
+.sw button[aria-pressed="true"]{outline:4px solid var(--ink);outline-offset:3px}
+.hats{display:flex;gap:8px;flex-wrap:wrap}
+.hats button{padding:8px 14px;border-radius:999px;background:var(--paper-2);font-weight:800}
+.hats button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.hats button.lock{opacity:.5}
+input.name{font:inherit;font-weight:800;font-size:22px;padding:10px 14px;border-radius:14px;border:2px solid var(--line);width:100%;max-width:320px;background:#fff;color:var(--ink)}
+.stickers{display:flex;gap:8px;flex-wrap:wrap}
+.stickers span{background:#fff;border-radius:12px;padding:6px 10px;font-weight:800;box-shadow:var(--shadow);font-size:14px}
+
+/* ---------- notions ---------- */
+.path{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.notion{background:var(--card);border-radius:18px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;position:relative}
+.notion .st{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;display:flex;gap:6px;align-items:center}
+.notion .st.bloom{color:var(--leaf)}.notion .st.sprout{color:var(--control)}.notion .st.seed{color:var(--ink-2)}
+.notion h3{font-size:18px}
+.notion p{margin:0;font-size:14px;color:var(--ink-2)}
+.notion .prg{font-size:12px;color:var(--ink-2);border-top:1px solid var(--line);padding-top:8px;margin-top:auto}
+.notion.seed{opacity:.75}
+
+/* ---------- grown-ups ---------- */
+.gu{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.gu .panel h3{font-size:18px;margin-bottom:8px}
+.gu ul{margin:6px 0 0;padding-left:18px;color:var(--ink-2)}
+.gu li{margin:4px 0}
+.model{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;background:var(--paper-2);margin-top:8px}
+.model .st{width:10px;height:10px;border-radius:50%;flex:none}
+.model .st.on{background:var(--ok)}.model .st.off{background:#CFC6B3}
+.model b{display:block}
+.model small{color:var(--ink-2)}
+.demo{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.demo input{flex:1 1 200px;font:inherit;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--ink)}
+.out{margin-top:10px;background:var(--violet-2);border-radius:12px;padding:10px 12px;font-weight:700;min-height:44px}
+.out small{display:block;font-weight:700;color:#6a5aa8;font-size:12px}
+.note{margin-top:18px;font-size:13px;color:var(--ink-2);text-align:center}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-fwd" viewBox="0 0 24 24"><path d="M12 4l7 8h-4v8H9v-8H5z" fill="currentColor"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="M9 6L3 11l6 5v-3h6a4 4 0 010 8h-2v-3h2a1 1 0 000-2H9v3z" fill="currentColor" transform="scale(1,-1) translate(0,-24)"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="M15 6l6 5-6 5v-3H9a4 4 0 000 8h2v-3H9a1 1 0 010-2h6v3z" fill="currentColor" transform="scale(1,-1) translate(0,-24)"/></symbol>
+    <symbol id="i-water" viewBox="0 0 24 24"><path d="M12 3s6 7 6 11a6 6 0 01-12 0c0-4 6-11 6-11z" fill="currentColor"/><path d="M9.5 15.5a2.5 2.5 0 002 2.4" stroke="#fff" stroke-width="1.6" stroke-linecap="round" fill="none"/></symbol>
+    <symbol id="i-loop" viewBox="0 0 24 24"><path d="M17 4l3 3-3 3V8H8a3 3 0 000 6h1v2H8a5 5 0 010-10h9zM7 20l-3-3 3-3v2h9a3 3 0 000-6h-1V8h1a5 5 0 010 10H7z" fill="currentColor"/></symbol>
+    <symbol id="i-if" viewBox="0 0 24 24"><path d="M12 2l10 10-10 10L2 12z" fill="currentColor"/><path d="M10 8h4v5h-4zm0 6.5h4v2h-4z" fill="#fff"/></symbol>
+    <symbol id="i-wall" viewBox="0 0 24 24"><path d="M3 5h18v4H3zm0 5h18v4H3zm0 5h18v4H3z" fill="currentColor" opacity=".9"/><path d="M11 5v4m-4 5v4m8-4v4M7 10v4m8 0V9" stroke="#fff" stroke-width="1.5"/></symbol>
+    <symbol id="i-say" viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 012 2v9a2 2 0 01-2 2h-8l-5 4v-4H4a2 2 0 01-2-2V6a2 2 0 012-2z" fill="currentColor"/><circle cx="8" cy="10.5" r="1.4" fill="#fff"/><circle cx="12" cy="10.5" r="1.4" fill="#fff"/><circle cx="16" cy="10.5" r="1.4" fill="#fff"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z" fill="currentColor"/></symbol>
+    <symbol id="i-step" viewBox="0 0 24 24"><path d="M5 4l10 8-10 8z" fill="currentColor"/><rect x="17" y="4" width="3" height="16" fill="currentColor"/></symbol>
+    <symbol id="i-rec" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="currentColor"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M12 5a7 7 0 106.3 4H16l4-5 2 5h-1.6A9 9 0 1112 3z" fill="currentColor"/></symbol>
+    <symbol id="i-tidy" viewBox="0 0 24 24"><path d="M4 6h16v3H4zm0 5h10v3H4zm0 5h6v3H4z" fill="currentColor"/><path d="M17 12l4 4-4 4v-3h-3v-2h3z" fill="currentColor"/></symbol>
+    <symbol id="tulip" viewBox="0 0 48 64"><path d="M24 62V30" stroke="#3FA66B" stroke-width="4" stroke-linecap="round"/><path d="M24 48c-6-2-10-8-12-14 6 0 11 4 12 8-1-4 6-8 12-8-2 6-6 12-12 14z" fill="#3FA66B"/><path d="M10 12c0 14 6 22 14 24 8-2 14-10 14-24-4 4-8 6-14 2-6 4-10 2-14-2z" fill="#FF6B9A"/><path d="M24 14v22" stroke="#E04E7E" stroke-width="2"/></symbol>
+    <symbol id="tree" viewBox="0 0 64 64"><rect x="28" y="40" width="8" height="18" rx="3" fill="#A9773F"/><circle cx="32" cy="26" r="16" fill="#3E9B62"/><circle cx="20" cy="34" r="11" fill="#48AF70"/><circle cx="44" cy="34" r="11" fill="#48AF70"/><circle cx="26" cy="20" r="3" fill="#FFD166"/><circle cx="40" cy="30" r="3" fill="#FFD166"/></symbol>
+    <symbol id="rock" viewBox="0 0 64 64"><path d="M12 48l6-18 14-8 16 6 6 16-8 6H20z" fill="#9C9AA6"/><path d="M20 40l6-10 12-2 8 8-4 8H24z" fill="#B7B5C2"/></symbol>
+    <symbol id="house" viewBox="0 0 64 64"><path d="M8 30L32 8l24 22v28H8z" fill="#FFE3B3"/><path d="M4 32L32 6l28 26-4 4L32 14 8 36z" fill="#E86A5E"/><rect x="26" y="38" width="12" height="18" rx="2" fill="#8B5A2B"/><rect x="12" y="36" width="9" height="9" rx="2" fill="#7CC6F0"/><rect x="43" y="36" width="9" height="9" rx="2" fill="#7CC6F0"/></symbol>
+    <symbol id="granny" viewBox="0 0 64 64"><circle cx="32" cy="30" r="18" fill="#F7D3B5"/><path d="M14 26c0-14 36-14 36 0 0 4-2 6-4 6-4-8-24-8-28 0-2 0-4-2-4-6z" fill="#E9E4EF"/><circle cx="25" cy="30" r="2.5" fill="#2E2A3D"/><circle cx="39" cy="30" r="2.5" fill="#2E2A3D"/><circle cx="25" cy="30" r="5" fill="none" stroke="#2E2A3D" stroke-width="1.5"/><circle cx="39" cy="30" r="5" fill="none" stroke="#2E2A3D" stroke-width="1.5"/><path d="M30 30h4" stroke="#2E2A3D" stroke-width="1.5"/><path d="M26 38q6 5 12 0" stroke="#C0574A" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M14 62c2-12 34-12 36 0z" fill="#8F6BFF"/></symbol>
+    <symbol id="cat" viewBox="0 0 64 64"><path d="M14 30l4-16 10 8h8l10-8 4 16z" fill="#F3B76A"/><ellipse cx="32" cy="38" rx="18" ry="16" fill="#F3B76A"/><circle cx="25" cy="36" r="3" fill="#2E2A3D"/><circle cx="39" cy="36" r="3" fill="#2E2A3D"/><path d="M29 43h6l-3 3z" fill="#E06B8A"/><path d="M10 40h10M10 46h10M44 40h10M44 46h10" stroke="#2E2A3D" stroke-width="1.5"/></symbol>
+    <symbol id="postie" viewBox="0 0 64 64"><circle cx="32" cy="28" r="16" fill="#C98A5E"/><path d="M14 24c2-12 34-12 36 0z" fill="#3E63C8"/><rect x="10" y="20" width="44" height="6" rx="3" fill="#3E63C8"/><circle cx="26" cy="30" r="2.5" fill="#2E2A3D"/><circle cx="38" cy="30" r="2.5" fill="#2E2A3D"/><path d="M27 37q5 4 10 0" stroke="#7A3F2D" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M14 62c2-12 34-12 36 0z" fill="#3E63C8"/></symbol>
+    <symbol id="owl" viewBox="0 0 64 64"><ellipse cx="32" cy="36" rx="22" ry="24" fill="#8F6BFF"/><path d="M12 18l8 8h24l8-8-6 2-4-4-6 4-6-4-4 4z" fill="#8F6BFF"/><ellipse cx="32" cy="42" rx="14" ry="14" fill="#EEE8FF"/><circle cx="24" cy="32" r="8" fill="#fff"/><circle cx="40" cy="32" r="8" fill="#fff"/><circle cx="25" cy="33" r="4" fill="#2E2A3D"/><circle cx="39" cy="33" r="4" fill="#2E2A3D"/><path d="M32 38l-4 5h8z" fill="#FFB347"/><path d="M26 58l-3 4M38 58l3 4" stroke="#FFB347" stroke-width="3" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#tulip" x="8" y="0" width="48" height="64"></use></svg><span data-t="brand">Bot Garden</span></div>
+    <nav class="tabs" role="tablist" aria-label="Screens">
+      <button class="tab" role="tab" data-screen="island" aria-selected="false" data-t="navIsland">Island</button>
+      <button class="tab" role="tab" data-screen="workshop" aria-selected="true" data-t="navWorkshop">Workshop</button>
+      <button class="tab" role="tab" data-screen="robot" aria-selected="false" data-t="navRobot">My robot</button>
+      <button class="tab" role="tab" data-screen="notions" aria-selected="false" data-t="navNotions">Skills</button>
+      <button class="tab" role="tab" data-screen="grownups" aria-selected="false" data-t="navGrown">Grown-ups</button>
+    </nav>
+    <div class="seg" role="group" aria-label="Age band"><button id="band1" aria-pressed="false">7–9</button><button id="band2" aria-pressed="true">10–12</button></div>
+    <div class="seg" role="group" aria-label="Language"><button id="langEN" aria-pressed="true">EN</button><button id="langFR" aria-pressed="false">FR</button></div>
+    <div class="who"><span class="av"><svg width="22" height="22" viewBox="0 0 64 64"><use href="#owl"></use></svg></span><span id="whoName">Léa</span></div>
+  </header>
+
+  <!-- ================= WORKSHOP ================= -->
+  <section class="screen" id="s-workshop">
+    <div class="head">
+      <div><div class="eyebrow" data-t="wsEyebrow">Mamie Rose's request</div><h1 data-t="wsTitle">Teach Pip to water the tulips</h1><p data-t="wsSub">Drive Pip yourself first. Pip remembers every step as a block, and then you can tidy the steps up.</p></div>
+    </div>
+    <div class="ws" id="ws">
+      <div class="panel">
+        <div class="task">
+          <div class="face"><svg><use href="#granny"></use></svg></div>
+          <div><h2 data-t="taskH">Mamie Rose</h2><p data-t="taskP">"My three tulips are so thirsty. Can Pip water them for me?"</p></div>
+          <div class="tulips" id="tulipCount"><span class="d"></span><span class="d"></span><span class="d"></span></div>
+        </div>
+        <div class="world" id="world" aria-label="The garden">
+          <div class="rec" id="recBadge" hidden><i></i><span data-t="recording">Pip is learning…</span></div>
+          <div class="pad" id="pad" hidden>
+            <button class="fwd" data-op="fwd" title="Forward"><svg><use href="#i-fwd"></use></svg></button>
+            <button class="l" data-op="left" title="Turn left"><svg><use href="#i-left"></use></svg></button>
+            <button class="w" data-op="water" title="Water"><svg style="color:#4FA7DC"><use href="#i-water"></use></svg></button>
+            <button class="r" data-op="right" title="Turn right"><svg><use href="#i-right"></use></svg></button>
+          </div>
+          <div class="win" id="win" hidden><div class="card">
+            <svg width="72" height="72" viewBox="0 0 64 64"><use href="#granny"></use></svg>
+            <h3 data-t="winH">"My tulips! Thank you, Pip."</h3>
+            <p id="winP"></p>
+            <div><span class="reward" id="rewardHat">🌻 <span data-t="winHat">Sunflower hat unlocked</span></span><span class="reward learn" id="rewardLearn" hidden>🔁 <span data-t="winLearn">Pip learned: repeat</span></span></div>
+            <div class="controls" style="justify-content:center"><button class="btn primary" id="winIsland" data-t="winIsland">Back to the island</button><button class="btn" id="winStay" data-t="winStay">Keep tinkering</button></div>
+          </div></div>
+        </div>
+        <div class="controls">
+          <button class="btn teach" id="btnTeach"><svg><use href="#i-rec"></use></svg><span data-t="teach">Teach Pip</span></button>
+          <button class="btn primary" id="btnPlay"><svg><use href="#i-play"></use></svg><span data-t="play">Play</span></button>
+          <button class="btn" id="btnStep"><svg><use href="#i-step"></use></svg><span data-t="step">One step</span></button>
+          <button class="btn" id="btnReset"><svg><use href="#i-reset"></use></svg><span data-t="reset">Start over</span></button>
+          <button class="btn ask" id="btnAsk" style="margin-left:auto"><svg><use href="#owl"></use></svg><span data-t="ask">Ask Olive</span></button>
+        </div>
+        <div class="owl">
+          <svg class="o" viewBox="0 0 64 64" aria-hidden="true"><use href="#owl"></use></svg>
+          <div><div class="say" id="owlSay"></div><div class="meta"><span class="dot"></span><span data-t="owlMeta">Olive lives on this computer. No internet needed.</span></div></div>
+        </div>
+      </div>
+
+      <div class="panel script" id="scriptPanel">
+        <h2><span data-t="scriptH">Pip's steps</span><span class="count" id="blockCount"></span></h2>
+        <div class="palette" id="palette"></div>
+        <div class="prog" id="prog"></div>
+        <div class="tidy" id="tidy" hidden><span id="tidyText"></span><button class="btn" id="tidyGo"><svg><use href="#i-tidy"></use></svg><span data-t="tidyGo">Fold it</span></button><button class="btn quiet" id="tidyNo" data-t="tidyNo">Not now</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ISLAND ================= -->
+  <section class="screen" id="s-island" hidden>
+    <div class="head"><div><div class="eyebrow" data-t="isEyebrow">Your island</div><h1 data-t="isTitle">Who needs a hand today?</h1><p data-t="isSub">Every request teaches Pip one new trick. Nothing is timed and nothing runs out. The garden waits for you.</p></div></div>
+    <div class="island">
+      <div class="map" aria-label="Island map">
+        <div class="land"></div>
+        <div class="pin" style="left:24%;top:30%;width:11%;height:19%"><svg viewBox="0 0 64 64"><use href="#house"></use></svg><span class="lbl">Mamie Rose</span></div>
+        <div class="pin" style="left:62%;top:26%;width:9%;height:16%"><svg viewBox="0 0 64 64"><use href="#tree"></use></svg></div>
+        <div class="pin" style="left:72%;top:34%;width:9%;height:16%"><svg viewBox="0 0 64 64"><use href="#tree"></use></svg></div>
+        <div class="pin" style="left:40%;top:56%;width:7%;height:12%"><svg viewBox="0 0 64 64"><use href="#tulip" x="8" width="48"></use></svg></div>
+        <div class="pin" style="left:46%;top:60%;width:7%;height:12%"><svg viewBox="0 0 64 64"><use href="#tulip" x="8" width="48"></use></svg></div>
+        <div class="pin" style="left:52%;top:56%;width:7%;height:12%"><svg viewBox="0 0 64 64"><use href="#tulip" x="8" width="48"></use></svg></div>
+        <div class="pin" style="left:78%;top:66%;width:10%;height:17%"><svg viewBox="0 0 64 64"><use href="#cat"></use></svg><span class="lbl">Biscuit</span></div>
+        <div class="pin" style="left:20%;top:70%;width:11%;height:19%"><svg viewBox="0 0 64 64"><use href="#rock"></use></svg></div>
+        <div class="pin" style="left:34%;top:40%;width:10%;height:17%"><svg viewBox="0 0 64 64" class="botsvg"></svg><span class="lbl" id="isBotName">Pip</span></div>
+        <div class="pin" style="left:60%;top:76%;width:8%;height:14%"><svg viewBox="0 0 64 64"><use href="#owl"></use></svg><span class="lbl">Olive</span></div>
+      </div>
+      <div class="quests">
+        <div class="eyebrow" data-t="isReq">Requests</div>
+        <button class="quest" data-go="workshop"><div class="face"><svg><use href="#granny"></use></svg></div><div><h3>Mamie Rose</h3><p data-t="q1">Water my three tulips</p></div><span class="tag control" data-t="q1t">repeat</span></button>
+        <button class="quest" data-go="workshop"><div class="face"><svg><use href="#cat"></use></svg></div><div><h3>Biscuit</h3><p data-t="q2">Feed me, but only if my bowl is empty</p></div><span class="tag control" data-t="q2t">if</span></button>
+        <button class="quest" data-go="workshop"><div class="face"><svg><use href="#postie"></use></svg></div><div><h3>Sami</h3><p data-t="q3">Deliver a letter and say something kind</p></div><span class="tag ask" data-t="q3t">say</span></button>
+        <button class="quest done" data-go="workshop"><div class="face"><svg><use href="#postie"></use></svg></div><div><h3>Sami</h3><p data-t="q4">Walk the path to the post box</p></div><span class="go">✓ <span data-t="done">done</span></span></button>
+        <div class="eyebrow" style="margin-top:8px" data-t="isFree">Free play</div>
+        <button class="quest" data-go="workshop"><div class="face"><svg viewBox="0 0 64 64" class="botsvg"></svg></div><div><h3 data-t="sandH">Pip's garden</h3><p data-t="sandP">No request. Plant, build, teach Pip anything.</p></div><span class="go">→</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MY ROBOT ================= -->
+  <section class="screen" id="s-robot" hidden>
+    <div class="head"><div><div class="eyebrow" data-t="rbEyebrow">My robot</div><h1 data-t="rbTitle">Make Pip yours</h1><p data-t="rbSub">Colours, hats and a name are always free. Hats are gifts from the islanders you helped.</p></div></div>
+    <div class="robo">
+      <div class="stage"><svg viewBox="0 0 64 64" class="botsvg big"></svg></div>
+      <div class="panel opts">
+        <h3 data-t="rbName">Name</h3>
+        <input class="name" id="botName" value="Pip" maxlength="14">
+        <h3 data-t="rbColour">Colour</h3>
+        <div class="sw" id="swatches"></div>
+        <h3 data-t="rbEyes">Eyes</h3>
+        <div class="hats" id="eyes"><button aria-pressed="true" data-eye="round" data-t="eyeRound">Round</button><button aria-pressed="false" data-eye="happy" data-t="eyeHappy">Happy</button><button aria-pressed="false" data-eye="wink" data-t="eyeWink">Wink</button></div>
+        <h3 data-t="rbHat">Hat</h3>
+        <div class="hats" id="hats"><button aria-pressed="true" data-hat="none" data-t="hatNone">None</button><button aria-pressed="false" data-hat="cap" data-t="hatCap">Cap</button><button aria-pressed="false" data-hat="sun" id="hatSun" class="lock">🌻 <span data-t="hatSun">Sunflower</span> <small data-t="hatFrom">· Mamie Rose</small></button><button class="lock" data-hat="crown">👑 <span data-t="hatCrown">Crown</span> <small data-t="hatCrownFrom">· Sami</small></button></div>
+        <h3 data-t="rbStickers">Stickers on Pip's shell</h3>
+        <div class="stickers"><span>🐾 Biscuit</span><span>✉️ Sami</span><span id="stTulip" hidden>🌷 Mamie Rose</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= NOTIONS ================= -->
+  <section class="screen" id="s-notions" hidden>
+    <div class="head"><div><div class="eyebrow" data-t="ntEyebrow">Pip's tricks</div><h1 data-t="ntTitle">What Pip can do now</h1><p data-t="ntSub">Each trick is a block. A trick blooms the first time you use it to finish a request. There is no score and nothing wilts.</p></div></div>
+    <div class="path" id="notions"></div>
+  </section>
+
+  <!-- ================= GROWN-UPS ================= -->
+  <section class="screen" id="s-grownups" hidden>
+    <div class="head"><div><div class="eyebrow" data-t="guEyebrow">For grown-ups</div><h1 data-t="guTitle">Olive, offline</h1><p data-t="guSub">Olive is the helper owl. Her hints come from the game's own rules. A small language model, stored on this computer, only puts them into friendly words and writes the islanders' thank-yous.</p></div></div>
+    <div class="gu">
+      <div class="panel">
+        <h3 data-t="guWhereH">Where Olive lives</h3>
+        <div class="model"><span class="st on"></span><div><b data-t="guM1">This computer · small model (0.5 GB)</b><small data-t="guM1s">Installed. Slow but private: a hint takes 5–10 seconds here.</small></div></div>
+        <div class="model"><span class="st off"></span><div><b data-t="guM2">Family Mac · bigger model (1.3 GB)</b><small data-t="guM2s">Not found on the home network right now. Olive uses this computer.</small></div></div>
+        <div class="model"><span class="st off"></span><div><b data-t="guM3">No model at all</b><small data-t="guM3s">The game still works. Olive's hints use her written lines instead.</small></div></div>
+      </div>
+      <div class="panel">
+        <h3 data-t="guRulesH">What Olive is allowed to do</h3>
+        <ul>
+          <li data-t="guR1">Say a hint in her own words. The hint itself is decided by the game, not by the model.</li>
+          <li data-t="guR2">Write a thank-you or a greeting for an islander, in French or English, under 25 words.</li>
+          <li data-t="guR3">Never place a block, never solve a request, never talk about anything outside the island.</li>
+          <li data-t="guR4">Every line is checked against a word list before it is shown. A refused line falls back to a written one.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3 data-t="guDataH">Nothing leaves the house</h3>
+        <ul>
+          <li data-t="guD1">No account, no internet, no adverts. The game is installed like any other program.</li>
+          <li data-t="guD2">Saved on this computer. A save code moves a garden to another computer.</li>
+          <li data-t="guD3">No timers, streaks, points or "you missed a day". Rewards are cosmetic and always earnable.</li>
+        </ul>
+        <h3 style="margin-top:14px" data-t="guTryH">Try Olive</h3>
+        <div class="demo"><input id="tryIn" value="Write Mamie Rose a thank-you from Pip"><button class="btn ask" id="tryGo" data-t="guTryGo">Ask</button></div>
+        <div class="out" id="tryOut"><small data-t="guTryNote">Example of a reply from the small offline model</small><span id="tryText">—</span></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="note" data-t="note">Interactive mockup. The garden, the recording and the tidy-up really work. Olive's replies here are written examples: no model runs in this page.</p>
+</div>
+
+<script>
+/* ---------------- strings ---------------- */
+const STR = {
+en:{brand:'Bot Garden',navIsland:'Island',navWorkshop:'Workshop',navRobot:'My robot',navNotions:'Skills',navGrown:'Grown-ups',
+ wsEyebrow:"Mamie Rose's request",wsTitle:'Teach {b} to water the tulips',wsSub:'Drive {b} yourself first. {b} remembers every step as a block, and then you can tidy the steps up.',
+ taskH:'Mamie Rose',taskP:'"My three tulips are so thirsty. Can {b} water them for me?"',recording:'{b} is learning…',
+ winH:'"My tulips! Thank you, {b}."',winHat:'Sunflower hat unlocked',winLearn:'{b} learned: repeat',winIsland:'Back to the island',winStay:'Keep tinkering',
+ teach:'Teach {b}',teachStop:'Done teaching',play:'Play',step:'One step',reset:'Start over',ask:'Ask Olive',owlMeta:'Olive lives on this computer. No internet needed.',
+ scriptH:"{b}'s steps",tidyGo:'Fold it',tidyNo:'Not now',blocks:'{n} blocks',block1:'1 block',
+ bFwd:'forward',bLeft:'turn left',bRight:'turn right',bWater:'water',bRepeat:'repeat',bTimes:'times',bUntil:'until the wall',bIf:'if a tulip is ahead',bSay:'say thanks',
+ empty:'No steps yet. Press "Teach {b}" and drive, or tap a block.',
+ tidyFound:'I spotted the same {len} steps, {n} times in a row.',tidyFound1:'{n} × "{s}" in a row.',
+ hintEmpty:'Drive {b} yourself first: press Teach and use the arrows. {b} remembers every step.',
+ hintPattern:'Look at the steps: the same little dance, over and over. What if {b} could "do this {n} times"?',
+ hintMissed:'{b} watered {w} of 3 tulips. Which one did {b} walk past?',
+ hintBump:'{b} bumped into something. Which step sent {b} the wrong way?',
+ hintDone:'Perfect! Could you do it with fewer blocks? A repeat counts as one.',
+ hintWet:'A puddle! {b} watered where there is no tulip. Where was {b} facing?',
+ hintStart:'Hello! Mamie Rose is waiting. Press Teach and show {b} what to do.',
+ sayBump:'Boing!',saySplash:'Splash!',sayDrink:'Glug glug!',
+ winFew:'{k} blocks. Neat!',winMany:'{k} blocks. It works, and it could be shorter.',
+ isEyebrow:'Your island',isTitle:'Who needs a hand today?',isSub:'Every request teaches {b} one new trick. Nothing is timed and nothing runs out. The garden waits for you.',
+ isReq:'Requests',q1:'Water my three tulips',q1t:'repeat',q2:'Feed me, but only if my bowl is empty',q2t:'if',q3:'Deliver a letter and say something kind',q3t:'say',q4:'Walk the path to the post box',done:'done',
+ isFree:'Free play',sandH:"{b}'s garden",sandP:'No request. Plant, build, teach {b} anything.',
+ rbEyebrow:'My robot',rbTitle:'Make {b} yours',rbSub:'Colours, hats and a name are always free. Hats are gifts from the islanders you helped.',
+ rbName:'Name',rbColour:'Colour',rbEyes:'Eyes',eyeRound:'Round',eyeHappy:'Happy',eyeWink:'Wink',rbHat:'Hat',hatNone:'None',hatCap:'Cap',hatSun:'Sunflower',hatFrom:'· Mamie Rose',hatCrown:'Crown',hatCrownFrom:'· Sami',rbStickers:"Stickers on {b}'s shell",
+ ntEyebrow:"{b}'s tricks",ntTitle:'What {b} can do now',ntSub:'Each trick is a block. A trick blooms the first time you use it to finish a request. There is no score and nothing wilts.',
+ stBloom:'Blooming',stSprout:'Sprouted',stSeed:'Seed',
+ n1:'Steps in order',n1p:'{b} does exactly what you say, one step after another.',
+ n2:'Repeat',n2p:'Do the same dance several times, without saying it several times.',
+ n3:'Repeat until',n3p:'Keep going until something is true, like reaching the wall.',
+ n4:'If',n4p:'Only do it when something is true: water only if a tulip is ahead.',
+ n5:'When',n5p:'Start when something happens: when Biscuit meows, go to the bowl.',
+ n6:'Counting',n6p:'{b} keeps a number in mind, like how many eggs are in the basket.',
+ n7:'A trick with a name',n7p:'Bundle steps into one new block, like "water a row", and use it anywhere.',
+ p1:'CP–CE2 · moves on a grid, up to 15 instructions (programme 2025)',p2:'6e · "répéter n fois" (programme 2025); 5e · simple loop',p3:'3e · conditional loop (programme 2026)',p4:'4e · conditional instructions (programme 2026)',p5:'Cycle 4 · events (2016 programme; not in the 2026 text)',p6:'4e · handle a variable (programme 2026)',p7:'Beyond the programme · procedures, as in Lightbot',
+ guEyebrow:'For grown-ups',guTitle:'Olive, offline',guSub:"Olive is the helper owl. Her hints come from the game's own rules. A small language model, stored on this computer, only puts them into friendly words and writes the islanders' thank-yous.",
+ guWhereH:'Where Olive lives',guM1:'This computer · small model (0.5 GB)',guM1s:'Installed. Slow but private: a hint takes 5–10 seconds here.',guM2:'Family Mac · bigger model (1.3 GB)',guM2s:'Not found on the home network right now. Olive uses this computer.',guM3:'No model at all',guM3s:"The game still works. Olive's hints use her written lines instead.",
+ guRulesH:'What Olive is allowed to do',guR1:'Say a hint in her own words. The hint itself is decided by the game, not by the model.',guR2:'Write a thank-you or a greeting for an islander, in French or English, under 25 words.',guR3:'Never place a block, never solve a request, never talk about anything outside the island.',guR4:'Every line is checked against a word list before it is shown. A refused line falls back to a written one.',
+ guDataH:'Nothing leaves the house',guD1:'No account, no internet, no adverts. The game is installed like any other program.',guD2:'Saved on this computer. A save code moves a garden to another computer.',guD3:'No timers, streaks, points or "you missed a day". Rewards are cosmetic and always earnable.',
+ guTryH:'Try Olive',guTryGo:'Ask',guTryNote:'Example of a reply from the small offline model',
+ thanks:['Dear Mamie Rose, your tulips are drinking and so am I. Love, {b}.','Mamie Rose, three tulips, three drinks, one happy robot. {b} x','Thank you for trusting me with your garden, Mamie Rose. The tulips say hello!'],
+ note:"Interactive mockup. The garden, the recording and the tidy-up really work. Olive's replies here are written examples: no model runs in this page."},
+fr:{brand:'Bot Garden',navIsland:'Île',navWorkshop:'Atelier',navRobot:'Mon robot',navNotions:'Astuces',navGrown:'Parents',
+ wsEyebrow:'La demande de Mamie Rose',wsTitle:'Apprends à {b} à arroser les tulipes',wsSub:'Conduis {b} toi-même d\'abord. {b} retient chaque pas comme un bloc, et ensuite tu peux ranger les pas.',
+ taskH:'Mamie Rose',taskP:'« Mes trois tulipes ont tellement soif. {b} peut les arroser pour moi ? »',recording:'{b} apprend…',
+ winH:'« Mes tulipes ! Merci, {b}. »',winHat:'Chapeau tournesol débloqué',winLearn:'{b} a appris : répéter',winIsland:'Retour à l\'île',winStay:'Continuer à bricoler',
+ teach:'Apprendre à {b}',teachStop:'Fin de la leçon',play:'Jouer',step:'Un pas',reset:'Recommencer',ask:'Demander à Olive',owlMeta:'Olive habite dans cet ordinateur. Pas besoin d\'internet.',
+ scriptH:'Les pas de {b}',tidyGo:'Plier',tidyNo:'Pas maintenant',blocks:'{n} blocs',block1:'1 bloc',
+ bFwd:'avancer',bLeft:'tourner à gauche',bRight:'tourner à droite',bWater:'arroser',bRepeat:'répéter',bTimes:'fois',bUntil:'jusqu\'au mur',bIf:'si une tulipe devant',bSay:'dire merci',
+ empty:'Pas encore de pas. Appuie sur « Apprendre à {b} » et conduis, ou touche un bloc.',
+ tidyFound:'J\'ai vu les mêmes {len} pas, {n} fois de suite.',tidyFound1:'{n} × « {s} » de suite.',
+ hintEmpty:'Conduis {b} toi-même d\'abord : appuie sur Apprendre et utilise les flèches. {b} retient chaque pas.',
+ hintPattern:'Regarde les pas : la même petite danse, encore et encore. Et si {b} pouvait « faire ça {n} fois » ?',
+ hintMissed:'{b} a arrosé {w} tulipes sur 3. Laquelle a-t-il ratée ?',
+ hintBump:'{b} s\'est cogné. Quel pas l\'a envoyé du mauvais côté ?',
+ hintDone:'Parfait ! Tu peux le faire avec moins de blocs ? Un « répéter » compte pour un.',
+ hintWet:'Une flaque ! {b} a arrosé là où il n\'y a pas de tulipe. Il regardait où ?',
+ hintStart:'Coucou ! Mamie Rose attend. Appuie sur Apprendre et montre à {b} quoi faire.',
+ sayBump:'Boing !',saySplash:'Splash !',sayDrink:'Glou glou !',
+ winFew:'{k} blocs. Bien joué !',winMany:'{k} blocs. Ça marche, et ça pourrait être plus court.',
+ isEyebrow:'Ton île',isTitle:'Qui a besoin d\'aide aujourd\'hui ?',isSub:'Chaque demande apprend une nouvelle astuce à {b}. Rien n\'est chronométré, rien ne s\'épuise. Le jardin t\'attend.',
+ isReq:'Demandes',q1:'Arrose mes trois tulipes',q1t:'répéter',q2:'Nourris-moi, mais seulement si ma gamelle est vide',q2t:'si',q3:'Livre une lettre et dis quelque chose de gentil',q3t:'dire',q4:'Suis le chemin jusqu\'à la boîte aux lettres',done:'fait',
+ isFree:'Jeu libre',sandH:'Le jardin de {b}',sandP:'Sans demande. Plante, construis, apprends n\'importe quoi à {b}.',
+ rbEyebrow:'Mon robot',rbTitle:'{b}, à ta façon',rbSub:'Les couleurs, les chapeaux et le nom sont toujours gratuits. Les chapeaux sont des cadeaux des habitants que tu as aidés.',
+ rbName:'Nom',rbColour:'Couleur',rbEyes:'Yeux',eyeRound:'Ronds',eyeHappy:'Contents',eyeWink:'Clin d\'œil',rbHat:'Chapeau',hatNone:'Aucun',hatCap:'Casquette',hatSun:'Tournesol',hatFrom:'· Mamie Rose',hatCrown:'Couronne',hatCrownFrom:'· Sami',rbStickers:'Autocollants sur la coque de {b}',
+ ntEyebrow:'Les astuces de {b}',ntTitle:'Ce que {b} sait faire',ntSub:'Chaque astuce est un bloc. Une astuce fleurit la première fois que tu l\'utilises pour finir une demande. Pas de score, rien ne fane.',
+ stBloom:'En fleur',stSprout:'Germée',stSeed:'Graine',
+ n1:'Des pas dans l\'ordre',n1p:'{b} fait exactement ce que tu dis, un pas après l\'autre.',
+ n2:'Répéter',n2p:'Faire la même danse plusieurs fois, sans la dire plusieurs fois.',
+ n3:'Répéter jusqu\'à',n3p:'Continuer jusqu\'à ce que quelque chose soit vrai, comme toucher le mur.',
+ n4:'Si',n4p:'Le faire seulement si c\'est vrai : arroser seulement s\'il y a une tulipe devant.',
+ n5:'Quand',n5p:'Démarrer quand quelque chose arrive : quand Biscuit miaule, aller à la gamelle.',
+ n6:'Compter',n6p:'{b} garde un nombre en tête, comme le nombre d\'œufs dans le panier.',
+ n7:'Une astuce avec un nom',n7p:'Regrouper des pas dans un nouveau bloc, comme « arroser une rangée », et l\'utiliser partout.',
+ p1:'CP–CE2 · déplacements sur quadrillage, 15 instructions max (programme 2025)',p2:'6e · « répéter n fois » (programme 2025) ; 5e · boucle simple',p3:'3e · boucle conditionnelle (programme 2026)',p4:'4e · instructions conditionnelles (programme 2026)',p5:'Cycle 4 · événements (programme 2016 ; absent du texte 2026)',p6:'4e · manipuler une variable (programme 2026)',p7:'Hors programme · procédures, comme dans Lightbot',
+ guEyebrow:'Pour les parents',guTitle:'Olive, hors ligne',guSub:'Olive est la chouette qui aide. Ses indices viennent des règles du jeu. Un petit modèle de langage, stocké sur cet ordinateur, ne fait que les formuler gentiment et écrire les mercis des habitants.',
+ guWhereH:'Où habite Olive',guM1:'Cet ordinateur · petit modèle (0,5 Go)',guM1s:'Installé. Lent mais privé : un indice prend 5 à 10 secondes ici.',guM2:'Le Mac de la famille · modèle plus grand (1,3 Go)',guM2s:'Introuvable sur le réseau de la maison pour l\'instant. Olive utilise cet ordinateur.',guM3:'Aucun modèle',guM3s:'Le jeu marche quand même. Olive utilise ses phrases écrites.',
+ guRulesH:'Ce qu\'Olive a le droit de faire',guR1:'Dire un indice avec ses mots. L\'indice lui-même est décidé par le jeu, pas par le modèle.',guR2:'Écrire un merci ou un bonjour pour un habitant, en français ou en anglais, en moins de 25 mots.',guR3:'Ne jamais poser un bloc, ne jamais résoudre une demande, ne jamais parler d\'autre chose que de l\'île.',guR4:'Chaque phrase est vérifiée avec une liste de mots avant d\'être montrée. Une phrase refusée est remplacée par une phrase écrite.',
+ guDataH:'Rien ne sort de la maison',guD1:'Pas de compte, pas d\'internet, pas de pub. Le jeu s\'installe comme n\'importe quel programme.',guD2:'Sauvegardé sur cet ordinateur. Un code de sauvegarde déplace un jardin vers un autre ordinateur.',guD3:'Pas de chrono, de série, de points ni de « tu as raté un jour ». Les récompenses sont décoratives et toujours gagnables.',
+ guTryH:'Essayer Olive',guTryGo:'Demander',guTryNote:'Exemple de réponse du petit modèle hors ligne',
+ thanks:['Chère Mamie Rose, tes tulipes boivent et moi aussi. Bisous, {b}.','Mamie Rose, trois tulipes, trois gorgées, un robot content. {b}','Merci de m\'avoir confié ton jardin, Mamie Rose. Les tulipes te disent bonjour !'],
+ note:'Maquette interactive. Le jardin, l\'enregistrement et le rangement fonctionnent vraiment. Les réponses d\'Olive ici sont des exemples écrits : aucun modèle ne tourne dans cette page.'}
+};
+let lang='en', band=2, botName='Pip';
+const t=(k,v={})=>{let s=STR[lang][k]??STR.en[k]??k; if(Array.isArray(s)) s=s[Math.floor(Math.random()*s.length)]; s=s.replaceAll('{b}',botName); for(const [a,b] of Object.entries(v)) s=s.replaceAll('{'+a+'}',b); return s;};
+function applyStrings(){ document.querySelectorAll('[data-t]').forEach(el=>{ el.textContent=t(el.dataset.t); }); document.documentElement.lang=lang; document.getElementById('isBotName').textContent=botName; renderPalette(); renderProg(); renderNotions(); owl(lastHintKey,lastHintVars); btnTeachLabel(); }
+
+/* ---------------- robot drawing ---------------- */
+const look={color:'#FF7A59',eye:'round',hat:'none',sun:false};
+const COLORS=['#FF7A59','#FFB347','#FFD166','#3FA66B','#5FB4E8','#8F6BFF','#F06BA8','#7A8CA3'];
+function botSVG(){
+  const eyes = look.eye==='happy' ? '<path d="M22 24q4-5 8 0M34 24q4-5 8 0" stroke="#2E2A3D" stroke-width="3" fill="none" stroke-linecap="round"/>'
+    : look.eye==='wink' ? '<circle cx="26" cy="24" r="3.5" fill="#2E2A3D"/><path d="M34 24h8" stroke="#2E2A3D" stroke-width="3" stroke-linecap="round"/>'
+    : '<circle cx="26" cy="24" r="3.5" fill="#2E2A3D"/><circle cx="38" cy="24" r="3.5" fill="#2E2A3D"/><circle cx="27" cy="23" r="1.2" fill="#fff"/><circle cx="39" cy="23" r="1.2" fill="#fff"/>';
+  const hat = look.hat==='cap' ? '<path d="M18 14h28v6H18z" fill="#3E63C8"/><path d="M14 20h36v3H14z" fill="#3E63C8"/>'
+    : look.hat==='sun' ? '<g transform="translate(46,10)"><circle r="7" fill="#7A4B1F"/>'+[0,45,90,135,180,225,270,315].map(a=>'<ellipse rx="3" ry="6" cx="0" cy="-10" fill="#FFD166" transform="rotate('+a+')"/>').join('')+'</g>'
+    : look.hat==='crown' ? '<path d="M18 16l6 6 8-10 8 10 6-6v8H18z" fill="#FFD166"/>' : '';
+  return '<g><ellipse cx="32" cy="58" rx="18" ry="4" fill="rgba(0,0,0,.12)"/>'
+   +'<rect x="12" y="10" width="40" height="46" rx="16" fill="'+look.color+'"/>'
+   +'<rect x="18" y="16" width="28" height="16" rx="8" fill="#fff"/>'+eyes
+   +'<rect x="24" y="38" width="16" height="6" rx="3" fill="rgba(0,0,0,.18)"/>'
+   +'<rect x="6" y="26" width="6" height="16" rx="3" fill="'+look.color+'" stroke="rgba(0,0,0,.15)"/><rect x="52" y="26" width="6" height="16" rx="3" fill="'+look.color+'" stroke="rgba(0,0,0,.15)"/>'
+   +'<path d="M32 10V4" stroke="#2E2A3D" stroke-width="2"/><circle cx="32" cy="3" r="3" fill="#FFD166"/>'
+   +'<path d="M50 44l6 2v6l-6 2z" fill="#4FA7DC"/>'
+   +hat+'</g>';
+}
+function paintBots(){ document.querySelectorAll('.botsvg').forEach(s=>{ s.innerHTML=botSVG(); }); const b=document.getElementById('botEl'); if(b) b.querySelector('svg').innerHTML=botSVG(); }
+
+/* ---------------- world ---------------- */
+const MAP=[ 'GGTGGGTH','GGGGGGGG','GGFGFGFG','PPPPPPPP','GWWGGRGG','GGGGGTGG' ];
+const W=8,H=6;
+const world=document.getElementById('world');
+let cells=[], tulips={}, robot, puddles=new Set(), bumped=false, splashed=false, runTimer=null, running=false;
+function buildWorld(){
+  cells=[];tulips={};
+  world.querySelectorAll('.cell,#botEl').forEach(e=>e.remove());
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const ch=MAP[y][x]; const d=document.createElement('div'); d.className='cell '+(ch==='F'?'F dry':ch==='W'?'W':ch==='P'?'P':'G'); d.dataset.x=x;d.dataset.y=y;
+    if(ch==='T') d.innerHTML='<svg><use href="#tree"></use></svg>';
+    if(ch==='R') d.innerHTML='<svg><use href="#rock"></use></svg>';
+    if(ch==='H') d.innerHTML='<svg><use href="#house"></use></svg>';
+    if(ch==='F'){ d.innerHTML='<svg><use href="#tulip"></use></svg>'; tulips[x+','+y]=false; }
+    world.insertBefore(d, document.getElementById('pad'));
+    cells.push(d);
+  }
+  const b=document.createElement('div'); b.id='botEl'; b.className='bot'; b.innerHTML='<svg viewBox="0 0 64 64"></svg>'; world.appendChild(b);
+  robot={x:0,y:3,d:1}; puddles.clear(); bumped=false; splashed=false;
+  paintBots(); placeBot(false); renderTulips();
+}
+const DX=[0,1,0,-1],DY=[-1,0,1,0];
+function cell(x,y){ return cells[y*W+x]; }
+function placeBot(anim=true){ const b=document.getElementById('botEl'); b.style.left=(robot.x*12.5)+'%'; b.style.top=(robot.y*100/6)+'%'; b.style.setProperty('--rot','rotate('+(robot.d*90)+'deg)'); b.style.transform='rotate('+(robot.d*90)+'deg)'; }
+function blocked(x,y){ if(x<0||y<0||x>=W||y>=H) return true; const c=MAP[y][x]; return c==='W'||c==='R'||c==='T'||c==='H'||c==='F'; }
+function say(txt,ai=false){ const b=document.getElementById('botEl'); const old=world.querySelector('.bubble'); if(old) old.remove(); const s=document.createElement('div'); s.className='bubble'+(ai?' ai':''); s.innerHTML=(ai?'<small>Olive · '+(lang==='fr'?'exemple':'example')+'</small>':'')+txt; s.style.left=(robot.x*12.5+6)+'%'; s.style.top=(robot.y*100/6)+'%'; world.appendChild(s); setTimeout(()=>s.remove(), ai?3200:1100); }
+function renderTulips(){ for(const k in tulips){ const [x,y]=k.split(',').map(Number); cell(x,y).classList.toggle('dry',!tulips[k]); } const n=Object.values(tulips).filter(Boolean).length; document.querySelectorAll('#tulipCount .d').forEach((d,i)=>{ d.classList.toggle('on',i<n); d.innerHTML=i<n?'<svg width="16" height="16" viewBox="0 0 48 64"><use href="#tulip"></use></svg>':''; }); return n; }
+function exec(op){ // returns true if it changed the world
+  const b=document.getElementById('botEl');
+  if(op==='left'){ robot.d=(robot.d+3)%4; placeBot(); return true; }
+  if(op==='right'){ robot.d=(robot.d+1)%4; placeBot(); return true; }
+  if(op==='fwd'){ const nx=robot.x+DX[robot.d], ny=robot.y+DY[robot.d]; if(blocked(nx,ny)){ bumped=true; b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump'); say(t('sayBump')); return false; } robot.x=nx;robot.y=ny; placeBot(); return true; }
+  if(op==='water'){ const fx=robot.x+DX[robot.d], fy=robot.y+DY[robot.d]; const k=fx+','+fy; if(k in tulips){ tulips[k]=true; renderTulips(); say(t('sayDrink')); return true; } if(fx>=0&&fy>=0&&fx<W&&fy<H&&!blocked(fx,fy)){ const c=cell(fx,fy); if(!c.querySelector('.puddle')){ const p=document.createElement('div'); p.className='puddle'; c.appendChild(p);} splashed=true; say(t('saySplash')); } return false; }
+  if(op==='say'){ say(t('thanks'),true); return true; }
+  return false;
+}
+function frontIsTulip(){ return ((robot.x+DX[robot.d])+','+(robot.y+DY[robot.d])) in tulips; }
+function frontBlocked(){ return blocked(robot.x+DX[robot.d],robot.y+DY[robot.d]); }
+
+/* ---------------- program ---------------- */
+let prog=[], selRep=null, uid=1;
+const mk=(tp,extra={})=>({id:uid++,t:tp,...extra});
+const PAL={1:['fwd','left','right','water'],2:['fwd','left','right','water','repeat','until','if','say']};
+const BLK={fwd:['motion','i-fwd','bFwd'],left:['motion','i-left','bLeft'],right:['motion','i-right','bRight'],water:['action','i-water','bWater'],repeat:['control','i-loop','bRepeat'],until:['control','i-wall','bUntil'],if:['control','i-if','bIf'],say:['ask','i-say','bSay']};
+function blkHTML(tp,label,extra=''){ const [cls,ic,key]=BLK[tp]; return '<span class="blk '+cls+'"><svg><use href="#'+ic+'"></use></svg><span class="n">'+(label??t(key))+'</span>'+extra+'</span>'; }
+function renderPalette(){ const p=document.getElementById('palette'); p.innerHTML=''; PAL[band].forEach(tp=>{ const w=document.createElement('span'); w.innerHTML=blkHTML(tp); const el=w.firstChild; el.tabIndex=0; el.setAttribute('role','button'); el.title=t(BLK[tp][2]); const add=()=>addBlock(tp); el.onclick=add; el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();add();}}; p.appendChild(el); }); document.getElementById('scriptPanel').classList.toggle('band1',band===1); document.getElementById('ws').classList.toggle('band1',band===1); }
+function addBlock(tp){ let b; if(tp==='repeat') b=mk('repeat',{n:3,body:[]}); else if(tp==='until') b=mk('until',{body:[]}); else if(tp==='if') b=mk('if',{body:[mk('water')]}); else b=mk(tp); const target=selRep?findBlock(prog,selRep):null; (target?target.body:prog).push(b); if(b.body&&tp!=='if') selRep=b.id; renderProg(); }
+function findBlock(list,id){ for(const b of list){ if(b.id===id) return b; if(b.body){ const f=findBlock(b.body,id); if(f) return f; } } return null; }
+function removeBlock(list,id){ const i=list.findIndex(b=>b.id===id); if(i>=0){ list.splice(i,1); return true;} for(const b of list) if(b.body&&removeBlock(b.body,id)) return true; return false; }
+function countBlocks(list){ return list.reduce((n,b)=>n+1+(b.body?countBlocks(b.body):0),0); }
+function renderList(list,host){
+  list.forEach(b=>{
+    if(b.body){ const r=document.createElement('div'); r.className='rep'+(selRep===b.id?' sel':''); r.dataset.id=b.id;
+      const hd=document.createElement('div'); hd.className='hd';
+      const label = b.t==='repeat' ? t('bRepeat') : b.t==='until' ? t('bUntil') : t('bIf');
+      const nctl = b.t==='repeat' ? '<span class="nctl"><button data-dec>−</button><b style="min-width:22px;text-align:center">'+b.n+'</b><button data-inc>+</button></span><span class="n">'+t('bTimes')+'</span>' : '';
+      hd.innerHTML=blkHTML(b.t,label,nctl+'<span class="x">✕</span>');
+      const blk=hd.firstChild; blk.dataset.id=b.id;
+      blk.onclick=e=>{ if(e.target.closest('[data-dec]')){ b.n=Math.max(1,b.n-1); renderProg(); return;} if(e.target.closest('[data-inc]')){ b.n=Math.min(9,b.n+1); renderProg(); return;} if(e.target.closest('.x')){ removeBlock(prog,b.id); if(selRep===b.id) selRep=null; renderProg(); return;} selRep=(selRep===b.id?null:b.id); renderProg(); };
+      r.appendChild(hd); const body=document.createElement('div'); body.className='body'; renderList(b.body,body); if(!b.body.length){ body.innerHTML='<span style="font-size:13px;color:var(--ink-2);font-weight:700">…</span>'; } r.appendChild(body); host.appendChild(r);
+    } else { const row=document.createElement('div'); row.className='row'; row.innerHTML=blkHTML(b.t,null,'<span class="x">✕</span>'); const el=row.firstChild; el.dataset.id=b.id; el.onclick=()=>{ removeBlock(prog,b.id); renderProg(); }; host.appendChild(row); }
+  });
+}
+function renderProg(){ const p=document.getElementById('prog'); p.innerHTML=''; if(!prog.length){ p.innerHTML='<div class="empty">'+t('empty')+'</div>'; } else renderList(prog,p); const n=countBlocks(prog); document.getElementById('blockCount').textContent=n===1?t('block1'):t('blocks',{n}); checkTidy(); }
+
+/* tidy: find the best repetition at top level */
+function sameSimple(a,b){ return a && b && !a.body && !b.body && a.t===b.t; }
+function findRepeat(seq){ let best=null; for(let len=1;len<=6;len++){ for(let i=0;i+len*2<=seq.length;i++){ let count=1; while(i+(count+1)*len<=seq.length && [...Array(len)].every((_,k)=>sameSimple(seq[i+k],seq[i+count*len+k]))) count++; if(count>=2){ const cover=len*count; if(!best||cover>best.cover||(cover===best.cover&&len>best.len)) best={i,len,count,cover}; } } } return best; }
+let tidyPlan=null;
+function checkTidy(){ const box=document.getElementById('tidy'); tidyPlan=band===2?findRepeat(prog):null; if(!tidyPlan||tidyPlan.cover<3){ box.hidden=true; return; } const seq=prog.slice(tidyPlan.i,tidyPlan.i+tidyPlan.len); document.getElementById('tidyText').textContent = tidyPlan.len===1 ? t('tidyFound1',{n:tidyPlan.count,s:t(BLK[seq[0].t][2])}) : t('tidyFound',{len:tidyPlan.len,n:tidyPlan.count}); box.hidden=false; }
+document.getElementById('tidyGo').onclick=()=>{ if(!tidyPlan) return; const {i,len,count}=tidyPlan; const body=prog.slice(i,i+len).map(b=>mk(b.t)); prog.splice(i,len*count,mk('repeat',{n:count,body})); usedRepeat=true; renderProg(); owl('hintDone'); };
+document.getElementById('tidyNo').onclick=()=>{ document.getElementById('tidy').hidden=true; };
+
+/* flatten for execution */
+function flatten(list,out=[]){ for(const b of list){ if(b.t==='repeat'){ for(let k=0;k<b.n;k++){ out.push({id:b.id,op:'noop'}); flatten(b.body,out);} } else if(b.t==='until'){ out.push({id:b.id,op:'until',body:b.body}); } else if(b.t==='if'){ out.push({id:b.id,op:'if',body:b.body}); } else out.push({id:b.id,op:b.t}); } return out; }
+let steps=[], pc=0, usedRepeat=false;
+function highlight(id){ document.querySelectorAll('.prog .blk.run').forEach(e=>e.classList.remove('run')); if(id!=null){ const el=document.querySelector('.prog .blk[data-id="'+id+'"]'); if(el) el.classList.add('run'); } }
+function expandStep(s){ // returns array of primitive ops to run now
+  if(s.op==='until'){ const ops=[]; let guard=0; return {dyn:true, body:s.body}; }
+  if(s.op==='if'){ return frontIsTulip()? {dyn:true, body:s.body, once:true} : {dyn:false, ops:[]}; }
+  return {dyn:false, ops:[s.op]};
+}
+function runStep(){ if(pc>=steps.length){ finish(); return false; } const s=steps[pc]; highlight(s.id);
+  if(s.op==='until'){ if(frontBlocked()||s.guard>=40){ pc++; return true; } s.guard=(s.guard||0)+1; steps.splice(pc+1,0,...flatten(s.body)); pc++; return true; }
+  if(s.op==='if'){ if(frontIsTulip()) steps.splice(pc+1,0,...flatten(s.body)); pc++; return true; }
+  if(s.op!=='noop') exec(s.op); pc++; return true; }
+function prepareRun(){ resetWorld(false); steps=flatten(prog); pc=0; usedRepeat=usedRepeat||prog.some(b=>b.t==='repeat'||b.t==='until'); }
+function play(){ if(running) return; if(!prog.length){ owl('hintEmpty'); return; } endTeach(); prepareRun(); running=true; setBusy(true); const tick=()=>{ if(!running) return; const more=runStep(); if(more && pc<=steps.length) runTimer=setTimeout(tick, 420); }; tick(); }
+function stepOnce(){ if(running) return; endTeach(); if(pc===0||pc>=steps.length){ prepareRun(); } runStep(); }
+function finish(){ running=false; setBusy(false); highlight(null); const n=renderTulips(); if(n===3){ win(); } else if(bumped){ owl('hintBump'); } else if(splashed){ owl('hintWet'); } else { owl('hintMissed',{w:n}); } }
+function setBusy(b){ ['btnTeach','btnStep','btnReset'].forEach(id=>document.getElementById(id).disabled=b); }
+function resetWorld(clearProg){ if(runTimer) clearTimeout(runTimer); running=false; setBusy(false); highlight(null); for(const k in tulips) tulips[k]=false; document.querySelectorAll('.puddle').forEach(p=>p.remove()); robot={x:0,y:3,d:1}; bumped=false; splashed=false; placeBot(); renderTulips(); pc=0; steps=[]; if(clearProg){ prog=[]; selRep=null; usedRepeat=false; renderProg(); } document.getElementById('win').hidden=true; }
+function win(){ const k=countBlocks(prog); document.getElementById('winP').textContent = k<=8 ? t('winFew',{k}) : t('winMany',{k}); document.getElementById('rewardLearn').hidden=!usedRepeat; document.getElementById('win').hidden=false; look.sun=true; const hs=document.getElementById('hatSun'); hs.classList.remove('lock'); document.getElementById('stTulip').hidden=false; notionState.n1='bloom'; if(usedRepeat) notionState.n2='bloom'; if(prog.some(b=>b.t==='if')) notionState.n4='bloom'; if(prog.some(b=>b.t==='until')) notionState.n3='bloom'; if(prog.some(b=>b.t==='say')) notionState.n5='sprout'; renderNotions(); }
+
+/* teach mode */
+let teaching=false;
+function btnTeachLabel(){ document.querySelector('#btnTeach span').textContent=teaching?t('teachStop'):t('teach'); }
+function startTeach(){ if(running) return; teaching=true; document.getElementById('pad').hidden=false; document.getElementById('recBadge').hidden=false; btnTeachLabel(); document.getElementById('btnTeach').classList.remove('teach'); document.getElementById('btnTeach').classList.add('primary'); }
+function endTeach(){ if(!teaching) return; teaching=false; document.getElementById('pad').hidden=true; document.getElementById('recBadge').hidden=true; btnTeachLabel(); document.getElementById('btnTeach').classList.add('teach'); document.getElementById('btnTeach').classList.remove('primary'); const n=Object.values(tulips).filter(Boolean).length; if(n===3){ /* taught by hand: the recording is the program; play it back to earn */ owl('hintPattern',{n:3}); } }
+document.getElementById('btnTeach').onclick=()=>teaching?endTeach():startTeach();
+document.getElementById('pad').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; const op=b.dataset.op; exec(op); const target=selRep?findBlock(prog,selRep):null; (target?target.body:prog).push(mk(op)); renderProg(); };
+document.getElementById('btnPlay').onclick=play;
+document.getElementById('btnStep').onclick=stepOnce;
+document.getElementById('btnReset').onclick=()=>{ endTeach(); resetWorld(true); owl('hintStart'); };
+document.getElementById('winIsland').onclick=()=>{ document.getElementById('win').hidden=true; go('island'); };
+document.getElementById('winStay').onclick=()=>{ document.getElementById('win').hidden=true; owl('hintDone'); };
+
+/* owl */
+let lastHintKey='hintStart', lastHintVars={}, owlTimer=null;
+function owl(key,vars={},think=false){ lastHintKey=key; lastHintVars=vars; const el=document.getElementById('owlSay'); if(owlTimer) clearTimeout(owlTimer); if(think){ el.innerHTML='<span class="think"><b></b><b></b><b></b></span>'; owlTimer=setTimeout(()=>{ el.textContent=t(key,vars); }, 1100); } else el.textContent=t(key,vars); }
+function askOwl(){ let key='hintStart', vars={}; const n=Object.values(tulips).filter(Boolean).length; const rep=findRepeat(prog);
+  if(!prog.length) key='hintEmpty';
+  else if(rep && rep.cover>=4 && !prog.some(b=>b.body)) { key='hintPattern'; vars={n:rep.count}; }
+  else if(n===3) key='hintDone';
+  else if(bumped) key='hintBump';
+  else if(splashed) key='hintWet';
+  else if(steps.length) { key='hintMissed'; vars={w:n}; }
+  else key='hintStart';
+  owl(key,vars,true); }
+document.getElementById('btnAsk').onclick=askOwl;
+
+/* ---------------- notions ---------------- */
+const notionState={n1:'sprout',n2:'seed',n3:'seed',n4:'seed',n5:'seed',n6:'seed',n7:'seed'};
+const NOTION_BLK={n1:'fwd',n2:'repeat',n3:'until',n4:'if',n5:'say',n6:null,n7:null};
+function renderNotions(){ const host=document.getElementById('notions'); host.innerHTML=''; ['n1','n2','n3','n4','n5','n6','n7'].forEach((k,i)=>{ const st=notionState[k]; const d=document.createElement('div'); d.className='notion '+st; const stLabel=st==='bloom'?t('stBloom'):st==='sprout'?t('stSprout'):t('stSeed'); const icon=st==='bloom'?'🌷':st==='sprout'?'🌱':'•'; const blk=NOTION_BLK[k]?blkHTML(NOTION_BLK[k]):(k==='n6'?'<span class="blk control"><span class="n">'+(lang==='fr'?'compter +1':'count +1')+'</span></span>':'<span class="blk ask"><span class="n">'+(lang==='fr'?'arroser une rangée':'water a row')+'</span></span>'); d.innerHTML='<div class="st '+st+'">'+icon+' '+stLabel+'</div><h3>'+t(k)+'</h3><div>'+blk+'</div><p>'+t(k+'p')+'</p><div class="prg">'+t('p'+(i+1))+'</div>'; host.appendChild(d); }); }
+
+/* ---------------- my robot ---------------- */
+const sw=document.getElementById('swatches'); COLORS.forEach(c=>{ const b=document.createElement('button'); b.style.background=c; b.setAttribute('aria-pressed',c===look.color); b.setAttribute('aria-label',c); b.onclick=()=>{ look.color=c; sw.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b)); paintBots(); }; sw.appendChild(b); });
+document.getElementById('eyes').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; look.eye=b.dataset.eye; e.currentTarget.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b)); paintBots(); };
+document.getElementById('hats').onclick=e=>{ const b=e.target.closest('button'); if(!b||b.classList.contains('lock')) return; look.hat=b.dataset.hat; e.currentTarget.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b)); paintBots(); };
+document.getElementById('botName').oninput=e=>{ botName=e.target.value.trim()||'Pip'; applyStrings(); };
+
+/* ---------------- grown-ups demo ---------------- */
+document.getElementById('tryGo').onclick=()=>{ const out=document.getElementById('tryText'); out.innerHTML='<span class="think"><b></b><b></b><b></b></span>'; setTimeout(()=>{ out.textContent=t('thanks'); }, 1400); };
+
+/* ---------------- navigation ---------------- */
+function go(name){ document.querySelectorAll('.screen').forEach(s=>s.hidden=(s.id!=='s-'+name)); document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.screen===name)); window.scrollTo({top:0}); }
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>go(b.dataset.screen));
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+document.getElementById('band1').onclick=()=>{ band=1; document.getElementById('band1').setAttribute('aria-pressed','true'); document.getElementById('band2').setAttribute('aria-pressed','false'); document.getElementById('whoName').textContent='Maya'; renderPalette(); renderProg(); };
+document.getElementById('band2').onclick=()=>{ band=2; document.getElementById('band2').setAttribute('aria-pressed','true'); document.getElementById('band1').setAttribute('aria-pressed','false'); document.getElementById('whoName').textContent='Léa'; renderPalette(); renderProg(); };
+document.getElementById('langEN').onclick=()=>{ lang='en'; document.getElementById('langEN').setAttribute('aria-pressed','true'); document.getElementById('langFR').setAttribute('aria-pressed','false'); applyStrings(); };
+document.getElementById('langFR').onclick=()=>{ lang='fr'; document.getElementById('langFR').setAttribute('aria-pressed','true'); document.getElementById('langEN').setAttribute('aria-pressed','false'); applyStrings(); };
+
+/* ---------------- boot ---------------- */
+function start(){ buildWorld(); applyStrings(); paintBots(); owl('hintStart'); }
+start();
+</script>
