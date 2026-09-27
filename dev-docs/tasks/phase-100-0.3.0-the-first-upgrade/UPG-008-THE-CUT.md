@@ -53,6 +53,19 @@ The process merges **`cline-dev`** into `main`. For 0.3.0 that would bring §75 
 - **A fix found before the tag** goes on `cline-dev` first, then is cherry-picked onto
   `release/0.3.0`. Never commit a fix only to the release branch: it would be lost in 0.3.1.
 
+## 2.2 ✅ s7b (2026-09-27): TAGGED — the draft exists
+
+- `release/0.3.0` pushed; **PR #47** → `main` merged (merge commit `202314165`, tree == `release/0.3.0`).
+  Three of the six required checks were red on first CI of P101–P104; fixed in `1a34cdc76` + `98687a4d7`
+  (on `cline-dev` as `62c70e723`, minus TPL-010's two MCP specs a peer holds open). Test (editor): **2998 specs,
+  0 failures**. 🔴 Three ratchets RAISED on purpose (tsfixme, hex colours, font sizes) — owed back down.
+- **`v0.3.0` tagged on `main`**; release run `36307995764`: four legs green, both Macs **notarised**
+  (Developer ID, Osborne Solutions), mac feed lists all four files, *verify draft* green, **16 assets**. Draft body
+  = `GITHUB-RELEASE-0.3.0.md`. Windows unsigned (no `WIN_CSC_LINK`), as every release.
+- 🔴 Red: *every authored library entry is installable* — **Game Kit is not on the shelf.** Publish library
+  dry run on `release/0.3.0` passed (`36307941103`); the live publish is Richard's (it reaches 0.2.x editors at once).
+- Left: Richard's drives, a clean-machine check, Publish library, **Publish**, then feed post + changelog date + nodegx-web deploy (§4 steps 6–9).
+
 ## 3. Before the tag — what is still owed
 
 | # | item | owner | state 2026-09-27 |
