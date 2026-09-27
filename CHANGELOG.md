@@ -19,7 +19,8 @@ Each NodeGX release links to its page on GitHub, where you can download it.
 
 ## 0.3.0 · 2026-09-24
 
-**Projects made in 0.2 are upgraded when you open them, and there is a new Styles panel.**
+**Projects made in 0.2 are upgraded when you open them, there is a new Styles panel, and your
+backend has its own page in the browser.**
 
 ### New
 
@@ -60,6 +61,30 @@ Each NodeGX release links to its page on GitHub, where you can download it.
 - **Schedules can skip a run** while the previous run is still going.
 - **Your backend has an MCP address** (`/mcp`) that Claude or another app can connect to with an
   API key. An API key can belong to one user.
+- **The backend manager.** Your backend is run from its own page in the browser, opened from the
+  Backend card in the editor. You pick and tick things there instead of typing JSON, lists or
+  schedule codes. It works in light and dark, and every page has its own link.
+- **Collections:** filter rows, sort by a column, choose columns, save views, edit each field with
+  a control for its type, see who can see a record, and import a CSV file.
+- **Schema:** choose one of eleven kinds for a field, and set rules the backend enforces, such as a
+  list of choices, a maximum length or whole numbers only. If you add a required field to a
+  collection that already has records, you give one value to fill them with.
+- **Users and roles:** people are shown by name. You can turn off someone's sign-in, and add people
+  to a role by searching or pasting email addresses.
+- **Permissions:** a grid of who can do what in each collection, with ready-made templates, and
+  *Try it as* to check a rule as a particular person.
+- **Triggers:** build a schedule by picking options and see its next five runs. A webhook shows its
+  address, and shows its secret once.
+- **Workflows and runs:** run a workflow from a form, watch runs live, and cancel one that is
+  running.
+- **Email and sign-in:** choose an email provider from a list, edit each email with a preview, and
+  set up a sign-in provider step by step.
+- **Files and backups:** browse uploaded files and see which records use them, and restore a
+  backup. Uploads and backups can be kept in an S3-compatible bucket instead of on the server's
+  disk, with a *Test connection* button.
+- **The first admin is a person.** The first time you open the backend manager, it asks you to
+  choose an admin email and password. That account signs in to the manager, and to your own app
+  with the `admin` role. From the Users page you can give other people full or look-only access.
 - **Code export:** Looks and text styles now export. Before, they were left out.
 - **Code export:** popups export as dialogs.
 
@@ -75,6 +100,9 @@ Each NodeGX release links to its page on GitHub, where you can download it.
 - **Buttons and form controls show a focus ring** when you reach them with the keyboard.
 - **Emailed sign-in links open a page with a button.** Pressing the button signs you in. Before, the
   link signed you in straight away, so a mail scanner could use it up.
+- **The backend panels have left the editor.** Data, schema, sign-in, email, permissions, search,
+  secrets and triggers are all in the backend manager. *Add a field* and the canvas's *Add / Edit
+  this trigger…* open the right page there, already signed in.
 - **The backend returns `true` and `false`,** not `1` and `0`.
 - **A query with no limit returns at most 1,000 rows,** and the reply says it was cut short.
 - **A redesigned editor:** one type scale, consistent corners and shadows, a new properties panel,
