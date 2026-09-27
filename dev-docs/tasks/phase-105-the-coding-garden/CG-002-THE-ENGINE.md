@@ -1,6 +1,6 @@
 # CG-002 — The engine: the interpreter, the fold, the hints, the save
 
-**Opened 2026-09-27**, scoped from TPL-012 §2–§3. **Status: ⬜ not started.** Depends on nothing. Lane B.
+**Opened 2026-09-27**, scoped from TPL-012 §2–§3. **Status: 🟡 built, session 1 (2026-09-27) — AC1–AC9 measured green in the engine gate; the `template:garden` hook is owed by CG-003.** Depends on nothing. Lane B.
 
 ## 1. The person sentence
 
@@ -74,3 +74,72 @@ cannot ship an engine regression.
 `Function` `Outputs` publish only on change (use a fresh object per tick); a `Variable` is global by
 name; `flagOutputDirty` on a signal never; an `await` on a callback-style write is a no-op; a repeated
 row sends one signal per update and the second wins.
+
+## 7. Session 1 — what was built (2026-09-27, lane B, worktree `cg002-engine`)
+
+Three files under `packages/noodl-mcp/tests/`, the TPL-007 shape (scripts as exported template-literal strings with
+literal `Inputs.x` / `Outputs.y` lines, one `Logic/*` component each, `runScript`/`portsOf` as the harness):
+
+- `cg002Scripts.ts` — 18 scripts: `Logic/New run`, `Step`, `Apply delta`, `Sense`, `Goal met`, `Find repeat`, `Fold`,
+  `Unfold`, `Predict end`, `Choose hint`, `Hint line`, `Hint table`, `Palette`, `Add profile`, `Complete request`,
+  `Encode save code`, `Decode save code`, `Translate words` (generated one line per word). The shared `ENGINE` block
+  (world, sensors, flatten, step, apply, goal) is inlined into the five scripts that run a program.
+- `cg002Content.ts` — the request schema (`id, islander, band, tricks, map, things, robotStart, schedule?, goal,
+  palette, reward, copyKeys, referenceProgram`), 8 requests (the three D3 ones plus one per remaining trick), 21 hint
+  keys EN+FR, 182 word keys EN+FR (both bands' block labels: `b*` the word, `c*` the caption).
+- `cg002Engine.test.ts` — 97 tests, 3.3 s: `cd packages/noodl-mcp && npx jest tests/cg002Engine.test.ts`.
+
+| AC | Status | Measured by |
+|---|---|---|
+| 1 | ✅ measured | 20 rows (8 requests × {en, fr} × every band from the request's own up: 2 open at band 7–9, 6 at 10–12 only) each run to `met: true`, 0 bumps, 0 puddles, ≤ 41 ticks; a band-1 row runs the unrolled program and every block is checked against the band's palette |
+| 2 | ✅ measured | 200 seeded programs (81 with an `until`, 85 with a nested `repeat`, 81 hitting the guard; longest 574 ticks, mean 123 — counted on the emitted spec by `$SCRATCH/sample.js`) → identical deltas, glows and world twice; the guard runs a never-true `until` body exactly 40 times; `repeat 3 { repeat 2 { fwd } }` = 6 moves |
+| 3 | ✅ measured | 30 fixtures → expected `{i, len, count, containerId}`; the 27 foldable ones fold then unfold to the same shape; the folded tulip program ends on the same world as the recording |
+| 4 | ✅ measured | 21 keys × 2 languages non-empty and different, no "tell me" (EN/FR); 12 named states → the expected key; the ladder (done > bump > puddle) asserted; `MANY_BLOCKS` measured on the artefact (8 → `hintDone`, 9 → `hintDoneMany`) |
+| 5 | ✅ measured | a two-profile family with a done request encodes to a 250-char `BG1.` code and decodes `toEqual`; re-encode byte-identical; a hand-built v1 code decodes with defaults and `migrated: true`; its re-save is v2 and `migrated: false` |
+| 6 | ✅ measured | no script text contains `document`/`window`/`localStorage`/`sessionStorage`/`navigator`/`Noodl.`/`fetch(`; `olive_says` reads only `value`/`text` of the last answer (yes/oui, no/non, a one-of word; a fallback with no value is false); an `ask` parks with `{seq, rung, slots, lang, shape, temperature}`, drops a stale `seq`, resumes on the matching one |
+| 7 | ✅ measured | the tulip program predicts (6,3) d=1, tap there hits, beside misses; a wall-walker ends at (7,3) with 2 bumps; an empty program ends where it starts; an `ask` predicts along the fallback |
+| 8 | ✅ measured | two runs alternate on one world: pip (3,3) count 3, bo (4,1) count 0, ticks 10 and 6; no script text names `Noodl.Variables`/`Objects`/`Arrays`/`globalThis` |
+| 9 | ✅ measured | every script text: no backtick, no `${` |
+
+**Arms: 12/12 killed** (`$SCRATCH/mut-summary.txt`): left turns the wrong way (14 red), off-map not blocked (5),
+until guard ×10 (2), findRepeat tie-break inverted (9), a bump beats done (1), migration never asks for its save (1),
+predictEnd returns the start (3), the run held under one global name (34; the two AC8 behavioural tests red, the text gate green — a behavioural kill), unfold lays out n−1 copies (27),
+`olive_says` ignores the answer (1), step returns the same run object (1), the code says v1 (2). Restored after each;
+97/97 after.
+
+**Decisions taken here** (say so if overturned):
+- The **program block** is `{ id, t, n?, body?, slots? }`; `slots` holds `sensor`+`arg` (until/if), `event` (when),
+  `name` (trick/do), `text` (say), `rung`/`args`/`shape`/`dial` (ask). A `repeat` with `slots.n === 'olive'` takes its
+  count from the last answer (CG-005 AC1). Sensors: `wall_ahead tulip_ahead bowl_empty basket_full count_is olive_says`.
+- The **world** is `{ map: rows, things: [{kind, x, y, watered?, food?}], robots: [{id, x, y, d, carry, basket?}],
+  events: [], schedule: [{tick, event}] }`; `d` is 0–3 clockwise from up. Blocking: `W R T H` tiles, tulips and bowls.
+  Every action acts on the **tile ahead** (water, pick, put, feed a bowl). A puddle forms on any in-bounds tile that is
+  not water and has no tulip — including a rock (README §1's sentence); the mockup puddles only on walkable tiles.
+- **`step` returns a delta; `apply` is the only writer** of the world, so the kit can animate from the delta and two
+  robots share one world. A `when` handler is spliced in at the top of the tick whose scheduled event fires; a run with
+  handlers idles until the schedule is exhausted. The `ask` step parks until an answer whose `seq` matches (or has none).
+- **The save model** is v2: `{ v, family, profiles: [{id, name, band, lang, face, robot, tricks, stickers, hats}],
+  island: {done, placed, activeId} }`; v1 is the same without `tricks`/`stickers`/`hats`/`placed`. `Decode` reports
+  `migrated` so the page saves at once (the P100 lesson). A request done by either profile is done (D2); each profile
+  blooms its own tricks and keeps its own hats.
+- **The hint ladder**: empty · pattern (cover ≥ 4, no container yet) · Olive resting · Predict miss · done / done-many
+  (> 8 blocks) · bump · puddle · the rung just played · missed ({w} of {t}) · start.
+
+**Findings** (each is a residual with an owner):
+- 🔴 **The mockup's `until` never loops**: `runStep` splices the body after the `until` and moves past it, so the body
+  runs once and the 40-guard is dead. The engine loops (as §2.3 and "walk to the wall" need). Owner: CG-007, when the
+  mockup is used as the look reference only — no code to change; the gate pins the engine's behaviour.
+- 🟡 **The mockup's tie-break** (equal coverage → the LONGER sequence wins) makes `F F F F` fold to `repeat 2 { F F }`
+  and `F L R F L R F L R F L R` to `repeat 2 { F L R F L R }`, not `4 ×`. Ported as-is and pinned by fixtures 2, 6,
+  12, 24, 25, 29. A child would probably expect the higher count. **Owner: Richard, a ruling**; one comparison to flip
+  and six fixtures to re-derive.
+- `ENGINE` is inlined into five scripts (~17 KB each, ~85 KB of script in the template). One-time parse, not per tick;
+  the per-tick cost is the world JSON, which stays under 1 KB for the mockup map. Owner: NONE unless the tablet says so
+  (CG-001 AC9 / CG-008).
+- `world.events` (the page's queued events, e.g. a tapped Biscuit) are consumed by the first run that ticks; with two
+  robots the first handler wins. `schedule` is per tick and reaches both. Owner: CG-003 if a page needs both to hear it.
+- **Not done here, by design**: the `npm run template:garden` pre-step that runs this gate is CG-003's (the generator
+  does not exist yet); the `Logic/*` components themselves are generated there from `FUNCTION_SCRIPTS`. No drive: the
+  engine is pure and every AC is graded in the spec. Requests beyond the eight are CG-006's; the Olive rungs' content
+  and the stub Olive are CG-005's (the interpreter's `ask` step and the `olive_says` sensor are here for them).
+
