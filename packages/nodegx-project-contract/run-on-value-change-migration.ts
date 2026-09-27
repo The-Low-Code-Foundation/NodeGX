@@ -232,11 +232,16 @@ export const RUN_ON_CHANGE_FAMILIES: Readonly<Record<string, RunOnChangeFamily>>
 
   // std-library/expression.ts — every free identifier in `expression` becomes an input.
   // `expression` is the definition port and keeps the old guard deliberately.
+  //
+  // 🔴 `staticInputs` must list EVERY declared input: anything else observed on a saved instance
+  // reads as a free variable. P88 GAM-002 (`89e533625`) declared `evaluateAtLoad`, and until it
+  // was listed here a saved `evaluateAtLoad: false` on an Expression whose `run` is wired was
+  // handed `runOnChange-evaluateAtLoad: false`, a checkbox for a port no expression feeds.
   Expression: {
     controlSignal: 'run',
     declared: [],
     discoveredBareIdentifiers: true,
-    staticInputs: ['expression', 'run']
+    staticInputs: ['evaluateAtLoad', 'expression', 'run']
   }
 };
 

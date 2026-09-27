@@ -32,6 +32,7 @@ import * as path from 'path';
 // installs the jsdom globals Preact renders into.
 import { mount, unmount } from './admin-app/dom';
 import { h } from 'preact';
+import type { VNode } from 'preact';
 
 import { OverlapCell } from '../src/admin/app/views/triggers';
 
@@ -259,7 +260,7 @@ describe('FED-004 AC7 — the Overlap column in the admin dashboard', () => {
 
   function run(trigger: unknown): HTMLElement {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return mount(h(OverlapCell, { t: trigger as any }));
+    return mount(h(OverlapCell, { t: trigger as any }) as VNode);
   }
 
   it('is actually reached: the row builder calls it, and the header names it', () => {

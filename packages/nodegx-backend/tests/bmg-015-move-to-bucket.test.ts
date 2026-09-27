@@ -174,6 +174,9 @@ describe('BMG-015 §7 — Move files to the bucket', () => {
       stat: async (key) => ({ exists: objects.has(key), size: statSize(objects.get(key)!.length) }),
       async *listKeys() {
         yield* objects.keys();
+      },
+      async *listEntries() {
+        for (const key of objects.keys()) yield { key, modified: null };
       }
     });
 

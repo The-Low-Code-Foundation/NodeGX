@@ -355,12 +355,21 @@ interface EntryResult {
   warningLines: string[];
 }
 
+/**
+ * Source folders that live under `library/` but are NOT shelf entries: each builds a
+ * module INTO a template (its `build.mjs` writes `templates/<t>/noodl_modules/<slug>/`)
+ * and has no `library.json` on purpose. Named here rather than skipped by shape, so a
+ * real entry that lost its `library.json` still fails. `verify-origin.ts` already
+ * skips a folder with no `library.json`.
+ */
+const TEMPLATE_KIT_SOURCES = new Set(['modules/dbt-lesson']);
+
 function listEntries(type: string): string[] {
   const dir = path.join(LIBRARY_DIR, type);
   if (!fs.existsSync(dir)) return [];
   return fs
     .readdirSync(dir, { withFileTypes: true })
-    .filter((d) => d.isDirectory())
+    .filter((d) => d.isDirectory() && !TEMPLATE_KIT_SOURCES.has(`${type}/${d.name}`))
     .map((d) => d.name)
     .sort();
 }

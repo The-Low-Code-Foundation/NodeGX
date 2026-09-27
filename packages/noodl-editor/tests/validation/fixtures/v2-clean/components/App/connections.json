@@ -3,6 +3,6 @@
   "componentId": "c_app",
   "version": 1,
   "connections": [
-    { "fromId": "app_text", "fromProperty": "hovered", "toId": "app_root", "toProperty": "hoverStart" }
+    { "fromId": "app_text", "fromProperty": "hoverStart", "toId": "app_root", "toProperty": "focus" }
   ]
 }

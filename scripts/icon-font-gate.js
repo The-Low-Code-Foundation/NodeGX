@@ -88,7 +88,9 @@ const PATTERNS = [
   { name: 'fa-class-pair', re: /\bfa\s+fa-[a-z0-9-]+/g, what: 'the canonical `fa fa-<glyph>` class pair' },
   { name: 'fa-class-attr', re: /\bclass(?:Name)?\s*=\s*(?:"|'|\{`)fa\b/g, what: 'a class attribute opening with the bare `fa` class' },
   { name: 'fa-glyph-token', re: /(['"`])fa-[a-z0-9-]+\1/g, what: 'a quoted `fa-<glyph>` token (a class set from code)' },
-  { name: 'font-awesome-name', re: /font-awesome|FontAwesome/g, what: 'the Font Awesome stylesheet or font-family name' }
+  // `modules/font-awesome-*` is the out-of-scope library above, named by its id (the
+  // editor lists its docs page in `libraryDocsPages.ts`) — not the deleted stylesheet.
+  { name: 'font-awesome-name', re: /(?<!modules\/)font-awesome|FontAwesome/g, what: 'the Font Awesome stylesheet or font-family name' }
 ];
 
 function findFiles() {
