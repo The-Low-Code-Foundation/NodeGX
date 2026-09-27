@@ -1,4 +1,25 @@
-# Phase 100 — next session (written end of s6, 2026-09-23)
+# Phase 100 — next session (written end of s7, 2026-09-27)
+
+## 🔴 s7: the release is PREPPED — start from [UPG-008](UPG-008-THE-CUT.md), not from s6 below
+
+- **The cut is `484d9d646`, on local branch `release/0.3.0`**, plus one docs commit. It is **not**
+  `cline-dev`: R11 (*"without the recent code export work"*) excludes `fcf68a1c7` (P18 §75,
+  parsers), the only thing between the cut and HEAD. The PR into `main` is `release/0.3.0` →
+  `main`. **A fix goes on `cline-dev` first, then is cherry-picked across.**
+- **R12: the backend manager (P104) ships in 0.3.0** (Richard, against the recommendation).
+- Drafted: `CHANGELOG.md` 0.3.0 (P104 added), [GitHub body](GITHUB-RELEASE-0.3.0.md),
+  [feed post](whats-new-0.3.0.READY-TO-PUSH.json) (push only AFTER Publish).
+- **Next for the agent, in order:** UPG-008 §3 **G4** (UPG-001 §3.9: a 0.2.4 backend with data,
+  opened under the backend manager on the cut tree; never measured, and the GitHub body's
+  *"keeps all its data"* is graded by it). Then G7/G8 (`ci:build:editor` + the editor floor, in a
+  worktree on `release/0.3.0` with its own build output), then G9, each alone on the box.
+- **Richard's:** INS-004, CMG-011, BMG-013 drives; pushing `cline-dev` (88 ahead) and
+  `release/0.3.0`.
+- **No product code changed in s7**, so no suite was run and none was owed.
+
+---
+
+## s6 (2026-09-23)
 
 Read the [board](README.md) status line and [UPG-001](UPG-001-THE-BREAK-CENSUS.md) §3 first. 0.3.0 still
 **waits on P101** (R7, the properties panel move) — nothing here cuts the release.
