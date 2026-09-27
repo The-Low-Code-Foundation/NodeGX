@@ -16,6 +16,7 @@
  *
  * Clauses (each beside its known-firing half — the marker Text and the Avatar prove the page and game-kit drew):
  *   AC1  both kits on the page under Group roots, beside a game-kit Avatar
+ *   LOOK the tiles are sized and paint apart (path, water unlike grass) and the tree, tulip and house draw their art
  *   AC3  a drag with pointerType touch, pen and mouse reorders and publishes Program; a drag ending outside puts it back
  *   AC5  Band 1 → 2 restyles the same element (no remount)
  *   AC6  8×6 and 12×8 at 1368×912 and 390×844: no horizontal scroll, the face ≥ 20px
@@ -117,6 +118,9 @@ withDeployedSite({ dir: DIR }, async (page) => {
     evaluate(`[...document.querySelectorAll(${JSON.stringify(selector)})].map((e) => { const r = e.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; })`);
   const intersects = (a, b) => a && b && a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
   const resetProgram = async () => {
+    // 🔴 Session 1: pen and mouse read publishedChanged:false because the kit republished the SAME reordered JSON the
+    // previous drag had published (before === after). The output Variable is emptied before every drag.
+    await setVar('programOut', '');
     await setVar('program', '[]');
     await setVar('program', PROGRAM);
     await until(ORDER, (o) => JSON.stringify(o) === JSON.stringify(['1', '2', '3', '4', '5']), 4000);
@@ -150,6 +154,14 @@ withDeployedSite({ dir: DIR }, async (page) => {
   readings.ac1 = drew;
   check('AC1: the Garden (8 columns), the Block List (5 blocks) and a game-kit Avatar all drew under Group roots', drew.world && drew.blocks === 5 && drew.ada === 1, drew);
   await shot('ac1-two-modules');
+  // THE LOOK (README §6): the tiles paint apart — session 1 drew one flat rectangle (the bridge’s display:block beat the grid).
+  const look = await evaluate(`(() => {
+    const bg = (sel) => { const e = document.querySelector(sel); return e ? getComputedStyle(e).backgroundImage + '|' + getComputedStyle(e).backgroundColor : null; };
+    const size = (sel) => { const e = document.querySelector(sel); if (!e) return null; const r = e.getBoundingClientRect(); return { w: Math.round(r.width), h: Math.round(r.height) }; };
+    return { display: getComputedStyle(document.querySelector('[data-gd-world]')).display, grass: bg('.gd-cell.gd-grass'), path: bg('.gd-cell.gd-path'), water: bg('.gd-cell.gd-water'), tree: bg('.gd-cell.gd-tree'), cell: size('.gd-cell.gd-grass'), treeArt: size('.gd-cell.gd-tree [data-sprite="tree"]'), tulipArt: size('.gd-cell.gd-bed [data-sprite="tulip"]'), houseArt: size('.gd-cell.gd-house [data-sprite="house"]') };
+  })()`);
+  readings.look = look;
+  check('THE LOOK: the world is a grid of sized tiles, path and water paint unlike grass, and a tree, a tulip and a house draw their art', look.display === 'grid' && look.cell && look.cell.w >= 40 && look.cell.h >= 40 && look.path !== look.grass && look.water !== look.grass && look.treeArt && look.treeArt.w >= 30 && look.tulipArt && look.tulipArt.w >= 20 && look.houseArt && look.houseArt.w >= 30, look);
 
   // ── AC3: drags with three pointer types, and one that ends outside ───────
   const DRAG = (pointerType, fromId, to) => `(async () => {
@@ -222,10 +234,11 @@ withDeployedSite({ dir: DIR }, async (page) => {
     for (const vp of [{ width: 1368, height: 912, mobile: false }, { width: 390, height: 844, mobile: true }]) {
       await page.setViewport(vp);
       await wait(400);
-      const r = await evaluate(`({ scrollW: document.documentElement.scrollWidth, innerW: window.innerWidth, face: (() => { const f = document.querySelector('[data-face]'); return f ? Math.round(f.getBoundingClientRect().width * 10) / 10 : null; })(), world: (() => { const w = document.querySelector('[data-gd-world]'); const r = w.getBoundingClientRect(); return { w: Math.round(r.width), h: Math.round(r.height), cells: w.querySelectorAll('.gd-cell').length }; })() })`);
+      const r = await evaluate(`({ scrollW: document.documentElement.scrollWidth, innerW: window.innerWidth, face: (() => { const f = document.querySelector('[data-face]'); if (!f) return null; const r = f.getBoundingClientRect(); return Math.round(Math.min(r.width, r.height) * 10) / 10; })(), world: (() => { const w = document.querySelector('[data-gd-world]'); const r = w.getBoundingClientRect(); return { w: Math.round(r.width), h: Math.round(r.height), cells: w.querySelectorAll('.gd-cell').length }; })() })`);
       const key = `${label}@${vp.width}x${vp.height}`;
       readings.ac6[key] = r;
-      check(`AC6: ${key} — no horizontal scroll and the robot's face ≥ 20px`, r.scrollW <= r.innerW && r.face !== null && r.face >= 20 && r.world.cells === (label === '8x6' ? 48 : 96), r);
+      // The face is the visor’s SMALLER side on screen: session 1 read 12px on a 56px box because a robot facing right is rotated 90°.
+      check(`AC6: ${key} — no horizontal scroll and the robot's face ≥ 20px (its smaller side, rotated as it faces)`, r.scrollW <= r.innerW && r.face !== null && r.face >= 20 && r.world.cells === (label === '8x6' ? 48 : 96), r);
       await shot(`ac6-${label}-${vp.width}x${vp.height}`);
     }
   }
@@ -251,11 +264,16 @@ withDeployedSite({ dir: DIR }, async (page) => {
     const rotAfter = await evaluate(`getComputedStyle(document.querySelector('.gd-turn')).transform`);
     const turn = rotBefore !== rotAfter && (await evaluate(`document.querySelector('.gd-bot').getAttribute('data-d')`)) === '2';
     await shot(`ac7-turn-${lang}`);
-    await setJson('bubble', { robot: 0, text: WORDS[lang].bump, ms: 1500 });
+    // 🔴 Session 1 (fr): this waited for data-bump === '1', but the kit counts bumps for the life of the sprite (a RISING count
+    // restarts the animation, exactly as designed), so the second language read '2', the 2 s wait ran out, and the 1.5 s bubble
+    // had gone by the time it was read. Instrument fault: the wait is for a RISE, and the bubble outlives the wait.
+    const BUMP_READ = `({ bump: Number((document.querySelector('.gd-turn') || { getAttribute: () => 0 }).getAttribute('data-bump') || 0), cls: !!document.querySelector('.gd-turn.gd-bump'), bubble: (document.querySelector('.gd-bubble') || {}).textContent || '' })`;
+    const bumpBefore = (await evaluate(BUMP_READ)).bump;
+    await setJson('bubble', { robot: 0, text: WORDS[lang].bump, ms: 4000 });
     await setJson('robots', [{ ...PIP, x: 1, d: 2, bump: 1 }]);
-    const bumped = await until(`({ bump: (document.querySelector('.gd-turn') || {}).getAttribute && document.querySelector('.gd-turn').getAttribute('data-bump'), cls: !!document.querySelector('.gd-turn.gd-bump'), bubble: (document.querySelector('.gd-bubble') || {}).textContent || '' })`, (v) => v.bump === '1', 2000);
+    const bumped = await until(BUMP_READ, (v) => v.bump === bumpBefore + 1, 2000);
     const stillThere = await rect('.gd-bot[data-robot="0"]');
-    const bump = bumped.bump === '1' && stillThere && Math.abs(stillThere.x - botAfter.x) < 2 && bumped.bubble.includes(WORDS[lang].bump);
+    const bump = bumped.bump === bumpBefore + 1 && stillThere && Math.abs(stillThere.x - botAfter.x) < 2 && bumped.bubble.includes(WORDS[lang].bump);
     await shot(`ac7-bump-${lang}`);
     await setJson('bubble', { robot: 0, text: WORDS[lang].drink, ms: 1500 });
     await setJson('things', [{ kind: 'tulip', x: 2, y: 2, watered: true }]);
@@ -268,7 +286,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
     const puddle = puddled.puddles === 1 && puddled.at === 'right cell' && puddled.bubble.includes(WORDS[lang].splash);
     await shot(`ac7-puddle-${lang}`);
     const word = await evaluate(`(document.querySelector('.gd-prog .gd-blk[data-id="1"] .gd-n') || {}).textContent`);
-    readings.ac7[lang] = { botBefore, botAfter, rotBefore, rotAfter, bumped, watered, puddled, word };
+    readings.ac7[lang] = { botBefore, botAfter, rotBefore, rotAfter, bumpBefore, bumped, watered, puddled, word };
     check(`AC7 (${lang}): step moved the robot one tile`, step, { botBefore, botAfter });
     check(`AC7 (${lang}): turn changed the robot's rotation without moving it`, turn, { rotBefore, rotAfter });
     check(`AC7 (${lang}): bump animated in place, with its word in a bubble`, bump, bumped);

@@ -46,8 +46,9 @@ picker of the palette's words. Long-press does nothing (the context menu is supp
 | Tile Tapped | output | signal | A tile was tapped. |
 | Ready | output | signal | The world is on the page. |
 
-A robot is never drawn smaller than 56px, whatever the tile size, so its face reads at 21px or more on a
-phone-width 12-column map (the P95 AC9 lesson). Reduced motion stills the puddle pop, the bump, the cheer
+A robot is never drawn smaller than 56px, whatever the tile size, so its face (the visor's smaller side —
+a robot facing right is rotated, so its visor's height is what is seen as width) reads at 22px or more on
+a phone-width 12-column map (the P95 AC9 lesson). Reduced motion stills the puddle pop, the bump, the cheer
 and the glides.
 
 ## What it bundles, and the licences

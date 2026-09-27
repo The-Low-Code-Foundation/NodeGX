@@ -105,10 +105,10 @@ text?}]`; robots `[{x, y, d, colour, eyes, hat, name, bump?}]` with `d` 0–3 cl
 | 3 | 🟡 prepared, drive pending | drive clauses AC3 ×4 | synthetic `PointerEvent`s with `pointerType` touch / pen / mouse; a 4th touch drag ending on the garden |
 | 4 | ✅ measured | gate `AC4` ×2 | `[fwd, repeat 3 {left, water}]`, the engine's id sequence `1 2 3 4 3 4 3 4`: step 7 (water, 3rd pass) → exactly 1 `data-run`, on id 4; 8/8 steps one glow; `''` and `99` glow none |
 | 5 | ✅ measured (markup + CSS) · 🟡 live switch in the drive | gate `AC5` ×2; drive clause AC5 | band 1 and band 2 markup identical once the root's band is masked; `.gd-band1 … .gd-n{font-size:11px}` vs `15px`; the drive marks the DOM node and reads it back after the switch |
-| 6 | ✅ cells + face floor measured · 🟡 pixels in the drive | gate `AC6` ×3; drive clauses AC6 ×4 | 8×6 → 48 cells `{grass 30, tree 3, house 1, bed 3, path 8, water 2, rock 1}`; 12×8 → 96; robot floor 56 px × face fraction 0.376 = **21 px** (a 12-column tile at 390 px would give 11 px) |
+| 6 | ✅ cells + face floor measured · 🔴 first drive: face 12 px (see §7.1) · 🟡 re-drive pending | gate `AC6` ×4; drive clauses AC6 ×4 | 8×6 → 48 cells `{grass 30, tree 3, house 1, bed 3, path 8, water 2, rock 1}`; 12×8 → 96; robot floor 56 px × face fraction 0.40 (the visor's SMALLER side, 28 of 64 units at 92 %) = **22.5 px**, read off the rendered `<rect data-face>` |
 | 7 | 🟡 prepared, drive pending | drive clauses AC7 ×12 (EN + FR), 10 screenshots | step Δx ≈ one tile, turn = a changed transform at the same place, bump = `data-bump="1"` + bubble, water = `.gd-wet` 1 / `.gd-dry` 2, puddle on cell (1,4) |
 | 8 | ✅ measured (markup) · 🟡 boxes in the drive | gate `AC8` ×2; drive clauses AC8 ×2 | two tiles: 2 sprites, `Pip`,`Bo`; one tile: `data-share` 0/1, `scale(.78)` at −90 %/−10 % ⇒ centres 0.8 box apart, a 0.02-box gap |
-| 9 | 🟡 prepared — a READOUT, not a pass | drive clause AC9 | 12×8, two robots, `Emulation.setCPUThrottlingRate 4`, 20 `Robots` writes, ms to the second `requestAnimationFrame`: p50 / p95 / max printed and written to `drive.json` |
+| 9 | ✅ MEASURED (a readout, not a pass) | drive clause AC9, run by the orchestrator on the primary checkout 2026-09-27 | 12×8, two robots, `Emulation.setCPUThrottlingRate 4`, 20 `Robots` writes, ms from the write to the 2nd `requestAnimationFrame`: **p50 27.9 ms, p95 29.8 ms, max 29.8 ms** (samples 10.3 28.9 29.8 27.2 28.1 28.4 25.6 27.3 28.5 29.6 26.1 25.5 28.8 29.7 27.9 26.4 28.6 27 25.5 27.3) — under the 50 ms line on a Mac at ×4; CG-008 measures the tablet |
 | 10 | ✅ measured | gate `AC10` ×2 | README names the mockup as the sprites' source, GPL-3.0, the borrowed icon, "nothing is fetched"; the built file has 0 of `fetch(`, `http://`, `https://`, `<img`, `url(`, `XMLHttpRequest`, `@import` beside 1+ `'svg'`/`viewBox` |
 
 **Runs:** `cd packages/noodl-mcp && npx jest tests/cg001GardenKit.test.ts` → `Tests: 19 passed, 19 total` (0.4 s). Control:
@@ -142,3 +142,36 @@ crash): a synthetic `PointerEvent` reaching React's root listener (if not, real 
 run · the band-1 "never a keyboard" rule is code (`s.text && band === 2`), not yet a spec: the picker opens on a tap, which
 needs state — owner: CG-003's page drive · `icon.png` is game-kit's — owner: CG-007 · the AC9 number on the real tablet —
 owner: CG-008 · the colour ports default to the mockup's hex, not tokens (no design system exists yet) — owner: CG-007.
+
+### 7.1 The first drive (orchestrator, primary checkout, 2026-09-27): 20/27, and what it found
+
+The drive ran once the fixture's Router listed its page (`129775882`, the orchestrator's fix: a Router with no `pages` logs
+`[router/no-pages]` and draws nothing — 0/27 before it). Readings, each with its cause and where the fix went:
+
+1. **🔴 The look — one flat green rectangle, no tile art (README §6).** Cause, in the kit: `react-component-node.ts:994` seeds
+   `props.style` from `defaultCss` (`display: block`), and the world merged `props.style` LAST, so the inline `display:block`
+   beat the class's `display:grid` — 48 `<button>` cells flowed inline at zero size (the drive counted them; nothing painted;
+   the robot, placed by percentage, was the only thing on screen). Fix in the kit: the grid is set after the merge (only the
+   graph's `display:none` is kept) and `defaultCss` is `grid`. Gate row added (the bridge's `display:block` is passed in and
+   `display:grid` must come out; a tree, rock, house and bed cell carry their sprite, grass/path/water none; four distinct
+   backgrounds in the stylesheet). Drive clause added (`THE LOOK`: computed `display:grid`, cells ≥ 40 px, path and water
+   backgrounds ≠ grass, a tree/tulip/house sprite each with a box). The tile CSS and the sprites were already the mockup's
+   (`.cell.G/.P/.W/.F`, the `<symbol>`s inline); they never had a sized cell to paint in.
+2. **🔴 AC6 face 16.9 px at 80 px cells, 12.0 px at the 56 px floor.** Cause, in the kit's sprite: the visor was 28 × 16 units,
+   and Pip faces right (`d=1`, `rotate(90deg)`), so `getBoundingClientRect().width` reads the visor's HEIGHT — 16/64 × 0.86 ×
+   56 = 12.0, exactly the reading. Fix: the visor is 34 × 28 and the sprite 92 % of its box, so the smaller side is 0.40 of the
+   box = 22.5 px at the floor whichever way the robot faces; the gate now reads the rendered `<rect data-face>`'s width and
+   height and the `viewBox`, and the drive reads `min(width, height)`. (The first `faceFraction` was a constant computed from
+   the unrotated width — a fact about the viewBox, not about the screen.)
+3. **AC3 pen and mouse `publishedChanged:false`** with the reorder itself correct (`2,3,4,5,1`). Instrument fault: `resetProgram`
+   restored the same program, the kit republished the same reordered text, `before === after`. The drive now empties
+   `programOut` before each drag. Touch passed only because it ran first.
+4. **AC7 (fr) bump: `{bump: "2", bubble: ""}`.** Instrument fault: the drive waited for `data-bump === "1"`, but the kit counts
+   bumps for the life of the sprite (a RISING count restarts the animation — by design, so a robot can bump twice), so the
+   second language read `2`, the 2 s wait ran out, and the 1.5 s bubble had gone before it was read. The drive now waits for a
+   rise from the count it read before, and the bubble outlives the wait (4 s). The kit is unchanged here.
+5. **AC9 measured:** p50 27.9 / p95 29.8 / max 29.8 ms (in the table above).
+
+Gate after the fix-up: `cd packages/noodl-mcp && npx jest tests/cg001GardenKit.test.ts` → **20 passed, 20 total**; arms 11/11
+(two added: the grid override removed, the visor back to 28 × 16 — each killed by the new rows). The drive is prepared again
+(28 clauses, the LOOK clause added); the orchestrator re-runs it.

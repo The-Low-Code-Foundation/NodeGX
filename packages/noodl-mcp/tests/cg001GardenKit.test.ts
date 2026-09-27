@@ -404,17 +404,57 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       expect(big.match(/class="gd-cell /g)).toHaveLength(96);
     });
 
-    it('🔴 the robot is floored at a size whose face is ≥ 20 px, and the sprite carries the face a drive measures', () => {
-      const sprite = node('garden-kit.Garden').sprite as { minPx: number; faceFraction: number };
-      expect(sprite.minPx * sprite.faceFraction).toBeGreaterThanOrEqual(20);
+    it('🔴 the robot is floored at a size whose face is ≥ 20 px WHICHEVER WAY IT FACES — read off the rendered visor, not a constant', () => {
+      const sprite = node('garden-kit.Garden').sprite as { minPx: number; svgPct: number; faceFraction: number };
       const html = render('garden-kit.Garden', { map: MOCKUP, robots: [{ x: 0, y: 3, d: 1, colour: '#FF7A59', eyes: 'happy', hat: 'sun', name: 'Pip' }] });
-      expect(html).toContain('data-face="true"');
+      // The visor as rendered: the drive reads the same rect through getBoundingClientRect, rotated with the robot.
+      const visor = /<rect[^>]*data-face="true"[^>]*width="(\d+)"[^>]*height="(\d+)"/.exec(html);
+      expect(visor).not.toBeNull();
+      const [w, hgt] = [Number(visor![1]), Number(visor![2])];
+      const svgTag = html.slice(html.lastIndexOf('<svg', html.indexOf('data-robot-svg')), html.indexOf('>', html.indexOf('data-robot-svg')));
+      const box = /viewBox="0 0 (\d+) (\d+)"/.exec(svgTag)!;
+      const units = Number(box[1]);
+      const css = node('garden-kit.Garden').css as string;
+      expect(css).toContain(`.gd-turn>svg{width:${sprite.svgPct}%;height:${sprite.svgPct}%`);
+      // 🔴 Session 1’s drive: Pip faces right, so the visor’s HEIGHT is its width on screen. The smaller side is what counts.
+      const onScreenAtFloor = (Math.min(w, hgt) / units) * (sprite.svgPct / 100) * sprite.minPx;
+      expect(onScreenAtFloor).toBeGreaterThanOrEqual(20);
+      expect(Math.round(onScreenAtFloor * 10) / 10).toBe(Math.round(sprite.minPx * sprite.faceFraction * 10) / 10);
+      expect(Math.round(onScreenAtFloor)).toBe(23);
+      // The FIRST visor, for contrast: 28 × 16 at 86% on a 56px box was 12px when rotated (measured 12.0 in the drive).
+      expect((16 / 64) * 0.86 * 56).toBeLessThan(13);
       expect(html).toContain(`max(12.5000%, ${sprite.minPx}px)`);
       expect(html).toContain('rotate(90deg)');
       expect(html).toContain('<span class="gd-name">Pip</span>');
-      // The world at a phone’s width: 12 columns of ~30px each would give an 11px face; the floor makes it 21.
+      // The world at a phone’s width: 12 columns of ~30px each would give a 12px face; the floor makes it 23.
       expect(Math.round((358 / 12) * sprite.faceFraction)).toBeLessThan(20);
-      expect(Math.round(sprite.minPx * sprite.faceFraction)).toBe(21);
+    });
+
+    it('🔴 the look: the grid survives the bridge’s inline display:block, and each tile kind draws its own art', () => {
+      // The bridge seeds props.style from defaultCss; session 1’s drive saw display:block win over the class and 48 zero-size cells.
+      const bridged = render('garden-kit.Garden', { map: MOCKUP, style: { display: 'block', width: '100%' } });
+      expect(bridged).toMatch(/class="gd-world"[^>]*style="[^"]*display:grid/);
+      expect(bridged).toContain('width:100%');
+      expect(render('garden-kit.Garden', { map: MOCKUP, style: { display: 'none' } })).toMatch(/style="[^"]*display:none/);
+      expect(node('garden-kit.Garden').defaultCss).toEqual({ display: 'grid' });
+      // Per kind: a tree, a rock and a house cell carry their sprite; grass, path and water carry none; a bed carries a tulip.
+      const cell = (x: number, y: number) => {
+        const at = bridged.indexOf(`data-x="${x}" data-y="${y}"`);
+        const open = bridged.lastIndexOf('<button', at);
+        return bridged.slice(open, bridged.indexOf('</button>', at));
+      };
+      expect(cell(2, 0)).toMatch(/class="gd-cell gd-tree"[\s\S]*data-sprite="tree"/);
+      expect(cell(5, 4)).toMatch(/class="gd-cell gd-rock"[\s\S]*data-sprite="rock"/);
+      expect(cell(7, 0)).toMatch(/class="gd-cell gd-house"[\s\S]*data-sprite="house"/);
+      expect(cell(2, 2)).toMatch(/class="gd-cell gd-bed"[\s\S]*data-sprite="tulip"/);
+      expect(cell(0, 0)).toContain('class="gd-cell gd-grass"');
+      expect(cell(0, 0)).not.toContain('data-sprite');
+      expect(cell(0, 3)).toContain('class="gd-cell gd-path"');
+      expect(cell(1, 4)).toContain('class="gd-cell gd-water"');
+      // And the stylesheet paints them apart: path and water and bed each have a background of their own, distinct from grass.
+      const bg = (kind: string) => (new RegExp(`\\.gd-${kind}\\{background:([^;}]+)`).exec(node('garden-kit.Garden').css as string) || [])[1];
+      expect(new Set([bg('grass'), bg('path'), bg('water'), bg('bed')].map(String)).size).toBe(4);
+      expect(bg('path')).toBeTruthy();
     });
   });
 

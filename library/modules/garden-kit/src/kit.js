@@ -869,49 +869,57 @@
   /**
    * P95 AC9’s lesson, applied before the pages exist: a robot is never drawn smaller than this, in CSS px, however
    * small a tile is — at 390px wide a 12-column tile is about 30px, and a face on a 30px robot is 11px. The visor is
-   * 28 of the sprite’s 64 units, drawn at 86% of the box: the face is FACE_FRACTION of the box, so 56px gives 21px.
+   * FACE_W × FACE_H of the sprite’s 64 units, drawn at ROBOT_SVG_PCT of the box. 🔴 Session 1’s drive measured the
+   * FIRST visor (28 × 16) at 12px on a 56px box: a robot facing right is rotated 90°, so the visor’s HEIGHT is the
+   * width on screen. The face fraction is therefore the visor’s SMALLER side, and the visor is 34 × 28 so that side is
+   * 0.40 of the box: 22.5px at the floor, whichever way the robot faces.
    */
   var ROBOT_MIN_PX = 56;
-  var FACE_FRACTION = (28 / 64) * 0.86;
+  var ROBOT_SVG_PCT = 92;
+  var FACE_X = 15;
+  var FACE_Y = 13;
+  var FACE_W = 34;
+  var FACE_H = 28;
+  var FACE_FRACTION = (Math.min(FACE_W, FACE_H) / 64) * (ROBOT_SVG_PCT / 100);
 
   /** The robot, the mockup’s botSVG in a 64 × 64 box, facing up. */
   function robotSvg(r, key) {
     var ink = '#2E2A3D';
     var eyes;
-    if (r.eyes === 'happy') eyes = [h('path', { key: 'e', d: 'M22 24q4-5 8 0M34 24q4-5 8 0', stroke: ink, strokeWidth: 3, fill: 'none', strokeLinecap: 'round' })];
-    else if (r.eyes === 'wink') eyes = [h('circle', { key: 'e1', cx: 26, cy: 24, r: 3.5, fill: ink }), h('path', { key: 'e2', d: 'M34 24h8', stroke: ink, strokeWidth: 3, strokeLinecap: 'round' })];
+    if (r.eyes === 'happy') eyes = [h('path', { key: 'e', d: 'M19 28q5-6 10 0M35 28q5-6 10 0', stroke: ink, strokeWidth: 3, fill: 'none', strokeLinecap: 'round' })];
+    else if (r.eyes === 'wink') eyes = [h('circle', { key: 'e1', cx: 24, cy: 27, r: 4, fill: ink }), h('path', { key: 'e2', d: 'M35 27h10', stroke: ink, strokeWidth: 3, strokeLinecap: 'round' })];
     else
       eyes = [
-        h('circle', { key: 'e1', cx: 26, cy: 24, r: 3.5, fill: ink }),
-        h('circle', { key: 'e2', cx: 38, cy: 24, r: 3.5, fill: ink }),
-        h('circle', { key: 'e3', cx: 27, cy: 23, r: 1.2, fill: '#fff' }),
-        h('circle', { key: 'e4', cx: 39, cy: 23, r: 1.2, fill: '#fff' })
+        h('circle', { key: 'e1', cx: 24, cy: 27, r: 4, fill: ink }),
+        h('circle', { key: 'e2', cx: 40, cy: 27, r: 4, fill: ink }),
+        h('circle', { key: 'e3', cx: 25.3, cy: 25.7, r: 1.4, fill: '#fff' }),
+        h('circle', { key: 'e4', cx: 41.3, cy: 25.7, r: 1.4, fill: '#fff' })
       ];
     var hat = null;
-    if (r.hat === 'cap') hat = h('g', { key: 'hat' }, h('path', { d: 'M18 14h28v6H18z', fill: '#3E63C8' }), h('path', { d: 'M14 20h36v3H14z', fill: '#3E63C8' }));
+    if (r.hat === 'cap') hat = h('g', { key: 'hat' }, h('path', { d: 'M16 11h32v6H16z', fill: '#3E63C8' }), h('path', { d: 'M12 17h40v3H12z', fill: '#3E63C8' }));
     else if (r.hat === 'sun')
       hat = h(
         'g',
-        { key: 'hat', transform: 'translate(46,10)' },
+        { key: 'hat', transform: 'translate(48,8)' },
         [0, 45, 90, 135, 180, 225, 270, 315].map(function (a) {
           return h('ellipse', { key: a, rx: 3, ry: 6, cx: 0, cy: -10, fill: '#FFD166', transform: 'rotate(' + a + ')' });
         }),
         h('circle', { key: 'c', r: 7, fill: '#7A4B1F' })
       );
-    else if (r.hat === 'crown') hat = h('path', { key: 'hat', d: 'M18 16l6 6 8-10 8 10 6-6v8H18z', fill: '#FFD166' });
+    else if (r.hat === 'crown') hat = h('path', { key: 'hat', d: 'M16 13l6 6 10-10 10 10 6-6v8H16z', fill: '#FFD166' });
     return h(
       'svg',
       { key: key, viewBox: '0 0 64 64', className: 'gd-robot', 'data-robot-svg': 'true', 'aria-hidden': 'true' },
       h('ellipse', { key: 'sh', cx: 32, cy: 58, rx: 18, ry: 4, fill: 'rgba(0,0,0,.12)' }),
-      h('rect', { key: 'body', x: 12, y: 10, width: 40, height: 46, rx: 16, fill: r.colour }),
-      h('rect', { key: 'face', className: 'gd-face', 'data-face': 'true', x: 18, y: 16, width: 28, height: 16, rx: 8, fill: '#fff' }),
+      h('rect', { key: 'body', x: 10, y: 8, width: 44, height: 48, rx: 16, fill: r.colour }),
+      h('rect', { key: 'face', className: 'gd-face', 'data-face': 'true', x: FACE_X, y: FACE_Y, width: FACE_W, height: FACE_H, rx: 10, fill: '#fff' }),
       eyes,
-      h('rect', { key: 'mouth', x: 24, y: 38, width: 16, height: 6, rx: 3, fill: 'rgba(0,0,0,.18)' }),
-      h('rect', { key: 'a1', x: 6, y: 26, width: 6, height: 16, rx: 3, fill: r.colour, stroke: 'rgba(0,0,0,.15)' }),
-      h('rect', { key: 'a2', x: 52, y: 26, width: 6, height: 16, rx: 3, fill: r.colour, stroke: 'rgba(0,0,0,.15)' }),
-      h('path', { key: 'ant', d: 'M32 10V4', stroke: ink, strokeWidth: 2 }),
-      h('circle', { key: 'bulb', cx: 32, cy: 3, r: 3, fill: '#FFD166' }),
-      h('path', { key: 'can', d: 'M50 44l6 2v6l-6 2z', fill: '#4FA7DC' }),
+      h('rect', { key: 'mouth', x: 24, y: 46, width: 16, height: 5, rx: 2.5, fill: 'rgba(0,0,0,.18)' }),
+      h('rect', { key: 'a1', x: 4, y: 26, width: 6, height: 16, rx: 3, fill: r.colour, stroke: 'rgba(0,0,0,.15)' }),
+      h('rect', { key: 'a2', x: 54, y: 26, width: 6, height: 16, rx: 3, fill: r.colour, stroke: 'rgba(0,0,0,.15)' }),
+      h('path', { key: 'ant', d: 'M32 8V3', stroke: ink, strokeWidth: 2 }),
+      h('circle', { key: 'bulb', cx: 32, cy: 2.5, r: 2.5, fill: '#FFD166' }),
+      h('path', { key: 'can', d: 'M52 44l6 2v6l-6 2z', fill: '#4FA7DC' }),
       hat
     );
   }
@@ -989,7 +997,7 @@
     '.gd-label{position:absolute;left:50%;bottom:4%;transform:translateX(-50%);background:#fff;border-radius:999px;padding:1px 7px;font-size:11px;font-weight:800;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);z-index:2;pointer-events:none}\n' +
     '.gd-bot{position:absolute;z-index:3;display:grid;place-items:center;pointer-events:none;transform:translate(-50%,-50%);transition:left var(--gd-step) ease,top var(--gd-step) ease}\n' +
     '.gd-turn{width:100%;height:100%;display:grid;place-items:center;transition:transform .3s ease;transform:var(--gd-rot)}\n' +
-    '.gd-turn>svg{width:86%;height:86%;overflow:visible}\n' +
+    '.gd-turn>svg{width:' + ROBOT_SVG_PCT + '%;height:' + ROBOT_SVG_PCT + '%;overflow:visible}\n' +
     '.gd-bump{animation:gd-bump .35s}\n' +
     '@keyframes gd-bump{30%{transform:var(--gd-rot) translateX(-8%)}60%{transform:var(--gd-rot) translateX(6%)}}\n' +
     '.gd-cheer .gd-turn{animation:gd-cheer .7s ease 2}\n' +
@@ -1055,7 +1063,7 @@
 
     /** The pure parts, for the kit gate. */
     world: { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, robotPlaces: robotPlaces, rose: rose, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS },
-    sprite: { minPx: ROBOT_MIN_PX, faceFraction: FACE_FRACTION, robotSvg: robotSvg, sprites: SPRITES },
+    sprite: { minPx: ROBOT_MIN_PX, svgPct: ROBOT_SVG_PCT, face: { x: FACE_X, y: FACE_Y, w: FACE_W, h: FACE_H }, faceFraction: FACE_FRACTION, robotSvg: robotSvg, sprites: SPRITES },
     css: WORLD_CSS,
 
     getReactComponent: function () {
@@ -1208,6 +1216,19 @@
           }
         }
 
+        // 🔴 Session 1’s drive: the bridge seeds props.style from defaultCss, so an inline display:block arrived and beat
+        // the class’s display:grid — 48 cells of zero size, one flat green rectangle. The grid is set AFTER the merge;
+        // only the graph hiding the node (display none) is kept.
+        var worldStyle = Object.assign(
+          {
+            gridTemplateColumns: 'repeat(' + Math.max(1, grid.w) + ', minmax(0, 1fr))',
+            gridTemplateRows: 'repeat(' + Math.max(1, grid.h) + ', minmax(0, 1fr))',
+            aspectRatio: Math.max(1, grid.w) + ' / ' + Math.max(1, grid.h),
+            '--gd-step': stepMs + 'ms'
+          },
+          props.style
+        );
+        if (worldStyle.display !== 'none') worldStyle.display = 'grid';
         return h(
           'div',
           {
@@ -1218,15 +1239,7 @@
             'data-h': String(grid.h),
             role: 'group',
             'aria-label': props.label || 'garden',
-            style: Object.assign(
-              {
-                gridTemplateColumns: 'repeat(' + Math.max(1, grid.w) + ', minmax(0, 1fr))',
-                gridTemplateRows: 'repeat(' + Math.max(1, grid.h) + ', minmax(0, 1fr))',
-                aspectRatio: Math.max(1, grid.w) + ' / ' + Math.max(1, grid.h),
-                '--gd-step': stepMs + 'ms'
-              },
-              props.style
-            )
+            style: worldStyle
           },
           h('style', { key: 'css' }, WORLD_CSS),
           cellEls,
@@ -1236,7 +1249,7 @@
       };
     },
 
-    defaultCss: { display: 'block' },
+    defaultCss: { display: 'grid' },
 
     inputProps: {
       map: { type: 'object', displayName: 'Map', group: 'World', default: '{"rows":["GGTGGGTH","GGGGGGGG","GGFGFGFG","PPPPPPPP","GWWGGRGG","GGGGGTGG"]}', description: 'Rows of characters and a legend, as an object or JSON: { rows: ["GGTG…"], legend: { G: "grass" } }. Kinds: grass, path, water, tree, rock, house, bed (a tulip bed, dry until a Thing waters it). The mockup’s legend is the default.' },
