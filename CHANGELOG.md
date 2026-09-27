@@ -17,7 +17,7 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
-## 0.3.0 · 2026-09-24
+## 0.3.0 · 2026-09-27
 
 **Projects made in 0.2 are upgraded when you open them, there is a new Styles panel, and your
 backend has its own page in the browser.**
