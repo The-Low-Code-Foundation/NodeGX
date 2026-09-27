@@ -1,0 +1,679 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e9119548-cdcd-560e-88b8-7b9710b2a3ef",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rcStore",
+      "fromProperty": "app",
+      "toId": "rcMe",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "rcWords",
+      "fromProperty": "words",
+      "toId": "rcT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "lang",
+      "toId": "rcT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rcFalse",
+      "fromProperty": "result",
+      "toId": "rcInitDone",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rcPage",
+      "fromProperty": "didMount",
+      "toId": "rcInitDone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "hasProfile",
+      "toId": "rcNoOne",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "rcNoOne",
+      "fromProperty": "result",
+      "toId": "rcGuard",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rcPage",
+      "fromProperty": "didMount",
+      "toId": "rcGuard",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rcGuard",
+      "fromProperty": "ontrue",
+      "toId": "rcGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "rcHeader",
+      "fromProperty": "hangar",
+      "toId": "rcGoHangar",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "name",
+      "toId": "rcHeader",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "look",
+      "toId": "rcHeader",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "seed",
+      "toId": "rcHeader",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "lang",
+      "toId": "rcHeader",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "level",
+      "toId": "rcHeader",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "layout",
+      "toId": "rcHeader",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "soundMode",
+      "toId": "rcHeader",
+      "toProperty": "soundMode"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "answerMode",
+      "toId": "rcHeader",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "profileId",
+      "toId": "rcHeader",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "faceOptions",
+      "toId": "rcHeader",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "rcStore",
+      "fromProperty": "app",
+      "toId": "rcHeader",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "rcHeader",
+      "fromProperty": "app",
+      "toId": "rcStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "rcHeader",
+      "fromProperty": "write",
+      "toId": "rcStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "rcHeader",
+      "fromProperty": "switchPlayer",
+      "toId": "rcGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "rcHeader",
+      "fromProperty": "deleted",
+      "toId": "rcGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "rcHeader",
+      "fromProperty": "home",
+      "toId": "rcGoHome",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "gameRace",
+      "toId": "rcTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "mathsMode",
+      "toId": "rcSetup",
+      "toProperty": "mathsWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "typingMode",
+      "toId": "rcSetup",
+      "toProperty": "typingWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "onePlayer",
+      "toId": "rcSetup",
+      "toProperty": "onePlayerWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "twoPlayers",
+      "toId": "rcSetup",
+      "toProperty": "twoPlayersWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "practice",
+      "toId": "rcSetup",
+      "toProperty": "practiceWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "challenge",
+      "toId": "rcSetup",
+      "toProperty": "challengeWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "practiceRule",
+      "toId": "rcSetup",
+      "toProperty": "practiceRuleWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "challengeRule",
+      "toId": "rcSetup",
+      "toProperty": "challengeRuleWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "start",
+      "toId": "rcSetup",
+      "toProperty": "startWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "yourName",
+      "toId": "rcSetup",
+      "toProperty": "nameWord"
+    },
+    {
+      "fromId": "rcNotPlaying",
+      "fromProperty": "result",
+      "toId": "rcSetup",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rcNotPlaying",
+      "fromProperty": "result",
+      "toId": "rcTitle",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rcPlaying",
+      "fromProperty": "value",
+      "toId": "rcHeader",
+      "toProperty": "hideBar"
+    },
+    {
+      "fromId": "rcPlaying",
+      "fromProperty": "value",
+      "toId": "rcNotPlaying",
+      "toProperty": "playing"
+    },
+    {
+      "fromId": "rcTrue",
+      "fromProperty": "result",
+      "toId": "rcSetPlaying",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rcSetup",
+      "fromProperty": "start",
+      "toId": "rcSetPlaying",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rcSetPlaying",
+      "fromProperty": "done",
+      "toId": "rcPlay",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "rcPlaying",
+      "fromProperty": "value",
+      "toId": "rcPlay",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "level",
+      "toId": "rcPlay",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "lang",
+      "toId": "rcPlay",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "layout",
+      "toId": "rcPlay",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "answerMode",
+      "toId": "rcPlay",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "model",
+      "toId": "rcPlay",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "sound",
+      "toId": "rcPlay",
+      "toProperty": "soundOn"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "name",
+      "toId": "rcPlay",
+      "toProperty": "nameA"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "look",
+      "toId": "rcPlay",
+      "toProperty": "lookA"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "seed",
+      "toId": "rcPlay",
+      "toProperty": "seedA"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "faceOptions",
+      "toId": "rcPlay",
+      "toProperty": "optionsA"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "paint",
+      "toId": "rcPlay",
+      "toProperty": "paintA"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "pattern",
+      "toId": "rcPlay",
+      "toProperty": "patternA"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "turboReady",
+      "toId": "rcPlay",
+      "toProperty": "turboWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "turboCharging",
+      "toId": "rcPlay",
+      "toProperty": "chargingWord"
+    },
+    {
+      "fromId": "rcCurriculum",
+      "fromProperty": "skills",
+      "toId": "rcPlay",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "rcWordLists",
+      "fromProperty": "lists",
+      "toId": "rcPlay",
+      "toProperty": "wordLists"
+    },
+    {
+      "fromId": "rcSetup",
+      "fromProperty": "mode",
+      "toId": "rcPlay",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "rcSetup",
+      "fromProperty": "players",
+      "toId": "rcPlay",
+      "toProperty": "players"
+    },
+    {
+      "fromId": "rcSetup",
+      "fromProperty": "timed",
+      "toId": "rcPlay",
+      "toProperty": "timed"
+    },
+    {
+      "fromId": "rcSetup",
+      "fromProperty": "players",
+      "toId": "rcNameB",
+      "toProperty": "players"
+    },
+    {
+      "fromId": "rcSetup",
+      "fromProperty": "nameB",
+      "toId": "rcNameB",
+      "toProperty": "nameB"
+    },
+    {
+      "fromId": "rcNameB",
+      "fromProperty": "result",
+      "toId": "rcPlay",
+      "toProperty": "nameB"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "typeAnswer",
+      "toId": "rcPlay",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "check",
+      "toId": "rcPlay",
+      "toProperty": "checkWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "fluent",
+      "toId": "rcPlay",
+      "toProperty": "fluentWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "correct",
+      "toId": "rcPlay",
+      "toProperty": "correctWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "wrong",
+      "toId": "rcPlay",
+      "toProperty": "wrongWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "timeUp",
+      "toId": "rcPlay",
+      "toProperty": "timeUpWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "next",
+      "toId": "rcPlay",
+      "toProperty": "nextWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "showMe",
+      "toId": "rcPlay",
+      "toProperty": "showMeWord"
+    },
+    {
+      "fromId": "rcTeachCards",
+      "fromProperty": "cards",
+      "toId": "rcPlay",
+      "toProperty": "teachCards"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "anExample",
+      "toId": "rcPlay",
+      "toProperty": "anExampleWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "gotIt",
+      "toId": "rcPlay",
+      "toProperty": "gotItWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "yourTurn",
+      "toId": "rcPlay",
+      "toProperty": "yourTurnWord"
+    },
+    {
+      "fromId": "rcStore",
+      "fromProperty": "app",
+      "toId": "rcSave",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "profileId",
+      "toId": "rcSave",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "rcPlay",
+      "fromProperty": "model",
+      "toId": "rcSave",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rcPlay",
+      "fromProperty": "graded",
+      "toId": "rcSave",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rcSave",
+      "fromProperty": "app",
+      "toId": "rcStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "rcSave",
+      "fromProperty": "done",
+      "toId": "rcStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "rcStore",
+      "fromProperty": "app",
+      "toId": "rcKeys",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "profileId",
+      "toId": "rcKeys",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "rcPlay",
+      "fromProperty": "layoutSeen",
+      "toId": "rcKeys",
+      "toProperty": "layoutSeen"
+    },
+    {
+      "fromId": "rcPlay",
+      "fromProperty": "layoutSeenNow",
+      "toId": "rcKeys",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rcKeys",
+      "fromProperty": "app",
+      "toId": "rcStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "rcKeys",
+      "fromProperty": "done",
+      "toId": "rcStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "rcStore",
+      "fromProperty": "app",
+      "toId": "rcPick",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "profileId",
+      "toId": "rcPick",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "rcPlay",
+      "fromProperty": "layoutPick",
+      "toId": "rcPick",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "rcPlay",
+      "fromProperty": "layoutPickNow",
+      "toId": "rcPick",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rcPick",
+      "fromProperty": "app",
+      "toId": "rcStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "rcPick",
+      "fromProperty": "done",
+      "toId": "rcStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "youWin",
+      "toId": "rcPlay",
+      "toProperty": "youWinWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "computerWins",
+      "toId": "rcPlay",
+      "toProperty": "computerWinsWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "playerWins",
+      "toId": "rcPlay",
+      "toProperty": "winsWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "again",
+      "toId": "rcPlay",
+      "toProperty": "againWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "otherRace",
+      "toId": "rcPlay",
+      "toProperty": "otherRaceWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "restart",
+      "toId": "rcPlay",
+      "toProperty": "restartWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "rightAnswers",
+      "toId": "rcPlay",
+      "toProperty": "rightAnswersWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "earnedPick",
+      "toId": "rcPlay",
+      "toProperty": "pickWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "toHangar",
+      "toId": "rcPlay",
+      "toProperty": "hangarWord"
+    },
+    {
+      "fromId": "rcPlay",
+      "fromProperty": "hangar",
+      "toId": "rcGoHangar",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "rcFalse",
+      "fromProperty": "result",
+      "toId": "rcSetDone",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rcPlay",
+      "fromProperty": "changeRace",
+      "toId": "rcSetDone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "sound",
+      "toId": "rcSoundsEnd",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "rcPlay",
+      "fromProperty": "cheer",
+      "toId": "rcSoundsEnd",
+      "toProperty": "win"
+    },
+    {
+      "fromId": "rcPlay",
+      "fromProperty": "sigh",
+      "toId": "rcSoundsEnd",
+      "toProperty": "lose"
+    }
+  ]
+}

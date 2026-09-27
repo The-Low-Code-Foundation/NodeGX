@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { Icon, IconName, IconSize } from '@noodl-core-ui/components/common/Icon';
 import type { Slot } from '@noodl-core-ui/types/global';
 
 export interface RuleDropdownProps {
@@ -21,7 +22,7 @@ export function RuleDropdown({ label, value, dropdownItems, onItemSelected }: Ru
         {value}
       </div>
 
-      <i className="queryeditor-caret-icon fa fa-caret-down" />
+      <Icon icon={IconName.CaretDown} size={IconSize.Tiny} UNSAFE_className="queryeditor-caret-icon" />
 
       {showDropdown ? (
         <div className="queryeditor-dropdown">

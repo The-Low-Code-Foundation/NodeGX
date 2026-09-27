@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5430a522-e364-5f0f-8c11-436fc20e9b6e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "listquestionIn",
+      "fromProperty": "app",
+      "toId": "listquestionFn",
+      "toProperty": "in-app"
+    },
+    {
+      "fromId": "listquestionIn",
+      "fromProperty": "setId",
+      "toId": "listquestionFn",
+      "toProperty": "in-setId"
+    },
+    {
+      "fromId": "listquestionFn",
+      "fromProperty": "out-sets",
+      "toId": "listquestionOut",
+      "toProperty": "sets"
+    },
+    {
+      "fromId": "listquestionFn",
+      "fromProperty": "out-count",
+      "toId": "listquestionOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "listquestionFn",
+      "fromProperty": "out-hasSets",
+      "toId": "listquestionOut",
+      "toProperty": "hasSets"
+    },
+    {
+      "fromId": "listquestionFn",
+      "fromProperty": "out-chosenId",
+      "toId": "listquestionOut",
+      "toProperty": "chosenId"
+    },
+    {
+      "fromId": "listquestionFn",
+      "fromProperty": "out-chosenName",
+      "toId": "listquestionOut",
+      "toProperty": "chosenName"
+    },
+    {
+      "fromId": "listquestionFn",
+      "fromProperty": "out-chosenItems",
+      "toId": "listquestionOut",
+      "toProperty": "chosenItems"
+    },
+    {
+      "fromId": "listquestionFn",
+      "fromProperty": "out-chosenJson",
+      "toId": "listquestionOut",
+      "toProperty": "chosenJson"
+    },
+    {
+      "fromId": "listquestionFn",
+      "fromProperty": "success",
+      "toId": "listquestionOut",
+      "toProperty": "done"
+    }
+  ]
+}

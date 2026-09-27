@@ -1,0 +1,235 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "79d2eef7-26e6-5cf4-89cc-e590ab59d0f9",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pfPage",
+      "fromProperty": "didMount",
+      "toId": "pfCloseForm",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pfT",
+      "fromProperty": "whoIsPlaying",
+      "toId": "pfTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pfT",
+      "fromProperty": "tagline",
+      "toId": "pfLead",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pfT",
+      "fromProperty": "newProfile",
+      "toId": "pfNew",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pfWords",
+      "fromProperty": "words",
+      "toId": "pfT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "pfStore",
+      "fromProperty": "app",
+      "toId": "pfList2",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "pfList2",
+      "fromProperty": "profiles",
+      "toId": "pfEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pfStore",
+      "fromProperty": "app",
+      "toId": "pfSelect",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "pfEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "pfSelect",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "pfEach",
+      "fromProperty": "itemOutputSignal-chosen",
+      "toId": "pfSelect",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pfSelect",
+      "fromProperty": "app",
+      "toId": "pfStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "pfSelect",
+      "fromProperty": "done",
+      "toId": "pfStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "pfStore",
+      "fromProperty": "app",
+      "toId": "pfCreate",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "pfForm",
+      "fromProperty": "name",
+      "toId": "pfCreate",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "pfForm",
+      "fromProperty": "look",
+      "toId": "pfCreate",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "pfForm",
+      "fromProperty": "seed",
+      "toId": "pfCreate",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "pfForm",
+      "fromProperty": "level",
+      "toId": "pfCreate",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "pfForm",
+      "fromProperty": "lang",
+      "toId": "pfCreate",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "pfForm",
+      "fromProperty": "create",
+      "toId": "pfCreate",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pfCreate",
+      "fromProperty": "app",
+      "toId": "pfStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "pfCreate",
+      "fromProperty": "done",
+      "toId": "pfStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "pfStore",
+      "fromProperty": "written",
+      "toId": "pfGoHome",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "pfTrue",
+      "fromProperty": "result",
+      "toId": "pfOpenForm",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pfNew",
+      "fromProperty": "onClick",
+      "toId": "pfOpenForm",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pfNew",
+      "fromProperty": "onClick",
+      "toId": "pfForm",
+      "toProperty": "reset"
+    },
+    {
+      "fromId": "pfFalse",
+      "fromProperty": "result",
+      "toId": "pfCloseForm",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pfForm",
+      "fromProperty": "cancel",
+      "toId": "pfCloseForm",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pfFormOpen",
+      "fromProperty": "value",
+      "toId": "pfForm",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pfList2",
+      "fromProperty": "canAdd",
+      "toId": "pfNewShown",
+      "toProperty": "canAdd"
+    },
+    {
+      "fromId": "pfFormOpen",
+      "fromProperty": "value",
+      "toId": "pfNewShown",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "pfNewShown",
+      "fromProperty": "result",
+      "toId": "pfNew",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pfT",
+      "fromProperty": "yourName",
+      "toId": "pfForm",
+      "toProperty": "nameWord"
+    },
+    {
+      "fromId": "pfT",
+      "fromProperty": "pickAvatar",
+      "toId": "pfForm",
+      "toProperty": "faceWord"
+    },
+    {
+      "fromId": "pfT",
+      "fromProperty": "rollAvatar",
+      "toId": "pfForm",
+      "toProperty": "rollWord"
+    },
+    {
+      "fromId": "pfT",
+      "fromProperty": "yourLevel",
+      "toId": "pfForm",
+      "toProperty": "levelWord"
+    },
+    {
+      "fromId": "pfT",
+      "fromProperty": "language",
+      "toId": "pfForm",
+      "toProperty": "langWord"
+    },
+    {
+      "fromId": "pfT",
+      "fromProperty": "create",
+      "toId": "pfForm",
+      "toProperty": "createWord"
+    },
+    {
+      "fromId": "pfT",
+      "fromProperty": "cancel",
+      "toId": "pfForm",
+      "toProperty": "cancelWord"
+    }
+  ]
+}

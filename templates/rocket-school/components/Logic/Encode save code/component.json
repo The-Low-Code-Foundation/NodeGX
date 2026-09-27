@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f6455e57-6d2e-5177-8c64-1ecc4a4c4fb6",
+  "name": "Encode save code",
+  "path": "/Logic/Encode save code",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A profile and its skills as a short code a child can copy."
+}

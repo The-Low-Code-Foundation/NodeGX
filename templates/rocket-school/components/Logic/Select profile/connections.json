@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4a3b5294-ac12-54c8-8cac-9810011abc61",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "selectprofilIn",
+      "fromProperty": "app",
+      "toId": "selectprofilFn",
+      "toProperty": "in-app"
+    },
+    {
+      "fromId": "selectprofilIn",
+      "fromProperty": "profileId",
+      "toId": "selectprofilFn",
+      "toProperty": "in-profileId"
+    },
+    {
+      "fromId": "selectprofilIn",
+      "fromProperty": "run",
+      "toId": "selectprofilFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "selectprofilFn",
+      "fromProperty": "out-app",
+      "toId": "selectprofilOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "selectprofilFn",
+      "fromProperty": "success",
+      "toId": "selectprofilOut",
+      "toProperty": "done"
+    }
+  ]
+}

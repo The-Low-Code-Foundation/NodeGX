@@ -1,0 +1,42 @@
+{
+  "from": [
+    70,
+    92
+  ],
+  "to": [
+    93,
+    127
+  ],
+  "dragger": {
+    "display": "block",
+    "box": [
+      48,
+      27
+    ],
+    "text": "title",
+    "indicatorHtml": "<span class=\"popup-layer-drop-type-indicator\" style=\"display: inline-flex; align-items: center; vertical-align: middle;\"><span class=\"Icon-module__Root--OBnR1 Icon-module__is-size-small--hhv1i\"><svg x",
+    "colour": "rgb(24, 33, 43)"
+  },
+  "census": {
+    "scope": "popup-layer-dragger",
+    "scopeBox": [
+      48,
+      27
+    ],
+    "total": 2,
+    "drawn": 1,
+    "emptyHosts": 0,
+    "collapsed": 0,
+    "boxes": [
+      "14x14"
+    ],
+    "colours": [
+      "rgb(24, 33, 43)"
+    ],
+    "faLeft": 0,
+    "glyphs": [
+      "title | 14x14 | svg 14x14 | rgb(24, 33, 43)"
+    ]
+  },
+  "afterRelease": "block"
+}

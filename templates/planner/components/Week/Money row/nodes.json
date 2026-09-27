@@ -1,0 +1,333 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8cf5e03f-ac7e-5604-80cf-b7a11fdabb5d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mrIn",
+      "type": "Component Inputs",
+      "label": "The line",
+      "ports": [
+        {
+          "name": "key",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "dateText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "dateColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "labelColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sub",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "subColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "amountText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "amountColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "afterText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "afterColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tickShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "tickFill",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tickInk",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rowBackground",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rowEdge",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rowEdgeStyle",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "mrOut",
+      "type": "Component Outputs",
+      "label": "Picked",
+      "ports": [
+        {
+          "name": "pick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "key",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "mrRoot",
+      "type": "Group",
+      "label": "One money line",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)"
+      },
+      "children": [
+        "mrTick",
+        "mrDate",
+        "mrMain",
+        "mrNums"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mrTick",
+      "type": "net.noodl.controls.button",
+      "label": "Tick it — opens it with the date and amount to confirm",
+      "parent": "mrRoot",
+      "parameters": {
+        "label": "✓",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "lineHeight": {
+          "value": 11,
+          "unit": "px"
+        },
+        "backgroundColor": "transparent",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-2)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-sm)",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 16,
+          "unit": "px"
+        },
+        "height": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0)",
+        "paddingBottom": "var(--space-0)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mrDate",
+      "type": "Text",
+      "label": "When",
+      "parent": "mrRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 58,
+          "unit": "px"
+        },
+        "cssClassName": "planner-money-date"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "mrMain",
+      "type": "Group",
+      "label": "What it is",
+      "parent": "mrRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "mrLabel",
+        "mrSub"
+      ],
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "mrLabel",
+      "type": "Text",
+      "label": "What it is",
+      "parent": "mrMain",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "mrSub",
+      "type": "Text",
+      "label": "Where it came from",
+      "parent": "mrMain",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "mrNums",
+      "type": "Group",
+      "label": "How much, and after",
+      "parent": "mrRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentSize",
+        "rowGap": "var(--space-0)",
+        "alignItems": "flex-end"
+      },
+      "children": [
+        "mrAmount",
+        "mrAfter"
+      ],
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "mrAmount",
+      "type": "Text",
+      "label": "How much",
+      "parent": "mrNums",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-mono)",
+        "fontVariantNumeric": "tabular-nums",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-semibold)",
+        "textAlignX": "right"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "mrAfter",
+      "type": "Text",
+      "label": "The balance after it",
+      "parent": "mrNums",
+      "parameters": {
+        "text": "",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-mono)",
+        "fontVariantNumeric": "tabular-nums",
+        "sizeMode": "contentSize",
+        "textAlignX": "right"
+      },
+      "x": 160,
+      "y": 1000
+    }
+  ],
+  "visualRoots": [
+    "mrRoot"
+  ]
+}

@@ -571,7 +571,7 @@ export const APP_ERROR_TS_TYPE = '{ code: string; message: string; nodeId: strin
 export const STREAM_PARSER_TYPE = 'net.noodl.JSONStreamParser';
 export const STREAM_BUFFER_TYPE = 'net.noodl.StreamBuffer';
 export const TEXT_ACCUMULATOR_TYPE = 'net.noodl.TextAccumulator';
-export type StreamKind = 'parser' | 'buffer' | 'accumulator' | 'sse' | 'websocket' | 'subscription';
+export type StreamKind = 'parser' | 'buffer' | 'accumulator' | 'sse' | 'websocket' | 'subscription' | 'repeat';
 /** EXP-011 §64. `Server-Sent Events` — the fourth member of the table: no data port, two Actions, its own module. */
 export const SSE_TYPE = 'net.noodl.SSE';
 /** EXP-011 §65. `WebSocket` — the fifth member: a data port (Message) that only the Send verb carries, three Actions, its own module. */
@@ -582,6 +582,12 @@ export const WEBSOCKET_TYPE = 'net.noodl.WebSocket';
  * its own module, riding EXP-009's client. The Backend picker, the Filter and its `qp-` ports are refused by name (streamPlanOf).
  */
 export const SUBSCRIBE_TO_CHANGES_TYPE = 'SubscribeToChanges';
+/**
+ * GAM-013 (P88). `Repeat` — the seventh member: no data port, one config port (Interval), two Actions (Start, Stop), Tick
+ * and the outcome trio as listeners, Count a live getter; its own module, `src/lib/repeat.ts`. The table fits it exactly,
+ * where Delay's per-verb callbacks (§39) could not carry a node whose Tick belongs to the node and whose Count is a value.
+ */
+export const REPEAT_TYPE = 'Repeat';
 /** EXP-011 §66. The structural RealtimeError — `src/lib/realtime.ts`'s, spelled so a store row needs no import. */
 export const REALTIME_ERROR_TS_TYPE = '{ message: string; code: string; kind: string } | null';
 export interface StreamValueField {
@@ -597,7 +603,7 @@ export interface StreamNodeSpec {
   hook: string;
   localStem: string;
   /** The module the hook lives in (component.ts maps it to a path; emitApp.ts ships it). */
-  lib: 'streaming' | 'sse' | 'websocket' | 'realtime';
+  lib: 'streaming' | 'sse' | 'websocket' | 'realtime' | 'repeat';
   /** The runtime file the hook transcribes, for the emitted comment. */
   sourceFile: string;
   /** The data port, delivered with the pulse — absent on a node whose actions carry nothing (§64's SSE). */
@@ -817,12 +823,29 @@ export const STREAM_NODES: Record<string, StreamNodeSpec> = {
       changedRecords: { tsType: 'Record<string, unknown>[]', cast: 'array', maybeUndefined: false },
       changedRecordId: { tsType: 'string', cast: 'string', maybeUndefined: false }
     }
+  },
+  // GAM-013 (P88). The Interval is the one config port (read at Start and at every tick, so a change lands on the next
+  // tick); Start and Stop carry nothing; Tick and the outcome trio are the listeners; Count is a live getter, 0 before the
+  // first Start (initialize), never undefined.
+  [REPEAT_TYPE]: {
+    kind: 'repeat',
+    displayName: 'Repeat',
+    hook: 'useRepeat',
+    localStem: 'Repeat',
+    lib: 'repeat',
+    sourceFile: 'repeat.ts',
+    config: [{ port: 'interval', displayName: 'Interval' }],
+    actions: { start: { verb: 'start', takesData: false }, stop: { verb: 'stop', takesData: false } },
+    signals: ['tick', ...OUTCOME_SIGNALS],
+    values: {
+      count: { tsType: 'number', cast: 'number', maybeUndefined: false }
+    }
   }
 };
 
 /** EXP-011 §64. The type id behind a `stream-out`'s kind — the one ladder component.ts and the maybe-undefined answer share. */
 export function streamTypeOfKind(kind: StreamKind): string {
-  return kind === 'parser' ? STREAM_PARSER_TYPE : kind === 'buffer' ? STREAM_BUFFER_TYPE : kind === 'accumulator' ? TEXT_ACCUMULATOR_TYPE : kind === 'sse' ? SSE_TYPE : kind === 'websocket' ? WEBSOCKET_TYPE : SUBSCRIBE_TO_CHANGES_TYPE;
+  return kind === 'parser' ? STREAM_PARSER_TYPE : kind === 'buffer' ? STREAM_BUFFER_TYPE : kind === 'accumulator' ? TEXT_ACCUMULATOR_TYPE : kind === 'sse' ? SSE_TYPE : kind === 'websocket' ? WEBSOCKET_TYPE : kind === 'repeat' ? REPEAT_TYPE : SUBSCRIBE_TO_CHANGES_TYPE;
 }
 export const RUN_TASKS_TYPE = 'RunTasks';
 /** EXP-011 §57. `Repeater Item` — the type id is the runtime's `name`, not the display name. */
@@ -856,6 +879,8 @@ const OWN_CHAIN_OUTPUTS: Record<string, readonly string[]> = {
   [WEBSOCKET_TYPE]: STREAM_NODES[WEBSOCKET_TYPE].signals,
   // EXP-011 §66. The subscription's five signals, the same footing.
   [SUBSCRIBE_TO_CHANGES_TYPE]: STREAM_NODES[SUBSCRIBE_TO_CHANGES_TYPE].signals,
+  // GAM-013. Tick and the outcome trio, the same footing.
+  [REPEAT_TYPE]: STREAM_NODES[REPEAT_TYPE].signals,
   [LOG_TYPE]: ['done'],
   [TIMER_TYPE]: TIMER_OUTPUTS,
   [VALUE_CHANGED_TYPE]: ['valueChanged'],
@@ -3432,6 +3457,15 @@ export interface PopupSlotPlan {
   targetLegacy: string;
   /** Literal `popupParam-*` values, keyed by the target's input port name — props at emit. */
   params: Array<{ input: string; value: string | number | boolean }>;
+  /**
+   * HLT-014 — Show Popup's `Close On Escape`. The emitted `PopupDialog` closes on Escape unless this is
+   * `false`, matching the runtime's default-on.
+   */
+  closeOnEscape: boolean;
+  /** HLT-014 — Show Popup's `Accessible Name`; absent means "named by the popup's first heading". */
+  label?: string;
+  /** HLT-014 — Show Popup's `Modal`. `false` renders the plain overlay: not a dialog (a toast). */
+  modal: boolean;
 }
 
 export interface ComponentFilePlan {
@@ -9642,7 +9676,15 @@ function planComponent(
    * own code declared (EXP-011 §52), which no table keyed by type can list.
    */
   const isTriggerInto = (node: NodeIR, toProperty: string): boolean =>
-    isTriggerWire(node.type, toProperty) || (node.type === SCRIPT_TYPE && scriptPortsOf(node).signalInputs.includes(toProperty));
+    isTriggerWire(node.type, toProperty) ||
+    (node.type === SCRIPT_TYPE && scriptPortsOf(node).signalInputs.includes(toProperty)) ||
+    kitSignalInputOf(node, toProperty) !== undefined;
+
+  /** P88 GAM-017 — a kit node's declared signal input (`inputProps` or `inputs`), or undefined. */
+  const kitSignalInputOf = (node: NodeIR, port: string) =>
+    plan.roleOf[node.id] === 'custom'
+      ? plan.customNodes[node.id]?.def.inputs.find((input) => input.name === port && input.type === 'signal')
+      : undefined;
 
   // Which components open as popups anywhere in the project — the close side translates only
   // inside one; elsewhere the runtime resolves an enclosing popup by ancestor walk, which a
@@ -9660,15 +9702,23 @@ function planComponent(
   // params share a key; distinct param sets on one target take numeric suffixes in compile
   // order. plan.popups is filtered to the keys that actually attached, after pass 2.
   const slotRegistry: PopupSlotPlan[] = [];
-  const slotFor = (targetLegacy: string, params: PopupSlotPlan['params']): string => {
-    const identity = JSON.stringify([targetLegacy, params]);
-    const existing = slotRegistry.find((s) => JSON.stringify([s.targetLegacy, s.params]) === identity);
+  const slotFor = (
+    targetLegacy: string,
+    params: PopupSlotPlan['params'],
+    dialog: Pick<PopupSlotPlan, 'closeOnEscape' | 'label' | 'modal'>
+  ): string => {
+    // HLT-014: two nodes opening one target as DIFFERENT dialogs (one Escape-proof, one not; two names)
+    // are two slots — sharing one would give the second node the first one's dialog.
+    const identityOf = (x: Pick<PopupSlotPlan, 'targetLegacy' | 'params' | 'closeOnEscape' | 'label' | 'modal'>) =>
+      JSON.stringify([x.targetLegacy, x.params, x.closeOnEscape, x.label ?? null, x.modal]);
+    const identity = identityOf({ targetLegacy, params, ...dialog });
+    const existing = slotRegistry.find((s) => identityOf(s) === identity);
     if (existing) return existing.slotKey;
     const base = pascalCase(lastSegment(targetLegacy.replace(/^\//, '')));
     let key = base;
     let counter = 2;
     while (slotRegistry.some((s) => s.slotKey === key)) key = `${base}${counter++}`;
-    slotRegistry.push({ slotKey: key, targetLegacy, params });
+    slotRegistry.push({ slotKey: key, targetLegacy, params, ...dialog });
     return key;
   };
 
@@ -9781,10 +9831,24 @@ function planComponent(
       }
       params.push({ input, value: param.value.value });
     }
+    // HLT-014 — the two dialog inputs. Literal only: the runtime reads both at open, and a wired value
+    // would have to be snapshotted exactly as `popupParam-*` would, which this slice does not do.
+    for (const port of ['closeOnEscape', 'accessibleName', 'modal']) {
+      if (wiredPorts.has(`${node.id}:${port}`)) {
+        return { defer: `${port} is wired — only a literal Modal / Close On Escape / Accessible Name translates` };
+      }
+    }
+    const closeOnEscape = literalParam(node, 'closeOnEscape') !== false;
+    const accessibleName = literalParam(node, 'accessibleName');
+    const dialog = {
+      modal: literalParam(node, 'modal') !== false,
+      closeOnEscape,
+      ...(typeof accessibleName === 'string' && accessibleName !== '' ? { label: accessibleName } : {})
+    };
     const chain = doneChainOf(node);
     if ('defer' in chain) return chain;
     return {
-      action: { kind: 'popup-show', slotKey: slotFor(target, params), then: chain.then },
+      action: { kind: 'popup-show', slotKey: slotFor(target, params, dialog), then: chain.then },
       consumes: chain.consumes,
       collapses: chain.collapses,
       subscribes: chain.subscribes
@@ -9948,6 +10012,37 @@ function planComponent(
                 ? { kind: 'state-set', name, op: 'dec' }
                 : { kind: 'state-set', name, expr: { kind: 'literal', value: rec.stateVar.boot as number } };
     return { action, consumes: [] };
+  };
+
+  /**
+   * P88 GAM-017 — a signal into a kit node's signal input, as a pulse count.
+   *
+   * The viewer hands a signal PROP to the component as a count from 0 that goes up by one per pulse
+   * (`react-component-node.ts` `defineSignalInputProp`), and an `inputs` signal runs its
+   * `valueChangedToTrue`. The export keeps one count per wired kit input in the component, the
+   * handler adds one (a functional update, so two pulses in one render are not lost), and the count
+   * is bound to the kit node's port: the prop the component reads, and the edge the kit runtime turns
+   * into a `valueChangedToTrue` call. Every wire into the same port shares its count.
+   */
+  const kitPulseVars = new Map<string, StateVarPlan>();
+  const compileKitSignal = (node: NodeIR, port: string): CompiledSink => {
+    const key = `${node.id}\u0000${port}`;
+    let stateVar = kitPulseVars.get(key);
+    if (stateVar === undefined) {
+      stateVar = allocStateVar(
+        node.authoredLabel === undefined ? undefined : `${node.authoredLabel} ${port}`,
+        `${port}Pulses`,
+        'number',
+        0,
+        node.id,
+        'counter',
+        `How many times "${port}" on the kit node ${node.id} has been signalled — the count the node reads (GAM-017).`
+      );
+      kitPulseVars.set(key, stateVar);
+      plan.bindings[node.id] = plan.bindings[node.id] ?? {};
+      plan.bindings[node.id][port] = { kind: 'computed', expr: { kind: 'state-get', name: stateVar.name } };
+    }
+    return { action: { kind: 'state-set', name: stateVar.name, op: 'inc' }, consumes: [] };
   };
 
   /** Checkbox check/uncheck and Text Input clear as state writes on a stateful control (§4c). */
@@ -13325,6 +13420,9 @@ function planComponent(
     const easeParam = literalParam(node, 'easingCurve') ?? 'easeOut';
     if (!(ANIMATE_EASE_NAMES as readonly unknown[]).includes(easeParam)) return refuse(`its Easing Curve "${String(easeParam)}" is not a curve the node knows`);
     for (const wire of component.connections.filter((c) => c.toId === node.id)) {
+      // GAM-008: the node has these two, and the hook does not translate them yet. The engine does
+      // (`jumpTo`/`carryOn` in animateLib, graded by A4), so the refusal names the port honestly.
+      if (wire.toProperty === 'jumpTo' || wire.toProperty === 'jumpValue') return refuse(`its ${wire.toProperty === 'jumpTo' ? 'Jump To' : 'Jump Value'} input is wired, and the export does not translate a jump yet`);
       if (!['targetValue', 'duration', 'delay', 'easingCurve'].includes(wire.toProperty)) return refuse(`its ${wire.toProperty} input is not a port this node has`);
     }
     for (const wire of component.connections.filter((c) => c.fromId === node.id)) {
@@ -13695,6 +13793,7 @@ function planComponent(
     if (USER_VERBS[node.type] !== undefined && port === USER_VERBS[node.type].trigger) return compileUserOp(node);
     if (jsNodeKindOf(node.type) !== null && port === 'run') return compileJsRun(node);
     if (isLatchType(node.type)) return compileLatch(node, port);
+    if (kitSignalInputOf(node, port) !== undefined) return compileKitSignal(node, port);
     if ((plan.roleOf[node.id] === 'checkbox' || plan.roleOf[node.id] === 'input') && (CONTROL_ACTION_PORTS[plan.roleOf[node.id]] ?? []).includes(port)) {
       return compileControlAction(node, port);
     }

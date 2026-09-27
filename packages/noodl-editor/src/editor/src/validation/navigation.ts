@@ -227,7 +227,7 @@ export function checkNavigation(
           message: `${where} navigates nowhere: no Target Page is set, so pressing it does nothing.`,
           location: { component, nodeId: node.id, port: 'target' },
           suggestion:
-            'Set "target" to the page component name the router lists, e.g. "/Pages/Home".'
+            'Set "target" to the page name the router lists, e.g. "/Pages/Home".'
         });
         continue;
       }

@@ -12,11 +12,12 @@ import type {
   OutcomeToken
 } from '@noodl/types';
 
+import { expressionPorts, isReservedExpressionName } from './expression-ports';
 import { ARITHMETIC_SEARCH_TAGS } from './logic-search-tags';
 
 import Node = require('../../node');
 import { outcomeOutputs, reportOutcomes } from '../../outcome';
-import { runOnChangeDynamicPorts } from '../../run-on-value-change';
+import { RUN_ON_CHANGE_GROUP, runOnChangeDynamicPorts } from '../../run-on-value-change';
 
 const difference = require('lodash.difference');
 const ExpressionEvaluator = require('../../expression-evaluator');
@@ -32,7 +33,7 @@ interface NoodlDependencies {
  * `this` inside the Expression node.
  *
  * The port set is `runtime-discovered` in the strongest sense: the inputs are whatever
- * identifiers appear in the user's expression text, found by {@link parsePorts}. Nothing
+ * names the user's expression reads, found by `expressionPorts` (GAM-002). Nothing
  * about that set is knowable statically, which is why the catalog records the mechanism
  * rather than the ports.
  *
@@ -103,12 +104,22 @@ interface ExpressionNodeInstance extends NodeInstance {
      * ⚠️ Created lazily in `_scheduleEvaluateExpression`, not in `initialize`.
      */
     pendingRunOutcomes?: OutcomeToken[];
+    /** GAM-001 (P78 D55), R3: the Evaluate At Load checkbox. Ticked by default, saved projects included. */
+    evaluateAtLoad: boolean;
+    /** GAM-001: the load asked for an evaluation while no referenced input had arrived. */
+    pendingLoadEvaluation: boolean;
   };
   /** Mutable here: `registerInputIfNeeded` seeds a value before the port exists. */
   _inputValues: Record<string, unknown>;
   _scheduleEvaluateExpression(token?: OutcomeToken): void;
   /** Schedule an evaluation nobody explicitly asked for. See `anyInputArrived`. */
   _scheduleAutomaticEvaluation(): void;
+  /** The `expression` setter's evaluation at load. See GAM-001 in `_scheduleEvaluateExpression`. */
+  _scheduleLoadEvaluation(): void;
+  /** The answer over inputs that have not arrived, or `NOT_EVALUATED` when there is none to give. */
+  _evaluateOverUnsetInputs(): unknown;
+  /** The compiled function's arguments: every input's current value, then the Noodl API. */
+  _argumentsForEvaluation(): unknown[];
   /** Record a value arrival and re-run if this input is ticked. */
   _onInputValueArrived(name: string, value: unknown): void;
   _calculateExpression(tokens?: OutcomeToken[]): unknown;
@@ -147,6 +158,8 @@ const ExpressionNode: NodeDefinitionOptions = {
     internal.hasEvaluated = false;
     internal.anyInputArrived = false;
     internal.referencedPorts = [];
+    internal.evaluateAtLoad = true;
+    internal.pendingLoadEvaluation = false;
     internal.currentExpression = '';
     internal.compiledFunction = undefined;
     internal.inputNames = [];
@@ -172,6 +185,14 @@ const ExpressionNode: NodeDefinitionOptions = {
     },
     registerInputIfNeeded: function (this: ExpressionNodeInstance, name: string) {
       if (this.hasInput(name)) {
+        return;
+      }
+
+      // GAM-002. A wire into `String` or `typeof`, saved before those stopped being ports. The
+      // input exists so the wire connects, but it never becomes a parameter: as one it shadowed
+      // the global (`String is not a function`), or stopped the node compiling at all.
+      if (isReservedExpressionName(name)) {
+        this.registerInput(name, { set: function () {} });
         return;
       }
 
@@ -210,6 +231,17 @@ const ExpressionNode: NodeDefinitionOptions = {
       if (internal.referencedPorts.length > 0 && !internal.anyInputArrived) return;
       this._scheduleEvaluateExpression();
     },
+    _scheduleLoadEvaluation: function (this: ExpressionNodeInstance) {
+      const internal = this._internal;
+      // GAM-001 (P78 D55), R3. This used to be `_scheduleAutomaticEvaluation`, which does not
+      // schedule at all while a referenced input has never arrived, so `m !== false` over an
+      // optional port the page never set did not run, its `null` was seeded into Mounted, and the
+      // part was hidden. Now it is scheduled and marked, and the callback decides once the inputs
+      // have had their chance to land: an input that arrives in the meantime makes it an ordinary
+      // evaluation.
+      if (internal.referencedPorts.length > 0 && !internal.anyInputArrived) internal.pendingLoadEvaluation = true;
+      this._scheduleEvaluateExpression();
+    },
     _scheduleEvaluateExpression: function (this: ExpressionNodeInstance, token?: OutcomeToken) {
       const internal = this._internal;
       if (token) {
@@ -229,7 +261,24 @@ const ExpressionNode: NodeDefinitionOptions = {
           // Drained before the evaluation, so a `Run` arriving during it owns its own batch.
           const tokens = internal.pendingRunOutcomes || [];
           internal.pendingRunOutcomes = undefined;
-          internal.cachedValue = this._calculateExpression(tokens);
+          // GAM-001 (P78 D55), R3. The load asked for this before any referenced input had
+          // arrived, none has since, and no `Run` is in the batch. It runs over the unset inputs
+          // unless the author unticked Evaluate At Load. An answer it cannot give (a throw, a
+          // compile failure, a NaN) leaves the node abstaining on `null` exactly as it did before,
+          // so NDA-004's "an unset input is not a failure" and OBS-003's `node/nan-input` both hold.
+          const overUnsetInputs =
+            internal.pendingLoadEvaluation && tokens.length === 0 && !internal.anyInputArrived;
+          internal.pendingLoadEvaluation = false;
+          if (overUnsetInputs) {
+            const answer = internal.evaluateAtLoad ? this._evaluateOverUnsetInputs() : NOT_EVALUATED;
+            if (answer === NOT_EVALUATED) {
+              internal.hasScheduledEvaluation = false;
+              return;
+            }
+            internal.cachedValue = answer;
+          } else {
+            internal.cachedValue = this._calculateExpression(tokens);
+          }
           internal.hasEvaluated = true;
           // `!hadEvaluated` is load-bearing: the very first evaluation moves the outputs off
           // `null` even when it happens to land on the same value the getters were reporting,
@@ -355,15 +404,7 @@ const ExpressionNode: NodeDefinitionOptions = {
         return 0;
       }
 
-      for (let i = 0; i < internal.inputNames.length; ++i) {
-        const inputValue = internal.scope[internal.inputNames[i]];
-        internal.inputValues[i] = inputValue;
-      }
-
-      // Get proper Noodl API and append as last parameter for backward compatibility
-      const JavascriptNodeParser = require('../../javascriptnodeparser');
-      const noodlAPI = JavascriptNodeParser.createNoodlAPI(this.context && this.context.modelScope);
-      const argsWithNoodl = internal.inputValues.concat([noodlAPI]);
+      const argsWithNoodl = this._argumentsForEvaluation();
 
       try {
         const value = internal.compiledFunction.apply(null, argsWithNoodl);
@@ -380,6 +421,36 @@ const ExpressionNode: NodeDefinitionOptions = {
         this._reportFailure('expression/threw', 'The expression threw: ' + e.message, { message: e.message }, tokens);
       }
       return 0;
+    },
+    _argumentsForEvaluation: function (this: ExpressionNodeInstance) {
+      const internal = this._internal;
+      for (let i = 0; i < internal.inputNames.length; ++i) {
+        const inputValue = internal.scope[internal.inputNames[i]];
+        internal.inputValues[i] = inputValue;
+      }
+
+      // Get proper Noodl API and append as last parameter for backward compatibility
+      const JavascriptNodeParser = require('../../javascriptnodeparser');
+      const noodlAPI = JavascriptNodeParser.createNoodlAPI(this.context && this.context.modelScope);
+      return internal.inputValues.concat([noodlAPI]);
+    },
+    _evaluateOverUnsetInputs: function (this: ExpressionNodeInstance) {
+      const internal = this._internal;
+      if (!internal.compiledFunction) internal.compiledFunction = this._compileFunction();
+      // A compile failure is reported when an input arrives, as it was before GAM-001: this path
+      // adds evaluations, never reports.
+      if (!internal.compiledFunction) return NOT_EVALUATED;
+      let value: unknown;
+      try {
+        value = internal.compiledFunction.apply(null, this._argumentsForEvaluation());
+      } catch (e) {
+        // `a.missing.deeper` over an `a` that never arrived. NDA-004: not a failure, and not an answer.
+        return NOT_EVALUATED;
+      }
+      // `a + b` over nothing. Publishing it would raise OBS-003's `node/nan-input` on every
+      // consumer of a node nobody has fed yet (GAM-001 §5, session 1's condition).
+      if (value !== value) return NOT_EVALUATED;
+      return value;
     },
     _compileFunction: function (this: ExpressionNodeInstance) {
       const expression = this._internal.currentExpression;
@@ -426,13 +497,14 @@ const ExpressionNode: NodeDefinitionOptions = {
         codenotation: 'expression'
       },
       displayName: 'Expression',
-      description: 'JavaScript expression whose value becomes Result; every identifier in it becomes an input port',
+      description:
+        "JavaScript expression whose value becomes Result. Every name it reads becomes an input port, except JavaScript's own (String, Number, JSON, Date, parseInt, Math and the rest), the Math shortcuts (round, min, pi…) and keywords such as typeof; a port can never be called one of those",
       set: function (this: ExpressionNodeInstance, value: string) {
         const internal = this._internal;
         internal.currentExpression = functionPreamble + 'return (' + value + ');';
         internal.compiledFunction = undefined;
 
-        const newInputs = parsePorts(value);
+        const newInputs = expressionPorts(value);
         internal.referencedPorts = newInputs;
 
         const inputsToAdd: string[] = difference(newInputs, internal.inputNames);
@@ -509,9 +581,10 @@ const ExpressionNode: NodeDefinitionOptions = {
         // Surfaced in the handover rather than buried here, because it is the one place the
         // build does not do what the decision says word for word.
         //
-        // `_scheduleAutomaticEvaluation` rather than the scheduler directly: see
-        // `anyInputArrived` for the NDA-004 regression that distinction exists to prevent.
-        if (!this.isInputConnected('run')) this._scheduleAutomaticEvaluation();
+        // `_scheduleLoadEvaluation` rather than the scheduler directly: see `anyInputArrived` for
+        // the NDA-004 regression that distinction exists to prevent, and GAM-001 for why the load
+        // no longer waits for an input to arrive.
+        if (!this.isInputConnected('run')) this._scheduleLoadEvaluation();
       }
     },
     run: {
@@ -527,6 +600,23 @@ const ExpressionNode: NodeDefinitionOptions = {
         // ERG-001 §4. Only the port mints; every value setter and the `expression` setter reach
         // the same scheduler and report nothing.
         this._scheduleEvaluateExpression(this.beginOutcome());
+      }
+    },
+    /**
+     * GAM-001 (P78 D55), R3 — ruled a node-level checkbox, not one of NDA-017's per-input
+     * `runOnChange-` controls: those govern an arrival, and at load nothing has arrived. On by
+     * default, and saved projects are not migrated to off. Wiring `Run` still stops the load's
+     * evaluation, as it always did.
+     */
+    evaluateAtLoad: {
+      group: RUN_ON_CHANGE_GROUP,
+      displayName: 'Evaluate At Load',
+      default: true,
+      type: { name: 'boolean', allowEditOnly: true } as never,
+      description:
+        'Whether the expression runs when the page loads even though an input it reads has not arrived yet. Those inputs read as undefined, so `m !== false` is true and `m === true` is false. An expression that throws or gives NaN over them waits for its inputs instead. Untick to wait for an input to arrive',
+      set: function (this: ExpressionNodeInstance, value: unknown) {
+        this._internal.evaluateAtLoad = value !== false;
       }
     }
   },
@@ -687,6 +777,9 @@ const functionPreamble = [
     '}'
 ].join('');
 
+/** GAM-001: what `_evaluateOverUnsetInputs` returns when there is no answer to publish. */
+const NOT_EVALUATED = {};
+
 //Since apply cannot be used on constructors (i.e. new Something) we need this hax
 //see http://stackoverflow.com/questions/1606797/use-of-apply-with-new-operator-is-this-possible
 function construct(constructor: FunctionConstructor, args: string[]) {
@@ -699,80 +792,9 @@ function construct(constructor: FunctionConstructor, args: string[]) {
 
 const compiledFunctionsCache: Record<string, (...args: unknown[]) => unknown> = {};
 
-const portsToIgnore = [
-  'min',
-  'max',
-  'cos',
-  'sin',
-  'tan',
-  'sqrt',
-  'pi',
-  'round',
-  'floor',
-  'ceil',
-  'abs',
-  'random',
-  'pow',
-  'log',
-  'exp',
-  'Math',
-  'window',
-  'document',
-  'undefined',
-  'Vars',
-  'Variables',
-  'Objects',
-  'Arrays',
-  'Noodl',
-  'NoodlContext',
-  'true',
-  'false',
-  'null',
-  'Boolean'
-];
-
-/**
- * The whole `runtime-discovered` port mechanism for this node: every identifier in the
- * expression that is not a known built-in becomes an input port.
- *
- * It is a text scan, not a parse, so it is deliberately conservative in one direction only
- * — string literals are stripped first so their contents cannot mint ports, and a dotted
- * path contributes just its root. An identifier inside a comment still would.
- */
-function parsePorts(expression: string): string[] {
-  const ports: string[] = [];
-
-  function addPort(name: string) {
-    if (portsToIgnore.indexOf(name) !== -1) return;
-    if (
-      ports.some(function (p) {
-        return p === name;
-      })
-    )
-      return;
-
-    ports.push(name);
-  }
-
-  // First remove all strings
-  expression = expression.replace(/\"([^\"]*)\"/g, '').replace(/\'([^\']*)\'/g, '');
-
-  // Extract identifiers
-  const identifiers = expression.matchAll(/[a-zA-Z\_\$][a-zA-Z0-9\.\_\$]*/g);
-  for (const _id of identifiers) {
-    let name = _id[0];
-    if (name.indexOf('.') !== -1) {
-      name = name.split('.')[0]; // Take first symbol on "." sequence
-    }
-
-    addPort(name);
-  }
-
-  return ports;
-}
-
 function updatePorts(nodeId: string, expression: string, editorConnection: EditorConnectionLike) {
-  const portNames = parsePorts(expression);
+  // The same function the `expression` setter uses, so the editor's ports are the runtime's.
+  const portNames = expressionPorts(expression);
 
   const ports = portNames.map(function (name) {
     return {

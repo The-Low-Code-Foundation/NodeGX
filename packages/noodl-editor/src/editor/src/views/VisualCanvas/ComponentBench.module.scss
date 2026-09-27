@@ -111,7 +111,7 @@
      positioned against this box's edges. */
   position: relative;
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm), 0 0 0 1px var(--theme-color-border-default);
+  box-shadow: var(--shadow-card), 0 0 0 1px var(--theme-color-border-default);
   overflow: hidden;
 }
 

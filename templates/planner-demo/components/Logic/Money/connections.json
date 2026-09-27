@@ -1,0 +1,229 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a4b72b55-4fa9-5740-8c34-3754a1164e49",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "moIn",
+      "fromProperty": "items",
+      "toId": "moWork",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "moIn",
+      "fromProperty": "marks",
+      "toId": "moWork",
+      "toProperty": "in-marks"
+    },
+    {
+      "fromId": "moIn",
+      "fromProperty": "readings",
+      "toId": "moWork",
+      "toProperty": "in-readings"
+    },
+    {
+      "fromId": "moIn",
+      "fromProperty": "projects",
+      "toId": "moWork",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "moIn",
+      "fromProperty": "blocks",
+      "toId": "moWork",
+      "toProperty": "in-blocks"
+    },
+    {
+      "fromId": "moIn",
+      "fromProperty": "settings",
+      "toId": "moWork",
+      "toProperty": "in-settings"
+    },
+    {
+      "fromId": "moIn",
+      "fromProperty": "since",
+      "toId": "moWork",
+      "toProperty": "in-since"
+    },
+    {
+      "fromId": "moIn",
+      "fromProperty": "filter",
+      "toId": "moWork",
+      "toProperty": "in-filter"
+    },
+    {
+      "fromId": "moIn",
+      "fromProperty": "horizon",
+      "toId": "moWork",
+      "toProperty": "in-horizon"
+    },
+    {
+      "fromId": "moIn",
+      "fromProperty": "sel",
+      "toId": "moWork",
+      "toProperty": "in-sel"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-groups",
+      "toId": "moOut",
+      "toProperty": "groups"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-empty",
+      "toId": "moOut",
+      "toProperty": "empty"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-emptyText",
+      "toId": "moOut",
+      "toProperty": "emptyText"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-moreShown",
+      "toId": "moOut",
+      "toProperty": "moreShown"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-modalBalance",
+      "toId": "moOut",
+      "toProperty": "modalBalance"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-upFill",
+      "toId": "moOut",
+      "toProperty": "upFill"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-upInk",
+      "toId": "moOut",
+      "toProperty": "upInk"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-pastFill",
+      "toId": "moOut",
+      "toProperty": "pastFill"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-pastInk",
+      "toId": "moOut",
+      "toProperty": "pastInk"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-recFill",
+      "toId": "moOut",
+      "toProperty": "recFill"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-recInk",
+      "toId": "moOut",
+      "toProperty": "recInk"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-stripRows",
+      "toId": "moOut",
+      "toProperty": "stripRows"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-stripBalance",
+      "toId": "moOut",
+      "toProperty": "stripBalance"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-monthName",
+      "toId": "moOut",
+      "toProperty": "monthName"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-monthText",
+      "toId": "moOut",
+      "toProperty": "monthText"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-mightShown",
+      "toId": "moOut",
+      "toProperty": "mightShown"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-mightLead",
+      "toId": "moOut",
+      "toProperty": "mightLead"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-mightRows",
+      "toId": "moOut",
+      "toProperty": "mightRows"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-lowText",
+      "toId": "moOut",
+      "toProperty": "lowText"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-lowColor",
+      "toId": "moOut",
+      "toProperty": "lowColor"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-footText",
+      "toId": "moOut",
+      "toProperty": "footText"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-targetHours",
+      "toId": "moOut",
+      "toProperty": "targetHours"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-targetLine",
+      "toId": "moOut",
+      "toProperty": "targetLine"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-lateCount",
+      "toId": "moOut",
+      "toProperty": "lateCount"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-hasLate",
+      "toId": "moOut",
+      "toProperty": "hasLate"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-lateConcern",
+      "toId": "moOut",
+      "toProperty": "lateConcern"
+    },
+    {
+      "fromId": "moWork",
+      "fromProperty": "out-lateKey",
+      "toId": "moOut",
+      "toProperty": "lateKey"
+    }
+  ]
+}

@@ -126,6 +126,37 @@ export interface ExportReportData {
     /** Component paths, sorted — where an author would go to look. */
     components: string[];
   };
+  /**
+   * STY-004 AC6 — the named styles this export resolved into CSS.
+   *
+   * 🔴 **Silence was the defect.** A variant and a text style on an ordinary leaf node were both
+   * dropped, and `variant` appeared **0 times in a 1,059-line report** — so the author had no
+   * signal at all, in a report that itemises dropped wires. A link that IS carried must therefore
+   * say so out loud; an export that prints nothing here is claiming the project has no named
+   * styles, which is a checkable claim rather than an absence.
+   *
+   * Absent when the project declares no styles — every fixture in this package and all seven
+   * shipped templates.
+   */
+  styles?: StylesReport;
+}
+
+/** STY-004. What {@link ExportReportData.styles} counts. Every field is "resolved into CSS", not "present in the file". */
+export interface StylesReport {
+  /** `Look name (NodeType)` → how many nodes wore it. Sorted by name. */
+  looks: Array<{ name: string; typename: string; nodes: number }>;
+  /** Text style name → how many nodes resolved it. Sorted. */
+  textStyles: Array<{ name: string; nodes: number }>;
+  /** Colour style names the project defines, sorted. Resolution is per parameter and not counted here. */
+  colors: string[];
+  /**
+   * Looks that carry `stateParameters` — hover, pressed, disabled.
+   *
+   * 🔴 **Carried in the file, NOT drawn by this export.** Naming them is the honest half of AC6:
+   * the states half of the Look model is a later task, and an author whose Look defines a hover
+   * needs to be told it did not ship rather than discover it in a browser.
+   */
+  looksWithUnemittedStates: string[];
 }
 
 /**
@@ -373,6 +404,48 @@ export function renderReport(data: ExportReportData): string {
         'plus the app shell, styles and build config'
     )
   );
+  // STY-004 AC6. Right here in "What was generated", not in a footnote: a person reading this
+  // section is asking what came out, and "the links you built with were carried" is part of the
+  // answer. The old behaviour's whole signature was that this paragraph did not exist.
+  if (data.styles) {
+    const { looks, textStyles, colors, looksWithUnemittedStates } = data.styles;
+    const wornBy = looks.reduce((total, look) => total + look.nodes, 0);
+    const parts = [
+      looks.length > 0
+        ? `**${looks.length} ${looks.length === 1 ? 'Look' : 'Looks'}** worn by ${wornBy} ${wornBy === 1 ? 'node' : 'nodes'}`
+        : null,
+      textStyles.length > 0
+        ? `**${textStyles.length} text ${textStyles.length === 1 ? 'style' : 'styles'}**`
+        : null,
+      colors.length > 0 ? `**${colors.length} colour ${colors.length === 1 ? 'style' : 'styles'}**` : null
+    ].filter((part): part is string => part !== null);
+    if (parts.length > 0) {
+      out.push(
+        bullet(
+          `**Your named styles**, resolved into the CSS modules — ${parts.join(', ')}. ` +
+            'Each is written into the classes of the nodes that use it.'
+        )
+      );
+      for (const look of looks) {
+        out.push(`  - Look \`${look.name}\` (${look.typename}) — ${look.nodes} ${look.nodes === 1 ? 'node' : 'nodes'}`);
+      }
+      for (const style of textStyles) {
+        out.push(`  - Text style \`${style.name}\` — ${style.nodes} ${style.nodes === 1 ? 'node' : 'nodes'}`);
+      }
+      for (const name of colors) out.push(`  - Colour style \`${name}\``);
+    }
+    if (looksWithUnemittedStates.length > 0) {
+      // The one thing in this paragraph that is a warning rather than a receipt.
+      out.push(
+        bullet(
+          `⚠️ **Hover, pressed and disabled states are not exported yet.** ` +
+            `${looksWithUnemittedStates.map((name) => `\`${name}\``).join(', ')} ` +
+            `${looksWithUnemittedStates.length === 1 ? 'defines' : 'define'} state parameters that this export ` +
+            'does not draw — the nodes wearing them ship with their neutral appearance only.'
+        )
+      );
+    }
+  }
   const backend = backendMode(data);
   if (backend !== 'absent') {
     out.push(

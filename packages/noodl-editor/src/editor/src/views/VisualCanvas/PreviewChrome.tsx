@@ -29,16 +29,19 @@ import { revealBenchTarget } from './benchRequest';
 import {
   APP_SCOPE,
   BENCH_FRAME_PRESETS,
-  benchTargetLabel,
+  BOARD_SCOPE,
   benchTargets,
   clampBenchHeight,
   clampBenchWidth,
   isMounted,
   matchingPreset,
   readMenuComponents,
+  scopeChipIconKind,
+  scopeChromeLabels,
   type BenchFrame,
   type PreviewScope
 } from './previewScope';
+import { WORKBENCH } from './benchWords';
 import css from './PreviewChrome.module.scss';
 
 export interface PreviewScopeControlProps {
@@ -110,7 +113,17 @@ export function PreviewScopeControl({ scope, onScopeChange, getComponents }: Pre
     if (next.mode === 'bench') revealBenchTarget(next.target);
   }
 
+  // The kind-to-icon map, kept beside the render and nowhere else. See
+  // `scopeChipIconKind` for why the decision is not made here.
+  const SCOPE_CHIP_ICONS = {
+    app: IconName.Home,
+    component: IconName.Component,
+    board: IconName.Columns
+  } as const;
+
   const isBench = scope.mode === 'bench';
+  // P99 HLT-008 B1 — every word this control draws, per mode, from one graded place.
+  const labels = scopeChromeLabels(scope);
 
   return (
     <div className={css.ScopeRoot} ref={rootRef}>
@@ -122,8 +135,8 @@ export function PreviewScopeControl({ scope, onScopeChange, getComponents }: Pre
         onClick={() => (isOpen ? setIsOpen(false) : open())}
         data-test="preview-scope-chip"
       >
-        <Icon icon={isBench ? IconName.Component : IconName.Home} size={IconSize.Small} />
-        <span className={css.ScopeLabel}>{isBench ? benchTargetLabel(scope.target) : 'App'}</span>
+        <Icon icon={SCOPE_CHIP_ICONS[scopeChipIconKind(scope)]} size={IconSize.Small} />
+        <span className={css.ScopeLabel}>{labels.chip}</span>
         <Icon icon={IconName.CaretDown} size={IconSize.Small} />
       </button>
 
@@ -147,9 +160,46 @@ export function PreviewScopeControl({ scope, onScopeChange, getComponents }: Pre
               data-test="preview-scope-app"
             >
               <Icon icon={IconName.Home} size={IconSize.Small} />
-              <span className={css.ScopeItemLabel}>App preview</span>
+              <span className={css.ScopeItemLabel}>{labels.appRow}</span>
               <span className={css.ScopeItemHint}>the whole project, as it ships</span>
             </button>
+
+            {/*
+              TVW-008 — the third thing this control switches between, and it
+              sits above the Workbench heading rather than in the list below it:
+              the heading scopes that list to *components you can mount*, and
+              the board is not one of them. It is a place, like `App preview`.
+
+              ⚠️ `choose` navigates the canvas only for a bench pick, which is
+              what makes this row safe to add here — the board carries no target,
+              so there is no one component for a canvas to reveal, and jumping
+              somewhere arbitrary would be worse than staying put.
+            */}
+            <button
+              type="button"
+              role="option"
+              aria-selected={scope.mode === 'board'}
+              className={classNames(css.ScopeItem, scope.mode === 'board' && css['is-current'])}
+              onClick={() => choose(BOARD_SCOPE)}
+              data-test="preview-scope-board"
+            >
+              <Icon icon={SCOPE_CHIP_ICONS.board} size={IconSize.Small} />
+              <span className={css.ScopeItemLabel}>{labels.boardRow}</span>
+              <span className={css.ScopeItemHint}>components side by side, at their own sizes</span>
+            </button>
+
+            {/*
+              TVW-001 (f) / R-G — the picker had no heading at all, so the list
+              below `App preview` was a row of component names that never said
+              what picking one *does*. It puts the component on the Workbench,
+              and now it says so. This is the third surface fed by
+              `benchWords.ts`, with the caption and the panel's menu row.
+
+              Drawn above the empty state as well as the list, because the
+              heading is what makes "No component matches" legible as a failed
+              search rather than an empty feature.
+            */}
+            <div className={css.ScopeHeading}>{labels.listHeading}</div>
 
             {targets.length === 0 && (
               <div className={css.ScopeEmpty}>
@@ -256,7 +306,7 @@ export function BenchFrameControl({ frame, onFrameChange, onSetDefaultSize, hasD
         className={css.FrameWidth}
         value={draft}
         disabled={frame.stretch}
-        aria-label="Bench frame width in pixels"
+        aria-label={`${WORKBENCH} frame width in pixels`}
         onChange={(event) => setDraft(event.target.value)}
         onBlur={commit}
         onKeyDown={(event) => {
@@ -282,7 +332,7 @@ export function BenchFrameControl({ frame, onFrameChange, onSetDefaultSize, hasD
         className={css.FrameHeight}
         value={heightDraft}
         placeholder="Fill"
-        aria-label="Bench frame height in pixels, empty to fill the stage"
+        aria-label={`${WORKBENCH} frame height in pixels, empty to fill the stage`}
         title="Frame height in pixels. Leave empty to fill the stage."
         onChange={(event) => setHeightDraft(event.target.value)}
         onBlur={commitHeight}
@@ -324,8 +374,8 @@ export function BenchFrameControl({ frame, onFrameChange, onSetDefaultSize, hasD
           className={css.FrameDefault}
           title={
             hasDefaultSize
-              ? 'Update the size this component opens at on the bench'
-              : 'Set as the size this component opens at on the bench'
+              ? `Update the size this component opens at on the ${WORKBENCH}`
+              : `Set as the size this component opens at on the ${WORKBENCH}`
           }
           aria-label="Set as default size"
           onClick={onSetDefaultSize}

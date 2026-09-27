@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { Catalog, CatalogIndex, loadCatalog } from '../src/catalog';
 import { parseIdentityMapping, planProject } from '../src/analyze/plan';
+import { Catalog, CatalogIndex, loadCatalog } from '../src/catalog';
 import { emitApp } from '../src/emit/emitApp';
 import { assignClassNames, partitionMergeGroup } from '../src/emit/naming';
 import { computeNodeStyle } from '../src/emit/style';
@@ -22,6 +22,7 @@ const project = planProject(ir, index);
 // ---------------------------------------------------------------------------------------------
 
 const GOLDEN_PUPPY_CARD_TSX = `// @nodegx:generated (visual — provenance markers complete in EXP-007)
+import { mediaSrc } from '../lib/media';
 import styles from './PuppyCard.module.css';
 
 export interface PuppyCardProps {
@@ -36,7 +37,7 @@ export interface PuppyCardProps {
 export function PuppyCard({ photo, name, breed, age, description }: PuppyCardProps) {
   return (
     <div className={styles.card}>
-      <img className={styles.photo} src={photo} alt={name} />
+      <img className={styles.photo} src={mediaSrc(photo)} alt={name} />
       <div className={styles.body}>
         <div className={styles.nameRow}>
           <p className={styles.nameText}>{name}</p>
@@ -282,6 +283,35 @@ describe('computeNodeStyle', () => {
     expect(shadow!.value).toBe('0 0 5px 2px var(--shadow-md)');
   });
 
+  test('P102 CMP-008 — in token mode the whole box-shadow is the token, and the six pieces are ignored', () => {
+    const node = {
+      id: 'card',
+      type: 'Group',
+      catalogRef: 'Group',
+      parameters: [
+        { name: 'boxShadowEnabled', value: { kind: 'literal', value: true } as const },
+        { name: 'boxShadowSource', value: { kind: 'literal', value: 'token' } as const },
+        { name: 'boxShadowToken', value: { kind: 'literal', value: 'var(--shadow-lg)' } as const },
+        { name: 'boxShadowColor', value: { kind: 'literal', value: '#ff0000' } as const }
+      ],
+      declaredPorts: [],
+      portKnowledge: 'partial' as const
+    };
+    const style = computeNodeStyle(node as never, 'group', index);
+    const shadow = style.decls.find((d) => d.prop === 'box-shadow');
+    expect(shadow?.value).toBe('var(--shadow-lg)');
+    // Custom stays exactly what it was: the switch is an addition, not a replacement.
+    const custom = computeNodeStyle(
+      {
+        ...node,
+        parameters: node.parameters.filter((p) => p.name !== 'boxShadowSource' && p.name !== 'boxShadowToken')
+      } as never,
+      'group',
+      index
+    );
+    expect(custom.decls.find((d) => d.prop === 'box-shadow')?.value).toBe('0 0 5px 2px #ff0000');
+  });
+
   test('sizeMode gates width and height as TARGET-OUTPUT §1 settles', () => {
     const landing = ir.components.find((c) => c.path === 'Pages/Landing')!;
     const brand = landing.nodes.find((n) => n.id === 'brandText')!; // sizeMode contentSize
@@ -349,9 +379,7 @@ describe('naming', () => {
   test('machine ids fall back to label, then role', () => {
     expect(assignClassNames([{ nodeIds: ['e82d69fb-927d-45e7-af21-ccf6bc4b5e84'], role: 'page' }])).toEqual(['page']);
     expect(
-      assignClassNames([
-        { nodeIds: ['e82d69fb-927d-45e7-af21-ccf6bc4b5e84'], label: 'Hero title', role: 'text' }
-      ])
+      assignClassNames([{ nodeIds: ['e82d69fb-927d-45e7-af21-ccf6bc4b5e84'], label: 'Hero title', role: 'text' }])
     ).toEqual(['heroTitle']);
   });
 });

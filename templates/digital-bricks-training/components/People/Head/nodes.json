@@ -1,0 +1,118 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "9364e4d2-b426-4c25-bf78-45f860cdce65",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hd_in",
+      "type": "Component Inputs",
+      "label": "The person, their programme, the words",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "person",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "entries",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "copy",
+          "plug": "output",
+          "type": "object"
+        }
+      ]
+    },
+    {
+      "id": "hd_fn",
+      "type": "JavaScriptFunction",
+      "label": "Where they are, what they just did, what is next",
+      "x": 520,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * PORTED, NEVER RE-DERIVED: Head and headline -> src/lib/components/staff/LearnerShell.tsx\n * (TASK-L165 §2). Three facts about the LEARNER, read off the programme in the\n * MODEL's order — which is why this takes `inOrder` from Logic/Ordered timeline\n * rather than sorting anything itself.\n */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst fill = (t, v) => String(t || '').replace(/\\{(\\w+)\\}/g, (m, k) => (k in v ? String(v[k]) : m));\n\n/* Wait for the words and the person; throw only on words that arrived WITHOUT\n   this page's namespace, which is a wiring fault rather than an arrival order\n   (Logic/Roster filter's two halves, L164). */\nconst copy = plain(Inputs.copy);\nconst person = plain(Inputs.person);\nif (!copy || !person) return;\nconst W = (copy.people || {}).learner;\nif (!W) throw new Error('People/Head: the copy has no people.learner namespace — wire it from a coach-audience Data/Strings');\nconst TL = copy.timeline || {};\nconst entries = plain(Inputs.entries) || [];\n\n/* One owner for every date on this page, pinned to UTC (Logic/Ordered timeline's\n   rule): a bare toLocale* reads the viewer's zone and moves a day. */\nconst FORMAT = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', day: 'numeric', month: 'short', year: 'numeric' });\nconst fmtDate = (iso) => (iso ? FORMAT.format(new Date(iso)) : '');\n\n/* One short phrase per entry. Never a count, never a verdict. */\nconst headline = (e) => {\n  switch (e.kind) {\n    case 'lesson': return e.title;\n    case 'session': return e.session.title;\n    case 'assignment': return e.title;\n    case 'submission': return W.headline.submission;\n    case 'note': return W.headline.note;\n    case 'message': return e.subject;\n    case 'signal': return W.headline.signal;\n    /* The review's point by name. The product appends \"review\" to its own\n       staff labels; this table's labels already say it (\"Mid-programme\n       review\"), so appending would read \"review review\". */\n    case 'evaluation': return (TL.evaluationKind || {})[e.evaluationKind] || e.evaluationKind;\n    default: throw new Error('People/Head: no headline for kind \"' + String(e.kind) + '\"');\n  }\n};\nconst line = (e) => ((TL.kind || {})[e.kind] || e.kind) + ' · ' + headline(e);\n\n/* WHERE THEY ARE. L89's own count, carried verbatim: steps done out of steps on\n   the path, presented as a count. Never a percentage, never a bar, and a person\n   with no path is told so in words rather than \"0 of 0\". */\nconst whereCount = person.stepsTotal === 0\n  ? W.head.noPath\n  : fill(W.head.steps, { done: person.stepsComplete, total: person.stepsTotal });\nconst where = person.lastActivity ? whereCount + ' · ' + fill(W.head.lastSeen, { when: fmtDate(person.lastActivity) }) : whereCount;\n\n/* WHAT THEY JUST DID. The model bands `done` first, ascending, so the most\n   recent finished thing is the LAST of them (L116's orderEntries). Quiet, never\n   an accusation, when there is none: a learner who has just signed up is the\n   person L89 built the roster to surface. */\nconst done = entries.filter((e) => e.state === 'done');\nconst justDid = done[done.length - 1];\n\n/* WHAT IS NEXT: a DATED in-play entry preferred, falling back to the first. That\n   is not the same as \"the first one\", and it is the kind of rule that silently\n   degrades if it is re-derived — an undated lesson would otherwise outrank the\n   session booked for Thursday. */\nconst inPlay = entries.filter((e) => e.state !== 'done');\nconst next = inPlay.find((e) => e.at !== null) || inPlay[0];\n\nOutputs.facts = [\n  { id: 'where', label: W.head.where, value: where },\n  { id: 'justDid', label: W.head.justDid, value: justDid ? line(justDid) : W.head.nothingYet },\n  { id: 'next', label: W.head.next, value: next ? line(next) + (next.at ? ' · ' + fmtDate(next.at) : '') : W.head.nothingScheduled }\n];\n"
+      },
+      "ports": [
+        {
+          "name": "in-copy",
+          "displayName": "copy",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-person",
+          "displayName": "person",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-entries",
+          "displayName": "entries",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-facts",
+          "displayName": "facts",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "hd_box",
+      "type": "Group",
+      "label": "Three facts",
+      "x": 40,
+      "y": 360,
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "backgroundColor": "var(--surface-raised)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "cssClassName": "dbt-coach-head"
+      },
+      "metadata": {
+        "comment": "The quiet card — a thin edge and no pop — because this is read, not pressed (sprint 43's rule for staff and review surfaces)."
+      },
+      "children": [
+        "hd_rep"
+      ]
+    },
+    {
+      "id": "hd_rep",
+      "type": "For Each",
+      "label": "One pair per fact",
+      "parent": "hd_box",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/People/Head fact"
+      },
+      "x": 100,
+      "y": 480
+    }
+  ],
+  "visualRoots": [
+    "hd_box"
+  ]
+}

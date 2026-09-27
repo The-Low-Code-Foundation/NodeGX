@@ -1,55 +1,130 @@
-# The served admin dashboard
+# The backend manager (the served admin page)
 
-`nodegx-backend` carries its own web admin UI. A deployed backend is
-administered from a browser with no NodeGX editor installed anywhere near it —
-the thing you actually need on a VPS at 2am.
+`nodegx-backend` carries its own web UI. A deployed backend is administered
+from a browser with no NodeGX editor installed anywhere near it — the thing you
+actually need on a VPS at 2am — and a backend the editor is running is
+administered from the same page: the editor's Backend Services card manages
+*which* backend runs, and its one button, **Manage data & settings**, opens
+this page signed in. Everything inside a backend is done here.
 
 ```
 http://your-backend-host:8577/_admin
 ```
 
-The editor keeps its Backend Services panel. That panel is for the backend you
-are *building*; this dashboard is for the backend you are *running*. Both speak
-the same HTTP routes to the same server, which is why they cannot drift.
+The page and the editor speak the same HTTP routes to the same server, which is
+why they cannot drift. Since phase 104 the page is a small Preact app, still
+bundled into the one served document at build time (`scripts/build-admin-app.js`).
 
 ---
 
 ## What it does
 
-| Section | What you can do |
-|---|---|
-| **Collections** | Browse, filter (JSON `where`), page, create, edit and delete records. Optional **Live** toggle streams changes over the backend's SSE realtime. |
-| **Schema** | See tables and columns; create tables; add columns; **delete a table** (typed confirmation). |
-| **Users** | List `_User`, create a user, delete one, trigger a password-reset email, see role membership. |
-| **Roles** | Create/delete roles, add members. Permissions reference these as `role:<name>`. |
-| **Permissions** | Per-collection rules for `find`/`get`/`create`/`update`/`delete` plus creator-owns. Shows loudly when enforcement is off. |
-| **API keys** | Issue scoped keys (secret shown once), revoke them. |
-| **Triggers** | List schedules/webhooks/db-change hooks with last-fired and last-result; enable, disable, fire now. |
-| **Workflows** | List WF-001 definitions and run them with a payload. |
-| **Executions** | The full run history with per-run detail. |
-| **Email** | SMTP settings, verification policy, templates, and a real test send. |
-| **Backups** | Schedule and status, archive list, and "back up now". |
+The nav groups the pages the way a person thinks about a backend: **Data**,
+**People**, **Access**, **Automation**, **Storage**, **Settings**, **Activity**.
+
+| Group | Page | What you can do |
+|---|---|---|
+| Data | **Collections** | Browse, search, page, create, edit and delete records; a typed form per record; cells edit in place. Optional **Live** toggle streams changes over the backend's SSE realtime. |
+| Data | **Schema** | See collections and fields; create a collection as rows of choices; add, rename and retype fields; indexes; **delete a collection** (typed confirmation). |
+| People | **Users** | List `_User`, create a user, delete one, trigger a password-reset email, see role membership. |
+| People | **Roles** | Create/delete roles, add members. Permissions reference these as `role:<name>`. |
+| People | **Sign-in** | Identity providers (Google, GitHub, OpenID Connect) with the callback URL to register, magic links, the redirect allow-list, account linking. |
+| Access | **Permissions** | Per-collection rules for `find`/`get`/`create`/`update`/`delete` plus creator-owns. Shows loudly when enforcement is off. |
+| Access | **API keys** | Issue scoped keys (secret shown once), revoke them. |
+| Automation | **Triggers** | List schedules/webhooks/db-change hooks with last-fired and last-result; enable, disable, fire now. |
+| Automation | **Workflows** | List WF-001 definitions and run them with a payload. |
+| Automation | **Runs** | The full run history — every function, trigger, workflow and backup run — with per-run detail: the failures first, then the steps. (Called *Executions* before phase 104.) |
+| Storage | **Files** | Browse what the app has stored (thumbnails, sizes, *used by* the record that points at each file), upload, download, delete — a delete refuses by name while a record uses the file and offers to clear the field. Below: the largest upload, how long a private link lives, the kinds refused as ticked categories (in the backend's own sniffer vocabulary) plus custom types, thumbnail presets as rows, and the clean-up on a schedule built with the schedule builder. *Where files are stored*: this machine, or an S3-compatible bucket whose details are typed once here — **Test connection** answers the endpoint's own sentence and *Save* waits for it. |
+| Settings | **Email** | SMTP settings, verification policy, templates, and a real test send. |
+| Settings | **Backups** | When (the schedule builder, a missed-run policy), keep (the last N, one a day for N days, one a week for N weeks), where (a folder on the machine, or the bucket from the Storage page — nothing to type), "back up now", the archives with **Download** and **Restore…** — restore asks for the backend's typed name with *Back up first* ticked, and blocks the page until the backend answers. |
+| Settings | **Secrets** | The values cloud functions read with a Secret node: add, set a new value, delete. Names only ever come back; a value is typed once. Variables set in the environment are listed beside them. |
+| Settings | **Search** | Per collection: searchable or not, which text fields, rebuild the index. |
+| Settings | **Server** | Who may call from a browser (any site, or named sites as chips, cookies), rate limits per kind of request, logging, the activity trail's retention, run history retention and *Compact now*, metrics. Each card saves alone and applies at once. |
+| Activity | **Activity** | Who changed what, when, and from where — the thing as a link (*Pets · permissions*, *editors · role*), the actor as a person or *API key: deploy*, the detail as a tree with the raw entry one click away. Filter by action · who · outcome · when. (Called *Audit* before BMG-011.) |
 
 Sections whose backing subsystem is not present in your build are **not
-rendered**. They never appear and then fail.
+rendered**. They never appear and then fail. Every list that is empty says what
+to do first.
+
+### Deep links
+
+The address bar is the page's state, so any page can be sent as a link:
+
+```
+#/collections/Pet            that collection
+#/collections/Pet/<objectId> that record, open in its drawer
+#/collections/Pet/new        a new record in it
+#/schema/Pet                 that collection's card
+#/schema/Pet/new-field       that collection with the *Add a field* picker open
+#/users/<objectId>  #/roles/<name>  #/triggers/<id>  #/runs/<id>
+#/triggers/new               the new-trigger drawer
+#/secrets  #/search  #/server  #/audit   the Settings pages and Activity
+```
+
+`#/executions` still works and lands on Runs.
+
+### From the editor
+
+The editor's Backend Services card manages *which* backend runs; everything
+inside it is this page (phase 104, BMG-012 — the editor's own schema, data,
+permissions, triggers, email, sign-in, search and secrets panels are gone).
+Three things in the editor open the page, all signed in through the same
+fragment hand-off:
+
+| In the editor | Opens |
+|---|---|
+| the local backend card's **Manage data & settings** | the home |
+| the property panel's **Add a field to <table>** on a Query Records / Create Record node whose table has no such field | `#/schema/<table>/new-field` |
+| the workflow canvas's **Add a trigger on …** / **Edit this trigger…** | `#/triggers/new` / `#/triggers/<id>` |
+
+Until the backend has an admin **account**, the hand-off is
+`/_admin#token=<credential>&route=<encoded path>`: the main process resolves the
+admin credential and opens the browser, the page consumes the fragment at boot
+(scrubbing it from the address bar and history), signs in, and then sets the
+route — and that first open is where the page asks you to make the account.
+**Once an account exists** (`whoami.adminAccount`), the editor sends
+`/_admin#route=<encoded path>` with no credential: you sign in with your email
+and password once in that browser, every later open from the editor is already
+you, and *Activity* names you rather than *admin credential*. If the backend
+cannot say whether an account exists, the credential goes as before. Only a
+plain path is accepted as a route (one leading `/`, no `#`); anything else opens
+the home.
+
+### Light and dark
+
+The page follows the system theme; the ☀ / ☾ button in the top bar overrides
+it and remembers your choice in the browser. Both themes are painted from the
+editor's own design tokens, copied into the page at build time.
 
 ### What it deliberately does not do
 
 - **Author graphs.** Functions and workflows are edited in the editor. The
   dashboard shows what they did; it does not write them.
-- **Restore a backup.** The blessed recovery path is `nodegx-backend restore`
-  with the service stopped. A one-click restore of a live service is a footgun,
-  not a feature. (The route exists for automation; there is no button.)
+- **Restore without being asked twice.** Restore is a button (since BMG-011,
+  at Richard's ruling), but it is behind the backend's typed name, *Back up
+  first* is ticked by default, and the backend disconnects from its database
+  for the swap and reconnects to the restored one before it answers — so what
+  the page says was restored is what the next request reads. The CLI
+  `nodegx-backend restore` with the service stopped remains the path for a
+  backend you cannot reach in a browser.
 - **Manage more than one backend.** One dashboard per instance.
 
 ---
 
 ## Signing in
 
-The credential is BAK-003's admin credential — the same one the editor and MCP
-use. There is no separate dashboard account.
+Two ways in, one form:
 
-Find it in the backend's data directory:
+- **As a person** — an email and a password. The account is an ordinary `_User`
+  row that carries **backend access** (`adminAccess`: *full* or *read-only*),
+  given on the Users page by a full admin. Its session is the admin principal
+  for every route, so the same account signs into your app (where it is in the
+  `admin` role the setup step made) and into the manager.
+- **With the admin credential** — BAK-003's `adminToken`, behind *Use the admin
+  credential instead*. It is what the editor, MCP and scripts hold; it is not
+  replaced by the account.
+
+Find the credential in the backend's data directory:
 
 ```
 <data-dir>/secrets.json   →   { "adminToken": "…" }      (mode 0600)
@@ -61,21 +136,31 @@ Or choose your own at start:
 nodegx-backend serve --data-dir /srv/nodegx --port 8577 --token "$(openssl rand -base64 32)"
 ```
 
-The dashboard holds the token in `sessionStorage` (this tab only, cleared when
-the tab closes) and sends it as `Authorization: Bearer …` on every request.
-There is no cookie and therefore no CSRF surface.
+The manager holds the credential in `sessionStorage` (this tab only, cleared
+when the tab closes) and a person's session — *Keep me signed in on this
+browser*, on by default — in `localStorage`, so a sign-in outlives the tab until
+you sign out or the session expires; **Sign out** forgets it and ends the
+session on the server. Either is sent on every request — the credential as
+`Authorization: Bearer …`, a session as `X-Parse-Session-Token`. There is no
+cookie and therefore no CSRF surface. A refused password spends the same
+per-address failure budget as a refused token.
 
 ### First run
 
-Unlike Pocketbase, there is **no "create the first admin" page**, and this is
-deliberate. A NodeGX backend always has an admin credential by the time it can
-serve anything — it mints one on first start. An unauthenticated setup page on
-an already-provisioned backend is a takeover waiting to happen, so instead:
+The first time the manager is opened with the credential on a backend that has
+no admin account, it shows **Create your admin account** before anything else:
+an email and a password. That makes the account, gives it full backend access,
+puts it in the `admin` role, and signs you in as yourself. From the editor the
+page arrives already holding the credential, so the first load is that step.
 
-- the service prints the dashboard URL and, when the credential was auto-minted
-  on that start, exactly where to read it;
-- the dashboard shows a first-run banner saying the same, and how to replace it
-  with `--token`.
+This is not an unauthenticated setup page (which BAK-005-NOTES refused, and
+still does): `POST /_admin/setup` is admin-gated, so the credential — printed
+at start, minted before anything can be served — is the proof. Once a
+full-access account exists the route answers 409 for good; after that, access
+is given on the Users page.
+
+The CLI's startup lines say *NO ADMIN ACCOUNT YET* and where the credential is
+until the account exists.
 
 ### Dev-open backends
 
@@ -92,8 +177,14 @@ saying enforcement is off.
 
 ## Read-only access
 
-For support and demos: a second credential that can read everything the admin
-surface exposes and change nothing.
+For support, demos and clients who should see their data and change nothing.
+Two ways to give it:
+
+- **A person** — on the Users page, under *Backend access*, choose *Can look,
+  not change*. They sign in with their email and password and see everything;
+  every write is refused. No token to hand over.
+- **A second credential** that can read everything the admin surface exposes
+  and change nothing:
 
 ```sh
 nodegx-backend serve --data-dir /srv/nodegx \
@@ -153,11 +244,13 @@ plain HTTP it is on the wire in cleartext. Terminate TLS at a reverse proxy.
 
 ### What the service already does for you
 
-- **The page fetches nothing.** Markup, styles and script are one document, and
-  its `Content-Security-Policy` is `default-src 'none'` with a per-response
-  nonce and no `unsafe-inline`. No CDN, no font host, no analytics — a hostile
-  value in one of your records has nowhere to send anything.
-- **Record values never touch `innerHTML`.** They are rendered as text.
+- **The page fetches nothing.** Markup, styles and script are one document
+  (the app is bundled into it at build time), and its `Content-Security-Policy`
+  is `default-src 'none'` with a per-response nonce and no `unsafe-inline`. No
+  CDN, no font host, no analytics — a hostile value in one of your records has
+  nowhere to send anything.
+- **Record values are rendered as text.** The app's source may not use
+  `dangerouslySetInnerHTML` or `innerHTML` — a test reads every source file.
 - **Failed credentials are rate-limited** — 10 failures per client per 5
   minutes, then `429` with `Retry-After`.
 - `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`,
@@ -173,7 +266,7 @@ plain HTTP it is on the wire in cleartext. Terminate TLS at a reverse proxy.
    one credential and no recovery flow.
 2. **The credential in the browser is the master key.** It bypasses all CLPs and
    ACLs by design. Cross-site scripting inside the dashboard would be a full
-   compromise — which is what the CSP, the nonce and the no-`innerHTML` rule are
+   compromise — which is what the CSP, the nonce and the text-only rendering rule are
    for. Hand out the read-only token instead whenever read access is enough.
 
 ---

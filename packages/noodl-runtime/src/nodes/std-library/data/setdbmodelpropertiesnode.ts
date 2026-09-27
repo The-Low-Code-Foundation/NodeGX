@@ -30,6 +30,8 @@ interface SetDbModelPropertiesInstance
     AccessControlInstance['_internal'] & {
       storeType?: 'cloud' | 'local';
       storeProperties?: 'specified' | 'all';
+      /** HLT-016 — the properties that must be unchanged since the record was read. */
+      onlyIfUnchanged?: string[];
     };
   /** On the instance rather than in `_internal` — guards {@link scheduleStore}. */
   hasScheduledStore?: boolean;
@@ -97,6 +99,36 @@ const SetDbModelPropertiedNodeDefinition: DbCrudNodeModule = {
         set: function (this: SetDbModelPropertiesInstance, value: unknown) {
           this._internal.storeType = value as 'cloud' | 'local';
         }
+      },
+      /**
+       * HLT-016 — "change this record only if nobody else has changed it since I read it".
+       *
+       * Names one or more properties, comma-separated: usually a `version` number the graph
+       * bumps on every write. The values sent as the precondition are the ones the record held
+       * BEFORE this node applied its inputs, i.e. what was read, so there is nothing else to wire.
+       * The backend checks them inside the UPDATE. If someone else wrote the record in between,
+       * nothing is written, `Failure` fires with the reason on `Error`, and the record goes back to
+       * what it held. The graph should fetch the record again and retry from there: retrying with
+       * the same values fails the same way. Empty: the node behaves exactly as it always has.
+       */
+      onlyIfUnchanged: {
+        type: 'string',
+        displayName: 'Only If Unchanged',
+        group: 'General',
+        description:
+          'Property names, comma-separated (e.g. version). The update is applied only if these still hold ' +
+          'the values the record had when it was read; otherwise Failure fires and nothing is written. ' +
+          'Fetch the record again before retrying. Needs a NodeGX backend. Leave empty to always write.',
+        set: function (this: SetDbModelPropertiesInstance, value: unknown) {
+          const names =
+            typeof value === 'string'
+              ? value
+                  .split(',')
+                  .map((n) => n.trim())
+                  .filter((n) => n !== '')
+              : [];
+          this._internal.onlyIfUnchanged = names.length > 0 ? names : undefined;
+        }
       }
     },
     // ERG-001 §4: declared once in `dbmodelcrudbase.addBaseInfo` for the whole family; `stored`
@@ -124,7 +156,34 @@ const SetDbModelPropertiedNodeDefinition: DbCrudNodeModule = {
           }
 
           const model = internal.model;
+
+          // HLT-016: the precondition is what the record held when it was read, so it is taken
+          // BEFORE the inputs are applied. A name the record never held is refused rather than sent
+          // as `null`: "still empty" is a real precondition and must not be guessed.
+          let ifMatch: Record<string, string | number | boolean | null> | undefined;
+          if (internal.onlyIfUnchanged) {
+            ifMatch = {};
+            for (const name of internal.onlyIfUnchanged) {
+              const held = model.get(name);
+              const scalar =
+                held === null || typeof held === 'string' || typeof held === 'boolean' || typeof held === 'number';
+              if (!scalar) {
+                _this.setError(
+                  held === undefined
+                    ? `Only If Unchanged names "${name}", which this record has not been read with. Fetch the record first.`
+                    : `Only If Unchanged names "${name}", which holds an object or list. Name a plain value such as a version number.`,
+                  tokens
+                );
+                return;
+              }
+              ifMatch[name] = held as string | number | boolean | null;
+            }
+          }
+          // Only a guarded save can be refused for a precondition, so only it needs the values to put
+          // back. An unguarded save runs exactly the loop it always did.
+          const before: Record<string, unknown> = {};
           for (const key in internal.inputValues) {
+            if (ifMatch) before[key] = model.get(key);
             model.set(key, internal.inputValues[key], { resolve: true });
           }
 
@@ -137,6 +196,7 @@ const SetDbModelPropertiedNodeDefinition: DbCrudNodeModule = {
             objectId: model.getId(), // Get the objectId part of the model id
             data: internal.storeProperties === 'all' ? model.data : internal.inputValues, // Only store input values by default, if not explicitly specified
             acl: _this._getACL(),
+            ifMatch,
             success: function (response: Record<string, unknown>) {
               for (const key in response) {
                 model.set(key, response[key]);
@@ -144,7 +204,17 @@ const SetDbModelPropertiedNodeDefinition: DbCrudNodeModule = {
 
               reportOutcomes(_this, tokens, 'done');
             },
-            error: function (err: string) {
+            error: function (err?: string, detail?: Record<string, unknown>) {
+              if (detail && detail.reason === 'precondition-failed') {
+                // Nothing was written, so the record must not keep showing what was refused.
+                for (const key in before) model.set(key, before[key]);
+                _this.setError(
+                  'Someone else changed this record after it was read, so this update was not applied. ' +
+                    'Fetch the record again, then retry.',
+                  tokens
+                );
+                return;
+              }
               _this.setError(err || 'Failed to save.', tokens);
             }
           });

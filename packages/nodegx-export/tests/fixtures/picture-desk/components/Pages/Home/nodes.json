@@ -1,0 +1,26 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "p1c7u2ed-e5c0-4000-8000-000000000003",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "homePage",
+      "type": "Page",
+      "label": "Home",
+      "parameters": { "title": "Picture Desk", "urlPath": "home" },
+      "children": ["homeText"],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "homeText",
+      "type": "Text",
+      "label": "Where the pictures are",
+      "parent": "homePage",
+      "parameters": { "text": "The pictures are two segments down, at /gallery/team." },
+      "x": 100,
+      "y": 160
+    }
+  ],
+  "visualRoots": ["homePage"]
+}

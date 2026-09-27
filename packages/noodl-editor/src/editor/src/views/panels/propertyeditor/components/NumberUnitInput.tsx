@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import classNames from 'classnames';
+import React, { useEffect, useState, useRef } from 'react';
 
 import { PropertyPanelBaseInput } from '@noodl-core-ui/components/property-panel/PropertyPanelBaseInput';
 import { PropertyPanelRow } from '@noodl-core-ui/components/property-panel/PropertyPanelInput/PropertyPanelRow';
 import { PropertyPanelSelectInput } from '@noodl-core-ui/components/property-panel/PropertyPanelSelectInput';
 import { ScrubBinding, useDragToScrub } from '@noodl-core-ui/components/property-panel/scrub';
+import { TokenChip } from '@noodl-core-ui/components/property-panel/TokenChip';
+
+import css from './NumberUnitInput.module.scss';
 
 export interface NumberUnitInputProps {
   label: string;
@@ -43,6 +47,51 @@ export interface NumberUnitInputProps {
    * is the coercion question FB-019 owns and settled the other way.
    */
   scrub?: ScrubBinding;
+
+  /** CHR-009 §12.4 — an unset per-side field shows what it inherits from all sides, muted. */
+  placeholder?: string;
+
+  /**
+   * HLT-012 — open the design-token picker for this parameter, anchored to the button.
+   *
+   * ⚠️ **Absent means the parameter has no scale**, and then no button is drawn at all. The
+   * decision is `fieldOffersTokens(portName)` in the row, never a guess here: 86 ports in the
+   * shipped catalog reach this component and only 64 have a token category that fits one.
+   */
+  onOpenTokenPicker?: (anchor: HTMLElement) => void;
+  /** Whether the stored value IS a token — the button says so, since the value box just shows text. */
+  isToken?: boolean;
+  /**
+   * P103 CMG-009 — the token the field holds, drawn as a chip in place of the value box: its
+   * name, what it resolves to, and ✕ to detach. Absent while `isToken`, the box shows the raw
+   * text as it did before.
+   */
+  tokenName?: string;
+  tokenValue?: string;
+  onDetachToken?: () => void;
+  /** CMG-010: the pencil and *Show in Styles* on the chip. */
+  tokenActions?: React.ReactNode;
+}
+
+/**
+ * The token button's mark: `{ }` around a dot, drawn rather than set in type.
+ *
+ * ⚠️ A text glyph here would be counted by the type-scale ratchet and would sit on the UI font's
+ * baseline rather than the field's, which is the reason `MarginPaddingInput` draws its arrows.
+ */
+export function TokenGlyph() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+      <path
+        d="M4.6 1.6C3.4 1.6 3.2 2.4 3.2 3.4V4.6C3.2 5.4 2.8 6 1.8 6C2.8 6 3.2 6.6 3.2 7.4V8.6C3.2 9.6 3.4 10.4 4.6 10.4M7.4 1.6C8.6 1.6 8.8 2.4 8.8 3.4V4.6C8.8 5.4 9.2 6 10.2 6C9.2 6 8.8 6.6 8.8 7.4V8.6C8.8 9.6 8.6 10.4 7.4 10.4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.1"
+        strokeLinecap="round"
+      />
+      <circle cx="6" cy="6" r="1" fill="currentColor" />
+    </svg>
+  );
 }
 
 export function NumberUnitInput({
@@ -64,13 +113,21 @@ export function NumberUnitInput({
   onReset,
   onFocus,
   onBlur,
-  scrub
+  scrub,
+  placeholder,
+  onOpenTokenPicker,
+  isToken,
+  tokenName,
+  tokenValue,
+  onDetachToken,
+  tokenActions
 }: NumberUnitInputProps) {
   const [displayedValue, setDisplayedValue] = useState(value ?? '');
   // ⚠️ A scrub does not go through `commitIfChanged`. That path goes to the view's
   // `updateValue`, which reaches `parent.setParameter` and therefore records an undo entry
   // every time — one per pixel, if a drag were routed through it.
   const dragToScrub = useDragToScrub(scrub);
+  const tokenButtonRef = useRef<HTMLButtonElement>(null);
 
   const hasUnitChoice = (units?.length ?? 0) > 1;
   const staticUnit = unit || units?.[0] || '';
@@ -85,6 +142,10 @@ export function NumberUnitInput({
     }
   }
 
+  // CHR-009: `Fixed` is only drawn on a % value. P101 INS-003 row 6: when it is, it may wrap under
+  // the field on a narrow panel, so the row pins its label to the first line.
+  const drawsFixed = Boolean(showFixed && isPercent);
+
   return (
     // FB-018 AC1 — this is the row the test user hit. Width was a fully editable
     // field with a 1px outline while a connection drove it, so typing a width
@@ -96,81 +157,96 @@ export function NumberUnitInput({
       isConnected={isConnected}
       connectionLabel={connectionLabel}
       onConnectionClick={onConnectionClick}
+      alignTop={drawsFixed && !isConnected}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
-        <PropertyPanelBaseInput
-          type="text"
-          isNumeric
-          value={displayedValue}
-          isChanged={isChanged}
-          isConnected={isConnected}
-          isScrubbable={Boolean(scrub)}
-          dataIdentifier={dataIdentifier}
-          onChange={(text) => setDisplayedValue(String(text))}
-          onMouseDown={dragToScrub.onMouseDown}
-          onFocus={() => onFocus && onFocus()}
-          onBlur={() => {
-            commitIfChanged();
-            onBlur && onBlur();
-          }}
-          onKeyDown={(e) => e.key === 'Enter' && commitIfChanged()}
-        />
-        {/* FH-014. About half the unit-bearing ports declare exactly one unit
+      <div className={classNames(css['Line'], drawsFixed && css['has-fixed'])}>
+        <div className={css['Field']}>
+          {/* P103 CMG-009 — a token reads as a token: the chip replaces the value box and the unit. */}
+          {isToken && tokenName ? (
+            <TokenChip
+              name={tokenName}
+              value={tokenValue}
+              onOpen={onOpenTokenPicker}
+              onDetach={onDetachToken}
+              actions={tokenActions}
+              dataTest={`token-chip-${dataIdentifier}`}
+            />
+          ) : (
+          <PropertyPanelBaseInput
+            type="text"
+            isNumeric
+            className={css['Value']}
+            value={displayedValue}
+            placeholder={placeholder}
+            isChanged={isChanged}
+            isConnected={isConnected}
+            isScrubbable={Boolean(scrub)}
+            dataIdentifier={dataIdentifier}
+            onChange={(text) => setDisplayedValue(String(text))}
+            onMouseDown={dragToScrub.onMouseDown}
+            onFocus={() => onFocus && onFocus()}
+            onBlur={() => {
+              commitIfChanged();
+              onBlur && onBlur();
+            }}
+            onKeyDown={(e) => e.key === 'Enter' && commitIfChanged()}
+          />
+          )}
+          {/* FH-014. About half the unit-bearing ports declare exactly one unit
             (21x ['px'], 4x ['%'], 1x ['deg'] — Font Size, Padding, Border Width,
             the Shadow numbers, Rotation...). A dropdown offering one immutable
             choice is noise, so those render a static unit label instead. */}
-        {hasUnitChoice ? (
-          <div style={{ width: 40, flexShrink: 0 }}>
-            <PropertyPanelSelectInput
-              value={unit}
-              properties={{ options: units.map((u) => ({ label: u, value: u })) }}
-              onChange={(u) => onUnitChange(String(u), displayedValue)}
-              hasHiddenCaret
-              hasSmallText
-            />
-          </div>
-        ) : (
-          Boolean(staticUnit) && (
-            <div
-              style={{
-                width: 40,
-                flexShrink: 0,
-                textAlign: 'center',
-                fontSize: 10,
-                lineHeight: '28px',
-                color: 'var(--theme-color-fg-default)',
-                userSelect: 'none'
+          {isToken && tokenName ? null : hasUnitChoice ? (
+            <div className={css['UnitPicker']}>
+              <PropertyPanelSelectInput
+                value={unit}
+                properties={{ options: units.map((u) => ({ label: u, value: u })) }}
+                onChange={(u) => onUnitChange(String(u), displayedValue)}
+                hasHiddenCaret
+                hasSmallText
+              />
+            </div>
+          ) : (
+            Boolean(staticUnit) && <span className={css['Unit']}>{staticUnit}</span>
+          )}
+          {/* HLT-012 — the design-token affordance. `isConnected` hides it for the same reason
+              `PropertyPanelRow` replaces the whole control while a wire drives the port: nothing
+              picked here would survive the connection. */}
+          {onOpenTokenPicker && !isConnected && (
+            <button
+              type="button"
+              ref={tokenButtonRef}
+              className={classNames(css['TokenButton'], isToken && css['is-token'])}
+              title={isToken ? `${value} — pick a different design token` : 'Pick a design token'}
+              aria-label="Pick a design token"
+              data-test={`token-button-${dataIdentifier}`}
+              // 🔴 `mouseDown`, not `click`: the value input commits on blur, and a click that
+              // first blurs a field holding a half-typed number would write it on the way to
+              // opening the picker. Preventing the default keeps the focus where it was.
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onOpenTokenPicker(tokenButtonRef.current || (e.currentTarget as HTMLElement));
               }}
             >
-              {staticUnit}
-            </div>
-          )
-        )}
+              <TokenGlyph />
+            </button>
+          )}
+        </div>
 
-        {showFixed && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              flexShrink: 0,
-              opacity: isPercent ? 1 : 0.3,
-              pointerEvents: isPercent ? 'auto' : 'none'
-            }}
+        {/* CHR-009 (Richard, s17): only drawn while the value is a %, the one unit it changes anything for
+            (`layout.ts` turns a % in a row/column into a flex share unless it is fixed). On px the field
+            takes the whole control column. A stored `isFixed` on a px value is inert and left alone. */}
+        {drawsFixed && (
+          <button
+            type="button"
+            className={css['Fixed']}
+            aria-pressed={Boolean(isFixed)}
+            title="Keep this size fixed instead of a share of the parent"
+            onClick={() => onFixedToggle && onFixedToggle()}
           >
-            <label
-              className="property-label"
-              style={{ position: 'relative', width: 'auto', marginLeft: 6, marginRight: 4 }}
-            >
-              Fixed
-            </label>
-            <div
-              className="sidebar-panel-dark-input"
-              style={{ width: 26, height: 26, position: 'relative', cursor: 'pointer' }}
-              onClick={() => onFixedToggle && onFixedToggle()}
-            >
-              {isFixed && <i className="fa fa-check" style={{ position: 'absolute', left: 7, top: 6 }} />}
-            </div>
-          </div>
+            Fixed
+          </button>
         )}
       </div>
     </PropertyPanelRow>

@@ -100,7 +100,10 @@ describe('TPL-003 — install writes a project that opens', () => {
   it('writes a project.json and the start-here note, and NO policy', async () => {
     const project = await installOnce('/projects/a');
     expect([...written.keys()]).toEqual(['/projects/a/project.json', '/projects/a/docs/START-HERE.md']);
-    expect(project.components).toHaveLength(21);
+    // Every component the committed content carries, by name. The literal this replaced (21) went red when
+    // TPL-004 grew the content to 28 on 2026-09-11; the count is the content's, not this file's.
+    expect(project.components.map((c) => c.name)).toEqual(landingPagesTemplate.content.components.map((c) => c.name));
+    expect(project.components.length).toBeGreaterThan(0);
     expect(written.get('/projects/a/docs/START-HERE.md')).toContain('EDIT — the address the form sends to');
   });
 

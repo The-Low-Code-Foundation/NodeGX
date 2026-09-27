@@ -69,8 +69,8 @@ export class Group extends React.Component<GroupProps> {
       this.iScroll.destroy();
       this.iScroll = undefined;
     }
-
-    this.props.noodlNode.context.setNodeFocused(this.props.noodlNode, false);
+    // GAM-012 fault 3 — no Blur on unmount any more: `NoodlReactComponent` drops the node from the
+    // focus tracker, which fires nothing. A Blur here fired `Focus Lost` on the containers.
   }
 
   /**

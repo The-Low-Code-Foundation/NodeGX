@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import { Root } from 'react-dom/client';
 
 import { Comment, CommentsModel } from '@noodl-models/commentsmodel';
 import KeyboardHandler from '@noodl-utils/keyboardhandler';
@@ -8,6 +8,7 @@ import KeyboardHandler from '@noodl-utils/keyboardhandler';
 import { pointInsideRectangle, rectanglesOverlap } from '../utils/utils';
 import * as CommentLayerView from './CommentLayer/CommentLayerView';
 import { NodeGraphEditor } from './nodegrapheditor';
+import { createReactRoot, unmountReactRoot } from '../../../shared/utils/unmountReactRoot';
 
 function arrayShallowEqual(a, b) {
   return a.length === b.length && a.every((value, index) => value === b[index]);
@@ -144,12 +145,12 @@ export default class CommentLayer {
 
     // Create roots only once, reuse for subsequent renders
     if (!this.backgroundRoot) {
-      this.backgroundRoot = createRoot(this.backgroundDiv);
+      this.backgroundRoot = createReactRoot(this.backgroundDiv);
     }
     this.backgroundRoot.render(React.createElement(CommentLayerView.Background, this.props));
     
     if (!this.foregroundRoot) {
-      this.foregroundRoot = createRoot(this.foregroundDiv);
+      this.foregroundRoot = createReactRoot(this.foregroundDiv);
     }
     this.foregroundRoot.render(React.createElement(CommentLayerView.Foreground, this.props));
   }
@@ -158,11 +159,11 @@ export default class CommentLayer {
     // Clean up existing roots if we're switching to new divs
     if (this.backgroundDiv) {
       if (this.backgroundRoot) {
-        this.backgroundRoot.unmount();
+        unmountReactRoot(this.backgroundRoot);
         this.backgroundRoot = null;
       }
       if (this.foregroundRoot) {
-        this.foregroundRoot.unmount();
+        unmountReactRoot(this.foregroundRoot);
         this.foregroundRoot = null;
       }
     }
@@ -315,11 +316,11 @@ export default class CommentLayer {
 
   dispose() {
     if (this.foregroundRoot) {
-      this.foregroundRoot.unmount();
+      unmountReactRoot(this.foregroundRoot);
       this.foregroundRoot = null;
     }
     if (this.backgroundRoot) {
-      this.backgroundRoot.unmount();
+      unmountReactRoot(this.backgroundRoot);
       this.backgroundRoot = null;
     }
 

@@ -1,0 +1,697 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "387a644c-f75e-5e40-8e75-e88c787fc2d1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rdIn",
+      "fromProperty": "myAt",
+      "toId": "rdGrade",
+      "toProperty": "myAt"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "cpuAt",
+      "toId": "rdGrade",
+      "toProperty": "cpuAt"
+    },
+    {
+      "fromId": "rdArmed",
+      "fromProperty": "on",
+      "toId": "rdGrade",
+      "toProperty": "useTurbo"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "slipPct",
+      "toId": "rdOut",
+      "toProperty": "slipPct"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "chain",
+      "toId": "rdOut",
+      "toProperty": "chain"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "chainOf",
+      "toId": "rdOut",
+      "toProperty": "chainOf"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "chainReady",
+      "toId": "rdOut",
+      "toProperty": "chainReady"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "turboUsed",
+      "toId": "rdOut",
+      "toProperty": "turboUsed"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "behind",
+      "toId": "rdOut",
+      "toProperty": "behind"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "chain",
+      "toId": "rdChainLine",
+      "toProperty": "in-n"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "chainOf",
+      "toId": "rdChainLine",
+      "toProperty": "in-of"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "chainReady",
+      "toId": "rdChainLine",
+      "toProperty": "in-ready"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "chargingWord",
+      "toId": "rdChainLine",
+      "toProperty": "in-word"
+    },
+    {
+      "fromId": "rdChainLine",
+      "fromProperty": "out-line",
+      "toId": "rdCharging",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "turboWord",
+      "toId": "rdTurbo",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "chainReady",
+      "toId": "rdCanFire",
+      "toProperty": "ready"
+    },
+    {
+      "fromId": "rdBanner",
+      "fromProperty": "isOpen",
+      "toId": "rdCanFire",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "rdCanFire",
+      "fromProperty": "result",
+      "toId": "rdTurbo",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rdTurbo",
+      "fromProperty": "onClick",
+      "toId": "rdArmed",
+      "toProperty": "to-armed"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "done",
+      "toId": "rdArmed",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "ask",
+      "toId": "rdNonce",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "rdNonce",
+      "fromProperty": "currentCount",
+      "toId": "rdPick",
+      "toProperty": "nonce"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "curriculum",
+      "toId": "rdPick",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "model",
+      "toId": "rdPick",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "level",
+      "toId": "rdPick",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "lang",
+      "toId": "rdPick",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "layout",
+      "toId": "rdPick",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "mode",
+      "toId": "rdPick",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "answerMode",
+      "toId": "rdPick",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "wordLists",
+      "toId": "rdPick",
+      "toProperty": "wordLists"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "limitScale",
+      "toId": "rdPick",
+      "toProperty": "limitScale"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "prompt",
+      "toId": "rdBox",
+      "toProperty": "prompt"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "kind",
+      "toId": "rdBox",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "choices",
+      "toId": "rdBox",
+      "toProperty": "choices"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "skillName",
+      "toId": "rdBox",
+      "toProperty": "skillName"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "placeholder",
+      "toId": "rdBox",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "checkWord",
+      "toId": "rdBox",
+      "toProperty": "checkWord"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "padKeys",
+      "toId": "rdBox",
+      "toProperty": "padKeys"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "padNumeric",
+      "toId": "rdBox",
+      "toProperty": "numeric"
+    },
+    {
+      "fromId": "rdBanner",
+      "fromProperty": "isOpen",
+      "toId": "rdBoxOn",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "rdBoxOn",
+      "fromProperty": "result",
+      "toId": "rdBox",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "limitMs",
+      "toId": "rdClock",
+      "toProperty": "limitMs"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "timed",
+      "toId": "rdClock",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "done",
+      "toId": "rdClock",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "layout",
+      "toId": "rdKeys",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "answer",
+      "toId": "rdNextKey",
+      "toProperty": "answer"
+    },
+    {
+      "fromId": "rdBox",
+      "fromProperty": "text",
+      "toId": "rdNextKey",
+      "toProperty": "typed"
+    },
+    {
+      "fromId": "rdNextKey",
+      "fromProperty": "result",
+      "toId": "rdKeys",
+      "toProperty": "nextKey"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "answer",
+      "toId": "rdExpected",
+      "toProperty": "answer"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "isTyping",
+      "toId": "rdExpected",
+      "toProperty": "isTyping"
+    },
+    {
+      "fromId": "rdExpected",
+      "fromProperty": "result",
+      "toId": "rdBox",
+      "toProperty": "expected"
+    },
+    {
+      "fromId": "rdBox",
+      "fromProperty": "wrongKey",
+      "toId": "rdKeys",
+      "toProperty": "wrongKey"
+    },
+    {
+      "fromId": "rdBox",
+      "fromProperty": "mistakes",
+      "toId": "rdKeys",
+      "toProperty": "wrongCount"
+    },
+    {
+      "fromId": "rdBox",
+      "fromProperty": "mistakes",
+      "toId": "rdGrade",
+      "toProperty": "mistakes"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "isTyping",
+      "toId": "rdShowKeys",
+      "toProperty": "isTyping"
+    },
+    {
+      "fromId": "rdBanner",
+      "fromProperty": "isOpen",
+      "toId": "rdShowKeys",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "rdShowKeys",
+      "fromProperty": "result",
+      "toId": "rdKeys",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "model",
+      "toId": "rdGrade",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "level",
+      "toId": "rdGrade",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "lang",
+      "toId": "rdGrade",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "skillId",
+      "toId": "rdGrade",
+      "toProperty": "skillId"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "answer",
+      "toId": "rdGrade",
+      "toProperty": "answer"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "fluentMs",
+      "toId": "rdGrade",
+      "toProperty": "fluentMs"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "itemDiff",
+      "toId": "rdGrade",
+      "toProperty": "itemDiff"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "shownAt",
+      "toId": "rdGrade",
+      "toProperty": "shownAt"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "strategy",
+      "toId": "rdGrade",
+      "toProperty": "strategy"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "worked",
+      "toId": "rdGrade",
+      "toProperty": "worked"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "raceId",
+      "toId": "rdGrade",
+      "toProperty": "raceId"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "forB",
+      "toId": "rdGrade",
+      "toProperty": "forB"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "game",
+      "toId": "rdGrade",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "rdBox",
+      "fromProperty": "answer",
+      "toId": "rdGrade",
+      "toProperty": "typed"
+    },
+    {
+      "fromId": "rdClock",
+      "fromProperty": "isExpired",
+      "toId": "rdGrade",
+      "toProperty": "timedOut"
+    },
+    {
+      "fromId": "rdBox",
+      "fromProperty": "answered",
+      "toId": "rdGrade",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rdClock",
+      "fromProperty": "expired",
+      "toId": "rdGrade",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rdBox",
+      "fromProperty": "answered",
+      "toId": "rdClock",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "abandon",
+      "toId": "rdClock",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "outcome",
+      "toId": "rdBanner",
+      "toProperty": "outcome"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "message",
+      "toId": "rdBanner",
+      "toProperty": "message"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "boost",
+      "toId": "rdBanner",
+      "toProperty": "boost"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "boostPct",
+      "toId": "rdBanner",
+      "toProperty": "boostPct"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "done",
+      "toId": "rdBanner",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "fluentWord",
+      "toId": "rdBanner",
+      "toProperty": "fluentWord"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "correctWord",
+      "toId": "rdBanner",
+      "toProperty": "correctWord"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "wrongWord",
+      "toId": "rdBanner",
+      "toProperty": "wrongWord"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "timeUpWord",
+      "toId": "rdBanner",
+      "toProperty": "timeUpWord"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "nextWord",
+      "toId": "rdBanner",
+      "toProperty": "nextWord"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "showMeWord",
+      "toId": "rdBanner",
+      "toProperty": "showMeWord"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "ask",
+      "toId": "rdBanner",
+      "toProperty": "hide"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "correct",
+      "toId": "rdCanTeach",
+      "toProperty": "correct"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "teach",
+      "toId": "rdCanTeach",
+      "toProperty": "teach"
+    },
+    {
+      "fromId": "rdCanTeach",
+      "fromProperty": "result",
+      "toId": "rdBanner",
+      "toProperty": "canTeach"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "soundOn",
+      "toId": "rdSounds",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "correct",
+      "toId": "rdRight",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "done",
+      "toId": "rdRight",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rdRight",
+      "fromProperty": "ontrue",
+      "toId": "rdSounds",
+      "toProperty": "correct"
+    },
+    {
+      "fromId": "rdRight",
+      "fromProperty": "onfalse",
+      "toId": "rdSounds",
+      "toProperty": "wrong"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "done",
+      "toId": "rdOut",
+      "toProperty": "graded"
+    },
+    {
+      "fromId": "rdBox",
+      "fromProperty": "layoutSeen",
+      "toId": "rdOut",
+      "toProperty": "layoutSeen"
+    },
+    {
+      "fromId": "rdBox",
+      "fromProperty": "layoutSeenNow",
+      "toId": "rdOut",
+      "toProperty": "layoutSeenNow"
+    },
+    {
+      "fromId": "rdKeys",
+      "fromProperty": "picked",
+      "toId": "rdOut",
+      "toProperty": "layoutPick"
+    },
+    {
+      "fromId": "rdKeys",
+      "fromProperty": "pick",
+      "toId": "rdOut",
+      "toProperty": "layoutPickNow"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "correct",
+      "toId": "rdOut",
+      "toProperty": "correct"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "gain",
+      "toId": "rdOut",
+      "toProperty": "gain"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "cpuGain",
+      "toId": "rdOut",
+      "toProperty": "cpuGain"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "model",
+      "toId": "rdOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "outcome",
+      "toId": "rdOut",
+      "toProperty": "outcome"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "teach",
+      "toId": "rdOut",
+      "toProperty": "teach"
+    },
+    {
+      "fromId": "rdBanner",
+      "fromProperty": "next",
+      "toId": "rdOut",
+      "toProperty": "next"
+    },
+    {
+      "fromId": "rdBanner",
+      "fromProperty": "showMe",
+      "toId": "rdOut",
+      "toProperty": "showMe"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "isTyping",
+      "toId": "rdOut",
+      "toProperty": "isTyping"
+    },
+    {
+      "fromId": "rdNextKey",
+      "fromProperty": "result",
+      "toId": "rdOut",
+      "toProperty": "nextKey"
+    },
+    {
+      "fromId": "rdGrade",
+      "fromProperty": "missCount",
+      "toId": "rdOut",
+      "toProperty": "missCount"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "worked",
+      "toId": "rdOut",
+      "toProperty": "worked"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "prompt",
+      "toId": "rdOut",
+      "toProperty": "prompt"
+    },
+    {
+      "fromId": "rdClock",
+      "fromProperty": "left",
+      "toId": "rdOut",
+      "toProperty": "clockLeft"
+    }
+  ]
+}

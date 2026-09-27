@@ -111,7 +111,8 @@ export const TEMPLATE_CATEGORY_LABELS: Record<string, string> = {
   dashboard: 'Dashboard',
   site: 'Site',
   form: 'Form',
-  integration: 'Integration'
+  integration: 'Integration',
+  game: 'Game'
 };
 
 /**

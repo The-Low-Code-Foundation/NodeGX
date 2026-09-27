@@ -131,6 +131,9 @@
       "parameters": {
         "name": "playerX"
       },
+      "metadata": {
+        "comment": "Shared on purpose: the four Move buttons all move the one player."
+      },
       "x": 40,
       "y": 640
     },
@@ -140,6 +143,9 @@
       "label": "You are here now — down",
       "parameters": {
         "name": "playerY"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the four Move buttons all move the one player."
       },
       "x": 40,
       "y": 760

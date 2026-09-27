@@ -1,0 +1,23 @@
+{
+  "cardHasPicture": {
+    "src": "http://localhost:3399/api/v1/community/templates/todo-list/thumbnail?v=1",
+    "loaded": true
+  },
+  "wizard": {
+    "buttons": [
+      "Next"
+    ]
+  },
+  "pressed": [
+    "Next",
+    "Next",
+    "Create Project"
+  ],
+  "recentRow": {
+    "name": "chr006-todo",
+    "dir": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/bb3ebd8a-45f3-4793-89f7-e8af49e6025f/scratchpad/chr006-projects/chr006-todo",
+    "thumbPrefix": "data:image/webp;base64,UklGRsy",
+    "thumbLength": 48435
+  },
+  "thumbEqualsShot": true
+}

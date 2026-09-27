@@ -7,6 +7,7 @@ import { getEditType } from '../utils';
 import { BasicType } from './BasicType';
 import { BooleanType } from './BooleanType';
 import { ColorType } from './ColorPicker/ColorType';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 function inferType(value) {
   if (typeof value === 'string') {
@@ -115,7 +116,7 @@ export class VariableType extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     this.typeView && this.typeView.dispose && this.typeView.dispose();

@@ -29,10 +29,26 @@ const ACTIONS: Record<string, string> = {
   'PUT admin/permissions/functions/:name': 'permissions.function.update',
   'DELETE admin/permissions/functions/:name': 'permissions.function.delete',
   'POST admin/roles': 'role.create',
+  'PUT admin/roles/:name': 'role.update',
   'DELETE admin/roles/:name': 'role.delete',
   'POST admin/roles/:name/users': 'role.user.add',
   'DELETE admin/roles/:name/users/:userId': 'role.user.remove',
+  // BMG-004. Who created, changed, disabled or deleted a person — and who
+  // signed them out. The entry carries the KEYS changed, never the values.
+  'POST admin/users': 'user.create',
+  'PUT admin/users/:id': 'user.update',
+  'DELETE admin/users/:id': 'user.delete',
+  'DELETE admin/users/:id/sessions': 'user.sessions.revoke',
+  // BMG-014. The first admin account, made from the manager's setup step with
+  // the credential. Carries the new person's id; never the password.
+  'POST _admin/setup': 'admin.setup',
+  // BMG-002. A saved view changes what everyone's Collections page offers.
+  'PUT admin/views/:collection/:name': 'view.save',
+  'DELETE admin/views/:collection/:name': 'view.delete',
   'POST admin/keys': 'apikey.create',
+  // BMG-007. What a key may do changed — the entry an operator reads when a
+  // script suddenly can (or cannot) write.
+  'PUT admin/keys/:id': 'apikey.update',
   'DELETE admin/keys/:id': 'apikey.revoke',
   // CWF-009. The entry records the NAME and never the value — the trail is a
   // queryable table, and a credential in one would defeat the point of a store
@@ -80,10 +96,18 @@ const ACTIONS: Record<string, string> = {
   'DELETE admin/email/templates/:id': 'email.template.delete',
   'PUT admin/files/config': 'files.config.update',
   'POST admin/files/sweep': 'files.sweep',
+  'POST admin/files/move': 'files.move',
+  // BMG-011. A stored file removed from the Storage page — with the records
+  // whose fields were cleared, when the person chose to. The listing and the
+  // uses lookup are reads.
+  'DELETE admin/files/:name': 'file.delete',
   'PUT admin/search/collections/:name': 'search.collection.update',
   'DELETE admin/search/collections/:name': 'search.collection.delete',
   'POST admin/search/collections/:name/rebuild': 'search.rebuild',
   'PUT admin/ops': 'ops.config.update',
+  // PRD-003. A full rewrite of executions.sqlite under a write lock is the kind of thing an
+  // operator wants to be able to place in time when a latency graph has a notch in it.
+  'POST admin/executions/compact': 'executions.compact',
 
   // Sign-in providers (BAK-004). Changing a provider's client id, or adding an
   // issuer, changes WHO can obtain a session on this backend — which is the
@@ -108,7 +132,17 @@ const NOT_AUDITED: Record<string, string> = {
   // which ARE audited as workflow.create / workflow.update. The editor's review
   // surface calls it on every proposal it opens and again on every accept, so
   // auditing it would bury the two entries an operator actually wants.
-  'POST admin/workflow-defs/validate': 'dry run — changes nothing'
+  'POST admin/workflow-defs/validate': 'dry run — changes nothing',
+  // BMG-008: the schedule builder asks this for the sentence and the next five
+  // fires of an expression that is not saved, on every change of a control.
+  // It stores nothing and arms nothing; the save that follows is trigger.create
+  // or trigger.update, which ARE audited.
+  'POST admin/triggers/preview': 'dry run — changes nothing',
+  // BMG-015: the Storage page's *Test connection*. It builds a throwaway
+  // driver over the unsaved bucket details, writes and removes one probe key
+  // in the BUCKET, and persists nothing here. The save that follows is
+  // files.config.update, which IS audited (and refuses when this fails).
+  'POST admin/files/config/test': 'dry run — changes nothing'
 };
 
 /** Why a privileged route is exempt from the trail, or null if it is not exempt. */
@@ -171,6 +205,24 @@ export const AUDIT_SYSTEM_USER_DELETE = 'user.system.delete';
  * families write — higher than `user.system.create`, which by construction
  * creates an account with no privilege at all.
  */
+/**
+ * FED-005 §3.4 — one row per MCP tool call, raised by `McpRoutes` rather than
+ * by the route table.
+ *
+ * The same exception as CWF-015's three below, and for the identical reason:
+ * `POST /mcp` is ONE route whose action is whatever tool the caller named, so
+ * the dispatcher cannot know whether a row was read, a row was added or a
+ * function was run — only the handler can. Declaring `POST mcp` in ACTIONS
+ * would have produced a trail in which every entry says "mcp", which answers
+ * none of the questions the trail exists for.
+ *
+ * ⚠️ It is also the first audited action on a route that is NOT admin-gated,
+ * which is why `requiresAuditAction` does not demand it: the coverage test
+ * asks admin routes for a declared action, and this one is declared because the
+ * task wants it, not because a gate insists.
+ */
+export const AUDIT_MCP_TOOL_CALL = 'mcp.tool.call';
+
 export const AUDIT_SYSTEM_ROLE_CREATE = 'role.system.create';
 export const AUDIT_SYSTEM_ROLE_USER_ADD = 'role.system.user.add';
 export const AUDIT_SYSTEM_ROLE_USER_REMOVE = 'role.system.user.remove';
@@ -203,6 +255,7 @@ export function declaredAuditActions(): string[] {
       AUDIT_SYSTEM_USER_CREATE,
       AUDIT_SYSTEM_USER_UPDATE,
       AUDIT_SYSTEM_USER_DELETE,
+      AUDIT_MCP_TOOL_CALL,
       AUDIT_SYSTEM_ROLE_CREATE,
       AUDIT_SYSTEM_ROLE_USER_ADD,
       AUDIT_SYSTEM_ROLE_USER_REMOVE

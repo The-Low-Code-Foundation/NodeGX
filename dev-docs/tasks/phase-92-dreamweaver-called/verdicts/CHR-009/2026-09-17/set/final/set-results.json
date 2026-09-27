@@ -1,0 +1,1017 @@
+{
+  "group": {
+    "type": "Group",
+    "selected": "Group / Group",
+    "docked-width": 312,
+    "docked-dark": {
+      "elements": 1309,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "12px": 16,
+        "11px": 10
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 15,
+        "rgb(35, 33, 41)": 1,
+        "rgb(77, 163, 255)": 1,
+        "rgb(56, 54, 66)": 2,
+        "rgb(73, 70, 86)": 1
+      },
+      "radii": {
+        "6px": 25,
+        "9999px": 2,
+        "4px": 13
+      },
+      "labelLefts": {
+        "70": 12
+      },
+      "controlHeights": {
+        "26": 10,
+        "30": 1
+      }
+    },
+    "docked-light": {
+      "elements": 1309,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "12px": 16,
+        "11px": 10
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 15,
+        "rgb(255, 255, 255)": 1,
+        "rgb(21, 112, 239)": 1,
+        "rgb(229, 233, 237)": 2,
+        "rgb(201, 210, 220)": 1
+      },
+      "radii": {
+        "6px": 25,
+        "9999px": 2,
+        "4px": 13
+      },
+      "labelLefts": {
+        "70": 12
+      },
+      "controlHeights": {
+        "26": 10,
+        "30": 1
+      }
+    },
+    "docked-cuts": {
+      "labelsDrawn": 69,
+      "cuts": [
+        {
+          "kind": "text",
+          "row": "Padding",
+          "text": "String · Value",
+          "box": 29,
+          "content": 103,
+          "cls": "MarginPaddingInput-module__BoundSource--rueYb"
+        },
+        {
+          "kind": "value",
+          "row": "Box Sizing",
+          "text": "Include padding and border",
+          "box": 154,
+          "content": 193
+        },
+        {
+          "kind": "label",
+          "row": null,
+          "text": "Background Gradient",
+          "box": 116,
+          "content": 120,
+          "cls": "PropertyPanelInput-module__Label--abxD5"
+        },
+        {
+          "kind": "label",
+          "row": null,
+          "text": "Scroll To Element - Duration",
+          "box": 116,
+          "content": 159,
+          "cls": "PropertyPanelInput-module__Label--abxD5"
+        },
+        {
+          "kind": "label",
+          "row": null,
+          "text": "Scroll To Index - Index",
+          "box": 116,
+          "content": 126,
+          "cls": "PropertyPanelInput-module__Label--abxD5"
+        },
+        {
+          "kind": "label",
+          "row": null,
+          "text": "Scroll To Index - Duration",
+          "box": 116,
+          "content": 143,
+          "cls": "PropertyPanelInput-module__Label--abxD5"
+        }
+      ]
+    },
+    "docked-opened": [
+      "Advanced CSS"
+    ],
+    "wide-width": 736,
+    "wide-dark": {
+      "elements": 1309,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "12px": 17,
+        "11px": 10
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 15,
+        "rgb(35, 33, 41)": 1,
+        "rgb(77, 163, 255)": 1,
+        "rgb(56, 54, 66)": 2,
+        "rgb(73, 70, 86)": 1
+      },
+      "radii": {
+        "6px": 25,
+        "9999px": 2,
+        "4px": 16
+      },
+      "labelLefts": {
+        "70": 13
+      },
+      "controlHeights": {
+        "26": 10,
+        "30": 1
+      }
+    },
+    "wide-light": {
+      "elements": 1309,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "12px": 17,
+        "11px": 10
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 15,
+        "rgb(255, 255, 255)": 1,
+        "rgb(21, 112, 239)": 1,
+        "rgb(229, 233, 237)": 2,
+        "rgb(201, 210, 220)": 1
+      },
+      "radii": {
+        "6px": 25,
+        "9999px": 2,
+        "4px": 16
+      },
+      "labelLefts": {
+        "70": 13
+      },
+      "controlHeights": {
+        "26": 10,
+        "30": 1
+      }
+    },
+    "wide-cuts": {
+      "labelsDrawn": 69,
+      "cuts": [
+        {
+          "kind": "label",
+          "row": null,
+          "text": "Background Gradient",
+          "box": 116,
+          "content": 120,
+          "cls": "PropertyPanelInput-module__Label--abxD5"
+        },
+        {
+          "kind": "label",
+          "row": null,
+          "text": "Scroll To Element - Duration",
+          "box": 116,
+          "content": 159,
+          "cls": "PropertyPanelInput-module__Label--abxD5"
+        },
+        {
+          "kind": "label",
+          "row": null,
+          "text": "Scroll To Index - Index",
+          "box": 116,
+          "content": 126,
+          "cls": "PropertyPanelInput-module__Label--abxD5"
+        },
+        {
+          "kind": "label",
+          "row": null,
+          "text": "Scroll To Index - Duration",
+          "box": 116,
+          "content": 143,
+          "cls": "PropertyPanelInput-module__Label--abxD5"
+        }
+      ]
+    },
+    "wide-opened": [
+      "Advanced CSS"
+    ]
+  },
+  "text": {
+    "type": "Text",
+    "selected": "Text / Text",
+    "docked-width": 312,
+    "docked-dark": {
+      "elements": 718,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "12px": 17,
+        "11px": 12
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 14,
+        "rgb(35, 33, 41)": 1,
+        "rgb(77, 163, 255)": 1,
+        "rgb(56, 54, 66)": 2
+      },
+      "radii": {
+        "6px": 20,
+        "9999px": 1,
+        "4px": 11
+      },
+      "labelLefts": {
+        "70": 10
+      },
+      "controlHeights": {
+        "26": 9,
+        "30": 1
+      }
+    },
+    "docked-light": {
+      "elements": 718,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "12px": 17,
+        "11px": 12
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 14,
+        "rgb(255, 255, 255)": 1,
+        "rgb(21, 112, 239)": 1,
+        "rgb(229, 233, 237)": 2
+      },
+      "radii": {
+        "6px": 20,
+        "9999px": 1,
+        "4px": 11
+      },
+      "labelLefts": {
+        "70": 10
+      },
+      "controlHeights": {
+        "26": 9,
+        "30": 1
+      }
+    },
+    "docked-cuts": {
+      "labelsDrawn": 46,
+      "cuts": []
+    },
+    "docked-opened": [
+      "Advanced CSS"
+    ],
+    "wide-width": 736,
+    "wide-dark": {
+      "elements": 718,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "12px": 17,
+        "11px": 12
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 14,
+        "rgb(35, 33, 41)": 1,
+        "rgb(77, 163, 255)": 1,
+        "rgb(56, 54, 66)": 2
+      },
+      "radii": {
+        "6px": 20,
+        "9999px": 1,
+        "4px": 11
+      },
+      "labelLefts": {
+        "70": 10
+      },
+      "controlHeights": {
+        "26": 9,
+        "30": 1
+      }
+    },
+    "wide-light": {
+      "elements": 718,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "12px": 17,
+        "11px": 12
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 14,
+        "rgb(255, 255, 255)": 1,
+        "rgb(21, 112, 239)": 1,
+        "rgb(229, 233, 237)": 2
+      },
+      "radii": {
+        "6px": 20,
+        "9999px": 1,
+        "4px": 11
+      },
+      "labelLefts": {
+        "70": 10
+      },
+      "controlHeights": {
+        "26": 9,
+        "30": 1
+      }
+    },
+    "wide-cuts": {
+      "labelsDrawn": 46,
+      "cuts": []
+    },
+    "wide-opened": [
+      "Advanced CSS"
+    ]
+  },
+  "image": {
+    "type": "Image",
+    "selected": "Image / Image",
+    "docked-width": 312,
+    "docked-dark": {
+      "elements": 909,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "12px": 15,
+        "11px": 13
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 14,
+        "rgb(35, 33, 41)": 1,
+        "rgb(77, 163, 255)": 1,
+        "rgb(56, 54, 66)": 2
+      },
+      "radii": {
+        "6px": 20,
+        "9999px": 1,
+        "4px": 12
+      },
+      "labelLefts": {
+        "70": 11
+      },
+      "controlHeights": {
+        "26": 9,
+        "30": 1
+      }
+    },
+    "docked-light": {
+      "elements": 909,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "12px": 15,
+        "11px": 13
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 14,
+        "rgb(255, 255, 255)": 1,
+        "rgb(21, 112, 239)": 1,
+        "rgb(229, 233, 237)": 2
+      },
+      "radii": {
+        "6px": 20,
+        "9999px": 1,
+        "4px": 12
+      },
+      "labelLefts": {
+        "70": 11
+      },
+      "controlHeights": {
+        "26": 9,
+        "30": 1
+      }
+    },
+    "docked-cuts": {
+      "labelsDrawn": 47,
+      "cuts": []
+    },
+    "docked-opened": [
+      "Advanced CSS"
+    ],
+    "wide-width": 736,
+    "wide-dark": {
+      "elements": 909,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "12px": 15,
+        "11px": 13
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 14,
+        "rgb(35, 33, 41)": 1,
+        "rgb(77, 163, 255)": 1,
+        "rgb(56, 54, 66)": 2
+      },
+      "radii": {
+        "6px": 20,
+        "9999px": 1,
+        "4px": 12
+      },
+      "labelLefts": {
+        "70": 11
+      },
+      "controlHeights": {
+        "26": 9,
+        "30": 1
+      }
+    },
+    "wide-light": {
+      "elements": 909,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "12px": 15,
+        "11px": 13
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 14,
+        "rgb(255, 255, 255)": 1,
+        "rgb(21, 112, 239)": 1,
+        "rgb(229, 233, 237)": 2
+      },
+      "radii": {
+        "6px": 20,
+        "9999px": 1,
+        "4px": 12
+      },
+      "labelLefts": {
+        "70": 11
+      },
+      "controlHeights": {
+        "26": 9,
+        "30": 1
+      }
+    },
+    "wide-cuts": {
+      "labelsDrawn": 47,
+      "cuts": []
+    },
+    "wide-opened": [
+      "Advanced CSS"
+    ]
+  },
+  "function": {
+    "type": "JavaScriptFunction",
+    "selected": "JavaScriptFunction / Function",
+    "docked-width": 312,
+    "docked-dark": {
+      "elements": 66,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "11px": 3,
+        "12px": 2
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 1
+      },
+      "radii": {
+        "6px": 5
+      },
+      "labelLefts": {
+        "70": 1
+      },
+      "controlHeights": {}
+    },
+    "docked-light": {
+      "elements": 66,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "11px": 3,
+        "12px": 2
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 1
+      },
+      "radii": {
+        "6px": 5
+      },
+      "labelLefts": {
+        "70": 1
+      },
+      "controlHeights": {}
+    },
+    "docked-cuts": {
+      "labelsDrawn": 1,
+      "cuts": []
+    },
+    "docked-opened": [],
+    "wide-width": 736,
+    "wide-dark": {
+      "elements": 66,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "11px": 3,
+        "12px": 2
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 1
+      },
+      "radii": {
+        "6px": 5
+      },
+      "labelLefts": {
+        "70": 1
+      },
+      "controlHeights": {}
+    },
+    "wide-light": {
+      "elements": 66,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "11px": 3,
+        "12px": 2
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 1
+      },
+      "radii": {
+        "6px": 5
+      },
+      "labelLefts": {
+        "70": 1
+      },
+      "controlHeights": {}
+    },
+    "wide-cuts": {
+      "labelsDrawn": 1,
+      "cuts": []
+    },
+    "wide-opened": []
+  },
+  "query-records": {
+    "type": "DbCollection2",
+    "selected": "DbCollection2 / Query Records",
+    "docked-width": 312,
+    "docked-dark": {
+      "elements": 151,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "11px": 7,
+        "12px": 10
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 3,
+        "rgb(73, 70, 86)": 3,
+        "rgb(77, 163, 255)": 4
+      },
+      "radii": {
+        "6px": 3,
+        "9999px": 7,
+        "4px": 1
+      },
+      "labelLefts": {
+        "70": 10
+      },
+      "controlHeights": {
+        "26": 5
+      }
+    },
+    "docked-light": {
+      "elements": 151,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "11px": 7,
+        "12px": 10
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 3,
+        "rgb(201, 210, 220)": 3,
+        "rgb(21, 112, 239)": 4
+      },
+      "radii": {
+        "6px": 3,
+        "9999px": 7,
+        "4px": 1
+      },
+      "labelLefts": {
+        "70": 10
+      },
+      "controlHeights": {
+        "26": 5
+      }
+    },
+    "docked-cuts": {
+      "labelsDrawn": 10,
+      "cuts": []
+    },
+    "docked-opened": [],
+    "wide-width": 736,
+    "wide-dark": {
+      "elements": 151,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "11px": 7,
+        "12px": 10
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 3,
+        "rgb(73, 70, 86)": 3,
+        "rgb(77, 163, 255)": 4
+      },
+      "radii": {
+        "6px": 3,
+        "9999px": 7,
+        "4px": 1
+      },
+      "labelLefts": {
+        "70": 10
+      },
+      "controlHeights": {
+        "26": 5
+      }
+    },
+    "wide-light": {
+      "elements": 151,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "11px": 7,
+        "12px": 10
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 3,
+        "rgb(201, 210, 220)": 3,
+        "rgb(21, 112, 239)": 4
+      },
+      "radii": {
+        "6px": 3,
+        "9999px": 7,
+        "4px": 1
+      },
+      "labelLefts": {
+        "70": 10
+      },
+      "controlHeights": {
+        "26": 5
+      }
+    },
+    "wide-cuts": {
+      "labelsDrawn": 10,
+      "cuts": []
+    },
+    "wide-opened": []
+  },
+  "columns": {
+    "type": "net.noodl.visual.columns",
+    "selected": "net.noodl.visual.columns / Columns",
+    "docked-width": 312,
+    "docked-dark": {
+      "elements": 241,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "12px": 11,
+        "11px": 9
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 10,
+        "rgb(35, 33, 41)": 1,
+        "rgb(77, 163, 255)": 1,
+        "rgb(56, 54, 66)": 1
+      },
+      "radii": {
+        "6px": 13,
+        "9999px": 1,
+        "4px": 4
+      },
+      "labelLefts": {
+        "70": 9
+      },
+      "controlHeights": {
+        "26": 10,
+        "30": 1
+      }
+    },
+    "docked-light": {
+      "elements": 241,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "12px": 11,
+        "11px": 9
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 10,
+        "rgb(255, 255, 255)": 1,
+        "rgb(21, 112, 239)": 1,
+        "rgb(229, 233, 237)": 1
+      },
+      "radii": {
+        "6px": 13,
+        "9999px": 1,
+        "4px": 4
+      },
+      "labelLefts": {
+        "70": 9
+      },
+      "controlHeights": {
+        "26": 10,
+        "30": 1
+      }
+    },
+    "docked-cuts": {
+      "labelsDrawn": 15,
+      "cuts": []
+    },
+    "docked-opened": [
+      "Advanced CSS"
+    ],
+    "wide-width": 736,
+    "wide-dark": {
+      "elements": 241,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "12px": 11,
+        "11px": 9
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 10,
+        "rgb(35, 33, 41)": 1,
+        "rgb(77, 163, 255)": 1,
+        "rgb(56, 54, 66)": 1
+      },
+      "radii": {
+        "6px": 13,
+        "9999px": 1,
+        "4px": 4
+      },
+      "labelLefts": {
+        "70": 9
+      },
+      "controlHeights": {
+        "26": 10,
+        "30": 1
+      }
+    },
+    "wide-light": {
+      "elements": 241,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "12px": 11,
+        "11px": 9
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 10,
+        "rgb(255, 255, 255)": 1,
+        "rgb(21, 112, 239)": 1,
+        "rgb(229, 233, 237)": 1
+      },
+      "radii": {
+        "6px": 13,
+        "9999px": 1,
+        "4px": 4
+      },
+      "labelLefts": {
+        "70": 9
+      },
+      "controlHeights": {
+        "26": 10,
+        "30": 1
+      }
+    },
+    "wide-cuts": {
+      "labelsDrawn": 15,
+      "cuts": []
+    },
+    "wide-opened": [
+      "Advanced CSS"
+    ]
+  },
+  "states": {
+    "type": "States",
+    "selected": "States / States",
+    "docked-width": 312,
+    "docked-dark": {
+      "elements": 68,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "11px": 3,
+        "12px": 1
+      },
+      "fills": {
+        "rgb(77, 163, 255)": 1
+      },
+      "radii": {
+        "9999px": 1,
+        "6px": 4
+      },
+      "labelLefts": {
+        "70": 1
+      },
+      "controlHeights": {}
+    },
+    "docked-light": {
+      "elements": 68,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "11px": 3,
+        "12px": 1
+      },
+      "fills": {
+        "rgb(21, 112, 239)": 1
+      },
+      "radii": {
+        "9999px": 1,
+        "6px": 4
+      },
+      "labelLefts": {
+        "70": 1
+      },
+      "controlHeights": {}
+    },
+    "docked-cuts": {
+      "labelsDrawn": 1,
+      "cuts": []
+    },
+    "docked-opened": [],
+    "wide-width": 736,
+    "wide-dark": {
+      "elements": 68,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "11px": 3,
+        "12px": 1
+      },
+      "fills": {
+        "rgb(77, 163, 255)": 1
+      },
+      "radii": {
+        "9999px": 1,
+        "6px": 4
+      },
+      "labelLefts": {
+        "70": 1
+      },
+      "controlHeights": {}
+    },
+    "wide-light": {
+      "elements": 68,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "11px": 3,
+        "12px": 1
+      },
+      "fills": {
+        "rgb(21, 112, 239)": 1
+      },
+      "radii": {
+        "9999px": 1,
+        "6px": 4
+      },
+      "labelLefts": {
+        "70": 1
+      },
+      "controlHeights": {}
+    },
+    "wide-cuts": {
+      "labelsDrawn": 1,
+      "cuts": []
+    },
+    "wide-opened": []
+  },
+  "button-popout": {
+    "type": "net.noodl.controls.button",
+    "selected": "net.noodl.controls.button / Button",
+    "docked-width": 312,
+    "docked-dark": {
+      "elements": 1007,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "12px": 25,
+        "11px": 7
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 13,
+        "rgb(35, 33, 41)": 1,
+        "rgb(77, 163, 255)": 3,
+        "rgb(73, 70, 86)": 1,
+        "rgb(255, 255, 255)": 1
+      },
+      "radii": {
+        "6px": 16,
+        "4px": 4,
+        "9999px": 4,
+        "2px": 1
+      },
+      "labelLefts": {
+        "70": 12
+      },
+      "controlHeights": {
+        "24": 1,
+        "26": 7,
+        "30": 1
+      }
+    },
+    "docked-light": {
+      "elements": 1007,
+      "panelWidth": 312,
+      "visibleTextSizes": {
+        "12px": 25,
+        "11px": 7
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 13,
+        "rgb(255, 255, 255)": 2,
+        "rgb(21, 112, 239)": 3,
+        "rgb(201, 210, 220)": 1
+      },
+      "radii": {
+        "6px": 16,
+        "4px": 4,
+        "9999px": 4,
+        "2px": 1
+      },
+      "labelLefts": {
+        "70": 12
+      },
+      "controlHeights": {
+        "24": 1,
+        "26": 7,
+        "30": 1
+      }
+    },
+    "docked-cuts": {
+      "labelsDrawn": 54,
+      "cuts": [
+        {
+          "kind": "value",
+          "row": "Box Sizing",
+          "text": "Include padding and border",
+          "box": 154,
+          "content": 193
+        }
+      ]
+    },
+    "docked-opened": [
+      "Advanced CSS"
+    ],
+    "wide-width": 736,
+    "wide-dark": {
+      "elements": 1007,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "12px": 26,
+        "11px": 8
+      },
+      "fills": {
+        "rgb(46, 44, 54)": 14,
+        "rgb(35, 33, 41)": 1,
+        "rgb(77, 163, 255)": 3,
+        "rgb(73, 70, 86)": 1,
+        "rgb(255, 255, 255)": 1
+      },
+      "radii": {
+        "6px": 17,
+        "4px": 5,
+        "9999px": 4,
+        "2px": 1
+      },
+      "labelLefts": {
+        "70": 13
+      },
+      "controlHeights": {
+        "24": 1,
+        "26": 8,
+        "30": 1
+      }
+    },
+    "wide-light": {
+      "elements": 1007,
+      "panelWidth": 736,
+      "visibleTextSizes": {
+        "12px": 26,
+        "11px": 8
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 14,
+        "rgb(255, 255, 255)": 2,
+        "rgb(21, 112, 239)": 3,
+        "rgb(201, 210, 220)": 1
+      },
+      "radii": {
+        "6px": 17,
+        "4px": 5,
+        "9999px": 4,
+        "2px": 1
+      },
+      "labelLefts": {
+        "70": 13
+      },
+      "controlHeights": {
+        "24": 1,
+        "26": 8,
+        "30": 1
+      }
+    },
+    "wide-cuts": {
+      "labelsDrawn": 54,
+      "cuts": []
+    },
+    "wide-opened": [
+      "Advanced CSS"
+    ]
+  }
+}

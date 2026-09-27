@@ -16,6 +16,7 @@
  */
 
 import type { RequestContext } from './HttpServer';
+import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { WorkflowSubsystem } from '../workflow/WorkflowSubsystem';
 import { WorkflowConfigError } from '../workflow/WorkflowRegistry';
 import { buildRunPayload, spreadableBody } from '../workflow/runPayload';
@@ -23,9 +24,26 @@ import { stepKindCatalog } from '../workflow/steps/kinds';
 import type { WorkflowDefinition, WorkflowInput, WorkflowRunResult } from '../workflow/types';
 import { HttpError, readJSONBody, sendJSON } from './http-util';
 
+/**
+ * What the Workflows page's *Last run* column shows (BMG-009): the newest
+ * execution record of each workflow, or nothing. A DECORATION beside the
+ * definitions, never on them — a definition is what a `PUT` carries back,
+ * and it must not grow a field the registry did not write.
+ */
+export interface WorkflowLastRun {
+  id: string;
+  status: string;
+  startedAt: number;
+  durationMs?: number;
+  /** `cancelled` / `timeout` when the engine said so; the store's own status alone cannot. */
+  engineStatus?: string;
+}
+
 /** `GET /admin/workflow-defs`. */
 export interface WorkflowListResponse {
   workflows: WorkflowDefinition[];
+  /** BMG-009 — by workflow id; a workflow that never ran is absent. */
+  lastRuns: Record<string, WorkflowLastRun>;
 }
 
 /** The body of every single-definition response (GET / POST / PUT). */
@@ -71,8 +89,23 @@ export interface WorkflowRunResponse {
   run: WorkflowRunResult;
 }
 
+/**
+ * `POST /admin/workflow-defs/:id/run` with `wait: false` (BMG-009) — a **202**
+ * as soon as the record is opened, so a page can land on `#/runs/<id>` while
+ * the run is still going. Only when the history is on: without a record there
+ * is no id to hand back, and the route waits as before.
+ */
+export interface WorkflowStartedResponse {
+  started: true;
+  executionId: string;
+  workflowId: string;
+}
+
 export class AdminWorkflowRoutes {
-  constructor(private readonly getWorkflows: () => WorkflowSubsystem | null) {}
+  constructor(
+    private readonly getWorkflows: () => WorkflowSubsystem | null,
+    private readonly getExecutions: () => ExecutionHistory | null = () => null
+  ) {}
 
   private subsystem(): WorkflowSubsystem {
     const wf = this.getWorkflows();
@@ -94,7 +127,24 @@ export class AdminWorkflowRoutes {
   }
 
   list(ctx: RequestContext): void {
-    sendJSON(ctx.res, 200, { workflows: this.subsystem().registry.list() } satisfies WorkflowListResponse);
+    const workflows = this.subsystem().registry.list();
+    const history = this.getExecutions();
+    const lastRuns: Record<string, WorkflowLastRun> = {};
+    if (history) {
+      for (const def of workflows) {
+        const [last] = history.list({ workflowId: def.id, limit: 1 });
+        if (!last) continue;
+        const engineStatus = last.metadata && typeof last.metadata.engineStatus === 'string' ? last.metadata.engineStatus : undefined;
+        lastRuns[def.id] = {
+          id: last.id,
+          status: last.status,
+          startedAt: last.startedAt,
+          ...(last.durationMs !== undefined && last.durationMs !== null ? { durationMs: last.durationMs } : {}),
+          ...(engineStatus ? { engineStatus } : {})
+        };
+      }
+    }
+    sendJSON(ctx.res, 200, { workflows, lastRuns } satisfies WorkflowListResponse);
   }
 
   get(ctx: RequestContext): void {
@@ -161,18 +211,43 @@ export class AdminWorkflowRoutes {
     // payload itself. WFA-003: whichever it was, the caller's data lands under
     // `body` — and stays spread at the top level as the deprecated legacy view,
     // which is the shape every workflow authored before this reads.
+    // BMG-009: `wait: false` is the page's, never part of the caller's data. It is
+    // read off the envelope form only; a bare body is the payload, `wait` and all.
+    const noWait = !!body && body.wait === false && 'payload' in body;
     const callerData = (body && (body.payload as Record<string, unknown>)) || body || {};
     const payload = buildRunPayload({
       type: 'manual',
       body: callerData,
       legacy: spreadableBody(callerData)
     });
-    const { found, result } = await this.subsystem().run(
-      ctx.params.id,
-      { type: 'manual', source: `manual run of ${ctx.params.id}` },
-      payload
-    );
-    if (!found || !result) throw new HttpError(404, `No workflow "${ctx.params.id}"`);
+    const id = ctx.params.id;
+    const subsystem = this.subsystem();
+    if (!subsystem.registry.get(id)) throw new HttpError(404, `No workflow "${id}"`);
+
+    let answered = false;
+    let startedHook: ((executionId: string) => void) | undefined;
+    const started = new Promise<WorkflowStartedResponse>((resolve) => {
+      if (!noWait) return;
+      // FED-004's `onStarted`: called once with the record id before the graph runs.
+      startedHook = (executionId: string) => resolve({ started: true, executionId, workflowId: id });
+    });
+
+    const finished = subsystem.run(id, { type: 'manual', source: `manual run of ${id}`, ...(noWait ? { onStarted: (eid) => startedHook && startedHook(eid) } : {}) }, payload);
+    // Whichever comes first: the record opening (202) or, with the history off, the run ending (200).
+    const outcome = await Promise.race([
+      started.then((s) => ({ kind: 'started' as const, s })),
+      finished.then((r) => ({ kind: 'finished' as const, r }))
+    ]);
+    if (outcome.kind === 'started') {
+      answered = true;
+      sendJSON(ctx.res, 202, outcome.s);
+      // The run goes on; its record is where its outcome lands. A rejection here would otherwise be unhandled.
+      finished.catch(() => undefined);
+      return;
+    }
+    const { found, result } = outcome.r;
+    if (answered) return;
+    if (!found || !result) throw new HttpError(404, `No workflow "${id}"`);
     sendJSON(ctx.res, 200, { run: result } satisfies WorkflowRunResponse);
   }
 

@@ -1,0 +1,331 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "826ad945-7d23-5eec-8c0c-71ca35035c5f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mgStore",
+      "fromProperty": "app",
+      "toId": "mgMe",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mgWords",
+      "fromProperty": "words",
+      "toId": "mgT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "mgMe",
+      "fromProperty": "lang",
+      "toId": "mgT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "mgMe",
+      "fromProperty": "hasProfile",
+      "toId": "mgNoOne",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "mgNoOne",
+      "fromProperty": "result",
+      "toId": "mgGuard",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "mgPage",
+      "fromProperty": "didMount",
+      "toId": "mgGuard",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "mgGuard",
+      "fromProperty": "ontrue",
+      "toId": "mgGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "mgHeader",
+      "fromProperty": "hangar",
+      "toId": "mgGoHangar",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "mgMe",
+      "fromProperty": "name",
+      "toId": "mgHeader",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "mgMe",
+      "fromProperty": "look",
+      "toId": "mgHeader",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "mgMe",
+      "fromProperty": "seed",
+      "toId": "mgHeader",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "mgMe",
+      "fromProperty": "lang",
+      "toId": "mgHeader",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "mgMe",
+      "fromProperty": "level",
+      "toId": "mgHeader",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "mgMe",
+      "fromProperty": "layout",
+      "toId": "mgHeader",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "mgMe",
+      "fromProperty": "soundMode",
+      "toId": "mgHeader",
+      "toProperty": "soundMode"
+    },
+    {
+      "fromId": "mgMe",
+      "fromProperty": "answerMode",
+      "toId": "mgHeader",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "mgMe",
+      "fromProperty": "profileId",
+      "toId": "mgHeader",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "mgMe",
+      "fromProperty": "faceOptions",
+      "toId": "mgHeader",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "mgStore",
+      "fromProperty": "app",
+      "toId": "mgHeader",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mgHeader",
+      "fromProperty": "app",
+      "toId": "mgStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mgHeader",
+      "fromProperty": "write",
+      "toId": "mgStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "mgHeader",
+      "fromProperty": "switchPlayer",
+      "toId": "mgGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "mgHeader",
+      "fromProperty": "deleted",
+      "toId": "mgGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "mgHeader",
+      "fromProperty": "home",
+      "toId": "mgGoHome",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "mgT",
+      "fromProperty": "gameMerge",
+      "toId": "mgTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mgMe",
+      "fromProperty": "level",
+      "toId": "mgPlay",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "mgMe",
+      "fromProperty": "lang",
+      "toId": "mgPlay",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "mgMe",
+      "fromProperty": "model",
+      "toId": "mgPlay",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "mgT",
+      "fromProperty": "mergeRule",
+      "toId": "mgPlay",
+      "toProperty": "ruleWord"
+    },
+    {
+      "fromId": "mgT",
+      "fromProperty": "newGame",
+      "toId": "mgPlay",
+      "toProperty": "newGameWord"
+    },
+    {
+      "fromId": "mgT",
+      "fromProperty": "home",
+      "toId": "mgPlay",
+      "toProperty": "homeWord"
+    },
+    {
+      "fromId": "mgT",
+      "fromProperty": "earnedPick",
+      "toId": "mgPlay",
+      "toProperty": "pickWord"
+    },
+    {
+      "fromId": "mgT",
+      "fromProperty": "toHangar",
+      "toId": "mgPlay",
+      "toProperty": "hangarWord"
+    },
+    {
+      "fromId": "mgMe",
+      "fromProperty": "mergeMode",
+      "toId": "mgPlay",
+      "toProperty": "mergeMode"
+    },
+    {
+      "fromId": "mgT",
+      "fromProperty": "mergeModeLabel",
+      "toId": "mgPlay",
+      "toProperty": "modeWord"
+    },
+    {
+      "fromId": "mgT",
+      "fromProperty": "mergeEasy",
+      "toId": "mgPlay",
+      "toProperty": "easyWord"
+    },
+    {
+      "fromId": "mgT",
+      "fromProperty": "mergeHard",
+      "toId": "mgPlay",
+      "toProperty": "hardWord"
+    },
+    {
+      "fromId": "mgT",
+      "fromProperty": "mergeFull",
+      "toId": "mgPlay",
+      "toProperty": "fullWord"
+    },
+    {
+      "fromId": "mgStore",
+      "fromProperty": "app",
+      "toId": "mgMode",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mgMe",
+      "fromProperty": "profileId",
+      "toId": "mgMode",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "mgPlay",
+      "fromProperty": "mergeMode",
+      "toId": "mgMode",
+      "toProperty": "mergeMode"
+    },
+    {
+      "fromId": "mgPlay",
+      "fromProperty": "modeChanged",
+      "toId": "mgMode",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mgMode",
+      "fromProperty": "app",
+      "toId": "mgStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mgMode",
+      "fromProperty": "done",
+      "toId": "mgStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "mgStore",
+      "fromProperty": "app",
+      "toId": "mgSave",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mgMe",
+      "fromProperty": "profileId",
+      "toId": "mgSave",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "mgPlay",
+      "fromProperty": "model",
+      "toId": "mgSave",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "mgPlay",
+      "fromProperty": "graded",
+      "toId": "mgSave",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mgSave",
+      "fromProperty": "app",
+      "toId": "mgStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mgSave",
+      "fromProperty": "done",
+      "toId": "mgStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "mgPlay",
+      "fromProperty": "home",
+      "toId": "mgGoHome",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "mgPlay",
+      "fromProperty": "hangar",
+      "toId": "mgGoHangar",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "mgMe",
+      "fromProperty": "sound",
+      "toId": "mgSounds",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "mgPlay",
+      "fromProperty": "cheer",
+      "toId": "mgSounds",
+      "toProperty": "win"
+    }
+  ]
+}

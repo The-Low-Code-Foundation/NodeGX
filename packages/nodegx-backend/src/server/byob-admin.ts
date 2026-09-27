@@ -5,7 +5,7 @@
  * nodes and the Data Browser speak — moved from the in-editor
  * `LocalBackendServer.js`, with one fix: the old handlers `await`ed the
  * adapter's callback-style methods (which return undefined), so they could
- * never actually answer with data. They now go through AdapterFacade.
+ * never actually answer with data. They now go through IStorageFacade.
  * Responses stay storage-shaped (no Parse `__type` envelopes) — that is the
  * shape these clients have always been written against.
  *
@@ -18,14 +18,59 @@
 
 import type * as http from 'http';
 
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { WorkflowRunner } from '../workflow/WorkflowRunner';
 import type { RequestContext } from './HttpServer';
 import type { ClpOp } from '../security/model';
-import type { SchemaColumnLike } from '../persistence/SchemaManagerLike';
+import type {
+  StorageCheckDecl,
+  StorageCheckStatus,
+  StorageColumn,
+  StorageIndexStatus,
+  StorageSupabaseExportOptions
+} from '@noodl/backend-contract';
 import { validateAclShape } from '../security/model';
-import { HttpError, readJSONBody, sendJSON } from './http-util';
+import { isVisibleAccountColumn } from '../users/accountColumns';
+
+/** The four columns every record carries; never a person's to drop. */
+const SYSTEM_FIELDS: readonly string[] = ['objectId', 'createdAt', 'updatedAt', 'ACL'];
+
+/**
+ * BMG-003: the engines' two sentences for "a NOT NULL column added over rows
+ * with nothing to fill it" — SQLite's at the DDL, PostgreSQL's at the queue —
+ * as one of ours, or null for any other error.
+ */
+function requiredNeedsDefault(e: unknown, table: string, column: StorageColumn | undefined): HttpError | null {
+  const message = e instanceof Error ? e.message : String(e);
+  if (!/Cannot add a NOT NULL column with default value NULL|contains null values/.test(message)) return null;
+  const name = column && column.name ? `"${column.name}"` : 'a required field';
+  return new HttpError(
+    400,
+    `${name} can be required here only with a value for the records "${table}" already has: each of them needs one. ` +
+      'Say what they get (fillExisting — once, not a default), or add it as optional.',
+    142,
+    { reason: 'required-needs-default', collection: table, field: column ? column.name : undefined }
+  );
+}
+
+/** Whether a declared check reads this column (BMG-003 — the drop refusal). */
+function checkReads(rule: StorageCheckDecl, column: string): boolean {
+  if ('exactlyOne' in rule) return rule.exactlyOne.includes(column);
+  if ('allOrNone' in rule) return rule.allOrNone.includes(column);
+  return rule.field === column;
+}
+import { summariseModelCalls } from '../execution/modelCost';
+import { executionKind, isExecutionKind } from '../execution/kind';
+import {
+  checkViolationToHttp,
+  createErrorToHttp,
+  HttpError,
+  readJSONBody,
+  sendJSON,
+  splitCapped,
+  uniqueViolationToHttp
+} from './http-util';
 
 function parseJSON(value: string | undefined, name: string): Record<string, unknown> | undefined {
   if (!value) return undefined;
@@ -51,6 +96,42 @@ function parseJSON(value: string | undefined, name: string): Record<string, unkn
  *
  * `null`/`undefined` stay legal — that is how an ACL is cleared.
  */
+/**
+ * BMG-004 — what the BYOB door sends for a `_User` row. Measured before this
+ * existed: `GET /api/_User` handed the scrypt hash to the browser (the `/classes`
+ * door has always stripped it, `AdapterFacade.toWire`), and a `password` column
+ * — which only a BYOB write could have created, in plain text — came back as
+ * written. Neither is shown to anybody, admin or not.
+ */
+function forWire<T>(table: string, record: T): T {
+  if (table !== '_User' || !record || typeof record !== 'object') return record;
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(record as Record<string, unknown>)) {
+    if (isVisibleAccountColumn(key)) out[key] = value;
+  }
+  return out as T;
+}
+
+/**
+ * BMG-004 — a `_User` write that would store a password as text, or write the
+ * backend's own `_` columns. Refused rather than hashed here: the admin user
+ * routes are the door that hashes, revokes sessions on a change and audits it,
+ * and a second door doing half of that is how the two drift.
+ */
+function assertAccountWrite(table: string, data: Record<string, unknown> | undefined | null): void {
+  if (table !== '_User' || !data) return;
+  for (const key of Object.keys(data)) {
+    if (!isVisibleAccountColumn(key)) {
+      throw new HttpError(
+        400,
+        key === 'password'
+          ? 'A password is not written through /api/_User — it would be stored as text. Use PUT /admin/users/:id { password }, which hashes it.'
+          : `"${key}" is the backend's own column and cannot be written.`
+      );
+    }
+  }
+}
+
 function assertAclShape(data: Record<string, unknown> | undefined | null): void {
   if (!data || !Object.prototype.hasOwnProperty.call(data, 'ACL')) return;
   const error = validateAclShape(data.ACL);
@@ -67,6 +148,14 @@ export interface SchemaTable {
   name: string;
   columns: unknown[];
   createdAt: string | null;
+  /**
+   * FED-002 — every declared index and whether SQLite has it, plus anything
+   * built that nothing declares. Absent (not empty) on an adapter too old to
+   * answer, which is a different fact from "this collection has no indexes".
+   */
+  indexes?: StorageIndexStatus[];
+  /** HLT-016 — every declared check and whether it is enforced. Absent on an adapter too old to answer. */
+  checks?: StorageCheckStatus[];
 }
 
 /** `GET /admin/schema` and `GET /api/_schema`. */
@@ -78,16 +167,23 @@ export interface SchemaResponse {
 export interface TableSchemaResponse {
   name: string;
   columns: unknown[];
+  /** FED-002 — see {@link SchemaTable.indexes}. */
+  indexes?: StorageIndexStatus[];
+  /** HLT-016 — see {@link SchemaTable.checks}. */
+  checks?: StorageCheckStatus[];
 }
 
 /** `POST /admin/schema` — one of the five mutation actions. */
 export interface SchemaMutationResponse {
   success: boolean;
-  action: 'createTable' | 'addColumn' | 'renameColumn' | 'changeColumnType' | 'deleteTable';
+  action: 'createTable' | 'addColumn' | 'renameColumn' | 'changeColumnType' | 'deleteTable' | 'setIndexes' | 'setChecks' | 'dropColumn';
   table: string;
   /** Present on createTable / deleteTable: whether the DDL actually ran. */
   created?: boolean;
   deleted?: boolean;
+  /** BMG-003 — dropColumn: whether the column was there to drop. */
+  dropped?: boolean;
+  column?: string;
   // ── changeColumnType (AAQ-002) ────────────────────────────────────────────
   /** Whether the column's type actually moved (false when it already matched). */
   changed?: boolean;
@@ -97,14 +193,47 @@ export interface SchemaMutationResponse {
   rebuilt?: boolean;
   /** How many non-null values went through `CAST`, and so could have been lost. */
   convertedValues?: number;
+  // ── setIndexes (FED-002) ──────────────────────────────────────────────────
+  //
+  // Prefixed, because `created` was already taken by createTable and means a
+  // boolean there. Two fields a wire-reader has to tell apart by the action
+  // they arrived with is exactly the drift PLAT-004 keeps finding.
+  /** Derived names of the indexes this push created (a changed one is here, not in `indexesDropped`). */
+  indexesCreated?: string[];
+  /** Derived names it dropped — a declaration that is gone from the list. */
+  indexesDropped?: string[];
+  /** Already built in exactly this shape, so nothing was done to them. */
+  indexesKept?: string[];
+  /** Every declared index on the collection afterwards, and whether it is built. */
+  indexes?: StorageIndexStatus[];
+  // ── setChecks (HLT-016) ───────────────────────────────────────────────────
+  checksCreated?: string[];
+  checksDropped?: string[];
+  checksKept?: string[];
+  /** Every declared check on the collection afterwards, and whether it is enforced. */
+  checks?: StorageCheckStatus[];
+}
+
+/**
+ * What `GET /admin/schema-export` hands the Supabase generator (BRG-004).
+ *
+ * Both fields come from OUTSIDE this route — the live security config from the
+ * service, the claim name from the caller — because both are facts the
+ * generator would otherwise have to invent, and inventing them is what BRG-D1
+ * was.
+ */
+export interface SchemaExportOptions {
+  security?: StorageSupabaseExportOptions['security'];
+  /** The JWT claim carrying the NodeGX `_User` objectId. No default. */
+  userIdClaim?: string;
 }
 
 export class ByobAdminRoutes {
-  private readonly facade: AdapterFacade;
+  private readonly facade: IStorageFacade;
   private readonly executions: ExecutionHistory;
   private readonly getRunner: () => WorkflowRunner | null;
 
-  constructor(facade: AdapterFacade, executions: ExecutionHistory, getRunner: () => WorkflowRunner | null) {
+  constructor(facade: IStorageFacade, executions: ExecutionHistory, getRunner: () => WorkflowRunner | null) {
     this.facade = facade;
     this.executions = executions;
     this.getRunner = getRunner;
@@ -124,14 +253,23 @@ export class ByobAdminRoutes {
       count: query.count === '1' || query.count === 'true',
       acl: ctx.acl('read')
     };
-    const { results, count } = await this.facade.rawQuery(ctx.params.table, options);
-    sendJSON(ctx.res, 200, { results, count: count !== undefined ? count : results.length });
+    const result = await this.facade.rawQuery(ctx.params.table, options);
+    const { results, count } = result;
+    // PRD-001: the same header the Parse routes set. The BYOB body is ours and
+    // could have carried it; it does not, so there is one answer to "was this
+    // capped?" rather than two that can drift (see `splitCapped`).
+    sendJSON(
+      ctx.res,
+      200,
+      { results: results.map((r) => forWire(ctx.params.table, r)), count: count !== undefined ? count : results.length },
+      splitCapped(result).headers
+    );
   }
 
   async fetch(ctx: RequestContext): Promise<void> {
     try {
       const record = await this.facade.rawFetch(ctx.params.table, ctx.params.id, ctx.acl('read'));
-      sendJSON(ctx.res, 200, record);
+      sendJSON(ctx.res, 200, forWire(ctx.params.table, record));
     } catch {
       throw new HttpError(404, 'Record not found');
     }
@@ -139,18 +277,36 @@ export class ByobAdminRoutes {
 
   async create(ctx: RequestContext): Promise<void> {
     const data = await readJSONBody(ctx.req);
+    assertAccountWrite(ctx.params.table, data);
     ctx.stampCreate(ctx.params.table, data);
-    const record = await this.facade.rawCreate(ctx.params.table, data);
-    sendJSON(ctx.res, 201, record);
+    let record: Record<string, unknown>;
+    try {
+      record = await this.facade.rawCreate(ctx.params.table, data);
+    } catch (e) {
+      // FED-002: `data` is passed so a unique-index refusal can name the value
+      // as well as the field. This is the door the Data Browser writes through,
+      // and a 500 saying `UNIQUE constraint failed: Item.id` in a panel is not
+      // something a person can act on.
+      throw createErrorToHttp(e, data, this.facade.schemaManager);
+    }
+    sendJSON(ctx.res, 201, forWire(ctx.params.table, record));
   }
 
   async save(ctx: RequestContext): Promise<void> {
     const data = await readJSONBody(ctx.req);
     assertAclShape(data);
+    assertAccountWrite(ctx.params.table, data);
     try {
       const record = await this.facade.rawSave(ctx.params.table, ctx.params.id, data, ctx.acl('write'));
-      sendJSON(ctx.res, 200, record);
-    } catch {
+      sendJSON(ctx.res, 200, forWire(ctx.params.table, record));
+    } catch (e) {
+      // FED-002: an edit refused by a unique index is a conflict, not a missing
+      // row — the same distinction `classPut` draws.
+      const message = e instanceof Error ? e.message : String(e);
+      const conflict = uniqueViolationToHttp(message, data);
+      if (conflict) throw conflict;
+      const broke = checkViolationToHttp(message, this.facade.schemaManager);
+      if (broke) throw broke;
       throw new HttpError(404, 'Record not found');
     }
   }
@@ -197,13 +353,15 @@ export class ByobAdminRoutes {
           case 'create': {
             ctx.checkData(collection, clpOp);
             const data = (op.data as Record<string, unknown>) || {};
+            assertAccountWrite(collection, data);
             ctx.stampCreate(collection, data);
-            results.push(await this.facade.rawCreate(collection, data));
+            results.push(forWire(collection, await this.facade.rawCreate(collection, data)));
             break;
           }
           case 'save':
             ctx.checkData(collection, clpOp);
             assertAclShape(op.data as Record<string, unknown>);
+            assertAccountWrite(collection, op.data as Record<string, unknown>);
             await this.facade.rawSave(
               collection,
               op.objectId as string,
@@ -232,16 +390,43 @@ export class ByobAdminRoutes {
   // Schema: /api/_schema (BYOB-compat) + /admin/schema
   // ==========================================================================
 
-  getSchema(res: http.ServerResponse): void {
+  /**
+   * `withAccounts` — BMG-004, `/admin/schema` only. `listTables()` leaves out
+   * every `_`-prefixed table on purpose (the MCP tool surface and the Supabase
+   * export both lean on that), so the accounts table was missing from the page
+   * that is supposed to add fields to it. It is appended here, for the admin
+   * listing, with the backend's own columns hidden — and NOT on the BYOB
+   * `/api/_schema`, whose readers never asked for it.
+   */
+  getSchema(res: http.ServerResponse, withAccounts = false): void {
     const sm = this.facade.schemaManager;
     if (!sm) throw new HttpError(500, 'Schema manager not available');
     const tables: string[] = sm.listTables();
+    const accounts = withAccounts ? sm.getTableSchema('_User') : null;
     const schemas: { name: string; columns?: unknown[]; createdAt?: string }[] = sm.exportSchemas();
     sendJSON(res, 200, {
       tables: tables.map((name) => {
         const schema = schemas.find((s) => s.name === name);
-        return { name, columns: schema?.columns || [], createdAt: schema?.createdAt || null };
-      })
+        return {
+          name,
+          columns: schema?.columns || [],
+          createdAt: schema?.createdAt || null,
+          ...this.indexesOf(name),
+          ...this.checksOf(name)
+        };
+      }).concat(
+        accounts
+          ? [
+              {
+                name: '_User',
+                columns: ((accounts.columns || []) as Array<{ name: string }>).filter((c) => isVisibleAccountColumn(c.name)),
+                createdAt: null,
+                ...this.indexesOf('_User'),
+                ...this.checksOf('_User')
+              }
+            ]
+          : []
+      )
     } satisfies SchemaResponse);
   }
 
@@ -250,10 +435,56 @@ export class ByobAdminRoutes {
     if (!sm) throw new HttpError(500, 'Schema manager not available');
     const schema = sm.getTableSchema(tableName);
     if (!schema) throw new HttpError(404, `No such table: ${tableName}`);
-    sendJSON(res, 200, { name: tableName, columns: schema.columns || [] } satisfies TableSchemaResponse);
+    const columns = (schema.columns || []) as Array<{ name: string }>;
+    sendJSON(res, 200, {
+      name: tableName,
+      columns: tableName === '_User' ? columns.filter((c) => isVisibleAccountColumn(c.name)) : columns,
+      ...this.indexesOf(tableName),
+      ...this.checksOf(tableName)
+    } satisfies TableSchemaResponse);
   }
 
-  async mutateSchema(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+  /**
+   * FED-002 — `{ indexes: [...] }` for a collection, or `{}` on an adapter that
+   * cannot answer. The two are deliberately different on the wire: an empty
+   * array says "this collection declares no indexes", and an absent key says
+   * "this backend cannot tell you", which is what the dashboard has to render
+   * differently.
+   */
+  private checksOf(tableName: string): { checks?: StorageCheckStatus[] } {
+    const sm = this.facade.schemaManager;
+    if (!sm || typeof sm.checkStatus !== 'function') return {};
+    try {
+      return { checks: sm.checkStatus(tableName) };
+    } catch {
+      return { checks: [] };
+    }
+  }
+
+  private indexesOf(tableName: string): { indexes?: StorageIndexStatus[] } {
+    const sm = this.facade.schemaManager;
+    if (!sm || typeof sm.indexStatus !== 'function') return {};
+    try {
+      return { indexes: sm.indexStatus(tableName) };
+    } catch {
+      // A table listed by `_Schema` that no longer exists reads as no indexes,
+      // not as a 500 on the whole schema listing.
+      return { indexes: [] };
+    }
+  }
+
+  /**
+   * `POST /admin/schema` — one of the six mutation actions.
+   *
+   * Takes the whole context since FED-002: a schema push has to be able to
+   * ENRICH its audit entry (`ctx.audit`) with the index names it created or
+   * dropped, which is §3.4's "the execution record of a schema push names the
+   * indexes it created or dropped". The dispatcher still writes the entry;
+   * handlers never create one.
+   */
+  async mutateSchema(ctx: RequestContext): Promise<void> {
+    const req = ctx.req;
+    const res = ctx.res;
     const body = await readJSONBody(req);
     const sm = this.facade.schemaManager;
     if (!sm) throw new HttpError(500, 'Schema manager not available');
@@ -264,15 +495,58 @@ export class ByobAdminRoutes {
     const table = body.table as string;
     switch (body.action) {
       case 'createTable': {
+        // FED-002: `indexes` rides along with the columns, because that is how
+        // a schema is pushed — one declaration per collection, not a table
+        // created here and its unique constraints remembered somewhere else.
+        // `createTable` is create-if-absent, so the reconcile runs afterwards
+        // either way: a push against a table that already exists is exactly the
+        // case where a declaration has CHANGED.
         const created = sm.createTable({
           name: table,
-          columns: (body.columns as SchemaColumnLike[] | undefined) || []
+          columns: (body.columns as StorageColumn[] | undefined) || []
         });
-        sendJSON(res, 200, { success: true, action: 'createTable', created, table } satisfies SchemaMutationResponse);
+        // HLT-016: `checks` rides along the same way, and is applied first: a
+        // push refused by its rows is refused before any index is built.
+        const checkReport = body.checks === undefined ? null : await this.applyChecks(ctx, table, body.checks);
+        const report = body.indexes === undefined ? null : await this.applyIndexes(ctx, table, body.indexes);
+        sendJSON(res, 200, {
+          success: true,
+          action: 'createTable',
+          created,
+          table,
+          ...(checkReport || {}),
+          ...(report || {})
+        } satisfies SchemaMutationResponse);
+        return;
+      }
+      case 'setChecks': {
+        const report = await this.applyChecks(ctx, table, body.checks);
+        sendJSON(res, 200, { success: true, action: 'setChecks', table, ...report } satisfies SchemaMutationResponse);
+        return;
+      }
+      case 'setIndexes': {
+        const report = await this.applyIndexes(ctx, table, body.indexes);
+        sendJSON(res, 200, {
+          success: true,
+          action: 'setIndexes',
+          table,
+          ...report
+        } satisfies SchemaMutationResponse);
         return;
       }
       case 'addColumn':
-        sm.addColumn(table, body.column as SchemaColumnLike);
+        // BMG-003: a required column over rows needs a value for them on both
+        // engines (SQLite refuses the DDL outright; PostgreSQL refuses it at the
+        // queue) — R6: `column.fillExisting`, written once, never a default —
+        // and either refusal is the person's to act on — so it is 400 in words,
+        // and the queue is awaited here so it reaches the person who added the
+        // field rather than whoever writes the next record.
+        try {
+          sm.addColumn(table, body.column as StorageColumn);
+        } catch (e) {
+          throw requiredNeedsDefault(e, table, body.column as StorageColumn) || new HttpError(400, e instanceof Error ? e.message : String(e));
+        }
+        await this.awaitSchemaQueue(ctx, table, undefined, body.column as StorageColumn);
         sendJSON(res, 200, { success: true, action: 'addColumn', table } satisfies SchemaMutationResponse);
         return;
       case 'renameColumn':
@@ -285,6 +559,11 @@ export class ByobAdminRoutes {
         if (typeof sm.changeColumnType !== 'function') {
           throw new HttpError(501, 'This adapter cannot change a column type.');
         }
+        // BMG-003 §5: SQLite rebuilds a column by add-copy-DROP-rename, and a
+        // DROP COLUMN fails on a column a trigger or an index reads; a check that
+        // still parsed would then grade values of the wrong type anyway. Refuse
+        // in words, naming what to take away first, rather than relay the engine.
+        this.refuseIfInUse(table, body.column as string, 'change the type of');
         const result = sm.changeColumnType(table, body.column as string, body.type as string);
         sendJSON(res, 200, {
           success: true,
@@ -292,6 +571,35 @@ export class ByobAdminRoutes {
           table,
           ...result
         } satisfies SchemaMutationResponse);
+        return;
+      }
+      case 'dropColumn': {
+        // BMG-003 §3.3. Optional on the interface, like `deleteTable`.
+        if (typeof sm.dropColumn !== 'function') {
+          throw new HttpError(501, 'This adapter cannot drop a column.');
+        }
+        const column = body.column as string;
+        if (typeof column !== 'string' || !column) throw new HttpError(400, 'Say which column to drop.');
+        if (SYSTEM_FIELDS.includes(column)) {
+          throw new HttpError(400, `"${column}" is set by the backend on every record and cannot be dropped.`);
+        }
+        if (table === '_User' && !isVisibleAccountColumn(column)) {
+          throw new HttpError(400, `"${column}" is one of the backend's own account fields and cannot be dropped.`);
+        }
+        if (table === '_User' && (column === 'username' || column === 'email')) {
+          throw new HttpError(400, `"${column}" is how a person signs in and cannot be dropped.`);
+        }
+        this.refuseIfInUse(table, column, 'drop');
+        let dropped: boolean;
+        try {
+          dropped = sm.dropColumn(table, column);
+        } catch (e) {
+          const err = e as { code?: string; message?: string };
+          if (err && err.code === 'COLUMN_IN_USE') throw new HttpError(409, String(err.message));
+          throw new HttpError(400, e instanceof Error ? e.message : String(e));
+        }
+        ctx.audit({ droppedColumn: `${table}.${column}` });
+        sendJSON(res, 200, { success: true, action: 'dropColumn', table, column, dropped } satisfies SchemaMutationResponse);
         return;
       }
       case 'deleteTable': {
@@ -305,18 +613,223 @@ export class ByobAdminRoutes {
         return;
       }
       default:
-        throw new HttpError(400, `Unknown schema action: ${String(body.action)}`);
+        throw new HttpError(
+          400,
+          `Unknown schema action: ${String(body.action)}. Expected one of createTable, addColumn, ` +
+            'renameColumn, changeColumnType, dropColumn, deleteTable, setIndexes, setChecks.'
+        );
     }
   }
 
-  exportSchema(res: http.ServerResponse, format: string): void {
+  /**
+   * BMG-003 — a column a declared index, a check or a search opt-in reads is
+   * refused for a drop or a type change, naming what reads it (AC4). The
+   * adapters refuse the same way; this is the sentence the page shows, and it
+   * runs first so the two engines answer identically.
+   *
+   * @private
+   */
+  private refuseIfInUse(table: string, column: string, verb: string): void {
+    const sm = this.facade.schemaManager;
+    if (!sm) return;
+    const indexes = typeof sm.indexStatus === 'function' ? sm.indexStatus(table) : [];
+    const index = indexes.find((i) => i.declared !== false && (i.fields || []).includes(column));
+    if (index) {
+      throw new HttpError(
+        409,
+        `Cannot ${verb} "${column}": the index ${index.name} (${(index.fields || []).join(', ')}${index.unique ? ', unique' : ''}) ` +
+          'reads it. Drop that index first.'
+      );
+    }
+    const checks = typeof sm.checkStatus === 'function' ? sm.checkStatus(table) : [];
+    const check = checks.find((c) => c.declared && checkReads(c.rule, column));
+    if (check) {
+      throw new HttpError(409, `Cannot ${verb} "${column}": the rule "${check.description}" reads it. Remove that rule first.`);
+    }
+  }
+
+  /**
+   * P99 HLT-016 W5. On PostgreSQL a reconcile is QUEUED (BRG-005) and a refusal
+   * surfaces on "the next data-plane call" — which, after a push, was always
+   * the audit write for this very request. `AuditLog.record` never throws, so
+   * the refusal was logged there and dropped: the push answered 200, the
+   * person's next write succeeded, and the trail lost the entry. Waiting for
+   * the queue here is what makes the refusal reach the person who pushed.
+   *
+   * @private
+   */
+  private async awaitSchemaQueue(ctx: RequestContext, table: string, described?: Map<string, string>, column?: StorageColumn): Promise<void> {
+    const sm = this.facade.schemaManager;
+    const barrier = (sm as { barrier?: () => Promise<void> } | undefined)?.barrier;
+    if (typeof barrier !== 'function') return;
+    try {
+      await barrier.call(sm);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      const needsDefault = column ? requiredNeedsDefault(e, table, column) : null;
+      if (needsDefault) throw needsDefault;
+      if (/UNIQUE constraint failed/.test(message)) {
+        ctx.audit({ indexesRefused: { table, engine: 'postgres' } });
+        throw new HttpError(
+          409,
+          `Cannot build the unique indexes declared for "${table}": rows already in it share a value ` +
+            `(${message.replace(/^.*UNIQUE constraint failed: /, '')}). Nothing was changed and no row was deleted.`,
+          137
+        );
+      }
+      // The queued error names the operation first: `reconcileChecks("T") failed
+      // on PostgreSQL: CHECK constraint failed: T.chk_…`.
+      const m = /CHECK constraint failed: [A-Za-z0-9_]+\.(chk_[A-Za-z0-9_]+)/.exec(message);
+      const check = m ? { check: m[1] } : null;
+      if (check) {
+        ctx.audit({ checksRefused: { table, engine: 'postgres', check: check.check } });
+        // Read from what was pushed: by now the model has rolled the declaration back.
+        const description = described?.get(check.check) ?? check.check;
+        throw new HttpError(
+          409,
+          `Cannot require "${description}" on "${table}": rows already in it break it. ` +
+            'Nothing was changed and no row was deleted.',
+          142
+        );
+      }
+      throw new HttpError(500, message);
+    }
+  }
+
+  /**
+   * HLT-016 — reconcile one collection's checks and report what happened. A
+   * mis-shaped declaration is 400; rows that already break a new check are
+   * 409 with the count (SQLite) or PostgreSQL's refusal (at the queue).
+   *
+   * @private
+   */
+  private async applyChecks(
+    ctx: RequestContext,
+    table: string,
+    checks: unknown
+  ): Promise<{ checksCreated: string[]; checksDropped: string[]; checksKept: string[]; checks: StorageCheckStatus[] }> {
+    const sm = this.facade.schemaManager;
+    if (!sm || typeof sm.reconcileChecks !== 'function') {
+      throw new HttpError(501, 'This adapter cannot declare checks.');
+    }
+    let report;
+    try {
+      report = sm.reconcileChecks(table, checks);
+    } catch (e) {
+      const err = e as { code?: string; message?: string; violations?: number; check?: string };
+      if (err && err.code === 'CHECK_VIOLATIONS') {
+        ctx.audit({ checksRefused: { table, check: err.check, violations: err.violations } });
+        throw new HttpError(409, String(err.message), 142, { violations: err.violations, check: err.check });
+      }
+      throw new HttpError(400, e instanceof Error ? e.message : String(e));
+    }
+    const described = new Map((this.checksOf(table).checks || []).map((c) => [c.name, c.description]));
+    await this.awaitSchemaQueue(ctx, table, described);
+    ctx.audit({ checksCreated: report.created, checksDropped: report.dropped });
+    return {
+      checksCreated: report.created,
+      checksDropped: report.dropped,
+      checksKept: report.kept,
+      checks: this.checksOf(table).checks || []
+    };
+  }
+
+  /**
+   * FED-002 — reconcile one collection's indexes and report what happened.
+   *
+   * Three refusals, each answered as the caller's mistake rather than a 500:
+   * a mis-shaped declaration (400), an adapter that cannot do indexes at all
+   * (501), and — the one that matters — a unique index the rows already in the
+   * table would refuse (409, carrying the duplicate count and three of the
+   * offending values). The last one changes nothing: no index is created, none
+   * is dropped, and no row is deleted to make room.
+   *
+   * @private
+   */
+  private async applyIndexes(
+    ctx: RequestContext,
+    table: string,
+    indexes: unknown
+  ): Promise<{ indexesCreated: string[]; indexesDropped: string[]; indexesKept: string[]; indexes: StorageIndexStatus[] }> {
+    const sm = this.facade.schemaManager;
+    if (!sm || typeof sm.reconcileIndexes !== 'function') {
+      throw new HttpError(501, 'This adapter cannot declare indexes.');
+    }
+
+    let report;
+    try {
+      report = sm.reconcileIndexes(table, indexes);
+    } catch (e) {
+      const err = e as { code?: string; message?: string; duplicates?: number; samples?: unknown[][] };
+      if (err && err.code === 'INDEX_DUPLICATES') {
+        // AC4. The push is REFUSED, and the audit entry says so with the
+        // numbers — an operator who reads "refused" without them has to go and
+        // find the duplicates themselves.
+        ctx.audit({ indexesRefused: { table, duplicates: err.duplicates, samples: err.samples } });
+        throw new HttpError(409, String(err.message), 137, {
+          duplicates: err.duplicates,
+          samples: err.samples
+        });
+      }
+      throw new HttpError(400, e instanceof Error ? e.message : String(e));
+    }
+
+    await this.awaitSchemaQueue(ctx, table);
+
+    ctx.audit({ indexesCreated: report.created, indexesDropped: report.dropped });
+    return {
+      indexesCreated: report.created,
+      indexesDropped: report.dropped,
+      indexesKept: report.kept,
+      indexes: this.indexesOf(table).indexes || []
+    };
+  }
+
+  exportSchema(res: http.ServerResponse, format: string, options?: SchemaExportOptions): void {
     const sm = this.facade.schemaManager;
     if (!sm) throw new HttpError(500, 'Schema manager not available');
 
+    // BRG-001: both generators are OPTIONAL on `IStorageSchema` — they are a
+    // migration concern that only the SQLite schema manager implements, and an
+    // adapter without them must answer rather than crash. Same 501 the index
+    // routes above give, for the same reason.
+    //
+    // BRG-004 repaired what they emit (relations, declared indexes, and the row
+    // ACL translated into real policies). The part that shows up HERE is that
+    // they now REFUSE: anything the export cannot carry across comes back as a
+    // 409 naming the construct, rather than as SQL that looks fine.
     let content: string;
-    if (format === 'postgres') content = sm.generatePostgresSQL();
-    else if (format === 'supabase') content = sm.generateSupabaseSQL();
-    else content = JSON.stringify(sm.exportSchemas(), null, 2);
+    try {
+      if (format === 'postgres') {
+        if (typeof sm.generatePostgresSQL !== 'function') {
+          throw new HttpError(501, 'This adapter cannot export PostgreSQL schema.');
+        }
+        content = sm.generatePostgresSQL();
+      } else if (format === 'supabase') {
+        if (typeof sm.generateSupabaseSQL !== 'function') {
+          throw new HttpError(501, 'This adapter cannot export Supabase schema.');
+        }
+        content = sm.generateSupabaseSQL({
+          security: options && options.security,
+          userIdClaim: options && options.userIdClaim
+        });
+      } else {
+        content = JSON.stringify(sm.exportSchemas(), null, 2);
+      }
+    } catch (e) {
+      if (e instanceof HttpError) throw e;
+      const err = e as { code?: string; message?: string; construct?: string; table?: string };
+      if (err && err.code === 'CANNOT_CROSS') {
+        // 409, the same answer a unique-index refusal gives: the request is
+        // well-formed and the state of the data or the config is what refuses.
+        // No Parse error code: 137 is `duplicate value` and this is not one.
+        // `construct` is the machine-readable half — a carry report groups by
+        // it, and a sentence cannot be grouped by.
+        throw new HttpError(409, String(err.message), undefined, { construct: err.construct, table: err.table });
+      }
+      throw e;
+    }
+
 
     sendJSON(res, 200, { format: format || 'json', content });
   }
@@ -356,22 +869,76 @@ export class ByobAdminRoutes {
   // Executions: /executions*
   // ==========================================================================
 
+  /**
+   * `GET /executions` — the list, filtered.
+   *
+   * BMG-009 added the Runs page's rows: `kind` (workflow / function / backup /
+   * maintenance, derived from the record's metadata), `name` (contains),
+   * `trigger` (the registered trigger that started it), `since` / `until`
+   * (an instant, as ISO text or epoch ms; `startedAfter` / `startedBefore`
+   * remain as the ms spelling) and `minDurationMs`. A parameter the route
+   * cannot read is a 400 in words, not a silently unfiltered list. The answer
+   * stays a BARE ARRAY (`admin-dashboard.test.ts` names that seam); the page
+   * count rides the `X-Total-Count` header.
+   */
   listExecutions(res: http.ServerResponse, query: Record<string, string>): void {
-    const result = this.executions.list({
+    if (query.kind && !isExecutionKind(query.kind)) {
+      throw new HttpError(400, `"${query.kind}" is not a kind of run: workflow, function, backup or maintenance.`);
+    }
+    const q = {
       workflowId: query.workflowId || undefined,
       status: query.status || undefined,
       triggerType: query.triggerType || undefined,
       limit: query.limit ? parseInt(query.limit, 10) : undefined,
       offset: query.offset ? parseInt(query.offset, 10) : undefined,
-      startedAfter: query.startedAfter ? parseInt(query.startedAfter, 10) : undefined,
-      startedBefore: query.startedBefore ? parseInt(query.startedBefore, 10) : undefined
+      startedAfter: instantParam('since', query.since) ?? (query.startedAfter ? parseInt(query.startedAfter, 10) : undefined),
+      startedBefore: instantParam('until', query.until) ?? (query.startedBefore ? parseInt(query.startedBefore, 10) : undefined),
+      // PRD-002: `?capped=true` names the runs whose record hit a size bound.
+      capped: query.capped === 'true' ? true : query.capped === 'false' ? false : undefined,
+      kind: isExecutionKind(query.kind) ? query.kind : undefined,
+      nameContains: query.name || undefined,
+      triggerId: query.trigger || undefined,
+      minDurationMs: query.minDurationMs ? numberParam('minDurationMs', query.minDurationMs) : undefined
+    };
+    const result = this.executions.list(q);
+    /**
+     * FED-003 §5.5 / FED-006 AC5 — the cost sentence on the LIST as well as on the row.
+     *
+     * §3.4's first screenshot is the execution list, and "which of these runs was expensive" is a
+     * question a list can answer at a glance or not at all. The arithmetic is the same derivation
+     * `getExecution` uses; a run that called no model gets no field, so the column is absent
+     * rather than a page of zeros.
+     */
+    const decorated = result.map((row) => {
+      const modelCost = summariseModelCalls((row as { metadata?: unknown }).metadata);
+      const kind = executionKind((row as { metadata?: unknown }).metadata);
+      return modelCost ? { ...row, kind, modelCost } : { ...row, kind };
     });
-    sendJSON(res, 200, result);
+    sendJSON(res, 200, decorated, { 'X-Total-Count': String(this.executions.count(q)) });
   }
 
   getExecution(res: http.ServerResponse, id: string): void {
     const result = this.executions.get(id);
     if (!result) throw new HttpError(404, 'Execution not found');
-    sendJSON(res, 200, result);
+    // FED-003 §3.4 — what the run spent on models, summed here rather than by each of the three
+    // readers of this route. Derived, never stored: see `execution/modelCost.ts`.
+    const modelCost = summariseModelCalls(result.metadata);
+    const kind = executionKind(result.metadata);
+    sendJSON(res, 200, modelCost ? { ...result, kind, modelCost } : { ...result, kind });
   }
+}
+
+/** `since` / `until`: epoch ms, or anything `Date.parse` reads. Absent → undefined; unreadable → 400. */
+function instantParam(name: string, raw: string | undefined): number | undefined {
+  if (raw === undefined || raw === '') return undefined;
+  if (/^\d+$/.test(raw)) return parseInt(raw, 10);
+  const ms = Date.parse(raw);
+  if (isNaN(ms)) throw new HttpError(400, `"${name}" must be a date or a time in milliseconds, not "${raw}".`);
+  return ms;
+}
+
+function numberParam(name: string, raw: string): number {
+  const n = Number(raw);
+  if (raw.trim() === '' || isNaN(n) || n < 0) throw new HttpError(400, `"${name}" must be a number of milliseconds, not "${raw}".`);
+  return n;
 }

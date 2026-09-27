@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "826ad945-7d23-5eec-8c0c-71ca35035c5f",
+  "name": "Merge",
+  "path": "/Pages/Merge",
+  "type": "page",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Make Ten Merge (TPL-007 §2.2 B): Richard's 2048, where two tiles join only when they make 10, 20, 30… The game is Merge/Play. The page gives it the player and the words, saves the model a finished board pays into, and plays the fanfare."
+}

@@ -150,7 +150,18 @@ function serveFolder(dir, port, backendPort) {
       res.writeHead(403).end('forbidden');
       return;
     }
-    if (!fs.existsSync(file) || fs.statSync(file).isDirectory()) file = path.join(dir, 'index.html');
+    // 🔴 A DIRECTORY SERVES ITS OWN index.html BEFORE THE ROOT'S. Falling straight
+    // back to the root index turns a nested site — `site/templates/<slug>/`, which
+    // is how nodegx.io serves its template demos — into the HOMEPAGE, served with a
+    // 200 under the app's URL. Every absence assertion in a drive then passes on a
+    // page that has nothing on it, and the reading looks like a broken template.
+    // The root fallback is kept AFTER it, because a client-side route has no file.
+    if (fs.existsSync(file) && fs.statSync(file).isDirectory()) {
+      const dirIndex = path.join(file, 'index.html');
+      file = fs.existsSync(dirIndex) ? dirIndex : path.join(dir, 'index.html');
+    } else if (!fs.existsSync(file)) {
+      file = path.join(dir, 'index.html');
+    }
     if (!fs.existsSync(file)) {
       res.writeHead(404).end('not found');
       return;
@@ -168,8 +179,16 @@ function serveFolder(dir, port, backendPort) {
  * @param {(page: object) => Promise<any>} fn
  */
 async function withDeployedSite(options, fn) {
-  const dir = path.resolve(options.dir);
-  if (!fs.existsSync(path.join(dir, 'index.html'))) {
+  /**
+   * 🔴 `options.origin` drives a site THAT IS ALREADY SERVED — a live host —
+   * instead of one served from disk here. Nothing local is started, so what is
+   * graded is what the public actually gets: the host's own rewrites, headers,
+   * compression and cert. A local copy that plays is not evidence the deploy
+   * landed; only this is.
+   */
+  const origin = options.origin ? String(options.origin).replace(/\/$/, '') : null;
+  const dir = origin ? null : path.resolve(options.dir);
+  if (dir && !fs.existsSync(path.join(dir, 'index.html'))) {
     throw new Error(`${dir} is not a deploy folder (no index.html).`);
   }
   const { chrome, probed } = findChrome();
@@ -177,7 +196,9 @@ async function withDeployedSite(options, fn) {
 
   const servePort = options.port || (await freePort());
   const cdpPort = await freePort();
-  const server = await serveFolder(dir, servePort, options.backendPort);
+  const server = origin ? { close() {} } : await serveFolder(dir, servePort, options.backendPort);
+  /** What every navigation in this session is relative to. */
+  const base = origin || `http://127.0.0.1:${servePort}`;
 
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'nodegx-deployed-'));
   const proc = spawn(
@@ -245,7 +266,7 @@ async function withDeployedSite(options, fn) {
     await client.send('Page.enable', {});
     await client.send('Runtime.enable', {});
     await client.send('Network.enable', {});
-    await client.send('Page.navigate', { url: `http://127.0.0.1:${servePort}/` });
+    await client.send('Page.navigate', { url: `${base}/` });
     await wait(BOOT_MS);
 
     return await fn({
@@ -255,7 +276,7 @@ async function withDeployedSite(options, fn) {
       networkErrors,
       evaluate: (expression) => evaluate(client, expression),
       async navigate(urlPath) {
-        await client.send('Page.navigate', { url: `http://127.0.0.1:${servePort}${urlPath}` });
+        await client.send('Page.navigate', { url: `${base}${urlPath}` });
         await wait(PAGE_NAV_MS);
       },
       async setViewport(vp) {

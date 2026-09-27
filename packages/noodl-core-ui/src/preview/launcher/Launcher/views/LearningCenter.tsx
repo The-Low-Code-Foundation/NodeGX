@@ -114,7 +114,7 @@ function LessonCard({ lesson, onStart, onRestart }: LessonCardProps) {
               borderRadius: '10px',
               backgroundColor: 'var(--theme-color-secondary)',
               color: 'var(--theme-color-on-secondary, #fff)',
-              fontSize: '11px'
+              fontSize: 'var(--font-size-xs)'
             }}
           >
             <Icon icon={IconName.Check} size={IconSize.Tiny} />
@@ -171,7 +171,7 @@ function ProgressBar({ percent }: { percent: number }) {
       >
         <div style={{ width: `${clamped}%`, height: '100%', backgroundColor: 'var(--theme-color-secondary)' }} />
       </div>
-      <div style={{ marginTop: '4px', fontSize: '11px', color: 'var(--theme-color-fg-default-shy)' }}>
+      <div style={{ marginTop: '4px', fontSize: 'var(--font-size-xs)', color: 'var(--theme-color-fg-default-shy)' }}>
         {clamped}% complete
       </div>
     </div>

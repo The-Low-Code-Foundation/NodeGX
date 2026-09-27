@@ -20,7 +20,7 @@
 
 .Title {
   font-family: var(--font-family-display);
-  font-size: 15px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--theme-color-fg-highlight);
@@ -28,7 +28,7 @@
 }
 
 .Count {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--theme-color-fg-muted);
 }
 
@@ -37,18 +37,18 @@
 }
 
 .Empty {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.6;
   color: var(--theme-color-fg-muted);
   margin: 0;
   padding: 14px;
   background: var(--theme-color-bg-1);
   border: 1px solid var(--theme-color-border-default);
-  border-radius: var(--radius-7);
+  border-radius: var(--radius-xl);
 
   code {
     font-family: var(--font-family-code);
-    font-size: 11px;
+    font-size: var(--font-size-xs);
     padding: 1px 4px;
     border-radius: 3px;
     background: var(--theme-color-bg-3);
@@ -81,7 +81,7 @@
   padding: 14px;
   background: var(--theme-color-bg-1);
   border: 1px solid var(--theme-color-border-default);
-  border-radius: var(--radius-7);
+  border-radius: var(--radius-xl);
 }
 
 .CardHead {
@@ -92,7 +92,7 @@
 }
 
 .CardTitle {
-  font-size: 13px;
+  font-size: var(--font-size-md);
   font-weight: 600;
   color: var(--theme-color-fg-highlight);
   margin: 0;
@@ -101,17 +101,17 @@
 
 .Provenance {
   flex: none;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   line-height: 1.4;
   padding: 2px 7px;
-  border-radius: var(--radius-7);
+  border-radius: var(--radius-md);
   background: var(--theme-color-bg-3);
   color: var(--theme-color-fg-muted);
   white-space: nowrap;
 }
 
 .CardBody {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.5;
   color: var(--theme-color-fg-muted);
   margin: 0;
@@ -134,7 +134,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--theme-color-fg-muted);
 }
 
@@ -147,31 +147,31 @@
 }
 
 .Score {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--theme-color-fg-default);
   margin: 0;
 }
 
 .Feedback {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.5;
   color: var(--theme-color-fg-default);
   margin: 0;
   padding: 8px 10px;
   background: var(--theme-color-bg-2);
-  border-radius: var(--radius-7);
+  border-radius: var(--radius-md);
 }
 
 /* Not-run is not failure. Muted, never the danger colour. */
 .Muted {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   line-height: 1.5;
   color: var(--theme-color-fg-muted);
   margin: 0;
 }
 
 .Warning {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.5;
   color: var(--theme-color-fg-default);
   margin: 0;
@@ -188,10 +188,10 @@
 .Primary,
 .Ghost {
   font-family: var(--font-family);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   line-height: 1.2;
-  border-radius: var(--radius-7);
+  border-radius: var(--radius-md);
   padding: 6px 12px;
   border: 1px solid transparent;
   cursor: pointer;
@@ -238,7 +238,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   background: var(--theme-color-bg-3);
   color: var(--theme-color-fg-muted);
@@ -259,16 +259,16 @@
 }
 
 .Chapter {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--theme-color-fg-muted);
   letter-spacing: 0.01em;
 }
 
 .NextUpChip {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   padding: 2px 7px;
-  border-radius: var(--radius-7);
+  border-radius: var(--radius-full);
   background: var(--theme-color-primary);
   color: var(--theme-color-on-primary);
 }
@@ -284,11 +284,11 @@
   background: var(--theme-color-bg-1);
   border: 1px solid var(--theme-color-border-default);
   border-left: 3px solid var(--theme-color-primary);
-  border-radius: var(--radius-7);
+  border-radius: var(--radius-xl);
 }
 
 .NextUpEyebrow {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -297,14 +297,14 @@
 
 .NextUpTitle {
   font-family: var(--font-family-display);
-  font-size: 15px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--theme-color-fg-highlight);
 }
 
 .NextUpBody {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.55;
   color: var(--theme-color-fg-default);
   max-width: 70ch;
@@ -318,40 +318,3 @@
   margin-bottom: 14px;
 }
 
-/* The same pill `LearnerPathSection`'s intake options use, so the two tabs share a control. */
-.Filter {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: inherit;
-  font-size: 12px;
-  padding: 5px 10px;
-  border-radius: var(--radius-7);
-  border: 1px solid var(--theme-color-border-control);
-  background: var(--theme-color-bg-2);
-  color: var(--theme-color-fg-default);
-  cursor: pointer;
-
-  &:hover {
-    background: var(--theme-color-bg-3);
-  }
-
-  &[aria-pressed='true'] {
-    border-color: var(--theme-color-primary);
-    background: var(--theme-color-bg-3);
-    color: var(--theme-color-fg-highlight);
-    font-weight: 600;
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--theme-color-focus-ring);
-    outline-offset: 2px;
-  }
-}
-
-.FilterCount {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--theme-color-fg-muted);
-  font-variant-numeric: tabular-nums;
-}

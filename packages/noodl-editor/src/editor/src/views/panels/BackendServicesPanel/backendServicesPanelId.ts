@@ -1,17 +1,15 @@
 /**
  * The Backend Services panel's registered id, on its own.
  *
- * It used to live at the bottom of `LocalBackendCard/backendSurfaces.tsx`, which
- * imports all seven surface panels — so anything that merely wants to *link* to
- * Backend Services had to import the whole surface registry, and a surface that
- * wanted to link back (AAQ-011/F11 gave the Data Browser a "Choose a backend"
- * action) would have closed an import cycle through itself.
- *
- * A leaf module with no imports of its own is the fix. `backendSurfaces` re-
- * exports it, so every existing importer is unaffected.
+ * It used to live at the bottom of the card's surface registry, which
+ * imported all eight surface panels — so anything that merely wanted to *link*
+ * to Backend Services had to import the whole surface registry. A leaf module
+ * with no imports of its own was the fix (AAQ-011/F11). BMG-012 removed the
+ * surfaces and the registry; the id stays here because the rail, the lesson
+ * layer and the tutorials still address the panel by it.
  *
  * @module BackendServicesPanel/backendServicesPanelId
  */
 
-/** The panel a backend surface returns to when its own close button is used. */
+/** The Backend Services panel, as the rail registers it. */
 export const BACKEND_SERVICES_PANEL_ID = 'backend-services';

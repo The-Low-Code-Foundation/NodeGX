@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f8b1fb7f-910e-527a-85bc-1b22061346f5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ClosetaskIn",
+      "fromProperty": "rows",
+      "toId": "ClosetaskGuard",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "ClosetaskIn",
+      "fromProperty": "taskId",
+      "toId": "ClosetaskGuard",
+      "toProperty": "in-taskId"
+    },
+    {
+      "fromId": "ClosetaskIn",
+      "fromProperty": "note",
+      "toId": "ClosetaskGuard",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "ClosetaskIn",
+      "fromProperty": "do",
+      "toId": "ClosetaskGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ClosetaskGuard",
+      "fromProperty": "out-status",
+      "toId": "ClosetaskWrite",
+      "toProperty": "prop-status"
+    },
+    {
+      "fromId": "ClosetaskGuard",
+      "fromProperty": "out-note",
+      "toId": "ClosetaskWrite",
+      "toProperty": "prop-closingNote"
+    },
+    {
+      "fromId": "ClosetaskGuard",
+      "fromProperty": "out-at",
+      "toId": "ClosetaskWrite",
+      "toProperty": "prop-closedAt"
+    },
+    {
+      "fromId": "ClosetaskIn",
+      "fromProperty": "taskId",
+      "toId": "ClosetaskWrite",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "ClosetaskGuard",
+      "fromProperty": "out-go",
+      "toId": "ClosetaskWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "ClosetaskIn",
+      "fromProperty": "taskId",
+      "toId": "ClosetaskHistory",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "ClosetaskGuard",
+      "fromProperty": "out-summary",
+      "toId": "ClosetaskHistory",
+      "toProperty": "summary"
+    },
+    {
+      "fromId": "ClosetaskGuard",
+      "fromProperty": "out-note",
+      "toId": "ClosetaskHistory",
+      "toProperty": "body"
+    },
+    {
+      "fromId": "ClosetaskWrite",
+      "fromProperty": "done",
+      "toId": "ClosetaskHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "ClosetaskHistory",
+      "fromProperty": "done",
+      "toId": "ClosetaskOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "ClosetaskWrite",
+      "fromProperty": "failure",
+      "toId": "ClosetaskProblem",
+      "toProperty": "do"
+    }
+  ]
+}

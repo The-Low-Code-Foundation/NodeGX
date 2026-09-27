@@ -1,0 +1,211 @@
+{
+  "align": {
+    "docked": {
+      "width": 312,
+      "before": {
+        "horizontal": {
+          "segments": 3,
+          "chip": null,
+          "gutterConnected": false,
+          "height": 32
+        },
+        "vertical": {
+          "segments": 3,
+          "chip": null,
+          "gutterConnected": false,
+          "height": 32
+        }
+      },
+      "liveChipWithin5s": true,
+      "live": {
+        "horizontal": {
+          "segments": 0,
+          "chip": "Bound to String · Value",
+          "gutterConnected": true,
+          "height": 32
+        },
+        "vertical": {
+          "segments": 3,
+          "chip": null,
+          "gutterConnected": false,
+          "height": 32
+        }
+      },
+      "width2": 312,
+      "reselected": {
+        "horizontal": {
+          "segments": 0,
+          "chip": "Bound to String · Value",
+          "gutterConnected": true,
+          "height": 32
+        },
+        "vertical": {
+          "segments": 3,
+          "chip": null,
+          "gutterConnected": false,
+          "height": 32
+        }
+      },
+      "chipClickSelected": "chr009-s27-src",
+      "unwired": {
+        "horizontal": {
+          "segments": 3,
+          "chip": null,
+          "gutterConnected": false,
+          "height": 32
+        },
+        "vertical": {
+          "segments": 3,
+          "chip": null,
+          "gutterConnected": false,
+          "height": 32
+        }
+      }
+    },
+    "wide": {
+      "width": 736,
+      "before": {
+        "horizontal": {
+          "segments": 3,
+          "chip": null,
+          "gutterConnected": false,
+          "height": 32
+        },
+        "vertical": {
+          "segments": 3,
+          "chip": null,
+          "gutterConnected": false,
+          "height": 32
+        }
+      },
+      "liveChipWithin5s": true,
+      "live": {
+        "horizontal": {
+          "segments": 0,
+          "chip": "Bound to String · Value",
+          "gutterConnected": true,
+          "height": 32
+        },
+        "vertical": {
+          "segments": 3,
+          "chip": null,
+          "gutterConnected": false,
+          "height": 32
+        }
+      },
+      "width2": 736,
+      "reselected": {
+        "horizontal": {
+          "segments": 0,
+          "chip": "Bound to String · Value",
+          "gutterConnected": true,
+          "height": 32
+        },
+        "vertical": {
+          "segments": 3,
+          "chip": null,
+          "gutterConnected": false,
+          "height": 32
+        }
+      },
+      "chipClickSelected": "chr009-s27-src",
+      "unwired": {
+        "horizontal": {
+          "segments": 3,
+          "chip": null,
+          "gutterConnected": false,
+          "height": 32
+        },
+        "vertical": {
+          "segments": 3,
+          "chip": null,
+          "gutterConnected": false,
+          "height": 32
+        }
+      }
+    }
+  },
+  "pair": {
+    "docked": {
+      "width": 312,
+      "fields": [
+        {
+          "title": "Top and bottom padding: var(--space-2)",
+          "text": "--space-2",
+          "cut": true,
+          "field": 61,
+          "value": 43,
+          "need": 69
+        },
+        {
+          "title": "Left and right padding: var(--space-3)",
+          "text": "--space-3",
+          "cut": true,
+          "field": 61,
+          "value": 43,
+          "need": 69
+        }
+      ]
+    },
+    "wide": {
+      "width": 736,
+      "fields": [
+        {
+          "title": "Top and bottom padding: var(--space-2)",
+          "text": "--space-2",
+          "cut": false,
+          "field": 273,
+          "value": 255,
+          "need": 255
+        },
+        {
+          "title": "Left and right padding: var(--space-3)",
+          "text": "--space-3",
+          "cut": false,
+          "field": 273,
+          "value": 255,
+          "need": 255
+        }
+      ]
+    }
+  },
+  "opacity": {
+    "opaque": {
+      "open": true,
+      "inputs": [
+        {
+          "value": "#FBF8F3",
+          "placeholder": "",
+          "color": "rgb(255, 255, 255)",
+          "placeholderShown": false
+        },
+        {
+          "value": "",
+          "placeholder": "100%",
+          "color": "rgb(255, 255, 255)",
+          "placeholderShown": true
+        }
+      ],
+      "model": "#FBF8F3"
+    },
+    "alpha": {
+      "open": true,
+      "inputs": [
+        {
+          "value": "#FBF8F3",
+          "placeholder": "",
+          "color": "rgb(255, 255, 255)",
+          "placeholderShown": false
+        },
+        {
+          "value": "40%",
+          "placeholder": "100%",
+          "color": "rgb(255, 255, 255)",
+          "placeholderShown": false
+        }
+      ],
+      "model": "#FBF8F366"
+    },
+    "restored": "undefined"
+  }
+}

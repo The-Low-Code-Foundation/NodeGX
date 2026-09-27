@@ -1,0 +1,18 @@
+
+> @thelowcodefoundation/repo@1.1.0 validate:project
+> ts-node -P ./scripts/tsconfig.json ./scripts/validate-project.ts templates/digital-bricks-training
+
+# templates/digital-bricks-training
+WARN [unknown-parameter] /Course/Dossier segment › node ds_seg "The objective, as a button" (dbt-lesson.DossierSegment) › input "width": dbt-lesson.DossierSegment has no input port "width", so this parameter is never read.
+WARN [unknown-parameter] /Course/Dossier segment › node ds_seg "The objective, as a button" (dbt-lesson.DossierSegment) › input "sizeMode": dbt-lesson.DossierSegment has no input port "sizeMode", so this parameter is never read.
+WARN [unknown-parameter] /Course/Timeline row › node tr_row "The entry" (dbt-lesson.TimelineRow) › input "width": dbt-lesson.TimelineRow has no input port "width", so this parameter is never read.
+WARN [unknown-parameter] /Course/Timeline row › node tr_row "The entry" (dbt-lesson.TimelineRow) › input "sizeMode": dbt-lesson.TimelineRow has no input port "sizeMode", so this parameter is never read.
+WARN [unknown-parameter] /Course/Trajectory row › node tj_gauge "Where they are against the goal" (dbt-lesson.RatingGauge) › input "width": dbt-lesson.RatingGauge has no input port "width", so this parameter is never read.
+WARN [unknown-parameter] /Course/Trajectory row › node tj_gauge "Where they are against the goal" (dbt-lesson.RatingGauge) › input "sizeMode": dbt-lesson.RatingGauge has no input port "sizeMode", so this parameter is never read.
+WARN [unknown-parameter] /Pages/Course › node cs_pace "Two lines and a horizon" (dbt-lesson.PaceTracker) › input "width": dbt-lesson.PaceTracker has no input port "width", so this parameter is never read.
+WARN [unknown-parameter] /Pages/Course › node cs_pace "Two lines and a horizon" (dbt-lesson.PaceTracker) › input "sizeMode": dbt-lesson.PaceTracker has no input port "sizeMode", so this parameter is never read.
+INFO [oversized-page] /Pages/Course › node cs_page "Course" (Page): This page's own graph is 50 nodes. Above about 40 a page has usually inlined sections that wanted to be components of their own — a page reads best as a handful of section instances. A component instance counts as one node here, so factoring a section out is a real reduction, not a rename.
+INFO [oversized-page] /Pages/Learner › node lr_page "Learner" (Page): This page's own graph is 58 nodes. Above about 40 a page has usually inlined sections that wanted to be components of their own — a page reads best as a handful of section instances. A component instance counts as one node here, so factoring a section out is a real reduction, not a rename.
+
+0 error(s), 8 warning(s), 2 info — 372 nodes, 854 endpoints checked
+

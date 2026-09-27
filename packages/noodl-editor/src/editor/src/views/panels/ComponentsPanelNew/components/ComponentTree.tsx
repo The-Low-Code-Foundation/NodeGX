@@ -6,9 +6,10 @@
 
 import React from 'react';
 
-import { Sheet, TreeNode } from '../types';
+import { TreeNode } from '../types';
 import { ComponentItem } from './ComponentItem';
 import { FolderItem } from './FolderItem';
+import { SectionHeader } from './SectionHeader';
 
 interface ComponentTreeProps {
   nodes: TreeNode[];
@@ -16,7 +17,8 @@ interface ComponentTreeProps {
   onItemClick: (node: TreeNode) => void;
   onCaretClick: (folderId: string) => void;
   expandedFolders: Set<string>;
-  selectedId?: string;
+  /** TVW-001 (a): the component the canvas shows — the only thing a row highlights for. */
+  activeComponentName?: string;
   onMakeHome?: (node: TreeNode) => void;
   onDelete?: (node: TreeNode) => void;
   onDuplicate?: (node: TreeNode) => void;
@@ -27,8 +29,6 @@ interface ComponentTreeProps {
   canAcceptDrop?: (node: TreeNode) => boolean;
   onAddComponent?: (template: TSFixme, parentPath?: string) => void;
   onAddFolder?: (parentPath?: string) => void;
-  /** Switch to the Cloud Functions sheet, offered from a folder row's create menu. */
-  onGoToCloudSheet?: () => void;
   // Rename mode props
   renamingItem?: TreeNode | null;
   renameValue?: string;
@@ -36,9 +36,6 @@ interface ComponentTreeProps {
   onRenameConfirm?: () => void;
   onRenameCancel?: () => void;
   onDoubleClick?: (node: TreeNode) => void;
-  // Sheet management props
-  sheets?: Sheet[];
-  onMoveToSheet?: (componentPath: string, sheet: Sheet) => void;
   /**
    * PNL-006 — rows that matched the filter themselves. Anything rendered while
    * this is non-null and *not* in it is ancestry kept for context, and is
@@ -46,16 +43,10 @@ interface ComponentTreeProps {
    */
   matched?: Set<string> | null;
   /**
-   * WFA-001 — which runtime the create menus author for. Derived from the
-   * selected sheet by `ComponentsPanel`; `'cloud'` only on the Cloud Functions
-   * sheet.
+   * WFA-001 — which runtime the create menus author for. TVW-001 (e): it comes from the section a
+   * row sits under, not from a selected sheet; `'cloud'` only inside `Cloud functions`.
    */
   runtimeType?: 'browser' | 'cloud';
-  /**
-   * SPR-005 — the sheet in force, by the name a user sees. Passed to every row's
-   * create menu so it can say where a new component will land before the click.
-   */
-  sheetName?: string;
 }
 
 export function ComponentTree({
@@ -64,7 +55,7 @@ export function ComponentTree({
   onItemClick,
   onCaretClick,
   expandedFolders,
-  selectedId,
+  activeComponentName,
   onMakeHome,
   onDelete,
   onDuplicate,
@@ -75,22 +66,57 @@ export function ComponentTree({
   canAcceptDrop,
   onAddComponent,
   onAddFolder,
-  onGoToCloudSheet,
   renamingItem,
   renameValue,
   onRenameChange,
   onRenameConfirm,
   onRenameCancel,
   onDoubleClick,
-  sheets,
-  onMoveToSheet,
   matched = null,
   runtimeType = 'browser',
-  sheetName
 }: ComponentTreeProps) {
   return (
     <>
       {nodes.map((node) => {
+        /* TVW-001 (d): a section is a heading over rows at the same depth — it adds no indent, and
+           the rows under it author for the section's runtime (the cloud section's create menus make
+           cloud components). */
+        if (node.type === 'section') {
+          return (
+            <React.Fragment key={`section:${node.data.id}`}>
+              <SectionHeader section={node.data} />
+              {node.data.children.length > 0 && (
+                <ComponentTree
+                  nodes={node.data.children}
+                  level={level}
+                  onItemClick={onItemClick}
+                  onCaretClick={onCaretClick}
+                  expandedFolders={expandedFolders}
+                  activeComponentName={activeComponentName}
+                  onMakeHome={onMakeHome}
+                  onDelete={onDelete}
+                  onDuplicate={onDuplicate}
+                  onRename={onRename}
+                  onOpen={onOpen}
+                  onDragStart={onDragStart}
+                  onDrop={onDrop}
+                  canAcceptDrop={canAcceptDrop}
+                  onAddComponent={onAddComponent}
+                  onAddFolder={onAddFolder}
+                  renamingItem={renamingItem}
+                  renameValue={renameValue}
+                  onRenameChange={onRenameChange}
+                  onRenameConfirm={onRenameConfirm}
+                  onRenameCancel={onRenameCancel}
+                  onDoubleClick={onDoubleClick}
+                  matched={matched}
+                  runtimeType={node.data.runtimeType}
+                />
+              )}
+            </React.Fragment>
+          );
+        }
+
         const id = node.type === 'component' ? node.data.name : node.data.path;
         const isDimmed = matched !== null && !matched.has(id);
 
@@ -107,7 +133,7 @@ export function ComponentTree({
               folder={node.data}
               level={level}
               isExpanded={expandedFolders.has(node.data.path)}
-              isSelected={selectedId === node.data.path}
+              isSelected={!!node.data.component && node.data.component.name === activeComponentName}
               onCaretClick={() => onCaretClick(node.data.path)}
               onClick={() => onItemClick(node)}
               onDelete={onDelete}
@@ -118,20 +144,16 @@ export function ComponentTree({
               onDoubleClick={onDoubleClick}
               onAddComponent={onAddComponent}
               onAddFolder={onAddFolder}
-              onGoToCloudSheet={onGoToCloudSheet}
               isRenaming={isRenaming}
               renameValue={renameValue}
               onRenameChange={onRenameChange}
               onRenameConfirm={onRenameConfirm}
               onRenameCancel={onRenameCancel}
-              sheets={sheets}
-              onMoveToSheet={onMoveToSheet}
               onOpen={onOpen}
               onMakeHome={onMakeHome}
               onDuplicate={onDuplicate}
               isDimmed={isDimmed}
               runtimeType={runtimeType}
-              sheetName={sheetName}
             >
               {expandedFolders.has(node.data.path) && node.data.children.length > 0 && (
                 <ComponentTree
@@ -140,7 +162,7 @@ export function ComponentTree({
                   onItemClick={onItemClick}
                   onCaretClick={onCaretClick}
                   expandedFolders={expandedFolders}
-                  selectedId={selectedId}
+                  activeComponentName={activeComponentName}
                   onMakeHome={onMakeHome}
                   onDelete={onDelete}
                   onDuplicate={onDuplicate}
@@ -151,18 +173,14 @@ export function ComponentTree({
                   canAcceptDrop={canAcceptDrop}
                   onAddComponent={onAddComponent}
                   onAddFolder={onAddFolder}
-                  onGoToCloudSheet={onGoToCloudSheet}
                   renamingItem={renamingItem}
                   renameValue={renameValue}
                   onRenameChange={onRenameChange}
                   onRenameConfirm={onRenameConfirm}
                   onRenameCancel={onRenameCancel}
                   onDoubleClick={onDoubleClick}
-                  sheets={sheets}
-                  onMoveToSheet={onMoveToSheet}
                   matched={matched}
                   runtimeType={runtimeType}
-              sheetName={sheetName}
                 />
               )}
             </FolderItem>
@@ -170,10 +188,25 @@ export function ComponentTree({
         } else {
           return (
             <ComponentItem
-              key={node.data.id}
+              // HLT-003 — total, so the key cannot silently become `undefined`.
+              //
+              // React logged *"Each child in a list should have a unique `key`
+              // prop … Check the render method of `ComponentTree`"* on
+              // 2026-09-20 14:19, and every branch of this map already passed a
+              // key — which is the tell: `key={undefined}` is reported as a
+              // *missing* key, not a bad one. No component in the drive corpus
+              // is missing `id`, so the row that produced it is not reproducible
+              // here and the sighting is recorded rather than claimed fixed.
+              //
+              // `name` is the fallback because it is the other identity this
+              // component already trusts: line ~119 uses it as the match id and
+              // `isSelected` compares it to `activeComponentName`. Not an index,
+              // which would silence React and lose the row's identity across a
+              // reorder.
+              key={node.data.id ?? node.data.name}
               component={node.data}
               level={level}
-              isSelected={selectedId === node.data.name}
+              isSelected={node.data.name === activeComponentName}
               onClick={() => onItemClick(node)}
               onMakeHome={onMakeHome}
               onDelete={onDelete}
@@ -191,11 +224,8 @@ export function ComponentTree({
               onRenameChange={onRenameChange}
               onRenameConfirm={onRenameConfirm}
               onRenameCancel={onRenameCancel}
-              sheets={sheets}
-              onMoveToSheet={onMoveToSheet}
               isDimmed={isDimmed}
               runtimeType={runtimeType}
-              sheetName={sheetName}
             />
           );
         }

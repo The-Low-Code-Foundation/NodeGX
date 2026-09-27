@@ -118,7 +118,10 @@ export function analyzeSource(sourceDir: string): Promise<AnalyzedSource> {
       } catch (err) {
         reject(err instanceof Error ? err : new Error(String(err)));
       }
-    });
+      // P100 UPG-003: read the source as it is on disk. Converted, its nodes would name tokens
+      // this project does not define; unconverted, its text styles travel with the parts, and this
+      // project converts them the next time it opens.
+    }, { upgradeOnLoad: false });
   });
 }
 

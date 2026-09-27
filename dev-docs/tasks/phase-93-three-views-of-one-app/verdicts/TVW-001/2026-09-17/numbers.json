@@ -1,0 +1,84 @@
+{
+  "task": "TVW-001",
+  "criterion": "AC7",
+  "date": "2026-09-17",
+  "panelWidths": {
+    "wide": 300,
+    "narrow": 240,
+    "minPanelWidthConstant": 240
+  },
+  "metaAlignment": {
+    "at240": {
+      "everyMetaRightEdgePx": 258,
+      "rowsChecked": 9,
+      "includesWarningDotRow": true
+    },
+    "reading": "s8's alignment fix holds; the s1 dot-slot shift is gone."
+  },
+  "homeRowAt240Corpus": {
+    "labelAllottedPx": 19,
+    "labelNeededPx": 33,
+    "labelRendered": "H…",
+    "startChipPx": 26,
+    "routeMetaPx": 88,
+    "routeMetaClipped": true,
+    "routeChars": 57,
+    "reading": "The page's NAME loses its row to a machine-derived URL that is itself unreadable."
+  },
+  "routeTruthfulness": {
+    "chipUrlBodyChars": 4892,
+    "nonsensePathBodyChars": 0,
+    "reading": "The chip names a URL the app really serves; the nonsense-path control excludes a catch-all router."
+  },
+  "benchCaption": {
+    "atPanel300": {
+      "availablePx": 451,
+      "neededPx": 451,
+      "truncated": false
+    },
+    "atPanel646": {
+      "availablePx": 105,
+      "neededPx": 330,
+      "truncated": true,
+      "rendered": "Workbench — Filt…"
+    },
+    "reading": "Cannot wrap (nowrap+ellipsis) and is the only flex-shrinkable item in the strip, so the disclaimer is the first thing dropped."
+  },
+  "usedInPopover": {
+    "fixture": "/Components/Logic/Scroll to section",
+    "instances": 8,
+    "parents": 3,
+    "perParent": {
+      "Sections/Hero": 2,
+      "Sections/SiteFooter": 1,
+      "Sections/SiteNav": 5
+    },
+    "heading": "Used in 3 places · 8 times",
+    "rowHeightWithCountPx": 51,
+    "rowHeightWithoutCountPx": 29,
+    "reading": "Confirms the recorded unevenness and gives it a number."
+  },
+  "sectionCounts": {
+    "corpus": {
+      "PAGES": 1,
+      "COMPONENTS": 22,
+      "LOGIC": 2,
+      "CLOUD FUNCTIONS": 0
+    },
+    "cloud": {
+      "PAGES": 3,
+      "COMPONENTS": 16,
+      "LOGIC": 4,
+      "CLOUD FUNCTIONS": 1
+    }
+  },
+  "cloudFixtureAt240": {
+    "anyTruncation": false,
+    "routes": [
+      "/home",
+      "/catalog",
+      "/settings"
+    ],
+    "reading": "The control that shows the corpus clipping is the long route, not the 240px width."
+  }
+}

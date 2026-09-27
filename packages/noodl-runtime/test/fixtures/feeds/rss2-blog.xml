@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- FED-001 fixture: RSS 2.0 as a self-hosted blog emits it. Synthetic, not captured. -->
+<rss version="2.0"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/"
+     xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>The Slow Web</title>
+    <link>https://slowweb.example/</link>
+    <description>Essays about building software that lasts</description>
+    <lastBuildDate>Tue, 15 Sep 2026 09:00:00 +0000</lastBuildDate>
+    <item>
+      <title>What a feed reader owes you</title>
+      <link>https://slowweb.example/posts/what-a-feed-reader-owes-you</link>
+      <guid isPermaLink="false">slowweb-0031</guid>
+      <pubDate>Mon, 14 Sep 2026 08:30:00 +0000</pubDate>
+      <dc:creator>A. Writer</dc:creator>
+      <category>feeds</category>
+      <category>design</category>
+      <description>A reader should tell you what is new and then get out of the way.</description>
+      <content:encoded><![CDATA[<p>A reader should tell you what is <em>new</em> &amp; then get out of the way.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Against the infinite scroll</title>
+      <link>https://slowweb.example/posts/against-the-infinite-scroll</link>
+      <guid isPermaLink="false">slowweb-0030</guid>
+      <pubDate>Fri, 11 Sep 2026 17:05:00 GMT</pubDate>
+      <dc:creator>A. Writer</dc:creator>
+      <description>An end is a feature.</description>
+    </item>
+    <item>
+      <title>Notes on RFC 822 &amp; friends</title>
+      <link>https://slowweb.example/posts/notes-on-rfc-822</link>
+      <guid isPermaLink="false">slowweb-0029</guid>
+      <pubDate>Wed, 09 Sep 2026 06:00:00 -0400</pubDate>
+      <description>Dates in feeds are a small disaster.</description>
+    </item>
+  </channel>
+</rss>

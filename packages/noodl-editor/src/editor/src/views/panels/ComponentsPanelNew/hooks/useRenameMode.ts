@@ -23,6 +23,7 @@ export function useRenameMode() {
    * Start rename mode for an item
    */
   const startRename = useCallback((item: TreeNode) => {
+    if (item.type === 'section') return; // TVW-001 (d): a heading, not a name on disk.
     setRenamingItem(item);
 
     // Set initial value based on item type

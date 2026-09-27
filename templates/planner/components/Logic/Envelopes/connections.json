@@ -1,0 +1,163 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "64d01105-c2ee-54b5-8a1c-0c1622895871",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "enIn",
+      "fromProperty": "projects",
+      "toId": "enWork",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "enIn",
+      "fromProperty": "blocks",
+      "toId": "enWork",
+      "toProperty": "in-blocks"
+    },
+    {
+      "fromId": "enIn",
+      "fromProperty": "monthPlans",
+      "toId": "enWork",
+      "toProperty": "in-monthPlans"
+    },
+    {
+      "fromId": "enIn",
+      "fromProperty": "settings",
+      "toId": "enWork",
+      "toProperty": "in-settings"
+    },
+    {
+      "fromId": "enIn",
+      "fromProperty": "weekStart",
+      "toId": "enWork",
+      "toProperty": "in-weekStart"
+    },
+    {
+      "fromId": "enIn",
+      "fromProperty": "targetHours",
+      "toId": "enWork",
+      "toProperty": "in-targetHours"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-rows",
+      "toId": "enOut",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-target",
+      "toId": "enOut",
+      "toProperty": "target"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-billableUsed",
+      "toId": "enOut",
+      "toProperty": "billableUsed"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-billableLeft",
+      "toId": "enOut",
+      "toProperty": "billableLeft"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-perDay",
+      "toId": "enOut",
+      "toProperty": "perDay"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-buildingLeft",
+      "toId": "enOut",
+      "toProperty": "buildingLeft"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-daysLeft",
+      "toId": "enOut",
+      "toProperty": "daysLeft"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-focusHours",
+      "toId": "enOut",
+      "toProperty": "focusHours"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-hasPlan",
+      "toId": "enOut",
+      "toProperty": "hasPlan"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-planLine",
+      "toId": "enOut",
+      "toProperty": "planLine"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-workingDaysInMonth",
+      "toId": "enOut",
+      "toProperty": "workingDaysInMonth"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-capacityHours",
+      "toId": "enOut",
+      "toProperty": "capacityHours"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-recBuilding",
+      "toId": "enOut",
+      "toProperty": "recBuilding"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-recAdmin",
+      "toId": "enOut",
+      "toProperty": "recAdmin"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-recHobby",
+      "toId": "enOut",
+      "toProperty": "recHobby"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-recBuildingLine",
+      "toId": "enOut",
+      "toProperty": "recBuildingLine"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-recAdminLine",
+      "toId": "enOut",
+      "toProperty": "recAdminLine"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-recHobbyLine",
+      "toId": "enOut",
+      "toProperty": "recHobbyLine"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-recLabel",
+      "toId": "enOut",
+      "toProperty": "recLabel"
+    },
+    {
+      "fromId": "enWork",
+      "fromProperty": "out-guardConcern",
+      "toId": "enOut",
+      "toProperty": "guardConcern"
+    }
+  ]
+}

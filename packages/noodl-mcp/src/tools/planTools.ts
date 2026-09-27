@@ -276,6 +276,34 @@ function plannedComponentNames(plan: ServerPlan): string[] {
 }
 
 /**
+ * AAQ-003 — the project settings a plan asks `apply_plan` to write. The write and
+ * the check below both read this, so they cannot come to disagree about it.
+ */
+function planSettings(plan: ServerPlan['plan']): Record<string, unknown> {
+  return plan.scroll !== undefined ? { bodyScroll: plan.scroll === 'page' } : {};
+}
+
+/**
+ * GAM-021 — `bodyScroll` as this plan's apply will leave it: the project's own
+ * value if it has one (a setting is never overwritten), otherwise the plan's.
+ *
+ * `page-cannot-scroll` used to read the disk alone, so a plan saying
+ * `scroll: "page"` was warned, on every page and again at apply, that the app
+ * cannot scroll — immediately before the same apply wrote `bodyScroll: true`.
+ * A plan with no `scroll` resolves to the disk's `null` and is still told.
+ * Independent of which operations are skipped: the settings write is too.
+ */
+function bodyScrollAfterApply(store: ProjectStore, plan: ServerPlan): boolean | null {
+  try {
+    const value = store.projectSettingsAfterWrite(planSettings(plan.plan)).settings.bodyScroll;
+    return typeof value === 'boolean' ? value : null;
+  } catch {
+    // No readable project file: the same `null` `projectBodyScroll` reads, and the apply's write would refuse.
+    return null;
+  }
+}
+
+/**
  * The plan's staged candidates keyed by legacy name — what the precondition
  * checks must see as "the project", so a page staged in this plan resolves as a
  * navigation target before anything exists on disk.
@@ -453,7 +481,10 @@ function validateStaged(
     ...report.diagnostics,
     // DEF-013 — the plan's declared siblings resolve as names. See
     // `plannedComponentNames`.
-    ...preconditionDiagnostics(store, legacyName, candidate, views, plannedComponentNames(plan))
+    ...preconditionDiagnostics(store, legacyName, candidate, views, plannedComponentNames(plan), {
+      // GAM-021 — judged against the setting this plan's apply will leave, not the one on disk now.
+      bodyScroll: bodyScrollAfterApply(store, plan)
+    })
   ]);
   let errors = diagnostics.filter(isBlockingForAuthoredOutput);
 
@@ -478,7 +509,9 @@ function validateStaged(
     const baselineViews = authoredProjectViews(store, stagedOverlay(plan, { opId: operation.id, files: baseline }));
     const baselineDiagnostics = [
       ...baselineReport.diagnostics,
-      ...preconditionDiagnostics(store, legacyName, baseline, baselineViews, plannedComponentNames(plan))
+      ...preconditionDiagnostics(store, legacyName, baseline, baselineViews, plannedComponentNames(plan), {
+        bodyScroll: bodyScrollAfterApply(store, plan)
+      })
     ];
     const preexisting = new Set(baselineDiagnostics.filter(isBlockingForAuthoredOutput).map(diagnosticKey));
     errors = errors.filter((d) => !preexisting.has(diagnosticKey(d)));
@@ -1035,10 +1068,9 @@ export function registerPlanTools(
       // beside registration: a page that cannot scroll is as unreachable as a
       // page nobody routed. Only when the plan said so, and only when the
       // project has not already decided.
+      const requestedSettings = planSettings(serverPlan.plan);
       const settingsWritten =
-        serverPlan.plan.scroll !== undefined
-          ? store.writeProjectSettings({ bodyScroll: serverPlan.plan.scroll === 'page' })
-          : [];
+        Object.keys(requestedSettings).length > 0 ? store.writeProjectSettings(requestedSettings) : [];
 
       const docsWritten: Array<{ operation: string; path: string }> = [];
       for (const op of docOps) {

@@ -1,0 +1,19 @@
+/* The finding, as a proposal: every property-panel field edge moves from `border-default`
+   (1.26:1 against the panel ground, both themes) to `border-control` (3.72:1 light / 4.51:1 dark)
+   — the token NAT-001 ruled for a control edge and already grades at 3:1.
+
+   Applied over the running app with the look gate's `--arm`, so the pair below is a picture of the
+   choice with no compile and no commit. It is NOT a fix: the real change is in the field
+   components' own stylesheets. */
+.sidebar-property-editor input[class*='PropertyPanelBaseInput-module__Root'],
+.sidebar-property-editor textarea[class*='PropertyPanelTextArea-module__Root'],
+.sidebar-property-editor [class*='PropertyPanelSelectInput-module__Root'],
+.sidebar-property-editor [class*='NumberUnitInput-module__Field'],
+.sidebar-property-editor button[class*='NumberUnitInput-module__Fixed'],
+.sidebar-property-editor button[class*='ColorInput-module__Swatch'],
+.sidebar-property-editor [class*='IconInput-module__IconField'],
+.sidebar-property-editor button[class*='VariantSelector-trigger'],
+.sidebar-property-editor button.panel-head-row-field,
+.sidebar-property-editor button.property-codeeditor-button {
+  border-color: var(--theme-color-border-control) !important;
+}

@@ -1,0 +1,96 @@
+{
+  "expect": "0",
+  "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/HLT-002 Thumbnail Drive",
+  "arms": [
+    {
+      "name": "the editor bundle is reachable (__wreq pushed)",
+      "ok": true,
+      "detail": "true"
+    },
+    {
+      "name": "the instrument is armed before a single action is driven",
+      "ok": true,
+      "detail": "armed"
+    },
+    {
+      "name": "the RUNNING bundle carries the seam this run means to grade (--expect 0)",
+      "ok": true,
+      "detail": "GUARDED"
+    },
+    {
+      "name": "the driven project is the copy this drive names",
+      "ok": true,
+      "detail": "/Users/richardosborne/vscode_projects/NodeGX test projects/HLT-002 Thumbnail Drive"
+    },
+    {
+      "name": "no dev-server error overlay is covering the window",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "name": "the capturePage counter is armed — the deterministic half of the control",
+      "ok": true,
+      "detail": "armed"
+    },
+    {
+      "name": "the project has components to drive",
+      "ok": true,
+      "detail": "6 components"
+    },
+    {
+      "name": "phase A really is the app preview — the mode is read, not assumed",
+      "ok": true,
+      "detail": "ok → app"
+    },
+    {
+      "name": "🔴 the capture SUCCEEDS while the app preview is showing — the feature works, here, in this run",
+      "ok": true,
+      "detail": "2 successful captures, 0 failed"
+    },
+    {
+      "name": "🔴 in bench mode the app webview is STILL ATTACHED but NOT VISIBLE — the state the guard cannot see",
+      "ok": true,
+      "detail": "mode=bench isConnected=true visible=false ok"
+    },
+    {
+      "name": "the drive REALLY ENTERED board mode — the board is mounted, not merely \"something is hidden\"",
+      "ok": true,
+      "detail": "ok → board"
+    },
+    {
+      "name": "🔴 the guarded build calls capturePage ZERO times while the stage is hidden, having still ticked",
+      "ok": true,
+      "detail": "0 calls across 3 ticks"
+    },
+    {
+      "name": "the drive REALLY RETURNED to the app preview — the stage is showing again",
+      "ok": true,
+      "detail": "ok → app"
+    },
+    {
+      "name": "AC3 — the capture still SUCCEEDS once the app preview is showing again (the control, in this run)",
+      "ok": true,
+      "detail": "2 → 4 successful captures"
+    },
+    {
+      "name": "🔴 the drive REACHED the capture — it ran on the timer during this session",
+      "ok": true,
+      "detail": "56 attempts"
+    },
+    {
+      "name": "AC1 — the driven session logs ZERO UnknownVizError rejections",
+      "ok": true,
+      "detail": "0 rejections"
+    },
+    {
+      "name": "and the log written since this drive began carries none either",
+      "ok": true,
+      "detail": "0 log lines"
+    },
+    {
+      "name": "AC4 — the cure is not a move: no console.error carries it either",
+      "ok": true,
+      "detail": "0 console errors"
+    }
+  ]
+}

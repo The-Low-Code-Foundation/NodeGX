@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "p1c7u2ed-e5c0-4000-8000-000000000005",
+  "name": "MemberCard",
+  "path": "/Components/MemberCard",
+  "type": "visual",
+  "created": "2026-09-12T09:00:00.000Z",
+  "modified": "2026-09-12T09:00:00.000Z"
+}

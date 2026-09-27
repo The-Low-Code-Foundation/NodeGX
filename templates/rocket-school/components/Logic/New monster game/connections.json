@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5e8619ec-82e1-57b3-89d3-0ee9cfe13c1f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "newmonstergaIn",
+      "fromProperty": "style",
+      "toId": "newmonstergaFn",
+      "toProperty": "in-style"
+    },
+    {
+      "fromId": "newmonstergaIn",
+      "fromProperty": "timed",
+      "toId": "newmonstergaFn",
+      "toProperty": "in-timed"
+    },
+    {
+      "fromId": "newmonstergaIn",
+      "fromProperty": "run",
+      "toId": "newmonstergaFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "newmonstergaFn",
+      "fromProperty": "out-game",
+      "toId": "newmonstergaOut",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "newmonstergaFn",
+      "fromProperty": "out-id",
+      "toId": "newmonstergaOut",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "newmonstergaFn",
+      "fromProperty": "out-timeScale",
+      "toId": "newmonstergaOut",
+      "toProperty": "timeScale"
+    },
+    {
+      "fromId": "newmonstergaFn",
+      "fromProperty": "success",
+      "toId": "newmonstergaOut",
+      "toProperty": "done"
+    }
+  ]
+}

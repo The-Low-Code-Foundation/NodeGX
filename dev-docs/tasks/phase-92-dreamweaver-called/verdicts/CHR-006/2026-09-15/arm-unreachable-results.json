@@ -1,0 +1,402 @@
+{
+  "arm-unreachable-templates-1368x900-dark-top": {
+    "viewport": [
+      1368,
+      900
+    ],
+    "theme": "dark",
+    "titleText": "Templates",
+    "state": {
+      "loading": false,
+      "unreadable": true,
+      "bare": false,
+      "partialNotice": true
+    },
+    "gridLayout": "feature",
+    "gridColumns": "173.328px 173.328px 173.328px 173.328px 173.328px 173.328px",
+    "rows": [
+      {
+        "y": 285,
+        "cards": 2,
+        "widths": [
+          552,
+          552
+        ]
+      }
+    ],
+    "cards": [
+      {
+        "rect": {
+          "x": 120,
+          "y": 285,
+          "w": 552,
+          "h": 481
+        },
+        "eyebrow": "Site · 3 pages",
+        "title": "Landing Pages",
+        "sentence": "Three complete landing pages with no backend — a freelancer’",
+        "footer": "Use this template → No backend Built in",
+        "picture": {
+          "src": "../assets/images/templates/landing-pages.webp",
+          "hidden": false,
+          "complete": true,
+          "natural": [
+            1200,
+            750
+          ],
+          "objectPosition": "50% 0%",
+          "objectFit": "cover"
+        },
+        "contrast": {
+          "eyebrow": 5.6,
+          "title": 14.71,
+          "sentence": 9.24,
+          "action": 5.6,
+          "tags": [
+            {
+              "text": "No backend",
+              "ratio": 9.24
+            },
+            {
+              "text": "Built in",
+              "ratio": 9.24
+            }
+          ]
+        }
+      },
+      {
+        "rect": {
+          "x": 688,
+          "y": 285,
+          "w": 552,
+          "h": 481
+        },
+        "eyebrow": "Site",
+        "title": "Site Builder",
+        "sentence": "A content-managed website: pages and sections stored as reco",
+        "footer": "Use this template → Needs a backend Built in",
+        "picture": "wireframe",
+        "contrast": {
+          "eyebrow": 5.6,
+          "title": 14.71,
+          "sentence": 9.24,
+          "action": 5.6,
+          "tags": [
+            {
+              "text": "Needs a backend",
+              "ratio": 9.24
+            },
+            {
+              "text": "Built in",
+              "ratio": 9.24
+            }
+          ]
+        }
+      }
+    ],
+    "thumbnailRequests": [],
+    "kittenRequests": [],
+    "documentScrollsSideways": false,
+    "contentScrollsSideways": false
+  },
+  "arm-unreachable-templates-1368x900-dark-bottom": {
+    "viewport": [
+      1368,
+      900
+    ],
+    "theme": "dark",
+    "titleText": "Templates",
+    "state": {
+      "loading": false,
+      "unreadable": true,
+      "bare": false,
+      "partialNotice": true
+    },
+    "gridLayout": "feature",
+    "gridColumns": "173.328px 173.328px 173.328px 173.328px 173.328px 173.328px",
+    "rows": [
+      {
+        "y": 285,
+        "cards": 2,
+        "widths": [
+          552,
+          552
+        ]
+      }
+    ],
+    "cards": [
+      {
+        "rect": {
+          "x": 120,
+          "y": 285,
+          "w": 552,
+          "h": 481
+        },
+        "eyebrow": "Site · 3 pages",
+        "title": "Landing Pages",
+        "sentence": "Three complete landing pages with no backend — a freelancer’",
+        "footer": "Use this template → No backend Built in",
+        "picture": {
+          "src": "../assets/images/templates/landing-pages.webp",
+          "hidden": false,
+          "complete": true,
+          "natural": [
+            1200,
+            750
+          ],
+          "objectPosition": "50% 0%",
+          "objectFit": "cover"
+        },
+        "contrast": {
+          "eyebrow": 5.6,
+          "title": 14.71,
+          "sentence": 9.24,
+          "action": 5.6,
+          "tags": [
+            {
+              "text": "No backend",
+              "ratio": 9.24
+            },
+            {
+              "text": "Built in",
+              "ratio": 9.24
+            }
+          ]
+        }
+      },
+      {
+        "rect": {
+          "x": 688,
+          "y": 285,
+          "w": 552,
+          "h": 481
+        },
+        "eyebrow": "Site",
+        "title": "Site Builder",
+        "sentence": "A content-managed website: pages and sections stored as reco",
+        "footer": "Use this template → Needs a backend Built in",
+        "picture": "wireframe",
+        "contrast": {
+          "eyebrow": 5.6,
+          "title": 14.71,
+          "sentence": 9.24,
+          "action": 5.6,
+          "tags": [
+            {
+              "text": "Needs a backend",
+              "ratio": 9.24
+            },
+            {
+              "text": "Built in",
+              "ratio": 9.24
+            }
+          ]
+        }
+      }
+    ],
+    "thumbnailRequests": [],
+    "kittenRequests": [],
+    "documentScrollsSideways": false,
+    "contentScrollsSideways": false
+  },
+  "arm-unreachable-templates-1368x900-light-top": {
+    "viewport": [
+      1368,
+      900
+    ],
+    "theme": "light",
+    "titleText": "Templates",
+    "state": {
+      "loading": false,
+      "unreadable": true,
+      "bare": false,
+      "partialNotice": true
+    },
+    "gridLayout": "feature",
+    "gridColumns": "173.328px 173.328px 173.328px 173.328px 173.328px 173.328px",
+    "rows": [
+      {
+        "y": 285,
+        "cards": 2,
+        "widths": [
+          552,
+          552
+        ]
+      }
+    ],
+    "cards": [
+      {
+        "rect": {
+          "x": 120,
+          "y": 285,
+          "w": 552,
+          "h": 481
+        },
+        "eyebrow": "Site · 3 pages",
+        "title": "Landing Pages",
+        "sentence": "Three complete landing pages with no backend — a freelancer’",
+        "footer": "Use this template → No backend Built in",
+        "picture": {
+          "src": "../assets/images/templates/landing-pages.webp",
+          "hidden": false,
+          "complete": true,
+          "natural": [
+            1200,
+            750
+          ],
+          "objectPosition": "50% 0%",
+          "objectFit": "cover"
+        },
+        "contrast": {
+          "eyebrow": 4.57,
+          "title": 16.26,
+          "sentence": 6.18,
+          "action": 4.57,
+          "tags": [
+            {
+              "text": "No backend",
+              "ratio": 6.18
+            },
+            {
+              "text": "Built in",
+              "ratio": 6.18
+            }
+          ]
+        }
+      },
+      {
+        "rect": {
+          "x": 688,
+          "y": 285,
+          "w": 552,
+          "h": 481
+        },
+        "eyebrow": "Site",
+        "title": "Site Builder",
+        "sentence": "A content-managed website: pages and sections stored as reco",
+        "footer": "Use this template → Needs a backend Built in",
+        "picture": "wireframe",
+        "contrast": {
+          "eyebrow": 4.57,
+          "title": 16.26,
+          "sentence": 6.18,
+          "action": 4.57,
+          "tags": [
+            {
+              "text": "Needs a backend",
+              "ratio": 6.18
+            },
+            {
+              "text": "Built in",
+              "ratio": 6.18
+            }
+          ]
+        }
+      }
+    ],
+    "thumbnailRequests": [],
+    "kittenRequests": [],
+    "documentScrollsSideways": false,
+    "contentScrollsSideways": false
+  },
+  "arm-unreachable-templates-1368x900-light-bottom": {
+    "viewport": [
+      1368,
+      900
+    ],
+    "theme": "light",
+    "titleText": "Templates",
+    "state": {
+      "loading": false,
+      "unreadable": true,
+      "bare": false,
+      "partialNotice": true
+    },
+    "gridLayout": "feature",
+    "gridColumns": "173.328px 173.328px 173.328px 173.328px 173.328px 173.328px",
+    "rows": [
+      {
+        "y": 285,
+        "cards": 2,
+        "widths": [
+          552,
+          552
+        ]
+      }
+    ],
+    "cards": [
+      {
+        "rect": {
+          "x": 120,
+          "y": 285,
+          "w": 552,
+          "h": 481
+        },
+        "eyebrow": "Site · 3 pages",
+        "title": "Landing Pages",
+        "sentence": "Three complete landing pages with no backend — a freelancer’",
+        "footer": "Use this template → No backend Built in",
+        "picture": {
+          "src": "../assets/images/templates/landing-pages.webp",
+          "hidden": false,
+          "complete": true,
+          "natural": [
+            1200,
+            750
+          ],
+          "objectPosition": "50% 0%",
+          "objectFit": "cover"
+        },
+        "contrast": {
+          "eyebrow": 4.57,
+          "title": 16.26,
+          "sentence": 6.18,
+          "action": 4.57,
+          "tags": [
+            {
+              "text": "No backend",
+              "ratio": 6.18
+            },
+            {
+              "text": "Built in",
+              "ratio": 6.18
+            }
+          ]
+        }
+      },
+      {
+        "rect": {
+          "x": 688,
+          "y": 285,
+          "w": 552,
+          "h": 481
+        },
+        "eyebrow": "Site",
+        "title": "Site Builder",
+        "sentence": "A content-managed website: pages and sections stored as reco",
+        "footer": "Use this template → Needs a backend Built in",
+        "picture": "wireframe",
+        "contrast": {
+          "eyebrow": 4.57,
+          "title": 16.26,
+          "sentence": 6.18,
+          "action": 4.57,
+          "tags": [
+            {
+              "text": "Needs a backend",
+              "ratio": 6.18
+            },
+            {
+              "text": "Built in",
+              "ratio": 6.18
+            }
+          ]
+        }
+      }
+    ],
+    "thumbnailRequests": [],
+    "kittenRequests": [],
+    "documentScrollsSideways": false,
+    "contentScrollsSideways": false
+  }
+}

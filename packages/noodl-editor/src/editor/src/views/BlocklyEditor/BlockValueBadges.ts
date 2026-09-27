@@ -66,8 +66,8 @@ const BADGE_TOKENS: Record<string, ColorSpec> = {
   /** Badge ink. No token, for its surface's reason: it has to read on a fixed dark fill. */
   text: { fallback: '#eef2f6' },
   /** The hollow mark's wash over an inert block. Follows the theme. */
-  wash: { css: '--theme-color-bg-2', fallback: '#2b3440' },
-  border: { css: '--theme-color-border-strong', fallback: '#434e5c' },
+  wash: { css: '--theme-color-bg-2', fallback: '#2e2c36' },
+  border: { css: '--theme-color-border-strong', fallback: '#494656' },
   muted: { css: '--theme-color-fg-muted', fallback: '#c4cedb' },
   accent: { css: '--theme-color-primary', fallback: '#4da3ff' }
 };

@@ -1,0 +1,24 @@
+{
+  "task": "TVW-007",
+  "question": "R-Z settled the count's TEXT (`· 3×`). It did not settle its ROW. Asked to choose between the four placements, Richard said he would need to see them.",
+  "session": "s20",
+  "date": "2026-09-19",
+  "project": "Noodl projects/TVW-007 s20 Eyebrow (a COPY of Prefab marketplace)",
+  "component": "/Pages/Logged in/Account",
+  "why_this_canvas": "33 instance nodes, 7 of them renamed (so the sub-label row own-row must sit under is on screen), longest component name 26 chars, 25 with a project-wide count of 10+. Chosen by census over 128 projects so each placement's failure mode is visible in one frame.",
+  "framing": "All four are the same crop of the same graph at 100% zoom, canvas only (1220x1075 CSS px), viewport overridden to 1600x1500 @2x so the node graph is not a third of the window.",
+  "drive": "scripts/devtools/drive-tvw007-eyebrow.js — 12/12 arms",
+  "shots": [
+    { "file": "tvw007-hover-only.png", "placement": "hover-only", "titlebar": "36-64px", "cost": "nothing on the card; this is also what the editor looks like today" },
+    { "file": "tvw007-own-row.png", "placement": "own-row", "titlebar": "48-76px", "cost": "every port on all 33 cards moves down" },
+    { "file": "tvw007-reserve-width.png", "placement": "reserve-width", "titlebar": "36-78px", "cost": "ports also move, and its tallest card exceeds own-row's, because narrowing the name makes it wrap" },
+    { "file": "tvw007-inline-if-fits.png", "placement": "inline-if-fits", "titlebar": "36-64px", "cost": "nothing moves, but the count is absent on 55% of unrenamed instance nodes — visible in the shot as Main Navbar and User Avatar having none while their neighbours do" }
+  ],
+  "corpus": {
+    "instance_nodes": 9634,
+    "renamed_pct": 17.7,
+    "unrenamed_count_fits_after_last_line_pct": 44.7,
+    "name_allowance_px": "93 (81 with an icon) — not the 114 the s18 census assumed"
+  },
+  "ships_until_ruled": "hover-only — the only placement that moves nothing"
+}

@@ -48,7 +48,7 @@ Reach for States whenever several properties must change together between named 
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `completed` | Signal | — | Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error |
-| `done` | Signal | — | Fires once a Toggle or To <state> you triggered has moved the node, after State Changed |
+| `done` | Signal | — | Fires once a Toggle or To &lt;state> you triggered has moved the node, after State Changed |
 | `stateChanged` | Signal | — | Fires on every state change except entering the first, which is where the node starts |
 | `unchanged` | Signal | — | Fires when the node is already in the state you asked for, or already heading there in this pass |
 

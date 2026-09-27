@@ -95,7 +95,9 @@ care about narrow containers author breakpoints, and those translate.
 - **Sprite** (`{kind:'sprite', url, symbolId}`): `<svg className …><use href="url#id" /></svg>`;
   class: `width`/`height` = iconSize, `fill` = iconColor, `display: block`. The sheet is an
   ordinary project asset (same story as every `Image` src: assets ship beside the export).
-- **Image**: `<img className src alt="" />`; class sizes it.
+- **Image**: `<img className src alt="" />`; class sizes it. The `src` is `absoluteUrl(iconImageSource)`
+  (EXP-014 §14.5) — the runtime's `iconImageSource` setter is `getAbsoluteUrl` with no empty gate, so an
+  empty source stays `src=""` here as it does there.
 - **Inline** (`{kind:'inline'}`): defers — its SVG passes a sanitizer at render time in the
   runtime, and the export will not inline unsanitized markup by another path.
 - No source at all renders an empty sized span, which is what the runtime draws.
@@ -197,8 +199,11 @@ values land in `unhandled` and are reported. `Changed` → `onChange`.
 
 ## 6. Video → `<video>`
 
-`src`/`poster` pass through as project-relative URLs (the `Image` precedent — assets ship
-beside the export). `controls`/`autoplay`/`muted`/`loop` are the boolean attrs; `object-fit`
+`src`/`poster` are resolved as the viewer's ports resolve them (EXP-014 §14.5; the `Image`
+precedent): a literal at emit time through `mediaSrc` — a project-relative path made root-absolute
+because the app routes with a `BrowserRouter` and the document sits at the route's depth, anything
+already absolute verbatim, an empty value emitting no attribute — and a wire at run time through the
+same function from `src/lib/media.ts`. Assets still ship beside the export, at `public/<same path>`. `controls`/`autoplay`/`muted`/`loop` are the boolean attrs; `object-fit`
 emits always (runtime default `contain` ≠ CSS default `fill`); `objectPositionX/Y` fold into
 `object-position`. `volume` has no attribute (DOM property) — reported. The action inputs
 (Play/Pause/Restart/Reset) and playback outputs are wires pass 6 already reports.

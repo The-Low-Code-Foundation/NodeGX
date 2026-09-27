@@ -1,4 +1,6 @@
 dist/
+# BMG-001: the admin app bundle and token sheet (scripts/build-admin-app.js)
+build/
 node_modules/
 *.tsbuildinfo
 

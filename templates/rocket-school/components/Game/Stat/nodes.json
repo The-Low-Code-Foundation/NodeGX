@@ -1,0 +1,110 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c9bef010-f81d-5728-89d8-a7e2b488188c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "stIn",
+      "type": "Component Inputs",
+      "label": "The reading",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tone",
+          "plug": "output",
+          "type": "color"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "stTile",
+      "type": "Group",
+      "label": "The tile",
+      "children": [
+        "stValue",
+        "stLabel"
+      ],
+      "parameters": {
+        "width": {
+          "value": 150,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "alignItems": "center"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "stValue",
+      "type": "Text",
+      "label": "The number",
+      "parent": "stTile",
+      "parameters": {
+        "text": "0",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-bold)",
+        "fontVariantNumeric": "tabular-nums",
+        "color": "var(--primary)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "stLabel",
+      "type": "Text",
+      "label": "The word",
+      "parent": "stTile",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "stTile"
+  ]
+}

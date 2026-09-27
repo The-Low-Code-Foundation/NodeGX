@@ -22,11 +22,13 @@ import {
   renderStyleVocabulary,
   type StyleTokenRecord,
   type StyleTokensData,
-  type TokenCategory
+  type TokenCategory,
+  type VocabProjectLook
 } from '../editor-deps';
 import { ToolError } from '../errors';
 import { readIconSets, renderIconSets } from '../iconSets';
 import { readImagery, renderImagery } from '../imagery';
+import { applyPresetFonts } from '../presetFontFiles';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
 import { guarded, jsonResult } from './util';
@@ -39,9 +41,17 @@ function inferCategory(name: string): TokenCategory {
   if (name.startsWith('--space')) return 'spacing';
   if (name.startsWith('--text')) return 'typography-size';
   if (name.startsWith('--font')) return 'typography-weight';
+  if (name.startsWith('--leading')) return 'typography-leading';
+  if (name.startsWith('--tracking')) return 'typography-tracking';
   if (name.startsWith('--radius')) return 'border-radius';
   if (name.startsWith('--border')) return 'border-width';
   if (name.startsWith('--shadow')) return 'shadow';
+  // P103 CMG-002 §5: a token this tool adds lands in the Styles panel section its category names.
+  // Before this, a `--gradient-*`, `--ease-*` or `--duration-*` the agent minted was filed as a
+  // COLOUR and drawn under Colours with a swatch.
+  if (name.startsWith('--gradient')) return 'gradient';
+  if (name.startsWith('--ease')) return 'animation-easing';
+  if (name.startsWith('--duration')) return 'animation-duration';
   return 'color-semantic';
 }
 
@@ -90,7 +100,10 @@ export function registerStyleReadTools(server: McpServer, binding: ProjectBindin
       title: 'Get style vocabulary',
       description:
         "This project's design system: design tokens by category (semantic colours, spacing, typography, " +
-        'radius, borders, shadows), the legal variants/sizes per element type, and the named COMPOSITIONS — ' +
+        // P94 STY-002 AC6. 🔴 Says the new thing in FEWER characters than the old line, because the
+        // resident surface has 5 tokens of headroom: naming Looks at the old length read 8,285 of the
+        // 8,280 budget (`toolDisclosure`), and a budget is not answered by raising it.
+        'radius, borders, shadows), its Looks and the shipped Look library, and the named COMPOSITIONS — ' +
         'ready-made parameter sets for a card, a shell, a section head, the buttons and the type ramp, each ' +
         'naming the recipe that shows it assembled, the icon sets installed here with a copyable ' +
         'iconIconSource value, and the bundled stock photographs. ' +
@@ -106,7 +119,7 @@ export function registerStyleReadTools(server: McpServer, binding: ProjectBindin
     },
     guarded((args: { detail?: 'full' | 'prompt' }) => {
       const store = binding.require();
-      const vocab = buildStyleVocabulary(store.designTokenMetaSource());
+      const vocab = buildStyleVocabulary(store.designTokenMetaSource(), readProjectLooks(store));
 
       // VIB-003. Read here rather than inside `buildStyleVocabulary`: that function is pure and
       // takes a token source, while the installed sets are a fact about a directory on disk. The
@@ -129,6 +142,44 @@ export function registerStyleReadTools(server: McpServer, binding: ProjectBindin
   );
 }
 
+/**
+ * P94 STY-002 AC6 — the Looks this project holds.
+ *
+ * Read here rather than inside `buildStyleVocabulary` for the reason `icons` and `imagery` are:
+ * that function is pure and takes a token source, while what a project holds is a fact about a
+ * directory on disk.
+ *
+ * 🔴 **Both spellings of the second key are accepted, and this phase has three scars that say why.**
+ * The sidecar's keys are `colors` / `textStyles` / `variants`; the legacy `metadata.styles` shape
+ * spells the second one `text`, and `VariantModel.toJSON` spells state parameters `stateParamaters`
+ * (sic). STY-001 read a wrong key twice in one session and reported a populated project as empty
+ * both times. An absence here must mean an absence.
+ *
+ * Returns `undefined` — not `[]` — when the project has no styles file at all, so that
+ * "nothing to report" and "no Looks" stay different readings on the wire.
+ */
+function readProjectLooks(store: ProjectStore): VocabProjectLook[] | undefined {
+  const styles = store.readStyles();
+  if (styles === undefined) return undefined;
+
+  const variants = Array.isArray(styles.variants) ? styles.variants : [];
+  return variants
+    .filter((v) => typeof v?.name === 'string' && typeof v?.typename === 'string')
+    .map((v) => {
+      const states = Object.keys(
+        (v.stateParameters as Record<string, unknown> | undefined) ??
+          ((v as Record<string, unknown>).stateParamaters as Record<string, unknown> | undefined) ??
+          {}
+      );
+      return {
+        name: v.name,
+        typename: v.typename,
+        parameters: (v.parameters ?? {}) as Record<string, unknown>,
+        ...(states.length > 0 ? { states } : {})
+      };
+    });
+}
+
 /** Write tools — only when --allow-writes. */
 export function registerStyleWriteTools(server: McpServer, binding: ProjectBinding): void {
   server.registerTool(
@@ -139,7 +190,9 @@ export function registerStyleWriteTools(server: McpServer, binding: ProjectBindi
         'Override design token values for this project (e.g. change --primary to a brand colour). Only the ' +
         'overrides are stored; unlisted tokens keep their defaults. Token names must be CSS custom properties ' +
         '("--primary"). A value may be a literal ("#7c3aed", "12px") or a reference to another token ' +
-        '("var(--blue-600)"). Nodes reference the token by name as "var(--primary)".',
+        '("var(--blue-600)"). Nodes reference the token by name as "var(--primary)". Spell shadows, gradients, ' +
+        "easing, durations and font families as get_style_vocabulary's COMPOSABLE SPELLINGS line says, or the " +
+        'Styles panel opens them as raw text (validate_project warns).',
       inputSchema: {
         tokens: z
           .array(z.object({ name: z.string(), value: z.string() }))
@@ -164,7 +217,9 @@ export function registerStyleWriteTools(server: McpServer, binding: ProjectBindi
       description:
         'Adopt a built-in style preset for this project — a curated set of token overrides that gives a ' +
         'coherent look from the start. Applied as token overrides on top of the defaults (like ' +
-        'set_project_tokens). List available presets via get_style_vocabulary (presets field).',
+        'set_project_tokens). A preset that names a typeface also copies its font files into noodl_modules ' +
+        "(and removes a previous preset's font folder if nobody changed it). List available presets via " +
+        'get_style_vocabulary (presets field).',
       inputSchema: {
         preset_id: z.string().describe(
           `One of: ${listVocabularyPresets()
@@ -182,18 +237,23 @@ export function registerStyleWriteTools(server: McpServer, binding: ProjectBindi
         });
       }
       const entries = Object.entries(preset.tokens).map(([name, value]) => ({ name, value }));
+      // P88 GAM-016 — the typeface travels with the tokens that name it. Reported, never fatal: the
+      // tokens are the preset, and a font that could not be copied is named in `fonts.failed`, which
+      // `validate_project`'s `font-face-not-shipped` repeats until it is fixed.
+      const fonts = applyPresetFonts(store.projectDir, preset.id);
       // Modern = the defaults, so its override map is empty; clear overrides to
       // return to defaults rather than write an empty block.
       if (entries.length === 0) {
         store.writeDesignTokens(TOKEN_METADATA_KEY, null);
-        return jsonResult({ ok: true, preset: preset.id, customTokenCount: 0 });
+        return jsonResult({ ok: true, preset: preset.id, customTokenCount: 0, fonts });
       }
       const customTokens = upsertTokens(store, entries);
       return jsonResult({
         ok: true,
         preset: preset.id,
         updated: entries.map((e) => e.name),
-        customTokenCount: customTokens.length
+        customTokenCount: customTokens.length,
+        fonts
       });
     })
   );

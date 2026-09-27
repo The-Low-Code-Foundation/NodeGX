@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "58777b6d-48ca-5fc1-88c0-b02b983ef096",
+  "name": "Face",
+  "path": "/Game/Face",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A profile's face: the same Look and Seed always draw the same picture. Selected puts a ring on it. Publishes Clicked."
+}

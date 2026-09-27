@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7900eea1-b63d-58bf-80ce-67cf9ed2c70e",
+  "name": "Task summary",
+  "path": "/Todo/Task summary",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The top of an open task: its title (edit it in place), where it is in the list, its deadline, and Move to #1 / Close task / Reopen. A closed task shows what happened."
+}

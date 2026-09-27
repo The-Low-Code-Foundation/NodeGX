@@ -3,8 +3,8 @@
  *
  * Answers "what has the user pointed at" from two sources, in order:
  *
- *  1. The live canvas selection, which since FH-008 survives opening this panel
- *     (see `panelHoldsCanvasSelection` in EditorEventBindings).
+ *  1. The live canvas selection, which survives opening this panel — since FH-008
+ *     for Explain, and since P101 INS-001 for every panel (no panel switch deselects).
  *  2. The remembered target from ./explainTarget, for the paths where the live
  *     read cannot see it.
  *

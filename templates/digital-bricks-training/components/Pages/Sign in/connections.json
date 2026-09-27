@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8867636f-eae1-4b88-99d2-cbbe64cfc902",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "si_url",
+      "fromProperty": "pm-email",
+      "toId": "si_email",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "si_url",
+      "fromProperty": "pm-email",
+      "toId": "si_request",
+      "toProperty": "email"
+    },
+    {
+      "fromId": "si_email",
+      "fromProperty": "onTextChanged",
+      "toId": "si_request",
+      "toProperty": "email"
+    },
+    {
+      "fromId": "si_redirect",
+      "fromProperty": "out-redirect",
+      "toId": "si_request",
+      "toProperty": "redirect"
+    },
+    {
+      "fromId": "si_send",
+      "fromProperty": "onClick",
+      "toId": "si_request",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "si_send",
+      "fromProperty": "onClick",
+      "toId": "si_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "si_request",
+      "fromProperty": "done",
+      "toId": "si_sent_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "si_request",
+      "fromProperty": "failure",
+      "toId": "si_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "si_request",
+      "fromProperty": "failure",
+      "toId": "si_sent_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "si_sent_sw",
+      "fromProperty": "state",
+      "toId": "si_sent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "si_fail_sw",
+      "fromProperty": "state",
+      "toId": "si_failed",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "si_back",
+      "fromProperty": "onClick",
+      "toId": "si_home",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "t_si_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "si_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_si_title",
+      "fromProperty": "Translation",
+      "toId": "si_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_si_lede",
+      "fromProperty": "Translation",
+      "toId": "si_lede",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_si_label",
+      "fromProperty": "Translation",
+      "toId": "si_email",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_si_placeholder",
+      "fromProperty": "Translation",
+      "toId": "si_email",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "t_si_send",
+      "fromProperty": "Translation",
+      "toId": "si_send",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_si_sent",
+      "fromProperty": "Translation",
+      "toId": "si_sent",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_si_failed",
+      "fromProperty": "Translation",
+      "toId": "si_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_si_back",
+      "fromProperty": "Translation",
+      "toId": "si_back",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_si_page_title",
+      "fromProperty": "Translation",
+      "toId": "seo_si_page",
+      "toProperty": "in-title"
+    }
+  ]
+}

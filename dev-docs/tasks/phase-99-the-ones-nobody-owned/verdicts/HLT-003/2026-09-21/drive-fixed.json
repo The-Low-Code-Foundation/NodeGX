@@ -1,0 +1,87 @@
+{
+  "expect": "0",
+  "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/HLT-003 Warnings Drive",
+  "at": "2026-09-21T06:14:34.029Z",
+  "counts": {
+    "duplicateKey": 0,
+    "missingKey": 0,
+    "nullValue": 0,
+    "setStateInRender": 0,
+    "otherErrors": 0,
+    "samples": []
+  },
+  "reach": {
+    "boardFrames": 2,
+    "nullValueInputs": 1,
+    "visualStateRows": 3,
+    "launcherCards": 104
+  },
+  "controls": null,
+  "arms": [
+    {
+      "name": "the counter is armed before anything is driven",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "the editor router was found",
+      "ok": true,
+      "detail": "ok"
+    },
+    {
+      "name": "the driven project is the copy this drive names",
+      "ok": true,
+      "detail": "/Users/richardosborne/vscode_projects/NodeGX test projects/HLT-003 Warnings Drive"
+    },
+    {
+      "name": "REACH — the board mounted and drew frames",
+      "ok": true,
+      "detail": "mode=board, frames=2"
+    },
+    {
+      "name": "REACH — the property input rendered from a null style value",
+      "ok": true,
+      "detail": "[{\"value\":\"\"}]"
+    },
+    {
+      "name": "the field is CONTROLLED and empty, which is what the null broke",
+      "ok": true,
+      "detail": "{\"value\":\"\"}"
+    },
+    {
+      "name": "REACH — the visual-state rows are on screen",
+      "ok": true,
+      "detail": "3 rows"
+    },
+    {
+      "name": "REACH — the launcher grid rendered its rows",
+      "ok": true,
+      "detail": "104 cards"
+    },
+    {
+      "name": "duplicateKey — 0",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "name": "setStateInRender — 0",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "name": "nullValue — 0",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "name": "missingKey — 0",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "name": "no OTHER console error class appeared in the driven window",
+      "ok": true,
+      "detail": "otherErrors=0"
+    }
+  ]
+}

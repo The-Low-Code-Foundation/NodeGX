@@ -1,0 +1,108 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "58777b6d-48ca-5fc1-88c0-b02b983ef096",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fcIn",
+      "type": "Component Inputs",
+      "label": "Whose face",
+      "ports": [
+        {
+          "name": "look",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "seed",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "size",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "selected",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "options",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "fcIsOn",
+      "type": "Condition",
+      "label": "Is it selected?",
+      "parameters": {},
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "fcStates",
+      "type": "States",
+      "label": "Ringed or not",
+      "parameters": {
+        "states": "off,on",
+        "values": "ring",
+        "useTransitions": false,
+        "type-ring": "number",
+        "value-off-ring": 0,
+        "value-on-ring": 4
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "fcRoot",
+      "type": "Group",
+      "label": "The face",
+      "children": [
+        "fcAvatar"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "fcAvatar",
+      "type": "game-kit.Avatar",
+      "label": "The picture",
+      "parent": "fcRoot",
+      "parameters": {
+        "look": "pixel-art",
+        "seed": "Rocket",
+        "size": 64,
+        "ringColor": "var(--primary)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "fcOut",
+      "type": "Component Outputs",
+      "label": "Tapped",
+      "ports": [
+        {
+          "name": "clicked",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 350,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "fcRoot"
+  ]
+}

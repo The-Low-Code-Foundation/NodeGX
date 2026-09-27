@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9c14b616-b593-5d5a-8f05-a990b3d9f23c",
+  "name": "Reminders switch",
+  "path": "/Todo/Reminders switch",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The bell at the top right: turns deadline reminders on or off for this device. Shown only when the server the app is served from can send them."
+}

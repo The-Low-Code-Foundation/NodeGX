@@ -94,8 +94,9 @@ export function exportComponent(comp: ComponentModel) {
 
     json.nodes.push(exportNode(n));
 
-    // Add nodes that may be children to the root array
-    if (n.type.allowAsChild) json.roots.push(n.id);
+    // Add nodes that may be children to the root array. GAM-014: through the graph, so a kit
+    // type this process never loaded keeps the root its file recorded.
+    if (comp.graph.isVisualRoot(n)) json.roots.push(n.id);
   }
 
   // Export connections

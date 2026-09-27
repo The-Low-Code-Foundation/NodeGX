@@ -47,8 +47,10 @@ How to cut, verify, publish, and roll back a signed NodeGX release.
 ## 0. TL;DR
 
 ```bash
-# 1. Bump the version in packages/noodl-editor/package.json (e.g. 0.2.2 -> 0.2.3).
-# 2. Commit it on cline-dev and push.
+# 1. Bump the version in packages/noodl-editor/package.json (e.g. 0.2.2 -> 0.2.3),
+#    and add the release's entry at the top of CHANGELOG.md (the shape is in its
+#    header comment; plain words, one bold sentence, then New / Fixed / Good to know).
+# 2. Commit both on cline-dev and push.
 # 3. Get the six required checks GREEN, then merge cline-dev into main (PR #20).
 #    main is protected with enforce_admins, so a red check stops everyone. See §3.
 # 4. Tag on main — the branch a reader can actually clone:
@@ -60,6 +62,9 @@ git push origin v0.2.3
 # 7. Download and smoke-test each platform artifact on a CLEAN machine.
 # 8. Click "Publish release". Only now can existing installs auto-update.
 # 9. Close the issues held open for a shipped — not merely committed — fix.
+# 10. Publish the changelog: in ~/vscode_projects/nodegx-web run
+#     ops/deploy.sh 49.12.102.195 — its build renders CHANGELOG.md into
+#     https://nodegx.io/changelog/. Check the new version is on the live page.
 ```
 
 > ⚠️ **Releases up to v0.2.2 were tagged on `cline-dev`, not `main`.** If you are

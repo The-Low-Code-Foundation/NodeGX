@@ -105,6 +105,20 @@ const DEFAULT_CONFIG: LoggerConfig = {
 };
 
 /**
+ * FED-007 AC1 — the sentence a run gets when it answered but a step inside it failed.
+ *
+ * It says BOTH things on purpose. "A step failed" alone reads as a run that fell over, and the
+ * person looking at this row is about to see a 200 in the trigger data and disbelieve the
+ * record. Naming the node is the same argument FED-006's ruling 1 made one layer down: a
+ * failure with no subject sends you scrolling.
+ */
+function describeStepFailure(failure: { nodeId: string; nodeName?: string; message?: string }): string {
+  const subject = failure.nodeName || failure.nodeId;
+  const because = failure.message ? ` — ${failure.message}` : '';
+  return `The run answered, but a step failed: ${subject}${because}`;
+}
+
+/**
  * ExecutionLogger class
  *
  * High-level API for logging workflow executions with lifecycle management.
@@ -120,6 +134,38 @@ export class ExecutionLogger {
 
   // Track active steps for timing
   private activeSteps: Map<string, number> = new Map();
+
+  /**
+   * FED-007 AC1 — the first step of this run that failed, or null.
+   *
+   * 🔴 **A run whose record contains a failed step does not read `success`.** Ruled by Richard,
+   * 2026-09-20, on FED-006's shots: three schedule fires all read `success`, in green, including
+   * the one where a feed was down. The status was about whether a reply was sent
+   * (`WorkflowRunner`: `response.statusCode >= 200 && < 300`) rather than about whether the work
+   * happened, and a graph that catches its own failure and answers 200 — which is the shape
+   * every well-wired graph has, because CWF-018 requires the failure path to reach a Response
+   * node — recorded a green row over a broken poll.
+   *
+   * ⚠️ **This is the caller's `success` being OVERRULED, never the other way round.** A run that
+   * ends badly stays `error` with its own message; a run that ends well but stepped in something
+   * becomes `error` and borrows the step's message, because the step's message is the only one
+   * anybody wrote.
+   *
+   * Why here rather than in `WorkflowRunner`: eight call sites complete an execution — the
+   * cloud-function runner, the workflow engine, the dispatcher twice, the backup manager twice,
+   * the backup subsystem, the file subsystem — and all eight write through this object. The same
+   * argument `BoundedExecutionLogger` makes for bounding here.
+   *
+   * ⚠️ `skipped` is not a failure and does not count. A skipped step is a branch not taken.
+   */
+  private firstStepFailure: { nodeId: string; nodeName?: string; message?: string } | null = null;
+
+  /**
+   * What each open step is called, so a failure can name its node. `completeNode` is handed a
+   * step id and nothing else, and "a step failed" with no subject is the complaint FED-006's
+   * ruling 1 already fixed one layer down.
+   */
+  private openStepNames: Map<string, { nodeId: string; nodeName?: string }> = new Map();
 
   /**
    * Create an ExecutionLogger
@@ -202,6 +248,11 @@ export class ExecutionLogger {
   /**
    * Complete the current workflow execution
    *
+   * 🔴 **FED-007 AC1: `success` here is what the CALLER observed, not what the run did.** A run
+   * that recorded a failed step is `error` whatever the caller says — see
+   * {@link firstStepFailure}. The reverse never happens: a caller reporting failure is always
+   * believed.
+   *
    * @param success - Whether the execution succeeded
    * @param error - Error if execution failed
    */
@@ -213,11 +264,17 @@ export class ExecutionLogger {
     const now = Date.now();
     const durationMs = now - this.executionStartTime;
 
+    // The caller said the run was fine and a step inside it was not. The step wins, and it
+    // brings the only message anybody wrote — `errorStack` stays empty because a step failure
+    // is not a throw at this level and inventing a stack here would point at this file.
+    const failedStep = success && !error ? this.firstStepFailure : null;
+    const stepErrorMessage = failedStep ? describeStepFailure(failedStep) : undefined;
+
     this.store.updateExecution(this.currentExecutionId, {
-      status: success ? 'success' : 'error',
+      status: success && !failedStep ? 'success' : 'error',
       completedAt: now,
       durationMs,
-      errorMessage: error?.message,
+      errorMessage: error?.message ?? stepErrorMessage,
       errorStack: error?.stack
     });
 
@@ -269,6 +326,7 @@ export class ExecutionLogger {
 
     // Track start time for duration calculation
     this.activeSteps.set(stepId, now);
+    this.openStepNames.set(stepId, { nodeId: params.nodeId, nodeName: params.nodeName });
 
     return stepId;
   }
@@ -290,6 +348,17 @@ export class ExecutionLogger {
     const startTime = this.activeSteps.get(stepId);
     const durationMs = startTime ? now - startTime : undefined;
 
+    // FED-007 AC1. The FIRST failure is kept rather than the last: it is the one that explains
+    // the others, and a run that fails a step per item would otherwise be named after item 200.
+    if (!success && !this.firstStepFailure) {
+      const named = this.openStepNames.get(stepId);
+      this.firstStepFailure = {
+        nodeId: named ? named.nodeId : stepId,
+        nodeName: named ? named.nodeName : undefined,
+        message: error?.message
+      };
+    }
+
     this.store.updateStep(stepId, {
       status: success ? 'success' : 'error',
       completedAt: now,
@@ -300,6 +369,7 @@ export class ExecutionLogger {
 
     // Clean up tracking
     this.activeSteps.delete(stepId);
+    this.openStepNames.delete(stepId);
   }
 
   /**
@@ -369,6 +439,8 @@ export class ExecutionLogger {
     this.executionStartTime = 0;
     this.stepIndex = 0;
     this.activeSteps.clear();
+    this.openStepNames.clear();
+    this.firstStepFailure = null;
   }
 
   // ===========================================================================

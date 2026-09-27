@@ -54,14 +54,23 @@ export interface LauncherProps {
   // Project management callbacks
   onCreateProject?: () => void;
   onOpenProject?: () => void;
-  onLaunchProject?: (projectId: string) => void;
-  onOpenProjectFolder?: (projectId: string) => void;
-  onDeleteProject?: (projectId: string) => void;
-  onMigrateProject?: (projectId: string) => void;
-  onOpenReadOnly?: (projectId: string) => void;
+  /**
+   * HLT-011 — every one of these is handed the project's **directory**, not its `id`.
+   *
+   * 🔴 The stored `project.id` is not unique: two projects on one machine can carry the same
+   * one (measured 2026-09-21, and the cause is a writer outside the editor — a copied store
+   * entry). A host that resolves it with `.find` opens, reveals or deletes whichever row sorts
+   * first, which is how clicking a card came to open a different project. A directory is what
+   * a row *is*, and `LocalProjectsModel.fetch` keeps one row per directory.
+   */
+  onLaunchProject?: (projectPath: string) => void;
+  onOpenProjectFolder?: (projectPath: string) => void;
+  onDeleteProject?: (projectPath: string) => void;
+  onMigrateProject?: (projectPath: string) => void;
+  onOpenReadOnly?: (projectPath: string) => void;
 
   /** FB-005 T5 — the kebab entry and the dialog it opens. See `LauncherContext` for the split. */
-  onShareAsTemplate?: (projectId: string) => void;
+  onShareAsTemplate?: (projectPath: string) => void;
   shareTemplateModal?: ShareTemplateModalProps | null;
 
   // Lessons (Learn tab)
@@ -321,16 +330,19 @@ export function Launcher({
 
   const [activePageId, setActivePageId] = usePersistentTab(defaultTab);
 
-  // Mock data toggle state with localStorage persistence
+  // Mock data toggle state with localStorage persistence.
+  //
+  // CHR-005 — OFF unless asked for. It used to default ON whenever no `projects` prop arrived, so a
+  // host that had not wired projects (Storybook, any build without `ProjectsPage`) drew four
+  // placekitten cards as if they were somebody's work. ⚠️ The editor was never on that branch —
+  // `ProjectsPage` always passes an array, empty until the list loads — so its empty state was
+  // already real; what changes is every other host. The flag stays for development:
+  // `localStorage['launcher:useMockData'] = 'true'`.
   const [useMockData, setUseMockData] = useState<boolean>(() => {
-    // Default to mock if no projects provided, otherwise check localStorage
-    if (!projects) return true;
-
     try {
-      const stored = localStorage.getItem('launcher:useMockData');
-      return stored === 'true';
+      return localStorage.getItem('launcher:useMockData') === 'true';
     } catch {
-      return false; // Default to real data if provided
+      return false;
     }
   });
 
@@ -366,7 +378,7 @@ export function Launcher({
 
   // Determine which projects to use and if toggle should be available
   const hasRealProjects = Boolean(projects && projects.length > 0);
-  const activeProjects = useMockData ? MOCK_PROJECTS : projects || MOCK_PROJECTS;
+  const activeProjects = useMockData ? MOCK_PROJECTS : projects ?? [];
 
   // Update URL when tab changes (for deep linking support).
   //

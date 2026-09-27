@@ -277,7 +277,7 @@ export class VariantModel extends Model {
       const undo = typeof args.undo === 'object' ? args.undo : UndoQueue.instance;
 
       undo.push({
-        label: 'set variant state transition',
+        label: 'set Look state transition',
         do: () => {
           this.setStateTransition(state, parameterName, curve, args);
         },
@@ -311,7 +311,7 @@ export class VariantModel extends Model {
       const undo = typeof args.undo === 'object' ? args.undo : UndoQueue.instance;
 
       undo.push({
-        label: 'set variant default state transition',
+        label: 'set Look default state transition',
         do: () => {
           this.setDefaultStateTransition(state, curve, args);
         },
@@ -360,7 +360,7 @@ export class VariantModel extends Model {
                 ours: ourValue,
                 theirs: theirValue
               },
-              message: `Merge conflict in variant ${this.name} for type ${this.getType().displayName}`,
+              message: `Merge conflict in the Look ${this.name} for type ${this.getType().displayName}`,
               showGlobally: true,
               onDismiss: () => {
                 clearConflict(c);
@@ -402,7 +402,7 @@ export class VariantModel extends Model {
                 ours: ourValue,
                 theirs: theirValue
               },
-              message: `Merge conflict in variant ${this.name} for type ${
+              message: `Merge conflict in the Look ${this.name} for type ${
                 this.getType().displayName
               } in visual state parameter for state ${stateName}`,
               showGlobally: true,
@@ -444,7 +444,7 @@ export class VariantModel extends Model {
                 ours: ourValue,
                 theirs: theirValue
               },
-              message: `Merge conflict in variant ${this.name} for type ${
+              message: `Merge conflict in the Look ${this.name} for type ${
                 this.getType().displayName
               } in visual state transition ${portName} for state ${stateName}`,
               showGlobally: true,
@@ -473,7 +473,7 @@ export class VariantModel extends Model {
                 ours: ourValue,
                 theirs: theirValue
               },
-              message: `Merge conflict in variant ${this.name} for type ${
+              message: `Merge conflict in the Look ${this.name} for type ${
                 this.getType().displayName
               } in default visual state transition ${portName} for state ${stateName}`,
               level: 'error',

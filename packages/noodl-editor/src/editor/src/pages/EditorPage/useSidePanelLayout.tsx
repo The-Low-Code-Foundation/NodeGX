@@ -177,25 +177,23 @@ function defaultWidthFor(panelId: string): number {
 }
 
 /**
- * FIX-009 — the panels that take turns in the *selection slot* share one width.
+ * FIX-009 — where `components` keeps its width, and why the key is a group's.
  *
- * `components`, `PropertyEditor` and `PortEditor` are not three panels the user
- * sizes independently; they are one slot whose contents swap as the canvas
- * selection changes (`SidebarModel.switchToNode` on select, `hidePanels` on
- * deselect). Storing a width per panel id means the first drag writes *one* of
- * them, and every select/deselect from then on moves the divider — and the
- * canvas with it — to whichever width that panel happens to remember.
+ * Until P101, `components`, `PropertyEditor` and `PortEditor` took turns in one
+ * left-hand slot as the canvas selection changed, so FIX-009 stored them under
+ * one key: per-panel widths moved the divider — and the canvas — on every
+ * select and deselect.
  *
- * `d12b1329` equalised the three *defaults*, which held only until the first
- * drag. Grouping the storage key is what actually makes them one slot.
+ * P101 INS-001 (2026-09-23) moved the node panels into their own column on the
+ * right (`views/Inspector`, sized by `inspector.width` in EditorSettings), so
+ * nothing swaps here any more and `components` is the group's only live member.
+ * The group stays, on purpose, for upgrades:
+ *  - `selection-slot` is where every width dragged since FIX-009 was written.
+ *    Renaming it would reset every user's Layers/Components width.
+ *  - the legacy leg in `storedWidthFor` still reads a pre-FIX-009 width stored
+ *    under `PropertyEditor` or `PortEditor` — the same slot's width, then.
  *
- * `PortEditor` is in the group for the same reason the other two are, and
- * `panelHoldsCanvasSelection` (EditorEventBindings) is the precedent for
- * treating exactly this set as one family.
- *
- * Deliberately *not* the whole docked sidebar: deselect restores whichever panel
- * was active before, which may be Search (340) or Docs (420) — panels users size
- * differently on purpose. Those keep their own widths.
+ * Every other docked panel (Search 340, Docs 420, …) keeps its own width.
  */
 const SELECTION_SLOT_KEY = 'selection-slot';
 

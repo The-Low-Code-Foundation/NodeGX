@@ -1,0 +1,273 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8c06431d-ae40-4f70-972e-fa7c6b5d7b86",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "app_root",
+      "type": "Group",
+      "label": "App",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "app_router"
+      ],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)"
+      },
+      "metadata": {
+        "comment": "The ground is a token so the Styles panel owns it. Full-size so a page's own bands decide their height (settings.bodyScroll is true)."
+      }
+    },
+    {
+      "id": "app_router",
+      "type": "Router",
+      "label": "Main router",
+      "x": 100,
+      "y": 160,
+      "parent": "app_root",
+      "parameters": {
+        "name": "Main",
+        "pages": {
+          "startPage": "/Pages/Home",
+          "routes": [
+            "/Pages/Home",
+            "/Pages/Lesson",
+            "/Pages/Course",
+            "/Pages/Palette",
+            "/Pages/People",
+            "/Pages/Learner",
+            "/Pages/Sign in"
+          ]
+        }
+      }
+    },
+    {
+      "id": "app_css",
+      "type": "CSS Definition",
+      "label": "The few things a port cannot say",
+      "x": 400,
+      "y": 40,
+      "parameters": {
+        "style": "/* Digital Bricks Training — the page ground and the pointer. The lesson CSS is the kit's stylesheet. */\nhtml, body { background: var(--background); color: var(--foreground); font-family: var(--font-sans); }\n.pressable { cursor: pointer; }\n@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }\n"
+      },
+      "metadata": {
+        "comment": "Everything else this template styles lives in noodl_modules/dbt-lesson/styles.css (the product's token aliases and the lesson CSS lifted from globals.css) — TASK-L154 §2. This node holds only what needs the document itself."
+      }
+    },
+    {
+      "id": "app_strings",
+      "type": "/Data/Strings",
+      "label": "Every word on screen",
+      "x": 760,
+      "y": 40,
+      "metadata": {
+        "comment": "Mounted HERE, in the root, because a Translation node takes no wire — it reads the module-scoped i18next instance. A bundle loaded inside a page would leave every other page unresolved until someone had visited that one. TASK-L161 §0. App's instance feeds the i18next Language Bundles, whose namespaces (common, home, course, lesson, palette) have no coach wording — so the value is immaterial HERE and is still written down, because an input with no default is what stops a page serving the wrong audience's words in silence (TASK-L163 §3)."
+      },
+      "parameters": {
+        "audience": "learner"
+      }
+    },
+    {
+      "id": "app_ns_common",
+      "type": "Language Bundle",
+      "label": "common → i18next",
+      "x": 1060,
+      "y": 40,
+      "parameters": {
+        "Namespace": "common"
+      },
+      "metadata": {
+        "comment": "ONE Language Bundle PER NAMESPACE, because its Bundle port parses a JSON string and loads it under exactly one namespace (measured, TASK-L161 §0). Its Language is no longer written here: it arrives from the one owner below, so this node registers the strings under the language they ARE rather than under a code somebody typed twice (TASK-L162 §1). The order is load-bearing — loadBundle() reads Language only at the moment Bundle changes, and the language wire is one node shorter than the JSON wire for exactly that reason."
+      }
+    },
+    {
+      "id": "app_ns_home",
+      "type": "Language Bundle",
+      "label": "home → i18next",
+      "x": 1060,
+      "y": 160,
+      "parameters": {
+        "Namespace": "home"
+      }
+    },
+    {
+      "id": "app_ns_course",
+      "type": "Language Bundle",
+      "label": "course → i18next",
+      "x": 1060,
+      "y": 280,
+      "parameters": {
+        "Namespace": "course"
+      }
+    },
+    {
+      "id": "app_ns_lesson",
+      "type": "Language Bundle",
+      "label": "lesson → i18next",
+      "x": 1060,
+      "y": 400,
+      "parameters": {
+        "Namespace": "lesson"
+      }
+    },
+    {
+      "id": "app_ns_palette",
+      "type": "Language Bundle",
+      "label": "palette → i18next",
+      "x": 1060,
+      "y": 520,
+      "parameters": {
+        "Namespace": "palette"
+      }
+    },
+    {
+      "id": "app_ns_people",
+      "type": "Language Bundle",
+      "label": "people → i18next",
+      "x": 1060,
+      "y": 620,
+      "parameters": {
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "app_i18n",
+      "type": "i18next",
+      "label": "WHICH LANGUAGE — the one owner",
+      "x": 1460,
+      "y": 40,
+      "parameters": {
+        "Language": "en"
+      },
+      "metadata": {
+        "comment": "THE ONE VALUE. Change this and the whole template changes language: the kit's copy object and the graph's Translation nodes both read it, so they cannot disagree about what language a page is in (TASK-L162 §2). There is deliberately no language picker — with one locale that is a control whose condition nothing can change.\n\nTwo measured facts about this node. Setting Language does NOTHING on its own: only the ChangeLanguage signal calls i18next, so it is pulsed once below. And the module's detector (querystring lng, cookie, localStorage, sessionStorage, navigator, htmlTag) is baked into the vendored bundle with no port to configure — the pulse is what makes the template's language deterministic instead of the visitor's browser's."
+      }
+    },
+    {
+      "id": "app_lang_once",
+      "type": "Switch",
+      "label": "Pulse the language once, not forever",
+      "x": 1460,
+      "y": 220,
+      "metadata": {
+        "comment": "There is a CYCLE here and this breaks it structurally rather than with a delay: the strings emit `loaded`, which sets the language, whose CurrentLanguage feeds back into the strings, which emit `loaded` again. `switchedToOn` fires on the TRANSITION only, so the second pulse is absorbed. TASK-L162 §1."
+      }
+    },
+    {
+      "id": "app_lang_var",
+      "type": "Variable",
+      "label": "language — broadcast to every string table",
+      "x": 1460,
+      "y": 400,
+      "parameters": {
+        "name": "language"
+      },
+      "metadata": {
+        "comment": "A TRANSPORT, NEVER A SECOND DECISION. `Data/Strings` is instantiated once per surface that needs the kit's copy object, and a component cannot wire across to another, so the resolved language is broadcast through this named Variable. The one OWNER is still the `i18next` node in App: this node only carries its answer. Every `/Data/Strings` instance in the project learns the language exactly this way — TASK-L162 §2."
+      }
+    },
+    {
+      "id": "app_ns_dossier",
+      "type": "Language Bundle",
+      "label": "dossier → i18next",
+      "x": 1060,
+      "y": 740,
+      "parameters": {
+        "Namespace": "dossier"
+      },
+      "metadata": {
+        "comment": "The dossier's eyebrow on /course is a graph Translation (TASK-L167). Without this bundle it resolved to nothing and the Text showed its editor default, TEXT — which is why tools/check-language-owner.py now asserts every Translation's namespace is registered here."
+      }
+    },
+    {
+      "id": "app_user",
+      "type": "net.noodl.user.User",
+      "label": "Who is signed in",
+      "x": 700,
+      "y": 40
+    },
+    {
+      "id": "app_gate",
+      "type": "JavaScriptFunction",
+      "label": "THE GATE — signed out, only the public pages",
+      "x": 700,
+      "y": 160,
+      "parameters": {
+        "functionScript": "/*\n * THE ONE GATE (TASK-L171 §2). Two rules, in ONE place, never a check per page:\n * a page that forgot its own check would be the one somebody could read.\n *\n *   1. Signed out, every page but the public ones goes to sign-in.\n *   2. Signed in WITHOUT the `staff` role, the coach's pages go to Home.\n *\n * PUBLIC and STAFF are lists of what is allowed, never of what is forbidden to\n * everybody else: a page added later is gated for the signed-out by default,\n * which is the safe way for the first list to be wrong.\n *\n *   Home     the front door, with its two demo doors\n *   Sign in  the way in\n *   Palette  the kit's specimen, not anybody's data (TASK-L171 decision 9)\n *\n * NONE OF THIS IS WHAT KEEPS DATA PRIVATE. Every read is a cloud function behind\n * nodegx.security.json, and the page asks before this can send it anywhere, so a\n * learner at /people is refused by the backend first (403, read off the network\n * — criterion 5). Rule 2 exists because of what the page would otherwise SAY:\n * the roster's empty state is \"Nobody has signed up yet\", which is false.\n *\n * ROLES THAT ARE NOT KNOWN YET ARE WAITED FOR, NEVER GUESSED. `roles` is\n * undefined while the backend has not said (user.ts, DEF-005: \"we could not\n * ask\" is not \"in no roles\"), so rule 2 acts only on an answer. Nothing here\n * asks for one: every arrival already carries them — a magic link's\n * `POST /oauth/exchange` since NodeGX HLT-024, and a stored session through\n * the runtime's own `/users/me` on load. Until HLT-024 this gate asked once,\n * through a Switch; with the exchange fixed the ask never fired, and it was\n * deleted (TASK-L171 follow-up, measured: 0 asks after a link, and a stored\n * session with no roles still resolved with the ask unwired).\n */\nconst PUBLIC = ['Pages/Home', 'Pages/Sign in', 'Pages/Palette'];\nconst STAFF = ['Pages/People', 'Pages/Learner'];\nconst page = String(Inputs.page || '').replace(/^\\/+/, '');\nconst signedIn = Inputs.signedIn === true;\nconst roles = Array.isArray(Inputs.roles) ? Inputs.roles : undefined;\nif (!page) return;\nif (!signedIn) {\n  if (PUBLIC.indexOf(page) === -1) Outputs.toSignIn();\n  return;\n}\nif (roles && roles.indexOf('staff') === -1 && STAFF.indexOf(page) !== -1) Outputs.toHome();\n"
+      },
+      "ports": [
+        {
+          "name": "in-page",
+          "displayName": "page",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-signedIn",
+          "displayName": "signedIn",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-roles",
+          "displayName": "roles",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-toSignIn",
+          "displayName": "toSignIn",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-toHome",
+          "displayName": "toHome",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "app_to_signin",
+      "type": "RouterNavigate",
+      "label": "→ Sign in",
+      "x": 700,
+      "y": 280,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Sign in"
+      }
+    },
+    {
+      "id": "app_to_home",
+      "type": "RouterNavigate",
+      "label": "→ Home",
+      "x": 700,
+      "y": 400,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Home"
+      }
+    }
+  ],
+  "visualRoots": [
+    "app_root"
+  ]
+}

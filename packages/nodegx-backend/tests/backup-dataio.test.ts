@@ -59,7 +59,7 @@ describe('backup/dataio export + import', () => {
     const dst = tmpDir();
     dirs.push(dst);
     const { facade: f2, disconnect: d2 } = await facadeFor(dst);
-    const report = importCollection(f2, 'Note', json.content, { format: 'json' });
+    const report = await importCollection(f2, 'Note', json.content, { format: 'json' });
     expect(report.applied).toBe(true);
     expect(report.created).toBe(20);
     expect(report.rejected).toEqual([]);
@@ -67,7 +67,7 @@ describe('backup/dataio export + import', () => {
     expect(restored).toEqual(original);
 
     // Re-import is idempotent (upsert by objectId — updates, no duplicates).
-    const again = importCollection(f2, 'Note', json.content, { format: 'json' });
+    const again = await importCollection(f2, 'Note', json.content, { format: 'json' });
     expect(again.updated).toBe(20);
     expect(again.created).toBe(0);
     expect((await f2.rawQuery('Note', { limit: 1000 })).results.length).toBe(20);
@@ -91,13 +91,13 @@ describe('backup/dataio export + import', () => {
     const csv = lines.join('\r\n') + '\r\n';
 
     // Dry run writes nothing.
-    const dry = importCollection(facade, 'Big', csv, { format: 'csv', dryRun: true });
+    const dry = await importCollection(facade, 'Big', csv, { format: 'csv', dryRun: true });
     expect(dry.total).toBe(10000);
     expect(dry.created).toBe(10000);
     expect((await facade.rawQuery('Big', { limit: 5 })).results.length).toBe(0);
 
     // Real import.
-    const real = importCollection(facade, 'Big', csv, { format: 'csv' });
+    const real = await importCollection(facade, 'Big', csv, { format: 'csv' });
     expect(real.applied).toBe(true);
     expect(real.created).toBe(10000);
     expect((await facade.rawQuery('Big', { count: true, limit: 0 })).count).toBe(10000);
@@ -111,7 +111,7 @@ describe('backup/dataio export + import', () => {
     expect(Boolean(even.ok)).toBe(true);
 
     // Re-import upserts idempotently (no duplicates).
-    const reimport = importCollection(facade, 'Big', csv, { format: 'csv' });
+    const reimport = await importCollection(facade, 'Big', csv, { format: 'csv' });
     expect(reimport.updated).toBe(10000);
     expect((await facade.rawQuery('Big', { count: true, limit: 0 })).count).toBe(10000);
     await disconnect();
@@ -123,7 +123,7 @@ describe('backup/dataio export + import', () => {
     const { facade, disconnect } = await facadeFor(dir);
     facade.schemaManager.createTable({ name: 'Typed', columns: [{ name: 'n', type: 'Number' }] });
     const csv = 'objectId,n\r\ngood,42\r\nbad,not-a-number\r\nalso-good,7\r\n';
-    const report = importCollection(facade, 'Typed', csv, { format: 'csv' });
+    const report = await importCollection(facade, 'Typed', csv, { format: 'csv' });
     expect(report.applied).toBe(true);
     expect(report.created).toBe(2);
     expect(report.rejected.length).toBe(1);

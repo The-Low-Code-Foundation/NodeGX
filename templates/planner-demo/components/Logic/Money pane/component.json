@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "394bb5ba-d41d-5e80-8afb-cde6c8177e37",
+  "name": "Money pane",
+  "path": "/Logic/Money pane",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What the Money modal’s right-hand side shows — the month’s target, one repeat with what you can do to it, the item editor, ending an item, or recording the balance — and the Billing on a project’s card."
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "acc857cb-ab0b-5431-822e-1bce2877303d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "erIn",
+      "fromProperty": "dayText",
+      "toId": "erDay",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "erIn",
+      "fromProperty": "hoursText",
+      "toId": "erHours",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "erIn",
+      "fromProperty": "note",
+      "toId": "erNote",
+      "toProperty": "text"
+    }
+  ]
+}

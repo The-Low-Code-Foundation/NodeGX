@@ -21,7 +21,8 @@
  * @module nodegx-backend/backup/dataio
  */
 
-import type { AdapterFacade, ImportColumn } from '../persistence/AdapterFacade';
+import type { IStorageFacade, StorageImportColumn as ImportColumn } from '@noodl/backend-contract';
+import { requiredWithoutDefault, type SchemaColumn } from '@noodl/runtime/src/api/adapters/local-sql/schemaCommon';
 
 export type DataFormat = 'json' | 'csv';
 
@@ -34,14 +35,25 @@ export interface ExportResult {
 
 const SYSTEM_KEYS = ['objectId', 'createdAt', 'updatedAt', 'ACL'];
 
-async function readAll(facade: AdapterFacade, collection: string): Promise<Record<string, unknown>[]> {
+/**
+ * Every row of a collection, in pages.
+ *
+ * 🔴 PRD-001 §3.3 — `rawQueryAll`, never `rawQuery`. An export or a backup that
+ * silently stopped at the request page cap would restore cleanly and have lost
+ * data, which is the worst failure available in this codebase: an operator
+ * would learn about it from the rows that are not there. The page size below is
+ * this function's own decision about memory, and the cap an operator sets on
+ * REQUESTS must not be able to reach it — `queries.maxLimit: 100` is a
+ * reasonable thing for someone to type and must not quietly truncate backups.
+ */
+async function readAll(facade: IStorageFacade, collection: string): Promise<Record<string, unknown>[]> {
   // Page through so a large collection does not rely on one huge query.
   const page = 1000;
   const out: Record<string, unknown>[] = [];
   let skip = 0;
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const { results } = await facade.rawQuery(collection, { limit: page, skip, sort: 'createdAt' });
+    const { results } = await facade.rawQueryAll(collection, { limit: page, skip, sort: 'createdAt' });
     out.push(...results);
     if (results.length < page) break;
     skip += page;
@@ -54,12 +66,12 @@ async function readAll(facade: AdapterFacade, collection: string): Promise<Recor
 // ============================================================================
 
 export async function exportCollection(
-  facade: AdapterFacade,
+  facade: IStorageFacade,
   collection: string,
   format: DataFormat
 ): Promise<ExportResult> {
   const records = await readAll(facade, collection);
-  const columns = facade.getColumns(collection);
+  const columns = await facade.getColumns(collection);
 
   if (format === 'json') {
     const content =
@@ -277,12 +289,12 @@ function coerce(value: unknown, type: string | undefined, fromCsv: boolean): { v
   }
 }
 
-export function importCollection(
-  facade: AdapterFacade,
+export async function importCollection(
+  facade: IStorageFacade,
   collection: string,
   content: string,
   options: ImportOptions
-): ImportReport {
+): Promise<ImportReport> {
   const dryRun = !!options.dryRun;
   let parsed: ParsedPayload;
   try {
@@ -302,12 +314,32 @@ export function importCollection(
 
   // Effective type map: JSON schema (if any) overlaid on the target's schema.
   const typeMap = new Map<string, string>();
-  for (const c of facade.getColumns(collection)) if (c.type) typeMap.set(c.name, c.type);
+  const targetColumns = await facade.getColumns(collection);
+  for (const c of targetColumns) if (c.type) typeMap.set(c.name, c.type);
   if (parsed.schemaColumns) for (const c of parsed.schemaColumns) if (c.type) typeMap.set(c.name, c.type);
   typeMap.set('ACL', 'Object');
 
   const rejected: ImportReject[] = [];
   const valid: { objectId?: string; data: Record<string, unknown> }[] = [];
+
+  // Classify created vs updated (read-only; safe in dry-run too).
+  //
+  // BRG-002 §3.1: this was one query per row. It is now one call for the whole
+  // import — which on SQLite is worth little (measured: see the task file) and
+  // on an out-of-process adapter is the difference between one round trip and
+  // ten thousand. BMG-017: it is read BEFORE the rows are judged, because a new
+  // row and an update are judged differently (below).
+  const existing = await facade.existingIds(
+    collection,
+    parsed.records.map((r) => r.objectId).filter((id): id is string => typeof id === 'string' && id.length > 0)
+  );
+
+  // R6 (BMG-017): a NEW row must name every required field that has no default
+  // — a field added over records with a one-time fill gave THEM a value, not
+  // the rows to come. The row is refused by name here, before the batch, so the
+  // rest import; below this the insert would refuse the whole batch (or, on
+  // SQLite without `buildInsert`'s guard, hand the row the fill).
+  const mustName = requiredWithoutDefault({ name: collection, columns: targetColumns as SchemaColumn[] });
 
   parsed.records.forEach((rec, idx) => {
     const errors: string[] = [];
@@ -327,15 +359,20 @@ export function importCollection(
       else if (c.value !== null || !parsed.fromCsv) out[key] = c.value;
     }
 
+    if (!(objectId && existing.has(objectId))) {
+      for (const name of mustName) {
+        if (out[name] === undefined || out[name] === null) errors.push(`${name}: required, and this new row leaves it out`);
+      }
+    }
+
     if (errors.length > 0) rejected.push({ row: idx, objectId, errors });
     else valid.push({ objectId, data: out });
   });
 
-  // Classify created vs updated (read-only; safe in dry-run too).
   let created = 0;
   let updated = 0;
   for (const v of valid) {
-    if (v.objectId && facade.existsSync(collection, v.objectId)) updated++;
+    if (v.objectId && existing.has(v.objectId)) updated++;
     else created++;
   }
 
@@ -348,11 +385,13 @@ export function importCollection(
   try {
     if (valid.length > 0) {
       const sample = valid[0].data;
-      const schemaCols = parsed.schemaColumns || facade.getColumns(collection);
-      facade.ensureImportShape(collection, schemaCols, sample);
-      facade.transaction(() => {
-        for (const v of valid) facade.upsertSync(collection, v.objectId, v.data);
-      });
+      const schemaCols = parsed.schemaColumns || (await facade.getColumns(collection));
+      await facade.ensureImportShape(collection, schemaCols, sample);
+      // One awaitable call that owns the all-or-nothing transaction internally —
+      // BRG-002 §3.1. The `created`/`updated` it returns are deliberately NOT
+      // used: the counts reported to the caller are the ones classified above,
+      // which are also what a dry run reports, so the two agree by construction.
+      await facade.upsertBatch(collection, valid);
     }
     return { collection, dryRun: false, total, created, updated, rejected, applied: true };
   } catch (e) {

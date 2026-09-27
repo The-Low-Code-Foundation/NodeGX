@@ -22,6 +22,12 @@ export interface TabStripTab {
   label: string;
   id?: string;
   testId?: string;
+  /**
+   * CHR-009 (R7) — a small dot after the label: this tab holds something the others do not show.
+   * The property panel's `Comment` tab wears it once a comment is written, so moving the comment
+   * off the panel top never hides a note silently.
+   */
+  hasMarker?: boolean;
 }
 
 export interface TabsTab extends TabStripTab {
@@ -59,6 +65,13 @@ export interface TabStripProps {
   variant?: TabsVariant;
   slotEnd?: Slot;
   onSelect: (tab: TabStripTab) => void;
+  /**
+   * CHR-005 — wrap the strip in its own variant class, for a caller with no `Tabs` root. The
+   * variant rules hang off an ANCESTOR carrying that class (FB-006), so without this the launcher's
+   * community view imported `Tabs.module.scss` to look the hashed name up. Off by default: `Tabs`
+   * already carries the class on its root, and the seven editor panels keep their DOM.
+   */
+  hasVariantScope?: boolean;
 }
 
 /**
@@ -81,11 +94,18 @@ export interface TabStripProps {
  * ⚠️ `Tabs` renders this in place of the markup it used to hold inline, so **the DOM it produces
  * is unchanged** — seven editor panels draw from it and none of them should notice this task.
  */
-export function TabStrip({ tabs, activeTabId, variant = TabsVariant.Default, slotEnd, onSelect }: TabStripProps) {
+export function TabStrip({
+  tabs,
+  activeTabId,
+  variant = TabsVariant.Default,
+  slotEnd,
+  onSelect,
+  hasVariantScope = false
+}: TabStripProps) {
   const tabWidth = `calc(${100 / tabs.length}% - 2px)`;
   const isAutoWidth = variant === TabsVariant.Text || variant === TabsVariant.Segmented;
 
-  return (
+  const row = (
     <div className={css['ButtonRow']}>
       <nav className={css['Buttons']} role="tablist">
         {tabs.map((tab) => (
@@ -99,6 +119,7 @@ export function TabStrip({ tabs, activeTabId, variant = TabsVariant.Default, slo
             data-test={tab.testId}
           >
             <Text>{tab.label}</Text>
+            {tab.hasMarker && <span className={css['Marker']} aria-label="has content" />}
           </button>
         ))}
       </nav>
@@ -106,6 +127,8 @@ export function TabStrip({ tabs, activeTabId, variant = TabsVariant.Default, slo
       {Boolean(slotEnd) && <div className={css['SlotEnd']}>{slotEnd}</div>}
     </div>
   );
+
+  return hasVariantScope ? <div className={css[variant]}>{row}</div> : row;
 }
 
 export function Tabs({

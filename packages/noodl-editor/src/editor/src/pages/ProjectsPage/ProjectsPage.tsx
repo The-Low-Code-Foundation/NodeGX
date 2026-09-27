@@ -62,6 +62,7 @@ import { attachLearningLesson } from '../../models/learninglesson';
 import { LessonsProjectsModel } from '../../models/LessonsProjectModel';
 import LessonTemplatesModel from '../../models/lessontemplatesmodel';
 import { getCloudServices, projectFromDirectory, setCloudServices } from '../../models/projectmodel.editor';
+import { seedTemplateThumbnail } from '../../models/template/seedTemplateThumbnail';
 import { ensureTemplateBackend } from '../../models/templatebackend';
 import { ProjectDocsModel } from '../../models/ProjectDocs/ProjectDocsModel';
 import type { ProjectModel } from '../../models/projectmodel';
@@ -212,6 +213,48 @@ function mapLessonsToLauncherData(
     progressPercent: states[i].progressPercent,
     state: (states[i].name as LauncherLessonData['state']) || 'not-started'
   }));
+}
+
+/**
+ * HLT-011 — two projects claiming one durable identity, said out loud exactly once.
+ *
+ * 🔴 **It reports and repairs nothing, and that is the decision.** `project.id` is the
+ * ownership half of `findReusableBackend`; re-minting one to break a collision would move a
+ * datastore from under whichever project lost the coin toss. Measured on the machine this row
+ * was opened from: `backend_msjck0y2ukxwv` — *"Puppy test 3 backend"* — carries the very id
+ * that `Puppy test 3` and a copy of it both claim, and the two also share the per-project
+ * layout under that key in `editorSettings.json`. A person can fix that knowingly; the editor
+ * cannot fix it silently.
+ *
+ * ⚠️ **Once per editor session, not once per visit to the launcher.** The projects screen is
+ * where a person comes back to between projects, and a toast that reappears on every return is
+ * one they learn to dismiss without reading.
+ *
+ * ⚠️ `console.warn`, deliberately not `console.error`: HLT-010's renderer-error budget counts
+ * error events, and a true statement about the user's disk is not an editor fault.
+ */
+let durableIdCollisionsReported = false;
+
+function reportDurableIdCollisions() {
+  if (durableIdCollisionsReported) return;
+  const collisions = LocalProjectsModel.instance.getDurableIdCollisions();
+  if (!collisions.length) return;
+  durableIdCollisionsReported = true;
+
+  for (const collision of collisions) {
+    console.warn(
+      `Two projects share one stored identity (${collision.id}): ${collision.directories.join(' and ')}. ` +
+        'Per-project editor settings, git credentials and backend ownership are keyed on it.'
+    );
+  }
+
+  const first = collisions[0];
+  const others = collisions.length > 1 ? ` (and ${collisions.length - 1} more)` : '';
+  ToastLayer.showWarning(
+    `${first.names.join(' and ')} share one identity${others}, so their editor settings, git credentials and backend ownership are the same. ` +
+      'Opening each one still opens the right project.',
+    { title: 'Two projects share one identity' }
+  );
 }
 
 /**
@@ -743,8 +786,9 @@ export function ProjectsPage(props: ProjectsPageProps) {
           const shouldOpen = confirm(`Project "${repo.name}" cloned successfully!\n\nWould you like to open it now?`);
 
           if (shouldOpen) {
-            const projects = LocalProjectsModel.instance.getProjects();
-            const projectEntry = projects.find((p) => p.id === project.id);
+            const projectEntry = LocalProjectsModel.instance.getProjectEntryWithDirectory(
+              project._retainedProjectDirectory
+            );
 
             if (projectEntry) {
               const loaded = await LocalProjectsModel.instance.loadProject(projectEntry);
@@ -779,6 +823,7 @@ export function ProjectsPage(props: ProjectsPageProps) {
       const projects = LocalProjectsModel.instance.getProjectsWithRuntime();
       console.log('🔵 Projects loaded, triggering runtime detection for:', projects.length);
       setRealProjects(projects.map(mapProjectToLauncherData));
+      reportDurableIdCollisions();
     };
 
     loadProjects();
@@ -1140,6 +1185,10 @@ export function ProjectsPage(props: ProjectsPageProps) {
         mode === 'template' &&
         projectTemplates.items.find((item) => item.url === templateUrl)?.needsBackend === true;
 
+      // CHR-006 AC2 — the chosen row's picture, read at the same moment for the same reason.
+      const templateThumbnail =
+        mode === 'template' ? projectTemplates.items.find((item) => item.url === templateUrl)?.thumbnail : undefined;
+
       // Store the chosen preset — StyleTokensModel will consume it on editor startup.
       //
       // 🔴 FB-005 T3. Template mode never visits the preset step, so `presetId` is the untouched
@@ -1170,6 +1219,12 @@ export function ProjectsPage(props: ProjectsPageProps) {
               ToastLayer.showError('Could not create project');
               return;
             }
+
+            // CHR-006 AC2 — not awaited: a picture never holds the editor's door, and the seed
+            // never throws. It persists through `LocalProjectsModel`'s `thumbnailChanged` binding.
+            void seedTemplateThumbnail(project, templateThumbnail).then((outcome) => {
+              if (templateThumbnail) console.log(`[CHR-006] template picture: ${outcome}`);
+            });
 
             if (templateNeedsBackend) {
               // Awaited before the route, like `finishScopedProject` below: the
@@ -1261,8 +1316,9 @@ export function ProjectsPage(props: ProjectsPageProps) {
         project.name = filesystem.basename(direntry);
       }
 
-      const projects = LocalProjectsModel.instance.getProjects();
-      const projectEntry = projects.find((p) => p.id === project.id);
+      const projectEntry = LocalProjectsModel.instance.getProjectEntryWithDirectory(
+        project._retainedProjectDirectory
+      );
 
       if (!projectEntry) {
         ToastLayer.hideActivity(activityId);
@@ -1323,10 +1379,21 @@ export function ProjectsPage(props: ProjectsPageProps) {
   const handleStartLesson = useCallback((lessonId: string) => openLesson(lessonId, false), [openLesson]);
   const handleRestartLesson = useCallback((lessonId: string) => openLesson(lessonId, true), [openLesson]);
 
+  /**
+   * HLT-011 — a card hands back the project's **directory**, and that is what resolves the row.
+   *
+   * 🔴 These handlers used `projects.find((p) => p.id === projectId)`, and `id` is not unique:
+   * two projects on one machine can carry the same stored id, so `.find` answered about
+   * whichever row sorted first. Driven 2026-09-21 — clicking the second of two colliding cards
+   * opened the first card's project, and the same `.find` sat under *reveal in Finder*,
+   * *delete*, *migrate*, *share* and *open read-only*, each of which would have acted on the
+   * other project just as silently. `getProjectEntryWithDirectory` is the addressing seam; see
+   * `LocalProjectsModel` and `recentProjectRows` for why a directory can carry this and an id
+   * cannot.
+   */
   const handleLaunchProject = useCallback(
-    async (projectId: string) => {
-      const projects = LocalProjectsModel.instance.getProjects();
-      const project = projects.find((p) => p.id === projectId);
+    async (projectPath: string) => {
+      const project = LocalProjectsModel.instance.getProjectEntryWithDirectory(projectPath);
       if (!project) return;
 
       const activityId = 'launching-project';
@@ -1351,9 +1418,8 @@ export function ProjectsPage(props: ProjectsPageProps) {
     [props.route]
   );
 
-  const handleOpenProjectFolder = useCallback(async (projectId: string) => {
-    const projects = LocalProjectsModel.instance.getProjects();
-    const project = projects.find((p) => p.id === projectId);
+  const handleOpenProjectFolder = useCallback(async (projectPath: string) => {
+    const project = LocalProjectsModel.instance.getProjectEntryWithDirectory(projectPath);
     if (!project || !project.retainedProjectDirectory) {
       ToastLayer.showError('Project folder not found');
       return;
@@ -1367,9 +1433,8 @@ export function ProjectsPage(props: ProjectsPageProps) {
     }
   }, []);
 
-  const handleDeleteProject = useCallback((projectId: string) => {
-    const projects = LocalProjectsModel.instance.getProjects();
-    const project = projects.find((p) => p.id === projectId);
+  const handleDeleteProject = useCallback((projectPath: string) => {
+    const project = LocalProjectsModel.instance.getProjectEntryWithDirectory(projectPath);
     if (!project) return;
 
     // Confirm deletion
@@ -1378,7 +1443,10 @@ export function ProjectsPage(props: ProjectsPageProps) {
         `Remove project "${project.name}" from the list?\n\nNote: The project folder will remain on disk and can be opened again later.`
       )
     ) {
-      LocalProjectsModel.instance.removeProject(projectId);
+      // ⚠️ By the ENTRY's id, read from the row the directory resolved — never the card's
+      // address. `removeProject` splices the first match, so deleting by a shared id would
+      // remove the other project's row from the list the user is looking at.
+      LocalProjectsModel.instance.removeProject(project.id);
       ToastLayer.showSuccess('Project removed from list');
     }
   }, []);
@@ -1387,26 +1455,27 @@ export function ProjectsPage(props: ProjectsPageProps) {
    * Handle "Migrate Project" button click - opens the migration wizard
    */
   const handleMigrateProject = useCallback(
-    (projectId: string) => {
-      const projects = LocalProjectsModel.instance.getProjects();
-      const project = projects.find((p) => p.id === projectId);
+    (projectPath: string) => {
+      const project = LocalProjectsModel.instance.getProjectEntryWithDirectory(projectPath);
       if (!project || !project.retainedProjectDirectory) {
         ToastLayer.showError('Cannot migrate project: path not found');
         return;
       }
 
-      const projectPath = project.retainedProjectDirectory;
+      // ⚠️ The entry's directory, not the card's address: the card's copy was made when
+      // the list was built, and the wizard walks this folder on disk.
+      const sourceDirectory = project.retainedProjectDirectory;
 
       // Show the migration wizard as a dialog
       DialogLayerModel.instance.showDialog(
         (close) =>
           React.createElement(MigrationWizard, {
-            sourcePath: projectPath,
+            sourcePath: sourceDirectory,
             projectName: project.name,
             onComplete: async (targetPath: string) => {
               close();
               // Clear runtime cache for the source project
-              LocalProjectsModel.instance.clearRuntimeCache(projectPath);
+              LocalProjectsModel.instance.clearRuntimeCache(sourceDirectory);
 
               // Show activity indicator
               const activityId = 'adding-migrated-project';
@@ -1424,7 +1493,7 @@ export function ProjectsPage(props: ProjectsPageProps) {
                 await LocalProjectsModel.instance.fetch();
 
                 // Trigger runtime detection for both projects to update UI immediately
-                await LocalProjectsModel.instance.detectProjectRuntime(projectPath);
+                await LocalProjectsModel.instance.detectProjectRuntime(sourceDirectory);
                 await LocalProjectsModel.instance.detectProjectRuntime(targetPath);
 
                 // Force a full re-detection to update the UI with correct runtime info
@@ -1450,7 +1519,7 @@ export function ProjectsPage(props: ProjectsPageProps) {
                   }
 
                   // Move original project to Legacy folder
-                  ProjectOrganizationService.instance.moveProjectToFolder(projectPath, legacyFolder.id);
+                  ProjectOrganizationService.instance.moveProjectToFolder(sourceDirectory, legacyFolder.id);
 
                   ToastLayer.showSuccess(
                     `"${migratedProject.name}" is ready! Original moved to Legacy Projects folder.`
@@ -1510,14 +1579,15 @@ export function ProjectsPage(props: ProjectsPageProps) {
    * *contents* of a folder and "there is no folder" is not one of them.
    */
   const handleShareAsTemplate = useCallback(
-    (projectId: string) => {
-      const project = LocalProjectsModel.instance.getProjects().find((p) => p.id === projectId);
+    (projectPath: string) => {
+      const project = LocalProjectsModel.instance.getProjectEntryWithDirectory(projectPath);
       if (!project || !project.retainedProjectDirectory) {
         ToastLayer.showError('Cannot share this project: its folder could not be found.');
         return;
       }
       shareTemplate.open({
-        projectId,
+        // The row's own stored id, read from the entry the directory resolved.
+        projectId: project.id,
         projectName: project.name,
         projectDir: project.retainedProjectDirectory
       });
@@ -1526,9 +1596,8 @@ export function ProjectsPage(props: ProjectsPageProps) {
   );
 
   const handleOpenReadOnly = useCallback(
-    async (projectId: string) => {
-      const projects = LocalProjectsModel.instance.getProjects();
-      const project = projects.find((p) => p.id === projectId);
+    async (projectPath: string) => {
+      const project = LocalProjectsModel.instance.getProjectEntryWithDirectory(projectPath);
       if (!project) return;
 
       const activityId = 'opening-project-readonly';

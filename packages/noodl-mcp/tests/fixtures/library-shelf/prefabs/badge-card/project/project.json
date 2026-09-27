@@ -19,7 +19,7 @@
                 "type": "Text",
                 "x": 20,
                 "y": 40,
-                "parameters": { "text": "Badge" }
+                "parameters": { "text": "Badge", "textStyle": "Badge Label" }
               }
             ]
           }
@@ -51,6 +51,7 @@
       },
       "text": {
         "Badge Label": {
+          "fontFamily": "fonts/Badge/Badge-Bold.ttf",
           "fontSize": { "value": "12", "unit": "px" },
           "letterSpacing": "Auto"
         }

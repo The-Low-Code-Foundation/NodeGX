@@ -99,7 +99,7 @@ describe('LIB-005 import apply path', function () {
   });
 
   it('reports what landed, for the DONE stage to summarise', function (done) {
-    withTargetCopy(function (project) {
+    withTargetCopy(function (project, dir) {
       planProfileCard(project)
         .then((p) => apply(p, ProjectModel.instance))
         .then((r) => {
@@ -111,7 +111,17 @@ describe('LIB-005 import apply path', function () {
           // Accent arrives via the closure (both incoming components use it);
           // Brand was picked explicitly and collides.
           expect(r.stylesImported.colors.sort()).toEqual(['Accent', 'Brand']);
-          expect(r.stylesImported.text).toEqual(['Heading']);
+          // P100 UPG-003 §6: the text style arrives as typography tokens, not as a text style. The
+          // target copy's own "Heading" became `--heading-*` when it opened (a different font and
+          // size), so the source's lands beside it as `--heading-*-2` and the target's is untouched.
+          expect(r.stylesImported.text).toEqual([]);
+          const tokens = {};
+          for (const t of ProjectModel.instance.getMetaData('designTokens').customTokens) tokens[t.name] = t.value;
+          expect(tokens['--heading-size']).toBe('20px');
+          expect(tokens['--heading-size-2']).toBe('32px');
+          expect(tokens['--heading-family-2']).toBe("'QASource'");
+          const faces = fs.readFileSync(dir + '/noodl_modules/text-style-fonts/styles.css', 'utf8');
+          expect(faces).toContain("font-family: 'QASource';");
 
           // The image is a port-type dependency of ProfileCard; the font is a
           // dependency of the Heading text style — the style→file edge LIB-005
@@ -176,7 +186,10 @@ describe('LIB-005 import apply path', function () {
           const styles = ProjectModel.instance.getMetaData('styles');
           expect(styles.colors.Brand).toBe('#FF00AA');
           expect(styles.colors.Accent).toBe('#00AAFF');
-          expect(styles.text.Heading.fontFamily).toBe('fonts/QASource.ttf');
+          // P100 UPG-003 §6: the source's Heading arrived as tokens, given through metadata the same
+          // way — so they survive the undo too.
+          const tokens = ProjectModel.instance.getMetaData('designTokens').customTokens.map((t) => t.name);
+          expect(tokens).toContain('--heading-size-2');
 
           // And the files stay on disk — the DONE stage says so in as many words
           // ("Files on disk remain").

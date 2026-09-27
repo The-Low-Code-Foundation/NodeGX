@@ -50,6 +50,14 @@
  * it does so on the post path only.
  */
 
+// FLD-017 — CHR-012 made the community write verbs `PrimaryButton`, which imports `Icon`.
+jest.mock('@noodl-core-ui/components/common/Icon', () => ({
+  Icon: () => null,
+  IconName: {},
+  IconSize: { Small: 'small' },
+  IconVariant: {}
+}));
+
 import {
   CommunityApiClient,
   type ThreadAttachment

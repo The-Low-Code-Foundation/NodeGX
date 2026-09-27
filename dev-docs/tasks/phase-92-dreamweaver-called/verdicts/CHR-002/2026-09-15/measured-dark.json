@@ -1,0 +1,753 @@
+{
+  "launcher-projects": {
+    "root": "body",
+    "auditMethod": {
+      "fontSizes": {
+        "distinct": 9,
+        "values": {
+          "10px": 2,
+          "10.5px": 2,
+          "11px": 9,
+          "12px": 38,
+          "13px": 100,
+          "15px": 13,
+          "20px": 1,
+          "26px": 1,
+          "96px": 2
+        }
+      },
+      "radii": {
+        "distinct": 10,
+        "values": {
+          "2px": 1,
+          "3px": 3,
+          "4px": 1,
+          "5px": 2,
+          "6px": 4,
+          "7px": 9,
+          "8px": 4,
+          "10px": 2,
+          "50%": 3,
+          "100%": 3
+        }
+      },
+      "fills": {
+        "distinct": 10,
+        "values": {
+          "rgb(33, 41, 50)": 8,
+          "rgb(22, 28, 36)": 4,
+          "rgb(255, 106, 95)": 1,
+          "rgb(43, 52, 64)": 3,
+          "rgba(77, 163, 255, 0.13)": 1,
+          "rgb(77, 163, 255)": 3,
+          "rgb(51, 62, 77)": 7,
+          "rgb(60, 72, 87)": 4,
+          "rgb(255, 255, 255)": 3,
+          "rgb(221, 228, 236)": 1
+        }
+      }
+    },
+    "viewport": [
+      1368,
+      781
+    ],
+    "theme": "dark",
+    "elements": 168,
+    "elementsVisible": 132,
+    "inlineStyled": 8,
+    "fontSizesAllVisible": {
+      "distinct": 7,
+      "values": {
+        "10.5px": 2,
+        "11px": 9,
+        "12px": 17,
+        "13px": 96,
+        "15px": 5,
+        "26px": 1,
+        "96px": 2
+      }
+    },
+    "fontSizesTextBearing": {
+      "distinct": 7,
+      "values": {
+        "10.5px": 2,
+        "11px": 5,
+        "12px": 6,
+        "13px": 18,
+        "15px": 3,
+        "26px": 1,
+        "96px": 2
+      }
+    },
+    "radii": {
+      "distinct": 9,
+      "values": {
+        "2px": 1,
+        "3px": 2,
+        "4px": 1,
+        "5px": 2,
+        "6px": 4,
+        "7px": 9,
+        "8px": 2,
+        "10px": 2,
+        "50%": 3
+      }
+    },
+    "fills": {
+      "distinct": 8,
+      "values": {
+        "rgb(33, 41, 50)": 8,
+        "rgb(22, 28, 36)": 2,
+        "rgb(255, 106, 95)": 1,
+        "rgb(43, 52, 64)": 3,
+        "rgba(77, 163, 255, 0.13)": 1,
+        "rgb(77, 163, 255)": 3,
+        "rgb(51, 62, 77)": 6,
+        "rgb(60, 72, 87)": 2
+      }
+    },
+    "buttons": {
+      "count": 19,
+      "distinctStyles": 11,
+      "styles": {
+        "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(255, 255, 255)": 1,
+        "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(196, 206, 219)": 4,
+        "6px | 13px | 400 | rgb(51, 62, 77) | 0px none rgb(196, 206, 219)": 2,
+        "7px | 13px | 500 | rgb(43, 52, 64) | 1px solid rgb(125, 138, 152)": 1,
+        "7px | 13px | 500 | rgba(77, 163, 255, 0.13) | 0px none rgb(77, 163, 255)": 1,
+        "7px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": 1,
+        "7px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(196, 206, 219)": 1,
+        "7px | 13px | 500 | rgba(0, 0, 0, 0) | 1px solid rgba(0, 0, 0, 0)": 2,
+        "7px | 13px | 500 | rgb(77, 163, 255) | 1px solid rgba(0, 0, 0, 0)": 3,
+        "10px | 13px | 400 | rgb(33, 41, 50) | 1px solid rgb(125, 138, 152)": 2,
+        "50% | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": 1
+      }
+    }
+  },
+  "launcher-community": {
+    "root": "body",
+    "auditMethod": {
+      "fontSizes": {
+        "distinct": 8,
+        "values": {
+          "10px": 2,
+          "11px": 15,
+          "12px": 40,
+          "13px": 56,
+          "15px": 11,
+          "20px": 1,
+          "22px": 3,
+          "26px": 1
+        }
+      },
+      "radii": {
+        "distinct": 8,
+        "values": {
+          "2px": 1,
+          "3px": 5,
+          "4px": 8,
+          "6px": 4,
+          "7px": 4,
+          "8px": 2,
+          "50%": 4,
+          "100%": 3
+        }
+      },
+      "fills": {
+        "distinct": 9,
+        "values": {
+          "rgb(33, 41, 50)": 6,
+          "rgb(22, 28, 36)": 4,
+          "rgb(255, 106, 95)": 1,
+          "rgb(43, 52, 64)": 6,
+          "rgb(77, 163, 255)": 1,
+          "rgb(51, 62, 77)": 3,
+          "rgb(60, 72, 87)": 4,
+          "rgb(255, 255, 255)": 3,
+          "rgb(221, 228, 236)": 1
+        }
+      }
+    },
+    "viewport": [
+      1368,
+      781
+    ],
+    "theme": "dark",
+    "elements": 129,
+    "elementsVisible": 98,
+    "inlineStyled": 6,
+    "fontSizesAllVisible": {
+      "distinct": 6,
+      "values": {
+        "11px": 15,
+        "12px": 21,
+        "13px": 55,
+        "15px": 3,
+        "22px": 3,
+        "26px": 1
+      }
+    },
+    "fontSizesTextBearing": {
+      "distinct": 6,
+      "values": {
+        "11px": 7,
+        "12px": 12,
+        "13px": 14,
+        "15px": 1,
+        "22px": 3,
+        "26px": 1
+      }
+    },
+    "radii": {
+      "distinct": 6,
+      "values": {
+        "2px": 1,
+        "3px": 4,
+        "4px": 8,
+        "6px": 4,
+        "7px": 4,
+        "50%": 4
+      }
+    },
+    "fills": {
+      "distinct": 7,
+      "values": {
+        "rgb(33, 41, 50)": 6,
+        "rgb(22, 28, 36)": 2,
+        "rgb(255, 106, 95)": 1,
+        "rgb(43, 52, 64)": 6,
+        "rgb(77, 163, 255)": 1,
+        "rgb(51, 62, 77)": 2,
+        "rgb(60, 72, 87)": 2
+      }
+    },
+    "buttons": {
+      "count": 18,
+      "distinctStyles": 12,
+      "styles": {
+        "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(196, 206, 219)": 4,
+        "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(255, 255, 255)": 1,
+        "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": 1,
+        "3px | 11px | 400 | rgba(0, 0, 0, 0) | 1px solid rgb(125, 138, 152)": 1,
+        "3px | 11px | 400 | rgb(51, 62, 77) | 1px solid rgb(77, 163, 255)": 1,
+        "4px | 13px | 600 | rgb(77, 163, 255) | 1px solid rgb(77, 163, 255)": 1,
+        "4px | 13px | 400 | rgba(0, 0, 0, 0) | 1px solid rgba(0, 0, 0, 0)": 1,
+        "4px | 13px | 400 | rgba(0, 0, 0, 0) | 1px solid rgb(125, 138, 152)": 1,
+        "4px | 13px | 400 | rgb(33, 41, 50) | 0px none rgb(0, 0, 0)": 1,
+        "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": 4,
+        "7px | 13px | 500 | rgb(43, 52, 64) | 1px solid rgb(125, 138, 152)": 1,
+        "50% | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": 1
+      }
+    }
+  },
+  "launcher-learning": {
+    "root": "body",
+    "auditMethod": {
+      "fontSizes": {
+        "distinct": 6,
+        "values": {
+          "10px": 2,
+          "11px": 63,
+          "12px": 67,
+          "13px": 95,
+          "15px": 12,
+          "20px": 1
+        }
+      },
+      "radii": {
+        "distinct": 8,
+        "values": {
+          "2px": 10,
+          "3px": 3,
+          "4px": 2,
+          "6px": 1,
+          "7px": 44,
+          "8px": 2,
+          "50%": 11,
+          "100%": 3
+        }
+      },
+      "fills": {
+        "distinct": 9,
+        "values": {
+          "rgb(33, 41, 50)": 14,
+          "rgb(22, 28, 36)": 4,
+          "rgb(255, 106, 95)": 1,
+          "rgb(43, 52, 64)": 4,
+          "rgb(77, 163, 255)": 20,
+          "rgb(51, 62, 77)": 29,
+          "rgb(60, 72, 87)": 4,
+          "rgb(255, 255, 255)": 3,
+          "rgb(221, 228, 236)": 1
+        }
+      }
+    },
+    "viewport": [
+      1368,
+      781
+    ],
+    "theme": "dark",
+    "elements": 240,
+    "elementsVisible": 200,
+    "inlineStyled": 15,
+    "fontSizesAllVisible": {
+      "distinct": 4,
+      "values": {
+        "11px": 63,
+        "12px": 48,
+        "13px": 85,
+        "15px": 4
+      }
+    },
+    "fontSizesTextBearing": {
+      "distinct": 4,
+      "values": {
+        "11px": 50,
+        "12px": 39,
+        "13px": 15,
+        "15px": 2
+      }
+    },
+    "radii": {
+      "distinct": 6,
+      "values": {
+        "2px": 10,
+        "3px": 2,
+        "4px": 2,
+        "6px": 1,
+        "7px": 44,
+        "50%": 11
+      }
+    },
+    "fills": {
+      "distinct": 7,
+      "values": {
+        "rgb(33, 41, 50)": 14,
+        "rgb(22, 28, 36)": 2,
+        "rgb(255, 106, 95)": 1,
+        "rgb(43, 52, 64)": 4,
+        "rgb(77, 163, 255)": 11,
+        "rgb(51, 62, 77)": 28,
+        "rgb(60, 72, 87)": 2
+      }
+    },
+    "buttons": {
+      "count": 32,
+      "distinctStyles": 10,
+      "styles": {
+        "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(196, 206, 219)": 4,
+        "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(255, 255, 255)": 1,
+        "4px | 13px | 400 | rgb(33, 41, 50) | 0px none rgb(0, 0, 0)": 1,
+        "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": 1,
+        "7px | 13px | 500 | rgb(43, 52, 64) | 1px solid rgb(125, 138, 152)": 1,
+        "7px | 12px | 500 | rgba(0, 0, 0, 0) | 1px solid rgba(0, 0, 0, 0)": 10,
+        "7px | 12px | 500 | rgb(77, 163, 255) | 1px solid rgba(0, 0, 0, 0)": 10,
+        "7px | 12px | 600 | rgb(51, 62, 77) | 1px solid rgb(77, 163, 255)": 1,
+        "7px | 12px | 400 | rgb(43, 52, 64) | 1px solid rgb(125, 138, 152)": 2,
+        "50% | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": 1
+      }
+    }
+  },
+  "launcher-templates": {
+    "root": "body",
+    "auditMethod": {
+      "fontSizes": {
+        "distinct": 7,
+        "values": {
+          "10px": 2,
+          "11px": 31,
+          "12px": 31,
+          "13px": 70,
+          "15px": 11,
+          "20px": 1,
+          "26px": 1
+        }
+      },
+      "radii": {
+        "distinct": 7,
+        "values": {
+          "2px": 15,
+          "3px": 3,
+          "4px": 13,
+          "7px": 1,
+          "8px": 2,
+          "50%": 3,
+          "100%": 3
+        }
+      },
+      "fills": {
+        "distinct": 8,
+        "values": {
+          "rgb(33, 41, 50)": 3,
+          "rgb(22, 28, 36)": 4,
+          "rgb(255, 106, 95)": 1,
+          "rgb(43, 52, 64)": 20,
+          "rgb(51, 62, 77)": 10,
+          "rgb(60, 72, 87)": 4,
+          "rgb(255, 255, 255)": 3,
+          "rgb(221, 228, 236)": 1
+        }
+      }
+    },
+    "viewport": [
+      1368,
+      781
+    ],
+    "theme": "dark",
+    "elements": 147,
+    "elementsVisible": 116,
+    "inlineStyled": 6,
+    "fontSizesAllVisible": {
+      "distinct": 5,
+      "values": {
+        "11px": 31,
+        "12px": 12,
+        "13px": 69,
+        "15px": 3,
+        "26px": 1
+      }
+    },
+    "fontSizesTextBearing": {
+      "distinct": 5,
+      "values": {
+        "11px": 27,
+        "12px": 3,
+        "13px": 21,
+        "15px": 1,
+        "26px": 1
+      }
+    },
+    "radii": {
+      "distinct": 5,
+      "values": {
+        "2px": 15,
+        "3px": 2,
+        "4px": 13,
+        "7px": 1,
+        "50%": 3
+      }
+    },
+    "fills": {
+      "distinct": 6,
+      "values": {
+        "rgb(33, 41, 50)": 3,
+        "rgb(22, 28, 36)": 2,
+        "rgb(255, 106, 95)": 1,
+        "rgb(43, 52, 64)": 20,
+        "rgb(51, 62, 77)": 9,
+        "rgb(60, 72, 87)": 2
+      }
+    },
+    "buttons": {
+      "count": 19,
+      "distinctStyles": 7,
+      "styles": {
+        "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(196, 206, 219)": 4,
+        "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(255, 255, 255)": 1,
+        "4px | 11px | 400 | rgb(51, 62, 77) | 2px solid rgb(77, 163, 255)": 1,
+        "4px | 11px | 400 | rgb(43, 52, 64) | 2px solid rgb(125, 138, 152)": 4,
+        "4px | 13px | 400 | rgb(51, 62, 77) | 2px solid rgb(125, 138, 152)": 7,
+        "7px | 13px | 500 | rgb(43, 52, 64) | 1px solid rgb(125, 138, 152)": 1,
+        "50% | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": 1
+      }
+    },
+    "templateRows": [
+      "Site BuilderUse this template ",
+      "Landing PagesUse this template",
+      "Todo listUse this template →On",
+      "Story engineUse this template ",
+      "Pixel dungeonUse this template",
+      "Rocket SchoolUse this template",
+      "Members' areaUse this template"
+    ]
+  },
+  "editor-group-panel": {
+    "root": ".sidebar-property-editor",
+    "auditMethod": {
+      "fontSizes": {
+        "distinct": 3,
+        "values": {
+          "11px": 181,
+          "12px": 944,
+          "14px": 1
+        }
+      },
+      "radii": {
+        "distinct": 5,
+        "values": {
+          "4px": 44,
+          "6px": 90,
+          "8px": 1,
+          "50%": 3,
+          "9999px": 14
+        }
+      },
+      "fills": {
+        "distinct": 10,
+        "values": {
+          "rgb(33, 41, 50)": 6,
+          "rgb(77, 163, 255)": 7,
+          "rgba(77, 163, 255, 0.13)": 1,
+          "rgb(187, 198, 211)": 3,
+          "rgb(43, 52, 64)": 87,
+          "rgb(51, 62, 77)": 2,
+          "rgb(67, 78, 92)": 9,
+          "rgb(255, 255, 255)": 7,
+          "rgb(0, 0, 0)": 1,
+          "rgba(0, 0, 0, 0.2)": 1
+        }
+      }
+    },
+    "viewport": [
+      1368,
+      781
+    ],
+    "theme": "dark",
+    "elements": 1126,
+    "elementsVisible": 663,
+    "inlineStyled": 250,
+    "fontSizesAllVisible": {
+      "distinct": 3,
+      "values": {
+        "11px": 83,
+        "12px": 579,
+        "14px": 1
+      }
+    },
+    "fontSizesTextBearing": {
+      "distinct": 2,
+      "values": {
+        "11px": 47,
+        "12px": 43
+      }
+    },
+    "radii": {
+      "distinct": 5,
+      "values": {
+        "4px": 38,
+        "6px": 39,
+        "8px": 1,
+        "50%": 3,
+        "9999px": 5
+      }
+    },
+    "fills": {
+      "distinct": 10,
+      "values": {
+        "rgb(33, 41, 50)": 6,
+        "rgb(77, 163, 255)": 4,
+        "rgba(77, 163, 255, 0.13)": 1,
+        "rgb(187, 198, 211)": 3,
+        "rgb(43, 52, 64)": 40,
+        "rgb(51, 62, 77)": 2,
+        "rgb(67, 78, 92)": 3,
+        "rgb(255, 255, 255)": 3,
+        "rgb(0, 0, 0)": 1,
+        "rgba(0, 0, 0, 0.2)": 1
+      }
+    },
+    "buttons": {
+      "count": 23,
+      "distinctStyles": 4,
+      "styles": {
+        "0px | 11px | 600 | rgba(0, 0, 0, 0) | 0px none rgb(196, 206, 219)": 11,
+        "0px | 11px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(77, 163, 255)": 7,
+        "4px | 12px | 400 | rgb(77, 163, 255) | 0px none rgb(7, 22, 39)": 2,
+        "4px | 11px | 600 | rgba(0, 0, 0, 0) | 0px none rgb(196, 206, 219)": 3
+      }
+    },
+    "shadowHints": 6
+  },
+  "editor-nodepicker": {
+    "root": "body",
+    "auditMethod": {
+      "fontSizes": {
+        "distinct": 12,
+        "values": {
+          "10px": 13,
+          "11px": 552,
+          "11.5px": 15,
+          "12px": 2313,
+          "12.5px": 11,
+          "13px": 10,
+          "14px": 11,
+          "14.04px": 5,
+          "15px": 238,
+          "16px": 4,
+          "17px": 19,
+          "20px": 1
+        }
+      },
+      "radii": {
+        "distinct": 11,
+        "values": {
+          "2px": 17,
+          "3px": 3,
+          "4px": 55,
+          "5px": 149,
+          "6px": 126,
+          "7px": 162,
+          "8px": 161,
+          "10px": 1,
+          "50%": 30,
+          "100%": 3,
+          "9999px": 16
+        }
+      },
+      "fills": {
+        "distinct": 31,
+        "values": {
+          "rgb(33, 41, 50)": 25,
+          "rgb(43, 52, 64)": 393,
+          "color(srgb 0.360784 0.662745 1 / 0.12)": 2,
+          "rgb(51, 62, 77)": 13,
+          "rgb(77, 163, 255)": 10,
+          "rgba(77, 163, 255, 0.13)": 4,
+          "rgb(187, 198, 211)": 3,
+          "rgb(67, 78, 92)": 9,
+          "rgb(255, 255, 255)": 10,
+          "rgb(0, 0, 0)": 1,
+          "rgba(0, 0, 0, 0.2)": 1,
+          "rgb(22, 28, 36)": 3,
+          "rgb(196, 206, 219)": 15,
+          "rgb(60, 203, 127)": 1,
+          "rgb(47, 57, 69)": 27,
+          "rgba(0, 0, 0, 0.5)": 1,
+          "rgb(60, 72, 87)": 4,
+          "rgb(92, 169, 255)": 1,
+          "rgb(245, 184, 67)": 2,
+          "rgb(167, 139, 250)": 1,
+          "rgb(69, 208, 138)": 6,
+          "rgb(247, 118, 196)": 1,
+          "color(srgb 0.360784 0.662745 1 / 0.14)": 41,
+          "color(srgb 0.960784 0.721569 0.262745 / 0.14)": 32,
+          "color(srgb 0.654902 0.545098 0.980392 / 0.14)": 11,
+          "color(srgb 0.270588 0.815686 0.541176 / 0.14)": 61,
+          "color(srgb 0.992157 0.690196 0.133333 / 0.2)": 10,
+          "color(srgb 0.968627 0.462745 0.768627 / 0.14)": 5,
+          "color(srgb 0.768627 0.807843 0.858824 / 0.14)": 3,
+          "rgb(53, 195, 232)": 3,
+          "rgb(221, 228, 236)": 1
+        }
+      }
+    },
+    "viewport": [
+      1368,
+      781
+    ],
+    "theme": "dark",
+    "elements": 3192,
+    "elementsVisible": 2343,
+    "inlineStyled": 339,
+    "fontSizesAllVisible": {
+      "distinct": 11,
+      "values": {
+        "10px": 11,
+        "11px": 302,
+        "11.5px": 15,
+        "12px": 1730,
+        "12.5px": 11,
+        "13px": 7,
+        "14px": 9,
+        "14.04px": 5,
+        "15px": 230,
+        "16px": 4,
+        "17px": 19
+      }
+    },
+    "fontSizesTextBearing": {
+      "distinct": 7,
+      "values": {
+        "10px": 1,
+        "11px": 256,
+        "11.5px": 4,
+        "12px": 410,
+        "13px": 1,
+        "14.04px": 5,
+        "15px": 2
+      }
+    },
+    "radii": {
+      "distinct": 10,
+      "values": {
+        "2px": 17,
+        "3px": 2,
+        "4px": 46,
+        "5px": 8,
+        "6px": 72,
+        "7px": 162,
+        "8px": 160,
+        "10px": 1,
+        "50%": 30,
+        "9999px": 7
+      }
+    },
+    "fills": {
+      "distinct": 30,
+      "values": {
+        "rgb(33, 41, 50)": 24,
+        "rgb(43, 52, 64)": 203,
+        "color(srgb 0.360784 0.662745 1 / 0.12)": 2,
+        "rgb(51, 62, 77)": 12,
+        "rgb(77, 163, 255)": 7,
+        "rgba(77, 163, 255, 0.13)": 4,
+        "rgb(187, 198, 211)": 3,
+        "rgb(67, 78, 92)": 3,
+        "rgb(255, 255, 255)": 3,
+        "rgb(0, 0, 0)": 1,
+        "rgba(0, 0, 0, 0.2)": 1,
+        "rgb(22, 28, 36)": 1,
+        "rgb(196, 206, 219)": 15,
+        "rgb(60, 203, 127)": 1,
+        "rgb(47, 57, 69)": 27,
+        "rgba(0, 0, 0, 0.5)": 1,
+        "rgb(60, 72, 87)": 3,
+        "rgb(92, 169, 255)": 1,
+        "rgb(245, 184, 67)": 2,
+        "rgb(167, 139, 250)": 1,
+        "rgb(69, 208, 138)": 6,
+        "rgb(247, 118, 196)": 1,
+        "color(srgb 0.360784 0.662745 1 / 0.14)": 41,
+        "color(srgb 0.960784 0.721569 0.262745 / 0.14)": 32,
+        "color(srgb 0.654902 0.545098 0.980392 / 0.14)": 11,
+        "color(srgb 0.270588 0.815686 0.541176 / 0.14)": 61,
+        "color(srgb 0.992157 0.690196 0.133333 / 0.2)": 10,
+        "color(srgb 0.968627 0.462745 0.768627 / 0.14)": 5,
+        "color(srgb 0.768627 0.807843 0.858824 / 0.14)": 3,
+        "rgb(53, 195, 232)": 3
+      }
+    },
+    "buttons": {
+      "count": 225,
+      "distinctStyles": 26,
+      "styles": {
+        "0px | 12px | 400 | rgb(33, 41, 50) | 0px none rgb(221, 228, 236)": 1,
+        "0px | 12px | 400 | rgb(51, 62, 77) | 0px none rgb(221, 228, 236)": 1,
+        "0px | 11px | 600 | rgba(0, 0, 0, 0) | 0px none rgb(196, 206, 219)": 11,
+        "0px | 11px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(77, 163, 255)": 7,
+        "0px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": 3,
+        "2px | 11px | 600 | rgb(51, 62, 77) | 1px solid rgb(47, 57, 69)": 1,
+        "4px | 15px | 600 | rgba(0, 0, 0, 0) | 0px none rgb(255, 255, 255)": 1,
+        "4px | 12px | 400 | rgb(77, 163, 255) | 0px none rgb(7, 22, 39)": 2,
+        "4px | 11px | 600 | rgba(0, 0, 0, 0) | 0px none rgb(196, 206, 219)": 3,
+        "4px | 12px | 400 | rgb(33, 41, 50) | 0px none rgb(0, 0, 0)": 1,
+        "4px | 12px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": 3,
+        "6px | 12px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": 18,
+        "6px | 12px | 400 | rgba(77, 163, 255, 0.13) | 0px none rgb(0, 0, 0)": 1,
+        "6px | 12px | 400 | rgba(0, 0, 0, 0) | 0px none rgba(16, 16, 16, 0.3)": 4,
+        "6px | 12.5px | 500 | rgb(33, 41, 50) | 0px none rgb(255, 255, 255)": 1,
+        "6px | 12.5px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(196, 206, 219)": 1,
+        "6px | 13px | 600 | rgb(77, 163, 255) | 0px none rgb(7, 22, 39)": 1,
+        "6px | 11.5px | 600 | rgb(77, 163, 255) | 0px none rgb(7, 22, 39)": 1,
+        "6px | 12px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(196, 206, 219)": 1,
+        "7px | 12px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(77, 163, 255)": 1,
+        "7px | 12px | 600 | rgba(77, 163, 255, 0.13) | 0px none rgb(77, 163, 255)": 1,
+        "7px | 12px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": 7,
+        "7px | 12px | 600 | rgb(33, 41, 50) | 1px solid rgb(125, 138, 152)": 1,
+        "8px | 12px | 400 | rgb(33, 41, 50) | 1px solid rgb(77, 163, 255)": 1,
+        "8px | 12px | 400 | rgb(43, 52, 64) | 1px solid rgb(125, 138, 152)": 151,
+        "9999px | 12px | 600 | rgba(0, 0, 0, 0) | 1px solid rgb(67, 78, 92)": 1
+      }
+    }
+  }
+}

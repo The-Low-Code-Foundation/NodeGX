@@ -1,0 +1,63 @@
+{
+ "theme": "dark",
+ "classes": {
+  "Root": "PrimaryButton-module__Root--KMqLg",
+  "is-size-small": "PrimaryButton-module__is-size-small--P9bel",
+  "is-variant-muted": "PrimaryButton-module__is-variant-muted--Cskrn",
+  "is-variant-muted-on-low-bg": "PrimaryButton-module__is-variant-muted-on-low-bg--rsdzS",
+  "Label": "PrimaryButton-module__Label--ztZ26",
+  "Spinner": "PrimaryButton-module__Spinner--GCCBK"
+ },
+ "rows": [
+  {
+   "name": "muted/default",
+   "shipped": "70x36 border 1px solid shadow none",
+   "oldRing": "70x36 border 0px none",
+   "contentBox": "94x52",
+   "sameAsOldRing": true,
+   "contentBoxDelta": "24x16",
+   "borderWithoutGiveBack": "70x36",
+   "giveBackDelta": "0x0"
+  },
+  {
+   "name": "muted/small",
+   "shipped": "70x30.390625 border 1px solid shadow none",
+   "oldRing": "70x30.390625 border 0px none",
+   "contentBox": "94x44",
+   "sameAsOldRing": true,
+   "contentBoxDelta": "24x13.609375",
+   "borderWithoutGiveBack": "70x32.390625",
+   "giveBackDelta": "0x2"
+  },
+  {
+   "name": "muted-on-low-bg/default",
+   "shipped": "70x36 border 1px solid shadow none",
+   "oldRing": "70x36 border 0px none",
+   "contentBox": "94x52",
+   "sameAsOldRing": true,
+   "contentBoxDelta": "24x16",
+   "borderWithoutGiveBack": "70x36",
+   "giveBackDelta": "0x0"
+  },
+  {
+   "name": "muted-on-low-bg/small",
+   "shipped": "70x30.390625 border 1px solid shadow none",
+   "oldRing": "70x30.390625 border 0px none",
+   "contentBox": "94x44",
+   "sameAsOldRing": true,
+   "contentBoxDelta": "24x13.609375",
+   "borderWithoutGiveBack": "70x32.390625",
+   "giveBackDelta": "0x2"
+  },
+  {
+   "name": "muted/small/disabled",
+   "shipped": "70x30.390625 border 1px solid shadow none",
+   "oldRing": "70x30.390625 border 0px none",
+   "contentBox": "94x44",
+   "sameAsOldRing": true,
+   "contentBoxDelta": "24x13.609375",
+   "borderWithoutGiveBack": "70x32.390625",
+   "giveBackDelta": "0x2"
+  }
+ ]
+}

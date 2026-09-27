@@ -1,0 +1,165 @@
+
+> @thelowcodefoundation/repo@1.1.0 docs:verify-origin
+> ts-node -P ./scripts/tsconfig.json ./scripts/docs/verify-origin.ts --library-docs
+
+LIB-008 — both editor origins, and every library docs link, resolved by calling the editor's own functions.
+
+docs: https://the-low-code-foundation.github.io/NodeGX/docs
+   ok   200                    liveness /  — the docs site itself
+   ok   200                             /nodes/logic/and  — a node page (property panel, node picker)
+   ok   200                             /nodes/cloud-services/net-noodl-user-log-in  — a node whose legacy URL and route disagree
+   ok   200                             /custom-nodes  — the hand-authored custom-nodes guide
+
+content: https://the-low-code-foundation.github.io/nodegx-content/static
+   ok   200                    liveness /README.md  — the content repo's README, served above /static
+   ok   200                             /library/prefabs/index.json  — the prefab library index
+   ok   200                             /library/modules/index.json  — the module library index
+   ok   200                             /lessons/index.json  — the Learn lesson list
+   note 404                             /whats-new/feed.json  — the what's-new feed
+
+library-docs: https://the-low-code-foundation.github.io/NodeGX/docs
+   ok   200                    liveness /  — the docs site itself
+   🔴   404                             /library/modules/chartjs  — "Read docs" on Chart.js
+   🔴   404                             /library/modules/clipboard  — "Read docs" on Clipboard
+   🔴   404                             /library/modules/custom-html  — "Read docs" on Custom HTML
+   🔴   404                             /library/modules/data-context  — "Read docs" on Data Context
+   🔴   404                             /library/modules/drag-to-reorder  — "Read docs" on Drag to Reorder
+   🔴   404                             /library/modules/file-download  — "Read docs" on File Download
+   🔴   404                             /library/modules/font-awesome-brands  — "Read docs" on Font Awesome Brands
+   🔴   404                             /library/modules/font-awesome-solid  — "Read docs" on Font Awesome Solid
+   🔴   404                             /library/modules/validation  — "Read docs" on Form Validation
+   🔴   404                             /library/modules/geospatial-analysis  — "Read docs" on Geospatial Analysis
+   🔴   404                             /library/modules/graphql  — "Read docs" on GraphQL
+   🔴   404                             /library/modules/i18next  — "Read docs" on i18next Translation
+   🔴   404                             /library/modules/intl-format  — "Read docs" on Intl Format
+   🔴   404                             /library/modules/keyboard-shortcuts  — "Read docs" on Keyboard Shortcuts
+   🔴   404                             /library/modules/lottie  — "Read docs" on Lottie
+   🔴   404                             /library/modules/maplibre  — "Read docs" on MapLibre GL
+   🔴   404                             /library/modules/markdown  — "Read docs" on Markdown
+   🔴   404                             /library/modules/marquee  — "Read docs" on Marquee
+   🔴   404                             /library/modules/material-icons  — "Read docs" on Material Icons
+   🔴   404                             /library/modules/media-recorder  — "Read docs" on Media Recorder
+   🔴   404                             /library/modules/pdf-viewer  — "Read docs" on PDF Viewer
+   🔴   404                             /library/modules/qr-scanner  — "Read docs" on QR Scanner
+   🔴   404                             /library/modules/rich-text-editor  — "Read docs" on Rich Text Editor
+   🔴   404                             /library/modules/simple-tooltips  — "Read docs" on Simple Tooltips
+   🔴   404                             /library/modules/virtual-list  — "Read docs" on Virtual List
+   🔴   404                             /library/modules/webcamera  — "Read docs" on Web Camera
+   🔴   404                             /library/prefabs/accordion  — "Read docs" on Accordion
+   🔴   404                             /library/prefabs/advanced-columns  — "Read docs" on Advanced Columns
+   🔴   404                             /library/prefabs/app-shell  — "Read docs" on App Shell
+   🔴   404                             /library/prefabs/auth-pages  — "Read docs" on Auth Pages
+   🔴   404                             /library/prefabs/avatar  — "Read docs" on Avatar
+   🔴   404                             /library/prefabs/card-grid  — "Read docs" on Card & Card Grid
+   🔴   404                             /library/prefabs/confirm-dialog  — "Read docs" on Confirm Dialog
+   🔴   404                             /library/prefabs/crud-screen  — "Read docs" on CRUD Screen
+   🔴   404                             /library/prefabs/date-picker  — "Read docs" on Date Picker
+   🔴   404                             /library/prefabs/email-verification  — "Read docs" on Email Verification
+   🔴   404                             /library/prefabs/file-upload  — "Read docs" on File Upload
+   🔴   404                             /library/prefabs/filters  — "Read docs" on Filters
+   🔴   404                             /library/prefabs/form  — "Read docs" on Form
+   🔴   404                             /library/prefabs/form-fields  — "Read docs" on Form Fields
+   🔴   404                             /library/prefabs/format-date  — "Read docs" on Format Date
+   🔴   404                             /library/prefabs/format-full-name  — "Read docs" on Format Full Name
+   🔴   404                             /library/prefabs/list-with-icons  — "Read docs" on List With Icons
+   🔴   404                             /library/prefabs/mailgun  — "Read docs" on Mail Gun
+   🔴   404                             /library/prefabs/media-query  — "Read docs" on Media Query
+   🔴   404                             /library/prefabs/multi-select  — "Read docs" on Multi Select
+   🔴   404                             /library/prefabs/navigation-menu  — "Read docs" on Navigation Menu
+   🔴   404                             /library/prefabs/oauth2  — "Read docs" on OAuth2
+   🔴   404                             /library/prefabs/page-header  — "Read docs" on Page Header
+   🔴   404                             /library/prefabs/pagination  — "Read docs" on Pagination
+   🔴   404                             /library/prefabs/progress-circle  — "Read docs" on Progress Circle
+   🔴   404                             /library/prefabs/rating  — "Read docs" on Rating
+   🔴   404                             /library/prefabs/sanitise-email  — "Read docs" on Sanitise Email
+   🔴   404                             /library/prefabs/search-bar  — "Read docs" on Search Bar
+   🔴   404                             /library/prefabs/sendgrid  — "Read docs" on Send Grid
+   🔴   404                             /library/prefabs/settings-page  — "Read docs" on Settings Page
+   🔴   404                             /library/modules/shake-detector  — "Read docs" on Shake Detector
+   🔴   404                             /library/prefabs/states-kit  — "Read docs" on States Kit
+   🔴   404                             /library/prefabs/stepper  — "Read docs" on Stepper
+   🔴   404                             /library/prefabs/stripe  — "Read docs" on Stripe
+   🔴   404                             /library/prefabs/supabase  — "Read docs" on Supabase
+   🔴   404                             /library/prefabs/tab-bar  — "Read docs" on Tab Bar
+   🔴   404                             /library/prefabs/table  — "Read docs" on Table
+   🔴   404                             /library/prefabs/tags  — "Read docs" on Tags
+   🔴   404                             /library/prefabs/time-picker  — "Read docs" on Time Picker
+   🔴   404                             /library/prefabs/toast  — "Read docs" on Toast
+   🔴   404                             /library/prefabs/toggle  — "Read docs" on Toggle Switch
+   🔴   404                             /library/prefabs/totp  — "Read docs" on TOTP
+   🔴   404                             /library/prefabs/user-menu  — "Read docs" on User Menu
+   🔴   404                             /library/prefabs/xano  — "Read docs" on Xano
+
+🔴 library-docs: PATH MOVED — the origin is alive, 70 known pages are not where the editor looks.
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/chartjs  — "Read docs" on Chart.js
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/clipboard  — "Read docs" on Clipboard
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/custom-html  — "Read docs" on Custom HTML
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/data-context  — "Read docs" on Data Context
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/drag-to-reorder  — "Read docs" on Drag to Reorder
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/file-download  — "Read docs" on File Download
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/font-awesome-brands  — "Read docs" on Font Awesome Brands
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/font-awesome-solid  — "Read docs" on Font Awesome Solid
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/validation  — "Read docs" on Form Validation
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/geospatial-analysis  — "Read docs" on Geospatial Analysis
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/graphql  — "Read docs" on GraphQL
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/i18next  — "Read docs" on i18next Translation
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/intl-format  — "Read docs" on Intl Format
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/keyboard-shortcuts  — "Read docs" on Keyboard Shortcuts
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/lottie  — "Read docs" on Lottie
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/maplibre  — "Read docs" on MapLibre GL
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/markdown  — "Read docs" on Markdown
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/marquee  — "Read docs" on Marquee
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/material-icons  — "Read docs" on Material Icons
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/media-recorder  — "Read docs" on Media Recorder
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/pdf-viewer  — "Read docs" on PDF Viewer
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/qr-scanner  — "Read docs" on QR Scanner
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/rich-text-editor  — "Read docs" on Rich Text Editor
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/simple-tooltips  — "Read docs" on Simple Tooltips
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/virtual-list  — "Read docs" on Virtual List
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/webcamera  — "Read docs" on Web Camera
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/accordion  — "Read docs" on Accordion
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/advanced-columns  — "Read docs" on Advanced Columns
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/app-shell  — "Read docs" on App Shell
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/auth-pages  — "Read docs" on Auth Pages
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/avatar  — "Read docs" on Avatar
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/card-grid  — "Read docs" on Card & Card Grid
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/confirm-dialog  — "Read docs" on Confirm Dialog
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/crud-screen  — "Read docs" on CRUD Screen
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/date-picker  — "Read docs" on Date Picker
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/email-verification  — "Read docs" on Email Verification
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/file-upload  — "Read docs" on File Upload
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/filters  — "Read docs" on Filters
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/form  — "Read docs" on Form
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/form-fields  — "Read docs" on Form Fields
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/format-date  — "Read docs" on Format Date
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/format-full-name  — "Read docs" on Format Full Name
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/list-with-icons  — "Read docs" on List With Icons
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/mailgun  — "Read docs" on Mail Gun
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/media-query  — "Read docs" on Media Query
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/multi-select  — "Read docs" on Multi Select
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/navigation-menu  — "Read docs" on Navigation Menu
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/oauth2  — "Read docs" on OAuth2
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/page-header  — "Read docs" on Page Header
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/pagination  — "Read docs" on Pagination
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/progress-circle  — "Read docs" on Progress Circle
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/rating  — "Read docs" on Rating
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/sanitise-email  — "Read docs" on Sanitise Email
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/search-bar  — "Read docs" on Search Bar
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/sendgrid  — "Read docs" on Send Grid
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/settings-page  — "Read docs" on Settings Page
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/modules/shake-detector  — "Read docs" on Shake Detector
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/states-kit  — "Read docs" on States Kit
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/stepper  — "Read docs" on Stepper
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/stripe  — "Read docs" on Stripe
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/supabase  — "Read docs" on Supabase
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/tab-bar  — "Read docs" on Tab Bar
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/table  — "Read docs" on Table
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/tags  — "Read docs" on Tags
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/time-picker  — "Read docs" on Time Picker
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/toast  — "Read docs" on Toast
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/toggle  — "Read docs" on Toggle Switch
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/totp  — "Read docs" on TOTP
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/user-menu  — "Read docs" on User Menu
+   404  https://the-low-code-foundation.github.io/NodeGX/docs/library/prefabs/xano  — "Read docs" on Xano
+   The origin is right and the path is wrong: check the suffix in packages/noodl-editor/src/editor/src/views/NodePicker/components/ModuleCard/ModuleCard.tsx
+   against how that site is built, and the path derivation that produced these.

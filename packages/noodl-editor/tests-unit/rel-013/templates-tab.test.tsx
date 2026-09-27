@@ -35,6 +35,19 @@ import React from 'react';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
+/**
+ * ⚠️ `Icon` is replaced, and only `Icon` — FLD-017's stub, for FLD-017's reason. CHR-005 made the
+ * tab's buttons the shared `PrimaryButton`, which imports `Icon`, and `Icon.tsx` calls webpack's
+ * `require.context` at import time: without this the suite fails TO RUN. No button here passes an
+ * `icon`, so the stub is never called; everything else the tab renders is the real component.
+ */
+jest.mock('@noodl-core-ui/components/common/Icon', () => ({
+  Icon: () => null,
+  IconName: {},
+  IconSize: { Small: 'small' },
+  IconVariant: {}
+}));
+
 import type {
   TemplateChoice,
   TemplateGalleryState
@@ -60,6 +73,15 @@ const LAUNCHER_SRC = join(__dirname, '../../../noodl-core-ui/src/preview/launche
 
 function sourceOf(absolutePath: string): string {
   return stripComments(readFileSync(absolutePath, 'utf8'));
+}
+
+/**
+ * The template cards on screen. CHR-005: found by `data-test`, not by a stylesheet class — the card
+ * is the launcher's shared `LauncherCard` now, and a class the styleMock echoes back would pass on
+ * markup that carries no such class at runtime.
+ */
+function cards(tree: ReturnType<typeof render>) {
+  return walk(tree).filter((n) => n.props['data-test'] === 'template-card');
 }
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
@@ -180,7 +202,7 @@ describe('REL-013 AC1 — the tab draws the registry\u2019s rows', () => {
     expect(words).toContain('Members area');
     expect(words).toContain('Simple CRM');
     expect(words).toContain('A sign-in, a members-only page and the records behind them.');
-    expect(byClass(tree, 'TemplateCard').length).toBe(2);
+    expect(cards(tree).length).toBe(2);
   });
 
   it('🔴 draws the category LABEL, not the platform slug', () => {
@@ -197,10 +219,40 @@ describe('REL-013 AC1 — the tab draws the registry\u2019s rows', () => {
     expect(words).toContain('Built in');
   });
 
-  it('⚠️ draws no image element at all — there is no thumbnail column and there never will be', () => {
-    // Trap 4. `PlatformTemplateProvider` ships `iconURL: ''` deliberately.
+  // CHR-006 (R4, 2026-09-15) reversed Trap 4: the shelf entry carries a picture now. What survives of
+  // the trap is the half that was always the point — a row with NO picture draws no image at all.
+  it('⚠️ a row with no thumbnail draws no image element — the wireframe, never a guessed picture', () => {
     const tree = render(<TemplatesTabBody gallery={shelfOf(row())} />);
     expect(walk(tree).filter((n) => n.type === 'img').length).toBe(0);
+  });
+
+  it('🔴 …and the KNOWN-FIRING CONTROL: a row WITH a thumbnail draws exactly that image, once', () => {
+    const src = 'https://community.nodegx.io/api/v1/community/templates/todo-list/thumbnail?v=2';
+    const tree = render(<TemplatesTabBody gallery={shelfOf(row({ thumbnail: src }))} />);
+    const images = walk(tree).filter((n) => n.type === 'img');
+    expect(images.map((n) => n.props.src)).toEqual([src]);
+  });
+
+  it('draws the shelf’s eyebrow when it wrote one, and the category label when it did not', () => {
+    const written = text(render(<TemplatesTabBody gallery={shelfOf(row({ eyebrow: 'Game · ages 8–12' }))} />));
+    expect(written).toContain('Game · ages 8–12');
+    expect(written).not.toContain('Data app');
+    const fallback = text(render(<TemplatesTabBody gallery={shelfOf(row())} />));
+    expect(fallback).toContain('Data app');
+  });
+
+  it('draws the backend tag the host worded, and none when the host could not say', () => {
+    expect(text(render(<TemplatesTabBody gallery={shelfOf(row({ backendLabel: 'No backend' }))} />))).toContain(
+      'No backend'
+    );
+    const unsaid = text(render(<TemplatesTabBody gallery={shelfOf(row())} />));
+    expect(unsaid).not.toContain('No backend');
+    expect(unsaid).not.toContain('Needs a backend');
+  });
+
+  it('lays the cards out as the homepage’s feature grid', () => {
+    const tree = render(<TemplatesTabBody gallery={shelfOf(row(), row({ url: 'community://b' }))} />);
+    expect(walk(tree).some((n) => n.type === 'ul' && n.props['data-layout'] === 'feature')).toBe(true);
   });
 
   it('says on every row what clicking it does', () => {
@@ -232,7 +284,7 @@ describe('REL-013 AC3 — loading, rows and partial are three different screens'
     // 🔴 The rows are still there. A provider outage arrives as a SHORTER list, and drawing the
     // notice instead of the list would throw away the templates that did arrive.
     expect(words).toContain('Members area');
-    expect(byClass(tree, 'TemplateCard').length).toBe(1);
+    expect(cards(tree).length).toBe(1);
   });
 
   it('offers the retry the host supplied, and calls it', () => {
@@ -294,7 +346,8 @@ describe('REL-013 AC4 — the empty shelf is the shipped state and it must read 
     const calls: number[] = [];
     const tree = render(<TemplatesTabBody gallery={EMPTY_SHELF} onCreateProject={() => calls.push(1)} />);
 
-    const buttons = walk(tree).filter((n) => n.type === 'button' && n.ownText === 'New project');
+    // `text`, not `ownText`: `PrimaryButton` (CHR-005) puts its label in a span inside the button.
+    const buttons = walk(tree).filter((n) => n.type === 'button' && text(n) === 'New project');
     expect(buttons.length).toBe(1);
     (buttons[0].props.onClick as () => void)();
     expect(calls.length).toBe(1);
@@ -389,14 +442,18 @@ describe('REL-013 — narrowing the shelf reuses FB-005 T4\u2019s one producer',
         onFilterChange={() => undefined}
       />
     );
-    const pills = byClass(tree, 'TemplatesTab-pill').map((p) => p.ownText);
+    // CHR-005: the pills are the launcher's one filter `Chip`, found as what they are — pressable
+    // buttons — and read with every word inside them, because the count is its own mono span now.
+    const pills = walk(tree)
+      .filter((n) => n.type === 'button' && n.props['aria-pressed'] !== undefined)
+      .map((p) => text(p));
 
     // ⚠️ The ✓ is part of the ACTIVE pill's text, not a decoration beside it — FB-002 shipped a
     // selected pill at 1.16:1 and a state carried only by fill is a state somebody cannot see.
     // So the "All" pill's label is asserted WITH it: dropping the mark would redden this.
-    expect(pills).toContain('All (2) ✓');
-    expect(pills).toContain('Starter (1)');
-    expect(pills).toContain('Data app (1)');
+    expect(pills).toContain('All 2 ✓');
+    expect(pills).toContain('Starter 1');
+    expect(pills).toContain('Data app 1');
   });
 
   it('does not carry a second matcher of its own', () => {
@@ -418,7 +475,7 @@ describe('REL-013 AC5 — picking from the tab creates by the wizard\u2019s path
     const chosen: string[] = [];
     const tree = render(<TemplatesTabBody gallery={shelfOf(row())} onUseTemplate={(url) => chosen.push(url)} />);
 
-    const card = byClass(tree, 'TemplateCard')[0];
+    const card = cards(tree)[0];
     (card.props.onClick as () => void)();
     expect(chosen).toEqual(['community://members-area']);
   });

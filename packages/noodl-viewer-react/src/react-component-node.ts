@@ -96,7 +96,13 @@ export interface ReactNodeContext extends NodeContextLike {
    * Records which node currently holds keyboard focus. Installed by `viewer.jsx`,
    * so it exists only in the browser viewer.
    */
-  setNodeFocused(node: ReactNodeInstance, focused: boolean): void;
+  /** `false` when a Focus could not act because the node is not mounted (GAM-012, R13); see `focus-tracker.ts`. */
+  setNodeFocused(node: ReactNodeInstance, focused: boolean): boolean | void;
+  /**
+   * Drops a node leaving the page from the focus tracker, firing nothing (GAM-012 fault 3). Installed by
+   * `viewer.jsx`, so absent in any runtime without the browser viewer.
+   */
+  setNodeUnmounted?(node: ReactNodeInstance): void;
   /** True when the runtime is rendering inside the editor's canvas preview. */
   runningInCanvas?: boolean;
 }
@@ -614,6 +620,22 @@ function dimensionIsUsable(value: { value?: unknown; unit?: string }): boolean {
   return false;
 }
 
+/**
+ * GAM-003 (P78 D62), R3 session 2 — a size that is empty rather than wrong.
+ *
+ * `NaN` (bare, or merged into the port's unit) and `{value: null}` are what a units port receives
+ * from an Expression that has not answered, or answered over an input that never arrived. Richard
+ * ruled both empty, silently, accepting that a real `0/0` in an author's expression also goes quiet
+ * here. `Infinity`, `{unit}` alone and `{value: "tall"}` are not empty and are still refused by
+ * FLD-004 (b).
+ */
+function isEmptyMagnitude(value: unknown): boolean {
+  if (typeof value === 'number') return Number.isNaN(value);
+  if (!value || typeof value !== 'object' || !('value' in value)) return false;
+  const magnitude = (value as { value?: unknown }).value;
+  return magnitude === null || (typeof magnitude === 'number' && Number.isNaN(magnitude));
+}
+
 /** Diagnostic key namespace for an icon port that was handed something it cannot draw. */
 const ICON_SOURCE_DIAGNOSTIC = 'visual/icon-source-not-an-icon';
 
@@ -661,7 +683,12 @@ function defineRegularInputProp(input: ReactInputPropDefinition, name: string) {
         props[name] = value;
       } else if (value && (value as { value?: unknown }).value !== undefined && dimensionIsUsable(value)) {
         props[name] = value.value + value.unit;
-      } else if (value === undefined || value === null) {
+      } else if (value === undefined || value === null || isEmptyMagnitude(value)) {
+        // GAM-003 (P78 D62), R3: a size nobody has computed yet is empty, not a mistake. An
+        // Expression that has not answered seeds `null`, which the runtime merges into the port's
+        // unit as `{value: null}`; one computed over an unset input gives `NaN`, bare or merged.
+        // All three clear, silently, exactly like the bare `null` below.
+        //
         // The explicit empty, and the one the editor sends when a parameter is cleared. The
         // Empty-Value Contract's `null` clears; `undefined` here keeps the sibling setters'
         // shipped meaning, because this is also the path the property panel uses to remove a
@@ -709,6 +736,34 @@ function defineRegularInputProp(input: ReactInputPropDefinition, name: string) {
   }
 }
 
+/**
+ * GAM-017 (P78 D70), R17 — a signal declared as a prop.
+ *
+ * It used to log "Signals not supported as a react prop" when the kit registered, and was registered
+ * anyway with the runtime's no-op setter: the port showed in the editor, took a wire, and did nothing.
+ * Rocket School's Race Track turned its Burst into a number that rises because of it.
+ *
+ * A prop cannot hold an event, so the pulse becomes a count: the prop starts at 0 (seeded where the
+ * defaults are) and goes up by one on each pulse, and the node re-renders. A component reacts with
+ * `useEffect(() => { if (props.play) … }, [props.play])`. That is the pattern kits already wrote by
+ * hand through `inputs` + `valueChangedToTrue`; this is the same thing, declared where the author
+ * reached for it first.
+ *
+ * `valueChangedToTrue`, not `set`: the runtime makes a port with one a signal in the editor and gives
+ * every instance its own edge detector, so a held `true` counts once.
+ */
+function defineSignalInputProp(input: ReactInputPropDefinition, name: string) {
+  const authored = input.valueChangedToTrue;
+  delete input.set;
+  input.valueChangedToTrue = function () {
+    const node = this as unknown as ReactNodeInstance;
+    const props = input.propPath ? node.props[input.propPath] : node.props;
+    props[name] = (typeof props[name] === 'number' ? props[name] : 0) + 1;
+    if (authored) authored.call(this);
+    node.forceUpdate();
+  };
+}
+
 function flattenArray(target: React.ReactNode[], array: React.ReactNode[]) {
   for (const e of array) {
     if (Array.isArray(e)) {
@@ -747,6 +802,9 @@ export class NoodlReactComponent extends React.Component<NoodlReactComponentProp
     this.props.noodlNode.sendSignalOnOutput('willUnmount');
     //Remove
     const noodlNode = this.props.noodlNode;
+    // GAM-012 fault 3 — leaving the page is not a Blur. Every node is dropped from the focus list
+    // here; `Group.tsx` used to send a Blur instead, and the tracker could not tell the two apart.
+    noodlNode.context.setNodeUnmounted?.(noodlNode);
     if (noodlNode.currentVisualStates) {
       const statesToRemove = ['hover', 'pressed', 'focused'];
       const vs = noodlNode.currentVisualStates.filter((s) => !statesToRemove.includes(s));
@@ -1030,7 +1088,10 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
 
         const props = input.propPath ? this.props[input.propPath] : this.props;
 
-        if (input.hasOwnProperty('default')) {
+        if (input.type === 'signal') {
+          // GAM-017: a signal prop is a pulse count, and 0 is "not pulsed yet".
+          props[name] = 0;
+        } else if (input.hasOwnProperty('default')) {
           // Only the object form of a port type carries units; the bare-name form
           // never does, so reading through it is safe and yields undefined.
           const type = input.type as PortType;
@@ -1071,6 +1132,11 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
     getInspectInfo: def.getInspectInfo,
     nodeScopeDidInitialize: def.nodeScopeDidInitialize,
     dynamicports,
+    // P88 GAM-019 — NDA-017 §2's field was dropped here, so Text Input's `runOnValueChange` never
+    // reached `defineNode`: its Run On Value Change checkbox was not a declared port, not in the
+    // catalog and not in the panel, while a saved `runOnChange-startValue` still worked through
+    // `defineNode`'s lazy `registerInputIfNeeded` claim. Forwarded so `defineNode` synthesises it.
+    runOnValueChange: def.runOnValueChange as NodeDefinitionOptions['runOnValueChange'],
     inputs: {
       cssClassName: {
         index: 100010,
@@ -2001,7 +2067,7 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
       };
     } else {
       if (input.type === 'signal') {
-        console.error(`Error: Signals not supported as a react prop. node: '${def.name}' input: '${inputName}'`);
+        defineSignalInputProp(input, inputName);
       } else {
         defineRegularInputProp(input, inputName);
       }

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ac07434c-acd3-5268-89b3-5bd56e307b17",
+  "name": "Hunt move",
+  "path": "/Logic/Hunt move",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The hunt after one move. Action is a parameter, placed once per action: tap (the square Index joins or leaves the pick, and a full pick is checked at once), show (one way not found yet, after two misses on this grid; it pays nothing) or next (the next grid, once every way on this one is found). A move that does not apply changes nothing. Takes and publishes the whole Game."
+}

@@ -130,7 +130,7 @@
   border-radius: var(--radius-md);
   border: 1px solid var(--theme-color-primary);
   background-color: var(--theme-color-bg-2);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-float);
 
   /* It explains the click; it must never eat the next one. */
   pointer-events: none;
@@ -179,11 +179,31 @@
    the strip.
 
    FIX-019's chip is affordable at all because it is assertive: it appears only
-   on divergence and costs zero width in the common case. */
+   on divergence and costs zero width in the common case.
+
+   🔴 **REVERSED by Richard at P93 AC7, 2026-09-18 — the size controls give way
+   before the sentence does.** The settlement above reasoned that the caption is
+   "the one genuinely redundant thing" because the name is also in the scope
+   chip. That is true of the *name* — and the name is the half that `ellipsis`
+   KEEPS, because it truncates from the end. What it actually dropped first was
+   `not the app.`, the one clause in the strip that nothing else says and the
+   whole reason the surface has a caption. AC7's drive measured it: at a
+   squeezed stage the caption held **105px of the 330px it needed** and read
+   `Workbench — Filt…`, while `Small / Medium / Large` and `768 × Fill` beside
+   it kept every pixel. A strip that sheds its only disclaimer to keep three
+   size presets has its priorities the wrong way round.
+
+   So the shrink order is now: **the frame controls first** (`.FrameRoot` in
+   `PreviewChrome.module.scss`, which shrinks 8× faster and stops at a floor
+   that keeps the width field reachable), **then** the caption. Cutting
+   "Sample values." in the same pass (see `benchWords.ts`) bought ~70px back,
+   so the sentence now fits where it used to clip. */
 .BenchCaption {
-  /* The shrink zone. `1 1 auto` rather than the default `0 1 auto` so it also
-     takes the *slack* — otherwise a wide panel leaves a gap between the caption
-     and the controls, and the strip reads as two clumps rather than one row. */
+  /* Takes the slack (`1 1 auto`, not `0 1 auto`) so a wide strip reads as one
+     row rather than two clumps — and still shrinks, but now it is no longer the
+     *first* thing to. `min-width: 0` stays: a floor here would make the caption
+     able to force the strip to overflow, which is a worse failure than an
+     ellipsis. The ordering is done with shrink factors instead. */
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
@@ -326,7 +346,7 @@
      border-radius never alter the layout box, so the JS-driven preview size
      and canvas-fit math are untouched. */
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm), 0 0 0 1px var(--theme-color-border-default);
+  box-shadow: var(--shadow-card), 0 0 0 1px var(--theme-color-border-default);
 }
 
 .Crashed {
@@ -336,4 +356,135 @@
   align-items: center;
   justify-content: center;
   background-color: var(--theme-color-bg-2);
+}
+
+/* TVW-002 — the sentence between the canvas and the app preview.
+   ───────────────────────────────────────────────────────────────────────────
+   A row in the column, above `.Stages`, so it pushes the preview down rather
+   than covering it. Never an overlay: the thing it is explaining is the app,
+   and an explanation that hides part of what it is explaining is the
+   `DesignToast`'s problem (which is why that one is `pointer-events: none`).
+
+   28px per the spec. The amber wash is `--theme-color-notice-bg`, the token
+   pair the warning surfaces already use, so both themes are answered by the
+   tokens rather than by a second palette (P75's "a second copy of a palette
+   drifts silently"). */
+.Strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* 🔴 RULED 2026-09-18 (Richard): BELOW A CERTAIN WIDTH THE DOORS GO UNDER THE SENTENCE.
+     Measured in the detached preview at its default 372px: the sentence kept **96px of the 266 it
+     needed** — `_DSI Atoms isn'…` — while the two doors kept **277px of the window**. That is the
+     same shape as the Workbench caption he ruled on the day before: the text collapses to its floor
+     while the controls beside it keep full width.
+     Wrapping rather than a container query, because the trigger is "these items do not fit", which
+     is the question flex already answers — no breakpoint to pick, and it is right for a narrow
+     DOCKED panel too, which no width-based rule about the window would have covered. */
+  flex-wrap: wrap;
+  row-gap: 6px;
+  flex: 0 0 auto;
+  /* ⚠️ `min-height`, not `height`: it has to be able to become two rows. The single-row case still
+     measures exactly 28px (content ~14px + 8px padding is under the floor), which is what every
+     docked reading in the s13 verdicts asserts. */
+  min-height: 28px;
+  padding: 4px 10px;
+  /* 🔴 OPAQUE BASE UNDER THE WASH, and the drive is what found it.
+     `--theme-color-notice-bg` is `rgba(…, 0.12)`, and this row sits inside `.Background`, whose
+     backdrop is the preview CHECKERBOARD. A 12% wash over a checkerboard is a striped strip: the
+     2026-09-18 shots show the checker squares straight through the amber in both themes, which no
+     geometry reading could have caught (every width measured clean). The surface colour goes
+     underneath as its own layer, the wash on top, both still tokens. */
+  background-color: var(--theme-color-bg-2);
+  /* The rule goes on the APP side, because that is the edge this row is separating you from. It is
+     the last row of the preview column (Richard, 2026-09-18), directly above the frame divider —
+     the divider draws the other edge, so a second bottom rule here would be two lines in one seam. */
+  border-top: 1px solid var(--theme-color-bg-3);
+  font-size: 11.5px;
+  line-height: 1.2;
+  /* 🔴 THE ROW IS ALWAYS HERE — the amber is what comes and goes (Richard, 2026-09-18).
+     It is drawn as a SEPARATOR first and a notice second, so the base state is surface colour and
+     a muted sentence; `data-tone="notice"` washes it. Built the other way round — the notice being
+     the thing that exists — the separator vanished in the common case, which is the defect the
+     re-drive found and he ruled on. See `StripTone`. */
+  color: var(--theme-color-fg-muted);
+
+  &[data-tone='notice'] {
+    background-image: linear-gradient(var(--theme-color-notice-bg), var(--theme-color-notice-bg));
+    color: var(--theme-color-fg-default);
+  }
+}
+
+/* The one element allowed to shrink, and it shrinks LAST — the doors keep
+   their width.
+
+   🔴 This is AC7's ruling applied before the same defect can happen twice. The
+   Workbench caption shipped as the only shrinkable item in its strip and was
+   measured keeping 105px of the 330px it needed while the frame controls beside
+   it kept full width; Richard ruled the controls give way instead. Here the
+   doors are `flex-shrink: 0` and the sentence has a floor, so the sentence is
+   never squeezed to nothing by a button that could have wrapped. */
+.StripText {
+  flex: 1 1 auto;
+  /* The width at which the doors give up the line. Wide enough that when they DO wrap, a normal
+     sentence gets the whole row and nothing truncates at all (266px needed, 352px available at the
+     detached window's 372px); low enough that ellipsis is still the last resort in a window too
+     narrow for even one row of text, where overflow would be worse. */
+  min-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  strong {
+    /* The quiet row's bold half is one step down from the notice's: it is the same sentence shape
+       (a claim, then the detail) said in a voice that does not ask to be read. `fg-highlight` on a
+       row that is on screen permanently is a surface competing with the app above it. */
+    color: inherit;
+    font-weight: 600;
+  }
+
+  [data-tone='notice'] & strong {
+    color: var(--theme-color-fg-highlight);
+  }
+}
+
+/* Styled on the `DesignBannerExit` precedent — a way out offered on the surface
+   where the confusion happens, quiet enough that a normal state does not read
+   as an error. */
+.StripDoor {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 8px;
+  border: 1px solid var(--theme-color-notice-dim);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--theme-color-fg-default);
+  font-size: 11px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--theme-color-notice-bg-hover);
+  }
+}
+
+.StripDismiss {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--theme-color-fg-muted);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--theme-color-notice-bg-hover);
+    color: var(--theme-color-fg-default);
+  }
 }

@@ -45,11 +45,25 @@ export interface ComponentFilterResult {
 
 /** A tree node's stable identity — the same key the tree selects and expands by. */
 function idOf(node: TreeNode): string {
+  if (node.type === 'section') return `section:${node.data.id}`;
   return node.type === 'component' ? node.data.name : node.data.path;
 }
 
 function nameOf(node: TreeNode): string {
+  if (node.type === 'section') return '';
   return node.type === 'component' ? node.data.localName : node.data.name;
+}
+
+/** Component rows under these nodes, each name once (a page two Routers list draws twice). */
+function countRows(nodes: TreeNode[], seen = new Set<string>()): number {
+  for (const node of nodes) {
+    if (node.type === 'component') seen.add(node.data.name);
+    else {
+      if (node.type === 'folder' && node.data.component) seen.add(node.data.component.name);
+      countRows(node.data.children, seen);
+    }
+  }
+  return seen.size;
 }
 
 export function useComponentFilter(
@@ -84,6 +98,15 @@ export function useComponentFilter(
      * dimming is reserved for rows kept purely as ancestry.
      */
     function walk(node: TreeNode, keepWholeSubtree: boolean): TreeNode | null {
+      /* TVW-001 (d): a section is never a match (typing "logic" filters names, not roles) and never
+         dims. It survives when something under it does, headed as before. */
+      if (node.type === 'section') {
+        const children = node.data.children.map((child) => walk(child, false)).filter(Boolean);
+        if (children.length === 0) return null;
+        // The count says what is under the heading now, not before the filter.
+        return { type: 'section', data: { ...node.data, children, count: countRows(children), emptyText: undefined } };
+      }
+
       const self = nameOf(node).toLowerCase().includes(needle);
       const id = idOf(node);
 

@@ -168,12 +168,16 @@ describe('Project import and export unit tests', function () {
   });
 
   it('can check for collissions (with styles and variants)', function (done) {
+    // 🔴 `{ upgradeOnLoad: false }`: this grades the PLANNER on the committed fixture, opened in place.
+    // Upgraded (P100 UPG-003), its text styles become tokens, and the upgrade writes a backup beside
+    // it and a font module into it — into the repo's own tests/testfs (found by test:ci, 2026-09-23).
     projectFromDirectory(Process.cwd() + '/tests/testfs/import_proj5', function (project) {
       ProjectModel.instance = project;
 
       // Importing a project into itself: everything collides.
       planEverythingInto(Process.cwd() + '/tests/testfs/import_proj5', project).then(({ plan: p }) => {
         const collisions = collisionsOf(p);
+        expect(fs.existsSync(Process.cwd() + '/tests/testfs/import_proj5.before-0.3')).toBe(false);
         expect(collisions.components.length).toBe(2);
         expect(collisions.modules.length).toBe(1);
         expect(collisions.resources.length).toBe(13);
@@ -182,7 +186,7 @@ describe('Project import and export unit tests', function () {
         expect(collisions.styles.text.length).toBe(3);
         done();
       });
-    });
+    }, { upgradeOnLoad: false });
   });
 
   it('can list components and dependencies', async function () {
@@ -341,7 +345,15 @@ describe('Project import and export unit tests', function () {
                 'Primary Dark',
                 'Primary Light'
               ]);
-              expect(Object.keys(styles.text).sort()).toEqual(['Body Text', 'Button Label', 'Label Text']);
+              // P100 UPG-003 §6: the three text styles arrive as typography tokens, not text styles.
+              expect(Object.keys(styles.text ?? {})).toEqual([]);
+              const tokens = {};
+              for (const t of ProjectModel.instance.getMetaData('designTokens').customTokens) tokens[t.name] = t.value;
+              expect([tokens['--body-text-size'], tokens['--button-label-size'], tokens['--label-text-size']]).toEqual([
+                '18px',
+                '16px',
+                '14px'
+              ]);
 
               expect(
                 ProjectModel.instance.findVariant('Basic', {

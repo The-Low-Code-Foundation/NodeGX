@@ -14,6 +14,7 @@ import type {
   Timer
 } from '@noodl/types';
 
+import { cssRejectsColor, readColor } from '../../color-reader';
 import EaseCurves from '../../easecurves';
 
 /** `[r, g, b, a]`, each 0–255. */
@@ -32,6 +33,8 @@ interface StatesTimer extends Timer {
   startValues: Record<string, number | RGBA>;
   targetValues: Record<string, number | RGBA>;
   valueTypes: Record<string, 'number' | 'color'>;
+  /** GAM-006 (a): per colour, the endpoint the reader could not read. Such a colour holds instead of tweening. */
+  unreadable: Record<string, string | undefined>;
 }
 
 interface StatesInstance extends NodeInstance {
@@ -43,6 +46,8 @@ interface StatesInstance extends NodeInstance {
     /** Every `type-<name>` port value, by port name. */
     stateParameterTypes: Record<string, StateValueType>;
     startValues: Record<string, unknown>;
+    /** GAM-006 R7: colours already reported, so a bad colour is reported once, not once per transition. */
+    warnedUnreadableColors?: Record<string, boolean>;
     bezierEaseCurves: Record<string, unknown>;
     transitionFuncs: Record<string, { get(t: number): number }>;
     valuesAreInitialised: boolean;
@@ -80,24 +85,32 @@ interface StatesInstance extends NodeInstance {
   jumpToState(state?: string): void;
   updateAtStatePorts(): void;
   _failUnknownState(state: string, token?: OutcomeToken): void;
+  warnUnreadableColor(value: string, color: string): void;
 }
 
 const defaultDuration = 300;
 const previousStates: Record<string, string[] | undefined> = {},
   previousValues: Record<string, string[] | undefined> = {};
 
-function setRGBA(result: RGBA, hex: string) {
-  if (hex === 'transparent' || !hex) {
+/**
+ * Fills `result` from a colour through the shared reader (GAM-006 (a)). It used to read every
+ * value as hex, so `var(--primary)` gave `'ar'` = 10 and NaN for the rest, and `var(--muted)` (12
+ * characters) grew the array to six entries. `transparent` and an empty value zero the alpha, as
+ * before. `false` for a colour the reader cannot read.
+ */
+function setRGBA(result: RGBA, color: string): boolean {
+  if (color === 'transparent' || !color) {
     result[3] = 0;
-    return;
+    return true;
   }
 
-  const numComponents = (hex.length - 1) / 2;
-
-  for (let i = 0; i < numComponents; ++i) {
-    const index = 1 + i * 2;
-    result[i] = parseInt(hex.substring(index, index + 2), 16);
-  }
+  const rgba = readColor(color);
+  if (!rgba) return false;
+  result[0] = rgba[0];
+  result[1] = rgba[1];
+  result[2] = rgba[2];
+  result[3] = rgba[3];
+  return true;
 }
 
 function componentToHex(c: number) {
@@ -154,6 +167,7 @@ const StatesNode: NodeDefinitionOptions = {
         this.targetValues = {};
         this.startValues = {};
         this.valueTypes = {};
+        this.unreadable = {};
 
         for (const v in this.transitionCurves) {
           // var v = values[i];
@@ -165,17 +179,17 @@ const StatesNode: NodeDefinitionOptions = {
           } else if (valueTypes['type-' + v] === 'color') {
             this.valueTypes[v] = 'color';
 
+            // GAM-006 (a): both endpoints go through the shared reader, so a token is read off the
+            // document and glides. One it cannot read holds the colour on screen until the end.
+            const from = _this.context.styles.resolveColor((startValues[v] as string) || '#000000');
+            const to = _this.context.styles.resolveColor(stateValues[prefix + v] || '#000000');
             this.startValues[v] = [0, 0, 0, 255];
-            setRGBA(
-              this.startValues[v] as RGBA,
-              _this.context.styles.resolveColor((startValues[v] as string) || '#000000')
-            );
-
             this.targetValues[v] = [0, 0, 0, 255];
-            setRGBA(
-              this.targetValues[v] as RGBA,
-              _this.context.styles.resolveColor(stateValues[prefix + v] || '#000000')
-            );
+            const fromRead = setRGBA(this.startValues[v] as RGBA, from);
+            const toRead = setRGBA(this.targetValues[v] as RGBA, to);
+            if (!fromRead) _this.warnUnreadableColor(v, from);
+            if (!toRead) _this.warnUnreadableColor(v, to);
+            if (!fromRead || !toRead) this.unreadable[v] = fromRead ? to : from;
           }
         }
       },
@@ -188,11 +202,38 @@ const StatesNode: NodeDefinitionOptions = {
           const c = this.transitionCurves[v];
           //  var v = values[i];
 
-          if (ms < c.delay) currentValues[v] = this.startValues[v];
-          else if (ms >= c.delay + c.dur)
+          const holding =
+            ms < c.delay ||
+            // GAM-006 (a): a colour the reader could not read has nothing to tween between.
+            (this.valueTypes[v] === 'color' && this.unreadable[v] !== undefined && ms < c.delay + c.dur);
+          if (holding) {
+            // GAM-006. A waiting colour (out its delay, or unreadable) holds the colour already on
+            // screen. The tween's start value for a colour is the RGBA array `onStart` parsed, and
+            // publishing it handed a style sink `[51,68,85,255]` (or, for a token, a six-entry NaN
+            // array) for the whole delay. A start that was never a colour string still falls back
+            // to the tween's hex.
+            const onScreen = _internal.startValues[v];
             currentValues[v] =
-              this.valueTypes[v] === 'color' ? rgbaToHex(this.targetValues[v] as RGBA) : this.targetValues[v];
-          else {
+              this.valueTypes[v] !== 'color'
+                ? this.startValues[v]
+                : typeof onScreen === 'string' && onScreen !== ''
+                  ? onScreen
+                  : rgbaToHex(this.startValues[v] as RGBA);
+          } else if (ms >= c.delay + c.dur) {
+            // GAM-006 (b). A colour lands on the value its state names, not on the channels the
+            // tween parsed out of it. The parse only reads hex, so a token (`var(--primary)`) came
+            // out as `#0aNaNNaNNaN` and the last frame published that: a colour the browser
+            // rejects, which left the old colour on screen for good (P78 D49). Transitions off has
+            // always ended on the authored value, so now both do. A state that names no colour
+            // still ends where the tween does.
+            const authored = _internal.stateParameters['value-' + _internal.state + '-' + v];
+            currentValues[v] =
+              this.valueTypes[v] !== 'color'
+                ? this.targetValues[v]
+                : authored !== undefined && authored !== null && authored !== ''
+                  ? authored
+                  : rgbaToHex(this.targetValues[v] as RGBA);
+          } else {
             const _t = _internal.transitionFuncs[v].get((ms - c.delay) / c.dur);
             if (this.valueTypes[v] === 'number') {
               //convert values to Numers, since they might be strings, which can cause NaN
@@ -513,6 +554,29 @@ const StatesNode: NodeDefinitionOptions = {
     setCurrentState: function (this: StatesInstance, value: string) {
       this.scheduleGoToState(value);
     },
+    /**
+     * GAM-006, P88 R7: a colour the tween cannot read is reported only when the browser would also
+     * reject it, once per colour. A valid colour the reader cannot interpolate (`red`, a token the
+     * page does not define) holds, then lands on the authored value, silently. Where there is no
+     * page to ask (server render, a headless spec) `cssRejectsColor` answers `undefined` and nothing
+     * is reported on a guess; the colour still holds and lands.
+     */
+    warnUnreadableColor: function (this: StatesInstance, value: string, color: string) {
+      if (cssRejectsColor(color) !== true) return;
+      const internal = this._internal;
+      const warned = internal.warnedUnreadableColors || (internal.warnedUnreadableColors = {});
+      if (warned[color]) return;
+      warned[color] = true;
+      // Guarded, as Color Blend's report is: the export's parity suite runs this node on a stand-in.
+      if (typeof this.raiseRuntimeError !== 'function') return;
+      this.raiseRuntimeError(
+        'states/unreadable-color',
+        `The value "${value}" is set to ${JSON.stringify(color)}, which is not a colour the browser accepts, ` +
+          `so it is never drawn. Use #RRGGBB, rgb() or var(--token).`,
+        { value, color }
+      );
+    },
+
     jumpToState: function (this: StatesInstance, state?: string) {
       const internal = this._internal;
       if (!internal.states) return;

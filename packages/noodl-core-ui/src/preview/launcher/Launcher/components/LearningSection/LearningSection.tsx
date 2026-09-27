@@ -28,6 +28,8 @@
 
 import React from 'react';
 
+import { Chip, ChipVariant } from '@noodl-core-ui/components/common/Chip';
+
 import css from './LearningSection.module.scss';
 
 export type LearningProvenance = 'curated' | 'org' | 'local-ai' | 'local';
@@ -249,17 +251,16 @@ export function LearningSection({
             // dead click, and the count beside each label is what tells a reader why.
             if (count === 0 && option.id !== 'all') return null;
             return (
-              <button
+              // CHR-005 — the launcher's one filter pill, the same one the Templates tab draws.
+              <Chip
                 key={option.id}
-                type="button"
-                className={css['Filter']}
-                aria-pressed={filter === option.id}
-                data-test={`learning-filter-${option.id}`}
+                variant={ChipVariant.Filter}
+                label={option.label}
+                count={count}
+                isSelected={filter === option.id}
+                testId={`learning-filter-${option.id}`}
                 onClick={() => onFilterChange?.(option.id)}
-              >
-                {option.label}
-                <span className={css['FilterCount']}>{count}</span>
-              </button>
+              />
             );
           })}
         </div>

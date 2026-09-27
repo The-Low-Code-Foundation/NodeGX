@@ -24,10 +24,13 @@
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
+import { platform } from '@noodl/platform';
 import { guid } from '@noodl-utils/utils';
 
 import { PreviewTokenInjector } from '../../services/PreviewTokenInjector';
 import { ViewerConnection } from '../../ViewerConnection';
+import { applyInspectScript } from './applyInspectScript';
+import { sandboxEditorBridge } from './editorBridge';
 import { registerLivePreview, unregisterLivePreview } from './livePreviewCapture';
 import { viewerOrigin } from './viewerOrigin';
 
@@ -76,6 +79,13 @@ export interface SandboxViewerOptions {
    * `lastExports[clientId]` for a sandbox client.
    */
   remountKey?: number;
+  /**
+   * TVW-003 AC4 — the editor's Design | Preview state, given only by a host whose design-mode
+   * clicks select on the canvas (the bench). Left out, the window gets no editor bridge at all:
+   * the authoring preview renders a proposal, and a click there must not move the app canvas.
+   * See `editorBridge`.
+   */
+  designMode?: boolean;
 }
 
 export interface SandboxViewer {
@@ -92,13 +102,16 @@ export interface SandboxViewer {
    * which is exactly the add/remove the injector needs.
    */
   attachWebview: (element: Electron.WebviewTag | null) => void;
+  /** `preload` for the `<webview>`; `undefined` unless the host passed `designMode`. */
+  preload: string | undefined;
 }
 
 export function useSandboxViewer({
   json,
   useSampleData,
   signedIn,
-  remountKey = 0
+  remountKey = 0,
+  designMode
 }: SandboxViewerOptions): SandboxViewer {
   const sessionId = useMemo(() => guid(), []);
   const clientId = `sandbox-${sessionId}`;
@@ -110,6 +123,43 @@ export function useSandboxViewer({
 
   const webview = useRef<Electron.WebviewTag | null>(null);
   const onDomReady = useRef<(() => void) | null>(null);
+
+  const bridge = sandboxEditorBridge(designMode, platform.getAppPath());
+  // Read on dom-ready, which is not when React renders.
+  const inspectScript = useRef<string | null>(null);
+  inspectScript.current = bridge.inspectScript;
+
+  // A reload re-runs this through dom-ready; this is the toggle while the page stays up.
+  useEffect(() => {
+    const element = webview.current;
+    if (!element || !bridge.inspectScript) return;
+    /**
+     * 🔴 **TVW-008 s26 — the guard was on the WRONG SIDE of the call, and it took the whole
+     * preview down with it.**
+     *
+     * The `.catch()` below says *"not attached or not loaded yet — dom-ready will apply it"*, and
+     * the intent was right. But `WebviewTag.executeJavaScript` calls `getWebContentsId()` FIRST,
+     * and that **throws synchronously** (`The WebView must be attached to the DOM and the
+     * dom-ready event emitted before this method can be called`) — so it never returns a promise
+     * and there is nothing for a `.catch()` to attach to. The rejection handler was written for a
+     * failure mode this call does not have.
+     *
+     * The throw escaped a passive effect, and with no error boundary over the preview React
+     * unmounted the subtree: measured 2026-09-20 opening the board on a fresh project, where the
+     * **entire** preview vanished — `[data-test="app-preview"]`, the scope chip and the board all
+     * absent from the DOM, and the log carrying *"An error occurred in the &lt;ComponentBoard&gt;
+     * component"*. Six of TVW-008's ACs were ungradable behind it.
+     *
+     * ⚠️ **It reads as board-specific and is not.** Nothing here knows which surface mounted it;
+     * the board is simply the first host that mounts a sandbox whose `<webview>` is not yet
+     * attached when this effect first runs. The bench reaches the same line by a slower path.
+     *
+     * ✅ So the guard now covers BOTH failure shapes — a synchronous throw and a rejected promise —
+     * because "not ready yet" can arrive as either, and the recovery is identical: dom-ready
+     * applies the script ([[verify-the-consequence-not-just-the-mechanism]]).
+     */
+    applyInspectScript(element, bridge.inspectScript);
+  }, [bridge.inspectScript]);
 
   useEffect(() => {
     ViewerConnection.instance.registerSandboxExport(clientId, () => latest.current);
@@ -135,7 +185,12 @@ export function useSandboxViewer({
     onDomReady.current = null;
 
     if (element) {
-      const handler = () => PreviewTokenInjector.instance.notifyDomReady(element);
+      const handler = () => {
+        PreviewTokenInjector.instance.notifyDomReady(element);
+        // Same call, same two failure shapes — a webview can be torn down between `dom-ready`
+        // firing and this line running. One helper so the two sites cannot drift apart.
+        if (inspectScript.current) applyInspectScript(element, inspectScript.current);
+      };
       onDomReady.current = handler;
       element.addEventListener('dom-ready', handler);
       registerLivePreview(element);
@@ -157,5 +212,5 @@ export function useSandboxViewer({
     // to the one it loaded before this option existed.
     (remountKey > 0 ? `&noodl-sandbox-remount=${remountKey}` : '');
 
-  return { clientId, src, attachWebview };
+  return { clientId, src, attachWebview, preload: bridge.preload };
 }

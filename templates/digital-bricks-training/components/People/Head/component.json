@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9364e4d2-b426-4c25-bf78-45f860cdce65",
+  "name": "Head",
+  "path": "/People/Head",
+  "type": "visual",
+  "created": "2026-09-21T12:54:44.419Z",
+  "modified": "2026-09-21T12:54:44.419Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Three facts above everything on the coach's page about one learner: where they are, what they just did, what is next. Counts, never verdicts."
+}

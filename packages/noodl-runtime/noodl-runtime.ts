@@ -297,6 +297,13 @@ function registerNodes(noodlRuntime: NoodlRuntime) {
     require('./src/nodes/std-library/data/parsecsv'),
     require('./src/nodes/std-library/data/tocsv'),
 
+    // XML and feeds (FED-001). Shared for the same reason as the CSV pair, and Richard ruled it
+    // directly (phase 96 README §4, R1): a parser that lives in a kit module is invisible in the
+    // node picker, and "you cannot see how the thing you built works" is the complaint the whole
+    // phase answers. Nothing here is privileged — both nodes read text and return an object.
+    require('./src/nodes/std-library/data/parsexml'),
+    require('./src/nodes/std-library/data/parsefeed'),
+
     // CWF-013 — `Log`. Shared rather than cloud-only, and the task argued that out: a browser
     // app wants a log line too, and two implementations behind one name is the mistake. So the
     // node has one branch and the RUNTIME chooses the destination — the cloud runner attaches a

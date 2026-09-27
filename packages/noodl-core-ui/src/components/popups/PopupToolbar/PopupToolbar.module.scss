@@ -3,8 +3,9 @@
   display: inline-flex;
   animation-duration: 300ms;
   animation-name: slideup;
-  filter: drop-shadow(0 4px 15px var(--theme-color-bg-1-transparent-2));
-  box-shadow: 0 0 10px -5px var(--theme-color-bg-1-transparent-2), 0 0 2px -1px var(--theme-color-bg-1);
+  /* P103 CMG-007: the shared floating shadow (was a drop-shadow + box-shadow in
+     --theme-color-bg-1-transparent-2, white at 0.5 in light mode). The hairline stays. */
+  box-shadow: var(--shadow-float), 0 0 2px -1px var(--theme-color-bg-1);
   border-radius: 2px;
 }
 

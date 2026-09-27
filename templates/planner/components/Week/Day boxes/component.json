@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "75af2f9a-f320-5b65-827c-b9c7da5d828e",
+  "name": "Day boxes",
+  "path": "/Week/Day boxes",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The six days of the week as six small boxes, each with this project’s hours on that day."
+}

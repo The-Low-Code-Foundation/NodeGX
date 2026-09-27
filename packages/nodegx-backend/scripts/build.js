@@ -20,6 +20,7 @@
 
 const path = require('path');
 const esbuild = require('esbuild');
+const { buildAdminApp } = require('./build-admin-app');
 
 const pkgRoot = path.resolve(__dirname, '..');
 const packagesRoot = path.resolve(pkgRoot, '..');
@@ -46,10 +47,14 @@ const shared = {
   // it" true with a UI attached — there is no asset directory to ship, no
   // second bundler, and nothing for the page to fetch (so its CSP can forbid
   // every external origin outright).
-  loader: { '.html': 'text', '.css': 'text' }
+  // BMG-001: `.txt` is the admin app's bundle (build/admin/app.js.txt), read as a string for
+  // the same reason — one file, nothing to fetch.
+  loader: { '.html': 'text', '.css': 'text', '.txt': 'text' }
 };
 
 async function main() {
+  // The browser half first: the service bundle inlines what this writes.
+  await buildAdminApp();
   await esbuild.build({
     ...shared,
     entryPoints: [path.join(pkgRoot, 'src', 'cli.ts')],

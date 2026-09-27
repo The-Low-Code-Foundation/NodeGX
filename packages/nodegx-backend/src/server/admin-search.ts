@@ -15,7 +15,7 @@
  * @module nodegx-backend/server/admin-search
  */
 
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import type { SearchState } from '../search/SearchState';
 import type { CollectionSearchConfig, SearchConfig } from '../search/model';
 import { SearchIndexer, SearchCapabilityError, RebuildReport } from '../search/SearchIndexer';
@@ -42,13 +42,13 @@ export interface SearchCollectionResponse {
 
 export class AdminSearchRoutes {
   private readonly search: SearchState;
-  private readonly facade: AdapterFacade;
+  private readonly facade: IStorageFacade;
   private readonly indexer: SearchIndexer;
 
-  constructor(search: SearchState, facade: AdapterFacade) {
+  constructor(search: SearchState, facade: IStorageFacade) {
     this.search = search;
     this.facade = facade;
-    this.indexer = new SearchIndexer(facade.schemaManager);
+    this.indexer = new SearchIndexer(() => facade.schemaManager);
   }
 
   getConfig(ctx: RequestContext): void {
@@ -74,7 +74,7 @@ export class AdminSearchRoutes {
     }
 
     // Validate the fields are real columns on the collection before touching SQL.
-    const columns = new Set(this.facade.getColumns(name).map((c) => c.name));
+    const columns = new Set((await this.facade.getColumns(name)).map((c) => c.name));
     const unknown = fields.filter((f) => !columns.has(f));
     if (enabled && unknown.length > 0) {
       throw new HttpError(400, `Unknown column(s) for "${name}": ${unknown.join(', ')}. Create the field(s) first.`);

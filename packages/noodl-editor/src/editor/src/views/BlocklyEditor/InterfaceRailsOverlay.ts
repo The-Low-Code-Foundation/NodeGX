@@ -37,7 +37,7 @@
 import * as Blockly from 'blockly';
 
 import type { BenchSurface } from './BenchController';
-import { SANDBOX_NOTE } from './benchModel';
+import { TEST_VALUES_NOTE } from './benchModel';
 import type { BenchInputRow, BenchOutputRow } from './benchModel';
 import css from './BlocklyWorkspace.module.scss';
 import { RailModel, RailRow, dragBlockJsonForRow, railModelForWorkspace, unusedOutputName } from './interfaceRails';
@@ -190,7 +190,14 @@ class InterfaceRails {
     if (this.bench) {
       const marker = document.createElement('div');
       marker.className = css.RailSandboxNote;
-      marker.textContent = SANDBOX_NOTE;
+      marker.textContent = TEST_VALUES_NOTE;
+      // 🔴 TVW-009 does NOT rename this surface. This is the Blockly **logic run bench**, not the
+      // Workbench (`views/VisualCanvas/benchWords.ts`) — two different surfaces wear the word.
+      // Richard ruled 2026-09-17: swap the jargon, do not merge the names. VFN-011's acceptance
+      // criterion 3 is that the cost of running inside the editor is STATED, and calling this the
+      // Workbench would claim it mounts the real app on sample values, which is the opposite of
+      // what it does. `SANDBOX_NOTE` already became `TEST_VALUES_NOTE` under that ruling.
+      // Whether the logic bench gets a name of its own is still an open question for Richard.
       marker.title =
         'The bench runs these blocks here in the editor, against values you type. Variables, Objects and ' +
         'Arrays are empty stand-ins, not your app’s data, and nothing a bench run does reaches your app.';
@@ -273,7 +280,7 @@ class InterfaceRails {
     cell.value = benchRow.text;
     cell.placeholder = benchRow.row.displayType;
     cell.spellcheck = false;
-    cell.title = 'A sandbox value for “' + benchRow.row.name + '”. ' + SANDBOX_NOTE + '.';
+    cell.title = 'A test value for “' + benchRow.row.name + '”. ' + TEST_VALUES_NOTE + '.';
 
     /**
      * ⚠️ **`stopPropagation`, not `preventDefault`.** The row's own `pointerdown` handler starts a
@@ -301,7 +308,7 @@ class InterfaceRails {
       const pulse = document.createElement('div');
       pulse.className = css.RailPulse;
       pulse.textContent = '▶ fired';
-      pulse.title = 'The last sandbox run sent this signal. ' + SANDBOX_NOTE + '.';
+      pulse.title = 'The last test run sent this signal. ' + TEST_VALUES_NOTE + '.';
       element.appendChild(pulse);
       return;
     }
@@ -314,7 +321,7 @@ class InterfaceRails {
     // ⚠️ The full value in the tooltip, because the cell is 132px wide and `previewValue` has
     // already capped the string once. Two truncations with no way to see past either would make
     // the rail a place values go to be almost readable.
-    value.title = benchRow.preview + '\n' + SANDBOX_NOTE + '.';
+    value.title = benchRow.preview + '\n' + TEST_VALUES_NOTE + '.';
     element.appendChild(value);
   }
 

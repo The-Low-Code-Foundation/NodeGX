@@ -1,0 +1,301 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ebeaf769-6a21-5603-882e-cfff1ba44d5e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "model",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "skillId",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-skillId"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "level",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-level"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "lang",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "timedOut",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-timedOut"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "answer",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-answer"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "typed",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-typed"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "fluentMs",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-fluentMs"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "itemDiff",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-itemDiff"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "shownAt",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-shownAt"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "elapsedOverride",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-elapsedOverride"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "wasDue",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-wasDue"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "strategy",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-strategy"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "worked",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-worked"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "raceId",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-raceId"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "forB",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-forB"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "mistakes",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-mistakes"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "game",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-game"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "myAt",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-myAt"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "cpuAt",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-cpuAt"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "useTurbo",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-useTurbo"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "startTurbo",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-startTurbo"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "run",
+      "toId": "gradeanswerFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-correct",
+      "toId": "gradeanswerOut",
+      "toProperty": "correct"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-fluent",
+      "toId": "gradeanswerOut",
+      "toProperty": "fluent"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-outcome",
+      "toId": "gradeanswerOut",
+      "toProperty": "outcome"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-elapsedMs",
+      "toId": "gradeanswerOut",
+      "toProperty": "elapsedMs"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-model",
+      "toId": "gradeanswerOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-gain",
+      "toId": "gradeanswerOut",
+      "toProperty": "gain"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-speed",
+      "toId": "gradeanswerOut",
+      "toProperty": "speed"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-boost",
+      "toId": "gradeanswerOut",
+      "toProperty": "boost"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-boostPct",
+      "toId": "gradeanswerOut",
+      "toProperty": "boostPct"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-cpuGain",
+      "toId": "gradeanswerOut",
+      "toProperty": "cpuGain"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-message",
+      "toId": "gradeanswerOut",
+      "toProperty": "message"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-mastery",
+      "toId": "gradeanswerOut",
+      "toProperty": "mastery"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-ratingDelta",
+      "toId": "gradeanswerOut",
+      "toProperty": "ratingDelta"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-streak",
+      "toId": "gradeanswerOut",
+      "toProperty": "streak"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-missCount",
+      "toId": "gradeanswerOut",
+      "toProperty": "missCount"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-starsEarned",
+      "toId": "gradeanswerOut",
+      "toProperty": "starsEarned"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-stars",
+      "toId": "gradeanswerOut",
+      "toProperty": "stars"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-slip",
+      "toId": "gradeanswerOut",
+      "toProperty": "slip"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-slipPct",
+      "toId": "gradeanswerOut",
+      "toProperty": "slipPct"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-behind",
+      "toId": "gradeanswerOut",
+      "toProperty": "behind"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-turboUsed",
+      "toId": "gradeanswerOut",
+      "toProperty": "turboUsed"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-chain",
+      "toId": "gradeanswerOut",
+      "toProperty": "chain"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-turbo",
+      "toId": "gradeanswerOut",
+      "toProperty": "turbo"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-chainReady",
+      "toId": "gradeanswerOut",
+      "toProperty": "chainReady"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-chainOf",
+      "toId": "gradeanswerOut",
+      "toProperty": "chainOf"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "success",
+      "toId": "gradeanswerOut",
+      "toProperty": "done"
+    }
+  ]
+}

@@ -31,6 +31,17 @@ const MAX_DATA_SIZE = 50 * 1024; // 50KB
 const DEFAULT_QUERY_LIMIT = 100;
 
 /**
+ * A run's kind, read off its metadata (nodegx-backend BMG-009). The same rule as `executionKind`
+ * in nodegx-backend `execution/kind.ts`, in SQL so the store can filter on it; a spec there
+ * holds the two to the same answer over the same records.
+ */
+const KIND_SQL =
+  "CASE WHEN json_extract(metadata, '$.kind') IN ('workflow', 'function', 'backup', 'maintenance') THEN json_extract(metadata, '$.kind') " +
+  "WHEN json_extract(metadata, '$.operation') IN ('backup', 'restore') THEN 'backup' " +
+  "WHEN json_extract(metadata, '$.operation') IS NOT NULL THEN 'maintenance' " +
+  "ELSE 'function' END";
+
+/**
  * Generate a unique ID (similar to CUID)
  */
 function generateId(): string {
@@ -110,17 +121,38 @@ export interface SQLiteDatabase {
  *
  * Uses better-sqlite3 for synchronous SQLite access.
  */
+/**
+ * Construction options.
+ *
+ * `maxDataSize` — the per-value cap (JSON length) on `trigger_data`, `metadata`, `input_data`
+ * and `output_data`. Default {@link MAX_DATA_SIZE}. A function is read on every write, so an
+ * embedder whose cap is live-configurable (nodegx-backend's `ops.json`, PRD-002) can pass its
+ * getter and the store follows it without being reconstructed.
+ */
+export interface ExecutionStoreOptions {
+  maxDataSize?: number | (() => number);
+}
+
 export class ExecutionStore {
   private db: SQLiteDatabase;
   private initialized = false;
+  private readonly maxDataSize: number | (() => number);
 
   /**
    * Create an ExecutionStore
    *
    * @param db - SQLite Database instance (better-sqlite3 compatible)
+   * @param options - see {@link ExecutionStoreOptions}
    */
-  constructor(db: SQLiteDatabase) {
+  constructor(db: SQLiteDatabase, options: ExecutionStoreOptions = {}) {
     this.db = db;
+    this.maxDataSize = options.maxDataSize ?? MAX_DATA_SIZE;
+  }
+
+  /** The per-value cap in force for this write. */
+  private dataLimit(): number {
+    const limit = typeof this.maxDataSize === 'function' ? this.maxDataSize() : this.maxDataSize;
+    return Number.isFinite(limit) && limit > 0 ? limit : MAX_DATA_SIZE;
   }
 
   /**
@@ -217,14 +249,14 @@ export class ExecutionStore {
       options.workflowId,
       options.workflowName,
       options.triggerType,
-      truncateData(options.triggerData),
+      truncateData(options.triggerData, this.dataLimit()),
       options.status,
       options.startedAt,
       options.completedAt ?? null,
       options.durationMs ?? null,
       options.errorMessage ?? null,
       options.errorStack ?? null,
-      truncateData(options.metadata)
+      truncateData(options.metadata, this.dataLimit())
     );
 
     return id;
@@ -261,7 +293,7 @@ export class ExecutionStore {
     }
     if (updates.metadata !== undefined) {
       fields.push('metadata = ?');
-      values.push(truncateData(updates.metadata));
+      values.push(truncateData(updates.metadata, this.dataLimit()));
     }
 
     if (fields.length === 0) {
@@ -307,11 +339,21 @@ export class ExecutionStore {
   }
 
   /**
-   * Query executions with filters and pagination
+   * How many executions match `query`, ignoring its `limit` / `offset` — the page count behind
+   * `GET /executions`'s `X-Total-Count` (nodegx-backend BMG-009). Same conditions as the list,
+   * from the one helper, so the two cannot disagree.
    */
-  queryExecutions(query: ExecutionQuery = {}): WorkflowExecution[] {
+  countExecutions(query: ExecutionQuery = {}): number {
     this.initSchema();
+    const { conditions, params } = this.conditionsFor(query);
+    let sql = 'SELECT COUNT(*) AS count FROM workflow_executions';
+    if (conditions.length > 0) sql += ' WHERE ' + conditions.join(' AND ');
+    const row = this.db.prepare(sql).get(...params) as { count: number | bigint };
+    return Number(row.count);
+  }
 
+  /** The WHERE clause `queryExecutions` and `countExecutions` share. */
+  private conditionsFor(query: ExecutionQuery): { conditions: string[]; params: unknown[] } {
     const conditions: string[] = [];
     const params: unknown[] = [];
 
@@ -335,6 +377,41 @@ export class ExecutionStore {
       conditions.push('started_at <= ?');
       params.push(query.startedBefore);
     }
+    // PRD-002: runs whose record hit a size bound stamp `metadata.recordCapped`. Filtering on
+    // it here is what lets an operator name the offending workflow from the API without
+    // reading every record — the whole point of a cap that announces itself.
+    if (query.capped === true) {
+      conditions.push("json_extract(metadata, '$.recordCapped') IS NOT NULL");
+    } else if (query.capped === false) {
+      conditions.push("(metadata IS NULL OR json_extract(metadata, '$.recordCapped') IS NULL)");
+    }
+    // BMG-009 — the Runs page's rows.
+    if (query.kind) {
+      conditions.push(`${KIND_SQL} = ?`);
+      params.push(query.kind);
+    }
+    if (query.nameContains) {
+      conditions.push("workflow_name LIKE ? ESCAPE '\\'");
+      params.push('%' + query.nameContains.replace(/[\\%_]/g, (c) => '\\' + c) + '%');
+    }
+    if (query.triggerId) {
+      conditions.push("json_extract(metadata, '$.triggerId') = ?");
+      params.push(query.triggerId);
+    }
+    if (query.minDurationMs !== undefined) {
+      conditions.push('duration_ms >= ?');
+      params.push(query.minDurationMs);
+    }
+    return { conditions, params };
+  }
+
+  /**
+   * Query executions with filters and pagination
+   */
+  queryExecutions(query: ExecutionQuery = {}): WorkflowExecution[] {
+    this.initSchema();
+
+    const { conditions, params } = this.conditionsFor(query);
 
     let sql = 'SELECT * FROM workflow_executions';
     if (conditions.length > 0) {
@@ -403,8 +480,8 @@ export class ExecutionStore {
       options.completedAt ?? null,
       options.durationMs ?? null,
       options.status,
-      truncateData(options.inputData),
-      truncateData(options.outputData),
+      truncateData(options.inputData, this.dataLimit()),
+      truncateData(options.outputData, this.dataLimit()),
       options.errorMessage ?? null
     );
 
@@ -434,7 +511,7 @@ export class ExecutionStore {
     }
     if (updates.outputData !== undefined) {
       fields.push('output_data = ?');
-      values.push(truncateData(updates.outputData));
+      values.push(truncateData(updates.outputData, this.dataLimit()));
     }
     if (updates.errorMessage !== undefined) {
       fields.push('error_message = ?');

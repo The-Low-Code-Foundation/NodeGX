@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "bc825954-a46b-57f9-8eed-8ecbcd6785f4",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rwIn",
+      "fromProperty": "tasks",
+      "toId": "rwBuild",
+      "toProperty": "in-tasks"
+    },
+    {
+      "fromId": "rwIn",
+      "fromProperty": "actions",
+      "toId": "rwBuild",
+      "toProperty": "in-actions"
+    },
+    {
+      "fromId": "rwIn",
+      "fromProperty": "selectedId",
+      "toId": "rwBuild",
+      "toProperty": "in-selectedId"
+    },
+    {
+      "fromId": "rwBuild",
+      "fromProperty": "out-openRows",
+      "toId": "rwOut",
+      "toProperty": "openRows"
+    },
+    {
+      "fromId": "rwBuild",
+      "fromProperty": "out-doneRows",
+      "toId": "rwOut",
+      "toProperty": "doneRows"
+    },
+    {
+      "fromId": "rwBuild",
+      "fromProperty": "out-listLabel",
+      "toId": "rwOut",
+      "toProperty": "listLabel"
+    },
+    {
+      "fromId": "rwBuild",
+      "fromProperty": "out-doneLabel",
+      "toId": "rwOut",
+      "toProperty": "doneLabel"
+    },
+    {
+      "fromId": "rwBuild",
+      "fromProperty": "out-addPlaceholder",
+      "toId": "rwOut",
+      "toProperty": "addPlaceholder"
+    },
+    {
+      "fromId": "rwBuild",
+      "fromProperty": "out-addSummary",
+      "toId": "rwOut",
+      "toProperty": "addSummary"
+    },
+    {
+      "fromId": "rwBuild",
+      "fromProperty": "out-nextPosition",
+      "toId": "rwOut",
+      "toProperty": "nextPosition"
+    },
+    {
+      "fromId": "rwBuild",
+      "fromProperty": "out-nextRank",
+      "toId": "rwOut",
+      "toProperty": "nextRank"
+    }
+  ]
+}

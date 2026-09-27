@@ -101,6 +101,18 @@
   gap: 0;
 }
 
+/* CHR-009 R6 (RULED 2026-09-17, s29): the label column is 118px, and this is the ONE place the
+   width is written. It was 116px copied into five stylesheets that each said "must match"; the
+   ruling moved it by 2px, which is exactly the kind of change a copy sleeps through
+   (`--sp` palettes drifted the same way). Everything below reads it with a 118px fallback, so a
+   surface rendered outside the editor keeps the same geometry.
+   Why 118: at 116px, `Background Position` (116.2px) and `Pointer Events Mode` (116.6px) each lost
+   a character to the ellipsis — a sub-pixel overflow that `scrollWidth`, being an integer, reads as
+   a fit. Measured with `measureText` on the row's own computed font. */
+:root {
+  --property-label-column: 118px;
+}
+
 /* `.property-label-col` is for the rows whose label is wrapped in a <Tooltip>,
    which inserts two divs between the row and the label — the column has to be
    the flex item, so it cannot always be the label itself. */
@@ -108,9 +120,10 @@
 .property-row > .property-label-col {
   position: static;
   flex: 0 0 auto;
-  width: 37%;
-  min-width: 62px;
-  max-width: 160px;
+  width: var(--property-label-column, 118px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .property-row > .property-value {
@@ -121,7 +134,7 @@
   bottom: auto;
   flex: 1 1 auto;
   min-width: 0;
-  height: 28px;
+  height: 26px;
   margin-right: 10px;
 }
 
@@ -131,7 +144,7 @@
   z-index: 10;
   border: 1px solid var(--theme-color-border-default);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-popup);
+  box-shadow: var(--shadow-float);
   overflow: hidden;
   background-color: var(--theme-color-bg-1);
 }
@@ -190,7 +203,7 @@
   resize: vertical;
   padding-top: 10px;
   min-height: 35px;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
 }
 
 .property-input-textarea:focus {
@@ -212,8 +225,10 @@
   padding: 6px 16px 16px;
 }
 
+/* CHR-009 §2: the mockup's section rhythm (`section { padding: 6px 14px 10px }`). Was 13/15 — with
+   the 30px header and each row's own 30px, a one-row group (General: Mounted) spent ~60px on air. */
 .property-group {
-  padding: 13px 0 15px;
+  padding: 6px 0 10px;
 }
 
 .property-group:not(:last-child) {
@@ -239,11 +254,14 @@
   text-align: left;
   cursor: pointer;
   color: var(--theme-color-fg-muted);
-  font-size: 10.5px;
+  /* CHR-009 §2 section header: mono uppercase at -xs, .08em, one 30px line. */
+  height: 30px;
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-bottom: 10px;
+  margin-bottom: 2px;
 }
 
 .property-group-label:hover {
@@ -262,9 +280,9 @@
    `VariantSelector` — see PropertyGroups.tsx for why this module stays icon-free. */
 .property-group-chevron {
   flex-shrink: 0;
-  display: inline-block;
-  width: 8px;
-  font-size: 9px;
+  display: inline-flex;
+  width: 10px;
+  height: 10px;
   line-height: 1;
   color: var(--theme-color-fg-default-shy);
   transform: rotate(-90deg);
@@ -289,17 +307,38 @@
   border-radius: 7px;
   background-color: var(--theme-color-bg-3);
   color: var(--theme-color-fg-default);
-  font-size: 9px;
+  font-size: var(--font-size-xs);
   letter-spacing: 0.03em;
   text-transform: none;
 }
 
-/* The nested groups inside `Advanced CSS`. Indented so the folded headings read as
-   belonging to the section rather than as siblings of the basics above it, and with
-   the last child's divider suppressed — the super-group draws its own. */
+/* CHR-009 §2 — `Advanced CSS` as the panel's footer row (Richard, s20: "match the mockup"): the count is
+   plain muted text on the trailing edge, not a pill. The rule above it is the previous group's own
+   `border-bottom`. */
+.property-group-label--footer .property-group-badge {
+  padding: 0;
+  border-radius: 0;
+  background-color: transparent;
+  color: var(--theme-color-fg-default-shy);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+/* The nested groups inside `Advanced CSS`. The last child's divider is suppressed — the
+   super-group draws its own.
+   CHR-009 (ruled 2026-09-17, s29): the 10px padding + 1px rule that used to indent this
+   block are GONE. They moved every row inside `Advanced CSS` 11px right of every other row
+   in the panel — 8 of the Group's sections, 28 of its 71 labels at x=81 while the rest sat
+   at x=70 — and narrowed those fields by the same 11px. Richard: align them, the nesting is
+   shown by the heading alone. AC2's own census could not see this: it reads the rows VISIBLE
+   near the top of the panel, and these sections are collapsed by default, so nine slices
+   graded a two-edge panel as one. What the indent used to carry is a real thing (a folded
+   `Border Color` here restyles a sub-element and shares the root's port name); that is now
+   carried by the sub-group's own NAMED heading and nothing else. Richard was shown the
+   alternative — rows aligned, 11px on the nested heading only, so `SCROLL` still read as
+   inside `ADVANCED CSS` — and ruled **fully flat**: do not re-indent either one. */
 .property-group-children {
-  padding-left: 10px;
-  border-left: 1px solid var(--theme-color-border-default);
+  padding-left: 0;
 }
 
 .property-group-children .property-group:last-child {
@@ -319,7 +358,7 @@
 
    It sits on the panel ground so it reads as chrome rather than as a first row. */
 .property-filter {
-  padding: 4px 0 10px 0;
+  padding: 2px 0 8px 0;
   background-color: var(--theme-color-bg-1);
 
   /* ✅ Sticky, and this time it was measured working rather than assumed. Session 23
@@ -355,6 +394,28 @@
   border: 1px solid var(--theme-color-border-control);
 }
 
+/* CHR-009 §2 "head" — the filter at the panel's control scale: 30px, 12px text, the glyph at 14px
+   in a 30px gutter (was `SearchInput`'s 45px bar, 14px text and a 22px glyph — the tallest box in
+   the head). Same edge token as above, so NAT-001's pairing is unchanged. */
+.property-filter input.property-filter-input {
+  height: 30px;
+  line-height: 28px;
+  padding-left: 30px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+}
+
+.property-filter input.property-filter-input::placeholder {
+  padding-left: 0;
+}
+
+.property-filter input.property-filter-input + * {
+  width: 14px;
+  height: 14px;
+  left: 9px;
+}
+
 /* The match count is for screen readers only — the surviving rows are the sighted
    answer, and a number beside the box would be chrome that case does not need. Not
    `display: none`, which would take it out of the accessibility tree along with the
@@ -383,32 +444,51 @@
 
 .property-filter-empty-title {
   color: var(--theme-color-fg-default);
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
 }
 
 .property-filter-empty-hint {
   color: var(--theme-color-fg-muted);
-  font-size: 10.5px;
+  font-size: var(--font-size-xs);
   line-height: 1.4;
 }
 
-/* Panel header (PAR-002, mock `.props-head`): column layout — name row +
-   type-chip — on the panel ground with a hairline below. */
+/* CHR-009 §2 "head" — the node row: glyph tile, name over a mono eyebrow, actions. No hairline
+   under it: the segmented `Properties | Ports | Comment` control directly below is the break.
+   (Was PAR-002's name row, then a coloured type chip on a row of its own, then a border.) */
 .property-header-bar {
-  border-bottom: 1px solid var(--theme-color-border-default);
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 7px;
-  padding: 9px 16px 12px;
+  gap: 4px;
+  padding: 10px 14px 10px;
 }
 
 .property-header-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
+}
+
+/* The category glyph on its own wash — the colour the canvas card uses for the category. The
+   fill and the glyph colour are set inline from the category token (NodeLabel.tsx). */
+.property-node-glyph {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+}
+
+.property-node-titles {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 /* PNL-007: the node name at rest is text, not a field. Editing swaps in a real
@@ -426,11 +506,11 @@
   width: fit-content;
   max-width: 100%;
   font-family: var(--font-family);
-  font-size: 14.5px;
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   color: var(--theme-color-fg-highlight);
-  line-height: 20px;
-  padding: 4px 2px;
+  line-height: 18px;
+  padding: 0;
   border-radius: var(--radius-default);
   border-bottom: 1px solid transparent;
   cursor: text;
@@ -461,26 +541,59 @@
   flex: none;
 }
 
-/* Type-chip (UIX-004b deferral, closed by PAR-002): `TYPE · CATEGORY`,
-   colored by node category. color + background are set inline from the
-   category token (see NodeLabel.tsx). */
+/* `TYPE · CATEGORY` (UIX-004b / PAR-002), now the mono eyebrow under the name (CHR-009). The
+   category colour moved to the glyph tile; the words are quiet. */
 .property-type-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--font-family);
-  font-size: 10.5px;
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.03em;
+  display: block;
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 14px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  border-radius: var(--radius-default);
-  padding: 2.5px 7px;
-  width: fit-content;
+  color: var(--theme-color-fg-default-shy);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.property-type-chip svg {
-  flex: none;
+/* CHR-009 §2 "head" — `Properties | Ports | Comment` as ONE segmented control with equal
+   segments, inset to the head's gutter. `Tabs`' segmented buttons size to their labels (the node
+   picker's use); here the segments split the width. Role selectors, not the module's hashed names;
+   the extra attribute step outranks `.is-variant-segmented .Button` whatever the load order. */
+.property-editor-tabs {
+  --tabs-row-padding: 0 14px 8px;
+}
+
+.property-editor-tabs [role='tablist'] {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  border-radius: var(--radius-md);
+  background-color: var(--theme-color-bg-2);
+}
+
+.property-editor-tabs [role='tablist'] > [role='tab'] {
+  height: 24px;
+  padding: 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.property-editor-tabs [role='tablist'] > [role='tab'] > p {
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.property-editor-tabs [role='tablist'] > [role='tab'][aria-selected='true'] {
+  background-color: var(--theme-color-bg-3);
+  box-shadow: none;
 }
 
 /* CN-006b AC2 — provenance ("from Cashflow Kit"), under the type chip.
@@ -494,7 +607,7 @@
   display: block;
   margin-top: 4px;
   font-family: var(--font-family);
-  font-size: 10.5px;
+  font-size: var(--font-size-xs);
   color: var(--theme-color-fg-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -518,12 +631,40 @@
    mirror element that has to agree with the textarea to the pixel.
    ============================================================================= */
 
+/* CHR-009 R7: the row is the Comment tab's content now — no hairline against a strip it no longer
+   sits under.
+
+   🔴 HLT-005 — the two declarations below are what keep the field INSIDE the panel, and they are
+   stated here rather than inline because the inline `flex: '0 0 auto'` they replace is why no
+   stylesheet could govern this element and why six "Left" lists could name the defect without
+   anyone being able to fix it in the file that describes the row.
+
+   This bar is the sole child of a `ScrollArea`, whose `.Container` is a ROW flex container. As a
+   flex item with `flex-shrink: 0` it was sized to its own max-content width — the full unwrapped
+   longest line of the hidden `.property-comment-sizer` below, which is `pre-wrap` with no
+   `max-width` — and forbidden to come back to the scrollport. Measured on a driven editor,
+   2026-09-21, on a 264-character single-line comment: the bar rendered **1,489px inside a 224px
+   scrollport** at the panel's minimum docked width and inside a 980px one at its maximum, with
+   **1,253px** and **497px** of reachable `scrollLeft` — a horizontal scrollbar in a component
+   that declares vertical scrolling only, and the middle of the field out over the canvas.
+
+   `flex: 1` is the Properties tab's own declaration (`propertyeditor/index.tsx`), which is the
+   control that never overflowed: basis 0 means the bar's width cannot be a function of its
+   content at all.
+
+   ⚠️ `min-width: 0` is NOT redundant beside it, and not a second copy of `ScrollArea`'s
+   `> * { min-width: 0 }` doing the same job by accident. With basis 0 the used minimum is still
+   the automatic one — the bar's min-content width, i.e. its longest WORD, because
+   `overflow-wrap: break-word` does not reduce intrinsic size. An element that must never widen
+   its own scrollport says so itself rather than inheriting it from a container in another
+   package. Graded: a 200-character run with no spaces, which overflowed by 1,069px before. */
 .property-comment-bar {
-  border-bottom: 1px solid var(--theme-color-border-default);
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 10px 16px 12px;
+  padding: 6px 14px 12px;
+  flex: 1;
+  min-width: 0;
 }
 
 /* The tooltip wraps its child in a trigger div; hug the label so hovering the
@@ -544,7 +685,7 @@
   display: block;
   color: var(--theme-color-fg-default-shy);
   font-family: var(--font-family);
-  font-size: 10.5px;
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -572,7 +713,7 @@
   border: 1px solid transparent;
   border-radius: var(--radius-default);
   font-family: var(--font-family);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 17px;
   letter-spacing: normal;
   white-space: pre-wrap;
@@ -673,25 +814,6 @@
   opacity: 0.3;
 }
 
-.property-tab {
-  opacity: 0.25;
-  margin-left: 5px;
-  margin-right: 5px;
-}
-
-.property-tab.selected {
-  opacity: 1;
-}
-
-/* UIX-011: the glyph now comes from a core-ui <Icon> child (PropertyTabs.tsx),
-   not a `content: url()` background — the old SVGs had baked white fills and
-   could not follow the theme. The 32x32 box is unchanged. */
-.property-tab-icon {
-  width: 32px;
-  height: 32px;
-  color: var(--theme-color-fg-default);
-}
-
 /* BCN-010 — a port the chosen backend cannot serve.
    The control is dimmed and inert; the sentence under it is the deliverable.
    Amber rather than red: phase 23's colour law reserves red for danger, and
@@ -718,13 +840,13 @@
 }
 
 .property-schema-notice-title {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   margin-bottom: 4px;
 }
 
 .property-schema-notice-message {
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   opacity: 0.85;
 }
 
@@ -744,7 +866,7 @@
   border-radius: 2px;
   background: transparent;
   color: var(--theme-color-fg-default);
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   text-align: center;
   cursor: pointer;
 }
@@ -768,7 +890,7 @@
   padding-left: 6px;
   border-left: 2px solid var(--theme-color-warning);
   color: var(--theme-color-fg-default);
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   line-height: 1.35;
   opacity: 0.85;
 }
@@ -792,7 +914,7 @@
   padding-left: 6px;
   border-left: 2px solid var(--theme-color-notice);
   color: var(--theme-color-fg-default);
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   line-height: 1.35;
   opacity: 0.85;
 }
@@ -828,7 +950,7 @@
   padding-left: 6px;
   border-left: 2px solid var(--theme-color-notice);
   color: var(--theme-color-fg-default);
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   line-height: 1.35;
   opacity: 0.85;
 }
@@ -843,7 +965,7 @@
   border: 0;
   background: none;
   color: var(--theme-color-primary);
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   line-height: 1.35;
   font-family: inherit;
   cursor: pointer;
@@ -869,8 +991,27 @@
   padding-left: 6px;
   border-left: 2px solid var(--theme-color-warning);
   color: var(--theme-color-fg-default);
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   line-height: 1.35;
+}
+
+/* CHR-008 (R8) — a switched-off group says so once, above its dimmed rows.
+
+   The FB-021 row language, spoken once per group: the same notice rule and the same link-style verb, so an
+   author who has learned "coloured rule, short sentence" reads this without learning anything new. The
+   rows under it keep `.property-port-gated-control`'s dimming and lose their own sentence. */
+.property-group-gate {
+  margin: 4px 8px 8px 8px;
+  padding-left: 6px;
+  border-left: 2px solid var(--theme-color-notice);
+  color: var(--theme-color-fg-default);
+  font-size: var(--font-size-xs);
+  line-height: 1.35;
+}
+
+.property-group-gate .property-port-gate-link {
+  margin-left: 6px;
+  font-weight: var(--font-weight-medium);
 }
 
 /* FB-021 AC3 — where the author just landed.
@@ -889,4 +1030,139 @@
 .property-port-gate-target:focus,
 .property-port-gate-target:focus-visible {
   outline: 2px solid var(--theme-color-primary);
+}
+
+/* ── P94 STY-003 — where a value came from (design §2 rules 2 and 3) ──────────────────────────
+ *
+ * 🔴 THE COLOURS ARE EXISTING SEMANTIC TOKENS, NOT NEW ONES, and design §3.3 asked for exactly
+ * that check before committing. The mockup used purple for linked and amber for overridden and
+ * left both unruled. Amber is kept — it IS `--theme-color-fg-notice`, the editor's "caution, look
+ * here" that deliberately does not mean "error", which is the right weight for an override: a
+ * legitimate act the panel wants seen, not a fault. Purple has no token at all, so linked takes
+ * `--theme-color-fg-accent`, the azure the editor already uses for text that means "this belongs
+ * to something bigger". Minting a purple here would have started a second palette beside the one
+ * `colors.css` documents ([[a-second-copy-of-a-palette-drifts-silently]]).
+ *
+ * Both tokens are redefined under `:root[data-theme='light']`, so light and dark are carried by
+ * the token layer rather than by a second rule here — and both are FG tokens, which `colors.css`
+ * states are chosen to clear 4.5:1 on bg-0..bg-4. ⚠️ Still to be READ off the rendered element in
+ * a running editor in both themes (AC5) — a token's documented contrast is a fact about the token,
+ * not a reading of this row ([[a-ring-must-be-read-on-the-element-a-person-sees]]).
+ *
+ * An inset shadow rather than a border: `.property-panel-row` carries no box rule today, and a
+ * border would move every control 2px and change a layout CHR-009 closed on Richard's look. */
+.property-panel-row[data-look-treatment] {
+  position: relative;
+}
+
+/* 🔴 The bar lives in the panel's LEFT GUTTER, not inside the row. An `inset` box-shadow was the
+   first attempt and the drive's screenshots are why it is not the last: a 2px inset bar paints
+   over the leading edge of the label's first glyph — measured, the rows host starts 16px inside
+   the panel and the row's own box begins where the text does, so there is no room on the inside
+   and plenty on the outside. Positioned rather than a wider shadow so the bar keeps its 2px
+   weight, and inset 2px top and bottom so a column of them reads as separate marks rather than
+   one continuous rule. The parent is `overflow: visible`, checked, so nothing clips it.
+
+   🔴 **THE GUTTER ALREADY HAD A MARK IN IT, AND THE FIRST VERSION OF THIS BAR WAS DRAWN THROUGH
+   THE MIDDLE OF IT.** Richard, 2026-09-19, ruling AC8: *"the little dot to the left of the label
+   that says when something is changed is overlapping with the blue or red vertical line next to
+   each label from a 'look' controlled value."* He found it by looking at the shot; every assertion
+   about the treatment was green, because a `data-look-treatment` attribute cannot say whether two
+   marks share a lane.
+
+   Measured off the source, not by eye: CHR-009 §2's `GutterDot` is `left: -11px; width: 6px`
+   (`PropertyPanelInput.module.scss`), so it spans **-11 → -5**; this bar was `left: -8px;
+   width: 2px`, spanning **-8 → -6**. The bar was *entirely inside* the dot, which is why an
+   overridden row — where a node owning the value is exactly what BOTH marks are reporting — drew
+   a grey disc punched into the middle of an amber rule.
+
+   🔴 **The dot does not move.** CHR-009 closed that gutter on Richard's look, and the two marks
+   are not redundant even though they coincide here: the dot resets to the port DEFAULT, `Revert`
+   puts the field back under the LOOK. So the bar takes the outer lane instead — `-15px` leaves
+   2px of clear ground before the dot's leading edge at `-11px` and still sits 1px inside the rows
+   host, which starts 16px in. A change-bar at the far edge is also the shape a person already
+   knows from a diff gutter.
+
+   ⚠️ NOT YET READ OFF A RENDERED ELEMENT. The numbers above are the stylesheets'; the two rules
+   live in different containing blocks (`.Root` in core-ui, `.property-panel-row` here) and the
+   screenshot is what says they coincide. Drive it before calling AC8 closed — twice now this
+   surface has been green in every assertion and wrong on screen. */
+.property-panel-row[data-look-treatment]::before {
+  content: '';
+  position: absolute;
+  left: -15px;
+  top: 2px;
+  bottom: 2px;
+  width: 2px;
+  border-radius: 1px;
+}
+
+.property-panel-row[data-look-treatment='linked']::before {
+  background-color: var(--theme-color-fg-accent);
+}
+
+.property-panel-row[data-look-treatment='overridden']::before {
+  background-color: var(--theme-color-fg-notice);
+}
+
+/* Rule 3 — "loud and reversible". The sentence says what the Look wanted; the button puts the
+   field back under it. Sits below the control, as the gate and capability reasons do, so the
+   three kinds of thing a row can say about itself read as one family. */
+.property-look-override {
+  display: flex;
+  align-items: center;
+  /* P103 CMG-008 — a merged control's line carries one Put back per field; they wrap rather than
+     squeeze the sentence to an ellipsis. */
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  padding: 2px 10px 5px 12px;
+  color: var(--theme-color-fg-notice);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+}
+
+.property-look-override[data-look-fields] > span {
+  flex: 1 1 100%;
+}
+
+.property-look-override[data-look-fields] > .property-look-revert {
+  margin-left: 0;
+}
+
+.property-look-override > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.property-look-revert {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 1px 6px;
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: 3px;
+  background-color: transparent;
+  color: var(--theme-color-fg-default);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+}
+
+.property-look-revert:hover {
+  border-color: var(--theme-color-border-hover);
+  color: var(--theme-color-fg-highlight);
+}
+
+/* Rule 2's naming half — `STYLE — from Primary Button`, once per group. A treatment can make a
+   row look different; only this can say which Look it came from. */
+.property-group-look-source {
+  margin-left: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--theme-color-fg-accent);
+  font-weight: var(--font-weight-regular);
+  text-transform: none;
+  letter-spacing: 0;
 }

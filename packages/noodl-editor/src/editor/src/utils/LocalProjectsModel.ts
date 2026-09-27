@@ -14,9 +14,15 @@ import { RuntimeVersionInfo } from '../models/migration/types';
 import { projectFromDirectory, unzipIntoDirectory } from '../models/projectmodel.editor';
 import { backfillProjectAgentConfig, installProjectAgentConfig } from '../models/template/installAgentConfig';
 import { createProjectFromTemplate } from '../models/template/createFromTemplate';
-import { installStarterAssets } from '../models/template/starterAssets';
+import { installPresetFonts, installStarterAssets } from '../models/template/starterAssets';
 import { GitHubOAuthService } from '../services/GitHubOAuthService';
 import { isV2FormatEnabled } from '../services/ProjectStructure/featureFlags';
+import {
+  dedupeProjectRowsByDirectory,
+  findDurableIdCollisions,
+  findRowByDirectory,
+  type DurableIdCollision
+} from './recentProjectRows';
 import { tracker } from './tracker';
 import { guid } from './utils';
 
@@ -39,6 +45,9 @@ export class LocalProjectsModel extends Model {
   public static instance = new LocalProjectsModel();
 
   projectEntries: ProjectItem[] = [];
+
+  /** HLT-011. Recomputed by {@link fetch}; read through {@link getDurableIdCollisions}. */
+  private durableIdCollisions: DurableIdCollision[] = [];
 
   private recentProjectsStore = new Store({
     name: 'recently_opened_project'
@@ -74,8 +83,25 @@ export class LocalProjectsModel extends Model {
 
     existingFolders.sort((a, b) => b.latestAccessed - a.latestAccessed);
 
-    if (!this.projectEntries || (this.projectEntries && !isEqual(this.projectEntries, existingFolders))) {
-      this.projectEntries = existingFolders;
+    // HLT-003. Sorted first, deduplicated second: the survivor of a duplicated
+    // directory is the most recently opened one, whose name and thumbnail are
+    // the current ones. `_addProject` has never checked whether a directory is
+    // already registered, so a re-opened folder could be stored twice and the
+    // grid drew the same project twice — and re-keying that grid on the
+    // directory (which is what makes HLT-003's duplicate-key warning go away)
+    // needs the directory to be unique. See `recentProjectRows`.
+    const rows = dedupeProjectRowsByDirectory(existingFolders);
+
+    // HLT-011. Read on every fetch, repaired on none: two rows claiming one
+    // durable id is a fact about the user's machine that the launcher must not
+    // resolve on their behalf — see `findDurableIdCollisions`, and
+    // `getDurableIdCollisions` for who says it out loud.
+    this.durableIdCollisions = findDurableIdCollisions(rows);
+
+    if (!this.projectEntries || (this.projectEntries && !isEqual(this.projectEntries, rows))) {
+      this.projectEntries = rows;
+      // Writes the repaired list back, so a duplicate is healed once rather
+      // than re-filtered on every launch.
       this.store();
 
       this.notifyListeners('myProjectsChanged');
@@ -97,8 +123,46 @@ export class LocalProjectsModel extends Model {
     return this.projectEntries;
   }
 
+  /**
+   * ⚠️ **HLT-011 — this returns the FIRST row carrying `id`, and `id` can be
+   * shared by two projects.** It is kept for the callers that hold an id which
+   * is unique *by construction* — a project this session just minted one for
+   * ({@link _addProject}) or is already holding open ({@link bindProject}).
+   *
+   * 🔴 **A row a person pointed at is addressed by
+   * {@link getProjectEntryWithDirectory}, never by this.** Driven 2026-09-21:
+   * with two rows sharing one id, clicking the second card opened the first
+   * card's project, because `.find` answers honestly and answers about the
+   * wrong row.
+   */
   getProjectEntryWithId(id: string): ProjectItem {
     return this.projectEntries.find((p) => p.id === id);
+  }
+
+  /**
+   * HLT-011 — the launcher's addressing seam. A row **is** a project directory.
+   *
+   * ⚠️ **Unique because HLT-003 makes it so.** `fetch()` runs
+   * `dedupeProjectRowsByDirectory` before anything reads `projectEntries`, so
+   * one directory is one row. A caller that leans on this inherits that
+   * dependency, which is why the two live in one module and are documented
+   * together. Normalised through `projectRowKey` for the same reason the
+   * de-duplication is: a trailing separator is the same directory written twice.
+   */
+  getProjectEntryWithDirectory(directory: string): ProjectItem | undefined {
+    return findRowByDirectory(this.projectEntries, directory);
+  }
+
+  /**
+   * HLT-011 — the rows that claim one identity, as of the last {@link fetch}.
+   *
+   * Empty on every machine where nothing went wrong. Where it is not empty, the
+   * two projects share whatever else is keyed on that id — per-project editor
+   * settings (`editorSettings.json`), git credentials (`GitStore`) and the
+   * ownership half of `findReusableBackend` — and the editor's job is to say so.
+   */
+  getDurableIdCollisions(): DurableIdCollision[] {
+    return this.durableIdCollisions;
   }
 
   // Update latests accessed time for project
@@ -318,7 +382,12 @@ export class LocalProjectsModel extends Model {
       {
         makeDirectory: (directory) => filesystem.makeDirectory(directory),
         installTemplate: (templateUrl, destination) => templateRegistry.install(templateUrl, destination),
-        installStarterAssets: (destination) => installStarterAssets(destination),
+        // P88 GAM-016 — the chosen preset's typeface, placed with the starter assets so the first
+        // module scan links it. The id is peeked, not consumed: StyleTokensModel writes the tokens.
+        installStarterAssets: async (destination) => {
+          await installStarterAssets(destination);
+          await installPresetFonts(destination);
+        },
         writeAgentConfig: (destination, projectName) => this.writeAgentConfigFor(destination, projectName),
         // FB-005 T3 / AC2. The one caller passes a `makeUniquePath`, so this pair only ever
         // removes a directory that did not exist a moment ago — and it now matters, because a

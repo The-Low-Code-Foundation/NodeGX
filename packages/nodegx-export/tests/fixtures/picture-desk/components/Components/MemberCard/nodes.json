@@ -1,0 +1,46 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "p1c7u2ed-e5c0-4000-8000-000000000005",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "card",
+      "type": "Group",
+      "label": "Member card",
+      "children": ["photo", "nameText"],
+      "parameters": { "flexDirection": "row", "columnGap": "var(--space-3)", "alignItems": "center" },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "photo",
+      "type": "Image",
+      "label": "Photo",
+      "parent": "card",
+      "parameters": { "alt": "", "width": { "value": 64, "unit": "px" } },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "nameText",
+      "type": "Text",
+      "label": "Name",
+      "parent": "card",
+      "parameters": { "fontSize": "var(--text-base)" },
+      "x": 100,
+      "y": 260
+    },
+    {
+      "id": "cardInputs",
+      "type": "Component Inputs",
+      "label": "Card properties",
+      "ports": [
+        { "name": "picture", "plug": "output", "type": "string", "index": 0 },
+        { "name": "name", "plug": "output", "type": "string", "index": 1 }
+      ],
+      "x": 350,
+      "y": 160
+    }
+  ],
+  "visualRoots": ["card"]
+}

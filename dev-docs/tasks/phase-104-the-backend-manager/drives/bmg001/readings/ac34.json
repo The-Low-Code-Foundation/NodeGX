@@ -1,0 +1,292 @@
+{
+  "signedIn": true,
+  "tokenScrubbed": "#/collections/Pet",
+  "milo": "7363bdd1-ebd6-4429-8ec4-dcc15c796c6a",
+  "drawerOnLoad": {
+    "hash": "#/collections/Pet/7363bdd1-ebd6-4429-8ec4-dcc15c796c6a",
+    "drawer": true,
+    "title": "Edit Pet / 7363bdd1…",
+    "nameField": "Milo",
+    "focusInside": true
+  },
+  "afterEsc": {
+    "hash": "#/collections/Pet",
+    "drawer": false
+  },
+  "schemaUser": {
+    "hash": "#/schema/Toy",
+    "cards": [
+      "schema-Pet:card",
+      "schema-Toy:card hit"
+    ],
+    "hit": "card hit",
+    "top": 682,
+    "petTop": 227,
+    "userListed": [
+      "Pet",
+      "Toy"
+    ],
+    "mainScrollTop": 15,
+    "firstCard": "Pet"
+  },
+  "backWalk": [
+    "#/keys API keys",
+    "#/roles Roles",
+    "#/users Users",
+    "#/schema/Toy Schema"
+  ],
+  "triggerHit": "nightly-cleanupschedulefunction:cleanuponskip24/09/2026, 23:",
+  "runOnLink": {
+    "hash": "#/runs/exec_mug1hf37x077fh4g",
+    "modalTitle": "Execution exec_mug1hf37x077fh4g"
+  },
+  "runAfterClose": "#/runs",
+  "userHit": "45059518-4621-4c78-8d75-4dec0c4b8a9aannann@example.comnostaf",
+  "roleHit": "staff45059518-4621-4c78-8d75-4dec0c4b8a9aAdd memberDelete",
+  "legacy": {
+    "hash": "#/runs",
+    "title": "Runs"
+  },
+  "themes": {
+    "dark": {
+      "attr": "dark",
+      "toggleLabel": "Switch to the light theme",
+      "pages": {
+        "collections": {
+          "theme": "dark",
+          "bodyBg": "rgb(5, 5, 6)",
+          "bodyFg": "rgb(221, 228, 236)",
+          "mainBg": "rgb(20, 19, 24)",
+          "h1": "rgb(255, 255, 255)",
+          "btnBg": "rgb(77, 163, 255)"
+        },
+        "schema": {
+          "theme": "dark",
+          "bodyBg": "rgb(5, 5, 6)",
+          "bodyFg": "rgb(221, 228, 236)",
+          "mainBg": "rgb(20, 19, 24)",
+          "h1": "rgb(255, 255, 255)",
+          "btnBg": "rgb(77, 163, 255)"
+        },
+        "users": {
+          "theme": "dark",
+          "bodyBg": "rgb(5, 5, 6)",
+          "bodyFg": "rgb(221, 228, 236)",
+          "mainBg": "rgb(20, 19, 24)",
+          "h1": "rgb(255, 255, 255)",
+          "btnBg": "rgb(77, 163, 255)"
+        },
+        "roles": {
+          "theme": "dark",
+          "bodyBg": "rgb(5, 5, 6)",
+          "bodyFg": "rgb(221, 228, 236)",
+          "mainBg": "rgb(20, 19, 24)",
+          "h1": "rgb(255, 255, 255)",
+          "btnBg": "rgb(77, 163, 255)"
+        },
+        "signin": {
+          "theme": "dark",
+          "bodyBg": "rgb(5, 5, 6)",
+          "bodyFg": "rgb(221, 228, 236)",
+          "mainBg": "rgb(20, 19, 24)",
+          "h1": "rgb(255, 255, 255)",
+          "btnBg": "rgb(77, 163, 255)"
+        },
+        "permissions": {
+          "theme": "dark",
+          "bodyBg": "rgb(5, 5, 6)",
+          "bodyFg": "rgb(221, 228, 236)",
+          "mainBg": "rgb(20, 19, 24)",
+          "h1": "rgb(255, 255, 255)",
+          "btnBg": "rgb(77, 163, 255)"
+        },
+        "keys": {
+          "theme": "dark",
+          "bodyBg": "rgb(5, 5, 6)",
+          "bodyFg": "rgb(221, 228, 236)",
+          "mainBg": "rgb(20, 19, 24)",
+          "h1": "rgb(255, 255, 255)",
+          "btnBg": "rgb(77, 163, 255)"
+        },
+        "triggers": {
+          "theme": "dark",
+          "bodyBg": "rgb(5, 5, 6)",
+          "bodyFg": "rgb(221, 228, 236)",
+          "mainBg": "rgb(20, 19, 24)",
+          "h1": "rgb(255, 255, 255)",
+          "btnBg": "rgb(46, 44, 54)"
+        },
+        "workflows": {
+          "theme": "dark",
+          "bodyBg": "rgb(5, 5, 6)",
+          "bodyFg": "rgb(221, 228, 236)",
+          "mainBg": "rgb(20, 19, 24)",
+          "h1": "rgb(255, 255, 255)",
+          "btnBg": "rgb(77, 163, 255)"
+        },
+        "runs": {
+          "theme": "dark",
+          "bodyBg": "rgb(5, 5, 6)",
+          "bodyFg": "rgb(221, 228, 236)",
+          "mainBg": "rgb(20, 19, 24)",
+          "h1": "rgb(255, 255, 255)",
+          "btnBg": "rgb(46, 44, 54)"
+        },
+        "files": {
+          "theme": "dark",
+          "bodyBg": "rgb(5, 5, 6)",
+          "bodyFg": "rgb(221, 228, 236)",
+          "mainBg": "rgb(20, 19, 24)",
+          "h1": "rgb(255, 255, 255)",
+          "btnBg": "rgb(77, 163, 255)"
+        },
+        "email": {
+          "theme": "dark",
+          "bodyBg": "rgb(5, 5, 6)",
+          "bodyFg": "rgb(221, 228, 236)",
+          "mainBg": "rgb(20, 19, 24)",
+          "h1": "rgb(255, 255, 255)",
+          "btnBg": "rgb(77, 163, 255)"
+        },
+        "backups": {
+          "theme": "dark",
+          "bodyBg": "rgb(5, 5, 6)",
+          "bodyFg": "rgb(221, 228, 236)",
+          "mainBg": "rgb(20, 19, 24)",
+          "h1": "rgb(255, 255, 255)",
+          "btnBg": "rgb(77, 163, 255)"
+        },
+        "audit": {
+          "theme": "dark",
+          "bodyBg": "rgb(5, 5, 6)",
+          "bodyFg": "rgb(221, 228, 236)",
+          "mainBg": "rgb(20, 19, 24)",
+          "h1": "rgb(255, 255, 255)",
+          "btnBg": "rgb(46, 44, 54)"
+        }
+      }
+    },
+    "light": {
+      "attr": "light",
+      "toggleLabel": "Switch to the dark theme",
+      "pages": {
+        "collections": {
+          "theme": "light",
+          "bodyBg": "rgb(231, 235, 241)",
+          "bodyFg": "rgb(74, 86, 99)",
+          "mainBg": "rgb(238, 241, 245)",
+          "h1": "rgb(24, 33, 43)",
+          "btnBg": "rgb(21, 112, 239)"
+        },
+        "schema": {
+          "theme": "light",
+          "bodyBg": "rgb(231, 235, 241)",
+          "bodyFg": "rgb(74, 86, 99)",
+          "mainBg": "rgb(238, 241, 245)",
+          "h1": "rgb(24, 33, 43)",
+          "btnBg": "rgb(21, 112, 239)"
+        },
+        "users": {
+          "theme": "light",
+          "bodyBg": "rgb(231, 235, 241)",
+          "bodyFg": "rgb(74, 86, 99)",
+          "mainBg": "rgb(238, 241, 245)",
+          "h1": "rgb(24, 33, 43)",
+          "btnBg": "rgb(21, 112, 239)"
+        },
+        "roles": {
+          "theme": "light",
+          "bodyBg": "rgb(231, 235, 241)",
+          "bodyFg": "rgb(74, 86, 99)",
+          "mainBg": "rgb(238, 241, 245)",
+          "h1": "rgb(24, 33, 43)",
+          "btnBg": "rgb(21, 112, 239)"
+        },
+        "signin": {
+          "theme": "light",
+          "bodyBg": "rgb(231, 235, 241)",
+          "bodyFg": "rgb(74, 86, 99)",
+          "mainBg": "rgb(238, 241, 245)",
+          "h1": "rgb(24, 33, 43)",
+          "btnBg": "rgb(21, 112, 239)"
+        },
+        "permissions": {
+          "theme": "light",
+          "bodyBg": "rgb(231, 235, 241)",
+          "bodyFg": "rgb(74, 86, 99)",
+          "mainBg": "rgb(238, 241, 245)",
+          "h1": "rgb(24, 33, 43)",
+          "btnBg": "rgb(21, 112, 239)"
+        },
+        "keys": {
+          "theme": "light",
+          "bodyBg": "rgb(231, 235, 241)",
+          "bodyFg": "rgb(74, 86, 99)",
+          "mainBg": "rgb(238, 241, 245)",
+          "h1": "rgb(24, 33, 43)",
+          "btnBg": "rgb(21, 112, 239)"
+        },
+        "triggers": {
+          "theme": "light",
+          "bodyBg": "rgb(231, 235, 241)",
+          "bodyFg": "rgb(74, 86, 99)",
+          "mainBg": "rgb(238, 241, 245)",
+          "h1": "rgb(24, 33, 43)",
+          "btnBg": "rgb(242, 244, 246)"
+        },
+        "workflows": {
+          "theme": "light",
+          "bodyBg": "rgb(231, 235, 241)",
+          "bodyFg": "rgb(74, 86, 99)",
+          "mainBg": "rgb(238, 241, 245)",
+          "h1": "rgb(24, 33, 43)",
+          "btnBg": "rgb(21, 112, 239)"
+        },
+        "runs": {
+          "theme": "light",
+          "bodyBg": "rgb(231, 235, 241)",
+          "bodyFg": "rgb(74, 86, 99)",
+          "mainBg": "rgb(238, 241, 245)",
+          "h1": "rgb(24, 33, 43)",
+          "btnBg": "rgb(242, 244, 246)"
+        },
+        "files": {
+          "theme": "light",
+          "bodyBg": "rgb(231, 235, 241)",
+          "bodyFg": "rgb(74, 86, 99)",
+          "mainBg": "rgb(238, 241, 245)",
+          "h1": "rgb(24, 33, 43)",
+          "btnBg": "rgb(21, 112, 239)"
+        },
+        "email": {
+          "theme": "light",
+          "bodyBg": "rgb(231, 235, 241)",
+          "bodyFg": "rgb(74, 86, 99)",
+          "mainBg": "rgb(238, 241, 245)",
+          "h1": "rgb(24, 33, 43)",
+          "btnBg": "rgb(21, 112, 239)"
+        },
+        "backups": {
+          "theme": "light",
+          "bodyBg": "rgb(231, 235, 241)",
+          "bodyFg": "rgb(74, 86, 99)",
+          "mainBg": "rgb(238, 241, 245)",
+          "h1": "rgb(24, 33, 43)",
+          "btnBg": "rgb(21, 112, 239)"
+        },
+        "audit": {
+          "theme": "light",
+          "bodyBg": "rgb(231, 235, 241)",
+          "bodyFg": "rgb(74, 86, 99)",
+          "mainBg": "rgb(238, 241, 245)",
+          "h1": "rgb(24, 33, 43)",
+          "btnBg": "rgb(242, 244, 246)"
+        }
+      }
+    }
+  },
+  "toggled": {
+    "attr": "dark",
+    "stored": "dark"
+  }
+}

@@ -3,21 +3,28 @@
  * All colors use design tokens — no hardcoded values.
  */
 
+// CHR-009 §2 (s23): a 30px row of the panel's label column — 16px gutter, the label column, 8px gap, 26px field — the
+// geometry of `.panel-head-row` beside it. Was a caps label stacked over a full-width trigger.
 .VariantSelector {
   position: relative;
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-1, 4px);
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  padding: 0 16px;
+  box-sizing: border-box;
   width: 100%;
 }
 
-// Label above the trigger
+// Label in the panel's label column (`--property-label-column`), in the property rows' voice
+// (no caps, no weight).
 .VariantSelector-label {
+  flex: 0 0 var(--property-label-column, 118px);
   font-size: var(--font-size-sm);
-  font-weight: 500;
   color: var(--theme-color-fg-default-shy);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   user-select: none;
 }
 
@@ -26,31 +33,28 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-1, 4px);
-  width: 100%;
-  padding: var(--spacing-1, 4px) var(--spacing-2, 8px);
-  background: var(--theme-color-bg-3);
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 26px;
+  box-sizing: border-box;
+  padding: 0 8px;
+  /* CHR-009 s24, Richard: the four head rows (`Variant · Preset · Size · State`) share ONE edge, the dimmer
+     one — `.panel-head-row-field`'s bg-2 fill, `border-default` edge and `border-strong` hover. Was the
+     Phase-75 sweep's `border-control` on `bg-3` (≥3:1), which drew these two brighter than their neighbours;
+     matching the head row is the ruling. CHR-004 retired `style-section-control-borders.test.ts`; the fills and
+     edges here are now read off the rendered panel by `scripts/look-gate/`, in every state. */
+  background: var(--theme-color-bg-2);
   color: var(--theme-color-fg-default);
-  /* Phase-75 border sweep. The property editor is a `bg-1` panel
-     (`.sidebar-panel`, PAR-002), and this trigger's `bg-3` fill is only
-     1.36:1 dark / 1.22:1 light on it — so the fill does not carry the object
-     and the ring is load-bearing. `border-default` was 1.26 / 1.27 there;
-     `border-control` is 4.17 / 3.72 on the panel and 3.08 / 3.05 on this
-     control's own fill, so it clears 3:1 on BOTH sides.
-     ✅ The `:hover` below already names `primary` (5.60 / 4.57 on the panel),
-     which is stronger than the resting tone — checked, not assumed, because
-     raising a resting edge and leaving a divider-toned hover behind is the
-     regression this sweep documents. */
-  border: 1px solid var(--theme-color-border-control);
-  border-radius: var(--radius-default);
-  font-size: var(--font-size-base);
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
   cursor: pointer;
   text-align: left;
-  transition: border-color 100ms ease, background 100ms ease;
+  transition: border-color 100ms ease;
 
   &:hover:not(:disabled) {
-    background: var(--theme-color-bg-2);
-    border-color: var(--theme-color-primary);
+    border-color: var(--theme-color-border-strong);
   }
 
   &:focus-visible {
@@ -73,22 +77,23 @@
 
 .VariantSelector-chevron {
   flex-shrink: 0;
-  font-size: 10px;
+  width: 10px;
+  height: 10px;
   color: var(--theme-color-fg-default-shy);
-  line-height: 1;
   pointer-events: none;
 }
 
 // Dropdown list
 .VariantSelector-dropdown {
   position: absolute;
-  top: calc(100% + var(--spacing-1, 4px));
-  left: 0;
-  right: 0;
+  top: calc(100% - 2px);
+  // Under the field, not under the label: gutter 16 + label 116 + gap 8.
+  left: 140px;
+  right: 16px;
   z-index: 200;
   background: var(--theme-color-bg-2);
   border: 1px solid var(--theme-color-border-default);
-  border-radius: var(--radius-default);
+  border-radius: var(--radius-md);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   overflow: hidden;
   display: flex;
@@ -107,7 +112,7 @@
   background: transparent;
   color: var(--theme-color-fg-default);
   border: none;
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   cursor: pointer;
   text-align: left;
   width: 100%;
@@ -136,7 +141,7 @@
 
 .VariantSelector-checkmark {
   flex-shrink: 0;
-  font-size: 10px;
+  width: 10px;
+  height: 10px;
   color: var(--theme-color-primary);
-  line-height: 1;
 }

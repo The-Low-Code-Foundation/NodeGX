@@ -1,0 +1,300 @@
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!./src/editor/src/views/NodePicker/components/ModuleCard/ModuleCard.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/code-editor/CodeHistory/CodeHistoryDiffModal.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!./src/editor/src/views/BlocklyEditor/MyBlocksSaveDialog.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/code-editor/CodeHistory/CodeHistoryButton.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/property-panel/PropertyPanelBaseInput/PropertyPanelBaseInput.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/ai/AiChatSuggestion/AiChatSuggestion.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/code-editor/CodeHistory/CodeHistoryDropdown.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/inputs/TagButton/TagButton.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/common/Card/Card.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/json-editor/JSONEditor.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/property-panel/BindingChip/BindingChip.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/toolbar/ToolbarGrip/ToolbarGrip.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!./src/editor/src/views/panels/propertyeditor/components/ByobFilterBuilder/ByobFilterBuilder.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!./src/editor/src/views/panels/StylesPanel/components/TokenCategorySection/TokenCategorySection.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!./src/editor/src/views/panels/propertyeditor/GeneratedCodeModal/GeneratedCodeModal.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/preview/launcher/Launcher/components/FolderTreeItem/FolderTreeItem.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/StyleSuggestions/SuggestionBanner.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!./src/editor/src/views/NodePicker/components/NodePickerCard/NodePickerCard.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/json-editor/modes/EasyMode/EasyMode.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!./src/editor/src/views/panels/propertyeditor/ExpressionEditorModal/ExpressionEditorModal.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/json-editor/modes/AdvancedMode/AdvancedMode.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/ai/AiIconAnimated/AiIconAnimated.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/json-editor/modes/EasyMode/ValueEditor.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/property-panel/ExpressionInput/ExpressionInput.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/property-panel/PropertyPanelSliderInput/PropertyPanelSliderInput.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/property-panel/PropertyPanelIconRadioInput/PropertyPanelIconRadioInput.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/property-panel/PropertyPanelTextArea/PropertyPanelTextArea.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/property-panel/ExpressionToggle/ExpressionToggle.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/property-panel/PropertyPanelLengthUnitInput/PropertyPanelLengthUnitInput.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: LOG from ../../node_modules/sass-loader/dist/cjs.js sass-loader ../../node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!../../node_modules/sass-loader/dist/cjs.js!../noodl-core-ui/src/components/property-panel/PropertyPanelTextRadioInput/PropertyPanelTextRadioInput.module.scss
+Editor: <w> Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+Editor: <w> 
+Editor: <w> More info: https://sass-lang.com/d/legacy-js-api
+Editor: <w> 
+Editor: <w> null
+Editor: 
+Editor: webpack 5.108.4 compiled successfully in 67112 ms
+Editor: [renderer:info] (index.js:485) [webpack-dev-server] Server started: Hot Module Replacement enabled, Live Reloading enabled, Progress disabled, Overlay enabled.
+Editor: [renderer:info] (log.js:39) [HMR] Waiting for update signal from WDS...
+Editor: [renderer:info] (react-dom-client.development.js:24593) %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools
+Editor: You might need to use a local HTTP server (instead of file://): https://react.dev/link/react-devtools-faq font-weight:bold
+Editor: [renderer:warning] (bugtracker.ts:162) The vm module of Node.js is unsupported in Electron's renderer process due to incompatibilities with the Blink rendering engine. Crashes are likely and avoiding the module is highly recommended. This module may be removed in a future release.
+Editor: [renderer:info] (community-showcase.ts:130) ✅ Showcase loaded! Run: noodlShowcase.start()
+Editor: [renderer:info] (test-highlights.ts:251) ✅ Highlight test utilities loaded!
+Editor: [renderer:info] (test-highlights.ts:252) 💡 Try: window.testHighlightManager.testBasicHighlight()
+Editor: [renderer:info] (useEventListener.ts:28) 🔥🔥🔥 useEventListener.ts MODULE LOADED WITH DEBUG LOGS - Version 2.0 🔥🔥🔥
+Editor: [renderer:warning] (bugtracker.ts:162) The vm module of Node.js is unsupported in Electron's renderer process due to incompatibilities with the Blink rendering engine. Crashes are likely and avoiding the module is highly recommended. This module may be removed in a future release.
+Editor: [renderer:warning] (bugtracker.ts:162) The vm module of Node.js is unsupported in Electron's renderer process due to incompatibilities with the Blink rendering engine. Crashes are likely and avoiding the module is highly recommended. This module may be removed in a future release.
+Editor: [renderer:warning] (bugtracker.ts:162) The vm module of Node.js is unsupported in Electron's renderer process due to incompatibilities with the Blink rendering engine. Crashes are likely and avoiding the module is highly recommended. This module may be removed in a future release.
+Editor: [renderer:info] (index.ts:44) 🔥🔥 BUILD TIMESTAMP: 2026-09-20T20:15:20.500Z
+Editor: [renderer:info] (router.tsx:108) 
+Editor:   _   _                    _  _
+Editor:  | \ | |                  | || |
+Editor:  |  \| |  ___    ___    __| || |
+Editor:  | . ` | / _ \  / _ \  / _` || |
+Editor:  | |\  || (_) || (_) || (_| || |
+Editor:  |_| \_| \___/  \___/  \__,_||_|
+Editor: 
+Editor:       version: 0.2.4
+Editor: 
+Editor: 
+Editor: [renderer:info] (GitHubOAuthService.ts:57) 🔧 [GitHubOAuthService] Constructor called - setting up IPC listeners
+Editor: [renderer:info] (GitHubOAuthService.ts:70) 🔌 [GitHubOAuthService] Setting up IPC listeners for github-oauth-complete and github-oauth-error
+Editor: [renderer:info] (GitHubOAuthService.ts:83) ✅ [GitHubOAuthService] IPC listeners registered
+Editor: [renderer:info] (useProjectOrganization.ts:30) ✅ Using real ProjectOrganizationService
+Editor: [renderer:info] (useProjectOrganization.ts:30) ✅ Using real ProjectOrganizationService
+Editor: [renderer:info] (ProjectsPage.tsx:411) 🔧 [ProjectsPage] Initializing GitHub OAuth...
+Editor: [renderer:info] (GitHubOAuthService.ts:320) 🔧 [GitHub OAuth] Initializing GitHubOAuthService
+Editor: [renderer:info] (useGitHubRepos.ts:95) 🔍 [useGitHubRepos] fetchRepos called [object Object]
+Editor: [renderer:info] (useGitHubRepos.ts:100) 🔍 [useGitHubRepos] Skipping fetch - not authenticated or no client
+Editor: [renderer:info] (ProjectsPage.tsx:731) 🔵 Projects loaded, triggering runtime detection for: 103
+Editor: [renderer:warning] (bugtracker.ts:162) %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+Editor:   Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+Editor:   this app to unnecessary security risks.
+Editor: 
+Editor: For more information and help, consult
+Editor: https://electronjs.org/docs/tutorial/security.
+Editor: This warning will not show up
+Editor: once the app is packaged.
+Editor: [renderer:info] (ProjectsPage.tsx:415) 🔧 [ProjectsPage] GitHub auth state: false undefined
+Editor: [renderer:info] (ViewerConnection.ts:109) Connected to viewer server at ws://localhost:8574
+Editor: [renderer:error] Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. .$692d3658-f11a-10db-e6c8-6b000f774898
+Editor: [renderer:error] Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. .$692d3658-f11a-10db-e6c8-6b000f774898
+Editor: [renderer:error] Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. .$692d3658-f11a-10db-e6c8-6b000f774898
+Editor: [renderer:error] Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. .$692d3658-f11a-10db-e6c8-6b000f774898
+Editor: [renderer:error] Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. .$692d3658-f11a-10db-e6c8-6b000f774898
+Editor: [renderer:error] Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. .$692d3658-f11a-10db-e6c8-6b000f774898
+[renderer:error] Failed to load resource: the server responded with a status of 401 () (path)
+Editor: [renderer:error] Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. .$692d3658-f11a-10db-e6c8-6b000f774898
+[renderer:error] Failed to load resource: the server responded with a status of 401 () (profile)
+Editor: [renderer:error] Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. .$692d3658-f11a-10db-e6c8-6b000f774898
+Editor: [renderer:error] Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. .$692d3658-f11a-10db-e6c8-6b000f774898
+Editor: [renderer:error] Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. .$692d3658-f11a-10db-e6c8-6b000f774898
+Editor: [renderer:info] (projectmodel.modules.ts:57) Loaded 1 modules
+Editor: [renderer:info] (ProjectsPage.tsx:738) 🔔 Projects list changed, updating dashboard with runtime detection
+[renderer:error] Failed to load resource: the server responded with a status of 404 () (feed.json)
+Editor: [renderer:debug] (NodeLibraryImporter.ts:310) [nodelib] Received browser  (nodes: 164)
+Editor: [renderer:debug] (NodeLibraryImporter.ts:310) [nodelib] Received cloud  (nodes: 85)
+Editor: [renderer:debug] (NodeLibraryImporter.ts:415) [nodelib] Loaded new node library
+Editor: [renderer:info] (projectmodel.ts:1760) Project saved Sun Sep 20 2026 22:15:37 GMT+0200 (Central European Summer Time)
+Editor: [renderer:error] `value` prop on `%s` should not be null. Consider using an empty string to clear the component or `undefined` for uncontrolled components. input
+Editor: [renderer:info] (useProjectOrganization.ts:30) ✅ Using real ProjectOrganizationService
+Editor: [renderer:info] (useProjectOrganization.ts:30) ✅ Using real ProjectOrganizationService
+Editor: [renderer:info] (ProjectsPage.tsx:411) 🔧 [ProjectsPage] Initializing GitHub OAuth...
+Editor: [renderer:info] (GitHubOAuthService.ts:320) 🔧 [GitHub OAuth] Initializing GitHubOAuthService
+Editor: [renderer:info] (useGitHubRepos.ts:95) 🔍 [useGitHubRepos] fetchRepos called [object Object]
+Editor: [renderer:info] (useGitHubRepos.ts:100) 🔍 [useGitHubRepos] Skipping fetch - not authenticated or no client
+Editor: [renderer:info] (ProjectsPage.tsx:731) 🔵 Projects loaded, triggering runtime detection for: 103
+Editor: [renderer:info] (ViewerConnection.ts:140) Warnings have been resolved, doing full export
+Editor: [renderer:info] (ProjectsPage.tsx:415) 🔧 [ProjectsPage] GitHub auth state: false undefined
+Editor: [renderer:error] Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. .$692d3658-f11a-10db-e6c8-6b000f774898
+Editor: [renderer:error] Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. .$692d3658-f11a-10db-e6c8-6b000f774898
+Editor: [renderer:error] Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. .$692d3658-f11a-10db-e6c8-6b000f774898
+Editor: [renderer:error] Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. .$692d3658-f11a-10db-e6c8-6b000f774898
+[renderer:error] Failed to load resource: the server responded with a status of 401 () (path)
+[renderer:error] Failed to load resource: the server responded with a status of 401 () (profile)
+Editor: [renderer:error] Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. .$692d3658-f11a-10db-e6c8-6b000f774898
+Editor: [renderer:error] Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. .$692d3658-f11a-10db-e6c8-6b000f774898
+Editor: [renderer:error] Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. .$692d3658-f11a-10db-e6c8-6b000f774898
+Editor: [renderer:info] (projectmodel.modules.ts:57) Loaded 1 modules
+Editor: [renderer:info] (ProjectsPage.tsx:738) 🔔 Projects list changed, updating dashboard with runtime detection
+[renderer:error] Failed to load resource: the server responded with a status of 404 () (feed.json)
+Editor: [renderer:debug] (NodeLibraryImporter.ts:310) [nodelib] Received browser  (nodes: 164)
+Editor: [renderer:debug] (NodeLibraryImporter.ts:310) [nodelib] Received cloud  (nodes: 85)
+Editor: [renderer:debug] (NodeLibraryImporter.ts:415) [nodelib] Loaded new node library
+Editor: [renderer:info] (projectmodel.ts:1760) Project saved Sun Sep 20 2026 22:16:36 GMT+0200 (Central European Summer Time)

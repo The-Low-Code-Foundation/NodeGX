@@ -187,6 +187,10 @@ describe('AC4 — a kit that registers zero nodes', () => {
    * (dom-shim + a `Noodl` collector, requiring each `main`) confirmed
    * `form-validation/noodl-validation-module` loading cleanly and registering
    * nothing. See `notes/cn-015-premise-census.md`.
+   *
+   * ⚠️ GAM-018 (2026-09-16): that census reading was false. The census's catch-all `Noodl`
+   * answered the kit's feature test, and the kit registers `noodl.net.validate` in a browser
+   * and in the fixed extractor. The overlay below is still the shape of a real zero-node kit.
    */
   test('a kit that loaded but registered nothing is a WARNING, not an error', () => {
     const overlay = {

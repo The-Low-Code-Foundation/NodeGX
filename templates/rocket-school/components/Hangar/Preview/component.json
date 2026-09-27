@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "81037661-6fff-57ab-89b1-11cb7f4fee08",
+  "name": "Preview",
+  "path": "/Hangar/Preview",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The child’s face and rocket as they will race, wearing what is on, and one line about picks. Changed (a signal) pops the pair, and reduced motion stills it. Publishes Clicked."
+}

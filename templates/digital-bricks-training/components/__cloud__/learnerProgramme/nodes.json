@@ -1,0 +1,144 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "47042b47-b11c-5cca-8de3-5fd11f3d7375",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req",
+      "type": "noodl.cloud.request",
+      "label": "Staff only (security: role:staff)",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "learnerId,now",
+        "allowNoAuth": false,
+        "ptype-learnerId": "string",
+        "preq-learnerId": true,
+        "ptype-now": "string",
+        "preq-now": false
+      }
+    },
+    {
+      "id": "ask",
+      "type": "JavaScriptFunction",
+      "label": "Which learner, and when",
+      "x": 300,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * A named learner's programme, for a staff caller (`role:staff` in the\n * security file). `now` is honoured HERE and only here (§0.6): it is the proof\n * seam that pins the assembly to the fixture's instant, and a page never sends it.\n * One hop from the Request node, run on `Received`, so both parameters are set.\n */\nconst learnerId = String(Inputs.learnerId || '').trim();\nconst now = String(Inputs.now || '').trim();\nif (!learnerId) {\n  Outputs.error = 'learnerId is required';\n  Outputs.failed();\n} else if (now && Number.isNaN(Date.parse(now))) {\n  Outputs.error = 'now is not an instant';\n  Outputs.failed();\n} else {\n  Outputs.query = { learnerId, now };\n}\n",
+        "runOnChange-in-learnerId": false,
+        "runOnChange-in-now": false
+      },
+      "ports": [
+        {
+          "name": "in-learnerId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "learnerId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-now",
+          "plug": "input",
+          "type": "*",
+          "displayName": "now",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-query",
+          "plug": "output",
+          "type": "*",
+          "displayName": "query",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "plug": "output",
+          "type": "*",
+          "displayName": "error",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Run on Received, one hop from the Request node, so both parameters are set (BACKEND-AUTHORING-MODEL rule 2). Inputs do not re-run it (NDA-017, L165)."
+      }
+    },
+    {
+      "id": "prog",
+      "type": "/#__cloud__/shared/Programme",
+      "label": "The superset",
+      "x": 560,
+      "y": 40
+    },
+    {
+      "id": "proj",
+      "type": "JavaScriptFunction",
+      "label": "projectForCoach",
+      "x": 820,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * WHAT A GATED STAFF CALLER MAY READ — `projectForCoach`\n * (src/lib/server/timeline/model.ts). A superset of the learner's: signals and\n * internal notes stay. THE GATE IS THE SECURITY FILE'S (`role:staff`), never\n * this node's — the one thing worse than no gate is two half-gates disagreeing.\n * `unread` is resolved from the coach's side, on the live list and the history.\n */\nif (Inputs.payload !== undefined) {\n  try {\n    const p = Inputs.payload;\n    const one = (e) => {\n      let out = e;\n      if (e.kind === 'note') {\n        const { _visibility, ...note } = e.note;\n        out = { ...e, note };\n      }\n      return out.kind === 'message' ? { ...out, unread: out.authorRole !== 'coach' && !out.read } : out;\n    };\n    Outputs.rows = [{ ...p, entries: p.entries.map(one), history: p.history.map(one) }];\n    Outputs.done();\n  } catch (e) {\n    Outputs.error = String((e && e.message) || e);\n    // Logged for the operator; the caller still gets one refusal body (the mcp/auth.ts rule).\n    console.error('[dbt:learnerProgramme]', Outputs.error);\n    Outputs.failed();\n  }\n}\n",
+        "runOnChange-in-payload": true
+      },
+      "ports": [
+        {
+          "name": "in-payload",
+          "plug": "input",
+          "type": "*",
+          "displayName": "payload",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-rows",
+          "plug": "output",
+          "type": "*",
+          "displayName": "rows",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "plug": "output",
+          "type": "*",
+          "displayName": "error",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "res",
+      "type": "noodl.cloud.response",
+      "label": "rows — the fixture's own shape",
+      "x": 1080,
+      "y": 40,
+      "parameters": {
+        "params": "rows"
+      }
+    },
+    {
+      "id": "deny",
+      "type": "noodl.cloud.response",
+      "label": "One refusal, whatever went wrong",
+      "x": 1080,
+      "y": 220,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This could not be read."
+      }
+    }
+  ]
+}

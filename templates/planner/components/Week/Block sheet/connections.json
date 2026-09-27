@@ -1,0 +1,193 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ce248651-7c15-5bd9-8202-f2f3b2fa213d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "bsIn",
+      "fromProperty": "shown",
+      "toId": "bsScrim",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "title",
+      "toId": "bsTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "projects",
+      "toId": "bsProject",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "projectId",
+      "toId": "bsProject",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "bsProject",
+      "fromProperty": "value",
+      "toId": "bsOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "what",
+      "toId": "bsWhat",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "bsWhat",
+      "fromProperty": "onTextChanged",
+      "toId": "bsOut",
+      "toProperty": "what"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "planned",
+      "toId": "bsPlanned",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "bsPlanned",
+      "fromProperty": "onTextChanged",
+      "toId": "bsOut",
+      "toProperty": "planned"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "date",
+      "toId": "bsDate",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "bsDate",
+      "fromProperty": "Value",
+      "toId": "bsOut",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "timeShown",
+      "toId": "bsTime",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "loggedLine",
+      "toId": "bsLogged",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "entries",
+      "toId": "bsEntries",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "hours",
+      "toId": "bsHours",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "bsHours",
+      "fromProperty": "onTextChanged",
+      "toId": "bsOut",
+      "toProperty": "hours"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "note",
+      "toId": "bsNote",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "bsNote",
+      "fromProperty": "onTextChanged",
+      "toId": "bsOut",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "shown",
+      "toId": "bsOpened",
+      "toProperty": "in-shown"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "done",
+      "toId": "bsOpened",
+      "toProperty": "in-done"
+    },
+    {
+      "fromId": "bsOpened",
+      "fromProperty": "out-doneOn",
+      "toId": "bsDone",
+      "toProperty": "check"
+    },
+    {
+      "fromId": "bsOpened",
+      "fromProperty": "out-doneOff",
+      "toId": "bsDone",
+      "toProperty": "uncheck"
+    },
+    {
+      "fromId": "bsOpened",
+      "fromProperty": "out-closed",
+      "toId": "bsWhat",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "bsOpened",
+      "fromProperty": "out-closed",
+      "toId": "bsPlanned",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "bsOpened",
+      "fromProperty": "out-closed",
+      "toId": "bsHours",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "bsOpened",
+      "fromProperty": "out-closed",
+      "toId": "bsNote",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "bsDone",
+      "fromProperty": "checked",
+      "toId": "bsOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "saveLabel",
+      "toId": "bsSave",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "bsSave",
+      "fromProperty": "onClick",
+      "toId": "bsOut",
+      "toProperty": "save"
+    },
+    {
+      "fromId": "bsClose",
+      "fromProperty": "onClick",
+      "toId": "bsOut",
+      "toProperty": "close"
+    },
+    {
+      "fromId": "bsScrim",
+      "fromProperty": "onClick",
+      "toId": "bsOut",
+      "toProperty": "close"
+    }
+  ]
+}

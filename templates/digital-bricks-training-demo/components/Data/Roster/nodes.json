@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2e89e413-5201-4626-aaf6-ac66ed3f0282",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fr_order",
+      "type": "JavaScriptFunction",
+      "label": "The server's order",
+      "x": 300,
+      "y": 160,
+      "parameters": {
+        "functionScript": "/*\n * THE COACH'S PEOPLE, AS THE SERVER WOULD HAND THEM OVER (TASK-L164 §2).\n *\n * Stands in for `getRoster()` (src/lib/server/coach/roster-service.ts): ONE\n * statement that starts from `accounts` and LEFT JOINs everything else, so a\n * learner who signed up and never finished onboarding still has a row. That is\n * L89's whole reason for existing — the old list started from\n * `project_contexts` and hid exactly the people a coach most needs to notice.\n *\n * EVERY DERIVED FIELD IS NULLABLE ON PURPOSE: email, coachLabel, projectName,\n * contextVersion (null = never finished onboarding), lastActivity (null, never\n * the word \"never\"), coachEmail, replanBlockedAt, awaitingReplySince (a DATE,\n * never a count). `cohorts` and `programmes` are `[]`, never null.\n *\n * STAFF-ONLY. `coachLabel` is the trainer's private shorthand (L84) and must\n * never reach a learner surface.\n *\n * The ORDER is the server's and is applied here, where the server's ORDER BY\n * would be: lastActivity descending, NULLS LAST, then createdAt descending. The\n * fixture's rows are deliberately NOT written in that order, so the sort is\n * exercised rather than assumed. The filter downstream decides nothing about\n * order.\n */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\n\nconst rows = plain(Inputs.items) || [];\nconst ms = (iso) => (iso ? new Date(iso).getTime() : null);\n\nOutputs.people = rows.slice().sort((a, b) => {\n  const la = ms(a.lastActivity);\n  const lb = ms(b.lastActivity);\n  if (la === null && lb !== null) return 1;\n  if (lb === null && la !== null) return -1;\n  if (la !== lb) return lb - la;\n  return ms(b.createdAt) - ms(a.createdAt);\n});\nOutputs.count = rows.length;\nOutputs.loaded();\n"
+      },
+      "ports": [
+        {
+          "name": "in-items",
+          "displayName": "items",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-loaded",
+          "displayName": "loaded",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-people",
+          "displayName": "people",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "fr_out",
+      "type": "Component Outputs",
+      "label": "People",
+      "x": 560,
+      "y": 40,
+      "ports": [
+        {
+          "name": "people",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "loaded",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "ro_ask",
+      "type": "JavaScriptFunction",
+      "label": "Ask once, when this arrives",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * ASK ONCE, ON ARRIVAL (TASK-L171 §1). Nothing is wired to this node's Run, so\n * the runtime runs it once when its script loads — which is when the page that\n * places this component mounts. That is the whole trigger: the roster has no\n * parameter, because the backend decides whose people these are from the\n * session (`role:staff` in nodegx.security.json), never from anything a page\n * sends.\n */\nOutputs.ask();\n"
+      },
+      "metadata": {
+        "comment": "The fixture's Static Data node stood here and emitted its rows on load. A Function with nothing on Run also runs once on load (simplejavascript.ts, NDA-017 §2), so the call happens exactly when the fixture used to arrive, and no page changes."
+      },
+      "ports": [
+        {
+          "name": "out-ask",
+          "displayName": "ask",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "ro_call",
+      "type": "JavaScriptFunction",
+      "label": "roster — answered in the browser (demo)",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "functionScript": "/*\n * GENERATED by tools/build-demo.mjs (TASK-L180) — do not edit by hand.\n *\n * Stands where the template's backend function stands, and answers what it\n * answers — from the fixture that function is proven to return (L170). Nothing\n * leaves this browser.\n */\n/* THE DEMO'S CLOCK — generated from tools/lib/demo-clock.mjs (TASK-L180). */\nvar DEMO_FIXTURE_NOW = Date.parse('2026-09-22T12:00:00.000Z');\nvar DEMO_DAY = 86400000;\nvar DEMO_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];\nfunction demoShiftDays(nowMs) {\n  return Math.floor((nowMs - DEMO_FIXTURE_NOW) / DEMO_DAY);\n}\nfunction demoFresh(value, nowMs) {\n  var days = demoShiftDays(nowMs);\n  if (days === 0) return value;\n  var DATETIME = /^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z$/;\n  var DATE = /^\\d{4}-\\d{2}-\\d{2}$/;\n  var MONTH = /\\b(end of )?(January|February|March|April|May|June|July|August|September|October|November|December)\\b/g;\n  function month(match, endOf, name) {\n    var anchor = Date.UTC(2026, DEMO_MONTHS.indexOf(name), endOf ? 25 : 15) + days * DEMO_DAY;\n    return (endOf || '') + DEMO_MONTHS[new Date(anchor).getUTCMonth()];\n  }\n  function walk(x) {\n    if (typeof x === 'string') {\n      if (DATETIME.test(x)) return new Date(Date.parse(x) + days * DEMO_DAY).toISOString();\n      if (DATE.test(x)) return new Date(Date.parse(x + 'T00:00:00.000Z') + days * DEMO_DAY).toISOString().slice(0, 10);\n      return x.replace(MONTH, month);\n    }\n    if (Array.isArray(x)) return x.map(walk);\n    if (x && typeof x === 'object') {\n      var out = {};\n      for (var k in x) if (Object.prototype.hasOwnProperty.call(x, k)) out[k] = walk(x[k]);\n      return out;\n    }\n    return x;\n  }\n  return walk(value);\n}\nvar FIXTURE = /*FIXTURE-BEGIN*/[{\"learnerId\":\"l-recipe\",\"email\":\"ade.bello@example.test\",\"coachLabel\":null,\"projectName\":\"Recipe cost calculator\",\"contextVersion\":1,\"stepsTotal\":11,\"stepsComplete\":0,\"lastActivity\":\"2026-09-02T09:00:00.000Z\",\"createdAt\":\"2026-09-02T09:00:00.000Z\",\"coachEmail\":null,\"replanBlockedAt\":null,\"awaitingReplySince\":null,\"cohorts\":[{\"id\":\"c-sunday\",\"name\":\"Sunday Builders\"}],\"programmes\":[{\"id\":\"p-recipe\",\"title\":\"Autumn programme\",\"startsOn\":null,\"endsOn\":\"2026-12-18\",\"status\":\"active\",\"archivedAt\":null,\"createdAt\":\"2026-09-02T09:00:00.000Z\"}]},{\"learnerId\":\"l-marie\",\"email\":\"marie.dubois@example.test\",\"coachLabel\":\"Marie Dubois\",\"projectName\":\"Parent evening booking\",\"contextVersion\":3,\"stepsTotal\":12,\"stepsComplete\":4,\"lastActivity\":\"2026-09-20T16:40:00.000Z\",\"createdAt\":\"2026-08-11T10:00:00.000Z\",\"coachEmail\":\"trainer@example.test\",\"replanBlockedAt\":null,\"awaitingReplySince\":\"2026-09-18T21:30:00.000Z\",\"cohorts\":[{\"id\":\"c-q4\",\"name\":\"Q4 intensive\"},{\"id\":\"c-sunday\",\"name\":\"Sunday Builders\"}],\"programmes\":[{\"id\":\"p-marie\",\"title\":\"Q4 intensive\",\"startsOn\":null,\"endsOn\":\"2026-12-18\",\"status\":\"active\",\"archivedAt\":null,\"createdAt\":\"2026-08-11T10:00:00.000Z\"}]},{\"learnerId\":\"l-sam\",\"email\":\"sam.okafor@example.test\",\"coachLabel\":\"Sam — first site, autumn\",\"projectName\":\"My business landing page\",\"contextVersion\":3,\"stepsTotal\":20,\"stepsComplete\":5,\"lastActivity\":\"2026-09-21T20:14:00.000Z\",\"createdAt\":\"2026-07-08T09:00:00.000Z\",\"coachEmail\":null,\"replanBlockedAt\":null,\"awaitingReplySince\":null,\"cohorts\":[],\"programmes\":[{\"id\":\"prog-summer\",\"title\":\"Finding your feet\",\"startsOn\":\"2026-07-08\",\"endsOn\":\"2026-07-31\",\"status\":\"closed\",\"archivedAt\":\"2026-08-01T09:00:00.000Z\",\"createdAt\":\"2026-07-08T09:00:00.000Z\"},{\"id\":\"prog-autumn\",\"title\":\"Getting your first site live\",\"startsOn\":\"2026-09-01\",\"endsOn\":\"2026-11-27\",\"status\":\"active\",\"archivedAt\":null,\"createdAt\":\"2026-09-01T09:00:00.000Z\"}]},{\"learnerId\":\"l-allotment\",\"email\":\"j.hughes@example.test\",\"coachLabel\":\"Allotment waiting list\",\"projectName\":\"Allotment waiting list app\",\"contextVersion\":2,\"stepsTotal\":10,\"stepsComplete\":2,\"lastActivity\":\"2026-09-14T11:00:00.000Z\",\"createdAt\":\"2026-08-20T10:00:00.000Z\",\"coachEmail\":\"trainer@example.test\",\"replanBlockedAt\":\"2026-09-13T09:00:00.000Z\",\"awaitingReplySince\":null,\"cohorts\":[{\"id\":\"c-q4\",\"name\":\"Q4 intensive\"}],\"programmes\":[{\"id\":\"p-allot\",\"title\":\"Q4 intensive\",\"startsOn\":null,\"endsOn\":\"2026-12-18\",\"status\":\"active\",\"archivedAt\":null,\"createdAt\":\"2026-08-20T10:00:00.000Z\"}]},{\"learnerId\":\"l-invoice\",\"email\":null,\"coachLabel\":null,\"projectName\":\"Invoice payment tracker\",\"contextVersion\":2,\"stepsTotal\":14,\"stepsComplete\":1,\"lastActivity\":\"2026-09-12T15:00:00.000Z\",\"createdAt\":\"2026-08-25T10:00:00.000Z\",\"coachEmail\":null,\"replanBlockedAt\":null,\"awaitingReplySince\":null,\"cohorts\":[],\"programmes\":[{\"id\":\"p-invoice\",\"title\":\"Solo programme\",\"startsOn\":null,\"endsOn\":null,\"status\":\"closed\",\"archivedAt\":null,\"createdAt\":\"2026-08-25T10:00:00.000Z\"}]},{\"learnerId\":\"l-priya\",\"email\":\"priya@example.test\",\"coachLabel\":\"Priya Shah\",\"projectName\":\"After-school club booking form\",\"contextVersion\":5,\"stepsTotal\":7,\"stepsComplete\":3,\"lastActivity\":\"2026-09-09T22:05:00.000Z\",\"createdAt\":\"2026-05-02T10:00:00.000Z\",\"coachEmail\":\"trainer@example.test\",\"replanBlockedAt\":null,\"awaitingReplySince\":null,\"cohorts\":[{\"id\":\"c-spring\",\"name\":\"Spring cohort\"}],\"programmes\":[{\"id\":\"p-priya-1\",\"title\":\"Spring programme\",\"startsOn\":\"2026-03-02\",\"endsOn\":\"2026-07-31\",\"status\":\"closed\",\"archivedAt\":\"2026-08-01T09:00:00.000Z\",\"createdAt\":\"2026-03-02T09:00:00.000Z\"},{\"id\":\"p-priya-0\",\"title\":\"Autumn programme\",\"startsOn\":\"2026-08-10\",\"endsOn\":\"2026-12-18\",\"status\":\"active\",\"archivedAt\":null,\"createdAt\":\"2026-08-10T09:00:00.000Z\"}]},{\"learnerId\":\"l-choir\",\"email\":\"eleni.k@example.test\",\"coachLabel\":null,\"projectName\":\"Choir rota\",\"contextVersion\":1,\"stepsTotal\":9,\"stepsComplete\":3,\"lastActivity\":\"2026-09-20T07:10:00.000Z\",\"createdAt\":\"2026-08-30T10:00:00.000Z\",\"coachEmail\":null,\"replanBlockedAt\":null,\"awaitingReplySince\":null,\"cohorts\":[],\"programmes\":[]},{\"learnerId\":\"l-cycling\",\"email\":\"tom.reyes@example.test\",\"coachLabel\":\"Tomás Reyes\",\"projectName\":\"Cycling club ride log\",\"contextVersion\":4,\"stepsTotal\":16,\"stepsComplete\":9,\"lastActivity\":\"2026-09-21T06:00:00.000Z\",\"createdAt\":\"2026-06-10T10:00:00.000Z\",\"coachEmail\":\"trainer@example.test\",\"replanBlockedAt\":null,\"awaitingReplySince\":null,\"cohorts\":[{\"id\":\"c-q4\",\"name\":\"Q4 intensive\"}],\"programmes\":[{\"id\":\"p-cyc-0\",\"title\":\"Summer programme\",\"startsOn\":null,\"endsOn\":\"2026-08-29\",\"status\":\"closed\",\"archivedAt\":null,\"createdAt\":\"2026-06-10T10:00:00.000Z\"},{\"id\":\"p-cyc-1\",\"title\":\"Q4 intensive\",\"startsOn\":null,\"endsOn\":\"2026-12-18\",\"status\":\"active\",\"archivedAt\":null,\"createdAt\":\"2026-06-10T10:00:00.000Z\"}]},{\"learnerId\":\"l-lingo\",\"email\":\"noor.a@example.test\",\"coachLabel\":null,\"projectName\":\"Language exchange matcher\",\"contextVersion\":1,\"stepsTotal\":0,\"stepsComplete\":0,\"lastActivity\":\"2026-09-17T19:00:00.000Z\",\"createdAt\":\"2026-09-16T10:00:00.000Z\",\"coachEmail\":null,\"replanBlockedAt\":null,\"awaitingReplySince\":null,\"cohorts\":[],\"programmes\":[]},{\"learnerId\":\"l-csv\",\"email\":\"dana.k@example.test\",\"coachLabel\":null,\"projectName\":\"Client-intake CSV sanitiser\",\"contextVersion\":1,\"stepsTotal\":8,\"stepsComplete\":5,\"lastActivity\":\"2026-09-15T17:20:00.000Z\",\"createdAt\":\"2026-08-28T10:00:00.000Z\",\"coachEmail\":null,\"replanBlockedAt\":null,\"awaitingReplySince\":null,\"cohorts\":[],\"programmes\":[]},{\"learnerId\":\"l-newstart\",\"email\":\"jo.whitfield@example.test\",\"coachLabel\":null,\"projectName\":null,\"contextVersion\":null,\"stepsTotal\":0,\"stepsComplete\":0,\"lastActivity\":null,\"createdAt\":\"2026-09-19T17:42:00.000Z\",\"coachEmail\":null,\"replanBlockedAt\":null,\"awaitingReplySince\":null,\"cohorts\":[],\"programmes\":[]}]/*FIXTURE-END*/;\n/* The coach's people, moved to today. */\nOutputs.rows = demoFresh(FIXTURE, Date.now());\n"
+      },
+      "metadata": {
+        "comment": "Demo stand-in for the backend (TASK-L180). The fixture is backend/fixtures/roster.json in the template."
+      },
+      "ports": [
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ]
+}

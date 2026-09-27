@@ -25,6 +25,19 @@ import * as path from 'path';
 
 const COLORS_CSS = path.join(__dirname, '../../../noodl-core-ui/src/styles/custom-properties/colors.css');
 
+/**
+ * CHR-004: the arithmetic below is no longer written here.
+ *
+ * The WCAG formula had four homes when CHR-004 started — this file, `scripts/devtools/
+ * icon-contrast.js`, `scripts/devtools/deploy-from-disk.cjs` and the canvas's `CanvasTheme.ts` —
+ * and the look gate would have been a fifth. `scripts/look-gate/lib/color.js` is now the one home,
+ * in plain CommonJS because its three callers share no build step: this runner, a devtools script,
+ * and the body of a `Runtime.evaluate` inside the editor's renderer. This file's exported surface
+ * is unchanged; what changed is that the token gate and the rendered gate can no longer disagree
+ * about what 3:1 means.
+ */
+const colour = require('../../../../scripts/look-gate/lib/color.js');
+
 export type ThemeName = 'dark' | 'light';
 
 export type TokenMap = Record<string, string>;
@@ -129,43 +142,22 @@ export type Rgba = [number, number, number, number];
  * header already states the limitation. This is an addition, not a correction to it.
  */
 export function parseColorAlpha(value: string | undefined): Rgba | null {
-  if (!value) return null;
-
-  const rgba = value.trim().match(/^rgba?\(([^)]+)\)$/i);
-  if (rgba) {
-    const parts = rgba[1].split(/[\s,/]+/).filter(Boolean).map((part) => parseFloat(part));
-    if (parts.length < 3 || parts.some((part) => Number.isNaN(part))) return null;
-    return [parts[0], parts[1], parts[2], parts.length > 3 ? parts[3] : 1];
-  }
-
-  const opaque = parseColor(value);
-  return opaque && [opaque[0], opaque[1], opaque[2], 1];
+  return colour.parseColorAlpha(value);
 }
 
 /** Source-over compositing of a translucent colour onto an opaque one. */
 export function composite(top: Rgba, under: Rgb): Rgb {
-  const alpha = top[3];
-  return [0, 1, 2].map((i) => Math.round(top[i] * alpha + under[i] * (1 - alpha))) as Rgb;
+  return colour.composite(top, under);
 }
 
 /** `[12, 34, 56]` → `#0c2238`, for failure messages that name the colour actually graded. */
-export function toHex(colour: Rgb): string {
-  return `#${colour.map((channel) => Math.round(channel).toString(16).padStart(2, '0')).join('')}`;
-}
-
-function relativeLuminance(colour: Rgb): number {
-  const [r, g, b] = colour.map((channel) => {
-    const c = channel / 255;
-    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-  });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+export function toHex(value: Rgb): string {
+  return colour.toHex(value);
 }
 
 /** WCAG 2.x contrast ratio, 1–21. */
 export function contrastRatio(a: Rgb, b: Rgb): number {
-  const la = relativeLuminance(a);
-  const lb = relativeLuminance(b);
-  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+  return colour.contrastRatio(a, b);
 }
 
 /**

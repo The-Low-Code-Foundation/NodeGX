@@ -1,0 +1,119 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "335bc6dc-15e1-5937-869f-f8abbaa91d57",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "llIn",
+      "type": "Component Inputs",
+      "label": "The rows",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "llOut",
+      "type": "Component Outputs",
+      "label": "Opened",
+      "ports": [
+        {
+          "name": "open",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "taskId",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "llRoot",
+      "type": "Group",
+      "label": "Log list",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "llEach",
+        "llEmpty"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "llEach",
+      "type": "For Each",
+      "label": "One line per entry",
+      "parent": "llRoot",
+      "parameters": {
+        "template": "/Todo/Log entry",
+        "templateType": "explicit"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "llEmpty",
+      "type": "Text",
+      "label": "When nothing has happened",
+      "parent": "llRoot",
+      "parameters": {
+        "text": "Nothing has happened yet.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "llCount",
+      "type": "JavaScriptFunction",
+      "label": "Is it empty?",
+      "parameters": {
+        "functionScript": "Outputs.empty = (Inputs.rows || []).length === 0;"
+      },
+      "x": 350,
+      "y": 400,
+      "ports": [
+        {
+          "name": "in-rows",
+          "displayName": "rows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "llRoot"
+  ]
+}

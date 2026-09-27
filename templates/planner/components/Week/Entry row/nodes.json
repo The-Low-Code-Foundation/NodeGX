@@ -1,0 +1,104 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "acc857cb-ab0b-5431-822e-1bce2877303d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "erIn",
+      "type": "Component Inputs",
+      "label": "The sitting",
+      "ports": [
+        {
+          "name": "dayText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hoursText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "erRoot",
+      "type": "Group",
+      "label": "One sitting",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "erDay",
+        "erHours",
+        "erNote"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "erDay",
+      "type": "Text",
+      "label": "Which day",
+      "parent": "erRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "erHours",
+      "type": "Text",
+      "label": "How long",
+      "parent": "erRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-mono)",
+        "fontVariantNumeric": "tabular-nums",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "erNote",
+      "type": "Text",
+      "label": "What was done",
+      "parent": "erRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "erRoot"
+  ]
+}

@@ -5,6 +5,7 @@ import { PropertyPanelInput, PropertyPanelInputType } from '@noodl-core-ui/compo
 
 import { TypeView } from '../TypeView';
 import { getEditType } from '../utils';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 export class BooleanType extends TypeView {
   el: TSFixme;
@@ -85,7 +86,7 @@ export class BooleanType extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

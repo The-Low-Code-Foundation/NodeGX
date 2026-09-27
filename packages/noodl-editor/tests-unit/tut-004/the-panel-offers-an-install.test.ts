@@ -13,6 +13,14 @@
  * layout, colour and anything a hook would have supplied. Saying so is the point; an unstated
  * limit reads as coverage.
  */
+// FLD-017 — CHR-012 made the community write verbs `PrimaryButton`, which imports `Icon`.
+jest.mock('@noodl-core-ui/components/common/Icon', () => ({
+  Icon: () => null,
+  IconName: {},
+  IconSize: { Small: 'small' },
+  IconVariant: {}
+}));
+
 import React from 'react';
 
 import { composeTutorials, actionLabel, tutorialMetaLine, noteForOutcome } from '../../src/editor/src/models/community/tutorialsview';

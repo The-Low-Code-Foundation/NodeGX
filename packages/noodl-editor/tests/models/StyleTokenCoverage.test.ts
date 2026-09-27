@@ -44,7 +44,6 @@ describe('ElementConfig token vocabulary', () => {
   beforeAll(() => {
     for (const config of ElementConfigRegistry.getAll()) {
       collectTokenReferences(config.defaults, referenced);
-      collectTokenReferences(config.sizes, referenced);
       collectTokenReferences(config.variants, referenced);
     }
   });

@@ -62,9 +62,10 @@
 
 import * as crypto from 'crypto';
 
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import type { ProviderIdentity } from './oidc';
-import type { SchemaManagerLike } from '../persistence/SchemaManagerLike';
+import { ACCOUNT_DISABLED_MESSAGE, isAccountDisabled } from '../users/accountColumns';
+import type { IStorageSchema } from '@noodl/backend-contract';
 
 export const IDENTITY_COLLECTION = '_UserIdentity';
 
@@ -85,7 +86,7 @@ export function isFlagSet(value: unknown): boolean {
 }
 
 /** Created up front like `_Session`/`_EmailToken`: a `where` on a missing table is a SQL error. */
-export function ensureIdentityTable(schemaManager: SchemaManagerLike | undefined): void {
+export function ensureIdentityTable(schemaManager: IStorageSchema | undefined): void {
   if (!schemaManager) return;
   schemaManager.createTable({
     name: IDENTITY_COLLECTION,
@@ -151,7 +152,7 @@ export interface ResolveOptions {
 }
 
 export class IdentityStore {
-  constructor(private readonly facade: AdapterFacade) {}
+  constructor(private readonly facade: IStorageFacade) {}
 
   async findBySubject(provider: string, subject: string): Promise<IdentityRow | null> {
     const { results } = await this.facade.rawQuery(IDENTITY_COLLECTION, {
@@ -162,7 +163,8 @@ export class IdentityStore {
   }
 
   async listForUser(userId: string): Promise<IdentityRow[]> {
-    const { results } = await this.facade.rawQuery(IDENTITY_COLLECTION, { where: { userId } });
+    // PRD-001 §3.3: every identity this user has linked, not a page of them.
+    const { results } = await this.facade.rawQueryAll(IDENTITY_COLLECTION, { where: { userId } });
     return results as unknown as IdentityRow[];
   }
 
@@ -221,7 +223,9 @@ export class IdentityStore {
 
   /** Delete every `_Session` for a user. Shared by rule 5 and by unlink-driven revocation. */
   private async revokeAllSessions(userId: string): Promise<number> {
-    const { results } = await this.facade.rawQuery('_Session', { where: { userId } });
+    // PRD-001 §3.3: ALL of them. A session left behind by a page cap is a
+    // stolen token that survived the revocation meant to kill it.
+    const { results } = await this.facade.rawQueryAll('_Session', { where: { userId } });
     for (const session of results) {
       await this.facade.rawDelete('_Session', session.objectId as string);
     }
@@ -245,6 +249,9 @@ export class IdentityStore {
         user = null;
       }
       if (user) {
+        // BMG-004 (R3) — before any write: a sign-in attempt on a disabled
+        // account must not so much as touch its identity row.
+        if (isAccountDisabled(user)) throw new AuthLinkError('ACCOUNT_DISABLED', ACCOUNT_DISABLED_MESSAGE);
         await this.writeIdentity(existing.userId, identity, existing);
         return { userId: existing.userId, outcome: 'signed-in', notice: null };
       }
@@ -287,6 +294,12 @@ export class IdentityStore {
     }
 
     const userId = match.objectId as string;
+
+    // BMG-004 (R3) — before rules 4 and 5 write. Measured: with this check only
+    // after the linking rule, a magic link pressed for a disabled account ran
+    // rule 5 and WIPED its password, so switching the account back on left the
+    // person unable to sign in the way they always had.
+    if (isAccountDisabled(match)) throw new AuthLinkError('ACCOUNT_DISABLED', ACCOUNT_DISABLED_MESSAGE);
 
     // Rule 4 — both sides verified.
     if (isFlagSet(match.emailVerified)) {

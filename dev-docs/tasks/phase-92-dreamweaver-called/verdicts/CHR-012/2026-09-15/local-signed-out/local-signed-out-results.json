@@ -1,0 +1,7410 @@
+{
+  "local-signed-out-community-bench-1368x900-dark": {
+    "room": "bench",
+    "theme": "dark",
+    "size": "1368x900",
+    "geometry": {
+      "viewport": [
+        1368,
+        900
+      ],
+      "theme": "dark",
+      "title": {
+        "x": 120,
+        "y": 84,
+        "w": 564,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 708,
+        "y": 84,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 120,
+        "y": 134,
+        "w": 1120,
+        "h": 33
+      },
+      "column": {
+        "x": 120,
+        "y": 84,
+        "w": 1120,
+        "h": 333
+      },
+      "contentBottom": 417,
+      "scrolls": false,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(77, 163, 255) | 0px none rgb(7, 22, 39)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 2,
+        "distinct": 2,
+        "styles": {
+          "9999px | 12px | 500 | rgba(0, 0, 0, 0) | 1px solid rgb(125, 138, 152)": [
+            "Solved1"
+          ],
+          "9999px | 12px | 500 | rgba(77, 163, 255, 0.13) | 1px solid rgb(77, 163, 255)": [
+            "Waiting for an answer2✓"
+          ]
+        }
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgb(33, 41, 50) | 0px none rgb(0, 0, 0)": [
+            "Bench"
+          ],
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Chat",
+            "Tutorials",
+            "Replays",
+            "People"
+          ]
+        }
+      },
+      "row": {
+        "count": 2,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Why does my For Each dra",
+            "Custom node won't load i"
+          ]
+        }
+      },
+      "retry link": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 5,
+            "e": [
+              "1",
+              "2",
+              "✓"
+            ]
+          },
+          "12px": {
+            "n": 16,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 9,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 4,
+        "sizes": {
+          "11px": {
+            "n": 4,
+            "e": [
+              "1",
+              "2",
+              "✓"
+            ]
+          },
+          "12px": {
+            "n": 12,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 4,
+            "e": [
+              "Reading as a guest",
+              "Questions asked from the",
+              "Why does my For Each dra"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 401,
+      "found": []
+    },
+    "contrast": {
+      "controls": 12,
+      "boundaryUnder3": [
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        }
+      ],
+      "textUnder45": [
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        }
+      ],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 6.53,
+          "textOnly": false,
+          "boundary": 6.53,
+          "text": 6.94
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Solved1",
+          "cls": "Chip-module__Root--nac5E",
+          "disabled": false,
+          "fillOnGround": 1,
+          "edgeOnFill": 4.86,
+          "edgeOnGround": 4.86,
+          "textOnly": false,
+          "boundary": 4.86,
+          "text": 13.37
+        },
+        {
+          "label": "Waiting for an answer2✓",
+          "cls": "Chip-module__Root--nac5E",
+          "disabled": false,
+          "fillOnGround": 1.23,
+          "edgeOnFill": 5.29,
+          "edgeOnGround": 6.53,
+          "textOnly": false,
+          "boundary": 5.29,
+          "text": 13.89
+        },
+        {
+          "label": "Why does my For Each draw on",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Custom node won't load in pr",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        }
+      ]
+    }
+  },
+  "local-signed-out-community-chat-1368x900-dark": {
+    "room": "chat",
+    "theme": "dark",
+    "size": "1368x900",
+    "geometry": {
+      "viewport": [
+        1368,
+        900
+      ],
+      "theme": "dark",
+      "title": {
+        "x": 120,
+        "y": 84,
+        "w": 564,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 708,
+        "y": 84,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 120,
+        "y": 134,
+        "w": 1120,
+        "h": 33
+      },
+      "column": {
+        "x": 120,
+        "y": 84,
+        "w": 1120,
+        "h": 306
+      },
+      "contentBottom": 390,
+      "scrolls": false,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(77, 163, 255) | 0px none rgb(7, 22, 39)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Bench",
+            "Tutorials",
+            "Replays",
+            "People"
+          ],
+          "4px | 13px | 400 | rgb(33, 41, 50) | 0px none rgb(0, 0, 0)": [
+            "Chat"
+          ]
+        }
+      },
+      "row": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "retry link": {
+        "count": 1,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(157, 204, 255)": [
+            "Say something on the web"
+          ]
+        }
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 1,
+            "e": [
+              "NodeGX 0.2.4"
+            ]
+          },
+          "12px": {
+            "n": 12,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 10,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 3,
+        "sizes": {
+          "12px": {
+            "n": 8,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 5,
+            "e": [
+              "Reading as a guest",
+              "Everything anyone is say",
+              "You are not signed in to"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 496,
+      "found": []
+    },
+    "contrast": {
+      "controls": 9,
+      "boundaryUnder3": [
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        }
+      ],
+      "textUnder45": [
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        }
+      ],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 6.53,
+          "textOnly": false,
+          "boundary": 6.53,
+          "text": 6.94
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Say something on the web",
+          "cls": "Community-module__RetryButton--WBANu",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 10.21
+        }
+      ]
+    }
+  },
+  "local-signed-out-community-tutorials-1368x900-dark": {
+    "room": "tutorials",
+    "theme": "dark",
+    "size": "1368x900",
+    "geometry": {
+      "viewport": [
+        1368,
+        900
+      ],
+      "theme": "dark",
+      "title": {
+        "x": 120,
+        "y": 84,
+        "w": 564,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 708,
+        "y": 84,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 120,
+        "y": 134,
+        "w": 1120,
+        "h": 33
+      },
+      "column": {
+        "x": 120,
+        "y": 84,
+        "w": 1120,
+        "h": 583
+      },
+      "contentBottom": 667,
+      "scrolls": false,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(77, 163, 255) | 0px none rgb(7, 22, 39)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Bench",
+            "Chat",
+            "Replays",
+            "People"
+          ],
+          "4px | 13px | 400 | rgb(33, 41, 50) | 0px none rgb(0, 0, 0)": [
+            "Tutorials"
+          ]
+        }
+      },
+      "row": {
+        "count": 5,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Your first stored record",
+            "Styling without fighting",
+            "Drawing a row per itemTu",
+            "Signals and valuesTipA s",
+            "Your first hour with Nod"
+          ]
+        }
+      },
+      "retry link": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 1,
+            "e": [
+              "NodeGX 0.2.4"
+            ]
+          },
+          "12px": {
+            "n": 23,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 12,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 3,
+        "sizes": {
+          "12px": {
+            "n": 19,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 7,
+            "e": [
+              "Reading as a guest",
+              "Guides and walkthroughs ",
+              "Your first stored record"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 735,
+      "found": []
+    },
+    "contrast": {
+      "controls": 13,
+      "boundaryUnder3": [
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        }
+      ],
+      "textUnder45": [
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        }
+      ],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 6.53,
+          "textOnly": false,
+          "boundary": 6.53,
+          "text": 6.94
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Your first stored recordTuto",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Styling without fighting the",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Drawing a row per itemTutori",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Signals and valuesTipA signa",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Your first hour with NodeGXT",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        }
+      ]
+    }
+  },
+  "local-signed-out-community-replays-1368x900-dark": {
+    "room": "replays",
+    "theme": "dark",
+    "size": "1368x900",
+    "geometry": {
+      "viewport": [
+        1368,
+        900
+      ],
+      "theme": "dark",
+      "title": {
+        "x": 120,
+        "y": 84,
+        "w": 564,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 708,
+        "y": 84,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 120,
+        "y": 134,
+        "w": 1120,
+        "h": 33
+      },
+      "column": {
+        "x": 120,
+        "y": 84,
+        "w": 1120,
+        "h": 417
+      },
+      "contentBottom": 501,
+      "scrolls": false,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(77, 163, 255) | 0px none rgb(7, 22, 39)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Bench",
+            "Chat",
+            "Tutorials",
+            "People"
+          ],
+          "4px | 13px | 400 | rgb(33, 41, 50) | 0px none rgb(0, 0, 0)": [
+            "Replays"
+          ]
+        }
+      },
+      "row": {
+        "count": 3,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Community call — the nod",
+            "Community call — logic w",
+            "Community call — shippin"
+          ]
+        }
+      },
+      "retry link": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 1,
+            "e": [
+              "NodeGX 0.2.4"
+            ]
+          },
+          "12px": {
+            "n": 19,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 10,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 3,
+        "sizes": {
+          "12px": {
+            "n": 15,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 5,
+            "e": [
+              "Reading as a guest",
+              "Recordings of the weekly",
+              "Community call — the nod"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 537,
+      "found": []
+    },
+    "contrast": {
+      "controls": 11,
+      "boundaryUnder3": [
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        }
+      ],
+      "textUnder45": [
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        }
+      ],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 6.53,
+          "textOnly": false,
+          "boundary": 6.53,
+          "text": 6.94
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Community call — the node yo",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Community call — logic witho",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Community call — shipping a ",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        }
+      ]
+    }
+  },
+  "local-signed-out-community-people-1368x900-dark": {
+    "room": "people",
+    "theme": "dark",
+    "size": "1368x900",
+    "geometry": {
+      "viewport": [
+        1368,
+        900
+      ],
+      "theme": "dark",
+      "title": {
+        "x": 120,
+        "y": 84,
+        "w": 564,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 708,
+        "y": 84,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 120,
+        "y": 134,
+        "w": 1120,
+        "h": 33
+      },
+      "column": {
+        "x": 120,
+        "y": 84,
+        "w": 1120,
+        "h": 866
+      },
+      "contentBottom": 950,
+      "scrolls": true,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(77, 163, 255) | 0px none rgb(7, 22, 39)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 2,
+        "distinct": 1,
+        "styles": {
+          "9999px | 12px | 500 | rgba(0, 0, 0, 0) | 1px solid rgb(125, 138, 152)": [
+            "Available for work4",
+            "Offers coaching2"
+          ]
+        }
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Bench",
+            "Chat",
+            "Tutorials",
+            "Replays"
+          ],
+          "4px | 13px | 400 | rgb(33, 41, 50) | 0px none rgb(0, 0, 0)": [
+            "People"
+          ]
+        }
+      },
+      "row": {
+        "count": 6,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Tom Reilly, tom-teaches",
+            "Ada Osei, ada-builds",
+            "Priya Raman, priya-plans",
+            "Mo Adeyemi, mo-makes",
+            "Sam Okafor, sam-solves",
+            "Nia Patel, nia-new"
+          ]
+        }
+      },
+      "retry link": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 25,
+            "e": [
+              "Search names, handles, b",
+              "4",
+              "2"
+            ]
+          },
+          "12px": {
+            "n": 32,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 13,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 4,
+        "sizes": {
+          "11px": {
+            "n": 24,
+            "e": [
+              "Search names, handles, b",
+              "4",
+              "2"
+            ]
+          },
+          "12px": {
+            "n": 28,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 8,
+            "e": [
+              "Reading as a guest",
+              "Who else is building wit",
+              "Tom Reilly"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 1457,
+      "found": []
+    },
+    "contrast": {
+      "controls": 17,
+      "boundaryUnder3": [
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        }
+      ],
+      "textUnder45": [
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        }
+      ],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 6.53,
+          "textOnly": false,
+          "boundary": 6.53,
+          "text": 6.94
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        },
+        {
+          "label": "",
+          "cls": "Community-module__SearchInput--eMtdG",
+          "disabled": false,
+          "fillOnGround": 1.36,
+          "edgeOnFill": 3.57,
+          "edgeOnGround": 4.86,
+          "textOnly": false,
+          "boundary": 3.57,
+          "text": 9.82
+        },
+        {
+          "label": "Available for work4",
+          "cls": "Chip-module__Root--nac5E",
+          "disabled": false,
+          "fillOnGround": 1,
+          "edgeOnFill": 4.86,
+          "edgeOnGround": 4.86,
+          "textOnly": false,
+          "boundary": 4.86,
+          "text": 13.37
+        },
+        {
+          "label": "Offers coaching2",
+          "cls": "Chip-module__Root--nac5E",
+          "disabled": false,
+          "fillOnGround": 1,
+          "edgeOnFill": 4.86,
+          "edgeOnGround": 4.86,
+          "textOnly": false,
+          "boundary": 4.86,
+          "text": 13.37
+        },
+        {
+          "label": "Tom Reilly, tom-teaches",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Ada Osei, ada-builds",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Priya Raman, priya-plans",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Mo Adeyemi, mo-makes",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Sam Okafor, sam-solves",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Nia Patel, nia-new",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        }
+      ]
+    },
+    "typeAtBottom": {
+      "page": {
+        "distinct": 4,
+        "sizes": {
+          "11px": {
+            "n": 27,
+            "e": [
+              "Search names, handles, b",
+              "4",
+              "2"
+            ]
+          },
+          "12px": {
+            "n": 24,
+            "e": [
+              "Connect GitHub",
+              "Available for work4",
+              "Offers coaching2"
+            ]
+          },
+          "13px": {
+            "n": 12,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 3,
+        "sizes": {
+          "11px": {
+            "n": 26,
+            "e": [
+              "Search names, handles, b",
+              "4",
+              "2"
+            ]
+          },
+          "12px": {
+            "n": 20,
+            "e": [
+              "Available for work4",
+              "Offers coaching2",
+              "T"
+            ]
+          },
+          "13px": {
+            "n": 7,
+            "e": [
+              "Who else is building wit",
+              "Tom Reilly",
+              "Ada Osei"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "local-signed-out-community-bench-700x500-dark": {
+    "room": "bench",
+    "theme": "dark",
+    "size": "700x500",
+    "geometry": {
+      "viewport": [
+        700,
+        500
+      ],
+      "theme": "dark",
+      "title": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 20,
+        "y": 178,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 20,
+        "y": 228,
+        "w": 652,
+        "h": 33
+      },
+      "column": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 373
+      },
+      "contentBottom": 510,
+      "scrolls": true,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(77, 163, 255) | 0px none rgb(7, 22, 39)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 2,
+        "distinct": 2,
+        "styles": {
+          "9999px | 12px | 500 | rgba(0, 0, 0, 0) | 1px solid rgb(125, 138, 152)": [
+            "Solved1"
+          ],
+          "9999px | 12px | 500 | rgba(77, 163, 255, 0.13) | 1px solid rgb(77, 163, 255)": [
+            "Waiting for an answer2✓"
+          ]
+        }
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgb(33, 41, 50) | 0px none rgb(0, 0, 0)": [
+            "Bench"
+          ],
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Chat",
+            "Tutorials",
+            "Replays",
+            "People"
+          ]
+        }
+      },
+      "row": {
+        "count": 2,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Why does my For Each dra",
+            "Custom node won't load i"
+          ]
+        }
+      },
+      "retry link": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 5,
+            "e": [
+              "1",
+              "2",
+              "✓"
+            ]
+          },
+          "12px": {
+            "n": 16,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 9,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 4,
+        "sizes": {
+          "11px": {
+            "n": 4,
+            "e": [
+              "1",
+              "2",
+              "✓"
+            ]
+          },
+          "12px": {
+            "n": 12,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 4,
+            "e": [
+              "Reading as a guest",
+              "Questions asked from the",
+              "Why does my For Each dra"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 401,
+      "found": []
+    },
+    "contrast": {
+      "controls": 12,
+      "boundaryUnder3": [
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        }
+      ],
+      "textUnder45": [
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        }
+      ],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 6.53,
+          "textOnly": false,
+          "boundary": 6.53,
+          "text": 6.94
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Solved1",
+          "cls": "Chip-module__Root--nac5E",
+          "disabled": false,
+          "fillOnGround": 1,
+          "edgeOnFill": 4.86,
+          "edgeOnGround": 4.86,
+          "textOnly": false,
+          "boundary": 4.86,
+          "text": 13.37
+        },
+        {
+          "label": "Waiting for an answer2✓",
+          "cls": "Chip-module__Root--nac5E",
+          "disabled": false,
+          "fillOnGround": 1.23,
+          "edgeOnFill": 5.29,
+          "edgeOnGround": 6.53,
+          "textOnly": false,
+          "boundary": 5.29,
+          "text": 13.89
+        },
+        {
+          "label": "Why does my For Each draw on",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Custom node won't load in pr",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        }
+      ]
+    },
+    "typeAtBottom": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 5,
+            "e": [
+              "1",
+              "2",
+              "✓"
+            ]
+          },
+          "12px": {
+            "n": 16,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 9,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 4,
+        "sizes": {
+          "11px": {
+            "n": 4,
+            "e": [
+              "1",
+              "2",
+              "✓"
+            ]
+          },
+          "12px": {
+            "n": 12,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 4,
+            "e": [
+              "Reading as a guest",
+              "Questions asked from the",
+              "Why does my For Each dra"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "local-signed-out-community-chat-700x500-dark": {
+    "room": "chat",
+    "theme": "dark",
+    "size": "700x500",
+    "geometry": {
+      "viewport": [
+        700,
+        500
+      ],
+      "theme": "dark",
+      "title": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 20,
+        "y": 178,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 20,
+        "y": 228,
+        "w": 652,
+        "h": 33
+      },
+      "column": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 366
+      },
+      "contentBottom": 503,
+      "scrolls": true,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(77, 163, 255) | 0px none rgb(7, 22, 39)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Bench",
+            "Tutorials",
+            "Replays",
+            "People"
+          ],
+          "4px | 13px | 400 | rgb(33, 41, 50) | 0px none rgb(0, 0, 0)": [
+            "Chat"
+          ]
+        }
+      },
+      "row": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "retry link": {
+        "count": 1,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(157, 204, 255)": [
+            "Say something on the web"
+          ]
+        }
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 1,
+            "e": [
+              "NodeGX 0.2.4"
+            ]
+          },
+          "12px": {
+            "n": 12,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 10,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 3,
+        "sizes": {
+          "12px": {
+            "n": 8,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 5,
+            "e": [
+              "Reading as a guest",
+              "Everything anyone is say",
+              "You are not signed in to"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 496,
+      "found": []
+    },
+    "contrast": {
+      "controls": 9,
+      "boundaryUnder3": [
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        }
+      ],
+      "textUnder45": [
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        }
+      ],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 6.53,
+          "textOnly": false,
+          "boundary": 6.53,
+          "text": 6.94
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Say something on the web",
+          "cls": "Community-module__RetryButton--WBANu",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 10.21
+        }
+      ]
+    },
+    "typeAtBottom": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 1,
+            "e": [
+              "NodeGX 0.2.4"
+            ]
+          },
+          "12px": {
+            "n": 12,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 10,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 3,
+        "sizes": {
+          "12px": {
+            "n": 8,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 5,
+            "e": [
+              "Reading as a guest",
+              "Everything anyone is say",
+              "You are not signed in to"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "local-signed-out-community-tutorials-700x500-dark": {
+    "room": "tutorials",
+    "theme": "dark",
+    "size": "700x500",
+    "geometry": {
+      "viewport": [
+        700,
+        500
+      ],
+      "theme": "dark",
+      "title": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 20,
+        "y": 178,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 20,
+        "y": 228,
+        "w": 652,
+        "h": 33
+      },
+      "column": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 624
+      },
+      "contentBottom": 761,
+      "scrolls": true,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(77, 163, 255) | 0px none rgb(7, 22, 39)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Bench",
+            "Chat",
+            "Replays",
+            "People"
+          ],
+          "4px | 13px | 400 | rgb(33, 41, 50) | 0px none rgb(0, 0, 0)": [
+            "Tutorials"
+          ]
+        }
+      },
+      "row": {
+        "count": 5,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Your first stored record",
+            "Styling without fighting",
+            "Drawing a row per itemTu",
+            "Signals and valuesTipA s",
+            "Your first hour with Nod"
+          ]
+        }
+      },
+      "retry link": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 1,
+            "e": [
+              "NodeGX 0.2.4"
+            ]
+          },
+          "12px": {
+            "n": 17,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 9,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 3,
+        "sizes": {
+          "12px": {
+            "n": 13,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 4,
+            "e": [
+              "Reading as a guest",
+              "Guides and walkthroughs ",
+              "Your first stored record"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 735,
+      "found": []
+    },
+    "contrast": {
+      "controls": 13,
+      "boundaryUnder3": [
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        }
+      ],
+      "textUnder45": [
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        }
+      ],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 6.53,
+          "textOnly": false,
+          "boundary": 6.53,
+          "text": 6.94
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Your first stored recordTuto",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Styling without fighting the",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Drawing a row per itemTutori",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Signals and valuesTipA signa",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Your first hour with NodeGXT",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        }
+      ]
+    },
+    "typeAtBottom": {
+      "page": {
+        "distinct": 4,
+        "sizes": {
+          "11px": {
+            "n": 1,
+            "e": [
+              "NodeGX 0.2.4"
+            ]
+          },
+          "12px": {
+            "n": 14,
+            "e": [
+              "Connect GitHub",
+              "Tutorial",
+              "Writing something down, "
+            ]
+          },
+          "13px": {
+            "n": 9,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 2,
+        "sizes": {
+          "12px": {
+            "n": 10,
+            "e": [
+              "Tutorial",
+              "Writing something down, ",
+              "Tutorial"
+            ]
+          },
+          "13px": {
+            "n": 4,
+            "e": [
+              "Styling without fighting",
+              "Drawing a row per item",
+              "Signals and values"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "local-signed-out-community-replays-700x500-dark": {
+    "room": "replays",
+    "theme": "dark",
+    "size": "700x500",
+    "geometry": {
+      "viewport": [
+        700,
+        500
+      ],
+      "theme": "dark",
+      "title": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 20,
+        "y": 178,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 20,
+        "y": 228,
+        "w": 652,
+        "h": 33
+      },
+      "column": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 458
+      },
+      "contentBottom": 595,
+      "scrolls": true,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(77, 163, 255) | 0px none rgb(7, 22, 39)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Bench",
+            "Chat",
+            "Tutorials",
+            "People"
+          ],
+          "4px | 13px | 400 | rgb(33, 41, 50) | 0px none rgb(0, 0, 0)": [
+            "Replays"
+          ]
+        }
+      },
+      "row": {
+        "count": 3,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Community call — the nod",
+            "Community call — logic w",
+            "Community call — shippin"
+          ]
+        }
+      },
+      "retry link": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 1,
+            "e": [
+              "NodeGX 0.2.4"
+            ]
+          },
+          "12px": {
+            "n": 17,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 9,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 3,
+        "sizes": {
+          "12px": {
+            "n": 13,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 4,
+            "e": [
+              "Reading as a guest",
+              "Recordings of the weekly",
+              "Community call — the nod"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 537,
+      "found": []
+    },
+    "contrast": {
+      "controls": 11,
+      "boundaryUnder3": [
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        }
+      ],
+      "textUnder45": [
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        }
+      ],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 6.53,
+          "textOnly": false,
+          "boundary": 6.53,
+          "text": 6.94
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Community call — the node yo",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Community call — logic witho",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Community call — shipping a ",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        }
+      ]
+    },
+    "typeAtBottom": {
+      "page": {
+        "distinct": 4,
+        "sizes": {
+          "11px": {
+            "n": 1,
+            "e": [
+              "NodeGX 0.2.4"
+            ]
+          },
+          "12px": {
+            "n": 16,
+            "e": [
+              "Connect GitHub",
+              "Bench",
+              "Chat"
+            ]
+          },
+          "13px": {
+            "n": 9,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 2,
+        "sizes": {
+          "12px": {
+            "n": 12,
+            "e": [
+              "Bench",
+              "Chat",
+              "Tutorials"
+            ]
+          },
+          "13px": {
+            "n": 4,
+            "e": [
+              "Recordings of the weekly",
+              "Community call — the nod",
+              "Community call — logic w"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "local-signed-out-community-people-700x500-dark": {
+    "room": "people",
+    "theme": "dark",
+    "size": "700x500",
+    "geometry": {
+      "viewport": [
+        700,
+        500
+      ],
+      "theme": "dark",
+      "title": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 20,
+        "y": 178,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 20,
+        "y": 228,
+        "w": 652,
+        "h": 33
+      },
+      "column": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 906
+      },
+      "contentBottom": 1043,
+      "scrolls": true,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(77, 163, 255) | 0px none rgb(7, 22, 39)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 2,
+        "distinct": 1,
+        "styles": {
+          "9999px | 12px | 500 | rgba(0, 0, 0, 0) | 1px solid rgb(125, 138, 152)": [
+            "Available for work4",
+            "Offers coaching2"
+          ]
+        }
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Bench",
+            "Chat",
+            "Tutorials",
+            "Replays"
+          ],
+          "4px | 13px | 400 | rgb(33, 41, 50) | 0px none rgb(0, 0, 0)": [
+            "People"
+          ]
+        }
+      },
+      "row": {
+        "count": 6,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Tom Reilly, tom-teaches",
+            "Ada Osei, ada-builds",
+            "Priya Raman, priya-plans",
+            "Mo Adeyemi, mo-makes",
+            "Sam Okafor, sam-solves",
+            "Nia Patel, nia-new"
+          ]
+        }
+      },
+      "retry link": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 5,
+            "e": [
+              "Search names, handles, b",
+              "4",
+              "2"
+            ]
+          },
+          "12px": {
+            "n": 17,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 8,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 4,
+        "sizes": {
+          "11px": {
+            "n": 4,
+            "e": [
+              "Search names, handles, b",
+              "4",
+              "2"
+            ]
+          },
+          "12px": {
+            "n": 13,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 3,
+            "e": [
+              "Reading as a guest",
+              "Who else is building wit",
+              "Tom Reilly"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 1457,
+      "found": []
+    },
+    "contrast": {
+      "controls": 17,
+      "boundaryUnder3": [
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        }
+      ],
+      "textUnder45": [
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        }
+      ],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 6.53,
+          "textOnly": false,
+          "boundary": 6.53,
+          "text": 6.94
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 1.67
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.17,
+          "textOnly": false,
+          "boundary": 1.17,
+          "text": 1.43
+        },
+        {
+          "label": "",
+          "cls": "Community-module__SearchInput--eMtdG",
+          "disabled": false,
+          "fillOnGround": 1.36,
+          "edgeOnFill": 3.57,
+          "edgeOnGround": 4.86,
+          "textOnly": false,
+          "boundary": 3.57,
+          "text": 9.82
+        },
+        {
+          "label": "Available for work4",
+          "cls": "Chip-module__Root--nac5E",
+          "disabled": false,
+          "fillOnGround": 1,
+          "edgeOnFill": 4.86,
+          "edgeOnGround": 4.86,
+          "textOnly": false,
+          "boundary": 4.86,
+          "text": 13.37
+        },
+        {
+          "label": "Offers coaching2",
+          "cls": "Chip-module__Root--nac5E",
+          "disabled": false,
+          "fillOnGround": 1,
+          "edgeOnFill": 4.86,
+          "edgeOnGround": 4.86,
+          "textOnly": false,
+          "boundary": 4.86,
+          "text": 13.37
+        },
+        {
+          "label": "Tom Reilly, tom-teaches",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Ada Osei, ada-builds",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Priya Raman, priya-plans",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Mo Adeyemi, mo-makes",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Sam Okafor, sam-solves",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        },
+        {
+          "label": "Nia Patel, nia-new",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 13.37
+        }
+      ]
+    },
+    "typeAtBottom": {
+      "page": {
+        "distinct": 4,
+        "sizes": {
+          "11px": {
+            "n": 14,
+            "e": [
+              "Offers coaching",
+              "Not for hire",
+              "Component Inputs"
+            ]
+          },
+          "12px": {
+            "n": 16,
+            "e": [
+              "Connect GitHub",
+              "P",
+              "@priya-plans · 105 point"
+            ]
+          },
+          "13px": {
+            "n": 9,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 3,
+        "sizes": {
+          "11px": {
+            "n": 13,
+            "e": [
+              "Offers coaching",
+              "Not for hire",
+              "Component Inputs"
+            ]
+          },
+          "12px": {
+            "n": 12,
+            "e": [
+              "P",
+              "@priya-plans · 105 point",
+              "Product person who learn"
+            ]
+          },
+          "13px": {
+            "n": 4,
+            "e": [
+              "Priya Raman",
+              "Mo Adeyemi",
+              "Sam Okafor"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "local-signed-out-community-bench-1368x900-light": {
+    "room": "bench",
+    "theme": "light",
+    "size": "1368x900",
+    "geometry": {
+      "viewport": [
+        1368,
+        900
+      ],
+      "theme": "light",
+      "title": {
+        "x": 120,
+        "y": 84,
+        "w": 564,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 708,
+        "y": 84,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 120,
+        "y": 134,
+        "w": 1120,
+        "h": 33
+      },
+      "column": {
+        "x": 120,
+        "y": 84,
+        "w": 1120,
+        "h": 333
+      },
+      "contentBottom": 417,
+      "scrolls": false,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(21, 112, 239) | 0px none rgb(255, 255, 255)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 2,
+        "distinct": 2,
+        "styles": {
+          "9999px | 12px | 500 | rgba(0, 0, 0, 0) | 1px solid rgb(122, 134, 145)": [
+            "Solved1"
+          ],
+          "9999px | 12px | 500 | rgba(21, 112, 239, 0.09) | 1px solid rgb(21, 112, 239)": [
+            "Waiting for an answer2✓"
+          ]
+        }
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgb(255, 255, 255) | 0px none rgb(0, 0, 0)": [
+            "Bench"
+          ],
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Chat",
+            "Tutorials",
+            "Replays",
+            "People"
+          ]
+        }
+      },
+      "row": {
+        "count": 2,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Why does my For Each dra",
+            "Custom node won't load i"
+          ]
+        }
+      },
+      "retry link": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 5,
+            "e": [
+              "1",
+              "2",
+              "✓"
+            ]
+          },
+          "12px": {
+            "n": 16,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 9,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 4,
+        "sizes": {
+          "11px": {
+            "n": 4,
+            "e": [
+              "1",
+              "2",
+              "✓"
+            ]
+          },
+          "12px": {
+            "n": 12,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 4,
+            "e": [
+              "Reading as a guest",
+              "Questions asked from the",
+              "Why does my For Each dra"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 401,
+      "found": []
+    },
+    "contrast": {
+      "controls": 12,
+      "boundaryUnder3": [
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        }
+      ],
+      "textUnder45": [],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 4.03,
+          "textOnly": false,
+          "boundary": 4.03,
+          "text": 4.57
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Solved1",
+          "cls": "Chip-module__Root--nac5E",
+          "disabled": false,
+          "fillOnGround": 1,
+          "edgeOnFill": 3.28,
+          "edgeOnGround": 3.28,
+          "textOnly": false,
+          "boundary": 3.28,
+          "text": 6.61
+        },
+        {
+          "label": "Waiting for an answer2✓",
+          "cls": "Chip-module__Root--nac5E",
+          "disabled": false,
+          "fillOnGround": 1.12,
+          "edgeOnFill": 3.6,
+          "edgeOnGround": 4.03,
+          "textOnly": false,
+          "boundary": 3.6,
+          "text": 12.82
+        },
+        {
+          "label": "Why does my For Each draw on",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Custom node won't load in pr",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        }
+      ]
+    }
+  },
+  "local-signed-out-community-chat-1368x900-light": {
+    "room": "chat",
+    "theme": "light",
+    "size": "1368x900",
+    "geometry": {
+      "viewport": [
+        1368,
+        900
+      ],
+      "theme": "light",
+      "title": {
+        "x": 120,
+        "y": 84,
+        "w": 564,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 708,
+        "y": 84,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 120,
+        "y": 134,
+        "w": 1120,
+        "h": 33
+      },
+      "column": {
+        "x": 120,
+        "y": 84,
+        "w": 1120,
+        "h": 306
+      },
+      "contentBottom": 390,
+      "scrolls": false,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(21, 112, 239) | 0px none rgb(255, 255, 255)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Bench",
+            "Tutorials",
+            "Replays",
+            "People"
+          ],
+          "4px | 13px | 400 | rgb(255, 255, 255) | 0px none rgb(0, 0, 0)": [
+            "Chat"
+          ]
+        }
+      },
+      "row": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "retry link": {
+        "count": 1,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(14, 92, 202)": [
+            "Say something on the web"
+          ]
+        }
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 1,
+            "e": [
+              "NodeGX 0.2.4"
+            ]
+          },
+          "12px": {
+            "n": 12,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 10,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 3,
+        "sizes": {
+          "12px": {
+            "n": 8,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 5,
+            "e": [
+              "Reading as a guest",
+              "Everything anyone is say",
+              "You are not signed in to"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 496,
+      "found": []
+    },
+    "contrast": {
+      "controls": 9,
+      "boundaryUnder3": [
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        }
+      ],
+      "textUnder45": [],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 4.03,
+          "textOnly": false,
+          "boundary": 4.03,
+          "text": 4.57
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Say something on the web",
+          "cls": "Community-module__RetryButton--WBANu",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 5.45
+        }
+      ]
+    }
+  },
+  "local-signed-out-community-tutorials-1368x900-light": {
+    "room": "tutorials",
+    "theme": "light",
+    "size": "1368x900",
+    "geometry": {
+      "viewport": [
+        1368,
+        900
+      ],
+      "theme": "light",
+      "title": {
+        "x": 120,
+        "y": 84,
+        "w": 564,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 708,
+        "y": 84,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 120,
+        "y": 134,
+        "w": 1120,
+        "h": 33
+      },
+      "column": {
+        "x": 120,
+        "y": 84,
+        "w": 1120,
+        "h": 583
+      },
+      "contentBottom": 667,
+      "scrolls": false,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(21, 112, 239) | 0px none rgb(255, 255, 255)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Bench",
+            "Chat",
+            "Replays",
+            "People"
+          ],
+          "4px | 13px | 400 | rgb(255, 255, 255) | 0px none rgb(0, 0, 0)": [
+            "Tutorials"
+          ]
+        }
+      },
+      "row": {
+        "count": 5,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Your first stored record",
+            "Styling without fighting",
+            "Drawing a row per itemTu",
+            "Signals and valuesTipA s",
+            "Your first hour with Nod"
+          ]
+        }
+      },
+      "retry link": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 1,
+            "e": [
+              "NodeGX 0.2.4"
+            ]
+          },
+          "12px": {
+            "n": 23,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 12,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 3,
+        "sizes": {
+          "12px": {
+            "n": 19,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 7,
+            "e": [
+              "Reading as a guest",
+              "Guides and walkthroughs ",
+              "Your first stored record"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 735,
+      "found": []
+    },
+    "contrast": {
+      "controls": 13,
+      "boundaryUnder3": [
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        }
+      ],
+      "textUnder45": [],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 4.03,
+          "textOnly": false,
+          "boundary": 4.03,
+          "text": 4.57
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Your first stored recordTuto",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Styling without fighting the",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Drawing a row per itemTutori",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Signals and valuesTipA signa",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Your first hour with NodeGXT",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        }
+      ]
+    }
+  },
+  "local-signed-out-community-replays-1368x900-light": {
+    "room": "replays",
+    "theme": "light",
+    "size": "1368x900",
+    "geometry": {
+      "viewport": [
+        1368,
+        900
+      ],
+      "theme": "light",
+      "title": {
+        "x": 120,
+        "y": 84,
+        "w": 564,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 708,
+        "y": 84,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 120,
+        "y": 134,
+        "w": 1120,
+        "h": 33
+      },
+      "column": {
+        "x": 120,
+        "y": 84,
+        "w": 1120,
+        "h": 417
+      },
+      "contentBottom": 501,
+      "scrolls": false,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(21, 112, 239) | 0px none rgb(255, 255, 255)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Bench",
+            "Chat",
+            "Tutorials",
+            "People"
+          ],
+          "4px | 13px | 400 | rgb(255, 255, 255) | 0px none rgb(0, 0, 0)": [
+            "Replays"
+          ]
+        }
+      },
+      "row": {
+        "count": 3,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Community call — the nod",
+            "Community call — logic w",
+            "Community call — shippin"
+          ]
+        }
+      },
+      "retry link": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 1,
+            "e": [
+              "NodeGX 0.2.4"
+            ]
+          },
+          "12px": {
+            "n": 19,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 10,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 3,
+        "sizes": {
+          "12px": {
+            "n": 15,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 5,
+            "e": [
+              "Reading as a guest",
+              "Recordings of the weekly",
+              "Community call — the nod"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 537,
+      "found": []
+    },
+    "contrast": {
+      "controls": 11,
+      "boundaryUnder3": [
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        }
+      ],
+      "textUnder45": [],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 4.03,
+          "textOnly": false,
+          "boundary": 4.03,
+          "text": 4.57
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Community call — the node yo",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Community call — logic witho",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Community call — shipping a ",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        }
+      ]
+    }
+  },
+  "local-signed-out-community-people-1368x900-light": {
+    "room": "people",
+    "theme": "light",
+    "size": "1368x900",
+    "geometry": {
+      "viewport": [
+        1368,
+        900
+      ],
+      "theme": "light",
+      "title": {
+        "x": 120,
+        "y": 84,
+        "w": 564,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 708,
+        "y": 84,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 120,
+        "y": 134,
+        "w": 1120,
+        "h": 33
+      },
+      "column": {
+        "x": 120,
+        "y": 84,
+        "w": 1120,
+        "h": 866
+      },
+      "contentBottom": 950,
+      "scrolls": true,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(21, 112, 239) | 0px none rgb(255, 255, 255)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 2,
+        "distinct": 1,
+        "styles": {
+          "9999px | 12px | 500 | rgba(0, 0, 0, 0) | 1px solid rgb(122, 134, 145)": [
+            "Available for work4",
+            "Offers coaching2"
+          ]
+        }
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Bench",
+            "Chat",
+            "Tutorials",
+            "Replays"
+          ],
+          "4px | 13px | 400 | rgb(255, 255, 255) | 0px none rgb(0, 0, 0)": [
+            "People"
+          ]
+        }
+      },
+      "row": {
+        "count": 6,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Tom Reilly, tom-teaches",
+            "Ada Osei, ada-builds",
+            "Priya Raman, priya-plans",
+            "Mo Adeyemi, mo-makes",
+            "Sam Okafor, sam-solves",
+            "Nia Patel, nia-new"
+          ]
+        }
+      },
+      "retry link": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 25,
+            "e": [
+              "Search names, handles, b",
+              "4",
+              "2"
+            ]
+          },
+          "12px": {
+            "n": 32,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 13,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 4,
+        "sizes": {
+          "11px": {
+            "n": 24,
+            "e": [
+              "Search names, handles, b",
+              "4",
+              "2"
+            ]
+          },
+          "12px": {
+            "n": 28,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 8,
+            "e": [
+              "Reading as a guest",
+              "Who else is building wit",
+              "Tom Reilly"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 1457,
+      "found": []
+    },
+    "contrast": {
+      "controls": 17,
+      "boundaryUnder3": [
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        }
+      ],
+      "textUnder45": [],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 4.03,
+          "textOnly": false,
+          "boundary": 4.03,
+          "text": 4.57
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        },
+        {
+          "label": "",
+          "cls": "Community-module__SearchInput--eMtdG",
+          "disabled": false,
+          "fillOnGround": 1.03,
+          "edgeOnFill": 3.37,
+          "edgeOnGround": 3.28,
+          "textOnly": false,
+          "boundary": 3.28,
+          "text": 6.8
+        },
+        {
+          "label": "Available for work4",
+          "cls": "Chip-module__Root--nac5E",
+          "disabled": false,
+          "fillOnGround": 1,
+          "edgeOnFill": 3.28,
+          "edgeOnGround": 3.28,
+          "textOnly": false,
+          "boundary": 3.28,
+          "text": 6.61
+        },
+        {
+          "label": "Offers coaching2",
+          "cls": "Chip-module__Root--nac5E",
+          "disabled": false,
+          "fillOnGround": 1,
+          "edgeOnFill": 3.28,
+          "edgeOnGround": 3.28,
+          "textOnly": false,
+          "boundary": 3.28,
+          "text": 6.61
+        },
+        {
+          "label": "Tom Reilly, tom-teaches",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Ada Osei, ada-builds",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Priya Raman, priya-plans",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Mo Adeyemi, mo-makes",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Sam Okafor, sam-solves",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Nia Patel, nia-new",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        }
+      ]
+    },
+    "typeAtBottom": {
+      "page": {
+        "distinct": 4,
+        "sizes": {
+          "11px": {
+            "n": 27,
+            "e": [
+              "Search names, handles, b",
+              "4",
+              "2"
+            ]
+          },
+          "12px": {
+            "n": 24,
+            "e": [
+              "Connect GitHub",
+              "Available for work4",
+              "Offers coaching2"
+            ]
+          },
+          "13px": {
+            "n": 12,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 3,
+        "sizes": {
+          "11px": {
+            "n": 26,
+            "e": [
+              "Search names, handles, b",
+              "4",
+              "2"
+            ]
+          },
+          "12px": {
+            "n": 20,
+            "e": [
+              "Available for work4",
+              "Offers coaching2",
+              "T"
+            ]
+          },
+          "13px": {
+            "n": 7,
+            "e": [
+              "Who else is building wit",
+              "Tom Reilly",
+              "Ada Osei"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "local-signed-out-community-bench-700x500-light": {
+    "room": "bench",
+    "theme": "light",
+    "size": "700x500",
+    "geometry": {
+      "viewport": [
+        700,
+        500
+      ],
+      "theme": "light",
+      "title": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 20,
+        "y": 178,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 20,
+        "y": 228,
+        "w": 652,
+        "h": 33
+      },
+      "column": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 373
+      },
+      "contentBottom": 510,
+      "scrolls": true,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(21, 112, 239) | 0px none rgb(255, 255, 255)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 2,
+        "distinct": 2,
+        "styles": {
+          "9999px | 12px | 500 | rgba(0, 0, 0, 0) | 1px solid rgb(122, 134, 145)": [
+            "Solved1"
+          ],
+          "9999px | 12px | 500 | rgba(21, 112, 239, 0.09) | 1px solid rgb(21, 112, 239)": [
+            "Waiting for an answer2✓"
+          ]
+        }
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgb(255, 255, 255) | 0px none rgb(0, 0, 0)": [
+            "Bench"
+          ],
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Chat",
+            "Tutorials",
+            "Replays",
+            "People"
+          ]
+        }
+      },
+      "row": {
+        "count": 2,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Why does my For Each dra",
+            "Custom node won't load i"
+          ]
+        }
+      },
+      "retry link": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 5,
+            "e": [
+              "1",
+              "2",
+              "✓"
+            ]
+          },
+          "12px": {
+            "n": 16,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 9,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 4,
+        "sizes": {
+          "11px": {
+            "n": 4,
+            "e": [
+              "1",
+              "2",
+              "✓"
+            ]
+          },
+          "12px": {
+            "n": 12,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 4,
+            "e": [
+              "Reading as a guest",
+              "Questions asked from the",
+              "Why does my For Each dra"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 401,
+      "found": []
+    },
+    "contrast": {
+      "controls": 12,
+      "boundaryUnder3": [
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        }
+      ],
+      "textUnder45": [],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 4.03,
+          "textOnly": false,
+          "boundary": 4.03,
+          "text": 4.57
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Solved1",
+          "cls": "Chip-module__Root--nac5E",
+          "disabled": false,
+          "fillOnGround": 1,
+          "edgeOnFill": 3.28,
+          "edgeOnGround": 3.28,
+          "textOnly": false,
+          "boundary": 3.28,
+          "text": 6.61
+        },
+        {
+          "label": "Waiting for an answer2✓",
+          "cls": "Chip-module__Root--nac5E",
+          "disabled": false,
+          "fillOnGround": 1.12,
+          "edgeOnFill": 3.6,
+          "edgeOnGround": 4.03,
+          "textOnly": false,
+          "boundary": 3.6,
+          "text": 12.82
+        },
+        {
+          "label": "Why does my For Each draw on",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Custom node won't load in pr",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        }
+      ]
+    },
+    "typeAtBottom": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 5,
+            "e": [
+              "1",
+              "2",
+              "✓"
+            ]
+          },
+          "12px": {
+            "n": 16,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 9,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 4,
+        "sizes": {
+          "11px": {
+            "n": 4,
+            "e": [
+              "1",
+              "2",
+              "✓"
+            ]
+          },
+          "12px": {
+            "n": 12,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 4,
+            "e": [
+              "Reading as a guest",
+              "Questions asked from the",
+              "Why does my For Each dra"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "local-signed-out-community-chat-700x500-light": {
+    "room": "chat",
+    "theme": "light",
+    "size": "700x500",
+    "geometry": {
+      "viewport": [
+        700,
+        500
+      ],
+      "theme": "light",
+      "title": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 20,
+        "y": 178,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 20,
+        "y": 228,
+        "w": 652,
+        "h": 33
+      },
+      "column": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 366
+      },
+      "contentBottom": 503,
+      "scrolls": true,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(21, 112, 239) | 0px none rgb(255, 255, 255)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Bench",
+            "Tutorials",
+            "Replays",
+            "People"
+          ],
+          "4px | 13px | 400 | rgb(255, 255, 255) | 0px none rgb(0, 0, 0)": [
+            "Chat"
+          ]
+        }
+      },
+      "row": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "retry link": {
+        "count": 1,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(14, 92, 202)": [
+            "Say something on the web"
+          ]
+        }
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 1,
+            "e": [
+              "NodeGX 0.2.4"
+            ]
+          },
+          "12px": {
+            "n": 12,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 10,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 3,
+        "sizes": {
+          "12px": {
+            "n": 8,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 5,
+            "e": [
+              "Reading as a guest",
+              "Everything anyone is say",
+              "You are not signed in to"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 496,
+      "found": []
+    },
+    "contrast": {
+      "controls": 9,
+      "boundaryUnder3": [
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        }
+      ],
+      "textUnder45": [],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 4.03,
+          "textOnly": false,
+          "boundary": 4.03,
+          "text": 4.57
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Say something on the web",
+          "cls": "Community-module__RetryButton--WBANu",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 5.45
+        }
+      ]
+    },
+    "typeAtBottom": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 1,
+            "e": [
+              "NodeGX 0.2.4"
+            ]
+          },
+          "12px": {
+            "n": 12,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 10,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 3,
+        "sizes": {
+          "12px": {
+            "n": 8,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 5,
+            "e": [
+              "Reading as a guest",
+              "Everything anyone is say",
+              "You are not signed in to"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "local-signed-out-community-tutorials-700x500-light": {
+    "room": "tutorials",
+    "theme": "light",
+    "size": "700x500",
+    "geometry": {
+      "viewport": [
+        700,
+        500
+      ],
+      "theme": "light",
+      "title": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 20,
+        "y": 178,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 20,
+        "y": 228,
+        "w": 652,
+        "h": 33
+      },
+      "column": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 624
+      },
+      "contentBottom": 761,
+      "scrolls": true,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(21, 112, 239) | 0px none rgb(255, 255, 255)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Bench",
+            "Chat",
+            "Replays",
+            "People"
+          ],
+          "4px | 13px | 400 | rgb(255, 255, 255) | 0px none rgb(0, 0, 0)": [
+            "Tutorials"
+          ]
+        }
+      },
+      "row": {
+        "count": 5,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Your first stored record",
+            "Styling without fighting",
+            "Drawing a row per itemTu",
+            "Signals and valuesTipA s",
+            "Your first hour with Nod"
+          ]
+        }
+      },
+      "retry link": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 1,
+            "e": [
+              "NodeGX 0.2.4"
+            ]
+          },
+          "12px": {
+            "n": 17,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 9,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 3,
+        "sizes": {
+          "12px": {
+            "n": 13,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 4,
+            "e": [
+              "Reading as a guest",
+              "Guides and walkthroughs ",
+              "Your first stored record"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 735,
+      "found": []
+    },
+    "contrast": {
+      "controls": 13,
+      "boundaryUnder3": [
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        }
+      ],
+      "textUnder45": [],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 4.03,
+          "textOnly": false,
+          "boundary": 4.03,
+          "text": 4.57
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Your first stored recordTuto",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Styling without fighting the",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Drawing a row per itemTutori",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Signals and valuesTipA signa",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Your first hour with NodeGXT",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        }
+      ]
+    },
+    "typeAtBottom": {
+      "page": {
+        "distinct": 4,
+        "sizes": {
+          "11px": {
+            "n": 1,
+            "e": [
+              "NodeGX 0.2.4"
+            ]
+          },
+          "12px": {
+            "n": 14,
+            "e": [
+              "Connect GitHub",
+              "Tutorial",
+              "Writing something down, "
+            ]
+          },
+          "13px": {
+            "n": 9,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 2,
+        "sizes": {
+          "12px": {
+            "n": 10,
+            "e": [
+              "Tutorial",
+              "Writing something down, ",
+              "Tutorial"
+            ]
+          },
+          "13px": {
+            "n": 4,
+            "e": [
+              "Styling without fighting",
+              "Drawing a row per item",
+              "Signals and values"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "local-signed-out-community-replays-700x500-light": {
+    "room": "replays",
+    "theme": "light",
+    "size": "700x500",
+    "geometry": {
+      "viewport": [
+        700,
+        500
+      ],
+      "theme": "light",
+      "title": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 20,
+        "y": 178,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 20,
+        "y": 228,
+        "w": 652,
+        "h": 33
+      },
+      "column": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 458
+      },
+      "contentBottom": 595,
+      "scrolls": true,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(21, 112, 239) | 0px none rgb(255, 255, 255)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Bench",
+            "Chat",
+            "Tutorials",
+            "People"
+          ],
+          "4px | 13px | 400 | rgb(255, 255, 255) | 0px none rgb(0, 0, 0)": [
+            "Replays"
+          ]
+        }
+      },
+      "row": {
+        "count": 3,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Community call — the nod",
+            "Community call — logic w",
+            "Community call — shippin"
+          ]
+        }
+      },
+      "retry link": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 1,
+            "e": [
+              "NodeGX 0.2.4"
+            ]
+          },
+          "12px": {
+            "n": 17,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 9,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 3,
+        "sizes": {
+          "12px": {
+            "n": 13,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 4,
+            "e": [
+              "Reading as a guest",
+              "Recordings of the weekly",
+              "Community call — the nod"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 537,
+      "found": []
+    },
+    "contrast": {
+      "controls": 11,
+      "boundaryUnder3": [
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        }
+      ],
+      "textUnder45": [],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 4.03,
+          "textOnly": false,
+          "boundary": 4.03,
+          "text": 4.57
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Community call — the node yo",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Community call — logic witho",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Community call — shipping a ",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        }
+      ]
+    },
+    "typeAtBottom": {
+      "page": {
+        "distinct": 4,
+        "sizes": {
+          "11px": {
+            "n": 1,
+            "e": [
+              "NodeGX 0.2.4"
+            ]
+          },
+          "12px": {
+            "n": 16,
+            "e": [
+              "Connect GitHub",
+              "Bench",
+              "Chat"
+            ]
+          },
+          "13px": {
+            "n": 9,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 2,
+        "sizes": {
+          "12px": {
+            "n": 12,
+            "e": [
+              "Bench",
+              "Chat",
+              "Tutorials"
+            ]
+          },
+          "13px": {
+            "n": 4,
+            "e": [
+              "Recordings of the weekly",
+              "Community call — the nod",
+              "Community call — logic w"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "local-signed-out-community-people-700x500-light": {
+    "room": "people",
+    "theme": "light",
+    "size": "700x500",
+    "geometry": {
+      "viewport": [
+        700,
+        500
+      ],
+      "theme": "light",
+      "title": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 29
+      },
+      "titleText": "Community",
+      "actions": {
+        "x": 20,
+        "y": 178,
+        "w": 533,
+        "h": 30
+      },
+      "toolbar": {
+        "x": 20,
+        "y": 228,
+        "w": 652,
+        "h": 33
+      },
+      "column": {
+        "x": 20,
+        "y": 137,
+        "w": 652,
+        "h": 906
+      },
+      "contentBottom": 1043,
+      "scrolls": true,
+      "documentScrollsSideways": false,
+      "contentScrollsSideways": false,
+      "pastRightEdge": []
+    },
+    "controls": {
+      "PrimaryButton": {
+        "count": 3,
+        "distinct": 2,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Refresh",
+            "Open community.nodegx.io"
+          ],
+          "6px | 12px | 500 | rgb(21, 112, 239) | 0px none rgb(255, 255, 255)": [
+            "Sign in"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 2,
+        "distinct": 1,
+        "styles": {
+          "9999px | 12px | 500 | rgba(0, 0, 0, 0) | 1px solid rgb(122, 134, 145)": [
+            "Available for work4",
+            "Offers coaching2"
+          ]
+        }
+      },
+      "room tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "4px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(0, 0, 0)": [
+            "Bench",
+            "Chat",
+            "Tutorials",
+            "Replays"
+          ],
+          "4px | 13px | 400 | rgb(255, 255, 255) | 0px none rgb(0, 0, 0)": [
+            "People"
+          ]
+        }
+      },
+      "row": {
+        "count": 6,
+        "distinct": 1,
+        "styles": {
+          "0px | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Tom Reilly, tom-teaches",
+            "Ada Osei, ada-builds",
+            "Priya Raman, priya-plans",
+            "Mo Adeyemi, mo-makes",
+            "Sam Okafor, sam-solves",
+            "Nia Patel, nia-new"
+          ]
+        }
+      },
+      "retry link": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {},
+        "classes": []
+      }
+    },
+    "type": {
+      "page": {
+        "distinct": 5,
+        "sizes": {
+          "11px": {
+            "n": 5,
+            "e": [
+              "Search names, handles, b",
+              "4",
+              "2"
+            ]
+          },
+          "12px": {
+            "n": 17,
+            "e": [
+              "Connect GitHub",
+              "Refresh",
+              "Open community.nodegx.io"
+            ]
+          },
+          "13px": {
+            "n": 8,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 4,
+        "sizes": {
+          "11px": {
+            "n": 4,
+            "e": [
+              "Search names, handles, b",
+              "4",
+              "2"
+            ]
+          },
+          "12px": {
+            "n": 13,
+            "e": [
+              "Refresh",
+              "Open community.nodegx.io",
+              "Sign in"
+            ]
+          },
+          "13px": {
+            "n": 3,
+            "e": [
+              "Reading as a guest",
+              "Who else is building wit",
+              "Tom Reilly"
+            ]
+          },
+          "26px": {
+            "n": 1,
+            "e": [
+              "Community"
+            ]
+          }
+        }
+      }
+    },
+    "targetWords": {
+      "chars": 1457,
+      "found": []
+    },
+    "contrast": {
+      "controls": 17,
+      "boundaryUnder3": [
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        }
+      ],
+      "textUnder45": [],
+      "rows": [
+        {
+          "label": "Refresh",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Open community.nodegx.io",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Sign in",
+          "cls": "PrimaryButton-module__Root--KMqLg",
+          "disabled": false,
+          "fillOnGround": 4.03,
+          "textOnly": false,
+          "boundary": 4.03,
+          "text": 4.57
+        },
+        {
+          "label": "Bench",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Chat",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Tutorials",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "Replays",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 19.05
+        },
+        {
+          "label": "People",
+          "cls": "Tabs-module__Button--rruzp",
+          "disabled": false,
+          "fillOnGround": 1.1,
+          "textOnly": false,
+          "boundary": 1.1,
+          "text": 21
+        },
+        {
+          "label": "",
+          "cls": "Community-module__SearchInput--eMtdG",
+          "disabled": false,
+          "fillOnGround": 1.03,
+          "edgeOnFill": 3.37,
+          "edgeOnGround": 3.28,
+          "textOnly": false,
+          "boundary": 3.28,
+          "text": 6.8
+        },
+        {
+          "label": "Available for work4",
+          "cls": "Chip-module__Root--nac5E",
+          "disabled": false,
+          "fillOnGround": 1,
+          "edgeOnFill": 3.28,
+          "edgeOnGround": 3.28,
+          "textOnly": false,
+          "boundary": 3.28,
+          "text": 6.61
+        },
+        {
+          "label": "Offers coaching2",
+          "cls": "Chip-module__Root--nac5E",
+          "disabled": false,
+          "fillOnGround": 1,
+          "edgeOnFill": 3.28,
+          "edgeOnGround": 3.28,
+          "textOnly": false,
+          "boundary": 3.28,
+          "text": 6.61
+        },
+        {
+          "label": "Tom Reilly, tom-teaches",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Ada Osei, ada-builds",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Priya Raman, priya-plans",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Mo Adeyemi, mo-makes",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Sam Okafor, sam-solves",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        },
+        {
+          "label": "Nia Patel, nia-new",
+          "cls": "Community-module__Row--WS1o4",
+          "disabled": false,
+          "fillOnGround": 1,
+          "textOnly": true,
+          "boundary": 1,
+          "text": 6.61
+        }
+      ]
+    },
+    "typeAtBottom": {
+      "page": {
+        "distinct": 4,
+        "sizes": {
+          "11px": {
+            "n": 14,
+            "e": [
+              "Offers coaching",
+              "Not for hire",
+              "Component Inputs"
+            ]
+          },
+          "12px": {
+            "n": 16,
+            "e": [
+              "Connect GitHub",
+              "P",
+              "@priya-plans · 105 point"
+            ]
+          },
+          "13px": {
+            "n": 9,
+            "e": [
+              "Projects",
+              "Community",
+              "Learning"
+            ]
+          },
+          "15px": {
+            "n": 1,
+            "e": [
+              "NodeGX"
+            ]
+          }
+        }
+      },
+      "content": {
+        "distinct": 3,
+        "sizes": {
+          "11px": {
+            "n": 13,
+            "e": [
+              "Offers coaching",
+              "Not for hire",
+              "Component Inputs"
+            ]
+          },
+          "12px": {
+            "n": 12,
+            "e": [
+              "P",
+              "@priya-plans · 105 point",
+              "Product person who learn"
+            ]
+          },
+          "13px": {
+            "n": 4,
+            "e": [
+              "Priya Raman",
+              "Mo Adeyemi",
+              "Sam Okafor"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

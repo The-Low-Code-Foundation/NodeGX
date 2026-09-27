@@ -1,0 +1,73 @@
+/* CHR-009 §2 slice 5: an alignment port as a row of the label column — one segmented track that
+   fills the control column (the Size Mode track: bg-2, bg-3 pressed). Six segments must fit ~156px. */
+
+.Root {
+  display: flex;
+  flex-direction: column;
+}
+
+.Segment {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+  height: 26px;
+  box-sizing: border-box;
+  padding: 2px;
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--theme-color-bg-2);
+}
+
+.Option {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-default);
+  background: none;
+  color: var(--theme-color-fg-muted);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--theme-color-fg-default);
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--theme-color-primary);
+    outline-offset: 0;
+  }
+
+  &.is-pressed {
+    background-color: var(--theme-color-bg-3);
+    color: var(--theme-color-fg-highlight);
+  }
+
+  /* No glyph for this value: the enum's label, which must still fit a sixth of the track. */
+  &.is-text {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: var(--font-size-xs);
+  }
+}
+
+.Glyph {
+  display: flex;
+
+  svg {
+    display: block;
+  }
+}
+
+.is-rotate .Glyph svg {
+  transform: rotate(90deg);
+}
+
+.is-rotate2 .Glyph svg {
+  transform: rotate(270deg);
+}

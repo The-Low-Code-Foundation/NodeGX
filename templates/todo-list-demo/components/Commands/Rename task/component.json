@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4a8ef1c9-51a4-5232-8f39-b45ea1aa389b",
+  "name": "Rename task",
+  "path": "/Commands/Rename task",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Renames a task, if the new title is different and not empty."
+}

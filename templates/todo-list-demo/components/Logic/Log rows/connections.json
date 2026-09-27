@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4a01ff50-dc2d-5677-8ba6-652f3c658b99",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lrIn",
+      "fromProperty": "events",
+      "toId": "lrBuild",
+      "toProperty": "in-events"
+    },
+    {
+      "fromId": "lrIn",
+      "fromProperty": "tasks",
+      "toId": "lrBuild",
+      "toProperty": "in-tasks"
+    },
+    {
+      "fromId": "lrBuild",
+      "fromProperty": "out-rows",
+      "toId": "lrOut",
+      "toProperty": "rows"
+    }
+  ]
+}

@@ -291,9 +291,16 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
       // unit suites all take the XHR branch, and upstream Parse ignores a
       // master-key header it does not recognise rather than rejecting it. The
       // one server that fails loudly here is our own.
+      // P99 HLT-023: the run this request belongs to, read NOW — while the caller's async
+      // context is still the run's. Same `undefined` rule as the master key above.
+      const runId =
+        typeof _noodl_cloudservices !== 'undefined' && _noodl_cloudservices.currentRunId
+          ? _noodl_cloudservices.currentRunId()
+          : undefined;
       const headers: Record<string, string> = Object.assign(
         { 'X-Parse-Application-Id': appId, 'Content-Type': 'application/json' },
         masterKey !== undefined ? { 'X-Parse-Master-Key': masterKey } : {},
+        runId !== undefined ? { 'X-NodeGX-Run': runId } : {},
         options.headers || {}
       );
 
@@ -358,8 +365,11 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
       success: function (response) {
         options.success(_this.normalizeAll(response.results), response.count);
       },
-      error: function () {
-        options.error();
+      // P99 HLT-023: pass the server's words on, as `fetch` and the rest do. Dropped here, a
+      // refusal that names its cause (the per-run ceiling, a 429 with its class) reached the
+      // function as "Failed to query."
+      error: function (res) {
+        options.error(res && res.error);
       }
     });
   }
@@ -492,6 +502,11 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
   create(handle: BackendHandle, options: CreateOptions): void {
     this._makeRequest(handle, '/classes/' + options.collection, {
       method: 'POST',
+      // FED-002. A header, not a body key: everything in the body is stored, so
+      // an `__upsertOn` in there would be a property no caller could then name.
+      // The same route answers 201 for a create and 200 for the update, and
+      // both land on `success` (`_makeRequest` accepts either).
+      headers: options.upsertOn ? { 'X-NodeGX-Upsert': options.upsertOn } : undefined,
       content: Object.assign(
         _removeProtectedFields(this.serializeObject(options.data, options.collection), options.collection),
         { ACL: options.acl }
@@ -544,6 +559,8 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
         _removeProtectedFields(this.serializeObject(_data, options.collection), options.collection),
         { ACL: options.acl }
       ),
+      // HLT-016: the precondition travels as a header, as FED-002's upsert does.
+      headers: options.ifMatch ? { 'X-NodeGX-If': JSON.stringify(options.ifMatch) } : undefined,
       success: (response) => {
         options.success(this.normalize(response));
         this.emitAdapterEvent({
@@ -554,7 +571,9 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
         });
       },
       error: function (res) {
-        options.error(res.error);
+        // The body rides along so a caller can tell a precondition failure (`reason`) from any
+        // other refusal without reading the sentence.
+        options.error(res.error, res);
       }
     });
   }

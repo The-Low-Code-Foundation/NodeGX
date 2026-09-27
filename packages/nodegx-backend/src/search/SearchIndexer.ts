@@ -14,7 +14,7 @@
  * @module nodegx-backend/search/SearchIndexer
  */
 
-import type { SchemaManagerLike } from '../persistence/SchemaManagerLike';
+import type { IStorageSchema } from '@noodl/backend-contract';
 import type { SearchState } from './SearchState';
 import type { CollectionSearchConfig } from './model';
 
@@ -35,16 +35,25 @@ export class SearchCapabilityError extends Error {
 }
 
 // The four methods this class needs are declared on the shared
-// `SchemaManagerLike` (PLAT-004). This file used to carry its own copy of that
+// `IStorageSchema` (PLAT-004). This file used to carry its own copy of that
 // interface — the second such copy in the package — which is how the same
 // adapter got described twice, differently.
 
 export class SearchIndexer {
-  private readonly schemaManager: SchemaManagerLike | null;
+  private readonly read: () => IStorageSchema | null;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(schemaManager: SchemaManagerLike | null) {
-    this.schemaManager = schemaManager || null;
+  /**
+   * Takes the schema manager, or a function that reads it. BMG-011: a restore
+   * over HTTP reconnects the adapter, which makes a NEW schema manager — an
+   * indexer that captured the old one at construction would drop and rebuild
+   * FTS tables on a closed database. Long-lived holders pass the getter.
+   */
+  constructor(schemaManager: IStorageSchema | null | (() => IStorageSchema | null)) {
+    this.read = typeof schemaManager === 'function' ? schemaManager : () => schemaManager;
+  }
+
+  private get schemaManager(): IStorageSchema | null {
+    return this.read() || null;
   }
 
   /** The BAK-008 "verify first" check, live: does THIS running engine have FTS5? */
@@ -52,7 +61,7 @@ export class SearchIndexer {
     return Boolean(this.schemaManager && this.schemaManager.hasFts5Support());
   }
 
-  private assertReady(): SchemaManagerLike {
+  private assertReady(): IStorageSchema {
     if (!this.schemaManager) {
       throw new Error('No schema manager available (persistence has not connected).');
     }

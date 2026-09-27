@@ -1,6 +1,11 @@
 import React, { useMemo, useState } from 'react';
 
 import { IconName } from '@noodl-core-ui/components/common/Icon';
+import {
+  PrimaryButton,
+  PrimaryButtonSize,
+  PrimaryButtonVariant
+} from '@noodl-core-ui/components/inputs/PrimaryButton';
 import { SelectOption } from '@noodl-core-ui/components/inputs/Select';
 import {
   CommunityAccountCard,
@@ -11,10 +16,7 @@ import {
   ConnectAgentVariant
 } from '@noodl-core-ui/preview/launcher/Launcher/components/ConnectAgentCard';
 import { FolderTree } from '@noodl-core-ui/preview/launcher/Launcher/components/FolderTree';
-import {
-  LauncherButton,
-  LauncherButtonVariant
-} from '@noodl-core-ui/preview/launcher/Launcher/components/LauncherButton';
+import { LauncherCardGrid } from '@noodl-core-ui/preview/launcher/Launcher/components/LauncherCard';
 import { LauncherPage } from '@noodl-core-ui/preview/launcher/Launcher/components/LauncherPage';
 import {
   LauncherProjectCard,
@@ -70,7 +72,7 @@ export function Projects({}: ProjectsViewProps) {
 
   const { getProjectMeta, getProjectsInFolder, folders, moveProjectToFolder } = useProjectOrganization();
 
-  const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [selectedProjectPath, setSelectedProjectPath] = useState(null);
   const [movingProject, setMovingProject] = useState<LauncherProjectData | null>(null);
 
   // Filter projects based on selected folder
@@ -117,12 +119,22 @@ export function Projects({}: ProjectsViewProps) {
     propertyNameToFilter: 'cloudSyncMeta.type'
   });
 
-  function onOpenProjectSettings(projectDataId: LauncherProjectData['id']) {
-    setSelectedProjectId(projectDataId);
+  /**
+   * HLT-011 — a project is addressed by its directory, never by `id`.
+   *
+   * 🔴 `LauncherProjectData.id` is the stored `project.id`, and two projects can
+   * carry one: the host resolves it with `.find`, which answers about whichever
+   * row is sorted first. Driven 2026-09-21 — clicking the second of two
+   * colliding cards opened the first card's project. `localPath` is the row's
+   * own identity and `LocalProjectsModel.fetch` guarantees one row per
+   * directory, which is the same guarantee the grid's `key` leans on.
+   */
+  function onOpenProjectSettings(projectPath: LauncherProjectData['localPath']) {
+    setSelectedProjectPath(projectPath);
   }
 
   function onCloseProjectSettings() {
-    setSelectedProjectId(null);
+    setSelectedProjectPath(null);
   }
 
   function onMoveToFolder(project: LauncherProjectData) {
@@ -150,10 +162,10 @@ export function Projects({}: ProjectsViewProps) {
 
   function buildMenuItems(project: LauncherProjectData) {
     const items: any[] = [
-      { label: 'Launch project', onClick: () => onLaunchProject?.(project.id) },
-      { label: 'Open project folder', onClick: () => onOpenProjectFolder?.(project.id) },
+      { label: 'Launch project', onClick: () => onLaunchProject?.(project.localPath) },
+      { label: 'Open project folder', onClick: () => onOpenProjectFolder?.(project.localPath) },
       { label: 'Move to folder...', onClick: () => onMoveToFolder(project) },
-      { label: 'Open project settings', onClick: () => onOpenProjectSettings(project.id) }
+      { label: 'Open project settings', onClick: () => onOpenProjectSettings(project.localPath) }
     ];
 
     /**
@@ -164,21 +176,21 @@ export function Projects({}: ProjectsViewProps) {
      * by hiding the offer — a feature that appears and disappears with a session reads as broken.
      */
     if (onShareAsTemplate) {
-      items.push({ label: 'Share as template…', onClick: () => onShareAsTemplate(project.id) });
+      items.push({ label: 'Share as template…', onClick: () => onShareAsTemplate(project.localPath) });
     }
 
     // React 17 projects keep the migrate / read-only capability the old expandable
     // runtime banner used to offer — moved into the kebab so the card stays compact.
     if (project.runtimeInfo?.version === 'react17') {
       items.push('divider');
-      items.push({ label: 'Assisted migration…', onClick: () => onMigrateProject?.(project.id) });
-      items.push({ label: 'Open read-only', onClick: () => onOpenReadOnly?.(project.id) });
+      items.push({ label: 'Assisted migration…', onClick: () => onMigrateProject?.(project.localPath) });
+      items.push({ label: 'Open read-only', onClick: () => onOpenReadOnly?.(project.localPath) });
     }
 
     items.push('divider');
     items.push({
       label: 'Delete project',
-      onClick: () => onDeleteProject?.(project.id),
+      onClick: () => onDeleteProject?.(project.localPath),
       icon: IconName.Trash,
       isDangerous: true
     });
@@ -187,45 +199,56 @@ export function Projects({}: ProjectsViewProps) {
   }
 
   return (
-    <div className={css['Root']}>
-      {/* Folder Tree Sidebar (mock: 224px, bg-1, padding 16px 10px) */}
-      <aside className={css['Sidebar']}>
-        <FolderTree
-          selectedFolderId={selectedFolderId}
-          onFolderSelect={setSelectedFolderId}
-          totalProjectCount={allProjects.length}
-          uncategorizedProjectCount={uncategorizedCount}
-        />
-      </aside>
+    <LauncherPage
+      title="Projects"
+      lede="Projects you have opened on this machine. Pick one up where you left off, or start a new one."
+      actions={
+        <>
+          <PrimaryButton
+            label="Open project…"
+            variant={PrimaryButtonVariant.Text}
+            size={PrimaryButtonSize.Small}
+            onClick={onImportProjectClick}
+            testId="launcher-open-project"
+          />
+          <PrimaryButton
+            label="New project"
+            glyph={PlusGlyph}
+            size={PrimaryButtonSize.Small}
+            onClick={onNewProjectClick}
+            testId="launcher-new-project"
+          />
+        </>
+      }
+      toolbar={
+        allProjects.length > 0 ? (
+          <LauncherSearchBar
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            filterValue={filterValue}
+            setFilterValue={setFilterValue}
+            filterDropdownItems={visibleTypesDropdownItems}
+          />
+        ) : undefined
+      }
+    >
+      {/* D5's Learning section used to render here, above the grid. Moved
+          to its own tab (`views/Learning.tsx`) — it filled the top of the
+          launcher, and the first thing you should see on opening it is your
+          projects. D5's "visible, because visible progress motivates" is
+          still met by a permanent tab in the header; what it does not
+          survive is being the launcher's opening screen. */}
+      <div className={css['Layout']}>
+        <aside className={css['Sidebar']}>
+          <FolderTree
+            selectedFolderId={selectedFolderId}
+            onFolderSelect={setSelectedFolderId}
+            totalProjectCount={allProjects.length}
+            uncategorizedProjectCount={uncategorizedCount}
+          />
+        </aside>
 
-      {/* Main Content */}
-      <div className={css['Main']}>
-        <LauncherPage
-          title="Recent projects"
-          headerSlot={
-            <>
-              <LauncherButton
-                label="Open project…"
-                variant={LauncherButtonVariant.Ghost}
-                onClick={onImportProjectClick}
-                testId="launcher-open-project"
-              />
-              <LauncherButton
-                label="New project"
-                icon={PlusGlyph}
-                onClick={onNewProjectClick}
-                testId="launcher-new-project"
-              />
-            </>
-          }
-        >
-          {/* D5's Learning section used to render here, above the grid. Moved
-              to its own tab (`views/Learning.tsx`) — it filled the top of the
-              launcher, and the first thing you should see on opening it is your
-              projects. D5's "visible, because visible progress motivates" is
-              still met by a permanent tab in the header; what it does not
-              survive is being the launcher's opening screen. */}
-
+        <div className={css['Main']}>
           {allProjects.length === 0 ? (
             /* First-launch welcome — the actual first impression. */
             <div className={css['Welcome']}>
@@ -234,13 +257,13 @@ export function Projects({}: ProjectsViewProps) {
                 Build full-stack apps visually. Create your first project to get started — or start from a template.
               </p>
               <div className={css['WelcomeActions']}>
-                <LauncherButton label="New project" icon={PlusGlyph} onClick={onNewProjectClick} />
+                <PrimaryButton label="New project" glyph={PlusGlyph} onClick={onNewProjectClick} />
                 {/* POL-002: was "Browse lessons" → the removed Learn tab. On the
                     empty-state screen this is the literal first thing a new user
                     sees, so it could not be left pointing at a tab that is gone. */}
-                <LauncherButton
+                <PrimaryButton
                   label="Browse templates"
-                  variant={LauncherButtonVariant.Ghost}
+                  variant={PrimaryButtonVariant.Text}
                   onClick={() => setActivePageId('templates')}
                 />
               </div>
@@ -271,17 +294,9 @@ export function Projects({}: ProjectsViewProps) {
               {shareTemplateModal && <ShareTemplateModal {...shareTemplateModal} />}
 
               <ProjectSettingsModal
-                isVisible={selectedProjectId !== null}
+                isVisible={selectedProjectPath !== null}
                 onClose={onCloseProjectSettings}
-                projectData={projects.find((project) => project.id === selectedProjectId)}
-              />
-
-              <LauncherSearchBar
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                filterValue={filterValue}
-                setFilterValue={setFilterValue}
-                filterDropdownItems={visibleTypesDropdownItems}
+                projectData={projects.find((project) => project.localPath === selectedProjectPath)}
               />
 
               {projects.length === 0 ? (
@@ -290,54 +305,62 @@ export function Projects({}: ProjectsViewProps) {
                   {searchTerm ? `No projects match “${searchTerm}”.` : 'No projects here yet.'}
                 </div>
               ) : (
-                <div className={css['Grid']}>
+                <LauncherCardGrid>
                   {projects.map((project) => (
                     <LauncherProjectCard
-                      key={project.id}
+                      // HLT-003: the directory, not the id. Two different
+                      // projects can carry the same stored `id` — measured, and
+                      // the single cause of all 62 duplicate-key events phase 99
+                      // recorded — whereas a row *is* a project directory.
+                      // `LocalProjectsModel.fetch` guarantees one row per
+                      // directory; without that guarantee this key would collide
+                      // wherever the id one did not.
+                      key={project.localPath}
                       {...project}
-                      onClick={() => onLaunchProject?.(project.id)}
-                      onMigrateProject={() => onMigrateProject?.(project.id)}
-                      onOpenReadOnly={() => onOpenReadOnly?.(project.id)}
+                      onClick={() => onLaunchProject?.(project.localPath)}
+                      onMigrateProject={() => onMigrateProject?.(project.localPath)}
+                      onOpenReadOnly={() => onOpenReadOnly?.(project.localPath)}
                       contextMenuItems={buildMenuItems(project)}
                     />
                   ))}
-                </div>
+                </LauncherCardGrid>
               )}
             </>
           )}
-
-          {/* Folder Picker Modal */}
-          {movingProject && (
-            <div className={css['FolderPicker']}>
-              <div className={css['FolderPickerBackdrop']} onClick={onCloseFolderPicker} />
-              <div className={css['FolderPickerDialog']}>
-                <h3 className={css['FolderPickerTitle']}>Move "{movingProject.title}" to folder</h3>
-                <div className={css['FolderPickerList']}>
-                  <button className={css['FolderPickerItem']} onClick={() => handleMoveToFolder(null)}>
-                    Uncategorized
-                  </button>
-                  {folders.map((folder) => (
-                    <button
-                      key={folder.id}
-                      className={css['FolderPickerItem']}
-                      onClick={() => handleMoveToFolder(folder.id)}
-                    >
-                      {folder.name}
-                    </button>
-                  ))}
-                </div>
-                <div className={css['FolderPickerFooter']}>
-                  <LauncherButton
-                    label="Cancel"
-                    variant={LauncherButtonVariant.Secondary}
-                    onClick={onCloseFolderPicker}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-        </LauncherPage>
+        </div>
       </div>
-    </div>
+
+      {/* Folder Picker Modal */}
+      {movingProject && (
+        <div className={css['FolderPicker']}>
+          <div className={css['FolderPickerBackdrop']} onClick={onCloseFolderPicker} />
+          <div className={css['FolderPickerDialog']}>
+            <h3 className={css['FolderPickerTitle']}>Move "{movingProject.title}" to folder</h3>
+            <div className={css['FolderPickerList']}>
+              <button className={css['FolderPickerItem']} onClick={() => handleMoveToFolder(null)}>
+                Uncategorized
+              </button>
+              {folders.map((folder) => (
+                <button
+                  key={folder.id}
+                  className={css['FolderPickerItem']}
+                  onClick={() => handleMoveToFolder(folder.id)}
+                >
+                  {folder.name}
+                </button>
+              ))}
+            </div>
+            <div className={css['FolderPickerFooter']}>
+              <PrimaryButton
+                label="Cancel"
+                variant={PrimaryButtonVariant.Muted}
+                size={PrimaryButtonSize.Small}
+                onClick={onCloseFolderPicker}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </LauncherPage>
   );
 }

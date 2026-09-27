@@ -1,0 +1,124 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7dcc6d86-0f4e-5066-91c3-6b56194eae36",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req",
+      "type": "noodl.cloud.request",
+      "label": "Signed in (security: authenticated). No parameters, so nothing a learner sends can choose whose rows or move the clock.",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "",
+        "allowNoAuth": false
+      }
+    },
+    {
+      "id": "who",
+      "type": "/#__cloud__/shared/Caller learner",
+      "label": "Their learner",
+      "x": 300,
+      "y": 40
+    },
+    {
+      "id": "ask",
+      "type": "JavaScriptFunction",
+      "label": "At the server clock",
+      "x": 560,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * The learner's own programme, at the SERVER's clock (§0.6). `now` is not a\n * parameter of this function at all, so a learner cannot move the clock that\n * decides what `state` says about them. '' means \"the server clock\".\n */\nif (Inputs.learnerId !== undefined) {\n  Outputs.query = { learnerId: String(Inputs.learnerId), now: '' };\n}\n",
+        "runOnChange-in-learnerId": true
+      },
+      "ports": [
+        {
+          "name": "in-learnerId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "learnerId",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-query",
+          "plug": "output",
+          "type": "*",
+          "displayName": "query",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "prog",
+      "type": "/#__cloud__/shared/Programme",
+      "label": "The superset",
+      "x": 820,
+      "y": 40
+    },
+    {
+      "id": "proj",
+      "type": "JavaScriptFunction",
+      "label": "projectForLearner",
+      "x": 1080,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * WHAT THE LEARNER MAY READ — `projectForLearner` (src/lib/server/timeline/model.ts).\n *\n * A SEPARATE NODE FROM THE COACH'S, NEVER A FLAG (L91, L116). Three things\n * leave the superset here and nowhere else:\n *   - every `signal` — our inference about their confusion, never theirs to be\n *     shown back (L60's self-certification from the other direction);\n *   - every INTERNAL note — a coach's private working note (L128). In the\n *     product these never reach the learner's assembly at all; here the\n *     superset carries them, so this filter is the whole boundary;\n *   - `history` — the learner's page does not read it (L170 §1).\n * And `unread` is resolved from the learner's side.\n */\nif (Inputs.payload !== undefined) {\n  try {\n    const p = Inputs.payload;\n    const resolveUnread = (e) => (e.kind === 'message' ? { ...e, unread: e.authorRole !== 'learner' && !e.read } : e);\n    const stripNote = (e) => {\n      if (e.kind !== 'note') return e;\n      const { _visibility, ...note } = e.note;\n      return { ...e, note };\n    };\n    const entries = p.entries\n      .filter((e) => e.kind !== 'signal')\n      .filter((e) => e.kind !== 'note' || e.note._visibility === 'shared')\n      .map(stripNote)\n      .map(resolveUnread);\n    const { history, ...rest } = p;\n    Outputs.rows = [{ ...rest, entries }];\n    Outputs.done();\n  } catch (e) {\n    Outputs.error = String((e && e.message) || e);\n    // Logged for the operator; the caller still gets one refusal body (the mcp/auth.ts rule).\n    console.error('[dbt:course]', Outputs.error);\n    Outputs.failed();\n  }\n}\n",
+        "runOnChange-in-payload": true
+      },
+      "ports": [
+        {
+          "name": "in-payload",
+          "plug": "input",
+          "type": "*",
+          "displayName": "payload",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-rows",
+          "plug": "output",
+          "type": "*",
+          "displayName": "rows",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "plug": "output",
+          "type": "*",
+          "displayName": "error",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "res",
+      "type": "noodl.cloud.response",
+      "label": "rows — the fixture's own shape",
+      "x": 1340,
+      "y": 40,
+      "parameters": {
+        "params": "rows"
+      }
+    },
+    {
+      "id": "deny",
+      "type": "noodl.cloud.response",
+      "label": "One refusal, whatever went wrong",
+      "x": 1340,
+      "y": 220,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This could not be read."
+      }
+    }
+  ]
+}

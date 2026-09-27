@@ -26,9 +26,9 @@ providers on a backend that already has password users.
 
 ## Setting up a provider
 
-In the editor: **Backend Services → (your backend) → Sign-in**. On a deployed
-backend with no editor: the served dashboard's **Sign-in** view. For an agent:
-`configure_backend_auth_provider` over MCP. All three edit the same
+On the backend manager's **Sign-in** page (from the editor: the local backend's
+card → **Manage data & settings**; on a deployed backend, the served page at
+`/_admin`). For an agent: `configure_backend_auth_provider` over MCP. Both edit the same
 `/admin/auth` surface.
 
 Before anything else, set the backend's **Base URL** (in the Email section — it
@@ -40,7 +40,7 @@ your own machine. The panel says so loudly if you have not set it.
 Then, for every provider, the same three steps:
 
 1. Add the provider here, with its client id and secret.
-2. **Copy the callback URL the panel shows you** and paste it into the
+2. **Copy the callback URL the page shows you** and paste it into the
    provider's console. Do not type it from memory — a redirect-URI mismatch is
    the most common and most time-consuming way this fails, and the provider's
    error message blames you rather than explaining.
@@ -110,7 +110,7 @@ their own console wording.
 ## Magic links
 
 Passwordless sign-in by email. It needs **both** its own switch (Sign-in →
-Magic links) and working SMTP ([Email](./BACKEND-EMAIL.md)) — the panel reports
+Magic links) and working SMTP ([Email](./BACKEND-EMAIL.md)) — the page reports
 which one is missing.
 
 Behaviour worth stating explicitly, because it looks like a bug otherwise:
@@ -123,8 +123,17 @@ Behaviour worth stating explicitly, because it looks like a bug otherwise:
   its way"*, not *"check your inbox"*. A UI that appears to know hands back the
   oracle the endpoint just removed.
 - A link is single-use and short-lived (15 minutes by default, capped at 24
-  hours). Anyone who opens it is signed in, so the shipped email template says
-  not to forward it.
+  hours).
+- **Opening the link spends nothing.** It opens a small *"Sign in to <your
+  app>"* page with one button, and only pressing that button signs in and uses
+  up the link. Many company mailboxes (Microsoft Defender Safe Links, Mimecast,
+  Proofpoint) and chat unfurlers fetch every link in a message before the
+  person sees it; if opening the link used it up, those people would always
+  meet *"Sign-in link expired"*, and the scanner would be the one signed in.
+  The button is a plain form, with no script, so it works in a mail app's
+  built-in browser.
+- Whoever presses the button is signed in, so the shipped email template still
+  says not to forward the link.
 
 ## Wiring it into your app
 

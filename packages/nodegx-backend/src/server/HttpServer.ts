@@ -29,12 +29,14 @@ import * as http from 'http';
 
 import type { BackendServiceOptions } from '../config';
 import type { PersistenceHandle } from '../persistence/createAdapter';
-import type { AdapterFacade, AclOption } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
+import type { AclOption } from '../persistence/AdapterFacade';
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { IdempotencyStore } from '../execution/IdempotencyStore';
 import { buildRunPayload } from '../workflow/runPayload';
 import type { WorkflowRunner } from '../workflow/WorkflowRunner';
 import { DEFAULT_FUNCTION_TIMEOUT_MS } from '../workflow/WorkflowRunner';
+import { RUN_HEADER } from '../workflow/FunctionRuns';
 import type { SecurityState } from '../security/state';
 import type { SearchState } from '../search/SearchState';
 import type { RealtimeHub, Subscription } from '../realtime/RealtimeHub';
@@ -46,6 +48,7 @@ import {
   functionIdempotency,
   functionTimeoutMs,
   ruleAllows,
+  rulePrincipal,
   validateAclShape
 } from '../security/model';
 import type { TriggerSubsystem } from '../triggers/TriggerSubsystem';
@@ -58,20 +61,24 @@ import { EmailTokenStore } from '../email/tokens';
 import type { AuthConfigState } from '../auth/AuthConfigState';
 import { OAuthRoutes } from './oauth-routes';
 import { AdminAuthRoutes } from './admin-auth';
+import { AdminUserRoutes } from './admin-users';
 import { AdminSecurityRoutes } from './admin-security';
+import { verifyFileAccess } from '../storage/signing';
+import { AdminViewRoutes, ViewsStore } from './admin-views';
 import { AdminSecretsRoutes } from './admin-secrets';
 import { SecretsStore } from '../config/SecretsStore';
 import { AdminTriggerRoutes } from './admin-triggers';
 import { AdminWorkflowRoutes } from './admin-workflows';
 import { AdminEmailRoutes } from './admin-email';
 import { AdminBackupRoutes } from './admin-backups';
+import type { PersistenceControl } from './admin-backups';
 import { AdminFileRoutes } from './admin-files';
 import { AdminSearchRoutes } from './admin-search';
 import { ByobAdminRoutes } from './byob-admin';
 import { EmailRoutes } from './email-routes';
 import { FileRoutes } from './files';
 import type { FileSubsystem } from '../storage/FileSubsystem';
-import { ParseWireRoutes } from './parse-wire';
+import { ParseWireRoutes, toQueryOptions } from './parse-wire';
 import { UserRoutes } from './users';
 import { AdminDashboardRoutes, DashboardFeatures } from '../admin/AdminDashboardRoutes';
 import { AuthAttemptLimiter } from '../admin/auth';
@@ -83,7 +90,8 @@ import { RateLimiter, classifyRoute, type RateDecision } from '../ops/rate-limit
 import type { AuditLog } from '../ops/audit';
 import { AUDIT_LOGIN_FAILURE, AUDIT_LOGIN_SUCCESS, auditActionFor, declaredAuditActions } from '../ops/audit-actions';
 import { REQUEST_ID_HEADER, resolveRequestId } from '../ops/request-id';
-import { applyAdminSecurityHeaders, applyCors, serverHeader } from '../ops/headers';
+import { SERVICE_VERSION, applyAdminSecurityHeaders, applyCors, serverHeader } from '../ops/headers';
+import { McpRoutes } from './mcp/McpRoutes';
 import { metrics, recordRateLimited, recordRequest, registerProcessGauges } from '../ops/metrics';
 import { HttpError, parseURL, readJSONBody, readRawBody, sendError, sendJSON } from './http-util';
 
@@ -110,7 +118,18 @@ export type RouteAccess =
   | { kind: 'session' }
   /** Incoming webhook (WF-005) — SELF-ENFORCING on the per-hook secret; the
    *  handler verifies and rejects loudly into the execution record. */
-  | { kind: 'webhook' };
+  | { kind: 'webhook' }
+  /**
+   * FED-005 — the MCP endpoint. A SCOPED API KEY and nothing else: not a
+   * session, not anonymous, and deliberately **not** the master key (AC7).
+   *
+   * Its own class rather than reusing `data`, for two reasons a shared class
+   * would get wrong. The route is not per-collection, so there is no
+   * `collectionParam` for `data` to gate on — the gating is per TOOL, inside.
+   * And it must be refused BEFORE dev-open relaxes anything, which is a
+   * property only a declared class can carry (see `checkAccess`).
+   */
+  | { kind: 'mcp' };
 
 export interface RequestContext {
   req: http.IncomingMessage;
@@ -147,6 +166,9 @@ export interface RequestContext {
 function rateLimitKey(principal: Principal, ip: string): string {
   switch (principal.kind) {
     case 'admin':
+      // BMG-014: a person with backend access spends their own bucket, so one
+      // client's read-only dashboard cannot empty the operator's.
+      if (principal.userId) return `admin:${principal.readonly ? 'readonly:' : ''}${principal.userId}`;
       return principal.readonly ? 'admin:readonly' : 'admin';
     case 'apiKey':
       return `key:${principal.name}`;
@@ -234,6 +256,8 @@ interface RequestTrace {
   logged: boolean;
   /** The rate-limit / metrics class of the matched route. */
   rateClass?: string;
+  /** HLT-023: the function whose run made this loopback request, when one did. */
+  functionRun?: string;
   /** BAK-009 audit: the action this request performs, when it is an audited one. */
   auditAction?: string;
   /** Stable actor identity within the principal kind (user id / key name). */
@@ -258,7 +282,7 @@ interface RouteDef extends RouteInfo {
 export interface HttpServerDeps {
   options: BackendServiceOptions;
   persistence: PersistenceHandle;
-  facade: AdapterFacade;
+  facade: IStorageFacade;
   executions: ExecutionHistory;
   /** CWF-016: the idempotency claim table. Disabled when sqlite is unavailable. */
   idempotency: IdempotencyStore;
@@ -289,6 +313,8 @@ export interface HttpServerDeps {
   ops: OpsState;
   /** The `_Audit` writer (BAK-009). */
   audit: AuditLog;
+  /** BMG-011: lets `POST /admin/backups/restore` swap the served database (see admin-backups.ts). */
+  persistenceControl?: PersistenceControl;
 }
 
 // ============================================================================
@@ -346,7 +372,7 @@ export interface ListenInfo {
 export class HttpServer {
   private readonly options: BackendServiceOptions;
   private readonly persistence: PersistenceHandle;
-  private readonly facade: AdapterFacade;
+  private readonly facade: IStorageFacade;
   private readonly security: SecurityState;
   private readonly getRunner: () => WorkflowRunner | null;
   private readonly realtime: RealtimeHub;
@@ -377,7 +403,14 @@ export class HttpServer {
   private readonly parse: ParseWireRoutes;
   private readonly users: UserRoutes;
   private readonly files: FileRoutes;
+  /** PRD-005: the subsystem itself, for the secrets provenance on `/admin/status`. */
+  private readonly fileSubsystem: FileSubsystem;
+  /** PRD-003: the history itself, for `/admin/status`, the gauge and compaction. */
+  private readonly executions: ExecutionHistory;
   private readonly adminSecurity: AdminSecurityRoutes;
+  /** BMG-004: the accounts, administered. */
+  private readonly adminUsers: AdminUserRoutes;
+  private readonly adminViews: AdminViewRoutes;
   /** CWF-009 slice 4: the `functions` secrets door, names out and values in. */
   private readonly adminSecrets: AdminSecretsRoutes;
   private readonly adminTriggers: AdminTriggerRoutes;
@@ -391,6 +424,8 @@ export class HttpServer {
   private readonly adminAuth: AdminAuthRoutes;
   /** BAK-005's dashboard, or null when `--no-admin` removed it entirely. */
   private readonly dashboard: AdminDashboardRoutes | null;
+  /** FED-005: the backend's own MCP endpoint. */
+  private readonly mcp: McpRoutes;
   /** BAK-005: failure budget in front of the one credential check. */
   private readonly authLimiter = new AuthAttemptLimiter();
   /**
@@ -441,6 +476,7 @@ export class HttpServer {
       // creation through OAuth and magic links too, rather than leaving a side
       // door open beside a closed front one.
       signupAllowedForAnonymous: () => ruleAllows(deps.security.config.signup, { kind: 'anonymous' }),
+      rolesForUser: (userId) => deps.security.rolesForUser(userId),
       limiter: this.rateLimiter,
       clientAddress: (req) => clientIp(req, this.ops.config.rateLimit.trustedProxies),
       audit: deps.audit
@@ -451,8 +487,21 @@ export class HttpServer {
       callbackUrl: (providerId) => this.oauth.callbackUrl(providerId),
       getLocalUrl: () => this.localUrl()
     });
+    this.adminUsers = new AdminUserRoutes({
+      facade: deps.facade,
+      sendInvite: (userId, email) => this.oauth.sendInvite(userId, email),
+      inviteUnavailable: () => {
+        const off = this.oauth.magicLinkUnavailable();
+        return off ? off.reason : null;
+      },
+      sendVerification: (user) => this.email.sendVerificationEmail(user),
+      listIdentities: (ctx, userId) => this.oauth.listIdentities(ctx, userId)
+    });
+    this.adminViews = new AdminViewRoutes(new ViewsStore(deps.options.dataDir));
     this.files = new FileRoutes(deps.options.dataDir, `http://127.0.0.1:${deps.options.port}`, deps.files);
-    this.adminFiles = new AdminFileRoutes(deps.files);
+    this.fileSubsystem = deps.files;
+    this.executions = deps.executions;
+    this.adminFiles = new AdminFileRoutes(deps.files, deps.facade);
     this.adminSecurity = new AdminSecurityRoutes(
       deps.security,
       deps.facade,
@@ -475,21 +524,46 @@ export class HttpServer {
     // a caller to pass a store pointed somewhere else.
     this.adminSecrets = new AdminSecretsRoutes(new SecretsStore(deps.options.dataDir));
     this.adminTriggers = new AdminTriggerRoutes(deps.triggers);
-    this.adminWorkflows = new AdminWorkflowRoutes(() => deps.workflows);
+    this.adminWorkflows = new AdminWorkflowRoutes(
+      () => deps.workflows,
+      () => deps.executions
+    );
     this.adminBackups = new AdminBackupRoutes({
       backups: deps.backups,
+      // BMG-015: backups share the files' bucket (one bucket, typed once).
+      getBucket: () => deps.files.bucketDriver(),
       facade: deps.facade,
-      dataDir: deps.options.dataDir
+      dataDir: deps.options.dataDir,
+      persistence: deps.persistenceControl
     });
-    this.adminEmail = new AdminEmailRoutes(deps.emailConfig, deps.mailer);
+    this.adminEmail = new AdminEmailRoutes(deps.emailConfig, deps.mailer, () => ({ magicLinkTtlMinutes: deps.auth ? deps.auth.config.magicLink.ttlMinutes : undefined }));
     this.adminSearch = new AdminSearchRoutes(deps.search, deps.facade);
     this.dashboard = deps.options.adminDashboard
       ? new AdminDashboardRoutes({
           options: deps.options,
           security: deps.security,
-          features: () => this.dashboardFeatures(deps)
+          facade: deps.facade,
+          features: () => this.dashboardFeatures(deps),
+          rolesForUser: (userId) => deps.security.rolesForUser(userId),
+          // BMG-014: a refused password spends the same budget as a refused token.
+          recordAuthFailure: (ip) => this.authLimiter.recordFailure(ip)
         })
       : null;
+    this.mcp = new McpRoutes({
+      facade: deps.facade,
+      security: deps.security,
+      audit: deps.audit,
+      getRunner: deps.getRunner,
+      // The query-argument reader the `/classes` routes use, passed in rather
+      // than re-derived: `where`/`order`/`limit`/`skip` mean one thing on this
+      // backend, and the MCP `_find` tool takes exactly those four words.
+      toQueryOptions,
+      // The name a client shows a person in its server list. The backend's own
+      // name, because somebody with three NodeGX backends connected needs to
+      // tell them apart, and "nodegx-backend" three times does not.
+      serverName: deps.options.backendName || deps.options.backendId || 'nodegx-backend',
+      serverVersion: SERVICE_VERSION
+    });
     this.routes = this.buildRoutes();
   }
 
@@ -521,7 +595,10 @@ export class HttpServer {
       auth: Boolean(deps.auth && deps.facade.schemaManager),
       // The audit view needs somewhere for the rows to live; a build without a
       // schema manager cannot have the table, so it hides rather than 500s.
-      ops: Boolean(deps.facade.schemaManager)
+      ops: Boolean(deps.facade.schemaManager),
+      // BMG-011: the Secrets page. The store is the data dir's secrets.json,
+      // which every backend has — the route family is always registered.
+      secrets: true
     };
   }
 
@@ -541,6 +618,7 @@ export class HttpServer {
 
   private buildRoutes(): RouteDef[] {
     const byob = this.byob;
+    const security = this.security;
     const parse = this.parse;
     const users = this.users;
     const files = this.files;
@@ -553,6 +631,7 @@ export class HttpServer {
     const email = this.email;
     const adminEmail = this.adminEmail;
     const adminSearch = this.adminSearch;
+    const mcp = this.mcp;
 
     return [
       // ---- Public ----------------------------------------------------------
@@ -648,6 +727,13 @@ export class HttpServer {
         access: { kind: 'function', nameParam: 'name' },
         handler: (ctx) => this.runFunction(ctx)
       },
+
+      // ---- MCP (FED-005) ---------------------------------------------------
+      // Stateless Streamable HTTP. The GET is there to answer 405 rather than
+      // the router's 404: the official client special-cases 405 as "no SSE
+      // stream here" and treats anything else as a fault.
+      { method: 'POST', pattern: 'mcp', access: { kind: 'mcp' }, handler: (ctx) => mcp.handle(ctx) },
+      { method: 'GET', pattern: 'mcp', access: { kind: 'mcp' }, handler: (ctx) => mcp.noStream(ctx) },
 
       // ---- Files (BAK-006) --------------------------------------------------
       {
@@ -760,8 +846,16 @@ export class HttpServer {
         access: { kind: 'public' },
         handler: (ctx) => this.oauth.requestMagicLink(ctx)
       },
+      // HLT-015: the GET is the link a mail scanner fetches, so it renders a
+      // button and spends nothing; only the button's POST redeems the token.
       {
         method: 'GET',
+        pattern: 'auth/magic-link/callback',
+        access: { kind: 'public' },
+        handler: (ctx) => this.oauth.openMagicLink(ctx)
+      },
+      {
+        method: 'POST',
         pattern: 'auth/magic-link/callback',
         access: { kind: 'public' },
         handler: (ctx) => this.oauth.magicLinkCallback(ctx)
@@ -794,7 +888,7 @@ export class HttpServer {
         method: 'POST',
         pattern: 'api/_schema',
         access: { kind: 'admin' },
-        handler: (ctx) => byob.mutateSchema(ctx.req, ctx.res)
+        handler: (ctx) => byob.mutateSchema(ctx)
       },
       { method: 'POST', pattern: 'api/_batch', access: { kind: 'data-perOp' }, handler: (ctx) => byob.batch(ctx) },
       {
@@ -829,13 +923,13 @@ export class HttpServer {
       },
 
       // ---- Admin -----------------------------------------------------------
-      { method: 'GET', pattern: 'admin/status', access: { kind: 'admin' }, handler: (ctx) => this.health(ctx.res) },
-      { method: 'GET', pattern: 'admin/schema', access: { kind: 'admin' }, handler: (ctx) => byob.getSchema(ctx.res) },
+      { method: 'GET', pattern: 'admin/status', access: { kind: 'admin' }, handler: (ctx) => this.adminStatus(ctx.res) },
+      { method: 'GET', pattern: 'admin/schema', access: { kind: 'admin' }, handler: (ctx) => byob.getSchema(ctx.res, true) },
       {
         method: 'POST',
         pattern: 'admin/schema',
         access: { kind: 'admin' },
-        handler: (ctx) => byob.mutateSchema(ctx.req, ctx.res)
+        handler: (ctx) => byob.mutateSchema(ctx)
       },
       {
         method: 'GET',
@@ -847,7 +941,15 @@ export class HttpServer {
         method: 'GET',
         pattern: 'admin/schema-export',
         access: { kind: 'admin' },
-        handler: (ctx) => byob.exportSchema(ctx.res, ctx.query.format || 'json')
+        // BRG-004: the Supabase format generates its policies from the LIVE CLP
+        // config, so the route hands it over rather than letting the generator
+        // guess — guessing is how `USING (true)` got written. `userIdClaim` has
+        // no default for the same reason; without it the export refuses.
+        handler: (ctx) =>
+          byob.exportSchema(ctx.res, ctx.query.format || 'json', {
+            security: security.config,
+            userIdClaim: ctx.query.userIdClaim
+          })
       },
       {
         method: 'GET',
@@ -884,6 +986,13 @@ export class HttpServer {
         pattern: 'executions/:id',
         access: { kind: 'admin' },
         handler: (ctx) => byob.getExecution(ctx.res, ctx.params.id)
+      },
+      // PRD-003 AC6: the full rewrite of executions.sqlite, on request only, cost in the reply.
+      {
+        method: 'POST',
+        pattern: 'admin/executions/compact',
+        access: { kind: 'admin' },
+        handler: (ctx) => this.compactExecutions(ctx)
       },
 
       // ---- Admin: the BAK-003 security surface -----------------------------
@@ -955,6 +1064,8 @@ export class HttpServer {
       },
       { method: 'GET', pattern: 'admin/roles', access: { kind: 'admin' }, handler: (ctx) => adminSec.listRoles(ctx) },
       { method: 'POST', pattern: 'admin/roles', access: { kind: 'admin' }, handler: (ctx) => adminSec.createRole(ctx) },
+      // BMG-005: a role's description, from the Roles page.
+      { method: 'PUT', pattern: 'admin/roles/:name', access: { kind: 'admin' }, handler: (ctx) => adminSec.updateRole(ctx) },
       {
         method: 'DELETE',
         pattern: 'admin/roles/:name',
@@ -973,8 +1084,34 @@ export class HttpServer {
         access: { kind: 'admin' },
         handler: (ctx) => adminSec.removeRoleUser(ctx)
       },
+      // BMG-004 — the Users page. `admin/users/:id/sessions` before `:id` is
+      // not needed (the matcher compares segment counts), but it reads in the
+      // order a person meets them.
+      { method: 'GET', pattern: 'admin/users', access: { kind: 'admin' }, handler: (ctx) => this.adminUsers.list(ctx) },
+      { method: 'POST', pattern: 'admin/users', access: { kind: 'admin' }, handler: (ctx) => this.adminUsers.create(ctx) },
+      { method: 'GET', pattern: 'admin/users/:id', access: { kind: 'admin' }, handler: (ctx) => this.adminUsers.get(ctx) },
+      { method: 'PUT', pattern: 'admin/users/:id', access: { kind: 'admin' }, handler: (ctx) => this.adminUsers.update(ctx) },
+      { method: 'DELETE', pattern: 'admin/users/:id', access: { kind: 'admin' }, handler: (ctx) => this.adminUsers.remove(ctx) },
+      {
+        method: 'GET',
+        pattern: 'admin/users/:id/identities',
+        access: { kind: 'admin' },
+        handler: (ctx) => this.adminUsers.identities(ctx)
+      },
+      {
+        method: 'DELETE',
+        pattern: 'admin/users/:id/sessions',
+        access: { kind: 'admin' },
+        handler: (ctx) => this.adminUsers.signOutEverywhere(ctx)
+      },
+      // BMG-002 — the Collections page's saved views, shared by everyone who
+      // administers this backend.
+      { method: 'GET', pattern: 'admin/views/:collection', access: { kind: 'admin' }, handler: (ctx) => this.adminViews.list(ctx) },
+      { method: 'PUT', pattern: 'admin/views/:collection/:name', access: { kind: 'admin' }, handler: (ctx) => this.adminViews.save(ctx) },
+      { method: 'DELETE', pattern: 'admin/views/:collection/:name', access: { kind: 'admin' }, handler: (ctx) => this.adminViews.remove(ctx) },
       { method: 'GET', pattern: 'admin/keys', access: { kind: 'admin' }, handler: (ctx) => adminSec.listKeys(ctx) },
       { method: 'POST', pattern: 'admin/keys', access: { kind: 'admin' }, handler: (ctx) => adminSec.createKey(ctx) },
+      { method: 'PUT', pattern: 'admin/keys/:id', access: { kind: 'admin' }, handler: (ctx) => adminSec.updateKey(ctx) },
       {
         method: 'DELETE',
         pattern: 'admin/keys/:id',
@@ -989,6 +1126,14 @@ export class HttpServer {
         pattern: 'admin/triggers',
         access: { kind: 'admin' },
         handler: (ctx) => adminTriggers.create(ctx)
+      },
+      // BMG-008: an unsaved cron's words and next fires — a dry run, registered
+      // BEFORE any `admin/triggers/:id` pattern so "preview" is never read as an id.
+      {
+        method: 'POST',
+        pattern: 'admin/triggers/preview',
+        access: { kind: 'admin' },
+        handler: (ctx) => adminTriggers.preview(ctx)
       },
       {
         method: 'GET',
@@ -1109,6 +1254,14 @@ export class HttpServer {
         access: { kind: 'admin' },
         handler: (ctx) => adminBackups.restore(ctx)
       },
+      // BMG-011: an archive as a download. A literal segment, so it can never
+      // be mistaken for `admin/backups/config` or `restore`.
+      {
+        method: 'GET',
+        pattern: 'admin/backups/archive',
+        access: { kind: 'admin' },
+        handler: (ctx) => adminBackups.download(ctx)
+      },
       {
         method: 'GET',
         pattern: 'admin/export/:collection',
@@ -1152,6 +1305,29 @@ export class HttpServer {
         pattern: 'admin/files/sweep',
         access: { kind: 'admin' },
         handler: (ctx) => adminFiles.runSweep(ctx)
+      },
+      // BMG-015: the Storage page's *Test connection* — a dry run over an
+      // unsaved bucket config (audit-actions.ts NOT_AUDITED).
+      {
+        method: 'POST',
+        pattern: 'admin/files/config/test',
+        access: { kind: 'admin' },
+        handler: (ctx) => adminFiles.testConfig(ctx)
+      },
+      // BMG-011: the Storage page's file browser. `uses` is registered before
+      // `:name` so the literal wins; `config` and `sweep` are not deletable
+      // because nothing stores a file under those names — and if something
+      // did, the delete would be of that file, which is the honest answer.
+      { method: 'GET', pattern: 'admin/files', access: { kind: 'admin' }, handler: (ctx) => adminFiles.list(ctx) },
+      { method: 'GET', pattern: 'admin/files/uses', access: { kind: 'admin' }, handler: (ctx) => adminFiles.uses(ctx) },
+      // BMG-015 §7: *Move files to the bucket* — the count and progress, and the press.
+      { method: 'GET', pattern: 'admin/files/move', access: { kind: 'admin' }, handler: (ctx) => adminFiles.moveStatus(ctx) },
+      { method: 'POST', pattern: 'admin/files/move', access: { kind: 'admin' }, handler: (ctx) => adminFiles.moveStart(ctx) },
+      {
+        method: 'DELETE',
+        pattern: 'admin/files/:name',
+        access: { kind: 'admin' },
+        handler: (ctx) => adminFiles.remove(ctx)
       },
 
       // ---- Admin: the BAK-002 email surface --------------------------------
@@ -1255,7 +1431,13 @@ export class HttpServer {
     const dashboard = this.dashboard;
     return [
       { method: 'GET', pattern: '_admin', access: { kind: 'public' }, handler: (ctx) => dashboard.serve(ctx) },
-      { method: 'GET', pattern: '_admin/whoami', access: { kind: 'admin' }, handler: (ctx) => dashboard.whoami(ctx) }
+      { method: 'GET', pattern: '_admin/whoami', access: { kind: 'admin' }, handler: (ctx) => dashboard.whoami(ctx) },
+      // BMG-014. `login` is public because a password is what it checks — it
+      // sits on the auth budget (rate-limit.ts) and its failures count against
+      // the same per-IP budget as a wrong token. `setup` is admin-gated: the
+      // credential (or a full admin) is the proof that makes the first account.
+      { method: 'POST', pattern: '_admin/login', access: { kind: 'public' }, handler: (ctx) => dashboard.login(ctx) },
+      { method: 'POST', pattern: '_admin/setup', access: { kind: 'admin' }, handler: (ctx) => dashboard.setup(ctx) }
     ];
   }
 
@@ -1413,6 +1595,14 @@ export class HttpServer {
         return null;
       }
     });
+    // PRD-003: the OTHER file. `nodegx_db_file_bytes` is local.db; this is what pruning bounds
+    // and what compaction gives back — the number that has to visibly move for the fix to be
+    // real to the operator it is for.
+    metrics.gauge(
+      'nodegx_executions_db_file_bytes',
+      'Size of executions.sqlite on disk: what executions.retentionDays / maxCount bound, and what compaction reclaims.',
+      () => this.executions.fileBytes()
+    );
     metrics.gauge(
       'nodegx_backup_age_seconds',
       'Seconds since the last successful backup. ABSENT when none has ever succeeded — an absent series is a ' +
@@ -1459,6 +1649,7 @@ export class HttpServer {
       // The KIND of principal only — never the credential, the session token,
       // or the user id, which are exactly the things a log ships off-box.
       principal: trace.principal,
+      ...(trace.functionRun ? { functionRun: trace.functionRun } : {}),
       ip: trace.clientIp,
       ...(trace.error ? { error: trace.error } : {})
     });
@@ -1473,8 +1664,11 @@ export class HttpServer {
   private recordAudit(res: http.ServerResponse, trace: RequestTrace): void {
     if (!trace.auditAction || !this.auditLog.enabled) return;
     const status = res.statusCode;
+    // BMG-014: a sign-in that was refused is `admin.login.failed`, the same
+    // entry a wrong credential writes — one action to search for either way.
+    const action = trace.auditAction === AUDIT_LOGIN_SUCCESS && status >= 400 ? AUDIT_LOGIN_FAILURE : trace.auditAction;
     void this.auditLog.record({
-      action: trace.auditAction,
+      action,
       actorKind: trace.principal,
       actor: trace.actor,
       target: trace.auditTarget,
@@ -1607,13 +1801,27 @@ export class HttpServer {
       }
     }
     trace.principal = principal.kind === 'admin' && principal.readonly ? 'admin:readonly' : principal.kind;
-    trace.actor = principal.kind === 'user' ? principal.userId : principal.kind === 'apiKey' ? principal.name : '';
+    // BMG-014: an admin who is a person is recorded as that person; the
+    // credential itself stays '' (there is no one to name).
+    trace.actor =
+      principal.kind === 'user'
+        ? principal.userId
+        : principal.kind === 'apiKey'
+          ? principal.name
+          : principal.kind === 'admin' && principal.userId
+            ? principal.userId
+            : '';
 
     // The dashboard proves a credential by reaching `_admin/whoami`; that call
     // is the login event there is to record.
     if (route.pattern === '_admin/whoami' && principal.kind === 'admin') {
       trace.auditAction = AUDIT_LOGIN_SUCCESS;
       trace.auditDetail = { readonly: Boolean(principal.readonly) };
+    } else if (route.pattern === '_admin/login' && method === 'POST') {
+      // BMG-014: the manager's email + password sign-in. The handler names the
+      // person through `ctx.audit({ actor })` on success; `recordAudit` turns a
+      // refused attempt into `admin.login.failed`, the entry an operator reads.
+      trace.auditAction = AUDIT_LOGIN_SUCCESS;
     } else {
       const action = auditActionFor(method, route.pattern);
       if (action) {
@@ -1650,8 +1858,39 @@ export class HttpServer {
       );
     };
 
-    const decision = this.rateLimiter.check(routeClass, limitKey);
-    if (!decision.allowed) refuse(decision, routeClass, `${routeClass} requests`);
+    // P99 HLT-023: a function's own loopback request — its queries, and the runtime's caller
+    // lookup before the body runs — is charged to the RUN, not to a client bucket. Keyed by
+    // principal, every run was `admin`: one bucket for the whole deployment, shared with the
+    // operator, and a class of fourteen emptied it. The call that started the run already
+    // spent the caller's `functions` token; the per-run ceiling is the runaway guard.
+    // Honoured only beside the admin credential, and only for a run still in flight.
+    const runHeader = req.headers[RUN_HEADER];
+    const run =
+      principal.kind === 'admin' && !principal.readonly
+        ? this.getRunner()?.functionRuns.get(Array.isArray(runHeader) ? runHeader[0] : runHeader)
+        : undefined;
+    if (run) {
+      run.requests += 1;
+      trace.functionRun = run.functionName;
+      const ceiling = this.ops.config.rateLimit.functionRunQueries;
+      if (this.ops.config.rateLimit.enabled && ceiling > 0 && run.requests > ceiling) {
+        recordRateLimited('function-run');
+        logger.warn('function.runQueryCeiling', {
+          requestId: trace.requestId,
+          function: run.functionName,
+          ceiling,
+          route: route.pattern
+        });
+        throw new HttpError(
+          429,
+          `Function "${run.functionName}" made more than ${ceiling} backend requests in one run ` +
+            `(rateLimit.functionRunQueries), so this one was refused. Nobody else's requests are affected.`
+        );
+      }
+    } else {
+      const decision = this.rateLimiter.check(routeClass, limitKey);
+      if (!decision.allowed) refuse(decision, routeClass, `${routeClass} requests`);
+    }
 
     // CWF-017: a function may carry its OWN budget on top of the class one, for
     // the expensive-endpoint case where "600 function calls a minute" is right
@@ -1694,7 +1933,7 @@ export class HttpServer {
     }
 
     // Steps 2–3: dev-open fast-path, then the route gate.
-    this.checkAccess(route.access, principal, params, body);
+    this.checkAccess(route.access, principal, params, body, query);
 
     const ctx: RequestContext = {
       req,
@@ -1710,7 +1949,12 @@ export class HttpServer {
       checkData: (collection, op) => this.assertDataAccess(principal, collection, op),
       stampCreate: (collection, data) => this.stampCreate(principal, collection, data),
       audit: (detail) => {
-        trace.auditDetail = { ...(trace.auditDetail || {}), ...detail };
+        // BMG-014: a handler that establishes WHO the caller is after the
+        // credential step (the manager's password login) names the actor here.
+        // Only an actor the credential step left blank can be named.
+        const { actor, ...rest } = detail;
+        if (typeof actor === 'string' && actor && !trace.actor) trace.actor = actor;
+        trace.auditDetail = { ...(trace.auditDetail || {}), ...rest };
       }
     };
     await route.handler(ctx);
@@ -1729,7 +1973,8 @@ export class HttpServer {
     access: RouteAccess,
     principal: Principal,
     params: Record<string, string>,
-    body: Record<string, unknown> | null
+    body: Record<string, unknown> | null,
+    query: Record<string, string> = {}
   ): void {
     if (access.kind === 'public') return;
 
@@ -1759,6 +2004,38 @@ export class HttpServer {
       if (principal.kind !== 'admin') {
         // One answer for wrong and missing credentials — no admin oracle.
         throw new HttpError(401, 'Unauthorized.');
+      }
+      return;
+    }
+
+    // Step 2a½: the MCP gate, which dev-open does NOT relax either — placed
+    // beside the admin one above and for FH-024's exact reason.
+    //
+    // Dev-open exists so an app can hit its own collections without a token
+    // from loopback, and a browser makes "only the developer can reach
+    // loopback" false: any web page can POST JSON-RPC to 127.0.0.1 on the
+    // developer's behalf. Relaxing this route would hand that page a tool list
+    // and a `_create` on every collection. `/mcp` is a credential-shaped door
+    // by construction — a key is the whole of how a client identifies itself —
+    // so there is nothing for dev-open to make more convenient here.
+    if (access.kind === 'mcp') {
+      if (principal.kind === 'admin') {
+        // AC7. Not 401 — the credential is real and was understood; it is the
+        // WRONG one, and saying so is the difference between a person fixing it
+        // in a minute and a person retyping the same token.
+        throw new HttpError(
+          403,
+          'The master key is refused on /mcp on purpose. An MCP client gets a scoped API key, never the admin ' +
+            'credential: make one on the API keys page of the backend manager, or with POST /admin/keys (scopes like ' +
+            '["classes:read"], optionally bound to a user with actsAsUserId), and send it as X-NodeGX-Api-Key.',
+          119
+        );
+      }
+      if (principal.kind !== 'apiKey') {
+        throw new HttpError(
+          401,
+          'This endpoint needs a NodeGX API key, in X-NodeGX-Api-Key or as a Bearer token.'
+        );
       }
       return;
     }
@@ -1803,6 +2080,15 @@ export class HttpServer {
           throw new HttpError(403, 'Permission denied for this file operation.', 119);
         }
         if (ruleAllows(this.security.config.files[access.op], principal)) return;
+        // BMG-002: a signed URL IS the credential for reading one file — it is
+        // what `GET /files/:name/sign` mints for an `<img src>`, which cannot
+        // send a header. With `files.read` above `public` this gate refused it
+        // before the handler could look (measured: 403 on a freshly minted URL
+        // while `/sign` answered 200), so the signature is verified HERE, for
+        // this stored name only. Verifying rather than deferring matters:
+        // `assertReadable` passes any file without an ACL, so a gate that merely
+        // stepped aside for `?sig=` would hand a forged one every public file.
+        if (access.op === 'read' && params.name && query.sig && this.signatureAdmits(params.name, query)) return;
         throw new HttpError(403, 'Permission denied for this file operation.', 119);
       }
 
@@ -1825,6 +2111,12 @@ export class HttpServer {
         // secret is the credential.
         return;
     }
+  }
+
+  /** A valid, unexpired `?exp=&sig=` for exactly this stored file name. */
+  private signatureAdmits(storedName: string, query: Record<string, string>): boolean {
+    if (!this.fileSubsystem) return false;
+    return verifyFileAccess(this.fileSubsystem.getSigningSecret(), storedName, Number(query.exp), query.sig);
   }
 
   /**
@@ -1888,7 +2180,18 @@ export class HttpServer {
     if (aclError) throw new HttpError(400, `Invalid ACL: ${aclError}`, 123);
     if (data.ACL === undefined || data.ACL === null) delete data.ACL;
 
-    if (principal.kind === 'user' && this.security.creatorOwns(collection)) {
+    // FED-005: a key BOUND to a user stamps that user, exactly as a session
+    // would. Without this half, `aclFor` would hand the same key a row
+    // predicate it could not satisfy — it would create rows it could not then
+    // read back, which is a worse failure than the one the binding fixes
+    // because it looks like data loss. `rulePrincipal` is the same mapping the
+    // rule sites use, so "who is this?" has one answer.
+    // BMG-014: an admin who is a PERSON owns what they create in their own
+    // app, like any session — the bypass is about what they may read and
+    // write, not about whose row it is.
+    const owner =
+      principal.kind === 'admin' && principal.userId ? { kind: 'user' as const, userId: principal.userId } : rulePrincipal(principal);
+    if (owner.kind === 'user' && this.security.creatorOwns(collection)) {
       const sm = this.facade.schemaManager;
       if (sm) {
         // Ensure the table + a properly-typed owner column exist before insert
@@ -1897,9 +2200,9 @@ export class HttpServer {
         sm.createTable({ name: collection, columns: [] });
         sm.addColumn(collection, { name: 'owner', type: 'Pointer', targetClass: '_User' });
       }
-      data.owner = principal.userId;
+      data.owner = owner.userId;
       if (data.ACL === undefined) {
-        data.ACL = { [principal.userId]: { read: true, write: true } };
+        data.ACL = { [owner.userId]: { read: true, write: true } };
       }
     }
   }
@@ -1909,9 +2212,49 @@ export class HttpServer {
   // ==========================================================================
 
   private health(res: http.ServerResponse): void {
+    sendJSON(res, 200, this.healthBody());
+  }
+
+  /**
+   * `GET /admin/status` — `/health` plus what only an operator should see: the execution
+   * history's size, prune and compaction state (PRD-003), and where each secret came from
+   * (PRD-005). Sources and sizes, never a value and never a record.
+   */
+  private adminStatus(res: http.ServerResponse): void {
+    const provenance = this.security.secretProvenance;
+    sendJSON(res, 200, {
+      ...this.healthBody(),
+      executions: this.executions.describe(),
+      secrets: {
+        stance: this.options.requireSecrets ? 'provisioned' : 'generate',
+        adminToken: provenance.adminToken,
+        adminReadonlyToken: provenance.adminReadonlyToken,
+        filesSigningSecret: this.fileSubsystem.signingSecretProvenance()
+      }
+    });
+  }
+
+  /** `POST /admin/executions/compact` — PRD-003 AC6. Refuses when history is disabled. */
+  private compactExecutions(ctx: RequestContext): void {
+    let report;
+    try {
+      report = this.executions.compact();
+    } catch (e) {
+      throw new HttpError(503, e instanceof Error ? e.message : String(e));
+    }
+    ctx.audit({
+      beforeBytes: report.beforeBytes,
+      afterBytes: report.afterBytes,
+      durationMs: report.durationMs,
+      converted: report.converted
+    });
+    sendJSON(ctx.res, 200, { ...report, executions: this.executions.describe() });
+  }
+
+  private healthBody(): Record<string, unknown> {
     const runner = this.getRunner();
     const status = this.persistence.status;
-    sendJSON(res, 200, {
+    return {
       ok: true,
       service: 'nodegx-backend',
       backendId: this.options.backendId,
@@ -1922,7 +2265,11 @@ export class HttpServer {
         engine: status.engine,
         persistent: status.persistent,
         ephemeral: status.ephemeral,
-        error: status.error
+        error: status.error,
+        // BRG-005 AC4: pool saturation beside the persistence status, so an
+        // under-configured pool is visible here before it is blamed on the
+        // database. `null` on SQLite, which has no pool.
+        pool: this.persistence.saturation ? this.persistence.saturation() : null
       },
       security: {
         devOpen: this.security.config.devOpen,
@@ -1930,7 +2277,7 @@ export class HttpServer {
         migratedThisStart: this.security.migratedThisStart
       },
       workflows: runner ? runner.getStatus() : { initialized: false, workflowCount: 0, functions: [] }
-    });
+    };
   }
 
   /**
@@ -1995,7 +2342,9 @@ export class HttpServer {
    */
   private async putOps(ctx: RequestContext): Promise<void> {
     const body = await readJSONBody(ctx.req);
-    const known = ['logging', 'rateLimit', 'cors', 'audit', 'executions', 'metrics'];
+    // `queries` (PRD-001's page cap) was validated by the model and refused here
+    // — the Server page could not set it (BMG-011 §7).
+    const known = ['logging', 'rateLimit', 'cors', 'audit', 'executions', 'queries', 'metrics'];
     const given = Object.keys(body).filter((k) => k !== 'version');
     if (given.length === 0 || given.some((k) => !known.includes(k))) {
       throw new HttpError(
@@ -2123,7 +2472,7 @@ export class HttpServer {
     const deadline = Date.now() + waitMs;
 
     for (;;) {
-      const claim = this.idempotency.claim(name, identity, requestHash);
+      const claim = await this.idempotency.claim(name, identity);
 
       if (claim.outcome === 'replay') {
         ctx.res.writeHead(claim.statusCode, {
@@ -2149,18 +2498,18 @@ export class HttpServer {
           // The graph blew up in a way `run()` did not turn into a response.
           // The claim goes back: nothing was answered, so nothing may be
           // replayed.
-          this.idempotency.release(name, identity, claim.claimId);
+          await this.idempotency.release(name, identity, claim.claimId);
           throw e;
         }
 
         const success = response.statusCode >= 200 && response.statusCode < 300;
         if (success) {
-          this.idempotency.complete(name, identity, claim.claimId, response.statusCode, response.body);
+          await this.idempotency.complete(name, identity, claim.claimId, response.statusCode, response.body);
         } else {
           // ⚠️ A 500 must not be cached. Replaying a failure for 24 hours is
           // worse than running twice, and the caller retrying is exactly the
           // behaviour that fixes a transient failure.
-          this.idempotency.release(name, identity, claim.claimId);
+          await this.idempotency.release(name, identity, claim.claimId);
         }
         ctx.res.writeHead(response.statusCode, {
           'Content-Type': 'application/json',

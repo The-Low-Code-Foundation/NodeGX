@@ -123,7 +123,7 @@ export const DIAGNOSTIC_EXAMPLES: readonly ExampleCitation[] = [
   {
     code: DiagnosticCode.PageWithoutPageNode,
     examples: ['ui-page-shell-bands'],
-    why: 'a page component built around a Page node at its root, which is what makes the router able to render it'
+    why: 'a page built around a Page node at its root, which is what makes the router able to render it'
   },
   // LAS-012 — the repeater contract, from both directions. The same recipe
   // answers all three codes because all three are one misunderstanding: the

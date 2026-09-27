@@ -1,0 +1,229 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "100kde5k-5c00-4000-8000-000000000003",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ldPage",
+      "type": "Page",
+      "label": "Looks",
+      "parameters": {
+        "title": "Look Desk",
+        "urlPath": "looks"
+      },
+      "children": [
+        "cards",
+        "headings",
+        "swatches",
+        "buttons"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "cards",
+      "type": "Group",
+      "label": "Cards",
+      "parent": "ldPage",
+      "parameters": {
+        "flexDirection": "column"
+      },
+      "children": [
+        "lookCard",
+        "plainCard"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "lookCard",
+      "type": "Group",
+      "label": "Look card",
+      "parent": "cards",
+      "variant": "Card",
+      "parameters": {
+        "borderRadius": {
+          "value": 24,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 220
+    },
+    {
+      "id": "plainCard",
+      "type": "Group",
+      "label": "Plain card",
+      "parent": "cards",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "paddingTop": "var(--space-6)",
+        "borderRadius": {
+          "value": 24,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "headings",
+      "type": "Group",
+      "label": "Headings",
+      "parent": "ldPage",
+      "parameters": {
+        "flexDirection": "column"
+      },
+      "children": [
+        "lookHeading",
+        "plainHeading",
+        "lostHeading"
+      ],
+      "x": 100,
+      "y": 340
+    },
+    {
+      "id": "lookHeading",
+      "type": "Text",
+      "label": "Look heading",
+      "parent": "headings",
+      "parameters": {
+        "text": "A heading wearing a text style",
+        "textStyle": "Heading",
+        "fontSize": "var(--text-6xl)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "plainHeading",
+      "type": "Text",
+      "label": "Plain heading",
+      "parent": "headings",
+      "parameters": {
+        "text": "A heading holding its own values",
+        "fontFamily": "Georgia",
+        "fontWeight": "700",
+        "color": "#1b2a4a",
+        "letterSpacing": {
+          "value": 1,
+          "unit": "px"
+        },
+        "fontSize": "var(--text-6xl)"
+      },
+      "x": 100,
+      "y": 460
+    },
+    {
+      "id": "lostHeading",
+      "type": "Text",
+      "label": "Lost heading",
+      "parent": "headings",
+      "parameters": {
+        "text": "A heading naming a text style the project does not define",
+        "textStyle": "Subheading"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "swatches",
+      "type": "Group",
+      "label": "Swatches",
+      "parent": "ldPage",
+      "parameters": {
+        "flexDirection": "column"
+      },
+      "children": [
+        "styleSwatch",
+        "tokenSwatch",
+        "hexSwatch",
+        "unknownSwatch"
+      ],
+      "x": 100,
+      "y": 580
+    },
+    {
+      "id": "styleSwatch",
+      "type": "Group",
+      "label": "Style swatch",
+      "parent": "swatches",
+      "parameters": {
+        "backgroundColor": "Brand Ink"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "tokenSwatch",
+      "type": "Group",
+      "label": "Token swatch",
+      "parent": "swatches",
+      "parameters": {
+        "backgroundColor": "var(--surface)"
+      },
+      "x": 100,
+      "y": 700
+    },
+    {
+      "id": "hexSwatch",
+      "type": "Group",
+      "label": "Hex swatch",
+      "parent": "swatches",
+      "parameters": {
+        "backgroundColor": "#ff00aa"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "unknownSwatch",
+      "type": "Group",
+      "label": "Unknown swatch",
+      "parent": "swatches",
+      "parameters": {
+        "backgroundColor": "Brand Fog"
+      },
+      "x": 100,
+      "y": 820
+    },
+    {
+      "id": "buttons",
+      "type": "Group",
+      "label": "Buttons",
+      "parent": "ldPage",
+      "parameters": {
+        "flexDirection": "column"
+      },
+      "children": [
+        "lookButton",
+        "plainButton"
+      ],
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "lookButton",
+      "type": "net.noodl.controls.button",
+      "label": "Look button",
+      "parent": "buttons",
+      "variant": "Primary Button",
+      "parameters": {
+        "text": "Wearing a Look"
+      },
+      "x": 100,
+      "y": 940
+    },
+    {
+      "id": "plainButton",
+      "type": "net.noodl.controls.button",
+      "label": "Plain button",
+      "parent": "buttons",
+      "parameters": {
+        "text": "Holding its own values"
+      },
+      "x": 100,
+      "y": 1000
+    }
+  ]
+}

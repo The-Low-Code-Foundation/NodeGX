@@ -2,11 +2,15 @@ import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 
 import { NumberUnitInput } from '../components/NumberUnitInput';
+import { inheritedNumberText, inheritedSideValue } from '../model/inheritedSide';
 import { transformOriginFocus } from '../transformOriginFocus';
 import { TypeView } from '../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } from '../utils';
 import { commitScrub, writeScrubStep } from './scrubCommit';
 import { scrubSpecForPortType, scrubStartValue } from './scrubPolicy';
+import { TokenChipActions } from '../components/TokenChipActions';
+import { fieldOffersTokens, openTokenFieldPopout, resolveTokenText } from './tokenFieldPopout';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 /**
  * REL-014 — what a typed edit to a number-with-units field *means*.
@@ -156,6 +160,9 @@ export class NumberWithUnits extends TypeView {
         key: `${this.name}#${this.refusals}`,
         label: this.displayName,
         value: this.value === undefined ? '' : String(this.value),
+        placeholder: inheritedNumberText(
+          inheritedSideValue(this.name, this.numberWithUnits, (n) => this.parent.model.getParameter(n))
+        ),
         unit: this.unit,
         units: this.type.units || [],
         isChanged: !this.isDefault,
@@ -169,6 +176,7 @@ export class NumberWithUnits extends TypeView {
         onFocus: () => transformOriginFocus.focus(this.name),
         onBlur: () => transformOriginFocus.blur(this.name),
         scrub: this.scrubBinding(),
+        ...this.tokenPickerProps(),
         onCommit: (text: string) => this.updateValue(text, this.unit),
         onUnitChange: (unit: string, currentText: string) => this.updateValue(currentText, unit),
         onReset: () => {
@@ -180,6 +188,52 @@ export class NumberWithUnits extends TypeView {
         }
       })
     );
+  }
+
+  /**
+   * HLT-012 — the design-token affordance for this row, or nothing when this parameter has no
+   * scale that fits it.
+   *
+   * ⚠️ **`isToken` reads the STORED parameter, not the displayed text.** `value` stringifies
+   * whatever it gets, so `var(--space-3)` and the literal characters somebody typed are the same
+   * string by the time they reach the field; only the parameter says which one is a reference.
+   */
+  private tokenPickerProps() {
+    if (!fieldOffersTokens(this.name)) return {};
+
+    const stored = this.numberWithUnits;
+    const isToken = isTokenReference(stored);
+    return {
+      isToken,
+      // P103 CMG-009 — the chip: the token's name, what it resolves to here, and Detach.
+      tokenName: isToken ? String(stored) : undefined,
+      tokenValue: isToken ? resolveTokenText(stored) : undefined,
+      onDetachToken: isToken ? () => this.detachToken() : undefined,
+      // CMG-010 — ✎ and Show in Styles on the chip.
+      tokenActions: isToken ? React.createElement(TokenChipActions, { reference: String(stored), port: this.name }) : undefined,
+      onOpenTokenPicker: (anchor: HTMLElement) =>
+        openTokenFieldPopout({
+          view: this,
+          portName: this.name,
+          anchor,
+          currentValue: isTokenReference(stored) ? String(stored) : undefined,
+          onSelect: (reference: string) => {
+            this.parent.setParameter(this.name, reference);
+            this.refreshFromModel();
+          }
+        })
+    };
+  }
+
+  /**
+   * P103 CMG-009 §3.1 — *Detach*: the resolved value goes into the field in the token's place,
+   * one undo step, so ⌘Z brings the token back. Nothing is written when the token resolves to
+   * nothing (a name this project does not have): the chip stays, and says so in its tooltip.
+   */
+  private detachToken() {
+    const resolved = resolveTokenText(this.numberWithUnits);
+    if (resolved === undefined) return;
+    this.updateValue(resolved, this.unit);
   }
 
   /**
@@ -196,7 +250,11 @@ export class NumberWithUnits extends TypeView {
    * `ScrubPortState` for why one of them being enough is not a reason to have only one.
    */
   private scrubBinding() {
-    const spec = scrubSpecForPortType(this.type, this.unit, { isConnected: this.isConnected });
+    const spec = scrubSpecForPortType(this.type, this.unit, {
+      isConnected: this.isConnected,
+      // HLT-012 — a field holding a token has no magnitude to drag from; see `ScrubPortState.isToken`.
+      isToken: isTokenReference(this.numberWithUnits)
+    });
     if (!spec) return undefined;
 
     return {
@@ -313,7 +371,7 @@ export class NumberWithUnits extends TypeView {
     transformOriginFocus.release(this.name);
 
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

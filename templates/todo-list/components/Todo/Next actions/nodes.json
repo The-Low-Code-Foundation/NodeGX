@@ -1,0 +1,289 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "15fe2b32-90be-50b0-823a-66fada7d189b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "naIn",
+      "type": "Component Inputs",
+      "label": "The next actions",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "clearNew",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "naOut",
+      "type": "Component Outputs",
+      "label": "What you did",
+      "ports": [
+        {
+          "name": "tick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "untick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "up",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "down",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "rename",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "openDescription",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "closeDescription",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "describe",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "add",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "actionId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "actionTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "actionTitleText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "descriptionText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "newTitle",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "naRoot",
+      "type": "Group",
+      "label": "Next actions",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "naHeading",
+        "naRows",
+        "naAdd"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "naHeading",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "naRoot",
+      "parameters": {
+        "text": "Next actions",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "as": "h2"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "naRows",
+      "type": "Group",
+      "label": "The rows",
+      "parent": "naRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "naEach"
+      ],
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "naEach",
+      "type": "For Each",
+      "label": "One row per next action",
+      "parent": "naRows",
+      "parameters": {
+        "template": "/Todo/Action row",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "naAdd",
+      "type": "Group",
+      "label": "Add a next action",
+      "parent": "naRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "naField",
+        "naButton"
+      ],
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "naField",
+      "type": "net.noodl.controls.textinput",
+      "label": "New next action",
+      "parent": "naAdd",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Add a next action"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "naButton",
+      "type": "net.noodl.controls.button",
+      "label": "Add",
+      "parent": "naAdd",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Add"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "naSubmit",
+      "type": "JavaScriptFunction",
+      "label": "The title, if one was typed",
+      "parameters": {
+        "functionScript": "var t = String(Inputs.text || '').trim();\nif (t === '') return;\nOutputs.text = t;\nOutputs.go();",
+        "runOnChange-in-text": false
+      },
+      "x": 410,
+      "y": 640,
+      "ports": [
+        {
+          "name": "in-text",
+          "displayName": "text",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "naRoot"
+  ]
+}

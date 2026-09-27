@@ -370,6 +370,10 @@ function startServer(
     // listening everywhere. It says so now, on every launch and on every change.
     console.log('[preview]', describeAccess(access, listeningPort, lanAddress() || undefined));
     process.env.NOODLPORT = String(listeningPort);
+    // HLT-021. The line above reaches this process only: the renderer's env was copied when its
+    // window was created, before this bind, so with `NOODLPORT=0` it would still read '0'. It
+    // asks for this global instead (`viewerOrigin.ts`, `remote.getGlobal`).
+    global.noodlBoundPort = listeningPort;
 
     // 🔴 HLS-006. `listening` fires again after every rebind, and everything below it is
     // once-per-launch work. Attaching a second relay to the same HTTP server is not a no-op: both
@@ -620,6 +624,7 @@ function _stopServerForTests() {
     httpServer = null;
     access = null;
     listeningPort = null;
+    global.noodlBoundPort = null;
     relayAttached = false;
     rebinding = false;
     for (const socket of openSockets) socket.destroy();

@@ -10,6 +10,7 @@
  */
 
 import { NodeIR } from '../ir/types';
+import { EXPRESSION_MATH_ALIASES as RUNTIME_MATH_ALIASES, expressionPorts, expressionReferences } from './expression-ports';
 
 export const JS_FUNCTION = 'JavaScriptFunction';
 export const JS_EXPRESSION = 'Expression';
@@ -46,41 +47,30 @@ export function jsBodyOf(node: NodeIR, kind: JsNodeKind): string | undefined {
  * The Expression preamble's Math aliases (expression.ts `functionPreamble`). A referenced name
  * emits as a destructured alias above the return; `pi` is the one non-member spelling.
  */
-export const EXPRESSION_MATH_ALIASES: ReadonlySet<string> = new Set([
-  'min', 'max', 'cos', 'sin', 'tan', 'sqrt', 'pi', 'round', 'floor', 'ceil', 'abs', 'random', 'pow', 'log', 'exp'
-]);
-
-/** expression.ts `portsToIgnore`, verbatim — identifiers that never become input ports. */
-const EXPRESSION_IGNORED: ReadonlySet<string> = new Set([
-  'min', 'max', 'cos', 'sin', 'tan', 'sqrt', 'pi', 'round', 'floor', 'ceil', 'abs', 'random', 'pow', 'log', 'exp',
-  'Math', 'window', 'document', 'undefined', 'Vars', 'Variables', 'Objects', 'Arrays', 'Noodl', 'NoodlContext',
-  'true', 'false', 'null', 'Boolean'
-]);
+export const EXPRESSION_MATH_ALIASES: ReadonlySet<string> = new Set(RUNTIME_MATH_ALIASES);
 
 export interface ExpressionIdentifiers {
-  /** Identifiers that become input ports, in first-appearance order (parsePorts). */
+  /** Names that become input ports, in first-appearance order (the runtime's `expressionPorts`). */
   ports: string[];
   /** Preamble Math aliases the expression references — destructured in the wrapper. */
   mathAliases: string[];
-  /** Every mined identifier root, ignore list included — the Noodl-globals check reads this. */
+  /** Every name the expression reads as a variable, reserved ones included — the Noodl-globals check reads this. */
   raw: Set<string>;
 }
 
-/** expression.ts `parsePorts`, with the ignore-list split out so the gate can see behind it. */
+/**
+ * The runtime's port set, with the reserved names left visible so the gate can see behind them.
+ * GAM-002: `expression-ports.ts` is a byte-identical copy of the runtime's, so `String(n)` mints
+ * only `n` here too, and a method name after `)` is no port in either.
+ */
 export function expressionIdentifiersOf(expression: string): ExpressionIdentifiers {
-  const stripped = expression.replace(/\"([^\"]*)\"/g, '').replace(/\'([^\']*)\'/g, '');
-  const ports: string[] = [];
   const mathAliases: string[] = [];
   const raw = new Set<string>();
-  for (const match of stripped.matchAll(/[a-zA-Z\_\$][a-zA-Z0-9\.\_\$]*/g)) {
-    let name = match[0];
-    if (name.indexOf('.') !== -1) name = name.split('.')[0];
-    raw.add(name);
-    if (EXPRESSION_MATH_ALIASES.has(name) && !mathAliases.includes(name)) mathAliases.push(name);
-    if (EXPRESSION_IGNORED.has(name)) continue;
-    if (!ports.includes(name)) ports.push(name);
+  for (const ref of expressionReferences(expression)) {
+    raw.add(ref.name);
+    if (EXPRESSION_MATH_ALIASES.has(ref.name) && !mathAliases.includes(ref.name)) mathAliases.push(ref.name);
   }
-  return { ports, mathAliases, raw };
+  return { ports: expressionPorts(expression), mathAliases, raw };
 }
 
 export interface FunctionMinedPorts {

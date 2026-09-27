@@ -2,7 +2,7 @@
 title: Node reference
 ---
 
-Every node in the catalog — 176 in total — generated from the same
+Every node in the catalog — 180 in total — generated from the same
 enriched catalog the editor reads for its own in-editor help. Grouped by picker category.
 
 :::info Generated
@@ -27,6 +27,7 @@ This page is generated from `node-catalog-enriched.json`. Do not edit it by hand
 - [JWT Sign](./cloud/noodl-cloud-jwtsign.md)
 - [JWT Verify](./cloud/noodl-cloud-jwtverify.md)
 - [List Users In Role](./cloud/noodl-cloud-listusersinrole.md)
+- [Model Request](./cloud/noodl-cloud-modelrequest.md)
 - [Remove User From Role](./cloud/noodl-cloud-removeuserfromrole.md)
 - [Request](./cloud/noodl-cloud-request.md)
 - [Response](./cloud/noodl-cloud-response.md)
@@ -102,6 +103,8 @@ This page is generated from `node-catalog-enriched.json`. Do not edit it by hand
 - [Object](./data/model2.md)
 - [Optimistic Update](./data/net-noodl-optimistic-update.md)
 - [Parse CSV](./data/net-noodl-parse-csv.md)
+- [Parse Feed](./data/net-noodl-parse-feed.md)
+- [Parse XML](./data/net-noodl-parse-xml.md)
 - [Pattern Extractor](./data/net-noodl-pattern-extractor.md)
 - [Remove Object From Array](./data/collection-remove.md)
 - [Remove Record Relation](./data/remove-db-model-relation.md)
@@ -194,6 +197,7 @@ This page is generated from `node-catalog-enriched.json`. Do not edit it by hand
 - [On App Error](./utilities/on-app-error.md)
 - [Open File Picker](./utilities/open-file-picker.md)
 - [Random Bytes](./utilities/net-noodl-random-bytes.md)
+- [Repeat](./utilities/repeat.md)
 - [Screen Resolution](./utilities/screen-resolution.md)
 - [String Mapper](./utilities/string-mapper.md)
 - [UUID](./utilities/net-noodl-uuid.md)

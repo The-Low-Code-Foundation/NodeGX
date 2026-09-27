@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ff4b2a8e-52ba-52c6-83c3-0261fa5e617e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "updatesettinIn",
+      "fromProperty": "app",
+      "toId": "updatesettinFn",
+      "toProperty": "in-app"
+    },
+    {
+      "fromId": "updatesettinIn",
+      "fromProperty": "profileId",
+      "toId": "updatesettinFn",
+      "toProperty": "in-profileId"
+    },
+    {
+      "fromId": "updatesettinIn",
+      "fromProperty": "name",
+      "toId": "updatesettinFn",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "updatesettinIn",
+      "fromProperty": "lang",
+      "toId": "updatesettinFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "updatesettinIn",
+      "fromProperty": "layout",
+      "toId": "updatesettinFn",
+      "toProperty": "in-layout"
+    },
+    {
+      "fromId": "updatesettinIn",
+      "fromProperty": "layoutSeen",
+      "toId": "updatesettinFn",
+      "toProperty": "in-layoutSeen"
+    },
+    {
+      "fromId": "updatesettinIn",
+      "fromProperty": "level",
+      "toId": "updatesettinFn",
+      "toProperty": "in-level"
+    },
+    {
+      "fromId": "updatesettinIn",
+      "fromProperty": "sound",
+      "toId": "updatesettinFn",
+      "toProperty": "in-sound"
+    },
+    {
+      "fromId": "updatesettinIn",
+      "fromProperty": "soundMode",
+      "toId": "updatesettinFn",
+      "toProperty": "in-soundMode"
+    },
+    {
+      "fromId": "updatesettinIn",
+      "fromProperty": "answerMode",
+      "toId": "updatesettinFn",
+      "toProperty": "in-answerMode"
+    },
+    {
+      "fromId": "updatesettinIn",
+      "fromProperty": "look",
+      "toId": "updatesettinFn",
+      "toProperty": "in-look"
+    },
+    {
+      "fromId": "updatesettinIn",
+      "fromProperty": "seed",
+      "toId": "updatesettinFn",
+      "toProperty": "in-seed"
+    },
+    {
+      "fromId": "updatesettinIn",
+      "fromProperty": "mergeMode",
+      "toId": "updatesettinFn",
+      "toProperty": "in-mergeMode"
+    },
+    {
+      "fromId": "updatesettinIn",
+      "fromProperty": "run",
+      "toId": "updatesettinFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "updatesettinFn",
+      "fromProperty": "out-app",
+      "toId": "updatesettinOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "updatesettinFn",
+      "fromProperty": "success",
+      "toId": "updatesettinOut",
+      "toProperty": "done"
+    }
+  ]
+}

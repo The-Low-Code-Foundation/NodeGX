@@ -35,11 +35,10 @@
  *
  * ## Why module state rather than React state
  *
- * `index.tsx` already carries this lesson for the tab strip, in `rememberedTab`:
- * `SidebarModel.createPanel` builds a brand-new function component on every node selection, so
- * the element *type* changes identity and React unmounts and remounts the panel every time you
- * click a different node. Anything held in `useState` here is destroyed by the very event it
- * exists to survive.
+ * Written when `SidebarModel.createPanel` remounted the panel on every node selection. CHR-008 §3.4
+ * (2026-09-15) keeps it mounted now, but the reason this stays outside React is unchanged: the
+ * scroll map is keyed by NODE, and a node's view is built afresh each time it is selected — the
+ * offset has to outlive that view — while expansion is persisted and outlives the editor.
  */
 
 import { ADVANCED_CSS_GROUP } from './propertyPanelTiers';

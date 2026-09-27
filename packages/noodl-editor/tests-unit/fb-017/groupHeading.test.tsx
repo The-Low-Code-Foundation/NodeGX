@@ -5,11 +5,14 @@
  *
  * `GroupHeading` calls no hooks, so `renderElements` evaluates it end-to-end and these
  * assertions are about the real element tree: the chevron, `aria-expanded`, the badge, the
- * handler. `PropertyGroups` around it reaches `RowHost`, which calls `useRef` and
- * `useLayoutEffect` and therefore throws in this runner — so *which sections exist and in what
+ * handler. The rows `PropertyGroups` is handed each contain a `ControlHost`, which calls `useRef`
+ * and `useLayoutEffect` and therefore throws in this runner — so *which sections exist and in what
  * order* is covered by `propertyPanelTiers.test.ts` on the decision side and by the drive on the
  * rendering side. 🔴 That gap is named rather than papered over: this file grades the heading,
  * not the panel.
+ *
+ * (CHR-008 §3.2 deleted `RowHost`, which used to be the hook-calling part; `ControlHost` inherited
+ * its job of hosting a row element built outside React.)
  */
 import React from 'react';
 
@@ -97,8 +100,8 @@ describe('the badge — FB-017 AC2', () => {
  * FB-017 AC7 — the notice that stands in for an empty panel.
  *
  * Hook-free like `GroupHeading` above, so this runner evaluates the real element tree. What it
- * cannot see is that `PropertyGroups` reaches for it on the right condition — that branch sits
- * above `RowHost`, which throws here, and is the drive's to prove.
+ * cannot see is that `PropertyGroups` reaches for it on the right condition — that branch is
+ * reached only with real rows, which carry a hook-calling `ControlHost`, and is the drive's to prove.
  */
 describe('when a filter matches nothing', () => {
   it('says so rather than leaving the panel blank', () => {

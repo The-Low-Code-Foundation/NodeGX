@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f9f79b58-52af-5eef-8faa-1b999d9b9b97",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "finishhuntIn",
+      "fromProperty": "model",
+      "toId": "finishhuntFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "finishhuntIn",
+      "fromProperty": "game",
+      "toId": "finishhuntFn",
+      "toProperty": "in-game"
+    },
+    {
+      "fromId": "finishhuntIn",
+      "fromProperty": "lang",
+      "toId": "finishhuntFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "finishhuntIn",
+      "fromProperty": "run",
+      "toId": "finishhuntFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "finishhuntFn",
+      "fromProperty": "out-model",
+      "toId": "finishhuntOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "finishhuntFn",
+      "fromProperty": "out-paid",
+      "toId": "finishhuntOut",
+      "toProperty": "paid"
+    },
+    {
+      "fromId": "finishhuntFn",
+      "fromProperty": "out-starsEarned",
+      "toId": "finishhuntOut",
+      "toProperty": "starsEarned"
+    },
+    {
+      "fromId": "finishhuntFn",
+      "fromProperty": "out-stars",
+      "toId": "finishhuntOut",
+      "toProperty": "stars"
+    },
+    {
+      "fromId": "finishhuntFn",
+      "fromProperty": "out-starsText",
+      "toId": "finishhuntOut",
+      "toProperty": "starsText"
+    },
+    {
+      "fromId": "finishhuntFn",
+      "fromProperty": "out-why",
+      "toId": "finishhuntOut",
+      "toProperty": "why"
+    },
+    {
+      "fromId": "finishhuntFn",
+      "fromProperty": "out-earnedPick",
+      "toId": "finishhuntOut",
+      "toProperty": "earnedPick"
+    },
+    {
+      "fromId": "finishhuntFn",
+      "fromProperty": "out-won",
+      "toId": "finishhuntOut",
+      "toProperty": "won"
+    },
+    {
+      "fromId": "finishhuntFn",
+      "fromProperty": "out-headline",
+      "toId": "finishhuntOut",
+      "toProperty": "headline"
+    },
+    {
+      "fromId": "finishhuntFn",
+      "fromProperty": "out-line",
+      "toId": "finishhuntOut",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "finishhuntFn",
+      "fromProperty": "success",
+      "toId": "finishhuntOut",
+      "toProperty": "done"
+    }
+  ]
+}

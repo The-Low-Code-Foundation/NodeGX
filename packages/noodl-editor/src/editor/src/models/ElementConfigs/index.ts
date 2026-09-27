@@ -2,7 +2,7 @@
  * STYLE-002: ElementConfigs public API
  */
 
-export type { ElementConfig, VariantConfig, StateStyles, SizePresets, ResolvedVariant } from './ElementConfigTypes';
+export type { ElementConfig, VariantConfig, StateStyles, ResolvedVariant } from './ElementConfigTypes';
 export { ElementConfigRegistry } from './ElementConfigRegistry';
 export type { NodeModelLike } from './ElementConfigRegistry';
 

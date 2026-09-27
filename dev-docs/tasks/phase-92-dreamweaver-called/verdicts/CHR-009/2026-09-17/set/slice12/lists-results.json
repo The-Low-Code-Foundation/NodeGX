@@ -1,0 +1,70 @@
+{
+ "states": {
+  "before": "null",
+  "oldFaIcons": 0,
+  "fieldOpenAfterAdd": true,
+  "afterAdd": "\"Alpha\"",
+  "rowDrawn": true,
+  "rowButtons": [
+   "IconButton",
+   "IconButton"
+  ],
+  "entry": {
+   "height": 30,
+   "textCentreMinusIconCentre": 0,
+   "textInsideRow": true
+  },
+  "actions": {
+   "left": 70,
+   "top": 324,
+   "right": 350,
+   "bottom": 354
+  },
+  "renameFieldOpen": true,
+  "afterRename": "\"Beta\"",
+  "jsonEditorOpen": true,
+  "jsonEditorBox": {
+   "left": 329,
+   "top": 128,
+   "right": 849,
+   "bottom": 549
+  },
+  "jsonEditorClosed": true,
+  "afterJson": "\"Beta\"",
+  "afterDelete": "null"
+ },
+ "function": {
+  "before": "null",
+  "oldFaIcons": 0,
+  "fieldOpenAfterAdd": true,
+  "afterAdd": "[{\"id\":\"ero9\",\"label\":\"Alpha\"}]",
+  "rowDrawn": true,
+  "rowButtons": [
+   "IconButton",
+   "IconButton"
+  ],
+  "entry": {
+   "height": 30,
+   "textCentreMinusIconCentre": 0,
+   "textInsideRow": true
+  },
+  "actions": {
+   "left": 70,
+   "top": 528,
+   "right": 350,
+   "bottom": 558
+  },
+  "renameFieldOpen": true,
+  "afterRename": "[{\"id\":\"ero9\",\"label\":\"Beta\"}]",
+  "jsonEditorOpen": true,
+  "jsonEditorBox": {
+   "left": 329,
+   "top": 332,
+   "right": 849,
+   "bottom": 753
+  },
+  "jsonEditorClosed": true,
+  "afterJson": "[{\"id\":\"ero9\",\"label\":\"Beta\"}]",
+  "afterDelete": "null"
+ }
+}

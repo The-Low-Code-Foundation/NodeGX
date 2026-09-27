@@ -61,7 +61,7 @@ export class RouterNavigateAdapter extends NodeTypeAdapter {
 
     ports.push({
       plug: 'input',
-      type: { name: 'component', title: 'Choose page component', components: pageComponents, allowEditOnly: true },
+      type: { name: 'component', title: 'Choose page', components: pageComponents, allowEditOnly: true },
       group: 'General',
       displayName: 'Target Page',
       name: 'target'

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8a236654-a0bb-57eb-8aa8-e5663b59f8bd",
+  "name": "Keyboard",
+  "path": "/Game/Keyboard",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The on-screen keyboard from the kit, AZERTY or QWERTY, with the next key lit. Show false hides it (maths questions). RKT-008 AC7: a small FR / UK / US dropdown sits at its corner, so a child whose keyboard is not the one drawn fixes it where they are looking; it publishes Picked with the layout chosen. RKT-012: Wrong Key flashes red each time Wrong Count goes up, and the next key stays lit."
+}

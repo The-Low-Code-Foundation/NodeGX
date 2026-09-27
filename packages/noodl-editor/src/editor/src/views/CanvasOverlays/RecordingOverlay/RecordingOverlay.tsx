@@ -321,9 +321,10 @@ export function RecordingOverlay({ viewport, getNodeBounds, enabled }: Recording
                 role="button"
                 tabIndex={0}
                 title={`Walk forwards from ${row.label}`}
-                // ⚠️ Opens the panel; it must never *select* the node. Selecting switches the
+                // ⚠️ Opens the panel; it does not *select* the node. Selecting used to switch the
                 // sidebar to the property editor, which is how the panel's own row detail became
-                // unreachable by the only gesture anyone tries.
+                // unreachable by the only gesture anyone tries. Since P101 INS-001 properties
+                // have their own column, so selecting here would be safe — it is just not asked for.
                 onClick={() => requestProvenanceRootWalk(row.root)}
                 data-test="recording-hud-interaction"
               >

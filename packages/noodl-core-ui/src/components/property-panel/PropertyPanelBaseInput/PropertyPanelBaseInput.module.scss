@@ -1,7 +1,11 @@
 @use '../../../styles/scss-variables/length.scss';
 
 /* PAR-002 (mock `.input`): bg-2 box, hairline border, radius 6; hover lifts
-   the border to border-strong. */
+   the border to border-strong.
+   CHR-009 §2 "one control height, 26px". The height used to be padding + border + Chromium's line box
+   for an <input>, which is not `line-height` — so the 12px text inputs (every select, every text field)
+   drew 27px and the 11px mono ones 25.5, beside the 26px number+unit, pair and segmented fields. The
+   box is now stated and the text centres in it, as it does in any <input>. */
 .Root {
   font-family: var(--font-family);
   color: var(--theme-color-fg-highlight);
@@ -9,14 +13,21 @@
   line-height: 1;
   border: 1px solid var(--theme-color-border-default);
   border-radius: var(--radius-md);
-  padding: 5.5px 9px;
+  height: 26px;
+  padding: 0 9px;
   width: 100%;
   box-sizing: border-box;
-  font-size: 12.5px;
+  font-size: var(--font-size-sm);
   transition: background-color var(--speed-turbo), color var(--speed-turbo), border-color var(--speed-turbo);
 
   &:hover {
     border-color: var(--theme-color-border-strong);
+  }
+
+  /* CHR-009 §12.4 — a placeholder is a hint (an unset side's inherited value), never a value. `fg-muted` read almost as white as a value in dark (196,206,219 vs 255), so the dimmer grey. */
+  &::placeholder {
+    color: var(--theme-color-fg-disabled);
+    opacity: 1;
   }
 
   &:focus,
@@ -52,7 +63,7 @@
   /* Unit pickers etc. — the mock's `.unit`: small mono, muted. */
   &.has-small-text {
     font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
-    font-size: 10.5px;
+    font-size: var(--font-size-xs);
     color: var(--theme-color-fg-muted);
     padding-left: length.$property-panel-small-xy-padding;
     padding-right: length.$property-panel-small-xy-padding;
@@ -72,7 +83,7 @@
   &.is-numeric,
   &[type='number'] {
     font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
-    font-size: 11.5px;
+    font-size: var(--font-size-xs);
     text-align: center;
   }
 }

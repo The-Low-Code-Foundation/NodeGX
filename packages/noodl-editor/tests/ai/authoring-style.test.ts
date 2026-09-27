@@ -103,7 +103,7 @@ function filesFor(groupParams: Record<string, unknown>): ComponentFiles {
 }
 
 describe('AIX-006 style vocabulary', () => {
-  it('exports tokens by category, element variants/sizes, and presets', () => {
+  it('exports tokens by category, the shipped Look library, and presets', () => {
     const vocab = buildStyleVocabulary();
     const semantic = vocab.categories.find((c) => c.category === 'color-semantic');
     expect(semantic).toBeDefined();
@@ -113,10 +113,17 @@ describe('AIX-006 style vocabulary', () => {
 
     const button = vocab.elements.find((e) => e.nodeType === 'net.noodl.controls.button');
     expect(button).toBeDefined();
-    expect(button!.variants).toContain('primary');
-    expect(button!.sizes).toContain('md');
-    // The primary variant carries token-referenced styles the agent can copy.
-    expect(JSON.stringify(button!.variantStyles.primary)).toContain('var(--primary)');
+    // P94 STY-002: element types carry a Look library, not variants-and-sizes. `sizes` are gone —
+    // `_size` occurs 0 times in the seven shipped templates and 0 times in 105 real projects, and a
+    // second axis cannot survive the design's "one row decides it".
+    expect(button!.looks.map((l) => l.id)).toContain('primary');
+    expect(button!.looks.map((l) => l.name)).toContain('Primary');
+    // A Look lists what it CHANGES; the type's floor is reported once, beside it. Both halves are
+    // token-referenced, and an agent is told to copy both.
+    expect(JSON.stringify(button!.looks.find((l) => l.id === 'primary')!.parameters)).toContain('var(--primary)');
+    expect(JSON.stringify(button!.defaults)).toContain('var(--radius-md)');
+    // and the preset bookkeeping never reaches the vocabulary
+    expect(Object.keys(button!.defaults)).not.toContain('_variant');
 
     expect(vocab.presets.map((p) => p.id)).toEqual(
       jasmine.arrayContaining(['modern', 'minimal', 'playful', 'enterprise', 'soft'])

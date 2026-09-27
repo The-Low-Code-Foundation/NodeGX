@@ -79,11 +79,20 @@ export interface LauncherContextValue {
   // Project management callbacks
   onCreateProject?: () => void;
   onOpenProject?: () => void;
-  onLaunchProject?: (projectId: string) => void;
-  onOpenProjectFolder?: (projectId: string) => void;
-  onDeleteProject?: (projectId: string) => void;
-  onMigrateProject?: (projectId: string) => void;
-  onOpenReadOnly?: (projectId: string) => void;
+  /**
+   * HLT-011 — every one of these is handed the project's **directory**, not its `id`.
+   *
+   * 🔴 The stored `project.id` is not unique: two projects on one machine can carry the same
+   * one (measured 2026-09-21, and the cause is a writer outside the editor — a copied store
+   * entry). A host that resolves it with `.find` opens, reveals or deletes whichever row sorts
+   * first, which is how clicking a card came to open a different project. A directory is what
+   * a row *is*, and `LocalProjectsModel.fetch` keeps one row per directory.
+   */
+  onLaunchProject?: (projectPath: string) => void;
+  onOpenProjectFolder?: (projectPath: string) => void;
+  onDeleteProject?: (projectPath: string) => void;
+  onMigrateProject?: (projectPath: string) => void;
+  onOpenReadOnly?: (projectPath: string) => void;
 
   /**
    * FB-005 T5 — "Share as template" on a project's kebab, and the dialog it opens.
@@ -95,7 +104,7 @@ export interface LauncherContextValue {
    *
    * Absent in Storybook, where the menu entry simply does not appear.
    */
-  onShareAsTemplate?: (projectId: string) => void;
+  onShareAsTemplate?: (projectPath: string) => void;
   shareTemplateModal?: ShareTemplateModalProps | null;
 
   /**

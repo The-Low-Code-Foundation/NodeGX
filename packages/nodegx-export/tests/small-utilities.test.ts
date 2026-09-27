@@ -61,6 +61,22 @@ interface RuntimeNodeDefinition {
 /** `EaseCurves.linear`, the one thing colorblend.ts imports — two lines in easecurves.ts. */
 const easeCurvesStub = { linear: (start: number, end: number, t: number) => start + (end - start) * t };
 
+/** A module with no imports, transpiled and evaluated from source. */
+const loadPlain = (file: string): Record<string, unknown> => {
+  const js = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 }
+  }).outputText;
+  const exported: Record<string, unknown> = {};
+  const module = { exports: exported };
+  // eslint-disable-next-line no-new-func
+  new Function('exports', 'module', js)(exported, module);
+  return module.exports;
+};
+
+// GAM-006 (P88): colorblend.ts reads colours through the viewer's shared `color-reader.ts`, loaded
+// here from source too, so the parity is still against the interpreter's own parser.
+const colorReader = loadPlain(path.join(VIEWER_NODES, '..', '..', 'color-reader.ts'));
+
 const loadNode = (dir: string, file: string): RuntimeNodeDefinition => {
   const source = fs.readFileSync(path.join(dir, file), 'utf8');
   const js = ts.transpileModule(source, {
@@ -68,8 +84,10 @@ const loadNode = (dir: string, file: string): RuntimeNodeDefinition => {
   }).outputText;
   const exported: Record<string, unknown> = {};
   const module = { exports: exported };
-  const require = (specifier: string) =>
-    specifier.endsWith('easecurves') ? { default: easeCurvesStub, ...easeCurvesStub } : {};
+  const require = (specifier: string) => {
+    if (specifier.endsWith('color-reader')) return colorReader;
+    return specifier.endsWith('easecurves') ? { default: easeCurvesStub, ...easeCurvesStub } : {};
+  };
   // eslint-disable-next-line no-new-func
   new Function('exports', 'module', 'require', js)(exported, module, require);
   const out = module.exports as { node?: RuntimeNodeDefinition; default?: { node: RuntimeNodeDefinition } };

@@ -64,11 +64,11 @@ export interface ApiMember {
  * ships.
  */
 const RECORDS_MEMBERS: readonly ApiMember[] = [
-  { label: 'query', type: 'function', info: 'query(className, query, options) — find records matching a query.' },
+  { label: 'query', type: 'function', info: 'query(className, query, options) — find records matching a query. { plain: true } returns the rows as saved, not Noodl Objects.' },
   { label: 'count', type: 'function', info: 'count(className, query) — how many records match.' },
   { label: 'distinct', type: 'function', info: 'distinct(className, property, query) — the distinct values of a property.' },
   { label: 'aggregate', type: 'function', info: 'aggregate(className, group, query) — grouped totals.' },
-  { label: 'fetch', type: 'function', info: 'fetch(objectOrId, options) — re-read one record from the backend.' },
+  { label: 'fetch', type: 'function', info: 'fetch(objectOrId, options) — re-read one record from the backend. { plain: true } returns the row as saved.' },
   { label: 'increment', type: 'function', info: 'increment(objectOrId, properties, options) — add to numeric properties atomically.' },
   { label: 'save', type: 'function', info: 'save(objectOrId, properties, options) — write changes to an existing record.' },
   { label: 'create', type: 'function', info: 'create(className, properties, options) — make a new record.' },

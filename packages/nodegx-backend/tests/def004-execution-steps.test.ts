@@ -274,7 +274,7 @@ describe('DEF-004 (a) — an execution record names the steps a cloud function r
   });
 
   /** The last run of `workflowId`, read back out of sqlite the way a panel would. */
-  const lastRun = (workflowId: string): { status: string; steps: StepRow[] } => {
+  const lastRun = (workflowId: string): { status: string; errorMessage?: string; steps: StepRow[] } => {
     const history = new ExecutionHistory();
     history.open(dataDir);
     const runs = history.list({ workflowId, limit: 20 });
@@ -282,6 +282,7 @@ describe('DEF-004 (a) — an execution record names the steps a cloud function r
     const record = history.get(runs[0].id);
     return {
       status: runs[0].status,
+      errorMessage: runs[0].errorMessage,
       steps: ((record?.steps || []) as unknown as StepRow[]).map((s) => ({
         nodeId: s.nodeId,
         nodeType: s.nodeType,
@@ -338,14 +339,26 @@ describe('DEF-004 (a) — an execution record names the steps a cloud function r
     expect(failed?.errorMessage).toContain('NEVER_PROVISIONED');
   });
 
-  it('⚠️ the execution is still `success`, and the failed STEP is the only thing that says otherwise', async () => {
+  /**
+   * 🔴 **This spec asserted `success` until FED-007, and its old title said why:** *"the
+   * execution is still `success`, and the failed STEP is the only thing that says otherwise"*.
+   * The status meant "the function answered 2xx", and a graph that handles its own failure and
+   * answers 200 therefore recorded a green run over a failed action.
+   *
+   * Richard ruled that out on 2026-09-20, looking at FED-006's shots: **a run with a failed step
+   * must not read `success`.** This function is the smallest possible example of the shape he
+   * was looking at — one failed `Secret`, a failure edge, a 200 — so the assertion is inverted
+   * here rather than deleted.
+   */
+  it('🔴 the execution reads `error`, because a step in it failed (FED-007 AC1)', async () => {
     await client.request('POST', '/functions/failing', { body: { seed: 1 } });
     const run = lastRun('failing');
-    // Deliberate, and recorded here rather than in a comment nobody reads: the execution's
-    // status means "the function answered 2xx", and a graph that handles its own failure and
-    // answers 200 did not fail. What used to be missing is the row below it.
-    expect(run.status).toBe('success');
     expect(run.steps.filter((s) => s.status === 'error')).toHaveLength(1);
+    expect(run.status).toBe('error');
+    // And the row carries the step's message, because the step's is the only one anybody wrote:
+    // nothing threw at the run level — the graph answered.
+    expect(run.errorMessage).toContain('The run answered, but a step failed:');
+    expect(run.errorMessage).toContain('secret/unavailable');
   });
 
   it('a run where nothing failed has NO error step — the control for the two rows above', async () => {

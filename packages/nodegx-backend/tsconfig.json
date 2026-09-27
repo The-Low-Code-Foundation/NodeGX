@@ -18,6 +18,11 @@
     "noImplicitAny": false,
     "forceConsistentCasingInFileNames": true,
     "types": ["node", "jest"],
+    // BMG-001: the admin app (src/admin/app, excluded below, its own tsconfig) is TSX. These two
+    // are here for ts-jest, which transpiles every .ts/.tsx through THIS config (one transform
+    // entry — see jest.config.js); they affect no .ts file.
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
     // Mirrors the esbuild alias in scripts/build.js and the jest
     // moduleNameMapper, so `import type` from the cloud runtime resolves to the
     // same sources those two already bundle. Type-only by policy: the runtime
@@ -28,5 +33,5 @@
     }
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "src/admin/app"]
 }

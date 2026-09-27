@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8caeb933-3846-5104-8b66-53f35f623162",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pbVar",
+      "fromProperty": "value",
+      "toId": "pbShow",
+      "toProperty": "in-problem"
+    },
+    {
+      "fromId": "pbShow",
+      "fromProperty": "out-show",
+      "toId": "pbRoot",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pbShow",
+      "fromProperty": "out-text",
+      "toId": "pbText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pbDismiss",
+      "fromProperty": "onClick",
+      "toId": "pbClear",
+      "toProperty": "do"
+    }
+  ]
+}

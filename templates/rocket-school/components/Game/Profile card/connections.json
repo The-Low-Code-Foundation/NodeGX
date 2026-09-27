@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2e8e1133-d219-5670-8a98-5130747f56c1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pcIn",
+      "fromProperty": "look",
+      "toId": "pcFace",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "seed",
+      "toId": "pcFace",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "faceOptions",
+      "toId": "pcFace",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "selected",
+      "toId": "pcFace",
+      "toProperty": "selected"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "name",
+      "toId": "pcName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "level",
+      "toId": "pcLevel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "due",
+      "toId": "pcDueText",
+      "toProperty": "due"
+    },
+    {
+      "fromId": "pcDueText",
+      "fromProperty": "result",
+      "toId": "pcDue",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "selected",
+      "toId": "pcSelected",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "pcSelected",
+      "fromProperty": "ontrue",
+      "toId": "pcStates",
+      "toProperty": "to-on"
+    },
+    {
+      "fromId": "pcSelected",
+      "fromProperty": "onfalse",
+      "toId": "pcStates",
+      "toProperty": "to-off"
+    },
+    {
+      "fromId": "pcStates",
+      "fromProperty": "edge",
+      "toId": "pcCard",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "pcStates",
+      "fromProperty": "ground",
+      "toId": "pcCard",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "pcCard",
+      "fromProperty": "onClick",
+      "toId": "pcOut",
+      "toProperty": "chosen"
+    },
+    {
+      "fromId": "pcFace",
+      "fromProperty": "clicked",
+      "toId": "pcOut",
+      "toProperty": "chosen"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "id",
+      "toId": "pcOut",
+      "toProperty": "id"
+    }
+  ]
+}

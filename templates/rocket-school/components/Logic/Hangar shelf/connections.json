@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b490b010-f838-5744-8b56-8628b80d0f12",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hangarshelfIn",
+      "fromProperty": "app",
+      "toId": "hangarshelfFn",
+      "toProperty": "in-app"
+    },
+    {
+      "fromId": "hangarshelfIn",
+      "fromProperty": "shelf",
+      "toId": "hangarshelfFn",
+      "toProperty": "in-shelf"
+    },
+    {
+      "fromId": "hangarshelfIn",
+      "fromProperty": "tab",
+      "toId": "hangarshelfFn",
+      "toProperty": "in-tab"
+    },
+    {
+      "fromId": "hangarshelfFn",
+      "fromProperty": "out-rows",
+      "toId": "hangarshelfOut",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "hangarshelfFn",
+      "fromProperty": "out-count",
+      "toId": "hangarshelfOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "hangarshelfFn",
+      "fromProperty": "out-picks",
+      "toId": "hangarshelfOut",
+      "toProperty": "picks"
+    },
+    {
+      "fromId": "hangarshelfFn",
+      "fromProperty": "out-hasPicks",
+      "toId": "hangarshelfOut",
+      "toProperty": "hasPicks"
+    },
+    {
+      "fromId": "hangarshelfFn",
+      "fromProperty": "out-purse",
+      "toId": "hangarshelfOut",
+      "toProperty": "purse"
+    },
+    {
+      "fromId": "hangarshelfFn",
+      "fromProperty": "out-elsewhere",
+      "toId": "hangarshelfOut",
+      "toProperty": "elsewhere"
+    },
+    {
+      "fromId": "hangarshelfFn",
+      "fromProperty": "out-elsewhereText",
+      "toId": "hangarshelfOut",
+      "toProperty": "elsewhereText"
+    },
+    {
+      "fromId": "hangarshelfFn",
+      "fromProperty": "out-wearsNothing",
+      "toId": "hangarshelfOut",
+      "toProperty": "wearsNothing"
+    },
+    {
+      "fromId": "hangarshelfFn",
+      "fromProperty": "out-emptyText",
+      "toId": "hangarshelfOut",
+      "toProperty": "emptyText"
+    },
+    {
+      "fromId": "hangarshelfFn",
+      "fromProperty": "success",
+      "toId": "hangarshelfOut",
+      "toProperty": "done"
+    }
+  ]
+}

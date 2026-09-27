@@ -297,8 +297,10 @@ export type {
   VocabComposition,
   VocabCompositionGroup,
   VocabElement,
+  VocabLook,
   VocabParamValue,
   VocabPreset,
+  VocabProjectLook,
   VocabToken,
   VocabTokenCategory
 } from '../../noodl-editor/src/editor/src/models/StyleTokensModel/StyleVocabulary';
@@ -312,6 +314,14 @@ export {
   STYLE_TOKENS_METADATA_KEY
 } from '../../noodl-editor/src/editor/src/models/StyleTokensModel/ProjectTokenCss';
 export type { MetaDataSource } from '../../noodl-editor/src/editor/src/models/StyleTokensModel/ProjectTokenCss';
+// P100 UPG-003 §6 — a prefab's text styles arrive as typography tokens, by the same conversion the
+// editor's install and on-load upgrade run. Pure: it imports only `@nodegx/project-contract/tokens`.
+export {
+  convertTextStylesForImport,
+  FONT_MODULE_DIR,
+  fontFaceStylesheet,
+  fontModuleManifest
+} from '../../noodl-editor/src/editor/src/models/ProjectPatches/textStylesToTokens';
 // CMP-008 — the ONE definition of what counts as a `var(--token)` reference.
 // The export side (`libraryExport.entryTokens`) and the editor's install side
 // (`import-engine/tokenGap`) both read it, because a disagreement between them
@@ -328,6 +338,18 @@ export type {
   TokenCategory
 } from '../../noodl-editor/src/editor/src/models/StyleTokensModel/TokenCategories';
 export { getPreset, getAllPresets } from '../../noodl-editor/src/editor/src/models/StylePresets/StylePresetsModel';
+// P88 GAM-016 — a preset's typeface travels with it. Import-free, like `starterAssetList`.
+export {
+  planPresetFonts,
+  PRESET_FONTS,
+  PRESET_FONT_SOURCE_ROOT
+} from '../../noodl-editor/src/editor/src/models/StylePresets/presetFonts';
+export type { PresetFontPlan, PresetFontReader } from '../../noodl-editor/src/editor/src/models/StylePresets/presetFonts';
+export { checkFontFaces } from '../../noodl-editor/src/editor/src/validation/fontFaces';
+// P102 CMP-009 — a custom token the composer cannot open. Pure: it imports the codec module
+// (`@nodegx/project-contract/token-codecs`, the ONE path the editor and the census use) and
+// `diagnostics`.
+export { checkTokenComposable } from '../../noodl-editor/src/editor/src/validation/tokenComposable';
 export type { StylePreset } from '../../noodl-editor/src/editor/src/models/StylePresets/StylePresetTypes';
 
 // ─── Project docs (AIX-009) ───────────────────────────────────────────────────

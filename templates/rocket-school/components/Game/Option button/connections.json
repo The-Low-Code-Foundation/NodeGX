@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ef990703-84da-51aa-88ae-2aae0cb5db40",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "obIn",
+      "fromProperty": "label",
+      "toId": "obBtn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "obBtn",
+      "fromProperty": "onClick",
+      "toId": "obOut",
+      "toProperty": "picked"
+    },
+    {
+      "fromId": "obIn",
+      "fromProperty": "value",
+      "toId": "obOut",
+      "toProperty": "value"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Story Engine fonts",
+  "browser": {
+    "stylesheets": [
+      "noodl_modules/story-engine-fonts/styles.css"
+    ]
+  },
+  "_note": "P88 GAM-016: the passage prose face, bundled rather than fetched, like the starter project's Inter. It used to be Iowan Old Style, which only Apple machines carry, so a Windows reader got Palatino Linotype or Georgia. Source Serif 4 is SIL Open Font License 1.1; the licence travels beside it. Latin and Latin-extended subsets."
+}

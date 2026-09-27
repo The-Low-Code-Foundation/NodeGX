@@ -91,6 +91,21 @@ Every one of them takes its Class dropdown and its property ports from the
 synced schema of whichever backend it is pointed at, whatever kind that backend
 is.
 
+### How many records come back
+
+**A query with no Limit does not return the whole table.** A NodeGX backend
+applies a page cap — 1,000 rows by default, and at most 10,000 however large a
+Limit is asked for. It exists because the common accident is a filter built
+from an input that was empty, which is an unfiltered query, which used to be
+every row in the collection materialised in one process.
+
+A capped response says so in its headers, so the page is never silently passed
+off as the whole set. If you are showing a list that can grow past a thousand
+rows, page it: ask for the count, then use `Limit` and `Skip`. The operator's
+two numbers, and the readers that are deliberately exempt from them (backups
+and exports read whole tables), are in
+[BACKEND-OPERATIONS.md](./BACKEND-OPERATIONS.md#no-query-returns-everything).
+
 ### Filtering
 
 One visual filter builder serves every backend. It builds nested and/or

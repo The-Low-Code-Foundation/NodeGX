@@ -1,0 +1,277 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5dfc510e-f4d6-50e6-83a7-8d343726851f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cdIn",
+      "fromProperty": "enabled",
+      "toId": "cdGate",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "cdIn",
+      "fromProperty": "start",
+      "toId": "cdGate",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "cdIn",
+      "fromProperty": "enabled",
+      "toId": "cdShown",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "cdShown",
+      "fromProperty": "result",
+      "toId": "cdRow",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cdAnim",
+      "fromProperty": "currentValue",
+      "toId": "cdSecsText",
+      "toProperty": "v"
+    },
+    {
+      "fromId": "cdIn",
+      "fromProperty": "limitMs",
+      "toId": "cdSecsText",
+      "toProperty": "limit"
+    },
+    {
+      "fromId": "cdAnim",
+      "fromProperty": "currentValue",
+      "toId": "cdSecsNearly",
+      "toProperty": "v"
+    },
+    {
+      "fromId": "cdIn",
+      "fromProperty": "limitMs",
+      "toId": "cdSecsNearly",
+      "toProperty": "limit"
+    },
+    {
+      "fromId": "cdSecsNearly",
+      "fromProperty": "result",
+      "toId": "cdSecsMode",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "cdSecsMode",
+      "fromProperty": "calm",
+      "toId": "cdSecs",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cdSecsMode",
+      "fromProperty": "last",
+      "toId": "cdSecsLast",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cdSecsText",
+      "fromProperty": "result",
+      "toId": "cdSecs",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cdSecsText",
+      "fromProperty": "result",
+      "toId": "cdSecsLast",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cdFalse",
+      "fromProperty": "result",
+      "toId": "cdSetFresh",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cdGate",
+      "fromProperty": "ontrue",
+      "toId": "cdSetFresh",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cdOne",
+      "fromProperty": "result",
+      "toId": "cdSetDur0",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cdSetFresh",
+      "fromProperty": "done",
+      "toId": "cdSetDur0",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cdHundred",
+      "fromProperty": "result",
+      "toId": "cdSetFull",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cdSetDur0",
+      "fromProperty": "done",
+      "toId": "cdSetFull",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cdIn",
+      "fromProperty": "limitMs",
+      "toId": "cdSetDur",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cdSetFull",
+      "fromProperty": "done",
+      "toId": "cdKick",
+      "toProperty": "restart"
+    },
+    {
+      "fromId": "cdKick",
+      "fromProperty": "timerFinished",
+      "toId": "cdSetDur",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cdIn",
+      "fromProperty": "stop",
+      "toId": "cdKick",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "cdZero",
+      "fromProperty": "result",
+      "toId": "cdSetEmpty",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cdSetDur",
+      "fromProperty": "done",
+      "toId": "cdSetEmpty",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cdSetEmpty",
+      "fromProperty": "done",
+      "toId": "cdDeadline",
+      "toProperty": "restart"
+    },
+    {
+      "fromId": "cdIn",
+      "fromProperty": "limitMs",
+      "toId": "cdDeadline",
+      "toProperty": "duration"
+    },
+    {
+      "fromId": "cdIn",
+      "fromProperty": "stop",
+      "toId": "cdDeadline",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "cdOne",
+      "fromProperty": "result",
+      "toId": "cdSetDurHold",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cdIn",
+      "fromProperty": "stop",
+      "toId": "cdSetDurHold",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cdAnim",
+      "fromProperty": "currentValue",
+      "toId": "cdSetHold",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cdSetDurHold",
+      "fromProperty": "done",
+      "toId": "cdSetHold",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cdTarget",
+      "fromProperty": "value",
+      "toId": "cdAnim",
+      "toProperty": "targetValue"
+    },
+    {
+      "fromId": "cdDur",
+      "fromProperty": "value",
+      "toId": "cdAnim",
+      "toProperty": "duration"
+    },
+    {
+      "fromId": "cdAnim",
+      "fromProperty": "currentValue",
+      "toId": "cdWidth",
+      "toProperty": "v"
+    },
+    {
+      "fromId": "cdWidth",
+      "fromProperty": "result",
+      "toId": "cdFill",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "cdAnim",
+      "fromProperty": "currentValue",
+      "toId": "cdLevel",
+      "toProperty": "v"
+    },
+    {
+      "fromId": "cdLevel",
+      "fromProperty": "result",
+      "toId": "cdStates",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "cdStates",
+      "fromProperty": "fill",
+      "toId": "cdFill",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "cdTrue",
+      "fromProperty": "result",
+      "toId": "cdSetExpired",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cdDeadline",
+      "fromProperty": "timerFinished",
+      "toId": "cdSetExpired",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cdSetExpired",
+      "fromProperty": "done",
+      "toId": "cdOut",
+      "toProperty": "expired"
+    },
+    {
+      "fromId": "cdExpired",
+      "fromProperty": "value",
+      "toId": "cdOut",
+      "toProperty": "isExpired"
+    },
+    {
+      "fromId": "cdIn",
+      "fromProperty": "enabled",
+      "toId": "cdOut",
+      "toProperty": "running"
+    },
+    {
+      "fromId": "cdAnim",
+      "fromProperty": "currentValue",
+      "toId": "cdOut",
+      "toProperty": "left"
+    }
+  ]
+}

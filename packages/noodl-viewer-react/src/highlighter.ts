@@ -6,6 +6,7 @@ import {
   readCornerRadii,
   type RectLike
 } from './box-model-overlay';
+import { instancePathOf, pathAddresses } from './instance-path';
 import type { ReactNodeInstance } from './react-component-node';
 import { TransformOriginCrosshair } from './transform-origin-crosshair';
 
@@ -33,6 +34,24 @@ interface HighlighterRuntime {
 export class Highlighter {
   highlightedNodes: Map<ReactNodeInstance, HTMLDivElement>;
   selectedNodes: Map<ReactNodeInstance, HTMLDivElement>;
+  /**
+   * TVW-002 AC1 — *"the thing you are editing is here"*, drawn without anyone having selected it.
+   *
+   * 🔴 **A third map, and the drive is what demanded it.** The first build sent this down
+   * `selectNode`, which is the channel the spec named and which draws the right line. The
+   * screenshot showed what no number did: the box-model chip — five lines of CSS facts — appeared
+   * over the running app because {@link Highlighter.updateHighlights} takes its `focus` from the
+   * selected and hovered maps, and a selection is a selection.
+   *
+   * That is the very thing {@link Highlighter.designMode}'s note says its gate exists to prevent:
+   * *"a chip of CSS facts over a running app nobody asked to inspect"*. The placement outline is
+   * not an inspection request — nobody clicked anything; they changed which component the canvas is
+   * on. So it draws a line and is excluded from `focus`.
+   *
+   * ⚠️ It is also the map that cleans up after itself properly. A node whose element has gone is
+   * deleted from here, unlike `selectedNodes` — see the note in `updateHighlights`.
+   */
+  placedNodes: Map<ReactNodeInstance, HTMLDivElement>;
   noodlRuntime: HighlighterRuntime;
   isUpdatingHighlights: boolean;
   highlightRootDiv: HTMLDivElement;
@@ -68,6 +87,7 @@ export class Highlighter {
   constructor(noodlRuntime: HighlighterRuntime) {
     this.highlightedNodes = new Map();
     this.selectedNodes = new Map();
+    this.placedNodes = new Map();
     this.noodlRuntime = noodlRuntime;
 
     this.isUpdatingHighlights = false;
@@ -100,12 +120,19 @@ export class Highlighter {
     this.windowBorderDiv.style.height = '100vh';
   }
 
-  createHighlightDiv(): HTMLDivElement {
+  /**
+   * TVW-003 AC1 (ruled 2026-09-17, Richard: option 2) — a hover is a 1px line, a selection a 2px
+   * one, same teal. They were both 2px, so with the canvas hovering one thing and another selected
+   * the preview could not say which was which. Thin-versus-thick is the Figma/Webflow convention and
+   * stays legible over a photograph, where a dashed line breaks up. A node both hovered and
+   * selected carries both divs; the 2px line covers the 1px one.
+   */
+  createHighlightDiv(weight: 'hover' | 'selected' = 'selected'): HTMLDivElement {
     const div = document.createElement('div');
     div.style.position = 'absolute';
     div.style.top = '0';
     div.style.left = '0';
-    div.style.outline = '2px solid #2CA7BA';
+    div.style.outline = `${weight === 'hover' ? 1 : 2}px solid #2CA7BA`;
     div.style.opacity = '1.0';
     return div;
   }
@@ -150,13 +177,20 @@ export class Highlighter {
       return;
     }
 
-    if ((this.selectedNodes.size > 0 || this.highlightedNodes.size > 0) && !this.isUpdatingHighlights) {
+    if (this.anyHighlight() && !this.isUpdatingHighlights) {
       this.updateHighlights();
     }
   }
 
+  /** Whether anything at all is drawn — the rAF loop's start and stop condition. */
+  private anyHighlight(): boolean {
+    return this.selectedNodes.size > 0 || this.highlightedNodes.size > 0 || this.placedNodes.size > 0;
+  }
+
   updateHighlights(): void {
-    const items = Array.from(this.highlightedNodes.entries()).concat(Array.from(this.selectedNodes.entries()));
+    const items = Array.from(this.highlightedNodes.entries())
+      .concat(Array.from(this.selectedNodes.entries()))
+      .concat(Array.from(this.placedNodes.entries()));
 
     let focus: { element: HTMLElement; computed: CSSStyleDeclaration; rect: RectLike } | null = null;
     let focusIsHovered = false;
@@ -178,7 +212,14 @@ export class Highlighter {
         // therefore never removed from `selectedNodes`, so it is revisited (and its
         // div `remove()`d again) on every subsequent frame. Recorded rather than
         // fixed: the correct disposal semantics are a behavioural decision.
+        //
+        // 🔴 `placedNodes` IS deleted from, and that is not a style preference. Its members are
+        // chosen by a walk rather than by a click, and TVW-002's drive hit exactly this: a
+        // component-instance node passes the `getRef` filter and has no `getDOMElement`, so it
+        // would sit in the map for ever, spinning the rAF loop and re-removing its own div on every
+        // frame, while `size` reported a healthy selection and nothing was on screen.
         this.highlightedNodes.delete(item[0]);
+        this.placedNodes.delete(item[0]);
         item[1].remove();
         continue;
       }
@@ -206,7 +247,12 @@ export class Highlighter {
       // The hovered node wins the box model; a selection keeps it once the pointer has left for
       // the properties panel, which is exactly when an author is changing the numbers it explains.
       const hovered = this.highlightedNodes.has(item[0]);
-      if (!focus || (hovered && !focusIsHovered)) {
+      // 🔴 A placement outline never takes `focus`, so it never brings the box model with it. It
+      // answers "where is it", which is not a request to inspect anything — see `placedNodes`.
+      // A node that is ALSO hovered or selected is in one of the other maps too, and that entry
+      // takes focus normally.
+      const placementOnly = this.placedNodes.has(item[0]) && !hovered && !this.selectedNodes.has(item[0]);
+      if (!placementOnly && (!focus || (hovered && !focusIsHovered))) {
         focus = { element: domNode, computed, rect };
         focusIsHovered = hovered;
       }
@@ -236,7 +282,7 @@ export class Highlighter {
       this.originCrosshair.clear();
     }
 
-    this.isUpdatingHighlights = this.highlightedNodes.size > 0 || this.selectedNodes.size > 0;
+    this.isUpdatingHighlights = this.anyHighlight();
 
     if (this.isUpdatingHighlights) {
       requestAnimationFrame(this.updateHighlights.bind(this));
@@ -244,13 +290,18 @@ export class Highlighter {
   }
 
   highlightNodesWithId(nodeId: string): void {
+    this.highlightNodesAtPath([nodeId]);
+  }
+
+  /** TVW-003 — hover outlines what `path` addresses: one instance, or every one for `[nodeId]`. */
+  highlightNodesAtPath(path: readonly string[]): void {
     //gather all nodes with a DOM node we can highlight, that aren't already highlighted
-    const nodes = getNodes(this.noodlRuntime, nodeId)
+    const nodes = getNodesAtPath(this.noodlRuntime, path)
       .filter((node) => node.getRef)
       .filter((node) => !this.highlightedNodes.has(node));
 
     for (const node of nodes) {
-      const highlight = this.createHighlightDiv();
+      const highlight = this.createHighlightDiv('hover');
 
       this.highlightRootDiv.appendChild(highlight);
       this.highlightedNodes.set(node, highlight);
@@ -275,22 +326,32 @@ export class Highlighter {
   }
 
   selectNodesWithId(nodeId: string): ReactNodeInstance[] {
+    return this.selectNodesAtPath([nodeId]);
+  }
+
+  /**
+   * TVW-003 — outline what the editor's selection path addresses.
+   *
+   * `[nodeId]` (a canvas showing the definition) outlines every instance, as `selectNodesWithId`
+   * always did; `[card2Id, titleId]` outlines only the second card's title. See `pathAddresses`.
+   */
+  selectNodesAtPath(path: readonly string[]): ReactNodeInstance[] {
     //we don't track when nodes are created, so if there's no root component, wait a while and then highlight so we can get all the instances
     //TODO: track nodes as they're created so newly created nodes can be selected if their IDs match
     if (!this.noodlRuntime.rootComponent) {
       this.noodlRuntime.eventEmitter.once('rootComponentUpdated', () => {
         setTimeout(() => {
-          this.selectNodesWithId(nodeId);
+          this.selectNodesAtPath(path);
         }, 300);
       });
     }
 
-    const nodes = getNodes(this.noodlRuntime, nodeId)
+    const nodes = getNodesAtPath(this.noodlRuntime, path)
       .filter((node) => node.getRef)
       .filter((node) => !this.selectedNodes.has(node));
 
     for (const node of nodes) {
-      const selection = this.createHighlightDiv();
+      const selection = this.createHighlightDiv('selected');
 
       this.highlightRootDiv.appendChild(selection);
       this.selectedNodes.set(node, selection);
@@ -305,6 +366,44 @@ export class Highlighter {
     }
 
     return nodes;
+  }
+
+  /**
+   * TVW-002 AC1 — outline where the canvas's component sits on this screen. One path, one line.
+   *
+   * Separate from {@link Highlighter.selectNodesAtPath} rather than a flag on it, because the two
+   * differ in what they mean and therefore in what else they are allowed to draw. See
+   * {@link Highlighter.placedNodes}.
+   */
+  showPlacementAtPath(path: readonly string[]): void {
+    this.clearPlacement();
+    if (!path || !path.length) return;
+
+    // Same wait-for-the-root retry as a selection: this can arrive before the app has mounted,
+    // and a component the canvas is already on is exactly the case that happens on open.
+    if (!this.noodlRuntime.rootComponent) {
+      this.noodlRuntime.eventEmitter.once('rootComponentUpdated', () => {
+        setTimeout(() => this.showPlacementAtPath(path), 300);
+      });
+    }
+
+    for (const node of getNodesAtPath(this.noodlRuntime, path).filter((candidate) => candidate.getRef)) {
+      const outline = this.createHighlightDiv('selected');
+      this.highlightRootDiv.appendChild(outline);
+      this.placedNodes.set(node, outline);
+    }
+
+    if (this.anyHighlight() && !this.isUpdatingHighlights) {
+      this.updateHighlights();
+    }
+  }
+
+  clearPlacement(): void {
+    // es5 target, so no direct Map iteration — same reason as `disableHighlight`.
+    for (const item of Array.from(this.placedNodes.entries())) {
+      if (item[1]) item[1].remove();
+    }
+    this.placedNodes.clear();
   }
 
   deselectNodes(): void {
@@ -330,9 +429,10 @@ function childRects(element: HTMLElement): RectLike[] {
   return rects;
 }
 
-function getNodes(noodlRuntime: HighlighterRuntime, nodeId: string): ReactNodeInstance[] {
-  if (!noodlRuntime.rootComponent) {
+function getNodesAtPath(noodlRuntime: HighlighterRuntime, path: readonly string[]): ReactNodeInstance[] {
+  if (!noodlRuntime.rootComponent || !path.length) {
     return [];
   }
-  return noodlRuntime.rootComponent.nodeScope.getNodesWithIdRecursive(nodeId);
+  const nodes = noodlRuntime.rootComponent.nodeScope.getNodesWithIdRecursive(path[path.length - 1]);
+  return path.length === 1 ? nodes : nodes.filter((node) => pathAddresses(path, instancePathOf(node)));
 }

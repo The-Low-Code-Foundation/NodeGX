@@ -1,0 +1,250 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2e8e1133-d219-5670-8a98-5130747f56c1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pcIn",
+      "type": "Component Inputs",
+      "label": "The row",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "look",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "seed",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "level",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "selected",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "due",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "faceOptions",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "pcCard",
+      "type": "Group",
+      "label": "The card",
+      "children": [
+        "pcFace",
+        "pcName",
+        "pcLevelPill",
+        "pcDue"
+      ],
+      "parameters": {
+        "width": {
+          "value": 150,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 3,
+          "unit": "px"
+        },
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "alignItems": "center",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "cssClassName": "pressable"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pcFace",
+      "type": "/Game/Face",
+      "label": "The face",
+      "parent": "pcCard",
+      "parameters": {
+        "size": 72
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pcName",
+      "type": "Text",
+      "label": "The name",
+      "parent": "pcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h3",
+        "fontFamily": "Grandstander",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "pcLevelPill",
+      "type": "Group",
+      "label": "The class pill",
+      "parent": "pcCard",
+      "children": [
+        "pcLevel"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-full)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "pcLevel",
+      "type": "Text",
+      "label": "The class",
+      "parent": "pcLevelPill",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "pcDue",
+      "type": "Text",
+      "label": "What is due",
+      "parent": "pcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "pcDueText",
+      "type": "Expression",
+      "label": "A clock when something is due",
+      "parameters": {
+        "expression": "due > 0 ? '⏰ ' + due : ''"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "pcSelected",
+      "type": "Condition",
+      "label": "Is this the one?",
+      "parameters": {},
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "pcStates",
+      "type": "States",
+      "label": "Chosen or not",
+      "parameters": {
+        "states": "off,on",
+        "values": "edge,ground",
+        "useTransitions": false,
+        "type-edge": "color",
+        "value-off-edge": "var(--border)",
+        "value-on-edge": "var(--foreground)",
+        "type-ground": "color",
+        "value-off-ground": "var(--surface)",
+        "value-on-ground": "var(--accent)"
+      },
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "pcOut",
+      "type": "Component Outputs",
+      "label": "Tapped",
+      "ports": [
+        {
+          "name": "chosen",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "pcCard"
+  ]
+}

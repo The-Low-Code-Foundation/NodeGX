@@ -1,0 +1,513 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7900eea1-b63d-58bf-80ce-67cf9ed2c70e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tsIn",
+      "type": "Component Inputs",
+      "label": "The task",
+      "ports": [
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rankLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "deadline",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "dueText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "dueColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "deadlineError",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasDeadlineError",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "isOpen",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "isClosed",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "canMakeNext",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "closingNote",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "narrow",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 530,
+      "y": 280
+    },
+    {
+      "id": "tsOut",
+      "type": "Component Outputs",
+      "label": "What you did",
+      "ports": [
+        {
+          "name": "rename",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "setDeadline",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "makeNext",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "close",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "reopen",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "back",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "newTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "deadlineText",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 530,
+      "y": 400
+    },
+    {
+      "id": "tsRoot",
+      "type": "Group",
+      "label": "Task summary",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "tsBack",
+        "tsTitle",
+        "tsMeta",
+        "tsBar",
+        "tsClosing"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "tsBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back to the list",
+      "parent": "tsRoot",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "← Back",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "tsTitle",
+      "type": "net.noodl.controls.textinput",
+      "label": "Title",
+      "parent": "tsRoot",
+      "parameters": {
+        "type": "text",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "placeholder": "Task title",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)",
+        "backgroundColor": "transparent",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-subtle)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "tsMeta",
+      "type": "Text",
+      "label": "Where it is",
+      "parent": "tsRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "tsBar",
+      "type": "Group",
+      "label": "Deadline and buttons",
+      "parent": "tsRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "paddingBottom": "var(--space-4)"
+      },
+      "children": [
+        "tsDeadline",
+        "tsButtons"
+      ],
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "tsDeadline",
+      "type": "Group",
+      "label": "Deadline",
+      "parent": "tsBar",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "tsDeadlineLabel",
+        "tsDeadlineRow",
+        "tsDeadlineError"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "tsDeadlineLabel",
+      "type": "Text",
+      "label": "Deadline label",
+      "parent": "tsDeadline",
+      "parameters": {
+        "text": "Deadline",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "tsDeadlineRow",
+      "type": "Group",
+      "label": "Deadline field",
+      "parent": "tsDeadline",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "tsDeadlineField",
+        "tsDue"
+      ],
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "tsDeadlineField",
+      "type": "/Todo/Date picker",
+      "label": "Deadline field",
+      "parent": "tsDeadlineRow",
+      "parameters": {
+        "Label": "Deadline",
+        "Width": {
+          "value": 200,
+          "unit": "px"
+        }
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "tsDue",
+      "type": "Text",
+      "label": "How long until it is due",
+      "parent": "tsDeadlineRow",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "tsDeadlineError",
+      "type": "Text",
+      "label": "A deadline that is not a date",
+      "parent": "tsDeadline",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "lineHeight": "var(--leading-snug)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "tsButtons",
+      "type": "Group",
+      "label": "Buttons",
+      "parent": "tsBar",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "tsMakeNext",
+        "tsClose",
+        "tsReopen"
+      ],
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "tsMakeNext",
+      "type": "net.noodl.controls.button",
+      "label": "Move to #1",
+      "parent": "tsButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Move to #1",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "tsClose",
+      "type": "net.noodl.controls.button",
+      "label": "Close task",
+      "parent": "tsButtons",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Close task",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "tsReopen",
+      "type": "net.noodl.controls.button",
+      "label": "Reopen",
+      "parent": "tsButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Reopen",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1720
+    },
+    {
+      "id": "tsClosing",
+      "type": "Group",
+      "label": "What happened",
+      "parent": "tsRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "paddingBottom": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "tsClosingLabel",
+        "tsClosingNote"
+      ],
+      "x": 100,
+      "y": 1840
+    },
+    {
+      "id": "tsClosingLabel",
+      "type": "Text",
+      "label": "What happened label",
+      "parent": "tsClosing",
+      "parameters": {
+        "text": "What happened",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1960
+    },
+    {
+      "id": "tsClosingNote",
+      "type": "Text",
+      "label": "What happened",
+      "parent": "tsClosing",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 2080
+    }
+  ],
+  "visualRoots": [
+    "tsRoot"
+  ]
+}

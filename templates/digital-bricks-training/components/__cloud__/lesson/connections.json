@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ecaba4aa-e324-5586-9231-85712e61c8f5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "req",
+      "fromProperty": "userId",
+      "toId": "who",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-conceptId",
+      "toId": "read",
+      "toProperty": "in-conceptId"
+    },
+    {
+      "fromId": "who",
+      "fromProperty": "learnerId",
+      "toId": "read",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "read",
+      "fromProperty": "out-rows",
+      "toId": "res",
+      "toProperty": "pm-rows"
+    },
+    {
+      "fromId": "read",
+      "fromProperty": "out-done",
+      "toId": "res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "who",
+      "fromProperty": "failed",
+      "toId": "deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "read",
+      "fromProperty": "out-failed",
+      "toId": "deny",
+      "toProperty": "send"
+    }
+  ]
+}

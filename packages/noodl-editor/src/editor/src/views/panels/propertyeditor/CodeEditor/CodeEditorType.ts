@@ -1,6 +1,6 @@
 import React from 'react';
 import { flushSync } from 'react-dom';
-import { createRoot, Root } from 'react-dom/client';
+import { Root } from 'react-dom/client';
 
 import { CodeHistoryStore } from '@noodl-models/CodeHistory';
 import { WarningsModel } from '@noodl-models/warningsmodel';
@@ -26,6 +26,7 @@ import {
   type Viewport
 } from './popoutSize';
 import { Property, PropertyProps } from './Property';
+import { createReactRoot, unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 /** Where the popout's remembered size lives. Unchanged, so an existing good size survives. */
 const SIZE_STORAGE_KEY = 'codeeditor_size_percentage';
@@ -275,7 +276,7 @@ export class CodeEditorType extends TypeView {
 
     // Unmount popout root
     if (this.popoutRoot) {
-      this.popoutRoot.unmount();
+      unmountReactRoot(this.popoutRoot);
       this.popoutRoot = null;
     }
 
@@ -296,7 +297,7 @@ export class CodeEditorType extends TypeView {
     };
 
     this.propertyDiv = document.createElement('div');
-    this.propertyRoot = createRoot(this.propertyDiv);
+    this.propertyRoot = createReactRoot(this.propertyDiv);
     this.propertyRoot.render(React.createElement(Property, propertyProps));
 
     this.el = this.propertyDiv;
@@ -346,7 +347,7 @@ export class CodeEditorType extends TypeView {
     const initialSize = { x: size.width, y: size.height };
 
     this.popoutDiv = document.createElement('div');
-    this.popoutRoot = createRoot(this.popoutDiv);
+    this.popoutRoot = createReactRoot(this.popoutDiv);
 
     const validationType = this.getValidationType();
 

@@ -1,0 +1,230 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "826ad945-7d23-5eec-8c0c-71ca35035c5f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mgPage",
+      "type": "Page",
+      "label": "Merge",
+      "children": [
+        "mgOuter"
+      ],
+      "parameters": {
+        "title": "Make Ten Merge",
+        "urlPath": "merge"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mgOuter",
+      "type": "Group",
+      "label": "The ground",
+      "parent": "mgPage",
+      "children": [
+        "mgWrap"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mgWrap",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "mgOuter",
+      "children": [
+        "mgHeader",
+        "mgTitle",
+        "mgPlay"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "rowGap": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "maxWidth": {
+          "value": 960,
+          "unit": "px"
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "mgHeader",
+      "type": "/Game/Header",
+      "label": "The bar",
+      "parent": "mgWrap",
+      "parameters": {
+        "showHome": true,
+        "showHangar": true
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "mgTitle",
+      "type": "Text",
+      "label": "Make Ten Merge",
+      "parent": "mgWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-tight)",
+        "letterSpacing": "var(--tracking-tight)",
+        "color": "var(--foreground)",
+        "as": "h2",
+        "fontFamily": "Grandstander"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "mgPlay",
+      "type": "/Merge/Play",
+      "label": "The game",
+      "parent": "mgWrap",
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "mgStore",
+      "type": "/Logic/App store",
+      "label": "The store",
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "mgMe",
+      "type": "/Logic/Active profile",
+      "label": "Who is playing",
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "mgWords",
+      "type": "/Data/Words",
+      "label": "The words",
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "mgT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "mgCurriculum",
+      "type": "/Data/Curriculum",
+      "label": "The skills",
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "mgWordLists",
+      "type": "/Data/Word lists",
+      "label": "The typing words",
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "mgSave",
+      "type": "/Logic/Save model",
+      "label": "Remember the stars",
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "mgNoOne",
+      "type": "Expression",
+      "label": "Nobody signed in?",
+      "parameters": {
+        "expression": "has === false"
+      },
+      "x": 470,
+      "y": 1840
+    },
+    {
+      "id": "mgGuard",
+      "type": "Condition",
+      "label": "Send them to the profiles?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "mgGoProfiles",
+      "type": "RouterNavigate",
+      "label": "To the profiles",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Profiles"
+      },
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "mgGoHome",
+      "type": "RouterNavigate",
+      "label": "Home",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Home"
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "mgGoHangar",
+      "type": "RouterNavigate",
+      "label": "To the hangar",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Hangar"
+      },
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "mgSounds",
+      "type": "/Logic/Play sounds",
+      "label": "The fanfare",
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "mgMode",
+      "type": "/Logic/Update settings",
+      "label": "Keep Easy or Hard on the player",
+      "x": 470,
+      "y": 1360
+    }
+  ],
+  "visualRoots": [
+    "mgPage"
+  ]
+}

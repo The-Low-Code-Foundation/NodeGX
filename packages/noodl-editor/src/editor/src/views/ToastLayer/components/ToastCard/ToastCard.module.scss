@@ -8,7 +8,7 @@
   width: 340px;
   max-width: 50vw;
   padding: 13px 14px;
-  border-radius: var(--radius-10);
+  border-radius: var(--radius-xl);
   background-color: var(--theme-color-bg-1);
   border: 1px solid var(--theme-color-border-default);
   color: var(--theme-color-fg-highlight);
@@ -123,7 +123,7 @@
   cursor: pointer;
   width: 22px;
   height: 22px;
-  border-radius: var(--radius-5);
+  border-radius: var(--radius-default);
   display: flex;
   align-items: center;
   justify-content: center;

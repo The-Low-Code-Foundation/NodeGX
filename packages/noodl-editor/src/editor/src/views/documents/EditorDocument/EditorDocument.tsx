@@ -2,12 +2,12 @@ import { useNodeGraphContext } from '@noodl-contexts/NodeGraphContext/NodeGraphC
 import { useKeyboardCommands } from '@noodl-hooks/useKeyboardCommands';
 import usePrevious from '@noodl-hooks/usePrevious';
 import { ipcRenderer } from 'electron';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { IDocumentProvider } from '@noodl-models/app_registry';
 import { ProjectModel } from '@noodl-models/projectmodel';
-import { SidebarModel } from '@noodl-models/sidebar';
-import { SidebarModelEvent } from '@noodl-models/sidebar/sidebarmodel';
+import { ThemeManager } from '@noodl-models/ThemeManager';
+import { authoredPath, NodePath, samePath, selectionStore } from '@noodl-models/selection/selectionStore';
 import { EditorSettings } from '@noodl-utils/editorsettings';
 import { KeyCode, KeyMod } from '@noodl-utils/keyboard/KeyCode';
 import { KeyboardCommand } from '@noodl-utils/keyboardhandler';
@@ -23,14 +23,24 @@ import { EditorTopbar } from '../../EditorTopbar';
 import { HelpCenter } from '../../HelpCenter';
 import { NodeGraphEditor } from '../../nodegrapheditor';
 import { remeasureNodeGraphCanvas } from '../../nodegrapheditor/CanvasDOMBindings';
-import { panelHoldsCanvasSelection } from '../../nodegrapheditor/EditorEventBindings';
 import { ScopePlanStrip } from '../../panels/AiAuthoringPanel/ScopePlanStrip';
 import {
   TRANSFORM_ORIGIN_FOCUS_EVENT,
   transformOriginFocus
 } from '../../panels/propertyeditor/transformOriginFocus';
 import { showContextMenuInPopup } from '../../ShowContextMenuInPopup';
-import { BENCH_MOUNT_EVENT } from '../../VisualCanvas/benchRequest';
+import {
+  activeCanvasComponentName,
+  BENCH_MOUNT_EVENT,
+  requestBenchMount
+} from '../../VisualCanvas/benchRequest';
+import {
+  PREVIEW_STRIP_ACTION,
+  PREVIEW_STRIP_PUSH,
+  type StripAction
+} from '../../VisualCanvas/detachedStrip';
+import { onPlacementOutline, type PlacementOutline } from '../../VisualCanvas/placementOutline';
+import { usePreviewStrip } from '../../VisualCanvas/usePreviewStrip';
 import { useCanvasView } from './hooks/UseCanvasView';
 import { useCaptureThumbnails } from './hooks/UseCaptureThumbnails';
 import { useImportNodeset } from './hooks/UseImportNodeset';
@@ -59,7 +69,13 @@ function EditorDocument() {
   const [viewportSize, setViewportSize] = useState({ width: null, height: null, deviceName: null });
   const [frameDividerSize, setFrameDividerSize] = useState(undefined);
 
-  const [selectedNodeId, setSelectedNodeId] = useState(null); //The ID of the selected node, as highlighted by the viewer
+  // TVW-003 — the selected node's instance path (`NodePath`), as outlined by the viewer. `null` for none.
+  const [selectedNodePath, setPathState] = useState<NodePath | null>(null);
+  // A new array for an equal path would re-send the same outline to the preview on every click.
+  const setSelectedNodePath = useCallback(
+    (path: NodePath | null) => setPathState((current) => (samePath(current, path) ? current : path)),
+    []
+  );
 
   const [hasLoadedEditorSettings, setHasLoadedEditorSettings] = useState(false);
 
@@ -120,33 +136,41 @@ function EditorDocument() {
 
   useSetupNodeGraph(nodeGraph);
 
-  //track which nodes is currently selected. A hack that relies on the side panel to tell us.
+  /**
+   * TVW-003 — what the preview outlines is read from the one selection store.
+   *
+   * This replaced "a hack that relies on the side panel to tell us" (`SidebarModelEvent.nodeSelected`)
+   * and its `activeChanged` twin. Both were copies of the canvas selection; the canvas now writes the
+   * store itself, including the deselect on switching to a panel that has no use for a selection
+   * (FH-008's allow-list, `EditorEventBindings`), so there is nothing left for them to catch.
+   *
+   * The whole path goes to the viewer: `[headline]` from a canvas outlines every instance, as before;
+   * `[homeHero, headline]` from a preview click outlines only that Hero's headline.
+   */
+  /**
+   * Hover goes straight to the preview this document owns, not through React state: it changes on
+   * every pointer move over the canvas, and re-rendering this document for each would be the cost.
+   *
+   * 🔴 **This is the app client and nothing else.** Hover used to be a `hoverStart`/`hoverEnd`
+   * broadcast over the relay to every viewer. Only a `CanvasView` webview loads the preload that
+   * gives the viewer `window.NoodlEditor`, so only the app preview ever listened; a bench or
+   * authoring sandbox received the message and dropped it. Sending it here says so.
+   *
+   * It outlines, it never scrolls: the app preview does not move because the canvas did.
+   */
+  const canvasViewRef = useRef(canvasView);
+  canvasViewRef.current = canvasView;
+
   useEffect(() => {
-    const eventGroup = {};
-    SidebarModel.instance.on(
-      SidebarModelEvent.nodeSelected,
-      (nodeId) => {
-        setSelectedNodeId(nodeId);
-      },
-      eventGroup
-    );
-
-    SidebarModel.instance.on(
-      SidebarModelEvent.activeChanged,
-      (activeId) => {
-        // Same allow-list as the canvas deselect, deliberately shared: this is
-        // what the detached viewer highlights, and it drifting from what is
-        // selected on canvas is how the two used to disagree (FH-008).
-        if (panelHoldsCanvasSelection(activeId) === false) {
-          setSelectedNodeId(null);
-        }
-      },
-      eventGroup
-    );
-
-    return () => {
-      SidebarModel.instance.off(eventGroup);
-    };
+    const unsubscribe = selectionStore.subscribe({
+      surface: 'preview',
+      onSelection: (selection) => setSelectedNodePath(selection.nodes[0] ?? null),
+      onHover: (path) => {
+        canvasViewRef.current?.setNodeHovered(path);
+        ipcRenderer.send('viewer-hover-node', path);
+      }
+    });
+    return unsubscribe;
   }, [nodeGraph]);
 
   useEffect(() => {
@@ -156,7 +180,12 @@ function EditorDocument() {
         route: navigationState.route,
         viewportSize,
         inspectMode: previewMode ? false : true,
-        selectedNodeId
+        // TVW-002 AC6 — the RESOLVED theme, so the window does not open dark in a light editor.
+        // `ThemeManager` pushes every CHANGE, but a window detached while the theme is sitting
+        // still would never see one; this is the seed, and main sends it on `did-finish-load`.
+        theme: ThemeManager.resolvedTheme,
+        // The key keeps its old name: main forwards it verbatim as `viewer-select-node`'s argument.
+        selectedNodeId: selectedNodePath
       });
 
       const onViewerInspectNode = (_event, nodeId) => {
@@ -183,10 +212,113 @@ function EditorDocument() {
     }
   }, [previewMode, canvasView]);
 
+  /**
+   * TVW-002 AC5 — the strip for the **detached** window, computed here because this is the window
+   * that can compute it.
+   *
+   * 🔴 **The task file's §3 was wrong about where this lives, and the correction is structural.**
+   * It said the detached window should render the strip "reading `activeCanvasComponentName()`" —
+   * the one function that returns `undefined` there, because that window has no node graph. The
+   * editor owns the graph, the project model and the route table; the viewer owns the pixels. So
+   * this document computes the sentence and pushes it, exactly as DES-001's design toast does.
+   *
+   * ⚠️ **Only while detached.** Docked, `VisualCanvas` runs its own copy of this hook and this one
+   * is disabled — which now costs nothing, because the hook skips the project walk when it is off.
+   * Two live walks of a 165-component project on every graph event is the thing being avoided.
+   */
+  const [detachedCanvasComponent, setDetachedCanvasComponent] = useState(activeCanvasComponentName);
+
+  useEffect(() => {
+    if (!viewerDetached) return undefined;
+
+    const eventGroup = {};
+    EventDispatcher.instance.on(
+      'activeComponentChanged',
+      () => setDetachedCanvasComponent(activeCanvasComponentName()),
+      eventGroup
+    );
+    // Seeded as well as subscribed: detaching does not move the canvas, so without this the strip
+    // would be blank until the author next navigated — which is the moment they are least likely to
+    // need an explanation of where they are.
+    setDetachedCanvasComponent(activeCanvasComponentName());
+    return () => EventDispatcher.instance.off(eventGroup);
+  }, [viewerDetached]);
+
+  const {
+    strip: detachedStrip,
+    goToPage: detachedGoToPage,
+    dismiss: detachedDismiss
+  } = usePreviewStrip(detachedCanvasComponent, viewerDetached);
+
+  useEffect(() => {
+    if (!viewerDetached) return;
+    ipcRenderer.send(PREVIEW_STRIP_PUSH, detachedStrip);
+  }, [viewerDetached, detachedStrip]);
+
+  /**
+   * The return leg — ruled by Richard on 2026-09-18: the detached strip **carries its doors**.
+   *
+   * The alternative was the sentence alone, on the grounds that the detached window is deliberately
+   * close to "just the app". He ruled against a surface that explains less than another. A press
+   * therefore travels viewer → main → here, on the `viewer-request-preview-mode` precedent.
+   */
+  useEffect(() => {
+    const onAction = (_event: unknown, action: StripAction) => {
+      if (action?.kind === 'goto') detachedGoToPage(action.page);
+      else if (action?.kind === 'dismiss') detachedDismiss();
+      else if (action?.kind === 'ready') {
+        // The detached window has just loaded and is asking what is true. Both facts it cannot
+        // work out for itself, in one answer.
+        ipcRenderer.send(PREVIEW_STRIP_PUSH, detachedStrip);
+        ipcRenderer.send('viewer-set-theme', ThemeManager.resolvedTheme);
+      } else if (action?.kind === 'bench' && detachedCanvasComponent) {
+        // BEN-004: the bench is a mode of the DOCKED surface. `requestBenchMount` parks the target
+        // and the handler below re-attaches, which is what this door has always meant — it is the
+        // menu item's behaviour, reached from a second place.
+        requestBenchMount(detachedCanvasComponent);
+      }
+    };
+
+    ipcRenderer.on(PREVIEW_STRIP_ACTION, onAction);
+    return () => {
+      ipcRenderer.off(PREVIEW_STRIP_ACTION, onAction);
+    };
+  }, [detachedGoToPage, detachedDismiss, detachedCanvasComponent, detachedStrip]);
+
+  /**
+   * TVW-002 AC1 — where the canvas's component sits on the screen the preview is showing, published
+   * by the strip.
+   *
+   * 🔴 **This document is the single writer of the preview's outline, and that is the whole reason
+   * the value arrives here instead of being drawn where it was computed.** The guest holds one
+   * selection with no notion of who asked; two writers means the outline lands on whichever effect
+   * ran last. See `placementOutline.ts`.
+   */
+  const [placementOutline, setPlacementOutline] = useState<PlacementOutline>(null);
+  useEffect(() => onPlacementOutline(setPlacementOutline), []);
+
+  /**
+   * TVW-002 AC1 — the placement outline, on its OWN channel.
+   *
+   * 🔴 It used to be merged into the selection above (`selectedNodePath ?? placementOutline`),
+   * which drew the right line and, the drive showed, also dropped the box-model chip over the
+   * running app — because the highlighter takes its inspector focus from the selection. It is not
+   * an inspection request. See `CanvasView.setPlacementOutline`.
+   *
+   * **A real selection still wins**, and now for a plain reason rather than a merge: the outline is
+   * cleared while one exists, so the preview is never drawing a line about a question the author
+   * has stopped asking. In preview mode nothing is drawn at all, as before.
+   */
+  useEffect(() => {
+    const path = previewMode || selectedNodePath ? null : placementOutline;
+    canvasView?.setPlacementOutline(path);
+    ipcRenderer.send('viewer-placement-outline', path);
+  }, [placementOutline, selectedNodePath, previewMode, canvasView]);
+
   useEffect(() => {
     if (!previewMode) {
-      canvasView?.setNodeSelected(selectedNodeId);
-      ipcRenderer.send('viewer-select-node', selectedNodeId);
+      canvasView?.setNodeSelected(selectedNodePath);
+      ipcRenderer.send('viewer-select-node', selectedNodePath);
     }
 
     // FB-016 scope 4 — a new selection rebuilds the properties panel, which is exactly the case
@@ -194,7 +326,7 @@ function EditorDocument() {
     // back on dispose; this is the belt to that pair of braces, and it is also simply correct:
     // the crosshair described the node that is no longer selected.
     transformOriginFocus.reset();
-  }, [selectedNodeId, canvasView, previewMode]);
+  }, [selectedNodePath, canvasView, previewMode]);
 
   const onRouteChanged = useCallback(
     (route) => {
@@ -312,7 +444,17 @@ function EditorDocument() {
           // Did we find a node that belongs to a component
           if (node && node.owner && node.owner.owner) {
             const component = node.owner.owner;
-            nodeGraph.switchToComponent(component, { node: node, pushHistory: true });
+            // TVW-003: the preview writes the store and the canvas decides whether it has to move
+            // (`resolveCanvasMove`). The preview does not hear its own write, so it sets its own
+            // outline here — the same thing the canvas's echo used to set.
+            //
+            // A click sends the instance path (`args.paths`); ids the project does not hold — a
+            // router's page, a For Each row, all fresh guids per render — are dropped, so the path
+            // still addresses the same element after a reload.
+            const clicked = args.paths?.[0];
+            const path = clicked ? authoredPath(clicked, (id) => !!ProjectModel.instance.findNodeWithId(id)) : [node.id];
+            selectionStore.select('preview', component, [path]);
+            setSelectedNodePath(path);
 
             /**
              * DES-001 — say what was selected, in the preview.

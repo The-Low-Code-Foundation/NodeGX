@@ -373,14 +373,32 @@ export type TemplateSummary = {
    * one direction that matters.
    */
   attestedLicence: string | null;
+  /** CHR-006 (`0029`) — the category as the card reads it. `null` from an older platform or a publisher who gave none. */
+  eyebrow: string | null;
+  /**
+   * CHR-006 — the card's picture as an **absolute URL on the community origin**, or `null`.
+   *
+   * 🔴 **THE PLATFORM SENDS A PATH AND ONLY A TEMPLATE-THUMBNAIL PATH IS BELIEVED.** This value
+   * becomes an `<img src>` in the launcher, so a row that named any other origin, or any other
+   * route, would be the shelf deciding what the editor fetches. Anything but
+   * `/api/v1/community/templates/<slug>/thumbnail…` reads as `null`, and the card draws its
+   * wireframe — the same card an older platform gets.
+   */
+  thumbnail: string | null;
   updatedAt: string;
 };
 
-function readTemplateSummary(raw: unknown): TemplateSummary | null {
+const TEMPLATE_THUMBNAIL_PATH = /^\/api\/v1\/community\/templates\/[a-z0-9-]+\/thumbnail(\?v=\d+)?$/;
+
+/** Exported so a spec grades the refusal without a fetch. `origin` is the client's `baseUrl`. */
+export function readTemplateSummary(raw: unknown, origin = ''): TemplateSummary | null {
   if (!raw || typeof raw !== 'object') return null;
   const r = raw as Record<string, unknown>;
   if (typeof r.slug !== 'string' || typeof r.title !== 'string') return null;
   return {
+    eyebrow: typeof r.eyebrow === 'string' && r.eyebrow.trim() !== '' ? r.eyebrow : null,
+    thumbnail:
+      typeof r.thumbnail === 'string' && TEMPLATE_THUMBNAIL_PATH.test(r.thumbnail) ? `${origin}${r.thumbnail}` : null,
     slug: r.slug,
     title: r.title,
     // ⚠️ `''` and not `null`, unlike `TutorialSummary.summary`. This one is drawn as the
@@ -1454,7 +1472,26 @@ export class CommunityApiClient {
     this.doFetch = options.fetchImpl ?? (fallbackFetch ? fallbackFetch.bind(globalThis) : (fallbackFetch as typeof fetch));
   }
 
-  private async get<T>(path: string): Promise<Read<T>> {
+  private async get<T>(path: string, options?: { credentialed?: boolean }): Promise<Read<T>> {
+    // 🔴 **A ROUTE THAT CANNOT BE ANSWERED WITHOUT A CREDENTIAL IS NOT REQUESTED WITHOUT ONE,
+    // AND THE REASON IS THE CONSOLE RATHER THAN THE ROUND TRIP.** Chromium writes
+    // `Failed to load resource: … 401` from the NETWORK stack, as a `Log.entryAdded` entry —
+    // before any JavaScript sees the response and with nothing a `catch` can do about it. So
+    // the 401 this client models so carefully as an ordinary `unauthenticated` fact still
+    // lands in every renderer log as an error, and HLT-004 measured two of them on every
+    // single launch. The only way to stop writing them is not to make the request.
+    //
+    // ⚠️ **The flag is passed at the CALL SITE, not matched against a table of paths.** A
+    // second list of "which routes need a token" here would be a copy of a fact the platform
+    // owns, free to drift the moment a route changes its mind — the shape
+    // [[a-second-copy-of-a-palette-drifts-silently]] names. Marked beside the route string,
+    // there is exactly one place per route and it is the line that already knows.
+    //
+    // ⚠️ **Only the two routes HLT-004 MEASURED are marked.** Others may well require a
+    // credential too; none of them was measured, and marking a route on a guess is how a
+    // read that works signed out quietly stops being made.
+    if (options?.credentialed && !this.token) return { outcome: 'unauthenticated' };
+
     const headers: Record<string, string> = { accept: 'application/json' };
     // ⚠️ A bearer header rather than a cookie: this is not a browser and has no jar scoped to
     // the platform's origin. The platform accepts both against the same `sessions` row.
@@ -2163,7 +2200,8 @@ export class CommunityApiClient {
 
     const items: TemplateSummary[] = [];
     for (const entry of raw) {
-      const row = readTemplateSummary(entry);
+      // CHR-006: the origin, so a picture path becomes a URL on the server that sent it.
+      const row = readTemplateSummary(entry, this.baseUrl);
       if (row) items.push(row);
     }
     return { outcome: 'ok', value: { items, page: readPageInfo(read.value?.page, items.length) } };
@@ -2462,7 +2500,7 @@ export class CommunityApiClient {
    * *"list yourself"* to a pupil the platform is refusing to show a directory to at all.
    */
   myListing(): Promise<Read<MyListingResponse>> {
-    return this.get<MyListingResponse>('/api/v1/me/profile');
+    return this.get<MyListingResponse>('/api/v1/me/profile', { credentialed: true });
   }
 
   /**
@@ -2533,7 +2571,7 @@ export class CommunityApiClient {
    * {@link Read} — the variant exists because of this route.
    */
   path(): Promise<Read<PathState>> {
-    return this.get<PathState>('/api/v1/me/path');
+    return this.get<PathState>('/api/v1/me/path', { credentialed: true });
   }
 
   /**

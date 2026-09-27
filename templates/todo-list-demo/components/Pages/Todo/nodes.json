@@ -1,0 +1,656 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2a27acad-faa1-5d5d-8b2a-96f109b88cac",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tdPage",
+      "type": "Page",
+      "label": "Todo",
+      "parameters": {
+        "title": "Todo list",
+        "urlPath": ""
+      },
+      "children": [
+        "tdRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "tdRoot",
+      "type": "Group",
+      "label": "Page",
+      "parent": "tdPage",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "alignItems": "center",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-12)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "children": [
+        "tdShell",
+        "tdDialog"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "tdShell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "tdRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-5)",
+        "maxWidth": {
+          "value": 1080,
+          "unit": "px"
+        }
+      },
+      "children": [
+        "tdDemoNotice",
+        "tdHeader",
+        "tdProblem",
+        "tdMain"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "tdDemoNotice",
+      "type": "Text",
+      "label": "It is a demo",
+      "parent": "tdShell",
+      "parameters": {
+        "text": "This is a demo. Nothing you type leaves this browser, and Reset demo puts the example list back.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "tdHeader",
+      "type": "/Todo/Header",
+      "label": "Header",
+      "parent": "tdShell",
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "tdProblem",
+      "type": "/Todo/Problem banner",
+      "label": "Problem",
+      "parent": "tdShell",
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "tdMain",
+      "type": "Group",
+      "label": "List and task",
+      "parent": "tdShell",
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "flex-start",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-6)",
+        "styleCss": "row-gap: 24px;"
+      },
+      "children": [
+        "tdLeft",
+        "tdRight"
+      ],
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "tdLeft",
+      "type": "Group",
+      "label": "The list",
+      "parent": "tdMain",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)",
+        "styleCss": "flex: 1 1 380px; min-width: 0;"
+      },
+      "children": [
+        "tdListView",
+        "tdDoneView",
+        "tdLogView"
+      ],
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "tdListView",
+      "type": "Group",
+      "label": "List view",
+      "parent": "tdLeft",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "tdList"
+      ],
+      "x": 340,
+      "y": 1000
+    },
+    {
+      "id": "tdList",
+      "type": "/Todo/Task list",
+      "label": "Open tasks",
+      "parent": "tdListView",
+      "x": 400,
+      "y": 1120
+    },
+    {
+      "id": "tdDoneView",
+      "type": "Group",
+      "label": "Done view",
+      "parent": "tdLeft",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "mounted": false
+      },
+      "children": [
+        "tdDone"
+      ],
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "tdDone",
+      "type": "/Todo/Done list",
+      "label": "Closed tasks",
+      "parent": "tdDoneView",
+      "x": 400,
+      "y": 1360
+    },
+    {
+      "id": "tdLogView",
+      "type": "Group",
+      "label": "Log view",
+      "parent": "tdLeft",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "mounted": false
+      },
+      "children": [
+        "tdLog"
+      ],
+      "x": 340,
+      "y": 1480
+    },
+    {
+      "id": "tdLog",
+      "type": "/Todo/Log list",
+      "label": "Everything that happened",
+      "parent": "tdLogView",
+      "x": 400,
+      "y": 1600
+    },
+    {
+      "id": "tdRight",
+      "type": "Group",
+      "label": "The selected task",
+      "parent": "tdMain",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-6)",
+        "styleCss": "flex: 1 1 380px; min-width: 0;",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-6)"
+      },
+      "children": [
+        "tdEmpty",
+        "tdDetail"
+      ],
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "tdEmpty",
+      "type": "Text",
+      "label": "When nothing is selected",
+      "parent": "tdRight",
+      "parameters": {
+        "text": "Select a task to see its details.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "textAlignX": "center"
+      },
+      "x": 340,
+      "y": 1840
+    },
+    {
+      "id": "tdDetail",
+      "type": "Group",
+      "label": "Task detail",
+      "parent": "tdRight",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-6)",
+        "mounted": false
+      },
+      "children": [
+        "tdSummary",
+        "tdNext",
+        "tdHistory"
+      ],
+      "x": 340,
+      "y": 1960
+    },
+    {
+      "id": "tdSummary",
+      "type": "/Todo/Task summary",
+      "label": "Summary",
+      "parent": "tdDetail",
+      "x": 400,
+      "y": 2080
+    },
+    {
+      "id": "tdNext",
+      "type": "/Todo/Next actions",
+      "label": "Next actions",
+      "parent": "tdDetail",
+      "x": 400,
+      "y": 2200
+    },
+    {
+      "id": "tdHistory",
+      "type": "/Todo/History",
+      "label": "History",
+      "parent": "tdDetail",
+      "x": 400,
+      "y": 2320
+    },
+    {
+      "id": "tdDialog",
+      "type": "/Todo/Dialog flow",
+      "label": "What happened?",
+      "parent": "tdRoot",
+      "x": 160,
+      "y": 2440
+    },
+    {
+      "id": "tdData",
+      "type": "/Logic/Todo data",
+      "label": "Your list, kept in this browser",
+      "x": 650,
+      "y": 40
+    },
+    {
+      "id": "tdRows",
+      "type": "/Logic/Task rows",
+      "label": "The rows",
+      "x": 650,
+      "y": 520
+    },
+    {
+      "id": "tdSel",
+      "type": "/Logic/Selected task",
+      "label": "The selected task",
+      "x": 650,
+      "y": 1960
+    },
+    {
+      "id": "tdLogRows",
+      "type": "/Logic/Log rows",
+      "label": "The log lines",
+      "x": 650,
+      "y": 1720
+    },
+    {
+      "id": "tdScreen",
+      "type": "Screen Resolution",
+      "label": "How wide the screen is",
+      "x": 650,
+      "y": 4120
+    },
+    {
+      "id": "tdLayout",
+      "type": "JavaScriptFunction",
+      "label": "One pane or two?",
+      "parameters": {
+        "functionScript": "var narrow = (Inputs.width || 1200) < 820;\nvar found = !!Inputs.found;\nOutputs.narrow = narrow;\nOutputs.showLeft = !(narrow && found);\nOutputs.showRight = !narrow || found;"
+      },
+      "x": 650,
+      "y": 880,
+      "ports": [
+        {
+          "name": "in-width",
+          "displayName": "width",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-found",
+          "displayName": "found",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-narrow",
+          "displayName": "narrow",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showLeft",
+          "displayName": "showLeft",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showRight",
+          "displayName": "showRight",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "tdTab",
+      "type": "States",
+      "label": "Which view",
+      "parameters": {
+        "states": "list,done,log",
+        "currentState": "list",
+        "useTransitions": false
+      },
+      "x": 650,
+      "y": 640
+    },
+    {
+      "id": "tdSelected",
+      "type": "Variable2",
+      "label": "The selected task",
+      "parameters": {
+        "name": "todoSelected"
+      },
+      "x": 650,
+      "y": 3520
+    },
+    {
+      "id": "tdSelectFromList",
+      "type": "Set Variable",
+      "label": "Select from the list",
+      "parameters": {
+        "name": "todoSelected",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 1120
+    },
+    {
+      "id": "tdSelectFromDone",
+      "type": "Set Variable",
+      "label": "Select from Done",
+      "parameters": {
+        "name": "todoSelected",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 1600
+    },
+    {
+      "id": "tdSelectFromLog",
+      "type": "Set Variable",
+      "label": "Select from the log",
+      "parameters": {
+        "name": "todoSelected",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 1840
+    },
+    {
+      "id": "tdDeselect",
+      "type": "Set Variable",
+      "label": "Back to the list",
+      "parameters": {
+        "name": "todoSelected",
+        "setWith": "emptyString"
+      },
+      "x": 650,
+      "y": 2080
+    },
+    {
+      "id": "tdOpenAction",
+      "type": "Variable2",
+      "label": "Which description is open",
+      "parameters": {
+        "name": "todoOpenAction"
+      },
+      "x": 650,
+      "y": 4240
+    },
+    {
+      "id": "tdOpenDesc",
+      "type": "Set Variable",
+      "label": "Open a description",
+      "parameters": {
+        "name": "todoOpenAction",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 2560
+    },
+    {
+      "id": "tdCloseDesc",
+      "type": "Set Variable",
+      "label": "Close the description",
+      "parameters": {
+        "name": "todoOpenAction",
+        "setWith": "emptyString"
+      },
+      "x": 650,
+      "y": 2680
+    },
+    {
+      "id": "cmdAdd",
+      "type": "/Commands/Add task",
+      "label": "Add",
+      "x": 650,
+      "y": 1240
+    },
+    {
+      "id": "cmdUp",
+      "type": "/Commands/Move task",
+      "label": "Up",
+      "parameters": {
+        "direction": "up"
+      },
+      "x": 650,
+      "y": 1360
+    },
+    {
+      "id": "cmdDown",
+      "type": "/Commands/Move task",
+      "label": "Down",
+      "parameters": {
+        "direction": "down"
+      },
+      "x": 650,
+      "y": 1480
+    },
+    {
+      "id": "cmdTop",
+      "type": "/Commands/Move task",
+      "label": "Top",
+      "parameters": {
+        "direction": "top"
+      },
+      "x": 650,
+      "y": 2200
+    },
+    {
+      "id": "cmdClose",
+      "type": "/Commands/Close task",
+      "label": "Close",
+      "x": 650,
+      "y": 3640
+    },
+    {
+      "id": "cmdReopen",
+      "type": "/Commands/Reopen task",
+      "label": "Reopen",
+      "x": 650,
+      "y": 3760
+    },
+    {
+      "id": "cmdRename",
+      "type": "/Commands/Rename task",
+      "label": "Rename",
+      "x": 650,
+      "y": 2320
+    },
+    {
+      "id": "cmdDeadline",
+      "type": "/Commands/Set deadline",
+      "label": "Deadline",
+      "x": 650,
+      "y": 2440
+    },
+    {
+      "id": "cmdAddAction",
+      "type": "/Commands/Add action",
+      "label": "AddAction",
+      "x": 650,
+      "y": 2800
+    },
+    {
+      "id": "cmdTick",
+      "type": "/Commands/Tick action",
+      "label": "Tick",
+      "x": 650,
+      "y": 3880
+    },
+    {
+      "id": "cmdUntick",
+      "type": "/Commands/Untick action",
+      "label": "Untick",
+      "x": 650,
+      "y": 4000
+    },
+    {
+      "id": "cmdActUp",
+      "type": "/Commands/Move action",
+      "label": "ActUp",
+      "parameters": {
+        "direction": "up"
+      },
+      "x": 650,
+      "y": 2920
+    },
+    {
+      "id": "cmdActDown",
+      "type": "/Commands/Move action",
+      "label": "ActDown",
+      "parameters": {
+        "direction": "down"
+      },
+      "x": 650,
+      "y": 3040
+    },
+    {
+      "id": "cmdRenameAct",
+      "type": "/Commands/Rename action",
+      "label": "RenameAct",
+      "x": 650,
+      "y": 3160
+    },
+    {
+      "id": "cmdDescribe",
+      "type": "/Commands/Describe action",
+      "label": "Describe",
+      "x": 650,
+      "y": 3280
+    },
+    {
+      "id": "cmdNote",
+      "type": "/Commands/Add note",
+      "label": "Note",
+      "x": 650,
+      "y": 3400
+    }
+  ],
+  "visualRoots": [
+    "tdPage"
+  ]
+}

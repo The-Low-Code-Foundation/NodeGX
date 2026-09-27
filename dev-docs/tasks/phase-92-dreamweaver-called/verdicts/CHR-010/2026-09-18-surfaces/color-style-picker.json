@@ -1,0 +1,70 @@
+{
+  "name": "color-style-picker",
+  "scope": "document.querySelector('.popup-layer-popout')",
+  "themes": {
+    "dark": {
+      "ground": "rgb(35, 33, 41)",
+      "census": {
+        "scope": "popup-layer-popout",
+        "scopeBox": [
+          230,
+          600
+        ],
+        "total": 1,
+        "drawn": 1,
+        "emptyHosts": 0,
+        "collapsed": 0,
+        "boxes": [
+          "14x14"
+        ],
+        "colours": [
+          "rgb(221, 228, 236)"
+        ],
+        "faLeft": 0,
+        "glyphs": [
+          " | 14x14 | svg 14x14 | rgb(221, 228, 236)"
+        ]
+      },
+      "clip": {
+        "x": 352,
+        "y": 159,
+        "width": 246,
+        "height": 616,
+        "scale": 1
+      },
+      "png": "color-style-picker-dark.png"
+    },
+    "light": {
+      "ground": "rgb(255, 255, 255)",
+      "census": {
+        "scope": "popup-layer-popout",
+        "scopeBox": [
+          230,
+          600
+        ],
+        "total": 1,
+        "drawn": 1,
+        "emptyHosts": 0,
+        "collapsed": 0,
+        "boxes": [
+          "14x14"
+        ],
+        "colours": [
+          "rgb(74, 86, 99)"
+        ],
+        "faLeft": 0,
+        "glyphs": [
+          " | 14x14 | svg 14x14 | rgb(74, 86, 99)"
+        ]
+      },
+      "clip": {
+        "x": 352,
+        "y": 159,
+        "width": 246,
+        "height": 616,
+        "scale": 1
+      },
+      "png": "color-style-picker-light.png"
+    }
+  }
+}

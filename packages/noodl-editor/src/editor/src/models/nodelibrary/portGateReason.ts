@@ -119,15 +119,51 @@ export interface PortGateReason {
   /**
    * The parameter to focus when the author clicks the reason — AC3.
    *
-   * The first clause's parameter, which for every multi-clause condition in the
+   * The first clause's parameter, which for nearly every multi-clause condition in the
    * catalog is also every other clause's: a condition that gates `width` asks
    * about `sizeMode` five times, never about five different things.
+   *
+   * 🔴 Not all: `useLabel = true AND labelPosition = top`, and P102's `boxShadowEnabled = true AND
+   * boxShadowSource = token`, each ask two things, and the first is usually already met. A panel with the node's values at hand passes the
+   * reason through {@link withUnmetGate} so the link goes to what is still missing.
    */
   gatePortName: string;
   /** That parameter's label, for the clickable part of the row. */
   gateLabel: string;
   /** `Width applies when Size Mode is Explicit or Content Height.` */
   sentence: string;
+  /**
+   * CHR-008 (R8): the part of {@link sentence} after "applies when" — `Size Mode is Explicit or Content
+   * Height` — so a group whose rows share it can say it once (`groupGate.ts`). Optional because a reason
+   * built anywhere but {@link reasonsForGatedPorts} may not carry it, and `groupGate.ts` then refuses to
+   * summarise rather than guess.
+   */
+  condition?: string;
+  /**
+   * CHR-008 (R8): the condition is one clause, `<boolean port> = true`, so one press sets the gate port to
+   * `true` and every row it switched off comes back. Anything else — an enum, `!=`, `NOT SET`, several
+   * clauses — has no single value to set, and the panel does not choose one for the author. Absent reads
+   * as `false`.
+   */
+  turnOn?: boolean;
+  /**
+   * CHR-008 (R8, Richard's condition: no "same error repeated on 5 lines successively"): the clauses behind
+   * {@link condition}, each with the label and value label the sentence used, and how they combine. A group
+   * whose rows have DIFFERENT conditions phrases only what they share (`groupGate.ts`) through
+   * {@link phraseCondition}, so its line and a row's own sentence can never word a clause two ways.
+   */
+  clauses?: LabelledClause[];
+  connective?: 'and' | 'or';
+}
+
+/** A clause with the words {@link phraseCondition} needs, resolved while the node's ports were at hand. */
+export interface LabelledClause extends GateClause {
+  /** The parameter's label — `Size Mode`. */
+  label: string;
+  /** The value as the control shows it — `Content Height`, `on`. Absent for `NOT SET`. */
+  valueLabel?: string;
+  /** The parameter is a boolean port, so `= true` is one press. */
+  isBoolean?: boolean;
 }
 
 /** The `conditionalports/*` group shape, as `nodelibraryexport` writes it. */
@@ -264,7 +300,7 @@ function labelForValue(port: GatePortLike | undefined, value: string): string {
  * sentence repeats "Size Mode is" five times and stops being readable — which
  * would make the reason exactly the kind of thing an author skips over.
  */
-function phraseFor(clauses: GateClause[], ports: Map<string, GatePortLike>): GatePhrase[] {
+function phraseFor(clauses: LabelledClause[]): GatePhrase[] {
   const phrases: GatePhrase[] = [];
 
   let index = 0;
@@ -272,7 +308,6 @@ function phraseFor(clauses: GateClause[], ports: Map<string, GatePortLike>): Gat
 
   while (index < clauses.length) {
     const clause = clauses[index];
-    const port = ports.get(clause.param);
     /*
      * 🔴 The subject is dropped when it would repeat, and the drive is why.
      *
@@ -282,7 +317,7 @@ function phraseFor(clauses: GateClause[], ports: Map<string, GatePortLike>): Gat
      * Explicit or Content Height or Size Mode is not set."* True, and it names the control
      * twice in one short sentence, which is exactly the kind of line an author's eye slides off.
      */
-    const subject = previousParam === clause.param ? '' : `${labelForPort(port, clause.param)} `;
+    const subject = previousParam === clause.param ? '' : `${clause.label} `;
     previousParam = clause.param;
 
     if (clause.op === 'NOT SET') {
@@ -291,10 +326,10 @@ function phraseFor(clauses: GateClause[], ports: Map<string, GatePortLike>): Gat
       continue;
     }
 
-    const values = [labelForValue(port, clause.value)];
+    const values = [clause.valueLabel];
     let next = index + 1;
     while (next < clauses.length && clauses[next].param === clause.param && clauses[next].op === clause.op) {
-      values.push(labelForValue(ports.get(clauses[next].param), clauses[next].value));
+      values.push(clauses[next].valueLabel);
       next += 1;
     }
     index = next;
@@ -305,6 +340,32 @@ function phraseFor(clauses: GateClause[], ports: Map<string, GatePortLike>): Gat
   }
 
   return phrases;
+}
+
+/**
+ * A condition's words — `Size Mode is Explicit or Content height, or is not set` — from labelled clauses.
+ *
+ * The one place a condition is worded: a row's sentence and CHR-008's group line both come through here.
+ * The comma before the final connective is there only when the last phrase dropped its subject.
+ * *"Explicit or Content height or is not set"* runs the two readings together;
+ * *"Explicit or Content height, or is not set"* separates them. Where every phrase names its own control
+ * there is nothing to disambiguate, and the comma would just be clutter.
+ */
+export function phraseCondition(clauses: readonly LabelledClause[], connective: 'and' | 'or'): string {
+  const phrases = phraseFor(clauses.slice());
+  const last = phrases[phrases.length - 1];
+  return phrases.length === 1
+    ? last.text
+    : `${phrases
+        .slice(0, -1)
+        .map((phrase) => phrase.text)
+        .join(', ')}${last.elided ? ',' : ''} ${connective} ${last.text}`;
+}
+
+/** Whether a port is a boolean — `'boolean'` or `{ name: 'boolean' }`. */
+function isBooleanPort(port: GatePortLike | undefined): boolean {
+  const type = port ? port.type : undefined;
+  return type === 'boolean' || (typeof type === 'object' && type !== null && (type as { name?: string }).name === 'boolean');
 }
 
 /**
@@ -375,8 +436,12 @@ export function reasonsForGatedPorts(
     // catalog references an undeclared parameter — this keeps it that way.
     if (usable.length !== parsed.clauses.length && parsed.connective !== 'or') continue;
 
-    const phrases = phraseFor(usable, byName);
-    const last = phrases[phrases.length - 1];
+    const labelled: LabelledClause[] = usable.map((clause) => ({
+      ...clause,
+      label: labelForPort(byName.get(clause.param), clause.param),
+      ...(clause.op === 'NOT SET' ? {} : { valueLabel: labelForValue(byName.get(clause.param), clause.value) }),
+      isBoolean: isBooleanPort(byName.get(clause.param))
+    }));
     /*
      * The comma before the final connective is there only when the last phrase dropped its
      * subject. *"Explicit or Content height or is not set"* runs the two readings together;
@@ -384,25 +449,49 @@ export function reasonsForGatedPorts(
      * its own control there is nothing to disambiguate, and the comma would just be clutter —
      * *"Layout is not None and Enable Scroll is on"* is right as it stands.
      */
-    const joined =
-      phrases.length === 1
-        ? last.text
-        : `${phrases
-            .slice(0, -1)
-            .map((phrase) => phrase.text)
-            .join(', ')}${last.elided ? ',' : ''} ${parsed.connective} ${last.text}`;
+    const joined = phraseCondition(labelled, parsed.connective);
 
     const gatePortName = usable[0].param;
+    const gatePort = byName.get(gatePortName);
 
     reasons.set(portName, {
       portName,
       gatePortName,
-      gateLabel: labelForPort(byName.get(gatePortName), gatePortName),
-      sentence: `${labelForPort(byName.get(portName), portName)} applies when ${joined}.`
+      gateLabel: labelForPort(gatePort, gatePortName),
+      sentence: `${labelForPort(byName.get(portName), portName)} applies when ${joined}.`,
+      condition: joined,
+      // CHR-008 (R8). Sound after the undeclared-disjunct drop above: what is left is `<port> = true` OR
+      // clauses that can never be true, so setting the port to `true` is exactly what switches the row on.
+      turnOn: labelled.length === 1 && Boolean(labelled[0].isBoolean) && labelled[0].op === '=' && labelled[0].value === 'true',
+      clauses: labelled,
+      connective: parsed.connective
     });
   }
 
   return reasons;
+}
+
+/**
+ * P102 CMP-007 row 2 — send the author to the clause the node does not meet yet.
+ *
+ * {@link reasonsForGatedPorts} works from declarations, so its `gatePortName` is the first clause's
+ * parameter. For an `and` over two parameters that is usually the one already satisfied: a Group
+ * with its shadow on and Source *Custom* read *"Shadow Token applies when Shadow Enabled is on and
+ * Shadow Source is From a style token. **Show Shadow Enabled**"* — a link to a switch that was on.
+ * Each clause is judged the way `evaluateDynamicPortsCondition` judges it (`'' + value === text`).
+ * Returns the reason unchanged when every clause is met, when it is an `or`, or when the first
+ * unmet clause is already the one it names.
+ */
+export function withUnmetGate(reason: PortGateReason, getParameter: (name: string) => unknown): PortGateReason {
+  if (reason.connective !== 'and' || !reason.clauses) return reason;
+  const holds = (clause: GateClause) => {
+    const value = getParameter(clause.param);
+    if (clause.op === 'NOT SET') return value === undefined;
+    return clause.op === '=' ? '' + value === clause.value : '' + value !== clause.value;
+  };
+  const unmet = reason.clauses.find((clause) => !holds(clause));
+  if (!unmet || unmet.param === reason.gatePortName) return reason;
+  return { ...reason, gatePortName: unmet.param, gateLabel: unmet.label, turnOn: false };
 }
 
 /**

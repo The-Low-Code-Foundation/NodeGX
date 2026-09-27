@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5e8619ec-82e1-57b3-89d3-0ee9cfe13c1f",
+  "name": "New monster game",
+  "path": "/Logic/New monster game",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A fresh Monster Gate game in Style (gate: Beat it to the gate; push: Push it back) and pace (Timed): three hearts, the first of three monsters, and a new Id, which the round grades the answers under and the finish pays once for. Publishes the whole Game: hold it in one Variable."
+}

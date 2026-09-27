@@ -11,6 +11,14 @@
  *
  * @module noodl-editor/tests-unit/nat-007/threadview-writes
  */
+// FLD-017 — CHR-012 made the community write verbs `PrimaryButton`, which imports `Icon`.
+jest.mock('@noodl-core-ui/components/common/Icon', () => ({
+  Icon: () => null,
+  IconName: {},
+  IconSize: { Small: 'small' },
+  IconVariant: {}
+}));
+
 import type { MeResponse, Read, ThreadDetail, ThreadPost } from '@noodl-models/community/communityapi';
 import { composeThreadView, postedNote, threadDetailView } from '@noodl-models/community/threadview';
 import type { AcceptOffer } from '@noodl-models/community/threadwrites';

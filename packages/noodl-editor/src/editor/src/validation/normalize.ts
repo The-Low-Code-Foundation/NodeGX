@@ -26,6 +26,8 @@ import {
 // this module has no hard dependency on the editor's model classes.
 interface LegacyPortLike {
   name?: string;
+  /** GAM-019 — a string, or an object with a `name`; see NormNode.instancePortTypes. */
+  type?: unknown;
 }
 interface LegacyNodeLike {
   id: string;
@@ -67,6 +69,25 @@ function instancePortNames(node: { ports?: LegacyPortLike[]; dynamicports?: Lega
   for (const p of node.ports ?? []) if (p && typeof p.name === 'string') names.push(p.name);
   for (const p of node.dynamicports ?? []) if (p && typeof p.name === 'string') names.push(p.name);
   return names;
+}
+
+/**
+ * GAM-019 — the same two bags, keeping each port's declared type name.
+ *
+ * Spread-able for the same reason as {@link normalizedParameters}: a node whose ports record no
+ * type carries no `instancePortTypes` key at all.
+ */
+export function instancePortTypes(ports: readonly (LegacyPortLike | null | undefined)[]): {
+  instancePortTypes?: Record<string, string>;
+} {
+  const types: Record<string, string> = {};
+  for (const p of ports) {
+    if (!p || typeof p.name !== 'string') continue;
+    const t = p.type;
+    const name = typeof t === 'string' ? t : t && typeof t === 'object' ? (t as { name?: unknown }).name : undefined;
+    if (typeof name === 'string' && name) types[p.name] = name;
+  }
+  return Object.keys(types).length > 0 ? { instancePortTypes: types } : {};
 }
 
 /**
@@ -121,6 +142,7 @@ function flatten(roots: LegacyNodeLike[]): NormNode[] {
       parent: parentId,
       children: childIds,
       instancePorts: instancePortNames(node),
+      ...instancePortTypes([...(node.ports ?? []), ...(node.dynamicports ?? [])]),
       ...normalizedParameters(node.parameters),
       metadata: node.metadata
     });
@@ -149,6 +171,7 @@ export function normalizeV2Component(
     parent: n.parent,
     children: Array.isArray(n.children) ? n.children : [],
     instancePorts: instancePortNames(n),
+    ...instancePortTypes([...(n.ports ?? []), ...(n.dynamicports ?? [])]),
     ...normalizedParameters((n as { parameters?: Record<string, unknown> | null }).parameters),
     metadata: (n as { metadata?: Record<string, unknown> }).metadata
   }));

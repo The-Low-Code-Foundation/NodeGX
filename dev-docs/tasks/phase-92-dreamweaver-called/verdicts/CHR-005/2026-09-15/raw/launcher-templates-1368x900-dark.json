@@ -1,0 +1,462 @@
+{
+  "tab": "Templates",
+  "theme": "dark",
+  "size": "1368x900",
+  "geometry": {
+    "viewport": [
+      1368,
+      900
+    ],
+    "theme": "dark",
+    "title": {
+      "x": 120,
+      "y": 84,
+      "w": 1009,
+      "h": 29
+    },
+    "titleText": "Templates",
+    "toolbar": {
+      "x": 120,
+      "y": 178,
+      "w": 1120,
+      "h": 35
+    },
+    "column": {
+      "x": 120,
+      "y": 84,
+      "w": 1120,
+      "h": 1264
+    },
+    "header": {
+      "x": 0,
+      "y": 0,
+      "w": 1368,
+      "h": 52
+    },
+    "documentScrollsSideways": false,
+    "contentScrollsSideways": false,
+    "pastRightEdge": []
+  },
+  "controls": {
+    "kinds": {
+      "header tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(196, 206, 219)": [
+            "Projects",
+            "Community",
+            "Learning",
+            "GitHub"
+          ],
+          "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(255, 255, 255)": [
+            "Templates"
+          ]
+        }
+      },
+      "PrimaryButton": {
+        "count": 2,
+        "distinct": 1,
+        "styles": {
+          "6px | 12px | 500 | rgb(43, 52, 64) | 1px solid rgb(125, 138, 152)": [
+            "Connect GitHub",
+            "Start blank"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "9999px | 12px | 500 | rgba(77, 163, 255, 0.13) | 1px solid rgb(77, 163, 255)": [
+            "All7✓"
+          ],
+          "9999px | 12px | 500 | rgba(0, 0, 0, 0) | 1px solid rgb(125, 138, 152)": [
+            "Starter1",
+            "Data app1",
+            "Site2",
+            "Game3"
+          ]
+        }
+      },
+      "card": {
+        "count": 7,
+        "distinct": 1,
+        "styles": {
+          "12px | 13px | 400 | rgb(33, 41, 50) | 1px solid rgb(125, 138, 152)": [
+            "SiteSite BuilderA conten",
+            "SiteLanding PagesThree c",
+            "Data appTodo listOne lis",
+            "GameStory engineA branch",
+            "GamePixel dungeonA turn-",
+            "GameRocket SchoolMaths a",
+            "StarterMembers' areamemb"
+          ]
+        }
+      },
+      "other": {
+        "count": 1,
+        "distinct": 1,
+        "styles": {
+          "50% | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": [
+            "Settings"
+          ]
+        }
+      }
+    },
+    "radii": {
+      "50%": 3,
+      "6px": 3,
+      "9999px": 5,
+      "12px": 7,
+      "8px": 7,
+      "2px": 35,
+      "4px": 10
+    }
+  },
+  "contrast": {
+    "controls": 22,
+    "boundaryUnder3": [],
+    "textUnder45": [],
+    "rows": [
+      {
+        "label": "Projects",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 9.24
+      },
+      {
+        "label": "Community",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 9.24
+      },
+      {
+        "label": "Learning",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 9.24
+      },
+      {
+        "label": "Templates",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 14.71
+      },
+      {
+        "label": "GitHub",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 9.24
+      },
+      {
+        "label": "Connect GitHub",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 1.17,
+        "edgeOnFill": 3.57,
+        "edgeOnGround": 4.17,
+        "textOnly": false,
+        "boundary": 3.57,
+        "text": 9.82
+      },
+      {
+        "label": "Settings",
+        "cls": "LauncherHeader-module__SettingsButton--GVqlZ",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 11.47
+      },
+      {
+        "label": "Start blank",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 1.36,
+        "edgeOnFill": 3.57,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 3.57,
+        "text": 9.82
+      },
+      {
+        "label": "",
+        "cls": "LauncherSearchBar-module__Search--I24Ib",
+        "disabled": false,
+        "fillOnGround": 1.16,
+        "edgeOnFill": 4.17,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.17,
+        "text": 9.24
+      },
+      {
+        "label": "Search templates",
+        "cls": "LauncherSearchBar-module__SearchInput--zRY2M",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 14.71
+      },
+      {
+        "label": "All7✓",
+        "cls": "Chip-module__Root--nac5E",
+        "disabled": false,
+        "fillOnGround": 1.23,
+        "edgeOnFill": 5.29,
+        "edgeOnGround": 6.53,
+        "textOnly": false,
+        "boundary": 5.29,
+        "text": 13.89
+      },
+      {
+        "label": "Starter1",
+        "cls": "Chip-module__Root--nac5E",
+        "disabled": false,
+        "fillOnGround": 1,
+        "edgeOnFill": 4.86,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.86,
+        "text": 13.37
+      },
+      {
+        "label": "Data app1",
+        "cls": "Chip-module__Root--nac5E",
+        "disabled": false,
+        "fillOnGround": 1,
+        "edgeOnFill": 4.86,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.86,
+        "text": 13.37
+      },
+      {
+        "label": "Site2",
+        "cls": "Chip-module__Root--nac5E",
+        "disabled": false,
+        "fillOnGround": 1,
+        "edgeOnFill": 4.86,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.86,
+        "text": 13.37
+      },
+      {
+        "label": "Game3",
+        "cls": "Chip-module__Root--nac5E",
+        "disabled": false,
+        "fillOnGround": 1,
+        "edgeOnFill": 4.86,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.86,
+        "text": 13.37
+      },
+      {
+        "label": "SiteSite BuilderA content-ma",
+        "cls": "LauncherCard-module__Card--JeK9j",
+        "disabled": false,
+        "fillOnGround": 1.16,
+        "edgeOnFill": 4.17,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.17,
+        "text": 11.47
+      },
+      {
+        "label": "SiteLanding PagesThree compl",
+        "cls": "LauncherCard-module__Card--JeK9j",
+        "disabled": false,
+        "fillOnGround": 1.16,
+        "edgeOnFill": 4.17,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.17,
+        "text": 11.47
+      },
+      {
+        "label": "Data appTodo listOne list in",
+        "cls": "LauncherCard-module__Card--JeK9j",
+        "disabled": false,
+        "fillOnGround": 1.16,
+        "edgeOnFill": 4.17,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.17,
+        "text": 11.47
+      },
+      {
+        "label": "GameStory engineA branching ",
+        "cls": "LauncherCard-module__Card--JeK9j",
+        "disabled": false,
+        "fillOnGround": 1.16,
+        "edgeOnFill": 4.17,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.17,
+        "text": 11.47
+      },
+      {
+        "label": "GamePixel dungeonA turn-base",
+        "cls": "LauncherCard-module__Card--JeK9j",
+        "disabled": false,
+        "fillOnGround": 1.16,
+        "edgeOnFill": 4.17,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.17,
+        "text": 11.47
+      },
+      {
+        "label": "GameRocket SchoolMaths and t",
+        "cls": "LauncherCard-module__Card--JeK9j",
+        "disabled": false,
+        "fillOnGround": 1.16,
+        "edgeOnFill": 4.17,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.17,
+        "text": 11.47
+      },
+      {
+        "label": "StarterMembers' areamembers ",
+        "cls": "LauncherCard-module__Card--JeK9j",
+        "disabled": false,
+        "fillOnGround": 1.16,
+        "edgeOnFill": 4.17,
+        "edgeOnGround": 4.86,
+        "textOnly": false,
+        "boundary": 4.17,
+        "text": 11.47
+      }
+    ]
+  },
+  "chr001Measure": {
+    "root": "body",
+    "auditMethod": {
+      "fontSizes": {
+        "distinct": 7,
+        "values": {
+          "10px": 2,
+          "11px": 25,
+          "12px": 45,
+          "13px": 128,
+          "15px": 18,
+          "20px": 1,
+          "26px": 1
+        }
+      },
+      "radii": {
+        "distinct": 9,
+        "values": {
+          "2px": 35,
+          "3px": 1,
+          "4px": 10,
+          "6px": 3,
+          "8px": 9,
+          "12px": 7,
+          "50%": 3,
+          "100%": 3,
+          "9999px": 5
+        }
+      },
+      "fills": {
+        "distinct": 9,
+        "values": {
+          "rgb(33, 41, 50)": 11,
+          "rgb(22, 28, 36)": 4,
+          "rgb(255, 106, 95)": 1,
+          "rgb(43, 52, 64)": 9,
+          "rgba(77, 163, 255, 0.13)": 1,
+          "rgb(51, 62, 77)": 37,
+          "rgb(60, 72, 87)": 4,
+          "rgb(255, 255, 255)": 3,
+          "rgb(221, 228, 236)": 1
+        }
+      }
+    },
+    "viewport": [
+      1368,
+      900
+    ],
+    "theme": "dark",
+    "elements": 220,
+    "elementsVisible": 188,
+    "inlineStyled": 7,
+    "fontSizesAllVisible": {
+      "distinct": 5,
+      "values": {
+        "11px": 25,
+        "12px": 24,
+        "13px": 128,
+        "15px": 10,
+        "26px": 1
+      }
+    },
+    "fontSizesTextBearing": {
+      "distinct": 5,
+      "values": {
+        "11px": 21,
+        "12px": 10,
+        "13px": 20,
+        "15px": 8,
+        "26px": 1
+      }
+    },
+    "radii": {
+      "distinct": 7,
+      "values": {
+        "2px": 35,
+        "4px": 10,
+        "6px": 3,
+        "8px": 7,
+        "12px": 7,
+        "50%": 3,
+        "9999px": 5
+      }
+    },
+    "fills": {
+      "distinct": 7,
+      "values": {
+        "rgb(33, 41, 50)": 11,
+        "rgb(22, 28, 36)": 2,
+        "rgb(255, 106, 95)": 1,
+        "rgb(43, 52, 64)": 9,
+        "rgba(77, 163, 255, 0.13)": 1,
+        "rgb(51, 62, 77)": 36,
+        "rgb(60, 72, 87)": 2
+      }
+    },
+    "buttons": {
+      "count": 20,
+      "distinctStyles": 7,
+      "styles": {
+        "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(196, 206, 219)": 4,
+        "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(255, 255, 255)": 1,
+        "6px | 12px | 500 | rgb(43, 52, 64) | 1px solid rgb(125, 138, 152)": 2,
+        "12px | 13px | 400 | rgb(33, 41, 50) | 1px solid rgb(125, 138, 152)": 7,
+        "50% | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(221, 228, 236)": 1,
+        "9999px | 12px | 500 | rgba(77, 163, 255, 0.13) | 1px solid rgb(77, 163, 255)": 1,
+        "9999px | 12px | 500 | rgba(0, 0, 0, 0) | 1px solid rgb(125, 138, 152)": 4
+      }
+    }
+  }
+}

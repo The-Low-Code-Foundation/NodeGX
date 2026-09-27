@@ -1,0 +1,528 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6fdb09de-13ae-546e-8c58-1e276973cee4",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "arIn",
+      "type": "Component Inputs",
+      "label": "The next action",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "num",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "titleColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "showPreview",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "descriptionOpen",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "noteLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasNote",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "done",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "canMove",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "canUp",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "canDown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "checkBg",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "checkIconColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "checkBorder",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "arOut",
+      "type": "Component Outputs",
+      "label": "What you did to it",
+      "ports": [
+        {
+          "name": "tick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "untick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "up",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "down",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "rename",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "openDescription",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "closeDescription",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "describe",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "titleText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "descriptionText",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "arRoot",
+      "type": "Group",
+      "label": "Next action",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "children": [
+        "arTop",
+        "arPreview",
+        "arEditor",
+        "arNote"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "arTop",
+      "type": "Group",
+      "label": "The line",
+      "parent": "arRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "arNum",
+        "arCheck",
+        "arTitle",
+        "arDescOpen",
+        "arMove"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "arNum",
+      "type": "Text",
+      "label": "Its place",
+      "parent": "arTop",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 20,
+          "unit": "px"
+        },
+        "textAlignX": "right",
+        "fontVariantNumeric": "tabular-nums"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "arCheck",
+      "type": "net.noodl.controls.button",
+      "label": "Tick box",
+      "parent": "arTop",
+      "parameters": {
+        "label": "✓",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--border-control)",
+        "backgroundColor": "transparent",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-2)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-full)",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 26,
+          "unit": "px"
+        },
+        "height": {
+          "value": 26,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0)",
+        "paddingBottom": "var(--space-0)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "arTitle",
+      "type": "net.noodl.controls.textinput",
+      "label": "Title",
+      "parent": "arTop",
+      "parameters": {
+        "type": "text",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "placeholder": "Next action",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "backgroundColor": "transparent",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-subtle)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "arDescOpen",
+      "type": "net.noodl.controls.button",
+      "label": "Open the description",
+      "parent": "arTop",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "≡",
+        "fontSize": "var(--text-base)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "arMove",
+      "type": "Group",
+      "label": "Move buttons",
+      "parent": "arTop",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentSize"
+      },
+      "children": [
+        "arUp",
+        "arDown"
+      ],
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "arUp",
+      "type": "net.noodl.controls.button",
+      "label": "Move up",
+      "parent": "arMove",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "▲",
+        "fontSize": "var(--text-base)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "arDown",
+      "type": "net.noodl.controls.button",
+      "label": "Move down",
+      "parent": "arMove",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "▼",
+        "fontSize": "var(--text-base)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "arPreview",
+      "type": "Group",
+      "label": "Description, folded",
+      "parent": "arRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "paddingLeft": 62,
+        "mounted": false
+      },
+      "children": [
+        "arPreviewText"
+      ],
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "arPreviewText",
+      "type": "Text",
+      "label": "Description",
+      "parent": "arPreview",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "arEditor",
+      "type": "Group",
+      "label": "Description, open",
+      "parent": "arRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)",
+        "paddingLeft": 62,
+        "paddingBottom": "var(--space-2)",
+        "mounted": false
+      },
+      "children": [
+        "arDescField",
+        "arSave"
+      ],
+      "x": 100,
+      "y": 1360
+    },
+    {
+      "id": "arDescField",
+      "type": "net.noodl.controls.textinput",
+      "label": "Description",
+      "parent": "arEditor",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "textArea",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Add a description"
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "arSave",
+      "type": "net.noodl.controls.button",
+      "label": "Save the description",
+      "parent": "arEditor",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Save"
+      },
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "arNote",
+      "type": "Text",
+      "label": "What happened",
+      "parent": "arRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "marginLeft": {
+          "value": 62,
+          "unit": "px"
+        },
+        "marginBottom": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 1720
+    },
+    {
+      "id": "arWhich",
+      "type": "Condition",
+      "label": "Tick or untick?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 470,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "arRoot"
+  ]
+}

@@ -42,7 +42,7 @@ import { decideSchemaCache, SCHEMA_OUTCOME_CHANGED, type SchemaFetchOutcome } fr
  * for any built-in backend.
  *
  * What is restored here is narrow and needs no key: a backend **this editor
- * runs** is reachable over the same IPC the Data Browser uses, so when the
+ * runs** is reachable over the manager's IPC (`backend:getSchema`), so when the
  * project's endpoint resolves to one of the managed processes its schema is
  * fetched and cached in the shape the runtime's port generator already reads
  * (`{ tables: [...] }` normalises through `collectionsFromParseClasses`). A
@@ -306,7 +306,7 @@ async function fetchBuiltInSchema(): Promise<SchemaFetchOutcome> {
   }
 
   // An empty array here is an answer, not a failure: a backend with no tables is a
-  // fact the Data Browser and the AI review both have to be able to state.
+  // fact the property panel's notice and the AI review both have to be able to state.
   //
   // DEF-036 AC4 — and this is the one moment we know *which* backend answered. See
   // `SchemaBackendRef`: the alternative is a second resolution that can disagree with the

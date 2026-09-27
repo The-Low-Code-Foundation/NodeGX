@@ -1,0 +1,223 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6a297d4e-bb5e-5998-8169-36b6bdf277b7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "name",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "sub",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-sub"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "kind",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "rate",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-rate"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "slot",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-slot"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "rung",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-rung"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "move",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-move"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "moveWorth",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-moveWorth"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "moveWhen",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-moveWhen"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "moveDue",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-moveDue"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "moveStop",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-moveStop"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "say",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-say"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "billing",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-billing"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "termsDays",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-termsDays"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "agreedHours",
+      "toId": "AddprojectGuard",
+      "toProperty": "in-agreedHours"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "do",
+      "toId": "AddprojectGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-name",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-name"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-sub",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-sub"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-kind",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-kind"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-rate",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-rate"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-slot",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-slot"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-rung",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-rung"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-move",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-move"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-moveWorth",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-moveWorth"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-moveWhen",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-moveWhen"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-moveDue",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-moveDue"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-moveStop",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-moveStop"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-say",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-say"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-billing",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-billing"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-termsDays",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-termsDays"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-agreedHours",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-agreedHours"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-position",
+      "toId": "AddprojectWrite",
+      "toProperty": "prop-position"
+    },
+    {
+      "fromId": "AddprojectGuard",
+      "fromProperty": "out-go",
+      "toId": "AddprojectWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "AddprojectWrite",
+      "fromProperty": "done",
+      "toId": "AddprojectOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "AddprojectWrite",
+      "fromProperty": "failure",
+      "toId": "AddprojectProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "AddprojectWrite",
+      "fromProperty": "id",
+      "toId": "AddprojectOut",
+      "toProperty": "projectId"
+    }
+  ]
+}

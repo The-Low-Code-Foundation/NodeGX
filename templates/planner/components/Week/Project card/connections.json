@@ -1,0 +1,523 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1fbaab12-1e67-5dca-8021-3322b11367c8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pcIn",
+      "fromProperty": "shown",
+      "toId": "pcScrim",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "groups",
+      "toId": "pcEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pcEach",
+      "fromProperty": "itemOutputSignal-pick",
+      "toId": "pcOut",
+      "toProperty": "pick"
+    },
+    {
+      "fromId": "pcEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "pcOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "detailShown",
+      "toId": "pcDetailBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "name",
+      "toId": "pcDetail",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "sub",
+      "toId": "pcDetail",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "move",
+      "toId": "pcDetail",
+      "toProperty": "move"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hasMove",
+      "toId": "pcDetail",
+      "toProperty": "hasMove"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "worth",
+      "toId": "pcDetail",
+      "toProperty": "worth"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hasWorth",
+      "toId": "pcDetail",
+      "toProperty": "hasWorth"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "when",
+      "toId": "pcDetail",
+      "toProperty": "when"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "whenColor",
+      "toId": "pcDetail",
+      "toProperty": "whenColor"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "mark",
+      "toId": "pcDetail",
+      "toProperty": "mark"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "soft",
+      "toId": "pcDetail",
+      "toProperty": "soft"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "canPlan",
+      "toId": "pcDetail",
+      "toProperty": "canPlan"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "placed",
+      "toId": "pcDetail",
+      "toProperty": "placed"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "unplaced",
+      "toId": "pcDetail",
+      "toProperty": "unplaced"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "placedLine",
+      "toId": "pcDetail",
+      "toProperty": "placedLine"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "planDate",
+      "toId": "pcDetail",
+      "toProperty": "planDate"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "planHours",
+      "toId": "pcDetail",
+      "toProperty": "planHours"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "minDate",
+      "toId": "pcDetail",
+      "toProperty": "minDate"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "lastLine",
+      "toId": "pcDetail",
+      "toProperty": "lastLine"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hasLast",
+      "toId": "pcDetail",
+      "toProperty": "hasLast"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "moveKey",
+      "toId": "pcDetail",
+      "toProperty": "moveKey"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "weekText",
+      "toId": "pcDetail",
+      "toProperty": "weekText"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "sparkTitle",
+      "toId": "pcDetail",
+      "toProperty": "sparkTitle"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "say",
+      "toId": "pcDetail",
+      "toProperty": "say"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "facts",
+      "toId": "pcDetail",
+      "toProperty": "facts"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "bars",
+      "toId": "pcDetail",
+      "toProperty": "bars"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "boxes",
+      "toId": "pcDetail",
+      "toProperty": "boxes"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "firstLabel",
+      "toId": "pcDetail",
+      "toProperty": "firstLabel"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "lastLabel",
+      "toId": "pcDetail",
+      "toProperty": "lastLabel"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "billingShown",
+      "toId": "pcDetail",
+      "toProperty": "billingShown"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "billingTerms",
+      "toId": "pcDetail",
+      "toProperty": "billingTerms"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "billingRows",
+      "toId": "pcDetail",
+      "toProperty": "billingRows"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hopeShown",
+      "toId": "pcDetail",
+      "toProperty": "hopeShown"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hopedText",
+      "toId": "pcDetail",
+      "toProperty": "hopedText"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hasHoped",
+      "toId": "pcDetail",
+      "toProperty": "hasHoped"
+    },
+    {
+      "fromId": "pcDetail",
+      "fromProperty": "plan",
+      "toId": "pcOut",
+      "toProperty": "plan"
+    },
+    {
+      "fromId": "pcDetail",
+      "fromProperty": "moveIt",
+      "toId": "pcOut",
+      "toProperty": "moveIt"
+    },
+    {
+      "fromId": "pcDetail",
+      "fromProperty": "takeOut",
+      "toId": "pcOut",
+      "toProperty": "takeOut"
+    },
+    {
+      "fromId": "pcDetail",
+      "fromProperty": "planDate",
+      "toId": "pcOut",
+      "toProperty": "planDate"
+    },
+    {
+      "fromId": "pcDetail",
+      "fromProperty": "planHours",
+      "toId": "pcOut",
+      "toProperty": "planHours"
+    },
+    {
+      "fromId": "pcDetail",
+      "fromProperty": "edit",
+      "toId": "pcOut",
+      "toProperty": "edit"
+    },
+    {
+      "fromId": "pcDetail",
+      "fromProperty": "addBill",
+      "toId": "pcOut",
+      "toProperty": "addBill"
+    },
+    {
+      "fromId": "pcDetail",
+      "fromProperty": "addHope",
+      "toId": "pcOut",
+      "toProperty": "addHope"
+    },
+    {
+      "fromId": "pcDetail",
+      "fromProperty": "close",
+      "toId": "pcOut",
+      "toProperty": "close"
+    },
+    {
+      "fromId": "pcNew",
+      "fromProperty": "onClick",
+      "toId": "pcOut",
+      "toProperty": "newProject"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edShown",
+      "toId": "pcEditor",
+      "toProperty": "shown"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edTitle",
+      "toId": "pcEditor",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edKinds",
+      "toId": "pcEditor",
+      "toProperty": "kinds"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edBillings",
+      "toId": "pcEditor",
+      "toProperty": "billings"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edName",
+      "toId": "pcEditor",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edSub",
+      "toId": "pcEditor",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edKind",
+      "toId": "pcEditor",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edRate",
+      "toId": "pcEditor",
+      "toProperty": "rate"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edSlot",
+      "toId": "pcEditor",
+      "toProperty": "slot"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edRung",
+      "toId": "pcEditor",
+      "toProperty": "rung"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edMove",
+      "toId": "pcEditor",
+      "toProperty": "move"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edMoveWorth",
+      "toId": "pcEditor",
+      "toProperty": "moveWorth"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edMoveWhen",
+      "toId": "pcEditor",
+      "toProperty": "moveWhen"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edMoveDue",
+      "toId": "pcEditor",
+      "toProperty": "moveDue"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edMoveStop",
+      "toId": "pcEditor",
+      "toProperty": "moveStop"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edSay",
+      "toId": "pcEditor",
+      "toProperty": "say"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edBilling",
+      "toId": "pcEditor",
+      "toProperty": "billing"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edTermsDays",
+      "toId": "pcEditor",
+      "toProperty": "termsDays"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "edAgreedHours",
+      "toId": "pcEditor",
+      "toProperty": "agreedHours"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "name",
+      "toId": "pcOut",
+      "toProperty": "edName"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "sub",
+      "toId": "pcOut",
+      "toProperty": "edSub"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "kind",
+      "toId": "pcOut",
+      "toProperty": "edKind"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "rate",
+      "toId": "pcOut",
+      "toProperty": "edRate"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "slot",
+      "toId": "pcOut",
+      "toProperty": "edSlot"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "rung",
+      "toId": "pcOut",
+      "toProperty": "edRung"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "move",
+      "toId": "pcOut",
+      "toProperty": "edMove"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "moveWorth",
+      "toId": "pcOut",
+      "toProperty": "edMoveWorth"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "moveWhen",
+      "toId": "pcOut",
+      "toProperty": "edMoveWhen"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "moveDue",
+      "toId": "pcOut",
+      "toProperty": "edMoveDue"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "moveStop",
+      "toId": "pcOut",
+      "toProperty": "edMoveStop"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "say",
+      "toId": "pcOut",
+      "toProperty": "edSay"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "billing",
+      "toId": "pcOut",
+      "toProperty": "edBilling"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "termsDays",
+      "toId": "pcOut",
+      "toProperty": "edTermsDays"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "agreedHours",
+      "toId": "pcOut",
+      "toProperty": "edAgreedHours"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "save",
+      "toId": "pcOut",
+      "toProperty": "edSave"
+    },
+    {
+      "fromId": "pcEditor",
+      "fromProperty": "cancel",
+      "toId": "pcOut",
+      "toProperty": "edCancel"
+    },
+    {
+      "fromId": "pcScrim",
+      "fromProperty": "onClick",
+      "toId": "pcOut",
+      "toProperty": "close"
+    }
+  ]
+}

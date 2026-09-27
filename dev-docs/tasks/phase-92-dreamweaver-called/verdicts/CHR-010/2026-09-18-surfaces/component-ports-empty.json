@@ -1,0 +1,64 @@
+{
+  "name": "component-ports-empty",
+  "scope": "document.querySelector('.sidebar-panel-footer-button').closest('[class*=BasePanel-module__Root]') || document.querySelector('.sidebar-panel-footer-button').parentElement.parentElement",
+  "themes": {
+    "dark": {
+      "ground": "rgb(35, 33, 41)",
+      "census": {
+        "scope": "sidebar-panel",
+        "total": 2,
+        "drawn": 2,
+        "emptyHosts": 0,
+        "collapsed": 0,
+        "boxes": [
+          "14x14"
+        ],
+        "colours": [
+          "rgb(196, 206, 219)"
+        ],
+        "faLeft": 0,
+        "glyphs": [
+          "Port | 14x14 | svg 14x14 | rgb(196, 206, 219)",
+          "Group | 14x14 | svg 14x14 | rgb(196, 206, 219)"
+        ]
+      },
+      "clip": {
+        "x": 45,
+        "y": 66,
+        "width": 342,
+        "height": 726,
+        "scale": 1
+      },
+      "png": "component-ports-empty-dark.png"
+    },
+    "light": {
+      "ground": "rgb(255, 255, 255)",
+      "census": {
+        "scope": "sidebar-panel",
+        "total": 2,
+        "drawn": 2,
+        "emptyHosts": 0,
+        "collapsed": 0,
+        "boxes": [
+          "14x14"
+        ],
+        "colours": [
+          "rgb(89, 98, 110)"
+        ],
+        "faLeft": 0,
+        "glyphs": [
+          "Port | 14x14 | svg 14x14 | rgb(89, 98, 110)",
+          "Group | 14x14 | svg 14x14 | rgb(89, 98, 110)"
+        ]
+      },
+      "clip": {
+        "x": 45,
+        "y": 66,
+        "width": 342,
+        "height": 726,
+        "scale": 1
+      },
+      "png": "component-ports-empty-light.png"
+    }
+  }
+}

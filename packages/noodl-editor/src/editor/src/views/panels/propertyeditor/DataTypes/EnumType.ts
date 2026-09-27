@@ -4,8 +4,10 @@ import { find } from 'underscore';
 
 import { PropertyPanelInput, PropertyPanelInputType } from '@noodl-core-ui/components/property-panel/PropertyPanelInput';
 
+import { inheritedSideValue } from '../model/inheritedSide';
 import { TypeView } from '../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } from '../utils';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 export class EnumType extends TypeView {
   el: TSFixme;
@@ -64,9 +66,15 @@ export class EnumType extends TypeView {
       value: typeof e === 'object' ? e.value : e
     }));
 
+    const value = this.parent.model.getParameter(this.name);
+    // CHR-009 §12.4 — an unset side shows the all-sides choice it renders with, muted.
+    const inherited = inheritedSideValue(this.name, value, (n) => this.parent.model.getParameter(n));
+    const inheritedOption = options.find((o) => o.value === inherited);
+
     const props = {
       label: this.displayName,
-      value: this.parent.model.getParameter(this.name),
+      value,
+      placeholder: inheritedOption ? inheritedOption.label : undefined,
       inputType: PropertyPanelInputType.Select,
       properties: { options },
       isChanged: !this.isDefault,
@@ -101,7 +109,7 @@ export class EnumType extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

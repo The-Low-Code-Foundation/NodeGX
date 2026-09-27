@@ -1,0 +1,155 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d8f3776a-f74c-551c-89af-5586a4919cb3",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "TickactionIn",
+      "type": "Component Inputs",
+      "label": "What to do",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "taskId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "actionId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "TickactionOut",
+      "type": "Component Outputs",
+      "label": "Done",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "TickactionGuard",
+      "type": "JavaScriptFunction",
+      "label": "Is there anything to write?",
+      "parameters": {
+        "functionScript": "function findRow(rows, id) {\n  for (var i = 0; i < rows.length; i++) if (rows[i] && rows[i].id === id) return rows[i];\n  return null;\n}\nvar row = findRow(Inputs.rows || [], String(Inputs.actionId || ''));\nvar note = String(Inputs.note || '').trim();\nif (!row || note === '') return;\nOutputs.done = true;\nOutputs.note = note;\nOutputs.summary = 'Ticked off “' + row.title + '”';\nOutputs.go();",
+        "runOnChange-in-rows": false,
+        "runOnChange-in-actionId": false,
+        "runOnChange-in-note": false
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-rows",
+          "displayName": "rows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-actionId",
+          "displayName": "actionId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-note",
+          "displayName": "note",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-note",
+          "displayName": "note",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-summary",
+          "displayName": "summary",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "TickactionWrite",
+      "type": "SetDbModelProperties",
+      "label": "Tick it off",
+      "parameters": {
+        "collectionName": "Action",
+        "idSource": "explicit"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "TickactionHistory",
+      "type": "/Logic/Write history",
+      "label": "Write the history line",
+      "parameters": {
+        "kind": "action-done"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "TickactionProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "todoProblem",
+        "setWith": "string",
+        "value": "That change did not save. Check your connection, then try again."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 640
+    }
+  ]
+}

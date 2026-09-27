@@ -5,10 +5,13 @@ import { ProjectModel } from '@noodl-models/projectmodel';
 
 import { EventDispatcher } from '../../../../../../../shared/utils/EventDispatcher';
 import { ColorInput } from '../../components/ColorInput';
+import { colorCommitOf, colorFieldPartsOf } from '../../model/colorField';
+import { inheritedSideValue } from '../../model/inheritedSide';
 import { TypeView } from '../../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } from '../../utils';
 import ColorPicker from './colorpicker';
 import ColorStylePicker from './colorstylepicker';
+import { unmountReactRoot } from '../../../../../../../shared/utils/unmountReactRoot';
 
 //Note: this entire property can be re-created by events such as undo
 //so the color picker can be left open, but now need a new callback to set
@@ -59,7 +62,7 @@ export class ColorType extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     TypeView.prototype.dispose.call(this);
@@ -100,45 +103,26 @@ export class ColorType extends TypeView {
     return this.el;
   }
 
-  private displayString(value: TSFixme): string {
-    let stringColor = value;
-
-    if (stringColor && stringColor[0] === '#') {
-      //only display the RGB part of a color in the input field
-      //so if the color has a #RRGGBBAA format, strip away the alpha
-      const hasAlpha = stringColor.length === 9;
-      stringColor = hasAlpha ? stringColor.slice(0, 7) : stringColor;
-      stringColor = stringColor.toUpperCase();
-    }
-
-    return stringColor ?? '';
-  }
-
   renderReact() {
     if (!this.root) return;
 
     const current = this.getCurrentValue();
+    // CHR-009 §12.4 — an unset side paints and hints the all-sides colour it renders with.
+    const inherited = inheritedSideValue(this.name, current.value, (n) => this.parent.model.getParameter(n));
 
     this.root.render(
       React.createElement(ColorInput, {
         label: this.displayName,
-        value: this.displayString(current.value),
-        resolvedColor: ProjectModel.instance.resolveColor(current.value),
+        value: current.value,
+        placeholder: inherited === undefined ? undefined : colorFieldPartsOf(inherited).text || undefined,
+        resolvedColor: ProjectModel.instance.resolveColor(inherited === undefined ? current.value : inherited),
         isChanged: !this.isDefault,
         isConnected: this.isConnected,
         connectionLabel: this.isConnected ? getConnectionSourceLabel(this.parent.model, this.name) : undefined,
         onConnectionClick: this.isConnected ? getConnectionSourceNavigate(this.parent.model, this.name) : undefined,
         dataIdentifier: this.name,
         onCommit: (text: string) => {
-          let value: TSFixme = text.trim();
-          if (value === '') value = undefined;
-
-          const isHex = value !== undefined && /[0-9A-F]{6}$/i.test(value);
-          if (isHex === true && value[0] !== '#') {
-            value = '#' + value;
-          }
-
-          this.parent.setParameter(this.name, value);
+          this.parent.setParameter(this.name, colorCommitOf(text, current.value));
           this.updateCurrentValue();
         },
         onOpenColorPicker: (anchor: HTMLElement) => this.openColorPicker(anchor),
@@ -205,7 +189,7 @@ export class ColorType extends TypeView {
       position: 'right',
       onClose: () => {
         if (this.stylePickerRoot) {
-          this.stylePickerRoot.unmount();
+          unmountReactRoot(this.stylePickerRoot);
           this.stylePickerRoot = null;
         }
       }

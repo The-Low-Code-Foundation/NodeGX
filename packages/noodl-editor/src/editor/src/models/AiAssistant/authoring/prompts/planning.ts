@@ -142,7 +142,7 @@ ${DECOMPOSITION_PLANNING}
 ${DESIGN_PLANNING}
 
 PAGES ARE REGISTERED, OR THEY DO NOT EXIST
-A page component is only reachable when a Page Router node lists it — the router's "pages" parameter
+A page is only reachable when a Page Router node lists it — the router's "pages" parameter
 carries { startPage, routes: [component names] }, and a page that is not in "routes" cannot be opened,
 linked to, or navigated to, however good it is. This is the canonical case of "integration is edits to
 the neighbours":

@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "devOpen": false,
+  "defaults": {
+    "permissions": {
+      "find": "nobody",
+      "get": "nobody",
+      "create": "nobody",
+      "update": "nobody",
+      "delete": "nobody"
+    },
+    "creatorOwns": true
+  },
+  "collections": {
+    "Task": {
+      "permissions": {
+        "find": "authenticated",
+        "get": "authenticated",
+        "create": "authenticated",
+        "update": "authenticated",
+        "delete": "nobody"
+      },
+      "creatorOwns": true
+    },
+    "Action": {
+      "permissions": {
+        "find": "authenticated",
+        "get": "authenticated",
+        "create": "authenticated",
+        "update": "authenticated",
+        "delete": "nobody"
+      },
+      "creatorOwns": true
+    },
+    "Event": {
+      "permissions": {
+        "find": "authenticated",
+        "get": "authenticated",
+        "create": "authenticated",
+        "update": "authenticated",
+        "delete": "nobody"
+      },
+      "creatorOwns": true
+    },
+    "PushSubscription": {
+      "permissions": {
+        "find": "authenticated",
+        "get": "authenticated",
+        "create": "authenticated",
+        "update": "authenticated",
+        "delete": "nobody"
+      },
+      "creatorOwns": true
+    }
+  },
+  "functions": {},
+  "files": {
+    "upload": "nobody",
+    "read": "nobody",
+    "delete": "nobody"
+  },
+  "signup": "public"
+}

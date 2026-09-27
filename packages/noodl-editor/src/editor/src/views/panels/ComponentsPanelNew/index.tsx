@@ -8,4 +8,4 @@
 export { ComponentsPanel } from './ComponentsPanelReact';
 
 // Export types
-export type { ComponentsPanelProps, ComponentsPanelOptions } from './types';
+export type { ComponentsPanelProps } from './types';

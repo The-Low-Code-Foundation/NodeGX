@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4c3cba42-b470-58a2-8990-beb4e0c472b6",
+  "name": "Task rows",
+  "path": "/Logic/Task rows",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Turns the Task and Action queries into the open list (in order, with deadline and next action), the Done list (newest first), the tab labels, and where a new task goes."
+}

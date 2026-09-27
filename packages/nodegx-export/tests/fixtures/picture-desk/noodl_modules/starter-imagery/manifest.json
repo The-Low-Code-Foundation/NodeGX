@@ -1,0 +1,4 @@
+{
+  "name": "Starter imagery",
+  "_note": "Four of the starter project's own SVG tiles, so the export's copies channel ships bytes a browser can fetch. A picture module has no main and no nodes; it is copied verbatim."
+}

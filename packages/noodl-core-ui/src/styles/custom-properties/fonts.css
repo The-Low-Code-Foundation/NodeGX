@@ -32,16 +32,25 @@
 
   /* ---------------------------------------------------------------------------
      FONT SIZES
-     Scale from the phase-23 mocks. Use these; do not hardcode px sizes.
+     The chrome type scale: R1, phase 92 (ruled 2026-09-15). Five sizes and one
+     display size, nothing under 11. Use these; do not hardcode px sizes —
+     `npm run type` counts every raw px size and the count may only fall.
      --------------------------------------------------------------------------- */
-  --font-size-xs: 10px; /* Micro labels, badges */
-  --font-size-sm: 11px; /* Secondary text, captions */
-  --font-size-base: 12.5px; /* Default body text */
-  --font-size-md: 13px; /* Emphasized body text */
-  --font-size-lg: 14.5px; /* Section titles, important */
-  --font-size-xl: 17px; /* Panel titles */
-  --font-size-2xl: 18px; /* Dialog titles */
-  --font-size-3xl: 24px; /* Page titles, hero text */
+  --font-size-xs: 11px; /* Caps labels, units, tags, hints */
+  --font-size-sm: 12px; /* Panel labels and values, secondary text */
+  --font-size-md: 13px; /* Launcher body, titles in a panel */
+  --font-size-lg: 15px; /* Card titles, a selected node's name */
+  --font-size-xl: 20px; /* Dialog titles */
+  --font-size-display: 26px; /* Launcher page titles, in the display face */
+
+  /* The pre-R1 names, kept as aliases so every existing consumer resolves. */
+  --font-size-base: var(--font-size-sm);
+  --font-size-2xl: var(--font-size-xl);
+  --font-size-3xl: var(--font-size-display);
+
+  /* Off-scale by design (CHR-002 AC5): the ghosted initial on a never-opened
+     project's placeholder card is artwork, not text a person reads. */
+  --font-size-card-initial: 96px;
 
   /* ---------------------------------------------------------------------------
      LINE HEIGHTS

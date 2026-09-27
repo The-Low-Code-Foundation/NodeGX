@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8a040159-3c30-54dd-8f69-be46ec36384a",
+  "name": "Add settings",
+  "path": "/Commands/Add settings",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Writes your settings for the first time, on a planner that has none yet."
+}

@@ -912,7 +912,7 @@ Node.prototype.raiseRuntimeError = function (code: string, message: string, deta
   // Opened and closed in one breath: a hand-rolled failure has no "started" moment to record —
   // the node reached this line having already decided it could not act.
   const step = runContext.beginStep({ nodeId: this.id, nodeType: this.name });
-  if (step !== undefined && step !== null) runContext.endStep(step, { status: 'failure', code, message });
+  if (step !== undefined && step !== null) runContext.endStep(step, { status: 'failure', code, message, detail });
 };
 
 /**
@@ -1116,7 +1116,10 @@ Node.prototype.reportOutcome = function (token, outcome, options) {
       runContext.endStep(step, {
         status: outcome,
         code: options && options.code,
-        message: options && options.message
+        message: options && options.message,
+        // The subject of the failure, for a record whose steps are all called `http`. See
+        // `RuntimeStepEnd.detail` — the node already composes this for the error bus.
+        detail: options && options.detail
       });
     }
   }

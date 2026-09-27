@@ -1,0 +1,271 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "fc90c4a3-4913-5caf-88ef-d5ba72e3a318",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "nhStore",
+      "fromProperty": "app",
+      "toId": "nhMe",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "nhWords",
+      "fromProperty": "words",
+      "toId": "nhT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "nhMe",
+      "fromProperty": "lang",
+      "toId": "nhT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "nhMe",
+      "fromProperty": "hasProfile",
+      "toId": "nhNoOne",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "nhNoOne",
+      "fromProperty": "result",
+      "toId": "nhGuard",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "nhPage",
+      "fromProperty": "didMount",
+      "toId": "nhGuard",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "nhGuard",
+      "fromProperty": "ontrue",
+      "toId": "nhGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "nhHeader",
+      "fromProperty": "hangar",
+      "toId": "nhGoHangar",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "nhMe",
+      "fromProperty": "name",
+      "toId": "nhHeader",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "nhMe",
+      "fromProperty": "look",
+      "toId": "nhHeader",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "nhMe",
+      "fromProperty": "seed",
+      "toId": "nhHeader",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "nhMe",
+      "fromProperty": "lang",
+      "toId": "nhHeader",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "nhMe",
+      "fromProperty": "level",
+      "toId": "nhHeader",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "nhMe",
+      "fromProperty": "layout",
+      "toId": "nhHeader",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "nhMe",
+      "fromProperty": "soundMode",
+      "toId": "nhHeader",
+      "toProperty": "soundMode"
+    },
+    {
+      "fromId": "nhMe",
+      "fromProperty": "answerMode",
+      "toId": "nhHeader",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "nhMe",
+      "fromProperty": "profileId",
+      "toId": "nhHeader",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "nhMe",
+      "fromProperty": "faceOptions",
+      "toId": "nhHeader",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "nhStore",
+      "fromProperty": "app",
+      "toId": "nhHeader",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "nhHeader",
+      "fromProperty": "app",
+      "toId": "nhStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "nhHeader",
+      "fromProperty": "write",
+      "toId": "nhStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "nhHeader",
+      "fromProperty": "switchPlayer",
+      "toId": "nhGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "nhHeader",
+      "fromProperty": "deleted",
+      "toId": "nhGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "nhHeader",
+      "fromProperty": "home",
+      "toId": "nhGoHome",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "nhT",
+      "fromProperty": "gameHunt",
+      "toId": "nhTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nhMe",
+      "fromProperty": "level",
+      "toId": "nhPlay",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "nhMe",
+      "fromProperty": "lang",
+      "toId": "nhPlay",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "nhMe",
+      "fromProperty": "model",
+      "toId": "nhPlay",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "nhT",
+      "fromProperty": "newGame",
+      "toId": "nhPlay",
+      "toProperty": "newGameWord"
+    },
+    {
+      "fromId": "nhT",
+      "fromProperty": "home",
+      "toId": "nhPlay",
+      "toProperty": "homeWord"
+    },
+    {
+      "fromId": "nhT",
+      "fromProperty": "earnedPick",
+      "toId": "nhPlay",
+      "toProperty": "pickWord"
+    },
+    {
+      "fromId": "nhT",
+      "fromProperty": "toHangar",
+      "toId": "nhPlay",
+      "toProperty": "hangarWord"
+    },
+    {
+      "fromId": "nhT",
+      "fromProperty": "huntNextGrid",
+      "toId": "nhPlay",
+      "toProperty": "nextGridWord"
+    },
+    {
+      "fromId": "nhT",
+      "fromProperty": "huntShowWay",
+      "toId": "nhPlay",
+      "toProperty": "showWayWord"
+    },
+    {
+      "fromId": "nhStore",
+      "fromProperty": "app",
+      "toId": "nhSave",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "nhMe",
+      "fromProperty": "profileId",
+      "toId": "nhSave",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "nhPlay",
+      "fromProperty": "model",
+      "toId": "nhSave",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "nhPlay",
+      "fromProperty": "graded",
+      "toId": "nhSave",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nhSave",
+      "fromProperty": "app",
+      "toId": "nhStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "nhSave",
+      "fromProperty": "done",
+      "toId": "nhStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "nhPlay",
+      "fromProperty": "home",
+      "toId": "nhGoHome",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "nhPlay",
+      "fromProperty": "hangar",
+      "toId": "nhGoHangar",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "nhMe",
+      "fromProperty": "sound",
+      "toId": "nhSounds",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "nhPlay",
+      "fromProperty": "cheer",
+      "toId": "nhSounds",
+      "toProperty": "win"
+    }
+  ]
+}

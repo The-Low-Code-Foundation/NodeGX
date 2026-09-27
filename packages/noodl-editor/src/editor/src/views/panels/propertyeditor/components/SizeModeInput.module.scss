@@ -1,0 +1,68 @@
+/* CHR-009 §2 "dimensions": two per-axis segments on one 26px line, in the row's control column. */
+
+/* P101 INS-003 row 6: the two axes need a 135px track. Below ~323px of inspector the H segment
+   was cut by the row's `overflow: hidden` — at Richard's 301px, 22 of its 26px. The H axis now
+   wraps under W instead; the row pins its label to the first line (`alignTop`), and the 2px
+   padding keeps a one-line row's centre on the label's 30px line. */
+.Root {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  min-width: 0;
+  padding: 2px 0;
+}
+
+.Axis {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.AxisLetter {
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-xs);
+  color: var(--theme-color-fg-muted);
+  user-select: none;
+}
+
+/* The segmented track the head's tabs use (`TabsVariant.Segmented`): bg-2 track, bg-3 selected. */
+.Segment {
+  display: inline-grid;
+  grid-auto-flow: column;
+  gap: 2px;
+  height: 26px;
+  box-sizing: border-box;
+  padding: 2px;
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--theme-color-bg-2);
+}
+
+.Option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-default);
+  background: none;
+  color: var(--theme-color-fg-muted);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--theme-color-fg-default);
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--theme-color-primary);
+    outline-offset: 0;
+  }
+
+  &.is-pressed {
+    background-color: var(--theme-color-bg-3);
+    color: var(--theme-color-fg-highlight);
+  }
+}

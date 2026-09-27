@@ -1,0 +1,949 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3906e21a-9217-5824-8ab8-6dee64d48d64",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rpIn",
+      "type": "Component Inputs",
+      "label": "The race",
+      "ports": [
+        {
+          "name": "start",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "level",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "layout",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "answerMode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "curriculum",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "wordLists",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "timed",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "players",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "soundOn",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "nameA",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lookA",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "seedA",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "nameB",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mounted",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "placeholder",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "checkWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fluentWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "correctWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "wrongWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "timeUpWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "nextWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "showMeWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "yourTurnWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "youWinWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "computerWinsWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "winsWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "againWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "otherRaceWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rightAnswersWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "teachCards",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "anExampleWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "gotItWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "restartWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "optionsA",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "paintA",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "patternA",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pickWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hangarWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "turboWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "chargingWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 1720
+    },
+    {
+      "id": "rpWrap",
+      "type": "Group",
+      "label": "The race",
+      "children": [
+        "rpControls",
+        "rpTrack",
+        "rpTurn",
+        "rpRoundSlot",
+        "rpTeach",
+        "rpResult"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rpControls",
+      "type": "Group",
+      "label": "Restart, or change the race",
+      "parent": "rpWrap",
+      "children": [
+        "rpRestart",
+        "rpSettings"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "justifyContent": "flex-end"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "rpRestart",
+      "type": "net.noodl.controls.button",
+      "label": "Restart",
+      "parent": "rpControls",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Restart"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "rpSettings",
+      "type": "net.noodl.controls.button",
+      "label": "Change the race",
+      "parent": "rpControls",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Change the race"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "rpTrack",
+      "type": "/Game/Race track",
+      "label": "The course",
+      "parent": "rpWrap",
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "rpTurn",
+      "type": "Text",
+      "label": "Whose turn",
+      "parent": "rpWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        },
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "rpRoundSlot",
+      "type": "Group",
+      "label": "While racing",
+      "parent": "rpWrap",
+      "children": [
+        "rpRound"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "rpRound",
+      "type": "/Race/Round",
+      "label": "This question",
+      "parent": "rpRoundSlot",
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "rpTeach",
+      "type": "/Game/Teach card",
+      "label": "Show me how",
+      "parent": "rpWrap",
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "rpResult",
+      "type": "/Race/Result",
+      "label": "How it ended",
+      "parent": "rpWrap",
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "rpA",
+      "type": "Variable2",
+      "label": "Rocket A",
+      "parameters": {
+        "name": "raceProgressA"
+      },
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "rpB",
+      "type": "Variable2",
+      "label": "Rocket B",
+      "parameters": {
+        "name": "raceProgressB"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "rpSetA",
+      "type": "Set Variable",
+      "label": "Move rocket A",
+      "parameters": {
+        "name": "raceProgressA"
+      },
+      "x": 410,
+      "y": 4240
+    },
+    {
+      "id": "rpSetB",
+      "type": "Set Variable",
+      "label": "Move rocket B",
+      "parameters": {
+        "name": "raceProgressB"
+      },
+      "x": 410,
+      "y": 4360
+    },
+    {
+      "id": "rpResetA",
+      "type": "Set Variable",
+      "label": "A to the start",
+      "parameters": {
+        "name": "raceProgressA"
+      },
+      "x": 410,
+      "y": 3520
+    },
+    {
+      "id": "rpResetB",
+      "type": "Set Variable",
+      "label": "B to the start",
+      "parameters": {
+        "name": "raceProgressB"
+      },
+      "x": 410,
+      "y": 1840
+    },
+    {
+      "id": "rpZero",
+      "type": "Expression",
+      "label": "Zero",
+      "parameters": {
+        "expression": "0"
+      },
+      "x": 410,
+      "y": 4480
+    },
+    {
+      "id": "rpRounds",
+      "type": "Counter",
+      "label": "Rounds played",
+      "parameters": {
+        "startValue": 0
+      },
+      "x": 410,
+      "y": 1960
+    },
+    {
+      "id": "rpTurnIsB",
+      "type": "Expression",
+      "label": "Is it B's turn? (two players, odd rounds)",
+      "parameters": {
+        "expression": "players === 2 && rounds % 2 === 1"
+      },
+      "x": 410,
+      "y": 2080
+    },
+    {
+      "id": "rpMineAt",
+      "type": "Expression",
+      "label": "Where the answering rocket is",
+      "parameters": {
+        "expression": "isB ? b : a"
+      },
+      "x": 410,
+      "y": 2200
+    },
+    {
+      "id": "rpTheirsAt",
+      "type": "Expression",
+      "label": "Where the other one is",
+      "parameters": {
+        "expression": "isB ? a : b"
+      },
+      "x": 410,
+      "y": 2320
+    },
+    {
+      "id": "rpTurnText",
+      "type": "Expression",
+      "label": "Whose turn, in words",
+      "parameters": {
+        "expression": "players === 2 ? (isB ? nameB : nameA) + ' — ' + word : ''"
+      },
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "rpNextA",
+      "type": "Expression",
+      "label": "Where A would be",
+      "parameters": {
+        "expression": "min(1, a + gain)"
+      },
+      "x": 410,
+      "y": 2440
+    },
+    {
+      "id": "rpNextB",
+      "type": "Expression",
+      "label": "Where B would be",
+      "parameters": {
+        "expression": "min(1, b + (players === 2 ? gain : cpu))"
+      },
+      "x": 410,
+      "y": 2560
+    },
+    {
+      "id": "rpAMoves",
+      "type": "Expression",
+      "label": "Does A move?",
+      "parameters": {
+        "expression": "!isB"
+      },
+      "x": 410,
+      "y": 4600
+    },
+    {
+      "id": "rpBMoves",
+      "type": "Expression",
+      "label": "Does B move?",
+      "parameters": {
+        "expression": "players === 1 || isB"
+      },
+      "x": 410,
+      "y": 4720
+    },
+    {
+      "id": "rpGateA",
+      "type": "Condition",
+      "label": "Move A?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 410,
+      "y": 2680
+    },
+    {
+      "id": "rpGateB",
+      "type": "Condition",
+      "label": "Move B?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 410,
+      "y": 2800
+    },
+    {
+      "id": "rpOver",
+      "type": "Expression",
+      "label": "Is it over?",
+      "parameters": {
+        "expression": "a >= 1 || b >= 1"
+      },
+      "x": 410,
+      "y": 4840
+    },
+    {
+      "id": "rpGoOn",
+      "type": "Condition",
+      "label": "Another round?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 410,
+      "y": 2920
+    },
+    {
+      "id": "rpWinner",
+      "type": "Variable2",
+      "label": "Who won",
+      "parameters": {
+        "name": "raceWinner"
+      },
+      "x": 410,
+      "y": 4960
+    },
+    {
+      "id": "rpSetWinA",
+      "type": "Set Variable",
+      "label": "A won",
+      "parameters": {
+        "name": "raceWinner"
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "rpSetWinB",
+      "type": "Set Variable",
+      "label": "B won",
+      "parameters": {
+        "name": "raceWinner"
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "rpNameAExpr",
+      "type": "Expression",
+      "label": "'A'",
+      "parameters": {
+        "expression": "'A'"
+      },
+      "x": 410,
+      "y": 5080
+    },
+    {
+      "id": "rpNameBExpr",
+      "type": "Expression",
+      "label": "'B'",
+      "parameters": {
+        "expression": "'B'"
+      },
+      "x": 410,
+      "y": 5200
+    },
+    {
+      "id": "rpIsTwo",
+      "type": "Expression",
+      "label": "Two players?",
+      "parameters": {
+        "expression": "players === 2"
+      },
+      "x": 410,
+      "y": 1480
+    },
+    {
+      "id": "rpShown",
+      "type": "Expression",
+      "label": "Only while racing",
+      "parameters": {
+        "expression": "m === true"
+      },
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "rpTyping",
+      "type": "Expression",
+      "label": "A typing race? Then the keyboard takes the course’s room",
+      "parameters": {
+        "expression": "mode === 'typing'"
+      },
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "rpPhase",
+      "type": "States",
+      "label": "Racing, the result, or a Teach card",
+      "parameters": {
+        "states": "racing,over,teaching",
+        "values": "racing,over,teaching,controls",
+        "useTransitions": false,
+        "type-racing": "boolean",
+        "value-racing-racing": true,
+        "value-over-racing": false,
+        "value-teaching-racing": false,
+        "type-over": "boolean",
+        "value-racing-over": false,
+        "value-over-over": true,
+        "value-teaching-over": false,
+        "type-teaching": "boolean",
+        "value-racing-teaching": false,
+        "value-over-teaching": false,
+        "value-teaching-teaching": true,
+        "type-controls": "boolean",
+        "value-racing-controls": true,
+        "value-over-controls": false,
+        "value-teaching-controls": true
+      },
+      "x": 410,
+      "y": 1600
+    },
+    {
+      "id": "rpTeachPick",
+      "type": "/Logic/Teach card",
+      "label": "The card for the skill just missed",
+      "x": 410,
+      "y": 3400
+    },
+    {
+      "id": "rpStep",
+      "type": "Expression",
+      "label": "Which step: less each miss in a row",
+      "parameters": {
+        "expression": "min(2, max(0, misses - 1))"
+      },
+      "x": 410,
+      "y": 3040
+    },
+    {
+      "id": "rpBoostsA",
+      "type": "Counter",
+      "label": "Right answers that moved A",
+      "parameters": {
+        "startValue": 0
+      },
+      "x": 410,
+      "y": 5320
+    },
+    {
+      "id": "rpBoostA",
+      "type": "Condition",
+      "label": "Was A right?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "rpBRight",
+      "type": "Expression",
+      "label": "Was player two right?",
+      "parameters": {
+        "expression": "players === 2 && correct === true"
+      },
+      "x": 410,
+      "y": 3160
+    },
+    {
+      "id": "rpBoostB",
+      "type": "Condition",
+      "label": "Burst B?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "rpBLanded",
+      "type": "Condition",
+      "label": "B landed: a friend, or the computer?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 410,
+      "y": 5440
+    },
+    {
+      "id": "rpWon",
+      "type": "Expression",
+      "label": "Something to cheer?",
+      "parameters": {
+        "expression": "players === 2 || winner === 'A'"
+      },
+      "x": 410,
+      "y": 3640
+    },
+    {
+      "id": "rpResultText",
+      "type": "Expression",
+      "label": "The result, in words",
+      "parameters": {
+        "expression": "players === 2 ? (winner === 'A' ? nameA : nameB) + ' ' + winsWord : winner === 'A' ? youWin : computerWins"
+      },
+      "x": 410,
+      "y": 3760
+    },
+    {
+      "id": "rpResultLine",
+      "type": "Expression",
+      "label": "How many were right",
+      "parameters": {
+        "expression": "players === 2 ? '' : right + ' / ' + rounds + ' ' + word"
+      },
+      "x": 410,
+      "y": 3880
+    },
+    {
+      "id": "rpMint",
+      "type": "JavaScriptFunction",
+      "label": "A new race id",
+      "parameters": {
+        "functionScript": "Outputs.raceId = 'r' + Date.now().toString(36) + Math.floor(Math.random() * 1000000).toString(36);"
+      },
+      "x": 410,
+      "y": 3280,
+      "ports": [
+        {
+          "name": "out-raceId",
+          "displayName": "raceId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "rpFinish",
+      "type": "/Logic/Finish race",
+      "label": "Pay the landing, and a new best",
+      "x": 410,
+      "y": 4000
+    },
+    {
+      "id": "rpOut",
+      "type": "Component Outputs",
+      "label": "How it went",
+      "ports": [
+        {
+          "name": "finished",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "winner",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "graded",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "rounds",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "showMe",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "teach",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "cheer",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "sigh",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "changeRace",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "hangar",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "layoutSeen",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "layoutSeenNow",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "layoutPick",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "layoutPickNow",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 4120
+    }
+  ],
+  "visualRoots": [
+    "rpWrap"
+  ]
+}

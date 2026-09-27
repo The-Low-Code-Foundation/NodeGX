@@ -1,0 +1,406 @@
+.TokenList {
+  padding: 4px 0;
+}
+
+.TokenRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  min-height: 28px;
+  border-radius: 4px;
+  transition: background-color var(--transition-fast) var(--transition-ease-out);
+
+  &:hover {
+    background-color: var(--theme-color-bg-3);
+  }
+
+  &.isOverridden {
+    .TokenName {
+      color: var(--theme-color-fg-highlight);
+    }
+  }
+}
+
+// ─── Color swatch ─────────────────────────────────────────────────────────────
+
+.ColorSwatch {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1px solid var(--theme-color-border-default);
+  background-color: var(--theme-color-bg-3);
+}
+
+// ─── Token info ───────────────────────────────────────────────────────────────
+
+.TokenInfo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  gap: 1px;
+}
+
+.TokenName {
+  font-size: 11px;
+  color: var(--theme-color-fg-default);
+  font-family: var(--font-family-code);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.TokenValue {
+  font-size: 10px;
+  color: var(--theme-color-fg-default-shy);
+  font-family: var(--font-family-code);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// P103 CMG-011 row 1: the value is an <input> since P102, and an input with no background of its own
+// paints the browser's white box — light grey text on white in dark mode. At rest it reads as text;
+// hover and focus show that it is a field.
+input.TokenValue {
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 2px 4px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  outline: none;
+
+  &:hover {
+    border-color: var(--theme-color-border-default);
+  }
+
+  &:focus {
+    color: var(--theme-color-fg-default);
+    background-color: var(--theme-color-bg-1);
+    border-color: var(--theme-color-primary);
+  }
+}
+
+// ─── P102 CMP-001 (RC-3): the composer rows ───────────────────────────────────
+
+.composes {
+  min-height: 40px;
+  cursor: pointer;
+}
+
+.TokenWords {
+  font-size: 11px;
+  color: var(--theme-color-fg-default-shy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.PreviewButton {
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.LargePreview {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: #ffffff;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+// A shadow needs room to fall into: the stage is the 28px button, the card is smaller.
+.ShadowStage {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--theme-color-bg-1, #f1f5f9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .LargePreview {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+  }
+}
+
+.GradientPreview {
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.DurationBar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--theme-color-primary);
+  align-self: center;
+  margin: 0 3px;
+  min-width: 2px;
+}
+
+.FamilyPreview {
+  font-size: 13px;
+  line-height: 1;
+  color: var(--theme-color-fg-default);
+  background: var(--theme-color-bg-2);
+}
+
+.PencilButton {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--theme-color-fg-default-shy);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 2px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity var(--transition-fast) var(--transition-ease-out);
+
+  .TokenRow:hover & {
+    opacity: 1;
+  }
+
+  &:hover {
+    color: var(--theme-color-fg-default);
+  }
+}
+
+// ─── P103 CMG-002: copy and delete, on row hover like the pencil ──────────────
+
+.CopyButton,
+.DeleteButton {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--theme-color-fg-default-shy);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 2px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity var(--transition-fast) var(--transition-ease-out);
+
+  .TokenRow:hover &,
+  &:focus-visible {
+    opacity: 1;
+  }
+
+  &:hover {
+    color: var(--theme-color-fg-default);
+  }
+}
+
+.DeleteButton:hover {
+  color: var(--theme-color-notice, #d97706);
+}
+
+// ─── Override reset button ────────────────────────────────────────────────────
+
+.ResetButton {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--theme-color-fg-default-shy);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0 2px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity var(--transition-fast) var(--transition-ease-out);
+
+  .TokenRow:hover & {
+    opacity: 1;
+  }
+
+  &:hover {
+    color: var(--theme-color-fg-default);
+  }
+}
+
+// ─── Non-color previews ───────────────────────────────────────────────────────
+
+.SpacingPreview {
+  flex-shrink: 0;
+  width: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.SpacingBar {
+  height: 4px;
+  background-color: var(--theme-color-primary);
+  border-radius: 2px;
+  min-width: 1px;
+}
+
+.RadiusPreview {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--theme-color-fg-default-shy);
+  background: transparent;
+}
+
+.ShadowPreview {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--theme-color-bg-2);
+}
+
+.FontSizePreview {
+  flex-shrink: 0;
+  width: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--theme-color-fg-default);
+  line-height: 1;
+  overflow: hidden;
+}
+
+.DotPreview {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--theme-color-fg-default-shy);
+  margin: 5px;
+}
+
+// ─── P103 CMG-010: Used by ────────────────────────────────────────────────────
+
+.Usage {
+  flex: 0 0 auto;
+  font-size: 10px;
+  color: var(--theme-color-fg-default-shy);
+  font-variant-numeric: tabular-nums;
+}
+
+.isUnused {
+  color: var(--theme-color-notice);
+}
+
+.UsageButton {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 1px 3px;
+  margin: 0;
+  font: inherit;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  border-radius: 3px;
+
+  &:hover,
+  &.isOpen {
+    color: var(--theme-color-fg-highlight);
+    background-color: var(--theme-color-bg-4);
+  }
+}
+
+.Wearers {
+  display: flex;
+  flex-direction: column;
+  margin: 0 12px 6px 24px;
+  padding-left: 8px;
+  border-left: 1px solid var(--theme-color-bg-4);
+}
+
+.WearersTitle {
+  font-size: 10px;
+  color: var(--theme-color-fg-default-shy);
+  padding: 2px 0 4px;
+}
+
+.Wearer {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  width: 100%;
+  appearance: none;
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 3px 4px;
+  border-radius: 3px;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--theme-color-bg-3);
+  }
+}
+
+.WearerLook {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  width: 100%;
+  padding: 3px 4px;
+}
+
+.WearerName {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--theme-color-fg-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.WearerField {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: 10px;
+  font-family: var(--font-family-code);
+  color: var(--theme-color-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.WearerWhere {
+  flex: 0 0 auto;
+  font-size: 10px;
+  color: var(--theme-color-fg-default-shy);
+  max-width: 40%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.WearerBadge {
+  flex: 0 0 auto;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--theme-color-fg-default-shy);
+  border: 1px solid var(--theme-color-bg-4);
+  border-radius: 3px;
+  padding: 0 4px;
+}

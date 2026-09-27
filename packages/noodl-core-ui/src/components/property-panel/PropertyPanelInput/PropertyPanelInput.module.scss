@@ -15,7 +15,7 @@
 .Label {
   font-family: var(--font-family);
   color: var(--theme-color-fg-default);
-  font-size: 12.5px;
+  font-size: var(--font-size-sm);
   line-height: 1.35;
   width: 37%;
   flex-grow: 0;
@@ -35,7 +35,6 @@
   display: inline-block;
   width: 7px;
   height: 7px;
-  margin-left: 6px;
   border-radius: 50%;
   background-color: var(--theme-color-secondary-as-fg);
   cursor: pointer;
@@ -46,10 +45,27 @@
   }
 }
 
+/* CHR-009 §2 — a wire arrives: filled primary with a wash ring (mockup `.dot.on`). */
+.ConnectedDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--theme-color-primary);
+  box-shadow: 0 0 0 3px var(--theme-color-primary-bg);
+  flex-shrink: 0;
+}
+
 .InputContainer {
   flex: 1 1 auto;
   min-width: 0; // Allow flex item to shrink below content size
   overflow: hidden; // Prevent content overflow
+}
+
+/* CHR-009 — a select fills the value track like every other field; the expression toggle stays
+   at the end of the line. */
+.Control.is-select > :first-child {
+  flex: 1 1 auto;
 }
 
 /* Mock `.toggle-row`: label takes the row, control right-aligned. */
@@ -73,11 +89,54 @@
    ceiling: it still starts at 62px on the narrowest panel, grows as the panel
    grows, and stops at 160px so the value track always keeps the majority of
    the row. Every row shares the one column, so inputs stay aligned. */
+/* CHR-009 R6 — RULED (Richard, 2026-09-17): one fixed label column at every panel width, so every
+   label's left AND every control's left edge line up; a label that does not fit is ellipsised, and
+   the component sets `title` so the whole label is one hover away. This reverses FH-013's wrap on
+   purpose. The width itself is `--property-label-column`, declared once in the editor's
+   `propertyeditor.css`; never write the number here. */
 :global(.sidebar-property-editor) {
+  .Root {
+    min-height: 30px;
+    margin-bottom: 2px;
+  }
+
   .Label {
-    width: 37%;
-    min-width: 62px;
-    max-width: 160px;
+    width: var(--property-label-column, 118px);
+    color: var(--theme-color-fg-default-shy);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* CHR-009 §2 — the gutter. The row's mark (`GutterDot`) sits in the 16px the groups already
+     leave left of the label column, centred on the row, so the label x is one value with or
+     without a mark. */
+  .Root {
+    position: relative;
+  }
+
+  .ResetDot,
+  .ConnectedDot {
+    position: absolute;
+    top: 50%;
+    left: -11px;
+    width: 6px;
+    height: 6px;
+    margin: -3px 0 0;
+  }
+
+  /* A multi-line control: label and mark sit on the first 30px line, not the row's middle. */
+  .Root.is-top-aligned {
+    align-items: flex-start;
+
+    .Label {
+      line-height: 30px;
+    }
+
+    .ResetDot,
+    .ConnectedDot {
+      top: 15px;
+    }
   }
 
   .Root.is-toggle-row .Label {

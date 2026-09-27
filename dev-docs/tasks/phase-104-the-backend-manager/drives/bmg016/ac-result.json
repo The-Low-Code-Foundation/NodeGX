@@ -1,0 +1,148 @@
+{
+  "checks": {
+    "seed: the first admin account exists": {
+      "pass": true,
+      "detail": 201
+    },
+    "R6: over 2 records the box is the one-time fill, and says it is not a default": {
+      "pass": true,
+      "detail": "Add a field to Pet\nText — words, names, descriptions\n✕\nAa\nText\n\nwords, names, descriptions\n\nString\nName\nLetters, digits and _ — this is the name app logic reads it by.\nDescription (optional)\nFill the 2 records already here with\nOnce, now. It is not a default: a new record without this field is refused.\nMax length\nMust look like\nanything\nan email address\na web address\nRULES\nRequired — every record "
+    },
+    "R6: the two records there were filled once — an apostrophe too": {
+      "pass": true,
+      "detail": [
+        [
+          "Rex",
+          "O'Neill"
+        ],
+        [
+          "Tess",
+          "O'Neill"
+        ]
+      ]
+    },
+    "R6: declared required with NO default": {
+      "pass": true,
+      "detail": {
+        "name": "phone",
+        "type": "String",
+        "required": true
+      }
+    },
+    "R6: a new record without the field is refused, naming it — the point of Required": {
+      "pass": true,
+      "detail": {
+        "status": 400,
+        "json": {
+          "error": "\"phone\" is required on \"Pet\": every record must say it. The write was refused, and nothing was changed.",
+          "code": 142,
+          "reason": "required",
+          "collection": "Pet",
+          "field": "phone",
+          "requestId": "ab573290-e52e-4670-8580-e2a521d6b536"
+        }
+      }
+    },
+    "Server: How long a list can be shows the backend’s two numbers": {
+      "pass": true
+    },
+    "Server: upside down is refused inline and Save is off": {
+      "pass": true,
+      "detail": "The longest list cannot be shorter than the one the app gets without asking."
+    },
+    "Server: saved as the queries section": {
+      "pass": true,
+      "detail": {
+        "defaultLimit": 100,
+        "maxLimit": 5000
+      }
+    },
+    "Move: no move card while uploads go to this machine": {
+      "pass": true
+    },
+    "Move: the bucket connects (the card appears only then)": {
+      "pass": true,
+      "detail": 200
+    },
+    "Move: the card counts the files still on this machine": {
+      "pass": true,
+      "detail": "2 files are still on this machine. They keep serving from here; new uploads go to the bucket."
+    },
+    "Move: it asks first, and says a file that cannot move keeps working": {
+      "pass": true,
+      "detail": "Move 2 files to the bucket?\nEach file is copied into the bucket, checked, and only then removed from this machine — a file that cannot be moved stays where it is and keeps working.\nCancel\nMove"
+    },
+    "Move: the card says what happened, from the route": {
+      "pass": true,
+      "detail": "2 files moved to the bucket. Every file is in the bucket."
+    },
+    "Move: both are in the bucket and neither is on this machine": {
+      "pass": true,
+      "detail": {
+        "keys": [
+          "54/50/545039687d19fd88a6c7655da4f9df9f3b300e8406e7c442c33e325d551cc91f-1b543236",
+          "a3/a5/a3a55be5cdc341ba977b549275d7cf0abc25ef9cb80427b73d6e2b8551b40017-689e620f"
+        ],
+        "onThisMachine": 0
+      }
+    },
+    "Move: each still serves, byte for byte": {
+      "pass": true,
+      "detail": [
+        "first file, on this machine\n",
+        "second file, also on this machine\n"
+      ]
+    },
+    "Move: served FROM the bucket now (the fake saw the GETs)": {
+      "pass": true,
+      "detail": 2
+    },
+    "R7: opened with no credential, the page asks for email + password, \"Keep me signed in on this browser\" ticked": {
+      "pass": true
+    },
+    "R7: signed in as the person, on the page the link named": {
+      "pass": true,
+      "detail": [
+        "richard@example.com",
+        "#/server"
+      ]
+    },
+    "R7: the session is kept for the browser; nothing for the tab": {
+      "pass": true,
+      "detail": {
+        "person": "{\"kind\":\"session\",\"value\":\"r:461db27da500c95ed1afa1325ce4fc04298584a960e58db3\"}",
+        "tab": null
+      }
+    },
+    "R7: Activity records the person (their id) for a change made on the page; the credential records none": {
+      "pass": true,
+      "detail": {
+        "person": "2774f017-58c1-4386-a085-f85983595fae",
+        "credential": "",
+        "personId": "2774f017-58c1-4386-a085-f85983595fae"
+      }
+    },
+    "R7: the next open is already the person, on its page — no password asked": {
+      "pass": true,
+      "detail": [
+        "richard@example.com",
+        "#/files"
+      ]
+    },
+    "R7: Sign out forgets the session in this browser": {
+      "pass": true
+    },
+    "R7: …and ends it on the server (the same token: 200 before, \"Invalid session token\" 209 after)": {
+      "pass": true,
+      "detail": [
+        200,
+        400,
+        {
+          "error": "Invalid session token",
+          "code": 209,
+          "requestId": "43bbd2de-7d7b-4792-a1b9-de60607189ce"
+        }
+      ]
+    }
+  }
+}

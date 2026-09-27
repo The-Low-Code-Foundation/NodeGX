@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f8b1fb7f-910e-527a-85bc-1b22061346f5",
+  "name": "Close task",
+  "path": "/Commands/Close task",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Closes a task with a note saying what happened. Without a note it does nothing."
+}

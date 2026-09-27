@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d29ccabc-b47c-5a97-8d55-b79710d8d0b2",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tlIn",
+      "fromProperty": "rows",
+      "toId": "tlEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "tlIn",
+      "fromProperty": "rows",
+      "toId": "tlCount",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "tlCount",
+      "fromProperty": "out-empty",
+      "toId": "tlEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tlIn",
+      "fromProperty": "placeholder",
+      "toId": "tlField",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "tlIn",
+      "fromProperty": "clearNew",
+      "toId": "tlField",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "tlField",
+      "fromProperty": "onTextChanged",
+      "toId": "tlSubmit",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "tlField",
+      "fromProperty": "onEnter",
+      "toId": "tlSubmit",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tlButton",
+      "fromProperty": "onClick",
+      "toId": "tlSubmit",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tlSubmit",
+      "fromProperty": "out-text",
+      "toId": "tlOut",
+      "toProperty": "newTitle"
+    },
+    {
+      "fromId": "tlSubmit",
+      "fromProperty": "out-go",
+      "toId": "tlOut",
+      "toProperty": "add"
+    },
+    {
+      "fromId": "tlEach",
+      "fromProperty": "itemOutputSignal-open",
+      "toId": "tlOut",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "tlEach",
+      "fromProperty": "itemOutputSignal-up",
+      "toId": "tlOut",
+      "toProperty": "up"
+    },
+    {
+      "fromId": "tlEach",
+      "fromProperty": "itemOutputSignal-down",
+      "toId": "tlOut",
+      "toProperty": "down"
+    },
+    {
+      "fromId": "tlEach",
+      "fromProperty": "itemOutputSignal-close",
+      "toId": "tlOut",
+      "toProperty": "close"
+    },
+    {
+      "fromId": "tlEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "tlOut",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "tlEach",
+      "fromProperty": "itemOutput-title",
+      "toId": "tlOut",
+      "toProperty": "taskTitle"
+    }
+  ]
+}

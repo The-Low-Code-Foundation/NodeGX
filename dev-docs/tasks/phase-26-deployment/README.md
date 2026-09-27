@@ -6,6 +6,11 @@
 **Status:** 📋 Specced, not started — 7 tasks. See [PROGRESS.md](./PROGRESS.md).
 **Starts:** Anytime. DEP-001 is a prerequisite for the rest and is small.
 
+> **2026-09-15:** DEP-001, DEP-002, DEP-004, DEP-005 and DEP-006 are absorbed into
+> [phase 89](../phase-89-a-box-of-your-own/README.md) as BOX-002 to BOX-006. Their spec files here are the starting point
+> for those tasks. DEP-003 and DEP-007 stay in this phase. DEP-008 is built (`e3c8198e6`), although PROGRESS.md still
+> says 0/8.
+
 ## Why this phase exists
 
 Phase 19's WF-003 built a genuinely good deployment *destination*: Docker Compose, one origin,
@@ -144,6 +149,9 @@ GitHub Pages is the one target that genuinely cannot avoid git.
 - **No CI/CD integration.** The whole point of DEP-003 is that you do not need one. If someone wants
   GitHub Actions they can already have it; a static folder is a static folder.
 - **No mobile/desktop targets.** Phase 5's Capacitor and Electron targets stay parked.
+  *Reopened in part on 2026-09-15:* [P89](../phase-89-a-box-of-your-own/README.md) builds a PWA and
+  [P91](../phase-91-the-app-in-your-dock/README.md) builds one desktop wrapper, for your own machine and unsigned.
+  Capacitor, the extension and Phase 5's target system stay parked.
 
 ## Verification posture
 

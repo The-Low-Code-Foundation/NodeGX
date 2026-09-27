@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 
 import { ProjectModel } from '@noodl-models/projectmodel';
+import { colourTokensForPicking, tokenReferenceStrings } from '@noodl-models/StyleTokensModel/TokensForPicking';
+import { StyleTokensModel } from '@noodl-models/StyleTokensModel/StyleTokensModel';
 import { StylesModel } from '@noodl-models/StylesModel';
 
-import { IconName, IconSize } from '@noodl-core-ui/components/common/Icon';
+import { Icon, IconName, IconSize } from '@noodl-core-ui/components/common/Icon';
 import { IconButtonVariant, IconButton } from '@noodl-core-ui/components/inputs/IconButton';
 
 import { escapeHtml } from '../../../../../utils/escapeHtml';
@@ -14,7 +16,51 @@ import ColorPicker from './colorpicker';
 
 require('../../../../../styles/propertyeditor/variantseditor.css');
 
-function getProjectColors(colorStyles) {
+/**
+ * What a swatch should actually paint.
+ *
+ * 🔴 **A swatch handed a raw `var(--token)` paints NOTHING.** Those tokens are the *project's*
+ * design tokens; the editor's own chrome never declares them, so `background-color: var(--primary)`
+ * is an invalid declaration in this DOM, the element paints transparent, and the checkerboard
+ * behind it shows through. Measured 2026-09-19 (P94 STY-007) in the running editor: **17 of the 20
+ * rows** under `Colors in project` computed to `rgba(0, 0, 0, 0)` while
+ * `ProjectModel.resolveColor` had the true colour for every one of them — `var(--primary)` is
+ * `#2f5bc8`, `var(--destructive)` is `#b3261e`. Richard, seeing the shot: *"Why do all the colour
+ * squares next to the list of 'Colors in project' look transparent??"* — because they were.
+ *
+ * ⚠️ **`transparent` must survive.** It is a real, pickable value and its checkerboard is correct;
+ * only an UNRESOLVABLE token should ever read as nothing. `resolveColor` returns its input
+ * unchanged when it cannot resolve it, so the fallback is exactly the old behaviour and no row can
+ * be made worse by this.
+ */
+function swatchColor(value) {
+  if (!value) return value;
+  try {
+    return ProjectModel.instance.resolveColor(value);
+  } catch {
+    return value;
+  }
+}
+
+/**
+ * The colours this project has *typed in somewhere*, as opposed to the ones it has *defined*.
+ *
+ * 🔴 **This is an echo, not an enumeration, and HLT-006 exists because the two were confused.**
+ * It walks every node's `type === 'color'` ports and collects the values it finds. On a project
+ * authored against design tokens those values are `var(--primary)` strings — which is how P94's
+ * STY-007 came to be fixing `var(--…)` swatches "in the colour picker" while this task's §2 was
+ * simultaneously right that no picker *enumerates* tokens. Both were true of different lists.
+ *
+ * Measured on `Puppy test 3` (2026-09-21): 13 of the project's 91 colour tokens reached this list,
+ * and they reached it only because a node already wore them. The other 78 were unpickable, so the
+ * only way to first use a token was to type `var(--name)` by hand — a list that can only offer what
+ * someone already entered cannot bootstrap ([[a-derivation-fed-by-its-own-gate-cannot-bootstrap]]).
+ *
+ * `knownTokenRefs` removes the overlap: a token now has a row of its own in the section below, and
+ * showing it a second time here — under a heading that means "loose values in use" — would be a
+ * duplicate this fix created rather than one it found.
+ */
+function getProjectColors(colorStyles, knownTokenRefs) {
   const colorsNames = new Set();
 
   const components = ProjectModel.instance.getComponents();
@@ -32,6 +78,7 @@ function getProjectColors(colorStyles) {
 
   let colors = Array.from(colorsNames);
   colors = colors.filter((c) => !colorStyles.find((s) => s.name === c)); //remove all color styles from the list, so we only get the #HEX colors
+  colors = colors.filter((c) => !knownTokenRefs.has(c)); // tokens have their own section now — HLT-006
   colors.sort();
   return colors;
 }
@@ -41,6 +88,8 @@ function ColorStylePicker(props) {
 
   const [colorStyles, setColorsStyles] = useState([]);
   const [projectColors, setProjectColors] = useState([]);
+  const [colourTokens, setColourTokens] = useState({ semantic: [], palette: [] });
+  const [tokensModel, setTokensModel] = useState(null);
 
   const [styleToEdit, setStyleToEdit] = useState(null);
   const [popupAnchor, setPopupAnchor] = useState(null);
@@ -52,9 +101,19 @@ function ColorStylePicker(props) {
     const stylesModel = new StylesModel();
     setStylesModel(stylesModel);
 
+    // HLT-006 — its own instance, for the same reason `StyleSuggestionHost` and `BenchInputsRail`
+    // keep one: this picker is rendered into a popout via `createRoot`, OUTSIDE the
+    // `ProjectDesignTokenContext` provider that wraps `EditorPage`, so there is no context to read.
+    // Multiple instances stay in step through `ProjectModel.metadataChanged`.
+    const tokensModel = new StyleTokensModel();
+    setTokensModel(tokensModel);
+
+    const tokens = colourTokensForPicking(tokensModel.getTokens());
+    setColourTokens(tokens);
+
     const styles = stylesModel.getStyles('colors');
     setColorsStyles(styles);
-    setProjectColors(getProjectColors(styles));
+    setProjectColors(getProjectColors(styles, tokenReferenceStrings(tokensModel.getTokens())));
 
     stylesModel.on('stylesChanged', (args) => {
       if (args.type === 'colors') {
@@ -63,8 +122,13 @@ function ColorStylePicker(props) {
       }
     });
 
+    tokensModel.on('tokensChanged', () => {
+      setColourTokens(colourTokensForPicking(tokensModel.getTokens()));
+    });
+
     return () => {
       stylesModel.dispose();
+      tokensModel.dispose();
     };
   }, []);
 
@@ -73,9 +137,21 @@ function ColorStylePicker(props) {
 
   const filterString = props.filter ? props.filter.toLowerCase() : undefined;
 
+  let filteredSemantic = colourTokens.semantic;
+  let filteredPalette = colourTokens.palette;
+
   if (filterString) {
     filteredStyles = colorStyles.filter((style) => style.name.toLowerCase().includes(filterString));
     filteredProjectColors = projectColors.filter((color) => color.toLowerCase().includes(filterString));
+
+    // A token matches on its name OR its description — "Main brand and action color" is how someone
+    // who has not memorised `--primary` finds it, and the description is already carried on the record.
+    const matchesToken = (token) =>
+      token.name.toLowerCase().includes(filterString) ||
+      (token.description || '').toLowerCase().includes(filterString);
+
+    filteredSemantic = colourTokens.semantic.filter(matchesToken);
+    filteredPalette = colourTokens.palette.filter(matchesToken);
   }
 
   const onItemSelected = (name) => props.onItemSelected(name);
@@ -174,11 +250,138 @@ function ColorStylePicker(props) {
           />
         ))}
 
+        <DesignTokensList
+          semantic={filteredSemantic}
+          palette={filteredPalette}
+          paletteTotal={colourTokens.palette.length}
+          isFiltering={Boolean(filterString)}
+          tokensModel={tokensModel}
+          onSelect={onItemSelected}
+          currentSelectedColor={props.inputValue}
+        />
+
         <ProjectColorsList
           colors={filteredProjectColors}
           onSelect={onItemSelected}
           currentSelectedColor={props.inputValue}
         />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * HLT-006 — the project's design tokens, offered for picking.
+ *
+ * 🔴 **Two lists, because 91 rows in one is the defect not the feature.** Measured on
+ * `Puppy test 3`: 25 semantic tokens (`--primary`, `--muted`, `--border`…), 16 of them the
+ * project's own overrides, plus a shipped 61-swatch ramp the project references not once.
+ * Richard: *"I don't want hundreds of lines in a colour picker just because some font somewhere
+ * has a random colour."* So the semantic set is open — that IS the app's palette — and the ramp
+ * sits behind a closed row that states its count, which is the same shape P94 landed on in
+ * `ColoursSection` after 88 open rows buried the styles above them.
+ *
+ * ⚠️ **Filtering opens the ramp.** A closed disclosure that hides matches is a search box that
+ * lies; typing `blue` has to reach `--blue-500` or the ramp may as well not be there.
+ */
+function DesignTokensList(props) {
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+
+  const showPalette = props.isFiltering ? props.palette.length > 0 : isPaletteOpen;
+
+  if (props.semantic.length === 0 && props.palette.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      {props.semantic.length > 0 && (
+        <>
+          <div className="variants-header">
+            <span>Design tokens</span>
+          </div>
+
+          {props.semantic.map((token) => (
+            <TokenItem
+              key={token.name}
+              token={token}
+              tokensModel={props.tokensModel}
+              onSelect={props.onSelect}
+              currentSelectedColor={props.currentSelectedColor}
+            />
+          ))}
+        </>
+      )}
+
+      {props.paletteTotal > 0 && (
+        <>
+          <div
+            className="variants-header is-toggle"
+            onClick={() => setIsPaletteOpen((open) => !open)}
+            data-test="palette-disclosure"
+          >
+            <Icon
+              icon={showPalette ? IconName.CaretDown : IconName.CaretRight}
+              size={IconSize.Small}
+              UNSAFE_style={{ marginRight: 4 }}
+            />
+            <span>Palette</span>
+            <span className="variants-header-count">
+              {props.isFiltering ? `${props.palette.length} of ${props.paletteTotal}` : props.paletteTotal}
+            </span>
+          </div>
+
+          {showPalette &&
+            props.palette.map((token) => (
+              <TokenItem
+                key={token.name}
+                token={token}
+                tokensModel={props.tokensModel}
+                onSelect={props.onSelect}
+                currentSelectedColor={props.currentSelectedColor}
+              />
+            ))}
+        </>
+      )}
+    </>
+  );
+}
+
+/**
+ * One token row.
+ *
+ * 🔴 **What it SETS is `var(--name)`, never the resolved hex.** That is the whole point of picking
+ * a token: the parameter keeps the reference, so changing `--primary` in the Styles panel moves
+ * every node that picked it. `ColorType.openStylePicker` passes `onItemSelected`'s argument
+ * straight to `setParameter`, so the string handed over here is the string stored.
+ *
+ * What it SHOWS beside the name is the resolved value, because Richard's ask was the other
+ * direction: *"when I see --var(someColour) I can go find out what that colour is"*.
+ */
+function TokenItem(props) {
+  const ref = useRef();
+  const reference = `var(${props.token.name})`;
+
+  const resolved = props.tokensModel ? props.tokensModel.resolveToken(props.token.name) : undefined;
+  const displayValue = resolved || props.token.value;
+
+  useScrollToIfSelected(ref, reference, props.currentSelectedColor);
+
+  return (
+    <div
+      className="variants-pick-variant-item"
+      onClick={(e) => {
+        props.onSelect(reference);
+        e.stopPropagation();
+      }}
+      ref={ref}
+      title={props.token.description ? `${props.token.description} — ${displayValue}` : displayValue}
+      style={{ backgroundColor: props.currentSelectedColor === reference ? 'var(--hover-bg-color)' : null }}
+    >
+      <div className="variant-item-name">{props.token.name}</div>
+      <div className="token-item-value">{displayValue}</div>
+      <div className="color-thumbnail">
+        <div className="color-thumbnail-content" style={{ backgroundColor: swatchColor(reference) }} />
       </div>
     </div>
   );
@@ -275,7 +478,7 @@ function ColorStyleItem(props) {
           onBlur={() => setIsEditing(false)}
         />
         <div className="color-thumbnail">
-          <div className="color-thumbnail-content" style={{ backgroundColor: props.style.style }} />
+          <div className="color-thumbnail-content" style={{ backgroundColor: swatchColor(props.style.style) }} />
         </div>
       </div>
     );
@@ -290,13 +493,13 @@ function ColorStyleItem(props) {
     >
       <div className="variant-item-name">{props.style.name}</div>
       <div className="variants-item-icon" onClick={onEditClicked}>
-        <i className="fa fa-edit" />
+        <Icon icon={IconName.Pencil} size={IconSize.Small} />
       </div>
       <div className="variants-item-icon" onClick={onDeleteClicked}>
-        <i className="fa fa-trash" />
+        <Icon icon={IconName.Trash} size={IconSize.Small} />
       </div>
       <div className="color-thumbnail" onClick={onColorClicked}>
-        <div className="color-thumbnail-content" style={{ backgroundColor: props.style.style }} />
+        <div className="color-thumbnail-content" style={{ backgroundColor: swatchColor(props.style.style) }} />
       </div>
     </div>
   );
@@ -321,7 +524,7 @@ function ColorItem(props) {
     >
       <div className="variant-item-name">{props.color}</div>
       <div className="color-thumbnail">
-        <div className="color-thumbnail-content" style={{ backgroundColor: props.color }} />
+        <div className="color-thumbnail-content" style={{ backgroundColor: swatchColor(props.color) }} />
       </div>
     </div>
   );

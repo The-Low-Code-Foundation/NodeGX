@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d0c12976-efb9-5698-8c38-dc4e1e4cedd7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "datawordlistsData",
+      "fromProperty": "items",
+      "toId": "datawordlistsOut",
+      "toProperty": "lists"
+    },
+    {
+      "fromId": "datawordlistsData",
+      "fromProperty": "count",
+      "toId": "datawordlistsOut",
+      "toProperty": "count"
+    }
+  ]
+}

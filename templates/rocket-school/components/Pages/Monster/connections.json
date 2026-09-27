@@ -1,0 +1,517 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8228e7e6-6498-5920-8fd4-73122a16e0f5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "zgStore",
+      "fromProperty": "app",
+      "toId": "zgMe",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "zgWords",
+      "fromProperty": "words",
+      "toId": "zgT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "lang",
+      "toId": "zgT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "zgFalse",
+      "fromProperty": "result",
+      "toId": "zgInitDone",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "zgPage",
+      "fromProperty": "didMount",
+      "toId": "zgInitDone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "hasProfile",
+      "toId": "zgNoOne",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "zgNoOne",
+      "fromProperty": "result",
+      "toId": "zgGuard",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "zgPage",
+      "fromProperty": "didMount",
+      "toId": "zgGuard",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "zgGuard",
+      "fromProperty": "ontrue",
+      "toId": "zgGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "zgHeader",
+      "fromProperty": "hangar",
+      "toId": "zgGoHangar",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "name",
+      "toId": "zgHeader",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "look",
+      "toId": "zgHeader",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "seed",
+      "toId": "zgHeader",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "lang",
+      "toId": "zgHeader",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "level",
+      "toId": "zgHeader",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "layout",
+      "toId": "zgHeader",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "soundMode",
+      "toId": "zgHeader",
+      "toProperty": "soundMode"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "answerMode",
+      "toId": "zgHeader",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "profileId",
+      "toId": "zgHeader",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "faceOptions",
+      "toId": "zgHeader",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "zgStore",
+      "fromProperty": "app",
+      "toId": "zgHeader",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "zgHeader",
+      "fromProperty": "app",
+      "toId": "zgStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "zgHeader",
+      "fromProperty": "write",
+      "toId": "zgStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "zgHeader",
+      "fromProperty": "switchPlayer",
+      "toId": "zgGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "zgHeader",
+      "fromProperty": "deleted",
+      "toId": "zgGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "zgHeader",
+      "fromProperty": "home",
+      "toId": "zgGoHome",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "gameMonster",
+      "toId": "zgTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "mathsMode",
+      "toId": "zgSetup",
+      "toProperty": "mathsWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "typingMode",
+      "toId": "zgSetup",
+      "toProperty": "typingWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "monsterGate",
+      "toId": "zgSetup",
+      "toProperty": "gateWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "monsterPush",
+      "toId": "zgSetup",
+      "toProperty": "pushWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "practice",
+      "toId": "zgSetup",
+      "toProperty": "practiceWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "challenge",
+      "toId": "zgSetup",
+      "toProperty": "challengeWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "monsterGatePractice",
+      "toId": "zgSetup",
+      "toProperty": "gatePracticeWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "monsterGateChallenge",
+      "toId": "zgSetup",
+      "toProperty": "gateChallengeWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "monsterPushPractice",
+      "toId": "zgSetup",
+      "toProperty": "pushPracticeWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "monsterPushChallenge",
+      "toId": "zgSetup",
+      "toProperty": "pushChallengeWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "start",
+      "toId": "zgSetup",
+      "toProperty": "startWord"
+    },
+    {
+      "fromId": "zgNotPlaying",
+      "fromProperty": "result",
+      "toId": "zgSetup",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "zgNotPlaying",
+      "fromProperty": "result",
+      "toId": "zgTitle",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "zgPlaying",
+      "fromProperty": "value",
+      "toId": "zgHeader",
+      "toProperty": "hideBar"
+    },
+    {
+      "fromId": "zgPlaying",
+      "fromProperty": "value",
+      "toId": "zgNotPlaying",
+      "toProperty": "playing"
+    },
+    {
+      "fromId": "zgTrue",
+      "fromProperty": "result",
+      "toId": "zgSetPlaying",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "zgSetup",
+      "fromProperty": "start",
+      "toId": "zgSetPlaying",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "zgSetPlaying",
+      "fromProperty": "done",
+      "toId": "zgPlay",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "zgPlaying",
+      "fromProperty": "value",
+      "toId": "zgPlay",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "zgSetup",
+      "fromProperty": "style",
+      "toId": "zgPlay",
+      "toProperty": "style"
+    },
+    {
+      "fromId": "zgSetup",
+      "fromProperty": "timed",
+      "toId": "zgPlay",
+      "toProperty": "timed"
+    },
+    {
+      "fromId": "zgSetup",
+      "fromProperty": "mode",
+      "toId": "zgPlay",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "level",
+      "toId": "zgPlay",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "lang",
+      "toId": "zgPlay",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "layout",
+      "toId": "zgPlay",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "answerMode",
+      "toId": "zgPlay",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "model",
+      "toId": "zgPlay",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "sound",
+      "toId": "zgPlay",
+      "toProperty": "soundOn"
+    },
+    {
+      "fromId": "zgCurriculum",
+      "fromProperty": "skills",
+      "toId": "zgPlay",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "zgWordLists",
+      "fromProperty": "lists",
+      "toId": "zgPlay",
+      "toProperty": "wordLists"
+    },
+    {
+      "fromId": "zgTeachCards",
+      "fromProperty": "cards",
+      "toId": "zgPlay",
+      "toProperty": "teachCards"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "typeAnswer",
+      "toId": "zgPlay",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "check",
+      "toId": "zgPlay",
+      "toProperty": "checkWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "fluent",
+      "toId": "zgPlay",
+      "toProperty": "fluentWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "correct",
+      "toId": "zgPlay",
+      "toProperty": "correctWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "wrong",
+      "toId": "zgPlay",
+      "toProperty": "wrongWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "timeUp",
+      "toId": "zgPlay",
+      "toProperty": "timeUpWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "next",
+      "toId": "zgPlay",
+      "toProperty": "nextWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "showMe",
+      "toId": "zgPlay",
+      "toProperty": "showMeWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "anExample",
+      "toId": "zgPlay",
+      "toProperty": "anExampleWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "gotIt",
+      "toId": "zgPlay",
+      "toProperty": "gotItWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "restart",
+      "toId": "zgPlay",
+      "toProperty": "restartWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "monsterChange",
+      "toId": "zgPlay",
+      "toProperty": "changeWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "newGame",
+      "toId": "zgPlay",
+      "toProperty": "againWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "earnedPick",
+      "toId": "zgPlay",
+      "toProperty": "pickWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "toHangar",
+      "toId": "zgPlay",
+      "toProperty": "hangarWord"
+    },
+    {
+      "fromId": "zgStore",
+      "fromProperty": "app",
+      "toId": "zgSave",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "profileId",
+      "toId": "zgSave",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "zgPlay",
+      "fromProperty": "model",
+      "toId": "zgSave",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "zgPlay",
+      "fromProperty": "graded",
+      "toId": "zgSave",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "zgSave",
+      "fromProperty": "app",
+      "toId": "zgStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "zgSave",
+      "fromProperty": "done",
+      "toId": "zgStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "zgPlay",
+      "fromProperty": "hangar",
+      "toId": "zgGoHangar",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "zgFalse",
+      "fromProperty": "result",
+      "toId": "zgSetDone",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "zgPlay",
+      "fromProperty": "changeGame",
+      "toId": "zgSetDone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "sound",
+      "toId": "zgSounds",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "zgPlay",
+      "fromProperty": "cheer",
+      "toId": "zgSounds",
+      "toProperty": "win"
+    },
+    {
+      "fromId": "zgPlay",
+      "fromProperty": "sigh",
+      "toId": "zgSounds",
+      "toProperty": "lose"
+    }
+  ]
+}

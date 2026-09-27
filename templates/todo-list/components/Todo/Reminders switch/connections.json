@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9c14b616-b593-5d5a-8f05-a990b3d9f23c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rmTurnOn",
+      "fromProperty": "onClick",
+      "toId": "rmToggle",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rmTurnOff",
+      "fromProperty": "onClick",
+      "toId": "rmToggle",
+      "toProperty": "run"
+    }
+  ]
+}

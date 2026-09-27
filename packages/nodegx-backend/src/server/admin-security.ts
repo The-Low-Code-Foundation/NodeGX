@@ -10,8 +10,10 @@
  *   DELETE /admin/permissions/functions/:name       back to the graph's own declaration
  *   POST   /admin/permissions/check                 dry-run a decision
  *   GET    /admin/roles          POST /admin/roles          DELETE /admin/roles/:name
+ *   PUT    /admin/roles/:name    its description (BMG-005)
  *   POST   /admin/roles/:name/users                 DELETE /admin/roles/:name/users/:userId
  *   GET    /admin/keys           POST /admin/keys           DELETE /admin/keys/:id (revoke)
+ *   PUT    /admin/keys/:id       change scopes / actsAsUserId (BMG-007)
  *
  * All admin-gated by the dispatcher. The same surface backs the editor panel
  * (via BackendManager IPC proxy), BAK-005's served dashboard, and the MCP
@@ -20,9 +22,11 @@
  * @module nodegx-backend/server/admin-security
  */
 
+import { createHash } from 'crypto';
+
 import type { BackendServiceOptions } from '../config';
 import { requiresAuth } from '../config';
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import type { WorkflowRunner } from '../workflow/WorkflowRunner';
 import { DEFAULT_FUNCTION_TIMEOUT_MS } from '../workflow/WorkflowRunner';
 import type { SecurityState } from '../security/state';
@@ -44,7 +48,7 @@ import {
   ruleAllows
 } from '../security/model';
 import { HttpError, readJSONBody, sendJSON } from './http-util';
-import { ROLE_NAME_RULE, RoleStore, isValidRoleName } from '../roles/RoleStore';
+import { ROLE_DESCRIPTION_MAX, ROLE_NAME_RULE, RoleStore, isValidRoleName } from '../roles/RoleStore';
 import type { RoleRecord } from '../roles/RoleStore';
 
 /**
@@ -57,9 +61,38 @@ import type { RoleRecord } from '../roles/RoleStore';
  */
 export type { RoleRecord };
 
+/** How many members the role list names (BMG-005: "count + the first three names"). */
+const ROLE_NAMES_SHOWN = 3;
+
+/** A role description from a request body: trimmed text, or undefined for none. Refuses anything else in words. */
+function roleDescription(raw: unknown): string | undefined {
+  if (raw === undefined || raw === null) return undefined;
+  if (typeof raw !== 'string') throw new HttpError(400, 'A role description is a sentence of text.');
+  const text = raw.trim();
+  if (text.length > ROLE_DESCRIPTION_MAX) {
+    throw new HttpError(400, `A role description is at most ${ROLE_DESCRIPTION_MAX} characters; this one is ${text.length}.`);
+  }
+  return text || undefined;
+}
+
+/**
+ * BMG-006 AC4 — the version tag of the stored config, for the whole-document
+ * write. `GET /admin/permissions` answers it (body `etag` and the `ETag`
+ * header); a `PUT /admin/permissions` that carries `If-Match` is refused with
+ * 412 when the stored config no longer matches, so a page that read, patched
+ * and wrote cannot overwrite a change made under it. A PUT without the header
+ * behaves as before — MCP and the editor never sent one.
+ *
+ * A digest of the JSON rather than a counter: the file is also edited by hand
+ * and by MCP, and a counter kept beside it would not move for those.
+ */
+export function configEtag(config: SecurityConfig): string {
+  return '"' + createHash('sha1').update(JSON.stringify(config)).digest('hex').slice(0, 20) + '"';
+}
+
 export class AdminSecurityRoutes {
   private readonly security: SecurityState;
-  private readonly facade: AdapterFacade;
+  private readonly facade: IStorageFacade;
   private readonly options: BackendServiceOptions;
   private readonly getRunner: () => WorkflowRunner | null;
   /** Read through a getter so an ops.json edit shows up without a restart. */
@@ -74,7 +107,7 @@ export class AdminSecurityRoutes {
 
   constructor(
     security: SecurityState,
-    facade: AdapterFacade,
+    facade: IStorageFacade,
     options: BackendServiceOptions,
     getRunner: () => WorkflowRunner | null,
     getFunctionClassPolicy: () => RateLimitPolicy,
@@ -93,16 +126,35 @@ export class AdminSecurityRoutes {
   // ==========================================================================
 
   getPermissions(ctx: RequestContext): void {
-    sendJSON(ctx.res, 200, {
-      config: this.security.config,
-      enforced: !this.security.devOpenActive,
-      loopback: !requiresAuth(this.options)
-    });
+    const etag = configEtag(this.security.config);
+    sendJSON(
+      ctx.res,
+      200,
+      {
+        config: this.security.config,
+        enforced: !this.security.devOpenActive,
+        loopback: !requiresAuth(this.options),
+        etag
+      },
+      { ETag: etag }
+    );
   }
 
   async putPermissions(ctx: RequestContext): Promise<void> {
     const body = await readJSONBody(ctx.req);
     const candidate = (body.config !== undefined ? body.config : body) as SecurityConfig;
+    // BMG-006 AC4: refuse to write over a change the caller has not seen.
+    const ifMatch = ctx.req.headers['if-match'];
+    if (typeof ifMatch === 'string' && ifMatch.trim() !== '' && ifMatch.trim() !== '*') {
+      const current = configEtag(this.security.config);
+      if (ifMatch.trim() !== current) {
+        throw new HttpError(
+          412,
+          'The permissions changed since this page loaded (by someone else, in another tab, or by an agent). ' +
+            'Nothing was saved. Reload to see the current rules, then make your change again.'
+        );
+      }
+    }
     const errors = validateSecurityConfig(candidate);
     if (errors.length > 0) {
       throw new HttpError(400, `Invalid security config:\n${errors.map((e) => `- ${e}`).join('\n')}`);
@@ -115,7 +167,8 @@ export class AdminSecurityRoutes {
     ctx.audit({ sections: Object.keys(candidate), devOpen: candidate.devOpen });
     Object.assign(this.security.config, candidate);
     this.security.save();
-    sendJSON(ctx.res, 200, { success: true, config: this.security.config });
+    const etag = configEtag(this.security.config);
+    sendJSON(ctx.res, 200, { success: true, config: this.security.config, etag }, { ETag: etag });
   }
 
   /**
@@ -377,7 +430,7 @@ export class AdminSecurityRoutes {
    */
   async checkAccess(ctx: RequestContext): Promise<void> {
     const body = await readJSONBody(ctx.req);
-    const principal = this.parsePrincipal(body.principal);
+    const principal = await this.parsePrincipal(body.principal);
 
     if (typeof body.functionName === 'string') {
       // CWF-017: one resolver with the dispatcher's gate. This used to restate
@@ -422,7 +475,7 @@ export class AdminSecurityRoutes {
   }
 
   /** Build a Principal from a check-request descriptor (never from credentials). */
-  private parsePrincipal(raw: unknown): Principal {
+  private async parsePrincipal(raw: unknown): Promise<Principal> {
     if (!raw || typeof raw !== 'object') return { kind: 'anonymous' };
     const p = raw as Record<string, unknown>;
     switch (p.kind) {
@@ -438,7 +491,7 @@ export class AdminSecurityRoutes {
         const userId = String(p.userId || '');
         if (!userId) throw new HttpError(400, 'principal.userId is required for kind "user"');
         // Roles may be supplied explicitly (hypotheticals) or resolved live.
-        const roles = Array.isArray(p.roles) ? p.roles.map(String) : this.security.rolesForUser(userId);
+        const roles = Array.isArray(p.roles) ? p.roles.map(String) : await this.security.rolesForUser(userId);
         return { kind: 'user', userId, roles };
       }
       case 'anonymous':
@@ -458,11 +511,33 @@ export class AdminSecurityRoutes {
     return new RoleStore(this.facade);
   }
 
+  /**
+   * Every role with its member ids, and (BMG-005) `names`: the first three
+   * members as a person reads them — a username, else an email — so the list
+   * can say who is in a role without the page fetching each id.
+   */
   async listRoles(ctx: RequestContext): Promise<void> {
     const store = this.roles;
-    const roles: (RoleRecord & { users: string[] })[] = [];
+    const roles: (RoleRecord & { users: string[]; names: string[] })[] = [];
+    const wanted = new Set<string>();
     for (const role of await store.list()) {
-      roles.push({ ...role, users: store.members(role) });
+      const users = store.members(role);
+      users.slice(0, ROLE_NAMES_SHOWN).forEach((id) => wanted.add(id));
+      roles.push({ ...role, users, names: [] });
+    }
+    const label: Record<string, string> = {};
+    if (wanted.size) {
+      const { results } = await this.facade.rawQueryAll('_User', { where: { objectId: { $in: Array.from(wanted) } } });
+      for (const u of results) {
+        const name = typeof u.username === 'string' && u.username ? u.username : typeof u.email === 'string' ? u.email : '';
+        if (name) label[u.objectId as string] = name;
+      }
+    }
+    for (const role of roles) {
+      role.names = role.users
+        .slice(0, ROLE_NAMES_SHOWN)
+        .map((id) => label[id])
+        .filter((n): n is string => !!n);
     }
     sendJSON(ctx.res, 200, { roles });
   }
@@ -476,9 +551,25 @@ export class AdminSecurityRoutes {
     if (await this.roles.find(name)) {
       throw new HttpError(400, `Role "${name}" already exists.`);
     }
-    ctx.audit({ role: name });
-    const role = await this.roles.create(name);
+    const description = roleDescription(body.description);
+    ctx.audit({ role: name, described: !!description });
+    const role = await this.roles.create(name, description);
     sendJSON(ctx.res, 201, { objectId: role.objectId, name });
+  }
+
+  /** `PUT /admin/roles/:name {description}` (BMG-005). The name is not editable: rules spell it. */
+  async updateRole(ctx: RequestContext): Promise<void> {
+    const role = await this.findRole(ctx.params.name);
+    const body = await readJSONBody(ctx.req);
+    for (const key of Object.keys(body)) {
+      if (key !== 'description') {
+        throw new HttpError(400, `Only a role's description can be changed here ("${key}" is not). A role's name is spelled into its permission rules.`);
+      }
+    }
+    const description = roleDescription(body.description) || '';
+    ctx.audit({ role: role.name, described: !!description });
+    await this.roles.describe(role, description);
+    sendJSON(ctx.res, 200, { name: role.name, description });
   }
 
   /** The named role, or a 404. `RoleStore.find` answers null instead. */
@@ -517,9 +608,9 @@ export class AdminSecurityRoutes {
   // API keys
   // ==========================================================================
 
-  listKeys(ctx: RequestContext): void {
+  async listKeys(ctx: RequestContext): Promise<void> {
     // Names, scopes, status — never secrets (they are unrecoverable by design).
-    sendJSON(ctx.res, 200, { keys: this.security.listApiKeys() });
+    sendJSON(ctx.res, 200, { keys: await this.security.listApiKeys() });
   }
 
   async createKey(ctx: RequestContext): Promise<void> {
@@ -528,16 +619,74 @@ export class AdminSecurityRoutes {
     if (!name) throw new HttpError(400, 'Key name is required');
     const scopeError = validateScopes(body.scopes);
     if (scopeError) throw new HttpError(400, scopeError);
-    // Name and scopes are the audit-worthy part; the secret is returned to the
-    // caller once and never recorded (the redaction rule would drop it anyway).
-    ctx.audit({ key: name, scopes: body.scopes });
-    const { objectId, secret } = this.security.createApiKey(name, body.scopes as string[]);
+    // FED-005 §3.3 — binding the key to a user, and the reason it is ADMIN-only
+    // and set at creation: a caller who could choose or change whom a key acts
+    // as would hold exactly the authority the binding exists to withhold.
+    //
+    // 🔴 The user is verified to EXIST here rather than at first use. A binding
+    // to a typo'd id would otherwise be accepted silently and only surface as a
+    // 401 on the MCP client's first call, with nothing pointing back at the
+    // typo — and `actingUserFor` fails shut on a missing user precisely so that
+    // this cannot fail open instead.
+    const actsAsUserId = body.actsAsUserId === undefined || body.actsAsUserId === null
+      ? null
+      : String(body.actsAsUserId).trim();
+    if (actsAsUserId !== null) {
+      if (!actsAsUserId) throw new HttpError(400, 'actsAsUserId must be a non-empty user id, or omitted');
+      try {
+        await this.facade.rawFetch('_User', actsAsUserId);
+      } catch {
+        throw new HttpError(400, `No such user: ${actsAsUserId}`);
+      }
+    }
+    // Name, scopes and the binding are the audit-worthy part; the secret is
+    // returned to the caller once and never recorded (the redaction rule would
+    // drop it anyway).
+    ctx.audit({ key: name, scopes: body.scopes, actsAsUserId });
+    const { objectId, secret } = await this.security.createApiKey(name, body.scopes as string[], actsAsUserId);
     // The one and only time the secret is returned.
-    sendJSON(ctx.res, 201, { objectId, name, scopes: body.scopes, secret });
+    sendJSON(ctx.res, 201, { objectId, name, scopes: body.scopes, actsAsUserId, secret });
   }
 
-  revokeKey(ctx: RequestContext): void {
-    const revoked = this.security.revokeApiKey(ctx.params.id);
+  /**
+   * `PUT /admin/keys/:id` — BMG-007. The API keys page edits a key's scopes
+   * (and the user it acts as) with the same checkboxes that created it, so a
+   * key whose job grew does not have to be revoked and re-pasted everywhere.
+   * Only the two mutable fields are accepted; the name and the secret are not
+   * edits, they are a new key.
+   */
+  async updateKey(ctx: RequestContext): Promise<void> {
+    const body = await readJSONBody(ctx.req);
+    const patch: { scopes?: string[]; actsAsUserId?: string | null } = {};
+    if (body.scopes !== undefined) {
+      const scopeError = validateScopes(body.scopes);
+      if (scopeError) throw new HttpError(400, scopeError);
+      patch.scopes = body.scopes as string[];
+    }
+    if (body.actsAsUserId !== undefined) {
+      const actsAsUserId = body.actsAsUserId === null ? null : String(body.actsAsUserId).trim();
+      if (actsAsUserId !== null) {
+        if (!actsAsUserId) throw new HttpError(400, 'actsAsUserId must be a non-empty user id, or null');
+        try {
+          await this.facade.rawFetch('_User', actsAsUserId);
+        } catch {
+          throw new HttpError(400, `No such user: ${actsAsUserId}`);
+        }
+      }
+      patch.actsAsUserId = actsAsUserId;
+    }
+    if (patch.scopes === undefined && patch.actsAsUserId === undefined) {
+      throw new HttpError(400, 'Nothing to change: send scopes, actsAsUserId, or both');
+    }
+    ctx.audit({ keyId: ctx.params.id, ...patch });
+    const result = await this.security.updateApiKey(ctx.params.id, patch);
+    if (result === 'missing') throw new HttpError(404, `No such key: ${ctx.params.id}`);
+    if (result === 'revoked') throw new HttpError(409, 'That key is revoked. A revoked key cannot be changed; make a new one.');
+    sendJSON(ctx.res, 200, { success: true, objectId: ctx.params.id, ...patch });
+  }
+
+  async revokeKey(ctx: RequestContext): Promise<void> {
+    const revoked = await this.security.revokeApiKey(ctx.params.id);
     if (!revoked) throw new HttpError(404, `No such key: ${ctx.params.id}`);
     sendJSON(ctx.res, 200, { success: true, objectId: ctx.params.id, revoked: true });
   }

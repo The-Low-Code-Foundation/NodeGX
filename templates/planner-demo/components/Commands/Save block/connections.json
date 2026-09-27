@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ba4e3675-8671-5d52-8ce2-5ac468f35f05",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "blockId",
+      "toId": "SaveblockGuard",
+      "toProperty": "in-blockId"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "projectId",
+      "toId": "SaveblockGuard",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "what",
+      "toId": "SaveblockGuard",
+      "toProperty": "in-what"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "planned",
+      "toId": "SaveblockGuard",
+      "toProperty": "in-planned"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "date",
+      "toId": "SaveblockGuard",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "do",
+      "toId": "SaveblockGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-projectId",
+      "toId": "SaveblockWrite",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-what",
+      "toId": "SaveblockWrite",
+      "toProperty": "in-what"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-planned",
+      "toId": "SaveblockWrite",
+      "toProperty": "in-planned"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-date",
+      "toId": "SaveblockWrite",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "blockId",
+      "toId": "SaveblockWrite",
+      "toProperty": "in-modelId"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-go",
+      "toId": "SaveblockWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "SaveblockWrite",
+      "fromProperty": "out-done",
+      "toId": "SaveblockOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "SaveblockWrite",
+      "fromProperty": "out-failure",
+      "toId": "SaveblockProblem",
+      "toProperty": "do"
+    }
+  ]
+}

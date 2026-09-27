@@ -73,8 +73,8 @@ type Claim = { file: string; line: number; token: string; hex: string };
 
 /**
  * Two shapes, both of which mean "token X is this colour":
- *   `'--theme-color-bg-0': '#161c24'`      — a token map
- *   `{ css: '--theme-color-bg-0', fallback: '#161c24' }` — CanvasTheme's pairing
+ *   `'--theme-color-bg-0': '#141318'`      — a token map
+ *   `{ css: '--theme-color-bg-0', fallback: '#141318' }` — CanvasTheme's pairing
  *
  * ⚠️ A bare `--theme-color-x: #hex` DECLARATION is not a claim about the canonical value — it is
  * a component overriding a token for itself, which is legal. Only the two forms above assert

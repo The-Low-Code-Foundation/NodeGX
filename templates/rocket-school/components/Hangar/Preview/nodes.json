@@ -1,0 +1,247 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "81037661-6fff-57ab-89b1-11cb7f4fee08",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pvIn",
+      "type": "Component Inputs",
+      "label": "Who, wearing what",
+      "ports": [
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "look",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "seed",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "options",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "paint",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pattern",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "line",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "changed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "pvCard",
+      "type": "Group",
+      "label": "The preview",
+      "children": [
+        "pvPop",
+        "pvLine"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "alignItems": "center",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pvPop",
+      "type": "Group",
+      "label": "What pops",
+      "parent": "pvCard",
+      "children": [
+        "pvFace",
+        "pvTrackBox"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "columnGap": "var(--space-4)",
+        "flexWrap": "nowrap",
+        "cssClassName": "rkt-preview"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pvFace",
+      "type": "/Game/Face",
+      "label": "The face",
+      "parent": "pvPop",
+      "parameters": {
+        "size": 96
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "pvTrackBox",
+      "type": "Group",
+      "label": "The rocket",
+      "parent": "pvPop",
+      "children": [
+        "pvTrack"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 420,
+          "unit": "px"
+        },
+        "height": {
+          "value": 120,
+          "unit": "px"
+        },
+        "sizeMode": "explicit"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "pvTrack",
+      "type": "game-kit.RaceTrack",
+      "label": "The rocket on a short course",
+      "parent": "pvTrackBox",
+      "parameters": {
+        "progressA": 0.5,
+        "showB": false,
+        "celebrate": false,
+        "aspect": "auto",
+        "colorA": "var(--primary)"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "pvLine",
+      "type": "Text",
+      "label": "Picks, in words",
+      "parent": "pvCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-bold)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "pvChanges",
+      "type": "Counter",
+      "label": "Changes so far",
+      "parameters": {
+        "startValue": 0
+      },
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "pvWhich",
+      "type": "Expression",
+      "label": "Which pop",
+      "parameters": {
+        "expression": "n > 0 ? (n % 2 === 1 ? 'a' : 'b') : 'still'"
+      },
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "pvPopState",
+      "type": "States",
+      "label": "Still, or popping",
+      "parameters": {
+        "states": "still,a,b",
+        "values": "cls",
+        "useTransitions": false,
+        "type-cls": "string",
+        "value-still-cls": "rkt-preview",
+        "value-a-cls": "rkt-preview rkt-wear-a",
+        "value-b-cls": "rkt-preview rkt-wear-b"
+      },
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "pvOut",
+      "type": "Component Outputs",
+      "label": "Tapped",
+      "ports": [
+        {
+          "name": "clicked",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "pvCard"
+  ]
+}

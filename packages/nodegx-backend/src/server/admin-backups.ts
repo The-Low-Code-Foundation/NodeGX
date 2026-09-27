@@ -14,17 +14,39 @@
  *   POST   /admin/schema/diff         { source } -> diff against THIS backend
  *   POST   /admin/schema/apply        { source, allowDestructive } -> apply result
  *
- * Restore over HTTP swaps files under a running service; it is intended for a
- * quiesced backend (documented in the runbook). The CLI `restore` is the
- * blessed path (service stopped). We still expose it because the panel needs it.
+ * BMG-011 (R4: restore is a button in the browser, behind the backend's typed
+ * name). Restore over HTTP used to swap `data/local.db` under the running
+ * adapter's open handle: the process kept serving the OLD rows from the
+ * unlinked inode and every write after the "restore" went into a file nothing
+ * would ever read again. It now quiesces first — `persistence.pause()`
+ * disconnects the adapter, the archive is unpacked, `persistence.resume()`
+ * reconnects and re-ensures the system tables — so what the route answers is
+ * what the next request reads. Requests that arrive in between fail loudly
+ * against a closed adapter rather than reading torn state; the page blocks its
+ * own controls for the duration. Without a `persistence` dep (a harness that
+ * builds the routes bare) the old swap-only behaviour stands, and the response
+ * says `reconnected: false`.
+ *
+ *   GET    /admin/backups/archive?file=<name>   stream one listed archive (download)
+ *
+ * BMG-015: the destination can be the files' bucket. The list answers
+ * `bucket` (connected or not, and its name) so the page can offer the tile;
+ * a PUT that asks for the bucket while none is connected is 400 by sentence;
+ * a restore FETCHES the archive to disk before `persistence.pause()`, so a
+ * failed download leaves the running database alone; a download pipes the
+ * object.
  *
  * @module nodegx-backend/server/admin-backups
  */
 
+import * as fs from 'fs';
+
 import type { RequestContext } from './HttpServer';
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import type { BackupSubsystem } from '../backup/BackupSubsystem';
 import type { BackupListItem } from '../backup/BackupManager';
+import { BackupNotFileBackedError } from '../backup/BackupManager';
+import type { S3Driver } from '../storage/S3Driver';
 import type { BackupConfig } from '../backup/config';
 import { exportCollection, importCollection, DataFormat } from '../backup/dataio';
 import {
@@ -37,17 +59,44 @@ import {
 } from '../backup/schema-migrate';
 import { HttpError, readJSONBody, sendJSON } from './http-util';
 
+/** BMG-011: how the service lets a restore swap the database it is serving. */
+export interface PersistenceControl {
+  /** Close the adapter's handle so the file can be replaced. */
+  pause(): Promise<void>;
+  /**
+   * Reopen the (new) file, re-ensure the system tables, and re-read the
+   * settings files the archive's `config/` put back (BMG-011 §7) — answering
+   * which were taken up and which were refused, by file.
+   */
+  resume(): Promise<SettingsReload | void>;
+}
+
+/** BMG-011 §7: the restored settings files the running backend took up, and the ones it refused. */
+export interface SettingsReload {
+  reloaded: string[];
+  refused: Array<{ file: string; reason: string }>;
+}
+
 export interface AdminBackupDeps {
   backups: BackupSubsystem;
-  facade: AdapterFacade;
+  facade: IStorageFacade;
   dataDir: string;
+  /** Absent only in a harness that builds the routes without a service. */
+  persistence?: PersistenceControl;
+  /** BMG-015: the files' bucket, read live. Absent in a bare harness. */
+  getBucket?: () => S3Driver | null;
 }
 
 /** `GET /admin/backups`. */
 export interface BackupListResponse {
   config: BackupConfig;
   backups: BackupListItem[];
+  /** BMG-015: whether a bucket is connected on the Storage page, and which. */
+  bucket: { connected: boolean; name: string | null };
 }
+
+/** The sentence `PUT /admin/backups/config {destination:{type:'s3'}}` is refused with when no bucket is connected. */
+export const NO_BUCKET_CONNECTED = 'Connect a bucket on the Storage page first: backups go to the same bucket as files.';
 
 /** `GET`/`PUT /admin/backups/config`. */
 export interface BackupConfigResponse {
@@ -69,15 +118,44 @@ export interface SchemaDiffResponse {
   rendered: string;
 }
 
+/**
+ * BRG-008: turn the backup subsystem's "this engine is not a file" refusal into
+ * a 409. Anything else is rethrown untouched — this translates ONE named error
+ * and is not a general error swallow.
+ */
+async function asRefusal<T>(run: () => Promise<T>): Promise<T> {
+  try {
+    return await run();
+  } catch (e) {
+    if (e instanceof BackupNotFileBackedError) throw new HttpError(409, e.message);
+    throw e;
+  }
+}
+
 export class AdminBackupRoutes {
   constructor(private readonly deps: AdminBackupDeps) {}
 
-  list(ctx: RequestContext): void {
+  private bucket(): S3Driver | null {
+    return this.deps.getBucket ? this.deps.getBucket() : null;
+  }
+
+  async list(ctx: RequestContext): Promise<void> {
     const { backups } = this.deps;
+    const bucket = this.bucket();
+    let items: BackupListItem[] = [];
+    let listingError: string | undefined;
+    try {
+      items = await backups.manager.listBackups();
+    } catch (e) {
+      // A bucket that cannot be listed is a sentence on the page, not a dead page.
+      listingError = e instanceof Error ? e.message : String(e);
+    }
     sendJSON(ctx.res, 200, {
       config: backups.config.get(),
-      backups: backups.manager.listBackups()
-    } satisfies BackupListResponse);
+      backups: items,
+      bucket: { connected: !!bucket, name: bucket ? bucket.bucket : null },
+      ...(listingError ? { listingError } : {})
+    } satisfies BackupListResponse & { listingError?: string });
   }
 
   async updateConfig(ctx: RequestContext): Promise<void> {
@@ -99,17 +177,26 @@ export class AdminBackupRoutes {
     }
     const patch: Record<string, unknown> = {};
     if (body.retention !== undefined) patch.retention = body.retention;
-    if (body.destination !== undefined) patch.destination = body.destination;
+    if (body.destination !== undefined) {
+      const d = body.destination as { type?: string } | null;
+      if (d && d.type === 's3' && !this.bucket()) throw new HttpError(400, NO_BUCKET_CONNECTED);
+      patch.destination = body.destination;
+    }
     if (body.includeSecrets !== undefined) patch.includeSecrets = body.includeSecrets;
     if (Object.keys(patch).length) this.deps.backups.config.update(patch);
     sendJSON(ctx.res, 200, { config: this.deps.backups.config.get() } satisfies BackupConfigResponse);
   }
 
   async runBackup(ctx: RequestContext): Promise<void> {
-    const result = await this.deps.backups.manager.createBackup({
-      triggerType: 'manual',
-      source: 'admin backup'
-    });
+    // BRG-008: a backend whose rows are not in a file refuses. That is a
+    // precondition of this route, not a fault in it — 409, not 500, so an
+    // operator's client can tell "you cannot do this here" from "it broke".
+    const result = await asRefusal(() =>
+      this.deps.backups.manager.createBackup({
+        triggerType: 'manual',
+        source: 'admin backup'
+      })
+    );
     sendJSON(ctx.res, 200, {
       ok: true,
       archive: result.archivePath,
@@ -119,16 +206,83 @@ export class AdminBackupRoutes {
     } satisfies BackupRunResponse);
   }
 
+  /**
+   * `POST /admin/backups/restore {archive, safetySnapshot?}`. `archive` is a
+   * listed archive's `file` or its full `path`; anything else is 404 by name,
+   * so the route cannot be pointed at an arbitrary file on the box.
+   */
   async restore(ctx: RequestContext): Promise<void> {
     const body = await readJSONBody(ctx.req);
-    const archive = typeof body.archive === 'string' ? body.archive : '';
-    if (!archive) throw new HttpError(400, 'archive (path) is required');
-    const result = await this.deps.backups.manager.restore(archive, {
-      triggerType: 'manual',
-      source: 'admin restore',
-      safetySnapshot: body.safetySnapshot !== false
+    const asked = typeof body.archive === 'string' ? body.archive : '';
+    if (!asked) throw new HttpError(400, 'archive (a listed archive) is required');
+    const listed = await this.listedArchive(asked);
+    if (!listed) throw new HttpError(404, `No archive "${asked}" in this backend's backups.`);
+    const safetySnapshot = body.safetySnapshot !== false;
+    // BMG-015: the bytes are on disk BEFORE the database is paused. A download
+    // that fails is a 502 with the sentence and a backend still serving.
+    let fetched;
+    try {
+      fetched = await this.deps.backups.manager.fetchArchive(listed);
+    } catch (e) {
+      throw new HttpError(502, e instanceof Error ? e.message : String(e));
+    }
+    const control = this.deps.persistence;
+    if (control) await control.pause();
+    let result;
+    let settings: SettingsReload | void = undefined;
+    try {
+      result = await asRefusal(() =>
+        this.deps.backups.manager.restore(fetched.localPath, {
+          triggerType: 'manual',
+          source: 'admin restore',
+          safetySnapshot
+        })
+      );
+    } finally {
+      // Whatever happened on disk, the service must be serving SOMETHING
+      // again — the old file if the swap never happened, the archive if it did.
+      if (control) settings = await control.resume();
+      fetched.cleanup();
+    }
+    ctx.audit({
+      archive: listed.file,
+      safetyArchive: result.safetyArchive,
+      reconnected: !!control,
+      where: listed.where,
+      ...(settings ? { settingsRefused: settings.refused.map((r) => r.file) } : {})
     });
-    sendJSON(ctx.res, 200, { ok: true, ...result });
+    sendJSON(ctx.res, 200, { ok: true, reconnected: !!control, ...result, restoredFrom: listed.path, ...(settings ? { settings } : {}) });
+  }
+
+  /** A listed archive by `file` or `path` — the only two spellings the routes accept. */
+  private async listedArchive(asked: string): Promise<BackupListItem | null> {
+    const items = await this.deps.backups.manager.listBackups();
+    return items.find((b) => b.file === asked || b.path === asked) || null;
+  }
+
+  /** `GET /admin/backups/archive?file=<name>` — the bytes of one listed archive, as a download. */
+  async download(ctx: RequestContext): Promise<void> {
+    const asked = (ctx.query.file || '').trim();
+    if (!asked) throw new HttpError(400, 'file (a listed archive) is required');
+    const listed = await this.listedArchive(asked);
+    if (!listed || (listed.where === 'local' && !fs.existsSync(listed.path))) {
+      throw new HttpError(404, `No archive "${asked}" in this backend's backups.`);
+    }
+    const size = listed.where === 'local' ? fs.statSync(listed.path).size : listed.bytes;
+    const stream = this.deps.backups.manager.archiveStream(listed);
+    stream.on('error', (e: Error) => {
+      // Headers may already be out; end the connection loudly in the log.
+      // eslint-disable-next-line no-console
+      console.error(`[nodegx-backend] error streaming archive "${listed.file}": ${e.message}`);
+      ctx.res.destroy();
+    });
+    ctx.res.writeHead(200, {
+      'Content-Type': 'application/octet-stream',
+      'Content-Length': size,
+      'Content-Disposition': `attachment; filename="${listed.file.replace(/[^\w.-]/g, '_')}"`,
+      'Cache-Control': 'no-store'
+    });
+    stream.pipe(ctx.res);
   }
 
   async exportCollection(ctx: RequestContext): Promise<void> {
@@ -143,7 +297,7 @@ export class AdminBackupRoutes {
     const format = (body.format || 'json') as DataFormat;
     if (format !== 'json' && format !== 'csv') throw new HttpError(400, 'format must be json or csv');
     if (typeof body.content !== 'string') throw new HttpError(400, 'content (string) is required');
-    const report = importCollection(this.deps.facade, ctx.params.collection, body.content, {
+    const report = await importCollection(this.deps.facade, ctx.params.collection, body.content, {
       format,
       dryRun: !!body.dryRun
     });

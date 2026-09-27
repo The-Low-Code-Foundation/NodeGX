@@ -1,0 +1,229 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "01a3fce1-6aba-5d1d-8357-fcb14f972fb6",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "brIn",
+      "type": "Component Inputs",
+      "label": "The thing",
+      "ports": [
+        {
+          "name": "key",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sub",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lostLabel",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "brOut",
+      "type": "Component Outputs",
+      "label": "The answer",
+      "ports": [
+        {
+          "name": "happened",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "lost",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "part",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "key",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "brRoot",
+      "type": "Group",
+      "label": "One question",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)"
+      },
+      "children": [
+        "brLabel",
+        "brSub",
+        "brButtons"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "brLabel",
+      "type": "Text",
+      "label": "What it is",
+      "parent": "brRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "brSub",
+      "type": "Text",
+      "label": "How much and when",
+      "parent": "brRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "brButtons",
+      "type": "Group",
+      "label": "The answers",
+      "parent": "brRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-1-5)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "brHappened",
+        "brPart",
+        "brLost"
+      ],
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "brHappened",
+      "type": "net.noodl.controls.button",
+      "label": "It happened",
+      "parent": "brButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Happened"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "brPart",
+      "type": "net.noodl.controls.button",
+      "label": "Part of it happened",
+      "parent": "brButtons",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Part of it…"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "brLost",
+      "type": "net.noodl.controls.button",
+      "label": "It is lost",
+      "parent": "brButtons",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Lost"
+      },
+      "x": 160,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "brRoot"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d9ccc804-1bc2-5b40-885b-663c2f143bd5",
+  "name": "Add note",
+  "path": "/Commands/Add note",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Adds a note to a task’s history. A note is only ever added, never edited."
+}

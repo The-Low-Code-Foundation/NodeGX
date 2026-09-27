@@ -1,5 +1,7 @@
 import React, { useRef, useState } from 'react';
 
+import { Icon, IconName, IconSize } from '@noodl-core-ui/components/common/Icon';
+
 import PopupLayer from '../../popuplayer';
 
 export interface ComponentPortItem {
@@ -170,7 +172,7 @@ function PortRow({
                 e.stopPropagation();
               }}
             >
-              <i className="fa fa-pencil-square-o" />
+              <Icon icon={IconName.Pencil} size={IconSize.Small} />
             </button>
 
             <button
@@ -181,7 +183,7 @@ function PortRow({
                 e.stopPropagation();
               }}
             >
-              <i className="fa fa-trash-o" />
+              <Icon icon={IconName.Trash} size={IconSize.Small} />
             </button>
           </div>
         </>
@@ -240,7 +242,7 @@ function GroupRow({
                   e.stopPropagation();
                 }}
               >
-                <i className="fa fa-pencil-square-o" />
+                <Icon icon={IconName.Pencil} size={IconSize.Small} />
               </button>
 
               <button
@@ -251,7 +253,7 @@ function GroupRow({
                   e.stopPropagation();
                 }}
               >
-                <i className="fa fa-trash-o" />
+                <Icon icon={IconName.Trash} size={IconSize.Small} />
               </button>
             </div>
           </>
@@ -321,7 +323,7 @@ export function ComponentPortsView({
             e.stopPropagation();
           }}
         >
-          <i className="fa fa-plus" />
+          <Icon icon={IconName.Plus} size={IconSize.Small} />
           <span>Port</span>
         </button>
 
@@ -334,7 +336,7 @@ export function ComponentPortsView({
               e.stopPropagation();
             }}
           >
-            <i className="fa fa-plus" />
+            <Icon icon={IconName.Plus} size={IconSize.Small} />
             <span>Group</span>
           </button>
         )}

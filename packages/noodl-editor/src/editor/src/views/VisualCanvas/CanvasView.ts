@@ -1,13 +1,26 @@
 import { ipcRenderer } from 'electron';
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import { Root } from 'react-dom/client';
 import { platform } from '@noodl/platform';
 
 import { EventDispatcher } from '../../../../shared/utils/EventDispatcher';
 import View from '../../../../shared/ListenableView';
 import { PreviewTokenInjector } from '../../services/PreviewTokenInjector';
 import { VisualCanvas } from './VisualCanvas';
+import { PREVIEW_STRIP_ACTION, type StripAction } from './detachedStrip';
 import { previewRoutePath } from './previewRoutePath';
+import { viewerOrigin } from '../SandboxSurface/viewerOrigin';
+import type { StripModel } from './previewStripWords';
+import {
+  CAPTURE_SKIP_EXPLANATION,
+  captureThumbnailSafely,
+  type CaptureFailure,
+  type CaptureSkipReason
+} from './thumbnailCapture';
+import { createReactRoot, unmountReactRoot } from '../../../../shared/utils/unmountReactRoot';
+
+/** What the preview outlines: a TVW-003 selection path, a bare node id, or nothing. */
+type NodeSelection = readonly string[] | string | null;
 
 export class CanvasView extends View {
   webview: Electron.WebviewTag;
@@ -19,7 +32,9 @@ export class CanvasView extends View {
   viewportHeight: number;
 
   inspectMode: boolean;
-  selectedNodeId: string | null;
+  selectedNodeId: NodeSelection;
+  /** TVW-002 AC1 — re-applied on `dom-ready`, like the selection, so a reload keeps the line. */
+  placementOutline: NodeSelection = null;
 
   private root: Root | null = null;
 
@@ -30,6 +45,10 @@ export class CanvasView extends View {
     designMode?: boolean;
     onExitDesignMode?: () => void;
     designSelection?: { label: string; seq: number };
+    /** TVW-002 AC5 — the strip the editor computed, pushed into the detached window. */
+    previewStrip?: StripModel | null;
+    /** TVW-002 AC5 — set only in the detached window; a door press travels back to the editor. */
+    onStripAction?: (action: StripAction) => void;
   };
 
   /** Bumped per selection so the toast re-fires when the same node is clicked twice. */
@@ -129,7 +148,16 @@ export class CanvasView extends View {
       this.webview.executeJavaScript(`NoodlEditorInspectorAPI.setEnabled(${this.inspectMode})`);
 
       if (this.selectedNodeId) {
-        this.webview.executeJavaScript(`NoodlEditorHighlightAPI.selectNode('${this.selectedNodeId}')`);
+        this.webview.executeJavaScript(`NoodlEditorHighlightAPI.selectNode(${JSON.stringify(this.selectedNodeId)})`);
+      }
+
+      // ⚠️ Re-applied here for the same reason the selection is: the app reloads on every save, and
+      // an outline that only survived until the next edit would be a line that came and went for
+      // reasons the author could not see.
+      if (this.placementOutline) {
+        this.webview.executeJavaScript(
+          `NoodlEditorHighlightAPI.showPlacement(${JSON.stringify(this.placementOutline)})`
+        );
       }
 
       // Inject project design tokens into the preview so var(--token-name) resolves correctly.
@@ -143,9 +171,7 @@ export class CanvasView extends View {
         return;
       }
 
-      const protocol = process.env.ssl ? 'https://' : 'http://';
-      const port = process.env.NOODLPORT || 8574;
-      const urlPrefix = protocol + 'localhost:' + port;
+      const urlPrefix = viewerOrigin();
 
       const route = event.url.startsWith(urlPrefix) ? event.url.substring(urlPrefix.length) : event.url;
 
@@ -189,15 +215,40 @@ export class CanvasView extends View {
     }
 
     if (!this.root) {
-      this.root = createRoot(this.el as HTMLElement);
+      this.root = createReactRoot(this.el as HTMLElement);
     }
     this.root.render(React.createElement(VisualCanvas, this.props as any));
   }
-  setCurrentRoute(route: string) {
-    const protocol = process.env.ssl ? 'https://' : 'http://';
-    const port = process.env.NOODLPORT || 8574;
+  /**
+   * TVW-002 AC5 — this copy is the detached preview window's, so it can act like it.
+   *
+   * ⚠️ **Told, never detected.** `onExitDesignMode` above fires both the bus and the IPC precisely
+   * because this view "does not know which window it is in", and that is the right answer for an
+   * idempotent request. A `Go to Home` is not idempotent: sent twice it loads the page twice. So
+   * the one renderer that *does* know — `viewer-frame/src/views/viewer.js`, which exists only in
+   * the detached window — says so once, at construction.
+   */
+  setDetachedWindow() {
+    this.props.onStripAction = (action: StripAction) => {
+      ipcRenderer.send(PREVIEW_STRIP_ACTION, action);
+    };
+    this.renderReact();
+  }
 
-    this.webview.src = protocol + 'localhost:' + port + route;
+  /**
+   * TVW-002 AC5 — the sentence, computed in the editor window and pushed here.
+   *
+   * ⚠️ Unlike `showDesignSelection` there is no `seq`, and deliberately: a toast is an *event* that
+   * must re-fire when the same node is clicked twice, and this is a *state* that must not re-fire
+   * when it has not changed. The row is on screen permanently now.
+   */
+  showPreviewStrip(strip: StripModel | null) {
+    this.props.previewStrip = strip;
+    this.renderReact();
+  }
+
+  setCurrentRoute(route: string) {
+    this.webview.src = viewerOrigin() + route;
     // FLD-007: the same normalisation `load-commit` applies, so this global means one thing
     // whichever of the two writers ran last.
     window.noodlEditorPreviewRoute = previewRoutePath(route);
@@ -213,7 +264,7 @@ export class CanvasView extends View {
     }
 
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     PreviewTokenInjector.instance.clearWebview(this.webview);
@@ -221,10 +272,6 @@ export class CanvasView extends View {
   }
   refresh() {
     //set back to root to reset any navigation that's been done
-    // const protocol = process.env.ssl ? 'https://' : 'http://';
-    // const port = process.env.NOODLPORT || 8574;
-    // this.webview.src = protocol + 'localhost:' + port;
-
     this.tryWebviewCall(() => {
       this.webview.reloadIgnoringCache();
     });
@@ -353,20 +400,88 @@ export class CanvasView extends View {
     });
   }
 
-  setNodeSelected(nodeId: string) {
+  /** TVW-003 — a selection path (a bare id still works); the viewer outlines what it addresses. */
+  setNodeSelected(nodeId: NodeSelection) {
     this.selectedNodeId = nodeId;
     this.tryWebviewCall(() => {
-      this.webview.executeJavaScript(`NoodlEditorHighlightAPI.selectNode('${nodeId}')`);
+      this.webview.executeJavaScript(`NoodlEditorHighlightAPI.selectNode(${JSON.stringify(nodeId)})`);
     });
   }
 
+  /**
+   * TVW-002 AC1 — outline where the canvas's component sits on the screen the preview is showing.
+   *
+   * 🔴 A channel of its own, not `setNodeSelected`. Sent as a selection it draws the same line AND
+   * brings the box-model chip with it — the drive photographed five lines of CSS facts over the
+   * running app because the author had merely changed which component the canvas was on. See
+   * `Highlighter.placedNodes`.
+   */
+  setPlacementOutline(path: NodeSelection) {
+    this.placementOutline = path;
+    this.tryWebviewCall(() => {
+      this.webview.executeJavaScript(`NoodlEditorHighlightAPI.showPlacement(${JSON.stringify(path)})`);
+    });
+  }
+
+  /**
+   * TVW-003 — outline what the canvas is hovering (a path; `null` when it moves off). Replaces the
+   * old relay broadcast, which reached this webview and nothing that could draw it.
+   */
+  setNodeHovered(path: NodeSelection) {
+    this.tryWebviewCall(() => {
+      this.webview.executeJavaScript(`NoodlEditorHighlightAPI.hoverNode(${JSON.stringify(path)})`);
+    });
+  }
+
+  /**
+   * HLT-002 — a picture of the preview, or `null` and a reason.
+   *
+   * The guard that used to be here asked whether the `<webview>` was attached, and every one of
+   * the 116 unhandled rejections Richard's 2026-09-20 session logged happened with it attached,
+   * DOM-ready, in a visible window, with a real rectangle. See `thumbnailCapture.ts` for what the
+   * condition actually is and for the second regime — an occluded window, where `capturePage()`
+   * never settles at all — that made the count as large as it is.
+   *
+   * ⚠️ **The containment belongs here rather than at the call sites**, because there are two
+   * callers and only one of them is obvious: `UseCaptureThumbnails` in the editor window, and
+   * `viewer-frame/src/views/viewer.js:127` in the *detached preview* window, which awaits this the
+   * same unguarded way. Fixing the method covers both; fixing the hook would have left the
+   * detached window exactly as it was.
+   */
   async captureThumbnail() {
-    if (!this.webviewDomReady || !this.webview?.isConnected) {
-      return null;
+    return captureThumbnailSafely(
+      {
+        domReady: this.webviewDomReady,
+        webview: this.webview,
+        pageVisibility: document.visibilityState
+      },
+      async () => this.resizeToThumbnail(await this.webview.capturePage()),
+      (reason, detail) => this.reportThumbnailSkip(reason, detail)
+    );
+  }
+
+  /**
+   * AC4 — a skip says so, **once per reason**, not once per tick.
+   *
+   * The timer fires every 20 seconds for as long as a project is open, so a line per skip would
+   * put thousands of them in the log of anyone who works on the board for an afternoon — and this
+   * task exists because a log nobody can read is a log nobody reads. A line when the reason
+   * *changes* says the same thing and stays legible.
+   */
+  private lastThumbnailSkip: string | null = null;
+
+  private reportThumbnailSkip(reason: CaptureSkipReason | CaptureFailure, detail?: string) {
+    const key = `${reason}:${detail ?? ''}`;
+    if (this.lastThumbnailSkip === key) {
+      return;
     }
+    this.lastThumbnailSkip = key;
 
-    const nativeImage = await this.webview.capturePage();
+    const why = reason in CAPTURE_SKIP_EXPLANATION ? CAPTURE_SKIP_EXPLANATION[reason] : detail;
+    console.debug(`[thumbnail] not capturing the project thumbnail: ${why}`);
+  }
 
+  private resizeToThumbnail(nativeImage: Electron.NativeImage) {
     const size = nativeImage.getSize();
     const canvasWidth = size.width;
     const canvasHeight = size.height;

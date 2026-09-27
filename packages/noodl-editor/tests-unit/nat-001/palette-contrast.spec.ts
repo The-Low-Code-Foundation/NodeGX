@@ -91,25 +91,41 @@ const PAIRS: Pair[] = [
   // a ground nothing paints any more. ⚠️ The trigger for editing a row is the same as the trigger
   // for adding one: a new PAIRING.
   //
-  // The chain is canvas `bg-0` < card `bg-1` < row hover `bg-2`.
+  // 🔴 **CHR-012 (2026-09-15) MOVED IT BACK DOWN, and the rows below were EDITED for the same
+  // reason NAT-005 edited them.** Richard ruled the carded tab *"still looks like shit"*: the
+  // sections, the head and the health readout each sat in their own card, and the page read as a
+  // settings form. The sections now draw on the canvas like every other launcher tab, rows under a
+  // rule, and a row lifts to `bg-1` under the pointer. So every card-ground row is a canvas row
+  // again, the hover rows moved from `bg-2` to `bg-1`, and three rows went with what they graded:
+  // the health readout line (R9 took it off the page) and the Refresh / "Open community.nodegx.io"
+  // bespoke buttons (they are `PrimaryButton`'s `Text` variant now, rows below).
+  //
+  // The chain is canvas `bg-0` < row hover `bg-1`.
   {
-    what: 'the launcher tab: the viewer line, on the canvas above the cards',
+    what: 'the launcher tab: the viewer line (points and badges), in the page head',
     fg: '--theme-color-fg-default-shy',
     bg: '--theme-color-bg-0',
     min: 4.5,
-    why: '13px body copy — no large-text relief, which does not begin until 24px (or 18.66px bold)'
+    why: '12px body copy — no large-text relief, which does not begin until 24px (or 18.66px bold)'
   },
   {
-    what: 'the launcher tab: the Refresh button label, at rest on the canvas',
-    fg: '--theme-color-fg-default-shy',
+    what: 'the launcher tab: the handle or "Reading as a guest", in the page head',
+    fg: '--theme-color-fg-highlight',
     bg: '--theme-color-bg-0',
     min: 4.5,
-    why: '13px words in a ghost button; a separate rule from the viewer line, so it can move alone'
+    why: '13px semibold — who you are, beside the one primary action a guest has'
   },
   {
-    what: 'the launcher tab: the Refresh button under the pointer, which lifts to bg-1 and darkens its label',
+    what: 'the launcher tab: Refresh and "Open community.nodegx.io" at rest — `PrimaryButton` Text',
     fg: '--theme-color-fg-default',
-    bg: '--theme-color-bg-1',
+    bg: '--theme-color-bg-0',
+    min: 4.5,
+    why: '12px words on a button with no fill and no edge until hovered, so the label IS the control'
+  },
+  {
+    what: 'the launcher tab: those two doors under the pointer, which lift to bg-3 and brighten',
+    fg: '--theme-color-fg-highlight',
+    bg: '--theme-color-bg-3',
     min: 4.5,
     why: 'hover changes BOTH halves of the pair, so the resting row does not cover it'
   },
@@ -120,102 +136,79 @@ const PAIRS: Pair[] = [
     min: 4.5,
     why: '13px words on the canvas — the first sentence a person reads on the tab'
   },
-  // 🔴 **NAT-005's two CARD-BOUNDARY claims are NOT rows here, and the table said so itself.**
-  // A first draft added them at `min: 1.09` and `every row names a bar it stated on purpose` went
-  // red: this table grades WORDS at 4.5 and SHAPES at 3, and an elevation step is neither. A row
-  // at 1.09 would have loosened that guard for every future row in exchange for two claims that
-  // belong elsewhere — so the card fill is the `bg-0`↔`bg-1` step the elevation ramp below
-  // already grades, and the 1px edge is asserted beside it. See `the %s elevation ramp is a ramp`.
+  // 🔴 **The rules under the rows and the dashed well round the quiet states are NOT rows here.**
+  // This table grades WORDS at 4.5 and SHAPES at 3; a divider between two rows that are already
+  // told apart by their words is decoration, exactly as NAT-005's card edge was, and a row at its
+  // real ratio would loosen `every row names a bar it stated on purpose` for every future row.
   {
-    what: 'the launcher tab: a section heading, now on the card',
+    what: 'the launcher tab: a section heading, on the canvas',
     fg: '--theme-color-fg-highlight',
-    bg: '--theme-color-bg-1',
+    bg: '--theme-color-bg-0',
     min: 4.5,
     why: '13px semibold — under the 18.66px bold threshold, so the normal-size bar applies'
   },
   {
     what: 'the launcher tab: the item count beside a section heading',
     fg: '--theme-color-fg-default-shy',
-    bg: '--theme-color-bg-1',
+    bg: '--theme-color-bg-0',
     min: 4.5,
-    why: '11px words. ⚠️ Smaller than body copy and held to the SAME bar — 1.4.3 has no relief below 24px, only above'
+    why: '12px words. ⚠️ Smaller than body copy and held to the SAME bar — 1.4.3 has no relief below 24px, only above'
   },
   {
-    what: 'the launcher tab: the loading, empty and unreachable lines on a card',
+    what: 'the launcher tab: the loading, empty and unreachable lines, in their dashed well',
     fg: '--theme-color-fg-default-shy',
-    bg: '--theme-color-bg-1',
+    bg: '--theme-color-bg-0',
     min: 4.5,
     why: '13px words, and on an empty tab they are the ONLY words in the section'
   },
   {
     what: 'the launcher tab: the pulsing dot beside “Loading…”',
     fg: '--theme-color-fg-default-shy',
-    bg: '--theme-color-bg-1',
+    bg: '--theme-color-bg-0',
     min: 3,
     why: 'NON-TEXT (1.4.11): a 6px dot is a shape. ⚠️ It carries no information the word beside it does not — it is what makes `loading` a different SHAPE from `empty`, not a different sentence'
   },
   {
     what: 'the launcher tab: the rule down the left of an unreachable section',
     fg: '--theme-color-border-control',
-    bg: '--theme-color-bg-1',
+    bg: '--theme-color-bg-0',
     min: 3,
     why: 'NON-TEXT (1.4.11): the 2px rule is what makes an error a different shape from an empty, so it is a graphical object doing work'
   },
   {
     what: 'the launcher tab: the “Try again” link on an unreachable section',
     fg: '--theme-color-fg-accent',
-    bg: '--theme-color-bg-1',
+    bg: '--theme-color-bg-0',
     min: 4.5,
     why: 'words, and the only way out of the error state'
   },
   {
-    what: 'the launcher tab: a discussion, guide or replay title in a row on a card',
+    what: 'the launcher tab: a discussion, guide or replay title in a row on the canvas',
     fg: '--theme-color-fg-default',
-    bg: '--theme-color-bg-1',
+    bg: '--theme-color-bg-0',
     min: 4.5,
     why: '13px medium-weight words, and the thing a person came to the tab to read'
   },
   {
     what: 'the launcher tab: a row’s meta line and its summary — NAT-005’s new second and third lines',
     fg: '--theme-color-fg-default-shy',
-    bg: '--theme-color-bg-1',
+    bg: '--theme-color-bg-0',
     min: 4.5,
-    why: '11px words: “3 days ago · no reply yet”, and a guide’s summary. 🔴 These are WORDS and the smallest on the surface — the first draft of this table graded a duration as chrome'
+    why: '12px words: “3 days ago · no reply yet”, and a guide’s summary. 🔴 These are WORDS and the smallest on the surface — the first draft of this table graded a duration as chrome'
   },
   {
     what: 'the launcher tab: a row title under the pointer',
     fg: '--theme-color-fg-default',
-    bg: '--theme-color-bg-2',
+    bg: '--theme-color-bg-1',
     min: 4.5,
     why: 'hover lifts the row to a new ground, and a hover surface nobody listed is one nobody graded'
   },
   {
     what: 'the launcher tab: a row’s meta line under the pointer',
     fg: '--theme-color-fg-default-shy',
-    bg: '--theme-color-bg-2',
-    min: 4.5,
-    why: 'the quietest words on the surface, on the surface’s brightest row ground — the worst case of the four row pairings'
-  },
-  {
-    what: 'the launcher tab: a health readout line on its card',
-    fg: '--theme-color-fg-default-shy',
     bg: '--theme-color-bg-1',
     min: 4.5,
-    why: '12px words. D21 made these a READOUT — a number nobody can read is not a readout'
-  },
-  {
-    what: 'the launcher tab: the “Open community.nodegx.io” label',
-    fg: '--theme-color-fg-default',
-    bg: '--theme-color-bg-0',
-    min: 4.5,
-    why: '13px words in a bordered button, still on the canvas below the cards'
-  },
-  {
-    what: 'the launcher tab: the border that IS the “Open community.nodegx.io” button',
-    fg: '--theme-color-border-control',
-    bg: '--theme-color-bg-0',
-    min: 3,
-    why: 'NON-TEXT (1.4.11): the button has no fill, so this 1px edge is the only thing that says a control is there'
+    why: 'the quietest words on the surface, on the surface’s brightest row ground — the worst case of the four row pairings'
   },
 
   // ── NAT-008: the people surfaces ────────────────────────────────────────────────────────
@@ -602,6 +595,24 @@ const PAIRS: Pair[] = [
     bg: '--theme-color-bg-1',
     min: 3,
     why: 'NON-TEXT (1.4.11): the field paints no fill of its own, so this edge is the only thing that says a control is there'
+  },
+  // 🔴 **This repeats a (fg, bg, min) tuple the rail-panel row already carries, on purpose.** The
+  // duplicate is the point: that row is described as the rail's field edge, so a session that moves
+  // the rail to another ground edits it — and the colour swatch, which is a different control in a
+  // different panel, would lose its only token-level gate without anybody touching this file. The
+  // table tolerates duplicates by design (`PAIRS.length > distinct.size` is asserted below); what it
+  // does not tolerate is one row standing in for two surfaces.
+  //
+  // ⚠️ What this row CANNOT see: which token `.Swatch` actually uses. It grades the pair, not the
+  // component, so it would stay green if the swatch went back to `border-strong`. The instrument for
+  // that is the rendered look gate (`--surface=property-panel`), which is what found it —
+  // deliberately NOT a spec that greps the stylesheet for a class name (CHR-004 §3.3).
+  {
+    what: 'the property panel: the edge of the colour swatch inside a colour field',
+    fg: '--theme-color-border-control',
+    bg: '--theme-color-bg-2',
+    min: 3,
+    why: 'NON-TEXT (1.4.11): the swatch IS the value, so the edge is what says where the colour stops — it sat at 1.499:1 dark / 1.387:1 light on `border-strong` until Richard ruled it a visible edge (2026-09-18)'
   }
 ];
 
@@ -625,7 +636,15 @@ const PAIRS: Pair[] = [
  */
 // ⚠️ 41 before NAT-007, 48 after. The first run of the assertion below caught this constant being
 // wrong by two — which is the whole argument for having it, on the day it was written.
-const DISTINCT_PAIRINGS = 48;
+//
+// 🔴 CHR-012 (2026-09-15): 48 → 51, counted off the table at HEAD and after, not read off the red
+// run. The launcher Community tab left its cards for the canvas, so its rows moved ground. FOUR
+// tuples are new — `fg-accent` on `bg-0` (the retry link), `fg-default-shy` on `bg-0` at 3 (the
+// loading dot), `fg-highlight` on `bg-0` (a section heading, the handle) and `fg-highlight` on
+// `bg-3` (a `PrimaryButton` Text door under the pointer) — and ONE is gone: `fg-highlight` on
+// `bg-1`, which only the carded section heading drew. Every other moved row landed on a tuple the
+// table already measured.
+const DISTINCT_PAIRINGS = 51;
 
 /**
  * NAT-003 — the syntax palette, on the ground CodeMirror actually paints.
@@ -969,11 +988,17 @@ describe.each(['dark', 'light'] as const)('the %s foreground ramp keeps its step
  * ## What this table cannot see
  *
  * Alpha. `--theme-color-bg-1-transparent` is `rgba(0,0,0,0.8)` in dark and does NOT follow the
- * ramp — deliberately, because its consumers are scrims and `box-shadow`s (`BaseDialog`,
- * `PopupToolbar`, `popuplayer.css`, `SideNavigation`), and a shadow is an occlusion rather than a
- * surface. That reading is NAT-003's, it is recorded in `colors.css`, and it is not asserted here
- * because a token named `bg-1-*` that is not on the `bg-1` ramp is a NAMING defect, not a
- * contrast one.
+ * ramp — deliberately, because its consumers are scrims (`BaseDialog`, `ActivityIndicator`,
+ * `IconButton`, `ConnectionPopup`), and a scrim is an occlusion rather than a surface. That
+ * reading is NAT-003's, it is recorded in `colors.css`, and it is not asserted here because a
+ * token named `bg-1-*` that is not on the `bg-1` ramp is a NAMING defect, not a contrast one.
+ *
+ * ⚠️ P103 CMG-007 (2026-09-24): it is no longer used for a SHADOW anywhere. It is white at 0.85
+ * in light mode, so every `box-shadow` / `drop-shadow` drawn in it was a white glow there —
+ * Richard's *"weird white glow"* on the Look popup, and on all 26 `showPopout` callers with it.
+ * The seven shadow uses (`popuplayer.css` ×3, `PopupToolbar`, `SideNavigation`,
+ * `BranchStatusButton`, and the popout's own) now wear `--shadow-float`, the token the newer
+ * surfaces already used. `tests-unit/cmg-007` holds the count at zero.
  */
 describe.each(['dark', 'light'] as const)('the %s elevation ramp is a ramp', (theme) => {
   /** Adjacent surfaces a user sees meeting each other, and the bar each is held to. */
@@ -1056,9 +1081,9 @@ describe.each(['dark', 'light'] as const)('the %s elevation ramp is a ramp', (th
  */
 describe('the light arm is a different palette from the dark arm', () => {
   it.each([
-    ['--theme-color-bg-0', '#161c24', '#eef1f5'],
-    ['--theme-color-bg-1', '#212932', '#ffffff'],
-    ['--theme-color-bg-4', '#3c4857', '#d9dfe6'],
+    ['--theme-color-bg-0', '#141318', '#eef1f5'],
+    ['--theme-color-bg-1', '#232129', '#ffffff'],
+    ['--theme-color-bg-4', '#42404e', '#d9dfe6'],
     ['--theme-color-fg-highlight', '#ffffff', '#18212b'],
     ['--theme-color-fg-default', '#dde4ec', '#4a5663'],
     ['--theme-color-fg-default-shy', '#c4cedb', '#59626e'],

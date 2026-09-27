@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "80db4ba9-49f5-5904-8807-11ee166b7e3d",
+  "name": "Sign in",
+  "path": "/Pages/Sign in",
+  "type": "page",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Sign in, or create an account with the same two boxes. Someone already signed in goes straight to their list."
+}

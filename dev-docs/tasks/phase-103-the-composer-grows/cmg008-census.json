@@ -1,0 +1,372 @@
+[
+  {
+    "type": "Group",
+    "rows": 73,
+    "shown": 99,
+    "covered": 99,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)",
+      "focus (signal)",
+      "dragValue (no row)",
+      "scrollToElement.do (signal)",
+      "scrollToElement.element (no row)",
+      "scrollToIndex.do (signal)"
+    ]
+  },
+  {
+    "type": "Text",
+    "rows": 52,
+    "shown": 57,
+    "covered": 57,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)",
+      "dragValue (no row)"
+    ]
+  },
+  {
+    "type": "Image",
+    "rows": 52,
+    "shown": 74,
+    "covered": 74,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)",
+      "dragValue (no row)"
+    ]
+  },
+  {
+    "type": "net.noodl.visual.icon",
+    "rows": 21,
+    "shown": 29,
+    "covered": 29,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)"
+    ]
+  },
+  {
+    "type": "Circle",
+    "rows": 43,
+    "shown": 47,
+    "covered": 47,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)",
+      "dragValue (no row)"
+    ]
+  },
+  {
+    "type": "Video",
+    "rows": 51,
+    "shown": 73,
+    "covered": 73,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)",
+      "srcObject (no row)",
+      "play (signal)",
+      "restart (signal)",
+      "pause (signal)",
+      "reset (signal)",
+      "dragValue (no row)"
+    ]
+  },
+  {
+    "type": "Drag",
+    "rows": 13,
+    "shown": 13,
+    "covered": 13,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)",
+      "snapToPositionX.do (signal)",
+      "snapToPositionY.do (signal)"
+    ]
+  },
+  {
+    "type": "net.noodl.visual.columns",
+    "rows": 15,
+    "shown": 15,
+    "covered": 15,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)"
+    ]
+  },
+  {
+    "type": "Button",
+    "rows": 40,
+    "shown": 48,
+    "covered": 48,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)"
+    ]
+  },
+  {
+    "type": "Checkbox",
+    "rows": 35,
+    "shown": 39,
+    "covered": 39,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)"
+    ]
+  },
+  {
+    "type": "Radio Button",
+    "rows": 35,
+    "shown": 39,
+    "covered": 39,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)"
+    ]
+  },
+  {
+    "type": "Options",
+    "rows": 44,
+    "shown": 52,
+    "covered": 52,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)",
+      "value (no row)"
+    ]
+  },
+  {
+    "type": "Range",
+    "rows": 36,
+    "shown": 40,
+    "covered": 40,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)"
+    ]
+  },
+  {
+    "type": "Label",
+    "rows": 37,
+    "shown": 59,
+    "covered": 59,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)"
+    ]
+  },
+  {
+    "type": "Text Input",
+    "rows": 44,
+    "shown": 52,
+    "covered": 52,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)",
+      "set (signal)",
+      "clear (signal)",
+      "focus (signal)",
+      "blur (signal)"
+    ]
+  },
+  {
+    "type": "Form",
+    "rows": 25,
+    "shown": 33,
+    "covered": 33,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)"
+    ]
+  },
+  {
+    "type": "Field Set",
+    "rows": 25,
+    "shown": 33,
+    "covered": 33,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)"
+    ]
+  },
+  {
+    "type": "net.noodl.controls.button",
+    "rows": 51,
+    "shown": 86,
+    "covered": 86,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)",
+      "focus (signal)",
+      "blur (signal)"
+    ]
+  },
+  {
+    "type": "net.noodl.controls.checkbox",
+    "rows": 44,
+    "shown": 79,
+    "covered": 79,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)",
+      "check (signal)",
+      "uncheck (signal)",
+      "focus (signal)",
+      "blur (signal)"
+    ]
+  },
+  {
+    "type": "net.noodl.controls.radiobutton",
+    "rows": 46,
+    "shown": 81,
+    "covered": 81,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)",
+      "focus (signal)",
+      "blur (signal)"
+    ]
+  },
+  {
+    "type": "net.noodl.controls.options",
+    "rows": 66,
+    "shown": 101,
+    "covered": 101,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)",
+      "focus (signal)",
+      "blur (signal)"
+    ]
+  },
+  {
+    "type": "net.noodl.controls.range",
+    "rows": 27,
+    "shown": 93,
+    "covered": 93,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)",
+      "focus (signal)",
+      "blur (signal)"
+    ]
+  },
+  {
+    "type": "net.noodl.controls.textinput",
+    "rows": 61,
+    "shown": 105,
+    "covered": 105,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)",
+      "set (signal)",
+      "insert (signal)",
+      "backspace (signal)",
+      "clear (signal)",
+      "focus (signal)",
+      "blur (signal)",
+      "startValue (no row)"
+    ]
+  },
+  {
+    "type": "nodegx.broken.Intact",
+    "rows": 4,
+    "shown": 4,
+    "covered": 4,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)"
+    ]
+  },
+  {
+    "type": "nodegx.cashflow.Lane",
+    "rows": 8,
+    "shown": 8,
+    "covered": 8,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)"
+    ]
+  },
+  {
+    "type": "nodegx.cashflow.Pill",
+    "rows": 22,
+    "shown": 22,
+    "covered": 22,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)"
+    ]
+  },
+  {
+    "type": "nodegx.cashflow.BalanceStrip",
+    "rows": 15,
+    "shown": 15,
+    "covered": 15,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)"
+    ]
+  },
+  {
+    "type": "nodegx.cashflow.DayAxis",
+    "rows": 11,
+    "shown": 11,
+    "covered": 11,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)"
+    ]
+  },
+  {
+    "type": "nodegx.cashflow.DangerBanner",
+    "rows": 18,
+    "shown": 18,
+    "covered": 18,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)"
+    ]
+  },
+  {
+    "type": "nodegx.grow.Alpha",
+    "rows": 4,
+    "shown": 4,
+    "covered": 4,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)"
+    ]
+  },
+  {
+    "type": "nodegx.grow.Beta",
+    "rows": 4,
+    "shown": 4,
+    "covered": 4,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)"
+    ]
+  },
+  {
+    "type": "nodegx.grow.Gamma",
+    "rows": 5,
+    "shown": 5,
+    "covered": 5,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)"
+    ]
+  },
+  {
+    "type": "nodegx.rename.Badge",
+    "rows": 4,
+    "shown": 4,
+    "covered": 4,
+    "uncovered": [],
+    "excepted": [
+      "variant (the Look row)"
+    ]
+  }
+]

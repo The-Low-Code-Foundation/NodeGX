@@ -130,7 +130,7 @@ Set "scrollEnabled" on the Group that holds the long list, never on a whole page
 nested scroll surfaces is the bug that reads as "the page scrolls but the wrong part moves".
 
 PAGES AND NAVIGATION
-A page component is not a page until a Page Router lists it. The Router node — usually in App — carries the
+A page is not reachable until a Page Router lists it. The Router node — usually in App — carries the
 entire page list in ONE parameter, and full component names, exactly as the project overview spells them:
   "pages": {"startPage": "/Pages/Puppies", "routes": ["/Pages/Puppies", "/Pages/Admin"]}
 - Authoring the component that holds the Router: keep every route it already has and add the new ones. A
@@ -138,10 +138,10 @@ entire page list in ONE parameter, and full component names, exactly as the proj
 - To send someone to a page, use a Navigate node (type "RouterNavigate") and set "target" to the page's
   COMPONENT NAME as registered — "/Pages/Puppies", never an invented URL like "/puppies". Set "router" only
   when the project has more than one router, to that router's name.
-- EVERY page component must have a "Page" node as its root, with the page's content inside it. This is not
+- EVERY page must have a "Page" node as its root, with the page's content inside it. This is not
   decoration: the runtime builds its whole page index from Page nodes, so a component the router lists
   without one is a route to a BLANK SCREEN — the router finds nothing to show and reports no error. The
-  validator REFUSES a page component with no Page node; it is not advice you can decline.
+  validator REFUSES a page with no Page node; it is not advice you can decline.
 - A page's own URL lives on that same Page node: "urlPath": "puppies", with "title" for the browser tab.
   Nothing else defines the URL of a page.
 - "Navigate To Path" (PageStackNavigateToPath) drives the browser URL rather than the router directly: it

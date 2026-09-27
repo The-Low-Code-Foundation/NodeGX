@@ -63,13 +63,28 @@ describe('SUB-006 dynamic-port guards', () => {
     expect(errorsOf(validator.validate(p)).length).toBe(0);
   });
 
-  it('does NOT error on a legacy/adapter port of a declared-port-groups node (Text Input `disabled`)', () => {
-    // `disabled` is neither in Text Input's static inputs nor its declared groups,
-    // yet it appears in real projects. Because the node carries dynamic ports, we
-    // must skip rather than error.
+  it('DOES error on a port a declared-port-groups node does not have (Text Input `disabled`) — GAM-019', () => {
+    // 🔴 This case used to assert the opposite: that `disabled` "appears in real projects" and is
+    // reachable although neither the static inputs nor the declared groups list it, so any node
+    // carrying dynamic ports had to be skipped. Re-read 2026-09-14 (P88 GAM-019): the deprecated
+    // Text Input's `disabled` input is commented out in `nodes-deprecated/controls/text-input.tsx`,
+    // so the wire reaches nothing at runtime, and a census of 7,260 endpoints on the affected types
+    // across 178 projects (templates, prefabs, project-examples, NodeGX test projects) found none
+    // to an undeclared port. A declared-port-groups node's every port is enumerable, so the skip
+    // only hid real faults — P78 D66's `name0 → text` on a Text Input among them.
     const p = project(
       [node('b', 'Boolean'), node('ti', 'Text Input')],
       [{ fromId: 'b', fromProperty: 'completed', toId: 'ti', toProperty: 'disabled' }]
+    );
+    const errs = errorsOf(validator.validate(p));
+    expect(errs.length).toBe(1);
+    expect(errs[0].code).toBe(DiagnosticCode.NonexistentPort);
+  });
+
+  it('CONTRAST: the same Text Input accepts the port it does have (`enabled`)', () => {
+    const p = project(
+      [node('b', 'Boolean'), node('ti', 'Text Input')],
+      [{ fromId: 'b', fromProperty: 'completed', toId: 'ti', toProperty: 'enabled' }]
     );
     expect(errorsOf(validator.validate(p)).length).toBe(0);
   });

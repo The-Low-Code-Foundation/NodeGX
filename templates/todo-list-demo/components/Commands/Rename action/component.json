@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "fe746af0-68fd-5cb2-8fcd-90fa7c48e205",
+  "name": "Rename action",
+  "path": "/Commands/Rename action",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Renames a next action, if the new title is different and not empty."
+}

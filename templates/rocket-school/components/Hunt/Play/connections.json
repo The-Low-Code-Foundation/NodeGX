@@ -1,0 +1,361 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2dd85165-b7df-59fa-84ea-ab5190897102",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hpIn",
+      "fromProperty": "level",
+      "toId": "hpNewHunt",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "hpRoot",
+      "fromProperty": "didMount",
+      "toId": "hpNewHunt",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hpNew",
+      "fromProperty": "onClick",
+      "toId": "hpNewHunt",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hpResult",
+      "fromProperty": "again",
+      "toId": "hpNewHunt",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hpNewHunt",
+      "fromProperty": "game",
+      "toId": "hpSetGame",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hpNewHunt",
+      "fromProperty": "done",
+      "toId": "hpSetGame",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "hpGame",
+      "fromProperty": "value",
+      "toId": "hpTap",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "hpTap",
+      "fromProperty": "game",
+      "toId": "hpSetGame",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hpTap",
+      "fromProperty": "done",
+      "toId": "hpSetGame",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "hpGame",
+      "fromProperty": "value",
+      "toId": "hpShowWay",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "hpShowWay",
+      "fromProperty": "game",
+      "toId": "hpSetGame",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hpShowWay",
+      "fromProperty": "done",
+      "toId": "hpSetGame",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "hpGame",
+      "fromProperty": "value",
+      "toId": "hpNextGrid",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "hpNextGrid",
+      "fromProperty": "game",
+      "toId": "hpSetGame",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hpNextGrid",
+      "fromProperty": "done",
+      "toId": "hpSetGame",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "hpRows",
+      "fromProperty": "itemOutput-at",
+      "toId": "hpTap",
+      "toProperty": "index"
+    },
+    {
+      "fromId": "hpRows",
+      "fromProperty": "itemOutputSignal-tapped",
+      "toId": "hpTap",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hpShow",
+      "fromProperty": "onClick",
+      "toId": "hpShowWay",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hpNext",
+      "fromProperty": "onClick",
+      "toId": "hpNextGrid",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hpGame",
+      "fromProperty": "value",
+      "toId": "hpDraw",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "hpIn",
+      "fromProperty": "lang",
+      "toId": "hpDraw",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "hpDraw",
+      "fromProperty": "rows",
+      "toId": "hpRows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "hpDraw",
+      "fromProperty": "instruction",
+      "toId": "hpTask",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hpDraw",
+      "fromProperty": "progress",
+      "toId": "hpProgress",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hpDraw",
+      "fromProperty": "note",
+      "toId": "hpNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hpDraw",
+      "fromProperty": "noteKind",
+      "toId": "hpTone",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "hpTone",
+      "fromProperty": "ground",
+      "toId": "hpNoteBox",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "hpTone",
+      "fromProperty": "edge",
+      "toId": "hpNoteBox",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "hpDraw",
+      "fromProperty": "phase",
+      "toId": "hpPhase",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "hpPhase",
+      "fromProperty": "going",
+      "toId": "hpControls",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hpPhase",
+      "fromProperty": "found",
+      "toId": "hpNextRow",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hpPhase",
+      "fromProperty": "over",
+      "toId": "hpResult",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hpDraw",
+      "fromProperty": "canShow",
+      "toId": "hpShow",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hpIn",
+      "fromProperty": "nextGridWord",
+      "toId": "hpNext",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hpIn",
+      "fromProperty": "showWayWord",
+      "toId": "hpShow",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hpIn",
+      "fromProperty": "newGameWord",
+      "toId": "hpNew",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hpNext",
+      "fromProperty": "didMount",
+      "toId": "hpNext",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "hpDraw",
+      "fromProperty": "over",
+      "toId": "hpIsOver",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "hpIsOver",
+      "fromProperty": "ontrue",
+      "toId": "hpFinish",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hpGame",
+      "fromProperty": "value",
+      "toId": "hpFinish",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "hpIn",
+      "fromProperty": "model",
+      "toId": "hpFinish",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "hpIn",
+      "fromProperty": "lang",
+      "toId": "hpFinish",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "hpFinish",
+      "fromProperty": "model",
+      "toId": "hpOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "hpFinish",
+      "fromProperty": "done",
+      "toId": "hpOut",
+      "toProperty": "graded"
+    },
+    {
+      "fromId": "hpFinish",
+      "fromProperty": "done",
+      "toId": "hpOut",
+      "toProperty": "cheer"
+    },
+    {
+      "fromId": "hpIn",
+      "fromProperty": "newGameWord",
+      "toId": "hpEndInView",
+      "toProperty": "in-word"
+    },
+    {
+      "fromId": "hpFinish",
+      "fromProperty": "done",
+      "toId": "hpEndInView",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hpFinish",
+      "fromProperty": "won",
+      "toId": "hpResult",
+      "toProperty": "won"
+    },
+    {
+      "fromId": "hpFinish",
+      "fromProperty": "headline",
+      "toId": "hpResult",
+      "toProperty": "headline"
+    },
+    {
+      "fromId": "hpFinish",
+      "fromProperty": "line",
+      "toId": "hpResult",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "hpFinish",
+      "fromProperty": "starsText",
+      "toId": "hpResult",
+      "toProperty": "stars"
+    },
+    {
+      "fromId": "hpFinish",
+      "fromProperty": "why",
+      "toId": "hpResult",
+      "toProperty": "why"
+    },
+    {
+      "fromId": "hpFinish",
+      "fromProperty": "earnedPick",
+      "toId": "hpResult",
+      "toProperty": "hasPick"
+    },
+    {
+      "fromId": "hpIn",
+      "fromProperty": "newGameWord",
+      "toId": "hpResult",
+      "toProperty": "againWord"
+    },
+    {
+      "fromId": "hpIn",
+      "fromProperty": "homeWord",
+      "toId": "hpResult",
+      "toProperty": "otherWord"
+    },
+    {
+      "fromId": "hpIn",
+      "fromProperty": "pickWord",
+      "toId": "hpResult",
+      "toProperty": "pickWord"
+    },
+    {
+      "fromId": "hpIn",
+      "fromProperty": "hangarWord",
+      "toId": "hpResult",
+      "toProperty": "hangarWord"
+    },
+    {
+      "fromId": "hpResult",
+      "fromProperty": "other",
+      "toId": "hpOut",
+      "toProperty": "home"
+    },
+    {
+      "fromId": "hpResult",
+      "fromProperty": "hangar",
+      "toId": "hpOut",
+      "toProperty": "hangar"
+    }
+  ]
+}

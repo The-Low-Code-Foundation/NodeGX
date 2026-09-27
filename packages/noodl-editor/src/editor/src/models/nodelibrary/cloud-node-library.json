@@ -62,7 +62,9 @@
     },
     {
       "from": "enum",
-      "to": []
+      "to": [
+        "string"
+      ]
     },
     {
       "from": "object",
@@ -556,7 +558,7 @@
           "plug": "input",
           "group": "General",
           "displayName": "Expression",
-          "description": "JavaScript expression whose value becomes Result; every identifier in it becomes an input port"
+          "description": "JavaScript expression whose value becomes Result. Every name it reads becomes an input port, except JavaScript's own (String, Number, JSON, Date, parseInt, Math and the rest), the Math shortcuts (round, min, pi…) and keywords such as typeof; a port can never be called one of those"
         },
         {
           "name": "run",
@@ -568,6 +570,18 @@
           "group": "Actions",
           "displayName": "Run",
           "description": "Evaluates the expression now. This is additional to the inputs that re-run it; untick an input under Run On Value Change to stop that one triggering a run"
+        },
+        {
+          "name": "evaluateAtLoad",
+          "type": {
+            "name": "boolean",
+            "allowEditOnly": true
+          },
+          "plug": "input",
+          "group": "Run On Value Change",
+          "displayName": "Evaluate At Load",
+          "description": "Whether the expression runs when the page loads even though an input it reads has not arrived yet. Those inputs read as undefined, so `m !== false` is true and `m === true` is false. An expression that throws or gives NaN over them waits for its inputs instead. Untick to wait for an input to arrive",
+          "default": true
         },
         {
           "name": "result",
@@ -1374,6 +1388,14 @@
           "default": "cloud"
         },
         {
+          "name": "onlyIfUnchanged",
+          "type": "string",
+          "plug": "input",
+          "group": "General",
+          "displayName": "Only If Unchanged",
+          "description": "Property names, comma-separated (e.g. version). The update is applied only if these still hold the values the record had when it was read; otherwise Failure fires and nothing is written. Fetch the record again before retrying. Needs a NodeGX backend. Leave empty to always write."
+        },
+        {
           "name": "idSource",
           "type": {
             "name": "enum",
@@ -1642,6 +1664,14 @@
           "group": "General",
           "displayName": "Source Object Id",
           "description": "Id of an existing record whose properties seed the new one before the property inputs are applied over them; leave blank to start empty"
+        },
+        {
+          "name": "upsertOn",
+          "type": "string",
+          "plug": "input",
+          "group": "General",
+          "displayName": "Upsert On",
+          "description": "Name of a unique-indexed property. When a record already holds this value the write updates that record instead of creating a second one. Leave empty to always create."
         },
         {
           "name": "accessControl",
@@ -5763,6 +5793,229 @@
       ]
     },
     {
+      "name": "net.noodl.ParseXML",
+      "displayNodeName": "Parse XML",
+      "docs": "https://docs.noodl.net/nodes/data/array/parse-xml",
+      "shortDocs": "https://docs.noodl.net/nodes/data/array/parse-xml-short.md",
+      "category": "Data",
+      "color": "data",
+      "ports": [
+        {
+          "name": "text",
+          "type": {
+            "name": "string",
+            "codeeditor": "text"
+          },
+          "plug": "input",
+          "group": "General",
+          "displayName": "XML",
+          "description": "The XML text to parse. Wire an HTTP Request node's Response here with its Response Type set to Text, so the body reaches this node untouched whatever content-type the server claimed"
+        },
+        {
+          "name": "attributePrefix",
+          "type": "string",
+          "plug": "input",
+          "group": "General",
+          "displayName": "Attribute Prefix",
+          "description": "What an attribute's key starts with, so it cannot collide with a child element of the same name. With the default, <a href=\"x\"/> is { \"@href\": \"x\" }",
+          "default": "@"
+        },
+        {
+          "name": "alwaysArray",
+          "type": "string",
+          "plug": "input",
+          "group": "General",
+          "displayName": "Always Array",
+          "description": "Comma-separated tag names that are always an array, however many times they appear. Without this, a document with one <item> and a document with ten have different shapes and everything downstream needs a branch",
+          "default": ""
+        },
+        {
+          "name": "trimValues",
+          "type": "boolean",
+          "plug": "input",
+          "group": "General",
+          "displayName": "Trim Values",
+          "description": "Strip leading and trailing whitespace from text. Untick it to keep a document's indentation",
+          "default": true
+        },
+        {
+          "name": "maxBytes",
+          "type": "number",
+          "plug": "input",
+          "group": "General",
+          "displayName": "Max Bytes",
+          "description": "Refuse a document larger than this, before parsing it. A big document costs many times its own size in memory once it is an object, and a server can always send more than you expected",
+          "default": 5242880
+        },
+        {
+          "name": "result",
+          "type": "object",
+          "plug": "output",
+          "group": "Values",
+          "displayName": "Result",
+          "description": "The document as an object. Every value is a string, including ones that look numeric — an id of 0123 stays \"0123\". A tag carrying both attributes and text becomes { \"@attr\": \"…\", \"#text\": \"…\" }. Unchanged while the XML cannot be parsed"
+        },
+        {
+          "name": "changed",
+          "type": "signal",
+          "plug": "output",
+          "group": "Events",
+          "displayName": "Changed",
+          "description": "Fires once Result holds the freshly parsed document"
+        },
+        {
+          "name": "failure",
+          "type": "signal",
+          "plug": "output",
+          "group": "Events",
+          "displayName": "Failure",
+          "description": "Fires when the XML could not be parsed or was refused, leaving Result as it was"
+        },
+        {
+          "name": "error",
+          "type": "string",
+          "plug": "output",
+          "group": "Error",
+          "displayName": "Error",
+          "description": "Why the XML could not be read; empty until a parse fails"
+        },
+        {
+          "name": "errorCode",
+          "type": "string",
+          "plug": "output",
+          "group": "Error",
+          "displayName": "Error Code",
+          "description": "A stable code for the failure, for a graph that branches rather than reads: xml/too-large, xml/entity-declaration, xml/doctype-subset, xml/parse-failed, xml/empty"
+        }
+      ]
+    },
+    {
+      "name": "net.noodl.ParseFeed",
+      "displayNodeName": "Parse Feed",
+      "docs": "https://docs.noodl.net/nodes/data/array/parse-feed",
+      "shortDocs": "https://docs.noodl.net/nodes/data/array/parse-feed-short.md",
+      "category": "Data",
+      "color": "data",
+      "ports": [
+        {
+          "name": "text",
+          "type": {
+            "name": "string",
+            "codeeditor": "text"
+          },
+          "plug": "input",
+          "group": "General",
+          "displayName": "Feed",
+          "description": "The feed document — RSS 2.0, Atom 1.0 or RDF/RSS 1.0. Wire an HTTP Request node's Response here with its Response Type set to Text: feeds are served as application/rss+xml, text/xml and, from some sources, text/html, and Text is what guarantees the body arrives untouched"
+        },
+        {
+          "name": "maxBytes",
+          "type": "number",
+          "plug": "input",
+          "group": "General",
+          "displayName": "Max Bytes",
+          "description": "Refuse a document larger than this, before parsing it. Raise it for a source that really does publish its whole archive in one file",
+          "default": 5242880
+        },
+        {
+          "name": "items",
+          "type": "array",
+          "plug": "output",
+          "group": "Values",
+          "displayName": "Items",
+          "description": "The feed's items, always an array whether the feed carried one or a hundred. Each has Id, Title, Link, Published, Updated, Author, Summary, Content, Image, Enclosure, Tags and Raw. Id is never empty — it is the guid, or the Atom id, or the link, or a hash of title and date — which is what lets a collection store each item once. Unchanged while the feed cannot be parsed"
+        },
+        {
+          "name": "count",
+          "type": "number",
+          "plug": "output",
+          "group": "Values",
+          "displayName": "Count",
+          "description": "How many items the last successful parse produced"
+        },
+        {
+          "name": "feedTitle",
+          "type": "string",
+          "plug": "output",
+          "group": "Feed",
+          "displayName": "Feed Title",
+          "description": "The title of the feed itself, not of any item"
+        },
+        {
+          "name": "feedLink",
+          "type": "string",
+          "plug": "output",
+          "group": "Feed",
+          "displayName": "Feed Link",
+          "description": "The site the feed belongs to — its alternate link, never its own XML address"
+        },
+        {
+          "name": "feedDescription",
+          "type": "string",
+          "plug": "output",
+          "group": "Feed",
+          "displayName": "Feed Description",
+          "description": "The feed's description, or an Atom feed's subtitle"
+        },
+        {
+          "name": "feedUpdated",
+          "type": "string",
+          "plug": "output",
+          "group": "Feed",
+          "displayName": "Feed Updated",
+          "description": "When the feed last changed, as an ISO 8601 string; empty when it did not say"
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "plug": "output",
+          "group": "Feed",
+          "displayName": "Kind",
+          "description": "Which format this was: rss, atom or rdf"
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "plug": "output",
+          "group": "Feed",
+          "displayName": "Source",
+          "description": "A hint at where the feed came from, for a graph that wants to branch: youtube, reddit, podcast or generic. A hint, not a promise — generic is what an unrecognised source gets and it is not a failure"
+        },
+        {
+          "name": "changed",
+          "type": "signal",
+          "plug": "output",
+          "group": "Events",
+          "displayName": "Changed",
+          "description": "Fires once Items and the Feed outputs hold the freshly parsed feed"
+        },
+        {
+          "name": "failure",
+          "type": "signal",
+          "plug": "output",
+          "group": "Events",
+          "displayName": "Failure",
+          "description": "Fires when the feed could not be read, leaving Items and Count as they were"
+        },
+        {
+          "name": "error",
+          "type": "string",
+          "plug": "output",
+          "group": "Error",
+          "displayName": "Error",
+          "description": "Why the feed could not be read; empty until a parse fails"
+        },
+        {
+          "name": "errorCode",
+          "type": "string",
+          "plug": "output",
+          "group": "Error",
+          "displayName": "Error Code",
+          "description": "A stable code for the failure, for a graph that branches rather than reads: feed/unrecognised when the document is XML but not a feed, otherwise the Parse XML codes (xml/too-large, xml/entity-declaration, xml/doctype-subset, xml/parse-failed, xml/empty)"
+        }
+      ]
+    },
+    {
       "name": "net.noodl.Log",
       "displayNodeName": "Log",
       "docs": "https://docs.noodl.net/nodes/utilities/log",
@@ -8377,6 +8630,280 @@
       ]
     },
     {
+      "name": "noodl.cloud.modelrequest",
+      "displayNodeName": "Model Request",
+      "docs": "https://docs.noodl.net/nodes/cloud-functions/model-request",
+      "shortDocs": "https://docs.noodl.net/nodes/cloud-functions/model-request-short.md",
+      "category": "Cloud",
+      "color": "data",
+      "connectionPanel": {
+        "groupPriority": [
+          "General",
+          "Request",
+          "Limits",
+          "Actions",
+          "Values",
+          "Events",
+          "Error"
+        ]
+      },
+      "ports": [
+        {
+          "name": "provider",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Anthropic",
+                "value": "anthropic"
+              },
+              {
+                "label": "OpenAI-compatible (not yet implemented)",
+                "value": "openai-compatible"
+              }
+            ]
+          },
+          "plug": "input",
+          "group": "General",
+          "displayName": "Provider",
+          "description": "Which API shape the request is built in. Only Anthropic is implemented; OpenAI-compatible is listed so a graph drawn today keeps its wiring when it arrives, and until then it fails on Failure with Error Code not_implemented rather than pretending",
+          "default": "anthropic"
+        },
+        {
+          "name": "model",
+          "type": "string",
+          "plug": "input",
+          "group": "General",
+          "displayName": "Model",
+          "description": "The model id, sent verbatim. Free text on purpose: a model released after this backend was built needs no release of NodeGX to be usable",
+          "default": "claude-opus-5"
+        },
+        {
+          "name": "apiKeySecret",
+          "type": "string",
+          "plug": "input",
+          "group": "General",
+          "displayName": "API Key Secret",
+          "description": "The NAME of a secret in the project's functions namespace — never the key itself. It is read server-side at the moment of the call, exactly as the Secret node reads one, used in one header and dropped. There is deliberately no port that could hold the value",
+          "default": "MODEL_KEY"
+        },
+        {
+          "name": "baseUrl",
+          "type": "string",
+          "plug": "input",
+          "group": "General",
+          "displayName": "Base URL",
+          "description": "Where the request goes. Change it for a proxy, a gateway, or a test double",
+          "default": "https://api.anthropic.com"
+        },
+        {
+          "name": "instructions",
+          "type": {
+            "name": "string",
+            "codeeditor": "text"
+          },
+          "plug": "input",
+          "group": "Request",
+          "displayName": "Instructions",
+          "description": "The system prompt — who the model is being asked to be, and the rules of the task. Cached: the first call writes it to the provider's prompt cache and calls in the next 5 minutes read it at a tenth of the price. Keep it the same on every call; anything that changes per call (a name, today's date) belongs in Per-Call Instructions or Input, or nothing is ever read back. Instructions shorter than the model's minimum (512 tokens on Claude Opus 5, up to 4,096 on some older models) are not cached at all: the call works, and Usage shows 0 written"
+        },
+        {
+          "name": "callInstructions",
+          "type": {
+            "name": "string",
+            "codeeditor": "text"
+          },
+          "plug": "input",
+          "group": "Request",
+          "displayName": "Per-Call Instructions",
+          "description": "More instructions that change from call to call — who this learner is, what happened last time. Sent after Instructions and never cached, so changing them does not throw the cached Instructions away"
+        },
+        {
+          "name": "input",
+          "type": {
+            "name": "string",
+            "codeeditor": "text"
+          },
+          "plug": "input",
+          "group": "Request",
+          "displayName": "Input",
+          "description": "The one thing being asked, as a single user turn. Ignored when Messages is wired — a graph holding a conversation sends the whole conversation"
+        },
+        {
+          "name": "messages",
+          "type": {
+            "name": "array",
+            "allowConnectionsOnly": true
+          },
+          "plug": "input",
+          "group": "Request",
+          "displayName": "Messages",
+          "description": "A whole conversation as [{ role, content }], for a graph that is holding one. When this is wired and non-empty it replaces Input entirely"
+        },
+        {
+          "name": "outputSchema",
+          "type": {
+            "name": "object",
+            "allowConnectionsOnly": true
+          },
+          "plug": "input",
+          "group": "Request",
+          "displayName": "Output Schema",
+          "description": "A JSON schema the answer must match. When set, the answer is constrained to it and arrives parsed on Json as well as raw on Text. Objects in the schema need additionalProperties false, and the provider refuses the request outright if they do not have it"
+        },
+        {
+          "name": "effort",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Low",
+                "value": "low"
+              },
+              {
+                "label": "Medium",
+                "value": "medium"
+              },
+              {
+                "label": "High",
+                "value": "high"
+              },
+              {
+                "label": "Extra high",
+                "value": "xhigh"
+              },
+              {
+                "label": "Max",
+                "value": "max"
+              }
+            ]
+          },
+          "plug": "input",
+          "group": "Limits",
+          "displayName": "Effort",
+          "description": "How hard the model works before answering — the first lever to reach for on both cost and quality. Low for tagging and classifying, high for anything that has to be right",
+          "default": "high"
+        },
+        {
+          "name": "maxTokens",
+          "type": "number",
+          "plug": "input",
+          "group": "Limits",
+          "displayName": "Max Tokens",
+          "description": "The ceiling on the answer. Hitting it is not an error: Done fires with Stop Reason set to max_tokens and a truncated Text, so the graph can decide what that means",
+          "default": 16000
+        },
+        {
+          "name": "timeoutMs",
+          "type": "number",
+          "plug": "input",
+          "group": "Limits",
+          "displayName": "Timeout (ms)",
+          "description": "The whole call's budget, retries included. Keep it under the function's own timeout, or the function answers 504 before this node gets to report anything",
+          "default": 120000
+        },
+        {
+          "name": "send",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "plug": "input",
+          "group": "Actions",
+          "displayName": "Do",
+          "description": "Sends the request"
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "plug": "output",
+          "group": "Values",
+          "displayName": "Text",
+          "description": "The model's answer. When Output Schema is set this is the raw JSON of it"
+        },
+        {
+          "name": "json",
+          "type": "object",
+          "plug": "output",
+          "group": "Values",
+          "displayName": "Json",
+          "description": "The answer parsed, when Output Schema asked for one. Untouched when no schema was set — a graph that wants an object has to say what shape it is"
+        },
+        {
+          "name": "usage",
+          "type": "object",
+          "plug": "output",
+          "group": "Values",
+          "displayName": "Usage",
+          "description": "What the call cost, as { inputTokens, outputTokens, cacheReadTokens, cacheWriteTokens }. A write on every call and reads of 0 means Instructions differ between calls. The same numbers land on the run's execution record, where they are summed per run"
+        },
+        {
+          "name": "stopReason",
+          "type": "string",
+          "plug": "output",
+          "group": "Values",
+          "displayName": "Stop Reason",
+          "description": "Why the model stopped: end_turn when it finished, max_tokens when it ran out of room, tool_use when it wants a tool. A refusal never arrives here — it fires Failure"
+        },
+        {
+          "name": "attempts",
+          "type": "number",
+          "plug": "output",
+          "group": "Values",
+          "displayName": "Attempts",
+          "description": "How many HTTP requests this call actually took. More than one means the provider rate-limited or faulted and the node retried; it is the number to watch before raising a quota"
+        },
+        {
+          "name": "done",
+          "type": "signal",
+          "plug": "output",
+          "group": "Events",
+          "displayName": "Done",
+          "description": "Fires once the model has answered and Text, Json, Usage and Stop Reason hold that answer"
+        },
+        {
+          "name": "completed",
+          "type": "signal",
+          "plug": "output",
+          "group": "Events",
+          "displayName": "Completed",
+          "description": "Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error"
+        },
+        {
+          "name": "failure",
+          "type": "signal",
+          "plug": "output",
+          "group": "Events",
+          "displayName": "Failure",
+          "description": "Fires when no answer was obtained — a missing secret, a refusal, a provider error that outlived its retries, or an answer that did not match the schema. Read Error Code to tell them apart rather than matching on Error, which is written for a person"
+        },
+        {
+          "name": "status",
+          "type": "number",
+          "plug": "output",
+          "group": "Error",
+          "displayName": "Status",
+          "description": "The HTTP status of the last attempt, or 0 when the request never reached the provider — a missing secret, an unimplemented provider, a timeout"
+        },
+        {
+          "name": "error",
+          "type": "string",
+          "plug": "output",
+          "group": "Error",
+          "displayName": "Error",
+          "description": "Why there is no answer, in a sentence. Names the secret or the status, never a key"
+        },
+        {
+          "name": "errorCode",
+          "type": "string",
+          "plug": "output",
+          "group": "Error",
+          "displayName": "Error Code",
+          "description": "A stable code for the failure, for a graph that branches rather than reads: not_implemented, secret_missing, refusal, bad_json, http_error, rate_limited, timeout, network, unavailable"
+        }
+      ]
+    },
+    {
       "name": "noodl.cloud.hmac",
       "displayNodeName": "HMAC",
       "docs": "https://docs.noodl.net/nodes/cloud-functions/hmac",
@@ -9899,7 +10426,7 @@
           "plug": "output",
           "group": "Response",
           "displayName": "Response",
-          "description": "Body the server sent, parsed as JSON when it said so and as text otherwise; it keeps the previous body when a request never reached the server"
+          "description": "Body the server sent, read the way Response Type says: Auto parses JSON when the server said application/json and hands over text otherwise, Text always hands over text, JSON always parses; it keeps the previous body when a request never reached the server"
         },
         {
           "name": "statusCode",
@@ -9924,6 +10451,14 @@
           "group": "Events",
           "displayName": "Canceled",
           "description": "Fires only when Cancel abandoned a request in flight; a timeout answers on Failure instead"
+        },
+        {
+          "name": "notModified",
+          "type": "signal",
+          "plug": "output",
+          "group": "Events",
+          "displayName": "Not Modified",
+          "description": "Fires when Conditional is on and the server answered 304 — nothing has changed since the last fetch, Response still holds the previous body, and the invocation reports Unchanged"
         },
         {
           "name": "error",
@@ -9955,7 +10490,7 @@
           "plug": "output",
           "group": "Events",
           "displayName": "Unchanged",
-          "description": "Fires when nothing was fetched and nothing changed: a Cancel that abandoned a request in flight, or a Cancel with no request to abandon. Canceled tells those two apart"
+          "description": "Fires when nothing was fetched and nothing changed: a Cancel that abandoned a request in flight, a Cancel with no request to abandon, or a Conditional request the server answered 304. Canceled and Not Modified tell those apart"
         },
         {
           "name": "failure",
@@ -10044,6 +10579,7 @@
               "States",
               "Value Changed",
               "Timer",
+              "Repeat",
               "Color Blend",
               "Number Remapper",
               "Counter",
@@ -10166,7 +10702,9 @@
               "Map Collection",
               "Static Data",
               "net.noodl.ParseCSV",
-              "net.noodl.ToCSV"
+              "net.noodl.ToCSV",
+              "net.noodl.ParseXML",
+              "net.noodl.ParseFeed"
             ]
           },
           {
@@ -10287,6 +10825,12 @@
             "name": "Secrets",
             "items": [
               "noodl.cloud.secret"
+            ]
+          },
+          {
+            "name": "AI",
+            "items": [
+              "noodl.cloud.modelrequest"
             ]
           },
           {

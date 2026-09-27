@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d8048e94-3852-5851-837b-ac9ad44db406",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "AddtaskIn",
+      "fromProperty": "title",
+      "toId": "AddtaskGuard",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "AddtaskIn",
+      "fromProperty": "position",
+      "toId": "AddtaskGuard",
+      "toProperty": "in-position"
+    },
+    {
+      "fromId": "AddtaskIn",
+      "fromProperty": "summary",
+      "toId": "AddtaskGuard",
+      "toProperty": "in-summary"
+    },
+    {
+      "fromId": "AddtaskIn",
+      "fromProperty": "do",
+      "toId": "AddtaskGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "AddtaskGuard",
+      "fromProperty": "out-title",
+      "toId": "AddtaskCreate",
+      "toProperty": "prop-title"
+    },
+    {
+      "fromId": "AddtaskGuard",
+      "fromProperty": "out-position",
+      "toId": "AddtaskCreate",
+      "toProperty": "prop-position"
+    },
+    {
+      "fromId": "AddtaskGuard",
+      "fromProperty": "out-status",
+      "toId": "AddtaskCreate",
+      "toProperty": "prop-status"
+    },
+    {
+      "fromId": "AddtaskGuard",
+      "fromProperty": "out-empty",
+      "toId": "AddtaskCreate",
+      "toProperty": "prop-deadline"
+    },
+    {
+      "fromId": "AddtaskGuard",
+      "fromProperty": "out-empty",
+      "toId": "AddtaskCreate",
+      "toProperty": "prop-closingNote"
+    },
+    {
+      "fromId": "AddtaskGuard",
+      "fromProperty": "out-empty",
+      "toId": "AddtaskCreate",
+      "toProperty": "prop-closedAt"
+    },
+    {
+      "fromId": "AddtaskGuard",
+      "fromProperty": "out-go",
+      "toId": "AddtaskCreate",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "AddtaskCreate",
+      "fromProperty": "id",
+      "toId": "AddtaskHistory",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "AddtaskGuard",
+      "fromProperty": "out-summary",
+      "toId": "AddtaskHistory",
+      "toProperty": "summary"
+    },
+    {
+      "fromId": "AddtaskCreate",
+      "fromProperty": "done",
+      "toId": "AddtaskHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "AddtaskHistory",
+      "fromProperty": "done",
+      "toId": "AddtaskOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "AddtaskCreate",
+      "fromProperty": "failure",
+      "toId": "AddtaskProblem",
+      "toProperty": "do"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c05ff50d-fdf2-5cfd-877c-16b54c7beb94",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ceIn",
+      "fromProperty": "when",
+      "toId": "ceWhen",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ceIn",
+      "fromProperty": "whenColor",
+      "toId": "ceWhen",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "ceIn",
+      "fromProperty": "background",
+      "toId": "ceRoot",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "ceIn",
+      "fromProperty": "key",
+      "toId": "ceOut",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "ceRoot",
+      "fromProperty": "onClick",
+      "toId": "ceOut",
+      "toProperty": "pick"
+    },
+    {
+      "fromId": "ceIn",
+      "fromProperty": "amount",
+      "toId": "ceAmount",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ceIn",
+      "fromProperty": "amountColor",
+      "toId": "ceAmount",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "ceIn",
+      "fromProperty": "label",
+      "toId": "ceLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ceIn",
+      "fromProperty": "running",
+      "toId": "ceRunning",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ceIn",
+      "fromProperty": "edge",
+      "toId": "ceRoot",
+      "toProperty": "borderColor"
+    }
+  ]
+}

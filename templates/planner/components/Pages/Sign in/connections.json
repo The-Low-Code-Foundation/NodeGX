@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "dfcbf2f3-587a-5609-856f-9f0c02a69236",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "siPage",
+      "fromProperty": "didMount",
+      "toId": "siAuth",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "siUser",
+      "fromProperty": "authenticated",
+      "toId": "siAuth",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "siAuth",
+      "fromProperty": "ontrue",
+      "toId": "siToWeek",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "siEmail",
+      "fromProperty": "onTextChanged",
+      "toId": "siLogIn",
+      "toProperty": "username"
+    },
+    {
+      "fromId": "siPassword",
+      "fromProperty": "onTextChanged",
+      "toId": "siLogIn",
+      "toProperty": "password"
+    },
+    {
+      "fromId": "siEmail",
+      "fromProperty": "onTextChanged",
+      "toId": "siSignUp",
+      "toProperty": "username"
+    },
+    {
+      "fromId": "siPassword",
+      "fromProperty": "onTextChanged",
+      "toId": "siSignUp",
+      "toProperty": "password"
+    },
+    {
+      "fromId": "siSignIn",
+      "fromProperty": "onClick",
+      "toId": "siClearError",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "siCreate",
+      "fromProperty": "onClick",
+      "toId": "siClearError",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "siSignIn",
+      "fromProperty": "onClick",
+      "toId": "siLogIn",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "siPassword",
+      "fromProperty": "onEnter",
+      "toId": "siLogIn",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "siCreate",
+      "fromProperty": "onClick",
+      "toId": "siSignUp",
+      "toProperty": "signup"
+    },
+    {
+      "fromId": "siLogIn",
+      "fromProperty": "done",
+      "toId": "siToWeek",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "siSignUp",
+      "fromProperty": "done",
+      "toId": "siToWeek",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "siLogIn",
+      "fromProperty": "error",
+      "toId": "siSetError",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "siSignUp",
+      "fromProperty": "error",
+      "toId": "siSetError",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "siLogIn",
+      "fromProperty": "failure",
+      "toId": "siSetError",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "siSignUp",
+      "fromProperty": "failure",
+      "toId": "siSetError",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "siVarError",
+      "fromProperty": "value",
+      "toId": "siError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "siVarError",
+      "fromProperty": "value",
+      "toId": "siHasError",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "siHasError",
+      "fromProperty": "out-shown",
+      "toId": "siError",
+      "toProperty": "mounted"
+    }
+  ]
+}

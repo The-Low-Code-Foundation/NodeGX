@@ -24,7 +24,7 @@
         }
       ],
       "connections": [
-        { "fromId": "email_input", "fromProperty": "text", "toId": "write_user", "toProperty": "value" },
+        { "fromId": "email_input", "fromProperty": "onTextChanged", "toId": "write_user", "toProperty": "value" },
         { "fromId": "signin_button", "fromProperty": "onClick", "toId": "write_user", "toProperty": "set" }
       ]
     },

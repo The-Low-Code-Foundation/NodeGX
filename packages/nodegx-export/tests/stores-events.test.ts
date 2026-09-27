@@ -111,6 +111,7 @@ import { FarewellCard } from '../components/FarewellCard';
 import { GreetingBadge } from '../components/GreetingBadge';
 import { GreetingCard } from '../components/GreetingCard';
 import { celebrate } from '../events';
+import { PopupDialog } from '../lib/popupDialog';
 import { visitorName } from '../stores/variables';
 import styles from './Home.module.css';
 
@@ -130,8 +131,8 @@ Outputs.text = name.toUpperCase() + '!';
 }
 
 // From the Expression node "hasLongName" — the expression is preserved verbatim (EXP-003 §4).
-function hasLongName(__inputs: { name: string | undefined; length?: any }) {
-  const { name, length } = __inputs as { [K in keyof typeof __inputs]: any };
+function hasLongName(__inputs: { name: string | undefined }) {
+  const { name } = __inputs as { [K in keyof typeof __inputs]: any };
   try {
     return ((name || '').length > 1);
   } catch (e) {
@@ -196,9 +197,9 @@ export function HomePage() {
 
       {openPopup === 'AboutDialog' &&
         createPortal(
-          <div className={styles.popupLayer}>
+          <PopupDialog className={styles.popupLayer} onCancel={() => setOpenPopup(null)}>
             <AboutDialog onClose={() => setOpenPopup(null)} />
-          </div>,
+          </PopupDialog>,
           document.body
         )}
     </div>

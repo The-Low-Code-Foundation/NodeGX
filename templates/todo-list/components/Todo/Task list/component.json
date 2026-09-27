@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d29ccabc-b47c-5a97-8d55-b79710d8d0b2",
+  "name": "Task list",
+  "path": "/Todo/Task list",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The open tasks in order, one Task row each, and the box that adds a task at the bottom. Clear New empties the box."
+}

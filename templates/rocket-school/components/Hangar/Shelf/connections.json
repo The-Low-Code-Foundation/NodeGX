@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1900b827-9eb8-5137-8364-254c24f09d3b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hsFirstTab",
+      "fromProperty": "result",
+      "toId": "hsInitTab",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hsWrap",
+      "fromProperty": "didMount",
+      "toId": "hsInitTab",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "hsIn",
+      "fromProperty": "faceWord",
+      "toId": "hsTabItems",
+      "toProperty": "in-face"
+    },
+    {
+      "fromId": "hsIn",
+      "fromProperty": "rocketWord",
+      "toId": "hsTabItems",
+      "toProperty": "in-rocket"
+    },
+    {
+      "fromId": "hsTabItems",
+      "fromProperty": "out-items",
+      "toId": "hsTabs",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "hsTab",
+      "fromProperty": "value",
+      "toId": "hsTabs",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hsTabs",
+      "fromProperty": "value",
+      "toId": "hsSetTab",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hsTabs",
+      "fromProperty": "changed",
+      "toId": "hsSetTab",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "hsIn",
+      "fromProperty": "app",
+      "toId": "hsList",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hsIn",
+      "fromProperty": "shelf",
+      "toId": "hsList",
+      "toProperty": "shelf"
+    },
+    {
+      "fromId": "hsTab",
+      "fromProperty": "value",
+      "toId": "hsList",
+      "toProperty": "tab"
+    },
+    {
+      "fromId": "hsList",
+      "fromProperty": "rows",
+      "toId": "hsEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "hsList",
+      "fromProperty": "hasPicks",
+      "toId": "hsOut",
+      "toProperty": "hasPicks"
+    },
+    {
+      "fromId": "hsList",
+      "fromProperty": "purse",
+      "toId": "hsOut",
+      "toProperty": "purse"
+    },
+    {
+      "fromId": "hsList",
+      "fromProperty": "elsewhereText",
+      "toId": "hsElsewhere",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hsList",
+      "fromProperty": "emptyText",
+      "toId": "hsEmpty",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hsEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "hsOut",
+      "toProperty": "itemId"
+    },
+    {
+      "fromId": "hsEach",
+      "fromProperty": "itemOutput-label",
+      "toId": "hsOut",
+      "toProperty": "itemLabel"
+    },
+    {
+      "fromId": "hsEach",
+      "fromProperty": "itemOutput-cost",
+      "toId": "hsOut",
+      "toProperty": "itemCost"
+    },
+    {
+      "fromId": "hsEach",
+      "fromProperty": "itemOutputSignal-pick",
+      "toId": "hsOut",
+      "toProperty": "pick"
+    },
+    {
+      "fromId": "hsEach",
+      "fromProperty": "itemOutputSignal-wear",
+      "toId": "hsOut",
+      "toProperty": "wear"
+    }
+  ]
+}

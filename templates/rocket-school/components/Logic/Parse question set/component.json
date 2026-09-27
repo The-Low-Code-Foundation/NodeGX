@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2728d97b-89e1-5b63-880c-6de201baefde",
+  "name": "Parse question set",
+  "path": "/Logic/Parse question set",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Editor rows or pasted JSON into a clean list of { q, a, opts } questions."
+}

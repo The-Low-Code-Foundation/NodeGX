@@ -1,0 +1,46 @@
+{
+  "expect": "firing",
+  "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/HLT-001 Unmount Drive",
+  "arms": [
+    {
+      "name": "the counter is armed before a single action is driven",
+      "ok": true,
+      "detail": "armed"
+    },
+    {
+      "name": "the editor bundle is reachable (__wreq pushed)",
+      "ok": true,
+      "detail": "true"
+    },
+    {
+      "name": "the RUNNING bundle carries the seam this run means to grade (--expect firing)",
+      "ok": true,
+      "detail": "SYNCHRONOUS"
+    },
+    {
+      "name": "the driven project is the copy this drive names",
+      "ok": true,
+      "detail": "/Users/richardosborne/vscode_projects/NodeGX test projects/HLT-001 Unmount Drive"
+    },
+    {
+      "name": "no dev-server error overlay is covering the window",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "name": "the project has components to drive — the control for every count below",
+      "ok": true,
+      "detail": "9 components"
+    },
+    {
+      "name": "nodes were actually selected — the property editor really built and tore down rows",
+      "ok": true,
+      "detail": "47 selections across 98 nodes on canvas"
+    },
+    {
+      "name": "🔴 THE CONTROL — the mutated (synchronous) seam DOES produce the error on this drive",
+      "ok": true,
+      "detail": "1538 events"
+    }
+  ]
+}

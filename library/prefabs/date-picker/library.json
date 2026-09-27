@@ -1,15 +1,16 @@
 {
   "label": "Date Picker",
-  "description": "A date picker input with a pop-up calendar for selecting a date.",
+  "description": "A date field with a calendar that drops down on a computer and the device's own date picker on a phone. Value is YYYY-MM-DD. No network, follows light and dark.",
   "type": "prefab",
   "tags": [
     "UI",
     "Form",
-    "Input"
+    "Input",
+    "Date"
   ],
   "icon": "icon.png",
   "docsPath": "/library/prefabs/date-picker/",
-  "version": "1.6.1",
+  "version": "2.0.0",
   "minEditorVersion": "0.1.0",
   "runtimeVersion": "2.7.0",
   "provenance": {

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e67aeb29-c996-57f3-8c8b-ba0ecd00caa7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "buildnumberhIn",
+      "fromProperty": "nonce",
+      "toId": "buildnumberhFn",
+      "toProperty": "in-nonce"
+    },
+    {
+      "fromId": "buildnumberhIn",
+      "fromProperty": "level",
+      "toId": "buildnumberhFn",
+      "toProperty": "in-level"
+    },
+    {
+      "fromId": "buildnumberhIn",
+      "fromProperty": "lang",
+      "toId": "buildnumberhFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "buildnumberhFn",
+      "fromProperty": "out-cells",
+      "toId": "buildnumberhOut",
+      "toProperty": "cells"
+    },
+    {
+      "fromId": "buildnumberhFn",
+      "fromProperty": "out-target",
+      "toId": "buildnumberhOut",
+      "toProperty": "target"
+    },
+    {
+      "fromId": "buildnumberhFn",
+      "fromProperty": "out-count",
+      "toId": "buildnumberhOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "buildnumberhFn",
+      "fromProperty": "out-kind",
+      "toId": "buildnumberhOut",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "buildnumberhFn",
+      "fromProperty": "out-solutions",
+      "toId": "buildnumberhOut",
+      "toProperty": "solutions"
+    },
+    {
+      "fromId": "buildnumberhFn",
+      "fromProperty": "out-instruction",
+      "toId": "buildnumberhOut",
+      "toProperty": "instruction"
+    },
+    {
+      "fromId": "buildnumberhFn",
+      "fromProperty": "success",
+      "toId": "buildnumberhOut",
+      "toProperty": "done"
+    }
+  ]
+}

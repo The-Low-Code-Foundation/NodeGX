@@ -1,0 +1,148 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5e1586cb-e4a0-5c28-8375-04c303d9cd7c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "DescribeacIn",
+      "type": "Component Inputs",
+      "label": "What to do",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "taskId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "actionId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "text",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "DescribeacOut",
+      "type": "Component Outputs",
+      "label": "Done",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "DescribeacGuard",
+      "type": "JavaScriptFunction",
+      "label": "Is there anything to write?",
+      "parameters": {
+        "functionScript": "function findRow(rows, id) {\n  for (var i = 0; i < rows.length; i++) if (rows[i] && rows[i].id === id) return rows[i];\n  return null;\n}\nvar row = findRow(Inputs.rows || [], String(Inputs.actionId || ''));\nif (!row) return;\nvar t = String(Inputs.text || '').trim();\nif (t === String(row.description || '')) return;\nOutputs.description = t;\nOutputs.summary = 'Description changed on “' + row.title + '”';\nOutputs.go();",
+        "runOnChange-in-rows": false,
+        "runOnChange-in-actionId": false,
+        "runOnChange-in-text": false
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-rows",
+          "displayName": "rows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-actionId",
+          "displayName": "actionId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-text",
+          "displayName": "text",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-description",
+          "displayName": "description",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-summary",
+          "displayName": "summary",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "DescribeacWrite",
+      "type": "SetDbModelProperties",
+      "label": "Save the description",
+      "parameters": {
+        "collectionName": "Action",
+        "idSource": "explicit"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "DescribeacHistory",
+      "type": "/Logic/Write history",
+      "label": "Write the history line",
+      "parameters": {
+        "kind": "action-described"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "DescribeacProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "todoProblem",
+        "setWith": "string",
+        "value": "That change did not save. Check your connection, then try again."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 640
+    }
+  ]
+}

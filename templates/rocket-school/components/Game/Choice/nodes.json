@@ -1,0 +1,126 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8ee7828f-e601-5bc2-8d17-e523da84ad84",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "chIn",
+      "type": "Component Inputs",
+      "label": "The option",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "selected",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "chPill",
+      "type": "Group",
+      "label": "The pill",
+      "children": [
+        "chText"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 2,
+          "unit": "px"
+        },
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-full)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "cssClassName": "pressable"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "chText",
+      "type": "Text",
+      "label": "The label",
+      "parent": "chPill",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "chIsOn",
+      "type": "Condition",
+      "label": "Is it selected?",
+      "parameters": {},
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "chStates",
+      "type": "States",
+      "label": "Filled or not",
+      "parameters": {
+        "states": "off,on",
+        "values": "bg,fg,edge",
+        "useTransitions": false,
+        "type-bg": "color",
+        "value-off-bg": "var(--surface)",
+        "value-on-bg": "var(--primary)",
+        "type-fg": "color",
+        "value-off-fg": "var(--foreground)",
+        "value-on-fg": "var(--primary-foreground)",
+        "type-edge": "color",
+        "value-off-edge": "var(--border-control)",
+        "value-on-edge": "var(--foreground)"
+      },
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "chOut",
+      "type": "Component Outputs",
+      "label": "Tapped",
+      "ports": [
+        {
+          "name": "picked",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "value",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "chPill"
+  ]
+}

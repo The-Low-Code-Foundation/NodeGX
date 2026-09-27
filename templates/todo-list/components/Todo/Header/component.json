@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f0b43e39-f675-52ee-8d43-0bf69ff2771f",
+  "name": "Header",
+  "path": "/Todo/Header",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The app name, the three views (List, Done, Log), Sign out, the reminders bell and the theme switch. Tab is the view that is showing."
+}

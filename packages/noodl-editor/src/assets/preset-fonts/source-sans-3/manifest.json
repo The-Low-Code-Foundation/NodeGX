@@ -1,0 +1,9 @@
+{
+  "name": "Source Sans 3",
+  "browser": {
+    "stylesheets": [
+      "noodl_modules/preset-font-source-sans-3/styles.css"
+    ]
+  },
+  "_note": "The Enterprise preset's typeface, placed when the preset is applied (P88 GAM-016). Bundled rather than fetched, like the starter's Inter: an app renders it offline and asks nothing of fonts.googleapis.com. Switching to another preset removes this folder only if its files are exactly as shipped; an edited copy is kept."
+}

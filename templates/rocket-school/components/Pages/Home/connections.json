@@ -1,0 +1,301 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c31dee91-2d14-5271-89cc-3bdd66098a15",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hmStore",
+      "fromProperty": "app",
+      "toId": "hmMe",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hmWords",
+      "fromProperty": "words",
+      "toId": "hmT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "hmMe",
+      "fromProperty": "lang",
+      "toId": "hmT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "hmMe",
+      "fromProperty": "hasProfile",
+      "toId": "hmNoOne",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "hmNoOne",
+      "fromProperty": "result",
+      "toId": "hmGuard",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "hmPage",
+      "fromProperty": "didMount",
+      "toId": "hmGuard",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "hmGuard",
+      "fromProperty": "ontrue",
+      "toId": "hmGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "hmHeader",
+      "fromProperty": "hangar",
+      "toId": "hmGoHangar",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "hmMe",
+      "fromProperty": "name",
+      "toId": "hmHeader",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "hmMe",
+      "fromProperty": "look",
+      "toId": "hmHeader",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "hmMe",
+      "fromProperty": "seed",
+      "toId": "hmHeader",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "hmMe",
+      "fromProperty": "lang",
+      "toId": "hmHeader",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "hmMe",
+      "fromProperty": "level",
+      "toId": "hmHeader",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "hmMe",
+      "fromProperty": "layout",
+      "toId": "hmHeader",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "hmMe",
+      "fromProperty": "soundMode",
+      "toId": "hmHeader",
+      "toProperty": "soundMode"
+    },
+    {
+      "fromId": "hmMe",
+      "fromProperty": "answerMode",
+      "toId": "hmHeader",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "hmMe",
+      "fromProperty": "profileId",
+      "toId": "hmHeader",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "hmMe",
+      "fromProperty": "faceOptions",
+      "toId": "hmHeader",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "hmStore",
+      "fromProperty": "app",
+      "toId": "hmHeader",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hmHeader",
+      "fromProperty": "app",
+      "toId": "hmStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hmHeader",
+      "fromProperty": "write",
+      "toId": "hmStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "hmHeader",
+      "fromProperty": "switchPlayer",
+      "toId": "hmGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "hmHeader",
+      "fromProperty": "deleted",
+      "toId": "hmGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "hmMe",
+      "fromProperty": "due",
+      "toId": "hmDueText",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "hmDueText",
+      "fromProperty": "result",
+      "toId": "hmDue",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hmT",
+      "fromProperty": "dueToday",
+      "toId": "hmDue",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hmMe",
+      "fromProperty": "days7",
+      "toId": "hmDaysText",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "hmDaysText",
+      "fromProperty": "result",
+      "toId": "hmDays",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hmT",
+      "fromProperty": "daysThisWeek",
+      "toId": "hmDays",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hmMe",
+      "fromProperty": "stars",
+      "toId": "hmStarsText",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "hmStarsText",
+      "fromProperty": "result",
+      "toId": "hmStars",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hmT",
+      "fromProperty": "stars",
+      "toId": "hmStars",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hmT",
+      "fromProperty": "play",
+      "toId": "hmTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hmT",
+      "fromProperty": "gameRace",
+      "toId": "hmRace",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "hmT",
+      "fromProperty": "gameRaceBlurb",
+      "toId": "hmRace",
+      "toProperty": "blurb"
+    },
+    {
+      "fromId": "hmT",
+      "fromProperty": "gameMerge",
+      "toId": "hmMerge",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "hmT",
+      "fromProperty": "gameMergeBlurb",
+      "toId": "hmMerge",
+      "toProperty": "blurb"
+    },
+    {
+      "fromId": "hmT",
+      "fromProperty": "gameHunt",
+      "toId": "hmHunt",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "hmT",
+      "fromProperty": "gameHuntBlurb",
+      "toId": "hmHunt",
+      "toProperty": "blurb"
+    },
+    {
+      "fromId": "hmT",
+      "fromProperty": "gameMonster",
+      "toId": "hmMonster",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "hmT",
+      "fromProperty": "gameMonsterBlurb",
+      "toId": "hmMonster",
+      "toProperty": "blurb"
+    },
+    {
+      "fromId": "hmRace",
+      "fromProperty": "chosen",
+      "toId": "hmGoRace",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "hmMerge",
+      "fromProperty": "chosen",
+      "toId": "hmGoMerge",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "hmHunt",
+      "fromProperty": "chosen",
+      "toId": "hmGoHunt",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "hmMonster",
+      "fromProperty": "chosen",
+      "toId": "hmGoMonster",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "hmMe",
+      "fromProperty": "nextText",
+      "toId": "hmNext",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hmMe",
+      "fromProperty": "nextPct",
+      "toId": "hmNext",
+      "toProperty": "percent"
+    },
+    {
+      "fromId": "hmMe",
+      "fromProperty": "hasPicks",
+      "toId": "hmNext",
+      "toProperty": "hasPicks"
+    },
+    {
+      "fromId": "hmNext",
+      "fromProperty": "open",
+      "toId": "hmGoHangar",
+      "toProperty": "navigate"
+    }
+  ]
+}

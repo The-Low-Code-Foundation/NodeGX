@@ -1,0 +1,36 @@
+{
+  "from": [
+    199,
+    202
+  ],
+  "to": [
+    900,
+    650
+  ],
+  "dragger": {
+    "display": "block",
+    "box": [
+      34,
+      26
+    ],
+    "text": "title",
+    "indicatorHtml": "<span class=\"popup-layer-drop-type-indicator\" style=\"display: inline-flex; align-items: center; vertical-align: middle;\"></span>",
+    "colour": "rgb(24, 33, 43)"
+  },
+  "census": {
+    "scope": "popup-layer-dragger",
+    "scopeBox": [
+      34,
+      26
+    ],
+    "total": 1,
+    "drawn": 0,
+    "emptyHosts": 0,
+    "collapsed": 0,
+    "boxes": [],
+    "colours": [],
+    "faLeft": 0,
+    "glyphs": []
+  },
+  "afterRelease": "block"
+}

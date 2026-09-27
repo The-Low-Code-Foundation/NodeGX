@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "fc009aba-d0a8-5a11-8e69-3cd63299d429",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "finishmonsteIn",
+      "fromProperty": "model",
+      "toId": "finishmonsteFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "finishmonsteIn",
+      "fromProperty": "game",
+      "toId": "finishmonsteFn",
+      "toProperty": "in-game"
+    },
+    {
+      "fromId": "finishmonsteIn",
+      "fromProperty": "lang",
+      "toId": "finishmonsteFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "finishmonsteIn",
+      "fromProperty": "run",
+      "toId": "finishmonsteFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "finishmonsteFn",
+      "fromProperty": "out-model",
+      "toId": "finishmonsteOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "finishmonsteFn",
+      "fromProperty": "out-paid",
+      "toId": "finishmonsteOut",
+      "toProperty": "paid"
+    },
+    {
+      "fromId": "finishmonsteFn",
+      "fromProperty": "out-starsEarned",
+      "toId": "finishmonsteOut",
+      "toProperty": "starsEarned"
+    },
+    {
+      "fromId": "finishmonsteFn",
+      "fromProperty": "out-stars",
+      "toId": "finishmonsteOut",
+      "toProperty": "stars"
+    },
+    {
+      "fromId": "finishmonsteFn",
+      "fromProperty": "out-starsText",
+      "toId": "finishmonsteOut",
+      "toProperty": "starsText"
+    },
+    {
+      "fromId": "finishmonsteFn",
+      "fromProperty": "out-why",
+      "toId": "finishmonsteOut",
+      "toProperty": "why"
+    },
+    {
+      "fromId": "finishmonsteFn",
+      "fromProperty": "out-earnedPick",
+      "toId": "finishmonsteOut",
+      "toProperty": "earnedPick"
+    },
+    {
+      "fromId": "finishmonsteFn",
+      "fromProperty": "out-won",
+      "toId": "finishmonsteOut",
+      "toProperty": "won"
+    },
+    {
+      "fromId": "finishmonsteFn",
+      "fromProperty": "out-headline",
+      "toId": "finishmonsteOut",
+      "toProperty": "headline"
+    },
+    {
+      "fromId": "finishmonsteFn",
+      "fromProperty": "out-line",
+      "toId": "finishmonsteOut",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "finishmonsteFn",
+      "fromProperty": "success",
+      "toId": "finishmonsteOut",
+      "toProperty": "done"
+    }
+  ]
+}

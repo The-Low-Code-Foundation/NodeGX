@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e8815c55-0dfc-5dea-8636-bec1782352c0",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "savemodelIn",
+      "fromProperty": "app",
+      "toId": "savemodelFn",
+      "toProperty": "in-app"
+    },
+    {
+      "fromId": "savemodelIn",
+      "fromProperty": "profileId",
+      "toId": "savemodelFn",
+      "toProperty": "in-profileId"
+    },
+    {
+      "fromId": "savemodelIn",
+      "fromProperty": "model",
+      "toId": "savemodelFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "savemodelIn",
+      "fromProperty": "run",
+      "toId": "savemodelFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "savemodelFn",
+      "fromProperty": "out-app",
+      "toId": "savemodelOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "savemodelFn",
+      "fromProperty": "success",
+      "toId": "savemodelOut",
+      "toProperty": "done"
+    }
+  ]
+}

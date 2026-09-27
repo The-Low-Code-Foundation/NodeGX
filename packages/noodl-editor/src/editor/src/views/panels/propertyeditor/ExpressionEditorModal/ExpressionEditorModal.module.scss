@@ -32,7 +32,7 @@
 }
 
 .Title {
-  font-size: 16px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   color: var(--theme-color-fg-highlight);
   margin: 0;
@@ -51,7 +51,7 @@
   padding: 8px 12px;
   background-color: var(--theme-color-bg-3, rgba(255, 255, 255, 0.05));
   border-radius: 4px;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--theme-color-fg-default-shy, rgba(255, 255, 255, 0.6));
 
   code {
@@ -59,7 +59,7 @@
     padding: 2px 4px;
     border-radius: 2px;
     font-family: 'Monaco', 'Menlo', monospace;
-    font-size: 11px;
+    font-size: var(--font-size-xs);
     color: var(--theme-color-primary);
   }
 }

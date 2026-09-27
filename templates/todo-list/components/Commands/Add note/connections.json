@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d5b030a5-50f9-5525-8774-48ee26a04e7b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "AddnoteIn",
+      "fromProperty": "taskId",
+      "toId": "AddnoteGuard",
+      "toProperty": "in-taskId"
+    },
+    {
+      "fromId": "AddnoteIn",
+      "fromProperty": "text",
+      "toId": "AddnoteGuard",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "AddnoteIn",
+      "fromProperty": "do",
+      "toId": "AddnoteGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "AddnoteIn",
+      "fromProperty": "taskId",
+      "toId": "AddnoteHistory",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "AddnoteGuard",
+      "fromProperty": "out-summary",
+      "toId": "AddnoteHistory",
+      "toProperty": "summary"
+    },
+    {
+      "fromId": "AddnoteGuard",
+      "fromProperty": "out-body",
+      "toId": "AddnoteHistory",
+      "toProperty": "body"
+    },
+    {
+      "fromId": "AddnoteGuard",
+      "fromProperty": "out-go",
+      "toId": "AddnoteHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "AddnoteHistory",
+      "fromProperty": "done",
+      "toId": "AddnoteOut",
+      "toProperty": "done"
+    }
+  ]
+}

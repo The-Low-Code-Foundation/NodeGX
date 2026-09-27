@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "p1c7u2ed-e5c0-4000-8000-000000000005",
+  "version": 1,
+  "connections": [
+    { "fromId": "cardInputs", "fromProperty": "picture", "toId": "photo", "toProperty": "src" },
+    { "fromId": "cardInputs", "fromProperty": "name", "toId": "nameText", "toProperty": "text" }
+  ]
+}

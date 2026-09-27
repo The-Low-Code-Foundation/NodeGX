@@ -1,0 +1,794 @@
+<title>Three Views of One App</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700&display=swap">
+<style>
+  :root {
+    --bg-page: #e7ebf1; --bg-0: #eef1f5; --bg-1: #ffffff; --bg-2: #f2f4f6; --bg-3: #e5e9ed; --bg-hover: rgba(23,32,43,.06);
+    --fg-hi: #18212b; --fg: #4a5663; --fg-shy: #59626e; --fg-muted: #7a8691;
+    --border: #e0e5eb; --border-strong: #c9d1da;
+    --primary: #1570ef; --primary-bg: rgba(21,112,239,.09); --primary-25: rgba(21,112,239,.25);
+    --coral: #f5493f; --amber: #93370d; --amber-dot: #d98a12; --amber-bg: rgba(217,138,18,.10);
+    --cat-visual: #2e7cd6; --cat-data: #1e9e63; --cat-logic: #b87e14; --cat-function: #d6479a; --cat-component: #7c5ce0; --cat-default: #7a8691;
+    --wire-signal: #0e9cc0; --wire-data: #1e9e63;
+    --grid-dot: rgba(23,32,43,.14);
+    --canvas: #dfe4ea; --card: #ffffff; --card-border: #d3dae2;
+    --app-bg: #ffffff; --app-fg: #1d2530; --app-muted: #6b7684; --app-brand: #c2410c; --app-line: #e6eaef;
+    --shadow: 0 1px 2px rgba(23,32,43,.08), 0 8px 24px rgba(23,32,43,.08);
+    --ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --mono: ui-monospace, 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    --display: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg-page: #050506; --bg-0: #141318; --bg-1: #232129; --bg-2: #2e2c36; --bg-3: #383642; --bg-hover: rgba(255,255,255,.08);
+      --fg-hi: #ffffff; --fg: #dde4ec; --fg-shy: #c4cedb; --fg-muted: #8b95a1;
+      --border: #33323d; --border-strong: #494656;
+      --primary: #4da3ff; --primary-bg: rgba(77,163,255,.13); --primary-25: rgba(77,163,255,.25);
+      --coral: #ff6a5f; --amber: #fdb022; --amber-dot: #fdb022; --amber-bg: rgba(253,176,34,.10);
+      --cat-visual: #5ca9ff; --cat-data: #45d08a; --cat-logic: #f5b843; --cat-function: #f776c4; --cat-component: #a78bfa; --cat-default: #7d8a98;
+      --wire-signal: #35c3e8; --wire-data: #45d08a;
+      --grid-dot: rgba(255,255,255,.12);
+      --canvas: #141318; --card: #232129; --card-border: #33323d;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg-page: #050506; --bg-0: #141318; --bg-1: #232129; --bg-2: #2e2c36; --bg-3: #383642; --bg-hover: rgba(255,255,255,.08);
+    --fg-hi: #ffffff; --fg: #dde4ec; --fg-shy: #c4cedb; --fg-muted: #8b95a1;
+    --border: #33323d; --border-strong: #494656;
+    --primary: #4da3ff; --primary-bg: rgba(77,163,255,.13); --primary-25: rgba(77,163,255,.25);
+    --coral: #ff6a5f; --amber: #fdb022; --amber-dot: #fdb022; --amber-bg: rgba(253,176,34,.10);
+    --cat-visual: #5ca9ff; --cat-data: #45d08a; --cat-logic: #f5b843; --cat-function: #f776c4; --cat-component: #a78bfa; --cat-default: #7d8a98;
+    --wire-signal: #35c3e8; --wire-data: #45d08a;
+    --grid-dot: rgba(255,255,255,.12);
+    --canvas: #141318; --card: #232129; --card-border: #33323d;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg-page); color: var(--fg); font: 13px/1.5 var(--ui); padding-inline: 16px; padding-block: 0 48px; }
+  a { color: var(--primary); }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  button:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+  h1, h2, h3 { font-family: var(--display); color: var(--fg-hi); text-wrap: balance; margin: 0; }
+  .eyebrow { font: 600 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--fg-muted); }
+
+  .intro { max-width: 1180px; margin: 0 auto; padding-block: 36px 20px; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+  .intro h1 { font-size: 26px; font-weight: 600; line-height: 1.15; margin-top: 8px; }
+  .intro p { max-width: 62ch; margin: 12px 0 0; font-size: 13px; color: var(--fg-shy); }
+  .intro .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .themebtn { font-size: 11px; color: var(--fg-muted); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; background: var(--bg-1); }
+  .themebtn:hover { color: var(--fg-hi); }
+  .vocab { border: 1px solid var(--border); border-radius: 8px; background: var(--bg-1); overflow: hidden; }
+  .vocab table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .vocab th, .vocab td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .vocab th { font: 600 11px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--fg-muted); background: var(--bg-2); }
+  .vocab tr:last-child td { border-bottom: 0; }
+  .vocab td:first-child { font-weight: 600; color: var(--fg-hi); white-space: nowrap; }
+  .vocab .row-nodegx td { background: var(--primary-bg); }
+  .vocab .row-nodegx td:first-child { color: var(--primary); }
+
+  .scenarios { max-width: 1180px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-block: 8px 12px; }
+  .scn { border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px; font-size: 12px; color: var(--fg-shy); background: var(--bg-1); display: inline-flex; gap: 8px; align-items: center; }
+  .scn b { font-family: var(--mono); font-weight: 600; font-size: 11px; color: var(--fg-muted); }
+  .scn[aria-pressed="true"] { border-color: var(--primary); color: var(--fg-hi); background: var(--primary-bg); }
+  .scn[aria-pressed="true"] b { color: var(--primary); }
+  .scn:hover { color: var(--fg-hi); }
+
+  .stage-wrap { max-width: 1180px; margin: 0 auto; overflow-x: auto; border-radius: 10px; box-shadow: var(--shadow); }
+  .editor { min-width: 1100px; height: 820px; display: grid; grid-template-columns: 44px 300px 1fr; background: var(--bg-0); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; font-size: 12px; }
+
+  .rail { background: var(--bg-0); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding-top: 8px; gap: 4px; }
+  .rail .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); margin: 6px 0 10px; }
+  .rail button { width: 30px; height: 30px; border-radius: 6px; color: var(--fg-muted); display: grid; place-items: center; position: relative; }
+  .rail button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .rail button.on { background: var(--primary-bg); color: var(--primary); }
+  .rail button[data-tip]:hover::after { content: attr(data-tip); position: absolute; left: 38px; top: 2px; z-index: 30; width: 250px; padding: 8px 10px; background: var(--bg-1); color: var(--fg); border: 1px solid var(--border-strong); border-radius: 6px; font-size: 11px; line-height: 1.4; white-space: pre-line; text-align: left; box-shadow: var(--shadow); }
+
+  .panel { background: var(--bg-1); border-right: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; }
+  .panel-head { height: 40px; display: flex; align-items: center; padding: 0 8px 0 14px; gap: 6px; border-bottom: 1px solid var(--border); }
+  .panel-head .title { font-weight: 600; color: var(--fg-hi); font-size: 13px; flex: 1; }
+  .tabs { display: flex; gap: 2px; padding: 6px 8px 0; border-bottom: 1px solid var(--border); }
+  .tab { padding: 6px 10px 8px; border-radius: 6px 6px 0 0; color: var(--fg-muted); font-weight: 500; position: relative; }
+  .tab[aria-selected="true"] { color: var(--fg-hi); }
+  .tab[aria-selected="true"]::after { content: ""; position: absolute; left: 6px; right: 6px; bottom: -1px; height: 2px; background: var(--primary); border-radius: 2px; }
+  .tab:hover { color: var(--fg-hi); }
+  .crumbbar { display: flex; align-items: center; gap: 4px; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 11px; color: var(--fg-muted); min-height: 32px; flex-wrap: wrap; }
+  .crumbbar .scope { font-weight: 600; color: var(--fg-hi); }
+  .crumbbar .c { color: var(--fg-shy); }
+  .crumbbar .c.here { color: var(--fg-hi); font-weight: 600; }
+  .crumbbar .sep { opacity: .5; }
+  .crumbbar .places { margin-left: auto; color: var(--fg-muted); font-family: var(--mono); font-size: 11px; }
+  .note { padding: 8px 12px; border-bottom: 1px solid var(--border); background: var(--amber-bg); font-size: 11px; line-height: 1.45; color: var(--fg); }
+  .note b { color: var(--fg-hi); }
+  .note button { color: var(--primary); font-weight: 600; }
+  .tree { overflow: auto; flex: 1; padding: 6px 0; }
+  .row { display: flex; align-items: center; height: 28px; padding: 0 8px 0 calc(12px + var(--lvl, 0) * 14px); gap: 6px; position: relative; cursor: default; color: var(--fg); }
+  .row:hover { background: var(--bg-hover); }
+  .row.sel { background: var(--primary-bg); color: var(--fg-hi); }
+  .row.sel::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--primary); }
+  .row.dim { color: var(--fg-muted); }
+  .row.inside { color: var(--fg-shy); }
+  .row.editing { background: color-mix(in srgb, var(--cat-component) 9%, transparent); }
+  .row.editing.sel { background: var(--primary-bg); }
+  .row.band { height: 22px; font: 500 10px/1 var(--mono); letter-spacing: .04em; color: var(--cat-component); }
+  .row.band .name { text-transform: uppercase; }
+  .row.band .enter { font-family: var(--ui); font-size: 11px; font-weight: 600; letter-spacing: 0; }
+  .row .g { width: 14px; height: 14px; border-radius: 3px; display: inline-grid; place-items: center; flex: none; }
+  .row .g svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .row .name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .meta { font-family: var(--mono); font-size: 11px; color: var(--fg-muted); flex: none; }
+  .row .meta.btn { border: 1px solid var(--border); border-radius: 999px; padding: 1px 7px; background: var(--bg-2); }
+  .row .meta.btn:hover { border-color: var(--primary); color: var(--primary); }
+  .row .meta.unplaced { font-style: italic; }
+  .row .chev { color: var(--fg-muted); width: 12px; text-align: center; flex: none; font-size: 10px; }
+  .row .enter { color: var(--fg-muted); font-size: 14px; line-height: 1; padding: 0 4px; border-radius: 4px; }
+  .row .enter:hover { color: var(--primary); background: var(--primary-bg); }
+  .row .warndot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber-dot); flex: none; }
+  .row .chip { font: 600 10px/1 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--amber); border: 1px solid currentColor; border-radius: 4px; padding: 2px 5px; opacity: .9; }
+  .sect { display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; font: 600 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--fg-muted); }
+  .sect .n { margin-left: auto; font-weight: 500; }
+  .guide { position: absolute; left: calc(18px + (var(--lvl, 0) - 1) * 14px); top: 0; bottom: 0; width: 1px; background: var(--border); }
+  .footer-note { padding: 10px 14px; border-top: 1px solid var(--border); font-size: 11px; color: var(--fg-muted); }
+  .footer-note button { color: var(--primary); }
+  .empty { padding: 20px 18px; color: var(--fg-shy); font-size: 12px; line-height: 1.55; }
+  .empty b { color: var(--fg-hi); font-weight: 600; }
+  .cat-visual { color: var(--cat-visual); background: color-mix(in srgb, var(--cat-visual) 18%, transparent); }
+  .cat-data { color: var(--cat-data); background: color-mix(in srgb, var(--cat-data) 18%, transparent); }
+  .cat-logic { color: var(--cat-logic); background: color-mix(in srgb, var(--cat-logic) 18%, transparent); }
+  .cat-function { color: var(--cat-function); background: color-mix(in srgb, var(--cat-function) 18%, transparent); }
+  .cat-component { color: var(--cat-component); background: color-mix(in srgb, var(--cat-component) 18%, transparent); }
+  .cat-default { color: var(--cat-default); background: color-mix(in srgb, var(--cat-default) 18%, transparent); }
+  .cat-home { color: var(--coral); background: color-mix(in srgb, var(--coral) 16%, transparent); }
+  .cat-page { color: var(--fg-shy); background: color-mix(in srgb, var(--fg-shy) 14%, transparent); }
+
+  .main { display: grid; grid-template-rows: 40px 290px 1fr 36px; min-width: 0; }
+  .topbar { display: flex; align-items: center; gap: 8px; padding: 0 10px; border-bottom: 1px solid var(--border); background: var(--bg-0); }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; background: var(--bg-1); }
+  .seg button { padding: 5px 10px; color: var(--fg-muted); font-weight: 500; display: inline-flex; gap: 6px; align-items: center; }
+  .seg button + button { border-left: 1px solid var(--border); }
+  .seg button[aria-pressed="true"] { background: var(--primary-bg); color: var(--fg-hi); }
+  .seg button .who { font-family: var(--mono); font-size: 11px; color: var(--primary); }
+  .route { flex: 1; display: flex; align-items: center; gap: 8px; height: 28px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; background: var(--bg-1); color: var(--fg-shy); font-family: var(--mono); font-size: 11px; max-width: 360px; }
+  .route .home { color: var(--fg-muted); }
+  .topbar .spacer { flex: 1; }
+  .topbar .plain { color: var(--fg-muted); font-size: 11px; }
+  .deploy { background: var(--primary); color: #fff; border-radius: 6px; padding: 5px 10px; font-weight: 600; }
+
+  .preview { position: relative; background: var(--bg-0); border-bottom: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; }
+  .caption { height: 28px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 12px; font-size: 11px; color: var(--fg-shy); background: var(--bg-1); border-bottom: 1px solid var(--border); z-index: 2; }
+  .caption .mode { font-weight: 600; color: var(--fg-hi); }
+  .caption .hint { color: var(--fg-muted); }
+  .strip { flex: none; display: flex; align-items: center; gap: 10px; padding: 6px 12px; font-size: 11px; line-height: 1.4; background: var(--amber-bg); border-bottom: 1px solid var(--border); color: var(--fg); z-index: 2; }
+  .strip b { color: var(--fg-hi); }
+  .strip .door { color: var(--primary); font-weight: 600; white-space: nowrap; }
+  .strip .door:hover { text-decoration: underline; }
+  .strip .or { color: var(--fg-muted); }
+  .strip .sample { color: var(--fg-muted); font-style: italic; }
+  .strip .x { margin-left: auto; color: var(--fg-muted); }
+  .stage { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+  .app { position: absolute; inset: 0; background: var(--app-bg); color: var(--app-fg); overflow: hidden; font-family: var(--ui); }
+  .el { position: relative; cursor: default; }
+  .el.sel { outline: 2px solid var(--primary); outline-offset: -2px; }
+  .el.hov { outline: 1px dashed var(--primary); outline-offset: -1px; }
+  .el.sel::after { content: attr(data-label); position: absolute; left: 0; top: -1px; transform: translateY(-100%); background: var(--primary); color: #fff; font: 600 10px/1 var(--mono); padding: 3px 6px; border-radius: 3px 3px 0 0; z-index: 3; white-space: nowrap; }
+  .el.sel.top::after { top: auto; bottom: -1px; transform: translateY(100%); border-radius: 0 0 3px 3px; }
+  .c-nav { display: flex; align-items: center; gap: 28px; padding: 14px 32px; border-bottom: 1px solid var(--app-line); }
+  .c-nav .brand { font-weight: 700; font-size: 15px; display: flex; gap: 8px; align-items: center; }
+  .c-nav .brand i { width: 14px; height: 14px; border: 2px solid var(--app-brand); border-radius: 50% 50% 50% 0; display: inline-block; }
+  .c-nav .links { margin-left: auto; display: flex; gap: 22px; color: var(--app-muted); font-size: 13px; }
+  .c-btn { display: inline-block; background: var(--app-brand); color: #fff; padding: 8px 14px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .c-hero { padding: 24px 32px 26px; background: linear-gradient(180deg, #f6efe8, #fff); }
+  .c-hero .eb { font: 600 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--app-brand); }
+  .c-hero h2 { font-family: var(--display); font-size: 32px; line-height: 1.05; color: var(--app-fg); margin: 8px 0 14px; font-weight: 700; max-width: 22ch; }
+  .c-strip { display: flex; gap: 12px; padding: 16px 32px; }
+  .c-card { flex: 1; border: 1px solid var(--app-line); border-radius: 8px; padding: 10px 12px; font-size: 12px; background: #fff; color: var(--app-fg); }
+  .c-card .yr { color: var(--app-muted); font-family: var(--mono); font-size: 11px; }
+  .c-foot { padding: 10px 32px; border-top: 1px solid var(--app-line); font-size: 11px; color: var(--app-muted); }
+  .c-h { font-family: var(--display); font-size: 24px; font-weight: 700; padding: 22px 32px 6px; color: var(--app-fg); }
+  .c-plan { flex: 1; border: 1px solid var(--app-line); border-radius: 8px; padding: 12px; font-size: 12px; }
+  .c-plan .nm { font-weight: 600; }
+  .c-plan .pr { font-family: var(--display); font-size: 22px; font-weight: 700; margin: 4px 0; }
+  .c-tag { padding: 14px 16px; display: flex; align-items: baseline; gap: 6px; background: #fff; color: var(--app-fg); }
+  .c-tag .amt { font-family: var(--display); font-size: 28px; font-weight: 700; }
+  .c-tag .per { color: var(--app-muted); font-size: 12px; }
+
+  .bench { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr 240px; background: repeating-linear-gradient(45deg, transparent 0 10px, color-mix(in srgb, var(--fg-muted) 6%, transparent) 10px 11px), var(--bg-0); }
+  .bench.board { grid-template-columns: 1fr; }
+  .bench .stagearea { display: grid; place-items: center; padding: 16px; overflow: auto; }
+  .bench .frame { background: var(--app-bg); color: var(--app-fg); border: 1px solid var(--border-strong); border-radius: 4px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+  .bench .frame .size { position: absolute; right: 0; bottom: -18px; font: 500 10px/1 var(--mono); color: var(--fg-muted); }
+  .bench .rails { border-left: 1px solid var(--border); background: var(--bg-1); overflow: auto; font-size: 11px; }
+  .bench .rails h4 { margin: 0; padding: 8px 12px; font: 600 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--fg-muted); border-bottom: 1px solid var(--border); }
+  .bench .kv { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; padding: 7px 12px; align-items: center; border-bottom: 1px solid var(--border); }
+  .bench .kv .k { color: var(--fg-shy); }
+  .bench .kv .v { font-family: var(--mono); color: var(--fg-hi); background: var(--bg-2); border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; min-width: 64px; text-align: right; }
+  .bench .kv .t { font-family: var(--mono); color: var(--fg-muted); font-size: 10px; }
+  .bench .kv .out { color: var(--cat-data); font-family: var(--mono); }
+  .bench .nothing { padding: 16px; color: var(--fg-shy); font-size: 12px; max-width: 34ch; text-align: center; }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px 16px; padding: 14px 16px; align-content: start; overflow: auto; position: absolute; inset: 0; }
+  .tile { display: flex; flex-direction: column; gap: 6px; cursor: pointer; min-width: 0; }
+  .tile .frame { height: 92px; }
+  .tile .frame > div { transform: scale(.55); transform-origin: top left; width: 181.8%; }
+  .tile:hover .frame { border-color: var(--primary); }
+  .tile .cap { display: flex; gap: 8px; font-size: 11px; color: var(--fg-shy); align-items: baseline; }
+  .tile .cap b { color: var(--fg-hi); font-weight: 600; }
+  .tile .cap .m { font-family: var(--mono); color: var(--fg-muted); margin-left: auto; }
+
+  .canvas { position: relative; background: var(--canvas); background-image: radial-gradient(var(--grid-dot) 1px, transparent 1px); background-size: 18px 18px; overflow: hidden; min-height: 0; }
+  .canvas svg.wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .canvas svg.wires path { fill: none; stroke-width: 1.5; }
+  .node { position: absolute; background: var(--card); border: 1px solid var(--card-border); border-radius: 6px; min-width: 150px; box-shadow: 0 1px 2px rgba(0,0,0,.12); font-size: 12px; cursor: default; color: var(--fg); }
+  .node.sel { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-25); }
+  .node.hov { border-color: var(--border-strong); }
+  .node .nh { display: flex; align-items: center; gap: 7px; padding: 6px 10px; }
+  .node .nh .g { width: 16px; height: 16px; border-radius: 4px; display: grid; place-items: center; flex: none; }
+  .node .nh .g svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .node .nh .nm { font-weight: 600; color: var(--fg-hi); flex: 1; white-space: nowrap; }
+  .node .eb { padding: 0 10px 6px 33px; font: 500 10px/1.2 var(--mono); color: var(--fg-muted); letter-spacing: .04em; }
+  .node .eb b { color: var(--cat-component); font-weight: 600; }
+  .node .edit { position: absolute; right: 6px; top: 6px; font-size: 10px; font-weight: 600; color: var(--primary); background: var(--primary-bg); border-radius: 4px; padding: 2px 6px; opacity: 0; transition: opacity .12s; }
+  .node:hover .edit { opacity: 1; }
+  .node.instance { border-left: 3px solid var(--cat-component); }
+  .node .kids { padding: 0 0 5px 18px; display: flex; flex-direction: column; gap: 4px; }
+  .node .kids .node { position: static; box-shadow: none; min-width: 0; }
+  .lane { position: absolute; top: var(--ly, 14px); left: var(--lx, 14px); padding: 22px 12px 12px; border: 1px dashed var(--border-strong); border-radius: 10px; background: color-mix(in srgb, var(--cat-visual) 4%, transparent); }
+  .lane .eyebrow { position: absolute; left: 12px; top: 7px; color: var(--fg-muted); }
+  .lane .node { position: static; }
+  .lane .stack { display: flex; flex-direction: column; gap: 8px; }
+  .canvas.f-structure .logic { opacity: .25; }
+  .canvas.f-structure svg.wires path { opacity: .25; }
+  .canvas.f-logic .lane { opacity: .25; }
+  .canvas.f-logic svg.wires path { opacity: .5; }
+  .logic-eyebrow { position: absolute; }
+  .zoom { position: absolute; right: 12px; bottom: 12px; display: inline-flex; gap: 8px; align-items: center; background: var(--bg-1); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-family: var(--mono); font-size: 11px; color: var(--fg-muted); }
+  .lanefilter { position: absolute; right: 12px; top: 12px; display: flex; align-items: center; }
+  .lanefilter .seg button { padding: 4px 9px; font-size: 11px; }
+
+  .trail { display: flex; align-items: center; gap: 6px; padding: 0 12px; border-top: 1px solid var(--border); background: var(--bg-0); font-size: 12px; }
+  .trail .navb { color: var(--fg-muted); width: 20px; text-align: center; }
+  .trail .crumb { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; border-radius: 5px; color: var(--fg-shy); }
+  .trail .crumb.inst { background: color-mix(in srgb, var(--cat-component) 16%, transparent); color: var(--fg); }
+  .trail .crumb.inst .d { width: 8px; height: 8px; background: var(--cat-component); transform: rotate(45deg); border-radius: 1px; }
+  .trail .crumb.here { color: var(--fg-hi); font-weight: 600; background: var(--bg-2); }
+  .trail .crumb.here .g { width: 12px; height: 12px; border-radius: 3px; display: inline-grid; place-items: center; }
+  .trail .crumb.here .g svg { width: 10px; height: 10px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+  .trail .sep { color: var(--fg-muted); }
+  .trail .live { margin-left: auto; display: inline-flex; gap: 6px; align-items: center; color: var(--fg-muted); font-size: 11px; }
+  .trail .live i { width: 6px; height: 6px; border-radius: 50%; background: var(--cat-data); }
+
+  .co { display: inline-grid; place-items: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--coral); color: #fff; font: 700 10px/1 var(--mono); flex: none; margin-left: 4px; vertical-align: middle; }
+  .legend { max-width: 1180px; margin: 20px auto 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px 24px; }
+  .legend .li { display: flex; gap: 10px; align-items: flex-start; font-size: 12px; color: var(--fg-shy); padding-block: 6px; }
+  .legend .li .co { margin: 3px 0 0; }
+  .legend .li b { color: var(--fg-hi); font-weight: 600; }
+  .legend .li .ref { font-family: var(--mono); font-size: 11px; color: var(--fg-muted); }
+  .legend-head { max-width: 1180px; margin: 28px auto 0; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .legend-head h2 { font-size: 20px; font-weight: 600; }
+  .legend-head span { font-size: 12px; color: var(--fg-muted); }
+
+  .pop { position: absolute; z-index: 40; background: var(--bg-1); border: 1px solid var(--border-strong); border-radius: 8px; box-shadow: var(--shadow); min-width: 220px; padding: 6px; font-size: 12px; }
+  .pop h5 { margin: 0; padding: 6px 8px; font: 600 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--fg-muted); }
+  .pop button { display: flex; width: 100%; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 5px; text-align: left; color: var(--fg); }
+  .pop button:hover { background: var(--bg-hover); color: var(--fg-hi); }
+  .pop button .d { width: 8px; height: 8px; background: var(--cat-component); transform: rotate(45deg); border-radius: 1px; }
+  .pop button .path { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--fg-muted); }
+
+  @media (max-width: 800px) { .intro { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header class="intro">
+  <div>
+    <div class="top">
+      <span class="eyebrow">Proposal · mock · revision 2 · nothing built</span>
+      <button class="themebtn" id="themebtn" type="button">Theme: system</button>
+    </div>
+    <h1>Three views of one app</h1>
+    <p>Keep the components panel. Put the tree it was always missing next to it — <b>Layers</b>, the DOM of the page in the preview, all the way down through the instances — name a component and an instance apart, draw the canvas's structure lane so the DOM reads as the DOM, and when the canvas is editing something the preview isn't showing, <b>say so in the preview</b>, with the two doors out.</p>
+    <p>Click any row, node or element: the same thing lights up everywhere. Scenario 2 is the moment new people get lost — Hero on the canvas, Pricing in the preview. Scenario 5 is the old component canvas, back as a view of the Workbench.</p>
+  </div>
+  <div class="vocab" aria-label="the same idea in three vocabularies">
+    <table>
+      <thead><tr><th>you know</th><th>what you have</th><th>what this screen is made of</th><th>the recipe</th><th>one part alone</th></tr></thead>
+      <tbody>
+        <tr><td>React</td><td>src/components/</td><td>DevTools tree</td><td>the .tsx file</td><td>Storybook</td></tr>
+        <tr><td>Figma · Webflow</td><td>Assets</td><td>Layers · Navigator</td><td>— new to you</td><td>a playground</td></tr>
+        <tr><td>nothing yet</td><td>the parts bin</td><td>what's on the page</td><td>how a part is made</td><td>the workbench</td></tr>
+        <tr class="row-nodegx"><td>NodeGX</td><td>Components</td><td>Layers</td><td>the canvas</td><td>Workbench</td></tr>
+      </tbody>
+    </table>
+  </div>
+</header>
+
+<nav class="scenarios" aria-label="scenarios" id="scenarios"><span class="eyebrow">Scenario</span></nav>
+
+<div class="stage-wrap">
+  <div class="editor" id="editor">
+    <div class="rail">
+      <div class="dot"></div>
+      <button class="on" type="button" data-tip="Project&#10;Layers — what the page in the preview is made of, through every instance.&#10;Components — every component in the project, placed or not." aria-label="Project"><svg viewBox="0 0 16 16"><rect x="2" y="2" width="5" height="5" rx="1.2"/><rect x="9" y="2" width="5" height="5" rx="1.2"/><rect x="2" y="9" width="5" height="5" rx="1.2"/><rect x="9" y="9" width="5" height="5" rx="1.2"/></svg></button>
+      <button type="button" aria-label="Search"><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg></button>
+      <button type="button" aria-label="Version control"><svg viewBox="0 0 16 16"><circle cx="5" cy="4" r="1.8"/><circle cx="5" cy="12" r="1.8"/><circle cx="11.5" cy="6" r="1.8"/><path d="M5 5.8v4.4M11.5 7.8c0 2.4-3 2.4-4.6 3.3"/></svg></button>
+      <button type="button" aria-label="Data"><svg viewBox="0 0 16 16"><ellipse cx="8" cy="4" rx="5.5" ry="2.2"/><path d="M2.5 4v8c0 1.2 2.5 2.2 5.5 2.2s5.5-1 5.5-2.2V4M2.5 8c0 1.2 2.5 2.2 5.5 2.2s5.5-1 5.5-2.2"/></svg></button>
+    </div>
+    <aside class="panel" id="panel"></aside>
+    <div class="main">
+      <div class="topbar" id="topbar"></div>
+      <div class="preview" id="preview"></div>
+      <div class="canvas" id="canvas"></div>
+      <div class="trail" id="trail"></div>
+    </div>
+  </div>
+</div>
+
+<div class="legend-head"><h2>What the dots point at</h2><span>section numbers are the proposal's, THREE-VIEWS-OF-ONE-APP.md</span></div>
+<section class="legend" id="legend"></section>
+
+<script>
+(function () {
+  'use strict';
+
+  const G = {
+    page: '<svg viewBox="0 0 16 16"><path d="M4 2h5l3 3v9H4z"/><path d="M9 2v3h3"/></svg>',
+    home: '<svg viewBox="0 0 16 16"><path d="M2.5 8 8 3l5.5 5"/><path d="M4 7v6h8V7"/></svg>',
+    group: '<svg viewBox="0 0 16 16"><rect x="2.5" y="2.5" width="11" height="11" rx="2"/></svg>',
+    text: '<svg viewBox="0 0 16 16"><path d="M3 4h10M8 4v9M6 13h4"/></svg>',
+    image: '<svg viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="10" rx="1.5"/><path d="m3 11 3-3 3 3 2-2 2 2"/><circle cx="10.5" cy="6" r="1"/></svg>',
+    comp: '<svg viewBox="0 0 16 16"><path d="M8 2.5 13.5 8 8 13.5 2.5 8z"/></svg>',
+    fn: '<svg viewBox="0 0 16 16"><path d="M5 3h3M5 13h3M6.5 3v10M9 6l3 4M12 6l-3 4"/></svg>',
+    data: '<svg viewBox="0 0 16 16"><ellipse cx="8" cy="4" rx="5" ry="2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4"/></svg>',
+    foreach: '<svg viewBox="0 0 16 16"><path d="M3 5h10M3 8h10M3 11h10"/></svg>',
+    inputs: '<svg viewBox="0 0 16 16"><path d="M2 8h8M7 5l3 3-3 3"/><rect x="11" y="3" width="3" height="10" rx="1"/></svg>',
+    outputs: '<svg viewBox="0 0 16 16"><rect x="2" y="3" width="3" height="10" rx="1"/><path d="M6 8h8M11 5l3 3-3 3"/></svg>',
+    folder: '<svg viewBox="0 0 16 16"><path d="M2 4.5A1.5 1.5 0 0 1 3.5 3h3l1.5 1.5h4.5A1.5 1.5 0 0 1 14 6v6.5A1.5 1.5 0 0 1 12.5 14h-9A1.5 1.5 0 0 1 2 12.5z"/></svg>',
+    ui: '<svg viewBox="0 0 16 16"><rect x="2.5" y="2.5" width="11" height="11" rx="2"/><rect x="5" y="5" width="6" height="6" rx="1"/></svg>'
+  };
+
+  // ---------- the project: Halden & Rowe (the P92 corpus landing page) ----------
+  // components: id → { name, path, kind, used, pages[], parents[] }
+  const comps = {
+    Home:  { name: 'Home', path: 'Pages/Home', kind: 'page', route: '/', home: true },
+    Pricing: { name: 'Pricing', path: 'Pages/Pricing', kind: 'page', route: '/pricing' },
+    Work:  { name: 'Work', path: 'Pages/Work', kind: 'page', route: '/work' },
+    Contact: { name: 'Contact', path: 'Pages/Contact', kind: 'page', route: '/contact' },
+    Legal: { name: 'Legal', path: 'Pages/Legal', kind: 'page', notInRouter: true },
+    Nav:   { name: 'Nav', path: 'Sections/Nav', kind: 'visual', used: 4, pages: ['Home', 'Pricing', 'Work', 'Contact'] },
+    Hero:  { name: 'Hero', path: 'Sections/Hero', kind: 'visual', used: 1, pages: ['Home'] },
+    Footer:{ name: 'Footer', path: 'Sections/Footer', kind: 'visual', used: 4, pages: ['Home', 'Pricing', 'Work', 'Contact'], warn: 1 },
+    ProjectCard: { name: 'Project Card', path: 'Cards/Project Card', kind: 'visual', used: 1, pages: ['Home'] },
+    PriceTag: { name: 'Price Tag', path: 'Cards/Price Tag', kind: 'visual', used: 0, pages: [] },
+    PrimaryButton: { name: 'Primary Button', path: 'Controls/Primary Button', kind: 'visual', used: 3, pages: ['Home', 'Pricing', 'Contact'] },
+    FormatPrice: { name: 'Format price', path: 'Logic/Format price', kind: 'logic', used: 2, pages: ['Pricing'] },
+    IsSignedIn: { name: 'Is signed in', path: 'Logic/Is signed in', kind: 'logic', used: 1, pages: ['Home'] },
+    Scratch: { name: 'Scratch', path: 'Logic/Scratch', kind: 'logic', used: 0, empty: true }
+  };
+  const folders = { visual: [['Sections', ['Nav', 'Hero', 'Footer']], ['Cards', ['ProjectCard', 'PriceTag']], ['Controls', ['PrimaryButton']]], logic: ['FormatPrice', 'IsSignedIn', 'Scratch'], pages: ['Home', 'Pricing', 'Work', 'Contact', 'Legal'] };
+
+  // Each component's own visual fragment (what the canvas shows). ids are local; selection ids are `${comp}:${id}`.
+  const frag = {
+    Home: { id: 'PageNode', label: 'Page', cat: 'page', glyph: 'page', kids: [
+      { id: 'Nav', label: 'Nav', inst: 'Nav' },
+      { id: 'Hero', label: 'Hero', inst: 'Hero' },
+      { id: 'WorkStrip', label: 'Work strip', cat: 'visual', glyph: 'group', kids: [ { id: 'ProjectCard', label: 'Project Card', inst: 'ProjectCard', repeat: true } ] },
+      { id: 'Footer', label: 'Footer', inst: 'Footer' }
+    ]},
+    Pricing: { id: 'PageNode', label: 'Page', cat: 'page', glyph: 'page', kids: [
+      { id: 'Nav', label: 'Nav', inst: 'Nav' },
+      { id: 'Title', label: 'Title', cat: 'visual', glyph: 'text' },
+      { id: 'Plans', label: 'Plans row', cat: 'visual', glyph: 'group', kids: [
+        { id: 'Plan1', label: 'Plan · Studio', cat: 'visual', glyph: 'group' }, { id: 'Plan2', label: 'Plan · Agency', cat: 'visual', glyph: 'group' }, { id: 'Plan3', label: 'Plan · Retainer', cat: 'visual', glyph: 'group' } ] },
+      { id: 'Footer', label: 'Footer', inst: 'Footer' }
+    ]},
+    Nav: { id: 'Root', label: 'Nav bar', cat: 'visual', glyph: 'group', kids: [ { id: 'Brand', label: 'Brand', cat: 'visual', glyph: 'text' }, { id: 'Links', label: 'Links', cat: 'visual', glyph: 'group' }, { id: 'CTA', label: 'Primary Button', inst: 'PrimaryButton' } ] },
+    Hero: { id: 'Root', label: 'Hero', cat: 'visual', glyph: 'group', kids: [
+      { id: 'Backdrop', label: 'Backdrop', cat: 'visual', glyph: 'image' },
+      { id: 'Copy', label: 'Copy', cat: 'visual', glyph: 'group', kids: [ { id: 'Eyebrow', label: 'Eyebrow', cat: 'visual', glyph: 'text' }, { id: 'Headline', label: 'Headline', cat: 'visual', glyph: 'text' }, { id: 'PrimaryButton', label: 'Primary Button', inst: 'PrimaryButton' } ] }
+    ]},
+    Footer: { id: 'Root', label: 'Footer', cat: 'visual', glyph: 'group', kids: [ { id: 'Line', label: 'Copyright', cat: 'visual', glyph: 'text' } ] },
+    ProjectCard: { id: 'Root', label: 'Card', cat: 'visual', glyph: 'group', kids: [ { id: 'Title', label: 'Title', cat: 'visual', glyph: 'text' }, { id: 'Year', label: 'Year', cat: 'visual', glyph: 'text' } ] },
+    PriceTag: { id: 'Root', label: 'Price Tag', cat: 'visual', glyph: 'group', kids: [ { id: 'Amount', label: 'Amount', cat: 'visual', glyph: 'text' }, { id: 'Period', label: 'Period', cat: 'visual', glyph: 'text' } ] },
+    PrimaryButton: { id: 'Root', label: 'Button', cat: 'visual', glyph: 'group', kids: [ { id: 'Label', label: 'Label', cat: 'visual', glyph: 'text' } ] },
+    FormatPrice: null
+  };
+  const logic = {
+    Home: { stack: [250, 24], nodes: [
+      { id: 'Query', label: 'Query · projects', cat: 'data', glyph: 'data', x: 30, y: 200 },
+      { id: 'Sort', label: 'Sort by year', cat: 'function', glyph: 'fn', x: 30, y: 280 },
+      { id: 'ForEach', label: 'For Each', cat: 'data', glyph: 'foreach', x: 60, y: 360 },
+      { id: 'IsSignedIn', label: 'Is signed in', cat: 'component', glyph: 'comp', x: 660, y: 60, inst: 'IsSignedIn' }
+    ], wires: [['Query', 'Sort', 'data'], ['Sort', 'ForEach', 'data'], ['ForEach', 'ProjectCard', 'data'], ['IsSignedIn', 'Nav', 'data']] },
+    Hero: { stack: [300, 30], nodes: [
+      { id: 'CInputs', label: 'Component Inputs', cat: 'component', glyph: 'inputs', x: 40, y: 60 },
+      { id: 'Split', label: 'Split headline', cat: 'function', glyph: 'fn', x: 60, y: 170 },
+      { id: 'ScrollTo', label: 'Scroll to work', cat: 'logic', glyph: 'fn', x: 720, y: 230 }
+    ], wires: [['CInputs', 'Split', 'data'], ['Split', 'Headline', 'data'], ['CInputs', 'Eyebrow', 'data'], ['PrimaryButton', 'ScrollTo', 'signal']] },
+    PriceTag: { stack: [320, 40], nodes: [
+      { id: 'CInputs', label: 'Component Inputs', cat: 'component', glyph: 'inputs', x: 40, y: 50 },
+      { id: 'FormatPrice', label: 'Format price', cat: 'component', glyph: 'comp', x: 60, y: 150, inst: 'FormatPrice' }
+    ], wires: [['CInputs', 'FormatPrice', 'data'], ['FormatPrice', 'Amount', 'data'], ['CInputs', 'Period', 'data']] },
+    FormatPrice: { nodes: [
+      { id: 'CInputs', label: 'Component Inputs', cat: 'component', glyph: 'inputs', x: 60, y: 60 },
+      { id: 'Round', label: 'Round to unit', cat: 'logic', glyph: 'fn', x: 300, y: 150 },
+      { id: 'Fmt', label: 'Intl format', cat: 'function', glyph: 'fn', x: 300, y: 60 },
+      { id: 'COutputs', label: 'Component Outputs', cat: 'component', glyph: 'outputs', x: 540, y: 60 }
+    ], wires: [['CInputs', 'Round', 'data'], ['Round', 'Fmt', 'data'], ['Fmt', 'COutputs', 'data']] }
+  };
+
+  const scenarios = [
+    { n: '1', title: 'Editing a page — Home', edit: 'Home', page: 'Home', mode: 'app', tab: 'layers', sel: 'Home:Hero' },
+    { n: '2', title: 'Editing Hero while the preview is on Pricing', edit: 'Hero', page: 'Pricing', mode: 'app', tab: 'layers', sel: 'Hero:Headline' },
+    { n: '3', title: 'An unplaced component — Price Tag', edit: 'PriceTag', page: 'Home', mode: 'app', tab: 'components', sel: 'PriceTag:Amount' },
+    { n: '4', title: 'A logic component — Format price', edit: 'FormatPrice', page: 'Home', mode: 'app', tab: 'components', sel: null },
+    { n: '5', title: 'The board — every component on the Workbench', edit: 'Home', page: 'Home', mode: 'board', tab: 'components', sel: null }
+  ];
+  const state = { scn: scenarios[0], edit: 'Home', page: 'Home', mode: 'app', benchTarget: null, tab: 'layers', sel: 'Home:Hero', hov: null, lane: 'all', pop: null };
+
+  const $ = (s, r) => (r || document).querySelector(s);
+  const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+  const catClass = c => 'cat-' + (c || 'default');
+  const nodeCat = n => n.inst ? 'component' : (n.cat || 'default');
+  const nodeGlyph = n => n.inst ? 'comp' : (n.glyph || 'group');
+  const onPage = (comp, page) => comp === page || (comps[comp].pages || []).includes(page);
+
+  function select(id) { state.sel = id; paintSelection(); }
+  function hover(id) { state.hov = id; paintSelection(); }
+  function paintSelection() {
+    document.querySelectorAll('[data-sel]').forEach(n => {
+      n.classList.toggle('sel', n.dataset.sel === state.sel);
+      n.classList.toggle('hov', state.hov != null && n.dataset.sel === state.hov && n.dataset.sel !== state.sel);
+    });
+  }
+  function wireSel(node, id) {
+    node.dataset.sel = id;
+    node.addEventListener('click', e => { e.stopPropagation(); select(id); });
+    node.addEventListener('mouseenter', () => hover(id));
+    node.addEventListener('mouseleave', () => hover(null));
+  }
+  function goScenario(s) { state.scn = s; state.edit = s.edit; state.page = s.page; state.mode = s.mode; state.benchTarget = null; state.tab = s.tab; state.sel = s.sel; state.lane = 'all'; state.pop = null; render(); }
+  function editComp(id, sel) { state.edit = id; state.sel = sel || null; state.lane = 'all'; state.pop = null; if (state.mode === 'bench') state.benchTarget = id; render(); }
+  function showPage(page) { state.page = page; state.mode = 'app'; render(); }
+  function bench(target) { state.mode = 'bench'; state.benchTarget = target || state.edit; render(); }
+
+  function renderScenarios() {
+    const nav = $('#scenarios'); nav.querySelectorAll('.scn').forEach(b => b.remove());
+    scenarios.forEach(s => { const b = el('button', 'scn', `<b>${s.n}</b>${s.title}`); b.type = 'button'; b.setAttribute('aria-pressed', String(s === state.scn)); b.addEventListener('click', () => goScenario(s)); nav.appendChild(b); });
+  }
+
+  // ---------- panel ----------
+  function renderPanel() {
+    const p = $('#panel'); p.innerHTML = '';
+    p.appendChild(el('div', 'panel-head', `<span class="title">Project</span><button type="button" title="New page, component, logic component or folder" style="color:var(--fg-muted);font-size:16px;line-height:1;padding:0 6px">+</button>`));
+    const tabs = el('div', 'tabs');
+    [['layers', 'Layers'], ['components', 'Components']].forEach(([k, t]) => {
+      const b = el('button', 'tab', t + (k === 'layers' ? '<b class="co">1</b>' : '')); b.type = 'button'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(state.tab === k));
+      b.addEventListener('click', () => { state.tab = k; state.pop = null; renderPanel(); });
+      tabs.appendChild(b);
+    });
+    p.appendChild(tabs);
+    if (state.tab === 'layers') renderLayers(p); else renderComponents(p);
+    paintSelection();
+  }
+
+  function renderLayers(p) {
+    const page = state.page, edit = state.edit, c = comps[edit];
+    const cb = el('div', 'crumbbar');
+    cb.appendChild(el('span', 'scope', 'Layers · ' + comps[page].name));
+    cb.appendChild(el('span', 'places', 'in the preview'));
+    p.appendChild(cb);
+    if (onPage(edit, page)) {
+      if (edit !== page) {
+        const crumb = el('div', 'crumbbar');
+        crumb.appendChild(el('span', 'c', comps[page].name)); crumb.appendChild(el('span', 'sep', '›')); crumb.appendChild(el('span', 'c here', c.name));
+        crumb.appendChild(el('span', 'places', c.used === 1 ? 'in 1 place' : 'in ' + c.used + ' places'));
+        crumb.appendChild(el('b', 'co', '3'));
+        p.appendChild(crumb);
+      }
+    } else {
+      const n = el('div', 'note');
+      if (c.kind === 'logic') n.innerHTML = `<b>${c.name} is logic</b> — it has no screen. <button type="button" data-act="bench">Watch it run on the Workbench</button>. <b class="co">9</b>`;
+      else if (!c.pages.length) n.innerHTML = `<b>${c.name} isn't on any page yet.</b> <button type="button" data-act="bench">See it on the Workbench</button>, or drag it into this tree to place it.`;
+      else n.innerHTML = `<b>${c.name} isn't on ${comps[page].name}.</b> It's on ${c.pages.map(pg => `<button type="button" data-act="page" data-page="${pg}">${comps[pg].name}</button>`).join(', ')}.`;
+      n.querySelectorAll('button').forEach(b => b.addEventListener('click', () => b.dataset.act === 'bench' ? bench(edit) : showPage(b.dataset.page)));
+      p.appendChild(n);
+    }
+    const box = el('div', 'tree');
+    const walk = (node, owner, lvl, insideInst) => {
+      const selId = owner + ':' + node.id;
+      const editing = owner === edit && edit !== page;
+      const r = el('div', 'row' + (insideInst ? ' inside' : '') + (editing ? ' editing' : '')); r.style.setProperty('--lvl', lvl);
+      for (let i = 1; i <= lvl; i++) { const g = el('i', 'guide'); g.style.setProperty('--lvl', i); r.appendChild(g); }
+      const hasKids = node.kids && node.kids.length;
+      r.appendChild(el('span', 'chev', (hasKids || node.inst) ? '▾' : ''));
+      r.appendChild(el('span', 'g ' + catClass(nodeCat(node)), G[nodeGlyph(node)]));
+      r.appendChild(el('span', 'name', node.label));
+      if (node.repeat) r.appendChild(el('span', 'meta', '× n'));
+      if (node.inst) { const e = el('button', 'enter', '›'); e.type = 'button'; e.title = 'Edit ' + comps[node.inst].path; e.addEventListener('click', ev => { ev.stopPropagation(); editComp(node.inst); }); r.appendChild(e); }
+      if (owner === 'Home' && node.id === 'Hero' && page === 'Home') r.appendChild(el('b', 'co', '2'));
+      wireSel(r, selId);
+      if (node.inst) r.addEventListener('dblclick', () => editComp(node.inst));
+      box.appendChild(r);
+      if (hasKids) node.kids.forEach(k => walk(k, owner, lvl + 1, insideInst));
+      if (node.inst) {
+        const inner = frag[node.inst]; const isEditing = node.inst === edit;
+        const band = el('div', 'row band'); band.style.setProperty('--lvl', lvl + 1);
+        band.appendChild(el('span', 'chev', ''));
+        band.appendChild(el('span', 'name', (isEditing ? 'editing ' : 'inside ') + comps[node.inst].name));
+        if (!isEditing) { const e = el('button', 'enter', 'Edit ›'); e.type = 'button'; e.addEventListener('click', ev => { ev.stopPropagation(); editComp(node.inst); }); band.appendChild(e); }
+        box.appendChild(band);
+        if (inner) inner.kids.forEach(k => walk(k, node.inst, lvl + 1, !isEditing));
+      }
+    };
+    walk(frag[page], page, 0, false);
+    p.appendChild(box);
+    const n = (logic[edit] || { nodes: [] }).nodes.length;
+    const f = el('div', 'footer-note', `+ <button type="button" id="logicfoot">${n} logic nodes on the canvas</button> — not on screen, so not in Layers`);
+    p.appendChild(f);
+    $('#logicfoot', f).addEventListener('click', () => { state.lane = 'logic'; renderCanvas(); });
+  }
+
+  function compRow(id, opts) {
+    const c = comps[id];
+    const r = el('div', 'row' + (c.empty || c.used === 0 ? ' dim' : '')); r.style.setProperty('--lvl', opts.lvl || 0);
+    for (let i = 1; i <= (opts.lvl || 0); i++) { const g = el('i', 'guide'); g.style.setProperty('--lvl', i); r.appendChild(g); }
+    r.appendChild(el('span', 'chev', ''));
+    r.appendChild(el('span', 'g ' + opts.cat, opts.glyph));
+    r.appendChild(el('span', 'name', c.name));
+    if (c.warn) r.appendChild(el('i', 'warndot'));
+    if (c.notInRouter) r.appendChild(el('span', 'chip', 'not in a router'));
+    else if (c.route != null) r.appendChild(el('span', 'meta', c.route + (c.home ? ' ★' : '')));
+    else if (c.empty) r.appendChild(el('span', 'meta unplaced', 'empty'));
+    else if (c.used === 0) r.appendChild(el('span', 'meta unplaced', 'unplaced'));
+    else if (c.used != null) { const b = el('button', 'meta btn', '×' + c.used); b.type = 'button'; b.title = 'Used in ' + c.used + (c.used === 1 ? ' place' : ' places'); b.addEventListener('click', ev => { ev.stopPropagation(); openUsedIn(b, id); }); r.appendChild(b); }
+    if (id === state.edit) r.classList.add('sel');
+    r.addEventListener('click', () => { if (frag[id] !== undefined) editComp(id); else flash(r); });
+    if (id === 'PriceTag') r.appendChild(el('b', 'co', '4'));
+    return r;
+  }
+  function renderComponents(p) {
+    const box = el('div', 'tree');
+    const sect = (t, n, co) => box.appendChild(el('div', 'sect', `<span>${t}</span>${co ? '<b class="co">' + co + '</b>' : ''}<span class="n">${n}</span>`));
+    sect('Pages', folders.pages.length, '4');
+    folders.pages.forEach(id => box.appendChild(compRow(id, { cat: comps[id].home ? 'cat-home' : 'cat-page', glyph: comps[id].home ? G.home : G.page })));
+    sect('Components', folders.visual.reduce((a, f) => a + f[1].length, 0));
+    folders.visual.forEach(([name, ids]) => {
+      const fr = el('div', 'row'); fr.style.setProperty('--lvl', 0); fr.appendChild(el('span', 'chev', '▾')); fr.appendChild(el('span', 'g cat-default', G.folder)); const nm = el('span', 'name', name); nm.style.fontWeight = '600'; fr.appendChild(nm); box.appendChild(fr);
+      ids.forEach(id => box.appendChild(compRow(id, { lvl: 1, cat: 'cat-visual', glyph: G.ui })));
+    });
+    sect('Logic', folders.logic.length);
+    folders.logic.forEach(id => box.appendChild(compRow(id, { cat: 'cat-default', glyph: G.fn })));
+    sect('Cloud functions', 0);
+    const e = el('div', 'empty', 'None yet. Cloud functions run in the backend, not the browser, so they keep their own section.'); e.style.paddingBlock = '4px 12px'; box.appendChild(e);
+    p.appendChild(box);
+  }
+  function openUsedIn(anchor, id) {
+    closePop(); const c = comps[id];
+    const pop = el('div', 'pop'); pop.appendChild(el('h5', null, `${c.name} · used in ${c.used}`));
+    (c.pages || []).forEach(pg => {
+      const b = el('button', null, `<i class="d"></i><span>${comps[pg].name}</span><span class="path">${frag[pg] ? 'reveal in Layers' : 'page'}</span>`); b.type = 'button';
+      b.addEventListener('click', () => { closePop(); if (frag[pg]) { state.page = pg; state.mode = 'app'; state.tab = 'layers'; state.sel = pg + ':' + id; render(); } else flash(b); });
+      pop.appendChild(b);
+    });
+    const r = anchor.getBoundingClientRect(), pr = $('#editor').getBoundingClientRect();
+    pop.style.left = (r.left - pr.left + 8) + 'px'; pop.style.top = (r.bottom - pr.top + 4) + 'px';
+    $('#editor').appendChild(pop); state.pop = pop;
+  }
+  function closePop() { if (state.pop) { state.pop.remove(); state.pop = null; } }
+  document.addEventListener('click', closePop);
+  function flash(node) { node.style.outline = '2px solid var(--amber-dot)'; setTimeout(() => { node.style.outline = ''; }, 350); }
+
+  // ---------- topbar ----------
+  function renderTopbar() {
+    const t = $('#topbar'); t.innerHTML = '';
+    const seg = el('div', 'seg');
+    const mk = (label, on, fn) => { const b = el('button', null, label); b.type = 'button'; b.setAttribute('aria-pressed', String(on)); b.addEventListener('click', fn); seg.appendChild(b); };
+    mk('App', state.mode === 'app', () => { state.mode = 'app'; render(); });
+    mk('Workbench' + (state.mode === 'bench' ? ` <span class="who">· ${comps[state.benchTarget].name}</span>` : ''), state.mode === 'bench', () => bench(state.benchTarget || state.edit));
+    mk('All components', state.mode === 'board', () => { state.mode = 'board'; render(); });
+    t.appendChild(seg); t.appendChild(el('b', 'co', '8'));
+    t.appendChild(el('div', 'route', `<span class="home">⌂</span><span>${comps[state.page].route || '/'}</span><span style="margin-left:auto;opacity:.6">▾</span>`));
+    t.appendChild(el('span', 'plain', '100%')); t.appendChild(el('span', 'spacer'));
+    const dm = el('div', 'seg'); dm.innerHTML = '<button type="button" aria-pressed="true">Design</button><button type="button">Preview</button>'; t.appendChild(dm);
+    t.appendChild(el('button', 'deploy', 'Deploy'));
+  }
+
+  // ---------- component renderers (app pieces) ----------
+  function piece(id, label, cls, html) { const e = el('div', 'el ' + (cls || ''), html); e.dataset.label = label; if (id) wireSel(e, id); return e; }
+  function navPiece(page) {
+    const e = piece(page + ':Nav', 'Nav · instance', 'c-nav top', '');
+    e.appendChild(piece('Nav:Brand', 'Brand', 'brand', '<i></i>Halden &amp; Rowe'));
+    e.appendChild(piece('Nav:Links', 'Links', 'links', '<span>Services</span><span>Work</span><span>Pricing</span><span>Contact</span>'));
+    e.appendChild(piece('Nav:CTA', 'Primary Button · instance', 'c-btn', 'Start a project'));
+    return e;
+  }
+  function heroPiece(page) {
+    const h = piece(page + ':Hero', 'Hero · instance', 'c-hero', '');
+    h.appendChild(piece('Hero:Eyebrow', 'Eyebrow', 'eb', 'Sheffield · taking new work from March'));
+    const hh = piece('Hero:Headline', 'Headline', '', ''); hh.appendChild(el('h2', null, 'You draw it, then we build it properly.')); h.appendChild(hh);
+    const pb = piece('Hero:PrimaryButton', 'Primary Button · instance', 'c-btn', 'See the work'); h.appendChild(pb);
+    return h;
+  }
+  function footPiece(page) { return piece(page + ':Footer', 'Footer · instance', 'c-foot', '© Halden &amp; Rowe · Sheffield'); }
+  function pageHome() {
+    const app = el('div', 'app');
+    app.appendChild(navPiece('Home')); app.appendChild(heroPiece('Home'));
+    const strip = piece('Home:WorkStrip', 'Work strip', 'c-strip', '');
+    [['Hallam Bakery', '2025'], ['Kelham Wines', '2024'], ['Peak Physio', '2024']].forEach(([n, y], i) => strip.appendChild(piece(i === 0 ? 'Home:ProjectCard' : null, 'Project Card · instance', 'c-card', `<div>${n}</div><div class="yr">${y}</div>`)));
+    app.appendChild(strip); app.appendChild(footPiece('Home'));
+    return app;
+  }
+  function pagePricing() {
+    const app = el('div', 'app');
+    app.appendChild(navPiece('Pricing'));
+    app.appendChild(piece('Pricing:Title', 'Title', 'c-h', 'Plans'));
+    const row = piece('Pricing:Plans', 'Plans row', 'c-strip', '');
+    [['Studio', '£1,200', 'Plan1'], ['Agency', '£3,800', 'Plan2'], ['Retainer', '£900 / mo', 'Plan3']].forEach(([n, pr, id]) => row.appendChild(piece('Pricing:' + id, 'Plan · ' + n, 'c-plan', `<div class="nm">${n}</div><div class="pr">${pr}</div><div class="c-btn" style="font-size:11px;padding:6px 10px">Choose</div>`)));
+    app.appendChild(row); app.appendChild(footPiece('Pricing'));
+    return app;
+  }
+  // standalone renders for the bench / board (no wiring)
+  const solo = {
+    Nav: () => `<div class="c-nav"><span class="brand"><i></i>Halden &amp; Rowe</span><span class="links"><span>Services</span><span>Work</span><span>Pricing</span><span>Contact</span></span><span class="c-btn">Start a project</span></div>`,
+    Hero: () => `<div class="c-hero"><div class="eb">Sheffield · taking new work from March</div><h2>You draw it, then we build it properly.</h2><span class="c-btn">See the work</span></div>`,
+    Footer: () => `<div class="c-foot">© Halden &amp; Rowe · Sheffield</div>`,
+    ProjectCard: () => `<div style="padding:12px"><div class="c-card" style="max-width:220px"><div>Hallam Bakery</div><div class="yr">2025</div></div></div>`,
+    PriceTag: () => `<div class="c-tag"><span class="amt">£1,200</span><span class="per">per month</span></div>`,
+    PrimaryButton: () => `<div style="padding:16px"><span class="c-btn">Label</span></div>`
+  };
+  const benchSize = { Nav: [1280, 56], Hero: [1280, 200], Footer: [1280, 40], ProjectCard: [360, 90], PriceTag: [360, 62], PrimaryButton: [200, 66] };
+  const benchInputs = {
+    Hero: [['eyebrow', 'string', 'Sheffield · taking…'], ['headline', 'string', 'You draw it, then…'], ['ctaLabel', 'string', 'See the work']],
+    PriceTag: [['amount', 'number', '1200'], ['period', 'string', 'per month'], ['currency', 'string', 'GBP']],
+    Nav: [['activePage', 'string', '/']], Footer: [], ProjectCard: [['title', 'string', 'Hallam Bakery'], ['year', 'number', '2025']], PrimaryButton: [['label', 'string', 'Label']],
+    FormatPrice: [['value', 'number', '1200'], ['currency', 'string', 'GBP']], IsSignedIn: [], Home: [], Pricing: []
+  };
+  const benchOutputs = { FormatPrice: [['formatted', 'string', '"£1,200"'], ['done', 'signal', 'fired · 1']], PrimaryButton: [['click', 'signal', 'not yet']], Hero: [['ctaClick', 'signal', 'not yet']] };
+
+  // ---------- preview ----------
+  function renderPreview() {
+    const p = $('#preview'); p.innerHTML = '';
+    const edit = state.edit, page = state.page, c = comps[edit];
+    if (state.mode === 'app') {
+      p.appendChild(el('div', 'caption', `<span class="mode">App</span><span class="hint">Design mode — click an element to select it on the canvas and in Layers. Showing ${comps[page].route}</span>`));
+      if (!onPage(edit, page)) {
+        const s = el('div', 'strip');
+        if (c.kind === 'logic') s.innerHTML = `<span><b>${c.name} is logic</b> — it draws nothing. It runs on ${c.pages.map(pg => comps[pg].name).join(', ')}.</span><button type="button" class="door" data-act="bench">Watch it run on the Workbench</button><span class="sample">feed it inputs, read its outputs</span>`;
+        else if (!c.pages.length) s.innerHTML = `<span><b>${c.name} isn't on any page yet</b> — nothing in the app places it.</span><button type="button" class="door" data-act="bench">See it on its own on the Workbench</button><span class="or">or</span><span>drag it into Layers to put it on this page.</span>`;
+        else s.innerHTML = `<span><b>${c.name} isn't on ${comps[page].name}.</b> It's on ${c.pages.map(pg => `<button type="button" class="door" data-act="page" data-page="${pg}">Go to ${comps[pg].name}</button>`).join(', ')}</span><span class="or">or</span><button type="button" class="door" data-act="bench">see it on its own on the Workbench</button><span class="sample">— with sample values, not the app's data.</span>`;
+        s.appendChild(el('b', 'co', '10'));
+        s.querySelectorAll('button').forEach(b => b.addEventListener('click', () => b.dataset.act === 'bench' ? bench(edit) : showPage(b.dataset.page)));
+        p.appendChild(s);
+      }
+      const stage = el('div', 'stage'); stage.appendChild(page === 'Home' ? pageHome() : pagePricing()); p.appendChild(stage);
+    } else if (state.mode === 'bench') {
+      const t = state.benchTarget, tc = comps[t];
+      p.appendChild(el('div', 'caption', `<span class="mode">Workbench</span><span>${tc.name} on its own, not the app.</span><span class="hint">Sample values — the app's data is in the App view.</span>`));
+      const stage = el('div', 'stage'); const b = el('div', 'bench'); const area = el('div', 'stagearea');
+      if (solo[t]) {
+        const [w, h] = benchSize[t]; const fr = el('div', 'frame'); fr.style.width = Math.min(w, 620) + 'px'; fr.innerHTML = solo[t]();
+        if (t === 'PriceTag') { fr.innerHTML = ''; const tag = el('div', 'c-tag'); const a = piece('PriceTag:Amount', 'Amount', 'amt', '£1,200'); const pe = piece('PriceTag:Period', 'Period', 'per', 'per month'); tag.appendChild(a); tag.appendChild(pe); fr.appendChild(tag); }
+        if (t === 'Hero') { fr.innerHTML = ''; fr.appendChild(heroPiece('bench')); }
+        fr.appendChild(el('div', 'size', `${Math.min(w, 620)} × ${h}`)); area.appendChild(fr);
+      } else area.appendChild(el('div', 'nothing', 'No visual root, so nothing to draw. The outputs rail is the readout.'));
+      b.appendChild(area);
+      const rails = el('div', 'rails'); rails.appendChild(el('h4', null, 'Inputs'));
+      (benchInputs[t] || []).forEach(([k, ty, v]) => rails.appendChild(el('div', 'kv', `<span class="k">${k} <span class="t">${ty}</span></span><span class="v">${v}</span>`)));
+      if (!(benchInputs[t] || []).length) rails.appendChild(el('div', 'kv', '<span class="k">none declared</span><span class="t">add Component Inputs</span>'));
+      rails.appendChild(el('h4', null, 'Outputs'));
+      (benchOutputs[t] || []).forEach(([k, ty, v]) => rails.appendChild(el('div', 'kv', `<span class="k">${k} <span class="t">${ty}</span></span><span class="out">${v}</span>`)));
+      if (!(benchOutputs[t] || []).length) rails.appendChild(el('div', 'kv', '<span class="k">none declared</span><span class="t">add Component Outputs</span>'));
+      rails.appendChild(el('h4', null, 'Scenario')); rails.appendChild(el('div', 'kv', '<span class="k">none</span><span class="t">Save as scenario</span>'));
+      b.appendChild(rails); stage.appendChild(b); p.appendChild(stage);
+    } else {
+      p.appendChild(el('div', 'caption', `<span class="mode">Workbench · All components</span><span class="hint">Every visual component in its own frame, at its saved size, with its first scenario. Sample values, not the app's data. Click one to bench it.</span><b class="co">11</b>`));
+      const stage = el('div', 'stage'); const b = el('div', 'bench board'); const grid = el('div', 'grid');
+      Object.keys(solo).forEach(id => {
+        const t = el('div', 'tile'); const fr = el('div', 'frame'); fr.innerHTML = '<div>' + solo[id]() + '</div>'; t.appendChild(fr);
+        const [w, h] = benchSize[id]; const c2 = comps[id];
+        t.appendChild(el('div', 'cap', `<b>${c2.name}</b><span>${c2.used ? '×' + c2.used : 'unplaced'}</span><span class="m">${w} × ${h} · ${benchInputs[id] && benchInputs[id].length ? 'scenario: default' : 'no inputs set'}</span>`));
+        t.addEventListener('click', () => bench(id));
+        grid.appendChild(t);
+      });
+      b.appendChild(grid); stage.appendChild(b); p.appendChild(stage);
+    }
+    paintSelection();
+  }
+
+  // ---------- canvas ----------
+  function renderCanvas() {
+    const c = $('#canvas'); c.innerHTML = ''; c.className = 'canvas' + (state.lane !== 'all' ? ' f-' + state.lane : '');
+    const edit = state.edit; const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('class', 'wires'); c.appendChild(svg);
+    const tree = frag[edit];
+    if (tree) {
+      const lane = el('div', 'lane'); const pos = (logic[edit] && logic[edit].stack) || [250, 24]; lane.style.setProperty('--lx', pos[0] + 'px'); lane.style.setProperty('--ly', pos[1] + 'px');
+      lane.appendChild(el('span', 'eyebrow', 'Structure <b class="co">5</b>'));
+      const stack = el('div', 'stack');
+      const build = node => {
+        const n = el('div', 'node' + (node.inst ? ' instance' : ''));
+        n.appendChild(el('div', 'nh', `<span class="g ${catClass(nodeCat(node))}">${G[nodeGlyph(node)]}</span><span class="nm">${node.label}</span>`));
+        if (node.inst) {
+          n.appendChild(el('div', 'eb', `<b>INSTANCE</b> · ${comps[node.inst].path} · used ${comps[node.inst].used}×`));
+          const e = el('button', 'edit', 'Edit ›'); e.type = 'button'; e.addEventListener('click', ev => { ev.stopPropagation(); editComp(node.inst); }); n.appendChild(e);
+          if (edit === 'Home' && node.id === 'Hero') n.querySelector('.nh').appendChild(el('b', 'co', '6'));
+        }
+        wireSel(n, edit + ':' + node.id);
+        n.addEventListener('dblclick', ev => { ev.stopPropagation(); if (node.inst) editComp(node.inst); });
+        if (node.kids && node.kids.length) { const k = el('div', 'kids'); node.kids.forEach(kid => k.appendChild(build(kid))); n.appendChild(k); }
+        return n;
+      };
+      stack.appendChild(build(tree)); lane.appendChild(stack); c.appendChild(lane);
+    } else { const e = el('div', 'eyebrow logic-eyebrow', 'Logic only — no structure lane'); e.style.left = '14px'; e.style.top = '14px'; c.appendChild(e); }
+    const lg = logic[edit] || { nodes: [], wires: [] };
+    lg.nodes.forEach(nd => {
+      const n = el('div', 'node logic' + (nd.inst ? ' instance' : '')); n.style.left = nd.x + 'px'; n.style.top = nd.y + 'px';
+      n.appendChild(el('div', 'nh', `<span class="g ${catClass(nd.cat)}">${G[nd.glyph]}</span><span class="nm">${nd.label}</span>`));
+      if (nd.inst) { n.appendChild(el('div', 'eb', `<b>INSTANCE</b> · ${comps[nd.inst].path} · used ${comps[nd.inst].used}×`)); const e = el('button', 'edit', 'Edit ›'); e.type = 'button'; e.addEventListener('click', ev => { ev.stopPropagation(); editComp(nd.inst); }); n.appendChild(e); }
+      wireSel(n, edit + ':' + nd.id); c.appendChild(n);
+    });
+    const lf = el('div', 'lanefilter'); const seg = el('div', 'seg');
+    [['all', 'All'], ['structure', 'Structure'], ['logic', 'Logic']].forEach(([k, t]) => { const b = el('button', null, t); b.type = 'button'; b.setAttribute('aria-pressed', String(state.lane === k)); b.addEventListener('click', () => { state.lane = k; renderCanvas(); }); seg.appendChild(b); });
+    lf.appendChild(seg); lf.appendChild(el('b', 'co', '5')); c.appendChild(lf);
+    c.appendChild(el('div', 'zoom', '− 100% +'));
+    requestAnimationFrame(() => {
+      const cr = c.getBoundingClientRect();
+      const box = id => { const n = c.querySelector(`.node[data-sel="${edit}:${id}"]`); if (!n) return null; const r = n.getBoundingClientRect(); return { l: r.left - cr.left, r: r.right - cr.left, t: r.top - cr.top, h: r.height }; };
+      lg.wires.forEach(([from, to, kind]) => {
+        const a = box(from), b = box(to); if (!a || !b) return;
+        const ax = a.r, ay = a.t + Math.min(16, a.h / 2), bx = b.l, by = b.t + Math.min(16, b.h / 2); const dx = Math.max(40, Math.abs(bx - ax) * 0.5);
+        const pth = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        pth.setAttribute('d', `M${ax},${ay} C${ax + dx},${ay} ${bx - dx},${by} ${bx},${by}`); pth.setAttribute('stroke', kind === 'signal' ? 'var(--wire-signal)' : 'var(--wire-data)'); svg.appendChild(pth);
+      });
+    });
+    paintSelection();
+  }
+
+  // ---------- trail ----------
+  function renderTrail() {
+    const t = $('#trail'); t.innerHTML = ''; const edit = state.edit, c = comps[edit];
+    t.appendChild(el('span', 'navb', '‹')); t.appendChild(el('span', 'navb', '›'));
+    const crumbs = [];
+    if (edit !== state.page && onPage(edit, state.page)) crumbs.push({ t: comps[state.page].name, inst: true, go: state.page });
+    else if (edit !== state.page) crumbs.push({ t: c.path.split('/')[0] });
+    crumbs.push({ t: c.name, here: true, cat: c.kind === 'page' ? (c.home ? 'home' : 'page') : (c.kind === 'logic' ? 'default' : 'visual'), glyph: c.kind === 'page' ? (c.home ? 'home' : 'page') : (c.kind === 'logic' ? 'fn' : 'ui') });
+    crumbs.forEach((cr, i) => {
+      if (i) t.appendChild(el('span', 'sep', '›'));
+      const b = el(cr.go ? 'button' : 'span', 'crumb' + (cr.inst ? ' inst' : '') + (cr.here ? ' here' : ''));
+      if (cr.inst) b.appendChild(el('i', 'd'));
+      if (cr.here) b.appendChild(el('span', 'g ' + catClass(cr.cat), G[cr.glyph]));
+      b.appendChild(el('span', null, cr.t));
+      if (cr.go) { b.type = 'button'; b.addEventListener('click', () => editComp(cr.go)); }
+      t.appendChild(b);
+    });
+    if (crumbs[0] && crumbs[0].inst) t.appendChild(el('b', 'co', '7'));
+    t.appendChild(el('span', 'live', '<i></i>Preview live'));
+  }
+
+  const legend = [
+    ['1', 'One panel, two tabs.', 'Layers is what the page in the preview is made of; Components is what you have. The hinge actions jump between them.', '§4.1'],
+    ['2', 'Layers is the page\'s DOM, through every instance.', 'Not the canvas column again: the canvas shows one component\'s fragment with its ports; Layers shows the whole page, into Nav, Hero and Footer. An instance is a purple row, then an inside band, then its elements one shade quieter. The component on the canvas is lit as a region.', '§4.2'],
+    ['3', 'The containment crumb.', 'Home › Hero is how you got here, not which folder the file is in. It is the "go to parent" the canvas never had.', '§4.2'],
+    ['4', 'Components: sections by role, folders inside.', 'Pages carry their route and the start page; a page no Router lists says so. ×3 is a button — Used in — and picking a page flips to Layers with that instance selected. unplaced is dimmed and italic.', '§4.3'],
+    ['5', 'The structure lane, drawn around the stack wherever it is.', 'The nested stack is the DOM; the halo and the eyebrow say so, and they follow the root node when you drag it — the stack is never pinned left, and logic nodes sit on any side with wires from either direction. The lane filter dims the other lane, never hides it.', '§4.4'],
+    ['6', 'An instance says what it is.', 'INSTANCE · Sections/Hero · used 1×, and an Edit › that is the existing "Open component" given a visible door.', '§4.4'],
+    ['7', 'The trail becomes containment when you came through an instance.', 'Home is drawn as the instance chip you double-clicked, and it is live. From the panel, the trail reads as it does today.', '§4.4'],
+    ['8', 'App | Workbench | All components is a mode, not a chip.', 'The preview never moves because the canvas did. The Workbench segment carries the component\'s name; the strip below pre-aims it.', '§4.5'],
+    ['9', 'The note in Layers is the lesson.', '"Format price is logic — it has no screen. Watch it run on the Workbench." Scenario 4, Layers tab.', '§4.6'],
+    ['10', 'The strip: the preview says what it is not showing.', 'Hero on the canvas, Pricing in the preview: "Hero isn\'t on Pricing. It\'s on Home → Go to Home, or see it on its own on the Workbench — with sample values, not the app\'s data." Three shapes: on another page, on no page, logic. Go to Home is instant because the app preview is never torn down.', '§4.5'],
+    ['11', 'The board: the old component canvas, as a Workbench view.', 'Every visual component in its own frame at its saved size with its first scenario, captioned ×N or unplaced. One export, one harness, N instances. It lives under the word Workbench and says "sample values", so it never competes with the app for "the real one".', '§4.7']
+  ];
+  function renderLegend() { const l = $('#legend'); legend.forEach(([n, b, t, ref]) => l.appendChild(el('div', 'li', `<b class="co">${n}</b><div><b>${b}</b> ${t} <span class="ref">${ref}</span></div>`))); }
+
+  function render() { renderScenarios(); renderPanel(); renderTopbar(); renderPreview(); renderCanvas(); renderTrail(); }
+
+  const themes = ['system', 'dark', 'light']; let ti = 0;
+  const applyTheme = () => { const t = themes[ti]; if (t === 'system') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t); $('#themebtn').textContent = 'Theme: ' + t; };
+  $('#themebtn').addEventListener('click', () => { ti = (ti + 1) % themes.length; applyTheme(); try { localStorage.setItem('tv-theme', String(ti)); } catch (e) {} });
+  try { const saved = localStorage.getItem('tv-theme'); if (saved != null) ti = Number(saved) || 0; } catch (e) {}
+  applyTheme();
+  window.addEventListener('resize', () => renderCanvas());
+  renderLegend();
+  const hm = /s=(\d)/.exec(location.hash); if (hm && scenarios[+hm[1] - 1]) goScenario(scenarios[+hm[1] - 1]); else render();
+})();
+</script>

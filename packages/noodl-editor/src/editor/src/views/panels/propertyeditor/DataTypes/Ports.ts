@@ -1,13 +1,20 @@
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import { Root } from 'react-dom/client';
 
-import { NodeLibrary } from '@noodl-models/nodelibrary';
-import { GATED_PORT_REASON_KEY, type PortGateReason } from '@noodl-models/nodelibrary/portGateReason';
-import { capabilityProbes, gateForPort, resolveGateTarget, type GateTarget } from '@noodl-utils/capability-gating';
-import { decoratePortElement } from '@noodl-utils/capability-gating/portDecoration';
-import { describePortElement } from '@noodl-utils/portDescription';
-import { applyPortGate, revealGateTarget } from '@noodl-utils/portGate';
-import { applyPortHint, hintPortsOf, portNamesForView, HINT_PORTS_ATTRIBUTE } from '@noodl-utils/portHint';
+import { displayableValue, readField, readFields, treatmentOf } from '@noodl-models/Looks/fieldState';
+import { type PortGateReason, withUnmetGate } from '@noodl-models/nodelibrary/portGateReason';
+// P103 CMG-008 — one undo step for a merged control's "Put back all". `undo-queue-model` imports
+// only the shared `Model`, so this does not reach the `projectmodel` chain the note below warns of.
+import { UndoActionGroup, UndoQueue } from '@noodl-models/undo-queue-model';
+import {
+  capabilityProbes,
+  gateForPort,
+  gateSentence,
+  resolveGateTarget,
+  type GateTarget
+} from '@noodl-utils/capability-gating';
+import { revealGateTarget } from '@noodl-utils/portGate';
+import { applyPortHint, hintPortsOf, portNamesForView, portsForView, HINT_PORTS_ATTRIBUTE } from '@noodl-utils/portHint';
 import { SCHEMA_OUTCOME_CHANGED } from '@noodl-utils/schemaCachePolicy';
 import {
   addFieldTarget,
@@ -18,23 +25,27 @@ import {
 } from '@noodl-utils/schemaFieldNotice';
 import SchemaHandler from '@noodl-utils/schemahandler';
 
-import { listPortTypeFor } from '@noodl-core-ui/components/json-editor/utils/listValueCodec';
-
 import View from '../../../../../../shared/ListenableView';
 import { EventDispatcher } from '../../../../../../shared/utils/EventDispatcher';
+import { createReactRoot, unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 import PopupLayer from '../../../popuplayer';
 import { CodeEditorType } from '../CodeEditor';
+import { MakeShadowTokenRow } from '../components/makeShadowToken';
 import { PropertyFilterInput } from '../components/PropertyFilterInput';
 import { PropertyGroups, PropertyGroupModel } from '../components/PropertyGroups';
+import { ControlHost, PropertyRow, type PropertyRowCapability, type PropertyRowLook } from '../components/PropertyRow';
 import { SchemaAddFieldButton } from '../components/SchemaAddFieldButton';
 import { SchemaFieldNoticeView } from '../components/SchemaFieldNoticeView';
+import { WIDGET_COMPONENTS } from '../components/widgets';
+import { describeRows, type RowDescriptor, type RowPortLike } from '../model/describeRows';
+import { groupGatesFor, type GroupGate } from '../model/groupGate';
+import { widgetForPort, type WidgetId } from '../model/widgets';
 import { ModelProxy } from '../models/modelProxy';
 import { PagesType } from '../Pages';
 import { countFilterableRows, filterGroups, isFilterActive, shouldOfferFilter } from '../propertyPanelFilter';
 import { hintsForNode, HINTABLE_PORTS, HINT_INPUT_PARAMETERS } from '../propertyPanelHints';
-import { ADVANCED_CSS_GROUP, countActivePorts, orderPropertyGroups } from '../propertyPanelTiers';
+import { ADVANCED_CSS_GROUP, countActivePorts, isParameterSet, orderPropertyGroups } from '../propertyPanelTiers';
 import { propertyPanelViewState } from '../propertyPanelViewState';
-import { getEditType } from '../utils';
 import { AlignToolsType } from './AlignTools/AlignToolsType';
 import { BasicType } from './BasicType';
 import { BooleanType } from './BooleanType';
@@ -89,12 +100,51 @@ type Port = {
 /** How many frames to keep looking for the panel's scroller before giving up. */
 const SCROLL_BIND_ATTEMPTS = 5;
 
+/**
+ * ERG-004 — the longest port description the row puts in a native tooltip.
+ *
+ * The same 400 `portDescription.ts` used, kept because the reason is unchanged: a native tooltip
+ * cannot scroll, so a 900-character description arrives as a wall of text pinned to the pointer.
+ */
+const MAX_DESCRIPTION_TITLE = 400;
+
+/**
+ * The project singleton, fetched at the point of use rather than imported at the top of this file.
+ *
+ * 🔴 **A top-level `import { ProjectModel }` here makes a suite fail to RUN, not fail.** Measured
+ * 2026-09-19 after landing exactly that: `projectmodel.ts:5` pulls in `warningsmodel`, whose module
+ * body constructs a `WarningsModel` that reads `NodeLibrary.instance.on` — and under jest there is
+ * no `NodeLibrary.instance` yet, so `tests-unit/chr-007/widgetDispatch.test.ts` reported
+ * **`Tests: 0 total`** with a `TypeError` from a file it never meant to load. A suite that cannot
+ * start grades nothing ([[tests-0-total-can-mean-the-wrong-directory]]), so this is worse than a
+ * red: it is a gate silently switched off, and it reached a peer before it reached me.
+ *
+ * Deferring the `require` to call time is enough, because every caller here runs long after the
+ * editor has booted. `PickerTypeView` defers `@electron/remote` the same way.
+ */
+function projectModel(): TSFixme | undefined {
+  return require('@noodl-models/projectmodel').ProjectModel?.instance;
+}
+
+/** The node behind the panel's model: a `ModelProxy` wraps it, a bare model is its own node. */
+function nodeOf(model: TSFixme): TSFixme {
+  return model && model.model ? model.model : model;
+}
+
+/** The graph the panel's node lives in — where connection and attach events are raised. */
+function graphOf(model: TSFixme): TSFixme {
+  const node = nodeOf(model);
+  return node && node.owner && typeof node.owner.on === 'function' ? node.owner : undefined;
+}
+
 export class Ports extends View {
   model: ModelProxy;
   popout: TSFixme;
   _selectedTabForGroup: TSFixme;
   activePopout: TSFixme;
   _portsHash: TSFixme;
+  /** P94 STY-003 — the owned-parameter keys as last drawn; see `renderGroupsIfOwnershipChanged`. */
+  _ownedSignature: string;
   views: TSFixme = [];
   _toolsType: TSFixme;
   /** FB-017 AC7: the raw text in the filter box. Empty means the tier view. */
@@ -185,13 +235,47 @@ export class Ports extends View {
       'parametersChanged',
       (args) => {
         if (args && HINT_INPUT_PARAMETERS.has(args.name)) this.refreshHints();
+        this.renderGroupsIfOwnershipChanged();
       },
       this
     );
 
+    // 🔴 P94 STY-003 — A RENAME IS A SECOND TRIGGER THE HASH ALREADY CATCHES AND NOTHING ASKED FOR.
+    //
+    // `renameVariant` mutates the Look in place and raises `variantRenamed` on the PROJECT. Every
+    // subscription above is a *node* event, so nothing called `renderGroups` and every row went on
+    // naming the name the Look used to have.
+    //
+    // Measured in a running editor: renaming `test` to `Section Heading` updated the Look row —
+    // `variantseditor` listens to this same project event — while the group heading still read
+    // `— from test` and the override line still read `test says var(--text-4xl)`, a Look name that
+    // no longer existed anywhere. That is exactly what rules 2 and 3 are for. It survived a
+    // reselect, because the panel stays mounted across selection (CHR-008 §3.4's
+    // `followsSelection`), and any unrelated rebuild — one keystroke in the filter box — printed
+    // the new name correctly, which is what proves the model was right throughout.
+    //
+    // 🔴 The same shape as the ownership defect below, and the same lesson: `variant` is ALREADY in
+    // `renderGroups`'s hash, so a guard was never the missing half — asking is. The hash is what
+    // keeps this cheap when some *other* Look is renamed.
+    projectModel()?.on(
+      ['variantRenamed', 'variantDeleted'],
+      () => {
+        this.renderGroups();
+      },
+      this
+    );
+
+    // 🔴 CHR-009 slice 3: THE GRAPH, NOT `model.owner`. `model` is a `ModelProxy` everywhere the
+    // property panel builds this view, and the proxy has no `owner` — so both `model.owner && …`
+    // subscriptions below had never bound anything, since the initial commit. Measured on the dev
+    // build: `ModelProxy` has no `owner` field, and a wire into the selected Group's `width` did
+    // not reach its row until another node was selected. `graphOf` reads through the proxy and still
+    // accepts a model that is its own node (the project settings tab).
+    const graph = graphOf(model);
+
     // A child dragged into or out of the selected node changes whether anything can overflow it.
-    model.owner &&
-      model.owner.on(
+    graph &&
+      graph.on(
         ['nodeAttached', 'nodeDetached'],
         () => {
           this.refreshHints();
@@ -208,10 +292,21 @@ export class Ports extends View {
       this
     );
 
-    model.owner &&
-      model.owner.on(
+    graph &&
+      graph.on(
         ['connectionAdded', 'connectionRemoved'],
-        () => {
+        (args) => {
+          // 🔴 CHR-009 slice 3: a wire into THIS node changes what a row draws (FB-018's chip, the
+          // gutter's connected dot) but not the ports, the variant or the filter — so the hash
+          // below was unchanged and `renderGroups` returned early. Measured on the dev build: a
+          // wire into `width` with the Group's panel open drew nothing until another node was
+          // selected and this one reselected. Only a wire that touches this node clears the hash;
+          // the graph raises these for every wire in the component, and a rebuild costs the caret.
+          const connection = args && args.model;
+          const nodeId = nodeOf(this.model)?.id;
+          if (!connection || connection.toId === nodeId || connection.fromId === nodeId) {
+            this._portsHash = undefined;
+          }
           this.renderGroups();
         },
         this
@@ -221,14 +316,27 @@ export class Ports extends View {
     this._unsubscribeProbes && this._unsubscribeProbes();
     this._unsubscribeProbes = null;
     this.model && this.model.off(this);
-    // @ts-expect-error
-    this.model && this.model.owner && this.model.owner.off(this);
+    const graph = this.model && graphOf(this.model);
+    graph && graph.off(this);
     EventDispatcher.instance.off(this);
+    // May be torn down after the project singleton has been cleared, as `variantseditor` also
+    // guards for.
+    projectModel()?.off(this);
 
     this.views.forEach((v) => v.dispose && v.dispose());
+    this.disposeTabGroups();
+
+    // CHR-008 §3.4: the Properties panel is no longer remounted per selection, so the next node's view
+    // scrolls the SAME `ScrollArea`. A listener left here would record that node's offsets under this
+    // node's id.
+    if (this._scrollTrackedEl && this._onScroll) {
+      this._scrollTrackedEl.removeEventListener('scroll', this._onScroll);
+    }
+    this._scrollTrackedEl = undefined;
+    this._onScroll = undefined;
 
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
 
@@ -418,52 +526,273 @@ export class Ports extends View {
     }, 1);
   }
 
-  /** Render a group's views (and their child views) and collect their elements. */
-  renderParams(views): TSFixme[] {
-    const els = [];
-    const target = this.capabilityTarget();
+  /**
+   * CHR-007: the panel's rows as data — what `renderParams` draws, answerable without a DOM.
+   *
+   * Every probe is the one `renderParams` used to call inline, so the descriptor is not a second
+   * opinion: `gateForPort` against the backend resolved once, and `isPortConnected` through the same
+   * `ModelProxy` the rows get. The switched-off reason is read off the port, where
+   * `ModelProxy.getPorts` put it.
+   */
+  rowDescriptors(target: GateTarget = this.capabilityTarget()): RowDescriptor[] {
     const typeName = this.model.type && (this.model.type.name || this.model.type.localName);
 
-    // ERG-004 §7.7 item 2: the port objects, so a row can be given its own
-    // `description`. Looked up by name rather than read off the view, because
-    // only some `fromPort` implementations keep a `.port` reference — the same
-    // reason the decoration below is a wrapper and not a prop.
-    const portsByName = new Map<string, TSFixme>();
-    for (const port of this._getPorts()) portsByName.set(port.name, port);
+    return describeRows({
+      ports: this._getPorts() as readonly RowPortLike[],
+      capabilityGate: (portName) => (typeName ? gateForPort(typeName, portName, target) : undefined),
+      isConnected: (portName) => Boolean(this.model.isPortConnected(portName))
+    });
+  }
 
-    // FB-017 AC4: computed once per group render rather than per row — every row on one node
-    // resolves against the same node state, and the answer is an empty map in the normal case.
-    const hints = this.structuralHints();
+  /**
+   * A group's rows, as React nodes — CHR-008 §3.2.
+   *
+   * This used to decorate each row by mutating the element a row class had just built: ERG-004's
+   * description, BCN-010's capability gate and FB-021's switched-off gate, applied in turn by
+   * `describePortElement` / `decoratePortElement` / `applyPortGate`. All three are facts about the
+   * port, known before anything is drawn, so they are **props on `PropertyRow`** now and the rows
+   * are siblings in one tree rather than elements appended into a host.
+   *
+   * ⚠️ The structural hint is deliberately still a post-render pass — see `renderGroups`'s tail and
+   * `PropertyRow`'s note. `PropertyRow` only *marks* the row with `data-hint-ports`, exactly as
+   * `applyPortHint` did, so `refreshHints` can keep bringing notes into line **in place**: a hint
+   * must not rebuild a row under a focused field, which §8 measured costs the caret.
+   *
+   * CHR-008 (R8): a row a group line already speaks for (`groupGates`) is drawn quiet — dimmed, no sentence.
+   */
+  renderParams(views, groupGates?: Map<string, GroupGate>): React.ReactNode[] {
+    const nodes: React.ReactNode[] = [];
+    const target = this.capabilityTarget();
+
+    // CHR-007: every decoration below is read off the row's descriptor. Looked up by the view's
+    // `name`, which only a port row carries — `TabGroup` and `PopoutGroup` set `group` and never
+    // `name` — so a descriptor exists for exactly the views the old per-view lookups reached.
+    const rows = new Map<string, RowDescriptor>();
+    for (const row of this.rowDescriptors(target)) rows.set(row.name, row);
 
     for (const j in views) {
       const v = views[j];
       v.childViews && v.childViews.forEach((v) => v.render()); // Render any child views first
 
-      // BCN-010: the one place every row's element passes through, whatever
-      // class produced it. See `portDecoration.ts` for why the gate is a wrapper
-      // here rather than two props on twenty-nine row classes. ERG-004's
-      // description hangs off the same seam, for the same reason — see
-      // `portDescription.ts`.
-      const el = describePortElement(v.render(), v.name ? portsByName.get(v.name) : undefined);
-      const gate = typeName && v.name ? gateForPort(typeName, v.name, target) : undefined;
-      const decorated = gate ? decoratePortElement(el, gate, target, v.name) : el;
-      // FB-021 — a port a `dynamicports` condition has switched off. The reason travels on the
-      // port object itself (`ModelProxy.getPorts` put it there), so this is a lookup and not a
-      // second evaluation of the condition: `applyPortConditionsFilterForNode` remains the only
-      // thing that decides, and this only draws what it decided.
-      const switchedOff: PortGateReason | undefined = v.name
-        ? (portsByName.get(v.name) || {})[GATED_PORT_REASON_KEY]
-        : undefined;
-      const gated = applyPortGate(decorated as TSFixme, switchedOff, {
-        isConnected: Boolean(v.name && this.model.isPortConnected(v.name)),
-        onFocusGate: switchedOff ? () => this.focusGatePort(switchedOff.gatePortName) : undefined
-      });
-      // FB-017 AC4. Last, so the note sits under the gate's reason rather than inside the
-      // dimmed control — and keyed by `portNamesForView`, because the corner-radius ports
-      // arrive folded into a nameless `TabGroup`.
-      els.push(applyPortHint(gated as TSFixme, portNamesForView(v), hints, HINTABLE_PORTS));
+      const row = v.name ? rows.get(v.name) : undefined;
+
+      // CHR-008 §3.1 — a widget that has become a React component is rendered as one, under a key
+      // stable across re-renders, so React reconciles the control instead of replacing it. That is
+      // what keeps a focused field's caret through a rebuild (§8.3). A widget still on the old path
+      // falls through to `ControlHost` and behaves exactly as before.
+      const Widget = row ? WIDGET_COMPONENTS[row.widget] : undefined;
+
+      // 🔴 Once per view, and the result is held by `ControlHost` for as long as the view lives: a
+      // row class's `render()` mints a NEW element each call (`BasicType` builds a fresh div while
+      // its React root stays bound to the old one), so a second call hands back an empty row.
+      // ⚠️ NOT called on the component path: a converted row has no root to build, and calling it
+      // would build one nothing would ever render into.
+      const control = Widget
+        ? React.createElement(Widget, { view: v })
+        : React.createElement(ControlHost, { el: v.render() });
+
+      // FB-021 — a port a `dynamicports` condition has switched off. `applyPortConditionsFilterForNode`
+      // remains the only thing that decides; the descriptor carries what it decided.
+      // P102 CMP-007 row 2: the link goes to the clause still unmet, not the first one declared.
+      const switchedOff: PortGateReason | undefined =
+        row && row.switchedOff
+          ? withUnmetGate(row.switchedOff, (name) => (this.model.getParameter ? this.model.getParameter(name) : undefined))
+          : undefined;
+      // CHR-008 (R8): the group's one line already says why — the row is dimmed and says nothing itself.
+      const groupGate = row && groupGates ? groupGates.get(row.group) : undefined;
+      const quiet = Boolean(groupGate && row && groupGate.portNames.indexOf(row.name) !== -1);
+
+      nodes.push(
+        React.createElement(PropertyRow, {
+          key: v.name || `${v.group || 'group'}#${j}`,
+          description: this.rowDescription(row),
+          capability: this.rowCapability(row, target),
+          gate: switchedOff
+            ? {
+                reason: switchedOff,
+                isConnected: Boolean(row && row.connected),
+                onFocusGate: quiet ? undefined : () => this.focusGatePort(switchedOff.gatePortName),
+                quiet
+              }
+            : undefined,
+          // P94 STY-003 rules 2 and 3 — where this row's value came from. P103 CMG-008: a view
+          // with no name (alignment, margin/padding, a tab group) answers for every port it merged.
+          look: v.name ? this.rowLook(v.name) : this.mergedLook(v),
+          // FB-017 AC4 — keyed by `portNamesForView`, because the corner-radius ports arrive
+          // folded into a nameless `TabGroup` and would otherwise be reachable from nowhere.
+          hintPorts: portNamesForView(v).filter((name) => HINTABLE_PORTS.has(name)),
+          // As a prop rather than `createElement`'s third argument: `PropertyRowProps` declares
+          // `children`, and the variadic overload does not satisfy a props type that requires it.
+          children: control
+        })
+      );
     }
-    return els;
+    return nodes;
+  }
+
+  /**
+   * P102 CMP-008 (RC-5) — *Make this a token*, drawn under the six custom fields of the Box Shadow
+   * group while the shadow is on and its source is Custom. Keyed by the group's name, the way
+   * `propertyPanelTiers` keys its tiers: the group is the mixin's, and every node that carries
+   * `addShadowInputs` names it identically.
+   */
+  private withMakeShadowTokenRow(groupName: string, rows: React.ReactNode[]): React.ReactNode[] {
+    if (groupName !== 'Box Shadow') return rows;
+    const model = this.model;
+    if (!model || model.getParameter('boxShadowEnabled') !== true) return rows;
+    const source = model.getParameter('boxShadowSource');
+    if (source !== undefined && source !== 'custom') return rows;
+    return [...rows, React.createElement(MakeShadowTokenRow, { key: 'make-shadow-token', node: model })];
+  }
+
+  /**
+   * P94 STY-003 rule 2 — the Look a group's rows draw from, or nothing.
+   *
+   * 🔴 **The union of linked *and* overridden**, which is what `styledFieldNames` is built on: a
+   * group whose every row is overridden is still a group the Look has something to say about, and
+   * dropping its heading would take the name away from exactly the rows that most need it.
+   */
+  private groupLookSource(views: TSFixme[]): string | undefined {
+    for (const view of views || []) {
+      const look = this.rowLook(view && view.name);
+      if (look) return look.lookName;
+    }
+    return undefined;
+  }
+
+  /**
+   * P94 STY-003 — what this row says about the Look, or nothing.
+   *
+   * 🔴 **The decision is `readField`'s, on ownership, and is not re-made here.** A field that owns
+   * the same value the Look offers still reads `overridden`: edit the Look and it will not follow,
+   * which is precisely the situation a person cannot see today. Anything that compared values
+   * would go quiet in exactly that case (STY-003 §2).
+   *
+   * Returns `undefined` for `own` and `default` alike — design §3.2's plain row, where the absence
+   * of a treatment is itself the signal. `treatmentOf` collapses the two; `readField` keeps them
+   * apart for anything that reasons.
+   */
+  private rowLook(portName: string | undefined): PropertyRowLook | undefined {
+    if (!portName) return undefined;
+
+    // `undefined` when the question does not apply at all — editing the Look itself, or a
+    // non-neutral visual state, whose values live on an axis this task does not draw.
+    const facts = (this.model as TSFixme).lookProvenance;
+    if (!facts || !facts.look) return undefined;
+
+    const reading = readField(facts.node, facts.look, portName);
+    const treatment = treatmentOf(reading.source);
+    if (treatment === 'plain') return undefined;
+
+    return {
+      treatment,
+      lookName: reading.lookName as string,
+      lookValueText: displayableValue(reading.lookValue),
+      ports: [portName],
+      onRevert:
+        treatment === 'overridden'
+          ? () => {
+              // Clearing the node's own value is what puts the field back under the Look:
+              // `getParameter` resolves own → variant → port default, so removing the key makes
+              // the Look's value the one that renders again. Undoable in one step.
+              this.model.setParameter(portName, undefined, { undo: true, label: 'revert to Look' });
+              this.render();
+            }
+          : undefined
+    };
+  }
+
+  /**
+   * P103 CMG-008 — what a MERGED control says about the Look, or nothing.
+   *
+   * Richard: *"I changed the 'alignment' of a group node that I'd saved a Look for, and it doesn't
+   * say the look has a different alignment, there's no alert at all."* `rowLook` is keyed by a
+   * row's port name, and an `AlignToolsType`, a `MarginPaddingType` or a `TabGroup` (corners,
+   * border sides) has none — so those controls never asked. This asks `readField` for every port
+   * the view stands for (`portsForView`, the same list the structural hint uses) and answers with
+   * the same treatment the named rows draw, plus the fields that differ, each with its own *Put
+   * back* and one for all of them. The decision is still `readField`'s, on ownership.
+   */
+  private mergedLook(view: TSFixme): PropertyRowLook | undefined {
+    const facts = (this.model as TSFixme).lookProvenance;
+    if (!facts || !facts.look) return undefined;
+
+    const ports = portsForView(view);
+    if (ports.length === 0) return undefined;
+
+    const readings = readFields(
+      facts.node,
+      facts.look,
+      ports.map((p) => p.name)
+    );
+    if (!readings.lookName) return undefined;
+    const lookName = readings.lookName;
+
+    if (readings.overridden.length === 0) {
+      if (readings.linked.length === 0) return undefined;
+      return { treatment: 'linked', lookName, ports: ports.map((p) => p.name) };
+    }
+
+    const revert = (names: string[]) => {
+      // One undo step for a group of fields, as `MarginPaddingType` writes a `↕`/`↔` pair.
+      const group = new UndoActionGroup({ label: 'revert to Look' });
+      for (const name of names) this.model.setParameter(name, undefined, { undo: group });
+      UndoQueue.instance.push(group);
+      this.render();
+    };
+
+    const fields = readings.overridden.map(({ name, reading }) => ({
+      name,
+      label: ports.find((p) => p.name === name)?.label ?? name,
+      lookValueText: displayableValue(reading.lookValue),
+      onRevert: () => revert([name])
+    }));
+
+    return {
+      treatment: 'overridden',
+      lookName,
+      ports: ports.map((p) => p.name),
+      fields,
+      onRevert: () => revert(fields.map((f) => f.name))
+    };
+  }
+
+  /**
+   * ERG-004 — the port's own description, as the row's native tooltip.
+   *
+   * Capped rather than passed whole: a native tooltip has no scrollbar, and a wall of text on hover
+   * is a worse answer than a trimmed one. `describeRows` has already trimmed and dropped the empty
+   * and non-string cases, which is why there is no type check left here.
+   */
+  private rowDescription(row: RowDescriptor | undefined): string | undefined {
+    const text = row && row.description;
+    if (!text) return undefined;
+    return text.length > MAX_DESCRIPTION_TITLE ? `${text.slice(0, MAX_DESCRIPTION_TITLE - 1)}…` : text;
+  }
+
+  /**
+   * BCN-010 — what this row says about the backend, or nothing.
+   *
+   * 🔴 **Refuses to gate a port it cannot explain**, and says so loudly. A disabled control with no
+   * reason converts "this backend cannot do that" into "this is broken", which is the bug BCN-010
+   * was filed for; the contract's own tests make the state impossible, so reaching this branch is a
+   * hole in a capability descriptor rather than a UI fault.
+   */
+  private rowCapability(row: RowDescriptor | undefined, target: GateTarget): PropertyRowCapability | undefined {
+    const gate = row && row.capabilityGate;
+    if (!gate || gate.effective === 'supported') return undefined;
+
+    const sentence = gateSentence(gate as TSFixme, target);
+    if (!sentence) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `[capability-gating] port "${row.name}" resolved to ${gate.effective} with no reason string; ` +
+          'leaving it enabled. This is a hole in the capability descriptor, not a UI bug.'
+      );
+      return undefined;
+    }
+
+    return { portName: row.name, state: gate.effective, isUsable: gate.isUsable, sentence };
   }
   /**
    * Bind scroll tracking and restore the offset, once the panel is actually in the DOM.
@@ -497,6 +826,58 @@ export class Ports extends View {
       },
       attempt === 0 ? 0 : 50
     );
+  }
+
+  /**
+   * FB-017 AC4's notes, applied once the rows they attach to are in the DOM — CHR-008 §3.2.
+   *
+   * 🔴 **A bare `setTimeout(0)` here drew nothing on a fresh selection, and only there.** Measured
+   * (`verdicts/CHR-008/2026-09-16/`): typing a radius drew the note; selecting away and back with the
+   * radius still set drew none, and a frame-by-frame trace of the reselect showed the marked rows
+   * arriving at **t = 60 ms** — long after a `setTimeout(0)` had already run and queried
+   * `[data-hint-ports]` against a panel with no rows in it yet. The live path worked precisely because
+   * its rows were committed by an earlier render. Half a feature, and invisible to every spec.
+   *
+   * So this retries on the same bounded pattern — and for the same reason — as {@link settleScroll}
+   * directly below: React commits asynchronously, and the first render of a newly selected node runs
+   * before the panel is mounted at all.
+   *
+   * ⚠️ `applyPortHint` stays the ONE thing that draws a note, in both paths. Drawing it from
+   * `PropertyRow` instead would put React and `refreshHints` in charge of the same DOM node — and
+   * `applyPortHint` removes any note it finds before adding one, which is not a thing to do to a child
+   * React owns. The row is marked declaratively; the note is written in place, which is what lets a
+   * hint change while a field is focused without rebuilding the row (§8: a rebuild costs the caret).
+   */
+  settleHints(attempt = 0): void {
+    setTimeout(
+      () => {
+        if (!this.el) return;
+
+        // Nothing marked yet means React has not committed these rows — not that there is nothing to
+        // say. A node with no hintable ports falls through the attempts and applies harmlessly.
+        if (this.el.querySelectorAll(`[${HINT_PORTS_ATTRIBUTE}]`).length === 0 && attempt < SCROLL_BIND_ATTEMPTS) {
+          this.settleHints(attempt + 1);
+          return;
+        }
+
+        this.refreshHints();
+      },
+      attempt === 0 ? 0 : 50
+    );
+  }
+
+  /**
+   * CHR-008 §3.4 — put the panel where this node was left, now, in the caller's task.
+   *
+   * For the moment a kept-mounted panel swaps one node's view for the next: called in the same task
+   * as the swap, the first frame that shows this node's rows shows them at its offset. `settleScroll`
+   * stays for every other render; this only removes the frames it used to leave at the old offset.
+   */
+  restoreScroll(): void {
+    this.bindScrollTracking();
+    const target = this.scrollContainer();
+    if (!target || isFilterActive(this._filterQuery)) return;
+    target.scrollTop = propertyPanelViewState.getScroll(this.nodeId());
   }
 
   /**
@@ -582,13 +963,17 @@ export class Ports extends View {
    */
   countActiveInGroup(group: TSFixme): number {
     const names: string[] = [];
+    const defaults: Record<string, unknown> = {};
     for (const view of group.views || []) {
-      if (view && typeof view.name === 'string') names.push(view.name);
+      if (view && typeof view.name === 'string') {
+        names.push(view.name);
+        defaults[view.name] = view.port?.default;
+      }
     }
 
     return countActivePorts(names, {
       isConnected: (name) => Boolean(this.model && this.model.isPortConnected(name)),
-      isSet: (name) => Boolean(this.model) && this.model.parameters[name] !== undefined
+      isSet: (name) => Boolean(this.model) && isParameterSet(this.model.parameters[name], defaults[name])
     });
   }
 
@@ -630,12 +1015,75 @@ export class Ports extends View {
     this.renderGroups();
   }
 
+  /**
+   * P94 STY-003 — rebuild the rows when the node TAKES a field over or GIVES it back, and at no
+   * other time.
+   *
+   * 🔴 **Why this exists at all:** parameter edits deliberately do **not** rebuild rows. §8 measured
+   * what a rebuild costs under a focused field — the caret — which is why the structural hint is
+   * re-applied *in place* rather than re-rendered. But the provenance treatments are computed from
+   * ownership, so without this a field that has just become an override keeps drawing `linked`.
+   * Measured in a running editor before the fix: a node wearing a Look, given an own `fontSize`
+   * the Look also offered, kept **six linked rows and no override line**, and it survived a
+   * reselect — the model read `overridden` throughout.
+   *
+   * 🔴 **The signature is the KEYS, so a value edit cannot reach `renderGroups` through here.**
+   * Typing in a field the node already owns leaves the set unchanged and returns early, which is
+   * what keeps §8's measurement intact. Only crossing the owned/not-owned line rebuilds — and that
+   * is a commit, never a keystroke.
+   */
+  private renderGroupsIfOwnershipChanged(): void {
+    const signature = Object.keys(this.model.parameters ?? {})
+      .sort()
+      .join(',');
+    if (signature === this._ownedSignature) return;
+    this._ownedSignature = signature;
+    this.renderGroups();
+  }
+
   renderGroups() {
     if (!this.root) return; // not rendered yet
 
     const inputData = {
       ports: this._getPorts(),
       variant: this.model.variantName,
+      /**
+       * 🔴 P94 STY-003 — THE NAME AS DRAWN, because `variantName` is a STALE COPY OF IT.
+       *
+       * `NodeGraphNode.variantName` is a plain stored string, written when the node was given the
+       * Look and never touched again; `renameVariant` mutates the Look object in place. So after a
+       * rename the node holds two names for one thing and they disagree — measured live on
+       * `members area Richard test`: `variantName: "test"` beside `variant.name:
+       * "Section Heading"`, with the project holding only the new one.
+       *
+       * That is why s6's subscription fix did not close the defect. The project event **fires** —
+       * instrumented in the same drive, `variantRenamed` arrived once — and `renderGroups` then
+       * returned early because the hash is built from the name that cannot move. The panel went on
+       * saying `— from test` about a Look nothing was called any more. **Three times this phase the
+       * missing half has been assumed to be the ask; here the ask arrived and the GUARD dropped
+       * it** ([[verify-the-consequence-not-just-the-mechanism]]).
+       *
+       * Both are kept. They are not redundant: `node.variant = 'SomeName'` (the string setter)
+       * moves `variantName` while `_variant` still holds the old object, so each field catches a
+       * transition the other cannot see, and a hash is the cheapest place to be generous.
+       */
+      variantAsDrawn: nodeOf(this.model)?.variant?.name,
+      // 🔴 P94 STY-003 — WHICH parameters the node owns, because that is what the provenance
+      // treatments are computed from and nothing else here moves when it changes.
+      //
+      // Measured in a running editor (s5's drive): a node wearing a Look, given an own `fontSize`
+      // the Look also offers, kept **six linked rows and no override line** while the model
+      // correctly read `overridden` — and it survived a reselect, because none of the other
+      // fields below move when ownership does. `variant` catches switching Look; `ports` catches a
+      // port appearing; neither catches the node taking a value over.
+      //
+      // ⚠️ The KEYS, not the values: `readField` decides on ownership alone, so a value edited
+      // from one number to another must NOT rebuild the panel under a focused field — that is the
+      // caret §8 measured. Taking a field over, or giving it back, changes this string; typing in
+      // one that is already owned does not.
+      ownedParams: Object.keys(this.model.parameters ?? {})
+        .sort()
+        .join(','),
       // BCN-010: without this, a probe that settles *after* the panel is open
       // never reaches the screen — the ports have not changed, so the hash has
       // not changed, and `renderGroups` returns early. Subscribe To Changes on
@@ -694,13 +1142,22 @@ export class Ports extends View {
     // group name rather than by a per-port `tier` field.
     const { basic, advanced } = orderPropertyGroups(groups);
 
+    // CHR-008 (R8): which groups say "switched off" once instead of under every row. Read off the same
+    // descriptors `renderParams` draws, so a quiet row and its group's line cannot disagree.
+    const groupGates = groupGatesFor(this.rowDescriptors());
+
     const toModel = (g): PropertyGroupModel => ({
       name: g.name,
       isExpanded: this.isGroupExpanded(g.name),
       // AC2: a collapsed group still reports how much of it is live, so folding CSS away
       // cannot become a new hiding place for FB-018's confusion.
       activeCount: this.countActiveInGroup(g),
-      els: this.renderParams(g.views)
+      rows: this.withMakeShadowTokenRow(g.name, this.renderParams(g.views, groupGates)),
+      gate: this.groupGateLine(groupGates.get(g.name)),
+      // P94 STY-003 rule 2 — the source, named once per group (design §3.1: "so the per-field
+      // labels do not have to shout"). Only on groups that actually hold a row the Look speaks
+      // for, so a node's unrelated sections do not all grow a Look's name.
+      lookSource: this.groupLookSource(g.views)
     });
 
     const notice = this.schemaNotice();
@@ -751,6 +1208,9 @@ export class Ports extends View {
     //and now the rendering is done. In case any scrolling was done, set the scrolling again.
     //React commits asynchronously, so this has to wait for the rows to be in the DOM.
     this.settleScroll(scrollTop);
+
+    // CHR-008 §3.2 — the structural notes, once React has actually committed the rows.
+    this.settleHints();
   }
   render() {
     this._portsHash = undefined; // Clear cache
@@ -772,10 +1232,26 @@ export class Ports extends View {
     }
 
     if (!this.root) {
-      this.root = createRoot(this.el);
+      this.root = createReactRoot(this.el);
     }
 
     this.renderGroups();
+  }
+  /**
+   * CHR-008 (R8): what a group line says and does. `Turn on` sets the gate port to `true` through the same
+   * undoable write every row uses; the port list then changes (the gate marks go), `ModelProxy` raises
+   * `instancePortsChanged`, and the panel redraws with the rows live and no line.
+   */
+  private groupGateLine(gate: GroupGate | undefined): PropertyGroupModel['gate'] {
+    if (!gate) return undefined;
+    return {
+      sentence: gate.sentence,
+      gatePortName: gate.gatePortName,
+      actionLabel: gate.turnOn ? 'Turn on' : `Show ${gate.gateLabel}`,
+      onAction: gate.turnOn
+        ? () => this.setParameter(gate.gatePortName, true)
+        : () => this.focusGatePort(gate.gatePortName)
+    };
   }
   setParameterEx(name, newvalue, oldvalue, skipundo) {
     this.model.setParameter(name, newvalue, {
@@ -787,288 +1263,55 @@ export class Ports extends View {
   setParameter(name, newvalue) {
     this.model.setParameter(name, newvalue, { undo: true, label: 'edit parameter' });
   }
+  /**
+   * CHR-007: which row class a port gets. The decision is `widgetForPort` (`model/widgets.ts`), an
+   * ordered table that needs no DOM; this only maps its answer to a class. BCN-003b's two filter
+   * ports share `byobFilter`.
+   */
+  private static readonly WIDGET_CLASSES: Record<WidgetId, TSFixme> = {
+    logicBuilderWorkspace: LogicBuilderWorkspaceType,
+    logicBuilderHidden: LogicBuilderHiddenType,
+    alignTools: AlignToolsType,
+    sizeMode: SizeModeType,
+    enum: EnumType,
+    color: ColorType,
+    boolean: BooleanType,
+    textArea: TextAreaType,
+    codeEditor: CodeEditorType,
+    listValue: ListValueType,
+    marginPadding: MarginPaddingType,
+    numberWithUnits: NumberWithUnits,
+    dimension: Dimension,
+    identifier: IdentifierType,
+    basic: BasicType,
+    image: ImageType,
+    icon: IconType,
+    font: FontType,
+    textStyle: TextStyleType,
+    component: ComponentType,
+    sourceCode: SourceCodeType,
+    stringList: StringListType,
+    resizing: ResizingType,
+    variable: VariableType,
+    curve: CurveType,
+    byobFilter: ByobFilterType,
+    querySorting: QuerySortingType,
+    pages: PagesType,
+    propList: PropListType,
+    workflowCondition: WorkflowConditionType,
+    workflowCases: WorkflowCasesType,
+    workflowValue: WorkflowValueType,
+    workflowParams: WorkflowParamsType,
+    workflowTransform: WorkflowTransformType,
+    workflowValidate: WorkflowValidateType,
+    workflowBackoff: WorkflowBackoffType,
+    workflowTriggerInfo: WorkflowTriggerInfoType,
+    workflowFunctionRef: WorkflowFunctionRefType
+  };
+
   viewClassForPort(p) {
-    const type = getEditType(p);
-
-    // Check for custom editorType
-    if (typeof type === 'object' && type.editorType === 'logic-builder-workspace') {
-      return LogicBuilderWorkspaceType;
-    }
-
-    // Hidden type for internal Logic Builder parameters (renders nothing)
-    if (typeof type === 'object' && type.editorType === 'logic-builder-hidden') {
-      return LogicBuilderHiddenType;
-    }
-
-    // Align tools types
-    function isOfAlignToolsType() {
-      return NodeLibrary.nameForPortType(type) === 'enum' && typeof type === 'object' && type.alignComp !== undefined;
-    }
-
-    // Size mode types
-    function isOfSizeModeType() {
-      return NodeLibrary.nameForPortType(type) === 'enum' && typeof type === 'object' && type.sizeComp === 'mode';
-    }
-
-    // Enum types
-    function isOfEnumType() {
-      return NodeLibrary.nameForPortType(type) === 'enum' && typeof type === 'object' && type.enums;
-    }
-
-    // Color types
-    function isOfColorType() {
-      return NodeLibrary.nameForPortType(type) === 'color';
-    }
-
-    // Boolean types
-    function isOfBooleanType() {
-      return NodeLibrary.nameForPortType(type) === 'boolean';
-    }
-
-    // Basic types
-    function isOfBasicType() {
-      const name = NodeLibrary.nameForPortType(type);
-      return name === 'string' || name === 'number';
-    }
-
-    /**
-     * ## Which string ports get `fx` — POL-011, decided rather than inherited
-     *
-     * A `string` port can reach four different views, and until POL-011 **only
-     * `BasicType` had heard of expressions**. So Button's `label` offered `fx`
-     * and the Text node's `text` did not, purely because the latter is declared
-     * `multiline` and multiline had its own view. That was never a decision.
-     *
-     * It is one now, per route:
-     *
-     * | Route | `fx` | Why |
-     * |---|---|---|
-     * | `BasicType` — plain `string`/`number` | **yes** | the original, unchanged |
-     * | `TextAreaType` — `multiline` | **yes** | the reported gap; the literal is multiline, the expression is one line |
-     * | `CodeEditorType` — `codeeditor` | **no** | the value already *is* code; an expression producing code is a second language in one field, and nothing asked for it |
-     * | `IdentifierType` — `identifierOf` | **no** | a name chosen from a set the project holds. An expression could name something that does not exist, and the picker could not show it. Same reasoning as `EnumType` |
-     *
-     * The two `no`s are structural rather than a flag: neither view renders
-     * `PropertyPanelInput`, so neither can offer the toggle — `CodeEditorType`
-     * is its own editor and `IdentifierType` is a `PickerTypeView`. A
-     * `supportsExpression: false` on them would be a prop nothing reads. The
-     * decision is recorded here, at the one place that routes them.
-     */
-    function isOfTextAreaType() {
-      return NodeLibrary.nameForPortType(type) === 'string' && typeof type === 'object' && type.multiline;
-    }
-
-    // Is of code editor type
-    function isOfCodeEditorType() {
-      return NodeLibrary.nameForPortType(type) === 'string' && typeof type === 'object' && type.codeeditor;
-    }
-
-    // Array- and object-typed ports both edit as a literal.
-    //
-    // Without the object branch `viewClassForPort` returned undefined and `_getPorts`
-    // filtered the row out altogether, so an object-typed input was connection-only with
-    // nothing on screen to say why — you could not give a Global Store its starting shape
-    // or an SSE call its headers without wiring a Function node whose whole body was a
-    // literal. `Node.setInputValue` parses a string arriving on either type.
-    //
-    // ERG-003: both now route to `ListValueType` (the shared `JSONEditor`) rather than to
-    // `CodeEditorType`, so they gain a visual builder. The stored form is unchanged, and
-    // `listPortTypeFor` is the one definition of "is this a list-shaped port" — the catalog
-    // test derives its expectation from the same function, so the set of ports the shared
-    // editor covers cannot drift from the set it is claimed to cover.
-    function isOfListValueType() {
-      const t = listPortTypeFor(type);
-      // ⚠️ `stringlist` and `proplist` have their own row types and are deliberately absent.
-      // `optionslist` (§3, Richard 2026-09-04) joins the shared editor because its whole point is
-      // the visual list builder — the codec decides how a row is spelled, this only decides which
-      // editor opens.
-      return t === 'array' || t === 'object' || t === 'optionslist';
-    }
-
-    // Image ref type
-    function isOfImageType() {
-      return NodeLibrary.nameForPortType(type) === 'image';
-    }
-
-    // Icon ref type
-    function isOfIconType() {
-      return NodeLibrary.nameForPortType(type) === 'icon';
-    }
-
-    // Font ref type
-    function isOfFontType() {
-      return NodeLibrary.nameForPortType(type) === 'font';
-    }
-
-    // Text style type
-    function isOfTextStyleType() {
-      return NodeLibrary.nameForPortType(type) === 'textStyle';
-    }
-
-    // Component reference type
-    function isOfComponentType() {
-      return NodeLibrary.nameForPortType(type) === 'component';
-    }
-
-    // Number with units
-    function isOfNumberWithUnitsType() {
-      return NodeLibrary.nameForPortType(type) === 'number' && type.units !== undefined;
-    }
-
-    // Dimension type (number, unit dropdown and special boolean for fixed dimension)
-    function isOfDimensionType() {
-      return NodeLibrary.nameForPortType(type) === 'dimension';
-    }
-
-    // Is source code file
-    function isOfSourceCodeFileType() {
-      return NodeLibrary.nameForPortType(type) === 'source';
-    }
-
-    // Is string list type
-    function isOfStringListType() {
-      return NodeLibrary.nameForPortType(type) === 'stringlist';
-    }
-
-    // Is margin padding type
-    function isOfMarginPaddingType() {
-      //  return NodeLibrary.nameForPortType(type) === 'margins' || NodeLibrary.nameForPortType(type) === 'padding';
-      return type && type.marginPaddingComp !== undefined;
-    }
-
-    // Is of resizing type
-    function isOfResizingType() {
-      return NodeLibrary.nameForPortType(type) === 'resizing';
-    }
-
-    // Is of variable type
-    function isOfVariableType() {
-      return NodeLibrary.nameForPortType(type) === 'variable';
-    }
-
-    // Is of identifier
-    function isOfIdentifierType() {
-      return NodeLibrary.nameForPortType(type) === 'string' && typeof type === 'object' && type.identifierOf;
-    }
-
-    // Is of curve
-    function isOfCurveType() {
-      return NodeLibrary.nameForPortType(type) === 'curve';
-    }
-
-    // Is of query
-    function isOfQueryFilterType() {
-      return NodeLibrary.nameForPortType(type) === 'query-filter';
-    }
-
-    function isOfQuerySortingType() {
-      return NodeLibrary.nameForPortType(type) === 'query-sorting';
-    }
-
-    function isOfByobFilterType() {
-      return NodeLibrary.nameForPortType(type) === 'byob-filter';
-    }
-
-    // Is of pages type
-    function isOfPagesType() {
-      return NodeLibrary.nameForPortType(type) === 'pages';
-    }
-
-    // Is of proplist
-    // WFA-004: workflow step params. Three more port types beside the thirty
-    // above — the registry's intended extension point.
-    function isOfWorkflowConditionType() {
-      return NodeLibrary.nameForPortType(type) === 'workflow-condition';
-    }
-
-    function isOfWorkflowCasesType() {
-      return NodeLibrary.nameForPortType(type) === 'workflow-cases';
-    }
-
-    function isOfWorkflowValueType() {
-      const name = NodeLibrary.nameForPortType(type);
-      return name === 'workflow-value' || name === 'workflow-path';
-    }
-
-    // CWF-001: `call-function`'s param mapping — a dictionary of author-chosen
-    // names, each holding one of the values above.
-    function isOfWorkflowParamsType() {
-      return NodeLibrary.nameForPortType(type) === 'workflow-params';
-    }
-
-    // CWF-004: a transform's `output` — one row per field of the object the
-    // step produces, each row a value or one operation from the served table.
-    function isOfWorkflowTransformType() {
-      return NodeLibrary.nameForPortType(type) === 'workflow-transform';
-    }
-
-    // CWF-004 slice 2: a validate step's `rules` — one row per thing that must
-    // be true, each a path assertion or a condition.
-    function isOfWorkflowValidateType() {
-      return NodeLibrary.nameForPortType(type) === 'workflow-validate';
-    }
-
-    // CWF-005: an attempt count that shows the delay sequence it implies.
-    function isOfWorkflowBackoffType() {
-      return NodeLibrary.nameForPortType(type) === 'workflow-backoff';
-    }
-
-    // WFA-005: a read-only fact about a trigger — a backend object drawn on the
-    // canvas as an entry node. A row, not a control.
-    function isOfWorkflowTriggerInfoType() {
-      return NodeLibrary.nameForPortType(type) === 'workflow-trigger-info';
-    }
-
-    // WFA-006: the cloud function a step calls. A name, plus what it resolves to
-    // in the project and on the backend — which are two different questions.
-    function isOfWorkflowFunctionRefType() {
-      return NodeLibrary.nameForPortType(type) === 'workflow-function-ref';
-    }
-
-    function isOfPropListType() {
-      return NodeLibrary.nameForPortType(type) === 'proplist';
-    }
-
-    if (isOfAlignToolsType()) return AlignToolsType;
-    else if (isOfSizeModeType()) return SizeModeType;
-    else if (isOfEnumType()) return EnumType;
-    else if (isOfColorType()) return ColorType;
-    else if (isOfBooleanType()) return BooleanType;
-    else if (isOfTextAreaType()) return TextAreaType;
-    else if (isOfCodeEditorType()) return CodeEditorType;
-    else if (isOfListValueType()) return ListValueType;
-    else if (isOfMarginPaddingType()) return MarginPaddingType;
-    else if (isOfNumberWithUnitsType()) return NumberWithUnits;
-    else if (isOfDimensionType()) return Dimension;
-    else if (isOfIdentifierType()) return IdentifierType;
-    else if (isOfBasicType()) return BasicType;
-    else if (isOfImageType()) return ImageType;
-    else if (isOfIconType()) return IconType;
-    else if (isOfFontType()) return FontType;
-    else if (isOfTextStyleType()) return TextStyleType;
-    else if (isOfComponentType()) return ComponentType;
-    else if (isOfSourceCodeFileType()) return SourceCodeType;
-    else if (isOfStringListType()) return StringListType;
-    else if (isOfResizingType()) return ResizingType;
-    else if (isOfVariableType()) return VariableType;
-    else if (isOfCurveType()) return CurveType;
-    // BCN-003b: both filter ports render the one builder. `QueryFilterType` and
-    // the `QueryEditor` filter components it rendered are deleted, not
-    // deprecated — a second builder for one idea is what this task retired.
-    else if (isOfQueryFilterType()) return ByobFilterType;
-    else if (isOfQuerySortingType()) return QuerySortingType;
-    else if (isOfByobFilterType()) return ByobFilterType;
-    else if (isOfPagesType()) return PagesType;
-    else if (isOfPropListType()) return PropListType;
-    else if (isOfWorkflowConditionType()) return WorkflowConditionType;
-    else if (isOfWorkflowCasesType()) return WorkflowCasesType;
-    else if (isOfWorkflowValueType()) return WorkflowValueType;
-    else if (isOfWorkflowParamsType()) return WorkflowParamsType;
-    else if (isOfWorkflowTransformType()) return WorkflowTransformType;
-    else if (isOfWorkflowValidateType()) return WorkflowValidateType;
-    else if (isOfWorkflowBackoffType()) return WorkflowBackoffType;
-    else if (isOfWorkflowTriggerInfoType()) return WorkflowTriggerInfoType;
-    else if (isOfWorkflowFunctionRefType()) return WorkflowFunctionRefType;
+    const widget = widgetForPort(p);
+    return widget === undefined ? undefined : Ports.WIDGET_CLASSES[widget];
   }
   _getPorts(): readonly Port[] {
     let ports = this.model.getPorts('input');
@@ -1088,6 +1331,13 @@ export class Ports extends View {
     return ports;
   }
 
+  private _tabGroups: TabGroup[] = [];
+
+  private disposeTabGroups() {
+    this._tabGroups.forEach((t) => t.dispose());
+    this._tabGroups = [];
+  }
+
   getViewGroupsFromPorts() {
     const ports = this._getPorts();
 
@@ -1096,6 +1346,9 @@ export class Ports extends View {
     // used to just drop them (as the legacy `el.html('')` did), leaking every
     // row's React root on each panel re-render.
     this.views.forEach((v) => v.dispose && v.dispose());
+    // CHR-009 slice 7: a `TabGroup` lives in a group, not in `this.views`, so it was never disposed —
+    // its React root leaked on every rebuild, and it now also listens to the model.
+    this.disposeTabGroups();
 
     this._toolsType = {};
     const _viewForPort = {};
@@ -1120,6 +1373,8 @@ export class Ports extends View {
           this.views.push(_popoutViews[p.popout.group]);
           _viewForPort[p.name] = v;
         }
+        // P103 CMG-008 — the group's row speaks for every port behind its button.
+        _popoutViews[p.popout.group].addPort(p);
 
         continue;
       }
@@ -1172,6 +1427,7 @@ export class Ports extends View {
             parent: this
           });
           addToGroup(_tabViews[group]);
+          this._tabGroups.push(_tabViews[group]);
         }
         _tabViews[group].addView(v);
       } else addToGroup(v);

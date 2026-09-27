@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d8f3776a-f74c-551c-89af-5586a4919cb3",
+  "name": "Tick action",
+  "path": "/Commands/Tick action",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Ticks off a next action with a note saying what happened."
+}

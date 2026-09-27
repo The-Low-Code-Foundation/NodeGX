@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e8334ab3-05e7-5fda-8404-3aa60fdc4c51",
+  "name": "Feedback banner",
+  "path": "/Game/Feedback banner",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What just happened — fluent, correct, wrong or out of time — with the correction and its strategy, a Next button and a Show-me button. RKT-007: beside the glyph, the grader's Boost line (how fast, and how much of a step it earned) and a small meter filled to that same Boost Pct. Show opens it; Next and ShowMe close it and publish."
+}

@@ -1,0 +1,50 @@
+{
+  "sqlite": {
+    "adapter": "sqlite",
+    "push": {
+      "status": 200
+    },
+    "satisfying": 201,
+    "breaking": {
+      "both": {
+        "status": 201
+      },
+      "neither": 201,
+      "tooHigh": {
+        "status": 201
+      },
+      "edit": {
+        "status": 200
+      }
+    },
+    "rowsWritten": 4,
+    "setChecksAction": {
+      "status": 400,
+      "error": "Unknown schema action: setChecks. Expected one of createTable, addColumn, renameColumn, changeColumnType, deleteTable, setIndexes."
+    }
+  },
+  "postgres": {
+    "adapter": "postgres",
+    "push": {
+      "status": 200
+    },
+    "satisfying": 201,
+    "breaking": {
+      "both": {
+        "status": 201
+      },
+      "neither": 201,
+      "tooHigh": {
+        "status": 201
+      },
+      "edit": {
+        "status": 200
+      }
+    },
+    "rowsWritten": 4,
+    "setChecksAction": {
+      "status": 400,
+      "error": "Unknown schema action: setChecks. Expected one of createTable, addColumn, renameColumn, changeColumnType, deleteTable, setIndexes."
+    }
+  }
+}

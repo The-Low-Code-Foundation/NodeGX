@@ -1,0 +1,811 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2463605d-d4ee-51ca-8937-523da5754c43",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "translateworIn",
+      "fromProperty": "lang",
+      "toId": "translateworFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "translateworIn",
+      "fromProperty": "words",
+      "toId": "translateworFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-lang",
+      "toId": "translateworOut",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-isFr",
+      "toId": "translateworOut",
+      "toProperty": "isFr"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-addRow",
+      "toId": "translateworOut",
+      "toProperty": "addRow"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-again",
+      "toId": "translateworOut",
+      "toProperty": "again"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-anExample",
+      "toId": "translateworOut",
+      "toProperty": "anExample"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-answer",
+      "toId": "translateworOut",
+      "toProperty": "answer"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-answersAuto",
+      "toId": "translateworOut",
+      "toProperty": "answersAuto"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-answersLabel",
+      "toId": "translateworOut",
+      "toProperty": "answersLabel"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-answersOptions",
+      "toId": "translateworOut",
+      "toProperty": "answersOptions"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-answersTyped",
+      "toId": "translateworOut",
+      "toProperty": "answersTyped"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-appName",
+      "toId": "translateworOut",
+      "toProperty": "appName"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-badCode",
+      "toId": "translateworOut",
+      "toProperty": "badCode"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-biggest",
+      "toId": "translateworOut",
+      "toProperty": "biggest"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-buyTitle",
+      "toId": "translateworOut",
+      "toProperty": "buyTitle"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-cancel",
+      "toId": "translateworOut",
+      "toProperty": "cancel"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-challenge",
+      "toId": "translateworOut",
+      "toProperty": "challenge"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-challengeRule",
+      "toId": "translateworOut",
+      "toProperty": "challengeRule"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-check",
+      "toId": "translateworOut",
+      "toProperty": "check"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-closeMenu",
+      "toId": "translateworOut",
+      "toProperty": "closeMenu"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-computerWins",
+      "toId": "translateworOut",
+      "toProperty": "computerWins"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-correct",
+      "toId": "translateworOut",
+      "toProperty": "correct"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-create",
+      "toId": "translateworOut",
+      "toProperty": "create"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-credits",
+      "toId": "translateworOut",
+      "toProperty": "credits"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-customMode",
+      "toId": "translateworOut",
+      "toProperty": "customMode"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-daysThisWeek",
+      "toId": "translateworOut",
+      "toProperty": "daysThisWeek"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-deleteAsk",
+      "toId": "translateworOut",
+      "toProperty": "deleteAsk"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-deleteNo",
+      "toId": "translateworOut",
+      "toProperty": "deleteNo"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-deleteProfile",
+      "toId": "translateworOut",
+      "toProperty": "deleteProfile"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-deleteYes",
+      "toId": "translateworOut",
+      "toProperty": "deleteYes"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-dueToday",
+      "toId": "translateworOut",
+      "toProperty": "dueToday"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-earnedPick",
+      "toId": "translateworOut",
+      "toProperty": "earnedPick"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-editPlayer",
+      "toId": "translateworOut",
+      "toProperty": "editPlayer"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-faceTab",
+      "toId": "translateworOut",
+      "toProperty": "faceTab"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-familiar",
+      "toId": "translateworOut",
+      "toProperty": "familiar"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-fluent",
+      "toId": "translateworOut",
+      "toProperty": "fluent"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-found",
+      "toId": "translateworOut",
+      "toProperty": "found"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-gameHunt",
+      "toId": "translateworOut",
+      "toProperty": "gameHunt"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-gameHuntBlurb",
+      "toId": "translateworOut",
+      "toProperty": "gameHuntBlurb"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-gameMerge",
+      "toId": "translateworOut",
+      "toProperty": "gameMerge"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-gameMergeBlurb",
+      "toId": "translateworOut",
+      "toProperty": "gameMergeBlurb"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-gameMonster",
+      "toId": "translateworOut",
+      "toProperty": "gameMonster"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-gameMonsterBlurb",
+      "toId": "translateworOut",
+      "toProperty": "gameMonsterBlurb"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-gameOver",
+      "toId": "translateworOut",
+      "toProperty": "gameOver"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-gameRace",
+      "toId": "translateworOut",
+      "toProperty": "gameRace"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-gameRaceBlurb",
+      "toId": "translateworOut",
+      "toProperty": "gameRaceBlurb"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-gotIt",
+      "toId": "translateworOut",
+      "toProperty": "gotIt"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-hangar",
+      "toId": "translateworOut",
+      "toProperty": "hangar"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-hangarBlurb",
+      "toId": "translateworOut",
+      "toProperty": "hangarBlurb"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-hearts",
+      "toId": "translateworOut",
+      "toProperty": "hearts"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-home",
+      "toId": "translateworOut",
+      "toProperty": "home"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-huntNextGrid",
+      "toId": "translateworOut",
+      "toProperty": "huntNextGrid"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-huntShowWay",
+      "toId": "translateworOut",
+      "toProperty": "huntShowWay"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-itCosts",
+      "toId": "translateworOut",
+      "toProperty": "itCosts"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-keyboard",
+      "toId": "translateworOut",
+      "toProperty": "keyboard"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-language",
+      "toId": "translateworOut",
+      "toProperty": "language"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-lessOnNext",
+      "toId": "translateworOut",
+      "toProperty": "lessOnNext"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-loadCode",
+      "toId": "translateworOut",
+      "toProperty": "loadCode"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-loaded",
+      "toId": "translateworOut",
+      "toProperty": "loaded"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-mastered",
+      "toId": "translateworOut",
+      "toProperty": "mastered"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-mathsMode",
+      "toId": "translateworOut",
+      "toProperty": "mathsMode"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-menuHangar",
+      "toId": "translateworOut",
+      "toProperty": "menuHangar"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-mergeEasy",
+      "toId": "translateworOut",
+      "toProperty": "mergeEasy"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-mergeFull",
+      "toId": "translateworOut",
+      "toProperty": "mergeFull"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-mergeHard",
+      "toId": "translateworOut",
+      "toProperty": "mergeHard"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-mergeModeLabel",
+      "toId": "translateworOut",
+      "toProperty": "mergeModeLabel"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-mergeRule",
+      "toId": "translateworOut",
+      "toProperty": "mergeRule"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-monsterChange",
+      "toId": "translateworOut",
+      "toProperty": "monsterChange"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-monsterGate",
+      "toId": "translateworOut",
+      "toProperty": "monsterGate"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-monsterGateChallenge",
+      "toId": "translateworOut",
+      "toProperty": "monsterGateChallenge"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-monsterGatePractice",
+      "toId": "translateworOut",
+      "toProperty": "monsterGatePractice"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-monsterPush",
+      "toId": "translateworOut",
+      "toProperty": "monsterPush"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-monsterPushChallenge",
+      "toId": "translateworOut",
+      "toProperty": "monsterPushChallenge"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-monsterPushPractice",
+      "toId": "translateworOut",
+      "toProperty": "monsterPushPractice"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-moves",
+      "toId": "translateworOut",
+      "toProperty": "moves"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-mySets",
+      "toId": "translateworOut",
+      "toProperty": "mySets"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-newGame",
+      "toId": "translateworOut",
+      "toProperty": "newGame"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-newProfile",
+      "toId": "translateworOut",
+      "toProperty": "newProfile"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-newSet",
+      "toId": "translateworOut",
+      "toProperty": "newSet"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-newSkill",
+      "toId": "translateworOut",
+      "toProperty": "newSkill"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-next",
+      "toId": "translateworOut",
+      "toProperty": "next"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-noThanks",
+      "toId": "translateworOut",
+      "toProperty": "noThanks"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-onePlayer",
+      "toId": "translateworOut",
+      "toProperty": "onePlayer"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-otherRace",
+      "toId": "translateworOut",
+      "toProperty": "otherRace"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-ownedElsewhere",
+      "toId": "translateworOut",
+      "toProperty": "ownedElsewhere"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-pasteJson",
+      "toId": "translateworOut",
+      "toProperty": "pasteJson"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-pickAvatar",
+      "toId": "translateworOut",
+      "toProperty": "pickAvatar"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-play",
+      "toId": "translateworOut",
+      "toProperty": "play"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-playerWins",
+      "toId": "translateworOut",
+      "toProperty": "playerWins"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-practice",
+      "toId": "translateworOut",
+      "toProperty": "practice"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-practiceRule",
+      "toId": "translateworOut",
+      "toProperty": "practiceRule"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-proficient",
+      "toId": "translateworOut",
+      "toProperty": "proficient"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-progress",
+      "toId": "translateworOut",
+      "toProperty": "progress"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-question",
+      "toId": "translateworOut",
+      "toProperty": "question"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-remove",
+      "toId": "translateworOut",
+      "toProperty": "remove"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-restart",
+      "toId": "translateworOut",
+      "toProperty": "restart"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-rightAnswers",
+      "toId": "translateworOut",
+      "toProperty": "rightAnswers"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-rocketTab",
+      "toId": "translateworOut",
+      "toProperty": "rocketTab"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-rollAvatar",
+      "toId": "translateworOut",
+      "toProperty": "rollAvatar"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-save",
+      "toId": "translateworOut",
+      "toProperty": "save"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-saveChanges",
+      "toId": "translateworOut",
+      "toProperty": "saveChanges"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-saveCode",
+      "toId": "translateworOut",
+      "toProperty": "saveCode"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-saveCodeHelp",
+      "toId": "translateworOut",
+      "toProperty": "saveCodeHelp"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-score",
+      "toId": "translateworOut",
+      "toProperty": "score"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-setName",
+      "toId": "translateworOut",
+      "toProperty": "setName"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-showMe",
+      "toId": "translateworOut",
+      "toProperty": "showMe"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-soundNo",
+      "toId": "translateworOut",
+      "toProperty": "soundNo"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-soundOn",
+      "toId": "translateworOut",
+      "toProperty": "soundOn"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-soundYes",
+      "toId": "translateworOut",
+      "toProperty": "soundYes"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-stars",
+      "toId": "translateworOut",
+      "toProperty": "stars"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-start",
+      "toId": "translateworOut",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-switchPlayer",
+      "toId": "translateworOut",
+      "toProperty": "switchPlayer"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-tagline",
+      "toId": "translateworOut",
+      "toProperty": "tagline"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-target",
+      "toId": "translateworOut",
+      "toProperty": "target"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-teach",
+      "toId": "translateworOut",
+      "toProperty": "teach"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-theAnswerWas",
+      "toId": "translateworOut",
+      "toProperty": "theAnswerWas"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-timeUp",
+      "toId": "translateworOut",
+      "toProperty": "timeUp"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-toHangar",
+      "toId": "translateworOut",
+      "toProperty": "toHangar"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-turboCharging",
+      "toId": "translateworOut",
+      "toProperty": "turboCharging"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-turboReady",
+      "toId": "translateworOut",
+      "toProperty": "turboReady"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-twoPlayers",
+      "toId": "translateworOut",
+      "toProperty": "twoPlayers"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-typeAnswer",
+      "toId": "translateworOut",
+      "toProperty": "typeAnswer"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-typingMode",
+      "toId": "translateworOut",
+      "toProperty": "typingMode"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-whoIsPlaying",
+      "toId": "translateworOut",
+      "toProperty": "whoIsPlaying"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-wrong",
+      "toId": "translateworOut",
+      "toProperty": "wrong"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-yesBuy",
+      "toId": "translateworOut",
+      "toProperty": "yesBuy"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-youHave",
+      "toId": "translateworOut",
+      "toProperty": "youHave"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-youWin",
+      "toId": "translateworOut",
+      "toProperty": "youWin"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-youllHave",
+      "toId": "translateworOut",
+      "toProperty": "youllHave"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-yourLevel",
+      "toId": "translateworOut",
+      "toProperty": "yourLevel"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-yourName",
+      "toId": "translateworOut",
+      "toProperty": "yourName"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-yourTurn",
+      "toId": "translateworOut",
+      "toProperty": "yourTurn"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "success",
+      "toId": "translateworOut",
+      "toProperty": "done"
+    }
+  ]
+}

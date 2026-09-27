@@ -1,0 +1,211 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "775fa7cc-2692-5b4a-81e4-beccb38bfdf8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "MoveactionIn",
+      "type": "Component Inputs",
+      "label": "What to do",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "taskId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "actionId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "direction",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "MoveactionOut",
+      "type": "Component Outputs",
+      "label": "Done",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "MoveactionGuard",
+      "type": "JavaScriptFunction",
+      "label": "Is there anything to write?",
+      "parameters": {
+        "functionScript": "var rows = Inputs.rows || [];\nvar id = String(Inputs.itemId || '');\nvar dir = String(Inputs.direction || '');\nvar i = -1;\nfor (var k = 0; k < rows.length; k++) if (rows[k] && rows[k].id === id) i = k;\nif (i < 0) return;\nvar j = dir === 'up' ? i - 1 : dir === 'down' ? i + 1 : 0;\nif (j < 0 || j >= rows.length || j === i) return;\nOutputs.firstId = id;\nOutputs.from = i + 1;\nOutputs.to = j + 1;\nif (dir === 'top') {\n  // Above whatever is first now. Nobody else's row is rewritten.\n  Outputs.firstPosition = Number(rows[0].position) - 1;\n  Outputs.hasSecond = false;\n} else {\n  // Swap with the neighbour.\n  Outputs.firstPosition = Number(rows[j].position);\n  Outputs.secondId = rows[j].id;\n  Outputs.secondPosition = Number(rows[i].position);\n  Outputs.hasSecond = true;\n}\nOutputs.summary = 'Next actions reordered';\nOutputs.go();",
+        "runOnChange-in-rows": false,
+        "runOnChange-in-direction": false,
+        "runOnChange-in-itemId": false
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-rows",
+          "displayName": "rows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-itemId",
+          "displayName": "itemId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-direction",
+          "displayName": "direction",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-firstId",
+          "displayName": "firstId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-from",
+          "displayName": "from",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-to",
+          "displayName": "to",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-firstPosition",
+          "displayName": "firstPosition",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasSecond",
+          "displayName": "hasSecond",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-secondId",
+          "displayName": "secondId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-secondPosition",
+          "displayName": "secondPosition",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-summary",
+          "displayName": "summary",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "MoveactionFirst",
+      "type": "SetDbModelProperties",
+      "label": "Move it",
+      "parameters": {
+        "collectionName": "Action",
+        "idSource": "explicit"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "MoveactionSwap",
+      "type": "Condition",
+      "label": "Is there a neighbour to swap with?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "MoveactionSecond",
+      "type": "SetDbModelProperties",
+      "label": "Move the neighbour",
+      "parameters": {
+        "collectionName": "Action",
+        "idSource": "explicit"
+      },
+      "x": 40,
+      "y": 640
+    },
+    {
+      "id": "MoveactionHistory",
+      "type": "/Logic/Write history",
+      "label": "Write the history line",
+      "parameters": {
+        "kind": "action-moved"
+      },
+      "x": 40,
+      "y": 760
+    },
+    {
+      "id": "MoveactionProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "todoProblem",
+        "setWith": "string",
+        "value": "That change did not save. Check your connection, then try again."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 880
+    }
+  ]
+}

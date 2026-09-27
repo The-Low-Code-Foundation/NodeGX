@@ -1,0 +1,199 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e8334ab3-05e7-5fda-8404-3aa60fdc4c51",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fbIn",
+      "fromProperty": "outcome",
+      "toId": "fbTitleText",
+      "toProperty": "outcome"
+    },
+    {
+      "fromId": "fbIn",
+      "fromProperty": "fluentWord",
+      "toId": "fbTitleText",
+      "toProperty": "fluentWord"
+    },
+    {
+      "fromId": "fbIn",
+      "fromProperty": "correctWord",
+      "toId": "fbTitleText",
+      "toProperty": "correctWord"
+    },
+    {
+      "fromId": "fbIn",
+      "fromProperty": "wrongWord",
+      "toId": "fbTitleText",
+      "toProperty": "wrongWord"
+    },
+    {
+      "fromId": "fbIn",
+      "fromProperty": "timeUpWord",
+      "toId": "fbTitleText",
+      "toProperty": "timeUpWord"
+    },
+    {
+      "fromId": "fbTitleText",
+      "fromProperty": "result",
+      "toId": "fbTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fbIn",
+      "fromProperty": "outcome",
+      "toId": "fbStates",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "fbStates",
+      "fromProperty": "tone",
+      "toId": "fbTitle",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "fbStates",
+      "fromProperty": "tone",
+      "toId": "fbCard",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "fbStates",
+      "fromProperty": "ground",
+      "toId": "fbCard",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "fbStates",
+      "fromProperty": "glyph",
+      "toId": "fbGlyph",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fbIn",
+      "fromProperty": "message",
+      "toId": "fbMessage",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fbIn",
+      "fromProperty": "message",
+      "toId": "fbHasMessage",
+      "toProperty": "message"
+    },
+    {
+      "fromId": "fbHasMessage",
+      "fromProperty": "result",
+      "toId": "fbMessage",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fbIn",
+      "fromProperty": "boost",
+      "toId": "fbBoost",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fbIn",
+      "fromProperty": "boost",
+      "toId": "fbHasBoost",
+      "toProperty": "boost"
+    },
+    {
+      "fromId": "fbHasBoost",
+      "fromProperty": "result",
+      "toId": "fbBoost",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fbIn",
+      "fromProperty": "boostPct",
+      "toId": "fbMeterFill",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "fbIn",
+      "fromProperty": "boostPct",
+      "toId": "fbMeterOn",
+      "toProperty": "p"
+    },
+    {
+      "fromId": "fbMeterOn",
+      "fromProperty": "result",
+      "toId": "fbMeter",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fbIn",
+      "fromProperty": "nextWord",
+      "toId": "fbNext",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fbIn",
+      "fromProperty": "showMeWord",
+      "toId": "fbTeach",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fbIn",
+      "fromProperty": "canTeach",
+      "toId": "fbTeach",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fbIn",
+      "fromProperty": "show",
+      "toId": "fbOpen",
+      "toProperty": "to-open"
+    },
+    {
+      "fromId": "fbIn",
+      "fromProperty": "hide",
+      "toId": "fbOpen",
+      "toProperty": "to-closed"
+    },
+    {
+      "fromId": "fbNext",
+      "fromProperty": "onClick",
+      "toId": "fbOpen",
+      "toProperty": "to-closed"
+    },
+    {
+      "fromId": "fbTeach",
+      "fromProperty": "onClick",
+      "toId": "fbOpen",
+      "toProperty": "to-closed"
+    },
+    {
+      "fromId": "fbOpen",
+      "fromProperty": "isOpen",
+      "toId": "fbCard",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fbNext",
+      "fromProperty": "didMount",
+      "toId": "fbNext",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "fbOpen",
+      "fromProperty": "isOpen",
+      "toId": "fbOut",
+      "toProperty": "isOpen"
+    },
+    {
+      "fromId": "fbNext",
+      "fromProperty": "onClick",
+      "toId": "fbOut",
+      "toProperty": "next"
+    },
+    {
+      "fromId": "fbTeach",
+      "fromProperty": "onClick",
+      "toId": "fbOut",
+      "toProperty": "showMe"
+    }
+  ]
+}

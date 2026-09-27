@@ -23,16 +23,25 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { BackendService } from './service';
-import { createAdapter } from './persistence/createAdapter';
+import { createAdapter, describeConfiguredStorage } from './persistence/createAdapter';
+import type { IStorageFacade } from '@noodl/backend-contract';
+
 import { AdapterFacade } from './persistence/AdapterFacade';
 import { BackendServiceOptions, resolveOptions } from './config';
 import { ExecutionHistory } from './execution/ExecutionStore';
 import { BackupConfigStore } from './backup/config';
 import { BackupAuditActor, BackupManager } from './backup/BackupManager';
+import { SecretsStore } from './config/SecretsStore';
+import { FileConfigStore } from './storage/config';
+import { buildBucketDriver } from './storage/FileSubsystem';
 import { ARCHIVE_EXT } from './backup/archive';
 import { AuditLog, ensureAuditTable } from './ops/audit';
 import { OpsState } from './ops/OpsState';
+import { requireSecretsFromEnv } from './config/provisioned-secrets';
 import { exportCollection, importCollection, DataFormat } from './backup/dataio';
+import { formatCarryReport, redactTarget, surveyForMigration } from './migrate/survey';
+import { cutoverAdvice, migrateToPostgres } from './migrate/move';
+import { formatVerifyReport, verifyMigration } from './migrate/verify';
 import {
   applySchema,
   diffSchema,
@@ -89,6 +98,10 @@ function parseArgs(argv: string[]): ParsedArgs {
       case '--readonly-token':
         options.readonlyToken = next();
         break;
+      // PRD-005: refuse to start rather than mint a missing secret.
+      case '--require-secrets':
+        options.requireSecrets = true;
+        break;
       // SB-015: the project this backend was provisioned for. Read for exactly
       // one thing — installing `nodegx.security.json` as this backend's policy
       // on a first start that has none.
@@ -111,6 +124,28 @@ function parseArgs(argv: string[]): ParsedArgs {
       case '--dry-run':
         extras.dryRun = true;
         break;
+      // BRG-004: the migration destination and the four flags that govern a move.
+      case '--to':
+        extras.to = next();
+        break;
+      case '--resume':
+        extras.resume = true;
+        break;
+      case '--keep-snapshot':
+        extras.keepSnapshot = true;
+        break;
+      case '--verify-only':
+        extras.verifyOnly = true;
+        break;
+      case '--batch-size':
+        extras.batchSize = next();
+        break;
+      case '--sample':
+        extras.sample = next();
+        break;
+      case '--json':
+        extras.json = true;
+        break;
       case '--allow-destructive':
         extras.allowDestructive = true;
         break;
@@ -131,6 +166,10 @@ function parseArgs(argv: string[]): ParsedArgs {
         }
     }
   }
+
+  // PRD-005: a container that cannot edit its command line turns the stance on with the
+  // environment instead. The flag and the variable are the same switch.
+  if (requireSecretsFromEnv()) options.requireSecrets = true;
 
   return { command, positionals, options, extras };
 }
@@ -173,16 +212,28 @@ function cliBackupManager(options: Partial<BackendServiceOptions>): { manager: B
   const config = new BackupConfigStore(dataDir);
   const dbPath = path.join(dataDir, 'data', 'local.db');
   const allowEphemeral = !!options.allowEphemeral;
+  // BRG-008. 🔴 This path does NOT go through `createAdapter` — it builds the
+  // SQLite path itself. On a data dir that has been migrated to PostgreSQL the
+  // pre-migration `local.db` is still sitting there (that is what makes going
+  // back work), so without this the CLI would archive it and report success:
+  // a healthy-looking backup of stale rows, which is worse than a failure.
+  const storage = describeConfiguredStorage();
   const manager = new BackupManager({
     dataDir,
     dbPath,
+    engine: storage.engine,
+    storageTarget: storage.target,
     executions,
     config,
     backendId: resolved.backendId,
     backendName: resolved.backendName,
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     getSchema: () => require('./backup/schema-migrate').tablesFromDbFile(dbPath),
-    openAudit: (auditDataDir: string) => openCliAuditLog(auditDataDir, allowEphemeral)
+    openAudit: (auditDataDir: string) => openCliAuditLog(auditDataDir, allowEphemeral),
+    // BMG-015: the same bucket the served backend would use — files.json's
+    // driver + the `files` secrets — so `nodegx-backend backup` on a
+    // bucket-backed data dir lands beside the scheduled ones.
+    getBucket: () => buildBucketDriver(new FileConfigStore(dataDir).get().driver, new SecretsStore(dataDir))
   });
   return { manager, config, dataDir };
 }
@@ -198,7 +249,7 @@ function snapshotFromPath(p: string): SchemaSnapshot {
   return snapshotFromDataDir(p);
 }
 
-async function withFacade<T>(dataDir: string, fn: (facade: AdapterFacade) => Promise<T> | T): Promise<T> {
+async function withFacade<T>(dataDir: string, fn: (facade: IStorageFacade) => Promise<T> | T): Promise<T> {
   const handle = await createAdapter({ dataDir });
   const facade = new AdapterFacade(handle.adapter);
   try {
@@ -223,6 +274,9 @@ Usage:
   nodegx-backend import  <collection> <file> --data-dir <dir> [--format json|csv] [--dry-run]
   nodegx-backend schema  diff  <source> <target>
   nodegx-backend schema  apply <source> --data-dir <target> [--allow-destructive]
+  nodegx-backend migrate --data-dir <dir> --to <postgres-url>
+                        [--dry-run | --resume | --verify-only]
+                        [--batch-size <n>] [--sample <n>] [--keep-snapshot] [--json]
 
 Commands:
   serve    Start the service and stay running: BYOB /api routes, the Parse-wire
@@ -237,6 +291,15 @@ Commands:
   import   Import one collection (upsert by objectId; --dry-run previews).
   schema   diff/apply schema + config promotion (dev -> prod). Additive applies
            automatically; destructive needs --allow-destructive (backs up first).
+  migrate  Move this backend's database to PostgreSQL. --dry-run prints the
+           CARRY REPORT — every construct, and whether it crosses, crosses
+           degraded, or does not cross — and touches nothing. Without it the
+           move runs: a consistent snapshot, the schema, the rows in
+           checkpointed batches, then VERIFICATION through the adapter on each
+           side, which must be clean or the command says do not cut over. The
+           source database is opened READ-ONLY throughout and is byte-identical
+           afterwards. --resume continues an interrupted run from its
+           checkpoint; --verify-only re-runs the comparison alone.
 
 Options:
   --data-dir <dir>       Directory for the SQLite files, uploads, and workflows.
@@ -260,6 +323,14 @@ Options:
                          everything the admin surface exposes and change
                          nothing. Never minted automatically — a backend has
                          this tier only if you ask for it.
+  --require-secrets      The production stance: every secret this backend would
+                         otherwise mint — the admin credential, the signed-URL
+                         secret — must be provisioned (--token, or
+                         NODEGX_ADMIN_TOKEN / NODEGX_FILES_SIGNING_SECRET, or
+                         their _FILE forms, or already in secrets.json). A start
+                         that cannot find one refuses and names it. Same as
+                         NODEGX_REQUIRE_SECRETS=1. Off by default: minting is
+                         right for a laptop and wrong for an empty volume.
 `;
 
 async function runServe(options: Partial<BackendServiceOptions>, parentPid?: number): Promise<void> {
@@ -302,7 +373,19 @@ async function runServe(options: Partial<BackendServiceOptions>, parentPid?: num
   // part of the feature, not a nicety.
   if (started.options.adminDashboard) {
     process.stdout.write(`[nodegx-backend] admin dashboard: ${started.listen.url}/_admin\n`);
-    if (started.security.adminTokenMintedThisStart) {
+    // BMG-014: the manager asks for an admin email and password on its first
+    // load, once it holds the credential — so the line an operator needs is
+    // where the credential is, and that the account comes next.
+    if (!started.security.hasAdminAccount) {
+      process.stdout.write(
+        `[nodegx-backend]   NO ADMIN ACCOUNT YET: open the manager and sign in with the admin credential — it then\n` +
+          `[nodegx-backend]   asks you to choose an admin email and password. The credential is in\n` +
+          `[nodegx-backend]   ${path.join(started.options.dataDir, 'secrets.json')} ("adminToken")` +
+          (started.security.adminTokenMintedThisStart
+            ? `, generated on this start;\n[nodegx-backend]   restart with --token <your-own-secret> to choose your own.\n`
+            : `.\n`)
+      );
+    } else if (started.security.adminTokenMintedThisStart) {
       process.stdout.write(
         `[nodegx-backend]   FIRST RUN: an admin credential was generated for this backend. Read it from\n` +
           `[nodegx-backend]   ${path.join(started.options.dataDir, 'secrets.json')} ("adminToken"), or restart with\n` +
@@ -314,6 +397,16 @@ async function runServe(options: Partial<BackendServiceOptions>, parentPid?: num
     }
   } else {
     process.stdout.write('[nodegx-backend] admin dashboard: DISABLED (--no-admin); /_admin is not routed\n');
+  }
+  // PRD-005: a minted credential on a bind other people can reach is the n8n failure waiting
+  // to happen — the next empty volume mints a different one. Say so once, at the moment the
+  // operator is reading the startup lines.
+  if (started.security.adminTokenMintedThisStart && service.requiresAuth()) {
+    process.stdout.write(
+      '[nodegx-backend]   ⚠ non-loopback bind with a MINTED admin credential. For a deploy, provision it\n' +
+        '[nodegx-backend]   (NODEGX_ADMIN_TOKEN, NODEGX_ADMIN_TOKEN_FILE or --token) and start with\n' +
+        '[nodegx-backend]   --require-secrets, so an empty volume refuses rather than minting a different one.\n'
+    );
   }
 
   // Machine-readable readiness line — the editor supervisor handshakes on this.
@@ -499,6 +592,126 @@ async function runSchema(
   throw new Error('schema requires a subcommand: diff | apply');
 }
 
+/**
+ * BRG-004 phase 1 — the carry report, and nothing else yet.
+ *
+ * The four phases after it (schema, data, verify, cutover) need a PostgreSQL
+ * driver, which is BRG-005's decision to make. Until then this command does the
+ * one thing it can do honestly: survey, and refuse to pretend. A `migrate` that
+ * started copying and stopped halfway would be the failure mode the whole phase
+ * exists to remove.
+ */
+async function runMigrate(
+  options: Partial<BackendServiceOptions>,
+  extras: Record<string, string | boolean>
+): Promise<void> {
+  const dataDir = options.dataDir;
+  if (!dataDir) throw new Error('migrate requires --data-dir');
+  const to = typeof extras.to === 'string' ? extras.to : '';
+  if (!to) throw new Error('migrate requires --to <postgres://…>');
+  if (!/^postgres(ql)?:\/\//.test(to)) {
+    // R5: Postgres only, and said out loud rather than discovered at phase 3.
+    throw new Error(`Only PostgreSQL destinations are supported: ${redactTarget(to)}`);
+  }
+
+  const report = surveyForMigration(dataDir, to);
+
+  if (extras.json) {
+    process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+  } else {
+    process.stdout.write(`${formatCarryReport(report)}\n`);
+  }
+
+  if (extras.dryRun) {
+    // A dry run that found a refusal is still a successful dry run — it did
+    // exactly what it was asked to. The exit code says whether the MIGRATION
+    // would start, because that is what a script wants to branch on.
+    if (!report.clean) process.exitCode = 1;
+    return;
+  }
+
+  // 🔴 The survey is a precondition, not a preamble: a construct that cannot
+  // cross is a refusal BEFORE any row moves (AC8). Nothing overrides it here —
+  // an override belongs to whoever is willing to name what they are losing.
+  if (!report.clean) {
+    process.stderr.write(
+      '\nmigrate: the carry report is not clean — the constructs above marked `cannot-cross` would be\n' +
+        'silently approximated by a move. Refusing to start one.\n'
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  const sample = typeof extras.sample === 'string' ? parseInt(extras.sample, 10) : undefined;
+
+  if (extras.verifyOnly) {
+    // Verifying reads the LIVE database on the source side, because there is no
+    // snapshot from a run that is not happening — and says so, since a source
+    // that has moved on since the migration is a difference that is not damage.
+    const verified = await verifyMigration({ sourceDataDir: dataDir, target: to, sample });
+    process.stdout.write(`${extras.json ? JSON.stringify(verified, null, 2) : formatVerifyReport(verified)}\n`);
+    if (!verified.ok) process.exitCode = 1;
+    return;
+  }
+
+  const result = await migrateToPostgres({
+    dataDir,
+    target: to,
+    resume: !!extras.resume,
+    batchSize: typeof extras.batchSize === 'string' ? parseInt(extras.batchSize, 10) : undefined,
+    onProgress: (p) => {
+      if (p.phase === 'data' && p.copied !== undefined) {
+        process.stderr.write(`\r  ${p.table}: ${p.copied}/${p.rows}   `);
+      } else if (p.message) {
+        process.stderr.write(`  ${p.phase}: ${p.message}\n`);
+      }
+    }
+  });
+  process.stderr.write('\n');
+
+  // The snapshot the copy read is the thing verification compares against: the
+  // live file may have moved on, and a difference from THAT is not damage.
+  const verified = await verifyMigration({
+    sourceDataDir: path.dirname(path.dirname(result.snapshotPath)),
+    target: to,
+    sample
+  });
+
+  if (extras.json) {
+    process.stdout.write(`${JSON.stringify({ migration: result, verify: verified }, null, 2)}\n`);
+  } else {
+    process.stdout.write(`${formatVerifyReport(verified)}\n\n`);
+    process.stdout.write(
+      `Copied ${result.tables.reduce((n, t) => n + t.copied, 0)} rows in ${result.batches} batches, ` +
+        `${(result.elapsedMs / 1000).toFixed(1)}s.\n`
+    );
+    process.stdout.write(
+      `Source unchanged: sha256 ${result.sourceSha256Before.slice(0, 16)} before and after (AC7).\n\n`
+    );
+    process.stdout.write(`${cutoverAdvice(to, path.join(dataDir, 'data', 'local.db'))}\n`);
+  }
+
+  if (!verified.ok) {
+    process.stderr.write(
+      '\nmigrate: verification found differences (above). The source database is untouched — do not cut over.\n'
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  // Only a verified migration deletes its checkpoint: while one exists, the
+  // move is resumable, and a resumable move is not one that has been finished.
+  // The snapshot goes with it — it is a whole second copy of the database, and
+  // leaving it in the temp directory is how a migration fills a disk a week
+  // later. A FAILED run keeps both, because that is what --resume reads.
+  if (fs.existsSync(result.checkpointPath)) fs.unlinkSync(result.checkpointPath);
+  if (!extras.keepSnapshot) {
+    fs.rmSync(path.dirname(path.dirname(result.snapshotPath)), { recursive: true, force: true });
+  } else {
+    process.stdout.write(`\nSnapshot kept: ${result.snapshotPath}\n`);
+  }
+}
+
 export async function main(argv: string[] = process.argv.slice(2)): Promise<void> {
   const { command, positionals, options, extras } = parseArgs(argv);
 
@@ -525,6 +738,9 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
       break;
     case 'schema':
       await runSchema(positionals, options, extras);
+      break;
+    case 'migrate':
+      await runMigrate(options, extras);
       break;
     case 'help':
     case '--help':

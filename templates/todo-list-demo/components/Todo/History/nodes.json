@@ -1,0 +1,229 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b470ad3c-712c-5101-8d2a-951cf84b5c04",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hiIn",
+      "type": "Component Inputs",
+      "label": "The history",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "clearNote",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "hiOut",
+      "type": "Component Outputs",
+      "label": "A note",
+      "ports": [
+        {
+          "name": "addNote",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "noteText",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "hiRoot",
+      "type": "Group",
+      "label": "History",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "hiHeading",
+        "hiForm",
+        "hiRows"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hiHeading",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "hiRoot",
+      "parameters": {
+        "text": "History",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "as": "h2"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "hiForm",
+      "type": "Group",
+      "label": "Add a note",
+      "parent": "hiRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "alignItems": "flex-end"
+      },
+      "children": [
+        "hiField",
+        "hiButton"
+      ],
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "hiField",
+      "type": "net.noodl.controls.textinput",
+      "label": "New note",
+      "parent": "hiForm",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "textArea",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Add a note"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "hiButton",
+      "type": "net.noodl.controls.button",
+      "label": "Add note",
+      "parent": "hiForm",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Add note"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "hiRows",
+      "type": "Group",
+      "label": "The entries",
+      "parent": "hiRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "hiEach"
+      ],
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "hiEach",
+      "type": "For Each",
+      "label": "One line per entry",
+      "parent": "hiRows",
+      "parameters": {
+        "template": "/Todo/History entry",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "hiSubmit",
+      "type": "JavaScriptFunction",
+      "label": "The note, if one was typed",
+      "parameters": {
+        "functionScript": "var t = String(Inputs.text || '').trim();\nif (t === '') return;\nOutputs.text = t;\nOutputs.go();",
+        "runOnChange-in-text": false
+      },
+      "x": 410,
+      "y": 400,
+      "ports": [
+        {
+          "name": "in-text",
+          "displayName": "text",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "hiRoot"
+  ]
+}

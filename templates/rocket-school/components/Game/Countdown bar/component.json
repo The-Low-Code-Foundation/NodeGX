@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5dfc510e-f4d6-50e6-83a7-8d343726851f",
+  "name": "Countdown bar",
+  "path": "/Game/Countdown bar",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A bar that empties over Limit ms after Start, with the whole seconds left beside it, and publishes Expired when it is empty. No ticker: a Delay is the deadline and an Animate To Value is the bar, and the seconds are read off the bar, so the two cannot disagree. The last three seconds pulse. Stop freezes the bar where it is. Enabled false makes it inert and unmounted (practice mode). Left is the bar itself, 100 full to 0 empty: TPL-007 §16 walks the monster off it, so the walk and the clock cannot disagree."
+}

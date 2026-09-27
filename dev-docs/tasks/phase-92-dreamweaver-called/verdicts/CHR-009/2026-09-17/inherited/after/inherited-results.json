@@ -1,0 +1,116 @@
+{
+  "fresh": {
+    "DataTypes/EnumType.ts": true,
+    "DataTypes/NumberWithUnits.ts": true,
+    "ColorPicker/ColorType.ts": true,
+    "PropertyPanelSelectInput.tsx": true
+  },
+  "setup": {
+    "before": {
+      "borderStyle": "solid",
+      "borderColor": "#FF0000",
+      "borderWidth": {
+        "value": 3,
+        "unit": "px"
+      },
+      "borderRadius": {
+        "value": 8,
+        "unit": "px"
+      },
+      "borderLeftStyle": "<undefined>",
+      "borderLeftWidth": "<undefined>",
+      "borderLeftColor": "<undefined>",
+      "borderTopLeftRadius": "<undefined>"
+    },
+    "borderOpen": "true"
+  },
+  "read": {
+    "allEdges": {
+      "borderStyle": null,
+      "borderWidth": {
+        "value": "3",
+        "placeholder": null,
+        "placeholderColor": "rgb(255, 255, 255)",
+        "valueColor": "rgb(255, 255, 255)",
+        "visible": true
+      },
+      "borderColor": {
+        "value": "#FF0000",
+        "placeholder": null,
+        "placeholderColor": "rgb(255, 255, 255)",
+        "valueColor": "rgb(255, 255, 255)",
+        "visible": true,
+        "swatch": "rgb(255, 0, 0)"
+      }
+    },
+    "leftPressed": "true",
+    "leftEdge": {
+      "borderLeftStyle": {
+        "value": "",
+        "placeholder": "Solid",
+        "placeholderColor": "rgb(125, 138, 152)",
+        "valueColor": "rgb(255, 255, 255)",
+        "visible": true
+      },
+      "borderLeftWidth": {
+        "value": "",
+        "placeholder": "3",
+        "placeholderColor": "rgb(125, 138, 152)",
+        "valueColor": "rgb(255, 255, 255)",
+        "visible": true
+      },
+      "borderLeftColor": {
+        "value": "",
+        "placeholder": "#FF0000",
+        "placeholderColor": "rgb(125, 138, 152)",
+        "valueColor": "rgb(255, 255, 255)",
+        "visible": true,
+        "swatch": "rgb(255, 0, 0)"
+      }
+    },
+    "topLeft": {
+      "borderTopLeftRadius": {
+        "value": "",
+        "placeholder": "8",
+        "placeholderColor": "rgb(125, 138, 152)",
+        "valueColor": "rgb(255, 255, 255)",
+        "visible": true
+      }
+    },
+    "placeholderColor_dark": {
+      "value": "",
+      "placeholder": "3",
+      "placeholderColor": "rgb(125, 138, 152)",
+      "valueColor": "rgb(255, 255, 255)",
+      "visible": true
+    },
+    "placeholderColor_light": {
+      "value": "",
+      "placeholder": "3",
+      "placeholderColor": "rgb(122, 134, 145)",
+      "valueColor": "rgb(24, 33, 43)",
+      "visible": true
+    },
+    "focused": true,
+    "afterType": {
+      "field": {
+        "value": "5",
+        "placeholder": null,
+        "placeholderColor": "rgb(255, 255, 255)",
+        "valueColor": "rgb(255, 255, 255)",
+        "visible": true
+      },
+      "stored": "{\"value\":5,\"unit\":\"px\"}"
+    },
+    "afterUndo": {
+      "field": {
+        "value": "",
+        "placeholder": "3",
+        "placeholderColor": "rgb(125, 138, 152)",
+        "valueColor": "rgb(255, 255, 255)",
+        "visible": true
+      },
+      "stored": "undefined"
+    }
+  }
+}

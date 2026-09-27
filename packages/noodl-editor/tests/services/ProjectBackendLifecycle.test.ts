@@ -291,7 +291,7 @@ describe('AAQ-011/F10 project backend toast rules', () => {
     if (intent.kind !== 'error') return;
     expect(intent.title).toContain('App backend');
     expect(intent.message).toContain('native SQLite engine is unavailable');
-    expect(intent.message).toContain('Data Browser');
+    expect(intent.message).toContain('backend manager');
   });
 
   it('still names something when the backend has no name and no error text', () => {

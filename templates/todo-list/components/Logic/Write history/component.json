@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "fede4626-1958-5462-8052-923faff07f8e",
+  "name": "Write history",
+  "path": "/Logic/Write history",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Writes one line of a task’s history to Event, and is the only thing that does. A move, deadline or description change repeated within two minutes extends the previous line instead of adding another."
+}

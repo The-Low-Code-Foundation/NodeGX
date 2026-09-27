@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2a27acad-faa1-5d5d-8b2a-96f109b88cac",
+  "name": "Todo",
+  "path": "/Pages/Todo",
+  "type": "page",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The demo app: the list (or Done, or the Log) beside the selected task, kept in this browser. Holds the selection, places the data and the dialog flow, and wires every button to its command."
+}

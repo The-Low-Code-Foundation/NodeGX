@@ -129,6 +129,21 @@ export interface ArrangementNode extends ParameterizedNode {
   children?: readonly string[] | null;
 }
 
+/**
+ * GAM-022 — a component as Arm B reads it: enough to find the visual root of the item a `For Each`
+ * draws. `ComponentNodesView` satisfies it; stored v2 nodes carry `children`, `GraphNode`s both.
+ */
+export interface ItemComponentView {
+  name: string;
+  nodes: readonly {
+    id?: string;
+    type: string;
+    parameters?: Record<string, unknown> | null;
+    children?: readonly string[] | null;
+    parent?: string | null;
+  }[];
+}
+
 export interface CheckResponsiveArrangementOptions {
   /** Component identifier for the diagnostics' location. */
   component: string;
@@ -136,7 +151,17 @@ export interface CheckResponsiveArrangementOptions {
   catalog: CatalogIndex;
   /** Severity for both arms. Defaults to `warning`. */
   severity?: Severity;
+  /**
+   * GAM-022 — the project's components, so Arm B can judge the item a `For Each` draws. Omitted
+   * means the item cannot be read, and Arm B judges the row alone, as it did before.
+   */
+  views?: readonly ItemComponentView[];
+  /** GAM-022 — `${nodeId}::${port}` for every wired input. A wired `template` names no item. */
+  connectedInputs?: ReadonlySet<string>;
 }
+
+/** The Component Children placeholder: what it draws is decided by whoever places the component. */
+const COMPONENT_CHILDREN_TYPE = 'net.noodl.ParentComponentObject';
 
 /**
  * The exit, in the doctrine's own words, and in the same sentence as the defect.
@@ -154,6 +179,43 @@ function isVisualType(type: string, catalog: CatalogIndex): boolean {
   // three-cards-in-a-row case is *made* of them, so they have to count.
   if (isComponentRef(type)) return true;
   return !!catalog.getNode(type)?.isVisual;
+}
+
+/**
+ * GAM-022 (P78 D50) — how wide the item a `For Each` draws is, read off its template's visual root.
+ *
+ * Arm B's message is *"each item keeps the width it was given"*, which is true of a card given
+ * 340px or 32% and false of a pill sized by its label: TPL-006's tag sidebar and Rocket School's
+ * choice row wrap correctly on a phone, and were told to become 300px columns. The container is not
+ * the discriminator (both of those are full-width), the item is.
+ *
+ * `unknown` abstains, as everywhere in this module: a wired or unresolved template, a Component
+ * Children root, a component-instance root, or not exactly one visual root. Read on 2026-09-15, all
+ * three calibration grids resolve to one Group with a width, so abstaining silences none of them.
+ */
+function repeatedItemWidth(
+  repeater: ArrangementNode,
+  views: readonly ItemComponentView[],
+  connectedInputs: ReadonlySet<string> | undefined,
+  catalog: CatalogIndex
+): 'content' | 'sized' | 'unknown' {
+  if (connectedInputs?.has(`${repeater.id}::template`)) return 'unknown';
+  const template = repeater.parameters?.['template'];
+  if (typeof template !== 'string' || template === '') return 'unknown';
+  const legacyName = template.startsWith('/') ? template : `/${template}`;
+  const view = views.find((v) => v.name === template || v.name === legacyName);
+  if (!view) return 'unknown';
+
+  const childIds = new Set(view.nodes.flatMap((n) => n.children ?? []));
+  const roots = view.nodes.filter((n) => !n.parent && !(n.id !== undefined && childIds.has(n.id)));
+  if (roots.some((n) => n.type === COMPONENT_CHILDREN_TYPE)) return 'unknown';
+  const visualRoots = roots.filter((n) => isVisualType(n.type, catalog));
+  if (visualRoots.length !== 1 || isComponentRef(visualRoots[0].type)) return 'unknown';
+
+  const [root] = visualRoots;
+  // Unset reads as the catalog default: a Group is `explicit`, a Button is `contentSize`.
+  const sizeMode = root.parameters?.['sizeMode'] ?? catalog.inputDefaults(root.type)['sizeMode'];
+  return CONTENT_WIDTH_MODES.has(String(sizeMode)) ? 'content' : 'sized';
 }
 
 /** Total nodes in a subtree, counting the root. Cycle-safe: a corrupt graph is not a crash. */
@@ -188,7 +250,7 @@ export function checkResponsiveArrangement(
   nodes: readonly ArrangementNode[],
   options: CheckResponsiveArrangementOptions
 ): Diagnostic[] {
-  const { component, catalog, severity = 'warning' } = options;
+  const { component, catalog, severity = 'warning', views, connectedInputs } = options;
   const diagnostics: Diagnostic[] = [];
 
   const byId = new Map<string, ArrangementNode>(nodes.map((n) => [n.id, n]));
@@ -240,7 +302,15 @@ export function checkResponsiveArrangement(
     // the corpus split on: 3 of the 45 rows that parent a `For Each` set one,
     // and all three are the defect.
     const gutter = parameters['columnGap'];
-    if (wraps && repeaterChild && gutter !== undefined && gutter !== null && gutter !== '') {
+    if (
+      wraps &&
+      repeaterChild &&
+      gutter !== undefined &&
+      gutter !== null &&
+      gutter !== '' &&
+      // GAM-022 — only a grid of items given a width. No views: the item cannot be read, judge the row.
+      (!views || repeatedItemWidth(repeaterChild, views, connectedInputs, catalog) === 'sized')
+    ) {
       diagnostics.push({
         code: DiagnosticCode.UncollapsibleMultiColumn,
         severity,

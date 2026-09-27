@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2728d97b-89e1-5b63-880c-6de201baefde",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "parsequestioIn",
+      "fromProperty": "json",
+      "toId": "parsequestioFn",
+      "toProperty": "in-json"
+    },
+    {
+      "fromId": "parsequestioIn",
+      "fromProperty": "rows",
+      "toId": "parsequestioFn",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "parsequestioFn",
+      "fromProperty": "out-items",
+      "toId": "parsequestioOut",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "parsequestioFn",
+      "fromProperty": "out-count",
+      "toId": "parsequestioOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "parsequestioFn",
+      "fromProperty": "out-error",
+      "toId": "parsequestioOut",
+      "toProperty": "error"
+    },
+    {
+      "fromId": "parsequestioFn",
+      "fromProperty": "out-valid",
+      "toId": "parsequestioOut",
+      "toProperty": "valid"
+    },
+    {
+      "fromId": "parsequestioFn",
+      "fromProperty": "success",
+      "toId": "parsequestioOut",
+      "toProperty": "done"
+    }
+  ]
+}

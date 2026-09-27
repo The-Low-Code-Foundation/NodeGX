@@ -89,6 +89,48 @@ const TextInputNode = {
       },
       default: 'text'
     },
+    // GAM-011 (a) — which soft keyboard a touch screen opens, and what its Enter key says. Both reach the
+    // element as `inputmode` / `enterkeyhint`. **No default**: unset renders no attribute, so no field
+    // that exists today changes. 🔒 R12: `none` is the way to ask for no soft keyboard (an on-screen pad).
+    // Desktop browsers ignore both, so a desktop drive grades the attribute, not a keyboard.
+    inputMode: {
+      displayName: 'Input Mode',
+      description:
+        'Which on-screen keyboard a phone or tablet opens: Decimal for numbers with a decimal key, Telephone for digits, None for no keyboard when the page has its own keypad',
+      group: 'Text',
+      index: 20,
+      type: {
+        name: 'enum',
+        enums: [
+          { label: 'Text', value: 'text' },
+          { label: 'Numeric', value: 'numeric' },
+          { label: 'Decimal', value: 'decimal' },
+          { label: 'Telephone', value: 'tel' },
+          { label: 'Email', value: 'email' },
+          { label: 'URL', value: 'url' },
+          { label: 'Search', value: 'search' },
+          { label: 'None', value: 'none' }
+        ]
+      }
+    },
+    enterKeyHint: {
+      displayName: 'Enter Key Hint',
+      description: 'The word on the Enter key of a phone or tablet keyboard, such as Next, Go or Send',
+      group: 'Text',
+      index: 21,
+      type: {
+        name: 'enum',
+        enums: [
+          { label: 'Enter', value: 'enter' },
+          { label: 'Done', value: 'done' },
+          { label: 'Go', value: 'go' },
+          { label: 'Next', value: 'next' },
+          { label: 'Previous', value: 'previous' },
+          { label: 'Search', value: 'search' },
+          { label: 'Send', value: 'send' }
+        ]
+      }
+    },
     placeholder: {
       index: 22,
       group: 'Text',
@@ -197,6 +239,42 @@ const TextInputNode = {
         }
       }
     },
+    // GAM-011 (b) — an on-screen key. Insert Text writes at the caret (or over the selection) the way a
+    // pressed key does, **whether or not the field has focus**: `Set` abstains while focused, and a keypad
+    // tapped while the caret is in the box is exactly that case. 🔒 R12: Max length holds.
+    textToInsert: {
+      type: 'string',
+      // SIG-003: "Actions" holds signals only; the value Insert Text writes sits with the field's text.
+      group: 'Text',
+      displayName: 'Text To Insert',
+      description: 'What Insert Text writes, for example the digit on a keypad button',
+      set(value) {
+        this._internal.textToInsert = value === undefined || value === null ? '' : String(value);
+      }
+    },
+    insert: {
+      type: 'signal',
+      group: 'Actions',
+      displayName: 'Insert Text',
+      description:
+        'Writes Text To Insert at the caret, replacing any selection, as if it had been typed — even while the field has focus. Max length still applies',
+      valueChangedToTrue() {
+        const outcome = this.beginOutcome();
+        this.scheduleAfterInputsHaveUpdated(() => {
+          this.reportOutcome(outcome, this.edit('insert', this._internal.textToInsert || '') ? 'done' : 'unchanged');
+        });
+      }
+    },
+    backspace: {
+      type: 'signal',
+      group: 'Actions',
+      displayName: 'Backspace',
+      description: 'Deletes the selection, or the character before the caret, as the Backspace key does — even while the field has focus',
+      valueChangedToTrue() {
+        const outcome = this.beginOutcome();
+        this.reportOutcome(outcome, this.edit('backspace') ? 'done' : 'unchanged');
+      }
+    },
     clear: {
       type: 'signal',
       group: 'Actions',
@@ -214,8 +292,19 @@ const TextInputNode = {
       description: 'Puts the keyboard cursor in this field',
       valueChangedToTrue() {
         const outcome = this.beginOutcome();
-        this.context.setNodeFocused(this, true);
-        this.reportOutcome(outcome, 'done');
+        // 🔒 GAM-012 R13 — a field that is not on the page cannot take the cursor, and the Focus is
+        // not kept for later: taking focus once the field appears would steal it from wherever the
+        // person has gone since. So it ends here, and the author is told in the editor. A
+        // diagnostic is editor-only by contract, so a deployed page prints nothing.
+        const took = this.context.setNodeFocused(this, true) !== false;
+        this.setDiagnostic(
+          'focus/not-mounted',
+          took
+            ? null
+            : 'Focus arrived while this field was not on the page, so nothing was focused. A Focus is not kept for ' +
+                'later: send it once the field has mounted, for example from its row’s Did Mount'
+        );
+        this.reportOutcome(outcome, took ? 'done' : 'unchanged');
       }
     },
     blur: {
@@ -282,7 +371,9 @@ const TextInputNode = {
       description:
         'What the field currently contains, updated as the user types. A number when Type is Number, otherwise text',
       index: 1,
-      onChange() {
+      onChange(value) {
+        // GAM-009 — what was last announced, so a remount can tell a real change from a return.
+        this._internal.announced = { value };
         this.sendSignalOnOutput('textChanged');
       }
     },
@@ -311,16 +402,20 @@ const TextInputNode = {
      * changes, from typing as much as from a `Set`, and it does not fire at all when a `Set` was
      * absorbed.
      *
-     * No `Failure`: none of the four can fail. `Set` and `Clear` can legitimately do nothing,
-     * which is `Unchanged`; `Focus` and `Blur` always report `Done`, because
-     * `setNodeFocused` has no answer to give and "the field was already focused" is not a fact
-     * this node holds.
+     * No `Failure`: `Set` and `Clear` can legitimately do nothing, which is `Unchanged`. So can
+     * `Focus` since GAM-012 (R13): sent while the field is not mounted, it moves nothing and is not
+     * held, and `setNodeFocused` now says so. It is `Unchanged` and not `Failure` because a
+     * `Failure` raises on the error bus, which prints in a deployed page, and Richard ruled the
+     * message editor-only. The reason travels as the `focus/not-mounted` diagnostic. `Blur`
+     * still always reports `Done`.
      */
     ...outcomeOutputs({
-      done: 'Fires when Set, Clear, Focus or Blur did something',
+      done: 'Fires when Set, Clear, Insert Text, Backspace, Focus or Blur did something',
       unchanged:
         'Fires when a Set or Clear left the field as it was — most often a Set while the field ' +
-        'has focus, which is deliberately absorbed so it cannot overwrite what is being typed'
+        'has focus, which is deliberately absorbed so it cannot overwrite what is being typed — when Insert Text ' +
+        'or Backspace had nothing to write (a full Max length, or an empty field), or when a Focus arrived while ' +
+        'the field was not on the page'
     })
   },
   methods: {
@@ -331,6 +426,60 @@ const TextInputNode = {
     _blur() {
       if (!this.innerReactComponentRef) return;
       this.innerReactComponentRef.blur();
+    },
+    /** GAM-012 — the tracker asks before it records a Focus; see `focus-tracker.ts`. */
+    _canFocus() {
+      return !!this.innerReactComponentRef;
+    },
+    /** GAM-012 — being listed by the tracker is not holding focus: a remounted field is a new element. */
+    _hasFocus() {
+      return !!this.innerReactComponentRef && this.innerReactComponentRef.hasFocus();
+    },
+    /**
+     * GAM-009 🔒 R10 (a) — typing writes the start value, so a field that unmounts and mounts again
+     * starts from what the person typed. Called by the component on a real keystroke only.
+     *
+     * ⚠️ `_internal.text` is deliberately left alone. It is the author's last Value, and R10 keeps
+     * `Set` meaning that: typed over, an unfocused `Set` still puts the author's Value back.
+     */
+    _typed(text) {
+      this.props.startValue = text;
+    },
+    /**
+     * GAM-009 🔒 R10 — did the Value output last announce exactly this? The component's mount asks
+     * before it announces. A value `setText` or `Clear` wrote while unmounted flags the output but
+     * sends no `Value Changed`, so it is not announced and the mount still sends it.
+     */
+    _announcedValueIs(value) {
+      return this._internal.announced !== undefined && this._internal.announced.value === value;
+    },
+    /**
+     * GAM-011 (b) — Insert Text and Backspace. Mounted, the component edits at the caret. Not mounted,
+     * there is no caret, so Insert appends to (and Backspace trims) the value the field will start from,
+     * and the Value output says so at once, as `Set` does while unmounted.
+     *
+     * @returns whether the text changed — `Unchanged` when not.
+     */
+    edit(mode, text) {
+      if (this.innerReactComponentRef) return this.innerReactComponentRef.edit(mode, text);
+
+      const current = this.props.startValue === undefined || this.props.startValue === null ? '' : String(this.props.startValue);
+      let next;
+      if (mode === 'backspace') {
+        const chars = Array.from(current);
+        chars.pop();
+        next = chars.join('');
+      } else {
+        const maxLength = Number(this.props.maxLength);
+        const room = maxLength > 0 ? Math.max(0, maxLength - current.length) : Infinity;
+        next = current + Array.from(String(text ?? '')).reduce((kept: string, ch: string) => (kept.length + ch.length <= room ? kept + ch : kept), '');
+      }
+      if (next === current) return false;
+
+      this.props.startValue = next;
+      this.outputPropValues['onTextChanged'] = outwardValueForFieldType(this.props.type, next);
+      this.flagOutputDirty('onTextChanged');
+      return true;
     },
     /** @returns whether anything actually changed — ERG-001 §4 reports `Unchanged` when not. */
     clear() {

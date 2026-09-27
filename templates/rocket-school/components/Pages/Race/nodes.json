@@ -1,0 +1,333 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e9119548-cdcd-560e-88b8-7b9710b2a3ef",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rcPage",
+      "type": "Page",
+      "label": "Race",
+      "children": [
+        "rcOuter"
+      ],
+      "parameters": {
+        "title": "Rocket Race",
+        "urlPath": "race"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rcOuter",
+      "type": "Group",
+      "label": "The ground",
+      "parent": "rcPage",
+      "children": [
+        "rcWrap"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "rcWrap",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "rcOuter",
+      "children": [
+        "rcHeader",
+        "rcTitle",
+        "rcSetup",
+        "rcPlay"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "rowGap": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "maxWidth": {
+          "value": 960,
+          "unit": "px"
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "rcHeader",
+      "type": "/Game/Header",
+      "label": "The bar",
+      "parent": "rcWrap",
+      "parameters": {
+        "showHome": true,
+        "showHangar": true
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "rcTitle",
+      "type": "Text",
+      "label": "Rocket Race",
+      "parent": "rcWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-tight)",
+        "letterSpacing": "var(--tracking-tight)",
+        "color": "var(--foreground)",
+        "as": "h2",
+        "fontFamily": "Grandstander"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "rcSetup",
+      "type": "/Race/Setup",
+      "label": "Before the race",
+      "parent": "rcWrap",
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "rcPlay",
+      "type": "/Race/Play",
+      "label": "The race",
+      "parent": "rcWrap",
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "rcStore",
+      "type": "/Logic/App store",
+      "label": "The store",
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "rcMe",
+      "type": "/Logic/Active profile",
+      "label": "Who is playing",
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "rcWords",
+      "type": "/Data/Words",
+      "label": "The words",
+      "x": 470,
+      "y": 2560
+    },
+    {
+      "id": "rcT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "rcCurriculum",
+      "type": "/Data/Curriculum",
+      "label": "The skills",
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "rcWordLists",
+      "type": "/Data/Word lists",
+      "label": "The typing words",
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "rcSave",
+      "type": "/Logic/Save model",
+      "label": "Remember what was learned",
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "rcKeys",
+      "type": "/Logic/Update settings",
+      "label": "Keep the keyboard a key press reports",
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "rcPick",
+      "type": "/Logic/Update settings",
+      "label": "Keep the keyboard picked beside the map",
+      "x": 470,
+      "y": 1840
+    },
+    {
+      "id": "rcNoOne",
+      "type": "Expression",
+      "label": "Nobody signed in?",
+      "parameters": {
+        "expression": "has === false"
+      },
+      "x": 470,
+      "y": 2680
+    },
+    {
+      "id": "rcGuard",
+      "type": "Condition",
+      "label": "Send them to the profiles?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "rcGoProfiles",
+      "type": "RouterNavigate",
+      "label": "To the profiles",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Profiles"
+      },
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "rcGoHome",
+      "type": "RouterNavigate",
+      "label": "Home",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Home"
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "rcGoHangar",
+      "type": "RouterNavigate",
+      "label": "To the hangar",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Hangar"
+      },
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "rcPlaying",
+      "type": "Variable2",
+      "label": "Racing?",
+      "parameters": {
+        "name": "racePlaying"
+      },
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "rcSetPlaying",
+      "type": "Set Variable",
+      "label": "Racing now",
+      "parameters": {
+        "name": "racePlaying"
+      },
+      "x": 470,
+      "y": 1960
+    },
+    {
+      "id": "rcSetDone",
+      "type": "Set Variable",
+      "label": "Not racing",
+      "parameters": {
+        "name": "racePlaying"
+      },
+      "x": 470,
+      "y": 2080
+    },
+    {
+      "id": "rcInitDone",
+      "type": "Set Variable",
+      "label": "Not racing yet (on load)",
+      "parameters": {
+        "name": "racePlaying"
+      },
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "rcTrue",
+      "type": "Expression",
+      "label": "True",
+      "parameters": {
+        "expression": "true"
+      },
+      "x": 470,
+      "y": 2800
+    },
+    {
+      "id": "rcFalse",
+      "type": "Expression",
+      "label": "False",
+      "parameters": {
+        "expression": "false"
+      },
+      "x": 470,
+      "y": 2920
+    },
+    {
+      "id": "rcNotPlaying",
+      "type": "Expression",
+      "label": "Setting up?",
+      "parameters": {
+        "expression": "!playing"
+      },
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "rcNameB",
+      "type": "Expression",
+      "label": "Player two, or the computer",
+      "parameters": {
+        "expression": "players === 2 && ((nameB || '') + '').trim() ? nameB : 'CPU'"
+      },
+      "x": 470,
+      "y": 2200
+    },
+    {
+      "id": "rcSoundsEnd",
+      "type": "/Logic/Play sounds",
+      "label": "The fanfare",
+      "x": 470,
+      "y": 2320
+    },
+    {
+      "id": "rcTeachCards",
+      "type": "/Data/Teach cards",
+      "label": "The Teach cards",
+      "x": 470,
+      "y": 2440
+    }
+  ],
+  "visualRoots": [
+    "rcPage"
+  ]
+}

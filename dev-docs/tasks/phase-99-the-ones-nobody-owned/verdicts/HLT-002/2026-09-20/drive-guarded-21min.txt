@@ -1,0 +1,84 @@
+ok    the editor bundle is reachable (__wreq pushed) — true
+ok    the instrument is armed before a single action is driven — armed
+ok    the RUNNING bundle carries the seam this run means to grade (--expect 0) — GUARDED
+opening /Users/richardosborne/vscode_projects/NodeGX test projects/HLT-002 Thumbnail Drive (editor had NONE)
+ok    the driven project is the copy this drive names — /Users/richardosborne/vscode_projects/NodeGX test projects/HLT-002 Thumbnail Drive
+ok    no dev-server error overlay is covering the window — none
+ok    the capturePage counter is armed — the deterministic half of the control — armed
+ok    the project has components to drive — 6 components
+
+phase A — app preview showing (the capture should succeed here)
+ok    phase A really is the app preview — the mode is read, not assumed — ok → app
+  [app] attempts 2 · capturePage calls 2 · succeeded 2 · failed 0 · rejections 0
+ok    🔴 the capture SUCCEEDS while the app preview is showing — the feature works, here, in this run — 2 successful captures, 0 failed
+
+phase B — bench mode (app stage hidden with visibility, webview still attached)
+ok    🔴 in bench mode the app webview is STILL ATTACHED but NOT VISIBLE — the state the guard cannot see — mode=bench isConnected=true visible=false ok
+  [bench] attempts 4 · capturePage calls 2 · succeeded 2 · failed 0 · rejections 0
+
+phase C — board mode
+ok    the drive REALLY ENTERED board mode — the board is mounted, not merely "something is hidden" — ok → board
+  [board] attempts 7 · capturePage calls 2 · succeeded 2 · failed 0 · rejections 0
+ok    🔴 the guarded build calls capturePage ZERO times while the stage is hidden, having still ticked — 0 calls across 3 ticks
+
+phase D — back to the app preview
+ok    the drive REALLY RETURNED to the app preview — the stage is showing again — ok → app
+  [app again] attempts 9 · capturePage calls 4 · succeeded 4 · failed 0 · rejections 0
+ok    AC3 — the capture still SUCCEEDS once the app preview is showing again (the control, in this run) — 2 → 4 successful captures
+
+phase E — 17.9 more minutes of ordinary use (AC1 asks for 21)
+  [minute 3.5] attempts 10 · capturePage calls 5 · succeeded 5 · failed 0 · rejections 0
+  [minute 3.8] attempts 11 · capturePage calls 6 · succeeded 6 · failed 0 · rejections 0
+  [minute 4.6] attempts 13 · capturePage calls 7 · succeeded 7 · failed 0 · rejections 0
+  [minute 5.0] attempts 14 · capturePage calls 8 · succeeded 8 · failed 0 · rejections 0
+  [minute 5.3] attempts 15 · capturePage calls 9 · succeeded 9 · failed 0 · rejections 0
+  [minute 6.6] attempts 18 · capturePage calls 11 · succeeded 11 · failed 0 · rejections 0
+  [minute 6.9] attempts 19 · capturePage calls 12 · succeeded 12 · failed 0 · rejections 0
+  [minute 7.3] attempts 20 · capturePage calls 13 · succeeded 13 · failed 0 · rejections 0
+  [minute 8.0] attempts 22 · capturePage calls 14 · succeeded 14 · failed 0 · rejections 0
+  [minute 8.4] attempts 23 · capturePage calls 15 · succeeded 15 · failed 0 · rejections 0
+  [minute 8.7] attempts 24 · capturePage calls 16 · succeeded 16 · failed 0 · rejections 0
+  [minute 10.0] attempts 27 · capturePage calls 18 · succeeded 18 · failed 0 · rejections 0
+  [minute 10.4] attempts 28 · capturePage calls 19 · succeeded 19 · failed 0 · rejections 0
+  [minute 10.7] attempts 29 · capturePage calls 20 · succeeded 20 · failed 0 · rejections 0
+  [minute 11.5] attempts 31 · capturePage calls 21 · succeeded 21 · failed 0 · rejections 0
+  [minute 11.8] attempts 32 · capturePage calls 22 · succeeded 22 · failed 0 · rejections 0
+  [minute 12.2] attempts 33 · capturePage calls 23 · succeeded 23 · failed 0 · rejections 0
+  [minute 13.4] attempts 36 · capturePage calls 25 · succeeded 25 · failed 0 · rejections 0
+  [minute 13.8] attempts 37 · capturePage calls 26 · succeeded 26 · failed 0 · rejections 0
+  [minute 14.1] attempts 38 · capturePage calls 27 · succeeded 27 · failed 0 · rejections 0
+  [minute 14.9] attempts 40 · capturePage calls 28 · succeeded 28 · failed 0 · rejections 0
+  [minute 15.3] attempts 41 · capturePage calls 29 · succeeded 29 · failed 0 · rejections 0
+  [minute 15.6] attempts 42 · capturePage calls 30 · succeeded 30 · failed 0 · rejections 0
+  [minute 16.9] attempts 45 · capturePage calls 32 · succeeded 32 · failed 0 · rejections 0
+  [minute 17.2] attempts 46 · capturePage calls 33 · succeeded 33 · failed 0 · rejections 0
+  [minute 17.6] attempts 47 · capturePage calls 34 · succeeded 34 · failed 0 · rejections 0
+  [minute 18.4] attempts 49 · capturePage calls 35 · succeeded 35 · failed 0 · rejections 0
+  [minute 18.7] attempts 50 · capturePage calls 36 · succeeded 36 · failed 0 · rejections 0
+  [minute 19.1] attempts 51 · capturePage calls 37 · succeeded 37 · failed 0 · rejections 0
+  [minute 20.3] attempts 54 · capturePage calls 39 · succeeded 39 · failed 0 · rejections 0
+  [minute 20.7] attempts 55 · capturePage calls 40 · succeeded 40 · failed 0 · rejections 0
+  [minute 21.0] attempts 56 · capturePage calls 41 · succeeded 41 · failed 0 · rejections 0
+
+capture attempts: 56 (succeeded 41, failed 0) · capturePage calls: 41
+driven UNHANDLED REJECTIONS matching "UnknownVizError": 0
+console.error events matching "UnknownVizError": 0
+
+what the webview WAS at each failure (the mechanism arm):
+  {"how":"skipped (returned null)","domReady":true,"isConnected":true,"visible":false,"pageVisibility":"visible","rect":"988x285"}
+  {"how":"skipped (returned null)","domReady":true,"isConnected":true,"visible":false,"pageVisibility":"visible","rect":"988x285"}
+  {"how":"skipped (returned null)","domReady":true,"isConnected":true,"visible":false,"pageVisibility":"visible","rect":"988x285"}
+  {"how":"skipped (returned null)","domReady":true,"isConnected":true,"visible":false,"pageVisibility":"visible","rect":"988x285"}
+  {"how":"skipped (returned null)","domReady":true,"isConnected":true,"visible":false,"pageVisibility":"visible","rect":"988x285"}
+  {"how":"skipped (returned null)","domReady":true,"isConnected":true,"visible":false,"pageVisibility":"visible","rect":"988x285"}
+  {"how":"skipped (returned null)","domReady":true,"isConnected":true,"visible":false,"pageVisibility":"visible","rect":"988x285"}
+  {"how":"skipped (returned null)","domReady":true,"isConnected":true,"visible":false,"pageVisibility":"visible","rect":"988x285"}
+
+per phase — app 0 · bench 0 · board 0 · app again 0 (cumulative)
+log lines matching, written SINCE this drive began (lines ≠ events): 0
+ok    🔴 the drive REACHED the capture — it ran on the timer during this session — 56 attempts
+ok    AC1 — the driven session logs ZERO UnknownVizError rejections — 0 rejections
+ok    and the log written since this drive began carries none either — 0 log lines
+ok    AC4 — the cure is not a move: no console.error carries it either — 0 console errors
+
+PASSED — 18/18 graded arms

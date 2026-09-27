@@ -175,6 +175,15 @@ export function classifyRoute(pattern: string, accessKind: string): RouteClass {
     case 'data':
     case 'data-perOp':
       return 'data';
+    // FED-005 — the MCP endpoint spends the DATA budget, not the public one.
+    // Every call it serves is a query, a write or a function run, so the class
+    // that matches what it costs is `data`; letting it fall through to the
+    // `default` would have given a credentialed door the budget meant for
+    // `/health`. It is deliberately NOT `functions`: most calls are rows, and
+    // the per-function budget (CWF-017) is not spent here at all — see
+    // McpRoutes' door table.
+    case 'mcp':
+      return 'data';
     case 'function':
       return 'functions';
     case 'files':
@@ -207,6 +216,9 @@ const AUTH_PATTERNS = new Set([
   // admin-credentialed and the dashboard polls it, so it belongs to the admin
   // budget. The login DOCUMENT is the guessable surface.
   '_admin',
+  // BMG-014: the manager's email + password sign-in. A credential is PRESENTED
+  // here, so it spends the auth budget like `login` does.
+  '_admin/login',
   'requestPasswordReset',
   'verificationEmailRequest',
   'apps/:appId/request_password_reset',

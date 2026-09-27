@@ -422,7 +422,51 @@ function _fromJSON(item, collectionName, modelScope) {
   return m;
 }
 
+/**
+ * P99 HLT-022 (a): one backend record as the ROW, for `Records.query/fetch(…, { plain: true })`.
+ *
+ * `_fromJSON` makes every nested object a Model with a generated id — right for an app that
+ * binds to it, wrong for a cloud function that wants back the document it saved: a lesson's
+ * sections lost their `id`s (a Model's `id` is read-only) and a facts map grew one per read.
+ *
+ * Only the wire's own top-level envelopes are unwrapped — a Date column to its ISO string, a
+ * Pointer to the id it points at, an included row to a plain row; a Relation field carries no
+ * data and is left out, as `_fromJSON` leaves it out. Everything else, at any depth, is the
+ * value as stored. `objectId` stays on the row.
+ *
+ * @param {Record<string, unknown>} item
+ * @returns {Record<string, unknown>}
+ */
+function _plainFromJSON(item) {
+  const row = {};
+  for (const key in item) {
+    if (key === 'ACL') continue;
+    const value = item[key];
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      if (value.__type === 'Relation') continue;
+      if (value.__type === 'Date' && typeof value.iso === 'string') {
+        row[key] = value.iso;
+        continue;
+      }
+      if (value.__type === 'Pointer' && value.objectId !== undefined) {
+        row[key] = value.objectId;
+        continue;
+      }
+      if (value.__type === 'Object' && value.className !== undefined && value.objectId !== undefined) {
+        const included = Object.assign({}, value);
+        delete included.__type;
+        delete included.className;
+        row[key] = _plainFromJSON(included);
+        continue;
+      }
+    }
+    row[key] = value;
+  }
+  return row;
+}
+
 CloudStore._fromJSON = _fromJSON;
+CloudStore._plainFromJSON = _plainFromJSON;
 CloudStore._deserializeJSON = _deserializeJSON;
 CloudStore._serializeObject = _serializeObject;
 /** Exported for the REST serialiser, which has to unwrap a `Model`/`Collection` too. */

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8cf5e03f-ac7e-5604-80cf-b7a11fdabb5d",
+  "name": "Money row",
+  "path": "/Week/Money row",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One thing that happens to the money, in the Money modal: a tick, its date, what it is and where it came from, the amount, and the balance after it."
+}

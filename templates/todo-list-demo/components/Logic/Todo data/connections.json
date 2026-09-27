@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0bc34de3-fb10-555e-8cb4-cbe4ebec170d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "dtIn",
+      "fromProperty": "refresh",
+      "toId": "dtRead",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "dtIn",
+      "fromProperty": "loadHistory",
+      "toId": "dtRead",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "dtSelected",
+      "fromProperty": "value",
+      "toId": "dtRead",
+      "toProperty": "in-taskId"
+    },
+    {
+      "fromId": "dtIn",
+      "fromProperty": "reset",
+      "toId": "dtForget",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "dtForget",
+      "fromProperty": "out-done",
+      "toId": "dtForgetLast",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "dtForgetLast",
+      "fromProperty": "done",
+      "toId": "dtRead",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "dtRead",
+      "fromProperty": "out-failure",
+      "toId": "dtLoadProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "dtRead",
+      "fromProperty": "out-tasks",
+      "toId": "dtOut",
+      "toProperty": "tasks"
+    },
+    {
+      "fromId": "dtRead",
+      "fromProperty": "out-actions",
+      "toId": "dtOut",
+      "toProperty": "actions"
+    },
+    {
+      "fromId": "dtRead",
+      "fromProperty": "out-events",
+      "toId": "dtOut",
+      "toProperty": "events"
+    },
+    {
+      "fromId": "dtRead",
+      "fromProperty": "out-recent",
+      "toId": "dtOut",
+      "toProperty": "recent"
+    }
+  ]
+}

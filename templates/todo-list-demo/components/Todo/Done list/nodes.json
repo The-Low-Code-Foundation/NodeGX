@@ -1,0 +1,123 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "de3ca29f-f184-58c9-82a6-4069b2308e41",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "dlIn",
+      "type": "Component Inputs",
+      "label": "The rows",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "dlOut",
+      "type": "Component Outputs",
+      "label": "Opened",
+      "ports": [
+        {
+          "name": "open",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "taskId",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "dlRoot",
+      "type": "Group",
+      "label": "Done list",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border-subtle)"
+      },
+      "children": [
+        "dlEach",
+        "dlEmpty"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "dlEach",
+      "type": "For Each",
+      "label": "One row per closed task",
+      "parent": "dlRoot",
+      "parameters": {
+        "template": "/Todo/Done row",
+        "templateType": "explicit"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "dlEmpty",
+      "type": "Text",
+      "label": "When nothing is closed",
+      "parent": "dlRoot",
+      "parameters": {
+        "text": "Nothing closed yet.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "marginTop": "var(--space-3)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "dlCount",
+      "type": "JavaScriptFunction",
+      "label": "Is it empty?",
+      "parameters": {
+        "functionScript": "Outputs.empty = (Inputs.rows || []).length === 0;"
+      },
+      "x": 350,
+      "y": 400,
+      "ports": [
+        {
+          "name": "in-rows",
+          "displayName": "rows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "dlRoot"
+  ]
+}

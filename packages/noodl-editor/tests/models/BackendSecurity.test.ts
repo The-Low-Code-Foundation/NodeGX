@@ -17,7 +17,6 @@ import { BACKEND_TYPES, type BackendType } from '@noodl/backend-contract';
 import { ENDPOINT_BACKEND_ID } from '../../src/editor/src/models/BackendServices/activeBackend';
 import {
   buildBackendList,
-  dataBrowserAvailability,
   endpointBackendType,
   matchEndpointToManaged
 } from '../../src/editor/src/models/BackendServices/backendList';
@@ -277,15 +276,6 @@ describe('BCN-009 — one list from three mechanisms', () => {
     expect(entries[0].detail).toContain('backend_ms94j6xso72rl');
     expect(entries[0].backendId).toBe(ENDPOINT_BACKEND_ID);
   });
-
-  it('offers the record grid only where the editor can actually reach it, with a reason where it cannot', () => {
-    const managed = dataBrowserAvailability('nodegx', 'managed');
-    expect(managed.isAvailable).toBe(true);
-
-    const external = dataBrowserAvailability('directus', 'external');
-    expect(external.isAvailable).toBe(false);
-    expect(external.reason.length).toBeGreaterThan(0);
-  });
 });
 
 /**
@@ -318,7 +308,7 @@ describe('AAQ-002 — the provisioned backend is one entry', () => {
     expect(matchEndpointToManaged(undefined, [local])).toBeUndefined();
   });
 
-  it('gives the surviving entry the badge, and the Data Browser with it', () => {
+  it('gives the surviving entry the badge (and, since BMG-012, the manager button with it)', () => {
     const entries = buildBackendList({
       managed: [local],
       endpoint: { id: 'backend_abc', endpoint: 'http://localhost:8577', appId: 'backend_abc', type: 'nodegx' },
@@ -330,9 +320,9 @@ describe('AAQ-002 — the provisioned backend is one entry', () => {
     expect(entries[0].kind).toBe('managed');
     expect(entries[0].isActive).toBe(true);
     expect(entries[0].isProjectEndpoint).toBe(true);
-    // The point of folding them: this is the gate the crippled card failed, with
-    // a reason written for foreign Parse servers.
-    expect(dataBrowserAvailability(entries[0].type, entries[0].kind).isAvailable).toBe(true);
+    // The point of folding them: the surviving entry is the MANAGED one, which is
+    // the card that can open the backend manager (BMG-012: the record grid's
+    // availability gate went with the grid).
   });
 
   it('leaves a deployed or foreign endpoint its own entry — there is no process here to fold it into', () => {

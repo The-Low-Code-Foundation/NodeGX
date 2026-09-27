@@ -27,8 +27,8 @@
  * against it, so the number is comparable even if not philosophically exact.
  *
  * Permanent exemptions (never counted, listed in `exclude` below):
- *   - Vendored third-party CSS we do not own or edit: Font Awesome.
- *     (`packages/noodl-editor/src/assets/lib/fontawesome/`)
+ *   - `colors.css`, where the palette's hex literals are DEFINED.
+ *     (Font Awesome's vendored CSS stood here until CHR-010 deleted it.)
  *
  * Documented in-source exemptions (counted, but explained where they live):
  *   - The Lessons tutorial popup's light cream card + sage-teal accent in
@@ -138,7 +138,12 @@ function countAll(baseline) {
   const byPackage = {};
 
   for (const file of cssFiles) {
-    const count = countFile(file, false);
+    // 🔴 SCSS has `//` comments and plain CSS does not, so the line-comment strip is per-extension.
+    // Without it this gate counts its OWN prose: a comment explaining why a colour moved names the
+    // colour, and the file "grows" by one literal for saying so (P92 s33, PrimaryButton). A gate
+    // that reddens on its changelog is one somebody switches off — the same lesson
+    // `scripts/icon-font-gate.js` was built with.
+    const count = countFile(file, file.endsWith('.scss'));
     if (count === 0) continue;
     byFile[file] = count;
     const pkg = packageOf(file);

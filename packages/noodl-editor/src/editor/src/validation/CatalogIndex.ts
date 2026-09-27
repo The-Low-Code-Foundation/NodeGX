@@ -25,13 +25,19 @@ export type { NodeCatalog, CatalogNode, CatalogPort };
  * connection names a port we can't find on such a node, we must NOT error: the
  * port is very likely legitimate and runtime-determined.
  *
- * `declared-port-groups` is deliberately absent — its ports are (mostly) listed
- * in the static inputs/outputs plus `declaredPortGroups`. But because a handful
- * of legacy/adapter port names (e.g. Text Input's `disabled`) are reachable on
- * such nodes without appearing in either list, ANY node carrying dynamic ports
- * still takes the conservative skip path in the port rule (see `isDynamicNode`).
- * This matches the SUB-004 corpus preview, which produced zero static-port
- * false positives across the whole real-project corpus.
+ * `declared-port-groups` is deliberately absent: its ports are listed in the
+ * static inputs/outputs plus `declaredPortGroups`. So is `runtime-narrowed`, a
+ * `setup` that republishes ports the node already declares with a narrower type
+ * (Text Input, Options) and mints no new name.
+ *
+ * 🔴 GAM-019 — this comment used to say the port rule skips ANY dynamic node
+ * because "legacy/adapter port names (e.g. Text Input's `disabled`) are reachable
+ * without appearing in either list". Re-read 2026-09-14: the deprecated Text
+ * Input's `disabled` input is commented out (`nodes-deprecated/controls/
+ * text-input.tsx`), so a wire to it cannot reach anything at runtime. A census
+ * of 7,260 endpoints on the affected types across 178 projects (templates,
+ * prefabs, project-examples, NodeGX test projects) found **zero** to an
+ * undeclared port. The port rule now skips on {@link CatalogIndex.hasRuntimeDynamicPorts}.
  */
 const RUNTIME_DYNAMIC_MECHANISMS = new Set([
   'runtime-discovered',
@@ -332,10 +338,40 @@ export class CatalogIndex {
     return nearest(unknown, this.allTypeNames);
   }
 
-  /** Nearest port name (of a plug) to an unknown port string, if close enough. */
-  suggestPort(typeName: string, plug: Plug, unknown: string): string | undefined {
-    return nearest(unknown, this.portNames(typeName, plug));
+  /**
+   * Nearest port name (of a plug) to an unknown port string, if close enough.
+   *
+   * GAM-019 (ruled 2026-09-14) — pass the `kind` the wire carries, and a port of the other kind
+   * is never the suggestion. Edit distance alone offered D66's `text` the signal `set` for a
+   * string wire, and an agent that follows the first hint wires a value into a signal. A port
+   * with no kind (`*`) stays a candidate either way; no `kind` filters nothing.
+   */
+  suggestPort(typeName: string, plug: Plug, unknown: string, kind?: PortKind): string | undefined {
+    const names = this.portNames(typeName, plug);
+    const candidates = kind
+      ? names.filter((name) => {
+          const own = this.portKind(typeName, plug, name);
+          return own === undefined || own === kind;
+        })
+      : names;
+    return nearest(unknown, candidates);
   }
+
+  /** Whether a statically-known port carries a signal or a value; `undefined` for `*` or unknown. */
+  portKind(typeName: string, plug: Plug, portName: string): PortKind | undefined {
+    const port = this.getPort(typeName, plug, portName);
+    if (!port) return undefined;
+    return portKindOfTypeName(port.isSignal ? 'signal' : CatalogIndex.portTypeName(port));
+  }
+}
+
+/** GAM-019 — what a wire carries, for matching a suggestion to it. */
+export type PortKind = 'signal' | 'value';
+
+/** `signal` → signal; `*`, empty or unknown → no kind; any other type name → value. */
+export function portKindOfTypeName(typeName: string | undefined): PortKind | undefined {
+  if (!typeName || typeName === '*') return undefined;
+  return typeName === 'signal' ? 'signal' : 'value';
 }
 
 // ─── Edit distance ──────────────────────────────────────────────────────────

@@ -1,0 +1,114 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2728d97b-89e1-5b63-880c-6de201baefde",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "parsequestioIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "json",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "parsequestioFn",
+      "type": "JavaScriptFunction",
+      "label": "Parse question set",
+      "parameters": {
+        "functionScript": "\n// Accepts the editor's rows OR pasted JSON: [{ \"q\": \"...\", \"a\": \"...\", \"opts\": [...] }] — or [[\"q\",\"a\"], ...].\nvar raw = Inputs.json;\nvar rows = Inputs.rows;\nvar items = [], error = '';\nfunction push(q, a, opts) { q = String(q === undefined ? '' : q).trim(); a = String(a === undefined ? '' : a).trim(); if (q && a) items.push(opts && opts.length ? { q: q, a: a, opts: opts.map(String) } : { q: q, a: a }); }\nif (Array.isArray(rows) && rows.length) { for (var i = 0; i < rows.length; i++) push(rows[i].q, rows[i].a, rows[i].opts); }\nelse if (typeof raw === 'string' && raw.trim()) {\n  try {\n    var parsed = JSON.parse(raw);\n    if (!Array.isArray(parsed)) throw new Error('not a list');\n    for (var j = 0; j < parsed.length; j++) { var it = parsed[j]; if (Array.isArray(it)) push(it[0], it[1], it[2]); else if (it && typeof it === 'object') push(it.q || it.question, it.a || it.answer, it.opts || it.options); }\n  } catch (e) { error = 'That is not a list of questions. Expected [{\"q\": \"...\", \"a\": \"...\"}].'; }\n}\nOutputs.items = items;\nOutputs.count = items.length;\nOutputs.error = error;\nOutputs.valid = items.length > 0 && !error;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-json",
+          "displayName": "json",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rows",
+          "displayName": "rows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "displayName": "error",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-valid",
+          "displayName": "valid",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "parsequestioOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "items",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "error",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "valid",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

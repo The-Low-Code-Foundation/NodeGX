@@ -361,7 +361,8 @@
  * is filed as a follow-up rather than faked here; `cursor: help` says
  * "informational" instead of promising a click that would do nothing.
  * -------------------------------------------------------------------------- */
-.Warning {
+.Warning,
+.WarningSlot {
   flex: 0 0 auto;
   width: 6px;
   height: 6px;
@@ -369,6 +370,146 @@
   border-radius: var(--radius-full);
   background-color: var(--theme-color-warning);
   cursor: help;
+}
+
+/* TVW-001 (c) — the empty half of that pair: reserves the dot's width so every row's meta shares
+   one right edge. No background, no cursor, nothing to hover. */
+.WarningSlot {
+  background: none;
+  cursor: inherit;
+}
+
+/* -----------------------------------------------------------------------------
+ * TVW-001 (b) — the row's right-hand meta.
+ *
+ * Quieter than the label on purpose: it answers "where is this used" for a row
+ * you are already reading, and must never compete with the name. `unplaced` and
+ * `empty` are dimmed and italic — a fact about absence, said in the voice of an
+ * absence. `not in a router` is the one that is a problem, so it takes the
+ * warning colour the dot already uses rather than a new one.
+ * -------------------------------------------------------------------------- */
+.Meta {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 45%;
+  margin-left: var(--spacing-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--theme-color-fg-default);
+}
+
+.Meta-unplaced,
+.Meta-empty {
+  font-style: italic;
+  color: var(--theme-color-fg-muted);
+}
+
+.Meta-route {
+  color: var(--theme-color-fg-muted);
+}
+
+.Meta-unrouted {
+  color: var(--theme-color-warning);
+}
+
+.TreeItem.Selected .Meta-count {
+  color: var(--theme-color-fg-highlight);
+}
+
+/* TVW-001 (c) — `×N` is a button: it opens the *Used in* list. It has to stay the same size and
+   colour as the label it replaced (the meta column's rhythm is shared with routes and `unplaced`),
+   so the affordance is the hover, not a border or a background at rest. */
+.MetaButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.MetaButton:hover {
+  color: var(--theme-color-fg-highlight);
+  text-decoration: underline;
+}
+
+.MetaButton:focus-visible {
+  outline: 2px solid var(--theme-color-primary);
+  outline-offset: 1px;
+}
+
+/* TVW-001 (d) — the start page's marker, in front of its route. Same voice as the meta, one step
+   louder: it is the one page that opens by itself. */
+.MetaStart {
+  flex: 0 0 auto;
+  margin-left: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--theme-color-fg-default);
+}
+
+.MetaStart + .Meta {
+  margin-left: var(--spacing-1);
+}
+
+/* -----------------------------------------------------------------------------
+ * TVW-001 (d) — section headings: Pages, Components, Logic, Cloud functions.
+ *
+ * A heading, not a row: the row height (30px, CHR-009) so the rhythm does not
+ * break, the tree inset so its label starts where a level-0 caret does, and the
+ * muted small caps the mock draws. The count sits where a row's meta sits.
+ * A Router's group inside Pages is the same heading, quieter and unspaced.
+ * -------------------------------------------------------------------------- */
+.Section {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: 30px;
+  padding: 0 var(--spacing-3) 0 var(--tree-inset);
+  margin-top: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--theme-color-fg-muted);
+  user-select: none;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.Section-router {
+  margin-top: 0;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.SectionLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.SectionCount {
+  flex: 0 0 auto;
+  margin-left: var(--spacing-2);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.SectionEmpty {
+  padding: 0 var(--spacing-3) var(--spacing-2) var(--tree-inset);
+  font-size: var(--font-size-xs);
+  color: var(--theme-color-fg-muted);
 }
 
 /* -----------------------------------------------------------------------------
@@ -380,8 +521,7 @@
   display: flex;
   align-items: center;
   min-height: 26px;
-  padding: 0 var(--spacing-2) 0
-    calc(var(--tree-inset) + var(--level, 0) * var(--tree-indent) + var(--tree-caret-slot));
+  padding: 0 var(--spacing-2) 0 calc(var(--tree-inset) + var(--level, 0) * var(--tree-indent) + var(--tree-caret-slot));
   background-color: var(--theme-color-bg-3);
 }
 
@@ -406,4 +546,386 @@
     background-color: var(--theme-color-primary);
     color: var(--theme-color-on-primary);
   }
+}
+
+/* -----------------------------------------------------------------------------
+ * TVW-004 — the Layers tab.
+ *
+ * Every row here is the Components tab's `.TreeItem`: same height, same caret
+ * slot, same glyph box, same category colours, same indent guides. What differs
+ * is the arithmetic, and only because it was measured:
+ *
+ *   --tree-indent: 10px  — Richard, 2026-09-18. At the Components tab's 12px,
+ *   28% of the 47,494 rows on this machine sat past the right edge of a 240px
+ *   panel with no room left for a name. The step was reduced AND the depth the
+ *   row is drawn at is capped at 8 levels in `layersTree.ts` (`indentFor`), so
+ *   the widest indent a Layers row can ever carry is 80px. `data-level` keeps
+ *   the true depth for anything that needs to read it.
+ * -------------------------------------------------------------------------- */
+.LayersTree {
+  --tree-indent: 10px;
+}
+
+/* The band: `INSIDE MAIN NAVBAR` / `EDITING HERO` / `SHOWING HOME`.
+   A heading over the rows it introduces, not a row: it names the boundary
+   between two components' files, and there is nothing there to select. */
+.LayerBand {
+  cursor: default;
+
+  &:hover {
+    background-color: transparent;
+  }
+}
+
+.LayerBandLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-family-code, monospace);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--theme-color-node-category-component);
+}
+
+/* The editing region: the canvas's own component, wherever it sits on this
+   screen. A tint rather than a selection fill — the rows inside it are still
+   individually selectable, and two accent fills on one row cannot be told
+   apart. */
+.LayerTint {
+  /* 🔴 The COMPONENT hue at 9% (§2), not `--theme-color-primary-bg`.
+     The first build reused the accent fill — which is what the Components tab paints a SELECTED
+     row with, and what `.Selected` paints a Layers row with two lines below. Two meanings in one
+     colour: a region that is merely *being edited* read as a row you had clicked. Measured off the
+     screen, `rgba(77, 163, 255, 0.13)` on both. The band label above it is already this hue, so
+     the region and the line that names it now agree. */
+  background-color: color-mix(in srgb, var(--theme-color-node-category-component) 9%, transparent);
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--theme-color-node-category-component) 14%, transparent);
+  }
+}
+
+/* ---------------------------------------------------------------- TVW-005
+   Dragging in Layers: three indicators, and one refusal.
+
+   🔴 The three are DIFFERENT SHAPES, not three colours of one shape. A reorder
+   is a position between two rows and is drawn as a line between them; a
+   reparent is a containment and is drawn as a fill over the row that would
+   contain it. A person reading a 2px line at the top of a row and a 2px line
+   at the bottom of the row above has to know which row owns it — a fill cannot
+   be misread that way.
+
+   ⚠️ The line is drawn with an inset box-shadow rather than a border or a
+   pseudo-element: the row's own geometry (`--level`, the indent guides) is
+   already carrying padding and background layers, and a border changes the
+   row's height, which moves every row below it by 2px at the moment a person
+   is aiming at a 4px gap. */
+.LayerDropBefore {
+  box-shadow: inset 0 2px 0 0 var(--theme-color-primary);
+}
+
+.LayerDropAfter {
+  box-shadow: inset 0 -2px 0 0 var(--theme-color-primary);
+}
+
+.LayerDropInto {
+  background-color: var(--theme-color-primary-bg);
+}
+
+/* The row that is being carried. Not hidden: Figma keeps it in place and
+   dims it, so the tree does not reflow under a moving hand. */
+.LayerDragging {
+  opacity: 0.45;
+}
+
+/* §2's refusal: the row shakes. The sentence is on the drag, where the eye is. */
+.LayerRefused {
+  animation: layer-refused 0.4s ease-in-out;
+}
+
+@keyframes layer-refused {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-3px); }
+  35% { transform: translateX(3px); }
+  55% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+/* An instance row: the thing that places another component's file. */
+.LayerInstance .Label {
+  color: var(--theme-color-node-category-component);
+}
+
+/* `Edit ›` on a band, `›` on an instance row. Invisible until the row is
+   hovered or focused, so the tree reads as names rather than as controls. */
+.LayerEdit {
+  flex: 0 0 auto;
+  margin-left: var(--spacing-2);
+  padding: 0 var(--spacing-1);
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: var(--font-size-xs);
+  color: var(--theme-color-node-category-component);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--speed-turbo) var(--easing-base);
+
+  .TreeItem:hover &,
+  .TreeItem:focus-within & {
+    opacity: 1;
+  }
+
+  &:focus-visible {
+    opacity: 1;
+    outline: 1px solid var(--theme-color-primary);
+    outline-offset: 1px;
+  }
+}
+
+/* `one per item` — what a repeated instance says instead of a count it cannot
+   have. Sits where a Components row's meta sits, in the same quiet ink. */
+.LayerRepeat {
+  flex: 0 0 auto;
+  margin-left: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  font-style: italic;
+  color: var(--theme-color-fg-muted);
+}
+
+/* `↻ places itself` and `pages are in Components → Pages`: statements about the
+   tree, not things in it. */
+.LayerNote {
+  cursor: default;
+
+  &:hover {
+    background-color: transparent;
+  }
+}
+
+.LayerNoteLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--font-size-xs);
+  font-style: italic;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--theme-color-fg-muted);
+}
+
+/* -----------------------------------------------------------------------------
+ * The two tabs. One panel, two views of one project — the rail entry and the
+ * panel are titled `Project` (R-E), and the tab says which of the two you are
+ * looking at.
+ * -------------------------------------------------------------------------- */
+.TabBar {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--spacing-1);
+  padding: var(--spacing-2) var(--spacing-3) 0;
+}
+
+.Tab {
+  flex: 0 0 auto;
+  padding: var(--spacing-1) var(--spacing-2);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  font: 12px/1.35 var(--font-family);
+  color: var(--theme-color-fg-muted);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--theme-color-fg-default);
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--theme-color-primary);
+    outline-offset: 1px;
+  }
+}
+
+.TabActive {
+  border-bottom-color: var(--theme-color-primary);
+  color: var(--theme-color-fg-highlight);
+}
+
+/* TVW-005 §2 — the Layers tab while a component is being carried out of the
+   Components tab. The two tabs are exclusive, so this is the ONLY target the
+   gesture has: the rows it could be dropped between are on the tab that is not
+   showing.
+
+   🔴 Drawn with `outline`, not `border`. `.Tab` has a 2px bottom border and no
+   others; giving it a real border here would resize the tab the instant a drag
+   started, moving the target out from under a hand that is already on its way to
+   it. An outline occupies no space. */
+.TabDropStrip {
+  outline: 1px dashed var(--theme-color-primary);
+  outline-offset: -1px;
+  color: var(--theme-color-fg-default);
+}
+
+/* Over it, and it would land. The fill is `LayerDropInto`'s — one colour means
+   "this is where it goes" on both surfaces. */
+.TabDropOk {
+  outline-style: solid;
+  background-color: var(--theme-color-primary-bg);
+  color: var(--theme-color-fg-highlight);
+}
+
+/* Over it and it would not. Deliberately quiet: the sentence saying WHY is on
+   the drag, under the cursor, and a second alarm here would compete with it. */
+.TabDropRefused {
+  outline-color: var(--theme-color-fg-muted);
+  color: var(--theme-color-fg-muted);
+}
+
+/* Says what the outline means, because an outline alone is a shape a person has
+   to have seen before. It only exists during a drag, so it cannot be clutter at
+   rest — and the wording never changes between the armed and refused states,
+   which would be text moving under a moving hand. */
+.TabDropHint {
+  margin-left: var(--spacing-1);
+  font-size: var(--font-size-xs);
+  color: var(--theme-color-fg-muted);
+
+  /* 🔴 The separator is here and not in the markup, and a photograph is why: without it the tab
+     read as the single run-on phrase "Layers drop to place". `·` is this panel's own separator —
+     `Layers · Home` in the header, `label · type` on every row — so the tab says the same thing the
+     rest of the panel would. Decoration, so the element's text stays the sentence a drive reads. */
+  &::before {
+    content: '·';
+    margin-right: var(--spacing-1);
+  }
+}
+
+/* `Layers · Home` with `in the preview` at the right — the one line that says
+   which of the three things this surface is showing. */
+.LayersHeader {
+  box-sizing: border-box;
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3) var(--spacing-1);
+  font-size: var(--font-size-xs);
+  color: var(--theme-color-fg-default);
+}
+
+.LayersHeaderScreen {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+
+.LayersHeaderWhere {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--theme-color-fg-muted);
+}
+
+/* TVW-004 — there is no note block in this panel: the strip at the preview's edge already says
+   it, in every layout including detached (Richard, 2026-09-18). See `ComponentsPanelReact`. */
+
+/* §2's containment crumb — `Home › Hero · in 3 places`. The "go to parent" the canvas does not
+   have: every step is live, because the point of naming the chain is being able to walk it. */
+.LayersCrumb {
+  box-sizing: border-box;
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-2);
+  padding: 0 var(--spacing-3) var(--spacing-2);
+  font-size: var(--font-size-xs);
+}
+
+/* 🔴 **The crumb's LAST step is the one a person is looking for, and it was the first to go.**
+ *
+ * This was a block with `text-overflow: ellipsis` over inline-block buttons. At `MIN_PANEL_WIDTH`
+ * the three steps measured 143px inside a 140px box — and because a button is an *atomic* inline
+ * box, Chromium cannot clip three pixels off it: it drops the whole box and draws the ellipsis
+ * instead. So `App › Home › Main Navbar` rendered as `App › Home ›…` and the name of the thing
+ * being edited — the only word on the line that is not already in the header — disappeared for
+ * want of 3px. Found in AC6's screenshot at 240px; the DOM read "not clipped", because
+ * `scrollWidth > clientWidth` is meaningless on an inline element and `elementFromPoint` still
+ * returned the button. **The pixels were the only honest witness.**
+ *
+ * A flex row instead, where each step ellipsises **in its own box** — so what a tight panel costs
+ * is characters, not a name.
+ *
+ * ⚠️ **Which step gives up the width was measured, not assumed.** Shrinking the leading steps
+ * first looks like the obvious answer — they are the context, the last one is the subject — and it
+ * renders `A… › Ho… › Main Navb…`: three shredded words, because a step one pixel short still has
+ * to find room for the ellipsis. The steps are 20px and 29px; there is nothing there to take. So
+ * the leading steps hold their ground and the long tail absorbs it: `App › Home › Main Navb…`,
+ * which loses three characters of one word and keeps every word legible. */
+.LayersCrumbPath {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.LayersCrumbStep,
+.LayersCrumbPlaces {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: var(--theme-color-fg-muted);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--theme-color-fg-highlight);
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--theme-color-primary);
+    outline-offset: 1px;
+  }
+}
+
+.LayersCrumbStep {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  /* The context holds its ground; the subject absorbs the shortfall — see `.LayersCrumbPath`. */
+  flex: 0 0 auto;
+}
+
+.LayersCrumbStep:last-child {
+  color: var(--theme-color-fg-default);
+  flex: 0 1 auto;
+}
+
+.LayersCrumbSep {
+  margin: 0 var(--spacing-1);
+  color: var(--theme-color-fg-muted);
+  flex: 0 0 auto;
+}
+
+.LayersCrumbPlaces {
+  flex: 0 0 auto;
+}
+
+/* §2's footer: what the canvas's component holds that this screen does not draw. Pinned under the
+   tree rather than scrolling with it — it is a statement about the canvas, not a row of the tree. */
+.LayersFooter {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  padding: var(--spacing-2) var(--spacing-3);
+  border-top: 1px solid var(--theme-color-border-default);
+  font-size: var(--font-size-xs);
+  color: var(--theme-color-fg-muted);
 }

@@ -1,0 +1,309 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8228e7e6-6498-5920-8fd4-73122a16e0f5",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "zgPage",
+      "type": "Page",
+      "label": "Monster",
+      "children": [
+        "zgOuter"
+      ],
+      "parameters": {
+        "title": "Monster Gate",
+        "urlPath": "monster"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "zgOuter",
+      "type": "Group",
+      "label": "The ground",
+      "parent": "zgPage",
+      "children": [
+        "zgWrap"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "zgWrap",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "zgOuter",
+      "children": [
+        "zgHeader",
+        "zgTitle",
+        "zgSetup",
+        "zgPlay"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "rowGap": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "maxWidth": {
+          "value": 960,
+          "unit": "px"
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "zgHeader",
+      "type": "/Game/Header",
+      "label": "The bar",
+      "parent": "zgWrap",
+      "parameters": {
+        "showHome": true,
+        "showHangar": true
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "zgTitle",
+      "type": "Text",
+      "label": "Monster Gate",
+      "parent": "zgWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-tight)",
+        "letterSpacing": "var(--tracking-tight)",
+        "color": "var(--foreground)",
+        "as": "h2",
+        "fontFamily": "Grandstander"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "zgSetup",
+      "type": "/Monster/Setup",
+      "label": "Before the game",
+      "parent": "zgWrap",
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "zgPlay",
+      "type": "/Monster/Play",
+      "label": "The game",
+      "parent": "zgWrap",
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "zgStore",
+      "type": "/Logic/App store",
+      "label": "The store",
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "zgMe",
+      "type": "/Logic/Active profile",
+      "label": "Who is playing",
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "zgWords",
+      "type": "/Data/Words",
+      "label": "The words",
+      "x": 470,
+      "y": 2200
+    },
+    {
+      "id": "zgT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "zgCurriculum",
+      "type": "/Data/Curriculum",
+      "label": "The skills",
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "zgWordLists",
+      "type": "/Data/Word lists",
+      "label": "The typing words",
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "zgSave",
+      "type": "/Logic/Save model",
+      "label": "Remember what was learned",
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "zgNoOne",
+      "type": "Expression",
+      "label": "Nobody signed in?",
+      "parameters": {
+        "expression": "has === false"
+      },
+      "x": 470,
+      "y": 2320
+    },
+    {
+      "id": "zgGuard",
+      "type": "Condition",
+      "label": "Send them to the profiles?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "zgGoProfiles",
+      "type": "RouterNavigate",
+      "label": "To the profiles",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Profiles"
+      },
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "zgGoHome",
+      "type": "RouterNavigate",
+      "label": "Home",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Home"
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "zgGoHangar",
+      "type": "RouterNavigate",
+      "label": "To the hangar",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Hangar"
+      },
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "zgPlaying",
+      "type": "Variable2",
+      "label": "Playing?",
+      "parameters": {
+        "name": "monsterPlaying"
+      },
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "zgSetPlaying",
+      "type": "Set Variable",
+      "label": "Playing now",
+      "parameters": {
+        "name": "monsterPlaying"
+      },
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "zgSetDone",
+      "type": "Set Variable",
+      "label": "Not playing",
+      "parameters": {
+        "name": "monsterPlaying"
+      },
+      "x": 470,
+      "y": 1840
+    },
+    {
+      "id": "zgInitDone",
+      "type": "Set Variable",
+      "label": "Not playing yet (on load)",
+      "parameters": {
+        "name": "monsterPlaying"
+      },
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "zgTrue",
+      "type": "Expression",
+      "label": "True",
+      "parameters": {
+        "expression": "true"
+      },
+      "x": 470,
+      "y": 2440
+    },
+    {
+      "id": "zgFalse",
+      "type": "Expression",
+      "label": "False",
+      "parameters": {
+        "expression": "false"
+      },
+      "x": 470,
+      "y": 2560
+    },
+    {
+      "id": "zgNotPlaying",
+      "type": "Expression",
+      "label": "Setting up?",
+      "parameters": {
+        "expression": "!playing"
+      },
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "zgSounds",
+      "type": "/Logic/Play sounds",
+      "label": "The fanfare",
+      "x": 470,
+      "y": 1960
+    },
+    {
+      "id": "zgTeachCards",
+      "type": "/Data/Teach cards",
+      "label": "The Teach cards",
+      "x": 470,
+      "y": 2080
+    }
+  ],
+  "visualRoots": [
+    "zgPage"
+  ]
+}

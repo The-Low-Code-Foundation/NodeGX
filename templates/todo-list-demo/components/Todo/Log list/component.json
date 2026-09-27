@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "498bd46b-f3c8-5bf8-8001-d089ad6ca9c7",
+  "name": "Log list",
+  "path": "/Todo/Log list",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Everything that happened to every task, newest first."
+}

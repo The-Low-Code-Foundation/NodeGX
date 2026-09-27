@@ -23,6 +23,17 @@ export type {
   VocabToken,
   VocabTokenCategory
 } from './StyleVocabulary';
+export {
+  allColourTokens,
+  colourTokensForPicking,
+  PALETTE_COLOUR_CATEGORY,
+  PORT_TOKEN_RULES,
+  SEMANTIC_COLOUR_CATEGORY,
+  tokenCategoriesForPort,
+  tokenReferenceStrings,
+  tokensForPicking
+} from './TokensForPicking';
+export type { ColourTokensForPicking, PortTokenRule, TokenPickGroup } from './TokensForPicking';
 export { STYLE_COMPOSITIONS, formatCompositionValue } from './StyleCompositions';
 export type { VocabComposition, VocabCompositionGroup, VocabParamValue } from './StyleCompositions';
 export type {
@@ -33,4 +44,4 @@ export type {
   TokenCategory,
   TokenCategoryGroup
 } from './TokenCategories';
-export { TOKEN_CATEGORIES, TOKEN_CATEGORY_GROUPS } from './TokenCategories';
+export { TOKEN_CATEGORIES, TOKEN_CATEGORY_GROUPS, groupForTokenCategory } from './TokenCategories';

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "84530e5b-83a5-5e7d-85a4-20363f969881",
+  "name": "Dialog flow",
+  "path": "/Todo/Dialog flow",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Asks \"what happened?\" before a close, a reopen, a tick or an untick: remembers which task or next action it is about, shows the dialog, and says which question was answered."
+}

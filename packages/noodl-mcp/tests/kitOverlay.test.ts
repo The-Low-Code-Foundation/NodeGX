@@ -294,8 +294,12 @@ describe('acceptance criterion 3 — the skipped checks run, and find something'
     // `SemanticValidator` over the built-ins, and the "after" call below has to
     // get a different one or the overlay is installed and never read.
     const before = codes(KIT_APP);
+    // P88 GAM-016: the fixture names Inter and ships no Inter module — one project-wide font warning,
+    // before and after alike. Named, and kept out of the kit's numbers.
+    const FONT = 'font-face-not-shipped';
+    expect(before.byCode[FONT]).toBe(1);
     expect(before.summary.errors).toBe(0);
-    expect(before.summary.warnings).toBe(5);
+    expect(before.summary.warnings - before.byCode[FONT]).toBe(5);
     expect(before.summary.infos).toBe(8);
     expect(before.summary.endpointsChecked).toBe(0);
     expect(before.byCode['unknown-type-check-skipped']).toBe(8);
@@ -309,7 +313,8 @@ describe('acceptance criterion 3 — the skipped checks run, and find something'
     expect(after.summary.infos).toBe(0);
     expect(after.byCode['unknown-type-check-skipped']).toBeUndefined();
     // The types are known now, so they are not "unknown" either.
-    expect(after.summary.warnings).toBe(0);
+    expect(after.byCode[FONT]).toBe(1);
+    expect(after.summary.warnings - after.byCode[FONT]).toBe(0);
     expect(after.byCode['unknown-node-type']).toBeUndefined();
 
     // 🔴 And the checks *ran*. All four endpoints — both ends of both

@@ -1,0 +1,187 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5f218695-e218-5b59-8acc-eb93929ef4b3",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "settingsId",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-settingsId"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "rate",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-rate"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "focusHours",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-focusHours"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "savingsTarget",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-savingsTarget"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "lowWaterMark",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-lowWaterMark"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "workingDays",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-workingDays"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "buildingHours",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-buildingHours"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "adminHours",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-adminHours"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "hobbyHours",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-hobbyHours"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "hobbyWeekCeiling",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-hobbyWeekCeiling"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "buildingWeekCeiling",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-buildingWeekCeiling"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "billableFloorPct",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-billableFloorPct"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "todoUrl",
+      "toId": "EditsettinGuard",
+      "toProperty": "in-todoUrl"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "do",
+      "toId": "EditsettinGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-rate",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-rate"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-focusHours",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-focusHours"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-savingsTarget",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-savingsTarget"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-lowWaterMark",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-lowWaterMark"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-workingDays",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-workingDays"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-buildingHours",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-buildingHours"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-adminHours",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-adminHours"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-hobbyHours",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-hobbyHours"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-hobbyWeekCeiling",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-hobbyWeekCeiling"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-buildingWeekCeiling",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-buildingWeekCeiling"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-billableFloorPct",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-billableFloorPct"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-todoUrl",
+      "toId": "EditsettinWrite",
+      "toProperty": "prop-todoUrl"
+    },
+    {
+      "fromId": "EditsettinIn",
+      "fromProperty": "settingsId",
+      "toId": "EditsettinWrite",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "EditsettinGuard",
+      "fromProperty": "out-go",
+      "toId": "EditsettinWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "EditsettinWrite",
+      "fromProperty": "done",
+      "toId": "EditsettinOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "EditsettinWrite",
+      "fromProperty": "failure",
+      "toId": "EditsettinProblem",
+      "toProperty": "do"
+    }
+  ]
+}

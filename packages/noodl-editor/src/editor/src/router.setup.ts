@@ -28,14 +28,13 @@ import { ComponentDiffDocumentProvider } from './views/documents/ComponentDiffDo
 import { EditorDocumentProvider } from './views/documents/EditorDocument';
 import { AiAuthoringPanel, AiAuthoringPanel_ID } from './views/panels/AiAuthoringPanel';
 import { BackendServicesPanel } from './views/panels/BackendServicesPanel/BackendServicesPanel';
-import { installBackendSurfacePanels } from './views/panels/BackendServicesPanel/LocalBackendCard/backendSurfaces';
 import { ComponentPortsComponent } from './views/panels/componentports';
 import { ComponentsPanel } from './views/panels/componentspanel';
+import { PANEL_TITLE } from './views/panels/ComponentsPanelNew/layersTab';
 import { ComponentXRayPanel } from './views/panels/ComponentXRayPanel';
 // DataLineagePanel retired from reach (DEBT-012) — registration below is dead;
 // import kept commented so the panel code (one release cycle) still compiles.
 // import { DataLineagePanel } from './views/panels/DataLineagePanel';
-import { DesignTokenPanel } from './views/panels/DesignTokenPanel/DesignTokenPanel';
 import { CommunityPanel, CommunityPanel_ID } from './views/panels/CommunityPanel';
 import { installCommunityRailGate } from './utils/community/communityRailGate';
 import { DocsPanel, DocsPanel_ID } from './views/panels/DocsPanel';
@@ -47,10 +46,12 @@ import { NodeReferencesPanel_ID } from './views/panels/NodeReferencesPanel';
 import { NodeReferencesPanel } from './views/panels/NodeReferencesPanel/NodeReferencesPanel';
 import { ProblemsPanel_ID } from './views/panels/ProblemsPanel';
 import { ProblemsPanel } from './views/panels/ProblemsPanel/ProblemsPanel';
+import { LOOK_EDITOR_PANEL_ID, LookEditorPanel } from './views/panels/LookEditor';
 import { PropertyEditor } from './views/panels/propertyeditor';
 import { ProvenancePanel } from './views/panels/ProvenancePanel';
 import { SearchPanel } from './views/panels/search-panel/search-panel';
 import { SETTINGS_PANEL_ID, SettingsPanel } from './views/panels/SettingsPanel';
+import { StylesPanel, StylesPanel_ID } from './views/panels/StylesPanel';
 // import { TopologyMapPanel } from './views/panels/TopologyMapPanel'; // Disabled - shelved feature
 import { UndoQueuePanel } from './views/panels/UndoQueuePanel/UndoQueuePanel';
 import { VersionControlPanel_ID } from './views/panels/VersionControlPanel';
@@ -79,6 +80,8 @@ export function installSidePanel({ isLesson, lessonNeedsDatabase }: SetupEditorO
 
   SidebarModel.instance.register({
     transient: true,
+    // CHR-008 §3.4: kept mounted across selections, so a node click does not blank the panel.
+    followsSelection: true,
     id: 'PropertyEditor',
     name: 'Properties',
     // @ts-expect-error
@@ -92,6 +95,16 @@ export function installSidePanel({ isLesson, lessonNeedsDatabase }: SetupEditorO
     panel: ComponentPortsComponent
   });
 
+  // P103 CMG-006: a Look's fields, in the inspector, with or without a node wearing it. Opened by
+  // `openLookEditor` from the Styles panel; never in the rail (transient, like Properties).
+  SidebarModel.instance.register({
+    transient: true,
+    id: LOOK_EDITOR_PANEL_ID,
+    name: 'Look',
+    // @ts-expect-error the panel's props arrive through `showInInspector`, as Properties' do
+    panel: LookEditorPanel
+  });
+
   SidebarModel.instance.register({
     id: 'components',
     // Deliberately no `defaultWidth`: this panel and 'PropertyEditor' alternate
@@ -99,7 +112,12 @@ export function installSidePanel({ isLesson, lessonNeedsDatabase }: SetupEditorO
     // the divider — and the canvas with it — on every select and deselect. It
     // used to declare 280 against the Properties panel's implicit 328, which
     // jittered the canvas 48px. Both now take DEFAULT_PANEL_WIDTH.
-    name: 'Components',
+    /**
+     * TVW-004 (R-E) — the rail entry is titled after the **thing**, not after one of its two
+     * views: the panel now holds `Layers` and `Components` as tabs, and naming the rail after one
+     * of them would say the other is somewhere else. `PANEL_TITLE` is the one copy of the word.
+     */
+    name: PANEL_TITLE,
     order: 1,
     icon: IconName.Components,
     onOpen: () => {
@@ -107,20 +125,31 @@ export function installSidePanel({ isLesson, lessonNeedsDatabase }: SetupEditorO
         appRegistry.openDocument(EditorDocumentProvider.ID);
       }
     },
-    panelProps: {
-      // This is a temporary solution so we can keep the state of open folder etc
-      options: {
-        showSheetList: true
-        // WFA-001: `hideSheets: ['__cloud__']` used to be here, and it filtered
-        // cloud functions out of both the sheet dropdown and the tree — the
-        // first of the four cuts that made everything phases 19 and 22 built
-        // unreachable from the editor. The cloud sheet is now a first-class,
-        // always-listed sheet; it is still kept out of the flattened "All" tree,
-        // but that is `useComponentsPanel`'s decision about runtime boundaries
-        // rather than a panel option. See WFA-001-NOTES.md decision 1.
-      }
-    },
     panel: ComponentsPanel
+  });
+
+  /**
+   * P94 STY-005 — the Styles panel, at R5's slot.
+   *
+   * Richard ruled **directly under Components, above Search**: *"it is a thing about the project,
+   * not a tool"*. Components is `order: 1` and Search is `order: 2`, so the ruling is this number.
+   *
+   * 🔴 **NOT `experimental`, and that is the point of the task.** The surface this replaces —
+   * `design-tokens` — registered only inside `if (config.devMode)`, a flag declared solely in
+   * `shared/config/config-dev.js`, which no build loads. It was `undefined` everywhere, so that
+   * branch never ran and the panel never reached a single person's rail. An experimental flag here
+   * would ship the identical nothing with a nicer changelog entry.
+   */
+  SidebarModel.instance.register({
+    id: StylesPanel_ID,
+    defaultWidth: 340,
+    name: 'Styles',
+    description:
+      "This project's colours, text styles and Looks, with what uses each one — create, rename and " +
+      'delete them without finding a node first.',
+    order: 1.5,
+    icon: IconName.Palette,
+    panel: StylesPanel
   });
 
   SidebarModel.instance.register({
@@ -366,8 +395,8 @@ export function installSidePanel({ isLesson, lessonNeedsDatabase }: SetupEditorO
     name: 'Backend Services',
     // 🔴 TUT-005 — a lesson that grades against the database KEEPS this panel,
     // and it is the only lesson exception in the rail. `log-a-thing` step 1 is
-    // "create a collection called LogEntries", and the Schema and Data surfaces
-    // open from a local backend's card in here (`backendSurfaces.tsx`) and from
+    // "create a collection called LogEntries", and the way to the backend
+    // manager (the card's *Manage data & settings*, BMG-012) is in here and
     // nowhere else — so disabling it for every lesson made that step, and the
     // tutorial behind it, impossible to finish. `ensureLessonBackend` has
     // already created and bound the backend by the time a learner opens this,
@@ -380,11 +409,10 @@ export function installSidePanel({ isLesson, lessonNeedsDatabase }: SetupEditorO
     panel: BackendServicesPanel
   });
 
-  // PNL-009: Schema, Data, Access, Triggers, Email, Sign-in providers and
-  // Search. Transient, so they take no rail slot — they are opened from a local
-  // backend's card and land in full mode. They used to be `createPortal` calls
-  // into a fixed overlay; see `backendSurfaces.tsx` for what that cost.
-  installBackendSurfacePanels();
+  // BMG-012: the eight backend surfaces (schema, data, access, triggers, email,
+  // sign-in providers, search, secrets) that PNL-009 registered here as
+  // transient panels are gone. The backend manager in the browser is the one
+  // surface for everything inside a backend; the card opens it.
 
   // WFA-002: no longer experimental. It has a main-process handler, real data
   // from every running backend, and a working detail view — the flag was a
@@ -442,14 +470,10 @@ export function installSidePanel({ isLesson, lessonNeedsDatabase }: SetupEditorO
       panel: FileExplorerPanel
     });
 
-    SidebarModel.instance.register({
-      experimental: true,
-      id: 'design-tokens',
-      name: 'Design Tokens',
-      order: 20,
-      icon: IconName.Palette,
-      panel: DesignTokenPanel
-    });
+    // P94 STY-005 (R3): the `design-tokens` slot that stood here is gone — a fresh Styles panel
+    // replaces it, registered unconditionally above. Its token editor was not thrown away: it is
+    // the Tokens section of that panel, and the `TokenCategorySection` under it still answers to
+    // `tests-unit/fix-015`. What went is the shell and the placeholder Colors tab.
 
     SidebarModel.instance.register({
       experimental: true,

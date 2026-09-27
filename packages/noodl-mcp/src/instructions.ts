@@ -58,8 +58,19 @@ export function projectInstructions(options: ProjectInstructionOptions): string 
   return (
     `NodeGX (OpenNoodl) project server for ${projectDir} — mode: ` +
     (allowWrites ? 'read-write' : 'read-only (writes require restarting with --allow-writes)') +
-    '. Start with get_project_info. Component identifiers accept path form ("Pages/Home") or legacy name ' +
-    '("/Pages/Home"); a node instantiating a project component uses the legacyName as its node type. ' +
+    // TVW-009 §2.5 — 🔴 the identifier clause that stood here was the SAME FACT this
+    // briefing already sends a model to fetch. `get_project_info`'s `note` carries it
+    // near-verbatim (`tools/read.ts`), and the sentence immediately before this one tells
+    // the agent to call that tool FIRST. One fact, stated twice, in a surface that is
+    // billed once per session for the resident copy and nothing at all for the result one.
+    //
+    // Filed as P77 D48 with a measured estimate of ~39 tokens, owner NONE, since
+    // 2026-09-02. TVW-009's lane sentence below costs 23 and the surface had 6 free, so
+    // this is the funding rather than a third renegotiation of SURFACE_TOKEN_BUDGET —
+    // which `toolDisclosure.test.ts`'s own header says there must not be. The division
+    // that works, from SBR-013: `instructions` carries the ORDER, and the free channel
+    // (a tool's RESULT) carries the detail.
+    '. Start with get_project_info. ' +
     // LAS-006 §4. The order was the finding: both measured models planned
     // correctly and then built something the plan never described, because
     // nothing in the tool shape asked for the tree first. This paragraph now
@@ -106,13 +117,19 @@ export function projectInstructions(options: ProjectInstructionOptions): string 
     // One sentence, the same two-family rule the shared layout pass enforces.
     'LAYOUT: the visual tree flows down a left column, logic nodes in a right column beside the visual ' +
     'node they feed; nodes sent without x/y are auto-placed; x/y you set are kept verbatim. ' +
+    // TVW-009 §2.5. FIX-014's sentence reads as a rule about where the visual stack must
+    // GO, and TVW-006 built a lane that finds the stack wherever it already is. An agent
+    // that believes the column is mandatory will move a graph to satisfy it — so the
+    // sentence says which of the two is the default and which is the mechanism.
+    'The editor draws a structure lane around the visual stack wherever it is; the column is a default, ' +
+    'not a rule. ' +
     // AAQ-005. The word "Router" appeared nowhere in any guidance a model
     // saw, which is why pages were built that nothing could reach and
     // navigation was aimed at invented URL paths. Both halves are stated:
     // what makes a page a page, and what this server does about it, so an
     // agent neither omits the registration nor writes a competing one.
-    'PAGES: a page component is only reachable if a Router node lists it in its `pages` parameter, and it ' +
-    'renders blank without a `Page` node at its root — so build page components around a `Page` node, and ' +
+    'PAGES: a page is only reachable if a Router node lists it in its `pages` parameter, and it ' +
+    'renders blank without a `Page` node at its root — so build pages around a `Page` node, and ' +
     'aim RouterNavigate.target at a component legacyName ("/Pages/Home"), never at an invented URL path. ' +
     'Writing a page registers it in the project router for you (reported as `registeredPages`); you do not ' +
     'need to edit the router yourself, and re-registering an already-listed page is a no-op. ' +

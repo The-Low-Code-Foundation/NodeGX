@@ -1,0 +1,71 @@
+{
+  "collections": [
+    {
+      "text": "This backend has no collections yet.",
+      "cta": "Create one in Schema"
+    }
+  ],
+  "schema": [
+    {
+      "text": "No collections yet. A collection is a table of records — Products, Orders, Members.",
+      "cta": "Create the first one"
+    }
+  ],
+  "users": [
+    {
+      "text": "No users yet.",
+      "cta": "New user"
+    }
+  ],
+  "roles": [
+    {
+      "text": "No roles yet. A role groups users so a permission can name them.",
+      "cta": "New role"
+    }
+  ],
+  "signin": [
+    {
+      "text": "No sign-in providers yet. Add Google, GitHub or any OpenID Connect provider.",
+      "cta": "Add provider"
+    }
+  ],
+  "permissions": [
+    {
+      "text": "No collections to set permissions on yet.",
+      "cta": "Create a collection in Schema"
+    }
+  ],
+  "keys": [
+    {
+      "text": "No API keys yet. A key lets a server or script call this backend.",
+      "cta": "New key"
+    }
+  ],
+  "triggers": [
+    {
+      "text": "No triggers yet. A trigger runs a function on a schedule, on a webhook, or when data changes.",
+      "cta": "Refresh"
+    }
+  ],
+  "workflows": [
+    {
+      "text": "No workflows yet. Workflows are authored in the editor.",
+      "cta": "Refresh"
+    }
+  ],
+  "runs": [
+    {
+      "text": "No runs recorded yet. Fire a trigger or run a workflow and it appears here.",
+      "cta": "Open Workflows"
+    }
+  ],
+  "files": [],
+  "email": [],
+  "backups": [
+    {
+      "text": "No backups yet.",
+      "cta": "Back up now"
+    }
+  ],
+  "audit": []
+}

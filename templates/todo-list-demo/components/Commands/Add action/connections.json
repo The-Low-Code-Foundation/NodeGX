@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d01f1d88-a94a-5705-8783-350b2e676535",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "AddactionIn",
+      "fromProperty": "taskId",
+      "toId": "AddactionGuard",
+      "toProperty": "in-taskId"
+    },
+    {
+      "fromId": "AddactionIn",
+      "fromProperty": "title",
+      "toId": "AddactionGuard",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "AddactionIn",
+      "fromProperty": "position",
+      "toId": "AddactionGuard",
+      "toProperty": "in-position"
+    },
+    {
+      "fromId": "AddactionIn",
+      "fromProperty": "do",
+      "toId": "AddactionGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "AddactionGuard",
+      "fromProperty": "out-taskId",
+      "toId": "AddactionCreate",
+      "toProperty": "in-taskId"
+    },
+    {
+      "fromId": "AddactionGuard",
+      "fromProperty": "out-title",
+      "toId": "AddactionCreate",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "AddactionGuard",
+      "fromProperty": "out-position",
+      "toId": "AddactionCreate",
+      "toProperty": "in-position"
+    },
+    {
+      "fromId": "AddactionGuard",
+      "fromProperty": "out-done",
+      "toId": "AddactionCreate",
+      "toProperty": "in-done"
+    },
+    {
+      "fromId": "AddactionGuard",
+      "fromProperty": "out-empty",
+      "toId": "AddactionCreate",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "AddactionGuard",
+      "fromProperty": "out-empty",
+      "toId": "AddactionCreate",
+      "toProperty": "in-description"
+    },
+    {
+      "fromId": "AddactionGuard",
+      "fromProperty": "out-go",
+      "toId": "AddactionCreate",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "AddactionIn",
+      "fromProperty": "taskId",
+      "toId": "AddactionHistory",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "AddactionGuard",
+      "fromProperty": "out-summary",
+      "toId": "AddactionHistory",
+      "toProperty": "summary"
+    },
+    {
+      "fromId": "AddactionCreate",
+      "fromProperty": "out-done",
+      "toId": "AddactionHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "AddactionHistory",
+      "fromProperty": "done",
+      "toId": "AddactionOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "AddactionCreate",
+      "fromProperty": "out-failure",
+      "toId": "AddactionProblem",
+      "toProperty": "do"
+    }
+  ]
+}

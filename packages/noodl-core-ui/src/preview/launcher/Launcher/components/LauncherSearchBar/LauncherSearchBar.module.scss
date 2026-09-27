@@ -2,14 +2,16 @@
  * LauncherSearchBar - mock toolbar-row styling (PAR-001)
  */
 
+/* CHR-005: this row now sits in `LauncherPage`'s toolbar slot, which owns the spacing under it. */
 .Root {
   display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 22px;
 }
 
 .Search {
-  flex: 1;
+  flex: 1 1 260px;
   max-width: 380px;
   display: flex;
   align-items: center;
@@ -20,7 +22,7 @@
      `.TemplateFilter-search`, `NodePickerSearchBar .Field` and `.NameField`.
      4.17 dark / 3.72 light on its own fill, 4.86 / 3.28 on the bg-0 content area. */
   border: 1px solid var(--theme-color-border-control);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   padding: 8px 12px;
   color: var(--theme-color-fg-muted);
 
@@ -40,7 +42,7 @@
   flex: 1;
   min-width: 0;
   font-family: var(--font-family);
-  font-size: 13px;
+  font-size: var(--font-size-md);
   color: var(--theme-color-fg-highlight);
 
   &::placeholder {
@@ -50,7 +52,7 @@
 
 .Kbd {
   font-family: var(--font-family-code);
-  font-size: 10.5px;
+  font-size: var(--font-size-xs);
   background: var(--theme-color-bg-3);
   border: 1px solid var(--theme-color-border-default);
   border-radius: var(--radius-default);
@@ -68,7 +70,7 @@
   background: var(--theme-color-bg-1);
   /* Wraps a native <select>; same treatment and same measurements as `.Search`. */
   border: 1px solid var(--theme-color-border-control);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   padding: 8px 12px;
   color: var(--theme-color-fg-default);
   font-weight: 500;
@@ -91,7 +93,7 @@
   background: none;
   outline: none;
   font-family: var(--font-family);
-  font-size: 13px;
+  font-size: var(--font-size-md);
   font-weight: 500;
   color: var(--theme-color-fg-default);
   cursor: pointer;

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f29e4f1b-2863-5cc1-8c2a-fb3e14d645d1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "finishraceIn",
+      "fromProperty": "model",
+      "toId": "finishraceFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "finishraceIn",
+      "fromProperty": "raceId",
+      "toId": "finishraceFn",
+      "toProperty": "in-raceId"
+    },
+    {
+      "fromId": "finishraceIn",
+      "fromProperty": "timed",
+      "toId": "finishraceFn",
+      "toProperty": "in-timed"
+    },
+    {
+      "fromId": "finishraceIn",
+      "fromProperty": "lang",
+      "toId": "finishraceFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "finishraceIn",
+      "fromProperty": "run",
+      "toId": "finishraceFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "finishraceFn",
+      "fromProperty": "out-model",
+      "toId": "finishraceOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "finishraceFn",
+      "fromProperty": "out-starsEarned",
+      "toId": "finishraceOut",
+      "toProperty": "starsEarned"
+    },
+    {
+      "fromId": "finishraceFn",
+      "fromProperty": "out-raceStars",
+      "toId": "finishraceOut",
+      "toProperty": "raceStars"
+    },
+    {
+      "fromId": "finishraceFn",
+      "fromProperty": "out-starsText",
+      "toId": "finishraceOut",
+      "toProperty": "starsText"
+    },
+    {
+      "fromId": "finishraceFn",
+      "fromProperty": "out-why",
+      "toId": "finishraceOut",
+      "toProperty": "why"
+    },
+    {
+      "fromId": "finishraceFn",
+      "fromProperty": "out-newBest",
+      "toId": "finishraceOut",
+      "toProperty": "newBest"
+    },
+    {
+      "fromId": "finishraceFn",
+      "fromProperty": "out-stars",
+      "toId": "finishraceOut",
+      "toProperty": "stars"
+    },
+    {
+      "fromId": "finishraceFn",
+      "fromProperty": "out-earnedPick",
+      "toId": "finishraceOut",
+      "toProperty": "earnedPick"
+    },
+    {
+      "fromId": "finishraceFn",
+      "fromProperty": "success",
+      "toId": "finishraceOut",
+      "toProperty": "done"
+    }
+  ]
+}

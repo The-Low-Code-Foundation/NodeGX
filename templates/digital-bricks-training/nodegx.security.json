@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "devOpen": false,
+  "defaults": {
+    "permissions": {
+      "find": "nobody",
+      "get": "nobody",
+      "create": "nobody",
+      "update": "nobody",
+      "delete": "nobody"
+    },
+    "creatorOwns": false
+  },
+  "collections": {},
+  "functions": {
+    "course": {
+      "call": "authenticated"
+    },
+    "lesson": {
+      "call": "authenticated"
+    },
+    "learnerProgramme": {
+      "call": "role:staff"
+    },
+    "roster": {
+      "call": "role:staff"
+    }
+  },
+  "files": {
+    "upload": "nobody",
+    "read": "nobody",
+    "delete": "nobody"
+  },
+  "signup": "nobody"
+}

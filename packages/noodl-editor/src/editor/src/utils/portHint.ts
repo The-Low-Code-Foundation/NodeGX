@@ -56,30 +56,70 @@ export interface HintElementLike {
 }
 
 /** The minimum of a row view this module reads. */
+/** What this module reads off a port: its name and what a person calls it. */
+interface PortLike {
+  name?: string;
+  displayName?: string;
+  editorName?: string;
+}
+
 interface ViewLike {
   name?: string;
   /** A `TabGroup`'s member views. Absent on an ordinary row. */
-  views?: { name?: string }[];
+  views?: { name?: string; port?: PortLike }[];
+  /**
+   * P103 CMG-008 — an `AlignToolsType` / `MarginPaddingType` keeps the ports it merged as
+   * `comp → port`. Absent on an ordinary row and on a `TabGroup`.
+   */
+  ports?: Record<string, PortLike | undefined>;
+  port?: PortLike;
 }
 
 /**
  * Every port name a rendered view speaks for.
  *
  * One for an ordinary row; for a `TabGroup`, the ports it holds — which is the only way the
- * corner-radius ports are reachable from `renderParams` at all.
+ * corner-radius ports are reachable from `renderParams` at all; for an alignment or margin/padding
+ * control, the ports it merged (P103 CMG-008 — the third shape, and the one the Look drift line
+ * could not reach either).
  */
 export function portNamesForView(view: ViewLike | undefined): string[] {
+  return portsForView(view).map((p) => p.name);
+}
+
+/** A port a view speaks for, with the label a person reads on that part of the control. */
+export interface ViewPort {
+  name: string;
+  label: string;
+}
+
+/**
+ * The ports a view speaks for, each with its label — `portNamesForView` with the words kept.
+ *
+ * ⚠️ A `TabGroup`'s member keeps its `editorName` (*Corner Radius (BottomLeft)*) over its
+ * `displayName` (*Corner Radius*, the same on all five): inside the group the tab already says
+ * which corner, but a sentence under the group does not.
+ */
+export function portsForView(view: ViewLike | undefined): ViewPort[] {
   if (!view) return [];
 
-  const names: string[] = [];
-  if (view.name) names.push(view.name);
+  const out: ViewPort[] = [];
+  const labelOf = (port: PortLike | undefined, name: string) =>
+    (port && (port.editorName || port.displayName)) || name;
+
+  if (view.name) out.push({ name: view.name, label: labelOf(view.port, view.name) });
   if (Array.isArray(view.views)) {
     view.views.forEach((child) => {
-      if (child && child.name) names.push(child.name);
+      if (child && child.name) out.push({ name: child.name, label: labelOf(child.port, child.name) });
     });
   }
+  if (view.ports && typeof view.ports === 'object') {
+    for (const port of Object.values(view.ports)) {
+      if (port && port.name) out.push({ name: port.name, label: labelOf(port, port.name) });
+    }
+  }
 
-  return names;
+  return out;
 }
 
 /** Read back the port names a previous pass recorded on a row. */

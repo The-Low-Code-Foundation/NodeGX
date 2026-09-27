@@ -55,12 +55,15 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 | `boxShadowInset` | Boolean | `false` | Draws the shadow inside the element instead of behind it |
 | `boxShadowOffsetX` | Number | `0` | How far to the right the shadow is cast from the element |
 | `boxShadowOffsetY` | Number | `0` | How far down the shadow is cast from the element |
+| `boxShadowSource` | Enum (`custom`, `token`) | `custom` | Where the shadow comes from: Custom builds it from the six fields below; From a style token wears one of the project’s shadow tokens, so every element sharing that token changes together |
 | `boxShadowSpreadRadius` | Number | `2` | How much larger than the element the shadow is drawn |
+| `boxShadowToken` | String | `var(--shadow-md)` | The project shadow this element wears, as var(--shadow-md). Pick one from the list; compose new ones in the Styles panel |
 | `boxSizing` | Enum (`border-box`, `content-box`) | `border-box` | Whether Width and Height include this element's padding and border, or only its content |
 | `clickBubbling` | Enum (`auto`, `always`, `never`) | `auto` | Whether a click on this control also fires Click on the nodes it sits inside. Automatic keeps it here as soon as this control's own Click is connected, so a Favourite button inside a clickable card runs Favourite and not the card; Always is the older behaviour where both run; Never keeps every click here, wired or not |
 | `color` | Color | — | Colour of the text itself, not of the element behind it |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
 | `enabled` | Boolean | `true` | Lets the user interact with this control; when off it still renders and occupies its space but ignores clicks, touches and typing |
+| `enterKeyHint` | Enum (`enter`, `done`, `go`, `next`, `previous`, `search`, `send`) | — | The word on the Enter key of a phone or tablet keyboard, such as Next, Go or Send |
 | `fontFamily` | Font | — | Typeface to render the text in, either a web-safe family name or a font file added to the project |
 | `fontSize` | Number | — | Height of the text, in pixels |
 | `fontStyle` | Enum (`normal`, `italic`) | `normal` | Renders the text upright or italic |
@@ -74,6 +77,7 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 | `iconSize` | Number | `16` | Height of the icon |
 | `iconSourceType` | Enum (`image`, `icon`) | `icon` | Whether the icon comes from an installed icon set or from an image file, which decides the source port below |
 | `iconSpacing` | Number | `10` | Gap between the icon and the text beside it |
+| `inputMode` | Enum (`text`, `numeric`, `decimal`, `tel`, `email`, `url`, `search`, `none`) | — | Which on-screen keyboard a phone or tablet opens: Decimal for numbers with a decimal key, Telephone for digits, None for no keyboard when the page has its own keypad |
 | `label` | String | `Label` | Text shown on this element |
 | `labelSpacing` | Number | `10` | Gap between the label and the edges around it |
 | `labelcolor` | Color | — | Colour of the text itself, not of the element behind it |
@@ -107,11 +111,13 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 | `placeHolderOpacity` | Number | `0.5` | How faded the placeholder text is, from 0 to 1 |
 | `placeholder` | String | `` | Greyed-out hint shown while the field is empty |
 | `position` | Enum (`relative`, `absolute`, `sticky`, `fixed`) | `relative` | How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space |
+| `runOnChange-startValue` | Boolean | `true` | Whether a new value on Value re-runs this node. On by default; untick to make this input passive so only the control signal runs it |
 | `sizeMode` | Enum (`explicit`, `contentWidth`, `contentHeight`, `contentSize`) | `contentSize` | Whether Width and Height are used as given, or the element sizes itself to fit its contents |
 | `startValue` | * | — | The value to put in the field. Applied as it arrives, unless you untick it under Run On Value Change, in which case it waits for a Set pulse |
 | `styleCss` | String | `/* background-color: red; */` | Raw CSS declarations applied to this element, overriding the styling ports above |
 | `textAlignX` | Enum (`left`, `center`, `right`) | `left` | Aligns the typed text within the field |
 | `textStyle` | TextStyle | `None` | Applies one of the project's saved text styles; the individual font ports below override whatever it sets |
+| `textToInsert` | String | — | What Insert Text writes, for example the digit on a keypad button |
 | `textTransform` | Enum (`none`, `uppercase`, `lowercase`, `capitalize`) | `none` | Forces the text to upper case, lower case or capitalised without changing the underlying value |
 | `transformOriginX` | Number | `50` | Horizontal point the element rotates and scales around, as a fraction of its width |
 | `transformOriginY` | Number | `50` | Vertical point the element rotates and scales around, as a fraction of its height |
@@ -131,9 +137,11 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 
 | Name | Type | Default | Description |
 |---|---|---|---|
+| `backspace` | Signal | — | Deletes the selection, or the character before the caret, as the Backspace key does — even while the field has focus |
 | `blur` | Signal | — | Takes keyboard focus away from this field, which is what fires Blurred |
 | `clear` | Signal | — | Empties the field |
 | `focus` | Signal | — | Puts the keyboard cursor in this field |
+| `insert` | Signal | — | Writes Text To Insert at the caret, replacing any selection, as if it had been typed — even while the field has focus. Max length still applies |
 | `set` | Signal | — | Writes the current Value into the field now. This is additional to Value applying as it arrives; untick Value under Run On Value Change to stop that |
 
 ## Outputs
@@ -160,7 +168,7 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 |---|---|---|---|
 | `completed` | Signal | — | Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error |
 | `didMount` | Signal | — | Fires once this element has been added to the page and can be measured |
-| `done` | Signal | — | Fires when Set, Clear, Focus or Blur did something |
+| `done` | Signal | — | Fires when Set, Clear, Insert Text, Backspace, Focus or Blur did something |
 | `hoverEnd` | Signal | — | Fires when the pointer leaves this control, including when it leaves while a button is still held |
 | `hoverStart` | Signal | — | Fires when the pointer moves onto this control |
 | `onBlur` | Signal | — | Fires when keyboard focus leaves this control, which is the usual place to validate what was entered |
@@ -169,12 +177,12 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 | `pointerDown` | Signal | — | Fires as a mouse button or finger goes down on this control, before any click has completed |
 | `pointerUp` | Signal | — | Fires when the mouse button or finger is lifted, and also when a touch is cancelled by the system |
 | `textChanged` | Signal | — | Fires whenever the Value output changes, so a graph can sequence off the new value rather than poll it |
-| `unchanged` | Signal | — | Fires when a Set or Clear left the field as it was — most often a Set while the field has focus, which is deliberately absorbed so it cannot overwrite what is being typed |
+| `unchanged` | Signal | — | Fires when a Set or Clear left the field as it was — most often a Set while the field has focus, which is deliberately absorbed so it cannot overwrite what is being typed — when Insert Text or Backspace had nothing to write (a full Max length, or an empty field), or when a Focus arrived while the field was not on the page |
 | `willUnmount` | Signal | — | Fires just before this element is removed from the page, while it still exists |
 
 ## Dynamic ports
 
-_This node's port list changes at runtime (declared-port-groups, runtime-discovered); the tables above may be incomplete for a given instance._
+_This node's port list changes at runtime (declared-port-groups, runtime-narrowed); the tables above may be incomplete for a given instance._
 
 The port list above is complete — this node mints no ports. It republishes its own two value ports (`startValue`, `onTextChanged`) per instance with a narrowed type: `number` when the `type` parameter is `number`, `string` for every other Type. They are declared `*` statically because nothing outside a connected editor can narrow them.
 
@@ -191,7 +199,9 @@ The port list above is complete — this node mints no ports. It republishes its
 | borderTopStyle = solid OR borderTopStyle = dashed OR borderTopStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted  | `borderTopWidth`, `borderTopColor` | — |
 | borderRightStyle = solid OR borderRightStyle = dashed OR borderRightStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted  | `borderRightWidth`, `borderRightColor` | — |
 | borderBottomStyle = solid OR borderBottomStyle = dashed OR borderBottomStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted  | `borderBottomWidth`, `borderBottomColor` | — |
-| boxShadowEnabled = true | `boxShadowOffsetX`, `boxShadowOffsetY`, `boxShadowInset`, `boxShadowBlurRadius`, `boxShadowSpreadRadius`, `boxShadowColor` | — |
+| boxShadowEnabled = true | `boxShadowSource` | — |
+| boxShadowEnabled = true AND boxShadowSource = token | `boxShadowToken` | — |
+| boxShadowEnabled = true AND boxShadowSource != token | `boxShadowOffsetX`, `boxShadowOffsetY`, `boxShadowInset`, `boxShadowBlurRadius`, `boxShadowSpreadRadius`, `boxShadowColor` | — |
 
 ## Ports at runtime
 

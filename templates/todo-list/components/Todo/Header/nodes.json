@@ -1,0 +1,254 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f0b43e39-f675-52ee-8d43-0bf69ff2771f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hdIn",
+      "type": "Component Inputs",
+      "label": "The view",
+      "ports": [
+        {
+          "name": "tab",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "listLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "doneLabel",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "hdOut",
+      "type": "Component Outputs",
+      "label": "What was picked",
+      "ports": [
+        {
+          "name": "pickList",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "pickDone",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "pickLog",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "signOut",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "hdRoot",
+      "type": "Group",
+      "label": "Header",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-4)",
+        "justifyContent": "space-between",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "hdTitle",
+        "hdNav"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hdTitle",
+      "type": "Text",
+      "label": "App name",
+      "parent": "hdRoot",
+      "parameters": {
+        "text": "Todo list",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h1",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "hdNav",
+      "type": "Group",
+      "label": "Views",
+      "parent": "hdRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "children": [
+        "hdList",
+        "hdDone",
+        "hdLog",
+        "hdSignOut",
+        "hdReminders",
+        "hdTheme"
+      ],
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "hdList",
+      "type": "net.noodl.controls.button",
+      "label": "List",
+      "parent": "hdNav",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "List"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "hdDone",
+      "type": "net.noodl.controls.button",
+      "label": "Done",
+      "parent": "hdNav",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Done"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "hdLog",
+      "type": "net.noodl.controls.button",
+      "label": "Log",
+      "parent": "hdNav",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Log"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "hdSignOut",
+      "type": "net.noodl.controls.button",
+      "label": "Sign out",
+      "parent": "hdNav",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Sign out"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "hdReminders",
+      "type": "/Todo/Reminders switch",
+      "label": "Deadline reminders",
+      "parent": "hdNav",
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "hdTheme",
+      "type": "/Todo/Theme switch",
+      "label": "Light or dark",
+      "parent": "hdNav",
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "hdLook",
+      "type": "States",
+      "label": "Which view is showing",
+      "parameters": {
+        "states": "list,done,log",
+        "currentState": "list",
+        "values": "listBg,doneBg,logBg",
+        "type-listBg": "color",
+        "type-doneBg": "color",
+        "type-logBg": "color",
+        "value-list-listBg": "var(--muted)",
+        "value-list-doneBg": "transparent",
+        "value-list-logBg": "transparent",
+        "value-done-listBg": "transparent",
+        "value-done-doneBg": "var(--muted)",
+        "value-done-logBg": "transparent",
+        "value-log-listBg": "transparent",
+        "value-log-doneBg": "transparent",
+        "value-log-logBg": "var(--muted)",
+        "useTransitions": false
+      },
+      "x": 410,
+      "y": 640
+    }
+  ],
+  "visualRoots": [
+    "hdRoot"
+  ]
+}

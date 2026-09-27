@@ -10,20 +10,26 @@
  * We can only see (1) and (2). For (3) we must not guess: reporting "port does
  * not exist" for a runtime-created port would flood real projects with false
  * errors and destroy trust in the validator. So:
- *   - port found in (1) or (2)                         → OK
- *   - not found, but the node has ANY dynamic ports    → skip (optional info)
- *   - not found, and the node is fully static          → error
+ *   - port found in (1) or (2)                                   → OK
+ *   - not found, and the node really mints ports at runtime      → skip (optional info)
+ *   - not found, and every port the node can have is enumerable  → error
  *
- * This is exactly the behaviour the SUB-004 corpus preview proved clean: zero
- * static-port false positives across the entire real-project corpus, while
- * ~2000 runtime-created ports were correctly skipped.
+ * 🔴 GAM-019 (P78 D66) — the middle row used to read "the node has ANY dynamic
+ * ports" (`isDynamicNode`), and that is how `name0 → text` on a Text Input went
+ * through the door silently. 88 of the 176 shipped types carry a `dynamicPorts`
+ * entry; for 18 of them the only mechanism is `declared-port-groups`, whose members
+ * are all in (1), and Text Input and Options republish only ports they already
+ * declare (`runtime-narrowed`). None of those can have a port (1) does not list,
+ * so skipping them skipped the check for nothing. The predicate is now
+ * `hasRuntimeDynamicPorts`, which `parameterValues` has used for the parameter half
+ * of the same question since CN-004.
  *
  * @module noodl-editor/validation/rules/nonexistentPort
  */
 
-import { CatalogIndex, Plug } from '../CatalogIndex';
+import { CatalogIndex, Plug, PortKind, portKindOfTypeName } from '../CatalogIndex';
 import { Diagnostic, DiagnosticCode } from '../diagnostics';
-import { NormNode, isComponentRef } from '../model';
+import { NormConnection, NormNode, isComponentRef } from '../model';
 import { SkippedCheck, unknownTypeSkip } from '../unknownTypeSkip';
 import { Rule, RuleContext } from './types';
 
@@ -31,18 +37,41 @@ const MAX_ALTERNATIVES = 24;
 
 function availableAlternatives(catalog: CatalogIndex, type: string, plug: Plug): string[] {
   // For inputs, lead with signal inputs — "how do I trigger this" is the most
-  // common near-miss — then the rest, capped so the message stays readable.
+  // common near-miss — then the ports that carry a value or a behaviour, then
+  // the styling ports a visual state can vary, capped so the message stays readable.
+  //
+  // ⚠️ GAM-019 — the middle tier is load bearing. Alphabetical order put a Text
+  // Input's `startValue` 88th of its 105 inputs, behind every `border*`, so the
+  // refusal of D66's `text` listed 24 styling ports and never the one the author
+  // meant. `suggestPort` cannot rescue it: "text" is nowhere near "startValue".
   const all = catalog.portNames(type, plug);
-  if (plug === 'input') {
-    const signals = new Set(catalog.signalInputNames(type));
-    const ordered = [...all].sort((a, b) => {
-      const sa = signals.has(a) ? 0 : 1;
-      const sb = signals.has(b) ? 0 : 1;
-      return sa !== sb ? sa - sb : a < b ? -1 : 1;
-    });
-    return ordered.slice(0, MAX_ALTERNATIVES);
+  const signals = new Set(plug === 'input' ? catalog.signalInputNames(type) : []);
+  const tier = (name: string) => (signals.has(name) ? 0 : catalog.getPort(type, plug, name)?.allowVisualStates ? 2 : 1);
+  const ordered = [...all].sort((a, b) => tier(a) - tier(b) || (a < b ? -1 : 1));
+  return ordered.slice(0, MAX_ALTERNATIVES);
+}
+
+/**
+ * GAM-019 (ruled 2026-09-14) — what the wire carries, read from its other end.
+ *
+ * A catalog port answers first. Otherwise the type the instance declared for the port, which is
+ * where D66's `Component Inputs.name0` (`string`) lives. `*`, an untyped instance port, a
+ * component instance and a dangling end have no kind, and the suggestion is not filtered.
+ */
+function otherEndKind(
+  catalog: CatalogIndex,
+  nodeById: { get(id: string): NormNode | undefined },
+  conn: NormConnection,
+  plug: Plug
+): PortKind | undefined {
+  const [id, port, otherPlug]: [string, string, Plug] =
+    plug === 'input' ? [conn.fromId, conn.fromProperty, 'output'] : [conn.toId, conn.toProperty, 'input'];
+  const other = nodeById.get(id);
+  if (!other) return undefined;
+  if (!isComponentRef(other.type) && catalog.hasPort(other.type, otherPlug, port)) {
+    return catalog.portKind(other.type, otherPlug, port);
   }
-  return all.slice(0, MAX_ALTERNATIVES);
+  return portKindOfTypeName(other.instancePortTypes?.[port]);
 }
 
 export const nonexistentPort: Rule = {
@@ -94,7 +123,7 @@ export const nonexistentPort: Rule = {
           if (catalog.hasPort(node.type, plug, port)) continue; // (1)
           if (node.instancePorts.includes(port)) continue; // (2)
 
-          if (catalog.isDynamicNode(node.type)) {
+          if (catalog.hasRuntimeDynamicPorts(node.type)) {
             // (3) — runtime/adapter/numbered/component ports. Never an error.
             if (ctx.options.emitDynamicPortInfo) {
               out.push({
@@ -118,7 +147,7 @@ export const nonexistentPort: Rule = {
           }
 
           // Fully static node — a missing port here is a real error.
-          const suggestion = catalog.suggestPort(node.type, plug, port);
+          const suggestion = catalog.suggestPort(node.type, plug, port, otherEndKind(catalog, nodeById, conn, plug));
           const alternatives = availableAlternatives(catalog, node.type, plug);
           out.push({
             code: DiagnosticCode.NonexistentPort,

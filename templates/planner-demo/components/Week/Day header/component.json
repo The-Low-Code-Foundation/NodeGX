@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "17ecdf4b-4f9b-5c7b-8c6e-a67221f0130c",
+  "name": "Day header",
+  "path": "/Week/Day header",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The head of one day: the date, the focused hours against the six-hour ceiling, a bar of logged against planned, and what kind of day it is."
+}

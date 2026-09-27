@@ -1,0 +1,186 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "fe746af0-68fd-5cb2-8fcd-90fa7c48e205",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "RenameactiIn",
+      "type": "Component Inputs",
+      "label": "What to do",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "taskId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "actionId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "newTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "RenameactiOut",
+      "type": "Component Outputs",
+      "label": "Done",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "RenameactiGuard",
+      "type": "JavaScriptFunction",
+      "label": "Is there anything to write?",
+      "parameters": {
+        "functionScript": "function findRow(rows, id) {\n  for (var i = 0; i < rows.length; i++) if (rows[i] && rows[i].id === id) return rows[i];\n  return null;\n}\nvar row = findRow(Inputs.rows || [], String(Inputs.actionId || ''));\nif (!row) return;\nvar old = String(row.title || '');\nvar t = String(Inputs.newTitle || '').trim();\nif (t === '' || t === old) return;\nOutputs.title = t;\nOutputs.summary = 'Next action renamed from “' + old + '”';\nOutputs.go();",
+        "runOnChange-in-rows": false,
+        "runOnChange-in-actionId": false,
+        "runOnChange-in-newTitle": false
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-rows",
+          "displayName": "rows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-actionId",
+          "displayName": "actionId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-newTitle",
+          "displayName": "newTitle",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-summary",
+          "displayName": "summary",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "RenameactiWrite",
+      "type": "JavaScriptFunction",
+      "label": "Rename the next action, in this browser",
+      "parameters": {
+        "functionScript": "var DEMO_KEY = \"nodegx-todo-list-demo-v1\";\nfunction demoLoad() {\n  var raw = null;\n  try { raw = window.localStorage.getItem(DEMO_KEY); } catch (e) { raw = null; }\n  if (raw === null && typeof window.__todoListDemo === 'string') raw = window.__todoListDemo;\n  if (raw === null) return null;\n  try { return JSON.parse(raw); } catch (e) { return null; }\n}\nfunction demoSave(store) {\n  var raw = JSON.stringify(store);\n  window.__todoListDemo = raw;\n  try { window.localStorage.setItem(DEMO_KEY, raw); } catch (e) {}\n}\nvar id = String(Inputs.modelId || '');\nvar store = demoLoad();\nvar list = (store && store[\"Action\"]) || [];\nvar record = null;\nfor (var i = 0; i < list.length; i++) if (list[i] && list[i].id === id) record = list[i];\nif (!record) { Outputs.failure(); return; }\nrecord.title = Inputs.title;\nrecord.updatedAt = new Date().toISOString();\ntry { demoSave(store); } catch (e) { Outputs.failure(); return; }\nOutputs.id = id;\nOutputs.done();",
+        "runOnChange-in-title": false,
+        "runOnChange-in-modelId": false
+      },
+      "x": 40,
+      "y": 400,
+      "ports": [
+        {
+          "name": "in-modelId",
+          "displayName": "modelId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-title",
+          "displayName": "title",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-failure",
+          "displayName": "failure",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-id",
+          "displayName": "id",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "RenameactiHistory",
+      "type": "/Logic/Write history",
+      "label": "Write the history line",
+      "parameters": {
+        "kind": "action-renamed"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "RenameactiProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "todoProblem",
+        "setWith": "string",
+        "value": "That change did not save in this browser. Try again, or reset the demo."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 640
+    }
+  ]
+}

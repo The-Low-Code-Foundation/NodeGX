@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "32a6a325-9b74-57f3-873c-353667740bf0",
+  "name": "Theme switch",
+  "path": "/Todo/Theme switch",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The moon or the sun at the top right. The page follows the system until the person presses it; choosing the system’s own theme again goes back to following the system."
+}

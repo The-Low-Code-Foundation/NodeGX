@@ -1,0 +1,485 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a174c5bd-2561-49ef-b6af-c8a1f6d479d8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "wm_in",
+      "type": "Component Inputs",
+      "label": "The learner's objectives and facts, and the words",
+      "x": 900,
+      "y": 40,
+      "ports": [
+        {
+          "name": "deliverables",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "facts",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "submissions",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "concepts",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "onboardingFacts",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "projectName",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "problemStatement",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "copy",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "audience",
+          "plug": "output",
+          "type": "*"
+        }
+      ]
+    },
+    {
+      "id": "wm_dossier",
+      "type": "/Logic/Dossier",
+      "label": "What each objective holds — the one owner, shared with the learner's meter",
+      "x": 900,
+      "y": 360,
+      "metadata": {
+        "comment": "The SAME component the learner's meter reads (L166). With audience 'coach' it keeps archived objectives on the list and emits toldUs; nothing here re-derives a segment."
+      }
+    },
+    {
+      "id": "wm_words",
+      "type": "JavaScriptFunction",
+      "label": "Word the objectives",
+      "x": 1300,
+      "y": 360,
+      "parameters": {
+        "functionScript": "/*\n * WORD THE OBJECTIVES (TASK-L168 §1). Fills the coach's sentences from what\n * Logic/Dossier already emits — it computes nothing about an objective.\n *\n * PORTED: DeliverablesTab.tsx (the read half of a row) and ObjectivesPanel.tsx\n * (the project, and \"What they have told us\"). Every line the product renders\n * only when it has something to say is `has*`-gated here the same way:\n * `d.description &&`, `expectedCoreFields.length > 0 &&`, `dossier &&`.\n *\n * NOTHING IS COUNTED. No \"3 of 4\", no \"2 answered\" — L114's guard and\n * this task's DO NOT. The ORDER is the data's: segments arrive in position\n * order, as the product's query returns them, and are not re-sorted here.\n *\n * No Run wire: this runs whenever an input changes, which is what a value-\n * driven Function is for. (L165's runOnChange rule is about RUN-driven ones.)\n */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst fill = (t, v) => String(t || '').replace(/\\{(\\w+)\\}/g, (m, k) => (k in v ? String(v[k]) : m));\n\n/* Not arrived yet is not wired wrong (L164): an absent copy waits; a copy that\n   arrives without the namespace is a named failure. */\nif (Inputs.copy === undefined || Inputs.copy === null) return;\nconst W = (plain(Inputs.copy) || {}).dossierCoach;\nif (!W || !W.filedUnder || !W.toldUs) {\n  throw new Error('People/What they must produce: no `dossierCoach` copy. Wire Data/Strings.copy into Copy (TASK-L168).');\n}\nif (Inputs.segments === undefined || Inputs.segments === null) return;\n\nconst segments = plain(Inputs.segments) || [];\nconst told = plain(Inputs.toldUs) || [];\n\nconst rows = segments.map((s) => {\n  const asks = s.asksFor || [];\n  const needs = (s.requires || []).map((r) => r.title);\n  return {\n    id: s.slug,\n    title: s.label,\n    archived: !!s.archived,\n    archivedLabel: W.archived,\n    filedUnder: fill(W.filedUnder, { slug: s.slug }),\n    description: s.description || '',\n    hasDescription: !!s.description,\n    expecting: fill(W.expecting, { fields: asks.join(', ') }),\n    hasExpecting: asks.length > 0,\n    needs: fill(W.needs, { concepts: needs.join(', ') }),\n    hasNeeds: needs.length > 0\n  };\n});\n\nconst projectName = String(Inputs.projectName || '');\nOutputs.hasProject = projectName !== '';\nOutputs.projectName = projectName;\nOutputs.problemStatement = String(Inputs.problemStatement || '');\nOutputs.heading = W.heading;\nOutputs.intro = W.intro;\nOutputs.rows = rows;\nOutputs.hasRows = rows.length > 0;\n/* The product's empty sentence is \"Nothing set yet. Add the first thing you\n   have agreed they will produce.\" Its second half points at a composer that\n   is not on this page, so it is not carried (L81's rung, as copy). */\nOutputs.emptyText = W.nothingSet;\nOutputs.hasEmpty = rows.length === 0;\nOutputs.toldUsHeading = W.toldUs;\nOutputs.told = told;\nOutputs.hasTold = told.length > 0;\nOutputs.toldEmptyText = W.toldUsEmpty;\nOutputs.hasToldEmpty = told.length === 0;\n"
+      },
+      "metadata": {
+        "comment": "Words, not facts: every value it fills in came out of Logic/Dossier."
+      },
+      "ports": [
+        {
+          "name": "in-copy",
+          "displayName": "copy",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-segments",
+          "displayName": "segments",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-toldUs",
+          "displayName": "toldUs",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projectName",
+          "displayName": "projectName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-problemStatement",
+          "displayName": "problemStatement",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-hasProject",
+          "displayName": "hasProject",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-projectName",
+          "displayName": "projectName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-problemStatement",
+          "displayName": "problemStatement",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-heading",
+          "displayName": "heading",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-intro",
+          "displayName": "intro",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasRows",
+          "displayName": "hasRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-emptyText",
+          "displayName": "emptyText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasEmpty",
+          "displayName": "hasEmpty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-toldUsHeading",
+          "displayName": "toldUsHeading",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-told",
+          "displayName": "told",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasTold",
+          "displayName": "hasTold",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-toldEmptyText",
+          "displayName": "toldEmptyText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasToldEmpty",
+          "displayName": "hasToldEmpty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "wm_root",
+      "type": "Group",
+      "label": "Surface C — what they must produce",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "wm_project",
+        "wm_obj",
+        "wm_told"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-8)",
+        "cssClassName": "dbt-coach-surface-objectives"
+      },
+      "metadata": {
+        "comment": "READ-ONLY (TASK-L168 §1): no composer, no concept picker, no Edit, no Archive, no assignment composer — each writes in the product. And NOT filtered by the programme scope above the nav (§2): objectives are per LEARNER, because nothing writes learner_deliverables.programme_id (L127), so the product ignores the programme here too."
+      }
+    },
+    {
+      "id": "wm_project",
+      "type": "Group",
+      "label": "Their project",
+      "x": 40,
+      "y": 160,
+      "parent": "wm_root",
+      "children": [
+        "wm_pname",
+        "wm_pstate"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "wm_pname",
+      "type": "Text",
+      "label": "The project's name",
+      "x": 40,
+      "y": 240,
+      "parent": "wm_project",
+      "parameters": {
+        "as": "h2",
+        "fontFamily": "var(--font-display)",
+        "fontWeight": 800,
+        "fontSize": "var(--text-2xl)",
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "wm_pstate",
+      "type": "Text",
+      "label": "The problem it solves, in their words",
+      "x": 40,
+      "y": 320,
+      "parent": "wm_project",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "wm_obj",
+      "type": "Group",
+      "label": "The objectives",
+      "x": 40,
+      "y": 420,
+      "parent": "wm_root",
+      "children": [
+        "wm_obj_h",
+        "wm_obj_intro",
+        "wm_obj_empty",
+        "wm_obj_rows"
+      ],
+      "parameters": {
+        "as": "section",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "wm_obj_h",
+      "type": "Text",
+      "label": "Objectives eyebrow",
+      "x": 40,
+      "y": 500,
+      "parent": "wm_obj",
+      "parameters": {
+        "as": "h2",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)",
+        "marginBottom": "var(--space-2)"
+      }
+    },
+    {
+      "id": "wm_obj_intro",
+      "type": "Text",
+      "label": "That they can read these",
+      "x": 40,
+      "y": 580,
+      "parent": "wm_obj",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "metadata": {
+        "comment": "The product's disclosure, trimmed to what is true here: the learner's meter shows each TITLE. Its authoring advice ('write the title as something you would say to them') is not carried, because there is no title to write on this page."
+      }
+    },
+    {
+      "id": "wm_obj_empty",
+      "type": "Text",
+      "label": "Nothing set yet",
+      "x": 40,
+      "y": 660,
+      "parent": "wm_obj",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "marginTop": "var(--space-3)"
+      }
+    },
+    {
+      "id": "wm_obj_rows",
+      "type": "Group",
+      "label": "The rows",
+      "x": 40,
+      "y": 740,
+      "parent": "wm_obj",
+      "children": [
+        "wm_obj_each"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "wm_obj_each",
+      "type": "For Each",
+      "label": "One row per objective, archived ones included",
+      "x": 40,
+      "y": 820,
+      "parent": "wm_obj_rows",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/People/Objective row"
+      }
+    },
+    {
+      "id": "wm_told",
+      "type": "Group",
+      "label": "What they have told us",
+      "x": 40,
+      "y": 920,
+      "parent": "wm_root",
+      "children": [
+        "wm_told_h",
+        "wm_told_empty",
+        "wm_told_rows"
+      ],
+      "parameters": {
+        "as": "section",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "wm_told_h",
+      "type": "Text",
+      "label": "Told-us eyebrow",
+      "x": 40,
+      "y": 1000,
+      "parent": "wm_told",
+      "parameters": {
+        "as": "h2",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)",
+        "marginBottom": "var(--space-2)"
+      }
+    },
+    {
+      "id": "wm_told_empty",
+      "type": "Text",
+      "label": "Nothing captured yet",
+      "x": 40,
+      "y": 1080,
+      "parent": "wm_told",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "wm_told_rows",
+      "type": "Group",
+      "label": "The facts",
+      "x": 40,
+      "y": 1160,
+      "parent": "wm_told",
+      "children": [
+        "wm_told_each"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "wm_told_each",
+      "type": "For Each",
+      "label": "One row per fact — an archived objective's answers included",
+      "x": 40,
+      "y": 1240,
+      "parent": "wm_told_rows",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/People/Told us row"
+      }
+    }
+  ],
+  "visualRoots": [
+    "wm_root"
+  ]
+}

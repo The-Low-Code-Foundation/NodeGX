@@ -22,7 +22,7 @@ import { javascriptGenerator } from 'blockly/javascript';
 
 import { BenchController, DEFAULT_BENCH_TRIGGER } from '../../src/editor/src/views/BlocklyEditor/BenchController';
 import {
-  SANDBOX_NOTE,
+  TEST_VALUES_NOTE,
   benchInputRows,
   benchInputsFor,
   benchOutputRows,
@@ -270,7 +270,7 @@ describe('VFN-011 — what a run produces, and what it says about itself', () =>
       // Criterion 7: the frame is the viewer's shape plus a flag, so one history holds both and a
       // scrubbed-back run can still say which it was.
       expect(frames[0].frame.sandbox).toBe(true);
-      expect(frames[0].note).toContain(SANDBOX_NOTE);
+      expect(frames[0].note).toContain(TEST_VALUES_NOTE);
       expect(Object.keys(frames[0].frame.values).length).toBeGreaterThan(0);
     } finally {
       workspace.dispose();
@@ -301,7 +301,7 @@ describe('VFN-011 — what a run produces, and what it says about itself', () =>
 
       // The failed run is still in the scrubber, and still says what happened.
       expect(frames).toHaveLength(1);
-      expect(frames[0].note).toContain('Sandbox run failed');
+      expect(frames[0].note).toContain('Test run failed');
     } finally {
       workspace.dispose();
     }
@@ -408,7 +408,7 @@ describe('VFN-011 — 🔴 NEGATIVE CONTROLS: each claim above can be made to fa
   it('the run note distinguishes a run that worked from one that did not', () => {
     // If both said the same thing the scrubber's note would be decoration, and criterion 7 would
     // be met by a string that is always present and never informative.
-    expect(benchRunNote({ ok: true })).toContain(SANDBOX_NOTE);
+    expect(benchRunNote({ ok: true })).toContain(TEST_VALUES_NOTE);
     expect(benchRunNote({ ok: true })).not.toContain('failed');
     expect(benchRunNote({ ok: false, error: 'x is not a function' })).toContain('x is not a function');
   });

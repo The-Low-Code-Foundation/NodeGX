@@ -1,0 +1,193 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1efb5ae5-94d0-5cd3-8666-f5c855bd7816",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "EditmoneyiIn",
+      "fromProperty": "itemId",
+      "toId": "EditmoneyiGuard",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "EditmoneyiIn",
+      "fromProperty": "label",
+      "toId": "EditmoneyiGuard",
+      "toProperty": "in-label"
+    },
+    {
+      "fromId": "EditmoneyiIn",
+      "fromProperty": "dir",
+      "toId": "EditmoneyiGuard",
+      "toProperty": "in-dir"
+    },
+    {
+      "fromId": "EditmoneyiIn",
+      "fromProperty": "amount",
+      "toId": "EditmoneyiGuard",
+      "toProperty": "in-amount"
+    },
+    {
+      "fromId": "EditmoneyiIn",
+      "fromProperty": "repeat",
+      "toId": "EditmoneyiGuard",
+      "toProperty": "in-repeat"
+    },
+    {
+      "fromId": "EditmoneyiIn",
+      "fromProperty": "date",
+      "toId": "EditmoneyiGuard",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "EditmoneyiIn",
+      "fromProperty": "until",
+      "toId": "EditmoneyiGuard",
+      "toProperty": "in-until"
+    },
+    {
+      "fromId": "EditmoneyiIn",
+      "fromProperty": "monthEnd",
+      "toId": "EditmoneyiGuard",
+      "toProperty": "in-monthEnd"
+    },
+    {
+      "fromId": "EditmoneyiIn",
+      "fromProperty": "projectId",
+      "toId": "EditmoneyiGuard",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "EditmoneyiIn",
+      "fromProperty": "billDate",
+      "toId": "EditmoneyiGuard",
+      "toProperty": "in-billDate"
+    },
+    {
+      "fromId": "EditmoneyiIn",
+      "fromProperty": "billLeadDays",
+      "toId": "EditmoneyiGuard",
+      "toProperty": "in-billLeadDays"
+    },
+    {
+      "fromId": "EditmoneyiIn",
+      "fromProperty": "fromHours",
+      "toId": "EditmoneyiGuard",
+      "toProperty": "in-fromHours"
+    },
+    {
+      "fromId": "EditmoneyiIn",
+      "fromProperty": "likelihood",
+      "toId": "EditmoneyiGuard",
+      "toProperty": "in-likelihood"
+    },
+    {
+      "fromId": "EditmoneyiIn",
+      "fromProperty": "note",
+      "toId": "EditmoneyiGuard",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "EditmoneyiIn",
+      "fromProperty": "do",
+      "toId": "EditmoneyiGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "EditmoneyiGuard",
+      "fromProperty": "out-label",
+      "toId": "EditmoneyiWrite",
+      "toProperty": "in-label"
+    },
+    {
+      "fromId": "EditmoneyiGuard",
+      "fromProperty": "out-amount",
+      "toId": "EditmoneyiWrite",
+      "toProperty": "in-amount"
+    },
+    {
+      "fromId": "EditmoneyiGuard",
+      "fromProperty": "out-repeat",
+      "toId": "EditmoneyiWrite",
+      "toProperty": "in-repeat"
+    },
+    {
+      "fromId": "EditmoneyiGuard",
+      "fromProperty": "out-date",
+      "toId": "EditmoneyiWrite",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "EditmoneyiGuard",
+      "fromProperty": "out-until",
+      "toId": "EditmoneyiWrite",
+      "toProperty": "in-until"
+    },
+    {
+      "fromId": "EditmoneyiGuard",
+      "fromProperty": "out-monthEnd",
+      "toId": "EditmoneyiWrite",
+      "toProperty": "in-monthEnd"
+    },
+    {
+      "fromId": "EditmoneyiGuard",
+      "fromProperty": "out-projectId",
+      "toId": "EditmoneyiWrite",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "EditmoneyiGuard",
+      "fromProperty": "out-billDate",
+      "toId": "EditmoneyiWrite",
+      "toProperty": "in-billDate"
+    },
+    {
+      "fromId": "EditmoneyiGuard",
+      "fromProperty": "out-billLeadDays",
+      "toId": "EditmoneyiWrite",
+      "toProperty": "in-billLeadDays"
+    },
+    {
+      "fromId": "EditmoneyiGuard",
+      "fromProperty": "out-fromHours",
+      "toId": "EditmoneyiWrite",
+      "toProperty": "in-fromHours"
+    },
+    {
+      "fromId": "EditmoneyiGuard",
+      "fromProperty": "out-likelihood",
+      "toId": "EditmoneyiWrite",
+      "toProperty": "in-likelihood"
+    },
+    {
+      "fromId": "EditmoneyiGuard",
+      "fromProperty": "out-note",
+      "toId": "EditmoneyiWrite",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "EditmoneyiIn",
+      "fromProperty": "itemId",
+      "toId": "EditmoneyiWrite",
+      "toProperty": "in-modelId"
+    },
+    {
+      "fromId": "EditmoneyiGuard",
+      "fromProperty": "out-go",
+      "toId": "EditmoneyiWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "EditmoneyiWrite",
+      "fromProperty": "out-done",
+      "toId": "EditmoneyiOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "EditmoneyiWrite",
+      "fromProperty": "out-failure",
+      "toId": "EditmoneyiProblem",
+      "toProperty": "do"
+    }
+  ]
+}

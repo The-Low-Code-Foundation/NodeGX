@@ -1,0 +1,421 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "03e5eb89-ced5-4ac3-9ec8-9914d7939acc",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "projectName",
+      "toId": "cs_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "problemStatement",
+      "toId": "cs_scope",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "entries",
+      "toId": "cs_ordered",
+      "toProperty": "entries"
+    },
+    {
+      "fromId": "cs_ordered",
+      "fromProperty": "ordered",
+      "toId": "cs_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cs_open",
+      "fromProperty": "onClick",
+      "toId": "cs_go",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "entries",
+      "toId": "cs_standing",
+      "toProperty": "entries"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "dimensions",
+      "toId": "cs_standing",
+      "toProperty": "dimensions"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "endsOn",
+      "toId": "cs_standing",
+      "toProperty": "endsOn"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "hasStanding",
+      "toId": "cs_whereat",
+      "toProperty": "hasStanding"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "countsSentence",
+      "toId": "cs_whereat",
+      "toProperty": "countsSentence"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "hasEndsOn",
+      "toId": "cs_whereat",
+      "toProperty": "hasEndsOn"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "endsOnSentence",
+      "toId": "cs_whereat",
+      "toProperty": "endsOnSentence"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "hasOrder",
+      "toId": "cs_whereat",
+      "toProperty": "hasOrder"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "orderSentence",
+      "toId": "cs_whereat",
+      "toProperty": "orderSentence"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "hasRequires",
+      "toId": "cs_whereat",
+      "toProperty": "hasRequires"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "requiresLabel",
+      "toId": "cs_whereat",
+      "toProperty": "requiresLabel"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "requires",
+      "toId": "cs_whereat",
+      "toProperty": "requires"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "hasPace",
+      "toId": "cs_pace_wrap",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "paceView",
+      "toId": "cs_pace",
+      "toProperty": "view"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "parPoints",
+      "toId": "cs_pace",
+      "toProperty": "par"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "paceHeadline",
+      "toId": "cs_pace",
+      "toProperty": "headline"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "legendActual",
+      "toId": "cs_pace",
+      "toProperty": "legendActual"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "legendPar",
+      "toId": "cs_pace",
+      "toProperty": "legendPar"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "hasTrajectory",
+      "toId": "cs_traj",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "trajectoryRows",
+      "toId": "cs_traj_each",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "hasEarlier",
+      "toId": "cs_traj_caption",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "earlierCaption",
+      "toId": "cs_traj_caption",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_cs_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "cs_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_cs_card_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "cs_card_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_cs_prog_label",
+      "fromProperty": "Translation",
+      "toId": "cs_prog_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_cs_pace_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "cs_pace_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_cs_traj_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "cs_traj_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_cs_page_title",
+      "fromProperty": "Translation",
+      "toId": "seo_cs_page",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "cs_lang_var",
+      "fromProperty": "value",
+      "toId": "cs_strings",
+      "toProperty": "language"
+    },
+    {
+      "fromId": "cs_strings",
+      "fromProperty": "copy",
+      "toId": "cs_ordered",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "cs_strings",
+      "fromProperty": "audience",
+      "toId": "cs_ordered",
+      "toProperty": "audience"
+    },
+    {
+      "fromId": "cs_strings",
+      "fromProperty": "copy",
+      "toId": "cs_standing",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "deliverables",
+      "toId": "cs_dossier",
+      "toProperty": "deliverables"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "facts",
+      "toId": "cs_dossier",
+      "toProperty": "facts"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "submissions",
+      "toId": "cs_dossier",
+      "toProperty": "submissions"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "concepts",
+      "toId": "cs_dossier",
+      "toProperty": "concepts"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "onboardingFacts",
+      "toId": "cs_dossier",
+      "toProperty": "onboardingFacts"
+    },
+    {
+      "fromId": "cs_strings",
+      "fromProperty": "copy",
+      "toId": "cs_dossier",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "cs_strings",
+      "fromProperty": "audience",
+      "toId": "cs_dossier",
+      "toProperty": "audience"
+    },
+    {
+      "fromId": "cs_dossier",
+      "fromProperty": "hasSegments",
+      "toId": "cs_dos_wrap",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cs_dossier",
+      "fromProperty": "segments",
+      "toId": "cs_dos_each",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cs_dossier",
+      "fromProperty": "segments",
+      "toId": "cs_dos_pick",
+      "toProperty": "in-segments"
+    },
+    {
+      "fromId": "cs_dos_each",
+      "fromProperty": "itemActionItemId",
+      "toId": "cs_dos_open",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "cs_dos_each",
+      "fromProperty": "itemOutputSignal-opened",
+      "toId": "cs_dos_open",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cs_dos_var",
+      "fromProperty": "value",
+      "toId": "cs_dos_pick",
+      "toProperty": "in-open"
+    },
+    {
+      "fromId": "cs_dos_pick",
+      "fromProperty": "out-open",
+      "toId": "cs_dos_reveal",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "cs_dos_pick",
+      "fromProperty": "out-segment",
+      "toId": "cs_dos_reveal",
+      "toProperty": "segment"
+    },
+    {
+      "fromId": "cs_strings",
+      "fromProperty": "copy",
+      "toId": "cs_dos_reveal",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "cs_dos_reveal",
+      "fromProperty": "onClosed",
+      "toId": "cs_dos_close",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cs_dos_reveal",
+      "fromProperty": "onLessonOpened",
+      "toId": "cs_dos_close",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cs_dos_reveal",
+      "fromProperty": "onLessonOpened",
+      "toId": "cs_dos_lesson",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "t_cs_dos_title",
+      "fromProperty": "Translation",
+      "toId": "cs_dos_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "nextLessonTitle",
+      "toId": "cs_lesson_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "nextLessonWhy",
+      "toId": "cs_landing",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "hasNextLesson",
+      "toId": "cs_card",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "nextLessonAction",
+      "toId": "cs_open",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cs_standing",
+      "fromProperty": "nextLessonConceptId",
+      "toId": "cs_go",
+      "toProperty": "pm-concept"
+    },
+    {
+      "fromId": "cs_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "cs_orow_pick",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "cs_rows",
+      "fromProperty": "itemOutputSignal-openLesson",
+      "toId": "cs_orow_pick",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cs_ordered",
+      "fromProperty": "ordered",
+      "toId": "cs_orow_pick",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "cs_orow_pick",
+      "fromProperty": "out-concept",
+      "toId": "cs_orow_go",
+      "toProperty": "pm-concept"
+    },
+    {
+      "fromId": "cs_orow_pick",
+      "fromProperty": "out-go",
+      "toId": "cs_orow_go",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "work",
+      "toId": "cs_ordered",
+      "toProperty": "work"
+    },
+    {
+      "fromId": "cs_dos_reveal",
+      "fromProperty": "onLessonConceptId",
+      "toId": "cs_dos_lesson",
+      "toProperty": "pm-concept"
+    }
+  ]
+}

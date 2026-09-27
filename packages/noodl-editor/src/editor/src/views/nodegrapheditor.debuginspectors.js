@@ -1,9 +1,9 @@
 const DebugInspector = require('../utils/debuginspector');
 const { ProjectModel } = require('../models/projectmodel');
 const { InspectPopup } = require('./nodegrapheditor/InspectJSONView/InspectPopup');
-const { createRoot } = require('react-dom/client');
 const React = require('react');
 const { EventDispatcher } = require('../../../shared/utils/EventDispatcher');
+const { createReactRoot, unmountReactRoot } = require('../../../shared/utils/unmountReactRoot');
 
 // --------------------------------------------------------------
 // DebugInspector
@@ -59,14 +59,14 @@ DebugInspectorPopup.prototype.render = function () {
 
   // Create root only once, reuse for subsequent renders
   if (!this.root) {
-    this.root = createRoot(this.div);
+    this.root = createReactRoot(this.div);
   }
   this.root.render(React.createElement(InspectPopup, { debugValue, onPinClicked, pinned: this.model.pinned }));
 };
 
 DebugInspectorPopup.prototype.dispose = function () {
   if (this.root) {
-    this.root.unmount();
+    unmountReactRoot(this.root);
     this.root = null;
   }
   if (this.div.parentElement) {

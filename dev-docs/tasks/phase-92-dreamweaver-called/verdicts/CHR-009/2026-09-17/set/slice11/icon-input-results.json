@@ -1,0 +1,84 @@
+{
+  "before": {
+    "useIcon": null,
+    "iconIconSource": null
+  },
+  "turnedOn": {
+    "params": {
+      "useIcon": true,
+      "iconIconSource": null
+    },
+    "fieldText": "None",
+    "field": {
+      "left": 194,
+      "top": 619,
+      "right": 350,
+      "bottom": 645,
+      "height": 26
+    }
+  },
+  "picker": {
+    "open": true,
+    "box": {
+      "left": 360,
+      "top": 341,
+      "right": 830,
+      "bottom": 711,
+      "height": 370
+    },
+    "field": {
+      "left": 194,
+      "top": 513,
+      "right": 350,
+      "bottom": 539,
+      "height": 26
+    },
+    "coversField": false,
+    "openAfterClose": false
+  },
+  "named": {
+    "params": {
+      "useIcon": true,
+      "iconIconSource": {
+        "class": "lucide",
+        "code": "icon-star",
+        "codeAsClass": true
+      }
+    },
+    "fieldText": "star",
+    "glyph": true,
+    "field": {
+      "left": 194,
+      "top": 513,
+      "right": 350,
+      "bottom": 539,
+      "height": 26
+    }
+  },
+  "edit": {
+    "box": {
+      "left": 194,
+      "top": 754,
+      "right": 350,
+      "bottom": 780,
+      "height": 26
+    },
+    "open": true,
+    "popout": {
+      "left": 360,
+      "top": 502,
+      "right": 660,
+      "bottom": 550,
+      "height": 48
+    },
+    "coversButton": false,
+    "openAfterClose": false
+  },
+  "undone": {
+    "params": {
+      "useIcon": null,
+      "iconIconSource": null
+    },
+    "fieldText": "None"
+  }
+}

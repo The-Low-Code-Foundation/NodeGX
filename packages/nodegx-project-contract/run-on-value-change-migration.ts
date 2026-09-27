@@ -217,14 +217,12 @@ export const RUN_ON_CHANGE_FAMILIES: Readonly<Record<string, RunOnChangeFamily>>
   // noodl-viewer-react/nodes/controls/text-input.ts — `Set` is the control signal and `Text` the
   // one value input it silenced.
   //
-  // ⚠️ This family's checkbox port does **not** exist. `createNodeFromReactComponent` builds its
-  // definition field by field and never copies `runOnValueChange`, so `defineNode` synthesises
-  // nothing and the catalog carries no `runOnChange-startValue` — while `text-input.ts` calls
-  // `shouldRunOnValueChange('startValue')`, which therefore always answers *ticked*. The family is
-  // migrated anyway, and correctly: the parameter reaches `registerInputIfNeeded`, `defineNode`'s
-  // wrapper claims it and mints the checkbox, and the untick lands. Kept in the table with this
-  // note rather than dropped, because dropping it would silently exclude the most common
-  // `Set`-driven node in the library.
+  // ✅ P88 GAM-019 (2026-09-14): this family's checkbox port is now declared. Until then
+  // `createNodeFromReactComponent` built its definition field by field and never copied
+  // `runOnValueChange`, so `defineNode` synthesised nothing and the catalog and the panel carried
+  // no `runOnChange-startValue`, though a saved parameter still reached `registerInputIfNeeded`,
+  // where `defineNode`'s wrapper claimed it and the untick landed. The field is forwarded now, so
+  // the port is in the catalog and the panel, and the validator's parameter check accepts it.
   'net.noodl.controls.textinput': { controlSignal: 'set', declared: ['startValue'] },
 
   // std-library/simplejavascript.ts — script inputs are registered as `in-<name>`, so the
@@ -234,11 +232,16 @@ export const RUN_ON_CHANGE_FAMILIES: Readonly<Record<string, RunOnChangeFamily>>
 
   // std-library/expression.ts — every free identifier in `expression` becomes an input.
   // `expression` is the definition port and keeps the old guard deliberately.
+  //
+  // 🔴 `staticInputs` must list EVERY declared input: anything else observed on a saved instance
+  // reads as a free variable. P88 GAM-002 (`89e533625`) declared `evaluateAtLoad`, and until it
+  // was listed here a saved `evaluateAtLoad: false` on an Expression whose `run` is wired was
+  // handed `runOnChange-evaluateAtLoad: false`, a checkbox for a port no expression feeds.
   Expression: {
     controlSignal: 'run',
     declared: [],
     discoveredBareIdentifiers: true,
-    staticInputs: ['expression', 'run']
+    staticInputs: ['evaluateAtLoad', 'expression', 'run']
   }
 };
 

@@ -1,0 +1,421 @@
+# BRG-003 — The conformance suite
+
+**Status: 🏗 s4 (2026-09-19). The suite is 56 cases across five areas, green against SQLite and
+proven able to fail by six mutants — and **the §3.5 gate is built and in CI**. AC1, AC3, AC4, AC5,
+AC6 and AC7 closed. **AC8 was the only criterion left and it was BRG-004's — closed s5** (BRG-004 §5): the two generators are repaired and tested, and this file's AC7 ratchet falls from 22 to 20 because neither is `uncovered` any more. The three §3.2 areas
+with no cases are now *declared* rather than merely absent, and counted by a ratchet. Exercising the
+two mechanisms found four things nobody had noticed — §5.6 and §5.7.**
+
+## 1. The person sentence
+
+**The promise "your app moves" is a test suite that runs, not a sentence someone wrote — and the day
+a feature lands that would have broken it, CI says so instead of a user finding out in a year.**
+
+## 2. What is there (read 2026-09-18, HEAD `df60eb6f5`)
+
+| reading | where |
+|---|---|
+| 8 test files exercise the adapter stack, all written against `LocalSQLAdapter` **by name** — implementation tests, not a contract | `noodl-runtime/test/adapters/*.test.js` |
+| 159 test files in the backend, most provisioning a real service over HTTP. Good raw material; none of it is adapter-parameterised | `nodegx-backend/tests/` |
+| `QueryBuilder.test.js` asserts emitted **SQLite SQL text** — the single most adapter-specific suite there is, and the one that must NOT become conformance | `noodl-runtime/test/adapters/QueryBuilder.test.js` |
+| 🔴 `generatePostgresSQL` / `generateSupabaseSQL` have **zero** tests and are reachable from a live admin route | grep: 0 hits; `server/byob-admin.ts:466-468` |
+| `capabilities.ts` already carries `supported \| unsupported \| conditional \| degraded` with a `reason`, plus a `CapabilityProbe` shape for verifying a claim against a live backend | `nodegx-backend-contract/src/capabilities.ts:33-60, 164-211` |
+
+## 3. Design
+
+### 3.1 The shape
+
+One suite, exported as a function, run once per adapter:
+
+```
+packages/nodegx-backend-contract/conformance/
+  index.ts          runConformance(makeAdapter: () => Promise<IStorageAdapter>, decl: Declaration)
+  cases/            records, queries, filters, acl, relations, transactions, changes, schema, operational
+```
+
+`nodegx-backend` runs it against SQLite. BRG-005 adds one file to run it against Postgres. Nothing
+else changes.
+
+### 3.2 What it covers, and why each
+
+| area | why it is in the promise |
+|---|---|
+| CRUD + the `wire*` `{__type}` envelopes and `include=` expansion | this is what every data node on the canvas receives; a difference here is a visibly broken app |
+| Every filter operator in `QueryBuilder` — `$in/$nin/$regex/$exists/$gt…` | the filter surface is what an author actually builds with |
+| Row ACLs, `creatorOwns`, and the CLP gate | 🔴 **the highest-stakes area.** A row-level predicate that translates loosely is a data breach, not a bug. See rule 4 |
+| Relations, and junction behaviour | BRG-D3: relations currently vanish from the Postgres export entirely |
+| Declared indexes, unique constraints, and upsert-on-unique (FED-002) | BRG-D2: these silently do not cross today |
+| Transactions, including rollback and the buffered change emission | `ChangeBus` depends on post-commit ordering; realtime and DB-change triggers both ride it |
+| The change tap: ordering, commit-boundary, no events on rollback | realtime SSE and `triggers/dbchange` are both consumers |
+| `IOperationalStore`: claim, CAS, release, sweep | idempotency correctness is what makes a retried cloud function safe |
+| Aggregate and distinct | served under an ordinary `find` permission here, unlike upstream Parse — `backends.ts:16-23` |
+
+### 3.3 What it deliberately does not cover
+
+Emitted SQL text. Engine-specific plans. `QueryBuilder.test.js` stays exactly where it is, testing
+SQLite, and is never parameterised — asserting SQL text across two dialects is how a conformance
+suite becomes a second implementation.
+
+### 3.4 Declared divergence, not silent divergence
+
+Some things genuinely cannot be identical. FTS5 and `tsvector` rank differently; SQLite's `$regex`
+and Postgres `~` differ at the edges; collation and `ORDER BY` on mixed types diverge.
+
+Each such case declares itself through the **existing** `capabilities.ts` vocabulary with a
+`reason`, and the suite asserts *the declaration*: a case marked `degraded` must still return
+correct rows and may differ in order; a case marked `unsupported` must **fail loudly**, never return
+a wrong answer quietly. An undeclared divergence is a suite failure. **Silence is the failure mode
+this whole phase was created by** (README §2).
+
+### 3.4.1 The cross-process notify channel — filed here, and NOT in BRG-001
+
+Raised 2026-09-19 by a peer session from
+[`dev-docs/future-projects/HORIZONTAL-SCALING-STUDY.md`](../../future-projects/HORIZONTAL-SCALING-STUDY.md)
+§3: a `LISTEN/NOTIFY` channel is *"near-unfixable on SQLite and near-trivial on Postgres"*, and the
+study asks that it be declared `conditional` in `capabilities.ts` — **"cheap now, awkward to retrofit
+after the interface is published"**.
+
+**The subject is real and the placement was measured wrong.** Three readings, taken at
+HEAD `978d49da8` before deciding:
+
+1. 🟢 **BRG-001's interface does not foreclose it, which is what the study actually asked for.**
+   `IStorageAdapter.on/off` are optional and carry `StorageChange`, and nothing in the declaration
+   says where the event came from. A Postgres adapter sourcing those events from `LISTEN/NOTIFY`
+   published inside the committing transaction implements the interface **as written**, with no
+   change — and that is exactly the post-commit, release-on-commit semantics `ChangeBus` already
+   promises. Nothing to do.
+2. 🔴 **A `CapabilityKey` is a node/port gate, and a notify channel gates neither.** Every one of the
+   27 keys exists so the editor can grey something an author can see: `NODE_CAPABILITIES` binds
+   `realtime.subscribe` to the `SubscribeToChanges` node and to `DbCollection2`'s `realtime` port
+   (`nodeCapabilities.ts:86, 98`). How many app processes you run is not a node, not a port, and not
+   a property of a backend *type* — it is the same descriptor under a different deployment. The key
+   would be the first one nothing consumes.
+3. 🔴 **And it is not cheap.** `CAPABILITY_KEYS` is enumerated by `gating.test.ts` across
+   `BACKEND_TYPES` × every key, so a new key must be declared in all **eight** descriptors
+   (`src/descriptors/`) with both readings of a `conditional` cell holding. **"Awkward to retrofit
+   after publication" does not apply either**: this package is `file:`-linked inside the monorepo
+   with three consumers and no external ones, so the retrofit costs the same the day it is needed as
+   it does today.
+
+**So: the declaration belongs to this task's §3.4 mechanism, not to BRG-001's interface, and it
+lands when the thing it describes exists.** It is recorded here so it is not rediscovered — and §10
+already says DAT-007 and §3.4 must be implemented once, not twice; this is a third claimant on the
+same mechanism.
+
+⚠️ **The one live consequence for BRG-006:** the published sentence (R2) must not be read as
+promising cross-process change delivery. It already says *"one app process"*, which covers it.
+
+### 3.5 The gate — the part that earns its keep before any Postgres exists
+
+A CI check that fails when a new capability appears on the facade or the schema surface without a
+conformance case or an explicit `unsupported` declaration. This is what converts the invisible
+permanent tax into a visible one, and it works from the day it lands with SQLite as the only
+adapter. FED-002's index declaration would have tripped it (BRG-D2).
+
+## 4. Acceptance criteria
+
+1. **AC1** — `runConformance()` exists, runs against SQLite via `createAdapter`, and is green.
+2. **AC2** — Every area in §3.2 has cases. The case count is recorded in this file.
+3. **AC3** — A deliberately broken adapter (a mutant: drops the ACL predicate, ignores `unique`,
+   emits changes before commit, loses rollback) **fails** the suite, one distinct failure per
+   mutation, and each is recorded here by name. A suite that cannot fail proves nothing.
+4. **AC4** — The ACL cases are adversarial, in the house style of `security-enforcement.test.ts`: a
+   non-owner reading, updating and deleting another user's rows through query, fetch, aggregate,
+   distinct, search, relation traversal and realtime — each denied.
+5. **AC5** — The declaration mechanism works: a capability marked `unsupported` and then exercised
+   produces a loud failure and never a wrong row; a capability marked `degraded` returns correct
+   rows.
+6. **AC6** — The §3.5 gate is in CI. Adding a facade method with no case and no declaration fails
+   the build; the failure message names the method.
+7. **AC7** — The gate is run against HEAD as it stands and **every existing uncovered capability is
+   either given a case or declared**. The list of what needed declaring is recorded here — that list
+   is the honest measure of how far the product had already drifted.
+8. **AC8** — BRG-D4 closed: the two SQL generators either have tests or no longer exist (per R3).
+
+
+## 5. As built, s2 — 2026-09-19
+
+### 5.1 What landed
+
+| file | what |
+|---|---|
+| `nodegx-backend-contract/conformance/index.ts` | `runConformance(makeAdapter, decl)`, the case registry, the §3.4 declaration vocabulary |
+| `conformance/context.ts` | the promisified data plane every case is written against |
+| `conformance/assert.ts` | four assertions — deliberately not jest's `expect` |
+| `conformance/cases/{records,filters,acl,relations,schema}.ts` | **53 cases** |
+| `conformance/mutants.ts` | six deliberately-broken adapters (AC3) |
+| `nodegx-backend/tests/brg-003-conformance-sqlite.test.ts` | AC1 — the suite against SQLite |
+| `nodegx-backend/tests/brg-003-conformance-mutants.test.ts` | AC3 — the proof it can fail |
+
+**AC2 — the case count, by area: `records 15, filters 10, acl 16, relations 6, schema 9` = 56.**
+(53 at s2; s4 added three search cases — see §5.6.)
+The count is printed by the run from `CONFORMANCE_CASES.length` rather than kept by hand here: a
+hand-maintained count drifts the first time a case lands.
+
+### 5.2 AC3 — the six mutations, and what caught each
+
+Every mutation is a plausible way a second adapter gets it wrong, not a cartoon break. Each is
+caught by a **distinct** set of cases, which is asserted — six mutations all caught by one case
+would mean the suite has one real assertion and fifty-two decorations.
+
+| mutation | cases that caught it |
+|---|---|
+| `drop-acl-on-reads` | **11** — every read shape: query, count, distinct, aggregate, **fetch**, **search**, the empty-key-set case and the write-grant-does-not-confer-read case. 🔴 **9 at s2.** The mutant left `fetch` and `search` filtered, so `acl/fetch-of-an-invisible-row-does-not-return-it` was a case no mutation could make fail — see §5.6 |
+| `drop-acl-on-writes` | **3** — `a-non-owner-cannot-{save,delete,increment}` |
+| `count-returns-page-length` | **2** — `records/count-matches-the-visible-set`, `acl/count-counts-only-visible-rows` |
+| `ignore-unique` | **3** — `unique-index-refuses-a-duplicate`, `compound-index-is-unique-over-the-tuple`, `index-declaration-survives-a-reread` |
+| `relation-inverse-ignores-target` | **2** — both `inverse-lookup-*` cases |
+| `aggregate-ignores-acl` | **1** — `acl/aggregate-computes-only-over-visible-rows` |
+
+🔴 **`ignore-unique` is BRG-D2 itself.** It is not a hypothetical: `generatePostgresSQL()` drops
+every declared index at HEAD, so the mutant models the exporter that is live right now. The suite
+catches it in three places, which is what makes BRG-004's fix checkable rather than assertable.
+
+Two controls run in the same file, because a detector that fires on everything detects nothing:
+the **unmutated** adapter passes all 53, and **no** mutation reds the whole suite.
+
+### 5.3 What the first drive found, and it was the instrument
+
+The first run reported 22 failures. **One was the adapter's; twenty-one were the harness's.**
+`ctx.collection('Flt')` keyed only on the run, so every case asking for the same base name got the
+same table and ran against the accumulated fixtures of all the others — which surfaced as
+`["ada","ada","ada"]` rather than as an error, because piling rows into a shared table breaks no
+invariant the adapter has. A suite whose cases are not isolated measures the adapter's behaviour
+plus its own execution order, and the second is not in the promise. `collection()` is now unique
+per *call*.
+
+🔴 **And a second instrument fault that jest could not see.** `mutants.ts` typed its call-shape
+helper as `Record<string, unknown>`, widening all seven mutated call sites. Every test stayed green,
+because these files run under the backend's ts-jest with `isolatedModules: true`, which transpiles
+without typechecking. `tsc --noEmit` on the contract package is what caught it — so **the suite's
+own gate is two commands, not one**, and a BRG-005 session that runs only jest has not gated its
+adapter. `tsconfig.json`'s `include` also needed `conformance/**/*.ts` added, or the directory is
+invisible to `tsc` entirely.
+
+### 5.3.1 ⚠️ `npx jest` in `nodegx-backend` does not terminate — and it is not this task
+
+Gating the suite meant running the whole backend package, which sat at **142 of 143 suites for 17
+minutes**. The straggler is `tests/ac2-page-editor-drag-drive.test.ts` (SBR-007 AC2, phase 77,
+unmodified since 2026-09-11). It hangs **standalone** too, with `--testTimeout=45000 --forceExit`,
+for over five minutes: the log shows it provisioning a backend and running `claimSite` successfully
+and then stopping, because it drives the real `/Pages/PageEditor` and needs a live editor that a
+plain `jest` run has not started.
+
+So: **142/143 green, 0 failed**, and the one that did not report is environment-dependent and
+predates this task. Recorded because the next session to gate a `BRG` task will otherwise spend the
+same 17 minutes discovering it — and because a run that never prints `Tests:` looks exactly like a
+run that is still working.
+
+🔴 Kill such a run by **PPID**, never `pkill -f jest`: two peer sessions had their own suites running
+on this box at the time.
+
+### 5.4 Acceptance criteria
+
+| | criterion | |
+|---|---|---|
+| AC1 | `runConformance()` runs against SQLite via `createAdapter` and is green | ✅ 53/53 |
+| AC2 | every §3.2 area has cases; the count is recorded | 🏗 five areas, 53 cases. **Changes, transactions and `IOperationalStore` have none** — see 5.5 |
+| AC3 | a mutant fails, one distinct failure per mutation, each recorded by name | ✅ six mutations, six distinct signatures, both controls green |
+| AC4 | the ACL cases are adversarial | ✅ 15 cases; every read and write shape a non-owner can reach |
+| AC5 | the declaration mechanism works | ✅ s4 — exercised against three limited adapters, and **it did not work**: `unsupported` covered a wrong answer. Fixed and proved (§5.7) |
+| AC6 | the §3.5 CI gate | ✅ s4 — two mechanisms, both in CI, both **measured failing** on a real injected method (§5.6) |
+| AC7 | the gate run against HEAD; everything uncovered declared | ✅ s4 — **22 of 61** members declared uncovered, each with a reason and an owing task, held by a ratchet |
+| AC8 | BRG-D4 closed | ✅ s5, in BRG-004 §5 — 36 cases and four mutants over the two generators; both register entries moved `uncovered` → `not-in-the-promise` (a migration concern no second adapter implements), which drops the AC7 ratchet 22 → 20 |
+
+### 5.5 What is deliberately not covered yet, and why it is not a silent gap
+
+Rule 2 of the phase README: *"nothing may be in the promise that is not in the suite."* Three §3.2
+areas have **no cases**, and they are named here rather than left to be discovered as an absence:
+
+| area | why not yet |
+|---|---|
+| **Transactions and rollback** | `IStorageAdapter.transaction()` is still synchronous, and BRG-002 §3.1 moved the only caller to `upsertBatch` — which is the one facade method whose implementation is still SQLite-specific. Testing rollback portably needs that resolved first |
+| **The change tap** (ordering, commit-boundary, none on rollback) | `on`/`off` are optional and feature-detected; `ChangeBus` is the real consumer and it lives in `nodegx-backend`, not behind the adapter interface. This wants a case that drives the bus, not the adapter |
+| **`IOperationalStore`** (claim, CAS, release, sweep) | ~~does not exist yet~~ — **built 2026-09-19 s3** (BRG-002 §7). It is now the cheapest of the three to cover: the interface is 7 methods with no I/O of its own, and `nodegx-backend/tests/brg002-operational-store.test.ts` already has 17 SQLite-bound cases to lift into an adapter-agnostic harness |
+
+The `wire*` envelopes and `include=` expansion are also uncovered: they live on `IStorageFacade`,
+not on the adapter, so they need a second harness taking a facade. That is the largest remaining
+piece of AC2.
+
+⚠️ **As of s4 none of these is a prose list any more.** Every one is an entry in
+`conformance/coverage.ts` with a reason and an owing task, the count is held by a ratchet, and the
+gate fails if this file and that register disagree. The difference matters: a paragraph naming three
+absences is read once, and a register is read by CI on every push.
+
+## 5.6 As built, s4 — the gate (AC6, AC7)
+
+### The shape: two mechanisms, one artefact
+
+| | mechanism | fails how | runs as |
+|---|---|---|---|
+| compile time | `coverage.ts`'s three registers are mapped types over `keyof IStorageFacade`, `keyof IStorageSchema`, `keyof IStorageAdapter`, with `-?` so optional members count | `tsc` exits 2 naming the property | `npm run typecheck:contract`, **new**, added to `pr.yml`'s Typecheck job |
+| run time | `surface.ts` parses `storage.ts` for the member lists; `recorder.ts` wraps the adapter and the suite is run **once per case**; `checkCoverage()` compares | jest fails, printing `[facade] rawExportEverything — …is on the storage surface with no conformance case and no declaration` | `tests/brg-003-conformance-gate.test.ts`, inside `test:packages` |
+
+🔴 **Both halves were measured failing, not asserted to.** `rawExportEverything(collection: string)`
+was added to `IStorageFacade`, both commands run, and both named it — `tsc` at exit 2 with
+`TS2741: Property 'rawExportEverything' is missing`, and the gate test with the finding above. Then
+reverted. §5.2's own standard, applied to the gate: *a detector that cannot fail proves nothing.*
+
+### Why it is a recorded run and not an annotation
+
+The register says which cases cover which member. Left there that is a **claim**, true the day it
+is written and silently false after the next refactor. So the gate does not take it: it runs each of
+the 56 cases against a recording proxy and rejects any entry naming a case that did not reach the
+member. Two controls hold it honest, both in the gate test:
+
+- feed it an **empty** recording and `adapter.query`, `schema.createTable` and `facade.rawQuery` all
+  red — so the green result is evidence, not the register read back to itself;
+- the facade's twelve `through` entries are checked against `AdapterFacade.prototype[name].toString()`,
+  because `call()` dispatches **by string** (README §2) and the string is therefore in the compiled
+  method. A claim about another package's source is read, not trusted.
+
+⚠️ **The recorder's one blind spot, written down rather than left to be found.** It wraps the
+reference the *suite* holds, so a call the adapter makes to its **own** schema manager is invisible —
+`LocalSQLAdapter.ts:1255` calls `this.schemaManager.addRelation(...)` inside `addRelation()`. Those
+two members are therefore registered `through`, not `uncovered`: "no case reached it" means "no case
+reached it **directly**", and reporting that as an absence would have been a false one.
+
+### What the gate's first run found
+
+🔴 **1. `search` had no case at all — and `ConformanceContext` has had a `search()` method since s2.**
+A door in the harness that nothing walked through. §3.2 lists search among the read shapes a row ACL
+must hold for; AC4 was ticked ✅ at s2 on the strength of that list. **The tick was wrong.** Three
+cases added (`records/search-finds-a-row-by-its-text`,
+`records/search-composes-with-a-structured-where`, `acl/search-returns-only-visible-rows`), 53 → 56.
+Search is the worst read shape to miss: the index is built over the *text* of private rows, so an
+unfiltered search leaks what the rows say, not merely that they exist.
+
+🔴 **2. The `drop-acl-on-reads` mutant left `fetch` and `search` filtered.** Found immediately
+beside the above, and the same shape one level up: `acl/fetch-of-an-invisible-row-does-not-return-it`
+has existed since s2 and **no mutation could make it fail**, so it pinned nothing that had been shown
+to move. The mutant now strips the predicate on both; it goes from 9 cases to **11**, and the
+distinct-signature control still holds.
+
+⚠️ **3. Two of the three counts in `storage.ts`'s own header were wrong** — the facade is 21
+members, not 22, and the schema surface is 20 names, not 16. Corrected, with the note that they are
+no longer load-bearing now that the register is keyed by `keyof` and the gate parses the file.
+
+### AC7 — the drift, counted
+
+**22 of 61** storage-surface members are declared uncovered. The list is printed by the run and
+owned in the register, not kept here — a hand-maintained list drifts exactly like the counts above:
+
+| owing task | count | members |
+|---|---|---|
+| `BRG-003 AC2` | 11 | `adapter.on`, `adapter.off`, `adapter.transaction`, `facade.wire{Query,Fetch,Search,Record}`, `facade.{getColumns,existingIds,ensureImportShape,upsertBatch}` — the change tap, transactions, and the facade harness of §5.5 |
+| `BRG-004` | 6 | `schema.{renameColumn,changeColumnType,deleteTable,exportSchemas,generatePostgresSQL,generateSupabaseSQL}` |
+| `BRG-005` | 3 | `adapter.{connect,disconnect,getPersistenceStatus}` — lifecycle the runner owns, not the suite (§3.1) |
+| `BRG-003 AC5` | 2 | `schema.{hasSearchIndex,dropSearchIndex}` — the search-index lifecycle, which wants the §3.4 declaration because FTS5 and `tsvector` genuinely rank differently |
+
+Two members are declared **out of the promise** rather than owed: `adapter.getDatabase` (the raw
+handle BRG-002 fenced — a case depending on it is a case no second adapter can pass) and
+`schema.hasFts5Support` (a SQLite feature *by name*; the portable question is whether search works).
+
+🔴 **`generatePostgresSQL` and `generateSupabaseSQL` are on that list, and that is the phase.** The
+two generators that drop every declared index, drop every relation column and emit four
+`USING (true)` policies over a `creatorOwns` backend are now **named by CI on every push**, owed to
+BRG-004, instead of being a thing two sessions happened to notice. §3.5 said FED-002's index
+declaration would have tripped this gate; these two entries are what that looks like once it exists.
+
+The 22 is a **ceiling**, asserted `toBeLessThanOrEqual`, never an equality — a session that closes a
+gap must not also have to come here and edit a literal to make a gate green, because that reflex is
+the one that ships the drift.
+
+## 5.7 As built, s4 — the declaration mechanism (AC5)
+
+**AC5 asked whether the mechanism works. Exercised, it did not.**
+
+s2 recorded the criterion honestly — *"the vocabulary is implemented and `unsupported` inverts
+correctly, but nothing declares yet, so it is unexercised"* — and that was the right call to write
+down. What it could not know is that the inversion it described was only half the property.
+
+### The hole, and how it was found
+
+§3.4's sentence is *"a case marked `unsupported` must fail loudly, never return a wrong answer
+quietly."* The runner satisfied it with **any** throw. But a case's own assertions throw too — and
+`ConformanceError` was the class for both an adapter refusing and an assertion failing, so nothing
+downstream could tell them apart.
+
+🔴 **So an adapter that answered, and answered wrongly, was recorded `failed-as-declared` and
+travelled as an accepted divergence.** That is precisely the failure mode the phase names in its
+own README §2: *silence*. A declaration meant to say "I cannot do this" could be used to say "do not
+look at what I do here."
+
+Measured, not reasoned. `conformance/limited.ts` adds three adapters that are **limited rather than
+broken** — the distinction matters, and it is why they do not live in `mutants.ts`, where every
+entry is an adapter that is simply wrong:
+
+| adapter | what it models | what must happen |
+|---|---|---|
+| `no-search` | an engine with no full-text index — Postgres without `tsvector` | declared `unsupported`: fails loudly, **accepted** |
+| `search-ignores-the-term` | "supports" search by returning every row | declared `unsupported`: **rejected** — it answered |
+| `reordered-reads` | ranking and collation that genuinely differ | declared `degraded`: correct rows, different order, all green |
+
+Run before the fix: the wrong-answer adapter produced **1** failure where three were owed. Two of
+the three search cases were laundered.
+
+### The fix
+
+`AdapterRefusal extends ConformanceError`, thrown only where the adapter's own `error` callback
+fires. `unsupported` is now satisfied by a refusal and by nothing else; an assertion failure under
+an `unsupported` declaration is a genuine failure whose message says so — *"the adapter did not
+refuse — it answered, and the answer was wrong."*
+
+⚠️ **The same conflation was in `ctx.refused()` and is closed with it.** It returned the message of
+*any* error, so an assertion failing inside the callback read as the refusal the case was looking
+for — an expectation satisfied by its own collapse. It now rethrows anything that is not an
+`AdapterRefusal`. Both of its call sites (`schema.ts:129, 175`) were unaffected, checked before the
+change rather than after.
+
+### And one thing the mechanism got right
+
+🟢 **`degraded` holds by construction, and the first attempt to prove it was wrong instead.**
+`reordered-reads` initially reversed *every* read, and two cases went red —
+`records/sort-ascending-and-descending` and `records/limit-skip-and-count-compose`. That is the
+suite being correct: **reversing a `sort` the caller asked for is not a divergence in ranking, it is
+an adapter getting `sort` wrong**, and `degraded` has no business covering it. §3.4 says *"may
+differ in order"*, and an order the caller specified is not one the adapter may differ on. The model
+was corrected to vary order only where none was requested; `assert.ts`'s `pluck()` sorts, so every
+other read case is order-tolerant already — an s2 decision that paid off here without being asked
+to.
+
+`conditional` was checked too: reported `skipped`, never `passed`, never counted as green.
+
+## The hole this suite had, and where it was closed (s11)
+
+🔴 **56 green cases said nothing about a boolean round-trip, because there was no boolean
+round-trip case.** That is how BRG-D8 crossed this suite — a gate with a hole shaped exactly like
+the defect ([[a-gate-can-have-a-hole-shaped-like-the-defect]]).
+
+The obvious repair — add one case here — **would have been the same hole again**, and BRG-D10 is
+why. Two REST prefixes over the same store disagreed about the same column; a single case would
+have been written against whichever one its author reached for and passed either way. A conformance
+case also runs at the **adapter** level, below both prefixes, so it could not have seen the
+disagreement at all.
+
+So the gate lives where the prefixes do:
+[`brg-007-a-boolean-reads-the-same-through-every-prefix.test.ts`](BRG-007-THE-BOOLEAN-COMES-INTO-LINE.md)
+— **one case per wire prefix**, both arms, SQLite only so it runs where there is no database.
+
+**What was still owed to this suite — ✅ closed s12.** A declared-type round-trip case *at the
+conformance level*, for the property BRG-007 fixed at source: an adapter hands back the DECLARED
+type, not the driver's. That is the portable claim, and a third adapter needs it.
+
+`records/a-declared-type-survives-the-round-trip` — **the suite is 57 cases**
+(records 16, filters 10, acl 16, relations 6, schema 9), green on SQLite **and** on PostgreSQL
+16.11. The count is still derived from the artefact and asserted against `report.total`, never kept
+by hand, so the ratchet moved by itself.
+
+Three things the case does that a one-line boolean assertion would not:
+
+- **both arms.** `0` and `false` are both falsy, so a case asserting only the `true` arm passes on
+  an adapter that hands back `0` for false. The false arm is asserted separately, on `typeof`.
+- **a `Number` control in the same case.** Without it the case also passes on an adapter that
+  coerces everything and happens to land on a boolean-shaped value.
+- **`typeof`, not equality.** `eq(row.done, true)` is satisfied by `1` under `==`-shaped thinking;
+  the type is the claim, so the type is what is read.
+
+🔴 **Verified by removing the repair it pins**, not by watching it pass: the pre-R7 lookup
+(`schema.properties[key].type`) was put back in `LocalSQLAdapter._rowToRecord` and the SQLite run
+went red on **this case and no other** — which is the same reading as BRG-003's hole, stated from
+the other side. Restored by `cp` and `diff -u -a`-verified byte-identical.

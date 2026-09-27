@@ -1,0 +1,45 @@
+{
+  "task": "TVW-002",
+  "date": "2026-09-18",
+  "session": 12,
+  "buildSha": "884881cff",
+  "note": "🔴 The PNGs are gitignored (.gitignore:265). They exist on this machine only; numbers.json carries every measurement, and the sentences below are the text a person read on screen.",
+  "fixture": {
+    "project": "Prefab marketplace (a COPY, under the session scratchpad — opening a project writes into it)",
+    "components": 165,
+    "root": "/App",
+    "routedPages": 11,
+    "picked": "by measurement: the only candidate of 57 producing all four shapes"
+  },
+  "surface": "app preview, docked, viewport 1368x900, panel at its stored width",
+  "images": [
+    { "file": "tvw002-shape1-other-screen-<theme>.png", "shape": "other-screen", "component": "/#Noodl Component System/__DESIGN SYSTEM INTERNALS/_DSI Atoms", "reads": "_DSI Atoms isn't on Home. It's on Design System.", "doors": ["Go to Design System", "Open on the Workbench", "x"] },
+    { "file": "tvw002-shape2-nothing-places-it-<theme>.png", "shape": "unplaced", "component": "/#Noodl Component System/Atoms/Avatar/User Avatar Skeleton", "reads": "User Avatar Skeleton isn't on any page yet — nothing in the app places it.", "doors": ["Open on the Workbench", "x"] },
+    { "file": "tvw002-shape2-placed-unreached-<theme>.png", "shape": "unplaced", "component": "/#Noodl Component System/Atoms/Checkbox/Save button", "reads": "Save button isn't on any page yet — it's only inside Package Hero section, which no page shows.", "doors": ["Open on the Workbench", "x"] },
+    { "file": "tvw002-shape3-logic-<theme>.png", "shape": "logic", "component": "/#Integrations/Check if user is logged in", "reads": "Check if user is logged in is logic — it draws nothing. It runs on My Packages and Account.", "doors": ["Open on the Workbench", "x"] },
+    { "file": "tvw002-agree-no-strip-<theme>.png", "shape": "agree", "component": "/#Integrations/Algolia/Algolia Search", "reads": "(no strip at all)", "doors": [] }
+  ],
+  "themes": ["dark", "light"],
+  "defectFoundAndFixed": {
+    "what": "the strip's amber wash is rgba(...,0.12) and this row sits inside .Background, whose backdrop is the preview CHECKERBOARD — the first shots show the checker squares straight through the strip in BOTH themes",
+    "whyNoNumberCaughtIt": "every geometry reading was clean (28px tall, no truncation, text 653/653 and 789/789). A translucency defect has no width.",
+    "fix": "an opaque --theme-color-bg-2 base with the notice wash layered on top, both still tokens",
+    "reshot": "these images are AFTER the fix"
+  },
+  "ac3": {
+    "claim": "the app preview never changed route or mode because the canvas moved",
+    "method": "webview.src and [data-preview-mode] read immediately before and after EVERY canvas switch, via the same ComponentPanel.SwitchToComponent event the panel emits",
+    "switches": 7,
+    "result": "HELD on all",
+    "knownFiringControl": "pressed 'Go to Design System' — src http://localhost:8680/ -> http://localhost:8680/design-system, and the strip then went to agree. Without this the HELD readings could not be told from a drive that cannot move the preview at all."
+  },
+  "ac1RoundTrip": {
+    "benchDoor": "mode app -> bench, caption 'Workbench — _DSI Atoms on its own, not the app.', app preview KEPT src http://localhost:8680/ (R3)",
+    "backToApp": "scope chip -> 'App preview' row: mode bench -> app, same src, the same strip returned identically"
+  },
+  "notDriven": [
+    "AC1's outline-when-agreeing (the first instance highlighted and labelled in the preview) — NOT BUILT",
+    "AC5 detached preview — its premise is wrong; see the task file",
+    "a v2-format project (these populations are measured on legacy project.json)"
+  ]
+}

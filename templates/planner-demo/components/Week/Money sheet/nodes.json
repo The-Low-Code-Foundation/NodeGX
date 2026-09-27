@@ -1,0 +1,1340 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "81594c28-b4fa-5cc2-8058-00a110850e3c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "msIn-2",
+      "type": "Component Inputs",
+      "label": "The money",
+      "ports": [
+        {
+          "name": "shown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "cardClass",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "groups",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "empty",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "emptyText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "moreShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "balanceText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "upFill",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "upInk",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pastFill",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pastInk",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "recFill",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "recInk",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sumShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "sumLines",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "sumNote",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sumBalanceLines",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "rpShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "rpKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpSub",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpSubColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpAmountText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpAmountColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpDetail",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpTickShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "rpTickHead",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpTickOn",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpTickAmount",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpRemaining",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "rpRests",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "rpRestDefault",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpChangeLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpSkipShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "rpLostShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "rpChangeShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "rpChDate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpChAmount",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpChNote",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpChHint",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpResetShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "rpClosedShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "rpClosedText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpHopedShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "rpHopedText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpBillShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "rpBillText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpSendShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "rpSentOn",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpSentAmount",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpSentAmountShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "rpUnsendShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "rpFromShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "rpFromText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpItemLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rpEndShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "endShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "endTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "endText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "endChoices",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "endAt",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "balShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "balOn",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "balHint",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "balRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "balHasRows",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "balNote",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "edKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edSub",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edDirs",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "edRepeats",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "edProjects",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "edProjectTerms",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "edSaveLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edDir",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edAmount",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edRepeat",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edDate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edUntil",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edMonthEnd",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "edProjectId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edBillDate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edBillLeadDays",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edFromHours",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "edLikelihood",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edNote",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 590,
+      "y": 40
+    },
+    {
+      "id": "msOut-2",
+      "type": "Component Outputs",
+      "label": "What you did in it",
+      "ports": [
+        {
+          "name": "close",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "showUp",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "showPast",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "showRec",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "more",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "add",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "record",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "pick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "key",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "sumRecordBalance",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "sumBack",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "rpTick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "rpTickOn",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpTickAmount",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpTickRest",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpChangeOne",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "rpChDate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpChAmount",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpChNote",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpSaveOne",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "rpResetOne",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "rpSkip",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "rpLost",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "rpUntick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "rpAgreed",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "rpMarkSent",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "rpSentOn",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpSentAmount",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rpUnsend",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "rpChangeItem",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "rpEndItem",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "rpBack",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "endAt",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "endGo",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "endCancel",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "endBack",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "balOn",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "balAmount",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "balSave",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "balCancel",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "balHappened",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "balLost",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "balPart",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "balKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "balBack",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "edLabel",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edDir",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edAmount",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edRepeat",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edDate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edUntil",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edMonthEnd",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "edProjectId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edBillDate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edBillLeadDays",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edFromHours",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "edLikelihood",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edNote",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "edSave",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "edCancel",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "edBack",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 590,
+      "y": 640
+    },
+    {
+      "id": "msScrim",
+      "type": "Group",
+      "label": "Behind the modal",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "position": "fixed",
+        "backgroundColor": "var(--scrim)",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "styleCss": "z-index: 45;"
+      },
+      "children": [
+        "msCard"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "msCard",
+      "type": "Group",
+      "label": "The modal",
+      "parent": "msScrim",
+      "parameters": {
+        "cssClassName": "planner-over planner-money",
+        "clickBubbling": "never",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 92,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 1100,
+          "unit": "px"
+        },
+        "height": {
+          "value": 88,
+          "unit": "%"
+        },
+        "styleCss": "overflow: hidden;"
+      },
+      "children": [
+        "msTop",
+        "msBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "msTop",
+      "type": "Group",
+      "label": "Title, filter, balance",
+      "parent": "msCard",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-2)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border)"
+      },
+      "children": [
+        "msTitle-2",
+        "msFilter",
+        "msGap",
+        "msBalance",
+        "msClose"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "msTitle-2",
+      "type": "Text",
+      "label": "Money",
+      "parent": "msTop",
+      "parameters": {
+        "text": "Money",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-display)",
+        "cssClassName": "planner-display",
+        "sizeMode": "contentSize",
+        "as": "h2"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "msFilter",
+      "type": "Group",
+      "label": "Which list",
+      "parent": "msTop",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentSize",
+        "columnGap": "var(--space-0-5)",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-0-5)",
+        "paddingRight": "var(--space-0-5)",
+        "paddingTop": "var(--space-0-5)",
+        "paddingBottom": "var(--space-0-5)"
+      },
+      "children": [
+        "msUp",
+        "msPast",
+        "msRec"
+      ],
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "msUp",
+      "type": "net.noodl.controls.button",
+      "label": "Show what is coming",
+      "parent": "msFilter",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "Upcoming"
+      },
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "msPast",
+      "type": "net.noodl.controls.button",
+      "label": "Show what has happened",
+      "parent": "msFilter",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "Past"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "msRec",
+      "type": "net.noodl.controls.button",
+      "label": "Show what repeats",
+      "parent": "msFilter",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "Recurring"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "msGap",
+      "type": "Group",
+      "label": "Room between the filter and the balance",
+      "parent": "msTop",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 1,
+          "unit": "px"
+        },
+        "height": {
+          "value": 1,
+          "unit": "px"
+        },
+        "styleCss": "flex: 1 1 0;"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "msBalance",
+      "type": "Text",
+      "label": "The balance",
+      "parent": "msTop",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-mono)",
+        "fontVariantNumeric": "tabular-nums",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "msClose",
+      "type": "net.noodl.controls.button",
+      "label": "Close Money",
+      "parent": "msTop",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "✕",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "lineHeight": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "msBody",
+      "type": "Group",
+      "label": "The list and the pane",
+      "parent": "msCard",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "stretch",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "cssClassName": "planner-money-body",
+        "styleCss": "overflow: hidden; min-height: 0; flex: 1 1 0;"
+      },
+      "children": [
+        "msList",
+        "msSide"
+      ],
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "msList",
+      "type": "Group",
+      "label": "The list",
+      "parent": "msBody",
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 60,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--background)",
+        "borderRightStyle": "solid",
+        "borderRightWidth": "var(--border-1)",
+        "borderRightColor": "var(--border)",
+        "cssClassName": "planner-over-col planner-money-list"
+      },
+      "children": [
+        "msScroll-2",
+        "msFoot"
+      ],
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "msScroll-2",
+      "type": "Group",
+      "label": "What is in it",
+      "parent": "msList",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-3)",
+        "styleCss": "overflow: auto; flex: 1 1 0; min-height: 0;"
+      },
+      "children": [
+        "msEach-2",
+        "msEmpty-2",
+        "msMore"
+      ],
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "msEach-2",
+      "type": "For Each",
+      "label": "One group per month",
+      "parent": "msScroll-2",
+      "parameters": {
+        "template": "/Week/Money month",
+        "templateType": "explicit"
+      },
+      "x": 340,
+      "y": 1720
+    },
+    {
+      "id": "msEmpty-2",
+      "type": "Text",
+      "label": "When there is nothing",
+      "parent": "msScroll-2",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "marginLeft": "var(--space-2)",
+        "marginTop": "var(--space-3)"
+      },
+      "x": 340,
+      "y": 1840
+    },
+    {
+      "id": "msMore",
+      "type": "net.noodl.controls.button",
+      "label": "Show three more months",
+      "parent": "msScroll-2",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Show three more months"
+      },
+      "x": 340,
+      "y": 1960
+    },
+    {
+      "id": "msFoot",
+      "type": "Group",
+      "label": "Add and record",
+      "parent": "msList",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border)"
+      },
+      "children": [
+        "msAdd",
+        "msRecord"
+      ],
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "msAdd",
+      "type": "net.noodl.controls.button",
+      "label": "Add money",
+      "parent": "msFoot",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "+ Add money"
+      },
+      "x": 340,
+      "y": 2200
+    },
+    {
+      "id": "msRecord",
+      "type": "net.noodl.controls.button",
+      "label": "Record the balance",
+      "parent": "msFoot",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Record balance"
+      },
+      "x": 340,
+      "y": 2320
+    },
+    {
+      "id": "msSide",
+      "type": "Group",
+      "label": "The one picked",
+      "parent": "msBody",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 40,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "cssClassName": "planner-over-col planner-money-side",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-4)",
+        "styleCss": "overflow: auto; min-height: 0;"
+      },
+      "children": [
+        "msSum",
+        "msRepeat",
+        "msEnd",
+        "msBal",
+        "msEditor"
+      ],
+      "x": 220,
+      "y": 2440
+    },
+    {
+      "id": "msSum",
+      "type": "/Week/Money summary",
+      "label": "What the target is made of",
+      "parent": "msSide",
+      "x": 280,
+      "y": 2560
+    },
+    {
+      "id": "msRepeat",
+      "type": "/Week/Money repeat",
+      "label": "The repeat picked",
+      "parent": "msSide",
+      "x": 280,
+      "y": 2680
+    },
+    {
+      "id": "msEnd",
+      "type": "/Week/Money end",
+      "label": "Ending an item",
+      "parent": "msSide",
+      "x": 280,
+      "y": 2800
+    },
+    {
+      "id": "msBal",
+      "type": "/Week/Money balance",
+      "label": "Record balance",
+      "parent": "msSide",
+      "x": 280,
+      "y": 2920
+    },
+    {
+      "id": "msEditor",
+      "type": "/Week/Money editor",
+      "label": "The item as a form",
+      "parent": "msSide",
+      "x": 280,
+      "y": 3040
+    }
+  ],
+  "visualRoots": [
+    "msScrim"
+  ]
+}

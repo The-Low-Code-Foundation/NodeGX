@@ -24,7 +24,7 @@
 
 import { NodeGraphNode } from '@noodl-models/nodegraphmodel';
 
-import { cronGloss, TriggerDef, webhookUrl } from '../triggers/TriggerBackendClient';
+import { TriggerDef, webhookUrl } from '../triggers/TriggerBackendClient';
 import { LAYOUT_COLUMN_WIDTH, LAYOUT_ROW_HEIGHT } from './workflowLayout';
 import { isTriggerTypeName, PORT_FIRES, PORT_IN, triggerTypeFromTypeName, triggerTypeName } from './workflowNodeLibrary';
 
@@ -61,7 +61,8 @@ export function triggerSubLabel(trigger: TriggerDef | null): string {
 
   const parts: string[] = [];
   if (trigger.type === 'schedule' && trigger.schedule) {
-    parts.push('Schedule', cronGloss(trigger.schedule.cron) || trigger.schedule.cron);
+    // BMG-012: the backend's own words (`scheduleWords`, one gloss), else the cron as written.
+    parts.push('Schedule', trigger.scheduleWords || trigger.schedule.cron);
   } else if (trigger.type === 'webhook' && trigger.webhook) {
     parts.push('Webhook', `POST /${trigger.webhook.slug}`);
   } else if (trigger.type === 'db-change' && trigger.dbChange) {
@@ -111,7 +112,7 @@ export function triggerParameters(
   if (trigger.type === 'schedule' && trigger.schedule) {
     return {
       cron: trigger.schedule.cron,
-      when: cronGloss(trigger.schedule.cron) || 'no plain-English reading of this expression',
+      when: trigger.scheduleWords || 'no plain-English reading of this expression',
       nextFire: fmt(trigger.status.nextFireAt),
       missedFires:
         trigger.schedule.missedFirePolicy === 'skip'
@@ -213,12 +214,14 @@ export function addTriggerNodes(
      * creating a node (WFA-008, found live).
      *
      * `ModelBindings`' `nodeAdded` handler selects a newly added node unless
-     * asked not to, and selecting switches the sidebar to the property editor.
-     * The Triggers panel is a *transient* panel, so switching away unmounts it —
-     * and with it the banner holding a webhook's **one-time, unrecoverable
-     * secret**, the moment after it was created. Creating a trigger from the
-     * panel bounced the user to Properties and destroyed the secret in the same
-     * tick.
+     * asked not to. When this was written, selecting switched the sidebar to the
+     * property editor; the Triggers panel is *transient*, so switching away
+     * unmounted it — and with it the banner holding a webhook's **one-time,
+     * unrecoverable secret**, the moment after it was created.
+     *
+     * P101 INS-001 (2026-09-23) moved node properties to their own column, so
+     * selecting no longer touches this panel. The flag stays for the first
+     * reason: a redraw is not a creation, and must not steal the selection.
      */
     graph.addRoot(node, { disableSelect: true });
 

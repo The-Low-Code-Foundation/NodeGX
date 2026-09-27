@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7900eea1-b63d-58bf-80ce-67cf9ed2c70e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tsIn",
+      "fromProperty": "title",
+      "toId": "tsTitle",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "tsIn",
+      "fromProperty": "rankLine",
+      "toId": "tsMeta",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tsIn",
+      "fromProperty": "deadline",
+      "toId": "tsDeadlineField",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "tsIn",
+      "fromProperty": "dueText",
+      "toId": "tsDue",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tsIn",
+      "fromProperty": "dueColor",
+      "toId": "tsDue",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "tsIn",
+      "fromProperty": "deadlineError",
+      "toId": "tsDeadlineError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tsIn",
+      "fromProperty": "hasDeadlineError",
+      "toId": "tsDeadlineError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tsIn",
+      "fromProperty": "canMakeNext",
+      "toId": "tsMakeNext",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tsIn",
+      "fromProperty": "isOpen",
+      "toId": "tsClose",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tsIn",
+      "fromProperty": "isClosed",
+      "toId": "tsReopen",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tsIn",
+      "fromProperty": "isClosed",
+      "toId": "tsClosing",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tsIn",
+      "fromProperty": "closingNote",
+      "toId": "tsClosingNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tsIn",
+      "fromProperty": "narrow",
+      "toId": "tsBack",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tsTitle",
+      "fromProperty": "onTextChanged",
+      "toId": "tsOut",
+      "toProperty": "newTitle"
+    },
+    {
+      "fromId": "tsTitle",
+      "fromProperty": "onEnter",
+      "toId": "tsTitle",
+      "toProperty": "blur"
+    },
+    {
+      "fromId": "tsTitle",
+      "fromProperty": "onBlur",
+      "toId": "tsOut",
+      "toProperty": "rename"
+    },
+    {
+      "fromId": "tsDeadlineField",
+      "fromProperty": "Value",
+      "toId": "tsOut",
+      "toProperty": "deadlineText"
+    },
+    {
+      "fromId": "tsDeadlineField",
+      "fromProperty": "Changed",
+      "toId": "tsOut",
+      "toProperty": "setDeadline"
+    },
+    {
+      "fromId": "tsMakeNext",
+      "fromProperty": "onClick",
+      "toId": "tsOut",
+      "toProperty": "makeNext"
+    },
+    {
+      "fromId": "tsClose",
+      "fromProperty": "onClick",
+      "toId": "tsOut",
+      "toProperty": "close"
+    },
+    {
+      "fromId": "tsReopen",
+      "fromProperty": "onClick",
+      "toId": "tsOut",
+      "toProperty": "reopen"
+    },
+    {
+      "fromId": "tsBack",
+      "fromProperty": "onClick",
+      "toId": "tsOut",
+      "toProperty": "back"
+    }
+  ]
+}

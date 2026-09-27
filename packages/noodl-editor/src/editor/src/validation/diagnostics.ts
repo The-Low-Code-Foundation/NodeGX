@@ -216,6 +216,34 @@ export enum DiagnosticCode {
    */
   LabelNotAClickTarget = 'label-not-a-click-target',
   /**
+   * P99 **HLT-014 §3.1** — a Show Popup whose dialog has no accessible name.
+   *
+   * HLT-014 made every open popup a real modal dialog — `role="dialog"`,
+   * `aria-modal="true"`, the page behind it `inert`, focus returned to the
+   * opener. A dialog with no *name* passes all of that and is still announced
+   * as the bare word **"dialog"**: something opened, and nothing about what.
+   *
+   * The runtime names it from Show Popup's `Accessible Name`, or failing that
+   * from the popup's first `h1`–`h3` (`popup-dialog.ts:109-114`, `:254-257`).
+   * This code fires when neither is available.
+   *
+   * 🔴 **Two things the predicate must not assume.** A `Text` is a heading
+   * only when its `as` parameter says so — the default is `div` — and the
+   * runtime's `querySelector` searches nested component instances, so the check
+   * recurses. Measured across 238 projects: **756** Show Popups, **0** with an
+   * Accessible Name, **5** whose target carries a heading. A version that
+   * accepted any `Text` would pass 728 popups that are all still announced as
+   * "dialog".
+   *
+   * A **warning**, never an error: the graph is correct and it renders.
+   * ✅ **0 hits on the ten shipped templates** — they contain exactly one Show
+   * Popup and its target already has a heading — so this cannot turn
+   * `validate:project` red on the product's own corpus. On a legacy project it
+   * is loud, and that is the truth about those popups rather than a reason to
+   * soften it.
+   */
+  DialogWithoutName = 'dialog-without-name',
+  /**
    * LAS-003/F7 — a `position: absolute` box with neither `width` nor `height`,
    * carrying decoration (background, border, radius, shadow).
    *
@@ -343,6 +371,27 @@ export enum DiagnosticCode {
    * output, and 67 hand-authored corpus projects would go red the day it refused.
    */
   PageCannotScroll = 'page-cannot-scroll',
+  /**
+   * P88 GAM-016 (R16 (c)) — a family token (`--font-sans`, `--font-serif`, `--font-mono`) whose
+   * **first** family is a named face that no `@font-face` in the project's module stylesheets
+   * declares, and that is not a generic or widely installed platform family.
+   *
+   * The page then draws the next family in the stack, on every visitor's machine, with zero console
+   * errors — and `getComputedStyle().fontFamily` still reports the stack as written, so nothing a
+   * person or an agent reads says it happened. Measured on deployed pages before the fix: Playful,
+   * Enterprise and Soft loaded no face at all. A warning, not an error: the page still reads.
+   * Project-wide, so it is reported once per token against the root component.
+   */
+  FontFaceNotShipped = 'font-face-not-shipped',
+  /**
+   * P102 CMP-009 — a custom shadow, gradient, easing, duration or font-family token written in a
+   * spelling the Styles panel's composer cannot open. The value is valid CSS and renders; it only
+   * opens as raw text, and the person has to type CSS to change it, which is what the composer
+   * exists to end. The check runs the **same codec** the editor and the round-trip census use, so
+   * the validator and the composer can never disagree. A warning, project-wide, once per token,
+   * with the codec's reason (*lengths must be px*) and a suggested spelling when one is an edit away.
+   */
+  TokenNotComposable = 'token-not-composable',
   /**
    * A bare number on a units-typed port that is read as a **percentage** —
    * `width`, `height`, `maxWidth`, `minWidth`. `{ value, unit }` is the form
@@ -711,6 +760,17 @@ export enum DiagnosticCode {
    * `layoutInertCombination.ts` for the calibration and the honest limits.
    */
   ColumnsChildKeepsOwnWidth = 'columns-child-keeps-own-width',
+
+  /**
+   * P88 GAM-020 (P78 D58) — a `Text` at `contentSize`/`contentWidth` holding a sentence.
+   * `Text.tsx` renders those modes as `white-space: pre`, so the sentence is one line in any
+   * box, and runs out of a card on a phone with zero console errors (Rocket School, RKT-001).
+   *
+   * R18 (Richard, 2026-09-17): fires only when the longest literal line is at least 26
+   * characters, the shortest line measured clipping (RKT-001 §6). A **warning**, advisory.
+   * Inside a `Columns` the D28 warning above speaks instead: same node, same exit.
+   */
+  TextCannotWrap = 'text-cannot-wrap',
 
   /**
    * DEF-020 (P78 D32) — a row `Group` whose `justifyContent` distributes free
@@ -1162,7 +1222,33 @@ export enum DiagnosticCode {
    * not check", so a door that cannot read the project root stays honest about
    * the limited functions it cannot see.
    */
-  PublicWriteDoorUnlimited = 'public-write-door-unlimited'
+  PublicWriteDoorUnlimited = 'public-write-door-unlimited',
+  /**
+   * GAM-005 (P78 D57): a `Variable2`/`Set Variable` inside a component the
+   * project draws more than once. A Variable is one value for the whole app by
+   * name, so every copy reads and writes the same one: Rocket School's two
+   * feedback banners opened together, and four choice rows shared one pick.
+   *
+   * 🔒 Warning, never blocking (R6, Richard 2026-09-14), with an escape: a
+   * comment containing "shared on purpose" on any node of that name in the
+   * component silences it. App-wide is correct and depended on (TPL-006,
+   * SBR-004), and a row of filter pills writing one filter is the point.
+   * Reported at the holder, from the holder's validation and from its placer's,
+   * as one identical diagnostic (`repeatedComponentVariable.ts`).
+   */
+  VariableInRepeatedComponent = 'variable-in-repeated-component',
+  /**
+   * GAM-007 (P78 D64): a Static Data row field named like one of a Noodl
+   * Object's own members (`on`, `get`, `data`, `toString`…). Each row reaches
+   * the graph as a Noodl Object, whose proxy answers that name with the member,
+   * so the data is unreachable by name and `Object.keys` still lists it: Rocket
+   * School's hangar drew no tiles, with every gate green.
+   *
+   * 🔒 Warning (R8, Richard 2026-09-14: C, reserve loudly now, data wins later).
+   * `Collection.set` raises `collection/reserved-field-name` for the same rows at
+   * runtime. The list is pinned to the runtime (`reservedRowField.ts`).
+   */
+  ReservedRowField = 'reserved-row-field'
 }
 
 // ─── Location ─────────────────────────────────────────────────────────────────

@@ -71,6 +71,21 @@ const INTAKE: IntakeState = {
 
 const EMPTY_PATH: PathState = { intake: null, path: null };
 
+/**
+ * 🔴 **EVERY CLIENT IN THIS BLOCK NOW CARRIES A TOKEN, AND HLT-004 IS WHY.** `/api/v1/me/path`
+ * is marked `credentialed` in `communityapi.ts`, so a client with NO token answers
+ * `unauthenticated` **without making a request** — the editor was writing a `401` into the
+ * renderer log on every launch otherwise, from Chromium's network stack where no `catch` can
+ * reach it.
+ *
+ * ⚠️ **The three cases below always meant to exercise the STATUS MAPPING**, and built a
+ * token-less client only because a token was irrelevant to it. It is relevant now, and a
+ * token restores exactly what each case was written to prove — most sharply the first, whose
+ * whole point is that an expired credential and a dead socket must NOT read the same. That
+ * distinction only ever mattered to somebody **holding** a credential, which is the case
+ * UNI-007 argued from: *"telling a learner whose token had expired that their network was
+ * down."* The short-circuit itself is asserted separately, below.
+ */
 describe('the read that answers 401', () => {
   it('is `unauthenticated`, and a dead socket is NOT — the two must disagree', async () => {
     const { impl } = fakeFetch({
@@ -81,7 +96,7 @@ describe('the read that answers 401', () => {
     const dead = (async () => {
       throw new TypeError('Failed to fetch');
     }) as unknown as typeof fetch;
-    const offline = await new CommunityApiClient({ baseUrl: 'https://x', fetchImpl: dead }).path();
+    const offline = await new CommunityApiClient({ baseUrl: 'https://x', fetchImpl: dead, token: 'stale' }).path();
 
     expect(expired.outcome).toBe('unauthenticated');
     expect(offline.outcome).toBe('unreachable');
@@ -93,15 +108,37 @@ describe('the read that answers 401', () => {
     // ⚠️ The 401 branch is checked BEFORE the 404 one. This proves adding it did not swallow
     // the refusal that must draw nothing at all.
     const { impl } = fakeFetch({ '/api/v1/me/path': { status: 404 } });
-    const read = await new CommunityApiClient({ baseUrl: 'https://x', fetchImpl: impl }).path();
+    const read = await new CommunityApiClient({ baseUrl: 'https://x', fetchImpl: impl, token: 'live' }).path();
     expect(read.outcome).toBe('absent');
   });
 
   it('leaves an ordinary 500 as `unreachable` with its status', async () => {
     const { impl } = fakeFetch({ '/api/v1/me/path': { status: 503 } });
-    const read = await new CommunityApiClient({ baseUrl: 'https://x', fetchImpl: impl }).path();
+    const read = await new CommunityApiClient({ baseUrl: 'https://x', fetchImpl: impl, token: 'live' }).path();
     if (read.outcome !== 'unreachable') throw new Error(`expected unreachable, got ${read.outcome}`);
     expect(read.status).toBe(503);
+  });
+
+  /**
+   * HLT-004 — the short-circuit itself, asserted where the mapping it bypasses is asserted, so
+   * a later reader cannot conclude from the four cases above that this route always reaches
+   * the network.
+   *
+   * 🔴 **`calls` IS THE ASSERTION, NOT THE OUTCOME.** `unauthenticated` is what a real 401
+   * would have produced too, so an outcome-only test passes on both the old client and the
+   * new one and proves nothing ([[verify-the-consequence-not-just-the-mechanism]]). The claim
+   * is that **no request was made**, because a network log entry is written by the browser
+   * before any JavaScript sees the response and only an unmade request removes it.
+   */
+  it('HLT-004: with NO token it answers `unauthenticated` and makes no request at all', async () => {
+    const { impl, calls } = fakeFetch({ '/api/v1/me/path': { status: 503 } });
+    const read = await new CommunityApiClient({ baseUrl: 'https://x', fetchImpl: impl }).path();
+    // ⚠️ The 503 above is the control's teeth: had the request gone out it would have read
+    // `unreachable`, so this cannot pass by the route happening to answer 401.
+    expect({ outcome: read.outcome, requests: calls.length }).toEqual({
+      outcome: 'unauthenticated',
+      requests: 0
+    });
   });
 });
 

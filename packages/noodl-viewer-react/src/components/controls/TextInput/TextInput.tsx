@@ -18,6 +18,9 @@ function preventGlobalFocusChange(e) {
 export interface TextInputProps extends Noodl.ReactProps {
   id: string;
   type: 'text' | 'textArea' | 'email' | 'number' | 'password' | 'url';
+  /** GAM-011 (a) — unset renders no attribute. */
+  inputMode?: 'text' | 'numeric' | 'decimal' | 'tel' | 'email' | 'url' | 'search' | 'none';
+  enterKeyHint?: 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send';
   textStyle: Noodl.TextStyle;
 
   enabled: boolean;
@@ -57,6 +60,12 @@ type State = {
   value: string;
 };
 
+/** GAM-009 — the two things the field asks of its node. Optional: a stand-in node may have neither. */
+interface TextInputNodeSeam {
+  _typed?: (text: string) => void;
+  _announcedValueIs?: (value: string | number | null) => boolean;
+}
+
 export class TextInput extends React.Component<TextInputProps, State> {
   ref: React.MutableRefObject<InputRef>;
 
@@ -77,17 +86,25 @@ export class TextInput extends React.Component<TextInputProps, State> {
    * before this they were the same string. The rule, and why the state stays raw text, is in
    * `nodes/controls/textInputValue.ts`.
    */
-  setText(value: string | number) {
+  setText(value: string | number, afterRender?: () => void) {
     // Inward it is always text: `startValue` may arrive as a number on a Number field, and the
     // `<input>`'s `value` has to be a string or React drops the control.
     const text = value === null || value === undefined ? '' : String(value);
-    this.setState({ value: text });
+    this.setState({ value: text }, afterRender);
     this.props.onTextChanged && this.props.onTextChanged(outwardValueForFieldType(this.props.type, text));
   }
 
   componentDidMount() {
     //plumbing for the focused signals
     this.ref.current.noodlNode = this.props.noodlNode;
+
+    // GAM-009 🔒 R10 — a remount fires `Value Changed` only on a real change. The constructor has
+    // already put `startValue` in the state, so all a mount adds is the announcement, and a field
+    // coming back to the value it last announced has nothing to announce. A value the node wrote
+    // while the field was away was never announced, so it still is, here, as before.
+    const node = this.props.noodlNode as unknown as TextInputNodeSeam | undefined;
+    const text = this.props.startValue === null || this.props.startValue === undefined ? '' : String(this.props.startValue);
+    if (node?._announcedValueIs?.(outwardValueForFieldType(this.props.type, text))) return;
 
     this.setText(this.props.startValue);
   }
@@ -151,15 +168,24 @@ export class TextInput extends React.Component<TextInputProps, State> {
 
     inputStyles.color = props.noodlNode.context.styles.resolveColor(inputStyles.color);
 
+    const events = Utils.controlEvents(props);
     const inputProps = {
       id: props.id,
       value: this.state.value,
-      ...Utils.controlEvents(props),
+      ...events,
+      // GAM-011 (b) — a field that has held focus has a caret someone placed; Insert Text uses it.
+      onFocus: (e) => {
+        this.hadCaret = true;
+        events.onFocus && events.onFocus(e);
+      },
       disabled: !props.enabled,
       style: inputStyles,
       className,
       placeholder: props.placeholder,
       maxLength: props.maxLength,
+      // GAM-011 (a) — `undefined` when unset, which React leaves off the element.
+      inputMode: props.inputMode || undefined,
+      enterKeyHint: props.enterKeyHint || undefined,
       onChange: (e) => this.onChange(e)
     };
 
@@ -260,7 +286,85 @@ export class TextInput extends React.Component<TextInputProps, State> {
 
   onChange(event) {
     const value = event.target.value;
+    // GAM-009 🔒 R10 (a) — what a person typed is what the next mount starts from. Only typing
+    // writes it from here, and it writes the raw text: `Set` and `Clear` already write the start
+    // value through the node, and a converted value would bring a Number field's "1." back as "1".
+    (this.props.noodlNode as unknown as TextInputNodeSeam | undefined)?._typed?.(value);
     this.setText(value);
+  }
+
+  /**
+   * GAM-011 (b) — the caret an on-screen key lands at: the selection if the field has ever held
+   * one, otherwise the end. `selectionStart` is `null` (and can throw) on a Number or Email field,
+   * and a field nobody has focused has no caret a person chose, so both append.
+   */
+  private caret(value: string): { start: number; end: number } {
+    const el = this.ref.current;
+    if (el && this.hadCaret) {
+      try {
+        if (el.selectionStart !== null && el.selectionEnd !== null) {
+          return { start: Math.min(el.selectionStart, value.length), end: Math.min(el.selectionEnd, value.length) };
+        }
+      } catch (e) {
+        // A type with no selection API: append.
+      }
+    }
+    return { start: value.length, end: value.length };
+  }
+
+  /** Whether the field has held focus since it mounted, so its selection is a caret someone placed. */
+  private hadCaret = false;
+
+  /**
+   * GAM-011 (b) — write text the way a key press does, whether or not the field has focus: through
+   * React state, never `el.value` (a controlled input reverts that), and as typing, so the next mount
+   * starts from it (GAM-009 R10). Focus stays where it was; the caret ends up after what was written.
+   *
+   * @param replacement what to put at the caret (or over the selection)
+   * @param mode `insert` writes `replacement`; `backspace` removes the selection, or the character before the caret
+   * @returns whether the field's text changed
+   */
+  edit(mode: 'insert' | 'backspace', replacement = ''): boolean {
+    const value = this.state.value ?? '';
+    const { start, end } = this.caret(value);
+    let from = start;
+    let text = replacement;
+
+    if (mode === 'backspace') {
+      text = '';
+      if (start === end) {
+        if (start === 0) return false;
+        // One character, not one UTF-16 unit: an emoji is two.
+        const before = Array.from(value.slice(0, start));
+        from = start - before[before.length - 1].length;
+      }
+    } else {
+      // 🔒 R12 — Max length holds, as it does for a typed key: what does not fit is not written.
+      const maxLength = Number(this.props.maxLength);
+      if (maxLength > 0) {
+        const room = Math.max(0, maxLength - (value.length - (end - start)));
+        text = Array.from(text).reduce((kept, ch) => (kept.length + ch.length <= room ? kept + ch : kept), '');
+      }
+      if (text.length === 0) return false;
+    }
+
+    const next = value.slice(0, from) + text + value.slice(end);
+    if (next === value) return false;
+    const caret = from + text.length;
+
+    (this.props.noodlNode as unknown as TextInputNodeSeam | undefined)?._typed?.(next);
+    this.setText(next, () => {
+      const el = this.ref.current;
+      // Only a field that holds focus shows a caret; setting a selection elsewhere can pull focus on some browsers.
+      if (el && this.hasFocus()) {
+        try {
+          el.setSelectionRange(caret, caret);
+        } catch (e) {
+          // A type with no selection API keeps the browser's caret.
+        }
+      }
+    });
+    return true;
   }
 
   focus() {

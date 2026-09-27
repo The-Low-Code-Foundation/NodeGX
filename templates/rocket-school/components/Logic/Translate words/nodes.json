@@ -1,0 +1,1638 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2463605d-d4ee-51ca-8937-523da5754c43",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "translateworIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "translateworFn",
+      "type": "JavaScriptFunction",
+      "label": "Translate words",
+      "parameters": {
+        "functionScript": "\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar rows = Inputs.words || [];\nvar map = {};\nfor (var i = 0; i < rows.length; i++) map[rows[i].key] = rows[i][lang] || rows[i].en || '';\nOutputs.lang = lang;\nOutputs.isFr = lang === 'fr';\nOutputs.appName = map.appName || '';\nOutputs.tagline = map.tagline || '';\nOutputs.whoIsPlaying = map.whoIsPlaying || '';\nOutputs.newProfile = map.newProfile || '';\nOutputs.yourName = map.yourName || '';\nOutputs.pickAvatar = map.pickAvatar || '';\nOutputs.rollAvatar = map.rollAvatar || '';\nOutputs.yourLevel = map.yourLevel || '';\nOutputs.language = map.language || '';\nOutputs.keyboard = map.keyboard || '';\nOutputs.create = map.create || '';\nOutputs.cancel = map.cancel || '';\nOutputs.deleteProfile = map.deleteProfile || '';\nOutputs.switchPlayer = map.switchPlayer || '';\nOutputs.editPlayer = map.editPlayer || '';\nOutputs.saveChanges = map.saveChanges || '';\nOutputs.soundYes = map.soundYes || '';\nOutputs.soundNo = map.soundNo || '';\nOutputs.answersLabel = map.answersLabel || '';\nOutputs.answersTyped = map.answersTyped || '';\nOutputs.answersOptions = map.answersOptions || '';\nOutputs.answersAuto = map.answersAuto || '';\nOutputs.closeMenu = map.closeMenu || '';\nOutputs.deleteAsk = map.deleteAsk || '';\nOutputs.deleteYes = map.deleteYes || '';\nOutputs.deleteNo = map.deleteNo || '';\nOutputs.home = map.home || '';\nOutputs.play = map.play || '';\nOutputs.practice = map.practice || '';\nOutputs.challenge = map.challenge || '';\nOutputs.practiceRule = map.practiceRule || '';\nOutputs.challengeRule = map.challengeRule || '';\nOutputs.dueToday = map.dueToday || '';\nOutputs.daysThisWeek = map.daysThisWeek || '';\nOutputs.gameRace = map.gameRace || '';\nOutputs.gameRaceBlurb = map.gameRaceBlurb || '';\nOutputs.gameMerge = map.gameMerge || '';\nOutputs.gameMergeBlurb = map.gameMergeBlurb || '';\nOutputs.mergeRule = map.mergeRule || '';\nOutputs.newGame = map.newGame || '';\nOutputs.mergeModeLabel = map.mergeModeLabel || '';\nOutputs.mergeEasy = map.mergeEasy || '';\nOutputs.mergeHard = map.mergeHard || '';\nOutputs.mergeFull = map.mergeFull || '';\nOutputs.menuHangar = map.menuHangar || '';\nOutputs.gameHunt = map.gameHunt || '';\nOutputs.gameHuntBlurb = map.gameHuntBlurb || '';\nOutputs.huntNextGrid = map.huntNextGrid || '';\nOutputs.huntShowWay = map.huntShowWay || '';\nOutputs.gameMonster = map.gameMonster || '';\nOutputs.gameMonsterBlurb = map.gameMonsterBlurb || '';\nOutputs.monsterGate = map.monsterGate || '';\nOutputs.monsterPush = map.monsterPush || '';\nOutputs.monsterGatePractice = map.monsterGatePractice || '';\nOutputs.monsterGateChallenge = map.monsterGateChallenge || '';\nOutputs.monsterPushPractice = map.monsterPushPractice || '';\nOutputs.monsterPushChallenge = map.monsterPushChallenge || '';\nOutputs.monsterChange = map.monsterChange || '';\nOutputs.typingMode = map.typingMode || '';\nOutputs.mathsMode = map.mathsMode || '';\nOutputs.customMode = map.customMode || '';\nOutputs.onePlayer = map.onePlayer || '';\nOutputs.twoPlayers = map.twoPlayers || '';\nOutputs.start = map.start || '';\nOutputs.again = map.again || '';\nOutputs.otherRace = map.otherRace || '';\nOutputs.restart = map.restart || '';\nOutputs.rightAnswers = map.rightAnswers || '';\nOutputs.stars = map.stars || '';\nOutputs.hangar = map.hangar || '';\nOutputs.buyTitle = map.buyTitle || '';\nOutputs.youHave = map.youHave || '';\nOutputs.itCosts = map.itCosts || '';\nOutputs.youllHave = map.youllHave || '';\nOutputs.yesBuy = map.yesBuy || '';\nOutputs.noThanks = map.noThanks || '';\nOutputs.ownedElsewhere = map.ownedElsewhere || '';\nOutputs.turboReady = map.turboReady || '';\nOutputs.turboCharging = map.turboCharging || '';\nOutputs.hangarBlurb = map.hangarBlurb || '';\nOutputs.faceTab = map.faceTab || '';\nOutputs.rocketTab = map.rocketTab || '';\nOutputs.earnedPick = map.earnedPick || '';\nOutputs.toHangar = map.toHangar || '';\nOutputs.next = map.next || '';\nOutputs.check = map.check || '';\nOutputs.typeAnswer = map.typeAnswer || '';\nOutputs.correct = map.correct || '';\nOutputs.fluent = map.fluent || '';\nOutputs.wrong = map.wrong || '';\nOutputs.timeUp = map.timeUp || '';\nOutputs.theAnswerWas = map.theAnswerWas || '';\nOutputs.showMe = map.showMe || '';\nOutputs.gotIt = map.gotIt || '';\nOutputs.anExample = map.anExample || '';\nOutputs.youWin = map.youWin || '';\nOutputs.computerWins = map.computerWins || '';\nOutputs.playerWins = map.playerWins || '';\nOutputs.yourTurn = map.yourTurn || '';\nOutputs.score = map.score || '';\nOutputs.biggest = map.biggest || '';\nOutputs.moves = map.moves || '';\nOutputs.gameOver = map.gameOver || '';\nOutputs.hearts = map.hearts || '';\nOutputs.target = map.target || '';\nOutputs.found = map.found || '';\nOutputs.progress = map.progress || '';\nOutputs.mastered = map.mastered || '';\nOutputs.proficient = map.proficient || '';\nOutputs.familiar = map.familiar || '';\nOutputs.newSkill = map.newSkill || '';\nOutputs.saveCode = map.saveCode || '';\nOutputs.saveCodeHelp = map.saveCodeHelp || '';\nOutputs.loadCode = map.loadCode || '';\nOutputs.loaded = map.loaded || '';\nOutputs.badCode = map.badCode || '';\nOutputs.mySets = map.mySets || '';\nOutputs.newSet = map.newSet || '';\nOutputs.setName = map.setName || '';\nOutputs.question = map.question || '';\nOutputs.answer = map.answer || '';\nOutputs.addRow = map.addRow || '';\nOutputs.remove = map.remove || '';\nOutputs.save = map.save || '';\nOutputs.pasteJson = map.pasteJson || '';\nOutputs.teach = map.teach || '';\nOutputs.lessOnNext = map.lessOnNext || '';\nOutputs.soundOn = map.soundOn || '';\nOutputs.credits = map.credits || '';\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-lang",
+          "displayName": "lang",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isFr",
+          "displayName": "isFr",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-appName",
+          "displayName": "appName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tagline",
+          "displayName": "tagline",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-whoIsPlaying",
+          "displayName": "whoIsPlaying",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-newProfile",
+          "displayName": "newProfile",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-yourName",
+          "displayName": "yourName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pickAvatar",
+          "displayName": "pickAvatar",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rollAvatar",
+          "displayName": "rollAvatar",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-yourLevel",
+          "displayName": "yourLevel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-language",
+          "displayName": "language",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-keyboard",
+          "displayName": "keyboard",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-create",
+          "displayName": "create",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cancel",
+          "displayName": "cancel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-deleteProfile",
+          "displayName": "deleteProfile",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-switchPlayer",
+          "displayName": "switchPlayer",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-editPlayer",
+          "displayName": "editPlayer",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-saveChanges",
+          "displayName": "saveChanges",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-soundYes",
+          "displayName": "soundYes",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-soundNo",
+          "displayName": "soundNo",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-answersLabel",
+          "displayName": "answersLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-answersTyped",
+          "displayName": "answersTyped",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-answersOptions",
+          "displayName": "answersOptions",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-answersAuto",
+          "displayName": "answersAuto",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-closeMenu",
+          "displayName": "closeMenu",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-deleteAsk",
+          "displayName": "deleteAsk",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-deleteYes",
+          "displayName": "deleteYes",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-deleteNo",
+          "displayName": "deleteNo",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-home",
+          "displayName": "home",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-play",
+          "displayName": "play",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-practice",
+          "displayName": "practice",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-challenge",
+          "displayName": "challenge",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-practiceRule",
+          "displayName": "practiceRule",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-challengeRule",
+          "displayName": "challengeRule",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-dueToday",
+          "displayName": "dueToday",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-daysThisWeek",
+          "displayName": "daysThisWeek",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-gameRace",
+          "displayName": "gameRace",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-gameRaceBlurb",
+          "displayName": "gameRaceBlurb",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-gameMerge",
+          "displayName": "gameMerge",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-gameMergeBlurb",
+          "displayName": "gameMergeBlurb",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mergeRule",
+          "displayName": "mergeRule",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-newGame",
+          "displayName": "newGame",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mergeModeLabel",
+          "displayName": "mergeModeLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mergeEasy",
+          "displayName": "mergeEasy",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mergeHard",
+          "displayName": "mergeHard",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mergeFull",
+          "displayName": "mergeFull",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-menuHangar",
+          "displayName": "menuHangar",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-gameHunt",
+          "displayName": "gameHunt",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-gameHuntBlurb",
+          "displayName": "gameHuntBlurb",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-huntNextGrid",
+          "displayName": "huntNextGrid",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-huntShowWay",
+          "displayName": "huntShowWay",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-gameMonster",
+          "displayName": "gameMonster",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-gameMonsterBlurb",
+          "displayName": "gameMonsterBlurb",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-monsterGate",
+          "displayName": "monsterGate",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-monsterPush",
+          "displayName": "monsterPush",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-monsterGatePractice",
+          "displayName": "monsterGatePractice",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-monsterGateChallenge",
+          "displayName": "monsterGateChallenge",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-monsterPushPractice",
+          "displayName": "monsterPushPractice",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-monsterPushChallenge",
+          "displayName": "monsterPushChallenge",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-monsterChange",
+          "displayName": "monsterChange",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-typingMode",
+          "displayName": "typingMode",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mathsMode",
+          "displayName": "mathsMode",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-customMode",
+          "displayName": "customMode",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-onePlayer",
+          "displayName": "onePlayer",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-twoPlayers",
+          "displayName": "twoPlayers",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-start",
+          "displayName": "start",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-again",
+          "displayName": "again",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-otherRace",
+          "displayName": "otherRace",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-restart",
+          "displayName": "restart",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rightAnswers",
+          "displayName": "rightAnswers",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stars",
+          "displayName": "stars",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hangar",
+          "displayName": "hangar",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-buyTitle",
+          "displayName": "buyTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-youHave",
+          "displayName": "youHave",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-itCosts",
+          "displayName": "itCosts",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-youllHave",
+          "displayName": "youllHave",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-yesBuy",
+          "displayName": "yesBuy",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-noThanks",
+          "displayName": "noThanks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ownedElsewhere",
+          "displayName": "ownedElsewhere",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-turboReady",
+          "displayName": "turboReady",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-turboCharging",
+          "displayName": "turboCharging",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hangarBlurb",
+          "displayName": "hangarBlurb",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-faceTab",
+          "displayName": "faceTab",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rocketTab",
+          "displayName": "rocketTab",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-earnedPick",
+          "displayName": "earnedPick",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-toHangar",
+          "displayName": "toHangar",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-next",
+          "displayName": "next",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-check",
+          "displayName": "check",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-typeAnswer",
+          "displayName": "typeAnswer",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-correct",
+          "displayName": "correct",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-fluent",
+          "displayName": "fluent",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-wrong",
+          "displayName": "wrong",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-timeUp",
+          "displayName": "timeUp",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-theAnswerWas",
+          "displayName": "theAnswerWas",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showMe",
+          "displayName": "showMe",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-gotIt",
+          "displayName": "gotIt",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-anExample",
+          "displayName": "anExample",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-youWin",
+          "displayName": "youWin",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-computerWins",
+          "displayName": "computerWins",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-playerWins",
+          "displayName": "playerWins",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-yourTurn",
+          "displayName": "yourTurn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-score",
+          "displayName": "score",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-biggest",
+          "displayName": "biggest",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-moves",
+          "displayName": "moves",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-gameOver",
+          "displayName": "gameOver",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hearts",
+          "displayName": "hearts",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-target",
+          "displayName": "target",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-found",
+          "displayName": "found",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-progress",
+          "displayName": "progress",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mastered",
+          "displayName": "mastered",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-proficient",
+          "displayName": "proficient",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-familiar",
+          "displayName": "familiar",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-newSkill",
+          "displayName": "newSkill",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-saveCode",
+          "displayName": "saveCode",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-saveCodeHelp",
+          "displayName": "saveCodeHelp",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-loadCode",
+          "displayName": "loadCode",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-loaded",
+          "displayName": "loaded",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-badCode",
+          "displayName": "badCode",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mySets",
+          "displayName": "mySets",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-newSet",
+          "displayName": "newSet",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-setName",
+          "displayName": "setName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-question",
+          "displayName": "question",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-answer",
+          "displayName": "answer",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-addRow",
+          "displayName": "addRow",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-remove",
+          "displayName": "remove",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-save",
+          "displayName": "save",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pasteJson",
+          "displayName": "pasteJson",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-teach",
+          "displayName": "teach",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lessOnNext",
+          "displayName": "lessOnNext",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-soundOn",
+          "displayName": "soundOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-credits",
+          "displayName": "credits",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "translateworOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "lang",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "isFr",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "addRow",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "again",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "anExample",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "answer",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "answersAuto",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "answersLabel",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "answersOptions",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "answersTyped",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "appName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "badCode",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "biggest",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "buyTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "cancel",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "challenge",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "challengeRule",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "check",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "closeMenu",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "computerWins",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "correct",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "create",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "credits",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "customMode",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "daysThisWeek",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "deleteAsk",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "deleteNo",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "deleteProfile",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "deleteYes",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "dueToday",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "earnedPick",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "editPlayer",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "faceTab",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "familiar",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "fluent",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "found",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "gameHunt",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "gameHuntBlurb",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "gameMerge",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "gameMergeBlurb",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "gameMonster",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "gameMonsterBlurb",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "gameOver",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "gameRace",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "gameRaceBlurb",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "gotIt",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hangar",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hangarBlurb",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hearts",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "home",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "huntNextGrid",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "huntShowWay",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "itCosts",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "keyboard",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "language",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "lessOnNext",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "loadCode",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "loaded",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "mastered",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "mathsMode",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "menuHangar",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "mergeEasy",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "mergeFull",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "mergeHard",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "mergeModeLabel",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "mergeRule",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "monsterChange",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "monsterGate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "monsterGateChallenge",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "monsterGatePractice",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "monsterPush",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "monsterPushChallenge",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "monsterPushPractice",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "moves",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "mySets",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "newGame",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "newProfile",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "newSet",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "newSkill",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "next",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "noThanks",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "onePlayer",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "otherRace",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ownedElsewhere",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pasteJson",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pickAvatar",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "play",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "playerWins",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "practice",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "practiceRule",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "proficient",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "progress",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "question",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "remove",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "restart",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rightAnswers",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rocketTab",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rollAvatar",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "save",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "saveChanges",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "saveCode",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "saveCodeHelp",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "score",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "setName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "showMe",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "soundNo",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "soundOn",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "soundYes",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "stars",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "start",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "switchPlayer",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "tagline",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "target",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "teach",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "theAnswerWas",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "timeUp",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "toHangar",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "turboCharging",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "turboReady",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "twoPlayers",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "typeAnswer",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "typingMode",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "whoIsPlaying",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "wrong",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "yesBuy",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "youHave",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "youWin",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "youllHave",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "yourLevel",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "yourName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "yourTurn",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

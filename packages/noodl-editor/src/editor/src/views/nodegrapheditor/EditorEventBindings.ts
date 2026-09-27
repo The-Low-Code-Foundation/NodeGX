@@ -1,8 +1,6 @@
 import _ from 'underscore';
 
 import { AiAssistantEvent, AiAssistantModel } from '@noodl-models/AiAssistant/AiAssistantModel';
-import { SidebarModel } from '@noodl-models/sidebar';
-import { SidebarModelEvent } from '@noodl-models/sidebar/sidebarmodel';
 import { KeyCode } from '@noodl-utils/keyboard/KeyCode';
 import { KeyboardCommand } from '@noodl-utils/keyboardhandler';
 
@@ -11,7 +9,6 @@ import { ComponentModel } from '../../models/componentmodel';
 import { NodeLibrary } from '../../models/nodelibrary';
 import { ProjectModel } from '../../models/projectmodel';
 import { WarningsModel } from '../../models/warningsmodel';
-import { ExplainPanel_ID } from '../panels/ExplainPanel';
 import { SnapSpacing } from './canvas/types';
 import { LOGIC_BUILDER_PARK_EVENT, yieldLogicOverlayToSidePanel } from './LogicOverlay';
 
@@ -111,23 +108,6 @@ export function registerRenderEventBindings(editor: NodeGraphEditor): void {
   );
 }
 
-/**
- * Which sidebar panels are allowed to keep the canvas selection alive.
- *
- * Opening any other panel clears it, so that a stale highlight never outlives
- * the panel that explained it. That rule costs a panel *about* the selection
- * everything: FH-008 measured Explain being handed an empty canvas every time,
- * because the deselect below runs on `activeChanged` — before the panel it is
- * switching to has read anything.
- *
- * A function rather than an exported array on purpose: `ExplainPanel_ID` comes
- * from a module that imports the canvas context back, and a top-level array
- * would capture it at module-init time.
- */
-export function panelHoldsCanvasSelection(panelId: string): boolean {
-  return panelId === 'PropertyEditor' || panelId === 'PortEditor' || panelId === ExplainPanel_ID;
-}
-
 export function registerEditorEventBindings(editor: NodeGraphEditor): KeyboardCommand[] {
   EventDispatcher.instance.on(
     ['DebugInspectorConnectionPulseChanged'],
@@ -220,17 +200,17 @@ export function registerEditorEventBindings(editor: NodeGraphEditor): KeyboardCo
     editor
   );
 
-  SidebarModel.instance.on(
-    SidebarModelEvent.activeChanged,
-    (activeId) => {
-      if (panelHoldsCanvasSelection(activeId) === false) {
-        //deselect nodes when switching to a panel that has no use for a selection
-        editor.deselect({ disableHidePanels: true });
-        editor.repaint();
-      }
-    },
-    editor
-  );
+  /*
+   * P101 INS-001 — opening a left-hand panel no longer clears the canvas selection.
+   *
+   * It used to, for every panel outside an allow-list (`panelHoldsCanvasSelection`: the two node
+   * panels and, after FH-008, Explain), so that a highlight never outlived the panel explaining
+   * it. That rule was about the ONE slot: the node's panel and the rail's panels took turns in it,
+   * so opening Styles hid the properties and the leftover highlight explained nothing. The node's
+   * panel has its own column now and is on screen whatever the left shows — left in, this rule
+   * would blank the inspector every time someone opened Styles to work beside it, which is the
+   * exact thing Richard asked to be able to do (P101 RI-2).
+   */
 
   return [
     {

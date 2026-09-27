@@ -15,6 +15,14 @@
  *
  * @module noodl-editor/tests-unit/nat-007/postblocks-boundary
  */
+// FLD-017 — CHR-012 made the community write verbs `PrimaryButton`, which imports `Icon`.
+jest.mock('@noodl-core-ui/components/common/Icon', () => ({
+  Icon: () => null,
+  IconName: {},
+  IconSize: { Small: 'small' },
+  IconVariant: {}
+}));
+
 import { readFileSync } from 'fs';
 import { join } from 'path';
 

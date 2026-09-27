@@ -40,7 +40,7 @@ One-off or simple API calls where the response can be consumed directly or hande
 
 | Name | Type | Default | Description |
 |---|---|---|---|
-| `response` | * | — | Body the server sent, parsed as JSON when it said so and as text otherwise; it keeps the previous body when a request never reached the server |
+| `response` | * | — | Body the server sent, read the way Response Type says: Auto parses JSON when the server said application/json and hands over text otherwise, Text always hands over text, JSON always parses; it keeps the previous body when a request never reached the server |
 | `responseHeaders` | Object | — | Every header the server returned, keyed by lower-cased header name |
 | `statusCode` | Number | — | HTTP status the server answered with; it keeps the previous status when a request timed out or never reached the server |
 
@@ -51,7 +51,8 @@ One-off or simple API calls where the response can be consumed directly or hande
 | `canceled` | Signal | — | Fires only when Cancel abandoned a request in flight; a timeout answers on Failure instead |
 | `completed` | Signal | — | Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error |
 | `done` | Signal | — | Fires once the server has answered with a 2xx status and Response is up to date |
-| `unchanged` | Signal | — | Fires when nothing was fetched and nothing changed: a Cancel that abandoned a request in flight, or a Cancel with no request to abandon. Canceled tells those two apart |
+| `notModified` | Signal | — | Fires when Conditional is on and the server answered 304 — nothing has changed since the last fetch, Response still holds the previous body, and the invocation reports Unchanged |
+| `unchanged` | Signal | — | Fires when nothing was fetched and nothing changed: a Cancel that abandoned a request in flight, a Cancel with no request to abandon, or a Conditional request the server answered 304. Canceled and Not Modified tell those apart |
 
 ### Failure outputs
 

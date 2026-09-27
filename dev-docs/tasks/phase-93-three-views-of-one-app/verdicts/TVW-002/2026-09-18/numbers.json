@@ -1,0 +1,216 @@
+[
+  {
+    "theme": "dark",
+    "appliedTheme": "dark",
+    "shape": "other-screen",
+    "component": "/#Noodl Component System/__DESIGN SYSTEM INTERNALS/_DSI Atoms",
+    "present": true,
+    "text": "_DSI Atoms isn't on Home. It's on Design System.",
+    "stripHeight": 28,
+    "stripWidth": 988,
+    "textWidth": 653,
+    "textScrollWidth": 653,
+    "textClientWidth": 653,
+    "truncated": false,
+    "doors": [
+      {
+        "label": "Go to Design System",
+        "width": 128
+      },
+      {
+        "label": "Open on the Workbench",
+        "width": 145
+      },
+      {
+        "label": "×",
+        "width": 18
+      }
+    ]
+  },
+  {
+    "theme": "dark",
+    "appliedTheme": "dark",
+    "shape": "unplaced",
+    "component": "/#Noodl Component System/Atoms/Avatar/User Avatar Skeleton",
+    "present": true,
+    "text": "User Avatar Skeleton isn't on any page yet — nothing in the app places it.",
+    "stripHeight": 28,
+    "stripWidth": 988,
+    "textWidth": 789,
+    "textScrollWidth": 789,
+    "textClientWidth": 789,
+    "truncated": false,
+    "doors": [
+      {
+        "label": "Open on the Workbench",
+        "width": 145
+      },
+      {
+        "label": "×",
+        "width": 18
+      }
+    ]
+  },
+  {
+    "theme": "dark",
+    "appliedTheme": "dark",
+    "shape": "unplaced",
+    "component": "/#Noodl Component System/Atoms/Checkbox/Save button",
+    "present": true,
+    "text": "Save button isn't on any page yet — it's only inside Package Hero section, which no page shows.",
+    "stripHeight": 28,
+    "stripWidth": 988,
+    "textWidth": 789,
+    "textScrollWidth": 789,
+    "textClientWidth": 789,
+    "truncated": false,
+    "doors": [
+      {
+        "label": "Open on the Workbench",
+        "width": 145
+      },
+      {
+        "label": "×",
+        "width": 18
+      }
+    ]
+  },
+  {
+    "theme": "dark",
+    "appliedTheme": "dark",
+    "shape": "logic",
+    "component": "/#Integrations/Check if user is logged in",
+    "present": true,
+    "text": "Check if user is logged in is logic — it draws nothing. It runs on My Packages and Account.",
+    "stripHeight": 28,
+    "stripWidth": 988,
+    "textWidth": 789,
+    "textScrollWidth": 789,
+    "textClientWidth": 789,
+    "truncated": false,
+    "doors": [
+      {
+        "label": "Open on the Workbench",
+        "width": 145
+      },
+      {
+        "label": "×",
+        "width": 18
+      }
+    ]
+  },
+  {
+    "theme": "dark",
+    "appliedTheme": "dark",
+    "shape": "agree",
+    "component": "/#Integrations/Algolia/Algolia Search",
+    "present": false
+  },
+  {
+    "theme": "light",
+    "appliedTheme": "light",
+    "shape": "other-screen",
+    "component": "/#Noodl Component System/__DESIGN SYSTEM INTERNALS/_DSI Atoms",
+    "present": true,
+    "text": "_DSI Atoms isn't on Home. It's on Design System.",
+    "stripHeight": 28,
+    "stripWidth": 988,
+    "textWidth": 653,
+    "textScrollWidth": 653,
+    "textClientWidth": 653,
+    "truncated": false,
+    "doors": [
+      {
+        "label": "Go to Design System",
+        "width": 128
+      },
+      {
+        "label": "Open on the Workbench",
+        "width": 145
+      },
+      {
+        "label": "×",
+        "width": 18
+      }
+    ]
+  },
+  {
+    "theme": "light",
+    "appliedTheme": "light",
+    "shape": "unplaced",
+    "component": "/#Noodl Component System/Atoms/Avatar/User Avatar Skeleton",
+    "present": true,
+    "text": "User Avatar Skeleton isn't on any page yet — nothing in the app places it.",
+    "stripHeight": 28,
+    "stripWidth": 988,
+    "textWidth": 789,
+    "textScrollWidth": 789,
+    "textClientWidth": 789,
+    "truncated": false,
+    "doors": [
+      {
+        "label": "Open on the Workbench",
+        "width": 145
+      },
+      {
+        "label": "×",
+        "width": 18
+      }
+    ]
+  },
+  {
+    "theme": "light",
+    "appliedTheme": "light",
+    "shape": "unplaced",
+    "component": "/#Noodl Component System/Atoms/Checkbox/Save button",
+    "present": true,
+    "text": "Save button isn't on any page yet — it's only inside Package Hero section, which no page shows.",
+    "stripHeight": 28,
+    "stripWidth": 988,
+    "textWidth": 789,
+    "textScrollWidth": 789,
+    "textClientWidth": 789,
+    "truncated": false,
+    "doors": [
+      {
+        "label": "Open on the Workbench",
+        "width": 145
+      },
+      {
+        "label": "×",
+        "width": 18
+      }
+    ]
+  },
+  {
+    "theme": "light",
+    "appliedTheme": "light",
+    "shape": "logic",
+    "component": "/#Integrations/Check if user is logged in",
+    "present": true,
+    "text": "Check if user is logged in is logic — it draws nothing. It runs on My Packages and Account.",
+    "stripHeight": 28,
+    "stripWidth": 988,
+    "textWidth": 789,
+    "textScrollWidth": 789,
+    "textClientWidth": 789,
+    "truncated": false,
+    "doors": [
+      {
+        "label": "Open on the Workbench",
+        "width": 145
+      },
+      {
+        "label": "×",
+        "width": 18
+      }
+    ]
+  },
+  {
+    "theme": "light",
+    "appliedTheme": "light",
+    "shape": "agree",
+    "component": "/#Integrations/Algolia/Algolia Search",
+    "present": false
+  }
+]

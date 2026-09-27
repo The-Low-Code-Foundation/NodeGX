@@ -278,6 +278,9 @@ function preconditionDiagnostics(
     // diverging on what they check is the defect AAQ-005 closed and
     // `gateParity.test.ts` exists to keep closed.
     derived: derivedPortIndices(views),
+    // GAM-005 — the same views, counted for how many copies of each component are drawn.
+    // `GraphNode.comment` carries the "shared on purpose" escape.
+    views,
     // LAS-012 — a `template` fed by a wire is a working list, and only the
     // candidate's own connections can say so.
     connections: connectedInputs(files.connections.connections),

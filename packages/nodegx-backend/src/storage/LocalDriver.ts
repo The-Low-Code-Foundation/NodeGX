@@ -19,7 +19,7 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import type { StorageDriver, StorageStat } from './types';
+import type { StorageDriver, StorageStat, StoredEntry } from './types';
 
 export class LocalDriver implements StorageDriver {
   readonly kind = 'local' as const;
@@ -70,6 +70,10 @@ export class LocalDriver implements StorageDriver {
   }
 
   async *listKeys(): AsyncIterable<string> {
+    for await (const entry of this.listEntries()) yield entry.key;
+  }
+
+  async *listEntries(): AsyncIterable<StoredEntry> {
     if (!fs.existsSync(this.root)) return;
     for (const b1 of fs.readdirSync(this.root)) {
       const dir1 = path.join(this.root, b1);
@@ -78,7 +82,13 @@ export class LocalDriver implements StorageDriver {
         const dir2 = path.join(dir1, b2);
         if (!fs.statSync(dir2).isDirectory()) continue;
         for (const name of fs.readdirSync(dir2)) {
-          yield [b1, b2, name].join('/');
+          let modified: Date | null = null;
+          try {
+            modified = fs.statSync(path.join(dir2, name)).mtime;
+          } catch {
+            continue; // deleted between the listing and the stat
+          }
+          yield { key: [b1, b2, name].join('/'), modified };
         }
       }
     }

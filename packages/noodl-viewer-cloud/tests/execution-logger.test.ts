@@ -4,7 +4,7 @@
  * Tests lifecycle methods, configuration, and data handling.
  */
 
-import { ExecutionLogger, ExecutionStore, SQLiteDatabase } from '../src/execution-history';
+import { ExecutionLogger, ExecutionStore } from '../src/execution-history';
 
 /**
  * Mock ExecutionStore that tracks calls for testing
@@ -435,6 +435,119 @@ describe('ExecutionLogger', () => {
 
       expect(store.executions.size).toBe(3);
       expect(store.steps.size).toBe(3);
+    });
+  });
+
+  /**
+   * FED-007 AC1 — ruled by Richard, 2026-09-20: **a run with a failed step must not read
+   * `success`.**
+   *
+   * The run this was ruled on answered HTTP 200 with a feed down inside it, and the row was
+   * green. `completeExecution(true)` is the caller saying "the reply went out"; it is not the
+   * run saying the work happened.
+   *
+   * ⚠️ Every arm here has its counterpart in the same block — a green run beside the red one,
+   * a skipped step beside the failed one — because a rule that reads `error` in both arms
+   * grades nothing.
+   */
+  describe('FED-007 AC1: a run with a failed step does not read success', () => {
+    function runWithSteps(steps: Array<{ nodeId: string; nodeName?: string; fail?: Error | true }>): string {
+      const execId = logger.startExecution({
+        workflowId: 'pollSources',
+        workflowName: 'pollSources',
+        triggerType: 'schedule'
+      });
+      for (const step of steps) {
+        const stepId = logger.startNode({ nodeId: step.nodeId, nodeType: 'test', nodeName: step.nodeName });
+        if (step.fail) {
+          logger.completeNode(stepId, false, undefined, step.fail === true ? undefined : step.fail);
+        } else {
+          logger.completeNode(stepId, true, { ok: true });
+        }
+      }
+      return execId;
+    }
+
+    it('records error when the caller said success and a step failed', () => {
+      const execId = runWithSteps([{ nodeId: 'fetch' }, { nodeId: 'http', fail: new Error('HTTP 403: Forbidden') }]);
+
+      logger.completeExecution(true);
+
+      expect(store.executions.get(execId)?.status).toBe('error');
+    });
+
+    it('still records success when every step succeeded', () => {
+      const execId = runWithSteps([{ nodeId: 'fetch' }, { nodeId: 'http' }]);
+
+      logger.completeExecution(true);
+
+      expect(store.executions.get(execId)?.status).toBe('success');
+    });
+
+    it('borrows the failed step’s message, and names the node, because nobody else wrote one', () => {
+      const execId = runWithSteps([{ nodeId: 'http', nodeName: 'Fetch feed', fail: new Error('HTTP 403: Forbidden') }]);
+
+      logger.completeExecution(true);
+
+      // Both halves on purpose: a bare "a step failed" reads as a run that fell over, and this
+      // one answered 200.
+      expect(store.executions.get(execId)?.errorMessage).toBe(
+        'The run answered, but a step failed: Fetch feed — HTTP 403: Forbidden'
+      );
+    });
+
+    it('names the node id when the step has no display name', () => {
+      const execId = runWithSteps([{ nodeId: 'http', fail: new Error('HTTP 403: Forbidden') }]);
+
+      logger.completeExecution(true);
+
+      expect(store.executions.get(execId)?.errorMessage).toContain('a step failed: http —');
+    });
+
+    it('names the FIRST failure, not the last — item 200 does not explain item 1', () => {
+      const execId = runWithSteps([
+        { nodeId: 'store', nodeName: 'item 1', fail: new Error('first') },
+        { nodeId: 'store', nodeName: 'item 2', fail: new Error('second') }
+      ]);
+
+      logger.completeExecution(true);
+
+      expect(store.executions.get(execId)?.errorMessage).toContain('item 1 — first');
+    });
+
+    it('never overrules a caller who reported failure — the run’s own error stays', () => {
+      const execId = runWithSteps([{ nodeId: 'http', fail: new Error('HTTP 403: Forbidden') }]);
+
+      logger.completeExecution(false, new Error('no Response node was reached'));
+
+      const exec = store.executions.get(execId);
+      expect(exec?.status).toBe('error');
+      expect(exec?.errorMessage).toBe('no Response node was reached');
+    });
+
+    it('does not treat a skipped step as a failure — a branch not taken is not a fault', () => {
+      const execId = logger.startExecution({
+        workflowId: 'pollSources',
+        workflowName: 'pollSources',
+        triggerType: 'schedule'
+      });
+      logger.skipNode({ nodeId: 'recover', nodeType: 'test' });
+
+      logger.completeExecution(true);
+
+      expect(store.executions.get(execId)?.status).toBe('success');
+    });
+
+    it('does not colour the NEXT run — the failure is per execution', () => {
+      runWithSteps([{ nodeId: 'http', fail: new Error('HTTP 403: Forbidden') }]);
+      logger.completeExecution(true);
+
+      const second = runWithSteps([{ nodeId: 'http' }]);
+      logger.completeExecution(true);
+
+      const exec = store.executions.get(second);
+      expect(exec?.status).toBe('success');
+      expect(exec?.errorMessage).toBeUndefined();
     });
   });
 });

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "cf3915f8-3246-5aea-8565-38f8895f5545",
+  "name": "Draw merge board",
+  "path": "/Logic/Draw merge board",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The Make Ten game as the graph draws it: four rows of four squares (id, word, kind, fx) for the nested repeaters, the score line in the child’s language, and Phase (playing or over)."
+}

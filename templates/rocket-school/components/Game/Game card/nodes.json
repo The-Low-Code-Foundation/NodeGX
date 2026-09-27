@@ -1,0 +1,180 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "358343f1-c054-55d2-87cf-0cc080d2f330",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "gcIn",
+      "type": "Component Inputs",
+      "label": "The game",
+      "ports": [
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "blurb",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "glyph",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "enabled",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "gcCard",
+      "type": "Group",
+      "label": "The card",
+      "children": [
+        "gcGlyph",
+        "gcTitle",
+        "gcBlurb"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "cssClassName": "pressable game-card",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "gcGlyph",
+      "type": "Text",
+      "label": "The glyph",
+      "parent": "gcCard",
+      "parameters": {
+        "text": "🚀",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-4xl)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "gcTitle",
+      "type": "Text",
+      "label": "The title",
+      "parent": "gcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h3",
+        "fontFamily": "Grandstander"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "gcBlurb",
+      "type": "Text",
+      "label": "The line",
+      "parent": "gcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "gcOn",
+      "type": "Condition",
+      "label": "Is it playable?",
+      "parameters": {},
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "gcStates",
+      "type": "States",
+      "label": "Playable or not yet",
+      "parameters": {
+        "states": "on,off",
+        "values": "opacity,edge",
+        "useTransitions": false,
+        "type-opacity": "number",
+        "value-on-opacity": 1,
+        "value-off-opacity": 0.45,
+        "type-edge": "color",
+        "value-on-edge": "var(--border)",
+        "value-off-edge": "var(--border-subtle)"
+      },
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "gcGate",
+      "type": "Condition",
+      "label": "Only a playable one answers a tap",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "gcOut",
+      "type": "Component Outputs",
+      "label": "Tapped",
+      "ports": [
+        {
+          "name": "chosen",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 350,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "gcCard"
+  ]
+}

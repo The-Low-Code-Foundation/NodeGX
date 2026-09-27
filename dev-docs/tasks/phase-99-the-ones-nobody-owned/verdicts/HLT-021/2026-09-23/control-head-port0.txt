@@ -1,0 +1,41 @@
+workspace /var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt010-ujFMDF
+CDP port  63846
+fixture   templates/landing-pages
+
+ok    the editor launched and React mounted — 
+ok    requestAnimationFrame fires in the driven window
+ok    REACH the launcher drew the seeded project card — 1 cards
+ok    REACH the launcher’s community layer ran (`/api/v1/me` requested) — 3 requests
+ok    REACH the fixture opened from its launcher card — /var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt010-ujFMDF/Renderer Error Gate
+ok    REACH components visited and nodes selected — 10 components, 52 selections
+ok    REACH the board mounted and drew frames — 3 frames
+ok    REACH a component was put on the Workbench
+ok    REACH the app preview ran a thumbnail tick — 1 webviews, 25 s
+MISS  HLT-021 main bound a real port for NOODLPORT=0 — bound undefined
+MISS  HLT-021 REACH the preview relay socket is open on the bound port — {"port":null,"open":false}
+MISS  HLT-021 REACH the canvas webview loads from the bound port — webview ports [null]
+MISS  HLT-021 REACH the JSON inspector builds its image URL on the bound port — http://localhost:0/hlt-021.png
+ok    REACH back to the launcher
+ok    REACH the fixture reopened from its card
+
+drive + teardown took 179 s
+ok    the log exists and CDP attached to the editor — 2922 lines
+ok    sentinel sentinel/console came back as exactly one event — 1 events on 1 lines
+ok    sentinel sentinel/uncaught came back as exactly one event — 1 events on 2 lines
+ok    sentinel sentinel/browser came back as exactly one event — 1 events on 1 lines
+
+── classes seen ─────────────────────────────────────────────
+  OVER      68 / 0  thumbnail/guest-view-manager-call
+            line 2294, during "components and node selection" [console renderer_init:2] Uncaught (in promise) Error: Error invoking remote method 'GUEST_VIEW_MANAGER_CALL': Error: Script failed to execute, this normally means an error was thrown. Check the renderer console for the error.
+            line 2295, during "components and node selection" [exception] Uncaught (in promise) Error: Error invoking remote method 'GUEST_VIEW_MANAGER_CALL': Error: Script failed to execute, this normally means an error was thrown. Check the renderer console for the error.
+  UNKNOWN   39 / -  unknown:WebSocket connection to 'ws://localhost:N/' failed: Error in connection establishment: net
+            line 2265, during "launch" [browser] WebSocket connection to 'ws://localhost:0/' failed: Error in connection establishment: net::ERR_UNSAFE_PORT (ViewerConnection.ts)
+            line 2274, during "launcher" [browser] WebSocket connection to 'ws://localhost:0/' failed: Error in connection establishment: net::ERR_UNSAFE_PORT (ViewerConnection.ts)
+
+── the allowlist (every class with a budget above 0, and why) ──
+  network/whats-new-feed-404 ≤ 2 — Chromium's network log, not an app error: whats-new.ts asks for /whats-new/feed.json on every project open, the feed has never existed, and the client resolves to null without throwing (HLT-013 verdict, 'knowingly unserved'). Only NOT asking removes the line. The gate opens a project twice, so 2. Goes to 0 when the feed is published or the request is dropped.
+
+COULD NOT MEASURE — 4 precondition(s) missed; a quiet log here proves nothing.
+
+log kept: /var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt010-ujFMDF/dev.log
+EXIT=2

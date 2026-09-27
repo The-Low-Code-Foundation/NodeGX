@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f0b43e39-f675-52ee-8d43-0bf69ff2771f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hdIn",
+      "fromProperty": "tab",
+      "toId": "hdLook",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "listLabel",
+      "toId": "hdList",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "doneLabel",
+      "toId": "hdDone",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hdLook",
+      "fromProperty": "listBg",
+      "toId": "hdList",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "hdLook",
+      "fromProperty": "doneBg",
+      "toId": "hdDone",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "hdLook",
+      "fromProperty": "logBg",
+      "toId": "hdLog",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "hdList",
+      "fromProperty": "onClick",
+      "toId": "hdOut",
+      "toProperty": "pickList"
+    },
+    {
+      "fromId": "hdDone",
+      "fromProperty": "onClick",
+      "toId": "hdOut",
+      "toProperty": "pickDone"
+    },
+    {
+      "fromId": "hdLog",
+      "fromProperty": "onClick",
+      "toId": "hdOut",
+      "toProperty": "pickLog"
+    },
+    {
+      "fromId": "hdSignOut",
+      "fromProperty": "onClick",
+      "toId": "hdOut",
+      "toProperty": "signOut"
+    }
+  ]
+}

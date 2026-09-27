@@ -175,7 +175,7 @@
           }
         ],
         "connections": [
-          { "fromId": "expr-string-port", "fromProperty": "hovered", "toId": "expr-number-port", "toProperty": "visible" }
+          { "fromId": "expr-string-port", "fromProperty": "isDragOver", "toId": "expr-number-port", "toProperty": "visible" }
         ],
         "visualRoots": ["expr-group"]
       }

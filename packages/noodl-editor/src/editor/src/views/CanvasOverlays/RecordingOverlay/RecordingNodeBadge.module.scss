@@ -23,7 +23,7 @@
   background-color: var(--theme-color-bg-1);
   color: var(--theme-color-primary);
   border: 1px solid var(--theme-color-primary);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card);
 
   /* ⚠️ The badge must never take a click. See the component header — the canvas owns every
      gesture over a node and there is no port hit-testing to fall back on. */

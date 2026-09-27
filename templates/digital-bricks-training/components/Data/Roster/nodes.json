@@ -1,0 +1,128 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2e89e413-5201-4626-aaf6-ac66ed3f0282",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fr_order",
+      "type": "JavaScriptFunction",
+      "label": "The server's order",
+      "x": 300,
+      "y": 160,
+      "parameters": {
+        "functionScript": "/*\n * THE COACH'S PEOPLE, AS THE SERVER WOULD HAND THEM OVER (TASK-L164 §2).\n *\n * Stands in for `getRoster()` (src/lib/server/coach/roster-service.ts): ONE\n * statement that starts from `accounts` and LEFT JOINs everything else, so a\n * learner who signed up and never finished onboarding still has a row. That is\n * L89's whole reason for existing — the old list started from\n * `project_contexts` and hid exactly the people a coach most needs to notice.\n *\n * EVERY DERIVED FIELD IS NULLABLE ON PURPOSE: email, coachLabel, projectName,\n * contextVersion (null = never finished onboarding), lastActivity (null, never\n * the word \"never\"), coachEmail, replanBlockedAt, awaitingReplySince (a DATE,\n * never a count). `cohorts` and `programmes` are `[]`, never null.\n *\n * STAFF-ONLY. `coachLabel` is the trainer's private shorthand (L84) and must\n * never reach a learner surface.\n *\n * The ORDER is the server's and is applied here, where the server's ORDER BY\n * would be: lastActivity descending, NULLS LAST, then createdAt descending. The\n * fixture's rows are deliberately NOT written in that order, so the sort is\n * exercised rather than assumed. The filter downstream decides nothing about\n * order.\n */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\n\nconst rows = plain(Inputs.items) || [];\nconst ms = (iso) => (iso ? new Date(iso).getTime() : null);\n\nOutputs.people = rows.slice().sort((a, b) => {\n  const la = ms(a.lastActivity);\n  const lb = ms(b.lastActivity);\n  if (la === null && lb !== null) return 1;\n  if (lb === null && la !== null) return -1;\n  if (la !== lb) return lb - la;\n  return ms(b.createdAt) - ms(a.createdAt);\n});\nOutputs.count = rows.length;\nOutputs.loaded();\n"
+      },
+      "ports": [
+        {
+          "name": "in-items",
+          "displayName": "items",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-loaded",
+          "displayName": "loaded",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-people",
+          "displayName": "people",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "fr_out",
+      "type": "Component Outputs",
+      "label": "People",
+      "x": 560,
+      "y": 40,
+      "ports": [
+        {
+          "name": "people",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "loaded",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "ro_ask",
+      "type": "JavaScriptFunction",
+      "label": "Ask once, when this arrives",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * ASK ONCE, ON ARRIVAL (TASK-L171 §1). Nothing is wired to this node's Run, so\n * the runtime runs it once when its script loads — which is when the page that\n * places this component mounts. That is the whole trigger: the roster has no\n * parameter, because the backend decides whose people these are from the\n * session (`role:staff` in nodegx.security.json), never from anything a page\n * sends.\n */\nOutputs.ask();\n"
+      },
+      "metadata": {
+        "comment": "The fixture's Static Data node stood here and emitted its rows on load. A Function with nothing on Run also runs once on load (simplejavascript.ts, NDA-017 §2), so the call happens exactly when the fixture used to arrive, and no page changes."
+      },
+      "ports": [
+        {
+          "name": "out-ask",
+          "displayName": "ask",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "ro_call",
+      "type": "CloudFunction2",
+      "label": "roster — staff only, from the backend",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "function": "roster"
+      },
+      "metadata": {
+        "comment": "The backend's `roster` function (components/__cloud__/roster). Its output IS the fixture array this component used to hold (L170, proven by tools/check-read-functions.mjs), so fr_order below is unchanged. The gate is role:staff in nodegx.security.json — one place."
+      }
+    },
+    {
+      "id": "ro_refused",
+      "type": "JavaScriptFunction",
+      "label": "A refusal is an empty list",
+      "x": 40,
+      "y": 280,
+      "parameters": {
+        "functionScript": "/*\n * A REFUSAL IS AN EMPTY LIST (TASK-L171 criterion 5). A signed-in learner who\n * types /people is refused by the backend, and the page must render its empty\n * state rather than wait forever for rows that are not coming. The reason is\n * NOT shown: the backend answers every refusal with one body on purpose, so a\n * caller cannot tell \"not yours\" from \"not there\" (the mcp/auth.ts rule).\n */\nOutputs.items = [];\n"
+      },
+      "metadata": {
+        "comment": "Runs on the Cloud Function's failure only (its Run is wired)."
+      },
+      "ports": [
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ]
+}

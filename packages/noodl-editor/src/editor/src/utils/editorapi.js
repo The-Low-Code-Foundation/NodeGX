@@ -18,6 +18,15 @@ class EditorAPI {
     cb();
   }
 
+  /** TVW-003 — a design-mode click, as instance paths (`[heroInstanceId, headlineId]`). */
+  inspectPaths(evt, cb) {
+    EventDispatcher.instance.emit('inspectNodes', {
+      nodeIds: evt.paths.map((path) => path[path.length - 1]),
+      paths: evt.paths
+    });
+    cb();
+  }
+
   projectGetInfo(args, cb) {
     if (ProjectModel.instance) {
       cb({

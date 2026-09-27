@@ -308,8 +308,18 @@ describe('BAK-004 account linking and magic links', () => {
       return (match as RegExpExecArray)[1];
     }
 
+    /** Open the link (a page that spends nothing — HLT-015), then press its button. */
     async function clickMagicLink(url: string) {
-      const callback = await req('GET', url.slice(base.length));
+      const opened = await req('GET', url.slice(base.length));
+      if (opened.status !== 200) return { ok: false as const, callback: opened };
+      const token = new URL(url).searchParams.get('token') as string;
+      const res = await fetch(`${base}/auth/magic-link/callback`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ token }).toString(),
+        redirect: 'manual'
+      });
+      const callback = { status: res.status, text: await res.text(), location: res.headers.get('location') };
       if (callback.status !== 302) return { ok: false as const, callback };
       const location = new URL(callback.location as string);
       const error = location.searchParams.get('nodegx_auth_error');
@@ -358,9 +368,10 @@ describe('BAK-004 account linking and magic links', () => {
       const first = await clickMagicLink(link);
       expect(first.ok).toBe(true);
 
-      const second = await req('GET', link.slice(base.length));
-      expect(second.status).toBe(400);
-      expect(second.text).toMatch(/already been used/i);
+      const second = await clickMagicLink(link);
+      expect(second.ok).toBe(false);
+      expect(second.callback?.status).toBe(400);
+      expect(second.callback?.text).toMatch(/already been used/i);
     });
 
     it('obeys the SAME linking rule: clicking a link for an unverified account revokes its password', async () => {

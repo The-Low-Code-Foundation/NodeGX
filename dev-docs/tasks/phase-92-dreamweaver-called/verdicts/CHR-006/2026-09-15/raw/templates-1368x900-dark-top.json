@@ -1,0 +1,293 @@
+{
+  "viewport": [
+    1368,
+    900
+  ],
+  "theme": "dark",
+  "titleText": "Templates",
+  "state": {
+    "loading": false,
+    "unreadable": false,
+    "bare": false,
+    "partialNotice": false
+  },
+  "gridLayout": "feature",
+  "gridColumns": "173.328px 173.328px 173.328px 173.336px 173.328px 173.328px",
+  "rows": [
+    {
+      "y": 232,
+      "cards": 1,
+      "widths": [
+        552
+      ]
+    },
+    {
+      "y": 233,
+      "cards": 1,
+      "widths": [
+        552
+      ]
+    },
+    {
+      "y": 729,
+      "cards": 3,
+      "widths": [
+        363,
+        363,
+        363
+      ]
+    },
+    {
+      "y": 1119,
+      "cards": 2,
+      "widths": [
+        552,
+        552
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "rect": {
+        "x": 120,
+        "y": 233,
+        "w": 552,
+        "h": 481
+      },
+      "eyebrow": "Site · 3 pages",
+      "title": "Landing Pages",
+      "sentence": "Three complete landing pages with no backend — a freelancer’",
+      "footer": "Use this template → No backend Built in",
+      "picture": {
+        "src": "../assets/images/templates/landing-pages.webp",
+        "hidden": false,
+        "complete": true,
+        "natural": [
+          1200,
+          750
+        ],
+        "objectPosition": "50% 0%",
+        "objectFit": "cover"
+      },
+      "contrast": {
+        "eyebrow": 5.6,
+        "title": 14.71,
+        "sentence": 9.24,
+        "action": 5.6,
+        "tags": [
+          {
+            "text": "No backend",
+            "ratio": 9.24
+          },
+          {
+            "text": "Built in",
+            "ratio": 9.24
+          }
+        ]
+      }
+    },
+    {
+      "rect": {
+        "x": 688,
+        "y": 232,
+        "w": 552,
+        "h": 481
+      },
+      "eyebrow": "Productivity",
+      "title": "Todo list",
+      "sentence": "One list in the order you will do things, with deadlines, ne",
+      "footer": "Use this template → Community",
+      "picture": {
+        "src": "http://localhost:3399/api/v1/community/templates/todo-list/thumbnail?v=1",
+        "hidden": false,
+        "complete": true,
+        "natural": [
+          1200,
+          750
+        ],
+        "objectPosition": "50% 0%",
+        "objectFit": "cover"
+      },
+      "contrast": {
+        "eyebrow": 5.6,
+        "title": 14.71,
+        "sentence": 9.24,
+        "action": 5.6,
+        "tags": [
+          {
+            "text": "Community",
+            "ratio": 9.24
+          }
+        ]
+      }
+    },
+    {
+      "rect": {
+        "x": 120,
+        "y": 729,
+        "w": 363,
+        "h": 374
+      },
+      "eyebrow": "Interactive story",
+      "title": "Story engine",
+      "sentence": "A branching story where choices hand you things and some onl",
+      "footer": "Use this template → Community",
+      "picture": {
+        "src": "http://localhost:3399/api/v1/community/templates/story-engine/thumbnail?v=1",
+        "hidden": false,
+        "complete": true,
+        "natural": [
+          1200,
+          750
+        ],
+        "objectPosition": "50% 0%",
+        "objectFit": "cover"
+      },
+      "contrast": {
+        "eyebrow": 5.6,
+        "title": 14.71,
+        "sentence": 9.24,
+        "action": 5.6,
+        "tags": [
+          {
+            "text": "Community",
+            "ratio": 9.24
+          }
+        ]
+      }
+    },
+    {
+      "rect": {
+        "x": 499,
+        "y": 729,
+        "w": 363,
+        "h": 374
+      },
+      "eyebrow": "Game",
+      "title": "Pixel dungeon",
+      "sentence": "A turn-based dungeon played with the arrow keys. The five ro",
+      "footer": "Use this template → Community",
+      "picture": {
+        "src": "http://localhost:3399/api/v1/community/templates/pixel-dungeon/thumbnail?v=1",
+        "hidden": false,
+        "complete": true,
+        "natural": [
+          1200,
+          750
+        ],
+        "objectPosition": "50% 0%",
+        "objectFit": "cover"
+      },
+      "contrast": {
+        "eyebrow": 5.6,
+        "title": 14.71,
+        "sentence": 9.24,
+        "action": 5.6,
+        "tags": [
+          {
+            "text": "Community",
+            "ratio": 9.24
+          }
+        ]
+      }
+    },
+    {
+      "rect": {
+        "x": 877,
+        "y": 729,
+        "w": 363,
+        "h": 374
+      },
+      "eyebrow": "Game · ages 8–12",
+      "title": "Rocket School",
+      "sentence": "Maths and typing practice for ages 8 to 12, in English and F",
+      "footer": "Use this template → Community",
+      "picture": {
+        "src": "http://localhost:3399/api/v1/community/templates/rocket-school/thumbnail?v=1",
+        "hidden": false,
+        "complete": true,
+        "natural": [
+          1200,
+          750
+        ],
+        "objectPosition": "50% 0%",
+        "objectFit": "cover"
+      },
+      "contrast": {
+        "eyebrow": 5.6,
+        "title": 14.71,
+        "sentence": 9.24,
+        "action": 5.6,
+        "tags": [
+          {
+            "text": "Community",
+            "ratio": 9.24
+          }
+        ]
+      }
+    },
+    {
+      "rect": {
+        "x": 120,
+        "y": 1119,
+        "w": 552,
+        "h": 461
+      },
+      "eyebrow": "Site",
+      "title": "Site Builder",
+      "sentence": "A content-managed website: pages and sections stored as reco",
+      "footer": "Use this template → Needs a backend Built in",
+      "picture": "wireframe",
+      "contrast": {
+        "eyebrow": 5.6,
+        "title": 14.71,
+        "sentence": 9.24,
+        "action": 5.6,
+        "tags": [
+          {
+            "text": "Needs a backend",
+            "ratio": 9.24
+          },
+          {
+            "text": "Built in",
+            "ratio": 9.24
+          }
+        ]
+      }
+    },
+    {
+      "rect": {
+        "x": 688,
+        "y": 1119,
+        "w": 552,
+        "h": 461
+      },
+      "eyebrow": "Starter",
+      "title": "Members' area",
+      "sentence": "members only site for a club, charity or church",
+      "footer": "Use this template → Community",
+      "picture": "wireframe",
+      "contrast": {
+        "eyebrow": 5.6,
+        "title": 14.71,
+        "sentence": 9.24,
+        "action": 5.6,
+        "tags": [
+          {
+            "text": "Community",
+            "ratio": 9.24
+          }
+        ]
+      }
+    }
+  ],
+  "thumbnailRequests": [
+    "http://localhost:3399/api/v1/community/templates/todo-list/thumbnail?v=1",
+    "http://localhost:3399/api/v1/community/templates/story-engine/thumbnail?v=1",
+    "http://localhost:3399/api/v1/community/templates/pixel-dungeon/thumbnail?v=1",
+    "http://localhost:3399/api/v1/community/templates/rocket-school/thumbnail?v=1"
+  ],
+  "kittenRequests": [],
+  "documentScrollsSideways": false,
+  "contentScrollsSideways": false
+}

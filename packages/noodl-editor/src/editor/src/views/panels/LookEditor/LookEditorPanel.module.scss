@@ -1,0 +1,66 @@
+.Header {
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid var(--theme-color-border-default);
+  background-color: var(--theme-color-bg-2);
+}
+
+.Title {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--theme-color-fg-highlight);
+
+  strong {
+    font-weight: 650;
+  }
+}
+
+.Meta {
+  font-size: 11px;
+  color: var(--theme-color-fg-default-shy);
+}
+
+.Actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.Action {
+  appearance: none;
+  border: 1px solid var(--theme-color-border-default);
+  background: var(--theme-color-bg-3);
+  color: var(--theme-color-fg-default);
+  border-radius: 4px;
+  padding: 3px 10px;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--theme-color-bg-4);
+  }
+}
+
+.Primary {
+  background: var(--theme-color-primary);
+  border-color: var(--theme-color-primary);
+  color: var(--theme-color-on-primary, #fff);
+
+  &:hover {
+    filter: brightness(1.1);
+    background: var(--theme-color-primary);
+  }
+}
+
+.Note {
+  margin-top: 8px;
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: var(--theme-color-fg-default-shy);
+}
+
+.Gone {
+  padding: 16px 12px;
+  font-size: 11px;
+  color: var(--theme-color-fg-default-shy);
+}

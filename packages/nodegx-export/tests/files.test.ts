@@ -257,7 +257,9 @@ describe('§B — the component', () => {
     expect(page).toContain("{(photoUploadFile === undefined ? undefined : cloudFileName(photoUploadFile)) ?? ''}");
     expect(page).toContain("{photoUploadFile?.contentType ?? ''}");
     expect(page).toContain("{String(photoUploadFile?.size ?? '')}");
-    expect(page).toContain('<img className={styles.preview} src={photoUploadFile?.url} />');
+    // EXP-014 §14.5: a wired src resolves through `mediaSrc` at run time, as the viewer's port does — an https
+    // Cloud File url passes through it untouched, and an unset one clears the attribute instead of `src=""`.
+    expect(page).toContain('<img className={styles.preview} src={mediaSrc(photoUploadFile?.url)} />');
     expect(dispositionOf(baseIr, HOME, 'cloud')).toBe('collapsed');
     expect(page).not.toContain('TODO(export)');
   });

@@ -5,6 +5,8 @@ import { webUtils } from 'electron';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 
+import { Icon, IconName, IconSize } from '@noodl-core-ui/components/common/Icon';
+
 import FileSystem from '@noodl-utils/filesystem';
 import { KeyCode } from '@noodl-utils/keyboard/KeyCode';
 import KeyboardHandler from '@noodl-utils/keyboardhandler';
@@ -12,9 +14,12 @@ import { windowTitleBarHeight } from '@noodl-utils/utils';
 
 import { CodeExportModal, CodeExportModalProps } from './PopupLayer/CodeExportModal';
 import { blockerIsNeeded, popoutBlocksOutsideClicks, pressIsInsideKeptRegion } from './PopupLayer/popoutdismissal';
+import { OPPOSITE_POSITION, placeBesideAnchor } from './PopupLayer/placeBesideAnchor';
 import { ConfirmModal, ErrorModal } from './PopupLayer/ConfirmModal';
 import { StringInputPopup } from './PopupLayer/StringInputPopup';
 import { ToastLayer } from './ToastLayer/ToastLayer';
+import { clampPopoutTop } from './popuplayerClamp';
+import { unmountReactRoot } from '../../../shared/utils/unmountReactRoot';
 
 // Styles
 require('../styles/popuplayer.css');
@@ -141,6 +146,32 @@ function el(tag: string, className?: string): HTMLElement {
   return node;
 }
 
+/**
+ * CHR-010: the drag chrome's glyphs, drawn from core-ui's `Icon` set like the
+ * rest of the editor. This file is imperative, so the icon is hosted in a plain
+ * element with its own React root — the pattern `showReactModal` already uses.
+ *
+ * The host is `inline-flex` on purpose. `Icon` is `display: block`, and the
+ * glyph it replaced was an inline `<i>` sitting on a text line beside a label;
+ * blockifying it would have dropped the label onto its own line. Colour needs
+ * nothing: the SVGs paint with `currentColor`, which is what the Font Awesome
+ * glyph inherited too, so `.popup-layer-dragger`'s `color` still drives both.
+ */
+function iconHost(className: string): { node: HTMLElement; setIcon(icon?: IconName): void } {
+  const node = el('span', className);
+  node.style.display = 'inline-flex';
+  node.style.alignItems = 'center';
+  node.style.verticalAlign = 'middle';
+
+  const root = createRoot(node);
+  return {
+    node,
+    setIcon(icon?: IconName) {
+      root.render(icon ? React.createElement(Icon, { icon, size: IconSize.Small }) : null);
+    }
+  };
+}
+
 /** Border box size, plus margins when `includeMargin` — jQuery's outerWidth(true). */
 function outerSize(node: HTMLElement, includeMargin: boolean): { width: number; height: number } {
   const rect = node.getBoundingClientRect();
@@ -196,18 +227,6 @@ const ARROW_COLOR_CSS_ATTR = {
   right: 'borderRightColor'
 };
 
-/**
- * The side a popout flips to when the one it asked for does not fit.
- *
- * It doubles as the arrow-class map: a popout placed *below* its anchor wears
- * the `top` arrow, and so on — which is the same table read the other way.
- */
-const OPPOSITE_POSITION: Record<PopoutPosition, PopoutPosition> = {
-  bottom: 'top',
-  top: 'bottom',
-  left: 'right',
-  right: 'left'
-};
 
 // ---------------------------------------------------------------------
 // PopupLayer
@@ -259,6 +278,7 @@ export class PopupLayer {
   private draggerEl: HTMLElement;
   private draggerLabel: HTMLElement;
   private dropTypeIndicator: HTMLElement;
+  private dropTypeIcon: { node: HTMLElement; setIcon(icon?: IconName): void };
   private dragMessage: HTMLElement;
   private dragMessageText: HTMLElement;
   private tooltipEl: HTMLElement;
@@ -328,14 +348,17 @@ export class PopupLayer {
     this.el.appendChild(this.toastEl);
 
     this.draggerEl = el('div', 'popup-layer-dragger');
-    this.dropTypeIndicator = el('i', 'popup-layer-drop-type-indicator fa');
+    this.dropTypeIcon = iconHost('popup-layer-drop-type-indicator');
+    this.dropTypeIndicator = this.dropTypeIcon.node;
     this.draggerLabel = el('span', 'popup-layer-dragger-label');
     this.dragMessage = el('div', 'popup-layer-drag-message');
     this.dragMessage.style.display = 'none';
     this.dragMessageText = el('span', 'popup-layer-drag-message-text');
     const dragMessageSmall = el('small');
     dragMessageSmall.appendChild(this.dragMessageText);
-    this.dragMessage.append(el('i', 'fa fa-exclamation-triangle'), dragMessageSmall);
+    const dragWarning = iconHost('popup-layer-drag-message-icon');
+    dragWarning.setIcon(IconName.WarningTriangle);
+    this.dragMessage.append(dragWarning.node, dragMessageSmall);
     this.draggerEl.append(this.dropTypeIndicator, this.draggerLabel, this.dragMessage);
     this.el.appendChild(this.draggerEl);
 
@@ -707,28 +730,21 @@ export class PopupLayer {
 
       // Figure out the position of the popup
       let x: number, y: number;
-      setArrowDirection(this.popupArrow, args.position);
-
-      if (args.position === 'bottom') {
-        x = attachToLeft + attachToWidth / 2 - contentWidth / 2;
-        y = attachToHeight + attachToTop + arrowSize;
-      } else if (args.position === 'top') {
-        x = attachToLeft + attachToWidth / 2 - contentWidth / 2;
-        y = attachToTop - contentHeight - arrowSize;
-      } else if (args.position === 'left') {
-        x = attachToLeft - contentWidth - arrowSize;
-        y = attachToTop + attachToHeight / 2 - contentHeight / 2;
-      } else if (args.position === 'right') {
-        x = attachToWidth + attachToLeft + arrowSize;
-        y = attachToTop + attachToHeight / 2 - contentHeight / 2;
-      }
-
-      // Make sure the popup is not outside of the screen
-      const margin = 2;
-      if (x + contentWidth > this.width - margin) x = this.width - margin - contentWidth;
-      if (y + contentHeight > this.height - margin) y = this.height - margin - contentHeight;
-      if (x < margin) x = margin;
-      if (y < margin) y = margin;
+      // P101 INS-003 — the side is resolved (and flipped when it hangs off the window) before the
+      // arrow is drawn, so the arrow points back at the anchor from the side the popup ended on.
+      const placed = placeBesideAnchor({
+        position: args.position as PopoutPosition,
+        anchor: { left: attachToLeft, top: attachToTop, width: attachToWidth, height: attachToHeight },
+        width: contentWidth,
+        height: contentHeight,
+        arrowSize,
+        viewport: { width: this.width, height: this.height },
+        margin: 2
+      });
+      const position = placed.position;
+      x = placed.x;
+      y = placed.y;
+      setArrowDirection(this.popupArrow, position);
 
       // Cannot cover to bar as that is used for moving window
       const topBarHeight = windowTitleBarHeight();
@@ -747,11 +763,11 @@ export class PopupLayer {
 
       // Set the position of the arrow
       this.popupArrow.style.left =
-        args.position === 'top' || args.position === 'bottom'
+        position === 'top' || position === 'bottom'
           ? Math.round(Math.abs(attachToLeft + attachToWidth / 2 - x)) + 'px'
           : '';
       this.popupArrow.style.top =
-        args.position === 'left' || args.position === 'right'
+        position === 'left' || position === 'right'
           ? Math.round(Math.abs(attachToTop + attachToHeight / 2 - y)) + 'px'
           : '';
 
@@ -778,6 +794,38 @@ export class PopupLayer {
     popout.el.style.width = size.width + 'px';
     popout.el.style.height = size.height + 'px';
     popout.el.style.transition = 'none';
+  }
+
+  /**
+   * P103 CMG-001 §3.2 — the one move a `disableDynamicPositioning` popout is allowed after it
+   * opened: up, by however much its bottom now hangs below the window. `clampPopoutTop` is the
+   * pure arithmetic (and its spec); this reads the DOM and moves the arrow with it.
+   */
+  private _clampPopout(popout: Popout) {
+    const popoutEl = popout.el;
+    const top = parseFloat(popoutEl.style.top);
+    if (!Number.isFinite(top)) return;
+
+    const margin = 10;
+    const height = popoutEl.getBoundingClientRect().height;
+    const next = clampPopoutTop({
+      top,
+      height,
+      minY: Math.max(margin, windowTitleBarHeight()),
+      maxY: this.height - margin
+    });
+    if (next === top) return;
+
+    popoutEl.style.top = next + 'px';
+
+    // The arrow keeps pointing at the anchor: on a left/right popout its offset is measured from
+    // the popout's top, which just moved.
+    const arrow = popoutEl.querySelector('.popup-layer-popout-arrow') as HTMLElement | null;
+    const side = popout.effectivePosition;
+    if (arrow && (side === 'left' || side === 'right')) {
+      const attachRect = popout.attachToRect;
+      arrow.style.top = Math.round(Math.abs(attachRect.top + attachRect.height / 2 - next)) + 'px';
+    }
   }
 
   private _positionPopout(popout: Popout, args: PopoutArgs) {
@@ -936,6 +984,11 @@ export class PopupLayer {
       this._resizePopout(popout);
       if (!args.disableDynamicPositioning) {
         this._positionPopout(popout, args);
+      } else {
+        // P103 CMG-001: placed once at open, never re-centred — but a popout that GROWS past the
+        // bottom of the window (Show CSS, a list editor gaining rows) is moved up by the overflow
+        // and nothing else, so its footer stays reachable.
+        this._clampPopout(popout);
       }
     });
 
@@ -1185,7 +1238,7 @@ export class PopupLayer {
     this.showModal({
       content: { el: container },
       // Deferred: onClose runs inside the React event that triggered the close.
-      onClose: () => setTimeout(() => root.unmount(), 0)
+      onClose: () => unmountReactRoot(root)
     });
   }
 
@@ -1236,13 +1289,18 @@ export class PopupLayer {
   }
 
   public indicateDropType(type?: string) {
-    const dropTypeClasses = {
-      move: 'fa-share',
-      add: 'fa-plus'
+    // CHR-010: was two Font Awesome classes toggled on an `<i>`. `fa-share` (a
+    // right-curving arrow) becomes `ArrowRight` — the house set has no "share"
+    // glyph and the mark means "this goes there".
+    const dropTypeIcons: Record<string, IconName> = {
+      move: IconName.ArrowRight,
+      add: IconName.Plus
     };
-    Object.values(dropTypeClasses).forEach((cls) => this.dropTypeIndicator.classList.remove(cls));
 
-    if (type) this.dropTypeIndicator.classList.add(dropTypeClasses[type]);
+    // `indicateDropType('none')` is a real caller (ComponentPortsView's
+    // `onMouseOut`). The old code let it through the `if (type)` guard and added
+    // a literal `undefined` class; an unmapped type now simply draws nothing.
+    this.dropTypeIcon.setIcon(type ? dropTypeIcons[type] : undefined);
   }
 
   public setDragMessage(message?: string) {

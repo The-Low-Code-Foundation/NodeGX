@@ -6,7 +6,7 @@ import type { CommunityAccountState } from '@noodl-core-ui/preview/launcher/Laun
 import type { CommunityAccountHostState } from '@noodl-core-ui/preview/launcher/Launcher/LauncherContext';
 
 import { readCommunitySession } from '../../models/community/communitysession';
-import { signIntoCommunity, signOutOfCommunity } from '../../models/community/communitysignin';
+import { confirmStoredSession, signIntoCommunity, signOutOfCommunity } from '../../models/community/communitysignin';
 import { onCommunityChanged } from '../../models/community/communitychanged';
 
 /**
@@ -69,6 +69,34 @@ export function useCommunityAccount(): CommunityAccountHostState {
       });
     };
     read();
+    /**
+     * HLT-004 — and it belongs to THIS hook because this hook is the one that makes the claim.
+     *
+     * 🔴 **THE CARD USED TO SAY "signed in as @somebody" ON THE STRENGTH OF A LOCAL FILE AND
+     * NOTHING ELSE.** `phase: 'signed-in'` is set above from the mere PRESENCE of a stored
+     * session; nothing in this hook, or anywhere else in the editor, ever asked the platform
+     * whether that credential still meant anything. Measured 2026-09-21: a token written a
+     * month earlier, refused by every authenticated route, and a chip reading
+     * *"@richardosborne14"* above it on every launch.
+     *
+     * ⚠️ **The read above is NOT replaced by this, and the order is the point.** The store
+     * answers instantly and off the network, so the chip still draws on the first frame for
+     * somebody whose session is fine — which is the whole reason `unknown` exists (see the
+     * header). The confirmation lands a moment later and only ever REMOVES a claim this hook
+     * should not have been making. A hook that waited for the network before drawing would
+     * put a flash of *"Sign in to NodeGX"* in front of every signed-in user, which is the bug
+     * the three-state distinction above was written to prevent.
+     *
+     * ⚠️ `forgotten` is the only outcome that does anything here, and it does it through the
+     * store rather than through `setState`: `clearCommunitySession` fires
+     * `notifyCommunityChanged('session')`, the FIX-025 subscription below re-reads, and every
+     * other surface that cached the session re-reads with it. Setting state here as well would
+     * be a second path to the same frame, free to disagree with the store.
+     */
+    void confirmStoredSession().then((outcome) => {
+      if (!live) return;
+      if (outcome === 'forgotten') read();
+    });
     // FIX-025 — the other direction of the same fix. This hook already re-reads after ITS OWN
     // sign-in and sign-out; this is for a session written or cleared anywhere else, so the card
     // and the Learning tab cannot disagree about whether there is an account.

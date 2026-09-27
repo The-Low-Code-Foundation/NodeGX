@@ -6,7 +6,8 @@
  *   GET  /oauth/:provider/callback          <- 302 back from the provider, then 302 to the app
  *   POST /oauth/exchange   { code }         the app trades the handoff code for a session
  *   POST /auth/magic-link  { email, redirect }
- *   GET  /auth/magic-link/callback?token=   the click in the inbox
+ *   GET  /auth/magic-link/callback?token=   the click in the inbox: a page, spends nothing
+ *   POST /auth/magic-link/callback  token=  the page's button: spends the link, signs in
  *
  * Not to be confused with the EDITOR's `noodl://` OAuth (NodeGX cloud sign-in),
  * which is unrelated and untouched. This is plain web redirects on the deployed
@@ -49,14 +50,14 @@
 
 import type * as http from 'http';
 
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import type { AuthConfigState } from '../auth/AuthConfigState';
 import type { AuthProvider } from '../auth/model';
 import type { EmailConfigState } from '../email/EmailConfigState';
 import type { Mailer } from '../email/Mailer';
 import type { EmailTokenStore } from '../email/tokens';
 import { MAGIC_LINK_DEFAULT_TTL_MS } from '../email/tokens';
-import { renderTemplate } from '../email/templates';
+import { magicLinkExpiresIn, renderTemplate } from '../email/templates';
 import { FlowStore } from '../auth/FlowStore';
 import { AuthLinkError, IdentityStore, isFlagSet, SignInResult } from '../auth/identities';
 import {
@@ -76,8 +77,8 @@ import type { RateLimiter } from '../ops/rate-limit';
 import type { RateLimitPolicy } from '../ops/model';
 import type { AuditLog } from '../ops/audit';
 import { AUDIT_AUTH_CREDENTIALS_REVOKED, AUDIT_AUTH_SIGN_IN } from '../ops/audit-actions';
-import { HttpError, readJSONBody, sendJSON } from './http-util';
-import { page, sendErrorPage, sendHTML } from './mini-page';
+import { HttpError, readJSONBody, readRawBody, sendJSON } from './http-util';
+import { escapeHtml, page, sendErrorPage, sendHTML } from './mini-page';
 import type { RequestContext } from './HttpServer';
 
 /** The query parameter the runtime looks for on load. Also in docs and in the node's help text. */
@@ -120,7 +121,7 @@ function redirectTo(res: http.ServerResponse, url: string): void {
 }
 
 export interface OAuthRoutesDeps {
-  facade: AdapterFacade;
+  facade: IStorageFacade;
   auth: AuthConfigState;
   emailConfig: EmailConfigState;
   mailer: Mailer;
@@ -130,6 +131,12 @@ export interface OAuthRoutesDeps {
   getLocalUrl: () => string;
   /** Is signup allowed at all on this backend? BAK-003's `signup` rule, evaluated for an anonymous principal. */
   signupAllowedForAnonymous: () => boolean;
+  /**
+   * HLT-024 — the roles a user is in, for the exchange's response. The SAME
+   * resolver `/login` and `/users/me` answer from (`SecurityState.rolesForUser`,
+   * the one the access check calls), never a second query that could disagree.
+   */
+  rolesForUser: (userId: string) => Promise<string[]>;
   limiter: RateLimiter;
   clientAddress: (req: http.IncomingMessage) => string;
   audit: AuditLog;
@@ -149,6 +156,14 @@ export class OAuthRoutes {
   private static readonly START_POLICY: RateLimitPolicy = { ratePerMinute: 20, burst: 20 };
   private static readonly MAGIC_SEND_POLICY: RateLimitPolicy = { ratePerMinute: 5 / 15, burst: 5 };
   private static readonly EXCHANGE_POLICY: RateLimitPolicy = { ratePerMinute: 30, burst: 30 };
+  /** Redeeming a link — the step that mints a session. */
+  private static readonly MAGIC_CONSUME_POLICY: RateLimitPolicy = { ratePerMinute: 20 / 15, burst: 20 };
+  /**
+   * Opening one. Looser than the consume, because a mail scanner may fetch the
+   * same link several times before the person does, and a page that spends
+   * nothing is not worth guarding as tightly as one that signs you in.
+   */
+  private static readonly MAGIC_OPEN_POLICY: RateLimitPolicy = { ratePerMinute: 60 / 15, burst: 60 };
 
   constructor(deps: OAuthRoutesDeps) {
     this.deps = deps;
@@ -495,8 +510,14 @@ export class OAuthRoutes {
   /**
    * `POST /oauth/exchange { code }` — the app trades the one-time code for the
    * session. The response is deliberately the SAME shape `/login` returns (the
-   * `_User` record plus `sessionToken`), so the client stores it through the
-   * one code path it already has.
+   * `_User` record plus `roles` plus `sessionToken`), so the client stores it
+   * through the one code path it already has.
+   *
+   * 🔴 HLT-024: `roles` was missing here until 2026-09-23, so a person signing
+   * in from a magic link or a provider read `roles: undefined` ("we could not
+   * ask") until something re-read `/users/me`. "The same shape" is now tested:
+   * `tests/hlt-024-exchange-roles.test.ts` enumerates every response that hands
+   * out a `sessionToken` and requires each to carry `roles`.
    */
   async exchange(ctx: RequestContext): Promise<void> {
     this.enforce(ctx, 'auth:oauth-exchange', OAuthRoutes.EXCHANGE_POLICY);
@@ -515,6 +536,9 @@ export class OAuthRoutes {
     const wire = await this.deps.facade.wireRecord('_User', user);
     sendJSON(ctx.res, 200, {
       ...wire,
+      // After the spread, as `/login` does: a stored `roles` column must never
+      // outrank the live junction.
+      roles: await this.deps.rolesForUser(handoff.userId),
       sessionToken: handoff.sessionToken,
       /** How the account was resolved — `created`, `linked`, `linked-credentials-revoked`, `signed-in`. */
       authOutcome: handoff.outcome,
@@ -550,15 +574,9 @@ export class OAuthRoutes {
   private async tryIssueMagicLink(email: string, redirect: string | undefined): Promise<void> {
     if (!email || !email.includes('@')) return;
 
-    const config = this.deps.auth.config.magicLink;
-    if (!config.enabled) {
-      logger.warn('auth.magic-link-disabled', {
-        detail: 'A magic link was requested but magicLink.enabled is false in auth.json. No mail was sent.'
-      });
-      return;
-    }
-    if (!this.deps.emailConfig.isConfigured()) {
-      logger.warn('auth.magic-link-no-email', { detail: this.deps.emailConfig.notConfiguredReason() });
+    const off = this.magicLinkUnavailable();
+    if (off) {
+      logger.warn(off.event, { detail: off.reason });
       return;
     }
 
@@ -576,24 +594,59 @@ export class OAuthRoutes {
 
     const { results } = await this.deps.facade.rawQuery('_User', { where: { email }, limit: 1 });
     const user = results[0];
-    if (!user && !(config.allowSignup && this.deps.signupAllowedForAnonymous())) {
+    if (!user && !(this.deps.auth.config.magicLink.allowSignup && this.deps.signupAllowedForAnonymous())) {
       logger.warn('auth.magic-link-unknown-address', {
         detail: 'A magic link was requested for an unknown address and signup is not allowed. No mail was sent.'
       });
       return;
     }
 
+    const result = await this.sendMagicLink(email, user ? (user.objectId as string) : '', decision.url);
+    if (!result.success) logger.error('auth.magic-link-send-failed', { detail: result.error });
+  }
+
+  /**
+   * Why a magic link cannot be sent from this backend right now, or null.
+   * `event` is the log line the public route writes; `reason` is the sentence
+   * the admin invite answers with.
+   */
+  magicLinkUnavailable(): { event: string; reason: string } | null {
+    if (!this.deps.auth.config.magicLink.enabled) {
+      return {
+        event: 'auth.magic-link-disabled',
+        reason: 'Magic links are switched off on this backend. Turn them on under Sign-in, then invite again.'
+      };
+    }
+    if (!this.deps.emailConfig.isConfigured()) {
+      return { event: 'auth.magic-link-no-email', reason: this.deps.emailConfig.notConfiguredReason() || 'Email is not set up on this backend.' };
+    }
+    return null;
+  }
+
+  /**
+   * BMG-004 — the Users page's *Invite by email*. The account already exists
+   * (the admin route made it, with no password), so this is the send half of
+   * the public flow without its anti-enumeration silence: an administrator is
+   * told whether the mail went, because they are the one who has to act on it.
+   */
+  async sendInvite(userId: string, email: string): Promise<{ success: boolean; error?: string }> {
+    const off = this.magicLinkUnavailable();
+    if (off) return { success: false, error: off.reason };
+    const decision = resolveRedirect(DEFAULT_REDIRECT_PATH, this.baseUrl(), this.deps.auth.config.redirectAllowList);
+    if (!decision.ok) return { success: false, error: decision.reason };
+    return this.sendMagicLink(email, userId, decision.url);
+  }
+
+  private async sendMagicLink(email: string, userId: string, redirectUrl: string | undefined): Promise<{ success: boolean; error?: string }> {
+    const config = this.deps.auth.config.magicLink;
     const ttlMs = config.ttlMinutes > 0 ? config.ttlMinutes * 60_000 : MAGIC_LINK_DEFAULT_TTL_MS;
-    const token = await this.deps.tokens.issue(user ? (user.objectId as string) : '', 'magic', ttlMs, {
-      email,
-      redirectUrl: decision.url
-    });
+    const token = await this.deps.tokens.issue(userId, 'magic', ttlMs, { email, redirectUrl });
     const linkUrl = `${this.baseUrl()}/auth/magic-link/callback?token=${encodeURIComponent(token)}`;
 
     const rendered = renderTemplate(this.deps.emailConfig.effectiveTemplate('magicLink'), {
       appName: this.deps.backendName,
       magicLinkUrl: linkUrl,
-      expiresIn: `${Math.round(ttlMs / 60_000)} minutes`
+      expiresIn: magicLinkExpiresIn(ttlMs / 60_000)
     });
     const result = await this.deps.mailer.send({
       to: email,
@@ -601,11 +654,57 @@ export class OAuthRoutes {
       text: rendered.text,
       html: rendered.html
     });
-    if (!result.success) logger.error('auth.magic-link-send-failed', { detail: result.error });
+    return { success: result.success, error: result.success ? undefined : String(result.error || 'The mail was not sent.') };
   }
 
   /**
-   * `GET /auth/magic-link/callback?token=` — the click.
+   * `GET /auth/magic-link/callback?token=` — the click. It spends NOTHING
+   * (HLT-015).
+   *
+   * Mail scanners — Defender Safe Links, Mimecast, Proofpoint — and link
+   * unfurlers fetch every URL in a message before the person sees it. When this
+   * GET consumed the token, those mailboxes met "Sign-in link expired" on every
+   * click, and whatever fetched the link was signed in as the person. So the
+   * GET only checks the token and renders one button; the button's form POST
+   * below is what redeems it.
+   *
+   * An unknown, expired and spent token all render the same page as a missing
+   * one, byte for byte, so the GET is no oracle for which tokens exist.
+   */
+  async openMagicLink(ctx: RequestContext): Promise<void> {
+    this.enforce(ctx, 'auth:magic-open', OAuthRoutes.MAGIC_OPEN_POLICY);
+
+    const token = ctx.query.token || '';
+    const row = token ? await this.deps.tokens.peekRow(token, 'magic') : null;
+    // The token is in this page's URL: keep it out of caches and out of the
+    // Referer of anything the page might load.
+    ctx.res.setHeader('Cache-Control', 'no-store');
+    ctx.res.setHeader('Referrer-Policy', 'no-referrer');
+    if (!row) {
+      this.sendMagicLinkExpired(ctx);
+      return;
+    }
+
+    const heading = `Sign in to ${this.deps.backendName}`;
+    sendHTML(
+      ctx.res,
+      200,
+      page(
+        heading,
+        `<h2>${escapeHtml(heading)}</h2>` +
+          // Relative, so it posts back to wherever this page was served from —
+          // behind a proxy prefix too. A plain form: no script, so it works in
+          // a mail client's in-app browser and under any CSP.
+          '<form method="POST" action="callback">' +
+          `<input type="hidden" name="token" value="${escapeHtml(token)}">` +
+          '<button type="submit" autofocus>Sign in</button>' +
+          '</form>'
+      )
+    );
+  }
+
+  /**
+   * `POST /auth/magic-link/callback` (form or JSON body `token`) — the press.
    *
    * Runs through the SAME linking rule as an OIDC sign-in, by presenting itself
    * as a verified-email assertion from a provider called `magic-link`. That is
@@ -615,17 +714,14 @@ export class OAuthRoutes {
    * for an attacker to find the gap in.
    */
   async magicLinkCallback(ctx: RequestContext): Promise<void> {
-    this.enforce(ctx, 'auth:magic-consume', { ratePerMinute: 20 / 15, burst: 20 });
+    this.enforce(ctx, 'auth:magic-consume', OAuthRoutes.MAGIC_CONSUME_POLICY);
 
-    const token = ctx.query.token || '';
+    const body = await this.readTokenBody(ctx.req);
+    const token = typeof body.token === 'string' ? body.token : '';
     const row = token ? await this.deps.tokens.consumeRow(token, 'magic') : null;
+    ctx.res.setHeader('Cache-Control', 'no-store');
     if (!row) {
-      sendErrorPage(
-        ctx.res,
-        400,
-        'Sign-in link expired',
-        'This sign-in link is invalid, expired, or has already been used. Request a new one from the app.'
-      );
+      this.sendMagicLinkExpired(ctx);
       return;
     }
 
@@ -648,6 +744,23 @@ export class OAuthRoutes {
     };
 
     await this.finishSignIn(ctx, identity, 'magic link', this.deps.auth.config.magicLink.allowSignup, redirectUrl);
+  }
+
+  private sendMagicLinkExpired(ctx: RequestContext): void {
+    sendErrorPage(
+      ctx.res,
+      400,
+      'Sign-in link expired',
+      'This sign-in link is invalid, expired, or has already been used. Request a new one from the app.'
+    );
+  }
+
+  /** The page's button posts a form; a script may post JSON. Either carries `token`. */
+  private async readTokenBody(req: http.IncomingMessage): Promise<Record<string, unknown>> {
+    const contentType = String(req.headers['content-type'] || '');
+    if (!contentType.includes('application/x-www-form-urlencoded')) return readJSONBody(req);
+    const params = new URLSearchParams((await readRawBody(req, 16 * 1024)).toString('utf-8'));
+    return Object.fromEntries(params);
   }
 
   // ==========================================================================

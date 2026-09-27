@@ -9,8 +9,12 @@ import { PROJECT_ASSETS_FOLDER } from '@noodl-utils/projectAssets';
 
 import { ContentPicker, ContentPickerAction, ContentPickerEmptyState, ContentPickerItem } from '../components/ContentPicker';
 import { PickerTextInput } from '../components/PickerTextInput';
+import { TokenChipActions } from '../components/TokenChipActions';
 import { TypeView } from '../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate } from '../utils';
+import { isTokenReference } from './NumberWithUnits';
+import { fieldOffersTokens, resolveTokenText } from './tokenFieldPopout';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 /**
  * Base for the property rows that pair a text input with a picker popout
@@ -55,8 +59,24 @@ export abstract class PickerTypeView extends TypeView {
 
     const current = this.getCurrentValue();
 
+    // P103 CMG-009 — a token reads as a token, on the picker rows too: `fontFamily` takes the
+    // family tokens (HLT-012, `fontItems.ts`) and every new Text is stamped with one. Only a port
+    // with a scale, and only while the value is exactly one `var()` (AC7). Detach puts the
+    // resolved family in, through the same commit typing it would take — one undo step.
+    const holdsToken = fieldOffersTokens(this.name) && isTokenReference(current.value);
+    const resolved = holdsToken ? resolveTokenText(current.value) : undefined;
+    const tokenProps = holdsToken
+      ? {
+          tokenName: String(current.value).trim(),
+          tokenValue: resolved,
+          onDetachToken: resolved !== undefined ? () => this.commit(resolved) : undefined,
+          tokenActions: React.createElement(TokenChipActions, { reference: String(current.value), port: this.name })
+        }
+      : {};
+
     this.root.render(
       React.createElement(PickerTextInput, {
+        ...tokenProps,
         label: this.displayName,
         value: current.value ?? '',
         isChanged: !this.isDefault,
@@ -147,7 +167,7 @@ export abstract class PickerTypeView extends TypeView {
       attachTo: this.el,
       position: 'right',
       onClose: () => {
-        root.unmount();
+        unmountReactRoot(root);
         if (this.contentPicker === state) this.contentPicker = null;
       }
     });
@@ -209,7 +229,7 @@ export abstract class PickerTypeView extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

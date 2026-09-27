@@ -1,0 +1,331 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "9023dc24-5a37-5e34-8c28-fbcb5652d6b0",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hgPage",
+      "type": "Page",
+      "label": "Hangar",
+      "children": [
+        "hgOuter"
+      ],
+      "parameters": {
+        "title": "Rocket School",
+        "urlPath": "hangar"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hgOuter",
+      "type": "Group",
+      "label": "The ground",
+      "parent": "hgPage",
+      "children": [
+        "hgWrap"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "hgWrap",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "hgOuter",
+      "children": [
+        "hgHeader",
+        "hgTitle",
+        "hgPreview",
+        "hgStack"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "rowGap": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "maxWidth": {
+          "value": 960,
+          "unit": "px"
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "hgHeader",
+      "type": "/Game/Header",
+      "label": "The bar",
+      "parent": "hgWrap",
+      "parameters": {
+        "showHome": true,
+        "showHangar": false
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "hgTitle",
+      "type": "Text",
+      "label": "Hangar",
+      "parent": "hgWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-tight)",
+        "letterSpacing": "var(--tracking-tight)",
+        "color": "var(--foreground)",
+        "as": "h2",
+        "fontFamily": "Grandstander"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "hgPreview",
+      "type": "/Hangar/Preview",
+      "label": "Your face and rocket",
+      "parent": "hgWrap",
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "hgStack",
+      "type": "Group",
+      "label": "The shelf, and the question over it",
+      "parent": "hgWrap",
+      "children": [
+        "hgShelfBox",
+        "hgOver"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "cssClassName": "rkt-shelf-stack"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "hgShelfBox",
+      "type": "Group",
+      "label": "The shelf",
+      "parent": "hgStack",
+      "children": [
+        "hgShelf"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "hgShelf",
+      "type": "/Hangar/Shelf",
+      "label": "The shelf",
+      "parent": "hgShelfBox",
+      "x": 340,
+      "y": 1000
+    },
+    {
+      "id": "hgOver",
+      "type": "Group",
+      "label": "The question, over the shelf",
+      "parent": "hgStack",
+      "children": [
+        "hgConfirm"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "cssClassName": "rkt-buy-over",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "hgConfirm",
+      "type": "/Hangar/Confirm",
+      "label": "Buy it?",
+      "parent": "hgOver",
+      "parameters": {
+        "mounted": false
+      },
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "hgStore",
+      "type": "/Logic/App store",
+      "label": "The store",
+      "x": 590,
+      "y": 400
+    },
+    {
+      "id": "hgMe",
+      "type": "/Logic/Active profile",
+      "label": "Who is playing",
+      "x": 590,
+      "y": 520
+    },
+    {
+      "id": "hgWords",
+      "type": "/Data/Words",
+      "label": "The words",
+      "x": 590,
+      "y": 1600
+    },
+    {
+      "id": "hgT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 590,
+      "y": 880
+    },
+    {
+      "id": "hgCurriculum",
+      "type": "/Data/Curriculum",
+      "label": "The skills",
+      "x": 590,
+      "y": 1720
+    },
+    {
+      "id": "hgWordLists",
+      "type": "/Data/Word lists",
+      "label": "The typing words",
+      "x": 590,
+      "y": 1840
+    },
+    {
+      "id": "hgItems",
+      "type": "/Data/Hangar",
+      "label": "What the shelf offers",
+      "x": 590,
+      "y": 1240
+    },
+    {
+      "id": "hgPick",
+      "type": "/Logic/Pick item",
+      "label": "Buy it",
+      "x": 590,
+      "y": 1000
+    },
+    {
+      "id": "hgAsk",
+      "type": "States",
+      "label": "Shelf, or the question",
+      "parameters": {
+        "states": "idle,asking",
+        "values": "idle,asking",
+        "useTransitions": false,
+        "type-idle": "boolean",
+        "value-idle-idle": true,
+        "value-asking-idle": false,
+        "type-asking": "boolean",
+        "value-idle-asking": false,
+        "value-asking-asking": true
+      },
+      "x": 590,
+      "y": 1360
+    },
+    {
+      "id": "hgBuyTitle",
+      "type": "Expression",
+      "label": "Buy what?",
+      "parameters": {
+        "expression": "String(word || '').replace('{item}', String(label || ''))"
+      },
+      "x": 590,
+      "y": 1480
+    },
+    {
+      "id": "hgWear",
+      "type": "/Logic/Wear item",
+      "label": "Put it on, or take it off",
+      "x": 590,
+      "y": 1120
+    },
+    {
+      "id": "hgNoOne",
+      "type": "Expression",
+      "label": "Nobody signed in?",
+      "parameters": {
+        "expression": "has === false"
+      },
+      "x": 590,
+      "y": 1960
+    },
+    {
+      "id": "hgGuard",
+      "type": "Condition",
+      "label": "Send them to the profiles?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 590,
+      "y": 40
+    },
+    {
+      "id": "hgGoProfiles",
+      "type": "RouterNavigate",
+      "label": "To the profiles",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Profiles"
+      },
+      "x": 590,
+      "y": 640
+    },
+    {
+      "id": "hgGoHome",
+      "type": "RouterNavigate",
+      "label": "Home",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Home"
+      },
+      "x": 590,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "hgPage"
+  ]
+}

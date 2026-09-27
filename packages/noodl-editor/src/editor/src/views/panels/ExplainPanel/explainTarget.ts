@@ -4,12 +4,12 @@
  * A record of what the user last pointed at, kept because the *live* selection
  * is not always readable when the panel wants it.
  *
- * Switching to any panel outside `panelHoldsCanvasSelection` (EditorEventBindings)
- * deselects every node on `SidebarModelEvent.activeChanged`. Explain used to be
- * outside that list — FH-008 — so opening it destroyed the very selection it was
- * opened to explain, and this memo was the only thing that survived. Explain is
- * in the list now and the live read normally wins; the memo still covers the
- * paths where it cannot:
+ * Switching panels used to deselect every node on `SidebarModelEvent.activeChanged`
+ * for any panel outside an allow-list. Explain was outside it — FH-008 — so opening
+ * it destroyed the very selection it was opened to explain, and this memo was the
+ * only thing that survived. P101 INS-001 removed the deselect altogether (the node's
+ * panel has its own column now), so the live read normally wins; the memo still
+ * covers the paths where it cannot:
  *
  *  - `SidebarModelEvent.nodeSelected`, which carries the node id explicitly and
  *    fires whenever clicking a node opens its property panel; and

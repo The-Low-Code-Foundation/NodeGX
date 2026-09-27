@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "92f1e423-5690-5072-809a-499ca2537415",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "crIn",
+      "fromProperty": "label",
+      "toId": "crLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "crIn",
+      "fromProperty": "items",
+      "toId": "crMark",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "crIn",
+      "fromProperty": "value",
+      "toId": "crMark",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "crMark",
+      "fromProperty": "rows",
+      "toId": "crEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "crEach",
+      "fromProperty": "itemOutput-value",
+      "toId": "crOut",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "crEach",
+      "fromProperty": "itemOutputSignal-picked",
+      "toId": "crOut",
+      "toProperty": "changed"
+    }
+  ]
+}

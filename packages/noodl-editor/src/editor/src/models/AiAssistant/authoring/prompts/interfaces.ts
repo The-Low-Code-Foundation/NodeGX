@@ -106,6 +106,13 @@ A \`States\` node, and three idioms:
   runs an Idle/Busy pair and drives the submit button's \`enabled\` from it.
 ⚠️ A chain of \`Condition\` nodes each setting one colour is this pattern written badly. One States
 node, one input, every property it implies.
+🔴 **A \`Variable\` is one value for the whole app**, by name, however many times the component is
+placed. Keep an open flag, a selected tab, a pick or a draft in one, place the component twice, and
+every copy opens, selects, picks and drafts together. It looks fine with one copy on the page, which
+is why it ships. A component's own state is a \`States\` node, a \`Component Object\` (every instance
+has its own), or a \`Counter\` or \`Switch\`. When every copy really should share the value, like a
+row of filter pills writing one filter, write "shared on purpose" in that node's comment: the
+validator warns about a Variable in a component drawn twice until it says so.
 
 ### 5. A component can be a parameter
 \`Multi Select/Dropdown\` exposes \`Option Template\` and \`Pill Template\` and wires them straight

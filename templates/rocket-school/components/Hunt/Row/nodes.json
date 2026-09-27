@@ -1,0 +1,71 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3b843f86-bca8-5731-8699-6e8748d4eeaa",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hwIn",
+      "type": "Component Inputs",
+      "label": "The row",
+      "ports": [
+        {
+          "name": "cells",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "hwRow",
+      "type": "Group",
+      "label": "One row",
+      "children": [
+        "hwCells"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hwCells",
+      "type": "For Each",
+      "label": "One number per cell",
+      "parameters": {
+        "template": "/Hunt/Tile",
+        "templateType": "explicit"
+      },
+      "parent": "hwRow",
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "hwOut",
+      "type": "Component Outputs",
+      "label": "A number was tapped",
+      "ports": [
+        {
+          "name": "tapped",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "at",
+          "plug": "input",
+          "type": "number"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "hwRow"
+  ]
+}

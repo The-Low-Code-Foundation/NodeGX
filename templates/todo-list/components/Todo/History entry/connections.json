@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4e2aaf1d-d9fa-5952-85f5-09b0e92e767b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "heIn",
+      "fromProperty": "line",
+      "toId": "heLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "heIn",
+      "fromProperty": "body",
+      "toId": "heBody",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "heIn",
+      "fromProperty": "hasBody",
+      "toId": "heBody",
+      "toProperty": "mounted"
+    }
+  ]
+}

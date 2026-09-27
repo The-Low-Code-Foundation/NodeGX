@@ -25,6 +25,13 @@ export interface StorageStat {
   size: number;
 }
 
+/** One stored object and the store's own age for it (BMG-017: the sweep spares the young). */
+export interface StoredEntry {
+  key: string;
+  /** The file's mtime, or the bucket's `LastModified`; null when the store did not say. */
+  modified: Date | null;
+}
+
 export interface StorageDriver {
   readonly kind: 'local' | 's3';
 
@@ -49,4 +56,12 @@ export interface StorageDriver {
    * the sweep is a background job, never inline with a request.
    */
   listKeys(): AsyncIterable<string>;
+
+  /**
+   * `listKeys` with each key's age in the store (BMG-017). The orphan sweep
+   * judges only what is older than its grace window: an upload writes its
+   * bytes BEFORE its `_Files` row, and a move its bucket copy before the row
+   * points there, so a young blob without a row may simply be arriving.
+   */
+  listEntries(): AsyncIterable<StoredEntry>;
 }

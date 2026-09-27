@@ -1,0 +1,127 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8721ff6d-cbfe-5333-857b-aa15c0294d89",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "slIn",
+      "fromProperty": "tasks",
+      "toId": "slBuild",
+      "toProperty": "in-tasks"
+    },
+    {
+      "fromId": "slIn",
+      "fromProperty": "actions",
+      "toId": "slBuild",
+      "toProperty": "in-actions"
+    },
+    {
+      "fromId": "slIn",
+      "fromProperty": "events",
+      "toId": "slBuild",
+      "toProperty": "in-events"
+    },
+    {
+      "fromId": "slIn",
+      "fromProperty": "selectedId",
+      "toId": "slBuild",
+      "toProperty": "in-selectedId"
+    },
+    {
+      "fromId": "slIn",
+      "fromProperty": "openActionId",
+      "toId": "slBuild",
+      "toProperty": "in-openActionId"
+    },
+    {
+      "fromId": "slBuild",
+      "fromProperty": "out-found",
+      "toId": "slOut",
+      "toProperty": "found"
+    },
+    {
+      "fromId": "slBuild",
+      "fromProperty": "out-notFound",
+      "toId": "slOut",
+      "toProperty": "notFound"
+    },
+    {
+      "fromId": "slBuild",
+      "fromProperty": "out-isOpen",
+      "toId": "slOut",
+      "toProperty": "isOpen"
+    },
+    {
+      "fromId": "slBuild",
+      "fromProperty": "out-isClosed",
+      "toId": "slOut",
+      "toProperty": "isClosed"
+    },
+    {
+      "fromId": "slBuild",
+      "fromProperty": "out-title",
+      "toId": "slOut",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "slBuild",
+      "fromProperty": "out-deadline",
+      "toId": "slOut",
+      "toProperty": "deadline"
+    },
+    {
+      "fromId": "slBuild",
+      "fromProperty": "out-dueText",
+      "toId": "slOut",
+      "toProperty": "dueText"
+    },
+    {
+      "fromId": "slBuild",
+      "fromProperty": "out-dueColor",
+      "toId": "slOut",
+      "toProperty": "dueColor"
+    },
+    {
+      "fromId": "slBuild",
+      "fromProperty": "out-rankLine",
+      "toId": "slOut",
+      "toProperty": "rankLine"
+    },
+    {
+      "fromId": "slBuild",
+      "fromProperty": "out-canMakeNext",
+      "toId": "slOut",
+      "toProperty": "canMakeNext"
+    },
+    {
+      "fromId": "slBuild",
+      "fromProperty": "out-closingNote",
+      "toId": "slOut",
+      "toProperty": "closingNote"
+    },
+    {
+      "fromId": "slBuild",
+      "fromProperty": "out-actionRows",
+      "toId": "slOut",
+      "toProperty": "actionRows"
+    },
+    {
+      "fromId": "slBuild",
+      "fromProperty": "out-openActionRows",
+      "toId": "slOut",
+      "toProperty": "openActionRows"
+    },
+    {
+      "fromId": "slBuild",
+      "fromProperty": "out-nextActionPosition",
+      "toId": "slOut",
+      "toProperty": "nextActionPosition"
+    },
+    {
+      "fromId": "slBuild",
+      "fromProperty": "out-historyRows",
+      "toId": "slOut",
+      "toProperty": "historyRows"
+    }
+  ]
+}

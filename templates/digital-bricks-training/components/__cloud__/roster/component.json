@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "46014181-4c88-5bff-9f82-d6ac548514a1",
+  "name": "roster",
+  "path": "/#__cloud__/roster",
+  "type": "cloud",
+  "created": "2026-09-23T09:00:00.000Z",
+  "modified": "2026-09-23T09:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Every learner account, with the counts a coach reads (security: role:staff). The only function that serves a trainer's label."
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7c09fdb3-ffc0-588f-802d-d26daf4a0daa",
+  "name": "Play",
+  "path": "/Merge/Play",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Make Ten Merge itself. A new board on mount and on New game. The arrow keys or the four arrow buttons slide it, through Logic/Slide and merge placed once per direction, and two tiles join only when they make a multiple of ten. The whole game is one Variable (mergeGame, global by name: one board per page). When the board locks, Logic/Finish merge pays it once and Race/Result takes the arrows' place. Publishes Model and Graded (store the model), Home, Hangar and Cheer."
+}

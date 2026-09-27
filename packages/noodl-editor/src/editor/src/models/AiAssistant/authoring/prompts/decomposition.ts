@@ -163,7 +163,8 @@ and change than the same page as one long column of nodes.
 - **Logic clusters are components.** Three or more logic nodes cooperating on one job get their own
   component with a declared interface, rather than sitting beside the visual nodes.
 - **Interfaces are deliberate.** Component Inputs/Outputs carry what varies per instance. Shared app
-  state goes through Variables and Objects, not through prop drilling.
+  state goes through Variables and Objects, not through prop drilling. A component's own state never
+  does: a Variable is one value however many times the component is placed, so two copies share it.
 - **Placement.** Used once, next to its page. Used twice or plausibly reusable, in a shared folder.
 - **Say why on the node.** A node's \`label\` says what it is for; its \`comment\` says why it is the way
   it is. Write one where the next reader would otherwise change something and break it — a decision that

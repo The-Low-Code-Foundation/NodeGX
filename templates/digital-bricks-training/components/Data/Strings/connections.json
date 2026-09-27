@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "913280da-9456-4aa4-96a0-06e51617796f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "str_data",
+      "fromProperty": "items",
+      "toId": "str_split",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-copy",
+      "toId": "str_out",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-common",
+      "toId": "str_out",
+      "toProperty": "common"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-lesson",
+      "toId": "str_out",
+      "toProperty": "lesson"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-timeline",
+      "toId": "str_out",
+      "toProperty": "timeline"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-productName",
+      "toId": "str_out",
+      "toProperty": "productName"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-loaded",
+      "toId": "str_out",
+      "toProperty": "loaded"
+    },
+    {
+      "fromId": "str_graph",
+      "fromProperty": "items",
+      "toId": "str_split",
+      "toProperty": "in-graph"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-jsonCommon",
+      "toId": "str_out",
+      "toProperty": "jsonCommon"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-jsonHome",
+      "toId": "str_out",
+      "toProperty": "jsonHome"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-jsonCourse",
+      "toId": "str_out",
+      "toProperty": "jsonCourse"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-jsonLesson",
+      "toId": "str_out",
+      "toProperty": "jsonLesson"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-jsonPalette",
+      "toId": "str_out",
+      "toProperty": "jsonPalette"
+    },
+    {
+      "fromId": "str_in",
+      "fromProperty": "language",
+      "toId": "str_lang",
+      "toProperty": "in-want"
+    },
+    {
+      "fromId": "str_locales",
+      "fromProperty": "items",
+      "toId": "str_lang",
+      "toProperty": "in-locales"
+    },
+    {
+      "fromId": "str_locales",
+      "fromProperty": "items",
+      "toId": "str_split",
+      "toProperty": "in-locales"
+    },
+    {
+      "fromId": "str_lang",
+      "fromProperty": "out-resolved",
+      "toId": "str_out",
+      "toProperty": "contentLanguage"
+    },
+    {
+      "fromId": "str_lang",
+      "fromProperty": "out-resolved",
+      "toId": "str_split",
+      "toProperty": "in-language"
+    },
+    {
+      "fromId": "str_in",
+      "fromProperty": "audience",
+      "toId": "str_split",
+      "toProperty": "in-audience"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-audience",
+      "toId": "str_out",
+      "toProperty": "audience"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-standing",
+      "toId": "str_out",
+      "toProperty": "standing"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-jsonPeople",
+      "toId": "str_out",
+      "toProperty": "jsonPeople"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-jsonDossier",
+      "toId": "str_out",
+      "toProperty": "jsonDossier"
+    }
+  ]
+}

@@ -1,0 +1,1725 @@
+{
+  "measured": {
+    "darkTop": {
+      "heightsByKind": {
+        "numberUnitField": {
+          "26": 4
+        },
+        "fixedChip": {
+          "26": 2
+        },
+        "alignTrack": {
+          "26": 2
+        },
+        "sizeModeTrack": {
+          "26": 2
+        },
+        "input": {
+          "30": 1
+        },
+        "select": {
+          "27": 3
+        },
+        "button": {
+          "26": 2,
+          "30": 4,
+          "14.8": 1
+        }
+      },
+      "controls": [
+        {
+          "kind": "numberUnitField",
+          "label": "Width",
+          "top": 397,
+          "left": 141,
+          "width": 104,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "numberUnitField",
+          "label": "Height",
+          "top": 429,
+          "left": 141,
+          "width": 104,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "numberUnitField",
+          "label": "Vertical Gap",
+          "top": 693,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "numberUnitField",
+          "label": "Horizontal Gap",
+          "top": 725,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "fixedChip",
+          "label": "Width",
+          "top": 397,
+          "left": 251,
+          "width": 46,
+          "height": 26,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "fixedChip",
+          "label": "Height",
+          "top": 429,
+          "left": 251,
+          "width": 46,
+          "height": 26,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "alignTrack",
+          "label": "Align Content",
+          "top": 661,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "alignTrack",
+          "label": "Align X",
+          "top": 838,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "sizeModeTrack",
+          "label": "Size Mode",
+          "top": 365,
+          "left": 141,
+          "width": 72,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "sizeModeTrack",
+          "label": "Size Mode",
+          "top": 365,
+          "left": 223,
+          "width": 72,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": null,
+          "top": 206,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Position",
+          "top": 564,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Layout",
+          "top": 596,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Multi Line Wrap",
+          "top": 628,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 140,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 170,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 250,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 331,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 476,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 540,
+          "left": 39,
+          "width": 116,
+          "height": 14.8,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 804,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        }
+      ],
+      "groupHeaders": [
+        {
+          "name": "General",
+          "top": 250
+        },
+        {
+          "name": "Dimensions",
+          "top": 331
+        },
+        {
+          "name": "Layout",
+          "top": 476
+        },
+        {
+          "name": "Alignment",
+          "top": 804
+        }
+      ],
+      "labelLefts": [
+        17
+      ],
+      "clipped": 3
+    },
+    "darkLower": {
+      "heightsByKind": {
+        "numberUnitField": {
+          "26": 2
+        },
+        "pairField": {
+          "26": 4
+        },
+        "alignTrack": {
+          "26": 5
+        },
+        "input": {
+          "27": 3,
+          "30": 1,
+          "25.5": 1
+        },
+        "select": {
+          "27": 7
+        },
+        "button": {
+          "24": 2,
+          "26": 2,
+          "30": 4
+        }
+      },
+      "controls": [
+        {
+          "kind": "numberUnitField",
+          "label": "Vertical Gap",
+          "top": 133,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "numberUnitField",
+          "label": "Horizontal Gap",
+          "top": 165,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "pairField",
+          "label": "Margin",
+          "top": 504,
+          "left": 141,
+          "width": 61,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "pairField",
+          "label": "Margin",
+          "top": 504,
+          "left": 206,
+          "width": 61,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "pairField",
+          "label": "Padding",
+          "top": 536,
+          "left": 141,
+          "width": 61,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "pairField",
+          "label": "Padding",
+          "top": 536,
+          "left": 206,
+          "width": 61,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "alignTrack",
+          "label": "Align Content",
+          "top": 101,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "alignTrack",
+          "label": "Align X",
+          "top": 278,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "alignTrack",
+          "label": "Align Y",
+          "top": 310,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "alignTrack",
+          "label": "Align Items",
+          "top": 391,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "alignTrack",
+          "label": "Justify Content",
+          "top": 423,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": null,
+          "top": 140,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Position",
+          "top": 4,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Layout",
+          "top": 36,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Multi Line Wrap",
+          "top": 68,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Box Sizing",
+          "top": 567,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "Opacity",
+          "top": 649,
+          "left": 141,
+          "width": 128,
+          "height": 25.5,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "select",
+          "label": "Blend Mode",
+          "top": 680,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "Background Color",
+          "top": 714,
+          "left": 141,
+          "width": 119,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "Background Image",
+          "top": 747,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "Background Gradient",
+          "top": 779,
+          "left": 141,
+          "width": 128,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Background Size",
+          "top": 811,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Background Position",
+          "top": 843,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 244,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 357,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 470,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": "Margin",
+          "top": 504,
+          "left": 271,
+          "width": 26,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "button",
+          "label": "Padding",
+          "top": 536,
+          "left": 271,
+          "width": 26,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 615,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": "Opacity",
+          "top": 650,
+          "left": 273,
+          "width": 24,
+          "height": 24,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": "Background Gradient",
+          "top": 781,
+          "left": 273,
+          "width": 24,
+          "height": 24,
+          "fontSize": "11px"
+        }
+      ],
+      "groupHeaders": [
+        {
+          "name": "Alignment",
+          "top": 244
+        },
+        {
+          "name": "Align and justify content",
+          "top": 357
+        },
+        {
+          "name": "Margin and padding",
+          "top": 470
+        },
+        {
+          "name": "Style",
+          "top": 615
+        }
+      ],
+      "labelLefts": [
+        17
+      ],
+      "clipped": 11
+    },
+    "darkBottom": {
+      "heightsByKind": {
+        "numberUnitField": {
+          "26": 4
+        },
+        "pairField": {
+          "26": 2
+        },
+        "input": {
+          "27": 4,
+          "30": 1,
+          "25.5": 2
+        },
+        "select": {
+          "27": 5
+        },
+        "button": {
+          "24": 3,
+          "26": 1,
+          "30": 4,
+          "14.8": 1
+        }
+      },
+      "controls": [
+        {
+          "kind": "numberUnitField",
+          "label": "Backdrop Blur",
+          "top": 316,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "numberUnitField",
+          "label": "Border Width",
+          "top": 529,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "numberUnitField",
+          "label": "Corner Radius",
+          "top": 681,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "numberUnitField",
+          "label": "Offset X",
+          "top": 848,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "pairField",
+          "label": "Padding",
+          "top": -24,
+          "left": 141,
+          "width": 61,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "pairField",
+          "label": "Padding",
+          "top": -24,
+          "left": 206,
+          "width": 61,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": null,
+          "top": 140,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Box Sizing",
+          "top": 7,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "Opacity",
+          "top": 89,
+          "left": 141,
+          "width": 128,
+          "height": 25.5,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "select",
+          "label": "Blend Mode",
+          "top": 120,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "Background Color",
+          "top": 154,
+          "left": 141,
+          "width": 119,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "Background Image",
+          "top": 187,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "Background Gradient",
+          "top": 219,
+          "left": 141,
+          "width": 128,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Background Size",
+          "top": 251,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Background Position",
+          "top": 283,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "zIndex",
+          "top": 380,
+          "left": 141,
+          "width": 128,
+          "height": 25.5,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "select",
+          "label": "Border Style",
+          "top": 496,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "Border Color",
+          "top": 562,
+          "left": 141,
+          "width": 119,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "button",
+          "label": "Padding",
+          "top": -24,
+          "left": 271,
+          "width": 26,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 55,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": "Opacity",
+          "top": 90,
+          "left": 273,
+          "width": 24,
+          "height": 24,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": "Background Gradient",
+          "top": 221,
+          "left": 273,
+          "width": 24,
+          "height": 24,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": "zIndex",
+          "top": 381,
+          "left": 273,
+          "width": 24,
+          "height": 24,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 427,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 611,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 728,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 791,
+          "left": 112,
+          "width": 41,
+          "height": 14.8,
+          "fontSize": "11px"
+        }
+      ],
+      "groupHeaders": [
+        {
+          "name": "Style",
+          "top": 55
+        },
+        {
+          "name": "Border Style",
+          "top": 427
+        },
+        {
+          "name": "Corner Radius",
+          "top": 611
+        },
+        {
+          "name": "Box Shadow",
+          "top": 728
+        }
+      ],
+      "labelLefts": [
+        17
+      ],
+      "clipped": 11
+    },
+    "lightTop": {
+      "heightsByKind": {
+        "numberUnitField": {
+          "26": 4
+        },
+        "fixedChip": {
+          "26": 2
+        },
+        "alignTrack": {
+          "26": 2
+        },
+        "sizeModeTrack": {
+          "26": 2
+        },
+        "input": {
+          "30": 1
+        },
+        "select": {
+          "27": 3
+        },
+        "button": {
+          "26": 2,
+          "30": 4,
+          "14.8": 1
+        }
+      },
+      "controls": [
+        {
+          "kind": "numberUnitField",
+          "label": "Width",
+          "top": 397,
+          "left": 141,
+          "width": 104,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "numberUnitField",
+          "label": "Height",
+          "top": 429,
+          "left": 141,
+          "width": 104,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "numberUnitField",
+          "label": "Vertical Gap",
+          "top": 693,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "numberUnitField",
+          "label": "Horizontal Gap",
+          "top": 725,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "fixedChip",
+          "label": "Width",
+          "top": 397,
+          "left": 251,
+          "width": 46,
+          "height": 26,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "fixedChip",
+          "label": "Height",
+          "top": 429,
+          "left": 251,
+          "width": 46,
+          "height": 26,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "alignTrack",
+          "label": "Align Content",
+          "top": 661,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "alignTrack",
+          "label": "Align X",
+          "top": 838,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "sizeModeTrack",
+          "label": "Size Mode",
+          "top": 365,
+          "left": 141,
+          "width": 72,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "sizeModeTrack",
+          "label": "Size Mode",
+          "top": 365,
+          "left": 223,
+          "width": 72,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": null,
+          "top": 206,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Position",
+          "top": 564,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Layout",
+          "top": 596,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Multi Line Wrap",
+          "top": 628,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 140,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 170,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 250,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 331,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 476,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 540,
+          "left": 39,
+          "width": 116,
+          "height": 14.8,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 804,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        }
+      ],
+      "groupHeaders": [
+        {
+          "name": "General",
+          "top": 250
+        },
+        {
+          "name": "Dimensions",
+          "top": 331
+        },
+        {
+          "name": "Layout",
+          "top": 476
+        },
+        {
+          "name": "Alignment",
+          "top": 804
+        }
+      ],
+      "labelLefts": [
+        17
+      ],
+      "clipped": 3
+    },
+    "lightLower": {
+      "heightsByKind": {
+        "numberUnitField": {
+          "26": 2
+        },
+        "pairField": {
+          "26": 4
+        },
+        "alignTrack": {
+          "26": 5
+        },
+        "input": {
+          "27": 3,
+          "30": 1,
+          "25.5": 1
+        },
+        "select": {
+          "27": 7
+        },
+        "button": {
+          "24": 2,
+          "26": 2,
+          "30": 4
+        }
+      },
+      "controls": [
+        {
+          "kind": "numberUnitField",
+          "label": "Vertical Gap",
+          "top": 133,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "numberUnitField",
+          "label": "Horizontal Gap",
+          "top": 165,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "pairField",
+          "label": "Margin",
+          "top": 504,
+          "left": 141,
+          "width": 61,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "pairField",
+          "label": "Margin",
+          "top": 504,
+          "left": 206,
+          "width": 61,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "pairField",
+          "label": "Padding",
+          "top": 536,
+          "left": 141,
+          "width": 61,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "pairField",
+          "label": "Padding",
+          "top": 536,
+          "left": 206,
+          "width": 61,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "alignTrack",
+          "label": "Align Content",
+          "top": 101,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "alignTrack",
+          "label": "Align X",
+          "top": 278,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "alignTrack",
+          "label": "Align Y",
+          "top": 310,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "alignTrack",
+          "label": "Align Items",
+          "top": 391,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "alignTrack",
+          "label": "Justify Content",
+          "top": 423,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": null,
+          "top": 140,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Position",
+          "top": 4,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Layout",
+          "top": 36,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Multi Line Wrap",
+          "top": 68,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Box Sizing",
+          "top": 567,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "Opacity",
+          "top": 649,
+          "left": 141,
+          "width": 128,
+          "height": 25.5,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "select",
+          "label": "Blend Mode",
+          "top": 680,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "Background Color",
+          "top": 714,
+          "left": 141,
+          "width": 119,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "Background Image",
+          "top": 747,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "Background Gradient",
+          "top": 779,
+          "left": 141,
+          "width": 128,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Background Size",
+          "top": 811,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Background Position",
+          "top": 843,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 244,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 357,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 470,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": "Margin",
+          "top": 504,
+          "left": 271,
+          "width": 26,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "button",
+          "label": "Padding",
+          "top": 536,
+          "left": 271,
+          "width": 26,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 615,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": "Opacity",
+          "top": 650,
+          "left": 273,
+          "width": 24,
+          "height": 24,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": "Background Gradient",
+          "top": 781,
+          "left": 273,
+          "width": 24,
+          "height": 24,
+          "fontSize": "11px"
+        }
+      ],
+      "groupHeaders": [
+        {
+          "name": "Alignment",
+          "top": 244
+        },
+        {
+          "name": "Align and justify content",
+          "top": 357
+        },
+        {
+          "name": "Margin and padding",
+          "top": 470
+        },
+        {
+          "name": "Style",
+          "top": 615
+        }
+      ],
+      "labelLefts": [
+        17
+      ],
+      "clipped": 11
+    },
+    "lightBottom": {
+      "heightsByKind": {
+        "numberUnitField": {
+          "26": 4
+        },
+        "pairField": {
+          "26": 2
+        },
+        "input": {
+          "27": 4,
+          "30": 1,
+          "25.5": 2
+        },
+        "select": {
+          "27": 5
+        },
+        "button": {
+          "24": 3,
+          "26": 1,
+          "30": 4,
+          "14.8": 1
+        }
+      },
+      "controls": [
+        {
+          "kind": "numberUnitField",
+          "label": "Backdrop Blur",
+          "top": 316,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "numberUnitField",
+          "label": "Border Width",
+          "top": 529,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "numberUnitField",
+          "label": "Corner Radius",
+          "top": 681,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "numberUnitField",
+          "label": "Offset X",
+          "top": 848,
+          "left": 141,
+          "width": 156,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "pairField",
+          "label": "Padding",
+          "top": -24,
+          "left": 141,
+          "width": 61,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "pairField",
+          "label": "Padding",
+          "top": -24,
+          "left": 206,
+          "width": 61,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": null,
+          "top": 140,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Box Sizing",
+          "top": 7,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "Opacity",
+          "top": 89,
+          "left": 141,
+          "width": 128,
+          "height": 25.5,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "select",
+          "label": "Blend Mode",
+          "top": 120,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "Background Color",
+          "top": 154,
+          "left": 141,
+          "width": 119,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "Background Image",
+          "top": 187,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "Background Gradient",
+          "top": 219,
+          "left": 141,
+          "width": 128,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Background Size",
+          "top": 251,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "select",
+          "label": "Background Position",
+          "top": 283,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "zIndex",
+          "top": 380,
+          "left": 141,
+          "width": 128,
+          "height": 25.5,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "select",
+          "label": "Border Style",
+          "top": 496,
+          "left": 141,
+          "width": 156,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "input",
+          "label": "Border Color",
+          "top": 562,
+          "left": 141,
+          "width": 119,
+          "height": 27,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "button",
+          "label": "Padding",
+          "top": -24,
+          "left": 271,
+          "width": 26,
+          "height": 26,
+          "fontSize": "12px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 55,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": "Opacity",
+          "top": 90,
+          "left": 273,
+          "width": 24,
+          "height": 24,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": "Background Gradient",
+          "top": 221,
+          "left": 273,
+          "width": 24,
+          "height": 24,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": "zIndex",
+          "top": 381,
+          "left": 273,
+          "width": 24,
+          "height": 24,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 427,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 611,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 728,
+          "left": 17,
+          "width": 280,
+          "height": 30,
+          "fontSize": "11px"
+        },
+        {
+          "kind": "button",
+          "label": null,
+          "top": 791,
+          "left": 112,
+          "width": 41,
+          "height": 14.8,
+          "fontSize": "11px"
+        }
+      ],
+      "groupHeaders": [
+        {
+          "name": "Style",
+          "top": 55
+        },
+        {
+          "name": "Border Style",
+          "top": 427
+        },
+        {
+          "name": "Corner Radius",
+          "top": 611
+        },
+        {
+          "name": "Box Shadow",
+          "top": 728
+        }
+      ],
+      "labelLefts": [
+        17
+      ],
+      "clipped": 11
+    }
+  },
+  "interaction": {}
+}

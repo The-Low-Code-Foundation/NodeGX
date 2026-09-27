@@ -1,0 +1,83 @@
+{
+  "task": "TVW-001",
+  "criterion": "AC7 (after Richard's rulings)",
+  "date": "2026-09-18",
+  "session": 11,
+  "buildKind": "dev",
+  "buildHeadSha": "e50ea09b4923dee6662d177f35150c9000aacd40 + uncommitted TVW-001 changes",
+  "viewerBundleMd5": "bf998c2aea1be4102abb24d473e3c47c",
+  "viewport": "1368x784 CSS px, captured at 2x (2736x1568)",
+  "widthMethod": "real FrameDivider drag; MIN_PANEL_WIDTH=240 is the product's own clamp",
+  "themeMethod": "ThemeManager.setMode, verified by reading data-theme back in a SEPARATE eval before every shot",
+  "rulings": {
+    "1": "Cut 'Sample values.' from the caption",
+    "2": "The size controls shrink, not the sentence",
+    "3": "Stop inventing a route from the page title — DISPLAY ONLY (re-asked after finding three copies of the fallback)",
+    "4": "Worthy once the above are done"
+  },
+  "projects": {
+    "corpus": "copy of 'Landing page test V2' — authors NO urlPath",
+    "routedControl": "copy of 'SBR-015 AC1 Refusal' — authors 6 urlPaths incl. path params"
+  },
+  "samplingNote": "Both original AC7 projects author no urlPath at all, so they show no routes after the change and are an unrepresentative sample. Measured across 130 projects: 221 Page nodes author a urlPath, 41 do not. The routed control was added so the route chip is shown still working.",
+  "peerInFlight": "A peer was deleting Font Awesome from the editor during this drive. Neither shot surface references it (grep-verified). Their surfaces — property panel, Ports panel, drag overlay — appear in none of these images and are NOT evidenced by them.",
+  "images": [
+    {
+      "file": "ac7b-corpus-300-dark.png",
+      "surface": "components panel",
+      "state": "corpus, Sections expanded, App preview",
+      "panelWidth": 300,
+      "theme": "dark"
+    },
+    {
+      "file": "ac7b-corpus-300-light.png",
+      "surface": "components panel",
+      "state": "corpus, Sections expanded, App preview",
+      "panelWidth": 300,
+      "theme": "light"
+    },
+    {
+      "file": "ac7b-corpus-240-dark.png",
+      "surface": "components panel",
+      "state": "corpus at the enforced minimum width",
+      "panelWidth": 240,
+      "theme": "dark"
+    },
+    {
+      "file": "ac7b-corpus-240-light.png",
+      "surface": "components panel",
+      "state": "corpus at the enforced minimum width",
+      "panelWidth": 240,
+      "theme": "light"
+    },
+    {
+      "file": "ac7b-routed-control-300-light.png",
+      "surface": "components panel",
+      "state": "CONTROL: a project that authors urlPath — 6 routes still render",
+      "panelWidth": 300,
+      "theme": "light"
+    },
+    {
+      "file": "ac7b-routed-control-240-light.png",
+      "surface": "components panel",
+      "state": "CONTROL at minimum width",
+      "panelWidth": 240,
+      "theme": "light"
+    },
+    {
+      "file": "ac7b-routed-control-240-dark.png",
+      "surface": "components panel",
+      "state": "CONTROL at minimum width",
+      "panelWidth": 240,
+      "theme": "dark"
+    },
+    {
+      "file": "ac7b-caption-squeezed-after.png",
+      "surface": "workbench caption",
+      "state": "stage squeezed by a 646px panel — the width AC7 measured the old behaviour at",
+      "panelWidth": 646,
+      "theme": "dark"
+    }
+  ],
+  "verdict": "Built to the rulings and re-driven. The WORTHY ruling itself remains Richard's."
+}

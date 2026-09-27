@@ -1,0 +1,62 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "1473c034-1e98-4ee6-b4d8-03f20b46e29c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "bv_in",
+      "type": "Component Inputs",
+      "label": "Which row, and what 'open' looks like",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "selector",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "openSelector",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "bv_fn",
+      "type": "JavaScriptFunction",
+      "label": "Wait until it is there and open, then scroll",
+      "x": 480,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * BRING A POINTED-AT ROW INTO VIEW (TASK-L165 §4), and only when it can be seen.\n *\n * A jump changes three things at once — which surface is mounted, which row is\n * open, and where the page is — and the first two land over the next frames.\n * Scrolling in the same tick as the change that opens the row centres the\n * row's COLLAPSED height and the expansion arrives underneath it: L142 measured\n * a panel opening 31 pixels below the fold that way. So this waits on the\n * CONDITION — the row exists and carries what open looks like — rather than on\n * a guessed delay, which is right until the first slow render.\n *\n * `block: 'start'`: the reader asked to see THIS entry, top first.\n */\nconst selector = String(Inputs.selector || '');\nconst openSelector = String(Inputs.openSelector || '');\nif (!selector || typeof window === 'undefined') return;\nlet frames = 0;\nconst look = () => {\n  const el = document.querySelector(selector);\n  const open = el && (!openSelector || el.querySelector(openSelector));\n  if (open) {\n    el.scrollIntoView({ block: 'start' });\n    return;\n  }\n  /* Two seconds of frames, then stop: a row that never arrives is a row the\n     page does not have, and scrolling somewhere else would be worse. */\n  if (++frames < 120) window.requestAnimationFrame(look);\n};\nwindow.requestAnimationFrame(look);\n",
+        "runOnChange-in-selector": false,
+        "runOnChange-in-openSelector": false
+      },
+      "ports": [
+        {
+          "name": "in-selector",
+          "displayName": "selector",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-openSelector",
+          "displayName": "openSelector",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Runs on the signal ONLY. Since NDA-017 §2, wiring Run no longer makes a Function's value inputs passive — each has its own Run On Value Change box, ticked by default — so without these unticked it also ran whenever a row's id arrived: opening a row in the log jumped to the programme (measured, TASK-L165)."
+      }
+    }
+  ]
+}

@@ -32,6 +32,8 @@ import type {
   RuntimeDiscoveredPort
 } from '@noodl/types';
 
+import type { HttpValidators, NodeRunContext } from '../../../runcontext';
+
 import { outcomeOutputs, reportOutcomes } from '../../../outcome';
 
 /**
@@ -177,6 +179,12 @@ interface HttpNodeInstance extends NodeInstance {
     bodyType?: string;
     authType?: string;
     timeout?: number;
+    /** FED-001 §3.2 — `auto` (today's behaviour), `json` or `text`. */
+    responseType?: string;
+    /** FED-004 §3.2 — send `If-None-Match` / `If-Modified-Since` from what this URL last answered. */
+    conditional?: boolean;
+    /** FED-004 §3.2 — the browser warning is once per node, not once per request. */
+    warnedNoConditionalSupport?: boolean;
     response?: unknown;
     statusCode?: number;
     responseHeaders?: Record<string, string>;
@@ -213,6 +221,15 @@ interface HttpNodeInstance extends NodeInstance {
   setAuthType(value: unknown): void;
   setMethod(value: unknown): void;
   setTimeout(value: unknown): void;
+  setResponseType(value: unknown): void;
+  /** FED-004 §3.2. */
+  setConditional(value: unknown): void;
+  /** FED-004 — the host's per-run services, `undefined` in a browser. */
+  runContext(): NodeRunContext | undefined;
+  /** FED-004 §3.2 — `If-None-Match` / `If-Modified-Since`, or `{}` for an ordinary request. */
+  conditionalHeaders(url: string): Promise<Record<string, string>>;
+  /** FED-004 §3.2 — store what a 200 answered with. */
+  rememberValidators(url: string, response: Response): void;
 }
 
 const HttpNode: NodeDefinitionOptions = {
@@ -285,7 +302,9 @@ const HttpNode: NodeDefinitionOptions = {
       displayName: 'Response',
       group: 'Response',
       description:
-        'Body the server sent, parsed as JSON when it said so and as text otherwise; it keeps the previous body when a request never reached the server',
+        'Body the server sent, read the way Response Type says: Auto parses JSON when the server ' +
+        'said application/json and hands over text otherwise, Text always hands over text, JSON always ' +
+        'parses; it keeps the previous body when a request never reached the server',
       getter: function (this: HttpNodeInstance) {
         return this._internal.response;
       }
@@ -324,6 +343,28 @@ const HttpNode: NodeDefinitionOptions = {
       group: 'Events',
       description: 'Fires only when Cancel abandoned a request in flight; a timeout answers on Failure instead'
     },
+    /**
+     * FED-004 §3.2 — the server said 304.
+     *
+     * ⚠️ **It names the CAUSE of an `Unchanged`, exactly as `Canceled` does**, and that is the
+     * whole reason it is a separate port rather than a fourth outcome. A 304 is not a failure
+     * (nothing went wrong) and it is not `Done` (no body arrived, and `Response` still holds
+     * the last one). It is the invocation reporting that there was nothing to do — which is
+     * what `Unchanged` means — and this is the port that says which kind of nothing.
+     *
+     * 🔴 Without `Conditional` on, this can never fire: an unconditional GET carries no
+     * validator, so a server has nothing to compare and answers 200. A graph that wires only
+     * this port and never turns `Conditional` on waits forever, which is register R1's shape
+     * one more time.
+     */
+    notModified: {
+      type: 'signal',
+      displayName: 'Not Modified',
+      group: 'Events',
+      description:
+        'Fires when Conditional is on and the server answered 304 — nothing has changed since the ' +
+        'last fetch, Response still holds the previous body, and the invocation reports Unchanged'
+    },
     error: {
       type: 'string',
       displayName: 'Error',
@@ -352,7 +393,8 @@ const HttpNode: NodeDefinitionOptions = {
       done: 'Fires once the server has answered with a 2xx status and Response is up to date',
       unchanged:
         'Fires when nothing was fetched and nothing changed: a Cancel that abandoned a request ' +
-        'in flight, or a Cancel with no request to abandon. Canceled tells those two apart',
+        'in flight, a Cancel with no request to abandon, or a Conditional request the server ' +
+        'answered 304. Canceled and Not Modified tell those apart',
       failure:
         'Fires when the request could not be completed — no URL, a network error, a timeout, ' +
         'an unparseable body, or a non-2xx status — after the reason has been put on Error'
@@ -392,7 +434,9 @@ const HttpNode: NodeDefinitionOptions = {
         bodyType: this.setBodyType.bind(this),
         bodyFields: this.setBodyFields.bind(this),
         authType: this.setAuthType.bind(this),
-        responseMapping: this.setResponseMapping.bind(this)
+        responseMapping: this.setResponseMapping.bind(this),
+        responseType: this.setResponseType.bind(this),
+        conditional: this.setConditional.bind(this)
       };
 
       if (configSetters[name]) {
@@ -693,26 +737,97 @@ const HttpNode: NodeDefinitionOptions = {
         headers['Content-Type'] = 'application/x-www-form-urlencoded';
       }
 
-      // Perform fetch
-      fetch(url, {
-        method: method,
-        headers: headers,
-        body: body,
-        signal: abortController.signal
-      })
+      /**
+       * FED-004 §3.3 — a name on the door.
+       *
+       * The host's `User-Agent` is a DEFAULT, not an override: a graph that set its own header
+       * keeps it, whatever case it spelled the name in. Reddit refuses an anonymous request and
+       * is why this exists; being identifiable to every other host is why it is not conditional
+       * on the hostname.
+       *
+       * ⚠️ Absent in the browser, and that is not an omission — `User-Agent` is a forbidden
+       * header name there, so a value set here would be dropped by `fetch` without a word.
+       */
+      const hostUserAgent = (this.runContext() || {}).httpUserAgent;
+      if (hostUserAgent && !Object.keys(headers).some((h) => h.toLowerCase() === 'user-agent')) {
+        headers['User-Agent'] = hostUserAgent;
+      }
+
+      // FED-004 §3.2. The validator lookup is the one asynchronous thing that has to happen
+      // BEFORE the request, so the fetch now hangs off it. `{}` covers every case that is not
+      // "conditional, on a host that remembers, with something remembered for this URL" — so
+      // the unconditional path is byte-for-byte the request this node has always sent.
+      this.conditionalHeaders(url)
+        .then((validatorHeaders) =>
+          fetch(url, {
+            method: method,
+            headers: { ...headers, ...validatorHeaders },
+            body: body,
+            signal: abortController.signal
+          })
+        )
         .then((response) => {
           clearTimeout(timeoutId);
           this._internal.abortController = null;
 
-          // Parse response based on content type
+          /**
+           * 🔴 **304 is intercepted here, before the body is read and before `response.ok` is
+           * consulted.** `ok` is false for 304, so without this branch a conditional request
+           * that worked perfectly would report `Failure` with "The server answered 304 Not
+           * Modified" — the feature succeeding and being reported as the feature failing.
+           *
+           * Nothing is parsed (a 304 has no body by definition), `Response` and `Status Code`
+           * keep what they held, and the invocation reports `Unchanged` with `Not Modified`
+           * naming the cause — the same shape `Cancel` uses.
+           */
+          if (response.status === 304) {
+            this._internal.inspectData = {
+              url: this._internal.lastRequestUrl,
+              method: method,
+              status: 304,
+              notModified: true
+            };
+            this.sendSignalOnOutput('notModified');
+            reportOutcomes(this, tokens, 'unchanged');
+            return null;
+          }
+
+          // A 200 renews what we know about this URL. Before the body is read, so a body that
+          // fails to parse does not cost us the validator we were just handed.
+          this.rememberValidators(url, response);
+
+          // FED-001 §3.2 — Response Type decides, and `auto` is what this node always did.
+          const responseType = this._internal.responseType || 'auto';
+
+          if (responseType === 'text') {
+            return response.text().then((text) => ({ response, body: text }));
+          }
+
+          if (responseType === 'json') {
+            // Asked for JSON explicitly: a body that is not JSON is an error the author wants to
+            // hear about, not a string that fails silently three nodes later.
+            return response.text().then((text) => {
+              try {
+                return { response, body: JSON.parse(text) };
+              } catch (e) {
+                throw new Error(
+                  'Response Type is JSON but the body is not JSON: ' +
+                    (e && (e as Error).message ? (e as Error).message : String(e))
+                );
+              }
+            });
+          }
+
           const contentType = response.headers.get('content-type') || '';
           if (contentType.includes('application/json')) {
             return response.json().then((json) => ({ response, body: json }));
-          } else {
-            return response.text().then((text) => ({ response, body: text }));
           }
+          return response.text().then((text) => ({ response, body: text }));
         })
-        .then(({ response, body }) => {
+        .then((settled) => {
+          // `null` is the 304 branch above, which has already reported. Nothing left to do.
+          if (!settled) return;
+          const { response, body } = settled;
           this.processResponse(response, body);
 
           // Send the outcome based on status. `processResponse` above has already flagged
@@ -796,6 +911,84 @@ const HttpNode: NodeDefinitionOptions = {
 
     setTimeout: function (this: HttpNodeInstance, value: unknown) {
       this._internal.timeout = (value as number) || 30000;
+    },
+
+    setResponseType: function (this: HttpNodeInstance, value: unknown) {
+      this._internal.responseType = (value as string) || 'auto';
+    },
+
+    setConditional: function (this: HttpNodeInstance, value: unknown) {
+      this._internal.conditional = value === true;
+    },
+
+    /**
+     * FED-004 — the host's per-run services, or `undefined` in a browser.
+     *
+     * One reader for both §3.2's validator store and §3.3's `User-Agent`, because both are the
+     * same fact: this node is running somewhere that has an opinion about outbound requests.
+     */
+    runContext: function (this: HttpNodeInstance): NodeRunContext | undefined {
+      const scope = this.nodeScope as { runContext?: NodeRunContext } | undefined;
+      return scope && scope.runContext ? scope.runContext : undefined;
+    },
+
+    /**
+     * FED-004 §3.2 — the validators to send with this request, if any.
+     *
+     * Returns `{}` for every case that is not "conditional is on, a host remembers, and it has
+     * something for this URL": off, browser, first-ever fetch, a server that sent neither
+     * validator last time. Every one of those is an ordinary unconditional GET, and the caller
+     * has one branch rather than four.
+     */
+    conditionalHeaders: function (this: HttpNodeInstance, url: string): Promise<Record<string, string>> {
+      if (!this._internal.conditional) return Promise.resolve({});
+
+      const ctx = this.runContext();
+      const store = ctx && ctx.httpValidators;
+      if (!store) {
+        // The browser case. Loud enough to explain a graph that behaves differently in the
+        // editor than it does deployed, quiet enough not to fire once per row of a feed —
+        // `warnedNoConditionalSupport` is per node instance.
+        if (!this._internal.warnedNoConditionalSupport) {
+          this._internal.warnedNoConditionalSupport = true;
+          console.warn(
+            '[HTTP Request] Conditional is on, but this runtime does not remember response validators ' +
+              '(only the NodeGX backend does). The request is being sent normally, and Not Modified will never fire here.'
+          );
+        }
+        return Promise.resolve({});
+      }
+
+      return Promise.resolve(store.read(url)).then(
+        (validators: HttpValidators | null) => {
+          const headers: Record<string, string> = {};
+          if (!validators) return headers;
+          if (validators.etag) headers['If-None-Match'] = validators.etag;
+          if (validators.lastModified) headers['If-Modified-Since'] = validators.lastModified;
+          return headers;
+        },
+        // A store that cannot answer is a store with nothing to say. The request still goes.
+        () => ({})
+      );
+    },
+
+    /** FED-004 §3.2 — remember what a 200 answered with, so the next fetch can be conditional. */
+    rememberValidators: function (this: HttpNodeInstance, url: string, response: Response) {
+      if (!this._internal.conditional) return;
+      const ctx = this.runContext();
+      const store = ctx && ctx.httpValidators;
+      if (!store) return;
+
+      const etag = response.headers.get('etag');
+      const lastModified = response.headers.get('last-modified');
+      // A server that sent neither has told us it does not do conditional requests. Writing an
+      // empty row would cost a round trip on every future fetch to learn the same thing again.
+      if (!etag && !lastModified) return;
+
+      store.write(url, {
+        ...(etag ? { etag } : {}),
+        ...(lastModified ? { lastModified } : {})
+      });
     }
   }
 };
@@ -1101,6 +1294,56 @@ function updatePorts(nodeId: string, parameters: Record<string, unknown>, editor
       'Time before the request is abandoned, in milliseconds; abandoning it fires Failure, not Canceled, and 0 or blank means 30000'
   });
 
+  /**
+   * FED-001 §3.2 — how to read the body.
+   *
+   * `auto` is what this node has always done and stays the default, so no existing graph changes.
+   * `text` exists because feeds are served as `application/rss+xml`, `text/xml`, `application/xml`
+   * and, from some sources, `text/html`, and a `Parse Feed` node downstream needs the bytes the
+   * server sent rather than this node's opinion about them.
+   */
+  ports.push({
+    name: 'responseType',
+    displayName: 'Response Type',
+    type: {
+      name: 'enum',
+      enums: [
+        { label: 'Auto', value: 'auto' },
+        { label: 'JSON', value: 'json' },
+        { label: 'Text', value: 'text' }
+      ],
+      allowEditOnly: true
+    },
+    default: 'auto',
+    plug: 'input',
+    group: 'Response',
+    description:
+      'How to read the body. Auto parses JSON when the server says application/json and hands over ' +
+      'text otherwise. Text always hands over text, whatever the server claimed — which is what an ' +
+      'XML or feed parser downstream needs. JSON always parses, and fires Failure when the body is not JSON'
+  });
+
+  /**
+   * FED-004 §3.2 — ask the server whether anything changed before it sends a body.
+   *
+   * Off by default, because it is only correct where the same URL is fetched repeatedly and
+   * the graph can handle "nothing arrived". A feed poller is exactly that; a one-shot API call
+   * is not, and would gain a `_HttpCache` row it never reads.
+   */
+  ports.push({
+    name: 'conditional',
+    displayName: 'Conditional',
+    type: 'boolean',
+    default: false,
+    plug: 'input',
+    group: 'Request',
+    description:
+      'Remembers the ETag and Last-Modified this URL last answered with and sends them back as ' +
+      'If-None-Match / If-Modified-Since, so an unchanged source answers 304 with no body and ' +
+      'fires Not Modified instead of Done. Only the backend remembers; in a browser the port is ' +
+      'ignored and the request is sent as normal'
+  });
+
   // Response mapping - add output names, then specify JSONPath for each
   // User adds output names like: userId, userName, totalCount
   // For each name, we generate a "Path" input and an output port
@@ -1240,6 +1483,23 @@ function updatePorts(nodeId: string, parameters: Record<string, unknown>, editor
     plug: 'output',
     group: 'Events',
     description: 'Fires only when Cancel abandoned a request in flight; a timeout answers on Failure instead'
+  });
+
+  /**
+   * FED-004 §3.2. Declared as a static output above as well — which is the rule the `success`
+   * scar left behind: **every signal output published here must be one the node type declares**,
+   * because `reportOutcome` and `sendSignalOnOutput` gate on the type's declaration and a port
+   * that exists only in this list draws a wire nothing can ever fire.
+   */
+  ports.push({
+    name: 'notModified',
+    displayName: 'Not Modified',
+    type: 'signal',
+    plug: 'output',
+    group: 'Events',
+    description:
+      'Fires when Conditional is on and the server answered 304 — nothing has changed, Response ' +
+      'still holds the previous body, and the invocation reports Unchanged'
   });
 
   ports.push({

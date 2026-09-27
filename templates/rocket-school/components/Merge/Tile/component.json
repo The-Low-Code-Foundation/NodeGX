@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d6f4843e-6e21-52e4-8958-2fb30d6fca7a",
+  "name": "Tile",
+  "path": "/Merge/Tile",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One square of the Make Ten board: its number, and a colour for the kind of number it is: empty, a single number, a ten (sunshine), tens (tomato), or a hundred and over (teal). Fx is its class, so a square that just joined pops and one that just landed grows in."
+}

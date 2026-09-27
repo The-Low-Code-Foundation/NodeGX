@@ -39,6 +39,7 @@ cardInputs name        → photo    alt        cardInputs breed       → breedT
 
 ```tsx
 // src/components/PuppyCard.tsx — generated from /Components/PuppyCard
+import { mediaSrc } from '../lib/media';
 import styles from './PuppyCard.module.css';
 
 export interface PuppyCardProps {
@@ -53,7 +54,7 @@ export interface PuppyCardProps {
 export function PuppyCard({ photo, name, breed, age, description }: PuppyCardProps) {
   return (
     <div className={styles.card}>
-      <img className={styles.photo} src={photo} alt={name} />
+      <img className={styles.photo} src={mediaSrc(photo)} alt={name} />
       <div className={styles.body}>
         <div className={styles.nameRow}>
           <p className={styles.nameText}>{name}</p>

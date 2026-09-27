@@ -1,0 +1,124 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "p1c7u2ed-e5c0-4000-8000-000000000004",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "teamPage",
+      "type": "Page",
+      "label": "Team",
+      "parameters": { "title": "The team", "urlPath": "gallery/team" },
+      "children": ["column"],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "column",
+      "type": "Group",
+      "label": "Column",
+      "parent": "teamPage",
+      "parameters": { "flexDirection": "column", "rowGap": "var(--space-4)", "paddingTop": "var(--space-8)" },
+      "children": ["hero", "remote", "rooted", "inline", "cleared", "responsive", "clip", "badge", "members"],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "hero",
+      "type": "Image",
+      "label": "Hero picture",
+      "parent": "column",
+      "parameters": { "src": "noodl_modules/starter-imagery/portrait.svg", "alt": "A portrait", "width": { "value": 200, "unit": "px" } },
+      "x": 100,
+      "y": 260
+    },
+    {
+      "id": "remote",
+      "type": "Image",
+      "label": "A picture on a CDN",
+      "parent": "column",
+      "parameters": { "src": "https://cdn.example.com/x.jpg", "alt": "Remote" },
+      "x": 100,
+      "y": 360
+    },
+    {
+      "id": "rooted",
+      "type": "Image",
+      "label": "Already root-absolute",
+      "parent": "column",
+      "parameters": { "src": "/already/root.png", "alt": "Rooted" },
+      "x": 100,
+      "y": 460
+    },
+    {
+      "id": "inline",
+      "type": "Image",
+      "label": "A data URI",
+      "parent": "column",
+      "parameters": { "src": "data:image/gif;base64,R0lGODlhAQABAAAAACw=", "alt": "Inline" },
+      "x": 100,
+      "y": 560
+    },
+    {
+      "id": "cleared",
+      "type": "Image",
+      "label": "The field an author emptied",
+      "parent": "column",
+      "parameters": { "src": "", "alt": "Nothing yet" },
+      "x": 100,
+      "y": 660
+    },
+    {
+      "id": "responsive",
+      "type": "Image",
+      "label": "A source set",
+      "parent": "column",
+      "parameters": {
+        "src": "noodl_modules/starter-imagery/tile-1.svg",
+        "srcSet": "noodl_modules/starter-imagery/tile-1.svg 480w, https://cdn.example.com/big.jpg 1080w",
+        "alt": "Responsive",
+        "width": { "value": 200, "unit": "px" }
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "clip",
+      "type": "Video",
+      "label": "A clip with a poster",
+      "parent": "column",
+      "parameters": { "src": "noodl_modules/starter-imagery/clip.mp4", "poster": "noodl_modules/starter-imagery/tile-2.svg", "controls": true },
+      "x": 100,
+      "y": 860
+    },
+    {
+      "id": "badge",
+      "type": "net.noodl.visual.icon",
+      "label": "A picture as an icon",
+      "parent": "column",
+      "parameters": { "iconSourceType": "image", "iconImageSource": "noodl_modules/starter-imagery/tile-3.svg", "iconSize": 48 },
+      "x": 100,
+      "y": 960
+    },
+    {
+      "id": "members",
+      "type": "For Each",
+      "label": "One card per member",
+      "parent": "column",
+      "parameters": { "template": "/Components/MemberCard" },
+      "x": 100,
+      "y": 1060
+    },
+    {
+      "id": "memberData",
+      "type": "Static Data",
+      "label": "Members",
+      "parameters": {
+        "type": "json",
+        "json": "[{\"id\":\"m1\",\"name\":\"Ada\",\"picture\":\"noodl_modules/starter-imagery/tile-1.svg\"},{\"id\":\"m2\",\"name\":\"Grace\",\"picture\":\"noodl_modules/starter-imagery/tile-3.svg\"}]"
+      },
+      "x": 400,
+      "y": 1060
+    }
+  ],
+  "visualRoots": ["teamPage"]
+}

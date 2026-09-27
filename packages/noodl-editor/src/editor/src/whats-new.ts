@@ -7,6 +7,7 @@ import getContentEndpoint from '@noodl-utils/getContentEndpoint';
 
 import { NewsModal } from './views/NewsModal';
 import PopupLayer from './views/popuplayer';
+import { unmountReactRoot } from '../../shared/utils/unmountReactRoot';
 
 /**
  * Fetch the newest what's-new entry, or `null` if there is nothing to show.
@@ -73,7 +74,7 @@ export async function whatsnewRender() {
       onFinished: () => {
         ipcRenderer.send('viewer-show');
         // Properly cleanup React root and DOM element
-        modalRoot.unmount();
+        unmountReactRoot(modalRoot);
         modalContainer.remove();
       }
     })

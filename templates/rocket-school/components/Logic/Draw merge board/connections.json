@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "cf3915f8-3246-5aea-8565-38f8895f5545",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "drawmergeboaIn",
+      "fromProperty": "game",
+      "toId": "drawmergeboaFn",
+      "toProperty": "in-game"
+    },
+    {
+      "fromId": "drawmergeboaIn",
+      "fromProperty": "lang",
+      "toId": "drawmergeboaFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "drawmergeboaFn",
+      "fromProperty": "out-rows",
+      "toId": "drawmergeboaOut",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "drawmergeboaFn",
+      "fromProperty": "out-scoreLine",
+      "toId": "drawmergeboaOut",
+      "toProperty": "scoreLine"
+    },
+    {
+      "fromId": "drawmergeboaFn",
+      "fromProperty": "out-phase",
+      "toId": "drawmergeboaOut",
+      "toProperty": "phase"
+    },
+    {
+      "fromId": "drawmergeboaFn",
+      "fromProperty": "out-over",
+      "toId": "drawmergeboaOut",
+      "toProperty": "over"
+    },
+    {
+      "fromId": "drawmergeboaFn",
+      "fromProperty": "out-score",
+      "toId": "drawmergeboaOut",
+      "toProperty": "score"
+    },
+    {
+      "fromId": "drawmergeboaFn",
+      "fromProperty": "out-made",
+      "toId": "drawmergeboaOut",
+      "toProperty": "made"
+    },
+    {
+      "fromId": "drawmergeboaFn",
+      "fromProperty": "out-biggest",
+      "toId": "drawmergeboaOut",
+      "toProperty": "biggest"
+    },
+    {
+      "fromId": "drawmergeboaFn",
+      "fromProperty": "out-fullness",
+      "toId": "drawmergeboaOut",
+      "toProperty": "fullness"
+    },
+    {
+      "fromId": "drawmergeboaFn",
+      "fromProperty": "success",
+      "toId": "drawmergeboaOut",
+      "toProperty": "done"
+    }
+  ]
+}

@@ -3,17 +3,25 @@ import { createRoot, Root } from 'react-dom/client';
 
 import { isExpressionParameter } from '@noodl-models/ExpressionParameter';
 import { NodeLibrary } from '@noodl-models/nodelibrary';
+import { tokenCategoriesForPort } from '@noodl-models/StyleTokensModel/TokensForPicking';
 import { ParameterValueResolver } from '@noodl-utils/ParameterValueResolver';
 
 import { PropertyPanelInputType } from '@noodl-core-ui/components/property-panel/PropertyPanelInput';
+import { PropertyPanelRow } from '@noodl-core-ui/components/property-panel/PropertyPanelInput/PropertyPanelRow';
+import { TokenChip } from '@noodl-core-ui/components/property-panel/TokenChip';
 
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
+import { TokenGlyph } from '../components/NumberUnitInput';
+import { TokenChipActions } from '../components/TokenChipActions';
+import tokenCss from '../components/NumberUnitInput.module.scss';
 import { PropertyPanelInputWithExpressionModal } from '../components/PropertyPanelInputWithExpressionModal';
 import { TypeView } from '../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } from '../utils';
 import { expressionProps } from './expressionProps';
-import { readNumberFieldEdit } from './NumberWithUnits';
+import { isTokenReference, readNumberFieldEdit } from './NumberWithUnits';
 import { commitScrub, writeScrubStep } from './scrubCommit';
 import { scrubSpecForPortType, scrubStartValue } from './scrubPolicy';
+import { fieldOffersTokens, openTokenFieldPopout, resolveTokenText } from './tokenFieldPopout';
 
 function firstType(type) {
   return NodeLibrary.nameForPortType(type);
@@ -170,7 +178,82 @@ export class BasicType extends TypeView {
       ...expressionProps(this)
     };
 
-    this.root.render(React.createElement(PropertyPanelInputWithExpressionModal, props));
+    const input = React.createElement(PropertyPanelInputWithExpressionModal, props);
+
+    // P102 CMP-008 — the design-token affordance on a STRING row, for the one string port that
+    // holds a whole token (`boxShadowToken`, by `PORT_TOKEN_RULES`). The number rows draw theirs
+    // inside `NumberUnitInput`; a string row has no such control, so the same glyph rides beside
+    // the field here and opens the same picker through the one opener HLT-012 built.
+    if (fieldOffersTokens(this.name) && !this.isConnected) {
+      const stored = this.parent.model.getParameter(this.name);
+      const isToken = isTokenReference(stored);
+      const openPicker = (anchor: HTMLElement) =>
+        openTokenFieldPopout({
+          view: this,
+          portName: this.name,
+          anchor,
+          currentValue: isToken ? String(stored) : undefined,
+          onSelect: (reference: string) => {
+            this.parent.setParameter(this.name, reference, { undo: true, label: `change ${this.displayName}` });
+            this.isDefault = false;
+            this.renderReact();
+          }
+        });
+      const pencil = React.createElement(
+        'button',
+        {
+          type: 'button',
+          className: `${tokenCss['TokenButton']} ${isToken ? tokenCss['is-token'] : ''}`,
+          style: { height: 24, alignSelf: 'flex-end' },
+          title: isToken ? `${String(stored)} — pick a different design token` : 'Pick a design token',
+          'aria-label': 'Pick a design token',
+          'data-test': `token-button-${this.name}`,
+          onMouseDown: (e: React.MouseEvent<HTMLButtonElement>) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openPicker(e.currentTarget as HTMLElement);
+          }
+        },
+        React.createElement(TokenGlyph)
+      );
+
+      // P103 CMG-009 — a token reads as a token. While the port holds exactly one `var(--x)` the
+      // text box is replaced by the chip. On `boxShadowToken` the shadow it resolves to is drawn
+      // small on a light card beside its name; on the unitless number ports a scale reaches
+      // (`Circle.cornerRadius`, `strokeWidth`) the resolved value is written out. No ✕ here: the
+      // shadow port takes a token or nothing (`boxShadowSource` decides whether it is read), and
+      // a unitless port has no unit to detach into. Anything that is not one token — a `calc()`,
+      // two tokens, a typed CSS shadow — stays in the text box (AC7).
+      const resolved = isToken ? resolveTokenText(stored) : undefined;
+      const isShadow = tokenCategoriesForPort(this.name).includes('shadow');
+      const field =
+        isToken && this.root
+          ? React.createElement(
+              PropertyPanelRow,
+              { label: this.displayName, isChanged: !this.isDefault, onReset: props.onReset, children: null },
+              React.createElement(TokenChip, {
+                name: String(stored).trim(),
+                value: isShadow ? undefined : resolved,
+                preview: isShadow && resolved ? { kind: 'shadow' as const, css: resolved } : undefined,
+                onOpen: openPicker,
+                actions: React.createElement(TokenChipActions, { reference: String(stored), port: this.name }),
+                dataTest: `token-chip-${this.name}`
+              })
+            )
+          : input;
+
+      this.root.render(
+        React.createElement(
+          'div',
+          { style: { display: 'flex', alignItems: 'stretch', width: '100%' } },
+          React.createElement('div', { style: { flex: 1, minWidth: 0 } }, field),
+          pencil
+        )
+      );
+      return;
+    }
+
+    this.root.render(input);
   }
 
   /**
@@ -246,7 +329,7 @@ export class BasicType extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

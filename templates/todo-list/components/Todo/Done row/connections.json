@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d861071e-09a4-52e3-8cdc-18378c3e6eae",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "drIn",
+      "fromProperty": "title",
+      "toId": "drTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "drIn",
+      "fromProperty": "note",
+      "toId": "drNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "drIn",
+      "fromProperty": "when",
+      "toId": "drWhen",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "drIn",
+      "fromProperty": "bg",
+      "toId": "drRow",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "drIn",
+      "fromProperty": "id",
+      "toId": "drOut",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "drRow",
+      "fromProperty": "onClick",
+      "toId": "drOut",
+      "toProperty": "open"
+    }
+  ]
+}

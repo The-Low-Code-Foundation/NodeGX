@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "83a36de0-bb6f-5815-8705-81533d05f065",
+  "name": "Curriculum",
+  "path": "/Data/Curriculum",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Every skill the game can ask about, for every level, in both languages. Add a row to add a skill to every game."
+}

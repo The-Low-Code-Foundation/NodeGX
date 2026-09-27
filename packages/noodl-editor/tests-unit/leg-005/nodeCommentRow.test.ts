@@ -125,15 +125,24 @@ describe('LEG-005 — the properties that live in the source', () => {
     expect(mount[0]).not.toMatch(/hasComment|getComment|\.comment/);
   });
 
-  it('sits above the tab strip and below the label', () => {
+  /**
+   * CHR-009 R7 (Richard, 2026-09-15: "next to ports?") moved the row out of the panel top into a
+   * tab beside `Ports`. The tab entry itself must not be conditional either — a tab that appears
+   * only once a comment exists is L12 again — and it carries a marker once one is written.
+   */
+  it('is a tab beside Ports, always present, marked once written', () => {
     const panel = read(...PANEL_INDEX);
-    const label = panel.indexOf('<NodeLabel');
-    const comment = panel.indexOf('<NodeComment');
-    const tabs = panel.indexOf('<Tabs');
+    const ports = panel.indexOf('label: TAB_PORTS');
+    const comment = panel.indexOf('label: TAB_COMMENT');
+    const row = panel.indexOf('<NodeComment');
 
-    expect(label).toBeGreaterThan(-1);
-    expect(comment).toBeGreaterThan(label);
-    expect(tabs).toBeGreaterThan(comment);
+    expect(ports).toBeGreaterThan(-1);
+    expect(comment).toBeGreaterThan(ports);
+    expect(row).toBeGreaterThan(comment);
+    expect(panel).toContain("const TAB_COMMENT = 'Comment';");
+    expect(panel).toMatch(/label: TAB_COMMENT,\s*hasMarker: hasComment,/);
+    // Pushed with the others, not `push`ed/`unshift`ed behind a condition.
+    expect(panel).not.toMatch(/tabs\.(push|unshift)\(\s*\{\s*label: TAB_COMMENT/);
   });
 
   /**

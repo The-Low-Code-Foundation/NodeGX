@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8721ff6d-cbfe-5333-857b-aa15c0294d89",
+  "name": "Selected task",
+  "path": "/Logic/Selected task",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Everything the detail pane shows about the selected task: title, where it is, its deadline, its next actions in order and its history, newest first."
+}

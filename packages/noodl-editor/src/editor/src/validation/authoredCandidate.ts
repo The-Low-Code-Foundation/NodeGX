@@ -64,6 +64,7 @@ import {
 } from './componentInterface';
 import { DiagnosticCode, type Diagnostic } from './diagnostics';
 import { checkImageSources } from './imageSource';
+import { checkReservedRowFields } from './reservedRowField';
 import { checkUnrealisedMeasure } from './unrealisedMeasure';
 import { checkPageScroll } from './pageScroll';
 import { checkFunctionNodePorts, checkScriptNodeRunnable, type FunctionWireLike } from './functionPorts';
@@ -72,6 +73,7 @@ import { checkNavigation, checkPageShape, looksLikePageComponent, PAGE_NODE_TYPE
 import { checkParameterValues } from './parameterValues';
 import { checkPublicWriteDoor, type FunctionSecurityPolicy } from './publicWriteDoor';
 import { checkRepeaterTemplate } from './repeaterTemplate';
+import { checkVariableInRepeatedComponent } from './repeatedComponentVariable';
 import { checkLayoutInertCombination } from './layoutInertCombination';
 import { checkOneWayGate } from './oneWayGate';
 import { checkQueryBeforeFilter } from './queryBeforeFilter';
@@ -179,6 +181,15 @@ export interface ComponentNodesView {
     type: string;
     parameters?: Record<string, unknown> | null;
     ports?: readonly AuthoredPortLike[] | null;
+    /**
+     * GAM-005 — where the "shared on purpose" diagnostic points, and the escape it reads. Both
+     * clients already hand these over: MCP views are the stored v2 nodes (`id`, `label`,
+     * `metadata.comment`), and the editor's are `GraphNode`s (`comment` flat).
+     */
+    id?: string;
+    label?: string;
+    comment?: string;
+    metadata?: Record<string, unknown> | null;
   }[];
 }
 
@@ -476,6 +487,12 @@ export interface AuthoredPreconditionOptions {
    */
   derived?: DerivedPortIndex;
   /**
+   * GAM-005 — every component's nodes, the candidate's included, the same views `interfaces` and
+   * `derived` are built from. **Omitted means "do not check"**: a caller that cannot enumerate the
+   * project cannot count copies, and a component it has not read may be the one placing a second.
+   */
+  views?: readonly ComponentNodesView[];
+  /**
    * REL-002a — the project's `settings.bodyScroll`, in three states.
    *
    * **`undefined` means "do not check"; `null` means "the project file was read and the setting
@@ -552,7 +569,8 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     wires,
     derived,
     security,
-    bodyScroll
+    bodyScroll,
+    views
   } = options;
   return [
     ...checkParameterValues(nodes, catalog, { component }),
@@ -588,6 +606,9 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     // named for its image shipping without one. Reads `connections` rather than `wires` because
     // the question is "is this input fed", which is exactly what that set answers.
     ...checkImageSources(nodes, { component, catalog, connectedInputs: connections }),
+    // GAM-007 (P78 D64) — a Static Data row field named like a Noodl Object member reads as the
+    // member at runtime. Warning, R8's B; `Collection.set` says the same at runtime.
+    ...checkReservedRowFields(nodes, { component }),
     // VIB-007 / register V29 — a shell whose declared measure no child can draw to. 🔴 The row
     // names "a maxWidth on a Text"; the render says twelve of that shape's thirteen corpus
     // instances are CORRECT, three of them on the WORTHY page, and the one defect is a property of
@@ -595,6 +616,10 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     // is a value the predicate cannot read and must not count as a cap.
     ...checkUnrealisedMeasure(nodes, { component, catalog, connectedInputs: connections }),
     ...checkRepeaterTemplate(nodes, { component, components, connectedInputs: connections }),
+    // GAM-005 (P78 D57) — a Variable in a component drawn more than once is one value every copy
+    // shares. Reads the views rather than `nodes`, because the copies are counted project-wide and
+    // the holder may be a component this candidate places, not the candidate itself.
+    ...(views ? checkVariableInRepeatedComponent({ component, views }) : []),
     // DEF-010 (SB-009) — the other twelve of the catalog's thirteen
     // component-typed ports. `For Each.template` is skipped inside the check:
     // the line above owns it, and a second producer over one population is a
@@ -606,7 +631,9 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     // lives with the predicate that needs it.
     ...checkPublicWriteDoor(nodes, { component, security, catalog }),
     // DSG-004 §2.1 — doctrine §7's only mechanical claim, which had no gate.
-    ...checkResponsiveArrangement(nodes, { component, catalog }),
+    // GAM-022 (P78 D50) — Arm B reads the item a `For Each` draws, so it needs the views and whether
+    // `template` is wired.
+    ...checkResponsiveArrangement(nodes, { component, catalog, views, connectedInputs: connections }),
     // DEF-018/DEF-020 — the two layout combinations in which a declared
     // parameter is silently inert: a contentSize child of a Columns, and a
     // distributing justifyContent on a row whose children all grow.

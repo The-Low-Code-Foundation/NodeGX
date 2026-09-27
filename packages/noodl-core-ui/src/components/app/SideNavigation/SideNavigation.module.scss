@@ -49,7 +49,8 @@ $_sidebar-hover-enter-offset: 250ms;
 
   &:has(.Label.is-tooltip-visible) {
     transition: box-shadow var(--speed-quick) var(--easing-base) $_sidebar-hover-enter-offset;
-    box-shadow: 0 0 30px 5px var(--theme-color-bg-1-transparent);
+    /* P103 CMG-007: was 0 0 30px 5px --theme-color-bg-1-transparent — white at 0.85 in light mode. */
+    box-shadow: var(--shadow-float);
   }
 }
 
@@ -264,7 +265,7 @@ $_sidebar-hover-enter-offset: 250ms;
   padding: 2px 5px;
   border-radius: 8px;
   background-color: var(--theme-color-secondary-bright);
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   font-weight: 700;
   font-family: var(--font-family);
   color: var(--theme-color-on-secondary);

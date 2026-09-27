@@ -1,64 +1,51 @@
 import classNames from 'classnames';
 import React from 'react';
 
-import { Icon, IconName } from '@noodl-core-ui/components/common/Icon';
+// The row's own module: the `PropertyPanelInput` index pulls in `Icon`, which a tests-unit spec cannot load.
+import { PropertyPanelRow } from '@noodl-core-ui/components/property-panel/PropertyPanelInput/PropertyPanelRow';
+
+import { ScopeRow } from '../model/scopeRows';
+import css from './PropertyTabs.module.scss';
 
 export interface PropertyTabsProps {
-  tabs: string[];
-  selectedTab: string;
+  row: ScopeRow;
   onTabClicked: (tab: string) => void;
 }
 
 /**
- * UIX-011: the tab name used to select a CSS `content: url(...)` background
- * (`.property-tab-icon.borders-all` and friends). Those SVGs carried baked
- * white fills and could not follow the theme, so the name now selects a
- * core-ui `currentColor` glyph instead. The 32x32 box is preserved exactly —
- * a background painted in the element's own box, an Icon is a child with its
- * own, and the old rule sized the element.
+ * The scope picker above a tab group's rows (`Border Style`, `Corner Radius`) — CHR-009 slice 7.
+ *
+ * Was a right-aligned strip of 32px icons with no label, off the column. Now a row of the label
+ * column: `Edge` / `Corner`, then one segmented track (slice 5's shape), the selected side pressed and
+ * a mark on each side that holds its own value (`model/scopeRows.ts`). It picks which rows show; it
+ * writes nothing, so it has no reset dot.
  */
-const TAB_ICON: Record<string, IconName> = {
-  'borders-all': IconName.BorderAll,
-  'borders-left': IconName.BorderLeft,
-  'borders-right': IconName.BorderRight,
-  'borders-bottom': IconName.BorderDown,
-  'borders-top': IconName.BorderUp,
-  'corners-all': IconName.RoundedCornerAll,
-  'corners-top-left': IconName.RoundedCornerLeftUp,
-  'corners-top-right': IconName.RoundedCornerRightUp,
-  'corners-bottom-left': IconName.RoundedCornerLeftDown,
-  'corners-bottom-right': IconName.RoundedCornerRightDown
-};
-
-/**
- * The row of icon tabs above a tab group's properties (legacy `tab-group` /
- * `tab-group-tab` templates).
- */
-export function PropertyTabs({ tabs, selectedTab, onTabClicked }: PropertyTabsProps) {
+export function PropertyTabs({ row, onTabClicked }: PropertyTabsProps) {
   return (
-    <div
-      className="tabs"
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        marginBottom: 4,
-        marginRight: 6
-      }}
-    >
-      {tabs.map((tab) => (
-        <div
-          key={tab}
-          className={classNames('property-tab', tab === selectedTab && 'selected')}
-          data-tab={tab}
-          onClick={() => onTabClicked(tab)}
-        >
-          <div className={classNames('property-tab-icon', tab)}>
-            {TAB_ICON[tab] && <Icon icon={TAB_ICON[tab]} UNSAFE_style={{ width: 32, height: 32 }} />}
-          </div>
+    <div data-test="scope-row">
+      <PropertyPanelRow label={row.label}>
+        <div className={css['Segment']} role="group" aria-label={row.label}>
+          {row.segments.map((segment) => (
+            <button
+              key={segment.tab}
+              type="button"
+              className={classNames(css['Option'], segment.pressed && css['is-pressed'], !segment.glyph && css['is-text'])}
+              aria-pressed={segment.pressed}
+              data-tab={segment.tab}
+              data-set={segment.isSet ? 'true' : undefined}
+              title={segment.isSet ? `${segment.title} (set)` : segment.title}
+              onClick={() => onTabClicked(segment.tab)}
+            >
+              {segment.glyph ? (
+                <span className={css['Glyph']} dangerouslySetInnerHTML={{ __html: segment.glyph }} />
+              ) : (
+                segment.title
+              )}
+              {segment.isSet && <span className={css['SetMark']} />}
+            </button>
+          ))}
         </div>
-      ))}
+      </PropertyPanelRow>
     </div>
   );
 }

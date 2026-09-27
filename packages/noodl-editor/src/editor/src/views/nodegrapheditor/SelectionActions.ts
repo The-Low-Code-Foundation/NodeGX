@@ -20,7 +20,34 @@ import type { NodeGraphEditor } from '../nodegrapheditor';
 export class SelectionActions {
   constructor(private editor: NodeGraphEditor) {}
 
+  /**
+   * TVW-003: told once the node selection has settled after an action, so the selection store can
+   * mirror it (`SelectionStoreBinding`). Unset on every canvas but the app's.
+   */
+  onSelectionChanged?: () => void;
+
+  /**
+   * How deep inside a selection action we are. `selectNode` deselects before it selects; without
+   * this the store would hear "nothing selected" and then the node, and the preview would drop its
+   * outline and redraw it on every click.
+   */
+  private actionDepth = 0;
+
+  private settle<T>(action: () => T): T {
+    this.actionDepth++;
+    try {
+      return action();
+    } finally {
+      this.actionDepth--;
+      if (this.actionDepth === 0) this.onSelectionChanged?.();
+    }
+  }
+
   deselect(args?: { disableHidePanels: boolean }) {
+    this.settle(() => this.deselectNow(args));
+  }
+
+  private deselectNow(args?: { disableHidePanels: boolean }) {
     const editor = this.editor;
 
     editor.commentLayer?.clearMultiselection();
@@ -112,6 +139,10 @@ export class SelectionActions {
   }
 
   addNodeToSelection(node: NodeGraphEditorNode) {
+    this.settle(() => this.addNodeToSelectionNow(node));
+  }
+
+  private addNodeToSelectionNow(node: NodeGraphEditorNode) {
     const editor = this.editor;
 
     if (editor.readOnly) {
@@ -134,6 +165,12 @@ export class SelectionActions {
     editor.repaint();
   }
 
+  /**
+   * @param options.keepSidePanel TVW-004 — do not replace the side panel with the node's
+   *   properties. Passed when the selection was made **in a panel**: a Layers row click used to
+   *   swap the Project panel out for Properties, so the tree the person was navigating removed
+   *   itself on first use. Measured in the drive, invisible to every count that graded it.
+   */
   selectNode(node: NodeGraphEditorNode) {
     const editor = this.editor;
 
@@ -144,14 +181,21 @@ export class SelectionActions {
 
     // Always select the node in the selector if not already selected
     if (!node.selected) {
-      this.clearSelection();
-      editor.commentLayer?.clearSelection();
-      node.selected = true;
-      editor.selector.select([node]);
-      editor.repaint();
+      this.settle(() => {
+        // P101 INS-002 — the deselect empties the inspector and `switchToNode` below refills it, in
+        // the same tick (`settle` is synchronous). Neither touches the left panel, so nothing needs
+        // the `keepSidePanel` guard P94 STY-006 measured was missing here.
+        this.clearSelection();
+        editor.commentLayer?.clearSelection();
+        node.selected = true;
+        editor.selector.select([node]);
+        editor.repaint();
+      });
     }
 
-    // Always switch to the node in the sidebar (fixes property panel stuck issue)
+    // Always show the node in the inspector — from the canvas, the preview, Layers or any panel.
+    // P101 INS-002: this was skipped for a selection made in a panel, because in a one-slot editor
+    // the node's panel would have replaced the panel that was clicked in. It has its own column now.
     SidebarModel.instance.switchToNode(node.model);
 
     // Handle double-click navigation
@@ -166,7 +210,9 @@ export class SelectionActions {
       }
 
       if (node.model.type instanceof ComponentModel) {
-        editor.switchToComponent(node.model.type, { pushHistory: true });
+        // TVW-007: the instance door. `viaInstance` is what makes the trail read `[◆ Home] › Hero`
+        // instead of the folder path — see `instanceTrail.ts`.
+        editor.switchToComponent(node.model.type, { pushHistory: true, viaInstance: true, viaNodeId: node.id });
       } else {
         const componentPorts = node.model
           .getPorts()
@@ -177,17 +223,31 @@ export class SelectionActions {
         const type = component.length && NodeLibrary.instance.getNodeTypeWithName(component[0]);
 
         if (type) {
+          /**
+           * ⚠️ TVW-007 deliberately does NOT pass `viaInstance` here.
+           *
+           * This branch is a node with a `component`-typed INPUT PARAMETER (a node configured to
+           * point at a component), not an instance of one. The trail's parent crumb is drawn as
+           * the instance chip — diamond and component-hue wash — and that chip would be a claim
+           * about containment that this relationship does not make: the component is not placed
+           * on this canvas, it is named by a parameter on it. These descend to the folder path.
+           */
           // @ts-expect-error TODO: this is wrong!
           editor.switchToComponent(type, { pushHistory: true });
         } else {
           //there was no type that matched, so forward the double click event to the sidebar
-          SidebarModel.instance.invokeActive('doubleClick', node);
+          // P101 INS-001 — the node's panel is in the inspector now, not the active left slot.
+          SidebarModel.instance.invokeInspector('doubleClick', node);
         }
       }
     }
   }
 
   multiselectNodes(x, y, x2, y2, mode) {
+    this.settle(() => this.multiselectNodesNow(x, y, x2, y2, mode));
+  }
+
+  private multiselectNodesNow(x, y, x2, y2, mode) {
     const editor = this.editor;
 
     const selectRect = { x: Math.min(x, x2), y: Math.min(y, y2), width: Math.abs(x2 - x), height: Math.abs(y2 - y) };

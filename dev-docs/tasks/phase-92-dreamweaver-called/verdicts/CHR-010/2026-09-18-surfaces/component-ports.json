@@ -1,0 +1,78 @@
+{
+  "name": "component-ports",
+  "scope": "[...document.querySelectorAll('.sidebar-panel')].sort((a,b)=>b.getBoundingClientRect().height-a.getBoundingClientRect().height)[0]",
+  "themes": {
+    "dark": {
+      "ground": "rgb(35, 33, 41)",
+      "census": {
+        "scope": "sidebar-panel",
+        "scopeBox": [
+          326,
+          710
+        ],
+        "total": 4,
+        "drawn": 4,
+        "emptyHosts": 0,
+        "collapsed": 0,
+        "boxes": [
+          "14x14"
+        ],
+        "colours": [
+          "rgb(196, 206, 219)",
+          "rgb(221, 228, 236)"
+        ],
+        "faLeft": 0,
+        "glyphs": [
+          " | 14x14 | svg 14x14 | rgb(221, 228, 236)",
+          " | 14x14 | svg 14x14 | rgb(221, 228, 236)",
+          "Port | 14x14 | svg 14x14 | rgb(196, 206, 219)",
+          "Group | 14x14 | svg 14x14 | rgb(196, 206, 219)"
+        ]
+      },
+      "clip": {
+        "x": 45,
+        "y": 66,
+        "width": 342,
+        "height": 726,
+        "scale": 1
+      },
+      "png": "component-ports-dark.png"
+    },
+    "light": {
+      "ground": "rgb(255, 255, 255)",
+      "census": {
+        "scope": "sidebar-panel",
+        "scopeBox": [
+          326,
+          710
+        ],
+        "total": 4,
+        "drawn": 4,
+        "emptyHosts": 0,
+        "collapsed": 0,
+        "boxes": [
+          "14x14"
+        ],
+        "colours": [
+          "rgb(74, 86, 99)",
+          "rgb(89, 98, 110)"
+        ],
+        "faLeft": 0,
+        "glyphs": [
+          " | 14x14 | svg 14x14 | rgb(74, 86, 99)",
+          " | 14x14 | svg 14x14 | rgb(74, 86, 99)",
+          "Port | 14x14 | svg 14x14 | rgb(89, 98, 110)",
+          "Group | 14x14 | svg 14x14 | rgb(89, 98, 110)"
+        ]
+      },
+      "clip": {
+        "x": 45,
+        "y": 66,
+        "width": 342,
+        "height": 726,
+        "scale": 1
+      },
+      "png": "component-ports-light.png"
+    }
+  }
+}

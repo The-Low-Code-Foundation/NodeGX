@@ -202,7 +202,9 @@ export class FileRoutes {
       return;
     }
 
-    const driver = this.subsystem.getDriver();
+    // BMG-015: the driver the row names, not the current one — a file uploaded
+    // before the switch to a bucket still lives on this machine.
+    const driver = this.subsystem.driverFor(record);
     ctx.res.writeHead(200, {
       'Content-Type': record.contentType,
       'Content-Length': record.size,
@@ -262,7 +264,12 @@ export class FileRoutes {
   private resolveThumbSpec(ctx: RequestContext, raw: string): ThumbSpec {
     const presets = this.subsystem.config.get().thumbnails.presets;
     const preset = presets[raw];
-    if (preset) return { key: raw, width: preset.width, height: preset.height, fit: preset.fit };
+    // BMG-011: the cache key (and the ETag) carry the SIZE, not just the
+    // preset's name — an edited preset used to keep serving the render made
+    // under its old size from `thumbs/<hash>/<name>.bin` for as long as the
+    // cache lived. The name stays in the key so two presets of one size are
+    // still two files a person can reason about.
+    if (preset) return { key: `${raw}-${preset.width}x${preset.height}-${preset.fit}`, width: preset.width, height: preset.height, fit: preset.fit };
 
     const m = /^(\d{1,4})x(\d{1,4})$/.exec(raw);
     if (m) {
@@ -303,7 +310,7 @@ export class FileRoutes {
         });
         return;
       }
-      const source = await this.subsystem.getDriver().get(record.key);
+      const source = await this.subsystem.driverFor(record).get(record.key);
       try {
         const rendered = await renderThumbnail(source, record.contentType, spec);
         buffer = rendered.buffer;
@@ -345,19 +352,14 @@ export class FileRoutes {
       throw new HttpError(403, 'You cannot delete this file.', 119);
     }
 
-    const driver = this.subsystem.getDriver();
-    await driver.delete(record.key);
-    await this.subsystem.metadata.deleteById(record.objectId);
-
-    // Invalidate cached thumbnails for this file's content — the success
-    // criterion "a replaced file invalidates its cached thumbnails": a
-    // replace in this wire protocol is delete-then-reupload (there is no
-    // in-place "replace this stored name"), and the reupload gets a NEW hash
-    // (different bytes) or a brand-new storedName+key (identical bytes) —
-    // either way the OLD cache entries below are for content nothing points
-    // at anymore once this delete completes.
-    const cacheDir = path.join(this.thumbsDir, record.hash);
-    if (fs.existsSync(cacheDir)) fs.rmSync(cacheDir, { recursive: true, force: true });
+    // Blob, row and cached thumbnails — the success criterion "a replaced
+    // file invalidates its cached thumbnails": a replace in this wire protocol
+    // is delete-then-reupload (there is no in-place "replace this stored
+    // name"), and the reupload gets a NEW hash (different bytes) or a brand-new
+    // storedName+key (identical bytes) — either way the OLD cache entries are
+    // for content nothing points at anymore once this delete completes.
+    // BMG-011: the admin page's delete shares this implementation.
+    await this.subsystem.deleteStored(record);
 
     sendJSON(ctx.res, 200, {});
   }

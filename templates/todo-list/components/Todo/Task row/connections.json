@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ba7a8478-e9c1-5aaa-8087-217fca382e6c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "trIn",
+      "fromProperty": "rank",
+      "toId": "trRank",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "trIn",
+      "fromProperty": "title",
+      "toId": "trTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "trIn",
+      "fromProperty": "titleWeight",
+      "toId": "trTitle",
+      "toProperty": "fontWeight"
+    },
+    {
+      "fromId": "trIn",
+      "fromProperty": "meta",
+      "toId": "trMeta",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "trIn",
+      "fromProperty": "hasMeta",
+      "toId": "trMeta",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "trIn",
+      "fromProperty": "metaColor",
+      "toId": "trMeta",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "trIn",
+      "fromProperty": "bg",
+      "toId": "trRow",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "trIn",
+      "fromProperty": "canUp",
+      "toId": "trUp",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "trIn",
+      "fromProperty": "canDown",
+      "toId": "trDown",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "trIn",
+      "fromProperty": "id",
+      "toId": "trOut",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "trIn",
+      "fromProperty": "title",
+      "toId": "trOut",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "trMain",
+      "fromProperty": "onClick",
+      "toId": "trOut",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "trUp",
+      "fromProperty": "onClick",
+      "toId": "trOut",
+      "toProperty": "up"
+    },
+    {
+      "fromId": "trDown",
+      "fromProperty": "onClick",
+      "toId": "trOut",
+      "toProperty": "down"
+    },
+    {
+      "fromId": "trClose",
+      "fromProperty": "onClick",
+      "toId": "trOut",
+      "toProperty": "close"
+    }
+  ]
+}

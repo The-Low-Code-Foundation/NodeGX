@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7b6ac05f-86e7-434f-8005-a6d1c1e927a5",
+  "name": "Told us row",
+  "path": "/People/Told us row",
+  "type": "visual",
+  "created": "2026-09-21T16:59:20.855Z",
+  "modified": "2026-09-21T16:59:20.855Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One thing a learner has told us, on the coach's page: the label for it and their own words. Their words are text, never markup."
+}

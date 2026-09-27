@@ -1,0 +1,287 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ba4fe502-d1fb-5c5c-894e-4eea7367e169",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "MoveactionIn",
+      "type": "Component Inputs",
+      "label": "What to do",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "taskId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "actionId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "direction",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "MoveactionOut",
+      "type": "Component Outputs",
+      "label": "Done",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "MoveactionGuard",
+      "type": "JavaScriptFunction",
+      "label": "Is there anything to write?",
+      "parameters": {
+        "functionScript": "var rows = Inputs.rows || [];\nvar id = String(Inputs.itemId || '');\nvar dir = String(Inputs.direction || '');\nvar i = -1;\nfor (var k = 0; k < rows.length; k++) if (rows[k] && rows[k].id === id) i = k;\nif (i < 0) return;\nvar j = dir === 'up' ? i - 1 : dir === 'down' ? i + 1 : 0;\nif (j < 0 || j >= rows.length || j === i) return;\nOutputs.firstId = id;\nOutputs.from = i + 1;\nOutputs.to = j + 1;\nif (dir === 'top') {\n  // Above whatever is first now. Nobody else's row is rewritten.\n  Outputs.firstPosition = Number(rows[0].position) - 1;\n  Outputs.hasSecond = false;\n} else {\n  // Swap with the neighbour.\n  Outputs.firstPosition = Number(rows[j].position);\n  Outputs.secondId = rows[j].id;\n  Outputs.secondPosition = Number(rows[i].position);\n  Outputs.hasSecond = true;\n}\nOutputs.summary = 'Next actions reordered';\nOutputs.go();",
+        "runOnChange-in-rows": false,
+        "runOnChange-in-direction": false,
+        "runOnChange-in-itemId": false
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-rows",
+          "displayName": "rows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-itemId",
+          "displayName": "itemId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-direction",
+          "displayName": "direction",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-firstId",
+          "displayName": "firstId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-from",
+          "displayName": "from",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-to",
+          "displayName": "to",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-firstPosition",
+          "displayName": "firstPosition",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasSecond",
+          "displayName": "hasSecond",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-secondId",
+          "displayName": "secondId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-secondPosition",
+          "displayName": "secondPosition",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-summary",
+          "displayName": "summary",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "MoveactionFirst",
+      "type": "JavaScriptFunction",
+      "label": "Move it, in this browser",
+      "parameters": {
+        "functionScript": "var DEMO_KEY = \"nodegx-todo-list-demo-v1\";\nfunction demoLoad() {\n  var raw = null;\n  try { raw = window.localStorage.getItem(DEMO_KEY); } catch (e) { raw = null; }\n  if (raw === null && typeof window.__todoListDemo === 'string') raw = window.__todoListDemo;\n  if (raw === null) return null;\n  try { return JSON.parse(raw); } catch (e) { return null; }\n}\nfunction demoSave(store) {\n  var raw = JSON.stringify(store);\n  window.__todoListDemo = raw;\n  try { window.localStorage.setItem(DEMO_KEY, raw); } catch (e) {}\n}\nvar id = String(Inputs.modelId || '');\nvar store = demoLoad();\nvar list = (store && store[\"Action\"]) || [];\nvar record = null;\nfor (var i = 0; i < list.length; i++) if (list[i] && list[i].id === id) record = list[i];\nif (!record) { Outputs.failure(); return; }\nrecord.position = Inputs.position;\nrecord.updatedAt = new Date().toISOString();\ntry { demoSave(store); } catch (e) { Outputs.failure(); return; }\nOutputs.id = id;\nOutputs.done();",
+        "runOnChange-in-position": false,
+        "runOnChange-in-modelId": false
+      },
+      "x": 40,
+      "y": 400,
+      "ports": [
+        {
+          "name": "in-modelId",
+          "displayName": "modelId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-position",
+          "displayName": "position",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-failure",
+          "displayName": "failure",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-id",
+          "displayName": "id",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "MoveactionSwap",
+      "type": "Condition",
+      "label": "Is there a neighbour to swap with?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "MoveactionSecond",
+      "type": "JavaScriptFunction",
+      "label": "Move the neighbour, in this browser",
+      "parameters": {
+        "functionScript": "var DEMO_KEY = \"nodegx-todo-list-demo-v1\";\nfunction demoLoad() {\n  var raw = null;\n  try { raw = window.localStorage.getItem(DEMO_KEY); } catch (e) { raw = null; }\n  if (raw === null && typeof window.__todoListDemo === 'string') raw = window.__todoListDemo;\n  if (raw === null) return null;\n  try { return JSON.parse(raw); } catch (e) { return null; }\n}\nfunction demoSave(store) {\n  var raw = JSON.stringify(store);\n  window.__todoListDemo = raw;\n  try { window.localStorage.setItem(DEMO_KEY, raw); } catch (e) {}\n}\nvar id = String(Inputs.modelId || '');\nvar store = demoLoad();\nvar list = (store && store[\"Action\"]) || [];\nvar record = null;\nfor (var i = 0; i < list.length; i++) if (list[i] && list[i].id === id) record = list[i];\nif (!record) { Outputs.failure(); return; }\nrecord.position = Inputs.position;\nrecord.updatedAt = new Date().toISOString();\ntry { demoSave(store); } catch (e) { Outputs.failure(); return; }\nOutputs.id = id;\nOutputs.done();",
+        "runOnChange-in-position": false,
+        "runOnChange-in-modelId": false
+      },
+      "x": 40,
+      "y": 640,
+      "ports": [
+        {
+          "name": "in-modelId",
+          "displayName": "modelId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-position",
+          "displayName": "position",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-failure",
+          "displayName": "failure",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-id",
+          "displayName": "id",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "MoveactionHistory",
+      "type": "/Logic/Write history",
+      "label": "Write the history line",
+      "parameters": {
+        "kind": "action-moved"
+      },
+      "x": 40,
+      "y": 760
+    },
+    {
+      "id": "MoveactionProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "todoProblem",
+        "setWith": "string",
+        "value": "That change did not save in this browser. Try again, or reset the demo."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 880
+    }
+  ]
+}

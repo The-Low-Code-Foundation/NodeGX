@@ -3,7 +3,7 @@ title: "Show Popup"
 ---
 Show Popup: overlays a component on top of the app when triggered; the popup closes itself and can hand back results.
 
-Show Popup instantiates `target` (a component) as an overlay above everything else when `show` fires. The popup component owns its dismissal: a Close Popup node inside it removes the overlay, fires this node's `Closed` signal, and delivers any declared result values as outputs here — plus one signal output per close action, so 'confirmed' and 'dismissed' can be told apart at the call site. `Closed` is a *later* event about a popup that opened — `done` is the one that says the `show` itself finished, and it fires the moment the popup is on screen.
+Show Popup instantiates `target` (a component) as an overlay above everything else when `show` fires. The popup component owns its dismissal: a Close Popup node inside it removes the overlay, fires this node's `Closed` signal, and delivers any declared result values as outputs here — plus one signal output per close action, so 'confirmed' and 'dismissed' can be told apart at the call site. `Closed` is a *later* event about a popup that opened — `done` is the one that says the `show` itself finished, and it fires the moment the popup is on screen. The popup is a modal dialog without any wiring: it is announced as a dialog (named by `accessibleName`, or by the first h1–h3 inside it), the page behind it is inert so Tab stays inside, focus moves into it on open and back to whatever opened it on close, and Escape closes the top popup and fires `Cancelled`.
 
 ## When to use it
 
@@ -25,6 +25,9 @@ Dialogs, sheets, confirmations — transient UI that must sit above the page and
 
 | Name | Type | Default | Description |
 |---|---|---|---|
+| `accessibleName` | String | — | What a screen reader announces when the popup opens. Leave empty to use the first heading inside the popup |
+| `closeOnEscape` | Boolean | `true` | Lets the person close the popup with the Escape key, which fires Cancelled. Turn off for a popup that must be finished or closed by its own buttons |
+| `modal` | Boolean | `true` | A modal popup is a dialog: the page behind it cannot be used, focus moves into it and Escape closes it. Turn off for an overlay that is not a dialog, such as a toast |
 | `stackPolicy` | Enum (`replace`, `stack`) | `replace` | Replace It closes the popup already showing, Show On Top opens this one over it |
 | `target` | Component | — | Component to open as a popup; its Component Inputs become input ports on this node |
 
@@ -40,6 +43,7 @@ Dialogs, sheets, confirmations — transient UI that must sit above the page and
 
 | Name | Type | Default | Description |
 |---|---|---|---|
+| `Cancelled` | Signal | — | Fires when the person closed the popup with the Escape key, so there are no Close Results |
 | `Closed` | Signal | — | Fires when the popup was closed without a close action, after Close Results are up to date |
 | `Dismissed` | Signal | — | Fires when another popup replaced this one before the user closed it, so there are no Close Results |
 | `completed` | Signal | — | Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error |
@@ -69,6 +73,7 @@ Result-value outputs and per-close-action signals are generated from the Close P
 ## Watch out for
 
 - Closing a popup from outside it — dismissal belongs inside the popup component, where Close Popup works.
+- Building a dialog as a custom React component to get Escape, focus handling or dialog semantics — Show Popup provides all three.
 
 ## Examples
 

@@ -1,1 +1,0 @@
-export { ElementStyleSectionHost } from './ElementStyleSectionHost';

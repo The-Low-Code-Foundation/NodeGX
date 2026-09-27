@@ -1,0 +1,484 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e8334ab3-05e7-5fda-8404-3aa60fdc4c51",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fbIn",
+      "type": "Component Inputs",
+      "label": "What happened",
+      "ports": [
+        {
+          "name": "outcome",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "message",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "show",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "hide",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "canTeach",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "fluentWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "correctWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "wrongWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "timeUpWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "nextWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "showMeWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "boost",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "boostPct",
+          "plug": "output",
+          "type": "number"
+        }
+      ],
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "fbCard",
+      "type": "Group",
+      "label": "The banner",
+      "children": [
+        "fbTop",
+        "fbTitle",
+        "fbMessage",
+        "fbRow"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 3,
+          "unit": "px"
+        },
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "alignItems": "center",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "fbTop",
+      "type": "Group",
+      "label": "What happened, and the boost",
+      "parent": "fbCard",
+      "children": [
+        "fbGlyph",
+        "fbBoost",
+        "fbMeter"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "justifyContent": "center",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "fbGlyph",
+      "type": "Text",
+      "label": "The glyph",
+      "parent": "fbTop",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-2xl)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "fbBoost",
+      "type": "Text",
+      "label": "The boost",
+      "parent": "fbTop",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-bold)",
+        "fontVariantNumeric": "tabular-nums",
+        "cssClassName": "rkt-boost"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "fbMeter",
+      "type": "Group",
+      "label": "The boost, as a bar",
+      "parent": "fbTop",
+      "children": [
+        "fbMeterFill"
+      ],
+      "parameters": {
+        "width": {
+          "value": 48,
+          "unit": "px"
+        },
+        "height": {
+          "value": 10,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "clip": true,
+        "cssClassName": "rkt-boost-meter"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "fbMeterFill",
+      "type": "Group",
+      "label": "How much of a step",
+      "parent": "fbMeter",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 10,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "backgroundColor": "var(--primary)"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "fbTitle",
+      "type": "Text",
+      "label": "The headline",
+      "parent": "fbCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-tight)",
+        "letterSpacing": "var(--tracking-tight)",
+        "color": "var(--foreground)",
+        "as": "h2",
+        "fontFamily": "Grandstander",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "fbMessage",
+      "type": "Text",
+      "label": "The correction",
+      "parent": "fbCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "textAlignX": "center",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "fbRow",
+      "type": "Group",
+      "label": "The two buttons",
+      "parent": "fbCard",
+      "children": [
+        "fbNext",
+        "fbTeach"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "justifyContent": "center"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "fbNext",
+      "type": "net.noodl.controls.button",
+      "label": "Next",
+      "parent": "fbRow",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Next"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "fbTeach",
+      "type": "net.noodl.controls.button",
+      "label": "Show me how",
+      "parent": "fbRow",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Show me how"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "fbTitleText",
+      "type": "Expression",
+      "label": "The word for what happened",
+      "parameters": {
+        "expression": "outcome === 'fluent' ? fluentWord : outcome === 'correct' ? correctWord : outcome === 'timeout' ? timeUpWord : wrongWord"
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "fbStates",
+      "type": "States",
+      "label": "What kind of news",
+      "parameters": {
+        "states": "fluent,correct,wrong,timeout",
+        "values": "tone,ground,glyph",
+        "useTransitions": false,
+        "type-tone": "color",
+        "value-fluent-tone": "var(--foreground)",
+        "value-correct-tone": "var(--foreground)",
+        "value-wrong-tone": "var(--destructive)",
+        "value-timeout-tone": "var(--destructive)",
+        "type-ground": "color",
+        "value-fluent-ground": "var(--accent)",
+        "value-correct-ground": "var(--accent)",
+        "value-wrong-ground": "var(--surface)",
+        "value-timeout-ground": "var(--surface)",
+        "type-glyph": "string",
+        "value-fluent-glyph": "🚀",
+        "value-correct-glyph": "✅",
+        "value-wrong-glyph": "❌",
+        "value-timeout-glyph": "⏰"
+      },
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "fbHasMessage",
+      "type": "Expression",
+      "label": "Anything to say?",
+      "parameters": {
+        "expression": "((message || '') + '').length > 0"
+      },
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "fbHasBoost",
+      "type": "Expression",
+      "label": "A boost line to show?",
+      "parameters": {
+        "expression": "((boost || '') + '').length > 0"
+      },
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "fbMeterOn",
+      "type": "Expression",
+      "label": "Any boost at all?",
+      "parameters": {
+        "expression": "(p || 0) > 0"
+      },
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "fbOpen",
+      "type": "States",
+      "label": "Open or closed",
+      "parameters": {
+        "states": "closed,open",
+        "values": "isOpen",
+        "useTransitions": false,
+        "type-isOpen": "boolean",
+        "value-closed-isOpen": false,
+        "value-open-isOpen": true
+      },
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "fbOut",
+      "type": "Component Outputs",
+      "label": "What was pressed",
+      "ports": [
+        {
+          "name": "next",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "showMe",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "isOpen",
+          "plug": "input",
+          "type": "boolean"
+        }
+      ],
+      "x": 470,
+      "y": 1240
+    }
+  ],
+  "visualRoots": [
+    "fbCard"
+  ]
+}

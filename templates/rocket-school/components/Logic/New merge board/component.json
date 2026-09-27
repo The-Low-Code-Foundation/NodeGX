@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "bb30ce0f-7aba-59d2-8597-4741d18fb60e",
+  "name": "New merge board",
+  "path": "/Logic/New merge board",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A fresh Make Ten game: two tiles, a new id, and the pool new tiles come from, by the profile’s bonds (single numbers at CE2; teens, then fives to 95, as the class or the mastery grows; the weakest group twice as often). Pool overrides it."
+}

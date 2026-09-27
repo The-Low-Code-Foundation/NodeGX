@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { Icon, IconName, IconSize } from '@noodl-core-ui/components/common/Icon';
+
 import { QuerySortingRule } from '../QuerySortingRule';
 import { QuerySortingRuleEditPopup } from '../QuerySortingRuleEditPopup';
 import { openPopup } from '../utils';
@@ -70,7 +72,8 @@ export class QuerySortingEditor extends React.Component<QuerySortingEditorProps>
         {this.sorting === undefined ? (
           <div className="queryeditor-add-filter-group">
             <div className="queryeditor-add-filter-group-inner" onClick={() => this.onAddRuleClicked()}>
-              <i className="fa fa-plus" style={{ marginRight: '10px' }}></i>Add sorting rule
+              <Icon icon={IconName.Plus} size={IconSize.Small} />
+              Add sorting rule
             </div>
           </div>
         ) : null}

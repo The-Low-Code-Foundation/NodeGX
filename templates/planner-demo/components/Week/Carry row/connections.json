@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b324063b-a374-535d-8a5b-a8ab6fd04988",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "crIn",
+      "fromProperty": "projectName",
+      "toId": "crWho",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "crIn",
+      "fromProperty": "what",
+      "toId": "crWhat",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "crIn",
+      "fromProperty": "carryLabel",
+      "toId": "crCarry",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "crIn",
+      "fromProperty": "id",
+      "toId": "crOut",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "crCarry",
+      "fromProperty": "onClick",
+      "toId": "crOut",
+      "toProperty": "carry"
+    },
+    {
+      "fromId": "crDrop",
+      "fromProperty": "onClick",
+      "toId": "crOut",
+      "toProperty": "drop"
+    }
+  ]
+}

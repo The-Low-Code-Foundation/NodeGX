@@ -21,6 +21,9 @@
       "parameters": {
         "name": "storyPasted"
       },
+      "metadata": {
+        "comment": "Shared on purpose: the Read page and the Remix page show the same pasted story."
+      },
       "x": 40,
       "y": 160
     },

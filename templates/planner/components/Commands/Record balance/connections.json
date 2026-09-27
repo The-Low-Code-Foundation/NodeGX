@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6882932d-971e-52de-8f83-1c0c93b30b7c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "RecordbalaIn",
+      "fromProperty": "date",
+      "toId": "RecordbalaGuard",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "RecordbalaIn",
+      "fromProperty": "amount",
+      "toId": "RecordbalaGuard",
+      "toProperty": "in-amount"
+    },
+    {
+      "fromId": "RecordbalaIn",
+      "fromProperty": "do",
+      "toId": "RecordbalaGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "RecordbalaGuard",
+      "fromProperty": "out-date",
+      "toId": "RecordbalaWrite",
+      "toProperty": "prop-date"
+    },
+    {
+      "fromId": "RecordbalaGuard",
+      "fromProperty": "out-amount",
+      "toId": "RecordbalaWrite",
+      "toProperty": "prop-amount"
+    },
+    {
+      "fromId": "RecordbalaGuard",
+      "fromProperty": "out-note",
+      "toId": "RecordbalaWrite",
+      "toProperty": "prop-note"
+    },
+    {
+      "fromId": "RecordbalaGuard",
+      "fromProperty": "out-go",
+      "toId": "RecordbalaWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "RecordbalaWrite",
+      "fromProperty": "done",
+      "toId": "RecordbalaOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "RecordbalaWrite",
+      "fromProperty": "failure",
+      "toId": "RecordbalaProblem",
+      "toProperty": "do"
+    }
+  ]
+}

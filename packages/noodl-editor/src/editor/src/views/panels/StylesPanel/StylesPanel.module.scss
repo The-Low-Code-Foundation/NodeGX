@@ -1,0 +1,203 @@
+.SectionSubtitle {
+  padding: 2px 12px 8px;
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--theme-color-fg-default-shy);
+}
+
+.InlineInputRow {
+  padding: 4px 12px 6px;
+}
+
+.InlineInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 3px 6px;
+  font-size: 11px;
+  color: var(--theme-color-fg-default);
+  background-color: var(--theme-color-bg-1);
+  border: 1px solid var(--theme-color-primary);
+  border-radius: 2px;
+  outline: none;
+}
+
+/** CMG-003 / CMG-002: why a name was refused, under the field it was typed in. */
+.InlineError {
+  padding: 0 12px 6px;
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--theme-color-notice, #d97706);
+}
+
+.AddButton {
+  /**
+   * The create door in each section. Deliberately a full-width row under the list rather than a
+   * `+` in the section header: the header's `actions` slot collapses with the section, and
+   * "how do I make one" must not be a thing you find by expanding something first — that is the
+   * same class of defect as the hover-only delete this panel exists to remove.
+   */
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 5px 12px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--theme-color-fg-default-shy);
+  text-align: left;
+
+  &:hover {
+    background-color: var(--theme-color-bg-3);
+    color: var(--theme-color-fg-default);
+  }
+}
+
+/**
+ * P103 CMG-005 §3.3 — the row `revealStyle` landed on. A global attribute rule rather than a
+ * module class because the row lives in three different components (`StyleRow`, `TokenRow`) and
+ * the route sets one attribute on whichever it found. ~1.6s, then it fades: long enough to see
+ * where the panel scrolled to, short enough that a second reveal reads as a second reveal.
+ */
+:global([data-style-row][data-revealed='true']) {
+  animation: styles-reveal-row 1.6s ease-out both;
+}
+
+@keyframes styles-reveal-row {
+  0%,
+  55% {
+    box-shadow: inset 0 0 0 2px var(--theme-color-primary);
+    background-color: var(--theme-color-bg-4);
+  }
+  100% {
+    box-shadow: inset 0 0 0 2px transparent;
+    background-color: transparent;
+  }
+}
+
+/** CMG-002 §3.1 — the ＋ in a section header, and the row it opens. */
+.SectionAdd {
+  appearance: none;
+  background: none;
+  border: 1px solid var(--theme-color-bg-4);
+  border-radius: 3px;
+  margin: 0;
+  padding: 0 6px;
+  min-width: 22px;
+  height: 20px;
+  font: inherit;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--theme-color-fg-default);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--theme-color-bg-3);
+    color: var(--theme-color-fg-highlight);
+  }
+}
+
+.AddTokenRow {
+  margin: 4px 8px 8px;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: var(--theme-color-bg-1);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.AddTokenLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  .InlineInput {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+  }
+}
+
+.AddTokenPrefix,
+.AddTokenLabel {
+  flex: 0 0 auto;
+  font-family: var(--font-family-code);
+  font-size: 11px;
+  color: var(--theme-color-fg-default-shy);
+}
+
+.AddTokenKind {
+  flex: 0 0 auto;
+  max-width: 45%;
+  font: inherit;
+  font-size: 11px;
+  padding: 2px 4px;
+  color: var(--theme-color-fg-default);
+  background-color: var(--theme-color-bg-2);
+  border: 1px solid var(--theme-color-bg-4);
+  border-radius: 2px;
+}
+
+.AddTokenButton,
+.AddTokenCancel {
+  flex: 0 0 auto;
+  appearance: none;
+  border: 1px solid var(--theme-color-bg-4);
+  border-radius: 3px;
+  padding: 2px 8px;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  background-color: var(--theme-color-bg-3);
+  color: var(--theme-color-fg-default);
+
+  &:hover {
+    background-color: var(--theme-color-bg-4);
+  }
+}
+
+.AddTokenButton {
+  background-color: var(--theme-color-primary);
+  border-color: var(--theme-color-primary);
+  color: var(--theme-color-on-primary, #fff);
+
+  &:hover {
+    background-color: var(--theme-color-primary);
+    filter: brightness(1.1);
+  }
+}
+
+/** CMG-004 §3.3 — the section header's own reset. Small, quiet, and only drawn when there is something to reset. */
+.HeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.SectionReset {
+  appearance: none;
+  background: none;
+  border: 1px solid var(--theme-color-bg-4);
+  border-radius: 3px;
+  margin: 0;
+  padding: 1px 6px;
+  font: inherit;
+  font-size: 10px;
+  color: var(--theme-color-fg-default-shy);
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--theme-color-fg-default);
+    background-color: var(--theme-color-bg-3);
+  }
+}
+
+.NoProject {
+  padding: 24px 16px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--theme-color-fg-default-shy);
+}

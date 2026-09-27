@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "669f201a-752b-5089-8ea5-d3ce6727a57e",
+  "name": "Teach cards",
+  "path": "/Data/Teach cards",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The faded worked examples a wrong answer opens: three steps each, shorter every time."
+}

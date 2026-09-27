@@ -28,7 +28,9 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 
 import type { ExecutionHistory } from '../execution/ExecutionStore';
+import { boundText, boundValue, RecordBounds } from '../execution/record-bounds';
 import { logger } from '../ops/logger';
+import { FunctionRuns } from './FunctionRuns';
 // SB-016 — the endpoint predicate, shared with the deploy interlock so the gate
 // and the runner cannot disagree about what a function is.
 import {
@@ -42,8 +44,10 @@ import {
 // and the `NodeScope.runContext` a node reads cannot drift apart.
 import type {
   CloudKitLoadResult,
+  HttpValidatorStore,
   NodeRunContext,
   RuntimeLogEntry,
+  RuntimeModelCall,
   RuntimeStepEnd,
   RuntimeStepStart
 } from '@cloud-runtime';
@@ -121,6 +125,28 @@ export interface WorkflowRunnerOptions {
    * (the key-based `redact()` inside `logger` runs either way).
    */
   scrubSecretValues?: LogValueScrubber;
+  /**
+   * FED-004 §3.2 — where an `HTTP Request` node with `Conditional` on remembers
+   * the `ETag` / `Last-Modified` a URL last answered with.
+   *
+   * Absent means "no conditional requests on this host", which is exactly what
+   * the browser sees, and the node degrades to an unconditional fetch without a
+   * second code path.
+   */
+  httpValidators?: HttpValidatorStore;
+  /**
+   * FED-004 §3.3 — the `User-Agent` outbound requests carry when the graph does
+   * not set its own. Late-bound and asked per run, like `getFunctionTimeoutMs`,
+   * because the public URL it names is edited through the admin surface and an
+   * operator should not have to restart to become identifiable.
+   */
+  getHttpUserAgent?: () => string | undefined;
+  /**
+   * PRD-002 — the record bounds, read live. Applied here to a `Log` node's message and data
+   * AFTER the scrub above and before they reach the ops log; the execution record's own copy
+   * is bounded by the `BoundedExecutionLogger` every record is born through.
+   */
+  getRecordBounds?: () => RecordBounds;
 }
 
 /** What {@link WorkflowRunnerOptions.scrubSecretValues} has to be able to do. */
@@ -151,6 +177,15 @@ export const MAX_LOG_LINES_PER_RUN = 200;
  */
 export const MAX_STEPS_PER_RUN = 1000;
 
+/**
+ * FED-003 — how many model calls one run may record the cost of.
+ *
+ * Lower than the step cap on purpose: a graph making a thousand model calls in one run has a
+ * problem the cost column cannot fix, and each of these is a read-modify-write on the execution
+ * row. Like the other two caps, it announces itself once and then goes quiet.
+ */
+export const MAX_MODEL_CALLS_PER_RUN = 200;
+
 export interface RunnerResponse {
   statusCode: number;
   body: string;
@@ -180,6 +215,20 @@ export interface RunTriggerContext {
    * three can be lined up after the fact.
    */
   requestId?: string;
+  /**
+   * FED-004 — called once, with this run's execution id, as soon as the record
+   * is opened and BEFORE the graph runs.
+   *
+   * The scheduler is the caller that needs it. `run()` resolves when the run is
+   * over, which is exactly too late for the question the overlap policy asks:
+   * *which run is the one still going?* A fire that yields has to be able to
+   * name it, and the only moment that answer exists and is still useful is this
+   * one.
+   *
+   * Never called when there is no record to open (history disabled) — a
+   * listener must treat "not called" as a normal outcome, not an error.
+   */
+  onStarted?(executionId: string): void;
 }
 
 /** One loaded bundle, and the fingerprint of the deploy that put it here. */
@@ -223,11 +272,17 @@ export class WorkflowRunner {
   private readonly enableDebugInspectors: boolean;
   private readonly getFunctionTimeoutMs?: (functionName: string) => number | undefined;
   private readonly scrubSecretValues?: LogValueScrubber;
+  private readonly getRecordBounds?: () => RecordBounds;
+  private readonly httpValidators?: HttpValidatorStore;
+  private readonly getHttpUserAgent?: () => string | undefined;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private cloudRunner: any = null;
   private loadedWorkflows = new Map<string, Record<string, unknown>>();
   isInitialized = false;
+
+  /** HLT-023: the runs in flight, so a loopback request can be charged to the run that made it. */
+  readonly functionRuns = new FunctionRuns();
 
   constructor(options: WorkflowRunnerOptions) {
     this.workflowsPath = options.workflowsPath;
@@ -237,6 +292,9 @@ export class WorkflowRunner {
     this.enableDebugInspectors = options.enableDebugInspectors || false;
     this.getFunctionTimeoutMs = options.getFunctionTimeoutMs;
     this.scrubSecretValues = options.scrubSecretValues;
+    this.getRecordBounds = options.getRecordBounds;
+    this.httpValidators = options.httpValidators;
+    this.getHttpUserAgent = options.getHttpUserAgent;
   }
 
   /**
@@ -265,14 +323,27 @@ export class WorkflowRunner {
   private createRunContext(
     functionName: string,
     execLogger: ReturnType<ExecutionHistory['createLogger']>,
-    trigger?: RunTriggerContext
+    trigger?: RunTriggerContext,
+    executionId?: string
   ): NodeRunContext {
     const requestId = trigger && trigger.requestId;
     let written = 0;
     let stepsWritten = 0;
+    // FED-003 §3.4. Accumulated rather than appended blind, because `stampMetadata` MERGES keys:
+    // stamping `{ modelCalls: [one] }` twice would leave the row holding the second call only.
+    const modelCalls: RuntimeModelCall[] = [];
+
+    // FED-004 §3.3. Read once per run rather than once per request the graph makes: the value
+    // is a deployment fact, and re-asking it inside a `for-each` over a thousand feeds would be
+    // a thousand identical answers.
+    const httpUserAgent = this.getHttpUserAgent ? this.getHttpUserAgent() : undefined;
 
     return {
       requestId,
+      // FED-004 §3.2 / §3.3 — both absent in the browser, which is what makes the `Conditional`
+      // port degrade rather than branch.
+      ...(this.httpValidators ? { httpValidators: this.httpValidators } : {}),
+      ...(httpUserAgent ? { httpUserAgent } : {}),
       log: (entry: RuntimeLogEntry) => {
         written++;
         if (written > MAX_LOG_LINES_PER_RUN) {
@@ -290,8 +361,17 @@ export class WorkflowRunner {
 
         const level = entry && entry.level ? entry.level : 'info';
         const scrub = this.scrubSecretValues;
-        const message = scrub ? scrub.scrub(String(entry.message || '')) : String((entry && entry.message) || '');
-        const data = entry && entry.data !== undefined ? (scrub ? scrub.scrubValue(entry.data) : entry.data) : undefined;
+        // PRD-002: bound AFTER scrubbing — see record-bounds.ts. A cut made first could split a
+        // secret and defeat the match; a cut made after it sees only `[REDACTED]`.
+        const bounds = this.getRecordBounds ? this.getRecordBounds() : null;
+        const scrubbedMessage = scrub
+          ? scrub.scrub(String(entry.message || ''))
+          : String((entry && entry.message) || '');
+        const message = bounds ? boundText(scrubbedMessage, bounds.maxValueBytes) : scrubbedMessage;
+        const scrubbedData =
+          entry && entry.data !== undefined ? (scrub ? scrub.scrubValue(entry.data) : entry.data) : undefined;
+        const data =
+          bounds && scrubbedData !== undefined ? boundValue(scrubbedData, bounds.maxValueBytes).value : scrubbedData;
 
         // `function.log` is one event name for every author line, so an operator can filter the
         // graph's own output apart from the service's with `jq 'select(.event=="function.log")'`.
@@ -363,7 +443,70 @@ export class WorkflowRunner {
                 'The action could not be performed'
             )
           : undefined;
-        execLogger.completeNode(handle, !failed, { outcome: end.status }, reason);
+
+        /**
+         * 🔴 **The subject of the failure, which is the half `message` cannot carry.**
+         *
+         * A step is named by `nodeId` — the GRAPH node's id — so every instance of a component
+         * writes steps under the same name. One `pollSources` run over three feeds records three
+         * steps called `http`, and before this a record reading `http · error · "HTTP 403:
+         * Forbidden"` could not say which feed was refused. The HTTP node already composes
+         * `{ url }` for the error bus; this carries it into the record. Ruled by Richard,
+         * 2026-09-19, as the condition for FED-006 AC5.
+         *
+         * ⚠️ **Scrubbed exactly as `inputData` is**, and for the same reason: a node hands over
+         * its own inputs and a URL is one of the likelier places a credential turns up. The
+         * record is never less safe than the log line.
+         *
+         * ⚠️ **Objects only.** `raiseRuntimeError`'s `detail` is `unknown` and most nodes pass a
+         * small object; a bare string or number would land in the record as a field whose
+         * meaning nobody could recover, so it is dropped rather than guessed at.
+         *
+         * It rides inside `outputData` rather than beside it so that
+         * `BoundedExecutionLogger.take` accounts for it against the run's record budget — a
+         * detail on a step inside a loop is a detail written hundreds of times.
+         */
+        const raw = end.detail;
+        const isPlainObject = typeof raw === 'object' && raw !== null && !Array.isArray(raw);
+        const detail = isPlainObject
+          ? ((scrub ? scrub.scrubValue(raw) : raw) as Record<string, unknown>)
+          : undefined;
+
+        execLogger.completeNode(handle, !failed, { outcome: end.status, ...(detail ? { detail } : {}) }, reason);
+      },
+
+      /**
+       * FED-003 §3.4 — what the run spent on model calls, on the execution record where the
+       * dashboard already reads.
+       *
+       * ⚠️ **Stamped on every call rather than once at the end, and the reason is CWF-018.** The
+       * run this column matters most for is the one that never finishes: a function that hangs
+       * after three expensive calls has spent that money, and a summary written in a completion
+       * path that is never reached would show zero. `completeExecution` does not touch metadata,
+       * so a stamp made now survives the run ending either way.
+       *
+       * ⚠️ Nothing here is scrubbed, because nothing here is free text: the node hands over five
+       * counts and a model id, and `RuntimeModelCall` exists to make that the only thing it can
+       * hand over.
+       */
+      recordModelCall: (call: RuntimeModelCall) => {
+        if (!executionId) return;
+
+        if (modelCalls.length >= MAX_MODEL_CALLS_PER_RUN) {
+          if (modelCalls.length === MAX_MODEL_CALLS_PER_RUN) {
+            modelCalls.push(call);
+            logger.warn('function.modelCalls.suppressed', {
+              function: functionName,
+              requestId,
+              limit: MAX_MODEL_CALLS_PER_RUN,
+              hint: 'a Model Request inside a loop — the rest of this run’s calls are not costed'
+            });
+          }
+          return;
+        }
+
+        modelCalls.push(call);
+        this.executions.stampMetadata(executionId, { modelCalls });
       }
     };
   }
@@ -610,6 +753,7 @@ export class WorkflowRunner {
         triggerType: trigger ? trigger.type : 'webhook',
         triggerData: scrubRequestForLogging(request || {}),
         metadata: {
+          kind: 'function',
           backendId: this.backendId,
           backendName: this.backendName,
           ...(trigger && trigger.source ? { triggerSource: trigger.source } : {}),
@@ -618,14 +762,26 @@ export class WorkflowRunner {
         }
       });
     }
+    // FED-004: announce the run before it runs, not after it finishes.
+    if (executionId && trigger && trigger.onStarted) {
+      try {
+        trigger.onStarted(executionId);
+      } catch {
+        // A listener's fault is never this run's problem.
+      }
+    }
 
     try {
       safeLog(`Executing function: ${functionName}`);
-      const response = await this.cloudRunner.run(functionName, request, {
-        timeoutMs,
-        // CWF-013: this is what gives a `Log` node in the graph somewhere to go.
-        runContext: this.createRunContext(functionName, execLogger, trigger)
-      });
+      // HLT-023: inside `within`, every loopback request the graph makes carries this run's id,
+      // so it is charged to the run and not to the operator's `data:admin` bucket.
+      const response = await this.functionRuns.within<RunnerResponse>(functionName, () =>
+        this.cloudRunner.run(functionName, request, {
+          timeoutMs,
+          // CWF-013: this is what gives a `Log` node in the graph somewhere to go.
+          runContext: this.createRunContext(functionName, execLogger, trigger, executionId)
+        })
+      );
       const duration = Date.now() - startTime;
       safeLog(`Function ${functionName} completed in ${duration}ms`);
 
@@ -719,10 +875,12 @@ export class WorkflowRunner {
       // the engine writes the one per-step record — so the sink gets no `execLogger` and the
       // lines land in the structured log only. Silence here would mean a function that logs
       // when you call it and does not when a workflow does, which is the worst of both.
-      return await this.cloudRunner.run(functionName, request, {
-        timeoutMs,
-        runContext: this.createRunContext(functionName, null)
-      });
+      return await this.functionRuns.within<RunnerResponse>(functionName, () =>
+        this.cloudRunner.run(functionName, request, {
+          timeoutMs,
+          runContext: this.createRunContext(functionName, null)
+        })
+      );
     } catch (e) {
       if (isCloudFunctionTimeout(e)) {
         logger.error('function.timeout', {
@@ -815,6 +973,25 @@ export class WorkflowRunner {
    */
   functionAllowsNoAuth(functionName: string): boolean {
     return requestNodeAllowsNoAuth(this.findRequestNodeForFunction(functionName));
+  }
+
+  /**
+   * FED-005 — the Request node's own `parameters` bag for a function, or
+   * undefined when this runner has not loaded it.
+   *
+   * Returned RAW rather than as a parsed contract, and that is the point:
+   * `requestParamSpecs` (CWF-014) is the single function that says what a
+   * Request node declares, and its docblock names an OpenAPI-style description
+   * generator as a caller it exists for. The MCP tool surface is that caller.
+   * Parsing here would make this the SECOND reader of the `ptype-`/`preq-`/
+   * `pdef-` convention, which is the drift `functionDeclarations`' own docblock
+   * is written about.
+   */
+  getRequestNodeParameters(functionName: string): Record<string, unknown> | undefined {
+    const node = this.findRequestNodeForFunction(functionName);
+    if (!node) return undefined;
+    const parameters = node.parameters;
+    return parameters && typeof parameters === 'object' ? (parameters as Record<string, unknown>) : undefined;
   }
 
   getAvailableFunctions(): { name: string; workflow: string; writesRecords: boolean }[] {

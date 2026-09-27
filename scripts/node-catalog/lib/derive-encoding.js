@@ -107,6 +107,11 @@ const RETYPES_DECLARED_PORTS = {
   // republished per instance as an `enum` over this node's own `items`, so an author picks an
   // option by its Label and stores its Value (Richard, 2026-09-06). The name never moves — which
   // is the claim `retypesEncoding` below actually checks against a headless drive.
+  //
+  // 🔴 GAM-019 — membership also decides the catalog MECHANISM: `build-catalog.js` records a listed
+  // type as `runtime-narrowed`, not `runtime-discovered`, and the validator's port rule then refuses
+  // a wire to a port the type does not have. So a wrong entry here no longer only mislabels an
+  // encoding, it would refuse real wires. `retypesEncoding`'s throw is what keeps that from shipping.
   'net.noodl.controls.options':
     'This node mints no port names. Its `value` input is declared `string` above and is ' +
     'republished per instance as an `enum` whose choices are this node\'s own `items` — labels ' +

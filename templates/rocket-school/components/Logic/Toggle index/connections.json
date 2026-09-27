@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "10e0af89-3205-51b0-86ed-27c38dbdb1de",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "toggleindexIn",
+      "fromProperty": "list",
+      "toId": "toggleindexFn",
+      "toProperty": "in-list"
+    },
+    {
+      "fromId": "toggleindexIn",
+      "fromProperty": "index",
+      "toId": "toggleindexFn",
+      "toProperty": "in-index"
+    },
+    {
+      "fromId": "toggleindexIn",
+      "fromProperty": "max",
+      "toId": "toggleindexFn",
+      "toProperty": "in-max"
+    },
+    {
+      "fromId": "toggleindexIn",
+      "fromProperty": "run",
+      "toId": "toggleindexFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "toggleindexFn",
+      "fromProperty": "out-list",
+      "toId": "toggleindexOut",
+      "toProperty": "list"
+    },
+    {
+      "fromId": "toggleindexFn",
+      "fromProperty": "out-count",
+      "toId": "toggleindexOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "toggleindexFn",
+      "fromProperty": "success",
+      "toId": "toggleindexOut",
+      "toProperty": "done"
+    }
+  ]
+}

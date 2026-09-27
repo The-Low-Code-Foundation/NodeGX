@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1c360751-bc13-5dc9-88ee-911f04768548",
+  "name": "Day columns",
+  "path": "/Logic/Day columns",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The six day columns: every block in each day, the focused hours against the ceiling, and what kind of day each one is."
+}

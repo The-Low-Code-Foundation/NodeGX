@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { SelectOption } from '@noodl-core-ui/components/inputs/Select';
 
 import css from './LauncherSearchBar.module.scss';
+import { LauncherSearchField } from './LauncherSearchField';
 
 interface UseLauncherSearchBarProps {
   filterDropdownItems: SelectOption[];
@@ -88,31 +89,14 @@ export function LauncherSearchBar({
 
   return (
     <div className={css['Root']}>
-      <div className={css['Search']}>
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          aria-hidden="true"
-        >
-          <circle cx="7" cy="7" r="4.5" />
-          <path d="m10.5 10.5 3 3" />
-        </svg>
-        <input
-          ref={inputRef}
-          className={css['SearchInput']}
-          placeholder="Search projects"
-          aria-label="Search projects"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.currentTarget.value)}
-          data-test="launcher-search-input"
-        />
-        <kbd className={css['Kbd']}>{IS_MAC ? '⌘K' : 'Ctrl K'}</kbd>
-      </div>
+      <LauncherSearchField
+        inputRef={inputRef}
+        placeholder="Search projects"
+        value={searchTerm}
+        onChange={setSearchTerm}
+        shortcutHint={IS_MAC ? '⌘K' : 'Ctrl K'}
+        testId="launcher-search-input"
+      />
 
       <label className={css['Select']}>
         <select

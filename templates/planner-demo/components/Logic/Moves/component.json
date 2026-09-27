@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e2beeeb9-b2d3-598d-8512-729a48bbeb33",
+  "name": "Moves",
+  "path": "/Logic/Moves",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Every project’s next move as a row of chips, the most urgent first, including the dormant projects worth a nudge."
+}

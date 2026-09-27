@@ -1,0 +1,234 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a8fa9e0e-06dc-574e-8f74-112a19006f7d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "AddtaskIn",
+      "type": "Component Inputs",
+      "label": "What to do",
+      "ports": [
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "position",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "summary",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "AddtaskOut",
+      "type": "Component Outputs",
+      "label": "Done",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "AddtaskGuard",
+      "type": "JavaScriptFunction",
+      "label": "Is there anything to write?",
+      "parameters": {
+        "functionScript": "var t = String(Inputs.title || '').trim();\nif (t === '') return;\nOutputs.title = t;\nOutputs.position = Number(Inputs.position) || 1;\nOutputs.status = 'open';\nOutputs.empty = '';\nOutputs.summary = String(Inputs.summary || '');\nOutputs.go();",
+        "runOnChange-in-title": false,
+        "runOnChange-in-position": false,
+        "runOnChange-in-summary": false
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-title",
+          "displayName": "title",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-position",
+          "displayName": "position",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-summary",
+          "displayName": "summary",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-position",
+          "displayName": "position",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-status",
+          "displayName": "status",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-summary",
+          "displayName": "summary",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "AddtaskCreate",
+      "type": "JavaScriptFunction",
+      "label": "Add the task, in this browser",
+      "parameters": {
+        "functionScript": "var DEMO_KEY = \"nodegx-todo-list-demo-v1\";\nfunction demoLoad() {\n  var raw = null;\n  try { raw = window.localStorage.getItem(DEMO_KEY); } catch (e) { raw = null; }\n  if (raw === null && typeof window.__todoListDemo === 'string') raw = window.__todoListDemo;\n  if (raw === null) return null;\n  try { return JSON.parse(raw); } catch (e) { return null; }\n}\nfunction demoSave(store) {\n  var raw = JSON.stringify(store);\n  window.__todoListDemo = raw;\n  try { window.localStorage.setItem(DEMO_KEY, raw); } catch (e) {}\n}\nvar store = demoLoad() || { Task: [], Action: [], Event: [] };\nvar list = store[\"Task\"] || (store[\"Task\"] = []);\nvar now = new Date().toISOString();\nvar record = { id: 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8), createdAt: now, updatedAt: now };\nrecord.title = Inputs.title;\nrecord.position = Inputs.position;\nrecord.status = Inputs.status;\nrecord.deadline = Inputs.deadline;\nrecord.closingNote = Inputs.closingNote;\nrecord.closedAt = Inputs.closedAt;\nlist.push(record);\ntry { demoSave(store); } catch (e) { Outputs.failure(); return; }\nOutputs.id = record.id;\nOutputs.done();",
+        "runOnChange-in-title": false,
+        "runOnChange-in-position": false,
+        "runOnChange-in-status": false,
+        "runOnChange-in-deadline": false,
+        "runOnChange-in-closingNote": false,
+        "runOnChange-in-closedAt": false
+      },
+      "x": 40,
+      "y": 400,
+      "ports": [
+        {
+          "name": "in-title",
+          "displayName": "title",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-position",
+          "displayName": "position",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-status",
+          "displayName": "status",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-deadline",
+          "displayName": "deadline",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-closingNote",
+          "displayName": "closingNote",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-closedAt",
+          "displayName": "closedAt",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-failure",
+          "displayName": "failure",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-id",
+          "displayName": "id",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "AddtaskHistory",
+      "type": "/Logic/Write history",
+      "label": "Write the history line",
+      "parameters": {
+        "kind": "created"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "AddtaskProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "todoProblem",
+        "setWith": "string",
+        "value": "That change did not save in this browser. Try again, or reset the demo."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 640
+    }
+  ]
+}

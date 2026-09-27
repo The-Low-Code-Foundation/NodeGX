@@ -1,0 +1,175 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3383d7c3-37cd-5079-8b64-6812652fc030",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "activeprofilIn",
+      "fromProperty": "app",
+      "toId": "activeprofilFn",
+      "toProperty": "in-app"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-hasProfile",
+      "toId": "activeprofilOut",
+      "toProperty": "hasProfile"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-profileId",
+      "toId": "activeprofilOut",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-name",
+      "toId": "activeprofilOut",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-look",
+      "toId": "activeprofilOut",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-seed",
+      "toId": "activeprofilOut",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-level",
+      "toId": "activeprofilOut",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-lang",
+      "toId": "activeprofilOut",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-layout",
+      "toId": "activeprofilOut",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-sound",
+      "toId": "activeprofilOut",
+      "toProperty": "sound"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-soundMode",
+      "toId": "activeprofilOut",
+      "toProperty": "soundMode"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-answerMode",
+      "toId": "activeprofilOut",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-mergeMode",
+      "toId": "activeprofilOut",
+      "toProperty": "mergeMode"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-model",
+      "toId": "activeprofilOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-due",
+      "toId": "activeprofilOut",
+      "toProperty": "due"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-days7",
+      "toId": "activeprofilOut",
+      "toProperty": "days7"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-answered",
+      "toId": "activeprofilOut",
+      "toProperty": "answered"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-stars",
+      "toId": "activeprofilOut",
+      "toProperty": "stars"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-faceOptions",
+      "toId": "activeprofilOut",
+      "toProperty": "faceOptions"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-paint",
+      "toId": "activeprofilOut",
+      "toProperty": "paint"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-pattern",
+      "toId": "activeprofilOut",
+      "toProperty": "pattern"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-picks",
+      "toId": "activeprofilOut",
+      "toProperty": "picks"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-hasPicks",
+      "toId": "activeprofilOut",
+      "toProperty": "hasPicks"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-nextAt",
+      "toId": "activeprofilOut",
+      "toProperty": "nextAt"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-nextPct",
+      "toId": "activeprofilOut",
+      "toProperty": "nextPct"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-nextText",
+      "toId": "activeprofilOut",
+      "toProperty": "nextText"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-sets",
+      "toId": "activeprofilOut",
+      "toProperty": "sets"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "success",
+      "toId": "activeprofilOut",
+      "toProperty": "done"
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ed976f67-a37a-5be4-81c8-d7db6a7acbf7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hnIn",
+      "type": "Component Inputs",
+      "label": "The number",
+      "ports": [
+        {
+          "name": "word",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fx",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "at",
+          "plug": "output",
+          "type": "number"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "hnCell",
+      "type": "Group",
+      "label": "The square",
+      "children": [
+        "hnBtn"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "alignItems": "center",
+        "justifyContent": "center"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hnBtn",
+      "type": "net.noodl.controls.button",
+      "label": "The number",
+      "parent": "hnCell",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-1)",
+        "paddingRight": "var(--space-1)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "explicit",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "",
+        "width": {
+          "value": 72,
+          "unit": "px"
+        },
+        "height": {
+          "value": 72,
+          "unit": "px"
+        },
+        "cssClassName": "rkt-hunt-tile"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "hnKind",
+      "type": "States",
+      "label": "Idle, picked, found, shown, or a wrong pick",
+      "parameters": {
+        "states": "idle,picked,found,shown,wrong",
+        "values": "ground,edge",
+        "useTransitions": false,
+        "type-ground": "color",
+        "value-idle-ground": "var(--surface)",
+        "value-picked-ground": "var(--accent)",
+        "value-found-ground": "var(--secondary)",
+        "value-shown-ground": "var(--muted)",
+        "value-wrong-ground": "var(--surface)",
+        "type-edge": "color",
+        "value-idle-edge": "var(--foreground)",
+        "value-picked-edge": "var(--foreground)",
+        "value-found-edge": "var(--foreground)",
+        "value-shown-edge": "var(--secondary)",
+        "value-wrong-edge": "var(--destructive)"
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "hnOut",
+      "type": "Component Outputs",
+      "label": "Tapped",
+      "ports": [
+        {
+          "name": "tapped",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "at",
+          "plug": "input",
+          "type": "number"
+        }
+      ],
+      "x": 350,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "hnCell"
+  ]
+}

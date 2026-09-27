@@ -1,0 +1,297 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "fede4626-1958-5462-8052-923faff07f8e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "whIn",
+      "type": "Component Inputs",
+      "label": "The line",
+      "ports": [
+        {
+          "name": "taskId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "summary",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "body",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "from",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "to",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "mergeKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "whOut",
+      "type": "Component Outputs",
+      "label": "Written",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "whLast",
+      "type": "Variable2",
+      "label": "The last line written",
+      "parameters": {
+        "name": "todoLastHistory"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: every command writes history through here, and a move from the up button then the down button must extend the same line (R5)."
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "whDecide",
+      "type": "JavaScriptFunction",
+      "label": "A new line, or extend the last one?",
+      "parameters": {
+        "functionScript": "var MERGE = [\"moved\",\"action-moved\",\"deadline\",\"action-described\"];\nvar last = Inputs.last || {};\nvar now = Date.now();\nvar kind = String(Inputs.kind || '');\nvar key = kind + '|' + String(Inputs.taskId || '') + '|' + String(Inputs.mergeKey || '');\nvar merge = MERGE.indexOf(kind) >= 0 && last.key === key && !!last.id && now - last.at < 120000;\nvar from = merge && kind === 'moved' ? last.from : Inputs.from;\nvar summary = String(Inputs.summary || '');\nif (kind === 'moved') summary = from === Inputs.to ? 'Moved back to #' + Inputs.to : 'Moved #' + from + ' → #' + Inputs.to;\nOutputs.summary = summary;\nOutputs.body = String(Inputs.body || '');\nOutputs.at = new Date(now).toISOString();\nOutputs.mergeId = merge ? last.id : '';\n// A fresh object every run: Outputs publish only on change.\nOutputs.pending = { key: key, at: now, from: from };\nif (merge) Outputs.update(); else Outputs.create();",
+        "runOnChange-in-taskId": false,
+        "runOnChange-in-kind": false,
+        "runOnChange-in-summary": false,
+        "runOnChange-in-body": false,
+        "runOnChange-in-from": false,
+        "runOnChange-in-to": false,
+        "runOnChange-in-mergeKey": false,
+        "runOnChange-in-last": false
+      },
+      "x": 40,
+      "y": 400,
+      "ports": [
+        {
+          "name": "in-last",
+          "displayName": "last",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-kind",
+          "displayName": "kind",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-taskId",
+          "displayName": "taskId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-mergeKey",
+          "displayName": "mergeKey",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-from",
+          "displayName": "from",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-summary",
+          "displayName": "summary",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-to",
+          "displayName": "to",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-body",
+          "displayName": "body",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-update",
+          "displayName": "update",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-create",
+          "displayName": "create",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-summary",
+          "displayName": "summary",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-body",
+          "displayName": "body",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-at",
+          "displayName": "at",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mergeId",
+          "displayName": "mergeId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pending",
+          "displayName": "pending",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "whCreate",
+      "type": "NewDbModelProperties",
+      "label": "Add the line",
+      "parameters": {
+        "collectionName": "Event"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "whUpdate",
+      "type": "SetDbModelProperties",
+      "label": "Extend the last line",
+      "parameters": {
+        "collectionName": "Event",
+        "idSource": "explicit"
+      },
+      "x": 40,
+      "y": 640
+    },
+    {
+      "id": "whRemember",
+      "type": "JavaScriptFunction",
+      "label": "Remember it, to extend next time",
+      "parameters": {
+        "functionScript": "var p = Inputs.pending || {};\nOutputs.value = { key: p.key, at: p.at, from: p.from, id: Inputs.id };\nOutputs.go();",
+        "runOnChange-in-pending": false,
+        "runOnChange-in-id": false
+      },
+      "x": 40,
+      "y": 760,
+      "ports": [
+        {
+          "name": "in-pending",
+          "displayName": "pending",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-value",
+          "displayName": "value",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "whSet",
+      "type": "Set Variable",
+      "label": "Keep the last line",
+      "parameters": {
+        "name": "todoLastHistory",
+        "setWith": "object"
+      },
+      "x": 40,
+      "y": 880
+    },
+    {
+      "id": "whProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "todoProblem",
+        "setWith": "string",
+        "value": "That change did not save. Check your connection, then try again."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 1000
+    }
+  ]
+}

@@ -55,7 +55,7 @@ import { byClass, render, text } from '../support/renderElements';
  * written down beside each one: a platform-side addition reddens these files loudly, which is
  * cheaper than a ruling that quietly stops being true.
  */
-const PLATFORM_CATEGORIES = ['starter', 'data-app', 'dashboard', 'site', 'form', 'integration'];
+const PLATFORM_CATEGORIES = ['starter', 'data-app', 'dashboard', 'site', 'form', 'integration', 'game'];
 
 const draw = (
   items: TemplateChoice[],

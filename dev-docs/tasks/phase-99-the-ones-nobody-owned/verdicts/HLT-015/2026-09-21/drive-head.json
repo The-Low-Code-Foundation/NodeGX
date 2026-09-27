@@ -1,0 +1,44 @@
+{
+  "curlGets": [
+    {
+      "status": "302",
+      "setCookie": false,
+      "location": "http://127.0.0.1:62384/auth/signed-in?nodegx_auth=JOdZhg52dWQJ0f3S29l0T9pkNErqrmY0Luo7Qaen5S0",
+      "nodegxAuthAnywhere": true
+    },
+    {
+      "status": "400",
+      "setCookie": false,
+      "location": null,
+      "nodegxAuthAnywhere": false,
+      "title": "Sign-in link expired"
+    },
+    {
+      "status": "400",
+      "setCookie": false,
+      "location": null,
+      "nodegxAuthAnywhere": false,
+      "title": "Sign-in link expired"
+    }
+  ],
+  "afterBrowserLoad": {
+    "chromeSawTitle": "Sign-in link expired",
+    "chromeSawHandoff": false,
+    "tokenRowUnchanged": false,
+    "consumedAt": "2026-09-21T20:38:48.282Z",
+    "sessionsMinted": 1
+  },
+  "firstPost": {
+    "status": "404",
+    "rowRedirect": "http://127.0.0.1:62384/auth/signed-in",
+    "consumedAt": "2026-09-21T20:38:48.282Z",
+    "sessionsMinted": 1
+  },
+  "secondPost": {
+    "status": "404"
+  },
+  "getAfterSpent": {
+    "status": "400",
+    "title": "Sign-in link expired"
+  }
+}

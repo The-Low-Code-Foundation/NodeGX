@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "77263425-aeb8-56eb-8064-f858ea994168",
+  "name": "Setup",
+  "path": "/Race/Setup",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Before a race: maths or typing, one player or two, practice or challenge, and the second player's name. Publishes Start with the four choices."
+}

@@ -1,12 +1,51 @@
 /**
- * QueryBuilder - Translates Parse-style queries to SQLite SQL
+ * QueryBuilder - Translates Parse-style queries to SQL
  *
  * Parse uses operators like $eq, $ne, $gt, $lt, $in, etc.
  * This translates them to SQL WHERE clauses.
  *
+ * ## The dialect seam (BRG-005 §6.1)
+ *
+ * Most of what this file emits is SQL both engines read: `escapeTable` and
+ * `escapeColumn` quote with `"` and sanitise identically, the comparison and
+ * range operators are standard, `ORDER BY`/`LIMIT`/`OFFSET` are standard, and
+ * the 22 sites that emit a `?` marker need no change at all — positional
+ * markers are translated to `$1 … $n` once at the driver boundary
+ * (`postgres/placeholders.ts`).
+ *
+ * Six expressions are not portable: the row ACL, the `$within` box, `$regex`,
+ * and the three geo operators. Each takes a `dialect` argument that **defaults
+ * to `'sqlite'`**, so every pre-existing caller and every pre-existing test is
+ * untouched by the seam's arrival.
+ *
+ * 🔴 **The seam is here, inside the builder, and not at the driver boundary,
+ * for a reason that was measured rather than assumed.** A boundary translator
+ * can only rewrite SQL that is already built, which requires the two dialects
+ * to bind the same number of values in the same order. Two of these do not:
+ * the Postgres haversine needs the centre latitude **twice** (the `dLat` term
+ * and the `cos·cos` term) so it has three markers where `SQL_DISTANCE_KM(col,
+ * ?, ?)` has two, and the Postgres `$regex` has **one** where
+ * `SQL_REGEXP(?, ?, col)` has two, because the flags become part of the
+ * operator instead of an argument. The parameters are pushed here, so the
+ * choice has to be made here.
+ *
+ * It is deliberately **not** a second copy of this file. A fork is the thing
+ * phase 97 exists to argue against: the claim is that the same backend runs on
+ * either database, and two query builders drifting apart is that claim failing
+ * from the inside. See [[a-second-copy-of-a-palette-drifts-silently]].
+ *
  * @module adapters/local-sql/QueryBuilder
  */
 
+import { aclPredicateSql, withinBoxSql } from '../postgres/predicates';
+import {
+  SEARCH_CONFIG,
+  SEARCH_FIELDS_REQUIRED,
+  SEARCH_TSQUERY,
+  searchTextSql,
+  searchVectorSql
+} from '../postgres/search';
+import { distanceKmSql, pointInPolygonSql, polygonLiteral, regexpSql, toAreRegex } from '../postgres/geo';
 import {
   EARTH_RADIUS_KM,
   KM_PER_MILE,
@@ -14,6 +53,17 @@ import {
   SQL_POINT_IN_POLYGON,
   SQL_REGEXP
 } from './sqlFunctions';
+
+/**
+ * Which SQL the builder should emit.
+ *
+ * `'sqlite'` is the default everywhere, so the built-in backend's behaviour is
+ * not a function of this argument existing. Deliberately narrow: it is not an
+ * extension point for a third engine, because a third engine would need its own
+ * measurements of every expression in this file rather than a new string in a
+ * union. R5 rules the same thing at the CLI — Postgres only, refused by name.
+ */
+export type SqlDialect = 'sqlite' | 'postgres';
 
 /** The caller's row-level access context (BAK-003). */
 export interface AclContext {
@@ -55,6 +105,16 @@ interface SearchOptions extends QueryOptionsBase {
   sort?: string | string[];
   limit?: number;
   skip?: number;
+  /**
+   * The indexed fields, for the Postgres dialect only (BRG-005 AC6).
+   *
+   * SQLite does not need this: the FTS5 shadow table IS the field list, and the
+   * `MATCH` goes against the table. PostgreSQL has no shadow table — the
+   * `tsvector` is built from the columns named here — so on that dialect the
+   * builder cannot guess and **refuses** rather than searching a field list it
+   * invented. Ignored entirely when the dialect is `'sqlite'`.
+   */
+  fields?: string[];
 }
 
 /** One aggregate output column: exactly one of the operators is set. */
@@ -222,7 +282,12 @@ export function columnRef(name: string, scope?: ColumnScope, tableAlias?: string
  * @param params - Parameter array to push principal keys to
  * @returns SQL predicate, or '' when acl is absent
  */
-export function buildAclPredicate(tableName: string, acl: AclContext | undefined, params: unknown[]): string {
+export function buildAclPredicate(
+  tableName: string,
+  acl: AclContext | undefined,
+  params: unknown[],
+  dialect: SqlDialect = 'sqlite'
+): string {
   if (!acl || !Array.isArray(acl.keys)) {
     return '';
   }
@@ -234,6 +299,13 @@ export function buildAclPredicate(tableName: string, acl: AclContext | undefined
   }
   const placeholders = acl.keys.map(() => '?').join(', ');
   params.push(...acl.keys);
+  if (dialect === 'postgres') {
+    // Same principal keys, same bind order, same number of markers — only the
+    // JSON operators and the flag comparison change. Both differences are
+    // measured against this SQLite expression over the same rows, and both are
+    // documented where the translation lives rather than here.
+    return aclPredicateSql(aclCol, placeholders, access, '_acl_entry');
+  }
   return (
     `(${aclCol} IS NULL OR EXISTS (` +
     `SELECT 1 FROM json_each(${aclCol}) AS _acl_entry ` +
@@ -324,7 +396,8 @@ export function buildWhereClause(
   params: unknown[],
   schema?: unknown,
   tableAlias?: string,
-  scope?: ColumnScope
+  scope?: ColumnScope,
+  dialect: SqlDialect = 'sqlite'
 ): string {
   if (!where || Object.keys(where).length === 0) {
     return '';
@@ -336,7 +409,7 @@ export function buildWhereClause(
     // Handle logical operators
     if (key === '$and' && Array.isArray(condition)) {
       const subConditions = condition
-        .map((sub) => buildWhereClause(sub as Record<string, unknown>, params, schema, tableAlias, scope))
+        .map((sub) => buildWhereClause(sub as Record<string, unknown>, params, schema, tableAlias, scope, dialect))
         .filter((c) => c);
       if (subConditions.length > 0) {
         conditions.push(`(${subConditions.join(' AND ')})`);
@@ -346,7 +419,7 @@ export function buildWhereClause(
 
     if (key === '$or' && Array.isArray(condition)) {
       const subConditions = condition
-        .map((sub) => buildWhereClause(sub as Record<string, unknown>, params, schema, tableAlias, scope))
+        .map((sub) => buildWhereClause(sub as Record<string, unknown>, params, schema, tableAlias, scope, dialect))
         .filter((c) => c);
       if (subConditions.length > 0) {
         conditions.push(`(${subConditions.join(' OR ')})`);
@@ -390,7 +463,7 @@ export function buildWhereClause(
     // condition of its own.
     const siblings = condition as Record<string, unknown>;
     for (const [op, value] of Object.entries(condition)) {
-      const sqlCondition = translateOperator(col, op, value, params, schema, siblings);
+      const sqlCondition = translateOperator(col, op, value, params, schema, siblings, dialect);
       if (sqlCondition) {
         conditions.push(sqlCondition);
       }
@@ -430,7 +503,8 @@ function translateOperator(
   value: unknown,
   params: unknown[],
   schema?: unknown,
-  siblings?: Record<string, unknown>
+  siblings?: Record<string, unknown>,
+  dialect: SqlDialect = 'sqlite'
 ): string | null {
   // Convert special types
   const convertedValue = convertQueryValue(value);
@@ -468,7 +542,11 @@ function translateOperator(
 
     case '$in': {
       if (!Array.isArray(value) || value.length === 0) {
-        return '0'; // Always false
+        // Always false. 🔴 A bare `0` is a boolean to SQLite and an INTEGER to
+        // PostgreSQL, where `WHERE 0` is a type error ("argument of WHERE must
+        // be type boolean") — so `$in: []` would fail the statement instead of
+        // matching nothing. Found by BRG-005's conformance run.
+        return dialect === 'postgres' ? 'FALSE' : '0';
       }
       const inValues = value.map((v) => convertQueryValue(v));
       const placeholders = inValues.map(() => '?').join(', ');
@@ -478,7 +556,7 @@ function translateOperator(
 
     case '$nin': {
       if (!Array.isArray(value) || value.length === 0) {
-        return '1'; // Always true (not in empty set)
+        return dialect === 'postgres' ? 'TRUE' : '1'; // Always true (not in empty set)
       }
       const ninValues = value.map((v) => convertQueryValue(v));
       const ninPlaceholders = ninValues.map(() => '?').join(', ');
@@ -499,8 +577,21 @@ function translateOperator(
       // JavaScript, so the pattern is now evaluated by the same engine the
       // user's browser would use. `$options` is read from the sibling key
       // rather than as an operator of its own.
-      params.push(String(value), typeof siblings?.$options === 'string' ? siblings.$options : '');
-      return `${SQL_REGEXP}(?, ?, ${col}) = 1`;
+      {
+        const flags = typeof siblings?.$options === 'string' ? siblings.$options : '';
+        if (dialect === 'postgres') {
+          // 🔴 ONE marker where SQLite has two. The flags are not a bound value
+          // on Postgres — `i` selects the `~*` operator and `m` becomes an
+          // embedded `(?n)` in the pattern itself — so the second parameter has
+          // nowhere to go. This is the second of the two marker-count changes
+          // that put the seam inside this file (§6.1); `toAreRegex` is why the
+          // pattern is rewritten rather than passed through.
+          params.push(toAreRegex(String(value)));
+          return regexpSql(col, flags);
+        }
+        params.push(String(value), flags);
+        return `${SQL_REGEXP}(?, ?, ${col}) = 1`;
+      }
 
     case '$options':
       // A modifier on $regex, consumed above. Not a condition.
@@ -512,7 +603,9 @@ function translateOperator(
       if (textValue && textValue.$search) {
         const term = typeof textValue.$search === 'string' ? textValue.$search : textValue.$search.$term || '';
         params.push(`%${term}%`);
-        return `${col} LIKE ?`;
+        // SQLite's LIKE is case-insensitive for ASCII; PostgreSQL's is not, and
+        // `ILIKE` is the operator that says what SQLite's LIKE means.
+        return `${col} ${dialect === 'postgres' ? 'ILIKE' : 'LIKE'} ?`;
       }
       return null;
     }
@@ -521,7 +614,7 @@ function translateOperator(
     case '$contains':
       // Contains search - convert to LIKE with wildcards
       params.push(`%${convertedValue}%`);
-      return `${col} LIKE ?`;
+      return `${col} ${dialect === 'postgres' ? 'ILIKE' : 'LIKE'} ?`;
 
     // ── Geo ────────────────────────────────────────────────────────────────
     //
@@ -548,8 +641,21 @@ function translateOperator(
         // honest translation of the *filter* is the one that narrows nothing —
         // but it still excludes rows with no usable point, which is what the
         // distance comparison below would do anyway.
+        if (dialect === 'postgres') {
+          params.push(centre.latitude, centre.latitude, centre.longitude);
+          return `${distanceKmSql(col)} IS NOT NULL`;
+        }
         params.push(centre.latitude, centre.longitude);
         return `${SQL_DISTANCE_KM}(${col}, ?, ?) IS NOT NULL`;
+      }
+      if (dialect === 'postgres') {
+        // 🔴 THREE markers where SQLite has two, and the centre latitude is two
+        // of them — the haversine needs it in both the `dLat` term and the
+        // `cos(lat1)cos(lat2)` term, and a positional marker binds one value
+        // each. The order is the contract `distanceKmSql` documents:
+        // `centreLat, centreLat, centreLon`.
+        params.push(centre.latitude, centre.latitude, centre.longitude, radiusKm);
+        return `${distanceKmSql(col)} <= ?`;
       }
       params.push(centre.latitude, centre.longitude, radiusKm);
       return `${SQL_DISTANCE_KM}(${col}, ?, ?) <= ?`;
@@ -582,6 +688,11 @@ function translateOperator(
         Math.min(southwest.longitude, northeast.longitude),
         Math.max(southwest.longitude, northeast.longitude)
       );
+      if (dialect === 'postgres') {
+        // Four markers, same order — the one non-portable expression here that a
+        // boundary translator could have handled. See `withinBoxSql`.
+        return withinBoxSql(col);
+      }
       return (
         `json_extract(${col}, '$.latitude') BETWEEN ? AND ? ` +
         `AND json_extract(${col}, '$.longitude') BETWEEN ? AND ?`
@@ -591,6 +702,22 @@ function translateOperator(
     case '$geoWithin': {
       const polygon = (value as { $polygon?: unknown[] } | null)?.$polygon;
       if (!Array.isArray(polygon) || polygon.length < 3) return null;
+      if (dialect === 'postgres') {
+        // One marker either way, but the bound VALUE differs: SQLite binds the
+        // JSON ring and reads it in JavaScript, Postgres binds a `polygon`
+        // literal and lets the server do the containment.
+        const literal = polygonLiteral(polygon);
+        if (literal === null) {
+          // An unusable ring — fewer than three usable vertices, or a vertex
+          // that is not a pair of numbers. `sqlFunctions.pointInPolygon`
+          // returns 0 for exactly these, so the faithful translation is a
+          // condition that matches nothing, NOT a dropped condition (which
+          // would widen the result set — the failure class BCN-003 closed).
+          return 'FALSE';
+        }
+        params.push(literal);
+        return pointInPolygonSql(col);
+      }
       params.push(JSON.stringify(polygon));
       return `${SQL_POINT_IN_POLYGON}(${col}, ?) = 1`;
     }
@@ -645,7 +772,12 @@ export function buildOrderClause(
 /**
  * Build a SELECT query
  */
-export function buildSelect(options: SelectOptions, schema?: unknown, scope?: ColumnScope): BuiltQuery {
+export function buildSelect(
+  options: SelectOptions,
+  schema?: unknown,
+  scope?: ColumnScope,
+  dialect: SqlDialect = 'sqlite'
+): BuiltQuery {
   const params: unknown[] = [];
   const table = escapeTable(options.collection);
 
@@ -674,12 +806,12 @@ export function buildSelect(options: SelectOptions, schema?: unknown, scope?: Co
   // Build WHERE clause (query filter AND row-level ACL predicate)
   const conditions: string[] = [];
   if (options.where) {
-    const whereClause = buildWhereClause(options.where, params, schema, undefined, scope);
+    const whereClause = buildWhereClause(options.where, params, schema, undefined, scope, dialect);
     if (whereClause) {
       conditions.push(whereClause);
     }
   }
-  const aclClause = buildAclPredicate(options.collection, options.acl, params);
+  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect);
   if (aclClause) {
     conditions.push(aclClause);
   }
@@ -712,7 +844,12 @@ export function buildSelect(options: SelectOptions, schema?: unknown, scope?: Co
 /**
  * Build a COUNT query
  */
-export function buildCount(options: QueryOptionsBase, schema?: unknown, scope?: ColumnScope): BuiltQuery {
+export function buildCount(
+  options: QueryOptionsBase,
+  schema?: unknown,
+  scope?: ColumnScope,
+  dialect: SqlDialect = 'sqlite'
+): BuiltQuery {
   const params: unknown[] = [];
   const table = escapeTable(options.collection);
 
@@ -720,12 +857,12 @@ export function buildCount(options: QueryOptionsBase, schema?: unknown, scope?: 
 
   const conditions: string[] = [];
   if (options.where) {
-    const whereClause = buildWhereClause(options.where, params, schema, undefined, scope);
+    const whereClause = buildWhereClause(options.where, params, schema, undefined, scope, dialect);
     if (whereClause) {
       conditions.push(whereClause);
     }
   }
-  const aclClause = buildAclPredicate(options.collection, options.acl, params);
+  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect);
   if (aclClause) {
     conditions.push(aclClause);
   }
@@ -737,18 +874,215 @@ export function buildCount(options: QueryOptionsBase, schema?: unknown, scope?: 
 }
 
 /**
- * Build an INSERT query
+ * A caller may name its own record (P90 SYN-003): an id a device made offline
+ * has to survive the trip, or anything pointing at it breaks. It is used in URL
+ * paths (`/classes/:c/:id`), so it is held to URL-safe characters.
  */
-export function buildInsert(options: { collection: string; data: Record<string, unknown> }, id: string): BuiltQuery {
+const CLIENT_OBJECT_ID = /^[A-Za-z0-9_-]{1,128}$/;
+
+export const CLIENT_OBJECT_ID_INVALID = 'objectId must be a string of 1 to 128 letters, digits, "-" or "_".';
+
+export function isClientObjectId(value: unknown): value is string {
+  return typeof value === 'string' && CLIENT_OBJECT_ID.test(value);
+}
+
+export function clientObjectIdTaken(collection: string, id: string): string {
+  return `objectId "${id}" is already used in "${collection}".`;
+}
+
+/**
+ * Which refusal a create's error message is, so the HTTP layer can answer 409
+ * or 400 without reading SQLite's wording. `null` for every other error.
+ */
+export function clientObjectIdProblem(message: string): 'taken' | 'invalid' | null {
+  if (message === CLIENT_OBJECT_ID_INVALID) return 'invalid';
+  if (/^objectId ".*" is already used in ".*"\.$/.test(message)) return 'taken';
+  return null;
+}
+
+/**
+ * A write refused by a unique index (FED-002), decoded from SQLite's own text.
+ *
+ * SQLite says `UNIQUE constraint failed: Item.guid` (and, for a composite
+ * index, `Item.sourceId, Item.guid`) — which names the table and the columns
+ * but not the offending value, and reads like a stack trace. It is decoded
+ * rather than rewritten because the HTTP layer is the only place that knows the
+ * value: it has the request body in its hand, and the adapter does not keep it.
+ *
+ * Returns `null` for every other error, including a failed PRIMARY KEY, which
+ * is the objectId case {@link clientObjectIdProblem} already owns.
+ */
+export function uniqueConstraintProblem(message: string): { collection: string; fields: string[] } | null {
+  const m = /^UNIQUE constraint failed: (.+)$/.exec(String(message || '').trim());
+  if (!m) return null;
+
+  const parts = m[1].split(',').map((s) => s.trim());
+  const collections = new Set<string>();
+  const fields: string[] = [];
+  for (const part of parts) {
+    const dot = part.lastIndexOf('.');
+    if (dot <= 0) return null;
+    collections.add(part.slice(0, dot));
+    fields.push(part.slice(dot + 1));
+  }
+  if (collections.size !== 1 || fields.length === 0) return null;
+  // The PRIMARY KEY is `objectId`; that refusal has its own, earlier reading.
+  if (fields.length === 1 && fields[0] === 'objectId') return null;
+
+  return { collection: [...collections][0], fields };
+}
+
+/**
+ * HLT-016 — "change this row only if nobody has changed it since I read it".
+ *
+ * Field → the value it must still hold for the update to apply. Scalars only, and deliberately:
+ * an object or array here would reach `node:sqlite` as a bound value, where a leading bare object
+ * is read as a named-parameter map and every `?` after it shifts by one (HLT-018). And SQLite
+ * compares TEXT byte-wise while PostgreSQL compares JSONB by meaning, so the two engines would
+ * disagree on whether `{a:1,b:2}` "still holds". `null` means the field must still be empty.
+ */
+export type ExpectedValues = Record<string, string | number | boolean | null>;
+
+/** At most this many fields per precondition: a version column is one, a small key is two. */
+export const MAX_EXPECTED_FIELDS = 8;
+
+/**
+ * The adapter's refusal when the row exists and the caller may write it, but it no longer holds
+ * the expected values. The HTTP layer answers it 409 via {@link preconditionProblem}.
+ */
+export const PRECONDITION_FAILED = 'Precondition failed: the record has changed since it was read';
+
+const EXPECTED_FIELD_NAME = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+
+/** Why `expect` cannot be used as a precondition, or `null` when it can. */
+export function expectedValuesProblem(expect: unknown): string | null {
+  if (!expect || typeof expect !== 'object' || Array.isArray(expect)) {
+    return 'must be an object of field names to the values they must still hold';
+  }
+  const keys = Object.keys(expect);
+  if (keys.length === 0) return 'names no field';
+  if (keys.length > MAX_EXPECTED_FIELDS) return `names ${keys.length} fields; at most ${MAX_EXPECTED_FIELDS}`;
+  for (const key of keys) {
+    if (!EXPECTED_FIELD_NAME.test(key)) return `"${key}" is not a field name`;
+    const value = (expect as Record<string, unknown>)[key];
+    const scalar =
+      value === null ||
+      typeof value === 'string' ||
+      typeof value === 'boolean' ||
+      (typeof value === 'number' && Number.isFinite(value));
+    if (!scalar) return `"${key}" must be a string, number, boolean or null — an object or list cannot be compared the same way on every database`;
+  }
+  return null;
+}
+
+/** `T."version" = ? AND T."owner" IS NULL`, pushing one param per `=` in text order. */
+function buildExpectClause(tableName: string, expect: ExpectedValues, params: unknown[]): string {
+  const table = escapeTable(tableName);
+  return Object.keys(expect)
+    .map((key) => {
+      const column = `${table}.${escapeColumn(key)}`;
+      const value = expect[key];
+      // `= NULL` never matches anything, on either engine.
+      if (value === null) return `${column} IS NULL`;
+      params.push(serializeValue(value));
+      return `${column} = ?`;
+    })
+    .join(' AND ');
+}
+
+/**
+ * `SELECT 1` for "does this row exist AND may this caller write it" — the question asked only
+ * after a precondition matched 0 rows, to tell "changed since read" (409) from "not found or
+ * forbidden" (404). The ACL is in it, so a row the caller cannot write still reads as missing:
+ * a failed precondition is never an existence oracle.
+ */
+export function buildRowExists(
+  collection: string,
+  objectId: string,
+  acl: AclContext | undefined,
+  dialect: SqlDialect = 'sqlite'
+): BuiltQuery {
+  const params: unknown[] = [objectId];
+  let sql = `SELECT 1 AS "one" FROM ${escapeTable(collection)} WHERE "objectId" = ?`;
+  const aclClause = buildAclPredicate(collection, acl, params, dialect);
+  if (aclClause) sql += ` AND ${aclClause}`;
+  return { sql, params };
+}
+
+/**
+ * The expected field the engine said does not exist, or `null`. SQLite: `no such column:
+ * Item.version`. PostgreSQL (42703): `column Item.version does not exist`. Only a field the
+ * precondition named counts: any other missing column is some other fault.
+ */
+export function missingExpectedField(message: string, expect: ExpectedValues | undefined): string | null {
+  if (!expect) return null;
+  const text = String(message || '');
+  const m =
+    /no such column: (?:"?[A-Za-z0-9_]+"?\.)?"?([A-Za-z0-9_]+)"?/.exec(text) ||
+    /column (?:"?[A-Za-z0-9_]+"?\.)?"?([A-Za-z0-9_]+)"? does not exist/.exec(text);
+  if (!m || !Object.prototype.hasOwnProperty.call(expect, m[1])) return null;
+  return m[1];
+}
+
+/** The refusal for a precondition that names a field the collection does not have. */
+export function preconditionFieldMessage(collection: string, field: string): string {
+  return `Precondition names "${field}", which "${collection}" does not have`;
+}
+
+/**
+ * Which precondition refusal an adapter message is, for the HTTP layer. `changed` is a 409, and
+ * `unknown-field` is the caller's mistake (400). Not a 409, because a misspelt field would
+ * otherwise read as a conflict forever and a retry loop would never end.
+ */
+export function preconditionProblem(message: string): { kind: 'changed' } | { kind: 'unknown-field'; field: string } | null {
+  const text = String(message || '');
+  if (text === PRECONDITION_FAILED) return { kind: 'changed' };
+  const m = /^Precondition names "([^"]+)", which "[^"]*" does not have$/.exec(text);
+  if (m) return { kind: 'unknown-field', field: m[1] };
+  return null;
+}
+
+/**
+ * HLT-016: a write refused by a declared check. Both engines speak this one
+ * sentence (`CHECK constraint failed: <collection>.<check name>`): SQLite's
+ * triggers raise it and `translatePgError` rewrites PostgreSQL's 23514 into it.
+ *
+ * @returns The collection and the check's derived name, or null.
+ */
+export function checkConstraintProblem(message: string): { collection: string; check: string } | null {
+  const m = /^CHECK constraint failed: ([A-Za-z0-9_]+)\.(chk_[A-Za-z0-9_]+)$/.exec(String(message || '').trim());
+  return m ? { collection: m[1], check: m[2] } : null;
+}
+
+/**
+ * Build an INSERT query.
+ *
+ * `required` (BMG-017, R6): the columns a record must name itself, from
+ * `requiredWithoutDefault`. Each one the data leaves out is written as NULL, so
+ * the engine refuses the row — SQLite keeps a one-time fill as the column's DDL
+ * default, and would otherwise hand it to every new record that forgot the
+ * field. Every SQLite caller passes it; `bmg-017-import-required` is the census.
+ */
+export function buildInsert(
+  options: { collection: string; data: Record<string, unknown>; required?: string[] },
+  id: string
+): BuiltQuery {
   const params: unknown[] = [];
   const table = escapeTable(options.collection);
+
+  // The id this is given is the id it writes. Spreading the data over it let a
+  // caller's `objectId` win the INSERT while `create()` read the row back by
+  // the id it passed here — the row existed and the caller got `null` (SYN-003).
+  const rest: Record<string, unknown> = { ...options.data };
+  delete rest.objectId;
+  for (const name of options.required || []) if (rest[name] === undefined) rest[name] = null;
 
   const now = new Date().toISOString();
   const data: Record<string, unknown> = {
     objectId: id,
     createdAt: now,
     updatedAt: now,
-    ...options.data
+    ...rest
   };
 
   // Remove protected fields
@@ -772,13 +1106,18 @@ export function buildInsert(options: { collection: string; data: Record<string, 
 /**
  * Build an UPDATE query
  */
-export function buildUpdate(options: {
-  collection: string;
-  id?: string;
-  objectId?: string;
-  data: Record<string, unknown>;
-  acl?: AclContext;
-}): BuiltQuery {
+export function buildUpdate(
+  options: {
+    collection: string;
+    id?: string;
+    objectId?: string;
+    data: Record<string, unknown>;
+    acl?: AclContext;
+    /** HLT-016 — "only if unchanged". See {@link ExpectedValues}. */
+    expect?: ExpectedValues;
+  },
+  dialect: SqlDialect = 'sqlite'
+): BuiltQuery {
   const params: unknown[] = [];
   const table = escapeTable(options.collection);
 
@@ -806,10 +1145,17 @@ export function buildUpdate(options: {
 
   let sql = `UPDATE ${table} SET ${setClause.join(', ')} WHERE "objectId" = ?`;
 
+  // HLT-016: the expected values go in the SAME statement, after the id and before the ACL, so
+  // their params land where their markers are. A version check done as a read before this
+  // UPDATE would be the race it exists to prevent.
+  if (options.expect) {
+    sql += ` AND ${buildExpectClause(options.collection, options.expect, params)}`;
+  }
+
   // Row-level write check compiled into the statement itself: 0 rows changed
   // means not-found OR forbidden, indistinguishably (no read-then-write race,
   // no existence leak).
-  const aclClause = buildAclPredicate(options.collection, options.acl, params);
+  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect);
   if (aclClause) {
     sql += ` AND ${aclClause}`;
   }
@@ -820,18 +1166,21 @@ export function buildUpdate(options: {
 /**
  * Build a DELETE query
  */
-export function buildDelete(options: {
-  collection: string;
-  id?: string;
-  objectId?: string;
-  acl?: AclContext;
-}): BuiltQuery {
+export function buildDelete(
+  options: {
+    collection: string;
+    id?: string;
+    objectId?: string;
+    acl?: AclContext;
+  },
+  dialect: SqlDialect = 'sqlite'
+): BuiltQuery {
   const table = escapeTable(options.collection);
   // Use id or objectId for backwards compatibility
   const recordId = options.id || options.objectId;
   const params: unknown[] = [recordId];
   let sql = `DELETE FROM ${table} WHERE "objectId" = ?`;
-  const aclClause = buildAclPredicate(options.collection, options.acl, params);
+  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect);
   if (aclClause) {
     sql += ` AND ${aclClause}`;
   }
@@ -841,13 +1190,16 @@ export function buildDelete(options: {
 /**
  * Build an INCREMENT query
  */
-export function buildIncrement(options: {
-  collection: string;
-  id?: string;
-  objectId?: string;
-  properties: Record<string, number>;
-  acl?: AclContext;
-}): BuiltQuery {
+export function buildIncrement(
+  options: {
+    collection: string;
+    id?: string;
+    objectId?: string;
+    properties: Record<string, number>;
+    acl?: AclContext;
+  },
+  dialect: SqlDialect = 'sqlite'
+): BuiltQuery {
   const params: unknown[] = [];
   const table = escapeTable(options.collection);
 
@@ -869,7 +1221,7 @@ export function buildIncrement(options: {
 
   let sql = `UPDATE ${table} SET ${setClause.join(', ')} WHERE "objectId" = ?`;
 
-  const aclClause = buildAclPredicate(options.collection, options.acl, params);
+  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect);
   if (aclClause) {
     sql += ` AND ${aclClause}`;
   }
@@ -907,6 +1259,22 @@ export function toFts5MatchQuery(term: string): string {
 }
 
 /**
+ * The three Postgres search expressions for one collection, or the refusal.
+ *
+ * `fields` is required on this dialect and there is no default: PostgreSQL has
+ * no shadow table to read the indexed field list out of, so a builder that
+ * guessed would search a set of columns nobody chose — the "wrong rows, no
+ * error" shape this file refuses in `translateOperator`'s default branch too.
+ */
+function pgSearchParts(fields: string[] | undefined, table: string) {
+  if (!Array.isArray(fields) || fields.length === 0) {
+    throw new Error(SEARCH_FIELDS_REQUIRED);
+  }
+  const cols = fields.map((f) => `${table}.${escapeColumn(f)}`);
+  return { vector: searchVectorSql(cols), text: searchTextSql(cols) };
+}
+
+/**
  * Build a search+filter+ACL SELECT joined against a collection's FTS5 shadow
  * table (BAK-008). MATCHes `options.search` (an FTS5 query string) against the
  * indexed fields, ANDs in the normal structured `where` and the row-level ACL
@@ -918,24 +1286,53 @@ export function toFts5MatchQuery(term: string): string {
  * callers should translate the resulting "no such table" SQL error into a
  * clear "search not enabled" message (see LocalSQLAdapter.search).
  */
-export function buildSearchSelect(options: SearchOptions, schema?: unknown, scope?: ColumnScope): BuiltQuery {
+export function buildSearchSelect(
+  options: SearchOptions,
+  schema?: unknown,
+  scope?: ColumnScope,
+  dialect: SqlDialect = 'sqlite'
+): BuiltQuery {
   const params: unknown[] = [];
   const table = escapeTable(options.collection);
   const ftsTable = escapeTable(`${options.collection}_fts`);
 
-  let sql =
-    `SELECT ${table}.*, bm25(${ftsTable}) AS "_rank", ` +
-    `snippet(${ftsTable}, -1, '<mark>', '</mark>', '…', 24) AS "_snippet" ` +
-    `FROM ${table} JOIN ${ftsTable} ON ${ftsTable}.rowid = ${table}.rowid`;
+  let sql: string;
+  let conditions: string[];
 
-  params.push(toFts5MatchQuery(options.search));
-  const conditions = [`${ftsTable} MATCH ?`];
+  if (dialect === 'postgres') {
+    const { vector, text } = pgSearchParts(options.fields, table);
+    // 🔴 `_rank` is NEGATED, and it is not cosmetic. SQLite's `bm25()` is
+    // lower-is-better; `LocalSQLAdapter.search` publishes `_score = -_rank` on
+    // that basis, and this function's own default ordering is `"_rank" ASC`.
+    // PostgreSQL's `ts_rank_cd` is higher-is-better, so emitting it unnegated
+    // would hand every caller the ranking backwards — worst match first, and a
+    // `_score` that decreases with relevance — with nothing failing anywhere.
+    sql =
+      `SELECT ${table}.*, -ts_rank_cd(${vector}, ${SEARCH_TSQUERY}) AS "_rank", ` +
+      `ts_headline(${SEARCH_CONFIG}, ${text}, ${SEARCH_TSQUERY}, ` +
+      `'StartSel=<mark>, StopSel=</mark>, MaxWords=24, MinWords=1, MaxFragments=1') AS "_snippet" ` +
+      `FROM ${table}`;
+    // Two markers in the SELECT (the rank's tsquery and the headline's), one in
+    // the predicate below: three bindings of one search term, where the SQLite
+    // statement binds it once.
+    params.push(options.search, options.search);
+    conditions = [`${vector} @@ ${SEARCH_TSQUERY}`];
+    params.push(options.search);
+  } else {
+    sql =
+      `SELECT ${table}.*, bm25(${ftsTable}) AS "_rank", ` +
+      `snippet(${ftsTable}, -1, '<mark>', '</mark>', '…', 24) AS "_snippet" ` +
+      `FROM ${table} JOIN ${ftsTable} ON ${ftsTable}.rowid = ${table}.rowid`;
+
+    params.push(toFts5MatchQuery(options.search));
+    conditions = [`${ftsTable} MATCH ?`];
+  }
 
   if (options.where) {
-    const whereClause = buildWhereClause(options.where, params, schema, table, scope);
+    const whereClause = buildWhereClause(options.where, params, schema, table, scope, dialect);
     if (whereClause) conditions.push(whereClause);
   }
-  const aclClause = buildAclPredicate(options.collection, options.acl, params);
+  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect);
   if (aclClause) conditions.push(aclClause);
 
   sql += ` WHERE ${conditions.join(' AND ')}`;
@@ -964,21 +1361,35 @@ export function buildSearchSelect(options: SearchOptions, schema?: unknown, scop
  * Build a COUNT query for a search (BAK-008) — same MATCH + filter + ACL
  * predicate as buildSearchSelect, no ranking/snippet/order/limit.
  */
-export function buildSearchCount(options: SearchOptions, schema?: unknown, scope?: ColumnScope): BuiltQuery {
+export function buildSearchCount(
+  options: SearchOptions,
+  schema?: unknown,
+  scope?: ColumnScope,
+  dialect: SqlDialect = 'sqlite'
+): BuiltQuery {
   const params: unknown[] = [];
   const table = escapeTable(options.collection);
   const ftsTable = escapeTable(`${options.collection}_fts`);
 
-  let sql = `SELECT COUNT(*) as count FROM ${table} JOIN ${ftsTable} ON ${ftsTable}.rowid = ${table}.rowid`;
+  let sql: string;
+  let conditions: string[];
 
-  params.push(toFts5MatchQuery(options.search));
-  const conditions = [`${ftsTable} MATCH ?`];
+  if (dialect === 'postgres') {
+    const { vector } = pgSearchParts(options.fields, table);
+    sql = `SELECT COUNT(*) as count FROM ${table}`;
+    conditions = [`${vector} @@ ${SEARCH_TSQUERY}`];
+    params.push(options.search);
+  } else {
+    sql = `SELECT COUNT(*) as count FROM ${table} JOIN ${ftsTable} ON ${ftsTable}.rowid = ${table}.rowid`;
+    params.push(toFts5MatchQuery(options.search));
+    conditions = [`${ftsTable} MATCH ?`];
+  }
 
   if (options.where) {
-    const whereClause = buildWhereClause(options.where, params, schema, table, scope);
+    const whereClause = buildWhereClause(options.where, params, schema, table, scope, dialect);
     if (whereClause) conditions.push(whereClause);
   }
-  const aclClause = buildAclPredicate(options.collection, options.acl, params);
+  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect);
   if (aclClause) conditions.push(aclClause);
 
   sql += ` WHERE ${conditions.join(' AND ')}`;
@@ -991,7 +1402,8 @@ export function buildSearchCount(options: SearchOptions, schema?: unknown, scope
  */
 export function buildDistinct(
   options: QueryOptionsBase & { property: string },
-  scope?: ColumnScope
+  scope?: ColumnScope,
+  dialect: SqlDialect = 'sqlite'
 ): BuiltQuery {
   const params: unknown[] = [];
   const table = escapeTable(options.collection);
@@ -1004,12 +1416,12 @@ export function buildDistinct(
 
   const conditions: string[] = [];
   if (options.where) {
-    const whereClause = buildWhereClause(options.where, params, undefined, undefined, scope);
+    const whereClause = buildWhereClause(options.where, params, undefined, undefined, scope, dialect);
     if (whereClause) {
       conditions.push(whereClause);
     }
   }
-  const aclClause = buildAclPredicate(options.collection, options.acl, params);
+  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect);
   if (aclClause) {
     conditions.push(aclClause);
   }
@@ -1025,7 +1437,8 @@ export function buildDistinct(
  */
 export function buildAggregate(
   options: QueryOptionsBase & { group: Record<string, AggregateGroupConfig>; limit?: number; skip?: number },
-  scope?: ColumnScope
+  scope?: ColumnScope,
+  dialect: SqlDialect = 'sqlite'
 ): BuiltQuery {
   const params: unknown[] = [];
   const table = escapeTable(options.collection);
@@ -1058,12 +1471,12 @@ export function buildAggregate(
 
   const conditions: string[] = [];
   if (options.where) {
-    const whereClause = buildWhereClause(options.where, params, undefined, undefined, scope);
+    const whereClause = buildWhereClause(options.where, params, undefined, undefined, scope, dialect);
     if (whereClause) {
       conditions.push(whereClause);
     }
   }
-  const aclClause = buildAclPredicate(options.collection, options.acl, params);
+  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect);
   if (aclClause) {
     conditions.push(aclClause);
   }
@@ -1101,15 +1514,15 @@ export function serializeValue(value: unknown): unknown {
     if (tagged.__type === 'GeoPoint') {
       return JSON.stringify(value);
     }
-    // Arrays and objects - store as JSON
-    if (Array.isArray(value) || Object.keys(value).length > 0) {
-      return JSON.stringify(value);
+    // Date objects - before the JSON branch, because a Date has no own keys
+    if (value instanceof Date) {
+      return value.toISOString();
     }
-  }
-
-  // Handle Date objects
-  if (value instanceof Date) {
-    return value.toISOString();
+    // Arrays and objects - store as JSON, empty ones included.
+    // P99 HLT-018: this used to require `Object.keys(value).length > 0`, which
+    // was how a Date reached the branch above; `{}` then fell through as a bare
+    // object SQLite cannot bind (500 on POST /classes, a whole import rolled back).
+    return JSON.stringify(value);
   }
 
   // Handle booleans - SQLite uses 0/1
@@ -1140,6 +1553,12 @@ export function deserializeValue(value: unknown, type?: string): unknown {
     return value; // Keep as ISO string, let CloudStore handle Date objects
   }
 
+  // P99 HLT-022 (b): a String column is text, whatever it looks like. The sniff below
+  // turned a learner's `[1,2]` into an array on read, on both adapters.
+  if (type === 'String') {
+    return value;
+  }
+
   if (type === 'Object' || type === 'Array' || type === 'GeoPoint' || type === 'File') {
     if (typeof value === 'string') {
       try {
@@ -1150,7 +1569,8 @@ export function deserializeValue(value: unknown, type?: string): unknown {
     }
   }
 
-  // Try to parse JSON strings that look like objects/arrays
+  // Try to parse JSON strings that look like objects/arrays. Kept, deliberately, for a
+  // column with NO declared type: a schemaless backend has nothing else to go on.
   if (typeof value === 'string') {
     if ((value.startsWith('{') && value.endsWith('}')) || (value.startsWith('[') && value.endsWith(']'))) {
       try {

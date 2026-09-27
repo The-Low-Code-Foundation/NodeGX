@@ -11,9 +11,10 @@ import { MenuDialogWidth } from '@noodl-core-ui/components/popups/MenuDialog';
 import { Tooltip } from '@noodl-core-ui/components/popups/Tooltip';
 
 import { ViewerConnection } from '../../ViewerConnection';
-import { buildCreateMenuItems, createMenuTitle, DEFAULT_SHEET_NAME } from '../panels/ComponentsPanelNew/createMenu';
+import type { LaneFilter } from '../nodegrapheditor/canvas/structureLane';
+import { buildCreateMenuItems, CLOUD_CREATE_PARENT_PATH, createMenuTitle } from '../panels/ComponentsPanelNew/createMenu';
+import { folderSegmentLabel } from '../panels/ComponentsPanelNew/folderDisplay';
 import { useComponentActions } from '../panels/ComponentsPanelNew/hooks/useComponentActions';
-import { CLOUD_SHEET } from '../panels/ComponentsPanelNew/types';
 import { showContextMenuInPopup } from '../ShowContextMenuInPopup';
 import css from './NodeGraphComponentTrail.module.scss';
 
@@ -24,6 +25,22 @@ export interface ComponentTrailItem {
   component?: TSFixme; // Noodl Component object or undefined if folder
   isCurrent: boolean;
   stateText: 'Read only' | null;
+
+  /**
+   * TVW-007 §2 — this crumb is the component you came THROUGH, not a folder you are stored in.
+   *
+   * Set only by `OverlayViews.updateTitle` on the parent crumb of a containment trail
+   * (`[◆ Home] › Hero`). It is what earns the diamond and the component-hue wash, and it is the
+   * only crumb kind in this bar that renders as a real `<button>` — see `Item`.
+   */
+  isInstanceCrumb?: boolean;
+
+  /**
+   * TVW-007 AC1 — the instance node on that parent's canvas, so pressing this crumb goes back to
+   * the *place* you left and not merely the canvas. Set alongside `isInstanceCrumb`; `undefined`
+   * on every folder crumb, which is the pre-AC1 behaviour.
+   */
+  viaNodeId?: string | null;
 }
 
 export interface NodeGraphComponentTrailProps {
@@ -51,6 +68,57 @@ export interface NodeGraphComponentTrailProps {
    * ordinary component's trail takes the same code path it takes today.
    */
   statusSlot?: React.ReactNode;
+
+  /**
+   * TVW-006 — the structure lane's `All · Structure · Logic` filter.
+   *
+   * Absent on a canvas that has no lane to filter (and in every existing test), and the segmented
+   * control is not rendered then. It is state the CANVAS owns, not this bar: the bar reads it and
+   * reports a press, which is why it arrives as a value and a callback rather than as a hook.
+   */
+  laneFilter?: LaneFilter;
+  onLaneFilterChange?: (filter: LaneFilter) => void;
+}
+
+/** §2: the three segments, in the order the mock's callout 5 draws them. */
+const LANE_FILTERS: Array<{ value: LaneFilter; label: string; title: string }> = [
+  { value: 'all', label: 'All', title: 'Show the whole graph' },
+  { value: 'structure', label: 'Structure', title: 'Dim everything that is not the screen' },
+  { value: 'logic', label: 'Logic', title: 'Dim the screen' }
+];
+
+/**
+ * TVW-006 — the lane filter, at the right of the trail.
+ *
+ * ⚠️ The words are *dim*, never *hide* or *show only* (R-F). A label that said "Only structure"
+ * would promise something the canvas deliberately does not do: a dimmed node is still there, still
+ * clickable and still connectable, and someone who pressed a control labelled "only" and then
+ * clicked a node that should not have been there would think the filter was broken.
+ */
+function LaneFilterControl({
+  value,
+  onChange
+}: {
+  value: LaneFilter;
+  onChange: (filter: LaneFilter) => void;
+}) {
+  return (
+    <div className={css['LaneFilter']} role="group" aria-label="Structure lane filter" data-test="lane-filter">
+      {LANE_FILTERS.map((segment) => (
+        <button
+          key={segment.value}
+          type="button"
+          className={classNames(css['LaneFilterSegment'], value === segment.value && css['is-active'])}
+          aria-pressed={value === segment.value}
+          title={segment.title}
+          data-test={`lane-filter-${segment.value}`}
+          onClick={() => onChange(segment.value)}
+        >
+          {segment.label}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 /**
@@ -71,26 +139,28 @@ export function NodeGraphComponentTrail({
 
   runtimeType,
   readOnly,
-  statusSlot
+  statusSlot,
+  laneFilter,
+  onLaneFilterChange
 }: NodeGraphComponentTrailProps) {
   const trailRef = useRef<HTMLDivElement>(null);
 
   /**
-   * SPR-005 — which sheet this bar's "+" creates into.
+   * SPR-005 — where this bar's "+" creates into.
    *
-   * It used to call `useComponentActions()` with no options, so `sheetPrefix`
-   * was `''` and every component it created was named `/<name>`. On a cloud
-   * function's canvas the menu offers **Cloud Function Component**, so that
-   * produced a component with `noodl.cloud.request`/`response` roots sitting
-   * *outside* `#__cloud__` — which `isCloudFunctionComponent` does not match, so
-   * no backend would ever be sent it and no `call-function` step could resolve
-   * it. It looked like a cloud function in the tree and was not one. The prefix
-   * is the same string `ComponentsPanel` computes from the selected sheet.
+   * On a cloud function's canvas the menu offers **Cloud Function Component**, and the component it
+   * creates has to land inside `#__cloud__`: a component with `noodl.cloud.request`/`response`
+   * roots sitting *outside* it is not matched by `isCloudFunctionComponent`, so no backend is ever
+   * sent it and no `call-function` step can resolve it. It looks like a cloud function in the tree
+   * and is not one.
+   *
+   * TVW-001 (e): that used to be done with `useComponentActions({ sheetPrefix })`, which silently
+   * prefixed every name the bar produced. `sheetPrefix` is gone with the sheets, so the destination
+   * is now said out loud — as the create context's `parentPath`, the same field every other surface
+   * uses to name where a new component lands.
    */
   const isCloudCanvas = runtimeType === RuntimeType.Cloud;
-  const { handleAddComponent } = useComponentActions({
-    sheetPrefix: isCloudCanvas ? '/' + CLOUD_SHEET.folderName : ''
-  });
+  const { handleAddComponent } = useComponentActions();
 
   /**
    * A workflow is not a component and is not stored in the project, so no
@@ -114,11 +184,11 @@ export function NodeGraphComponentTrail({
   // that literally the same builder rather than a second copy of it, so the
   // bar and the panel cannot offer different things or land them differently.
   const createContext = {
-    // The bar creates at the root of the sheet the canvas belongs to, which is
-    // a folder context — the same one the panel's empty space declares.
+    // The bar creates at the root of the section the canvas belongs to, which is a folder context —
+    // the same one the panel's empty space declares.
     forParentType: 'folder' as const,
     runtimeType: (isCloudCanvas ? 'cloud' : 'browser') as 'browser' | 'cloud',
-    sheetName: isCloudCanvas ? CLOUD_SHEET.displayName : DEFAULT_SHEET_NAME
+    parentPath: isCloudCanvas ? CLOUD_CREATE_PARENT_PATH : undefined
   };
 
   function onNewComponentClick() {
@@ -198,6 +268,10 @@ export function NodeGraphComponentTrail({
 
       <div className={css['Spacer']} />
 
+      {laneFilter && onLaneFilterChange && (
+        <LaneFilterControl value={laneFilter} onChange={onLaneFilterChange} />
+      )}
+
       {statusSlot}
 
       <PreviewLiveStatus />
@@ -262,16 +336,21 @@ function Item({ item, onSwitchToComponent }: ItemProps) {
     itemRef.current.scrollIntoView();
   }, [itemRef.current, item.isCurrent]);
 
-  const name = item.name;
-  let isSheet = false;
+  /**
+   * TVW-001 (e) — a legacy `#Sheet` crumb.
+   *
+   * Written as `name.substring(1, -1) === '#'` until slice 4, which reads as "the second character"
+   * and is not: JS `substring` swaps a reversed range and clamps the negative to 0, so it returned
+   * the *first* character. Right answer, by an expression nobody could check.
+   *
+   * The `#` is stripped here for the same reason the tree strips it — the two surfaces name the
+   * same folder, and after slice 4 the tree calls it `Design`. `folderSegmentLabel` is the one rule
+   * they share.
+   */
+  const isSheet = !item.component && item.name.startsWith('#');
+  const name = isSheet ? folderSegmentLabel(item.name) : item.name;
 
-  if (!item.component) {
-    if (name.substring(1, -1) === '#') {
-      isSheet = true;
-    }
-  }
-
-  if (name === '#__cloud__') return null;
+  if (item.name === '#__cloud__') return null;
 
   const rootComponent = getDefaultComponent();
   let isRootComponent = false;
@@ -282,26 +361,86 @@ function Item({ item, onSwitchToComponent }: ItemProps) {
     isRootComponent = rootComponent.name === item.fullName;
   }
 
-  return (
-    <div
-      ref={itemRef}
-      className={classNames(
-        css['Item'],
-        item.component ? css['is-component'] : css['is-folder'],
-        item.isCurrent && css['is-current']
+  const className = classNames(
+    css['Item'],
+    item.component ? css['is-component'] : css['is-folder'],
+    item.isCurrent && css['is-current'],
+    item.isInstanceCrumb && css['is-instance']
+  );
+
+  const body = (
+    <>
+      {/* TVW-007: the diamond, on the crumb you came through. Inline rather than an `Icon`
+          because the glyph IS the claim this crumb makes — that `Home` is a place containing
+          this component, not a folder above it — and an icon set is a thing a later task can
+          re-point. It paints with `currentColor`, so the hue comes from the class. */}
+      {item.isInstanceCrumb && (
+        <svg
+          className={css['Diamond']}
+          width="8"
+          height="8"
+          viewBox="0 0 8 8"
+          aria-hidden="true"
+          focusable="false"
+          data-test="trail-instance-diamond"
+        >
+          <path d="M4 0.5 L7.5 4 L4 7.5 L0.5 4 Z" fill="currentColor" />
+        </svg>
       )}
-      aria-current={item.isCurrent ? 'page' : undefined}
-      onClick={() => {
-        if (!item.component || item.isCurrent) return;
-        onSwitchToComponent(item.component, { pushHistory: true });
-      }}
-    >
       {/* Mock: only the current tab carries the component glyph. */}
       {icon && !isSheet && item.isCurrent && (
         <Icon icon={isRootComponent ? IconName.Home : icon} size={IconSize.Tiny} UNSAFE_className={css['Icon']} />
       )}
       <span className={css['Label']}>{name}</span>
       {item.component && Boolean(item.stateText) && <span className={css['StateText']}>({item.stateText})</span>}
+    </>
+  );
+
+  function onCrumbClick() {
+    if (!item.component || item.isCurrent) return;
+    /**
+     * TVW-007 AC1 — *"Press `Home` in the trail: back on Home with the Hero node selected."*
+     *
+     * ⚠️ `switchToComponent` reads only `node.id` (`nodegrapheditor.ts:711`), which it hands to
+     * `findNodeWithId` on the canvas it has just switched to — so `{ id }` is the whole of what it
+     * needs, and the trail does not have to resolve a `NodeGraphNode` it has no access to.
+     *
+     * Only the instance crumb carries a `viaNodeId`; every folder crumb leaves this undefined and
+     * behaves exactly as before.
+     */
+    onSwitchToComponent(item.component, {
+      pushHistory: true,
+      node: item.viaNodeId ? { id: item.viaNodeId } : undefined
+    });
+  }
+
+  /**
+   * TVW-007 AC4 — the instance crumb is a real `<button>`; every other crumb is unchanged.
+   *
+   * ⚠️ Scoped to the new crumb on purpose. Every clickable crumb in this bar SHOULD be a button —
+   * a `<div onClick>` is unreachable by keyboard and unannounced to a screen reader — but that is
+   * a change to the look of a bar three other phases are editing this week, and it has to be
+   * photographed before it ships. This crumb is new, so there is nothing to regress, and it means
+   * the two crumb kinds differ in the rendered DOM rather than only in a class name.
+   */
+  if (item.isInstanceCrumb) {
+    return (
+      <button
+        type="button"
+        ref={itemRef as unknown as React.RefObject<HTMLButtonElement>}
+        className={className}
+        data-test={`trail-instance-crumb-${item.fullName}`}
+        title={`Back to ${name}`}
+        onClick={onCrumbClick}
+      >
+        {body}
+      </button>
+    );
+  }
+
+  return (
+    <div ref={itemRef} className={className} aria-current={item.isCurrent ? 'page' : undefined} onClick={onCrumbClick}>
+      {body}
     </div>
   );
 }

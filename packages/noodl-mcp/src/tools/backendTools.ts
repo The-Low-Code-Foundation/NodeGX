@@ -390,7 +390,9 @@ export function registerBackendReadTools(server: McpServer): void {
         'Compute the dev->prod promotion diff between a SOURCE schema snapshot and a running (target) backend ' +
         '(BAK-007): which tables/columns and which permission/trigger/template config would be added or changed, ' +
         'and whether any change is destructive. Read-only — nothing is applied. The `source` is a snapshot ' +
-        '{ tables:[{name,columns}], permissions?, triggers?, templates? } (e.g. from a dev backend or archive).',
+        '{ tables:[{name,columns,indexes}], permissions?, triggers?, templates? } (e.g. from a dev backend or ' +
+        'archive). A collection\'s declared indexes (FED-002) are part of the shape and are diffed as a whole ' +
+        'list: a source that omits `indexes` is saying the collection declares none.',
       inputSchema: {
         backendId: z.string().optional().describe('The TARGET backend to diff against'),
         source: z.record(z.unknown()).describe('The source schema snapshot { tables: [...], permissions?, triggers?, templates? }')
@@ -545,7 +547,7 @@ export function registerBackendReadTools(server: McpServer): void {
       description:
         'Which providers a given user can sign in with on a running backend, and whether they also have a ' +
         'password. Reads the `_UserIdentity` rows directly through the admin data surface. Useful when a user ' +
-        'reports "I cannot sign in" — an account with no password and no identity has no way in at all.',
+        'reports "I cannot sign in" — a disabled account, or one with no password and no identity, has no way in.',
       inputSchema: {
         backendId: z.string().optional(),
         userId: z.string().describe('The _User objectId')
@@ -555,7 +557,12 @@ export function registerBackendReadTools(server: McpServer): void {
       const client = await requireBackend(backendId);
       const where = encodeURIComponent(JSON.stringify({ userId }));
       const { json } = await client.request('GET', `/api/_UserIdentity?where=${where}`);
-      return jsonResult(json);
+      // BMG-004: whether the account itself lets them in — a disabled flag, and
+      // the password this description has always promised. `account` is absent
+      // (not false) on a backend older than `/admin/users`, which cannot say.
+      const person = await client.request('GET', `/admin/users/${encodeURIComponent(userId)}`, undefined, [404]);
+      const user = person.status === 200 && person.json ? (person.json as { user?: Record<string, unknown> }).user : undefined;
+      return jsonResult(user ? { ...(json as object), account: { disabled: user.disabled === true, hasPassword: user.hasPassword === true } } : json);
     })
   );
 }
@@ -814,7 +821,13 @@ export function registerBackendWriteTools(server: McpServer): void {
     schedule: z
       .object({
         cron: z.string().describe('5-field cron or @preset (@hourly/@daily/…). Local timezone.'),
-        missedFirePolicy: z.enum(['skip', 'run-once-on-start']).describe('What to do about fires missed while down')
+        missedFirePolicy: z.enum(['skip', 'run-once-on-start']).describe('What to do about fires missed while down'),
+        // FED-004. Omit for the default, `skip`. Writable here because a policy an
+        // agent can read and not set is a policy it cannot fix (phase rule 1).
+        overlapPolicy: z
+          .enum(['skip', 'queue-one', 'allow'])
+          .optional()
+          .describe('What a fire does when the previous one is still running (default skip)')
       })
       .optional()
       .describe('Required for type "schedule"'),
@@ -1268,10 +1281,10 @@ export function registerBackendWriteTools(server: McpServer): void {
     {
       title: 'Set backend backup policy',
       description:
-        'Configure a running backend\'s backup policy (BAK-007): the schedule (cron; rides WF-005\'s scheduler), ' +
-        'retention (keepLast / keepDaily / keepWeekly), the local destination directory, and whether machine-local ' +
-        'secrets.json is included (OFF by default). Omitted fields keep their current value. An invalid cron is ' +
-        'rejected with the reason.',
+        'Configure a running backend\'s backup policy (BAK-007): the schedule (cron), retention (keepLast / ' +
+        'keepDaily / keepWeekly), where archives go (a local directory, or the files bucket), and whether ' +
+        'machine-local secrets.json is included (OFF by default). Omitted fields keep their current value. An ' +
+        'invalid cron is rejected with the reason.',
       inputSchema: {
         backendId: z.string().optional(),
         schedule: z
@@ -1290,7 +1303,16 @@ export function registerBackendWriteTools(server: McpServer): void {
             keepWeekly: z.number().optional()
           })
           .optional(),
-        destination: z.object({ path: z.string() }).optional().describe('Local directory for archives'),
+        destination: z
+          .union([
+            z.object({ type: z.literal('local').optional(), path: z.string() }),
+            z.object({ type: z.literal('s3'), prefix: z.string().optional() })
+          ])
+          .optional()
+          .describe(
+            "{path}: a local directory. {type:'s3'}: the bucket configure_backend_files connected (refused if none), " +
+              "under prefix (default 'backups/')"
+          ),
         includeSecrets: z.boolean().optional()
       }
     },
@@ -1424,8 +1446,10 @@ export function registerBackendWriteTools(server: McpServer): void {
     {
       title: 'Apply a schema promotion to a backend',
       description:
-        'Promote a SOURCE schema snapshot onto a running (target) backend (BAK-007): additive tables/columns and ' +
-        'permission/trigger/template config apply automatically; DATA is never touched. Destructive changes (dropped ' +
+        'Promote a SOURCE schema snapshot onto a running (target) backend (BAK-007): additive tables/columns, ' +
+        'declared indexes (FED-002) and permission/trigger/template config apply automatically; DATA is never ' +
+        'touched — a unique index the target\'s rows would refuse is SKIPPED with the duplicate count, never ' +
+        'forced by deleting rows. Destructive changes (dropped ' +
         'tables/columns, type changes) are REFUSED unless allowDestructive is true — and then a fresh pre-apply ' +
         'backup is taken first (enforced). Run diff_backend_schema first to preview.',
       inputSchema: {
@@ -1605,7 +1629,8 @@ export function registerBackendWriteTools(server: McpServer): void {
         'Run a backend\'s file-storage orphan sweep immediately (BAK-006), outside its schedule: finds storage ' +
         'blobs with no metadata row (orphan blobs) and metadata rows whose blob is missing (orphan rows). ' +
         'REPORT-ONLY by default — pass deleteOrphans:true to actually delete orphan BLOBS (orphan ROWS are never ' +
-        'auto-deleted; a metadata row with a missing blob is a data-integrity signal for a human to look at).',
+        'auto-deleted; a metadata row with a missing blob is a data-integrity signal for a human to look at). ' +
+        'A blob under 5 minutes old may still be arriving: it is listed in tooNew and never deleted.',
       inputSchema: {
         backendId: z.string().optional(),
         deleteOrphans: z.boolean().optional().describe('Actually delete orphan blobs found by this run (default false: report only)')

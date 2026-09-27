@@ -82,3 +82,7 @@ entry and remains **unowned as a product fix**. Filing it properly is worth doin
 3. Delta 5 is walked by a human on macOS, in both themes, with real keystrokes.
 4. Phase 24's `PROGRESS.md` status moves off 🚧, and its residual-deltas paragraph is
    replaced by the outcome rather than left standing beside it.
+
+---
+
+> **2026-09-15 — superseded by [Phase 92 — Dreamweaver called](../phase-92-dreamweaver-called/README.md).** The five residual deltas here are covered by CHR-005 (launcher page), CHR-009 (panel) and CHR-011 (verdict). Do not build this and that; if a delta is missing from the P92 tasks, add it there.

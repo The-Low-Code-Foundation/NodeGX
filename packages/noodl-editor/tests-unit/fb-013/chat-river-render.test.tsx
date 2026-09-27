@@ -17,6 +17,14 @@
  *
  * @module noodl-editor/tests-unit/fb-013/chat-river-render
  */
+// FLD-017 — CHR-012 made the community write verbs `PrimaryButton`, which imports `Icon`.
+jest.mock('@noodl-core-ui/components/common/Icon', () => ({
+  Icon: () => null,
+  IconName: {},
+  IconSize: { Small: 'small' },
+  IconVariant: {}
+}));
+
 import React from 'react';
 
 import { CommunityChatThread, CommunityChatView, CommunityDensity } from '@noodl-core-ui/components/community';

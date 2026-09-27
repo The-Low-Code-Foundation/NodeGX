@@ -1,3 +1,17 @@
+/**
+ * P94 STY-003 — the Look row (design §3.1, §3.2).
+ *
+ * 🔴 **One row decides it** (rule 1). This used to be one of two controls that set a node's
+ * styles: this row, and the `Preset` / `Size` picker below it, which stamped an `ElementConfig`
+ * variant's parameters in place and created nothing. Both were called "variant" and nothing drew a
+ * line between them — the stylesheet next door still carries the note about it. The other one is
+ * gone (STY-002 AC5), so this is now the only control that does this.
+ *
+ * ⚠️ **"Look" is the working name**, from the design Richard ruled; §9 leaves the final name open
+ * and STY-002 AC6 is where a different one would land. It is used here rather than "Variant"
+ * because the word `variant` names two different things in this codebase and the confusion is what
+ * the phase exists to remove.
+ */
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 
@@ -6,8 +20,10 @@ import { ProjectModel } from '@noodl-models/projectmodel';
 import { Icon, IconName } from '@noodl-core-ui/components/common/Icon';
 
 import PopupLayer from '../../../../popuplayer';
+import { revealStyle } from '../../../StylesPanel/stylesPanelRoute';
 import { ToastLayer } from '../../../../ToastLayer/ToastLayer';
 import { PickVariantPopup } from './PickVariantPopup';
+import { unmountReactRoot } from '../../../../../../../shared/utils/unmountReactRoot';
 
 // Styles
 require('../../../../../styles/propertyeditor/variantseditor.css');
@@ -84,41 +100,46 @@ export class VariantsEditor extends React.Component<VariantsEditorProps, State> 
     let content;
 
     if (this.state.variant === undefined || this.state.variant.name === undefined) {
-      //No variant
+      // No Look — design §3.2. 🔴 The wording is the point: "Add style variant" described an
+      // action and left the current state unsaid, so a node with no Look and a node whose Look
+      // had been removed read identically to one that had simply not been got to yet. "None —
+      // styles are its own" is the OTHER legal state of the model, stated.
       content = (
-        <div className="variants-section">
-          <div className="variants-name-section" onClick={this.onPickVariant.bind(this)}>
-            <label>Add style variant</label>
-            <div className="variants-add-icon">
-              <i className="fa fa-plus" style={{ color: 'white' }} />
-            </div>
-          </div>
+        <div className="variants-section panel-head-row">
+          <span className="panel-head-row-label">Look</span>
+          <button
+            type="button"
+            className="panel-head-row-field"
+            data-test="look-row-field"
+            onClick={this.onPickVariant.bind(this)}
+          >
+            <span className="panel-head-row-value is-placeholder">None — styles are its own</span>
+            <Icon icon={IconName.CaretDownUp} UNSAFE_className="panel-head-row-glyph" />
+          </button>
         </div>
       );
     } else if (this.state.variant !== undefined && this.state.variant.name !== undefined && !this.state.editMode) {
-      //Variant
+      // Wearing a Look — design §3.1.
       content = (
-        <div className="variants-section">
-          <div className="variants-name-section" onClick={this.onPickVariant.bind(this)}>
-            <label>{this.state.variant.name}</label>
-            <div className="variants-pick-icon">
-              <Icon icon={IconName.CaretDownUp} UNSAFE_style={{ width: 10, height: 12 }} />
-            </div>
-          </div>
+        <div className="variants-section panel-head-row">
+          <span className="panel-head-row-label">Look</span>
           <button
-            className="variants-button"
-            style={{ marginLeft: '10px', width: '78px' }}
-            onClick={this.onEditVariant.bind(this)}
+            type="button"
+            className="panel-head-row-field"
+            data-test="look-row-field"
+            onClick={this.onPickVariant.bind(this)}
           >
-            Edit variant
+            <span className="panel-head-row-value">{this.state.variant.name}</span>
+            <Icon icon={IconName.CaretDownUp} UNSAFE_className="panel-head-row-glyph" />
           </button>
         </div>
       );
     } else if (this.state.variant !== undefined && this.state.variant.name !== undefined && this.state.editMode) {
-      //Edit variant
+      // Editing the Look — P103 CMG-006: "Edit variant" was the one place the Variant→Look rename
+      // missed, and it was the header a person reads while editing.
       content = (
         <div style={{ width: '100%' }}>
-          <div className="variants-edit-mode-header">Edit variant</div>
+          <div className="variants-edit-mode-header">Editing the Look</div>
           <div className="variants-section">
             <label>{this.state.variant.name}</label>
             <button
@@ -134,8 +155,65 @@ export class VariantsEditor extends React.Component<VariantsEditorProps, State> 
     }
 
     return (
-      <div className="variants-editor" ref={(el) => { this.popupAnchor = el; }}>
+      <div
+        className="variants-editor"
+        ref={(el) => {
+          this.popupAnchor = el;
+        }}
+      >
         {content}
+        {this.renderWearerLine()}
+      </div>
+    );
+  }
+
+  /**
+   * P94 STY-003 §3.1 — `Worn by 26 buttons`.
+   *
+   * 🔴 **The reason this line is worth its pixels is that it is the only thing on the panel that
+   * says a change here leaves this node.** Rule 1 makes the Look the single place styles are
+   * decided; the consequence — that deciding here moves 26 other nodes — is invisible without it,
+   * and a person who cannot see it will not trust the row.
+   *
+   * ⚠️ Counted on every render rather than cached: the walk is `isVariantUsed`'s, which the
+   * delete-confirm modal already runs on the same surface, and a stale count here would be worse
+   * than none at all. Drawn only while wearing a Look, and never as `Worn by 0` — a Look the
+   * selected node wears is worn at least once, so a 0 would mean the count is wrong, and saying
+   * nothing is better than saying something false.
+   */
+  renderWearerLine() {
+    const variant = this.state.variant;
+    if (!variant || variant.name === undefined || this.state.editMode) return null;
+
+    const wearers = ProjectModel.instance?.variantWearerCounts(variant.typename)[variant.name] ?? 0;
+
+    // P103 CMG-011 row 2: Edit and In Styles live on this line, under the field. Beside it they left
+    // the Look's name 33px ("I can't see the value").
+    return (
+      <div className="variants-wearer-line">
+        {wearers >= 1 ? (
+          <span className="variants-wearer-count" data-test="look-wearer-count">
+            {wearers === 1 ? 'Worn by this node only' : `Worn by ${wearers} nodes`}
+          </span>
+        ) : null}
+        <span className="variants-wearer-actions">
+          <button type="button" className="panel-head-row-action" onClick={this.onEditVariant.bind(this)}>
+            Edit
+          </button>
+          {/* P103 CMG-006 §3.2 — node → Styles: the row in the Styles panel that manages this Look. */}
+          <button
+            type="button"
+            className="panel-head-row-action"
+            data-test="look-show-in-styles"
+            title="Show this Look in the Styles panel"
+            onClick={(e) => {
+              e.stopPropagation();
+              revealStyle({ kind: 'look', name: variant.name, typename: variant.typename });
+            }}
+          >
+            In Styles
+          </button>
+        </span>
       </div>
     );
   }
@@ -143,19 +221,19 @@ export class VariantsEditor extends React.Component<VariantsEditorProps, State> 
   performAddVariant(name) {
     if (ProjectModel.instance.findVariant(name, this.model.type)) {
       // Variant with name already exists for this node
-      ToastLayer.showError('Variant with the name already exists');
+      ToastLayer.showError('A Look with that name already exists');
       return;
     }
 
     this.model.createNewVariant(name, { undo: true });
 
-    ToastLayer.showSuccess('Variant created');
+    ToastLayer.showSuccess('Look created');
   }
 
   onUpdateVariant(evt) {
     this.model.updateVariant({ undo: true });
 
-    ToastLayer.showSuccess('Variant updated');
+    ToastLayer.showSuccess('Look updated');
 
     evt.stopPropagation();
   }
@@ -200,7 +278,7 @@ export class VariantsEditor extends React.Component<VariantsEditorProps, State> 
       position: 'right',
       onClose: () => {
         if (this.popupRoot) {
-          this.popupRoot.unmount();
+          unmountReactRoot(this.popupRoot);
           this.popupRoot = null;
         }
         this.popout = undefined;

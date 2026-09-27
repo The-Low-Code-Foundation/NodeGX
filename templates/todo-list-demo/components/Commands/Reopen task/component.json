@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a37bcd38-7518-5bfe-8580-73619d335b23",
+  "name": "Reopen task",
+  "path": "/Commands/Reopen task",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Puts a closed task back at the bottom of the list, with a note saying why."
+}

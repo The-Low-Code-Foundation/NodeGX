@@ -1,64 +1,35 @@
 /**
  * FB-002 / FB-013 — one filter pill, drawn once, with its selected state on something you can see.
  *
- * ## 🔴 Why this component exists at all: the state was carried by FILL, and fill was invisible
+ * ## 🔴 CHR-012 (2026-09-15) — the pill IS the launcher's `Chip`, and this is the adapter
  *
- * Three surfaces — the Bench, the people directory and Chat — each had their own copy of the same
- * seven lines of pill markup, all pointing at one shared `.FilterPill` class whose `is-active`
- * rule changed **only the background and the text ink**. Measured live in the running editor on
- * the Chat tab (session 57):
+ * Richard looked at the Community tab beside Templates and Learning and ruled it *"still looks like
+ * shit"*. One reason was a second chip: a small boxed `.FilterPill` beside CHR-005's
+ * `Chip variant=Filter`. Two pills for one job is the look phase 92 exists to remove, so the three
+ * community surfaces (Bench, People, Chat) now draw `Chip`, and this component only adapts their
+ * pill model to it.
  *
- * | pair | was | needs |
- * |---|---|---|
- * | active fill vs panel | **1.36:1** | 3:1 for a non-text state boundary (WCAG 1.4.11) |
- * | active vs inactive fill | 1.94:1 | — |
- * | border, active vs inactive | **identical** (4.17:1 both) | — |
- * | label text vs its own fill | 8.46:1 | ✅ passes AA comfortably |
+ * ## What FB-002 bought survives, because `Chip`'s filter variant was built from the same rule
  *
- * So every individual *label* was perfectly legible and **which pill was selected was not**. That
- * is the distinction the old rule missed: state visibility is not text contrast. FB-002 recorded
- * it on the Bench, NAT-008 inherited it on People, and FB-013's C4 made it three surfaces — at
- * which point a shared defect behind three copied call sites is worth one component.
+ * The shared `.FilterPill` once carried its selected state by **fill alone**, measured live at
+ * **1.36:1** against its panel — every label legible and which pill was on invisible.
  *
- * ## ✅ The state is on the BORDER and in the TEXT, and that is FB-005 T4's answer, not a new one
- *
- * `TemplateStep`'s facet pills solved exactly this and were measured at **4.80:1 dark / 4.14:1
- * light** for the active border against their panel. This is the same mechanism on the community
- * palette:
- *
- * | pair | dark | light |
- * |---|---|---|
- * | active border vs panel | **5.60:1** | **4.57:1** |
- * | active border vs its own fill | **4.13:1** | **3.74:1** |
- *
- * ⚠️ Those four numbers are the INSTRUMENT's, not arithmetic done by hand beside it —
- * `tests-unit/fb-002/filter-pill-state.test.tsx` gates them, and they are what it reports.
- *
- * 🔴 **Both sides of the border are checked and both must clear 3:1**, because a boundary is only
- * a boundary against what sits on either side of it — a border that reads against the panel and
- * vanishes into its own fill is still a line nobody can find.
- *
- * 🔴 **The border width does not change between states.** 1px either way, colour only. A border
- * that grows on activation reflows the row, and the list appearing to jump when you click a filter
- * is its own defect — the same reasoning `TemplateStep` writes down for using 2px in both states.
- *
- * ⚠️ **The fill still changes, and is deliberately no longer load-bearing.** It is a nicety now;
- * delete it and the state survives. That is the property worth keeping, and the spec asserts it.
- *
- * ## ⚠️ The `✓` is `aria-hidden`, and that is not an oversight
- *
- * A state carried only by colour fails WCAG 1.4.1 regardless of how much contrast the colour has,
- * so the pill says it in text too. But the button already carries `aria-pressed`, which is how a
- * screen reader is *supposed* to hear this — letting the `✓` into the accessible name would make
- * it announce *"Solved 3 ✓, pressed"*, saying the same thing twice. The marker is therefore for
- * eyes that cannot separate the two blues, and the accessible name stays exactly what it was.
+ * - 🔴 **The selected state is on the EDGE** (`primary`), with the wash and the label tone moving
+ *   with it; the fill is no longer load-bearing. `fb-002/filter-pill-state` grades that edge
+ *   against BOTH its sides, on the grounds the pill now sits on, reading the token names out of
+ *   `Chip.module.scss` rather than restating them.
+ * - 🔴 **The edge width does not change between states**, so selecting a filter does not reflow the
+ *   row and the list does not appear to jump.
+ * - ⚠️ **The ✓ is `aria-hidden`.** Colour may not be the only carrier of a state (WCAG 1.4.1), so
+ *   the pill says it in text too — but the button carries `aria-pressed`, and a ✓ in the accessible
+ *   name would announce *"Solved 3 ✓, pressed"*.
  *
  * @module noodl-core-ui/components/community/CommunityFilterPill
  */
 
 import React from 'react';
 
-import css from './Community.module.scss';
+import { Chip, ChipVariant } from '@noodl-core-ui/components/common/Chip';
 
 /**
  * The shape every filter pill on every community surface arrives as.
@@ -87,19 +58,13 @@ export interface FilterPillProps {
 
 export function FilterPill({ filter, onSelect, dataTest }: FilterPillProps) {
   return (
-    <button
-      type="button"
-      className={`${css['FilterPill']} ${filter.active ? css['is-active'] : ''}`}
-      aria-pressed={filter.active}
-      data-test={dataTest}
+    <Chip
+      variant={ChipVariant.Filter}
+      label={filter.label}
+      count={filter.count}
+      isSelected={filter.active}
+      testId={dataTest}
       onClick={() => onSelect(filter.key)}
-    >
-      {filter.label} <span className={css['FilterCount']}>{filter.count}</span>
-      {filter.active && (
-        <span className={css['FilterPillMark']} aria-hidden="true">
-          ✓
-        </span>
-      )}
-    </button>
+    />
   );
 }

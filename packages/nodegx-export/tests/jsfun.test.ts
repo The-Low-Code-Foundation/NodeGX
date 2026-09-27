@@ -158,15 +158,16 @@ describe('the fixture translation (EXP-003 §4 A1 — asserted piecewise; the by
     expect(home).toContain('disabled={!hasLongNameOut}');
   });
 
-  test('the runtime mints a port for `.length` after a paren — the wrapper carries it, unfed', () => {
-    // parsePorts strips the string, then matches `length` as a fresh identifier; the runtime
-    // registers that port too, it just never receives. Faithfulness includes the odd ports.
-    //
-    // 🔴 HLS-004 makes that faithfulness visible in the type: `length` is the mined-but-unfed
-    // class and is the *only* one of the two still optional, because nothing ever passes it.
-    // `name` arrives by wire, so it is required and merely possibly-undefined in value.
-    expect(home).toContain('function hasLongName(__inputs: { name: string | undefined; length?: any }) {');
-    expect(home).toContain('const { name, length } = __inputs as { [K in keyof typeof __inputs]: any };');
+  test('a member name after a paren is no port in the runtime, so the wrapper carries only `name`', () => {
+    // 🔴 GAM-002 (P78 D54). This row used to pin the opposite: the old regex scan matched `length`
+    // in `(name || '').length` as a fresh identifier, the runtime registered an unfed `length`
+    // port, and faithfulness meant carrying it as `length?: any`. The runtime's lexer now reads a
+    // name after `.` as a member, and the export mints from a byte-identical copy of it, so the
+    // faithful wrapper has one input. `name` arrives by wire, so it is required and merely
+    // possibly-undefined in value (HLS-004).
+    expect(home).toContain('function hasLongName(__inputs: { name: string | undefined }) {');
+    expect(home).toContain('const { name } = __inputs as { [K in keyof typeof __inputs]: any };');
+    expect(home).not.toContain('length?: any');
   });
 
   test('both nodes collapse — no JS deferral notes on the untouched fixture', () => {

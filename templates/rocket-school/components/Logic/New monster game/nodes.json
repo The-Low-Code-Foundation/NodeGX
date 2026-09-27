@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5e8619ec-82e1-57b3-89d3-0ee9cfe13c1f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "newmonstergaIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "run",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "style",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "timed",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "newmonstergaFn",
+      "type": "JavaScriptFunction",
+      "label": "New monster game",
+      "parameters": {
+        "functionScript": "\nvar MONSTER = {\"monsters\":3,\"hearts\":3,\"hp\":4,\"bigHit\":2,\"smallHit\":1,\"creep\":{\"practice\":0.3333333333333333,\"challenge\":0.25},\"back\":{\"practice\":0.15,\"challenge\":1},\"push\":2,\"step\":1.5,\"pushStart\":0.5,\"healRun\":3};\nvar MONSTER_LOOKS = [\"horns\",\"eye\",\"spikes\"];\nfunction monsterRound(v) { return Math.round(v * 1000) / 1000; }\n\nvar style = String(Inputs.style) === 'push' ? 'push' : 'gate';\nvar timed = Inputs.timed === true;\nvar id = 'm' + Date.now().toString(36) + Math.floor(Math.random() * 1000000).toString(36);\nOutputs.id = id;\nOutputs.timeScale = 1;\nOutputs.game = { id: id, style: style, timed: timed, hearts: MONSTER.hearts, beaten: 0, hp: MONSTER.hp, start: 1, pos: style === 'push' ? MONSTER.pushStart : 1, streak: 0, right: 0, answered: 0, event: 'start', fresh: false, healed: false, over: false, won: false, moves: 0 };\n",
+        "runOnChange-in-style": false,
+        "runOnChange-in-timed": false
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-style",
+          "displayName": "style",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-timed",
+          "displayName": "timed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-id",
+          "displayName": "id",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-timeScale",
+          "displayName": "timeScale",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-game",
+          "displayName": "game",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "newmonstergaOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "game",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "timeScale",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

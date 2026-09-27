@@ -93,6 +93,15 @@ export const ALIGN_ICONS: AlignIcon[] = [
     "rotate": "rotate2",
     "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"white\" xmlns=\"http://www.w3.org/2000/svg\"> <path d=\"M21 16L21 18L3 18L3 16L21 16Z\" fill-opacity=\"0.5\"/> <rect x=\"17\" y=\"5\" width=\"10\" height=\"4\" transform=\"rotate(90 17 5)\"/> <rect x=\"11\" y=\"7\" width=\"8\" height=\"4\" transform=\"rotate(90 11 7)\"/> </svg>"
   },
+  // CHR-009 slice 5 — not from the legacy template: `Stretch` joined Align Items later (14815f1e3)
+  // and had no glyph, so the strip never offered it.
+  {
+    "comp": "align-items",
+    "value": "stretch",
+    "tooltip": "Align items stretch",
+    "rotate": "rotate",
+    "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"white\" xmlns=\"http://www.w3.org/2000/svg\"> <path d=\"M3 3L3 1L21 1L21 3L3 3Z\" fill-opacity=\"0.5\"/> <path d=\"M3 23L3 21L21 21L21 23L3 23Z\" fill-opacity=\"0.5\"/> <rect x=\"7\" y=\"4\" width=\"4\" height=\"16\"/> <rect x=\"13\" y=\"4\" width=\"4\" height=\"16\"/> </svg>"
+  },
   {
     "comp": "justify-content",
     "value": "flex-start",

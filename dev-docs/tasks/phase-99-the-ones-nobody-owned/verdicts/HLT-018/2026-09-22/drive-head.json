@@ -1,0 +1,36 @@
+{
+  "createTable": 200,
+  "keyedCreate": 201,
+  "keyedReadBack": {
+    "a": 1
+  },
+  "emptyCreate": {
+    "status": 500,
+    "error": {
+      "error": "Provided value cannot be bound to SQLite parameter 5.",
+      "requestId": "68088c18-3545-4617-9a43-b034df0c7c67"
+    }
+  },
+  "emptyReadBack": null,
+  "emptyUpdate": 200,
+  "emptyUpdateBody": {
+    "updatedAt": "2026-09-22T08:44:51.025Z"
+  },
+  "emptiedReadBack": {
+    "a": 1
+  },
+  "import": {
+    "status": 400,
+    "body": {
+      "collection": "Learner",
+      "dryRun": false,
+      "total": 2,
+      "created": 0,
+      "updated": 0,
+      "rejected": [],
+      "applied": false,
+      "error": "import rolled back (no rows written): TypeError: Provided value cannot be bound to SQLite parameter 5."
+    },
+    "rowsAdded": 0
+  }
+}

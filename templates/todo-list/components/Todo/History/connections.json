@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "457afaba-bc07-58ff-832f-82e7395dd5d5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hiIn",
+      "fromProperty": "rows",
+      "toId": "hiEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "hiIn",
+      "fromProperty": "clearNote",
+      "toId": "hiField",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "hiField",
+      "fromProperty": "onTextChanged",
+      "toId": "hiSubmit",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "hiButton",
+      "fromProperty": "onClick",
+      "toId": "hiSubmit",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hiSubmit",
+      "fromProperty": "out-text",
+      "toId": "hiOut",
+      "toProperty": "noteText"
+    },
+    {
+      "fromId": "hiSubmit",
+      "fromProperty": "out-go",
+      "toId": "hiOut",
+      "toProperty": "addNote"
+    }
+  ]
+}

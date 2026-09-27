@@ -1,0 +1,401 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c31dee91-2d14-5271-89cc-3bdd66098a15",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hmPage",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "hmOuter"
+      ],
+      "parameters": {
+        "title": "Rocket School",
+        "urlPath": "home"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hmOuter",
+      "type": "Group",
+      "label": "The ground",
+      "parent": "hmPage",
+      "children": [
+        "hmWrap"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "hmWrap",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "hmOuter",
+      "children": [
+        "hmHeader",
+        "hmStats",
+        "hmNext",
+        "hmTitle",
+        "hmGames"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "rowGap": "var(--space-6)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-10)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "maxWidth": {
+          "value": 960,
+          "unit": "px"
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "hmHeader",
+      "type": "/Game/Header",
+      "label": "The bar",
+      "parent": "hmWrap",
+      "parameters": {
+        "showHome": false,
+        "showHangar": true
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "hmStats",
+      "type": "Group",
+      "label": "The readings",
+      "parent": "hmWrap",
+      "children": [
+        "hmDue",
+        "hmDays",
+        "hmStars"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "hmDue",
+      "type": "/Game/Stat",
+      "label": "Due today",
+      "parent": "hmStats",
+      "parameters": {
+        "tone": "var(--destructive)"
+      },
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "hmDays",
+      "type": "/Game/Stat",
+      "label": "Days this week",
+      "parent": "hmStats",
+      "parameters": {
+        "tone": "var(--primary)"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "hmStars",
+      "type": "/Game/Stat",
+      "label": "Stars earned",
+      "parent": "hmStats",
+      "parameters": {
+        "tone": "var(--primary)"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "hmNext",
+      "type": "/Game/Next pick",
+      "label": "The way to the next pick",
+      "parent": "hmWrap",
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "hmTitle",
+      "type": "Text",
+      "label": "Play",
+      "parent": "hmWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-tight)",
+        "letterSpacing": "var(--tracking-tight)",
+        "color": "var(--foreground)",
+        "as": "h2",
+        "fontFamily": "Grandstander"
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "hmGames",
+      "type": "Group",
+      "label": "The four games",
+      "parent": "hmWrap",
+      "children": [
+        "hmRace",
+        "hmMerge",
+        "hmHunt",
+        "hmMonster"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-4)",
+        "rowGap": "var(--space-4)"
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "hmRace",
+      "type": "/Game/Game card",
+      "label": "gameRace",
+      "parent": "hmGames",
+      "parameters": {
+        "glyph": "🚀",
+        "enabled": true
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "hmMerge",
+      "type": "/Game/Game card",
+      "label": "gameMerge",
+      "parent": "hmGames",
+      "parameters": {
+        "glyph": "🔟",
+        "enabled": true
+      },
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "hmHunt",
+      "type": "/Game/Game card",
+      "label": "gameHunt",
+      "parent": "hmGames",
+      "parameters": {
+        "glyph": "🔍",
+        "enabled": true
+      },
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "hmMonster",
+      "type": "/Game/Game card",
+      "label": "gameMonster",
+      "parent": "hmGames",
+      "parameters": {
+        "glyph": "👾",
+        "enabled": true
+      },
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "hmStore",
+      "type": "/Logic/App store",
+      "label": "The store",
+      "x": 530,
+      "y": 400
+    },
+    {
+      "id": "hmMe",
+      "type": "/Logic/Active profile",
+      "label": "Who is playing",
+      "x": 530,
+      "y": 520
+    },
+    {
+      "id": "hmWords",
+      "type": "/Data/Words",
+      "label": "The words",
+      "x": 530,
+      "y": 1840
+    },
+    {
+      "id": "hmT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 530,
+      "y": 880
+    },
+    {
+      "id": "hmCurriculum",
+      "type": "/Data/Curriculum",
+      "label": "The skills",
+      "x": 530,
+      "y": 1960
+    },
+    {
+      "id": "hmWordLists",
+      "type": "/Data/Word lists",
+      "label": "The typing words",
+      "x": 530,
+      "y": 2080
+    },
+    {
+      "id": "hmNoOne",
+      "type": "Expression",
+      "label": "Nobody signed in?",
+      "parameters": {
+        "expression": "has === false"
+      },
+      "x": 530,
+      "y": 2200
+    },
+    {
+      "id": "hmGuard",
+      "type": "Condition",
+      "label": "Send them to the profiles?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 530,
+      "y": 40
+    },
+    {
+      "id": "hmGoProfiles",
+      "type": "RouterNavigate",
+      "label": "To the profiles",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Profiles"
+      },
+      "x": 530,
+      "y": 640
+    },
+    {
+      "id": "hmGoRace",
+      "type": "RouterNavigate",
+      "label": "To the race",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Race"
+      },
+      "x": 530,
+      "y": 1360
+    },
+    {
+      "id": "hmGoMerge",
+      "type": "RouterNavigate",
+      "label": "To Make Ten Merge",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Merge"
+      },
+      "x": 530,
+      "y": 1480
+    },
+    {
+      "id": "hmGoHunt",
+      "type": "RouterNavigate",
+      "label": "To Number Hunt",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Hunt"
+      },
+      "x": 530,
+      "y": 1600
+    },
+    {
+      "id": "hmGoMonster",
+      "type": "RouterNavigate",
+      "label": "To Monster Gate",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Monster"
+      },
+      "x": 530,
+      "y": 1720
+    },
+    {
+      "id": "hmGoHangar",
+      "type": "RouterNavigate",
+      "label": "To the hangar",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Hangar"
+      },
+      "x": 530,
+      "y": 760
+    },
+    {
+      "id": "hmDueText",
+      "type": "Expression",
+      "label": "As text",
+      "parameters": {
+        "expression": "'' + n"
+      },
+      "x": 530,
+      "y": 1000
+    },
+    {
+      "id": "hmDaysText",
+      "type": "Expression",
+      "label": "As text",
+      "parameters": {
+        "expression": "'' + n"
+      },
+      "x": 530,
+      "y": 1120
+    },
+    {
+      "id": "hmStarsText",
+      "type": "Expression",
+      "label": "As text",
+      "parameters": {
+        "expression": "'' + n"
+      },
+      "x": 530,
+      "y": 1240
+    }
+  ],
+  "visualRoots": [
+    "hmPage"
+  ]
+}

@@ -1,0 +1,318 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3c366a11-4238-5e85-8388-fadfc722e559",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "zlIn",
+      "type": "Component Inputs",
+      "label": "The game, drawn",
+      "ports": [
+        {
+          "name": "hearts",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "line",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pips",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "monsterClass",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "laneClass",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rest",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "walkFrom",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "walking",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "left",
+          "plug": "output",
+          "type": "number"
+        }
+      ],
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "zlCard",
+      "type": "Group",
+      "label": "The lane, and what is said over and under it",
+      "children": [
+        "zlTop",
+        "zlLane",
+        "zlNote"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "rowGap": "var(--space-2)",
+        "maxWidth": {
+          "value": 640,
+          "unit": "px"
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "zlTop",
+      "type": "Group",
+      "label": "The hearts, which monster, and its hits left",
+      "parent": "zlCard",
+      "children": [
+        "zlHearts",
+        "zlLine",
+        "zlPips"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "justifyContent": "space-between"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "zlHearts",
+      "type": "Text",
+      "label": "The hearts",
+      "parent": "zlTop",
+      "parameters": {
+        "text": "❤️ ❤️ ❤️",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-xl)",
+        "lineHeight": "var(--leading-tight)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "zlLine",
+      "type": "Text",
+      "label": "Which monster of three",
+      "parent": "zlTop",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-bold)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "zlPips",
+      "type": "Text",
+      "label": "The hits it has left",
+      "parent": "zlTop",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-base)",
+        "color": "var(--destructive)",
+        "fontWeight": "var(--font-bold)",
+        "lineHeight": "var(--leading-tight)"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "zlLane",
+      "type": "Group",
+      "label": "The lane: the gate, the ground, and the cave",
+      "parent": "zlCard",
+      "children": [
+        "zlMover"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 150,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "flexDirection": "column",
+        "justifyContent": "flex-end",
+        "alignItems": "flex-start",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "clip": true,
+        "paddingLeft": {
+          "value": 150,
+          "unit": "px"
+        },
+        "paddingRight": "var(--space-4)",
+        "paddingBottom": "var(--space-6)",
+        "cssClassName": "rkt-lane rkt-lane-gate"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "zlMover",
+      "type": "Group",
+      "label": "Where the monster stands",
+      "parent": "zlLane",
+      "children": [
+        "zlMonster"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 65,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "flexDirection": "row",
+        "justifyContent": "flex-end",
+        "alignItems": "flex-end",
+        "cssClassName": "rkt-mover rkt-mover-glide"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "zlMonster",
+      "type": "/Game/Monster",
+      "label": "The monster",
+      "parent": "zlMover",
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "zlNote",
+      "type": "Text",
+      "label": "What just happened",
+      "parent": "zlCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-bold)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "zlWalk",
+      "type": "JavaScriptFunction",
+      "label": "Where the monster stands now: walking off the clock, or resting",
+      "parameters": {
+        "functionScript": "var from = Number(Inputs.walkFrom) || 0;\nvar left = Number(Inputs.left);\nvar walking = Inputs.walking === true && from > 0 && left >= 0 && left <= 100;\nvar at = walking ? from * left / 100 : Number(Inputs.rest);\nif (!(at >= 0)) at = 1;\nOutputs.width = Math.round(Math.min(1, at) * 1000) / 10;\nOutputs.moverClass = walking ? 'rkt-mover' : 'rkt-mover rkt-mover-glide';"
+      },
+      "x": 470,
+      "y": 760,
+      "ports": [
+        {
+          "name": "in-walkFrom",
+          "displayName": "walkFrom",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-left",
+          "displayName": "left",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-walking",
+          "displayName": "walking",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rest",
+          "displayName": "rest",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-width",
+          "displayName": "width",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-moverClass",
+          "displayName": "moverClass",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "zlHasPips",
+      "type": "Expression",
+      "label": "Hits to count?",
+      "parameters": {
+        "expression": "((p || '') + '').length > 0"
+      },
+      "x": 470,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "zlCard"
+  ]
+}

@@ -36,7 +36,7 @@ export function PortGroup(props: TSFixme) {
       >
         <div className={css.groupLabel}>{props.group.name}</div>
         {/* <div>
-          <i className={`fa ${expanded ? 'fa-caret-up' : 'fa-caret-down'}`} />
+          <Icon icon={expanded ? IconName.CaretUp : IconName.CaretDown} size={IconSize.Tiny} />
         </div> */}
       </div>
       {props.group.ports.map((p) => (

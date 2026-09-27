@@ -35,7 +35,7 @@
   height: 14px;
   border-radius: 50%;
   background-color: var(--theme-color-fg-highlight);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card);
   transition: transform var(--speed-quick) var(--easing-base), background-color var(--speed-quick) var(--easing-base);
 
   .Track.is-checked & {

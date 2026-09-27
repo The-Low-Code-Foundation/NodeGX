@@ -1,0 +1,87 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "184c0aea-3eec-43f0-b8fb-a7b420bd5b79",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hf_in",
+      "type": "Component Inputs",
+      "label": "One fact",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "hf_box",
+      "type": "Group",
+      "label": "The pair",
+      "x": 40,
+      "y": 240,
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "dbt-coach-head-fact"
+      },
+      "metadata": {
+        "comment": "The product's is a <dt>/<dd> pair inside a <dl>; the catalogue has no dl/dt/dd, so it is two paragraphs with the label in words (the same call L158 made for the requires list)."
+      },
+      "children": [
+        "hf_l",
+        "hf_v"
+      ]
+    },
+    {
+      "id": "hf_l",
+      "type": "Text",
+      "label": "Label",
+      "parent": "hf_box",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 360
+    },
+    {
+      "id": "hf_v",
+      "type": "Text",
+      "label": "Fact",
+      "parent": "hf_box",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 480
+    }
+  ],
+  "visualRoots": [
+    "hf_box"
+  ]
+}

@@ -34,14 +34,17 @@ import { STREAMING_LIB_PATH, streamingLibSource } from './streamingLib';
 import { SSE_LIB_PATH, sseLibSource } from './sseLib';
 import { WEBSOCKET_LIB_PATH, websocketLibSource } from './websocketLib';
 import { REALTIME_LIB_PATH, realtimeLibSource } from './realtimeLib';
+import { REPEAT_LIB_PATH, repeatLibSource } from './repeatLib';
 import { CRYPTO_LIB_PATH, cryptoLibSource } from './cryptoLib';
 import { SCREEN_LIB_PATH, screenLibSource } from './screenLib';
+import { MEDIA_LIB_PATH, mediaLibSource } from './mediaLib';
 import { COMPONENT_OBJECT_LIB_PATH, componentObjectLibSource } from './componentObjectLib';
 import { DRAG_LIB_PATH, dragLibSource } from './dragLib';
 import { PAGE_STACK_LIB_PATH, pageStackLibSource } from './pageStackLib';
+import { POPUP_DIALOG_LIB_PATH, popupDialogLibSource } from './popupDialogLib';
 import { EmittedCopy, emitKits } from './kits';
 import { README_PATH, renderReadme } from './readme';
-import { ExportReportData, REPORT_PATH, ReportComponent, renderReport, stripScope } from './report';
+import { ExportReportData, REPORT_PATH, ReportComponent, StylesReport, renderReport, stripScope } from './report';
 import { emitScaffold } from './scaffold';
 import { emitStateModules } from './state';
 
@@ -159,15 +162,20 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   let websocketLibUsed = false;
   // EXP-011 §66. The subscription's host — earned by a component whose plan kept a Subscribe To Changes node; it imports errors.ts and the client.
   let realtimeLibUsed = false;
+  // GAM-013. Repeat's host — earned by a component whose plan kept a Repeat node; it imports errors.ts only.
+  let repeatLibUsed = false;
   // EXP-011 §59.
   let cryptoLibUsed = false;
   let screenLibUsed = false;
+  // EXP-014 §14.5. The media URL helpers — earned where a component printed a wired src/srcSet/poster.
+  const mediaHelpersUsed = new Set<string>();
   // EXP-011 §60. The component-object record, its context and the parent hook; the lib raises on errors.ts.
   let componentObjectLibUsed = false;
   // EXP-011 §63.
   let dragLibUsed = false;
   // EXP-011 §61.
   let pageStackLibUsed = false;
+  let popupDialogLibUsed = false;
   const reportComponents: ReportComponent[] = [];
   for (const plan of project.plans) {
     if (plan.skipReason) {
@@ -226,11 +234,14 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
     if (emitted.sseLib) sseLibUsed = true;
     if (emitted.websocketLib) websocketLibUsed = true;
     if (emitted.realtimeLib) realtimeLibUsed = true;
+    if (emitted.repeatLib) repeatLibUsed = true;
     if (emitted.cryptoHelpers.size > 0) cryptoLibUsed = true;
     if (emitted.screenLib) screenLibUsed = true;
+    for (const helper of emitted.mediaHelpers) mediaHelpersUsed.add(helper);
     if (emitted.componentObjectLib) componentObjectLibUsed = true;
     if (emitted.dragLib) dragLibUsed = true;
     if (emitted.pageStackLib) pageStackLibUsed = true;
+    if (emitted.popupDialogLib) popupDialogLibUsed = true;
   }
 
   /**
@@ -289,7 +300,8 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   // `drag/snap-position-not-a-number` on the channel, so either earns errors.ts too.
   // EXP-011 §64. sse.ts raises `sse/connect-failed` on the channel, so it earns errors.ts too. §65: websocket.ts raises its own codes.
   // EXP-011 §66. realtime.ts raises subscribe-to-changes/realtime-failed on the channel.
-  if (errorsLibUsed || scriptLibUsed || runTasksLibUsed || streamingLibUsed || sseLibUsed || websocketLibUsed || realtimeLibUsed || componentObjectLibUsed || dragLibUsed) {
+  // GAM-013. repeat.ts raises repeat/interval-not-positive on the channel.
+  if (errorsLibUsed || scriptLibUsed || runTasksLibUsed || streamingLibUsed || sseLibUsed || websocketLibUsed || realtimeLibUsed || repeatLibUsed || componentObjectLibUsed || dragLibUsed) {
     files[ERRORS_LIB_PATH] = GENERATED_MODULE_TS + errorsLibSource();
   }
   // EXP-011 §58. `src/lib/streaming.ts` — the trio's host; it raises on the channel, so it earns errors.ts above.
@@ -310,6 +322,10 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   if (realtimeLibUsed) {
     files[REALTIME_LIB_PATH] = GENERATED_MODULE_TS + realtimeLibSource();
   }
+  // GAM-013. `src/lib/repeat.ts` — the Repeat hook, where a component printed one; it imports errors.ts only.
+  if (repeatLibUsed) {
+    files[REPEAT_LIB_PATH] = GENERATED_MODULE_TS + repeatLibSource();
+  }
   // EXP-011 §56. `src/lib/filterRecords.ts` — the Filter Records matcher, when a component printed one.
   // EXP-011 §59. The crypto verbs and the viewport hook, each only where a component calls into it.
   if (cryptoLibUsed) {
@@ -319,8 +335,16 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   if (pageStackLibUsed) {
     files[PAGE_STACK_LIB_PATH] = GENERATED_MODULE_TS + pageStackLibSource();
   }
+  // HLT-014. Owed by any component that renders a popup slot.
+  if (popupDialogLibUsed) {
+    files[POPUP_DIALOG_LIB_PATH] = GENERATED_MODULE_TS + popupDialogLibSource();
+  }
   if (screenLibUsed) {
     files[SCREEN_LIB_PATH] = GENERATED_MODULE_TS + screenLibSource();
+  }
+  // EXP-014 §14.5. `src/lib/media.ts` — the media URL helpers, where a component printed a wired src/srcSet/poster.
+  if (mediaHelpersUsed.size > 0) {
+    files[MEDIA_LIB_PATH] = GENERATED_MODULE_TS + mediaLibSource();
   }
   // EXP-011 §60. `src/lib/componentObject.ts` — the record hook, the context and the parent hook, where a component printed one.
   if (componentObjectLibUsed) {
@@ -381,6 +405,8 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
           components: [...new Set(settledWrites.map((w) => stripScope(w.component, w.component)))].sort()
         };
 
+  const styles = stylesReport(ir);
+
   const report: ExportReportData = {
     projectName: ir.project.name,
     // ⚠️ Both generated files are in their own count. Neither exists as a key yet — they are
@@ -391,6 +417,7 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
     modules: moduleFailures,
     project: projectNotes,
     ...(settled ? { settled } : {}),
+    ...(styles ? { styles } : {}),
     backendEndpoint: ir.project.cloudservices?.endpoint ?? null,
     usesBackend: api.usesBackend,
     httpModule: api.files.some(([path]) => path === 'src/api/http.ts'),
@@ -1834,3 +1861,55 @@ function envExample(backend: CloudServicesIR): string {
   );
 }
 
+
+/**
+ * STY-004 AC6 — what the export resolved out of the project's style dictionary.
+ *
+ * 🔴 **Counted off the IR, not off the emitted CSS, and the difference is deliberate.** Counting
+ * occurrences of a Look's declarations in the output would report a Look as carried whenever its
+ * values happened to match something else — the `a-css-property-whose-default-equals-the-test-value`
+ * shape. This counts the nodes that *point at* each style, which is the claim the paragraph makes.
+ *
+ * A node wearing a Look no node's type matches is not counted, because no such node exists: the
+ * pair (`name`, `typename`) is how a `variant` resolves at parse, in the runtime, and here.
+ */
+function stylesReport(ir: ExportIR): StylesReport | undefined {
+  const styles = ir.project.styles;
+  if (styles === undefined) return undefined;
+
+  const nodes = ir.components.flatMap((component) => component.nodes);
+
+  const looks = styles.variants
+    .map((variant) => ({
+      name: variant.name,
+      typename: variant.typename,
+      nodes: nodes.filter((node) => node.variant === variant.name && node.type === variant.typename).length
+    }))
+    .filter((look) => look.nodes > 0)
+    .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+
+  // A text style is reached through any `<prefix>textStyle` parameter, on the node itself or lent
+  // to it by its Look — the same two sources the parser expands, so the count matches the CSS.
+  const textStyleNamesOf = (node: (typeof nodes)[number]): string[] =>
+    [...node.parameters, ...(node.inheritedParameters ?? [])]
+      .filter((p) => p.name.endsWith('textStyle') && p.value.kind === 'literal' && typeof p.value.value === 'string')
+      .map((p) => String((p.value as { value: unknown }).value));
+
+  const textStyles = Object.keys(styles.textStyles)
+    .map((name) => ({ name, nodes: nodes.filter((node) => textStyleNamesOf(node).includes(name)).length }))
+    .filter((style) => style.nodes > 0)
+    .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+
+  const looksWithUnemittedStates = styles.variants
+    .filter((variant) => Object.keys(variant.stateParameters).length > 0)
+    .filter((variant) => looks.some((look) => look.name === variant.name && look.typename === variant.typename))
+    .map((variant) => variant.name)
+    .sort();
+
+  return {
+    looks,
+    textStyles,
+    colors: Object.keys(styles.colors).sort(),
+    looksWithUnemittedStates
+  };
+}

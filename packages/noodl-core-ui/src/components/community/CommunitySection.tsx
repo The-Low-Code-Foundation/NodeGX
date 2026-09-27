@@ -1,5 +1,8 @@
 /**
- * NAT-005 — a community section with its own heading and card, for the launcher's page density.
+ * NAT-005 — a community section with its own heading, for the launcher's page density.
+ *
+ * 🔴 CHR-012 (2026-09-15) took the card away: the section draws on the launcher's canvas like every
+ * other tab's content, and its rows carry the rules between them.
  *
  * ⚠️ **The rail panel does NOT use this.** It already has chrome — `BasePanel` plus
  * `sidebar/Section` — and wrapping a card in a panel section would be two frames saying the same
@@ -53,26 +56,24 @@ export function CommunitySection<T>({
 
   return (
     <section className={css['Section']}>
-      <div className={css['SectionCard']}>
-        {(showTitle || count !== null) && (
-          <div className={css['SectionHead']}>
-            {showTitle && <h3 className={css['SectionTitle']}>{title}</h3>}
-            {count !== null && (
-              <span className={css['SectionCount']}>
-                {count} {count === 1 ? 'item' : 'items'}
-              </span>
-            )}
-          </div>
-        )}
-        <CommunitySectionBody
-          state={state}
-          emptyLine={emptyLine}
-          onRetry={onRetry}
-          density={CommunityDensity.Page}
-        >
-          {children}
-        </CommunitySectionBody>
-      </div>
+      {(showTitle || count !== null) && (
+        <div className={css['SectionHead']}>
+          {showTitle && <h3 className={css['SectionTitle']}>{title}</h3>}
+          {count !== null && (
+            <span className={css['SectionCount']}>
+              {count} {count === 1 ? 'item' : 'items'}
+            </span>
+          )}
+        </div>
+      )}
+      <CommunitySectionBody
+        state={state}
+        emptyLine={emptyLine}
+        onRetry={onRetry}
+        density={CommunityDensity.Page}
+      >
+        {children}
+      </CommunitySectionBody>
     </section>
   );
 }

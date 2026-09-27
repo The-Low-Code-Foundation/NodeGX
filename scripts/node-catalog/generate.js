@@ -80,6 +80,7 @@ export type DynamicPortMechanism =
   | 'numbered-inputs'
   | 'component-ports'
   | 'runtime-discovered'
+  | 'runtime-narrowed'
   | 'editor-adapter';
 
 export interface PortType {

@@ -43,6 +43,7 @@ import { defaultLearningLessonFs, readLessonManifest } from '@noodl-models/learn
 import { getIpc } from '@noodl-utils/ipc';
 import PopupLayer from '../../views/popuplayer';
 import { AiAuthoringPanel_ID } from '../../views/panels/AiAuthoringPanel';
+import { InspectorFrame } from '../../views/Inspector';
 import { SidePanel } from '../../views/SidePanel';
 import { ToastLayer } from '../../views/ToastLayer/ToastLayer';
 import { BaseWindow } from '../../views/windows/BaseWindow';
@@ -345,6 +346,20 @@ export function EditorPage({ route }: EditorPageProps) {
       keybinding: KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.KEY_E
     },
     {
+      /**
+       * TVW-004 — flip the Project panel between `Layers` and `Components`.
+       *
+       * It **opens the panel first**: a shortcut that only worked while the panel happened to be
+       * showing would be a door you have to already be through. `switch` is a no-op when it is
+       * already the active panel, so the two cases are one line.
+       */
+      handler: () => {
+        SidebarModel.instance.switch('components');
+        EventDispatcher.instance.emit('componentsPanel.flipTab');
+      },
+      keybinding: KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.KEY_L
+    },
+    {
       // PNL-003: widen the panel and back. `KeyboardHandler` declines to run
       // commands while a *text* field has focus, so this does not fire while
       // you are typing in a panel field — but it does still fire right after
@@ -394,7 +409,13 @@ export function EditorPage({ route }: EditorPageProps) {
             <SidePanelLayoutProvider value={sidePanelLayout}>
               <FrameDivider
                 first={<SidePanel />}
-                second={<ErrorBoundary>{Boolean(Document) && <Document />}</ErrorBoundary>}
+                second={
+                  // P101 INS-001 — a selected node's panel lives in its own column on the right, so
+                  // it never takes the left slot over from whatever the person had open there.
+                  <InspectorFrame>
+                    <ErrorBoundary>{Boolean(Document) && <Document />}</ErrorBoundary>
+                  </InspectorFrame>
+                }
                 sizeMin={sidePanelLayout.dividerSizeMin}
                 size={sidePanelLayout.dividerSize}
                 horizontal

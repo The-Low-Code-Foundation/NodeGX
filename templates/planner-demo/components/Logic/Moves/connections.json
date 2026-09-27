@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e2beeeb9-b2d3-598d-8512-729a48bbeb33",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mvIn",
+      "fromProperty": "projects",
+      "toId": "mvWork",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "mvIn",
+      "fromProperty": "moveBlocks",
+      "toId": "mvWork",
+      "toProperty": "in-moveBlocks"
+    },
+    {
+      "fromId": "mvWork",
+      "fromProperty": "out-rows",
+      "toId": "mvOut",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "mvWork",
+      "fromProperty": "out-empty",
+      "toId": "mvOut",
+      "toProperty": "empty"
+    },
+    {
+      "fromId": "mvWork",
+      "fromProperty": "out-unplacedDormant",
+      "toId": "mvOut",
+      "toProperty": "unplacedDormant"
+    },
+    {
+      "fromId": "mvWork",
+      "fromProperty": "out-unsentBuilding",
+      "toId": "mvOut",
+      "toProperty": "unsentBuilding"
+    }
+  ]
+}

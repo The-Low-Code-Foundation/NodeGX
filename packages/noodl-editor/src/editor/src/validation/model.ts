@@ -61,6 +61,16 @@ export interface NormNode {
    */
   instancePorts: string[];
   /**
+   * GAM-019 — the declared type name of each instance port, where the source recorded one
+   * (`type` as a string, or `type.name`).
+   *
+   * `instancePorts` keeps names only, so a wire from `Component Inputs.name0` could not say
+   * whether it carries a value or a signal. The door's "did you mean" needs that: without it
+   * D66's `text` on a Text Input was offered `set`, a signal, for a string wire. Absent when no
+   * port records a type, and a name missing from the map means "not recorded", never a kind.
+   */
+  instancePortTypes?: Record<string, string>;
+  /**
    * Parameter values set on the node, carried verbatim from the source.
    *
    * ✅ **Added by D13, 2026-08-18, and its absence was the whole reason

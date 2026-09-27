@@ -97,12 +97,12 @@ export function EditorTopbar({
   const urlInputRef = useRef<HTMLDivElement>(null);
   const zoomLevelTrigger = useRef<HTMLDivElement>(null);
   const screenSizeTrigger = useRef<HTMLDivElement>(null);
-  const previewLayoutTrigger = useRef<HTMLDivElement>(null);
+  const moreMenuTrigger = useRef<HTMLDivElement>(null);
   const [isDeployVisible, setIsDeployVisible] = useState(false);
   const [isWarningsDialogVisible, setIsWarningsDialogVisible] = useState(false);
   const [isZoomDialogVisible, setIsZoomDialogVisible] = useState(false);
   const [isSizeDialogVisible, setIsSizeDialogVisible] = useState(false);
-  const [isPreviewLayoutDialogVisible, setIsPreviewLayoutDialogVisible] = useState(false);
+  const [isMoreMenuVisible, setIsMoreMenuVisible] = useState(false);
   const triggerRerender = useTriggerRerender();
   const [isRouteListVisible, setIsRouteListVisible] = useState(false);
   const currentScreenSize = getScreenSizeObjectFromMeasurements(previewSize.width, previewSize.height);
@@ -190,16 +190,6 @@ export function EditorTopbar({
   const topbarWidth = bounds?.width ?? Number.POSITIVE_INFINITY;
   const isSmall = topbarWidth < TOPBAR_ROOMY_MIN_WIDTH;
   const isTiny = topbarWidth < TOPBAR_TINY_MAX_WIDTH;
-  const getActiveLayoutIcon = () => {
-    switch (documentLayout) {
-      case 'vertical':
-        return IconName.VerticalSplit;
-      case 'horizontal':
-        return IconName.HorizontalSplit;
-      default:
-        return IconName.Cards;
-    }
-  };
 
   useKeyboardCommands(() => [
     {
@@ -259,7 +249,9 @@ export function EditorTopbar({
             least load-bearing controls here — the pill is a preview address bar
             (⌘L focuses it, and it returns as soon as the side panel narrows) and
             dev tools has its own keybinding. Unmounted rather than hidden, so
-            neither stays in the tab order while invisible. */}
+            neither stays in the tab order while invisible. P103 CMG-011: dev tools
+            is in the ⋯ menu while it is out — a control the bar folds away must
+            still be reachable from the bar. */}
         {!isTiny && (
           <>
             <MenuDialog
@@ -388,46 +380,60 @@ export function EditorTopbar({
           />
         </div>
 
+        {/* P103 CMG-011 row 3: everything the narrow bar folds away, in one ⋯ menu and in words.
+            It replaces a layout dropdown whose only label was the current layout's glyph (read as
+            "the preview mode options are gone"), and it carries dev tools while the tiny bar has no
+            room for it. Not the route list: out of the pill it read as "Show / in the preview" with
+            no context, and choosing one moved the preview and Layers (CMG-011 row 4). */}
         {isSmall && (
-          <div ref={previewLayoutTrigger}>
-            <Tooltip content="Preview layout" UNSAFE_triggerClassName={css.TooltipPositioner}>
-              <div
-                className={classNames(css['ZoomSelect'], css['TopbarSelect'])}
-                onClick={() => setIsPreviewLayoutDialogVisible(true)}
-              >
-                <Icon icon={getActiveLayoutIcon()} />
-                <Icon icon={IconName.CaretDown} />
-              </div>
+          <div ref={moreMenuTrigger}>
+            <Tooltip content="More: preview layout, dev tools" UNSAFE_triggerClassName={css.TooltipPositioner}>
+              <IconButton
+                icon={IconName.DotsThreeHorizontal}
+                variant={IconButtonVariant.Transparent}
+                onClick={() => setIsMoreMenuVisible(true)}
+                testId="editortopbar-more"
+              />
             </Tooltip>
 
             <MenuDialog
-              title="Preview layout"
-              width={MenuDialogWidth.Small}
-              isVisible={isPreviewLayoutDialogVisible}
-              onClose={() => setIsPreviewLayoutDialogVisible(false)}
-              triggerRef={previewLayoutTrigger}
+              title="More"
+              width={MenuDialogWidth.Medium}
+              isVisible={isMoreMenuVisible}
+              onClose={() => setIsMoreMenuVisible(false)}
+              triggerRef={moreMenuTrigger}
               items={[
                 {
-                  label: 'Vertical',
+                  label: 'Split workspace vertically',
                   icon: IconName.VerticalSplit,
                   isHighlighted: documentLayout === 'vertical',
                   onClick: () => setDocumentLayout('vertical')
                 },
                 {
-                  label: 'Horizontal',
+                  label: 'Split workspace horizontally',
                   icon: IconName.HorizontalSplit,
                   isHighlighted: documentLayout === 'horizontal',
                   onClick: () => setDocumentLayout('horizontal')
                 },
                 {
-                  label: 'Detached',
+                  label: 'Detach preview from editor',
                   icon: IconName.Cards,
                   isHighlighted: documentLayout === 'detachedPreview',
                   onClick: () => {
                     setDocumentLayout('detachedPreview');
                     ipcRenderer.send('viewer-focus');
                   }
-                }
+                },
+                ...(isTiny
+                  ? [
+                      'divider' as const,
+                      {
+                        label: 'Open dev tools',
+                        icon: IconName.Bug,
+                        onClick: () => EventDispatcher.instance.emit('viewer-open-devtools')
+                      }
+                    ]
+                  : [])
               ]}
             />
           </div>

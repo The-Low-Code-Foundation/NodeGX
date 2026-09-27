@@ -5,6 +5,7 @@ import { createRoot, Root } from 'react-dom/client';
 import { MenuDialog, MenuDialogWidth } from '@noodl-core-ui/components/popups/MenuDialog';
 
 import PopupLayer from '../popuplayer';
+import { unmountReactRoot } from '../../../../shared/utils/unmountReactRoot';
 
 export function showInspectMenu(items: TSFixme) {
   const container = document.createElement('div');
@@ -23,7 +24,7 @@ export function showInspectMenu(items: TSFixme) {
     position: 'top',
     onClose: () => {
       if (root) {
-        root.unmount();
+        unmountReactRoot(root);
         root = null;
       }
     }

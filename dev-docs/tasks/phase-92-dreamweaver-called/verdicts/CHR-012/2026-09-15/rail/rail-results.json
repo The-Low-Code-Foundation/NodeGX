@@ -1,0 +1,224 @@
+{
+  "rail-community-(default)-dark": {
+    "panel": {
+      "x": 53,
+      "y": 30,
+      "w": 378,
+      "h": 870
+    },
+    "rooms": [],
+    "controls": {
+      "PrimaryButton": {
+        "count": 2,
+        "distinct": 1,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 1px solid": [
+            "Community home — closes ",
+            "Open community.nodegx.io"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 2,
+        "distinct": 2,
+        "styles": {
+          "9999px | 12px | 500 | rgba(0, 0, 0, 0) | 1px solid": [
+            "Solved1"
+          ],
+          "9999px | 12px | 500 | rgba(77, 163, 255, 0.13) | 1px solid": [
+            "Waiting for an answer2✓"
+          ]
+        }
+      },
+      "room tab": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "row": {
+        "count": 7,
+        "distinct": 1,
+        "styles": {
+          "0px | 12px | 400 | rgba(0, 0, 0, 0) | 0px none": [
+            "Why does my For Each dra",
+            "Custom node won't load i",
+            "Your first stored record",
+            "Styling without fighting",
+            "Drawing a row per item —",
+            "Signals and values — Rea",
+            "Your first hour with Nod"
+          ]
+        }
+      },
+      "link": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 5,
+        "distinct": 1,
+        "styles": {
+          "6px | 12px | 400 | rgba(0, 0, 0, 0) | 0px none": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        "classes": [
+          "IconButton-module__Root--hfD5F IconButton-module__is-variant",
+          "IconButton-module__Root--hfD5F IconButton-module__is-variant",
+          "IconButton-module__Root--hfD5F IconButton-module__is-variant",
+          "IconButton-module__Root--hfD5F IconButton-module__is-variant",
+          "IconButton-module__Root--hfD5F IconButton-module__is-variant"
+        ]
+      }
+    },
+    "chips": [
+      {
+        "text": "Solved1",
+        "h": 28,
+        "w": 76,
+        "x": 45,
+        "y": 183
+      },
+      {
+        "text": "Waiting for an answer2✓",
+        "h": 28,
+        "w": 177,
+        "x": 129,
+        "y": 183
+      }
+    ],
+    "chipRows": [
+      {
+        "gap": "8px",
+        "marginBottom": "12px",
+        "w": 300,
+        "h": 28,
+        "panelW": 378,
+        "overflows": false
+      }
+    ],
+    "sizes": {
+      "13px": 1,
+      "12px": 14,
+      "11px": 16
+    },
+    "pastRight": [],
+    "pastRightCount": 0
+  },
+  "rail-community-(default)-light": {
+    "panel": {
+      "x": 53,
+      "y": 30,
+      "w": 378,
+      "h": 870
+    },
+    "rooms": [],
+    "controls": {
+      "PrimaryButton": {
+        "count": 2,
+        "distinct": 1,
+        "styles": {
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 1px solid": [
+            "Community home — closes ",
+            "Open community.nodegx.io"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 2,
+        "distinct": 2,
+        "styles": {
+          "9999px | 12px | 500 | rgba(0, 0, 0, 0) | 1px solid": [
+            "Solved1"
+          ],
+          "9999px | 12px | 500 | rgba(21, 112, 239, 0.09) | 1px solid": [
+            "Waiting for an answer2✓"
+          ]
+        }
+      },
+      "room tab": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "row": {
+        "count": 7,
+        "distinct": 1,
+        "styles": {
+          "0px | 12px | 400 | rgba(0, 0, 0, 0) | 0px none": [
+            "Why does my For Each dra",
+            "Custom node won't load i",
+            "Your first stored record",
+            "Styling without fighting",
+            "Drawing a row per item —",
+            "Signals and values — Rea",
+            "Your first hour with Nod"
+          ]
+        }
+      },
+      "link": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "other": {
+        "count": 5,
+        "distinct": 1,
+        "styles": {
+          "6px | 12px | 400 | rgba(0, 0, 0, 0) | 0px none": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        },
+        "classes": [
+          "IconButton-module__Root--hfD5F IconButton-module__is-variant",
+          "IconButton-module__Root--hfD5F IconButton-module__is-variant",
+          "IconButton-module__Root--hfD5F IconButton-module__is-variant",
+          "IconButton-module__Root--hfD5F IconButton-module__is-variant",
+          "IconButton-module__Root--hfD5F IconButton-module__is-variant"
+        ]
+      }
+    },
+    "chips": [
+      {
+        "text": "Solved1",
+        "h": 28,
+        "w": 76,
+        "x": 45,
+        "y": 183
+      },
+      {
+        "text": "Waiting for an answer2✓",
+        "h": 28,
+        "w": 177,
+        "x": 129,
+        "y": 183
+      }
+    ],
+    "chipRows": [
+      {
+        "gap": "8px",
+        "marginBottom": "12px",
+        "w": 300,
+        "h": 28,
+        "panelW": 378,
+        "overflows": false
+      }
+    ],
+    "sizes": {
+      "13px": 1,
+      "12px": 14,
+      "11px": 16
+    },
+    "pastRight": [],
+    "pastRightCount": 0
+  }
+}

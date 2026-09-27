@@ -16,7 +16,7 @@
  *
  * Storage: `_User` rows via the same adapter as everything else, passwords as
  * `scrypt$<salt>$<hash>` in `_hashed_password` (never sent over the wire —
- * AdapterFacade strips it). Sessions in `_Session` rows with Parse-style
+ * IStorageFacade strips it). Sessions in `_Session` rows with Parse-style
  * revocable tokens (`r:<random>`). Error code 209 (invalid session) is
  * load-bearing: it is what makes the client drop a stale local session.
  *
@@ -26,11 +26,12 @@
 import * as crypto from 'crypto';
 import type * as http from 'http';
 
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import type { SecurityState } from '../security/state';
 import type { EmailConfigState } from '../email/EmailConfigState';
 import type { EmailRoutes } from './email-routes';
 import { HttpError, readJSONBody, sendJSON } from './http-util';
+import { ACCOUNT_DISABLED_MESSAGE, ADMIN_ONLY_USER_FIELDS, isAccountDisabled } from '../users/accountColumns';
 
 function safeLog(...args: unknown[]): void {
   try {
@@ -61,7 +62,7 @@ export function verifyPassword(password: string, stored: string): boolean {
   }
 }
 
-function newSessionToken(): string {
+export function newSessionToken(): string {
   return 'r:' + crypto.randomBytes(24).toString('hex');
 }
 
@@ -115,7 +116,7 @@ export function isSessionExpired(session: Record<string, unknown>, now: number =
 }
 
 export class UserRoutes {
-  private readonly facade: AdapterFacade;
+  private readonly facade: IStorageFacade;
   // Reserved for session-policy decisions (the signup rule itself is enforced
   // by the dispatcher's route gate).
   private readonly security: SecurityState | null;
@@ -125,7 +126,7 @@ export class UserRoutes {
   private readonly emailConfig: EmailConfigState | null;
   private readonly emailRoutes: EmailRoutes | null;
 
-  constructor(facade: AdapterFacade, security?: SecurityState, emailConfig?: EmailConfigState, emailRoutes?: EmailRoutes) {
+  constructor(facade: IStorageFacade, security?: SecurityState, emailConfig?: EmailConfigState, emailRoutes?: EmailRoutes) {
     this.facade = facade;
     this.security = security || null;
     this.emailConfig = emailConfig || null;
@@ -171,11 +172,17 @@ export class UserRoutes {
     if (!session) {
       throw new HttpError(400, 'Invalid session token', 209);
     }
+    let user: Record<string, unknown>;
     try {
-      return await this.facade.rawFetch('_User', session.userId as string);
+      user = await this.facade.rawFetch('_User', session.userId as string);
     } catch {
       throw new HttpError(400, 'Invalid session token', 209);
     }
+    // BMG-004 (R3). Disabling revokes the sessions, so this only meets a row
+    // minted in the gap between the two writes — answered as an invalid
+    // session, 209, because that is the code that makes the client drop it.
+    if (isAccountDisabled(user)) throw new HttpError(400, 'Invalid session token', 209);
+    return user;
   }
 
   /**
@@ -201,7 +208,7 @@ export class UserRoutes {
    * them". The same absent-versus-false distinction `emailVerified` records in
    * `signup` below.
    */
-  private rolesFor(userId: unknown): string[] | undefined {
+  private async rolesFor(userId: unknown): Promise<string[] | undefined> {
     if (!this.security || typeof userId !== 'string' || !userId) return undefined;
     return this.security.rolesForUser(userId);
   }
@@ -225,6 +232,13 @@ export class UserRoutes {
       throw new HttpError(404, 'Invalid username/password.', 101);
     }
 
+    // BMG-004 (R3). AFTER the password check, so "disabled" is only ever told
+    // to somebody who proved they hold the account — never an oracle for
+    // which usernames exist.
+    if (isAccountDisabled(user)) {
+      throw new HttpError(403, ACCOUNT_DISABLED_MESSAGE, 119);
+    }
+
     // BAK-002 login policy: a backend can require a verified email before
     // login. 205 mirrors Parse's own EMAIL_NOT_FOUND-family numbering
     // (distinct from the 209 session-invalid code the client branches on).
@@ -240,7 +254,7 @@ export class UserRoutes {
     // ever acquired a literal `roles` column — an admin-side import, a restored
     // backup — `wire` would carry it, and a stored value outranking the live
     // junction is exactly the lie this field must never tell.
-    sendJSON(res, 200, { ...wire, roles: this.rolesFor(user.objectId), sessionToken });
+    sendJSON(res, 200, { ...wire, roles: await this.rolesFor(user.objectId), sessionToken });
   }
 
   async logout(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
@@ -268,6 +282,11 @@ export class UserRoutes {
 
     delete (rest as Record<string, unknown>).ACL;
     delete (rest as Record<string, unknown>)._method;
+    // BMG-014: the flags an administrator sets are never taken from a signup.
+    // Measured before this line existed: `...rest` below spread every field the
+    // caller sent into the row, so a signup could arrive verified, or — once
+    // the column existed — as the backend's admin.
+    for (const field of ADMIN_ONLY_USER_FIELDS) delete (rest as Record<string, unknown>)[field];
     const user = await this.facade.rawCreate('_User', {
       // ⚠️ **`emailVerified: false` is written here, and it is the close of a
       // defect BCN-006 could only half-fix from the client.**
@@ -287,8 +306,9 @@ export class UserRoutes {
       // already believes — `login` gates on `!user.emailVerified`, i.e. it has
       // been reading absent as false all along.
       //
-      // `...rest` first, deliberately: a caller that supplies the field (an
-      // admin-side import, say) outranks this default.
+      // `...rest` first, so a custom field a signup supplies is kept; the
+      // account flags were stripped from it above (BMG-014), so this default
+      // is what every signup gets.
       emailVerified: false,
       ...rest,
       username,
@@ -318,7 +338,7 @@ export class UserRoutes {
       // graphs and after on others; asking the junction is right either way,
       // and hard-coding `[]` would be a guess that is wrong exactly when a
       // membership app's first screen depends on it.
-      roles: this.rolesFor(user.objectId),
+      roles: await this.rolesFor(user.objectId),
       sessionToken
     });
   }
@@ -335,7 +355,7 @@ export class UserRoutes {
     // round trip, and nothing for a `User` node to schedule.
     sendJSON(res, 200, {
       ...wire,
-      roles: this.rolesFor(user.objectId),
+      roles: await this.rolesFor(user.objectId),
       sessionToken: req.headers['x-parse-session-token']
     });
   }
@@ -359,6 +379,8 @@ export class UserRoutes {
     // reasonably believe it meant something. A field that cannot be trusted
     // must not be storable.
     delete body.roles;
+    // BMG-004: account flags an administrator sets, never the account itself.
+    for (const field of ADMIN_ONLY_USER_FIELDS) delete body[field];
     const passwordChanged = typeof body.password === 'string' && body.password;
     if (passwordChanged) {
       body._hashed_password = hashPassword(body.password as string);
@@ -372,7 +394,8 @@ export class UserRoutes {
     // survive the victim rotating their password. Adversarial-suite item.
     if (passwordChanged) {
       const currentToken = req.headers['x-parse-session-token'] as string;
-      const { results: sessions } = await this.facade.rawQuery('_Session', { where: { userId: objectId } });
+      // PRD-001 §3.3: every other session, not a page — see IdentityStore.revokeAllSessions.
+      const { results: sessions } = await this.facade.rawQueryAll('_Session', { where: { userId: objectId } });
       for (const session of sessions) {
         if (session.sessionToken !== currentToken) {
           await this.facade.rawDelete('_Session', session.objectId as string);

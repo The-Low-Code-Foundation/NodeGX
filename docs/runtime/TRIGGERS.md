@@ -332,11 +332,12 @@ Rules the write path enforces, for the editor, an agent and `curl` alike:
   toggle or a rotation and **not** for a fire, which is what lets an editor tell
   "somebody changed this while I had it open" from "it fired twice".
 
-The editor's form is on the Triggers panel for both creating and editing — the
-canvas's trigger node offers **Edit this trigger…**, which opens that panel at
-that trigger rather than putting a second form on the canvas. It reads the
-trigger fresh when the form opens and again before it saves: if the definition
-moved in between, it says what changed and saves nothing until you say so again.
+The form is the backend manager's **Triggers** page for both creating and
+editing (since phase 104 the editor has no trigger panel). The canvas's trigger
+node offers **Add a trigger on …** and **Edit this trigger…**, which open the
+manager in the browser, signed in, at `#/triggers/new` or at that trigger's
+drawer, rather than putting a second form on the canvas. The manager reads the
+trigger fresh when its drawer opens.
 
 ### On the workflow canvas (WFA-005)
 

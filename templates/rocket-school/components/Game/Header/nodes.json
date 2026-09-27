@@ -1,0 +1,772 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d5aead7f-723c-5f79-8a2e-05b14f6e405a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hdIn",
+      "type": "Component Inputs",
+      "label": "Who, and the store",
+      "ports": [
+        {
+          "name": "app",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "profileId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "look",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "seed",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "level",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "layout",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "soundMode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "answerMode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "showHome",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "hideBar",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "options",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "showHangar",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "hdRoot",
+      "type": "Group",
+      "label": "The bar and its menu",
+      "children": [
+        "hdBar",
+        "hdMenu",
+        "hdForm"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hdBar",
+      "type": "Group",
+      "label": "The bar",
+      "parent": "hdRoot",
+      "children": [
+        "hdWho",
+        "hdHome"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "justifyContent": "space-between",
+        "columnGap": "var(--space-4)",
+        "flexWrap": "nowrap"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "hdWho",
+      "type": "Group",
+      "label": "The player, which opens the menu",
+      "parent": "hdBar",
+      "children": [
+        "hdFace",
+        "hdName",
+        "hdOpen"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "nowrap",
+        "columnGap": "var(--space-3)",
+        "cssClassName": "pressable"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "hdFace",
+      "type": "/Game/Face",
+      "label": "The face",
+      "parent": "hdWho",
+      "parameters": {
+        "size": 40
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "hdName",
+      "type": "Text",
+      "label": "The name",
+      "parent": "hdWho",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-bold)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "hdOpen",
+      "type": "net.noodl.controls.button",
+      "label": "Opens the menu",
+      "parent": "hdWho",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "▾"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "hdHome",
+      "type": "net.noodl.controls.button",
+      "label": "Home",
+      "parent": "hdBar",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Home"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "hdMenu",
+      "type": "Group",
+      "label": "The player menu",
+      "parent": "hdRoot",
+      "children": [
+        "hdHangar",
+        "hdEdit",
+        "hdLang",
+        "hdKeys",
+        "hdSound",
+        "hdAnswers",
+        "hdActions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "rowGap": "var(--space-4)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "maxWidth": {
+          "value": 480,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "hdHangar",
+      "type": "net.noodl.controls.button",
+      "label": "The hangar",
+      "parent": "hdMenu",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "🎁 Hangar"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "hdEdit",
+      "type": "net.noodl.controls.button",
+      "label": "Edit player",
+      "parent": "hdMenu",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Edit player"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "hdLang",
+      "type": "/Game/Choice row",
+      "label": "Language",
+      "parent": "hdMenu",
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "hdKeys",
+      "type": "/Game/Choice row",
+      "label": "Keyboard",
+      "parent": "hdMenu",
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "hdSound",
+      "type": "/Game/Choice row",
+      "label": "Sound",
+      "parent": "hdMenu",
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "hdAnswers",
+      "type": "/Game/Choice row",
+      "label": "Answers",
+      "parent": "hdMenu",
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "hdActions",
+      "type": "Group",
+      "label": "Switch, or close",
+      "parent": "hdMenu",
+      "children": [
+        "hdSwitch",
+        "hdClose"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "hdSwitch",
+      "type": "net.noodl.controls.button",
+      "label": "Switch player",
+      "parent": "hdActions",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Switch player"
+      },
+      "x": 220,
+      "y": 1840
+    },
+    {
+      "id": "hdClose",
+      "type": "net.noodl.controls.button",
+      "label": "Close",
+      "parent": "hdActions",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Close"
+      },
+      "x": 220,
+      "y": 1960
+    },
+    {
+      "id": "hdForm",
+      "type": "/Profiles/New player form",
+      "label": "Edit the player",
+      "parent": "hdRoot",
+      "parameters": {
+        "editing": true
+      },
+      "x": 100,
+      "y": 2080
+    },
+    {
+      "id": "hdWords",
+      "type": "/Data/Words",
+      "label": "The words",
+      "x": 470,
+      "y": 2320
+    },
+    {
+      "id": "hdT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "hdHide",
+      "type": "Expression",
+      "label": "Hide the bar?",
+      "parameters": {
+        "expression": "hide === true ? 'hidden' : 'shown'"
+      },
+      "x": 470,
+      "y": 2440
+    },
+    {
+      "id": "hdBarRoom",
+      "type": "States",
+      "label": "The bar, or the race’s own row",
+      "parameters": {
+        "states": "shown,hidden",
+        "values": "on",
+        "useTransitions": false,
+        "type-on": "boolean",
+        "value-shown-on": true,
+        "value-hidden-on": false
+      },
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "hdPanel",
+      "type": "States",
+      "label": "Closed, the menu, or editing the player",
+      "parameters": {
+        "states": "closed,menu,editing",
+        "values": "open,menu,form",
+        "useTransitions": false,
+        "type-open": "boolean",
+        "value-closed-open": false,
+        "value-menu-open": true,
+        "value-editing-open": true,
+        "type-menu": "boolean",
+        "value-closed-menu": false,
+        "value-menu-menu": true,
+        "value-editing-menu": false,
+        "type-form": "boolean",
+        "value-closed-form": false,
+        "value-menu-form": false,
+        "value-editing-form": true
+      },
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "hdIsOpen",
+      "type": "Condition",
+      "label": "Open already?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "hdLangItems",
+      "type": "Static Data",
+      "label": "The two languages",
+      "parameters": {
+        "type": "json",
+        "json": "[{\"label\":\"English\",\"value\":\"en\"},{\"label\":\"Français\",\"value\":\"fr\"}]"
+      },
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "hdKeyItems",
+      "type": "Static Data",
+      "label": "The two keyboards",
+      "parameters": {
+        "type": "json",
+        "json": "[{\"label\":\"FR · AZERTY\",\"value\":\"azerty\"},{\"label\":\"UK · QWERTY\",\"value\":\"qwerty-uk\"},{\"label\":\"US · QWERTY\",\"value\":\"qwerty\"}]"
+      },
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "hdSoundItems",
+      "type": "JavaScriptFunction",
+      "label": "On or off, in words",
+      "parameters": {
+        "functionScript": "Outputs.items = [{ label: Inputs.on, value: 'on' }, { label: Inputs.off, value: 'off' }];"
+      },
+      "x": 470,
+      "y": 1600,
+      "ports": [
+        {
+          "name": "in-on",
+          "displayName": "on",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-off",
+          "displayName": "off",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "hdAnswerItems",
+      "type": "JavaScriptFunction",
+      "label": "Type, buttons or auto, in words",
+      "parameters": {
+        "functionScript": "Outputs.items = [{ label: Inputs.typed, value: 'typed' }, { label: Inputs.options, value: 'options' }, { label: Inputs.auto, value: 'auto' }];"
+      },
+      "x": 470,
+      "y": 1720,
+      "ports": [
+        {
+          "name": "in-typed",
+          "displayName": "typed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-options",
+          "displayName": "options",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-auto",
+          "displayName": "auto",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "hdSet",
+      "type": "/Logic/Update settings",
+      "label": "Write a setting, at once",
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "hdRename",
+      "type": "/Logic/Update settings",
+      "label": "Write the edited player, on Save",
+      "x": 470,
+      "y": 2080
+    },
+    {
+      "id": "hdDelete",
+      "type": "/Logic/Delete profile",
+      "label": "Delete the player, on Yes",
+      "x": 470,
+      "y": 2200
+    },
+    {
+      "id": "hdOut",
+      "type": "Component Outputs",
+      "label": "What was pressed, and the store to write",
+      "ports": [
+        {
+          "name": "home",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "switchPlayer",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "app",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "write",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "deleted",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "hangar",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "hdRoot"
+  ]
+}

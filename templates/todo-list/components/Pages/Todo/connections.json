@@ -1,0 +1,991 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "27eed475-c71a-5eea-8fbd-a89544f4630b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tdPage",
+      "fromProperty": "didMount",
+      "toId": "tdAuth",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "tdUser",
+      "fromProperty": "authenticated",
+      "toId": "tdAuth",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "tdAuth",
+      "fromProperty": "ontrue",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "tdAuth",
+      "fromProperty": "onfalse",
+      "toId": "tdToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "tdHeader",
+      "fromProperty": "signOut",
+      "toId": "tdLogOut",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "tdLogOut",
+      "fromProperty": "done",
+      "toId": "tdToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "found",
+      "toId": "tdData",
+      "toProperty": "hasTask"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "tasks",
+      "toId": "tdRows",
+      "toProperty": "tasks"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "tasks",
+      "toId": "tdSel",
+      "toProperty": "tasks"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "tasks",
+      "toId": "tdLogRows",
+      "toProperty": "tasks"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "actions",
+      "toId": "tdRows",
+      "toProperty": "actions"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "actions",
+      "toId": "tdSel",
+      "toProperty": "actions"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "events",
+      "toId": "tdSel",
+      "toProperty": "events"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "recent",
+      "toId": "tdLogRows",
+      "toProperty": "events"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "tdRows",
+      "toProperty": "selectedId"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "tdSel",
+      "toProperty": "selectedId"
+    },
+    {
+      "fromId": "tdOpenAction",
+      "fromProperty": "value",
+      "toId": "tdSel",
+      "toProperty": "openActionId"
+    },
+    {
+      "fromId": "tdTab",
+      "fromProperty": "currentState",
+      "toId": "tdHeader",
+      "toProperty": "tab"
+    },
+    {
+      "fromId": "tdRows",
+      "fromProperty": "listLabel",
+      "toId": "tdHeader",
+      "toProperty": "listLabel"
+    },
+    {
+      "fromId": "tdRows",
+      "fromProperty": "doneLabel",
+      "toId": "tdHeader",
+      "toProperty": "doneLabel"
+    },
+    {
+      "fromId": "tdHeader",
+      "fromProperty": "pickList",
+      "toId": "tdTab",
+      "toProperty": "to-list"
+    },
+    {
+      "fromId": "tdHeader",
+      "fromProperty": "pickDone",
+      "toId": "tdTab",
+      "toProperty": "to-done"
+    },
+    {
+      "fromId": "tdHeader",
+      "fromProperty": "pickLog",
+      "toId": "tdTab",
+      "toProperty": "to-log"
+    },
+    {
+      "fromId": "tdTab",
+      "fromProperty": "at-list",
+      "toId": "tdListView",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tdTab",
+      "fromProperty": "at-done",
+      "toId": "tdDoneView",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tdTab",
+      "fromProperty": "at-log",
+      "toId": "tdLogView",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tdScreen",
+      "fromProperty": "width",
+      "toId": "tdLayout",
+      "toProperty": "in-width"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "found",
+      "toId": "tdLayout",
+      "toProperty": "in-found"
+    },
+    {
+      "fromId": "tdLayout",
+      "fromProperty": "out-showLeft",
+      "toId": "tdLeft",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tdLayout",
+      "fromProperty": "out-showRight",
+      "toId": "tdRight",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tdLayout",
+      "fromProperty": "out-narrow",
+      "toId": "tdSummary",
+      "toProperty": "narrow"
+    },
+    {
+      "fromId": "tdRows",
+      "fromProperty": "openRows",
+      "toId": "tdList",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdRows",
+      "fromProperty": "addPlaceholder",
+      "toId": "tdList",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "tdRows",
+      "fromProperty": "doneRows",
+      "toId": "tdDone",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdLogRows",
+      "fromProperty": "rows",
+      "toId": "tdLog",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "found",
+      "toId": "tdDetail",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "notFound",
+      "toId": "tdEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "title",
+      "toId": "tdSummary",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "rankLine",
+      "toId": "tdSummary",
+      "toProperty": "rankLine"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "deadline",
+      "toId": "tdSummary",
+      "toProperty": "deadline"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "dueText",
+      "toId": "tdSummary",
+      "toProperty": "dueText"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "dueColor",
+      "toId": "tdSummary",
+      "toProperty": "dueColor"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "isOpen",
+      "toId": "tdSummary",
+      "toProperty": "isOpen"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "isClosed",
+      "toId": "tdSummary",
+      "toProperty": "isClosed"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "canMakeNext",
+      "toId": "tdSummary",
+      "toProperty": "canMakeNext"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "closingNote",
+      "toId": "tdSummary",
+      "toProperty": "closingNote"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "actionRows",
+      "toId": "tdNext",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "historyRows",
+      "toId": "tdHistory",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdList",
+      "fromProperty": "taskId",
+      "toId": "tdSelectFromList",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tdList",
+      "fromProperty": "open",
+      "toId": "tdSelectFromList",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdDone",
+      "fromProperty": "taskId",
+      "toId": "tdSelectFromDone",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tdDone",
+      "fromProperty": "open",
+      "toId": "tdSelectFromDone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdLog",
+      "fromProperty": "taskId",
+      "toId": "tdSelectFromLog",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tdLog",
+      "fromProperty": "open",
+      "toId": "tdSelectFromLog",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSummary",
+      "fromProperty": "back",
+      "toId": "tdDeselect",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelectFromList",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "loadHistory"
+    },
+    {
+      "fromId": "tdSelectFromDone",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "loadHistory"
+    },
+    {
+      "fromId": "tdSelectFromLog",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "loadHistory"
+    },
+    {
+      "fromId": "tdSelectFromList",
+      "fromProperty": "done",
+      "toId": "tdCloseDesc",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelectFromDone",
+      "fromProperty": "done",
+      "toId": "tdCloseDesc",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelectFromLog",
+      "fromProperty": "done",
+      "toId": "tdCloseDesc",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdDeselect",
+      "fromProperty": "done",
+      "toId": "tdCloseDesc",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "actionId",
+      "toId": "tdOpenDesc",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "openDescription",
+      "toId": "tdOpenDesc",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "closeDescription",
+      "toId": "tdCloseDesc",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "describe",
+      "toId": "tdCloseDesc",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdList",
+      "fromProperty": "taskId",
+      "toId": "tdDialog",
+      "toProperty": "listTaskId"
+    },
+    {
+      "fromId": "tdList",
+      "fromProperty": "taskTitle",
+      "toId": "tdDialog",
+      "toProperty": "listTaskTitle"
+    },
+    {
+      "fromId": "tdList",
+      "fromProperty": "close",
+      "toId": "tdDialog",
+      "toProperty": "listClose"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "tdDialog",
+      "toProperty": "detailTaskId"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "title",
+      "toId": "tdDialog",
+      "toProperty": "detailTaskTitle"
+    },
+    {
+      "fromId": "tdSummary",
+      "fromProperty": "close",
+      "toId": "tdDialog",
+      "toProperty": "detailClose"
+    },
+    {
+      "fromId": "tdSummary",
+      "fromProperty": "reopen",
+      "toId": "tdDialog",
+      "toProperty": "detailReopen"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "actionId",
+      "toId": "tdDialog",
+      "toProperty": "actionId"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "actionTitle",
+      "toId": "tdDialog",
+      "toProperty": "actionTitle"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "tick",
+      "toId": "tdDialog",
+      "toProperty": "tick"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "untick",
+      "toId": "tdDialog",
+      "toProperty": "untick"
+    },
+    {
+      "fromId": "tdList",
+      "fromProperty": "newTitle",
+      "toId": "cmdAdd",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "tdRows",
+      "fromProperty": "nextPosition",
+      "toId": "cmdAdd",
+      "toProperty": "position"
+    },
+    {
+      "fromId": "tdRows",
+      "fromProperty": "addSummary",
+      "toId": "cmdAdd",
+      "toProperty": "summary"
+    },
+    {
+      "fromId": "tdList",
+      "fromProperty": "add",
+      "toId": "cmdAdd",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdAdd",
+      "fromProperty": "done",
+      "toId": "tdList",
+      "toProperty": "clearNew"
+    },
+    {
+      "fromId": "tdRows",
+      "fromProperty": "openRows",
+      "toId": "cmdUp",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdList",
+      "fromProperty": "taskId",
+      "toId": "cmdUp",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "tdList",
+      "fromProperty": "up",
+      "toId": "cmdUp",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdRows",
+      "fromProperty": "openRows",
+      "toId": "cmdDown",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdList",
+      "fromProperty": "taskId",
+      "toId": "cmdDown",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "tdList",
+      "fromProperty": "down",
+      "toId": "cmdDown",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdRows",
+      "fromProperty": "openRows",
+      "toId": "cmdTop",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdTop",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "tdSummary",
+      "fromProperty": "makeNext",
+      "toId": "cmdTop",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdRows",
+      "fromProperty": "openRows",
+      "toId": "cmdClose",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdDialog",
+      "fromProperty": "dialogTaskId",
+      "toId": "cmdClose",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "tdDialog",
+      "fromProperty": "note",
+      "toId": "cmdClose",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "tdDialog",
+      "fromProperty": "confirmClose",
+      "toId": "cmdClose",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdDialog",
+      "fromProperty": "dialogTaskId",
+      "toId": "cmdReopen",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "tdDialog",
+      "fromProperty": "note",
+      "toId": "cmdReopen",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "tdRows",
+      "fromProperty": "nextPosition",
+      "toId": "cmdReopen",
+      "toProperty": "position"
+    },
+    {
+      "fromId": "tdRows",
+      "fromProperty": "nextRank",
+      "toId": "cmdReopen",
+      "toProperty": "rank"
+    },
+    {
+      "fromId": "tdDialog",
+      "fromProperty": "confirmReopen",
+      "toId": "cmdReopen",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdRename",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "title",
+      "toId": "cmdRename",
+      "toProperty": "oldTitle"
+    },
+    {
+      "fromId": "tdSummary",
+      "fromProperty": "newTitle",
+      "toId": "cmdRename",
+      "toProperty": "newTitle"
+    },
+    {
+      "fromId": "tdSummary",
+      "fromProperty": "rename",
+      "toId": "cmdRename",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdDeadline",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "deadline",
+      "toId": "cmdDeadline",
+      "toProperty": "current"
+    },
+    {
+      "fromId": "tdSummary",
+      "fromProperty": "deadlineText",
+      "toId": "cmdDeadline",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tdSummary",
+      "fromProperty": "setDeadline",
+      "toId": "cmdDeadline",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdDeadline",
+      "fromProperty": "error",
+      "toId": "tdSummary",
+      "toProperty": "deadlineError"
+    },
+    {
+      "fromId": "cmdDeadline",
+      "fromProperty": "hasError",
+      "toId": "tdSummary",
+      "toProperty": "hasDeadlineError"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdAddAction",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "newTitle",
+      "toId": "cmdAddAction",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "nextActionPosition",
+      "toId": "cmdAddAction",
+      "toProperty": "position"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "add",
+      "toId": "cmdAddAction",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdAddAction",
+      "fromProperty": "done",
+      "toId": "tdNext",
+      "toProperty": "clearNew"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "actionRows",
+      "toId": "cmdTick",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdTick",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "tdDialog",
+      "fromProperty": "dialogActionId",
+      "toId": "cmdTick",
+      "toProperty": "actionId"
+    },
+    {
+      "fromId": "tdDialog",
+      "fromProperty": "note",
+      "toId": "cmdTick",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "tdDialog",
+      "fromProperty": "confirmTick",
+      "toId": "cmdTick",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "actionRows",
+      "toId": "cmdUntick",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdUntick",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "tdDialog",
+      "fromProperty": "dialogActionId",
+      "toId": "cmdUntick",
+      "toProperty": "actionId"
+    },
+    {
+      "fromId": "tdDialog",
+      "fromProperty": "note",
+      "toId": "cmdUntick",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "nextActionPosition",
+      "toId": "cmdUntick",
+      "toProperty": "position"
+    },
+    {
+      "fromId": "tdDialog",
+      "fromProperty": "confirmUntick",
+      "toId": "cmdUntick",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "openActionRows",
+      "toId": "cmdActUp",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdActUp",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "actionId",
+      "toId": "cmdActUp",
+      "toProperty": "actionId"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "up",
+      "toId": "cmdActUp",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "openActionRows",
+      "toId": "cmdActDown",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdActDown",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "actionId",
+      "toId": "cmdActDown",
+      "toProperty": "actionId"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "down",
+      "toId": "cmdActDown",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "actionRows",
+      "toId": "cmdRenameAct",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdRenameAct",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "actionId",
+      "toId": "cmdRenameAct",
+      "toProperty": "actionId"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "actionTitleText",
+      "toId": "cmdRenameAct",
+      "toProperty": "newTitle"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "rename",
+      "toId": "cmdRenameAct",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSel",
+      "fromProperty": "actionRows",
+      "toId": "cmdDescribe",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdDescribe",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "actionId",
+      "toId": "cmdDescribe",
+      "toProperty": "actionId"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "descriptionText",
+      "toId": "cmdDescribe",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tdNext",
+      "fromProperty": "describe",
+      "toId": "cmdDescribe",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdNote",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "tdHistory",
+      "fromProperty": "noteText",
+      "toId": "cmdNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tdHistory",
+      "fromProperty": "addNote",
+      "toId": "cmdNote",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdNote",
+      "fromProperty": "done",
+      "toId": "tdHistory",
+      "toProperty": "clearNote"
+    },
+    {
+      "fromId": "cmdAdd",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdUp",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdDown",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdTop",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdClose",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdReopen",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdRename",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdDeadline",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdAddAction",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdTick",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdUntick",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdActUp",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdActDown",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdRenameAct",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdDescribe",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdNote",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    }
+  ]
+}

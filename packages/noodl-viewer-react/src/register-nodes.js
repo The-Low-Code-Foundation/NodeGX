@@ -44,6 +44,7 @@ export default function registerNodes(noodlRuntime) {
     //require('./nodes/std-library/stringmapper'),
     //require('./nodes/std-library/inverter'),
     require('./nodes/std-library/timer'),
+    require('./nodes/std-library/repeat'),
     require('./nodes/std-library/variables/color'),
     //require('./nodes/std-library/substring'), // moved to runtime
     require('./nodes/std-library/eventsender'),

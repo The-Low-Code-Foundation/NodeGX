@@ -1,0 +1,352 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "10f7c5d6-8fa3-5944-851e-96f7f1e60c5f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hcIn",
+      "type": "Component Inputs",
+      "label": "What is being bought",
+      "ports": [
+        {
+          "name": "mounted",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "haveWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "costWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "leftWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "purse",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "cost",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "yesWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "noWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "hcCard",
+      "type": "Group",
+      "label": "The question",
+      "children": [
+        "hcTitle",
+        "hcSums",
+        "hcButtons"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "rowGap": "var(--space-4)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "maxWidth": {
+          "value": 420,
+          "unit": "px"
+        },
+        "alignItems": "stretch"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hcTitle",
+      "type": "Text",
+      "label": "Buy it?",
+      "parent": "hcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-tight)",
+        "letterSpacing": "var(--tracking-tight)",
+        "color": "var(--foreground)",
+        "as": "h2",
+        "fontFamily": "Grandstander",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "hcSums",
+      "type": "Group",
+      "label": "The sum",
+      "parent": "hcCard",
+      "children": [
+        "hcEach"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "hcEach",
+      "type": "For Each",
+      "label": "One line per number",
+      "parameters": {
+        "template": "/Hangar/Sum row",
+        "templateType": "explicit"
+      },
+      "parent": "hcSums",
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "hcButtons",
+      "type": "Group",
+      "label": "Yes or no",
+      "parent": "hcCard",
+      "children": [
+        "hcYes",
+        "hcNo"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "justifyContent": "center"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "hcYes",
+      "type": "net.noodl.controls.button",
+      "label": "Buy it",
+      "parent": "hcButtons",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Yes"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "hcNo",
+      "type": "net.noodl.controls.button",
+      "label": "Not now",
+      "parent": "hcButtons",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "No"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "hcSum",
+      "type": "JavaScriptFunction",
+      "label": "The three lines of the sum",
+      "parameters": {
+        "functionScript": "var purse = Math.max(0, Math.floor(Number(Inputs.purse) || 0));\nvar cost = Math.max(0, Math.floor(Number(Inputs.cost) || 0));\nOutputs.rows = [\n  { id: 'have', label: String(Inputs.haveWord || ''), value: purse + ' ⭐', strong: false },\n  { id: 'cost', label: String(Inputs.costWord || ''), value: '−' + cost + ' ⭐', strong: false },\n  { id: 'left', label: String(Inputs.leftWord || ''), value: Math.max(0, purse - cost) + ' ⭐', strong: true }\n];"
+      },
+      "x": 410,
+      "y": 400,
+      "ports": [
+        {
+          "name": "in-purse",
+          "displayName": "purse",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-cost",
+          "displayName": "cost",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-haveWord",
+          "displayName": "haveWord",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-costWord",
+          "displayName": "costWord",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-leftWord",
+          "displayName": "leftWord",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "hcShown",
+      "type": "Expression",
+      "label": "Only while asking",
+      "parameters": {
+        "expression": "m === true"
+      },
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "hcOut",
+      "type": "Component Outputs",
+      "label": "The answer",
+      "ports": [
+        {
+          "name": "yes",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "no",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 640
+    }
+  ],
+  "visualRoots": [
+    "hcCard"
+  ]
+}

@@ -1,0 +1,1270 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "fe87cb3f-e4c7-56a5-8f40-207124c2b1d2",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "edIn",
+      "type": "Component Inputs",
+      "label": "The item as it is",
+      "ports": [
+        {
+          "name": "shown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "key",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sub",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "dirs",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "repeats",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "projects",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "projectTerms",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "saveLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "dir",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "repeat",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "date",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "until",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "monthEnd",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "projectId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "billDate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "billLeadDays",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fromHours",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "likelihood",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "edOut",
+      "type": "Component Outputs",
+      "label": "The item as it should be",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "dir",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "repeat",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "date",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "until",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "monthEnd",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "projectId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "billDate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "billLeadDays",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "fromHours",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "likelihood",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "save",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cancel",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "back",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "edRoot",
+      "type": "Group",
+      "label": "Money item editor",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "edBack",
+        "edHead",
+        "edLabel",
+        "edRow1",
+        "edRow2",
+        "edRow3",
+        "edDueHint",
+        "edMonthEnd",
+        "edLead",
+        "edFromHours",
+        "edRow4",
+        "edLikeHint",
+        "edButtons"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "edBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back to the list",
+      "parent": "edRoot",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "‹ Money",
+        "cssClassName": "planner-phone-only"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "edHead",
+      "type": "Group",
+      "label": "What this form is",
+      "parent": "edRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0-5)"
+      },
+      "children": [
+        "edTitle",
+        "edSub"
+      ],
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "edTitle",
+      "type": "Text",
+      "label": "What this form is",
+      "parent": "edHead",
+      "parameters": {
+        "text": "",
+        "fontSize": {
+          "value": 19,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-display)",
+        "cssClassName": "planner-display",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "as": "h3"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "edSub",
+      "type": "Text",
+      "label": "What saving it changes",
+      "parent": "edHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "edLabel",
+      "type": "net.noodl.controls.textinput",
+      "label": "What it is",
+      "parent": "edRoot",
+      "parameters": {
+        "runOnChange-startValue": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Label",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "edRow1",
+      "type": "Group",
+      "label": "In or out, and how much",
+      "parent": "edRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "edDirBox",
+        "edAmountBox"
+      ],
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "edDirBox",
+      "type": "Group",
+      "label": "In or out",
+      "parent": "edRow1",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 50,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "edDir"
+      ],
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "edDir",
+      "type": "net.noodl.controls.options",
+      "label": "In or out",
+      "parent": "edDirBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Pick one",
+        "useLabel": true,
+        "label": "In or out",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "edAmountBox",
+      "type": "Group",
+      "label": "How much",
+      "parent": "edRow1",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 50,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "edAmount"
+      ],
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "edAmount",
+      "type": "net.noodl.controls.textinput",
+      "label": "How much",
+      "parent": "edAmountBox",
+      "parameters": {
+        "runOnChange-startValue": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Amount, €",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "edRow2",
+      "type": "Group",
+      "label": "How often, and whose",
+      "parent": "edRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "edRepeatBox",
+        "edProjectBox"
+      ],
+      "x": 100,
+      "y": 1360
+    },
+    {
+      "id": "edRepeatBox",
+      "type": "Group",
+      "label": "How often",
+      "parent": "edRow2",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 50,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "edRepeat"
+      ],
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "edRepeat",
+      "type": "net.noodl.controls.options",
+      "label": "How often",
+      "parent": "edRepeatBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Pick one",
+        "useLabel": true,
+        "label": "Happens",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "edProjectBox",
+      "type": "Group",
+      "label": "Whose",
+      "parent": "edRow2",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 50,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "edProject"
+      ],
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "edProject",
+      "type": "net.noodl.controls.options",
+      "label": "Which project, if any",
+      "parent": "edProjectBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "No project",
+        "useLabel": true,
+        "label": "Project (optional)",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 1840
+    },
+    {
+      "id": "edRow3",
+      "type": "Group",
+      "label": "The dates",
+      "parent": "edRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "edBillBox",
+        "edDateBox",
+        "edUntilBox"
+      ],
+      "x": 100,
+      "y": 1960
+    },
+    {
+      "id": "edBillBox",
+      "type": "Group",
+      "label": "When the bill goes out",
+      "parent": "edRow3",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 48,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "edBillDate"
+      ],
+      "x": 160,
+      "y": 2080
+    },
+    {
+      "id": "edBillDate",
+      "type": "/Week/Date picker",
+      "label": "When the bill goes out",
+      "parent": "edBillBox",
+      "parameters": {
+        "Label": "Bill goes out",
+        "Show Label": true
+      },
+      "x": 220,
+      "y": 2200
+    },
+    {
+      "id": "edDateBox",
+      "type": "Group",
+      "label": "The date",
+      "parent": "edRow3",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 48,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "edDate"
+      ],
+      "x": 160,
+      "y": 2320
+    },
+    {
+      "id": "edDate",
+      "type": "/Week/Date picker",
+      "label": "The date",
+      "parent": "edDateBox",
+      "parameters": {
+        "Show Label": true
+      },
+      "x": 220,
+      "y": 2440
+    },
+    {
+      "id": "edUntilBox",
+      "type": "Group",
+      "label": "Until",
+      "parent": "edRow3",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 48,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "edUntil"
+      ],
+      "x": 160,
+      "y": 2560
+    },
+    {
+      "id": "edUntil",
+      "type": "/Week/Date picker",
+      "label": "The last date",
+      "parent": "edUntilBox",
+      "parameters": {
+        "Label": "Last date (optional)",
+        "Show Label": true
+      },
+      "x": 220,
+      "y": 2680
+    },
+    {
+      "id": "edDueHint",
+      "type": "Text",
+      "label": "Where the due date came from",
+      "parent": "edRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 2800
+    },
+    {
+      "id": "edMonthEnd",
+      "type": "net.noodl.controls.checkbox",
+      "label": "On the last day of the month",
+      "parent": "edRoot",
+      "parameters": {
+        "checked": false,
+        "width": {
+          "value": 18,
+          "unit": "px"
+        },
+        "height": {
+          "value": 18,
+          "unit": "px"
+        },
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-sm)",
+        "useLabel": true,
+        "label": "On the last day of the month",
+        "labelSpacing": {
+          "value": 8,
+          "unit": "px"
+        },
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 2920
+    },
+    {
+      "id": "edLead",
+      "type": "net.noodl.controls.textinput",
+      "label": "Bill goes out this many days before it is due",
+      "parent": "edRoot",
+      "parameters": {
+        "runOnChange-startValue": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Bill goes out, days before it’s due",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 3040
+    },
+    {
+      "id": "edFromHours",
+      "type": "net.noodl.controls.checkbox",
+      "label": "Fill the amount from the hours",
+      "parent": "edRoot",
+      "parameters": {
+        "checked": false,
+        "width": {
+          "value": 18,
+          "unit": "px"
+        },
+        "height": {
+          "value": 18,
+          "unit": "px"
+        },
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-sm)",
+        "useLabel": true,
+        "label": "Fill the amount from the hours logged (hourly)",
+        "labelSpacing": {
+          "value": 8,
+          "unit": "px"
+        },
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 3160
+    },
+    {
+      "id": "edRow4",
+      "type": "Group",
+      "label": "Likelihood and note",
+      "parent": "edRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "edLikeBox",
+        "edNoteBox"
+      ],
+      "x": 100,
+      "y": 3280
+    },
+    {
+      "id": "edLikeBox",
+      "type": "Group",
+      "label": "How likely",
+      "parent": "edRow4",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 40,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "edLikelihood"
+      ],
+      "x": 160,
+      "y": 3400
+    },
+    {
+      "id": "edLikelihood",
+      "type": "net.noodl.controls.textinput",
+      "label": "How likely, in percent",
+      "parent": "edLikeBox",
+      "parameters": {
+        "runOnChange-startValue": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Likelihood, %",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 3520
+    },
+    {
+      "id": "edNoteBox",
+      "type": "Group",
+      "label": "A note",
+      "parent": "edRow4",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 60,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "edNote"
+      ],
+      "x": 160,
+      "y": 3640
+    },
+    {
+      "id": "edNote",
+      "type": "net.noodl.controls.textinput",
+      "label": "A note",
+      "parent": "edNoteBox",
+      "parameters": {
+        "runOnChange-startValue": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Note (optional)",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 3760
+    },
+    {
+      "id": "edLikeHint",
+      "type": "Text",
+      "label": "What likelihood means",
+      "parent": "edRoot",
+      "parameters": {
+        "text": "100 is expected. Less is hoped money, which is never in a balance.",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 3880
+    },
+    {
+      "id": "edButtons",
+      "type": "Group",
+      "label": "Buttons",
+      "parent": "edRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "edSave",
+        "edCancel"
+      ],
+      "x": 100,
+      "y": 4000
+    },
+    {
+      "id": "edSave",
+      "type": "net.noodl.controls.button",
+      "label": "Save the item",
+      "parent": "edButtons",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 4120
+    },
+    {
+      "id": "edCancel",
+      "type": "net.noodl.controls.button",
+      "label": "Stop editing the item",
+      "parent": "edButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Cancel"
+      },
+      "x": 160,
+      "y": 4240
+    },
+    {
+      "id": "edShape",
+      "type": "JavaScriptFunction",
+      "label": "Which fields this item needs",
+      "parameters": {
+        "functionScript": "var rep = String(Inputs.repeat || 'once');\nvar pid = String(Inputs.projectId || '');\nvar dir = String(Inputs.dir || 'in');\nvar list = Inputs.projectTerms || [];\nvar p = null;\nfor (var i = 0; i < list.length; i++) if (list[i] && list[i].id === pid) p = list[i];\nvar client = !!p && dir === 'in';\nOutputs.untilShown = rep !== 'once';\nOutputs.monthEndShown = rep === 'monthly' || rep === 'quarterly';\nOutputs.billShown = client && rep === 'once';\nOutputs.leadShown = client && rep !== 'once';\nOutputs.fromHoursShown = client && !!p && p.billing !== 'fixed';\nOutputs.dateLabel = client ? (rep === 'once' ? 'Due' : 'First due') : rep === 'once' ? 'Date' : 'First date';\nvar bill = String(Inputs.billDate || '');\nvar m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(bill);\nvar terms = p ? Number(p.terms) : NaN;\nvar stamp = pid + '|' + bill;\nif (this.stamp === undefined) this.stamp = stamp;\nif (client && rep === 'once' && m && isFinite(terms) && this.stamp !== stamp) {\n  var d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]) + Math.round(terms)));\n  Outputs.due = d.toISOString().slice(0, 10);\n}\nthis.stamp = stamp;\nOutputs.dueHint = client && rep === 'once' && isFinite(terms) ? 'Due ' + Math.round(terms) + ' days after the bill: ' + String(p.name || 'the project') + '\\u2019s payment terms.' : '';"
+      },
+      "x": 470,
+      "y": 2440,
+      "ports": [
+        {
+          "name": "in-repeat",
+          "displayName": "repeat",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projectId",
+          "displayName": "projectId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-dir",
+          "displayName": "dir",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projectTerms",
+          "displayName": "projectTerms",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-billDate",
+          "displayName": "billDate",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-untilShown",
+          "displayName": "untilShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-monthEndShown",
+          "displayName": "monthEndShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-billShown",
+          "displayName": "billShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-leadShown",
+          "displayName": "leadShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-fromHoursShown",
+          "displayName": "fromHoursShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-dateLabel",
+          "displayName": "dateLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-due",
+          "displayName": "due",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-dueHint",
+          "displayName": "dueHint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "edClosing",
+      "type": "JavaScriptFunction",
+      "label": "Clear the boxes on close; tick the two boxes to match the item",
+      "parameters": {
+        "functionScript": "var shown = Inputs.shown === true;\nif (this.wasShown && !shown) Outputs.closed();\nvar monthEndWant = shown ? Inputs.monthEnd === true : null;\nif (monthEndWant !== null && (!this.wasShown || this.monthEndLast !== monthEndWant)) { if (monthEndWant) Outputs.monthEndOn(); else Outputs.monthEndOff(); }\nthis.monthEndLast = monthEndWant;\nvar fromHoursWant = shown ? Inputs.fromHours === true : null;\nif (fromHoursWant !== null && (!this.wasShown || this.fromHoursLast !== fromHoursWant)) { if (fromHoursWant) Outputs.fromHoursOn(); else Outputs.fromHoursOff(); }\nthis.fromHoursLast = fromHoursWant;\nthis.wasShown = shown;"
+      },
+      "x": 470,
+      "y": 2920,
+      "ports": [
+        {
+          "name": "in-shown",
+          "displayName": "shown",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-monthEnd",
+          "displayName": "monthEnd",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-fromHours",
+          "displayName": "fromHours",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-closed",
+          "displayName": "closed",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-monthEndOn",
+          "displayName": "monthEndOn",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-monthEndOff",
+          "displayName": "monthEndOff",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-fromHoursOn",
+          "displayName": "fromHoursOn",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-fromHoursOff",
+          "displayName": "fromHoursOff",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "edReset",
+      "type": "JavaScriptFunction",
+      "label": "Put the boxes back when the item changes",
+      "parameters": {
+        "functionScript": "var key = String(Inputs.key || '');\nif (this.key !== undefined && this.key !== key) { Outputs.blur(); Outputs.reset(); }\nthis.key = key;"
+      },
+      "x": 470,
+      "y": 760,
+      "ports": [
+        {
+          "name": "in-key",
+          "displayName": "key",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-blur",
+          "displayName": "blur",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-reset",
+          "displayName": "reset",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "edRoot"
+  ]
+}

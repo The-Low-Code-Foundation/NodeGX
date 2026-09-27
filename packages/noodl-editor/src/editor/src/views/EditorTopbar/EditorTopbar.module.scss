@@ -241,7 +241,7 @@
   &.is-active {
     background-color: var(--theme-color-bg-1);
     color: var(--theme-color-fg-highlight);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-card);
   }
 
   &:focus-visible {

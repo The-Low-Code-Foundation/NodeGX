@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4c3cdd80-768e-508d-8b8f-0f92f384f9c0",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "dtIn",
+      "fromProperty": "refresh",
+      "toId": "dtTasks",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "dtIn",
+      "fromProperty": "refresh",
+      "toId": "dtActions",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "dtIn",
+      "fromProperty": "refresh",
+      "toId": "dtRecent",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "dtIn",
+      "fromProperty": "refresh",
+      "toId": "dtHasTask",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "dtIn",
+      "fromProperty": "hasTask",
+      "toId": "dtHasTask",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "dtHasTask",
+      "fromProperty": "ontrue",
+      "toId": "dtEvents",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "dtIn",
+      "fromProperty": "loadHistory",
+      "toId": "dtEvents",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "dtSelected",
+      "fromProperty": "value",
+      "toId": "dtEvents",
+      "toProperty": "qp-taskId"
+    },
+    {
+      "fromId": "dtTasks",
+      "fromProperty": "failure",
+      "toId": "dtLoadProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "dtTasks",
+      "fromProperty": "items",
+      "toId": "dtOut",
+      "toProperty": "tasks"
+    },
+    {
+      "fromId": "dtActions",
+      "fromProperty": "items",
+      "toId": "dtOut",
+      "toProperty": "actions"
+    },
+    {
+      "fromId": "dtEvents",
+      "fromProperty": "items",
+      "toId": "dtOut",
+      "toProperty": "events"
+    },
+    {
+      "fromId": "dtRecent",
+      "fromProperty": "items",
+      "toId": "dtOut",
+      "toProperty": "recent"
+    }
+  ]
+}

@@ -1,13 +1,11 @@
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 
-import { StylesModel } from '@noodl-models/StylesModel';
-import { UndoQueue } from '@noodl-models/undo-queue-model';
-
 import { EventDispatcher } from '../../../../../../shared/utils/EventDispatcher';
 import TextStylePicker from '../../../TextStylePicker/TextStylePicker';
 import { getEditType } from '../utils';
 import { PickerTypeView } from './PickerTypeView';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 export class TextStyleType extends PickerTypeView {
   private pickerRoot: Root | null = null;
@@ -52,90 +50,12 @@ export class TextStyleType extends PickerTypeView {
   protected openPicker(anchor: HTMLElement) {
     const props: TSFixme = (this.pickerProps = {});
 
-    const newStyleProps = {};
-    if (this.port.type.childPorts) {
-      const prefix = this.port.type.childPortPrefix;
-      for (const childPort of this.port.type.childPorts) {
-        const value = this.parent.model.getParameter(prefix + childPort);
-        if (value !== undefined) {
-          newStyleProps[childPort] = value;
-        }
-      }
-    }
-
-    props.newStyleProps = newStyleProps;
     props.selectedStyle = this.getCurrentValue().value;
     props.inputValue = (anchor as HTMLInputElement).value;
 
     props.onItemSelected = (name: string) => {
       this.commit(name ?? '');
       this.parent.hidePopout();
-    };
-
-    props.createNewStyle = (styleName: string, newStyle: TSFixme) => {
-      this.parent.hidePopout();
-
-      //reset the values that are now moved to the text style
-      const prevValue = this.parent.model.parameters[this.name];
-      const portValuesToReset = {};
-
-      if (this.port.type.childPorts) {
-        const prefix = this.port.type.childPortPrefix;
-        for (const childPort of this.port.type.childPorts) {
-          const value = this.parent.model.parameters[prefix + childPort];
-          if (value !== undefined) {
-            portValuesToReset[prefix + childPort] = value;
-          }
-        }
-      }
-
-      const portsToReset = Object.keys(portValuesToReset);
-
-      // @ts-expect-error
-      UndoQueue.instance.pushAndDo({
-        label: `create new text style: ${styleName}`,
-        do: () => {
-          const stylesModel = new StylesModel();
-          stylesModel.setStyle('text', styleName, newStyle);
-          stylesModel.dispose();
-
-          //Set the new text style
-          this.parent.model.setParameter(this.name, styleName === '' ? undefined : styleName, { undo: false });
-
-          if (portsToReset.length) {
-            for (const portName of portsToReset) {
-              this.parent.model.setParameter(portName, undefined, { undo: false });
-            }
-
-            //the ports have changed values so we need to re-render the ports
-            //this will reset any bound popouts, which causes some minor UX issues
-            this.parent._portsHash = undefined;
-            this.parent.renderGroups();
-          }
-
-          this.valueUpdated();
-        },
-        undo: () => {
-          const stylesModel = new StylesModel();
-          stylesModel.deleteStyle('text', styleName);
-          stylesModel.dispose();
-
-          this.parent.model.setParameter(this.name, prevValue === '' ? undefined : prevValue, { undo: false });
-
-          if (portsToReset.length) {
-            for (const portName of portsToReset) {
-              this.parent.model.setParameter(portName, portValuesToReset[portName], { undo: false });
-            }
-
-            //the ports have changed values so we need to re-render the ports
-            //this will reset any bound popouts, which causes some minor UX issues
-            this.parent._portsHash = undefined;
-            this.parent.renderGroups();
-          }
-
-          this.valueUpdated();
-        }
-      });
     };
 
     const div = document.createElement('div');
@@ -148,7 +68,7 @@ export class TextStyleType extends PickerTypeView {
       position: 'right',
       onClose: () => {
         if (this.pickerRoot) {
-          this.pickerRoot.unmount();
+          unmountReactRoot(this.pickerRoot);
           this.pickerRoot = null;
         }
       }
@@ -168,12 +88,6 @@ export class TextStyleType extends PickerTypeView {
 
   protected commit(value: string) {
     super.commit(value);
-    this.refreshChildPortViews();
-  }
-
-  private valueUpdated() {
-    this.isDefault = this.getCurrentValue().isDefault;
-    this.renderReact();
     this.refreshChildPortViews();
   }
 

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4e2aaf1d-d9fa-5952-85f5-09b0e92e767b",
+  "name": "History entry",
+  "path": "/Todo/History entry",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One line of a task’s history: when and what happened, and the note when there is one."
+}

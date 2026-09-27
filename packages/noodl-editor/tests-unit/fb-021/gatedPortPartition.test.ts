@@ -42,7 +42,7 @@ const AS_DRIVEN: PlannablePort[] = [
   port({ name: 'focus', displayName: 'Focus', typeName: 'signal', group: 'Focus', reason: 'type-mismatch' }),
   port({ name: 'width', displayName: 'Width', typeName: 'dimension', group: 'Dimensions', reason: 'gated' }),
   port({ name: 'height', displayName: 'Height', typeName: 'dimension', group: 'Dimensions', reason: 'gated' }),
-  port({ name: 'scrollToIndex.do', displayName: 'Scroll To Index - Do', typeName: 'signal', group: 'Scroll', reason: 'gated' })
+  port({ name: 'scrollToIndex.do', displayName: 'Scroll To Index', typeName: 'signal', group: 'Scroll', reason: 'gated' })
 ];
 
 /** What the component renders: one summary line per non-empty half, in render order. */

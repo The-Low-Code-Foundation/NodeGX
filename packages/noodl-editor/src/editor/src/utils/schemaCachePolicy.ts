@@ -125,7 +125,7 @@ export type UnavailableCause =
  *
  * Declared in this leaf module rather than in `schemahandler.ts` so a panel can listen for it
  * without importing the handler, its singletons and its IPC — the same split
- * `backendSurfaces.tsx` records for `BACKEND_SERVICES_PANEL_ID`.
+ * `backendServicesPanelId.ts` records for `BACKEND_SERVICES_PANEL_ID`.
  */
 export const SCHEMA_OUTCOME_CHANGED = 'SchemaHandler.outcomeChanged';
 

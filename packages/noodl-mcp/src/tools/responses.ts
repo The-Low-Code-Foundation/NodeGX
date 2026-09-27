@@ -190,6 +190,12 @@ export interface ProjectKitsReport {
   collisions?: Array<{ typeName: string; kitModule: string }>;
   /** Kits that threw at import or failed to register. Their nodes are absent. */
   failures?: Array<{ kitModule: string; message: string }>;
+  /**
+   * GAM-018 AC6 — kits whose script ran without throwing and registered no nodes. A kit whose
+   * guard returns early throws nothing, so it is absent from `failures` and reads as an empty
+   * `nodeTypes` above. The message is `kitDiagnostics`' `kit-registered-nothing`, not re-worded.
+   */
+  registeredNothing?: Array<{ kitModule: string; message: string }>;
   /** Malformed or unreadable `manifest.json` files, from the shared scanner. */
   warnings?: string[];
   /** 🔴 Set when extraction could not run. Not the same as "there are none". */

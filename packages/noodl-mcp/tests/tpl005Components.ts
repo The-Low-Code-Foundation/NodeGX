@@ -467,15 +467,17 @@ Outputs.left = coins.length;`;
  * what stops it jittering on a diagonal. It will not walk through a wall, and it
  * will not step onto a tile another enemy has already claimed this turn.
  *
- * 🔴 **It answers the WHOLE turn, and that is an ordering decision, not tidiness.**
- * This was three nodes — step, store, then a separate seam that read the stored
- * list back to see who reached you — and driving found the damage landing **one
- * move late**, twice, from two different intermediates. The cause is the same
- * both times: a gate whose `eval` comes from one node and whose `condition`
- * travels through another (a variable round-trip, or a reactive `Expression`)
- * can be evaluated before that value has arrived. With one node there is nothing
- * in between: the gate's condition is this script's own output and its `eval` is
- * this script's own `success`.
+ * **It answers the WHOLE turn in one node.** This was three nodes — step, store,
+ * then a separate seam that read the stored list back to see who reached you —
+ * and driving on 2026-09-11 found the damage landing **one move late**, twice,
+ * from two different intermediates. ⚠️ **The ordering cause this comment used to
+ * state was never measured, and re-measuring did not find it.** P88 GAM-004
+ * rebuilt both split shapes in the runtime (13 arms) and restored the Expression
+ * one on this page in a real browser with real keys (2026-09-14): both land the
+ * heart on time, beside a deliberately late arm that lands it a move late. Why
+ * the original drive read late is unrecovered (the split scripts are not in git).
+ * One node stays because it is simpler: the gate's condition is this script's own
+ * output and its `eval` is this script's own `success`.
  *
  * 🔴 **It may never END its turn on your tile** — the defect Richard found by
  * playing. An enemy that landed on you had `dx = dy = 0` the next turn, so it had
@@ -846,8 +848,10 @@ const MOVE: Tpl005Component = {
     logic('mvTy', EXPRESSION_NODE, 'The tile down', { expression: 'py + dy' }),
     logic('mvWall', FUNCTION_NODE, 'Is there a wall in the way?', { functionScript: IS_WALL_SCRIPT }),
     gate('mvGate', 'Can you walk there?'),
-    logic('mvSetX', SET_VARIABLE_NODE, 'You are here now — across', { name: VAR_X }),
-    logic('mvSetY', SET_VARIABLE_NODE, 'You are here now — down', { name: VAR_Y }),
+    // GAM-005: two or more copies share this Variable by design, so it says so and the door stays quiet.
+    { ...(logic('mvSetX', SET_VARIABLE_NODE, 'You are here now — across', { name: VAR_X }) as object), comment: 'Shared on purpose: the four Move buttons all move the one player.' },
+    // GAM-005: two or more copies share this Variable by design, so it says so and the door stays quiet.
+    { ...(logic('mvSetY', SET_VARIABLE_NODE, 'You are here now — down', { name: VAR_Y }) as object), comment: 'Shared on purpose: the four Move buttons all move the one player.' },
     outputs('mvOutputs', 'What happened', [
       ['moved', 'signal'],
       ['refused', 'signal']
@@ -1024,7 +1028,12 @@ const BOARD_STATES = {
   'value-hit-cls': 'game-board game-board-hit',
   // Out of hearts: it holds, rather than flashing, so the restart is legible.
   'value-dead-edge': LEGEND.costly,
-  'value-dead-cls': 'game-board game-board-dead'
+  'value-dead-cls': 'game-board game-board-dead',
+  // 🔴 FALSE, for the app people already have (2026-09-15). With transitions on, a token colour
+  // tweens through an invalid `#0aNaNNaNNaN` and never arrives (D49), so the edge never turns. P88
+  // GAM-006 fixed the runtime after v0.2.4, and this template installs from the community shelf into
+  // v0.2.4. Leave it false until every version the shelf reaches carries GAM-006.
+  useTransitions: false
 };
 
 const BANNER_STATES = {
@@ -1053,7 +1062,10 @@ const BANNER_STATES = {
   'value-won-title': 'Out, with all five behind you.',
   'value-won-line': 'That is the lot. Move to start another run.',
   'value-won-shown': true,
-  'value-won-tone': LEGEND.exit
+  'value-won-tone': LEGEND.exit,
+  // False for the same reason as `BOARD_STATES`: `tone` is a colour, and on v0.2.4's runtime it
+  // never arrives with transitions on (D49).
+  useTransitions: false
 };
 
 // ── Game/Hud and Game/Teach — the presentation, off the page ────────────────
@@ -1295,10 +1307,13 @@ const PLAY: Tpl005Component = {
 
     place('plTeach', TEACH_COMPONENT, 'How to play', 'plWrap'),
 
+    // P88 GAM-020: a sentence, so it takes the column's width and wraps. At contentSize it rendered
+    // 429px in a 358px box at 390×844 and held the whole page at 410px (minimum-layout-width).
     text('plFoot', 'Where to start editing', 'plWrap', 'The five rooms are one Static Data node — open it and add a sixth.', {
       ...T_META,
       color: 'var(--muted-foreground)',
-      sizeMode: 'contentSize'
+      sizeMode: 'contentHeight',
+      textAlignX: 'center'
     }),
 
     // ── The room, and the run ──────────────────────────────────────────────
@@ -1464,6 +1479,9 @@ const PLAY: Tpl005Component = {
     // only it and the keyboard ("Cannot convert object to primitive value"),
     // while registering cleanly in a project holding all 32. A template is a
     // two-module project, which is the arm where it does not work.
+    // ✅ GAM-018 (2026-09-16): that failure was the extractor's catch-all `Noodl`, not
+    // confetti. Confetti now registers alone and beside only the keyboard. Putting the
+    // node back is this template's call, and it has not been made.
     wire('plWinGate', 'ontrue', 'plBannerStates', 'to-won'),
     // Any other room: on to the next one.
     wire('plWinGate', 'onfalse', 'plLevel', 'increase'),
@@ -1477,10 +1495,10 @@ const PLAY: Tpl005Component = {
     wire('plVarY', 'value', 'plStepEnemies', 'in-py'),
     wire('plStepEnemies', 'out-enemies', 'plSetEnemies', 'value'),
     wire('plStepEnemies', 'success', 'plSetEnemies', 'do'),
-    // 🔴 ONE node answers the whole turn, so the gate's condition and its eval
-    // come from the SAME script run with nothing in between. Driving found the
-    // damage landing a move late twice — once through a reactive `Expression`,
-    // once through a variable round-trip — and both intermediates are gone.
+    // ONE node answers the whole turn, so the gate's condition and its eval come
+    // from the SAME script run with nothing in between. A 2026-09-11 drive found
+    // the damage a move late through two intermediates; P88 GAM-004 could not
+    // reproduce either, in the runtime or in a browser (see the script's header).
     wire('plStepEnemies', 'out-hurt', 'plHitGate', 'condition'),
     wire('plStepEnemies', 'success', 'plHitGate', 'eval'),
     wire('plHitGate', 'ontrue', 'plHearts', 'decrease'),
@@ -1534,5 +1552,8 @@ export const TPL005_COMPONENTS: ReadonlyArray<Tpl005Component> = [CELL, ROW, MOV
  * throws on registration takes only itself down — the control pair proved the
  * keyboard survives it — but a node that never reaches the catalog is a node the
  * door refuses to author, so the template cannot use it.
+ *
+ * ✅ GAM-018 (2026-09-16) fixed the cause in the extractor: confetti registers beside only the
+ * keyboard now, and in a browser it always did. Whether the win takes it back is not decided.
  */
 export const REQUIRED_MODULES = ['keyboard-shortcuts'] as const;

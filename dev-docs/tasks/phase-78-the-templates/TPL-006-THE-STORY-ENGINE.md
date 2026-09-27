@@ -8,10 +8,12 @@
 > the dungeon game you made that you can edit the static JSON file to create new levels. that's the
 > ultimate 'ok Claude built you the foundation, now you can scale it up for free' type message"*
 
-**Status: 🟢 BUILT, GATED AND DRIVEN 2026-09-12.** `templates/story-engine/` — 9 components, 88
+**Status: 🟢 BUILT, GATED, DRIVEN AND — 2026-09-12 — PUBLISHED.**
+**LIVE: <https://nodegx.io/templates/story-engine/>**, driven against the public URL at 16/16. `templates/story-engine/` — 9 components, 88
 nodes, 84 connections, **zero `noodl_modules`**, no backend, 0 validator errors, 62/62 on its gate,
-and driven in a real browser with 0 console errors. **AC1–AC6 green. AC7 (the demo page) is blocked
-and the blocker is the same D48/D44 pair that blocked TPL-005's. AC8 is Richard's.**
+and driven in a real browser with 0 console errors. **AC1–AC6 green. AC7's build half is green too
+as of 09-12 (§9) — the shipped deploy carries every wire and the deployed folder plays; what is left
+of it is the hosting, which is Richard's. AC8 is with Richard.**
 
 🔴 **The drive found the template's own headline defect in the product, not in the template**: a
 `States` node with `useTransitions` on — the DEFAULT — never publishes a colour. Filed as **D49**,
@@ -227,17 +229,16 @@ sufficient**, and the §7 record says which is which.
     different four-passage story and **every component's graph is diffed**: exactly one component
     differs, and inside it exactly one parameter of one node. *A person ships a different product by
     editing one JSON array.*
-- 🔴 **AC7 — a demo page on nodegx.io. BLOCKED, and the blocker is inherited, not new.** The same
-  **D44/D48** pair that blocked TPL-005's: the devtool deploy path drops every wire into a dynamic
-  port, and the shipped `nodegx deploy` CLI's health filter is inert. **This template is more
-  exposed than TPL-005**, because its engine is `Expression`, `Set Variable`, `String Format`,
-  `States` and — the one nothing has measured — a `For Each`'s `itemOutput-*` / `itemOutputSignal-*`
-  ports, all of which are minted in a `setup()` guarded on the editor connection.
-  ⬜ **Do not publish a build whose own census says it dropped wires.** Routes unchanged: Richard
-  deploys from the editor seat, or D44 lands first.
-- ⬜ **AC8 — Richard's look.** Outstanding on TPL-003, TPL-004 and TPL-005 too; not a blocker on the
-  rest. Four screenshots at 1100×1400 were taken this session and one of them changed the build —
-  see §7.
+- 🟢 **AC7 — a demo page on nodegx.io. LIVE at <https://nodegx.io/templates/story-engine/>**,
+  published 2026-09-12 on Richard's ask (*"publish it to the template path on the nodegx homepage
+  like the other templates"*), beside `pixel-dungeon` and `business-landing-page`. Built by the
+  **shipped** engine on the **production** viewer with **no `--allow-development-engine`**, and
+  **driven against the public URL — 16/16 clauses, 0 console errors.** §9a/§9e.
+- 🟡 **AC8 — Richard's look. SENT 2026-09-12, and from a better instrument than last time.** Four
+  screenshots at 1100×1400 were taken on 09-12 and one of them changed the build (see §7), but they
+  came from `render-from-disk`, which serves **0 shipped default tokens** — the same path whose
+  flatness TPL-004 §10 warns is an artefact of the instrument, not the look. The **four** sent to him
+  are of the **deployed** artefact, which carries the real stylesheet. Still ⬜ until he answers.
 
 ## 6. Rulings, and the one that was disproved
 
@@ -258,6 +259,13 @@ sample. Full row, the table and what it predicts about TPL-005 and TPL-004:
 
 ✅ **TPL-006 ships `useTransitions: false` on both its States nodes**, the reason is in the
 parameter, and the gate pins it so a later session cannot undo it by tidying.
+
+> **2026-09-14 — the workaround is removed.** [P88 GAM-006](../phase-88-the-defects-the-games-found/GAM-006-A-COLOUR-SWITCHED-BY-STATES-REACHES-THE-SCREEN.md)
+> fixed the runtime: a token colour tweened through `#0aNaNNaNNaN` and never arrived. Numbers were never broken; AC1
+> measured them gliding. Its §8 session 5 drove this template's `Story/Passage` with `useTransitions: true` in a
+> deployed page. The eyebrow colour passed through 19 distinct colours to `--primary`, and the rule through 18. On the
+> old runtime both held their first colour. Both States nodes are back at the default and the pinning gate is gone.
+> ⚠️ The nodegx.io demo was built before this, with the pin and the old runtime. It is unaffected until it is rebuilt.
 
 ### 🙋 Still Richard's, and still open
 
@@ -351,3 +359,178 @@ Recorded so the next reader does not re-derive the comparison:
   *behaviour*, so it needs a mini-DSL interpreter in the graph. That either looks brilliant or
   collapses into one `Function` node with a switch statement in it, and the downside is a demo that
   argues *against* the product.
+## 9. AC7 re-measured — the deploy, and a drive of the thing a person actually deploys
+
+**2026-09-12.** The handoff named AC7 blocked by D44/D48 and said this template was *more exposed
+than TPL-005* because of a `For Each`'s `itemOutput-*` ports, *"the one nothing has measured"*. It is
+measured now, and 🔴 **the prediction was right about the ports and wrong about who has the defect.**
+
+### 9a. Two deploy paths, and they disagree by exactly three wires
+
+Both run on `templates/story-engine/` at HEAD. The devtool needs `packages/noodl-editor` as its
+working directory — `getAppPath()` resolves to `process.cwd()`, so from anywhere else it throws
+`ENOENT … /src/external/deploy/index.json` and that is not a fact about the project.
+
+| path | authored | deployed | dropped |
+|---|---|---|---|
+| **`nodegx deploy`** — shipped engine, `packages/noodl-preview/dist/nodegx-deploy.cjs` | 84 | **84** | **0** |
+| `deploy-from-disk` devtool | 84 | 81 | 3 |
+| devtool, `--sabotage` control | 85 | 81 | 4 (the planted one + the same 3) |
+
+All nine components were diffed connection-by-connection in both directions, not totalled —
+[`scripts/devtools/deploy-connection-diff.js`](../../../scripts/devtools/deploy-connection-diff.js),
+committed because the census counts drops and does not name them, and that gap is the whole cost of
+D52: the
+shipped arm is `missing 0` on every one of them, and the devtool arm is `missing 0` on eight and
+`missing 3` on `/Pages/Read`. The three are the `For Each`'s `itemOutput-goto`, `itemOutput-gives`
+and `itemOutputSignal-picked` — **the entire click path of a choice**.
+
+🔴 **The `--sabotage` arm is what makes the clean arm's number mean anything.** A planted wire into a
+port that does not exist was dropped (`/Story/Source` 8 → 7), so the health filter was alive when it
+also dropped the three. Without that arm, "3 dropped" and "the filter is confused" are the same
+reading. Mechanism and the two gates behind it: **[D52](DEFECTS-THE-TEMPLATES-FOUND.md)**.
+
+### 9b. The deployed folder was driven, and it plays
+
+`scripts/devtools/drive-deployed.js` serving the **shipped engine's output** — not
+`render-from-disk`'s reconstruction — at 1100×1400, clicks dispatched as real CDP mouse events at
+each element's own centre after `elementFromPoint` confirmed nothing was on top of it:
+
+| step | read off the page |
+|---|---|
+| first load | `The lamp-room`, eyebrow `YOU ARE HERE`, 3 choices, carry *"Nothing yet."* |
+| **`requires` ABSENT** — gallery carrying nothing | 2 choices: `Light the lamp`, `Go down to the rocks` |
+| the `gives` choice | carry reads **`what Aldis wrote`**, and the empty-state line is gone |
+| **`requires` PRESENT** — same passage, carrying it | the same 2 **plus** `Light the oil lamp first, then take the north stair` |
+| the gated ending | `The north stair`, eyebrow **`AN ENDING`**, **0** choices, the note renders |
+| restart | back at `The lamp-room`, 3 choices, carry back to *"Nothing yet."* |
+| `/remix` | the box holds **3,939** characters, opening `[\n  {\n    "id": "start"` |
+| — | **0 console errors, 0 network errors** |
+
+🔴 **Both halves of the `requires` pair were read, in the same session, with the `gives` choice as
+the only variable** — the second arm reached by a full page navigation, so the app-wide `Variable`s
+reset and the run started honest. **Present-after alone would have graded nothing.**
+
+⚠️ **The choice rows are `Group`s with `cssClassName: "story-choice pressable"`, not `<button>`s.**
+A first drive selecting `button` found only *Start again* and *Write your own story*, reported
+`NOT FOUND` six times, and every screen read identically — **which looks exactly like a template
+whose clicks are dead.** The artefact was fine and the selector was wrong. *A drive that finds
+nothing has two explanations and the instrument is the likelier one.*
+
+### 9b-i. 🔴 The negative control, which is what makes 16/16 mean anything
+
+The drive is committed as [`scripts/devtools/drive-tpl006-story.js`](../../../scripts/devtools/drive-tpl006-story.js)
+and it is a **gate**: 16 clauses, exit 1 if any fails. Run against the **devtool's** build — the same
+project, the same script, the only difference being the three missing `For Each` item wires — it
+scores **9/16 and exits 1**:
+
+| | shipped engine's build | devtool's build |
+|---|---|---|
+| a choice moves passages | ✅ | ❌ never leaves the first passage |
+| a `gives` choice fills the inventory | ✅ | ❌ carries nothing, ever |
+| the `requires` choice appears | ✅ | ❌ never |
+| any ending is reachable | ✅ | ❌ none |
+| **console errors** | **0** | **0** |
+
+🔴 **Three dropped wires render perfectly and say nothing.** Not one console error, not one network
+error, every passage of prose on screen, every button present — and the story cannot be played.
+This is the defect class TPL-004's AC8 note names and it is the argument for driving an artefact
+rather than reading it.
+
+🔴 **And the control caught a hole in the drive's own ARM A.** *"The `requires` choice is ABSENT
+carrying nothing"* **passed on the broken build** — because the reader never reached the gallery, so
+the choice was absent for the wrong reason. An absence is evidence only beside a signal known to
+fire, and here that signal is ARM B. The pair is the reading; ARM A alone is not. Recorded in the
+script's own header so the next reader cannot take one half of it.
+
+### 9c. What this does and does not settle
+
+- ✅ **The three "dropped" wires are alive in the deployed artefact.** They are the three that carry
+  a clicked choice into the engine, and the story could not have been played without all three.
+- ✅ **The artefact a person deploys is complete** — 84/84, diffed per component.
+- 🔴 **It is NOT settled that all 84 are healthy.** The shipped filter is inert (**D48**): it keeps
+  every wire whatever its state, so `84 → 84` means *nothing was dropped*, never *nothing is broken*.
+  The browser drive is the other half, and neither reading is sufficient alone.
+- 🟡 **The zip half of "opened from a zip on a second machine" is done; the second machine is not.**
+  `templates/story-engine` zips to **31 KB / 30 files**, unpacks **byte-identical** (`diff -r` clean),
+  carries **no absolute path** and no `noodl_modules`, and the unpacked copy — deployed from a
+  directory outside the repo entirely — is **84/84 connections and 16/16 clauses**. What that does
+  not cover is another machine's Node, another OS, and a checkout that is not this one; it removes
+  the project directory as a suspect, not the environment.
+- 🟢 **The production viewer is built and the engine ACCEPTS it — §9d.** The publish itself is
+  outward-facing and Richard's; he ruled *build it, stop short of publishing*.
+### 9d. The production viewer, and a publishable bundle that was not published
+
+**Richard's ruling this session: build the production viewer, stop short of publishing.** Done, and
+it retires the last technical unknown on AC7's build half — **nobody had ever deployed this template
+on a production runtime.**
+
+`npm run build:editor:_viewer`, exit 0:
+
+| | development build | production build |
+|---|---|---|
+| `noodl.deploy.js` | 14 MB, **110,799 lines** | **1.5 MB, 1 line** |
+| inline source map | 9.43 MB, 66% of the file | — |
+| `.LICENSE.txt` sibling | absent | **present** |
+| the shipped engine's verdict | 🔴 **REFUSED by name** | ✅ **`ok: true`, no override** |
+
+Then the same two readings, on the production runtime and with **no `--allow-development-engine`**:
+**84 of 84 connections**, and the drive gate **16/16 with 0 console errors**. The whole deployable
+site is **1.7 MB in 8 files**. The screenshot is pixel-identical to the development-viewer one, so
+minification cost the look nothing.
+
+🔴 **EXP-017's refusal was never a blocker — it is the guard doing its job**, and the only reason
+this session's earlier deploys needed `--allow-development-engine` is that a census does not care
+what it measures and a publish does. **Never carry that flag into a publish**: it is what puts
+9.43 MB of base64 viewer source on a host.
+
+⚠️ **THE BUILD OVERWROTE THIS CHECKOUT'S VIEWERS, AND THE CHECKOUT IS SHARED.**
+`build-viewer.ts` writes `packages/noodl-editor/src/external/`, and it rewrote **all three** —
+`deploy/`, `viewer/` and `ssr/`. They are gitignored, so **`git status` says nothing about it**. The
+editor's own preview now runs a minified viewer, which means **no readable stack traces in the
+renderer console** — worth knowing before anyone reads a console error off a drive and believes its
+frames. ✅ **`npm run dev` restores a development build**: `scripts/start.ts:202` runs the viewer's
+`start` (webpack watch) rather than `build` unless `--build-viewer` is passed.
+
+⬜ **The bundle itself is not committed and not published.** It is gitignored build output and a
+1.7 MB artefact; what is durable is the expensive half — the viewer build now in the tree — and the
+two commands:
+
+    node packages/noodl-preview/dist/nodegx-deploy.cjs templates/story-engine <out>
+    node scripts/devtools/drive-tpl006-story.js <out>
+### 9e. The publish, and the harness defect that would have graded it wrong
+
+**2026-09-12.** `site/templates/<slug>/` in `~/vscode_projects/nodegx-web`, deployed with
+`ops/deploy.sh 49.12.102.195`. Both neighbours on that box (`nexus.digitalbricks.io`,
+`digitalbricks.io`) answered **200 before and after**, and `site/index.html` was **byte-identical**
+under the deploy's own `build.py`, so the homepage did not move.
+
+🔴 **The base URL is not optional.** The other two demos are built with
+`--base-url /templates/<slug>/`, which rewrites `<base href>`, `Noodl.Env['BaseUrl']` and every
+script src. The root-relative build driven in §9b would have asked for `/index-<hash>.js` and
+**rendered blank** under the subpath. Rebuilt with the flag; `<base href>` verified in the artefact
+before pushing.
+
+🔴 **AND THE DRIVE HARNESS PUBLISHED THE HOMEPAGE AS THE TEMPLATE.** `serveFolder` fell back to the
+**root** `index.html` for any **directory** request, so serving `site/` and asking for
+`/templates/story-engine/` returned **nodegx.io's homepage with a 200**. The gate scored **5/16** —
+and ⚠️ **every one of the five that passed was an ABSENCE clause**, each true of a page with no
+story on it: *"the `requires` choice is ABSENT"*, *"the empty-state line is gone"*, *"the ending
+offers no choices"*, and both error counts. **A blank page passes every absence a drive can make.**
+Fixed in `drive-deployed.js` (a directory serves its own index first, root fallback kept after) and
+committed.
+
+✅ **The reading that settles it is against the PUBLIC URL, not a local copy:**
+`drive-tpl006-story.js https://nodegx.io --path /templates/story-engine/` → **16/16, 0 console
+errors, 0 network errors**. `withDeployedSite` grew an `origin` option for exactly this — a local
+folder that plays is not evidence the deploy landed; the host's own rewrites, headers and cert are.
+
+⚠️ **`site/templates/` is UNTRACKED in `nodegx-web`, and was before this template** — all three
+demos live only on the box and in that working copy. They regenerate from this repo in one command,
+so nothing is lost, but **`git status` in the site repo does not describe what is published.** Left
+as found: committing three deploy folders is a decision, not a tidy-up.
+
+🙋 **The category slug is still unruled and this publish did not need it.** `interactive-fiction` is
+none of the six (`starter`, `data-app`, `dashboard`, `site`, `form`, `integration`). The demo page
+is a static path on the marketing site; **the in-editor shelf is the thing T3 still blocks**, for
+this template and `pixel-game` both.

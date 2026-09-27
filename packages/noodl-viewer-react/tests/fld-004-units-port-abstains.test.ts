@@ -146,14 +146,32 @@ describe('FLD-004 (b) — a units port abstains rather than throwing the author�
     expect(node.errors.map((e) => e.code)).toEqual(['dimensions/not-a-dimension']);
   });
 
-  it('keeps it for NaN and Infinity, which concatenate into CSS just as happily and just as uselessly', () => {
+  it('keeps it for Infinity, which concatenates into CSS just as happily and just as uselessly', () => {
+    const node = makeInstance();
+    const set = setterFor('height');
+    set.call(node, { value: 300, unit: 'px' });
+    set.call(node, { value: Infinity, unit: 'px' });
+    expect(node.props.height).toBe('300px');
+    expect(node.errors.map((e) => e.code)).toEqual(['dimensions/not-a-dimension']);
+  });
+
+  it('🔴 CLEARS on NaN, silently, bare or merged — GAM-003, R3 (this row used to keep it)', () => {
+    // Richard, 2026-09-14 (P88 GAM-003 §5): a NaN magnitude is empty, not a mistake. It is what an
+    // Expression computed over an input that never arrived gives, and it reaches this setter bare
+    // (`setInputValue` does not merge a NaN into the unit) or merged (the first update's queue does).
+    // The trade was accepted: a real `0/0` also goes quiet here.
     const node = makeInstance();
     const set = setterFor('height');
     set.call(node, { value: 300, unit: 'px' });
     set.call(node, { value: NaN, unit: 'px' });
-    expect(node.props.height).toBe('300px');
-    set.call(node, { value: Infinity, unit: 'px' });
-    expect(node.props.height).toBe('300px');
+    expect('height' in node.props).toBe(false);
+    set.call(node, { value: 300, unit: 'px' });
+    set.call(node, NaN);
+    expect('height' in node.props).toBe(false);
+    set.call(node, { value: 300, unit: 'px' });
+    set.call(node, { value: null, unit: 'px' });
+    expect('height' in node.props).toBe(false);
+    expect(node.errors).toEqual([]);
   });
 
   it('still accepts a NUMERIC string — the property panel and older projects both write them', () => {

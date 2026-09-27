@@ -108,8 +108,10 @@ export function formatStyleFindings(result: StyleAnalysisResult): string[] {
   for (const vc of [...result.variantCandidates].sort((a, b) => b.overrideCount - a.overrideCount)) {
     const short = vc.nodeType.split('.').pop();
     lines.push(
-      `${short} "${vc.nodeLabel}" carries ${vc.overrideCount} raw style overrides — prefer an element variant ` +
-        `(see ELEMENT VARIANTS in the style vocabulary) or token references for these.`
+      // P94 STY-002: the vocabulary's section is SHIPPED LOOKS now, and a pointer to a heading that
+      // no longer exists is worse than no pointer — it tells the reader to go and find nothing.
+      `${short} "${vc.nodeLabel}" carries ${vc.overrideCount} raw style overrides — prefer a Look ` +
+        `(see SHIPPED LOOKS in the style vocabulary) or token references for these.`
     );
   }
 

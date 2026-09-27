@@ -27,13 +27,20 @@
  * @module nodegx-backend/roles/RoleStore
  */
 
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 
 /** A `_Role` row. Stored fields stay open; the two anything reads do not. */
 export interface RoleRecord {
   objectId: string;
   name: string;
+  /** BMG-005: what the role is for, in the operator's words. Absent when never written. */
+  description?: string;
+  /** When the role was made, as the store answered it. */
+  createdAt?: string;
 }
+
+/** The longest description the Roles page may store — a sentence, not a document. */
+export const ROLE_DESCRIPTION_MAX = 280;
 
 /**
  * What a role name may contain.
@@ -62,12 +69,16 @@ export function asRole(row: Record<string, unknown>): RoleRecord {
   if (typeof row.objectId !== 'string' || typeof row.name !== 'string') {
     throw new Error(`Malformed _Role row: ${JSON.stringify(row)}`);
   }
-  return { objectId: row.objectId, name: row.name };
+  const role: RoleRecord = { objectId: row.objectId, name: row.name };
+  if (typeof row.description === 'string' && row.description) role.description = row.description;
+  const at = row.createdAt instanceof Date ? row.createdAt.toISOString() : row.createdAt;
+  if (typeof at === 'string') role.createdAt = at;
+  return role;
 }
 
 /** The role table and its membership junction. One reader, two callers. */
 export class RoleStore {
-  constructor(private readonly facade: AdapterFacade) {}
+  constructor(private readonly facade: IStorageFacade) {}
 
   /** The role with this name, or null. Never throws for "no such role". */
   async find(name: string): Promise<RoleRecord | null> {
@@ -75,9 +86,9 @@ export class RoleStore {
     return results.length === 0 ? null : asRole(results[0]);
   }
 
-  /** Every role, in storage order. */
+  /** Every role, in storage order. PRD-001 §3.3: a registry authorization is computed from. */
   async list(): Promise<RoleRecord[]> {
-    const { results } = await this.facade.rawQuery('_Role', {});
+    const { results } = await this.facade.rawQueryAll('_Role', {});
     return results.map(asRole);
   }
 
@@ -85,9 +96,14 @@ export class RoleStore {
    * Create a role. The caller checks for an existing one first when a duplicate
    * is an error for it — this does not, because `ensure` needs the same write.
    */
-  async create(name: string): Promise<RoleRecord> {
-    const row = await this.facade.rawCreate('_Role', { name });
+  async create(name: string, description?: string): Promise<RoleRecord> {
+    const row = await this.facade.rawCreate('_Role', description ? { name, description } : { name });
     return asRole(row);
+  }
+
+  /** Say what a role is for. An empty string clears it (stored as null, read back absent). */
+  async describe(role: RoleRecord, description: string): Promise<void> {
+    await this.facade.rawSave('_Role', role.objectId, { description: description || null });
   }
 
   /** The role, creating it if it is not there. `created` says which happened. */

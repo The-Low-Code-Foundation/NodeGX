@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "902da160-9ba4-533c-8195-660745360fd7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "MoveblockIn",
+      "fromProperty": "blockId",
+      "toId": "MoveblockGuard",
+      "toProperty": "in-blockId"
+    },
+    {
+      "fromId": "MoveblockIn",
+      "fromProperty": "date",
+      "toId": "MoveblockGuard",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "MoveblockIn",
+      "fromProperty": "from",
+      "toId": "MoveblockGuard",
+      "toProperty": "in-from"
+    },
+    {
+      "fromId": "MoveblockIn",
+      "fromProperty": "do",
+      "toId": "MoveblockGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "MoveblockGuard",
+      "fromProperty": "out-date",
+      "toId": "MoveblockWrite",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "MoveblockIn",
+      "fromProperty": "blockId",
+      "toId": "MoveblockWrite",
+      "toProperty": "in-modelId"
+    },
+    {
+      "fromId": "MoveblockGuard",
+      "fromProperty": "out-go",
+      "toId": "MoveblockWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "MoveblockWrite",
+      "fromProperty": "out-done",
+      "toId": "MoveblockOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "MoveblockWrite",
+      "fromProperty": "out-failure",
+      "toId": "MoveblockProblem",
+      "toProperty": "do"
+    }
+  ]
+}

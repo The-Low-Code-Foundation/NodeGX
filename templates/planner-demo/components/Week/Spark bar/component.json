@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b23e2cb5-de10-5322-812e-c216d3ce4b89",
+  "name": "Spark bar",
+  "path": "/Week/Spark bar",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One month’s bar in a project’s sparkline."
+}

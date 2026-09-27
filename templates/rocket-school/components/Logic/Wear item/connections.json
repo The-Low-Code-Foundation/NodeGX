@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "889a0b2b-5dd6-5b32-8f7d-d048024c7b47",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "wearitemIn",
+      "fromProperty": "app",
+      "toId": "wearitemFn",
+      "toProperty": "in-app"
+    },
+    {
+      "fromId": "wearitemIn",
+      "fromProperty": "profileId",
+      "toId": "wearitemFn",
+      "toProperty": "in-profileId"
+    },
+    {
+      "fromId": "wearitemIn",
+      "fromProperty": "itemId",
+      "toId": "wearitemFn",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "wearitemIn",
+      "fromProperty": "shelf",
+      "toId": "wearitemFn",
+      "toProperty": "in-shelf"
+    },
+    {
+      "fromId": "wearitemIn",
+      "fromProperty": "run",
+      "toId": "wearitemFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "wearitemFn",
+      "fromProperty": "out-app",
+      "toId": "wearitemOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "wearitemFn",
+      "fromProperty": "out-worn",
+      "toId": "wearitemOut",
+      "toProperty": "worn"
+    },
+    {
+      "fromId": "wearitemFn",
+      "fromProperty": "out-changed",
+      "toId": "wearitemOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "wearitemFn",
+      "fromProperty": "success",
+      "toId": "wearitemOut",
+      "toProperty": "done"
+    }
+  ]
+}

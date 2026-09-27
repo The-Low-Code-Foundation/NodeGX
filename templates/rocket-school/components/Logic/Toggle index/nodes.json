@@ -1,0 +1,110 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "10e0af89-3205-51b0-86ed-27c38dbdb1de",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "toggleindexIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "run",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "list",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "index",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "max",
+          "plug": "output",
+          "type": "number"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "toggleindexFn",
+      "type": "JavaScriptFunction",
+      "label": "Toggle index",
+      "parameters": {
+        "functionScript": "\nvar list = (Inputs.list || []).slice();\nvar index = Number(Inputs.index);\nvar max = Number(Inputs.max) || 99;\nvar at = list.indexOf(index);\nif (at >= 0) list.splice(at, 1);\nelse if (list.length < max) list.push(index);\nOutputs.list = list;\nOutputs.count = list.length;\n",
+        "runOnChange-in-list": false,
+        "runOnChange-in-index": false,
+        "runOnChange-in-max": false
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-list",
+          "displayName": "list",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-index",
+          "displayName": "index",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-max",
+          "displayName": "max",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-list",
+          "displayName": "list",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "toggleindexOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "list",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

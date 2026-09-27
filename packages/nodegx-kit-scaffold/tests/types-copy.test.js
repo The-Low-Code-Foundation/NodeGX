@@ -135,3 +135,29 @@ describe('the cashflow kit — the copy this phase already owes', () => {
     expect(typeof status.current).toBe('boolean');
   });
 });
+
+describe('GAM-015 — the kits this repository ships carry the published types', () => {
+  // 🔴 All seven checked-in copies were stale when GAM-015 read them (2026-09-17). Nothing failed,
+  // because `typesCopyStatus` was only ever asked about a copy outside the repository. The copies
+  // under `library/modules` are what an author opens, so a type documented after they were written
+  // (a size prop arriving as "40px", for one) never reached them.
+  //
+  // ⚠️ `templates/rocket-school/noodl_modules` is left out on purpose: a peer owns that tree, and its
+  // two copies were stale at write. `templates/pixel-game`'s one copy was refreshed and is graded.
+  const repo = path.join(__dirname, '..', '..', '..');
+  const copies = [
+    ...fs
+      .readdirSync(path.join(repo, 'library', 'modules'))
+      .map((kit) => path.join('library', 'modules', kit, 'project', 'noodl_modules', kit, KIT_TYPES_RELPATH)),
+    path.join('templates', 'pixel-game', 'noodl_modules', 'keyboard-shortcuts', KIT_TYPES_RELPATH)
+  ].filter((rel) => fs.existsSync(path.join(repo, rel)));
+
+  test('there are copies to grade (known-firing: the four library kits and pixel-game)', () => {
+    expect(copies.length).toBe(5);
+  });
+
+  test.each(copies)('%s is current', (rel) => {
+    const status = typesCopyStatus(fs.readFileSync(path.join(repo, rel), 'utf8'));
+    expect({ rel, current: status.current, reason: status.reason }).toEqual({ rel, current: true, reason: undefined });
+  });
+});

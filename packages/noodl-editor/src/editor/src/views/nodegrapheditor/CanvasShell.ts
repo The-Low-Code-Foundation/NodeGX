@@ -38,6 +38,15 @@ export interface CanvasShell {
   componentTrailRoot: HTMLDivElement;
   /** PAR-003: HUD overlays (AI pill, zoom cluster) over the canvas. */
   canvasHudRoot: HTMLDivElement;
+  /**
+   * TVW-007 AC2b: the hover surface an instance node carries — its path, its count and `Edit ›`.
+   *
+   * Its own layer for the reason `recordingOverlayLayer` has one (a named slot holds ONE root),
+   * and OUTSIDE `domLayer` for a second reason: that layer carries the pan/zoom transform, so a
+   * card mounted there would shrink with the graph. This one is screen-space, which is what lets
+   * the path stay legible at the zooms where the painted count is hidden.
+   */
+  instanceHoverRoot: HTMLDivElement;
 }
 
 function div(style?: Partial<CSSStyleDeclaration>, id?: string, className?: string): HTMLDivElement {
@@ -140,6 +149,17 @@ export const RECORDING_OVERLAY_Z = '6';
  */
 export const HIGHLIGHT_OVERLAY_Z = '7';
 
+/**
+ * TVW-007: the instance hover card sits one step above the highlight overlay.
+ *
+ * Same reasoning as its three neighbours — a positive `z-index` makes the wrapper a stacking
+ * context so the layer competes as one number — and the same ceiling, below `.popup-layer`'s 10.
+ * Above 7 because the card is the only one of these surfaces the user is pointing AT: it is
+ * summoned by the pointer, it carries a button under it, and a teaching highlight or an
+ * execution pin bar drawn over it would take a press the user aimed at the door.
+ */
+export const INSTANCE_HOVER_Z = '8';
+
 export function createCanvasShell(): CanvasShell {
   const root = div({ width: '100%', height: '100%' }, undefined, 'nodegrapgeditor-bg nodegrapheditor-canvas');
 
@@ -175,6 +195,7 @@ export function createCanvasShell(): CanvasShell {
   const domLayer = div(undefined, 'nodegraph-dom-layer');
   const domLayerWrapper = clippingWrapper(domLayer, 'none');
 
+  const instanceHoverRoot = div(undefined, undefined, 'instance-hover-root');
   const componentTrailRoot = div(undefined, undefined, 'nodegraph-component-trail-root');
   const canvasHudRoot = div(undefined, undefined, 'canvas-hud-root');
   const helpCenterLayer = div(undefined, undefined, 'help-center-layer');
@@ -189,6 +210,7 @@ export function createCanvasShell(): CanvasShell {
     clippingWrapper(recordingOverlayLayer, 'none', RECORDING_OVERLAY_Z),
     clippingWrapper(commentLayerFg, 'none'),
     domLayerWrapper,
+    clippingWrapper(instanceHoverRoot, 'none', INSTANCE_HOVER_Z),
     canvasHudRoot,
     componentTrailRoot,
     helpCenterLayer
@@ -206,6 +228,7 @@ export function createCanvasShell(): CanvasShell {
     recordingOverlayLayer,
     domLayer,
     componentTrailRoot,
-    canvasHudRoot
+    canvasHudRoot,
+    instanceHoverRoot
   };
 }

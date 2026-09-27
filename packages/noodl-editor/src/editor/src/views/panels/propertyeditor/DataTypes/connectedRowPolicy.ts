@@ -51,9 +51,10 @@ export type ConnectedRowPolicy =
   | { kind: 'deferred'; reason: string };
 
 /**
- * Keyed by the class names the `Ports.ts` dispatch chain returns. The test parses that
- * chain out of the real file rather than taking a list from here, so this table is graded
- * against the code that actually decides which row a port gets.
+ * Keyed by the class names `Ports.WIDGET_CLASSES` maps the dispatch to (CHR-007). The test
+ * reads that map out of the real file, and checks it against `WIDGET_RULES`, rather than taking
+ * a list from here — so this table is graded against the code that actually decides which row a
+ * port gets.
  */
 export const CONNECTED_ROW_POLICY: Record<string, ConnectedRowPolicy> = {
   // ── chips ────────────────────────────────────────────────────────────────
@@ -83,20 +84,27 @@ export const CONNECTED_ROW_POLICY: Record<string, ConnectedRowPolicy> = {
   // buttons: a connected checkbox stayed clickable, which is the filed bug with a
   // different control.
   BooleanType: { kind: 'chip' },
+  // Was an exception: one icon strip for several ports, so no single connection to name. CHR-009 slice 5
+  // drew one labelled row per port, which removed the reason, and each row now chips on its own.
+  AlignToolsType: { kind: 'chip' },
+  // Was an exception: the box editor wrote four sides from one control. CHR-009 slice 4 made each expanded
+  // field one port, so a wired edge chips on its own and a wired edge forces its side out of the `↕`/`↔` pairs.
+  MarginPaddingType: { kind: 'chip' },
 
   // ── structural exceptions ────────────────────────────────────────────────
-  AlignToolsType: {
+  // CHR-007: dispatched all along, and invisible to the old chain parse — both are early
+  // `editorType` returns the regex never matched.
+  LogicBuilderWorkspaceType: {
     kind: 'exception',
     reason:
-      'One row, several ports — it writes `this.ports[comp].name`, not `this.name`. ' +
-      'A single chip cannot name the connection because there is no single port; the row ' +
-      'would need per-port chrome, which is a different control, not a chip.'
+      'Its port (`Logic Builder.workspace`) is declared `allowEditOnly`, so no connection can ' +
+      'drive it: there is no connected state for a chip to show. The row opens the workspace editor.'
   },
-  MarginPaddingType: {
+  LogicBuilderHiddenType: {
     kind: 'exception',
     reason:
-      'The box-model editor edits four sides as four ports in one control. Same reason as ' +
-      'AlignToolsType: no single port for a chip to be about. FB-016 owns this control.'
+      'Renders nothing (`display: none`) for an internal, `allowEditOnly` parameter ' +
+      '(`Logic Builder.generatedCode`) — there is no row to put a chip on and no wire that can reach it.'
   },
 
   // ── deferred: one port, bespoke editor ───────────────────────────────────

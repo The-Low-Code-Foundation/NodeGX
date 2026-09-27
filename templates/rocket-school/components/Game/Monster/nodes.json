@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "613f7dd0-32cd-5343-8949-1daf444fa9c8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "zmIn",
+      "type": "Component Inputs",
+      "label": "Which monster, doing what",
+      "ports": [
+        {
+          "name": "monsterClass",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 290,
+      "y": 40
+    },
+    {
+      "id": "zmBody",
+      "type": "Group",
+      "label": "The monster",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 65,
+          "unit": "px"
+        },
+        "height": {
+          "value": 65,
+          "unit": "px"
+        },
+        "cssClassName": "rkt-monster rkt-monster-horns"
+      },
+      "x": 40,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "zmBody"
+  ]
+}

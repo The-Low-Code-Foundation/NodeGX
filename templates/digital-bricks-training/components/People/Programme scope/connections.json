@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "cf72f86e-30db-4d73-ad89-8ddc80917e46",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ps_in",
+      "fromProperty": "programmes",
+      "toId": "ps_opts",
+      "toProperty": "in-programmes"
+    },
+    {
+      "fromId": "ps_in",
+      "fromProperty": "copy",
+      "toId": "ps_opts",
+      "toProperty": "in-copy"
+    },
+    {
+      "fromId": "ps_opts",
+      "fromProperty": "out-hasSelect",
+      "toId": "ps_root",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ps_opts",
+      "fromProperty": "out-label",
+      "toId": "ps_lab",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ps_opts",
+      "fromProperty": "out-options",
+      "toId": "ps_sel",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ps_sel",
+      "fromProperty": "value",
+      "toId": "ps_fn",
+      "toProperty": "in-chosen"
+    },
+    {
+      "fromId": "ps_in",
+      "fromProperty": "programmes",
+      "toId": "ps_fn",
+      "toProperty": "in-programmes"
+    },
+    {
+      "fromId": "ps_in",
+      "fromProperty": "entries",
+      "toId": "ps_fn",
+      "toProperty": "in-entries"
+    },
+    {
+      "fromId": "ps_in",
+      "fromProperty": "history",
+      "toId": "ps_fn",
+      "toProperty": "in-history"
+    },
+    {
+      "fromId": "ps_in",
+      "fromProperty": "dimensions",
+      "toId": "ps_fn",
+      "toProperty": "in-dimensions"
+    },
+    {
+      "fromId": "ps_in",
+      "fromProperty": "endsOn",
+      "toId": "ps_fn",
+      "toProperty": "in-endsOn"
+    },
+    {
+      "fromId": "ps_in",
+      "fromProperty": "copy",
+      "toId": "ps_fn",
+      "toProperty": "in-copy"
+    },
+    {
+      "fromId": "ps_fn",
+      "fromProperty": "out-reading",
+      "toId": "ps_read",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ps_fn",
+      "fromProperty": "out-viewing",
+      "toId": "ps_read",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ps_fn",
+      "fromProperty": "out-entries",
+      "toId": "ps_out",
+      "toProperty": "entries"
+    },
+    {
+      "fromId": "ps_fn",
+      "fromProperty": "out-dimensions",
+      "toId": "ps_out",
+      "toProperty": "dimensions"
+    },
+    {
+      "fromId": "ps_fn",
+      "fromProperty": "out-endsOn",
+      "toId": "ps_out",
+      "toProperty": "endsOn"
+    },
+    {
+      "fromId": "ps_fn",
+      "fromProperty": "out-viewing",
+      "toId": "ps_out",
+      "toProperty": "viewing"
+    }
+  ]
+}

@@ -90,6 +90,38 @@ Sessions 1–31 are recorded in the target-output docs, principally
 the phase's working log. §20 is the session-31 measurement that forced this re-scope; §21 marks
 its own "what is left" lists void.
 
+**Session 99 (2026-09-12) — EXP-014 §14.5, the picture path: the `<img src>` residual closed. Picker
+117/127 unchanged — a parameter fix inside translated nodes, like the three of session 97.**
+
+Re-measured first: the emitted app routes with a `BrowserRouter`, `index.html` has no `<base>`, and
+`contentAttrs` printed every media URL verbatim — as did `renderIcon` for a picture-sourced icon, a
+fifth port the register did not name. The register named the literal channel; the product surface is
+the wire: the landing-pages template carries 2 literal `Image.src` and ~18 pictures through `Static
+Data` rows into a card's `src`, so a fix at emit time alone would have left every gallery where it was.
+
+Built: `src/emit/mediaLib.ts` — the viewer's own port rule transcribed, not invented: `absoluteUrl`
+(the runtime's `getAbsoluteUrl`, base `/`), `mediaSrc` (`resolveMediaSource` in front of it — an empty
+value clears the attribute, because `src=""` refetches the document), `mediaSrcSet` (the HTML `srcset`
+tokeniser), and `mediaLibSource()` as `src/lib/media.ts`. A literal resolves at emit time; a wire prints
+`src={mediaSrc(picture)}` and earns the import after the render; the module ships only when a line
+names it. One deliberate non-transcription, recorded beside `cssUrl`'s: `srcset` per candidate where the
+viewer is verbatim — the viewer's own latent 404 under path routing is §14.6, owner NONE, runtime.
+Fixture `picture-desk`, the first in the corpus two segments deep (`gallery/team`); spec
+`the-picture-path.test.ts` 26 rows, §E transpiling the emitted module against the package's functions
+so the second copy cannot drift, §F the reverted arm as Node's own WHATWG `URL` reading; **15 arms,
+15/15 killed**. Counted before any golden moved: 9 hashes in the three corpus projects with a wired
+picture (`gallery-desk`, `photo-desk` off a Cloud File's https url, `puppy-test-3`) and 3 `media.ts`,
+zero in the other 42 — the HLS-001 golden regenerated with that count in its comment, the PuppyCard
+golden and EXP-002-TARGET-OUTPUT §1 moved by the same two lines. Ledger notes for Image and Video.
+
+Driven as a reverted-worktree pair at `/gallery/team`: local pictures **0 of 4 → 4 of 4 decode**,
+the video's poster `/gallery/…` (`text/html`) → `/noodl_modules/…` (`image/svg+xml`), `src=""` → no
+attribute, zero console errors on both. 🔴 `vite preview`'s SPA fallback answers 200 `text/html` for
+a missing picture, so `responseStatus` graded the reverted arm green — the decode state is the
+reading. Gates: `nodegx-export` jest 101 files / 3491 rows exit 0 (run twice, the second after the
+golden and pins moved) · package `tsc` 0 · editor `tsc --noEmit` 0, empty log · `export-ledger:check`
+OK 176/124 · picker 117 · `test:ci` **2983 specs, 0 failures** (seed 42557 — the AIX-006 floor is gone on this tree).
+
 **Session 97 (2026-09-06) — EXP-014 + EXP-015 + EXP-016, the three divergences the landing-pages
 export drive found, built together. Picker 117/127 unchanged — every one of them is a parameter
 fix inside an already-translated node.**

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2a55b6eb-427f-5d98-8104-8a0a8ca05e8a",
+  "name": "Save question set",
+  "path": "/Logic/Save question set",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The store with a question set added or replaced."
+}

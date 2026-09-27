@@ -36,7 +36,7 @@ import * as path from 'path';
 
 import { BackendService } from '../src/service';
 import { SecurityState, SecurityStartupError } from '../src/security/state';
-import type { AdapterFacade } from '../src/persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 
 jest.setTimeout(40000);
 
@@ -264,7 +264,10 @@ describe('FH-024 — a default (dev-open, loopback) backend', () => {
     // loads, the token signs in, and `/admin/schema` answers 200 from inside it.
     const res = await probe(base, 'GET', '/_admin');
     expect(res.status).toBe(200);
-    expect(res.body).toContain('id="login-form"');
+    // BMG-001: the sign-in form is rendered by the app now; the document carries the app's
+    // mount point and the bundle that mounts into it.
+    expect(res.body).toContain('id="root"');
+    expect(res.body).toContain('getElementById("root")');
   });
 });
 
@@ -329,7 +332,7 @@ describe('FH-024 — the startup interlock still refuses dev-open on a wide bind
    * interlock is the LAST thing the constructor does, so the facade never gets
    * used on the paths under test.
    */
-  const facade = {} as AdapterFacade;
+  const facade = {} as IStorageFacade;
 
   // SB-016: `deployedFunctions: []` throughout, and it means *this backend
   // serves no cloud endpoints* rather than *nobody looked*. These data dirs are

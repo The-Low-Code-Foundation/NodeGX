@@ -1,0 +1,403 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9023dc24-5a37-5e34-8c28-fbcb5652d6b0",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hgStore",
+      "fromProperty": "app",
+      "toId": "hgMe",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hgWords",
+      "fromProperty": "words",
+      "toId": "hgT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "lang",
+      "toId": "hgT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "hasProfile",
+      "toId": "hgNoOne",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "hgNoOne",
+      "fromProperty": "result",
+      "toId": "hgGuard",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "hgPage",
+      "fromProperty": "didMount",
+      "toId": "hgGuard",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "hgGuard",
+      "fromProperty": "ontrue",
+      "toId": "hgGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "name",
+      "toId": "hgHeader",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "look",
+      "toId": "hgHeader",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "seed",
+      "toId": "hgHeader",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "lang",
+      "toId": "hgHeader",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "level",
+      "toId": "hgHeader",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "layout",
+      "toId": "hgHeader",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "soundMode",
+      "toId": "hgHeader",
+      "toProperty": "soundMode"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "answerMode",
+      "toId": "hgHeader",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "profileId",
+      "toId": "hgHeader",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "faceOptions",
+      "toId": "hgHeader",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "hgStore",
+      "fromProperty": "app",
+      "toId": "hgHeader",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hgHeader",
+      "fromProperty": "app",
+      "toId": "hgStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hgHeader",
+      "fromProperty": "write",
+      "toId": "hgStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "hgHeader",
+      "fromProperty": "switchPlayer",
+      "toId": "hgGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "hgHeader",
+      "fromProperty": "deleted",
+      "toId": "hgGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "hgHeader",
+      "fromProperty": "home",
+      "toId": "hgGoHome",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "hgT",
+      "fromProperty": "hangar",
+      "toId": "hgTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "name",
+      "toId": "hgPreview",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "look",
+      "toId": "hgPreview",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "seed",
+      "toId": "hgPreview",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "faceOptions",
+      "toId": "hgPreview",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "paint",
+      "toId": "hgPreview",
+      "toProperty": "paint"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "pattern",
+      "toId": "hgPreview",
+      "toProperty": "pattern"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "nextText",
+      "toId": "hgPreview",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "hgStore",
+      "fromProperty": "app",
+      "toId": "hgShelf",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hgItems",
+      "fromProperty": "items",
+      "toId": "hgShelf",
+      "toProperty": "shelf"
+    },
+    {
+      "fromId": "hgT",
+      "fromProperty": "faceTab",
+      "toId": "hgShelf",
+      "toProperty": "faceWord"
+    },
+    {
+      "fromId": "hgT",
+      "fromProperty": "rocketTab",
+      "toId": "hgShelf",
+      "toProperty": "rocketWord"
+    },
+    {
+      "fromId": "hgShelf",
+      "fromProperty": "pick",
+      "toId": "hgAsk",
+      "toProperty": "to-asking"
+    },
+    {
+      "fromId": "hgAsk",
+      "fromProperty": "asking",
+      "toId": "hgOver",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hgAsk",
+      "fromProperty": "asking",
+      "toId": "hgConfirm",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hgT",
+      "fromProperty": "buyTitle",
+      "toId": "hgBuyTitle",
+      "toProperty": "word"
+    },
+    {
+      "fromId": "hgShelf",
+      "fromProperty": "itemLabel",
+      "toId": "hgBuyTitle",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hgBuyTitle",
+      "fromProperty": "result",
+      "toId": "hgConfirm",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "hgShelf",
+      "fromProperty": "itemCost",
+      "toId": "hgConfirm",
+      "toProperty": "cost"
+    },
+    {
+      "fromId": "hgShelf",
+      "fromProperty": "purse",
+      "toId": "hgConfirm",
+      "toProperty": "purse"
+    },
+    {
+      "fromId": "hgT",
+      "fromProperty": "youHave",
+      "toId": "hgConfirm",
+      "toProperty": "haveWord"
+    },
+    {
+      "fromId": "hgT",
+      "fromProperty": "itCosts",
+      "toId": "hgConfirm",
+      "toProperty": "costWord"
+    },
+    {
+      "fromId": "hgT",
+      "fromProperty": "youllHave",
+      "toId": "hgConfirm",
+      "toProperty": "leftWord"
+    },
+    {
+      "fromId": "hgT",
+      "fromProperty": "yesBuy",
+      "toId": "hgConfirm",
+      "toProperty": "yesWord"
+    },
+    {
+      "fromId": "hgT",
+      "fromProperty": "noThanks",
+      "toId": "hgConfirm",
+      "toProperty": "noWord"
+    },
+    {
+      "fromId": "hgConfirm",
+      "fromProperty": "no",
+      "toId": "hgAsk",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "hgConfirm",
+      "fromProperty": "yes",
+      "toId": "hgAsk",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "hgStore",
+      "fromProperty": "app",
+      "toId": "hgPick",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "profileId",
+      "toId": "hgPick",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "hgShelf",
+      "fromProperty": "itemId",
+      "toId": "hgPick",
+      "toProperty": "itemId"
+    },
+    {
+      "fromId": "hgItems",
+      "fromProperty": "items",
+      "toId": "hgPick",
+      "toProperty": "shelf"
+    },
+    {
+      "fromId": "hgConfirm",
+      "fromProperty": "yes",
+      "toId": "hgPick",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hgPick",
+      "fromProperty": "app",
+      "toId": "hgStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hgPick",
+      "fromProperty": "done",
+      "toId": "hgStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "hgPick",
+      "fromProperty": "done",
+      "toId": "hgPreview",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "hgStore",
+      "fromProperty": "app",
+      "toId": "hgWear",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "profileId",
+      "toId": "hgWear",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "hgShelf",
+      "fromProperty": "itemId",
+      "toId": "hgWear",
+      "toProperty": "itemId"
+    },
+    {
+      "fromId": "hgItems",
+      "fromProperty": "items",
+      "toId": "hgWear",
+      "toProperty": "shelf"
+    },
+    {
+      "fromId": "hgShelf",
+      "fromProperty": "wear",
+      "toId": "hgWear",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hgWear",
+      "fromProperty": "app",
+      "toId": "hgStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hgWear",
+      "fromProperty": "done",
+      "toId": "hgStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "hgWear",
+      "fromProperty": "done",
+      "toId": "hgPreview",
+      "toProperty": "changed"
+    }
+  ]
+}

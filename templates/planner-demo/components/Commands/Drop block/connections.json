@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ad356c02-2737-598d-8ffb-70dc807d6244",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "DropblockIn",
+      "fromProperty": "blockId",
+      "toId": "DropblockGuard",
+      "toProperty": "in-blockId"
+    },
+    {
+      "fromId": "DropblockIn",
+      "fromProperty": "do",
+      "toId": "DropblockGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "DropblockIn",
+      "fromProperty": "blockId",
+      "toId": "DropblockWrite",
+      "toProperty": "in-modelId"
+    },
+    {
+      "fromId": "DropblockGuard",
+      "fromProperty": "out-go",
+      "toId": "DropblockWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "DropblockWrite",
+      "fromProperty": "out-done",
+      "toId": "DropblockOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "DropblockWrite",
+      "fromProperty": "out-failure",
+      "toId": "DropblockProblem",
+      "toProperty": "do"
+    }
+  ]
+}

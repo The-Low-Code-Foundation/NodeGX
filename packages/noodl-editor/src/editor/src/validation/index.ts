@@ -93,6 +93,19 @@ export type {
   MinedFunctionPorts,
   ScriptCarryingNode
 } from './functionPorts';
+// GAM-005 — a Variable inside a component drawn more than once.
+export {
+  checkVariableInRepeatedComponent,
+  componentCopies,
+  SHARED_ON_PURPOSE,
+  VARIABLE_NODE_TYPES
+} from './repeatedComponentVariable';
+export type {
+  CheckVariableInRepeatedComponentOptions,
+  ComponentCopies,
+  VariableView,
+  VariableViewNode
+} from './repeatedComponentVariable';
 // LAS-001 — an instance parameter that reaches a port that exists.
 export {
   checkComponentPortDirection,
@@ -115,6 +128,9 @@ export { checkImageSources } from './imageSource';
 export { checkUnrealisedMeasure } from './unrealisedMeasure';
 export { checkPageScroll } from './pageScroll';
 export type { CheckImageSourcesOptions, ImageSourceNode } from './imageSource';
+// GAM-007 — a Static Data row field the runtime answers with a Noodl Object member.
+export { checkReservedRowFields, csvHeaderCells, RESERVED_ROW_FIELD_NAMES } from './reservedRowField';
+export type { CheckReservedRowFieldsOptions, ReservedRowFieldNode } from './reservedRowField';
 // LAS-007 — the recipe that fixes a rejection, attached to the rejection. Lives
 // beside the checks that produce the diagnostics so both clients read one table.
 export { citationFor, DIAGNOSTIC_EXAMPLES, exampleAttachments } from './diagnosticExamples';

@@ -1,0 +1,37 @@
+✓ the editor on 9222 can be accounted for — listener 8792, ancestry 8792<8791<8736<1973<1855<1743<1646<1386<1354<1330<1300
+✓ rAF fires — the page is live enough to trust a red — raf
+✓ the driven project is the COPY this run was pointed at — /Users/richardosborne/vscode_projects/NodeGX test projects/HLT-005 Comment Drive
+✓ the renderer carries no control left over from an earlier run — never armed
+✓ a node in the copy carries a single line longer than any docked panel — {"component":"/App","nodeId":"f7c4f300-b263-4abf-9d1c-160d25a11c71","typename":"Router","chars":264}
+✓ the commented node is the selected one — {"selected":true}
+✓ 🔴 CONTROL armed — proven by READING the computed style off the element, not by inserting a rule — flex-shrink computes to 0
+✓ the dark theme is the one on screen — data-theme=dark
+✓ 🔴 REACH (dark, min 240px) — the comment field is on screen and touchable — already; left=property-comment-input centre=VisualCanvas-module__Webview--MlnpH
+✓ the panel really is at its min width (240px asked for) — scrollport clientWidth 224
+  dark/min: bar 1489.2 in port 224 (scrollWidth 1489), maxScrollLeft 1253, flex 0 0 auto
+✓ 🔴 CONTROL FIRES (dark, min) — the shipped declaration overflows the port — 1489.2px in 224px, maxScrollLeft 1253
+  shot hlt005-control-dark-min.png
+✓ 🔴 REACH (dark, max 996px) — the comment field is on screen and touchable — already; left=property-comment-input centre=property-comment-input
+✓ the panel really is at its max width (996px asked for) — scrollport clientWidth 980
+  dark/max: bar 1489.2 in port 980 (scrollWidth 1489), maxScrollLeft 497, flex 0 0 auto
+✓ 🔴 CONTROL FIRES (dark, max) — the shipped declaration overflows the port — 1489.2px in 980px, maxScrollLeft 497
+  shot hlt005-control-dark-max.png
+✓ the light theme is the one on screen — data-theme=light
+✓ 🔴 REACH (light, min 240px) — the comment field is on screen and touchable — already; left=property-comment-input centre=VisualCanvas-module__Webview--MlnpH
+✓ the panel really is at its min width (240px asked for) — scrollport clientWidth 224
+  light/min: bar 1489.2 in port 224 (scrollWidth 1489), maxScrollLeft 1253, flex 0 0 auto
+✓ 🔴 CONTROL FIRES (light, min) — the shipped declaration overflows the port — 1489.2px in 224px, maxScrollLeft 1253
+  shot hlt005-control-light-min.png
+✓ 🔴 REACH (light, max 996px) — the comment field is on screen and touchable — already; left=property-comment-input centre=property-comment-input
+✓ the panel really is at its max width (996px asked for) — scrollport clientWidth 980
+  light/max: bar 1489.2 in port 980 (scrollWidth 1489), maxScrollLeft 497, flex 0 0 auto
+✓ 🔴 CONTROL FIRES (light, max) — the shipped declaration overflows the port — 1489.2px in 980px, maxScrollLeft 497
+  shot hlt005-control-light-max.png
+✓ 🔴 AC3 — vertical growth still HAPPENS: thirty lines is taller than two — two lines 48px → thirty lines 184px
+✓ 🔴 AC3 — and it still STOPS at 184px — thirty lines gives 184px
+✓ AC3 — the textarea still matches the mirror it is positioned over — input 184px vs sizer 184px
+✓ CONTROL — the unbreakable run overflows too, as it did before the fix — maxScrollLeft 1068.5
+✓ all 4 cells produced a reading — a zero from a blank panel is not a zero — 4 cells: dark-min=1253 dark-max=497 light-min=1253 light-max=497
+✓ THE NUMBER — with the shipped declaration back — dark-min=1253 dark-max=497 light-min=1253 light-max=497
+
+27/27 graded arms passed

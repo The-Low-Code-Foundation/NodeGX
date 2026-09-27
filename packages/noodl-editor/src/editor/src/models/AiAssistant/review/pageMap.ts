@@ -207,7 +207,7 @@ function describeSources(sources: readonly PageSource[]): string {
   const label: Record<PageSource, string> = {
     'routes-file': 'the project routes file (declared)',
     'router-node': "a Router node's page list (declared)",
-    'page-node': "each page component's own Page node (declared)",
+    'page-node': "each page's own Page node (declared)",
     'name-convention': 'component naming convention (INFERRED — treat as uncertain)'
   };
   return sources.map((s) => label[s]).join('; ');

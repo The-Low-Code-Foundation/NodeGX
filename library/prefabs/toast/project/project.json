@@ -103,7 +103,8 @@
                         "y": -2.5,
                         "parameters": {
                             "stackPolicy": "stack",
-                            "target": "/Show Toast/Toast Component"
+                            "target": "/Show Toast/Toast Component",
+                            "modal": false
                         },
                         "ports": [],
                         "dynamicports": [

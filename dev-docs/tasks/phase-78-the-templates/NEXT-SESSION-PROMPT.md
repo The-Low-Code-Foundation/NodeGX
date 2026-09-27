@@ -1,5 +1,318 @@
 # Phase 78 — next session
 
+> ### 🟩 2026-09-22 (s6) — R2.7: THE DEMO CAN BE EMPTIED, AND THE FIRST DAY NOW WORKS — START HERE
+>
+> Richard asked for a button that clears the dummy data so the demo can be used for real. It is on the
+> first line of the page: **Empty it and start my own** — one press arms it, a second empties every
+> collection, *Reset demo* still puts the invented week back. The emptied store keeps every collection as
+> a key holding nothing, or the reader would seed the example back on the next read.
+> - 🔴 **The defect it found, and the important part of this session:** `Settings` was only ever
+>   **updated**, and the guard refuses an empty id — so on a planner with no settings row (a fresh install
+>   from the shelf, **the hosted app on its first morning**, a just-emptied demo) the sheet took every
+>   number typed and wrote none of them, silently. `Commands/Add settings` writes the row when there is
+>   none; both ways of saving go through one `Condition`; the two writers are gated field-for-field.
+> - Also fixed: the notice was a `contentSize` Text — 1,034px of sentence in a 358px box at 390 wide.
+>   **A Text sized to its content never wraps.**
+> - ✅ Gates **67/67**, `drive-tpl010-r25.js` **37/37**, money 40/40, R2.3 19/19, R2.4 22/22; three
+>   viewports 0 errors. Live: **37/37 and 40/40 against `https://nodegx.io/templates/planner/`**.
+> - ✅ Republished: the demo, the homepage (**Planner is in the Templates section too now, four cards
+>   two-by-two**) and the shelf (**v3, 214 files** — R2.7's three new files moved the count).
+> - The R2.7 record is in [R2](TPL-010-R2-FIRST-USE.md) §R2.7.
+>
+> ### 🟩 2026-09-22 — THE PLANNER IS PUBLISHED, AND R2.5 CLOSED THE BUILD
+>
+> `https://nodegx.io/templates/planner/` is live, first card on the homepage, and on the community shelf as
+> `planner` (data-app, 211 files, v2). The app calls itself **Planner** now — the name Richard ruled on
+> 2026-09-21 was never in the app bar. Built with the **production** viewer; driven **against the public URL**.
+> - ✅ **R2.5 built** ([R2](TPL-010-R2-FIRST-USE.md) §R2.5): Settings is four sections — Capacity (the ceiling,
+>   seven day ticks, and what they come to a week, live), Money, The split (each field with the rule it comes
+>   from beside it and one button that takes all three), Guardrails — plus L6's `todoUrl` and the bar's
+>   *Todo ↗*. Eight new `Settings` columns, all written by `Edit settings` so the coach can reach them.
+> - 🔴 **Two departures from the task file, both recorded in §R2.5:** the recommendation is **63.75 / 13.25**,
+>   not 64 / 13 (R24 rounds to the quarter hour, and a tenth of 132 h is 13.2 h), and **a row with no
+>   `workingDays` still means Mon–Sat**, so no existing month loses four days by upgrading. Richard's call on
+>   both, and each is one line to change.
+> - ✅ Gates **65/65**; drives on the deployed demo: r25 **25/25**, money **40/40**, r23 19/19, r24 22/22;
+>   1280×900, 1423×680 and 390×844 unchanged. On the public URL: r25 25/25, money 40/40.
+>   ⚠️ money's first clause failed once on a cold first visit and passed on every run after — the seed is
+>   written on first read and that check looked too early. Give it a longer `until` if it recurs.
+> - 🟡 **TPL-010-H is STILL one DNS record from done** (checked again at the end of s6: no record). `planning-digitalbricks/merge-policy.js` is written and has
+>   been run against the live policy off the box (kept Task/Action/Event/PushSubscription, added the planner's
+>   seven); the hosted site builds with `planning.digitalbricks.io` baked in. **Nothing has been shipped.**
+>   Blocked on: **A record `planning` → `49.12.102.195` at Namecheap**. Then steps 1–4 of that task file.
+> - 🔴 **The shelf has drifted for two older templates**: `todo-list` is 121 files where the publisher expects
+>   112, `story-engine` 35 where it expects 30. Both refuse until somebody looks at what moved (the todo
+>   list's icons, date picker and reminders among them) and updates the count in the same commit.
+> - ⚠️ **`signup` is still `public`** on the live todo backend; the todo README says to lock it once his
+>   account exists.
+> - ⚠️ **This checkout's viewers are now the PRODUCTION build** (`npm run build:editor:_viewer` overwrote
+>   `packages/noodl-editor/src/external/{deploy,viewer,ssr}`, which are gitignored). The editor's preview runs
+>   minified until `npm run dev` rebuilds them — worth knowing before reading a stack trace.
+> - **Next:** TPL-010-H the moment the record lands, then TPL-010-L (L6 is already built), then TPL-010-MCP.
+>   Still Richard's: M-14 and AC11 (his own month, his own week), R2.1-6, R2.6-5.
+
+> ### 🟩 2026-09-21 — TPL-010-M THE PLANNER'S MONEY: BUILT, GATED, DRIVEN — START HERE FOR THE PLANNER
+>
+> Read [TPL-010-M](TPL-010-MONEY.md) first. Richard wants money out of Settings and into its own modal (€ in the app bar):
+> every money number is a money item (partner, household, tax, each client's bills) that happens once or repeats weekly /
+> monthly / quarterly / yearly with a start and an end; each repeat can be changed alone and is **ticked by hand** when it
+> happens (unticked + past = late, listed first); hoped money carries a likelihood; the bottom of the week says break-even,
+> target, how far off, what might come and the lowest point. **He overruled deriving client bills from project terms** —
+> the person types each bill; the project's payment terms only pre-fill the due date (M5).
+> - ✅ **M10–M16 agreed** by Richard (s1), plus **M11a**: a payment can be *lost* or come *in part* (still owed / lost).
+> - ✅ **Step 0 mockup built and published** (s1): `nodegx-template-crm/mockups/money.html`,
+>   https://claude.ai/artifact/212cJarJjemstvgLdiPGjg. A working prototype; rendered at 1280×900, 1423×680, 390×844.
+> - ✅ **Mockup approved** by Richard 2026-09-21, four choices included (M s1). The build is open.
+> - ✅ **Billing types added after approval (M21–M24):** hourly (own rate) or fixed per project; the billable target counts
+>   fixed bills first; hourly bills fill from the hours until sent; fixed cards show €/h. Mockup v2 has them. Demo rate €50.
+> - ✅ **Built (M s2):** the Money modal, the strip's three lines, Billing on the card, late money in the drawer,
+>   billing types. Gates 61/61, `drive-tpl010-money.js` 40/40 on the deployed demo, R2.3 19/19, R2.4 22/22.
+> - **Next:** Richard tries it (M-14: his own month from nothing, on his laptop). Then R2.5 (Settings' other sections).
+> - **His:** R2.6-2 fold (page now 1229 at 1280×900), R2.1-6, R2.6-5, publish timing, D72, AC11.
+> - **For TPL-010-MCP:** the coach's list of collections gains `MoneyItem`, `MoneyMark`, `BalanceReading` (§8).
+> - It absorbs R2.2 and R2.5's money section ([R2](TPL-010-R2-FIRST-USE.md) s3). Board order: R2.3 (✅ built and driven 2026-09-21, R2 s4), then M, then R2.5.
+> - Build against `packages/noodl-mcp/src/server` (working tree), apply the four sheet traps up front (M §5.8), demo key v3.
+> - Local demo: `npm run template:planner`, then `node packages/noodl-preview/dist/nodegx-deploy.cjs templates/planner-demo
+>   <site>/templates/planner --base-url /templates/planner/ --allow-development-engine` (the dev viewer is refused
+>   otherwise; fine locally, never for publishing) and serve `<site>` statically.
+
+> ### 🟢 2026-09-15 — T3 RULED AND DONE: FOUR TEMPLATES ARE ON THE COMMUNITY SHELF
+>
+> Richard wanted a visitor who likes a demo on nodegx.io to download NodeGX and find it in the launcher's **Templates** tab. Ruled:
+> the community shelf (not zips — the launcher cannot import one), a new category **`game`**, and the **backend** todo list.
+> - **nodegx-community `ade0d28`** — `0028` widens the shelf's AND the submissions queue's category constraint; deployed, migration
+>   applied, neighbours 200 before/after. **Editor `85b59aaff`** labels it "Game" (0.2.4 draws the raw slug).
+> - **`3206e12e5`** pins `useTransitions: false` again in Story engine and Pixel dungeon, with a gate in each spec: the shelf installs
+>   into v0.2.4, which lacks GAM-006, and `1cf0a81d2` had removed the workaround. tpl005 + tpl006 119/119.
+> - **Committed on Richard's word:** P88 session 11 as one commit `89e533625` (GAM-001/002/003; the per-task hunk split was NOT done)
+>   and Monster Gate `b91b0a0a5`. Gates re-run first: 21 + 28 + 80 + 283. Pushed. `library/prefabs/form-fields` left uncommitted.
+> - **Published** with `publish-templates-to-shelf.sh` (`ca5c98770`), drafts first: `rocket-school`, `pixel-dungeon`, `story-engine`
+>   (game), `todo-list` (data-app). **Verified on the live shelf:** 5 rows, right categories and file counts, and every bundle
+>   downloaded and diffed against `templates/<dir>` — 0 missing, 0 extra, 0 differing.
+> - ⚠️ **Not driven in a real 0.2.4 install.** The 0.2.4 compatibility reading is from code and git (and the live Monster Gate demo ran
+>   on an engine without GAM-001/003). And 0.2.4's community route does NOT carry `needsBackend`, so the todo list installs without the
+>   automatic backend setup — a product defect worth filing.
+> - 🔴 **After ANY change to these four templates, republish** (the script refuses a moved file count — update its expected counts in
+>   the same commit), or the shelf drifts from the demos. The nodegx.io homepage now says every demo is a template.
+>
+> ### 🟢 2026-09-14 (night, session b7cd9341) — TPL-007 MONSTER GATE, THE FOURTH GAME: BUILT, GATED 326/326, DRIVEN ALL PASS
+>
+> Richard asked for options first: a playable mockup of three versions (<https://claude.ai/artifact/NkzcsuKFD1KX7JHEn3Q2rB>), then ruled
+> ([TPL-007 §16.1](TPL-007-THE-MATHS-AND-TYPING-GAME.md)): A *and* B as a setup choice, a wrong answer creeps closer, opens on Practice,
+> 3 monsters in 3 shapes × 3 colours, solo, a heart back after 3 quick answers. Built through the plan door (§16.2); every rule is `MONSTER`.
+> Gates: engine 190, three suites **326/326**, typecheck 0. `drive-tpl007-monster.js` (new) gate/walk/push/screen **ALL PASS**; race
+> regression `drive-rkt003-stage.js` 10 cells + `drive-rkt007-boost.js --arm defi` 4 cells **ALL PASS**. Served on 8782.
+> 🔴 The door's `wired-dimension-becomes-grow` caught a lane whose monster would never have moved (a wired % width on a row's axis).
+> 🔴 **Peer commit `9d77c9427` swept §16 half-done** (scripts + words whole, components partly); the rest is **uncommitted**.
+> Richard's first play: the bob stopped after the first question (an event animation replaced it on the same box). Reproduced RED
+> (`bobAfter`), moved to `::before`, build 3 `monster2` gates 327/327, gate + walk arms ALL PASS (§16.5).
+> **NEXT:** Richard plays it (§16.4: three look questions, and whether to publish). Not run: the other P87 drives, hunt/merge drives, `test:ci`.
+
+> ### 🟢 2026-09-14 (s4) — TPL-008 TODO LIST: LIGHT/DARK BUILT (R10) AND REPUBLISHED — gates 24/24 + 18/18, drives 14/14 + 10/10 + theme 9/9, live 16/16
+>
+> **s4:** follows the system, a moon/sun at the top right overrides it, the choice is remembered ([§3b](TPL-008-THE-TODO-LIST.md)).
+> A `CSS Definition` on `App` overrides the colour tokens on two selectors more specific than the token block; CSS also picks
+> which icon shows. Theme drive sabotaged (the sun's hide rules gone → exactly §0 and §2 red). Built with the SAME Sep 11
+> `nodegx-deploy.cjs`, 16/16 on the folder, `ops/deploy.sh` (neighbours 200, homepage md5 unchanged), **16/16 live**.
+> 🔴 **R11: the backend stays local** — sign-in from other devices and hosting are a later phase, not owed here.
+> ⚠️ **Richard's own copy does NOT have dark mode yet**: `rsync --delete` into it was denied by the classifier. **Uncommitted** — s4's paths are listed in §7.
+>
+> Richard's own template: one list ordered only by what you do next, nothing deleted, every change kept as history; stored
+> in the NodeGX backend. Rulings R1–R11 in [TPL-008 §1](TPL-008-THE-TODO-LIST.md); s1–s4 record in §7.
+>
+> **s3 built R9's demo** as `templates/todo-list-demo/`, written by the same `npm run template:todo` run. It is a **transform
+> of the template's components** (`tpl008Demo.ts`): all 15 record writes become `localStorage` Functions at the same node
+> ids, `Logic/Todo data` reads the same store (query shapes read off the backend nodes) and seeds an example list, sign-in is
+> gone, Sign out is **Reset demo**. `tpl008Demo.test.ts` **18/18** grades it in step wire-for-wire (sabotaged: an unconverted
+> write reddens exactly 3 rules). `tpl008-todo-demo-drive.test.ts` **10/10**, 0 console errors, no backend request beside a
+> control that sees one; reload keeps it. 🔴 **Reset had to forget `todoLastHistory`** — with constant example ids a move
+> after reset otherwise saves no line (sabotaged: drive §7 red). The template's drive is **14/14: reopen and untick driven**.
+>
+> 🔴 **GAM-005's uncommitted `variable-in-repeated-component` rule warned 54× per build** (4 pairs, all app-wide on purpose);
+> fixed with "Shared on purpose:" node comments, 0 warnings again. Two pictures in the session's scratchpad for Richard.
+>
+> ✅ **Richard looked ("Looks great") and asked for it on the site: PUBLISHED at <https://nodegx.io/templates/todo-list/>.**
+> Shipped `nodegx deploy` on the production engine with `--base-url /templates/todo-list/`, then `ops/deploy.sh
+> 49.12.102.195` (neighbours 200 before/after, homepage md5 unchanged, host held exactly the local `site/` before `--delete`).
+> `scripts/devtools/drive-tpl008-demo.js` **12/12 on the local folder and 12/12 against the public URL**.
+>
+> **NEXT:** nothing is owed on TPL-008 but Richard's: AC8 (a week of real use) and R4a (is a note on every tick too much) —
+> plus, if he says so, putting dark mode into his own copy and committing s4.
+> After any template change: `npm run template:todo`, the five suites, the deploy + `drive-tpl008-demo.js` (16 clauses), `ops/deploy.sh`.
+> `test:ci` / `test:main` not run this session.
+
+> ### 🟢 2026-09-12 (s4) — TPL-007 ROCKET SCHOOL: first cut BUILT, GATED, DEPLOYED, DRIVEN 17/17
+>
+> Richard ruled (all four games; "Rocket School"; DiceBear faces; stock lessons CE2→6e PLUS a visual
+> editor for a person's own question sets; every misconception we can find; **the latest MCP door,
+> the component way**). Built through **`create_plan → stage → apply_plan`** — the first template
+> through the plan door — and graded by phase 85's own instrument: **42 components, 95% / 38% / 0.19,
+> PASS ×3**. `npm run template:rocket` → `templates/rocket-school/` (50 components, one kit,
+> byte-identical builds). Gates: `tpl007GameKit` 13, `tpl007Engine` 115, `tpl007Template` 12 — 140/140.
+> Deployed with the production engine and driven: `scripts/devtools/drive-tpl007-rocket.js` **17/17,
+> 0 console errors**. Profiles, Home and the Rocket Race PLAY. Pictures: `tpl-007-shots/`.
+>
+> 🔴 **Five product defects filed, D53–D57, ALL with 0 console errors** — a kit React node as a
+> component ROOT draws nothing (wrap it in a Group); an `Expression` makes every identifier an input
+> (`String(n)` throws — write `'' + n`); an `Expression` with no delivered input never evaluates (do
+> not guard an optional `mounted` with one); `apply_plan` warns about the scroll setting it is about
+> to write; **a `Variable` is GLOBAL by name** — two banners on one page opened together (a States
+> node for local state; a repeater row needs an `id`).
+>
+> **NEXT, in order (TPL-007 §12):** Make Ten Merge page → Number Hunt page → Monster Gate → Teach
+> page + `showMe` → Progress + save code → the question-set editor (Richard's ruling 3) → answer
+> mode by level → publish to nodegx.io + Richard's look. Every Logic/ script the next pages need
+> already exists and is gated. 🔴 Nothing is committed: 20 new paths, listed in the task file's §11.
+
+> ### 🟢 2026-09-12 (s3) — TPL-006 IS **PUBLISHED**: <https://nodegx.io/templates/story-engine/>
+>
+> Richard played it, said *"it works, it's awesome"*, and asked for a zip and a publish to the
+> template path *"like the other templates"*. Both done. **AC7 IS GREEN** — the first AC7 closed on
+> any template in this phase. It sits beside `pixel-dungeon` and `business-landing-page` in
+> `~/vscode_projects/nodegx-web/site/templates/`, shipped by the **shipped engine on the production
+> viewer with NO `--allow-development-engine`**, and **driven against the PUBLIC URL: 16/16 clauses,
+> 0 console errors.** `ops/deploy.sh 49.12.102.195`; both neighbours 200 before and after;
+> `site/index.html` byte-identical under the deploy's own `build.py`. Commit **`92c9b1a2e`**.
+>
+> 🔴 **THE HARNESS PUBLISHED THE HOMEPAGE AS THE TEMPLATE, AND THE ABSENCE CLAUSES COVERED FOR IT.**
+> `serveFolder` fell back to the **root** `index.html` for any **directory** request, so serving
+> `site/` and asking for `/templates/story-engine/` returned **nodegx.io's homepage, with a 200**.
+> The gate scored **5/16** — and ⚠️ **every one of the five that passed was an ABSENCE clause**,
+> each true of a page with no story on it. **A blank page passes every absence a drive can make.**
+> ✅ Fixed: a directory serves its own index first, root fallback kept after it for client-side
+> routes. This is the second time in two sessions that absence assertions went green on a page that
+> had simply never loaded — see §9b-i.
+>
+> 🔴 **`--base-url /templates/<slug>/` IS NOT OPTIONAL** and the other two demos carry it: it
+> rewrites `<base href>`, `Noodl.Env['BaseUrl']` and every script src. The root-relative build would
+> have asked for `/index-<hash>.js` under the subpath and **rendered blank**.
+>
+> ✅ **`withDeployedSite` now takes `origin`** — drive a site that is already served.
+> `drive-tpl006-story.js https://nodegx.io --path /templates/story-engine/`. **A local folder that
+> plays is not evidence the deploy landed.**
+>
+> ⚠️ **`site/templates/` is UNTRACKED in `nodegx-web`, and was before this template.** All three
+> demos live only on the box and in that working copy; `git status` there does not describe what is
+> published. They regenerate from this repo in one command. **Left as found** — committing three
+> deploy folders is a decision, not a tidy-up.
+>
+> 🙋 **T3 still blocks the IN-EDITOR shelf, and this publish did not need it.**
+> `interactive-fiction` is none of the six ruled slugs. The demo page is a static path on the
+> marketing site; the shelf is the thing still waiting, for this template and `pixel-game` both.
+>
+> ⬜ **AC8 is the only thing left on TPL-006** — Richard has the four deployed-artefact shots and
+> has said the template works; he has not ruled on the look itself.
+
+> ### 🟢 2026-09-12 (s2) — TPL-006: **AC7's BLOCKER RE-MEASURED AND IT DOES NOT HOLD. THE DEPLOY CARRIES EVERY WIRE AND THE DEPLOYED FOLDER PLAYS.**
+>
+> The handoff below named AC7 blocked by **D44/D48** and predicted this template was the more exposed
+> one because of a `For Each`'s `itemOutput-*` ports — *"the one nothing has measured"*.
+> 🔴 **The prediction was right about the ports and wrong about who has the defect.**
+>
+> | path | authored | deployed | dropped |
+> |---|---|---|---|
+> | **`nodegx deploy`** — shipped engine | 84 | **84** | **0** |
+> | `deploy-from-disk` devtool | 84 | 81 | 3 |
+> | devtool `--sabotage` control | 85 | 81 | 4 (the planted one + the same 3) |
+>
+> The three are one `For Each`'s `itemOutput-goto`, `itemOutput-gives` and `itemOutputSignal-picked`
+> — **the entire click path of a choice** — and they are a gap in **that instrument**, filed as
+> **[D52](DEFECTS-THE-TEMPLATES-FOUND.md)**. Then the deployed folder was **driven**: real CDP mouse
+> events, **16/16 clauses, 0 console errors**. Commits **`50876627b`** and **`46f483f37`**.
+> Full record: **[TPL-006 §9](TPL-006-THE-STORY-ENGINE.md)**.
+>
+> 🔴 **THE NEGATIVE CONTROL IS THE POINT, AND IT IS THE SESSION'S ONE TRANSFERABLE FINDING.**
+> The same drive against the **devtool's** build — same project, same script, the only difference
+> being those three wires — scores **9/16 and exits 1**. The reader never leaves the first passage,
+> carries nothing ever, sees no `requires` choice and reaches no ending.
+> ⚠️ **And both builds report ZERO console errors.** Three dropped wires render perfectly, every
+> paragraph of prose on screen, every button present, and the story cannot be played.
+>
+> 🔴 **The control also caught a hole in MY OWN drive's ARM A.** *"The `requires` choice is ABSENT
+> carrying nothing"* **passed on the broken build**, because the reader never reached the gallery —
+> absent for the wrong reason. **An absence is evidence only beside a signal known to fire**, and
+> here that signal is ARM B. The pair is the reading. Pinned in the script's header.
+>
+> ### Two instruments are committed, because the census counts drops and does not name them
+>
+> - **[`scripts/devtools/deploy-connection-diff.js`](../../../scripts/devtools/deploy-connection-diff.js)**
+>   — authored vs deployed, per component, with each end's node type. The gap between *"3 dropped"*
+>   and *"which 3"* is the whole cost of D52. 🔴 The two sides spell a connection differently
+>   (`fromId`/`fromProperty` vs `sourceId`/`sourcePort`); keying one against the other reports
+>   **every** connection as dropped, which is a very convincing catastrophe that is not there.
+> - **[`scripts/devtools/drive-tpl006-story.js`](../../../scripts/devtools/drive-tpl006-story.js)**
+>   — 16 clauses, **exits 1**. 🔴 The choice rows are `Group`s with `cssClassName: "story-choice"`,
+>   **not `<button>`s**: a first drive selecting `button` reported `NOT FOUND` six times and read
+>   every screen as identical, which is indistinguishable from a template whose clicks are dead.
+>   *A drive that finds nothing has two explanations and the instrument is the likelier one.*
+>
+> ### 🔴 D52 — the devtool's probe misses a BUILT-IN, and it is TWO gates not one
+>
+> D44's correction recorded the remaining drops as `keyboard-shortcuts` — *a **module** type, and the
+> headless library holds built-ins only*. **That is not the whole cause.** `For Each` is a built-in
+> and is missed too, because:
+> 1. it subscribes to `nodeAdded.For Each` **only inside an `editorImportComplete` handler**
+>    ([`foreach.tsx:1099-1107`](../../../packages/noodl-viewer-react/src/nodes/std-library/data/foreach.tsx#L1099-L1107))
+>    which the probe never emits — so **it never appears in the census's own list of lazy types**,
+>    and *"that family never subscribed"* and *"that family found nothing"* print identically;
+> 2. its ports come from **another component's** `outputPorts`, and the probe's `graphModel` has no
+>    components in it.
+>
+> **Either gate alone reads as a fix and changes nothing.** Owner `NONE`. Blocks no template.
+>
+> ### What is now true of TPL-006, and what is not
+>
+> - 🟢 **AC1–AC6** green (62/62 gate, `typecheck:mcp` clean, re-run at HEAD this session).
+> - 🟢 **AC7's build half.** 84/84 diffed per component; the deployed folder plays 16/16.
+> - 🟡 **The zip round-trip is done and it clears the PROJECT DIRECTORY, not the environment.**
+>   31 KB / 30 files, **byte-identical** after unpack (`diff -r`), no absolute path, no
+>   `noodl_modules` — and the unpacked copy, deployed from **outside the repo**, is 84/84 and 16/16.
+>   ⬜ Another machine's Node, another OS and a different checkout are still untested.
+> - 🟡 **AC8 — the look was SENT to Richard**, and from a better instrument than last time: the
+>   earlier four came from `render-from-disk`, which serves **0 shipped default tokens** (TPL-004 §10
+>   warns that flatness is the instrument). The **four** sent are off the **deployed** artefact.
+>   ⬜ Still open until he answers.
+> - ⬜ **AC7's hosting is Richard's**, and he ruled this session: **build the production viewer,
+>   stop short of publishing.**
+>
+> 🔴 **`nodegx deploy` REFUSES this checkout's development viewer BY NAME, and that is EXP-017
+> working, not a blocker:** *"9.43 MB inline source map, 66% of the file… uploading the folder puts
+> that source on your host"*. Every deploy reading above used `--allow-development-engine`, which is
+> honest for a census and **wrong for a publish**.
+>
+> ⚠️ **`deploy-from-disk.cjs` throws `ENOENT … /src/external/deploy/index.json` from anywhere but
+> `packages/noodl-editor`** — `getAppPath()` resolves to `process.cwd()`. That is a fact about the
+> working directory and **not** about the project, and it reads exactly like a broken template.
+>
+> ### 🟢 THE PRODUCTION VIEWER IS BUILT, AND THE ENGINE ACCEPTS IT WITH NO OVERRIDE
+>
+> Richard ruled it this session: **build it, stop short of publishing.** `npm run build:editor:_viewer`
+> exit 0 — **14 MB / 110,799 lines → 1.5 MB / 1 line**, a `.LICENSE.txt` sibling appears, and the
+> shipped engine goes from **refusing by name** to `ok: true`. On that runtime, with no flag:
+> **84/84 connections and 16/16 clauses, 0 console errors**, whole site **1.7 MB in 8 files**, and
+> the screenshot is pixel-identical to the development-viewer one. **AC7's build half is finished.**
+>
+> 🔴 **THAT BUILD OVERWROTE THIS SHARED CHECKOUT'S VIEWERS AND `git status` SAYS NOTHING.**
+> `build-viewer.ts` rewrote **all three** of `packages/noodl-editor/src/external/{deploy,viewer,ssr}`;
+> they are gitignored. The editor's preview now runs a **minified** viewer — **no readable stack
+> traces in the renderer console**, which matters before anyone reads frames off a drive.
+> ✅ **`npm run dev` restores a development build** (`scripts/start.ts:202` runs the viewer's `start`,
+> not `build`). The old 14 MB development bundle was backed up **to a session scratchpad only**,
+> which is gone with the session — `npm run dev` is the recovery, not that copy.
+>
+> ⚠️ **Never carry `--allow-development-engine` into a publish.** Every census in §9a used it,
+> honestly, because a census does not care what it measures. A publish does: the flag is what puts
+> 9.43 MB of base64 viewer source on a host.
+>
+> ### 🔴 THE FIRST JOB IS UNCHANGED FROM THE ENTRY BELOW, AND IT IS STILL UNMEASURED
+>
+> **D49's two-word fix on TPL-005 and TPL-004**, and **TPL-004's AC8 click-drive**. This session did
+> not touch either. 🔴 **And §9b-i is the argument for doing the drive rather than reading the
+> graph**: a build with three dead wires renders perfectly, reports **0 console errors**, and cannot
+> be played. TPL-004's pages are wired, statically valid, and **nobody has clicked any of them**.
+> ⬜ Also still unmeasured: **a `to-<state>` SIGNAL with transitions on** — one `to-` wire and one
+> colour value. Do not read D49 as having tested it.
+
 > ### 🟢 2026-09-12 — TPL-006, THE STORY ENGINE: **BUILT, GATED, DRIVEN AND COMMITTED.**
 >
 > `templates/story-engine/` — 9 components, 88 nodes, 84 connections, **zero `noodl_modules`**, no
@@ -175,6 +488,32 @@
 > re-measuring *after* committing: the ratchet said *"8 fewer markers than the baseline"*, which is
 > only possible if the tree moved under the measurement the message was written from.
 > **Typing credit for those 8 belongs to the peer session, not to `23c23e4a1`'s author.**
+>
+> 🔴 **`23c23e4a1`'s message contains a FALSE REASON, corrected here.** It says *"Nothing typechecks
+> `scripts/devtools/`: it is in no tsconfig's include"*. **It is included** — `scripts/tsconfig.json`
+> extends the root config and includes `./**/*.ts`. That claim came from grepping tsconfig files for
+> the string `"scripts`, which can never find a config that lives *inside* `scripts/` and uses a
+> relative include.
+> ⚠️ **But the conclusion stands for a different and worse reason: that config cannot run.**
+> `npx tsc -p scripts/tsconfig.json --noEmit` exits **134** with a V8 stack dump and **0 `error TS`
+> lines** — measured independently in two sessions, and OOMing even at an 8 GB heap. **A log like
+> that reads as green to anything counting error lines.** Gate on the exit status.
+> ✅ **To verify one file there, use a scoped config**: `extends` the root tsconfig with
+> `files: ["devtools/<file>.ts"]`. The peer session did this for the deploy entry and got 39 errors,
+> all in transitively-imported editor sources (`router.tsx`, `nodegrapheditor.ts`, `EditorPage.tsx`)
+> and **0 in the target file** — so the 8 types do compile.
+> 🔴 **That scoped config is DELIBERATELY NOT COMMITTED, and the reason is this section's own
+> principle.** It exits 2 with 39 errors that are artifacts of forcing `module: CommonJS` onto that
+> import graph, not defects. Committed as a `tsconfig.json` it would *read* as a gate, and the next
+> reader finds it red on arrival and either "fixes" 39 non-problems or learns that a red config is
+> normal — which is how a team stops believing its own gates. **A recipe whose output is "0 in the
+> target, 39 elsewhere, and you must check which" is a diagnostic, not a gate, and belongs in prose
+> where the caveat travels with it.** Rebuild it when you need the reading; do not enshrine it.
+>
+> ⬜ **The finding underneath is unowned and is Richard's call:** `scripts/` is *nominally* covered by
+> `scripts/tsconfig.json` and *verified by nothing*, because the only command that would check it
+> cannot complete. **Token-counting (`npm run tsfixme`) is the only thing that actually runs over that
+> tree.** Not opened as a task mid-release.
 >
 > ⚠️ **And `library/prefabs/form-fields/project/project.json` is still modified and uncommitted**
 > (mtime 09-11 14:50, predating both sessions). It reddens `cmp004Parts`, which asserts a

@@ -1,0 +1,175 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "cee1fdaa-06cc-5407-8ab1-a040ab609612",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "EditmarkIn",
+      "fromProperty": "markId",
+      "toId": "EditmarkGuard",
+      "toProperty": "in-markId"
+    },
+    {
+      "fromId": "EditmarkIn",
+      "fromProperty": "itemId",
+      "toId": "EditmarkGuard",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "EditmarkIn",
+      "fromProperty": "occurs",
+      "toId": "EditmarkGuard",
+      "toProperty": "in-occurs"
+    },
+    {
+      "fromId": "EditmarkIn",
+      "fromProperty": "amount",
+      "toId": "EditmarkGuard",
+      "toProperty": "in-amount"
+    },
+    {
+      "fromId": "EditmarkIn",
+      "fromProperty": "date",
+      "toId": "EditmarkGuard",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "EditmarkIn",
+      "fromProperty": "skip",
+      "toId": "EditmarkGuard",
+      "toProperty": "in-skip"
+    },
+    {
+      "fromId": "EditmarkIn",
+      "fromProperty": "payments",
+      "toId": "EditmarkGuard",
+      "toProperty": "in-payments"
+    },
+    {
+      "fromId": "EditmarkIn",
+      "fromProperty": "doneOn",
+      "toId": "EditmarkGuard",
+      "toProperty": "in-doneOn"
+    },
+    {
+      "fromId": "EditmarkIn",
+      "fromProperty": "doneAmount",
+      "toId": "EditmarkGuard",
+      "toProperty": "in-doneAmount"
+    },
+    {
+      "fromId": "EditmarkIn",
+      "fromProperty": "lostOn",
+      "toId": "EditmarkGuard",
+      "toProperty": "in-lostOn"
+    },
+    {
+      "fromId": "EditmarkIn",
+      "fromProperty": "sentOn",
+      "toId": "EditmarkGuard",
+      "toProperty": "in-sentOn"
+    },
+    {
+      "fromId": "EditmarkIn",
+      "fromProperty": "note",
+      "toId": "EditmarkGuard",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "EditmarkIn",
+      "fromProperty": "do",
+      "toId": "EditmarkGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "EditmarkGuard",
+      "fromProperty": "out-itemId",
+      "toId": "EditmarkWrite",
+      "toProperty": "prop-itemId"
+    },
+    {
+      "fromId": "EditmarkGuard",
+      "fromProperty": "out-occurs",
+      "toId": "EditmarkWrite",
+      "toProperty": "prop-occurs"
+    },
+    {
+      "fromId": "EditmarkGuard",
+      "fromProperty": "out-amount",
+      "toId": "EditmarkWrite",
+      "toProperty": "prop-amount"
+    },
+    {
+      "fromId": "EditmarkGuard",
+      "fromProperty": "out-date",
+      "toId": "EditmarkWrite",
+      "toProperty": "prop-date"
+    },
+    {
+      "fromId": "EditmarkGuard",
+      "fromProperty": "out-skip",
+      "toId": "EditmarkWrite",
+      "toProperty": "prop-skip"
+    },
+    {
+      "fromId": "EditmarkGuard",
+      "fromProperty": "out-payments",
+      "toId": "EditmarkWrite",
+      "toProperty": "prop-payments"
+    },
+    {
+      "fromId": "EditmarkGuard",
+      "fromProperty": "out-doneOn",
+      "toId": "EditmarkWrite",
+      "toProperty": "prop-doneOn"
+    },
+    {
+      "fromId": "EditmarkGuard",
+      "fromProperty": "out-doneAmount",
+      "toId": "EditmarkWrite",
+      "toProperty": "prop-doneAmount"
+    },
+    {
+      "fromId": "EditmarkGuard",
+      "fromProperty": "out-lostOn",
+      "toId": "EditmarkWrite",
+      "toProperty": "prop-lostOn"
+    },
+    {
+      "fromId": "EditmarkGuard",
+      "fromProperty": "out-sentOn",
+      "toId": "EditmarkWrite",
+      "toProperty": "prop-sentOn"
+    },
+    {
+      "fromId": "EditmarkGuard",
+      "fromProperty": "out-note",
+      "toId": "EditmarkWrite",
+      "toProperty": "prop-note"
+    },
+    {
+      "fromId": "EditmarkIn",
+      "fromProperty": "markId",
+      "toId": "EditmarkWrite",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "EditmarkGuard",
+      "fromProperty": "out-go",
+      "toId": "EditmarkWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "EditmarkWrite",
+      "fromProperty": "done",
+      "toId": "EditmarkOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "EditmarkWrite",
+      "fromProperty": "failure",
+      "toId": "EditmarkProblem",
+      "toProperty": "do"
+    }
+  ]
+}

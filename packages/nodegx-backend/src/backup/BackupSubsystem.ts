@@ -103,6 +103,7 @@ class BackupScheduleDispatcher implements SchedulerDispatcher {
           triggerType: 'schedule',
           triggerData: input.triggerData,
           metadata: {
+            kind: 'backup',
             backendId: this.backendId,
             backendName: this.backendName,
             operation: 'backup',

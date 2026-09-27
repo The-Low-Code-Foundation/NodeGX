@@ -192,6 +192,17 @@ docker compose exec backend node /app/cli.js backup --data-dir /data
 Scheduled backups, retention, off-box copies, and the restore runbook are in
 [BACKUP-RESTORE.md](../../packages/nodegx-backend/docs/BACKUP-RESTORE.md).
 
+**On a small VM, put uploads and archives in a bucket.** A backend that keeps
+every upload and every nightly archive on the same disk as its database fills
+that disk — and a full disk is the one failure that takes the database down
+with it. On the manager's **Storage** page choose *An S3-compatible bucket*
+(AWS S3, MinIO, Backblaze B2, Cloudflare R2, Hetzner Object Storage…), paste
+the endpoint, bucket and key, press **Test connection**, save; then on
+**Backups** choose *The bucket from the Storage page*. From then on new
+uploads and every archive land in the bucket, the VM's disk holds only the
+database, and a restore pulls the archive back down when you need it. Files
+uploaded before the switch stay where they were and keep serving.
+
 ## Troubleshooting
 
 **Packaging refuses: "the app bundle has `http://localhost:8577` baked in".**
@@ -232,7 +243,7 @@ if you hit it, add the segment to the `location ~ ^/(…)` alternation in
 **Reserved paths.** Because app and API share an origin, these top-level names
 belong to the backend and cannot be used by your app's own files or routes:
 `_admin`, `admin`, `aggregate`, `api`, `apps`, `auth`, `classes`, `config`,
-`executions`, `files`, `functions`, `health`, `hooks`, `login`, `logout`,
+`executions`, `files`, `functions`, `health`, `hooks`, `login`, `logout`, `mcp`,
 `oauth`, `realtime`, `requestPasswordReset`, `users`, `verificationEmailRequest`.
 
 ## Other hosting
@@ -246,7 +257,11 @@ node cli.js serve --data-dir /var/lib/nodegx --port 8577 --host 0.0.0.0
 ```
 
 So you can deploy the app to any static host and run that command under systemd,
-or use a different container platform, or your existing Kubernetes. Package the
+or use a different container platform, or your existing Kubernetes — **as a
+single replica**. The backend assumes one process per data directory, so a
+`replicas: 2` Deployment will come up cleanly and then double-fire every
+schedule, split its realtime stream and multiply its own rate limits.
+[Scaling](./SCALING.md) has the full list and what to do instead. Package the
 artifact with `node scripts/package-deploy.js --app <folder>` and you have the
 same deterministic tree the images are built from; the pieces in
 `deploy/nginx.conf` and `deploy/entrypoint.sh` are the reference for what any

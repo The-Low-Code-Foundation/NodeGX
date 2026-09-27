@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8cb4121c-0b24-43d6-a656-547818664fac",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cp_in",
+      "fromProperty": "name",
+      "toId": "cp_name",
+      "toProperty": "text"
+    }
+  ]
+}

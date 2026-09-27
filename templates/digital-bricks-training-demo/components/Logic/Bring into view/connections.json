@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1473c034-1e98-4ee6-b4d8-03f20b46e29c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "bv_in",
+      "fromProperty": "selector",
+      "toId": "bv_fn",
+      "toProperty": "in-selector"
+    },
+    {
+      "fromId": "bv_in",
+      "fromProperty": "openSelector",
+      "toId": "bv_fn",
+      "toProperty": "in-openSelector"
+    },
+    {
+      "fromId": "bv_in",
+      "fromProperty": "go",
+      "toId": "bv_fn",
+      "toProperty": "run"
+    }
+  ]
+}

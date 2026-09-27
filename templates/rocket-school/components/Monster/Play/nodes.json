@@ -1,0 +1,586 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4da83bda-873b-586c-8fab-83cf17f938d7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "zpIn",
+      "type": "Component Inputs",
+      "label": "The game, the player and the words",
+      "ports": [
+        {
+          "name": "start",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "style",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "timed",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "mode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "level",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "layout",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "answerMode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "curriculum",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "wordLists",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "soundOn",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "mounted",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "placeholder",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "checkWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fluentWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "correctWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "wrongWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "timeUpWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "nextWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "showMeWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "teachCards",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "anExampleWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "gotItWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "restartWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "changeWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "againWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pickWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hangarWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "zpWrap",
+      "type": "Group",
+      "label": "The game",
+      "children": [
+        "zpControls",
+        "zpLane",
+        "zpRoundSlot",
+        "zpTeach",
+        "zpResult"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "zpControls",
+      "type": "Group",
+      "label": "Restart, or change the game",
+      "parent": "zpWrap",
+      "children": [
+        "zpRestart",
+        "zpChange"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "justifyContent": "flex-end"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "zpRestart",
+      "type": "net.noodl.controls.button",
+      "label": "Restart",
+      "parent": "zpControls",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Restart"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "zpChange",
+      "type": "net.noodl.controls.button",
+      "label": "Change the game",
+      "parent": "zpControls",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Change the game"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "zpLane",
+      "type": "/Monster/Lane",
+      "label": "The lane",
+      "parent": "zpWrap",
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "zpRoundSlot",
+      "type": "Group",
+      "label": "While playing",
+      "parent": "zpWrap",
+      "children": [
+        "zpRound"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "zpRound",
+      "type": "/Race/Round",
+      "label": "This question",
+      "parent": "zpRoundSlot",
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "zpTeach",
+      "type": "/Game/Teach card",
+      "label": "Show me how",
+      "parent": "zpWrap",
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "zpResult",
+      "type": "/Race/Result",
+      "label": "How it ended",
+      "parent": "zpWrap",
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "zpNew",
+      "type": "/Logic/New monster game",
+      "label": "A new game",
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "zpAnswer",
+      "type": "/Logic/Monster move",
+      "label": "An answer, graded",
+      "parameters": {
+        "action": "answer"
+      },
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "zpArrive",
+      "type": "/Logic/Monster move",
+      "label": "The next monster",
+      "parameters": {
+        "action": "next"
+      },
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "zpGame",
+      "type": "Variable2",
+      "label": "The game as it stands",
+      "parameters": {
+        "name": "monsterGame"
+      },
+      "x": 410,
+      "y": 1960
+    },
+    {
+      "id": "zpSetGame",
+      "type": "Set Variable",
+      "label": "The game after a move",
+      "parameters": {
+        "name": "monsterGame"
+      },
+      "x": 410,
+      "y": 2080
+    },
+    {
+      "id": "zpDraw",
+      "type": "/Logic/Draw monster",
+      "label": "The game, drawn",
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "zpPhase",
+      "type": "States",
+      "label": "Playing, the end card, or a Teach card",
+      "parameters": {
+        "states": "playing,over,teaching",
+        "values": "playing,over,teaching,controls",
+        "useTransitions": false,
+        "type-playing": "boolean",
+        "value-playing-playing": true,
+        "value-over-playing": false,
+        "value-teaching-playing": false,
+        "type-over": "boolean",
+        "value-playing-over": false,
+        "value-over-over": true,
+        "value-teaching-over": false,
+        "type-teaching": "boolean",
+        "value-playing-teaching": false,
+        "value-over-teaching": false,
+        "value-teaching-teaching": true,
+        "type-controls": "boolean",
+        "value-playing-controls": true,
+        "value-over-controls": false,
+        "value-teaching-controls": true
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "zpIsOver",
+      "type": "Condition",
+      "label": "Game over?",
+      "parameters": {},
+      "x": 410,
+      "y": 2200
+    },
+    {
+      "id": "zpFinish",
+      "type": "/Logic/Finish monster",
+      "label": "Pay the game, once",
+      "x": 410,
+      "y": 1840
+    },
+    {
+      "id": "zpGoOn",
+      "type": "Condition",
+      "label": "Another question, or the end card?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "zpCheer",
+      "type": "Condition",
+      "label": "The gate held, or it got in?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 410,
+      "y": 2320
+    },
+    {
+      "id": "zpTeachPick",
+      "type": "/Logic/Teach card",
+      "label": "The card for the skill just missed",
+      "x": 410,
+      "y": 1720
+    },
+    {
+      "id": "zpStep",
+      "type": "Expression",
+      "label": "Which step: less each miss in a row",
+      "parameters": {
+        "expression": "min(2, max(0, misses - 1))"
+      },
+      "x": 410,
+      "y": 1480
+    },
+    {
+      "id": "zpWalking",
+      "type": "Variable2",
+      "label": "Walking?",
+      "parameters": {
+        "name": "monsterWalking"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "zpWalkOn",
+      "type": "Set Variable",
+      "label": "It walks",
+      "parameters": {
+        "name": "monsterWalking"
+      },
+      "x": 410,
+      "y": 2440
+    },
+    {
+      "id": "zpWalkOff",
+      "type": "Set Variable",
+      "label": "It stops",
+      "parameters": {
+        "name": "monsterWalking"
+      },
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "zpWalkDelay",
+      "type": "Timer",
+      "label": "Once the clock has refilled",
+      "parameters": {
+        "duration": 150
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "zpTrue",
+      "type": "Expression",
+      "label": "True",
+      "parameters": {
+        "expression": "true"
+      },
+      "x": 410,
+      "y": 2560
+    },
+    {
+      "id": "zpFalse",
+      "type": "Expression",
+      "label": "False",
+      "parameters": {
+        "expression": "false"
+      },
+      "x": 410,
+      "y": 2680
+    },
+    {
+      "id": "zpShown",
+      "type": "Expression",
+      "label": "Only while playing",
+      "parameters": {
+        "expression": "m === true"
+      },
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "zpOut",
+      "type": "Component Outputs",
+      "label": "How it went",
+      "ports": [
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "graded",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "changeGame",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "hangar",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cheer",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "sigh",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 1600
+    }
+  ],
+  "visualRoots": [
+    "zpWrap"
+  ]
+}

@@ -1,0 +1,292 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ba7a8478-e9c1-5aaa-8087-217fca382e6c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "trIn",
+      "type": "Component Inputs",
+      "label": "The task",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rank",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "meta",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasMeta",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "metaColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "titleWeight",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "bg",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "canUp",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "canDown",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "trOut",
+      "type": "Component Outputs",
+      "label": "What you did to it",
+      "ports": [
+        {
+          "name": "open",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "up",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "down",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "close",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "trRow",
+      "type": "Group",
+      "label": "Row",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "children": [
+        "trRank",
+        "trMain",
+        "trUp",
+        "trDown",
+        "trClose"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "trRank",
+      "type": "Text",
+      "label": "Its place",
+      "parent": "trRow",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 28,
+          "unit": "px"
+        },
+        "textAlignX": "right",
+        "fontVariantNumeric": "tabular-nums"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "trMain",
+      "type": "Group",
+      "label": "Title and what is next",
+      "parent": "trRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0-5)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "children": [
+        "trTitle",
+        "trMeta"
+      ],
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "trTitle",
+      "type": "Text",
+      "label": "Title",
+      "parent": "trMain",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "trMeta",
+      "type": "Text",
+      "label": "Deadline and next action",
+      "parent": "trMain",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "trUp",
+      "type": "net.noodl.controls.button",
+      "label": "Move up",
+      "parent": "trRow",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "▲",
+        "fontSize": "var(--text-base)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "trDown",
+      "type": "net.noodl.controls.button",
+      "label": "Move down",
+      "parent": "trRow",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "▼",
+        "fontSize": "var(--text-base)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "trClose",
+      "type": "net.noodl.controls.button",
+      "label": "Close it",
+      "parent": "trRow",
+      "parameters": {
+        "label": "✓",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--border-control)",
+        "backgroundColor": "transparent",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-2)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-full)",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 26,
+          "unit": "px"
+        },
+        "height": {
+          "value": 26,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0)",
+        "paddingBottom": "var(--space-0)",
+        "marginLeft": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "trRow"
+  ]
+}

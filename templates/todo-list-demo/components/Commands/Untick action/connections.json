@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "346322dd-bb18-59c4-80b5-65a95bb69475",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "UntickactiIn",
+      "fromProperty": "rows",
+      "toId": "UntickactiGuard",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "UntickactiIn",
+      "fromProperty": "actionId",
+      "toId": "UntickactiGuard",
+      "toProperty": "in-actionId"
+    },
+    {
+      "fromId": "UntickactiIn",
+      "fromProperty": "note",
+      "toId": "UntickactiGuard",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "UntickactiIn",
+      "fromProperty": "position",
+      "toId": "UntickactiGuard",
+      "toProperty": "in-position"
+    },
+    {
+      "fromId": "UntickactiIn",
+      "fromProperty": "do",
+      "toId": "UntickactiGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "UntickactiGuard",
+      "fromProperty": "out-done",
+      "toId": "UntickactiWrite",
+      "toProperty": "in-done"
+    },
+    {
+      "fromId": "UntickactiGuard",
+      "fromProperty": "out-empty",
+      "toId": "UntickactiWrite",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "UntickactiGuard",
+      "fromProperty": "out-position",
+      "toId": "UntickactiWrite",
+      "toProperty": "in-position"
+    },
+    {
+      "fromId": "UntickactiIn",
+      "fromProperty": "actionId",
+      "toId": "UntickactiWrite",
+      "toProperty": "in-modelId"
+    },
+    {
+      "fromId": "UntickactiGuard",
+      "fromProperty": "out-go",
+      "toId": "UntickactiWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "UntickactiIn",
+      "fromProperty": "taskId",
+      "toId": "UntickactiHistory",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "UntickactiGuard",
+      "fromProperty": "out-summary",
+      "toId": "UntickactiHistory",
+      "toProperty": "summary"
+    },
+    {
+      "fromId": "UntickactiGuard",
+      "fromProperty": "out-note",
+      "toId": "UntickactiHistory",
+      "toProperty": "body"
+    },
+    {
+      "fromId": "UntickactiWrite",
+      "fromProperty": "out-done",
+      "toId": "UntickactiHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "UntickactiHistory",
+      "fromProperty": "done",
+      "toId": "UntickactiOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "UntickactiWrite",
+      "fromProperty": "out-failure",
+      "toId": "UntickactiProblem",
+      "toProperty": "do"
+    }
+  ]
+}

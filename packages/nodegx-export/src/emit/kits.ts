@@ -326,8 +326,10 @@ export function tsTypeOf(port: KitPortIR): string {
       return 'readonly unknown[]';
     case 'object':
       return 'Record<string, unknown>';
+    // P88 GAM-017 — a signal INPUT is a pulse count, the number the viewer hands a signal prop. Signal
+    // outputs never reach this switch: they are `() => void` handler props (`signalPropOf`).
     case 'signal':
-      return 'void';
+      return 'number';
     default:
       return 'unknown';
   }
@@ -449,6 +451,11 @@ function createNode(def: KitDefinition, callbacks: React.RefObject<Callbacks>, r
   };
 
   for (const [name, input] of Object.entries<any>(def.inputProps ?? {})) {
+    // GAM-017: a signal prop is a pulse count, and 0 is "not signalled yet" — the bridge's seed.
+    if (input && (input.type === 'signal' || input.type?.name === 'signal')) {
+      node.props[name] = 0;
+      continue;
+    }
     if (!input || !Object.prototype.hasOwnProperty.call(input, 'default')) continue;
     const unit = input.type && typeof input.type === 'object' ? input.type.defaultUnit : undefined;
     node.props[name] =
@@ -526,6 +533,30 @@ export function KitNode({ type, params, signals, values, children }: KitNodeProp
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [node, definition, ...setterValues]);
 
+  /*
+   * P88 GAM-017 — an \`inputs\` signal (\`valueChangedToTrue\`) arrives as a pulse count from the page. Each
+   * time the count goes up the edge runs once, as the runtime's edge-triggered setter does; the count the
+   * node first mounts with is where it starts, not a pulse. (A signal PROP needs none of this: the count
+   * is the prop, exactly what the viewer hands the component.)
+   */
+  const pulsePorts = React.useMemo(
+    () => Object.keys(definition?.inputs ?? {}).filter((name) => typeof definition.inputs[name]?.valueChangedToTrue === 'function'),
+    [definition]
+  );
+  const pulseCounts = React.useRef<Record<string, number>>({});
+  const pulseValues = pulsePorts.map((name) => params?.[name]);
+  React.useEffect(() => {
+    if (!node || !definition) return;
+    for (const name of pulsePorts) {
+      const count = params?.[name];
+      if (typeof count !== 'number') continue;
+      const seen = pulseCounts.current[name];
+      pulseCounts.current[name] = count;
+      if (seen !== undefined && count > seen) definition.inputs[name].valueChangedToTrue.call(node);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [node, definition, ...pulseValues]);
+
   React.useEffect(() => {
     if (!definition) {
       // eslint-disable-next-line no-console
@@ -540,6 +571,8 @@ export function KitNode({ type, params, signals, values, children }: KitNodeProp
   }
 
   const componentProps: Record<string, any> = { ...node.props, ...params };
+  // An \`inputs\` signal's count is for the edge effect above, not a prop the component was ever handed.
+  for (const name of pulsePorts) delete componentProps[name];
   if (children !== undefined) componentProps.children = children;
   return React.createElement(node.reactComponent, componentProps);
 }

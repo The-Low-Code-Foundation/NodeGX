@@ -1,0 +1,102 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d62f37fc-c3ff-5f61-8847-b6f871d3771a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "asIn",
+      "type": "Component Inputs",
+      "label": "A write",
+      "ports": [
+        {
+          "name": "write",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "app",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "asStore",
+      "type": "net.noodl.GlobalStore",
+      "label": "The persisted store",
+      "parameters": {
+        "storeName": "rocket",
+        "persist": true,
+        "storageKey": "rocket-school"
+      },
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "asRead",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "label": "Read the app object",
+      "parameters": {
+        "storeName": "rocket",
+        "keys": "app"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "asWrite",
+      "type": "net.noodl.GlobalStore.Set",
+      "label": "Write the app object",
+      "parameters": {
+        "storeName": "rocket",
+        "key": "app",
+        "merge": false
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "asKeep",
+      "type": "game-kit.KeepStorage",
+      "label": "Ask the browser to keep the storage",
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "asOut",
+      "type": "Component Outputs",
+      "label": "The store, read",
+      "ports": [
+        {
+          "name": "app",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "written",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "ready",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "error",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 640
+    }
+  ]
+}

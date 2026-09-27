@@ -39,7 +39,8 @@
     "array→collection": "Array and collection (legacy shared-list type) are interchangeable: the same underlying list object flows through unchanged.",
     "object→string": "The runtime serialises with JSON.stringify before the receiver's cast runs (NDA-014, PORT-TYPE-CONTRACT.md). Values with their own toString (e.g. Date) keep that rendering; circular structures deliver '' and raise a warning.",
     "array→string": "The runtime serialises with JSON.stringify before the receiver's cast runs (NDA-014, PORT-TYPE-CONTRACT.md). Circular structures deliver '' and raise a warning.",
-    "color→string": "The resolved color string — a style name resolves to its value (context.styles.resolveColor) before crossing the wire."
+    "color→string": "The resolved color string — a style name resolves to its value (context.styles.resolveColor) before crossing the wire.",
+    "enum→string": "The option's value (not its label), which is already a string, arrives unchanged. There is no enum→number cast: parse it with an Expression."
   },
   "verifiedPairs": {
     "$comment": "Sampled pairs asserted by scripts/node-catalog/merge.js against the gate rule + the catalog typecast table on every merge/check. 'permitted' must pass canCastPortTypes; 'rejected' must fail it.",
@@ -59,7 +60,8 @@
       { "from": "object", "to": "object", "note": "same type always connects" },
       { "from": "object", "to": "string", "note": "NDA-014: JSON on the wire" },
       { "from": "array", "to": "string", "note": "NDA-014: JSON on the wire" },
-      { "from": "color", "to": "string", "note": "NDA-014: the resolved color string" }
+      { "from": "color", "to": "string", "note": "NDA-014: the resolved color string" },
+      { "from": "enum", "to": "string", "note": "P88 GAM-023 ruling: an enum is a string" }
     ],
     "rejected": [
       { "from": "number", "to": "signal", "note": "numbers do not edge-trigger; go via boolean" },
@@ -68,7 +70,7 @@
       { "from": "image", "to": "string" },
       { "from": "signal", "to": "string" },
       { "from": "date", "to": "number", "note": "date only casts to string; use an Expression for timestamps" },
-      { "from": "enum", "to": "string" },
+      { "from": "enum", "to": "number", "note": "only enum→string is a cast; parse with an Expression" },
       { "from": "dimension", "to": "number" },
       { "from": "string", "to": "signal", "note": "strings never trigger signals; go via boolean" }
     ]

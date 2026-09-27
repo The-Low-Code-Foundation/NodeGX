@@ -1,0 +1,21 @@
+{
+  "commentTab": {
+    "fieldTop": 193,
+    "fieldHeight": 31,
+    "fieldWidth": 300,
+    "placeholder": "Why it's this way — a constraint, a rule, a decision"
+  },
+  "picked": "{\"component\":\"/App\",\"id\":\"app_css\",\"type\":\"CSS Definition\",\"color\":\"javascript\"}",
+  "select": "ok",
+  "other": {
+    "eyebrow": "CSS Definition · Function",
+    "glyphColor": "rgb(247, 118, 196)",
+    "rows": [],
+    "tabs": [
+      "Properties",
+      "Ports",
+      "Comment"
+    ],
+    "firstLabelTop": 229
+  }
+}

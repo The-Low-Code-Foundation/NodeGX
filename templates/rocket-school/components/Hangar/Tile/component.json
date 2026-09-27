@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ae90e67f-58fd-53c8-8a25-be68088bb32a",
+  "name": "Tile",
+  "path": "/Hangar/Tile",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One shelf item: the child’s own face wearing it (or the paint as a swatch), its name, and what a tap does. Worn fills it sunshine; Dim greys an item that does not fit today’s face or is still locked, and its note says why. Publishes Pick (a pick to spend on it) or Wear (theirs to put on or take off), with the item id."
+}

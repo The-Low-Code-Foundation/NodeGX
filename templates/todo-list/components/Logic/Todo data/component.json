@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4c3cdd80-768e-508d-8b8f-0f92f384f9c0",
+  "name": "Todo data",
+  "path": "/Logic/Todo data",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The four queries: your tasks, your next actions, the selected task’s history, and recent history across all tasks. Refresh loads them all again; a task’s history is only asked for when a task is selected."
+}

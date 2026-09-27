@@ -56,7 +56,7 @@ import {
   AUDIT_SYSTEM_ROLE_USER_ADD,
   AUDIT_SYSTEM_ROLE_USER_REMOVE
 } from '../ops/audit-actions';
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import { ROLE_NAME_RULE, RoleStore, isValidRoleName } from './RoleStore';
 
 /**
@@ -119,14 +119,14 @@ export interface SystemRoleResult {
 }
 
 export interface SystemRolesDeps {
-  facade: AdapterFacade;
+  facade: IStorageFacade;
   /**
    * ⚠️ Must be `SecurityState.rolesForUser` itself, not a re-implementation.
    * The `Roles` output exists to answer "did the membership take effect?", and
    * an answer from a second resolver would be an answer about a different
    * question.
    */
-  rolesForUser(userId: string): string[];
+  rolesForUser(userId: string): Promise<string[]>;
   /** Called after every write, for the audit trail. Never throws. */
   onAudit?(entry: { action: string; outcome: 'success' | 'failure'; target: Record<string, unknown> }): void;
 }
@@ -177,7 +177,7 @@ function boundedInt(value: unknown, fallback: number, minimumMeaningful: number)
  */
 export class SystemRoles {
   private readonly roles: RoleStore;
-  private readonly facade: AdapterFacade;
+  private readonly facade: IStorageFacade;
   private readonly rolesForUser: SystemRolesDeps['rolesForUser'];
   private readonly onAudit: SystemRolesDeps['onAudit'];
 
@@ -280,7 +280,7 @@ export class SystemRoles {
       role: name,
       userId,
       roleCreated,
-      roles: this.rolesForUser(userId)
+      roles: await this.rolesForUser(userId)
     };
   }
 
@@ -312,7 +312,7 @@ export class SystemRoles {
         error: `There is no role named "${name}", so nobody is in it.`,
         role: name,
         userId,
-        roles: this.rolesForUser(userId)
+        roles: await this.rolesForUser(userId)
       };
     }
 
@@ -331,7 +331,7 @@ export class SystemRoles {
       error: was ? undefined : `That user was not in the role "${name}".`,
       role: name,
       userId,
-      roles: this.rolesForUser(userId)
+      roles: await this.rolesForUser(userId)
     };
   }
 
@@ -360,7 +360,7 @@ export class SystemRoles {
       return fail('role/user-not-found', `There is no user with the id "${userId}".`);
     }
 
-    const roles = this.rolesForUser(userId);
+    const roles = await this.rolesForUser(userId);
     return {
       outcome: roles.length > 0 ? 'done' : 'unchanged',
       code: roles.length > 0 ? undefined : 'role/no-roles',

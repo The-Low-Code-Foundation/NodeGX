@@ -167,7 +167,8 @@
                         "x": 471.507425897032,
                         "y": 312.246805986177,
                         "parameters": {
-                            "target": "/#Image Cropper/Example Usage/Cropper Popup"
+                            "target": "/#Image Cropper/Example Usage/Cropper Popup",
+                            "accessibleName": "Crop image"
                         },
                         "ports": [],
                         "dynamicports": [

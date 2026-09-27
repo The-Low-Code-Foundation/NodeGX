@@ -8,62 +8,175 @@
  * @module adapters/local-sql/SchemaManager
  */
 
+import { aclPredicateSql } from '../postgres/predicates';
 import type { EngineDatabase } from './engine';
 import { escapeTable, escapeColumn } from './QueryBuilder';
+import {
+  builtInIndexNames as sharedBuiltInIndexNames,
+  CHECK_FAILED_PREFIX,
+  checkChecksAgainstColumns,
+  checkName,
+  checkSQL,
+  checkWhereAgainstColumns,
+  describeCheck,
+  normalizeCheckDecls,
+  sameCheck,
+  type CheckDecl,
+  type CheckReconcileReport,
+  type CheckStatus,
+  declaredColumn,
+  declaredProperties,
+  describeWhere,
+  indexName as sharedIndexName,
+  MigrationRefusal,
+  normalizeIndexDecls,
+  POSTGRES_TYPE_MAP,
+  junctionTableName,
+  quoteLiteral,
+  refuseColumnInUse,
+  sameIndexSignature,
+  sanitizeIdent,
+  SYSTEM_COLUMNS,
+  TYPE_MAP,
+  type BuiltIndex,
+  type IndexDecl,
+  type IndexReconcileReport,
+  type IndexStatus,
+  type IndexWhere,
+  type SchemaColumn,
+  type TableSchema,
+  whereSQL
+} from './schemaCommon';
+import { columnToPostgres, relationJunctions, tableDDL } from '../postgres/ddl';
 
-/** One column of a collection schema, as the editor's data model persists it. */
-interface SchemaColumn {
-  name: string;
-  type: string;
-  /** Relations only: the class on the other side of the junction table. */
-  targetClass?: string;
-  required?: boolean;
-  defaultValue?: unknown;
-}
+/**
+ * A unique index refused by the rows already in the table (FED-002 AC4).
+ *
+ * Carries the numbers rather than a sentence because the caller has to put them
+ * in front of a person: how many values are duplicated, and three of them, so
+ * "your feed table has 412 items sharing 3 guids" can be said instead of
+ * "UNIQUE constraint failed".
+ */
+class IndexDuplicatesError extends Error {
+  code: string;
+  table: string;
+  fields: string[];
+  duplicates: number;
+  samples: unknown[][];
 
-/** A collection's schema as tracked in the `_Schema` table. */
-interface TableSchema {
-  name: string;
-  columns?: SchemaColumn[];
-  [extra: string]: unknown;
+  constructor(table: string, fields: string[], duplicates: number, samples: unknown[][], where?: IndexWhere) {
+    super(
+      `Cannot make (${fields.join(', ')}) unique on "${table}"` +
+        (where ? ` where ${describeWhere(where)}` : '') +
+        `: ${duplicates} ` +
+        `value${duplicates === 1 ? '' : 's'} already appear${duplicates === 1 ? 's' : ''} more than once ` +
+        `(${samples.map((s) => JSON.stringify(s.length === 1 ? s[0] : s)).join(', ')}). ` +
+        'Nothing was changed and no row was deleted.'
+    );
+    this.name = 'IndexDuplicatesError';
+    this.code = 'INDEX_DUPLICATES';
+    this.table = table;
+    this.fields = fields;
+    this.duplicates = duplicates;
+    this.samples = samples;
+  }
 }
 
 /**
- * Map Noodl/Parse types to SQLite types
+ * A check refused by the rows already in the table (HLT-016 C3). The same
+ * shape as {@link IndexDuplicatesError}, for the same reason: the caller has to
+ * say "3 rows already break it" to a person.
  */
-const TYPE_MAP: Record<string, string | null> = {
-  String: 'TEXT',
-  Number: 'REAL',
-  Boolean: 'INTEGER', // SQLite uses 0/1
-  Date: 'TEXT', // ISO8601 string
-  Object: 'TEXT', // JSON string
-  Array: 'TEXT', // JSON string
-  Pointer: 'TEXT', // objectId reference
-  Relation: null, // Handled via junction tables
-  GeoPoint: 'TEXT', // JSON string
-  File: 'TEXT' // JSON string with url/name
-};
+class CheckViolationsError extends Error {
+  code: string;
+  table: string;
+  check: string;
+  violations: number;
+
+  constructor(table: string, check: CheckDecl, violations: number) {
+    super(
+      `Cannot require "${describeCheck(check)}" on "${table}": ${violations} ` +
+        `row${violations === 1 ? '' : 's'} already break${violations === 1 ? 's' : ''} it. ` +
+        'Nothing was changed and no row was deleted.'
+    );
+    this.name = 'CheckViolationsError';
+    this.code = 'CHECK_VIOLATIONS';
+    this.table = table;
+    this.check = describeCheck(check);
+    this.violations = violations;
+  }
+}
+
+/** Options for the plain PostgreSQL export. */
+interface PostgresExportOptions {
+  /**
+   * Emit a `BEFORE UPDATE` trigger stamping `updatedAt`. Off by default and
+   * on for the Supabase path — see the comment at its emission site: on the
+   * NodeGX path the app stamps the column itself and a trigger would overwrite
+   * what the caller just wrote.
+   */
+  updatedAtTrigger?: boolean;
+}
 
 /**
- * Map Noodl types to PostgreSQL types (for export)
+ * The shape of `security.json` this export reads, declared structurally rather
+ * than imported: the configuration lives in `nodegx-backend` and this package
+ * is below it. Only the two fields the policies are generated from are named,
+ * so a change to the rest of the config cannot break the export by type alone.
  */
-const POSTGRES_TYPE_MAP: Record<string, string | null> = {
-  String: 'TEXT',
-  Number: 'NUMERIC',
-  Boolean: 'BOOLEAN',
-  Date: 'TIMESTAMPTZ',
-  Object: 'JSONB',
-  Array: 'JSONB',
-  Pointer: 'TEXT', // or UUID with FK
-  Relation: null,
-  GeoPoint: 'POINT', // or use PostGIS
-  File: 'JSONB'
-};
+interface SecurityRulesLike {
+  defaults: { permissions: Record<string, string | string[]>; creatorOwns?: boolean };
+  collections?: Record<string, { permissions?: Record<string, string | string[]>; creatorOwns?: boolean }>;
+}
+
+/** Options for the Supabase export. Both fields are required in practice — see `generateSupabaseSQL`. */
+interface SupabaseExportOptions {
+  /** The live CLP configuration. Absent: refused. */
+  security?: SecurityRulesLike;
+  /** The JWT claim carrying the NodeGX `_User` objectId. Absent: refused. */
+  userIdClaim?: string;
+}
 
 /**
  * SchemaManager class
  */
+/**
+ * BMG-003: the cached schema is replaced, never mutated in place, after every
+ * change. `declaredProperties` memoises its derived map against the schema
+ * OBJECT (a WeakMap keyed by identity, per its own docstring: "SchemaManager
+ * replaces the cached object when a column is added"), and `addColumn` pushed
+ * into the same object — so a column added after any read of the collection
+ * had no declared type until restart: a max-length rule on it was refused as
+ * "a property with no declared type", and a Boolean written to it was not read
+ * back as one. A fresh object derives afresh.
+ */
+function freshSchema<T>(schema: T): T {
+  return JSON.parse(JSON.stringify(schema)) as T;
+}
+
 class SchemaManager {
+  /**
+   * Exposed as a static so a caller across the package edge (nodegx-backend
+   * requires this module untyped) can identify the refusal without matching on
+   * a sentence. `err.code === 'INDEX_DUPLICATES'` is the supported check.
+   */
+  static IndexDuplicatesError = IndexDuplicatesError;
+
+  /** HLT-016: `err.code === 'CHECK_VIOLATIONS'` is the supported check. */
+  static CheckViolationsError = CheckViolationsError;
+
+  /** Same reason, same door: `err.code === 'CANNOT_CROSS'` is the supported check. */
+  static MigrationRefusal = MigrationRefusal;
+
+  /**
+   * The two type maps, exposed so the portability invariant BETWEEN them can
+   * be asserted instead of believed: every type SQLite stores as a column must
+   * have a PostgreSQL type, or the export drops the column. That invariant is
+   * what `Relation: null` plus `if (pgType)` breached (BRG-D3), and nothing
+   * could read the maps to notice.
+   */
+  static TYPE_MAPS = { sqlite: TYPE_MAP, postgres: POSTGRES_TYPE_MAP };
+
   db: EngineDatabase;
   _schemaCache: Map<string, TableSchema>;
 
@@ -144,7 +257,18 @@ class SchemaManager {
       )
       .run(tableName, JSON.stringify(schema));
 
-    this._schemaCache.set(tableName, schema);
+    this._schemaCache.set(tableName, freshSchema(schema));
+
+    // FED-002: the indexes the schema declares, applied to a table that is one
+    // statement old and therefore empty — no unique declaration can be refused
+    // by data here. `createTable` is create-if-absent, so a push against a
+    // table that already exists reconciles through `reconcileIndexes` instead.
+    if (schema.checks !== undefined) {
+      this.reconcileChecks(tableName, schema.checks);
+    }
+    if (schema.indexes !== undefined) {
+      this.reconcileIndexes(tableName, schema.indexes);
+    }
 
     return true;
   }
@@ -155,21 +279,41 @@ class SchemaManager {
   addColumn(tableName: string, column: SchemaColumn): void {
     const colDef = this._columnToSQL(column);
     if (!colDef) {
+      // BMG-003: a Relation is a junction table, not a column. Before this it
+      // was dropped here — "Links" added to an existing collection did nothing,
+      // silently, on both engines. Now it is created and declared, exactly as
+      // `createTable` would have.
+      if (column.type === 'Relation' && column.targetClass) {
+        const schema = this.getTableSchema(tableName);
+        if (!schema) throw new Error(`Table "${tableName}" does not exist`);
+        if ((schema.columns || []).some((c) => c.name === column.name)) return;
+        this._createJunctionTable(tableName, column.name, column.targetClass);
+        schema.columns = (schema.columns || []).concat([column]);
+        this.db
+          .prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`)
+          .run(JSON.stringify(schema), tableName);
+        this._schemaCache.set(tableName, freshSchema(schema));
+      }
       return;
     }
 
     try {
-      this.db.exec(`ALTER TABLE ${escapeTable(tableName)} ADD COLUMN ${colDef}`);
+      // R6: a one-time fill is, on this engine, the column's DDL default — the
+      // rows already there read it. It is not declared, and `create` names a
+      // required column without a declared default as NULL when a record leaves
+      // it out, so the fill never reaches a new record.
+      const ddl = column.fillExisting === undefined ? colDef : this._columnToSQL({ ...column, defaultValue: column.fillExisting });
+      this.db.exec(`ALTER TABLE ${escapeTable(tableName)} ADD COLUMN ${ddl}`);
 
       // Update schema tracking
       const schema = this.getTableSchema(tableName);
       if (schema) {
         schema.columns = schema.columns || [];
-        schema.columns.push(column);
+        schema.columns.push(declaredColumn(column));
         this.db
           .prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`)
           .run(JSON.stringify(schema), tableName);
-        this._schemaCache.set(tableName, schema);
+        this._schemaCache.set(tableName, freshSchema(schema));
       }
     } catch (e) {
       // Column may already exist
@@ -177,6 +321,59 @@ class SchemaManager {
         throw e;
       }
     }
+  }
+
+  /**
+   * BMG-003 — drop a column. A Relation is a junction table, so that is what
+   * goes. A declared index, check or search opt-in that reads the column is a
+   * refusal (`code: 'COLUMN_IN_USE'`) naming it — SQLite's own DROP COLUMN
+   * would refuse a column an index or a trigger names, in its own words; this
+   * says the same thing in a person's, before any DDL, on both engines.
+   *
+   * @returns Whether there was a column to drop.
+   */
+  dropColumn(tableName: string, columnName: string): boolean {
+    const exists = this.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?").get(tableName);
+    if (!exists) throw new Error(`Table "${tableName}" does not exist`);
+    if (SYSTEM_COLUMNS.includes(columnName)) throw new Error(`Cannot drop "${columnName}": every record carries it.`);
+    const schema = this.getTableSchema(tableName);
+    const declared = ((schema && schema.columns) || []).find((c) => c.name === columnName);
+    const physical = this.tableColumns(tableName).has(columnName);
+    if (!declared && !physical) return false;
+
+    // The FTS sync trigger names every indexed column (`new."col"`), so it is
+    // the honest record of the search opt-in on this engine.
+    const fts = this.db
+      .prepare("SELECT sql FROM sqlite_master WHERE type = 'trigger' AND name = ?")
+      .get(`${tableName}_fts_ai`) as { sql?: string } | undefined;
+    const searched = fts && typeof fts.sql === 'string' && fts.sql.includes(escapeColumn(columnName)) ? [columnName] : undefined;
+    refuseColumnInUse(
+      tableName,
+      columnName,
+      this.declaredIndexes(tableName).map((i) => ({ name: this.indexName(tableName, i.fields, i.where), fields: i.fields })),
+      this.declaredChecks(tableName),
+      searched
+    );
+
+    const relation = !!declared && declared.type === 'Relation';
+    this.db.exec('SAVEPOINT nodegx_drop_column');
+    try {
+      if (relation) this.db.exec(`DROP TABLE IF EXISTS ${escapeTable(junctionTableName(tableName, columnName))}`);
+      else if (physical) this.db.exec(`ALTER TABLE ${escapeTable(tableName)} DROP COLUMN ${escapeColumn(columnName)}`);
+      if (schema && declared) {
+        schema.columns = (schema.columns || []).filter((c) => c !== declared);
+        this.db
+          .prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`)
+          .run(JSON.stringify(schema), tableName);
+        this._schemaCache.set(tableName, freshSchema(schema));
+      }
+      this.db.exec('RELEASE nodegx_drop_column');
+    } catch (e) {
+      this.db.exec('ROLLBACK TO nodegx_drop_column');
+      this.db.exec('RELEASE nodegx_drop_column');
+      throw e;
+    }
+    return true;
   }
 
   /**
@@ -245,7 +442,7 @@ class SchemaManager {
           this.db
             .prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`)
             .run(JSON.stringify(schema), tableName);
-          this._schemaCache.set(tableName, schema);
+          this._schemaCache.set(tableName, freshSchema(schema));
         }
       }
 
@@ -369,7 +566,7 @@ class SchemaManager {
     this.db
       .prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`)
       .run(JSON.stringify(schema), tableName);
-    this._schemaCache.set(tableName, schema);
+    this._schemaCache.set(tableName, freshSchema(schema));
 
     return { changed: true, from: oldType, rebuilt, convertedValues };
   }
@@ -390,7 +587,7 @@ class SchemaManager {
 
     if (row) {
       const schema = JSON.parse(row.schema);
-      this._schemaCache.set(tableName, schema);
+      this._schemaCache.set(tableName, freshSchema(schema));
       return schema;
     }
 
@@ -428,109 +625,326 @@ class SchemaManager {
     return rows.map((r) => JSON.parse(r.schema));
   }
 
+  // ===========================================================================
+  // The Postgres export — BRG-004, phase 97
+  //
+  // What was here before dropped every declared index (BRG-D2), dropped every
+  // relation column with no warning (BRG-D3), and — on the Supabase path —
+  // emitted four `TO authenticated … USING (true)` policies per table over a
+  // backend that enforces row ACLs in the SQL it builds (BRG-D1). Richard ruled
+  // (R3) that it is repaired here rather than removed.
+  //
+  // The rule the repair is written to, and the phase's own sentence: **anything
+  // that cannot be carried across is named and refused, never approximated.**
+  // Every `MigrationRefusal` below is a thing this export could have emitted
+  // something plausible for.
+  // ===========================================================================
+
   /**
-   * Generate PostgreSQL-compatible SQL for migration
+   * One relation column as the junction table it is actually stored in.
+   *
+   * The name is reproduced EXACTLY as `_createJunctionTable` builds it, down to
+   * the same sanitisation, rather than given a nicer one: the junction table's
+   * name is this adapter's private convention (`getRelationOwners`' docstring
+   * says so), and a junction the adapter cannot find by name is a relation that
+   * does not traverse on the other side.
+   *
+   * A `Relation` column with no `targetClass` has no junction table in SQLite
+   * either — nothing was stored, so there is nothing to carry.
    */
-  generatePostgresSQL(): string {
-    const schemas = this.exportSchemas();
-    const statements: string[] = [];
+  _relationJunctions(schema: TableSchema): Array<{ table: string; field: string; targetClass: string }> {
+    return relationJunctions(schema);
+  }
 
-    statements.push('-- Generated by Noodl LocalSQL Export');
-    statements.push('-- PostgreSQL Schema');
-    statements.push('');
-
-    for (const schema of schemas) {
-      statements.push(`-- Table: ${schema.name}`);
-
-      const columnDefs = [
-        '"objectId" TEXT PRIMARY KEY',
-        '"createdAt" TIMESTAMPTZ DEFAULT NOW()',
-        '"updatedAt" TIMESTAMPTZ DEFAULT NOW()',
-        '"ACL" JSONB'
-      ];
-
-      for (const col of schema.columns || []) {
-        const pgType = POSTGRES_TYPE_MAP[col.type];
-        if (pgType) {
-          let def = `"${col.name}" ${pgType}`;
-          if (col.required) def += ' NOT NULL';
-          columnDefs.push(def);
-        }
-      }
-
-      statements.push(`CREATE TABLE IF NOT EXISTS "${schema.name}" (`);
-      statements.push(`  ${columnDefs.join(',\n  ')}`);
-      statements.push(');');
-      statements.push('');
-
-      // Indexes
-      statements.push(`CREATE INDEX IF NOT EXISTS "idx_${schema.name}_createdAt" ON "${schema.name}"("createdAt");`);
-      statements.push(`CREATE INDEX IF NOT EXISTS "idx_${schema.name}_updatedAt" ON "${schema.name}"("updatedAt");`);
-      statements.push('');
-
-      // Add updatedAt trigger
-      statements.push(`-- Trigger for auto-updating updatedAt`);
-      statements.push(`CREATE OR REPLACE FUNCTION update_updated_at_column()`);
-      statements.push(`RETURNS TRIGGER AS $$`);
-      statements.push(`BEGIN`);
-      statements.push(`  NEW."updatedAt" = NOW();`);
-      statements.push(`  RETURN NEW;`);
-      statements.push(`END;`);
-      statements.push(`$$ language 'plpgsql';`);
-      statements.push('');
-      statements.push(`DROP TRIGGER IF EXISTS "update_${schema.name}_updated_at" ON "${schema.name}";`);
-      statements.push(`CREATE TRIGGER "update_${schema.name}_updated_at" BEFORE UPDATE ON "${schema.name}"`);
-      statements.push(`  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();`);
-      statements.push('');
-    }
-
-    return statements.join('\n');
+  /** One column definition, in Postgres, or a refusal naming the type. */
+  _columnToPostgres(schema: TableSchema, col: SchemaColumn): string | null {
+    return columnToPostgres(schema, col);
   }
 
   /**
-   * Generate Supabase-compatible SQL (includes RLS policies)
+   * PostgreSQL DDL for every collection: columns, the two built-in indexes,
+   * **every declared index including `unique`** (BRG-D2) and **every relation's
+   * junction table** (BRG-D3).
+   *
+   * No row-security policy is emitted and none is needed on this path: the
+   * NodeGX app server compiles the same ACL predicate into the SQL it builds
+   * whichever database is behind it (`QueryBuilder.buildAclPredicate`), so the
+   * ACLs carry because the enforcement code carries. `generateSupabaseSQL` is
+   * the path where a third party's PostgREST becomes the enforcement point, and
+   * it is the one that needs real policies.
+   *
+   * @throws MigrationRefusal — `code: 'CANNOT_CROSS'` — for anything it will
+   *   not approximate.
    */
-  generateSupabaseSQL(): string {
-    const baseSQL = this.generatePostgresSQL();
+  generatePostgresSQL(options?: PostgresExportOptions): string {
     const schemas = this.exportSchemas();
-    const rlsStatements: string[] = [];
+    const touchTrigger = Boolean(options && options.updatedAtTrigger);
+    const out: string[] = [];
 
-    rlsStatements.push('');
-    rlsStatements.push('-- Row Level Security Policies');
-    rlsStatements.push('');
+    out.push('-- Generated by NodeGX: SQLite -> PostgreSQL schema export.');
+    out.push(`-- ${schemas.length} collection${schemas.length === 1 ? '' : 's'}.`);
+    out.push('--');
+    out.push('-- Row ACLs are deliberately NOT expressed as policies here. The NodeGX app');
+    out.push('-- server compiles the same ACL predicate into every query it builds, whichever');
+    out.push('-- database is behind it, so they carry because the enforcement code carries.');
+    out.push('');
 
     for (const schema of schemas) {
-      const tableName = schema.name;
-
-      rlsStatements.push(`-- RLS for ${tableName}`);
-      rlsStatements.push(`ALTER TABLE "${tableName}" ENABLE ROW LEVEL SECURITY;`);
-      rlsStatements.push('');
-
-      // Default policy: allow authenticated users
-      rlsStatements.push(`-- Allow authenticated users to read all records`);
-      rlsStatements.push(
-        `CREATE POLICY "Allow authenticated read" ON "${tableName}" FOR SELECT TO authenticated USING (true);`
-      );
-      rlsStatements.push('');
-
-      rlsStatements.push(`-- Allow users to insert their own records`);
-      rlsStatements.push(
-        `CREATE POLICY "Allow insert" ON "${tableName}" FOR INSERT TO authenticated WITH CHECK (true);`
-      );
-      rlsStatements.push('');
-
-      rlsStatements.push(`-- Allow users to update their own records (customize based on ACL)`);
-      rlsStatements.push(
-        `CREATE POLICY "Allow update" ON "${tableName}" FOR UPDATE TO authenticated USING (true) WITH CHECK (true);`
-      );
-      rlsStatements.push('');
-
-      rlsStatements.push(`-- Allow users to delete their own records (customize based on ACL)`);
-      rlsStatements.push(`CREATE POLICY "Allow delete" ON "${tableName}" FOR DELETE TO authenticated USING (true);`);
-      rlsStatements.push('');
+      // BRG-005 moved the loop body to `postgres/ddl.ts` so the live adapter
+      // creates the same table this export describes. Same lines, one source.
+      out.push(...tableDDL(schema, { touchTrigger }));
     }
 
-    return baseSQL + rlsStatements.join('\n');
+    return out.join('\n');
+  }
+
+  /**
+   * The same DDL plus row-level security, for the path where a third party's
+   * PostgREST — not the NodeGX app server — is the thing deciding who may read
+   * a row.
+   *
+   * 🔴 **This is BRG-D1.** What was here granted every authenticated caller
+   * every row of every table, with two of the four policies carrying the
+   * comment "(customize based on ACL)".
+   *
+   * Three things it now needs, and refuses without, because each is a fact it
+   * cannot invent:
+   *
+   * 1. `security` — the live CLP configuration. Which operations are allowed at
+   *    all, and to whom, is written in `security.json`; a generator guessing it
+   *    is how `USING (true)` happened.
+   * 2. `userIdClaim` — the JWT claim carrying the **NodeGX `_User` objectId**.
+   *    The keys of a row's ACL are NodeGX user ids, and `auth.uid()` on the
+   *    other side is a Supabase auth user's uuid. They are not the same
+   *    identifier, and a policy comparing them denies everyone or, worse, is
+   *    written to compare something that happens to match.
+   * 3. Rows whose ACL names a **role**. Roles live in `_Role` inside this
+   *    backend; PostgREST has no idea what they are. A policy that ignores
+   *    `role:` keys quietly narrows access for exactly the rows an
+   *    administrator granted a team — so the export is refused by name, with
+   *    the count, rather than emitted.
+   *
+   * @throws MigrationRefusal — `code: 'CANNOT_CROSS'`.
+   */
+  generateSupabaseSQL(options?: SupabaseExportOptions): string {
+    const security = options && options.security;
+    if (!security || !security.defaults || !security.defaults.permissions) {
+      throw new MigrationRefusal(
+        'A Supabase export needs the live security configuration: which operations each collection ' +
+          'allows, and to whom, is in security.json and cannot be guessed. Generating policies without it ' +
+          'is how this export came to grant every authenticated user every row.',
+        'the CLP configuration'
+      );
+    }
+    const claim = options && options.userIdClaim;
+    if (!claim) {
+      throw new MigrationRefusal(
+        "A row's ACL is keyed by NodeGX _User objectIds, and PostgREST authenticates a Supabase auth user. " +
+          'Name the JWT claim that carries the NodeGX user id (`userIdClaim`) so the policies can compare like ' +
+          'with like — there is no correct default, and a policy comparing the wrong two identifiers either ' +
+          'denies everyone or lets the wrong person through.',
+        'the identity mapping'
+      );
+    }
+
+    const schemas = this.exportSchemas();
+    const rls: string[] = [];
+
+    rls.push('');
+    rls.push('-- Row Level Security, generated from security.json and the row ACLs.');
+    rls.push(`-- The principal is the JWT claim "${claim}", which must carry the NodeGX _User objectId.`);
+    rls.push('-- `anon` and `authenticated` are the roles PostgREST switches to; they must exist.');
+    rls.push('');
+
+    const principal = `(current_setting('request.jwt.claims', true)::jsonb ->> ${quoteLiteral(claim)})`;
+
+    for (const schema of schemas) {
+      const table = escapeTable(schema.name);
+      const name = schema.name;
+      this._assertNoRoleKeyedAcls(name);
+
+      const find = this._ruleFor(security, name, 'find');
+      const get = this._ruleFor(security, name, 'get');
+      // Compared by CONTENT: both are normalised, sorted lists, and `!==` on
+      // two arrays is a reference check that is always true.
+      if (find.join('|') !== get.join('|')) {
+        // PostgREST answers a fetch-by-id with the same SELECT it answers a
+        // listing with, so one policy has to stand for both rules. A union
+        // hands a caller denied `find` the whole table one row at a time; an
+        // intersection denies a `get` the backend allows. Neither is this
+        // collection's rule, so neither is written.
+        throw new MigrationRefusal(
+          `"${name}" allows find to ${JSON.stringify(find)} and get to ${JSON.stringify(get)}. PostgREST cannot ` +
+            'tell one from the other — both are a SELECT — so a single policy would have to be more permissive ' +
+            'or more restrictive than what this backend enforces.',
+          'find and get differing',
+          name
+        );
+      }
+
+      rls.push(`-- Policies for ${name}`);
+      rls.push(`ALTER TABLE ${table} ENABLE ROW LEVEL SECURITY;`);
+
+      this._emitPolicy(rls, table, name, 'SELECT', find, this._aclPredicate(principal, 'read'));
+      this._emitPolicy(
+        rls,
+        table,
+        name,
+        'INSERT',
+        this._ruleFor(security, name, 'create'),
+        this._aclPredicate(principal, 'write')
+      );
+      this._emitPolicy(
+        rls,
+        table,
+        name,
+        'UPDATE',
+        this._ruleFor(security, name, 'update'),
+        this._aclPredicate(principal, 'write')
+      );
+      this._emitPolicy(
+        rls,
+        table,
+        name,
+        'DELETE',
+        this._ruleFor(security, name, 'delete'),
+        this._aclPredicate(principal, 'write')
+      );
+      rls.push('');
+    }
+
+    return this.generatePostgresSQL({ updatedAtTrigger: true }) + rls.join('\n');
+  }
+
+  /** The effective CLP rule for one operation, collection entry over defaults. */
+  _ruleFor(security: SecurityRulesLike, collection: string, op: string): string[] {
+    const entry = security.collections && security.collections[collection];
+    const raw =
+      entry && entry.permissions && entry.permissions[op] !== undefined
+        ? entry.permissions[op]
+        : security.defaults.permissions[op];
+    const atoms = raw === undefined ? [] : Array.isArray(raw) ? raw.slice() : [raw];
+    return atoms.map((a) => String(a)).sort();
+  }
+
+  /**
+   * The ACL predicate, in PostgreSQL, saying exactly what
+   * `QueryBuilder.buildAclPredicate` says in SQLite: a row with no ACL is
+   * public, and a row with one qualifies when an entry whose key is '*' or this
+   * caller grants the access asked for.
+   *
+   * 🔴 **This used to be its own copy of that translation, and the copy was
+   * wrong in two ways that BRG-005 measured** (see `postgres/predicates.ts`, now
+   * the single source for it):
+   *
+   * - `(_acl.value ->> '<access>') IN ('1', 'true')` compared the flag as
+   *   **text**, so a flag stored as the JSON real `1.0` rendered as `"1.0"` and
+   *   was **denied** — where the SQLite predicate's numeric `= 1` grants it. A
+   *   policy that silently shows a user fewer of their own rows.
+   * - `jsonb_each` **raises** on an ACL that is not a JSON object, and an error
+   *   inside a policy's `USING` clause fails the statement — so one malformed
+   *   ACL row would break every read of the table, where SQLite merely hides
+   *   that row.
+   *
+   * Both were found by grading the two engines against each other over the same
+   * eight flag spellings and five ACL shapes, which is the only reason they were
+   * found at all: each copy agreed with itself.
+   */
+  _aclPredicate(principal: string, access: 'read' | 'write'): string {
+    return aclPredicateSql('"ACL"', `'*', ${principal}`, access, '_acl', '\n      ');
+  }
+
+  /**
+   * One policy, or the reason there is none.
+   *
+   * A rule of 'nobody' emits NO policy on purpose: RLS with no policy denies,
+   * which is the same answer the backend gives, and it is the one case where
+   * emitting nothing is the faithful translation rather than an omission — so
+   * it says so in a line of SQL that a person reading the file can see.
+   */
+  _emitPolicy(
+    out: string[],
+    table: string,
+    collection: string,
+    action: string,
+    rule: string[],
+    aclPredicate: string
+  ): void {
+    const roles = rule.filter((atom) => atom.startsWith('role:'));
+    if (roles.length > 0) {
+      throw new MigrationRefusal(
+        `"${collection}" restricts ${action} to ${roles.join(', ')}. Roles live in this backend's _Role table; ` +
+          'PostgREST has no membership to check, so the policy would either ignore the restriction or deny ' +
+          'everyone.',
+        'role-based collection permissions',
+        collection
+      );
+    }
+
+    const grantees: string[] = [];
+    if (rule.indexOf('public') !== -1) grantees.push('anon', 'authenticated');
+    else if (rule.indexOf('authenticated') !== -1) grantees.push('authenticated');
+
+    if (grantees.length === 0) {
+      out.push(`-- No ${action} policy: security.json allows ${action} to nobody, and RLS with no policy denies.`);
+      return;
+    }
+
+    const policy = `"nodegx_${sanitizeIdent(collection)}_${action.toLowerCase()}"`;
+    const to = grantees.join(', ');
+
+    // The GRANT as well as the policy. A policy narrows a privilege that has
+    // been granted; it does not grant one, so a table with policies and no
+    // grants denies everyone and reads as "the policies are wrong". Emitting
+    // both here also means an operation ruled `nobody` above leaves NEITHER,
+    // which is the same answer this backend gives, twice.
+    out.push(`GRANT ${action} ON ${table} TO ${to};`);
+    if (action === 'INSERT') {
+      out.push(`CREATE POLICY ${policy} ON ${table} FOR INSERT TO ${to}`);
+      out.push(`  WITH CHECK ${aclPredicate};`);
+    } else if (action === 'UPDATE') {
+      out.push(`CREATE POLICY ${policy} ON ${table} FOR UPDATE TO ${to}`);
+      out.push(`  USING ${aclPredicate}`);
+      out.push(`  WITH CHECK ${aclPredicate};`);
+    } else {
+      out.push(`CREATE POLICY ${policy} ON ${table} FOR ${action} TO ${to}`);
+      out.push(`  USING ${aclPredicate};`);
+    }
+  }
+
+  /**
+   * Refuse a table holding rows whose ACL names a role.
+   *
+   * This reads the DATA, not the configuration, because that is where the
+   * answer is: `security.json` says nothing about which keys a row's ACL
+   * carries, and an administrator granting a team access writes `role:editors`
+   * into the row itself.
+   */
+  _assertNoRoleKeyedAcls(tableName: string): void {
+    let row: { n?: number; sample?: string } | undefined;
+    try {
+      row = this.db
+        .prepare(
+          `SELECT COUNT(*) AS n, MIN(_acl.key) AS sample FROM ${escapeTable(tableName)}, json_each("ACL") AS _acl ` +
+            `WHERE "ACL" IS NOT NULL AND _acl.key LIKE 'role:%'`
+        )
+        .get() as { n?: number; sample?: string };
+    } catch (e) {
+      // No such table, or an engine with no json1 (the ephemeral mock). Nothing
+      // measured means nothing claimed: this check is an assertion about rows
+      // that exist, and where none can be read it has nothing to say.
+      return;
+    }
+    if (!row || !row.n) return;
+
+    throw new MigrationRefusal(
+      `${row.n} row${row.n === 1 ? '' : 's'} in "${tableName}" ${row.n === 1 ? 'has an ACL' : 'have ACLs'} naming a ` +
+        `role (${row.sample}). Roles are members of this backend's _Role table, which PostgREST cannot see, so ` +
+        'those grants would silently disappear from the exported policies.',
+      'role-keyed row ACLs',
+      tableName,
+      { rows: row.n, sample: row.sample }
+    );
   }
 
   /**
@@ -603,7 +1017,9 @@ class SchemaManager {
     }
     if (col.defaultValue !== undefined) {
       if (typeof col.defaultValue === 'string') {
-        def += ` DEFAULT '${col.defaultValue}'`;
+        // Quoted, not pasted: an apostrophe in a default ("O'Brien") ended the
+        // literal and the DDL refused.
+        def += ` DEFAULT ${quoteLiteral(col.defaultValue)}`;
       } else if (typeof col.defaultValue === 'boolean') {
         def += ` DEFAULT ${col.defaultValue ? 1 : 0}`;
       } else {
@@ -690,6 +1106,509 @@ class SchemaManager {
       }
       throw e;
     }
+  }
+
+  /**
+   * The INVERSE of `getRelatedIds`: which owners is this related id attached to.
+   *
+   * Added by phase 97 BRG-002 §3.3, ruled by Richard 2026-09-19. It exists
+   * because `security/state.ts` answered "which roles is this user in" with a
+   * hand-written JOIN on the raw SQLite handle — the last thing in the backend
+   * reaching past the storage interface, and the one standing between the
+   * product and "your app moves to Postgres" being true for PERMISSIONS.
+   *
+   * Two alternatives were measured and rejected:
+   *   - `$relatedTo` (QueryBuilder.ts:357) only filters by `owningId`, so it
+   *     answers the other direction and cannot express this one.
+   *   - Querying `_Join_<key>_<Class>` as an ordinary collection works today
+   *     (measured), but the junction table's NAME is this adapter's private
+   *     storage convention. A caller that hardcodes it would silently return no
+   *     roles on any adapter that stores relations differently — which reads as
+   *     a permissions outage, not an error.
+   *
+   * So the lookup belongs here, beside its mirror image, where a second adapter
+   * has to answer it in whatever shape its own storage takes.
+   *
+   * @param owningClass - the class that OWNS the relation (e.g. `_Role`)
+   * @param relationName - the relation's key (e.g. `users`)
+   * @param relatedId - the id on the far side (e.g. a user's objectId)
+   * @returns the owning objectIds, `[]` when the junction table does not exist
+   */
+  getRelationOwners(owningClass: string, relationName: string, relatedId: string): string[] {
+    const junctionTable = `_Join_${relationName}_${owningClass}`;
+
+    try {
+      const rows = this.db
+        .prepare(`SELECT "owningId" FROM ${escapeTable(junctionTable)} WHERE "relatedId" = ?`)
+        .all(relatedId) as Array<{ owningId: string }>;
+      return rows.map((r) => r.owningId);
+    } catch (e) {
+      if (e.message.includes('no such table')) {
+        return [];
+      }
+      throw e;
+    }
+  }
+
+  // ===========================================================================
+  // Declared indexes (FED-002)
+  //
+  // Until this section existed a collection had exactly two indexes —
+  // `createdAt` and `updatedAt` — and no way to declare a third. A feed's item
+  // table keyed on a guid full-scanned on every poll, and "write this item
+  // once" was a query-then-insert with a race in the gap between them.
+  //
+  // The declaration lives in the collection's `_Schema` row — and therefore in
+  // the schema export, the backup and a promotion — rather than in a file
+  // beside it the way the FTS5 opt-in does. An index is a property of the
+  // collection's *shape* in a way a search opt-in is not: a promotion that
+  // carried columns but not their unique constraints would promote a dedupe
+  // guarantee into a hope.
+  //
+  // 🔴 Reconciliation reads what SQLite ACTUALLY has (`PRAGMA index_list` /
+  // `PRAGMA index_xinfo`), never what `_Schema` last claimed — the same choice,
+  // for the same reason, that `_columnScope` makes about `PRAGMA table_info`
+  // (DEF-014): the tracking row records what someone meant, and the only thing
+  // a reconcile may act on is what is there.
+  // ===========================================================================
+
+  /** The two indexes every table gets on creation. They cannot be declared away. */
+  builtInIndexNames(tableName: string): string[] {
+    return sharedBuiltInIndexNames(tableName);
+  }
+
+  /**
+   * The derived name of a declared index — never written by a person, so that
+   * two declarations of the same fields are the same index however they were
+   * spelled, and a declaration removed from `schema.json` has a name to drop.
+   */
+  indexName(tableName: string, fields: string[], where?: IndexWhere): string {
+    return sharedIndexName(tableName, fields, where);
+  }
+
+  /** The indexes a collection's `_Schema` row declares (normalized, never null). */
+  declaredIndexes(tableName: string): IndexDecl[] {
+    const schema = this.getTableSchema(tableName);
+    return normalizeIndexDecls(schema ? schema.indexes : undefined);
+  }
+
+  /**
+   * Every index SQLite currently has on this table that THIS class manages:
+   * `origin = 'c'` (a real `CREATE INDEX`, not a PK or a table-level UNIQUE),
+   * named in the derived form, and not one of the two built-ins.
+   *
+   * Reads `index_xinfo` rather than `index_info` for one reason: it is the only
+   * pragma that reports `desc`, and an index declared `desc` that was built
+   * `asc` has to come back as a difference or the reconcile silently keeps the
+   * wrong one.
+   */
+  builtIndexes(tableName: string): BuiltIndex[] {
+    let list: Array<{ name?: string; unique?: number; origin?: string; partial?: number }>;
+    try {
+      list = this.db.prepare(`PRAGMA index_list(${escapeTable(tableName)})`).all() as typeof list;
+    } catch (e) {
+      // No such table, or an engine with no pragma support (the ephemeral mock).
+      return [];
+    }
+    if (!Array.isArray(list)) return [];
+
+    const builtIn = new Set(this.builtInIndexNames(tableName));
+    const prefix = `idx_${sanitizeIdent(tableName)}_`;
+    const out: BuiltIndex[] = [];
+
+    for (const row of list) {
+      const name = row && row.name;
+      if (typeof name !== 'string') continue;
+      if (row.origin !== 'c') continue;
+      if (!name.startsWith(prefix) || builtIn.has(name)) continue;
+
+      const cols = this.db.prepare(`PRAGMA index_xinfo(${escapeTable(name)})`).all() as Array<{
+        name?: string | null;
+        desc?: number;
+        key?: number;
+      }>;
+      const keyCols = (Array.isArray(cols) ? cols : []).filter((c) => c && c.key === 1);
+
+      out.push({
+        name,
+        fields: keyCols.map((c) => String(c.name)),
+        unique: row.unique === 1,
+        order: keyCols.length > 0 && keyCols[0].desc === 1 ? 'desc' : 'asc',
+        partial: row.partial === 1
+      });
+    }
+
+    return out;
+  }
+
+  /**
+   * What a person is shown: every declared index and whether it is actually
+   * built, plus anything built that nothing declares (drift — a hand-made index,
+   * or a failed reconcile).
+   */
+  indexStatus(tableName: string): IndexStatus[] {
+    const built = new Map(this.builtIndexes(tableName).map((b) => [b.name, b]));
+    const out: IndexStatus[] = [];
+
+    for (const decl of this.declaredIndexes(tableName)) {
+      const name = this.indexName(tableName, decl.fields, decl.where);
+      const b = built.get(name);
+      out.push({
+        name,
+        fields: [...decl.fields],
+        unique: decl.unique === true,
+        order: decl.order === 'desc' ? 'desc' : 'asc',
+        ...(decl.where ? { where: decl.where } : {}),
+        built: Boolean(b && sameIndexSignature(b, decl)),
+        declared: true
+      });
+      built.delete(name);
+    }
+
+    for (const b of built.values()) {
+      out.push({ name: b.name, fields: b.fields, unique: b.unique, order: b.order, built: true, declared: false });
+    }
+
+    return out;
+  }
+
+  /**
+   * The rows that would refuse a unique index, for the collection and fields
+   * given: how many distinct key values appear more than once, and the first
+   * three of them.
+   *
+   * ⚠️ Rows with a NULL in any indexed field are excluded, and that is not
+   * tidiness — SQLite treats NULLs as distinct in a unique index, so two rows
+   * with no `guid` do not collide. `GROUP BY` disagrees: it puts every NULL in
+   * one group, and a check that trusted it would refuse a push over data the
+   * index would have accepted.
+   */
+  duplicateValues(
+    tableName: string,
+    fields: string[],
+    sampleLimit = 3,
+    where?: IndexWhere
+  ): { duplicates: number; samples: unknown[][] } {
+    const cols = fields.map((f) => escapeColumn(f)).join(', ');
+    // HLT-016 W5: a partial index only covers the rows its predicate holds
+    // for, so a duplicate outside it is not one the index would refuse.
+    const notNull =
+      fields.map((f) => `${escapeColumn(f)} IS NOT NULL`).join(' AND ') +
+      (where ? ` AND (${whereSQL(where, 'sqlite')})` : '');
+    const table = escapeTable(tableName);
+    const limit = Math.max(0, Math.floor(sampleLimit));
+
+    const total = this.db
+      .prepare(
+        `SELECT COUNT(*) AS n FROM (SELECT 1 FROM ${table} WHERE ${notNull} GROUP BY ${cols} HAVING COUNT(*) > 1)`
+      )
+      .get() as { n?: number } | undefined;
+
+    const rows = this.db
+      .prepare(
+        `SELECT ${cols}, COUNT(*) AS __n FROM ${table} WHERE ${notNull} ` +
+          `GROUP BY ${cols} HAVING COUNT(*) > 1 ORDER BY __n DESC, ${cols} LIMIT ${limit}`
+      )
+      .all() as Array<Record<string, unknown>>;
+
+    return {
+      duplicates: total && typeof total.n === 'number' ? total.n : 0,
+      samples: (Array.isArray(rows) ? rows : []).map((r) => fields.map((f) => r[f]))
+    };
+  }
+
+  /**
+   * Make SQLite's indexes match the declaration. The whole of FED-002's §3.2.
+   *
+   * Every check runs BEFORE any DDL does, because AC4's promise is that a
+   * refused push changes nothing: a unique declaration over duplicate rows
+   * refuses the *push*, it does not drop the other three indexes first and then
+   * refuse. Nothing here ever deletes a row — the only way a unique index and
+   * existing data are reconciled is by the person fixing the data.
+   *
+   * @param indexes - The FULL declaration for this collection. A declaration
+   *   that is gone from this list is an index that gets dropped; passing `[]`
+   *   removes every declared index and keeps the two built-ins.
+   * @throws IndexDuplicatesError when a unique index would refuse rows the
+   *   table already holds — carrying the count and the first three values.
+   */
+  reconcileIndexes(tableName: string, indexes: unknown): IndexReconcileReport {
+    const exists = this.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?").get(tableName);
+    if (!exists) throw new Error(`Table "${tableName}" does not exist`);
+
+    const desired = normalizeIndexDecls(indexes);
+    const built = new Map(this.builtIndexes(tableName).map((b) => [b.name, b]));
+    const builtIn = new Set(this.builtInIndexNames(tableName));
+
+    // ---- Checks. All of them, before anything is created or dropped. -------
+    const columns = this.tableColumns(tableName);
+    const seen = new Set<string>();
+
+    const typeOf = (field: string): string | undefined =>
+      field === 'objectId' ? 'String' : declaredProperties(this.getTableSchema(tableName))?.[field]?.type;
+
+    for (const decl of desired) {
+      const name = this.indexName(tableName, decl.fields, decl.where);
+      if (builtIn.has(name)) {
+        throw new Error(
+          `"${decl.fields.join(', ')}" is always indexed on "${tableName}" — createdAt and updatedAt ` +
+            'cannot be declared, and cannot be declared away.'
+        );
+      }
+      if (seen.has(name)) {
+        throw new Error(`"${tableName}" declares the index on (${decl.fields.join(', ')}) twice.`);
+      }
+      seen.add(name);
+
+      for (const field of decl.fields) {
+        if (!columns.has(field)) {
+          throw new Error(
+            `Cannot index "${field}" on "${tableName}": the collection has no such property. ` +
+              'A column here exists once something has written it, so declare the column first.'
+          );
+        }
+      }
+      if (decl.where) checkWhereAgainstColumns(tableName, decl.where, columns, typeOf);
+
+      // Only a unique index that is not ALREADY built in this exact shape can
+      // be refused by the data: one that is built has been enforcing itself.
+      const already = built.get(name);
+      if (decl.unique === true && !(already && sameIndexSignature(already, decl))) {
+        const report = this.duplicateValues(tableName, decl.fields, 3, decl.where);
+        if (report.duplicates > 0) {
+          throw new IndexDuplicatesError(tableName, decl.fields, report.duplicates, report.samples, decl.where);
+        }
+      }
+    }
+
+    // ---- Apply -------------------------------------------------------------
+    const created: string[] = [];
+    const dropped: string[] = [];
+    const kept: string[] = [];
+
+    // 🔴 A SAVEPOINT, not `BEGIN`. `createTable` calls this, and `createTable` is
+    // reached from inside an open transaction on at least one path (an import
+    // ensures the shape, then writes every row in one) — `BEGIN` there is
+    // "cannot start a transaction within a transaction", which would turn a
+    // declaration into a failed import. A savepoint nests either way.
+    this.db.exec('SAVEPOINT nodegx_reconcile_indexes');
+    try {
+      for (const [name] of built) {
+        if (!seen.has(name)) {
+          this.db.exec(`DROP INDEX IF EXISTS ${escapeTable(name)}`);
+          dropped.push(name);
+        }
+      }
+
+      for (const decl of desired) {
+        const name = this.indexName(tableName, decl.fields, decl.where);
+        const already = built.get(name);
+        if (already && sameIndexSignature(already, decl)) {
+          kept.push(name);
+          continue;
+        }
+        // A changed signature is a drop and a create under one name. It is
+        // reported as `created` only — the index that was there is gone.
+        if (already) this.db.exec(`DROP INDEX IF EXISTS ${escapeTable(name)}`);
+
+        const order = decl.order === 'desc' ? 'DESC' : 'ASC';
+        const cols = decl.fields.map((f) => `${escapeColumn(f)} ${order}`).join(', ');
+        this.db.exec(
+          `CREATE ${decl.unique === true ? 'UNIQUE ' : ''}INDEX IF NOT EXISTS ${escapeTable(name)} ` +
+            `ON ${escapeTable(tableName)} (${cols})` +
+            (decl.where ? ` WHERE ${whereSQL(decl.where, 'sqlite')}` : '')
+        );
+        created.push(name);
+      }
+
+      this.persistIndexDecls(tableName, desired);
+      this.db.exec('RELEASE nodegx_reconcile_indexes');
+    } catch (e) {
+      this.db.exec('ROLLBACK TO nodegx_reconcile_indexes');
+      this.db.exec('RELEASE nodegx_reconcile_indexes');
+      throw e;
+    }
+
+    return { created, dropped, kept, indexes: desired };
+  }
+
+  /** The columns a table actually has, from the live connection (see DEF-014). */
+  tableColumns(tableName: string): Set<string> {
+    try {
+      const rows = this.db.prepare(`PRAGMA table_info(${escapeTable(tableName)})`).all() as Array<{ name?: string }>;
+      return new Set((Array.isArray(rows) ? rows : []).map((r) => r.name).filter((n): n is string => typeof n === 'string'));
+    } catch (e) {
+      return new Set<string>();
+    }
+  }
+
+  /**
+   * Write the declaration into the `_Schema` row so it survives a restart, a
+   * schema export and a backup. Called inside `reconcileIndexes`'s transaction.
+   *
+   * @private
+   */
+  persistIndexDecls(tableName: string, indexes: IndexDecl[]): void {
+    this.ensureSchemaTable();
+    const schema = this.getTableSchema(tableName) || { name: tableName };
+    if (indexes.length > 0) schema.indexes = indexes;
+    else delete schema.indexes;
+    this.db
+      .prepare(
+        `INSERT INTO "_Schema" ("name", "schema", "updatedAt") VALUES (?, ?, CURRENT_TIMESTAMP)
+         ON CONFLICT("name") DO UPDATE SET "schema" = excluded."schema", "updatedAt" = CURRENT_TIMESTAMP`
+      )
+      .run(tableName, JSON.stringify(schema));
+    this._schemaCache.set(tableName, freshSchema(schema));
+  }
+
+  // ===========================================================================
+  // Declared checks (HLT-016)
+  //
+  // SQLite cannot add a CHECK to a table that exists without rebuilding it, and
+  // a rebuild is the twelve-step dance `changeColumnType` deliberately avoids.
+  // So a check is a pair of triggers — BEFORE INSERT and BEFORE UPDATE — that
+  // RAISE(ABORT) with the one message both engines use. They are dropped and
+  // created like indexes, named like indexes, and read back from
+  // `sqlite_master`, never from what `_Schema` last claimed.
+  // ===========================================================================
+
+  /** The checks a collection's `_Schema` row declares (normalized, never null). */
+  declaredChecks(tableName: string): CheckDecl[] {
+    const schema = this.getTableSchema(tableName);
+    return normalizeCheckDecls(schema ? schema.checks : undefined);
+  }
+
+  /** The checks SQLite enforces on this table: both triggers of a pair, or it is not built. */
+  builtChecks(tableName: string): Set<string> {
+    const prefix = `chk_${sanitizeIdent(tableName)}_`;
+    let rows: Array<{ name?: string }>;
+    try {
+      rows = this.db
+        .prepare("SELECT name FROM sqlite_master WHERE type = 'trigger' AND tbl_name = ?")
+        .all(tableName) as typeof rows;
+    } catch (e) {
+      return new Set();
+    }
+    const names = new Set((Array.isArray(rows) ? rows : []).map((r) => String(r.name)));
+    const out = new Set<string>();
+    for (const n of names) {
+      if (!n.startsWith(prefix) || !n.endsWith('_ins')) continue;
+      const base = n.slice(0, -'_ins'.length);
+      if (names.has(`${base}_upd`)) out.add(base);
+    }
+    return out;
+  }
+
+  /** What a person is shown: every declared check and whether it is enforced, plus drift. */
+  checkStatus(tableName: string): CheckStatus[] {
+    const built = this.builtChecks(tableName);
+    const out: CheckStatus[] = [];
+    for (const rule of this.declaredChecks(tableName)) {
+      const name = checkName(tableName, rule);
+      out.push({ name, rule, description: describeCheck(rule), built: built.has(name), declared: true });
+      built.delete(name);
+    }
+    for (const name of built) {
+      out.push({ name, rule: { exactlyOne: [] }, description: 'not declared', built: true, declared: false });
+    }
+    return out;
+  }
+
+  /** How many rows already break a check. */
+  violatingRows(tableName: string, check: CheckDecl): number {
+    const row = this.db
+      .prepare(`SELECT COUNT(*) AS n FROM ${escapeTable(tableName)} WHERE NOT (${checkSQL(check)})`)
+      .get() as { n?: number } | undefined;
+    return row && typeof row.n === 'number' ? row.n : 0;
+  }
+
+  /**
+   * Make SQLite's enforced checks match the declaration (HLT-016 C1–C4).
+   *
+   * Every refusal runs before any DDL, as `reconcileIndexes` does: a check the
+   * rows already break refuses the push, and nothing else in it is applied.
+   *
+   * @param checks - The FULL declaration. A check gone from it is dropped.
+   * @throws CheckViolationsError when the rows already break a new check.
+   */
+  reconcileChecks(tableName: string, checks: unknown): CheckReconcileReport {
+    const exists = this.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?").get(tableName);
+    if (!exists) throw new Error(`Table "${tableName}" does not exist`);
+
+    const desired = normalizeCheckDecls(checks);
+    const typeOf = (field: string): string | undefined => declaredProperties(this.getTableSchema(tableName))?.[field]?.type;
+    checkChecksAgainstColumns(tableName, desired, this.tableColumns(tableName), typeOf);
+
+    const built = this.builtChecks(tableName);
+    const declared = new Map(this.declaredChecks(tableName).map((c) => [checkName(tableName, c), c]));
+    const unchanged = (check: CheckDecl): boolean => {
+      const name = checkName(tableName, check);
+      const before = declared.get(name);
+      return built.has(name) && before !== undefined && sameCheck(before, check);
+    };
+
+    for (const check of desired) {
+      if (unchanged(check)) continue;
+      const violations = this.violatingRows(tableName, check);
+      if (violations > 0) throw new CheckViolationsError(tableName, check, violations);
+    }
+
+    const created: string[] = [];
+    const dropped: string[] = [];
+    const kept: string[] = [];
+    const wanted = new Set(desired.map((c) => checkName(tableName, c)));
+    const table = escapeTable(tableName);
+
+    this.db.exec('SAVEPOINT nodegx_reconcile_checks');
+    try {
+      for (const name of built) {
+        if (wanted.has(name)) continue;
+        this.db.exec(`DROP TRIGGER IF EXISTS ${escapeTable(`${name}_ins`)}`);
+        this.db.exec(`DROP TRIGGER IF EXISTS ${escapeTable(`${name}_upd`)}`);
+        dropped.push(name);
+      }
+      for (const check of desired) {
+        const name = checkName(tableName, check);
+        if (unchanged(check)) {
+          kept.push(name);
+          continue;
+        }
+        const raise = `SELECT RAISE(ABORT, ${quoteLiteral(`${CHECK_FAILED_PREFIX}${sanitizeIdent(tableName)}.${name}`)})`;
+        const when = `WHEN NOT (${checkSQL(check, 'NEW.')})`;
+        for (const [suffix, event] of [['_ins', 'INSERT'], ['_upd', 'UPDATE']] as const) {
+          this.db.exec(`DROP TRIGGER IF EXISTS ${escapeTable(`${name}${suffix}`)}`);
+          this.db.exec(
+            `CREATE TRIGGER ${escapeTable(`${name}${suffix}`)} BEFORE ${event} ON ${table} ` +
+              `FOR EACH ROW ${when} BEGIN ${raise}; END`
+          );
+        }
+        created.push(name);
+      }
+      this.persistCheckDecls(tableName, desired);
+      this.db.exec('RELEASE nodegx_reconcile_checks');
+    } catch (e) {
+      this.db.exec('ROLLBACK TO nodegx_reconcile_checks');
+      this.db.exec('RELEASE nodegx_reconcile_checks');
+      throw e;
+    }
+
+    return { created, dropped, kept, checks: desired };
+  }
+
+  /** Write the check declaration into the `_Schema` row. Inside `reconcileChecks`'s savepoint. */
+  persistCheckDecls(tableName: string, checks: CheckDecl[]): void {
+    this.ensureSchemaTable();
+    const schema = this.getTableSchema(tableName) || { name: tableName };
+    if (checks.length > 0) schema.checks = checks;
+    else delete schema.checks;
+    this.db
+      .prepare(
+        `INSERT INTO "_Schema" ("name", "schema", "updatedAt") VALUES (?, ?, CURRENT_TIMESTAMP)
+         ON CONFLICT("name") DO UPDATE SET "schema" = excluded."schema", "updatedAt" = CURRENT_TIMESTAMP`
+      )
+      .run(tableName, JSON.stringify(schema));
+    this._schemaCache.set(tableName, freshSchema(schema));
   }
 
   // ===========================================================================

@@ -1,0 +1,30 @@
+HLT-003 warnings drive — --expect 0
+project: /Users/richardosborne/vscode_projects/NodeGX test projects/HLT-003 Warnings Drive
+
+ok    the counter is armed before anything is driven
+ok    the editor router was found — ok
+ok    the driven project is the copy this drive names — /Users/richardosborne/vscode_projects/NodeGX test projects/HLT-003 Warnings Drive
+ok    REACH — the board mounted and drew frames — mode=board, frames=2
+ok    REACH — the property input rendered from a null style value — [{"value":""}]
+ok    the field is CONTROLLED and empty, which is what the null broke — {"value":""}
+ok    REACH — the visual-state rows are on screen — 3 rows
+ok    REACH — the launcher grid rendered its rows — 104 cards
+
+counts: {
+  "duplicateKey": 0,
+  "missingKey": 0,
+  "nullValue": 0,
+  "setStateInRender": 0,
+  "otherErrors": 0,
+  "samples": []
+}
+reach:  {"boardFrames":2,"nullValueInputs":1,"visualStateRows":3,"launcherCards":104}
+
+ok    duplicateKey — 0 — 0
+ok    setStateInRender — 0 — 0
+ok    nullValue — 0 — 0
+ok    missingKey — 0 — 0
+ok    no OTHER console error class appeared in the driven window — otherErrors=0
+wrote dev-docs/tasks/phase-99-the-ones-nobody-owned/verdicts/HLT-003/2026-09-21/drive-fixed.json
+
+PASS

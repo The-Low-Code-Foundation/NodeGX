@@ -65,11 +65,15 @@ function twoNodeGraph(targetType: string) {
       ]
     }
   ];
+  // 🔴 `toProperty` is `text`, an input a `Text` HAS. It was `label`, which a `Text` does not have, and
+  // P88 GAM-019 (`4bb438165`) made the door refuse exactly that wire on a resolvable type. The known-type
+  // twin then carried an error the kit twin (whose port check is skipped) cannot, and the error identity
+  // below went red: 2 against 1, measured 2026-09-14. The control has to be a wire the door accepts.
   return fromLegacyProject({
     components: [
       {
         name: '/Pages/Home',
-        graph: { roots, connections: [{ fromId: 'src', fromProperty: 'text', toId: 'dst', toProperty: 'label' }] }
+        graph: { roots, connections: [{ fromId: 'src', fromProperty: 'text', toId: 'dst', toProperty: 'text' }] }
       }
     ]
   });

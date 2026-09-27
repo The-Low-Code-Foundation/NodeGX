@@ -1,0 +1,553 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d5aead7f-723c-5f79-8a2e-05b14f6e405a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hdWords",
+      "fromProperty": "words",
+      "toId": "hdT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "lang",
+      "toId": "hdT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "name",
+      "toId": "hdName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "look",
+      "toId": "hdFace",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "seed",
+      "toId": "hdFace",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "options",
+      "toId": "hdFace",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "home",
+      "toId": "hdHome",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "showHome",
+      "toId": "hdHome",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hdHome",
+      "fromProperty": "onClick",
+      "toId": "hdOut",
+      "toProperty": "home"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "hideBar",
+      "toId": "hdHide",
+      "toProperty": "hide"
+    },
+    {
+      "fromId": "hdHide",
+      "fromProperty": "result",
+      "toId": "hdBarRoom",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "hdBarRoom",
+      "fromProperty": "on",
+      "toId": "hdRoot",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hdPanel",
+      "fromProperty": "open",
+      "toId": "hdIsOpen",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "hdWho",
+      "fromProperty": "onClick",
+      "toId": "hdIsOpen",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "hdIsOpen",
+      "fromProperty": "ontrue",
+      "toId": "hdPanel",
+      "toProperty": "to-closed"
+    },
+    {
+      "fromId": "hdIsOpen",
+      "fromProperty": "onfalse",
+      "toId": "hdPanel",
+      "toProperty": "to-menu"
+    },
+    {
+      "fromId": "hdClose",
+      "fromProperty": "onClick",
+      "toId": "hdPanel",
+      "toProperty": "to-closed"
+    },
+    {
+      "fromId": "hdPanel",
+      "fromProperty": "menu",
+      "toId": "hdMenu",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hdPanel",
+      "fromProperty": "form",
+      "toId": "hdForm",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "editPlayer",
+      "toId": "hdEdit",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "language",
+      "toId": "hdLang",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "keyboard",
+      "toId": "hdKeys",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "soundOn",
+      "toId": "hdSound",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "answersLabel",
+      "toId": "hdAnswers",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "switchPlayer",
+      "toId": "hdSwitch",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "closeMenu",
+      "toId": "hdClose",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hdLangItems",
+      "fromProperty": "items",
+      "toId": "hdLang",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "hdKeyItems",
+      "fromProperty": "items",
+      "toId": "hdKeys",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "soundYes",
+      "toId": "hdSoundItems",
+      "toProperty": "in-on"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "soundNo",
+      "toId": "hdSoundItems",
+      "toProperty": "in-off"
+    },
+    {
+      "fromId": "hdSoundItems",
+      "fromProperty": "out-items",
+      "toId": "hdSound",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "answersTyped",
+      "toId": "hdAnswerItems",
+      "toProperty": "in-typed"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "answersOptions",
+      "toId": "hdAnswerItems",
+      "toProperty": "in-options"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "answersAuto",
+      "toId": "hdAnswerItems",
+      "toProperty": "in-auto"
+    },
+    {
+      "fromId": "hdAnswerItems",
+      "fromProperty": "out-items",
+      "toId": "hdAnswers",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "lang",
+      "toId": "hdLang",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "layout",
+      "toId": "hdKeys",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "soundMode",
+      "toId": "hdSound",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "answerMode",
+      "toId": "hdAnswers",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "app",
+      "toId": "hdSet",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "profileId",
+      "toId": "hdSet",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "hdLang",
+      "fromProperty": "value",
+      "toId": "hdSet",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "hdKeys",
+      "fromProperty": "value",
+      "toId": "hdSet",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "hdSound",
+      "fromProperty": "value",
+      "toId": "hdSet",
+      "toProperty": "soundMode"
+    },
+    {
+      "fromId": "hdAnswers",
+      "fromProperty": "value",
+      "toId": "hdSet",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "hdLang",
+      "fromProperty": "changed",
+      "toId": "hdSet",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hdKeys",
+      "fromProperty": "changed",
+      "toId": "hdSet",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hdSound",
+      "fromProperty": "changed",
+      "toId": "hdSet",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hdAnswers",
+      "fromProperty": "changed",
+      "toId": "hdSet",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hdSet",
+      "fromProperty": "app",
+      "toId": "hdOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hdSet",
+      "fromProperty": "done",
+      "toId": "hdOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "hdSwitch",
+      "fromProperty": "onClick",
+      "toId": "hdOut",
+      "toProperty": "switchPlayer"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "menuHangar",
+      "toId": "hdHangar",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "showHangar",
+      "toId": "hdHangar",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hdHangar",
+      "fromProperty": "onClick",
+      "toId": "hdPanel",
+      "toProperty": "to-closed"
+    },
+    {
+      "fromId": "hdHangar",
+      "fromProperty": "onClick",
+      "toId": "hdOut",
+      "toProperty": "hangar"
+    },
+    {
+      "fromId": "hdEdit",
+      "fromProperty": "onClick",
+      "toId": "hdPanel",
+      "toProperty": "to-editing"
+    },
+    {
+      "fromId": "hdEdit",
+      "fromProperty": "onClick",
+      "toId": "hdForm",
+      "toProperty": "fill"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "name",
+      "toId": "hdForm",
+      "toProperty": "name0"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "look",
+      "toId": "hdForm",
+      "toProperty": "look0"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "seed",
+      "toId": "hdForm",
+      "toProperty": "seed0"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "level",
+      "toId": "hdForm",
+      "toProperty": "level0"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "yourName",
+      "toId": "hdForm",
+      "toProperty": "nameWord"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "pickAvatar",
+      "toId": "hdForm",
+      "toProperty": "faceWord"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "rollAvatar",
+      "toId": "hdForm",
+      "toProperty": "rollWord"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "yourLevel",
+      "toId": "hdForm",
+      "toProperty": "levelWord"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "language",
+      "toId": "hdForm",
+      "toProperty": "langWord"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "saveChanges",
+      "toId": "hdForm",
+      "toProperty": "createWord"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "cancel",
+      "toId": "hdForm",
+      "toProperty": "cancelWord"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "deleteProfile",
+      "toId": "hdForm",
+      "toProperty": "deleteWord"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "deleteAsk",
+      "toId": "hdForm",
+      "toProperty": "askWord"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "deleteYes",
+      "toId": "hdForm",
+      "toProperty": "yesWord"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "deleteNo",
+      "toId": "hdForm",
+      "toProperty": "noWord"
+    },
+    {
+      "fromId": "hdForm",
+      "fromProperty": "cancel",
+      "toId": "hdPanel",
+      "toProperty": "to-menu"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "app",
+      "toId": "hdRename",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "profileId",
+      "toId": "hdRename",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "hdForm",
+      "fromProperty": "name",
+      "toId": "hdRename",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "hdForm",
+      "fromProperty": "look",
+      "toId": "hdRename",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "hdForm",
+      "fromProperty": "seed",
+      "toId": "hdRename",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "hdForm",
+      "fromProperty": "level",
+      "toId": "hdRename",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "hdForm",
+      "fromProperty": "create",
+      "toId": "hdRename",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hdRename",
+      "fromProperty": "app",
+      "toId": "hdOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hdRename",
+      "fromProperty": "done",
+      "toId": "hdOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "hdRename",
+      "fromProperty": "done",
+      "toId": "hdPanel",
+      "toProperty": "to-menu"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "app",
+      "toId": "hdDelete",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "profileId",
+      "toId": "hdDelete",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "hdForm",
+      "fromProperty": "delete",
+      "toId": "hdDelete",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hdDelete",
+      "fromProperty": "app",
+      "toId": "hdOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hdDelete",
+      "fromProperty": "done",
+      "toId": "hdOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "hdDelete",
+      "fromProperty": "done",
+      "toId": "hdPanel",
+      "toProperty": "to-closed"
+    },
+    {
+      "fromId": "hdDelete",
+      "fromProperty": "done",
+      "toId": "hdOut",
+      "toProperty": "deleted"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "abab884f-5843-599a-864f-5a29de225634",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "meIn",
+      "fromProperty": "shown",
+      "toId": "meRoot",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "title",
+      "toId": "meTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "text",
+      "toId": "meText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "choices",
+      "toId": "meAt",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "at",
+      "toId": "meAt",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "meAt",
+      "fromProperty": "value",
+      "toId": "meOut",
+      "toProperty": "at"
+    },
+    {
+      "fromId": "meGo",
+      "fromProperty": "onClick",
+      "toId": "meOut",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "meCancel",
+      "fromProperty": "onClick",
+      "toId": "meOut",
+      "toProperty": "cancel"
+    },
+    {
+      "fromId": "meBack",
+      "fromProperty": "onClick",
+      "toId": "meOut",
+      "toProperty": "back"
+    }
+  ]
+}

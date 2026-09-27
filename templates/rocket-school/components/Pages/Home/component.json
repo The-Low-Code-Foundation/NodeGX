@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c31dee91-2d14-5271-89cc-3bdd66098a15",
+  "name": "Home",
+  "path": "/Pages/Home",
+  "type": "page",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Home: who you are, what is due, the days this week, the stars earned (RKT-010), and the four games. A game that is not built yet is greyed out."
+}

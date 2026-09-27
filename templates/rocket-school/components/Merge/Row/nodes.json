@@ -1,0 +1,52 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4b2603aa-cada-58ec-8d7e-b953738bc095",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mwIn",
+      "type": "Component Inputs",
+      "label": "The row",
+      "ports": [
+        {
+          "name": "cells",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "mwRow",
+      "type": "Group",
+      "label": "One row",
+      "children": [
+        "mwCells"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mwCells",
+      "type": "For Each",
+      "label": "One square per cell",
+      "parameters": {
+        "template": "/Merge/Tile",
+        "templateType": "explicit"
+      },
+      "parent": "mwRow",
+      "x": 100,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "mwRow"
+  ]
+}

@@ -1,0 +1,1209 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "72ee87c8-c894-5729-8787-2a81680b1b12",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pdIn",
+      "type": "Component Inputs",
+      "label": "The project",
+      "ports": [
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sub",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "move",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasMove",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "worth",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasWorth",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "when",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "whenColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mark",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "soft",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "canPlan",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "placed",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "unplaced",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "placedLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "planDate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "planHours",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "minDate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lastLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasLast",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "moveKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "weekText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sparkTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "say",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "facts",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "bars",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "boxes",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "firstLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lastLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "billingShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "billingTerms",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "billingRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hopeShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "hopedText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasHoped",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 530,
+      "y": 400
+    },
+    {
+      "id": "pdOut",
+      "type": "Component Outputs",
+      "label": "What you did",
+      "ports": [
+        {
+          "name": "plan",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "moveIt",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "takeOut",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "edit",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "close",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "planDate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "planHours",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "addBill",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "addHope",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 530,
+      "y": 2200
+    },
+    {
+      "id": "pdRoot",
+      "type": "Group",
+      "label": "Project detail",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-4)"
+      },
+      "children": [
+        "pdTop",
+        "pdMove",
+        "pdBilling",
+        "pdWeek",
+        "pdTwo",
+        "pdSayBox"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pdTop",
+      "type": "Group",
+      "label": "Name and close",
+      "parent": "pdRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "pdNames",
+        "pdTopButtons"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pdNames",
+      "type": "Group",
+      "label": "What it is called",
+      "parent": "pdTop",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "pdName",
+        "pdSub"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "pdName",
+      "type": "Text",
+      "label": "Project name",
+      "parent": "pdNames",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-display)",
+        "cssClassName": "planner-display",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "as": "h2"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "pdSub",
+      "type": "Text",
+      "label": "One line about it",
+      "parent": "pdNames",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "pdTopButtons",
+      "type": "Group",
+      "label": "Edit and close",
+      "parent": "pdTop",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentSize",
+        "columnGap": "var(--space-1)"
+      },
+      "children": [
+        "pdEdit",
+        "pdClose"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "pdEdit",
+      "type": "net.noodl.controls.button",
+      "label": "Edit this project",
+      "parent": "pdTopButtons",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Edit"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "pdClose",
+      "type": "net.noodl.controls.button",
+      "label": "Close the card",
+      "parent": "pdTopButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "✕",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "lineHeight": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "pdMove",
+      "type": "Group",
+      "label": "Its next move",
+      "parent": "pdRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)",
+        "borderRadius": "var(--radius-md)",
+        "borderLeftStyle": "solid",
+        "borderLeftWidth": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "children": [
+        "pdMoveLabel",
+        "pdMoveText",
+        "pdMoveMeta",
+        "pdPlaced",
+        "pdLast",
+        "pdPlan",
+        "pdActs",
+        "pdHope",
+        "pdHoped"
+      ],
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "pdMoveLabel",
+      "type": "Text",
+      "label": "Label",
+      "parent": "pdMove",
+      "parameters": {
+        "text": "Next move",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "pdMoveText",
+      "type": "Text",
+      "label": "The move",
+      "parent": "pdMove",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "pdMoveMeta",
+      "type": "Group",
+      "label": "Worth and when",
+      "parent": "pdMove",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "pdWorth",
+        "pdWhen"
+      ],
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "pdWorth",
+      "type": "Text",
+      "label": "What it is worth",
+      "parent": "pdMoveMeta",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "pdWhen",
+      "type": "Text",
+      "label": "When to do it",
+      "parent": "pdMoveMeta",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "pdPlaced",
+      "type": "Text",
+      "label": "Where the move is in the week",
+      "parent": "pdMove",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "pdLast",
+      "type": "Text",
+      "label": "What happened to the last one",
+      "parent": "pdMove",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1840
+    },
+    {
+      "id": "pdPlan",
+      "type": "Group",
+      "label": "Its day and hours",
+      "parent": "pdMove",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)",
+        "paddingTop": "var(--space-1)"
+      },
+      "children": [
+        "pdDateBox",
+        "pdHoursBox"
+      ],
+      "x": 160,
+      "y": 1960
+    },
+    {
+      "id": "pdDateBox",
+      "type": "Group",
+      "label": "Which day",
+      "parent": "pdPlan",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 55,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "pdDate"
+      ],
+      "x": 220,
+      "y": 2080
+    },
+    {
+      "id": "pdDate",
+      "type": "/Week/Date picker",
+      "label": "Which day",
+      "parent": "pdDateBox",
+      "parameters": {
+        "Label": "Day",
+        "Show Label": true
+      },
+      "x": 280,
+      "y": 2200
+    },
+    {
+      "id": "pdHoursBox",
+      "type": "Group",
+      "label": "How long",
+      "parent": "pdPlan",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 45,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "pdHours"
+      ],
+      "x": 220,
+      "y": 2320
+    },
+    {
+      "id": "pdHours",
+      "type": "net.noodl.controls.textinput",
+      "label": "How long, in hours",
+      "parent": "pdHoursBox",
+      "parameters": {
+        "runOnChange-startValue": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useLabel": true,
+        "label": "Hours",
+        "labelSpacing": 6,
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 2440
+    },
+    {
+      "id": "pdReset",
+      "type": "JavaScriptFunction",
+      "label": "Put the hours back when the project changes",
+      "parameters": {
+        "functionScript": "var key = String(Inputs.key || '');\nif (this.key !== undefined && this.key !== key) { Outputs.blur(); Outputs.reset(); }\nthis.key = key;"
+      },
+      "x": 530,
+      "y": 2440,
+      "ports": [
+        {
+          "name": "in-key",
+          "displayName": "key",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-blur",
+          "displayName": "blur",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-reset",
+          "displayName": "reset",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pdActs",
+      "type": "Group",
+      "label": "What to do with it",
+      "parent": "pdMove",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "pdPut",
+        "pdMoveIt",
+        "pdTakeOut"
+      ],
+      "x": 160,
+      "y": 2560
+    },
+    {
+      "id": "pdPut",
+      "type": "net.noodl.controls.button",
+      "label": "Put it in the week",
+      "parent": "pdActs",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Put it in the week"
+      },
+      "x": 220,
+      "y": 2680
+    },
+    {
+      "id": "pdMoveIt",
+      "type": "net.noodl.controls.button",
+      "label": "Move it to that day",
+      "parent": "pdActs",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Move it"
+      },
+      "x": 220,
+      "y": 2800
+    },
+    {
+      "id": "pdTakeOut",
+      "type": "net.noodl.controls.button",
+      "label": "Take it out of the week",
+      "parent": "pdActs",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Take it out"
+      },
+      "x": 220,
+      "y": 2920
+    },
+    {
+      "id": "pdHope",
+      "type": "net.noodl.controls.button",
+      "label": "Add the move as hoped money",
+      "parent": "pdMove",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "Add as hoped money"
+      },
+      "x": 160,
+      "y": 3040
+    },
+    {
+      "id": "pdHoped",
+      "type": "Text",
+      "label": "The hoped money it already has",
+      "parent": "pdMove",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 3160
+    },
+    {
+      "id": "pdBilling",
+      "type": "Group",
+      "label": "Billing",
+      "parent": "pdRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1-5)"
+      },
+      "children": [
+        "pdBillingLabel",
+        "pdBillingTerms",
+        "pdBillingEach",
+        "pdAddBill"
+      ],
+      "x": 100,
+      "y": 3280
+    },
+    {
+      "id": "pdBillingLabel",
+      "type": "Text",
+      "label": "Label",
+      "parent": "pdBilling",
+      "parameters": {
+        "text": "Billing",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 3400
+    },
+    {
+      "id": "pdBillingTerms",
+      "type": "Text",
+      "label": "Hourly or fixed, and the terms",
+      "parent": "pdBilling",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 3520
+    },
+    {
+      "id": "pdBillingEach",
+      "type": "For Each",
+      "label": "The bills, the next one, this period, the past",
+      "parent": "pdBilling",
+      "parameters": {
+        "template": "/Week/Key line",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 3640
+    },
+    {
+      "id": "pdAddBill",
+      "type": "net.noodl.controls.button",
+      "label": "Add a bill for this project",
+      "parent": "pdBilling",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "dashed",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "label": "+ Add a bill"
+      },
+      "x": 160,
+      "y": 3760
+    },
+    {
+      "id": "pdWeek",
+      "type": "Group",
+      "label": "This week",
+      "parent": "pdRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "pdWeekLabel",
+        "pdBoxes"
+      ],
+      "x": 100,
+      "y": 3880
+    },
+    {
+      "id": "pdWeekLabel",
+      "type": "Text",
+      "label": "How much this week",
+      "parent": "pdWeek",
+      "parameters": {
+        "text": "",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 4000
+    },
+    {
+      "id": "pdBoxes",
+      "type": "/Week/Day boxes",
+      "label": "The six days",
+      "parent": "pdWeek",
+      "x": 160,
+      "y": 4120
+    },
+    {
+      "id": "pdTwo",
+      "type": "Group",
+      "label": "History and facts",
+      "parent": "pdRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-4)"
+      },
+      "children": [
+        "pdHistory",
+        "pdFacts"
+      ],
+      "x": 100,
+      "y": 4240
+    },
+    {
+      "id": "pdHistory",
+      "type": "Group",
+      "label": "Six months",
+      "parent": "pdTwo",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 50,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "pdSparkTitle",
+        "pdSpark"
+      ],
+      "x": 160,
+      "y": 4360
+    },
+    {
+      "id": "pdSparkTitle",
+      "type": "Text",
+      "label": "What the bars are",
+      "parent": "pdHistory",
+      "parameters": {
+        "text": "",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 4480
+    },
+    {
+      "id": "pdSpark",
+      "type": "/Week/Sparkline",
+      "label": "The bars",
+      "parent": "pdHistory",
+      "x": 220,
+      "y": 4600
+    },
+    {
+      "id": "pdFacts",
+      "type": "Group",
+      "label": "Facts",
+      "parent": "pdTwo",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 50,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "pdFactsLabel",
+        "pdFactEach"
+      ],
+      "x": 160,
+      "y": 4720
+    },
+    {
+      "id": "pdFactsLabel",
+      "type": "Text",
+      "label": "Label",
+      "parent": "pdFacts",
+      "parameters": {
+        "text": "Facts",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 4840
+    },
+    {
+      "id": "pdFactEach",
+      "type": "For Each",
+      "label": "One row per fact",
+      "parent": "pdFacts",
+      "parameters": {
+        "template": "/Week/Fact row",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 4960
+    },
+    {
+      "id": "pdSayBox",
+      "type": "Group",
+      "label": "The one line about it",
+      "parent": "pdRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "children": [
+        "pdSay"
+      ],
+      "x": 100,
+      "y": 5080
+    },
+    {
+      "id": "pdSay",
+      "type": "Text",
+      "label": "What to remember about it",
+      "parent": "pdSayBox",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 5200
+    }
+  ],
+  "visualRoots": [
+    "pdRoot"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a6103727-baf3-54ac-8870-575a2af1cb36",
+  "name": "Problem banner",
+  "path": "/Todo/Problem banner",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Shows the sentence in the \"todoProblem\" variable when a write or a load failed, with a Dismiss button. Draws nothing otherwise."
+}

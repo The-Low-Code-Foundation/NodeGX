@@ -30,6 +30,44 @@ export interface PropertyPanelRowProps {
   connectionLabel?: string;
   /** Click-to-navigate to the driving node; the chip is read-only without it. */
   onConnectionClick?: () => void;
+  /**
+   * CHR-009 — a control taller than one line (Margin/Padding split into four edges) pins the label and the gutter
+   * mark to its FIRST line. Centred on a 62px row the label floated between its own fields and the row above,
+   * and read as belonging to either.
+   */
+  alignTop?: boolean;
+}
+
+/**
+ * CHR-009 §2 "connection state" — the row's one mark, drawn in a gutter left of the label.
+ *
+ * Was a 7px dot AFTER the label text, inside the label box — so it moved with the label's length,
+ * and once CHR-009 R6 made the label `overflow: hidden` for its ellipsis, a long label could clip
+ * its own reset dot. In the gutter every row's mark sits on one x, and the label column starts at
+ * the same x whether a row has a mark or not.
+ *
+ * - **connected** → a filled `primary` dot with a wash ring (the mockup's `.dot.on`). Not clickable:
+ *   the binding chip beside it is the click, and names the source.
+ * - **changed from its default** → the reset dot, as before (same class, same title, same click).
+ * - neither → nothing. ⚠️ The mockup draws an OUTLINED dot on every row; that was not built, because
+ *   the rows that do not draw through this component (legacy `.property-row`s, the align strip, the
+ *   margin/padding box, `Variant`/`State`) would have had no ring and the gutter would read as a
+ *   pattern with holes. Recorded in CHR-009 §8 for Richard's look.
+ *
+ * Exported for `PropertyPanelInput`, the other row that draws a label.
+ */
+export function GutterDot({
+  isConnected,
+  showsChanged,
+  onReset
+}: {
+  isConnected?: boolean;
+  showsChanged?: boolean;
+  onReset?: () => void;
+}) {
+  if (isConnected) return <span className={css['ConnectedDot']} title="Connected" data-test="gutter-connected" />;
+  if (showsChanged && onReset) return <span className={css['ResetDot']} title="Reset to default" onClick={onReset} />;
+  return null;
 }
 
 export function PropertyPanelRow({
@@ -39,7 +77,8 @@ export function PropertyPanelRow({
   onReset,
   isConnected,
   connectionLabel,
-  onConnectionClick
+  onConnectionClick,
+  alignTop
 }: PropertyPanelRowProps) {
   // The chip REPLACES the row's controls rather than sitting beside them. For the
   // number+unit row that also retires the unit dropdown and the Fixed checkbox while
@@ -48,10 +87,10 @@ export function PropertyPanelRow({
   const showsChanged = isChanged && !isConnected;
 
   return (
-    <div className={css['Root']}>
-      <div className={classNames(css['Label'], showsChanged && css['is-changed'])}>
+    <div className={classNames(css['Root'], alignTop && css['is-top-aligned'])}>
+      <GutterDot isConnected={isConnected} showsChanged={showsChanged} onReset={onReset} />
+      <div className={classNames(css['Label'], showsChanged && css['is-changed'])} title={label}>
         {label}
-        {showsChanged && onReset && <span className={css['ResetDot']} title="Reset to default" onClick={onReset} />}
       </div>
       <div className={css['InputContainer']}>
         {isConnected ? <BindingChip source={connectionLabel} onClick={onConnectionClick} /> : children}

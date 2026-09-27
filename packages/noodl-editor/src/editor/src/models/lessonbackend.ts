@@ -5,7 +5,7 @@
  * 🔴 **THE DEFECT THIS CLOSES.** `log-a-thing` grades steps against the built-in
  * database (`collectionExists`, `hasColumns`, `rowCountAtLeast`). Nothing bound a
  * backend to an installed lesson, and `Backend Services` — the only surface that
- * can create or bind one — is registered `isDisabled: isLesson === true`. So the
+ * can create or bind one, and the door to the backend manager — is registered `isDisabled: isLesson === true`. So the
  * first actionable step of a shipping tutorial was unreachable: grading answered
  * *"this project is not bound to a backend, so there is no built-in database to
  * read"*, and the panel that would have fixed it was greyed out. Measured

@@ -15,6 +15,7 @@ import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 
 import PopupLayer from '../../../../popuplayer';
+import { unmountReactRoot } from '../../../../../../../shared/utils/unmountReactRoot';
 
 export function openPopup(args) {
   let root: Root | null = null;
@@ -52,7 +53,7 @@ export function openPopup(args) {
     position: 'right',
     onClose() {
       if (root) {
-        root.unmount();
+        unmountReactRoot(root);
         root = null;
       }
     }

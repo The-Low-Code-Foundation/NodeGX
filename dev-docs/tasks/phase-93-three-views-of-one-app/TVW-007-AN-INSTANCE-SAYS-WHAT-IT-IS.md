@@ -1,0 +1,661 @@
+# TVW-007 — An instance says what it is
+
+Proposal §4.4 (third and fourth bullets), mock callouts 6 and 7. Builds on FIX-018's look.
+
+## 1. The person sentence
+
+**Someone looking at the `Hero` node on Home's canvas reads that it is an instance of Sections/Hero
+used once, sees a door to edit it, and after going through that door the trail reads `Home › Hero`
+with Home drawn as the instance they came through — and clicking Home takes them back.**
+
+## 2. The spec
+
+| element | detail |
+|---|---|
+| **the eyebrow** | ✅ **REWRITTEN TO R-Z, s20.** The count alone — `· 3×` — in 10px mono, the number in the component hue, painted by `NodeGraphEditorNodePainter.ts` in the same pass as FIX-018's chip. `INSTANCE` and the path are gone. The count is TVW-001's, from the same walk (`instanceCounts.ts` → `buildUsageIndex`). Hidden below 75% zoom — read off `getPanAndScale().scale`, **never** `ctx.getTransform().a`, which is `ratio × scale` and so opens the gate at a different zoom on a retina screen |
+| **where the count sits** | 🔴 **NOT SETTLED BY R-Z — with Richard as four photographs (s20, `verdicts/TVW-007/2026-09-19`).** R-Z settled the text; the *row* is a separate cost, because `titlebarHeight()` fixes every connection-anchor position on the card (UIX-005). See §8 |
+| **the path** | on hover, and 🔴 **load-bearing** — with no name on the card it is the only place the component's identity lives. Not built at s20 |
+| **the door** | `Edit ›` at the node's top-right on hover, `primary` on `primary-bg`. It is `NodeContextMenu.ts:243-262`'s *Open component* given a visible control; double-click keeps working. Also on logic instances (a `Format price` node) |
+| **the trail** | today: `OverlayViews.updateTitle()` splits `fullName` on `/` (`OverlayViews.ts:483-503`). After: when the current component was entered *through an instance* (`switchToComponent` called from `SelectionActions.ts:167-169`, the `Edit ›` door, a Layers `›`, or TVW-001's *Used in*), the trail's first crumb is the **parent component**, drawn as the instance chip (diamond + component-hue wash), live, followed by `›` and the current component. Entered from the panel or search, the trail reads as today (folder path, folder crumbs inert). `NavigationHistory` (`NavigationHistory.ts:47-56`) records the entry route alongside the name so ⌘[ / ⌘] rebuild the right trail |
+| **more than one parent** | the parent crumb is the one you came through. `in 3 places ▾` on hover lists the others (TVW-001's popover) |
+| **cloud / workflow crumbs** | the synthetic two-crumb trail (`OverlayViews.ts:414-445`) and the cloud-function descent (`:466-480`) are unchanged; WFA-006 already made a workflow step behave as an instance |
+| **always visible** | LGC-008's ruling holds: the trail is never hidden, including in the Visual Function pane |
+
+## 3. Scope
+
+In: the eyebrow, the door, the trail's containment form, history, both themes, the zoom rule.
+
+Out: the panel's containment crumb (TVW-004). Any change to what the trail's `+` does. The lane.
+
+## 4. Acceptance criteria
+
+1. **(person)** Home's canvas. The `Hero` node shows `· 1×` (R-Z), and hovering it shows `Sections/Hero`. Hover it:
+   `Edit ›`. Press it: the canvas is Hero; the trail reads `[◆ Home] › Hero`. Press `Home` in the
+   trail: back on Home with the Hero node selected. Now open Hero from the Components panel: the trail
+   reads `Sections › Hero`. ⌘[ twice, ⌘] twice: each trail is the one that was shown at that step.
+2. The eyebrow's count equals TVW-001's for the same component — **one call, not one rule applied
+   twice**: both read `usage.instances.length` from `buildUsageIndex`. ⚠️ Stated as the *instances*, not
+   as "the row meta", because `rowMetaFor` gives a routed page its **route** instead of a count, so
+   a page that was also placed would show `/about` on its row and `· 2×` on its card. Measured
+   across 128 projects at s20: **0 instance nodes point at a routed page, 0 at the home component**
+   — the population where they can disagree is empty.
+2b. **(the hover, R-Z)** Hovering an instance node shows its full path, on visual **and** logic
+   instances, at every zoom where the count is drawn — graded on the rendered surface a person
+   sees, not on the handler firing. ⚠️ `Edit ›` is already specified on the same gesture at the
+   node's top-right, which is also the existing 20×20px connection-drag zone (`NodeGraphEditorNode.ts:261`)
+   — the canvas has **no** click dispatch for sub-regions today, so whoever builds it builds that too.
+3. A spec on `NavigationHistory`: entries carry `{name, via: parentName | null}`; `goBack` from an
+   instance-entered component rebuilds the containment trail; `discardInvalidEntries` drops entries
+   whose `via` component is deleted.
+4. The trail's crumb kinds are asserted on the rendered DOM: an instance crumb has the diamond; a
+   folder crumb has no button.
+5. Screenshots: both trail forms, the node with and without hover, both themes. **Richard rules
+   WORTHY.**
+6. `test:ci` at the floor; `leg-005`/LGC-008's trail-visibility pins green.
+
+## 5. Landmines
+
+- PAR-003 ruled the trail a breadcrumb, not tabs, and the mock's tab treatment was applied to the
+  existing mechanism. This task changes crumb *meaning*, not the mechanism; do not reintroduce tabs.
+- `Router.route()` is a silent no-op editor→editor (`CanvasTabs/tabNavigation.ts:11-15`); every
+  navigation goes through `switchToComponent`.
+- The painter's text measurement is per frame; cache the eyebrow's measured width per node like the
+  name.
+
+## 6. Scoping census — §2's eyebrow does not fit, in any form
+
+**Measured 2026-09-19 (s18) before anything was built**, over 128 projects / 5,558 components.
+Script: `scripts/devtools/tvw007-instance-census.js`. ⚠️ Text width is ESTIMATED at 6.0px/char for
+`CanvasFonts.portLabel` (10.5px mono); a string this estimate calls 3× too wide **is** too wide, and
+the near-fits would need the editor's real `measureText`. There are no near-fits.
+
+| what | number |
+|---|---|
+| instance nodes in the corpus | **8,833**, in 2,570 components |
+| distinct placed components (each would get an eyebrow) | 2,385 |
+| available width on a 150px node (less insets and FIX-018's chip) | **114px** |
+| §2's `INSTANCE · <path> · used N×` — **fits** | **0** |
+| — overflows | **2,385 (100%)**, p50 **396px**, p90 516px, max 846px |
+| the same sentence with the path reduced to its last segment — fits | **0** |
+
+🔴 **R-Z needed — the eyebrow's fixed chrome alone is wider than the node.** `INSTANCE · ` plus
+` · used 1×` is 21 characters ≈ 126px before a single character of the component's name. So this is
+not "long paths overflow"; **no component name can fit**, and shortening the path does not help.
+§2's format has to change, not be truncated. The options, in ascending order of how much they give
+up:
+
+1. **Drop the word `INSTANCE`.** FIX-018's chip and diamond already say it — the eyebrow would read
+   `Sections/Hero · 3×`. Still over at p50, but the leaf-name form (`Hero · 3×`) fits.
+2. **Two lines** — the path on one, `used 3×` on the next. Costs 12px of node height on 8,833 nodes.
+3. **The count only** (`· 3×`) on the node, with the path on hover. Cheapest, says least.
+
+🔴 **A placed component usually has MORE THAN ONE parent.** 424 have two and **632 have three or
+more** — 1,056 of 2,385 (44%). §2 treats `in 3 places ▾` as the exceptional case and "the parent
+crumb is the one you came through" as the ordinary one; it is the other way round for nearly half
+of them.
+
+⚠️ **This corrects a number carried since s8.** TVW-004's notes record that *"5 of the 6 corpus
+components with 2+ instances have them all in ONE parent"* — true, and about **six components in
+one project**. Across 128 projects the ratio inverts. Neither measurement is wrong; the first one's
+population was never the corpus ([[a-budget-measured-on-a-fixture-is-a-budget-on-the-fixture]]).
+
+## 7. R-Z — RULED 2026-09-19 (s19): the count only, the path on hover
+
+Richard chose **option 3**. The eyebrow on the node is **the count alone** — `· 3×` — and the
+component's path appears **on hover**.
+
+**What this changes in §2.** The eyebrow row reads `· N×` in 10px mono, `N×` in the component hue,
+painted in the same pass as FIX-018's chip. `INSTANCE` is gone (the chip and the diamond already say
+it) and so is the path. The hover surface carries `Sections/Hero`. Everything else in §2 stands: the
+count is still TVW-001's, from the same source (AC2 is unchanged and is now the *only* thing the
+painted row has to agree with), and the row is still hidden below 75% zoom.
+
+**Why it was the right shape to ask for.** It is the one option that **cannot overflow** — the
+painted string is 2–4 characters wide on every one of the 8,833 instance nodes in the corpus,
+against 114px of room. Options 1 and 2 both trade a measured cost for information the hover already
+carries: option 1 still loses the folder (two components named `Hero` draw identically), and option
+2 spends 12px of height on all 8,833 nodes. ⚠️ **What it gives up is real and must be built for, not
+apologised for**: with no name on the node, the hover is not a nicety — it is the only place the
+identity lives, so it has to be reachable, fast, and present on logic instances too.
+
+🔴 **The hover is now load-bearing, so it needs an AC of its own.** §4 was written when the node
+carried the name and the hover was a bonus. Add: *hovering an instance node shows its full path
+within Xms, on both visual and logic instances, and at every zoom where the eyebrow is drawn* — and
+grade it on the rendered surface a person sees, not on the handler firing
+([[a-rendered-surface-can-be-behind-a-blocker]]).
+
+⚠️ **Where the hover goes is not decided.** `Edit ›` (§2's door) is already specified at the node's
+top-right **on hover**, so two different things now appear on the same gesture. Whoever builds this
+resolves them together — one hover surface carrying both, or the path beside the eyebrow and the
+door where it is — and measures it before choosing.
+
+## 8. s20 — built, and the one thing the ruling did not price
+
+**Built (slice 1):** `instanceEyebrow.ts` (the pure rules: text, zoom gate, the four placements,
+the allowance), `instanceCounts.ts` (TVW-001's walk, cached behind a dirty flag for a per-frame
+caller), `eyebrowPlacement.ts` (the switch, 🔴 **delete it when Richard rules**), and the painter +
+`titlebarHeight()`/`titlebarLabelHeight()` wiring. 18 jest specs in `tests-unit/tvw-007`, **six
+mutants killed, none survived**.
+
+### 🔴 The question that went to Richard, and why R-Z could not answer it
+
+R-Z chose the count because it "cannot overflow" — 2–4 characters against **114px**. Two things
+were wrong with that number, and neither changes the text, only its cost:
+
+- **The real allowance is 93px (81px with an icon)**, not 114: `headerTextInset` is 37, not the
+  7 the s18 census assumed. The ruling holds *a fortiori* — the count still fits.
+- 🔴 **There is no free row to put it in.** `titlebarHeight()` = label + sub-label + 22, and
+  UIX-005 records that this formula fixes **every connection-anchor position**. So a count on its
+  own row moves the ports on every instance node in every project — the cost option 2 was rejected
+  for, one row's worth instead of two.
+
+Measured over 128 projects before anything was built (`scratchpad/eyebrow-*.js`): **9,634 instance
+nodes**; **1,702 (17.7%) renamed** so they already pay for a sub-label row; of the 7,932 unrenamed,
+the count fits after the name's last line on only **3,547 (44.7%)**.
+
+Asked to choose, Richard said he would need to see them — so all four were built and photographed
+on one canvas (`drive-tvw007-eyebrow.js`, 12/12 arms, `verdicts/TVW-007/2026-09-19`). What the
+**model** said, per placement, on 33 instance cards:
+
+| placement | titlebar | verdict from the drive |
+|---|---|---|
+| `hover-only` (today) | 36–64px | nothing on the card |
+| `own-row` | 48–76px | **every port on 33 cards moves** |
+| `reserve-width` | 36–78px | **also moves** — and its tallest card exceeds `own-row`'s |
+| `inline-if-fits` | 36–64px | nothing moves; **the count is absent on 55%** |
+
+### 🔴 The defect the photograph caught and every arm missed
+
+The first run's `reserve-width` shots showed **names clipped inside the titlebar** — `Main Navbar`
+lost its second line. The painter narrowed the name's allowance; `titlebarLabelHeight()` did not,
+so the card was *measured* for a one-line wrap and *painted* with a two-line one. Every arm was
+green, and the arm that was supposed to catch it reported **"card geometry unchanged"** — because
+it read a height that had never seen the narrowing. Both now call the same `titleAllowanceFor` with
+the same `eyebrowReserveWidth()`, and the placement is part of the label-height cache key. Once
+fixed, the same drive reported `reserve-width` at **36–78px**: the arm had been describing the bug.
+
+⚠️ **`reserve-width` reserves a fixed three-digit band, never the live count.** Reserving the real
+width would re-wrap a card — and move its ports — when a *tenth* instance was placed in another
+component, with nothing on screen saying why. The corpus holds counts needing three digits (198
+components at 10–99, **two over 100**, max 140).
+
+### What the next session does
+
+1. **Richard's verdict on the four shots.** Then: the winner becomes a constant, `eyebrowPlacement.ts`
+   is deleted with the three losers, and AC1/AC5 can be driven.
+2. `hover-only` is what ships until then — it is the only placement that moves nothing.
+3. Then the hover (AC2b) and the trail (AC3/AC4), which R-Z did not touch and which are independent
+   of the placement.
+
+## 8.5 🔴 R-Z2 — RULED 2026-09-20: `hover-only`. The count never goes on the card.
+
+Richard was shown all four photographs (`verdicts/TVW-007/2026-09-19/`) with the measured cost of
+each beside it, and ruled **`hover-only`** — the placement that was already shipping.
+
+**What this settles:** the instance node carries no count in its titlebar. The path (and the count)
+arrive on hover, which AC2b built and drove. **Nothing on any existing canvas moves**: the corpus's
+9,634 instance nodes keep the titlebar geometry they have today (36–64px), and `own-row` /
+`reserve-width` — each of which moved every port on every instance card — are dead.
+
+**What it costs, recorded so it is not rediscovered as a surprise:** the canvas's eyebrow now says
+*instance* only under the pointer. README §3's number 2 (*surfaces on which a placed component is
+called an instance*) is carried by the **Layers row**, the **trail crumb** and the **hover**, and
+TVW-010 must count it on the artefact rather than assume the card.
+
+**What the next session does with this:**
+1. `hover-only` becomes a **constant**, not a switch. `eyebrowPlacement.ts` is **deleted** along
+   with the `own-row`, `reserve-width` and `inline-if-fits` branches in `instanceEyebrow.ts`, and
+   the specs that exercised the three losers go with them.
+   🔴 A switch that outlives its verdict is a second copy of a decision.
+2. ⚠️ **AC1's sentence names the card.** §4 AC1 reads *"The `Hero` node shows `· 1×` (R-Z)"* — that
+   is `inline-if-fits`' behaviour, not this ruling's, and **AC1 was closed at s25 against the
+   shipped build**. Re-read what the s25 drive actually asserted before deleting anything; if it
+   graded a count drawn on the card, the arm and the criterion both need rewriting to the hover,
+   and AC1 is **re-opened**, not quietly kept ([[an-assertion-written-from-the-intent-contradicts-the-decision]]).
+3. `titleAllowanceFor` / `eyebrowReserveWidth()` and the placement key in the label-height cache
+   exist only to serve the three dead branches. Whoever deletes them re-runs the label-height specs
+   — the s20 clipping defect lived in exactly that seam.
+
+## 9. s21 — the trail (AC3 ✅ AC4 ✅), built while the placement is still with Richard
+
+`931f817a0f`. The placement verdict (§8) was still unanswered, so this session built the half of
+the task it does not block: **the trail's containment form**. Nothing here touches the eyebrow, the
+painter or `titlebarHeight()` — a peer was in `NodeGraphEditorNode.ts` the same evening and the two
+sets of files do not intersect.
+
+**What a person gets.** Double-click the `Hero` node on Home's canvas and the trail reads
+`[◆ Home] › Hero` — the component you came *through*, drawn as a crumb with a diamond, followed by
+where you are. Open the same component from the Components panel and it reads `Sections › Hero`,
+exactly as before. ⌘[ and ⌘] rebuild whichever trail was on screen at that step.
+
+**Built:** `instanceTrail.ts` (pure: `instanceParentCrumb`, `leafName`, `buildComponentTrail`),
+`NavigationHistory` entries as `{name, via}` + `currentEntry()`, `switchToComponent`'s
+`viaInstance` arg, the instance crumb in `NodeGraphComponentTrail.tsx` + its styling.
+**53 specs / 4 suites green in `tests-unit/tvw-007`; TWELVE mutants killed, none survived.**
+✅ **`test:main` — 517 suites / 8,258 specs all green, exit 0.** `typecheck:editor` 0,
+`typecheck:editor-tests` 0. 🔴 `test:ci` NOT run — six live sessions, four `dev` stacks; AC6 owes it.
+
+### 🔴 AC3's last clause, changed by building it
+
+§4 asked for `discardInvalidEntries` to **drop entries whose `via` component is deleted**. It now
+**clears the `via` and keeps the entry**, and the difference is worth the words:
+
+after deleting `Home`, the entry for `Hero` still names a component that exists and is still
+perfectly reachable. Dropping it makes ⌘[ skip a valid destination because something *else* was
+deleted. What is actually broken is the **route**, not the entry: the trail would draw a `Home`
+crumb wired to `switchToComponent(undefined)` — a crumb that looks live and does nothing. Clearing
+the route fixes exactly that and falls back to the folder path, which is what every other route
+shows anyway.
+
+⚠️ The spec arms **both halves** — the entry survives *and* its `via` is null — because asserting
+only the second would pass just as happily on an implementation that threw the entry away. The
+`§4`-as-written behaviour is mutant M5 and it is killed.
+
+### 🔴 Thirty lines that only a drive could have graded
+
+The trail construction was inside `OverlayViews.updateTitle()`. It is a **choice between two
+plausible trails for the same component**, and in there it needed Electron, a renderer and a live
+`ProjectModel` to run at all — so in practice it would have been graded by looking at it. It is now
+`buildComponentTrail`, called from the one place, and **the folder-path cases are a regression
+floor**: the containment branch cannot quietly become the only branch
+([[a-gate-can-have-a-hole-shaped-like-the-defect]]).
+
+### What was deliberately NOT done
+
+- ⚠️ **Only the instance crumb is a real `<button>`.** Every clickable crumb in that bar should be
+  one — a `<div onClick>` is unreachable by keyboard and silent to a screen reader — but that is a
+  change to the look of a surface P92/P94/P78 are all editing this week, and it needs a photograph
+  before it ships. The new crumb has nothing to regress, and it is what makes the two crumb kinds
+  differ in the **rendered DOM** rather than only in a class name, which is what AC4 asks to read.
+- **The component-port branch of the double-click does not pass `viaInstance`.** That node *names*
+  a component in a parameter; it does not contain one. The diamond is a containment claim that
+  relationship never makes.
+- **`in 3 places ▾`** (§2's multi-parent popover) — §6 measured that 44% of placed components have
+  2+ parents, so this is the ordinary case, not the exceptional one. The crumb drawn is the one you
+  came through, which is always right; what is missing is the way to see the others.
+- **`getTopComponent` deleted** — no callers anywhere in the repo.
+
+### AC1 and AC5 still need a drive
+
+AC3/AC4 close on specs. **AC1 is the person sentence end to end** (the eyebrow's `· 1×`, the hover,
+`Edit ›`, the trail, ⌘[/⌘]) and **AC5 is Richard's WORTHY on screenshots** — both need the editor.
+🔴 Not driven this session: **six Claude sessions were live on this box**, four of them holding
+`dev` stacks, and the s20 handoff records what an unattributed drive cost a peer. Use
+`drive-tvw007-eyebrow.js`'s PPID ownership check.
+
+**What a drive must actually confirm**, because no spec here does: that the crumb *appears*. The
+ordering is right by inspection — `activeComponent = component` → `push(component, via)` →
+`bindModel` → `updateTitle` — so `updateTitle` reads the fresh entry against the fresh component.
+That is an argument, not a photograph ([[verify-the-consequence-not-just-the-mechanism]]).
+
+## 10 — s22: the hover and the door (AC2b built, AC5's shots still owed)
+
+`hover-only` is still what ships (§8's verdict has not arrived), so this session built the surface
+that ruling made load-bearing: **the hover**, together with **`Edit ›`**, because §2 puts both on
+the same gesture at the same corner and §7 asked for them to be resolved together.
+
+**What a person gets.** Hovering an instance node — visual or logic — raises a one-line card just
+above it reading `Sections/Hero · 3×`, with `Edit ›` at its right end. Pressing that opens the
+component, and the trail then reads `[◆ Account] › Hero`, because the door passes `viaInstance`
+like the other two.
+
+**Built:** `canvas/instanceHover.ts` (pure: the close condition as a state machine, the content,
+the anchor, the graph→pane transform), `InstanceHoverController.ts` (the timer, the slot, the
+coordinates — no rules), `CanvasOverlays/InstanceHoverCard/` (the view + its stylesheet), a new
+`instanceHoverRoot` layer in `CanvasShell` at `INSTANCE_HOVER_Z = 8`, and the four wiring points:
+`NodeGraphEditorNode.mouse` (`move`, `move-out`, `down`), `ViewportActions.setPanAndScale` and
+`switchToComponent`.
+
+### 🔴 The door is NOT painted at the node's top-right, and that is a measurement
+
+§2 asks for `Edit ›` "at the node's top-right on hover". Those pixels are already spoken for:
+`NodeGraphEditorNode.ts:263` reads `pos.x > width - 20 && pos.y < 20` as the **connection-drag
+zone**, and a `down` there starts a wire. A control painted in that rectangle — or a DOM element
+floating over it — takes that gesture away from all **9,634 instance nodes** in the corpus, and
+takes it silently: the same pixels, a different result.
+
+So the door rides on the hover surface, anchored *outside* the card, which is where §2 was
+pointing and none of the pixels the canvas has already promised. Two consequences worth having:
+it is a real `<button>` (keyboard-reachable, announced, and a hit target the canvas cannot make —
+there is still **no click dispatch for sub-regions**, and this task no longer needs one), and
+AC2b can be graded the way it asks to be, with `elementFromPoint`.
+
+### 🔴 A hover surface over a canvas must own its close condition
+
+The obvious implementation hides the card on the node's `move-out`. The pointer has to cross
+`InstanceHover.gap` px of canvas to reach the button, and that boundary crossing *is* `move-out` —
+so the door would be drawn and unpressable ([[correct-and-usable-were-never-the-same-criterion]],
+fifth repeat). Hence a grace window (`graceMs: 220`) and a visible-while rule of **on the node OR
+on the card**.
+
+⚠️ **And the spec found the second half of it.** Writing the arm for "pointer leaves both surfaces"
+turned up a state the canvas actually produces and the first implementation could not represent:
+the card is a DOM element **above** the canvas, so a pointer that lands on it stops generating
+canvas mouse events **entirely** — the node's `move-out` never arrives. A machine that only
+cleared `overNode` on `node-leave` would go on believing the pointer was on the node and would
+survive every later `card-leave`: a box left on screen with the pointer elsewhere. So an arrival is
+also a departure, stated in both directions.
+
+### What the numbers say
+
+- `tests-unit/tvw-007` — **80 specs, 6 suites green** (+27 specs, +2 suites on s21).
+- **16 mutants, 16 killed, none survived**: the id-guarded leave, the immediate hide (the
+  unpressable door), the arrival-that-is-not-a-departure, the pointer carried across subjects, the
+  unconditional grace, the no-op dismiss, a count formatted here instead of by `eyebrowText`, the
+  path losing its folder, an unscaled screen rect, the card that never flips, right-alignment
+  without its off-the-left guard, room measured from the node instead of the clamped card edge,
+  identity-only state equality, a view ignoring its vertical anchor, a `<div>` door, and an empty
+  count drawn anyway.
+- 🔴 **Two of those survived first.** `M11` (the off-the-left guard) and `M16` (room read from the
+  node) both passed because the arm written for them **read the same answer in both arms** — a
+  narrow pane alone never reaches either branch ([[a-rule-reading-zero-in-both-arms-grades-nothing]]).
+  Two new cases, chosen so the correct and mutant answers differ, kill them.
+- ✅ **`test:main` — 520 suites, 8,292 specs, all green, exit 0**, beside a peer's live `dev` stack.
+- `typecheck:editor` **0**; `typecheck:editor-tests` **0**. `tsconfig.tests-main.json` still reports
+  the same 3 pre-existing errors in `erg-005/componentContract.pending.ts` and
+  `rel-004/webpackHeapCeiling.test.ts` — files this session never touched, in a config no
+  `typecheck:*` script runs.
+- 🔴 `test:ci` **NOT run** — a peer held a `dev` stack on this checkout for the whole session, and
+  AC6 still owes it.
+
+### What only a drive can settle, and the instrument for it
+
+`scripts/devtools/drive-tvw007-hover.js` is written and **UNRUN** — a peer's editor held 9222 from
+before this session started until after it ended, two dev stacks cannot coexist on this checkout
+(webpack-dev-server hardcodes 8080), and driving a stack you have not attributed is what cost a
+peer three misread runs at s20. It carries the PPID ownership guard, fails closed, and is guarded
+by `require.main === module`; `node --check` passes.
+
+Its arms, which are AC1's and AC2b's remainder: the card appears on hover and its path is
+**reachable by `elementFromPoint`** (not merely rendered); the door is a `BUTTON` and reachable;
+the count equals `buildUsageIndex`'s for the same component, read in the same run; the card
+**survives the pointer's journey** to the door and the press then lands on the component, with the
+trail's diamond crumb read off the DOM; the card does not outlive the canvas; a non-instance node
+gets **no** card (the control, in the same run); the second instance kind carries it too; and the
+path is still reachable at **50% zoom**, where the painted count is gated off — the arm R-Z's
+ruling makes load-bearing. Then both themes, shot.
+
+⚠️ **One thing no spec here covers**: that the door passes `viaInstance`. It is an options object
+in the controller, which needs a renderer to reach, so the trail's diamond after pressing `Edit ›`
+is the only place it is graded — the drive's job, exactly as the crumb's appearance was at s21.
+
+## 11 — s24: the drive ran, and the picture found what the log could not (AC2b ✅)
+
+**`node scripts/devtools/drive-tvw007-hover.js` — 22/22 arms, exit 0, 20 seconds.** First run ever;
+the box came free when a peer tore down mid-session and handed over 9222.
+
+### 11.1 Four instrument faults, found before any product fault — as s22 predicted
+
+The script had never executed, and every one of these looked exactly like a dead feature:
+
+1. 🔴 **The subject was chosen off the WINDOW, not the canvas.** The guard was `top > 60 && left > 40`,
+   written when the node graph filled the window. In the three-views layout the canvas starts
+   ~425px down, so a node panned off the top of the graph still passes it and its centre lands in
+   the **preview webview** — the dispatched move goes to the preview and no card ever opens. **Only
+   12 of the fixture's 55 nodes were on the canvas at the opening pan.** First run: `present:false`
+   on every card arm, 6/16. Fixed with `insideCanvas`, which tests the node against the canvas box
+   `NODE_RECTS` now returns. *A coordinate is not a surface* — the same lesson as
+   [[a-rendered-surface-can-be-behind-a-blocker]], one layer out.
+2. 🔴 **Coordinates were reused across a navigation and a zoom.** After `Edit ›` navigated away, the
+   arms below it aimed at boxes measured on the previous canvas; the author had anticipated this and
+   switched back, but **switching back does not restore the pan**. The 50% arm then changed the
+   scale under everything after it. Fixed with a `remeasure()` every arm calls.
+3. 🔴 **The control arm was measuring the positive one.** "A plain node gets no card" read
+   `present:true` on a `Group` and looked like a product defect. The controller's own state said
+   `overNode:false, overCard:true` — the Group sits **under** the card still open for the previous
+   subject, so the journey ended on the card, which is exactly what the card is built to do. The arm
+   never reached the Group. It now parks on empty canvas, waits out `graceMs`, **asserts the card is
+   gone**, and only then hovers — and reports `overNode`/`overCard` beside the verdict, because
+   "no card because it is not an instance" and "no card because the pointer missed" are two
+   different measurements.
+4. 🔴 **The logic instance was a guess, and the guess was wrong.** `instances.find(n => n.height < 90)`
+   picked `Main Navbar` — a 36px **visual** node — so AC2b's *"visual **and** logic"* was being graded
+   on two visual instances. `isVisual()` cannot answer it: it reads `type.visual`, which is
+   `undefined` on every component instance (measured). `allowAsChild` is the field that splits them.
+   The arm now searches the whole graph for `allowAsChild === false`, **brings it into view**
+   (`FOCUS_ON` inverts `NODE_RECTS`' arithmetic) and grades it — `[Profile] Create or Update`.
+
+⚠️ **And the fifth, which cost the most wall-clock: the green path had no `process.exit(0)`.** The
+first all-green run *appeared to hang*, was killed twice, and had already printed `21/21 arms
+passed` — the open CDP socket keeps the event loop alive, and every red run had left through
+`process.exit(1)`, so that line was the one path the instrument had never taken. **A gate that
+reports success by never returning is indistinguishable from a wedged editor.** Read the duration.
+
+### 11.2 🔴 The product defect the log could not see, and the picture could
+
+Every path arm was **green** while half the cards were unreadable. `textContent` returns the whole
+string even when CSS has clipped it, so `card.path.includes('/')` passes on text nobody can read.
+**The screenshot is what caught it** — the same way TVW-001 §"the picture caught it" caught a
+`canvas.measureText` error, and for the same reason.
+
+Measured over every instance on the fixture, hovering each in turn: **8 of 16 distinct paths were
+clipped**, the widest needing **412px in a 313px box**. And `text-overflow: ellipsis` truncates from
+the **end**, so what it dropped was the component's own **name**, keeping the long shared
+`#Noodl Component System/Atoms/…` prefix that tells two instances apart *least*:
+
+```
+before   #Noodl Component System/Atoms/Sections and Divid…      ← "Input Container" is GONE
+after    #Noodl Component System/Atoms/Se… Input Container       ← the folder gives way instead
+```
+
+🔴 **R-Z is what makes this a defect rather than a cosmetic loss.** The ruling took the name off the
+node card precisely so the hover would be the one place an instance says what it is — and the hover
+was ellipsising exactly that. This is TVW-001 §2's shrink-order finding **inverted**: there
+end-truncation *kept* the redundant half, here it *dropped* the load-bearing one. Same mechanism,
+opposite consequence, because which end carries the meaning had changed.
+
+**The fix** is a pure `splitHoverPath` (`instanceHover.ts`) plus two elements in the card: the folder
+is `flex-shrink: 1` with `min-width: 0`, the name is `flex-shrink: 0`. The halves concatenate back to
+the input exactly, so `textContent` — which the drive and every spec read — is unchanged. The folder
+still stays whenever it fits, and an ellipsis inside it still says *"there is more folder here"*.
+
+**Re-measured after the fix, same population, same run: names clipped `8 → 0`; folders clipped 8,
+which is the acceptable half.** The 8 paths still do not fit — 412px cannot become 313px — so this
+is a change of *which half gives way*, not a claim that everything fits.
+⚠️ The drive's own subject (`User Avatar`, 302/302) **fitted before the fix**, so its green arm
+proves nothing on its own; the before/after above is the census over all 16, and
+`ac2b-name-legible-after-fix.png` is the picture.
+The drive now carries `the component's NAME is legible, not ellipsised`, which reads
+`scrollWidth`/`clientWidth` on the name element rather than its text.
+
+### 11.3 What this closes, and what it does not
+
+- ✅ **AC2b — CLOSED.** The card is reachable by `elementFromPoint` on a **visual** and a **logic**
+  instance, at 100% and at 50% (where the painted count is gated off), in both themes; `Edit ›` is a
+  real reachable `BUTTON`; a non-instance gets no card, measured from a dismissed start; and the
+  path is now **legible**, not merely present.
+- ✅ **AC2** — the count on the card equals `buildUsageIndex`'s for the same component, read in one
+  run: `· 18×` vs `18`.
+- ⚠️ **AC1 — NOT closed, and the s23 handoff over-promised it.** The drive covers the hover, the
+  `Edit ›` press and the diamond crumb. Its sentence also asks for **pressing `Home` in the trail**
+  (returning with the node selected), **opening the component from the Components panel** (the
+  containment trail), and **⌘[ ⌘] twice each**. No arm exists for any of those three.
+- ⚠️ **AC5 — shots taken, verdict owed.** `ac5-hover-light.png`, `ac5-hover-dark.png`,
+  `ac2b-hover-at-50-percent.png`, `ac1-trail-after-the-door.png`,
+  `ac2b-name-legible-after-fix.png`. AC5 ends *"Richard rules WORTHY"*, so a drive cannot close it.
+
+### 11.4 Gates
+
+`tests-unit/tvw-007` **88 specs / 6 suites, exit 0** (was 80/6 — the delta is this pass's 8).
+`typecheck:editor` **0**; `typecheck:editor-tests` **0**. 🔴 `test:ci` still **NOT run** — owed since
+s21, and now owed this commit's card change as well.
+
+## 12 — s25: the gate ran, AC6 closed, and AC1's third arm cannot pass as built
+
+### 12.1 AC6 ✅ — `test:ci` at the floor, and the pins are in the OTHER runner
+
+`test:ci` had been owed since s21. It ran at **seed 52534: 3012 specs, 8 failures, and the eight are
+the floor by name** — 3 SUB-006, 3 SUB-011, 2 NDA-017 ([[test-ci-baseline-is-six-at-seed-39386]]).
+`test-results.json` mtime **16:00:59**, matching the run's own END line, against a baseline of
+2026-09-19 22:27:35 — a fresh readout, not yesterday's re-read
+([[test-results-json-is-the-readout-not-the-log]]).
+
+🔴 **AC6's second clause is graded by a different runner, and reading only `test:ci` would have
+closed it on an absence.** `leg-005` / LGC-008's trail-visibility pins live in `tests-unit/`, which
+is **jest** — `test:ci` is the jasmine bundle and never loads them, so their silence in that log
+means *not present*, not *green* ([[assert-an-absence-with-a-known-firing-signal-beside-it]]).
+`test:main`: **521 suites / 8343 specs, exit 0**, and the four suites the AC names are in the pass
+list by name — `leg-005/nodeCommentRow`, `lgc-008/canvas-remeasure`, `lgc-008/blockly-resize`,
+`lgc-008/tab-workspaces`. **Both clauses measured ⇒ AC6 ✅.**
+
+⚠️ **`board-export.test.ts` ran, and s23's `boardFrameMounts` extraction is green** — the handoff
+named it the thing most likely broken. Its describes are all `TVW-008 …`, which is why a grep for
+`board-export` in the log reads zero; the 34 `TVW-008` spec-starts are the known-firing signal that
+says it loaded.
+
+### 12.2 🔴 The instrument fault that cost the first run — a heap number borrowed from another context
+
+The first `test:ci` died at **60s, exit 134 (SIGABRT)** with `Reached heap limit` in webpack, and
+`test-results.json` was **unmoved**. The cause was mine: `NODE_OPTIONS=--max-old-space-size=2048`,
+carried over from [[the-smallest-runner-fails-first-and-names-nothing]] — a number that belongs to
+the *test runner*, not to a cold webpack build, and **less than half** this machine's default heap of
+4144MB. The repo sets no `NODE_OPTIONS` anywhere, so s21–s23 had always run on that default. Removing
+the override was the whole fix ([[a-budget-measured-on-a-fixture-is-a-budget-on-the-fixture]]).
+
+🔴 **And the harness reported that run as "exit code 0".** A backgrounded command reports its *last*
+statement's status, and the last statement was the `echo` — the real 134 survived only because it was
+captured into `EC` and written to the log ([[a-backgrounded-command-exit-code-can-lie]]). **Read the
+duration and the artefact mtime, never the harness's exit line.**
+
+### 12.3 🔴 AC1's "with the Hero node selected" is not implemented, and no drive can make it pass
+
+AC1 ends *"Press `Home` in the trail: back on Home **with the Hero node selected**."* Building the
+arm meant first asking what it would read, and the answer is that **nothing in the system remembers
+which instance node was entered through**:
+
+- `NavigationHistoryEntry` is `{ name, via }` and `via` is a **component `fullName`**, not a node id
+  (`NavigationHistory.ts:16-21`).
+- `buildComponentTrail`'s item carries `{ name, fullName, component }` — no node (`instanceTrail.ts:79`).
+- The crumb calls `onSwitchToComponent(item.component, { pushHistory: true })` — no node
+  (`NodeGraphComponentTrail.tsx:392-394`).
+- `goToCurrent()` calls `switchToComponent(component)` — no node (`NavigationHistory.ts`).
+
+`switchToComponent` **already accepts `args.node`** to select on arrival (`nodegrapheditor.ts:605`);
+every one of these four callers simply passes nothing. So this is a missing wire, not a redesign.
+
+⚠️ **This is why the arm was written before the drive.** A drive would have reported
+`selected: none` and read as a flaky instrument — the s24 failure mode exactly
+([[verify-the-consequence-not-just-the-mechanism]]). **The gap blocks an AC, so it is first-job
+work** ([[build-the-tasks-do-not-farm-the-defects]]).
+
+🔴 **The node id belongs on the history ENTRY, not beside `activeComponent`** — the same argument the
+`via` field already records in its own comment: ⌘[ and ⌘] must rebuild *the step*, and a single
+"which node did I come through" field is wrong the moment you go back one step.
+
+### 12.4 What s25 confirmed about AC1's other two arms, by measurement
+
+- **⌘[ / ⌘] DO exist** — `EditorDocument.tsx:755-763`, `KeyMod.CtrlCmd | KeyCode.US_OPEN/CLOSE_SQUARE_BRACKET`,
+  handlers `navigationHistory.goBack/goForward`. ⚠️ A first grep over `views/nodegrapheditor` and the
+  Electron menu found **nothing** and nearly recorded the gesture as unbuilt; the binding lives in
+  `views/documents/EditorDocument` ([[elimination-over-an-unchecked-candidate-list]]).
+- 🔴 **The drive must press real keys, not call `goBack()`.** The shortcut and the trail's back
+  button are the *same handler*, so calling it grades the button a second time
+  ([[a-check-in-a-second-pipeline-is-a-duplicate-first]]). The keyboard route's own risk is the focus
+  predicate in `keyboardhandler.ts`, which only a real keystroke crosses.
+- **The match is on `event.key`**, not `keyCode` or `code` — `KeyCodeUtils.fromString(event.key)`
+  (`keyboardhandler.ts:281,348`), and `'['` is the registered label (`KeyCodeMapper.ts:130`). So the
+  dispatch must set `key: '['` with `modifiers: 4` (Meta); `windowsVirtualKeyCode` alone would fire
+  nothing.
+- **The fixture has the subjects.** `TVW-007 s20 Eyebrow`, 165 components / **515 instance nodes**;
+  `/Pages/Logged in/Account` holds 33 instances of 16 distinct components, e.g.
+  `/#Noodl Component System/Atoms/Buttons/Primary Button` — whose panel-opened trail must read the
+  containment form **`Buttons › Primary Button`**.
+
+### 12.5 s25 built the missing wire — the entry remembers the NODE
+
+Six files, and the shape follows the one `via` already set.
+
+| file | change |
+|---|---|
+| `NavigationHistory.ts` | `NavigationHistoryEntry` gains **`viaNodeId: string \| null`**; `push(component, via, viaNodeId)`; `discardInvalidEntries` clears it **with** `via` |
+| `instanceTrail.ts` | `InstanceParentCrumb` and `ComponentTrailCrumb` carry it; `instanceParentCrumb` returns `entry.viaNodeId` |
+| `NodeGraphComponentTrail.tsx` | `ComponentTrailItem` carries it; `onCrumbClick` passes `{ node: { id: viaNodeId } }` |
+| `nodegrapheditor.ts` | `switchToComponent` args gain `viaNodeId?: string`, forwarded to `push` |
+| `InstanceHoverController.ts`, `NodeContextMenu.ts`, `SelectionActions.ts` | the three instance doors pass `viaNodeId: node.id` |
+
+**Three decisions worth the ink:**
+
+- 🔴 **`viaNodeId` is a separate fact from `via`, and the spec proves it has to be.** A parent can
+  hold many instances of the same child — `/Pages/Logged in/Account` holds **33 instances of 16
+  components** — so an implementation that derived the node from the component name would send you
+  back to the wrong one, and would pass any spec that ever placed only one. The arm *"TWO instances
+  of the same component on one canvas are two different destinations"* is the one that fails it.
+- ⚠️ **`viaInstance` stays a boolean; `viaNodeId` had to be the id.** The parent is always
+  `this.activeComponent` and so is derived in one place, but *which node* is known only to the door
+  — the one thing the editor cannot look up for itself.
+- **A node without a route is dropped, at both layers.** `push` stores `via ? viaNodeId : null` and
+  `switchToComponent` computes `via ? args.viaNodeId : null`. A node id with no `via` addresses a
+  canvas the trail will never navigate to ([[a-write-nobody-reads-is-a-write-nobody-grades]]).
+
+🔴 **Deliberately NOT done: ⌘[ does not select the node, only the crumb does.** AC1 asks for
+selection on *"Press `Home` in the trail"* and asks ⌘[/⌘] only for *"each trail is the one that was
+shown at that step"*. `goToCurrent()` switches to `history[index]`, and the node on an entry
+describes the route **into** that entry, not out of it — so making ⌘[ select would mean reading the
+entry being *left*, a different rule that nothing in §4 asks for. Left as a question rather than
+answered silently: **the two gestures land in the same place and differ in selection.** If that
+reads wrong to Richard it is a one-line change in `goToCurrent`, and it should be his call.
+
+**Gates.** `tests-unit/tvw-007` **95 specs / 6 suites, exit 0** (was 88 — the 7 new arms are AC1's).
+`test:main` **521 suites / 8350 specs, exit 0** (was 8343). `typecheck:editor` **0**;
+`typecheck:editor-tests` **0**.
+
+⚠️ **Two suites failed to RUN before they failed to pass** — `instanceCrumb.test.tsx` and
+`componentTrail.test.ts`, on a missing `viaNodeId` in a type and in five entry literals. Making the
+field **required** on `NavigationHistoryEntry` is what surfaced them; an optional field would have
+compiled clean and left five specs asserting a shape the product no longer produces
+([[this-jest-can-grade-a-react-component]] — a type error here is a suite that grades *nothing*).
+
+### 12.6 What is left on AC1
+
+The wire exists and is graded offline; **AC1 still needs the drive**, and it is now three arms:
+the trail `Home` press (asserting the *selection*, not just the canvas), the Components-panel open
+(trail must read `Buttons › Primary Button`), and ⌘[ ×2 / ⌘] ×2 pressed as **real keys**
+(`key: '['`, `modifiers: 4`). `drive-tvw007-hover.js` is the instrument to build them on.
+
+### 12.7 🔴 AC1 ✅ — the drive ran: **24/24**, and the shot confirms the consequence
+
+`scripts/devtools/drive-tvw007-ac1.js`, against `TVW-007 s20 Eyebrow`. All three remaining clauses
+of AC1's sentence are now measured on the rendered surface:
+
+| clause | result |
+|---|---|
+| Press `Home` in the trail: back on the parent **with the node selected** | ✅ `selected=[08383aa4…] labels=[Input Container]` |
+| Open from the Components panel: the **containment** trail | ✅ `Noodl Component System › Atoms › Sections and Dividers › Input Container`, `diamond=false` |
+| ⌘[ ×2, ⌘] ×2, each showing the trail shown at that step | ✅ all four steps, as **real keystrokes** |
+
+🔴 **The screenshot says more than the log could.** `ac1-returned-with-node-selected.png` shows the
+canvas back on `Account`, the `Input Container` node carrying a selection ring **and the Properties
+panel switched to `Input Container · VISUAL`**. The selection is not a flag the drive read back out
+of the model — the editor's property surface followed it, which is the thing a person is actually
+returning *for* ([[verify-the-consequence-not-just-the-mechanism]]).
+
+**The control pair is visible too**, and it is one component reached two ways: the instance route
+draws `◆ Account › Input Container` (`ac1-trail-instance-form.png`), the panel route draws the full
+folder path (`ac1-trail-containment-form.png`). **Route is the only variable**
+([[a-control-pair-proves-what-you-varied-only]]).
+
+### 12.8 🔴 Four instrument faults, and all four were the same mistake
+
+The first run reported **15/18** and every red was the drive, not the product. All four are one
+error — **reading "present" where the arm needed "usable"** — and this is the fourth phase running
+to pay for it ([[correct-and-usable-were-never-the-same-criterion]]).
+
+1. 🔴 **`ed.selector.selection` DOES NOT EXIST.** The reader mapped `undefined` to `[]` and reported
+   *"nothing is selected"* — failing AC1's headline arm against a wire that worked. The field is
+   **`selector._selected`**. Found by arming the reader with a known-firing control: `selectNode(x)`,
+   then read it back ([[assert-an-absence-with-a-known-firing-signal-beside-it]]).
+   **An absence from an unverified reader is not a measurement.**
+2. **Aiming is not hitting.** The drive aimed at `Main Navbar` and opened **`Page Main`'s** card: a
+   visual child is drawn inside its parent, so the child's centre hit-tests to the parent. Fixed by
+   choosing the subject **by measurement** — hover each candidate, keep the first whose card names
+   it. ⚠️ `instanceHover.state.node` is not exposed, so the card's own path is the identity.
+3. **The Components panel opens on the LAYERS tab**, so `component-tree-item` matched 0 rows.
+4. 🔴 **And once tabbed, the tree was `0 × 0`.** 18 rows in the DOM, `display:flex`,
+   `visibility:visible`, **every rect zero** — so a click computed from a row landed at `(0,0)`.
+   `SidebarModel.instance.switch('components')` is what gives the panel a size. The panel's own
+   filter input has the same defect and is **still invisible** (`offsetWidth`/`offsetHeight` 0),
+   which is why the drive expands folders by clicking instead ([[a-rect-is-not-visibility]]).
+
+⚠️ **The lesson that generalises**: three separate arms read *"the component is not in the panel"*
+when what was true was *"the panel has no size"*. **A row that exists is not a row a pointer can
+reach — assert on a rect, not on a `querySelector`.** The drive now grades `boxedRows > 0`.

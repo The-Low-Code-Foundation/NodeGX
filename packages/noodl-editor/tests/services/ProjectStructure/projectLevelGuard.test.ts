@@ -172,7 +172,9 @@ describe('FLD-009 — presence controls', () => {
 
     const { slice, raw, decisions } = await service.readProjectLevelFromDisk(DIR, project);
     expect(decisions.project.action).toBe('reload'); // nothing unsaved here, so adopt
-    applyProjectLevelSlice(project as TSFixme, slice, 'project');
+    // The hydrator only matters for the `styles` key (which carries the variants); identity is
+    // the honest thing to pass for a `project`-file slice, which has none.
+    applyProjectLevelSlice(project as TSFixme, slice, 'project', (raw) => raw);
     service.markProjectLevelBaseline('project', raw.project ?? null, project);
 
     (project as TSFixme).rootNodeId = 'home1';

@@ -22,8 +22,8 @@
  * @module nodegx-backend/storage/MetadataStore
  */
 
-import type { AdapterFacade } from '../persistence/AdapterFacade';
-import type { SchemaManagerLike } from '../persistence/SchemaManagerLike';
+import type { IStorageFacade } from '@noodl/backend-contract';
+import type { IStorageSchema } from '@noodl/backend-contract';
 
 export const FILES_COLLECTION = '_Files';
 
@@ -62,7 +62,7 @@ export interface CreateFileRecordInput {
 
 /** Ensure `_Files` exists with the right shape. Idempotent — call at every startup. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function ensureFilesTable(schemaManager: SchemaManagerLike | null | undefined): void {
+export function ensureFilesTable(schemaManager: IStorageSchema | null | undefined): void {
   if (!schemaManager) return;
   schemaManager.createTable({
     name: FILES_COLLECTION,
@@ -81,7 +81,7 @@ export function ensureFilesTable(schemaManager: SchemaManagerLike | null | undef
 }
 
 export class MetadataStore {
-  constructor(private readonly facade: AdapterFacade) {}
+  constructor(private readonly facade: IStorageFacade) {}
 
   async create(input: CreateFileRecordInput): Promise<FileRecord> {
     const acl = input.private && input.owner ? { [input.owner]: { read: true, write: true } } : undefined;
@@ -122,9 +122,16 @@ export class MetadataStore {
     await this.facade.rawDelete(FILES_COLLECTION, objectId);
   }
 
-  /** Every row — the orphan sweep's "what metadata thinks exists" half. Unbounded (v1; see BAK-006-NOTES). */
+  /**
+   * Every row — the orphan sweep's "what metadata thinks exists" half.
+   * Unbounded (v1; see BAK-006-NOTES).
+   *
+   * PRD-001 §3.3: `rawQueryAll`. A sweep that saw only the first page would
+   * read every unlisted file as an orphan and DELETE it — the one caller where
+   * a page cap does not truncate a listing but destroys data.
+   */
   async listAll(): Promise<FileRecord[]> {
-    const { results } = await this.facade.rawQuery(FILES_COLLECTION, { limit: 1000000 });
+    const { results } = await this.facade.rawQueryAll(FILES_COLLECTION, {});
     return results as unknown as FileRecord[];
   }
 }

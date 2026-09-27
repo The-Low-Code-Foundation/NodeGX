@@ -1,0 +1,1479 @@
+{
+  "measured": {
+    "darkLower": {
+      "oldStripPresent": false,
+      "rows": [
+        {
+          "comp": "align-content",
+          "top": 99,
+          "height": 32,
+          "visible": true,
+          "label": "Align Content",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "flex-start",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "flex-end",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-between",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-around",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-evenly",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        },
+        {
+          "comp": "horizontal",
+          "top": 276,
+          "height": 32,
+          "visible": true,
+          "label": "Align X",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "left",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "right",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        },
+        {
+          "comp": "vertical",
+          "top": 308,
+          "height": 32,
+          "visible": true,
+          "label": "Align Y",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "top",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "bottom",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        },
+        {
+          "comp": "align-items",
+          "top": 389,
+          "height": 32,
+          "visible": true,
+          "label": "Align Items",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "flex-start",
+              "pressed": true,
+              "width": 36,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(255, 255, 255)",
+              "fill": "rgb(51, 62, 77)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 36,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "flex-end",
+              "pressed": false,
+              "width": 36,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "stretch",
+              "pressed": false,
+              "width": 36,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        },
+        {
+          "comp": "justify-content",
+          "top": 421,
+          "height": 32,
+          "visible": true,
+          "label": "Justify Content",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "flex-start",
+              "pressed": true,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(255, 255, 255)",
+              "fill": "rgb(51, 62, 77)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "flex-end",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-between",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-around",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-evenly",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        }
+      ],
+      "labelLefts": [
+        17
+      ],
+      "groupHeaders": [
+        {
+          "name": "Alignment",
+          "top": 244
+        },
+        {
+          "name": "Align and justify content",
+          "top": 357
+        },
+        {
+          "name": "Margin and padding",
+          "top": 470
+        },
+        {
+          "name": "Style",
+          "top": 615
+        }
+      ],
+      "visibleTextSizes": {
+        "13px": 1,
+        "15px": 1,
+        "11px": 12,
+        "12px": 37
+      }
+    },
+    "dark": {
+      "oldStripPresent": false,
+      "rows": [
+        {
+          "comp": "align-content",
+          "top": 93,
+          "height": 32,
+          "visible": true,
+          "label": "Align Content",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "flex-start",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "flex-end",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-between",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-around",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-evenly",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        },
+        {
+          "comp": "horizontal",
+          "top": 270,
+          "height": 32,
+          "visible": true,
+          "label": "Align X",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "left",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "right",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        },
+        {
+          "comp": "vertical",
+          "top": 302,
+          "height": 32,
+          "visible": true,
+          "label": "Align Y",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "top",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "bottom",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        },
+        {
+          "comp": "align-items",
+          "top": 383,
+          "height": 32,
+          "visible": true,
+          "label": "Align Items",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "flex-start",
+              "pressed": true,
+              "width": 36,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(255, 255, 255)",
+              "fill": "rgb(51, 62, 77)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 36,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "flex-end",
+              "pressed": false,
+              "width": 36,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "stretch",
+              "pressed": false,
+              "width": 36,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        },
+        {
+          "comp": "justify-content",
+          "top": 415,
+          "height": 32,
+          "visible": true,
+          "label": "Justify Content",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "flex-start",
+              "pressed": true,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(255, 255, 255)",
+              "fill": "rgb(51, 62, 77)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "flex-end",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-between",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-around",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-evenly",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(196, 206, 219)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        }
+      ],
+      "labelLefts": [
+        17
+      ],
+      "groupHeaders": [
+        {
+          "name": "Alignment",
+          "top": 238
+        },
+        {
+          "name": "Align and justify content",
+          "top": 351
+        },
+        {
+          "name": "Margin and padding",
+          "top": 464
+        },
+        {
+          "name": "Style",
+          "top": 609
+        }
+      ],
+      "visibleTextSizes": {
+        "13px": 1,
+        "15px": 1,
+        "11px": 12,
+        "12px": 37
+      }
+    },
+    "lightLower": {
+      "oldStripPresent": false,
+      "rows": [
+        {
+          "comp": "align-content",
+          "top": 99,
+          "height": 32,
+          "visible": true,
+          "label": "Align Content",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "flex-start",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "flex-end",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-between",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-around",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-evenly",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        },
+        {
+          "comp": "horizontal",
+          "top": 276,
+          "height": 32,
+          "visible": true,
+          "label": "Align X",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "left",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "right",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        },
+        {
+          "comp": "vertical",
+          "top": 308,
+          "height": 32,
+          "visible": true,
+          "label": "Align Y",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "top",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "bottom",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        },
+        {
+          "comp": "align-items",
+          "top": 389,
+          "height": 32,
+          "visible": true,
+          "label": "Align Items",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "flex-start",
+              "pressed": true,
+              "width": 36,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(24, 33, 43)",
+              "fill": "rgb(229, 233, 237)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 36,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "flex-end",
+              "pressed": false,
+              "width": 36,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "stretch",
+              "pressed": false,
+              "width": 36,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        },
+        {
+          "comp": "justify-content",
+          "top": 421,
+          "height": 32,
+          "visible": true,
+          "label": "Justify Content",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "flex-start",
+              "pressed": true,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(24, 33, 43)",
+              "fill": "rgb(229, 233, 237)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "flex-end",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-between",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-around",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-evenly",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        }
+      ],
+      "labelLefts": [
+        17
+      ],
+      "groupHeaders": [
+        {
+          "name": "Alignment",
+          "top": 244
+        },
+        {
+          "name": "Align and justify content",
+          "top": 357
+        },
+        {
+          "name": "Margin and padding",
+          "top": 470
+        },
+        {
+          "name": "Style",
+          "top": 615
+        }
+      ],
+      "visibleTextSizes": {
+        "13px": 1,
+        "15px": 1,
+        "11px": 12,
+        "12px": 37
+      }
+    },
+    "light": {
+      "oldStripPresent": false,
+      "rows": [
+        {
+          "comp": "align-content",
+          "top": 93,
+          "height": 32,
+          "visible": true,
+          "label": "Align Content",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "flex-start",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "flex-end",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-between",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-around",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-evenly",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        },
+        {
+          "comp": "horizontal",
+          "top": 270,
+          "height": 32,
+          "visible": true,
+          "label": "Align X",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "left",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "right",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        },
+        {
+          "comp": "vertical",
+          "top": 302,
+          "height": 32,
+          "visible": true,
+          "label": "Align Y",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "top",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "bottom",
+              "pressed": false,
+              "width": 49,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        },
+        {
+          "comp": "align-items",
+          "top": 383,
+          "height": 32,
+          "visible": true,
+          "label": "Align Items",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "flex-start",
+              "pressed": true,
+              "width": 36,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(24, 33, 43)",
+              "fill": "rgb(229, 233, 237)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 36,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "flex-end",
+              "pressed": false,
+              "width": 36,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "stretch",
+              "pressed": false,
+              "width": 36,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        },
+        {
+          "comp": "justify-content",
+          "top": 415,
+          "height": 32,
+          "visible": true,
+          "label": "Justify Content",
+          "labelLeft": 17,
+          "labelCut": false,
+          "segment": {
+            "left": 141,
+            "right": 297,
+            "height": 26
+          },
+          "options": [
+            {
+              "value": "flex-start",
+              "pressed": true,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(24, 33, 43)",
+              "fill": "rgb(229, 233, 237)"
+            },
+            {
+              "value": "center",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "flex-end",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-between",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-around",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            },
+            {
+              "value": "space-evenly",
+              "pressed": false,
+              "width": 23,
+              "glyph": [
+                14,
+                14
+              ],
+              "color": "rgb(89, 98, 110)",
+              "fill": "rgba(0, 0, 0, 0)"
+            }
+          ],
+          "mark": false
+        }
+      ],
+      "labelLefts": [
+        17
+      ],
+      "groupHeaders": [
+        {
+          "name": "Alignment",
+          "top": 238
+        },
+        {
+          "name": "Align and justify content",
+          "top": 351
+        },
+        {
+          "name": "Margin and padding",
+          "top": 464
+        },
+        {
+          "name": "Style",
+          "top": 609
+        }
+      ],
+      "visibleTextSizes": {
+        "13px": 1,
+        "15px": 1,
+        "11px": 12,
+        "12px": 37
+      }
+    }
+  },
+  "interaction": {
+    "before": {
+      "alignItems": null,
+      "justifyContent": null,
+      "pressedItems": "flex-start"
+    },
+    "stretch": {
+      "model": "stretch",
+      "pressed": "stretch",
+      "mark": true
+    },
+    "stretchAfterUndo": {
+      "model": null,
+      "pressed": "flex-start"
+    },
+    "pressAgain": {
+      "value": "flex-start",
+      "undoBefore": "[\"listeners\",\"listenersOnce\",\"ptr\",\"queue\"]",
+      "model": null,
+      "undoAfter": "[\"listeners\",\"listenersOnce\",\"ptr\",\"queue\"]"
+    },
+    "justify": {
+      "model": "space-between",
+      "pressed": "space-between"
+    },
+    "reset": {
+      "model": null,
+      "pressed": "flex-start",
+      "mark": false
+    },
+    "resetUndo1": {
+      "model": "space-between",
+      "pressed": "space-between"
+    },
+    "resetUndo2": {
+      "model": null,
+      "pressed": "flex-start"
+    }
+  }
+}

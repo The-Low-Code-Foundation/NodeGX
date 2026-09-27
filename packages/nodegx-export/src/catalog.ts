@@ -97,6 +97,21 @@ export class CatalogIndex {
   }
 
   /**
+   * STY-004. The declared type name of an input port (`color`, `textStyle`, `string`, …), or
+   * undefined where the catalog does not know the port.
+   *
+   * 🔴 **This exists so colour-style resolution asks rather than guesses.** A project colour style
+   * is referenced by bare name (`resolveColor(v) = colors[v] ?? v`, `noodl-viewer-react/src/
+   * styles.ts:122`), so a resolver with no port types would have to try every string parameter
+   * against the colour dictionary — and would rewrite a `fontFamily` or a `cssClassName` that
+   * happened to share a style's name. The catalog declares 118 colour ports and 12 textStyle
+   * ports; asking it costs one lookup and cannot collide.
+   */
+  inputTypeName(typeName: string, portName: string): string | undefined {
+    return portTypeName(this.byTypeName.get(typeName)?.inputs?.find((p) => p.name === portName)?.type);
+  }
+
+  /**
    * The kind of a catalog-declared port, by name. Returns undefined when the catalog does not
    * know the port (dynamic ports, unknown types) — callers decide what that means; this function
    * never guesses.

@@ -191,5 +191,6 @@ NodeSharedPortDefinitions.addShadowInputs(RadioButtonNode, {
   styleTag: 'radio'
 });
 Utils.addControlEventsAndStates(RadioButtonNode, { checked: true });
+Utils.addFocusActions(RadioButtonNode, { noun: 'radio button' });
 
 export default createNodeFromReactComponent(RadioButtonNode);

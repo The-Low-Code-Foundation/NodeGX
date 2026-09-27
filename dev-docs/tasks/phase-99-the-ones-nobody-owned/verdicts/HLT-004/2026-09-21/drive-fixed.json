@@ -1,0 +1,78 @@
+{
+  "arm": "fixed",
+  "exit": 0,
+  "resources": {
+    "total": 10,
+    "bufferFull": false,
+    "me": 2,
+    "path": 0,
+    "profile": 0,
+    "intake": 1,
+    "feed": 0,
+    "community": 7
+  },
+  "log": {
+    "path401": 0,
+    "profile401": 0,
+    "feed404": 0,
+    "lines": 2288,
+    "missing": false
+  },
+  "arms": [
+    {
+      "name": "the store is in this arm’s state before the launch",
+      "ok": true,
+      "detail": "no credential"
+    },
+    {
+      "name": "the editor came up and CDP answered",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "REACH: the launcher’s community layer ran (`/api/v1/me` was requested)",
+      "ok": true,
+      "detail": "me=2"
+    },
+    {
+      "name": "the resource buffer did not overflow",
+      "ok": true,
+      "detail": "10 entries"
+    },
+    {
+      "name": "the log window is this launch only",
+      "ok": true,
+      "detail": "2288 lines"
+    },
+    {
+      "name": "`/me/path` was NOT requested",
+      "ok": true,
+      "detail": "requests=0"
+    },
+    {
+      "name": "`/me/profile` was NOT requested",
+      "ok": true,
+      "detail": "requests=0"
+    },
+    {
+      "name": "0 `401 (path)` lines in the launch log",
+      "ok": true,
+      "detail": "lines=0"
+    },
+    {
+      "name": "0 `401 (profile)` lines in the launch log",
+      "ok": true,
+      "detail": "lines=0"
+    },
+    {
+      "name": "the two instruments agree",
+      "ok": true,
+      "detail": "requests path=0 profile=0 · log path=0 profile=0"
+    },
+    {
+      "name": "feed.json 404s — recorded, NOT fixed by this task",
+      "ok": null,
+      "detail": "lines=0"
+    }
+  ]
+}

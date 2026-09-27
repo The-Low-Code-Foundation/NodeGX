@@ -1,0 +1,182 @@
+{
+  "task": "TVW-004",
+  "criterion": "AC6 \u2014 AC1's five states, both themes, 300px and 240px. Richard rules WORTHY.",
+  "date": "2026-09-18",
+  "session": 15,
+  "buildKind": "dev",
+  "buildHeadSha": "242db671b + uncommitted TVW-004 s15 changes (the Router/For Each trail fix, the key trail, the wired-template note, the crumb shrink)",
+  "viewport": "1368x900 CSS px",
+  "project": "copy of the 165-component 'Noodl Marketplace' corpus, as 'TVW-004 s15 Drive'",
+  "widthMethod": "real FrameDivider drag (the vertical one \u2014 the divider taller than it is wide), measured back off the panel box before every shot; the filename carries the MEASURED width, not the requested one",
+  "themeMethod": "ThemeManager.setMode, read back off documentElement[data-theme] in a separate eval after a wait, before every shot",
+  "designMode": "ON \u2014 the topbar's own Design button. EditorDocument gates the preview outline behind !previewMode (DES-001), so state 3 cannot be photographed in preview mode.",
+  "drive": "scripts/devtools/drive-tvw004-ac1.js, 14/14 graded arms at each width",
+  "whatToLookAt": [
+    "3-selected--light--238px.png: a deliberate selection also feeds the box-model chip, which covers a good part of the hero. TVW-002 kept the chip off the PLACEMENT channel for this reason; a real selection is supposed to have it. Is that right here?",
+    "2-editing--*--238px.png: band labels truncate at MIN_PANEL_WIDTH (INSIDE LIM...). The tree says Limiter two rows above, so nothing is lost \u2014 the question is whether it looks unfinished.",
+    "The crumb at 238px reads 'App > Home > Main Nav...'. It read 'App > Home > ...' before this session: three pixels of overflow were dropping the whole component name, because a button is an atomic inline box."
+  ],
+  "notEvidencedHere": "Peers were working on P78 (templates), P94 (styles panel) and P96 (backend feed) in the same checkout during this session. None of those surfaces appears in these images and none is evidenced by them.",
+  "images": [
+    {
+      "file": "1-screen--dark--238px.png",
+      "surface": "Layers, canvas on the app root",
+      "state": "preview on /home; the shell, the Router, SHOWING HOME, the page \u2014 cold, as R-S opens it",
+      "panelWidth": 238,
+      "theme": "dark",
+      "md5": "f4543c16114b3d4ba2c43211e9c4e96e"
+    },
+    {
+      "file": "1-screen--dark--298px.png",
+      "surface": "Layers, canvas on the app root",
+      "state": "preview on /home; the shell, the Router, SHOWING HOME, the page \u2014 cold, as R-S opens it",
+      "panelWidth": 298,
+      "theme": "dark",
+      "md5": "30aa51fb7d878699f885018b36db1895"
+    },
+    {
+      "file": "1-screen--light--238px.png",
+      "surface": "Layers, canvas on the app root",
+      "state": "preview on /home; the shell, the Router, SHOWING HOME, the page \u2014 cold, as R-S opens it",
+      "panelWidth": 238,
+      "theme": "light",
+      "md5": "1ad12a7094f8fb3f620aadc26d765886"
+    },
+    {
+      "file": "1-screen--light--298px.png",
+      "surface": "Layers, canvas on the app root",
+      "state": "preview on /home; the shell, the Router, SHOWING HOME, the page \u2014 cold, as R-S opens it",
+      "panelWidth": 298,
+      "theme": "light",
+      "md5": "ce23fe9c7be2ac2813bc8ac4d1c67bd3"
+    },
+    {
+      "file": "2-editing--dark--238px.png",
+      "surface": "Layers, canvas on Main Navbar",
+      "state": "opened by double-clicking the instance row; 16 tinted rows under EDITING MAIN NAVBAR, crumb App > Home > Main Navbar in 7 places",
+      "panelWidth": 238,
+      "theme": "dark",
+      "md5": "16e6d54684a5180463cfd174bb246111"
+    },
+    {
+      "file": "2-editing--dark--298px.png",
+      "surface": "Layers, canvas on Main Navbar",
+      "state": "opened by double-clicking the instance row; 16 tinted rows under EDITING MAIN NAVBAR, crumb App > Home > Main Navbar in 7 places",
+      "panelWidth": 298,
+      "theme": "dark",
+      "md5": "60338580ab0b38984b409eb77ab3503a"
+    },
+    {
+      "file": "2-editing--light--238px.png",
+      "surface": "Layers, canvas on Main Navbar",
+      "state": "opened by double-clicking the instance row; 16 tinted rows under EDITING MAIN NAVBAR, crumb App > Home > Main Navbar in 7 places",
+      "panelWidth": 238,
+      "theme": "light",
+      "md5": "83f27a18db26329b61a89075387ddbe6"
+    },
+    {
+      "file": "2-editing--light--298px.png",
+      "surface": "Layers, canvas on Main Navbar",
+      "state": "opened by double-clicking the instance row; 16 tinted rows under EDITING MAIN NAVBAR, crumb App > Home > Main Navbar in 7 places",
+      "panelWidth": 298,
+      "theme": "light",
+      "md5": "bb6c63dcea7c313f7c345708202cdf8b"
+    },
+    {
+      "file": "3-selected--dark--238px.png",
+      "surface": "Layers + preview + canvas",
+      "state": "a row inside the band clicked: selected on the canvas AND outlined in the preview (Highlighter.selectedNodes = 1)",
+      "panelWidth": 238,
+      "theme": "dark",
+      "md5": "9b3427e38889c60ca2b589252c83139c"
+    },
+    {
+      "file": "3-selected--dark--298px.png",
+      "surface": "Layers + preview + canvas",
+      "state": "a row inside the band clicked: selected on the canvas AND outlined in the preview (Highlighter.selectedNodes = 1)",
+      "panelWidth": 298,
+      "theme": "dark",
+      "md5": "4092975fe479f26b45a0bf1dde260a43"
+    },
+    {
+      "file": "3-selected--light--238px.png",
+      "surface": "Layers + preview + canvas",
+      "state": "a row inside the band clicked: selected on the canvas AND outlined in the preview (Highlighter.selectedNodes = 1)",
+      "panelWidth": 238,
+      "theme": "light",
+      "md5": "f2d5d32854e6e32f4cf98fa5749e1540"
+    },
+    {
+      "file": "3-selected--light--298px.png",
+      "surface": "Layers + preview + canvas",
+      "state": "a row inside the band clicked: selected on the canvas AND outlined in the preview (Highlighter.selectedNodes = 1)",
+      "panelWidth": 298,
+      "theme": "light",
+      "md5": "02a053284fd39310b42c7c94e6ca00e9"
+    },
+    {
+      "file": "4-navigated--dark--238px.png",
+      "surface": "Layers, preview navigated to /creator",
+      "state": "the tree follows the preview to the other screen",
+      "panelWidth": 238,
+      "theme": "dark",
+      "md5": "fa72af952b243657d158d8a02136f059"
+    },
+    {
+      "file": "4-navigated--dark--298px.png",
+      "surface": "Layers, preview navigated to /creator",
+      "state": "the tree follows the preview to the other screen",
+      "panelWidth": 298,
+      "theme": "dark",
+      "md5": "0cf34c1df96b5a25f13231c6a71baa2e"
+    },
+    {
+      "file": "4-navigated--light--238px.png",
+      "surface": "Layers, preview navigated to /creator",
+      "state": "the tree follows the preview to the other screen",
+      "panelWidth": 238,
+      "theme": "light",
+      "md5": "b15eba6db30b59128a9e8782e6a16301"
+    },
+    {
+      "file": "4-navigated--light--298px.png",
+      "surface": "Layers, preview navigated to /creator",
+      "state": "the tree follows the preview to the other screen",
+      "panelWidth": 298,
+      "theme": "light",
+      "md5": "c29585528e13625cb8cceb227cc10fde"
+    },
+    {
+      "file": "5-not-on-screen--dark--238px.png",
+      "surface": "Layers + the seam strip",
+      "state": "canvas on /Modals/Create Username modal, which nothing places; no crumb, and the sentence appears once, at the seam",
+      "panelWidth": 238,
+      "theme": "dark",
+      "md5": "ff2026edcc72df4494c3455457cd49f8"
+    },
+    {
+      "file": "5-not-on-screen--dark--298px.png",
+      "surface": "Layers + the seam strip",
+      "state": "canvas on /Modals/Create Username modal, which nothing places; no crumb, and the sentence appears once, at the seam",
+      "panelWidth": 298,
+      "theme": "dark",
+      "md5": "185fc7a2bb85906e697292c75fff6a94"
+    },
+    {
+      "file": "5-not-on-screen--light--238px.png",
+      "surface": "Layers + the seam strip",
+      "state": "canvas on /Modals/Create Username modal, which nothing places; no crumb, and the sentence appears once, at the seam",
+      "panelWidth": 238,
+      "theme": "light",
+      "md5": "e6c20821915ba0a31c69fdd30c2e3f19"
+    },
+    {
+      "file": "5-not-on-screen--light--298px.png",
+      "surface": "Layers + the seam strip",
+      "state": "canvas on /Modals/Create Username modal, which nothing places; no crumb, and the sentence appears once, at the seam",
+      "panelWidth": 298,
+      "theme": "light",
+      "md5": "847c3b89f6ac78a14cce2755db7914a2"
+    }
+  ]
+}

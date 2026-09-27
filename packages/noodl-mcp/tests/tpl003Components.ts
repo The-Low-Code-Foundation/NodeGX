@@ -1000,7 +1000,8 @@ const FILTER_PILL: Tpl003Component = {
       ['fpLabel']
     ),
     text('fpLabel', 'What it says', 'fpPill', '', { ...T_META, fontWeight: 'var(--font-medium)', sizeMode: 'contentSize' }),
-    logic('fpCurrent', VARIABLE_NODE, 'What is selected, app-wide', { name: WORK_FILTER_VARIABLE }),
+    // GAM-005: two or more copies share this Variable by design, so it says so and the door stays quiet.
+    { ...(logic('fpCurrent', VARIABLE_NODE, 'What is selected, app-wide', { name: WORK_FILTER_VARIABLE }) as object), comment: 'Shared on purpose: every pill on the page reads and writes the one filter the work list uses.' },
     logic('fpState', EXPRESSION_NODE, 'Am I the selected one?', { expression: "((selected || '') === (mine || '')) ? 'on' : 'off'" }),
     logic('fpLook', STATES_NODE, 'Off / on', {
       states: 'off,on',

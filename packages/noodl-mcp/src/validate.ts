@@ -29,7 +29,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import type { Diagnostic, FunctionSecurityPolicy, ValidationReport } from './editor-deps';
+import { catalogGeneration, catalogIndex } from './catalog';
 import {
   authoredNodes,
   authoredPreconditionDiagnostics,
@@ -44,10 +44,16 @@ import {
   SCHEMA_IDS,
   SchemaValidator,
   SemanticValidator,
-  sortDiagnostics
+  sortDiagnostics,
+  buildEffectiveTokens,
+  checkFontFaces,
+  checkTokenComposable,
+  readStoredTokens,
+  type Diagnostic,
+  type FunctionSecurityPolicy,
+  type ValidationReport,
+  type ComponentNodesView
 } from './editor-deps';
-import type { ComponentNodesView } from './editor-deps';
-import { catalogGeneration, catalogIndex } from './catalog';
 import type { ComponentFiles } from './graph';
 import type { ProjectStore } from './project/ProjectStore';
 
@@ -190,20 +196,25 @@ export function projectBodyScroll(store: ProjectStore): boolean | null {
  * deliberately: a planned component has no nodes, and adding it to `views` would
  * give it an empty interface rather than no interface — turning "unknown, do not
  * check" into "this component has no ports" for every instance of it.
+ *
+ * GAM-021 — `options.bodyScroll` is the setting a plan's apply will leave, which
+ * the plan door resolves and passes. Omitted, the disk is read, so
+ * `validate_component` and `validate_project` judge the project as it is.
  */
 export function preconditionDiagnostics(
   store: ProjectStore,
   legacyName: string,
   candidate: ComponentFiles,
   views: readonly ComponentNodesView[],
-  alsoResolvable: readonly string[] = []
+  alsoResolvable: readonly string[] = [],
+  options: { bodyScroll?: boolean | null } = {}
 ): Diagnostic[] {
   return authoredPreconditionDiagnostics({
     component: legacyName,
     // DEF-009 — null means "no policy file", never undefined: see projectSecurity.
     security: projectSecurity(store),
     // REL-002a — null means "the project has not set it", never undefined: see projectBodyScroll.
-    bodyScroll: projectBodyScroll(store),
+    bodyScroll: options.bodyScroll !== undefined ? options.bodyScroll : projectBodyScroll(store),
     nodes: authoredNodes(candidate.nodes.nodes),
     components: [...views.map((v) => v.name), legacyName, ...alsoResolvable],
     urlPaths: declaredUrlPaths(views),
@@ -216,6 +227,8 @@ export function preconditionDiagnostics(
     // DEF-002 §1(b)/§1(c) — the same views again, read for what an editor
     // adapter would mint rather than for what a Component Inputs node declares.
     derived: derivedPortIndices(views),
+    // GAM-005 — the same views, counted for how many copies of each component are drawn.
+    views,
     // LAS-012 — a `template` fed by a wire is a working list, and only the
     // candidate's own connections can say so.
     connections: connectedInputs(candidate.connections.connections),
@@ -247,7 +260,6 @@ function structuralCheck(files: ComponentFiles): StructuralFailure[] {
   return failures;
 }
 
-
 /**
  * Validate a candidate create/update for `key`. `baseline` is the on-disk
  * files before the change (undefined for creates).
@@ -277,7 +289,10 @@ export function validateCandidate(
   const report = validator().validateComponent(candidateProject, name, validatorOptions);
 
   const views = authoredProjectViews(store, new Map([[name, candidate]]));
-  const diagnostics = dedupeDiagnostics([...report.diagnostics, ...preconditionDiagnostics(store, name, candidate, views)]);
+  const diagnostics = dedupeDiagnostics([
+    ...report.diagnostics,
+    ...preconditionDiagnostics(store, name, candidate, views)
+  ]);
 
   let preexistingKeys = new Set<string>();
   if (baseline) {
@@ -456,8 +471,68 @@ export function validateOnDisk(
   }
 
   const report = validator().validate(project, validatorOptions);
-  const targets = store.listComponents().map((row) => ({ key: row.path, name: row.legacyName }));
-  return { report: withPreconditions(report, onDiskPreconditions(store, views, targets, emitSkipNotes)) };
+  const rows = store.listComponents();
+  const targets = rows.map((row) => ({ key: row.path, name: row.legacyName }));
+  const root = rows.find((row) => row.type === 'root') ?? rows[0];
+  return {
+    report: withPreconditions(report, [
+      ...onDiskPreconditions(store, views, targets, emitSkipNotes),
+      ...fontFaceDiagnostics(store, root ? root.legacyName : ''),
+      ...tokenComposableDiagnostics(store, root ? root.legacyName : '')
+    ])
+  };
+}
+
+/**
+ * P102 CMP-009 — a custom shadow, gradient, easing, duration or font token the Styles panel's
+ * composer cannot open. Project-wide, once per token, against the root component, through the
+ * same codec the composer reads with.
+ */
+function tokenComposableDiagnostics(store: ProjectStore, component: string): Diagnostic[] {
+  const tokens = [...buildEffectiveTokens(readStoredTokens(store.designTokenMetaSource())).values()];
+  return checkTokenComposable({ tokens, component });
+}
+
+/**
+ * P88 GAM-016 (R16 (c)) — a family token naming a face no module stylesheet declares.
+ *
+ * Project-wide, so only `validate_project` asks it, once, against the root component. The
+ * stylesheets are the ones each `noodl_modules/<dir>/manifest.json` lists under
+ * `browser.stylesheets`, which is exactly the set the viewer links into the page.
+ */
+function fontFaceDiagnostics(store: ProjectStore, component: string): Diagnostic[] {
+  const tokens = [...buildEffectiveTokens(readStoredTokens(store.designTokenMetaSource())).values()];
+  return checkFontFaces({ tokens, stylesheets: moduleStylesheets(store.projectDir), component });
+}
+
+function moduleStylesheets(projectDir: string): string[] {
+  const modulesDir = path.join(projectDir, 'noodl_modules');
+  let dirs: string[];
+  try {
+    dirs = fs.readdirSync(modulesDir);
+  } catch {
+    return [];
+  }
+  const out: string[] = [];
+  for (const dir of dirs) {
+    let manifest: { browser?: { stylesheets?: unknown } };
+    try {
+      manifest = JSON.parse(fs.readFileSync(path.join(modulesDir, dir, 'manifest.json'), 'utf8'));
+    } catch {
+      continue;
+    }
+    const sheets = manifest?.browser?.stylesheets;
+    if (!Array.isArray(sheets)) continue;
+    for (const sheet of sheets) {
+      if (typeof sheet !== 'string') continue;
+      try {
+        out.push(fs.readFileSync(path.join(projectDir, sheet), 'utf8'));
+      } catch {
+        // A stylesheet the manifest names but the folder lacks declares nothing, which is the finding.
+      }
+    }
+  }
+  return out;
 }
 
 /**

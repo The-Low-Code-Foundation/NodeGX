@@ -1,3 +1,5 @@
+import { outcomeOutputs } from '@noodl/runtime/src/outcome';
+
 import PointerListeners from '../../pointerlisteners';
 
 function _shallowCompare(o1, o2) {
@@ -338,8 +340,106 @@ function controlEvents(props) {
   );
 }
 
+/** The elements a person can put the keyboard on. A control's root is often a wrapper `div` around one. */
+const FOCUSABLE_SELECTOR = 'button, input, select, textarea';
+
+/**
+ * GAM-010 — `Focus` and `Blur` for a control, one definition for Button, Checkbox, Radio Button,
+ * Dropdown and Slider.
+ *
+ * 🔒 R11 follows R13 (GAM-012 §5): a Focus to a control that is on the page puts the keyboard on it
+ * every time. One that is not on the page does nothing and is **not held** for later, because taking
+ * focus once the control appears would steal it from wherever the person has gone since. It reports
+ * `Unchanged` and sets the editor-only `focus/not-mounted` diagnostic, so a deployed page prints
+ * nothing. Both actions go through the viewer's focus tracker (`focus-tracker.ts`), the same path
+ * as Text Input, so a Focus blurs a Group that was focused elsewhere and a repeated Focus lands.
+ *
+ * The target is the **real** control, never the wrapper: a Checkbox, Radio Button and Slider render
+ * a `div` around an `<input>`, and a Dropdown an invisible `<select>` inside two `div`s. Focusing the
+ * `div` does nothing in a browser, silently.
+ *
+ * Text Input keeps its own Focus and Blur, which predate this and read its inner component.
+ *
+ * @param options.unchanged the `Unchanged` sentence for a node that has no outcome ports yet. A node
+ * that already declares `done` (Checkbox) keeps its own ports and says Focus in its own sentences.
+ */
+function addFocusActions(definition, options: { noun: string; done?: string; unchanged?: string }) {
+  const noun = options.noun;
+
+  addInputs(definition, {
+    focus: {
+      type: 'signal',
+      group: 'Actions',
+      displayName: 'Focus',
+      description: `Puts the keyboard on this ${noun}, so Enter, Space and the arrow keys go to it`,
+      valueChangedToTrue() {
+        const outcome = this.beginOutcome();
+        const took = this.context.setNodeFocused(this, true) !== false;
+        this.setDiagnostic(
+          'focus/not-mounted',
+          took
+            ? null
+            : `Focus arrived while this ${noun} was not on the page, so nothing was focused. A Focus is not kept ` +
+                `for later: send it once the ${noun} has mounted, for example from its Did Mount or its row’s`
+        );
+        this.reportOutcome(outcome, took ? 'done' : 'unchanged');
+      }
+    },
+    blur: {
+      type: 'signal',
+      group: 'Actions',
+      displayName: 'Blur',
+      description: `Takes the keyboard away from this ${noun}, which is what fires Blurred`,
+      valueChangedToTrue() {
+        const outcome = this.beginOutcome();
+        this.context.setNodeFocused(this, false);
+        this.reportOutcome(outcome, 'done');
+      }
+    }
+  });
+
+  if (!definition.outputs || !definition.outputs.done) {
+    addOutputs(
+      definition,
+      outcomeOutputs({
+        done: options.done || `Fires when Focus put the keyboard on this ${noun}, or Blur took it away`,
+        unchanged:
+          options.unchanged ||
+          `Fires when Focus arrived while this ${noun} was not on the page, so nothing was focused`
+      })
+    );
+  }
+
+  mergeAttribute(definition, 'methods', {
+    /** The element that takes the keyboard, or null when the control is not on the page. */
+    _focusTarget() {
+      const root = this.getDOMElement();
+      if (!root || !root.isConnected) return null;
+      return root.matches(FOCUSABLE_SELECTOR) ? root : root.querySelector(FOCUSABLE_SELECTOR);
+    },
+    _focus() {
+      const target = this._focusTarget();
+      if (target) target.focus();
+    },
+    _blur() {
+      const target = this._focusTarget();
+      if (target) target.blur();
+    },
+    /** GAM-012 — the tracker asks before it records a Focus. */
+    _canFocus() {
+      return !!this._focusTarget();
+    },
+    /** GAM-012 — being listed by the tracker is not holding focus: a remounted control is a new element. */
+    _hasFocus() {
+      const target = this._focusTarget();
+      return !!target && target.ownerDocument.activeElement === target;
+    }
+  });
+}
+
 export default {
   updateStylesForClass,
   addControlEventsAndStates,
+  addFocusActions,
   controlEvents
 };

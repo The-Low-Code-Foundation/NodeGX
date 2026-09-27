@@ -11,6 +11,8 @@ on:
     branches: [main]
     paths:
       - 'docs-site/**'
+      # HLT-013: a library entry's README is the source of its docs page.
+      - 'library/*/*/README.md'
       - 'packages/noodl-types/src/node-catalog.json'
       - 'docs/node-catalog/enrichment/**'
       - '.github/workflows/deploy-docs.yml'
@@ -49,3 +51,24 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # 🔴 HLT-013. The node picker draws a "Read docs" button for every library
+  # entry `libraryDocsPages.ts` lists, and opens `getDocsEndpoint() + entry.docs`.
+  # This asks the site just deployed for each of those URLs. It runs here, not on
+  # the PR, because it grades what is SERVED — on the PR that adds a page the
+  # page is not served yet. Pages takes a moment to go live after
+  # `deploy-pages` returns, so a first PATH MOVED is retried before it counts.
+  verify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Every Read docs button answers
+        run: |
+          for attempt in 1 2 3 4 5; do
+            if npm run docs:verify-origin -- --library-docs; then exit 0; fi
+            echo "attempt $attempt did not pass; waiting for Pages to settle"
+            sleep 60
+          done
+          exit 1

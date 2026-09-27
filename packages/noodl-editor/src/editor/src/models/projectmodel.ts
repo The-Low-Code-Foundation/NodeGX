@@ -31,6 +31,8 @@ import { applyProjectLevelSlice } from '../services/ProjectStructure';
 import { hashComponent } from '../services/ProjectStructure/ComponentSaver';
 import { isV2FormatEnabled } from '../services/ProjectStructure/featureFlags';
 import { decideComponentReload } from '../services/ProjectFileWatcher/decide';
+import { resolveProjectTokenValue } from './StyleTokensModel/ProjectTokenCss';
+import { lookWearersIn } from './StylesModel.usage';
 
 /** Which on-disk format a loaded project uses. Set at load; drives the save path. */
 export type ProjectFormatKind = 'legacy' | 'v2';
@@ -130,6 +132,14 @@ export class ProjectModel extends Model {
       EventDispatcher.instance.notifyListeners('ProjectModel.instanceHasChanged', {
         oldInstance: _oldInstance
       });
+
+      // P100 UPG-003 — an upgrade on load rewrote this project in memory. A v2 project is written
+      // back on open anyway; a legacy one is not until its first edit, so without this it would
+      // be upgraded, and say so, on every open until the person happened to change something.
+      if (project?._upgradedOnLoad) {
+        project._upgradedOnLoad = false;
+        scheduleProjectSave();
+      }
     }
   }
 
@@ -160,6 +170,8 @@ export class ProjectModel extends Model {
   public runtimeVersion?: 'react17' | 'react19';
   public _retainedProjectDirectory?: string;
   public _isReadOnly?: boolean; // Flag for read-only mode (legacy projects)
+  /** P100 UPG-003: set by the loader when `upgradeOnLoad` rewrote this project; saved when it opens. */
+  public _upgradedOnLoad?: boolean;
   /** On-disk format this project was loaded from. Determines the save path. Defaults to legacy. */
   public _projectFormat?: ProjectFormatKind;
   public settings?: ProjectSettings;
@@ -714,7 +726,9 @@ export class ProjectModel extends Model {
 
   resolveColor(color: string) {
     const styles = this.getMetaData('styles');
-    return styles && styles.colors && styles.colors[color] ? styles.colors[color] : color;
+    if (styles && styles.colors && styles.colors[color]) return styles.colors[color];
+    // A project token (`var(--background)`) means nothing in the editor's own document: resolve it here.
+    return resolveProjectTokenValue(this, color) ?? color;
   }
 
   // Name
@@ -983,7 +997,11 @@ export class ProjectModel extends Model {
         // `metadata`, `rootNodeId`, …) — it IS the legacy project shape with
         // behaviour on top — but it declares them rather than an index
         // signature, which is what this cast bridges.
-        applyProjectLevelSlice(this as unknown as ProjectLevelTarget, slice, key);
+        // P94 STY-002: the variants in a slice are plain JSON and this model's
+        // `variants` must be `VariantModel`s — see `applyProjectLevelSlice`.
+        applyProjectLevelSlice(this as unknown as ProjectLevelTarget, slice, key, (raw) =>
+          raw instanceof VariantModel ? raw : VariantModel.fromJSON(raw)
+        );
         projectStructureService.markProjectLevelBaseline(key, raw[key] ?? null, this.toJSON());
         outcomes[key] = 'reloaded';
         reloaded.push(key);
@@ -1486,6 +1504,44 @@ export class ProjectModel extends Model {
     return isUsed;
   }
 
+  /**
+   * P94 STY-003 — how many nodes wear each Look of one node type, in **one** walk.
+   *
+   * Feeds both the panel's `Worn by 26 nodes` line and the Look menu's per-row counts (design §4).
+   * One function rather than a single-Look counter beside a bulk one: a caller wanting one number
+   * would walk the whole project anyway, so the two would have been the same cost and two places
+   * to get the identity rule wrong.
+   *
+   * 🔴 **A `.length` over {@link lookWearersIn}, and no longer its own walk** (P94 STY-006 AC2).
+   * The Looks section prints this number and, on a press, draws the wearers it came from directly
+   * underneath it — two traversals of the same graph would let a row say `3×` above two lines with
+   * nothing able to say which was right. [[a-second-copy-of-a-palette-drifts-silently]].
+   *
+   * 🔴 **That walk's callback must not return a truthy value.** `forEachNode` treats one as "stop
+   * walking" ([[foreachnode-stops-on-a-truthy-return]]), and the body now *pushes*, so
+   * `return list.push(...)` — push returns the new length — aborts at the first wearer and reports
+   * one for every Look that has any. Armed and measured at s9: 5 named arms red, reverted green.
+   * That is also why {@link isVariantUsed} beside it sets a flag instead of returning — the shape
+   * is deliberate, not a style.
+   *
+   * ⚠️ **Scoped by `typename`, because a name alone is not an identity.** Two node types may each
+   * hold a Look called `Primary`, and bucketing by name across both would report one number for
+   * two different things.
+   *
+   * ⚠️ `StylesModel.usage` imports NOTHING, which is what makes it safe to import from here and
+   * what makes it gradeable at all — see its own header.
+   * [[an-import-added-for-a-feature-can-switch-a-sibling-gate-off]].
+   */
+  variantWearerCounts(typename): Record<string, number> {
+    const counts: Record<string, number> = {};
+
+    for (const [name, wearers] of Object.entries(lookWearersIn(this, typename))) {
+      counts[name] = wearers.length;
+    }
+
+    return counts;
+  }
+
   addVariant(variant, args?: TSFixme) {
     const _v = this.variants.find((v) => v.name === variant.name && v.typename === variant.typename);
     if (_v !== undefined) return false; // Variant already exists
@@ -1500,7 +1556,7 @@ export class ProjectModel extends Model {
       const undo = typeof args.undo === 'object' ? args.undo : UndoQueue.instance;
 
       undo.push({
-        label: 'add variant',
+        label: 'add Look',
         do: () => {
           this.addVariant(variant);
         },
@@ -1530,7 +1586,7 @@ export class ProjectModel extends Model {
         const undo = typeof args.undo === 'object' ? args.undo : UndoQueue.instance;
 
         undo.push({
-          label: 'rename variant',
+          label: 'rename Look',
           do: () => {
             this.deleteVariant(variant);
           },
@@ -1559,7 +1615,7 @@ export class ProjectModel extends Model {
       const undo = typeof args.undo === 'object' ? args.undo : UndoQueue.instance;
 
       undo.push({
-        label: 'rename variant',
+        label: 'rename Look',
         do: () => {
           this.renameVariant(variant, newName);
         },

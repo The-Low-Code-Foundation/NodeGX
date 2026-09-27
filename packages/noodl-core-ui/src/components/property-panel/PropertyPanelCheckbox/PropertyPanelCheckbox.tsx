@@ -17,8 +17,11 @@ export function PropertyPanelCheckbox({ value, onChange, isConnected, isChanged 
     <div className={css['Root']}>
       <input
         type="checkbox"
-        checked={value}
-        value={null} // TODO: a bit ugly
+        // HLT-010: this carried `value={null}`, which React reports as an error — once per session,
+        // so it hid behind whichever null input rendered first (HLT-003 fixed that one). A
+        // checkbox's state is `checked`; `value` is only what a form would submit, and nothing does.
+        // `Boolean` so an unset property is a controlled `false`, never uncontrolled.
+        checked={Boolean(value)}
         className={css['Checkbox']}
         role="switch"
         aria-checked={Boolean(value)}

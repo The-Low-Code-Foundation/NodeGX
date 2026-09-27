@@ -21,6 +21,7 @@ import { refFromComponentName } from '../../models/workflow/functionRefResolutio
 import { descentFor } from '../../models/workflow/workflowDescent';
 import { NodeGraphComponentTrail } from '../NodeGraphComponentTrail';
 import { CloudFunctionTrailStatus } from '../NodeGraphComponentTrail/CloudFunctionTrailStatus';
+import type { LaneFilter } from './canvas/structureLane';
 import {
   beginLogicOverlayDrag,
   endLogicOverlayDrag,
@@ -29,6 +30,7 @@ import {
   updateLogicOverlayDrag
 } from './LogicOverlay';
 import { CenterToFitMode } from './canvas/types';
+import { buildComponentTrail } from './instanceTrail';
 
 import type { NodeGraphEditor } from '../nodegrapheditor';
 
@@ -480,25 +482,24 @@ export class OverlayViews {
         });
       }
 
-      for (let i = 0; i < nameParts.length; i++) {
-        let part = '';
-
-        for (let j = 0; j <= i; j++) {
-          part += '/' + nameParts[j];
-        }
-
-        componentTrail.push({
-          name: nameParts[i],
-          fullName: part,
+      /**
+       * TVW-007 §2 — the containment trail, or the folder path.
+       *
+       * When this component was entered through an instance, the trail is the route rather than
+       * the folder it is stored in: `[◆ Home] › Hero`. Both shapes are built by the same pure
+       * function so the choice between them can be graded without a renderer — see
+       * `instanceTrail.ts`.
+       */
+      componentTrail.push(
+        ...buildComponentTrail({
+          fullName,
+          nameParts,
+          entry: editor.navigationHistory.currentEntry(),
           stateText: editor.stateText,
-          // TODO: this returns undefined if the component is a folder,
-          // but if a folder and a component has the same name the result
-          // of this check will be wrong. i think this is a rare edge case though
-          component: ProjectModel.instance.getComponentWithName(part),
-          isCurrent: i === nameParts.length - 1,
-          isFolderComponent: nameParts.length > 1 && !fullName.endsWith(part)
-        });
-      }
+          hasDescent: Boolean(descent),
+          resolve: (name) => ProjectModel.instance.getComponentWithName(name)
+        })
+      );
 
       const componentName = nameParts.pop();
       editor.componentName = componentName;
@@ -530,7 +531,15 @@ export class OverlayViews {
               backendId: descent?.backendId,
               backendName: descent?.backendName
             })
-          : undefined
+          : undefined,
+        // TVW-006 — the structure lane's filter. The canvas owns the state; the bar reads it and
+        // reports a press. `setLaneFilter` repaints, and this bar re-renders from the same
+        // `updateTitle` the rest of the canvas's navigation already drives.
+        laneFilter: editor.laneFilter,
+        onLaneFilterChange: (filter: LaneFilter) => {
+          editor.setLaneFilter(filter);
+          this.updateTitle();
+        }
       };
 
       editor.overlays.renderSlot('title', rootElem, React.createElement(NodeGraphComponentTrail, props));

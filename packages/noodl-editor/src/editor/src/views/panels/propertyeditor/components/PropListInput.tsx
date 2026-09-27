@@ -1,7 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import { IconName } from '@noodl-core-ui/components/common/Icon';
+
 import PopupLayer from '../../../popuplayer';
 
+import { ListActions, ListIconButton } from './ListActions';
 import css from './ListInputRow.module.scss';
 
 export interface PropListItem {
@@ -148,9 +151,9 @@ function PropListRow({
         }}
       />
 
-      <div className="header proplist-header">
+      <div className={`header proplist-header ${css['ItemRow']}`}>
         {editing ? (
-          <div style={{ height: 35, position: 'relative' }}>
+          <div style={{ height: '100%', position: 'relative' }}>
             <input
               ref={inputRef}
               type="text"
@@ -180,31 +183,17 @@ function PropListRow({
               {item.label}
             </span>
 
-            <div className="sidebar-panel-edit-bar">
-              <button
-                type="button"
-                className="sidebar-panel-edit-button"
-                onClick={(e) => {
+            <div className={`sidebar-panel-edit-bar ${css['ItemBar']}`}>
+              <ListIconButton
+                icon={IconName.Pencil}
+                title="Rename"
+                onClick={() => {
                   setText(item.label);
                   setEditing(true);
-                  e.stopPropagation();
                 }}
-              >
-                <i className="fa fa-pencil-square-o" />
-              </button>
+              />
 
-              {!isDefault && (
-                <button
-                  type="button"
-                  className="sidebar-panel-edit-button"
-                  onClick={(e) => {
-                    onDelete(item.id);
-                    e.stopPropagation();
-                  }}
-                >
-                  <i className="fa fa-trash-o" />
-                </button>
-              )}
+              {!isDefault && <ListIconButton icon={IconName.Trash} title="Delete" onClick={() => onDelete(item.id)} />}
             </div>
           </>
         )}
@@ -279,34 +268,6 @@ export function PropListInput({
 
   return (
     <div style={{ position: 'relative' }}>
-      <div style={{ position: 'absolute', right: 5, top: -30, display: 'flex', gap: 2 }}>
-        <button
-          type="button"
-          className="components-panel-edit-button"
-          title="Edit as JSON"
-          onClick={(e) => {
-            onOpenCode(e.currentTarget);
-            e.stopPropagation();
-          }}
-        >
-          <i className="fa fa-code" />
-        </button>
-
-        <button
-          type="button"
-          className="components-panel-edit-button"
-          title="Add entry"
-          onClick={(e) => {
-            setError(undefined);
-            if (onAutoAdd) onAutoAdd();
-            else setAdding(true);
-            e.stopPropagation();
-          }}
-        >
-          <i className="fa fa-plus" />
-        </button>
-      </div>
-
       <div className="items">
         {items.map((item) => (
           <PropListRow
@@ -322,8 +283,8 @@ export function PropListInput({
 
         {adding && (
           <div className="proplist-item">
-            <div className="header proplist-header">
-              <div style={{ height: 35, position: 'relative' }}>
+            <div className={`header proplist-header ${css['ItemRow']}`}>
+              <div style={{ height: '100%', position: 'relative' }}>
                 <AddNameField
                   onCommit={(value) => {
                     if (value.trim() === '') {
@@ -347,6 +308,15 @@ export function PropListInput({
       </div>
 
       {error && <div className={css['InlineError']}>{error}</div>}
+
+      <ListActions
+        onOpenCode={onOpenCode}
+        onAdd={() => {
+          setError(undefined);
+          if (onAutoAdd) onAutoAdd();
+          else setAdding(true);
+        }}
+      />
     </div>
   );
 }

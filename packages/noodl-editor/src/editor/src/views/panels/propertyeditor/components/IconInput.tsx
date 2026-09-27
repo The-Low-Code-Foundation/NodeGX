@@ -1,9 +1,27 @@
+import classNames from 'classnames';
 import React from 'react';
 
 import { PropertyPanelRow } from '@noodl-core-ui/components/property-panel/PropertyPanelInput/PropertyPanelRow';
 
-import type { IconSetValue } from '../../../../../../shared/utils/iconsets';
+import { isSpriteIconValue, type IconSetValue } from '../../../../../../shared/utils/iconsets';
 import { IconGlyphPreview } from './IconGlyphPreview';
+import css from './IconInput.module.scss';
+
+/**
+ * What the field names a stored icon by, `''` when nothing is chosen. A sprite: its symbol id. A font glyph: its code
+ * without the `icon-` every lucide class carries (`icon-home` → `home`); a code that is a bare codepoint (a PUA glyph,
+ * which prints as a box in the panel's font) → `U+F015`.
+ */
+export function iconValueName(value: IconSetValue | undefined): string {
+  if (!value) return '';
+  if (isSpriteIconValue(value)) return value.symbolId || '';
+  const code = typeof value.code === 'string' ? value.code : '';
+  if (!code) return '';
+  if (!/[A-Za-z0-9]/.test(code)) {
+    return [...code].map((ch) => 'U+' + ch.codePointAt(0)!.toString(16).toUpperCase().padStart(4, '0')).join(' ');
+  }
+  return code.replace(/^icon-/, '');
+}
 
 /**
  * A stored icon parameter. Structurally `Noodl.Icon` — NDA-007 §1's union — because that is what
@@ -49,6 +67,7 @@ export function IconInput({
   onOpenPicker,
   onReset
 }: IconInputProps) {
+  const name = iconValueName(value);
   return (
     <PropertyPanelRow
       label={label}
@@ -59,27 +78,25 @@ export function IconInput({
       onConnectionClick={onConnectionClick}
     >
       <div
-        className="sidebar-panel-dark-input"
+        className={css['IconField']}
         data-identifier={dataIdentifier}
-        style={{
-          height: 32,
-          width: 33,
-          padding: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer'
-        }}
         onClick={(e) => {
           e.stopPropagation();
           onOpenPicker(e.currentTarget);
         }}
       >
-        {/* One renderer for the thumbnail and the picker cell — NDA-007 §3. This used to be a
-            third independent copy of the font splat, so a sprite value showed as an empty box. */}
-        <div style={{ color: 'white' }}>
-          <IconGlyphPreview value={value} size={20} />
-        </div>
+        {name ? (
+          <>
+            {/* One renderer for the thumbnail and the picker cell — NDA-007 §3. This used to be a
+                third independent copy of the font splat, so a sprite value showed as an empty box. */}
+            <span className={css['Glyph']}>
+              <IconGlyphPreview value={value} size={14} />
+            </span>
+            <span className={css['Name']}>{name}</span>
+          </>
+        ) : (
+          <span className={classNames(css['Name'], css['is-placeholder'])}>None</span>
+        )}
       </div>
     </PropertyPanelRow>
   );

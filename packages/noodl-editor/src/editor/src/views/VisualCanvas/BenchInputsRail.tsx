@@ -88,7 +88,7 @@ export interface BenchInputsRailProps {
  *
  * There is no singleton to read them from: `StyleTokensModel` is constructed per
  * consumer and they stay in sync through `ProjectModel.metadataChanged`, which
- * is the pattern `ElementStyleSectionHost` already follows.
+ * is the pattern `StyleSuggestionHost` already follows.
  */
 function useColorOptions() {
   const [tokenModel] = useState(() => new StyleTokensModel());

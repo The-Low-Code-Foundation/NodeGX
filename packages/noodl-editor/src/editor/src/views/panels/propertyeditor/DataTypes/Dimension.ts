@@ -8,9 +8,12 @@ import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } fr
 // they each carried their own byte-identical `parseNumberWithUnit`. Two copies is
 // how a fix lands in one field and not the other, so there is now one function
 // and this row imports it rather than restating it.
-import { readNumberFieldEdit } from './NumberWithUnits';
+import { isTokenReference, readNumberFieldEdit } from './NumberWithUnits';
 import { commitScrub, writeScrubStep } from './scrubCommit';
 import { scrubSpecForPortType, scrubStartValue } from './scrubPolicy';
+import { TokenChipActions } from '../components/TokenChipActions';
+import { fieldOffersTokens, openTokenFieldPopout, resolveTokenText } from './tokenFieldPopout';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 export class Dimension extends TypeView {
   numberWithUnits: TSFixme;
@@ -95,6 +98,7 @@ export class Dimension extends TypeView {
         isFixed: !!this.isFixed,
         isPercent: this.isPercent,
         scrub: this.scrubBinding(),
+        ...this.tokenPickerProps(),
         onCommit: (text: string) => this.updateValue(text, this.unit),
         onUnitChange: (unit: string, currentText: string) => this.updateValue(currentText, unit),
         onFixedToggle: () => {
@@ -114,6 +118,47 @@ export class Dimension extends TypeView {
   }
 
   /**
+   * HLT-012 — the design-token affordance. Same shape as `NumberWithUnits`', reached through the
+   * same opener; the twins stay twins.
+   *
+   * ⚠️ `isFixed` is untouched here for the reason `updateValue`'s token branch records: a token
+   * has no unit, so the Fixed tick is inert while one is set.
+   */
+  private tokenPickerProps() {
+    if (!fieldOffersTokens(this.name)) return {};
+
+    const stored = this.numberWithUnits;
+    const isToken = isTokenReference(stored);
+    return {
+      isToken,
+      // P103 CMG-009 — the chip: the token's name, what it resolves to here, and Detach.
+      tokenName: isToken ? String(stored) : undefined,
+      tokenValue: isToken ? resolveTokenText(stored) : undefined,
+      onDetachToken: isToken ? () => this.detachToken() : undefined,
+      // CMG-010 — ✎ and Show in Styles on the chip.
+      tokenActions: isToken ? React.createElement(TokenChipActions, { reference: String(stored), port: this.name }) : undefined,
+      onOpenTokenPicker: (anchor: HTMLElement) =>
+        openTokenFieldPopout({
+          view: this,
+          portName: this.name,
+          anchor,
+          currentValue: isTokenReference(stored) ? String(stored) : undefined,
+          onSelect: (reference: string) => {
+            this.parent.setParameter(this.name, reference);
+            this.refreshFromModel();
+          }
+        })
+    };
+  }
+
+  /** P103 CMG-009 §3.1 — *Detach*: the resolved value in the token's place, one undo step. */
+  private detachToken() {
+    const resolved = resolveTokenText(this.numberWithUnits);
+    if (resolved === undefined) return;
+    this.updateValue(resolved, this.unit);
+  }
+
+  /**
    * FB-022 — the drag-to-scrub binding for this row, or `undefined` when this port type is
    * not a draggable number.
    *
@@ -127,7 +172,11 @@ export class Dimension extends TypeView {
    * `ScrubPortState` for why one of them being enough is not a reason to have only one.
    */
   private scrubBinding() {
-    const spec = scrubSpecForPortType(this.type, this.unit, { isConnected: this.isConnected });
+    const spec = scrubSpecForPortType(this.type, this.unit, {
+      isConnected: this.isConnected,
+      // HLT-012 — a field holding a token has no magnitude to drag from; see `ScrubPortState.isToken`.
+      isToken: isTokenReference(this.numberWithUnits)
+    });
     if (!spec) return undefined;
 
     return {
@@ -241,7 +290,7 @@ export class Dimension extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

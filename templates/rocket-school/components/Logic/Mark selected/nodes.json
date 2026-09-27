@@ -1,0 +1,90 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "97c5f43b-3859-5f4b-81d4-810d38c14135",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "markselectedIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "items",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "markselectedFn",
+      "type": "JavaScriptFunction",
+      "label": "Mark selected",
+      "parameters": {
+        "functionScript": "\nvar items = Inputs.items || [];\nvar value = String(Inputs.value === undefined || Inputs.value === null ? '' : Inputs.value);\nvar rows = [];\nfor (var i = 0; i < items.length; i++) {\n  var it = items[i] && typeof items[i] === 'object' ? items[i] : { label: String(items[i]), value: String(items[i]) };\n  // \"id\" — a repeater tells rows apart by id; without one every re-run is a fresh set of rows.\n  rows.push({ id: String(it.value), label: String(it.label === undefined ? it.value : it.label), value: String(it.value), selected: String(it.value) === value });\n}\nOutputs.rows = rows;\nOutputs.count = rows.length;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-items",
+          "displayName": "items",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-value",
+          "displayName": "value",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "markselectedOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

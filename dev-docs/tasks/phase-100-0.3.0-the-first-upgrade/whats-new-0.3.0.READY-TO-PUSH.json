@@ -1,0 +1,16 @@
+{
+  "version": "https://jsonfeed.org/version/1.1",
+  "title": "NodeGX — what's new",
+  "home_page_url": "https://the-low-code-foundation.github.io/nodegx-content/",
+  "feed_url": "https://the-low-code-foundation.github.io/nodegx-content/static/whats-new/feed.json",
+  "description": "Release notes shown in the NodeGX editor. An empty items list means there is nothing to announce; the editor treats that as a normal state and opens no modal.",
+  "items": [
+    {
+      "id": "nodegx-0.3.0",
+      "url": "https://nodegx.io/changelog/#v0-3-0",
+      "title": "NodeGX 0.3.0",
+      "date_modified": "SET-TO-THE-PUBLISH-MOMENT-eg-2026-10-01T12:00:00Z",
+      "content_html": "<h2>NodeGX 0.3.0</h2><p><strong>Projects made in 0.2 are upgraded when you open them.</strong> The first time you open one, NodeGX copies the whole project folder to <code>&lt;project&gt;.before-0.3</code>, turns its text styles into typography tokens, and tells you it did. Keep that copy until you are happy with the upgraded project.</p><p><strong>A new Styles panel.</strong> Colours, tokens and Looks are in one place, with visual editors for shadows, gradients, animation timing and fonts.</p><p><strong>Properties have their own column on the right</strong>, and there is a Layers tab beside Components.</p><p><strong>Your backend has its own page in the browser.</strong> Open it from the Backend card. The backend panels have moved there from the editor.</p><p><a href=\"https://nodegx.io/changelog/#v0-3-0\" target=\"_blank\">Everything in 0.3.0</a></p>"
+    }
+  ]
+}

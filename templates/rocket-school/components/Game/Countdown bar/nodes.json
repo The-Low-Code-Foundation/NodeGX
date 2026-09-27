@@ -1,0 +1,464 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5dfc510e-f4d6-50e6-83a7-8d343726851f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cdIn",
+      "type": "Component Inputs",
+      "label": "The deadline",
+      "ports": [
+        {
+          "name": "limitMs",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "start",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "stop",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "enabled",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "cdRow",
+      "type": "Group",
+      "label": "The clock",
+      "children": [
+        "cdTrack",
+        "cdSecs",
+        "cdSecsLast"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "justifyContent": "center",
+        "cssClassName": "rkt-clock"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "cdTrack",
+      "type": "Group",
+      "label": "The track",
+      "parent": "cdRow",
+      "children": [
+        "cdFill"
+      ],
+      "parameters": {
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 12,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "backgroundColor": "var(--surface-raised)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "cdFill",
+      "type": "Group",
+      "label": "What is left",
+      "parent": "cdTrack",
+      "parameters": {
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 12,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "backgroundColor": "var(--primary)",
+        "borderRadius": "var(--radius-full)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "cdGate",
+      "type": "Condition",
+      "label": "Timed at all?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "cdDeadline",
+      "type": "Timer",
+      "label": "The deadline",
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "cdKick",
+      "type": "Timer",
+      "label": "A frame after full: then glide",
+      "parameters": {
+        "duration": 40
+      },
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "cdOne",
+      "type": "Expression",
+      "label": "One millisecond",
+      "parameters": {
+        "expression": "1"
+      },
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "cdDur",
+      "type": "Variable2",
+      "label": "How long the glide takes",
+      "parameters": {
+        "name": "countdownDuration"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: only one round is ever on screen (the race page's or Monster Gate's), and each question writes this before it is read."
+      },
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "cdTarget",
+      "type": "Variable2",
+      "label": "Where the bar is heading",
+      "parameters": {
+        "name": "countdownTarget"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: only one round is ever on screen (the race page's or Monster Gate's), and each question writes this before it is read."
+      },
+      "x": 410,
+      "y": 1480
+    },
+    {
+      "id": "cdSetDur0",
+      "type": "Set Variable",
+      "label": "No glide",
+      "parameters": {
+        "name": "countdownDuration"
+      },
+      "x": 410,
+      "y": 1600
+    },
+    {
+      "id": "cdSetFull",
+      "type": "Set Variable",
+      "label": "Full",
+      "parameters": {
+        "name": "countdownTarget"
+      },
+      "x": 410,
+      "y": 1720
+    },
+    {
+      "id": "cdSetDur",
+      "type": "Set Variable",
+      "label": "Glide over the limit",
+      "parameters": {
+        "name": "countdownDuration"
+      },
+      "x": 410,
+      "y": 1840
+    },
+    {
+      "id": "cdSetEmpty",
+      "type": "Set Variable",
+      "label": "Empty",
+      "parameters": {
+        "name": "countdownTarget"
+      },
+      "x": 410,
+      "y": 1960
+    },
+    {
+      "id": "cdAnim",
+      "type": "net.noodl.animatetovalue",
+      "label": "The bar, gliding",
+      "parameters": {
+        "easingCurve": "linear"
+      },
+      "x": 410,
+      "y": 2080
+    },
+    {
+      "id": "cdWidth",
+      "type": "Expression",
+      "label": "Pixels of bar",
+      "parameters": {
+        "expression": "round(v * 3)"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "cdLevel",
+      "type": "Expression",
+      "label": "Nearly out?",
+      "parameters": {
+        "expression": "v < 30 ? 'low' : 'ok'"
+      },
+      "x": 410,
+      "y": 2200
+    },
+    {
+      "id": "cdStates",
+      "type": "States",
+      "label": "Calm or urgent",
+      "parameters": {
+        "states": "ok,low",
+        "values": "fill",
+        "useTransitions": false,
+        "type-fill": "color",
+        "value-ok-fill": "var(--primary)",
+        "value-low-fill": "var(--destructive)"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "cdExpired",
+      "type": "Variable2",
+      "label": "Has it run out?",
+      "parameters": {
+        "name": "countdownExpired"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: only one round is ever on screen (the race page's or Monster Gate's), and each question writes this before it is read."
+      },
+      "x": 410,
+      "y": 2320
+    },
+    {
+      "id": "cdSetExpired",
+      "type": "Set Variable",
+      "label": "It ran out",
+      "parameters": {
+        "name": "countdownExpired"
+      },
+      "x": 410,
+      "y": 2440
+    },
+    {
+      "id": "cdSetFresh",
+      "type": "Set Variable",
+      "label": "Not yet",
+      "parameters": {
+        "name": "countdownExpired"
+      },
+      "x": 410,
+      "y": 2560
+    },
+    {
+      "id": "cdZero",
+      "type": "Expression",
+      "label": "Zero",
+      "parameters": {
+        "expression": "0"
+      },
+      "x": 410,
+      "y": 2680
+    },
+    {
+      "id": "cdHundred",
+      "type": "Expression",
+      "label": "A hundred",
+      "parameters": {
+        "expression": "100"
+      },
+      "x": 410,
+      "y": 2800
+    },
+    {
+      "id": "cdTrue",
+      "type": "Expression",
+      "label": "True",
+      "parameters": {
+        "expression": "true"
+      },
+      "x": 410,
+      "y": 2920
+    },
+    {
+      "id": "cdShown",
+      "type": "Expression",
+      "label": "Only when timed",
+      "parameters": {
+        "expression": "enabled === true"
+      },
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "cdFalse",
+      "type": "Expression",
+      "label": "False",
+      "parameters": {
+        "expression": "false"
+      },
+      "x": 410,
+      "y": 3040
+    },
+    {
+      "id": "cdSecs",
+      "type": "Text",
+      "label": "Seconds left",
+      "parent": "cdRow",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-bold)",
+        "fontVariantNumeric": "tabular-nums",
+        "lineHeight": "var(--leading-tight)",
+        "cssClassName": "rkt-clock-secs"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "cdSecsLast",
+      "type": "Text",
+      "label": "Seconds left, nearly out",
+      "parent": "cdRow",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-base)",
+        "color": "var(--destructive)",
+        "fontWeight": "var(--font-bold)",
+        "fontVariantNumeric": "tabular-nums",
+        "lineHeight": "var(--leading-tight)",
+        "cssClassName": "rkt-clock-last"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "cdSecsText",
+      "type": "Expression",
+      "label": "Whole seconds left",
+      "parameters": {
+        "expression": "'' + ceil(v * limit / 100000)"
+      },
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "cdSecsNearly",
+      "type": "Expression",
+      "label": "The last three seconds?",
+      "parameters": {
+        "expression": "v * limit / 100000 > 0 && v * limit / 100000 <= 3 ? 'last' : 'calm'"
+      },
+      "x": 410,
+      "y": 3160
+    },
+    {
+      "id": "cdSecsMode",
+      "type": "States",
+      "label": "Calm, or the last three seconds",
+      "parameters": {
+        "states": "calm,last",
+        "values": "calm,last",
+        "useTransitions": false,
+        "type-calm": "boolean",
+        "value-calm-calm": true,
+        "value-last-calm": false,
+        "type-last": "boolean",
+        "value-calm-last": false,
+        "value-last-last": true
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "cdSetDurHold",
+      "type": "Set Variable",
+      "label": "Stop gliding",
+      "parameters": {
+        "name": "countdownDuration"
+      },
+      "x": 410,
+      "y": 3280
+    },
+    {
+      "id": "cdSetHold",
+      "type": "Set Variable",
+      "label": "Stay where it is",
+      "parameters": {
+        "name": "countdownTarget"
+      },
+      "x": 410,
+      "y": 3400
+    },
+    {
+      "id": "cdOut",
+      "type": "Component Outputs",
+      "label": "Time",
+      "ports": [
+        {
+          "name": "expired",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "isExpired",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "running",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "left",
+          "plug": "input",
+          "type": "number"
+        }
+      ],
+      "x": 410,
+      "y": 3520
+    }
+  ],
+  "visualRoots": [
+    "cdRow"
+  ]
+}

@@ -64,6 +64,8 @@ import {
   TEMPLATE_PROJECT_NAME
 } from './tpl006Template';
 import { MEANING, requestedCompositions, TPL006_TOKENS, USED_COMPOSITIONS } from './tpl006Theme';
+import { checkFontFaces } from '../src/editor-deps';
+import { firstFamily } from '../../noodl-editor/src/editor/src/validation/fontFaces';
 
 jest.setTimeout(300_000);
 
@@ -527,18 +529,15 @@ describe('TPL-006 §3 — the writes are sequenced, not raced', () => {
   });
 
   /**
-   * 🔴 The parameter whose DEFAULT is a defect, pinned so a later session cannot
-   * undo this by tidying it.
+   * 🔴 Pinned again on 2026-09-15, and the reason is WHICH RUNTIME, not whether D49 is fixed.
    *
-   * Measured in a browser with the control beside it: with `useTransitions: true`
-   * a `States` node publishes its `string` and `boolean` values on a state change
-   * and **never publishes a `color` or a `number`**. Sampled at 0, 60, 150, 320,
-   * 700 and 1500ms after one change, the eyebrow string flipped at 60ms and both
-   * colours read their previous value at every sample; with the flag false all
-   * three changed together. The port's default is `true`, so the failing arm is
-   * the one an author gets by not thinking about it.
+   * GAM-006 fixed a token colour under transitions in the runtime, but after v0.2.4. The template is
+   * published to the community shelf, and the shelf installs into the app people already have, whose
+   * runtime still swallows the colour. So every States node here keeps transitions off until the
+   * oldest editor the shelf reaches carries GAM-006 — and this gate stops a tidy-up restoring the
+   * default before then.
    */
-  it('every States node in the template has transitions OFF, because the default does not publish colours', () => {
+  it('every States node in the template has transitions OFF, because v0.2.4’s runtime does not publish colours with them on', () => {
     const found: Array<[string, unknown]> = [];
     for (const c of componentsOf()) {
       for (const n of nodesOf(c.name)) {
@@ -719,13 +718,25 @@ describe('TPL-006 §6 — the graph is an interpreter, not a story', () => {
 // ── §7 The artefact keeps its promises ──────────────────────────────────────
 
 describe('TPL-006 §7 — the artefact', () => {
-  it('it ships ZERO library modules, and that is read off the directory', () => {
+  it('it ships ZERO library modules and one font module, and that is read off the directory', () => {
     // 🔴 "We did not install one" and "there is not one here" are different
     // sentences, and AC4 asks for the second.
     expect(REQUIRED_MODULES).toEqual([]);
     const dir = path.join(built.projectDir, 'noodl_modules');
     const contents = fs.existsSync(dir) ? fs.readdirSync(dir) : [];
-    expect(contents).toEqual([]);
+    expect(contents).toEqual(['story-engine-fonts']);
+  });
+
+  it('GAM-016: the face --font-serif names first is one the project ships (Source Serif 4, with its licence)', async () => {
+    const serif = TPL006_TOKENS.find((t) => t.name === '--font-serif')!.value;
+    expect(firstFamily(serif)).toBe('Source Serif 4');
+    const moduleDir = path.join(built.projectDir, 'noodl_modules', 'story-engine-fonts');
+    const manifest = JSON.parse(fs.readFileSync(path.join(moduleDir, 'manifest.json'), 'utf8'));
+    const css = manifest.browser.stylesheets.map((s: string) => fs.readFileSync(path.join(built.projectDir, s), 'utf8'));
+    expect(checkFontFaces({ tokens: [{ name: '--font-serif', value: serif }], stylesheets: css, component: '/App' })).toEqual([]);
+    // Known-firing: the same token with no stylesheet is named.
+    expect(checkFontFaces({ tokens: [{ name: '--font-serif', value: serif }], stylesheets: [], component: '/App' })).toHaveLength(1);
+    expect(fs.readFileSync(path.join(moduleDir, 'OFL-SourceSerif4.txt'), 'utf8')).toContain('SIL OPEN FONT LICENSE');
   });
 
   it('it ships no backend, and says so by containing nothing that needs one', () => {
@@ -748,32 +759,21 @@ describe('TPL-006 §7 — the artefact', () => {
   });
 
   /**
-   * 🔴 The door's own diagnostics, read rather than assumed silent — and the one
-   * warning it raises is **argued with** rather than suppressed.
+   * 🔴 The door's own diagnostics, read rather than assumed silent.
    *
-   * `uncollapsible-multi-column` Arm B fires on any wrapped row that parents a
-   * `For Each` and sets a `columnGap`, with **no exclusion for content-width
-   * sizing** — while Arm A has exactly that exclusion and calls it *"the exclusion
-   * that took the authored false-positive rate to zero"*
-   * (`responsiveArrangement.ts:262`). The sidebar's pills are `contentSize`, so the
-   * mechanism the message describes — *"each item keeps the width it was given"* —
-   * does not apply: nothing gave them a width. Following the suggestion (a
-   * `Columns` autoFit at 260–320px) would give every two-word tag a 300px column.
+   * Until P88 GAM-022 this list held one argued warning: `uncollapsible-multi-column`
+   * on `Story/Sidebar`, whose wrapped row of `contentSize` tag pills was told to
+   * become a `Columns` autoFit at 260–320px — a 300px column per two-word tag (P78
+   * D50). Arm B now reads the item a `For Each` draws, and a content-sized item is
+   * not a grid. The library's pill rows (`/Tags`, `/Multi Select/Pills`,
+   * `/Multi Select/Dropdown`) had dodged it only by setting no gap at all.
    *
-   * ⚠️ Measured, and the library agrees: `/Tags`, `/Multi Select/Pills` and
-   * `/Multi Select/Dropdown` all wrap a `For Each` of pills — and all three avoid
-   * this warning only by setting **no gap at all**, which is the thing the design
-   * doctrine tells authors not to do (*"use the gap ports, never margins on the
-   * children"*). Filed in `DEFECTS-THE-TEMPLATES-FOUND.md`.
-   *
-   * So the assertion is exact rather than absent: a NEW warning reddens this gate.
+   * The assertion stays exact rather than absent: a NEW warning reddens this gate.
    */
-  it('the door refused nothing, raised no error, and raised exactly the one argued warning', () => {
+  it('the door refused nothing, raised no error, and raised no warning', () => {
     expect(built.diagnostics.filter((d) => d.severity === 'error')).toEqual([]);
     const warnings = built.diagnostics.filter((d) => d.severity === 'warning');
-    expect(warnings.map((w) => `${w.component} ${w.code}`)).toEqual([
-      'Story/Sidebar uncollapsible-multi-column'
-    ]);
+    expect(warnings.map((w) => `${w.component} ${w.code}`)).toEqual([]);
   });
 
   it('the prepared directory carries the note, and the note teaches the one edit', () => {
@@ -788,9 +788,9 @@ describe('TPL-006 §7 — the artefact', () => {
     // SHAPE, so a person replacing the story does not find their own prose quoted
     // back at them in the documentation.
     for (const p of STORY) expect(note).not.toContain(p.title);
-    // Zero modules, all the way to the directory a person unzips.
+    // No kit, all the way to the directory a person unzips: only the prose face.
     const dir = path.join(OUTPUT, 'noodl_modules');
-    expect(fs.existsSync(dir) ? fs.readdirSync(dir) : []).toEqual([]);
+    expect(fs.existsSync(dir) ? fs.readdirSync(dir) : []).toEqual(['story-engine-fonts']);
   });
 });
 

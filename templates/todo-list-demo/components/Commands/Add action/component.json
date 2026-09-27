@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d01f1d88-a94a-5705-8783-350b2e676535",
+  "name": "Add action",
+  "path": "/Commands/Add action",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Adds a next action at the bottom of a task’s next actions."
+}

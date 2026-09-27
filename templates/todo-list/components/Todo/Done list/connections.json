@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "725659d8-7a63-5767-876d-4841508f224e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "dlIn",
+      "fromProperty": "rows",
+      "toId": "dlEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "dlIn",
+      "fromProperty": "rows",
+      "toId": "dlCount",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "dlCount",
+      "fromProperty": "out-empty",
+      "toId": "dlEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "dlEach",
+      "fromProperty": "itemOutputSignal-open",
+      "toId": "dlOut",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "dlEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "dlOut",
+      "toProperty": "taskId"
+    }
+  ]
+}

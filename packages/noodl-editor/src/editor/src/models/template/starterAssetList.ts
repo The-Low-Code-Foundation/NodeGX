@@ -41,9 +41,10 @@ const STARTER_ROOT = 'src/assets/starter-project/';
  * this product creates and in every app anybody deploys from one**; the same four faces as woff2
  * are 0.48 MB, a 61% saving on a payload that ships to strangers.
  *
- * The editor's own UI still loads the `.ttf` copies (`editor/index.html` preloads five of them),
- * so the two are now genuinely different artefacts rather than two copies of one — which is what
- * puts these in the starter tree beside the stylesheet that names them.
+ * The editor's own UI no longer loads Inter at all (CHR-003 removed its preloads and faces; the
+ * chrome is the system stack), but the `.ttf` copies stay as the source these are generated from
+ * and checked against — two different artefacts rather than two copies of one, which is what puts
+ * these in the starter tree beside the stylesheet that names them.
  *
  * ⚠️ **They are generated, and the generator is committed**: `scripts/library/ttf-to-woff2.js`,
  * Node and `zlib` only, no dependency. That matters because the reason woff2 was refused in the

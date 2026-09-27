@@ -15,6 +15,19 @@
  *
  * @module noodl-editor/tests-unit/nat-007/thread-render
  */
+
+/**
+ * ⚠️ `Icon` is replaced, and only `Icon` — FLD-017's stub. This file imports `CommunityTab`, whose
+ * head is the shared `PrimaryButton` since CHR-012; `PrimaryButton` imports `Icon`, and `Icon.tsx`
+ * calls webpack's `require.context` at import time, so without this the suite fails TO RUN.
+ */
+jest.mock('@noodl-core-ui/components/common/Icon', () => ({
+  Icon: () => null,
+  IconName: {},
+  IconSize: { Small: 'small' },
+  IconVariant: {}
+}));
+
 import React from 'react';
 
 import { readFileSync } from 'fs';

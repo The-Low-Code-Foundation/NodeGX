@@ -14,6 +14,14 @@
  *
  * @module noodl-editor/tests-unit/nat-007/thread-write-render
  */
+// FLD-017 — CHR-012 made the community write verbs `PrimaryButton`, which imports `Icon`.
+jest.mock('@noodl-core-ui/components/common/Icon', () => ({
+  Icon: () => null,
+  IconName: {},
+  IconSize: { Small: 'small' },
+  IconVariant: {}
+}));
+
 import React from 'react';
 
 import {
@@ -24,7 +32,7 @@ import {
   type CommunityThreadState
 } from '@noodl-core-ui/components/community';
 
-import { byClass, render, text, walk } from '../support/renderElements';
+import { byClass, byTestId, render, text, walk } from '../support/renderElements';
 
 const noop = () => undefined;
 
@@ -96,31 +104,31 @@ describe('AC4 — there is a box on the screen, and it belongs to the person typ
   });
 
   it('draws the verb', () => {
-    expect(byClass(tree, 'ReplySubmit')[0].ownText).toBe('Post answer');
+    expect(text(byTestId(tree, 'community-reply-submit')[0])).toBe('Post answer');
   });
 });
 
 describe('AC4 — the verb refuses when the host says it must', () => {
   it('is disabled with nothing typed, and says nothing about it', () => {
     const tree = draw(readyWith(), composer({ canSubmit: false, blockedReason: null }));
-    expect(byClass(tree, 'ReplySubmit')[0].props.disabled).toBe(true);
+    expect(byTestId(tree, 'community-reply-submit')[0].props.disabled).toBe(true);
     expect(byClass(tree, 'ReplyBlocked')).toHaveLength(0);
   });
 
   it('is disabled WITH a reason when there is one to give', () => {
     const tree = draw(readyWith(), composer({ canSubmit: false, blockedReason: 'That is 3 characters over.' }));
-    expect(byClass(tree, 'ReplySubmit')[0].props.disabled).toBe(true);
+    expect(byTestId(tree, 'community-reply-submit')[0].props.disabled).toBe(true);
     expect(byClass(tree, 'ReplyBlocked')[0].ownText).toBe('That is 3 characters over.');
   });
 
   it('is live when the host says the draft is sendable', () => {
     const tree = draw(readyWith(), composer({ canSubmit: true, value: 'x' }));
-    expect(byClass(tree, 'ReplySubmit')[0].props.disabled).toBe(false);
+    expect(byTestId(tree, 'community-reply-submit')[0].props.disabled).toBe(false);
   });
 
   it('🔴 disables BOTH the verb and the box while sending, so one click cannot post twice', () => {
     const tree = draw(readyWith(), composer({ canSubmit: true, busy: true, submitLabel: 'Posting…' }));
-    expect(byClass(tree, 'ReplySubmit')[0].props.disabled).toBe(true);
+    expect(byTestId(tree, 'community-reply-submit')[0].props.disabled).toBe(true);
     expect(byClass(tree, 'ReplyInput')[0].props.disabled).toBe(true);
   });
 });
@@ -206,27 +214,27 @@ describe('AC6 — the accept verb is drawn under the answer it is about', () => 
         answers: [post({ id: 'p2', author: '@ada', accept }), post({ id: 'p3', author: '@grace' })]
       })
     );
-    const buttons = byClass(tree, 'AcceptButton');
+    const buttons = byTestId(tree, 'community-accept');
     expect(buttons).toHaveLength(1);
-    expect(buttons[0].ownText).toBe('Accept this answer');
+    expect(text(buttons[0])).toBe('Accept this answer');
   });
 
   it('🔴 draws NOTHING where the host gave no verb — the control is the row above', () => {
     const tree = draw(readyWith({ answers: [post({ id: 'p2', author: '@ada' })] }));
-    expect(byClass(tree, 'AcceptButton')).toHaveLength(0);
+    expect(byTestId(tree, 'community-accept')).toHaveLength(0);
   });
 
   it('puts the verb inside the post it belongs to, not in a toolbar at the top', () => {
     const tree = draw(readyWith({ answers: [post({ id: 'p2', author: '@ada', accept })] }));
     const posts = byClass(tree, 'Post');
     const answer = posts[posts.length - 1];
-    expect(walk(answer).some((n) => String(n.props.className ?? '').includes('AcceptButton'))).toBe(true);
+    expect(walk(answer).some((n) => n.props['data-test'] === 'community-accept')).toBe(true);
   });
 
   it('goes busy with its own label rather than vanishing', () => {
     const tree = draw(readyWith({ answers: [post({ id: 'p2', accept: { ...accept, busy: true } })] }));
-    const button = byClass(tree, 'AcceptButton')[0];
-    expect(button.ownText).toBe('Accepting…');
+    const button = byTestId(tree, 'community-accept')[0];
+    expect(text(button)).toBe('Accepting…');
     expect(button.props.disabled).toBe(true);
   });
 
@@ -242,7 +250,7 @@ describe('AC6 — the accept verb is drawn under the answer it is about', () => 
 
   it('is a real button, so a keyboard can reach it', () => {
     const tree = draw(readyWith({ answers: [post({ id: 'p2', accept })] }));
-    expect(byClass(tree, 'AcceptButton')[0].type).toBe('button');
+    expect(byTestId(tree, 'community-accept')[0].type).toBe('button');
   });
 });
 

@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7004a2d5-d0da-54c1-82c9-edc27b36c0fb",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "psIn",
+      "fromProperty": "enabled",
+      "toId": "ps_correct",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "psIn",
+      "fromProperty": "correct",
+      "toId": "ps_correct",
+      "toProperty": "play"
+    },
+    {
+      "fromId": "ps_correct",
+      "fromProperty": "ended",
+      "toId": "psOut",
+      "toProperty": "ended"
+    },
+    {
+      "fromId": "psIn",
+      "fromProperty": "enabled",
+      "toId": "ps_wrong",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "psIn",
+      "fromProperty": "wrong",
+      "toId": "ps_wrong",
+      "toProperty": "play"
+    },
+    {
+      "fromId": "ps_wrong",
+      "fromProperty": "ended",
+      "toId": "psOut",
+      "toProperty": "ended"
+    },
+    {
+      "fromId": "psIn",
+      "fromProperty": "enabled",
+      "toId": "ps_win",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "psIn",
+      "fromProperty": "win",
+      "toId": "ps_win",
+      "toProperty": "play"
+    },
+    {
+      "fromId": "ps_win",
+      "fromProperty": "ended",
+      "toId": "psOut",
+      "toProperty": "ended"
+    },
+    {
+      "fromId": "psIn",
+      "fromProperty": "enabled",
+      "toId": "ps_lose",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "psIn",
+      "fromProperty": "lose",
+      "toId": "ps_lose",
+      "toProperty": "play"
+    },
+    {
+      "fromId": "ps_lose",
+      "fromProperty": "ended",
+      "toId": "psOut",
+      "toProperty": "ended"
+    },
+    {
+      "fromId": "psIn",
+      "fromProperty": "enabled",
+      "toId": "ps_heart",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "psIn",
+      "fromProperty": "heart",
+      "toId": "ps_heart",
+      "toProperty": "play"
+    },
+    {
+      "fromId": "ps_heart",
+      "fromProperty": "ended",
+      "toId": "psOut",
+      "toProperty": "ended"
+    },
+    {
+      "fromId": "psIn",
+      "fromProperty": "enabled",
+      "toId": "ps_tick",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "psIn",
+      "fromProperty": "tick",
+      "toId": "ps_tick",
+      "toProperty": "play"
+    },
+    {
+      "fromId": "ps_tick",
+      "fromProperty": "ended",
+      "toId": "psOut",
+      "toProperty": "ended"
+    },
+    {
+      "fromId": "psIn",
+      "fromProperty": "enabled",
+      "toId": "ps_pop",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "psIn",
+      "fromProperty": "pop",
+      "toId": "ps_pop",
+      "toProperty": "play"
+    },
+    {
+      "fromId": "ps_pop",
+      "fromProperty": "ended",
+      "toId": "psOut",
+      "toProperty": "ended"
+    }
+  ]
+}

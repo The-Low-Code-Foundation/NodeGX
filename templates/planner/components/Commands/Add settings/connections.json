@@ -1,0 +1,175 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8a040159-3c30-54dd-8f69-be46ec36384a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "AddsettingIn",
+      "fromProperty": "rate",
+      "toId": "AddsettingGuard",
+      "toProperty": "in-rate"
+    },
+    {
+      "fromId": "AddsettingIn",
+      "fromProperty": "focusHours",
+      "toId": "AddsettingGuard",
+      "toProperty": "in-focusHours"
+    },
+    {
+      "fromId": "AddsettingIn",
+      "fromProperty": "savingsTarget",
+      "toId": "AddsettingGuard",
+      "toProperty": "in-savingsTarget"
+    },
+    {
+      "fromId": "AddsettingIn",
+      "fromProperty": "lowWaterMark",
+      "toId": "AddsettingGuard",
+      "toProperty": "in-lowWaterMark"
+    },
+    {
+      "fromId": "AddsettingIn",
+      "fromProperty": "workingDays",
+      "toId": "AddsettingGuard",
+      "toProperty": "in-workingDays"
+    },
+    {
+      "fromId": "AddsettingIn",
+      "fromProperty": "buildingHours",
+      "toId": "AddsettingGuard",
+      "toProperty": "in-buildingHours"
+    },
+    {
+      "fromId": "AddsettingIn",
+      "fromProperty": "adminHours",
+      "toId": "AddsettingGuard",
+      "toProperty": "in-adminHours"
+    },
+    {
+      "fromId": "AddsettingIn",
+      "fromProperty": "hobbyHours",
+      "toId": "AddsettingGuard",
+      "toProperty": "in-hobbyHours"
+    },
+    {
+      "fromId": "AddsettingIn",
+      "fromProperty": "hobbyWeekCeiling",
+      "toId": "AddsettingGuard",
+      "toProperty": "in-hobbyWeekCeiling"
+    },
+    {
+      "fromId": "AddsettingIn",
+      "fromProperty": "buildingWeekCeiling",
+      "toId": "AddsettingGuard",
+      "toProperty": "in-buildingWeekCeiling"
+    },
+    {
+      "fromId": "AddsettingIn",
+      "fromProperty": "billableFloorPct",
+      "toId": "AddsettingGuard",
+      "toProperty": "in-billableFloorPct"
+    },
+    {
+      "fromId": "AddsettingIn",
+      "fromProperty": "todoUrl",
+      "toId": "AddsettingGuard",
+      "toProperty": "in-todoUrl"
+    },
+    {
+      "fromId": "AddsettingIn",
+      "fromProperty": "do",
+      "toId": "AddsettingGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "AddsettingGuard",
+      "fromProperty": "out-rate",
+      "toId": "AddsettingWrite",
+      "toProperty": "prop-rate"
+    },
+    {
+      "fromId": "AddsettingGuard",
+      "fromProperty": "out-focusHours",
+      "toId": "AddsettingWrite",
+      "toProperty": "prop-focusHours"
+    },
+    {
+      "fromId": "AddsettingGuard",
+      "fromProperty": "out-savingsTarget",
+      "toId": "AddsettingWrite",
+      "toProperty": "prop-savingsTarget"
+    },
+    {
+      "fromId": "AddsettingGuard",
+      "fromProperty": "out-lowWaterMark",
+      "toId": "AddsettingWrite",
+      "toProperty": "prop-lowWaterMark"
+    },
+    {
+      "fromId": "AddsettingGuard",
+      "fromProperty": "out-workingDays",
+      "toId": "AddsettingWrite",
+      "toProperty": "prop-workingDays"
+    },
+    {
+      "fromId": "AddsettingGuard",
+      "fromProperty": "out-buildingHours",
+      "toId": "AddsettingWrite",
+      "toProperty": "prop-buildingHours"
+    },
+    {
+      "fromId": "AddsettingGuard",
+      "fromProperty": "out-adminHours",
+      "toId": "AddsettingWrite",
+      "toProperty": "prop-adminHours"
+    },
+    {
+      "fromId": "AddsettingGuard",
+      "fromProperty": "out-hobbyHours",
+      "toId": "AddsettingWrite",
+      "toProperty": "prop-hobbyHours"
+    },
+    {
+      "fromId": "AddsettingGuard",
+      "fromProperty": "out-hobbyWeekCeiling",
+      "toId": "AddsettingWrite",
+      "toProperty": "prop-hobbyWeekCeiling"
+    },
+    {
+      "fromId": "AddsettingGuard",
+      "fromProperty": "out-buildingWeekCeiling",
+      "toId": "AddsettingWrite",
+      "toProperty": "prop-buildingWeekCeiling"
+    },
+    {
+      "fromId": "AddsettingGuard",
+      "fromProperty": "out-billableFloorPct",
+      "toId": "AddsettingWrite",
+      "toProperty": "prop-billableFloorPct"
+    },
+    {
+      "fromId": "AddsettingGuard",
+      "fromProperty": "out-todoUrl",
+      "toId": "AddsettingWrite",
+      "toProperty": "prop-todoUrl"
+    },
+    {
+      "fromId": "AddsettingGuard",
+      "fromProperty": "out-go",
+      "toId": "AddsettingWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "AddsettingWrite",
+      "fromProperty": "done",
+      "toId": "AddsettingOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "AddsettingWrite",
+      "fromProperty": "failure",
+      "toId": "AddsettingProblem",
+      "toProperty": "do"
+    }
+  ]
+}

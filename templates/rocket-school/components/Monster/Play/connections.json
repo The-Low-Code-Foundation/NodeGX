@@ -1,0 +1,739 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4da83bda-873b-586c-8fab-83cf17f938d7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "zpIn",
+      "fromProperty": "mounted",
+      "toId": "zpShown",
+      "toProperty": "m"
+    },
+    {
+      "fromId": "zpShown",
+      "fromProperty": "result",
+      "toId": "zpWrap",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "zpTrue",
+      "fromProperty": "result",
+      "toId": "zpWalkOn",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "zpFalse",
+      "fromProperty": "result",
+      "toId": "zpWalkOff",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "zpWrap",
+      "fromProperty": "didMount",
+      "toId": "zpWalkOff",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "start",
+      "toId": "zpPhase",
+      "toProperty": "to-playing"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "start",
+      "toId": "zpNew",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "zpRestart",
+      "fromProperty": "onClick",
+      "toId": "zpPhase",
+      "toProperty": "to-playing"
+    },
+    {
+      "fromId": "zpRestart",
+      "fromProperty": "onClick",
+      "toId": "zpNew",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "zpRestart",
+      "fromProperty": "onClick",
+      "toId": "zpWalkOff",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "zpRestart",
+      "fromProperty": "onClick",
+      "toId": "zpWalkDelay",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "zpResult",
+      "fromProperty": "again",
+      "toId": "zpPhase",
+      "toProperty": "to-playing"
+    },
+    {
+      "fromId": "zpResult",
+      "fromProperty": "again",
+      "toId": "zpNew",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "style",
+      "toId": "zpNew",
+      "toProperty": "style"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "timed",
+      "toId": "zpNew",
+      "toProperty": "timed"
+    },
+    {
+      "fromId": "zpNew",
+      "fromProperty": "game",
+      "toId": "zpSetGame",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "zpNew",
+      "fromProperty": "done",
+      "toId": "zpSetGame",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "zpNew",
+      "fromProperty": "id",
+      "toId": "zpRound",
+      "toProperty": "raceId"
+    },
+    {
+      "fromId": "zpNew",
+      "fromProperty": "timeScale",
+      "toId": "zpRound",
+      "toProperty": "limitScale"
+    },
+    {
+      "fromId": "zpNew",
+      "fromProperty": "done",
+      "toId": "zpRound",
+      "toProperty": "ask"
+    },
+    {
+      "fromId": "zpNew",
+      "fromProperty": "done",
+      "toId": "zpWalkDelay",
+      "toProperty": "restart"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "mode",
+      "toId": "zpRound",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "level",
+      "toId": "zpRound",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "lang",
+      "toId": "zpRound",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "layout",
+      "toId": "zpRound",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "answerMode",
+      "toId": "zpRound",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "model",
+      "toId": "zpRound",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "curriculum",
+      "toId": "zpRound",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "wordLists",
+      "toId": "zpRound",
+      "toProperty": "wordLists"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "timed",
+      "toId": "zpRound",
+      "toProperty": "timed"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "soundOn",
+      "toId": "zpRound",
+      "toProperty": "soundOn"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "placeholder",
+      "toId": "zpRound",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "checkWord",
+      "toId": "zpRound",
+      "toProperty": "checkWord"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "fluentWord",
+      "toId": "zpRound",
+      "toProperty": "fluentWord"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "correctWord",
+      "toId": "zpRound",
+      "toProperty": "correctWord"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "wrongWord",
+      "toId": "zpRound",
+      "toProperty": "wrongWord"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "timeUpWord",
+      "toId": "zpRound",
+      "toProperty": "timeUpWord"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "nextWord",
+      "toId": "zpRound",
+      "toProperty": "nextWord"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "showMeWord",
+      "toId": "zpRound",
+      "toProperty": "showMeWord"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "style",
+      "toId": "zpRound",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "zpRound",
+      "fromProperty": "graded",
+      "toId": "zpWalkDelay",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "zpRound",
+      "fromProperty": "graded",
+      "toId": "zpWalkOff",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "zpGame",
+      "fromProperty": "value",
+      "toId": "zpAnswer",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "zpRound",
+      "fromProperty": "outcome",
+      "toId": "zpAnswer",
+      "toProperty": "outcome"
+    },
+    {
+      "fromId": "zpRound",
+      "fromProperty": "gain",
+      "toId": "zpAnswer",
+      "toProperty": "gain"
+    },
+    {
+      "fromId": "zpRound",
+      "fromProperty": "cpuGain",
+      "toId": "zpAnswer",
+      "toProperty": "cpuGain"
+    },
+    {
+      "fromId": "zpRound",
+      "fromProperty": "graded",
+      "toId": "zpAnswer",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "zpAnswer",
+      "fromProperty": "game",
+      "toId": "zpSetGame",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "zpAnswer",
+      "fromProperty": "done",
+      "toId": "zpSetGame",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "zpAnswer",
+      "fromProperty": "timeScale",
+      "toId": "zpRound",
+      "toProperty": "limitScale"
+    },
+    {
+      "fromId": "zpRound",
+      "fromProperty": "model",
+      "toId": "zpOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "zpRound",
+      "fromProperty": "graded",
+      "toId": "zpOut",
+      "toProperty": "graded"
+    },
+    {
+      "fromId": "zpGame",
+      "fromProperty": "value",
+      "toId": "zpArrive",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "zpRound",
+      "fromProperty": "next",
+      "toId": "zpArrive",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "zpArrive",
+      "fromProperty": "game",
+      "toId": "zpSetGame",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "zpArrive",
+      "fromProperty": "done",
+      "toId": "zpSetGame",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "zpDraw",
+      "fromProperty": "over",
+      "toId": "zpGoOn",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "zpRound",
+      "fromProperty": "next",
+      "toId": "zpGoOn",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "zpGoOn",
+      "fromProperty": "onfalse",
+      "toId": "zpRound",
+      "toProperty": "ask"
+    },
+    {
+      "fromId": "zpGoOn",
+      "fromProperty": "onfalse",
+      "toId": "zpWalkDelay",
+      "toProperty": "restart"
+    },
+    {
+      "fromId": "zpGoOn",
+      "fromProperty": "ontrue",
+      "toId": "zpPhase",
+      "toProperty": "to-over"
+    },
+    {
+      "fromId": "zpWalkDelay",
+      "fromProperty": "timerFinished",
+      "toId": "zpWalkOn",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "zpGame",
+      "fromProperty": "value",
+      "toId": "zpDraw",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "lang",
+      "toId": "zpDraw",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "zpDraw",
+      "fromProperty": "hearts",
+      "toId": "zpLane",
+      "toProperty": "hearts"
+    },
+    {
+      "fromId": "zpDraw",
+      "fromProperty": "line",
+      "toId": "zpLane",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "zpDraw",
+      "fromProperty": "note",
+      "toId": "zpLane",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "zpDraw",
+      "fromProperty": "pips",
+      "toId": "zpLane",
+      "toProperty": "pips"
+    },
+    {
+      "fromId": "zpDraw",
+      "fromProperty": "monsterClass",
+      "toId": "zpLane",
+      "toProperty": "monsterClass"
+    },
+    {
+      "fromId": "zpDraw",
+      "fromProperty": "laneClass",
+      "toId": "zpLane",
+      "toProperty": "laneClass"
+    },
+    {
+      "fromId": "zpDraw",
+      "fromProperty": "rest",
+      "toId": "zpLane",
+      "toProperty": "rest"
+    },
+    {
+      "fromId": "zpDraw",
+      "fromProperty": "walkFrom",
+      "toId": "zpLane",
+      "toProperty": "walkFrom"
+    },
+    {
+      "fromId": "zpWalking",
+      "fromProperty": "value",
+      "toId": "zpLane",
+      "toProperty": "walking"
+    },
+    {
+      "fromId": "zpRound",
+      "fromProperty": "clockLeft",
+      "toId": "zpLane",
+      "toProperty": "left"
+    },
+    {
+      "fromId": "zpPhase",
+      "fromProperty": "playing",
+      "toId": "zpRoundSlot",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "zpPhase",
+      "fromProperty": "over",
+      "toId": "zpResult",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "zpPhase",
+      "fromProperty": "teaching",
+      "toId": "zpTeach",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "zpPhase",
+      "fromProperty": "controls",
+      "toId": "zpControls",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "restartWord",
+      "toId": "zpRestart",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "changeWord",
+      "toId": "zpChange",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "zpChange",
+      "fromProperty": "onClick",
+      "toId": "zpRound",
+      "toProperty": "abandon"
+    },
+    {
+      "fromId": "zpChange",
+      "fromProperty": "onClick",
+      "toId": "zpWalkOff",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "zpChange",
+      "fromProperty": "onClick",
+      "toId": "zpWalkDelay",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "zpChange",
+      "fromProperty": "onClick",
+      "toId": "zpOut",
+      "toProperty": "changeGame"
+    },
+    {
+      "fromId": "zpRound",
+      "fromProperty": "showMe",
+      "toId": "zpPhase",
+      "toProperty": "to-teaching"
+    },
+    {
+      "fromId": "zpTeach",
+      "fromProperty": "gotIt",
+      "toId": "zpPhase",
+      "toProperty": "to-playing"
+    },
+    {
+      "fromId": "zpTeach",
+      "fromProperty": "gotIt",
+      "toId": "zpGoOn",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "teachCards",
+      "toId": "zpTeachPick",
+      "toProperty": "cards"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "lang",
+      "toId": "zpTeachPick",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "zpRound",
+      "fromProperty": "teach",
+      "toId": "zpTeachPick",
+      "toProperty": "teachId"
+    },
+    {
+      "fromId": "zpRound",
+      "fromProperty": "missCount",
+      "toId": "zpStep",
+      "toProperty": "misses"
+    },
+    {
+      "fromId": "zpStep",
+      "fromProperty": "result",
+      "toId": "zpTeachPick",
+      "toProperty": "step"
+    },
+    {
+      "fromId": "zpTeachPick",
+      "fromProperty": "title",
+      "toId": "zpTeach",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "zpTeachPick",
+      "fromProperty": "text",
+      "toId": "zpTeach",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "zpTeachPick",
+      "fromProperty": "example",
+      "toId": "zpTeach",
+      "toProperty": "example"
+    },
+    {
+      "fromId": "zpRound",
+      "fromProperty": "prompt",
+      "toId": "zpTeach",
+      "toProperty": "prompt"
+    },
+    {
+      "fromId": "zpRound",
+      "fromProperty": "worked",
+      "toId": "zpTeach",
+      "toProperty": "worked"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "anExampleWord",
+      "toId": "zpTeach",
+      "toProperty": "anExampleWord"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "gotItWord",
+      "toId": "zpTeach",
+      "toProperty": "gotItWord"
+    },
+    {
+      "fromId": "zpDraw",
+      "fromProperty": "over",
+      "toId": "zpIsOver",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "zpIsOver",
+      "fromProperty": "ontrue",
+      "toId": "zpFinish",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "zpGame",
+      "fromProperty": "value",
+      "toId": "zpFinish",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "zpRound",
+      "fromProperty": "model",
+      "toId": "zpFinish",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "lang",
+      "toId": "zpFinish",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "zpFinish",
+      "fromProperty": "model",
+      "toId": "zpOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "zpFinish",
+      "fromProperty": "done",
+      "toId": "zpOut",
+      "toProperty": "graded"
+    },
+    {
+      "fromId": "zpFinish",
+      "fromProperty": "won",
+      "toId": "zpCheer",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "zpFinish",
+      "fromProperty": "done",
+      "toId": "zpCheer",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "zpCheer",
+      "fromProperty": "ontrue",
+      "toId": "zpOut",
+      "toProperty": "cheer"
+    },
+    {
+      "fromId": "zpCheer",
+      "fromProperty": "onfalse",
+      "toId": "zpOut",
+      "toProperty": "sigh"
+    },
+    {
+      "fromId": "zpFinish",
+      "fromProperty": "won",
+      "toId": "zpResult",
+      "toProperty": "won"
+    },
+    {
+      "fromId": "zpFinish",
+      "fromProperty": "headline",
+      "toId": "zpResult",
+      "toProperty": "headline"
+    },
+    {
+      "fromId": "zpFinish",
+      "fromProperty": "line",
+      "toId": "zpResult",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "zpFinish",
+      "fromProperty": "starsText",
+      "toId": "zpResult",
+      "toProperty": "stars"
+    },
+    {
+      "fromId": "zpFinish",
+      "fromProperty": "why",
+      "toId": "zpResult",
+      "toProperty": "why"
+    },
+    {
+      "fromId": "zpFinish",
+      "fromProperty": "earnedPick",
+      "toId": "zpResult",
+      "toProperty": "hasPick"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "againWord",
+      "toId": "zpResult",
+      "toProperty": "againWord"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "changeWord",
+      "toId": "zpResult",
+      "toProperty": "otherWord"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "pickWord",
+      "toId": "zpResult",
+      "toProperty": "pickWord"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "hangarWord",
+      "toId": "zpResult",
+      "toProperty": "hangarWord"
+    },
+    {
+      "fromId": "zpResult",
+      "fromProperty": "other",
+      "toId": "zpOut",
+      "toProperty": "changeGame"
+    },
+    {
+      "fromId": "zpResult",
+      "fromProperty": "hangar",
+      "toId": "zpOut",
+      "toProperty": "hangar"
+    }
+  ]
+}

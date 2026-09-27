@@ -36,6 +36,8 @@
 
 import { filesystem, platform } from '@noodl/platform';
 
+import { PRESET_FONT_SOURCE_ROOT, PRESET_FONTS, planPresetFonts, type PresetFontPlan } from '../StylePresets/presetFonts';
+import { peekPendingPresetId } from '../StylePresets/StylePresetsModel';
 import { STARTER_ASSETS, type StarterAsset } from './starterAssetList';
 
 /**
@@ -99,5 +101,79 @@ export async function installStarterAssets(projectDirectory: string): Promise<St
     );
   }
 
+  return report;
+}
+
+/**
+ * P88 GAM-016 — copy the chosen preset's typeface into a freshly created project.
+ *
+ * Beside {@link installStarterAssets} and for the same reasons: before the project loads, so the
+ * scanner links the stylesheet on its first scan; never overwriting; and a failure is reported, never
+ * thrown. The plan is `planPresetFonts`, shared with the MCP server's `set_style_preset`. The planner
+ * is synchronous, so the bytes it compares are read first.
+ *
+ * `presetId` defaults to the pending preset, **peeked, not consumed**: `StyleTokensModel` consumes it when
+ * the project opens, to write the tokens.
+ */
+export async function installPresetFonts(
+  projectDirectory: string,
+  presetId: string | null = peekPendingPresetId()
+): Promise<StarterAssetsReport> {
+  const report: StarterAssetsReport = { written: [], skipped: [], failed: [] };
+  if (!presetId) return report;
+  const appPath = platform.getAppPath();
+
+  const projectFiles = new Map<string, Uint8Array>();
+  const projectDirs = new Map<string, string[]>();
+  const shippedFiles = new Map<string, Uint8Array>();
+  const readInto = async (map: Map<string, Uint8Array>, key: string, absolute: string) => {
+    if (filesystem.exists(absolute)) map.set(key, await filesystem.readBinaryFile(absolute));
+  };
+
+  let plan: PresetFontPlan;
+  try {
+    for (const module of Object.values(PRESET_FONTS)) {
+      const dir = `noodl_modules/${module.dir}`;
+      const absoluteDir = filesystem.join(projectDirectory, dir);
+      if (filesystem.exists(absoluteDir)) {
+        projectDirs.set(dir, (await filesystem.listDirectory(absoluteDir)).map((entry) => entry.name));
+      }
+      for (const file of module.files) {
+        await readInto(projectFiles, `${dir}/${file}`, filesystem.join(projectDirectory, dir, file));
+        const from = `${PRESET_FONT_SOURCE_ROOT}${module.source}/${file}`;
+        await readInto(shippedFiles, from, filesystem.join(appPath, from));
+      }
+    }
+    plan = planPresetFonts(presetId, {
+      project: (path) => projectFiles.get(path) ?? null,
+      shipped: (path) => shippedFiles.get(path) ?? null,
+      listProject: (dir) => projectDirs.get(dir) ?? null
+    });
+  } catch (error) {
+    report.failed.push(`preset fonts: ${error instanceof Error ? error.message : String(error)}`);
+    return report;
+  }
+
+  report.skipped.push(...plan.present);
+  for (const { from, to } of plan.copy) {
+    try {
+      const source = filesystem.join(appPath, from);
+      if (!filesystem.exists(source)) {
+        report.failed.push(`${to}: no such source ${from}`);
+        continue;
+      }
+      const target = filesystem.join(projectDirectory, to);
+      await filesystem.makeDirectory(filesystem.dirname(target));
+      await filesystem.copyFile(source, target);
+      report.written.push(to);
+    } catch (error) {
+      report.failed.push(`${to}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  if (report.failed.length > 0) {
+    // eslint-disable-next-line no-console
+    console.warn(`[preset-fonts] ${presetId}: could not place\n  ${report.failed.join('\n  ')}`);
+  }
   return report;
 }

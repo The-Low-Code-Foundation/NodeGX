@@ -1,0 +1,163 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "02367b69-5625-4431-83e6-1d395135d674",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hm_cta",
+      "fromProperty": "onClick",
+      "toId": "hm_go",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "t_hm_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "hm_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_hm_title",
+      "fromProperty": "Translation",
+      "toId": "hm_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_hm_cta",
+      "fromProperty": "Translation",
+      "toId": "hm_cta",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_hm_page_title",
+      "fromProperty": "Translation",
+      "toId": "seo_hm_page",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "hm_coach",
+      "fromProperty": "onClick",
+      "toId": "hm_go_people",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "t_hm_coach",
+      "fromProperty": "Translation",
+      "toId": "hm_coach",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_hm_note",
+      "fromProperty": "Translation",
+      "toId": "hm_note",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hm_user",
+      "fromProperty": "authenticated",
+      "toId": "hm_who",
+      "toProperty": "in-signedIn"
+    },
+    {
+      "fromId": "hm_user",
+      "fromProperty": "roles",
+      "toId": "hm_who",
+      "toProperty": "in-roles"
+    },
+    {
+      "fromId": "hm_who",
+      "fromProperty": "out-signedOut",
+      "toId": "hm_cta",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hm_who",
+      "fromProperty": "out-signedOut",
+      "toId": "hm_coach",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hm_who",
+      "fromProperty": "out-signedOut",
+      "toId": "hm_note",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hm_who",
+      "fromProperty": "out-isLearner",
+      "toId": "hm_open_course",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hm_who",
+      "fromProperty": "out-isStaff",
+      "toId": "hm_open_people",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hm_who",
+      "fromProperty": "out-canSignOut",
+      "toId": "hm_signout",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hm_open_course",
+      "fromProperty": "onClick",
+      "toId": "hm_to_course",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "hm_open_people",
+      "fromProperty": "onClick",
+      "toId": "hm_to_people",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "hm_signout",
+      "fromProperty": "onClick",
+      "toId": "hm_logout",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "t_hm_open_course",
+      "fromProperty": "Translation",
+      "toId": "hm_open_course",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_hm_open_people",
+      "fromProperty": "Translation",
+      "toId": "hm_open_people",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_hm_signout",
+      "fromProperty": "Translation",
+      "toId": "hm_signout",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_hm_line",
+      "fromProperty": "Translation",
+      "toId": "hm_which_lede",
+      "toProperty": "in-doors"
+    },
+    {
+      "fromId": "t_hm_line_in",
+      "fromProperty": "Translation",
+      "toId": "hm_which_lede",
+      "toProperty": "in-signedIn"
+    },
+    {
+      "fromId": "hm_who",
+      "fromProperty": "out-signedOut",
+      "toId": "hm_which_lede",
+      "toProperty": "in-signedOut"
+    },
+    {
+      "fromId": "hm_which_lede",
+      "fromProperty": "out-text",
+      "toId": "hm_line",
+      "toProperty": "text"
+    }
+  ]
+}

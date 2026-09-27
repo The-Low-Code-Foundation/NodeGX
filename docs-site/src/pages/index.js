@@ -10,6 +10,12 @@ const cards = [
     to: '/docs/getting-started'
   },
   {
+    title: 'Coming from Bubble',
+    description:
+      'A phrasebook of Bubble operators and what each one is in NodeGX — including the ones with no equivalent.',
+    to: '/docs/coming-from-bubble'
+  },
+  {
     title: 'Concepts',
     description:
       'The small set of ideas everything else assumes you already have — node, port, wire, and the signal/value split.',

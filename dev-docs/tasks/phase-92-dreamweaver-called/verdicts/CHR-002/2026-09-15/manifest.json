@@ -1,0 +1,215 @@
+{
+  "task": "CHR-002",
+  "date": "2026-09-15",
+  "head": "9706a1a8185d6dbe3166ca9626d94237de64159d",
+  "build": {
+    "kind": "dev",
+    "how": "webpack dev build of HEAD (dark: npm run dev:debug; light: packages/noodl-editor npm run start, to skip start.ts sweeping a peer server). Renderer served --font-size-xs 11px, -sm 12px, -display 26px, -card-initial 96px, verified over CDP before each capture"
+  },
+  "fixture": {
+    "projects": [
+      "Landing page test V2",
+      "Reading Shelf"
+    ],
+    "source": "~/vscode_projects/NodeGX test projects/, cp -R fresh per theme",
+    "appNodesJsonMd5": {
+      "before": "4373f147c5924e0f38eaa7a625ee1b76",
+      "afterDark": "4373f147c5924e0f38eaa7a625ee1b76",
+      "afterLight": "4373f147c5924e0f38eaa7a625ee1b76"
+    }
+  },
+  "profile": "NOODL_USER_DATA_DIR seeded with firstRunLegal.json, recently_opened_project.json and editorSettings.json {editor.theme: dark|light} - the two runs differ in that one key and the fixture copy path",
+  "viewport": {
+    "measured": [
+      1368,
+      781
+    ],
+    "devicePixelRatio": 1,
+    "how": "the dev window opens at 1368x900; window.resizeTo from the renderer brought innerHeight to 781 before capture.js ran, so the box matches CHR-001. DPR is 1 here vs 2 in CHR-001: PNG resolution differs, CSS-px measurements do not"
+  },
+  "instrument": "CHR-001/2026-09-15/capture.js + measure.js, run unchanged: NOODL_REMOTE_DEBUG_PORT=9333 node capture.js <theme> <this dir>",
+  "shots": [
+    {
+      "file": "launcher-projects-dark.png",
+      "surface": "launcher",
+      "state": "Projects tab",
+      "theme": "dark",
+      "renderedTheme": "dark",
+      "viewportCss": [
+        1368,
+        781
+      ],
+      "devicePixelRatio": 1,
+      "sha256": "4a99871e75735fc6"
+    },
+    {
+      "file": "launcher-community-dark.png",
+      "surface": "launcher",
+      "state": "Community tab",
+      "theme": "dark",
+      "renderedTheme": "dark",
+      "viewportCss": [
+        1368,
+        781
+      ],
+      "devicePixelRatio": 1,
+      "sha256": "6bb1ff1f801e3492"
+    },
+    {
+      "file": "launcher-learning-dark.png",
+      "surface": "launcher",
+      "state": "Learning tab",
+      "theme": "dark",
+      "renderedTheme": "dark",
+      "viewportCss": [
+        1368,
+        781
+      ],
+      "devicePixelRatio": 1,
+      "sha256": "63d630ec01a5f03b"
+    },
+    {
+      "file": "launcher-templates-dark.png",
+      "surface": "launcher",
+      "state": "Templates tab",
+      "theme": "dark",
+      "renderedTheme": "dark",
+      "viewportCss": [
+        1368,
+        781
+      ],
+      "devicePixelRatio": 1,
+      "sha256": "68224733b4da157f"
+    },
+    {
+      "file": "editor-group-panel-top-dark.png",
+      "surface": "property panel",
+      "state": "root Group of App selected, panel scrolled to top",
+      "theme": "dark",
+      "renderedTheme": "dark",
+      "viewportCss": [
+        1368,
+        781
+      ],
+      "devicePixelRatio": 1,
+      "sha256": "06221771b0908b2c"
+    },
+    {
+      "file": "editor-group-panel-boxshadow-dark.png",
+      "surface": "property panel",
+      "state": "same Group, panel scrolled to Box Shadow (Shadow Enabled off)",
+      "theme": "dark",
+      "renderedTheme": "dark",
+      "viewportCss": [
+        1368,
+        781
+      ],
+      "devicePixelRatio": 1,
+      "sha256": "df9f61b348969428"
+    },
+    {
+      "file": "editor-nodepicker-dark.png",
+      "surface": "node picker",
+      "state": "opened from the preview toolbar +, nothing typed",
+      "theme": "dark",
+      "renderedTheme": "dark",
+      "viewportCss": [
+        1368,
+        781
+      ],
+      "devicePixelRatio": 1,
+      "sha256": "229a09aae65a3ab1"
+    },
+    {
+      "file": "launcher-projects-light.png",
+      "surface": "launcher",
+      "state": "Projects tab",
+      "theme": "light",
+      "renderedTheme": "light",
+      "viewportCss": [
+        1368,
+        781
+      ],
+      "devicePixelRatio": 1,
+      "sha256": "2f343023d8e7ab11"
+    },
+    {
+      "file": "launcher-community-light.png",
+      "surface": "launcher",
+      "state": "Community tab",
+      "theme": "light",
+      "renderedTheme": "light",
+      "viewportCss": [
+        1368,
+        781
+      ],
+      "devicePixelRatio": 1,
+      "sha256": "fcf41e0268d91f71"
+    },
+    {
+      "file": "launcher-learning-light.png",
+      "surface": "launcher",
+      "state": "Learning tab",
+      "theme": "light",
+      "renderedTheme": "light",
+      "viewportCss": [
+        1368,
+        781
+      ],
+      "devicePixelRatio": 1,
+      "sha256": "c8adecc9ac6e8439"
+    },
+    {
+      "file": "launcher-templates-light.png",
+      "surface": "launcher",
+      "state": "Templates tab",
+      "theme": "light",
+      "renderedTheme": "light",
+      "viewportCss": [
+        1368,
+        781
+      ],
+      "devicePixelRatio": 1,
+      "sha256": "b9ed4020f5be8a09"
+    },
+    {
+      "file": "editor-group-panel-top-light.png",
+      "surface": "property panel",
+      "state": "root Group of App selected, panel scrolled to top",
+      "theme": "light",
+      "renderedTheme": "light",
+      "viewportCss": [
+        1368,
+        781
+      ],
+      "devicePixelRatio": 1,
+      "sha256": "ea7b114a7b5fc78f"
+    },
+    {
+      "file": "editor-group-panel-boxshadow-light.png",
+      "surface": "property panel",
+      "state": "same Group, panel scrolled to Box Shadow (Shadow Enabled off)",
+      "theme": "light",
+      "renderedTheme": "light",
+      "viewportCss": [
+        1368,
+        781
+      ],
+      "devicePixelRatio": 1,
+      "sha256": "af0f213b70628500"
+    },
+    {
+      "file": "editor-nodepicker-light.png",
+      "surface": "node picker",
+      "state": "opened from the preview toolbar +, nothing typed",
+      "theme": "light",
+      "renderedTheme": "light",
+      "viewportCss": [
+        1368,
+        781
+      ],
+      "devicePixelRatio": 1,
+      "sha256": "749b5729c51dc302"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "instrument": "file:///Users/richardosborne/vscode_projects/OpenNoodl/packages/noodl-editor/src/editor/index.html",
+  "baseline": {
+    "hints": 0,
+    "hintTexts": [],
+    "marked": 1,
+    "hintedHosts": 0,
+    "rows": 83,
+    "children": 3
+  },
+  "live": {
+    "hints": 1,
+    "hintTexts": [
+      "The children are not clipped, so their square corners paint "
+    ],
+    "marked": 1,
+    "hintedHosts": 1,
+    "rows": 83,
+    "radius": "{\"value\":40,\"unit\":\"px\"}",
+    "children": 3,
+    "rowMarkStillConnected": true
+  },
+  "render": {
+    "hints": 1,
+    "hintTexts": [
+      "The children are not clipped, so their square corners paint "
+    ],
+    "marked": 1,
+    "hintedHosts": 1,
+    "rows": 83,
+    "radius": "{\"value\":40,\"unit\":\"px\"}",
+    "children": 3
+  },
+  "cleared": {
+    "hints": 0,
+    "hintTexts": [],
+    "marked": 1,
+    "hintedHosts": 0,
+    "rows": 83,
+    "radius": "{\"value\":0,\"unit\":\"px\"}",
+    "children": 3
+  },
+  "end": {
+    "hints": 0,
+    "hintTexts": [],
+    "marked": 1,
+    "hintedHosts": 0,
+    "rows": 83,
+    "children": 3
+  }
+}

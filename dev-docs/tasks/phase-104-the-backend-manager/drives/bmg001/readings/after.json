@@ -1,0 +1,276 @@
+{
+  "signedIn": true,
+  "topbar": "capture backend · cap1\nadmin\ndev-open — nothing enforced\n☀\nSign out",
+  "pages": {
+    "collections": {
+      "hash": "#/collections/Pet",
+      "nav": "DATA\nCollections\nSchema\nPEOPLE\nUsers\nRoles\nSign-in\nACCESS\nPermissions\nAPI keys\nAUTOMATION\nTriggers\nWorkflows\nRuns\nSTORAGE\nFiles\nSETTINGS\nEmail\nBackups\nACTIVITY\nAudit",
+      "current": "Collections",
+      "main": "This backend enforces nothing. dev-open is enabled in security.json, so collection permissions, row ACLs and this page’s own credential are all bypassed. It is only ever active on a loopback bind — the service refuses to start dev-open while bound beyond localhost. Set \"devOpen\": false to test real enforcement.\nCollections\n\nBrowse and edit records. Click a cell to change it. Live updates arrive over the backend’s own SSE stream.\n\nCollection\nPet\nToy\nSearch\nRefresh\nLive\nExport CSV\nNew record\n▸\nAdvanced filter (JSON)\nPet · 2 record(s)\nShowing 1–2\nPrev\nNext\n\tobjectId String\tname String\tage Number\tisGood Boolean\tborn Date\ttags Array\towner Pointer\tcreatedAt Date\tupdatedAt Date\tACL ACL\t\n\tde4e2726…\tRex\t3\t✗\t\t[\"big\"]\t\t24/09/2026, 23:23:51\t24/09/2026, 23:23:51\tpublic\tEdit Delete\n\t7363bdd1…\tMilo\t7\t✓\t04/03/2019, 10:30:00\t[\"small\",\"brown\"]\t→ 45059518…\t24/09/2026, 23:23:51\t24/09/2026, 23:23:51\tpublic\tEdit Delete",
+      "buttons": [
+        "Refresh",
+        "Export CSV",
+        "New record",
+        "Prev",
+        "Next",
+        "Edit",
+        "Delete",
+        "Edit",
+        "Delete"
+      ],
+      "inputs": [
+        "SELECT:select-one:",
+        "INPUT:search:Search text fields…",
+        "INPUT:checkbox:",
+        "INPUT:checkbox:",
+        "INPUT:checkbox:",
+        "INPUT:checkbox:"
+      ]
+    },
+    "schema": {
+      "hash": "#/schema",
+      "nav": "DATA\nCollections\nSchema\nPEOPLE\nUsers\nRoles\nSign-in\nACCESS\nPermissions\nAPI keys\nAUTOMATION\nTriggers\nWorkflows\nRuns\nSTORAGE\nFiles\nSETTINGS\nEmail\nBackups\nACTIVITY\nAudit",
+      "current": "Schema",
+      "main": "This backend enforces nothing. dev-open is enabled in security.json, so collection permissions, row ACLs and this page’s own credential are all bypassed. It is only ever active on a loopback bind — the service refuses to start dev-open while bound beyond localhost. Set \"devOpen\": false to test real enforcement.\nSchema\n\nYour collections and their fields. Click a field name to rename it, or its type to change it.\n\nNew collection\nRefresh\nPet\n6 field(s)\n1 index(es)\nOpen records\nAdd field\nIndexes\nDelete collection\nField\tType\tRequired\tDefault\nobjectId\tString\t\tunique id, set by the backend\ncreatedAt\tDate\t\tset by the backend\nupdatedAt\tDate\t\tset by the backend\nname\t\nString\nNumber\nBoolean\nDate\nObject\nArray\nFile\nGeoPoint\n\t✓\t\nage\t\nString\nNumber\nBoolean\nDate\nObject\nArray\nFile\nGeoPoint\n\t\t\nisGood\t\nString\nNumber\nBoolean\nDate\nObject\nArray\nFile\nGeoPoint\n\t\t\nborn\t\nString\nNumber\nBoolean\nDate\nObject\nArray\nFile\nGeoPoint\n\t\t\ntags\t\nString\nNumber\nBoolean\nDate\nObject\nArray\nFile\nGeoPoint\n\t\t\nowner\t\nString\nNumber\nBoolean\nDate\nObject\nArray\nPointer → _User\nFile\nGeoPoint\n\t\t\nIndex\tFields\tUnique\tOrder\tState\nidx_Pet_name\tname\tyes\tascending\tbuilt\nToy\n2 field(s)\n0 index(es)\nOpen records\nAdd field\nIndexes\nDelete collection\nField\tType\tRequired\tDefault\nobjectId\tString\t\tunique id, set by the backend\ncreatedAt\tDate\t\tset by the backend\nupdatedAt\tDate\t\tset by the backend\nlabel\t\nString\nNumber\nBoolean\nDate\nObject\nArray\nFile\nGeoPoint\n\t\t\nprice\t\nString\nNumber\nBoolean\nDate\nObject\nArray\nFile\nGeoPoint\n\t\t",
+      "buttons": [
+        "New collection",
+        "Refresh",
+        "Open records",
+        "Add field",
+        "Indexes",
+        "Delete collection",
+        "name",
+        "age",
+        "isGood",
+        "born",
+        "tags",
+        "owner",
+        "Open records",
+        "Add field",
+        "Indexes",
+        "Delete collection",
+        "label",
+        "price"
+      ],
+      "inputs": [
+        "SELECT:select-one:",
+        "SELECT:select-one:",
+        "SELECT:select-one:",
+        "SELECT:select-one:",
+        "SELECT:select-one:",
+        "SELECT:select-one:",
+        "SELECT:select-one:",
+        "SELECT:select-one:"
+      ]
+    },
+    "users": {
+      "hash": "#/users",
+      "nav": "DATA\nCollections\nSchema\nPEOPLE\nUsers\nRoles\nSign-in\nACCESS\nPermissions\nAPI keys\nAUTOMATION\nTriggers\nWorkflows\nRuns\nSTORAGE\nFiles\nSETTINGS\nEmail\nBackups\nACTIVITY\nAudit",
+      "current": "Users",
+      "main": "This backend enforces nothing. dev-open is enabled in security.json, so collection permissions, row ACLs and this page’s own credential are all bypassed. It is only ever active on a loopback bind — the service refuses to start dev-open while bound beyond localhost. Set \"devOpen\": false to test real enforcement.\nUsers\n\nThe _User collection, plus the account actions the backend actually implements.\n\nNew user\nRefresh\nobjectId\tusername\temail\tverified\troles\tcreated\t\n45059518-4621-4c78-8d75-4dec0c4b8a9a\tann\tann@example.com\tno\tstaff\t24/09/2026, 23:23:51\tSend resetDelete\n820bc646-cba0-415c-9e36-356c16c44d44\tbob\tbob@example.com\tno\t\t24/09/2026, 23:23:51\tSend resetDelete",
+      "buttons": [
+        "New user",
+        "Refresh",
+        "Send reset",
+        "Delete",
+        "Send reset",
+        "Delete"
+      ],
+      "inputs": []
+    },
+    "roles": {
+      "hash": "#/roles",
+      "nav": "DATA\nCollections\nSchema\nPEOPLE\nUsers\nRoles\nSign-in\nACCESS\nPermissions\nAPI keys\nAUTOMATION\nTriggers\nWorkflows\nRuns\nSTORAGE\nFiles\nSETTINGS\nEmail\nBackups\nACTIVITY\nAudit",
+      "current": "Roles",
+      "main": "This backend enforces nothing. dev-open is enabled in security.json, so collection permissions, row ACLs and this page’s own credential are all bypassed. It is only ever active on a loopback bind — the service refuses to start dev-open while bound beyond localhost. Set \"devOpen\": false to test real enforcement.\nRoles\n\nFlat roles. Permissions reference them as \"role:<name>\".\n\nNew role\nRefresh\nRole\tMembers\t\nstaff\t45059518-4621-4c78-8d75-4dec0c4b8a9a\tAdd memberDelete\nowners\t\tAdd memberDelete",
+      "buttons": [
+        "New role",
+        "Refresh",
+        "Add member",
+        "Delete",
+        "Add member",
+        "Delete"
+      ],
+      "inputs": []
+    },
+    "permissions": {
+      "hash": "#/permissions",
+      "nav": "DATA\nCollections\nSchema\nPEOPLE\nUsers\nRoles\nSign-in\nACCESS\nPermissions\nAPI keys\nAUTOMATION\nTriggers\nWorkflows\nRuns\nSTORAGE\nFiles\nSETTINGS\nEmail\nBackups\nACTIVITY\nAudit",
+      "current": "Permissions",
+      "main": "This backend enforces nothing. dev-open is enabled in security.json, so collection permissions, row ACLs and this page’s own credential are all bypassed. It is only ever active on a loopback bind — the service refuses to start dev-open while bound beyond localhost. Set \"devOpen\": false to test real enforcement.\nPermissions\n\nCollection-level permissions (BAK-003). Rules are \"public\", \"authenticated\", \"nobody\" or \"role:<name>\".\n\nDEV-OPEN is on: every permission below is bypassed and this backend enforces nothing. It is only ever active on a loopback bind — the service refuses to start dev-open on a public bind.\nDefaults\nBackend defaults\ndefault find\ndefault get\ndefault create\ndefault update\ndefault delete\n\nDefaults, signup, file and function rules are edited through the whole-config route (PUT /admin/permissions) or MCP; this dashboard edits per-collection rules, which is where day-to-day operation lives.\n\nCollections\nPet\noverridden\nSave\nReset to defaults\nfind\nget\ncreate\nupdate\ndelete\ncreator-owns (stamp owner + a private ACL on create)\nToy\ndefaults\nSave\nReset to defaults\nfind\nget\ncreate\nupdate\ndelete\ncreator-owns (stamp owner + a private ACL on create)",
+      "buttons": [
+        "Save",
+        "Reset to defaults",
+        "Save",
+        "Reset to defaults"
+      ],
+      "inputs": [
+        "INPUT:text:",
+        "INPUT:text:",
+        "INPUT:text:",
+        "INPUT:text:",
+        "INPUT:text:",
+        "INPUT:text:(default)",
+        "INPUT:text:(default)",
+        "INPUT:text:(default)",
+        "INPUT:text:(default)",
+        "INPUT:text:(default)",
+        "INPUT:checkbox:",
+        "INPUT:text:(default)",
+        "INPUT:text:(default)",
+        "INPUT:text:(default)",
+        "INPUT:text:(default)",
+        "INPUT:text:(default)",
+        "INPUT:checkbox:"
+      ]
+    },
+    "keys": {
+      "hash": "#/keys",
+      "nav": "DATA\nCollections\nSchema\nPEOPLE\nUsers\nRoles\nSign-in\nACCESS\nPermissions\nAPI keys\nAUTOMATION\nTriggers\nWorkflows\nRuns\nSTORAGE\nFiles\nSETTINGS\nEmail\nBackups\nACTIVITY\nAudit",
+      "current": "API keys",
+      "main": "This backend enforces nothing. dev-open is enabled in security.json, so collection permissions, row ACLs and this page’s own credential are all bypassed. It is only ever active on a loopback bind — the service refuses to start dev-open while bound beyond localhost. Set \"devOpen\": false to test real enforcement.\nAPI keys\n\nScoped, revocable credentials for server-to-server callers. Secrets are shown once.\n\nNew key\nRefresh\nName\tScopes\tStatus\tCreated\tLast used\t\nreporting\tclasses:read\tactive\t24/09/2026, 23:23:51\t—\tRevoke",
+      "buttons": [
+        "New key",
+        "Refresh",
+        "Revoke"
+      ],
+      "inputs": []
+    },
+    "signin": {
+      "hash": "#/signin",
+      "nav": "DATA\nCollections\nSchema\nPEOPLE\nUsers\nRoles\nSign-in\nACCESS\nPermissions\nAPI keys\nAUTOMATION\nTriggers\nWorkflows\nRuns\nSTORAGE\nFiles\nSETTINGS\nEmail\nBackups\nACTIVITY\nAudit",
+      "current": "Sign-in",
+      "main": "This backend enforces nothing. dev-open is enabled in security.json, so collection permissions, row ACLs and this page’s own credential are all bypassed. It is only ever active on a loopback bind — the service refuses to start dev-open while bound beyond localhost. Set \"devOpen\": false to test real enforcement.\nSign-in\n\nHow end users of your app sign in: identity providers and passwordless email links.\n\nNo baseUrl is configured for this backend, so callback URLs below use the local address. Set the Base URL in the Email section (it is the backend's one canonical public origin) before registering these URLs with a provider.\nAdd provider\nRefresh\n⚿\nNo sign-in providers yet. Add Google, GitHub or any OpenID Connect provider.\nAdd provider\nMagic links\nMagic-link sign-in is turned off for this backend (auth.json: magicLink.enabled).\nMagic-link sign-in enabled\nLink lifetime (minutes)\nAn unknown address may create an account\nRedirect allow-list\n\nOne app origin per line. A completed sign-in may only be redirected to this backend’s own origin or to one of these — which is what stops the callback being used as an open redirect. If your app is served from a different origin than this backend, add it here or every sign-in is refused before it starts.\n\nAccount linking\nLink a provider sign-in to an existing account with the same VERIFIED address\n\nOnly a provider-verified address ever matches, and if the local account had never verified its own address, its password and sessions are revoked at the moment of linking — that is what stops someone registering your address before you do and keeping access afterwards. Every such event is in the audit trail as auth.link.credentials-revoked. Turning this off means such a sign-in is refused rather than linked.\n\nSave policy",
+      "buttons": [
+        "Add provider",
+        "Refresh",
+        "Add provider",
+        "Save policy"
+      ],
+      "inputs": [
+        "INPUT:checkbox:",
+        "INPUT:number:",
+        "INPUT:checkbox:",
+        "TEXTAREA:textarea:https://app.example.com",
+        "INPUT:checkbox:"
+      ]
+    },
+    "triggers": {
+      "hash": "#/triggers",
+      "nav": "DATA\nCollections\nSchema\nPEOPLE\nUsers\nRoles\nSign-in\nACCESS\nPermissions\nAPI keys\nAUTOMATION\nTriggers\nWorkflows\nRuns\nSTORAGE\nFiles\nSETTINGS\nEmail\nBackups\nACTIVITY\nAudit",
+      "current": "Triggers",
+      "main": "This backend enforces nothing. dev-open is enabled in security.json, so collection permissions, row ACLs and this page’s own credential are all bypassed. It is only ever active on a loopback bind — the service refuses to start dev-open while bound beyond localhost. Set \"devOpen\": false to test real enforcement.\nTriggers\n\nSchedules, webhooks and db-change hooks (WF-005). Authoring the functions they call is the editor’s job.\n\nRefresh\nName\tType\tTarget\tEnabled\tOverlap\tLast fired\tLast result\t\nnightly-cleanup\tschedule\tfunction:cleanup\ton\t\nskip\n\t24/09/2026, 23:23:51\tTrigger target function \"cleanup\" not found on this backend\tDisableFire now",
+      "buttons": [
+        "Refresh",
+        "Disable",
+        "Fire now"
+      ],
+      "inputs": []
+    },
+    "workflows": {
+      "hash": "#/workflows",
+      "nav": "DATA\nCollections\nSchema\nPEOPLE\nUsers\nRoles\nSign-in\nACCESS\nPermissions\nAPI keys\nAUTOMATION\nTriggers\nWorkflows\nRuns\nSTORAGE\nFiles\nSETTINGS\nEmail\nBackups\nACTIVITY\nAudit",
+      "current": "Workflows",
+      "main": "This backend enforces nothing. dev-open is enabled in security.json, so collection permissions, row ACLs and this page’s own credential are all bypassed. It is only ever active on a loopback bind — the service refuses to start dev-open while bound beyond localhost. Set \"devOpen\": false to test real enforcement.\nWorkflows\n\nWF-001 step DAGs. Run and cancel here; author them in the editor.\n\nRefresh\n⇶\nNo workflows yet. Workflows are authored in the editor.\nRefresh",
+      "buttons": [
+        "Refresh",
+        "Refresh"
+      ],
+      "inputs": []
+    },
+    "executions": {
+      "hash": "#/runs",
+      "nav": "DATA\nCollections\nSchema\nPEOPLE\nUsers\nRoles\nSign-in\nACCESS\nPermissions\nAPI keys\nAUTOMATION\nTriggers\nWorkflows\nRuns\nSTORAGE\nFiles\nSETTINGS\nEmail\nBackups\nACTIVITY\nAudit",
+      "current": "Runs",
+      "main": "This backend enforces nothing. dev-open is enabled in security.json, so collection permissions, row ACLs and this page’s own credential are all bypassed. It is only ever active on a loopback bind — the service refuses to start dev-open while bound beyond localhost. Set \"devOpen\": false to test real enforcement.\nRuns\n\nEvery function, trigger, workflow and backup run this backend has recorded.\n\nStatus\nany status\nRunning\nSuccess\nError\nRefresh\nStarted\tWorkflow / function\tTrigger\tStatus\tDuration\t\n24/09/2026, 23:23:51\tcleanup\tmanual\terror\t5 ms\tDetail",
+      "buttons": [
+        "Refresh",
+        "Detail"
+      ],
+      "inputs": [
+        "SELECT:select-one:"
+      ]
+    },
+    "email": {
+      "hash": "#/email",
+      "nav": "DATA\nCollections\nSchema\nPEOPLE\nUsers\nRoles\nSign-in\nACCESS\nPermissions\nAPI keys\nAUTOMATION\nTriggers\nWorkflows\nRuns\nSTORAGE\nFiles\nSETTINGS\nEmail\nBackups\nACTIVITY\nAudit",
+      "current": "Email",
+      "main": "This backend enforces nothing. dev-open is enabled in security.json, so collection permissions, row ACLs and this page’s own credential are all bypassed. It is only ever active on a loopback bind — the service refuses to start dev-open while bound beyond localhost. Set \"devOpen\": false to test real enforcement.\nEmail\n\nSMTP, the verification policy, and a real test send.\n\nEmail is NOT configured: Email is not configured for this backend: no SMTP host/port set. Configure SMTP in the Backend Services panel (Email section) or via the backend admin API before this can send mail.. Sends fail loudly into execution records rather than queueing.\nSending enabled\nSMTP host\nSMTP port\nUsername\nPassword\nFrom address\nFrom name\nBase URL (links in emails)\nImplicit TLS (port 465)\nSend verification on signup\nRequire verified email to log in\nSave\nSend test email\nTemplates\npasswordReset\ndefault\nReset to default\n\nSubject: Reset your password for {{appName}}\n\nverifyEmail\ndefault\nReset to default\n\nSubject: Verify your email for {{appName}}\n\nmagicLink\ndefault\nReset to default\n\nSubject: Your sign-in link for {{appName}}",
+      "buttons": [
+        "Save",
+        "Send test email",
+        "Reset to default",
+        "Reset to default",
+        "Reset to default"
+      ],
+      "inputs": [
+        "INPUT:checkbox:",
+        "INPUT:text:",
+        "INPUT:number:",
+        "INPUT:text:",
+        "INPUT:password:(not set)",
+        "INPUT:text:",
+        "INPUT:text:",
+        "INPUT:text:https://api.example.com",
+        "INPUT:checkbox:",
+        "INPUT:checkbox:",
+        "INPUT:checkbox:"
+      ]
+    },
+    "backups": {
+      "hash": "#/backups",
+      "nav": "DATA\nCollections\nSchema\nPEOPLE\nUsers\nRoles\nSign-in\nACCESS\nPermissions\nAPI keys\nAUTOMATION\nTriggers\nWorkflows\nRuns\nSTORAGE\nFiles\nSETTINGS\nEmail\nBackups\nACTIVITY\nAudit",
+      "current": "Backups",
+      "main": "This backend enforces nothing. dev-open is enabled in security.json, so collection permissions, row ACLs and this page’s own credential are all bypassed. It is only ever active on a loopback bind — the service refuses to start dev-open while bound beyond localhost. Set \"devOpen\": false to test real enforcement.\nBackups\n\nArchive status, schedule, and a backup you can run right now (BAK-007).\n\nno schedule\nnever succeeded\nBack up now\n\nDestination: /private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/5e5b26a1-6f0d-46e9-a703-938908b0d2ad/scratchpad/capture/data/backups\n\nArchives\nNo backups yet.\nBack up now\n\nRestoring is deliberately not a dashboard button: the blessed path is the `nodegx-backend restore` CLI with the service stopped.",
+      "buttons": [
+        "Back up now",
+        "Back up now"
+      ],
+      "inputs": []
+    },
+    "files": {
+      "hash": "#/files",
+      "nav": "DATA\nCollections\nSchema\nPEOPLE\nUsers\nRoles\nSign-in\nACCESS\nPermissions\nAPI keys\nAUTOMATION\nTriggers\nWorkflows\nRuns\nSTORAGE\nFiles\nSETTINGS\nEmail\nBackups\nACTIVITY\nAudit",
+      "current": "Files",
+      "main": "This backend enforces nothing. dev-open is enabled in security.json, so collection permissions, row ACLs and this page’s own credential are all bypassed. It is only ever active on a loopback bind — the service refuses to start dev-open while bound beyond localhost. Set \"devOpen\": false to test real enforcement.\nFiles\n\nUpload limits, content-type policy, the storage driver, thumbnail presets, and the orphan sweep (BAK-006).\n\ndriver: local\nthumbnails available\nMax upload size (MB)\nSigned URL TTL (seconds)\nDenied content types (comma-separated)\nSave limits\nThumbnail presets\nsm\n64×64 (cover)\nmd\n256×256 (cover)\nlg\n1024×1024 (contain)\n\nNamed presets are public; arbitrary \"?thumb=WxH\" sizes are admin-only. Edit presets via the configure_backend_files MCP tool or the Backend Services panel.\n\nOrphan sweep\nnever run\nRun now (report only)\nRun now + delete orphan blobs\nScheduled\nCron\nSave schedule\n\nReport-only by default: the schedule finds and reports orphans, it never auto-deletes. Orphan METADATA ROWS (a row whose blob went missing) are never auto-deleted either way — that is a data-integrity signal for a human.",
+      "buttons": [
+        "Save limits",
+        "Run now (report only)",
+        "Run now + delete orphan blobs",
+        "Save schedule"
+      ],
+      "inputs": [
+        "INPUT:number:",
+        "INPUT:number:",
+        "INPUT:text:application/x-msdownload, ...",
+        "INPUT:checkbox:",
+        "INPUT:text:"
+      ]
+    },
+    "audit": {
+      "hash": "#/audit",
+      "nav": "DATA\nCollections\nSchema\nPEOPLE\nUsers\nRoles\nSign-in\nACCESS\nPermissions\nAPI keys\nAUTOMATION\nTriggers\nWorkflows\nRuns\nSTORAGE\nFiles\nSETTINGS\nEmail\nBackups\nACTIVITY\nAudit",
+      "current": "Audit",
+      "main": "This backend enforces nothing. dev-open is enabled in security.json, so collection permissions, row ACLs and this page’s own credential are all bypassed. It is only ever active on a loopback bind — the service refuses to start dev-open while bound beyond localhost. Set \"devOpen\": false to test real enforcement.\nAudit trail\n\nWho changed what, when, and from where — permissions, roles, keys, schema, backups, config, and admin logins (BAK-009).\n\nAction\nany action\nadmin.login\nadmin.login.failed\napikey.create\napikey.revoke\nauth.config.update\nauth.link.credentials-revoked\nauth.provider.delete\nauth.provider.update\nauth.signin\nbackup.config.update\nbackup.create\nbackup.restore\ndata.import\nemail.config.update\nemail.template.delete\nemail.template.update\nemail.test-send\nexecutions.compact\nfiles.config.update\nfiles.sweep\nmcp.tool.call\nops.config.update\npermissions.collection.delete\npermissions.collection.update\npermissions.function.delete\npermissions.function.update\npermissions.update\nrole.create\nrole.delete\nrole.system.create\nrole.system.user.add\nrole.system.user.remove\nrole.user.add\nrole.user.remove\nschema.apply\nschema.diff\nschema.mutate\nsearch.collection.delete\nsearch.collection.update\nsearch.rebuild\nsecret.delete\nsecret.set\ntrigger.create\ntrigger.delete\ntrigger.enabled.set\ntrigger.fire\ntrigger.secret.rotate\ntrigger.update\nuser.system.create\nuser.system.delete\nuser.system.update\nworkflow.cancel\nworkflow.create\nworkflow.delete\nworkflow.file.delete\nworkflow.file.update\nworkflow.reload\nworkflow.run\nworkflow.update\nOutcome\nany outcome\nsuccess\nfailure\nRefresh\nrecording\nkept 90 days\n12 entries\nWhen\tAction\tActor\tTarget\tOutcome\t\n24/09/2026, 23:23:51\tadmin.login\tadmin\t—\tsuccess\tDetail\n24/09/2026, 23:23:51\ttrigger.create\tadmin\t—\tfailure\tDetail\n24/09/2026, 23:23:51\ttrigger.fire\tadmin\t{\"id\":\"trg_oySiaw_sW_qY\"}\tsuccess\tDetail\n24/09/2026, 23:23:51\ttrigger.create\tadmin\t—\tsuccess\tDetail\n24/09/2026, 23:23:51\tapikey.create\tadmin\t—\tsuccess\tDetail\n24/09/2026, 23:23:51\tpermissions.collection.update\tadmin\t{\"name\":\"Pet\"}\tsuccess\tDetail\n24/09/2026, 23:23:51\trole.user.add\tadmin\t{\"name\":\"staff\"}\tsuccess\tDetail\n24/09/2026, 23:23:51\trole.create\tadmin\t—\tsuccess\tDetail\n24/09/2026, 23:23:51\trole.create\tadmin\t—\tsuccess\tDetail\n24/09/2026, 23:23:51\tschema.mutate\tadmin\t—\tsuccess\tDetail\n24/09/2026, 23:23:51\tschema.mutate\tadmin\t—\tsuccess\tDetail\n24/09/2026, 23:23:51\tschema.mutate\tadmin\t—\tsuccess\tDetail\n\nThe trail is a plain table in this backend’s database: whoever can reach the file can edit it. Ship the structured logs off-box if you need a copy an attacker on this machine cannot rewrite — every entry here has a matching log line with the same request id.",
+      "buttons": [
+        "Refresh",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail",
+        "Detail"
+      ],
+      "inputs": [
+        "SELECT:select-one:",
+        "SELECT:select-one:"
+      ]
+    }
+  }
+}

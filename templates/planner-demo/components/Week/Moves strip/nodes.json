@@ -1,0 +1,200 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "db9be992-44dd-5844-835c-496bc5007f12",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "msIn",
+      "type": "Component Inputs",
+      "label": "The moves",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "empty",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "msOut",
+      "type": "Component Outputs",
+      "label": "A chip was pressed",
+      "ports": [
+        {
+          "name": "press",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "projectId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "move",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "placed",
+          "plug": "input",
+          "type": "boolean"
+        }
+      ],
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "msRoot",
+      "type": "Group",
+      "label": "Moves strip",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "cssClassName": "planner-pinned",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)"
+      },
+      "children": [
+        "msScroll"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "msTitle",
+      "type": "Text",
+      "label": "Moves",
+      "parent": "msLabel",
+      "parameters": {
+        "text": "Moves",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-bold)"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "msBy",
+      "type": "Text",
+      "label": "In what order",
+      "parent": "msLabel",
+      "parameters": {
+        "text": "by urgency",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "msScroll",
+      "type": "Group",
+      "label": "The chips",
+      "parent": "msRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-1-5)",
+        "cssClassName": "planner-pinned",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-1-5)"
+      },
+      "children": [
+        "msLabel",
+        "msEach",
+        "msEmpty"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "msLabel",
+      "type": "Group",
+      "label": "What this row is",
+      "parent": "msScroll",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentSize",
+        "rowGap": "var(--space-0)",
+        "paddingRight": "var(--space-1)"
+      },
+      "children": [
+        "msTitle",
+        "msBy"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "msEach",
+      "type": "For Each",
+      "label": "One chip per move",
+      "parent": "msScroll",
+      "parameters": {
+        "template": "/Week/Move chip",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "msEmpty",
+      "type": "Text",
+      "label": "When there is nothing to chase",
+      "parent": "msScroll",
+      "parameters": {
+        "text": "No moves waiting. Every project has its next step in the week.",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "msRoot"
+  ]
+}

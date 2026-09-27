@@ -1,0 +1,72 @@
+{
+  "name": "proplist-function-row",
+  "scope": "document.querySelector('.sidebar-property-editor')",
+  "themes": {
+    "dark": {
+      "ground": "rgb(35, 33, 41)",
+      "census": {
+        "scope": "sidebar-property-editor",
+        "total": 6,
+        "drawn": 6,
+        "emptyHosts": 0,
+        "collapsed": 0,
+        "boxes": [
+          "12x12"
+        ],
+        "colours": [
+          "rgb(221, 228, 236)"
+        ],
+        "faLeft": 0,
+        "glyphs": [
+          " | 12x12 | svg 12x12 | rgb(221, 228, 236)",
+          " | 12x12 | svg 12x12 | rgb(221, 228, 236)",
+          " | 12x12 | svg 12x12 | rgb(221, 228, 236)",
+          " | 12x12 | svg 12x12 | rgb(221, 228, 236)",
+          " | 12x12 | svg 12x12 | rgb(221, 228, 236)",
+          " | 12x12 | svg 12x12 | rgb(221, 228, 236)"
+        ]
+      },
+      "clip": {
+        "x": 46,
+        "y": 161,
+        "width": 328,
+        "height": 614,
+        "scale": 1
+      },
+      "png": "proplist-function-row-dark.png"
+    },
+    "light": {
+      "ground": "rgb(255, 255, 255)",
+      "census": {
+        "scope": "sidebar-property-editor",
+        "total": 6,
+        "drawn": 6,
+        "emptyHosts": 0,
+        "collapsed": 0,
+        "boxes": [
+          "12x12"
+        ],
+        "colours": [
+          "rgb(74, 86, 99)"
+        ],
+        "faLeft": 0,
+        "glyphs": [
+          " | 12x12 | svg 12x12 | rgb(74, 86, 99)",
+          " | 12x12 | svg 12x12 | rgb(74, 86, 99)",
+          " | 12x12 | svg 12x12 | rgb(74, 86, 99)",
+          " | 12x12 | svg 12x12 | rgb(74, 86, 99)",
+          " | 12x12 | svg 12x12 | rgb(74, 86, 99)",
+          " | 12x12 | svg 12x12 | rgb(74, 86, 99)"
+        ]
+      },
+      "clip": {
+        "x": 46,
+        "y": 161,
+        "width": 328,
+        "height": 614,
+        "scale": 1
+      },
+      "png": "proplist-function-row-light.png"
+    }
+  }
+}

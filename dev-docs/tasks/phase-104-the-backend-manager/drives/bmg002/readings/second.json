@@ -1,0 +1,37 @@
+{
+  "checks": {
+    "AC4 a second browser (empty storage) opens the saved view": {
+      "pass": true,
+      "detail": {
+        "storageAtStart": 0,
+        "options": [
+          "All records",
+          "Not done, biggest first"
+        ],
+        "sentence": "58 records where done is no",
+        "want": 58,
+        "heads": [
+          "n",
+          "title",
+          "done",
+          "due",
+          "owner",
+          "labels",
+          "createdAt"
+        ]
+      }
+    },
+    "AC4 Delete view asks first, and deletes only on Delete": {
+      "pass": true,
+      "detail": {
+        "asked": "Delete the view “Not done, biggest first”It is removed for everyone who administers this backend. The records are not touched.CancelDelete",
+        "stillThere": 1,
+        "after": 0,
+        "optionsAfter": [
+          "All records"
+        ]
+      }
+    }
+  },
+  "storageAtStart": 0
+}

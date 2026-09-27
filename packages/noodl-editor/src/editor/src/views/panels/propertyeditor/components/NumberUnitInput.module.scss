@@ -1,0 +1,162 @@
+/* CHR-009 §2 "number + unit": ONE field — the value in mono, the unit as a suffix inside it in
+   fg-muted — at the panel's one control height. Was four boxes (number, unit, "Fixed", a square),
+   which the fixed 116px label column squeezed until Width read `1(` instead of `100`. */
+
+/* P101 INS-003 row 6: the number is the one part of this row allowed to shrink, so a narrow panel
+   took it all from the number — at the 301px inspector Richard chose, Width was 18px for `100`
+   (needs 28) beside a 46px `Fixed`. The value now has a floor (below), and `Fixed` wraps to a
+   second line when the track cannot hold both; the row pins its label to the first line then
+   (`alignTop`), and the 2px padding keeps a one-line row's centre on the label's 30px line. */
+.Line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  min-width: 0;
+
+  &.has-fixed {
+    padding: 2px 0;
+  }
+}
+
+.Field {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  height: 26px;
+  box-sizing: border-box;
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--theme-color-bg-2);
+  transition: border-color var(--speed-turbo);
+
+  &:hover {
+    border-color: var(--theme-color-border-strong);
+  }
+
+  &:focus-within {
+    border-color: var(--theme-color-primary);
+  }
+}
+
+/* The base input's own box (border, fill, focus fill) belongs to the Field now. The doubled class
+   outranks `.Root:focus` / `.Root.is-numeric` whatever order the two stylesheets load in — at equal
+   specificity the numeric rule won and kept the value centred. */
+.Field .Value.Value,
+.Field .Value.Value:hover,
+.Field .Value.Value:focus {
+  /* `width: 0` + a zero basis keeps an <input>'s ~150px intrinsic width out of the Field's size,
+     so `Fixed` wraps on the real minimum, not on the browser's default. The floor is three
+     digits plus the left padding: the most that still fits at the inspector's 260px minimum
+     (track ≈ 87px) beside the unit and token button. A fourth digit shows as the panel widens. */
+  flex: 1 1 0;
+  width: 0;
+  min-width: calc(3ch + 8px);
+  height: 100%;
+  padding: 0 0 0 8px;
+  border: 0;
+  background-color: transparent;
+  text-align: left;
+}
+
+.Unit {
+  flex: 0 0 auto;
+  padding: 0 8px 0 4px;
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-xs);
+  color: var(--theme-color-fg-muted);
+  user-select: none;
+}
+
+/* A unit with a choice stays a picker, drawn as the same suffix: its input loses its box. */
+.UnitPicker {
+  flex: 0 0 36px;
+  height: 100%;
+
+  /* The select's own root has no height, so the input's `100%` resolved to its content. It read as
+     centred only while the base input carried 5.5px of vertical padding; at the stated 26px box with
+     none, `px` drew at the top of the field (s17 drive, Corner Radius). */
+  > * {
+    height: 100%;
+  }
+
+  input,
+  input:hover,
+  input:focus {
+    height: 100%;
+    border: 0;
+    background-color: transparent;
+  }
+}
+
+/* "Fixed" — a pressed/unpressed chip at the control height, not a label plus an empty square. Drawn only on a % value. */
+.Fixed {
+  flex: 0 0 auto;
+  height: 26px;
+  padding: 0 8px;
+  box-sizing: border-box;
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--theme-color-fg-default);
+  font-family: var(--font-family);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: var(--theme-color-border-strong);
+  }
+
+  &[aria-pressed='true'] {
+    background-color: var(--theme-color-bg-3);
+    border-color: var(--theme-color-primary);
+    color: var(--theme-color-fg-highlight);
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--theme-color-primary);
+    outline-offset: 1px;
+  }
+}
+
+/* HLT-012 — the design-token button, inside the field on its trailing edge.
+
+   🔴 **Always drawn, never on hover**, and that is this file's own history rather than a
+   preference: the margin/padding box tried a hover-revealed px↔% toggle and it took the clicks
+   meant for the value (`120` + Enter stored `0%`). A control that appears under a pointer already
+   moving towards the field is a control that intercepts it.
+
+   It is the width of the `%` suffix it sits beside, so a field that has one loses nothing a unit
+   would not have taken anyway. */
+.TokenButton {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid transparent;
+  background-color: transparent;
+  color: var(--theme-color-fg-default-shy);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--theme-color-fg-highlight);
+    background-color: var(--theme-color-bg-3);
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--theme-color-primary);
+    outline-offset: -1px;
+  }
+
+  /* The field holds a token: the button is the thing that says so, because the value box shows
+     `var(--space-3)` as text and nothing else distinguishes it from something typed. */
+  &.is-token {
+    color: var(--theme-color-primary);
+    border-left-color: var(--theme-color-border-default);
+  }
+}

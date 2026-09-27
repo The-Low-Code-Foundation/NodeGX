@@ -1,0 +1,283 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "77263425-aeb8-56eb-8064-f858ea994168",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rsIn",
+      "fromProperty": "mounted",
+      "toId": "rsShown",
+      "toProperty": "m"
+    },
+    {
+      "fromId": "rsShown",
+      "fromProperty": "result",
+      "toId": "rsCard",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rsDefMode",
+      "fromProperty": "result",
+      "toId": "rsInitMode",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rsSeeded",
+      "fromProperty": "seeded",
+      "toId": "rsFirst",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rsCard",
+      "fromProperty": "didMount",
+      "toId": "rsFirst",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rsFirst",
+      "fromProperty": "onfalse",
+      "toId": "rsInitMode",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rsDefPlayers",
+      "fromProperty": "result",
+      "toId": "rsInitPlayers",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rsInitMode",
+      "fromProperty": "done",
+      "toId": "rsInitPlayers",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rsDefTimed",
+      "fromProperty": "result",
+      "toId": "rsInitTimed",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rsInitPlayers",
+      "fromProperty": "done",
+      "toId": "rsInitTimed",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rsInitTimed",
+      "fromProperty": "done",
+      "toId": "rsSeeded",
+      "toProperty": "to-seeded"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "mathsWord",
+      "toId": "rsModeItems",
+      "toProperty": "in-maths"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "typingWord",
+      "toId": "rsModeItems",
+      "toProperty": "in-typing"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "onePlayerWord",
+      "toId": "rsPlayerItems",
+      "toProperty": "in-one"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "twoPlayersWord",
+      "toId": "rsPlayerItems",
+      "toProperty": "in-two"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "practiceWord",
+      "toId": "rsTimedItems",
+      "toProperty": "in-practice"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "challengeWord",
+      "toId": "rsTimedItems",
+      "toProperty": "in-challenge"
+    },
+    {
+      "fromId": "rsTimedVar",
+      "fromProperty": "value",
+      "toId": "rsRuleText",
+      "toProperty": "timed"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "practiceRuleWord",
+      "toId": "rsRuleText",
+      "toProperty": "practice"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "challengeRuleWord",
+      "toId": "rsRuleText",
+      "toProperty": "challenge"
+    },
+    {
+      "fromId": "rsRuleText",
+      "fromProperty": "result",
+      "toId": "rsRule",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "startWord",
+      "toId": "rsStart",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "nameWord",
+      "toId": "rsNameB",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "rsNameB",
+      "fromProperty": "onTextChanged",
+      "toId": "rsNameKeep",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rsNameKeep",
+      "fromProperty": "value",
+      "toId": "rsNameB",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "rsModeItems",
+      "fromProperty": "out-items",
+      "toId": "rsMode",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rsPlayerItems",
+      "fromProperty": "out-items",
+      "toId": "rsPlayers",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rsTimedItems",
+      "fromProperty": "out-items",
+      "toId": "rsTimed",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rsModeVar",
+      "fromProperty": "value",
+      "toId": "rsMode",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rsMode",
+      "fromProperty": "value",
+      "toId": "rsSetMode",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rsMode",
+      "fromProperty": "changed",
+      "toId": "rsSetMode",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rsPlayersVar",
+      "fromProperty": "value",
+      "toId": "rsPlayers",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rsPlayers",
+      "fromProperty": "value",
+      "toId": "rsSetPlayers",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rsPlayers",
+      "fromProperty": "changed",
+      "toId": "rsSetPlayers",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rsTimedVar",
+      "fromProperty": "value",
+      "toId": "rsTimed",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rsTimed",
+      "fromProperty": "value",
+      "toId": "rsSetTimed",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rsTimed",
+      "fromProperty": "changed",
+      "toId": "rsSetTimed",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rsPlayersVar",
+      "fromProperty": "value",
+      "toId": "rsIsTwo",
+      "toProperty": "players"
+    },
+    {
+      "fromId": "rsIsTwo",
+      "fromProperty": "result",
+      "toId": "rsNameB",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rsModeVar",
+      "fromProperty": "value",
+      "toId": "rsOut",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "rsPlayersVar",
+      "fromProperty": "value",
+      "toId": "rsPlayersNum",
+      "toProperty": "players"
+    },
+    {
+      "fromId": "rsPlayersNum",
+      "fromProperty": "result",
+      "toId": "rsOut",
+      "toProperty": "players"
+    },
+    {
+      "fromId": "rsTimedVar",
+      "fromProperty": "value",
+      "toId": "rsIsTimed",
+      "toProperty": "timed"
+    },
+    {
+      "fromId": "rsIsTimed",
+      "fromProperty": "result",
+      "toId": "rsOut",
+      "toProperty": "timed"
+    },
+    {
+      "fromId": "rsNameB",
+      "fromProperty": "onTextChanged",
+      "toId": "rsOut",
+      "toProperty": "nameB"
+    },
+    {
+      "fromId": "rsStart",
+      "fromProperty": "onClick",
+      "toId": "rsOut",
+      "toProperty": "start"
+    }
+  ]
+}

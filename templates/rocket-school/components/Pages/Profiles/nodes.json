@@ -1,0 +1,305 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "79d2eef7-26e6-5cf4-89cc-e590ab59d0f9",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pfPage",
+      "type": "Page",
+      "label": "Profiles",
+      "children": [
+        "pfWrap"
+      ],
+      "parameters": {
+        "title": "Rocket School",
+        "urlPath": ""
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pfWrap",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "pfPage",
+      "children": [
+        "pfEyebrow",
+        "pfTitle",
+        "pfLead",
+        "pfList",
+        "pfNew",
+        "pfForm"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-6)",
+        "paddingTop": "var(--space-10)",
+        "paddingBottom": "var(--space-10)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pfEyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "parent": "pfWrap",
+      "parameters": {
+        "text": "Rocket School",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--foreground)",
+        "as": "span",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "pfTitle",
+      "type": "Text",
+      "label": "Who is playing?",
+      "parent": "pfWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-4xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-none)",
+        "letterSpacing": "var(--tracking-tighter)",
+        "color": "var(--foreground)",
+        "as": "h1",
+        "fontFamily": "Grandstander",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "pfLead",
+      "type": "Text",
+      "label": "The tagline",
+      "parent": "pfWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        },
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "pfList",
+      "type": "Group",
+      "label": "The players",
+      "parent": "pfWrap",
+      "children": [
+        "pfEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-4)",
+        "rowGap": "var(--space-4)",
+        "justifyContent": "center"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "pfEach",
+      "type": "For Each",
+      "label": "One card per player",
+      "parameters": {
+        "template": "/Game/Profile card",
+        "templateType": "explicit"
+      },
+      "parent": "pfList",
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "pfNew",
+      "type": "net.noodl.controls.button",
+      "label": "New player",
+      "parent": "pfWrap",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "New player"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "pfForm",
+      "type": "/Profiles/New player form",
+      "label": "The form",
+      "parent": "pfWrap",
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "pfStore",
+      "type": "/Logic/App store",
+      "label": "The store",
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "pfList2",
+      "type": "/Logic/List profiles",
+      "label": "The profiles",
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "pfSelect",
+      "type": "/Logic/Select profile",
+      "label": "Choose one",
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "pfCreate",
+      "type": "/Logic/Create profile",
+      "label": "Make one",
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "pfWords",
+      "type": "/Data/Words",
+      "label": "The words",
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "pfT",
+      "type": "/Logic/Translate words",
+      "label": "In English until a player is chosen",
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "pfFormOpen",
+      "type": "Variable2",
+      "label": "Is the form open?",
+      "parameters": {
+        "name": "profileFormOpen"
+      },
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "pfOpenForm",
+      "type": "Set Variable",
+      "label": "Open the form",
+      "parameters": {
+        "name": "profileFormOpen"
+      },
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "pfCloseForm",
+      "type": "Set Variable",
+      "label": "Close the form",
+      "parameters": {
+        "name": "profileFormOpen"
+      },
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "pfTrue",
+      "type": "Expression",
+      "label": "True",
+      "parameters": {
+        "expression": "true"
+      },
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "pfFalse",
+      "type": "Expression",
+      "label": "False",
+      "parameters": {
+        "expression": "false"
+      },
+      "x": 470,
+      "y": 1840
+    },
+    {
+      "id": "pfNewShown",
+      "type": "Expression",
+      "label": "Show the button?",
+      "parameters": {
+        "expression": "canAdd && !open"
+      },
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "pfGoHome",
+      "type": "RouterNavigate",
+      "label": "Go home",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Home"
+      },
+      "x": 470,
+      "y": 1960
+    }
+  ],
+  "visualRoots": [
+    "pfPage"
+  ]
+}

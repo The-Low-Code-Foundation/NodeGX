@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "884171b8-8da5-5f09-8f7a-9c72443777af",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "finishmergeIn",
+      "fromProperty": "model",
+      "toId": "finishmergeFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "finishmergeIn",
+      "fromProperty": "game",
+      "toId": "finishmergeFn",
+      "toProperty": "in-game"
+    },
+    {
+      "fromId": "finishmergeIn",
+      "fromProperty": "lang",
+      "toId": "finishmergeFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "finishmergeIn",
+      "fromProperty": "run",
+      "toId": "finishmergeFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "finishmergeFn",
+      "fromProperty": "out-model",
+      "toId": "finishmergeOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "finishmergeFn",
+      "fromProperty": "out-paid",
+      "toId": "finishmergeOut",
+      "toProperty": "paid"
+    },
+    {
+      "fromId": "finishmergeFn",
+      "fromProperty": "out-starsEarned",
+      "toId": "finishmergeOut",
+      "toProperty": "starsEarned"
+    },
+    {
+      "fromId": "finishmergeFn",
+      "fromProperty": "out-stars",
+      "toId": "finishmergeOut",
+      "toProperty": "stars"
+    },
+    {
+      "fromId": "finishmergeFn",
+      "fromProperty": "out-starsText",
+      "toId": "finishmergeOut",
+      "toProperty": "starsText"
+    },
+    {
+      "fromId": "finishmergeFn",
+      "fromProperty": "out-why",
+      "toId": "finishmergeOut",
+      "toProperty": "why"
+    },
+    {
+      "fromId": "finishmergeFn",
+      "fromProperty": "out-earnedPick",
+      "toId": "finishmergeOut",
+      "toProperty": "earnedPick"
+    },
+    {
+      "fromId": "finishmergeFn",
+      "fromProperty": "out-won",
+      "toId": "finishmergeOut",
+      "toProperty": "won"
+    },
+    {
+      "fromId": "finishmergeFn",
+      "fromProperty": "out-headline",
+      "toId": "finishmergeOut",
+      "toProperty": "headline"
+    },
+    {
+      "fromId": "finishmergeFn",
+      "fromProperty": "out-line",
+      "toId": "finishmergeOut",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "finishmergeFn",
+      "fromProperty": "success",
+      "toId": "finishmergeOut",
+      "toProperty": "done"
+    }
+  ]
+}

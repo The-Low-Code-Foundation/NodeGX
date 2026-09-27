@@ -1,45 +1,73 @@
 /*
- * Admin dashboard stylesheet (BAK-005).
+ * Backend manager stylesheet (BAK-005; rebuilt onto core-ui's tokens in BMG-001).
  *
- * Inlined into the served document by AdminDashboardRoutes (esbuild's `text`
- * loader). Deliberately hand-written and dependency-free — see BAK-005-NOTES
- * for why the editor's @noodl-core-ui components are NOT reused here.
+ * Inlined into the served document by AdminDashboardRoutes after the token
+ * sheet (build/admin/tokens.css), which is core-ui's canonical colors.css and
+ * spacing.css copied by the build — so the palette below is ALIASES onto
+ * `--theme-color-*`, never a hand copy that can drift. `:root` is the dark
+ * theme; `:root[data-theme='light']` flips every token; the app stamps
+ * `data-theme` on <html> from `prefers-color-scheme` or the person's toggle.
  *
- * The palette below is a COPY of the phase-23 design tokens (UIX-001), not an
- * import: this package has no dependency on noodl-core-ui and must not grow
- * one. The copy is small and stable; the phase law it must keep is the one
- * that matters — azure is the action accent, RED IS DANGER ONLY.
+ * Two laws, both gated by admin-dashboard.test.ts:
+ *   - azure is the action accent, RED IS DANGER ONLY: every rule that consumes
+ *     `--danger` is a destructive or failure affordance;
+ *   - no colour literal outside a `:root` block, so both themes render every
+ *     page from the tokens.
  */
 
 :root {
-  --bg-page: #07090c;
-  --bg-0: #0b0e12;
-  --bg-1: #12161b;
-  --bg-2: #181d24;
-  --bg-3: #222933;
-  --bg-4: #2c3540;
+  color-scheme: dark;
 
-  --fg-hi: #eef2f6;
-  --fg: #a6b0bb;
-  --fg-shy: #8b95a1;
-  --fg-muted: #6b7682;
+  --bg-page: var(--theme-color-bg-page);
+  --bg-0: var(--theme-color-bg-0);
+  --bg-1: var(--theme-color-bg-1);
+  --bg-2: var(--theme-color-bg-2);
+  --bg-3: var(--theme-color-bg-3);
+  --bg-4: var(--theme-color-bg-4);
+  --border: var(--theme-color-border-default);
+  --border-strong: var(--theme-color-border-strong);
+  --border-control: var(--theme-color-border-control);
 
-  --primary: #4da3ff;
-  --primary-hi: #74b8ff;
-  --primary-dim: #1f6bc4;
-  --primary-bg: rgba(77, 163, 255, 0.13);
-  --on-primary: #071627;
+  --fg-hi: var(--theme-color-fg-highlight);
+  --fg: var(--theme-color-fg-default);
+  --fg-shy: var(--theme-color-fg-default-shy);
+  --fg-muted: var(--theme-color-fg-default-shy);
 
-  --success: #3ccb7f;
-  --success-bg: rgba(60, 203, 127, 0.12);
-  --warning: #fdb022;
-  --warning-bg: rgba(253, 176, 34, 0.12);
-  --danger: #f97066;
-  --danger-bg: rgba(249, 112, 102, 0.12);
+  --primary: var(--theme-color-primary);
+  --primary-fg: var(--theme-color-fg-accent);
+  --primary-hi: var(--theme-color-primary-highlight);
+  --primary-dim: var(--theme-color-primary-dim);
+  --primary-bg: var(--theme-color-primary-bg);
+  --on-primary: var(--theme-color-on-primary);
 
+  /* Status tones as TEXT use the fg-* roles (NAT-002 D10/D11); the fills stay for rings. */
+  --success: var(--theme-color-fg-success);
+  --success-fill: var(--theme-color-success);
+  --success-bg: var(--theme-color-success-bg);
+  --warning: var(--theme-color-fg-notice);
+  --warning-fill: var(--theme-color-warning);
+  --warning-bg: var(--theme-color-warning-bg);
+  --danger: var(--theme-color-fg-danger);
+  --danger-fill: var(--theme-color-danger);
+  --danger-bg: var(--theme-color-danger-bg);
+
+  /* FED-007's syntax colours: deliberately NOT the status palette. A string is not a success
+     and a number is not a warning, and red is danger only. */
+  --code-str: var(--theme-color-syntax-string);
+  --code-num: var(--theme-color-syntax-number);
+  --code-bool: var(--theme-color-syntax-keyword);
+
+  --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  --scrim: rgba(4, 6, 9, 0.72);
   --radius: 6px;
   --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
   --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --shadow: 0 6px 20px rgba(23, 32, 43, 0.18);
+  --scrim: rgba(23, 32, 43, 0.45);
 }
 
 * {
@@ -59,14 +87,22 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+#root {
+  height: 100%;
+}
+
 a {
-  color: var(--primary);
+  color: var(--primary-fg);
 }
 
 code,
 .mono {
   font-family: var(--mono);
   font-size: 12px;
+}
+
+.hi {
+  color: var(--fg-hi);
 }
 
 /* ---------------------------------------------------------------- layout -- */
@@ -86,8 +122,8 @@ code,
   gap: 8px;
   padding: 0 14px;
   background: var(--bg-1);
-  border-bottom: 1px solid var(--bg-3);
-  border-right: 1px solid var(--bg-3);
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
 }
 
 .brand b {
@@ -96,9 +132,14 @@ code,
   letter-spacing: 0.2px;
 }
 
-.brand .dot {
-  width: 6px;
-  height: 6px;
+.brand-role {
+  color: var(--fg-muted);
+}
+
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--primary);
 }
@@ -110,17 +151,22 @@ code,
   gap: 10px;
   padding: 0 14px;
   background: var(--bg-1);
-  border-bottom: 1px solid var(--bg-3);
+  border-bottom: 1px solid var(--border);
 }
 
 .topbar .spacer {
   flex: 1;
 }
 
+.theme-toggle {
+  font-size: 13px;
+  line-height: 1;
+}
+
 nav {
   grid-area: nav;
   background: var(--bg-1);
-  border-right: 1px solid var(--bg-3);
+  border-right: 1px solid var(--border);
   overflow-y: auto;
   padding: 8px 0 24px;
 }
@@ -133,7 +179,7 @@ nav .group {
   text-transform: uppercase;
 }
 
-nav button {
+nav a {
   display: block;
   width: 100%;
   text-align: left;
@@ -143,15 +189,16 @@ nav button {
   background: none;
   color: var(--fg);
   font: inherit;
+  text-decoration: none;
   cursor: pointer;
 }
 
-nav button:hover {
+nav a:hover {
   background: var(--bg-2);
   color: var(--fg-hi);
 }
 
-nav button[aria-current='true'] {
+nav a[aria-current='true'] {
   background: var(--primary-bg);
   border-left-color: var(--primary);
   color: var(--fg-hi);
@@ -193,10 +240,15 @@ h2 {
 
 .card {
   background: var(--bg-1);
-  border: 1px solid var(--bg-3);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 14px;
   margin-bottom: 14px;
+}
+
+.card.hit {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
 }
 
 .grid2 {
@@ -209,7 +261,7 @@ h2 {
 
 button.btn {
   padding: 5px 11px;
-  border: 1px solid var(--bg-4);
+  border: 1px solid var(--border-control);
   border-radius: var(--radius);
   background: var(--bg-2);
   color: var(--fg-hi);
@@ -240,7 +292,7 @@ button.btn.primary:hover:not(:disabled) {
 
 /* Destructive only. Nothing else in this stylesheet may use --danger. */
 button.btn.danger {
-  border-color: var(--danger);
+  border-color: var(--danger-fill);
   background: var(--danger-bg);
   color: var(--danger);
 }
@@ -254,7 +306,7 @@ input,
 select,
 textarea {
   padding: 5px 8px;
-  border: 1px solid var(--bg-4);
+  border: 1px solid var(--border-control);
   border-radius: var(--radius);
   background: var(--bg-2);
   color: var(--fg-hi);
@@ -272,7 +324,9 @@ textarea {
 input:focus,
 select:focus,
 textarea:focus,
-button:focus-visible {
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 1px;
 }
@@ -307,7 +361,7 @@ table {
 
 .scroller {
   overflow-x: auto;
-  border: 1px solid var(--bg-3);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--bg-1);
 }
@@ -320,7 +374,7 @@ th {
   text-align: left;
   font-weight: 600;
   padding: 7px 10px;
-  border-bottom: 1px solid var(--bg-3);
+  border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
 
@@ -338,6 +392,10 @@ td {
 
 tbody tr:hover td {
   background: var(--bg-2);
+}
+
+tr.hit td {
+  background: var(--primary-bg);
 }
 
 td.actions {
@@ -359,7 +417,7 @@ td.actions {
   gap: 5px;
   padding: 1px 8px;
   border-radius: 999px;
-  border: 1px solid var(--bg-4);
+  border: 1px solid var(--border-control);
   background: var(--bg-2);
   color: var(--fg-shy);
   font-size: 11px;
@@ -387,7 +445,7 @@ td.actions {
 .chip.accent {
   border-color: transparent;
   background: var(--primary-bg);
-  color: var(--primary);
+  color: var(--primary-fg);
 }
 
 /* -------------------------------------------------------------- notices -- */
@@ -402,12 +460,12 @@ td.actions {
 }
 
 .notice.warn {
-  border-left-color: var(--warning);
+  border-left-color: var(--warning-fill);
   background: var(--warning-bg);
 }
 
 .notice.bad {
-  border-left-color: var(--danger);
+  border-left-color: var(--danger-fill);
   background: var(--danger-bg);
 }
 
@@ -436,19 +494,19 @@ td.actions {
 .toast {
   padding: 9px 12px;
   border-radius: var(--radius);
-  border: 1px solid var(--bg-4);
+  border: 1px solid var(--border-strong);
   background: var(--bg-2);
   color: var(--fg-hi);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--shadow);
   white-space: pre-wrap;
 }
 
 .toast.ok {
-  border-color: var(--success);
+  border-color: var(--success-fill);
 }
 
 .toast.bad {
-  border-color: var(--danger);
+  border-color: var(--danger-fill);
 }
 
 /* --------------------------------------------------------------- modals -- */
@@ -456,7 +514,7 @@ td.actions {
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(4, 6, 9, 0.72);
+  background: var(--scrim);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -469,7 +527,7 @@ td.actions {
   max-height: 86vh;
   overflow: auto;
   background: var(--bg-1);
-  border: 1px solid var(--bg-4);
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
   padding: 18px;
 }
@@ -485,6 +543,66 @@ td.actions {
   justify-content: flex-end;
   gap: 8px;
   margin-top: 16px;
+}
+
+/* A record needs the width a table needs. FED-007. */
+.modal.wide {
+  width: min(900px, 100%);
+}
+
+/* --------------------------------------------------------------- drawer -- */
+
+.drawer-scrim {
+  position: fixed;
+  inset: 0;
+  background: var(--scrim);
+  z-index: 45;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.drawer {
+  width: min(560px, 100%);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-1);
+  border-left: 1px solid var(--border-strong);
+  box-shadow: var(--shadow);
+  outline: none;
+}
+
+.drawer.wide {
+  width: min(860px, 100%);
+}
+
+.drawer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 16px 18px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.drawer-head h3 {
+  margin: 0;
+  color: var(--fg-hi);
+  font-size: 14px;
+}
+
+.drawer-body {
+  flex: 1;
+  overflow: auto;
+  padding: 14px 18px;
+}
+
+.drawer-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
 }
 
 /* ---------------------------------------------------------------- login -- */
@@ -503,7 +621,7 @@ td.actions {
 #login form {
   width: min(420px, 100%);
   background: var(--bg-1);
-  border: 1px solid var(--bg-3);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 22px;
 }
@@ -525,6 +643,1535 @@ td.actions {
   flex: 1;
 }
 
+/* The checkbox is an input too; without this it stretched across the row. */
+#login input[type='checkbox'] {
+  flex: none;
+}
+
+/* BMG-014: the credential box, folded under the email + password form; the setup step. */
+#login .login-alt {
+  margin-top: 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+#login .field {
+  display: flex;
+}
+
+#login.setup form {
+  width: min(460px, 100%);
+}
+
+.access-tiles .tile b {
+  font-size: 13px;
+}
+
 .hidden {
   display: none !important;
+}
+
+/* ------------------------------------------------ empty states & danger -- */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 34px 22px;
+  text-align: center;
+  color: var(--fg-muted);
+}
+
+.empty-icon {
+  font-size: 22px;
+  color: var(--fg-shy);
+}
+
+.empty-text {
+  max-width: 48ch;
+  color: var(--fg);
+}
+
+.empty-docs {
+  font-size: 11.5px;
+}
+
+/* The danger zone IS the danger affordance: the one card that may wear red outside a failure. */
+.danger-zone {
+  margin-top: 28px;
+  border: 1px solid var(--danger-fill);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+
+.danger-zone-title {
+  color: var(--danger);
+  font-weight: 600;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.danger-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.danger-action + .danger-action {
+  border-top: 1px solid var(--border);
+}
+
+.danger-why {
+  color: var(--fg);
+  max-width: 60ch;
+}
+
+/* ------------------------------------------------------------ composers -- */
+
+.picker {
+  position: relative;
+  min-width: 200px;
+}
+
+.picker input {
+  width: 100%;
+}
+
+.picker.picked {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 4px 8px;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  color: var(--fg-hi);
+}
+
+.picker-clear,
+.chip-x {
+  border: 0;
+  background: none;
+  color: var(--fg-muted);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0 3px;
+}
+
+.picker-clear:hover,
+.chip-x:hover {
+  color: var(--fg-hi);
+}
+
+.picker-list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 3px);
+  max-height: 240px;
+  overflow: auto;
+  z-index: 55;
+  background: var(--bg-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.picker-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 10px;
+  cursor: pointer;
+  color: var(--fg-hi);
+}
+
+.picker-row.active,
+.picker-row:hover {
+  background: var(--primary-bg);
+}
+
+.picker-detail {
+  color: var(--fg-muted);
+  font-size: 11px;
+}
+
+.picker-create {
+  color: var(--primary-fg);
+  border-top: 1px solid var(--border);
+}
+
+.picker-empty {
+  padding: 8px 10px;
+  color: var(--fg-muted);
+  font-size: 11.5px;
+}
+
+.chips-set {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.chips-add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.chips-problem {
+  color: var(--warning);
+  font-size: 11px;
+}
+
+.list-editor {
+  display: grid;
+  gap: 8px;
+}
+
+.list-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.list-row > input[type='text'],
+.list-row > .kv-value {
+  flex: 1 1 140px;
+  min-width: 0;
+}
+
+.list-add {
+  justify-self: start;
+}
+
+.kv-key {
+  flex: 0 1 160px;
+}
+
+.kv-type {
+  flex: 0 0 auto;
+}
+
+/* ------------------------------------------------- the execution record -- */
+/*
+ * FED-007. A record opens as the band, the failures first (in red — the one place red is
+ * allowed on that screen), the steps as rows, and the raw JSON one click away.
+ */
+
+.rec-band {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 14px;
+  align-items: center;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.rec-fact {
+  color: var(--fg-shy);
+  font-size: 11.5px;
+}
+
+.rec-fact b {
+  color: var(--fg-hi);
+  font-weight: 600;
+}
+
+/* The cost line (FED-003), on its own row so it reads as the sentence it is. */
+.rec-cost {
+  flex-basis: 100%;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--primary-fg);
+}
+
+.rec-danger {
+  border-left: 3px solid var(--danger-fill);
+  background: var(--danger-bg);
+  border-radius: 3px;
+  padding: 9px 12px;
+  margin-bottom: 12px;
+}
+
+.rec-danger .rec-danger-head {
+  color: var(--danger);
+  font-weight: 600;
+  font-size: 11.5px;
+  margin-bottom: 6px;
+}
+
+.rec-danger .rec-danger-step {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--fg-hi);
+  margin-top: 5px;
+  word-break: break-all;
+}
+
+.rec-danger .rec-danger-why {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--fg);
+  word-break: break-all;
+}
+
+.step-row {
+  cursor: pointer;
+}
+
+.step-row.open td {
+  background: var(--bg-2);
+}
+
+.step-pane td {
+  white-space: normal;
+  font-family: var(--sans);
+  background: var(--bg-0);
+  max-width: none;
+  padding: 10px 12px;
+}
+
+.step-pane h4 {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--fg-shy);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.step-pane .pane-part + .pane-part {
+  margin-top: 10px;
+}
+
+/* ------------------------------------------ the JSON explorer itself -- */
+
+.jx {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.7;
+}
+
+.jx-children {
+  padding-left: 11px;
+  margin-left: 4px;
+  border-left: 1px solid var(--border);
+}
+
+.jx-line {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.jx-twist {
+  cursor: pointer;
+  width: 10px;
+  flex: none;
+  color: var(--fg-muted);
+  user-select: none;
+}
+
+.jx-twist:hover {
+  color: var(--fg-hi);
+}
+
+.jx-key {
+  color: var(--fg-hi);
+}
+
+.jx-meta {
+  color: var(--fg-muted);
+}
+
+.jx-val {
+  word-break: break-all;
+}
+
+.jx-str {
+  color: var(--code-str);
+}
+
+.jx-num {
+  color: var(--code-num);
+}
+
+.jx-bool {
+  color: var(--code-bool);
+}
+
+.jx-null {
+  color: var(--fg-muted);
+  font-style: italic;
+}
+
+/* ------------------------------------------------------- disclosure -- */
+
+.disclose {
+  margin-top: 14px;
+}
+
+.disclose-head {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  cursor: pointer;
+  color: var(--fg-shy);
+  font-size: 11.5px;
+}
+
+.disclose-head:hover {
+  color: var(--fg-hi);
+}
+
+.disclose-body {
+  margin-top: 8px;
+}
+
+/* ------------------------------------------------ visual record editing -- */
+
+div.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--fg-muted);
+}
+
+div.field b {
+  color: var(--fg-hi);
+  font-size: 12px;
+  font-family: var(--mono);
+}
+
+div.field input:not([type='checkbox']):not([type='radio']),
+div.field select {
+  width: 100%;
+}
+
+.field-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.req {
+  color: var(--warning);
+  font-size: 10.5px;
+}
+
+.hint {
+  color: var(--fg-muted);
+  font-size: 11px;
+}
+
+.form-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.chip.type {
+  font-family: var(--mono);
+  font-size: 10.5px;
+}
+
+.th-type {
+  color: var(--fg-muted);
+  font-weight: 400;
+  font-size: 10px;
+  margin-left: 4px;
+}
+
+th.pick,
+td.pick {
+  width: 28px;
+  padding-right: 0;
+}
+
+td.editable {
+  cursor: text;
+}
+
+td.editable:hover {
+  background: var(--bg-2);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+td.locked,
+td.shy,
+tr.sys td {
+  color: var(--fg-muted);
+}
+
+td.cell-edit {
+  padding: 2px 4px;
+  overflow: visible;
+}
+
+td.cell-edit input:not([type='checkbox']),
+td.cell-edit select,
+td.cell-edit .picker {
+  width: 100%;
+  min-width: 140px;
+}
+
+button.inline-edit {
+  background: none;
+  border: 0;
+  border-bottom: 1px dashed var(--border-strong);
+  padding: 0;
+  color: var(--fg-hi);
+  font: inherit;
+  cursor: text;
+}
+
+button.inline-edit:hover {
+  border-bottom-color: var(--primary);
+}
+
+select.inline-type {
+  padding: 1px 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.field-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.field-line > input[type='text'] {
+  flex: 1 1 140px;
+  min-width: 0;
+}
+
+/* A wide collection scrolls sideways; its Edit and Delete must not scroll away with it. */
+table.grid td.actions,
+table.grid th:last-child {
+  position: sticky;
+  right: 0;
+  background: var(--bg-1);
+  box-shadow: -1px 0 0 var(--border);
+}
+
+/* ------------------------------------------------- API keys (BMG-007) -- */
+/* Two groups of boxes with a select-all each; "any function" greys the named list. */
+.scope-groups {
+  display: grid;
+  gap: 10px;
+}
+
+.scope-group {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  background: var(--bg-1);
+}
+
+.scope-group .scope-all {
+  font-weight: 600;
+  color: var(--fg-hi);
+}
+
+.scope-list {
+  display: grid;
+  gap: 4px;
+  margin: 6px 0 2px 22px;
+}
+
+.scope-list.greyed {
+  opacity: 0.45;
+}
+
+.scope-indent {
+  display: grid;
+  gap: 6px;
+  margin: 6px 0 2px 22px;
+}
+
+tr.revoked td {
+  color: var(--fg-shy);
+}
+
+/* The one-time secret, and the example command that carries it. */
+.secret-box {
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  color: var(--fg-hi);
+  word-break: break-all;
+  user-select: all;
+}
+
+/* BMG-004 — Users: a person is a name with an initial, their email under it. */
+.users-search {
+  width: 240px;
+}
+
+tr.clickable {
+  cursor: pointer;
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.person-text {
+  display: grid;
+  gap: 1px;
+}
+
+.avatar {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--primary-bg);
+  color: var(--primary-fg);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.drawer-section {
+  margin: 20px 0 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg-muted);
+}
+
+.drawer-section:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* ------------------------------------------------------ Roles (BMG-005) -- */
+/* The first three members' initials, overlapping, beside the count. */
+.avatars {
+  display: inline-flex;
+}
+
+.avatars .avatar {
+  width: 24px;
+  height: 24px;
+  font-size: 11px;
+  border: 2px solid var(--bg-1);
+}
+
+.avatars .avatar + .avatar {
+  margin-left: -8px;
+}
+
+.role-uses {
+  margin: 0 0 8px;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+}
+
+.bulk-report {
+  display: grid;
+  gap: 2px;
+}
+
+/* ------------------------------------------------ Collections (BMG-002) -- */
+/* The filter said in rows; a group is indented under its and/or. */
+.filter-box {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-1);
+}
+
+.filter-group {
+  display: grid;
+  gap: 6px;
+}
+
+.filter-group.nested {
+  padding: 6px 8px;
+  border-left: 2px solid var(--primary-dim);
+  background: var(--bg-2);
+  border-radius: var(--radius);
+}
+
+.filter-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-conj {
+  flex: 0 0 64px;
+  color: var(--fg-muted);
+  font-size: 12px;
+  padding-top: 5px;
+}
+
+.filter-cond {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+}
+
+.filter-value {
+  width: 150px;
+}
+
+.filter-adds {
+  display: flex;
+  gap: 6px;
+}
+
+.result-sentence {
+  color: var(--fg);
+}
+
+.result-sentence b {
+  color: var(--fg-hi);
+}
+
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+th.sortable:hover {
+  color: var(--fg-hi);
+}
+
+.sort-mark {
+  margin-left: 4px;
+  color: var(--primary-fg);
+  font-size: 10px;
+}
+
+.columns-list {
+  display: grid;
+  gap: 2px;
+  max-height: 55vh;
+  overflow: auto;
+}
+
+.columns-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 6px;
+  border-radius: var(--radius);
+}
+
+.columns-row:hover,
+.columns-row.dragging {
+  background: var(--bg-2);
+}
+
+.drag-handle {
+  cursor: grab;
+  color: var(--fg-muted);
+}
+
+.import-preview select {
+  min-width: 120px;
+}
+
+/* A yes/no is a switch, not a checkbox with a word beside it. */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.switch-track {
+  position: relative;
+  width: 30px;
+  height: 17px;
+  border-radius: 9px;
+  background: var(--bg-4);
+  border: 1px solid var(--border-control);
+  transition: background 0.12s;
+}
+
+.switch-track::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--fg-hi);
+  transition: transform 0.12s;
+}
+
+.switch input:checked + .switch-track {
+  background: var(--primary);
+}
+
+.switch input:checked + .switch-track::after {
+  transform: translateX(13px);
+}
+
+.switch input:focus-visible + .switch-track {
+  box-shadow: 0 0 0 2px var(--primary-hi);
+}
+
+.struct-edit,
+.json-edit {
+  display: grid;
+  gap: 6px;
+}
+
+.json-edit textarea {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.geo-control input[type='number'] {
+  width: 130px;
+}
+
+.dropzone {
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  min-height: 64px;
+  padding: 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--fg-muted);
+  cursor: pointer;
+  text-align: center;
+}
+
+.dropzone:hover,
+.dropzone.over,
+.dropzone:focus-visible {
+  border-color: var(--primary);
+  color: var(--fg);
+}
+
+.file-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+}
+
+.file-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.file-icon {
+  font-size: 22px;
+  color: var(--fg-muted);
+}
+
+.file-text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  word-break: break-all;
+}
+
+/* "Who can see this record": a card with a state, then who, can see, can change. */
+.acl-card {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-1);
+  justify-items: start;
+}
+
+.acl-state {
+  display: grid;
+  gap: 2px;
+}
+
+.acl-state b {
+  color: var(--fg-hi);
+}
+
+.acl-table {
+  width: 100%;
+}
+
+.acl-table td,
+.acl-table th {
+  padding: 4px 6px;
+}
+
+.acl-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.acl-more {
+  font-size: 12px;
+}
+
+/* Inside a labelled field, a row of controls stays a row: the full-width rule above is for a
+   field's ONE control, not for the parts of a list, an object, a date or a location. */
+div.field .list-row > input:not([type='checkbox']):not([type='radio']),
+div.field .list-row > select,
+div.field .field-line > input:not([type='checkbox']):not([type='radio']),
+div.field .field-line > select {
+  width: auto;
+}
+
+div.field .list-row > .kv-key {
+  flex: 0 1 160px;
+}
+
+div.field .list-row > .kv-value,
+div.field .list-row > input[type='text'] {
+  flex: 1 1 140px;
+}
+
+div.field .date-control > input[type='date'] {
+  flex: 0 1 170px;
+}
+
+div.field .date-control > input[type='time'] {
+  flex: 0 1 120px;
+}
+
+div.field .field-line > .picker {
+  flex: 1 1 200px;
+}
+
+.filter-box > .btn,
+.acl-card > .btn {
+  justify-self: start;
+}
+
+/* ---------------------------------------------------- permissions (BMG-006) -- */
+
+/* The who × what matrix: one operation per row, one audience per column, a box per cell. */
+.perm-matrix th,
+.perm-matrix td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.perm-matrix th.perm-op,
+.perm-matrix td.perm-op {
+  text-align: left;
+  white-space: nowrap;
+}
+
+.perm-matrix th.perm-add {
+  text-align: left;
+  min-width: 120px;
+}
+
+.perm-matrix th.perm-add .picker input {
+  width: 110px;
+  font-size: 11px;
+}
+
+.perm-cell input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+/* *Everyone* is on: the other audiences are let through whatever the box says. */
+.perm-cell.implied,
+label.check.implied {
+  opacity: 0.45;
+}
+
+.perm-default-words {
+  display: block;
+  font-family: var(--sans);
+  font-size: 10px;
+  color: var(--fg-shy);
+  margin-top: 2px;
+}
+
+/* The sentence under a switch that says what "on" means. */
+.switch-why {
+  font-size: 11px;
+  color: var(--fg-shy);
+  margin: 4px 0 0 38px;
+}
+
+.perm-role .chip {
+  gap: 4px;
+}
+
+.perm-role .chip-x:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* One rule as a row of boxes (a function's *Who can call*). */
+.rule-boxes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+}
+
+.rule-boxes .rule-add .picker input {
+  width: 110px;
+  font-size: 11px;
+}
+
+.tpl-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+/* *Try it as ann doing Change on Pet* — a sentence with controls in it. */
+.tryas .tryas-line {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tryas .tryas-line select {
+  width: auto;
+}
+
+.tryas-person .picker input,
+.tryas-record .picker input {
+  width: 200px;
+}
+
+.verdict {
+  display: grid;
+  gap: 3px;
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+}
+
+.verdict.ok {
+  border-color: var(--success);
+  background: var(--success-bg);
+}
+
+.verdict.bad {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.fn-card {
+  margin-bottom: 10px;
+}
+
+.fn-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.fn-fields .field-line {
+  flex-wrap: nowrap;
+}
+
+.fn-fields .field-line input[type='number'] {
+  width: 64px;
+  flex: 0 0 64px;
+}
+
+/* ---- BMG-008: when a trigger runs, as tiles, and the schedule builder --------------------- */
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+  margin: 6px 0 4px;
+}
+
+.tile {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-1);
+  cursor: pointer;
+}
+
+.tile input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.tile.on {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+}
+
+.tile:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+/* BMG-015: a tile that cannot be chosen yet (the backups' bucket before one is connected). */
+.tile.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.tile .sub {
+  margin: 0;
+}
+
+.sched {
+  display: grid;
+  gap: 10px;
+}
+
+.sched-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sched-mode {
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-1);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.sched-mode input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.sched-mode.on {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+  color: var(--fg-hi);
+}
+
+.sched-mode:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.sched-controls {
+  display: grid;
+  gap: 8px;
+}
+
+.sched-controls input[type='time'],
+.sched-controls input[type='number'].sched-minute,
+.field-line input[type='number'].sched-minute {
+  width: 90px;
+  flex: 0 0 auto;
+}
+
+.sched-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sched-day {
+  min-width: 44px;
+  text-align: center;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-1);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.sched-day input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.sched-day.on {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-fg);
+}
+
+.sched-day:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.sched-readout {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  display: grid;
+  gap: 6px;
+}
+
+.sched-words {
+  font-weight: 600;
+  color: var(--fg-hi);
+}
+
+.sched-next ol {
+  margin: 4px 0 0;
+  padding-left: 20px;
+  color: var(--fg);
+}
+
+.sched-next li {
+  font-variant-numeric: tabular-nums;
+}
+
+pre.secret-box {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 12px;
+}
+
+/* The controls under a chosen tile. Not `.drawer-section`: that is a HEADING style and uppercases its text. */
+.when-body {
+  margin-top: 10px;
+  display: grid;
+  gap: 12px;
+}
+
+/* ---- BMG-003: the field-type picker, the kind badge, the rules list ------------------------ */
+
+.kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kind-icon {
+  display: inline-block;
+  min-width: 1.6em;
+  text-align: center;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.tiles.kinds {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  margin-top: 10px;
+}
+
+.tiles.kinds .tile {
+  position: relative;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+}
+
+.tiles.kinds .tile .kind-icon {
+  grid-row: 1 / span 3;
+  align-self: start;
+  font-size: 18px;
+  padding-top: 2px;
+}
+
+.tiles.kinds .tile .chip.type {
+  justify-self: start;
+}
+
+.kind-search {
+  width: 100%;
+}
+
+.kind-chosen {
+  margin-bottom: 12px;
+}
+
+.field-options {
+  display: grid;
+  gap: 12px;
+}
+
+.field-options div.field input.short {
+  width: 140px;
+}
+
+.rules {
+  margin-top: 10px;
+}
+
+.rules-list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.rule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+/* ---- BMG-010: email provider tiles, the template drawer, the sign-in wizard ---------------- */
+
+.tiles.providers {
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  margin-top: 6px;
+}
+
+.placeholder-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0;
+}
+
+.placeholder-bar button.chip {
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  border: 1px solid var(--border-control);
+}
+
+.placeholder-bar button.chip:hover:not([disabled]) {
+  background: var(--primary-bg);
+}
+
+.preview-pane {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+
+.preview-pane .preview-subject {
+  font-weight: 600;
+  color: var(--fg-hi);
+  margin-bottom: 6px;
+}
+
+.preview-pane pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font: inherit;
+  font-size: 13px;
+  color: var(--fg);
+}
+
+pre.preview-pane.mono {
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.template-card + .template-card {
+  margin-top: 8px;
+}
+
+.wizard-steps {
+  list-style: none;
+  display: flex;
+  gap: 6px;
+  padding: 0;
+  margin: 0 0 14px;
+}
+
+.wizard-steps li {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--fg-muted);
+  font-size: 12px;
+}
+
+.wizard-steps li button {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  cursor: pointer;
+  color: inherit;
+}
+
+.wizard-steps li button[disabled] {
+  cursor: default;
+}
+
+.wizard-steps li .num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-2);
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.wizard-steps li.current {
+  border-color: var(--primary);
+  color: var(--fg-hi);
+}
+
+.wizard-steps li.done {
+  color: var(--fg);
+}
+
+.wizard-steps li.done .num,
+.wizard-steps li.current .num {
+  background: var(--primary);
+  color: var(--primary-fg);
+}
+
+.wizard-step {
+  display: grid;
+  gap: 12px;
+}
+
+.callback-url {
+  font-size: 14px;
+  word-break: break-all;
+  user-select: all;
+}
+
+.wizard-list {
+  margin: 6px 0 0;
+  padding-left: 20px;
+}
+
+.wizard-list li {
+  margin: 4px 0;
+}
+
+.scope-boxes {
+  display: grid;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.step-missing {
+  margin-top: 4px;
+}
+
+a.btn {
+  text-decoration: none;
+}
+
+/* ------------------------------------------------------ BMG-011: storage, backups, server -- */
+.kind-boxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 6px 14px;
+  margin: 6px 0 4px;
+}
+
+.kind-box {
+  align-items: flex-start;
+}
+
+.kind-box > span {
+  display: grid;
+  gap: 2px;
+}
+
+.uses-list {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.uses-list li {
+  margin: 2px 0;
+}
+
+table.files td.thumb-cell {
+  width: 44px;
+}
+
+table.files .uses-cell {
+  max-width: 260px;
+}
+
+.list-head {
+  color: var(--fg-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.rate-table {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.rate-table .list-row > input[type='number'] {
+  flex: 0 0 auto;
+}
+
+.blocked {
+  opacity: 0.55;
+  pointer-events: none;
 }

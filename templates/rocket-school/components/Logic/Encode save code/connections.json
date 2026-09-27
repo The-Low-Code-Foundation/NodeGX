@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f6455e57-6d2e-5177-8c64-1ecc4a4c4fb6",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "encodesavecoIn",
+      "fromProperty": "app",
+      "toId": "encodesavecoFn",
+      "toProperty": "in-app"
+    },
+    {
+      "fromId": "encodesavecoIn",
+      "fromProperty": "profileId",
+      "toId": "encodesavecoFn",
+      "toProperty": "in-profileId"
+    },
+    {
+      "fromId": "encodesavecoFn",
+      "fromProperty": "out-code",
+      "toId": "encodesavecoOut",
+      "toProperty": "code"
+    },
+    {
+      "fromId": "encodesavecoFn",
+      "fromProperty": "out-length",
+      "toId": "encodesavecoOut",
+      "toProperty": "length"
+    },
+    {
+      "fromId": "encodesavecoFn",
+      "fromProperty": "success",
+      "toId": "encodesavecoOut",
+      "toProperty": "done"
+    }
+  ]
+}

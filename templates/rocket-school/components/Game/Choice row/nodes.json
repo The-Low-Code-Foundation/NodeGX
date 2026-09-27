@@ -1,0 +1,130 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "92f1e423-5690-5072-809a-499ca2537415",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "crIn",
+      "type": "Component Inputs",
+      "label": "The options and the value",
+      "ports": [
+        {
+          "name": "items",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "crWrap",
+      "type": "Group",
+      "label": "The control",
+      "children": [
+        "crLabel",
+        "crRow"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "crLabel",
+      "type": "Text",
+      "label": "What is being chosen",
+      "parent": "crWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "crRow",
+      "type": "Group",
+      "label": "The pills",
+      "parent": "crWrap",
+      "children": [
+        "crEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "crEach",
+      "type": "For Each",
+      "label": "One pill per option",
+      "parameters": {
+        "template": "/Game/Choice",
+        "templateType": "explicit"
+      },
+      "parent": "crRow",
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "crMark",
+      "type": "/Logic/Mark selected",
+      "label": "Flag the chosen one",
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "crOut",
+      "type": "Component Outputs",
+      "label": "What was chosen",
+      "ports": [
+        {
+          "name": "value",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "crWrap"
+  ]
+}

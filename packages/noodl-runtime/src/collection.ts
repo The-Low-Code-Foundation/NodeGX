@@ -520,6 +520,9 @@ Object.defineProperty(Array.prototype, "set", {
     }
 
     var bItems: ModelLike[] = [];
+    // GAM-007 (P78 D64): a row field the record answers for itself, field → the first row carrying
+    // it. Only rows being converted are read, so setting the same objects again stays quiet (F50).
+    let reserved: Map<string, number> | undefined;
     length = src.length;
     for (i = 0; i < length; i++) {
       var item = src[i];
@@ -531,6 +534,13 @@ Object.defineProperty(Array.prototype, "set", {
       const plain = item as Record<string, unknown>;
       let model = typeof plain === 'object' && plain !== null ? plainModels.get(plain) : undefined;
       if (model === undefined) {
+        if (typeof plain === 'object' && plain !== null) {
+          for (const key of Object.keys(plain)) {
+            if (!Model.isReservedFieldName(key)) continue;
+            if (reserved === undefined) reserved = new Map();
+            if (!reserved.has(key)) reserved.set(key, i);
+          }
+        }
         model = Model.create(plain);
         if (typeof plain === 'object' && plain !== null) plainModels.set(plain, model);
       } else {
@@ -544,6 +554,21 @@ Object.defineProperty(Array.prototype, "set", {
         }
       }
       bItems.push(model);
+    }
+
+    // GAM-007 (P78 D64), 🔒 R8's B: said once per field per `set`, never per row, because a query of a
+    // thousand records with a `data` field is one mistake, not a thousand. The trap is unchanged, so
+    // the row still reads as the member; this is what makes that not silent.
+    if (reserved !== undefined) {
+      reserved.forEach((row, field) => {
+        raiseUnattributedRuntimeError(
+          'collection/reserved-field-name',
+          `A row field is named "${field}" (row ${row}), and "${field}" is one of a Noodl Object's own ` +
+            `names. Every row in a list is a Noodl Object, so row.${field} reads that and never the data. ` +
+            'Rename the field.',
+          { field, row }
+        );
+      });
     }
 
     // NDA-002, the contract's second clause: `set` is *one* logical mutation, however many

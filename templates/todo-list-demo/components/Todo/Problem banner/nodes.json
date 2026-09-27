@@ -1,0 +1,136 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a6103727-baf3-54ac-8870-575a2af1cb36",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pbVar",
+      "type": "Variable2",
+      "label": "The problem, if there is one",
+      "parameters": {
+        "name": "todoProblem"
+      },
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "pbShow",
+      "type": "JavaScriptFunction",
+      "label": "Is there a problem?",
+      "parameters": {
+        "functionScript": "var p = String(Inputs.problem || '');\nOutputs.show = p !== '';\nOutputs.text = p;"
+      },
+      "x": 350,
+      "y": 40,
+      "ports": [
+        {
+          "name": "in-problem",
+          "displayName": "problem",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-show",
+          "displayName": "show",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pbRoot",
+      "type": "Group",
+      "label": "Problem",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)",
+        "justifyContent": "space-between",
+        "mounted": false,
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--destructive)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "children": [
+        "pbText",
+        "pbDismiss"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pbText",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "pbRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--destructive)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pbDismiss",
+      "type": "net.noodl.controls.button",
+      "label": "Dismiss",
+      "parent": "pbRoot",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Dismiss"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "pbClear",
+      "type": "Set Variable",
+      "label": "Forget the problem",
+      "parameters": {
+        "name": "todoProblem",
+        "setWith": "emptyString"
+      },
+      "x": 350,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "pbRoot"
+  ]
+}

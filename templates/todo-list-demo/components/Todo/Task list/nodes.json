@@ -1,0 +1,289 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "250a5631-2a8e-5a77-877b-6419e342a139",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tlIn",
+      "type": "Component Inputs",
+      "label": "The rows",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "placeholder",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "clearNew",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "tlOut",
+      "type": "Component Outputs",
+      "label": "What happened in the list",
+      "ports": [
+        {
+          "name": "open",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "up",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "down",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "close",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "add",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "taskId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "taskTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "newTitle",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "tlRoot",
+      "type": "Group",
+      "label": "Task list",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "tlRows",
+        "tlEmpty",
+        "tlAdd"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "tlRows",
+      "type": "Group",
+      "label": "The rows",
+      "parent": "tlRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border-subtle)"
+      },
+      "children": [
+        "tlEach"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "tlEach",
+      "type": "For Each",
+      "label": "One row per open task",
+      "parent": "tlRows",
+      "parameters": {
+        "template": "/Todo/Task row",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "tlEmpty",
+      "type": "Text",
+      "label": "When there is nothing to do",
+      "parent": "tlRoot",
+      "parameters": {
+        "text": "Nothing on the list. Add the next thing you need to do.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "tlAdd",
+      "type": "Group",
+      "label": "Add a task",
+      "parent": "tlRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "tlField",
+        "tlButton"
+      ],
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "tlField",
+      "type": "net.noodl.controls.textinput",
+      "label": "New task",
+      "parent": "tlAdd",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Add a task"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "tlButton",
+      "type": "net.noodl.controls.button",
+      "label": "Add",
+      "parent": "tlAdd",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Add"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "tlCount",
+      "type": "JavaScriptFunction",
+      "label": "Is the list empty?",
+      "parameters": {
+        "functionScript": "Outputs.empty = (Inputs.rows || []).length === 0;"
+      },
+      "x": 410,
+      "y": 520,
+      "ports": [
+        {
+          "name": "in-rows",
+          "displayName": "rows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "tlSubmit",
+      "type": "JavaScriptFunction",
+      "label": "The title, if one was typed",
+      "parameters": {
+        "functionScript": "var t = String(Inputs.text || '').trim();\nif (t === '') return;\nOutputs.text = t;\nOutputs.go();",
+        "runOnChange-in-text": false
+      },
+      "x": 410,
+      "y": 640,
+      "ports": [
+        {
+          "name": "in-text",
+          "displayName": "text",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "tlRoot"
+  ]
+}

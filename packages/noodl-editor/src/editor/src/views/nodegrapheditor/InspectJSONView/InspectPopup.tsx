@@ -7,6 +7,7 @@ import { ProjectModel } from '@noodl-models/projectmodel';
 
 import { Icon, IconName } from '@noodl-core-ui/components/common/Icon';
 
+import { viewerOrigin } from '../../SandboxSurface/viewerOrigin';
 import { ToastLayer } from '../../ToastLayer/ToastLayer';
 import css from './InspectPopup.module.scss';
 
@@ -30,9 +31,9 @@ import css from './InspectPopup.module.scss';
  * ------------------------------------------------------------------------- */
 const JSON_THEME_TOKENS = {
   /** Popup surface (ReactJson's own background is forced transparent). */
-  surface: { css: '--theme-color-bg-4', fallback: '#3c4857' },
-  surfaceRaised: { css: '--theme-color-bg-5', fallback: '#414e5e' },
-  border: { css: '--theme-color-border-default', fallback: '#2f3945' },
+  surface: { css: '--theme-color-bg-4', fallback: '#42404e' },
+  surfaceRaised: { css: '--theme-color-bg-5', fallback: '#484555' },
+  border: { css: '--theme-color-border-default', fallback: '#33323d' },
   /** Object/array keys and braces. */
   key: { css: '--theme-color-fg-highlight', fallback: '#ffffff' },
   /** `undefined`, the collapsed-node ellipsis. */
@@ -182,9 +183,7 @@ function ImageInspector({ source }: { source: string }) {
   if (source.startsWith('http')) {
     src = source;
   } else {
-    const protocol = process.env.ssl ? 'https' : 'http';
-    const port = process.env.NOODLPORT || 8574;
-    src = `${protocol}://localhost:${port}/${source}`;
+    src = `${viewerOrigin()}/${source}`;
   }
 
   return (

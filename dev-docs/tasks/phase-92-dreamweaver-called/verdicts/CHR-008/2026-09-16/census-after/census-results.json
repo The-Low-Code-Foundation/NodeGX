@@ -1,0 +1,217 @@
+{
+  "instrument": "file:///Users/richardosborne/vscode_projects/OpenNoodl/packages/noodl-editor/src/editor/index.html",
+  "nodes": {
+    "group-psWrap": {
+      "selected": "selected Group",
+      "dark": {
+        "groups": 19,
+        "groupNames": [
+          "General",
+          "Dimensions",
+          "Layout",
+          "Alignment",
+          "Align and justify content",
+          "Margin and padding",
+          "Style",
+          "Border Style",
+          "Corner Radius",
+          "Box Shadow",
+          "Advanced CSS",
+          "Scroll",
+          "Placement",
+          "File Drop",
+          "Dimension Constraints",
+          "Pointer Events",
+          "Scroll To Element",
+          "Scroll To Index",
+          "Advanced HTML"
+        ],
+        "rows": 83,
+        "gateWrappers": 18,
+        "gateReasons": 4,
+        "gateLinks": 8,
+        "deadWires": 0,
+        "groupGateLines": 4,
+        "capabilityWrappers": 0,
+        "structuralHints": 0,
+        "hintMarked": 1,
+        "rowsWithTitle": 56,
+        "propertyPanelRows": 63,
+        "controlHosts": 63,
+        "emptyControlHosts": 0,
+        "elements": 1241,
+        "inlineStyled": 250,
+        "fontSizes": [
+          "11px",
+          "12px"
+        ],
+        "gateTexts": [
+          {
+            "group": "Dimensions",
+            "texts": [
+              "Height applies when Size Mode is Explicit or Content Width, or is not set.Show Size Mode"
+            ]
+          },
+          {
+            "group": "Layout",
+            "texts": [
+              "Align Content and Horizontal Gap apply when Multi Line Wrap is On or On Reverse.Show Multi Line Wrap"
+            ]
+          },
+          {
+            "group": "Box Shadow",
+            "texts": [
+              "Offset X, Offset Y, Blur Radius, Spread Radius, Inset and Shadow Color apply once Shadow Enabled is on.Turn on"
+            ]
+          },
+          {
+            "group": "Advanced CSS",
+            "texts": [
+              "Snap, Snap To Every Item, Show Scrollbar, Bounce at boundaries and Native platform scroll apply only when Layout is not None and Enable Scroll is on.Show Enable Scroll",
+              "Accepted file types applies when Accept File Drops is on.Show Accept File Drops",
+              "Pointer Events Enabled applies when Pointer Events Mode is Explicit.Show Pointer Events Mode",
+              "Scroll To Element - Duration applies when Layout is not None, Enable Scroll is on and Native platform scroll is off.Show Layout",
+              "Scroll To Index - Index and Scroll To Index - Duration apply when Layout is not None, Enable Scroll is on and Native platform scroll is off.Show Layout"
+            ]
+          },
+          {
+            "group": "Scroll",
+            "texts": [
+              "Snap, Snap To Every Item, Show Scrollbar, Bounce at boundaries and Native platform scroll apply only when Layout is not None and Enable Scroll is on.Show Enable Scroll"
+            ]
+          },
+          {
+            "group": "File Drop",
+            "texts": [
+              "Accepted file types applies when Accept File Drops is on.Show Accept File Drops"
+            ]
+          },
+          {
+            "group": "Pointer Events",
+            "texts": [
+              "Pointer Events Enabled applies when Pointer Events Mode is Explicit.Show Pointer Events Mode"
+            ]
+          },
+          {
+            "group": "Scroll To Element",
+            "texts": [
+              "Scroll To Element - Duration applies when Layout is not None, Enable Scroll is on and Native platform scroll is off.Show Layout"
+            ]
+          },
+          {
+            "group": "Scroll To Index",
+            "texts": [
+              "Scroll To Index - Index and Scroll To Index - Duration apply when Layout is not None, Enable Scroll is on and Native platform scroll is off.Show Layout"
+            ]
+          }
+        ]
+      },
+      "light": {
+        "groups": 19,
+        "groupNames": [
+          "General",
+          "Dimensions",
+          "Layout",
+          "Alignment",
+          "Align and justify content",
+          "Margin and padding",
+          "Style",
+          "Border Style",
+          "Corner Radius",
+          "Box Shadow",
+          "Advanced CSS",
+          "Scroll",
+          "Placement",
+          "File Drop",
+          "Dimension Constraints",
+          "Pointer Events",
+          "Scroll To Element",
+          "Scroll To Index",
+          "Advanced HTML"
+        ],
+        "rows": 83,
+        "gateWrappers": 18,
+        "gateReasons": 4,
+        "gateLinks": 8,
+        "deadWires": 0,
+        "groupGateLines": 4,
+        "capabilityWrappers": 0,
+        "structuralHints": 0,
+        "hintMarked": 1,
+        "rowsWithTitle": 56,
+        "propertyPanelRows": 63,
+        "controlHosts": 63,
+        "emptyControlHosts": 0,
+        "elements": 1241,
+        "inlineStyled": 250,
+        "fontSizes": [
+          "11px",
+          "12px"
+        ],
+        "gateTexts": [
+          {
+            "group": "Dimensions",
+            "texts": [
+              "Height applies when Size Mode is Explicit or Content Width, or is not set.Show Size Mode"
+            ]
+          },
+          {
+            "group": "Layout",
+            "texts": [
+              "Align Content and Horizontal Gap apply when Multi Line Wrap is On or On Reverse.Show Multi Line Wrap"
+            ]
+          },
+          {
+            "group": "Box Shadow",
+            "texts": [
+              "Offset X, Offset Y, Blur Radius, Spread Radius, Inset and Shadow Color apply once Shadow Enabled is on.Turn on"
+            ]
+          },
+          {
+            "group": "Advanced CSS",
+            "texts": [
+              "Snap, Snap To Every Item, Show Scrollbar, Bounce at boundaries and Native platform scroll apply only when Layout is not None and Enable Scroll is on.Show Enable Scroll",
+              "Accepted file types applies when Accept File Drops is on.Show Accept File Drops",
+              "Pointer Events Enabled applies when Pointer Events Mode is Explicit.Show Pointer Events Mode",
+              "Scroll To Element - Duration applies when Layout is not None, Enable Scroll is on and Native platform scroll is off.Show Layout",
+              "Scroll To Index - Index and Scroll To Index - Duration apply when Layout is not None, Enable Scroll is on and Native platform scroll is off.Show Layout"
+            ]
+          },
+          {
+            "group": "Scroll",
+            "texts": [
+              "Snap, Snap To Every Item, Show Scrollbar, Bounce at boundaries and Native platform scroll apply only when Layout is not None and Enable Scroll is on.Show Enable Scroll"
+            ]
+          },
+          {
+            "group": "File Drop",
+            "texts": [
+              "Accepted file types applies when Accept File Drops is on.Show Accept File Drops"
+            ]
+          },
+          {
+            "group": "Pointer Events",
+            "texts": [
+              "Pointer Events Enabled applies when Pointer Events Mode is Explicit.Show Pointer Events Mode"
+            ]
+          },
+          {
+            "group": "Scroll To Element",
+            "texts": [
+              "Scroll To Element - Duration applies when Layout is not None, Enable Scroll is on and Native platform scroll is off.Show Layout"
+            ]
+          },
+          {
+            "group": "Scroll To Index",
+            "texts": [
+              "Scroll To Index - Index and Scroll To Index - Duration apply when Layout is not None, Enable Scroll is on and Native platform scroll is off.Show Layout"
+            ]
+          }
+        ]
+      }
+    },
+    "button-paPlay": {
+      "skipped": "no node"
+    }
+  }
+}

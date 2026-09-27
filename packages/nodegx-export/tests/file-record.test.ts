@@ -207,7 +207,8 @@ describe('§B — the component', () => {
     expect(page).toContain("{(thePhotoRow?.image === undefined ? undefined : cloudFileName(thePhotoRow?.image)) ?? ''}");
     expect(page).toContain("{thePhotoRow?.image?.contentType ?? ''}");
     expect(page).toContain("{String(thePhotoRow?.image?.size ?? '')}");
-    expect(page).toContain('src={thePhotoRow?.image?.url}');
+    // EXP-014 §14.5: the wired src resolves through `mediaSrc` at run time, as the viewer's port does.
+    expect(page).toContain('src={mediaSrc(thePhotoRow?.image?.url)}');
     expect(dispositionOf(baseIr, HOME, 'cloud2')).toBe('collapsed');
   });
 

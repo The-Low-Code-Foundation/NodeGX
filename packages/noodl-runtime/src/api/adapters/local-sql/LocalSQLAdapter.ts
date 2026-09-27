@@ -10,6 +10,7 @@
 
 import { resolveEngine, type EngineDatabase, type ResolvedEngine } from './engine';
 import { registerSqlFunctions } from './sqlFunctions';
+import { declaredProperties, inferType, requiredWithoutDefault } from './schemaCommon';
 import type { AclContext } from './QueryBuilder';
 
 import EventEmitter = require('../../../events');
@@ -30,9 +31,15 @@ interface ChangeEvent {
 /**
  * The schema shape `_rowToRecord` deserialises against — the editor's
  * dbCollections form. SchemaManager's tracked `TableSchema` (`{ name, columns }`)
- * also flows through `_getSchema`, and for it `properties` is simply absent, so
- * rows from SchemaManager-tracked-only collections deserialise without column
- * types. That asymmetry is the pre-existing behaviour, typed rather than hidden.
+ * also flows through `_getSchema`, and for it `properties` is simply absent.
+ *
+ * 🔴 **That asymmetry WAS the defect** (BRG-D8/BRG-D10, ruled R7). Rows from
+ * SchemaManager-tracked-only collections — which is every collection on a
+ * service-opened backend — deserialised with no column type at all, so a
+ * declared `Boolean` left here as whichever value the driver happened to
+ * return. `_rowToRecord` now reads both shapes through
+ * `schemaCommon.declaredProperties`, and this interface describes only the
+ * editor's half of that.
  */
 interface AdapterSchema {
   properties?: Record<string, { type?: string; required?: boolean; targetClass?: string }>;
@@ -107,6 +114,8 @@ interface SaveOptions {
   objectId?: string;
   data: Record<string, unknown>;
   acl?: AclContext;
+  /** HLT-016 — apply only if the row still holds these values. */
+  expect?: QueryBuilder.ExpectedValues;
   success(record: AdapterRecord): void;
   error: AdapterErrorCallback;
 }
@@ -749,11 +758,14 @@ class LocalSQLAdapter {
   _rowToRecord(row: AdapterRecord | null | undefined, collection: string): AdapterRecord {
     if (!row) return null;
 
-    const schema = this._getSchema(collection);
+    // R7 / BRG-D8: BOTH schema shapes, not just the editor's. A service-opened
+    // backend has only the manager's `TableSchema`, and reading `.properties`
+    // off that is how a declared `Boolean` left here as SQLite's raw `1`.
+    const properties = declaredProperties(this._getSchema(collection));
     const record: AdapterRecord = {};
 
     for (const [key, value] of Object.entries(row)) {
-      const colType = schema?.properties?.[key]?.type;
+      const colType = properties?.[key]?.type;
       record[key] = QueryBuilder.deserializeValue(value, colType);
     }
 
@@ -973,11 +985,30 @@ class LocalSQLAdapter {
    */
   create(options: CreateOptions): void {
     try {
+      // SYN-003: a caller may name its own record. The id is settled before
+      // anything is written, so a refused one leaves no table, column or row.
+      const requestedId = options.data.objectId;
+      const hasClientId = requestedId !== undefined && requestedId !== null;
+      if (hasClientId && !QueryBuilder.isClientObjectId(requestedId)) {
+        throw new Error(QueryBuilder.CLIENT_OBJECT_ID_INVALID);
+      }
+      const data: Record<string, unknown> = { ...options.data };
+      delete data.objectId;
+
       this._ensureTable(options.collection);
+
+      if (
+        hasClientId &&
+        this.db
+          .prepare(`SELECT 1 FROM ${QueryBuilder.escapeTable(options.collection)} WHERE "objectId" = ?`)
+          .get(requestedId)
+      ) {
+        throw new Error(QueryBuilder.clientObjectIdTaken(options.collection, requestedId as string));
+      }
 
       // Auto-add columns for new fields
       if (this.options.autoCreateTables && this.schemaManager) {
-        for (const [key, value] of Object.entries(options.data)) {
+        for (const [key, value] of Object.entries(data)) {
           if (key !== 'id' && key !== 'createdAt' && key !== 'updatedAt') {
             const type = this._inferType(value);
             const column: { name: string; type: string; targetClass?: string } = { name: key, type };
@@ -991,8 +1022,11 @@ class LocalSQLAdapter {
         }
       }
 
-      const recordId = generateUUID();
-      const { sql, params } = QueryBuilder.buildInsert(options, recordId);
+      const recordId = hasClientId ? (requestedId as string) : generateUUID();
+      const { sql, params } = QueryBuilder.buildInsert(
+        { collection: options.collection, data, required: this.requiredToName(options.collection) },
+        recordId
+      );
 
       this.db.prepare(sql).run(...params);
 
@@ -1012,7 +1046,19 @@ class LocalSQLAdapter {
         collection: options.collection
       });
     } catch (e) {
-      console.error('LocalSQLAdapter.create error:', e);
+      // A refused client objectId is the caller's mistake, answered as a 409 or
+      // 400 by the HTTP layer — not a server fault worth an error log line.
+      // FED-002 adds the second of these: a write refused by a unique index is
+      // the caller colliding with a row that is already there — a 409 upstream,
+      // and no more a server fault than a taken objectId is.
+      // HLT-016: a row a declared check refuses is the third (a 400 upstream).
+      if (
+        !QueryBuilder.clientObjectIdProblem(e.message) &&
+        !QueryBuilder.uniqueConstraintProblem(e.message) &&
+        !QueryBuilder.checkConstraintProblem(e.message)
+      ) {
+        console.error('LocalSQLAdapter.create error:', e);
+      }
       options.error(e.message);
     }
   }
@@ -1022,6 +1068,13 @@ class LocalSQLAdapter {
    */
   save(options: SaveOptions): void {
     try {
+      if (options.expect !== undefined) {
+        const problem = QueryBuilder.expectedValuesProblem(options.expect);
+        if (problem) {
+          options.error(`Precondition ${problem}`);
+          return;
+        }
+      }
       this._ensureTable(options.collection);
 
       // Auto-add columns for new fields
@@ -1044,6 +1097,16 @@ class LocalSQLAdapter {
       const recordId = options.id || options.objectId;
       const { sql, params } = QueryBuilder.buildUpdate(options);
       const result = this.db.prepare(sql).run(...params);
+
+      // HLT-016: a precondition that matched nothing is "changed since read" only if the row is
+      // there and this caller may write it. The probe carries the ACL, so a forbidden row still
+      // answers "not found". Asked AFTER the write, which already did not happen, so it cannot race.
+      if (options.expect && (!result || result.changes === 0)) {
+        const probe = QueryBuilder.buildRowExists(options.collection, recordId, options.acl);
+        const exists = this.db.prepare(probe.sql).get(...probe.params);
+        options.error(exists ? QueryBuilder.PRECONDITION_FAILED : 'Object not found');
+        return;
+      }
 
       // With an ACL context, 0 rows changed means not-found or forbidden —
       // deliberately indistinguishable (the write predicate is compiled into
@@ -1069,7 +1132,14 @@ class LocalSQLAdapter {
         collection: options.collection
       });
     } catch (e) {
-      console.error('LocalSQLAdapter.save error:', e);
+      const missing = QueryBuilder.missingExpectedField(e.message, options.expect);
+      if (missing) {
+        options.error(QueryBuilder.preconditionFieldMessage(options.collection, missing));
+        return;
+      }
+      if (!QueryBuilder.uniqueConstraintProblem(e.message) && !QueryBuilder.checkConstraintProblem(e.message)) {
+        console.error('LocalSQLAdapter.save error:', e);
+      }
       options.error(e.message);
     }
   }
@@ -1261,6 +1331,21 @@ class LocalSQLAdapter {
   }
 
   /**
+   * R6: the required-without-default columns an insert into this collection
+   * must name — the ones the table physically has. `buildInsert` writes each
+   * one a record leaves out as NULL, so the engine refuses it rather than
+   * handing it the one-time fill SQLite keeps as the column's DDL default.
+   * `create` and the facade's import batch both ask here (BMG-017).
+   */
+  requiredToName(collection: string): string[] {
+    if (!this.schemaManager) return [];
+    const required = requiredWithoutDefault(this.schemaManager.getTableSchema(collection));
+    if (!required.length) return required;
+    const present = this.schemaManager.tableColumns(collection);
+    return required.filter((name) => present.has(name));
+  }
+
+  /**
    * Get the raw database instance
    */
   getDatabase(): EngineDatabase | null {
@@ -1314,33 +1399,8 @@ class LocalSQLAdapter {
    * @private
    */
   _inferType(value: unknown): string {
-    if (value === null || value === undefined) {
-      return 'String';
-    }
-    if (typeof value === 'string') {
-      return 'String';
-    }
-    if (typeof value === 'number') {
-      return 'Number';
-    }
-    if (typeof value === 'boolean') {
-      return 'Boolean';
-    }
-    if (value instanceof Date) {
-      return 'Date';
-    }
-    if (Array.isArray(value)) {
-      return 'Array';
-    }
-    if (typeof value === 'object') {
-      const tagged = value as { __type?: string };
-      if (tagged.__type === 'Date') return 'Date';
-      if (tagged.__type === 'Pointer') return 'Pointer';
-      if (tagged.__type === 'File') return 'File';
-      if (tagged.__type === 'GeoPoint') return 'GeoPoint';
-      return 'Object';
-    }
-    return 'String';
+    // One rule for both adapters (BRG-005): `schemaCommon.inferType`.
+    return inferType(value);
   }
 }
 

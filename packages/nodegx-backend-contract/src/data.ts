@@ -177,6 +177,19 @@ export interface CreateOptions extends Callbacks<(record: AdapterRecord) => void
    * silent no-op.
    */
   acl?: Acl;
+  /**
+   * FED-002 — write this record once, matched on the named property.
+   *
+   * The property must be covered by a single-field UNIQUE index on the
+   * collection; a backend that has one turns the create into an update of the
+   * row that already holds the value. It is `unsupported` off the Parse family
+   * for the same reason `acl` is: Directus, PostgREST and PocketBase each spell
+   * conflict handling differently, and none of them can be given this meaning
+   * by accident. Those adapters REFUSE the option rather than dropping it — a
+   * silently ignored upsert writes the duplicate row the caller asked not to
+   * have.
+   */
+  upsertOn?: string;
 }
 
 export interface SaveOptions extends Callbacks<(record: AdapterRecord) => void> {
@@ -190,6 +203,16 @@ export interface SaveOptions extends Callbacks<(record: AdapterRecord) => void> 
    */
   data: Record<string, unknown>;
   acl?: Acl;
+  /**
+   * HLT-016 — apply only if the record still holds these values (field → value; scalars only),
+   * checked by the backend inside the UPDATE. If someone changed the record after it was read, the
+   * save is refused and `error` gets `detail.reason === 'precondition-failed'`; a retry must
+   * re-read first. `unsupported` off the Parse family, and REFUSED there for `upsertOn`'s reason:
+   * an ignored precondition is an unconditional write, the lost update it exists to prevent.
+   */
+  ifMatch?: Record<string, string | number | boolean | null>;
+  /** `detail` is the backend's error body when there is one (`reason`, `expected`, …). */
+  error: (err?: string, detail?: Record<string, unknown>) => void;
 }
 
 /**

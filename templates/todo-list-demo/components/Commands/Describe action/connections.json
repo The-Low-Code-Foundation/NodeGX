@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "71513ef9-1b8a-5092-8f96-51c652825617",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "DescribeacIn",
+      "fromProperty": "rows",
+      "toId": "DescribeacGuard",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "DescribeacIn",
+      "fromProperty": "actionId",
+      "toId": "DescribeacGuard",
+      "toProperty": "in-actionId"
+    },
+    {
+      "fromId": "DescribeacIn",
+      "fromProperty": "text",
+      "toId": "DescribeacGuard",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "DescribeacIn",
+      "fromProperty": "do",
+      "toId": "DescribeacGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "DescribeacGuard",
+      "fromProperty": "out-description",
+      "toId": "DescribeacWrite",
+      "toProperty": "in-description"
+    },
+    {
+      "fromId": "DescribeacIn",
+      "fromProperty": "actionId",
+      "toId": "DescribeacWrite",
+      "toProperty": "in-modelId"
+    },
+    {
+      "fromId": "DescribeacGuard",
+      "fromProperty": "out-go",
+      "toId": "DescribeacWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "DescribeacIn",
+      "fromProperty": "taskId",
+      "toId": "DescribeacHistory",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "DescribeacGuard",
+      "fromProperty": "out-summary",
+      "toId": "DescribeacHistory",
+      "toProperty": "summary"
+    },
+    {
+      "fromId": "DescribeacIn",
+      "fromProperty": "actionId",
+      "toId": "DescribeacHistory",
+      "toProperty": "mergeKey"
+    },
+    {
+      "fromId": "DescribeacWrite",
+      "fromProperty": "out-done",
+      "toId": "DescribeacHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "DescribeacHistory",
+      "fromProperty": "done",
+      "toId": "DescribeacOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "DescribeacWrite",
+      "fromProperty": "out-failure",
+      "toId": "DescribeacProblem",
+      "toProperty": "do"
+    }
+  ]
+}

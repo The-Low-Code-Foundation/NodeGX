@@ -1,0 +1,20 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "100kde5k-5c00-4000-8000-000000000002",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "look-desk-router",
+      "type": "Router",
+      "label": "Main Router",
+      "parameters": {
+        "name": "Main",
+        "pages": {
+          "startPage": "/Pages/Looks",
+          "routes": ["/Pages/Looks"]
+        }
+      }
+    }
+  ],
+  "visualRoots": ["look-desk-router"]
+}

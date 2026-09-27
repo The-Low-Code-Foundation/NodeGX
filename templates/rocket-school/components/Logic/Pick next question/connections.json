@@ -1,0 +1,199 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7f5c04d9-f738-599d-836f-186a4891f967",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "picknextquesIn",
+      "fromProperty": "nonce",
+      "toId": "picknextquesFn",
+      "toProperty": "in-nonce"
+    },
+    {
+      "fromId": "picknextquesIn",
+      "fromProperty": "curriculum",
+      "toId": "picknextquesFn",
+      "toProperty": "in-curriculum"
+    },
+    {
+      "fromId": "picknextquesIn",
+      "fromProperty": "model",
+      "toId": "picknextquesFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "picknextquesIn",
+      "fromProperty": "level",
+      "toId": "picknextquesFn",
+      "toProperty": "in-level"
+    },
+    {
+      "fromId": "picknextquesIn",
+      "fromProperty": "lang",
+      "toId": "picknextquesFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "picknextquesIn",
+      "fromProperty": "layout",
+      "toId": "picknextquesFn",
+      "toProperty": "in-layout"
+    },
+    {
+      "fromId": "picknextquesIn",
+      "fromProperty": "mode",
+      "toId": "picknextquesFn",
+      "toProperty": "in-mode"
+    },
+    {
+      "fromId": "picknextquesIn",
+      "fromProperty": "answerMode",
+      "toId": "picknextquesFn",
+      "toProperty": "in-answerMode"
+    },
+    {
+      "fromId": "picknextquesIn",
+      "fromProperty": "customSet",
+      "toId": "picknextquesFn",
+      "toProperty": "in-customSet"
+    },
+    {
+      "fromId": "picknextquesIn",
+      "fromProperty": "wordLists",
+      "toId": "picknextquesFn",
+      "toProperty": "in-wordLists"
+    },
+    {
+      "fromId": "picknextquesIn",
+      "fromProperty": "limitScale",
+      "toId": "picknextquesFn",
+      "toProperty": "in-limitScale"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-skillId",
+      "toId": "picknextquesOut",
+      "toProperty": "skillId"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-skillName",
+      "toId": "picknextquesOut",
+      "toProperty": "skillName"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-prompt",
+      "toId": "picknextquesOut",
+      "toProperty": "prompt"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-answer",
+      "toId": "picknextquesOut",
+      "toProperty": "answer"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-options",
+      "toId": "picknextquesOut",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-optionValues",
+      "toId": "picknextquesOut",
+      "toProperty": "optionValues"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-choices",
+      "toId": "picknextquesOut",
+      "toProperty": "choices"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-kind",
+      "toId": "picknextquesOut",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-isTyping",
+      "toId": "picknextquesOut",
+      "toProperty": "isTyping"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-nextKey",
+      "toId": "picknextquesOut",
+      "toProperty": "nextKey"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-fluentMs",
+      "toId": "picknextquesOut",
+      "toProperty": "fluentMs"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-limitMs",
+      "toId": "picknextquesOut",
+      "toProperty": "limitMs"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-strategy",
+      "toId": "picknextquesOut",
+      "toProperty": "strategy"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-teach",
+      "toId": "picknextquesOut",
+      "toProperty": "teach"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-itemDiff",
+      "toId": "picknextquesOut",
+      "toProperty": "itemDiff"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-predicted",
+      "toId": "picknextquesOut",
+      "toProperty": "predicted"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-shownAt",
+      "toId": "picknextquesOut",
+      "toProperty": "shownAt"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-worked",
+      "toId": "picknextquesOut",
+      "toProperty": "worked"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-padKeys",
+      "toId": "picknextquesOut",
+      "toProperty": "padKeys"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-padNumeric",
+      "toId": "picknextquesOut",
+      "toProperty": "padNumeric"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "success",
+      "toId": "picknextquesOut",
+      "toProperty": "done"
+    }
+  ]
+}

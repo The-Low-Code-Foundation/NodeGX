@@ -1,0 +1,111 @@
+/**
+ * CHR-006 AC2 — a project made from a template starts with the template's picture, stored as a
+ * `data:` URI and never over a real capture.
+ *
+ * ⚠️ What this cannot see: that the launcher's project card then DRAWS the seeded picture. That is
+ * the drive's (`verdicts/CHR-006/`); this grades the decision and the one call site.
+ */
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+import { seedTemplateThumbnail, type ThumbnailTarget } from '@noodl-models/template/seedTemplateThumbnail';
+
+import { stripComments } from '../support/renderElements';
+
+const SHOT = Buffer.from([0x52, 0x49, 0x46, 0x46, 0x1a, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50, 0x56, 0x50, 0x38, 0x4c, 0x20, 0x74, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x61, 0x20, 0x70, 0x69, 0x63, 0x74, 0x75, 0x72, 0x65]);
+const REAL_CAPTURE = `data:image/png;base64,${'A'.repeat(200)}`;
+
+function projectWith(initial?: string): ThumbnailTarget & { writes: string[] } {
+  let current = initial;
+  const writes: string[] = [];
+  return {
+    writes,
+    getThumbnailURI: () => current,
+    setThumbnailFromDataURI: (uri: string) => {
+      current = uri;
+      writes.push(uri);
+    }
+  };
+}
+
+const serve =
+  (body: Buffer, init: { status?: number; type?: string | null } = {}) =>
+  async () =>
+    new Response(new Uint8Array(body), {
+      status: init.status ?? 200,
+      headers: init.type === null ? {} : { 'content-type': init.type ?? 'image/webp' }
+    });
+
+describe('seedTemplateThumbnail', () => {
+  it('seeds a project with no capture from the picture, as a data URI of the exact bytes', async () => {
+    const project = projectWith(undefined);
+    const outcome = await seedTemplateThumbnail(project, 'https://c.test/api/v1/community/templates/a/thumbnail?v=1', serve(SHOT));
+    expect(outcome).toBe('seeded');
+    expect(project.writes).toEqual([`data:image/webp;base64,${SHOT.toString('base64')}`]);
+  });
+
+  it('🔴 never stores the URL itself — a stored URL is a network read on every launcher start', async () => {
+    const project = projectWith(undefined);
+    await seedTemplateThumbnail(project, 'https://c.test/x/thumbnail', serve(SHOT));
+    expect(project.writes.every((w) => w.startsWith('data:image/'))).toBe(true);
+    expect(project.writes.join('')).not.toContain('https://');
+  });
+
+  it('takes the type from the extension when a bundled asset arrives with none', async () => {
+    const project = projectWith(undefined);
+    const outcome = await seedTemplateThumbnail(project, '../assets/images/templates/landing-pages.webp', serve(SHOT, { type: null }));
+    expect(outcome).toBe('seeded');
+    expect(project.writes[0]).toMatch(/^data:image\/webp;base64,/);
+  });
+
+  it('🔴 keeps a real capture — and the control: an empty-svg sentinel is not one', async () => {
+    const captured = projectWith(REAL_CAPTURE);
+    expect(await seedTemplateThumbnail(captured, 'https://c.test/t', serve(SHOT))).toBe('kept');
+    expect(captured.writes).toEqual([]);
+
+    const sentinel = projectWith('data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=');
+    expect(await seedTemplateThumbnail(sentinel, 'https://c.test/t', serve(SHOT))).toBe('seeded');
+  });
+
+  it('⚠️ keeps a capture that arrived while the picture was on the wire', async () => {
+    const project = projectWith(undefined);
+    const racing = async () => {
+      project.setThumbnailFromDataURI(REAL_CAPTURE); // the editor captured meanwhile
+      return new Response(new Uint8Array(SHOT), { headers: { 'content-type': 'image/webp' } });
+    };
+    expect(await seedTemplateThumbnail(project, 'https://c.test/t', racing)).toBe('kept');
+    expect(project.getThumbnailURI()).toBe(REAL_CAPTURE);
+  });
+
+  it('changes nothing for a template with no picture, a 404, a non-image, an empty body or a thrown fetch', async () => {
+    const cases: Array<[string | undefined, () => Promise<Response>, string]> = [
+      [undefined, serve(SHOT), 'no-picture'],
+      ['https://c.test/t', serve(SHOT, { status: 404 }), 'failed'],
+      ['https://c.test/t', serve(Buffer.from('<html>'), { type: 'text/html' }), 'failed'],
+      ['https://c.test/t', serve(Buffer.alloc(0)), 'failed'],
+      [
+        'https://c.test/t',
+        async () => {
+          throw new Error('ENOTFOUND');
+        },
+        'failed'
+      ]
+    ];
+    for (const [src, fetchImpl, expected] of cases) {
+      const project = projectWith(undefined);
+      expect(await seedTemplateThumbnail(project, src, fetchImpl as typeof fetch)).toBe(expected);
+      expect(project.writes).toEqual([]);
+    }
+  });
+});
+
+describe('the one creation route seeds it', () => {
+  const page = stripComments(
+    readFileSync(join(__dirname, '../../src/editor/src/pages/ProjectsPage/ProjectsPage.tsx'), 'utf8')
+  );
+
+  it('calls the seed exactly once, with the chosen row’s thumbnail, only in template mode', () => {
+    expect(page.match(/seedTemplateThumbnail\(/g)?.length).toBe(1);
+    expect(page).toMatch(/mode === 'template'[\s\S]{0,160}\?\.thumbnail/);
+  });
+});

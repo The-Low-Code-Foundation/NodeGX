@@ -1,10 +1,10 @@
 # EXP-014 — The ground the headline sits on
 
-**Status:** 🟢 **BUILT, GATED AND DRIVEN — session 97, 2026-09-06.** All eight acceptance criteria
+**Status:** 🟢 **BUILT, GATED AND DRIVEN — session 97, 2026-09-06. §14.5 residual CLOSED — session 99, 2026-09-12** (record at the end).** All eight acceptance criteria
 graded below. `tests/the-ground.test.ts`, 32 rows; fixture `tests/fixtures/ground-desk`; ten
 mutation arms, 10/10 killed. Driven on the installed landing-pages template: the hero headline
 went from **1.03:1 to 17.24:1**, and the Business hero's photograph and its 14px frosted panel are
-in the running app. One residual registered (§14.5).
+in the running app. One residual registered (§14.5) and closed two sessions later; one runtime-side residual registered in its place (§14.6).
 **Owner:** P18. **Opened by:** the TPL-003 landing-pages export drive, 2026-09-06 (record at the end
 of this file). Richard: *"Can we write some bug fixing tasks to sort this out please?"*
 **Priority:** 🔴 **Highest of the three.** It is the first screen of all three shipped landing pages,
@@ -149,7 +149,77 @@ specs, **4 failures = the floor by name** (AIX-006 ×4, seed 61662, readout fres
 **Pictures.** `before-business.png` / `after-business.png` and `before-freelancer.png` /
 `after-freelancer.png`, 1280px, in the session-97 scratchpad `26fc68ac-…`.
 
-## Residual — §14.5, owner NONE
+## Residual — §14.5 — CLOSED s99 (2026-09-12)
+
+### What was built — session 99
+
+**Re-measured first, and the register was right but SMALLER than the surface.** The emitted app
+routes with a `BrowserRouter` (`scaffold.ts`), `index.html` carries no `<base>`, and `contentAttrs`
+printed every media URL parameter verbatim — but so did `renderIcon` for a picture-sourced icon, and
+the register named four ports where the product surface has five. And the literal case is the
+SMALLER half: the landing-pages template carries **2** literal `Image.src` and about **18** pictures
+through `Static Data` rows, wired into a card's `src` — the wired path is the common one, and a
+fix at emit time alone would have left the template's galleries exactly where they were.
+
+**The rule is the viewer's, transcribed, not invented.** The Image and Video nodes run every source
+through `resolveMediaSource` (`media-source.ts`: `null`/`undefined`/`''` clear the attribute — `src=""`
+refetches the document, measured there) in front of the runtime's `getAbsoluteUrl` (`utils.ts`: a
+local path takes `Noodl.baseUrl || '/'`; `/…`, `…://…` and `data:` pass through); the icon's
+`iconImageSource` setter is `getAbsoluteUrl` alone. `src/emit/mediaLib.ts` carries both as
+`absoluteUrl` and `mediaSrc`, plus `mediaSrcSet` (the HTML `srcset` tokeniser: a candidate URL is a
+run of non-whitespace with trailing commas stripped, so a comma inside a `data:` URI survives), and
+`mediaLibSource()` — the same three as emitted text, `src/lib/media.ts`. A **literal** resolves at emit
+time (`src="/noodl_modules/…"`, no attribute for an emptied field); a **wire** prints
+`src={mediaSrc(picture)}` and earns the import, set after the render because that is where the
+attribute is printed; the module ships exactly when a line names it (the dead-module rule).
+
+🔴 **One deliberate non-transcription, recorded where `cssUrl`'s is:** `srcset` is resolved candidate
+by candidate, where the viewer sets it verbatim (`image.ts`, `propPath: 'dom'`, no setter). The
+export's router has no hash mode, so verbatim would be a picture that breaks one route-depth away —
+the residual itself. The viewer carries the same latent 404 in `srcset` under path routing: **§14.6**,
+owner NONE, runtime.
+
+**The fixture is the first in the corpus two segments deep.** `tests/fixtures/picture-desk`: a Team
+page at `gallery/team` carrying a local picture, a CDN one, a root-absolute one, a `data:` URI, an
+emptied field, a `srcset`, a Video with a poster, a picture icon and a For Each over Static Data
+wiring a picture into a card; the module folder ships four real SVGs so the drive can fetch them.
+Pre-fix, on this tree: every local source verbatim, `src=""` printed, **no note** — the same silent
+vanish as the three ports in §1. `tests/the-picture-path.test.ts`, 26 rows; §E transpiles the
+emitted module and runs it beside the package's functions over one table, so the second copy cannot
+drift; §F is the reverted arm as a reading — Node's WHATWG `URL` resolves the verbatim spelling to
+`/gallery/noodl_modules/…` and the emitted one to `/noodl_modules/…`, and on a one-segment route the
+two agree, which is why three drives read zero broken images. **15 arms, 15/15 killed.**
+
+**What moved elsewhere, counted before any golden was touched.** Three corpus projects have a wired
+picture — `gallery-desk` and `photo-desk` (a Cloud File's https `url`, which `mediaSrc` passes
+through untouched, as the viewer does) and `puppy-test-3` (PuppyCard) — 9 hashes changed and
+3 `src/lib/media.ts` added, zero changes in the other 42; the HLS-001 golden regenerated with that
+count in its comment, the hand-written PuppyCard golden and EXP-002-TARGET-OUTPUT §1 moved by the same
+two lines, the two Cloud File pins re-pointed. Ledger notes for Image and Video updated; picker
+**117/127 unchanged** — a parameter fix inside translated nodes, like §1.
+
+**The drive — both arms, same fixture, same instrument.** The reverted arm is a `git worktree add
+--detach HEAD` export of `picture-desk`, built and served beside the fixed one (`npm install` once,
+shared; `tsc -b` 0 and `vite build` 0 on both, 48 vs 49 modules — the module), one headless Chrome at
+`/gallery/team`, 1280px:
+
+| reading at `/gallery/team` | before | after |
+|---|---|---|
+| where a local `<img src>` resolves | `/gallery/noodl_modules/…` ×4 | `/noodl_modules/…` ×4 |
+| local pictures that decoded (`naturalWidth`) | **0 of 4** | **4 of 4** (400, 800, 800, 800) |
+| the video's `src` / `poster` | both under `/gallery/…` | both at the root; the poster served `image/svg+xml` |
+| the emptied field | `src=""` | no `src` attribute |
+| console errors / page exceptions | 0 | 0 |
+
+🔴 **`responseStatus` read 200 for every broken picture in the reverted arm** — `vite preview`'s SPA
+fallback answers `text/html` for a path it does not have, so a status column would have graded the
+defect green. The decode state is the reading; the content type (`curl -I`: `text/html` for the
+`/gallery/…` spelling, `image/svg+xml` for the root one) is the control on the server side.
+⚠️ The `srcset` picture picks its `1080w` CDN candidate at 1280px in BOTH arms (the browser's choice,
+unreachable host), and the `data:` GIF is a hand-typed stub that decodes in neither — same in both,
+neither is a resolution reading. Pictures `drive-before.png` / `drive-after.png` in the s99 scratchpad.
+
+### Residual as registered s97 (for the record)
 
 ⬜ **An `<img src>` is still emitted project-relative, and that is a latent 404 one route-depth
 away.** `contentAttrs` prints `src="noodl_modules/starter-imagery/food-grocer.webp"` verbatim, the
@@ -160,6 +230,14 @@ cases). Every route this template emits is one segment, which is exactly why the
 broken images** and why this is a residual rather than a finding. The fix is `cssUrl`'s rule applied
 to the `attr:src` channel — `Image.src`, `Image.srcSet`, `Video.src` and `Video.poster` — and it
 wants a fixture with a nested `urlPath` to grade it.
+
+## Residual — §14.6, owner NONE (runtime)
+
+⬜ **The viewer sets `Image.srcSet` verbatim** (`image.ts`, an `inputProps` entry with `propPath: 'dom'`
+and no setter) while `src` goes through `getAbsoluteUrl`. Under the default hash routing the document
+is always `/` and it works; under `navigationPathType: "path"` a project-relative candidate on a
+route two segments deep resolves under the route — the same 404 §14.5 closed for the export. Found
+while transcribing; the export resolves per candidate and records the divergence in `mediaLib.ts`.
 
 ## Not in scope
 

@@ -159,14 +159,19 @@ describe('NDA-005 C1: every static port of the Record family is described', () =
       staticPorts: 10
     },
     {
+      // 8 → 9 with FED-002's `Upsert On` (phase 96): the one port on this family that is not
+      // contributed by a mixin. Counted, not bumped — the nine are `store`, `sourceObjectId`,
+      // `upsertOn` and `accessControl` in, and `done`, `completed`, `failure`, `error` and `id`
+      // out, which is the list this spec prints when the number is wrong.
       typeName: 'NewDbModelProperties',
       module: '../../src/nodes/std-library/data/newdbmodelpropertiesnode',
-      staticPorts: 8
+      staticPorts: 9
     },
     {
       typeName: 'SetDbModelProperties',
       module: '../../src/nodes/std-library/data/setdbmodelpropertiesnode',
-      staticPorts: 12
+      // 12 → 13: P99 HLT-016 added `onlyIfUnchanged` (described; see the port's own `description`).
+      staticPorts: 13
     },
     {
       typeName: 'DeleteDbModelProperties',

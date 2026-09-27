@@ -1,0 +1,82 @@
+{
+  "task": "TVW-001",
+  "criterion": "AC7 after rulings",
+  "date": "2026-09-18",
+  "homeRowAt240Corpus": {
+    "before": {
+      "labelAllottedPx": 19,
+      "labelNeededPx": 33,
+      "rendered": "H…",
+      "routeMetaPx": 88
+    },
+    "after": {
+      "labelAllottedPx": 117,
+      "labelNeededPx": 117,
+      "clipped": false,
+      "routeMeta": null,
+      "startChipPresent": true
+    }
+  },
+  "benchCaptionAtPanel646": {
+    "before": {
+      "availablePx": 105,
+      "neededPx": 330,
+      "frameControlsPx": 363,
+      "rendered": "Workbench — Filt…"
+    },
+    "after": {
+      "availablePx": 247,
+      "neededPx": 248,
+      "frameControlsPx": 221,
+      "rendered": "Workbench — FilterPill on its own, not the ap…"
+    }
+  },
+  "benchCaptionAtPanel300": {
+    "availablePx": 451,
+    "neededPx": 451,
+    "truncated": false,
+    "text": "Workbench — FilterPill on its own, not the app."
+  },
+  "shrinkFactorTried": {
+    "8": "caption still paid 11px while controls had 136px of give above their floor",
+    "100": "caption pays last"
+  },
+  "instrumentDisagreement": {
+    "canvasMeasureText": "243.8px needed in a 246.8px box — said it FITS",
+    "scrollWidth": "248 > 247 — said it truncates",
+    "screenshot": "truncated ('not the ap…')",
+    "cause": "measureText used the container's normal-weight font on a caption drawn as <strong>+<span>, under-measuring the bold half",
+    "resolution": "the screenshot won"
+  },
+  "urlPathReachAcrossMachine": {
+    "projectsScanned": 130,
+    "projectsWithPages": 91,
+    "pagesAuthoringUrlPath": 221,
+    "pagesWithout": 41,
+    "reading": "Authoring is the norm (84%); the ruling removes the chip only where it was never real."
+  },
+  "routedControl": {
+    "routesRendered": [
+      "/{slug}",
+      "/admin/page/{pageId}",
+      "/admin/theme",
+      "/admin/pages",
+      "/admin/signin",
+      "/admin/setup"
+    ],
+    "allMetaRightEdgePx": 258,
+    "onlyClippedAt240": "/admin/page/{pageId}",
+    "firstLabelClipped": false
+  },
+  "gates": {
+    "tvw001": "7 suites / 63",
+    "tvw001+vfn011": "11 suites / 118",
+    "tsc": "EXIT=0",
+    "fontSizeRatchet": -6,
+    "hexRatchet": "16/16",
+    "mutants": {
+      "red_and_cmp_proven": 3,
+      "failed_to_compile_not_a_pass": 1
+    }
+  }
+}

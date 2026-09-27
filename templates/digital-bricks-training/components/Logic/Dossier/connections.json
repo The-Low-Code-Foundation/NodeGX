@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7da347be-a8eb-47da-91a9-8ada61c99821",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "do_in",
+      "fromProperty": "deliverables",
+      "toId": "do_fn",
+      "toProperty": "in-deliverables"
+    },
+    {
+      "fromId": "do_in",
+      "fromProperty": "facts",
+      "toId": "do_fn",
+      "toProperty": "in-facts"
+    },
+    {
+      "fromId": "do_in",
+      "fromProperty": "submissions",
+      "toId": "do_fn",
+      "toProperty": "in-submissions"
+    },
+    {
+      "fromId": "do_in",
+      "fromProperty": "concepts",
+      "toId": "do_fn",
+      "toProperty": "in-concepts"
+    },
+    {
+      "fromId": "do_in",
+      "fromProperty": "onboardingFacts",
+      "toId": "do_fn",
+      "toProperty": "in-onboardingFacts"
+    },
+    {
+      "fromId": "do_in",
+      "fromProperty": "audience",
+      "toId": "do_fn",
+      "toProperty": "in-audience"
+    },
+    {
+      "fromId": "do_in",
+      "fromProperty": "copy",
+      "toId": "do_fn",
+      "toProperty": "in-copy"
+    },
+    {
+      "fromId": "do_fn",
+      "fromProperty": "out-segments",
+      "toId": "do_out",
+      "toProperty": "segments"
+    },
+    {
+      "fromId": "do_fn",
+      "fromProperty": "out-hasSegments",
+      "toId": "do_out",
+      "toProperty": "hasSegments"
+    },
+    {
+      "fromId": "do_fn",
+      "fromProperty": "out-toldUs",
+      "toId": "do_out",
+      "toProperty": "toldUs"
+    },
+    {
+      "fromId": "do_fn",
+      "fromProperty": "out-hasToldUs",
+      "toId": "do_out",
+      "toProperty": "hasToldUs"
+    },
+    {
+      "fromId": "do_fn",
+      "fromProperty": "out-loaded",
+      "toId": "do_out",
+      "toProperty": "loaded"
+    }
+  ]
+}

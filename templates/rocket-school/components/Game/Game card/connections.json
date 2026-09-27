@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "358343f1-c054-55d2-87cf-0cc080d2f330",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "gcIn",
+      "fromProperty": "title",
+      "toId": "gcTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gcIn",
+      "fromProperty": "blurb",
+      "toId": "gcBlurb",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gcIn",
+      "fromProperty": "glyph",
+      "toId": "gcGlyph",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gcIn",
+      "fromProperty": "enabled",
+      "toId": "gcOn",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "gcOn",
+      "fromProperty": "ontrue",
+      "toId": "gcStates",
+      "toProperty": "to-on"
+    },
+    {
+      "fromId": "gcOn",
+      "fromProperty": "onfalse",
+      "toId": "gcStates",
+      "toProperty": "to-off"
+    },
+    {
+      "fromId": "gcStates",
+      "fromProperty": "opacity",
+      "toId": "gcCard",
+      "toProperty": "opacity"
+    },
+    {
+      "fromId": "gcStates",
+      "fromProperty": "edge",
+      "toId": "gcCard",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "gcIn",
+      "fromProperty": "enabled",
+      "toId": "gcGate",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "gcCard",
+      "fromProperty": "onClick",
+      "toId": "gcGate",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "gcGate",
+      "fromProperty": "ontrue",
+      "toId": "gcOut",
+      "toProperty": "chosen"
+    }
+  ]
+}

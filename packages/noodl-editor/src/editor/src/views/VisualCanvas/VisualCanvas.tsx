@@ -53,14 +53,28 @@ import {
 } from './benchRequest';
 import { registerLivePreview, unregisterLivePreview } from '../SandboxSurface';
 import { BENCH_FRAME_KEY, benchFrameStore, readBenchFrameDefault } from './benchFrameDefault';
+import {
+  BENCH_SCENARIOS_KEY,
+  benchOpeningFrame,
+  benchOpeningScenario,
+  readBenchScenarios
+} from './benchScenarios';
+import { BOARD, CAPTION_JOIN, WORKBENCH, benchCaptionRest } from './benchWords';
+import { boardCaptionRest } from './boardSurface';
 import { ComponentBench } from './ComponentBench';
+import { ComponentBoard } from './ComponentBoard';
 import { BenchFrameControl, PreviewScopeControl } from './PreviewChrome';
+import { stripToRender, type DetachedStripProps } from './detachedStrip';
+import { publishPlacementOutline } from './placementOutline';
+import { usePreviewStrip } from './usePreviewStrip';
 import {
   APP_SCOPE,
   DEFAULT_BENCH_FRAME,
   benchSizeLabel,
   benchTargetLabel,
   isDivergedFromCanvas,
+  showsAppPreview,
+  showsBoard,
   type BenchFrame,
   type PreviewScope
 } from './previewScope';
@@ -77,14 +91,22 @@ export interface VisualCanvasProps {
   designSelection?: { label: string; seq: number };
 }
 
+/**
+ * TVW-002 AC5 — the two props that are set only when this copy is the **detached** preview
+ * window's. See `detachedStrip.ts`; the same component renders in both windows.
+ */
+export type VisualCanvasAllProps = VisualCanvasProps & DetachedStripProps;
+
 export function VisualCanvas({
   onWebView,
   deviceName,
   zoom,
   designMode,
   onExitDesignMode,
-  designSelection
-}: VisualCanvasProps) {
+  designSelection,
+  previewStrip,
+  onStripAction
+}: VisualCanvasAllProps) {
   const webviewRef = useRef<Electron.WebviewTag>(null);
   const containerRef = useRef(null);
 
@@ -106,7 +128,41 @@ export function VisualCanvas({
   const [frame, setFrame] = useState<BenchFrame>(DEFAULT_BENCH_FRAME);
   /** The bench frame's measured box — see `ComponentBench`'s `onFrameMeasured`. */
   const [benchMeasured, setBenchMeasured] = useState<{ width: number; height: number } | undefined>(undefined);
+  /**
+   * ⚠️ **Kept as the discriminant comparison on purpose, not tidied into
+   * `showsBench(scope)`.** TypeScript narrows a union through a `const` that
+   * aliases a discriminant check, so `scope.target` type-checks inside
+   * `isBench && …`. A helper returning `boolean` throws that away, and the four
+   * reads of `scope.target` below stop compiling. The predicate exists for the
+   * callers that only want the answer; this one wants the narrowing too.
+   */
   const isBench = scope.mode === 'bench';
+  /**
+   * 🔴 **TVW-008 §6.5 — this is not `!isBench`, and the difference is six
+   * behaviours.** Every question below used to be asked as `!isBench`, which was
+   * right while there were two modes and silently wrong the moment there were
+   * three: the preview strip, the design chrome and the viewport read-out all
+   * describe *a route and a viewport*, which the board has neither of. Adding
+   * the third variant compiled clean and changed all of them, so the question is
+   * asked of the mode directly now — `showsAppPreview` switches exhaustively, and
+   * a fourth mode is six compile errors instead of six silent changes.
+   */
+  const isApp = showsAppPreview(scope);
+
+  /**
+   * TVW-008 — the third mode. Read through the predicate rather than as
+   * `!isApp && !isBench`, which is the shape §6.5 measured six of.
+   */
+  const isBoard = showsBoard(scope);
+
+  /**
+   * How many components are on the board, for the strip caption.
+   *
+   * Reported up from `ComponentBoard` rather than read here, because
+   * `bench.board` has exactly one reader and a second one would be a second
+   * thing to keep in step with an undo.
+   */
+  const [boardFrameCount, setBoardFrameCount] = useState(0);
 
   /**
    * FIX-019 — which component the node graph is on, so the strip can say when
@@ -141,6 +197,45 @@ export function VisualCanvas({
   const diverged = isDivergedFromCanvas(scope, canvasComponent);
 
   /**
+   * TVW-002 — the sentence between the two surfaces.
+   *
+   * Shown for the app and nothing else, deliberately: the bench already says what it is showing in
+   * its caption and says when the canvas has moved away with its own chip, and the board says what
+   * is on it. A third claim on the same surface is a third answer to "what am I looking at", which
+   * is the confusion this phase is closing. ⚠️ Was `!isBench` until TVW-008 — see `isApp`.
+   */
+  const { strip: localStrip, outline, goToPage, dismiss } = usePreviewStrip(canvasComponent, isApp);
+
+  /**
+   * TVW-002 AC5 — the detached window renders the editor's answer; the docked one computes its own.
+   *
+   * 🔴 **`undefined` is not `null`.** `previewStrip === undefined` means nobody is pushing to this
+   * copy, so it is the docked one and `localStrip` is the answer. `null` means the editor pushed
+   * and had nothing to say — which still draws the wordless seam, because the seam belongs to the
+   * boundary and not to the sentence. Written `?? localStrip` rather than `|| localStrip` for
+   * exactly that distinction.
+   *
+   * ⚠️ In the detached window `localStrip` is always `IDLE` anyway (no node graph, no project
+   * model), so this is not a race between two live answers — it is one answer and one placeholder.
+   */
+  const isDetached = Boolean(onStripAction);
+  const strip = stripToRender(previewStrip, localStrip);
+
+  /**
+   * TVW-002 AC1 — publish where the canvas's component sits on the screen, for `EditorDocument` to
+   * merge with the author's own selection. See `placementOutline.ts` for why this surface publishes
+   * rather than draws.
+   *
+   * ⚠️ The cleanup publishes `null`. This component unmounts on every layout change (the reason
+   * `benchRequest.ts` decouples the bench at all), and an outline left behind would sit on the app
+   * with nothing on screen still claiming it.
+   */
+  useEffect(() => {
+    publishPlacementOutline(outline);
+    return () => publishPlacementOutline(null);
+  }, [outline]);
+
+  /**
    * FIX-011 — the component's own default size, read on the way in and written
    * only by the button.
    *
@@ -160,12 +255,26 @@ export function VisualCanvas({
     const stored = readBenchFrameDefault(component?.getMetaData(BENCH_FRAME_KEY));
     setHasDefaultSize(Boolean(stored));
 
-    // ⚠️ Only *applied* when there is one. Falling back to `DEFAULT_BENCH_FRAME`
-    // here would reset the frame every time you pointed the bench at a
-    // component that has no stored default — silently throwing away a width the
-    // user set moments ago, which is the frame control's own version of the
-    // reported bug.
-    if (stored) setFrame(stored);
+    /**
+     * TVW-008 AC4 — the scenario the bench opens on has a width, and it wins.
+     *
+     * ⚠️ **Only ever *applied* when there is one.** Falling back to `DEFAULT_BENCH_FRAME` here
+     * would reset the frame every time you pointed the bench at a component that has neither a
+     * scenario frame nor a stored default — silently throwing away a width the user set moments
+     * ago, which is the frame control's own version of the reported bug. That rule is now
+     * {@link benchOpeningFrame}'s `current` argument, which is why this is a functional update:
+     * the effect is keyed on the target, so a `frame` read from the closure would be the width
+     * from whenever the target last changed rather than the one on screen.
+     *
+     * 🔴 The *values* are seeded by `ComponentBench` and the *width* here, and they must not swap:
+     * child effects run before parent effects, so a width set in the child would be overwritten by
+     * this one without either file saying so.
+     */
+    // No interface is passed, and none is needed: `iface` only filters the *values*, and the only
+    // field read here is the scenario's own recorded frame. Which scenario it is — the first — is
+    // the one rule, and it is asked of the one function the bench asks.
+    const opening = benchOpeningScenario(readBenchScenarios(component?.getMetaData(BENCH_SCENARIOS_KEY)));
+    if (stored || opening) setFrame((current) => benchOpeningFrame(opening, stored, current));
   }, [benchTarget]);
 
   /**
@@ -191,11 +300,11 @@ export function VisualCanvas({
    * inspector eats the event in the capture phase) and read it as broken. The
    * frame is the standing answer, the toast is the answer to a specific click.
    *
-   * Scoped to `!isBench` deliberately: the bench has its own accent strip for
-   * its own claim, and two accent claims on one surface is two answers to
-   * "what am I looking at".
+   * Scoped to the app preview deliberately: the bench has its own accent strip
+   * for its own claim, and two accent claims on one surface is two answers to
+   * "what am I looking at". The board is the same case as the bench.
    */
-  const showDesignChrome = Boolean(designMode) && !isBench;
+  const showDesignChrome = Boolean(designMode) && isApp;
   const [selectionToast, setSelectionToast] = useState<string | null>(null);
 
   useEffect(() => {
@@ -348,10 +457,19 @@ export function VisualCanvas({
           <>
             {/* R2's persistent strip: what is mounted, and that it is isolated.
                 Said in words as well as drawn, because the words are what a
-                user repeats when they file a bug about it. */}
+                user repeats when they file a bug about it.
+
+                TVW-001 (f) / R-G — and the word it hands them is now the
+                surface's own name. FIX-019 had it describe itself without
+                naming itself; a person who cannot name it cannot ask for it.
+                The strings live in `benchWords.ts` so this, the panel's menu
+                row and the scope picker cannot drift into three dialects. */}
             <div className={css.BenchCaption} data-test="bench-caption">
-              <strong>{benchTargetLabel(scope.target)}</strong>
-              <span>&nbsp;— isolated component, not the app</span>
+              <strong>{WORKBENCH}</strong>
+              <span>
+                {CAPTION_JOIN}
+                {benchCaptionRest(benchTargetLabel(scope.target))}
+              </span>
             </div>
 
             {/*
@@ -397,13 +515,33 @@ export function VisualCanvas({
             </div>
           </>
         )}
+
+        {/*
+          TVW-008 — the board's half of the same row, in the same voice: the
+          surface names itself and then says what is on it.
+
+          🔴 **It does not mention data, and that is AC7's ruling rather than an
+          omission.** `boardCaptionRest` carries the reasoning: Richard cut
+          "Sample values." from the bench caption on 2026-09-18 because *sample*
+          meant two things within 44px, and on the board the frame captions
+          already say where each frame's values came from, per frame.
+        */}
+        {isBoard && (
+          <div className={css.BenchCaption} data-test="board-caption">
+            <strong>{BOARD}</strong>
+            <span>
+              {CAPTION_JOIN}
+              {boardCaptionRest(boardFrameCount)}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className={classNames(css.Stages, showDesignChrome && css['is-design'])}>
         {/* PAR-003: size tag per mock — `1280 × 800 · 100%`, mono, top-right.
             Lives inside the stage so it floats over the preview rather than
             over the chrome strip above it. */}
-        {showViewportSize && !isBench && webviewBounds && (
+        {showViewportSize && isApp && webviewBounds && (
           <div className={css.ViewportInfo}>{`${deviceName ? deviceName + ' · ' : ''}${Math.floor(
             webviewBounds.width
           )} × ${Math.floor(webviewBounds.height)} · ${Math.floor(zoom * 100)}%`}</div>
@@ -416,7 +554,7 @@ export function VisualCanvas({
           measuring a real rectangle.
         */}
         <div
-          className={classNames(css.WebviewContainer, isBench && css['is-hidden'])}
+          className={classNames(css.WebviewContainer, !isApp && css['is-hidden'])}
           style={style}
           ref={containerRef}
           data-test="app-preview"
@@ -440,6 +578,18 @@ export function VisualCanvas({
             frame={frame}
             onFrameChange={setFrame}
             onFrameMeasured={setBenchMeasured}
+            designMode={Boolean(designMode)}
+          />
+        )}
+
+        {/* TVW-008 slice 2 — one `<webview>`, N frames, and the chrome the
+            editor draws over it. Mounted only in board mode, so the board's
+            client exists only while somebody is looking at it. */}
+        {isBoard && (
+          <ComponentBoard
+            designMode={Boolean(designMode)}
+            onScopeChange={setScope}
+            onFrameCountChange={setBoardFrameCount}
           />
         )}
 
@@ -452,6 +602,103 @@ export function VisualCanvas({
             <strong>Selected {selectionToast}</strong>
             <span>Editing it in the property panel. Switch to Preview to click it for real.</span>
           </div>
+        )}
+      </div>
+
+      {/*
+        TVW-002 — what the preview is NOT showing, said AT THE BOUNDARY: the last row of the
+        preview column, directly above the frame divider that separates the app from the node
+        canvas. Proposal §2 row 11: the canvas and the preview show two different things and the
+        editor has never had a sentence between them.
+
+        🔴 **Richard moved it here on 2026-09-18, and the reason is the whole task.** §2 said "one
+        line under the preview caption"; driven, that put the sentence ~300px away from the edge
+        where the two surfaces actually meet — where an eye slides from the app straight onto the
+        graph without anything marking the change. A separator has to be at the seam to be one.
+        Never over the app (§2's own rule): it is a row in the column, so it takes its height.
+
+        ⚠️ It stays inside `VisualCanvas` rather than moving to the top of the node graph, which is
+        where the boundary also is. Three reasons, all structural: the sentence is about what the
+        PREVIEW is showing (R4 keeps the way back on this surface); the node graph is a legacy
+        non-React view; and in the detached layout the graph is the only thing in the window, so a
+        strip there would describe a preview that is somewhere else entirely.
+
+        ⚠️ In the `vertical` layout (the lessons default) the two surfaces meet at a VERTICAL edge,
+        so no horizontal row can sit in it. This is then simply the preview's last row.
+
+        🔴 **This is what is shipped INSTEAD of moving the preview.** The rule is that the app
+        preview never changes route or mode because the canvas did, and every door below is a
+        thing the *user* pressed. See `usePreviewStrip`.
+
+        🔴 **UNCONDITIONAL — ruled by Richard on 2026-09-18, and the re-drive is what asked him.**
+        The row used to render only when the two surfaces disagreed. Moving it to the seam made a
+        separator of it, and a separator that comes and goes is not one: `tvw002-agree-no-strip`
+        shows the app's hero image abutting the canvas's dotted grid with nothing between them, in
+        the case that is the COMMON one. The shape decides the row's `tone` now, not its existence
+        — `quiet` when they agree (surface colour, a short reassuring sentence, no doors), `notice`
+        when they do not. See `StripTone`.
+      */}
+      <div
+        className={css.Strip}
+        data-test="preview-strip"
+        data-shape={strip.shape}
+        data-tone={strip.tone}
+        data-detached={isDetached ? 'true' : undefined}
+      >
+        <span className={css.StripText}>
+          <strong>{strip.lead}</strong>
+          {strip.rest ? ' ' : ''}
+          <span>{strip.rest}</span>
+        </span>
+
+        {strip.doors.map((door) =>
+          door.kind === 'goto' ? (
+            <button
+              key={`goto:${door.page}`}
+              className={css.StripDoor}
+              onClick={() =>
+                onStripAction ? onStripAction({ kind: 'goto', page: door.page }) : goToPage(door.page)
+              }
+              data-test="preview-strip-goto"
+            >
+              {door.label}
+            </button>
+          ) : (
+            <button
+              key="bench"
+              className={css.StripDoor}
+              /* Detached, the bench cannot be shown in this window at all: BEN-004 made it a mode of
+                 the DOCKED surface, and `VisualCanvas` is not rendered in the editor while the
+                 preview is detached. The editor's own handler re-attaches and mounts it, which is
+                 the behaviour the menu item has had since BEN-004 — the door inherits it rather
+                 than growing a second answer. */
+              onClick={() =>
+                onStripAction
+                  ? onStripAction({ kind: 'bench' })
+                  : canvasComponent && setScope({ mode: 'bench', target: canvasComponent })
+              }
+              data-test="preview-strip-bench"
+            >
+              {door.label}
+            </button>
+          )
+        )}
+
+        {/* Per pair, for the session — `dismissalKey`. Not an icon: a `×` needs no legend and
+            this strip has already spent its width on a sentence.
+
+            ⚠️ On the `quiet` row there is nothing to dismiss, and offering the button anyway would
+            invite someone to press it to get rid of a separator that is deliberately permanent. */}
+        {strip.tone === 'notice' && (
+          <button
+            className={css.StripDismiss}
+            onClick={() => (onStripAction ? onStripAction({ kind: 'dismiss' }) : dismiss())}
+            title="Dismiss — until you open this component on this page again"
+            aria-label="Dismiss"
+            data-test="preview-strip-dismiss"
+          >
+            ×
+          </button>
         )}
       </div>
 

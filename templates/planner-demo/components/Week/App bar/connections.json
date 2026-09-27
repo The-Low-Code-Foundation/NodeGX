@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5ec5d8da-9952-58c0-8974-8b2eac9c4345",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "abIn",
+      "fromProperty": "weekLabel",
+      "toId": "abWeekLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "abPrev",
+      "fromProperty": "onClick",
+      "toId": "abOut",
+      "toProperty": "previousWeek"
+    },
+    {
+      "fromId": "abNext",
+      "fromProperty": "onClick",
+      "toId": "abOut",
+      "toProperty": "nextWeek"
+    },
+    {
+      "fromId": "abProjects",
+      "fromProperty": "onClick",
+      "toId": "abOut",
+      "toProperty": "openProjects"
+    },
+    {
+      "fromId": "abIn",
+      "fromProperty": "todoUrl",
+      "toId": "abHasTodo",
+      "toProperty": "in-url"
+    },
+    {
+      "fromId": "abHasTodo",
+      "fromProperty": "out-shown",
+      "toId": "abTodo",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "abIn",
+      "fromProperty": "todoUrl",
+      "toId": "abOpenTodo",
+      "toProperty": "in-url"
+    },
+    {
+      "fromId": "abTodo",
+      "fromProperty": "onClick",
+      "toId": "abOpenTodo",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "abMoney",
+      "fromProperty": "onClick",
+      "toId": "abOut",
+      "toProperty": "openMoney"
+    },
+    {
+      "fromId": "abIn",
+      "fromProperty": "lateCount",
+      "toId": "abLate",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "abIn",
+      "fromProperty": "hasLate",
+      "toId": "abLateBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "abSettings",
+      "fromProperty": "onClick",
+      "toId": "abOut",
+      "toProperty": "openSettings"
+    },
+    {
+      "fromId": "abShut",
+      "fromProperty": "onClick",
+      "toId": "abOut",
+      "toProperty": "shutDown"
+    },
+    {
+      "fromId": "abReset",
+      "fromProperty": "onClick",
+      "toId": "abOut",
+      "toProperty": "reset"
+    }
+  ]
+}

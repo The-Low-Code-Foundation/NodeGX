@@ -20,7 +20,7 @@
  */
 
 import { CatalogIndex } from '../catalog';
-import { NodeIR, ParamValue } from '../ir/types';
+import { NodeIR, ParamIR, ParamValue, StylesIR } from '../ir/types';
 
 /** How a rendered node behaves for style purposes. */
 export type StyleRole =
@@ -87,6 +87,9 @@ export const CONTENT_PARAMS: Record<string, Record<string, string>> = {
     startValue: 'attr:defaultValue',
     type: 'attr:type',
     maxLength: 'attr:maxLength',
+    // GAM-011 (a) — the soft keyboard and its Enter label, as the runtime renders them.
+    inputMode: 'attr:inputMode',
+    enterKeyHint: 'attr:enterKeyHint',
     enabled: 'attr-not:disabled'
   },
   'Text Input': {
@@ -94,6 +97,9 @@ export const CONTENT_PARAMS: Record<string, Record<string, string>> = {
     startValue: 'attr:defaultValue',
     type: 'attr:type',
     maxLength: 'attr:maxLength',
+    // GAM-011 (a) — the soft keyboard and its Enter label, as the runtime renders them.
+    inputMode: 'attr:inputMode',
+    enterKeyHint: 'attr:enterKeyHint',
     enabled: 'attr-not:disabled'
   },
   Page: { title: 'head', description: 'head', urlPath: 'routing' },
@@ -198,6 +204,8 @@ export const CONTENT_ATTR_ORDER: string[] = [
   'max',
   'step',
   'maxLength',
+  'inputMode',
+  'enterKeyHint',
   'controls',
   'autoPlay',
   'muted',
@@ -300,7 +308,10 @@ const CONSUMED = new Set([
   'boxShadowOffsetY',
   'boxShadowBlurRadius',
   'boxShadowSpreadRadius',
-  'boxShadowColor'
+  'boxShadowColor',
+  // P102 CMP-008 — the shadow source switch and the token it names.
+  'boxShadowSource',
+  'boxShadowToken'
 ]);
 
 const BORDER_SIDES: Array<{ param: string; css: string }> = [
@@ -410,8 +421,80 @@ const PROPERTY_ORDER = [
 
 const ORDER_INDEX = new Map(PROPERTY_ORDER.map((prop, i) => [prop, i]));
 
-export function computeNodeStyle(node: NodeIR, role: StyleRole, catalog: CatalogIndex): NodeStyle {
-  const params = new Map(node.parameters.map((p) => [p.name, p.value]));
+/**
+ * STY-004 AC3. The node's parameters with everything its Look and text style lend it underneath.
+ *
+ * The parser has already settled the order *within* the inherited pile and has already removed
+ * anything the node states itself, so this is a concatenation rather than a merge: inherited first,
+ * own second, and `new Map` keeps the last write — which is the node's, exactly as
+ * `react-component-node.ts:1817-1822` merges the variant then the model.
+ *
+ * Sorted by name so the declaration order a class prints does not depend on where a value came
+ * from. Without that, giving a node a Look would reshuffle its CSS block and every golden in this
+ * package would move for no reason a reader could see.
+ */
+function effectiveParameters(node: NodeIR): ParamIR[] {
+  if (node.inheritedParameters === undefined || node.inheritedParameters.length === 0) {
+    return node.parameters;
+  }
+  const merged = new Map<string, ParamValue>();
+  for (const p of node.inheritedParameters) merged.set(p.name, p.value);
+  for (const p of node.parameters) merged.set(p.name, p.value);
+  return [...merged]
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+}
+
+/** Whether the catalog declares this input as the `textStyle` type — 12 ports across the library. */
+function isTextStyleParam(node: NodeIR, name: string, catalog: CatalogIndex): boolean {
+  return node.catalogRef !== null && catalog.inputTypeName(node.catalogRef, name) === 'textStyle';
+}
+
+/** Whether a `textStyle` parameter's value names a text style the project actually defines. */
+function resolvedTextStyle(value: ParamValue | undefined, styles: StylesIR | undefined): boolean {
+  if (styles === undefined || value?.kind !== 'literal' || typeof value.value !== 'string') return false;
+  return styles.textStyles[value.value] !== undefined;
+}
+
+/**
+ * STY-004 AC5. A colour-typed parameter holding a project colour style's **name**, resolved to the
+ * colour it stands for. Everything else is returned untouched.
+ *
+ * 🔴 **The runtime's rule is `colors[v] ?? v` and the fallthrough is the whole of it**
+ * (`noodl-viewer-react/src/styles.ts:122-127`). A `var(--token)`, a hex and a bare `transparent`
+ * are all names the dictionary does not hold, so all three fall through unchanged — which is why
+ * tokens kept exporting correctly while style names vanished, and why this resolver must not be
+ * written as "if it doesn't look like a colour, look it up".
+ */
+function resolveColorParam(
+  node: NodeIR,
+  param: ParamIR,
+  catalog: CatalogIndex,
+  styles: StylesIR | undefined
+): ParamValue {
+  if (styles === undefined || param.value.kind !== 'literal' || typeof param.value.value !== 'string') {
+    return param.value;
+  }
+  if (node.catalogRef === null || catalog.inputTypeName(node.catalogRef, param.name) !== 'color') {
+    return param.value;
+  }
+  const resolved = styles.colors[param.value.value];
+  return resolved === undefined ? param.value : { kind: 'literal', value: resolved };
+}
+
+export function computeNodeStyle(
+  node: NodeIR,
+  role: StyleRole,
+  catalog: CatalogIndex,
+  /**
+   * STY-004. The project's style dictionary, when it has one. Optional because 48 of this package's
+   * 48 fixtures and all seven shipped templates have none, and because every existing caller
+   * predates it — a node with no Look and no text style must compute byte-identically without it.
+   */
+  styles?: StylesIR
+): NodeStyle {
+  const effective = effectiveParameters(node);
+  const params = new Map(effective.map((p) => [p.name, resolveColorParam(node, p, catalog, styles)]));
   const content = CONTENT_PARAMS[node.type] ?? {};
   const decls: Decl[] = [];
   const unhandled: string[] = [];
@@ -419,6 +502,13 @@ export function computeNodeStyle(node: NodeIR, role: StyleRole, catalog: Catalog
   const consumed = new Set<string>();
   // EXP-011 §63. A Drag's own ports are the hook's options — consumed here so the emitter does not report them unmapped.
   if (role === 'drag') for (const port of DRAG_OWN_PORTS) consumed.add(port);
+  // STY-004 AC4. A `textStyle` naming a style the project actually defines has already been
+  // expanded into its nine child ports by the parser, so the name itself is spent. One that names
+  // nothing is deliberately NOT consumed: it falls through to `unhandled` and is reported, which is
+  // the only signal a person gets that a text style went missing.
+  for (const { name } of effective) {
+    if (isTextStyleParam(node, name, catalog) && resolvedTextStyle(params.get(name), styles)) consumed.add(name);
+  }
 
   const literal = (name: string): string | number | boolean | undefined => {
     const v = params.get(name);
@@ -538,7 +628,10 @@ export function computeNodeStyle(node: NodeIR, role: StyleRole, catalog: Catalog
   // states it; the two position halves fold into object-position when authored.
   if (role === 'video') {
     for (const name of ['objectFit', 'objectPositionX', 'objectPositionY']) consumed.add(name);
-    decls.push({ prop: 'object-fit', value: cssParam('objectFit') ?? String(catalogDefault('objectFit') ?? 'contain') });
+    decls.push({
+      prop: 'object-fit',
+      value: cssParam('objectFit') ?? String(catalogDefault('objectFit') ?? 'contain')
+    });
     if (params.has('objectPositionX') || params.has('objectPositionY')) {
       const x = cssParam('objectPositionX') ?? '50%';
       const y = cssParam('objectPositionY') ?? '50%';
@@ -588,7 +681,11 @@ export function computeNodeStyle(node: NodeIR, role: StyleRole, catalog: Catalog
   if (uniformRadius !== undefined) {
     decls.push({ prop: 'border-radius', value: uniformRadius });
   }
-  if (presentCorners.length === 4 && uniformRadius === undefined && corners.every((c) => c.value === corners[0].value)) {
+  if (
+    presentCorners.length === 4 &&
+    uniformRadius === undefined &&
+    corners.every((c) => c.value === corners[0].value)
+  ) {
     decls.push({ prop: 'border-radius', value: corners[0].value! });
   } else {
     for (const corner of presentCorners) decls.push({ prop: corner.css, value: corner.value! });
@@ -598,7 +695,12 @@ export function computeNodeStyle(node: NodeIR, role: StyleRole, catalog: Catalog
 
   // The four boxShadow* params fold into one box-shadow when enabled; absent pieces take the
   // catalog's port defaults because the interpreter falls back to exactly those.
-  if (literal('boxShadowEnabled') === true) {
+  // P102 CMP-008 (RC-5) — in token mode the whole shadow is one `var(--shadow-x)`, exactly as the
+  // runtime's `_updateBoxShadow` emits it; the six custom pieces are ignored, not folded in.
+  const shadowToken = cssParam('boxShadowToken');
+  if (literal('boxShadowEnabled') === true && literal('boxShadowSource') === 'token') {
+    if (shadowToken && shadowToken.trim() !== '') decls.push({ prop: 'box-shadow', value: shadowToken.trim() });
+  } else if (literal('boxShadowEnabled') === true) {
     const piece = (name: string) => {
       const authored = params.get(name);
       return authored !== undefined ? shadowLength(cssValue(authored)) : shadowLength(catalogDefault(name));
@@ -607,9 +709,9 @@ export function computeNodeStyle(node: NodeIR, role: StyleRole, catalog: Catalog
     const inset = literal('boxShadowInset') === true ? 'inset ' : '';
     decls.push({
       prop: 'box-shadow',
-      value: `${inset}${piece('boxShadowOffsetX')} ${piece('boxShadowOffsetY')} ${piece(
-        'boxShadowBlurRadius'
-      )} ${piece('boxShadowSpreadRadius')} ${color}`
+      value: `${inset}${piece('boxShadowOffsetX')} ${piece('boxShadowOffsetY')} ${piece('boxShadowBlurRadius')} ${piece(
+        'boxShadowSpreadRadius'
+      )} ${color}`
     });
   }
 
@@ -683,7 +785,7 @@ export function computeNodeStyle(node: NodeIR, role: StyleRole, catalog: Catalog
   if (textAlign !== undefined) decls.push({ prop: 'text-align', value: textAlign });
   consumed.add('textAlignX');
 
-  for (const { name } of node.parameters) {
+  for (const { name } of effective) {
     if (consumed.has(name) || CONSUMED.has(name)) continue;
     if (content[name] !== undefined) continue;
     // EXP-011 §61. The stack's per-page ports are dynamic (`pageComp-<id>`, `pagePath-<id>`) — structure, read by the plan.
@@ -762,7 +864,8 @@ export type IconSource =
   | { kind: 'none' };
 
 export function iconSourceOf(node: NodeIR, catalog: CatalogIndex): IconSource {
-  const param = (name: string) => node.parameters.find((p) => p.name === name)?.value;
+  // STY-004. A Look can name the icon as readily as it can name a colour.
+  const param = (name: string) => effectiveParameters(node).find((p) => p.name === name)?.value;
   const sourceTypeParam = param('iconSourceType');
   const sourceType =
     sourceTypeParam?.kind === 'literal'
@@ -770,11 +873,20 @@ export function iconSourceOf(node: NodeIR, catalog: CatalogIndex): IconSource {
       : String((node.catalogRef && catalog.inputDefault(node.catalogRef, 'iconSourceType')) ?? 'icon');
   if (sourceType === 'image') {
     const src = param('iconImageSource');
-    return src?.kind === 'literal' && typeof src.value === 'string' ? { kind: 'image', src: src.value } : { kind: 'none' };
+    return src?.kind === 'literal' && typeof src.value === 'string'
+      ? { kind: 'image', src: src.value }
+      : { kind: 'none' };
   }
   const source = param('iconIconSource');
   if (source?.kind !== 'json' || typeof source.value !== 'object' || source.value === null) return { kind: 'none' };
-  const value = source.value as { kind?: string; url?: string; symbolId?: string; class?: string; code?: string; codeAsClass?: boolean };
+  const value = source.value as {
+    kind?: string;
+    url?: string;
+    symbolId?: string;
+    class?: string;
+    code?: string;
+    codeAsClass?: boolean;
+  };
   if (value.kind === 'sprite') {
     return typeof value.url === 'string' && typeof value.symbolId === 'string'
       ? { kind: 'sprite', url: value.url, symbolId: value.symbolId }
@@ -785,7 +897,10 @@ export function iconSourceOf(node: NodeIR, catalog: CatalogIndex): IconSource {
     // Font — IconGlyph's two branches: codeAsClass sets carry one class per glyph; the others
     // put the codepoint in the element's text.
     if (value.codeAsClass === true) {
-      return { kind: 'font', classes: [value.class, value.code].filter((c): c is string => typeof c === 'string' && c.length > 0) };
+      return {
+        kind: 'font',
+        classes: [value.class, value.code].filter((c): c is string => typeof c === 'string' && c.length > 0)
+      };
     }
     return {
       kind: 'font',
@@ -811,9 +926,19 @@ const TICK_MASK =
  * the columns breakpoints' @container rules. Kept beside computeNodeStyle because the two must
  * agree on effective values (border colour feeds both the box and the mark).
  */
-export function computeRoleCss(node: NodeIR, role: StyleRole, catalog: CatalogIndex): RoleCss {
+export function computeRoleCss(
+  node: NodeIR,
+  role: StyleRole,
+  catalog: CatalogIndex,
+  /**
+   * STY-004. The same dictionary `computeNodeStyle` gets, for the same reason this function sits
+   * beside it: a Look's `borderColor` has to reach the checkbox's mark as well as its box. Resolve
+   * it in one of the two and they disagree, which is the defect this pairing exists to prevent.
+   */
+  styles?: StylesIR
+): RoleCss {
   const result: RoleCss = { blocks: [], containerQueries: [], notes: [] };
-  const params = new Map(node.parameters.map((p) => [p.name, p.value]));
+  const params = new Map(effectiveParameters(node).map((p) => [p.name, resolveColorParam(node, p, catalog, styles)]));
   const literal = (name: string): string | number | boolean | undefined => {
     const v = params.get(name);
     return v?.kind === 'literal' ? v.value : undefined;

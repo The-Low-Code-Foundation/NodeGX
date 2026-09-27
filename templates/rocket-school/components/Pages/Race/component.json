@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e9119548-cdcd-560e-88b8-7b9710b2a3ef",
+  "name": "Race",
+  "path": "/Pages/Race",
+  "type": "page",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The Rocket Race page: setup, then the race and its result screen (both in Race/Play), with the model saved after every round."
+}

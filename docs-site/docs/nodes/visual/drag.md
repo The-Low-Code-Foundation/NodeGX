@@ -7,7 +7,7 @@ Drag is a visual container: whatever you place inside it can be dragged with the
 
 ## When to use it
 
-Sliders, swipeable cards, drawers, reorder handles — any direct-manipulation gesture where you need the live drag offset. For scrolling content use a Group with scrolling enabled instead; for purely programmatic motion use an Animation on a node's Pos X/Y rather than a Drag no one touches.
+Sliders, swipeable cards, drawers — any direct-manipulation gesture where you need the live drag offset. For scrolling content use a Group with scrolling enabled instead; for purely programmatic motion use an Animation on a node's Pos X/Y rather than a Drag no one touches.
 
 ## At a glance
 
@@ -90,6 +90,7 @@ Sliders, swipeable cards, drawers, reorder handles — any direct-manipulation g
 
 ## Watch out for
 
+- Working out which list a card landed in from its drag offset (start + offset ÷ column width). It breaks as soon as two columns differ in width and does nothing on a phone where columns stack. To move a card between lists or reorder one, switch Draggable on the card and Accept Drops on each list instead: the list reports Dropped, Dropped Value and Drop Index (example vis-kanban-drag-between-columns).
 - Rebuilding a scroll view out of Drag — a Group with scrolling enabled handles momentum, wheel and touch for free.
 
 ## Examples

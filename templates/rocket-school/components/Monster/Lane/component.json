@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3c366a11-4238-5e85-8388-fadfc722e559",
+  "name": "Lane",
+  "path": "/Monster/Lane",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Monster Gate's lane: the hearts, which monster of three and its hits left, over the lane; the Lane Class draws the gate (left), the ground and, in Push it back, the cave (right). The monster stands at Rest (0 the gate, 1 the far side), gliding there between answers, or, while Walking, walks from Walk From to the gate as the round's clock (Left, 100 to 0) empties. The note under the lane says what just happened."
+}

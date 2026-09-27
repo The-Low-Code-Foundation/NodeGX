@@ -46,7 +46,15 @@ export const PROJECT_LEVEL_KEYS: readonly ProjectLevelKey[] = ['project', 'route
 export function hashProjectLevel(content: unknown): string {
   if (content === null || content === undefined) return 'absent';
   const { modified: _m, ...rest } = content as Record<string, unknown>;
-  return hashString(stableStringify(rest));
+  // 🔴 P103 CMG-006 — hash what the DISK will hold, not the object in memory. A built styles file
+  // carries `stateParameters: undefined` on a Look that never set one; `JSON.stringify` drops that
+  // key on the way to disk, `stableStringify` did not, so the baseline recorded at our own write
+  // never matched the file read back. Every own write of `nodegx.styles.json` then read as an
+  // external change, the Look objects were replaced from disk ~2 s after each edit, and every undo
+  // closure written before that pointed at a dead object — a Look edit could not be undone once
+  // the autosave had landed (measured 2026-09-24: same object at 1.5 s, replaced at 3 s). One JSON
+  // round trip puts both sides of the comparison in disk space.
+  return hashString(stableStringify(JSON.parse(JSON.stringify(rest))));
 }
 
 /** What to do about a project-level file that just changed on disk. */
@@ -132,11 +140,30 @@ export interface ProjectLevelTarget {
  * Copies the fields owned by one project-level file from `slice` (a project
  * reconstructed from the files on disk) onto `target`, and leaves every other
  * field alone.
+ *
+ * 🔴 **`hydrateVariant` is required, and the reason is a defect this parameter
+ * exists to make impossible** (P94 STY-002). `slice.variants` are *plain
+ * JSON objects*, while `ProjectModel.variants` must hold `VariantModel`
+ * instances, because `ProjectModel.toJSON()` calls `v.toJSON()` on every one of
+ * them. Assigning the slice straight across left the project unable to save at
+ * all — `TypeError: v.toJSON is not a function` on every `doWriteProjectToDisk`
+ * after a styles-file reload, which is the shape P92 CHR-010 saw and filed as
+ * "creating a variant breaks saving". `ProjectModel.fromJSON` had it right all
+ * along (`json.variants.map(VariantModel.fromJSON)`); this path did not, and an
+ * optional parameter defaulting to identity would let the next caller repeat it
+ * silently.
+ *
+ * The slice's variants arrive in the **legacy** shape — `ProjectImporter.reconstructVariants`
+ * deliberately reverses the v2 file's `stateParameters` back to the legacy
+ * `stateParamaters` (sic) — which is the shape `VariantModel.fromJSON` reads.
+ * Passing a hydrator that expects the v2 spelling would silently drop every
+ * Look's state data instead.
  */
 export function applyProjectLevelSlice(
   target: ProjectLevelTarget,
   slice: LegacyProject,
-  key: ProjectLevelKey
+  key: ProjectLevelKey,
+  hydrateVariant: (raw: unknown) => unknown
 ): void {
   const sliceMetadata = (slice.metadata ?? {}) as Record<string, unknown>;
 
@@ -176,5 +203,14 @@ export function applyProjectLevelSlice(
   } else {
     delete target.metadata.styles;
   }
-  target.variants = slice.variants ?? [];
+  target.variants = (slice.variants ?? []).map(hydrateVariant);
+
+  // P103 CMG-006: every node caches the `VariantModel` it wears (`NodeGraphNode.variant`), and
+  // `NodeGraphModel` re-points those caches only on `variantAdded` / `Deleted` / `Renamed`. A slice
+  // applied from disk replaces the objects without raising any of them, so from here on a wearer
+  // read a Look nobody wrote to any more — the Look editor changed the new object, the preview
+  // followed (the viewer resolves by name), and the wearer's own resolved value stayed at what the
+  // old object held. Measured 2026-09-24 on a project whose files were swapped under it.
+  const project = target as { forEachComponent?: (fn: (c: { graph?: { updateVariantRefs?: () => void } }) => void) => void };
+  project.forEachComponent?.((component) => component.graph?.updateVariantRefs?.());
 }

@@ -1,0 +1,864 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7c09fdb3-ffc0-588f-802d-d26daf4a0daa",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mpIn",
+      "type": "Component Inputs",
+      "label": "The player, and the words",
+      "ports": [
+        {
+          "name": "level",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "ruleWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "newGameWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "homeWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pickWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hangarWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mergeMode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "modeWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "easyWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hardWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fullWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 650,
+      "y": 160
+    },
+    {
+      "id": "mpRoot",
+      "type": "Group",
+      "label": "The game",
+      "children": [
+        "mpMode",
+        "mpScore",
+        "mpStage"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mpMode",
+      "type": "/Game/Choice row",
+      "label": "Easy or Hard",
+      "parent": "mpRoot",
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mpScore",
+      "type": "Text",
+      "label": "The score",
+      "parent": "mpRoot",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-bold)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "mpStage",
+      "type": "Group",
+      "label": "The board, and what goes beside it",
+      "parent": "mpRoot",
+      "children": [
+        "mpBoard",
+        "mpSide"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "justifyContent": "center",
+        "alignItems": "flex-start",
+        "columnGap": "var(--space-6)",
+        "rowGap": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "mpBoard",
+      "type": "Group",
+      "label": "The board",
+      "parent": "mpStage",
+      "children": [
+        "mpRows"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "cssClassName": "rkt-merge-board",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "mpRows",
+      "type": "For Each",
+      "label": "One row per row of the board",
+      "parameters": {
+        "template": "/Merge/Row",
+        "templateType": "explicit"
+      },
+      "parent": "mpBoard",
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "mpSide",
+      "type": "Group",
+      "label": "The arrows, or the end of the board",
+      "parent": "mpStage",
+      "children": [
+        "mpControls",
+        "mpResult"
+      ],
+      "parameters": {
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-4)"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "mpControls",
+      "type": "Group",
+      "label": "The rule, the arrows, and New game",
+      "parent": "mpSide",
+      "children": [
+        "mpRule",
+        "mpHintBox",
+        "mpPad",
+        "mpNew"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-4)"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "mpRule",
+      "type": "Text",
+      "label": "How it works",
+      "parent": "mpControls",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "textAlignX": "center"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "mpHintBox",
+      "type": "Group",
+      "label": "The board is full, but a join is still there",
+      "parent": "mpControls",
+      "children": [
+        "mpHint"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "alignItems": "center",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "backgroundColor": "var(--accent)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "mpHint",
+      "type": "Text",
+      "label": "Full, and what to do",
+      "parent": "mpHintBox",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-bold)",
+        "textAlignX": "center"
+      },
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "mpPad",
+      "type": "Group",
+      "label": "The arrows",
+      "parent": "mpControls",
+      "children": [
+        "mpPadTop",
+        "mpPadLow"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "mpPadTop",
+      "type": "Group",
+      "label": "Up",
+      "parent": "mpPad",
+      "children": [
+        "mpBtnUp"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row"
+      },
+      "x": 340,
+      "y": 1480
+    },
+    {
+      "id": "mpPadLow",
+      "type": "Group",
+      "label": "Left, down and right",
+      "parent": "mpPad",
+      "children": [
+        "mpBtnLeft",
+        "mpBtnDown",
+        "mpBtnRight"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "columnGap": "var(--space-2)"
+      },
+      "x": 340,
+      "y": 1720
+    },
+    {
+      "id": "mpBtnUp",
+      "type": "net.noodl.controls.button",
+      "label": "Slide up",
+      "parent": "mpPadTop",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "↑",
+        "minWidth": {
+          "value": 64,
+          "unit": "px"
+        }
+      },
+      "x": 400,
+      "y": 1600
+    },
+    {
+      "id": "mpBtnLeft",
+      "type": "net.noodl.controls.button",
+      "label": "Slide left",
+      "parent": "mpPadLow",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "←",
+        "minWidth": {
+          "value": 64,
+          "unit": "px"
+        }
+      },
+      "x": 400,
+      "y": 1840
+    },
+    {
+      "id": "mpBtnDown",
+      "type": "net.noodl.controls.button",
+      "label": "Slide down",
+      "parent": "mpPadLow",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "↓",
+        "minWidth": {
+          "value": 64,
+          "unit": "px"
+        }
+      },
+      "x": 400,
+      "y": 1960
+    },
+    {
+      "id": "mpBtnRight",
+      "type": "net.noodl.controls.button",
+      "label": "Slide right",
+      "parent": "mpPadLow",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "→",
+        "minWidth": {
+          "value": 64,
+          "unit": "px"
+        }
+      },
+      "x": 400,
+      "y": 2080
+    },
+    {
+      "id": "mpNew",
+      "type": "net.noodl.controls.button",
+      "label": "New game",
+      "parent": "mpControls",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "New game"
+      },
+      "x": 280,
+      "y": 2200
+    },
+    {
+      "id": "mpResult",
+      "type": "/Race/Result",
+      "label": "How the board ended",
+      "parent": "mpSide",
+      "x": 220,
+      "y": 2320
+    },
+    {
+      "id": "mpNewBoard",
+      "type": "/Logic/New merge board",
+      "label": "A fresh board",
+      "x": 650,
+      "y": 40
+    },
+    {
+      "id": "mpSlideUp",
+      "type": "/Logic/Slide and merge",
+      "label": "Slide up",
+      "parameters": {
+        "dir": "up"
+      },
+      "x": 650,
+      "y": 1600
+    },
+    {
+      "id": "mpSlideLeft",
+      "type": "/Logic/Slide and merge",
+      "label": "Slide left",
+      "parameters": {
+        "dir": "left"
+      },
+      "x": 650,
+      "y": 1840
+    },
+    {
+      "id": "mpSlideDown",
+      "type": "/Logic/Slide and merge",
+      "label": "Slide down",
+      "parameters": {
+        "dir": "down"
+      },
+      "x": 650,
+      "y": 1960
+    },
+    {
+      "id": "mpSlideRight",
+      "type": "/Logic/Slide and merge",
+      "label": "Slide right",
+      "parameters": {
+        "dir": "right"
+      },
+      "x": 650,
+      "y": 2080
+    },
+    {
+      "id": "mpKeyUp",
+      "type": "keyboard-shortcuts.KeyboardShortcut",
+      "label": "The up arrow",
+      "parameters": {
+        "shortcut": "up",
+        "allowRepeat": false,
+        "preventDefault": true,
+        "ignoreInTextFields": true
+      },
+      "x": 650,
+      "y": 2440
+    },
+    {
+      "id": "mpKeyLeft",
+      "type": "keyboard-shortcuts.KeyboardShortcut",
+      "label": "The left arrow",
+      "parameters": {
+        "shortcut": "left",
+        "allowRepeat": false,
+        "preventDefault": true,
+        "ignoreInTextFields": true
+      },
+      "x": 650,
+      "y": 2560
+    },
+    {
+      "id": "mpKeyDown",
+      "type": "keyboard-shortcuts.KeyboardShortcut",
+      "label": "The down arrow",
+      "parameters": {
+        "shortcut": "down",
+        "allowRepeat": false,
+        "preventDefault": true,
+        "ignoreInTextFields": true
+      },
+      "x": 650,
+      "y": 2680
+    },
+    {
+      "id": "mpKeyRight",
+      "type": "keyboard-shortcuts.KeyboardShortcut",
+      "label": "The right arrow",
+      "parameters": {
+        "shortcut": "right",
+        "allowRepeat": false,
+        "preventDefault": true,
+        "ignoreInTextFields": true
+      },
+      "x": 650,
+      "y": 2800
+    },
+    {
+      "id": "mpGame",
+      "type": "Variable2",
+      "label": "The game as it stands",
+      "parameters": {
+        "name": "mergeGame"
+      },
+      "x": 650,
+      "y": 2920
+    },
+    {
+      "id": "mpSetGame",
+      "type": "Set Variable",
+      "label": "The game after a move",
+      "parameters": {
+        "name": "mergeGame"
+      },
+      "x": 650,
+      "y": 3040
+    },
+    {
+      "id": "mpDraw",
+      "type": "/Logic/Draw merge board",
+      "label": "The board, drawn",
+      "x": 650,
+      "y": 640
+    },
+    {
+      "id": "mpPhase",
+      "type": "States",
+      "label": "Playing, or no more moves",
+      "parameters": {
+        "states": "playing,over",
+        "values": "playing,over,boardOpacity",
+        "useTransitions": false,
+        "type-playing": "boolean",
+        "value-playing-playing": true,
+        "value-over-playing": false,
+        "type-over": "boolean",
+        "value-playing-over": false,
+        "value-over-over": true,
+        "type-boardOpacity": "number",
+        "value-playing-boardOpacity": 1,
+        "value-over-boardOpacity": 0.45
+      },
+      "x": 650,
+      "y": 880
+    },
+    {
+      "id": "mpFull",
+      "type": "States",
+      "label": "Room left, or full with a join still there",
+      "parameters": {
+        "states": "roomy,full",
+        "values": "rule,hint",
+        "useTransitions": false,
+        "type-rule": "boolean",
+        "value-roomy-rule": true,
+        "value-full-rule": false,
+        "type-hint": "boolean",
+        "value-roomy-hint": false,
+        "value-full-hint": true
+      },
+      "x": 650,
+      "y": 1000
+    },
+    {
+      "id": "mpModeItems",
+      "type": "JavaScriptFunction",
+      "label": "Easy or Hard, in words",
+      "parameters": {
+        "functionScript": "Outputs.items = [{ label: Inputs.easy, value: 'easy' }, { label: Inputs.hard, value: 'hard' }];"
+      },
+      "x": 650,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-easy",
+          "displayName": "easy",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-hard",
+          "displayName": "hard",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "mpIsOver",
+      "type": "Condition",
+      "label": "No more moves?",
+      "parameters": {},
+      "x": 650,
+      "y": 3160
+    },
+    {
+      "id": "mpFinish",
+      "type": "/Logic/Finish merge",
+      "label": "Pay the board, once",
+      "x": 650,
+      "y": 2320
+    },
+    {
+      "id": "mpEndInView",
+      "type": "JavaScriptFunction",
+      "label": "Bring New game on screen",
+      "parameters": {
+        "functionScript": "if (typeof document !== 'undefined') {\n  const word = String(Inputs.word || '').trim();\n  setTimeout(() => {\n    const button = Array.from(document.querySelectorAll('button')).find((b) => b.getClientRects().length > 0 && b.innerText.trim() === word);\n    if (!button) return;\n    // The whole row of ways on (New game, the hangar, Home), not New game alone: build 2's phone showed New game and cut Home off.\n    let row = button.parentElement;\n    while (row && row.querySelectorAll('button').length < 2) row = row.parentElement;\n    (row || button).scrollIntoView({ block: 'nearest', behavior: 'auto' });\n  }, 250);\n}",
+        "runOnChange-in-word": false
+      },
+      "x": 650,
+      "y": 3280,
+      "ports": [
+        {
+          "name": "in-word",
+          "displayName": "word",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "mpOut",
+      "type": "Component Outputs",
+      "label": "What the board did",
+      "ports": [
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "graded",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "home",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "hangar",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cheer",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "mergeMode",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "modeChanged",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 650,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "mpRoot"
+  ]
+}

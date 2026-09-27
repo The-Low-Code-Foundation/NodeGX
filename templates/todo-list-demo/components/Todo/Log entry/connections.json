@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "af531d4c-5343-55cb-8216-90d61bd3c51c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "leIn",
+      "fromProperty": "day",
+      "toId": "leDay",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "showDay",
+      "toId": "leDay",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "time",
+      "toId": "leTime",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "taskTitle",
+      "toId": "leTask",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "summary",
+      "toId": "leSummary",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "body",
+      "toId": "leBody",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "hasBody",
+      "toId": "leBody",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "taskId",
+      "toId": "leOut",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "leTask",
+      "fromProperty": "onClick",
+      "toId": "leOut",
+      "toProperty": "open"
+    }
+  ]
+}

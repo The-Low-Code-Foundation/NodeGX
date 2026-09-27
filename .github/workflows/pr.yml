@@ -49,6 +49,23 @@ jobs:
       # in it) — the specs are how the server's wire contract is stated, so a type
       # written in one has to mean something, the same argument as the two lines above.
       - run: npm run typecheck:mcp
+      # BRG-003 AC6. `@noodl/backend-contract` is not in the root program either,
+      # and it had the SAME hole `typecheck:mcp` above was added to close: the
+      # package carried a `typecheck` script that no workflow had ever called.
+      # That matters more here than it looks. The package's jest runs under
+      # ts-jest with `isolatedModules: true`, which transpiles WITHOUT
+      # typechecking — measured in BRG-003 §5.3, where a helper typed
+      # `Record<string, unknown>` widened seven mutated call sites and every test
+      # stayed green. So `tsc` is not a second opinion about this package, it is
+      # the only one.
+      #
+      # 🔴 It is also half of the conformance gate. `conformance/coverage.ts`
+      # keys its register with mapped types over `keyof IStorageFacade`,
+      # `keyof IStorageSchema` and `keyof IStorageAdapter`, so a capability added
+      # to the storage seam with no conformance case and no declaration stops
+      # this line compiling and names the method. The other half runs in
+      # `test:packages` (tests/brg-003-conformance-gate.test.ts).
+      - run: npm run typecheck:contract
       # ✅ D17 (phase 69). The editor's own program, not the root one.
       #
       # ⚠️ It overlaps `npm run typecheck` above heavily and deliberately: the root
@@ -89,11 +106,29 @@ jobs:
       # tracked per package (noodl-editor, noodl-core-ui) so a drop in one
       # can never mask a silent rise in the other.
       - run: npm run colors
+      # A gate at zero, not a ratchet (TVW-009 §2.1): the five words the editor
+      # uses for its own parts. The debt was twenty strings and the same change
+      # swept them, so there is no tail to burn down. It walks the TypeScript AST
+      # rather than grepping — `grep -c sandbox` over these roots returns 1192,
+      # nearly all of them Electron's `sandbox:` option — and prints every string
+      # it declines to count, with the rule that excused it, for a reviewer.
+      - run: npm run vocabulary
+      # Same shape for raw px font sizes (CHR-002): the chrome has a type scale
+      # (R1, phase 92: 11/12/13/15/20 + 26) as --font-size-* tokens, and a
+      # `font-size` or `font:` shorthand in px is a size that scale cannot reach.
+      - run: npm run type
       # Not a ratchet — a gate at zero (UIX-011). An SVG referenced from CSS via
       # url() renders as its own document and cannot inherit the theme colour,
       # so it silently breaks the light theme. There is no legacy tail left to
       # burn down, so any reintroduction is a straight regression.
       - run: npm run icons:css
+      # A gate at zero again (CHR-010). The editor linked Font Awesome 4.7 on
+      # every window to draw 23 glyphs beside core-ui's Icon set — two icon
+      # systems sharing one column, with two stroke weights, two grids and two
+      # colour mechanisms, and nothing measuring that they did not match. The
+      # font is deleted; this keeps it deleted. Comments are stripped before
+      # counting, or the gate reddens on the notes describing its own history.
+      - run: npm run icons:font
       # A gate at zero for the same reason (POL-004). `var(--theme-color-fg-subtle,
       # #7c7c7c)` names nothing, renders its fallback, and is the most reviewable
       # way to ship a hardcoded colour — CSS has no undefined-custom-property
@@ -126,6 +161,39 @@ jobs:
         env:
           NOODL_TEST_TIMEOUT_MINUTES: 30
         run: xvfb-run --auto-servernum -s "-screen 0 1280x1024x24" npm run test:ci
+
+  renderer-errors:
+    # HLT-010. P99 measured 264 renderer error events in 42 minutes of ordinary use while every
+    # suite here was green — nothing read the editor's log. This launches the dev stack against a
+    # throwaway profile and a copy of templates/landing-pages, drives the surfaces that session
+    # reached, and fails on any error class over its budget (scripts/renderer-errors/budget.json)
+    # or any class the budget does not name. Exit 2 = could not measure (a surface or a sentinel
+    # was missed) — that is a failure too, never a pass.
+    #
+    # ⚠️ The dev stack, not a production build: React's correctness warnings (HLT-001, HLT-003)
+    # are development-only, so a production editor would read 0 of them however broken it was.
+    name: Renderer errors (HLT-010)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      # 🔴 The runner's `chrome-sandbox` is not root-owned 4755, so a sandboxed Electron aborts with
+      # SIGTRAP before a window exists. That is how this job's first two runs died (2026-09-22; the
+      # uploaded log says `setuid_sandbox_host.cc:166`). `Test (editor)` avoids it the same way —
+      # see `run-electron-tests.js:132`. CI only; the editor that ships keeps its sandbox.
+      - name: Drive the editor and grade its log
+        env:
+          ELECTRON_DISABLE_SANDBOX: '1'
+        run: xvfb-run --auto-servernum -s "-screen 0 1280x1024x24" npm run renderer-errors
+      # The gate keeps its log on any non-zero exit. Without this the first Linux run (2026-09-22)
+      # died before React mounted and took the only record of why with the runner.
+      - name: Keep the log it graded
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: renderer-errors-log
+          path: /tmp/hlt010-*/dev.log
+          if-no-files-found: warn
 
   test-platform:
     name: Test (platform-node)
@@ -232,6 +300,26 @@ jobs:
       # committed corrupt/clean fixture pair. A project with two nodes sharing
       # an id used to pass every gate with zero failures.
       - run: node scripts/node-catalog/validate-project.js --self-test
+
+  docs-site:
+    name: Docs site builds (HLT-013)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      # 🔴 HLT-013. Until this job existed, nothing on a PR built the docs site —
+      # only `deploy-docs.yml` did, after a merge to `main`. So a node description
+      # containing `<a href="x"/>` (landed 2026-09-18) became a real anchor, the
+      # site's `onBrokenLinks: 'throw'` refused it, and the NEXT docs deploy would
+      # have failed with nothing earlier to say so.
+      #
+      # The generated trees first, so staleness fails as staleness: the node
+      # reference, and the library reference the node picker's "Read docs" button
+      # opens (70 pages, which is why those 70 buttons exist at all). Then the
+      # build itself, which is the only thing that resolves every link.
+      - run: npm run docs:nodes:check
+      - run: npm run docs:library:check
+      - run: npm --prefix docs-site run build
 
   docs-origin:
     name: Docs origin reachable (LIB-008)

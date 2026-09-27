@@ -73,8 +73,14 @@ export interface ProjectTemplate {
   /** Template version (semver) */
   version: string;
 
-  /** Optional thumbnail/icon URL for UI display */
+  /**
+   * Optional picture URL for the Templates tab's card (CHR-006). A URL relative to the renderer's
+   * page (`src/editor/index.html`), e.g. `../assets/images/templates/<id>.webp`, or absolute.
+   */
   thumbnail?: string;
+
+  /** CHR-006 — the card's line above the title (`Site · 3 pages`). Omitted: the category's label. */
+  eyebrow?: string;
 
   /** The actual project content */
   content: ProjectContent;

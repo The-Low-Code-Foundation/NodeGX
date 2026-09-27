@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "32a6a325-9b74-57f3-873c-353667740bf0",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "thToDark",
+      "fromProperty": "onClick",
+      "toId": "thFlip",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "thToLight",
+      "fromProperty": "onClick",
+      "toId": "thFlip",
+      "toProperty": "run"
+    }
+  ]
+}

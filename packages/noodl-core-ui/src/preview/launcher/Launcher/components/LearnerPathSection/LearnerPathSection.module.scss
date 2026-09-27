@@ -24,7 +24,7 @@
 
 .Title {
   font-family: var(--font-family-display);
-  font-size: 15px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--theme-color-fg-highlight);
@@ -32,7 +32,7 @@
 }
 
 .Count {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--theme-color-fg-muted);
 }
 
@@ -41,7 +41,7 @@
 }
 
 .Muted {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.6;
   color: var(--theme-color-fg-muted);
   margin: 0 0 12px;
@@ -49,12 +49,12 @@
 
 .Detail {
   font-family: var(--font-family-code);
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   opacity: 0.8;
 }
 
 .Truth {
-  font-size: 13px;
+  font-size: var(--font-size-md);
   line-height: 1.65;
   color: var(--theme-color-fg-default);
   margin: 0 0 16px;
@@ -62,7 +62,7 @@
   background: var(--theme-color-bg-1);
   border: 1px solid var(--theme-color-border-default);
   border-left: 3px solid var(--theme-color-primary);
-  border-radius: var(--radius-7);
+  border-radius: var(--radius-md);
 }
 
 .Questions {
@@ -79,7 +79,7 @@
 }
 
 .Prompt {
-  font-size: 13px;
+  font-size: var(--font-size-md);
   font-weight: 600;
   color: var(--theme-color-fg-default);
   padding: 0;
@@ -104,9 +104,9 @@
  */
 .Option {
   font-family: inherit;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   padding: 7px 12px;
-  border-radius: var(--radius-7);
+  border-radius: var(--radius-md);
   border: 1px solid var(--theme-color-border-control);
   background: var(--theme-color-bg-2);
   color: var(--theme-color-fg-default);
@@ -139,10 +139,10 @@
  */
 .Primary {
   font-family: inherit;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   padding: 8px 14px;
-  border-radius: var(--radius-7);
+  border-radius: var(--radius-md);
   border: 1px solid var(--theme-color-primary);
   background: var(--theme-color-primary);
   color: var(--theme-color-on-primary);
@@ -166,9 +166,9 @@
  */
 .Ghost {
   font-family: inherit;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   padding: 6px 10px;
-  border-radius: var(--radius-7);
+  border-radius: var(--radius-md);
   border: 1px solid var(--theme-color-border-control);
   background: transparent;
   color: var(--theme-color-fg-default);
@@ -199,7 +199,7 @@
   padding: 12px 14px;
   background: var(--theme-color-bg-1);
   border: 1px solid var(--theme-color-border-default);
-  border-radius: var(--radius-7);
+  border-radius: var(--radius-md);
 
   /* A lesson that cannot be installed yet is quieter, never struck through or
      greyed to unreadability: it is coming, not cancelled. */
@@ -216,7 +216,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   background: var(--theme-color-bg-3);
   color: var(--theme-color-fg-muted);
@@ -235,14 +235,14 @@
 }
 
 .StepTitle {
-  font-size: 13px;
+  font-size: var(--font-size-md);
   font-weight: 600;
   color: var(--theme-color-fg-highlight);
   margin: 0;
 }
 
 .Standing {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--theme-color-fg-muted);
   padding: 1px 6px;
   border-radius: 3px;
@@ -250,20 +250,20 @@
 }
 
 .Minutes {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--theme-color-fg-muted);
   margin-left: auto;
 }
 
 .StepDescription {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.55;
   color: var(--theme-color-fg-default);
   margin: 4px 0 0;
 }
 
 .Reason {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   line-height: 1.5;
   color: var(--theme-color-fg-muted);
   margin: 4px 0 0;
@@ -271,24 +271,24 @@
 }
 
 .Projection {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.6;
   color: var(--theme-color-fg-default);
   margin: 8px 0 0;
   padding: 8px 10px;
   background: var(--theme-color-bg-2);
-  border-radius: var(--radius-7);
+  border-radius: var(--radius-md);
 }
 
 .Omitted {
   padding: 12px 14px;
   background: var(--theme-color-bg-1);
   border: 1px solid var(--theme-color-border-default);
-  border-radius: var(--radius-7);
+  border-radius: var(--radius-md);
 }
 
 .OmittedTitle {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--theme-color-fg-default);
   margin: 0 0 6px;
@@ -297,7 +297,7 @@
 .OmittedList {
   margin: 0;
   padding-left: 18px;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.6;
   color: var(--theme-color-fg-muted);
 
@@ -310,7 +310,7 @@
 /* A failed submit. Warning-weight rather than muted: it reports an action that did
    not happen, which is the one thing on this form a learner must not read past. */
 .Error {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.55;
   color: var(--theme-color-danger);
   margin: 0 0 10px;

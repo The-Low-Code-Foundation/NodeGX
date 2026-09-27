@@ -95,3 +95,32 @@ export function isBlankCapture(img: HTMLImageElement): boolean {
     return false; // tainted / cross-origin — assume real, keep it.
   }
 }
+
+/**
+ * CHR-005 — the colour along a capture's bottom edge, as `rgb(r, g, b)`, or `null` if it cannot
+ * be read. A capture is the top 400px of the page at the window's width (1263×400 on most), so the
+ * launcher card fits it to the card's width and paints the rest of its 16:9 slot in this — which on
+ * nearly every page is the page's own ground carrying on. Per-channel median across the row, so one
+ * button crossing the edge does not tint the slot.
+ */
+export function bottomEdgeColour(img: HTMLImageElement): string | null {
+  try {
+    const W = 32;
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = 1;
+    const ctx = canvas.getContext('2d');
+    if (!ctx || !img.naturalWidth || !img.naturalHeight) return null;
+    ctx.drawImage(img, 0, img.naturalHeight - 1, img.naturalWidth, 1, 0, 0, W, 1);
+    const { data } = ctx.getImageData(0, 0, W, 1);
+    const median = (offset: number) => {
+      const values: number[] = [];
+      for (let i = 0; i < data.length; i += 4) values.push(data[i + offset]);
+      values.sort((a, b) => a - b);
+      return values[W >> 1];
+    };
+    return `rgb(${median(0)}, ${median(1)}, ${median(2)})`;
+  } catch {
+    return null; // tainted / cross-origin — the slot keeps its neutral ground.
+  }
+}

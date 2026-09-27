@@ -1,0 +1,121 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "775fa7cc-2692-5b4a-81e4-beccb38bfdf8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "MoveactionIn",
+      "fromProperty": "rows",
+      "toId": "MoveactionGuard",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "MoveactionIn",
+      "fromProperty": "direction",
+      "toId": "MoveactionGuard",
+      "toProperty": "in-direction"
+    },
+    {
+      "fromId": "MoveactionIn",
+      "fromProperty": "do",
+      "toId": "MoveactionGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "MoveactionIn",
+      "fromProperty": "actionId",
+      "toId": "MoveactionGuard",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "MoveactionGuard",
+      "fromProperty": "out-firstId",
+      "toId": "MoveactionFirst",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "MoveactionGuard",
+      "fromProperty": "out-firstPosition",
+      "toId": "MoveactionFirst",
+      "toProperty": "prop-position"
+    },
+    {
+      "fromId": "MoveactionGuard",
+      "fromProperty": "out-go",
+      "toId": "MoveactionFirst",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "MoveactionGuard",
+      "fromProperty": "out-hasSecond",
+      "toId": "MoveactionSwap",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "MoveactionFirst",
+      "fromProperty": "done",
+      "toId": "MoveactionSwap",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "MoveactionGuard",
+      "fromProperty": "out-secondId",
+      "toId": "MoveactionSecond",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "MoveactionGuard",
+      "fromProperty": "out-secondPosition",
+      "toId": "MoveactionSecond",
+      "toProperty": "prop-position"
+    },
+    {
+      "fromId": "MoveactionSwap",
+      "fromProperty": "ontrue",
+      "toId": "MoveactionSecond",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "MoveactionIn",
+      "fromProperty": "taskId",
+      "toId": "MoveactionHistory",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "MoveactionGuard",
+      "fromProperty": "out-summary",
+      "toId": "MoveactionHistory",
+      "toProperty": "summary"
+    },
+    {
+      "fromId": "MoveactionSwap",
+      "fromProperty": "onfalse",
+      "toId": "MoveactionHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "MoveactionSecond",
+      "fromProperty": "done",
+      "toId": "MoveactionHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "MoveactionHistory",
+      "fromProperty": "done",
+      "toId": "MoveactionOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "MoveactionFirst",
+      "fromProperty": "failure",
+      "toId": "MoveactionProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "MoveactionSecond",
+      "fromProperty": "failure",
+      "toId": "MoveactionProblem",
+      "toProperty": "do"
+    }
+  ]
+}

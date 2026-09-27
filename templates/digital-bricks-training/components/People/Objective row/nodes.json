@@ -1,0 +1,249 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f819d91b-89f4-48d2-bf65-ee74477e47f2",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "or_in",
+      "type": "Component Inputs",
+      "label": "One objective, already worded",
+      "x": 700,
+      "y": 40,
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "archived",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "archivedLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "filedUnder",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasDescription",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "expecting",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasExpecting",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "needs",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasNeeds",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "id": "or_row",
+      "type": "Group",
+      "label": "The row",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "or_head",
+        "or_filed",
+        "or_desc",
+        "or_expect",
+        "or_needs"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": {
+          "value": 1,
+          "unit": "px"
+        },
+        "borderBottomColor": "var(--border-subtle)",
+        "cssClassName": "dbt-objective"
+      },
+      "metadata": {
+        "comment": "READ-ONLY BY DESIGN (TASK-L168 §1). The product's row carries Move up, Move down, Edit, Archive and a concept picker; each of those WRITES, and the template has no writes (sprint 47's rule). Nothing inside this row is a control."
+      }
+    },
+    {
+      "id": "or_head",
+      "type": "Group",
+      "label": "Title, and the pill when archived",
+      "x": 40,
+      "y": 160,
+      "parent": "or_row",
+      "children": [
+        "or_title",
+        "or_pill"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "or_title",
+      "type": "Text",
+      "label": "The objective's title",
+      "x": 40,
+      "y": 260,
+      "parent": "or_head",
+      "parameters": {
+        "as": "h3",
+        "fontFamily": "var(--font-display)",
+        "fontWeight": 800,
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "or_pill",
+      "type": "Group",
+      "label": "Archived",
+      "x": 40,
+      "y": 340,
+      "parent": "or_head",
+      "children": [
+        "or_pill_t"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-sm)"
+      },
+      "metadata": {
+        "comment": "The ONLY thing said about an archived objective's state (criterion 2). A plain word on a quiet ground: no red, no --warm, never 'failed' or 'dropped'. It is a decision the coach made, not a verdict on the learner."
+      }
+    },
+    {
+      "id": "or_pill_t",
+      "type": "Text",
+      "label": "Archived label",
+      "x": 40,
+      "y": 420,
+      "parent": "or_pill",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "or_filed",
+      "type": "Text",
+      "label": "Where its answers are filed",
+      "x": 40,
+      "y": 500,
+      "parent": "or_row",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "metadata": {
+        "comment": "The product puts the slug in a <code>. A Text node has no rich text, so the sentence is one line; the slug is still the exact key their answers live under."
+      }
+    },
+    {
+      "id": "or_desc",
+      "type": "Text",
+      "label": "What it is for",
+      "x": 40,
+      "y": 580,
+      "parent": "or_row",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "or_expect",
+      "type": "Text",
+      "label": "What it expects",
+      "x": 40,
+      "y": 660,
+      "parent": "or_row",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "metadata": {
+        "comment": "The NAMES of what it asks for, never a count of how many are answered (L144 §2)."
+      }
+    },
+    {
+      "id": "or_needs",
+      "type": "Text",
+      "label": "What it needs from their programme",
+      "x": 40,
+      "y": 740,
+      "parent": "or_row",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "metadata": {
+        "comment": "The concepts as TEXT, by title. In the product this is a picker that writes (L114); here it is what the picker would show as chosen."
+      }
+    }
+  ],
+  "visualRoots": [
+    "or_row"
+  ]
+}

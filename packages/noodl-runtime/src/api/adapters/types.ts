@@ -96,6 +96,19 @@ export interface CreateOptions extends AdapterCallbacks<(record: AdapterRecord) 
   collection: string;
   data: Record<string, unknown>;
   acl?: Acl;
+  /**
+   * FED-002 — write this record once, matched on the named property.
+   *
+   * The property must be covered by a single-field UNIQUE index on the
+   * collection; the backend refuses the request otherwise rather than updating
+   * an arbitrary one of several matches. When a row already holds the value the
+   * create becomes an update of that row.
+   *
+   * Honoured by `ParseWireAdapter` (as the `X-NodeGX-Upsert` header). The REST
+   * adapters refuse it loudly — Directus, PostgREST and PocketBase each spell
+   * upsert differently and none of them can be given this meaning by accident.
+   */
+  upsertOn?: string;
 }
 
 export interface SaveOptions extends AdapterCallbacks<(record: AdapterRecord) => void> {
@@ -103,6 +116,18 @@ export interface SaveOptions extends AdapterCallbacks<(record: AdapterRecord) =>
   objectId: string;
   data: Record<string, unknown>;
   acl?: Acl;
+  /**
+   * HLT-016 — apply only if the record still holds these values (field → value; scalars only).
+   * Checked by the backend inside the UPDATE itself. If someone changed the record after it was
+   * read, the save is refused and `error` gets `detail.reason === 'precondition-failed'`. A retry
+   * must re-read first.
+   *
+   * Honoured by `ParseWireAdapter` (as the `X-NodeGX-If` header). The REST adapters refuse it
+   * loudly: an ignored precondition is an unconditional write, which is the race it exists to stop.
+   */
+  ifMatch?: Record<string, string | number | boolean | null>;
+  /** `detail` is the backend's error body when there is one: `reason`, `expected`, … */
+  error: (err?: string, detail?: Record<string, unknown>) => void;
 }
 
 export interface DeleteOptions extends AdapterCallbacks<() => void> {

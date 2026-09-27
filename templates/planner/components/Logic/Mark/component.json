@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7573f218-25d9-521d-829b-11199b6c8078",
+  "name": "Mark",
+  "path": "/Logic/Mark",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Works out the mark a repeat should have after one press — a tick, a change to this one, a skip, lost, sent, or undoing one — and says whether it is a new mark or a changed one."
+}

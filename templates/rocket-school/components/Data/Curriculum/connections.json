@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "83a36de0-bb6f-5815-8705-81533d05f065",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "datacurriculumData",
+      "fromProperty": "items",
+      "toId": "datacurriculumOut",
+      "toProperty": "skills"
+    },
+    {
+      "fromId": "datacurriculumData",
+      "fromProperty": "count",
+      "toId": "datacurriculumOut",
+      "toProperty": "count"
+    }
+  ]
+}

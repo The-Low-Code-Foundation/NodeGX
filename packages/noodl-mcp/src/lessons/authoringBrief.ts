@@ -65,7 +65,7 @@ export const CONDITION_EXAMPLES: ReadonlyArray<{ readonly def: LessonConditionDe
   },
   {
     def: { routerLists: '/#__page__/About' },
-    note: '🔴 the page is REACHABLE — some Router lists it. A page component nobody routed to is unreachable'
+    note: '🔴 the page is REACHABLE — some Router lists it. A page nobody routed to is unreachable'
   },
   {
     def: { node: '/#__page__/Home:%Page:%Router', routerLists: '/#__page__/About' },

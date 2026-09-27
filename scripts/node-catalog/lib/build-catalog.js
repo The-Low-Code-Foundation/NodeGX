@@ -7,7 +7,7 @@
  */
 const { sanitize, normalizeType, tooltipToText, assignDefined } = require('./sanitize');
 const { NOTES, EDITOR_ADAPTER_TYPES } = require('./dynamic-port-notes');
-const { deriveEncoding } = require('./derive-encoding');
+const { deriveEncoding, RETYPES_DECLARED_PORTS } = require('./derive-encoding');
 
 // 1.1.0 — SUB-013 adds `parameterEncoding` to every node with dynamic ports. Additive, so a
 // minor bump: a reader written against 1.0.0 sees an unknown key and is otherwise unaffected.
@@ -60,13 +60,18 @@ function collectFunctionSources(value, key, depth, out) {
   return out;
 }
 
-function hasRuntimeDiscoveredPorts(rawDef) {
+/**
+ * @param {{ ignoreSetup?: boolean }} [opts] `ignoreSetup` leaves the `setup` hook out of the scan,
+ *   so a node that declares `republishesOnlyDeclaredPorts` is still called runtime-discovered when
+ *   something *other* than its setup mints ports.
+ */
+function hasRuntimeDiscoveredPorts(rawDef, opts = {}) {
   const fns = collectFunctionSources(rawDef, null, 0, []);
   return fns.some(
     ({ key, source }) =>
       DYNAMISM_METHOD_KEYS.has(key) ||
       FUNCTION_SOURCE_DYNAMISM.test(source) ||
-      (key === 'setup' && SETUP_SOURCE_DYNAMISM.test(source))
+      (!opts.ignoreSetup && key === 'setup' && SETUP_SOURCE_DYNAMISM.test(source))
   );
 }
 
@@ -114,8 +119,16 @@ function detectDynamism(typeName, metadata, rawDef) {
 
   if (metadata.haveComponentPorts) mechanisms.push('component-ports');
 
-  const runtimeDiscovered = !!metadata.exportDynamicPorts || (rawDef && hasRuntimeDiscoveredPorts(rawDef));
+  // GAM-019 — a type on FB-026's `RETYPES_DECLARED_PORTS` list has a `setup` that republishes ports
+  // it already declares and mints no name, and `deriveEncoding` proves that by driving the setup
+  // headlessly (it throws otherwise). Calling it `runtime-discovered` told the door its port list
+  // was incomplete, so `rules/nonexistentPort` skipped it and P78 D66's `name0 → text` on a Text
+  // Input went through silently. Only the setup is excused: anything else that mints still counts.
+  const narrowsOnly = !!RETYPES_DECLARED_PORTS[typeName];
+  const runtimeDiscovered =
+    !!metadata.exportDynamicPorts || (rawDef && hasRuntimeDiscoveredPorts(rawDef, { ignoreSetup: narrowsOnly }));
   if (runtimeDiscovered) mechanisms.push('runtime-discovered');
+  else if (narrowsOnly && rawDef && hasRuntimeDiscoveredPorts(rawDef)) mechanisms.push('runtime-narrowed');
 
   if (EDITOR_ADAPTER_TYPES[typeName]) mechanisms.push('editor-adapter');
 
@@ -129,6 +142,8 @@ function detectDynamism(typeName, metadata, rawDef) {
     'component-ports': 'Ports are defined by the user per instance (component input/output declarations).',
     'runtime-discovered':
       'Some ports are discovered at runtime from user code, parameters or connected components, and are pushed to the editor per instance; the static port list below is incomplete for such instances.',
+    'runtime-narrowed':
+      'An instance republishes some of the ports listed below with a narrower type. It mints no port of its own, so the static port list below is complete.',
     'editor-adapter': 'The editor computes additional ports for this node from project context (NodeTypeAdapters).'
   };
 

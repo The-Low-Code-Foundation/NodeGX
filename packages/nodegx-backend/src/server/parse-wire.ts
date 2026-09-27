@@ -3,7 +3,7 @@
  * (`cloudstore.js`; sessions live in ./users.ts, functions in the HttpServer
  * against the WorkflowRunner):
  *
- *   POST   /classes/:c            query (body._method === 'GET') or create
+ *   POST   /classes/:c            query (body._method === 'GET'), create, or upsert
  *   GET    /classes/:c            query via query-string (count calls)
  *   GET    /classes/:c/:id        fetch (include=)
  *   PUT    /classes/:c/:id        save / Increment / AddRelation / RemoveRelation
@@ -24,10 +24,66 @@
  * @module nodegx-backend/server/parse-wire
  */
 
-import type { AdapterFacade, QueryOptions } from '../persistence/AdapterFacade';
+import type { IStorageFacade, StorageQueryOptions as QueryOptions } from '@noodl/backend-contract';
 import type { RequestContext } from './HttpServer';
 import { validateAclShape } from '../security/model';
-import { HttpError, readJSONBody, sendJSON } from './http-util';
+// The adapter stack is plain CommonJS without type declarations (see AdapterFacade).
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const QueryBuilder = require('@noodl/runtime/src/api/adapters/local-sql/QueryBuilder');
+import {
+  cappedHeaders,
+  checkViolationToHttp,
+  createErrorToHttp,
+  HttpError,
+  readJSONBody,
+  sendJSON,
+  preconditionToHttp,
+  splitCapped,
+  uniqueViolationToHttp
+} from './http-util';
+
+/**
+ * FED-002 — the upsert header: `X-NodeGX-Upsert: <field>` on a create.
+ *
+ * A header rather than a body key or a query param because it is a property of
+ * the REQUEST, not of the record: everything in the body is stored, and a
+ * `__upsertOn` key in there would be a field a caller could not name. Node's
+ * header names arrive lower-cased.
+ */
+const UPSERT_HEADER = 'x-nodegx-upsert';
+
+/**
+ * HLT-016 — the precondition header: `X-NodeGX-If: {"version":3}` on a `PUT`. The update applies
+ * only if the row still holds those values, checked inside the same UPDATE statement as the ACL.
+ * A header for FED-002's reason: it is about the request, and every body key is a field.
+ */
+const IF_HEADER = 'x-nodegx-if';
+
+/** One request header, trimmed, or '' — Node lower-cases the names it parses. */
+function headerValue(ctx: RequestContext, name: string): string {
+  const raw = ctx.req.headers[name];
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+/**
+ * The `X-NodeGX-If` precondition, or `undefined` when none was sent. A header that is present
+ * but unusable is a 400 naming why, never silently ignored: an ignored precondition is an
+ * unconditional write, which is the race this header exists to stop.
+ */
+function readPrecondition(ctx: RequestContext): Record<string, string | number | boolean | null> | undefined {
+  const raw = headerValue(ctx, IF_HEADER);
+  if (!raw) return undefined;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new HttpError(400, 'X-NodeGX-If must be a JSON object, e.g. {"version":3}.');
+  }
+  const problem = QueryBuilder.expectedValuesProblem(parsed);
+  if (problem) throw new HttpError(400, `X-NodeGX-If ${problem}.`);
+  return parsed as Record<string, string | number | boolean | null>;
+}
 
 function parseJSONParam(value: string | undefined, name: string): Record<string, unknown> | undefined {
   if (!value) return undefined;
@@ -39,7 +95,13 @@ function parseJSONParam(value: string | undefined, name: string): Record<string,
 }
 
 /** Map the wire query fields (from body or query-string) to adapter options. */
-function toQueryOptions(src: Record<string, unknown>): QueryOptions {
+/**
+ * FED-005 exports this: the MCP `_find` tool takes `where`/`order`/`limit`/
+ * `skip`, which is this function's input shape, and a second reading of what
+ * those four words mean is a second answer to "does `order` accept a comma
+ * list?".
+ */
+export function toQueryOptions(src: Record<string, unknown>): QueryOptions {
   const options: QueryOptions = {};
   if (src.where !== undefined) {
     options.where =
@@ -156,10 +218,10 @@ export function visibleConfigParams(
 }
 
 export class ParseWireRoutes {
-  private readonly facade: AdapterFacade;
+  private readonly facade: IStorageFacade;
   private readonly getConfigParams: () => Record<string, unknown>;
 
-  constructor(facade: AdapterFacade, getConfigParams: () => Record<string, unknown>) {
+  constructor(facade: IStorageFacade, getConfigParams: () => Record<string, unknown>) {
     this.facade = facade;
     this.getConfigParams = getConfigParams;
   }
@@ -190,16 +252,35 @@ export class ParseWireRoutes {
       } else {
         result = await this.facade.wireQuery(collection, options);
       }
-      sendJSON(ctx.res, 200, result);
+      // PRD-001: a capped page says so in a header, and the annotation never
+      // reaches the Parse body.
+      const capped = splitCapped(result);
+      sendJSON(ctx.res, 200, capped.body, capped.headers);
       return;
     }
 
     delete body._method;
+
+    // FED-002: `X-NodeGX-Upsert: <field>` turns this create into "make sure
+    // there is exactly one row with this value". It is checked before anything
+    // is stamped, because the update half must not have a create's ACL applied
+    // over the owner the row already has.
+    const upsertOn = headerValue(ctx, UPSERT_HEADER);
+    if (upsertOn) {
+      await this.classesUpsert(ctx, collection, body, upsertOn);
+      return;
+    }
+
     // Client-supplied ACLs are accepted (the Create Record node's Access
     // Control Rules emit them). stampCreate validates the shape and applies
     // owner + template ACL per the collection's creator-owns setting.
     ctx.stampCreate(collection, body);
-    const record = await this.facade.rawCreate(collection, body);
+    let record: Record<string, unknown>;
+    try {
+      record = await this.facade.rawCreate(collection, body);
+    } catch (e) {
+      throw createErrorToHttp(e, body, this.facade.schemaManager);
+    }
     // Parse's create response: objectId + createdAt only. The client merges its
     // own data over this — returning wire-typed fields here would leak `__type`
     // envelopes into model data un-deserialized (create responses skip
@@ -207,12 +288,193 @@ export class ParseWireRoutes {
     sendJSON(ctx.res, 201, { objectId: record.objectId, createdAt: record.createdAt });
   }
 
+  /**
+   * FED-002 §3.3 — the whole dedupe story: `Parse Feed` → `for-each` →
+   * `Create Record (upsertOn: id)` writes each item once however many times the
+   * schedule fires and however many people follow the source.
+   *
+   * Four things this deliberately does NOT do:
+   *
+   *  - **It does not accept any field.** The named field must be covered by a
+   *    single-field UNIQUE index that is actually built. Without one, "the row
+   *    that already has this value" is not a single row, and an upsert over a
+   *    non-unique column is a silent data-loser: it would update an arbitrary
+   *    one of the matches and leave the rest. That is AC3's 400.
+   *  - **It does not widen access.** The request is gated as a `create` by the
+   *    dispatcher; the update half asks for `update` as well, here, because it
+   *    can update a row. A caller with create and no update gets a 403 rather
+   *    than an update it was not entitled to make.
+   *  - **It does not read past the ACL.** The lookup runs with the caller's
+   *    WRITE predicate, so a row it may not write is a row it does not find —
+   *    and the create that follows then hits the unique index and answers 409,
+   *    which is the same answer it would get without the header. No existence
+   *    oracle appears.
+   *  - **It does not trust the gap.** Between the lookup and the insert another
+   *    writer can land the same value; the index catches it, and the retry
+   *    turns that into the update it was always going to be. One retry, not a
+   *    loop: a second failure is a real conflict and is answered as one.
+   */
+  private async classesUpsert(
+    ctx: RequestContext,
+    collection: string,
+    body: Record<string, unknown>,
+    field: string
+  ): Promise<void> {
+    this.assertUpsertable(collection, field);
+
+    const value = body[field];
+    if (value === undefined || value === null) {
+      throw new HttpError(
+        400,
+        `X-NodeGX-Upsert names "${field}", but this record has no value for it. ` +
+          'A record with nothing in the unique field cannot be matched against the rows already there.'
+      );
+    }
+    if (typeof value === 'object') {
+      throw new HttpError(400, `X-NodeGX-Upsert: "${field}" must hold a plain value, not an object or array.`);
+    }
+
+    // The update half of the operation is an update, and is gated as one.
+    ctx.checkData(collection, 'update');
+
+    const existing = await this.findByUnique(ctx, collection, field, value);
+    if (existing) {
+      await this.upsertUpdate(ctx, collection, existing, body);
+      return;
+    }
+
+    ctx.stampCreate(collection, body);
+    let record: Record<string, unknown>;
+    try {
+      record = await this.facade.rawCreate(collection, body);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      const conflict = uniqueViolationToHttp(message, body);
+      if (!conflict) throw createErrorToHttp(e, body, this.facade.schemaManager);
+
+      // Lost the race. The row exists now; if it is one this caller may write,
+      // the request is the update it asked for. If it is not, the 409 stands.
+      const raced = await this.findByUnique(ctx, collection, field, value);
+      if (!raced) throw conflict;
+      await this.upsertUpdate(ctx, collection, raced, body);
+      return;
+    }
+    sendJSON(ctx.res, 201, { objectId: record.objectId, createdAt: record.createdAt, upsert: 'created' });
+  }
+
+  /**
+   * The row this upsert targets, or null. Runs with the caller's WRITE
+   * predicate — see `classesUpsert`'s third note.
+   *
+   * @private
+   */
+  private async findByUnique(
+    ctx: RequestContext,
+    collection: string,
+    field: string,
+    value: unknown
+  ): Promise<Record<string, unknown> | null> {
+    const { results } = await this.facade.rawQuery(collection, {
+      where: { [field]: value },
+      limit: 1,
+      acl: ctx.acl('write')
+    });
+    return results && results.length > 0 ? results[0] : null;
+  }
+
+  /**
+   * Apply the create's payload to the row that already exists, and answer 200.
+   *
+   * `createdAt` comes back from the row rather than from the clock, because a
+   * client merges this response over its own data: a create's answer that said
+   * the record was made just now would move an item's date every poll.
+   *
+   * @private
+   */
+  private async upsertUpdate(
+    ctx: RequestContext,
+    collection: string,
+    existing: Record<string, unknown>,
+    body: Record<string, unknown>
+  ): Promise<void> {
+    const objectId = String(existing.objectId);
+    const data: Record<string, unknown> = { ...body };
+    delete data.objectId;
+    delete data.createdAt;
+    delete data.updatedAt;
+
+    // An ACL the caller sent explicitly is applied (it is what the node's
+    // Access Control Rules emit); one it did not send leaves the row's alone.
+    // `stampCreate` is never run on this path — an owner stamped over an
+    // existing row's ACL would quietly hand the record to whoever polled last.
+    if (Object.prototype.hasOwnProperty.call(data, 'ACL')) {
+      const aclError = validateAclShape(data.ACL);
+      if (aclError) throw new HttpError(400, `Invalid ACL: ${aclError}`, 123);
+      if (data.ACL === undefined || data.ACL === null) delete data.ACL;
+    }
+
+    let updated: Record<string, unknown> | null = null;
+    try {
+      updated = await this.facade.rawSave(collection, objectId, data, ctx.acl('write'));
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      const conflict = uniqueViolationToHttp(message, data);
+      if (conflict) throw conflict;
+      const broke = checkViolationToHttp(message, this.facade.schemaManager);
+      if (broke) throw broke;
+      throw new HttpError(404, 'Object not found.', 101);
+    }
+
+    sendJSON(ctx.res, 200, {
+      objectId,
+      createdAt: existing.createdAt,
+      updatedAt: (updated && updated.updatedAt) || new Date().toISOString(),
+      upsert: 'updated'
+    });
+  }
+
+  /**
+   * AC3 — refuse an upsert on a field no unique index covers, and say why in
+   * the sentence that tells the person what to declare.
+   *
+   * @private
+   */
+  private assertUpsertable(collection: string, field: string): void {
+    const sm = this.facade.schemaManager;
+    if (!sm || typeof sm.indexStatus !== 'function') {
+      throw new HttpError(501, 'This backend cannot upsert: its adapter does not declare indexes.');
+    }
+    const single = sm
+      .indexStatus(collection)
+      .filter((i) => i.unique && i.built && i.fields.length === 1 && i.fields[0] === field);
+    // HLT-016 W6: a PARTIAL unique index is not cover. It holds only for the
+    // rows its predicate matches, and outside them the value may repeat — so
+    // "the row that already has this value" is several rows again.
+    if (single.some((i) => !i.where)) return;
+    if (single.length > 0) {
+      throw new HttpError(
+        400,
+        `X-NodeGX-Upsert: "${field}" is unique in "${collection}" only on the rows a partial index covers, ` +
+          'and outside them the same value may appear on several rows. An upsert needs a unique index with no ' +
+          `"where": declare { "fields": ["${field}"], "unique": true } and push the schema first.`
+      );
+    }
+
+    throw new HttpError(
+      400,
+      `X-NodeGX-Upsert: "${field}" is not a unique-indexed property of "${collection}". ` +
+        'An upsert needs one, because without it "the row that already has this value" may be several rows. ' +
+        `Declare { "fields": ["${field}"], "unique": true } on the collection and push the schema first.`
+    );
+  }
+
   /** GET /classes/:collection — used by count() with where/limit/count params. */
   async classesGet(ctx: RequestContext): Promise<void> {
     const options = toQueryOptions(ctx.query);
     options.acl = ctx.acl('read');
     const result = await this.facade.wireQuery(ctx.params.collection, options);
-    sendJSON(ctx.res, 200, result);
+    const { body, headers } = splitCapped(result);
+    sendJSON(ctx.res, 200, body, headers);
   }
 
   /** GET /classes/:collection/:id */
@@ -248,6 +510,24 @@ export class ParseWireRoutes {
     const acl = ctx.acl('write');
     const { increments, addRelations, removeRelations, plain } = extractOps(body);
 
+    // HLT-016: parse and refuse a precondition up front, before anything is written.
+    const expect = readPrecondition(ctx);
+    if (expect) {
+      // `plain` and the increments are two UPDATE statements, and relations are a third write.
+      // A precondition on the first would not cover the others, so the combination is refused
+      // rather than half-honoured.
+      if (Object.keys(increments).length > 0 || addRelations.length > 0 || removeRelations.length > 0) {
+        throw new HttpError(
+          400,
+          'X-NodeGX-If cannot be combined with __op (Increment, AddRelation, RemoveRelation) in one request: ' +
+            'those are separate writes the precondition would not cover. Send the plain fields on their own.'
+        );
+      }
+      if (Object.keys(plain).length === 0) {
+        throw new HttpError(400, 'X-NodeGX-If was sent with nothing to write.');
+      }
+    }
+
     // Relation-only updates never touch the row itself, so the write predicate
     // wouldn't run — assert writability explicitly before mutating junctions.
     if ((addRelations.length > 0 || removeRelations.length > 0) && acl) {
@@ -261,12 +541,25 @@ export class ParseWireRoutes {
     let updated: Record<string, unknown> | null = null;
     try {
       if (Object.keys(plain).length > 0) {
-        updated = await this.facade.rawSave(collection, objectId, plain, acl);
+        updated = await this.facade.rawSave(collection, objectId, plain, acl, expect);
       }
       if (Object.keys(increments).length > 0) {
         updated = await this.facade.rawIncrement(collection, objectId, increments, acl);
       }
-    } catch {
+    } catch (e) {
+      // FED-002: an update refused by a unique index is a conflict, not a
+      // missing row. Answering 404 here would tell a person their record had
+      // vanished when what actually happened is that another one has the value.
+      const message = e instanceof Error ? e.message : String(e);
+      const conflict = uniqueViolationToHttp(message, plain);
+      if (conflict) throw conflict;
+      // HLT-016: a rule broken is not a missing row either.
+      const broke = checkViolationToHttp(message, this.facade.schemaManager);
+      if (broke) throw broke;
+      if (expect) {
+        const refused = preconditionToHttp(message, expect);
+        if (refused) throw refused;
+      }
       throw new HttpError(404, 'Object not found.', 101);
     }
     for (const rel of addRelations) {
@@ -302,6 +595,12 @@ export class ParseWireRoutes {
    * `$avg`/`$sum`/`$max`/`$min`/`$addToSet` accessors. Both are governed by
    * the `find` permission and the read ACL — they reveal exactly what find
    * reveals.
+   *
+   * PRD-006 — both shapes answer with a LIST rather than a page, so both are
+   * bounded at `queries.maxLimit` in the facade and both say so with
+   * `X-NodeGX-Result-Capped`. The body is unchanged either way: the wire format
+   * is shared with clients we do not ship (`cloudstore.js`), so the signal
+   * rides in headers, exactly as it does on `GET /classes/:collection`.
    */
   async aggregate(ctx: RequestContext): Promise<void> {
     const collection = ctx.params.collection;
@@ -310,8 +609,13 @@ export class ParseWireRoutes {
     const acl = ctx.acl('read');
 
     if (query.distinct) {
-      const results = await this.facade.rawDistinct(collection, query.distinct, where, acl);
-      sendJSON(ctx.res, 200, { results });
+      const { values, cappedAt } = await this.facade.rawDistinct(
+        collection,
+        query.distinct,
+        where,
+        acl
+      );
+      sendJSON(ctx.res, 200, { results: values }, cappedHeaders(cappedAt));
       return;
     }
 
@@ -332,8 +636,8 @@ export class ParseWireRoutes {
       }
     }
 
-    const result = await this.facade.rawAggregate(collection, group, where, acl);
-    sendJSON(ctx.res, 200, { results: [result] });
+    const { result, cappedAt } = await this.facade.rawAggregate(collection, group, where, acl);
+    sendJSON(ctx.res, 200, { results: [result] }, cappedHeaders(cappedAt));
   }
 
   /**

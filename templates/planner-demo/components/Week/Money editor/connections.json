@@ -1,0 +1,427 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "fe87cb3f-e4c7-56a5-8f40-207124c2b1d2",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "edIn",
+      "fromProperty": "shown",
+      "toId": "edRoot",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "title",
+      "toId": "edTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "sub",
+      "toId": "edSub",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "saveLabel",
+      "toId": "edSave",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "label",
+      "toId": "edLabel",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "edLabel",
+      "fromProperty": "onTextChanged",
+      "toId": "edOut",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "amount",
+      "toId": "edAmount",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "edAmount",
+      "fromProperty": "onTextChanged",
+      "toId": "edOut",
+      "toProperty": "amount"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "billLeadDays",
+      "toId": "edLead",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "edLead",
+      "fromProperty": "onTextChanged",
+      "toId": "edOut",
+      "toProperty": "billLeadDays"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "likelihood",
+      "toId": "edLikelihood",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "edLikelihood",
+      "fromProperty": "onTextChanged",
+      "toId": "edOut",
+      "toProperty": "likelihood"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "note",
+      "toId": "edNote",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "edNote",
+      "fromProperty": "onTextChanged",
+      "toId": "edOut",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "dirs",
+      "toId": "edDir",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "dir",
+      "toId": "edDir",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "edDir",
+      "fromProperty": "value",
+      "toId": "edOut",
+      "toProperty": "dir"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "repeats",
+      "toId": "edRepeat",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "repeat",
+      "toId": "edRepeat",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "edRepeat",
+      "fromProperty": "value",
+      "toId": "edOut",
+      "toProperty": "repeat"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "projects",
+      "toId": "edProject",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "projectId",
+      "toId": "edProject",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "edProject",
+      "fromProperty": "value",
+      "toId": "edOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "billDate",
+      "toId": "edBillDate",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "edBillDate",
+      "fromProperty": "Value",
+      "toId": "edOut",
+      "toProperty": "billDate"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "date",
+      "toId": "edDate",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "edShape",
+      "fromProperty": "out-due",
+      "toId": "edDate",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "edDate",
+      "fromProperty": "Value",
+      "toId": "edOut",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "until",
+      "toId": "edUntil",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "edUntil",
+      "fromProperty": "Value",
+      "toId": "edOut",
+      "toProperty": "until"
+    },
+    {
+      "fromId": "edRepeat",
+      "fromProperty": "value",
+      "toId": "edShape",
+      "toProperty": "in-repeat"
+    },
+    {
+      "fromId": "edProject",
+      "fromProperty": "value",
+      "toId": "edShape",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "edDir",
+      "fromProperty": "value",
+      "toId": "edShape",
+      "toProperty": "in-dir"
+    },
+    {
+      "fromId": "edBillDate",
+      "fromProperty": "Value",
+      "toId": "edShape",
+      "toProperty": "in-billDate"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "projectTerms",
+      "toId": "edShape",
+      "toProperty": "in-projectTerms"
+    },
+    {
+      "fromId": "edShape",
+      "fromProperty": "out-untilShown",
+      "toId": "edUntilBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "edShape",
+      "fromProperty": "out-monthEndShown",
+      "toId": "edMonthEnd",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "edShape",
+      "fromProperty": "out-billShown",
+      "toId": "edBillBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "edShape",
+      "fromProperty": "out-leadShown",
+      "toId": "edLead",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "edShape",
+      "fromProperty": "out-fromHoursShown",
+      "toId": "edFromHours",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "edShape",
+      "fromProperty": "out-dateLabel",
+      "toId": "edDate",
+      "toProperty": "Label"
+    },
+    {
+      "fromId": "edShape",
+      "fromProperty": "out-dueHint",
+      "toId": "edDueHint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "shown",
+      "toId": "edClosing",
+      "toProperty": "in-shown"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "monthEnd",
+      "toId": "edClosing",
+      "toProperty": "in-monthEnd"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "fromHours",
+      "toId": "edClosing",
+      "toProperty": "in-fromHours"
+    },
+    {
+      "fromId": "edClosing",
+      "fromProperty": "out-monthEndOn",
+      "toId": "edMonthEnd",
+      "toProperty": "check"
+    },
+    {
+      "fromId": "edClosing",
+      "fromProperty": "out-monthEndOff",
+      "toId": "edMonthEnd",
+      "toProperty": "uncheck"
+    },
+    {
+      "fromId": "edClosing",
+      "fromProperty": "out-fromHoursOn",
+      "toId": "edFromHours",
+      "toProperty": "check"
+    },
+    {
+      "fromId": "edClosing",
+      "fromProperty": "out-fromHoursOff",
+      "toId": "edFromHours",
+      "toProperty": "uncheck"
+    },
+    {
+      "fromId": "edMonthEnd",
+      "fromProperty": "checked",
+      "toId": "edOut",
+      "toProperty": "monthEnd"
+    },
+    {
+      "fromId": "edFromHours",
+      "fromProperty": "checked",
+      "toId": "edOut",
+      "toProperty": "fromHours"
+    },
+    {
+      "fromId": "edClosing",
+      "fromProperty": "out-closed",
+      "toId": "edLabel",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "edClosing",
+      "fromProperty": "out-closed",
+      "toId": "edAmount",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "edClosing",
+      "fromProperty": "out-closed",
+      "toId": "edLead",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "edClosing",
+      "fromProperty": "out-closed",
+      "toId": "edLikelihood",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "edClosing",
+      "fromProperty": "out-closed",
+      "toId": "edNote",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "edIn",
+      "fromProperty": "key",
+      "toId": "edReset",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "edReset",
+      "fromProperty": "out-blur",
+      "toId": "edLabel",
+      "toProperty": "blur"
+    },
+    {
+      "fromId": "edReset",
+      "fromProperty": "out-reset",
+      "toId": "edLabel",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "edReset",
+      "fromProperty": "out-blur",
+      "toId": "edAmount",
+      "toProperty": "blur"
+    },
+    {
+      "fromId": "edReset",
+      "fromProperty": "out-reset",
+      "toId": "edAmount",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "edReset",
+      "fromProperty": "out-blur",
+      "toId": "edLead",
+      "toProperty": "blur"
+    },
+    {
+      "fromId": "edReset",
+      "fromProperty": "out-reset",
+      "toId": "edLead",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "edReset",
+      "fromProperty": "out-blur",
+      "toId": "edLikelihood",
+      "toProperty": "blur"
+    },
+    {
+      "fromId": "edReset",
+      "fromProperty": "out-reset",
+      "toId": "edLikelihood",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "edReset",
+      "fromProperty": "out-blur",
+      "toId": "edNote",
+      "toProperty": "blur"
+    },
+    {
+      "fromId": "edReset",
+      "fromProperty": "out-reset",
+      "toId": "edNote",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "edSave",
+      "fromProperty": "onClick",
+      "toId": "edOut",
+      "toProperty": "save"
+    },
+    {
+      "fromId": "edCancel",
+      "fromProperty": "onClick",
+      "toId": "edOut",
+      "toProperty": "cancel"
+    },
+    {
+      "fromId": "edBack",
+      "fromProperty": "onClick",
+      "toId": "edOut",
+      "toProperty": "back"
+    }
+  ]
+}

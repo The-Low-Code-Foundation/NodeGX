@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- FED-001 AC4. Every shape a reader of this repo will hit and get wrong once:
+     an element with attributes AND text, a repeated element, a singleton that must still be an
+     array when declared so, a CDATA section, an escaped entity, and a namespaced element. -->
+<catalogue xmlns:ext="https://example.invalid/ext" revision="7">
+  <name lang="en">Bench tools</name>
+  <tool id="t1" kind="vice">
+    <label>Record No. 3</label>
+    <note>Cast iron &amp; heavy</note>
+  </tool>
+  <tool id="t2" kind="plane">
+    <label>No. 4 smoother</label>
+    <note><![CDATA[Sole is <flat> to 0.02mm]]></note>
+  </tool>
+  <ext:origin country="GB">Sheffield</ext:origin>
+  <empty/>
+</catalogue>

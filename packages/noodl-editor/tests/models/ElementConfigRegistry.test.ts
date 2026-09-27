@@ -1,8 +1,18 @@
 /**
  * STYLE-004: Unit tests for ElementConfigRegistry
  *
- * Covers: applyVariant, applySize, getSizeNames, resolveVariant,
- * getVariantNames, applyDefaults.
+ * Covers: applyVariant, resolveVariant, getVariantNames, applyDefaults.
+ *
+ * 🔴 **P94 STY-002 AC1 removed two things this file used to cover**, and the removals are graded
+ * here rather than just deleted:
+ *
+ * - the **`_variant` marker**. `applyVariant` and `applyDefaults` still stamp the variant's
+ *   *styles*, because that is what a new Button looks like; they no longer write the parameter the
+ *   retired `Preset` row read. Each assertion below pins **both halves** — the styles are still
+ *   exactly what they were, *and* the marker is gone. Asserting only the absence would pass just
+ *   as well against a function that had stopped stamping anything at all.
+ * - the **size axis** (`applySize`, `getSizeNames`, `ButtonConfig.sizes`). `_size` occurred 0 times
+ *   across ~105 real projects, and a second styling axis cannot survive design rule 1.
  */
 
 
@@ -38,7 +48,16 @@ describe('ElementConfigRegistry.applyVariant', () => {
 
     expect(node.parameters['backgroundColor']).toBe('var(--primary)');
     expect(node.parameters['color']).toBe('var(--primary-foreground)');
-    expect(node.parameters['_variant']).toBe('primary');
+  });
+
+  // P94 STY-002 AC1. Paired with the assertion above on purpose: together they say "the styles
+  // still arrive and the marker does not", which is the whole change. Alone, this one would pass
+  // against a no-op.
+  it('writes no _variant marker', () => {
+    const node = makeNode();
+    ElementConfigRegistry.applyVariant(node, BUTTON_TYPE, 'primary');
+
+    expect(node.parameters['_variant']).toBeUndefined();
   });
 
   it('does not include the "states" key in stamped parameters', () => {
@@ -48,13 +67,13 @@ describe('ElementConfigRegistry.applyVariant', () => {
     expect(node.parameters['states']).toBeUndefined();
   });
 
-  it('updates _variant marker when switching variants', () => {
+  it('switching variants replaces the styles, and still writes no marker', () => {
     const node = makeNode();
     ElementConfigRegistry.applyVariant(node, BUTTON_TYPE, 'primary');
     ElementConfigRegistry.applyVariant(node, BUTTON_TYPE, 'secondary');
 
-    expect(node.parameters['_variant']).toBe('secondary');
     expect(node.parameters['backgroundColor']).toBe('var(--secondary)');
+    expect(node.parameters['_variant']).toBeUndefined();
   });
 
   it('is a no-op for an unknown node type', () => {
@@ -69,73 +88,6 @@ describe('ElementConfigRegistry.applyVariant', () => {
     ElementConfigRegistry.applyVariant(node, BUTTON_TYPE, 'nonexistent');
 
     expect(node.parameters).toEqual({});
-  });
-});
-
-// ---------------------------------------------------------------------------
-// applySize (STYLE-004)
-// ---------------------------------------------------------------------------
-
-describe('ElementConfigRegistry.applySize', () => {
-  it('stamps size preset styles onto node parameters', () => {
-    const node = makeNode();
-    ElementConfigRegistry.applySize(node, BUTTON_TYPE, 'sm');
-
-    expect(node.parameters['fontSize']).toBe('var(--text-xs)');
-    expect(node.parameters['_size']).toBe('sm');
-  });
-
-  it('stamps lg preset correctly', () => {
-    const node = makeNode();
-    ElementConfigRegistry.applySize(node, BUTTON_TYPE, 'lg');
-
-    expect(node.parameters['fontSize']).toBe('var(--text-base)');
-    expect(node.parameters['paddingTop']).toBe('var(--space-3)');
-    expect(node.parameters['_size']).toBe('lg');
-  });
-
-  it('is a no-op for a registered type with no sizes', () => {
-    const node = makeNode();
-    ElementConfigRegistry.applySize(node, TEXT_TYPE, 'sm');
-    expect(node.parameters).toEqual({});
-  });
-
-  it('is a no-op for an unregistered type', () => {
-    const node = makeNode();
-    ElementConfigRegistry.applySize(node, UNREGISTERED_TYPE, 'sm');
-    expect(node.parameters).toEqual({});
-  });
-
-  it('is a no-op for an unknown size name', () => {
-    const node = makeNode();
-    ElementConfigRegistry.applySize(node, BUTTON_TYPE, 'xxl');
-    expect(node.parameters).toEqual({});
-  });
-
-  it('is a no-op for an unknown type', () => {
-    const node = makeNode();
-    ElementConfigRegistry.applySize(node, 'unknown.type', 'md');
-    expect(node.parameters).toEqual({});
-  });
-});
-
-// ---------------------------------------------------------------------------
-// getSizeNames (STYLE-004)
-// ---------------------------------------------------------------------------
-
-describe('ElementConfigRegistry.getSizeNames', () => {
-  it('returns size keys in definition order for Button', () => {
-    const sizes = ElementConfigRegistry.getSizeNames(BUTTON_TYPE);
-    expect(sizes).toEqual(['sm', 'md', 'lg', 'xl']);
-  });
-
-  it('returns empty array for node types with no sizes', () => {
-    expect(ElementConfigRegistry.getSizeNames(UNREGISTERED_TYPE)).toEqual([]);
-    expect(ElementConfigRegistry.getSizeNames(TEXT_TYPE)).toEqual([]);
-  });
-
-  it('returns empty array for unknown type', () => {
-    expect(ElementConfigRegistry.getSizeNames('unknown.type')).toEqual([]);
   });
 });
 
@@ -190,16 +142,28 @@ describe('ElementConfigRegistry.resolveVariant', () => {
 // ---------------------------------------------------------------------------
 
 describe('ElementConfigRegistry.applyDefaults', () => {
-  it('applies default styles and stamps the default variant', () => {
+  it('applies default styles and the default variant\'s styles', () => {
     const node = makeNode();
     ElementConfigRegistry.applyDefaults(node, BUTTON_TYPE);
 
     // Default variant is 'primary', so its styles should be applied
-    expect(node.parameters['_variant']).toBe('primary');
     expect(node.parameters['backgroundColor']).toBe('var(--primary)');
     // Base defaults
     expect(node.parameters['borderRadius']).toBe('var(--radius-md)');
     expect(node.parameters['cursor']).toBe('pointer');
+  });
+
+  // P94 STY-002 AC1/AC7 — what a newly created node carries is unchanged **apart from** the
+  // marker, which is the claim AC7 rests on. `applyDefaults` is the canvas creation path
+  // (`NodeOperations.createNewNode`) and the Layers drop path both call it.
+  it('creates a node with no preset markers of either kind', () => {
+    const node = makeNode();
+    ElementConfigRegistry.applyDefaults(node, BUTTON_TYPE);
+
+    expect(node.parameters['_variant']).toBeUndefined();
+    expect(node.parameters['_size']).toBeUndefined();
+    // …and the node is not empty, so the two absences above are not vacuous.
+    expect(Object.keys(node.parameters).length).toBeGreaterThan(5);
   });
 
   it('does not overwrite already-set parameters', () => {

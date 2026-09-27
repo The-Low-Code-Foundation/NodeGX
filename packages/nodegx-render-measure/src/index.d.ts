@@ -53,6 +53,7 @@ export declare const RenderFinding: {
   readonly ContentNotVisible: 'content-not-visible';
   readonly ClippedPage: 'clipped-page';
   readonly ElementsOverflowing: 'elements-overflowing';
+  readonly TextWiderThanItsBox: 'text-wider-than-its-box';
   readonly SingleColumnGrid: 'single-column-grid';
   readonly MinimumLayoutWidth: 'minimum-layout-width';
   readonly HorizontalOverflow: 'horizontal-overflow';

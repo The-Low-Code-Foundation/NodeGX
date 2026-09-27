@@ -1,0 +1,90 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ef990703-84da-51aa-88ae-2aae0cb5db40",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "obIn",
+      "type": "Component Inputs",
+      "label": "The option",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 290,
+      "y": 40
+    },
+    {
+      "id": "obBtn",
+      "type": "net.noodl.controls.button",
+      "label": "The button",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-8)",
+        "paddingRight": "var(--space-8)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "?",
+        "minWidth": {
+          "value": 96,
+          "unit": "px"
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "obOut",
+      "type": "Component Outputs",
+      "label": "Tapped",
+      "ports": [
+        {
+          "name": "picked",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "value",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 290,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "obBtn"
+  ]
+}

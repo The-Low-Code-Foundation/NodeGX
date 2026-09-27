@@ -24,7 +24,9 @@ import * as path from 'path';
 
 import { BackendServiceOptions, resolveOptions, requiresAuth } from './config';
 import { createAdapter, PersistenceHandle } from './persistence/createAdapter';
-import { AdapterFacade } from './persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
+
+import { AdapterFacade, DEFAULT_PAGE_CAP } from './persistence/AdapterFacade';
 import { ExecutionHistory, ExecutionHistoryStatus } from './execution/ExecutionStore';
 import { IdempotencyStore } from './execution/IdempotencyStore';
 import { HttpServer, ListenInfo } from './server/HttpServer';
@@ -46,6 +48,7 @@ import {
 } from './config/SecretsStore';
 import { OpsState } from './ops/OpsState';
 import { logger } from './ops/logger';
+import type { SettingsReload } from './server/admin-backups';
 import { SecretValueScrubber } from './ops/log-scrub';
 import { AuditLog, ensureAuditTable } from './ops/audit';
 import { SystemUsers, SystemUserRequest, SystemUserResult } from './users/SystemUsers';
@@ -54,6 +57,8 @@ import { TriggerSubsystem } from './triggers/TriggerSubsystem';
 import { BackupSubsystem } from './backup/BackupSubsystem';
 import { FileSubsystem } from './storage/FileSubsystem';
 import { ensureFilesTable } from './storage/MetadataStore';
+import { ensureHttpCacheTable, HttpCacheStore } from './persistence/HttpCacheStore';
+import { SERVICE_VERSION } from './ops/headers';
 import { EmailConfigState } from './email/EmailConfigState';
 import { Mailer, SendEmailResult } from './email/Mailer';
 import { EmailTokenStore } from './email/tokens';
@@ -102,6 +107,8 @@ export interface StartedService {
     adminTokenMintedThisStart: boolean;
     /** BAK-005: a read-only admin credential is provisioned. */
     hasReadonlyTier: boolean;
+    /** BMG-014: some account carries full backend access (the manager's setup step is done). */
+    hasAdminAccount: boolean;
   };
   /** BAK-008: full-text search status at this start. */
   search: {
@@ -115,7 +122,7 @@ export interface StartedService {
 export class BackendService {
   readonly options: BackendServiceOptions;
   private persistence: PersistenceHandle | null = null;
-  private facade: AdapterFacade | null = null;
+  private facade: IStorageFacade | null = null;
   private http: HttpServer | null = null;
   private runner: WorkflowRunner | null = null;
   private workflows: WorkflowSubsystem | null = null;
@@ -204,7 +211,12 @@ export class BackendService {
       dataDir: this.options.dataDir,
       allowEphemeral: this.options.allowEphemeral
     });
-    this.facade = new AdapterFacade(this.persistence.adapter);
+    // PRD-001: the page cap, read fresh on every query so `PUT /admin/ops`
+    // applies to the next request rather than the next restart. `this.ops` is
+    // already loaded (its logging config configured the logger above).
+    this.facade = new AdapterFacade(this.persistence.adapter, () =>
+      this.ops ? this.ops.config.queries : DEFAULT_PAGE_CAP
+    );
     this.ensureSystemTables();
 
     // 1.4 SB-015: the project's own policy, if it ships one and this backend has
@@ -240,6 +252,8 @@ export class BackendService {
       loopback: !requiresAuth(this.options),
       cliToken: this.options.authToken,
       readonlyToken: this.options.readonlyToken,
+      // PRD-005: never mint under the production stance.
+      requireSecrets: this.options.requireSecrets,
       deployedFunctions,
       facade: this.facade
     });
@@ -340,7 +354,7 @@ export class BackendService {
     //      while enforcement said no.
     this.systemRoles = new SystemRoles({
       facade: this.facade,
-      rolesForUser: (userId) => (this.security ? this.security.rolesForUser(userId) : []),
+      rolesForUser: (userId) => (this.security ? this.security.rolesForUser(userId) : Promise.resolve([])),
       onAudit: ({ action, outcome, target }) => {
         void this.audit?.record({
           action,
@@ -361,7 +375,13 @@ export class BackendService {
     //    ExecutionHistory.maybePrune for why this service does not grow a fourth
     //    timer to do it.
     const executionHistory = this.executions.open(this.options.dataDir, {
-      getRetentionDays: () => this.ops!.config.executions.retentionDays
+      getRetentionDays: () => this.ops!.config.executions.retentionDays,
+      // PRD-003: the count limit beside the age limit; PRD-002: the record bounds. All live.
+      getMaxCount: () => this.ops!.config.executions.maxCount,
+      getRecordBounds: () => ({
+        maxValueBytes: this.ops!.config.executions.maxValueBytes,
+        maxRunBytes: this.ops!.config.executions.maxRunBytes
+      })
     });
     if (!executionHistory.enabled) {
       // eslint-disable-next-line no-console
@@ -374,14 +394,14 @@ export class BackendService {
     //     than growing a fourth timer, and its first act is to release every
     //     claim a prior process left `running` — the same doctrine as 5.5 below:
     //     a claim that outlived its process is a key nothing could ever retry.
-    const db = this.executions.getDatabase();
-    if (db) {
+    const operational = this.executions.getOperationalStore();
+    if (operational) {
       try {
-        this.idempotency.open(db, {
+        this.idempotency.open(operational, {
           getTtlMs: () => this.ops!.config.executions.idempotencyTtlHours * 3_600_000
         });
         this.executions.registerSweep('idempotency', () => this.idempotency.sweep());
-        const releasedClaims = this.idempotency.releaseInFlight();
+        const releasedClaims = await this.idempotency.releaseInFlight();
         if (releasedClaims > 0) {
           // eslint-disable-next-line no-console
           console.warn(
@@ -448,10 +468,19 @@ export class BackendService {
     this.backups = new BackupSubsystem({
       dataDir: this.options.dataDir,
       dbPath: this.persistence.dbPath,
+      // BRG-008: which engine actually holds the rows. On PostgreSQL `dbPath`
+      // is '' and a pre-migration `local.db` may still be sitting in `data/`,
+      // so without this the subsystem would archive stale rows and call it a
+      // success. The manager refuses by name instead.
+      engine: this.persistence.status.engine,
+      storageTarget: this.persistence.target,
       executions: this.executions,
       backendId: this.options.backendId,
       backendName: this.options.backendName,
-      getSchema: () => (this.facade && this.facade.schemaManager ? this.facade.schemaManager.exportSchemas() : [])
+      getSchema: () => (this.facade && this.facade.schemaManager ? this.facade.schemaManager.exportSchemas() : []),
+      // BMG-015: archives can go to the files' bucket (read live — the files
+      // subsystem is built just below, and the bucket can change at runtime).
+      getBucket: () => (this.files ? this.files.bucketDriver() : null)
     });
 
     // 2.66 Files (BAK-006): metadata + storage driver + orphan-sweep scheduler,
@@ -464,8 +493,13 @@ export class BackendService {
       secrets: new SecretsStore(this.options.dataDir),
       executions: this.executions,
       backendId: this.options.backendId,
-      backendName: this.options.backendName
+      backendName: this.options.backendName,
+      requireSecrets: this.options.requireSecrets
     });
+    // PRD-005: the signed-URL secret is settled NOW — before the port opens — rather than on
+    // the first signed URL, so a deploy told not to invent secrets refuses at start and not on
+    // a request a week later. Under the default stance this mints it, as first use would have.
+    this.files.verifyProvisionedSecrets();
 
     // 2.7 Email (BAK-002): config + secrets load beside security.json/secrets.json
     //     (same dataDir, same shared-secrets convention — see config/SecretsStore).
@@ -524,7 +558,22 @@ export class BackendService {
       emailTokens: new EmailTokenStore(this.facade),
       auth: this.auth,
       ops: this.ops,
-      audit: this.audit
+      audit: this.audit,
+      // BMG-011: a restore from the manager swaps the database this process
+      // serves. The adapter reopens the SAME path, so every holder of the
+      // facade sees the restored rows; the schema manager is remade by
+      // `connect()`, which is why long-lived readers of it take a getter.
+      persistenceControl: {
+        pause: async () => {
+          if (this.persistence) await this.persistence.adapter.disconnect();
+        },
+        resume: async () => {
+          if (!this.persistence) return;
+          await this.persistence.adapter.connect();
+          this.ensureSystemTables();
+          return this.reloadRestoredSettings();
+        }
+      }
     });
     const listen = await this.http.listen();
 
@@ -538,7 +587,10 @@ export class BackendService {
     (globalThis as any)._noodl_cloudservices = {
       endpoint: `http://127.0.0.1:${listen.port}`,
       appId: this.options.backendId,
-      masterKey: this.security.adminToken
+      masterKey: this.security.adminToken,
+      // HLT-023: the clients stamp each loopback request with the run it belongs to
+      // (`X-NodeGX-Run`), so it is charged to that run instead of to `data:admin`.
+      currentRunId: () => (this.runner ? this.runner.functionRuns.currentRunId() : undefined)
     };
 
     // 4.5 The Send Email node (BAK-002, noodl-viewer-cloud) runs INSIDE this
@@ -618,7 +670,19 @@ export class BackendService {
       // thing that holds a SecretsStore, and it deliberately stays that way — the scrubber
       // exposes `scrub(text)` and nothing that hands a value back, so this is not a way around
       // SecretsStore's missing bulk read (CWF-009 design question 4).
-      scrubSecretValues: new SecretValueScrubber(new SecretsStore(this.options.dataDir))
+      scrubSecretValues: new SecretValueScrubber(new SecretsStore(this.options.dataDir)),
+      // PRD-002: a `Log` node's message and data are bounded AFTER that scrub, live.
+      getRecordBounds: () => ({
+        maxValueBytes: this.ops!.config.executions.maxValueBytes,
+        maxRunBytes: this.ops!.config.executions.maxRunBytes
+      }),
+      // FED-004 §3.2 — the `HTTP Request` node's `Conditional` port has somewhere
+      // to remember. One store per service, shared by every run: validators are
+      // a fact about a URL, not about a request.
+      httpValidators: new HttpCacheStore(this.facade),
+      // FED-004 §3.3 — a name on the door. Read live, like the timeout above,
+      // because the public URL it names is edited through the admin surface.
+      getHttpUserAgent: () => this.outboundUserAgent()
     });
     await this.runner.initialize();
     await this.runner.loadWorkflows();
@@ -656,7 +720,8 @@ export class BackendService {
         enforced: !this.security.devOpenActive,
         migratedThisStart: this.security.migratedThisStart,
         adminTokenMintedThisStart: this.security.adminTokenMintedThisStart,
-        hasReadonlyTier: this.security.adminReadonlyToken !== null
+        hasReadonlyTier: this.security.adminReadonlyToken !== null,
+        hasAdminAccount: await this.hasAdminAccount()
       },
       search: {
         fts5Available: searchIndexer.hasFts5(),
@@ -678,6 +743,22 @@ export class BackendService {
    *      wrong before: the hub was closed first, so SSE clients had their
    *      streams cut without the goodbye the hub knows how to send.
    */
+  /**
+   * BMG-014: does any account carry full backend access? Read once at start
+   * for the CLI's first-run lines; the manager asks `whoami` for the live
+   * answer. A failure to read is "no" — the lines then say to make one, which
+   * is the safe direction.
+   */
+  async hasAdminAccount(): Promise<boolean> {
+    if (!this.facade) return false;
+    try {
+      const { results } = await this.facade.rawQuery('_User', { where: { adminAccess: 'full' }, limit: 1 });
+      return results.length > 0;
+    } catch {
+      return false;
+    }
+  }
+
   async stop(): Promise<void> {
     if (this.triggers) {
       this.triggers.stop();
@@ -691,6 +772,9 @@ export class BackendService {
       this.files.stop();
       this.files = null;
     }
+    // PRD-003: a reclaim step scheduled for the next tick must not run against a process that
+    // is leaving. The handle itself was never closed here (see ExecutionHistory.close).
+    this.executions.close();
     if (this.http) {
       await this.http.close();
       this.http = null;
@@ -834,6 +918,28 @@ export class BackendService {
   }
 
   /**
+   * FED-004 §3.3 — what this backend calls itself on an outbound request.
+   *
+   * `NodeGX/<version> (+<publicUrl>)`, RFC-shaped: a product token and a
+   * comment naming where to complain. Reddit REFUSES a request without a
+   * descriptive `User-Agent` and is the reason this exists; being identifiable
+   * to every other host is the reason it is not Reddit-specific.
+   *
+   * ⚠️ **The parenthetical is omitted rather than filled with a fallback.**
+   * `effectiveBaseUrl` will happily hand back `http://localhost:3000` when
+   * nothing is configured, and a localhost URL in a `User-Agent` identifies
+   * nobody — it is noise that looks like information. A backend that has not
+   * been told its public address says only its name.
+   */
+  private outboundUserAgent(): string {
+    const product = `NodeGX/${SERVICE_VERSION}`;
+    if (!this.emailConfig) return product;
+    const base = this.emailConfig.effectiveBaseUrl('');
+    if (base.usedFallback || !base.url) return product;
+    return `${product} (+${base.url})`;
+  }
+
+  /**
    * Parse's built-in classes, pre-created so the session endpoints can query
    * them before any row exists (a `where` on a column of a not-yet-created
    * table is a SQL error, not an empty result).
@@ -870,6 +976,16 @@ export class BackendService {
     // `addColumn` swallows "duplicate column name", so this is the idempotent
     // half of the same statement rather than a second policy.
     sm.addColumn('_Session', { name: 'expiresAt', type: 'Date' });
+    // BMG-004 (R3): an account that may not sign in. The same idempotent ALTER
+    // as the line above, for the same reason — and without it a
+    // `where: { disabled: true }` on an older data dir is a SQL error rather
+    // than an empty answer. Absent reads as enabled (accountColumns.ts).
+    sm.addColumn('_User', { name: 'disabled', type: 'Boolean' });
+    // BMG-014: whether a person may open the backend manager ('full' |
+    // 'readonly'; absent = no). Same idempotent ALTER, same reason. The value
+    // is read by `SecurityState.resolvePrincipal` on every session, so the
+    // column has to exist on every data dir, old or new.
+    sm.addColumn('_User', { name: 'adminAccess', type: 'String' });
     // BAK-003: roles (flat; membership via the users Relation's junction
     // table) and API keys (hashed secrets, never recoverable).
     sm.createTable({
@@ -879,6 +995,11 @@ export class BackendService {
         { name: 'users', type: 'Relation', targetClass: '_User' }
       ]
     });
+    // BMG-005: what a role is FOR, in the operator's words. The same idempotent
+    // ALTER as `_Session.expiresAt` above — `createTable` leaves an existing
+    // `_Role` alone, and without the column a description would be written into
+    // a table that has nowhere to keep it.
+    sm.addColumn('_Role', { name: 'description', type: 'String' });
     sm.createTable({
       name: '_ApiKey',
       columns: [
@@ -886,9 +1007,21 @@ export class BackendService {
         { name: 'keyHash', type: 'String' },
         { name: 'scopes', type: 'Array' },
         { name: 'revoked', type: 'Boolean' },
-        { name: 'lastUsedAt', type: 'Date' }
+        { name: 'lastUsedAt', type: 'Date' },
+        // FED-005 §3.3 — the `_User` this key acts as, or absent. A plain
+        // String rather than a Pointer: `aclFor` and `rolesForUser` both want
+        // the bare id, and a Pointer column would have every reader unwrap a
+        // `{__type: 'Pointer'}` envelope for a field no query ever joins on.
+        { name: 'actsAsUserId', type: 'String' }
       ]
     });
+    // Same shape as `_Session.expiresAt` above, and for the same reason:
+    // `createTable` does nothing to a table that already exists, so every
+    // backend created before FED-005 needs the ALTER, and `addColumn` swallows
+    // a duplicate. Without it a bound key written by the admin route would read
+    // back unbound — which fails OPEN, into the exact "the key sees everybody's
+    // rows" behaviour the binding exists to stop.
+    sm.addColumn('_ApiKey', { name: 'actsAsUserId', type: 'String' });
     // BAK-002: password-reset / verify-email tokens — hashed at rest, single-use.
     // BAK-004 adds two columns for magic links: `email`, because a signup link
     // is issued before any user exists (so `userId` is empty and the address is
@@ -916,6 +1049,50 @@ export class BackendService {
     // `isSystemCollection` keeps it off /api and /classes — the only front
     // door is the admin surface.
     ensureAuditTable(sm);
+    // FED-004 §3.2: the conditional-GET validator memory. Not a cache — it
+    // stores no bodies; see HttpCacheStore's module doc. System-collection
+    // rules keep it off every front door, which is the point: what a person
+    // opens is the node's `Conditional` port, not the bookkeeping behind it.
+    ensureHttpCacheTable(sm);
+  }
+
+  /**
+   * BMG-011 §7: a restore unpacks the archive's `config/` over the data dir —
+   * security.json, triggers.json, email.json, backups.json (config-params.json
+   * is read per request already). Each was read ONCE at start, so the running
+   * backend went on enforcing the pre-restore permissions, firing the
+   * pre-restore schedules, and the next edit on any of those pages wrote the
+   * OLD settings back over the restored file. Each is re-read here with its
+   * own start-up validation; one that refuses keeps the live settings — written
+   * back over it, so the next start is not refused either — and is named in
+   * the answer, never a crash mid-restore.
+   */
+  private reloadRestoredSettings(): SettingsReload {
+    const out: SettingsReload = { reloaded: [], refused: [] };
+    const step = (file: string, run: () => void) => {
+      if (!fs.existsSync(path.join(this.options.dataDir, file))) return;
+      try {
+        run();
+        out.reloaded.push(file);
+      } catch (e) {
+        const reason = e instanceof Error ? e.message : String(e);
+        out.refused.push({ file, reason });
+        logger.warn('restore.settings-refused', { file, detail: reason });
+      }
+    };
+    step('security.json', () => this.security && this.security.reloadConfig());
+    step('triggers.json', () => {
+      if (!this.triggers) return;
+      this.triggers.registry.reload();
+      this.triggers.reschedule();
+    });
+    step('email.json', () => this.emailConfig && this.emailConfig.reload());
+    step('backups.json', () => {
+      if (!this.backups) return;
+      this.backups.config.reload();
+      this.backups.reschedule();
+    });
+    return out;
   }
 
   /**

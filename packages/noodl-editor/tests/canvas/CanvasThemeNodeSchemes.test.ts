@@ -23,8 +23,8 @@ import { CanvasTheme } from '../../src/editor/src/views/nodegrapheditor/canvas/C
  * moves in `colors.css`, it has to move here too.
  */
 const DARK_TOKENS = {
-  '--theme-color-bg-0': '#161c24',
-  '--theme-color-bg-1': '#212932',
+  '--theme-color-bg-0': '#141318',
+  '--theme-color-bg-1': '#232129',
   '--theme-color-fg-highlight': '#ffffff',
   '--theme-color-fg-default-shy': '#c4cedb',
   '--theme-color-node-category-default': '#7d8a98',

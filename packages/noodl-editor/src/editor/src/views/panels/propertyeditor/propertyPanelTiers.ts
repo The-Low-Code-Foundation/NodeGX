@@ -103,6 +103,11 @@ export const ADVANCED_CSS_GROUPS: Readonly<Record<string, string>> = {
   // because that is five nodes' basic tier taxed permanently for a port most screens never
   // set, which is the accumulation FB-017 exists to stop.
   'File Drop': 'plumbing: drag-and-drop DOM machinery, opt-in per element',
+  // HLT-017. The same judgement as `File Drop`, for the same five nodes, and the same one-line
+  // revert: a card is not draggable by nature and a column is not a drop zone by nature, so
+  // neither belongs on every Group's first screen.
+  'Drag Source': 'plumbing: pick-up-and-drop machinery, opt-in per element',
+  'Drop Zone': 'plumbing: pick-up-and-drop machinery, opt-in per element',
   Focus: 'plumbing: whether the element takes focus',
   Scroll: 'plumbing: scroll behaviour on a container that already scrolls',
   'Scroll To Element': 'plumbing: an imperative scroll action and its parameters',
@@ -273,6 +278,19 @@ export interface PortActivityProbe {
   isConnected(portName: string): boolean;
   /** Has a value been set on this port, i.e. is it no longer at its default? */
   isSet(portName: string): boolean;
+}
+
+/**
+ * Whether a stored parameter moves a port off its default — the `isSet` half of {@link PortActivityProbe}.
+ *
+ * 🔴 CHR-009 §15.3, driven: clearing a text field stores `''`, not `undefined`, so `!== undefined` counted an
+ * emptied `CSS Class` as `1 set` on the folded footer. An empty string on a port whose default is empty is the
+ * default. On a port that ships non-empty (a Text node's text), `''` is a real edit and still counts.
+ */
+export function isParameterSet(value: unknown, defaultValue: unknown): boolean {
+  if (value === undefined) return false;
+  if (value === '') return defaultValue !== undefined && defaultValue !== null && defaultValue !== '';
+  return true;
 }
 
 export function countActivePorts(portNames: readonly string[], probe: PortActivityProbe): number {

@@ -31,6 +31,7 @@ import { Icon, IconName, IconSize } from '@noodl-core-ui/components/common/Icon'
 import { Text, TextType } from '@noodl-core-ui/components/typography/Text';
 
 import css from './BenchScenarioBar.module.scss';
+import { WORKBENCH } from './benchWords';
 import type { BenchScenario } from './benchScenarios';
 
 export interface BenchScenarioBarProps {
@@ -44,10 +45,10 @@ export interface BenchScenarioBarProps {
   onSelect: (name: string) => void;
   /**
    * FIX-012 — leave the scenario: back to the none-state, inputs cleared.
-   * Not the same as deleting one, which keeps what is on the bench.
+   * Not the same as deleting one, which keeps what is on the Workbench.
    */
   onClear: () => void;
-  /** Overwrite `current` with what is on the bench now. */
+  /** Overwrite `current` with what is on the Workbench now. */
   onSave: () => void;
   onSaveAs: (name: string) => void;
   onRename: (from: string, to: string) => void;
@@ -259,7 +260,11 @@ export function BenchScenarioBar({
           type="button"
           className={classNames(css.Action, modified && css['is-primary'])}
           disabled={!current}
-          title={current ? `Overwrite “${current}” with what is on the bench now` : 'Nothing selected to overwrite'}
+          title={
+            current
+              ? `Overwrite “${current}” with what is on the ${WORKBENCH} now`
+              : 'Nothing selected to overwrite'
+          }
           onClick={onSave}
           data-test="bench-scenario-save"
         >

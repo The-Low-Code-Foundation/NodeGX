@@ -51,10 +51,10 @@ its admin credential and loses webhook/SMTP secrets unless you either:
 - copy `secrets.json` out-of-band and drop it into the restored data dir.
 
 **Off-box:** the archive is a single file — copy it to another host, an external
-disk, or an S3-compatible bucket (`aws s3 cp`, `rclone`). Encrypt the destination
-(bucket-level SSE, or `gpg` the file); archives are not encrypted by NodeGX.
-An S3 *destination driver* is a recorded follow-on (needs BAK-006's storage
-driver); until then the destination is a local directory you sync off-box.
+disk, or an S3-compatible bucket (`aws s3 cp`, `rclone`) — or let the backend
+write it there itself: the destination can be the files' bucket (*Archives in a
+bucket*, below). Encrypt the destination (bucket-level SSE, or `gpg` the file);
+archives are not encrypted by NodeGX.
 
 ## Backup — CLI, admin, scheduled
 
@@ -84,6 +84,33 @@ Retention keeps the newest `keepLast`, plus the newest of each of the last
 `keepDaily` days and `keepWeekly` ISO weeks. `keepLast: 0` with all knobs `0`
 keeps everything.
 
+### Archives in a bucket
+
+`"destination": { "type": "s3", "prefix": "backups/" }` sends every archive —
+scheduled, *Back up now*, the CLI's `backup`, and the pre-restore safety copy —
+to the **same S3-compatible bucket the files driver is connected to**
+(`BACKEND-FILES.md` §Storage drivers: files.json's `driver`, the key in the
+`files` namespace of `secrets.json`), under `prefix`. There is deliberately no
+second endpoint or credential: the bucket is set up once, on the manager's
+Storage page, and the Backups page's *Where archives go* offers it as a tile
+once one is connected (`GET /admin/backups` answers `bucket: {connected, name}`;
+a `PUT` asking for the bucket while none is connected is 400 by sentence).
+
+How it works: the archive is assembled and written to a temp file exactly as
+before, then streamed into the bucket (hashed in one pass for the signature,
+sent in a second — a 2 GB archive never sits in memory) and the temp file
+removed. `GET /admin/backups` lists the prefix (each row `where: 's3'`, `path`
+`s3://<bucket>/<key>`); retention deletes from the bucket; **Download** pipes
+the object; **Restore…** downloads the archive to a temp file *before* the
+running database is paused (a failed download is a 502 that leaves the backend
+serving exactly what it was) and unpacks it as a local restore does. A backend
+whose files are local cannot have `s3` backups (the manager refuses by
+sentence, loudly, in the execution record) — connect the bucket first.
+
+The database file itself (`data/local.db`) stays on the disk either way; that
+is what the archive is for, and why backups are the half that fills a small
+VM.
+
 ### Failures are loud
 
 A failed backup (unwritable destination, snapshot error) is written as a failed
@@ -107,8 +134,19 @@ nodegx-backend restore /mnt/backups/backup-...ngxbackup.tar.gz --data-dir <dir>
 Restore refuses an archive whose engine does not match (no cross-engine restore
 is claimed) or whose hashes do not verify. The pre-restore safety snapshot is
 written to `<dataDir>/backups/pre-restore-…` so a bad restore is itself
-recoverable. `POST /admin/backups/restore` exists for a **quiesced** running
-backend, but the CLI (service stopped) is the blessed path.
+recoverable. `POST /admin/backups/restore` (the manager's **Restore…** button,
+BMG-011) takes a LISTED archive by file name, disconnects the running adapter,
+swaps the files, reconnects and re-ensures the system tables before it answers —
+requests that arrive during the swap fail rather than read torn state, and the
+page blocks its own controls for the duration. It then re-reads the settings the
+archive put back — `security.json`, `triggers.json`, `email.json`, `backups.json`
+(`config-params.json` is read per request anyway) — so the running backend
+enforces the restored permissions and fires the restored schedules at once, and
+the next edit on those pages starts from them. A restored settings file that
+does not validate is refused: the settings from before the restore stay in
+force and are written back over it (so the next start is not refused either),
+and the answer (`settings: {reloaded, refused}`) and the page name it. The CLI (service stopped) remains
+the path for a backend you cannot reach in a browser.
 
 ## Laptop → VPS (the blessed move)
 

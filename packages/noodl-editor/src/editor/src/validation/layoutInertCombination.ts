@@ -34,6 +34,14 @@
  *    ten lines off the bottom. 🔴 The parent's definite height is the whole condition: without it
  *    there is no free space, nothing grows, and the issue's own smallest graph renders correctly.
  *
+ *  - **`text-cannot-wrap`** (P88 GAM-020, D58): a `Text` at `contentSize`/`contentWidth` renders as
+ *    `white-space: pre` (`Text.tsx`, deliberate: it respects `\n` and lets a label size to its
+ *    words), so a sentence is one line in any box. Rocket School's helper did that to every Text
+ *    and the French sentences ran off their cards. R18 (Richard, 2026-09-17): only a line of at
+ *    least `SENTENCE_MIN_CHARS`, the shortest line measured clipping. Not a parent/child
+ *    combination strictly, but it lives here because a Columns child is D28's, and one module
+ *    decides the cardinality: D28 speaks, this does not.
+ *
  *  - **`justify-content-distributes-nothing`** (D32): every visual node's `width` defaults to
  *    `100%` (`node-shared-port-definitions.ts`), and `layout.ts` turns a percentage width inside
  *    a `row` parent into `flexGrow`. So growing is what a child of a row does unless something
@@ -83,8 +91,21 @@ import { COLUMNS_TYPE } from './responsiveArrangement';
 /** The one general-purpose container whose `flexDirection` makes a row. */
 const GROUP_TYPE = 'Group';
 
+const TEXT_TYPE = 'Text';
+
 /** `sizeMode` values in which the `width` port is never read and the node keeps intrinsic width. */
 const CONTENT_WIDTH_MODES = new Set(['contentSize', 'contentWidth']);
+
+/**
+ * R18's threshold, in characters of the longest literal line. RKT-001 §6 measured
+ * *"Tu as atteint la planète !"* (26) at 320px in a 304px banner, the shortest line seen clipping.
+ * The longest heading in the shipped corpus is 20 (*"An interactive story"*), and the 2026-09-17
+ * census over templates and prefabs fires on 7 sentences of 28 to 66 characters and no heading.
+ */
+export const SENTENCE_MIN_CHARS = 26;
+
+/** `textOverflow` values with which the author asked for one line on purpose (DEF-031). */
+const ONE_LINE_ON_PURPOSE = new Set(['ellipsis', 'clip']);
 
 /** `justifyContent` values that exist to distribute free space along the main axis. */
 const DISTRIBUTING = new Set(['space-between', 'space-around', 'space-evenly']);
@@ -202,6 +223,62 @@ function knowableChildren(
     out.push({ node, sizeMode });
   }
   return out;
+}
+
+/**
+ * GAM-020 — the longest line of a literal sentence, or `undefined` when the text is not one: not a
+ * string, a token, or no line holding a space between two words.
+ */
+function longestSentenceLine(text: unknown): string | undefined {
+  if (typeof text !== 'string' || text.includes('var(')) return undefined;
+  let longest: string | undefined;
+  for (const line of text.split('\n')) {
+    if (!/\S\s+\S/.test(line)) continue;
+    if (longest === undefined || [...line.trim()].length > [...longest].length) longest = line.trim();
+  }
+  return longest;
+}
+
+/** GAM-020 — a content-sized Text holding a sentence of at least `SENTENCE_MIN_CHARS`. */
+function checkTextCannotWrap(
+  node: LayoutNode,
+  parentOf: Map<string, LayoutNode>,
+  component: string,
+  catalog: CatalogIndex,
+  connected: ReadonlySet<string> | undefined
+): Diagnostic[] {
+  if (node.type !== TEXT_TYPE) return [];
+  // A Columns child is D28's: same node, same exit, one diagnostic.
+  if (parentOf.get(node.id)?.type === COLUMNS_TYPE) return [];
+  // Unknowable abstains.
+  if (['text', 'sizeMode', 'textOverflow'].some((port) => connected?.has(`${node.id}::${port}`))) return [];
+  const resolved = resolveAgainstDefaults(node.parameters ?? {}, catalog.inputDefaults(node.type));
+  const sizeMode = resolved['sizeMode'];
+  if (typeof sizeMode !== 'string' || !CONTENT_WIDTH_MODES.has(sizeMode)) return [];
+  if (typeof resolved['textOverflow'] === 'string' && ONE_LINE_ON_PURPOSE.has(resolved['textOverflow'])) return [];
+  const line = longestSentenceLine(resolved['text']);
+  if (line === undefined || [...line].length < SENTENCE_MIN_CHARS) return [];
+  const quoted = [...line].length > 40 ? `${[...line].slice(0, 40).join('')}…` : line;
+  return [
+    {
+      code: DiagnosticCode.TextCannotWrap,
+      severity: 'warning',
+      message:
+        `This Text holds a sentence ("${quoted}") and is sized to its own content (sizeMode "${sizeMode}"), which ` +
+        'renders as one line that never wraps. On a phone, or in any card narrower than the line, it runs out of ' +
+        'its box and is cut off, with no error. Give it sizeMode "contentHeight" so its width comes from its ' +
+        'parent and its height from the words, or textOverflow "ellipsis" if one line is what you want.',
+      location: {
+        component,
+        nodeId: node.id,
+        nodeType: node.type,
+        ...(node.label ? { nodeLabel: node.label } : {}),
+        port: 'sizeMode',
+        plug: 'input' as const
+      },
+      suggestion: 'sizeMode: "contentHeight"'
+    }
+  ];
 }
 
 /** The two exits, in the same sentence as the defect, the way every rule here phrases them. */
@@ -434,8 +511,13 @@ export function checkLayoutInertCombination(
   const { component, catalog, connectedInputs } = options;
   const diagnostics: Diagnostic[] = [];
   const byId = new Map<string, LayoutNode>(nodes.map((n) => [n.id, n]));
+  const parentOf = new Map<string, LayoutNode>();
+  for (const node of nodes) for (const child of node.children ?? []) parentOf.set(child, node);
 
   for (const node of nodes) {
+    // ── GAM-020: a sentence in a content-sized Text ─────────────────────────
+    diagnostics.push(...checkTextCannotWrap(node, parentOf, component, catalog, connectedInputs));
+
     // ── FLD-004: a number wired into the child's main-axis dimension ────────
     diagnostics.push(...checkWiredMainAxisDimensions(node, byId, component, catalog, connectedInputs));
 

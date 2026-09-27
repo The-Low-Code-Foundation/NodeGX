@@ -187,6 +187,29 @@ export function useLearnerPath(): LearnerPathHost {
     // not be made. ⚠️ The reverse inference is the trap: a HELD token is not a VALID session,
     // so an expired one still goes to the network and comes back `unauthenticated`. That is
     // the case a token check reports as signed in.
+    //
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // 🔴 **HLT-004 DELETED THIS BRANCH AS A DUPLICATE AND A GATE CAUGHT IT. IT IS NOT A
+    // DUPLICATE, AND THE REASON IS WORTH MORE THAN THE TIDINESS WAS.** HLT-004 marked
+    // `/api/v1/me/path` `credentialed` in `communityapi`, so the CLIENT now answers
+    // `unauthenticated` without a request for every caller — which is what finally silenced
+    // the `401` the identical route on the identical launcher (`myListing`, in
+    // `useCommunityPeople`) wrote on every launch. Having done that, this branch looked like
+    // the second copy [[a-second-copy-of-a-palette-drifts-silently]] warns about, and it went.
+    //
+    // `uni-001/session-readers.test.ts` went red, deliberately and loudly: *"the anchor
+    // setPath({ outcome: 'unauthenticated' }) is not in the source any more — this spec is
+    // blind, fix it."* This branch is that gate's **known-firing control** — the arm proving
+    // its region finder can see a session guard at all — and its sibling assertion, that
+    // `client.intake()` is NOT gated, is **vacuous without it**: an instrument that cannot
+    // find a gate reports "not gated" about a file with nothing in it
+    // ([[a-new-check-can-downgrade-an-existing-one]]).
+    //
+    // ⚠️ **So they are redundant and they do not drift.** Both say *do not request a path
+    // without a credential*; the client's mark is the one that binds every caller, this one
+    // is local and load-bearing for a gate. A copy that can only ever AGREE is not the failure
+    // mode that memory names — the one that drifts is a copy of a TABLE somebody edits.
+    // ═══════════════════════════════════════════════════════════════════════════════
     if (session === null) {
       setPath({ outcome: 'unauthenticated' });
       return;

@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "457ad573-ecb0-5f87-8c73-cf8390dfb1b6",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "newhuntIn",
+      "fromProperty": "level",
+      "toId": "newhuntFn",
+      "toProperty": "in-level"
+    },
+    {
+      "fromId": "newhuntIn",
+      "fromProperty": "run",
+      "toId": "newhuntFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "newhuntFn",
+      "fromProperty": "out-game",
+      "toId": "newhuntOut",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "newhuntFn",
+      "fromProperty": "out-rounds",
+      "toId": "newhuntOut",
+      "toProperty": "rounds"
+    },
+    {
+      "fromId": "newhuntFn",
+      "fromProperty": "success",
+      "toId": "newhuntOut",
+      "toProperty": "done"
+    }
+  ]
+}

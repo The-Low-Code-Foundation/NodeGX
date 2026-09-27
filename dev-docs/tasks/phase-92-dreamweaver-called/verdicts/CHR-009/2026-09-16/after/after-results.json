@@ -1,0 +1,132 @@
+{
+  "group-dark": {
+    "elements": 1284,
+    "visibleTextSizes": {
+      "12px": 8,
+      "11px": 7
+    },
+    "fills": {
+      "rgb(33, 41, 50)": 2,
+      "rgb(77, 163, 255)": 1,
+      "rgba(77, 163, 255, 0.13)": 1,
+      "rgb(187, 198, 211)": 3,
+      "rgb(43, 52, 64)": 5
+    },
+    "radii": {
+      "9999px": 1,
+      "4px": 4,
+      "50%": 3,
+      "6px": 11
+    },
+    "labelLefts": {
+      "70": 6
+    },
+    "labels": 75,
+    "labelsDrawn": 59,
+    "cut": 4,
+    "cutLabels": [
+      "Background Gradient",
+      "Scroll To Element - Duration",
+      "Scroll To Index - Index",
+      "Scroll To Index - Duration"
+    ],
+    "controlHeights": {
+      "24": 6,
+      "28": 6,
+      "45": 1
+    },
+    "chevronIsSvg": true,
+    "dimRows": [
+      {
+        "label": "Width",
+        "value": "100",
+        "clipped": false,
+        "inputWidth": 66,
+        "rowHeight": 30,
+        "fixedChip": {
+          "pressed": "false",
+          "disabled": false,
+          "height": 26
+        }
+      },
+      {
+        "label": "Height",
+        "value": "100",
+        "clipped": false,
+        "inputWidth": 66,
+        "rowHeight": 30,
+        "fixedChip": {
+          "pressed": "false",
+          "disabled": false,
+          "height": 26
+        }
+      }
+    ],
+    "groupHeaderHeight": 30
+  },
+  "group-light": {
+    "elements": 1284,
+    "visibleTextSizes": {
+      "12px": 8,
+      "11px": 7
+    },
+    "fills": {
+      "rgb(255, 255, 255)": 2,
+      "rgb(21, 112, 239)": 1,
+      "rgba(21, 112, 239, 0.09)": 1,
+      "rgb(74, 86, 99)": 3,
+      "rgb(242, 244, 246)": 5
+    },
+    "radii": {
+      "9999px": 1,
+      "4px": 4,
+      "50%": 3,
+      "6px": 11
+    },
+    "labelLefts": {
+      "70": 6
+    },
+    "labels": 75,
+    "labelsDrawn": 59,
+    "cut": 4,
+    "cutLabels": [
+      "Background Gradient",
+      "Scroll To Element - Duration",
+      "Scroll To Index - Index",
+      "Scroll To Index - Duration"
+    ],
+    "controlHeights": {
+      "24": 6,
+      "28": 6,
+      "45": 1
+    },
+    "chevronIsSvg": true,
+    "dimRows": [
+      {
+        "label": "Width",
+        "value": "100",
+        "clipped": false,
+        "inputWidth": 66,
+        "rowHeight": 30,
+        "fixedChip": {
+          "pressed": "false",
+          "disabled": false,
+          "height": 26
+        }
+      },
+      {
+        "label": "Height",
+        "value": "100",
+        "clipped": false,
+        "inputWidth": 66,
+        "rowHeight": 30,
+        "fixedChip": {
+          "pressed": "false",
+          "disabled": false,
+          "height": 26
+        }
+      }
+    ],
+    "groupHeaderHeight": 30
+  }
+}

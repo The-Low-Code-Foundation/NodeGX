@@ -1,0 +1,93 @@
+{
+  "arm": "fixed",
+  "arms": [
+    {
+      "name": "the fixture manufactures the collision before anything is driven",
+      "ok": true,
+      "detail": "3 rows, 2 sharing one id"
+    },
+    {
+      "name": "the editor came up",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "the router was found",
+      "ok": true,
+      "detail": "ok"
+    },
+    {
+      "name": "the editor reads the seeded profile, collision intact",
+      "ok": true,
+      "detail": "[{\"name\":\"HLT-011 Alpha\",\"id\":\"hlt011-shared-identity-0000-000000000000\",\"dir\":\"/var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt011-drive/projects/hlt011-alpha\"},{\"name\":\"HLT-011 Beta\",\"id\":\"hlt011-shared-identity-0000-000000000000\",\"dir\":\"/var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt011-"
+    },
+    {
+      "name": "REACH — three cards rendered on the launcher",
+      "ok": true,
+      "detail": "[\"HHLT-011 AlphaEdited 81 seconds agoLocal only\",\"HHLT-011 BetaEdited 61 minutes agoLocal only\",\"HHLT-011 GammaEdited 2 hours agoLocal only\"]"
+    },
+    {
+      "name": "AC3 — the launcher names the collision in words",
+      "ok": true,
+      "detail": "[\"Two projects share one identity\",\"HLT-011 Alpha and HLT-011 Beta share one identity, so their editor settings, git credentials and backend ownership are the same. Opening each one still opens the right project.\"]"
+    },
+    {
+      "name": "CALIBRATION — the uncollidable row opens itself",
+      "ok": true,
+      "detail": "reachable=true, opened=/var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt011-drive/projects/hlt011-gamma"
+    },
+    {
+      "name": "REACH — the clicked card was the one a person could press",
+      "ok": true,
+      "detail": "index=2, hit=LauncherProjectCard-module__Placeholder--WdFsj LauncherProjectCard-module__hue-4"
+    },
+    {
+      "name": "THE NUMBER — clicking Beta opens BETA",
+      "ok": true,
+      "detail": "opened=/var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt011-drive/projects/hlt011-beta"
+    }
+  ],
+  "reading": {
+    "arm": "fixed",
+    "fixture": [
+      {
+        "name": "HLT-011 Alpha",
+        "id": "hlt011-shared-identity-0000-000000000000",
+        "dir": "/var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt011-drive/projects/hlt011-alpha"
+      },
+      {
+        "name": "HLT-011 Beta",
+        "id": "hlt011-shared-identity-0000-000000000000",
+        "dir": "/var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt011-drive/projects/hlt011-beta"
+      },
+      {
+        "name": "HLT-011 Gamma",
+        "id": "hlt011-unique-identity-1111-111111111111",
+        "dir": "/var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt011-drive/projects/hlt011-gamma"
+      }
+    ],
+    "calibration": {
+      "tagged": true,
+      "cards": 3,
+      "index": 2,
+      "reachable": true,
+      "hit": "LauncherProjectCard-module__Placeholder--WdFsj LauncherProjectCard-module__hue-4",
+      "opened": "/var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt011-drive/projects/hlt011-gamma"
+    },
+    "target": {
+      "tagged": true,
+      "cards": 3,
+      "index": 2,
+      "reachable": true,
+      "hit": "LauncherProjectCard-module__Placeholder--WdFsj LauncherProjectCard-module__hue-4",
+      "opened": "/var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt011-drive/projects/hlt011-beta"
+    },
+    "warning": {
+      "present": true,
+      "lines": [
+        "Two projects share one identity",
+        "HLT-011 Alpha and HLT-011 Beta share one identity, so their editor settings, git credentials and backend ownership are the same. Opening each one still opens the right project."
+      ]
+    }
+  }
+}

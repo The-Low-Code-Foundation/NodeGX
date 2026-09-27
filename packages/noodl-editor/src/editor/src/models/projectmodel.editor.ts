@@ -5,6 +5,7 @@ import PopupLayer from '../views/popuplayer';
 import { ToastLayer } from '../views/ToastLayer/ToastLayer';
 import { CloudServiceMetadata, CloudServiceMetadataDataFormat, ProjectModel } from './projectmodel';
 import { applyPatches } from '@noodl-models/ProjectPatches/applypatches';
+import { describeUpgradeReport, UpgradeFile, upgradeOnLoad } from '@noodl-models/ProjectPatches/upgradeOnLoad';
 import { filesystem } from '@noodl/platform';
 import { projectStructureService } from '../services/ProjectStructure';
 import { isV2FormatEnabled } from '../services/ProjectStructure/featureFlags';
@@ -19,21 +20,64 @@ export function projectFromDirectory(projectdir: string, callback: (project?: Pr
   // importer reconstructs exactly the same shape `fromJSON` and `applyPatches`
   // already consume, so everything downstream is format-agnostic.
   const openFromContent = (content: TSFixme, format: 'legacy' | 'v2') => {
-    const openProject = () => {
-      // Before opening the project, we need to patch it, if necessary
-      applyPatches(content);
-
+    const build = (loaded: TSFixme, upgraded: boolean) => {
       // Disable model listeners while loading project, otherwise this will bog down large projects
       Model._listenersEnabled = false;
-      const project = ProjectModel.fromJSON(content);
+      const project = ProjectModel.fromJSON(loaded);
       Model._listenersEnabled = true;
       project._retainedProjectDirectory = projectdir;
       project._projectFormat = format;
+      project._upgradedOnLoad = upgraded;
 
       // Check if there are any packages
       project.readModules(() => {
         callback(project);
       });
+    };
+
+    const openProject = () => {
+      // Before opening the project, we need to patch it, if necessary
+      applyPatches(content);
+
+      // P100 UPG-002/003 — convert what 0.3.0 changed, and say so on screen (R2). Skipped for a
+      // project read only as an import source: its converted nodes would name tokens the target
+      // does not define, where its text styles would have travelled with them. An importer converts
+      // what travels itself, against the target's tokens (`convertSource`, UPG-003 §6).
+      if (args?.upgradeOnLoad === false) {
+        args.convertSource?.(content);
+        return build(content, false);
+      }
+
+      // Upgraded on a copy, because whether a backup is owed is only known once something changed.
+      const upgradedContent = JSON.parse(JSON.stringify(content));
+      const { sections, files } = upgradeOnLoad(upgradedContent);
+      if (sections.length === 0) return build(content, false);
+
+      // R10: the files as they were, beside the project, before the upgrade is saved over them —
+      // and before any file the upgrade adds (R9's font stylesheet) is written.
+      backupBeforeUpgrade(projectdir)
+        .then(async (backupPath) => {
+          await writeUpgradeFiles(projectdir, files);
+          return backupPath;
+        })
+        .then(
+          (backupPath) => {
+            const { title, message } = describeUpgradeReport(sections, backupPath);
+            ToastLayer.showInfo(message, { title, duration: Infinity, id: 'project-upgrade-report' });
+            build(upgradedContent, true);
+          },
+          (err) => {
+            // Nothing is lost by not upgrading: a 0.2.x project still draws as it did. Converting
+            // with no way back is the one thing R10 ruled out.
+            console.error('[upgrade] could not write the backup or the upgrade files; opened without upgrading', err);
+            ToastLayer.showError(
+              `This project needs upgrading for NodeGX 0.3, but the upgrade could not write its files ` +
+                `(a copy of the project first, then its font stylesheet), so it was opened as it is. ` +
+                `It works, and it will try again next time. (${err?.message ?? err})`
+            );
+            build(content, false);
+          }
+        );
     };
 
     //is project version incompatible?
@@ -138,6 +182,33 @@ export function projectFromDirectory(projectdir: string, callback: (project?: Pr
       console.error('[v2] Format detection failed, falling back to legacy read', err);
       readLegacy();
     });
+}
+
+/**
+ * P100 R10 — copy the project folder to a unique sibling (`<project>.before-0.3`) and check the copy
+ * holds a project file. Same mechanism as the v2 migrator's backup (`ProjectMigrator`), so an
+ * upgrade is undone the same way: put the folder back.
+ */
+async function backupBeforeUpgrade(projectdir: string): Promise<string> {
+  const backupPath = filesystem.makeUniquePath(
+    filesystem.join(filesystem.dirname(projectdir), `${filesystem.basename(projectdir)}.before-0.3`)
+  );
+  await filesystem.copyFolder(projectdir, backupPath);
+  const holdsProject = ['project.json', 'nodegx.project.json'].some((f) =>
+    filesystem.exists(filesystem.join(backupPath, f))
+  );
+  if (!holdsProject) throw new Error(`the copy at ${backupPath} holds no project file`);
+  return backupPath;
+}
+
+/** Write the files an upgrade adds beside the project, merging into any already there. */
+async function writeUpgradeFiles(projectdir: string, files: UpgradeFile[]): Promise<void> {
+  for (const file of files) {
+    const full = filesystem.join(projectdir, file.path);
+    const existing = filesystem.exists(full) ? await filesystem.readFile(full) : undefined;
+    await filesystem.makeDirectory(filesystem.dirname(full));
+    await filesystem.writeFile(full, file.merge(existing));
+  }
 }
 
 // Extracts a zip into a directory and returns the project in a callback

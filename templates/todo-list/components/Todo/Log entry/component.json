@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c1f0e233-7c82-5014-8c8e-7643714dc15f",
+  "name": "Log entry",
+  "path": "/Todo/Log entry",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One line of history across every task: the day (when it is the first line of that day), the time, which task, what happened and any note."
+}

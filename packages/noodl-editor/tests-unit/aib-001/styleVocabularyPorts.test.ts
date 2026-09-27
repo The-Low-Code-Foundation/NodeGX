@@ -41,15 +41,18 @@ const vocab = buildStyleVocabulary();
 /** Every (nodeType, styleName) pair the vocabulary hands a model. */
 function taughtStyles(): Array<{ nodeType: string; group: string; name: string; property: string; value: string }> {
   const out = [];
+  // P94 STY-002 reshaped what the vocabulary teaches: a Look library per element type, each Look
+  // listing what it changes on top of the type's `defaults`, and no sizes (`_size`: 0 uses in 105
+  // real projects). 🔴 **`defaults` is newly taught and was never checked here** — under the old
+  // shape it was folded into each variant by the *editor's* stamp and never reached this document,
+  // so widening the walk to include it is the point of this edit, not an accommodation of it.
   for (const element of vocab.elements) {
-    for (const [variant, styles] of Object.entries(element.variantStyles)) {
-      for (const [property, value] of Object.entries(styles)) {
-        out.push({ nodeType: element.nodeType, group: 'variant', name: variant, property, value });
-      }
+    for (const [property, value] of Object.entries(element.defaults)) {
+      out.push({ nodeType: element.nodeType, group: 'defaults', name: 'defaults', property, value });
     }
-    for (const [size, styles] of Object.entries(element.sizeStyles)) {
-      for (const [property, value] of Object.entries(styles)) {
-        out.push({ nodeType: element.nodeType, group: 'size', name: size, property, value });
+    for (const look of element.looks) {
+      for (const [property, value] of Object.entries(look.parameters)) {
+        out.push({ nodeType: element.nodeType, group: 'look', name: look.name, property, value });
       }
     }
   }

@@ -9,6 +9,7 @@ import { BasicNodeType } from '@noodl-models/nodelibrary/BasicNodeType';
 // of it. Nothing else about the filter changed.
 import { evaluateDynamicPortsCondition } from '@noodl-models/nodelibrary/dynamicPortRules';
 import type { NodeLibraryProjectSettings } from '@noodl-models/nodelibrary/NodeLibraryData';
+import { nameForPortType } from '@noodl-models/nodelibrary/portTypeName';
 // FB-019 scope (3): the one predicate for "is this a port whose value carries a
 // unit", shared with the connection popup's shape sentence and the Ports tab so
 // the three cannot disagree about which ports they are talking about.
@@ -63,10 +64,12 @@ export class NodeLibrary extends Model {
    * The signature claimed neither, so every call site holding a real port
    * declaration had to cast. The return type is unchanged (`string | undefined`
    * was already what it inferred).
+   *
+   * CHR-007: the body lives in `portTypeName.ts`, which imports nothing, so the
+   * property panel's widget dispatch can use it without loading this module.
    */
   static nameForPortType(type: string | { name?: string } | null | undefined): string | undefined {
-    if (!type) return;
-    return typeof type === 'string' ? type : type.name;
+    return nameForPortType(type);
   }
 
   /**

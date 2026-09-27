@@ -1,0 +1,3 @@
+# web-push.bundle.js is not committed: rebuild it with
+#   npm install web-push@3.6.7 && esbuild entry.js --bundle --platform=node --target=node22 --outfile=web-push.bundle.js
+# where entry.js is: module.exports = require("web-push");

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "97c5f43b-3859-5f4b-81d4-810d38c14135",
+  "name": "Mark selected",
+  "path": "/Logic/Mark selected",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Rows with the chosen one flagged selected — what a segmented control repeats over."
+}

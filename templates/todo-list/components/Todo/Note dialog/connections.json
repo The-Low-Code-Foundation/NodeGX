@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "89dcacce-4560-55d1-858e-220a0e442e7d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ndIn",
+      "fromProperty": "open",
+      "toId": "ndScrim",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ndIn",
+      "fromProperty": "subject",
+      "toId": "ndSubject",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ndIn",
+      "fromProperty": "heading",
+      "toId": "ndHeading",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ndIn",
+      "fromProperty": "help",
+      "toId": "ndHelp",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ndIn",
+      "fromProperty": "okLabel",
+      "toId": "ndOk",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ndField",
+      "fromProperty": "didMount",
+      "toId": "ndField",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "ndField",
+      "fromProperty": "didMount",
+      "toId": "ndField",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "ndField",
+      "fromProperty": "onTextChanged",
+      "toId": "ndCheck",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "ndCheck",
+      "fromProperty": "out-ok",
+      "toId": "ndOk",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "ndCheck",
+      "fromProperty": "out-note",
+      "toId": "ndOut",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "ndOk",
+      "fromProperty": "onClick",
+      "toId": "ndOut",
+      "toProperty": "confirm"
+    },
+    {
+      "fromId": "ndCancel",
+      "fromProperty": "onClick",
+      "toId": "ndOut",
+      "toProperty": "cancel"
+    }
+  ]
+}

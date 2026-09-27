@@ -188,6 +188,26 @@ export class EmailConfigState {
     atomicWriteJSON(path.join(this.dataDir, EMAIL_FILE), this.config);
   }
 
+  /**
+   * BMG-011 §7: re-read email.json (and the SMTP password) after a restore.
+   * A fresh instance does the reading, so the rules are the constructor's; the
+   * live config is replaced in place. An invalid file is refused: the live
+   * config is written back over it, and the refusal thrown.
+   */
+  reload(): void {
+    let fresh: EmailConfigState;
+    try {
+      fresh = new EmailConfigState(this.dataDir);
+    } catch (e) {
+      this.save();
+      throw e;
+    }
+    const live = this.config as unknown as Record<string, unknown>;
+    for (const key of Object.keys(live)) delete live[key];
+    Object.assign(live, fresh.config);
+    this.smtpPassword = fresh.smtpPassword;
+  }
+
   /** The plaintext SMTP password. Never serialized as part of `config` / never sent to the panel/MCP verbatim. */
   getSmtpPassword(): string {
     return this.smtpPassword;
@@ -211,13 +231,13 @@ export class EmailConfigState {
   /** Why sending isn't possible right now — the message that must reach flows, the node, and the panel. */
   notConfiguredReason(): string {
     if (!this.config.smtp.host || !this.config.smtp.port) {
-      return 'Email is not configured for this backend: no SMTP host/port set. Configure SMTP in the Backend Services panel (Email section) or via the backend admin API before this can send mail.';
+      return 'Email is not configured for this backend: no SMTP host/port set. Set it up on the Email page of the backend manager (/_admin) or via the backend admin API before this can send mail.';
     }
     if (!this.config.fromAddress) {
-      return 'Email is not configured for this backend: no "from" address set. Set one in the Email section of the Backend Services panel.';
+      return 'Email is not configured for this backend: no "from" address set. Set one on the Email page of the backend manager (/_admin).';
     }
     if (!this.config.enabled) {
-      return 'Email is configured but disabled for this backend. Turn it on in the Email section of the Backend Services panel.';
+      return 'Email is configured but disabled for this backend. Turn it on at the top of the Email page of the backend manager (/_admin).';
     }
     return 'Email is not configured for this backend.';
   }

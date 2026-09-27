@@ -1,0 +1,165 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "56f7d5c0-a48e-4e71-8012-c1d462ce95b2",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tr_in",
+      "type": "Component Inputs",
+      "label": "One row",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "entry",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "kindLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "when",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "collapsed",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "notes",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "heading",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasHeading",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "copy",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "audience",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "metadata": {
+        "comment": "One row of the programme. `copy` and `audience` arrive folded into the row's own data by Logic/Ordered timeline, which is how a For Each reaches a repeated component at all — and wiring `copy` through to the kit node is what TASK-L163 closes: until then TimelineRow was one of the three kit nodes handed no copy object, so it rendered its built-in English whatever the language or the audience was."
+      }
+    },
+    {
+      "id": "tr_root",
+      "type": "Group",
+      "label": "The row",
+      "x": 360,
+      "y": 40,
+      "children": [
+        "tr_heading",
+        "tr_row"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "tr_heading",
+      "type": "Text",
+      "label": "Band heading",
+      "x": 420,
+      "y": 200,
+      "parent": "tr_root",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)",
+        "marginTop": "var(--space-6)",
+        "marginBottom": "var(--space-1)"
+      },
+      "metadata": {
+        "comment": "Rendered by the FIRST row of each ahead group, which is how one repeater over one ordered list draws two headed groups without the page re-deciding an order the model owns. `mounted`, never `visible`: `visible: false` is visibility:hidden in this runtime and would leave an empty eyebrow's worth of space on the other nineteen rows (measured on L157 — a 316px hole under each folded row, and a 7327px page that became 3806px). It stays OUTSIDE the kit node because a band heading is not part of a row's card."
+      }
+    },
+    {
+      "id": "tr_row",
+      "type": "dbt-lesson.TimelineRow",
+      "label": "The entry",
+      "x": 420,
+      "y": 360,
+      "parent": "tr_root",
+      "parameters": {},
+      "metadata": {
+        "comment": "The kit draws the row; the graph decided what it is and where it goes. The fold, the six glyphs, the two-voice wash and the one markdown path are rendering facts the catalogue cannot express — 180 node types, no SVG, no <details> (measured 2026-09-20). A kind with no glyph or card rule throws by name rather than drawing nothing (L126)."
+      }
+    },
+    {
+      "id": "tr_log",
+      "type": "net.noodl.Log",
+      "label": "Where a question would go",
+      "x": 840,
+      "y": 360,
+      "parameters": {
+        "level": "info",
+        "message": "Ask your coach about this"
+      },
+      "metadata": {
+        "comment": "NOTHING WRITES THIS SPRINT (sprint 45 decision 6). The control emits and the graph decides where it goes — a Log until a backend exists, a Cloud Function after. Wiring it to a fake success would be worse than wiring it here."
+      }
+    },
+    {
+      "id": "tr_out",
+      "type": "Component Outputs",
+      "label": "What the row asked for",
+      "x": 840,
+      "y": 480,
+      "ports": [
+        {
+          "name": "showInLog",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "openLesson",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "metadata": {
+        "comment": "A COACH asked to see this entry in the activity log (TASK-L165). The For Each that places this row bubbles it up as itemOutputSignal-showInLog with the entry's id in itemActionItemId — the Lesson/Step chip pattern. It never fires on the learner's page, and nothing there listens for it. ALSO openLesson (TASK-L181): the learner pressed Review / Continue / Start on a lesson, or “Open the lesson this came from” on a piece of work. The same bubbling, with the entry's id in itemActionItemId; the page resolves the concept. It never fires on a coach's page."
+      }
+    }
+  ],
+  "visualRoots": [
+    "tr_root"
+  ]
+}

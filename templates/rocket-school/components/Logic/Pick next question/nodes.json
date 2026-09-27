@@ -1,0 +1,431 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7f5c04d9-f738-599d-836f-186a4891f967",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "picknextquesIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "nonce",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "curriculum",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "level",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "layout",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "answerMode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "customSet",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "wordLists",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "limitScale",
+          "plug": "output",
+          "type": "number"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "picknextquesFn",
+      "type": "JavaScriptFunction",
+      "label": "Pick next question",
+      "parameters": {
+        "functionScript": "\nvar LEVELS = [\"CE2\",\"CM1\",\"CM2\",\"6e\"];\nvar LEVEL_BASE = {\"CE2\":800,\"CM1\":1050,\"CM2\":1300,\"6e\":1550};\nfunction levelIndex(level) { var i = LEVELS.indexOf(String(level || 'CE2')); return i < 0 ? 0 : i; }\nfunction rnd(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }\nfunction pickOne(arr) { return arr[Math.floor(Math.random() * arr.length)]; }\nfunction shuffle(arr) { var a = arr.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }\nfunction isFr(lang) { return String(lang) === 'fr'; }\n/** 1234567.5 → \"1 234 567,5\" (fr, grouped with a narrow no-break space) or \"1,234,567.5\" (en). RKT-003: an ordinary space let a phone break \"8 266\" across two lines. */\nfunction fmtNum(n, lang) {\n  var neg = n < 0; n = Math.abs(n);\n  var s = String(Math.round(n * 1000) / 1000);\n  var parts = s.split('.');\n  var int = parts[0]; var out = '';\n  while (int.length > 3) { out = (isFr(lang) ? ' ' : ',') + int.slice(-3) + out; int = int.slice(0, -3); }\n  out = int + out;\n  if (parts[1]) out += (isFr(lang) ? ',' : '.') + parts[1];\n  return (neg ? '−' : '') + out;\n}\n/** What a typed answer becomes before comparison: numbers as numbers, words lower-case. */\nfunction normalise(v) {\n  var s = String(v === undefined || v === null ? '' : v).trim().toLowerCase();\n  var num = s.replace(/\\s+/g, '').replace(/,/g, '.');\n  if (/^-?\\d+(\\.\\d+)?$/.test(num)) return String(Number(num));\n  var big = s.replace(/[\\s.,']/g, '');\n  if (/^-?\\d+$/.test(big) && /\\d[\\s.,']\\d{3}/.test(s)) return String(Number(big));\n  return s.replace(/\\s+/g, ' ');\n}\nfunction sameAnswer(a, b) { return normalise(a) === normalise(b); }\n\nvar EN_ONES = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];\nvar EN_TENS = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];\nfunction enUnder1000(n) {\n  var out = '';\n  if (n >= 100) { out = EN_ONES[Math.floor(n / 100)] + ' hundred'; n = n % 100; if (n > 0) out += ' and '; }\n  if (n >= 20) { out += EN_TENS[Math.floor(n / 10)]; if (n % 10) out += '-' + EN_ONES[n % 10]; }\n  else if (n > 0 || out === '') out += EN_ONES[n];\n  return out;\n}\nfunction spellEn(n) {\n  n = Math.floor(Number(n)); if (n === 0) return 'zero';\n  var blocks = [[1000000000, 'billion'], [1000000, 'million'], [1000, 'thousand']];\n  var parts = [];\n  for (var i = 0; i < blocks.length; i++) { var q = Math.floor(n / blocks[i][0]); if (q > 0) { parts.push(enUnder1000(q) + ' ' + blocks[i][1]); n = n % blocks[i][0]; } }\n  if (n > 0) { if (parts.length && n < 100) parts.push('and ' + enUnder1000(n)); else parts.push(enUnder1000(n)); }\n  return parts.join(' ');\n}\nvar FR_ONES = ['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize'];\nvar FR_TENS = ['','dix','vingt','trente','quarante','cinquante','soixante','soixante','quatre-vingt','quatre-vingt'];\nfunction frUnder100(n) {\n  if (n < 17) return FR_ONES[n];\n  if (n < 20) return 'dix-' + FR_ONES[n - 10];\n  var t = Math.floor(n / 10), u = n % 10;\n  if (t === 7 || t === 9) { u += 10; }\n  var base = FR_TENS[t];\n  if (t === 8 && u === 0) return 'quatre-vingts';\n  if (u === 0) return base;\n  if (u === 1 && t !== 8) return base + ' et un';\n  if (u === 11 && t === 7) return base + ' et onze';\n  var unit = u < 17 ? FR_ONES[u] : 'dix-' + FR_ONES[u - 10];\n  return base + '-' + unit;\n}\nfunction frUnder1000(n) {\n  var out = '';\n  if (n >= 100) { var h = Math.floor(n / 100); n = n % 100; out = (h === 1 ? 'cent' : FR_ONES[h] + ' cent') + (n === 0 && h > 1 ? 's' : ''); if (n > 0) out += ' '; }\n  if (n > 0 || out === '') out += frUnder100(n);\n  return out;\n}\nfunction spellFr(n) {\n  n = Math.floor(Number(n)); if (n === 0) return 'zéro';\n  var parts = [];\n  var b = Math.floor(n / 1000000000); if (b > 0) { parts.push((b === 1 ? 'un milliard' : frUnder1000(b) + ' milliards')); n = n % 1000000000; }\n  var m = Math.floor(n / 1000000); if (m > 0) { parts.push((m === 1 ? 'un million' : frUnder1000(m) + ' millions')); n = n % 1000000; }\n  var k = Math.floor(n / 1000); if (k > 0) { parts.push((k === 1 ? 'mille' : frUnder1000(k) + ' mille')); n = n % 1000; }\n  if (n > 0) parts.push(frUnder1000(n));\n  return parts.join(' ');\n}\nfunction spell(n, lang) { return isFr(lang) ? spellFr(n) : spellEn(n); }\nfunction skillBase(skill) { return LEVEL_BASE[skill.level] + Number(skill.diff || 0) * 250; }\nfunction predict(r, d) { return 1 / (1 + Math.pow(10, (d - r) / 400)); }\nfunction pickText(bi, lang) { if (!bi) return ''; if (typeof bi === 'string') return bi; return isFr(lang) ? (bi.fr || bi.en || '') : (bi.en || bi.fr || ''); }\n\n// ── RKT-004: the correction works through the question that was asked ──────\n// Before, a wrong answer showed the skill's FIXED example: asked 36 + 7, the child read \"46 + 8: go to 50 first\".\n// Each maths generator now returns worked: its own numbers, worked the way the skill's Teach card teaches.\nfunction says(lang, en, fr) { return isFr(lang) ? fr : en; }\nfunction timesWorked(t, k, lang) {\n  var ans = t * k;\n  if (t === 2) return says(lang, 'Times 2 is doubling: ', 'Fois 2, c’est doubler : ') + k + ' + ' + k + ' = ' + ans + '.';\n  if (t === 4) return says(lang, 'Times 4 is double, double: ', 'Fois 4, c’est doubler deux fois : ') + k + ' → ' + (2 * k) + ' → ' + ans + '.';\n  if (t === 8) return says(lang, 'Times 8 is double three times: ', 'Fois 8, c’est doubler trois fois : ') + k + ' → ' + (2 * k) + ' → ' + (4 * k) + ' → ' + ans + '.';\n  if (t === 5) return says(lang, 'Times 5 is times 10, then half: ', 'Fois 5, c’est fois 10 puis la moitié : ') + k + ' × 10 = ' + (10 * k) + says(lang, ', and half of that is ', ', et la moitié, c’est ') + ans + '.';\n  if (t === 9) return says(lang, 'Times 9 is times 10, minus once: ', 'Fois 9, c’est fois 10 moins une fois : ') + k + ' × 10 = ' + (10 * k) + says(lang, ', then ', ', puis ') + (10 * k) + ' − ' + k + ' = ' + ans + '.';\n  if (t === 6) return says(lang, 'Times 6 is times 5, plus once: ', 'Fois 6, c’est fois 5 plus une fois : ') + k + ' × 5 = ' + (5 * k) + says(lang, ', then ', ', puis ') + (5 * k) + ' + ' + k + ' = ' + ans + '.';\n  if (t === 3) return says(lang, 'Times 3 is double, plus once: ', 'Fois 3, c’est le double plus une fois : ') + k + ' × 2 = ' + (2 * k) + says(lang, ', then ', ', puis ') + (2 * k) + ' + ' + k + ' = ' + ans + '.';\n  if (t === 7) return says(lang, 'Times 7 is times 5 plus times 2: ', 'Fois 7, c’est fois 5 plus fois 2 : ') + k + ' × 5 = ' + (5 * k) + ', ' + k + ' × 2 = ' + (2 * k) + says(lang, ', then ', ', puis ') + (5 * k) + ' + ' + (2 * k) + ' = ' + ans + '.';\n  if (t === 10) return says(lang, 'Times 10: every digit moves one place left, so ', 'Fois 10 : chaque chiffre se décale d’un rang vers la gauche, donc ') + k + ' → ' + ans + '.';\n  return k + ' × ' + t + ' = ' + ans + '.';\n}\nfunction missingWorked(a, b, lang) { var n = a * b; return '? × ' + b + ' = ' + n + says(lang, ' asks: ' + b + ' times what makes ' + n + '? ', ' demande : ' + b + ' fois combien font ' + n + ' ? ') + a + ' × ' + b + ' = ' + n + '.'; }\nfunction divisionWorked(a, b, lang) { var n = a * b; return n + ' ÷ ' + b + says(lang, ' asks: ' + b + ' times what makes ' + n + '? ', ' demande : ' + b + ' fois combien font ' + n + ' ? ') + b + ' × ' + a + ' = ' + n + '.'; }\nfunction addWorked(a, b, lang, compensation) {\n  var ans = a + b;\n  if (compensation) { var up = b + 1; return says(lang, 'Add ' + up + ' and take 1 back: ', 'Ajoute ' + up + ' et retire 1 : ') + a + ' + ' + b + ' = ' + a + ' + ' + up + ' − 1 = ' + (a + up) + ' − 1 = ' + ans + '.'; }\n  var x = Math.max(a, b), y = Math.min(a, b), gap = (10 - x % 10) % 10;\n  if (y < 10 && gap > 0 && y > gap) return says(lang, 'Go to the ten first: ', 'Passe par la dizaine : ') + x + ' + ' + y + ' = ' + x + ' + ' + gap + ' + ' + (y - gap) + ' = ' + (x + gap) + ' + ' + (y - gap) + ' = ' + ans + '.';\n  if (y >= 10 && y % 10) { var tens = y - y % 10; return says(lang, 'The tens first: ', 'Les dizaines d’abord : ') + x + ' + ' + y + ' = ' + x + ' + ' + tens + ' + ' + (y % 10) + ' = ' + (x + tens) + ' + ' + (y % 10) + ' = ' + ans + '.'; }\n  return x + ' + ' + y + ' = ' + ans + '.';\n}\nfunction subWorked(a, b, lang, p) {\n  var ans = a - b;\n  if (p.subChoices) { var up = b + 1; return says(lang, 'Take ' + up + ' and give 1 back: ', 'Retire ' + up + ' et rends 1 : ') + a + ' − ' + b + ' = ' + a + ' − ' + up + ' + 1 = ' + (a - up) + ' + 1 = ' + ans + '.'; }\n  if (p.borrow && b % 10) {\n    var nt = b - b % 10 + 10, g1 = nt - b, g2 = a - nt;\n    if (g2 > 0) return says(lang, 'Count up from ' + b + ': ', 'Compte en montant depuis ' + b + ' : ') + b + ' → ' + nt + ' (' + g1 + '), ' + nt + ' → ' + a + ' (' + g2 + ')' + says(lang, ', so ', ', donc ') + g1 + ' + ' + g2 + ' = ' + ans + '.';\n  }\n  var gap = a % 10;\n  if (b < 10 && gap > 0 && b > gap) return says(lang, 'Go down to the ten first: ', 'Descends d’abord à la dizaine : ') + a + ' − ' + b + ' = ' + a + ' − ' + gap + ' − ' + (b - gap) + ' = ' + (a - gap) + ' − ' + (b - gap) + ' = ' + ans + '.';\n  if (b >= 10 && b % 10) { var tens = b - b % 10; return says(lang, 'The tens first: ', 'Les dizaines d’abord : ') + a + ' − ' + b + ' = ' + a + ' − ' + tens + ' − ' + (b % 10) + ' = ' + (a - tens) + ' − ' + (b % 10) + ' = ' + ans + '.'; }\n  return a + ' − ' + b + ' = ' + ans + '.';\n}\nfunction bondWorked(a, target, lang) {\n  var ans = target - a;\n  if (target === 10) return says(lang, a + ' and ' + ans + ' are partners: ', a + ' et ' + ans + ' sont partenaires : ') + a + ' + ' + ans + ' = 10.';\n  var nt = a - a % 10 + 10;\n  if (a % 10 === 0 || nt >= target) return a + ' + ' + ans + ' = ' + target + (a % 10 ? says(lang, ', like ', ', comme ') + (a % 10) + ' + ' + (10 - a % 10) + ' = 10' : '') + '.';\n  return says(lang, 'Go to the next ten, then to ' + target + ': ', 'Va à la dizaine suivante, puis à ' + target + ' : ') + a + ' → ' + nt + ' (' + (nt - a) + '), ' + nt + ' → ' + target + ' (' + (target - nt) + ')' + says(lang, ', so ', ', donc ') + (nt - a) + ' + ' + (target - nt) + ' = ' + ans + '.';\n}\nfunction doubleWorked(n, lang) {\n  var tens = n - n % 10, u = n % 10, lead = says(lang, 'Double ' + n + ': ', 'Le double de ' + n + ' : ');\n  if (!tens || !u) return lead + n + ' + ' + n + ' = ' + (2 * n) + '.';\n  return lead + says(lang, 'double the tens, double the ones, ', 'double les dizaines, double les unités, ') + (2 * tens) + ' + ' + (2 * u) + ' = ' + (2 * n) + '.';\n}\nfunction halfWorked(m, lang) {\n  var tens = m - m % 10, u = m % 10, lead = says(lang, 'Half of ' + m + ': ', 'La moitié de ' + m + ' : ');\n  if (!tens || !u) return lead + (m / 2) + ' + ' + (m / 2) + ' = ' + m + '.';\n  return lead + says(lang, 'half of ' + tens + ' is ' + (tens / 2) + ', half of ' + u + ' is ' + (u / 2) + ', so ', 'la moitié de ' + tens + ', c’est ' + (tens / 2) + ', la moitié de ' + u + ', c’est ' + (u / 2) + ', donc ') + (m / 2) + '.';\n}\nfunction pow10Worked(n, f, divide, ans, lang) {\n  var k = Math.round(Math.abs(Math.log(f) / Math.LN10)), left = divide ? f < 1 : f >= 1;\n  return fmtNum(n, lang) + (divide ? ' ÷ ' : ' × ') + fmtNum(f, lang) + ' = ' + fmtNum(ans, lang) + says(lang, ': every digit moves ' + k + (k > 1 ? ' places ' : ' place ') + (left ? 'left.' : 'right.'), ' : chaque chiffre se décale de ' + k + ' rang' + (k > 1 ? 's' : '') + ' vers la ' + (left ? 'gauche.' : 'droite.'));\n}\nfunction mulByWorked(n, by, lang) {\n  var ans = n * by, lead = n + ' × ' + by + ' = ' + ans + says(lang, ': ', ' : ');\n  if (by === 4) return lead + says(lang, 'double, then double again, ', 'double, puis encore double, ') + n + ' → ' + (2 * n) + ' → ' + ans + '.';\n  if (by === 8) return lead + says(lang, 'double three times, ', 'double trois fois, ') + n + ' → ' + (2 * n) + ' → ' + (4 * n) + ' → ' + ans + '.';\n  if (by === 5) return lead + says(lang, 'times 10, then half, ', 'fois 10, puis la moitié, ') + n + ' × 10 = ' + (10 * n) + ' → ' + ans + '.';\n  if (by === 50) return lead + says(lang, 'times 100, then half, ', 'fois 100, puis la moitié, ') + n + ' × 100 = ' + (100 * n) + ' → ' + ans + '.';\n  if (by === 25) return lead + says(lang, 'times 100, then half of half, ', 'fois 100, puis la moitié de la moitié, ') + n + ' × 100 = ' + (100 * n) + ' → ' + (50 * n) + ' → ' + ans + '.';\n  return n + ' × ' + by + ' = ' + ans + '.';\n}\nfunction divByWorked(n, by, lang) {\n  var q = n / by;\n  if (by === 4) return n + ' ÷ 4' + says(lang, ' is half, then half again: ', ', c’est la moitié, puis encore la moitié : ') + n + ' → ' + (n / 2) + ' → ' + q + '.';\n  if (by === 8) return n + ' ÷ 8' + says(lang, ' is half three times: ', ', c’est trois fois la moitié : ') + n + ' → ' + (n / 2) + ' → ' + (n / 4) + ' → ' + q + '.';\n  return n + ' ÷ ' + by + ' = ' + q + says(lang, ', because ', ', car ') + by + ' × ' + q + ' = ' + n + '.';\n}\nfunction euclidWorked(n, d, q, r, lang) {\n  return says(lang, 'How many ' + d + 's fit in ' + n + '? ', 'Combien de fois ' + d + ' dans ' + n + ' ? ') + d + ' × ' + q + ' = ' + (d * q) + says(lang, ' fits, ', ' rentre, ') + d + ' × ' + (q + 1) + ' = ' + (d * (q + 1)) + says(lang, ' is too big. So ', ' est trop grand. Donc ') + n + ' = ' + d + ' × ' + q + ' + ' + r + '.';\n}\nfunction blocksWorked(n, lang) {\n  var digits = String(n), parts = [];\n  while (digits.length > 3) { parts.unshift(digits.slice(-3)); digits = digits.slice(0, -3); }\n  parts.unshift(digits);\n  return says(lang, 'Three digits in every block, even the empty ones: ', 'Trois chiffres dans chaque classe, même les vides : ') + parts.join(' | ') + ' → ' + fmtNum(n, lang) + '.';\n}\nfunction placeWorked(n, place, lang, namesEn, namesFr) {\n  var shown = fmtNum(n, lang), seen = 0, marked = '';\n  for (var i = shown.length - 1; i >= 0; i--) {\n    var ch = shown.charAt(i);\n    if (/[0-9]/.test(ch)) { marked = (seen === place ? '[' + ch + ']' : ch) + marked; seen++; }\n    else marked = ch + marked;\n  }\n  var digit = String(n).charAt(String(n).length - 1 - place);\n  return shown + says(lang, ': count from the RIGHT, ' + marked + ', the ' + namesEn[place] + ' digit is ' + digit + '.', ' : compte depuis la DROITE, ' + marked + ', le chiffre des ' + namesFr[place] + ' est ' + digit + '.');\n}\nfunction compareWorked(a, b, lang) {\n  var big = Math.max(a, b), small = Math.min(a, b), sb = String(big), ss = String(small);\n  if (sb.length !== ss.length) return fmtNum(big, lang) + says(lang, ' has more digits than ' + fmtNum(small, lang) + ', so it is bigger.', ' a plus de chiffres que ' + fmtNum(small, lang) + ', donc il est plus grand.');\n  var i = 0;\n  while (sb.charAt(i) === ss.charAt(i)) i++;\n  return says(lang, 'Same number of digits, so compare from the left: the first different digit is ' + sb.charAt(i) + ' in ' + fmtNum(big, lang) + ' and ' + ss.charAt(i) + ' in ' + fmtNum(small, lang) + '.', 'Même nombre de chiffres, alors compare depuis la gauche : le premier chiffre différent est ' + sb.charAt(i) + ' dans ' + fmtNum(big, lang) + ' et ' + ss.charAt(i) + ' dans ' + fmtNum(small, lang) + '.');\n}\nfunction decimalsOf(x) { var t = String(x); return t.indexOf('.') === -1 ? 0 : t.length - t.indexOf('.') - 1; }\nfunction decCompareWorked(a, b, lang) {\n  var k = Math.max(decimalsOf(a), decimalsOf(b));\n  var pad = function (x) { var t = x.toFixed(k); return isFr(lang) ? t.replace('.', ',') : t; };\n  return says(lang, 'Give them the same number of decimals: ' + pad(a) + ' and ' + pad(b) + ', so ' + fmtNum(Math.max(a, b), lang) + ' is bigger.', 'Donne-leur autant de décimales : ' + pad(a) + ' et ' + pad(b) + ', donc ' + fmtNum(Math.max(a, b), lang) + ' est le plus grand.');\n}\nfunction gcdOf(x, y) { return y ? gcdOf(y, x % y) : x; }\nfunction fracCompareWorked(a, b, lang) {\n  var fa = a[0] + '/' + a[1], fb = b[0] + '/' + b[1], big = a[0] / a[1] > b[0] / b[1] ? fa : fb;\n  if (a[1] === b[1]) return says(lang, 'Same bottom number, so compare the tops: ', 'Même dénominateur, alors compare les numérateurs : ') + fa + says(lang, ' and ', ' et ') + fb + ' → ' + big + '.';\n  if (a[0] === b[0]) return says(lang, 'Same top number: more slices means smaller slices, so ', 'Même numérateur : plus de parts, des parts plus petites, donc ') + big + says(lang, ' is bigger than ', ' est plus grande que ') + (big === fa ? fb : fa) + '.';\n  var den = a[1] * b[1] / gcdOf(a[1], b[1]);\n  return says(lang, 'Give them the same bottom number: ', 'Donne-leur le même dénominateur : ') + fa + ' = ' + (a[0] * den / a[1]) + '/' + den + ', ' + fb + ' = ' + (b[0] * den / b[1]) + '/' + den + says(lang, ', so ', ', donc ') + big + '.';\n}\nfunction fractionOfWorked(num, den, n, lang, joiner) {\n  var unit = n / den;\n  return num + '/' + den + joiner + n + says(lang, ': ', ' : ') + n + ' ÷ ' + den + ' = ' + unit + says(lang, ', then ', ', puis ') + unit + ' × ' + num + ' = ' + (unit * num) + '.';\n}\nfunction percentWorked(pc, n, lang) {\n  var head = pc + (isFr(lang) ? ' % de ' : '% of ') + n + says(lang, ' is ', ', c’est ');\n  if (pc === 10) return head + n + ' ÷ 10 = ' + fmtNum(n / 10, lang) + '.';\n  if (pc === 50) return head + says(lang, 'half: ', 'la moitié : ') + n + ' ÷ 2 = ' + (n / 2) + '.';\n  if (pc === 25) return head + says(lang, 'a quarter: ', 'le quart : ') + n + ' ÷ 4 = ' + (n / 4) + '.';\n  if (pc === 75) return head + says(lang, 'three quarters: ', 'trois quarts : ') + n + ' ÷ 4 = ' + (n / 4) + says(lang, ', then × 3 = ', ', puis × 3 = ') + (n / 4 * 3) + '.';\n  return head + fmtNum(n * pc / 100, lang) + '.';\n}\nfunction roundIntWorked(m, t, a2, lang) {\n  var next = t === 10 ? m % 10 : Math.floor(m / 10) % 10;\n  return fmtNum(m, lang) + says(lang, ' to the nearest ' + t + ': the digit just right of the ' + (t === 10 ? 'tens' : 'hundreds') + ' is ' + next + (next >= 5 ? ', 5 or more, so up: ' : ', under 5, so down: '), ' : le chiffre juste à droite des ' + (t === 10 ? 'dizaines' : 'centaines') + ' est ' + next + (next >= 5 ? ', 5 ou plus, on monte : ' : ', moins de 5, on descend : ')) + fmtNum(a2, lang) + '.';\n}\nfunction roundDecWorked(cents, to, ans, lang) {\n  var next = to === 1 ? Math.floor(cents / 10) % 10 : cents % 10;\n  return fmtNum(cents / 100, lang) + says(lang, ': the ' + (to === 1 ? 'tenths' : 'hundredths') + ' digit is ' + next + (next >= 5 ? ', 5 or more, so up: ' : ', under 5, so down: '), ' : le chiffre des ' + (to === 1 ? 'dixièmes' : 'centièmes') + ' est ' + next + (next >= 5 ? ', 5 ou plus, on monte : ' : ', moins de 5, on descend : ')) + fmtNum(ans, lang) + '.';\n}\nfunction balanceWorked(a, b, c, lang) {\n  var sum = a + b;\n  return a + ' + ' + b + ' = ' + sum + says(lang, ', so ? + ' + c + ' must make ' + sum + ' too: ', ', donc ? + ' + c + ' doit faire ' + sum + ' aussi : ') + sum + ' − ' + c + ' = ' + (sum - c) + '.';\n}\nfunction orderWorked(a, b, c, lang) {\n  return says(lang, '× first: ', 'Le × d’abord : ') + b + ' × ' + c + ' = ' + (b * c) + says(lang, ', then ', ', puis ') + a + ' + ' + (b * c) + ' = ' + (a + b * c) + '.';\n}\nfunction mulSmallWorked(n, f, ans, lang) {\n  var by = f === 0.5 ? 2 : f === 0.25 ? 4 : f === 0.2 ? 5 : 10;\n  return n + ' × ' + fmtNum(f, lang) + says(lang, ' is ', ', c’est ') + n + ' ÷ ' + by + ' = ' + fmtNum(ans, lang) + '.';\n}\nfunction divSmallWorked(n, f, ans, lang) {\n  var by = f === 0.5 ? 2 : f === 0.25 ? 4 : 10;\n  return n + ' ÷ ' + fmtNum(f, lang) + says(lang, ' asks how many ' + fmtNum(f, lang) + 's make ' + n + ': ', ' demande combien de ' + fmtNum(f, lang) + ' font ' + n + ' : ') + n + ' × ' + by + ' = ' + fmtNum(ans, lang) + '.';\n}\nfunction proportionWorked(a, b, unit, lang) {\n  return says(lang, 'Find one first: ', 'Trouve d’abord un seul : ') + (a * unit) + ' ÷ ' + a + ' = ' + unit + says(lang, ' € each, then ', ' € chacun, puis ') + b + ' × ' + unit + ' = ' + (b * unit) + ' €.';\n}\nfunction tableQ(p, lang) {\n  var t = Number(p.table) || rnd(2, 9); if (p.table === 0) t = rnd(2, 9);\n  var k = rnd(Number(p.min) || 1, Number(p.max) || 10);\n  var forms = ['mul'];\n  if (p.bothWays) forms.push('missing');\n  if (p.division) forms.push('div');\n  var form = pickOne(forms);\n  var a = Math.random() < 0.5 ? t : k, b = a === t ? k : t;\n  if (form === 'mul') return { prompt: a + ' × ' + b + ' = ?', answer: String(a * b), options: [String(a * b), String(a * b + a), String(a * b - b), String(a * (b + 1) + 1)], worked: timesWorked(t, a === t ? b : a, lang) };\n  if (form === 'missing') return { prompt: '? × ' + b + ' = ' + (a * b), answer: String(a), options: [String(a), String(a + 1), String(a - 1 || 2), String(a * b - b)], worked: missingWorked(a, b, lang) };\n  return { prompt: (a * b) + ' ÷ ' + b + ' = ?', answer: String(a), options: [String(a), String(a + 1), String(a - 1 || 2), String(b)], worked: divisionWorked(a, b, lang) };\n}\nfunction addQ(p, lang) {\n  var a, b;\n  if (p.addChoices) { a = rnd(p.min, p.max); b = pickOne(p.addChoices); }\n  else if (p.bridge) { do { a = rnd(p.min, p.max); b = rnd(p.addMin, p.addMax); } while (Math.floor((a + b) / 10) === Math.floor(a / 10)); }\n  else { a = rnd(p.min, p.max); b = rnd(p.min, Math.min(p.max, (p.sumMax || 99) - a)); }\n  var ans = a + b;\n  return { prompt: a + ' + ' + b + ' = ?', answer: String(ans), options: [String(ans), String(ans + 1), String(ans - 1), String(ans + 10)], worked: addWorked(a, b, lang, !!p.addChoices) };\n}\nfunction subQ(p, lang) {\n  var a, b;\n  if (p.subChoices) { a = rnd(p.min, p.max); b = pickOne(p.subChoices); }\n  else if (p.borrow) { do { a = rnd(p.min, p.max); b = rnd(p.subMin, p.subMax); } while (b >= a || (a % 10) >= (b % 10)); }\n  else if (p.bridge) { do { a = rnd(p.min, p.max); b = rnd(p.subMin, p.subMax); } while (Math.floor((a - b) / 10) === Math.floor(a / 10)); }\n  else { a = rnd(p.min, p.max); b = rnd(1, a); }\n  var ans = a - b;\n  // The smaller-from-larger bug: 52 − 38 → 26. Offered as an option on purpose.\n  var bug = Math.abs(Math.floor(a / 10) - Math.floor(b / 10)) * 10 + Math.abs((a % 10) - (b % 10));\n  return { prompt: a + ' − ' + b + ' = ?', answer: String(ans), options: [String(ans), String(bug === ans ? ans + 2 : bug), String(ans + 1), String(ans - 10 > 0 ? ans - 10 : ans + 10)], worked: subWorked(a, b, lang, p) };\n}\nfunction bondQ(p, lang) {\n  var target = Number(p.target) || 10, step = Number(p.step) || 1;\n  var a = rnd(1, Math.floor((target - 1) / step)) * step;\n  var first = Math.random() < 0.5;\n  var prompt = first ? (a + ' + ? = ' + target) : ('? + ' + a + ' = ' + target);\n  var ans = target - a;\n  return { prompt: prompt, answer: String(ans), options: [String(ans), String(ans + step), String(ans - step > 0 ? ans - step : ans + 2 * step), String(a)], worked: bondWorked(a, target, lang) };\n}\nfunction doubleHalfQ(p, lang) {\n  var half = Math.random() < 0.5;\n  var n = rnd(6, Number(p.max) || 50);\n  if (half) { n = n * 2; return { prompt: (isFr(lang) ? 'La moitié de ' : 'Half of ') + n + ' = ?', answer: String(n / 2), options: [String(n / 2), String(n / 2 + 1), String(n / 2 - 1), String(n * 2)], worked: halfWorked(n, lang) }; }\n  return { prompt: (isFr(lang) ? 'Le double de ' : 'Double ') + n + ' = ?', answer: String(n * 2), options: [String(n * 2), String(n * 2 + 2), String(n * 2 - 2), String(n / 2)], worked: doubleWorked(n, lang) };\n}\nfunction pow10Q(p, lang) {\n  var f = pickOne(p.factors);\n  var divide = p.divide && Math.random() < 0.4;\n  var n = p.decimals ? (rnd(11, 999) / (Math.random() < 0.5 ? 10 : 100)) : rnd(2, Number(p.max) || 99);\n  if (p.decimals && f < 1) divide = false;\n  var ans = divide ? n / f : n * f;\n  if (divide && !p.decimals) { n = n * f; ans = n / f; }\n  ans = Math.round(ans * 100000) / 100000;\n  var prompt = fmtNum(n, lang) + (divide ? ' ÷ ' : ' × ') + fmtNum(f, lang) + ' = ?';\n  // \"Add a zero\": 2.5 × 10 → 2.50. The trap, offered.\n  var addZero = p.decimals ? fmtNum(n, lang) + '0' : fmtNum(n * 10 * (f >= 100 ? 10 : 1), lang);\n  return { prompt: prompt, answer: String(ans), options: [fmtNum(ans, lang), addZero, fmtNum(ans * 10, lang), fmtNum(ans / 10, lang)], worked: pow10Worked(n, f, divide, ans, lang) };\n}\nfunction mulByQ(p, lang) {\n  var by = pickOne(p.by), n = rnd(p.min, p.max), ans = n * by;\n  return { prompt: n + ' × ' + by + ' = ?', answer: String(ans), options: [String(ans), String(ans + by), String(ans - by), String(n * (by + 1))], worked: mulByWorked(n, by, lang) };\n}\nfunction divByQ(p, lang) {\n  var by = pickOne(p.by), q = rnd(3, Math.floor((Number(p.max) || 400) / by)), n = q * by;\n  return { prompt: n + ' ÷ ' + by + ' = ?', answer: String(q), options: [String(q), String(q + 1), String(q - 1), String(q * 2)], worked: divByWorked(n, by, lang) };\n}\nfunction euclidQ(p, lang) {\n  var d = rnd(p.divisorMin, p.divisorMax), q = rnd(2, Math.floor(p.dividendMax / d)), r = rnd(1, d - 1), n = q * d + r;\n  var askRem = Math.random() < 0.4;\n  if (askRem) return { prompt: (isFr(lang) ? 'Le reste de ' : 'The remainder of ') + n + ' ÷ ' + d + ' = ?', answer: String(r), options: [String(r), String(q), String(r + 1), String(d - r)], worked: euclidWorked(n, d, q, r, lang) };\n  return { prompt: (isFr(lang) ? 'Le quotient de ' : 'The quotient of ') + n + ' ÷ ' + d + ' = ?', answer: String(q), options: [String(q), String(q + 1), String(r), String(q - 1)], worked: euclidWorked(n, d, q, r, lang) };\n}\nfunction bigNumberQ(p, lang) {\n  var max = Number(p.max) || 9999;\n  // Numbers that expose the blocks: mostly round-ish, with empty middles.\n  var shapes = [];\n  if (max >= 1000) shapes.push(function () { return rnd(1, 9) * 1000 + rnd(1, 99); });\n  if (max >= 1000) shapes.push(function () { return rnd(1, 9) * 1000 + rnd(1, 9) * 100; });\n  if (max >= 100000) shapes.push(function () { return rnd(100, 999) * 1000 + rnd(0, 99); });\n  if (max >= 100000) shapes.push(function () { return rnd(1, 999) * 1000; });\n  if (max >= 1000000) shapes.push(function () { return rnd(1, 999) * 1000000; });\n  if (max >= 1000000) shapes.push(function () { return rnd(1, 999) * 1000000 + rnd(1, 99) * 1000; });\n  if (max >= 1000000) shapes.push(function () { return rnd(1, 999) * 1000000 + rnd(1, 999); });\n  if (max >= 1000000000) shapes.push(function () { return rnd(1, 9) * 1000000000 + rnd(1, 999) * 1000000; });\n  if (max >= 1000000000) shapes.push(function () { return rnd(1, 9) * 1000000000 + rnd(1, 999) * 1000; });\n  if (!shapes.length) shapes.push(function () { return rnd(21, max); });\n  // The last four shapes are the ones at this level's magnitude; smaller ones\n  // belong to the level below and are drilled there.\n  shapes = shapes.slice(-4);\n  var n = pickOne(shapes)();\n  var prompt = (isFr(lang) ? 'Écris en chiffres : ' : 'Write in digits: ') + spell(n, lang);\n  return { prompt: prompt, answer: String(n), options: [], typedOnly: true, worked: blocksWorked(n, lang) };\n}\nfunction placeValueQ(p, lang) {\n  var max = Number(p.max) || 9999;\n  var n = rnd(Math.floor(max / 10) + 1, max);\n  var digits = String(n);\n  var namesEn = ['ones', 'tens', 'hundreds', 'thousands', 'ten thousands', 'hundred thousands', 'millions', 'ten millions', 'hundred millions'];\n  var namesFr = ['unités', 'dizaines', 'centaines', 'milliers', 'dizaines de mille', 'centaines de mille', 'millions', 'dizaines de millions', 'centaines de millions'];\n  var place = rnd(0, digits.length - 1);\n  var ans = digits.charAt(digits.length - 1 - place);\n  // The trap: reading the position from the LEFT.\n  var fromLeft = digits.charAt(Math.min(place, digits.length - 1));\n  // Four DISTINCT digits: the answer, the from-the-left trap, then neighbours,\n  // then whatever digits are left — a number like 7 501 has few to offer.\n  var opts = [ans];\n  var candidates = [fromLeft, digits.charAt(digits.length - 1 - Math.min(place + 1, digits.length - 1)), digits.charAt(digits.length - 1 - Math.max(place - 1, 0))];\n  for (var c = 0; c < 10; c++) candidates.push(String(c));\n  for (var q2 = 0; q2 < candidates.length && opts.length < 4; q2++) if (opts.indexOf(candidates[q2]) === -1) opts.push(candidates[q2]);\n  var prompt = isFr(lang)\n    ? 'Dans ' + fmtNum(n, lang) + ', quel est le chiffre des ' + namesFr[place] + ' ?'\n    : 'In ' + fmtNum(n, lang) + ', which digit is in the ' + namesEn[place] + ' place?';\n  return { prompt: prompt, answer: ans, options: opts, worked: placeWorked(n, place, lang, namesEn, namesFr) };\n}\nfunction compareIntQ(p, lang) {\n  var a = rnd(10, p.max), b;\n  do { b = rnd(10, p.max); } while (b === a);\n  var big = Math.max(a, b);\n  var prompt = (isFr(lang) ? 'Lequel est le plus grand : ' : 'Which is bigger: ') + fmtNum(a, lang) + (isFr(lang) ? ' ou ' : ' or ') + fmtNum(b, lang) + ' ?';\n  return { prompt: prompt, answer: String(big), options: [fmtNum(a, lang), fmtNum(b, lang)], optionValues: [String(a), String(b)], worked: compareWorked(a, b, lang) };\n}\nfunction decCompareQ(p, lang) {\n  var places = Number(p.places) || 2;\n  // Built so that the whole-number reading gives the WRONG answer.\n  var pairs = places >= 3\n    ? [[0.5, 0.125], [0.7, 0.25], [2.5, 2.45], [0.9, 0.875], [1.3, 1.275], [0.4, 0.399], [3.06, 3.5], [0.8, 0.108]]\n    : [[0.7, 0.25], [0.5, 0.15], [2.5, 2.45], [0.9, 0.85], [1.3, 1.25], [0.6, 0.55], [4.1, 4.05], [0.3, 0.12]];\n  var pair = pickOne(pairs);\n  var a = pair[0], b = pair[1];\n  if (Math.random() < 0.5) { var t = a; a = b; b = t; }\n  var big = Math.max(a, b);\n  var prompt = (isFr(lang) ? 'Lequel est le plus grand : ' : 'Which is bigger: ') + fmtNum(a, lang) + (isFr(lang) ? ' ou ' : ' or ') + fmtNum(b, lang) + ' ?';\n  return { prompt: prompt, answer: String(big), options: [fmtNum(a, lang), fmtNum(b, lang)], optionValues: [String(a), String(b)], worked: decCompareWorked(a, b, lang) };\n}\nfunction fracCompareQ(p, lang) {\n  var d = shuffle(p.denoms);\n  var a, b;\n  if (p.unit) { a = [1, d[0]]; b = [1, d[1]]; }\n  else {\n    var kind = rnd(0, 2);\n    // 🔴 Same denominator needs at least two numerators to choose from: with den = 2\n    // there is only 1/2, and the loop looking for a second one never ended (measured).\n    if (kind === 0) { var dens = d.filter(function (x) { return x >= 3; }); var den = dens.length ? dens[0] : 4; var n1 = rnd(1, den - 1), n2; do { n2 = rnd(1, den - 1); } while (n2 === n1); a = [n1, den]; b = [n2, den]; }\n    else if (kind === 1) { var num = rnd(1, Math.min(d[0], d[1]) - 1); a = [num, d[0]]; b = [num, d[1]]; }\n    else { a = [rnd(1, d[0] - 1), d[0]]; b = [rnd(1, d[1] - 1), d[1]]; if (a[0] / a[1] === b[0] / b[1]) b = [b[0] === 1 ? 2 : b[0] - 1, b[1]]; }\n  }\n  var av = a[0] / a[1], bv = b[0] / b[1];\n  if (av === bv) { a = [1, 2]; b = [1, 3]; av = 0.5; bv = 1 / 3; }\n  var fa = a[0] + '/' + a[1], fb = b[0] + '/' + b[1];\n  var prompt = (isFr(lang) ? 'Quelle fraction est la plus grande : ' : 'Which fraction is bigger: ') + fa + (isFr(lang) ? ' ou ' : ' or ') + fb + ' ?';\n  return { prompt: prompt, answer: av > bv ? fa : fb, options: [fa, fb], optionValues: [fa, fb], worked: fracCompareWorked(a, b, lang) };\n}\nfunction fracOfQ(p, lang) {\n  var den = pickOne(p.denoms), num = rnd(1, den - 1), unit = rnd(2, Math.floor(p.max / den)), n = unit * den, ans = unit * num;\n  var prompt = num + '/' + den + (isFr(lang) ? ' de ' : ' of ') + n + ' = ?';\n  return { prompt: prompt, answer: String(ans), options: [String(ans), String(unit), String(n - ans), String(ans + unit)], worked: fractionOfWorked(num, den, n, lang, isFr(lang) ? ' de ' : ' of ') };\n}\nfunction fracDecQ(p, lang) {\n  var table = [['1/2', 0.5], ['1/4', 0.25], ['3/4', 0.75], ['1/10', 0.1], ['1/5', 0.2], ['2/5', 0.4], ['3/10', 0.3], ['1/100', 0.01], ['7/10', 0.7], ['3/5', 0.6]];\n  var row = pickOne(table);\n  var wrong = shuffle(table.filter(function (r) { return r[1] !== row[1]; })).slice(0, 3);\n  return { prompt: row[0] + ' = ?', answer: String(row[1]), options: [fmtNum(row[1], lang), fmtNum(wrong[0][1], lang), fmtNum(wrong[1][1], lang), fmtNum(wrong[2][1], lang)], optionValues: [String(row[1]), String(wrong[0][1]), String(wrong[1][1]), String(wrong[2][1])], worked: row[0] + ' = ' + row[0].replace('/', ' ÷ ') + ' = ' + fmtNum(row[1], lang) + '.' };\n}\nfunction percentQ(p, lang) {\n  var pc = pickOne(p.ps), n = rnd(2, Math.floor(p.max / 4)) * 4, ans = n * pc / 100;\n  return { prompt: pc + (isFr(lang) ? ' % de ' : '% of ') + n + ' = ?', answer: String(ans), options: [String(ans), String(n / 10), String(n / 2), String(n - ans)], worked: percentWorked(pc, n, lang) };\n}\nfunction roundQ(p, lang) {\n  if (p.decimals) {\n    var to = pickOne(p.to);\n    var cents = rnd(101, 999), n = cents / 100;\n    var ans = to === 1 ? Math.round(n) : Math.round(n * 10) / 10;\n    var prompt = (isFr(lang) ? 'Arrondis ' : 'Round ') + fmtNum(n, lang) + (to === 1 ? (isFr(lang) ? ' à l’unité' : ' to the nearest whole') : (isFr(lang) ? ' au dixième' : ' to the nearest tenth'));\n    var trunc = to === 1 ? Math.floor(n) : Math.floor(n * 10) / 10;\n    return { prompt: prompt, answer: String(ans), options: [fmtNum(ans, lang), fmtNum(trunc, lang), fmtNum(n, lang), fmtNum(ans + (to === 1 ? 1 : 0.1), lang)], optionValues: [String(ans), String(trunc), String(n), String(Math.round((ans + (to === 1 ? 1 : 0.1)) * 10) / 10)], worked: roundDecWorked(cents, to, ans, lang) };\n  }\n  var t = pickOne(p.to), m = rnd(t + 1, p.max), a2 = Math.round(m / t) * t;\n  return { prompt: (isFr(lang) ? 'Arrondis ' : 'Round ') + fmtNum(m, lang) + (isFr(lang) ? ' à la ' + (t === 10 ? 'dizaine' : 'centaine') : ' to the nearest ' + t), answer: String(a2), options: [fmtNum(a2, lang), fmtNum(Math.floor(m / t) * t, lang), fmtNum(a2 + t, lang), fmtNum(m, lang)], optionValues: [String(a2), String(Math.floor(m / t) * t), String(a2 + t), String(m)], worked: roundIntWorked(m, t, a2, lang) };\n}\nfunction balanceQ(p, lang) {\n  var a = rnd(2, p.max), b = rnd(2, p.max), c = rnd(1, a + b - 1), ans = a + b - c;\n  return { prompt: a + ' + ' + b + ' = ? + ' + c, answer: String(ans), options: [String(ans), String(a + b), String(a + b + c), String(c)], worked: balanceWorked(a, b, c, lang) };\n}\nfunction orderOpsQ(p, lang) {\n  var a = rnd(2, p.max), b = rnd(2, p.max), c = rnd(2, 9), ans = a + b * c, wrong = (a + b) * c;\n  return { prompt: a + ' + ' + b + ' × ' + c + ' = ?', answer: String(ans), options: [String(ans), String(wrong), String(ans + c), String(a * b + c)], worked: orderWorked(a, b, c, lang) };\n}\nfunction mulSmallQ(p, lang) {\n  var n = rnd(2, 12) * 2, f = pickOne([0.5, 0.1, 0.25, 0.2]), ans = Math.round(n * f * 1000) / 1000;\n  var prompt = n + ' × ' + fmtNum(f, lang) + ' = ?';\n  return { prompt: prompt, answer: String(ans), options: [fmtNum(ans, lang), fmtNum(n * f * 10, lang), fmtNum(n * 2, lang), fmtNum(n + f, lang)], optionValues: [String(ans), String(Math.round(n * f * 10000) / 1000), String(n * 2), String(n + f)], worked: mulSmallWorked(n, f, ans, lang) };\n}\nfunction divSmallQ(p, lang) {\n  var n = rnd(2, 12), f = pickOne([0.5, 0.1, 0.25]), ans = Math.round(n / f * 1000) / 1000;\n  var prompt = n + ' ÷ ' + fmtNum(f, lang) + ' = ?';\n  return { prompt: prompt, answer: String(ans), options: [fmtNum(ans, lang), fmtNum(n * f, lang), fmtNum(n / 2, lang), fmtNum(n, lang)], optionValues: [String(ans), String(n * f), String(n / 2), String(n)], worked: divSmallWorked(n, f, ans, lang) };\n}\nfunction fracQuotientQ(p, lang) {\n  var table = [['3/4', 0.75], ['1/2', 0.5], ['1/4', 0.25], ['1/5', 0.2], ['2/5', 0.4], ['3/5', 0.6], ['1/8', 0.125], ['5/4', 1.25], ['3/2', 1.5], ['7/10', 0.7]];\n  var row = pickOne(table), wrong = shuffle(table.filter(function (r) { return r[1] !== row[1]; })).slice(0, 3);\n  var prompt = row[0].replace('/', ' ÷ ') + ' = ?';\n  return { prompt: prompt, answer: String(row[1]), options: [fmtNum(row[1], lang), fmtNum(wrong[0][1], lang), fmtNum(wrong[1][1], lang), fmtNum(wrong[2][1], lang)], optionValues: [String(row[1]), String(wrong[0][1]), String(wrong[1][1]), String(wrong[2][1])], worked: row[0].replace('/', ' ÷ ') + ' = ' + row[0] + ' = ' + fmtNum(row[1], lang) + '.' };\n}\nfunction fracTimesIntQ(p, lang) {\n  var den = pickOne([2, 3, 4, 5, 8]), num = rnd(1, den - 1), unit = rnd(2, Math.floor(p.max / den)), n = unit * den, ans = unit * num;\n  return { prompt: num + '/' + den + ' × ' + n + ' = ?', answer: String(ans), options: [String(ans), String(unit), String(n * num), String(ans + unit)], worked: fractionOfWorked(num, den, n, lang, ' × ') };\n}\nfunction proportionQ(p, lang) {\n  var unit = rnd(2, p.max), a = rnd(2, 6), b; do { b = rnd(2, 9); } while (b === a);\n  var prompt = isFr(lang)\n    ? a + ' cahiers coûtent ' + (a * unit) + ' €. Combien coûtent ' + b + ' cahiers ?'\n    : a + ' notebooks cost ' + (a * unit) + ' €. How much do ' + b + ' notebooks cost?';\n  var ans = b * unit;\n  return { prompt: prompt, answer: String(ans), options: [String(ans), String(a * unit + b), String(b * a), String(ans + unit)], worked: proportionWorked(a, b, unit, lang) };\n}\nvar KEY_SETS = {\n  azerty: { home: 'qsdfjklm', top: 'azertyuiop', bottom: 'wxcvbn', digits: '0123456789' },\n  qwerty: { home: 'asdfjkl', top: 'qwertyuiop', bottom: 'zxcvbnm', digits: '0123456789' }\n};\n// RKT-008 AC7: a UK keyboard drills the same letters as a US one; it is its own name only so the child's choice is kept.\nKEY_SETS['qwerty-uk'] = KEY_SETS.qwerty;\nfunction typingKeysQ(p, lang, layout) {\n  var sets = KEY_SETS[layout] || KEY_SETS.azerty;\n  var keys = sets[p.keys] || sets.home;\n  var len = Number(p.length) || 1;\n  var word = '';\n  for (var i = 0; i < len; i++) word += keys.charAt(Math.floor(Math.random() * keys.length));\n  return { prompt: word, answer: word, options: [], typedOnly: true, typing: true };\n}\nfunction typingWordsQ(p, lang, layout, wordLists) {\n  var list = null;\n  for (var i = 0; i < (wordLists || []).length; i++) if (wordLists[i].lang === (isFr(lang) ? 'fr' : 'en')) list = wordLists[i].words;\n  list = (list || ['rocket']).filter(function (w) { return w.length >= (p.minLen || 1) && w.length <= (p.maxLen || 99); });\n  if (!list.length) list = ['rocket'];\n  var count = Number(p.words) || 1, out = [];\n  for (var k = 0; k < count; k++) out.push(pickOne(list));\n  var word = out.join(' ');\n  return { prompt: word, answer: word, options: [], typedOnly: true, typing: true };\n}\nfunction customQ(items) {\n  var it = pickOne(items && items.length ? items : [{ q: '2 + 2 = ?', a: '4' }]);\n  var opts = Array.isArray(it.opts) && it.opts.length ? it.opts.slice() : [];\n  if (opts.length && opts.indexOf(String(it.a)) === -1) opts.push(String(it.a));\n  return { prompt: String(it.q || ''), answer: String(it.a === undefined ? '' : it.a), options: opts, typedOnly: !opts.length };\n}\nfunction generate(skill, lang, layout, wordLists) {\n  var p = skill.params || {};\n  switch (skill.generator) {\n    case 'table': return tableQ(p, lang);\n    case 'add': return addQ(p, lang);\n    case 'sub': return subQ(p, lang);\n    case 'bond': return bondQ(p, lang);\n    case 'doubleHalf': return doubleHalfQ(p, lang);\n    case 'pow10': return pow10Q(p, lang);\n    case 'mulBy': return mulByQ(p, lang);\n    case 'divBy': return divByQ(p, lang);\n    case 'euclid': return euclidQ(p, lang);\n    case 'bigNumber': return bigNumberQ(p, lang);\n    case 'placeValue': return placeValueQ(p, lang);\n    case 'compareInt': return compareIntQ(p, lang);\n    case 'decCompare': return decCompareQ(p, lang);\n    case 'fracCompare': return fracCompareQ(p, lang);\n    case 'fracOf': return fracOfQ(p, lang);\n    case 'fracDec': return fracDecQ(p, lang);\n    case 'percent': return percentQ(p, lang);\n    case 'round': return roundQ(p, lang);\n    case 'balance': return balanceQ(p, lang);\n    case 'orderOps': return orderOpsQ(p, lang);\n    case 'mulSmall': return mulSmallQ(p, lang);\n    case 'divSmall': return divSmallQ(p, lang);\n    case 'fracQuotient': return fracQuotientQ(p, lang);\n    case 'fracTimesInt': return fracTimesIntQ(p, lang);\n    case 'proportion': return proportionQ(p, lang);\n    case 'typingKeys': return typingKeysQ(p, lang, layout);\n    case 'typingWords': return typingWordsQ(p, lang, layout, wordLists);\n    default: return { prompt: '2 + 2 = ?', answer: '4', options: ['4', '3', '5', '22'] };\n  }\n}\n\n// The nudge: read so the port exists; a Counter wired here re-runs the pick.\nOutputs.nonce = Number(Inputs.nonce) || 0;\n\nvar curriculum = Inputs.curriculum || [];\nvar model = Inputs.model && typeof Inputs.model === 'object' ? Inputs.model : { rating: 0, skills: {}, lastSkill: '' };\nvar skills = model.skills || {};\nvar level = String(Inputs.level || 'CE2');\nvar lang = isFr(Inputs.lang) ? 'fr' : 'en';\nvar layout = String(Inputs.layout || (lang === 'fr' ? 'azerty' : 'qwerty'));\nvar mode = String(Inputs.mode || 'maths');\nvar answerMode = String(Inputs.answerMode || 'auto');\nvar now = Date.now();\nvar li = levelIndex(level);\nvar r = Number(model.rating) || (LEVEL_BASE[level] + 50);\n\nvar q, skill;\nif (mode !== 'custom' && !curriculum.length) {\n  // Nothing to ask yet (the curriculum has not arrived): an honest blank, not a throw.\n  skill = { id: 'none', name: { en: '', fr: '' }, strategy: { en: '', fr: '' }, teach: '', fluentMs: 4000, level: level, diff: 0.5, answer: 'typed' };\n  q = { prompt: '', answer: '', options: [], typedOnly: true };\n} else if (mode === 'custom') {\n  var items = Inputs.customSet || [];\n  q = customQ(items);\n  skill = { id: 'custom', name: { en: 'My questions', fr: 'Mes questions' }, strategy: { en: '', fr: '' }, teach: '', fluentMs: 6000, level: level, diff: 0.5, answer: 'either' };\n} else {\n  var wanted = mode === 'typing' ? ['typing'] : mode === 'mixed' ? ['calc', 'number', 'typing'] : ['calc', 'number'];\n  var candidates = [];\n  for (var i = 0; i < curriculum.length; i++) {\n    var sk = curriculum[i];\n    if (wanted.indexOf(sk.strand) === -1) continue;\n    var si = levelIndex(sk.level);\n    var st = skills[sk.id];\n    if (si > li) continue;\n    if (si < li - 1) { if (!st || st.m < 3) { if (si < li - 1 && (!st || st.n > 0)) continue; } else continue; }\n    if (si === li - 1 && st && st.m >= 3 && !(st.due <= now)) continue;\n    candidates.push(sk);\n  }\n  if (!candidates.length) candidates = curriculum.filter(function (sk) { return wanted.indexOf(sk.strand) !== -1; });\n  if (!candidates.length) candidates = curriculum.slice();\n\n  // A due review first — the most overdue one.\n  var due = null, dueBy = 0;\n  for (var j = 0; j < candidates.length; j++) {\n    var cs = skills[candidates[j].id];\n    if (cs && cs.m > 0 && cs.due && cs.due <= now && candidates[j].id !== model.lastSkill) {\n      var over = now - cs.due;\n      if (!due || over > dueBy) { due = candidates[j]; dueBy = over; }\n    }\n  }\n  if (due) skill = due;\n  else {\n    // Otherwise a weighted draw, peaking where the child is predicted ~75% right.\n    var total = 0, weights = [];\n    for (var k = 0; k < candidates.length; k++) {\n      var c = candidates[k], cst = skills[c.id];\n      var d = cst && cst.d ? cst.d : skillBase(c);\n      var p = predict(r, d);\n      var w = Math.exp(-Math.pow((p - 0.75) / 0.15, 2)) + 0.05;\n      if (!cst) w += 0.15;                                  // unseen at this level: meet it\n      if (cst && cst.m >= 3) w *= 0.3;                       // mastered: rarely, until due\n      if (c.id === model.lastSkill && candidates.length > 1) w = 0;   // never twice running\n      weights.push(w); total += w;\n    }\n    var roll = Math.random() * total, acc = 0; skill = candidates[candidates.length - 1];\n    for (var m = 0; m < candidates.length; m++) { acc += weights[m]; if (roll <= acc) { skill = candidates[m]; break; } }\n  }\n  q = generate(skill, lang, layout, Inputs.wordLists);\n}\n\nvar state = skills[skill.id];\nvar itemDiff = state && state.d ? state.d : skillBase(skill);\n// Buttons or a box: an 'options' skill always gets buttons (nobody types \"1/3\");\n// a profile set to 'options' gets buttons wherever the generator offers them\n// (CE2, or a child who is not typing yet); 'either' (a custom set with choices)\n// gets buttons unless the profile insists on typing.\nvar useOptions = !q.typedOnly && !!(q.options && q.options.length) &&\n  (skill.answer === 'options' || answerMode === 'options' || (skill.answer === 'either' && answerMode !== 'typed'));\nvar options = [], optionValues = [];\nif (useOptions && q.options && q.options.length) {\n  var pairs = [];\n  var seen = {};\n  for (var o = 0; o < q.options.length; o++) {\n    var label = String(q.options[o]);\n    var value = q.optionValues ? String(q.optionValues[o]) : label;\n    if (seen[normalise(value)]) continue;\n    seen[normalise(value)] = true;\n    pairs.push({ label: label, value: value });\n  }\n  pairs = shuffle(pairs);\n  for (var o2 = 0; o2 < pairs.length; o2++) { options.push(pairs[o2].label); optionValues.push(pairs[o2].value); }\n}\n\nOutputs.skillId = skill.id;\nOutputs.skillName = pickText(skill.name, lang);\nOutputs.prompt = q.prompt;\nOutputs.answer = q.answer;\nOutputs.options = options;\nOutputs.optionValues = optionValues;\n// The same choices as rows, for a For Each: { label, value }.\nvar choices = [];\nfor (var c2 = 0; c2 < options.length; c2++) choices.push({ id: 'o' + c2 + '-' + optionValues[c2], label: options[c2], value: optionValues[c2] });\nOutputs.choices = choices;\nOutputs.kind = options.length ? 'options' : 'typed';\nOutputs.isTyping = !!q.typing;\nOutputs.nextKey = q.typing ? q.answer.charAt(0) : '';\n// RKT-005: the answer pad's keys. A numeric answer gets the ten digits and this language's decimal point (the grader takes\n// either); a typing question gets the accented letters its word list actually uses, so a word with a new accent grows the strip.\nvar padNumeric = !q.typing && /^-?\\d+(\\.\\d+)?$/.test(normalise(q.answer));\nvar padKeys = '';\nif (q.typing) {\n  var accents = [];\n  for (var wl = 0; wl < (Inputs.wordLists || []).length; wl++) {\n    if (!Inputs.wordLists[wl] || Inputs.wordLists[wl].lang !== (isFr(lang) ? 'fr' : 'en')) continue;\n    var letters = (Inputs.wordLists[wl].words || []).join('').toLowerCase();\n    for (var li = 0; li < letters.length; li++) {\n      var letter = letters.charAt(li);\n      if (letter !== letter.toUpperCase() && !/[a-z]/.test(letter) && accents.indexOf(letter) === -1) accents.push(letter);\n    }\n  }\n  padKeys = accents.sort().join('');\n} else if (padNumeric) {\n  padKeys = '1234567890' + (isFr(lang) ? ',' : '.') + (/^-/.test(String(q.answer)) || String(Inputs.mode) === 'custom' ? '-' : '');\n}\nOutputs.padKeys = padKeys;\nOutputs.padNumeric = padNumeric;\nOutputs.fluentMs = Number(skill.fluentMs) || 4000;\n// TPL-007 §16: in Monster Gate the walk is the clock, so a monster that crept closer arrives sooner. Only a scale in (0, 1] is heard,\n// and the race sends none.\nvar limitScale = Number(Inputs.limitScale);\nif (!(limitScale > 0 && limitScale <= 1)) limitScale = 1;\nOutputs.limitMs = Math.round((Number(skill.fluentMs) || 4000) * 3 * limitScale);\nOutputs.strategy = pickText(skill.strategy, lang);\nOutputs.teach = skill.teach || '';\n// RKT-004: this question worked through in its own numbers ('' for a typing drill or a custom set).\n// Looked at, build 1: \"donc 3 + 10 =\" ended a line and \"13.\" began the next. An equals sign keeps both its neighbours.\nOutputs.worked = String(q.worked || '').replace(/ = /g, ' = ');\nOutputs.itemDiff = itemDiff;\nOutputs.predicted = Math.round(predict(r, itemDiff) * 100) / 100;\nOutputs.shownAt = now;\n",
+        "runOnChange-in-curriculum": false,
+        "runOnChange-in-model": false,
+        "runOnChange-in-level": false,
+        "runOnChange-in-lang": false,
+        "runOnChange-in-layout": false,
+        "runOnChange-in-mode": false,
+        "runOnChange-in-answerMode": false,
+        "runOnChange-in-customSet": false,
+        "runOnChange-in-wordLists": false,
+        "runOnChange-in-limitScale": false
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-nonce",
+          "displayName": "nonce",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-curriculum",
+          "displayName": "curriculum",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-level",
+          "displayName": "level",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-layout",
+          "displayName": "layout",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-mode",
+          "displayName": "mode",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-answerMode",
+          "displayName": "answerMode",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-customSet",
+          "displayName": "customSet",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-wordLists",
+          "displayName": "wordLists",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-limitScale",
+          "displayName": "limitScale",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-nonce",
+          "displayName": "nonce",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-skillId",
+          "displayName": "skillId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-skillName",
+          "displayName": "skillName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-prompt",
+          "displayName": "prompt",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-answer",
+          "displayName": "answer",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-options",
+          "displayName": "options",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-optionValues",
+          "displayName": "optionValues",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-choices",
+          "displayName": "choices",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-kind",
+          "displayName": "kind",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isTyping",
+          "displayName": "isTyping",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-nextKey",
+          "displayName": "nextKey",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-padKeys",
+          "displayName": "padKeys",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-padNumeric",
+          "displayName": "padNumeric",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-fluentMs",
+          "displayName": "fluentMs",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-limitMs",
+          "displayName": "limitMs",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-strategy",
+          "displayName": "strategy",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-teach",
+          "displayName": "teach",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-worked",
+          "displayName": "worked",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-itemDiff",
+          "displayName": "itemDiff",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-predicted",
+          "displayName": "predicted",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-shownAt",
+          "displayName": "shownAt",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "picknextquesOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "skillId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "skillName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "prompt",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "answer",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "options",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "optionValues",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "choices",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "kind",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "isTyping",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "nextKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "fluentMs",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "limitMs",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "strategy",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "teach",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "itemDiff",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "predicted",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "shownAt",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "worked",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "padKeys",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "padNumeric",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

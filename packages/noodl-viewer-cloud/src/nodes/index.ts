@@ -20,6 +20,13 @@ export function registerNodes(runtime: NoodlRuntime) {
      * key in the hands of everyone who opens the page. JWT Verify is here for the same reason:
      * an HS256 key is a shared secret, so verifying in a browser means shipping it.
      */
+    /**
+     * FED-003 — `Model Request`. Here for exactly the reason `Secret` is, one step removed: it
+     * READS a secret. A browser copy of this node would be a graph that hands a model key to
+     * everyone who opens the page, and it would look like it was working while it did.
+     */
+    require('./cloud/modelrequest'),
+
     require('./cloud/hmac'),
     require('./cloud/jwtsign'),
     require('./cloud/jwtverify'),

@@ -1,0 +1,8 @@
+{
+  "version": "https://jsonfeed.org/version/1.1",
+  "title": "NodeGX — what's new",
+  "home_page_url": "https://the-low-code-foundation.github.io/nodegx-content/",
+  "feed_url": "https://the-low-code-foundation.github.io/nodegx-content/static/whats-new/feed.json",
+  "description": "Release notes shown in the NodeGX editor. An empty items list means there is nothing to announce; the editor treats that as a normal state and opens no modal.",
+  "items": []
+}

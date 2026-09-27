@@ -1,11 +1,13 @@
 import React from 'react';
 
 import { NoHomeError } from './components/common/NoHomeError';
+import { FocusTracker } from './focus-tracker';
 import GraphWarnings from './graph-warnings';
 import { Highlighter } from './highlighter';
 import { bindInputInjector } from './inputinjector';
 import Inspector from './inspector';
 import NoodlJSAPI from './noodl-js-api';
+import { PopupDialogLayer } from './popup-dialog';
 import projectSettings from './project-settings';
 import { createNodeFromReactComponent } from './react-component-node';
 import registerNodes from './register-nodes';
@@ -42,13 +44,53 @@ if (typeof window !== 'undefined' && window.NoodlEditor) {
       this.highlighter.setWindowSelected(window.NoodlEditorInspectorAPI.enabled);
       this.highlighter.setDesignMode(window.NoodlEditorInspectorAPI.enabled);
     },
-    selectNode(nodeId) {
+    /**
+     * TVW-003 — takes the editor's selection path (`['heroInstance', 'headline']`), or a bare id as
+     * before. A path outlines only the instance it addresses.
+     */
+    selectNode(nodeIdOrPath) {
       this.highlighter.deselectNodes();
 
-      if (nodeId && nodeId !== 'null') {
-        this.highlighter.selectNodesWithId(nodeId);
+      const path = Array.isArray(nodeIdOrPath)
+        ? nodeIdOrPath
+        : nodeIdOrPath && nodeIdOrPath !== 'null'
+        ? [nodeIdOrPath]
+        : null;
+
+      if (path && path.length) {
+        this.highlighter.selectNodesAtPath(path);
       } else if (window.NoodlEditorInspectorAPI.enabled) {
         this.highlighter.setWindowSelected(true);
+      }
+    },
+    /**
+     * TVW-002 AC1 — where the canvas's component sits on this screen, outlined without anyone
+     * having selected it. A path (`null` to clear).
+     *
+     * 🔴 Deliberately NOT `selectNode`. It draws the same line, but a selection also feeds the
+     * box-model chip, and TVW-002's drive photographed five lines of CSS facts appearing over the
+     * running app merely because the author changed which component the canvas was on.
+     */
+    showPlacement(pathOrNull) {
+      if (!this.highlighter) return;
+
+      const path = Array.isArray(pathOrNull) ? pathOrNull : pathOrNull && pathOrNull !== 'null' ? [pathOrNull] : null;
+      if (path && path.length) {
+        this.highlighter.showPlacementAtPath(path);
+      } else {
+        this.highlighter.clearPlacement();
+      }
+    },
+    /**
+     * TVW-003 — the editor's hover, as a path (`null` to clear). Replaces the relay's
+     * `hoverStart`/`hoverEnd`, which every viewer received and only this one could draw. Outlines;
+     * never scrolls.
+     */
+    hoverNode(path) {
+      if (!this.highlighter) return;
+      this.highlighter.disableHighlight();
+      if (Array.isArray(path) && path.length) {
+        this.highlighter.highlightNodesAtPath(path);
       }
     },
     /**
@@ -162,9 +204,14 @@ export default class Viewer extends React.Component {
 
     const { noodlRuntime } = props;
     this.runningDeployed = this.props.projectData !== undefined;
-    this.focusedNoodlNodes = [];
+    this.focusTracker = new FocusTracker();
+    // HLT-014 — the popup container is a modal dialog; this layer is its one owner.
+    this.containerRef = React.createRef();
+    this.popupDialogs = new PopupDialogLayer(() => this.containerRef.current);
+    this.onDocumentKeyDown = this.onDocumentKeyDown.bind(this);
 
     noodlRuntime.context.setNodeFocused = this.setNodeFocused.bind(this);
+    noodlRuntime.context.setNodeUnmounted = (node) => this.focusTracker.nodeUnmounted(node);
 
     const enableDebugInspectors =
       (typeof document !== 'undefined' && document.location.href.indexOf('forceDebugger=true') !== -1) ||
@@ -172,7 +219,8 @@ export default class Viewer extends React.Component {
     noodlRuntime.setDebugInspectorsEnabled(enableDebugInspectors);
 
     noodlRuntime.context.setPopupCallbacks({
-      onShow: (popup) => {
+      onShow: (popup, options) => {
+        this.popupDialogs.shown(popup, options);
         const newPopupArray = this.state.popups.concat([popup]);
 
         const bodyScroll = noodlRuntime.getProjectSettings().bodyScroll;
@@ -189,6 +237,7 @@ export default class Viewer extends React.Component {
         });
       },
       onClose: (popup) => {
+        this.popupDialogs.closed(popup);
         const newPopupArray = this.state.popups.filter((p) => p !== popup);
 
         this.setState({
@@ -291,7 +340,7 @@ export default class Viewer extends React.Component {
       this.connectToEditor();
     }
 
-    this.focusedNoodlNodes = [];
+    this.focusTracker.reset();
   }
 
   connectToEditor() {
@@ -313,18 +362,16 @@ export default class Viewer extends React.Component {
       this.highlighter = new Highlighter(noodlRuntime);
       NoodlEditorHighlightAPI.setHighlighter(this.highlighter);
 
-      noodlRuntime.editorConnection.on('hoverStart', (id) => {
-        this.highlighter.highlightNodesWithId(id);
-      });
-      noodlRuntime.editorConnection.on('hoverEnd', (id) => {
-        this.highlighter.disableHighlight();
-      });
-
       this.inspector = new Inspector({
         onDisableHighlight: () => this.highlighter.disableHighlight(),
-        onHighlight: (id) => this.highlighter.highlightNodesWithId(id),
-        onInspect: (ids) => {
-          NoodlEditor.inspectNodes(ids);
+        onHighlight: (id, path) => this.highlighter.highlightNodesAtPath(path),
+        onInspect: (ids, paths) => {
+          // TVW-003 — an editor older than its viewer has no `inspectPaths`; ids still select.
+          if (paths && NoodlEditor.inspectPaths) {
+            NoodlEditor.inspectPaths(paths);
+          } else {
+            NoodlEditor.inspectNodes(ids);
+          }
         }
       });
       NoodlEditorInspectorAPI.setInspector(this.inspector);
@@ -345,53 +392,42 @@ export default class Viewer extends React.Component {
     this.graphWarnings = new GraphWarnings(noodlRuntime.graphModel, noodlRuntime.editorConnection);
   }
 
+  // GAM-012 — the tracker lives in `focus-tracker.ts`, where its three faults were fixed and a spec
+  // grades it without stubbing it. Returns `false` when a Focus could not act (R13).
   setNodeFocused(node, focused) {
-    if (focused && this.focusedNoodlNodes.indexOf(node) === -1) {
-      //blur nodes that don't contain this new node
-      this.focusedNoodlNodes
-        .filter((focusedNode) => !focusedNode.contains(node))
-        .forEach((blurredNode) => {
-          blurredNode._blur();
-        });
+    return this.focusTracker.setNodeFocused(node, focused);
+  }
 
-      node._focus();
-      this.focusedNoodlNodes.push(node);
-    } else if (!focused) {
-      const index = this.focusedNoodlNodes.indexOf(node);
-      if (index !== -1) {
-        return;
-      }
-
-      node._blur();
-
-      //also blur nodes that contain this node
-      this.focusedNoodlNodes
-        .filter((focusedNode) => focusedNode.contains(node))
-        .forEach((blurredNode) => {
-          blurredNode._blur();
-        });
-
-      this.focusedNoodlNodes.splice(index, 1);
-    }
+  /** The tracker's list, read by drives that inspect focus through the Viewer instance. */
+  get focusedNoodlNodes() {
+    return this.focusTracker.nodes;
   }
 
   onClickCapture(e) {
-    const focusedNoodlNodes = [];
+    this.focusTracker.onClickCapture(e.target);
+  }
 
-    //walk up the dom tree and collect all noodl nodes
-    let elem = e.target;
-    while (elem) {
-      if (elem.noodlNode && elem.noodlNode._focus) focusedNoodlNodes.push(elem.noodlNode);
-      elem = elem.parentNode;
-    }
+  componentDidMount() {
+    // HLT-014 §6: ONE listener for the viewer's life, reading the top of the runtime's stack —
+    // one registered per popup leaks under `replace`, where a popup has two ways out of the stack.
+    // In the editor this is the preview's own document; the editor forwards only modified keys
+    // out of it (`CanvasView.ts`), so a plain Escape here never reaches the editor's handlers.
+    document.addEventListener('keydown', this.onDocumentKeyDown);
+  }
 
-    //blur nodes that weren't part of this click
-    this.focusedNoodlNodes.filter((node) => focusedNoodlNodes.indexOf(node) === -1).forEach((node) => node._blur());
+  componentDidUpdate(_prevProps, prevState) {
+    if (prevState.popups !== this.state.popups) this.popupDialogs.afterRender();
+  }
 
-    //focus all new focused nodes
-    focusedNoodlNodes.filter((node) => this.focusedNoodlNodes.indexOf(node) === -1).forEach((node) => node._focus());
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.onDocumentKeyDown);
+    this.popupDialogs.dispose();
+  }
 
-    this.focusedNoodlNodes = focusedNoodlNodes;
+  onDocumentKeyDown(e) {
+    if (e.key !== 'Escape' || e.defaultPrevented || this.state.popups.length === 0) return;
+    // Something inside the popup already used the key (a select closing its list, say).
+    if (this.props.noodlRuntime.context.cancelTopPopup()) e.preventDefault();
   }
 
   render() {
@@ -418,7 +454,7 @@ export default class Viewer extends React.Component {
         flexDirection: 'column'
       };
       return (
-        <div style={style} onClickCapture={(e) => this.onClickCapture(e)}>
+        <div ref={this.containerRef} style={style} onClickCapture={(e) => this.onClickCapture(e)}>
           <div style={{ ...style, isolation: 'isolate' }}>{rootComponent.render()}</div>
           {this.state.popups.length ? (
             <div style={{ ...style, isolation: 'isolate' }}>{this.state.popups.map((p) => p.render())}</div>
@@ -428,6 +464,7 @@ export default class Viewer extends React.Component {
     } else {
       return (
         <div
+          ref={this.containerRef}
           style={{
             margin: 0,
             padding: 0,

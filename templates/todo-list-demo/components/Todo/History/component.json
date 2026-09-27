@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b470ad3c-712c-5101-8d2a-951cf84b5c04",
+  "name": "History",
+  "path": "/Todo/History",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A task’s history, newest first, and the box that adds a note to it."
+}

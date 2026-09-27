@@ -1,0 +1,47 @@
+{
+  "curlGets": [
+    {
+      "status": "200",
+      "setCookie": false,
+      "location": null,
+      "nodegxAuthAnywhere": false,
+      "title": "Sign in to Drive App"
+    },
+    {
+      "status": "200",
+      "setCookie": false,
+      "location": null,
+      "nodegxAuthAnywhere": false,
+      "title": "Sign in to Drive App"
+    },
+    {
+      "status": "200",
+      "setCookie": false,
+      "location": null,
+      "nodegxAuthAnywhere": false,
+      "title": "Sign in to Drive App"
+    }
+  ],
+  "afterBrowserLoad": {
+    "chromeSawTitle": "Sign in to Drive App",
+    "chromeSawHandoff": false,
+    "tokenRowUnchanged": true,
+    "consumedAt": null,
+    "sessionsMinted": 0
+  },
+  "firstPost": {
+    "status": "302",
+    "location": "http://127.0.0.1:62351/auth/signed-in?nodegx_auth=PPcUcvpNjLkyYvisAph4s1MFdtvuAhHCYNzgfzIhhjU",
+    "rowRedirect": "http://127.0.0.1:62351/auth/signed-in",
+    "consumedAt": "2026-09-21T20:38:46.799Z",
+    "sessionsMinted": 1
+  },
+  "secondPost": {
+    "status": "400",
+    "title": "Sign-in link expired"
+  },
+  "getAfterSpent": {
+    "status": "400",
+    "title": "Sign-in link expired"
+  }
+}

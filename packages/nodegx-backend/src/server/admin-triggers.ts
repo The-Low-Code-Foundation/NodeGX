@@ -19,13 +19,85 @@
 import { buildRunPayload, spreadableBody } from '../workflow/runPayload';
 import type { RequestContext } from './HttpServer';
 import type { TriggerSubsystem } from '../triggers/TriggerSubsystem';
-import { TriggerConfigError, TriggerDef, TriggerInput } from '../triggers/registry';
+import { cronWords } from '../triggers/cronWords';
+import { DEFAULT_OVERLAP_POLICY, effectiveOverlapPolicy, TriggerConfigError, TriggerDef, TriggerInput } from '../triggers/registry';
+import type { OverlapPolicy } from '../triggers/registry';
+import { nextFireTimes } from '../triggers/scheduler';
+import { validateCron } from '../triggers/cron';
 import { HttpError, readJSONBody, sendJSON } from './http-util';
+
+/**
+ * A stored trigger plus the things a reader cannot work out from it.
+ *
+ * `effectiveOverlapPolicy` (FED-004): `schedule.overlapPolicy` is OMITTED on
+ * disk when it was not authored, which is house style and right — a diff of
+ * `triggers.json` should show decisions, not defaults. The cost is that the
+ * omission is on exactly the triggers the default matters most for, and every
+ * consumer would otherwise have to carry its own copy of "absent means skip".
+ * A second copy of that sentence is a second copy that can drift.
+ *
+ * `scheduleWords` (BMG-008): the cron in a person's words, from `cronWords` —
+ * the one gloss, so the admin page's list never parses a cron itself.
+ *
+ * So the routes decorate. Read-only, never stored, never read back by `upsert` —
+ * and accepted on the write path rather than refused, so `GET` → edit → `PUT`
+ * still works (see TRIGGER_KEYS' note in registry.ts).
+ */
+export type TriggerView = TriggerDef & { effectiveOverlapPolicy?: OverlapPolicy; scheduleWords?: string | null };
+
+/** Add the computed view fields. Schedule triggers only — the others have no such policy. */
+function decorate(trigger: TriggerDef): TriggerView {
+  if (trigger.type !== 'schedule') return trigger;
+  return {
+    ...trigger,
+    effectiveOverlapPolicy: effectiveOverlapPolicy(trigger),
+    scheduleWords: trigger.schedule ? cronWords(trigger.schedule.cron) : null
+  };
+}
 
 /** `GET /admin/triggers`. */
 export interface TriggerListResponse {
-  triggers: TriggerDef[];
+  triggers: TriggerView[];
   maxChangeDepth: number;
+  /**
+   * BMG-008: what a NEW schedule gets when nobody says otherwise, so the drawer
+   * that authors one shows the scheduler's default and not a copy of its own.
+   */
+  overlapDefault: OverlapPolicy;
+}
+
+/**
+ * `POST /admin/triggers/preview` — an unsaved cron, read the way the scheduler
+ * will read it (BMG-008 §3.1). A dry run: nothing is stored, nothing is armed.
+ *
+ * `valid: false` comes with the parser's own sentence and is a 200, not a 400:
+ * the page asks on every keystroke of the custom field, and an expression that
+ * is not finished yet is an answer, not a failure.
+ */
+export interface TriggerPreviewResponse {
+  cron: string;
+  valid: boolean;
+  /** The parser's sentence when `valid` is false. */
+  error: string | null;
+  /** The cron in words, or null for a shape the gloss does not read. */
+  words: string | null;
+  /** The next fires, ISO, strictly after `from`. Empty when invalid. */
+  next: string[];
+  /** The instant the fires were computed from — so a caller can reproduce them. */
+  from: string;
+  /** The server's local zone, which is the one every cron here is read in. */
+  timezone: string;
+}
+
+/** The most fires a preview answers. Five is what the page shows; twenty is a bounded scan. */
+const PREVIEW_MAX = 20;
+
+function localTimezone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'local time';
+  } catch {
+    return 'local time';
+  }
 }
 
 /**
@@ -35,7 +107,7 @@ export interface TriggerListResponse {
  * separate type: the callers all read `.trigger` the same way.
  */
 export interface TriggerResponse {
-  trigger: TriggerDef;
+  trigger: TriggerView;
   /** Plaintext webhook secret, returned exactly once and never recoverable. */
   secret?: string;
   secretNote?: string;
@@ -64,15 +136,57 @@ export class AdminTriggerRoutes {
 
   list(ctx: RequestContext): void {
     sendJSON(ctx.res, 200, {
-      triggers: this.triggers.registry.list(),
-      maxChangeDepth: this.triggers.registry.getMaxChangeDepth()
+      triggers: this.triggers.registry.list().map(decorate),
+      maxChangeDepth: this.triggers.registry.getMaxChangeDepth(),
+      overlapDefault: DEFAULT_OVERLAP_POLICY
     } satisfies TriggerListResponse);
+  }
+
+  /**
+   * `POST /admin/triggers/preview { cron, count? }` — the sentence and the next
+   * fires for an expression that is not saved (BMG-008 AC2). The fires come
+   * from `nextFireTimes`, which chains the scheduler's own `next()`; there is no
+   * second cron reader on the page.
+   */
+  async preview(ctx: RequestContext): Promise<void> {
+    const body = await readJSONBody(ctx.req);
+    if (typeof body.cron !== 'string') throw new HttpError(400, 'cron (string) is required');
+    const cron = body.cron.trim();
+    const wanted = typeof body.count === 'number' && Number.isFinite(body.count) ? Math.floor(body.count) : 5;
+    const count = Math.max(1, Math.min(PREVIEW_MAX, wanted));
+    const from = new Date();
+    const answer: TriggerPreviewResponse = {
+      cron,
+      valid: false,
+      error: null,
+      words: null,
+      next: [],
+      from: from.toISOString(),
+      timezone: localTimezone()
+    };
+    const problem = validateCron(cron);
+    if (problem) {
+      answer.error = problem;
+      sendJSON(ctx.res, 200, answer);
+      return;
+    }
+    try {
+      answer.next = nextFireTimes(cron, from, count).map((d) => d.toISOString());
+    } catch (e) {
+      // Five valid fields that never fire (Feb 30): the scheduler would refuse to arm it, so the preview says so.
+      answer.error = e instanceof Error ? e.message : String(e);
+      sendJSON(ctx.res, 200, answer);
+      return;
+    }
+    answer.valid = true;
+    answer.words = cronWords(cron);
+    sendJSON(ctx.res, 200, answer);
   }
 
   get(ctx: RequestContext): void {
     const trigger = this.triggers.registry.get(ctx.params.id);
     if (!trigger) throw new HttpError(404, `No trigger "${ctx.params.id}"`);
-    sendJSON(ctx.res, 200, { trigger } satisfies TriggerResponse);
+    sendJSON(ctx.res, 200, { trigger: decorate(trigger) } satisfies TriggerResponse);
   }
 
   async create(ctx: RequestContext): Promise<void> {
@@ -114,7 +228,7 @@ export class AdminTriggerRoutes {
       throw new HttpError(400, `Trigger "${ctx.params.id}" is not a webhook — only a webhook has a secret.`);
     }
     sendJSON(ctx.res, 200, {
-      trigger: result.trigger,
+      trigger: decorate(result.trigger),
       secret: result.secret,
       secretNote:
         'Store this now — it is not recoverable. Every sender using the previous secret is now rejected until it is updated.'
@@ -126,7 +240,7 @@ export class AdminTriggerRoutes {
       const result = this.triggers.registry.upsert({ ...input, id: id || input.id });
       this.triggers.reschedule();
       sendJSON(ctx.res, status, {
-        trigger: result.trigger,
+        trigger: decorate(result.trigger),
         // The plaintext webhook secret is returned exactly once (like an API key).
         ...(result.secret ? { secret: result.secret, secretNote: 'Store this now — it is not recoverable.' } : {})
       } satisfies TriggerResponse);
@@ -142,7 +256,7 @@ export class AdminTriggerRoutes {
     const trigger = this.triggers.registry.setEnabled(ctx.params.id, body.enabled);
     if (!trigger) throw new HttpError(404, `No trigger "${ctx.params.id}"`);
     this.triggers.reschedule();
-    sendJSON(ctx.res, 200, { trigger } satisfies TriggerResponse);
+    sendJSON(ctx.res, 200, { trigger: decorate(trigger) } satisfies TriggerResponse);
   }
 
   delete(ctx: RequestContext): void {

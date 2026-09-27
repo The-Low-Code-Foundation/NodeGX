@@ -45,7 +45,7 @@ import os from 'os';
 import { filesystem, platform } from '@noodl/platform';
 
 import Config from '../../../shared/config/config';
-import { DebugLogLevel, formatEntry, logFileHeader, logFileName } from './debugLog';
+import { DebugLogLevel, formatConsoleArgs, formatEntry, logFileHeader, logFileName } from './debugLog';
 import { RedactorOptions } from './report/redact';
 
 export interface IBugTracker {
@@ -157,9 +157,13 @@ class BugTracker implements IBugTracker {
       // that one is "what was on screen just before the reporter clicked".
       // The one thing they share is the redactor, which is the part that is a
       // policy.
+      // ⚠️ The component stack must be read **here**, synchronously, before
+      // `original.apply` — see `reactComponentStack`. Reading it inside `write`
+      // would still work today only because `write` is synchronous too; doing it
+      // on this line is the part that is load-bearing, so it stays visible.
       const wrap = (level: DebugLogLevel, original: (...args: unknown[]) => void) =>
         function (this: unknown, ...args: unknown[]) {
-          write(level, args.map((arg) => formatArgument(arg)).join(' '));
+          write(level, formatConsoleArgs(args, reactComponentStack()));
           original.apply(console, args);
         };
 
@@ -194,14 +198,48 @@ class BugTracker implements IBugTracker {
   }
 }
 
-/** Local copy of `debugLog`'s argument renderer, to keep the import surface flat. */
-function formatArgument(value: unknown): string {
-  if (typeof value === 'string') return value;
-  if (value instanceof Error) return value.stack || `${value.name}: ${value.message}`;
+/**
+ * HLT-003 — the component a React warning is actually about.
+ *
+ * 🔴 **React 19 does not put it in the message.** The duplicate-key warning is
+ * `console.error('… same key, `%s`. …', key)` — the key and nothing else — and
+ * the missing-key warning passes its two `%s` as **empty strings** when it has
+ * no owner to name. So four phases of logs could not attribute either one, and
+ * no amount of fixing the *formatting* recovers a name that was never an
+ * argument. This is the seam that has it.
+ *
+ * `runWithFiberInDEV` (react-dom) and the JSX runtime's key check (react) both
+ * set `ReactSharedInternals.getCurrentStack` immediately around their
+ * `console.error` and restore it immediately after, so the stack is reachable
+ * **only** from inside the console call. Both packages share one internals
+ * object — `react-dom` reads it off `react` — so this one read sees warnings
+ * from either.
+ *
+ * Everything here is guarded and cached: this module has to keep working while
+ * the app is already broken, and an internals field React is free to rename is
+ * exactly the kind of thing that must degrade to "no stack" rather than throw
+ * inside an error handler.
+ */
+type ReactInternalsWithStack = { getCurrentStack?: () => string | null };
+let reactInternals: ReactInternalsWithStack | null | undefined;
+
+function reactComponentStack(): string | null {
   try {
-    return JSON.stringify(value);
+    if (reactInternals === undefined) {
+      // Resolved lazily rather than by a top-level import: `bugtracker` is
+      // imported extremely early and by almost everything, and it must not be
+      // the module that makes React load sooner than it otherwise would.
+      const react = require('react');
+      reactInternals =
+        (react && (react.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE as ReactInternalsWithStack)) ||
+        null;
+    }
+    const get = reactInternals && reactInternals.getCurrentStack;
+    if (typeof get !== 'function') return null;
+    const stack = get();
+    return typeof stack === 'string' && stack.trim() !== '' ? stack : null;
   } catch (_error) {
-    return String(value);
+    return null;
   }
 }
 

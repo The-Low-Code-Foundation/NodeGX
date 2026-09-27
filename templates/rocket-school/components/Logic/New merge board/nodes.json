@@ -1,0 +1,147 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "bb30ce0f-7aba-59d2-8597-4741d18fb60e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "newmergeboarIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "run",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "level",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "pool",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "mode",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "newmergeboarFn",
+      "type": "JavaScriptFunction",
+      "label": "New merge board",
+      "parameters": {
+        "functionScript": "\nvar LEVELS = [\"CE2\",\"CM1\",\"CM2\",\"6e\"];\nvar LEVEL_BASE = {\"CE2\":800,\"CM1\":1050,\"CM2\":1300,\"6e\":1550};\nfunction levelIndex(level) { var i = LEVELS.indexOf(String(level || 'CE2')); return i < 0 ? 0 : i; }\nfunction rnd(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }\nfunction pickOne(arr) { return arr[Math.floor(Math.random() * arr.length)]; }\nfunction shuffle(arr) { var a = arr.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }\nfunction isFr(lang) { return String(lang) === 'fr'; }\n/** 1234567.5 → \"1 234 567,5\" (fr, grouped with a narrow no-break space) or \"1,234,567.5\" (en). RKT-003: an ordinary space let a phone break \"8 266\" across two lines. */\nfunction fmtNum(n, lang) {\n  var neg = n < 0; n = Math.abs(n);\n  var s = String(Math.round(n * 1000) / 1000);\n  var parts = s.split('.');\n  var int = parts[0]; var out = '';\n  while (int.length > 3) { out = (isFr(lang) ? ' ' : ',') + int.slice(-3) + out; int = int.slice(0, -3); }\n  out = int + out;\n  if (parts[1]) out += (isFr(lang) ? ',' : '.') + parts[1];\n  return (neg ? '−' : '') + out;\n}\n/** What a typed answer becomes before comparison: numbers as numbers, words lower-case. */\nfunction normalise(v) {\n  var s = String(v === undefined || v === null ? '' : v).trim().toLowerCase();\n  var num = s.replace(/\\s+/g, '').replace(/,/g, '.');\n  if (/^-?\\d+(\\.\\d+)?$/.test(num)) return String(Number(num));\n  var big = s.replace(/[\\s.,']/g, '');\n  if (/^-?\\d+$/.test(big) && /\\d[\\s.,']\\d{3}/.test(s)) return String(Number(big));\n  return s.replace(/\\s+/g, ' ');\n}\nfunction sameAnswer(a, b) { return normalise(a) === normalise(b); }\n\nvar EN_ONES = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];\nvar EN_TENS = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];\nfunction enUnder1000(n) {\n  var out = '';\n  if (n >= 100) { out = EN_ONES[Math.floor(n / 100)] + ' hundred'; n = n % 100; if (n > 0) out += ' and '; }\n  if (n >= 20) { out += EN_TENS[Math.floor(n / 10)]; if (n % 10) out += '-' + EN_ONES[n % 10]; }\n  else if (n > 0 || out === '') out += EN_ONES[n];\n  return out;\n}\nfunction spellEn(n) {\n  n = Math.floor(Number(n)); if (n === 0) return 'zero';\n  var blocks = [[1000000000, 'billion'], [1000000, 'million'], [1000, 'thousand']];\n  var parts = [];\n  for (var i = 0; i < blocks.length; i++) { var q = Math.floor(n / blocks[i][0]); if (q > 0) { parts.push(enUnder1000(q) + ' ' + blocks[i][1]); n = n % blocks[i][0]; } }\n  if (n > 0) { if (parts.length && n < 100) parts.push('and ' + enUnder1000(n)); else parts.push(enUnder1000(n)); }\n  return parts.join(' ');\n}\nvar FR_ONES = ['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize'];\nvar FR_TENS = ['','dix','vingt','trente','quarante','cinquante','soixante','soixante','quatre-vingt','quatre-vingt'];\nfunction frUnder100(n) {\n  if (n < 17) return FR_ONES[n];\n  if (n < 20) return 'dix-' + FR_ONES[n - 10];\n  var t = Math.floor(n / 10), u = n % 10;\n  if (t === 7 || t === 9) { u += 10; }\n  var base = FR_TENS[t];\n  if (t === 8 && u === 0) return 'quatre-vingts';\n  if (u === 0) return base;\n  if (u === 1 && t !== 8) return base + ' et un';\n  if (u === 11 && t === 7) return base + ' et onze';\n  var unit = u < 17 ? FR_ONES[u] : 'dix-' + FR_ONES[u - 10];\n  return base + '-' + unit;\n}\nfunction frUnder1000(n) {\n  var out = '';\n  if (n >= 100) { var h = Math.floor(n / 100); n = n % 100; out = (h === 1 ? 'cent' : FR_ONES[h] + ' cent') + (n === 0 && h > 1 ? 's' : ''); if (n > 0) out += ' '; }\n  if (n > 0 || out === '') out += frUnder100(n);\n  return out;\n}\nfunction spellFr(n) {\n  n = Math.floor(Number(n)); if (n === 0) return 'zéro';\n  var parts = [];\n  var b = Math.floor(n / 1000000000); if (b > 0) { parts.push((b === 1 ? 'un milliard' : frUnder1000(b) + ' milliards')); n = n % 1000000000; }\n  var m = Math.floor(n / 1000000); if (m > 0) { parts.push((m === 1 ? 'un million' : frUnder1000(m) + ' millions')); n = n % 1000000; }\n  var k = Math.floor(n / 1000); if (k > 0) { parts.push((k === 1 ? 'mille' : frUnder1000(k) + ' mille')); n = n % 1000; }\n  if (n > 0) parts.push(frUnder1000(n));\n  return parts.join(' ');\n}\nfunction spell(n, lang) { return isFr(lang) ? spellFr(n) : spellEn(n); }\nfunction skillBase(skill) { return LEVEL_BASE[skill.level] + Number(skill.diff || 0) * 250; }\nfunction predict(r, d) { return 1 / (1 + Math.pow(10, (d - r) / 400)); }\nfunction pickText(bi, lang) { if (!bi) return ''; if (typeof bi === 'string') return bi; return isFr(lang) ? (bi.fr || bi.en || '') : (bi.en || bi.fr || ''); }\n\nfunction canMerge(a, b) { return a > 0 && b > 0 && (a + b) % 10 === 0; }\nfunction slideLine(line) {\n  var tiles = line.filter(function (v) { return v > 0; });\n  var out = [], joined = [], score = 0, merges = 0;\n  for (var i = 0; i < tiles.length; i++) {\n    if (i + 1 < tiles.length && canMerge(tiles[i], tiles[i + 1])) { joined.push(out.length); out.push(tiles[i] + tiles[i + 1]); score += tiles[i] + tiles[i + 1]; merges++; i++; }\n    else out.push(tiles[i]);\n  }\n  while (out.length < 4) out.push(0);\n  return { line: out, joined: joined, score: score, merges: merges };\n}\nfunction lines(board, dir) {\n  var out = [];\n  for (var i = 0; i < 4; i++) {\n    var idx = [];\n    for (var j = 0; j < 4; j++) {\n      if (dir === 'left') idx.push(i * 4 + j);\n      else if (dir === 'right') idx.push(i * 4 + (3 - j));\n      else if (dir === 'up') idx.push(j * 4 + i);\n      else idx.push((3 - j) * 4 + i);\n    }\n    out.push(idx);\n  }\n  return out;\n}\nfunction slide(board, dir) {\n  var next = board.slice(), moved = false, score = 0, merges = 0, joined = [];\n  var ls = lines(board, dir);\n  for (var l = 0; l < ls.length; l++) {\n    var idx = ls[l];\n    var line = idx.map(function (i) { return board[i]; });\n    var res = slideLine(line);\n    for (var k = 0; k < 4; k++) { if (next[idx[k]] !== res.line[k]) moved = true; next[idx[k]] = res.line[k]; }\n    for (var j = 0; j < res.joined.length; j++) joined.push(idx[res.joined[j]]);\n    score += res.score; merges += res.merges;\n  }\n  return { board: next, moved: moved, score: score, merges: merges, joined: joined };\n}\nfunction anyMove(board) {\n  var dirs = ['left', 'right', 'up', 'down'];\n  for (var i = 0; i < dirs.length; i++) if (slide(board, dirs[i]).moved) return true;\n  return false;\n}\nfunction spawnAt(board, pool, count, helper) {\n  var next = board.slice(), at = [];\n  var list = pool && pool.length ? pool : [1, 2, 3, 4, 5, 6, 7, 8, 9];\n  for (var c = 0; c < count; c++) {\n    var empties = [];\n    for (var i = 0; i < 16; i++) if (next[i] === 0) empties.push(i);\n    if (!empties.length) break;\n    var cell = pickOne(empties);\n    var value = pickOne(list);\n    // A helper tile (Easy): the partner, from the pool, of a single number already on the board, so a join is always near.\n    if (Number(helper) > 0 && Math.random() < Number(helper)) {\n      var singles = [];\n      for (var k = 0; k < 16; k++) if (next[k] > 0 && next[k] % 10 !== 0) singles.push(next[k]);\n      if (singles.length) {\n        var t = pickOne(singles);\n        var partners = list.filter(function (w) { return (t + w) % 10 === 0; });\n        if (partners.length) value = pickOne(partners);\n      }\n    }\n    next[cell] = value;\n    at.push(cell);\n  }\n  return { board: next, at: at };\n}\nfunction spawn(board, pool, count) { return spawnAt(board, pool, count, 0).board; }\nvar MERGE_MODES = {\"easy\":{\"helper\":0.5},\"hard\":{\"helper\":0}};\nfunction modeOf(mode) { return String(mode) === 'hard' ? 'hard' : 'easy'; }\nfunction biggestOf(board) { var b = 0; for (var i = 0; i < board.length; i++) if (board[i] > b) b = board[i]; return b; }\nvar MERGE_POOL_GROUPS = [{\"skill\":\"bond-10\",\"fromLevel\":0,\"after\":\"\",\"tiles\":[1,2,3,4,5,6,7,8,9]},{\"skill\":\"bond-20\",\"fromLevel\":1,\"after\":\"bond-10\",\"tiles\":[11,12,13,14,15,16,17,18,19]},{\"skill\":\"bond-100\",\"fromLevel\":2,\"after\":\"bond-20\",\"tiles\":[5,15,25,35,45,55,65,75,85,95]}];\nfunction mergePool(level, model) {\n  var li = levelIndex(level), skills = (model && model.skills) || {};\n  var mOf = function (id) { return Number(skills[id] && skills[id].m) || 0; };\n  var groups = MERGE_POOL_GROUPS.filter(function (g) { return li >= g.fromLevel || (!!g.after && mOf(g.after) >= 2); });\n  var weakest = groups[0];\n  for (var i = 1; i < groups.length; i++) if (mOf(groups[i].skill) < mOf(weakest.skill)) weakest = groups[i];\n  var pool = [];\n  for (var k = 0; k < groups.length; k++) for (var t = 0; t < (groups[k] === weakest ? 2 : 1); t++) pool = pool.concat(groups[k].tiles);\n  return { pool: pool, skills: groups.map(function (g) { return g.skill; }), weakest: weakest.skill };\n}\n\nvar drawn = mergePool(Inputs.level, Inputs.model);\nvar pool = Array.isArray(Inputs.pool) && Inputs.pool.length ? Inputs.pool : drawn.pool;\nvar empty = [];\nfor (var i = 0; i < 16; i++) empty.push(0);\nvar mode = modeOf(Inputs.mode);\nvar helper = MERGE_MODES[mode].helper;\nvar s = spawnAt(empty, pool, 2, helper);\nOutputs.board = s.board;\nOutputs.pool = pool;\nOutputs.game = { id: 'm' + Date.now().toString(36) + Math.floor(Math.random() * 1000000).toString(36), board: s.board, pool: pool, score: 0, made: 0, biggest: biggestOf(s.board), moves: 0, over: false, joined: [], landed: s.at, mode: mode, helper: helper };\nOutputs.mode = mode;\n",
+        "runOnChange-in-level": false,
+        "runOnChange-in-model": false,
+        "runOnChange-in-pool": false,
+        "runOnChange-in-mode": false
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-level",
+          "displayName": "level",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pool",
+          "displayName": "pool",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-mode",
+          "displayName": "mode",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-board",
+          "displayName": "board",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pool",
+          "displayName": "pool",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-game",
+          "displayName": "game",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mode",
+          "displayName": "mode",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "newmergeboarOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "game",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "board",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "pool",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "mode",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

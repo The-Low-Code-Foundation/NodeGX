@@ -1,0 +1,510 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0d73fed6-ad88-598a-83d0-053606a5ecec",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "zsIn",
+      "type": "Component Inputs",
+      "label": "The words",
+      "ports": [
+        {
+          "name": "mounted",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "mathsWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "typingWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "gateWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pushWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "practiceWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "challengeWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "startWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "gatePracticeWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "gateChallengeWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pushPracticeWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pushChallengeWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 1480
+    },
+    {
+      "id": "zsCard",
+      "type": "Group",
+      "label": "The setup",
+      "children": [
+        "zsMode",
+        "zsStyle",
+        "zsTimed",
+        "zsRule",
+        "zsStart"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "rowGap": "var(--space-5)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "zsMode",
+      "type": "/Game/Choice row",
+      "label": "Maths or typing",
+      "parent": "zsCard",
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "zsStyle",
+      "type": "/Game/Choice row",
+      "label": "The way to play",
+      "parent": "zsCard",
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "zsTimed",
+      "type": "/Game/Choice row",
+      "label": "Practice or challenge",
+      "parent": "zsCard",
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "zsRule",
+      "type": "Text",
+      "label": "What the chosen way and pace do",
+      "parent": "zsCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "zsStart",
+      "type": "net.noodl.controls.button",
+      "label": "Start",
+      "parent": "zsCard",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Start"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "zsModeItems",
+      "type": "JavaScriptFunction",
+      "label": "Maths or typing, in words",
+      "parameters": {
+        "functionScript": "Outputs.items = [{ label: Inputs.maths, value: 'maths' }, { label: Inputs.typing, value: 'typing' }];"
+      },
+      "x": 350,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-maths",
+          "displayName": "maths",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-typing",
+          "displayName": "typing",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "zsModeVar",
+      "type": "Variable2",
+      "label": "Maths or typing?",
+      "parameters": {
+        "name": "monsterMode"
+      },
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "zsSetMode",
+      "type": "Set Variable",
+      "label": "Choose maths or typing",
+      "parameters": {
+        "name": "monsterMode"
+      },
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "zsDefMode",
+      "type": "Expression",
+      "label": "maths",
+      "parameters": {
+        "expression": "'maths'"
+      },
+      "x": 350,
+      "y": 1720
+    },
+    {
+      "id": "zsInitMode",
+      "type": "Set Variable",
+      "label": "Start on Maths",
+      "parameters": {
+        "name": "monsterMode"
+      },
+      "x": 350,
+      "y": 1840
+    },
+    {
+      "id": "zsStyleItems",
+      "type": "JavaScriptFunction",
+      "label": "The two ways, in words",
+      "parameters": {
+        "functionScript": "Outputs.items = [{ label: Inputs.gate, value: 'gate' }, { label: Inputs.push, value: 'push' }];"
+      },
+      "x": 350,
+      "y": 640,
+      "ports": [
+        {
+          "name": "in-gate",
+          "displayName": "gate",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-push",
+          "displayName": "push",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "zsTimedItems",
+      "type": "JavaScriptFunction",
+      "label": "Practice or challenge, in words",
+      "parameters": {
+        "functionScript": "Outputs.items = [{ label: Inputs.practice, value: 'practice' }, { label: Inputs.challenge, value: 'challenge' }];"
+      },
+      "x": 350,
+      "y": 1000,
+      "ports": [
+        {
+          "name": "in-practice",
+          "displayName": "practice",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-challenge",
+          "displayName": "challenge",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "zsStyleVar",
+      "type": "Variable2",
+      "label": "The way to play",
+      "parameters": {
+        "name": "monsterStyle"
+      },
+      "x": 350,
+      "y": 760
+    },
+    {
+      "id": "zsSetStyle",
+      "type": "Set Variable",
+      "label": "Choose a way",
+      "parameters": {
+        "name": "monsterStyle"
+      },
+      "x": 350,
+      "y": 880
+    },
+    {
+      "id": "zsTimedVar",
+      "type": "Variable2",
+      "label": "Practice or challenge?",
+      "parameters": {
+        "name": "monsterTimed"
+      },
+      "x": 350,
+      "y": 1120
+    },
+    {
+      "id": "zsSetTimed",
+      "type": "Set Variable",
+      "label": "Choose the pace",
+      "parameters": {
+        "name": "monsterTimed"
+      },
+      "x": 350,
+      "y": 1240
+    },
+    {
+      "id": "zsIsTimed",
+      "type": "Expression",
+      "label": "Challenge?",
+      "parameters": {
+        "expression": "timed === 'challenge'"
+      },
+      "x": 350,
+      "y": 1960
+    },
+    {
+      "id": "zsRuleText",
+      "type": "Expression",
+      "label": "The chosen pair’s rule, in words",
+      "parameters": {
+        "expression": "style === 'push' ? (timed === 'challenge' ? pushChallenge : pushPractice) : (timed === 'challenge' ? gateChallenge : gatePractice)"
+      },
+      "x": 350,
+      "y": 1360
+    },
+    {
+      "id": "zsShown",
+      "type": "Expression",
+      "label": "Shown unless told not to",
+      "parameters": {
+        "expression": "m !== false"
+      },
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "zsDefStyle",
+      "type": "Expression",
+      "label": "gate",
+      "parameters": {
+        "expression": "'gate'"
+      },
+      "x": 350,
+      "y": 2080
+    },
+    {
+      "id": "zsDefTimed",
+      "type": "Expression",
+      "label": "practice",
+      "parameters": {
+        "expression": "'practice'"
+      },
+      "x": 350,
+      "y": 2200
+    },
+    {
+      "id": "zsInitStyle",
+      "type": "Set Variable",
+      "label": "Start on Beat it to the gate",
+      "parameters": {
+        "name": "monsterStyle"
+      },
+      "x": 350,
+      "y": 2320
+    },
+    {
+      "id": "zsInitTimed",
+      "type": "Set Variable",
+      "label": "Start on Practice",
+      "parameters": {
+        "name": "monsterTimed"
+      },
+      "x": 350,
+      "y": 2440
+    },
+    {
+      "id": "zsSeeded",
+      "type": "States",
+      "label": "Defaults written yet?",
+      "parameters": {
+        "states": "fresh,seeded",
+        "values": "seeded",
+        "useTransitions": false,
+        "type-seeded": "boolean",
+        "value-fresh-seeded": false,
+        "value-seeded-seeded": true
+      },
+      "x": 350,
+      "y": 2560
+    },
+    {
+      "id": "zsFirst",
+      "type": "Condition",
+      "label": "The first time the setup shows?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "zsOut",
+      "type": "Component Outputs",
+      "label": "Go",
+      "ports": [
+        {
+          "name": "start",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "style",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "timed",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "mode",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 1600
+    }
+  ],
+  "visualRoots": [
+    "zsCard"
+  ]
+}

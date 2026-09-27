@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- FED-001: a feed with no <guid> and no <id>. Real, and common on hand-written feeds.
+     The identity ladder's last two rungs (link, then a hash of title+published) are what
+     keeps FED-002's unique index from admitting the same item on every poll. -->
+<rss version="2.0">
+  <channel>
+    <title>Hand Rolled</title>
+    <link>https://handrolled.example/</link>
+    <description>Someone wrote this feed in a text editor</description>
+    <item>
+      <title>A post with a link but no guid</title>
+      <link>https://handrolled.example/one</link>
+      <pubDate>Mon, 07 Sep 2026 12:00:00 +0000</pubDate>
+      <description>The link becomes the id.</description>
+    </item>
+    <item>
+      <title>A post with neither</title>
+      <pubDate>Sun, 06 Sep 2026 12:00:00 +0000</pubDate>
+      <description>The hash becomes the id.</description>
+    </item>
+  </channel>
+</rss>

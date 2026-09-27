@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "45669960-a2cc-5492-820f-20cdd4797864",
+  "name": "Check hunt pick",
+  "path": "/Logic/Check hunt pick",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Do the picked tiles make the target?"
+}

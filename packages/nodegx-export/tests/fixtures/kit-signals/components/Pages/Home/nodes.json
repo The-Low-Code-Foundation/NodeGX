@@ -1,0 +1,84 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "layout"
+      ],
+      "parameters": {
+        "title": "Home"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "layout",
+      "type": "Group",
+      "label": "Layout",
+      "parent": "page",
+      "children": [
+        "marker",
+        "fire",
+        "signalProp",
+        "unwired",
+        "inputsRoute"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "marker",
+      "type": "Text",
+      "label": "Marker",
+      "parent": "layout",
+      "parameters": {
+        "text": "gam017 page drew"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "fire",
+      "type": "net.noodl.controls.button",
+      "label": "Fire",
+      "parent": "layout",
+      "parameters": {
+        "label": "Fire"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "signalProp",
+      "type": "gam017.SignalProp",
+      "label": "signal prop",
+      "parent": "layout",
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "unwired",
+      "type": "gam017.SignalProp",
+      "label": "unwired",
+      "parent": "layout",
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "inputsRoute",
+      "type": "gam017.InputsRoute",
+      "label": "inputs route",
+      "parent": "layout",
+      "x": 160,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

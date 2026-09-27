@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b002e026-f677-4157-8603-0d41df3dea69",
+  "name": "Feed chip",
+  "path": "/People/Feed chip",
+  "type": "visual",
+  "created": "2026-09-21T12:53:12.048Z",
+  "modified": "2026-09-21T12:53:12.048Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One kind a coach can narrow the activity log to. Words only — no count, ever (a tally of somebody's confusion on a chip is L89's deleted component in a smaller costume)."
+}

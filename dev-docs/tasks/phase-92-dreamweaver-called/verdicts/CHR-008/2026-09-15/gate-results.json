@@ -1,0 +1,115 @@
+{
+  "dark-before": {
+    "panel": true,
+    "shadowGroup": true,
+    "shadowExpanded": "true",
+    "lines": 1,
+    "lineText": [
+      "Offset X, Offset Y, Blur Radius, Spread Radius, Inset and Shadow Color apply once Shadow Enabled is on.Turn on"
+    ],
+    "lineAction": [
+      "Turn on"
+    ],
+    "rowSentencesInGroup": 0,
+    "rowLinksInGroup": 0,
+    "dimmedRowsInGroup": 6,
+    "dimmedTitles": [
+      "Offset X applies when Shadow Enabled is on.",
+      "Offset Y applies when Shadow Enabled is on.",
+      "Blur Radius applies when Shadow Enabled is on.",
+      "Spread Radius applies when Shadow Enabled is on.",
+      "Inset applies when Shadow Enabled is on.",
+      "Shadow Color applies when Shadow Enabled is on."
+    ],
+    "rowsInGroup": 7,
+    "rowSentencesOnPanel": 10,
+    "linesOnPanel": [
+      "group-gate-boxShadowEnabled",
+      "group-gate-flexDirection"
+    ],
+    "elements": 1126,
+    "inlineStyled": 250
+  },
+  "dark-after-turn-on": {
+    "panel": true,
+    "shadowGroup": true,
+    "shadowExpanded": "true",
+    "lines": 0,
+    "lineText": [],
+    "lineAction": [],
+    "rowSentencesInGroup": 0,
+    "rowLinksInGroup": 0,
+    "dimmedRowsInGroup": 0,
+    "dimmedTitles": [],
+    "rowsInGroup": 7,
+    "rowSentencesOnPanel": 10,
+    "linesOnPanel": [
+      "group-gate-flexDirection"
+    ],
+    "elements": 1112,
+    "inlineStyled": 251,
+    "modelShadowEnabled": true
+  },
+  "dark-after-undo": {
+    "panel": true,
+    "shadowGroup": true,
+    "shadowExpanded": "true",
+    "lines": 1,
+    "lineText": [
+      "Offset X, Offset Y, Blur Radius, Spread Radius, Inset and Shadow Color apply once Shadow Enabled is on.Turn on"
+    ],
+    "lineAction": [
+      "Turn on"
+    ],
+    "rowSentencesInGroup": 0,
+    "rowLinksInGroup": 0,
+    "dimmedRowsInGroup": 6,
+    "dimmedTitles": [
+      "Offset X applies when Shadow Enabled is on.",
+      "Offset Y applies when Shadow Enabled is on.",
+      "Blur Radius applies when Shadow Enabled is on.",
+      "Spread Radius applies when Shadow Enabled is on.",
+      "Inset applies when Shadow Enabled is on.",
+      "Shadow Color applies when Shadow Enabled is on."
+    ],
+    "rowsInGroup": 7,
+    "rowSentencesOnPanel": 10,
+    "linesOnPanel": [
+      "group-gate-boxShadowEnabled",
+      "group-gate-flexDirection"
+    ],
+    "elements": 1126,
+    "inlineStyled": 251
+  },
+  "light-before": {
+    "panel": true,
+    "shadowGroup": true,
+    "shadowExpanded": "true",
+    "lines": 1,
+    "lineText": [
+      "Offset X, Offset Y, Blur Radius, Spread Radius, Inset and Shadow Color apply once Shadow Enabled is on.Turn on"
+    ],
+    "lineAction": [
+      "Turn on"
+    ],
+    "rowSentencesInGroup": 0,
+    "rowLinksInGroup": 0,
+    "dimmedRowsInGroup": 6,
+    "dimmedTitles": [
+      "Offset X applies when Shadow Enabled is on.",
+      "Offset Y applies when Shadow Enabled is on.",
+      "Blur Radius applies when Shadow Enabled is on.",
+      "Spread Radius applies when Shadow Enabled is on.",
+      "Inset applies when Shadow Enabled is on.",
+      "Shadow Color applies when Shadow Enabled is on."
+    ],
+    "rowsInGroup": 7,
+    "rowSentencesOnPanel": 10,
+    "linesOnPanel": [
+      "group-gate-boxShadowEnabled",
+      "group-gate-flexDirection"
+    ],
+    "elements": 1126,
+    "inlineStyled": 251
+  }
+}

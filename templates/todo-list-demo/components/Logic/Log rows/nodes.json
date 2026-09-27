@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4a01ff50-dc2d-5677-8ba6-652f3c658b99",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lrIn",
+      "type": "Component Inputs",
+      "label": "The records",
+      "ports": [
+        {
+          "name": "events",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "tasks",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "lrOut",
+      "type": "Component Outputs",
+      "label": "The lines",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "input",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "lrBuild",
+      "type": "JavaScriptFunction",
+      "label": "Build the lines",
+      "parameters": {
+        "functionScript": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction fmtDay(d) { return DOW[d.getDay()] + ' ' + d.getDate() + ' ' + MON[d.getMonth()]; }\nfunction fmtTime(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }\nfunction when(v) {\n  if (v === undefined || v === null || v === '') return null;\n  var d = v instanceof Date ? v : new Date(v);\n  return isNaN(d.getTime()) ? null : d;\n}\nfunction dayLabel(d) {\n  var t = startOfToday();\n  if (d.getTime() >= t) return 'Today';\n  if (d.getTime() >= t - 86400000) return 'Yesterday';\n  return fmtDay(d);\n}\nfunction due(s) {\n  var d = toDay(s);\n  if (!d) return { text: '', late: false };\n  var n = Math.round((d.getTime() - startOfToday()) / 86400000);\n  if (n < 0) return { text: 'Overdue by ' + (-n) + (n === -1 ? ' day' : ' days'), late: true };\n  if (n === 0) return { text: 'Due today', late: true };\n  if (n === 1) return { text: 'Due tomorrow', late: false };\n  if (n <= 7) return { text: 'Due in ' + n + ' days', late: false };\n  return { text: 'Due ' + fmtDay(d), late: false };\n}\nfunction ago(d) {\n  var ms = Date.now() - d.getTime();\n  if (ms < 3600000) return 'just now';\n  if (ms < 86400000) return Math.round(ms / 3600000) + ' h ago';\n  var n = Math.round(ms / 86400000);\n  return n === 1 ? 'yesterday' : n + ' days ago';\n}\nfunction num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction byPosition(a, b) { return num(a.position, 0) - num(b.position, 0); }\nvar events = Inputs.events || [];\nvar tasks = Inputs.tasks || [];\nvar titles = {};\nfor (var i = 0; i < tasks.length; i++) if (tasks[i]) titles[tasks[i].id] = String(tasks[i].title || '');\nvar sorted = events.slice().sort(function (x, y) { return String(y.at || '').localeCompare(String(x.at || '')); });\nvar rows = [], lastDay = '';\nfor (var k = 0; k < sorted.length; k++) {\n  var e = sorted[k];\n  if (!e) continue;\n  var d = when(e.at);\n  var day = d ? dayLabel(d) : '';\n  var body = String(e.body || '');\n  rows.push({\n    id: e.id,\n    taskId: String(e.taskId || ''),\n    day: day,\n    showDay: day !== lastDay,\n    time: d ? fmtTime(d) : '',\n    taskTitle: titles[e.taskId] || 'A task',\n    summary: String(e.summary || ''),\n    body: body,\n    hasBody: body !== ''\n  });\n  lastDay = day;\n}\nOutputs.rows = rows;"
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-events",
+          "displayName": "events",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-tasks",
+          "displayName": "tasks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ]
+}

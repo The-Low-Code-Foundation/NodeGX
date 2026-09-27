@@ -302,6 +302,96 @@ export function benchScenarioFrame(scenario: BenchScenario, current: BenchFrame)
   };
 }
 
+/** What the bench opens on, resolved against the component it is about to mount. */
+export interface BenchOpening {
+  /** The scenario itself — the frame lives on it, and {@link benchOpeningFrame} is its only reader. */
+  scenario: BenchScenario;
+  /** Its name, for the bar's chip. */
+  name: string;
+  /**
+   * What the rail holds **and what the export is built from**. That second half is the
+   * whole point; see below.
+   */
+  inputs: Record<string, unknown>;
+  /** Names the scenario sets that the component no longer declares. */
+  missing: string[];
+}
+
+/**
+ * TVW-008 AC4 — the scenario the bench **opens** on: the first one, or none.
+ *
+ * > "if you saved a scenario, that's what you meant the component to look like." — Richard,
+ * > 2026-09-20, ruling on the board and the single bench disagreeing about one component
+ *
+ * The board has always done this: `boardFrameMounts` resolves `bench.scenarios[0]` into each
+ * harness node's `parameters`, which is why a frame draws its scenario from its first paint. The
+ * single bench opened on `None` and drew the node's own values, so the two surfaces said different
+ * things about the same component — which is the defect this whole phase exists to remove.
+ *
+ * 🔴 **The answer has to reach the EXPORT, and that is why this returns `inputs` rather than
+ * doing anything.** The first attempt auto-selected `scenarios[0]` through the same path a click
+ * goes through, and it *looked* right — the chip read `Checkout`, the rail read
+ * `label = Continue to checkout` — while **the runtime went on drawing `Button`**. Values reach a
+ * running bench as a targeted `modelUpdate` (`sendModelUpdateToClient`), and at mount the sandbox
+ * client has not connected yet, so the update is dropped on the floor. It was reverted rather than
+ * shipped: a surface *claiming* a scenario it is not rendering is worse than one honestly saying
+ * `None` ([[verify-the-consequence-not-just-the-mechanism]]).
+ *
+ * So `ComponentBench` seeds `inputsRef` with this **before** the effect that builds the export
+ * runs, and the values are in the exported harness node's parameters — the same place the board
+ * puts them, reached by the same `benchParameters` call. Every *later* switch stays a delta, and
+ * must: rebuilding the export reloads the window, and a scenario click that threw away the state
+ * someone was mid-way through inspecting would be a worse bug than the one this fixes.
+ *
+ * ⚠️ **`undefined` here means "this component has no scenarios", never "the user chose None".**
+ * Those are the same `activeScenario` value, which is why the caller keys this on the target and
+ * nothing else — a Refresh, a dataset change or an export rebuild must not re-open a scenario a
+ * person deliberately left.
+ */
+export function benchOpeningScenario(scenarios: BenchScenario[], iface?: BenchInterface): BenchOpening | undefined {
+  const scenario = scenarios[0];
+  if (!scenario) return undefined;
+
+  // The same resolution a click goes through, deliberately: two ways of working out what a
+  // scenario means would be two answers the moment a port is renamed.
+  const { inputs, missing } = applyBenchScenario(scenario, iface);
+  return { scenario, name: scenario.name, inputs, missing };
+}
+
+/**
+ * The width the bench opens at, when it opens on a scenario.
+ *
+ * 🔴 **This exists because otherwise the bench opens already claiming to be MODIFIED.** A
+ * scenario records the width it was saved at — every scenario saved since FIX-011 does, because
+ * `benchScenarioFrom` is always handed the frame — and `benchScenarioIsModified` compares that
+ * recorded width against the stage's. Open on the values alone and the bar reads `Checkout ●`
+ * over a bench nobody has touched, and pressing the Save it is offering would overwrite the
+ * scenario's 480 with the stage's 768. The dot would be telling the truth about a state the
+ * product put itself in.
+ *
+ * The order is *the scenario's recorded frame, then the component's stored default, then the width
+ * that is already there*. The scenario is the more specific statement — "renders correctly at 320"
+ * is part of what it claims — and it is the order a click already uses, because the resolution is
+ * literally {@link benchScenarioFrame}, the function `selectScenario` calls.
+ *
+ * ⚠️ Returning `current` rather than a default is FIX-011's rule, kept: falling back to
+ * `DEFAULT_BENCH_FRAME` for a component that has neither a scenario frame nor a stored one would
+ * silently throw away a width the user set moments ago, every time they pointed the bench
+ * somewhere new.
+ *
+ * ⚠️ **One writer.** This is called by `VisualCanvas`, which owns `frame`; the bench does not
+ * touch it. A second writer in the child would be resolved by React's child-effects-first
+ * ordering rather than by any rule anybody wrote down, and the stored default would silently win.
+ */
+export function benchOpeningFrame(
+  opening: BenchOpening | undefined,
+  stored: BenchFrame | undefined,
+  current: BenchFrame
+): BenchFrame {
+  if (opening) return benchScenarioFrame(opening.scenario, stored ?? current);
+  return stored ?? current;
+}
+
 /**
  * Whether the bench has drifted from the scenario it is showing.
  *

@@ -38,7 +38,7 @@ const TYPECASTS: TypecastRule[] = [
   { from: 'image', to: [] },
   { from: 'cloudfile', to: ['string', 'image'] },
   { from: 'color', to: ['string'] },
-  { from: 'enum', to: [] },
+  { from: 'enum', to: ['string'] },
   { from: 'object', to: ['string'] },
   { from: 'domelement', to: [] },
   { from: 'reference', to: [] },

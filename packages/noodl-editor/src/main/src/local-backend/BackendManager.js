@@ -17,7 +17,7 @@
  * @module local-backend/BackendManager
  */
 
-const { ipcMain, BrowserWindow } = require('electron');
+const { ipcMain, BrowserWindow, shell } = require('electron');
 const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');
@@ -172,50 +172,28 @@ class BackendManager {
     ipcMain.handle('backend:start', async (_, id, options) => this.startBackend(id, options));
     ipcMain.handle('backend:stop', async (_, id) => this.stopBackend(id));
     ipcMain.handle('backend:status', async (_, id) => this.getStatus(id));
-    ipcMain.handle('backend:get', async (_, id) => this.getBackend(id));
+    ipcMain.handle('backend:open-dashboard', async (_, id, route) => this.openDashboard(id, route));
     ipcMain.handle('backend:export-schema', async (_, id, format) => this.exportSchema(id, format));
     ipcMain.handle('backend:getSchema', async (_, id) => this.getSchema(id));
     ipcMain.handle('backend:getTableSchema', async (_, id, tableName) => this.getTableSchema(id, tableName));
-    ipcMain.handle('backend:getRecordCount', async (_, id, tableName) => this.getRecordCount(id, tableName));
     ipcMain.handle('backend:createTable', async (_, id, tableSchema) => this.createTable(id, tableSchema));
     ipcMain.handle('backend:addColumn', async (_, id, tableName, column) => this.addColumn(id, tableName, column));
-    ipcMain.handle('backend:renameColumn', async (_, id, tableName, oldName, newName) =>
-      this.renameColumn(id, tableName, oldName, newName)
-    );
     ipcMain.handle('backend:changeColumnType', async (_, id, tableName, columnName, newType) =>
       this.changeColumnType(id, tableName, columnName, newType)
     );
-    ipcMain.handle('backend:deleteTable', async (_, id, tableName) => this.deleteTable(id, tableName));
 
     // ==========================================================================
-    // DATA OPERATIONS (for Data Browser)
+    // DATA — what the editor still reads. BMG-012 removed the Data Browser and
+    // with it the create / save / delete record proxies and the realtime
+    // subscription proxies; the lesson grader and the backend list count rows.
     // ==========================================================================
 
     ipcMain.handle('backend:queryRecords', async (_, id, options) => this.queryRecords(id, options));
-    ipcMain.handle('backend:createRecord', async (_, id, collection, data) => this.createRecord(id, collection, data));
-    ipcMain.handle('backend:saveRecord', async (_, id, collection, objectId, data) =>
-      this.saveRecord(id, collection, objectId, data)
-    );
-    ipcMain.handle('backend:deleteRecord', async (_, id, collection, objectId) =>
-      this.deleteRecord(id, collection, objectId)
-    );
-
-    // Realtime (BAK-001): the Data Browser rides the backend's SSE stream so it
-    // reflects changes made by other clients live, dogfooding the protocol.
-    // These are fire-and-forget (`on`, not `handle`) because they set up a
-    // long-lived push, not a request/response.
-    ipcMain.on('backend:subscribeCollection', (event, id, collection) =>
-      this.subscribeCollection(event.sender, id, collection)
-    );
-    ipcMain.on('backend:unsubscribeCollection', (event, id, collection) =>
-      this.unsubscribeCollection(event.sender, id, collection)
-    );
 
     // Workflow management
     ipcMain.handle('backend:update-workflow', async (_, args) =>
       this.updateWorkflow(args.backendId, args.name, args.workflow)
     );
-    ipcMain.handle('backend:reload-workflows', async (_, id) => this.reloadWorkflows(id));
     ipcMain.handle('backend:workflow-status', async (_, id) => this.getWorkflowStatus(id));
 
     // WF-001 workflow definitions (WFA-002): the Execution History panel runs
@@ -259,225 +237,27 @@ class BackendManager {
     );
 
     // ==========================================================================
-    // ACCESS CONTROL (BAK-003) — the permissions panel proxies to /admin/*
-    // ==========================================================================
-
-    ipcMain.handle('backend:getPermissions', async (_, id) =>
-      this.requireRunning(id, 'read permissions').request('GET', '/admin/permissions')
-    );
-    ipcMain.handle('backend:setPermissions', async (_, id, config) =>
-      this.requireRunning(id, 'set permissions').request('PUT', '/admin/permissions', config)
-    );
-    ipcMain.handle('backend:setCollectionPermissions', async (_, id, collection, rules) =>
-      this.requireRunning(id, 'set collection permissions').request(
-        'PUT',
-        `/admin/permissions/collections/${encodeURIComponent(collection)}`,
-        rules
-      )
-    );
-    ipcMain.handle('backend:resetCollectionPermissions', async (_, id, collection) =>
-      this.requireRunning(id, 'reset collection permissions').request(
-        'DELETE',
-        `/admin/permissions/collections/${encodeURIComponent(collection)}`
-      )
-    );
-    ipcMain.handle('backend:checkAccess', async (_, id, query) =>
-      this.requireRunning(id, 'check access').request('POST', '/admin/permissions/check', query)
-    );
-    ipcMain.handle('backend:listRoles', async (_, id) =>
-      this.requireRunning(id, 'list roles').request('GET', '/admin/roles')
-    );
-    ipcMain.handle('backend:createRole', async (_, id, name) =>
-      this.requireRunning(id, 'create role').request('POST', '/admin/roles', { name })
-    );
-    ipcMain.handle('backend:deleteRole', async (_, id, name) =>
-      this.requireRunning(id, 'delete role').request('DELETE', `/admin/roles/${encodeURIComponent(name)}`)
-    );
-    ipcMain.handle('backend:addRoleUser', async (_, id, role, userId) =>
-      this.requireRunning(id, 'assign role').request('POST', `/admin/roles/${encodeURIComponent(role)}/users`, { userId })
-    );
-    ipcMain.handle('backend:removeRoleUser', async (_, id, role, userId) =>
-      this.requireRunning(id, 'remove role member').request(
-        'DELETE',
-        `/admin/roles/${encodeURIComponent(role)}/users/${encodeURIComponent(userId)}`
-      )
-    );
-    ipcMain.handle('backend:listApiKeys', async (_, id) =>
-      this.requireRunning(id, 'list API keys').request('GET', '/admin/keys')
-    );
-    ipcMain.handle('backend:createApiKey', async (_, id, name, scopes) =>
-      this.requireRunning(id, 'create API key').request('POST', '/admin/keys', { name, scopes })
-    );
-    ipcMain.handle('backend:revokeApiKey', async (_, id, objectId) =>
-      this.requireRunning(id, 'revoke API key').request('DELETE', `/admin/keys/${encodeURIComponent(objectId)}`)
-    );
-
-    // CWF-017: who may call each cloud function, and how often. The list is the
-    // EFFECTIVE rule resolved by the backend — the editor deliberately does not
-    // compute its own answer from the config, because a panel that resolves the
-    // fallback itself is a panel that can disagree with the gate.
-    ipcMain.handle('backend:getFunctionRules', async (_, id) =>
-      this.requireRunning(id, 'read function permissions').request('GET', '/admin/permissions/functions')
-    );
-    ipcMain.handle('backend:setFunctionRules', async (_, id, name, rules) =>
-      this.requireRunning(id, 'set function permissions').request(
-        'PUT',
-        `/admin/permissions/functions/${encodeURIComponent(name)}`,
-        rules
-      )
-    );
-    ipcMain.handle('backend:resetFunctionRules', async (_, id, name) =>
-      this.requireRunning(id, 'reset function permissions').request(
-        'DELETE',
-        `/admin/permissions/functions/${encodeURIComponent(name)}`
-      )
-    );
-
-    // CWF-009: the credentials a cloud function's Secret node reads. Names come
-    // back and values only go in — the backend has no route that returns one, so
-    // there is deliberately no `getSecret` here to proxy. A renderer that wants
-    // to show a value has nothing to call, which is the design and not a gap.
-    ipcMain.handle('backend:listSecrets', async (_, id) =>
-      this.requireRunning(id, 'list secrets').request('GET', '/admin/secrets')
-    );
-    ipcMain.handle('backend:setSecret', async (_, id, name, value) =>
-      this.requireRunning(id, 'set a secret').request('PUT', `/admin/secrets/${encodeURIComponent(name)}`, { value })
-    );
-    ipcMain.handle('backend:deleteSecret', async (_, id, name) =>
-      this.requireRunning(id, 'delete a secret').request('DELETE', `/admin/secrets/${encodeURIComponent(name)}`)
-    );
-
-    // ==========================================================================
-    // FULL-TEXT SEARCH (BAK-008) — the search panel proxies to /admin/search
-    // ==========================================================================
-
-    ipcMain.handle('backend:getSearchConfig', async (_, id) =>
-      this.requireRunning(id, 'read search config').request('GET', '/admin/search')
-    );
-    ipcMain.handle('backend:setCollectionSearch', async (_, id, collection, config) =>
-      this.requireRunning(id, 'set collection search').request(
-        'PUT',
-        `/admin/search/collections/${encodeURIComponent(collection)}`,
-        config
-      )
-    );
-    ipcMain.handle('backend:disableCollectionSearch', async (_, id, collection) =>
-      this.requireRunning(id, 'disable collection search').request(
-        'DELETE',
-        `/admin/search/collections/${encodeURIComponent(collection)}`
-      )
-    );
-    ipcMain.handle('backend:rebuildCollectionSearch', async (_, id, collection) =>
-      this.requireRunning(id, 'rebuild search index').request(
-        'POST',
-        `/admin/search/collections/${encodeURIComponent(collection)}/rebuild`
-      )
-    );
-
-    // ==========================================================================
-    // SIGN-IN PROVIDERS (BAK-004) — the auth panel proxies to /admin/auth.
+    // TRIGGERS (WF-005) — what the workflow canvas still does from the editor.
     //
-    // Note there is no "get client secret": the service never returns one, so
-    // there is nothing here to forward. The panel shows `hasClientSecret`.
-    // ==========================================================================
-
-    ipcMain.handle('backend:getAuthConfig', async (_, id) =>
-      this.requireRunning(id, 'read sign-in config').request('GET', '/admin/auth')
-    );
-    ipcMain.handle('backend:setAuthPolicy', async (_, id, policy) =>
-      this.requireRunning(id, 'update sign-in policy').request('PUT', '/admin/auth', policy)
-    );
-    ipcMain.handle('backend:setAuthProvider', async (_, id, providerId, provider) =>
-      this.requireRunning(id, 'update sign-in provider').request(
-        'PUT',
-        `/admin/auth/providers/${encodeURIComponent(providerId)}`,
-        provider
-      )
-    );
-    ipcMain.handle('backend:deleteAuthProvider', async (_, id, providerId) =>
-      this.requireRunning(id, 'remove sign-in provider').request(
-        'DELETE',
-        `/admin/auth/providers/${encodeURIComponent(providerId)}`
-      )
-    );
-
-    // ==========================================================================
-    // TRIGGERS (WF-005) — the trigger config UI proxies to /admin/triggers
+    // BMG-012: the proxies for permissions, roles, API keys, function rules,
+    // secrets, search, sign-in providers, email, and the trigger create / edit /
+    // rotate / fire verbs are gone with the editor panels that called them. The
+    // backend manager (`/_admin`, opened by `openDashboard`) speaks those
+    // routes directly. What stays is what the canvas draws and toggles.
     // ==========================================================================
 
     ipcMain.handle('backend:listTriggers', async (_, id) =>
       this.requireRunning(id, 'list triggers').request('GET', '/admin/triggers')
     );
-    ipcMain.handle('backend:getTrigger', async (_, id, triggerId) =>
-      this.requireRunning(id, 'get trigger').request('GET', `/admin/triggers/${encodeURIComponent(triggerId)}`)
-    );
-    ipcMain.handle('backend:createTrigger', async (_, id, def) =>
-      this.requireRunning(id, 'create trigger').request('POST', '/admin/triggers', def)
-    );
-    ipcMain.handle('backend:updateTrigger', async (_, id, triggerId, def) =>
-      this.requireRunning(id, 'update trigger').request('PUT', `/admin/triggers/${encodeURIComponent(triggerId)}`, def)
-    );
     ipcMain.handle('backend:setTriggerEnabled', async (_, id, triggerId, enabled) =>
-      this.requireRunning(id, 'toggle trigger').request(
-        'POST',
+      this.requireRunning(id, 'enable/disable trigger').request(
+        'PUT',
         `/admin/triggers/${encodeURIComponent(triggerId)}/enabled`,
         { enabled }
       )
     );
-    // WFA-008: rotation is a verb of its own, because sending `secret` on an
-    // update REPLACES it — an edit form that carried the key would break every
-    // sender as a side effect of a cron change.
-    ipcMain.handle('backend:rotateTriggerSecret', async (_, id, triggerId) =>
-      this.requireRunning(id, 'rotate a webhook secret').request(
-        'POST',
-        `/admin/triggers/${encodeURIComponent(triggerId)}/secret`
-      )
-    );
     ipcMain.handle('backend:deleteTrigger', async (_, id, triggerId) =>
       this.requireRunning(id, 'delete trigger').request('DELETE', `/admin/triggers/${encodeURIComponent(triggerId)}`)
-    );
-    ipcMain.handle('backend:fireTrigger', async (_, id, triggerId, payload) =>
-      this.requireRunning(id, 'fire trigger').request(
-        'POST',
-        `/admin/triggers/${encodeURIComponent(triggerId)}/fire`,
-        payload || {}
-      )
-    );
-
-    // ==========================================================================
-    // EMAIL (BAK-002) — the Email panel section proxies to /admin/email/*
-    // ==========================================================================
-
-    ipcMain.handle('backend:getEmailConfig', async (_, id) =>
-      this.requireRunning(id, 'read email config').request('GET', '/admin/email/config')
-    );
-    ipcMain.handle('backend:setEmailConfig', async (_, id, config) =>
-      this.requireRunning(id, 'set email config').request('PUT', '/admin/email/config', config)
-    );
-    ipcMain.handle('backend:sendTestEmail', async (_, id, to) =>
-      this.requireRunning(id, 'send test email').request('POST', '/admin/email/test', { to })
-    );
-    ipcMain.handle('backend:getEmailTemplates', async (_, id) =>
-      this.requireRunning(id, 'read email templates').request('GET', '/admin/email/templates')
-    );
-    ipcMain.handle('backend:setEmailTemplate', async (_, id, templateId, override) =>
-      this.requireRunning(id, 'set email template').request(
-        'PUT',
-        `/admin/email/templates/${encodeURIComponent(templateId)}`,
-        override
-      )
-    );
-    ipcMain.handle('backend:resetEmailTemplate', async (_, id, templateId) =>
-      this.requireRunning(id, 'reset email template').request(
-        'DELETE',
-        `/admin/email/templates/${encodeURIComponent(templateId)}`
-      )
-    );
-    ipcMain.handle('backend:previewEmailTemplate', async (_, id, templateId) =>
-      this.requireRunning(id, 'preview email template').request(
-        'GET',
-        `/admin/email/templates/${encodeURIComponent(templateId)}/preview`
-      )
     );
 
     this.ipcHandlersSetup = true;
@@ -522,52 +302,6 @@ class BackendManager {
       } catch (e) {
         safeLog(`Could not deliver backend:statusChanged to a window: ${e.message}`);
       }
-    }
-  }
-
-  /**
-   * Open (once per sender+backend+collection) a realtime SSE subscription and
-   * forward each change/resync to the renderer as `backend:collectionChanged`.
-   * No-op if the backend is not running. Streams are torn down on explicit
-   * unsubscribe and when the sender is destroyed (panel closed, window gone).
-   * @private
-   */
-  subscribeCollection(sender, id, collection) {
-    if (!collection) return;
-    const supervisor = this.runningBackends.get(id);
-    if (!supervisor || !supervisor.isRunning()) return;
-
-    if (!this.realtimeStreams) this.realtimeStreams = new Map();
-    const key = `${sender.id}:${id}:${collection}`;
-    if (this.realtimeStreams.has(key)) return;
-
-    const stream = supervisor.openRealtimeStream({
-      collection,
-      onEvent: (event, data) => {
-        if (sender.isDestroyed()) return;
-        sender.send('backend:collectionChanged', { backendId: id, collection, event, data });
-      }
-    });
-    this.realtimeStreams.set(key, stream);
-
-    // Reap the stream when the renderer goes away.
-    sender.once('destroyed', () => {
-      const s = this.realtimeStreams.get(key);
-      if (s) {
-        s.close();
-        this.realtimeStreams.delete(key);
-      }
-    });
-  }
-
-  /** Close a realtime subscription opened by subscribeCollection. @private */
-  unsubscribeCollection(sender, id, collection) {
-    if (!this.realtimeStreams) return;
-    const key = `${sender.id}:${id}:${collection}`;
-    const stream = this.realtimeStreams.get(key);
-    if (stream) {
-      stream.close();
-      this.realtimeStreams.delete(key);
     }
   }
 
@@ -959,6 +693,46 @@ class BackendManager {
   }
 
   /**
+   * Open the backend's own web dashboard (`/_admin`) in the default browser,
+   * on its home, or on a page (BMG-012).
+   *
+   * Until an admin ACCOUNT exists, the credential goes in the URL fragment,
+   * which the dashboard reads once and scrubs from the address bar — the first
+   * open is where it asks for the account (BMG-014). It is resolved here in the
+   * main process and handed straight to the OS, so the renderer never holds it.
+   * Once an account exists (`whoami.adminAccount`) the fragment carries only
+   * the route: the person signs in once per browser and the manager knows who
+   * they are (Richard, 2026-09-26). If the backend cannot say, the credential
+   * goes as before, so the button always opens something that works.
+   *
+   * `route` is a manager hash path (`/schema/Pet/new-field`, `/triggers/new`),
+   * carried in the same fragment as `route=` so the page can land on it after
+   * consuming the token (`admin/app/api.ts bootSession`). Only a path is
+   * accepted: it must start with one `/` (never `//`, which a browser reads as
+   * a host) and carry no `#`, so a caller cannot smuggle a second fragment or
+   * an origin through the editor's signed-in open.
+   * @param {string} id
+   * @param {string} [route]
+   */
+  async openDashboard(id, route) {
+    const supervisor = this.requireRunning(id, 'open the backend manager');
+    const token = supervisor.adminToken();
+    let account = false;
+    try {
+      const who = await supervisor.request('GET', '/_admin/whoami');
+      account = !!(who && who.adminAccount);
+    } catch (e) {
+      account = false;
+    }
+    const parts = [];
+    if (token && !account) parts.push(`token=${encodeURIComponent(token)}`);
+    if (typeof route === 'string' && /^\/(?!\/)[^#\s]*$/.test(route)) parts.push(`route=${encodeURIComponent(route)}`);
+    const url = `${supervisor.endpoint}/_admin` + (parts.length ? `#${parts.join('&')}` : '');
+    await shell.openExternal(url);
+    return true;
+  }
+
+  /**
    * Export backend schema
    * @param {string} id
    * @param {'postgres'|'supabase'|'json'} format
@@ -996,18 +770,6 @@ class BackendManager {
     } catch (e) {
       return null;
     }
-  }
-
-  /**
-   * Get record count for a table
-   * @param {string} id - Backend ID
-   * @param {string} tableName - Table name
-   * @returns {Promise<number>} Record count
-   */
-  async getRecordCount(id, tableName) {
-    const supervisor = this.requireRunning(id, 'get record count');
-    const result = await supervisor.request('GET', `/api/${encodeURIComponent(tableName)}?limit=0&count=1`);
-    return result.count || 0;
   }
 
   /**
@@ -1075,34 +837,6 @@ class BackendManager {
   }
 
   /**
-   * Rename a column in an existing table
-   * @param {string} id - Backend ID
-   * @param {string} tableName - Table name
-   * @param {string} oldName - Current column name
-   * @param {string} newName - New column name
-   * @returns {Promise<Object>} Result with success status
-   */
-  async renameColumn(id, tableName, oldName, newName) {
-    const supervisor = this.requireRunning(id, 'rename column');
-    await supervisor.request('POST', '/admin/schema', { action: 'renameColumn', table: tableName, oldName, newName });
-    safeLog(`Renamed column: ${oldName} -> ${newName} in table ${tableName}`);
-    return { success: true, tableName, oldName, newName };
-  }
-
-  /**
-   * Delete a table and all its data
-   * @param {string} id - Backend ID
-   * @param {string} tableName - Table name
-   * @returns {Promise<Object>} Result with success status
-   */
-  async deleteTable(id, tableName) {
-    const supervisor = this.requireRunning(id, 'delete table');
-    const result = await supervisor.request('POST', '/admin/schema', { action: 'deleteTable', table: tableName });
-    safeLog(`Deleted table: ${tableName} (deleted: ${result.deleted})`);
-    return { success: true, deleted: result.deleted, tableName };
-  }
-
-  /**
    * Find an available port starting from 8578.
    * (8577 was reserved for the now-deleted cloud-function-server, WF-007;
    * kept as the starting point so existing configs don't shift.)
@@ -1158,53 +892,6 @@ class BackendManager {
   }
 
   /**
-   * Create a new record
-   * @param {string} id - Backend ID
-   * @param {string} collection - Table/collection name
-   * @param {Object} data - Record data
-   * @returns {Promise<Object>} Created record with objectId
-   */
-  async createRecord(id, collection, data) {
-    const supervisor = this.requireRunning(id, 'create records');
-    const record = await supervisor.request('POST', `/api/${encodeURIComponent(collection)}`, data);
-    safeLog(`Created record in ${collection}:`, record.objectId);
-    return record;
-  }
-
-  /**
-   * Update an existing record
-   * @param {string} id - Backend ID
-   * @param {string} collection - Table/collection name
-   * @param {string} objectId - Record ID to update
-   * @param {Object} data - Fields to update
-   * @returns {Promise<Object>} Updated record
-   */
-  async saveRecord(id, collection, objectId, data) {
-    const supervisor = this.requireRunning(id, 'save records');
-    const record = await supervisor.request(
-      'PUT',
-      `/api/${encodeURIComponent(collection)}/${encodeURIComponent(objectId)}`,
-      data
-    );
-    safeLog(`Updated record in ${collection}:`, objectId);
-    return record;
-  }
-
-  /**
-   * Delete a record
-   * @param {string} id - Backend ID
-   * @param {string} collection - Table/collection name
-   * @param {string} objectId - Record ID to delete
-   * @returns {Promise<{success: boolean}>}
-   */
-  async deleteRecord(id, collection, objectId) {
-    const supervisor = this.requireRunning(id, 'delete records');
-    await supervisor.request('DELETE', `/api/${encodeURIComponent(collection)}/${encodeURIComponent(objectId)}`);
-    safeLog(`Deleted record from ${collection}:`, objectId);
-    return { success: true };
-  }
-
-  /**
    * Stop all running backends (for cleanup on app exit)
    */
   async stopAll() {
@@ -1239,15 +926,6 @@ class BackendManager {
   async updateWorkflow(backendId, name, workflow) {
     const supervisor = this.requireRunning(backendId, 'update workflows');
     return supervisor.request('PUT', `/admin/workflows/${encodeURIComponent(name)}`, workflow);
-  }
-
-  /**
-   * Reload all workflows for a backend
-   * @param {string} backendId - Backend ID
-   */
-  async reloadWorkflows(backendId) {
-    const supervisor = this.requireRunning(backendId, 'reload workflows');
-    return supervisor.request('POST', '/admin/workflows/reload');
   }
 
   /**

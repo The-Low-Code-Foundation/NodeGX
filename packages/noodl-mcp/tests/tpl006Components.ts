@@ -718,7 +718,8 @@ function sourceComponent(storyJson: string): Tpl006Component {
         label: `${EDIT}your story — every passage, in this one list`,
         parameters: { type: 'json', json: storyJson }
       },
-      logic('srPasted', VARIABLE_NODE, 'A story somebody pasted on the Remix page', { name: VAR_PASTED }),
+      // GAM-005: two or more copies share this Variable by design, so it says so and the door stays quiet.
+    { ...(logic('srPasted', VARIABLE_NODE, 'A story somebody pasted on the Remix page', { name: VAR_PASTED }) as object), comment: 'Shared on purpose: the Read page and the Remix page show the same pasted story.' },
       logic('srPick', FUNCTION_NODE, 'Which story is being read', { functionScript: PICK_STORY_SCRIPT }),
       outputs('srOutputs', 'The story', [
         ['ready', 'signal'],
@@ -797,14 +798,11 @@ const PASSAGE_STATES = {
   'value-stuck-rule': MEANING.broken,
   'value-stuck-eyebrow': 'No way on from here',
   'value-stuck-tone': MEANING.broken,
-  // 🔴 FALSE, and it is the difference between this panel working and not.
-  // Measured in a browser with the control beside it (TPL-006 §6): with
-  // `useTransitions: true` — which is the port's DEFAULT — a States node publishes
-  // its string and boolean values on a state change and **never publishes a colour
-  // or a number at all**. Sampled at 0, 60, 150, 320, 700 and 1500ms after the
-  // change: the eyebrow string flipped at 60ms and both colours read their
-  // previous value at every sample. With it false, all three change together.
-  // Registered as a product defect; do not "tidy" this back to the default.
+  // 🔴 FALSE AGAIN (2026-09-15), for the app people already have rather than for HEAD. With
+  // transitions on, a token colour tweens through an invalid `#0aNaNNaNNaN` and never arrives (D49).
+  // P88 GAM-006 fixed that in the runtime (`062dfd9c0`, `82a7d3775`), but both landed AFTER v0.2.4 —
+  // and this template is published to the community shelf, which installs it into v0.2.4. Restore
+  // the default only once every version the shelf can reach carries GAM-006.
   useTransitions: false
 };
 
@@ -1202,11 +1200,8 @@ const MODE_STATES = {
   'value-stuck-note':
     'Every choice here needs something you are not carrying, so there is no way on. That is usually a "requires" that nothing "gives".',
   'value-stuck-panel': 'stuck',
-  // False for the same measured reason as `PASSAGE_STATES` — and here it is
-  // belt-and-braces rather than load-bearing, because every value on this node is a
-  // string and strings are the type the transition path does not swallow. It is set
-  // anyway so the two States nodes in this template cannot disagree about a
-  // parameter whose default is a defect.
+  // Every value here is a string, which transitions never delayed, so this one is belt-and-braces:
+  // false so the two States nodes agree while the shelf still reaches runtimes without GAM-006.
   useTransitions: false
 };
 
@@ -1573,10 +1568,12 @@ const REMIX: Tpl006Component = {
       borderWidth: 'var(--border-1)',
       borderColor: 'var(--border)'
     }, ['rxHelpHead', 'rxHelpBody', 'rxHelpExample']),
+    // P88 GAM-020: a sentence in a content-sized Text cannot wrap. It fitted at 390×844, and a
+    // longer translation would not; the column is left-aligned, so contentHeight draws the same.
     text('rxHelpHead', 'The heading', 'rxHelp', 'Four words, and there is no fifth', {
       ...T_EYEBROW,
       color: 'var(--muted-foreground)',
-      sizeMode: 'contentSize'
+      sizeMode: 'contentHeight'
     }),
     prose('rxHelpBody', 'The four words', 'rxHelp',
       [

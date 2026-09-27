@@ -55,7 +55,9 @@ Boolean choices the user flips directly: settings, consent, done flags. For one-
 | `boxShadowInset` | Boolean | `false` | Draws the shadow inside the element instead of behind it |
 | `boxShadowOffsetX` | Number | `0` | How far to the right the shadow is cast from the element |
 | `boxShadowOffsetY` | Number | `0` | How far down the shadow is cast from the element |
+| `boxShadowSource` | Enum (`custom`, `token`) | `custom` | Where the shadow comes from: Custom builds it from the six fields below; From a style token wears one of the project’s shadow tokens, so every element sharing that token changes together |
 | `boxShadowSpreadRadius` | Number | `2` | How much larger than the element the shadow is drawn |
+| `boxShadowToken` | String | `var(--shadow-md)` | The project shadow this element wears, as var(--shadow-md). Pick one from the list; compose new ones in the Styles panel |
 | `boxSizing` | Enum (`border-box`, `content-box`) | `border-box` | Whether Width and Height include this element's padding and border, or only its content |
 | `checked` | Boolean | `false` | Sets whether the box is ticked; setting it from the graph does not fire Changed |
 | `clickBubbling` | Enum (`auto`, `always`, `never`) | `auto` | Whether a click on this control also fires Click on the nodes it sits inside. Automatic keeps it here as soon as this control's own Click is connected, so a Favourite button inside a clickable card runs Favourite and not the card; Always is the older behaviour where both run; Never keeps every click here, wired or not |
@@ -109,7 +111,9 @@ Boolean choices the user flips directly: settings, consent, done flags. For one-
 
 | Name | Type | Default | Description |
 |---|---|---|---|
+| `blur` | Signal | — | Takes the keyboard away from this checkbox, which is what fires Blurred |
 | `check` | Signal | — | Ticks the box if it is not already ticked, then fires Done — or Unchanged if it already was. Does not fire Changed |
+| `focus` | Signal | — | Puts the keyboard on this checkbox, so Enter, Space and the arrow keys go to it |
 | `uncheck` | Signal | — | Unticks the box if it is ticked, then fires Done — or Unchanged if it already was. Does not fire Changed |
 
 ## Outputs
@@ -136,7 +140,7 @@ Boolean choices the user flips directly: settings, consent, done flags. For one-
 |---|---|---|---|
 | `completed` | Signal | — | Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error |
 | `didMount` | Signal | — | Fires once this element has been added to the page and can be measured |
-| `done` | Signal | — | Fires when Check or Uncheck actually flipped the box |
+| `done` | Signal | — | Fires when Check or Uncheck actually flipped the box, when Focus put the keyboard on it, or when Blur took it away |
 | `hoverEnd` | Signal | — | Fires when the pointer leaves this control, including when it leaves while a button is still held |
 | `hoverStart` | Signal | — | Fires when the pointer moves onto this control |
 | `onBlur` | Signal | — | Fires when keyboard focus leaves this control, which is the usual place to validate what was entered |
@@ -144,7 +148,7 @@ Boolean choices the user flips directly: settings, consent, done flags. For one-
 | `onFocus` | Signal | — | Fires the moment this control takes keyboard focus, whether from a click, a tab or a Focus action |
 | `pointerDown` | Signal | — | Fires as a mouse button or finger goes down on this control, before any click has completed |
 | `pointerUp` | Signal | — | Fires when the mouse button or finger is lifted, and also when a touch is cancelled by the system |
-| `unchanged` | Signal | — | Fires when the box was already in that state, so nothing was flipped and Changed did not fire |
+| `unchanged` | Signal | — | Fires when the box was already in that state, so nothing was flipped and Changed did not fire, or when a Focus arrived while the box was not on the page |
 | `willUnmount` | Signal | — | Fires just before this element is removed from the page, while it still exists |
 
 ## Dynamic ports
@@ -164,7 +168,9 @@ Declares conditional/expandable port groups whose visibility depends on paramete
 | borderTopStyle = solid OR borderTopStyle = dashed OR borderTopStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted OR borderStyle NOT SET | `borderTopWidth`, `borderTopColor` | — |
 | borderRightStyle = solid OR borderRightStyle = dashed OR borderRightStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted OR borderStyle NOT SET | `borderRightWidth`, `borderRightColor` | — |
 | borderBottomStyle = solid OR borderBottomStyle = dashed OR borderBottomStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted OR borderStyle NOT SET | `borderBottomWidth`, `borderBottomColor` | — |
-| boxShadowEnabled = true | `boxShadowOffsetX`, `boxShadowOffsetY`, `boxShadowInset`, `boxShadowBlurRadius`, `boxShadowSpreadRadius`, `boxShadowColor` | — |
+| boxShadowEnabled = true | `boxShadowSource` | — |
+| boxShadowEnabled = true AND boxShadowSource = token | `boxShadowToken` | — |
+| boxShadowEnabled = true AND boxShadowSource != token | `boxShadowOffsetX`, `boxShadowOffsetY`, `boxShadowInset`, `boxShadowBlurRadius`, `boxShadowSpreadRadius`, `boxShadowColor` | — |
 
 ## Ports at runtime
 

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d9dfed6c-0e72-5488-847d-f6226ec9e5ff",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "dxIn",
+      "fromProperty": "value",
+      "toId": "dxValue",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "dxIn",
+      "fromProperty": "label",
+      "toId": "dxLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "dxIn",
+      "fromProperty": "background",
+      "toId": "dxRoot",
+      "toProperty": "backgroundColor"
+    }
+  ]
+}

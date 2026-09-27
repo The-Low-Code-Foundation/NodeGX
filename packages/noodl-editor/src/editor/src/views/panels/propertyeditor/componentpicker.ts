@@ -1,7 +1,7 @@
 import { NodeGraphContextTmp } from '@noodl-contexts/NodeGraphContext/NodeGraphContext';
 import _ from 'underscore';
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import { Root } from 'react-dom/client';
 
 import { ComponentModel } from '@noodl-models/componentmodel';
 import { getComponentIconType, ComponentIconType } from '@noodl-models/nodelibrary/ComponentIcon';
@@ -11,6 +11,7 @@ import { isComponentModel_CloudRuntime } from '@noodl-utils/NodeGraph';
 import { IconName } from '@noodl-core-ui/components/common/Icon';
 import { MenuDialog, MenuDialogProps, MenuDialogWidth } from '@noodl-core-ui/components/popups/MenuDialog';
 import { insertDividerBetweenAllItems } from '@noodl-core-ui/components/popups/MenuDialog/MenuDialog.utils';
+import { createReactRoot, unmountReactRoot } from '../../../../../shared/utils/unmountReactRoot';
 
 export type ComponentPickerOptions = {
   onItemSelected: (value: string) => void;
@@ -161,7 +162,7 @@ export class ComponentPicker {
     };
 
     if (!this.root) {
-      this.root = createRoot(this.reactMount);
+      this.root = createReactRoot(this.reactMount);
     }
     this.root.render(React.createElement(MenuDialog, props));
   }
@@ -173,7 +174,7 @@ export class ComponentPicker {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
   }

@@ -1029,6 +1029,17 @@ export class RestDataAdapter extends AdapterEvents implements IDataAdapter {
     const profile = this.begin(handle, 'data.create', options.error);
     if (!profile) return;
 
+    // FED-002: refused, not ignored. An upsert that quietly became a plain
+    // create would write the duplicate row the caller asked not to have, on a
+    // backend where nothing downstream would catch it.
+    if (options.upsertOn) {
+      options.error(
+        `Upsert is not supported on ${handle.type}: "Upsert On" needs a unique index declared on a ` +
+          'NodeGX backend collection. Remove the input, or use the backend\'s own conflict handling.'
+      );
+      return;
+    }
+
     if (options.acl && !this.allows(handle, 'data.acl')) {
       // Not fatal — the record is still created. A per-record ACL is a
       // Parse-family concept and these three control access with roles, RLS or
@@ -1075,6 +1086,16 @@ export class RestDataAdapter extends AdapterEvents implements IDataAdapter {
   save(handle: BackendHandle, options: SaveOptions): void {
     const profile = this.begin(handle, 'data.save', options.error);
     if (!profile) return;
+
+    // HLT-016: refused, not ignored, for FED-002's reason. A precondition that quietly became an
+    // unconditional write is the lost update it exists to prevent.
+    if (options.ifMatch) {
+      options.error(
+        `"Only if unchanged" is not supported on ${handle.type}: it needs a NodeGX backend. ` +
+          "Remove it, or use the backend's own version check."
+      );
+      return;
+    }
 
     const target = this.recordTarget(profile, options.collection, options.objectId);
     const body = stripServerOwned(profile, this.serializeObject(options.data, options.collection, handle));

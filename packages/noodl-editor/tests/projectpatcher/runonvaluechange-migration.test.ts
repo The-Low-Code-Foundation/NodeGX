@@ -177,6 +177,17 @@ describe('NDA-017 migration — discovered inputs', function () {
     expect(written).not.toContain('runOnChange-run');
   });
 
+  it('never governs a declared Expression input (`evaluateAtLoad`) as a free identifier', function () {
+    // P88 GAM-002 declared `evaluateAtLoad`. A saved `false` on it is the author's answer to a
+    // declared port, not a free variable, and must not be handed a `runOnChange-` checkbox.
+    const d = driver('e1', 'run');
+    const e = node('e1', 'Expression', { expression: 'a + 1', a: 1, evaluateAtLoad: false });
+    const p = project([d.node, e], [d.wire]);
+
+    const written = planRunOnValueChangeMigration(p).writes.map((w) => w.parameter);
+    expect(written).toEqual(['runOnChange-a']);
+  });
+
   it('does not invent a checkbox for an expression identifier nothing feeds', function () {
     // `c` is in the text but has neither a connection nor a parameter, so no value ever
     // arrives on it and its checkbox governs nothing. Writing it would only add a port.
@@ -285,9 +296,9 @@ describe('NDA-017 migration — the family table matches the shipped catalog', f
 
     const declared = Object.keys(RUN_ON_CHANGE_FAMILIES).sort();
 
-    // Every catalog family is in the table. The reverse does not hold, and that is the finding
-    // below: four families mint their ports at runtime and never reach the catalog, and a fifth
-    // (Text Input) declares `runOnValueChange` that `createNodeFromReactComponent` drops.
+    // Every catalog family is in the table. The reverse does not hold: four families mint their
+    // ports at runtime and never reach the catalog. (Text Input used to be a fifth, until P88
+    // GAM-019 made `createNodeFromReactComponent` forward `runOnValueChange` — see below.)
     fromCatalog.forEach((typeName: string) => expect(declared).toContain(typeName));
   });
 
@@ -323,20 +334,23 @@ describe('NDA-017 migration — the family table matches the shipped catalog', f
     const entry = byType.get('Expression');
     const declared = (entry.inputs || []).map((p: TSFixme) => p.name).sort();
     // If Expression ever gains a declared input, the migration would start writing a checkbox
-    // for it as if it were a free variable. This row is the tripwire.
-    expect(declared).toEqual(['expression', 'run']);
+    // for it as if it were a free variable. This row is the tripwire. It fired once: P88 GAM-002
+    // (`89e533625`) declared `evaluateAtLoad`, and the family's `staticInputs` gained it.
+    expect(declared).toEqual(['evaluateAtLoad', 'expression', 'run']);
     expect(RUN_ON_CHANGE_FAMILIES['Expression'].staticInputs.slice().sort()).toEqual(declared);
   });
 
-  it('⚠️ records that Text Input has no checkbox port in the catalog', function () {
-    // NOT a bug in this table. `createNodeFromReactComponent` builds its definition field by
-    // field and never copies `runOnValueChange`, so `defineNode` synthesises nothing — while
-    // `text-input.ts` calls `shouldRunOnValueChange('startValue')`, which therefore always
-    // answers *ticked* and the box cannot be unticked in the panel. Filed, not fixed here.
-    // When it IS fixed this row goes red, which is the signal to delete it.
+  it('records that Text Input carries its checkbox port in the catalog (fixed by P88 GAM-019)', function () {
+    // This row used to pin the defect: `createNodeFromReactComponent` built its definition field
+    // by field and never copied `runOnValueChange`, so `defineNode` synthesised no checkbox and
+    // the catalog and panel carried none. It said "when it IS fixed this row goes red". P88
+    // GAM-019 (`4bb438165`) forwards the field, so the row now pins the fix: exactly the one box
+    // the family table declares, which the family-by-family match above also checks.
     const entry = byType.get('net.noodl.controls.textinput');
-    const boxes = (entry.inputs || []).filter((p: TSFixme) => p.name.startsWith(RUN_ON_CHANGE_PREFIX));
-    expect(boxes.length).toBe(0);
+    const boxes = (entry.inputs || [])
+      .filter((p: { name: string }) => p.name.startsWith(RUN_ON_CHANGE_PREFIX))
+      .map((p: { name: string }) => p.name);
+    expect(boxes).toEqual([RUN_ON_CHANGE_PREFIX + 'startValue']);
   });
 });
 

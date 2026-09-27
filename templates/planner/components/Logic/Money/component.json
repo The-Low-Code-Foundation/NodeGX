@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "50c370cb-5b29-523e-81a6-b8d3252a14bd",
+  "name": "Money",
+  "path": "/Logic/Money",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The money, drawn: the Money modal’s list (upcoming, past or recurring), the lines and boxes at the bottom of the week, the month’s billable target, and what is late."
+}

@@ -1,8 +1,10 @@
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 
-import { AlignToolsInput } from '../../components/AlignToolsInput';
+import { AlignConnection, AlignToolsInput } from '../../components/AlignToolsInput';
 import { TypeView } from '../../TypeView';
+import { getConnectionSourceLabel, getConnectionSourceNavigate } from '../../utils';
+import { unmountReactRoot } from '../../../../../../../shared/utils/unmountReactRoot';
 
 export class AlignToolsType extends TypeView {
   defaults: TSFixme;
@@ -45,8 +47,28 @@ export class AlignToolsType extends TypeView {
     }
   }
 
+  /**
+   * P103 CMG-008 §3.2 — the RESOLVED direction (own, else the Look's, else the default), through the
+   * model proxy as every named row reads. `parameters.flexDirection` was the node's own value only,
+   * so a Group laid out as a row by its Look drew its glyphs turned the wrong way.
+   */
   private isVertical() {
-    return this.parent.model.parameters.flexDirection !== 'row';
+    const model = this.parent.model;
+    const direction = typeof model.getParameter === 'function' ? model.getParameter('flexDirection') : model.parameters.flexDirection;
+    return direction !== 'row';
+  }
+
+  /** P103 CMG-008 §3.2 — alignComp → what the node's Look sets, for the pressed segment when the node sets nothing. */
+  private inherited(): Record<string, string | undefined> {
+    const facts = this.parent.model.lookProvenance;
+    const look = facts && facts.look ? facts.look.parameters : undefined;
+    const out: Record<string, string | undefined> = {};
+    if (!look) return out;
+    Object.keys(this.ports).forEach((comp) => {
+      const value = look[this.ports[comp].name];
+      out[comp] = typeof value === 'string' ? value : undefined;
+    });
+    return out;
   }
 
   render() {
@@ -81,10 +103,13 @@ export class AlignToolsType extends TypeView {
 
     this.root.render(
       React.createElement(AlignToolsInput, {
+        // CHR-009 slice 5: one row per port, so the view hands over the ports, not a merged strip.
+        ports: Object.keys(this.ports).map((comp) => this.ports[comp]),
         values: { ...this.values },
-        defaults: this.defaults,
+        inherited: this.inherited(),
         isVertical: this.isVertical(),
-        onToggle: (comp: string, value: string | undefined) => {
+        connections: this.connections(),
+        onChange: (comp: string, value: string) => {
           this.values[comp] = value;
           this.parent.model.setParameter(this.ports[comp].name, value, {
             undo: true,
@@ -92,15 +117,12 @@ export class AlignToolsType extends TypeView {
           });
           this.renderReact();
         },
-        onReset: () => {
-          Object.keys(this.defaults).forEach((comp) => {
-            if (this.values[comp] !== undefined) {
-              this.values[comp] = undefined;
-              this.parent.model.setParameter(this.ports[comp].name, undefined, {
-                undo: true,
-                label: 'alignment changed'
-              });
-            }
+        onReset: (comp: string) => {
+          if (this.values[comp] === undefined) return;
+          this.values[comp] = undefined;
+          this.parent.model.setParameter(this.ports[comp].name, undefined, {
+            undo: true,
+            label: 'alignment changed'
           });
           this.renderReact();
         }
@@ -108,10 +130,25 @@ export class AlignToolsType extends TypeView {
     );
   }
 
+  /** alignComp → the wire driving that port, for the rows that are wired (FB-018 chip per row). */
+  private connections(): Record<string, AlignConnection> {
+    const model = this.parent.model;
+    const connections: Record<string, AlignConnection> = {};
+    Object.keys(this.ports).forEach((comp) => {
+      const name = this.ports[comp].name;
+      if (!model.isPortConnected(name, 'target')) return;
+      connections[comp] = {
+        label: getConnectionSourceLabel(model, name),
+        onClick: getConnectionSourceNavigate(model, name)
+      };
+    });
+    return connections;
+  }
+
   dispose() {
     this.parent.model.off(this);
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8b8392b4-115d-5889-8d1e-03cf896537d9",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "dpField",
+      "fromProperty": "this",
+      "toId": "dpScript",
+      "toProperty": "in-host"
+    },
+    {
+      "fromId": "dpField",
+      "fromProperty": "didMount",
+      "toId": "dpMounts",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "dpMounts",
+      "fromProperty": "out-mounts",
+      "toId": "dpScript",
+      "toProperty": "in-mounted"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "Value",
+      "toId": "dpScript",
+      "toProperty": "in-value"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "Label",
+      "toId": "dpScript",
+      "toProperty": "in-label"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "Min",
+      "toId": "dpScript",
+      "toProperty": "in-min"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "Max",
+      "toId": "dpScript",
+      "toProperty": "in-max"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "Disabled",
+      "toId": "dpScript",
+      "toProperty": "in-disabled"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "First Day Of Week",
+      "toId": "dpScript",
+      "toProperty": "in-firstDayOfWeek"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "Width",
+      "toId": "dpRoot",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "Align X",
+      "toId": "dpRoot",
+      "toProperty": "alignX"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "Align Y",
+      "toId": "dpRoot",
+      "toProperty": "alignY"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "Margin Top",
+      "toId": "dpRoot",
+      "toProperty": "marginTop"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "Margin Right",
+      "toId": "dpRoot",
+      "toProperty": "marginRight"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "Margin Bottom",
+      "toId": "dpRoot",
+      "toProperty": "marginBottom"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "Margin Left",
+      "toId": "dpRoot",
+      "toProperty": "marginLeft"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "Position",
+      "toId": "dpRoot",
+      "toProperty": "position"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "Label",
+      "toId": "dpLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "dpIn",
+      "fromProperty": "Show Label",
+      "toId": "dpLabel",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "dpScript",
+      "fromProperty": "out-value",
+      "toId": "dpOut",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "dpScript",
+      "fromProperty": "out-date",
+      "toId": "dpOut",
+      "toProperty": "Date"
+    },
+    {
+      "fromId": "dpScript",
+      "fromProperty": "out-changed",
+      "toId": "dpOut",
+      "toProperty": "Changed"
+    }
+  ]
+}

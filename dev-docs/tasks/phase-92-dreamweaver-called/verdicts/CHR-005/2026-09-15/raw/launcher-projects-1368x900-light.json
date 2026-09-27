@@ -1,0 +1,498 @@
+{
+  "tab": "Projects",
+  "theme": "light",
+  "size": "1368x900",
+  "geometry": {
+    "viewport": [
+      1368,
+      900
+    ],
+    "theme": "light",
+    "title": {
+      "x": 120,
+      "y": 84,
+      "w": 865,
+      "h": 29
+    },
+    "titleText": "Projects",
+    "toolbar": {
+      "x": 120,
+      "y": 178,
+      "w": 1120,
+      "h": 36
+    },
+    "column": {
+      "x": 120,
+      "y": 84,
+      "w": 1120,
+      "h": 1046
+    },
+    "header": {
+      "x": 0,
+      "y": 0,
+      "w": 1368,
+      "h": 52
+    },
+    "documentScrollsSideways": false,
+    "contentScrollsSideways": false,
+    "pastRightEdge": []
+  },
+  "controls": {
+    "kinds": {
+      "header tab": {
+        "count": 5,
+        "distinct": 2,
+        "styles": {
+          "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(24, 33, 43)": [
+            "Projects"
+          ],
+          "0px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(89, 98, 110)": [
+            "Community",
+            "Learning",
+            "Templates",
+            "GitHub"
+          ]
+        }
+      },
+      "PrimaryButton": {
+        "count": 6,
+        "distinct": 3,
+        "styles": {
+          "6px | 12px | 500 | rgb(242, 244, 246) | 1px solid rgb(122, 134, 145)": [
+            "Connect GitHub"
+          ],
+          "6px | 12px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Open project…",
+            "Copy the command instead"
+          ],
+          "6px | 12px | 500 | rgb(21, 112, 239) | 0px none rgb(255, 255, 255)": [
+            "New project",
+            "Connect Claude Code",
+            "Sign in to NodeGX"
+          ]
+        }
+      },
+      "filter chip": {
+        "count": 0,
+        "distinct": 0,
+        "styles": {}
+      },
+      "card": {
+        "count": 6,
+        "distinct": 1,
+        "styles": {
+          "12px | 13px | 400 | rgb(255, 255, 255) | 1px solid rgb(122, 134, 145)": [
+            "Rocket SchoolEdited 4 ho",
+            "Llib024-shelf-driveEdite",
+            "Landing page test V2Edit",
+            "Pixel dungeonEdited 3 da",
+            "Reading ShelfEdited 5 da",
+            "Deadline DeskEdited 5 da"
+          ]
+        }
+      },
+      "other": {
+        "count": 10,
+        "distinct": 5,
+        "styles": {
+          "50% | 13px | 400 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Settings"
+          ],
+          "6px | 13px | 500 | rgba(21, 112, 239, 0.09) | 0px none rgb(21, 112, 239)": [
+            "All projects6"
+          ],
+          "6px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(74, 86, 99)": [
+            "Uncategorized6"
+          ],
+          "6px | 13px | 500 | rgba(0, 0, 0, 0) | 0px none rgb(89, 98, 110)": [
+            "New folder"
+          ],
+          "6px | 13px | 400 | rgb(229, 233, 237) | 0px none rgb(89, 98, 110)": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        }
+      }
+    },
+    "radii": {
+      "50%": 3,
+      "6px": 17,
+      "4px": 10,
+      "12px": 8,
+      "8px": 1
+    }
+  },
+  "contrast": {
+    "controls": 30,
+    "boundaryUnder3": [
+      {
+        "label": "All projects6",
+        "cls": "FolderTreeItem-module__Root--ONbUN",
+        "disabled": false,
+        "fillOnGround": 1.12,
+        "textOnly": false,
+        "boundary": 1.12,
+        "text": 3.6
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.22,
+        "textOnly": false,
+        "boundary": 1.22,
+        "text": 5.07
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.22,
+        "textOnly": false,
+        "boundary": 1.22,
+        "text": 5.07
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.22,
+        "textOnly": false,
+        "boundary": 1.22,
+        "text": 5.07
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.22,
+        "textOnly": false,
+        "boundary": 1.22,
+        "text": 5.07
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.22,
+        "textOnly": false,
+        "boundary": 1.22,
+        "text": 5.07
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.22,
+        "textOnly": false,
+        "boundary": 1.22,
+        "text": 5.07
+      }
+    ],
+    "textUnder45": [
+      {
+        "label": "All projects6",
+        "cls": "FolderTreeItem-module__Root--ONbUN",
+        "disabled": false,
+        "fillOnGround": 1.12,
+        "textOnly": false,
+        "boundary": 1.12,
+        "text": 3.6
+      }
+    ],
+    "rows": [
+      {
+        "label": "Projects",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 16.26
+      },
+      {
+        "label": "Community",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.18
+      },
+      {
+        "label": "Learning",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.18
+      },
+      {
+        "label": "Templates",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.18
+      },
+      {
+        "label": "GitHub",
+        "cls": "LauncherHeader-module__Tab--oHv7m",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.18
+      },
+      {
+        "label": "Connect GitHub",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 1.1,
+        "edgeOnFill": 3.37,
+        "edgeOnGround": 3.72,
+        "textOnly": false,
+        "boundary": 3.37,
+        "text": 6.8
+      },
+      {
+        "label": "Settings",
+        "cls": "LauncherHeader-module__SettingsButton--GVqlZ",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 7.49
+      },
+      {
+        "label": "Open project…",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.61
+      },
+      {
+        "label": "New project",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 4.03,
+        "textOnly": false,
+        "boundary": 4.03,
+        "text": 4.57
+      },
+      {
+        "label": "⌘K",
+        "cls": "LauncherSearchBar-module__Search--I24Ib",
+        "disabled": false,
+        "fillOnGround": 1.13,
+        "edgeOnFill": 3.72,
+        "edgeOnGround": 3.28,
+        "textOnly": false,
+        "boundary": 3.28,
+        "text": 6.18
+      },
+      {
+        "label": "Search projects",
+        "cls": "LauncherSearchBar-module__SearchInput--zRY2M",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 16.26
+      },
+      {
+        "label": "All projectsOnly local proje",
+        "cls": "LauncherSearchBar-module__Select--OXILr",
+        "disabled": false,
+        "fillOnGround": 1.13,
+        "edgeOnFill": 3.72,
+        "edgeOnGround": 3.28,
+        "textOnly": false,
+        "boundary": 3.28,
+        "text": 7.49
+      },
+      {
+        "label": "All projects6",
+        "cls": "FolderTreeItem-module__Root--ONbUN",
+        "disabled": false,
+        "fillOnGround": 1.12,
+        "textOnly": false,
+        "boundary": 1.12,
+        "text": 3.6
+      },
+      {
+        "label": "Uncategorized6",
+        "cls": "FolderTreeItem-module__Root--ONbUN",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.61
+      },
+      {
+        "label": "New folder",
+        "cls": "FolderTree-module__NewFolderButton--B2MPm",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 5.46
+      },
+      {
+        "label": "Connect Claude Code",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 4.14,
+        "textOnly": false,
+        "boundary": 4.14,
+        "text": 4.57
+      },
+      {
+        "label": "Copy the command instead",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 1,
+        "textOnly": true,
+        "boundary": 1,
+        "text": 6.8
+      },
+      {
+        "label": "Sign in to NodeGX",
+        "cls": "PrimaryButton-module__Root--KMqLg",
+        "disabled": false,
+        "fillOnGround": 4.14,
+        "textOnly": false,
+        "boundary": 4.14,
+        "text": 4.57
+      },
+      {
+        "label": "Rocket SchoolEdited 4 hours ",
+        "cls": "LauncherCard-module__Card--JeK9j",
+        "disabled": false,
+        "fillOnGround": 1.13,
+        "edgeOnFill": 3.72,
+        "edgeOnGround": 3.28,
+        "textOnly": false,
+        "boundary": 3.28,
+        "text": 7.49
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.22,
+        "textOnly": false,
+        "boundary": 1.22,
+        "text": 5.07
+      },
+      {
+        "label": "Llib024-shelf-driveEdited 3 ",
+        "cls": "LauncherCard-module__Card--JeK9j",
+        "disabled": false,
+        "fillOnGround": 1.13,
+        "edgeOnFill": 3.72,
+        "edgeOnGround": 3.28,
+        "textOnly": false,
+        "boundary": 3.28,
+        "text": 7.49
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.22,
+        "textOnly": false,
+        "boundary": 1.22,
+        "text": 5.07
+      },
+      {
+        "label": "Landing page test V2Edited 3",
+        "cls": "LauncherCard-module__Card--JeK9j",
+        "disabled": false,
+        "fillOnGround": 1.13,
+        "edgeOnFill": 3.72,
+        "edgeOnGround": 3.28,
+        "textOnly": false,
+        "boundary": 3.28,
+        "text": 7.49
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.22,
+        "textOnly": false,
+        "boundary": 1.22,
+        "text": 5.07
+      },
+      {
+        "label": "Pixel dungeonEdited 3 days a",
+        "cls": "LauncherCard-module__Card--JeK9j",
+        "disabled": false,
+        "fillOnGround": 1.13,
+        "edgeOnFill": 3.72,
+        "edgeOnGround": 3.28,
+        "textOnly": false,
+        "boundary": 3.28,
+        "text": 7.49
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.22,
+        "textOnly": false,
+        "boundary": 1.22,
+        "text": 5.07
+      },
+      {
+        "label": "Reading ShelfEdited 5 days a",
+        "cls": "LauncherCard-module__Card--JeK9j",
+        "disabled": false,
+        "fillOnGround": 1.13,
+        "edgeOnFill": 3.72,
+        "edgeOnGround": 3.28,
+        "textOnly": false,
+        "boundary": 3.28,
+        "text": 7.49
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.22,
+        "textOnly": false,
+        "boundary": 1.22,
+        "text": 5.07
+      },
+      {
+        "label": "Deadline DeskEdited 5 days a",
+        "cls": "LauncherCard-module__Card--JeK9j",
+        "disabled": false,
+        "fillOnGround": 1.13,
+        "edgeOnFill": 3.72,
+        "edgeOnGround": 3.28,
+        "textOnly": false,
+        "boundary": 3.28,
+        "text": 7.49
+      },
+      {
+        "label": "",
+        "cls": "IconButton-module__Root--hfD5F",
+        "disabled": false,
+        "fillOnGround": 1.22,
+        "textOnly": false,
+        "boundary": 1.22,
+        "text": 5.07
+      }
+    ]
+  }
+}

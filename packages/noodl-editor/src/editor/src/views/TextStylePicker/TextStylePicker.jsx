@@ -5,13 +5,12 @@ import { createRoot } from 'react-dom/client';
 import { StylesModel } from '@noodl-models/StylesModel';
 
 import { Icon, IconName, IconSize } from '../../../../../../noodl-core-ui/src/components/common/Icon';
-import { IconButton, IconButtonVariant } from '../../../../../../noodl-core-ui/src/components/inputs/IconButton';
 import { escapeHtml } from '../../utils/escapeHtml';
 import FontLoader from '../../utils/fontloader';
 import PopupLayer from '../popuplayer';
-import { ToastLayer } from '../ToastLayer/ToastLayer';
 import TextStylePopup from './TextStylePopup';
 import utils from './utils';
+import { unmountReactRoot } from '../../../../shared/utils/unmountReactRoot';
 
 require('../../styles/propertyeditor/variantseditor.css');
 require('./TextStylePicker.css');
@@ -52,7 +51,7 @@ function TextStylePicker(props) {
       attachTo: popupAnchor,
       position: 'right',
       onClose: () => {
-        root.unmount();
+        unmountReactRoot(root);
       }
     });
 
@@ -112,22 +111,6 @@ function TextStylePicker(props) {
     });
   };
 
-  const onCreateStyle = (name) => {
-    //check if there's an existing style we should base the new style on
-    const styleToCopyFrom = props.selectedStyle && textStyles.find((t) => t.name === props.selectedStyle);
-    const newStyle = {};
-    if (styleToCopyFrom) {
-      Object.assign(newStyle, styleToCopyFrom.style);
-    }
-
-    //and copy the properties from the node
-    for (const prop in props.newStyleProps) {
-      newStyle[prop] = props.newStyleProps[prop];
-    }
-
-    props.createNewStyle(name, newStyle);
-  };
-
   const onEdit = (style, popupAnchor) => {
     setStyleToEdit(style);
     setPopupAnchor(popupAnchor);
@@ -136,7 +119,8 @@ function TextStylePicker(props) {
   return (
     <div style={{ width: '270px', maxHeight: '400px', display: 'flex', flexDirection: 'column', fontSize: '16px' }}>
       <div style={{ overflow: 'hidden auto', flexGrow: 1 }}>
-        <CreateNewStyle stylesModel={stylesModel} onCreateStyle={onCreateStyle} />
+        {/* No "Create new text style" (P100 R6): text styles are a closed layer that 0.3.0
+            converts to Looks on load, so nothing may mint a new one after the conversion. */}
         {filteredStyles.map((style) => (
           <TextStyleItem
             key={style.name}
@@ -148,6 +132,15 @@ function TextStylePicker(props) {
             onEditingName={() => setStyleToEdit(null)}
           />
         ))}
+        {/* With Create gone and UPG-003 converting on load, most projects have no text styles
+            left — and a list of nothing drew a 0px popout: just its arrow. Say why instead. */}
+        {filteredStyles.length === 0 && (
+          <div className="textstyles-empty">
+            {textStyles.length === 0
+              ? 'This project has no text styles. Since 0.3.0, set type with the Font Size, Font Weight and Line Height fields below — they take the Type tokens under Styles → Type.'
+              : 'No text style matches that name.'}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -243,10 +236,10 @@ function TextStyleItem(props) {
         <span style={css}>{props.style.name}</span>
       </div>
       <div className="variants-item-icon" onClick={onEditClicked}>
-        <i className="fa fa-edit" />
+        <Icon icon={IconName.Pencil} size={IconSize.Small} />
       </div>
       <div className="variants-item-icon" onClick={onDeleteClicked}>
-        <i className="fa fa-trash" />
+        <Icon icon={IconName.Trash} size={IconSize.Small} />
       </div>
       <div className="textstyles-edit-style" onClick={onEditStyleClicked} ref={popupAnchorRef}>
         <Icon icon={IconName.Sliders} UNSAFE_style={{ width: 20, height: 20 }} />
@@ -276,58 +269,6 @@ function colorToRGBA(color) {
   }
 
   return result;
-}
-
-function CreateNewStyle(props) {
-  const [isCreating, setIsCreating] = useState(false);
-  const inputRef = useRef(null);
-
-  const onCreateNewStyle = () => {
-    const name = inputRef.current.value;
-
-    if (!name) return;
-
-    if (props.stylesModel.styleExists('text', name)) {
-      ToastLayer.showError('Style already exists');
-    } else {
-      props.onCreateStyle(name);
-      setIsCreating(false);
-    }
-  };
-
-  if (isCreating) {
-    return (
-      <>
-        <div className="variants-header">
-          <span>New text style name</span>
-        </div>
-        <div className="variants-input-container">
-          <input
-            autoFocus
-            className="variants-input"
-            ref={inputRef}
-            onKeyUp={(e) => e.key === 'Enter' && onCreateNewStyle()}
-          />
-          <button className="variants-button primary" onClick={onCreateNewStyle}>
-            Create
-          </button>
-        </div>
-      </>
-    );
-  } else {
-    return (
-      <div onClick={() => setIsCreating(true)} className="variants-header variants-add-header">
-        <span>Create new text style</span>
-        <IconButton
-          icon={IconName.Plus}
-          size={IconSize.Small}
-          UNSAFE_className="add-button"
-          variant={IconButtonVariant.OpaqueOnHover}
-          onClick={() => setIsCreating(true)}
-        />
-      </div>
-    );
-  }
 }
 
 export default TextStylePicker;

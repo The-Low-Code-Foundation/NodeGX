@@ -31,7 +31,7 @@
   display: block;
   padding: 0 0 0 10px;
   box-sizing: border-box;
-  font: 12px var(--font-family);
+  font: var(--font-size-sm) var(--font-family);
 }
 
 /*
@@ -102,6 +102,6 @@
 /** SYL-003 — the artist credit beside a CC BY style's name, so the obligation is visible before the click. */
 .avatarpicker-credit {
   margin-left: 8px;
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   opacity: 0.65;
 }

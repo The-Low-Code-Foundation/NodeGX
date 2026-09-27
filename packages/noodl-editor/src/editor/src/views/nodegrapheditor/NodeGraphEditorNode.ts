@@ -5,13 +5,14 @@ import { ComponentModel } from '@noodl-models/componentmodel';
 import { NodeGraphNode } from '@noodl-models/nodegraphmodel';
 
 import { ProjectModel } from '../../models/projectmodel';
-import { ViewerConnection } from '../../ViewerConnection';
 import { NodeGraphEditor } from '../nodegrapheditor';
 import PopupLayer from '../popuplayer';
 import { CanvasFonts } from './canvas/CanvasTheme';
+import { currentEyebrowPlacement } from './canvas/eyebrowPlacement';
+import { eyebrowExtraHeight, titleAllowanceFor } from './canvas/instanceEyebrow';
 import { nodeShouldAttach } from './nodeAttachment';
 import { NodeGraphEditorConnection } from './NodeGraphEditorConnection';
-import { measureTextHeight, paintNode } from './NodeGraphEditorNodePainter';
+import { eyebrowReserveWidth, measureTextHeight, paintNode } from './NodeGraphEditorNodePainter';
 
 export class NodeGraphEditorNode {
   public static readonly size = { width: 150, height: 36 };
@@ -224,7 +225,7 @@ export class NodeGraphEditorNode {
         }
 
         // Send node highlighted to viewer if this node is being highligted
-        if (!this.borderHighlighted) ViewerConnection.instance.sendNodeHighlighted(this.model, true);
+        if (!this.borderHighlighted) this.owner.setPreviewHover?.(this.model.id, true);
 
         this.owner.setHighlightedNode(this, pos);
 
@@ -259,6 +260,14 @@ export class NodeGraphEditorNode {
           }
         }
 
+        /**
+         * TVW-007 AC2b — the hover surface, on every move over the node.
+         *
+         * Not only on `move-in`: the pointer can enter this node from a card belonging to the
+         * one next to it, and the controller is idempotent for a subject it already holds.
+         */
+        this.owner.instanceHover?.onNodeHover(this);
+
         this.connectionDragAreaHighlighted = pos.x > this.nodeSize.width - 20 && pos.y < 20;
 
         const showCrosshairCursor = this.connectionDragAreaHighlighted || this.borderHighlighted;
@@ -278,12 +287,19 @@ export class NodeGraphEditorNode {
 
         this.connectionDragAreaHighlighted = false;
         this.borderHighlighted = false;
+        // TVW-007: the card outlives this by `InstanceHover.graceMs`, which is the window the
+        // pointer needs to cross the gap and reach `Edit ›`.
+        this.owner.instanceHover?.onNodeLeave(this);
         this.owner.repaint();
 
-        ViewerConnection.instance.sendNodeHighlighted(this.model, false);
+        this.owner.setPreviewHover?.(this.model.id, false);
         break;
       case 'down':
         PopupLayer.instance.hideTooltip();
+
+        // TVW-007: a press starts a drag, a connection or a selection — the card is anchored to
+        // a rectangle that is about to move, and none of those gestures wants it in the way.
+        this.owner.instanceHover?.dismiss();
 
         if (this.owner.highlighted === this) {
           if (this.borderHighlighted || this.connectionDragAreaHighlighted) {
@@ -337,7 +353,11 @@ export class NodeGraphEditorNode {
   }
 
   titlebarLabelHeight() {
-    const cacheKey = this.labelText() + (this.icon ? 'icon' : '');
+    // TVW-007: the placement is part of the key. `reserve-width` narrows the allowance below, so a
+    // height cached under one placement is wrong under another — and the drive that switches
+    // between them would photograph the first placement's wrap four times.
+    const placement = currentEyebrowPlacement();
+    const cacheKey = this.labelText() + (this.icon ? 'icon' : '') + placement;
     if (cacheKey !== this._cachedLabelHeightTextKey) {
       const connectionDragAreaWidth = 10;
       const horizontalSpacing = 10;
@@ -351,7 +371,14 @@ export class NodeGraphEditorNode {
         connectionDragAreaWidth -
         iconOffset;
 
-      this._cachedLabelHeight = measureTextHeight(this.labelText(), CanvasFonts.nodeLabel, 14, maxWidth);
+      // 🔴 The same narrowing the painter applies, from the same function. Measuring the name
+      // against the full width and then painting it into a narrower one clips the last line
+      // inside the titlebar — photographed on the first TVW-007 verdict run.
+      const allowance = this.isComponent()
+        ? titleAllowanceFor(placement, maxWidth, eyebrowReserveWidth())
+        : maxWidth;
+
+      this._cachedLabelHeight = measureTextHeight(this.labelText(), CanvasFonts.nodeLabel, 14, allowance);
       this._cachedLabelHeightTextKey = cacheKey;
     }
 
@@ -374,7 +401,12 @@ export class NodeGraphEditorNode {
 
   titlebarHeight() {
     const labelExtraHeight = this.labelText() !== this.typeDisplayName() ? this.titlebarSublabelHeight() : 0;
-    return this.titlebarLabelHeight() + labelExtraHeight + 22;
+    // TVW-007: only the `own-row` placement adds anything here, and when it does it adds the same
+    // row to every instance node regardless of zoom or of whether there is a count to draw —
+    // 🔴 this number sets every connection-anchor position on the card (UIX-005), so it must not
+    // depend on anything the user can change without touching this node.
+    const eyebrowHeight = eyebrowExtraHeight(currentEyebrowPlacement(), this.isComponent());
+    return this.titlebarLabelHeight() + labelExtraHeight + eyebrowHeight + 22;
   }
 
   /**

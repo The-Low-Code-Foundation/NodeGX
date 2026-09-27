@@ -19,6 +19,14 @@
  *
  * @module noodl-editor/tests-unit/rel-015/listing-view
  */
+// FLD-017 — CHR-012 made the community write verbs `PrimaryButton`, which imports `Icon`.
+jest.mock('@noodl-core-ui/components/common/Icon', () => ({
+  Icon: () => null,
+  IconName: {},
+  IconSize: { Small: 'small' },
+  IconVariant: {}
+}));
+
 import { composeListing } from '@noodl-models/community/peopleview';
 import type { MeResponse, MyListingResponse, Read } from '@noodl-models/community/communityapi';
 

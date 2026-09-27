@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e02b661d-4250-5ed1-8094-435f24d582a7",
+  "name": "Carry block",
+  "path": "/Commands/Carry block",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Moves a block that did not get done to the next day."
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5430a522-e364-5f0f-8c11-436fc20e9b6e",
+  "name": "List question sets",
+  "path": "/Logic/List question sets",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The question sets, and the chosen one with its items."
+}

@@ -255,8 +255,12 @@ function generateNodeLibrary(nodeRegister: NodeRegisterLike, options?: { runtime
         to: ['string']
       },
       {
+        // P88 GAM-023 ruling (Richard, 2026-09-17): an enum is a string. An enum value is
+        // already the option's string, so a dropdown's value wired into a text port (or a
+        // component output typed string) arrives as it is. Only `string`: an enum into
+        // `number` still has nothing to convert it.
         from: 'enum',
-        to: []
+        to: ['string']
       },
       {
         // PORT-TYPE-CONTRACT.md: declaring `object` must not strand the port.
@@ -644,6 +648,7 @@ function generateNodeLibrary(nodeRegister: NodeRegisterLike, options?: { runtime
             'States',
             'Value Changed',
             'Timer',
+            'Repeat',
             'Color Blend',
             'Number Remapper',
             'Counter',
@@ -760,7 +765,11 @@ function generateNodeLibrary(nodeRegister: NodeRegisterLike, options?: { runtime
             // these two would have been registered and invisible — which is exactly how the
             // parser inside Static Array stayed authoring-only for years.
             'net.noodl.ParseCSV',
-            'net.noodl.ToCSV'
+            'net.noodl.ToCSV',
+            // FED-001, and the same sentence applies: a type absent from this index is
+            // unreachable in the add-node picker however well it is registered.
+            'net.noodl.ParseXML',
+            'net.noodl.ParseFeed'
           ]
         },
         {
@@ -909,6 +918,19 @@ function generateNodeLibrary(nodeRegister: NodeRegisterLike, options?: { runtime
           // a Secret node offered on a browser canvas would be a defect.
           name: 'Secrets',
           items: ['noodl.cloud.secret']
+        },
+        {
+          // FED-003: cloud-only for Secret's reason one notch on — this node READS a
+          // credential, so a browser copy would hand a model key to everyone who opens the
+          // page.
+          //
+          // ⚠️ **Being registered in `noodl-viewer-cloud/src/nodes/index.ts` is NOT being
+          // offered.** That registration is what makes the type run; THIS list is what makes
+          // it findable, and the catalog's `inNodePicker` is derived from here. Model Request
+          // was registered, tested green end to end, and absent from this list — which made it
+          // the only node in this whole category a person could not have added to a graph.
+          name: 'AI',
+          items: ['noodl.cloud.modelrequest']
         },
         {
           // CWF-010: the crypto nodes that hold a key. Cloud-only, deliberately — see the

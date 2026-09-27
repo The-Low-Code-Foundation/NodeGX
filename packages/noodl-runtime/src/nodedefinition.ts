@@ -439,6 +439,28 @@ function defineNode(opts: NodeDefinitionOptions): NodeDefinition {
   const prototypeDescriptors: PropertyDescriptorMap = {};
   Object.keys(prototypeExtensions).forEach(function (propName) {
     const declared = prototypeExtensions[propName] as PropertyDescriptor;
+    /**
+     * ⚠️ **The old SDK read the mutation this loop no longer makes.** The shim bundled into 38
+     * modules in `library/modules/` wraps `onNodeDeleted` at module load as
+     * `t.methods.onNodeDeleted.value.call(this)` — and `t.methods` is the very object handed in
+     * here, so `.value` only ever existed because this loop used to overwrite each method with
+     * its descriptor in place. Since NDA-017 it is a bare function, `.value` is `undefined`, and
+     * deleting any such node threw `Cannot read properties of undefined (reading 'call')`: every
+     * page-to-page navigation in a project using `i18next-noodl` blanked the page (TASK-L164,
+     * 2026-09-21; `test/nda-017-old-sdk-method-value.test.js`).
+     *
+     * So a function gets a NON-ENUMERABLE `value` that is itself. The map's entries stay the
+     * author's own functions — the no-mutation property above holds — and a function is
+     * recognised by type BEFORE the `.value` test, so a second `defineNode` on the same object
+     * still wraps it rather than mistaking it for a hand-written descriptor.
+     */
+    if (typeof declared === 'function') {
+      if (!Object.prototype.hasOwnProperty.call(declared, 'value')) {
+        Object.defineProperty(declared, 'value', { value: declared, configurable: true });
+      }
+      prototypeDescriptors[propName] = { value: declared, writable: true, configurable: true };
+      return;
+    }
     if (!declared.value) {
       prototypeDescriptors[propName] = { value: prototypeExtensions[propName], writable: true, configurable: true };
       return;

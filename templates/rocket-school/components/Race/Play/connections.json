@@ -1,0 +1,1069 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3906e21a-9217-5824-8ab8-6dee64d48d64",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rpIn",
+      "fromProperty": "mounted",
+      "toId": "rpShown",
+      "toProperty": "m"
+    },
+    {
+      "fromId": "rpShown",
+      "fromProperty": "result",
+      "toId": "rpWrap",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpZero",
+      "fromProperty": "result",
+      "toId": "rpResetA",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "start",
+      "toId": "rpResetA",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rpZero",
+      "fromProperty": "result",
+      "toId": "rpResetB",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rpResetA",
+      "fromProperty": "done",
+      "toId": "rpResetB",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rpResetB",
+      "fromProperty": "done",
+      "toId": "rpRounds",
+      "toProperty": "reset"
+    },
+    {
+      "fromId": "rpResetB",
+      "fromProperty": "done",
+      "toId": "rpRound",
+      "toProperty": "ask"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "level",
+      "toId": "rpRound",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "lang",
+      "toId": "rpRound",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "layout",
+      "toId": "rpRound",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "mode",
+      "toId": "rpRound",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "answerMode",
+      "toId": "rpRound",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "model",
+      "toId": "rpRound",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "curriculum",
+      "toId": "rpRound",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "wordLists",
+      "toId": "rpRound",
+      "toProperty": "wordLists"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "timed",
+      "toId": "rpRound",
+      "toProperty": "timed"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "soundOn",
+      "toId": "rpRound",
+      "toProperty": "soundOn"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "placeholder",
+      "toId": "rpRound",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "checkWord",
+      "toId": "rpRound",
+      "toProperty": "checkWord"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "fluentWord",
+      "toId": "rpRound",
+      "toProperty": "fluentWord"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "correctWord",
+      "toId": "rpRound",
+      "toProperty": "correctWord"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "wrongWord",
+      "toId": "rpRound",
+      "toProperty": "wrongWord"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "timeUpWord",
+      "toId": "rpRound",
+      "toProperty": "timeUpWord"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "nextWord",
+      "toId": "rpRound",
+      "toProperty": "nextWord"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "showMeWord",
+      "toId": "rpRound",
+      "toProperty": "showMeWord"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "turboWord",
+      "toId": "rpRound",
+      "toProperty": "turboWord"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "chargingWord",
+      "toId": "rpRound",
+      "toProperty": "chargingWord"
+    },
+    {
+      "fromId": "rpA",
+      "fromProperty": "value",
+      "toId": "rpMineAt",
+      "toProperty": "a"
+    },
+    {
+      "fromId": "rpB",
+      "fromProperty": "value",
+      "toId": "rpMineAt",
+      "toProperty": "b"
+    },
+    {
+      "fromId": "rpTurnIsB",
+      "fromProperty": "result",
+      "toId": "rpMineAt",
+      "toProperty": "isB"
+    },
+    {
+      "fromId": "rpA",
+      "fromProperty": "value",
+      "toId": "rpTheirsAt",
+      "toProperty": "a"
+    },
+    {
+      "fromId": "rpB",
+      "fromProperty": "value",
+      "toId": "rpTheirsAt",
+      "toProperty": "b"
+    },
+    {
+      "fromId": "rpTurnIsB",
+      "fromProperty": "result",
+      "toId": "rpTheirsAt",
+      "toProperty": "isB"
+    },
+    {
+      "fromId": "rpMineAt",
+      "fromProperty": "result",
+      "toId": "rpRound",
+      "toProperty": "myAt"
+    },
+    {
+      "fromId": "rpTheirsAt",
+      "fromProperty": "result",
+      "toId": "rpRound",
+      "toProperty": "cpuAt"
+    },
+    {
+      "fromId": "rpA",
+      "fromProperty": "value",
+      "toId": "rpTrack",
+      "toProperty": "progressA"
+    },
+    {
+      "fromId": "rpB",
+      "fromProperty": "value",
+      "toId": "rpTrack",
+      "toProperty": "progressB"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "nameA",
+      "toId": "rpTrack",
+      "toProperty": "nameA"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "nameB",
+      "toId": "rpTrack",
+      "toProperty": "nameB"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "lookA",
+      "toId": "rpTrack",
+      "toProperty": "lookA"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "seedA",
+      "toId": "rpTrack",
+      "toProperty": "seedA"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "patternA",
+      "toId": "rpTrack",
+      "toProperty": "patternA"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "optionsA",
+      "toId": "rpTrack",
+      "toProperty": "optionsA"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "paintA",
+      "toId": "rpTrack",
+      "toProperty": "paintA"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "mode",
+      "toId": "rpTyping",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "rpTyping",
+      "fromProperty": "result",
+      "toId": "rpTrack",
+      "toProperty": "compact"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "players",
+      "toId": "rpTurnIsB",
+      "toProperty": "players"
+    },
+    {
+      "fromId": "rpRounds",
+      "fromProperty": "currentCount",
+      "toId": "rpTurnIsB",
+      "toProperty": "rounds"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "players",
+      "toId": "rpTurnText",
+      "toProperty": "players"
+    },
+    {
+      "fromId": "rpTurnIsB",
+      "fromProperty": "result",
+      "toId": "rpTurnText",
+      "toProperty": "isB"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "nameA",
+      "toId": "rpTurnText",
+      "toProperty": "nameA"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "nameB",
+      "toId": "rpTurnText",
+      "toProperty": "nameB"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "yourTurnWord",
+      "toId": "rpTurnText",
+      "toProperty": "word"
+    },
+    {
+      "fromId": "rpTurnText",
+      "fromProperty": "result",
+      "toId": "rpTurn",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rpIsTwo",
+      "fromProperty": "result",
+      "toId": "rpTurn",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "players",
+      "toId": "rpIsTwo",
+      "toProperty": "players"
+    },
+    {
+      "fromId": "rpA",
+      "fromProperty": "value",
+      "toId": "rpNextA",
+      "toProperty": "a"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "gain",
+      "toId": "rpNextA",
+      "toProperty": "gain"
+    },
+    {
+      "fromId": "rpB",
+      "fromProperty": "value",
+      "toId": "rpNextB",
+      "toProperty": "b"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "gain",
+      "toId": "rpNextB",
+      "toProperty": "gain"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "cpuGain",
+      "toId": "rpNextB",
+      "toProperty": "cpu"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "players",
+      "toId": "rpNextB",
+      "toProperty": "players"
+    },
+    {
+      "fromId": "rpTurnIsB",
+      "fromProperty": "result",
+      "toId": "rpAMoves",
+      "toProperty": "isB"
+    },
+    {
+      "fromId": "rpTurnIsB",
+      "fromProperty": "result",
+      "toId": "rpBMoves",
+      "toProperty": "isB"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "players",
+      "toId": "rpBMoves",
+      "toProperty": "players"
+    },
+    {
+      "fromId": "rpAMoves",
+      "fromProperty": "result",
+      "toId": "rpGateA",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "graded",
+      "toId": "rpGateA",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rpNextA",
+      "fromProperty": "result",
+      "toId": "rpSetA",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rpGateA",
+      "fromProperty": "ontrue",
+      "toId": "rpSetA",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rpBMoves",
+      "fromProperty": "result",
+      "toId": "rpGateB",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "graded",
+      "toId": "rpGateB",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rpNextB",
+      "fromProperty": "result",
+      "toId": "rpSetB",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rpGateB",
+      "fromProperty": "ontrue",
+      "toId": "rpSetB",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "graded",
+      "toId": "rpRounds",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "rpA",
+      "fromProperty": "value",
+      "toId": "rpOver",
+      "toProperty": "a"
+    },
+    {
+      "fromId": "rpB",
+      "fromProperty": "value",
+      "toId": "rpOver",
+      "toProperty": "b"
+    },
+    {
+      "fromId": "rpOver",
+      "fromProperty": "result",
+      "toId": "rpGoOn",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "next",
+      "toId": "rpGoOn",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rpGoOn",
+      "fromProperty": "onfalse",
+      "toId": "rpRound",
+      "toProperty": "ask"
+    },
+    {
+      "fromId": "rpNameAExpr",
+      "fromProperty": "result",
+      "toId": "rpSetWinA",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rpTrack",
+      "fromProperty": "reachedA",
+      "toId": "rpSetWinA",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rpNameBExpr",
+      "fromProperty": "result",
+      "toId": "rpSetWinB",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rpTrack",
+      "fromProperty": "reachedB",
+      "toId": "rpSetWinB",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rpSetWinA",
+      "fromProperty": "done",
+      "toId": "rpOut",
+      "toProperty": "finished"
+    },
+    {
+      "fromId": "rpSetWinB",
+      "fromProperty": "done",
+      "toId": "rpOut",
+      "toProperty": "finished"
+    },
+    {
+      "fromId": "rpWinner",
+      "fromProperty": "value",
+      "toId": "rpOut",
+      "toProperty": "winner"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "correct",
+      "toId": "rpBoostA",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rpGateA",
+      "fromProperty": "ontrue",
+      "toId": "rpBoostA",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rpBoostA",
+      "fromProperty": "ontrue",
+      "toId": "rpBoostsA",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "rpBoostA",
+      "fromProperty": "ontrue",
+      "toId": "rpTrack",
+      "toProperty": "burstA"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "players",
+      "toId": "rpBRight",
+      "toProperty": "players"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "correct",
+      "toId": "rpBRight",
+      "toProperty": "correct"
+    },
+    {
+      "fromId": "rpBRight",
+      "fromProperty": "result",
+      "toId": "rpBoostB",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rpGateB",
+      "fromProperty": "ontrue",
+      "toId": "rpBoostB",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rpBoostB",
+      "fromProperty": "ontrue",
+      "toId": "rpTrack",
+      "toProperty": "burstB"
+    },
+    {
+      "fromId": "rpResetB",
+      "fromProperty": "done",
+      "toId": "rpBoostsA",
+      "toProperty": "reset"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "start",
+      "toId": "rpPhase",
+      "toProperty": "to-racing"
+    },
+    {
+      "fromId": "rpSetWinA",
+      "fromProperty": "done",
+      "toId": "rpPhase",
+      "toProperty": "to-over"
+    },
+    {
+      "fromId": "rpSetWinB",
+      "fromProperty": "done",
+      "toId": "rpPhase",
+      "toProperty": "to-over"
+    },
+    {
+      "fromId": "rpPhase",
+      "fromProperty": "racing",
+      "toId": "rpRoundSlot",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpPhase",
+      "fromProperty": "over",
+      "toId": "rpResult",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpResult",
+      "fromProperty": "again",
+      "toId": "rpPhase",
+      "toProperty": "to-racing"
+    },
+    {
+      "fromId": "rpResult",
+      "fromProperty": "again",
+      "toId": "rpResetA",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rpResult",
+      "fromProperty": "other",
+      "toId": "rpOut",
+      "toProperty": "changeRace"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "showMe",
+      "toId": "rpPhase",
+      "toProperty": "to-teaching"
+    },
+    {
+      "fromId": "rpPhase",
+      "fromProperty": "teaching",
+      "toId": "rpTeach",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpTeach",
+      "fromProperty": "gotIt",
+      "toId": "rpPhase",
+      "toProperty": "to-racing"
+    },
+    {
+      "fromId": "rpTeach",
+      "fromProperty": "gotIt",
+      "toId": "rpGoOn",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rpPhase",
+      "fromProperty": "controls",
+      "toId": "rpControls",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "restartWord",
+      "toId": "rpRestart",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "otherRaceWord",
+      "toId": "rpSettings",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rpRestart",
+      "fromProperty": "onClick",
+      "toId": "rpPhase",
+      "toProperty": "to-racing"
+    },
+    {
+      "fromId": "rpRestart",
+      "fromProperty": "onClick",
+      "toId": "rpResetA",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rpSettings",
+      "fromProperty": "onClick",
+      "toId": "rpRound",
+      "toProperty": "abandon"
+    },
+    {
+      "fromId": "rpSettings",
+      "fromProperty": "onClick",
+      "toId": "rpOut",
+      "toProperty": "changeRace"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "teachCards",
+      "toId": "rpTeachPick",
+      "toProperty": "cards"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "lang",
+      "toId": "rpTeachPick",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "teach",
+      "toId": "rpTeachPick",
+      "toProperty": "teachId"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "missCount",
+      "toId": "rpStep",
+      "toProperty": "misses"
+    },
+    {
+      "fromId": "rpStep",
+      "fromProperty": "result",
+      "toId": "rpTeachPick",
+      "toProperty": "step"
+    },
+    {
+      "fromId": "rpTeachPick",
+      "fromProperty": "title",
+      "toId": "rpTeach",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "rpTeachPick",
+      "fromProperty": "text",
+      "toId": "rpTeach",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rpTeachPick",
+      "fromProperty": "example",
+      "toId": "rpTeach",
+      "toProperty": "example"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "prompt",
+      "toId": "rpTeach",
+      "toProperty": "prompt"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "worked",
+      "toId": "rpTeach",
+      "toProperty": "worked"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "anExampleWord",
+      "toId": "rpTeach",
+      "toProperty": "anExampleWord"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "gotItWord",
+      "toId": "rpTeach",
+      "toProperty": "gotItWord"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "players",
+      "toId": "rpWon",
+      "toProperty": "players"
+    },
+    {
+      "fromId": "rpWinner",
+      "fromProperty": "value",
+      "toId": "rpWon",
+      "toProperty": "winner"
+    },
+    {
+      "fromId": "rpWon",
+      "fromProperty": "result",
+      "toId": "rpResult",
+      "toProperty": "won"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "players",
+      "toId": "rpResultText",
+      "toProperty": "players"
+    },
+    {
+      "fromId": "rpWinner",
+      "fromProperty": "value",
+      "toId": "rpResultText",
+      "toProperty": "winner"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "nameA",
+      "toId": "rpResultText",
+      "toProperty": "nameA"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "nameB",
+      "toId": "rpResultText",
+      "toProperty": "nameB"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "winsWord",
+      "toId": "rpResultText",
+      "toProperty": "winsWord"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "youWinWord",
+      "toId": "rpResultText",
+      "toProperty": "youWin"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "computerWinsWord",
+      "toId": "rpResultText",
+      "toProperty": "computerWins"
+    },
+    {
+      "fromId": "rpResultText",
+      "fromProperty": "result",
+      "toId": "rpResult",
+      "toProperty": "headline"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "players",
+      "toId": "rpResultLine",
+      "toProperty": "players"
+    },
+    {
+      "fromId": "rpBoostsA",
+      "fromProperty": "currentCount",
+      "toId": "rpResultLine",
+      "toProperty": "right"
+    },
+    {
+      "fromId": "rpRounds",
+      "fromProperty": "currentCount",
+      "toId": "rpResultLine",
+      "toProperty": "rounds"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "rightAnswersWord",
+      "toId": "rpResultLine",
+      "toProperty": "word"
+    },
+    {
+      "fromId": "rpResultLine",
+      "fromProperty": "result",
+      "toId": "rpResult",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "againWord",
+      "toId": "rpResult",
+      "toProperty": "againWord"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "otherRaceWord",
+      "toId": "rpResult",
+      "toProperty": "otherWord"
+    },
+    {
+      "fromId": "rpSetWinA",
+      "fromProperty": "done",
+      "toId": "rpOut",
+      "toProperty": "cheer"
+    },
+    {
+      "fromId": "rpIsTwo",
+      "fromProperty": "result",
+      "toId": "rpBLanded",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rpSetWinB",
+      "fromProperty": "done",
+      "toId": "rpBLanded",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rpBLanded",
+      "fromProperty": "ontrue",
+      "toId": "rpOut",
+      "toProperty": "cheer"
+    },
+    {
+      "fromId": "rpBLanded",
+      "fromProperty": "onfalse",
+      "toId": "rpOut",
+      "toProperty": "sigh"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "model",
+      "toId": "rpOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "graded",
+      "toId": "rpOut",
+      "toProperty": "graded"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "layoutSeen",
+      "toId": "rpOut",
+      "toProperty": "layoutSeen"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "layoutSeenNow",
+      "toId": "rpOut",
+      "toProperty": "layoutSeenNow"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "layoutPick",
+      "toId": "rpOut",
+      "toProperty": "layoutPick"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "layoutPickNow",
+      "toId": "rpOut",
+      "toProperty": "layoutPickNow"
+    },
+    {
+      "fromId": "rpRounds",
+      "fromProperty": "currentCount",
+      "toId": "rpOut",
+      "toProperty": "rounds"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "showMe",
+      "toId": "rpOut",
+      "toProperty": "showMe"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "teach",
+      "toId": "rpOut",
+      "toProperty": "teach"
+    },
+    {
+      "fromId": "rpResetA",
+      "fromProperty": "done",
+      "toId": "rpMint",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rpMint",
+      "fromProperty": "out-raceId",
+      "toId": "rpRound",
+      "toProperty": "raceId"
+    },
+    {
+      "fromId": "rpMint",
+      "fromProperty": "out-raceId",
+      "toId": "rpFinish",
+      "toProperty": "raceId"
+    },
+    {
+      "fromId": "rpTurnIsB",
+      "fromProperty": "result",
+      "toId": "rpRound",
+      "toProperty": "forB"
+    },
+    {
+      "fromId": "rpRound",
+      "fromProperty": "model",
+      "toId": "rpFinish",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "timed",
+      "toId": "rpFinish",
+      "toProperty": "timed"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "lang",
+      "toId": "rpFinish",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rpSetWinA",
+      "fromProperty": "done",
+      "toId": "rpFinish",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rpSetWinB",
+      "fromProperty": "done",
+      "toId": "rpFinish",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rpFinish",
+      "fromProperty": "model",
+      "toId": "rpOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rpFinish",
+      "fromProperty": "done",
+      "toId": "rpOut",
+      "toProperty": "graded"
+    },
+    {
+      "fromId": "rpFinish",
+      "fromProperty": "starsText",
+      "toId": "rpResult",
+      "toProperty": "stars"
+    },
+    {
+      "fromId": "rpFinish",
+      "fromProperty": "why",
+      "toId": "rpResult",
+      "toProperty": "why"
+    },
+    {
+      "fromId": "rpFinish",
+      "fromProperty": "earnedPick",
+      "toId": "rpResult",
+      "toProperty": "hasPick"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "pickWord",
+      "toId": "rpResult",
+      "toProperty": "pickWord"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "hangarWord",
+      "toId": "rpResult",
+      "toProperty": "hangarWord"
+    },
+    {
+      "fromId": "rpResult",
+      "fromProperty": "hangar",
+      "toId": "rpOut",
+      "toProperty": "hangar"
+    }
+  ]
+}

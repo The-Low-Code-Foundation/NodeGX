@@ -28,7 +28,11 @@ function createRecordsAPI(modelScope) {
           select: options ? options.select : undefined,
           count: options ? options.count : undefined,
           success: (results,count) => {
-            const _results = results.map((r) => cloudstore()._fromJSON(r, className));
+            // P99 HLT-022: `plain` returns the rows as stored, for a cloud function; the
+            // default stays the Model every app binding depends on.
+            const _results = options && options.plain
+              ? results.map((r) => CloudStore._plainFromJSON(r))
+              : results.map((r) => cloudstore()._fromJSON(r, className));
             if(count !== undefined)  resolve({results:_results,count});
             else resolve(_results);
           },
@@ -120,6 +124,7 @@ function createRecordsAPI(modelScope) {
           objectId: objectOrId,
           include: options ? options.include : undefined,
           success: function (response) {
+            if (options && options.plain) return resolve(CloudStore._plainFromJSON(response));
             var record = cloudstore()._fromJSON(response, className);
             resolve(record);
           },
@@ -160,8 +165,13 @@ function createRecordsAPI(modelScope) {
       const className = (options ? options.className : undefined) || (modelScope || Model).get(objectOrId)._class;
 
       const model = (modelScope || Model).get(objectOrId);
+      const ifMatch = options ? options.ifMatch : undefined;
+      // HLT-016: what the model held before this save, so a refused precondition can put it back.
+      // Without that, the local record would show values the backend just refused.
+      const before = {};
       if (properties) {
         Object.keys(properties).forEach((p) => {
+          before[p] = model.get(p);
           model.set(p, properties[p]);
         });
       }
@@ -174,12 +184,20 @@ function createRecordsAPI(modelScope) {
           objectId: objectOrId,
           data: properties || model.data,
           acl: options ? options.acl : undefined,
+          ifMatch,
           success: (response) => {
             cloudstore()._fromJSON(Object.assign({ objectId: objectOrId }, response), className); // Assign updated at
             resolve();
           },
-          error: (err) => {
-            reject(Error(err || 'Failed to save.'));
+          error: (err, detail) => {
+            const error = Error(err || 'Failed to save.');
+            if (detail && detail.reason === 'precondition-failed') {
+              // Someone else wrote the record after it was read. Re-read it, then decide again.
+              error.code = 'precondition-failed';
+              error.expected = detail.expected;
+              Object.keys(before).forEach((p) => model.set(p, before[p]));
+            }
+            reject(error);
           }
         });
       });

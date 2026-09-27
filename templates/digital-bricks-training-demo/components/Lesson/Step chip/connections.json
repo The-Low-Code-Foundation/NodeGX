@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "387f666a-c9e9-4154-8d31-63d376489e0c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sc_in",
+      "fromProperty": "title",
+      "toId": "sc_btn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "sc_in",
+      "fromProperty": "className",
+      "toId": "sc_btn",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "sc_btn",
+      "fromProperty": "onClick",
+      "toId": "sc_out",
+      "toProperty": "select"
+    },
+    {
+      "fromId": "sc_in",
+      "fromProperty": "bg",
+      "toId": "sc_btn",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "sc_in",
+      "fromProperty": "fg",
+      "toId": "sc_btn",
+      "toProperty": "color"
+    }
+  ]
+}

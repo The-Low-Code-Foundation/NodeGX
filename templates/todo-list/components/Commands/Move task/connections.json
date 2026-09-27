@@ -1,0 +1,127 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7cc34c53-61e6-55da-85a0-c2efbf2b87f4",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "MovetaskIn",
+      "fromProperty": "rows",
+      "toId": "MovetaskGuard",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "MovetaskIn",
+      "fromProperty": "direction",
+      "toId": "MovetaskGuard",
+      "toProperty": "in-direction"
+    },
+    {
+      "fromId": "MovetaskIn",
+      "fromProperty": "do",
+      "toId": "MovetaskGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "MovetaskIn",
+      "fromProperty": "taskId",
+      "toId": "MovetaskGuard",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "MovetaskGuard",
+      "fromProperty": "out-firstId",
+      "toId": "MovetaskFirst",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "MovetaskGuard",
+      "fromProperty": "out-firstPosition",
+      "toId": "MovetaskFirst",
+      "toProperty": "prop-position"
+    },
+    {
+      "fromId": "MovetaskGuard",
+      "fromProperty": "out-go",
+      "toId": "MovetaskFirst",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "MovetaskGuard",
+      "fromProperty": "out-hasSecond",
+      "toId": "MovetaskSwap",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "MovetaskFirst",
+      "fromProperty": "done",
+      "toId": "MovetaskSwap",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "MovetaskGuard",
+      "fromProperty": "out-secondId",
+      "toId": "MovetaskSecond",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "MovetaskGuard",
+      "fromProperty": "out-secondPosition",
+      "toId": "MovetaskSecond",
+      "toProperty": "prop-position"
+    },
+    {
+      "fromId": "MovetaskSwap",
+      "fromProperty": "ontrue",
+      "toId": "MovetaskSecond",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "MovetaskIn",
+      "fromProperty": "taskId",
+      "toId": "MovetaskHistory",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "MovetaskGuard",
+      "fromProperty": "out-from",
+      "toId": "MovetaskHistory",
+      "toProperty": "from"
+    },
+    {
+      "fromId": "MovetaskGuard",
+      "fromProperty": "out-to",
+      "toId": "MovetaskHistory",
+      "toProperty": "to"
+    },
+    {
+      "fromId": "MovetaskSwap",
+      "fromProperty": "onfalse",
+      "toId": "MovetaskHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "MovetaskSecond",
+      "fromProperty": "done",
+      "toId": "MovetaskHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "MovetaskHistory",
+      "fromProperty": "done",
+      "toId": "MovetaskOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "MovetaskFirst",
+      "fromProperty": "failure",
+      "toId": "MovetaskProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "MovetaskSecond",
+      "fromProperty": "failure",
+      "toId": "MovetaskProblem",
+      "toProperty": "do"
+    }
+  ]
+}

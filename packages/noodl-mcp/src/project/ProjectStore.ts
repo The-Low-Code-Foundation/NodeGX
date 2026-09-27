@@ -188,6 +188,23 @@ export class ProjectStore {
    * of a present one is to leave it alone.
    */
   writeProjectSettings(settings: Record<string, unknown>): string[] {
+    const { project, settings: current, written } = this.projectSettingsAfterWrite(settings);
+    if (written.length === 0) return [];
+    writeJsonAtomic(this.projectFilePath, { ...project, settings: current, modified: new Date().toISOString() });
+    return written;
+  }
+
+  /**
+   * GAM-021 — what {@link writeProjectSettings} would leave, without writing it.
+   *
+   * The write calls this, and so does the plan door's `page-cannot-scroll` check,
+   * so the value a warning is judged against is the value the apply writes.
+   */
+  projectSettingsAfterWrite(settings: Record<string, unknown>): {
+    project: ProjectV2File;
+    settings: Record<string, unknown>;
+    written: string[];
+  } {
     const p = this.projectFilePath;
     if (!fs.existsSync(p)) {
       throw new ToolError('not-found', `Missing nodegx.project.json in ${this.projectDir}; cannot store settings.`);
@@ -201,9 +218,7 @@ export class ProjectStore {
       current[name] = value;
       written.push(name);
     }
-    if (written.length === 0) return [];
-    writeJsonAtomic(p, { ...project, settings: current, modified: new Date().toISOString() });
-    return written;
+    return { project, settings: current, written };
   }
 
   /**

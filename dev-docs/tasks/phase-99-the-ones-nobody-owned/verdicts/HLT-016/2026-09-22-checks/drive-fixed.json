@@ -1,0 +1,64 @@
+{
+  "sqlite": {
+    "adapter": "sqlite",
+    "push": {
+      "status": 200,
+      "checksCreated": [
+        "chk_Assignment_one_learnerId_cohortId",
+        "chk_Assignment_range_target"
+      ]
+    },
+    "satisfying": 201,
+    "breaking": {
+      "both": {
+        "status": 400,
+        "code": 142,
+        "error": "This write breaks a rule of \"Assignment\": exactly one of learnerId, cohortId is set. It was refused, and nothing was changed."
+      },
+      "neither": 400,
+      "tooHigh": {
+        "status": 400,
+        "error": "This write breaks a rule of \"Assignment\": target is between 1 and 10. It was refused, and nothing was changed."
+      },
+      "edit": {
+        "status": 400,
+        "error": "This write breaks a rule of \"Assignment\": exactly one of learnerId, cohortId is set. It was refused, and nothing was changed."
+      }
+    },
+    "rowsWritten": 1,
+    "setChecksAction": {
+      "status": 200
+    }
+  },
+  "postgres": {
+    "adapter": "postgres",
+    "push": {
+      "status": 200,
+      "checksCreated": [
+        "chk_Assignment_one_learnerId_cohortId",
+        "chk_Assignment_range_target"
+      ]
+    },
+    "satisfying": 201,
+    "breaking": {
+      "both": {
+        "status": 400,
+        "code": 142,
+        "error": "This write breaks a rule of \"Assignment\": exactly one of learnerId, cohortId is set. It was refused, and nothing was changed."
+      },
+      "neither": 400,
+      "tooHigh": {
+        "status": 400,
+        "error": "This write breaks a rule of \"Assignment\": target is between 1 and 10. It was refused, and nothing was changed."
+      },
+      "edit": {
+        "status": 400,
+        "error": "This write breaks a rule of \"Assignment\": exactly one of learnerId, cohortId is set. It was refused, and nothing was changed."
+      }
+    },
+    "rowsWritten": 1,
+    "setChecksAction": {
+      "status": 200
+    }
+  }
+}

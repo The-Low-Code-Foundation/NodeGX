@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d0c12976-efb9-5698-8c38-dc4e1e4cedd7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "datawordlistsData",
+      "type": "Static Data",
+      "label": "EDIT — the typing words, per language",
+      "parameters": {
+        "type": "json",
+        "json": "[\n  {\n    \"lang\": \"en\",\n    \"words\": [\n      \"cat\",\n      \"dog\",\n      \"sun\",\n      \"red\",\n      \"run\",\n      \"big\",\n      \"hat\",\n      \"map\",\n      \"cup\",\n      \"bed\",\n      \"fox\",\n      \"jam\",\n      \"kit\",\n      \"log\",\n      \"pen\",\n      \"tree\",\n      \"book\",\n      \"star\",\n      \"fish\",\n      \"ship\",\n      \"milk\",\n      \"moon\",\n      \"frog\",\n      \"bird\",\n      \"cake\",\n      \"door\",\n      \"jump\",\n      \"rock\",\n      \"house\",\n      \"water\",\n      \"apple\",\n      \"green\",\n      \"happy\",\n      \"plant\",\n      \"chair\",\n      \"music\",\n      \"table\",\n      \"bread\",\n      \"cloud\",\n      \"horse\",\n      \"rocket\",\n      \"planet\",\n      \"garden\",\n      \"school\",\n      \"yellow\",\n      \"orange\",\n      \"friend\",\n      \"window\",\n      \"pencil\",\n      \"monkey\",\n      \"morning\",\n      \"picture\",\n      \"teacher\",\n      \"balloon\",\n      \"weekend\",\n      \"kitchen\",\n      \"chicken\",\n      \"holiday\",\n      \"elephant\",\n      \"sandwich\",\n      \"birthday\",\n      \"computer\",\n      \"mountain\",\n      \"football\",\n      \"dinosaur\"\n    ]\n  },\n  {\n    \"lang\": \"fr\",\n    \"words\": [\n      \"chat\",\n      \"lune\",\n      \"pain\",\n      \"lait\",\n      \"jour\",\n      \"nuit\",\n      \"mer\",\n      \"roi\",\n      \"fil\",\n      \"sac\",\n      \"bol\",\n      \"riz\",\n      \"vol\",\n      \"toit\",\n      \"main\",\n      \"pomme\",\n      \"table\",\n      \"porte\",\n      \"livre\",\n      \"rouge\",\n      \"bleu\",\n      \"vert\",\n      \"arbre\",\n      \"fleur\",\n      \"école\",\n      \"jardin\",\n      \"maison\",\n      \"chien\",\n      \"oiseau\",\n      \"soleil\",\n      \"fusée\",\n      \"cheval\",\n      \"gâteau\",\n      \"papier\",\n      \"crayon\",\n      \"fenêtre\",\n      \"cuisine\",\n      \"musique\",\n      \"planète\",\n      \"chocolat\",\n      \"bonjour\",\n      \"samedi\",\n      \"dimanche\",\n      \"copain\",\n      \"copine\",\n      \"voiture\",\n      \"bateau\",\n      \"jouet\",\n      \"ordinateur\",\n      \"montagne\",\n      \"éléphant\",\n      \"dinosaure\",\n      \"anniversaire\",\n      \"vacances\",\n      \"poisson\",\n      \"fromage\"\n    ]\n  }\n]"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "datawordlistsOut",
+      "type": "Component Outputs",
+      "label": "What this source publishes",
+      "ports": [
+        {
+          "name": "lists",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    }
+  ]
+}

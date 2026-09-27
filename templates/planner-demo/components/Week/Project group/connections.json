@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e49a3536-f56a-552c-8cac-1bc682d56ada",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pgIn",
+      "fromProperty": "name",
+      "toId": "pgName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pgIn",
+      "fromProperty": "color",
+      "toId": "pgName",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "pgIn",
+      "fromProperty": "hours",
+      "toId": "pgHours",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pgIn",
+      "fromProperty": "rows",
+      "toId": "pgEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pgEach",
+      "fromProperty": "itemOutputSignal-pick",
+      "toId": "pgOut",
+      "toProperty": "pick"
+    },
+    {
+      "fromId": "pgEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "pgOut",
+      "toProperty": "id"
+    }
+  ]
+}

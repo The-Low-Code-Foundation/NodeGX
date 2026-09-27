@@ -93,6 +93,60 @@ export interface ProjectIR {
    * with a `status` and a `message`, never a missing row.
    */
   modules: ModuleIR[];
+  /**
+   * STY-004. The project's style dictionary — `nodegx.styles.json`, or the legacy `metadata.styles`
+   * plus `variants` in the project file. The three things a node can *point at* instead of holding:
+   * a colour style, a text style, a Look (today's `VariantModel`).
+   *
+   * 🔴 **The defect this closed was that the exporter never opened the file.** A variant and a text
+   * style on an ordinary leaf node both vanished from the export with zero mentions in a 1,059-line
+   * report, while the identical values written inline on the same kind of node exported perfectly —
+   * so the exporter handled values and silently dropped every reference (STY-001-FINDINGS §8.4b).
+   *
+   * Absent when the project declares no styles, which is all 48 fixtures in this package and all
+   * seven shipped templates.
+   */
+  styles?: StylesIR;
+}
+
+/**
+ * A project's named styles. Field names are the **v2 file's** (`colors`, `textStyles`, `variants`);
+ * the legacy shape's `metadata.styles.text` is read into `textStyles` by the parser, exactly as
+ * `ProjectImporter.reconstructMetadata` maps it in the other direction
+ * (`noodl-editor/src/editor/src/io/ProjectImporter.ts:422-429`).
+ */
+export interface StylesIR {
+  /** Style name → the colour it stands for. The runtime's `resolveColor` is `colors[v] ?? v`. */
+  colors: Record<string, string>;
+  /**
+   * Style name → the nine font parameters it sets (`fontFamily`, `fontSize`, `fontWeight`,
+   * `fontStyle`, `color`, `letterSpacing`, `lineHeight`, `textTransform`, `fontVariantNumeric` —
+   * the `textStyle` port's own `childPorts`, `node-shared-port-definitions.ts:2122-2133`).
+   * Values are as written: a `{value, unit}` dimension, a token reference or a literal.
+   */
+  textStyles: Record<string, Record<string, unknown>>;
+  /** Looks. Keyed in use by `typename` + `name` — the pair a node's `variant` field resolves against. */
+  variants: VariantIR[];
+}
+
+/** One Look, as `nodegx.styles.json` writes it. */
+export interface VariantIR {
+  name: string;
+  /** The node type this Look applies to. A Look is per type — `Group`'s and `Text`'s never collide. */
+  typename: string;
+  /** The parameters it sets, beneath the node's own (react-component-node.ts:1817-1822). */
+  parameters: Record<string, unknown>;
+  /**
+   * Hover / pressed / disabled, and the transitions between them.
+   *
+   * 🔴 **Carried, deliberately unemitted.** Nothing in the corpus uses either field — 6 of 7
+   * templates hand-write those states as CSS text in a `CSS Definition` node instead
+   * (STY-001-FINDINGS §7) — and the Look design names states as the next thing after this and
+   * explicitly not part of it. Present here so the layer that emits them does not have to reopen
+   * the parser, and so the report can say a Look carried states that the export did not draw.
+   */
+  stateParameters: Record<string, Record<string, unknown>>;
+  stateTransitions: Record<string, Record<string, unknown>>;
 }
 
 /** Why a module's node definitions are, or are not, in {@link ModuleIR.nodes}. */
@@ -304,6 +358,32 @@ export interface NodeIR {
   parent?: string;
   /** Visual children, order = render order (D2). */
   children?: string[];
+  /**
+   * STY-004. The Look this node wears — `nodes.json`'s own `variant` field, verbatim, resolved
+   * against {@link StylesIR.variants} by `typename` + `name`.
+   *
+   * 🔴 **A top-level field on the node, NOT an entry in `parameters`, and that is exactly why its
+   * loss was silent.** Everything unrecognised in `parameters` reaches `style.unhandled` and prints
+   * a `dropped, reported` note; a field the parser never copied reaches nothing, reports nothing,
+   * and left `variant` with 0 mentions in a 1,059-line export report.
+   */
+  variant?: string;
+  /**
+   * STY-004. What this node's Look and its text style supply, **already beneath its own
+   * `parameters`** — sorted by name (D3), absent when nothing is inherited.
+   *
+   * 🔴 **This is a second pile, not a merge into `parameters`, and the separation is the point.**
+   * `parameters` stays the file as written, so the report can say which values a person typed and
+   * which a Look lent them; a style layer that wants the effective set takes `inherited` first and
+   * lets `parameters` win, which is the runtime's own order.
+   *
+   * The order *within* this pile is already settled: the text style's nine font parameters sit
+   * lowest and the Look's own parameters override them, because in the runtime both a Look's and a
+   * node's parameters arrive as individual ports and every individual port beats the text-style
+   * bundle it came with (`components/visual/Text/Text.tsx:48-51` spreads `textStyle` then `style`;
+   * the port's own description says so out loud).
+   */
+  inheritedParameters?: ParamIR[];
 }
 
 export interface ParamIR {

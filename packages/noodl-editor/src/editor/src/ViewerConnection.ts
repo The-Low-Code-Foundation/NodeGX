@@ -1,4 +1,3 @@
-import { NodeGraphNode } from '@noodl-models/nodegraphmodel';
 import { NodeLibraryImporter } from '@noodl-models/nodelibrary/NodeLibraryImporter';
 import { WORKFLOW_NAME_PREFIX } from '@noodl-utils/NodeGraph';
 
@@ -11,8 +10,7 @@ import { WarningsModel } from './models/warningsmodel';
 import DebugInspector from './utils/debuginspector';
 import * as Exporter from './utils/exporter';
 import { getIpc } from './utils/ipc';
-
-const port = process.env.NOODLPORT || 8574;
+import { viewerPort } from './views/SandboxSurface/viewerOrigin';
 
 /**
  * OBS-004 — this window's copy of the relay token, fetched once.
@@ -65,7 +63,6 @@ export class ViewerConnection extends Model {
   lastExports: object;
   clientsToExportTo: Set<unknown>;
   registeredRuntimeTypes: Set<unknown>;
-  highlightedNode: NodeGraphNode;
   /** AIX-008: clientId → the export that client gets instead of the project. */
   sandboxProviders: Map<string, () => object | undefined>;
 
@@ -109,7 +106,7 @@ export class ViewerConnection extends Model {
     const _this = this;
 
     const protocol = process.env.ssl ? 'wss://' : 'ws://';
-    const address = protocol + 'localhost:' + port;
+    const address = protocol + 'localhost:' + viewerPort();
 
     this.ws = new WebSocket(address);
     this.ws.addEventListener('open', function () {
@@ -482,34 +479,6 @@ export class ViewerConnection extends Model {
   send(request) {
     if (this.ws && this.ws.readyState == 1) {
       this.ws.send(JSON.stringify(request));
-    }
-  }
-
-  sendNodeHighlighted(node: NodeGraphNode, highlighted: boolean) {
-    if (highlighted) {
-      // Send and store this node as the highlighted node
-      if (this.highlightedNode === node) return;
-
-      if (this.highlightedNode) {
-        // Cancel existing highlight
-        this.send({
-          cmd: 'hoverEnd',
-          content: { id: this.highlightedNode.id }
-        });
-      }
-      this.highlightedNode = node;
-
-      this.send({
-        cmd: 'hoverStart',
-        content: { id: node.id }
-      });
-    } else {
-      if (this.highlightedNode == node) this.highlightedNode = undefined;
-
-      this.send({
-        cmd: 'hoverEnd',
-        content: { id: node.id }
-      });
     }
   }
 

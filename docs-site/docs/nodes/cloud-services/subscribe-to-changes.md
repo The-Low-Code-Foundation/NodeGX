@@ -60,7 +60,7 @@ When something in the app should react to a change another user made, without ow
 
 _This node's port list changes at runtime (runtime-discovered); the tables above may be incomplete for a given instance._
 
-Every input but "enabled" is discovered at runtime. "backendId" is a dropdown of the project's backends, defaulting to "_active_" and omitted entirely when the project has only one; "collectionName" is a dropdown of the selected backend's introspected classes; "visualFilter" is a query-filter editor built from that class's schema, and each filter value bound to a port mints one "qp-<name>" input. An authoring tool should set "collectionName" (and "backendId" only when the project has more than one backend); the outputs are all static.
+Every input but "enabled" is discovered at runtime. "backendId" is a dropdown of the project's backends, defaulting to "_active_" and omitted entirely when the project has only one; "collectionName" is a dropdown of the selected backend's introspected classes; "visualFilter" is a query-filter editor built from that class's schema, and each filter value bound to a port mints one "qp-&lt;name>" input. An authoring tool should set "collectionName" (and "backendId" only when the project has more than one backend); the outputs are all static.
 
 ## Ports at runtime
 

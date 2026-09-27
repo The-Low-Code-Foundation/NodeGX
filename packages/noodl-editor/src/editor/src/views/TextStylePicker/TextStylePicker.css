@@ -20,3 +20,10 @@
 .textstyles-edit-style:hover > * {
   opacity: 1;
 }
+
+.textstyles-empty {
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--theme-color-fg-default);
+}

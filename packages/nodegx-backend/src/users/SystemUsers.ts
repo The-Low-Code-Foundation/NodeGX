@@ -64,13 +64,14 @@
  * @module nodegx-backend/users/SystemUsers
  */
 
-import type { AdapterFacade } from '../persistence/AdapterFacade';
+import type { IStorageFacade } from '@noodl/backend-contract';
 import {
   AUDIT_SYSTEM_USER_CREATE,
   AUDIT_SYSTEM_USER_DELETE,
   AUDIT_SYSTEM_USER_UPDATE
 } from '../ops/audit-actions';
 import { hashPassword } from '../server/users';
+import { isAccountDisabled } from './accountColumns';
 
 /**
  * What a node asks for. One entry point with an `op` rather than four globals:
@@ -122,14 +123,16 @@ export const PROTECTED_PROPERTY_KEYS: Record<string, string> = {
   updatedAt: 'bookkeeping the backend owns',
   ACL: 'row-level access — a graph that could set this could grant a new account access to anything',
   password: 'use the Password port, so the value goes through the same hash the login route verifies against',
-  sessionToken: 'a session is not a property of a user, and these nodes never mint one'
+  sessionToken: 'a session is not a property of a user, and these nodes never mint one',
+  // BMG-014. The one column that turns a person into the backend's administrator.
+  adminAccess: 'access to the backend manager is given on its Users page by a full admin, never by a graph'
 };
 
 /** `_User` columns whose value the caller supplies through a dedicated port. */
 const CREATE_RESERVED_KEYS = ['username', 'email', 'emailVerified'];
 
 export interface SystemUsersDeps {
-  facade: AdapterFacade;
+  facade: IStorageFacade;
   /** Called after every write, for the audit trail. Never throws. */
   onAudit?(entry: { action: string; outcome: 'success' | 'failure'; target: Record<string, unknown> }): void;
 }
@@ -207,7 +210,7 @@ function checkProperties(
  * still sees whoever called it — asserted, not assumed.
  */
 export class SystemUsers {
-  private readonly facade: AdapterFacade;
+  private readonly facade: IStorageFacade;
   private readonly onAudit: SystemUsersDeps['onAudit'];
 
   constructor(deps: SystemUsersDeps) {
@@ -361,7 +364,9 @@ export class SystemUsers {
     // administrator is exactly the case where a stolen session must not live.
     let sessionsRevoked = 0;
     if (password !== undefined) {
-      const { results: sessions } = await this.facade.rawQuery('_Session', { where: { userId } });
+      // PRD-001 §3.3: every session, not a page — a token that outlived the
+    // account it belonged to is the failure this revocation exists to prevent.
+    const { results: sessions } = await this.facade.rawQueryAll('_Session', { where: { userId } });
       for (const session of sessions) {
         await this.facade.rawDelete('_Session', session.objectId as string);
         sessionsRevoked++;
@@ -411,7 +416,9 @@ export class SystemUsers {
     // that `SecurityState.resolvePrincipal` resolves to a `_User` row it can no
     // longer fetch — a 209 at best, and rows the sweep would never reach.
     let sessionsRevoked = 0;
-    const { results: sessions } = await this.facade.rawQuery('_Session', { where: { userId } });
+    // PRD-001 §3.3: every session, not a page — a token that outlived the
+    // account it belonged to is the failure this revocation exists to prevent.
+    const { results: sessions } = await this.facade.rawQueryAll('_Session', { where: { userId } });
     for (const session of sessions) {
       await this.facade.rawDelete('_Session', session.objectId as string);
       sessionsRevoked++;
@@ -467,6 +474,8 @@ export class SystemUsers {
       // invalid rather than repaired: a verification must not write.
       return { outcome: 'unchanged', code: 'user/token-invalid', valid: false };
     }
+    // BMG-004 (R3): the same answer the HTTP doors give a disabled account.
+    if (isAccountDisabled(user)) return { outcome: 'unchanged', code: 'user/token-invalid', valid: false };
 
     return {
       outcome: 'done',

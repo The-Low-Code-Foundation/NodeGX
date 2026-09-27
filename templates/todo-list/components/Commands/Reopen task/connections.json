@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d67f1b6a-7bec-55a3-8f7d-e14561c4d3bf",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ReopentaskIn",
+      "fromProperty": "taskId",
+      "toId": "ReopentaskGuard",
+      "toProperty": "in-taskId"
+    },
+    {
+      "fromId": "ReopentaskIn",
+      "fromProperty": "note",
+      "toId": "ReopentaskGuard",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "ReopentaskIn",
+      "fromProperty": "position",
+      "toId": "ReopentaskGuard",
+      "toProperty": "in-position"
+    },
+    {
+      "fromId": "ReopentaskIn",
+      "fromProperty": "rank",
+      "toId": "ReopentaskGuard",
+      "toProperty": "in-rank"
+    },
+    {
+      "fromId": "ReopentaskIn",
+      "fromProperty": "do",
+      "toId": "ReopentaskGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ReopentaskGuard",
+      "fromProperty": "out-status",
+      "toId": "ReopentaskWrite",
+      "toProperty": "prop-status"
+    },
+    {
+      "fromId": "ReopentaskGuard",
+      "fromProperty": "out-position",
+      "toId": "ReopentaskWrite",
+      "toProperty": "prop-position"
+    },
+    {
+      "fromId": "ReopentaskGuard",
+      "fromProperty": "out-empty",
+      "toId": "ReopentaskWrite",
+      "toProperty": "prop-closingNote"
+    },
+    {
+      "fromId": "ReopentaskGuard",
+      "fromProperty": "out-empty",
+      "toId": "ReopentaskWrite",
+      "toProperty": "prop-closedAt"
+    },
+    {
+      "fromId": "ReopentaskIn",
+      "fromProperty": "taskId",
+      "toId": "ReopentaskWrite",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "ReopentaskGuard",
+      "fromProperty": "out-go",
+      "toId": "ReopentaskWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "ReopentaskIn",
+      "fromProperty": "taskId",
+      "toId": "ReopentaskHistory",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "ReopentaskGuard",
+      "fromProperty": "out-summary",
+      "toId": "ReopentaskHistory",
+      "toProperty": "summary"
+    },
+    {
+      "fromId": "ReopentaskGuard",
+      "fromProperty": "out-note",
+      "toId": "ReopentaskHistory",
+      "toProperty": "body"
+    },
+    {
+      "fromId": "ReopentaskWrite",
+      "fromProperty": "done",
+      "toId": "ReopentaskHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "ReopentaskHistory",
+      "fromProperty": "done",
+      "toId": "ReopentaskOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "ReopentaskWrite",
+      "fromProperty": "failure",
+      "toId": "ReopentaskProblem",
+      "toProperty": "do"
+    }
+  ]
+}

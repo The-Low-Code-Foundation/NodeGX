@@ -25,13 +25,13 @@ would be trivially bypassable.
 
 ## Limits and content-type policy
 
-Configure in the editor: **Backend Services → (your local backend) → Files**,
-or via MCP (`get_backend_file_config` / `configure_backend_files`).
+Configure on the backend manager's **Storage** page (from the editor: the local
+backend's card → **Manage data & settings**), or via MCP (`get_backend_file_config` / `configure_backend_files`).
 
 | Setting | Default | Notes |
 |---|---|---|
 | Max upload size | 25 MB | Oversized uploads are rejected with `413` before the body is even fully read (declared `Content-Length` is checked first). |
-| Content-type deny list | empty | Refuse specific sniffed types outright (e.g. `application/x-msdownload`). |
+| Content-type deny list | empty | Refuse specific sniffed types outright (e.g. `application/x-msdownload`). The manager's Storage page offers these as ticked categories in the sniffer's own vocabulary plus custom types — a type the sniffer never produces is kept and labelled *never identified*, because it matches nothing. |
 | Content-type allow list | none (allow all) | When set, ONLY these sniffed types may be uploaded. |
 | Signed URL TTL | 300s | See "Private files" below. |
 
@@ -75,7 +75,10 @@ Three presets ship by default — `sm` (64×64, cover), `md` (256×256, cover),
 resize-anything DoS vector for the public internet; named presets are public.
 Results are cached on disk and served with a correct `ETag`/`Cache-Control`
 (`public, max-age=31536000, immutable` for public files; `private, no-store`
-for private ones) — a cache hit never touches the transform library.
+for private ones) — a cache hit never touches the transform library. The cache
+key carries the preset's size and fit as well as its name, so editing a preset
+on the manager's Storage page is honoured by the next request (before BMG-011
+the old render was served under the name for as long as the cache lived).
 
 ### The sharp caveat — read this before you rely on thumbnails
 
@@ -87,7 +90,7 @@ Thumbnails are rendered with [`sharp`](https://sharp.pixelplumbing.com/), a
   platform), `?thumb=` requests return an explicit **501** with the reason —
   never a silent skip, and never a pure-JS fallback resizer producing
   different bytes than sharp would.
-- `GET /admin/files/config` (and the panel/dashboard) report
+- `GET /admin/files/config` (and the manager's Storage page) report
   `transformsAvailable` honestly, so you find out from the config screen, not
   from a confusing 501 in production.
 
@@ -103,12 +106,50 @@ backend keeps running — everything except `?thumb=` is unaffected.
 | `local` (default) | none | Blobs under `<dataDir>/files/blobs/`, hash-bucketed (`hh/hh/hash-random`). |
 | `s3` | `endpoint`, `region`, `bucket`, `forcePathStyle`; credentials separately | Any S3-compatible service — AWS S3, MinIO, and others. Signed with a from-scratch SigV4 implementation (no AWS SDK) — see BAK-006-NOTES for why and how it's verified. |
 
-Set the driver via `configure_backend_files` (MCP) or the panel; S3
-credentials are set separately (`s3AccessKeyId`/`s3SecretAccessKey`) and are
-never echoed back by any read surface — same convention as the SMTP password.
-**Switching drivers does not migrate existing files** — that is a documented
-manual procedure (copy the blobs, update the `driver`/`key` on each `_Files`
-row), not a button, in v1.
+Set the driver on the backend manager's **Storage** page (*Where files are
+stored*: two tiles, this machine or an S3-compatible bucket — endpoint, region,
+bucket, path-style addressing, the key), via `configure_backend_files` (MCP), or
+`PUT /admin/files/config`. S3 credentials are set separately (`s3Credentials`
+on the wire, `s3AccessKeyId`/`s3SecretAccessKey` in the `files` namespace of
+`secrets.json`) and are never echoed back by any read surface — same convention
+as the SMTP password; `GET /admin/files/config` answers `s3CredentialsConfigured`
+and nothing more.
+
+**A bucket is tested before it is saved.** The page's **Test connection**
+(`POST /admin/files/config/test {driver, s3Credentials?}`, a dry run: nothing is
+stored) builds a throwaway driver over the unsaved details, does a `HEAD` on the
+bucket and a `PUT` + `DELETE` of one probe key, and answers the endpoint's own
+sentence when it refuses (*InvalidAccessKeyId: The Access Key Id you provided
+does not exist…*, *There is no bucket called "x" at …*, *Could not reach …*).
+Saving an `s3` driver runs the same probe first and refuses with `400 Not saved —
+the bucket could not be reached: …`, persisting neither the driver nor the key —
+so a typo in the endpoint is found by the save, never by the next upload.
+
+**Switching drivers does not migrate existing files**, and it does not have
+to: every `_Files` row records the `driver` that holds its blob, and a file is
+served, thumbnailed and deleted by *that* driver, not by whichever is current.
+The local store stays alive beside the bucket, so files uploaded before the
+switch keep serving from the machine; new uploads go to the bucket. Switching
+back to local while bucket-stored rows exist makes those files a loud sentence
+(*stored in a bucket this backend is no longer connected to*), not a 404 —
+reconnect the bucket and they serve again. The orphan sweep walks both stores
+and judges each row against its own.
+
+**Moving the files already here into the bucket** is a button: once uploads go
+to the bucket, the Storage page says how many files are still on this machine
+and offers **Move them to the bucket** (`POST /admin/files/move`, progress on
+`GET /admin/files/move`; audited as `files.move`). It runs in the background, one
+file at a time: the bytes are copied into the bucket and checked, then the row is
+pointed at the bucket — only if it still names the local copy — and then the
+local copy is deleted. A file that cannot be moved (its bytes are gone, the
+bucket did not take all of them, the row changed meanwhile) stays where it was,
+still serving, and is named with a sentence; the worst a crash can leave is a
+copy no row points at, which the orphan sweep lists. Moving files *back* from a
+bucket to this machine is not a button: do it before disconnecting the bucket,
+by hand (copy the blobs, update `driver`/`key` on each row).
+
+**The same bucket carries the backups** (`BACKUP-RESTORE.md`, *Archives in a
+bucket*): there is one set of details, typed once here.
 
 ## Orphan sweep
 

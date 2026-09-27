@@ -4,6 +4,5 @@ export * from './workflowtriggernodes.test';
 export * from './functionrefresolution.test';
 export * from './functiondescent.test';
 export * from './newfunctionfromstep.test';
-export * from './triggerediting.test';
 export * from './workflowproposal.test';
 export * from './workflowbackendlist.test';

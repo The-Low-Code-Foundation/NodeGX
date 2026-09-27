@@ -227,6 +227,25 @@ describe('TPL-005 §2 — the game is in the graph, not in a script', () => {
     expect(found.sort()).toEqual([...declared].sort());
   });
 
+  /**
+   * 🔴 Transitions OFF on every States node, for the runtime the community shelf installs into.
+   *
+   * With transitions on, a token colour tweens through an invalid `#0aNaNNaNNaN` and never arrives
+   * (D49): the board edge never turns and the banner keeps the default foreground. P88 GAM-006 fixed
+   * the runtime after v0.2.4, and this template is published to the shelf, which reaches v0.2.4. The
+   * gate stops a tidy-up restoring the default before every version the shelf reaches carries the fix.
+   */
+  it('every States node has transitions OFF, because v0.2.4’s runtime does not publish colours with them on', () => {
+    const found: Array<[string, unknown]> = [];
+    for (const c of built.project.components ?? []) {
+      for (const n of nodesOf(c.name)) {
+        if (n.type === 'States') found.push([`${c.name}::${n.id}`, n.parameters?.useTransitions]);
+      }
+    }
+    expect(found.length).toBeGreaterThanOrEqual(2);
+    for (const [where, value] of found) expect([where, value]).toEqual([where, false]);
+  });
+
   it('the Function nodes are exactly the named seams', () => {
     const declared = new Set(FUNCTION_SEAMS.map((f) => `${f.component}::${f.id}`));
     const found: string[] = [];

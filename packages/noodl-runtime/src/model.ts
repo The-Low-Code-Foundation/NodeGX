@@ -91,6 +91,11 @@ interface ModelConstructor {
   instanceOf(value: unknown): boolean;
   /** A 10-character random id. The runtime's only id generator for records. */
   guid(): string;
+  /**
+   * GAM-007 (P78 D64) — whether a data field of this name is unreachable by name through a record,
+   * because the proxy's `get` trap answers it with one of the record's own members first.
+   */
+  isReservedFieldName(name: string): boolean;
 }
 
 const Model = function Model(this: ModelInstance, id: string, data: Record<string, unknown>) {
@@ -258,6 +263,35 @@ Model._registrySize = function () {
 
 Model.instanceOf = function (collection: unknown) {
   return collection instanceof Model || (collection as { target?: unknown }).target instanceof Model;
+};
+
+/**
+ * GAM-007 (P78 D64) — Rocket School's hangar drew no tiles, because a shelf row's `on` field read
+ * back as the record's event method.
+ *
+ * 🔒 R8 (Richard, 2026-09-14): C. The names are reserved loudly now, and data wins later. So
+ * `_modelProxyHandler.get` is deliberately unchanged, and this answers **its** rule, not a typed
+ * list: a function anywhere up the chain (`Object.prototype` included), or any name `in` the record.
+ * `test/gam-007-a-data-field-called-on.test.ts` derives the list from real rows through the trap
+ * and pins this to it, so the two cannot drift.
+ *
+ * The probe is built with `new Model`, never `Model.get`, so it is in no registry. It runs `on` and
+ * sets `_class` once, because a record only grows `listeners` and `_class` later, and a row whose
+ * field has either name reads the data until then and the member after.
+ */
+let _reservedProbe: ModelInstance | undefined;
+
+Model.isReservedFieldName = function (name: string): boolean {
+  // `id` passes the `in` test, but it reads back the record's id, which is the row's own id whenever
+  // the row has one. Reserving it would refuse every row with an id.
+  if (name === 'id') return false;
+  if (_reservedProbe === undefined) {
+    _reservedProbe = new Model('', {});
+    _reservedProbe.on('change', () => undefined);
+    _reservedProbe._class = '';
+  }
+  const member = (_reservedProbe as unknown as Record<string, unknown>)[name];
+  return typeof member === 'function' || name in _reservedProbe;
 };
 
 function _randomString(size: number) {

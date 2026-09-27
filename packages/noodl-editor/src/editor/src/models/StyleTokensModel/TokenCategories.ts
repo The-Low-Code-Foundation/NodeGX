@@ -107,6 +107,20 @@ export const TOKEN_CATEGORY_GROUPS: TokenCategoryGroup[] = [
   'Animation'
 ];
 
+/**
+ * The panel group a token's category files under, read from {@link TOKEN_CATEGORIES} — the one
+ * table. P99 HLT-007: the Styles panel kept a hand-written second copy of this mapping, and a
+ * category the copy had not heard of returned `null` and vanished from the panel in silence.
+ *
+ * Takes a `string`, not a `TokenCategory`, because token records are read from a project file and
+ * the category can be one no build has seen. That, or an inherited name such as `toString`, is
+ * `null` (an own-property check: a bare index would hand back `Object.prototype`'s function).
+ */
+export function groupForTokenCategory(category: string): TokenCategoryGroup | null {
+  if (!Object.prototype.hasOwnProperty.call(TOKEN_CATEGORIES, category)) return null;
+  return TOKEN_CATEGORIES[category as TokenCategory].group;
+}
+
 // ─── Token Interface ──────────────────────────────────────────────────────────
 
 export interface StyleToken {

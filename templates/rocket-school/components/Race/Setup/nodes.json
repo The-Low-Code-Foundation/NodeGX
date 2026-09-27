@@ -1,0 +1,569 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "77263425-aeb8-56eb-8064-f858ea994168",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rsIn",
+      "type": "Component Inputs",
+      "label": "The words",
+      "ports": [
+        {
+          "name": "mounted",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "mathsWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "typingWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "onePlayerWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "twoPlayersWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "practiceWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "challengeWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "startWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "nameWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "practiceRuleWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "challengeRuleWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 1840
+    },
+    {
+      "id": "rsCard",
+      "type": "Group",
+      "label": "The setup",
+      "children": [
+        "rsMode",
+        "rsPlayers",
+        "rsTimed",
+        "rsRule",
+        "rsNameB",
+        "rsStart"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "rowGap": "var(--space-5)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rsMode",
+      "type": "/Game/Choice row",
+      "label": "Maths or typing",
+      "parent": "rsCard",
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "rsPlayers",
+      "type": "/Game/Choice row",
+      "label": "One or two",
+      "parent": "rsCard",
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "rsTimed",
+      "type": "/Game/Choice row",
+      "label": "Practice or challenge",
+      "parent": "rsCard",
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "rsRule",
+      "type": "Text",
+      "label": "What this mode rewards",
+      "parent": "rsCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "rsNameB",
+      "type": "net.noodl.controls.textinput",
+      "label": "Player two's name",
+      "parent": "rsCard",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Player 2"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "rsStart",
+      "type": "net.noodl.controls.button",
+      "label": "Start",
+      "parent": "rsCard",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Start"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "rsModeItems",
+      "type": "JavaScriptFunction",
+      "label": "The two modes, in words",
+      "parameters": {
+        "functionScript": "Outputs.items = [{ label: Inputs.maths, value: 'maths' }, { label: Inputs.typing, value: 'typing' }];"
+      },
+      "x": 350,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-maths",
+          "displayName": "maths",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-typing",
+          "displayName": "typing",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "rsPlayerItems",
+      "type": "JavaScriptFunction",
+      "label": "One or two, in words",
+      "parameters": {
+        "functionScript": "Outputs.items = [{ label: Inputs.one, value: '1' }, { label: Inputs.two, value: '2' }];"
+      },
+      "x": 350,
+      "y": 640,
+      "ports": [
+        {
+          "name": "in-one",
+          "displayName": "one",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-two",
+          "displayName": "two",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "rsTimedItems",
+      "type": "JavaScriptFunction",
+      "label": "Practice or challenge, in words",
+      "parameters": {
+        "functionScript": "Outputs.items = [{ label: Inputs.practice, value: 'practice' }, { label: Inputs.challenge, value: 'challenge' }];"
+      },
+      "x": 350,
+      "y": 1000,
+      "ports": [
+        {
+          "name": "in-practice",
+          "displayName": "practice",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-challenge",
+          "displayName": "challenge",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "rsModeVar",
+      "type": "Variable2",
+      "label": "The mode",
+      "parameters": {
+        "name": "raceMode"
+      },
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "rsSetMode",
+      "type": "Set Variable",
+      "label": "Choose a mode",
+      "parameters": {
+        "name": "raceMode"
+      },
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "rsPlayersVar",
+      "type": "Variable2",
+      "label": "How many",
+      "parameters": {
+        "name": "racePlayers"
+      },
+      "x": 350,
+      "y": 760
+    },
+    {
+      "id": "rsSetPlayers",
+      "type": "Set Variable",
+      "label": "Choose how many",
+      "parameters": {
+        "name": "racePlayers"
+      },
+      "x": 350,
+      "y": 880
+    },
+    {
+      "id": "rsTimedVar",
+      "type": "Variable2",
+      "label": "Timed?",
+      "parameters": {
+        "name": "raceTimed"
+      },
+      "x": 350,
+      "y": 1120
+    },
+    {
+      "id": "rsSetTimed",
+      "type": "Set Variable",
+      "label": "Choose timed",
+      "parameters": {
+        "name": "raceTimed"
+      },
+      "x": 350,
+      "y": 1240
+    },
+    {
+      "id": "rsNameKeep",
+      "type": "Variable2",
+      "label": "Player two’s name, kept",
+      "parameters": {
+        "name": "raceNameB"
+      },
+      "x": 350,
+      "y": 1480
+    },
+    {
+      "id": "rsIsTwo",
+      "type": "Expression",
+      "label": "Two players?",
+      "parameters": {
+        "expression": "players === '2'"
+      },
+      "x": 350,
+      "y": 1600
+    },
+    {
+      "id": "rsPlayersNum",
+      "type": "Expression",
+      "label": "As a number",
+      "parameters": {
+        "expression": "players === '2' ? 2 : 1"
+      },
+      "x": 350,
+      "y": 1960
+    },
+    {
+      "id": "rsIsTimed",
+      "type": "Expression",
+      "label": "Challenge?",
+      "parameters": {
+        "expression": "timed === 'challenge'"
+      },
+      "x": 350,
+      "y": 2080
+    },
+    {
+      "id": "rsRuleText",
+      "type": "Expression",
+      "label": "The chosen mode’s rule, in words",
+      "parameters": {
+        "expression": "timed === 'challenge' ? challenge : practice"
+      },
+      "x": 350,
+      "y": 1360
+    },
+    {
+      "id": "rsShown",
+      "type": "Expression",
+      "label": "Shown unless told not to",
+      "parameters": {
+        "expression": "m !== false"
+      },
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "rsDefMode",
+      "type": "Expression",
+      "label": "maths",
+      "parameters": {
+        "expression": "'maths'"
+      },
+      "x": 350,
+      "y": 2200
+    },
+    {
+      "id": "rsDefPlayers",
+      "type": "Expression",
+      "label": "one",
+      "parameters": {
+        "expression": "'1'"
+      },
+      "x": 350,
+      "y": 2320
+    },
+    {
+      "id": "rsDefTimed",
+      "type": "Expression",
+      "label": "practice",
+      "parameters": {
+        "expression": "'practice'"
+      },
+      "x": 350,
+      "y": 2440
+    },
+    {
+      "id": "rsInitMode",
+      "type": "Set Variable",
+      "label": "Start on maths",
+      "parameters": {
+        "name": "raceMode"
+      },
+      "x": 350,
+      "y": 2560
+    },
+    {
+      "id": "rsInitPlayers",
+      "type": "Set Variable",
+      "label": "Start solo",
+      "parameters": {
+        "name": "racePlayers"
+      },
+      "x": 350,
+      "y": 2680
+    },
+    {
+      "id": "rsInitTimed",
+      "type": "Set Variable",
+      "label": "Start untimed",
+      "parameters": {
+        "name": "raceTimed"
+      },
+      "x": 350,
+      "y": 2800
+    },
+    {
+      "id": "rsSeeded",
+      "type": "States",
+      "label": "Defaults written yet?",
+      "parameters": {
+        "states": "fresh,seeded",
+        "values": "seeded",
+        "useTransitions": false,
+        "type-seeded": "boolean",
+        "value-fresh-seeded": false,
+        "value-seeded-seeded": true
+      },
+      "x": 350,
+      "y": 2920
+    },
+    {
+      "id": "rsFirst",
+      "type": "Condition",
+      "label": "The first time the setup shows?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "rsOut",
+      "type": "Component Outputs",
+      "label": "Go",
+      "ports": [
+        {
+          "name": "start",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "mode",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "players",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "timed",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "nameB",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 1720
+    }
+  ],
+  "visualRoots": [
+    "rsCard"
+  ]
+}

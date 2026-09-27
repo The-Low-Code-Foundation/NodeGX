@@ -37,11 +37,34 @@ export interface RetentionPolicy {
   keepWeekly: number;
 }
 
-export interface BackupDestination {
-  /** Only 'local' in v1. S3 is a recorded follow-on (needs BAK-006's driver). */
-  type: 'local';
-  /** Directory backups are written to. Defaults to `<dataDir>/backups`. */
-  path: string;
+/**
+ * Where archives go. `local` is a directory on the backend's machine;
+ * `s3` (BMG-015) is the SAME bucket the files driver is connected to
+ * (files.json's `driver`, credentials in the `files` secrets namespace —
+ * typed once, on the Storage page), under `prefix`. There is deliberately no
+ * second endpoint or credential here.
+ */
+export type BackupDestination =
+  | {
+      type: 'local';
+      /** Directory backups are written to. Defaults to `<dataDir>/backups`. */
+      path: string;
+    }
+  | {
+      type: 's3';
+      /** Object-key prefix inside the files' bucket, always ending in `/`. */
+      prefix: string;
+    };
+
+export const DEFAULT_BACKUP_PREFIX = 'backups/';
+
+/** A prefix as an object key: no leading `/`, one trailing `/`, the default when blank. */
+export function normaliseBackupPrefix(raw: unknown): string {
+  const p = String(raw || '')
+    .trim()
+    .replace(/^\/+/, '')
+    .replace(/\/+$/, '');
+  return p ? p + '/' : DEFAULT_BACKUP_PREFIX;
 }
 
 export interface BackupResultStatus {
@@ -127,9 +150,11 @@ export class BackupConfigStore {
         : null,
       retention: { ...base.retention, ...(p.retention || {}) },
       destination:
-        p.destination && p.destination.type === 'local'
-          ? { type: 'local', path: p.destination.path || base.destination.path }
-          : base.destination,
+        p.destination && p.destination.type === 's3'
+          ? { type: 's3', prefix: normaliseBackupPrefix(p.destination.prefix) }
+          : p.destination && (p.destination.type === 'local' || (p.destination as { path?: string }).path)
+            ? { type: 'local', path: (p.destination as { path?: string }).path || (base.destination as { path: string }).path }
+            : base.destination,
       includeSecrets: !!p.includeSecrets,
       status: { ...emptyStatus(), ...(p.status || {}) }
     };
@@ -146,8 +171,23 @@ export class BackupConfigStore {
     return JSON.parse(JSON.stringify(this.config));
   }
 
+  /** BMG-011 §7: re-read backups.json after a restore. An invalid one is refused: the live policy is written back, the refusal thrown. */
+  reload(): void {
+    try {
+      this.config = this.load();
+    } catch (e) {
+      this.persist();
+      throw e;
+    }
+  }
+
+  /** The local archive directory: the destination's when it is local, else the default `<dataDir>/backups`. */
   getDestinationDir(): string {
-    return this.config.destination.path;
+    return this.config.destination.type === 'local' ? this.config.destination.path : path.join(this.dataDir, 'backups');
+  }
+
+  getDestination(): BackupDestination {
+    return { ...this.config.destination };
   }
 
   getRetention(): RetentionPolicy {
@@ -172,10 +212,12 @@ export class BackupConfigStore {
     if (patch.schedule !== undefined) this.config.schedule = patch.schedule;
     if (patch.retention) this.config.retention = { ...this.config.retention, ...patch.retention };
     if (patch.destination) {
-      this.config.destination = {
-        type: 'local',
-        path: patch.destination.path || this.config.destination.path
-      };
+      const d = patch.destination as { type?: string; path?: string; prefix?: string };
+      // `{path}` with no type (the MCP tool's shape, every pre-BMG-015 caller) is local.
+      this.config.destination =
+        d.type === 's3'
+          ? { type: 's3', prefix: normaliseBackupPrefix(d.prefix) }
+          : { type: 'local', path: d.path || this.getDestinationDir() };
     }
     if (patch.includeSecrets !== undefined) this.config.includeSecrets = patch.includeSecrets;
     this.persist();

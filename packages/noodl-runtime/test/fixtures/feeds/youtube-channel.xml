@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- FED-001 fixture: the shape YouTube's /feeds/videos.xml emits — Atom plus yt: and media:.
+     Synthetic: invented channel, invented video ids, no real account. -->
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015"
+      xmlns:media="http://search.yahoo.com/mrss/"
+      xmlns="http://www.w3.org/2005/Atom">
+  <link rel="self" href="https://www.youtube.com/feeds/videos.xml?channel_id=UCfixture000000000000001"/>
+  <id>yt:channel:UCfixture000000000000001</id>
+  <yt:channelId>UCfixture000000000000001</yt:channelId>
+  <title>Workshop Diaries</title>
+  <link rel="alternate" href="https://www.youtube.com/channel/UCfixture000000000000001"/>
+  <author>
+    <name>Workshop Diaries</name>
+    <uri>https://www.youtube.com/channel/UCfixture000000000000001</uri>
+  </author>
+  <published>2019-03-02T10:00:00+00:00</published>
+  <entry>
+    <id>yt:video:fixtureVid001</id>
+    <yt:videoId>fixtureVid001</yt:videoId>
+    <yt:channelId>UCfixture000000000000001</yt:channelId>
+    <title>Rebuilding a 1950s bench vice</title>
+    <link rel="alternate" href="https://www.youtube.com/watch?v=fixtureVid001"/>
+    <author>
+      <name>Workshop Diaries</name>
+      <uri>https://www.youtube.com/channel/UCfixture000000000000001</uri>
+    </author>
+    <published>2026-09-15T16:00:07+00:00</published>
+    <updated>2026-09-16T02:11:43+00:00</updated>
+    <media:group>
+      <media:title>Rebuilding a 1950s bench vice</media:title>
+      <media:content url="https://www.youtube.com/v/fixtureVid001?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+      <media:thumbnail url="https://i.ytimg.com/vi/fixtureVid001/hqdefault.jpg" width="480" height="360"/>
+      <media:description>Stripping, derusting and repainting a vice that outlived its owner.</media:description>
+      <media:community>
+        <media:starRating count="812" average="4.94" min="1" max="5"/>
+        <media:statistics views="20431"/>
+      </media:community>
+    </media:group>
+  </entry>
+  <entry>
+    <id>yt:video:fixtureVid002</id>
+    <yt:videoId>fixtureVid002</yt:videoId>
+    <title>Sharpening without a jig</title>
+    <link rel="alternate" href="https://www.youtube.com/watch?v=fixtureVid002"/>
+    <author><name>Workshop Diaries</name></author>
+    <published>2026-09-08T16:00:02+00:00</published>
+    <updated>2026-09-09T01:02:03+00:00</updated>
+    <media:group>
+      <media:title>Sharpening without a jig</media:title>
+      <media:thumbnail url="https://i.ytimg.com/vi/fixtureVid002/hqdefault.jpg" width="480" height="360"/>
+      <media:description>Freehand, and why it is worth the fortnight it takes to learn.</media:description>
+    </media:group>
+  </entry>
+</feed>

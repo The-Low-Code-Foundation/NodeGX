@@ -7,6 +7,14 @@
  *
  * @module noodl-editor/tests-unit/fb-013/chat-composer-render
  */
+// FLD-017 — CHR-012 made the community write verbs `PrimaryButton`, which imports `Icon`.
+jest.mock('@noodl-core-ui/components/common/Icon', () => ({
+  Icon: () => null,
+  IconName: {},
+  IconSize: { Small: 'small' },
+  IconVariant: {}
+}));
+
 import React from 'react';
 
 import { CommunityChatThread, CommunityChatView, CommunityDensity, type CommunityChatComposerBox } from '@noodl-core-ui/components/community';
@@ -15,7 +23,7 @@ import { composeChatComposer, composeChatReplyBox } from '@noodl-models/communit
 import type { ChatMessage, Read } from '@noodl-models/community/communityapi';
 import type { PostBlock } from '@noodl-models/community/postbody';
 
-import { byClass, render, text, walk } from '../support/renderElements';
+import { byClass, byTestId, render, text, walk } from '../support/renderElements';
 
 const noop = () => undefined;
 const para = (body: string): PostBlock[] => [{ kind: 'paragraph', inlines: [{ kind: 'text', text: body }] }];
@@ -87,7 +95,7 @@ describe('the starter — signed in, above the river', () => {
   });
 
   it('draws the verb, labelled to start something rather than to answer', () => {
-    expect(byClass(tree, 'ReplySubmit')[0].ownText).toBe('Say something');
+    expect(text(byTestId(tree, 'community-reply-submit')[0])).toBe('Say something');
   });
 
   it('🔴 changing the select calls back with the option’s own key, not a guess', () => {
@@ -135,7 +143,7 @@ describe('the starter — refusal and busy states', () => {
         onHandoff: noop
       })
     );
-    expect(byClass(tree, 'ReplySubmit')[0].props.disabled).toBe(true);
+    expect(byTestId(tree, 'community-reply-submit')[0].props.disabled).toBe(true);
     expect(byClass(tree, 'ReplyBlocked')).toHaveLength(1); // the channel purpose sentence only
   });
 
@@ -153,10 +161,10 @@ describe('the starter — refusal and busy states', () => {
         onHandoff: noop
       })
     );
-    expect(byClass(tree, 'ReplySubmit')[0].props.disabled).toBe(true);
+    expect(byTestId(tree, 'community-reply-submit')[0].props.disabled).toBe(true);
     expect(byClass(tree, 'ReplyInput')[0].props.disabled).toBe(true);
     expect(byClass(tree, 'ComposerSelect')[0].props.disabled).toBe(true);
-    expect(byClass(tree, 'ReplySubmit')[0].ownText).toBe('Posting…');
+    expect(text(byTestId(tree, 'community-reply-submit')[0])).toBe('Posting…');
   });
 
   it('a failed post keeps the text on screen and announces the failure', () => {
@@ -243,7 +251,7 @@ describe('the reply — signed in, under the replies', () => {
   });
 
   it('draws the verb, labelled to reply', () => {
-    expect(byClass(tree, 'ReplySubmit')[0].ownText).toBe('Reply');
+    expect(text(byTestId(tree, 'community-reply-submit')[0])).toBe('Reply');
   });
 
   it('sits after the replies that are drawn', () => {

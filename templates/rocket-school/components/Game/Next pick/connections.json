@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f4b2fe29-4793-5eef-8868-2c149f49c880",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "npIn",
+      "fromProperty": "text",
+      "toId": "npText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "npIn",
+      "fromProperty": "percent",
+      "toId": "npFill",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "npIn",
+      "fromProperty": "hasPicks",
+      "toId": "npReady",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "npReady",
+      "fromProperty": "ontrue",
+      "toId": "npTone",
+      "toProperty": "to-ready"
+    },
+    {
+      "fromId": "npReady",
+      "fromProperty": "onfalse",
+      "toId": "npTone",
+      "toProperty": "to-saving"
+    },
+    {
+      "fromId": "npTone",
+      "fromProperty": "fill",
+      "toId": "npFill",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "npCard",
+      "fromProperty": "onClick",
+      "toId": "npOut",
+      "toProperty": "open"
+    }
+  ]
+}

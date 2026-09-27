@@ -1,0 +1,644 @@
+{
+  "measured": {
+    "darkBottom": {
+      "rows": [
+        {
+          "label": "Edge",
+          "labelBox": {
+            "top": 465,
+            "left": 17,
+            "width": 116,
+            "height": 16.2
+          },
+          "labelCut": false,
+          "track": {
+            "top": 461,
+            "left": 141,
+            "width": 156,
+            "height": 26
+          },
+          "rowHeight": 30,
+          "segments": [
+            {
+              "tab": "borders-all",
+              "pressed": "true",
+              "set": null,
+              "title": "All edges",
+              "box": {
+                "top": 464,
+                "left": 144,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 467,
+                "left": 151,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(255, 255, 255)",
+              "bg": "rgb(51, 62, 77)",
+              "mark": null
+            },
+            {
+              "tab": "borders-top",
+              "pressed": "false",
+              "set": null,
+              "title": "Top edge",
+              "box": {
+                "top": 464,
+                "left": 174,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 467,
+                "left": 182,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(196, 206, 219)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "mark": null
+            },
+            {
+              "tab": "borders-right",
+              "pressed": "false",
+              "set": null,
+              "title": "Right edge",
+              "box": {
+                "top": 464,
+                "left": 205,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 467,
+                "left": 212,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(196, 206, 219)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "mark": null
+            },
+            {
+              "tab": "borders-bottom",
+              "pressed": "false",
+              "set": null,
+              "title": "Bottom edge",
+              "box": {
+                "top": 464,
+                "left": 235,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 467,
+                "left": 242,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(196, 206, 219)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "mark": null
+            },
+            {
+              "tab": "borders-left",
+              "pressed": "false",
+              "set": null,
+              "title": "Left edge",
+              "box": {
+                "top": 464,
+                "left": 266,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 467,
+                "left": 273,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(196, 206, 219)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "mark": null
+            }
+          ],
+          "shownRows": [
+            "Border Style",
+            "Border Width",
+            "Border Color"
+          ]
+        },
+        {
+          "label": "Corner",
+          "labelBox": {
+            "top": 645,
+            "left": 17,
+            "width": 116,
+            "height": 16.2
+          },
+          "labelCut": false,
+          "track": {
+            "top": 641,
+            "left": 141,
+            "width": 156,
+            "height": 26
+          },
+          "rowHeight": 30,
+          "segments": [
+            {
+              "tab": "corners-all",
+              "pressed": "true",
+              "set": null,
+              "title": "All corners",
+              "box": {
+                "top": 644,
+                "left": 144,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 647,
+                "left": 151,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(255, 255, 255)",
+              "bg": "rgb(51, 62, 77)",
+              "mark": null
+            },
+            {
+              "tab": "corners-top-left",
+              "pressed": "false",
+              "set": null,
+              "title": "Top left corner",
+              "box": {
+                "top": 644,
+                "left": 174,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 647,
+                "left": 182,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(196, 206, 219)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "mark": null
+            },
+            {
+              "tab": "corners-top-right",
+              "pressed": "false",
+              "set": null,
+              "title": "Top right corner",
+              "box": {
+                "top": 644,
+                "left": 205,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 647,
+                "left": 212,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(196, 206, 219)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "mark": null
+            },
+            {
+              "tab": "corners-bottom-right",
+              "pressed": "false",
+              "set": null,
+              "title": "Bottom right corner",
+              "box": {
+                "top": 644,
+                "left": 235,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 647,
+                "left": 242,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(196, 206, 219)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "mark": null
+            },
+            {
+              "tab": "corners-bottom-left",
+              "pressed": "false",
+              "set": null,
+              "title": "Bottom left corner",
+              "box": {
+                "top": 644,
+                "left": 266,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 647,
+                "left": 273,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(196, 206, 219)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "mark": null
+            }
+          ],
+          "shownRows": [
+            "Corner Radius"
+          ]
+        }
+      ],
+      "oldStripElements": 0,
+      "groupHeaders": [
+        {
+          "name": "Style",
+          "top": 55
+        },
+        {
+          "name": "Border Style",
+          "top": 427
+        },
+        {
+          "name": "Corner Radius",
+          "top": 607
+        },
+        {
+          "name": "Box Shadow",
+          "top": 720
+        }
+      ],
+      "labelLefts": [
+        17,
+        28
+      ]
+    },
+    "lightBottom": {
+      "rows": [
+        {
+          "label": "Edge",
+          "labelBox": {
+            "top": 465,
+            "left": 17,
+            "width": 116,
+            "height": 16.2
+          },
+          "labelCut": false,
+          "track": {
+            "top": 461,
+            "left": 141,
+            "width": 156,
+            "height": 26
+          },
+          "rowHeight": 30,
+          "segments": [
+            {
+              "tab": "borders-all",
+              "pressed": "true",
+              "set": null,
+              "title": "All edges",
+              "box": {
+                "top": 464,
+                "left": 144,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 467,
+                "left": 151,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(24, 33, 43)",
+              "bg": "rgb(229, 233, 237)",
+              "mark": null
+            },
+            {
+              "tab": "borders-top",
+              "pressed": "false",
+              "set": null,
+              "title": "Top edge",
+              "box": {
+                "top": 464,
+                "left": 174,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 467,
+                "left": 182,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(89, 98, 110)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "mark": null
+            },
+            {
+              "tab": "borders-right",
+              "pressed": "false",
+              "set": null,
+              "title": "Right edge",
+              "box": {
+                "top": 464,
+                "left": 205,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 467,
+                "left": 212,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(89, 98, 110)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "mark": null
+            },
+            {
+              "tab": "borders-bottom",
+              "pressed": "false",
+              "set": null,
+              "title": "Bottom edge",
+              "box": {
+                "top": 464,
+                "left": 235,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 467,
+                "left": 242,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(89, 98, 110)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "mark": null
+            },
+            {
+              "tab": "borders-left",
+              "pressed": "false",
+              "set": null,
+              "title": "Left edge",
+              "box": {
+                "top": 464,
+                "left": 266,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 467,
+                "left": 273,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(89, 98, 110)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "mark": null
+            }
+          ],
+          "shownRows": [
+            "Border Style",
+            "Border Width",
+            "Border Color"
+          ]
+        },
+        {
+          "label": "Corner",
+          "labelBox": {
+            "top": 645,
+            "left": 17,
+            "width": 116,
+            "height": 16.2
+          },
+          "labelCut": false,
+          "track": {
+            "top": 641,
+            "left": 141,
+            "width": 156,
+            "height": 26
+          },
+          "rowHeight": 30,
+          "segments": [
+            {
+              "tab": "corners-all",
+              "pressed": "true",
+              "set": null,
+              "title": "All corners",
+              "box": {
+                "top": 644,
+                "left": 144,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 647,
+                "left": 151,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(24, 33, 43)",
+              "bg": "rgb(229, 233, 237)",
+              "mark": null
+            },
+            {
+              "tab": "corners-top-left",
+              "pressed": "false",
+              "set": null,
+              "title": "Top left corner",
+              "box": {
+                "top": 644,
+                "left": 174,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 647,
+                "left": 182,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(89, 98, 110)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "mark": null
+            },
+            {
+              "tab": "corners-top-right",
+              "pressed": "false",
+              "set": null,
+              "title": "Top right corner",
+              "box": {
+                "top": 644,
+                "left": 205,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 647,
+                "left": 212,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(89, 98, 110)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "mark": null
+            },
+            {
+              "tab": "corners-bottom-right",
+              "pressed": "false",
+              "set": null,
+              "title": "Bottom right corner",
+              "box": {
+                "top": 644,
+                "left": 235,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 647,
+                "left": 242,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(89, 98, 110)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "mark": null
+            },
+            {
+              "tab": "corners-bottom-left",
+              "pressed": "false",
+              "set": null,
+              "title": "Bottom left corner",
+              "box": {
+                "top": 644,
+                "left": 266,
+                "width": 28.4,
+                "height": 20
+              },
+              "glyph": {
+                "top": 647,
+                "left": 273,
+                "width": 14,
+                "height": 14
+              },
+              "color": "rgb(89, 98, 110)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "mark": null
+            }
+          ],
+          "shownRows": [
+            "Corner Radius"
+          ]
+        }
+      ],
+      "oldStripElements": 0,
+      "groupHeaders": [
+        {
+          "name": "Style",
+          "top": 55
+        },
+        {
+          "name": "Border Style",
+          "top": 427
+        },
+        {
+          "name": "Corner Radius",
+          "top": 607
+        },
+        {
+          "name": "Box Shadow",
+          "top": 720
+        }
+      ],
+      "labelLefts": [
+        17,
+        28
+      ]
+    }
+  },
+  "interaction": {
+    "before": {
+      "model": null,
+      "pressed": [
+        "corners-all"
+      ],
+      "set": [],
+      "marks": 0,
+      "shownRows": 1,
+      "shownValue": "0"
+    },
+    "topLeftPicked": {
+      "model": null,
+      "pressed": [
+        "corners-top-left"
+      ],
+      "set": [],
+      "marks": 0,
+      "shownRows": 1,
+      "shownValue": ""
+    },
+    "typed8": {
+      "model": {
+        "value": 8,
+        "unit": "px"
+      },
+      "allRadius": null,
+      "pressed": [
+        "corners-top-left"
+      ],
+      "set": [
+        "corners-top-left"
+      ],
+      "marks": 1,
+      "shownRows": 1,
+      "shownValue": "8"
+    },
+    "backToAll": {
+      "model": {
+        "value": 8,
+        "unit": "px"
+      },
+      "pressed": [
+        "corners-all"
+      ],
+      "set": [
+        "corners-top-left"
+      ],
+      "marks": 1,
+      "shownRows": 1,
+      "shownValue": "0"
+    },
+    "undo": {
+      "model": null,
+      "pressed": [
+        "corners-all"
+      ],
+      "set": [],
+      "marks": 0,
+      "shownRows": 1,
+      "shownValue": "0"
+    },
+    "leftEdge": {
+      "pressed": [
+        "borders-left"
+      ],
+      "shown": [
+        "Border Style",
+        "Border Width",
+        "Border Color"
+      ],
+      "hiddenCount": 12
+    }
+  }
+}

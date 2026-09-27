@@ -63,6 +63,17 @@ export function setPendingPresetId(id: string | null): void {
 }
 
 /**
+ * P88 GAM-016 — read the pending preset id without consuming it.
+ *
+ * Project creation places the preset's font files before the project loads (the module scanner reads
+ * `noodl_modules` once, on the first scan), and `StyleTokensModel` consumes the preset afterwards to
+ * write its tokens. Consuming it here would leave the tokens unwritten.
+ */
+export function peekPendingPresetId(): string | null {
+  return _pendingPresetId;
+}
+
+/**
  * Consume (read + clear) the pending preset.
  * Returns the pending StylePreset, or null if none is set.
  * After calling this, _pendingPresetId is cleared.

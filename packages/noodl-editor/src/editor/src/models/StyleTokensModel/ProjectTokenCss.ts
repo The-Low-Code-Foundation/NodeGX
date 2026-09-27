@@ -57,3 +57,21 @@ export function generateProjectTokenCss(project: MetaDataSource | null | undefin
   const tokens = buildEffectiveTokens(readStoredTokens(project));
   return new TokenResolver(tokens).generateCss(tokens);
 }
+
+/**
+ * CHR-009 s20: what a `var(--token)` value means in this project — its resolved value (defaults plus
+ * overrides, references followed), or undefined for anything that is not a single known token.
+ *
+ * The editor's own document has none of the project's variables, so a colour swatch painted with
+ * `var(--background)` drew transparent: the value has to be resolved before it reaches the editor's CSS.
+ */
+export function resolveProjectTokenValue(
+  project: MetaDataSource | null | undefined,
+  value: unknown
+): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const name = TokenResolver.extractReference(value);
+  if (!name) return undefined;
+  const tokens = buildEffectiveTokens(readStoredTokens(project));
+  return new TokenResolver(tokens).resolve(name);
+}

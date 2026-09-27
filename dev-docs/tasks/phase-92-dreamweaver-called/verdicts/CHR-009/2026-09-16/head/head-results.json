@@ -1,0 +1,252 @@
+{
+  "measured": {
+    "dark": {
+      "zones": {
+        "nodeRow": {
+          "top": 45,
+          "height": 55,
+          "left": 1,
+          "width": 324
+        },
+        "tabStrip": {
+          "top": 100,
+          "height": 30,
+          "left": 15,
+          "width": 296
+        },
+        "variant": {
+          "top": 138,
+          "height": 30,
+          "left": 1,
+          "width": 312
+        },
+        "state": {
+          "top": 168,
+          "height": 30,
+          "left": 1,
+          "width": 312
+        },
+        "filter": {
+          "top": 204,
+          "height": 40,
+          "left": 17,
+          "width": 280
+        },
+        "filterField": {
+          "top": 206,
+          "height": 30,
+          "left": 17,
+          "width": 280
+        },
+        "comment": null
+      },
+      "firstGroupHeaderTop": 244,
+      "firstPropertyLabel": {
+        "text": "Mounted",
+        "top": 296
+      },
+      "propertyLabelLefts": [
+        17
+      ],
+      "headRowLabelLefts": [
+        17
+      ],
+      "headRowLabels": [
+        "Variant",
+        "State"
+      ],
+      "headControlHeights": [
+        26,
+        26,
+        30
+      ],
+      "nodeName": "App",
+      "eyebrow": "Group · Visual",
+      "tabs": [
+        {
+          "text": "Properties",
+          "selected": "true",
+          "width": 95,
+          "height": 24,
+          "marker": false,
+          "clipped": false
+        },
+        {
+          "text": "Ports",
+          "selected": "false",
+          "width": 95,
+          "height": 24,
+          "marker": false,
+          "clipped": false
+        },
+        {
+          "text": "Comment",
+          "selected": "false",
+          "width": 95,
+          "height": 24,
+          "marker": false,
+          "clipped": false
+        }
+      ],
+      "visibleTextSizes": {
+        "13px": 1,
+        "15px": 1,
+        "11px": 8,
+        "12px": 16
+      },
+      "fills": {
+        "rgb(43, 52, 64)": 12,
+        "rgb(33, 41, 50)": 4,
+        "color(srgb 0.360784 0.662745 1 / 0.14)": 1,
+        "rgb(51, 62, 77)": 1,
+        "rgb(77, 163, 255)": 1,
+        "rgba(77, 163, 255, 0.13)": 1,
+        "rgb(187, 198, 211)": 3,
+        "rgb(67, 78, 92)": 1
+      },
+      "radii": {
+        "6px": 29,
+        "4px": 14,
+        "9999px": 2,
+        "50%": 3
+      },
+      "elements": 1383
+    },
+    "light": {
+      "zones": {
+        "nodeRow": {
+          "top": 45,
+          "height": 55,
+          "left": 1,
+          "width": 324
+        },
+        "tabStrip": {
+          "top": 100,
+          "height": 30,
+          "left": 15,
+          "width": 296
+        },
+        "variant": {
+          "top": 138,
+          "height": 30,
+          "left": 1,
+          "width": 312
+        },
+        "state": {
+          "top": 168,
+          "height": 30,
+          "left": 1,
+          "width": 312
+        },
+        "filter": {
+          "top": 204,
+          "height": 40,
+          "left": 17,
+          "width": 280
+        },
+        "filterField": {
+          "top": 206,
+          "height": 30,
+          "left": 17,
+          "width": 280
+        },
+        "comment": null
+      },
+      "firstGroupHeaderTop": 244,
+      "firstPropertyLabel": {
+        "text": "Mounted",
+        "top": 296
+      },
+      "propertyLabelLefts": [
+        17
+      ],
+      "headRowLabelLefts": [
+        17
+      ],
+      "headRowLabels": [
+        "Variant",
+        "State"
+      ],
+      "headControlHeights": [
+        26,
+        26,
+        30
+      ],
+      "nodeName": "App",
+      "eyebrow": "Group · Visual",
+      "tabs": [
+        {
+          "text": "Properties",
+          "selected": "true",
+          "width": 95,
+          "height": 24,
+          "marker": false,
+          "clipped": false
+        },
+        {
+          "text": "Ports",
+          "selected": "false",
+          "width": 95,
+          "height": 24,
+          "marker": false,
+          "clipped": false
+        },
+        {
+          "text": "Comment",
+          "selected": "false",
+          "width": 95,
+          "height": 24,
+          "marker": false,
+          "clipped": false
+        }
+      ],
+      "visibleTextSizes": {
+        "13px": 1,
+        "15px": 1,
+        "11px": 8,
+        "12px": 16
+      },
+      "fills": {
+        "rgb(242, 244, 246)": 12,
+        "rgb(255, 255, 255)": 4,
+        "color(srgb 0.180392 0.486274 0.839216 / 0.14)": 1,
+        "rgb(229, 233, 237)": 1,
+        "rgb(21, 112, 239)": 1,
+        "rgba(21, 112, 239, 0.09)": 1,
+        "rgb(74, 86, 99)": 3,
+        "rgb(201, 210, 220)": 1
+      },
+      "radii": {
+        "6px": 29,
+        "4px": 14,
+        "9999px": 2,
+        "50%": 3
+      },
+      "elements": 1383
+    }
+  },
+  "interaction": {
+    "commentBefore": null,
+    "markerBefore": false,
+    "commentTabShows": true,
+    "modelAfterWrite": "Drive note: why this group fills the page",
+    "markerAfterWrite": true,
+    "rowsBackOnProperties": true,
+    "markerAfterUndo": false,
+    "modelAfterUndo": null,
+    "stateFieldBefore": "Neutral",
+    "stateListOpens": true,
+    "stateOptions": [
+      "Neutral",
+      "Hover"
+    ],
+    "stateListClosed": true,
+    "stateFieldAfter": "Hover",
+    "stateFieldRestored": "Neutral",
+    "variantFieldText": "Add style variant",
+    "popoutsBefore": 0,
+    "variantPickerOpens": true,
+    "escapeDismissed": false,
+    "popoutsAfterDismiss": 0
+  }
+}

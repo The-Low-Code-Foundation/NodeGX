@@ -1,0 +1,321 @@
+{
+  "project": {
+    "name": "Noodl Marketplace",
+    "components": 165,
+    "root": "/App"
+  },
+  "rows": [
+    {
+      "target": "/#Noodl Component System/__DESIGN SYSTEM INTERNALS/_DSI Atoms",
+      "before": {
+        "mode": "app",
+        "src": "http://localhost:8680/#/",
+        "shape": "other-screen",
+        "tone": "notice",
+        "stripPresent": true,
+        "stripHeight": 28,
+        "dismissable": true,
+        "text": "_DSI Atoms isn't on Home. It's on Design System.",
+        "doors": [
+          "Go to Design System",
+          "Open on the Workbench",
+          "×"
+        ]
+      },
+      "after": {
+        "mode": "app",
+        "src": "http://localhost:8680/#/",
+        "shape": "other-screen",
+        "tone": "notice",
+        "stripPresent": true,
+        "stripHeight": 28,
+        "dismissable": true,
+        "text": "_DSI Atoms isn't on Home. It's on Design System.",
+        "doors": [
+          "Go to Design System",
+          "Open on the Workbench",
+          "×"
+        ]
+      },
+      "outline": {
+        "api": true,
+        "placed": 0,
+        "selected": 0,
+        "drawn": 0,
+        "boxes": [],
+        "designMode": true,
+        "chip": null
+      },
+      "ac3": true
+    },
+    {
+      "target": "/#Noodl Component System/Atoms/Avatar/User Avatar Skeleton",
+      "before": {
+        "mode": "app",
+        "src": "http://localhost:8680/#/",
+        "shape": "other-screen",
+        "tone": "notice",
+        "stripPresent": true,
+        "stripHeight": 28,
+        "dismissable": true,
+        "text": "_DSI Atoms isn't on Home. It's on Design System.",
+        "doors": [
+          "Go to Design System",
+          "Open on the Workbench",
+          "×"
+        ]
+      },
+      "after": {
+        "mode": "app",
+        "src": "http://localhost:8680/#/",
+        "shape": "unplaced",
+        "tone": "notice",
+        "stripPresent": true,
+        "stripHeight": 28,
+        "dismissable": true,
+        "text": "User Avatar Skeleton isn't on any page yet — nothing in the app places it.",
+        "doors": [
+          "Open on the Workbench",
+          "×"
+        ]
+      },
+      "outline": {
+        "api": true,
+        "placed": 0,
+        "selected": 0,
+        "drawn": 0,
+        "boxes": [],
+        "designMode": true,
+        "chip": null
+      },
+      "ac3": true
+    },
+    {
+      "target": "/#Noodl Component System/Atoms/Checkbox/Save button",
+      "before": {
+        "mode": "app",
+        "src": "http://localhost:8680/#/",
+        "shape": "unplaced",
+        "tone": "notice",
+        "stripPresent": true,
+        "stripHeight": 28,
+        "dismissable": true,
+        "text": "User Avatar Skeleton isn't on any page yet — nothing in the app places it.",
+        "doors": [
+          "Open on the Workbench",
+          "×"
+        ]
+      },
+      "after": {
+        "mode": "app",
+        "src": "http://localhost:8680/#/",
+        "shape": "unplaced",
+        "tone": "notice",
+        "stripPresent": true,
+        "stripHeight": 28,
+        "dismissable": true,
+        "text": "Save button isn't on any page yet — it's only inside Package Hero section, which no page shows.",
+        "doors": [
+          "Open on the Workbench",
+          "×"
+        ]
+      },
+      "outline": {
+        "api": true,
+        "placed": 0,
+        "selected": 0,
+        "drawn": 0,
+        "boxes": [],
+        "designMode": true,
+        "chip": null
+      },
+      "ac3": true
+    },
+    {
+      "target": "/#Integrations/Check if user is logged in",
+      "before": {
+        "mode": "app",
+        "src": "http://localhost:8680/#/",
+        "shape": "unplaced",
+        "tone": "notice",
+        "stripPresent": true,
+        "stripHeight": 28,
+        "dismissable": true,
+        "text": "Save button isn't on any page yet — it's only inside Package Hero section, which no page shows.",
+        "doors": [
+          "Open on the Workbench",
+          "×"
+        ]
+      },
+      "after": {
+        "mode": "app",
+        "src": "http://localhost:8680/#/",
+        "shape": "logic",
+        "tone": "notice",
+        "stripPresent": true,
+        "stripHeight": 28,
+        "dismissable": true,
+        "text": "Check if user is logged in is logic — it draws nothing. It runs on My Packages and Account.",
+        "doors": [
+          "Open on the Workbench",
+          "×"
+        ]
+      },
+      "outline": {
+        "api": true,
+        "placed": 0,
+        "selected": 0,
+        "drawn": 0,
+        "boxes": [],
+        "designMode": true,
+        "chip": null
+      },
+      "ac3": true
+    },
+    {
+      "target": "/#Noodl Component System/Organisms/Main Navbar",
+      "before": {
+        "mode": "app",
+        "src": "http://localhost:8680/#/",
+        "shape": "logic",
+        "tone": "notice",
+        "stripPresent": true,
+        "stripHeight": 28,
+        "dismissable": true,
+        "text": "Check if user is logged in is logic — it draws nothing. It runs on My Packages and Account.",
+        "doors": [
+          "Open on the Workbench",
+          "×"
+        ]
+      },
+      "after": {
+        "mode": "app",
+        "src": "http://localhost:8680/#/",
+        "shape": "agree",
+        "tone": "quiet",
+        "stripPresent": true,
+        "stripHeight": 28,
+        "dismissable": false,
+        "text": "Main Navbar is on Home. The preview is showing that screen.",
+        "doors": []
+      },
+      "outline": {
+        "api": true,
+        "placed": 1,
+        "selected": 0,
+        "drawn": 1,
+        "boxes": [
+          {
+            "w": 973,
+            "h": 72,
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "designMode": true,
+        "chip": null
+      },
+      "ac3": true
+    },
+    {
+      "target": "/Pages/Main/Home",
+      "before": {
+        "mode": "app",
+        "src": "http://localhost:8680/#/",
+        "shape": "agree",
+        "tone": "quiet",
+        "stripPresent": true,
+        "stripHeight": 28,
+        "dismissable": false,
+        "text": "Main Navbar is on Home. The preview is showing that screen.",
+        "doors": []
+      },
+      "after": {
+        "mode": "app",
+        "src": "http://localhost:8680/#/",
+        "shape": "agree",
+        "tone": "quiet",
+        "stripPresent": true,
+        "stripHeight": 28,
+        "dismissable": false,
+        "text": "Home is the screen the preview is showing.",
+        "doors": []
+      },
+      "outline": {
+        "api": true,
+        "placed": 0,
+        "selected": 0,
+        "drawn": 0,
+        "boxes": [],
+        "designMode": true,
+        "chip": null
+      },
+      "ac3": true
+    },
+    {
+      "target": "/#Integrations/Algolia/Algolia Search",
+      "before": {
+        "mode": "app",
+        "src": "http://localhost:8680/#/",
+        "shape": "agree",
+        "tone": "quiet",
+        "stripPresent": true,
+        "stripHeight": 28,
+        "dismissable": false,
+        "text": "Home is the screen the preview is showing.",
+        "doors": []
+      },
+      "after": {
+        "mode": "app",
+        "src": "http://localhost:8680/#/",
+        "shape": "agree",
+        "tone": "quiet",
+        "stripPresent": true,
+        "stripHeight": 28,
+        "dismissable": false,
+        "text": "Algolia Search is logic — it draws nothing. It runs on this screen.",
+        "doors": []
+      },
+      "outline": {
+        "api": true,
+        "placed": 0,
+        "selected": 0,
+        "drawn": 0,
+        "boxes": [],
+        "designMode": true,
+        "chip": null
+      },
+      "ac3": true
+    },
+    {
+      "target": "door:Go to Design System",
+      "before": {
+        "mode": "app",
+        "src": "http://localhost:8680/#/",
+        "shape": "other-screen",
+        "tone": "notice",
+        "stripPresent": true,
+        "stripHeight": 28,
+        "dismissable": true,
+        "text": "_DSI Atoms isn't on Home. It's on Design System.",
+        "doors": [
+          "Go to Design System",
+          "Open on the Workbench",
+          "×"
+        ]
+      },
+      "after": {
+        "mode": "app",
+        "src": "http://localhost:8680/design-system",
+        "shape": "agree",
+        "tone": "quiet",
+        "stripPresent": true,
+        "stripHeight": 28,
+        "dismissable": false,
+        "text": "_DSI Atoms is on Design System. The preview is showing that screen.",
+        "doors": []
+      },
+      "navigated": true
+    }
+  ]
+}

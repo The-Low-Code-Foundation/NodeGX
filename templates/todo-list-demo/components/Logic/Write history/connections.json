@@ -1,0 +1,181 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "bba4174f-4a60-5fe6-81dc-d3b2c8ed25db",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "whIn",
+      "fromProperty": "taskId",
+      "toId": "whDecide",
+      "toProperty": "in-taskId"
+    },
+    {
+      "fromId": "whIn",
+      "fromProperty": "kind",
+      "toId": "whDecide",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "whIn",
+      "fromProperty": "summary",
+      "toId": "whDecide",
+      "toProperty": "in-summary"
+    },
+    {
+      "fromId": "whIn",
+      "fromProperty": "body",
+      "toId": "whDecide",
+      "toProperty": "in-body"
+    },
+    {
+      "fromId": "whIn",
+      "fromProperty": "from",
+      "toId": "whDecide",
+      "toProperty": "in-from"
+    },
+    {
+      "fromId": "whIn",
+      "fromProperty": "to",
+      "toId": "whDecide",
+      "toProperty": "in-to"
+    },
+    {
+      "fromId": "whIn",
+      "fromProperty": "mergeKey",
+      "toId": "whDecide",
+      "toProperty": "in-mergeKey"
+    },
+    {
+      "fromId": "whLast",
+      "fromProperty": "value",
+      "toId": "whDecide",
+      "toProperty": "in-last"
+    },
+    {
+      "fromId": "whIn",
+      "fromProperty": "do",
+      "toId": "whDecide",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "whIn",
+      "fromProperty": "taskId",
+      "toId": "whCreate",
+      "toProperty": "in-taskId"
+    },
+    {
+      "fromId": "whIn",
+      "fromProperty": "kind",
+      "toId": "whCreate",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "whDecide",
+      "fromProperty": "out-summary",
+      "toId": "whCreate",
+      "toProperty": "in-summary"
+    },
+    {
+      "fromId": "whDecide",
+      "fromProperty": "out-body",
+      "toId": "whCreate",
+      "toProperty": "in-body"
+    },
+    {
+      "fromId": "whDecide",
+      "fromProperty": "out-at",
+      "toId": "whCreate",
+      "toProperty": "in-at"
+    },
+    {
+      "fromId": "whDecide",
+      "fromProperty": "out-create",
+      "toId": "whCreate",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "whDecide",
+      "fromProperty": "out-mergeId",
+      "toId": "whUpdate",
+      "toProperty": "in-modelId"
+    },
+    {
+      "fromId": "whDecide",
+      "fromProperty": "out-summary",
+      "toId": "whUpdate",
+      "toProperty": "in-summary"
+    },
+    {
+      "fromId": "whDecide",
+      "fromProperty": "out-at",
+      "toId": "whUpdate",
+      "toProperty": "in-at"
+    },
+    {
+      "fromId": "whDecide",
+      "fromProperty": "out-update",
+      "toId": "whUpdate",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "whDecide",
+      "fromProperty": "out-pending",
+      "toId": "whRemember",
+      "toProperty": "in-pending"
+    },
+    {
+      "fromId": "whCreate",
+      "fromProperty": "out-id",
+      "toId": "whRemember",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "whUpdate",
+      "fromProperty": "out-id",
+      "toId": "whRemember",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "whCreate",
+      "fromProperty": "out-done",
+      "toId": "whRemember",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "whUpdate",
+      "fromProperty": "out-done",
+      "toId": "whRemember",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "whRemember",
+      "fromProperty": "out-value",
+      "toId": "whSet",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "whRemember",
+      "fromProperty": "out-go",
+      "toId": "whSet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "whSet",
+      "fromProperty": "done",
+      "toId": "whOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "whCreate",
+      "fromProperty": "out-failure",
+      "toId": "whProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "whUpdate",
+      "fromProperty": "out-failure",
+      "toId": "whProblem",
+      "toProperty": "do"
+    }
+  ]
+}

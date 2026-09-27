@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3610d902-50af-589d-8b53-850eb593bf8a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "createprofilIn",
+      "fromProperty": "app",
+      "toId": "createprofilFn",
+      "toProperty": "in-app"
+    },
+    {
+      "fromId": "createprofilIn",
+      "fromProperty": "name",
+      "toId": "createprofilFn",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "createprofilIn",
+      "fromProperty": "look",
+      "toId": "createprofilFn",
+      "toProperty": "in-look"
+    },
+    {
+      "fromId": "createprofilIn",
+      "fromProperty": "seed",
+      "toId": "createprofilFn",
+      "toProperty": "in-seed"
+    },
+    {
+      "fromId": "createprofilIn",
+      "fromProperty": "level",
+      "toId": "createprofilFn",
+      "toProperty": "in-level"
+    },
+    {
+      "fromId": "createprofilIn",
+      "fromProperty": "lang",
+      "toId": "createprofilFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "createprofilIn",
+      "fromProperty": "layout",
+      "toId": "createprofilFn",
+      "toProperty": "in-layout"
+    },
+    {
+      "fromId": "createprofilIn",
+      "fromProperty": "answerMode",
+      "toId": "createprofilFn",
+      "toProperty": "in-answerMode"
+    },
+    {
+      "fromId": "createprofilIn",
+      "fromProperty": "run",
+      "toId": "createprofilFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "createprofilFn",
+      "fromProperty": "out-app",
+      "toId": "createprofilOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "createprofilFn",
+      "fromProperty": "out-profileId",
+      "toId": "createprofilOut",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "createprofilFn",
+      "fromProperty": "out-created",
+      "toId": "createprofilOut",
+      "toProperty": "created"
+    },
+    {
+      "fromId": "createprofilFn",
+      "fromProperty": "success",
+      "toId": "createprofilOut",
+      "toProperty": "done"
+    }
+  ]
+}

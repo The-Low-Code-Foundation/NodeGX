@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8cb4121c-0b24-43d6-a656-547818664fac",
+  "name": "Cohort pill",
+  "path": "/People/Cohort pill",
+  "type": "visual",
+  "created": "2026-09-21T09:33:48.985Z",
+  "modified": "2026-09-21T09:33:48.985Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One trainer-assigned cohort a learner is in, as a quiet pill. The lounge never appears: it is on every row and therefore not information."
+}

@@ -27,6 +27,16 @@ class Viewer extends View {
       }
     });
 
+    // TVW-002 AC5 — this file exists only in the detached preview's renderer, so it is the one
+    // place in the tree that can say so without guessing. The view itself deliberately cannot tell.
+    this.canvasView.setDetachedWindow();
+
+    // TVW-002 — ask the editor for the current strip and theme, rather than waiting for the next
+    // CHANGE. This window can open, or reload, while nothing is changing; the push channel would
+    // then say nothing and the row would sit wordless, which is a legitimate state and so reads
+    // exactly like working. See `StripAction`'s `ready`.
+    ipcRenderer.send('viewer-preview-strip-action', { kind: 'ready' });
+
     ipcRenderer.on('viewer-refresh', () => {
       this.canvasView.refresh();
       ipcRenderer.send('viewer-refreshed');
@@ -47,6 +57,17 @@ class Viewer extends View {
       this.canvasView.setNodeSelected(nodeId);
     });
 
+    ipcRenderer.on('viewer-hover-node', (sender, path) => {
+      this.canvasView.setNodeHovered(path);
+    });
+
+    // TVW-002 AC1 — where the canvas's component sits on this screen. Computed in the editor
+    // window (this one has no node graph) and drawn here, on its own channel rather than as a
+    // selection: a selection also brings the box-model chip, and this is not an inspection.
+    ipcRenderer.on('viewer-placement-outline', (sender, path) => {
+      this.canvasView.setPlacementOutline(path);
+    });
+
     // FB-016 scope 4 — the crosshair follows a field in the editor window's properties panel,
     // so the detached preview can only hear about it through main.
     ipcRenderer.on('viewer-transform-origin-focus', (sender, enabled) => {
@@ -65,10 +86,28 @@ class Viewer extends View {
       this.canvasView.setInspectMode(inspectMode);
     });
 
+    // TVW-002 AC6 — the editor's RESOLVED theme. This renderer loads the same token sheets
+    // (`viewer-frame/index.js`), so the light overrides under `:root[data-theme='light']` work the
+    // moment the attribute is here; nothing was ever setting it, so this window was permanently
+    // dark. `ThemeManager` stamps the editor's own documentElement and cannot reach this one.
+    ipcRenderer.on('viewer-set-theme', (sender, resolved) => {
+      if (resolved === 'light' || resolved === 'dark') {
+        document.documentElement.setAttribute('data-theme', resolved);
+      }
+    });
+
     // DES-001 — the design-mode toast, resolved to a label by the editor
     // window (it owns the project model) and shown here, where the click was.
     ipcRenderer.on('viewer-design-selection', (sender, label) => {
       this.canvasView.showDesignSelection(label);
+    });
+
+    // TVW-002 AC5 — the preview strip, computed by the editor window (it owns the node graph and
+    // the project model; neither exists here) and rendered by the same React row this window
+    // already hosts. Richard ruled on 2026-09-18 that it carries its doors here too, which is what
+    // `setDetachedWindow` below is for. See `detachedStrip.ts`.
+    ipcRenderer.on('viewer-preview-strip', (sender, strip) => {
+      this.canvasView.showPreviewStrip(strip);
     });
 
     ipcRenderer.on('viewer-set-viewport-size', (sender, viewportSize) => {

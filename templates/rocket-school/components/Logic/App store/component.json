@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d62f37fc-c3ff-5f61-8847-b6f871d3771a",
+  "name": "App store",
+  "path": "/Logic/App store",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The one persisted store (localStorage, key rocket-school): publishes the app object, writes it back on Write, and says when it changed."
+}

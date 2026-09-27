@@ -118,7 +118,7 @@ describe('FB-018 — the icon row, which showed nothing at all', () => {
   // neither a chip nor even the 1px outline the other unchipped rows had.
   it('shows the picker thumbnail when unconnected', () => {
     const tree = render(<IconInput label="Icon" onOpenPicker={() => undefined} />);
-    expect(walk(tree).some((n) => String(n.props.className ?? '').includes('sidebar-panel-dark-input'))).toBe(true);
+    expect(walk(tree).some((n) => String(n.props.className ?? '') === 'IconField')).toBe(true);
     expect(text(tree)).not.toContain('Bound to');
   });
 
@@ -126,7 +126,7 @@ describe('FB-018 — the icon row, which showed nothing at all', () => {
     const tree = render(
       <IconInput label="Icon" isConnected connectionLabel="Icon Picker · Value" onOpenPicker={() => undefined} />
     );
-    expect(walk(tree).some((n) => String(n.props.className ?? '').includes('sidebar-panel-dark-input'))).toBe(false);
+    expect(walk(tree).some((n) => String(n.props.className ?? '') === 'IconField')).toBe(false);
     expect(text(tree)).toContain('Icon Picker · Value');
   });
 });

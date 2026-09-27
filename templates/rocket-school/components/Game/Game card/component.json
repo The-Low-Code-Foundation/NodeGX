@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "358343f1-c054-55d2-87cf-0cc080d2f330",
+  "name": "Game card",
+  "path": "/Game/Game card",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One game on the home screen: a glyph, a title, a line. Enabled false greys it out for a game that is not built yet. Publishes Chosen."
+}

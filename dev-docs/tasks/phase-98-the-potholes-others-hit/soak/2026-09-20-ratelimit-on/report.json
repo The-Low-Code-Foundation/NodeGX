@@ -1,0 +1,798 @@
+{
+  "startedAt": "2026-09-20T20:34:22.438Z",
+  "options": {
+    "out": "/Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-98-the-potholes-others-hit/soak/2026-09-20-ratelimit-on",
+    "dataDir": "/var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/nodegx-soak-2026-09-20T20-34-22-177Z",
+    "port": 8678,
+    "scale": 1,
+    "users": 2000,
+    "levels": [
+      8,
+      16,
+      32
+    ],
+    "seconds": 20,
+    "warmup": 3,
+    "rateLimit": true,
+    "arms": [
+      "ramp",
+      "scheduled"
+    ],
+    "keep": false,
+    "iKnow": false,
+    "heavyBudgetMs": 45000,
+    "sseTargets": [
+      50,
+      200,
+      500
+    ],
+    "mixNote": "85% reads / 15% writes, from the application shape in the field report (§3.1)"
+  },
+  "hardware": {
+    "model": "Apple M1",
+    "cores": 8,
+    "memoryBytes": 17179869184,
+    "platform": "darwin",
+    "release": "25.6.0",
+    "node": "v22.22.0"
+  },
+  "box": {
+    "checked": true,
+    "busy": [],
+    "idleMatches": [
+      {
+        "cpu": 0,
+        "line": "337   0.0       22:21 node scripts/devtools/render-from-disk.js templates/digital-bricks-training --port 8593"
+      },
+      {
+        "cpu": 0,
+        "line": "1921   0.0    01:03:50 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Plugin).app/Contents/MacOS/"
+      },
+      {
+        "cpu": 0,
+        "line": "25934   0.0    06:32:45 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Hel"
+      },
+      {
+        "cpu": 0,
+        "line": "25935   0.0    06:32:45 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Plugin).app/Contents/MacOS"
+      },
+      {
+        "cpu": 0,
+        "line": "25986   0.0    06:32:42 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Plugin).app/Contents/MacOS"
+      },
+      {
+        "cpu": 0,
+        "line": "26103   0.0    06:32:40 node /Users/richardosborne/Documents/Cline/MCP/speak-tts/build/index.js"
+      },
+      {
+        "cpu": 0,
+        "line": "26190   0.0    06:32:40 node /Users/richardosborne/vscode_projects/vh-command-centre/brain/dist/cli.js -p /Users/richard"
+      },
+      {
+        "cpu": 0,
+        "line": "27237   0.0    06:32:34 node /Applications/NodeGX.app/Contents/Resources/noodl-mcp/noodl-mcp.cjs /Users/richardosborne/v"
+      },
+      {
+        "cpu": 0,
+        "line": "27242   0.0    06:32:34 /Users/richardosborne/vscode_projects/OpenNoodl/node_modules/electron/dist/Electron.app/Contents"
+      },
+      {
+        "cpu": 0,
+        "line": "37576   0.0 06-13:10:45 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Hel"
+      },
+      {
+        "cpu": 0,
+        "line": "50736   0.0 07-23:29:18 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Hel"
+      },
+      {
+        "cpu": 0.2,
+        "line": "50737   0.2 07-23:29:18 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Plugin).app/Contents/MacOS"
+      },
+      {
+        "cpu": 0,
+        "line": "50738   0.0 07-23:29:18 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Hel"
+      },
+      {
+        "cpu": 0,
+        "line": "50739   0.0 07-23:29:18 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Hel"
+      },
+      {
+        "cpu": 0,
+        "line": "51186   0.0 07-23:29:16 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Plugin).app/Contents/MacOS"
+      },
+      {
+        "cpu": 0,
+        "line": "52025   0.0 07-23:29:11 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Plugin).app/Contents/MacOS"
+      },
+      {
+        "cpu": 0,
+        "line": "52027   0.0 07-23:29:10 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Plugin).app/Contents/MacOS"
+      },
+      {
+        "cpu": 0,
+        "line": "52240   0.0    01:21:15 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Plugin).app/Contents/MacOS"
+      },
+      {
+        "cpu": 0,
+        "line": "52242   0.0    01:21:15 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Plugin).app/Contents/MacOS"
+      },
+      {
+        "cpu": 0,
+        "line": "54279   0.0    02:06:53 node /Applications/NodeGX.app/Contents/Resources/noodl-mcp/noodl-mcp.cjs /Users/richardosborne/v"
+      },
+      {
+        "cpu": 0,
+        "line": "54284   0.0    02:06:53 /Users/richardosborne/vscode_projects/OpenNoodl/node_modules/electron/dist/Electron.app/Contents"
+      },
+      {
+        "cpu": 0,
+        "line": "54721   0.0       02:32 node /Applications/NodeGX.app/Contents/Resources/noodl-mcp/noodl-mcp.cjs /Users/richardosborne/v"
+      },
+      {
+        "cpu": 0,
+        "line": "54726   0.0       02:32 /Users/richardosborne/vscode_projects/OpenNoodl/node_modules/electron/dist/Electron.app/Contents"
+      },
+      {
+        "cpu": 0,
+        "line": "56149   0.0       02:06 node /Applications/NodeGX.app/Contents/Resources/noodl-mcp/noodl-mcp.cjs /Users/richardosborne/v"
+      },
+      {
+        "cpu": 0,
+        "line": "56154   0.0       02:06 /Users/richardosborne/vscode_projects/OpenNoodl/node_modules/electron/dist/Electron.app/Contents"
+      },
+      {
+        "cpu": 0.6,
+        "line": "63148   0.6    23:51:14 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Plugin).app/Contents/MacOS"
+      },
+      {
+        "cpu": 0,
+        "line": "63206   0.0    23:51:12 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Hel"
+      },
+      {
+        "cpu": 0,
+        "line": "63230   0.0    23:51:12 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Plugin).app/Contents/MacOS"
+      },
+      {
+        "cpu": 0,
+        "line": "63272   0.0    23:51:11 node /Users/richardosborne/Documents/Cline/MCP/speak-tts/build/index.js"
+      },
+      {
+        "cpu": 0,
+        "line": "63964   0.0    23:51:06 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Plugin).app/Contents/MacOS"
+      },
+      {
+        "cpu": 0,
+        "line": "64057   0.0    23:51:06 node /Users/richardosborne/vscode_projects/vh-command-centre/brain/dist/cli.js -p /Users/richard"
+      },
+      {
+        "cpu": 0,
+        "line": "64079   0.0    23:51:05 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Plugin).app/Contents/MacOS"
+      },
+      {
+        "cpu": 0,
+        "line": "64860   0.0    23:51:00 node /Applications/NodeGX.app/Contents/Resources/noodl-mcp/noodl-mcp.cjs /Users/richardosborne/v"
+      },
+      {
+        "cpu": 0,
+        "line": "64863   0.0    23:51:00 node /Applications/NodeGX.app/Contents/Resources/nodegx-observe/nodegx-observe.cjs"
+      },
+      {
+        "cpu": 0,
+        "line": "64865   0.0    23:51:00 /Users/richardosborne/vscode_projects/OpenNoodl/node_modules/electron/dist/Electron.app/Contents"
+      },
+      {
+        "cpu": 0,
+        "line": "73348   0.0 07-22:55:03 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Plugin).app/Contents/MacOS"
+      },
+      {
+        "cpu": 0,
+        "line": "75581   0.0    06:17:21 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Plugin).app/Contents/MacOS"
+      },
+      {
+        "cpu": 0,
+        "line": "79414   0.0 05-12:30:38 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Plugin).app/Contents/MacOS"
+      },
+      {
+        "cpu": 0,
+        "line": "93840   0.0 06-06:57:21 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Plugin).app/Contents/MacOS"
+      },
+      {
+        "cpu": 0,
+        "line": "94139   0.0    01:07:01 node /Applications/NodeGX.app/Contents/Resources/noodl-mcp/noodl-mcp.cjs /Users/richardosborne/v"
+      },
+      {
+        "cpu": 0,
+        "line": "94180   0.0    01:07:01 /Users/richardosborne/vscode_projects/OpenNoodl/node_modules/electron/dist/Electron.app/Contents"
+      }
+    ],
+    "loadAverage": [
+      2.94,
+      3.05,
+      3.3
+    ]
+  },
+  "backendStatus": {
+    "ok": true,
+    "service": "nodegx-backend",
+    "backendId": "soak",
+    "backendName": "PRD-004 soak",
+    "uptimeMs": 117,
+    "persistence": {
+      "mode": "persistent",
+      "engine": "node:sqlite",
+      "persistent": true,
+      "ephemeral": false,
+      "error": null,
+      "pool": null
+    },
+    "security": {
+      "devOpen": true,
+      "enforced": false,
+      "migratedThisStart": true
+    },
+    "workflows": {
+      "initialized": true,
+      "workflowCount": 1,
+      "functions": [
+        {
+          "name": "soakHeavyIngest",
+          "workflow": "soak-heavy-ingest",
+          "writesRecords": false
+        }
+      ],
+      "bundles": [
+        {
+          "name": "soak-heavy-ingest",
+          "deployFingerprint": null,
+          "functionCount": 1
+        }
+      ]
+    },
+    "executions": {
+      "enabled": true,
+      "dbPath": "/var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/nodegx-soak-2026-09-20T20-34-22-177Z/executions.sqlite",
+      "error": null,
+      "fileBytes": 65536,
+      "autoVacuum": "incremental",
+      "pageBytes": 4096,
+      "freePages": 0,
+      "lastPrune": {
+        "at": 1789936462316,
+        "durationMs": 0,
+        "byAge": 0,
+        "byCount": 0,
+        "retentionDays": 30,
+        "maxCount": 10000,
+        "boundBy": "none",
+        "reclaim": "none"
+      },
+      "reclaim": {
+        "running": false,
+        "last": null
+      },
+      "compaction": {
+        "manual": false,
+        "hint": "freed pages are returned to the filesystem after each prune, in bounded steps. POST /admin/executions/compact still runs a full rewrite on request (a write lock for the duration) if you want the file packed tight now."
+      },
+      "bounds": {
+        "retentionDays": 30,
+        "maxCount": 10000,
+        "maxValueBytes": 51200,
+        "maxRunBytes": 8388608
+      }
+    },
+    "secrets": {
+      "stance": "generate",
+      "adminToken": {
+        "source": "generated",
+        "persisted": true
+      },
+      "adminReadonlyToken": {
+        "source": "absent",
+        "persisted": false
+      },
+      "filesSigningSecret": {
+        "source": "generated",
+        "persisted": true
+      }
+    }
+  },
+  "schema": [
+    {
+      "table": "Talk",
+      "indexes": [
+        "idx_Talk_slug",
+        "idx_Talk_track_startsAt",
+        "idx_Talk_day"
+      ]
+    },
+    {
+      "table": "Exhibitor",
+      "indexes": [
+        "idx_Exhibitor_slug",
+        "idx_Exhibitor_tier"
+      ]
+    },
+    {
+      "table": "Attendee",
+      "indexes": [
+        "idx_Attendee_handle",
+        "idx_Attendee_company"
+      ]
+    },
+    {
+      "table": "MyDay",
+      "indexes": [
+        "idx_MyDay_attendee_day",
+        "idx_MyDay_attendee"
+      ]
+    },
+    {
+      "table": "Profile",
+      "indexes": [
+        "idx_Profile_attendee"
+      ]
+    }
+  ],
+  "counts": {
+    "Talk": 1200,
+    "Exhibitor": 800,
+    "Attendee": 40000,
+    "MyDay": 200000,
+    "Profile": 40000
+  },
+  "seedReport": {
+    "Talk": {
+      "rows": 1200,
+      "seconds": 0.2
+    },
+    "Exhibitor": {
+      "rows": 800,
+      "seconds": 0.1
+    },
+    "Attendee": {
+      "rows": 40000,
+      "seconds": 6.2
+    },
+    "MyDay": {
+      "rows": 200000,
+      "seconds": 41.7
+    },
+    "Profile": {
+      "rows": 40000,
+      "seconds": 6.7
+    }
+  },
+  "users": 2000,
+  "preflight": [
+    "Talk: 50 rows",
+    "Exhibitor: 50 rows",
+    "MyDay for attendee-0: 6 rows",
+    "Profile rewrite: the stored row changed",
+    "MyDay create: a row was created"
+  ],
+  "ramp": {
+    "levels": [
+      {
+        "concurrency": 8,
+        "seconds": 20,
+        "mix": {
+          "read": 85,
+          "write": 15
+        },
+        "completed": 181491,
+        "errors": 181091,
+        "refusals": 181091,
+        "capped": 0,
+        "wallSeconds": 20,
+        "throughput": 9074.5,
+        "latency": {
+          "n": 400,
+          "p50": 0.81,
+          "p95": 9.71,
+          "p99": 28.19,
+          "max": 39.76,
+          "mean": 2.42
+        },
+        "perOp": {
+          "programme": {
+            "n": 144,
+            "p50": 0.77,
+            "p95": 6.14,
+            "p99": 36.15,
+            "max": 37.51,
+            "mean": 1.97
+          },
+          "save-to-my-day": {
+            "n": 27,
+            "p50": 1.67,
+            "p95": 27.05,
+            "p99": 28.19,
+            "max": 28.19,
+            "mean": 5.53
+          },
+          "profile-rewrite": {
+            "n": 52,
+            "p50": 0.9,
+            "p95": 15.06,
+            "p99": 34.59,
+            "max": 34.59,
+            "mean": 2.59
+          },
+          "exhibitors": {
+            "n": 61,
+            "p50": 0.88,
+            "p95": 18.38,
+            "p99": 39.76,
+            "max": 39.76,
+            "mean": 3.37
+          },
+          "profile-read": {
+            "n": 31,
+            "p50": 0.76,
+            "p95": 4.1,
+            "p99": 5.66,
+            "max": 5.66,
+            "mean": 1.5
+          },
+          "my-day": {
+            "n": 85,
+            "p50": 0.66,
+            "p95": 6.98,
+            "p99": 18.79,
+            "max": 18.79,
+            "mean": 1.74
+          }
+        },
+        "cores": 0.75,
+        "refusalsDelta": 212018,
+        "rssBytes": 124813312,
+        "dbBytes": 99831808
+      },
+      {
+        "concurrency": 16,
+        "seconds": 20,
+        "mix": {
+          "read": 85,
+          "write": 15
+        },
+        "completed": 228243,
+        "errors": 227842,
+        "refusals": 227842,
+        "capped": 0,
+        "wallSeconds": 20,
+        "throughput": 11411.6,
+        "latency": {
+          "n": 401,
+          "p50": 1.3,
+          "p95": 3.3,
+          "p99": 11.8,
+          "max": 23.96,
+          "mean": 1.89
+        },
+        "perOp": {
+          "programme": {
+            "n": 144,
+            "p50": 1.36,
+            "p95": 3.71,
+            "p99": 19.46,
+            "max": 23.89,
+            "mean": 2.02
+          },
+          "exhibitors": {
+            "n": 59,
+            "p50": 1.29,
+            "p95": 4.56,
+            "p99": 13.03,
+            "max": 13.03,
+            "mean": 1.95
+          },
+          "my-day": {
+            "n": 97,
+            "p50": 1.27,
+            "p95": 3.05,
+            "p99": 5.88,
+            "max": 5.88,
+            "mean": 1.57
+          },
+          "profile-read": {
+            "n": 30,
+            "p50": 1.24,
+            "p95": 2.89,
+            "p99": 8.3,
+            "max": 8.3,
+            "mean": 1.68
+          },
+          "profile-rewrite": {
+            "n": 44,
+            "p50": 1.25,
+            "p95": 3.3,
+            "p99": 23.96,
+            "max": 23.96,
+            "mean": 2.12
+          },
+          "save-to-my-day": {
+            "n": 27,
+            "p50": 1.38,
+            "p95": 3.31,
+            "p99": 11.8,
+            "max": 11.8,
+            "mean": 2.07
+          }
+        },
+        "cores": 0.81,
+        "refusalsDelta": 257943,
+        "rssBytes": 124600320,
+        "dbBytes": 99885056
+      },
+      {
+        "concurrency": 32,
+        "seconds": 20,
+        "mix": {
+          "read": 85,
+          "write": 15
+        },
+        "completed": 227499,
+        "errors": 227098,
+        "refusals": 227098,
+        "capped": 0,
+        "wallSeconds": 20,
+        "throughput": 11374.4,
+        "latency": {
+          "n": 401,
+          "p50": 2.44,
+          "p95": 4.74,
+          "p99": 6.97,
+          "max": 37.32,
+          "mean": 2.99
+        },
+        "perOp": {
+          "my-day": {
+            "n": 99,
+            "p50": 2.4,
+            "p95": 4.6,
+            "p99": 12.86,
+            "max": 12.86,
+            "mean": 2.84
+          },
+          "profile-rewrite": {
+            "n": 46,
+            "p50": 2.41,
+            "p95": 5.77,
+            "p99": 22.86,
+            "max": 22.86,
+            "mean": 3.43
+          },
+          "exhibitors": {
+            "n": 56,
+            "p50": 2.36,
+            "p95": 4.36,
+            "p99": 4.63,
+            "max": 4.63,
+            "mean": 2.67
+          },
+          "programme": {
+            "n": 143,
+            "p50": 2.42,
+            "p95": 4.58,
+            "p99": 6.97,
+            "max": 7.87,
+            "mean": 2.85
+          },
+          "save-to-my-day": {
+            "n": 23,
+            "p50": 2.53,
+            "p95": 4.53,
+            "p99": 4.81,
+            "max": 4.81,
+            "mean": 2.81
+          },
+          "profile-read": {
+            "n": 34,
+            "p50": 2.66,
+            "p95": 5.86,
+            "p99": 37.32,
+            "max": 37.32,
+            "mean": 4.07
+          }
+        },
+        "cores": 0.8,
+        "refusalsDelta": 260938,
+        "rssBytes": 124813312,
+        "dbBytes": 99885056
+      }
+    ],
+    "knee": null,
+    "peakThroughput": 11411.6,
+    "firstSignal": {
+      "signal": "4 — rate-limit refusals",
+      "at": 8
+    },
+    "signals": [
+      {
+        "signal": "4 — rate-limit refusals",
+        "at": 8
+      }
+    ]
+  },
+  "scheduled": {
+    "concurrency": 16,
+    "idle": {
+      "concurrency": 16,
+      "seconds": 20,
+      "mix": {
+        "read": 85,
+        "write": 15
+      },
+      "completed": 180786,
+      "errors": 180386,
+      "refusals": 180386,
+      "capped": 0,
+      "wallSeconds": 20,
+      "throughput": 9038.8,
+      "latency": {
+        "n": 400,
+        "p50": 1.52,
+        "p95": 6.74,
+        "p99": 25.77,
+        "max": 42.14,
+        "mean": 2.85
+      },
+      "perOp": {
+        "my-day": {
+          "n": 94,
+          "p50": 1.55,
+          "p95": 24.17,
+          "p99": 33.95,
+          "max": 33.95,
+          "mean": 4.02
+        },
+        "programme": {
+          "n": 131,
+          "p50": 1.53,
+          "p95": 6.12,
+          "p99": 8.67,
+          "max": 42.14,
+          "mean": 2.53
+        },
+        "exhibitors": {
+          "n": 64,
+          "p50": 1.5,
+          "p95": 8.07,
+          "p99": 28.62,
+          "max": 28.62,
+          "mean": 2.97
+        },
+        "profile-rewrite": {
+          "n": 53,
+          "p50": 1.52,
+          "p95": 6.73,
+          "p99": 8.24,
+          "max": 8.24,
+          "mean": 2.19
+        },
+        "profile-read": {
+          "n": 35,
+          "p50": 1.57,
+          "p95": 5.88,
+          "p99": 6.74,
+          "max": 6.74,
+          "mean": 2.21
+        },
+        "save-to-my-day": {
+          "n": 23,
+          "p50": 1.43,
+          "p95": 4.67,
+          "p99": 6.04,
+          "max": 6.04,
+          "mean": 2.03
+        }
+      },
+      "cores": 0.74,
+      "refusalsDelta": 208677,
+      "rssBytes": 103333888,
+      "dbBytes": 99885056,
+      "label": "scheduler idle"
+    },
+    "during": {
+      "concurrency": 16,
+      "seconds": 20,
+      "mix": {
+        "read": 85,
+        "write": 15
+      },
+      "completed": 132177,
+      "errors": 131777,
+      "refusals": 131777,
+      "capped": 0,
+      "wallSeconds": 20,
+      "throughput": 6608.5,
+      "latency": {
+        "n": 400,
+        "p50": 2.34,
+        "p95": 9.39,
+        "p99": 25.34,
+        "max": 68.21,
+        "mean": 3.64
+      },
+      "perOp": {
+        "programme": {
+          "n": 110,
+          "p50": 2.42,
+          "p95": 9.39,
+          "p99": 16.11,
+          "max": 38.69,
+          "mean": 3.57
+        },
+        "my-day": {
+          "n": 105,
+          "p50": 2.21,
+          "p95": 7.53,
+          "p99": 12.48,
+          "max": 20.13,
+          "mean": 3.13
+        },
+        "save-to-my-day": {
+          "n": 28,
+          "p50": 2.76,
+          "p95": 25.34,
+          "p99": 35.83,
+          "max": 35.83,
+          "mean": 5.37
+        },
+        "exhibitors": {
+          "n": 81,
+          "p50": 2.25,
+          "p95": 3.68,
+          "p99": 68.21,
+          "max": 68.21,
+          "mean": 3.37
+        },
+        "profile-rewrite": {
+          "n": 42,
+          "p50": 2.67,
+          "p95": 22.15,
+          "p99": 38.4,
+          "max": 38.4,
+          "mean": 5.75
+        },
+        "profile-read": {
+          "n": 34,
+          "p50": 2.05,
+          "p95": 3.18,
+          "p99": 3.2,
+          "max": 3.2,
+          "mean": 2.02
+        }
+      },
+      "cores": 1.08,
+      "refusalsDelta": 145654,
+      "rssBytes": 119521280,
+      "dbBytes": 99917824,
+      "label": "heavy scheduled run"
+    },
+    "delta": {
+      "p95Idle": 6.74,
+      "p95During": 9.39,
+      "multiple": 1.39,
+      "throughputIdle": 9038.8,
+      "throughputDuring": 6608.5
+    },
+    "heavyRuns": [
+      {
+        "status": "success",
+        "completedAt": 1789936620002,
+        "error": null
+      },
+      {
+        "status": "running",
+        "completedAt": null,
+        "error": null
+      }
+    ],
+    "ranCleanly": 2,
+    "trustworthy": true,
+    "caveat": null
+  },
+  "finishedAt": "2026-09-20T20:37:14.508Z"
+}

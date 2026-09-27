@@ -68,7 +68,7 @@
   background-color: var(--theme-color-bg-1);
   border: 1px solid var(--theme-color-border-default);
   border-radius: var(--radius-full);
-  box-shadow: var(--shadow-popup);
+  box-shadow: var(--shadow-float);
   padding: 5px 6px 5px 14px;
 
   font-family: var(--font-family);
@@ -200,7 +200,7 @@
   border-radius: var(--radius-default);
   background-color: var(--theme-color-bg-1);
   border: 1px solid var(--theme-color-border-default);
-  box-shadow: var(--shadow-popup);
+  box-shadow: var(--shadow-float);
 
   font-family: var(--font-family);
   font-size: 12px;
@@ -307,7 +307,7 @@
   border-radius: var(--radius-full);
   background-color: var(--theme-color-bg-2);
   border: 1px solid var(--theme-color-border-default);
-  box-shadow: var(--shadow-popup);
+  box-shadow: var(--shadow-float);
 
   font-family: var(--font-family);
   font-size: 12.5px;
@@ -396,7 +396,7 @@
 
   background-color: var(--theme-color-bg-2);
   border: 1px solid var(--theme-color-border-default);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card);
 
   font-family: var(--font-family);
   font-size: 12px;

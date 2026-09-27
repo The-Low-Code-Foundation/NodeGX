@@ -62,8 +62,15 @@ import { deployToFolder } from '@noodl-utils/compilation/build/deployer';
 
 import { gradeRoots, readDeployedRoots, type RootsReading } from './deployReading';
 import { bootstrapNodeLibrary } from './headless';
-import { readProjectForDeploy, resolveTarget, type ProjectFormat } from './loader';
+import {
+  buildProjectModel,
+  readLegacyProject,
+  readProjectForDeploy,
+  resolveTarget,
+  type ProjectFormat
+} from './loader';
 import { describeDevelopmentEngine, readViewerBuild, type ViewerBuildReading } from './viewerBuild';
+import { describeWireHealth, readWireHealth, type WireHealthReading } from './wireHealth';
 
 /**
  * The editor's runtime folder, addressed from **this file** rather than from the working
@@ -86,6 +93,8 @@ export { gradeRoots, readDeployedRoots } from './deployReading';
 export type { RootsReading } from './deployReading';
 export { classifyViewerBuild, readViewerBuild, summariseViewerBuild } from './viewerBuild';
 export type { ViewerBuildReading } from './viewerBuild';
+export { describeWireHealth } from './wireHealth';
+export type { NamedWire, WireHealthReading } from './wireHealth';
 
 export const EXTERNAL_DIR = path.resolve(__dirname, '../../noodl-editor/src/external');
 
@@ -178,6 +187,11 @@ export interface DeployOutcome {
   blank: string | null;
   /** EXP-017 AC1 — which build of the viewer this deploy copied, read from the file it copied. */
   engine: ViewerBuildReading;
+  /**
+   * P88 GAM-023 — every wire judged after the runtime's ports arrived. Broken ones are named in
+   * `warnings` too, and all of them were published (R20: publish all, warn).
+   */
+  wires: WireHealthReading;
   warnings: string[];
 }
 
@@ -222,6 +236,20 @@ export async function deployProject(options: {
   // line is cheaper than finding out when it changes.
   project._isReadOnly = true;
 
+  // 🔴 P88 GAM-023. After the validation gate, which refuses what a declaration can judge. See
+  // wireHealth.ts for why ports come first.
+  //
+  // 🔴 **On a second model read from the same files, never on `project`.** The port pass and the
+  // editor adapters resolve component types, port types and dynamic ports, and on the exported model
+  // that changed what every site ships: component inputs typed `string` with `default: ""` instead of
+  // `*`, Function nodes gaining `runOnChange-in-*` ports, and pixel-game's two bundles merged into one
+  // (s18, all 7 templates). That may be the editor's deploy, but it is not what R20 ruled on. This
+  // reports; the export stays byte-identical to the one before it.
+  const { legacy: healthLegacy } = readLegacyProject(dir, format);
+  const { project: healthProject } = buildProjectModel(healthLegacy, dir);
+  healthProject._isReadOnly = true;
+  const wires = await readWireHealth(healthProject);
+
   let copyReport;
   let written: string[];
   try {
@@ -258,10 +286,12 @@ export async function deployProject(options: {
     roots,
     blank: gradeRoots(roots),
     engine,
+    wires,
     // EXP-017 AC4 — a duplicate the copy step could not leave out reaches the person through the
     // same channel every other deploy warning does, rather than only the editor's console.
     warnings: [
       ...warnings,
+      ...describeWireHealth(wires),
       ...copyReport.duplicatesKept.map(
         (kept) =>
           `${kept.path} (${kept.bytes} B) is the same file as ${kept.keep} and both were published — ` +

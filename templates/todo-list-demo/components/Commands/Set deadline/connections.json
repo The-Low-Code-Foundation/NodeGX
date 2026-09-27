@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "61652835-25ba-5ef5-8757-c28adf5a8bf0",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "SetdeadlinIn",
+      "fromProperty": "taskId",
+      "toId": "SetdeadlinGuard",
+      "toProperty": "in-taskId"
+    },
+    {
+      "fromId": "SetdeadlinIn",
+      "fromProperty": "text",
+      "toId": "SetdeadlinGuard",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "SetdeadlinIn",
+      "fromProperty": "current",
+      "toId": "SetdeadlinGuard",
+      "toProperty": "in-current"
+    },
+    {
+      "fromId": "SetdeadlinIn",
+      "fromProperty": "do",
+      "toId": "SetdeadlinGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "SetdeadlinGuard",
+      "fromProperty": "out-value",
+      "toId": "SetdeadlinWrite",
+      "toProperty": "in-deadline"
+    },
+    {
+      "fromId": "SetdeadlinIn",
+      "fromProperty": "taskId",
+      "toId": "SetdeadlinWrite",
+      "toProperty": "in-modelId"
+    },
+    {
+      "fromId": "SetdeadlinGuard",
+      "fromProperty": "out-go",
+      "toId": "SetdeadlinWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "SetdeadlinIn",
+      "fromProperty": "taskId",
+      "toId": "SetdeadlinHistory",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "SetdeadlinGuard",
+      "fromProperty": "out-summary",
+      "toId": "SetdeadlinHistory",
+      "toProperty": "summary"
+    },
+    {
+      "fromId": "SetdeadlinWrite",
+      "fromProperty": "out-done",
+      "toId": "SetdeadlinHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "SetdeadlinHistory",
+      "fromProperty": "done",
+      "toId": "SetdeadlinOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "SetdeadlinWrite",
+      "fromProperty": "out-failure",
+      "toId": "SetdeadlinProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "SetdeadlinGuard",
+      "fromProperty": "out-error",
+      "toId": "SetdeadlinOut",
+      "toProperty": "error"
+    },
+    {
+      "fromId": "SetdeadlinGuard",
+      "fromProperty": "out-hasError",
+      "toId": "SetdeadlinOut",
+      "toProperty": "hasError"
+    }
+  ]
+}

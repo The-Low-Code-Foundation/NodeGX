@@ -1,0 +1,73 @@
+{
+  "arm": "control",
+  "exit": 0,
+  "resources": {
+    "total": 20,
+    "bufferFull": false,
+    "me": 5,
+    "path": 1,
+    "profile": 1,
+    "intake": 2,
+    "feed": 0,
+    "community": 17
+  },
+  "log": {
+    "path401": 1,
+    "profile401": 1,
+    "feed404": 0,
+    "lines": 2290,
+    "missing": false
+  },
+  "arms": [
+    {
+      "name": "the store is in this arm’s state before the launch",
+      "ok": true,
+      "detail": "a dead token planted"
+    },
+    {
+      "name": "the editor came up and CDP answered",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "REACH: the launcher’s community layer ran (`/api/v1/me` was requested)",
+      "ok": true,
+      "detail": "me=5"
+    },
+    {
+      "name": "the resource buffer did not overflow",
+      "ok": true,
+      "detail": "20 entries"
+    },
+    {
+      "name": "the log window is this launch only",
+      "ok": true,
+      "detail": "2290 lines"
+    },
+    {
+      "name": "CONTROL: `/me/path` WAS requested with a dead token",
+      "ok": true,
+      "detail": "requests=1"
+    },
+    {
+      "name": "CONTROL: `/me/profile` WAS requested with a dead token",
+      "ok": true,
+      "detail": "requests=1"
+    },
+    {
+      "name": "CONTROL: the log carries the 401s the phase counted",
+      "ok": true,
+      "detail": "path=1 profile=1"
+    },
+    {
+      "name": "the dead credential was FORGOTTEN by the end of the launch",
+      "ok": true,
+      "detail": "the store no longer holds a token"
+    },
+    {
+      "name": "feed.json 404s — recorded, NOT fixed by this task",
+      "ok": null,
+      "detail": "lines=0"
+    }
+  ]
+}

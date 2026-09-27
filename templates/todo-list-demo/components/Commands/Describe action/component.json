@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "71513ef9-1b8a-5092-8f96-51c652825617",
+  "name": "Describe action",
+  "path": "/Commands/Describe action",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Saves a next action’s description when it changed."
+}

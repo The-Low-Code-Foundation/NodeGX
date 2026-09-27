@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- FED-001 fixture: RSS 1.0 / RDF. The point of this one is that <item> is a SIBLING of
+     <channel>, not a child — the bug that yields "a feed with a title and zero items". -->
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:dc="http://purl.org/dc/elements/1.1/"
+         xmlns="http://purl.org/rss/1.0/">
+  <channel rdf:about="https://rdf.example/feed">
+    <title>Standards Archive</title>
+    <link>https://rdf.example/</link>
+    <description>An RSS 1.0 feed, because some of them are still out there</description>
+    <items>
+      <rdf:Seq>
+        <rdf:li rdf:resource="https://rdf.example/a"/>
+        <rdf:li rdf:resource="https://rdf.example/b"/>
+      </rdf:Seq>
+    </items>
+  </channel>
+  <item rdf:about="https://rdf.example/a">
+    <title>RDF is still a feed</title>
+    <link>https://rdf.example/a</link>
+    <description>And a reader that ignores it drops a whole era.</description>
+    <dc:date>2026-09-14T10:00:00Z</dc:date>
+    <dc:creator>C. Archivist</dc:creator>
+  </item>
+  <item rdf:about="https://rdf.example/b">
+    <title>Where the items live</title>
+    <link>https://rdf.example/b</link>
+    <description>Beside the channel, not inside it.</description>
+    <dc:date>2026-09-13T10:00:00Z</dc:date>
+  </item>
+</rdf:RDF>

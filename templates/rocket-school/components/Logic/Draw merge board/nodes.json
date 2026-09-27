@@ -1,0 +1,162 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "cf3915f8-3246-5aea-8565-38f8895f5545",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "drawmergeboaIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "game",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "drawmergeboaFn",
+      "type": "JavaScriptFunction",
+      "label": "Draw merge board",
+      "parameters": {
+        "functionScript": "\nvar LEVELS = [\"CE2\",\"CM1\",\"CM2\",\"6e\"];\nvar LEVEL_BASE = {\"CE2\":800,\"CM1\":1050,\"CM2\":1300,\"6e\":1550};\nfunction levelIndex(level) { var i = LEVELS.indexOf(String(level || 'CE2')); return i < 0 ? 0 : i; }\nfunction rnd(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }\nfunction pickOne(arr) { return arr[Math.floor(Math.random() * arr.length)]; }\nfunction shuffle(arr) { var a = arr.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }\nfunction isFr(lang) { return String(lang) === 'fr'; }\n/** 1234567.5 → \"1 234 567,5\" (fr, grouped with a narrow no-break space) or \"1,234,567.5\" (en). RKT-003: an ordinary space let a phone break \"8 266\" across two lines. */\nfunction fmtNum(n, lang) {\n  var neg = n < 0; n = Math.abs(n);\n  var s = String(Math.round(n * 1000) / 1000);\n  var parts = s.split('.');\n  var int = parts[0]; var out = '';\n  while (int.length > 3) { out = (isFr(lang) ? ' ' : ',') + int.slice(-3) + out; int = int.slice(0, -3); }\n  out = int + out;\n  if (parts[1]) out += (isFr(lang) ? ',' : '.') + parts[1];\n  return (neg ? '−' : '') + out;\n}\n/** What a typed answer becomes before comparison: numbers as numbers, words lower-case. */\nfunction normalise(v) {\n  var s = String(v === undefined || v === null ? '' : v).trim().toLowerCase();\n  var num = s.replace(/\\s+/g, '').replace(/,/g, '.');\n  if (/^-?\\d+(\\.\\d+)?$/.test(num)) return String(Number(num));\n  var big = s.replace(/[\\s.,']/g, '');\n  if (/^-?\\d+$/.test(big) && /\\d[\\s.,']\\d{3}/.test(s)) return String(Number(big));\n  return s.replace(/\\s+/g, ' ');\n}\nfunction sameAnswer(a, b) { return normalise(a) === normalise(b); }\n\nvar EN_ONES = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];\nvar EN_TENS = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];\nfunction enUnder1000(n) {\n  var out = '';\n  if (n >= 100) { out = EN_ONES[Math.floor(n / 100)] + ' hundred'; n = n % 100; if (n > 0) out += ' and '; }\n  if (n >= 20) { out += EN_TENS[Math.floor(n / 10)]; if (n % 10) out += '-' + EN_ONES[n % 10]; }\n  else if (n > 0 || out === '') out += EN_ONES[n];\n  return out;\n}\nfunction spellEn(n) {\n  n = Math.floor(Number(n)); if (n === 0) return 'zero';\n  var blocks = [[1000000000, 'billion'], [1000000, 'million'], [1000, 'thousand']];\n  var parts = [];\n  for (var i = 0; i < blocks.length; i++) { var q = Math.floor(n / blocks[i][0]); if (q > 0) { parts.push(enUnder1000(q) + ' ' + blocks[i][1]); n = n % blocks[i][0]; } }\n  if (n > 0) { if (parts.length && n < 100) parts.push('and ' + enUnder1000(n)); else parts.push(enUnder1000(n)); }\n  return parts.join(' ');\n}\nvar FR_ONES = ['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize'];\nvar FR_TENS = ['','dix','vingt','trente','quarante','cinquante','soixante','soixante','quatre-vingt','quatre-vingt'];\nfunction frUnder100(n) {\n  if (n < 17) return FR_ONES[n];\n  if (n < 20) return 'dix-' + FR_ONES[n - 10];\n  var t = Math.floor(n / 10), u = n % 10;\n  if (t === 7 || t === 9) { u += 10; }\n  var base = FR_TENS[t];\n  if (t === 8 && u === 0) return 'quatre-vingts';\n  if (u === 0) return base;\n  if (u === 1 && t !== 8) return base + ' et un';\n  if (u === 11 && t === 7) return base + ' et onze';\n  var unit = u < 17 ? FR_ONES[u] : 'dix-' + FR_ONES[u - 10];\n  return base + '-' + unit;\n}\nfunction frUnder1000(n) {\n  var out = '';\n  if (n >= 100) { var h = Math.floor(n / 100); n = n % 100; out = (h === 1 ? 'cent' : FR_ONES[h] + ' cent') + (n === 0 && h > 1 ? 's' : ''); if (n > 0) out += ' '; }\n  if (n > 0 || out === '') out += frUnder100(n);\n  return out;\n}\nfunction spellFr(n) {\n  n = Math.floor(Number(n)); if (n === 0) return 'zéro';\n  var parts = [];\n  var b = Math.floor(n / 1000000000); if (b > 0) { parts.push((b === 1 ? 'un milliard' : frUnder1000(b) + ' milliards')); n = n % 1000000000; }\n  var m = Math.floor(n / 1000000); if (m > 0) { parts.push((m === 1 ? 'un million' : frUnder1000(m) + ' millions')); n = n % 1000000; }\n  var k = Math.floor(n / 1000); if (k > 0) { parts.push((k === 1 ? 'mille' : frUnder1000(k) + ' mille')); n = n % 1000; }\n  if (n > 0) parts.push(frUnder1000(n));\n  return parts.join(' ');\n}\nfunction spell(n, lang) { return isFr(lang) ? spellFr(n) : spellEn(n); }\nfunction skillBase(skill) { return LEVEL_BASE[skill.level] + Number(skill.diff || 0) * 250; }\nfunction predict(r, d) { return 1 / (1 + Math.pow(10, (d - r) / 400)); }\nfunction pickText(bi, lang) { if (!bi) return ''; if (typeof bi === 'string') return bi; return isFr(lang) ? (bi.fr || bi.en || '') : (bi.en || bi.fr || ''); }\n\nvar g = Inputs.game && typeof Inputs.game === 'object' ? Inputs.game : {};\nvar lang = isFr(Inputs.lang) ? 'fr' : 'en';\nvar board = Array.isArray(g.board) ? g.board : [];\nvar joined = Array.isArray(g.joined) ? g.joined : [];\nvar landed = Array.isArray(g.landed) ? g.landed : [];\nvar beat = (Number(g.moves) || 0) % 2 === 0 ? 'a' : 'b';\nvar rows = [];\nfor (var r = 0; r < 4; r++) {\n  var cells = [];\n  for (var c = 0; c < 4; c++) {\n    var i = r * 4 + c, n = Number(board[i]) || 0;\n    var kind = n === 0 ? 'empty' : n % 10 !== 0 ? 'unit' : n === 10 ? 'ten' : n < 100 ? 'tens' : 'big';\n    var fx = 'rkt-merge-tile' + (n && joined.indexOf(i) !== -1 ? ' rkt-join-' + beat : n && landed.indexOf(i) !== -1 ? ' rkt-land-' + beat : '');\n    cells.push({ id: 'c' + i, word: n ? fmtNum(n, lang) : '', kind: kind, fx: fx });\n  }\n  rows.push({ id: 'r' + r, cells: cells });\n}\nvar score = Number(g.score) || 0, made = Number(g.made) || 0, biggest = Number(g.biggest) || 0;\nOutputs.rows = rows;\nOutputs.score = score;\nOutputs.made = made;\nOutputs.biggest = biggest;\nOutputs.over = g.over === true;\nOutputs.phase = g.over === true ? 'over' : 'playing';\n// Richard, 2026-09-14: a board that filled while a join was still there \"doesn't say anything\", and felt like the end. Full and not over\n// is its own state, so the rule line gives way to a hint.\nvar filled = board.length === 16;\nfor (var f = 0; f < board.length; f++) if (!(Number(board[f]) > 0)) filled = false;\nOutputs.fullness = filled && g.over !== true ? 'full' : 'roomy';\nOutputs.scoreLine = lang === 'fr'\n  ? 'Score ' + fmtNum(score, lang) + ' · Plus grande tuile ' + fmtNum(biggest, lang) + ' · Fusions ' + made\n  : 'Score ' + fmtNum(score, lang) + ' · Biggest tile ' + fmtNum(biggest, lang) + ' · Joins ' + made;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-game",
+          "displayName": "game",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-score",
+          "displayName": "score",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-made",
+          "displayName": "made",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-biggest",
+          "displayName": "biggest",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-over",
+          "displayName": "over",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-phase",
+          "displayName": "phase",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-fullness",
+          "displayName": "fullness",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-scoreLine",
+          "displayName": "scoreLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "drawmergeboaOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "scoreLine",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "phase",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "over",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "score",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "made",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "biggest",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "fullness",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

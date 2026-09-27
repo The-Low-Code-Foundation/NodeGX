@@ -8,14 +8,36 @@ const ColorPicker = require('../views/panels/propertyeditor/DataTypes/ColorPicke
 const { ContentPicker } = require('../views/panels/propertyeditor/components/ContentPicker');
 const { loadFontItems } = require('../views/panels/propertyeditor/components/fontItems');
 const PopupLayer = require('../views/popuplayer').default;
+const { Icon, IconName, IconSize } = require('@noodl-core-ui/components/common/Icon');
+const { unmountReactRoot } = require('../../../shared/utils/unmountReactRoot');
 
 require('./propertyeditors.css');
 
+/**
+ * HLT-003 — one decision about "no value", written once.
+ *
+ * 🔴 The initial state guarded a missing value (`props.value || ''`) and the
+ * effect that syncs it on every later change did **not**, so the first time a
+ * port with no value reached this editor `inputValue` became `null` and React
+ * logged *"`value` prop on `input` should not be null"* — measured in fifteen
+ * separate sessions in `<userData>/debug`, which is what a guard that exists in
+ * one of two places looks like from the outside.
+ *
+ * The consequence is not the log line. A controlled `<input>` handed `null`
+ * becomes an **uncontrolled** one, so from that moment React stops owning the
+ * field: it keeps whatever the DOM has, and a later prop change can fail to
+ * reach it. That is the defect; the warning is React telling us about it.
+ *
+ * `?? ''` in both places, deliberately not `|| ''`. The old initialiser also
+ * collapsed `0` and `false` to an empty field, and this editor renders
+ * `type="number"` ports — so a port genuinely set to `0` showed as blank and
+ * read as unset. Nullish coalescing is the rule that was meant in both spots.
+ */
 const GenericInputProperty = React.forwardRef((props, ref) => {
-  const [inputValue, setInputValue] = useState(props.value || '');
+  const [inputValue, setInputValue] = useState(props.value ?? '');
 
   useEffect(() => {
-    setInputValue(props.value);
+    setInputValue(props.value ?? '');
   }, [props.value]);
 
   function onChange(newValue) {
@@ -204,7 +226,7 @@ function FontProperty(props) {
 
     return () => {
       PopupLayer.instance.hidePopout(popout);
-      root.unmount();
+      unmountReactRoot(root);
       fontPickerRef.current = null;
     };
   }, [showFontPicker, onChange]);
@@ -278,7 +300,12 @@ function EnumProperty(props) {
         style={{ display: 'flex', alignItems: 'center', flexGrow: 1, position: 'relative' }}
       >
         {labelForCurrentValue}
-        <i className="property-input-dropdown-arrow fa fa-caret-down" style={{ position: 'absolute', right: '10px' }} />
+        <Icon
+          icon={IconName.CaretDown}
+          size={IconSize.Tiny}
+          UNSAFE_className="property-input-dropdown-arrow"
+          UNSAFE_style={{ position: 'absolute', right: '10px' }}
+        />
         {dropdown}
       </div>
     </div>

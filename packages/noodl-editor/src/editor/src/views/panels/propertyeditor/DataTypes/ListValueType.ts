@@ -11,6 +11,7 @@ import { ListInputRow } from '../components/ListInputRow';
 import { openListValueEditor } from '../components/ListValueEditor';
 import { TypeView } from '../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } from '../utils';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 /**
  * ERG-003 — the property row for `array` and `object` ports.
@@ -140,7 +141,7 @@ export class ListValueType extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

@@ -37,7 +37,7 @@
   border: none;
   background: transparent;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--theme-color-fg-default-shy, rgba(255, 255, 255, 0.5));
   cursor: pointer;

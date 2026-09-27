@@ -183,6 +183,8 @@ NodeSharedPortDefinitions.addAlignInputs(ImageNode);
 NodeSharedPortDefinitions.addPointerEventOutputs(ImageNode);
 // DEF-029 — file drop, off until the author switches it on.
 NodeSharedPortDefinitions.addFileDropPorts(ImageNode);
+// HLT-017 — drag a card, drop it on a column; off until the author switches either side on.
+NodeSharedPortDefinitions.addDragDropPorts(ImageNode);
 NodeSharedPortDefinitions.addBorderInputs(ImageNode);
 NodeSharedPortDefinitions.addShadowInputs(ImageNode);
 

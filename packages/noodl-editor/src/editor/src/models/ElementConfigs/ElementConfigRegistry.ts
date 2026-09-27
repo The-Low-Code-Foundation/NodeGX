@@ -94,6 +94,18 @@ export interface NodeModelLike {
  * Uses `typeName` rather than reading from the node, because the node's type
  * may not yet be resolved when called from the creation flow.
  *
+ * 🔴 **P94 STY-002 AC1: the `_variant` marker is no longer written, and the styles still are.**
+ * The two were always separable and only one of them ever rendered anything. The values a new
+ * Button gets are its **own** — that is a legal, and now the only other, state in the Look model
+ * (`STY-DESIGN-THE-LOOK-MODEL.md` §1: a node wears a Look or its styles are its own) — while the
+ * marker existed solely so the panel's `Preset` row could show a tick beside the name it had
+ * stamped. That row is gone (AC5), and this was the last writer of the parameter in the product.
+ *
+ * ⚠️ **A newly created node is byte-identical apart from the missing marker**, which is what keeps
+ * AC7 true: the marker never reached a port and the runtime dropped it
+ * ([[a-rule-reading-zero-in-both-arms-grades-nothing]] is the trap avoided by asserting the
+ * *styles* are unchanged rather than only that the marker is absent).
+ *
  * @param node - A node model (must have a plain `parameters` object)
  * @param typeName - The node type identifier string (e.g. 'net.noodl.controls.button')
  */
@@ -113,11 +125,9 @@ function applyDefaults(node: NodeModelLike, typeName: string): void {
     }
   }
 
-  // Apply variant styles on top of defaults
+  // The named variant's styles on top, as its own values. No marker.
   if (variantName) {
     applyVariant(node, typeName, variantName);
-    // Persist the active variant name so the UI can show it
-    node.parameters['_variant'] = variantName;
   }
 }
 
@@ -136,42 +146,9 @@ function applyVariant(node: NodeModelLike, typeName: string, variantName: string
   for (const [key, value] of Object.entries(resolved.baseStyles)) {
     node.parameters[key] = value;
   }
-
-  // Update the active variant marker
-  node.parameters['_variant'] = variantName;
+  // P94 STY-002 AC1: no `_variant` marker. See `applyDefaults`.
 }
 
-/**
- * Apply a named size preset's style overrides to a node.
- * Overwrites existing values — intentional when user switches sizes.
- *
- * @param node - A node model (must have a plain `parameters` object)
- * @param typeName - The node type identifier string
- * @param sizeName - e.g. 'sm', 'md', 'lg', 'xl'
- */
-function applySize(node: NodeModelLike, typeName: string, sizeName: string): void {
-  const config = _configs.get(typeName);
-  if (!config?.sizes) return;
-
-  const sizePreset = config.sizes[sizeName];
-  if (!sizePreset) return;
-
-  for (const [key, value] of Object.entries(sizePreset)) {
-    node.parameters[key] = value;
-  }
-
-  // Track the active size
-  node.parameters['_size'] = sizeName;
-}
-
-/**
- * Return the size names defined in the config, in the order they appear.
- */
-function getSizeNames(nodeType: string): string[] {
-  const config = _configs.get(nodeType);
-  if (!config?.sizes) return [];
-  return Object.keys(config.sizes);
-}
 
 // ------------------------------------------------------------------
 // Register all built-in configs
@@ -199,9 +176,7 @@ export const ElementConfigRegistry = {
   has,
   getAll,
   getVariantNames,
-  getSizeNames,
   resolveVariant,
   applyDefaults,
-  applyVariant,
-  applySize
+  applyVariant
 } as const;

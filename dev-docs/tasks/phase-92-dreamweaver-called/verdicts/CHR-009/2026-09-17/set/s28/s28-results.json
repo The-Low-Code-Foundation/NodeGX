@@ -1,0 +1,608 @@
+{
+  "docked": {
+    "width": 312,
+    "before": {
+      "margin": {
+        "fields": [
+          {
+            "comp": "margin-vertical",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 61,
+            "height": 26,
+            "title": "Top and bottom margin"
+          },
+          {
+            "comp": "margin-horizontal",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 61,
+            "height": 26,
+            "title": "Left and right margin"
+          }
+        ],
+        "expander": {
+          "disabled": false,
+          "pressed": "false",
+          "title": "Set each margin edge separately"
+        },
+        "resetDot": false,
+        "height": 32
+      },
+      "padding": {
+        "fields": [
+          {
+            "comp": "padding-vertical",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 61,
+            "height": 26,
+            "title": "Top and bottom padding"
+          },
+          {
+            "comp": "padding-horizontal",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 61,
+            "height": 26,
+            "title": "Left and right padding"
+          }
+        ],
+        "expander": {
+          "disabled": false,
+          "pressed": "false",
+          "title": "Set each padding edge separately"
+        },
+        "resetDot": false,
+        "height": 32
+      }
+    },
+    "liveBoundWithin5s": true,
+    "live": {
+      "margin": {
+        "fields": [
+          {
+            "comp": "margin-vertical",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 61,
+            "height": 26,
+            "title": "Top and bottom margin"
+          },
+          {
+            "comp": "margin-horizontal",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 61,
+            "height": 26,
+            "title": "Left and right margin"
+          }
+        ],
+        "expander": {
+          "disabled": false,
+          "pressed": "false",
+          "title": "Set each margin edge separately"
+        },
+        "resetDot": false,
+        "height": 32
+      },
+      "padding": {
+        "fields": [
+          {
+            "comp": "padding-top",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 61,
+            "height": 26,
+            "title": "Top padding"
+          },
+          {
+            "comp": "padding-bottom",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 61,
+            "height": 26,
+            "title": "Bottom padding"
+          },
+          {
+            "comp": "padding-left",
+            "bound": true,
+            "input": false,
+            "text": "String · Value",
+            "cut": true,
+            "width": 61,
+            "height": 26,
+            "title": "Left padding. This input is driven by String · Value. The value you typed is used only while the connection hasn't sent anything."
+          },
+          {
+            "comp": "padding-right",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 61,
+            "height": 26,
+            "title": "Right padding"
+          }
+        ],
+        "expander": {
+          "disabled": true,
+          "pressed": "true",
+          "title": "An edge is wired, so each padding edge shows on its own"
+        },
+        "resetDot": false,
+        "height": 62
+      }
+    },
+    "width2": 312,
+    "reselected": {
+      "margin": {
+        "fields": [
+          {
+            "comp": "margin-vertical",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 61,
+            "height": 26,
+            "title": "Top and bottom margin"
+          },
+          {
+            "comp": "margin-horizontal",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 61,
+            "height": 26,
+            "title": "Left and right margin"
+          }
+        ],
+        "expander": {
+          "disabled": false,
+          "pressed": "false",
+          "title": "Set each margin edge separately"
+        },
+        "resetDot": false,
+        "height": 32
+      },
+      "padding": {
+        "fields": [
+          {
+            "comp": "padding-top",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 61,
+            "height": 26,
+            "title": "Top padding"
+          },
+          {
+            "comp": "padding-bottom",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 61,
+            "height": 26,
+            "title": "Bottom padding"
+          },
+          {
+            "comp": "padding-left",
+            "bound": true,
+            "input": false,
+            "text": "String · Value",
+            "cut": true,
+            "width": 61,
+            "height": 26,
+            "title": "Left padding. This input is driven by String · Value. The value you typed is used only while the connection hasn't sent anything."
+          },
+          {
+            "comp": "padding-right",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 61,
+            "height": 26,
+            "title": "Right padding"
+          }
+        ],
+        "expander": {
+          "disabled": true,
+          "pressed": "true",
+          "title": "An edge is wired, so each padding edge shows on its own"
+        },
+        "resetDot": false,
+        "height": 62
+      }
+    },
+    "typedTop": "{\"value\":7,\"unit\":\"px\"}",
+    "boundClickSelected": "chr009-s27-src",
+    "unwired": {
+      "margin": {
+        "fields": [
+          {
+            "comp": "margin-vertical",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 61,
+            "height": 26,
+            "title": "Top and bottom margin"
+          },
+          {
+            "comp": "margin-horizontal",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 61,
+            "height": 26,
+            "title": "Left and right margin"
+          }
+        ],
+        "expander": {
+          "disabled": false,
+          "pressed": "false",
+          "title": "Set each margin edge separately"
+        },
+        "resetDot": false,
+        "height": 32
+      },
+      "padding": {
+        "fields": [
+          {
+            "comp": "padding-vertical",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 61,
+            "height": 26,
+            "title": "Top and bottom padding: Top 7px · Bottom 0px"
+          },
+          {
+            "comp": "padding-horizontal",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 61,
+            "height": 26,
+            "title": "Left and right padding"
+          }
+        ],
+        "expander": {
+          "disabled": false,
+          "pressed": "false",
+          "title": "Set each padding edge separately"
+        },
+        "resetDot": true,
+        "height": 32
+      }
+    }
+  },
+  "wide": {
+    "width": 736,
+    "before": {
+      "margin": {
+        "fields": [
+          {
+            "comp": "margin-vertical",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 273,
+            "height": 26,
+            "title": "Top and bottom margin"
+          },
+          {
+            "comp": "margin-horizontal",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 273,
+            "height": 26,
+            "title": "Left and right margin"
+          }
+        ],
+        "expander": {
+          "disabled": false,
+          "pressed": "false",
+          "title": "Set each margin edge separately"
+        },
+        "resetDot": false,
+        "height": 32
+      },
+      "padding": {
+        "fields": [
+          {
+            "comp": "padding-vertical",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 273,
+            "height": 26,
+            "title": "Top and bottom padding: Top 7px · Bottom 0px"
+          },
+          {
+            "comp": "padding-horizontal",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 273,
+            "height": 26,
+            "title": "Left and right padding"
+          }
+        ],
+        "expander": {
+          "disabled": false,
+          "pressed": "false",
+          "title": "Set each padding edge separately"
+        },
+        "resetDot": true,
+        "height": 32
+      }
+    },
+    "liveBoundWithin5s": true,
+    "live": {
+      "margin": {
+        "fields": [
+          {
+            "comp": "margin-vertical",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 273,
+            "height": 26,
+            "title": "Top and bottom margin"
+          },
+          {
+            "comp": "margin-horizontal",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 273,
+            "height": 26,
+            "title": "Left and right margin"
+          }
+        ],
+        "expander": {
+          "disabled": false,
+          "pressed": "false",
+          "title": "Set each margin edge separately"
+        },
+        "resetDot": false,
+        "height": 32
+      },
+      "padding": {
+        "fields": [
+          {
+            "comp": "padding-top",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 273,
+            "height": 26,
+            "title": "Top padding"
+          },
+          {
+            "comp": "padding-bottom",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 273,
+            "height": 26,
+            "title": "Bottom padding"
+          },
+          {
+            "comp": "padding-left",
+            "bound": true,
+            "input": false,
+            "text": "String · Value",
+            "cut": false,
+            "width": 273,
+            "height": 26,
+            "title": "Left padding. This input is driven by String · Value. The value you typed is used only while the connection hasn't sent anything."
+          },
+          {
+            "comp": "padding-right",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 273,
+            "height": 26,
+            "title": "Right padding"
+          }
+        ],
+        "expander": {
+          "disabled": true,
+          "pressed": "true",
+          "title": "An edge is wired, so each padding edge shows on its own"
+        },
+        "resetDot": true,
+        "height": 62
+      }
+    },
+    "width2": 736,
+    "reselected": {
+      "margin": {
+        "fields": [
+          {
+            "comp": "margin-vertical",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 273,
+            "height": 26,
+            "title": "Top and bottom margin"
+          },
+          {
+            "comp": "margin-horizontal",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 273,
+            "height": 26,
+            "title": "Left and right margin"
+          }
+        ],
+        "expander": {
+          "disabled": false,
+          "pressed": "false",
+          "title": "Set each margin edge separately"
+        },
+        "resetDot": false,
+        "height": 32
+      },
+      "padding": {
+        "fields": [
+          {
+            "comp": "padding-top",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 273,
+            "height": 26,
+            "title": "Top padding"
+          },
+          {
+            "comp": "padding-bottom",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 273,
+            "height": 26,
+            "title": "Bottom padding"
+          },
+          {
+            "comp": "padding-left",
+            "bound": true,
+            "input": false,
+            "text": "String · Value",
+            "cut": false,
+            "width": 273,
+            "height": 26,
+            "title": "Left padding. This input is driven by String · Value. The value you typed is used only while the connection hasn't sent anything."
+          },
+          {
+            "comp": "padding-right",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 273,
+            "height": 26,
+            "title": "Right padding"
+          }
+        ],
+        "expander": {
+          "disabled": true,
+          "pressed": "true",
+          "title": "An edge is wired, so each padding edge shows on its own"
+        },
+        "resetDot": true,
+        "height": 62
+      }
+    },
+    "boundClickSelected": "chr009-s27-src",
+    "unwired": {
+      "margin": {
+        "fields": [
+          {
+            "comp": "margin-vertical",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 273,
+            "height": 26,
+            "title": "Top and bottom margin"
+          },
+          {
+            "comp": "margin-horizontal",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 273,
+            "height": 26,
+            "title": "Left and right margin"
+          }
+        ],
+        "expander": {
+          "disabled": false,
+          "pressed": "false",
+          "title": "Set each margin edge separately"
+        },
+        "resetDot": false,
+        "height": 32
+      },
+      "padding": {
+        "fields": [
+          {
+            "comp": "padding-vertical",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 273,
+            "height": 26,
+            "title": "Top and bottom padding: Top 7px · Bottom 0px"
+          },
+          {
+            "comp": "padding-horizontal",
+            "bound": false,
+            "input": true,
+            "text": null,
+            "cut": null,
+            "width": 273,
+            "height": 26,
+            "title": "Left and right padding"
+          }
+        ],
+        "expander": {
+          "disabled": false,
+          "pressed": "false",
+          "title": "Set each padding edge separately"
+        },
+        "resetDot": true,
+        "height": 32
+      }
+    }
+  },
+  "restoredTop": "undefined"
+}

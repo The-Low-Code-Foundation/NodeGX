@@ -1,0 +1,667 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2cae9852-7b2b-5076-840e-36c3ec065020",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "nfIn",
+      "fromProperty": "mounted",
+      "toId": "nfShown",
+      "toProperty": "m"
+    },
+    {
+      "fromId": "nfShown",
+      "fromProperty": "result",
+      "toId": "nfCard",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "nameWord",
+      "toId": "nfNameLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "nameWord",
+      "toId": "nfName",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "rollWord",
+      "toId": "nfRoll",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "faceWord",
+      "toId": "nfLook",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "levelWord",
+      "toId": "nfLevel",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "langWord",
+      "toId": "nfLang",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "createWord",
+      "toId": "nfCreate",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "cancelWord",
+      "toId": "nfCancel",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "look0",
+      "toId": "nfLookItems",
+      "toProperty": "in-look"
+    },
+    {
+      "fromId": "nfLookItems",
+      "fromProperty": "out-items",
+      "toId": "nfLook",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "nfLevelItems",
+      "fromProperty": "items",
+      "toId": "nfLevel",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "nfLangItems",
+      "fromProperty": "items",
+      "toId": "nfLang",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "nfLookVar",
+      "fromProperty": "value",
+      "toId": "nfLook",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfLook",
+      "fromProperty": "value",
+      "toId": "nfSetLook",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfLook",
+      "fromProperty": "changed",
+      "toId": "nfSetLook",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfLevelVar",
+      "fromProperty": "value",
+      "toId": "nfLevel",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfLevel",
+      "fromProperty": "value",
+      "toId": "nfSetLevel",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfLevel",
+      "fromProperty": "changed",
+      "toId": "nfSetLevel",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfLangVar",
+      "fromProperty": "value",
+      "toId": "nfLang",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfLang",
+      "fromProperty": "value",
+      "toId": "nfSetLang",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfLang",
+      "fromProperty": "changed",
+      "toId": "nfSetLang",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfLookVar",
+      "fromProperty": "value",
+      "toId": "nfFace",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "nfSeedVar",
+      "fromProperty": "value",
+      "toId": "nfFace",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "nfRoll",
+      "fromProperty": "onClick",
+      "toId": "nfRandom",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nfRandom",
+      "fromProperty": "result",
+      "toId": "nfRollRoll",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "nfRandom",
+      "fromProperty": "result",
+      "toId": "nfRollSet",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "nfRoll",
+      "fromProperty": "onClick",
+      "toId": "nfRollRoll",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nfBack",
+      "fromProperty": "onClick",
+      "toId": "nfRollBack",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nfForward",
+      "fromProperty": "onClick",
+      "toId": "nfRollFwd",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nfHistVar",
+      "fromProperty": "value",
+      "toId": "nfRollSet",
+      "toProperty": "history"
+    },
+    {
+      "fromId": "nfAtVar",
+      "fromProperty": "value",
+      "toId": "nfRollSet",
+      "toProperty": "at"
+    },
+    {
+      "fromId": "nfRollSet",
+      "fromProperty": "seed",
+      "toId": "nfSetSeed",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollSet",
+      "fromProperty": "history",
+      "toId": "nfSetHist",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollSet",
+      "fromProperty": "at",
+      "toId": "nfSetAt",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollSet",
+      "fromProperty": "position",
+      "toId": "nfPos",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nfRollSet",
+      "fromProperty": "canBack",
+      "toId": "nfBack",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfRollSet",
+      "fromProperty": "canForward",
+      "toId": "nfForward",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfRollSet",
+      "fromProperty": "done",
+      "toId": "nfSetSeed",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfHistVar",
+      "fromProperty": "value",
+      "toId": "nfRollRoll",
+      "toProperty": "history"
+    },
+    {
+      "fromId": "nfAtVar",
+      "fromProperty": "value",
+      "toId": "nfRollRoll",
+      "toProperty": "at"
+    },
+    {
+      "fromId": "nfRollRoll",
+      "fromProperty": "seed",
+      "toId": "nfSetSeed",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollRoll",
+      "fromProperty": "history",
+      "toId": "nfSetHist",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollRoll",
+      "fromProperty": "at",
+      "toId": "nfSetAt",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollRoll",
+      "fromProperty": "position",
+      "toId": "nfPos",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nfRollRoll",
+      "fromProperty": "canBack",
+      "toId": "nfBack",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfRollRoll",
+      "fromProperty": "canForward",
+      "toId": "nfForward",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfRollRoll",
+      "fromProperty": "done",
+      "toId": "nfSetSeed",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfHistVar",
+      "fromProperty": "value",
+      "toId": "nfRollBack",
+      "toProperty": "history"
+    },
+    {
+      "fromId": "nfAtVar",
+      "fromProperty": "value",
+      "toId": "nfRollBack",
+      "toProperty": "at"
+    },
+    {
+      "fromId": "nfRollBack",
+      "fromProperty": "seed",
+      "toId": "nfSetSeed",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollBack",
+      "fromProperty": "history",
+      "toId": "nfSetHist",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollBack",
+      "fromProperty": "at",
+      "toId": "nfSetAt",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollBack",
+      "fromProperty": "position",
+      "toId": "nfPos",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nfRollBack",
+      "fromProperty": "canBack",
+      "toId": "nfBack",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfRollBack",
+      "fromProperty": "canForward",
+      "toId": "nfForward",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfRollBack",
+      "fromProperty": "done",
+      "toId": "nfSetSeed",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfHistVar",
+      "fromProperty": "value",
+      "toId": "nfRollFwd",
+      "toProperty": "history"
+    },
+    {
+      "fromId": "nfAtVar",
+      "fromProperty": "value",
+      "toId": "nfRollFwd",
+      "toProperty": "at"
+    },
+    {
+      "fromId": "nfRollFwd",
+      "fromProperty": "seed",
+      "toId": "nfSetSeed",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollFwd",
+      "fromProperty": "history",
+      "toId": "nfSetHist",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollFwd",
+      "fromProperty": "at",
+      "toId": "nfSetAt",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfRollFwd",
+      "fromProperty": "position",
+      "toId": "nfPos",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nfRollFwd",
+      "fromProperty": "canBack",
+      "toId": "nfBack",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfRollFwd",
+      "fromProperty": "canForward",
+      "toId": "nfForward",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfRollFwd",
+      "fromProperty": "done",
+      "toId": "nfSetSeed",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfSetSeed",
+      "fromProperty": "done",
+      "toId": "nfSetHist",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfSetHist",
+      "fromProperty": "done",
+      "toId": "nfSetAt",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfDefaultLook",
+      "fromProperty": "result",
+      "toId": "nfResetLook",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "reset",
+      "toId": "nfResetLook",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfDefaultLevel",
+      "fromProperty": "result",
+      "toId": "nfResetLevel",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfResetLook",
+      "fromProperty": "done",
+      "toId": "nfResetLevel",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfDefaultLang",
+      "fromProperty": "result",
+      "toId": "nfResetLang",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfResetLevel",
+      "fromProperty": "done",
+      "toId": "nfResetLang",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfResetLang",
+      "fromProperty": "done",
+      "toId": "nfRandom",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nfResetLang",
+      "fromProperty": "done",
+      "toId": "nfRollSet",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "reset",
+      "toId": "nfName",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "nfName",
+      "fromProperty": "onTextChanged",
+      "toId": "nfOut",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "nfLookVar",
+      "fromProperty": "value",
+      "toId": "nfOut",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "nfSeedVar",
+      "fromProperty": "value",
+      "toId": "nfOut",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "nfLevelVar",
+      "fromProperty": "value",
+      "toId": "nfOut",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "nfLangVar",
+      "fromProperty": "value",
+      "toId": "nfOut",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "nfCreate",
+      "fromProperty": "onClick",
+      "toId": "nfOut",
+      "toProperty": "create"
+    },
+    {
+      "fromId": "nfCancel",
+      "fromProperty": "onClick",
+      "toId": "nfOut",
+      "toProperty": "cancel"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "editing",
+      "toId": "nfEditing",
+      "toProperty": "editing"
+    },
+    {
+      "fromId": "nfEditing",
+      "fromProperty": "result",
+      "toId": "nfMode",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "nfMode",
+      "fromProperty": "create",
+      "toId": "nfLangWrap",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfMode",
+      "fromProperty": "edit",
+      "toId": "nfDanger",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "look0",
+      "toId": "nfFillLook",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "fill",
+      "toId": "nfFillLook",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "level0",
+      "toId": "nfFillLevel",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "fill",
+      "toId": "nfFillLevel",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "seed0",
+      "toId": "nfRollSet",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "fill",
+      "toId": "nfRollSet",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "name0",
+      "toId": "nfName",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "fill",
+      "toId": "nfName",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "deleteWord",
+      "toId": "nfDelete",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "yesWord",
+      "toId": "nfYes",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "noWord",
+      "toId": "nfNo",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "askWord",
+      "toId": "nfAskLine",
+      "toProperty": "in-word"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "name0",
+      "toId": "nfAskLine",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "nfAskLine",
+      "fromProperty": "out-line",
+      "toId": "nfAskText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nfAskState",
+      "fromProperty": "idle",
+      "toId": "nfDelete",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfAskState",
+      "fromProperty": "asking",
+      "toId": "nfAsk",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nfDelete",
+      "fromProperty": "onClick",
+      "toId": "nfAskState",
+      "toProperty": "to-asking"
+    },
+    {
+      "fromId": "nfNo",
+      "fromProperty": "onClick",
+      "toId": "nfAskState",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "fill",
+      "toId": "nfAskState",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "nfYes",
+      "fromProperty": "onClick",
+      "toId": "nfAskState",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "nfYes",
+      "fromProperty": "onClick",
+      "toId": "nfOut",
+      "toProperty": "delete"
+    }
+  ]
+}

@@ -48,6 +48,19 @@ export const THEME_CHANGED_EVENT = 'nodegx:themechanged';
 /** IPC channel used to align Electron's native theme (scrollbars/menus). */
 const NATIVE_THEME_IPC = 'set-native-theme';
 
+/**
+ * TVW-002 AC6 (Richard, 2026-09-18: *"just fix it"*) — the DETACHED preview window's theme.
+ *
+ * 🔴 That window is a second renderer and `applyAttribute` below only ever reached this one, so it
+ * sat on the dark `:root` defaults whatever the editor was set to. Measured during TVW-002's drive:
+ * `document.documentElement.getAttribute('data-theme')` was **null** there, permanently.
+ *
+ * It rides beside {@link NATIVE_THEME_IPC} rather than anywhere cleverer because this is already
+ * the one place that knows a theme was resolved AND can reach the main process. A window that opens
+ * later gets the same value from its detach payload — see `main.js`'s `did-finish-load`.
+ */
+const VIEWER_THEME_IPC = 'viewer-set-theme';
+
 export enum ThemeManagerEvent {
   Changed = 'changed'
 }
@@ -160,6 +173,7 @@ class ThemeManagerModel extends Model<ThemeManagerEvent, ThemeManagerEvents> {
     const resolved = this.resolve(this.mode);
     this.applyAttribute(resolved);
     this.applyNativeTheme();
+    this.applyDetachedPreviewTheme(resolved);
 
     // Imperative consumers: the node-graph canvas (UIX-005) repaints on this,
     // and the CodeMirror theme follows the CSS variables for free.
@@ -180,6 +194,19 @@ class ThemeManagerModel extends Model<ThemeManagerEvent, ThemeManagerEvents> {
     try {
       // Electron's nativeTheme.themeSource accepts exactly these strings.
       ipcRenderer?.send(NATIVE_THEME_IPC, this.mode);
+    } catch {
+      /* main process not reachable (tests/headless) — nothing to align */
+    }
+  }
+
+  /**
+   * ⚠️ The **resolved** theme, not the mode. `system` means nothing in the other window: it has no
+   * media query of its own worth consulting and would have to re-resolve the same question. This
+   * renderer has already answered it.
+   */
+  private applyDetachedPreviewTheme(resolved: ResolvedTheme) {
+    try {
+      ipcRenderer?.send(VIEWER_THEME_IPC, resolved);
     } catch {
       /* main process not reachable (tests/headless) — nothing to align */
     }

@@ -10,6 +10,7 @@ import { renderReadableCodeFromJson } from '../../../BlocklyEditor/readableCode'
 import { GeneratedCodeModal } from '../GeneratedCodeModal';
 import { TypeView } from '../TypeView';
 import { getEditType } from '../utils';
+import { createReactRoot, unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 /**
  * Custom editor for Logic Builder workspace parameter
@@ -165,7 +166,7 @@ export class LogicBuilderWorkspaceType extends TypeView {
       this.modalContainer = document.createElement('div');
       this.modalContainer.id = 'generated-code-modal-container';
       document.body.appendChild(this.modalContainer);
-      this.modalRoot = createRoot(this.modalContainer);
+      this.modalRoot = createReactRoot(this.modalContainer);
     }
 
     this.isModalOpen = true;
@@ -200,7 +201,7 @@ export class LogicBuilderWorkspaceType extends TypeView {
   dispose() {
     // Clean up modal when view is disposed
     if (this.modalRoot) {
-      this.modalRoot.unmount();
+      unmountReactRoot(this.modalRoot);
       this.modalRoot = null;
     }
     if (this.modalContainer && this.modalContainer.parentNode) {
@@ -208,7 +209,7 @@ export class LogicBuilderWorkspaceType extends TypeView {
       this.modalContainer = null;
     }
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8ee7828f-e601-5bc2-8d17-e523da84ad84",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "chIn",
+      "fromProperty": "label",
+      "toId": "chText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "chIn",
+      "fromProperty": "selected",
+      "toId": "chIsOn",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "chIsOn",
+      "fromProperty": "ontrue",
+      "toId": "chStates",
+      "toProperty": "to-on"
+    },
+    {
+      "fromId": "chIsOn",
+      "fromProperty": "onfalse",
+      "toId": "chStates",
+      "toProperty": "to-off"
+    },
+    {
+      "fromId": "chStates",
+      "fromProperty": "bg",
+      "toId": "chPill",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "chStates",
+      "fromProperty": "edge",
+      "toId": "chPill",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "chStates",
+      "fromProperty": "fg",
+      "toId": "chText",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "chPill",
+      "fromProperty": "onClick",
+      "toId": "chOut",
+      "toProperty": "picked"
+    },
+    {
+      "fromId": "chIn",
+      "fromProperty": "value",
+      "toId": "chOut",
+      "toProperty": "value"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e02b661d-4250-5ed1-8094-435f24d582a7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "CarryblockIn",
+      "fromProperty": "blockId",
+      "toId": "CarryblockGuard",
+      "toProperty": "in-blockId"
+    },
+    {
+      "fromId": "CarryblockIn",
+      "fromProperty": "date",
+      "toId": "CarryblockGuard",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "CarryblockIn",
+      "fromProperty": "do",
+      "toId": "CarryblockGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "CarryblockGuard",
+      "fromProperty": "out-date",
+      "toId": "CarryblockWrite",
+      "toProperty": "prop-date"
+    },
+    {
+      "fromId": "CarryblockIn",
+      "fromProperty": "blockId",
+      "toId": "CarryblockWrite",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "CarryblockGuard",
+      "fromProperty": "out-go",
+      "toId": "CarryblockWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "CarryblockWrite",
+      "fromProperty": "done",
+      "toId": "CarryblockOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "CarryblockWrite",
+      "fromProperty": "failure",
+      "toId": "CarryblockProblem",
+      "toProperty": "do"
+    }
+  ]
+}

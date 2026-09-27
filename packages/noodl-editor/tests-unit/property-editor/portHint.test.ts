@@ -120,12 +120,18 @@ describe('applyPortHint', () => {
 
   it('leaves a row it can never hint on completely untouched', () => {
     const el = element();
-    el.className = 'property-row';
+    // A neutral sentinel on purpose. This asserts only that `apply` changed NOTHING, so the value
+    // is arbitrary — but it used to be the literal `property-row`, which read as a claim about a
+    // real product class and went stale when CHR-008 §3.2 renamed that class to
+    // `.property-panel-row`. A sentinel that names a live class invites exactly that confusion:
+    // nothing here cares what the panel calls its rows.
+    const UNTOUCHED = 'sentinel-class-this-test-never-interprets';
+    el.className = UNTOUCHED;
 
     apply(el, ['backgroundColor'], hint);
 
     expect(el.getAttribute(HINT_PORTS_ATTRIBUTE)).toBeNull();
-    expect(el.className).toBe('property-row');
+    expect(el.className).toBe(UNTOUCHED);
     expect(el.children.length).toBe(0);
   });
 

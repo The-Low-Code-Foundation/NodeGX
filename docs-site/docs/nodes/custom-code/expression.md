@@ -25,7 +25,8 @@ Small computations and predicates inline in a graph: arithmetic, comparisons, st
 
 | Name | Type | Default | Description |
 |---|---|---|---|
-| `expression` | String | — | JavaScript expression whose value becomes Result; every identifier in it becomes an input port |
+| `evaluateAtLoad` | Boolean | `true` | Whether the expression runs when the page loads even though an input it reads has not arrived yet. Those inputs read as undefined, so `m !== false` is true and `m === true` is false. An expression that throws or gives NaN over them waits for its inputs instead. Untick to wait for an input to arrive |
+| `expression` | String | — | JavaScript expression whose value becomes Result. Every name it reads becomes an input port, except JavaScript's own (String, Number, JSON, Date, parseInt, Math and the rest), the Math shortcuts (round, min, pi…) and keywords such as typeof; a port can never be called one of those |
 
 ### Signals
 
@@ -70,7 +71,7 @@ Input ports are created for each free variable referenced in the "expression" pa
 
 ## Ports at runtime
 
-Inputs are runtime-discovered by parsing the expression text: each identifier that is not a built-in becomes an input port registered on demand. The port set therefore changes whenever the expression is edited, and cannot be known without the expression. Reads of Noodl.Variables/Objects inside the expression additionally subscribe the node to those stores.
+Inputs are runtime-discovered by parsing the expression text: each identifier that is not a built-in becomes an input port registered on demand. The port set therefore changes whenever the expression is edited, and cannot be known without the expression. Reads of Noodl.Variables/Objects inside the expression additionally subscribe the node to those stores. At load the expression runs even if an input it reads has not arrived: that input reads as undefined, so a guard like `m !== false` on an optional component input is true and the part shows. If it throws or gives NaN over those unset inputs, the node waits for an input instead and Result stays null. Untick Evaluate At Load to always wait.
 
 ## Patterns
 
@@ -81,6 +82,8 @@ Inputs are runtime-discovered by parsing the expression text: each identifier th
 
 - Chaining many Expression nodes to build a program — one Function node with readable JavaScript beats a lattice of expressions.
 - Side effects in the expression; it may evaluate more often than you expect. Expressions must stay pure.
+- Naming an input after something JavaScript already has. String, Number, Boolean, Object, Array, JSON, Date, Math, parseInt, parseFloat, isNaN, isFinite, NaN, Infinity, undefined, window, document, the Math shortcuts (round, min, max, abs, pi…) and keywords such as typeof are never ports, so a wire into one delivers nothing. Call the value `count` or `label` instead.
+- Writing an object literal: a key is read as a name, so `{ size: n }` grows a `size` input beside `n`. Build objects in a Function node.
 
 ## Examples
 

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d4aeeaec-af6e-4114-af0a-cdfd86c4adda",
+  "name": "Ordered timeline",
+  "path": "/Logic/Ordered timeline",
+  "type": "visual",
+  "created": "2026-09-20T12:47:37.379Z",
+  "modified": "2026-09-20T12:47:37.379Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The order of a learner's programme, and what each row says when it is folded. Every rule here is PORTED from the product's own pure modules and names the file it came from; a second spelling of the ordering would put a learner's fortnight in one order and their coach's in another."
+}

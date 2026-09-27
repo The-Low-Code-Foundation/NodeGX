@@ -22,8 +22,57 @@ interface AnimateToValueInstance extends NodeInstance {
     animationStarted: boolean;
     setCurrentNumberEnabled: boolean;
     overrideValue: number;
+    /** GAM-008: where `Jump To` puts Current Value. */
+    jumpValue?: unknown;
     _animation: AnimationTimer;
   };
+}
+
+/** `targetValue.set`'s coercion: booleans are 1 and 0, anything else goes through `Number`. */
+function numericOf(value: unknown): number {
+  if (value === true) return 1;
+  if (value === false) return 0;
+  return Number(value);
+}
+
+/**
+ * GAM-008 (P88, P78 D67), ruled R9: a jump, then carry on towards Target Value.
+ *
+ * Without it a graph that writes "full" then "empty" in one pass got a glide from wherever the value
+ * was, never the jump: the setter sees both targets, and the second restarts the run from
+ * `currentNumber` before any frame has moved it (GAM-008 §8 AC1). A duration of 0 does not help,
+ * because the value only lands on the frame after the run joins.
+ *
+ * Current Value moves now, synchronously. Whether to move on is decided once every input of this
+ * update has landed, which is Transition's `setCurrentNumber` shape and is what makes the order of
+ * the jump and a new target in the same pass not matter: a target that arrives first is overtaken
+ * by the jump, and one that arrives after it restarts the run from the jumped value.
+ *
+ * A jump is not an arrival: At Target Value does not fire for it. A countdown that wires At Target
+ * Value to "time's up" must not be told time is up the moment it refills.
+ */
+function jumpTo(this: AnimateToValueInstance, value: unknown) {
+  const numeric = numericOf(value);
+  if (isNaN(numeric)) return;
+
+  const internal = this._internal;
+  const animation = internal._animation;
+
+  animation.stop();
+  if (internal.numberInitialized === false) {
+    // No target has arrived yet, so there is nothing to carry on towards.
+    internal.numberInitialized = true;
+    animation.endValue = numeric;
+  }
+  internal.currentNumber = numeric;
+  this.flagOutputDirty('currentValue');
+
+  this.scheduleAfterInputsHaveUpdated(function (this: AnimateToValueInstance) {
+    if (animation.endValue !== internal.currentNumber) {
+      animation.startValue = internal.currentNumber;
+      animation.start();
+    }
+  });
 }
 
 const defaultDuration = 300;
@@ -90,16 +139,11 @@ const AnimateToValue: NodeDefinitionOptions = {
       },
       displayName: 'Target Value',
       group: 'Target Value',
-      description: 'Value to move towards; the first one to arrive is adopted outright rather than animated to',
+      description:
+        'Value to move towards; the first one to arrive is adopted outright rather than animated to. Two targets in one update make one move, from wherever the value is: to jump first, use Jump To',
       default: undefined, //default is undefined so transition initializes to the first input value
       set: function (this: AnimateToValueInstance, value: unknown) {
-        if (value === true) {
-          value = 1;
-        } else if (value === false) {
-          value = 0;
-        }
-
-        const numeric = Number(value);
+        const numeric = numericOf(value);
 
         if (isNaN(numeric)) {
           //bail out on NaN values
@@ -122,6 +166,26 @@ const AnimateToValue: NodeDefinitionOptions = {
         internal._animation.startValue = internal.currentNumber;
         internal._animation.endValue = numeric;
         internal._animation.start();
+      }
+    },
+    jumpValue: {
+      type: {
+        name: 'number'
+      },
+      displayName: 'Jump Value',
+      group: 'Jump',
+      description: 'Where Jump To puts Current Value',
+      set: function (this: AnimateToValueInstance, value: unknown) {
+        this._internal.jumpValue = value;
+      }
+    },
+    jumpTo: {
+      displayName: 'Jump To',
+      group: 'Jump',
+      description:
+        'Puts Current Value at Jump Value at once, then carries on towards Target Value; a jump is not an arrival, so At Target Value does not fire for it',
+      valueChangedToTrue: function (this: AnimateToValueInstance) {
+        jumpTo.call(this, this._internal.jumpValue);
       }
     },
     duration: {

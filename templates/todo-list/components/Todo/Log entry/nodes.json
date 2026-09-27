@@ -1,0 +1,243 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c1f0e233-7c82-5014-8c8e-7643714dc15f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "leIn",
+      "type": "Component Inputs",
+      "label": "The line",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "taskId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "day",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "showDay",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "time",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "taskTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "summary",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "body",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasBody",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "leOut",
+      "type": "Component Outputs",
+      "label": "Opened",
+      "ports": [
+        {
+          "name": "open",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "taskId",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "leRoot",
+      "type": "Group",
+      "label": "Log entry",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "leDay",
+        "leLine"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "leDay",
+      "type": "Text",
+      "label": "Day",
+      "parent": "leRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "marginTop": "var(--space-4)",
+        "marginBottom": "var(--space-1)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "leLine",
+      "type": "Group",
+      "label": "The line",
+      "parent": "leRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0-5)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "children": [
+        "leHead",
+        "leSummary",
+        "leBody"
+      ],
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "leHead",
+      "type": "Group",
+      "label": "Time and task",
+      "parent": "leLine",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "leTime",
+        "leTask"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "leTime",
+      "type": "Text",
+      "label": "Time",
+      "parent": "leHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize",
+        "fontVariantNumeric": "tabular-nums"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "leTask",
+      "type": "Text",
+      "label": "Task",
+      "parent": "leHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "leSummary",
+      "type": "Text",
+      "label": "What happened",
+      "parent": "leLine",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "leBody",
+      "type": "Text",
+      "label": "The note",
+      "parent": "leLine",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "leRoot"
+  ]
+}

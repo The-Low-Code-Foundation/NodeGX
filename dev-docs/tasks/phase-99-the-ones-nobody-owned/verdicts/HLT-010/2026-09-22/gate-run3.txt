@@ -1,0 +1,30 @@
+workspace /var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt010-7kMI7O
+CDP port  52375
+fixture   templates/landing-pages
+
+ok    the editor launched and React mounted — 
+ok    requestAnimationFrame fires in the driven window
+ok    REACH the launcher drew the seeded project card — 1 cards
+ok    REACH the launcher’s community layer ran (`/api/v1/me` requested) — 3 requests
+ok    REACH the fixture opened from its launcher card — /var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt010-7kMI7O/Renderer Error Gate
+ok    REACH components visited and nodes selected — 10 components, 52 selections
+MISS  the drive ran to the end — no element matching [data-test="board-add-all"]
+
+drive + teardown took 116 s
+ok    the log exists and CDP attached to the editor — 2316 lines
+ok    sentinel sentinel/console came back as exactly one event — 1 events on 1 lines
+ok    sentinel sentinel/uncaught came back as exactly one event — 1 events on 2 lines
+ok    sentinel sentinel/browser came back as exactly one event — 1 events on 1 lines
+
+── classes seen ─────────────────────────────────────────────
+  ok         1 / 2  network/whats-new-feed-404
+  OVER       1 / 0  react/null-value-prop
+            line 2315 [console bugtracker.ts:166] `value` prop on `%s` should not be null. Consider using an empty string to clear the component or `undefined` for uncontrolled components. input
+
+── the allowlist (every class with a budget above 0, and why) ──
+  network/whats-new-feed-404 ≤ 2 — Chromium's network log, not an app error: whats-new.ts asks for /whats-new/feed.json on every project open, the feed has never existed, and the client resolves to null without throwing (HLT-013 verdict, 'knowingly unserved'). Only NOT asking removes the line. The gate opens a project twice, so 2. Goes to 0 when the feed is published or the request is dropped.
+
+COULD NOT MEASURE — 1 precondition(s) missed; a quiet log here proves nothing.
+
+log kept: /var/folders/jb/nb63j64j3qvg0thnmcl7zmnh0000gn/T/hlt010-7kMI7O/dev.log
+exit=2

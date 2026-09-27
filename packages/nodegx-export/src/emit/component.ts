@@ -60,12 +60,15 @@ import { STREAMING_LIB_PATH } from './streamingLib';
 import { SSE_LIB_PATH } from './sseLib';
 import { WEBSOCKET_LIB_PATH } from './websocketLib';
 import { REALTIME_LIB_PATH } from './realtimeLib';
+import { REPEAT_LIB_PATH } from './repeatLib';
 import { SCRIPT_CODE_PREFIX } from '../analyze/script';
 import { ID_HELPERS_BY_FN, ID_LIB_PATH, IdHelper } from './idLib';
 import { CRYPTO_LIB_PATH, CryptoHelper } from './cryptoLib';
 import { SCREEN_LIB_PATH } from './screenLib';
+import { MEDIA_ATTRS, MEDIA_LIB_PATH, MediaHelper, absoluteUrl } from './mediaLib';
 import { COMPONENT_OBJECT_LIB_PATH } from './componentObjectLib';
 import { PAGE_STACK_LIB_PATH } from './pageStackLib';
+import { POPUP_DIALOG_LIB_PATH } from './popupDialogLib';
 import { computeNodeStyle, computeRoleCss, CONTENT_ATTR_ORDER, CONTENT_PARAMS, Decl, iconSourceOf, RoleCss, StyleRole, WIRED_STYLE_SINKS } from './style';
 
 const GENERATED_TS = '// @nodegx:generated (visual — provenance markers complete in EXP-007)\n';
@@ -264,6 +267,8 @@ export interface EmittedComponent {
   websocketLib: boolean;
   /** EXP-011 §66. `src/lib/realtime.ts` is owed when this component keeps a Subscribe To Changes node. */
   realtimeLib: boolean;
+  /** GAM-013. `src/lib/repeat.ts` is owed when this component keeps a Repeat node. */
+  repeatLib: boolean;
   /** EXP-011 §59. `src/lib/crypto.ts` verbs this component calls; `src/lib/screen.ts` is owed when a viewport hook prints. */
   cryptoHelpers: Set<string>;
   screenLib: boolean;
@@ -273,6 +278,14 @@ export interface EmittedComponent {
   dragLib: boolean;
   /** EXP-011 §61. `src/lib/pageStack.ts` is owed when this component renders a stack, pushes, pops, or is pushed. */
   pageStackLib: boolean;
+  /** HLT-014 — a popup slot rendered, so `src/lib/popupDialog.ts` is owed. */
+  popupDialogLib: boolean;
+  /**
+   * EXP-014 §14.5. Which of `src/lib/media.ts`'s helpers this component prints a WIRED src / srcSet /
+   * poster through. Filled by `contentAttrs` at the point the attribute is printed — the same
+   * dead-module rule as `dateHelpers`: the module ships exactly when a line names it.
+   */
+  mediaHelpers: Set<MediaHelper>;
 }
 
 export function emitComponent(
@@ -356,7 +369,7 @@ export function emitComponent(
   for (const id of styledIds) {
     const node = nodeById.get(id)!;
     const role = plan.roleOf[id] as StyleRole;
-    const style = computeNodeStyle(node, role, catalog);
+    const style = computeNodeStyle(node, role, catalog, ir.project.styles);
     for (const name of style.unhandled) {
       if (name === 'visible' || name === 'mounted') continue; // §4b: handled by the render wrap / class toggle
       if (name === 'cssClassName' && authoredClassName(node) !== undefined) continue; // §48: folded into className
@@ -364,7 +377,7 @@ export function emitComponent(
       unmappedParams.push({ id, name });
     }
     for (const note of style.notes) notes.push(`${plan.path}: node ${id}: ${note}`);
-    const roleCss = computeRoleCss(node, role, catalog);
+    const roleCss = computeRoleCss(node, role, catalog, ir.project.styles);
     for (const note of roleCss.notes) notes.push(`${plan.path}: ${note}`);
     roleCssOf.set(id, roleCss);
     let decls = style.decls;
@@ -372,7 +385,7 @@ export function emitComponent(
     // declarations the Group does not already set (none in practice — Page style params are rare).
     if (id === plan.rootId && plan.collapsedGroupId) {
       const group = nodeById.get(plan.collapsedGroupId)!;
-      const groupStyle = computeNodeStyle(group, 'group', catalog);
+      const groupStyle = computeNodeStyle(group, 'group', catalog, ir.project.styles);
       for (const name of groupStyle.unhandled) {
         if (name === 'visible' || name === 'mounted') continue;
         if (name === 'cssClassName' && authoredClassName(group) !== undefined) continue; // §48: onto the page div
@@ -4098,6 +4111,9 @@ export function emitComponent(
   if (routerHooks.length > 0) externalImports.push(`import { ${routerHooks.join(', ')} } from 'react-router-dom';`);
 
   const internalImports = new Map<string, string>(); // specifier → line
+  // EXP-014 §14.5. The media helpers a wired src/srcSet/poster printed through; the import line is
+  // set AFTER the render, where the JSX lines are (the imports are joined later than that).
+  const usedMediaHelpers = new Set<MediaHelper>();
   // One import per api module, carrying the reads and the writes together — the record verbs
   // land in the same module as the query on the same class (RECORD-VERBS-TARGET §4d). Only the
   // fetch needs its item type imported; a mutation's argument type is inferred from the call.
@@ -4255,10 +4271,11 @@ export function emitComponent(
     internalImports.set(specifier, `import { ${names.join(', ')} } from '${specifier}';`);
   }
   // EXP-011 §58 + §64 + §65 + §66. The streaming hooks, one import per hook the plan kept, grouped by the module each lives in.
-  for (const lib of ['streaming', 'sse', 'websocket', 'realtime'] as const) {
+  // GAM-013. Repeat's hook is the table's seventh, in its own module.
+  for (const lib of ['streaming', 'sse', 'websocket', 'realtime', 'repeat'] as const) {
     const hooks = [...new Set(plan.streams.filter((s) => STREAM_NODES[s.type].lib === lib).map((s) => STREAM_NODES[s.type].hook))].sort();
     if (hooks.length === 0) continue;
-    const libPath = lib === 'streaming' ? STREAMING_LIB_PATH : lib === 'sse' ? SSE_LIB_PATH : lib === 'websocket' ? WEBSOCKET_LIB_PATH : REALTIME_LIB_PATH;
+    const libPath = lib === 'streaming' ? STREAMING_LIB_PATH : lib === 'sse' ? SSE_LIB_PATH : lib === 'websocket' ? WEBSOCKET_LIB_PATH : lib === 'repeat' ? REPEAT_LIB_PATH : REALTIME_LIB_PATH;
     const specifier = `${relRoot}/${libPath.replace(/^src\//, '').replace(/\.ts$/, '')}`;
     internalImports.set(specifier, `import { ${hooks.join(', ')} } from '${specifier}';`);
   }
@@ -4298,6 +4315,11 @@ export function emitComponent(
   if (usedPageStackNames.size > 0) {
     const specifier = `${relRoot}/${PAGE_STACK_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
     internalImports.set(specifier, `import { ${[...usedPageStackNames].sort().join(', ')} } from '${specifier}';`);
+  }
+  // HLT-014. `src/lib/popupDialog.ts`, owed by any rendered MODAL popup slot.
+  if (plan.popups.some((p) => p.modal)) {
+    const specifier = `${relRoot}/${POPUP_DIALOG_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
+    internalImports.set(specifier, `import { PopupDialog } from '${specifier}';`);
   }
   // EXP-011 §59. `src/lib/screen.ts`, earned where a viewport read printed (the hook line prints for the same set).
   const screenHooks = plan.screenResolutions.filter((s) => usedScreenNodeIds.has(s.nodeId));
@@ -4415,6 +4437,9 @@ export function emitComponent(
     muted: 'boolean',
     loop: 'boolean'
   };
+
+  /** GAM-011 (a) — attributes whose React type is a keyword union, so a `string` cannot be printed into them. */
+  const KEYWORD_ATTRS = new Set(['inputMode', 'enterKeyHint']);
 
   /** The sink a declared TypeScript prop type stands for — anything else is `opaque`. */
   const sinkOfTsType = (tsType: string | undefined): Sink => {
@@ -4687,7 +4712,18 @@ export function emitComponent(
       }
       if (!role?.startsWith('attr:')) continue;
       const attr = role.slice('attr:'.length);
-      if (param.value.kind === 'literal') attrs.set(attr, jsxAttr(attr, param.value.value));
+      if (param.value.kind !== 'literal') continue;
+      // EXP-014 §14.5. A media URL is printed as the browser must be handed it — root-absolute for a
+      // project-relative path, verbatim for anything already absolute, and NO attribute for an
+      // empty one (`src=""` refetches the document) — the viewer's own port rule, resolved here at
+      // emit time because the value is a literal. `mediaLib.ts` says why the route depth matters.
+      const media = MEDIA_ATTRS[attr];
+      if (media !== undefined) {
+        const resolved = media.resolve(param.value.value);
+        if (resolved !== undefined) attrs.set(attr, jsxAttr(attr, resolved));
+        continue;
+      }
+      attrs.set(attr, jsxAttr(attr, param.value.value));
     }
     for (const [toProperty, source] of Object.entries(plan.bindings[node.id] ?? {})) {
       // The controlled attribute prints from `useState`, not from here — handled, not skipped.
@@ -4710,13 +4746,31 @@ export function emitComponent(
       if (!role?.startsWith('attr:')) continue;
       claimBinding(node.id, toProperty);
       const attr = role.slice('attr:'.length);
+      // GAM-011 (a). React types `inputMode` and `enterKeyHint` as a union of keywords, and a wired value is
+      // a `string` at best: printed, the app does not compile (TS2322, measured on a typed string component
+      // input). So a wire is refused by name; only an authored keyword prints (above). The runtime would pass
+      // the value through, so this is a real drop, and it says so.
+      if (KEYWORD_ATTRS.has(attr)) {
+        if (source.kind === 'computed' && source.expr.kind === 'undefined') continue;
+        const reason = 'is not an authored keyword, and the exported attribute only takes one of its keywords';
+        notes.push(`${plan.path}: wire into ${node.id}.${toProperty} ${reason} — dropped, reported`);
+        defer(node.id, `the wire into "${toProperty}"`, reason, source);
+        continue;
+      }
       // A boot-value read renders as the attribute's absence — undefined delivered and nothing
       // delivered are the same rendered control (COMPONENT-OBJECT-TARGET §3; noted at plan).
       if (source.kind === 'computed' && source.expr.kind === 'undefined') continue;
       const sink = ATTR_SINK[attr] ?? 'opaque';
       const expr = bindingExpr(source, sink);
-      if (expr !== null) attrs.set(attr, `${attr}={${expr}}`);
-      else {
+      if (expr !== null) {
+        // EXP-014 §14.5. A wired media URL is resolved at RUN time, as the viewer's port setter does —
+        // `src={mediaSrc(picture)}` — and the helper earns its import below the render.
+        const media = MEDIA_ATTRS[attr];
+        if (media !== undefined) {
+          usedMediaHelpers.add(media.helper);
+          attrs.set(attr, `${attr}={${media.helper}(${expr})}`);
+        } else attrs.set(attr, `${attr}={${expr}}`);
+      } else {
         notes.push(
           `${plan.path}: wire into ${node.id}.${toProperty} ${noSourceReason(source, sink)} — dropped, reported`
         );
@@ -5512,7 +5566,10 @@ export function emitComponent(
   const renderIcon = (node: NodeIR, attrs: string[], className: string | undefined, indent: number): string[] => {
     const source = iconSourceOf(node, catalog);
     if (source.kind === 'image') {
-      return element('img', [...attrs, jsxAttr('src', source.src), 'alt=""'], null, indent, false);
+      // EXP-014 §14.5. The runtime's `iconImageSource` setter is `getAbsoluteUrl` with NO empty gate in
+      // front of it (unlike Image and Video), so this is `absoluteUrl`, not `mediaSrc`: an empty icon
+      // source stays `src=""` there and here — transcribed, not repaired (`mediaLib.ts`).
+      return element('img', [...attrs, jsxAttr('src', absoluteUrl(source.src)), 'alt=""'], null, indent, false);
     }
     if (source.kind === 'sprite') {
       const use = [`${pad(indent + 2)}<use href="${source.url}#${source.symbolId}" />`];
@@ -5850,12 +5907,33 @@ export function emitComponent(
         slotAttrs.push(jsxAttr(attr, p.value));
       }
       const attrs = [...slotAttrs, ...(closable ? [`onClose={() => ${popupSetter}(null)}`] : [])];
+      // HLT-014 — the slot's container is the runtime's modal dialog, not a bare div: semantics, `inert`
+      // behind it, focus in and back, and Escape → close. Escape closes a slot whose target has no
+      // Close Popup too; that is the runtime's behaviour, where `cancelTopPopup` needs none.
+      const dialogAttrs = [
+        `className={styles.${popupLayerClass}}`,
+        ...(slot.label !== undefined ? [jsxAttr('label', slot.label)] : []),
+        ...(slot.closeOnEscape ? [] : ['closeOnEscape={false}']),
+        `onCancel={() => ${popupSetter}(null)}`
+      ];
+      // `Modal` off: the plain overlay a popup always was — a toast is not a dialog.
+      if (!slot.modal) {
+        return [
+          `${pad(indent)}{${popupState} === ${tsLiteral(slot.slotKey)} &&`,
+          `${pad(indent + 2)}createPortal(`,
+          `${pad(indent + 4)}<div className={styles.${popupLayerClass}}>`,
+          ...element(target.symbol, attrs, null, indent + 6, false),
+          `${pad(indent + 4)}</div>,`,
+          `${pad(indent + 4)}document.body`,
+          `${pad(indent + 2)})}`
+        ];
+      }
       return [
         `${pad(indent)}{${popupState} === ${tsLiteral(slot.slotKey)} &&`,
         `${pad(indent + 2)}createPortal(`,
-        `${pad(indent + 4)}<div className={styles.${popupLayerClass}}>`,
+        `${pad(indent + 4)}<PopupDialog ${dialogAttrs.join(' ')}>`,
         ...element(target.symbol, attrs, null, indent + 6, false),
-        `${pad(indent + 4)}</div>,`,
+        `${pad(indent + 4)}</PopupDialog>,`,
         `${pad(indent + 4)}document.body`,
         `${pad(indent + 2)})}`
       ];
@@ -6223,6 +6301,13 @@ export function emitComponent(
   const hasCss = classNames.length > 0 || popupLayerClass !== undefined || hiddenKeepSpaceClass !== undefined;
   if (hasCss) {
     internalImports.set(`./${plan.file.fileBase}.module.css`, `import styles from './${plan.file.fileBase}.module.css';`);
+  }
+
+  // EXP-014 §14.5. `src/lib/media.ts`, earned where a wired src/srcSet/poster printed through a helper —
+  // set here, after the render that fills the set, and before the imports are joined.
+  if (usedMediaHelpers.size > 0) {
+    const specifier = `${relRoot}/${MEDIA_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
+    internalImports.set(specifier, `import { ${[...usedMediaHelpers].sort().join(', ')} } from '${specifier}';`);
   }
 
   const importLines: string[] = [];
@@ -7002,6 +7087,8 @@ export function emitComponent(
     sseLib: plan.streams.some((s) => STREAM_NODES[s.type].lib === 'sse'),
     websocketLib: plan.streams.some((s) => STREAM_NODES[s.type].lib === 'websocket'),
     realtimeLib: plan.streams.some((s) => STREAM_NODES[s.type].lib === 'realtime'),
+    // GAM-013.
+    repeatLib: plan.streams.some((s) => STREAM_NODES[s.type].lib === 'repeat'),
     // EXP-011 §59.
     cryptoHelpers: usedCryptoHelpers,
     screenLib: screenHooks.length > 0,
@@ -7009,7 +7096,9 @@ export function emitComponent(
     componentObjectLib: printsRecord || printsParent,
     dragLib: plan.drags.length > 0,
     // EXP-011 §61.
-    pageStackLib: usedPageStackNames.size > 0
+    pageStackLib: usedPageStackNames.size > 0,
+    popupDialogLib: plan.popups.some((p) => p.modal),
+    mediaHelpers: usedMediaHelpers
   };
 }
 

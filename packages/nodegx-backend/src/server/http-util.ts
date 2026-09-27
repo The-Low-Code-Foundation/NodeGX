@@ -7,7 +7,13 @@
 
 import type * as http from 'http';
 
+import type { StorageQueryResult } from '@noodl/backend-contract';
+
 import { requestIdOf } from '../ops/request-id';
+
+// The adapter stack is plain CommonJS without type declarations (see AdapterFacade).
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const QueryBuilder = require('@noodl/runtime/src/api/adapters/local-sql/QueryBuilder');
 
 const MAX_JSON_BODY = 10 * 1024 * 1024; // 10MB, matching the old server
 const MAX_FILE_BODY = 50 * 1024 * 1024; // uploads get more headroom
@@ -120,6 +126,53 @@ export function sendJSON(
 }
 
 /**
+ * PRD-001 — split a query result into the body the client gets and the headers
+ * that say the page cap fired.
+ *
+ * 🔴 The cap announces itself in a HEADER, never in the body. The Parse wire
+ * format is shared with four unchanged clients (`cloudstore.js`,
+ * `userservice.ts`, the two runtime readers), and a new key in `{results,
+ * count}` is a key one of them may already be iterating. A header is a surface
+ * every route can set and no existing client can trip over.
+ *
+ * The BYOB `/api/*` routes are ours and could carry it in the body, and
+ * deliberately do not: two surfaces answering the same question two ways is how
+ * they come to disagree about the answer.
+ *
+ * Returning the body separately rather than deleting in place is what keeps
+ * `capped` from leaking: a route that forgets to call this sends a result that
+ * still has the fields on it, and the test that reads the body catches it.
+ */
+export function splitCapped(result: StorageQueryResult): {
+  body: { results: Record<string, unknown>[]; count?: number };
+  headers: Record<string, string>;
+} {
+  const { capped, cappedAt, ...body } = result;
+  return { body, headers: capped ? cappedHeaders(cappedAt) : {} };
+}
+
+/**
+ * PRD-006 — the ONE spelling of the cap signal, for the routes that cannot use
+ * `splitCapped`.
+ *
+ * The aggregate routes answer with a scalar list and with a single object, not
+ * with `results: Record<string, unknown>[]`, so they cannot pass through the
+ * splitter — but they carry the same signal, and a second quoted copy of that
+ * header name in this file is exactly the drift `splitCapped`'s docblock above
+ * warns about. `splitCapped` calls this too, so the name is written once.
+ *
+ * `undefined` means the ceiling did not fire, and produces no headers at all:
+ * a caller whose result FIT is not marked (PRD-001 AC4, PRD-006 AC5).
+ */
+export function cappedHeaders(cappedAt: number | undefined): Record<string, string> {
+  if (cappedAt === undefined) return {};
+  return {
+    'X-NodeGX-Result-Capped': 'true',
+    'X-NodeGX-Result-Limit': String(cappedAt)
+  };
+}
+
+/**
  * An HTTP-mappable error. `parseCode` carries the Parse error code the clients
  * read (`{ code, error }` body) — e.g. 101 object-not-found / invalid-login,
  * 202 username-taken, 209 invalid-session-token.
@@ -127,13 +180,146 @@ export function sendJSON(
 export class HttpError extends Error {
   status: number;
   parseCode?: number;
+  /**
+   * Extra fields merged into the response body beside `error` and `code`.
+   *
+   * Added by FED-002, whose 409 has to say WHICH field collided and with what
+   * value — a refusal a graph can branch on rather than a sentence a person has
+   * to read. Everything else still answers with the two fields it always did.
+   */
+  extra?: Record<string, unknown>;
 
-  constructor(status: number, message: string, parseCode?: number) {
+  constructor(status: number, message: string, parseCode?: number, extra?: Record<string, unknown>) {
     super(message);
     this.name = 'HttpError';
     this.status = status;
     this.parseCode = parseCode;
+    this.extra = extra;
   }
+}
+
+/**
+ * A create the adapter refused because of the caller's own `objectId` (P90
+ * SYN-003) is the caller's mistake: a taken id is 409 with Parse's
+ * DUPLICATE_VALUE (137), a malformed one is 400. Any other error passes through
+ * unchanged, to be answered as before.
+ */
+export function createErrorToHttp(e: unknown, values?: Record<string, unknown>, schema?: CheckReader): unknown {
+  const message = e instanceof Error ? e.message : String(e);
+  const problem = QueryBuilder.clientObjectIdProblem(message);
+  if (problem === 'taken') return new HttpError(409, message, 137);
+  if (problem === 'invalid') return new HttpError(400, message);
+  return uniqueViolationToHttp(message, values) || checkViolationToHttp(message, schema) || requiredViolationToHttp(message) || e;
+}
+
+/**
+ * BMG-003: a write refused because a required field (a `NOT NULL` column on
+ * either engine) was left empty. **400** with Parse's VALIDATION_ERROR (142)
+ * and the field named, because `NOT NULL constraint failed: Pet.name` is the
+ * engine's sentence, not a person's. `reason: 'required'` is the stable value.
+ */
+export function requiredViolationToHttp(message: string): HttpError | null {
+  const sqlite = /NOT NULL constraint failed: ([A-Za-z0-9_]+)\.([A-Za-z0-9_]+)/.exec(message);
+  const pg = /null value in column "([A-Za-z0-9_]+)" of relation "([A-Za-z0-9_]+)" violates not-null constraint/.exec(message);
+  const collection = sqlite ? sqlite[1] : pg ? pg[2] : null;
+  const field = sqlite ? sqlite[2] : pg ? pg[1] : null;
+  if (!collection || !field) return null;
+  return new HttpError(400, `"${field}" is required on "${collection}": every record must say it. The write was refused, and nothing was changed.`, 142, {
+    reason: 'required',
+    collection,
+    field
+  });
+}
+
+/** The one schema reader {@link checkViolationToHttp} needs, declared structurally. */
+export interface CheckReader {
+  checkStatus?(table: string): Array<{ name: string; description: string; rule: unknown }>;
+}
+
+/**
+ * HLT-016: a write refused by a declared check. **400** with Parse's
+ * VALIDATION_ERROR (142) and the rule in words, looked up by the check's name,
+ * because `CHECK constraint failed: Assignment.chk_Assignment_one_learnerId_cohortId`
+ * is not a sentence a person can act on. `reason: 'check-failed'` is the stable
+ * value a graph branches on. Never a 404: the record is there; the write broke a rule.
+ */
+export function checkViolationToHttp(message: string, schema?: CheckReader): HttpError | null {
+  const problem = QueryBuilder.checkConstraintProblem(message) as { collection: string; check: string } | null;
+  if (!problem) return null;
+  let found: { description: string; rule: unknown } | undefined;
+  try {
+    found = schema?.checkStatus?.(problem.collection)?.find((c) => c.name === problem.check);
+  } catch {
+    /* the sentence falls back to the name; the refusal stands either way */
+  }
+  return new HttpError(
+    400,
+    `This write breaks a rule of "${problem.collection}": ${found ? found.description : problem.check}. ` +
+      'It was refused, and nothing was changed.',
+    142,
+    { reason: 'check-failed', check: problem.check, collection: problem.collection, ...(found ? { rule: found.rule } : {}) }
+  );
+}
+
+/**
+ * FED-002: a write refused by a declared unique index.
+ *
+ * SQLite names the table and the columns and stops there; the VALUE is in the
+ * request body, which is why this is composed here and not in the adapter. The
+ * result is a 409 whose body carries `{ code, field, value }` — the shape the
+ * `Create Record` node puts on `Failure`, and the shape a feed graph tests to
+ * tell "already had this item" from "the write broke".
+ *
+ * `field` is a single name for the ordinary one-field index and a
+ * comma-separated list for a composite one; `value` matches it (a scalar, or an
+ * array in the same order).
+ */
+export function uniqueViolationToHttp(message: string, values?: Record<string, unknown>): HttpError | null {
+  const conflict = QueryBuilder.uniqueConstraintProblem(message) as { collection: string; fields: string[] } | null;
+  if (!conflict) return null;
+
+  const { collection, fields } = conflict;
+  const value = fields.map((f) => (values ? values[f] : undefined));
+  const shown = fields.length === 1 ? value[0] : value;
+  return new HttpError(
+    409,
+    `"${fields.join(', ')}" is unique in "${collection}" and ${JSON.stringify(shown)} is already used. ` +
+      'Send X-NodeGX-Upsert to update the existing record instead.',
+    137,
+    { field: fields.join(', '), value: shown, fields, collection: collection }
+  );
+}
+
+/**
+ * HLT-016: a save whose `X-NodeGX-If` precondition failed.
+ *
+ * `changed`: the row exists, this caller may write it, and it no longer holds the expected
+ * values, because someone else wrote it after it was read. **409** with `reason:
+ * 'precondition-failed'`, the stable value a graph branches on (no Parse code fits: 137 is
+ * "duplicate value"), plus the `expected` values that failed. A retry must RE-READ the row
+ * first, or it fails the same way.
+ *
+ * `unknown-field`: the precondition names a field the collection does not have. **400**, the
+ * caller's mistake. Not a 409, which would read as a conflict forever.
+ */
+export function preconditionToHttp(message: string, expect: Record<string, unknown>): HttpError | null {
+  const problem = QueryBuilder.preconditionProblem(message) as
+    | { kind: 'changed' }
+    | { kind: 'unknown-field'; field: string }
+    | null;
+  if (!problem) return null;
+  if (problem.kind === 'unknown-field') {
+    return new HttpError(400, `${message}. X-NodeGX-If can only name fields the collection has.`, undefined, {
+      reason: 'precondition-unknown-field',
+      field: problem.field
+    });
+  }
+  return new HttpError(
+    409,
+    'The record has changed since it was read, so this update was not applied. Read it again and retry.',
+    undefined,
+    { reason: 'precondition-failed', expected: expect }
+  );
 }
 
 /**
@@ -148,6 +334,7 @@ export function sendError(res: http.ServerResponse, err: unknown): void {
   if (err instanceof HttpError) {
     const body: Record<string, unknown> = { error: err.message };
     if (err.parseCode !== undefined) body.code = err.parseCode;
+    if (err.extra) Object.assign(body, err.extra);
     if (requestId) body.requestId = requestId;
     // A 413 is raised while the body is still arriving, so the rest of it is
     // still in flight on this socket. Keeping the connection alive would leave

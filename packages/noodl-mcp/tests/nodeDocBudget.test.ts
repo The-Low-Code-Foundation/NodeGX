@@ -142,6 +142,27 @@ describe('AWP-005 — the response budget (a ratchet: move the number, say why)'
   });
 
   /**
+   * 🔴 **Ratchet moved 14,300 → 16,200 by P99/HLT-017 (2026-09-22). Two growths, attributed apart.**
+   * Measured with this spec's own harness (`get_node_type`, full detail, the wire text ÷ 4) against
+   * the enriched catalog at `HEAD` `447c33fef` and against the working tree:
+   *
+   * | | HEAD | after |
+   * |---|---|---|
+   * | worst single (**`Group`**) | **14,315** | **15,561** |
+   * | `Text` / `Image` / `Circle` / `Video` | 8,897 / 9,582 / 6,158 / 10,065 | 10,142 / 10,785 / 7,361 / 11,268 |
+   * | `net.noodl.controls.textinput` | 14,241 | 14,241 |
+   *
+   * - ⚠️ **This spec was already red on `HEAD`**, by 15 tokens: `Group` read 14,315 against 14,300.
+   *   The 626 tokens `Group` grew between P81's 13,689 and `HEAD` are **not attributed here** — they
+   *   were measured, not traced.
+   * - **HLT-017's share is +1,246 on `Group`** (and +1,203 to +1,245 on the other four): nine inputs
+   *   and eight outputs in the `Drag Source` and `Drop Zone` groups, on the five visual nodes that
+   *   already carry DEF-029's `File Drop`. `textinput` is unmoved, which is the control.
+   *
+   * Headroom kept at P81's convention: 611 before, **639 now** (15,561 of 16,200).
+   *
+   * ---
+   *
    * 🔴 **Ratchet moved 13,500 → 14,300 by P81/VIB-006 (2026-08-31), and the growth is NOT this
    * task's.** It was exposed by one, not caused by one: `packages/noodl-types/src/node-catalog-enriched.json`
    * — the file `get_node_type` answers from — had not been regenerated since VIB-002, so **everything
@@ -200,11 +221,11 @@ describe('AWP-005 — the response budget (a ratchet: move the number, say why)'
    * 12,500), 601 now (12,899 of 13,500). This ceiling exists to catch growth
    * nobody noticed; this growth was measured before it was taken.
    */
-  it('keeps any single full-detail response under 14,300 tokens', async () => {
+  it('keeps any single full-detail response under 16,200 tokens', async () => {
     const over: Array<{ name: string; cost: number }> = [];
     for (const name of allTypeNames()) {
       const c = await cost([name], 'full');
-      if (c >= 14_300) over.push({ name, cost: c });
+      if (c >= 16_200) over.push({ name, cost: c });
     }
     expect(over).toEqual([]);
   });

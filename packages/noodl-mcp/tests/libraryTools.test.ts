@@ -209,12 +209,13 @@ describe('LBR-008 — install_prefab', () => {
     expect(res.isError).toBe(false);
     expect(res.data.componentsInstalled).toEqual(['/Badge Card', '/Badge Card/Chip']);
     expect(res.data.componentsSkipped).toEqual([]);
+    // P100 UPG-003 §6: the text style arrives as typography tokens, not as a text style.
     expect(res.data.stylesMerged).toEqual({
       colors: ['Badge Red'],
-      textStyles: ['Badge Label'],
+      textStyles: [],
       variants: ['Pill (Group)']
     });
-    expect(res.data.filesCopied).toEqual(['images/badge.svg']);
+    expect(res.data.filesCopied.sort()).toEqual(['fonts/Badge/Badge-Bold.ttf', 'images/badge.svg']);
 
     // On disk, in the v2 layout the store and the editor both read.
     expect(exists(projectDir, 'components/Badge Card/component.json')).toBe(true);
@@ -239,6 +240,41 @@ describe('LBR-008 — install_prefab', () => {
     );
   });
 
+  it('UPG-003 §6: a text style arrives as typography tokens the project is given, with its font face', async () => {
+    const res = await call<InstallPrefabResponse>(session, 'install_prefab', { slug: 'badge-card' });
+    expect(res.isError).toBe(false);
+    expect(res.data.textStylesConverted).toEqual(['Badge Label']);
+    expect(res.data.tokensAdded).toEqual(['--badge-label-family', '--badge-label-size']);
+    expect(res.data.tokensUnresolved ?? []).toEqual([]);
+
+    // The part wears the tokens; nothing names the text style, and the sidecar holds none.
+    const nodes = readJson<Array<{ id: string; parameters?: Record<string, unknown> }>>(
+      projectDir,
+      'components/Badge Card/nodes.json'
+    );
+    const text = JSON.stringify(nodes);
+    expect(text).toContain('"fontSize":"var(--badge-label-size)"');
+    expect(text).toContain('"fontFamily":"var(--badge-label-family)"');
+    expect(text).not.toContain('Badge Label');
+    const styles = readJson<{ textStyles?: Record<string, unknown> }>(projectDir, 'nodegx.styles.json');
+    expect(Object.keys(styles.textStyles ?? {})).toEqual([]);
+
+    // The project defines them, with the style's values (`Auto` tracking is no token: it set nothing).
+    const project = readJson<{ metadata: { designTokens: { customTokens: Array<{ name: string; value: string }> } } }>(
+      projectDir,
+      'nodegx.project.json'
+    );
+    const tokens = Object.fromEntries(project.metadata.designTokens.customTokens.map((t) => [t.name, t.value]));
+    expect(tokens['--badge-label-size']).toBe('12px');
+    expect(tokens['--badge-label-family']).toBe("'Badge-Bold'");
+
+    // R9: the family token names a font file's face, which the project's font module loads.
+    const css = fs.readFileSync(path.join(projectDir, 'noodl_modules/text-style-fonts/styles.css'), 'utf8');
+    expect(css).toContain("font-family: 'Badge-Bold';");
+    expect(css).toContain("src: url('../../fonts/Badge/Badge-Bold.ttf');");
+    expect(exists(projectDir, 'noodl_modules/text-style-fonts/manifest.json')).toBe(true);
+  });
+
   it('a second install keeps yours: everything reports skipped, nothing duplicates', async () => {
     await call<InstallPrefabResponse>(session, 'install_prefab', { slug: 'badge-card' });
     const again = await call<InstallPrefabResponse>(session, 'install_prefab', { slug: 'badge-card' });
@@ -246,9 +282,11 @@ describe('LBR-008 — install_prefab', () => {
     expect(again.data.componentsInstalled).toEqual([]);
     expect(again.data.componentsSkipped).toEqual(['/Badge Card', '/Badge Card/Chip']);
     expect(again.data.stylesMerged).toEqual({ colors: [], textStyles: [], variants: [] });
+    // UPG-003 §6: the tokens the first install gave are reused, never given twice.
+    expect(again.data.tokensAdded ?? []).toEqual([]);
     expect(again.data.stylesSkipped.colors).toEqual(['Badge Red']);
     expect(again.data.filesCopied).toEqual([]);
-    expect(again.data.filesSkipped).toEqual(['images/badge.svg']);
+    expect(again.data.filesSkipped.sort()).toEqual(['fonts/Badge/Badge-Bold.ttf', 'images/badge.svg']);
 
     // The variant did not double — the collision check is by (name, typename),
     // not by "did anything error".

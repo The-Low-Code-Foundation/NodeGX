@@ -86,7 +86,10 @@ const easeCurvesModule = loadFile(path.join(VIEWER_SRC, 'easecurves.ts'));
 const edgeTriggeredInput = loadFile(path.join(RUNTIME_SRC, 'edgetriggeredinput.ts'));
 const diagnosticsModule = loadFile(path.join(RUNTIME_SRC, 'diagnostics.ts'));
 const outcomeModule = loadFile(path.join(RUNTIME_SRC, 'outcome.ts'));
+// GAM-006 (P88): states.ts reads colours through the viewer's shared reader.
+const colorReaderModule = loadFile(path.join(VIEWER_SRC, 'color-reader.ts'));
 const runtimeRequire = (id: string): unknown => {
+  if (id === '../../color-reader') return colorReaderModule;
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   if (id === 'bezier-easing') return require('bezier-easing');
   if (id === '@noodl/runtime') return { EdgeTriggeredInput: edgeTriggeredInput };
@@ -127,6 +130,8 @@ interface AnimateLib {
   runFrame(run: Run, now: number): void;
   createAnimatedValue(target: unknown, duration?: number, delay?: number, ease?: unknown): { run: Run; current: number };
   animateTo(anim: { run: Run; current: number }, target: unknown, publish: (v: number) => void, onArrive?: () => void): void;
+  jumpTo(anim: { run: Run; current: number }, value: unknown, publish: (v: number) => void): boolean;
+  carryOn(anim: { run: Run; current: number }, publish: (v: number) => void, onArrive?: () => void): void;
   useAnimatedValue: unknown;
 }
 type Listeners = { stateChanged?: () => void; reached?: Record<string, () => void>; done?: () => void; unchanged?: () => void; failure?: () => void };
@@ -274,12 +279,14 @@ describe('§A the run engine against timerscheduler.ts, frame by frame', () => {
 });
 
 describe('§A Animate To Value against animate-to-value.ts, frame by frame', () => {
-  type Step = { at: number; target?: unknown; duration?: number; delay?: number; ease?: string };
+  // GAM-008: `jump` fires Jump To with that Jump Value, before the step's target unless `jumpAfter`.
+  type Step = { at: number; target?: unknown; duration?: number; delay?: number; ease?: string; jump?: unknown; jumpAfter?: boolean };
   type Trace = { values: Array<[number, number]>; arrived: number[] };
   const interpreter = (steps: Step[]): Trace => {
     const trace: Trace = { values: [], arrived: [] };
     let now = 0;
     const scheduler = new SchedulerCtor(() => undefined);
+    const afterInputs: Array<(this: unknown) => void> = [];
     const inst: Record<string, unknown> = {
       _internal: {},
       context: { timerScheduler: scheduler },
@@ -287,15 +294,23 @@ describe('§A Animate To Value against animate-to-value.ts, frame by frame', () 
       sendSignalOnOutput: (name: string) => {
         if (name === 'atTargetValue') trace.arrived.push(now);
       },
-      addDeleteListener: () => undefined
+      addDeleteListener: () => undefined,
+      scheduleAfterInputsHaveUpdated: (callback: (this: unknown) => void) => afterInputs.push(callback)
     };
     AnimateNode.initialize.call(inst);
+    const jump = (value: unknown) => {
+      AnimateNode.inputs.jumpValue.set!.call(inst, value);
+      AnimateNode.inputs.jumpTo.valueChangedToTrue!.call(inst);
+    };
     for (const step of steps) {
       now = step.at;
       if (step.duration !== undefined) AnimateNode.inputs.duration.set!.call(inst, step.duration);
       if (step.delay !== undefined) AnimateNode.inputs.delay.set!.call(inst, step.delay);
       if (step.ease !== undefined) AnimateNode.inputs.easingCurve.set!.call(inst, step.ease);
+      if ('jump' in step && !step.jumpAfter) jump(step.jump);
       if ('target' in step) AnimateNode.inputs.targetValue.set!.call(inst, step.target);
+      if ('jump' in step && step.jumpAfter) jump(step.jump);
+      for (const callback of afterInputs.splice(0)) callback.call(inst);
       scheduler.runTimers(now);
       trace.values.push([now, AnimateNode.outputs.currentValue.getter!.call(inst) as number]);
     }
@@ -310,7 +325,11 @@ describe('§A Animate To Value against animate-to-value.ts, frame by frame', () 
       if (step.duration !== undefined) anim.run.duration = step.duration;
       if (step.delay !== undefined) anim.run.delay = step.delay;
       if (step.ease !== undefined) (anim as unknown as { ease: unknown }).ease = lib.eases[step.ease];
+      let jumped = false;
+      if ('jump' in step && !step.jumpAfter) jumped = lib.jumpTo(anim, step.jump, () => undefined);
       if ('target' in step) lib.animateTo(anim, step.target, () => undefined, () => trace.arrived.push(now));
+      if ('jump' in step && step.jumpAfter) jumped = lib.jumpTo(anim, step.jump, () => undefined);
+      if (jumped) lib.carryOn(anim, () => undefined, () => trace.arrived.push(now));
       lib.runFrame(anim.run, now);
       trace.values.push([now, anim.current]);
     }
@@ -324,7 +343,15 @@ describe('§A Animate To Value against animate-to-value.ts, frame by frame', () 
     ['booleans are 1 and 0', withFrames({ 0: { target: false, duration: 300, ease: 'linear' }, 50: { target: true } })],
     ['a NaN is ignored, a numeric string is a number', withFrames({ 0: { target: 'x', duration: 300, ease: 'linear' }, 50: { target: '4' }, 100: { target: 'nope' }, 150: { target: 8 } })],
     ['a delay before the move, easeInOut', withFrames({ 0: { target: 1, duration: 400, delay: 150, ease: 'easeInOut' }, 50: { target: 2 } })],
-    ['a zero duration settles on the first frame', withFrames({ 0: { target: 1, duration: 0, ease: 'easeIn' }, 50: { target: 2 } })]
+    ['a zero duration settles on the first frame', withFrames({ 0: { target: 1, duration: 0, ease: 'easeIn' }, 50: { target: 2 } })],
+    // GAM-008 (P88): Jump To. The value moves now, then carries on towards the target; a jump is not an arrival.
+    ['Jump To mid-run refills, then carries on towards the target (the countdown)', withFrames({ 0: { target: 100, duration: 500, ease: 'linear' }, 50: { target: 0 }, 300: { jump: 100 } })],
+    ['a jump then a target in one pass: refill, then glide to the new target', withFrames({ 0: { target: 100, duration: 500, ease: 'linear' }, 50: { target: 0 }, 300: { jump: 100, target: 40 } })],
+    ['a jump then the same end in one pass: the equal target is ignored, and the jump still carries on', withFrames({ 0: { target: 100, duration: 500, ease: 'linear' }, 50: { target: 0 }, 300: { jump: 100, target: 0 } })],
+    ['a target then a jump in one pass: the jump overtakes, then glides to that target', withFrames({ 0: { target: 100, duration: 500, ease: 'linear' }, 50: { target: 0 }, 300: { target: 40, jump: 100, jumpAfter: true } })],
+    ['a jump before any target sits there', withFrames({ 0: { jump: 7, duration: 300, ease: 'easeOut' }, 100: { target: 7 }, 150: { target: 9 } })],
+    ['a jump onto the end is not an arrival', withFrames({ 0: { target: 10, duration: 300, ease: 'linear' }, 50: { target: 20 }, 100: { jump: 20 } })],
+    ['a NaN jump is ignored', withFrames({ 0: { target: 10, duration: 300, ease: 'linear' }, 50: { target: 20 }, 100: { jump: 'nope' } })]
   ];
   beforeAll(() => jest.useFakeTimers());
   afterAll(() => jest.useRealTimers());
@@ -351,6 +378,15 @@ describe('§A Animate To Value against animate-to-value.ts, frame by frame', () 
   test('A4 CONTROL — a copy that does not skip an unchanged target restarts the tween and disagrees', () => {
     const broken = loadAnimateLib(animateLibSource().replace('  if (numeric === anim.end) return;\n', ''));
     const steps = withFrames({ 0: { target: 10, duration: 500, ease: 'easeOut' }, 100: { target: 20 }, 200: { target: 20 } });
+    expect(emitted(broken, steps).values).not.toEqual(interpreter(steps).values);
+  });
+
+  test('A4 CONTROL (GAM-008) — a copy whose jump does not carry on disagrees on the countdown row', () => {
+    const source = animateLibSource();
+    const marker = '  if (anim.end === anim.current) return;\n';
+    expect(source).toContain(marker);
+    const broken = loadAnimateLib(source.replace(marker, '  return;\n'));
+    const steps = withFrames({ 0: { target: 100, duration: 500, ease: 'linear' }, 50: { target: 0 }, 300: { jump: 100 } });
     expect(emitted(broken, steps).values).not.toEqual(interpreter(steps).values);
   });
 });
@@ -550,7 +586,10 @@ describe('§A States against states.ts, the whole node, frame by frame', () => {
     expect(at(150).tint).not.toBe('#334455ff');
     expect(at(400).opacity).toBeGreaterThan(0.2);
     expect(at(400).opacity).toBeLessThan(1);
-    expect(at(700)).toMatchObject({ opacity: 1, tint: '#ffcc00ff' });
+    // GAM-006 (b): a colour ends on the value its state names (`#ffcc00`), where it used to end on the
+    // tween's own 8-digit hex (`#ffcc00ff`). The interpreter ends in the same place, which the parity
+    // rows above compare frame by frame.
+    expect(at(700)).toMatchObject({ opacity: 1, tint: '#ffcc00' });
     expect(trace.events).toEqual([
       ['stateChanged', 0],
       ['done', 0],
@@ -597,20 +636,39 @@ describe('§A States against states.ts, the whole node, frame by frame', () => {
     expect(want.frames[0][1].error).toBe('Cannot go to state "Bright" — this node has no such state. Its states are: dim, bright. Did you mean "bright"?');
   });
 
-  test('A5 MEASURED — a var(--token) colour: the interpreter tweens through a NaN hex, and with no document the export answers the same', () => {
+  test('A5 MEASURED — a var(--token) colour with no document: both worlds hold the colour on screen, then LAND on the token (GAM-006 (a) + (b))', () => {
     const params = { ...PANEL_PARAMS, 'value-bright-tint': 'var(--primary)' };
     const def = { ...PANEL_DEF, values: { ...PANEL_DEF.values, tint: { type: 'color', byState: { dim: '#334455', bright: 'var(--primary)' } } } };
     const script = passes({ 0: { pulses: ['to-bright'] } }, 700);
     const want = interpreter(params, script, ['tint']);
     const got = emitted(statesLib, animateLib, def, undefined, script, ['tint']);
-    // Measured, not predicted: `setRGBA` reads `var(--primary)` two characters at a time, so the
-    // first channel is `parseInt('ar', 16)` = 10 and tweens to a real byte; the other three are NaN.
-    expect(want.frames.find(([now]) => now === 300)![1].tint).toMatch(/^#[0-9a-f]{2}NaNNaNNaN$/);
+    // 🔴 Measured before GAM-006: `setRGBA` read `var(--primary)` two characters at a time, so every
+    // frame was `#0aNaNNaNNaN`-shaped and the tween ENDED there too (EXP-011 §49.3, P78 D49).
+    // (b) lands a colour on the value its state names. (a) reads it through the shared reader, which
+    // needs a document to resolve a token; here there is none, so the token cannot be read and the
+    // value holds the colour already on screen until it lands. No frame is a NaN hex.
+    expect(want.frames.find(([now]) => now === 300)![1].tint).toBe('#334455');
+    expect(want.frames.map(([, values]) => String(values.tint))).not.toContainEqual(expect.stringMatching(/NaN/));
     expect(got.frames).toEqual(want.frames);
-    // 🔴 Measured: the tween ENDS on `rgbaToHex(targetValues)` — the parsed garbage, not the authored
-    // string — so a token-coloured value never reaches its colour in the interpreter while
-    // transitions are on. Registered in EXP-011 §49.3. The export resolves the token in a browser.
-    expect(want.frames[want.frames.length - 1][1].tint).toBe('#0aNaNNaNNaN');
+    expect(want.frames[want.frames.length - 1][1].tint).toBe('var(--primary)');
+  });
+
+  test('A5 a delayed COLOUR: both worlds hold the colour on screen for the delay, then tween and land (GAM-006)', () => {
+    // The per-value delay above is on `opacity`, a number, so parity could not see what a delayed
+    // colour publishes. Before GAM-006 both worlds published the tween's parsed RGBA array for the
+    // delay, agreed with each other, and handed a style sink `[51,68,85,255]`.
+    const delayed = { curve: [0, 0, 0.58, 1], dur: 400, delay: 200 };
+    const params = { ...PANEL_PARAMS, 'transition-bright-tint': delayed };
+    const def = { ...PANEL_DEF, values: { ...PANEL_DEF.values, tint: { ...PANEL_DEF.values.tint, transitions: { bright: delayed } } } };
+    const script = passes({ 0: { pulses: ['to-bright'] } }, 800);
+    const want = interpreter(params, script, READS);
+    const got = emitted(statesLib, animateLib, def, undefined, script, READS);
+    expect(got.events).toEqual(want.events);
+    expect(got.frames).toEqual(want.frames);
+    const at = (t: number) => want.frames.find(([now]) => now === t)![1];
+    expect([at(0).tint, at(100).tint, at(150).tint]).toEqual(['#334455', '#334455', '#334455']);
+    expect(String(at(400).tint)).toMatch(/^#[0-9a-f]{8}$/);
+    expect(at(700).tint).toBe('#ffcc00');
   });
 
   test('A5 CONTROL — a machine that animates every queued state rather than settling the intermediates disagrees on the one-pass script', () => {
@@ -833,6 +891,17 @@ describe('§B the translation — the fixture, then graphs mutated one fact at a
     wire(stray, GLOW, 'fade', 'progress', 'fadeText', 'text');
     expect(emitApp(stray, catalog).notes.join('\n')).toContain('its progress output is consumed, and this node publishes only Current Value and At Target Value');
 
+    // GAM-008 (P88): the node has Jump To and Jump Value now. The engine carries the jump (A4 above);
+    // the hook does not, so a wired jump is refused by its own name, not as a port the node lacks.
+    const jumpValue = cloneIr();
+    wire(jumpValue, GLOW, 'changes', 'currentCount', 'fade', 'jumpValue');
+    const jumpNotes = emitApp(jumpValue, catalog).notes.join('\n');
+    expect(jumpNotes).toContain('its Jump Value input is wired, and the export does not translate a jump yet');
+    expect(jumpNotes).not.toContain('is not a port this node has');
+    const jumpTo = cloneIr();
+    wire(jumpTo, GLOW, 'changes', 'currentCount', 'fade', 'jumpTo', 'signal');
+    expect(emitApp(jumpTo, catalog).notes.join('\n')).toContain('its Jump To input is wired, and the export does not translate a jump yet');
+
     // The Counter's count is a number-typed row (the fixture's Variables are untyped — a Set
     // Variable's value is not a typed writer, EXP-011 §10), so it is the source that typechecks.
     const wiredDuration = cloneIr();
@@ -898,7 +967,7 @@ describe('§B the translation — the fixture, then graphs mutated one fact at a
       expect(entry.status).toBe('translated');
       expect(entry.note).toContain('EXP-011 §49');
     }
-    expect(ledger.pickerCoverageFloor).toBe(117); // §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §61 the component-stack trio + §60 the component-object trio + §62 the relation pair + §63 Drag (session 86); §57 + §58 + §59 (session 85) // §51 added Component Children (session 79); §52 Script (session 80); §53 Run Tasks (session 81); §54 On App Error (session 82) §56 Filter Records
+    expect(ledger.pickerCoverageFloor).toBe(118); // GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §61 the component-stack trio + §60 the component-object trio + §62 the relation pair + §63 Drag (session 86); §57 + §58 + §59 (session 85) // §51 added Component Children (session 79); §52 Script (session 80); §53 Run Tasks (session 81); §54 On App Error (session 82) §56 Filter Records
   });
 });
 

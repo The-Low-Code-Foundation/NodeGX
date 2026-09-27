@@ -83,6 +83,7 @@ export type NodeTypeName =
   | 'Radio Button Group'
   | 'Range'
   | 'RemoveDbModelRelation'
+  | 'Repeat'
   | 'Router'
   | 'RouterNavigate'
   | 'RunTasks'
@@ -132,6 +133,8 @@ export type NodeTypeName =
   | 'net.noodl.OptimisticUpdate'
   | 'net.noodl.ParentComponentObject'
   | 'net.noodl.ParseCSV'
+  | 'net.noodl.ParseFeed'
+  | 'net.noodl.ParseXML'
   | 'net.noodl.PatternExtractor'
   | 'net.noodl.RandomBytes'
   | 'net.noodl.SSE'
@@ -175,6 +178,7 @@ export type NodeTypeName =
   | 'noodl.cloud.jwtsign'
   | 'noodl.cloud.jwtverify'
   | 'noodl.cloud.listusersinrole'
+  | 'noodl.cloud.modelrequest'
   | 'noodl.cloud.removeuserfromrole'
   | 'noodl.cloud.request'
   | 'noodl.cloud.response'
@@ -238,6 +242,7 @@ export type DynamicPortMechanism =
   | 'numbered-inputs'
   | 'component-ports'
   | 'runtime-discovered'
+  | 'runtime-narrowed'
   | 'editor-adapter';
 
 export interface PortType {

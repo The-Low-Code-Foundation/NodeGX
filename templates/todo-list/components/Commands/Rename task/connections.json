@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e56ad240-0bb9-54fa-8740-17137a48964b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "RenametaskIn",
+      "fromProperty": "taskId",
+      "toId": "RenametaskGuard",
+      "toProperty": "in-taskId"
+    },
+    {
+      "fromId": "RenametaskIn",
+      "fromProperty": "oldTitle",
+      "toId": "RenametaskGuard",
+      "toProperty": "in-oldTitle"
+    },
+    {
+      "fromId": "RenametaskIn",
+      "fromProperty": "newTitle",
+      "toId": "RenametaskGuard",
+      "toProperty": "in-newTitle"
+    },
+    {
+      "fromId": "RenametaskIn",
+      "fromProperty": "do",
+      "toId": "RenametaskGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "RenametaskGuard",
+      "fromProperty": "out-title",
+      "toId": "RenametaskWrite",
+      "toProperty": "prop-title"
+    },
+    {
+      "fromId": "RenametaskIn",
+      "fromProperty": "taskId",
+      "toId": "RenametaskWrite",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "RenametaskGuard",
+      "fromProperty": "out-go",
+      "toId": "RenametaskWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "RenametaskIn",
+      "fromProperty": "taskId",
+      "toId": "RenametaskHistory",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "RenametaskGuard",
+      "fromProperty": "out-summary",
+      "toId": "RenametaskHistory",
+      "toProperty": "summary"
+    },
+    {
+      "fromId": "RenametaskWrite",
+      "fromProperty": "done",
+      "toId": "RenametaskHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "RenametaskHistory",
+      "fromProperty": "done",
+      "toId": "RenametaskOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "RenametaskWrite",
+      "fromProperty": "failure",
+      "toId": "RenametaskProblem",
+      "toProperty": "do"
+    }
+  ]
+}

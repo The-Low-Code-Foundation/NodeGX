@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c8336c39-b6d8-517b-829c-15ebd49d6827",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "dkIn",
+      "fromProperty": "rows",
+      "toId": "dkEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "dkEach",
+      "fromProperty": "itemOutput-key",
+      "toId": "dkOut",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "dkEach",
+      "fromProperty": "itemOutputSignal-pick",
+      "toId": "dkOut",
+      "toProperty": "pick"
+    }
+  ]
+}

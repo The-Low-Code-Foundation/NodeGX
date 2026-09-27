@@ -1,0 +1,68 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/styles-v2.json",
+  "version": 1,
+  "colors": {
+    "Brand Ink": "#1b2a4a",
+    "Brand Wash": "#eef2ff",
+    "Brand Paper": "#fdfdfb"
+  },
+  "textStyles": {
+    "Heading": {
+      "fontFamily": "Georgia",
+      "fontSize": {
+        "value": 32,
+        "unit": "px"
+      },
+      "fontWeight": "700",
+      "color": "Brand Paper",
+      "letterSpacing": {
+        "value": 1,
+        "unit": "px"
+      },
+      "textTransform": ""
+    }
+  },
+  "variants": [
+    {
+      "name": "Card",
+      "typename": "Group",
+      "parameters": {
+        "backgroundColor": "Brand Wash",
+        "paddingTop": "var(--space-6)",
+        "borderRadius": {
+          "value": 12,
+          "unit": "px"
+        }
+      },
+      "stateParameters": {},
+      "stateTransitions": {}
+    },
+    {
+      "name": "Primary Button",
+      "typename": "net.noodl.controls.button",
+      "parameters": {
+        "backgroundColor": "Brand Ink",
+        "textStyle": "Heading",
+        "borderRadius": {
+          "value": 8,
+          "unit": "px"
+        }
+      },
+      "stateParameters": {
+        "hover": {
+          "backgroundColor": "Brand Wash"
+        }
+      },
+      "stateTransitions": {}
+    },
+    {
+      "name": "Card",
+      "typename": "Text",
+      "parameters": {
+        "color": "#00ff00"
+      },
+      "stateParameters": {},
+      "stateTransitions": {}
+    }
+  ]
+}

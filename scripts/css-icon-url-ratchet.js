@@ -24,10 +24,12 @@
  * is not a separate document fetch and can be authored with `currentColor`.
  *
  * Permanent exemptions (listed in EXCLUDE below):
- *   - Vendored Font Awesome CSS. Those are *font* loads, not icons, and we do
- *     not own the files. Font Awesome's own retirement is a separate question.
  *   - `frames/viewer-frame/assets/style.css` — the runtime viewer frame, not
  *     editor chrome. Out of UIX-011's scope by spec.
+ *
+ * Vendored Font Awesome CSS was exempt here until CHR-010 deleted it. "Font
+ * Awesome's own retirement is a separate question" is now answered: see
+ * `scripts/icon-font-gate.js`, which keeps it deleted.
  *
  *   node scripts/css-icon-url-ratchet.js          # check (exit 1 on any hit)
  *   node scripts/css-icon-url-ratchet.js --list   # list every scanned file
@@ -39,11 +41,9 @@ const ROOT = path.join(__dirname, '..');
 
 const TARGETS = ['packages/noodl-editor/src', 'packages/noodl-core-ui/src'];
 
-const EXCLUDE = [
-  'packages/noodl-editor/src/assets/lib/fontawesome/css/font-awesome.css',
-  'packages/noodl-editor/src/assets/lib/fontawesome/css/font-awesome.min.css',
-  'packages/noodl-editor/src/frames/viewer-frame/assets/style.css'
-];
+// CHR-010 deleted the vendored Font Awesome 4.7 stylesheets that stood at the
+// top of this list; the editor draws every glyph from core-ui's `Icon` set now.
+const EXCLUDE = ['packages/noodl-editor/src/frames/viewer-frame/assets/style.css'];
 
 const SKIP_DIRS = new Set(['node_modules', 'dist', 'out', 'coverage', '.git', '.cache', 'storybook-static']);
 

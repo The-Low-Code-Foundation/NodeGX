@@ -1,0 +1,181 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "05e4ec84-f240-56de-8cf4-110ccb03eb02",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rtIn",
+      "fromProperty": "compact",
+      "toId": "rtCompact",
+      "toProperty": "compact"
+    },
+    {
+      "fromId": "rtCompact",
+      "fromProperty": "result",
+      "toId": "rtBudget",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "rtBudget",
+      "fromProperty": "height",
+      "toId": "rtRoot",
+      "toProperty": "height"
+    },
+    {
+      "fromId": "rtIn",
+      "fromProperty": "progressA",
+      "toId": "rtAnimA",
+      "toProperty": "targetValue"
+    },
+    {
+      "fromId": "rtIn",
+      "fromProperty": "progressB",
+      "toId": "rtAnimB",
+      "toProperty": "targetValue"
+    },
+    {
+      "fromId": "rtAnimA",
+      "fromProperty": "currentValue",
+      "toId": "rtTrack",
+      "toProperty": "progressA"
+    },
+    {
+      "fromId": "rtAnimB",
+      "fromProperty": "currentValue",
+      "toId": "rtTrack",
+      "toProperty": "progressB"
+    },
+    {
+      "fromId": "rtIn",
+      "fromProperty": "nameA",
+      "toId": "rtTrack",
+      "toProperty": "nameA"
+    },
+    {
+      "fromId": "rtIn",
+      "fromProperty": "nameB",
+      "toId": "rtTrack",
+      "toProperty": "nameB"
+    },
+    {
+      "fromId": "rtIn",
+      "fromProperty": "lookA",
+      "toId": "rtTrack",
+      "toProperty": "styleA"
+    },
+    {
+      "fromId": "rtIn",
+      "fromProperty": "seedA",
+      "toId": "rtTrack",
+      "toProperty": "seedA"
+    },
+    {
+      "fromId": "rtIn",
+      "fromProperty": "optionsA",
+      "toId": "rtTrack",
+      "toProperty": "optionsA"
+    },
+    {
+      "fromId": "rtIn",
+      "fromProperty": "paintA",
+      "toId": "rtTrack",
+      "toProperty": "colorA"
+    },
+    {
+      "fromId": "rtIn",
+      "fromProperty": "patternA",
+      "toId": "rtTrack",
+      "toProperty": "patternA"
+    },
+    {
+      "fromId": "rtIn",
+      "fromProperty": "lookB",
+      "toId": "rtTrack",
+      "toProperty": "styleB"
+    },
+    {
+      "fromId": "rtIn",
+      "fromProperty": "seedB",
+      "toId": "rtTrack",
+      "toProperty": "seedB"
+    },
+    {
+      "fromId": "rtIn",
+      "fromProperty": "showB",
+      "toId": "rtTrack",
+      "toProperty": "showB"
+    },
+    {
+      "fromId": "rtIn",
+      "fromProperty": "burstA",
+      "toId": "rtTrack",
+      "toProperty": "burstA"
+    },
+    {
+      "fromId": "rtIn",
+      "fromProperty": "burstB",
+      "toId": "rtTrack",
+      "toProperty": "burstB"
+    },
+    {
+      "fromId": "rtIn",
+      "fromProperty": "progressA",
+      "toId": "rtTrack",
+      "toProperty": "targetA"
+    },
+    {
+      "fromId": "rtIn",
+      "fromProperty": "progressB",
+      "toId": "rtTrack",
+      "toProperty": "targetB"
+    },
+    {
+      "fromId": "rtIn",
+      "fromProperty": "progressA",
+      "toId": "rtLandedA",
+      "toProperty": "p"
+    },
+    {
+      "fromId": "rtLandedA",
+      "fromProperty": "result",
+      "toId": "rtGateA",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rtAnimA",
+      "fromProperty": "atTargetValue",
+      "toId": "rtGateA",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rtGateA",
+      "fromProperty": "ontrue",
+      "toId": "rtOut",
+      "toProperty": "reachedA"
+    },
+    {
+      "fromId": "rtIn",
+      "fromProperty": "progressB",
+      "toId": "rtLandedB",
+      "toProperty": "p"
+    },
+    {
+      "fromId": "rtLandedB",
+      "fromProperty": "result",
+      "toId": "rtGateB",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rtAnimB",
+      "fromProperty": "atTargetValue",
+      "toId": "rtGateB",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rtGateB",
+      "fromProperty": "ontrue",
+      "toId": "rtOut",
+      "toProperty": "reachedB"
+    }
+  ]
+}

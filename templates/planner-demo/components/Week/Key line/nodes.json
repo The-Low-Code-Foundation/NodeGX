@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ae778057-d41b-5efd-8d0e-6c5490c0da3d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "klIn",
+      "type": "Component Inputs",
+      "label": "The line",
+      "ports": [
+        {
+          "name": "key",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "text",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "klRoot",
+      "type": "Group",
+      "label": "One billing line",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "cssClassName": "planner-money-line"
+      },
+      "children": [
+        "klKey",
+        "klText"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "klKey",
+      "type": "Text",
+      "label": "What it is",
+      "parent": "klRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": {
+          "value": 11,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "letterSpacing": {
+          "value": 0.06,
+          "unit": "em"
+        },
+        "textTransform": "uppercase",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 88,
+          "unit": "px"
+        },
+        "cssClassName": "planner-money-key"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "klText",
+      "type": "Text",
+      "label": "What it says",
+      "parent": "klRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "klRoot"
+  ]
+}

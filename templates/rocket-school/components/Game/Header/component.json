@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d5aead7f-723c-5f79-8a2e-05b14f6e405a",
+  "name": "Header",
+  "path": "/Game/Header",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The top bar: one row with the player's face and name, which opens the player menu, and Home. The menu opens the hangar, edits the player (or deletes them), sets language, keyboard, sound and answers, and switches player. Every change is written through App in, then App and Write out. Hide Bar takes the bar and the menu away in a live race; Show Hangar false leaves the hangar out of the menu (on the hangar itself). Publishes Home, Hangar, Switch Player and Deleted."
+}

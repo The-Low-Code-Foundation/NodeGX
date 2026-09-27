@@ -1,0 +1,264 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "1900b827-9eb8-5137-8364-254c24f09d3b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hsIn",
+      "type": "Component Inputs",
+      "label": "The store and the shelf",
+      "ports": [
+        {
+          "name": "app",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "shelf",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "faceWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rocketWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "hsWrap",
+      "type": "Group",
+      "label": "The shelf",
+      "children": [
+        "hsTabs",
+        "hsGrid",
+        "hsEmpty",
+        "hsElsewhere"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-4)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hsTabs",
+      "type": "/Game/Choice row",
+      "label": "Face or rocket",
+      "parent": "hsWrap",
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "hsGrid",
+      "type": "Group",
+      "label": "The items",
+      "parent": "hsWrap",
+      "children": [
+        "hsEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "stretch",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "justifyContent": "center"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "hsEach",
+      "type": "For Each",
+      "label": "One tile per item",
+      "parameters": {
+        "template": "/Hangar/Tile",
+        "templateType": "explicit"
+      },
+      "parent": "hsGrid",
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "hsList",
+      "type": "/Logic/Hangar shelf",
+      "label": "This tab, as the player sees it",
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "hsTabItems",
+      "type": "JavaScriptFunction",
+      "label": "The two tabs, in words",
+      "parameters": {
+        "functionScript": "Outputs.items = [{ label: Inputs.face, value: 'face' }, { label: Inputs.rocket, value: 'rocket' }];"
+      },
+      "x": 410,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-face",
+          "displayName": "face",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rocket",
+          "displayName": "rocket",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "hsTab",
+      "type": "Variable2",
+      "label": "The tab",
+      "parameters": {
+        "name": "hangarTab"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "hsSetTab",
+      "type": "Set Variable",
+      "label": "Choose a tab",
+      "parameters": {
+        "name": "hangarTab"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "hsFirstTab",
+      "type": "Expression",
+      "label": "face",
+      "parameters": {
+        "expression": "'face'"
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "hsInitTab",
+      "type": "Set Variable",
+      "label": "Open on the face tab",
+      "parameters": {
+        "name": "hangarTab"
+      },
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "hsElsewhere",
+      "type": "Text",
+      "label": "Owned, for other faces",
+      "parent": "hsWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "hsEmpty",
+      "type": "Text",
+      "label": "Why this face has no things",
+      "parent": "hsWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "textAlignX": "center",
+        "maxWidth": {
+          "value": 420,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "hsOut",
+      "type": "Component Outputs",
+      "label": "What was tapped",
+      "ports": [
+        {
+          "name": "pick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "wear",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "itemId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "itemLabel",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "itemCost",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "hasPicks",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "purse",
+          "plug": "input",
+          "type": "number"
+        }
+      ],
+      "x": 410,
+      "y": 640
+    }
+  ],
+  "visualRoots": [
+    "hsWrap"
+  ]
+}

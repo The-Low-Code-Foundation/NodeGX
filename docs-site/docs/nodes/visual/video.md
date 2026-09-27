@@ -25,7 +25,9 @@ Embedded video content, background/hero loops, and camera previews (wire a media
 
 | Name | Type | Default | Description |
 |---|---|---|---|
+| `acceptDrops` | Boolean | `false` | Lets a Draggable element be dropped here, which reveals the Drop Zone outputs. The innermost zone under the pointer takes the drop |
 | `acceptFileDrops` | Boolean | `false` | Lets a file dragged from the desktop be dropped onto this element, which reveals the File Drop outputs below |
+| `acceptKind` | String | — | Comma-separated Drag Kinds this zone takes; leave blank to take any Draggable. A source of another kind never lights this zone up |
 | `acceptedFileTypes` | String | — | Comma-separated extensions or MIME types this element will take — ".png, .jpg" or "image/*"; leave blank to accept every file. A drop of nothing but rejected files fires Files Rejected instead of Files Dropped |
 | `alignX` | Enum (`left`, `center`, `right`) | — | Horizontal alignment of this element within the space its parent gives it |
 | `alignY` | Enum (`top`, `center`, `bottom`) | — | Vertical alignment of this element within the space its parent gives it |
@@ -54,9 +56,16 @@ Embedded video content, background/hero loops, and camera previews (wire a media
 | `clickBubbling` | Enum (`auto`, `always`, `never`) | `auto` | Whether a click here also fires Click on the nodes this one sits inside. Automatic keeps it here as soon as this node's own Click is connected, so a button inside a clickable card runs the button and not the card; Always is the older behaviour where both run; Never keeps every click here, wired or not. Note that an element at zero opacity takes no pointer events at all |
 | `controls` | Boolean | — | Shows the browser's own play, seek and volume controls |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dragKind` | String | — | Optional name for what this is — "card", "task". A zone with an Accept Kind only takes sources whose Drag Kind matches |
+| `dragValue` | * | — | What this element carries — usually the id of the item it shows. A drop zone reports it as Dropped Value |
+| `draggable` | Boolean | `false` | Lets a person pick this element up and drop it on an element with Accept Drops on. A see-through copy follows the pointer; the element itself stays put until the graph moves it |
+| `dropZoneName` | String | — | What a screen reader hears this zone called while a card is moved with the keyboard — "Thursday". Falls back to the element's accessible label |
 | `endTime` | Number | — | Seconds at which to stop; leave blank to play to the end. Ignored if it is not later than Start Time, and browsers vary in how strictly they honour it while Loop is on. ⚠️ Approximate on YouTube, and ignored entirely on Vimeo, whose embedded player has no end setting |
 | `height` | Dimension | `100` | Height of the element; how the value is read depends on Size Mode |
+| `holdTime` | Number | `0.5` | How long a held press takes to pick up, in seconds |
+| `holdToDrag` | Enum (`touch`, `always`, `never`) | `touch` | Whether a press must be held before it picks up. On touch (the default) a finger holds for Hold Time while a ring fills, so a moving finger still scrolls; a mouse picks up as soon as it moves |
 | `loop` | Boolean | — | Restarts the video automatically when it reaches the end |
+| `makeRoom` | Boolean | `true` | Slides the children apart to open a gap where the drop will land, while it hovers. Off keeps the children still and only reports Drop Index |
 | `marginBottom` | Number | — | Space outside the element's bottom edge, between it and its neighbours |
 | `marginLeft` | Number | — | Space outside the element's left edge, between it and its neighbours |
 | `marginRight` | Number | — | Space outside the element's right edge, between it and its neighbours |
@@ -111,12 +120,16 @@ Embedded video content, background/hero loops, and camera previews (wire a media
 | `boundingHeight` | Number | — | Height this element actually ended up with after layout, in pixels |
 | `boundingWidth` | Number | — | Width this element actually ended up with after layout, in pixels |
 | `childIndex` | Number | — | This element's position among its parent's children, counting from 0 |
+| `dropIndex` | Number | — | Where among this zone's children it landed, counting from 0 and leaving the dropped element itself out — so it is the index to insert at once it is removed from where it was |
 | `droppedFile` | * | — | The first accepted file, in the form an Upload File node takes |
 | `droppedFileName` | String | — | Name of the first accepted file, extension included |
 | `droppedFileSizeInBytes` | Number | — | Size of the first accepted file, in bytes |
 | `droppedFileType` | String | — | MIME type the browser reports for the first accepted file, blank for one it does not recognise |
 | `droppedFiles` | Array | — | Every accepted file in the drop, as an array — a drop can carry more than one |
+| `droppedValue` | * | — | The Drag Value of the element dropped here |
 | `isDragOver` | Boolean | — | True while a file is being dragged over this element — wire it to a border or background so the drop zone reacts |
+| `isDropTarget` | Boolean | — | True while something this zone takes is held over it — wire it to a background or border so the zone lights up |
+| `isLifted` | Boolean | — | True while this element is being dragged |
 | `onTimeUpdate` | Number | — | How far into the video playback has reached, in seconds |
 | `onVideoElementCreated` | Domelement | — | The underlying video element, for a Group to scroll to or a script to reach |
 | `screenPositionX` | Number | — | Distance in pixels from the left edge of the window to this element's left edge |
@@ -132,14 +145,18 @@ Embedded video content, background/hero loops, and camera previews (wire a media
 | `completed` | Signal | — | Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error |
 | `didMount` | Signal | — | Fires once this element has been added to the page and can be measured |
 | `done` | Signal | — | Fires once a Video Action has been carried out by the element |
+| `dragCancelled` | Signal | — | Fires when a lifted element is let go over nothing that takes it, or Escape puts it back |
+| `dropped` | Signal | — | Fires when a Draggable is dropped here, after Dropped Value and Drop Index are up to date. Move the data here — the engine moves nothing |
 | `filesDropped` | Signal | — | Fires when one or more accepted files are dropped here, after every File Drop output is up to date |
 | `filesRejected` | Signal | — | Fires when a drop landed here but every file in it was excluded by Accepted file types |
 | `hoverEnd` | Signal | — | Fires when the pointer leaves this element |
 | `hoverStart` | Signal | — | Fires when the pointer moves over this element or any of its children |
+| `landed` | Signal | — | Fires when this element is dropped on a zone that took it, after the zone's Dropped |
 | `onCanPlay` | Signal | — | Fires once enough of the video has loaded to start playing |
 | `onClick` | Signal | — | Fires when this element is clicked or tapped |
 | `onPause` | Signal | — | Fires when playback pauses |
 | `onPlay` | Signal | — | Fires when playback starts or resumes |
+| `pickedUp` | Signal | — | Fires when this element is lifted — after the hold on touch, on the first move with a mouse, on Space from the keyboard |
 | `pointerDown` | Signal | — | Fires when a mouse button is pressed or a finger touches this element |
 | `pointerEnter` | Signal | — | Fires when the pointer moves onto this element, not counting its children |
 | `pointerUp` | Signal | — | Fires when the mouse button is released or the finger lifts over this element |
@@ -165,6 +182,8 @@ Declares conditional/expandable port groups whose visibility depends on paramete
 | sizeMode = explicit OR sizeMode = contentWidth | `height` | — |
 | pointerEventsMode = explicit | `pointerEventsEnabled` | — |
 | acceptFileDrops = true | `acceptedFileTypes` | `filesDropped`, `filesRejected`, `droppedFile`, `droppedFiles`, `droppedFileName`, `droppedFileType`, `droppedFileSizeInBytes`, `isDragOver` |
+| draggable = true | `dragValue`, `dragKind`, `holdToDrag`, `holdTime` | `pickedUp`, `landed`, `dragCancelled`, `isLifted` |
+| acceptDrops = true | `acceptKind`, `makeRoom`, `dropZoneName` | `dropped`, `droppedValue`, `dropIndex`, `isDropTarget` |
 | borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted  | `borderWidth`, `borderColor` | — |
 | borderLeftStyle = solid OR borderLeftStyle = dashed OR borderLeftStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted  | `borderLeftWidth`, `borderLeftColor` | — |
 | borderTopStyle = solid OR borderTopStyle = dashed OR borderTopStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted  | `borderTopWidth`, `borderTopColor` | — |

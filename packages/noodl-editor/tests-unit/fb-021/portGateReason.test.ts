@@ -335,12 +335,24 @@ describe('FB-021 — over the shipped catalog, not a fixture', () => {
   //
   // 365 = those 364 plus §1 stage 3 — Circle's `svgSource`, gated `shape = svg`. One port, one
   // clause, explained, so the remainder is again untouched at 11.
-  it('finds all 365 conditionally-gated input ports', () => {
-    expect(all).toHaveLength(365);
+  //
+  // 400 = those 365 plus HLT-017's seven gated inputs — `dragValue`, `dragKind`, `holdToDrag`,
+  // `holdTime` behind `draggable = true`, and `acceptKind`, `makeRoom`, `dropZoneName` behind
+  // `acceptDrops = true` — on the same five visual nodes as DEF-029: 7 × 5 = 35. Both counts move
+  // by exactly 35, so every new gated port is explained and the remainder stays 11.
+  //
+  // 414 = those 400 plus P102 CMP-008's two shadow-source ports — `boxShadowSource` (behind
+  // `boxShadowEnabled = true`) and `boxShadowToken` (behind `… AND boxShadowSource = token`) — on
+  // the seven node types with a box shadow: 2 × 7 = 14. Both counts move by exactly 14. 🔴 The
+  // first CMP-008 build put the six shadow fields in TWO groups (`NOT SET` and `= custom`); the
+  // total read 456 and explained fell to 361, because a port in two groups is refused. One group
+  // (`!= token`) is what keeps the remainder at 11.
+  it('finds all 414 conditionally-gated input ports', () => {
+    expect(all).toHaveLength(414);
   });
 
-  it('explains 354 of them', () => {
-    expect(all.filter((row) => row.explained)).toHaveLength(354);
+  it('explains 403 of them', () => {
+    expect(all.filter((row) => row.explained)).toHaveLength(403);
   });
 
   /*

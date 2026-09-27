@@ -226,10 +226,74 @@ describe('BAK-009 rate limiting over real sockets', () => {
     // secret being read here — nothing reads a secret back at all, by
     // construction (admin-secrets.ts). The write is an operator action taken
     // once per credential, which is the shape the admin budget is for.
+    // FED-005 moved `data` by 2: `POST /mcp` and `GET /mcp`. Reviewed and put
+    // in the `data` budget deliberately — every call the endpoint serves is a
+    // query, a write or a function run, so that is what it costs, and letting a
+    // new access kind fall through `classifyRoute`'s `default` would have given
+    // a credentialed data door the `public` allowance meant for `/health`. It
+    // is NOT `functions`: most calls are rows, and the per-function budget
+    // (CWF-017) is deliberately not spent on this door at all — see the gate
+    // table in McpRoutes' docblock, which says so rather than leaving it to be
+    // found.
+    // PRD-003 moved `admin` by 1: `POST /admin/executions/compact`, the
+    // operator-triggered full rewrite of `executions.sqlite`. It arrived in
+    // `1289af079` without this tally, which is what made the full backend suite
+    // red by exactly one on 2026-09-20 — counted here, not guessed: it is the
+    // only admin pattern `getRouteTable()` gained since the FED-005 reading.
+    // Reviewed and left in the `admin` budget: it is a once-per-file operator
+    // action that holds a write lock for seconds per GB, so the thing that
+    // should stop it being called in a loop is the lock, not a token bucket.
+    // HLT-015 moved `auth` by 1: `POST /auth/magic-link/callback`. Opening a
+    // magic link no longer spends it — the GET renders a button and the button
+    // POSTs — so the redeem is a route of its own. `auth` like its GET, since
+    // the pattern is one entry in AUTH_PATTERNS; the handler adds its own
+    // stricter per-flow bucket on top, as every magic-link step does.
+    // BMG-007 moved `admin` by 1: `PUT /admin/keys/:id`, the API keys page
+    // changing what a key may do. Reviewed and left in the `admin` budget: an
+    // operator edits a key's scopes about as often as they create one, and the
+    // POST beside it already lives there. Counted, not guessed — it is the only
+    // admin pattern `getRouteTable()` gained since the HLT-015 reading.
+    // BMG-004 moved `admin` by 7: the Users page's `/admin/users` surface —
+    // GET and POST `admin/users`, GET/PUT/DELETE `admin/users/:id`, GET
+    // `admin/users/:id/identities`, DELETE `admin/users/:id/sessions`. Reviewed
+    // and left in the `admin` budget: a person administering accounts by hand,
+    // with the list and drawer reads a page makes. Counted, not guessed —
+    // 81 → 88, and seven is the number of patterns added.
+    // BMG-002 moved `admin` by 3: `admin/views/:collection` (GET) and
+    // `admin/views/:collection/:name` (PUT, DELETE) — the Collections page's
+    // saved views. Reviewed and left in the `admin` budget: a person saving a
+    // way of looking at a table. Counted, not guessed — 88 → 91.
+    // BMG-005 moved `admin` by 1: `PUT admin/roles/:name`, the Roles page saying
+    // what a role is for. Reviewed and left in the `admin` budget: an operator
+    // editing one sentence on a role. Counted, not guessed — 91 → 92.
+    // BMG-008 moved `admin` by 1: `POST admin/triggers/preview`, the schedule
+    // builder's dry run (the words and next fires of an unsaved cron). Reviewed
+    // and left in the `admin` budget: it is asked on every change of a control
+    // in one drawer, by one person, and answers from a bounded scan. Counted,
+    // not guessed — 92 → 93.
+    // BMG-014 moved `admin` by 1 and `auth` by 1: `POST _admin/setup` (the
+    // first admin account, made with the credential — admin-gated, so `admin`)
+    // and `POST _admin/login` (email + password presented — `auth`, beside
+    // `login` and the document). Counted, not guessed — 93 → 94, 16 → 17.
+    // BMG-011 moved `admin` by 4: `GET admin/files` (the Storage page's list),
+    // `GET admin/files/uses` (which records point at the files shown),
+    // `DELETE admin/files/:name` (remove one from the page) and
+    // `GET admin/backups/archive` (an archive as a download). Reviewed and left
+    // in the `admin` budget: one person, one page, reads of bounded size and a
+    // download the page hands the browser. Counted, not guessed — 94 → 98.
+    // BMG-015 moved `admin` by 1: `POST admin/files/config/test`, the Storage
+    // page's *Test connection* (a throwaway driver probes the bucket; nothing
+    // is saved). Reviewed and left in the `admin` budget: one person, one
+    // card, a press. Counted, not guessed — 98 → 99.
+    // BMG-015 §7 moved `admin` by 2: `GET admin/files/move` (how many files are
+    // still on this machine, and the move's progress, polled by the Storage
+    // page while it runs) and `POST admin/files/move` (start it: one background
+    // job, a 409 while it runs). Reviewed and left in the `admin` budget: one
+    // person, one card, a poll a second while a move runs. Counted — 99 → 101.
     expect(counts).toEqual({
-      admin: 79,
-      auth: 15,
-      data: 17,
+      admin: 101,
+      auth: 17,
+      data: 19,
       files: 4,
       functions: 1,
       hooks: 1,
@@ -242,6 +306,10 @@ describe('BAK-009 rate limiting over real sockets', () => {
       const cls = classifyRoute(route.pattern, route.access.kind);
       if (route.access.kind === 'admin') expect(cls).toBe('admin');
       if (route.pattern.startsWith('realtime')) expect(cls).toBe('realtime');
+      // FED-005: and the MCP door never drifts back to `public` by someone
+      // removing its `case` from `classifyRoute` — which is a silent change,
+      // since the switch has a `default`.
+      if (route.access.kind === 'mcp') expect(cls).toBe('data');
     }
   });
 });

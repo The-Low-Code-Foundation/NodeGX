@@ -12,7 +12,21 @@ import css from './CollapsableSection.module.scss';
 export interface CollapsableSectionProps extends UnsafeStyleProps {
   variant?: SectionVariant;
   title?: string;
+  /**
+   * The state the section STARTS in, read once. Uncontrolled: the section owns its open state
+   * from then on and a later change to this prop does nothing. Every caller before P103 CMG-005
+   * uses it this way and keeps doing so.
+   */
   isClosed?: boolean;
+  /**
+   * P103 CMG-005 — the controlled form. When this is a boolean the section draws exactly this
+   * state and asks `onCollapsedChange` to change it; something outside the section (the Styles
+   * panel's `revealStyle`) can then open it. `undefined` leaves the section uncontrolled.
+   */
+  isCollapsed?: boolean;
+  onCollapsedChange?: (collapsed: boolean) => void;
+  /** Rendered as `data-section-id`, so a route can find the section in the DOM. */
+  sectionId?: string;
 
   hasGutter?: boolean;
   hasBottomSpacing?: boolean;
@@ -27,6 +41,9 @@ export function CollapsableSection({
   variant = SectionVariant.Default,
   title,
   isClosed,
+  isCollapsed: controlledCollapsed,
+  onCollapsedChange,
+  sectionId,
 
   hasGutter,
   hasBottomSpacing,
@@ -39,7 +56,15 @@ export function CollapsableSection({
   UNSAFE_className,
   UNSAFE_style
 }: CollapsableSectionProps) {
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(!!isClosed);
+  const [ownCollapsed, setOwnCollapsed] = useState<boolean>(!!isClosed);
+  const isControlled = typeof controlledCollapsed === 'boolean';
+  const isCollapsed = isControlled ? controlledCollapsed : ownCollapsed;
+
+  function toggle() {
+    const next = !isCollapsed;
+    if (!isControlled) setOwnCollapsed(next);
+    onCollapsedChange?.(next);
+  }
 
   return (
     <section
@@ -51,10 +76,12 @@ export function CollapsableSection({
         UNSAFE_className
       ])}
       style={UNSAFE_style}
+      data-section-id={sectionId}
+      data-section-open={isCollapsed ? 'false' : 'true'}
     >
       {(Boolean(title) || Boolean(actions)) && (
         <div
-          onClick={() => setIsCollapsed((prev) => !prev)}
+          onClick={toggle}
           className={classNames([css['Header'], css[`is-variant-${variant}`], css['is-collapsable']])}
         >
           {/* PNL-005: a plain span for the same reason as `PanelHeader.Title` —
@@ -63,7 +90,9 @@ export function CollapsableSection({
           <div className={css['Title']} title={title}>
             {title}
           </div>
-          {Boolean(actions) && <div>{actions}</div>}
+          {/* A header action (the ＋ of CMG-002, the reset of CMG-004) must not also toggle the
+              section: the click stops at the actions slot. */}
+          {Boolean(actions) && <div onClick={(e) => e.stopPropagation()}>{actions}</div>}
           <IconButton
             icon={IconName.CaretUp}
             variant={IconButtonVariant.Transparent}

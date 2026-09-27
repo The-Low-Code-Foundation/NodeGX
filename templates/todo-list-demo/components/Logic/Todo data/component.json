@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0bc34de3-fb10-555e-8cb4-cbe4ebec170d",
+  "name": "Todo data",
+  "path": "/Logic/Todo data",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Your tasks, next actions and history, read from this browser’s storage — the first time, it puts the example list there. Refresh reads it all again; Reset puts the example list back."
+}

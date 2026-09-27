@@ -420,8 +420,10 @@ export function ProvenancePanel() {
    * so the walk *names* the failing node and this jumps to it.
    *
    * ⚠️ **This is not what a click on a row does, and used to be.** Revealing selects the node,
-   * and selecting a node switches the sidebar to the property editor — so every click on a row
-   * replaced the panel with the property panel before the row's detail could be read. Layer 3,
+   * and selecting a node used to switch the sidebar to the property editor — so every click on a
+   * row replaced the panel with the property panel before the row's detail could be read. (Since
+   * P101 INS-001 a node's properties open in their own column and this panel stays; the two
+   * gestures below are kept because Richard asked for both, not because of the old swap.) Layer 3,
    * the whole of OBS-003, lives in that detail: the difference between a walk that says *"it
    * stopped here"* and one that says *"it stopped here, **and this is why**"*. It was
    * unreachable by the only gesture anyone tries.

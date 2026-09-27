@@ -1,0 +1,38 @@
+{
+  "typeName": "net.noodl.ParseXML",
+  "summary": "Turns XML text that arrived at runtime into an object, with attributes prefixed and hostile documents refused rather than parsed.",
+  "description": "Parse XML reads XML text into a plain object. An element's attributes arrive under keys prefixed with @ (so <a href=\"x\"/> is { \"@href\": \"x\" }) and a tag that carries both attributes and text keeps its text under #text — which is the shape that catches everyone, because String(node.title) on such a tag gives [object Object] and not the words. Namespace prefixes are kept, deliberately: content:encoded and yt:videoId are how you tell one kind of item from another, and stripping the prefix would collide media:title with title. Every value is a string, the same rule Parse CSV set — an id of 0123 stays \"0123\" and never becomes the number 123. Always Array names tags that must be an array however many times they appear, so a document with one <item> and a document with ten have the same shape and nothing downstream needs a branch. Two guards run before parsing rather than during it: a document over Max Bytes is refused, and a document that declares its own entities (<!ENTITY>, or a DOCTYPE with an inline subset) is refused outright — that is the billion-laughs attack, where a dozen lines expand to gigabytes, and no feed or document format legitimately needs it. Both fail on Failure with a code on Error Code, in milliseconds, leaving the process alive.",
+  "whenToUse": "XML arriving from anywhere at runtime: an RSS or Atom feed, a SOAP or sitemap response, a supplier's export, an upload. For a feed specifically, use Parse Feed instead — it is this node plus the mapping that turns four incompatible feed formats into one item shape. Pair either with an HTTP Request node whose Response Type is Text, so the body reaches you untouched whatever content-type the server claimed.",
+  "ports": {
+    "text": "The XML text to parse. Wire an HTTP Request node's Response here with Response Type set to Text.",
+    "attributePrefix": "What an attribute's key starts with, so it cannot collide with a child element of the same name. Default '@'.",
+    "alwaysArray": "Comma-separated tag names that are always an array, however many times they appear.",
+    "trimValues": "Strip leading and trailing whitespace from text. Untick to keep a document's indentation.",
+    "maxBytes": "Refuse a document larger than this, before parsing it. Default 5 MB.",
+    "result": "The document as an object. Every value is a string. A tag with attributes and text becomes { \"@attr\": \"…\", \"#text\": \"…\" }. Left unchanged when a parse fails.",
+    "changed": "Fires once Result holds the freshly parsed document.",
+    "failure": "Fires when the XML could not be parsed or was refused, leaving Result as it was.",
+    "error": "Why the XML could not be read. Empty until a parse fails.",
+    "errorCode": "A stable code for the failure: xml/too-large, xml/entity-declaration, xml/doctype-subset, xml/parse-failed, xml/empty."
+  },
+  "patterns": [
+    "HTTP Request (Response Type: Text) → Parse XML `text`. Text is what guarantees the body arrives untouched — a server that labels XML as application/json will otherwise break the fetch itself, before this node runs.",
+    "Set Always Array for any tag you will loop over. Without it, a document that happens to carry one of something gives you an object where you expected a list.",
+    "Wire `failure` somewhere that answers the caller. A cloud function whose only wired path is the happy one hangs forever when the document is bad (CWF-018)."
+  ],
+  "antiPatterns": [
+    "Expecting numbers. Every value is a string; convert explicitly where you need one.",
+    "Reading a tag's text with String(node.tag) when the tag also has attributes — that gives [object Object]. Read node.tag['#text'].",
+    "Raising Max Bytes to take any document a server offers. The object costs several times the text in memory, and a server can always send more than you expected.",
+    "Using this for a feed and writing the RSS-versus-Atom mapping by hand. Parse Feed already did it, including the four cases that are easy to get wrong."
+  ],
+  "relatedNodes": [
+    "net.noodl.ParseFeed",
+    "net.noodl.ParseCSV",
+    "net.noodl.HTTP",
+    "Static Data"
+  ],
+  "examples": [
+    "bubble-read-an-xml-response"
+  ]
+}

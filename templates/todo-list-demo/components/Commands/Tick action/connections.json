@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b6eaf2c9-64c1-5d27-8c62-4715101e585f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "TickactionIn",
+      "fromProperty": "rows",
+      "toId": "TickactionGuard",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "TickactionIn",
+      "fromProperty": "actionId",
+      "toId": "TickactionGuard",
+      "toProperty": "in-actionId"
+    },
+    {
+      "fromId": "TickactionIn",
+      "fromProperty": "note",
+      "toId": "TickactionGuard",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "TickactionIn",
+      "fromProperty": "do",
+      "toId": "TickactionGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "TickactionGuard",
+      "fromProperty": "out-done",
+      "toId": "TickactionWrite",
+      "toProperty": "in-done"
+    },
+    {
+      "fromId": "TickactionGuard",
+      "fromProperty": "out-note",
+      "toId": "TickactionWrite",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "TickactionIn",
+      "fromProperty": "actionId",
+      "toId": "TickactionWrite",
+      "toProperty": "in-modelId"
+    },
+    {
+      "fromId": "TickactionGuard",
+      "fromProperty": "out-go",
+      "toId": "TickactionWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "TickactionIn",
+      "fromProperty": "taskId",
+      "toId": "TickactionHistory",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "TickactionGuard",
+      "fromProperty": "out-summary",
+      "toId": "TickactionHistory",
+      "toProperty": "summary"
+    },
+    {
+      "fromId": "TickactionGuard",
+      "fromProperty": "out-note",
+      "toId": "TickactionHistory",
+      "toProperty": "body"
+    },
+    {
+      "fromId": "TickactionWrite",
+      "fromProperty": "out-done",
+      "toId": "TickactionHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "TickactionHistory",
+      "fromProperty": "done",
+      "toId": "TickactionOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "TickactionWrite",
+      "fromProperty": "out-failure",
+      "toId": "TickactionProblem",
+      "toProperty": "do"
+    }
+  ]
+}

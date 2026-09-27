@@ -1,0 +1,171 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d0ced17a-7463-528f-86f9-ce3efabd0445",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rollfaceIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "run",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "history",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "at",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "action",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "seed",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rollfaceFn",
+      "type": "JavaScriptFunction",
+      "label": "Roll face",
+      "parameters": {
+        "functionScript": "\nvar ROLL_HISTORY = 30;\nvar hist = Array.isArray(Inputs.history) ? Inputs.history.filter(function (x) { return typeof x === 'string' && x; }) : [];\nvar at = Math.floor(Number(Inputs.at));\nif (!(at >= 0) || at > hist.length - 1) at = hist.length - 1;\nvar action = String(Inputs.action || 'roll');\nvar seed = String(Inputs.seed || '');\nif (action === 'set') { hist = seed ? [seed] : []; at = hist.length - 1; }\nelse if (action === 'roll') { if (seed) { hist = hist.concat([seed]).slice(-ROLL_HISTORY); at = hist.length - 1; } }\nelse if (action === 'back') { if (at > 0) at -= 1; }\nelse if (action === 'forward') { if (at < hist.length - 1) at += 1; }\nOutputs.history = hist;\nOutputs.at = at;\nOutputs.seed = at >= 0 && at < hist.length ? hist[at] : seed;\nOutputs.canBack = at > 0;\nOutputs.canForward = at >= 0 && at < hist.length - 1;\nOutputs.position = hist.length ? (at + 1) + '/' + hist.length : '';\n",
+        "runOnChange-in-history": false,
+        "runOnChange-in-at": false,
+        "runOnChange-in-action": false,
+        "runOnChange-in-seed": false
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-history",
+          "displayName": "history",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-at",
+          "displayName": "at",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-action",
+          "displayName": "action",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-seed",
+          "displayName": "seed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-history",
+          "displayName": "history",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-at",
+          "displayName": "at",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-seed",
+          "displayName": "seed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-canBack",
+          "displayName": "canBack",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-canForward",
+          "displayName": "canForward",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-position",
+          "displayName": "position",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "rollfaceOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "history",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "at",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "seed",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "canBack",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "canForward",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "position",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

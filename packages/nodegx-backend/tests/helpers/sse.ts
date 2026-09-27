@@ -63,7 +63,15 @@ function parseBlock(block: string): SseFrame | null {
 }
 
 /** Open `GET /realtime` and parse its frames incrementally. */
-export function openStream(base: string): Promise<SseHandle> {
+/**
+ * Open one SSE connection.
+ *
+ * `headers` is additive and optional (BRG-006): the hub authorises a subscription with the
+ * connection's own principal, so a backend whose collections are `authenticated` refuses an
+ * anonymous stream. Every caller before this one ran against a backend with no `security.json`,
+ * where the principal never mattered; they pass nothing and behave exactly as they did.
+ */
+export function openStream(base: string, headers: Record<string, string> = {}): Promise<SseHandle> {
   return new Promise((resolve, reject) => {
     const url = new URL(base + '/realtime');
     const req = http.get(
@@ -71,7 +79,7 @@ export function openStream(base: string): Promise<SseHandle> {
         hostname: url.hostname,
         port: url.port,
         path: url.pathname,
-        headers: { Accept: 'text/event-stream' }
+        headers: { Accept: 'text/event-stream', ...headers }
       },
       (res) => {
         if (res.statusCode !== 200) {

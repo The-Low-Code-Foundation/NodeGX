@@ -55,7 +55,9 @@ One-of-many choices too numerous or space-constrained for radio buttons: country
 | `boxShadowInset` | Boolean | `false` | Draws the shadow inside the element instead of behind it |
 | `boxShadowOffsetX` | Number | `0` | How far to the right the shadow is cast from the element |
 | `boxShadowOffsetY` | Number | `0` | How far down the shadow is cast from the element |
+| `boxShadowSource` | Enum (`custom`, `token`) | `custom` | Where the shadow comes from: Custom builds it from the six fields below; From a style token wears one of the project’s shadow tokens, so every element sharing that token changes together |
 | `boxShadowSpreadRadius` | Number | `2` | How much larger than the element the shadow is drawn |
+| `boxShadowToken` | String | `var(--shadow-md)` | The project shadow this element wears, as var(--shadow-md). Pick one from the list; compose new ones in the Styles panel |
 | `boxSizing` | Enum (`border-box`, `content-box`) | `border-box` | Whether Width and Height include this element's padding and border, or only its content |
 | `clickBubbling` | Enum (`auto`, `always`, `never`) | `auto` | Whether a click on this control also fires Click on the nodes it sits inside. Automatic keeps it here as soon as this control's own Click is connected, so a Favourite button inside a clickable card runs Favourite and not the card; Always is the older behaviour where both run; Never keeps every click here, wired or not |
 | `color` | Color | — | Colour of the text itself, not of the element behind it |
@@ -126,6 +128,13 @@ One-of-many choices too numerous or space-constrained for radio buttons: country
 | `width` | Dimension | `100` | Width of the element; how the value is read depends on Size Mode |
 | `zIndex` | Number | — | Paint order among overlapping siblings; higher numbers paint on top |
 
+### Signals
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `blur` | Signal | — | Takes the keyboard away from this dropdown, which is what fires Blurred |
+| `focus` | Signal | — | Puts the keyboard on this dropdown, so Enter, Space and the arrow keys go to it |
+
 ## Outputs
 
 ### Values
@@ -148,7 +157,9 @@ One-of-many choices too numerous or space-constrained for radio buttons: country
 
 | Name | Type | Default | Description |
 |---|---|---|---|
+| `completed` | Signal | — | Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error |
 | `didMount` | Signal | — | Fires once this element has been added to the page and can be measured |
+| `done` | Signal | — | Fires when Focus put the keyboard on this dropdown, or Blur took it away |
 | `hoverEnd` | Signal | — | Fires when the pointer leaves this control, including when it leaves while a button is still held |
 | `hoverStart` | Signal | — | Fires when the pointer moves onto this control |
 | `onBlur` | Signal | — | Fires when keyboard focus leaves this control, which is the usual place to validate what was entered |
@@ -156,11 +167,12 @@ One-of-many choices too numerous or space-constrained for radio buttons: country
 | `onFocus` | Signal | — | Fires the moment this control takes keyboard focus, whether from a click, a tab or a Focus action |
 | `pointerDown` | Signal | — | Fires as a mouse button or finger goes down on this control, before any click has completed |
 | `pointerUp` | Signal | — | Fires when the mouse button or finger is lifted, and also when a touch is cancelled by the system |
+| `unchanged` | Signal | — | Fires when Focus arrived while this dropdown was not on the page, so nothing was focused |
 | `willUnmount` | Signal | — | Fires just before this element is removed from the page, while it still exists |
 
 ## Dynamic ports
 
-_This node's port list changes at runtime (declared-port-groups, runtime-discovered); the tables above may be incomplete for a given instance._
+_This node's port list changes at runtime (declared-port-groups, runtime-narrowed); the tables above may be incomplete for a given instance._
 
 The port list above is complete — this node mints no ports. It republishes its own `value` input per instance as an `enum` built from this node's `items`: one choice per option, labelled with the option's `Label` and carrying its `Value`, plus the currently stored value when that matches no option. It is declared `string` statically because nothing outside a connected editor can know the instance's options.
 
@@ -177,7 +189,9 @@ The port list above is complete — this node mints no ports. It republishes its
 | borderTopStyle = solid OR borderTopStyle = dashed OR borderTopStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted OR borderStyle NOT SET | `borderTopWidth`, `borderTopColor` | — |
 | borderRightStyle = solid OR borderRightStyle = dashed OR borderRightStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted OR borderStyle NOT SET | `borderRightWidth`, `borderRightColor` | — |
 | borderBottomStyle = solid OR borderBottomStyle = dashed OR borderBottomStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted OR borderStyle NOT SET | `borderBottomWidth`, `borderBottomColor` | — |
-| boxShadowEnabled = true | `boxShadowOffsetX`, `boxShadowOffsetY`, `boxShadowInset`, `boxShadowBlurRadius`, `boxShadowSpreadRadius`, `boxShadowColor` | — |
+| boxShadowEnabled = true | `boxShadowSource` | — |
+| boxShadowEnabled = true AND boxShadowSource = token | `boxShadowToken` | — |
+| boxShadowEnabled = true AND boxShadowSource != token | `boxShadowOffsetX`, `boxShadowOffsetY`, `boxShadowInset`, `boxShadowBlurRadius`, `boxShadowSpreadRadius`, `boxShadowColor` | — |
 
 ## Ports at runtime
 

@@ -1,0 +1,140 @@
+{
+  "arm": "control",
+  "arms": [
+    {
+      "name": "the editor on 9222 can be accounted for",
+      "ok": true,
+      "detail": "listener 8792, ancestry 8792<8791<8736<1973<1855<1743<1646<1386<1354<1330<1300"
+    },
+    {
+      "name": "rAF fires — the page is live enough to trust a red",
+      "ok": true,
+      "detail": "raf"
+    },
+    {
+      "name": "the driven project is the COPY this run was pointed at",
+      "ok": true,
+      "detail": "/Users/richardosborne/vscode_projects/NodeGX test projects/HLT-005 Comment Drive"
+    },
+    {
+      "name": "the renderer carries no control left over from an earlier run",
+      "ok": true,
+      "detail": "never armed"
+    },
+    {
+      "name": "a node in the copy carries a single line longer than any docked panel",
+      "ok": true,
+      "detail": "{\"component\":\"/App\",\"nodeId\":\"f7c4f300-b263-4abf-9d1c-160d25a11c71\",\"typename\":\"Router\",\"chars\":264}"
+    },
+    {
+      "name": "the commented node is the selected one",
+      "ok": true,
+      "detail": "{\"selected\":true}"
+    },
+    {
+      "name": "🔴 CONTROL armed — proven by READING the computed style off the element, not by inserting a rule",
+      "ok": true,
+      "detail": "flex-shrink computes to 0"
+    },
+    {
+      "name": "the dark theme is the one on screen",
+      "ok": true,
+      "detail": "data-theme=dark"
+    },
+    {
+      "name": "🔴 REACH (dark, min 240px) — the comment field is on screen and touchable",
+      "ok": true,
+      "detail": "already; left=property-comment-input centre=VisualCanvas-module__Webview--MlnpH"
+    },
+    {
+      "name": "the panel really is at its min width (240px asked for)",
+      "ok": true,
+      "detail": "scrollport clientWidth 224"
+    },
+    {
+      "name": "🔴 CONTROL FIRES (dark, min) — the shipped declaration overflows the port",
+      "ok": true,
+      "detail": "1489.2px in 224px, maxScrollLeft 1253"
+    },
+    {
+      "name": "🔴 REACH (dark, max 996px) — the comment field is on screen and touchable",
+      "ok": true,
+      "detail": "already; left=property-comment-input centre=property-comment-input"
+    },
+    {
+      "name": "the panel really is at its max width (996px asked for)",
+      "ok": true,
+      "detail": "scrollport clientWidth 980"
+    },
+    {
+      "name": "🔴 CONTROL FIRES (dark, max) — the shipped declaration overflows the port",
+      "ok": true,
+      "detail": "1489.2px in 980px, maxScrollLeft 497"
+    },
+    {
+      "name": "the light theme is the one on screen",
+      "ok": true,
+      "detail": "data-theme=light"
+    },
+    {
+      "name": "🔴 REACH (light, min 240px) — the comment field is on screen and touchable",
+      "ok": true,
+      "detail": "already; left=property-comment-input centre=VisualCanvas-module__Webview--MlnpH"
+    },
+    {
+      "name": "the panel really is at its min width (240px asked for)",
+      "ok": true,
+      "detail": "scrollport clientWidth 224"
+    },
+    {
+      "name": "🔴 CONTROL FIRES (light, min) — the shipped declaration overflows the port",
+      "ok": true,
+      "detail": "1489.2px in 224px, maxScrollLeft 1253"
+    },
+    {
+      "name": "🔴 REACH (light, max 996px) — the comment field is on screen and touchable",
+      "ok": true,
+      "detail": "already; left=property-comment-input centre=property-comment-input"
+    },
+    {
+      "name": "the panel really is at its max width (996px asked for)",
+      "ok": true,
+      "detail": "scrollport clientWidth 980"
+    },
+    {
+      "name": "🔴 CONTROL FIRES (light, max) — the shipped declaration overflows the port",
+      "ok": true,
+      "detail": "1489.2px in 980px, maxScrollLeft 497"
+    },
+    {
+      "name": "🔴 AC3 — vertical growth still HAPPENS: thirty lines is taller than two",
+      "ok": true,
+      "detail": "two lines 48px → thirty lines 184px"
+    },
+    {
+      "name": "🔴 AC3 — and it still STOPS at 184px",
+      "ok": true,
+      "detail": "thirty lines gives 184px"
+    },
+    {
+      "name": "AC3 — the textarea still matches the mirror it is positioned over",
+      "ok": true,
+      "detail": "input 184px vs sizer 184px"
+    },
+    {
+      "name": "CONTROL — the unbreakable run overflows too, as it did before the fix",
+      "ok": true,
+      "detail": "maxScrollLeft 1068.5"
+    },
+    {
+      "name": "all 4 cells produced a reading — a zero from a blank panel is not a zero",
+      "ok": true,
+      "detail": "4 cells: dark-min=1253 dark-max=497 light-min=1253 light-max=497"
+    },
+    {
+      "name": "THE NUMBER — with the shipped declaration back",
+      "ok": true,
+      "detail": "dark-min=1253 dark-max=497 light-min=1253 light-max=497"
+    }
+  ]
+}

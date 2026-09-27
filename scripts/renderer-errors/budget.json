@@ -1,0 +1,68 @@
+{
+  "$comment": "HLT-010 — the renderer-error budget. Every class has a number and a reason. A class not listed here FAILS the gate whatever its count. Raising a budget above 0 needs a reason a reviewer can argue with; 'it was already there' is not one.",
+  "classes": [
+    {
+      "id": "build/webpack-compile-error",
+      "match": "^\\[webpack-dev-server\\] (ERROR|Errors while compiling)",
+      "budget": 0,
+      "owner": "whoever broke the build",
+      "reason": "Not a runtime reading at all: the dev server could not compile the tree, so the editor under test is a stale or broken bundle. Any count means the gate measured the wrong build and must fail."
+    },
+    {
+      "id": "react/sync-unmount",
+      "match": "Attempted to synchronously unmount a root",
+      "budget": 0,
+      "owner": "HLT-001",
+      "reason": "Fixed by HLT-001 (unmountReactRoot defers the unmount). 132 in Richard's 42-minute session, 0 on a driven one."
+    },
+    {
+      "id": "thumbnail/guest-view-manager-call",
+      "match": "GUEST_VIEW_MANAGER_CALL",
+      "budget": 0,
+      "owner": "HLT-002",
+      "reason": "Fixed by HLT-002 (captureThumbnail does not capture a hidden webview). 116 events in 42 minutes, 0 on a driven one."
+    },
+    {
+      "id": "react/duplicate-key",
+      "match": "Encountered two children with the same key",
+      "budget": 0,
+      "owner": "HLT-003",
+      "reason": "Fixed by HLT-003 (launcher keys by directory). 10 in 42 minutes."
+    },
+    {
+      "id": "react/missing-key",
+      "match": "Each child in a list should have a unique \"key\" prop",
+      "budget": 0,
+      "owner": "HLT-003",
+      "reason": "Fixed by HLT-003 (every list the drive reaches is keyed)."
+    },
+    {
+      "id": "react/null-value-prop",
+      "match": "`value` prop on `%s` should not be null|`value` prop on `\\w+` should not be null",
+      "budget": 0,
+      "owner": "HLT-003",
+      "reason": "Fixed by HLT-003 (property inputs render a null style value as an empty controlled field)."
+    },
+    {
+      "id": "react/setstate-in-render",
+      "match": "Cannot update a component .* while rendering a different component",
+      "budget": 0,
+      "owner": "HLT-003",
+      "reason": "Fixed by HLT-003 for the case it measured. Any new one is a new setState-during-render and is a defect."
+    },
+    {
+      "id": "network/community-401",
+      "match": "status of 401 .*\\((path|profile)\\)$",
+      "budget": 0,
+      "owner": "HLT-004",
+      "reason": "Fixed by HLT-004: a dead community credential is forgotten, so /me/path and /me/profile are never requested with it."
+    },
+    {
+      "id": "network/whats-new-feed-404",
+      "match": "status of 404 .*\\(feed\\.json\\)$",
+      "budget": 2,
+      "owner": "ALPHA-006 (unowned feed)",
+      "reason": "Chromium's network log, not an app error: whats-new.ts asks for /whats-new/feed.json on every project open, the feed has never existed, and the client resolves to null without throwing (HLT-013 verdict, 'knowingly unserved'). Only NOT asking removes the line. The gate opens a project twice, so 2. Goes to 0 when the feed is published or the request is dropped."
+    }
+  ]
+}

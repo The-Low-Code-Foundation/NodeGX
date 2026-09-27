@@ -53,7 +53,11 @@ export const landingPagesTemplate: ProjectTemplate = {
   // TPL-004 rebuilt what the pages do; a version that never moves is a claim
   // that nothing did.
   version: '1.1.0',
-  thumbnail: undefined,
+  // CHR-006 — nodegx.io's "A business landing page" shot, which IS one of this template's three
+  // pages. ⚠️ A URL relative to the renderer's page (`src/editor/index.html`), the way that page
+  // loads `../assets/css/style.css`; `src/assets` ships in the package.
+  thumbnail: '../assets/images/templates/landing-pages.webp',
+  eyebrow: 'Site · 3 pages',
 
   content,
 

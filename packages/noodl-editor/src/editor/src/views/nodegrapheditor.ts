@@ -29,12 +29,14 @@ import { TitleBar } from './documents/EditorDocument/titlebar';
 import { CanvasIcons } from './nodegrapheditor/canvas/CanvasIcons';
 import { CanvasRenderer } from './nodegrapheditor/canvas/CanvasRenderer';
 import { CanvasTheme } from './nodegrapheditor/canvas/CanvasTheme';
+import type { LaneFilter } from './nodegrapheditor/canvas/structureLane';
 import { CanvasViewport } from './nodegrapheditor/canvas/CanvasViewport';
 import * as HitTester from './nodegrapheditor/canvas/HitTester';
 import { InteractionController } from './nodegrapheditor/canvas/InteractionController';
 import { NodeSelector } from './nodegrapheditor/canvas/NodeSelector';
 import { AABB, CenterToFitMode, IVector2, MouseEventType, PanAndScale } from './nodegrapheditor/canvas/types';
 import { OverlayHost } from './nodegrapheditor/canvas/OverlayHost';
+import { InstanceHoverController } from './nodegrapheditor/InstanceHoverController';
 import { bindNodeGraphCanvas } from './nodegrapheditor/CanvasDOMBindings';
 import { CanvasPainter } from './nodegrapheditor/CanvasPainter';
 import { CanvasShell, createCanvasShell } from './nodegrapheditor/CanvasShell';
@@ -134,6 +136,14 @@ export class NodeGraphEditor extends View {
   /** Debug-inspector hover/show behaviour and inspector registry (PLAT-001 wave 2 extraction). */
   inspectorActions = new InspectorActions(this);
 
+  /**
+   * TVW-007 AC2b — the hover surface an instance node carries (its path, its count, `Edit ›`).
+   *
+   * R-Z took the component's name off the card, so this is the only place an instance says what
+   * it is; the rules it runs on are in `canvas/instanceHover.ts`.
+   */
+  instanceHover = new InstanceHoverController(this);
+
   /** Model mutations from canvas gestures: create/attach/detach/commit-move (PLAT-001 wave 2 extraction). */
   nodeOperations = new NodeOperations(this);
 
@@ -145,6 +155,22 @@ export class NodeGraphEditor extends View {
 
   /** Layout/paint pipeline: measure, AABB, per-frame FrameState assembly (PLAT-001 wave 3 extraction). */
   painter = new CanvasPainter(this);
+
+  /**
+   * TVW-006 — the structure lane's `All · Structure · Logic` filter.
+   *
+   * §2: **per canvas, not persisted.** A field on the editor rather than a stored setting, so it
+   * resets when the canvas does and never follows someone into a project they open tomorrow. It
+   * dims, never hides (R-F) — see `canvas/structureLane.ts`.
+   */
+  laneFilter: LaneFilter = 'all';
+
+  /** Set the lane filter and repaint. Returns the filter, so a caller can assert what landed. */
+  setLaneFilter(filter: LaneFilter): LaneFilter {
+    this.laneFilter = filter;
+    this.repaint();
+    return this.laneFilter;
+  }
 
   commentLayer: CommentLayer;
   _disposed: boolean;
@@ -239,7 +265,19 @@ export class NodeGraphEditor extends View {
     );
   }
 
+  /** TVW-003: set by `NodeGraphContext` on the app's canvas only. */
+  unbindSelectionStore?: () => void;
+
+  /**
+   * TVW-003 — hovering a node outlines it in the preview. Set by the store binding, so only the app's
+   * canvas has it: a change review or diff canvas hovering its own copy of a graph outlines nothing.
+   */
+  setPreviewHover?: (nodeId: string, hovered: boolean) => void;
+
   dispose() {
+    this.unbindSelectionStore?.();
+    this.unbindSelectionStore = undefined;
+
     AiAssistantModel.instance.off(this);
     KeyboardHandler.instance.deregisterCommands(this.keyboardCommands);
 
@@ -257,6 +295,8 @@ export class NodeGraphEditor extends View {
     // Clean up React roots. Pre-PLAT-001 this only unmounted the highlight
     // overlay and canvas tabs roots; the banner, execution overlay and title
     // roots leaked. unmountAll covers every root registered with the host.
+    this.instanceHover.dispose();
+
     this.overlays.unmountAll();
     this.contextMenu.releaseToolbarHandle();
 
@@ -537,8 +577,14 @@ export class NodeGraphEditor extends View {
     this.viewportActions.moveRoots(dx, dy);
   }
 
-  createNewNode(type: ComponentModel, pos: IVector2, options: Partial<NodeGraphNodeJSON> = {}) {
-    this.nodeOperations.createNewNode(type, pos, options);
+  createNewNode(
+    type: ComponentModel,
+    pos: IVector2,
+    options: Partial<NodeGraphNodeJSON> = {},
+    /** TVW-005: a parent and an index, for a drop that has no point on the canvas. */
+    placement?: { parent: NodeGraphNode; index?: number }
+  ): NodeGraphNode {
+    return this.nodeOperations.createNewNode(type, pos, options, placement);
   }
 
   deselect(args?: { disableHidePanels: boolean }) {
@@ -559,8 +605,32 @@ export class NodeGraphEditor extends View {
       node?: NodeGraphNode;
       pushHistory?: boolean;
       replaceHistory?: boolean;
+      /**
+       * TVW-007 — this navigation went THROUGH AN INSTANCE on the canvas being left.
+       *
+       * A boolean rather than the parent's name on purpose: the parent is always the component
+       * the canvas is on at the moment of the call, and every caller that had to look it up
+       * itself would be one more place that could look up the wrong one. It is read here, from
+       * `this.activeComponent`, before that field is reassigned.
+       */
+      viaInstance?: boolean;
+      /**
+       * TVW-007 AC1 — the id of the instance node on the canvas being LEFT.
+       *
+       * ⚠️ Unlike `viaInstance`, this cannot be derived here. The parent is always
+       * `this.activeComponent`, but *which* of its instance nodes was opened is known only to the
+       * door that opened it — and a canvas may hold many instances of the same component, so the
+       * component name cannot stand in for the node. Recorded on the history entry, and read back
+       * by the trail's instance crumb.
+       */
+      viaNodeId?: string;
     }
   ) {
+    // TVW-007: whatever the hover card was anchored to is not on the canvas after this call —
+    // including the instance whose `Edit ›` may be what made it. Before the early return, so a
+    // canvas being closed drops it too.
+    this.instanceHover?.dismiss();
+
     if (!component) {
       this.activeComponent?.off(this);
       this.activeComponent = undefined;
@@ -583,6 +653,10 @@ export class NodeGraphEditor extends View {
     this.runtimeType = getComponentModelRuntimeType(component);
 
     if (this.activeComponent !== component) {
+      // TVW-007: the canvas being LEFT — captured before `activeComponent` is reassigned below,
+      // because that is the component an instance route came through.
+      const cameFrom = this.activeComponent;
+
       this.activeComponent?.off(this);
 
       // Clear highlights when switching to a different component
@@ -604,11 +678,16 @@ export class NodeGraphEditor extends View {
        */
       const canPushHistory = this.runtimeType !== RuntimeType.Workflow;
 
+      // TVW-007: null unless this was an instance door AND there was a canvas to come from.
+      const via = args?.viaInstance && cameFrom ? cameFrom.fullName : null;
+      // TVW-007 AC1: the node rides with the route, and is dropped whenever the route is null.
+      const viaNodeId = via ? args?.viaNodeId ?? null : null;
+
       if (args?.replaceHistory) {
         this.navigationHistory.reset();
-        if (canPushHistory) this.navigationHistory.push(component);
+        if (canPushHistory) this.navigationHistory.push(component, via, viaNodeId);
       } else if (args?.pushHistory && canPushHistory) {
-        this.navigationHistory.push(component);
+        this.navigationHistory.push(component, via, viaNodeId);
       }
 
       TitleBar.instance.getWarningsAmount(component);
@@ -642,6 +721,12 @@ export class NodeGraphEditor extends View {
     if (args?.node) {
       const node = this.findNodeWithId(args.node.id);
       if (node) {
+        /*
+         * P101 INS-002 — no `keepSidePanel` here any more. It had to guard BOTH the deselect and the
+         * select below (P94 STY-006 measured the deselect leaking the panel away when only the select
+         * was guarded), because both used to move the ONE side panel. Neither moves the left panel
+         * now: the deselect empties the inspector and the select fills it, in the same tick.
+         */
         this.clearSelection();
         this.selectNode(node);
 

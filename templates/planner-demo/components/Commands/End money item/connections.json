@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ea419844-a1a9-5dec-8ddb-ddc1a1b00325",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "EndmoneyitIn",
+      "fromProperty": "itemId",
+      "toId": "EndmoneyitGuard",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "EndmoneyitIn",
+      "fromProperty": "until",
+      "toId": "EndmoneyitGuard",
+      "toProperty": "in-until"
+    },
+    {
+      "fromId": "EndmoneyitIn",
+      "fromProperty": "do",
+      "toId": "EndmoneyitGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "EndmoneyitGuard",
+      "fromProperty": "out-until",
+      "toId": "EndmoneyitWrite",
+      "toProperty": "in-until"
+    },
+    {
+      "fromId": "EndmoneyitIn",
+      "fromProperty": "itemId",
+      "toId": "EndmoneyitWrite",
+      "toProperty": "in-modelId"
+    },
+    {
+      "fromId": "EndmoneyitGuard",
+      "fromProperty": "out-go",
+      "toId": "EndmoneyitWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "EndmoneyitWrite",
+      "fromProperty": "out-done",
+      "toId": "EndmoneyitOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "EndmoneyitWrite",
+      "fromProperty": "out-failure",
+      "toId": "EndmoneyitProblem",
+      "toProperty": "do"
+    }
+  ]
+}

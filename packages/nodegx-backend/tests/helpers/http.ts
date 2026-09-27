@@ -218,6 +218,8 @@ export interface AuthSpecBody {
   email?: string;
   emailVerified?: boolean;
   hasPassword?: boolean;
+  /** The role names the session carries (HLT-024: the exchange and `/users/me` both answer them). */
+  roles?: string[];
   /** Never returned by any route — asserted absent, which is the point. */
   _hashed_password?: unknown;
   identities?: Array<Record<string, unknown>>;

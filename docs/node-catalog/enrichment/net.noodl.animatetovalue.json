@@ -1,16 +1,19 @@
 {
   "typeName": "net.noodl.animatetovalue",
   "summary": "Animate To Value: tweens its output toward whatever targetValue currently is, with duration, delay and easing.",
-  "description": "Animate To Value is the current general-purpose tween. Whenever `targetValue` changes, `currentValue` animates from wherever it is to the new target over `duration` ms with the chosen `easingCurve`; `atTargetValue` fires on arrival. It is retarget-safe: changing the target mid-flight redirects the animation smoothly instead of jumping.",
+  "description": "Animate To Value is the current general-purpose tween. Whenever `targetValue` changes, `currentValue` animates from wherever it is to the new target over `duration` ms with the chosen `easingCurve`; `atTargetValue` fires on arrival. It is retarget-safe: changing the target mid-flight redirects the animation smoothly instead of jumping. ⚠️ Two targets written in one update make ONE move, from wherever the value is: a graph that sets `targetValue` to 100 and then to 0 in the same pass glides to 0 from where it was, and never shows 100. A `duration` of 0 does not change that. To refill and then glide, fire `jumpTo` (with `jumpValue`): `currentValue` moves at once and then carries on towards `targetValue`, in whichever order the jump and the new target arrive. A jump is not an arrival, so `atTargetValue` does not fire for it.",
   "whenToUse": "Smoothing any numeric change: positions, opacity, blend values for Color Blend. It supersedes the deprecated Transition/Animation nodes. For multi-property, state-shaped animation use States with transitions.",
   "ports": {
     "targetValue": "Number level; each change starts (or redirects) the tween toward it.",
     "currentValue": "Number level streaming the animated value — wire to the visual input being animated.",
-    "atTargetValue": "Signal; the tween arrived. Sequence follow-ups here."
+    "atTargetValue": "Signal; the tween arrived. Sequence follow-ups here. Not sent for a jump.",
+    "jumpValue": "Number; where `jumpTo` puts `currentValue`.",
+    "jumpTo": "Signal action; puts `currentValue` at `jumpValue` now, then carries on towards `targetValue`."
   },
   "examples": ["anim-hover-highlight"],
   "patterns": [
     "Boolean state → (boolean→number cast) → `targetValue`: a two-state tween in one wire.",
+    "A countdown bar that refills for each question: `jumpValue` 100, the start signal → `jumpTo`, with `targetValue` 0 and `duration` the time limit. The bar jumps full and glides down. Do NOT write the target 100 then 0 in one pass: that is one glide from wherever the bar was.",
     "`currentValue` → Color Blend `blendValue`: animated color transitions."
   ],
   "relatedNodes": ["States", "Color Blend", "Switch", "Number Remapper"]

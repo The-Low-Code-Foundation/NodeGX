@@ -51,7 +51,11 @@ failure this file's first house rule exists to prevent.
 | D15 | ⚠️ open | **DEF-006** | product | every agent styling on-system |
 | D16 | ✅ fixed s6 | — | template | (was: every gated screen) |
 | D17 | ✅ answered s5 | — | — | — |
+| D76 | 🔴 open — measured 09-20 | **NONE** | product (`For Each`) | any repeated row that answers one event with two signals — a field that must save AND close, a button that must record AND navigate |
 | **D18** | 🔴 open (08-29) | **DEF-017** — filed as Track C **C2** (was `NONE`, s17) | product | every person filling in any form |
+| D77 | 🔴 open — measured 09-21; **both templates worked around 09-21** | **NONE** | product (icon ports + the door) | anyone who wires an icon in a project that has not installed the icon module — which is every template, because a template ships no modules |
+| D78 | 🔴 open — measured 09-21; **TPL-010 worked around 09-21** | **NONE** | product (`Text Input`) | anyone who reuses one form for a second record — a modal edit sheet, a wizard step, a row editor — and leaves a field empty |
+| D79 | ⚠️ open — measured 09-21 | **NONE** | devtools (`nodegx-deploy` wire check) | anyone reading a deploy's report: every `For Each` item signal is reported as a wire that cannot work, so the real broken wire hides among false ones |
 | **D19** | ⚠️ open (08-29) | **DEF-017** — filed as Track C **C2** (was `NONE`, s17) | product | every person filling in any form |
 | **D20** | 🔴 open (08-29) | **DEF-006** — **filed** as §0(c) (was `NONE`, s17) | product | every agent styling on-system |
 | **D21** | ✅ disproved (08-29) | — | — | (would have been: every agent placing a component) |
@@ -73,17 +77,40 @@ failure this file's first house rule exists to prevent.
 | **D37** | 🔴 open — worked around in template (08-29, s15) | **DEF-025** (registered 08-29) | product | every person tapping the words beside a checkbox |
 | **D38** | ✅ fixed s15 — harness, not product | — | harness | (was: every drive asserting on a project string) |
 | **D39** | ✅ **RULED 08-29 by Richard — no change, and now pinned** | — | template | — (ruled: it stays one sentence) |
-| **D40** | 🔴 open (09-11, TPL-005 scoping) | **NONE — deliberately**, see the section | product (node library) | every person who wants anything in their app to happen repeatedly |
-| **D41** | 🔴 open (09-11, TPL-005 build) | **NONE** — needs a ruling on which arm is the bug | product (library modules) | anyone who installs a kit and finds its node missing |
+| **D40** | 🔴 open (09-11, TPL-005 scoping) | **GAM-013** (P88) — 🔒 ruling R1 first | product (node library) | every person who wants anything in their app to happen repeatedly |
+| **D41** | 🔴 open (09-11, TPL-005 build) | **GAM-018** (P88) — 🔒 ruling R2 first | product (library modules) | anyone who installs a kit and finds its node missing |
 | **D42** | ✅ **FIXED 09-11 (TPL-005 build)** — `TOKENS_SRC` repointed at the contract package; 0 → 192 shipped defaults | — | harness | (was: every render drive in the repo, silently) |
 | **D43** | ⚠️ **DISPROVED AND REPLACED 09-12 (TPL-006 drive) — see D49.** The mechanism it named does not exist | — | — | (was: every graph that picks a state from a value instead of a signal) |
-| **D44** | 🟡 **open, and RESCOPED 09-11 — the shipped `nodegx deploy` CLI is NOT affected; 46 → 4 in the devtool** | **NONE** | tooling (`deploy-from-disk` devtool only) | anyone measuring a deploy with that devtool |
+| **D44** | 🟢 **fixed 09-17 (P88 GAM-024 s18), uncommitted at write:** one port pass in `noodl-preview/src/wireHealth.ts`; the devtool's 4 are kit wires, now named and counted *unchecked*. Checking kits stays open (GAM-024 AC5). ~~open, RESCOPED 09-11 — 46 → 4 in the devtool~~ | **GAM-024** (P88) | tooling (`deploy-from-disk` devtool only) | anyone measuring a deploy with that devtool |
 | **D45** | ✅ fixed 09-11 — template-side, caught by D44 | — | template | (was: every player who ran out of hearts) |
 | **D46** | ✅ **FIXED 09-11 — found by RICHARD PLAYING IT** | — | template | (was: every player an enemy ever touched) |
-| **D47** | 🔴 open (09-11) | **NONE** | product (runtime ordering) | every graph whose gate reads a value from another branch |
-| **D49** | 🔴 open (09-12, TPL-006 drive) — **replaces D43** | **NONE** | product (node library) | every `States` node with a colour or a number on it, which is most of them |
-| **D50** | 🔴 open (09-12, TPL-006 build) | **NONE** | product (validator) | every author who spaces a wrapped list of pills the way the design doctrine tells them to |
+| **D47** | 🔴 open (09-11) | **GAM-004** (P88) | product (runtime ordering) | every graph whose gate reads a value from another branch |
+| **D48** | 🟢 **fixed 09-17 (P88 GAM-023 s18, R20 publish all + warn), uncommitted at write:** `nodegx deploy` names each broken wire and publishes it. ⚠️ Measured: the validation gate already refused built-in-declaration wires; 6 of 10 kinds shipped silently. ~~open (09-11) — never evaluates connection health~~ | **GAM-023** (P88) | product (deploy) | every author who deploys a wire into a port that does not exist, and is told `ok: true` |
+| **D49** | 🔴 open (09-12, TPL-006 drive) — **replaces D43** | **GAM-006** (P88) | product (node library) | every `States` node with a colour or a number on it, which is most of them |
+| **D50** | 🟢 fixed `593de4f57` (P88 GAM-022 s12, 2026-09-15) — Arm B now reads the item a `For Each` draws: content-sized pills are silent, and items given a width still fire. 16 → 13 over 12 projects, all three calibration grids still firing; reverted arm 9 red, the wrong fix (Arm A's container exclusion) 10 | **GAM-022** (P88) | product (validator) | every author who spaces a wrapped list of pills the way the design doctrine tells them to |
 | **D51** | ✅ fixed 09-12 — repo-side, found by TPL-006 | — | harness/repo | (was: `typecheck:mcp` red for a day with nobody looking) |
+| **D52** | 🟢 **fixed 09-17 (P88 GAM-024 s18), uncommitted at write:** the probe runs `importEditorData` + `editorImportComplete`; story-engine 3 → 0, and the 3 come back by name without the event. ~~open (09-12) — a BUILT-IN node type~~ | **GAM-024** (P88) | tooling (`deploy-from-disk` devtool only) | anyone who reads that census as a publication gate on a template with a `For Each` |
+| **D53** | 🟢 fixed `bcfb1c2aa` (P88 GAM-014 s15, 2026-09-16): neither the door nor the viewer. The door writes the root; `nodegx deploy` never loads `noodl_modules`, so the kit type was `UnknownNodeType` and the export dropped it (`roots: []`). An unresolved root now answers from the file's recorded `visualRoots`. Editor half read true s16; AC6 (this template's wraps) left — **a kit React node as a component's ROOT renders NOTHING when the component is placed** | **GAM-014** (P88) | product (headless deploy export) | every kit author whose visual node is the whole component — three of this template's parts were invisible with 0 console errors |
+| **D54** | 🟢 fixed `89e533625` (P88 GAM-002 s11, 2026-09-14) — an `Expression` treated EVERY identifier in its text as an input port, so `String(n)` threw "String is not a function" (`Math.min` never did). JavaScript's globals and keywords are no longer ports, graded by 4 reverted arms; census 386 Expressions, 0 wires lose a port | **GAM-002** (P88) | product (Expression node / docs) | anyone who writes ordinary JavaScript in an Expression; the catalog names `min`/`round`/`random` and says nothing about the shadowing |
+| **D55** | 🟢 fixed `89e533625` (P88 GAM-001 s11, 2026-09-14) — an `Expression` whose inputs had never received a value never evaluated, and its `null` seed hid a part guarded `m !== false`. It now evaluates at load over unset inputs, with an `Evaluate At Load` opt-out; 4 reverted arms; census 14 visibility changes by name. Rocket School drive owed | **GAM-001** (P88) | product (Expression node / doctrine) | every component with an optional `mounted` input — the placement contract P1 recommends one |
+| **D56** | 🟢 fixed `6a6c309a5` (P88 GAM-021 s12, 2026-09-15) — `apply_plan` raised `page-cannot-scroll` on every page of the very plan whose `scroll: "page"` it was about to apply. The plan door now judges the `bodyScroll` the apply will leave; a plan with no `scroll` on an unset project is still told. Reverted arm 2 red | **GAM-021** (P88) | product (validator ordering) | every plan author, who reads three warnings about a setting they set |
+| **D57** | 🟢 built 09-14 (GAM-005: doctrine + `variable-in-repeated-component` warning, `44b3a9add`; AC5/AC7 owed) — was 🔴 open (09-12, TPL-007 drive) — a `Variable` is GLOBAL by name, so two instances of one component that holds a Variable share it: the race page's two `Feedback banner`s opened together, and four `Choice row`s shared one pick | **GAM-005** (P88) | doctrine (interface playbook) | every component author who reaches for a Variable to hold local state — the doctrine never says a Variable is not local |
+| **D58** | 🟢 **built 09-17 (P88 GAM-020 s19):** `text-cannot-wrap` (validator, a line of 26+ characters) and `text-wider-than-its-box` (render); pixel-game footer fixed. ~~open (09-13, P87 RKT-001)~~ — nothing warns that a sentence in a content-sized Text will never wrap; the template's `text()` helper overrode Text's wrapping default and no door said so | **GAM-020** (P88) | product (validator / render_report) | every template and agent that writes a Text helper |
+| **D59** | 🔴 open (09-13, P87 RKT-003) — a `Button` has no Focus input, so a verdict cannot hand the keyboard to its Next button; the template focuses it from a Function by its label | **GAM-010** (P88) | product (node library) | every game or form that wants Enter, Enter — the keyboard-only child, and anyone who cannot use a pointer |
+| **D60** | 🔴 open (09-13, P87 RKT-005) — a Text Input has no `inputmode`/`enterkeyhint` port and cannot be typed into at the caret while focused | **GAM-011** (P88) | product (node library) | every numeric, phone, email or PIN field on a tablet, and any on-screen pad |
+| **D61** | 🟢 built 09-14 (GAM-009 s9, `bdf1d3b19`: typing writes the start value, and a same-value remount announces nothing; driven on a minimal page; Rocket School's clause and the `rsNameKeep` removal owed) — was 🔴 open (09-13, P87 RKT-006) — a Text Input that remounts shows its Start Value, not what the person typed | **GAM-009** (P88) | product (node library) | every form split across steps, tabs or a collapsible section |
+| **D62** | 🟢 fixed `89e533625` (P88 GAM-003 s11, 2026-09-14) — an Expression wired into a size port raised "not a size" before it had ever evaluated. A `null` or `NaN` size is now empty, silently (R3), and `"tall"` is still refused; reverted arm 4 red; the countdown control is explained by the first update's consolidation. Browser drive owed | **GAM-003** (P88) | product (runtime) | every progress bar, meter or chart bar computed with an Expression |
+| **D63** | 🔴 open (09-13, P87 RKT-010) — player two's answers are graded into player one's learner model | **P87** — no task yet, beside RKT-008 | template | every sibling who plays a two-player race |
+| **D64** | 🟡 reserved loudly (09-14, P88 GAM-007 s8, `d57a11668`; GAM-025's "data wins later" closed by R22 s16: rename it): the door warns `reserved-row-field`, and `Collection.set` raises `collection/reserved-field-name`. The field still reads as the member until GAM-025 (R8's "data wins later") — a Static Data row field named like a Model member (`on`, `get`, `data`…) reads as that member | **GAM-007** (P88), then **GAM-025** | product (runtime model) | any data row with a field called `on`, `get`, `set`, `fill` or `data` |
+| **D65** | 🔴 open (09-13, P87 RKT-011) — a kit React node reading a wired px port with `Number()` draws its default; fixed inside game-kit only | **GAM-015** (P88) | product (kit bridge / node-kit docs) | every kit author whose size works typed and fails wired |
+| **D66** | ✅ fixed (09-14, P88 GAM-019, `4bb438165`) — the door refuses a wire to an input a built-in node does not have, by name, with the right port offered; graded by reverted arms at the rule, `validate_component`/`validate_project` and Rocket School's generator | **GAM-019** (P88) | product (validator) | every author or agent who names a control's input by its label |
+| **D67** | 🟢 built in GAM-008 s10, `5da1c9fd6` (registered 09-14, from P87 RKT-006) — Animate To Value turns two targets written in one pass into one glide from where it was (measured: the setter gets both; "one target" and "duration 0 is not a jump" are both wrong), so Rocket School's countdown never refilled. `Jump To` + `Jump Value` added; Rocket School's `cdKick` is still in place | **GAM-008** (P88) | product (node library) | every countdown or progress bar that resets and re-animates |
+| **D68** | 🔴 open (registered 09-14, from P87 RKT-003) — a Text Input's Focus signal sent on mount leaves it unfocused after a remount | **GAM-012** (P88) | product (node library) | every keyboard-only person in a form that mounts and focuses a field |
+| **D69** | 🔴 open (registered 09-14, from P87 RKT-002) — a style preset names a font that nothing ships, so a deployed app renders the fallback | **GAM-016** (P88) | product (presets / deploy) | every app styled with a preset |
+| **D70** | 🔴 open (registered 09-14, from P87 RKT-002/003) — a kit React node cannot take a signal, and gets no size ports | **GAM-017** (P88) | product (kit bridge) | every kit author whose node should react to an event or be sized in the graph |
+| **D71** | 🔴 open (09-14, TPL-008 drive) — the node reference tells an agent that wiring a Function's `run` makes it signal-only; the runtime still runs it on every ticked input, and the todo list moved tasks nobody asked to move | `NONE` | product (node catalog / validator) | every agent authoring a Function through the MCP door, which reads that sentence before writing one |
+| **D72** | 🔴 open (09-14, TPL-008 build, from the catalog and source) — a Button has no accessible-name port, so an icon-only button (move up, move down, tick) is announced as nothing | `NONE` | product (node library / a11y) | every screen-reader user of any list with icon buttons |
+| **D73** | ⚠️ open (09-14, TPL-008 build) — a Text Input has no date type, so a deadline is typed as `YYYY-MM-DD` and parsed by a script | `NONE` | product (node library) | every form that asks for a date: deadlines, bookings, birthdays |
 
 🔴 **D18/D19/D20 are the first rows created since the sweep, and they were already unowned within a
 day of the process being put in place.** That is the argument for the column, not an argument
@@ -1915,6 +1942,8 @@ job of a template task, which is the exact failure the rule names. **The next fr
 neither is a coding question: whether a repeating signal is a node or a port on `Delay`, and what it
 does when the graph it lives in is navigated away from — which is the bug the
 `keyboard-shortcuts` module's README spends a whole section on, in the same shape.
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** holds. `timer.ts:15-139` is a one-shot that stops itself on delete. The "§3.2" of phase 44 is its README line 55. P86's community "Strobe" button is a `setInterval` inside a script, the second route this row describes. Owner **GAM-013**.
+
 ## D41 — 🔴 A library module's registration depends on which OTHER modules are installed beside it
 
 **Measured 2026-09-11** while building [TPL-005](TPL-005-THE-PIXEL-GAME.md), which wanted
@@ -1955,6 +1984,10 @@ target) all read like a missing DOM/React environment, which points at the secon
 ⚠️ **Do not "fix" this by making the extractor swallow more.** A kit that cannot register is exactly
 what a person needs told, and today they are told nothing.
 
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** the source points at the extractor, not the kit. The extractor's global `Noodl` is a catch-all Proxy (`kitExtract` `entry.js:88-93`), so confetti's guard skips installing `defineNode` and registers the Proxy, which throws this message. Thirteen modules assign `Noodl.defineNode` unguarded, four sort before confetti, which is why 32 modules "fix" it. A real page defines `Noodl` with `defineModule` only, so confetti alone should register there. Arm D's three failures are a different, DOM-shaped fault. **Predicted, not run:** GAM-018 AC1 tests it. Owner **GAM-018**.
+
+**2026-09-14 (P88 sessions 3 and 6): measured, 🔒 R2 askable.** AC1: scan order, proven by renaming a kit to scan after confetti. All 10 kits guarded like confetti register 0 nodes alone in the extractor. AC2: confetti **alone** registers in a deployed page (and draws a canvas when Celebrate fires) and in the SSR kit loader, with no failures. It does the same beside an unguarded kit. **The kit is fine; the extractor's `Noodl` is the bug.** The editor-preview picker arm is read from source, not driven. See GAM-018 §8.
 
 ## D42 — ✅ FIXED (2026-09-11): the render harness emitted ZERO shipped design tokens, and looked like a product defect
 
@@ -2028,6 +2061,12 @@ row asserted the parameter-only mechanism as fact; the working control disproved
 the projection looks up, which is cheaper anyway — the States shape was three dynamic-port nodes per
 tile, 324 for one board.
 ## D44 — 🔴 The headless deploy silently drops every connection into a dynamically-ported node, and exits 0
+
+> **2026-09-14 (TPL-008 s2): two more families, 24 wires, exit 0.** `deploy-from-disk.cjs` rebuilt from source (19:14), run on
+> the todo list: **24 of 628 dropped**, diffed wire by wire against the project. **18 are `For Each` `itemOutput-*` /
+> `itemOutputSignal-*` into a list's `Component Outputs`** — every row click in every list — and **6 are `DbCollection2`
+> `storageFetch` (×5) and `qp-taskId`**. Neither family is in the table below. Not served, not driven (the bundle simply lacks
+> the wires). Editor Run unaffected; the editor's Deploy button still unmeasured. [TPL-008 §7 s2](TPL-008-THE-TODO-LIST.md).
 
 **Measured 2026-09-11**, publishing TPL-005's demo page. 🔴 **It blocks that page and it is the
 reason nothing was published.**
@@ -2200,6 +2239,8 @@ rather than a thing that is understood.
 
 ⬜ Owner `NONE`. It blocks nothing now, and it is worth a runtime task: an author cannot tell these
 two shapes apart by looking, and the failing one renders perfectly.
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** P80 DEF-046 (09-03) and P75 FB-025 (08-27) both predate this row, so neither moved it. Since 09-11 the runtime has only FLD-004's units commits and one `eventsender.ts` line. The two failing attempts are not in git. Lead candidate, unmeasured: a Function sends `success` after an `await` (`simplejavascript.ts:430-446`). Owner **GAM-004**.
+
 ## 🔴 D44 — THE CORRECTION (2026-09-11): it is the DEVTOOL, not the shipped CLI
 
 **I reported D44 as *"anyone who deploys a project off the editor seat"* and that was wrong.**
@@ -2247,6 +2288,9 @@ completion is to register the project's `noodl_modules` kits the way `noodl-mcp`
 does. Not done — it stopped blocking anything the moment the shipped CLI was measured.
 
 
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** the remaining 4 and D52's 3 are one function and one instrument; the probe reads its node-type list once (`deploy-from-disk.entry.ts:246-251`). Owner **GAM-024**.
+**2026-09-14 (P88 sessions 3 and 6): measured and not reproduced, 🔒 closing it is Richard's call.** GAM-004 rebuilt both attempts in the runtime (13 arms). It then restored attempt 1 on TPL-005's hit gate in a real browser, with real keys: the heart comes off on the move it happens, on both paths, beside an arm deliberately 80 ms late that takes it a move late. The split scripts of 09-11 are not in git, so what that drive saw is unrecovered. TPL-005's comments no longer state a mechanism. See GAM-004 §8.
+
 ## D48 — 🔴 The shipped `nodegx deploy` never evaluates connection health, so a broken wire ships silently
 
 **Measured 2026-09-11**, as the control that rescoped D44 — which is the only reason it was found.
@@ -2270,6 +2314,8 @@ defect. That ordering is the whole content of this row.
 ⬜ Owner `NONE`. It has been true since HLS-015 shipped the CLI, and every `nodegx deploy` to date
 has been unfiltered.
 
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** holds. `noodl-preview/src` has 0 hits for `registerModule`, `evaluateHealth` or `editorConnection`; `4e4fe967a` added only the engine check. ⚠️ **This hole was already named:** P80 DEF-028 §3 says forcing the health pass does nothing when the module is unregistered, which is this case. P77's D13 row still reads owner `NONE` and does not point at DEF-028. Owner **GAM-023**.
 
 ## D49 — 🔴 A `States` node with transitions ON never publishes a colour or a number. **This replaces D43.**
 
@@ -2339,6 +2385,10 @@ right, the validator is silent, and the screen does not change.
 ⬜ Owner `NONE`. **TPL-006 ships `useTransitions: false` on both its States nodes and the gate pins
 it**, with the reason in the parameter, so the template is correct while the product is not.
 
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** **the mechanism is now read.** `styles.resolveColor` returns `var(--token)` unchanged (`styles.ts:122-127`), `setRGBA` parses it as hex into NaN (`states.ts:89-101`), and the tween ends on `#0aNaNNaNNaN`, which the browser rejects (`states.ts:190-194`). ⚠️ **"or a number" is not supported by source:** a number tweens (`states.ts:161-164`, `:197-199`) and a hex colour parses; this row measured token colours only. P18 EXP-011 §49.3/§49.6 had measured the mechanism headlessly, and `animation-pair.test.ts:600` pins the broken output. Owner **GAM-006**.
+
+**2026-09-14 (P88 session 6): 🟢 fixed by GAM-006** (`82a7d3775` + `062dfd9c0`). One colour reader (`noodl-viewer-react/src/color-reader.ts`) is shared by States, visual states and Color Blend, and the `nodegx-export` `statesLib` matches it. Driven in a real browser on TPL-003's `Site/FilterPill`, TPL-006's `Story/Passage` and TPL-005's banner and board, beside the old runtime and a reader-bypassed one (GAM-006 §8, session 5). **TPL-006's `useTransitions: false` pin and its gate are removed** (`1cf0a81d2`). **Rocket School's 22 pins stay** with P87: no drive reached its `chStates` (For Each item wires are dropped by `deploy-from-disk`, D52). The row closes when P87 or TPL-008 removes its pins or says why they stay.
+
 ## D50 — 🔴 `uncollapsible-multi-column` warns about a wrapped row of pills, and the fix it suggests is wrong
 
 **Measured 2026-09-12 on TPL-006's `Story/Sidebar`.** The door raises it on every build:
@@ -2364,6 +2414,10 @@ rewards the shape the doctrine calls wrong.
 ⬜ Owner `NONE`. TPL-006 keeps the gap and its gate asserts **exactly this one warning on exactly
 this one component**, so a new warning reddens rather than hiding behind a known one.
 
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** 🔴 **"Arm A has exactly the exclusion Arm B is missing" does not hold.** Arm A excludes a content-width *container*; both D50 containers (`Story/Sidebar#sbList`, `Game/Choice row#crRow`) are full width and their *items* are content-sized, so copying the exclusion would silence neither. Rocket School's gate pins this warning too. P77 SBR-004 dropped `columnGap` to escape it. Owner **GAM-022**.
+
+**Built 2026-09-15 (P88 GAM-022, over HEAD `e740727f8`, committed `593de4f57`):** Arm B resolves the `For Each` template to its visual root and fires only when that root was given a width. A `contentSize` or `contentWidth` root is silent, including the catalog default for an unset `sizeMode`. An unknowable root abstains. With no views, the row is judged alone, as before. The three calibration grids (PuppyCard 340px, ProductCard 32%, sonnet's Product Card 31%) all resolve and still fire. RED at HEAD 9; reverted arm 9; the register's own reading (Arm A's container exclusion) built as a sabotage arm: 10 red. Census over 12 projects: 16 → 13, with `Story/Sidebar`, `Game/Choice row` and `Game/Question box` silent. Rocket School's `Hangar/Shelf` (132px tiles) and `Pages/Profiles` (150px cards) still fire, which scoping had missed. TPL-006's pin is `[]`; TPL-007's names those two. SBR-004's nav link is `contentSize`, so its dropped gap can come back. The render at 390×844 is owed. See GAM-022 §8.
+
 ## D51 — ✅ `typecheck:mcp` was red for a day, because the jest run compiles with babel and never sees it
 
 **Measured and fixed 2026-09-12.** `tsc -p packages/noodl-mcp --noEmit` failed on
@@ -2377,3 +2431,708 @@ the `Record<string, unknown>` annotation and a comment saying why. **`typecheck:
 
 ⚠️ The general shape is worth more than the fix: **a green jest run is not a typecheck**, and a
 fixture file that only jest ever compiles has no gate on it at all unless somebody runs `tsc`.
+## D52 — 🔴 The deploy census reports phantom drops on any project with a `For Each`, because the probe never mints its item ports
+
+**Measured 2026-09-12**, re-measuring AC7's inherited blocker on `templates/story-engine/` rather
+than inheriting it. D44's correction recorded the devtool's remaining 4 drops as
+`keyboard-shortcuts` — *a **module** node type, and the headless library holds built-ins only*.
+**That is not the whole cause.** `For Each` is a built-in, it is in the headless library, and its
+item ports are missed too:
+
+| path | authored | deployed | dropped |
+|---|---|---|---|
+| **`nodegx deploy`** (shipped engine, `dist/nodegx-deploy.cjs`) | 84 | **84** | **0** |
+| `deploy-from-disk` devtool | 84 | 81 | **3** |
+
+The three, all on `/Pages/Read` and all from the one `For Each`:
+
+    For Each[rdChoices].itemOutput-gives        -> JavaScriptFunction[rdCarry].in-gift
+    For Each[rdChoices].itemOutputSignal-picked -> JavaScriptFunction[rdCarry].run
+    For Each[rdChoices].itemOutput-goto         -> Set Variable[rdSetAt].value
+
+🔴 **The instrument is alive on both arms, which is the only reason the reading counts.** The
+`--sabotage` arm planted a wire into a port that does not exist and the filter dropped it
+(`/Story/Source` 8 → 7); the clean arm dropped exactly these 3 and nothing else across nine
+components. **A census that drops nothing and a census that never ran are byte-identical**, and this
+one is neither.
+
+### The mechanism, and it is TWO gates rather than one
+
+`registerRuntimeDiscoveredPorts` drives the shipped `setup()` functions against a probe runtime by
+emitting `nodeAdded.<type>` on the probe's graph model. That works for the `States` /
+`Set Variable` / `Expression` family because they subscribe **at setup time** and derive their ports
+from `node.parameters` alone. `For Each` does neither:
+
+1. 🔴 **It subscribes inside an `editorImportComplete` handler**
+   ([`foreach.tsx:1099-1107`](../../../packages/noodl-viewer-react/src/nodes/std-library/data/foreach.tsx#L1099-L1107)).
+   The probe never emits that event, so `nodeAdded.For Each` is never registered — which is why
+   **`For Each` does not appear in the census's own list of lazy types at all.** The census reads
+   *"no such family subscribed"*, not *"that family found nothing"*, and the two look identical in
+   the output.
+2. 🔴 **Its ports come from ANOTHER COMPONENT, not from its own parameters.**
+   `_collectPortsInTemplateComponent` reads `graphModel.components[node.parameters.template]` and
+   returns early when it is `undefined` — and the probe's graph model has no components in it,
+   because the project is imported into the editor's `ProjectModel` and never into the probe's.
+   So even with gate 1 crossed, the pass still mints nothing.
+
+**The completion is both**: emit `editorImportComplete` on the probe, and populate
+`graphModel.components` with the project's components and their `outputPorts`. Either alone reads
+as a fix and changes nothing.
+
+### 🔴 Why this row exists rather than a note: the census is used as a publication gate
+
+TPL-006's AC7 says *"do not publish a build whose own census says it dropped wires"*. The census
+says this template dropped three, **and it did not** — the artefact a person deploys carries all 84
+and plays. Left unfiled, the next person to run it on any template with a `For Each` in it (which is
+most of them) pays the full price of this measurement again, and the likeliest reading is the wrong
+one: that the product drops the wires that make a repeated row clickable.
+
+⚠️ **And the shipped CLI's `84 → 84` is NOT evidence those 84 are healthy.** Its filter is inert
+(**D48**) — it keeps every wire whatever its state. The two readings are complementary and neither
+is sufficient: the CLI says *nothing was dropped*, and the browser drive of that same deployed
+folder says *they work*.
+
+⬜ Owner `NONE`. It blocks no template: the shipped path is unaffected.
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** held. For Each gates at `foreach.tsx:1099-1106` and `:1020-1025`. Owner **GAM-024**, with D44's remainder.
+
+## D53 — 🔴 A kit React node as a component's root renders nothing when the component is placed
+
+**Measured 2026-09-12**, driving the deployed Rocket School (`scripts/devtools/drive-tpl007-rocket.js`).
+`Game/Face`, `Game/Race track` and `Game/Keyboard` each had the kit's React node (`game-kit.Avatar`,
+`game-kit.RaceTrack`, `game-kit.KeyboardMap`) as the component's only visual node, at the root.
+Placed on a page, **nothing drew** — no `<img>`, no `<svg>` — with **0 console errors**, while every
+Group-rooted component on the same page drew. The kit itself was registered (`window.__noodl_modules[0].reactNodes`
+listed all three) and the bundle answered (`typeof NodegxDicebear === 'object'`).
+
+**The control:** wrapping each kit node in a `Group` root, with the kit node as its child, drew all
+three on the next build — the drive went from 14/17 to 17/17 on that change alone.
+
+**Where it bites:** every kit author who makes a visual kit node the whole of a component, which is
+the natural shape for a wrapper (`Game/Face` is "an Avatar with a ring rule"). The component file
+says `type: "visual"` either way; the difference is invisible until a person looks at the page.
+Suspect: the visual-root derivation (`assembleCreateFiles` / `projectVisualPredicate`) does not
+count a kit type as visual, so the component has no visual root to mount. Not measured further —
+this is a template task, and the wrap is the fix a template can ship. Owner `NONE`.
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** ⚠️ **the suspect does not hold as written.** With the kit overlay loaded, the kit catalog marks every React node visual (`nodegx-kit-catalog/src/index.js:365`), and Rocket School installs modules before binding. Two causes remain: the door wrote no `visualRoots` because the overlay was empty (see D41), or it wrote them and the viewer draws nothing. The kit-rooted `nodes.json` was overwritten and never committed. Owner **GAM-014**.
+
+## D54 — 🔴 An Expression treats every identifier in its text as an input port
+
+**Measured 2026-09-12**, the same drive: `[noodl] Expression (/Pages/Home): The expression threw:
+String is not a function`. The expression was `String(n)`. `expression.ts` compiles the text with
+`new Function(...inputNames, preamble + expression)` where `inputNames` are the identifiers found in
+the text (minus `min`, `max`, `round`, `random`, … from `portsToIgnore`) — so `String`, `Number`,
+`Math`, `JSON` become **input ports**, arrive as `undefined`, and shadow the globals.
+
+**Fix in the template:** `'' + n`, bare `min(...)`, `round(...)`, `random()`. **Where it bites:** anyone
+who writes the JavaScript they know inside an Expression; the node's own help names the bare maths
+functions and says nothing about the shadowing. Belongs in the node's `docs` and the catalog's
+`antiPatterns`. Owner `NONE`.
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** ⚠️ **`Math` is already on the ignore list** (`expression.ts:718`) and a dotted name counts only its first part, so `Math.min` should work. `String`, `Number`, `JSON`, `Date` and `parseInt` are not on it. P30 NDA-012 filed this and declined to fix it, because widening the list changes existing Expressions' ports. Owner **GAM-002**.
+
+**Fixed 2026-09-14 (P88 GAM-002 session 11, `89e533625`):** R4 ruled that globals and keywords stop being ports. A lexer
+in `expression-ports.ts` (copied byte-identical into `nodegx-export`) replaced the regex. At HEAD the spec was RED on 17
+rows with "String is not a function", "parseInt is not a function" and a `typeof` compile failure. It is green after,
+and 4 reverted arms each redden exactly their rows. The census covered 386 Expressions and the 517 wires into them: 0
+wires lose their port, so no migration is owed. The same census found two published catalog examples that used
+`Number(…)` and threw at HEAD. Rocket School's `'' + n` still works and is the peer's to change. Left: the editor drive
+and the bundles.
+
+## D55 — 🔴 An Expression with no delivered input never evaluates
+
+**Measured 2026-09-12**, the same drive. `Game/Stat`, `Game/Choice row` and `Game/Face` each guarded
+an optional `mounted` input with `m !== false` — an Expression fed only by that `Component Inputs`
+port. An instance that does not set `mounted` delivers nothing, the Expression never runs, its
+`result` stays `undefined`, and the `Group.mounted` it feeds is unset: **the part is hidden.** The
+same guard on `Race/Setup`, whose `mounted` the page DOES wire, worked.
+
+**Fix in the template:** the optional pass-through was removed from the three parts (a parent that
+wants to hide one wraps it). **Where it bites:** the interface doctrine's P1 placement contract asks
+components to expose `mounted`; a component that obeys it and guards it is hidden by default.
+Either the doctrine says how to default an optional port, or the Expression evaluates once with
+its unset inputs `undefined`. Owner `NONE`.
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** ⚠️ **the result is not `undefined`.** An Expression that has never run reads `null`, `connectInput` hands that `null` to Mounted, and Mounted turns it into `false`. An unwired Mounted defaults to `true`. **This is the same cause as D62**, and the two share one ruling. Rocket School's `Game/Countdown bar#cdShown` stays hidden only because of this `null`. P30 NDA-017/NDA-004 made the Expression wait on purpose. Owner **GAM-001**.
+
+**Fixed 2026-09-14 (P88 GAM-001 session 11, `89e533625`):** R3's B. An Expression now evaluates at load over unset
+inputs, unless its new `Evaluate At Load` checkbox (ticked by default) is unticked. A throw, a compile failure or a `NaN`
+over those inputs leaves it abstaining, so NDA-004's guard and `node/nan-input` hold. At HEAD, Group's real Mounted setter
+was handed `null` for an unset `m !== false`; after, the part mounts. 4 reverted arms. The census lists 14 first-frame
+visibility changes where an input can be unset: 4 in Rocket School, 10 in test projects. `cdShown` is unchanged
+(`enabled === true` evaluates `false`). Rocket School's drive and workarounds are owed.
+
+## D56 — 🔴 `apply_plan` warns `page-cannot-scroll` on the plan whose own `scroll: "page"` it is applying
+
+**Measured 2026-09-12**, `npm run template:rocket`. The plan was created with `scroll: 'page'`; every
+page staged raised `page-cannot-scroll` ("This project does not set `bodyScroll`"), and `apply_plan`
+raised it again three times — then wrote `bodyScroll: true` into the project it had just warned
+about. The artefact is right; the warnings are about a state the same call replaces. The gate
+(`tpl007Template.test.ts`) pins exactly this pair of codes so a new warning cannot hide behind them.
+Owner `NONE`.
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** the check reads `bodyScroll` from disk (`validate.ts:175-206`) at staging (`planTools.ts:456`) and at apply (`:973`), both before the setting is written (`:1038-1041`). P79 lesson 2's warning is a different, true one. Owner **GAM-021**.
+
+**Built 2026-09-15 (P88 GAM-021, over HEAD `e740727f8`, committed `6a6c309a5`):** staging and apply now pass `preconditionDiagnostics` the `bodyScroll` the apply will leave, from `ProjectStore.projectSettingsAfterWrite`, the never-overwrite merge the write itself now calls. RED at HEAD at both doors for `scroll: "page"` and `"app"` on an unset project; a plan with no `scroll` is still warned. Reverted arm: 2 red. `tpl007Template.test.ts` no longer pins `page-cannot-scroll`. `validate_project` is unchanged: 205 findings both ways over 12 projects, with the demo fixture as the known-firing `page-cannot-scroll`. The editor's Build panel computes the same false warning at apply and shows it to nobody. See GAM-021 §8.
+
+## D57 — 🔴 A Variable is global by name, and the doctrine does not say so
+
+**Measured 2026-09-12**, the same drive, from the screenshot rather than the clauses: the race page
+showed **both** banners open after one answer ("Fast and correct!" AND "The computer got there
+first"), and the header's EN/FR pills doubled. `Game/Feedback banner` held its open/closed state in a
+`Variable` named `bannerOpen`; the page places two banners; one `Set Variable` opened both.
+`Game/Choice row` held its pick in `choiceRowPick`; four rows on one page shared it.
+
+**Fix in the template:** the banner's open state is a `States` node (`closed`/`open`, driven by
+`to-` signals); the choice row publishes the repeater's own `itemOutput-value` and
+`itemOutputSignal-picked` straight to its outputs (value lands before signal — TPL-006 measured).
+**Where it bites:** every component author who reaches for a Variable for local state. The
+interface playbook should carry the rule: *a Variable is app-wide; a component's own state is a
+States node, a Counter, or a Switch.* Owner `NONE`. ⚠️ A repeater also needs an `id` per row —
+without one, every re-run of the source is a fresh set of rows and the old ones stay (the doubled
+pills).
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** ⚠️ **half holds.** The node reference already says "app-wide" (`variablenode2.ts:172`). The doctrine an agent receives is silent (`AiAssistant/authoring/prompts/interfaces.ts`, served as `interfaceDoctrine`), and `decomposition.ts:165-166` recommends Variables for shared state. Four template components hold a Variable and are placed more than once. The claim that a repeater row without an `id` keeps old rows contradicts `collection.ts:504-546`, and is not re-measured. Owner **GAM-005**.
+
+**Built 2026-09-14 (P88 GAM-005, over HEAD `3747d1d20`, `44b3a9add`):** both doctrines now say a Variable is one value for the whole app (graded on a live `get_project_info`), and every validate and write door warns `variable-in-repeated-component` on a `Variable2`/`Set Variable` in a component drawn more than once, unless a node of that name carries a "shared on purpose" comment. AC4 ran the product check: 19 findings over 7 templates + 2 embedded, 0 over 46 prefabs and 104 catalog examples. TPL-003, TPL-005 and TPL-006 mark their intended hits. Rocket School's `New player form` is intended by reading (reset and fill rewrite the draft), and TPL-007/TPL-008 were told. The repeater-`id` note (AC7) and the browser drive (AC5) are still owed. See GAM-005 §8.
+
+## D58 — 🔴 Nothing warns that a sentence in a content-sized Text will never wrap
+
+**Measured 2026-09-13** (P87 [RKT-001](../phase-87-the-first-play-test/RKT-001-TEXT-THAT-WRAPS.md), from source). Rocket School's
+`text()` helper gave every Text `sizeMode: 'contentSize'`. The runtime renders that as `white-space: pre`
+(`packages/noodl-viewer-react/src/components/visual/Text/Text.tsx:79-84`), so every sentence ran off its card. Richard's
+first finding was *"a lot of texts don't wrap"*. **The node's own default is already `contentHeight`**, which wraps
+(`packages/noodl-viewer-react/src/nodes/visual/text.ts:167`). The author overrode a correct default, and no door said so:
+
+| door | warns? | reading |
+|---|---|---|
+| `validate_component` / `validate_project` (and so every plan tool) | no | the only `contentSize` rule is for a child of `Columns` (`validation/layoutInertCombination.ts:447-465`) |
+| `render_report` | only when the page itself overflows | renders at 1280×900 and 390×844 (`nodegx-render-measure/src/index.js:48-51`); `horizontal-overflow` and `elements-overflowing` compare against the **viewport** (`:938-977`, `:165-170`); nothing compares an element's own `scrollWidth` with its `clientWidth`, so a line clipped inside a 150px tile passes |
+| `get_node_type` Text / the style compositions | no | the sizeMode port says "sizes itself to fit its contents", with nothing about wrapping (`node-shared-port-definitions.ts:1148`); `lead` says it "wraps at a readable measure" (`StyleCompositions.ts:884`) without naming the mode that makes that true |
+
+**Where it bites:** every template, and every agent, that writes a Text helper. **Cheapest door:** a warning in
+`validation/layoutInertCombination.ts` for a Text set to `contentSize`/`contentWidth` whose literal text holds a space
+(it feeds validate and every plan tool). A second, stronger door: `render_report` flags `.ndl-visual-text` whose
+`scrollWidth > clientWidth + 1`. Owner `NONE`.
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** holds. The shipped corpus has 24 content-sized Texts holding a space, some of them headings that fit, so a sentence rule owes a threshold decision. A new warning must stay quiet under P80 DEF-031's ellipsis. Owner **GAM-020**.
+
+## D59 — 🔴 A Button has no Focus input
+
+**Measured 2026-09-13** (P87 [RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md), from source).
+RKT-003's design is *"Focus moves to Next, so Enter, Enter plays on without a mouse"*. A Text Input has a `focus` signal, and
+Rocket School uses it to put the cursor in the answer box. `packages/noodl-viewer-react/src/nodes/controls/button.ts` has no
+focus input: its only mentions of focus are `focusPort: 'label'` (the editor's property focus) and the Click description, which
+fires on Enter or Space *"while it has keyboard focus"*. So nothing in the graph can give a Button that focus.
+
+**Workaround in the template:** `Game/Feedback banner#fbFocusNext`, a Function run on the card's `didMount`, finds the rendered
+button whose label is the Next word and calls `.focus()` on the next frame. It works only while exactly one visible button has
+that label.
+
+**Where it bites:** keyboard-only play in every game, a form's primary button after validation, and accessibility generally.
+**Cheapest door:** a `focus` signal input on Button (and Checkbox, Radio Button, Select), matching Text Input's. Owner `NONE`.
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** family census: a Focus signal exists only on Text Input (`text-input.ts:210-231`) and Group (`group.ts:178-189`); Button, Checkbox, Radio Button, Radio Button Group, Dropdown and Slider have none. Rocket School has three workaround sites, not one (`fbFocusNext`, `tcFocus`, `rrFocus`). Owner **GAM-010**, after GAM-012.
+
+## D60 — 🔴 A Text Input cannot ask for a keypad, and nothing can type into it while it has focus
+
+**Measured 2026-09-13** (P87 [RKT-005](../phase-87-the-first-play-test/RKT-005-THE-ANSWER-PAD.md), from source). Two gaps
+in one surface, and an on-screen answer pad needs both:
+
+1. **No `inputmode` port.** `grep -rn "inputmode\|inputMode" packages/noodl-viewer-react/src` has 0 hits. The graph cannot
+   ask a tablet for a number keypad (`decimal`), or for no keyboard at all (`none`), so a numeric answer on a tablet opens
+   the full letter keyboard over half the screen. `enterkeyhint` is missing for the same reason.
+2. **No way to type at the caret.** `text-input.ts:149` — Set (and Value) abstain while the field has focus and report
+   `unchanged` (ERG-001 §4). That is right for a typist, and it means a pad writing through Value/Set is dropped exactly
+   while a child has the caret in the box. There is no insert action.
+
+**Workaround in the template:** the game kit's `Answer Pad` React node owns its own `<input>` (with `inputMode`), types at
+the caret, and reads a digit by `KeyboardEvent.code`, so AZERTY needs no Shift. On a coarse pointer its box is display-only.
+
+**Where it bites:** every numeric, phone, email, postcode or PIN field (Site Builder forms, checkout), and any on-screen
+keypad, accent strip or emoji picker. **Cheapest door:** an `Input Mode` enum (`text`, `numeric`, `decimal`, `tel`,
+`email`, `url`, `search`, `none`) and an `Enter Key Hint` on Text Input, plus an `Insert Text` action that writes a value at
+the caret whether or not the field has focus. Owner `NONE`.
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** holds: 0 hits for `inputmode`/`enterkeyhint`, and Set still abstains while focused. `Clear` already acts while focused (`text-input.ts:350-356`), the precedent for Insert Text. Owner **GAM-011**, after GAM-009.
+
+## D61 — 🔴 A Text Input that remounts shows its Start Value, not what the person typed
+
+**Measured 2026-09-13** (P87 [RKT-006](../phase-87-the-first-play-test/RKT-006-RESTART-FROM-INSIDE-THE-RACE.md), driven and read
+from source). In Rocket School a child types player two's name into the race setup, starts a Défi race, and taps *Change the
+race*. The setup card remounts and the name box is **empty**: `drive-rkt006-restart.js --arm settings`, build 2, `nameBox ""` in 4 of 4
+cells. The `Text` output still holds the name, so the box and the value disagree.
+
+**Cause:** the field mounts from `props.startValue` (`text-input.ts:372-373`). Only `Set`, `Start Value` and `Clear` write it
+(`setText`, `clear`). The component's own typing writes the DOM and `onTextChanged`, and **never `props.startValue`**. So anything a person
+typed is lost at the next mount: a card toggled by `Mounted`, a tab, a step in a wizard, a States-driven panel.
+
+**Workaround in the template:** `Race/Setup#rsNameKeep`, a Variable. The box's `Text` goes into it, and its Value goes back into the box's Start
+Value. While the field is focused `setText` abstains from the DOM but still writes `props.startValue`, so typing is not fought
+and the next mount starts from the name.
+
+**Where it bites:** every form split across steps or tabs (Site Builder forms, checkout, onboarding), any field inside a
+collapsible section, and any Text Input under a `Mounted` toggle. **Cheapest door:** have the component write `props.startValue`
+(or `_internal.text`) on every change, so a remount starts from what is there. Owner `NONE`.
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** mechanism holds, citation corrected: the field mounts from Start Value at `TextInput.tsx:69` and `:92`; `text-input.ts:372-373` is where Start Value is written. ⚠️ "The `Text` output still holds the name" is questionable from source: a remount calls `setText(startValue)`, which overwrites the output (`react-component-node.ts:562-566`). P77 D33's "startValue does not emit onTextChanged" is false at HEAD. Owner **GAM-009**.
+
+**Built 2026-09-14 (P88 GAM-009 session 9, `bdf1d3b19`; R10).**
+- **Measured:** the box came back `""`. ✅ **The remount also overwrote the Value output with `""` and fired `Value Changed`
+  again**, so this row's "the `Text` output still holds the name" was wrong.
+- **The fix:** typing writes the start value (raw text, `_typed`). A remount announces only a value the Value output has
+  not already announced (`_announcedValueIs`). `Set` still means the author's last Value.
+- **Graded:** a jsdom spec, RED at HEAD, then 12/12, with 3 reverted arms. In a browser, on a minimal Mounted-toggle page,
+  the old and sabotage runtimes read `""` and the fixed runtime reads `Tom`.
+- **Not graded:** Rocket School's own clause. P87's drive reached no cell in a `deploy-from-disk` build. So
+  `rsNameKeep` stays, and removing it is the TPL-007 peer's call.
+- **Blast radius:** 90 Text Inputs, 36 wired both ways. The 7 `Value Changed` consumers lose only the same-value remount
+  duplicate. See GAM-009 §8.
+
+## D62 — 🔴 An Expression wired into a size port raises "not a size" before it has ever evaluated
+
+**Measured 2026-09-13** (P87 [RKT-007](../phase-87-the-first-play-test/RKT-007-THE-CLOCK-AND-THE-BOOST-EXPLAIN-THEMSELVES.md), driven and
+read from source). The feedback banner's boost meter was an Expression, `round(s * 48)`, wired into a Group's Width. Every cell of
+`drive-rkt007-boost.js` logged `Group (/Game/Feedback banner): "Width" was sent {"value":null,"unit":"px"}, which is not a size`: 8 of 8
+cells in build 1, and 8 of 8 again in build 2 with `round((s || 0) * 48)`, so a guard inside the expression changes nothing.
+
+**Cause, from source:**
+- `connectInput` seeds a new wire's target with the source's current value whenever it is not `undefined` (`noodl-runtime/src/node.ts:545-569`).
+- An Expression's Result is `null` until its first evaluation, and it does not evaluate until an input has arrived (`expression.ts:208-212`, NDA-017).
+- A number wired into a size port is merged into the port's unit, so the seed arrives as `{value: null, unit}`. The size setter keeps
+  the old value and raises `dimensions/not-a-dimension` (`react-component-node.ts:662-689`).
+- So any Expression that feeds a size, where the Expression's own inputs arrive later than the component is built, logs an error
+  at build time. Nothing on screen is wrong, which is why only a console listener sees it.
+- ⚠️ **Not explained:** `Game/Countdown bar#cdWidth → cdFill.width` has the same shape and has not raised it in any drive. Its input
+  (an Animate To Value's Current Value) holds a number from creation; whether that makes it evaluate before the wire is made is
+  unmeasured.
+
+**Workaround in the template:** no Expression before the size. The grader publishes `boostPct`, which a Function output reads
+`undefined` until it runs, so nothing is seeded. It goes through Component Inputs into a fill whose width is `100 %`. The template
+gate pins that the fill's Width has exactly one source.
+
+**Fixed 2026-09-14 (P88 GAM-003 session 11, `89e533625`):** R3 ruled a `null` or `NaN` size empty, silently. The units
+setter now clears on a bare `NaN`, `{value: null}` and `{value: NaN}`, and raises nothing. At HEAD the spec reproduced
+this exact message through the real wiring and Group's real Width setter. It also found that a computed `NaN` arrives bare,
+not merged. The unexplained control is explained: a value the Expression produces during the first update replaces the
+queued `null` seed before Width drains, measured by GAM-001's reverted arm G4. FLD-004's `NaN` row was changed as ruled;
+`"tall"` and `Infinity` are still refused. Browser drive and the Rocket School meter owed.
+
+**Where it bites:** every progress bar, meter or chart bar computed with an Expression. The error reads like a wiring mistake
+the author did not make. **Cheapest door:** have `connectInput` treat `null` from an output that has never produced a value like
+`undefined`, or have a size port's setter treat `null` merged into a unit as "clear", as it already does for a bare `null`. Owner `NONE`.
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** holds; citation corrected to `node.ts:558-568`. **Same cause as D55.** The `null` is wrapped as `{value: null, unit}` because `isNaN(null) === false` (`node.ts:416`). The error is FLD-004 (b)'s refusal working correctly; a fix must not soften it. Owner **GAM-003**.
+
+## D63 — 🔴 In a two-player Rocket Race, player two's answers are graded into player one's learner model
+
+**Read from source 2026-09-13** (P87 [RKT-010](../phase-87-the-first-play-test/RKT-010-STARS-THAT-ADD-UP.md) §3.4 asked for this to be
+measured first). **Not driven yet.** This is a template defect, not a platform one.
+- `Race/Play` has one `model` input, the active profile's (`Pages/Race#rcMe.model`), and hands it to `Race/Round` every round (`rpIn.model → rpRound.model → rdGrade.model`).
+- `rpTurnIsB` decides which rocket moves, but until RKT-010 the grader was never told whose answer it was grading.
+- `Pages/Race` saves `rcPlay.model` into the active profile on every `graded` (`rcSave`).
+- So when Tom answers on his turn, Léa's rating, mastery, due dates and `answered` move. A friend who gets everything wrong demotes her
+  skills, and a friend who gets them right promotes her.
+
+**Workaround in the template (RKT-010):** the grader takes `forB` from `rpTurnIsB`. Player two's turns pay no stars and do not count
+toward a personal best, and a level they reach is marked paid, so it is never paid later. **The model itself is still written.**
+
+**Fix, not built:** grade player two's turns against a throwaway model (or a second profile), and save only player one's. Owner: P87,
+no task yet. It belongs beside RKT-008 (the player menu, where a second profile could be chosen).
+
+## D64 — 🔴 A Static Data row field named like a Model member reads as that member, not as the data
+
+**Measured 2026-09-13** (P87 [RKT-011](../phase-87-the-first-play-test/RKT-011-THE-HANGAR.md), driven, then reproduced headlessly).
+- **Seen:** the hangar opened with its header, preview and tabs, and drew **no tile**. The console said `JavaScriptFunction
+  (/Logic/Hangar shelf): The script threw: Cannot read properties of undefined (reading 'part')` (drive-rkt011-hangar.js, both arms).
+- **Every gate was green:** 252/252. They all passed the shelf as a plain array of plain objects.
+- **Reproduced headlessly:** the shipped shelf script, given `Collection.get().set(HANGAR_SHELF)`, throws the same message. A plain
+  array gives 12 rows. `Logic/Pick item` refused every item as not fitting, so the tiles would have been dead even if they had drawn.
+
+**Cause, from source:**
+- Static Data's `items` output is its Collection (`staticdata.ts:129-137`), and `Collection.set` makes every row a Model
+  (`collection.ts:534`, `Model.create(plain)`).
+- The Model's proxy `get` trap answers a name that is one of its own members with that member, before it looks at the data
+  (`model.ts:108-111`: `if (typeof member === 'function') return member.bind(target)`).
+- So the shelf rows' `on` field read as `Model.prototype.on`, the event method (`typeof row.on === 'function'`), and
+  `row.on['big-smile']` was `undefined`. `Object.keys(row)` still lists `on`, which is what makes it look like data.
+- The members that shadow data, read off the runtime: `on, off, notify, setAll, fill, set, get, getId, toJSON, constructor`, and `data`
+  (an instance field; it reads back the whole record). `id` is the Model's id and reads back the row's own id, so it is safe.
+
+**Workaround in the template:** the field is `faces`.
+- The template gate reads the member list from the runtime's own Model and refuses any `Data/*` row field on it, with a sabotage arm.
+- The engine gate runs the shelf, pick and wear scripts on a real runtime Collection. Its sabotage arm puts `on` back, and must throw
+  exactly as the browser did.
+
+**Where it bites:** any Static Data, Array or query row with a field called `on`, `get`, `set`, `fill`, `data`… (a calendar `on`, a
+form's `set`, a chart's `data`). It is silent, reads like a script bug, and no plain-JS test sees it.
+
+**Cheapest door:** have the proxy prefer a data key that exists over a prototype member, or have the door warn on a row field with a
+reserved name when it writes a Static Data node. Owner `NONE`.
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** holds, and the member list is incomplete: `Object.prototype` names (`toString`, `valueOf`, `hasOwnProperty`…), `listeners` and `_class` also shadow data. Rocket School's gate misses them. Runtime code calls members through the proxy (`collection.ts:497` `item.getId()`), so "data wins" needs care. Owner **GAM-007**.
+
+**Session 8, 2026-09-14 (P88 [GAM-007](../phase-88-the-defects-the-games-found/GAM-007-A-DATA-FIELD-CALLED-ON-READS-AS-DATA.md), at HEAD `f9981f7aa`, committed `d57a11668`): 🔒 R8's B is built. The names are reserved loudly, and the trap is unchanged.**
+- **Measured, not predicted:** the list read off real rows through the trap has 24 names. It adds `Object.prototype`'s ten, plus
+  `listeners` (only after an `on()`) and `_class` (only once it is set). `id` is safe.
+- **The door:** `validate_component`, `validate_project` and `create_component` warn `reserved-row-field` at the Static Data
+  node, naming the field. The runtime: `Collection.set` raises `collection/reserved-field-name` once per field.
+- **Census:** 0 hits over every template, prefab, module, embedded template and catalog example.
+- Five reverted arms each turned exactly their owning tests red.
+- **The export already reads the data** (frozen plain rows). "Data wins" is therefore registered as
+  [GAM-025](../phase-88-the-defects-the-games-found/GAM-025-A-ROW-FIELD-NAMED-ON-READS-AS-THE-DATA.md), call-site sweep first.
+- Rocket School's `faces` rename stays. Its gate can now ask `Model.isReservedFieldName`, and that change is the TPL-007 peer's.
+
+## D65 — 🔴 The game-kit Avatar draws every WIRED Size at its default 64 px
+
+**Measured 2026-09-13** (P87 [RKT-011](../phase-87-the-first-play-test/RKT-011-THE-HANGAR.md), the drive's picture diagnostics, then the
+mechanism on the built kit). This is a kit defect, and **older than RKT-011**: `Game/Face` has had it since TPL-007 session 1.
+- **Seen in the browser (`drive-rkt011-hangar.js`, build 2, FR 390×844):**
+  - The hangar preview's face was DiceBear's crowned picture at **`width="64"`** (`previewIs: "crowned64"`). The graph asks for 96.
+  - After a reload, Home had **no 40 px header face**. `Game/Header` places `Game/Face` with `size: 40`.
+  - The screenshots agree: the header and preview faces are both about 64 px.
+- **The artefact is correct.** `Game/Face` declares `size` on its Component Inputs and wires `fcIn.size → fcAvatar.size`, and every
+  instance carries its size (header 40, Profile card 72, preview 96, tile 64). So the door wrote everything, and the loss is at render.
+
+**Cause:**
+- A number wired into a units port arrives as `{ value, unit }`. See D62, and `react-component-node.ts:688`, which merges it into the
+  port's unit.
+- The Avatar read it as `Number(props.size) || 64` (`kit.js:368`), which is `NaN`, so 64.
+- Rendered on the server from the built kit: `40` and `"40"` draw 40 px; `{value: 40, unit: 'px'}` and `{value: 96, unit: 'px'}` both
+  draw **64**.
+- The Keyboard Map read its Key Size the same way (`kit.js:1060`). It is **latent in Rocket School**: `Game/Keyboard` sets
+  `keySize: 34` as a parameter and never wires it, and a parameter arrives as a plain number. The Answer Pad already read px ports
+  correctly, through `padPx`, which accepts all three shapes.
+
+**Fixed in the kit (RKT-011 build 3):** both reads go through `padPx`. The kit gate renders the Avatar at `{value: 40}`,
+`{value: 96}` and `'72px'`, with a sabotage arm that restores `Number(props.size)` and draws 64.
+
+**Where it bites:** any kit or custom React node that reads a px port with `Number()`. It works when the author types the
+number into the property panel, and fails as soon as the number is wired, so it is invisible in a hand-set example.
+
+**Cheapest door:** one shared px reader in the node-kit types or docs (`node-kit.d.ts`), or have the React bridge hand a units port
+to a kit node as a plain number when its unit is the port's only unit. Owner `NONE`.
+
+⚠️ **Visible change for Richard's replay:** every header face now draws at the 40 px it always asked for, instead of 64. The header is
+smaller on every page.
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** ⚠️ **a kit component receives the string `"40px"`, not `{value, unit}`**: the bridge writes `value.value + value.unit` (`react-component-node.ts:663`, since the initial commit). `Number("40px")` is NaN either way, so the kit fix holds, but the kit gate's `{value: 40}` arms feed a shape the bridge never delivers. FLD-004 did not change what a kit receives. Owner **GAM-015**.
+
+## D66 — 🔴 A wire to an input a built-in node does not have passes the plan door, and fails only in the browser's console
+
+> ✅ **Fixed 2026-09-14 by [P88 GAM-019](../phase-88-the-defects-the-games-found/GAM-019-A-WIRE-TO-AN-INPUT-A-BUILT-IN-NODE-DOES-NOT-HAVE-IS-REFUSED-AT-THE-DOOR.md), committed `4bb438165`.**
+> `rules/nonexistentPort` skips only runtime-unbounded types. FB-026's verified retype list is catalogued as `runtime-narrowed`.
+> Alternatives rank value ports before styling ports, so `startValue` is offered. Rebuilding Rocket School with `name0 → text`
+> is now refused at `stage_plan_operation`. With the old skip restored it builds with 154 diagnostics and none about the wire,
+> which is this row exactly. Found on the way: `createNodeFromReactComponent` dropped `runOnValueChange`, so Text Input's
+> NDA-017 checkbox port was never declared. That is forwarded now, as Richard ruled. ⚠️ Not fixed: the refusal's first hint is
+> "did you mean `set`?", a signal (GAM-019 §8).
+
+**Measured 2026-09-13** (P87 [RKT-008](../phase-87-the-first-play-test/RKT-008-THE-PLAYER-MENU.md) build 1, template build 6).
+- **Authored:** `Profiles/New player form` wired `nfIn.name0 → nfName.text`, to fill the name box in edit mode. `nfName` is a Text Input,
+  which has no `text` input: its value is `startValue` (displayed "Value", `text-input.ts:157`).
+- **The door:** GEN_EXIT=0. The generator's full diagnostics (`TPL007_DIAG_DETAIL=1`, 154 lines) mention no such connection, not even
+  as info. The same run refused two similar mistakes: `connection-unknown-instance-port` on a Choice row instance's `mounted`, and
+  `unprefixed-function-port` on a Function's `word`.
+- **The browser:** `Invalid connection, input doesn't exist. Trying to connect from Component Inputs output name0 to
+  net.noodl.controls.textinput input text`, logged on every page that places the form. The box opened empty (`drive-rkt008-menu.js`
+  `filled`: `nameBox: ""`). Every other clause passed, so only the console and one clause saw it.
+
+**Cause, partly read:** the door has two unknown-connection codes, `connection-unknown-instance-port` and
+`connection-unknown-derived-port` (`diagnostics.ts:970`, `:1013`). Neither fired for a built-in node's input. I did not read why the
+checks skip a built-in node's static inputs.
+
+**Fixed in the template (RKT-008 build 2):** `name0 → nfName.startValue`, plus Fill → `nfName.set`.
+
+**Where it bites:** any wire, authored by hand or by an agent, that names a built-in control's input by what it shows ("text") instead of
+its id (`startValue`). The artefact validates, the page renders, and the value simply never arrives.
+
+**Cheapest door:** check a connection's `toProperty` against the node catalog's inputs for built-in types, the way instance ports are
+checked, with the id suggested for a matching display name. Owner `NONE`.
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** **why DEF-002 misses it:** `rules/nonexistentPort` skips any type with a `dynamicPorts` entry (`nonexistentPort.ts:97`, `CatalogIndex.ts:143`). 88 of 176 catalog types have one, including Group, Text, Button and Text Input, which mints no ports. The skip's info is silent because the MCP door never sets `emitDynamicPortInfo`. Suggesting an id by display name would not have caught "text" (the display name is "Value"). Owner **GAM-019**.
+
+## D67 — 🔴 Animate To Value delivers one target when two arrive in one burst
+
+**Recorded 2026-09-13 in P87** ([RKT-006](../phase-87-the-first-play-test/RKT-006-RESTART-FROM-INSIDE-THE-RACE.md) §5, driven and read from
+source). Registered 2026-09-14. **Not re-measured at registration:** [GAM-008](../phase-88-the-defects-the-games-found/README.md) reproduces it at HEAD first.
+- **Seen:** Rocket School's Défi countdown bar **never refilled for a new question**, in every build since TPL-007 session 1. A question reached by
+  Next showed the bar at 0.50 and 0.63 (`drive-rkt006-restart.js` `clockAtNext`, session 6's deploy, EN and FR at 1366×768). The press-dated
+  control read *"bar 0.47 → 0.45 over 608 ms; last full 15691 ms before Next was pressed"*.
+- **Cause, as read:** the countdown wrote target 100 and then 0 in one burst, so its Animate To Value saw one target, and a target equal to its end
+  value is ignored (`animate-to-value.ts:111-124`). That a duration of 0 is not a jump was **inferred, not isolated**.
+- **Workaround in the template:** `cdKick`, a 40 ms Delay between full and empty, and a 1 ms jump. Both changed at once, so which one was needed is
+  not known.
+
+**Where it bites:** any countdown, progress bar or meter that snaps back and animates again, whenever the reset and the new target are written together.
+The bar looks like it is working. Owner **GAM-008**.
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** ⚠️ **"saw one target" does not hold in source.** `queueInput` keeps every value, consolidating last-wins only during a node's first update (`node.ts:1223-1270`). A target equal to `endValue` is ignored (`animate-to-value.ts:117-120`). `start()` only queues, and start, end and duration are read when frames run (`animate-to-value.ts:58-61`, `:133-135`; `timerscheduler.ts:43-50`). A duration of 0 lands in two frames, the same as 1 ms (`timerscheduler.ts:139-143`, `:185-195`). Three readings fit the drive numbers, and GAM-008 AC1 separates them. P30's animation audit ruled the equal-target no-op correct, and the export copies it.
+
+**Measured 2026-09-14 (GAM-008 session 10, HEAD `1f5c10c5b`, a runtime spec over a real `Set Variable → Variable` chain, frame by frame):** the
+cause is the **collapse**. The node's setter is handed **both** targets, 100 and then 0, in the press frame. The second restarts the run from the
+bar's unmoved value (47.2), and the bar never shows 100. **"Saw one target" is wrong**, and **"a duration of 0 is not a jump" is wrong**: 0 and
+1 ms both land on the second frame. A jump needs two frames, so full and empty written **one** frame apart still glide. `cdKick`'s 40 ms is what
+worked. **Built (R9):** `Jump To` and `Jump Value` move Current Value now, then carry on towards Target Value, in either order within one pass. A jump
+is not an arrival. The description says two targets in one pass make one move. Graded by 4 reverted arms and 7 export A4 rows. **Driven in a real browser** on a minimal deploy (GAM-008 §8 AC5): on
+every press the fixed runtime's bar is full within 32 ms and then glides, and the old and sabotaged runtimes never refill. Beside it, the unchanged
+one-pass chain refills once and then reads 182 and 109, which is this row seen in a browser. **Still open:** Rocket School keeps `cdKick` (AC6, P87's
+file), and Défi was not driven.
+
+## D68 — 🔴 A Text Input's Focus signal sent on mount leaves it unfocused after a remount
+
+**Recorded 2026-09-13 in P87** ([RKT-003](../phase-87-the-first-play-test/RKT-003-ONE-SCREEN-PER-QUESTION.md) §5, AC5 run 2, driven). Registered
+2026-09-14. **Not re-measured at registration:** [GAM-012](../phase-88-the-defects-the-games-found/README.md) reproduces it at HEAD first.
+- **Seen:** in the keyboard-only arm, `focusIn` failed in **13 of 13** typed rounds after the first. Round 1 passed, because the field's Focus signal
+  fires on the first prompt. After a verdict the typed row remounts, and the same signal sent on the row's `didMount` leaves nothing focused.
+- **Cause:** not isolated.
+- **Workaround in the template:** a Function focuses the rendered field on the next animation frame, found with `querySelector`
+  (`tpl007Components.ts`). Build 5 run 3 passed `focusIn` on 17 typed rounds, 13 of them after a verdict.
+
+**Where it bites:** a keyboard-only person in any form that mounts a field and focuses it, such as a wizard step, a dialog or a search box that
+reappears. They must reach for a pointer. Owner **GAM-012**.
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** **candidate cause, not isolated:** `setNodeFocused` calls `_focus()` only when the node is not already in `focusedNoodlNodes` (`viewer.jsx:348-358`), and nothing removes a node on unmount (`react-component-node.ts:747-757`). A second Focus is then a silent no-op, and the list is rebuilt only on a click (`viewer.jsx:378-395`), which fits a failure seen only in the keyboard arm. The Blur branch looks inverted (`viewer.jsx:359-375`). No spec covers the tracker.
+
+## D69 — 🔴 A style preset names a font that nothing ships
+
+**Recorded 2026-09-13 in P87** ([RKT-002](../phase-87-the-first-play-test/RKT-002-THE-LOOK.md) §6, AC3). Registered 2026-09-14. **Not re-measured
+at registration**, and ⚠️ **possibly overlapping** D18/D19 (controls ignore `--font-sans`, owned by P80 DEF-017).
+[GAM-016](../phase-88-the-defects-the-games-found/README.md) §4 settles whether this row is new.
+- **Seen:** Rocket School session 1 never loaded Nunito. The `playful` preset only names the font, and no library module ships one, so Richard
+  played it in the platform fallback.
+- **Workaround in the template:** Grandstander 800 and Nunito (Latin and Latin-extended, for œ) are bundled with their OFL licences as a module in
+  `packages/noodl-mcp/tests/tpl007Assets/noodl_modules/rocket-school-fonts/`, and `drive-rkt002-look.js` confirms both loaded.
+- **Not measured:** whether the editor's preview shows the named font while a deployed page does not, which would mean a person approves a look they
+  never ship.
+
+**Where it bites:** every app styled with a preset, whose type is quietly the platform's. Owner **GAM-016**.
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** **not owned elsewhere:** P80 DEF-017 (D18/D19) makes controls inherit `--font-sans` and ships no font. Four of five presets name a font (Playful, Enterprise, Soft; Minimal uses the system stack, Modern Inter). `applyPreset` writes tokens only (`StyleTokensModel.ts:273-280`). The only font shipped to apps is the starter's `noodl_modules/inter`. `FontLoader` loads only fonts named by file path (`fontloader.ts:49-86`), and the editor and deploy get the same token CSS, so the editor shows the font only if the author has it installed.
+
+## D70 — 🔴 A kit React node cannot take a signal, and gets no size ports
+
+**Recorded 2026-09-13 in P87** ([RKT-002](../phase-87-the-first-play-test/RKT-002-THE-LOOK.md) §6 AC4, and RKT-003). Registered 2026-09-14. **Not
+re-measured at registration:** [GAM-017](../phase-88-the-defects-the-games-found/README.md) reads both halves from source.
+- **Signals:** a signal wired into a kit React node logs *"Signals not supported as a react prop"*. Rocket School's burst on a right answer is
+  therefore a number that rises (`Boost A` / `Boost B` on the Race Track), and the kit draws a burst when the number goes up.
+- **Size:** a kit React node gets no size ports, so the Race Track is sized through its wrapper Group (30vh, capped at 56vw).
+
+**Where it bites:** every kit author whose node should react to an event (play, reset, celebrate) or be sized in the graph like a built-in node. Owner
+**GAM-017**.
+
+**Re-read 2026-09-14 (P88 scoping, HEAD `eb12ebe99`, read from source, nothing run):** ⚠️ **narrower than recorded.** Only a signal declared under `inputProps` is refused, and the message is logged when the kit registers (`react-component-node.ts:2000-2011`); it stays wireable with a no-op setter. A signal under `inputs` with `valueChangedToTrue` works, as Text Input uses it. `frame` is not dead: nothing sets it, but it registers size ports (`react-component-node.ts:903-917`), untested. The React export reads only `inputProps` and `inputs` (`kitSource.ts:269-300`).
+
+## D71 — 🔴 The node reference says a wired `run` makes a Function signal-only. It does not.
+
+**Measured 2026-09-14** ([TPL-008](TPL-008-THE-TODO-LIST.md) §7, driven, then read from source).
+- **What the door tells an agent:** `get_node_type JavaScriptFunction` returns the antiPattern *"Relying on auto-run while also
+  connecting `run`; once `run` is connected, only the signal executes the script."* Source:
+  `docs/node-catalog/enrichment/javascriptfunction.json:21`, generated into `packages/noodl-types/src/node-catalog-enriched.json`.
+- **What the runtime does:** `simplejavascript.ts:594` runs the script whenever an input with Run On Value Change ticked changes,
+  whether `run` is connected or not (NDA-017 §2 replaced the old `if (!this.isInputConnected('run'))`). Only the load-time auto-run
+  (`:248`) still checks `run`. Every input is ticked by default. This is the same fact as the 08-26 memory *"`Run` is ADDITIVE"*,
+  and the catalog was never corrected.
+- **Seen:** the todo list's `Commands/Move task` had `run` wired and one input, `in-itemId`, wired from outside its guard list with
+  the box still ticked. Clicking ANY row published a new id into it, so the up, down and top instances each re-ran and moved
+  that task. The first drive (`tpl008-todo-drive.test.ts`) found **three `moved` lines where one was expected**, and a close
+  logged "Closed from #3" for a task at #2. There were 0 console errors and every screen looked right.
+
+**Fixed in the template:** `runOnChange-in-itemId: false`, and `tpl008Template.test.ts` §3 now fails on any Function whose `run`
+is wired and which has a wired `in-*` input left ticked.
+
+**Where it bites:** every agent authoring a Function through the MCP door. It reads this sentence and believes the node waits for
+its signal, which is exactly the shape of a command (validate, then write). The failure writes data twice or on the wrong
+event and renders perfectly.
+
+**Cheapest door:** correct the antiPattern to say the opposite: *"Connecting `run` does not stop value changes from running the
+script — untick Run On Value Change on each input (`runOnChange-in-<name>: false`)."* A stronger door is a validator info when a
+Function has `run` wired and a wired `in-*` input still ticked, which is the rule the TPL-008 gate now carries. Owner `NONE`.
+
+## D72 — 🔴 An icon-only Button has no accessible name, and nothing in the graph can give it one
+
+**Recorded 2026-09-14** ([TPL-008](TPL-008-THE-TODO-LIST.md), read from the catalog and source; **not measured with a screen reader**).
+- `get_node_type net.noodl.controls.button` lists no `aria-label`, `title` or accessible-name port, and
+  `grep -n "aria-label\|ariaLabel"` over `nodes/controls/button.ts` and `components/controls/Button.tsx` has 0 hits.
+- The todo list's move-up, move-down and tick buttons are `useIcon: true` with `label: ''`, so each renders a `<button>` with no
+  text. **The drive itself could not find them by name**: `tpl008-todo-drive.test.ts` locates them by POSITION inside the row
+  (`clickButtonBeside`), which is exactly the position a screen-reader user does not have.
+
+**Workaround in the template (TPL-008 s2, 09-14):** the label IS the name. `label: 'Move up'` with `styleCss: 'font-size: 0;'`
+puts the words inside the `<button>` at no size, and the icon keeps its own (`iconSize` is set on the glyph). Driven: Chrome's
+accessibility tree names every list button, `font-size` computes to `0px` and the words are 0px wide. It is a trick every
+template has to know, so the product door below is still the fix.
+
+**Where it bites:** every screen-reader user of any list, toolbar or card with icon buttons — delete, edit, move, close, play.
+**Cheapest door:** an `Accessible Label` string input on Button (emitting `aria-label`), and a door warning when a Button has
+`useIcon` on and an empty `label` with no accessible label. Related: D59 (Button has no Focus input). Owner `NONE`.
+
+## D73 — ⚠️ A Text Input has no date type
+
+**Recorded 2026-09-14** ([TPL-008](TPL-008-THE-TODO-LIST.md), from the catalog). `type` is `text | textArea | email | number |
+password | url` — no `date`, `time` or `datetime-local`, and no date-picker node in the library (`list_node_types` query
+"date" returns only date *utilities*).
+
+**Workaround in the template:** the deadline is a text field with placeholder `YYYY-MM-DD`; `Commands/Set deadline` accepts an
+ISO date, `today` or `tomorrow`, and anything else is refused with *"Use a date like 2026-09-30, or leave it empty."* Driven.
+
+**Where it bites:** every form that asks for a date — a deadline, a booking, a meeting (TPL-001's Post page has the same shape),
+a birthday. On a phone the native picker is what a person expects. **Cheapest door:** add `date`, `time` and `datetime-local` to
+Text Input's `type`, with Value as the ISO string. Owner `NONE`.
+
+## D74 — 🔴 Under `--base-url`, path navigation leaves the base: every page after the first is a 404 on reload
+
+**Recorded 2026-09-14** ([TPL-007 §15](TPL-007-THE-MATHS-AND-TYPING-GAME.md), publishing Rocket School to `nodegx.io/templates/rocket-school/`).
+A multi-page project built with `nodegx-deploy.cjs --base-url /templates/<slug>/` and `navigationPathType: "path"` (what the MCP
+door's project skeleton writes) loads its first page, and the first navigation pushes **`https://nodegx.io/home`** — outside the base.
+Reload, or share the link, and the host answers 404. Measured on the live host: the drive's reload after making a player landed on
+`nodegx.io/home`, "HTTP ERROR 404", NOT REACHED.
+
+**The cause, read in `packages/noodl-viewer-react/src/nodes/navigation/router.tsx`:** `_getLocationPath` strips `Noodl.Env['BaseUrl']`
+when it READS the path (line ~689), but `_getCompleteUrlToPage` never adds it back when it WRITES one (line ~816), and
+`_updateUrlWithTopPage` pushes that bare path. Every other asset path in the deployed engine does prefix `BaseUrl` (bundles, fonts,
+images, video). **Second half, on the host:** nodegx.io's Caddy block is a plain `file_server` with no fallback, so even a correct
+`/templates/<slug>/home` would 404 on reload (`/templates/rocket-school/home` and `/templates/todo-list/sign-in` both 404).
+
+**Also bites:** the live todo-list demo (`/templates/todo-list/`, two pages) — its sign-in route is the same shape; not driven here.
+Single-page demos (story engine, pixel dungeon) never navigate, so never showed it.
+
+**Workaround used:** the published Rocket School is built from a copy with `navigationPathType: "hash"` (`#`-routes are relative, so a
+reload stays under the base and the plain file server answers it); the template itself is unchanged. Driven locally under the path
+(16/16) and on the public URL (TPL-007 §15). **Cheapest door:** prefix `BaseUrl` in `_getCompleteUrlToPage` for path mode, and have
+`nodegx-deploy.cjs --base-url` either warn about a multi-page path-mode project or write the host fallback it needs. Owner `NONE`.
+
+## D76 — 🔴 A repeated row can only send ONE signal per update through a `For Each`; a second one silently replaces the first
+
+**Measured 2026-09-20 (TPL-008 s8), on Richard's report that a next action's description "can't
+save or exit".**
+
+`Todo/Action row` ends a description edit on the field's `Blurred`, and that one event has two
+jobs: write the text (`describe`) and shut the box (`closeDescription`). Both were wired straight
+out of the row's `Component Outputs`, which is the obvious graph and reads correctly.
+
+**What happens.** `foreach.tsx`'s `itemOutputSignalTriggered` records the signal's name in
+`_internal.itemActionSignal`, then schedules ONE `scheduleAfterUpdate` behind
+`hasScheduledTriggerItemOutputSignal`. A second signal from the same row in the same update does
+not schedule its own callback — it overwrites `itemActionSignal` and returns. When the one
+callback runs it sends `itemOutputSignal-<the LAST name>`. **The first signal is never sent, and
+nothing says so.**
+
+**What was done.** The drive (`tpl008-todo-drive.test.ts` §4) typed a description and pressed
+Save. `closeDescription` arrived and shut the box; `describe` was dropped, and the record's
+`description` stayed empty through a 20-second wait — a page that looks like it worked and a write
+that never happened. Re-wired so the row emits `describe` alone and `Pages/Todo` drives both the
+command and the close from it: 14/14, and the description is written and the box closes.
+
+**Where it bites a person.** Any repeated row that answers one event with two signals — a form row
+that must save and collapse, a list row that must record a choice and navigate. The failure is
+silent and order-dependent (whichever signal is wired second wins), so it looks like a flake: in
+TPL-008 the same press dropped the save on one run and not another.
+
+**The cheapest door** is not a fix to the semantics but a diagnostic: `itemOutputSignalTriggered`
+already knows it is discarding a name, so a second signal in one update could raise
+`repeater/item-signal-replaced` naming both. Queueing them instead would be the real fix. Owner `NONE`.
+
+## D77 — 🔴 An icon port in a project without the icon module renders an empty box, and nothing says so
+
+**What was done.** TPL-010's app bar was built the way TPL-008's header was: `useIcon: true`,
+`iconSourceType: 'icon'`, `iconIconSource: { class: 'lucide', code: 'icon-chevron-left' }`. The
+door accepted it, `validate_project` reported no error, and the render measured no error. Driven in
+a browser (`drive-page.js dom 'button'`), the week's `‹` button is **8 px by 8 px with no glyph in
+it** — and so are `›`, the settings, the theme switch's moon and sun, a move chip's plus and all
+three close buttons. Nine controls, invisible and effectively unhittable, on a screen that had
+passed every automated check in the build.
+
+**Why.** Lucide is a **library module** (`library/modules/lucide-icons`), and a template ships no
+modules — TPL-010's own writer refuses to write one with a non-empty `noodl_modules`. The viewer
+renders the port as `<span class="lucide icon-chevron-left"></span>`: correct markup for a font
+that is not there, so it is a span of nothing. The button's label is hidden by the `font-size: 0`
+that D72's workaround requires, so nothing else gives it size either.
+
+**Where it bites a person.** Every project that wires an icon without installing the module, which
+includes every template by construction, and any agent following a template as its pattern. It is
+invisible to the graph, to the validator and to a measured render, because "no images, no icons" is
+already a warning the page is expected to carry.
+
+**The cheapest door** is a diagnostic at the door: a write that sets `iconSourceType: 'icon'` in a
+project whose `noodl_modules` has no icon module is a `icon-without-its-module` warning naming the
+node — the same shape as the existing port checks. A second, independent door is the render report,
+which already walks the DOM and could measure "an element asking for an icon font that resolves to
+zero glyph boxes".
+
+**How TPL-010 works around it.** Every icon is a character (`‹ › ⚙ ☾ ☼ + ✕ ✓`) at the size the icon
+was, in the colour the icon was — which is what the approved mockup did in the first place, and
+which needs no module on any machine. `tpl010Template.test.ts` §3 now fails if any node in the
+template asks for an icon again.
+
+**TPL-008, re-measured and fixed (2026-09-21).** The suspicion was right. `templates/todo-list-demo`
+rendered **"17 text elements and not one picture or glyph — no images, no icons"** while four of its
+components (`Theme switch`, `Reminders switch`, `Action row`, `Task row`) asked for Lucide, and the
+artefact ships no icon font. Ten glyph buttons on that one screen were empty boxes, and had been
+since the template was published to the community shelf. Same character swap — `✓ ☾ ☼ ▲ ▼ ≡`, plus
+`🔕 🔔` for the bell pair, because Unicode has no crossed-out bell outside the emoji block, so those
+two render in colour where the rest do not. After: **27 texts**, ten glyph buttons at 26–28px, every
+one reachable, **zero empty-text visible buttons**. `tpl008Template.test.ts`'s D72 gate became the
+D77 gate and keeps its eleven-button control list.
+
+🔴 **What the workaround costs, in both templates: the accessible name.** D72 says the label IS a
+Button's name and there is no second port. The label has to carry the glyph now, so a screen reader
+reads "☾" where it read "Use dark theme", and TPL-008's tick box lost `checkLabel`, which said
+*Mark done* / *Mark not done* per row. A trade between two faults rather than a regression from a
+working state — the names were being read off buttons nobody could see — but it is real, and
+**D72 is the port that would give both back**. Worth weighing the two together.
+
+⚠️ **TPL-008 is on the community shelf and has NOT been republished** (Richard: do not publish,
+2026-09-21). `templates/todo-list/` and `templates/todo-list-demo/` on disk are ahead of the shelf
+until `publish-templates-to-shelf.sh` runs — and that script refuses a moved file count, so its
+expected counts may need updating first. Owner `NONE`.
+
+## D78 — 🔴 A Text Input drops an arriving value equal to the last one it was sent, whatever the field now shows
+
+**Measured 2026-09-21 (TPL-010-R2.4), driven in a deployed demo.** The planner's block sheet is one
+sheet reused for every block. Its *What you did* box is filled from the block's row through
+`startValue`, which says `''` for every block (a new sitting starts empty). A note was typed and
+saved on one block; the sheet was then opened on a **different** block, and the box still held the
+first block's note (screenshot in the R2.4 drive). Nothing in the graph was wrong.
+
+**Why.** `text-input.ts` `startValue.set` ends `if (this._internal.text === text) return;`, and
+`_internal.text` is written only by an arriving value and by `Clear` (`:228`, `:496`) — never by
+typing, which reaches `onTextChanged` through the React component. So the comparison is against
+the last value the box was SENT, not the text it shows. Sent `''`, typed into, sent `''` again: the
+second `''` is dropped. `null` does not help: on a text box it becomes `''` before the comparison.
+
+**Where it bites a person.** Every form that is opened on one record after another — an edit
+modal, a detail pane, a step in a flow — and has a field whose value is empty for both records. The
+first person's words appear in the second person's form, and saving writes them there.
+
+**The cheapest door.** Compare against what the field holds (`outputPropValues.onTextChanged`,
+already kept) instead of `_internal.text`, or update `_internal.text` as the person types. Both
+are one line; the first keeps "a value that is already showing is a no-op", which is what the
+guard was for.
+
+**How TPL-010 works around it.** Each sheet pulses `Clear` on every box as it CLOSES (a Function
+that watches `shown`), which resets both the box and the remembered value — so the next opening's
+`''` is already true and any other value arrives. Clearing on close rather than open is what stops
+it racing the opening values. `tpl010Template.test.ts` §3 fails if any box in the three editors
+loses its clear wire.
+
+## D79 — ⚠️ The deploy's wire check reports every `For Each` item signal as a wire that cannot work
+
+**Measured 2026-09-21 (TPL-010-R2.4).** `nodegx-deploy.cjs templates/planner-demo …` reports
+`/Pages/Week: the wire twDayEach.itemOutputSignal-openLog → twSetLog.do cannot work (Source port
+doesn't exist.). It was published as it is.` — and the same for `toggle`, `openProject`, `addBlock`
+and the project card's `pick`. The committed build before R2.4 (`60c50a90d`) reports the same set
+for the wires it had, and every one of them is driven working in a browser (TPL-010 s3, and the
+R2.4 drive: 25/25 clauses, each through one of these wires). A For Each's item ports are dynamic,
+made from the template component's outputs, and the check does not make them.
+
+**Where it bites a person.** The report is right about other things: in the same run it named
+eight real broken wires (a Function writing its outputs as `Outputs[name]`, which the door does not
+declare as ports) — and they arrived mixed in with the false ones, indistinguishable by form. A
+person who learns to skim past "cannot work" lines will skim past the real one.
+
+**The cheapest door.** Resolve `itemOutput-*` / `itemOutputSignal-*` against the For Each's
+`template` component's outputs before calling a source port missing, as the editor does when it
+draws the node.
+

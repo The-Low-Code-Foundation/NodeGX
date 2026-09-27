@@ -55,6 +55,18 @@ export interface TemplateChoice {
    * provider could not say, and is read as "no".
    */
   needsBackend?: boolean;
+  /** CHR-006 — the card's picture URL. `undefined` draws the wireframe; never a guessed image. */
+  thumbnail?: string;
+  /** CHR-006 — the line above the title as the shelf wrote it. `undefined` falls back to the category's label. */
+  eyebrow?: string;
+  /**
+   * CHR-006 — the footer's backend tag, as words (`No backend` / `Needs a backend`).
+   *
+   * ⚠️ **A DISPLAY STRING BESIDE `needsBackend`, NOT A READ OF IT.** The Templates tab is gated
+   * (`rel-013`) never to name `needsBackend`, because that flag decides creation and creation has
+   * one route. The host derives the words from the same flag; `undefined` draws no tag.
+   */
+  backendLabel?: string;
 }
 
 /**

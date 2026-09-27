@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a8fa9e0e-06dc-574e-8f74-112a19006f7d",
+  "name": "Add task",
+  "path": "/Commands/Add task",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Adds a task at the bottom of the list, and writes \"Added at #n\" to its history."
+}

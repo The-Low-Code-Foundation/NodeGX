@@ -6,6 +6,8 @@
  * Includes caching to avoid repeated resolution on the same token map.
  */
 
+import { resolveVarsInline } from '@nodegx/project-contract/token-codecs';
+
 import { StyleTokenRecord } from './TokenCategories';
 
 const VAR_REGEX = /^var\((--[\w-]+)\)$/;
@@ -54,6 +56,19 @@ export class TokenResolver {
       this.cache.set(tokenName, resolved);
     }
     return resolved;
+  }
+
+  /**
+   * P102 CMP-001 §3 — resolve every `var()` **inside** a value, so a preview can paint it.
+   *
+   * `resolve()` above handles a value that IS one `var()`. It never touched a `var()` inside a
+   * gradient or a shadow, so `--gradient-brand` (`linear-gradient(135deg, var(--primary) 0%, …)`)
+   * painted as raw text — a blank swatch — in the Styles panel. This walks the value with the
+   * shared inline resolver (`@nodegx/project-contract/token-codecs`), following a token that refers
+   * to a token, stopping on a cycle, and leaving a name it does not know as written.
+   */
+  resolveInline(value: string): string {
+    return resolveVarsInline(value, (name) => this.tokens.get(name)?.value);
   }
 
   /**
@@ -152,6 +167,8 @@ export class TokenResolver {
     for (const [, token] of tokens) {
       lines.push(`  ${token.name}: ${token.value};`);
     }
-    return `:root {\n${lines.join('\n')}\n}\n\nbody {\n  font-family: var(--font-sans);\n  color: var(--foreground);\n}`;
+    return `:root {\n${lines.join(
+      '\n'
+    )}\n}\n\nbody {\n  font-family: var(--font-sans);\n  color: var(--foreground);\n}`;
   }
 }

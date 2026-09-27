@@ -266,7 +266,8 @@
         "text": "The five rooms are one Static Data node — open it and add a sixth.",
         "fontSize": "var(--text-sm)",
         "color": "var(--muted-foreground)",
-        "sizeMode": "contentSize"
+        "sizeMode": "contentHeight",
+        "textAlignX": "center"
       },
       "x": 160,
       "y": 1720
@@ -949,7 +950,8 @@
         "value-won-title": "Out, with all five behind you.",
         "value-won-line": "That is the lot. Move to start another run.",
         "value-won-shown": true,
-        "value-won-tone": "var(--accent-foreground)"
+        "value-won-tone": "var(--accent-foreground)",
+        "useTransitions": false
       },
       "x": 530,
       "y": 1360
@@ -968,7 +970,8 @@
         "value-hit-edge": "var(--destructive)",
         "value-hit-cls": "game-board game-board-hit",
         "value-dead-edge": "var(--destructive)",
-        "value-dead-cls": "game-board game-board-dead"
+        "value-dead-cls": "game-board game-board-dead",
+        "useTransitions": false
       },
       "x": 530,
       "y": 1120

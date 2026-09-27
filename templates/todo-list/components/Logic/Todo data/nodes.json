@@ -1,0 +1,191 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4c3cdd80-768e-508d-8b8f-0f92f384f9c0",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "dtIn",
+      "type": "Component Inputs",
+      "label": "When to load",
+      "ports": [
+        {
+          "name": "refresh",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "loadHistory",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "hasTask",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "dtOut",
+      "type": "Component Outputs",
+      "label": "The records",
+      "ports": [
+        {
+          "name": "tasks",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "actions",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "events",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "recent",
+          "plug": "input",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "dtSelected",
+      "type": "Variable2",
+      "label": "The selected task",
+      "parameters": {
+        "name": "todoSelected"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "dtTasks",
+      "type": "DbCollection2",
+      "label": "Your tasks",
+      "parameters": {
+        "runOnChange-records": true,
+        "runOnChange-search": true,
+        "collectionName": "Task",
+        "runOnChange-collectionName": false,
+        "runOnChange-querySettings": false,
+        "storageEnableLimit": true,
+        "storageLimit": 1000,
+        "visualSort": [
+          {
+            "property": "position",
+            "order": "ascending"
+          }
+        ]
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "dtActions",
+      "type": "DbCollection2",
+      "label": "Your next actions",
+      "parameters": {
+        "runOnChange-records": true,
+        "runOnChange-search": true,
+        "collectionName": "Action",
+        "runOnChange-collectionName": false,
+        "runOnChange-querySettings": false,
+        "storageEnableLimit": true,
+        "storageLimit": 1000,
+        "visualSort": [
+          {
+            "property": "position",
+            "order": "ascending"
+          }
+        ]
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "dtEvents",
+      "type": "DbCollection2",
+      "label": "The selected task’s history",
+      "parameters": {
+        "runOnChange-records": true,
+        "runOnChange-search": true,
+        "collectionName": "Event",
+        "runOnChange-collectionName": false,
+        "runOnChange-querySettings": false,
+        "storageEnableLimit": true,
+        "runOnChange-qp-taskId": false,
+        "storageLimit": 1000,
+        "visualFilter": {
+          "combinator": "and",
+          "rules": [
+            {
+              "property": "taskId",
+              "operator": "equal to",
+              "input": "taskId"
+            }
+          ]
+        },
+        "visualSort": [
+          {
+            "property": "at",
+            "order": "descending"
+          }
+        ]
+      },
+      "x": 40,
+      "y": 640
+    },
+    {
+      "id": "dtRecent",
+      "type": "DbCollection2",
+      "label": "Recent history, all tasks",
+      "parameters": {
+        "runOnChange-records": true,
+        "runOnChange-search": true,
+        "collectionName": "Event",
+        "runOnChange-collectionName": false,
+        "runOnChange-querySettings": false,
+        "storageEnableLimit": true,
+        "storageLimit": 300,
+        "visualSort": [
+          {
+            "property": "at",
+            "order": "descending"
+          }
+        ]
+      },
+      "x": 40,
+      "y": 760
+    },
+    {
+      "id": "dtHasTask",
+      "type": "Condition",
+      "label": "Is a task selected?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 40,
+      "y": 880
+    },
+    {
+      "id": "dtLoadProblem",
+      "type": "Set Variable",
+      "label": "Say the list did not load",
+      "parameters": {
+        "name": "todoProblem",
+        "setWith": "string",
+        "value": "Your list could not be loaded. Check that the backend is running, then sign in again."
+      },
+      "x": 40,
+      "y": 1000
+    }
+  ]
+}

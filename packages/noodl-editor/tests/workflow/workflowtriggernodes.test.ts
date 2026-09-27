@@ -25,11 +25,7 @@ import {
   triggerTypeName,
   typeNameForKind
 } from '../../src/editor/src/models/workflow/workflowNodeLibrary';
-import {
-  cronGloss,
-  isTargetResolved,
-  webhookUrl
-} from '../../src/editor/src/models/triggers/TriggerBackendClient';
+import { webhookUrl } from '../../src/editor/src/models/triggers/TriggerBackendClient';
 import {
   isTriggerNode,
   MANUAL_TRIGGER_NODE_ID,
@@ -127,6 +123,9 @@ function scheduleTrigger(overrides: Partial<TriggerDef> = {}): TriggerDef {
     enabled: true,
     target: { kind: 'workflow', name: 'orderPipeline' },
     schedule: { cron: '0 3 * * *', missedFirePolicy: 'skip', payload: { mode: 'nightly' } },
+    // BMG-012: the words are the backend's (`GET /admin/triggers` decorates `scheduleWords`), never a
+    // gloss of the editor's own.
+    scheduleWords: 'at 03:00 daily',
     status: status(),
     ...overrides
   } as TriggerDef;
@@ -245,7 +244,7 @@ describe('WFA-005 trigger entry nodes', () => {
   });
 
   describe('what the card says', () => {
-    it('names the schedule in plain English, and says when it is off', () => {
+    it('names the schedule in the backend\'s plain English, and says when it is off', () => {
       expect(triggerSubLabel(scheduleTrigger())).toBe('Schedule · at 03:00 daily');
       expect(triggerSubLabel(scheduleTrigger({ enabled: false }))).toContain('DISABLED');
     });
@@ -278,7 +277,7 @@ describe('WFA-005 trigger entry nodes', () => {
       expect(String(rows.secret)).not.toContain('whsec_');
     });
 
-    it('shows a schedule its gloss, next fire and payload', () => {
+    it('shows a schedule the backend\'s words for it, next fire and payload', () => {
       const rows = triggerParameters(scheduleTrigger(), {
         backendId: 'backend_test',
         backendName: 'SQLite backend',
@@ -305,41 +304,35 @@ describe('WFA-005 trigger entry nodes', () => {
     });
   });
 
-  describe('the helpers the panel and the canvas share', () => {
-    it('glosses the cron shapes people actually write', () => {
-      expect(cronGloss('*/5 * * * *')).toBe('every 5 minutes');
-      expect(cronGloss('* * * * *')).toBe('every minute');
-      expect(cronGloss('0 3 * * *')).toBe('at 03:00 daily');
-      expect(cronGloss('30 * * * *')).toBe('every hour, at 30 past');
-      expect(cronGloss('@daily')).toBe('every day at midnight');
-      expect(cronGloss('0 9 * * 1')).toBe('at 09:00 every Monday');
+  describe('the helpers the canvas reads (BMG-012: the panel is gone, the gloss is the backend\'s)', () => {
+    const scheduled = (scheduleWords: string | null | undefined): TriggerDef => ({
+      id: 'trg_words',
+      type: 'schedule',
+      enabled: true,
+      target: { kind: 'function', name: 'digest' },
+      schedule: { cron: '0 3 * * *', missedFirePolicy: 'skip' },
+      scheduleWords,
+      status: { fireCount: 0 } as TriggerDef['status']
     });
 
-    /** A wrong gloss is read as the truth about when this fires. */
-    it('says nothing rather than guessing at an expression it does not recognise', () => {
-      expect(cronGloss('0 0 1-5,10 */2 3')).toBeNull();
-      expect(cronGloss('nonsense')).toBeNull();
+    it('labels a schedule with the words the backend decorated it with, never a gloss of its own', () => {
+      expect(triggerSubLabel(scheduled('at 03:00 daily'))).toContain('at 03:00 daily');
+      expect(triggerSubLabel(scheduled('at 03:00 daily'))).not.toContain('0 3 * * *');
+    });
+
+    /** A wrong gloss is read as the truth about when this fires — so with no words, the cron itself. */
+    it('shows the cron as written when the backend has no reading of it', () => {
+      expect(triggerSubLabel(scheduled(null))).toContain('0 3 * * *');
+      expect(triggerSubLabel(scheduled(undefined))).toContain('0 3 * * *');
+      const rows = triggerParameters(scheduled(null), { backendId: 'b', backendName: 'B', endpoint: null });
+      expect(rows.when).toBe('no plain-English reading of this expression');
+      expect(rows.cron).toBe('0 3 * * *');
     });
 
     it('builds the hook URL the sender is pointed at', () => {
       expect(webhookUrl('http://127.0.0.1:8578/', 'backend_test', 'orders')).toBe(
         'http://127.0.0.1:8578/hooks/backend_test/orders'
       );
-    });
-
-    it('resolves a target against what the backend has, per kind', () => {
-      const targets = { functions: ['saveOrder'], workflows: [{ id: 'orderPipeline', name: 'Order Pipeline' }], known: true };
-      expect(isTargetResolved({ kind: 'function', name: 'saveOrder' }, targets)).toBe(true);
-      expect(isTargetResolved({ kind: 'function', name: 'orderPipeline' }, targets)).toBe(false);
-      expect(isTargetResolved({ kind: 'workflow', name: 'orderPipeline' }, targets)).toBe(true);
-    });
-
-    /**
-     * "We could not ask" must not be reported as "it is not there" — a wrong
-     * warning about a working trigger is worse than no warning.
-     */
-    it('answers null when the backend could not be asked', () => {
-      expect(isTargetResolved({ kind: 'function', name: 'saveOrder' }, { functions: [], workflows: [], known: false })).toBeNull();
     });
   });
 });

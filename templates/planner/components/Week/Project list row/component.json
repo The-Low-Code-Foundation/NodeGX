@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6769d649-eca5-5af2-8105-03235bbab717",
+  "name": "Project list row",
+  "path": "/Week/Project list row",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One project in the card’s list: its name, its hours this week, its next move, and a bar of how much of the week it is taking."
+}

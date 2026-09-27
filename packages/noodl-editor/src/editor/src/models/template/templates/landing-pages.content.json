@@ -2256,7 +2256,10 @@
               "name": "workFilter"
             },
             "ports": [],
-            "dynamicports": []
+            "dynamicports": [],
+            "metadata": {
+              "comment": "Shared on purpose: every pill on the page reads and writes the one filter the work list uses."
+            }
           },
           {
             "id": "fpState",

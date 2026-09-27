@@ -1,0 +1,128 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8a236654-a0bb-57eb-8aa8-e5663b59f8bd",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "kbIn",
+      "type": "Component Inputs",
+      "label": "Which key",
+      "ports": [
+        {
+          "name": "layout",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "nextKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "show",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "wrongKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "wrongCount",
+          "plug": "output",
+          "type": "number"
+        }
+      ],
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "kbRoot",
+      "type": "Group",
+      "label": "The keyboard",
+      "children": [
+        "kbPick",
+        "kbMap"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "column",
+        "alignItems": "flex-end",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "kbPick",
+      "type": "net.noodl.controls.options",
+      "label": "FR, UK or US",
+      "parent": "kbRoot",
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "kbMap",
+      "type": "game-kit.KeyboardMap",
+      "label": "The kit’s keyboard",
+      "parent": "kbRoot",
+      "parameters": {
+        "keySize": 34
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "kbShown",
+      "type": "Expression",
+      "label": "Only when asked",
+      "parameters": {
+        "expression": "show === true"
+      },
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "kbPickItems",
+      "type": "JavaScriptFunction",
+      "label": "The three keyboards",
+      "parameters": {
+        "functionScript": "Outputs.items = [{ Label: 'FR', Value: 'azerty' }, { Label: 'UK', Value: 'qwerty-uk' }, { Label: 'US', Value: 'qwerty' }];"
+      },
+      "x": 350,
+      "y": 160,
+      "ports": [
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "kbOut",
+      "type": "Component Outputs",
+      "label": "The keyboard chosen",
+      "ports": [
+        {
+          "name": "picked",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pick",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "kbRoot"
+  ]
+}

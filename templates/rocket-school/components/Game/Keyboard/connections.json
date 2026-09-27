@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8a236654-a0bb-57eb-8aa8-e5663b59f8bd",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "kbIn",
+      "fromProperty": "layout",
+      "toId": "kbMap",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "kbIn",
+      "fromProperty": "nextKey",
+      "toId": "kbMap",
+      "toProperty": "nextKey"
+    },
+    {
+      "fromId": "kbIn",
+      "fromProperty": "wrongKey",
+      "toId": "kbMap",
+      "toProperty": "wrongKey"
+    },
+    {
+      "fromId": "kbIn",
+      "fromProperty": "wrongCount",
+      "toId": "kbMap",
+      "toProperty": "wrongCount"
+    },
+    {
+      "fromId": "kbIn",
+      "fromProperty": "show",
+      "toId": "kbShown",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "kbShown",
+      "fromProperty": "result",
+      "toId": "kbMap",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "kbShown",
+      "fromProperty": "result",
+      "toId": "kbPick",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "kbRoot",
+      "fromProperty": "didMount",
+      "toId": "kbPickItems",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "kbPickItems",
+      "fromProperty": "out-items",
+      "toId": "kbPick",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "kbIn",
+      "fromProperty": "layout",
+      "toId": "kbPick",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "kbPick",
+      "fromProperty": "value",
+      "toId": "kbOut",
+      "toProperty": "picked"
+    },
+    {
+      "fromId": "kbPick",
+      "fromProperty": "onChange",
+      "toId": "kbOut",
+      "toProperty": "pick"
+    }
+  ]
+}

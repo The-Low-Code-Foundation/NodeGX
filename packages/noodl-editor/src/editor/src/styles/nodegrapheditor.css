@@ -124,3 +124,13 @@
 .nodegraph-wire-label-editor:focus {
   outline: none;
 }
+
+/* TVW-007 AC2b: the instance hover card's layer. Screen-space (it is NOT inside
+   `#nodegraph-dom-layer`, which carries the pan/zoom transform), and transparent
+   to the pointer — the card itself turns pointer events back on, because the
+   close condition depends on the pointer being able to reach it. */
+.instance-hover-root {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}

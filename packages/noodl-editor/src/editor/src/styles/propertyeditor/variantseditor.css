@@ -6,11 +6,52 @@
      that typename; the "Style" section's "Variant" picker stamps a built-in preset's parameters
      in place and creates nothing. Two different systems that read as one feature because nothing
      drew a line between them. `border-default` is the divider token this panel already uses for
-     the same job (`.property-header-bar`, `.property-group-children`). */
-  border-bottom: 1px solid var(--theme-color-border-default);
+     the same job (`.property-header-bar`, `.property-group-children`).
+     CHR-009: removed again — the section is one 30px `Variant` row now, labelled, and the
+     `State` row under it is the same shape; a hairline between two rows of one column is the
+     "separate bars" look the rows replaced. */
   position: relative;
   display: flex;
+  /* P94 STY-003: a column, because the row now has a second line under it — `Worn by 26 nodes`.
+     It was `align-items: center` on a single child, so the row's own centring is unchanged; the
+     inner `.variants-section` still lays itself out as a flex row and CHR-009's row shape is
+     untouched. `stretch` rather than `center` so the field keeps the full panel width. */
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* P94 STY-003 §3.1 — what a change to this row costs, quiet: it is a consequence, not a control.
+   Since P103 CMG-011 it also carries the Look's Edit and In Styles. */
+.variants-wearer-line {
+  display: flex;
   align-items: center;
+  gap: 8px;
+  padding: 0 16px 6px 16px;
+  color: var(--theme-color-fg-default-shy);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+}
+
+/* P103 CMG-011 row 2 — the count sits under the label, the Look's actions under the field, so the
+   field keeps the whole field column (they shared its row and left the Look's name 33px). */
+.variants-wearer-count {
+  flex: 0 1 var(--property-label-column, 118px);
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.variants-wearer-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.variants-wearer-actions .panel-head-row-action {
+  height: 22px;
+  padding: 0 6px;
+  font-size: var(--font-size-xs);
 }
 
 .variants-section {
@@ -85,18 +126,14 @@
 .variants-header span {
   margin-top: -1px;
   font-weight: var(--font-weight-semibold);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
 }
 
-.variants-header .fa {
-  padding-top: 2px;
-}
-
-.variants-add-header > i.fa {
-  margin-left: auto;
-  margin-right: 3px;
-}
-
+/* CHR-010: the two rules that stood here keyed on Font Awesome's `.fa` class —
+   a `padding-top: 2px` baseline nudge for a glyph drawn as text, and the
+   right-push for the header's `+`. Both are gone with the font: a core-ui
+   <Icon> is centred by the header's own flex box, and the `+` now shares the
+   `.add-button` rule below with the identical "Create new page" header. */
 .variants-add-header .add-button {
   margin-left: auto;
   margin-right: 0px;
@@ -145,7 +182,7 @@
   color: var(--theme-color-fg-default);
   padding: 5px 8px;
   border-radius: 1px;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   line-height: 17px;
   border: none;
   align-items: center;
@@ -257,4 +294,246 @@
   bottom: 0;
   pointer-events: none;
   border: 2px solid var(--theme-color-secondary);
+}
+
+/* =============================================================================
+   CHR-009 §2 — `Variant` and `State` as rows of the panel's label column.
+
+   The same geometry as a property row (`PropertyPanelInput.module.scss`): the
+   16px groups gutter, a label in `--property-label-column` in `fg-default-shy` at `-sm`, an 8px gap,
+   and a 26px field on `bg-2` with the `border-default` edge the number+unit
+   field uses. They were two 50px bars ("Add style variant ＋", "Neutral state ⇕")
+   each with its own divider.
+   ============================================================================= */
+.variants-section.panel-head-row {
+  min-height: 30px;
+  padding: 0 16px;
+  gap: 8px;
+}
+
+.panel-head-row-label {
+  flex: 0 0 var(--property-label-column, 118px);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  color: var(--theme-color-fg-default-shy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panel-head-row-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 26px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--theme-color-bg-2);
+  color: var(--theme-color-fg-default);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.panel-head-row-field:hover {
+  border-color: var(--theme-color-border-strong);
+}
+
+.panel-head-row-field:focus-visible {
+  outline: 1px solid var(--theme-color-primary);
+  outline-offset: 1px;
+}
+
+.panel-head-row-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panel-head-row-value.is-placeholder {
+  color: var(--theme-color-fg-default-shy);
+}
+
+.panel-head-row-glyph {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  color: var(--theme-color-fg-default-shy);
+}
+
+.panel-head-row-action {
+  flex: none;
+  height: 26px;
+  box-sizing: border-box;
+  padding: 0 8px;
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--theme-color-fg-default);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.panel-head-row-action:hover {
+  border-color: var(--theme-color-border-strong);
+  color: var(--theme-color-fg-highlight);
+}
+
+/* ── P94 STY-003 AC6/AC7 — the Look menu (design §4) ──────────────────────────────────────────
+ *
+ * 🔴 NOTE WHAT IS NOT HERE: a `visibility: hidden`. `.variants-item-icon` above is the rule AC7
+ * exists to remove — two icons revealed only by `:hover`, confirmed at rest and under a real hover
+ * with a control pair on the same element. The row's actions now hang off one always-visible `⋯`
+ * (R6: "it says 'there are actions here' without putting two bins in your eyeline on every row"),
+ * and nothing below may re-introduce a hover-gated affordance. */
+
+.variants-section-heading {
+  padding: 8px 10px 4px 10px;
+  color: var(--theme-color-fg-default-shy);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Rule 4, said out loud — "it won't change under you later" is the opposite of what a person
+   expects a shipped thing to do, so it is stated rather than implied. */
+.variants-section-note {
+  padding: 4px 10px 8px 10px;
+  color: var(--theme-color-fg-default-shy);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+}
+
+/* Design §4's `26`. A fact about the Look, on the trailing edge, like the panel's group badges. */
+.variant-item-count {
+  flex-shrink: 0;
+  padding: 0 8px;
+  color: var(--theme-color-fg-default-shy);
+  font-size: var(--font-size-xs);
+}
+
+.variant-item-current {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding-right: 4px;
+  color: var(--theme-color-fg-accent);
+}
+
+/* R6's one visible control. No `visibility` rule, deliberately — see the note above. */
+.variants-row-menu-button {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  margin-right: 4px;
+  border: none;
+  border-radius: 3px;
+  background-color: transparent;
+  color: var(--theme-color-fg-default-shy);
+  font-size: var(--font-size-md);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.variants-row-menu-button:hover,
+.variants-row-menu-button[aria-expanded='true'] {
+  background-color: var(--theme-color-bg-4);
+  color: var(--theme-color-fg-highlight);
+}
+
+.variants-row-actions {
+  display: flex;
+  gap: 4px;
+  padding: 4px 10px 6px 10px;
+  background-color: var(--theme-color-bg-2);
+}
+
+.variants-row-action {
+  padding: 2px 8px;
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: 3px;
+  background-color: transparent;
+  color: var(--theme-color-fg-default);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+}
+
+.variants-row-action:hover {
+  border-color: var(--theme-color-border-hover);
+  color: var(--theme-color-fg-highlight);
+}
+
+.variants-row-action.is-danger:hover {
+  border-color: var(--theme-color-danger);
+  color: var(--theme-color-fg-danger);
+}
+
+/* HLT-006 — the design-token rows in the colour style picker.
+   Every colour here is a theme variable: the P92 hex ratchet reads this file. */
+.variants-header.is-toggle {
+  cursor: pointer;
+  user-select: none;
+}
+
+.variants-header.is-toggle:hover {
+  color: var(--theme-color-fg-highlight);
+}
+
+.variants-header .variants-header-count {
+  margin-left: auto;
+  margin-right: 8px;
+  font-weight: var(--font-weight-regular);
+  color: var(--theme-color-fg-default-shy);
+}
+
+/* The resolved value beside a token row, so "what colour IS --primary" is answered in the
+   picker rather than by going to look it up. Shy, monospaced, and it never takes room from
+   the name — the name keeps flex-grow and this shrinks away first. */
+.token-item-value {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* A long name runs right up to its value without this — `--primary-foreground#ffffff` was the
+     first frame shot of this row. The gutter is on the VALUE so the name keeps every pixel it can. */
+  padding-left: 8px;
+  padding-right: 6px;
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-code);
+  color: var(--theme-color-fg-default-shy);
+}
+
+.variants-pick-variant-item:hover .token-item-value {
+  color: var(--theme-color-fg-default);
+}
+
+/* HLT-012 — the token picker a numeric field opens.
+
+   🔴 **The name stops wrapping here, and only here.** `.variant-item-name` carries
+   `overflow-wrap: anywhere` because a colour STYLE is user-named and can be a sentence. A design
+   token is not: the longest shipped name is `--tracking-widest`, and the three `--display-*` rows
+   were the only ones that wrapped — each into three lines, beside a `clamp(1.875rem, 1.2rem + …)`
+   value, which is what the first driven shot photographed. One line per token, both columns
+   truncating, is the shape every other row in this popout already had. */
+.token-field-picker .variant-item-name {
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A resolved value can be a whole `clamp()` expression, so it gets a ceiling rather than half the
+   row: the name is what a person is reading down, the value is what confirms the choice. */
+.token-field-picker .token-item-value {
+  max-width: 45%;
 }

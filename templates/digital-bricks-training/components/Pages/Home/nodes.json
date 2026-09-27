@@ -1,0 +1,573 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "02367b69-5625-4431-83e6-1d395135d674",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hm_page",
+      "type": "Page",
+      "label": "Home",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "hm_band"
+      ],
+      "parameters": {
+        "urlPath": "home",
+        "title": "Digital Bricks Training"
+      }
+    },
+    {
+      "id": "hm_band",
+      "type": "Group",
+      "label": "The ground",
+      "x": 100,
+      "y": 160,
+      "parent": "hm_page",
+      "children": [
+        "hm_shell"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "paddingTop": "var(--space-24)",
+        "paddingBottom": "var(--space-24)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "hm_shell",
+      "type": "Group",
+      "label": "The shell",
+      "x": 160,
+      "y": 280,
+      "parent": "hm_band",
+      "children": [
+        "hm_eyebrow",
+        "hm_title",
+        "hm_line",
+        "hm_actions",
+        "hm_note"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 720,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-5)"
+      }
+    },
+    {
+      "id": "hm_eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "x": 220,
+      "y": 400,
+      "parent": "hm_shell",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--thread-deep)"
+      },
+      "metadata": {
+        "comment": "The accent AS TEXT is --thread-deep (4.65:1), never the coral fill (2.92:1) — sprint 43 §2.2. The alias is defined in the kit stylesheet."
+      }
+    },
+    {
+      "id": "hm_title",
+      "type": "Text",
+      "label": "The headline",
+      "x": 220,
+      "y": 500,
+      "parent": "hm_shell",
+      "parameters": {
+        "as": "h1",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-5xl)",
+        "fontWeight": 800,
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      },
+      "metadata": {
+        "comment": "Grandstander 800 — the one display face, bundled by rocket-school-fonts."
+      }
+    },
+    {
+      "id": "hm_line",
+      "type": "Text",
+      "label": "One line",
+      "x": 220,
+      "y": 600,
+      "parent": "hm_shell",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        }
+      }
+    },
+    {
+      "id": "hm_actions",
+      "type": "Group",
+      "label": "Actions",
+      "x": 220,
+      "y": 700,
+      "parent": "hm_shell",
+      "children": [
+        "hm_cta",
+        "hm_coach",
+        "hm_open_course",
+        "hm_open_people",
+        "hm_signout"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "columnGap": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-3)"
+      },
+      "metadata": {
+        "comment": "WRAPS (TASK-L171, measured): the two doors side by side pushed \"Log in as their trainer\" to right=446 on a 390px screen, a horizontal scroll on the front door that predates the backend. A wrapped row of content-sized buttons is the intent (the lesson stepper's recipe), not a grid."
+      }
+    },
+    {
+      "id": "hm_cta",
+      "type": "net.noodl.controls.button",
+      "label": "Open your course",
+      "x": 280,
+      "y": 800,
+      "parent": "hm_actions",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn btn-thread pressable",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)"
+      },
+      "metadata": {
+        "comment": "The sticker book's button is the lifted .btn.btn-thread rules in the kit stylesheet: Grandstander 800, an ink edge, the 4px pop, ink on coral. Wired to Pages/Course by TASK-L156."
+      }
+    },
+    {
+      "id": "hm_go",
+      "type": "RouterNavigate",
+      "label": "→ Sign in, as the learner",
+      "x": 700,
+      "y": 800,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Sign in",
+        "pm-email": "sam.okafor@example.test"
+      },
+      "metadata": {
+        "comment": "A PREFILL, NOT A GATE (TASK-L171 decision 8). The door opens sign-in with the learner's demo address filled in, so a developer running this locally is one click from the link in Mailpit. Whoever signs in is whoever owns the inbox; the address decides nothing."
+      }
+    },
+    {
+      "id": "t_hm_eyebrow",
+      "type": "Translation",
+      "label": "common:productName",
+      "x": 1000,
+      "y": 880,
+      "parameters": {
+        "Key": "productName",
+        "Namespace": "common"
+      },
+      "metadata": {
+        "comment": "Was the literal \"Digital Bricks Training\" on hm_eyebrow.text. It lives in Data/Strings now (TASK-L161)."
+      }
+    },
+    {
+      "id": "t_hm_title",
+      "type": "Translation",
+      "label": "home:headline",
+      "x": 1000,
+      "y": 970,
+      "parameters": {
+        "Key": "headline",
+        "Namespace": "home"
+      },
+      "metadata": {
+        "comment": "Was the literal \"Learn to build the thing you actually need.\" on hm_title.text. It lives in Data/Strings now (TASK-L161)."
+      }
+    },
+    {
+      "id": "t_hm_line",
+      "type": "Translation",
+      "label": "home:lede",
+      "x": 1000,
+      "y": 1060,
+      "parameters": {
+        "Key": "lede",
+        "Namespace": "home"
+      },
+      "metadata": {
+        "comment": "Was the literal \"Your own project is the course. Every lesson is written for it, in an order that makes sense for what you are making — with a coach who reads the same page you do.\" on hm_line.text. It lives in Data/Strings now (TASK-L161)."
+      }
+    },
+    {
+      "id": "t_hm_cta",
+      "type": "Translation",
+      "label": "home:openCourse",
+      "x": 1000,
+      "y": 1150,
+      "parameters": {
+        "Key": "openCourse",
+        "Namespace": "home"
+      },
+      "metadata": {
+        "comment": "Was the literal \"Open your course\" on hm_cta.label. It lives in Data/Strings now (TASK-L161)."
+      }
+    },
+    {
+      "id": "t_hm_page_title",
+      "type": "Translation",
+      "label": "common:productName (the tab)",
+      "x": 1400,
+      "y": 900,
+      "parameters": {
+        "Key": "productName",
+        "Namespace": "common"
+      }
+    },
+    {
+      "id": "seo_hm_page",
+      "type": "JavaScriptFunction",
+      "label": "Set the browser tab",
+      "x": 1400,
+      "y": 1020,
+      "parameters": {
+        "functionScript": "// The page title is the browser TAB, and it is the one learner-facing string a\n// Translation node cannot reach: `Page.title` is read off the node's PARAMETERS at\n// export time into the router index (utils/exporter/router.ts), and the Router hands\n// that to Noodl.SEO.setTitle on mount. A connection to the port is silently ignored —\n// measured, TASK-L161 §1: with the parameter removed and a Translation wired, the tab\n// read \"Home\", the component name.\n//\n// So the parameter stays as the BUILD-TIME FALLBACK (the router index needs it, and it\n// is what the tab shows for the instant before this runs), and the translated value\n// overrides it here. Same shape as the kit's built-in English: a fallback is not a\n// second owner.\nconst t = Inputs.title;\nif (typeof t === 'string' && t !== '' && typeof Noodl !== 'undefined' && Noodl.SEO) {\n  Noodl.SEO.setTitle(t);\n}\n"
+      },
+      "ports": [
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "string",
+          "displayName": "title",
+          "group": "Inputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Why a JavaScript node and not a wire to Page.title: the port is build-time. See the script."
+      }
+    },
+    {
+      "id": "hm_coach",
+      "type": "net.noodl.controls.button",
+      "label": "Coach's view",
+      "x": 480,
+      "y": 640,
+      "parent": "hm_actions",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)"
+      },
+      "metadata": {
+        "comment": "TASK-L164. The template shows BOTH sides of the one assembly, so the front door offers the coach's. In a real product this is not a button on a public page: it is the staff gate, and that is the backend's job, not the template's (START-HERE)."
+      }
+    },
+    {
+      "id": "hm_go_people",
+      "type": "RouterNavigate",
+      "label": "→ Sign in, as their trainer",
+      "x": 900,
+      "y": 640,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Sign in",
+        "pm-email": "trainer@example.test"
+      },
+      "metadata": {
+        "comment": "A PREFILL, NOT A GATE (TASK-L171 decision 8) — the one place a staff address is written in this graph, and it decides nothing. Who is staff is the backend's `staff` role alone (nodegx.security.json), read on this page from the User node's `roles`, never from an email. tools/check-signin.py holds that."
+      }
+    },
+    {
+      "id": "t_hm_coach",
+      "type": "Translation",
+      "label": "home:coachView",
+      "x": 1200,
+      "y": 640,
+      "parameters": {
+        "Key": "coachView",
+        "Namespace": "home"
+      }
+    },
+    {
+      "id": "hm_note",
+      "type": "Text",
+      "label": "Nothing is saved",
+      "x": 220,
+      "y": 820,
+      "parent": "hm_shell",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        }
+      },
+      "metadata": {
+        "comment": "A visitor pressing a button called 'log in' is owed the truth about what happens next. Since TASK-L171 something IS sent: a sign-in link, by email. So the sentence says that, and says what is still true — this version only reads, so nothing anybody does once in changes a programme. Re-read it the day the first write lands."
+      }
+    },
+    {
+      "id": "t_hm_note",
+      "type": "Translation",
+      "label": "home:demoNote",
+      "x": 1000,
+      "y": 1200,
+      "parameters": {
+        "Key": "demoNote",
+        "Namespace": "home"
+      }
+    },
+    {
+      "id": "hm_open_course",
+      "type": "net.noodl.controls.button",
+      "label": "Open your course",
+      "x": 160,
+      "y": 900,
+      "parent": "hm_actions",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn btn-thread pressable",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "mounted": false
+      }
+    },
+    {
+      "id": "hm_open_people",
+      "type": "net.noodl.controls.button",
+      "label": "Open your people",
+      "x": 160,
+      "y": 980,
+      "parent": "hm_actions",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn btn-thread pressable",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "mounted": false
+      }
+    },
+    {
+      "id": "hm_signout",
+      "type": "net.noodl.controls.button",
+      "label": "Sign out",
+      "x": 160,
+      "y": 1060,
+      "parent": "hm_actions",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "mounted": false
+      }
+    },
+    {
+      "id": "hm_user",
+      "type": "net.noodl.user.User",
+      "label": "Who is signed in",
+      "x": 900,
+      "y": 900
+    },
+    {
+      "id": "hm_who",
+      "type": "JavaScriptFunction",
+      "label": "Which doors",
+      "x": 900,
+      "y": 1020,
+      "parameters": {
+        "functionScript": "/*\n * WHICH DOORS (TASK-L171 §2). Signed out: the two demo doors and the note that\n * says what they do. Signed in: one way on, decided by the backend's ROLE, never\n * by an address — L102's single owner is the backend's `staff` role now.\n *\n * `roles` is undefined when the backend has not said and [] when the user is in\n * none (user.ts, DEF-005). Undefined shows NEITHER way on rather than guessing\n * the learner's: a coach must not be offered a course that is not theirs because\n * a read had not come back yet. Nothing ASKS for them: a magic link's exchange\n * carries them (NodeGX HLT-024) and a stored session is re-read on load, so the\n * wait is short; this node only reads the answer, which every User node shares.\n */\nconst signedIn = Inputs.signedIn === true;\nconst roles = Array.isArray(Inputs.roles) ? Inputs.roles : undefined;\nOutputs.signedOut = !signedIn;\nOutputs.isStaff = signedIn && !!roles && roles.indexOf('staff') !== -1;\nOutputs.isLearner = signedIn && !!roles && roles.indexOf('staff') === -1;\nOutputs.canSignOut = signedIn;\n"
+      },
+      "ports": [
+        {
+          "name": "in-signedIn",
+          "displayName": "signedIn",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-roles",
+          "displayName": "roles",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-signedOut",
+          "displayName": "signedOut",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isStaff",
+          "displayName": "isStaff",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isLearner",
+          "displayName": "isLearner",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-canSignOut",
+          "displayName": "canSignOut",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "hm_to_course",
+      "type": "RouterNavigate",
+      "label": "→ Course",
+      "x": 900,
+      "y": 1140,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Course"
+      }
+    },
+    {
+      "id": "hm_to_people",
+      "type": "RouterNavigate",
+      "label": "→ People",
+      "x": 900,
+      "y": 1240,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/People"
+      }
+    },
+    {
+      "id": "hm_logout",
+      "type": "net.noodl.user.LogOut",
+      "label": "Sign out",
+      "x": 900,
+      "y": 1340
+    },
+    {
+      "id": "t_hm_open_course",
+      "type": "Translation",
+      "label": "home:signedIn.course",
+      "x": 1200,
+      "y": 900,
+      "parameters": {
+        "Key": "signedIn.course",
+        "Namespace": "home"
+      }
+    },
+    {
+      "id": "t_hm_open_people",
+      "type": "Translation",
+      "label": "home:signedIn.people",
+      "x": 1200,
+      "y": 980,
+      "parameters": {
+        "Key": "signedIn.people",
+        "Namespace": "home"
+      }
+    },
+    {
+      "id": "t_hm_signout",
+      "type": "Translation",
+      "label": "home:signedIn.signOut",
+      "x": 1200,
+      "y": 1060,
+      "parameters": {
+        "Key": "signedIn.signOut",
+        "Namespace": "home"
+      }
+    },
+    {
+      "id": "t_hm_line_in",
+      "type": "Translation",
+      "label": "home:signedIn.lede",
+      "x": 1200,
+      "y": 1140,
+      "parameters": {
+        "Key": "signedIn.lede",
+        "Namespace": "home"
+      }
+    },
+    {
+      "id": "hm_which_lede",
+      "type": "JavaScriptFunction",
+      "label": "Which lede",
+      "x": 1500,
+      "y": 1140,
+      "parameters": {
+        "functionScript": "/*\n * WHICH LEDE (TASK-L171). The signed-out lede ends \"Look at it from either\n * side:\", which introduces the two doors. Signed in there is one way on, so that\n * clause would point at buttons that are not there — found by looking at the\n * screenshot, not by any count. The signed-in lede is the same sentence without\n * it, one key in Data/Strings.\n */\nconst out = Inputs.signedOut !== false;\nOutputs.text = out ? Inputs.doors : Inputs.signedIn;\n"
+      },
+      "ports": [
+        {
+          "name": "in-signedOut",
+          "displayName": "signedOut",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-doors",
+          "displayName": "doors",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-signedIn",
+          "displayName": "signedIn",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "hm_page"
+  ]
+}

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- FED-001 fixture: Atom 1.0, with the rel="self" link that trips naive readers. Synthetic. -->
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Field Notes</title>
+  <subtitle>Short posts from a working engineer</subtitle>
+  <link rel="self" href="https://fieldnotes.example/atom.xml"/>
+  <link rel="alternate" type="text/html" href="https://fieldnotes.example/"/>
+  <updated>2026-09-16T11:20:00Z</updated>
+  <id>urn:uuid:8f1c0a12-0000-4000-8000-000000000001</id>
+  <entry>
+    <title type="text">Reading a feed is not reading XML</title>
+    <link rel="self" href="https://fieldnotes.example/atom/44"/>
+    <link rel="alternate" type="text/html" href="https://fieldnotes.example/44"/>
+    <id>tag:fieldnotes.example,2026:44</id>
+    <published>2026-09-16T11:20:00Z</published>
+    <updated>2026-09-16T12:00:00Z</updated>
+    <author><name>B. Engineer</name><uri>https://fieldnotes.example/about</uri></author>
+    <category term="parsing" label="Parsing"/>
+    <summary>Four formats, one shape, and the hour you lose to rel="self".</summary>
+    <content type="html">&lt;p&gt;Four formats, one shape.&lt;/p&gt;</content>
+  </entry>
+  <entry>
+    <title type="text">A date is not a string</title>
+    <link rel="alternate" type="text/html" href="https://fieldnotes.example/43"/>
+    <id>tag:fieldnotes.example,2026:43</id>
+    <published>2026-09-12T07:45:00Z</published>
+    <updated>2026-09-12T07:45:00Z</updated>
+    <author><name>B. Engineer</name></author>
+    <summary>Until you sort by it.</summary>
+  </entry>
+</feed>

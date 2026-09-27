@@ -5,6 +5,7 @@ import { IconInput, IconValue } from '../components/IconInput';
 import IconPicker from '../iconpicker';
 import { TypeView } from '../TypeView';
 import { getConnectionSourceLabel, getConnectionSourceNavigate, getEditType } from '../utils';
+import { unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
 
 export class IconType extends TypeView {
   el: TSFixme;
@@ -100,7 +101,7 @@ export class IconType extends TypeView {
       position: 'right',
       onClose: () => {
         if (this.pickerRoot) {
-          this.pickerRoot.unmount();
+          unmountReactRoot(this.pickerRoot);
           this.pickerRoot = null;
         }
       }
@@ -114,7 +115,7 @@ export class IconType extends TypeView {
 
   dispose() {
     if (this.root) {
-      this.root.unmount();
+      unmountReactRoot(this.root);
       this.root = null;
     }
     super.dispose();

@@ -43,6 +43,7 @@ if (!app || typeof app.on !== 'function') {
 const AutoUpdater = require('./src/autoupdater');
 const FloatingWindow = require('./src/floating-window');
 const startServer = require('./src/web-server');
+const { storedTokenOrNull } = require('./src/github-stored-token');
 const { setupBackendIPC, backendManager } = require('./src/local-backend');
 const { setupExecutionHistoryIPC } = require('./src/execution-history');
 const DesignToolImportServer = require('./src/design-tool-import-server');
@@ -577,6 +578,13 @@ function launchApp() {
 
       viewerWindow.send('viewer-set-inspect-mode', eventArgs.inspectMode);
       viewerWindow.send('viewer-select-node', eventArgs.selectedNodeId);
+
+      // TVW-002 AC6 — seeded, not only subscribed. The forward above carries a theme CHANGE; a
+      // window detached while the theme is simply sitting still would never see one, and would
+      // open dark in a light editor until the user happened to flip it.
+      if (eventArgs.theme) {
+        viewerWindow.send('viewer-set-theme', eventArgs.theme);
+      }
     });
 
     // viewerWindow.openDevTools();
@@ -1073,7 +1081,13 @@ function launchApp() {
       'viewer-inspect-node',
       // DES-001: "Preview" on the detached preview's design-mode banner. The
       // editor window owns the mode, so the request has to travel back to it.
-      'viewer-request-preview-mode'
+      'viewer-request-preview-mode',
+      // TVW-002 AC5: a door on the detached preview's strip. Richard ruled on
+      // 2026-09-18 that the strip carries its doors there too, and the editor
+      // window is the only one that can act on one — it owns the node graph,
+      // the project model and the route table. Forwarded with its `...args`,
+      // which is what lets `Go to Home` name its page.
+      'viewer-preview-strip-action'
     ]);
 
     //events to forward from main window to viewer
@@ -1090,8 +1104,18 @@ function launchApp() {
       'viewer-set-viewport-size',
       'viewer-set-inspect-mode',
       'viewer-select-node',
+      'viewer-hover-node',
+      // TVW-002 AC1: the placement outline. Its own channel rather than the selection's, because a
+      // selection also draws the box-model chip and this is not an inspection request.
+      'viewer-placement-outline',
       'viewer-transform-origin-focus',
       'viewer-design-selection',
+      // TVW-002 AC6: the editor's resolved theme. Without it this window sits on the dark :root
+      // defaults for ever — it is a second renderer and ThemeManager only stamps its own.
+      'viewer-set-theme',
+      // TVW-002 AC5: the strip's sentence, computed in the editor window
+      // because the detached renderer has no node graph and no project model.
+      'viewer-preview-strip',
       'viewer-capture-thumb',
       'viewer-show-inspect-menu',
       'editor-api-response'
@@ -1372,12 +1396,15 @@ function launchApp() {
     ipcMain.handle('github-load-token', async (event) => {
       try {
         // Use Promise wrapper for callback-based jsonstorage.get
-        const stored = await new Promise((resolve) => {
-          jsonstorage.get('github.token', (data) => {
-            resolve(data);
-          });
-        });
+        const stored = storedTokenOrNull(
+          await new Promise((resolve) => {
+            jsonstorage.get('github.token', (data) => {
+              resolve(data);
+            });
+          })
+        );
 
+        // A missing file reads as the string '{}', not nothing — see github-stored-token.js.
         if (!stored) return null;
 
         if (safeStorage.isEncryptionAvailable()) {

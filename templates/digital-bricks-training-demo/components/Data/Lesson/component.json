@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4dcbb470-2d3c-4f28-aa51-ee1c15eaffb9",
+  "name": "Lesson",
+  "path": "/Data/Lesson",
+  "type": "logic",
+  "created": "2026-09-23T13:41:25.811Z",
+  "modified": "2026-09-23T13:41:25.811Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "DEMO (TASK-L180): answers in the browser from the template's fixture, not from a backend. One of the signed-in learner's lessons, from the backend's `lesson` function, split into the parts the lesson page draws. `found` says whether a lesson came back: a step nobody has written a lesson for yet answers with nothing."
+}

@@ -1,0 +1,121 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ca459670-ac63-5204-8bbc-365c50e865f6",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "naIn",
+      "fromProperty": "rows",
+      "toId": "naEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "naIn",
+      "fromProperty": "clearNew",
+      "toId": "naField",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "naField",
+      "fromProperty": "onTextChanged",
+      "toId": "naSubmit",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "naField",
+      "fromProperty": "onEnter",
+      "toId": "naSubmit",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "naButton",
+      "fromProperty": "onClick",
+      "toId": "naSubmit",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "naSubmit",
+      "fromProperty": "out-text",
+      "toId": "naOut",
+      "toProperty": "newTitle"
+    },
+    {
+      "fromId": "naSubmit",
+      "fromProperty": "out-go",
+      "toId": "naOut",
+      "toProperty": "add"
+    },
+    {
+      "fromId": "naEach",
+      "fromProperty": "itemOutputSignal-tick",
+      "toId": "naOut",
+      "toProperty": "tick"
+    },
+    {
+      "fromId": "naEach",
+      "fromProperty": "itemOutputSignal-untick",
+      "toId": "naOut",
+      "toProperty": "untick"
+    },
+    {
+      "fromId": "naEach",
+      "fromProperty": "itemOutputSignal-up",
+      "toId": "naOut",
+      "toProperty": "up"
+    },
+    {
+      "fromId": "naEach",
+      "fromProperty": "itemOutputSignal-down",
+      "toId": "naOut",
+      "toProperty": "down"
+    },
+    {
+      "fromId": "naEach",
+      "fromProperty": "itemOutputSignal-rename",
+      "toId": "naOut",
+      "toProperty": "rename"
+    },
+    {
+      "fromId": "naEach",
+      "fromProperty": "itemOutputSignal-openDescription",
+      "toId": "naOut",
+      "toProperty": "openDescription"
+    },
+    {
+      "fromId": "naEach",
+      "fromProperty": "itemOutputSignal-closeDescription",
+      "toId": "naOut",
+      "toProperty": "closeDescription"
+    },
+    {
+      "fromId": "naEach",
+      "fromProperty": "itemOutputSignal-describe",
+      "toId": "naOut",
+      "toProperty": "describe"
+    },
+    {
+      "fromId": "naEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "naOut",
+      "toProperty": "actionId"
+    },
+    {
+      "fromId": "naEach",
+      "fromProperty": "itemOutput-title",
+      "toId": "naOut",
+      "toProperty": "actionTitle"
+    },
+    {
+      "fromId": "naEach",
+      "fromProperty": "itemOutput-titleText",
+      "toId": "naOut",
+      "toProperty": "actionTitleText"
+    },
+    {
+      "fromId": "naEach",
+      "fromProperty": "itemOutput-descriptionText",
+      "toId": "naOut",
+      "toProperty": "descriptionText"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8867636f-eae1-4b88-99d2-cbbe64cfc902",
+  "name": "Sign in",
+  "path": "/Pages/Sign in",
+  "type": "page",
+  "created": "2026-09-23T13:49:02.672Z",
+  "modified": "2026-09-23T13:49:02.672Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The way in: an email address and one button. The backend emails a one-time link; opening it spends nothing, and only the button on the page it opens signs you in (NodeGX HLT-015). Says the same thing whatever address was typed."
+}

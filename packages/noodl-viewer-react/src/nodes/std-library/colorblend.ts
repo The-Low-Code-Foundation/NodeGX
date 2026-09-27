@@ -1,5 +1,6 @@
 import type { NodeDefinitionOptions, NodeInstance } from '@noodl/types';
 
+import { readColor } from '../../color-reader';
 import EaseCurves from '../../easecurves';
 
 type RGB = [number, number, number];
@@ -33,71 +34,14 @@ function clamp(min: number, max: number, value: number) {
  * ⚠️ **Three-digit hex was broken too, and nobody had noticed.** `#abc` read `ab`, `c` and `""`,
  * so the blue channel alone came back `NaN` — a colour that is wrong rather than absent, which is
  * the harder kind to see.
- */
-const HEX_3 = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i;
-// Deliberately unanchored at the end: `#RRGGBBAA` is a valid authored colour and its first six
-// digits are the ones being blended.
-const HEX_6 = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i;
-const RGB_FN = /^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)/i;
-const VAR_FN = /^var\(\s*(--[^,)\s]+)\s*(?:,([\s\S]*))?\)$/;
-
-/**
- * A custom property's value, as the document actually resolves it.
  *
- * The one honest source: a token can be redefined per theme, per component, per media query, and
- * only the browser knows which definition won. Returns `''` anywhere there is no DOM — this node
- * is also compiled into the SSR and deploy bundles — so the caller falls back rather than throwing.
+ * GAM-006 (P88) found the same blind parse in `States` and in visual-state transitions, so the
+ * reader this node grew moved to `color-reader.ts` and all three share it. This node blends the
+ * first three channels and ignores alpha, as it always has.
  */
-function cssVariableValue(name: string): string {
-  if (typeof document === 'undefined' || !document.documentElement) return '';
-  if (typeof getComputedStyle !== 'function') return '';
-  try {
-    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  } catch (e) {
-    return '';
-  }
-}
-
-/** The colour as three channels, or `null` when this notation cannot be read. */
-function parseColor(value: unknown, depth = 0): RGB | null {
-  if (typeof value !== 'string') return null;
-  const text = value.trim();
-  if (!text) return null;
-
-  const asVar = VAR_FN.exec(text);
-  if (asVar) {
-    // A token may resolve to another token. Bounded so a definition that refers to itself
-    // cannot hang the render.
-    if (depth >= 8) return null;
-    const resolved = cssVariableValue(asVar[1]);
-    if (resolved) return parseColor(resolved, depth + 1);
-    // `var(--x, #fff)` — the author's own fallback, which is what CSS would use here.
-    if (asVar[2] !== undefined) return parseColor(asVar[2], depth + 1);
-    return null;
-  }
-
-  const short = HEX_3.exec(text);
-  if (short) {
-    return [
-      parseInt(short[1] + short[1], 16),
-      parseInt(short[2] + short[2], 16),
-      parseInt(short[3] + short[3], 16)
-    ];
-  }
-
-  const long = HEX_6.exec(text);
-  if (long) return [parseInt(long[1], 16), parseInt(long[2], 16), parseInt(long[3], 16)];
-
-  const fn = RGB_FN.exec(text);
-  if (fn) {
-    return [
-      clamp(0, 255, Math.round(Number(fn[1]))),
-      clamp(0, 255, Math.round(Number(fn[2]))),
-      clamp(0, 255, Math.round(Number(fn[3])))
-    ];
-  }
-
-  return null;
+function parseColor(value: unknown): RGB | null {
+  const rgba = readColor(value);
+  return rgba ? [rgba[0], rgba[1], rgba[2]] : null;
 }
 
 function componentToHex(c: number) {

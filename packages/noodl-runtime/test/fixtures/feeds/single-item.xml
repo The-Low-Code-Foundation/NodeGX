@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- FED-001 AC2: ONE item. The shape a graph sees must not depend on how many items a feed
+     happened to carry, or every reader needs a branch it should never have needed.
+     ⚠️ Two mechanisms could deliver that and only one does. A control run on 2026-09-18 removed
+     `item`/`entry` from `FEED_ARRAY_TAGS` and this test stayed GREEN: the guarantee comes from
+     `many()` in `src/feed.ts`, which wraps a lone object, NOT from the parser's `alwaysArray`.
+     `alwaysArray` is what keeps `link`, `category` and `enclosure` consistent inside `raw`. -->
+<rss version="2.0">
+  <channel>
+    <title>Only Once</title>
+    <link>https://once.example/</link>
+    <description>A feed with exactly one item</description>
+    <item>
+      <title>The only post</title>
+      <link>https://once.example/1</link>
+      <guid>once-1</guid>
+      <pubDate>Mon, 07 Sep 2026 12:00:00 +0000</pubDate>
+      <description>There is not another one.</description>
+    </item>
+  </channel>
+</rss>

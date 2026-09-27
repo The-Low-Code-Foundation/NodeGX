@@ -1,0 +1,187 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6fdb09de-13ae-546e-8c58-1e276973cee4",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "arIn",
+      "fromProperty": "num",
+      "toId": "arNum",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "arIn",
+      "fromProperty": "title",
+      "toId": "arTitle",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "arIn",
+      "fromProperty": "titleColor",
+      "toId": "arTitle",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "arIn",
+      "fromProperty": "description",
+      "toId": "arPreviewText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "arIn",
+      "fromProperty": "showPreview",
+      "toId": "arPreview",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "arIn",
+      "fromProperty": "description",
+      "toId": "arDescField",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "arIn",
+      "fromProperty": "descriptionOpen",
+      "toId": "arEditor",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "arIn",
+      "fromProperty": "noteLine",
+      "toId": "arNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "arIn",
+      "fromProperty": "hasNote",
+      "toId": "arNote",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "arIn",
+      "fromProperty": "canMove",
+      "toId": "arMove",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "arIn",
+      "fromProperty": "canUp",
+      "toId": "arUp",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "arIn",
+      "fromProperty": "canDown",
+      "toId": "arDown",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "arIn",
+      "fromProperty": "checkBg",
+      "toId": "arCheck",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "arIn",
+      "fromProperty": "checkIconColor",
+      "toId": "arCheck",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "arIn",
+      "fromProperty": "checkBorder",
+      "toId": "arCheck",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "arIn",
+      "fromProperty": "done",
+      "toId": "arWhich",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "arIn",
+      "fromProperty": "id",
+      "toId": "arOut",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "arIn",
+      "fromProperty": "title",
+      "toId": "arOut",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "arCheck",
+      "fromProperty": "onClick",
+      "toId": "arWhich",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "arWhich",
+      "fromProperty": "ontrue",
+      "toId": "arOut",
+      "toProperty": "untick"
+    },
+    {
+      "fromId": "arWhich",
+      "fromProperty": "onfalse",
+      "toId": "arOut",
+      "toProperty": "tick"
+    },
+    {
+      "fromId": "arUp",
+      "fromProperty": "onClick",
+      "toId": "arOut",
+      "toProperty": "up"
+    },
+    {
+      "fromId": "arDown",
+      "fromProperty": "onClick",
+      "toId": "arOut",
+      "toProperty": "down"
+    },
+    {
+      "fromId": "arTitle",
+      "fromProperty": "onTextChanged",
+      "toId": "arOut",
+      "toProperty": "titleText"
+    },
+    {
+      "fromId": "arTitle",
+      "fromProperty": "onEnter",
+      "toId": "arTitle",
+      "toProperty": "blur"
+    },
+    {
+      "fromId": "arTitle",
+      "fromProperty": "onBlur",
+      "toId": "arOut",
+      "toProperty": "rename"
+    },
+    {
+      "fromId": "arDescOpen",
+      "fromProperty": "onClick",
+      "toId": "arOut",
+      "toProperty": "openDescription"
+    },
+    {
+      "fromId": "arDescField",
+      "fromProperty": "onTextChanged",
+      "toId": "arOut",
+      "toProperty": "descriptionText"
+    },
+    {
+      "fromId": "arDescField",
+      "fromProperty": "onBlur",
+      "toId": "arOut",
+      "toProperty": "describe"
+    },
+    {
+      "fromId": "arSave",
+      "fromProperty": "onClick",
+      "toId": "arOut",
+      "toProperty": "closeDescription"
+    }
+  ]
+}

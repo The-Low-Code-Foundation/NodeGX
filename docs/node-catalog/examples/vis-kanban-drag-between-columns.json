@@ -1,0 +1,364 @@
+{
+  "id": "vis-kanban-drag-between-columns",
+  "title": "Kanban board: drag a card to another column, or to another place in its own",
+  "description": "Built from two checkboxes and one Function. Each card is a Group with `Draggable` on, carrying its id as `Drag Value`; each column's list is a Group with `Accept Drops` on. Pick a card up and a see-through copy follows the pointer while the card stays behind, faded. The list under the pointer turns `Drag Over` true (wired here through an Expression to its outline) and, with `Make Room` on, slides its cards apart to show where the drop will land. On touch, a press is held for half a second while a ring fills beside the finger, so a moving finger still scrolls. Letting go fires `Dropped` with `Dropped Value` and `Drop Index`, and the column's `Move card` Function does the move: it takes the card out of the Array it is in and puts it into this one at that index. The engine never moves data itself, so a drop on nothing, or Escape, leaves everything where it was. `Drop Index` counts the other cards only, so it is exactly the index to insert at once the card is out of its old place — that is why the same Function handles a reorder within a column. From the keyboard: Tab to a card, Space picks it up, the arrows move it (up and down within a column, left and right between columns), Enter drops it; each step is announced. The three Arrays are named `kanban-todo`, `kanban-doing` and `kanban-done`, and each card remembers which one it is in (`list`), so the Function needs nothing but the card's id. Each Column also publishes the drop — `Card Dropped`, `Card Id` and `Index` — so whatever owns the board can save the move to a backend; the Arrays are only what is on screen.",
+  "demonstrates": [
+    "Group",
+    "For Each",
+    "Collection2",
+    "JavaScriptFunction",
+    "Expression",
+    "Component Inputs",
+    "Text"
+  ],
+  "components": [
+    {
+      "name": "/Kanban",
+      "nodes": [
+        {
+          "id": "board",
+          "type": "Group",
+          "label": "Board",
+          "parameters": {
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "columnGap": "var(--space-4)",
+            "rowGap": "var(--space-4)",
+            "paddingTop": "var(--space-4)",
+            "paddingLeft": "var(--space-4)",
+            "paddingRight": "var(--space-4)",
+            "paddingBottom": "var(--space-4)",
+            "sizeMode": "contentHeight",
+            "alignItems": "flex-start"
+          },
+          "children": [
+            "col_todo",
+            "col_doing",
+            "col_done"
+          ]
+        },
+        {
+          "id": "col_todo",
+          "type": "/Kanban Column",
+          "parent": "board",
+          "parameters": {
+            "Title": "To do",
+            "List": "kanban-todo"
+          }
+        },
+        {
+          "id": "col_doing",
+          "type": "/Kanban Column",
+          "parent": "board",
+          "parameters": {
+            "Title": "Doing",
+            "List": "kanban-doing"
+          }
+        },
+        {
+          "id": "col_done",
+          "type": "/Kanban Column",
+          "parent": "board",
+          "parameters": {
+            "Title": "Done",
+            "List": "kanban-done"
+          }
+        },
+        {
+          "id": "seed",
+          "type": "JavaScriptFunction",
+          "label": "Starting cards",
+          "parameters": {
+            "functionScript": "// Runs once, when the board loads. Each card says which list it is in, so moving it needs only its id.\nvar cards = [\n  { id: 'card-brief', title: 'Write the brief', list: 'kanban-todo' },\n  { id: 'card-sketch', title: 'Sketch the screens', list: 'kanban-todo' },\n  { id: 'card-copy', title: 'Draft the copy', list: 'kanban-todo' },\n  { id: 'card-build', title: 'Build the page', list: 'kanban-doing' },\n  { id: 'card-review', title: 'Review with the team', list: 'kanban-doing' },\n  { id: 'card-fix', title: 'Fix what the review found', list: 'kanban-doing' },\n  { id: 'card-kickoff', title: 'Kick-off call', list: 'kanban-done' }\n];\n['kanban-todo', 'kanban-doing', 'kanban-done'].forEach(function (name) {\n  Noodl.Arrays[name] = cards\n    .filter(function (card) { return card.list === name; })\n    .map(function (card) { return Noodl.Object.create(card); });\n});\n"
+          }
+        }
+      ],
+      "connections": []
+    },
+    {
+      "name": "/Kanban Column",
+      "nodes": [
+        {
+          "id": "column_inputs",
+          "type": "Component Inputs",
+          "label": "Column in",
+          "ports": [
+            {
+              "name": "Title",
+              "plug": "output",
+              "type": "*"
+            },
+            {
+              "name": "List",
+              "plug": "output",
+              "type": "*"
+            }
+          ]
+        },
+        {
+          "id": "column",
+          "type": "Group",
+          "label": "Column",
+          "parameters": {
+            "flexDirection": "column",
+            "rowGap": "var(--space-2)",
+            "sizeMode": "contentHeight",
+            "width": {
+              "value": 260,
+              "unit": "px"
+            },
+            "paddingTop": "var(--space-3)",
+            "paddingLeft": "var(--space-3)",
+            "paddingRight": "var(--space-3)",
+            "paddingBottom": "var(--space-3)",
+            "borderRadius": 12,
+            "backgroundColor": "var(--muted)"
+          },
+          "children": [
+            "column_title",
+            "list"
+          ]
+        },
+        {
+          "id": "column_title",
+          "type": "Text",
+          "label": "Title",
+          "parent": "column",
+          "parameters": {
+            "fontWeight": 600,
+            "color": "var(--foreground)"
+          }
+        },
+        {
+          "id": "list",
+          "type": "Group",
+          "label": "Cards (drop zone)",
+          "parent": "column",
+          "parameters": {
+            "acceptDrops": true,
+            "acceptKind": "card",
+            "makeRoom": true,
+            "flexDirection": "column",
+            "rowGap": "var(--space-2)",
+            "sizeMode": "contentHeight",
+            "minHeight": {
+              "value": 160,
+              "unit": "px"
+            },
+            "borderRadius": 8,
+            "paddingTop": "var(--space-1)",
+            "paddingBottom": "var(--space-1)",
+            "borderStyle": "solid",
+            "borderWidth": 2,
+            "borderColor": "transparent"
+          },
+          "children": [
+            "cards"
+          ]
+        },
+        {
+          "id": "cards",
+          "type": "For Each",
+          "label": "One card per item",
+          "parent": "list",
+          "parameters": {
+            "template": "/Kanban Card"
+          }
+        },
+        {
+          "id": "items",
+          "type": "Collection2",
+          "label": "This column's cards"
+        },
+        {
+          "id": "highlight",
+          "type": "Expression",
+          "label": "Outline while a card is over",
+          "parameters": {
+            "expression": "over ? 'var(--primary)' : 'transparent'"
+          }
+        },
+        {
+          "id": "move",
+          "type": "JavaScriptFunction",
+          "label": "Move card",
+          "parameters": {
+            "functionScript": "// Runs on Dropped only: the three inputs are set just before it fires, and must not run it on their own.\nvar card = Noodl.Objects[Inputs.id];\nvar to = Inputs.list;\nif (!card || !to) return;\nvar from = card.get('list');\nif (from) Noodl.Arrays[from].remove(card);\ncard.set('list', to);\nvar dest = Noodl.Arrays[to];\nvar index = Number(Inputs.index);\nif (!isFinite(index)) index = dest.length;\ndest.addAtIndex(card, Math.max(0, Math.min(index, dest.length)));\n",
+            "runOnChange-in-id": false,
+            "runOnChange-in-list": false,
+            "runOnChange-in-index": false
+          }
+        },
+        {
+          "id": "column_outputs",
+          "type": "Component Outputs",
+          "label": "Column out",
+          "ports": [
+            {
+              "name": "Card Dropped",
+              "plug": "input",
+              "type": "*"
+            },
+            {
+              "name": "Card Id",
+              "plug": "input",
+              "type": "*"
+            },
+            {
+              "name": "Index",
+              "plug": "input",
+              "type": "*"
+            }
+          ]
+        }
+      ],
+      "connections": [
+        {
+          "fromId": "column_inputs",
+          "fromProperty": "Title",
+          "toId": "column_title",
+          "toProperty": "text"
+        },
+        {
+          "fromId": "column_inputs",
+          "fromProperty": "Title",
+          "toId": "list",
+          "toProperty": "dropZoneName"
+        },
+        {
+          "fromId": "column_inputs",
+          "fromProperty": "List",
+          "toId": "items",
+          "toProperty": "collectionId"
+        },
+        {
+          "fromId": "items",
+          "fromProperty": "items",
+          "toId": "cards",
+          "toProperty": "items"
+        },
+        {
+          "fromId": "list",
+          "fromProperty": "isDropTarget",
+          "toId": "highlight",
+          "toProperty": "over"
+        },
+        {
+          "fromId": "highlight",
+          "fromProperty": "result",
+          "toId": "list",
+          "toProperty": "borderColor"
+        },
+        {
+          "fromId": "list",
+          "fromProperty": "droppedValue",
+          "toId": "move",
+          "toProperty": "in-id"
+        },
+        {
+          "fromId": "list",
+          "fromProperty": "dropIndex",
+          "toId": "move",
+          "toProperty": "in-index"
+        },
+        {
+          "fromId": "column_inputs",
+          "fromProperty": "List",
+          "toId": "move",
+          "toProperty": "in-list"
+        },
+        {
+          "fromId": "list",
+          "fromProperty": "dropped",
+          "toId": "move",
+          "toProperty": "run"
+        },
+        {
+          "fromId": "list",
+          "fromProperty": "dropped",
+          "toId": "column_outputs",
+          "toProperty": "Card Dropped"
+        },
+        {
+          "fromId": "list",
+          "fromProperty": "droppedValue",
+          "toId": "column_outputs",
+          "toProperty": "Card Id"
+        },
+        {
+          "fromId": "list",
+          "fromProperty": "dropIndex",
+          "toId": "column_outputs",
+          "toProperty": "Index"
+        }
+      ]
+    },
+    {
+      "name": "/Kanban Card",
+      "nodes": [
+        {
+          "id": "card_inputs",
+          "type": "Component Inputs",
+          "label": "Item in",
+          "ports": [
+            {
+              "name": "id",
+              "plug": "output",
+              "type": "*"
+            },
+            {
+              "name": "title",
+              "plug": "output",
+              "type": "*"
+            }
+          ]
+        },
+        {
+          "id": "card",
+          "type": "Group",
+          "label": "Card",
+          "parameters": {
+            "draggable": true,
+            "dragKind": "card",
+            "sizeMode": "contentHeight",
+            "paddingTop": "var(--space-3)",
+            "paddingLeft": "var(--space-3)",
+            "paddingRight": "var(--space-3)",
+            "paddingBottom": "var(--space-3)",
+            "borderRadius": 8,
+            "borderStyle": "solid",
+            "borderWidth": 1,
+            "borderColor": "var(--border)",
+            "backgroundColor": "var(--card)"
+          },
+          "children": [
+            "card_title"
+          ]
+        },
+        {
+          "id": "card_title",
+          "type": "Text",
+          "label": "Title",
+          "parent": "card",
+          "parameters": {
+            "color": "var(--card-foreground)"
+          }
+        }
+      ],
+      "connections": [
+        {
+          "fromId": "card_inputs",
+          "fromProperty": "id",
+          "toId": "card",
+          "toProperty": "dragValue"
+        },
+        {
+          "fromId": "card_inputs",
+          "fromProperty": "title",
+          "toId": "card_title",
+          "toProperty": "text"
+        }
+      ]
+    }
+  ]
+}

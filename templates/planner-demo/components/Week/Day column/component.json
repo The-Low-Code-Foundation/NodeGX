@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "72a86917-ec6e-5558-886d-bbdc7c154eec",
+  "name": "Day column",
+  "path": "/Week/Day column",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One day of the week: its head, then every block of time in it, top to bottom."
+}

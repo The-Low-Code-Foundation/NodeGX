@@ -947,6 +947,7 @@ function exportForPorts(
 const PARTIAL_PORT_LIST_REASONS: Readonly<Record<string, string>> = {
   'component-ports': 'its ports are the names listed in the node\'s own `ports` parameter, so the author creates them',
   'runtime-discovered': 'ports are discovered at runtime from user code, parameters or connected components',
+  'runtime-narrowed': 'an instance republishes some listed ports with a narrower type, and adds no port of its own',
   'declared-port-groups': 'ports appear and disappear with the values of other parameters',
   'numbered-inputs': 'numbered inputs are added on demand',
   'editor-adapter': 'an editor adapter supplies ports the static catalog does not hold'

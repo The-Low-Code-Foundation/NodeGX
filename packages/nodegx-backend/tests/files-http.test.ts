@@ -365,6 +365,10 @@ describe('BAK-006 file storage v2 over HTTP', () => {
     fs.mkdirSync(orphanDir, { recursive: true });
     const orphanKey = 'de/ad/deadbeef-cafebabe';
     fs.writeFileSync(path.join(orphanDir, 'deadbeef-cafebabe'), 'planted orphan blob');
+    // BMG-017: a blob younger than the sweep's grace window may be an upload
+    // still writing its row, and is never judged — this one is an hour old.
+    const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    fs.utimesSync(path.join(orphanDir, 'deadbeef-cafebabe'), hourAgo, hourAgo);
 
     const reportOnly = await req<SweepResponse>('POST', '/admin/files/sweep', {}, asAdmin());
     expect(reportOnly.status).toBe(200);

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "576d5b55-477e-5c2e-84ab-e59a50e44215",
+  "name": "Log rows",
+  "path": "/Logic/Log rows",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Turns the recent history across all tasks into log lines, newest first, naming the task each line is about."
+}

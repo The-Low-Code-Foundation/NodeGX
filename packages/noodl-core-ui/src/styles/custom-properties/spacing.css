@@ -62,15 +62,17 @@
 
   /* ---------------------------------------------------------------------------
      BORDER RADIUS
+     CHR-003 (phase 92): one corner per kind of thing. Small marks — tags, chips,
+     key hints, close buttons — are `default`; controls — buttons, inputs, list
+     rows — are `md`; cards, dialogs and toasts are `xl`; pills are `full`. The
+     mock-derived 5 / 7 / 10 (PAR-001) are deleted, not aliased: a new consumer
+     of one fails `npm run tokens:css`.
      --------------------------------------------------------------------------- */
   --radius-none: 0;
   --radius-sm: 2px;
   --radius-default: 4px;
-  --radius-5: 5px; /* PAR-001: mock chip/close radius */
   --radius-md: 6px;
-  --radius-7: 7px; /* PAR-001: mock button/side-item radius */
   --radius-lg: 8px;
-  --radius-10: 10px; /* PAR-001: mock card/toast radius */
   --radius-xl: 12px;
   --radius-2xl: 16px;
   --radius-3xl: 24px;
@@ -78,21 +80,13 @@
 
   /* ---------------------------------------------------------------------------
      SHADOWS
+     CHR-003 (phase 92): four, each named by what it lifts. `card` for anything
+     resting on a surface (cards, knobs, a CTA), `card-hover` for a card being
+     pointed at, `float` for anything over the page (dialogs, menus, popovers,
+     tooltips, the node picker), `toast` for notifications. sm / default / md /
+     lg / xl / 2xl / inner / popup are deleted, not aliased. Light values are in
+     the [data-theme='light'] block below.
      --------------------------------------------------------------------------- */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-default: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
-
-  /* Dialog/popup shadow */
-  --shadow-popup: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 10px 15px -3px rgba(0, 0, 0, 0.2),
-    0 20px 25px -5px rgba(0, 0, 0, 0.15);
-
-  /* Card + toast shadows (PAR-001) — mock-normative dark values; light values in
-     the [data-theme='light'] block below. */
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2);
   --shadow-card-hover: 0 10px 28px rgba(0, 0, 0, 0.38);
   --shadow-toast: 0 12px 44px rgba(0, 0, 0, 0.6);
@@ -144,14 +138,6 @@
    ink-tinted (rgba 23,32,43) shadows match the mock and give visible separation.
    ============================================================================= */
 :root[data-theme='light'] {
-  --shadow-sm: 0 1px 2px rgba(23, 32, 43, 0.06);
-  --shadow-default: 0 1px 2px rgba(23, 32, 43, 0.08), 0 1px 3px rgba(23, 32, 43, 0.06);
-  --shadow-md: 0 2px 6px rgba(23, 32, 43, 0.08), 0 4px 12px rgba(23, 32, 43, 0.06);
-  --shadow-lg: 0 6px 16px rgba(23, 32, 43, 0.1), 0 12px 32px rgba(23, 32, 43, 0.08);
-  --shadow-xl: 0 12px 32px rgba(23, 32, 43, 0.12), 0 20px 48px rgba(23, 32, 43, 0.1);
-  --shadow-2xl: 0 24px 70px rgba(23, 32, 43, 0.18), 0 2px 8px rgba(23, 32, 43, 0.08);
-  --shadow-inner: inset 0 2px 4px rgba(23, 32, 43, 0.06);
-  --shadow-popup: 0 10px 32px rgba(23, 32, 43, 0.16), 0 2px 8px rgba(23, 32, 43, 0.08);
   --shadow-card: 0 1px 2px rgba(23, 32, 43, 0.05);
   --shadow-card-hover: 0 8px 24px rgba(23, 32, 43, 0.1);
   --shadow-toast: 0 12px 40px rgba(23, 32, 43, 0.22);

@@ -1,0 +1,180 @@
+{
+  "sqlite": {
+    "adapter": "sqlite",
+    "createTable": 200,
+    "control": {
+      "bothRead": [
+        0,
+        0
+      ],
+      "statuses": [
+        200,
+        200
+      ],
+      "finalFacts": {
+        "fromB": true
+      },
+      "finalVersion": 1,
+      "aFactKept": false,
+      "bFactKept": true
+    },
+    "guarded": {
+      "statuses": [
+        409,
+        200
+      ],
+      "loserBody": {
+        "error": "The record has changed since it was read, so this update was not applied. Read it again and retry.",
+        "reason": "precondition-failed",
+        "expected": {
+          "version": 0
+        },
+        "requestId": "a13135f5-7d29-4871-9f82-208cc5a50fdd"
+      },
+      "afterRaceFacts": {
+        "fromB": true
+      },
+      "afterRaceVersion": 1,
+      "retryStatus": 200,
+      "finalFacts": {
+        "fromB": true,
+        "fromA": true
+      },
+      "finalVersion": 2,
+      "noFactLost": true
+    },
+    "refusals": {
+      "missingRow": {
+        "status": 404,
+        "body": {
+          "error": "Object not found.",
+          "code": 101,
+          "requestId": "63cc0bb1-1809-4d50-9768-542726abf0b6"
+        }
+      },
+      "unknownField": {
+        "status": 400,
+        "body": {
+          "error": "Precondition names \"verison\", which \"Ctx\" does not have. X-NodeGX-If can only name fields the collection has.",
+          "reason": "precondition-unknown-field",
+          "field": "verison",
+          "requestId": "0ae6a8db-2712-452c-851d-d641e77a84e7"
+        }
+      },
+      "objectValue": {
+        "status": 400,
+        "body": {
+          "error": "X-NodeGX-If \"facts\" must be a string, number, boolean or null — an object or list cannot be compared the same way on every database.",
+          "requestId": "6b328c7e-7a47-44d7-8fc2-17e1915a4031"
+        }
+      },
+      "notJson": {
+        "status": 400
+      },
+      "withIncrement": {
+        "status": 400
+      },
+      "nullOnUnknownField": {
+        "status": 400
+      },
+      "rowUntouchedByAllOfThem": true
+    },
+    "plainPut": {
+      "status": 200,
+      "version": 7
+    },
+    "guardedUpdateStatements": [
+      "sqlite: UPDATE \"Ctx\" SET \"facts\" = ?, \"version\" = ?, \"updatedAt\" = ? WHERE \"objectId\" = ? AND \"Ctx\".\"version\" = ?",
+      "sqlite: UPDATE \"Ctx\" SET \"facts\" = ?, \"version\" = ?, \"updatedAt\" = ? WHERE \"objectId\" = ? AND \"Ctx\".\"version\" = ?"
+    ]
+  },
+  "postgres": {
+    "adapter": "postgres",
+    "createTable": 200,
+    "control": {
+      "bothRead": [
+        0,
+        0
+      ],
+      "statuses": [
+        200,
+        200
+      ],
+      "finalFacts": {
+        "fromA": true
+      },
+      "finalVersion": 1,
+      "aFactKept": true,
+      "bFactKept": false
+    },
+    "guarded": {
+      "statuses": [
+        200,
+        409
+      ],
+      "loserBody": {
+        "error": "The record has changed since it was read, so this update was not applied. Read it again and retry.",
+        "reason": "precondition-failed",
+        "expected": {
+          "version": 0
+        },
+        "requestId": "ba3b28ca-fb56-47fd-a68a-7d7827fb00d7"
+      },
+      "afterRaceFacts": {
+        "fromA": true
+      },
+      "afterRaceVersion": 1,
+      "retryStatus": 200,
+      "finalFacts": {
+        "fromA": true,
+        "fromB": true
+      },
+      "finalVersion": 2,
+      "noFactLost": true
+    },
+    "refusals": {
+      "missingRow": {
+        "status": 404,
+        "body": {
+          "error": "Object not found.",
+          "code": 101,
+          "requestId": "e910107b-06ea-469c-bd50-dc5ec03bd543"
+        }
+      },
+      "unknownField": {
+        "status": 400,
+        "body": {
+          "error": "Precondition names \"verison\", which \"Ctx\" does not have. X-NodeGX-If can only name fields the collection has.",
+          "reason": "precondition-unknown-field",
+          "field": "verison",
+          "requestId": "943f997f-fdd0-44be-a6b4-8a11669fb191"
+        }
+      },
+      "objectValue": {
+        "status": 400,
+        "body": {
+          "error": "X-NodeGX-If \"facts\" must be a string, number, boolean or null — an object or list cannot be compared the same way on every database.",
+          "requestId": "d0b8160b-bc10-4849-b0fa-0823f7357ef6"
+        }
+      },
+      "notJson": {
+        "status": 400
+      },
+      "withIncrement": {
+        "status": 400
+      },
+      "nullOnUnknownField": {
+        "status": 400
+      },
+      "rowUntouchedByAllOfThem": true
+    },
+    "plainPut": {
+      "status": 200,
+      "version": 7
+    },
+    "guardedUpdateStatements": [
+      "postgres: UPDATE \"Ctx\" SET \"facts\" = $1, \"version\" = $2, \"updatedAt\" = $3 WHERE \"objectId\" = $4 AND \"Ctx\".\"version\" = $5",
+      "postgres: UPDATE \"Ctx\" SET \"facts\" = $1, \"version\" = $2, \"updatedAt\" = $3 WHERE \"objectId\" = $4 AND \"Ctx\".\"version\" = $5"
+    ]
+  }
+}
