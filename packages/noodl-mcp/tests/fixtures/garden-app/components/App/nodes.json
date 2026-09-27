@@ -3,8 +3,31 @@
   "componentId": "c_app",
   "version": 1,
   "nodes": [
-    { "id": "app_group", "type": "Group", "label": "App Root", "children": ["app_router"] },
-    { "id": "app_router", "type": "Router", "label": "Main Router", "parent": "app_group", "parameters": { "name": "Main" } }
+    {
+      "id": "app_group",
+      "type": "Group",
+      "label": "App Root",
+      "children": [
+        "app_router"
+      ]
+    },
+    {
+      "id": "app_router",
+      "type": "Router",
+      "label": "Main Router",
+      "parent": "app_group",
+      "parameters": {
+        "name": "Main",
+        "pages": {
+          "startPage": "/Pages/Home",
+          "routes": [
+            "/Pages/Home"
+          ]
+        }
+      }
+    }
   ],
-  "visualRoots": ["app_group"]
+  "visualRoots": [
+    "app_group"
+  ]
 }
