@@ -728,7 +728,7 @@ describe('§4 the arithmetic, run rather than read', () => {
   /** R16a and R2.4-5, run against the page's own Function. */
   it('🔴 R2.4-5 — the tick opens the sheet with Done on and what is left of the plan; the words open it with Done off', () => {
     const row = scriptOf(built, C.pageWeek, 'twSheetRow');
-    const b = { ...block(MONDAY, 'p-earn', 1.5, false), entries: [{ day: MONDAY, hours: 0.5, note: 'Login flow' }], actual: 0.5 };
+    const b: Record<string, unknown> = { ...block(MONDAY, 'p-earn', 1.5, false), entries: [{ day: MONDAY, hours: 0.5, note: 'Login flow' }], actual: 0.5 };
     const ticked = run(row, { id: b.id, newDay: '', mode: 'tick', blocks: [b], projects: PROJECTS }).outputs;
     expect([ticked.shown, ticked.done, ticked.hours, ticked.timeShown]).toEqual([true, true, '1', true]);
     expect(ticked.loggedLine).toBe('0.5 of 1.5 h logged. It stays open until Done is ticked.');

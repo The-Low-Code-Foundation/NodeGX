@@ -11,6 +11,7 @@ import { BackendService } from '../src/service';
 import type { AuditEntry } from '../src/ops/audit';
 
 import { request } from './helpers/http';
+import { readonlyAdminMayCall } from '../src/admin/readonly';
 
 jest.setTimeout(30000);
 
@@ -113,7 +114,6 @@ describe('BMG-007 PUT /admin/keys/:id', () => {
   it('a read-only admin cannot use it', async () => {
     // The read-only tier is a second credential; without one provisioned, the
     // policy table is the gate this spec can reach: PUT is not in the safe set.
-    const { readonlyAdminMayCall } = await import('../src/admin/readonly');
     expect(readonlyAdminMayCall('PUT', 'admin/keys/:id')).toBe(false);
   });
 });

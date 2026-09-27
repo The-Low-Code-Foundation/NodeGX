@@ -218,7 +218,7 @@ function group(id: string, label: string, parent: string | undefined, params: Re
   return node;
 }
 
-function place(id: string, type: string, label: string, parent: string, parameters?: Record<string, unknown>): unknown {
+function place(id: string, type: string, label: string, parent: string | undefined, parameters?: Record<string, unknown>): unknown {
   const node: Record<string, unknown> = { id, type, label, parent };
   if (parameters) node.parameters = parameters;
   return node;

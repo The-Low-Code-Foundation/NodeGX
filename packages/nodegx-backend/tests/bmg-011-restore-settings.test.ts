@@ -34,11 +34,11 @@ describe('BMG-011 §7 — restored settings files', () => {
     const restored = { ...readJSON('security.json'), collections: { Pet: { permissions: { find: 'public' } } } };
     fs.writeFileSync(file('security.json'), JSON.stringify(restored));
     security.reloadConfig();
-    expect(held.collections.Pet.permissions.find).toBe('public');
+    expect(held.collections.Pet.permissions?.find).toBe('public');
 
     fs.writeFileSync(file('security.json'), JSON.stringify({ version: 99, nonsense: true }));
     expect(() => security.reloadConfig()).toThrow(/security\.json is invalid/);
-    expect(held.collections.Pet.permissions.find).toBe('public');
+    expect(held.collections.Pet.permissions?.find).toBe('public');
     expect(readJSON('security.json').collections.Pet.permissions.find).toBe('public');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(() => new SecurityState({ dataDir, loopback: true, cliToken: null, deployedFunctions: [], facade: {} as any })).not.toThrow();

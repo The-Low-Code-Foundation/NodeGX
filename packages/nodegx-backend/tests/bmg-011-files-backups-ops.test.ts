@@ -112,7 +112,7 @@ describe('BMG-011 files, backups and settings', () => {
   const req = <T = any>(method: string, p: string, body?: unknown, headers: Record<string, string> = T) =>
     request<T>(base, method, p, { body, headers });
   const upload = (name: string, bytes: Buffer, type: string) =>
-    request<{ name: string; url: string; size: number; contentType: string }>(base, 'POST', '/files/' + encodeURIComponent(name), {
+    request<{ name: string; url: string; size: number; contentType: string; error?: string }>(base, 'POST', '/files/' + encodeURIComponent(name), {
       body: bytes as unknown as Record<string, unknown>,
       raw: true,
       headers: { ...T, 'content-type': type, 'content-length': String(bytes.length) }
