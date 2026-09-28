@@ -360,7 +360,9 @@
     '.gd-prog{display:flex;flex-direction:column;gap:6px;min-height:120px}\n' +
     '.gd-row{display:flex;align-items:center;gap:6px}\n' +
     '.gd-prog .gd-blk{touch-action:none}\n' +
-    '.gd-blk.gd-run{outline:3px solid var(--gd-run);outline-offset:2px;transform:scale(1.03)}\n' +
+    // IG-001 D5 (P106 s1): the running block wears the ink ring (3 px) outside a 4 px white halo, so the ring reads on the
+    // white steps panel, inside a repeat (#FFF0DA) and against every block fill; the sun outline was 1.44:1 on white.
+    '.gd-blk.gd-run{outline:3px solid var(--gd-run);outline-offset:4px;box-shadow:0 0 0 4px #fff,inset 0 -3px 0 rgba(0,0,0,.18);transform:scale(1.04)}\n' +
     '.gd-x{margin-left:4px;font-size:13px;background:none;border:0;color:inherit;font-weight:800;cursor:pointer;padding:0 2px;font-family:inherit;touch-action:manipulation}\n' +
     '.gd-rep{border-radius:14px;background:#FFF0DA;padding:6px;display:flex;flex-direction:column;gap:6px;border:2px solid transparent}\n' +
     '.gd-rep[data-sel="1"]{border-color:var(--gd-control)}\n' +
@@ -372,7 +374,7 @@
     '.gd-count{min-width:22px;text-align:center}\n' +
     '.gd-empty{color:#6E6784;font-weight:700;padding:18px 10px;border:2px dashed #EBDFC4;border-radius:14px;text-align:center}\n' +
     '.gd-drag{opacity:.85;z-index:5;pointer-events:none;box-shadow:0 8px 18px rgba(0,0,0,.2)}\n' +
-    '.gd-dropline{height:4px;border-radius:2px;background:var(--gd-run);margin:-3px 0}\n' +
+    '.gd-dropline{height:4px;border-radius:2px;background:var(--gd-drop);margin:-3px 0}\n' +
     '.gd-slot{background:rgba(0,0,0,.2);border:0;border-radius:8px;color:#fff;font-weight:800;font-family:inherit;font-size:13px;padding:3px 8px;cursor:pointer;touch-action:manipulation}\n' +
     '.gd-picker{display:flex;flex-wrap:wrap;gap:6px;padding:8px;border-radius:12px;background:#EEE8FF}\n' +
     '.gd-opt{border:0;border-radius:999px;background:#fff;color:#4A2FA6;font-weight:800;font-family:inherit;font-size:14px;padding:7px 12px;cursor:pointer;touch-action:manipulation}\n' +
@@ -740,7 +742,7 @@
             onPointerDown: onPointerDown,
             onContextMenu: function (e) { e.preventDefault(); },
             style: Object.assign(
-              { '--gd-motion': props.motionColor, '--gd-action': props.actionColor, '--gd-control': props.controlColor, '--gd-ask': props.askColor, '--gd-run': props.runColor },
+              { '--gd-motion': props.motionColor, '--gd-action': props.actionColor, '--gd-control': props.controlColor, '--gd-ask': props.askColor, '--gd-run': props.runColor, '--gd-drop': props.dropColor },
               props.style
             )
           },
@@ -776,7 +778,10 @@
       actionColor: { type: 'color', displayName: 'Action Blocks', group: 'Style', default: '#058149' },
       controlColor: { type: 'color', displayName: 'Control Blocks', group: 'Style', default: '#A86501' },
       askColor: { type: 'color', displayName: 'Ask Blocks', group: 'Style', default: '#8059EC' },
-      runColor: { type: 'color', displayName: 'Running Glow', group: 'Style', default: '#FFD166' }
+      // The ring around the running block: the ink, over a white halo the sheet draws (IG-001 D5). The drop-line, drawn
+      // while a block is dragged, keeps the sun in a colour of its own.
+      runColor: { type: 'color', displayName: 'Running Ring', group: 'Style', default: '#2E2A3D', description: 'The 3 px ring around the block that is running, outside a 4 px white halo.' },
+      dropColor: { type: 'color', displayName: 'Drop Line', group: 'Style', default: '#FFD166', description: 'The line that shows where a dragged block will drop.' }
     },
 
     outputProps: {
@@ -791,8 +796,8 @@
   // ═══════════════════════════════════════════════════════════════════════════
 
   /** The mockup’s map characters. A page sends its own legend beside its rows. */
-  var DEFAULT_LEGEND = { G: 'grass', P: 'path', W: 'water', T: 'tree', R: 'rock', H: 'house', F: 'bed', '.': 'grass', ' ': 'grass' };
-  var KINDS = ['grass', 'path', 'water', 'tree', 'rock', 'house', 'bed'];
+  var DEFAULT_LEGEND = { G: 'grass', P: 'path', W: 'water', T: 'tree', R: 'rock', H: 'house', F: 'bed', B: 'postbox', '.': 'grass', ' ': 'grass' };
+  var KINDS = ['grass', 'path', 'water', 'tree', 'rock', 'house', 'bed', 'postbox'];
 
   /**
    * The Map port as a grid: { w, h, rows, legend, cells }. Rows or { rows, legend } or newline-separated text; a
@@ -972,8 +977,40 @@
       ['ellipse', { cx: 32, cy: 27, rx: 16, ry: 5, fill: '#C79A63' }],
       ['circle', { cx: 26, cy: 25, r: 2.5, fill: '#A9773F' }],
       ['circle', { cx: 36, cy: 26, r: 2.5, fill: '#A9773F' }]
+    ] },
+    // IG-001 D9 (P106 s1): the things the pages drew as emoji in a white pill — a stone a robot lays, the post box
+    // (a tile of its own, on path), the Predict flag, an egg, the cat's food — each a sprite in the mockup's palette.
+    stone: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 52, rx: 17, ry: 3.5, fill: 'rgba(0,0,0,.12)' }],
+      ['path', { d: 'M15 46l5-14 12-7 15 4 6 11-6 8H21z', fill: '#8E8B9A' }],
+      ['path', { d: 'M23 40l4-9 10-3 8 5-2 9H27z', fill: '#B3B0BE' }]
+    ] },
+    postbox: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 58, rx: 16, ry: 3, fill: 'rgba(0,0,0,.12)' }],
+      ['rect', { x: 20, y: 14, width: 24, height: 42, rx: 6, fill: '#E04E4E' }],
+      ['rect', { x: 17, y: 9, width: 30, height: 9, rx: 4.5, fill: '#B93A3A' }],
+      ['rect', { x: 25, y: 25, width: 14, height: 3.5, rx: 1.75, fill: '#2E2A3D' }],
+      ['rect', { x: 26, y: 34, width: 12, height: 9, rx: 1.5, fill: '#FFF7E8' }],
+      ['rect', { x: 16, y: 54, width: 32, height: 4, rx: 2, fill: '#B93A3A' }]
+    ] },
+    flag: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 22, cy: 58, rx: 8, ry: 2.5, fill: 'rgba(0,0,0,.12)' }],
+      ['path', { d: 'M20 57V7', stroke: '#2E2A3D', strokeWidth: 3.5, strokeLinecap: 'round' }],
+      ['path', { d: 'M22 9h28l-8 9 8 9H22z', fill: '#FFD166' }],
+      ['path', { d: 'M22 18h20l-4 4.5 4 4.5H22z', fill: '#E86A5E' }]
+    ] },
+    egg: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 55, rx: 13, ry: 3, fill: 'rgba(0,0,0,.12)' }],
+      ['path', { d: 'M32 12c9 0 15 12 15 24a15 15 0 01-30 0c0-12 6-24 15-24z', fill: '#FFF7E8', stroke: '#C79A63', strokeWidth: 2 }],
+      ['ellipse', { cx: 27, cy: 30, rx: 2.5, ry: 5, fill: '#fff' }]
+    ] },
+    food: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 50, rx: 18, ry: 3, fill: 'rgba(0,0,0,.12)' }],
+      ['path', { d: 'M17 40a5 5 0 01-3-9 5 5 0 013-9c2 0 4 1 5 3h20c1-2 3-3 5-3a5 5 0 013 9 5 5 0 01-3 9c-2 0-4-1-5-3H22c-1 2-3 3-5 3z', fill: '#FFF0DA', stroke: '#C79A63', strokeWidth: 2, strokeLinejoin: 'round' }]
     ] }
   };
+  /** The thing kinds drawn as a sprite of the same name (a tulip, a puddle and a bowl have rules of their own). */
+  var THING_SPRITES = { letter: 1, stone: 1, postbox: 1, flag: 1, egg: 1, food: 1 };
 
   function spriteEl(name, key, extraClass) {
     var s = SPRITES[name];
@@ -995,7 +1032,7 @@
     '.gd-world{position:relative;width:100%;max-width:640px;margin:0 auto;border-radius:16px;overflow:hidden;background:#BFE8CC;display:grid;gap:0;border:4px solid #A8D9B4;box-sizing:border-box;-webkit-tap-highlight-color:transparent;font-family:inherit}\n' +
     '.gd-cell{position:relative;min-height:0;overflow:visible;padding:0;border:0;background:none;cursor:pointer;touch-action:manipulation}\n' +
     '.gd-grass{background:linear-gradient(0deg,#BDE6C9,#C8EBD2)}.gd-grass:nth-child(odd){background:linear-gradient(0deg,#B6E2C3,#C3E8CE)}\n' +
-    '.gd-path{background:#F1DFB5}.gd-water{background:radial-gradient(circle at 40% 40%,#9AD6F5,#6ABBE6);border-radius:10px}.gd-bed{background:#C79A63;border-radius:8px}\n' +
+    '.gd-path{background:#F1DFB5}.gd-postbox{background:#F1DFB5}.gd-water{background:radial-gradient(circle at 40% 40%,#9AD6F5,#6ABBE6);border-radius:10px}.gd-bed{background:#C79A63;border-radius:8px}\n' +
     '.gd-cell>.gd-sprite{position:absolute;inset:11%;width:78%;height:78%}\n' +
     '.gd-bed>.gd-tulip{transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .4s}\n' +
     '.gd-tulip.gd-dry{opacity:.55;filter:saturate(.3);transform:rotate(18deg) translateY(6%)}\n' +
@@ -1061,7 +1098,7 @@
     displayNodeName: 'Garden',
     docs:
       'The tile world: a CSS grid of tiles from a Map of rows and a legend (grass, path, water, tree, rock, house, ' +
-      'bed), Things on tiles (tulips dry or watered, puddles, letters, bowls, labels) and one or two Robots that glide ' +
+      'bed, postbox), Things on tiles (tulips dry or watered, puddles, letters, bowls, stones, eggs, food, a flag, labels) and one or two Robots that glide ' +
       'to where the graph puts them in Step Ms, turn to face d (0 up, clockwise), bump in place when their bump count ' +
       'rises, and speak a Bubble. Every sprite is inline SVG; nothing is fetched. A tapped tile reports its x and y. ' +
       'It draws; the engine decides where a robot may go.',
@@ -1168,11 +1205,13 @@
             else if (t.kind === 'puddle') extras.push(h('div', { key: 'puddle-' + i, className: 'gd-puddle', 'data-puddle': 'true' }));
             else if (t.kind === 'letter') extras.push(spriteEl('letter', 'letter-' + i, 'gd-thing'));
             else if (t.kind === 'bowl') extras.push(spriteEl(t.full ? 'bowlFull' : 'bowl', 'bowl-' + i, 'gd-thing gd-bowl' + (t.full ? ' gd-full' : '')));
+            else if (THING_SPRITES[t.kind]) extras.push(spriteEl(t.kind, t.kind + '-' + i, 'gd-thing gd-' + t.kind));
             else if (t.kind === 'label') extras.push(h('span', { key: 'label-' + i, className: 'gd-label' }, String(t.text || '')));
           });
           if (c.kind === 'tree') kids.push(spriteEl('tree', 'tree'));
           if (c.kind === 'rock') kids.push(spriteEl('rock', 'rock'));
           if (c.kind === 'house') kids.push(spriteEl('house', 'house'));
+          if (c.kind === 'postbox') kids.push(spriteEl('postbox', 'postbox'));
           if (c.kind === 'bed' || tulip) {
             var wet = !!(tulip && (tulip.watered === true || tulip.state === 'watered' || tulip.state === 'wet'));
             kids.push(spriteEl('tulip', 'tulip', 'gd-tulip ' + (wet ? 'gd-wet' : 'gd-dry')));
@@ -1259,8 +1298,8 @@
     defaultCss: { display: 'grid' },
 
     inputProps: {
-      map: { type: 'object', displayName: 'Map', group: 'World', default: '{"rows":["GGTGGGTH","GGGGGGGG","GGFGFGFG","PPPPPPPP","GWWGGRGG","GGGGGTGG"]}', description: 'Rows of characters and a legend, as an object or JSON: { rows: ["GGTG…"], legend: { G: "grass" } }. Kinds: grass, path, water, tree, rock, house, bed (a tulip bed, dry until a Thing waters it). The mockup’s legend is the default.' },
-      things: { type: 'object', displayName: 'Things', group: 'World', description: 'A list, as an object or JSON: { kind, x, y } with kind tulip (watered true/false), puddle, letter, bowl (full true/false) or label (text).' },
+      map: { type: 'object', displayName: 'Map', group: 'World', default: '{"rows":["GGTGGGTH","GGGGGGGG","GGFGFGFG","PPPPPPPP","GWWGGRGG","GGGGGTGG"]}', description: 'Rows of characters and a legend, as an object or JSON: { rows: ["GGTG…"], legend: { G: "grass" } }. Kinds: grass, path, water, tree, rock, house, bed (a tulip bed, dry until a Thing waters it), postbox (the post box, on path). The mockup’s legend is the default.' },
+      things: { type: 'object', displayName: 'Things', group: 'World', description: 'A list, as an object or JSON: { kind, x, y } with kind tulip (watered true/false), puddle, letter, bowl (full true/false), stone, egg, food, flag or label (text).' },
       robots: { type: 'object', displayName: 'Robots', group: 'World', default: '[{"x":0,"y":3,"d":1,"colour":"#FF7A59","eyes":"round","hat":"none","name":"Pip"}]', description: 'One or two, as a list or JSON: { x, y, d, colour, eyes, hat, name, bump }. d is 0 up, 1 right, 2 down, 3 left. bump is a count: raise it once per bump.' },
       bubble: { type: 'object', displayName: 'Bubble', group: 'World', description: '{ robot, text, style, ms }: a line over a robot for ms (1100 plain, 3200 olive by default). A new object shows a new bubble.' },
       stepMs: { type: 'number', displayName: 'Step Ms', group: 'World', default: 380, description: 'How long a robot takes to glide one tile.' },

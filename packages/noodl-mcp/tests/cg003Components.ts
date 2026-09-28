@@ -243,7 +243,8 @@ const BLOCK_COLOURS: N = {
   actionColor: 'var(--block-action)',
   controlColor: 'var(--block-control)',
   askColor: 'var(--block-ask)',
-  runColor: 'var(--block-run)'
+  runColor: 'var(--block-run)',
+  dropColor: 'var(--block-drop)'
 };
 
 // ── Data/* ──────────────────────────────────────────────────────────────────

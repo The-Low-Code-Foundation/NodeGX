@@ -160,7 +160,9 @@ Outputs.sub = (req && SUBS[req.id] && w[SUBS[req.id]]) || w.isSub || '';
 `;
 
 export const DRAW_WORLD_SCRIPT = `${WORD_HELPER}
-var GLYPH = { egg: '🥚', stone: '🪨', food: '🍖' };
+// IG-001 D9 (P106 s1): a stone, an egg, the cat's food and the Predict flag are the kit's own sprites; the post box is the
+// B tile itself (legend B: postbox, drawn on path). No emoji in a white pill any more.
+var SPRITE_THINGS = { stone: 1, egg: 1, food: 1 };
 var world = Inputs.world && typeof Inputs.world === 'object' ? Inputs.world : { map: [], things: [], robots: [] };
 var rows = Array.isArray(world.map) ? world.map.slice() : [];
 var things = [];
@@ -170,13 +172,11 @@ for (var i = 0; i < list.length; i++) {
   var t = list[i];
   if (!t) continue;
   if (t.kind === 'tulip') { total++; if (t.watered) watered++; things.push({ kind: 'tulip', x: t.x, y: t.y, watered: !!t.watered }); }
-  else if (t.kind === 'puddle' || t.kind === 'letter') things.push({ kind: t.kind, x: t.x, y: t.y });
+  else if (t.kind === 'puddle' || t.kind === 'letter' || SPRITE_THINGS[t.kind]) things.push({ kind: t.kind, x: t.x, y: t.y });
   else if (t.kind === 'bowl') things.push({ kind: 'bowl', x: t.x, y: t.y, full: (Number(t.food) || 0) > 0 });
   else if (t.kind === 'label') things.push({ kind: 'label', x: t.x, y: t.y, text: String(t.text || '') });
-  else if (GLYPH[t.kind]) things.push({ kind: 'label', x: t.x, y: t.y, text: GLYPH[t.kind] });
 }
-for (var y = 0; y < rows.length; y++) for (var x = 0; x < String(rows[y]).length; x++) if (String(rows[y]).charAt(x) === 'B') things.push({ kind: 'label', x: x, y: y, text: '📮' });
-if (Inputs.showEnd === true && Inputs.endX !== undefined && Inputs.endX !== null && Number(Inputs.endX) >= 0) things.push({ kind: 'label', x: Number(Inputs.endX), y: Number(Inputs.endY), text: '🏁' });
+if (Inputs.showEnd === true && Inputs.endX !== undefined && Inputs.endX !== null && Number(Inputs.endX) >= 0) things.push({ kind: 'flag', x: Number(Inputs.endX), y: Number(Inputs.endY) });
 var bump = (Number(Inputs.bumps) || 0) + (Number(Inputs.teachBumps) || 0);
 var robots = [];
 var rl = Array.isArray(world.robots) ? world.robots : [];
@@ -184,7 +184,7 @@ for (var r = 0; r < rl.length; r++) robots.push({ x: rl[r].x, y: rl[r].y, d: rl[
 var lang = langOf(Inputs.lang);
 var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
 var say = String(Inputs.sayKey || '');
-Outputs.map = { rows: rows, legend: { B: 'path' } };
+Outputs.map = { rows: rows, legend: { B: 'postbox' } };
 Outputs.things = things;
 Outputs.robots = robots;
 Outputs.watered = watered;

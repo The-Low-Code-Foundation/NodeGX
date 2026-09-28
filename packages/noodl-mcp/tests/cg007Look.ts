@@ -125,7 +125,10 @@ export const GARDEN_TOKENS: ReadonlyArray<{ name: string; value: string }> = [
   { name: '--block-action', value: darkened('--block-action') },
   { name: '--block-control', value: darkened('--block-control') },
   { name: '--block-ask', value: darkened('--block-ask') },
-  { name: '--block-run', value: '#FFD166' },
+  // IG-001 D5 (P106 s1): the running ring is the ink (#2E2A3D = --ink), 13:1 on the panel and 12:1 inside a repeat; the
+  // sun it was (1.44:1 on white) stays only as the drag drop-line's own token.
+  { name: '--block-run', value: '#2E2A3D' },
+  { name: '--block-drop', value: '#FFD166' },
   // The tidy box, the repeat's ground, a watered tulip's dot, the pad's water key (mockup literals, named once).
   { name: '--tidy', value: '#FFF4E0' },
   { name: '--tidy-edge', value: '#FFD9A3' },

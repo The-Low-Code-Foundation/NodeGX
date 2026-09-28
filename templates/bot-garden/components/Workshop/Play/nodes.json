@@ -1224,7 +1224,8 @@
         "actionColor": "var(--block-action)",
         "controlColor": "var(--block-control)",
         "askColor": "var(--block-ask)",
-        "runColor": "var(--block-run)"
+        "runColor": "var(--block-run)",
+        "dropColor": "var(--block-drop)"
       },
       "x": 280,
       "y": 5560

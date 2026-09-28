@@ -408,6 +408,12 @@
         },
         {
           "name": "--block-run",
+          "value": "#2E2A3D",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--block-drop",
           "value": "#FFD166",
           "category": "color-semantic",
           "isCustom": true

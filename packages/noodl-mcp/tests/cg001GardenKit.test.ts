@@ -509,6 +509,50 @@ describe('CG-001 — garden-kit, the built artefact', () => {
     });
   });
 
+  describe('IG-001 (P106 s1) — D5 the running ring; D9 the stone, the post box and the flag as sprites', () => {
+    it('🔴 D5: the running block wears a 3 px ring in the Running Ring colour (ink by default), a 4 px white halo and scale(1.04); the drop-line has a colour of its own', () => {
+      const css = node('garden-kit.BlockList').css as string;
+      const ring = (css.match(/\.gd-blk\.gd-run\{[^}]*\}/) ?? [''])[0];
+      expect(ring).toContain('outline:3px solid var(--gd-run)');
+      expect(ring).toContain('box-shadow:0 0 0 4px #fff');
+      expect(ring).toContain('scale(1.04)');
+      const drop = (css.match(/\.gd-dropline\{[^}]*\}/) ?? [''])[0];
+      expect(drop).toContain('var(--gd-drop)');
+      expect(drop).not.toContain('--gd-run');
+      const props = node('garden-kit.BlockList').inputProps as Record<string, { default?: unknown }>;
+      expect([props.runColor.default, props.dropColor.default]).toEqual(['#2E2A3D', '#FFD166']);
+      const html = render('garden-kit.BlockList', { program: '[{"id":1,"t":"fwd"}]', runningId: '1', runColor: '#123456', dropColor: '#ABCDEF' });
+      expect(html).toContain('--gd-run:#123456');
+      expect(html).toContain('--gd-drop:#ABCDEF');
+      expect(html).toMatch(/data-id="1"[^>]*data-run="true"/);
+    });
+
+    it('🔴 D9: stone, post box, flag (and egg, food) are inline sprites; a B tile is a post box drawn on path; nothing is a label pill', () => {
+      const sprites = (node('garden-kit.Garden').sprite as { sprites: Record<string, unknown> }).sprites;
+      for (const k of ['stone', 'postbox', 'flag', 'egg', 'food']) expect({ k, has: !!sprites[k] }).toEqual({ k, has: true });
+      const html = render('garden-kit.Garden', { map: { rows: ['PPB'], legend: { B: 'postbox' } }, things: [{ kind: 'stone', x: 0, y: 0 }, { kind: 'food', x: 0, y: 0 }, { kind: 'flag', x: 1, y: 0 }, { kind: 'egg', x: 1, y: 0 }] });
+      const cell = (x: number, y: number) => {
+        const at = html.indexOf(`data-x="${x}" data-y="${y}"`);
+        return html.slice(html.lastIndexOf('<button', at), html.indexOf('</button>', at));
+      };
+      expect(cell(2, 0)).toMatch(/class="gd-cell gd-postbox"[\s\S]*data-sprite="postbox"/);
+      expect(cell(0, 0)).toContain('class="gd-sprite gd-thing gd-stone" data-sprite="stone"');
+      expect(cell(0, 0)).toContain('data-sprite="food"');
+      expect(cell(1, 0)).toContain('class="gd-sprite gd-thing gd-flag" data-sprite="flag"');
+      expect(cell(1, 0)).toContain('data-sprite="egg"');
+      // No pill drawn (the sheet still carries the rule; an ELEMENT is what a child would see).
+      expect(html).not.toContain('class="gd-label"');
+      // The kit's own legend knows B; the post box's ground is the path's.
+      const world = node('garden-kit.Garden').world as { DEFAULT_LEGEND: Record<string, string>; KINDS: string[] };
+      expect([world.DEFAULT_LEGEND.B, world.KINDS.includes('postbox')]).toEqual(['postbox', true]);
+      const css = node('garden-kit.Garden').css as string;
+      const bg = (kind: string) => (new RegExp(`\\.gd-${kind}\\{background:([^;}]+)`).exec(css) || [])[1];
+      expect(bg('postbox')).toBe(bg('path'));
+      // A label still draws (the port's contract), so an older page is not broken; the pages just send none any more.
+      expect(render('garden-kit.Garden', { map: ['G'], things: [{ kind: 'label', x: 0, y: 0, text: 'hi' }] })).toContain('class="gd-label"');
+    });
+  });
+
   describe('AC10 — what the kit bundles is written down, and nothing is fetched', () => {
     it('the README credits the source of the sprites, the licence, the borrowed icon, and says nothing is fetched', () => {
       const readme = fs.readFileSync(README, 'utf8');

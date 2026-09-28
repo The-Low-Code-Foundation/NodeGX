@@ -746,7 +746,19 @@ describe('CG-003 — Bot Garden, the artefact', () => {
     it('the preset under the tokens is Playful, which brings Nunito', () => {
       expect(getPreset(GARDEN_PRESET)).toBeTruthy();
       expect(tokenValue('--font-sans')).toMatch(/^"Nunito"/);
-      expect(GARDEN_TOKENS.filter((t) => t.name.startsWith('--block-')).map((t) => t.name)).toEqual(['--block-motion', '--block-action', '--block-control', '--block-ask', '--block-run']);
+      expect(GARDEN_TOKENS.filter((t) => t.name.startsWith('--block-')).map((t) => t.name)).toEqual(['--block-motion', '--block-action', '--block-control', '--block-ask', '--block-run', '--block-drop']);
+    });
+
+    it('🔴 IG-001 D5: the running ring is the ink, ≥ 3:1 on the steps panel and inside a repeat; the drop-line keeps the old yellow, as its own token', () => {
+      expect(tokenValue('--block-run')).toBe(tokenValue('--ink'));
+      expect(contrast(tokenValue('--block-run'), tokenValue('--card'))).toBeGreaterThanOrEqual(3);
+      expect(contrast(tokenValue('--block-run'), tokenValue('--rep'))).toBeGreaterThanOrEqual(3);
+      // Known-firing beside it: the ring Richard saw, the sun, fails both grounds with this very arithmetic (1.44, 1.29).
+      expect(contrast(tokenValue('--sun'), tokenValue('--card'))).toBeLessThan(3);
+      expect(contrast(tokenValue('--sun'), tokenValue('--rep'))).toBeLessThan(3);
+      expect(tokenValue('--block-drop')).toBe(tokenValue('--sun'));
+      const blocks = nodesOf(built, C.play).find((n) => n.type === 'garden-kit.BlockList')!;
+      expect([params(blocks).runColor, params(blocks).dropColor]).toEqual(['var(--block-run)', 'var(--block-drop)']);
     });
   });
 });
@@ -827,14 +839,21 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
   it('Draw world: the engine’s things in the kit’s words, the looks on the robot, the real end when a prediction missed', () => {
     const w = { map: ['GGB'], things: [{ kind: 'bowl', x: 0, y: 0, food: 1 }, { kind: 'egg', x: 1, y: 0 }], robots: [{ id: 'me', x: 0, y: 0, d: 1 }] };
     const d = run(DRAW_WORLD_SCRIPT, { world: w, color: '#8F6BFF', eye: 'wink', hat: 'sun', botName: 'Bo', bumps: 1, teachBumps: 2, showEnd: true, endX: 1, endY: 0 });
+    // IG-001 D9: an egg, a stone, food and the Predict flag are the kit's sprites, never a label pill; the post box is
+    // the B tile itself (the legend), not a thing on top of a path tile.
     expect(d.things).toEqual([
       { kind: 'bowl', x: 0, y: 0, full: true },
-      { kind: 'label', x: 1, y: 0, text: '🥚' },
-      { kind: 'label', x: 2, y: 0, text: '📮' },
-      { kind: 'label', x: 1, y: 0, text: '🏁' }
+      { kind: 'egg', x: 1, y: 0 },
+      { kind: 'flag', x: 1, y: 0 }
     ]);
+    expect(d.map).toEqual({ rows: ['GGB'], legend: { B: 'postbox' } });
     expect(d.robots).toEqual([{ x: 0, y: 0, d: 1, colour: '#8F6BFF', eyes: 'wink', hat: 'sun', name: 'Bo', bump: 3 }]);
-    expect(run(DRAW_WORLD_SCRIPT, { world: w, showEnd: false, endX: 1, endY: 0 }).things).toHaveLength(3);
+    expect(run(DRAW_WORLD_SCRIPT, { world: w, showEnd: false, endX: 1, endY: 0 }).things).toHaveLength(2);
+    const stones = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones' }).world;
+    stones.things.push({ kind: 'stone', x: 3, y: 3 });
+    const drawn = run(DRAW_WORLD_SCRIPT, { world: stones }).things;
+    expect(drawn).toEqual([{ kind: 'stone', x: 3, y: 3 }]);
+    expect(DRAW_WORLD_SCRIPT).not.toMatch(/GLYPH|🪨|📮|🏁/);
   });
 
   it('Update profile: a hat is worn only once it is owned; a language is set', () => {
@@ -951,7 +970,7 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     for (const sel of ['.gd-nctl button', '.gd-slot']) expect({ sel, lightened: /rgba\(255,255,255/.test(rule(sel)), found: rule(sel).length > 0 }).toEqual({ sel, lightened: false, found: true });
     for (const sel of ['.gd-x', '.gd-band1 .gd-blk .gd-n']) expect({ sel, faded: /opacity/.test(rule(sel)), found: rule(sel).length > 0 }).toEqual({ sel, faded: false, found: true });
     expect(rule('.gd-bubble.gd-olive small')).toContain('#6A5AA8');
-    for (const [port, token] of [['motionColor', '--block-motion'], ['actionColor', '--block-action'], ['controlColor', '--block-control'], ['askColor', '--block-ask']]) {
+    for (const [port, token] of [['motionColor', '--block-motion'], ['actionColor', '--block-action'], ['controlColor', '--block-control'], ['askColor', '--block-ask'], ['runColor', '--block-run'], ['dropColor', '--block-drop']]) {
       const m = kit.match(new RegExp(port + ": \\{[^}]*default: '(#[0-9A-F]{6})'"));
       expect({ port, value: m && m[1] }).toEqual({ port, value: tokenValue(token) });
     }
