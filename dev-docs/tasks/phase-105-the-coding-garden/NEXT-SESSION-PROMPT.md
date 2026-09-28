@@ -1,62 +1,57 @@
 # Phase 105 — next session
 
-> ### 📋 2026-09-28 (CG s3) — RICHARD RULED, THE GAME IS "OLIVE'S ISLAND", EVERY DRIVE GREEN ON THE MERGED TREE — START HERE
+> ### 📋 2026-09-28 (CG s4) — THE WINDOWS WORKFLOW RAN; THE INSTALLER WORKS; OLIVE IS TOO SLOW ON THE RUNNER'S CPU — START HERE
 >
-> - **Done on `cline-dev` (`83888c07d` → `ff06f39b5`, then the docs commit):** Richard's rulings R5–R15 (README §2, each
->   with the question it answered) built by five lanes (CONTENT, LOOK, DESKTOP, then HOOKS and BACKUP) plus the
->   orchestrator's fixes. The game is **"Olive's Island" / "L'île d'Olive"** everywhere a person sees it (slugs stay
->   `bot-garden`, `garden-desktop`, `garden-kit`); one island per kid (save model v3, migrated with its own save); the
->   Island is the mockup's sea with pins; every text ≥ 4.5:1 (darker fills); Olive lessons are band 10–12 only; rung 9 is
->   "no letter e"; the EN thank-you has no word check; rungs 13–18 promoted from the measured moments; Olive's page hooks;
->   the nightly backup copies the REAL save and a Restore menu brings it back.
-> - **Readings taken this session (primary checkout, 2026-09-28):**
->   - `ff06f39b5`: garden specs **332/332** (cg001 20, cg002 116, cg003Template 79, cg005 34, cg006 83); `template:garden`
->     exit 0, 78 components, two runs hash-identical (checked at `5d51e4018`); page drive **148/148** exit 0 (EN+FR, 1368 +
->     390, 0 console / 0 network errors); Olive page drive **16/16, 0 skip**, exit 0; packaged `Olive's Island.app` upgrade
->     drive **PASS 10/10** with the model (Ada/Bolt kept 0.0.1 → 0.0.2; `island-backup-2026-09-28.json` holds Ada/Bolt as
->     stored JSON and as a code). Without the model (at `6acf90060`+): **PASS**, the ask answers `no-model`.
->   - Shell `node --test` **89/89** after the backup lane (`c4a2470e1`).
->   - `443a01e97`, the real model through the shipped table: contract **31/31 CPU**, **30/31 Metal** (P21 poem, variance);
->     `probe-cg006` **6/7 offered on each path** — rung 14 withheld on CPU, rung 9 on Metal (below).
-> - **Where the last handoff was wrong:** the fold ruling moved **8** fixtures, not 6. "Rung 9's G1 fails 3/3 EN on both
->   paths" does not reproduce on Metal: she KEPT "no letter e" 2/3 in English ("A vibrant tulip sits tall against a sunny
->   sky."), so the exam withholds rung 9 on a Mac GPU (it offers it on CPU, the tablet's path). "10 of 10 band 7–9 rungs
->   unreachable" had measured the block list; the palette offered 11 (moot now: R8).
-> - **Defects found and fixed this session:** 3 of 6 real voiced hints passed every check and had stopped being the hint
->   (an answer in markdown; a story with no question) → `unfaithful` (`e1667b3e1`) · the kit cut a PICKED slot option to 40
->   characters, so 15 options of five rungs were never sent (`0166329e6`) · rungs 13–18 fell through to `hintMissed`
->   (`5d51e4018`) · at 390 the island's labels collided (`b16751f28`) · the backup copied an empty SQLite database while
->   the family lived in browser storage (`bc36c1f59`, R14) · `build-app.js` still built the to-do template and a refused
->   deploy exited 0 (`06ed8650a`) · the Olive drive wrapper exited 0 on a red drive.
+> - **Done on `cline-dev` (`770ec034a` → `ac3698953`, then the docs commit), each driven:**
+>   the Grown-ups **paste box** (a save code brings the islands back; a bad one writes nothing) · the **after-run rung
+>   lesson line** (`Logic/Olive played`: only an ask of THIS run that was SENT) · **Olive's 18 lessons as Skills cards**
+>   (band 10–12; "can't do this here yet" where the exam withheld one) · free play's **arrow** · the Mac **Edit menu**
+>   (Cmd+V in a text box) · the app **icon** · three CI first-run defects (below). Richard said PUSH: the branch
+>   `p105-garden-desktop` holds `ac3698953` (a fast-forward of `cline-dev` commits only).
+> - **Readings (primary checkout, 2026-09-28):** garden specs **337/337** (cg003Template 84); page drive **161/161** exit 0
+>   (`d4236a5d9` template, 14:47); Olive page drive **17/17, 0 skip** (14:54); shell `npm test` **89/89**. Packaged
+>   `Olive's Island.app` rebuilt at 15:54 with every s4 change (grep of its resources) — not driven.
+>   Windows, five runs (CG-008 §9): run 4 `36423640596` built `OlivesIsland-Setup-0.0.1.exe`, installed it silently
+>   (exe + FileDescription + Start-menu shortcut all "Olive's Island", no default-icon line), egress blocked, app up in
+>   4.2 s, model on CPU in 8.5 s — then **the exam never finished: 55/80 asks hit the 12 s limit**. Run 5 `36426590795`:
+>   **the contract itself on that CPU (2 threads, the shipped prebuilt) times out on every ask** (poem 12004 ms, 11/31,
+>   per probe 21–36 s) — so NOT the app's thread setting. Linux, same prebuilt: ~3 s a probe (31/31 in run 4).
+> - **Where the last handoff was wrong / what s4 settled:** "the Linux contract 31/31 CPU" in CI had been grading a
+>   llama.cpp COMPILED on the runner (the Mac-made lockfile had no linux/win prebuilt; `npm ci` took 3 min) — its P07
+>   4/4 red vanished on the prebuilt. The paste box's "a null model would be written" was reasoned: the control (null
+>   restored) passed the drive too — the decode change is a guard, not a measured fix. "Free play card missing": it
+>   existed; it differed from the mockup by a tag (now the arrow) and the owl's face (still — see 5).
 >
 > **For Richard (human, not code):**
-> 1. **Look at it** — the look is graded against the mockup by him, not by the ACs. Screenshots:
->    `../OpenNoodl-worktrees/p105-s3-scratch/final/pages/shots/` (the island, Workshop, Profiles at 1368 and 390; `mockup-*.png`
->    beside them), or run the packaged app `garden-desktop/shell/dist/mac-arm64/Olive's Island.app`.
-> 2. **Read the French** (CG-006 AC3), now including rungs 13–18's lines (`cg002Content.ts` WORDS, `cg003Content.ts`).
-> 3. **Two minutes by hand:** the Restore menu's native dialogs (CG-004 §8.1 has the steps; CDP cannot press them).
-> 4. **Say yes to pushing** the workflow branch for the first Windows run (`git push origin <commit>:refs/heads/p105-garden-desktop`,
->    CG-008) — outward-facing, so ask.
+> 1. **Try it on the Mac:** `open "dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/dist/mac-arm64/Olive's Island.app"`.
+>    The look against the mockup (now incl. the Skills "Olive's lessons" section, which the mockup does not have).
+> 2. **Two minutes by hand:** Cmd+V into Grown-ups → Paste a code (CDP cannot press a native menu shortcut); the Restore
+>    menu's dialogs (CG-004 §8.1).
+> 3. **Read the French** (CG-006 AC3) incl. s4's new lines: `saveCodeUse`, `saveCodeDone`, `guSaveLine`, `skRungsH`,
+>    `skRungsSub`, `rungGreen`, `rungGrad`.
+> 4. **The tablet:** install the run's installer (artifact `garden-win32-x64-ac36989…`, SmartScreen → More info → Run
+>    anyway) and bring back `%APPDATA%\Bot Garden\logs\timings.log` + `…\island\olive-exam.json`. The runner says Olive may
+>    answer NOTHING inside 12 s on a plain Windows CPU; only the tablet can say whether that is the kids' reality.
+> 5. **Rulings, when the tablet has spoken:** if Olive is too slow there — a longer limit (the child waits), a smaller
+>    job (fewer tokens), or "Olive only on the Mac"? And: must rung 9 show on every machine (it is withheld on Metal)?
 >
-> **Session 4, in order:**
-> 1. **CG-008 on Windows**, once Richard says push: the run, its step summary, the installed app driven; then the tablet.
->    The app has **no icon** (`electron-builder`: "default Electron icon is used") — make one from the kit's new `icon.png`.
-> 2. **The Grown-ups paste box** for a save code (the code is shown but nothing decodes it; words `saveCodePaste` /
->    `saveCodeBad` exist; wire `Logic/Decode save code` + the App store's write) — the second restore path.
-> 3. **The after-run rung lesson line**: `Choose hint` is not fed `oliveRung` / `oliveFallback` on the page, so the
->    `oliveRung1–18` lines never show (CG-005 §8 residual). Then the **18 rungs as Skills cards** (CG-003).
-> 4. **Rung 9 on Metal**: if the lesson must show on every machine, probe another rule she breaks in EN too (CG-006 §8.9).
-> 5. Small: the mockup's **Free play card** on the island; the **Mac Edit menu** (Cmd+C/V in text boxes, unmeasured);
->    the request↔rung mapping is lane HOOKS's choice (CG-006 may move it).
+> **Session 5, in order:**
+> 1. **Read run 5's app logs** (artifact `out/logs/timings.log`) and find why the win-x64 prebuilt is ~10× slower than
+>    linux-x64 on the same class of runner: which `ggml-cpu-*.dll` loads (node-llama-cpp debug log), Defender on the
+>    mmapped model, a `--cpu` run with 4 threads. A reading on the runner, then the tablet's numbers (CG-008 AC4).
+> 2. The Linux contract gate is flaky by design (30/31 both attempts, a different probe each time): judge the retry on
+>    the union, or two of three — a gate change, say so in CG-004.
+> 3. The installed-app drive's full path (CG-008 §2: island → tulip → teach → fold → play → win → Grown-ups → Try Olive)
+>    is still not built; with a slow Olive the drive must not wait on the exam for its other clauses.
+> 4. Small: free play's face is the owl, the mockup's is the kid's robot; the Workshop palette list's top is cut when it
+>    scrolls (`s4-rung-lesson.png`, seen not measured).
 >
-> - **Traps paid for this session:** a drive WRAPPER's exit is not the drive's — read `<step>.exit` and its mtime ·
->   `git worktree remove` of a worktree with a symlinked `node_modules` removed only the link (checked: primary's 272 entries
->   intact) · a lane's test count is its worktree's — recount on the primary before quoting · a probe that passed last
->   session is a sample, not a property: re-run it on both paths before building on it.
-> - **Known reds that are not ours:** as in s1/s2 (`noodl-mcp` whole-suite 8 suites red at the base; `library:check` 80/81
->   on the untracked `nightbook-kit`). Not re-measured.
-> - **Worktrees:** none left (branches `cg-s3-*` kept; every commit is on `cline-dev`). Scratch with every lane's
->   EXPECTED files, logs and screenshots: `../OpenNoodl-worktrees/p105-s3-scratch/`. The common brief:
->   `../OpenNoodl-worktrees/p105-COMMON-BRIEF-s3.md`.
+> - **Traps paid for this session:** a Mac-made lockfile drops other platforms' prebuilts and CI compiles silently
+>   (memory `a-lockfile-made-on-a-mac-drops-other-platforms-prebuilts`) · a `needs:` on a model-grading job skipped the
+>   whole product build · a drive clause whose control also passes is a regression check, not a proof — run the control
+>   · a drive finder keyed on a label's text broke when the label became an arrow (19 reds, one cause) · job logs are
+>   404 until the job completes.
+> - **Known reds not ours:** as in s1–s3 (`noodl-mcp` whole-suite, `library:check` 80/81). Not re-measured.
+> - **Worktrees:** none. Scratch: `/private/tmp/claude-501/…/962c15ed-…/scratchpad/` (pages1–4, olive2–5, run logs).
 > - **End of session:** `/next` — this block rewritten, README §4 from the task files, the memory
 >   (`tpl-012-the-coding-garden.md`). Names, ages and the tablet spec stay out of the repo.

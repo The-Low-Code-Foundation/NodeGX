@@ -1,6 +1,6 @@
 # CG-003 — The pages: six screens through the plan door
 
-**Opened 2026-09-27**, scoped from TPL-012 §2.2. **Status: 🟢 session 3 (2026-09-28) — one island per kid, the sea with pins, the name, the hooks' components; gate 79/79, template regenerated hash-identical, page drive 148/148 on the primary at `ff06f39b5`.** Depends on CG-001 and
+**Opened 2026-09-27**, scoped from TPL-012 §2.2. **Status: 🟢 session 4 (2026-09-28) — the Grown-ups paste box (the second restore path), Olive's eighteen lessons as Skills cards (band 10–12), free play's arrow; gate 84/84, page drive 161/161 on the primary at `d4236a5d9`.** Was: 🟢 s3 — one island per kid, the sea with pins, the name, the hooks' components. Depends on CG-001 and
 CG-002. Lanes A+B.
 
 ## 1. The person sentence
@@ -185,3 +185,22 @@ line makes the gate row "item 1" name it (a line owed in `cg003Content.ts`). An 
 a pin makes the pins row name her (`ISLAND_PINS`, `PIN_PLACES`).
 
 **Residuals:** the drive (≈147 clauses) and its screenshots — the orchestrator, `$SCRATCH/look/EXPECTED-DRIVE.md`.
+
+## 9. Session 4 — what was built (the orchestrator, primary checkout, 2026-09-28)
+
+| What | Commit | Measured |
+|---|---|---|
+| **The paste box** (Grown-ups, House panel): a text box + "Replace the islands with this code" run `Logic/Decode save code`; a good code is written through the page's one store (House panel out `model` + `write` → `guStore`), "Done: the islands from the code are back."; a bad one says `saveCodeBad` and writes nothing | `770ec034a` | page drive S4-PASTE ×8: the shown code; a bad code refused in words, the stored family byte-identical; the bar's next write still writes the family; a good code (the shown one, robot renamed "Remy", re-encoded as the game does) → stored robot Remy → the island pin says Remy; the first code brings the first family back |
+| `Decode save code` publishes NO model on a bad code (it published `null`) | `770ec034a` | engine gate: `'model' in bad` is false. 🔴 **Not a measured fix:** the control (s4, the null restored with `GARDEN_SKIP_ENGINE_GATE=1`) passed the drive's bar-write clause too — the bar sends a fresh model before each write. It is a construction guarantee; the clause is a regression check (`drive-cg003-pages.js` says so) |
+| `guSaveLine` said "the whole garden" after the rename → "every island" / "toutes les îles" | `770ec034a` | screenshot `cg007-ac1-grown-ups` |
+| **Olive's lessons on Skills** (`Skills/Olive lessons`, `Skills/Rung card`, glue `Logic/Rung rows`): 18 cards, band 10–12 only, title + lesson + a tag ("Olive does this" violet / "A program does it better" the control-block colour) + "Olive can't do this here yet" where this computer's exam failed any of the rung's table entries. No progress per rung (no save-model change). **The mockup has no such section: Richard grades it** | `d4236a5d9` | gate: Rung rows row (18 rows EN/FR, rung 4 and 1 marks, rung 13's moment title, rungs 3 + 8 held, nothing at band 1) + an arm; drive: 18 cards in each of the four passes (1368/390 × EN/FR), 0 at 7–9 and 18 back; Skills contrast clause green |
+| **Free play's card** ends in the mockup's green arrow (`.bg-go`), not a "Free play" tag | `d4236a5d9` | Olive drive enters free play by the card's own line (it found the tag's text before: 19 reds, an instrument coupling) |
+
+New words (Richard's FR read): `saveCodeUse`, `saveCodeDone`, `skRungsH`, `skRungsSub`, `rungGreen`, `rungGrad`, and the
+reworded `guSaveLine`.
+
+**Residuals:** the free play card still shows the owl's face where the mockup draws the kid's robot in its colours (a
+52 px face would need the kit's `Garden` node inside every request card) — Richard's look pass. The palette list in
+the Workshop's steps panel scrolls with its top cut ("count in words" half hidden, `s4-rung-lesson.png`) — seen, not
+measured, owner CG-007.
+

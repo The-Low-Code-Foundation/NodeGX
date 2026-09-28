@@ -1,6 +1,6 @@
 # CG-005 — Olive in the game: the ask-Olive blocks, the fallbacks, the exam gate
 
-**Opened 2026-09-27**, scoped from TPL-012 §2.4 and §2.6. **Status: 🟢 session 3 (2026-09-28) — the page hooks built and driven: Olive page drive 16/16 (0 skip) on the primary; a voiced hint must still be the hint (`unfaithful`); the kit keeps a picked option whole; contract test 31/31 CPU, 30/31 Metal (P21 poem, variance — the exam withholds it).** Depends on
+**Opened 2026-09-27**, scoped from TPL-012 §2.4 and §2.6. **Status: 🟢 session 4 (2026-09-28) — the after-run rung lesson line reaches the page (`Logic/Olive played`), Olive page drive 17/17; the eighteen lessons are Skills cards (CG-003 §9). Was: 🟢 session 3 — the page hooks built and driven: Olive page drive 16/16 (0 skip) on the primary; a voiced hint must still be the hint (`unfaithful`); the kit keeps a picked option whole; contract test 31/31 CPU, 30/31 Metal (P21 poem, variance — the exam withholds it).** Depends on
 CG-002 and CG-004. Lanes B+C. **Session 2 (2026-09-28, lane C): 🟡 AC1–AC6 and AC8 measured in the specs; AC7 and the page clauses prepared, drives pending — §7.**
 
 ## 1. The person sentence
@@ -214,9 +214,8 @@ regenerated in the lane and left uncommitted.
 - The voicing POSTs on every new hint line even where no shell answers (a plain web deploy, the editor's preview): each is
   a 404 → the written line; harmless, but noisy in a console. Gate it on the status door's `running` if a web build ever
   ships. Owner: NONE this phase (the game ships in the shell).
-- `Logic/Choose hint` still is not fed `oliveRung` / `oliveFallback` (the rung's lesson line and the hint `oliveResting`
-  after an ask): the tags carry "resting" now; the after-run lesson line is not on the page. Owner: CG-003 / CG-006.
-- The Skills page shows only what the exam withheld; the eighteen rungs as Skills cards (CG-006 §8 residual) are not built. Owner: CG-003.
+- ~~`Logic/Choose hint` still is not fed `oliveRung` / `oliveFallback`~~ — **done s4 (`718558751`), §9.**
+- ~~The eighteen rungs as Skills cards~~ — **done s4 (`d4236a5d9`), CG-003 §9.**
 - Which request carries which rung is a content choice made here; Richard or CG-006 may move any (one array each). Owner: CG-006.
 
 ### 8.1 The page drive, run: 14/17 on the primary, three reds, and 16/16 after (lane HOOKS, 2026-09-28)
@@ -269,3 +268,22 @@ word (a product defect the drive found): `setSlot(list, id, key, value, max?)` �
 - Page clauses (`DEPLOY=… drive-olive.sh pages`) at `ff06f39b5`: **16/16, 0 skip, exit 0** (the first run on the merged tree
   read 14 pass + 2 fail + a failed tap: two were ONE product defect in the kit — a picked option cut to 40 characters, so 15
   options of five rungs were never sent — and one was the drive tapping a palette the kit locks during a run; §8.1).
+
+## 9. Session 4 — the after-run lesson line (the orchestrator, 2026-09-28, `718558751`)
+
+`Logic/Choose hint` read `oliveRung` / `oliveFallback` and nothing on the page fed them, so the eighteen `oliveRung*`
+lines never showed. New glue **`Logic/Olive played`** (in the Workshop, `plPlayed`): the parked ask's answer
+(`plAskOlive.answer`) and the run (`plRunner.run`) → `oliveRung` (the rung table's number for the answer's rung; every
+palette rung maps, all 18) and `oliveFallback`. It counts an answer only when it is **this run's** (`answer.run ===
+run.runId`: a Start over or a new program says nothing) and **sent** (`answer.sent === true`); a voiced hint is not a rung.
+
+- 🔴 **The sent rule came from the drive, not the spec.** The first version counted any answer: a listed word refused
+  before sending is answered `{fallback: true, sent: false}`, so `Choose hint` said "Olive is resting" — P-AC6 red
+  (`"row":"Olive is resting. Here is her written line."`). AC6 says a refused slot is not Olive resting.
+- Gates: `cg003Template` row "s4: Olive played" (every palette rung → its number, all 18 covered; a stale run, a voiced
+  hint, a refused ask, no run → 0; the consequence through `CHOOSE_HINT_SCRIPT`: `oliveRung4`, `oliveResting`,
+  `hintMissed`; the four wires in the graph) + two arms (stale answer counted; refused ask counted as resting) killed.
+- Drive: **P-S4** — after the words-into-blocks run, the owl says oliveRung3 ("Olive turned the words into blocks. Place
+  them and see if Pip agrees."), `s4-rung-lesson.png`. Olive page drive **17/17, 0 skip**, exit 0 (`olive5`, 14:54).
+- The engine's priority is unchanged: a met goal, a bump or a puddle still speak before the rung's lesson.
+

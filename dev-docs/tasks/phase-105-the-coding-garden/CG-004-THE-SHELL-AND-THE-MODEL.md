@@ -394,3 +394,16 @@ now a contract `copies.test.js` reads from `cg003Components.ts`.
   Bolt}` as stored JSON AND as a save code; no backend backup; the control home has none.
 - 🟡 Not measured: the Restore menu's native dialogs (CDP cannot press them) — a two-minute hand check, steps in §8.1.
   `electron-builder` printed `default Electron icon is used` — the app has no icon (owner CG-008).
+
+## 9. Session 4 (the orchestrator, 2026-09-28)
+
+- **The Mac app gets the Edit menu** (`7dcba0a2b`, `copies.js` `restoreMenu`): on macOS the Edit menu's roles ARE the
+  clipboard shortcuts and Electron has no right-click menu, so Cmd+V did nothing in a text box — a parent could not
+  paste a save code into the new Grown-ups paste box (CG-003 §9). Windows needs no menu for Ctrl+V (unchanged). Shell
+  tests 89/89 (the menu test pins both platforms). 🔴 **Not driven:** a CDP key press never reaches a native menu
+  accelerator — Richard's hand check, beside the Restore dialogs (§8.1).
+- **The app has an icon** (`16b68e964`): `shell/build/icon.png`, the robot cut from `garden-kit/icon.png` (680×384 → a
+  300 px square → 512×512), electron-builder's default build resource. Whether the Windows log still says "default
+  Electron icon is used" is read in CG-008 §9.
+- **The lockfile carries the Windows and Linux prebuilt llama.cpp** (`bf6b2a191`) — CG-008 §9.
+

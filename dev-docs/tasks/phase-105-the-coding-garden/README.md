@@ -1,7 +1,7 @@
 # Phase 105 — The coding garden: teach a robot, then tidy the lesson into a loop
 
 **Scoped:** 2026-09-27, from [TPL-012](../phase-78-the-templates/TPL-012-THE-CODING-GARDEN.md) (the
-scoping, the research, the mockup, the model readout). **Status: 📋 session 3 done 2026-09-28 — Richard ruled R5–R15 (the game is now "Olive's Island", one island per kid, the sea with pins, Olive lessons 10–12 only, the real save backed up); CG-001–CG-005 🟢, CG-006 🟡 (FR read), CG-007 🟡 (Richard's look), CG-008 🟡 prepared. Page drive 148/148, Olive page drive 16/16, the packaged Mac app's upgrade drive PASS 10/10. Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).** **Prefix: `CG`.**
+scoping, the research, the mockup, the model readout). **Status: 📋 session 4 done 2026-09-28 — the Windows workflow RUN (the installer builds and installs as "Olive's Island"; on the runner's CPU Olive's calls pass the 12 s limit, CG-008 §9), the paste box, the after-run lesson line, Olive's 18 lessons on Skills, the Mac Edit menu, the icon. Session 3: Richard ruled R5–R15 (the game is now "Olive's Island", one island per kid, the sea with pins, Olive lessons 10–12 only, the real save backed up); CG-001–CG-005 🟢, CG-006 🟡 (FR read), CG-007 🟡 (Richard's look), CG-008 🟡 prepared. Page drive 148/148, Olive page drive 16/16, the packaged Mac app's upgrade drive PASS 10/10. Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).** **Prefix: `CG`.**
 
 > *"I'd like to scope out a new template app for my kids … learn 'Scratch' … like 'Autonauts' … a kind
 > of 'LLM call' step … a safe and fully offline LLM."* — Richard, 2026-09-27
@@ -82,12 +82,12 @@ ring-fenced moments this phase adds are in [CG-006](CG-006-THE-REQUESTS.md) §4.
 |---|---|---|---|---|
 | [CG-001 — the kit](CG-001-THE-KIT.md) | `garden-kit`: `Block List` (the program editor) and `Garden` (the tile world), React nodes, touch and pen | — | A | 🟢 s1: gate 20/20, drive 28/28, AC9 p95 29.9 ms Mac ×4 |
 | [CG-002 — the engine](CG-002-THE-ENGINE.md) | interpreter, fold, hint table, save model, word table, request schema — Function scripts with a gate in both languages | — | B | 🟢 s3: the fold offers the higher count (R5), save model v3 = one island per kid (R12), rungs 13–18 hinted; 116/116 |
-| [CG-003 — the pages](CG-003-THE-PAGES.md) | Profiles, Island, Workshop, My robot, Skills, Grown-ups through the plan door; driven at 1368×912 and 390×844 | 001, 002 | A+B | 🟢 s3: the sea with pins, one island per kid, the name, the hooks' components; gate 79/79, page drive 148/148 (EN+FR, 1368 + 390) |
+| [CG-003 — the pages](CG-003-THE-PAGES.md) | Profiles, Island, Workshop, My robot, Skills, Grown-ups through the plan door; driven at 1368×912 and 390×844 | 001, 002 | A+B | 🟢 s4: the Grown-ups paste box (a save code brings the islands back), Olive's 18 lessons as Skills cards (band 10–12), free play's arrow; gate 84/84, page drive 161/161 |
 | [CG-004 — the shell and the model](CG-004-THE-SHELL-AND-THE-MODEL.md) | the Nightbook shell forked; node-llama-cpp in the main process; `POST /__garden/olive` on the relay; the GGUF fetched at build; Olive's exam | — | C | 🟢 Mac s3: "Olive's Island" (saves pinned), built from the real template, the real save backed up + a Restore menu (R14); packaged upgrade drive PASS 10/10 with the model, PASS without; shell 89/89. Windows = CG-008 |
-| [CG-005 — Olive in the game](CG-005-OLIVE-IN-THE-GAME.md) | the `ask Olive` block family, the thinking state, written fallbacks, rungs gated by the exam, a stub Olive for drives | 002, 004 | B+C | 🟢 s3: page hooks driven 16/16 (0 skip); a voiced hint must stay the hint (`unfaithful`, from 3/6 real voicings that were not); the kit keeps a picked option whole (15 options were never sent); contract 31/31 CPU, 30/31 Metal (P21 variance) |
+| [CG-005 — Olive in the game](CG-005-OLIVE-IN-THE-GAME.md) | the `ask Olive` block family, the thinking state, written fallbacks, rungs gated by the exam, a stub Olive for drives | 002, 004 | B+C | 🟢 s4: the after-run lesson line reaches the page (`Logic/Olive played`: this run's, sent asks only); Olive page drive 17/17 (0 skip). s3: a voiced hint must stay the hint; the kit keeps a picked option whole |
 | [CG-006 — the requests](CG-006-THE-REQUESTS.md) | the content: seven coding tricks as requests, twelve Olive rungs, the extra ring-fenced moments, islanders, rewards, FR/EN copy | 002 (005 for the Olive rungs) | B | 🟡 s3: R6/R7/R8 built, rungs 13–18 promoted (E3 E4 E5 E8 E9 E10), one source for voiced hints; real model 6/7 offered on each path (rung 9 withheld on Metal, rung 14 on CPU); FR copy awaits Richard |
 | [CG-007 — the look](CG-007-THE-LOOK.md) | the mockup's look in one stylesheet, bundled fonts, the robot and sprites, rendered beside the artboards | 003 | A | 🟡 s3: every text ≥ 4.5:1 measured live (R9), the sea with pins (R10), look items, Profiles, the phone map fixed; screenshots looked at — awaits Richard's own look |
-| [CG-008 — the installer and the tablet](CG-008-THE-INSTALLER-AND-THE-TABLET.md) | the NSIS installer on the Windows runner, the installed app driven, the exam and the timings on the tablet | 003, 005, 007 | C | 🟡 s3 prepared: the Windows workflow builds `templates/bot-garden`, installs `OlivesIsland-Setup`, drives it — not pushed; the app has no icon yet |
+| [CG-008 — the installer and the tablet](CG-008-THE-INSTALLER-AND-THE-TABLET.md) | the NSIS installer on the Windows runner, the installed app driven, the exam and the timings on the tablet | 003, 005, 007 | C | 🟡 s4: RUN on windows-latest ×5 — the installer builds and installs as "Olive's Island" with its icon, the app opens with the model on CPU; **on that CPU every Olive call passes the 12 s limit** (the contract too, 2 threads: not the app's settings). The tablet run decides |
 | [CG-009 — the kids' verdict](CG-009-THE-KIDS-VERDICT.md) | the two children play; their words the same day; what changes | 008 | — | ⬜ |
 
 ## 5. Order and lanes
@@ -97,7 +97,8 @@ recipe): **A** CG-001, **B** CG-002, **C** CG-004. They share no files. The orch
 runs the gates once on the merged tree, and writes the handoff.
 **Session 2:** CG-003 + CG-007 (lane A), CG-005 (lane B+C), CG-006 (lane B).
 **Session 3 (done):** Richard's rulings first; lanes CONTENT, LOOK, DESKTOP at once, then HOOKS and BACKUP; the orchestrator merged, regenerated and drove.
-**Session 4:** CG-008 on the Windows runner and the tablet, Richard's look + FR read, then CG-009.
+**Session 4 (done):** the Windows workflow pushed and run (five runs, three first-run defects fixed; Olive too slow on the runner's CPU), the paste box, the after-run lesson line, the 18 lessons on Skills, the Mac Edit menu, the icon.
+**Session 5:** the Windows run read to the end and the tablet (CG-008), Richard's look + FR read + the hand checks, then CG-009.
 
 Every session ends with `/next` (the handoff and the memory) — the standing rule.
 

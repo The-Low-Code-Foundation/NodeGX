@@ -300,3 +300,17 @@ the reply rather than the reply alone.
   offers it on CPU (the tablet's path). Ruling R6 stands (G2 is kept 3/3); if rung 9 must show everywhere, a rule she breaks
   in EN too is a CG-006 row for the next session.
 - Still with Richard: the FR copy read (AC3), now including rungs 13–18's lines.
+
+### 8.10 Session 4 — the contract on the Linux runner's CPU (GitHub Actions, 2026-09-28)
+
+- **Run 1 (`36419321133`, llama.cpp COMPILED on the runner** — the lockfile had no linux-x64 prebuilt, CG-008 §9):
+  P07 (words-to-blocks fr, "Avance d'une case, tourne à gauche, et arrose la tulipe.") wrong **4 of 4** across the run and
+  its retry — it adds a `droite` (`["avancer","gauche","droite"]`, then `[…,"droite","arroser"]`); the retry also
+  missed P15 and E10-fr once. Red.
+- **The shipped `@node-llama-cpp/linux-x64` 3.21.1 prebuilt:** run 3 (`36422960335`) 30/31 on the first attempt (P06,
+  words-to-blocks fr, `["avancer","gauche"] / ["avancer"]`), PASS on the retry; run 4 (`36423640596`) **31/31** on the
+  first attempt (per probe 1087–7937 ms, mean 3079; exam 130.7 s). So the 4/4 P07 was the runner's own
+  build, not x86 as such — but **rung 3 (words into blocks) is the rung that wobbles on CPU** (P06/P07 across the
+  Mac CPU, Linux and s1's notes). If the tablet's exam withholds it, CG-008 AC5's "Olive can't do this here yet" is the
+  product doing its job; if it must show everywhere, its probes are the ones to look at first.
+
