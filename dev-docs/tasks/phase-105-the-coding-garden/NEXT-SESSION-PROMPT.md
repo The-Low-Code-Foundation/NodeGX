@@ -1,5 +1,16 @@
 # Phase 105 — next session
 
+> ### 📋 2026-09-28 (s5, no build) — RICHARD PLAYED IT; PHASE 106 SCOPED, AWAITING HIS RULINGS — START THERE
+>
+> Richard's first play of the packaged app produced seven points and two global asks (a persistent Autonauts-style
+> world; a 3D renderer). Each was MEASURED against the source and written into
+> `dev-docs/tasks/phase-106-the-island-grows/README.md`: his words verbatim (§0), the readings (§1), eight rulings
+> in plain words (§3), ten defects that need no ruling (§4: the stuck "thinking" in One step, the run leaking across
+> requests, "fewer blocks" on the reference program, the 1.44:1 highlight, answers never shown, `olive_says` not in
+> the picker, the emoji pills, the fixed pad), and the board IG-000–IG-008 (§5). **Richard ruled the same day: "go 3D and a bit more open world"; the nine task
+> files are written. Next session starts at `phase-106-the-island-grows/NEXT-SESSION-PROMPT.md` (IG-001 first).** The s4 items below (the Windows
+> timings, the tablet, the FR read) stay owed.
+
 > ### 📋 2026-09-28 (CG s4) — THE WINDOWS WORKFLOW RAN; THE INSTALLER WORKS; OLIVE IS TOO SLOW ON THE RUNNER'S CPU — START HERE
 >
 > - **Done on `cline-dev` (`770ec034a` → `ac3698953`, then the docs commit), each driven:**
