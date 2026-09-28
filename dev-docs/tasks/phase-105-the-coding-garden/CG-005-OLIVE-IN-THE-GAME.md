@@ -151,3 +151,70 @@ wants an object and the rung's own temperature — both fixed without changing C
   the request's `rungs`, `[data-owl-row]`, the slot message, a second Ask Olive for the voiced hint, the "Use them / No
   thanks" card.
 
+
+## 8. Session 3 — what was built (lane HOOKS, worktree `cg-s3-hooks`, base `b16751f28`, 2026-09-28)
+
+The page hooks §7.1 said were owed, so the page clauses can read PASS instead of SKIP (s2: 1 PASS, 4 SKIP). Files:
+`packages/noodl-mcp/tests/` `cg005Olive.ts` (+`Logic/Voice hint`, `Logic/Proposal card`; Owl row, Olive slots changed),
+`cg003Components.ts` (Workshop/Play hooks, `Skills/Olive line`), `cg003Scripts.ts` (+`Logic/Olive held`; Olive status
+hands on `exam`; free play `rungs: 'all'`), `cg002Content.ts` (`rungs` on six requests — nothing else), `cg007Look.ts`
+(four rules), the two specs; `scripts/devtools/drive-cg005-olive.js` (page part rewritten); `drives/drive-olive.sh`.
+
+| Hook (§7.1 owed) | Status | Instrument and reading |
+|---|---|---|
+| 1 the palette fed the request's `rungs` — ruling 4 | ✅ spec + graph · 🟡 page | Six band 10–12 requests name their rungs (Biscuit's bowl: what-wants, is-it-a; Sami's letter: say-thanks, translate, letter; the wall: words-to-blocks, count-in-words; the meow: narrate-run; the eggs: count-tulips, maths-seeds, maths; the rows: name-one, name-three, name-trick, explain-program — each rung with the islander §3 frames it with and the trick it fits); free play offers `'all'`; the four band 7–9 requests none. Spec "ruling 4 on the requests": every named rung is a band-2 table rung on a band-2 request; Palette offers exactly them at 10–12 and `[]` at 7–9; free play 20 at 10–12, 0 at 7–9. Graph: `Start world.rungs → Palette.rungs` and a new `Olive status.exam → Palette.exam` (the exam gate was never fed on the page: AC5's page half had no input). **Content choice, not a ruling**: which request carries which rung is one array each in `cg002Content.ts` (CG-006 may move them). |
+| 2 the owl row the drive finds | ✅ | One source of truth: the page's classes. The drive reads `.bg-owl-say` (the line) and `.bg-owl` (the row with its tags); the gate pins both classes and the owl column's order. No `data-` attribute added (a node cannot write one). |
+| 3 the slot refusal beside the picker (AC6) | ✅ spec + graph · 🟡 page | `Logic/Olive slots` now takes the PROGRAM (and the kit's selected id): it judges the ask block the child is on, else the first one that would be refused; `show`, `blockId` out. `.bg-slot-msg` under the block list: "Fill in every slot first." on a new ask block, "Olive can’t use that word." / "Olive ne peut pas utiliser ce mot.", "Too long: 40 letters at most." — words already in `OLIVE_WORDS`, EN+FR. Nothing new is sent: Ask Olive already refused before sending (s2). |
+| 4 the voiced hint, a second Ask Olive | ✅ spec (real route) + graph · 🟡 page | Owl row → `voiceSig` (the line as text: key, numbers, robot, language) → `Logic/Voice hint` (reads ONLY that text, so the answer can never re-ask) → a second `Logic/Ask Olive` → Owl row `voiced`. The row shows the voicing only if its `seq` is THIS line's signature (a late "1 of 3" is dropped when the row says "2 of 3"), clean, and still the hint: the page mirrors the shell's new `unfaithful` rule (question kept, the kid's robot named, no markdown). Through the real route: clean → "Hou hou ! …" shown; mutant → written, silent; the two real unfaithful replies of 2026-09-28 (FR markdown, EN no question) → route `unfaithful` → written, silent, both languages. |
+| 5 "Use them / No thanks" on `Step.proposal` (AC1) | ✅ spec + graph · 🟡 page | `Logic/Proposal card` reads the RUN (`run.proposal`: Step publishes `proposal` on one tick only, so the Runner's output could not hold a card), shows while the ask is still in the program and the child has not answered (signature = run + ask + blocks). "Use them" → `Accept proposal.go` (its only trigger, gated) → the program; its `ran` then marks it answered; "No thanks" marks it answered. A new run proposes again; Start over hides it. The card sits in the owl's column (Olive is speaking), so at 390 it never pushes Play or the owl's top. |
+| 6 thinking / resting tags | ✅ spec + graph · 🟡 page | Two tags in the owl column, violet ink on violet-2 (a new contrast pair, 7.84:1; the slot line coral on white, 4.61): "Olive is thinking" with three dots that fill (no clock; reduced motion stills them) while a run is parked OR the line's voicing is out (TPL-012: on the tablet a hint takes 5–10 s); "Olive is resting" when nothing is out and the program's last answer was a fallback of a question that was SENT (a slot the rules refused is not Olive resting; the slot line says why). |
+| 7 (for P-AC5) Skills says it | ✅ spec + graph · 🟡 page | `Skills/Olive line` on Skills: "Olive can’t do this here yet: words into blocks" from the status door's exam, band 10–12 only, nothing when nothing failed. The status door now hands `exam` on (it read only the counts). |
+
+**Numbers.** `cg005Olive` **33/33** (26 → 33), `cg003Template` **79/79** (69 → 79: 8 graph rows, 2 glue rows; two contrast
+pairs added, lowest still 4.61), `cg002Engine` 115/115 and `cg006Requests` 84/84 unchanged (232/232 with Olive).
+`npm run template:garden` exit 0 (engine pre-step green), 78 components (74 + 4), warnings `uncollapsible-multi-column` ×4
+as before; pages ≤ 32 nodes. Route drive (`drive-cg005-olive.js route`, plain node): **4/4 PASS** after the change. In the
+lane the generator and the gate ran with `NODEGX_KIT_EXTRACT=<primary>/packages/noodl-mcp/dist/kit-extract.cjs` and a
+`--require` resolving `@nodegx/export` to its source; neither is needed on the primary.
+
+**Arms 16/16 killed** (`p105-s3-scratch/hooks/arms.py`, `arms.txt`: file copied to scratch, one anchor mutated, the one
+spec row run, the file copied back and `cmp`-checked): the row takes any answer (seq ignored); the mirror forgets the
+question; the signature carries the answer (it would ask again); no thinking while the voicing is out; a refused slot
+reads as resting; the card ignores the child's answer; the card outlives Start over; the slot line ignores the program; a
+band 7–9 request carries a rung; the palette not told the exam; Voice hint fed the request object (it would loop); the
+blocks go in when the run ends, not on Use them; the slot line never shows; Skills tells band 7–9; the status door drops
+the exam; free play offers no rung.
+
+**Found on the way.** 🔴 The exam gate had no input on the page: `Logic/Palette` takes `exam`, but nothing on the
+Workshop fed it (only Grown-ups asked the status door, for the counts), so a rung the exam failed would have been offered —
+P-AC5 could never have passed. 🔴 `Step.proposal` is a one-tick output (`delta.proposal`); a card fed from the Runner's
+`proposal` would have vanished 420 ms after it appeared — the card reads `run.proposal`. 🟡 s2's P-AC2 asked for "the
+robot's transition mid-wait": unreachable by construction (a park comes a tick, 420 ms, after the last move; the glide is
+380 ms). The clause now measures the page alive while parked (the robot moved first, animation frames, the dots advancing).
+
+**Prepared, not run** (the orchestrator, primary checkout, one heavy job; `$SCRATCH/hooks/EXPECTED-DRIVE.md`):
+`OUT=<pages-out> zsh …/drives/drive-pages.sh` (makes `<pages-out>/deploy`), then
+`DEPLOY=<pages-out>/deploy zsh …/drives/drive-olive.sh pages` → `{"pass":16,"fail":0,"skip":0}`, exit 0: P-AC6 ×4, P-AC1 ×3,
+P-AC3 ×2, P-AC2 ×2, P-AC5, P-390, P-S3-R5, the setup line, 0 console errors. The page part now makes a band 10–12 player
+and enters free play from the island (s2's `--workshop` reload landed on the island: AC8); `--workshop/--skills` are gone.
+The main page drive keeps every finder (0 of its classes missing from the generated template); its in-Chrome stub answers
+the new voicing POSTs with a line the page's own faithful rule refuses for all seven voiced keys, so its owl reads are
+the written lines, as at base.
+
+**Contract changes (merge hazards).** Additive: Owl row out `voiceSig`, `voiceRequest.seq`; Olive slots in `program`,
+`selected`, out `show`, `blockId`; Olive status out `exam`; new `Logic/Voice hint` (in `sig`; out `request`, `due`),
+`Logic/Proposal card` (in `run`, `program`, `handled`, `words`, `lang`; out `show`, `proposal`, `blocksText`, `sig`),
+`Logic/Olive held` (in `exam`, `band`, `lang`, `words`, `botName`; out `held`, `show`, `text`), `Skills/Olive line`; a
+`GardenRequest.rungs?`; `FREE_PLAY.rungs = 'all'`; a Variable `gardenProposalDone`. Changed meaning: the owl's `thinking`
+is now "a question is out" (parked OR voicing), `resting` needs nothing out and a SENT question. `templates/bot-garden/**`
+regenerated in the lane and left uncommitted.
+
+**Residuals.**
+- The page drive above, and its screenshots (`ac1-proposal`, `ac2-resting`, `ac5-skills`, `workshop-free-390`). Owner: orchestrator.
+- The voicing POSTs on every new hint line even where no shell answers (a plain web deploy, the editor's preview): each is
+  a 404 → the written line; harmless, but noisy in a console. Gate it on the status door's `running` if a web build ever
+  ships. Owner: NONE this phase (the game ships in the shell).
+- `Logic/Choose hint` still is not fed `oliveRung` / `oliveFallback` (the rung's lesson line and the hint `oliveResting`
+  after an ask): the tags carry "resting" now; the after-run lesson line is not on the page. Owner: CG-003 / CG-006.
+- The Skills page shows only what the exam withheld; the eighteen rungs as Skills cards (CG-006 §8 residual) are not built. Owner: CG-003.
+- Which request carries which rung is a content choice made here; Richard or CG-006 may move any (one array each). Owner: CG-006.
