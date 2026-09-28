@@ -249,7 +249,7 @@
       "label": "Open or done",
       "parameters": {
         "states": "open,done",
-        "values": "tagShown,doneShown,opacity",
+        "values": "tagShown,doneShown,ground",
         "useTransitions": false,
         "type-tagShown": "boolean",
         "value-open-tagShown": true,
@@ -257,9 +257,9 @@
         "type-doneShown": "boolean",
         "value-open-doneShown": false,
         "value-done-doneShown": true,
-        "type-opacity": "number",
-        "value-open-opacity": 1,
-        "value-done-opacity": 0.7
+        "type-ground": "color",
+        "value-open-ground": "var(--card)",
+        "value-done-ground": "var(--paper)"
       },
       "x": 470,
       "y": 760

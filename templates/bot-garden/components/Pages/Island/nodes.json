@@ -11,7 +11,7 @@
         "isWrap"
       ],
       "parameters": {
-        "title": "Bot Garden",
+        "title": "Olive’s Island",
         "urlPath": "island"
       },
       "x": 40,
@@ -82,7 +82,7 @@
         "name": "gardenLang"
       },
       "x": 590,
-      "y": 1600
+      "y": 1480
     },
     {
       "id": "isWords",
@@ -97,6 +97,16 @@
       "label": "In their language",
       "x": 590,
       "y": 640
+    },
+    {
+      "id": "isResave",
+      "type": "Condition",
+      "label": "An older family, migrated: write it back",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 590,
+      "y": 1600
     },
     {
       "id": "isHead",
@@ -128,34 +138,11 @@
     },
     {
       "id": "isMap",
-      "type": "Group",
-      "label": "The map",
+      "type": "/Island/Map",
+      "label": "The island map",
       "parent": "isGrid",
-      "children": [
-        "isGarden"
-      ],
-      "parameters": {
-        "width": {
-          "value": 100,
-          "unit": "%"
-        },
-        "sizeMode": "contentHeight",
-        "cssClassName": "bg-map"
-      },
       "x": 220,
       "y": 640
-    },
-    {
-      "id": "isGarden",
-      "type": "garden-kit.Garden",
-      "label": "The island",
-      "parent": "isMap",
-      "parameters": {
-        "stepMs": 380,
-        "label": "The island"
-      },
-      "x": 280,
-      "y": 760
     },
     {
       "id": "isQuests",
@@ -178,7 +165,7 @@
         "rowGap": "var(--space-2-5)"
       },
       "x": 220,
-      "y": 880
+      "y": 760
     },
     {
       "id": "isReqL",
@@ -197,7 +184,7 @@
         "cssClassName": "bg-eyebrow"
       },
       "x": 280,
-      "y": 1000
+      "y": 880
     },
     {
       "id": "isList",
@@ -217,7 +204,7 @@
         "rowGap": "var(--space-2-5)"
       },
       "x": 280,
-      "y": 1120
+      "y": 1000
     },
     {
       "id": "isEach",
@@ -229,7 +216,7 @@
         "templateType": "explicit"
       },
       "x": 340,
-      "y": 1240
+      "y": 1120
     },
     {
       "id": "isFreeL",
@@ -249,7 +236,7 @@
         "marginTop": "var(--space-2)"
       },
       "x": 280,
-      "y": 1360
+      "y": 1240
     },
     {
       "id": "isFree",
@@ -264,7 +251,7 @@
         "doneWord": ""
       },
       "x": 280,
-      "y": 1480
+      "y": 1360
     },
     {
       "id": "isRequests",
@@ -278,12 +265,12 @@
       "type": "/Logic/Island rows",
       "label": "Who needs a hand",
       "x": 590,
-      "y": 1240
+      "y": 1120
     },
     {
-      "id": "isWorld",
-      "type": "/Logic/Island world",
-      "label": "The island and its robots",
+      "id": "isPins",
+      "type": "/Logic/Island pins",
+      "label": "The islanders on the sea",
       "x": 590,
       "y": 760
     },
@@ -295,7 +282,7 @@
         "name": "gardenRequestId"
       },
       "x": 590,
-      "y": 1360
+      "y": 1240
     },
     {
       "id": "isSetFree",
@@ -307,7 +294,7 @@
         "value": "free"
       },
       "x": 590,
-      "y": 1480
+      "y": 1360
     },
     {
       "id": "isGoWorkshop",

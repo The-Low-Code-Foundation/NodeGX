@@ -1,0 +1,140 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6b78aeca-7611-577b-84b1-2b095a4702b7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pnIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pinClass",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "picClass",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "requestId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "isOpen",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "pnPin",
+      "type": "Group",
+      "label": "The pin",
+      "children": [
+        "pnPic",
+        "pnLabel"
+      ],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 10,
+          "unit": "%"
+        },
+        "height": {
+          "value": 17,
+          "unit": "%"
+        },
+        "cssClassName": "bg-pin"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pnPic",
+      "type": "Group",
+      "label": "The picture",
+      "parent": "pnPin",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "cssClassName": "bg-pin-pic"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pnLabel",
+      "type": "Text",
+      "label": "The name",
+      "parent": "pnPin",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 13,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "cssClassName": "bg-pin-lbl"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "pnGate",
+      "type": "Condition",
+      "label": "Only an open pin answers",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "pnOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "chosen",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "requestId",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "pnPin"
+  ]
+}

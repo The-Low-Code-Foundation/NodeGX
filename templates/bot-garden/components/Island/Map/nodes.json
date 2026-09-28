@@ -1,0 +1,366 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "91d45e03-fb21-5774-8858-cfbc603952fd",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mpIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "pins",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "color",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "eye",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hat",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "mpSea",
+      "type": "Group",
+      "label": "The sea",
+      "children": [
+        "mpLand",
+        "mp_tree1",
+        "mp_tree2",
+        "mp_tulip1",
+        "mp_tulip2",
+        "mp_tulip3",
+        "mp_rock",
+        "mpEach",
+        "mpBot",
+        "mpOlive"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "bg-sea"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mpLand",
+      "type": "Group",
+      "label": "The land",
+      "parent": "mpSea",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 90,
+          "unit": "%"
+        },
+        "height": {
+          "value": 86,
+          "unit": "%"
+        },
+        "cssClassName": "bg-land"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mp_tree1",
+      "type": "Group",
+      "label": "A tree",
+      "parent": "mpSea",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 9,
+          "unit": "%"
+        },
+        "height": {
+          "value": 16,
+          "unit": "%"
+        },
+        "cssClassName": "bg-pin bg-pin-tree1 bg-pin-scene bg-sp-tree"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "mp_tree2",
+      "type": "Group",
+      "label": "Another tree",
+      "parent": "mpSea",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 9,
+          "unit": "%"
+        },
+        "height": {
+          "value": 16,
+          "unit": "%"
+        },
+        "cssClassName": "bg-pin bg-pin-tree2 bg-pin-scene bg-sp-tree"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "mp_tulip1",
+      "type": "Group",
+      "label": "A tulip",
+      "parent": "mpSea",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 9,
+          "unit": "%"
+        },
+        "height": {
+          "value": 16,
+          "unit": "%"
+        },
+        "cssClassName": "bg-pin bg-pin-tulip1 bg-pin-scene bg-sp-tulip"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "mp_tulip2",
+      "type": "Group",
+      "label": "A tulip",
+      "parent": "mpSea",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 9,
+          "unit": "%"
+        },
+        "height": {
+          "value": 16,
+          "unit": "%"
+        },
+        "cssClassName": "bg-pin bg-pin-tulip2 bg-pin-scene bg-sp-tulip"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "mp_tulip3",
+      "type": "Group",
+      "label": "A tulip",
+      "parent": "mpSea",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 9,
+          "unit": "%"
+        },
+        "height": {
+          "value": 16,
+          "unit": "%"
+        },
+        "cssClassName": "bg-pin bg-pin-tulip3 bg-pin-scene bg-sp-tulip"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "mp_rock",
+      "type": "Group",
+      "label": "The rock",
+      "parent": "mpSea",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 9,
+          "unit": "%"
+        },
+        "height": {
+          "value": 16,
+          "unit": "%"
+        },
+        "cssClassName": "bg-pin bg-pin-rock bg-pin-scene bg-sp-rock"
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "mpEach",
+      "type": "For Each",
+      "label": "One pin per islander",
+      "parent": "mpSea",
+      "parameters": {
+        "template": "/Island/Pin",
+        "templateType": "explicit"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "mpBot",
+      "type": "Group",
+      "label": "This kid’s robot",
+      "parent": "mpSea",
+      "children": [
+        "mpGarden"
+      ],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 10,
+          "unit": "%"
+        },
+        "height": {
+          "value": 17,
+          "unit": "%"
+        },
+        "cssClassName": "bg-pin bg-pin-bot"
+      },
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "mpGarden",
+      "type": "garden-kit.Garden",
+      "label": "The robot",
+      "parent": "mpBot",
+      "parameters": {
+        "stepMs": 380,
+        "label": "The robot"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "mpDraw",
+      "type": "/Logic/Draw world",
+      "label": "The robot in its looks",
+      "parameters": {
+        "world": {
+          "map": [
+            "G"
+          ],
+          "things": [],
+          "robots": [
+            {
+              "id": "me",
+              "x": 0,
+              "y": 0,
+              "d": 0,
+              "carry": []
+            }
+          ],
+          "events": [],
+          "schedule": []
+        }
+      },
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "mpOlive",
+      "type": "Group",
+      "label": "Olive",
+      "parent": "mpSea",
+      "children": [
+        "mpOlivePic",
+        "mpOliveName"
+      ],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 8,
+          "unit": "%"
+        },
+        "height": {
+          "value": 14,
+          "unit": "%"
+        },
+        "cssClassName": "bg-pin bg-pin-olive"
+      },
+      "x": 100,
+      "y": 1360
+    },
+    {
+      "id": "mpOlivePic",
+      "type": "Group",
+      "label": "Her picture",
+      "parent": "mpOlive",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "cssClassName": "bg-pin-pic bg-sp-owl"
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "mpOliveName",
+      "type": "Text",
+      "label": "Olive",
+      "parent": "mpOlive",
+      "parameters": {
+        "text": "Olive",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 13,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "cssClassName": "bg-pin-lbl"
+      },
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "mpOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "chosen",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "requestId",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 1120
+    }
+  ],
+  "visualRoots": [
+    "mpSea"
+  ]
+}

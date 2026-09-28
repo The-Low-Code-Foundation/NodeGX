@@ -155,7 +155,7 @@
         "paddingBottom": "var(--space-2-5)",
         "paddingLeft": "var(--space-3-5)",
         "paddingRight": "var(--space-3-5)",
-        "maxLength": 14
+        "maxLength": 16
       },
       "x": 100,
       "y": 280

@@ -10,6 +10,30 @@
       "toProperty": "model"
     },
     {
+      "fromId": "skFam",
+      "fromProperty": "model",
+      "toId": "skStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "skFam",
+      "fromProperty": "migrated",
+      "toId": "skResave",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "skFam",
+      "fromProperty": "ran",
+      "toId": "skResave",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "skResave",
+      "fromProperty": "ontrue",
+      "toId": "skStore",
+      "toProperty": "write"
+    },
+    {
       "fromId": "skLangVar",
       "fromProperty": "value",
       "toId": "skFam",

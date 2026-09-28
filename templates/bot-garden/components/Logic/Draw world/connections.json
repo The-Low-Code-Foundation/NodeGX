@@ -95,12 +95,6 @@
     },
     {
       "fromId": "drawworldFn",
-      "fromProperty": "out-dots",
-      "toId": "drawworldOut",
-      "toProperty": "dots"
-    },
-    {
-      "fromId": "drawworldFn",
       "fromProperty": "out-hasTulips",
       "toId": "drawworldOut",
       "toProperty": "hasTulips"
@@ -110,6 +104,12 @@
       "fromProperty": "out-map",
       "toId": "drawworldOut",
       "toProperty": "map"
+    },
+    {
+      "fromId": "drawworldFn",
+      "fromProperty": "out-marks",
+      "toId": "drawworldOut",
+      "toProperty": "marks"
     },
     {
       "fromId": "drawworldFn",

@@ -10,6 +10,30 @@
       "toProperty": "model"
     },
     {
+      "fromId": "rbFam",
+      "fromProperty": "model",
+      "toId": "rbStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "migrated",
+      "toId": "rbResave",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "ran",
+      "toId": "rbResave",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rbResave",
+      "fromProperty": "ontrue",
+      "toId": "rbStore",
+      "toProperty": "write"
+    },
+    {
       "fromId": "rbLangVar",
       "fromProperty": "value",
       "toId": "rbFam",

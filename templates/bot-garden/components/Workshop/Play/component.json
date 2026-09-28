@@ -7,5 +7,5 @@
   "created": "2026-09-27T00:00:00.000Z",
   "modified": "2026-09-27T00:00:00.000Z",
   "modifiedBy": "noodl-mcp",
-  "description": "The workshop: teach the robot by driving it, see the steps as blocks, fold the repetition, play, and win. Request Id picks the request (free for free play). Won fires with Bloom, Reward and Won Request set; Island asks for the island; Found says whether the request exists (a reload has none)."
+  "description": "The workshop: teach the robot by driving it, see the steps as blocks, fold the repetition, play, and win. Request Id picks the request (free for free play); the line under the title is that request’s own. Won fires with Bloom, Reward and Won Request set; Island asks for the island; Found says whether the request exists (a reload has none)."
 }

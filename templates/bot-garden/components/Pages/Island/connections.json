@@ -10,6 +10,30 @@
       "toProperty": "model"
     },
     {
+      "fromId": "isFam",
+      "fromProperty": "model",
+      "toId": "isStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "migrated",
+      "toId": "isResave",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "ran",
+      "toId": "isResave",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "isResave",
+      "fromProperty": "ontrue",
+      "toId": "isStore",
+      "toProperty": "write"
+    },
+    {
       "fromId": "isLangVar",
       "fromProperty": "value",
       "toId": "isFam",
@@ -184,46 +208,76 @@
       "toProperty": "botName"
     },
     {
+      "fromId": "isRequests",
+      "fromProperty": "requests",
+      "toId": "isPins",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "done",
+      "toId": "isPins",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "band",
+      "toId": "isPins",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "isWords",
+      "fromProperty": "words",
+      "toId": "isPins",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "lang",
+      "toId": "isPins",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "botName",
+      "toId": "isPins",
+      "toProperty": "botName"
+    },
+    {
       "fromId": "isRows",
       "fromProperty": "rows",
       "toId": "isEach",
       "toProperty": "items"
     },
     {
-      "fromId": "isStore",
-      "fromProperty": "model",
-      "toId": "isWorld",
-      "toProperty": "model"
-    },
-    {
-      "fromId": "isWords",
-      "fromProperty": "words",
-      "toId": "isWorld",
-      "toProperty": "words"
+      "fromId": "isPins",
+      "fromProperty": "pins",
+      "toId": "isMap",
+      "toProperty": "pins"
     },
     {
       "fromId": "isFam",
-      "fromProperty": "lang",
-      "toId": "isWorld",
-      "toProperty": "lang"
+      "fromProperty": "botName",
+      "toId": "isMap",
+      "toProperty": "botName"
     },
     {
-      "fromId": "isWorld",
-      "fromProperty": "map",
-      "toId": "isGarden",
-      "toProperty": "map"
+      "fromId": "isFam",
+      "fromProperty": "color",
+      "toId": "isMap",
+      "toProperty": "color"
     },
     {
-      "fromId": "isWorld",
-      "fromProperty": "things",
-      "toId": "isGarden",
-      "toProperty": "things"
+      "fromId": "isFam",
+      "fromProperty": "eye",
+      "toId": "isMap",
+      "toProperty": "eye"
     },
     {
-      "fromId": "isWorld",
-      "fromProperty": "robots",
-      "toId": "isGarden",
-      "toProperty": "robots"
+      "fromId": "isFam",
+      "fromProperty": "hat",
+      "toId": "isMap",
+      "toProperty": "hat"
     },
     {
       "fromId": "isEach",
@@ -234,6 +288,18 @@
     {
       "fromId": "isEach",
       "fromProperty": "itemOutputSignal-chosen",
+      "toId": "isSetReq",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "isMap",
+      "fromProperty": "requestId",
+      "toId": "isSetReq",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "isMap",
+      "fromProperty": "chosen",
       "toId": "isSetReq",
       "toProperty": "do"
     },

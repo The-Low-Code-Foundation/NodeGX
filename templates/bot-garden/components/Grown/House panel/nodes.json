@@ -242,7 +242,7 @@
         "fontWeight": "800",
         "fontFamily": "Nunito",
         "sizeMode": "contentSize",
-        "cssClassName": "bg-btn bg-i-owl",
+        "cssClassName": "bg-btn bg-i-owlc",
         "label": "Ask"
       },
       "x": 160,

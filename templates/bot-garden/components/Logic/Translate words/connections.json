@@ -1031,6 +1031,42 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-or13Lesson",
+      "toId": "translatewordsOut",
+      "toProperty": "or13Lesson"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-or14Lesson",
+      "toId": "translatewordsOut",
+      "toProperty": "or14Lesson"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-or15Lesson",
+      "toId": "translatewordsOut",
+      "toProperty": "or15Lesson"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-or16Lesson",
+      "toId": "translatewordsOut",
+      "toProperty": "or16Lesson"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-or17Lesson",
+      "toId": "translatewordsOut",
+      "toProperty": "or17Lesson"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-or18Lesson",
+      "toId": "translatewordsOut",
+      "toProperty": "or18Lesson"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-or1Lesson",
       "toId": "translatewordsOut",
       "toProperty": "or1Lesson"
@@ -1184,18 +1220,6 @@
       "fromProperty": "out-or9Line",
       "toId": "translatewordsOut",
       "toProperty": "or9Line"
-    },
-    {
-      "fromId": "translatewordsFn",
-      "fromProperty": "out-or9LineG1",
-      "toId": "translatewordsOut",
-      "toProperty": "or9LineG1"
-    },
-    {
-      "fromId": "translatewordsFn",
-      "fromProperty": "out-or9LineG2",
-      "toId": "translatewordsOut",
-      "toProperty": "or9LineG2"
     },
     {
       "fromId": "translatewordsFn",
@@ -1535,9 +1559,27 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-rungDefine",
+      "toId": "translatewordsOut",
+      "toProperty": "rungDefine"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-rungExplainProgram",
+      "toId": "translatewordsOut",
+      "toProperty": "rungExplainProgram"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-rungIsItA",
       "toId": "translatewordsOut",
       "toProperty": "rungIsItA"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-rungLetter",
+      "toId": "translatewordsOut",
+      "toProperty": "rungLetter"
     },
     {
       "fromId": "translatewordsFn",
@@ -1565,6 +1607,24 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-rungNameTrick",
+      "toId": "translatewordsOut",
+      "toProperty": "rungNameTrick"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-rungNarrateRun",
+      "toId": "translatewordsOut",
+      "toProperty": "rungNarrateRun"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-rungNoLetterE",
+      "toId": "translatewordsOut",
+      "toProperty": "rungNoLetterE"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-rungPoem",
       "toId": "translatewordsOut",
       "toProperty": "rungPoem"
@@ -1577,6 +1637,12 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-rungSortWords",
+      "toId": "translatewordsOut",
+      "toProperty": "rungSortWords"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-rungTallTales",
       "toId": "translatewordsOut",
       "toProperty": "rungTallTales"
@@ -1586,12 +1652,6 @@
       "fromProperty": "out-rungTranslate",
       "toId": "translatewordsOut",
       "toProperty": "rungTranslate"
-    },
-    {
-      "fromId": "translatewordsFn",
-      "fromProperty": "out-rungUnderFiveWords",
-      "toId": "translatewordsOut",
-      "toProperty": "rungUnderFiveWords"
     },
     {
       "fromId": "translatewordsFn",
@@ -1799,6 +1859,12 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-slotBody",
+      "toId": "translatewordsOut",
+      "toProperty": "slotBody"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-slotDeed",
       "toId": "translatewordsOut",
       "toProperty": "slotDeed"
@@ -1847,6 +1913,18 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-slotObject",
+      "toId": "translatewordsOut",
+      "toProperty": "slotObject"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-slotProgram",
+      "toId": "translatewordsOut",
+      "toProperty": "slotProgram"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-slotQuestion",
       "toId": "translatewordsOut",
       "toProperty": "slotQuestion"
@@ -1874,6 +1952,30 @@
       "fromProperty": "out-slotTooLong",
       "toId": "translatewordsOut",
       "toProperty": "slotTooLong"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-slotTrace",
+      "toId": "translatewordsOut",
+      "toProperty": "slotTrace"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-slotWho",
+      "toId": "translatewordsOut",
+      "toProperty": "slotWho"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-slotWord",
+      "toId": "translatewordsOut",
+      "toProperty": "slotWord"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-slotWords",
+      "toId": "translatewordsOut",
+      "toProperty": "slotWords"
     },
     {
       "fromId": "translatewordsFn",
@@ -1922,6 +2024,66 @@
       "fromProperty": "out-stickersNone",
       "toId": "translatewordsOut",
       "toProperty": "stickersNone"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-subBowlIf",
+      "toId": "translatewordsOut",
+      "toProperty": "subBowlIf"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-subEggsCount",
+      "toId": "translatewordsOut",
+      "toProperty": "subEggsCount"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-subLetterSay",
+      "toId": "translatewordsOut",
+      "toProperty": "subLetterSay"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-subMeowWhen",
+      "toId": "translatewordsOut",
+      "toProperty": "subMeowWhen"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-subPathPostbox",
+      "toId": "translatewordsOut",
+      "toProperty": "subPathPostbox"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-subPathStones",
+      "toId": "translatewordsOut",
+      "toProperty": "subPathStones"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-subRowsTrick",
+      "toId": "translatewordsOut",
+      "toProperty": "subRowsTrick"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-subTulipDoor",
+      "toId": "translatewordsOut",
+      "toProperty": "subTulipDoor"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-subTulipsThree",
+      "toId": "translatewordsOut",
+      "toProperty": "subTulipsThree"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-subWallUntil",
+      "toId": "translatewordsOut",
+      "toProperty": "subWallUntil"
     },
     {
       "fromId": "translatewordsFn",

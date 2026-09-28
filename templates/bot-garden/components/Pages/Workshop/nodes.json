@@ -11,7 +11,7 @@
         "wsWrap"
       ],
       "parameters": {
-        "title": "Bot Garden",
+        "title": "Olive’s Island",
         "urlPath": "workshop"
       },
       "x": 40,
@@ -96,6 +96,16 @@
       "label": "In their language",
       "x": 410,
       "y": 1480
+    },
+    {
+      "id": "wsResave",
+      "type": "Condition",
+      "label": "An older family, migrated: write it back",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 410,
+      "y": 1600
     },
     {
       "id": "wsPlay",

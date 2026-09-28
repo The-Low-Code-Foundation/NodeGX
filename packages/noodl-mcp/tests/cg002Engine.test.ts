@@ -22,7 +22,7 @@
  *
  * @module noodl-mcp/tests/cg002Engine.test
  */
-import { BAND_PALETTE, Block, BlockType, GardenRequest, HINTS, HINT_KEYS, REQUESTS, WORDS, WORD_KEYS } from './cg002Content';
+import { BAND_PALETTE, Block, BlockType, GardenRequest, HINTS, HINT_KEYS, OLIVE_RUNGS, REQUESTS, WORDS, WORD_KEYS } from './cg002Content';
 import {
   ADD_PROFILE_SCRIPT,
   APPLY_DELTA_SCRIPT,
@@ -498,6 +498,16 @@ describe('CG-002 — the engine', () => {
       const chosen = runScript(CHOOSE_HINT_SCRIPT, { world: world(), ...inputs });
       expect({ key: chosen.key, vars: chosen.vars }).toEqual({ key, vars: expect.objectContaining(vars) });
       expect(HINT_KEYS).toContain(chosen.key);
+    });
+
+    it('every Olive rung, 1 to the last (18 since CG-006 s3), has its own after-run line — none falls through to hintMissed', () => {
+      const ns = OLIVE_RUNGS.map((r) => r.n);
+      expect(Math.max(...ns)).toBe(18);
+      for (const n of ns) {
+        const chosen = runScript(CHOOSE_HINT_SCRIPT, { world: world(), program: parse('F L'), run: ranRun(), oliveRung: n });
+        expect({ n, key: chosen.key }).toEqual({ n, key: 'oliveRung' + n });
+        expect(HINT_KEYS).toContain(chosen.key);
+      }
     });
 
     it('the priority is a ladder: done beats a bump, a bump beats a puddle, a Predict hit is silent', () => {

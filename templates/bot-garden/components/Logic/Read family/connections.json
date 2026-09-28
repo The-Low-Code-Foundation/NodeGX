@@ -95,6 +95,12 @@
     },
     {
       "fromId": "readfamilyFn",
+      "fromProperty": "out-migrated",
+      "toId": "readfamilyOut",
+      "toProperty": "migrated"
+    },
+    {
+      "fromId": "readfamilyFn",
       "fromProperty": "out-model",
       "toId": "readfamilyOut",
       "toProperty": "model"

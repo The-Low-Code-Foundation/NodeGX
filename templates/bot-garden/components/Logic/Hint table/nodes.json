@@ -32,7 +32,7 @@
       "type": "JavaScriptFunction",
       "label": "Hint table",
       "parameters": {
-        "functionScript": "\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar rows = Inputs.hints || [];\nvar name = String(Inputs.botName || 'Pip');\nvar map = {};\nfor (var i = 0; i < rows.length; i++) map[rows[i].key] = String(rows[i][lang] || rows[i].en || '').split('{b}').join(name);\nOutputs.lang = lang;\nOutputs.hintStart = map.hintStart || '';\nOutputs.hintEmpty = map.hintEmpty || '';\nOutputs.hintPattern = map.hintPattern || '';\nOutputs.hintMissed = map.hintMissed || '';\nOutputs.hintBump = map.hintBump || '';\nOutputs.hintWet = map.hintWet || '';\nOutputs.hintDone = map.hintDone || '';\nOutputs.hintDoneMany = map.hintDoneMany || '';\nOutputs.hintPredictMiss = map.hintPredictMiss || '';\nOutputs.oliveThinking = map.oliveThinking || '';\nOutputs.oliveResting = map.oliveResting || '';\nOutputs.oliveRung1 = map.oliveRung1 || '';\nOutputs.oliveRung2 = map.oliveRung2 || '';\nOutputs.oliveRung3 = map.oliveRung3 || '';\nOutputs.oliveRung4 = map.oliveRung4 || '';\nOutputs.oliveRung5 = map.oliveRung5 || '';\nOutputs.oliveRung6 = map.oliveRung6 || '';\nOutputs.oliveRung7 = map.oliveRung7 || '';\nOutputs.oliveRung8 = map.oliveRung8 || '';\nOutputs.oliveRung9 = map.oliveRung9 || '';\nOutputs.oliveRung10 = map.oliveRung10 || '';\nOutputs.oliveRung11 = map.oliveRung11 || '';\nOutputs.oliveRung12 = map.oliveRung12 || '';\n"
+        "functionScript": "\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar rows = Inputs.hints || [];\nvar name = String(Inputs.botName || 'Pip');\nvar map = {};\nfor (var i = 0; i < rows.length; i++) map[rows[i].key] = String(rows[i][lang] || rows[i].en || '').split('{b}').join(name);\nOutputs.lang = lang;\nOutputs.hintStart = map.hintStart || '';\nOutputs.hintEmpty = map.hintEmpty || '';\nOutputs.hintPattern = map.hintPattern || '';\nOutputs.hintMissed = map.hintMissed || '';\nOutputs.hintBump = map.hintBump || '';\nOutputs.hintWet = map.hintWet || '';\nOutputs.hintDone = map.hintDone || '';\nOutputs.hintDoneMany = map.hintDoneMany || '';\nOutputs.hintPredictMiss = map.hintPredictMiss || '';\nOutputs.oliveThinking = map.oliveThinking || '';\nOutputs.oliveResting = map.oliveResting || '';\nOutputs.oliveRung1 = map.oliveRung1 || '';\nOutputs.oliveRung2 = map.oliveRung2 || '';\nOutputs.oliveRung3 = map.oliveRung3 || '';\nOutputs.oliveRung4 = map.oliveRung4 || '';\nOutputs.oliveRung5 = map.oliveRung5 || '';\nOutputs.oliveRung6 = map.oliveRung6 || '';\nOutputs.oliveRung7 = map.oliveRung7 || '';\nOutputs.oliveRung8 = map.oliveRung8 || '';\nOutputs.oliveRung9 = map.oliveRung9 || '';\nOutputs.oliveRung10 = map.oliveRung10 || '';\nOutputs.oliveRung11 = map.oliveRung11 || '';\nOutputs.oliveRung12 = map.oliveRung12 || '';\nOutputs.oliveRung13 = map.oliveRung13 || '';\nOutputs.oliveRung14 = map.oliveRung14 || '';\nOutputs.oliveRung15 = map.oliveRung15 || '';\nOutputs.oliveRung16 = map.oliveRung16 || '';\nOutputs.oliveRung17 = map.oliveRung17 || '';\nOutputs.oliveRung18 = map.oliveRung18 || '';\n"
       },
       "x": 40,
       "y": 160,
@@ -225,6 +225,48 @@
           "plug": "output",
           "type": "*",
           "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung13",
+          "displayName": "oliveRung13",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung14",
+          "displayName": "oliveRung14",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung15",
+          "displayName": "oliveRung15",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung16",
+          "displayName": "oliveRung16",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung17",
+          "displayName": "oliveRung17",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung18",
+          "displayName": "oliveRung18",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
         }
       ]
     },
@@ -305,6 +347,36 @@
         },
         {
           "name": "oliveRung12",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung13",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung14",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung15",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung16",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung17",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung18",
           "plug": "input",
           "type": "*"
         },

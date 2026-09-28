@@ -148,10 +148,10 @@
     {
       "id": "brName",
       "type": "Text",
-      "label": "Bot Garden",
+      "label": "The game’s name",
       "parent": "brBrand",
       "parameters": {
-        "text": "Bot Garden",
+        "text": "Olive’s Island",
         "sizeMode": "contentSize",
         "fontFamily": "Fredoka",
         "fontSize": {

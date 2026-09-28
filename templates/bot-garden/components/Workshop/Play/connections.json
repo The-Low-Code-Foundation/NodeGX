@@ -64,8 +64,8 @@
       "toProperty": "text"
     },
     {
-      "fromId": "plT",
-      "fromProperty": "isSub",
+      "fromId": "plCard",
+      "fromProperty": "sub",
       "toId": "plSub",
       "toProperty": "text"
     },
@@ -743,14 +743,14 @@
     },
     {
       "fromId": "plDraw",
-      "fromProperty": "dots",
-      "toId": "plDots",
-      "toProperty": "text"
+      "fromProperty": "marks",
+      "toId": "plMarkEach",
+      "toProperty": "items"
     },
     {
       "fromId": "plDraw",
       "fromProperty": "hasTulips",
-      "toId": "plDots",
+      "toId": "plMarks",
       "toProperty": "mounted"
     },
     {

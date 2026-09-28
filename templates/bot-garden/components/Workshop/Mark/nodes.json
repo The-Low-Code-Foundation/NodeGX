@@ -1,0 +1,80 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c32f6e69-03ab-5b71-85ec-9bf37ed7dff9",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mkIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cls",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lit",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 290,
+      "y": 40
+    },
+    {
+      "id": "mkDot",
+      "type": "Group",
+      "label": "The mark",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 26,
+          "unit": "px"
+        },
+        "height": {
+          "value": 26,
+          "unit": "px"
+        },
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--paper-2)",
+        "cssClassName": "bg-mark"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mkIsLit",
+      "type": "Condition",
+      "label": "Has it drunk?",
+      "x": 290,
+      "y": 280
+    },
+    {
+      "id": "mkStates",
+      "type": "States",
+      "label": "Empty or filled",
+      "parameters": {
+        "states": "dry,lit",
+        "values": "ground",
+        "useTransitions": false,
+        "type-ground": "color",
+        "value-dry-ground": "var(--paper-2)",
+        "value-lit-ground": "var(--tulip-dot)"
+      },
+      "x": 290,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "mkDot"
+  ]
+}

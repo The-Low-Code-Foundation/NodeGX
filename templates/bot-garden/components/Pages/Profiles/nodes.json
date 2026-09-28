@@ -11,7 +11,7 @@
         "prWrap"
       ],
       "parameters": {
-        "title": "Bot Garden",
+        "title": "Olive’s Island",
         "urlPath": ""
       },
       "x": 40,
@@ -27,7 +27,6 @@
         "prHead",
         "prList",
         "prFull",
-        "prNew",
         "prForm"
       ],
       "parameters": {
@@ -102,6 +101,16 @@
       "y": 880
     },
     {
+      "id": "prResave",
+      "type": "Condition",
+      "label": "An older family, migrated: write it back",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 470,
+      "y": 1480
+    },
+    {
       "id": "prHead",
       "type": "/Garden/Page head",
       "label": "The head",
@@ -115,19 +124,21 @@
       "label": "The players",
       "parent": "prWrap",
       "children": [
-        "prEach"
+        "prEach",
+        "prNew"
       ],
       "parameters": {
         "sizeMode": "contentHeight",
         "flexDirection": "row",
-        "alignItems": "center",
+        "alignItems": "stretch",
         "flexWrap": "wrap",
         "columnGap": "var(--space-3-5)",
         "rowGap": "var(--space-3-5)",
         "width": {
           "value": 100,
           "unit": "%"
-        }
+        },
+        "cssClassName": "bg-profiles"
       },
       "x": 160,
       "y": 520
@@ -160,49 +171,38 @@
         "mounted": false
       },
       "x": 160,
-      "y": 760
+      "y": 880
     },
     {
       "id": "prNew",
       "type": "net.noodl.controls.button",
       "label": "New player",
-      "parent": "prWrap",
+      "parent": "prList",
       "parameters": {
-        "backgroundColor": "var(--leaf)",
-        "color": "var(--on-fill)",
+        "backgroundColor": "var(--paper-2)",
+        "color": "var(--ink)",
         "borderStyle": "none",
-        "borderRadius": {
-          "value": 999,
-          "unit": "px"
-        },
-        "paddingTop": {
-          "value": 11,
-          "unit": "px"
-        },
-        "paddingBottom": {
-          "value": 11,
-          "unit": "px"
-        },
-        "paddingLeft": {
-          "value": 18,
-          "unit": "px"
-        },
-        "paddingRight": {
-          "value": 18,
-          "unit": "px"
-        },
+        "borderRadius": "var(--radius-card)",
         "fontSize": {
-          "value": 16,
+          "value": 18,
           "unit": "px"
         },
-        "fontWeight": "800",
-        "fontFamily": "Nunito",
-        "sizeMode": "contentSize",
-        "cssClassName": "bg-btn",
+        "fontWeight": "700",
+        "fontFamily": "Fredoka",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 208,
+          "unit": "px"
+        },
+        "height": {
+          "value": 222,
+          "unit": "px"
+        },
+        "cssClassName": "bg-profile-new bg-press",
         "label": "New player"
       },
-      "x": 160,
-      "y": 880
+      "x": 220,
+      "y": 760
     },
     {
       "id": "prForm",
@@ -253,7 +253,7 @@
         "target": "/Pages/Island"
       },
       "x": 470,
-      "y": 1480
+      "y": 1600
     },
     {
       "id": "prLeaving",
@@ -268,7 +268,7 @@
         "value-go-go": true
       },
       "x": 470,
-      "y": 1600
+      "y": 1720
     },
     {
       "id": "prGoGate",
@@ -278,7 +278,7 @@
         "runOnChange-condition": false
       },
       "x": 470,
-      "y": 1720
+      "y": 1840
     },
     {
       "id": "prAddOk",
@@ -288,7 +288,7 @@
         "runOnChange-condition": false
       },
       "x": 470,
-      "y": 1840
+      "y": 1960
     },
     {
       "id": "prLangEn",

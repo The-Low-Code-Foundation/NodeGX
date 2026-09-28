@@ -10,6 +10,30 @@
       "toProperty": "model"
     },
     {
+      "fromId": "prFam",
+      "fromProperty": "model",
+      "toId": "prStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "prFam",
+      "fromProperty": "migrated",
+      "toId": "prResave",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "prFam",
+      "fromProperty": "ran",
+      "toId": "prResave",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "prResave",
+      "fromProperty": "ontrue",
+      "toId": "prStore",
+      "toProperty": "write"
+    },
+    {
       "fromId": "prLangVar",
       "fromProperty": "value",
       "toId": "prFam",

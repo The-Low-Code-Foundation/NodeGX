@@ -1,18 +1,20 @@
-# Bot Garden
+# Olive’s Island
 
 A coding game for 7–12 year olds, in English and French, built entirely out of NodeGX nodes. A child drives a
 small robot by hand, watches her steps appear as blocks, and lets the game fold the repetition into a loop.
 Nothing is timed, scored or streaked; the reward is a hat.
 
-There is no backend and no account. The family lives on this computer (localStorage, key `bot-garden`), and
-the Grown-ups screen shows a save code that carries the whole garden to another computer.
+There is no backend and no account. The family lives on this computer (localStorage, key `bot-garden`): one
+island per kid, each with her own requests done and her own robot. The Grown-ups screen shows a save code that
+carries the whole family to another computer.
 
 ## The first thing to change
 
 Open **Data/Requests** and find the node labelled **"EDIT — the requests: this list IS the island"**. It is a
 `Static Data` node holding a JSON array; one entry is one islander asking for help: its map (rows of letters),
 the things on it, where the robot starts, the goal (a named check, never code), the blocks offered, and the
-reward. Add one and it is on the island. Every word is one row in **Data/Words**, English and French.
+reward. Add one and it is on the island. Every word is one row in **Data/Words**, English and French (a request’s
+line under the Workshop title too).
 
 ## How it works, in the graph
 

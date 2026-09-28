@@ -24,8 +24,38 @@
     {
       "fromId": "pcIn",
       "fromProperty": "robot",
-      "toId": "pcRobot",
-      "toProperty": "text"
+      "toId": "pcDraw",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "color",
+      "toId": "pcDraw",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "eye",
+      "toId": "pcDraw",
+      "toProperty": "eye"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hat",
+      "toId": "pcDraw",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "pcDraw",
+      "fromProperty": "map",
+      "toId": "pcGarden",
+      "toProperty": "map"
+    },
+    {
+      "fromId": "pcDraw",
+      "fromProperty": "robots",
+      "toId": "pcGarden",
+      "toProperty": "robots"
     },
     {
       "fromId": "pcIn",

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "02f0b809-95a5-5838-81da-c32a36434a2c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "islandpinsIn",
+      "fromProperty": "band",
+      "toId": "islandpinsFn",
+      "toProperty": "in-band"
+    },
+    {
+      "fromId": "islandpinsIn",
+      "fromProperty": "botName",
+      "toId": "islandpinsFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "islandpinsIn",
+      "fromProperty": "done",
+      "toId": "islandpinsFn",
+      "toProperty": "in-done"
+    },
+    {
+      "fromId": "islandpinsIn",
+      "fromProperty": "lang",
+      "toId": "islandpinsFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "islandpinsIn",
+      "fromProperty": "requests",
+      "toId": "islandpinsFn",
+      "toProperty": "in-requests"
+    },
+    {
+      "fromId": "islandpinsIn",
+      "fromProperty": "words",
+      "toId": "islandpinsFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "islandpinsFn",
+      "fromProperty": "out-count",
+      "toId": "islandpinsOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "islandpinsFn",
+      "fromProperty": "out-open",
+      "toId": "islandpinsOut",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "islandpinsFn",
+      "fromProperty": "out-pins",
+      "toId": "islandpinsOut",
+      "toProperty": "pins"
+    },
+    {
+      "fromId": "islandpinsFn",
+      "fromProperty": "success",
+      "toId": "islandpinsOut",
+      "toProperty": "ran"
+    }
+  ]
+}

@@ -10,6 +10,30 @@
       "toProperty": "model"
     },
     {
+      "fromId": "wsFam",
+      "fromProperty": "model",
+      "toId": "wsStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "migrated",
+      "toId": "wsResave",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "ran",
+      "toId": "wsResave",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "wsResave",
+      "fromProperty": "ontrue",
+      "toId": "wsStore",
+      "toProperty": "write"
+    },
+    {
       "fromId": "wsLangVar",
       "fromProperty": "value",
       "toId": "wsFam",

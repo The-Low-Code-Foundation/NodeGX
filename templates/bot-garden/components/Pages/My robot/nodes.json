@@ -11,7 +11,7 @@
         "rbWrap"
       ],
       "parameters": {
-        "title": "Bot Garden",
+        "title": "Olive’s Island",
         "urlPath": "robot"
       },
       "x": 40,
@@ -97,6 +97,16 @@
       "label": "In their language",
       "x": 530,
       "y": 640
+    },
+    {
+      "id": "rbResave",
+      "type": "Condition",
+      "label": "An older family, migrated: write it back",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 530,
+      "y": 1000
     },
     {
       "id": "rbHead",

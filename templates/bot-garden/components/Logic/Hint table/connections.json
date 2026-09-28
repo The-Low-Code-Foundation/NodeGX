@@ -113,6 +113,42 @@
     },
     {
       "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung13",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung13"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung14",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung14"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung15",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung15"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung16",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung16"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung17",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung17"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung18",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung18"
+    },
+    {
+      "fromId": "hinttableFn",
       "fromProperty": "out-oliveRung2",
       "toId": "hinttableOut",
       "toProperty": "oliveRung2"

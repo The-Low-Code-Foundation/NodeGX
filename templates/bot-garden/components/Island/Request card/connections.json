@@ -71,9 +71,9 @@
     },
     {
       "fromId": "qcStates",
-      "fromProperty": "opacity",
+      "fromProperty": "ground",
       "toId": "qcCard",
-      "toProperty": "opacity"
+      "toProperty": "backgroundColor"
     },
     {
       "fromId": "qcCard",

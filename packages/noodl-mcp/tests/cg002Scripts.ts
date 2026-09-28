@@ -58,7 +58,7 @@
  *
  * @module noodl-mcp/tests/cg002Scripts
  */
-import { BAND_PALETTE, BLOCK_TYPES, HINT_KEYS, WORD_KEYS } from './cg002Content';
+import { BAND_PALETTE, BLOCK_TYPES, HINT_KEYS, OLIVE_RUNGS, WORD_KEYS } from './cg002Content';
 import { BLOCK_WORD, OLIVE_HELPERS, RUNG_SHAPE, RUNG_TEMPERATURE } from './cg005Olive';
 
 /** An `until` gives up after this many passes, whatever its sensor says. */
@@ -72,6 +72,8 @@ export const MAX_TICKS = 2000;
 
 /** A finished request with more blocks than this is "done, but it could be shorter" (the mockup's `winMany`). */
 export const MANY_BLOCKS = 8;
+/** The highest Olive rung (18 since CG-006 s3 promoted six moments): a rung after the last one has no hint line of its own. */
+export const OLIVE_RUNG_MAX = Math.max(...OLIVE_RUNGS.map((r) => r.n));
 
 /** The dial on an `ask Olive` block: same every time · in between · surprise me (CG-005 §2). */
 export const DIAL_TEMPERATURE = [0, 0.8, 1.2] as const;
@@ -656,7 +658,7 @@ else if (predictAsked && !predictHit) key = 'hintPredictMiss';
 else if (goalMetNow) { key = blocks > ${MANY_BLOCKS} ? 'hintDoneMany' : 'hintDone'; vars = { k: blocks }; }
 else if (bumps > 0) key = 'hintBump';
 else if (puddles > 0) key = 'hintWet';
-else if (rung >= 1 && rung <= 12) key = 'oliveRung' + rung;
+else if (rung >= 1 && rung <= ${OLIVE_RUNG_MAX}) key = 'oliveRung' + rung;
 else if (ran) { key = 'hintMissed'; vars = { w: done, t: total }; }
 Outputs.key = key;
 Outputs.vars = vars;

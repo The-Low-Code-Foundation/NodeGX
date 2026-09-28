@@ -10,6 +10,30 @@
       "toProperty": "model"
     },
     {
+      "fromId": "guFam",
+      "fromProperty": "model",
+      "toId": "guStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "guFam",
+      "fromProperty": "migrated",
+      "toId": "guResave",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "guFam",
+      "fromProperty": "ran",
+      "toId": "guResave",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "guResave",
+      "fromProperty": "ontrue",
+      "toId": "guStore",
+      "toProperty": "write"
+    },
+    {
       "fromId": "guLangVar",
       "fromProperty": "value",
       "toId": "guFam",

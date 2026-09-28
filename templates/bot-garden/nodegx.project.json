@@ -1,10 +1,10 @@
 {
   "$schema": "https://opennoodl.dev/schemas/project-v2.json",
-  "name": "Bot Garden",
+  "name": "Olive’s Island",
   "version": "4",
   "nodegxVersion": "1.1.0",
   "settings": {
-    "htmlTitle": "Bot Garden",
+    "htmlTitle": "Olive’s Island",
     "navigationPathType": "path",
     "bodyScroll": true
   },
@@ -18,14 +18,14 @@
       "customTokens": [
         {
           "name": "--primary",
-          "value": "#3FA66B",
+          "value": "#058149",
           "category": "color-semantic",
           "isCustom": true,
           "description": "Main brand and action color"
         },
         {
           "name": "--primary-hover",
-          "value": "#37945F",
+          "value": "#04703F",
           "category": "color-semantic",
           "isCustom": true,
           "description": "Primary color on hover"
@@ -39,14 +39,14 @@
         },
         {
           "name": "--secondary",
-          "value": "#FF7A59",
+          "value": "#CB4A2A",
           "category": "color-semantic",
           "isCustom": true,
           "description": "Supporting action color"
         },
         {
           "name": "--secondary-hover",
-          "value": "#F2694A",
+          "value": "#B43C1E",
           "category": "color-semantic",
           "isCustom": true,
           "description": "Secondary color on hover"
@@ -282,7 +282,7 @@
         },
         {
           "name": "--leaf",
-          "value": "#3FA66B",
+          "value": "#058149",
           "category": "color-semantic",
           "isCustom": true
         },
@@ -324,7 +324,7 @@
         },
         {
           "name": "--coral",
-          "value": "#FF7A59",
+          "value": "#CB4A2A",
           "category": "color-semantic",
           "isCustom": true
         },
@@ -336,7 +336,7 @@
         },
         {
           "name": "--violet",
-          "value": "#8F6BFF",
+          "value": "#8059EC",
           "category": "color-semantic",
           "isCustom": true
         },
@@ -384,25 +384,25 @@
         },
         {
           "name": "--block-motion",
-          "value": "#4C8DFF",
+          "value": "#3170E0",
           "category": "color-semantic",
           "isCustom": true
         },
         {
           "name": "--block-action",
-          "value": "#3FA66B",
+          "value": "#058149",
           "category": "color-semantic",
           "isCustom": true
         },
         {
           "name": "--block-control",
-          "value": "#FF9F1C",
+          "value": "#A86501",
           "category": "color-semantic",
           "isCustom": true
         },
         {
           "name": "--block-ask",
-          "value": "#8F6BFF",
+          "value": "#8059EC",
           "category": "color-semantic",
           "isCustom": true
         },
@@ -463,6 +463,24 @@
         {
           "name": "--sea-bottom",
           "value": "#7CC6F0",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--land",
+          "value": "#C8EBD2",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--land-edge",
+          "value": "#B4E1C2",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--shore",
+          "value": "#E9D9A8",
           "category": "color-semantic",
           "isCustom": true
         },

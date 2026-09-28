@@ -130,7 +130,7 @@
         {
           "name": "open",
           "plug": "input",
-          "type": "*"
+          "type": "number"
         },
         {
           "name": "rows",

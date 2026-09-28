@@ -34,37 +34,49 @@
           "type": "string"
         },
         {
+          "name": "color",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "eye",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hat",
+          "plug": "output",
+          "type": "string"
+        },
+        {
           "name": "selected",
           "plug": "output",
           "type": "boolean"
         }
       ],
-      "x": 350,
-      "y": 280
+      "x": 470,
+      "y": 520
     },
     {
       "id": "pcCard",
       "type": "Group",
       "label": "The card",
       "children": [
-        "pcFace",
-        "pcName",
-        "pcBand",
-        "pcRobot"
+        "pcStage",
+        "pcWho"
       ],
       "parameters": {
         "width": {
-          "value": 160,
+          "value": 208,
           "unit": "px"
         },
         "sizeMode": "contentHeight",
         "flexDirection": "column",
-        "alignItems": "center",
-        "rowGap": "var(--space-1-5)",
+        "rowGap": "var(--space-3)",
         "backgroundColor": "var(--card)",
         "borderRadius": "var(--radius-card)",
-        "paddingTop": "var(--space-4)",
-        "paddingBottom": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
         "paddingLeft": "var(--space-3)",
         "paddingRight": "var(--space-3)",
         "borderStyle": "solid",
@@ -79,83 +91,175 @@
       "y": 40
     },
     {
-      "id": "pcFace",
-      "type": "game-kit.Avatar",
-      "label": "The face",
+      "id": "pcStage",
+      "type": "Group",
+      "label": "Her robot, on its stage",
       "parent": "pcCard",
+      "children": [
+        "pcGarden"
+      ],
       "parameters": {
-        "look": "fun-emoji",
-        "seed": "Pip",
-        "size": 72,
-        "background": "var(--sun)"
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "explicit",
+        "height": {
+          "value": 136,
+          "unit": "px"
+        },
+        "borderRadius": {
+          "value": 14,
+          "unit": "px"
+        },
+        "cssClassName": "bg-profile-stage"
       },
       "x": 100,
       "y": 160
     },
     {
+      "id": "pcGarden",
+      "type": "garden-kit.Garden",
+      "label": "Her robot",
+      "parent": "pcStage",
+      "parameters": {
+        "stepMs": 380,
+        "label": "Her robot"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "pcDraw",
+      "type": "/Logic/Draw world",
+      "label": "The robot in its looks",
+      "parameters": {
+        "world": {
+          "map": [
+            "G"
+          ],
+          "things": [],
+          "robots": [
+            {
+              "id": "me",
+              "x": 0,
+              "y": 0,
+              "d": 0,
+              "carry": []
+            }
+          ],
+          "events": [],
+          "schedule": []
+        }
+      },
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "pcWho",
+      "type": "Group",
+      "label": "Who she is",
+      "parent": "pcCard",
+      "children": [
+        "pcFace",
+        "pcText"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "nowrap",
+        "columnGap": "var(--space-2-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "pcFace",
+      "type": "game-kit.Avatar",
+      "label": "The face",
+      "parent": "pcWho",
+      "parameters": {
+        "look": "fun-emoji",
+        "seed": "Pip",
+        "size": 44,
+        "background": "var(--sun)"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "pcText",
+      "type": "Group",
+      "label": "Name and band",
+      "parent": "pcWho",
+      "children": [
+        "pcName",
+        "pcBand"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-0-5)",
+        "cssClassName": "bg-grow"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
       "id": "pcName",
       "type": "Text",
       "label": "The name",
-      "parent": "pcCard",
+      "parent": "pcText",
       "parameters": {
         "text": "",
         "sizeMode": "contentHeight",
         "fontFamily": "Fredoka",
         "as": "h3",
         "fontSize": {
-          "value": 18,
+          "value": 20,
           "unit": "px"
         },
         "fontWeight": "600",
         "color": "var(--ink)",
-        "lineHeight": 1.2,
-        "textAlignX": "center"
+        "lineHeight": 1.2
       },
-      "x": 100,
-      "y": 280
+      "x": 220,
+      "y": 760
     },
     {
       "id": "pcBand",
       "type": "Text",
       "label": "The band",
-      "parent": "pcCard",
+      "parent": "pcText",
       "parameters": {
         "text": "",
-        "sizeMode": "contentHeight",
+        "sizeMode": "contentSize",
         "fontSize": {
-          "value": 14,
+          "value": 13,
           "unit": "px"
         },
+        "fontWeight": "800",
         "color": "var(--ink-2)",
-        "textAlignX": "center"
+        "cssClassName": "bg-profile-band"
       },
-      "x": 100,
-      "y": 400
-    },
-    {
-      "id": "pcRobot",
-      "type": "Text",
-      "label": "The robot",
-      "parent": "pcCard",
-      "parameters": {
-        "text": "",
-        "sizeMode": "contentHeight",
-        "fontSize": {
-          "value": 14,
-          "unit": "px"
-        },
-        "color": "var(--ink-2)",
-        "textAlignX": "center"
-      },
-      "x": 100,
-      "y": 520
+      "x": 220,
+      "y": 880
     },
     {
       "id": "pcIsOn",
       "type": "Condition",
       "label": "The one playing?",
-      "x": 350,
-      "y": 400
+      "x": 470,
+      "y": 640
     },
     {
       "id": "pcStates",
@@ -169,7 +273,7 @@
         "value-off-edge": "transparent",
         "value-on-edge": "var(--leaf)"
       },
-      "x": 350,
+      "x": 470,
       "y": 40
     },
     {
@@ -188,7 +292,7 @@
           "type": "string"
         }
       ],
-      "x": 350,
+      "x": 470,
       "y": 160
     }
   ],
