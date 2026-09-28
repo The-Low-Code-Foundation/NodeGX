@@ -62,6 +62,11 @@
           "name": "showBand",
           "plug": "output",
           "type": "boolean"
+        },
+        {
+          "name": "hasProfile",
+          "plug": "output",
+          "type": "boolean"
         }
       ],
       "x": 410,
@@ -368,7 +373,8 @@
         "flexWrap": "wrap",
         "columnGap": "var(--space-2)",
         "rowGap": "var(--space-2)",
-        "cssClassName": "bg-who bg-press"
+        "cssClassName": "bg-who bg-press",
+        "mounted": false
       },
       "x": 100,
       "y": 1960
@@ -462,6 +468,16 @@
       },
       "x": 410,
       "y": 1480
+    },
+    {
+      "id": "brChanged",
+      "type": "Condition",
+      "label": "Did a tap change the family?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 410,
+      "y": 2200
     },
     {
       "id": "brGo_island",

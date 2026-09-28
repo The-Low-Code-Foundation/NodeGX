@@ -133,9 +133,9 @@ withDeployedSite({ dir: DIR }, async (page) => {
   const path0 = () => evaluate('location.pathname');
 
   /** The element a finger would hit: a JS finder expression returning an element; its centre; elementFromPoint inside it. */
-  const where = (finder) =>
+  const where = (finder, scroll = true) =>
     evaluate(`(() => { const el = (${finder}); if (!el) return { found: false };
-      el.scrollIntoView({ block: 'center', inline: 'center' });
+      if (${scroll}) el.scrollIntoView({ block: 'center', inline: 'center' });
       const r = el.getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2;
       const at = document.elementFromPoint(x, y);
       return { found: true, x, y, w: r.width, h: r.height, hit: !!at && (el === at || el.contains(at)) }; })()`);
@@ -144,6 +144,11 @@ withDeployedSite({ dir: DIR }, async (page) => {
     for (let i = 0; i < 20 && !p.found; i++) {
       await wait(150);
       p = await where(finder);
+    }
+    // Settle, then measure again WITHOUT scrolling: the press goes where the element is now (s2: a card shifted under the press).
+    if (p.found) {
+      await wait(200);
+      p = await where(finder, false);
     }
     if (!p.found || !p.hit) {
       check(`tap ${label}`, false, p);
@@ -216,7 +221,13 @@ withDeployedSite({ dir: DIR }, async (page) => {
       await page.setViewport(vp);
       await freshFamily(tag);
       // Profiles, in the language asked for (AC9 on the Profiles screen, before anyone is chosen).
-      if (lang === 'fr') await seg('FR');
+      if (lang === 'fr') {
+        await seg('FR');
+        await wait(700);
+        // A language tap before anyone is chosen stays on Profiles and makes nobody (s2 drive: it went to the island).
+        const after = await evaluate(`(() => { const k = Object.keys(localStorage).find((x) => /bot-garden/.test(x)); let n = 0; try { const v = k ? JSON.parse(localStorage.getItem(k)) : null; n = v && v.model && Array.isArray(v.model.profiles) ? v.model.profiles.length : 0; } catch (e) { n = -1; } return { path: location.pathname, profiles: n }; })()`);
+        check(`AC9 ${tag}: FR on an empty Profiles stays on Profiles with 0 profiles`, after.path === '/' && after.profiles === 0, after);
+      }
       const who = await until('document.body.innerText', (t) => t.includes(w(lang, 'whoIsPlaying')));
       check(`AC3 ${tag}: Profiles says "${w(lang, 'whoIsPlaying')}"`, who.includes(w(lang, 'whoIsPlaying')), who.slice(0, 200));
       await shot(`ac3-${tag}-01-profiles`);
@@ -238,7 +249,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
       // The tulip request.
       await tap(byText('.bg-quest', w(lang, 'rqTulipsTitle')), 'the tulip request');
       const ws = await until('location.pathname', (p) => p === '/workshop');
-      check(`AC3 ${tag}: the tulip request opens the workshop`, ws === '/workshop', ws);
+      const title = await until(`(() => { const h = [...document.querySelectorAll('h1')].find((e) => e.offsetParent !== null); return h ? h.innerText : ''; })()`, (t) => t.includes(w(lang, 'rqTulipsTitle')));
+      check(`AC3 ${tag}: the tulip request opens the workshop, titled with it`, ws === '/workshop' && title.includes(w(lang, 'rqTulipsTitle')), { path: ws, title });
       await wait(900);
       await shot(`ac3-${tag}-03-workshop`);
 
@@ -252,6 +264,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
         check(`AC4 ${lang}: the world is on screen`, r.world && r.world.top < r.vh && r.world.bottom > 0, r.world);
         check(`AC4 ${lang}: the owl starts on screen`, r.owl && r.owl.top < r.vh, r.owl);
         check(`AC4 ${lang}: no horizontal scroll`, r.sx <= r.vw, r);
+        // A page wider than the phone is shrunk to fit by mobile Chrome: innerWidth grows and nothing scrolls (s2: 506).
+        check(`AC4 ${lang}: the page lays out at the phone's own width (innerWidth 390, innerHeight 844)`, r.vw === vp.width && r.vh === vp.height, { vw: r.vw, vh: r.vh });
       }
 
       // Teach four steps, see four blocks.

@@ -436,7 +436,7 @@ const BAR: CgComponent = {
   path: 'Garden/Top bar',
   description: 'The top bar: brand, the five screens, band 7–9 / 10–12, EN / FR, and who is playing. Page is which tab is lit. A band or language tap writes the family through Model and Write. Show Tabs false and Show Band false for the Profiles screen.',
   nodes: [
-    inputs('brIn', [['page', 'string'], ['band', 'number'], ['lang', 'string'], ['name', 'string'], ['face', 'string'], ['words', 'array'], ['botName', 'string'], ['model', 'object'], ['profileId', 'string'], ['showTabs', 'boolean'], ['showBand', 'boolean']]),
+    inputs('brIn', [['page', 'string'], ['band', 'number'], ['lang', 'string'], ['name', 'string'], ['face', 'string'], ['words', 'array'], ['botName', 'string'], ['model', 'object'], ['profileId', 'string'], ['showTabs', 'boolean'], ['showBand', 'boolean'], ['hasProfile', 'boolean']]),
     group('brBar', 'The bar', undefined, { ...row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(14), rowGap: sp(10) }), backgroundColor: 'var(--card)', borderRadius: 'var(--radius-bar)', ...pad(10, 14), cssClassName: 'bg-top' }, ['brBrand', 'brTabs', 'brBandSeg', 'brLangSeg', 'brWho']),
     group('brBrand', 'The brand', 'brBar', row({ columnGap: sp(10) }), ['brMark', 'brName']),
     group('brMark', 'The tulip', 'brBrand', { sizeMode: 'explicit', width: px(38), height: px(38), cssClassName: 'bg-brand-mark bg-sp-tulip' }),
@@ -449,7 +449,7 @@ const BAR: CgComponent = {
     group('brLangSeg', 'Language', 'brBar', { ...row({ columnGap: sp(0) }), backgroundColor: 'var(--paper-2)', borderRadius: px(999), ...pad(3), cssClassName: 'bg-seg' }, ['brEn', 'brFr']),
     place('brEn', C.seg, 'EN', 'brLangSeg', { label: 'EN' }),
     place('brFr', C.seg, 'FR', 'brLangSeg', { label: 'FR' }),
-    group('brWho', 'Who is playing', 'brBar', { ...row({ columnGap: sp(8) }), cssClassName: 'bg-who bg-press' }, ['brFace', 'brWhoName']),
+    group('brWho', 'Who is playing', 'brBar', { ...row({ columnGap: sp(8) }), cssClassName: 'bg-who bg-press', mounted: false }, ['brFace', 'brWhoName']),
     place('brFace', KIT_AVATAR, 'The face', 'brWho', { look: 'fun-emoji', seed: 'Pip', size: 34, background: 'var(--sun)' }),
     text('brWhoName', 'The name', 'brWho', '', { sizeMode: 'contentSize', ...T_STRONG }),
     logic('brT', L('Translate words'), 'In their language'),
@@ -458,6 +458,7 @@ const BAR: CgComponent = {
     logic('brSetFr', L('Update profile'), 'French', { field: 'lang', value: 'fr' }),
     logic('brSetB1', L('Update profile'), 'Band 7–9', { field: 'band', value: 1 }),
     logic('brSetB2', L('Update profile'), 'Band 10–12', { field: 'band', value: 2 }),
+    gate('brChanged', 'Did a tap change the family?'),
     ...TABS.map((t) => navigate(`brGo_${t.id}`, t.target, `To ${t.id}`)),
     navigate('brGoProfiles', C.pageProfiles, 'To the profiles'),
     outputs('brOut', [['model', 'object'], ['write', 'signal'], ['pickedEn', 'signal'], ['pickedFr', 'signal']])
@@ -471,6 +472,8 @@ const BAR: CgComponent = {
     wire('brIn', 'lang', 'brLit', 'lang'),
     wire('brIn', 'showTabs', 'brTabs', 'mounted'),
     wire('brIn', 'showBand', 'brBandSeg', 'mounted'),
+    // Nobody chosen yet: no face, no name (the s2 drive saw a placeholder face on an empty Profiles screen).
+    wire('brIn', 'hasProfile', 'brWho', 'mounted'),
     wire('brIn', 'name', 'brWhoName', 'text'),
     wire('brIn', 'face', 'brFace', 'seed'),
     wire('brT', 'brand', 'brName', 'text'),
@@ -480,7 +483,10 @@ const BAR: CgComponent = {
     wire('brLit', 'enOn', 'brEn', 'isOn'),
     wire('brLit', 'frOn', 'brFr', 'isOn'),
     wire('brWho', 'onClick', 'brGoProfiles', 'navigate'),
-    ...(['brSetEn', 'brSetFr', 'brSetB1', 'brSetB2'] as const).flatMap((u) => [wire('brIn', 'model', u, 'model'), wire('brIn', 'profileId', u, 'profileId'), wire(u, 'model', 'brOut', 'model'), wire(u, 'ran', 'brOut', 'write')]),
+    ...(['brSetEn', 'brSetFr', 'brSetB1', 'brSetB2'] as const).flatMap((u) => [wire('brIn', 'model', u, 'model'), wire('brIn', 'profileId', u, 'profileId'), wire(u, 'model', 'brOut', 'model'), wire(u, 'changed', 'brChanged', 'condition'), wire(u, 'ran', 'brChanged', 'eval')]),
+    // 🔴 Written only when something changed: with nobody chosen, a language tap changes no profile and writes nothing
+    // (s2 drive: FR on an empty Profiles wrote an empty family, and the write sent the page to the island).
+    wire('brChanged', 'ontrue', 'brOut', 'write'),
     wire('brEn', 'clicked', 'brSetEn', 'go'),
     wire('brEn', 'clicked', 'brOut', 'pickedEn'),
     wire('brFr', 'clicked', 'brSetFr', 'go'),
@@ -686,8 +692,8 @@ const PLAY: CgComponent = {
     group('plRoot', 'The workshop', undefined, column({ rowGap: sp(12) }), ['plHead', 'plWs', 'plWin']),
     group('plHead', 'The head', 'plRoot', column({ rowGap: sp(2) }), ['plEyebrow', 'plTitle', 'plSub']),
     text('plEyebrow', 'Whose request', 'plHead', '', T_EYEBROW),
-    text('plTitle', 'The request', 'plHead', '', T_H1),
-    text('plSub', 'How it works', 'plHead', '', { ...T_MUTED, maxWidth: px(640) }),
+    text('plTitle', 'The request', 'plHead', '', { ...T_H1, cssClassName: 'bg-ws-title' }),
+    text('plSub', 'How it works', 'plHead', '', { ...T_MUTED, maxWidth: px(640), cssClassName: 'bg-ws-sub' }),
     group('plWs', 'World and steps', 'plRoot', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-ws' }, ['plLeft', 'plRight']),
     group('plLeft', 'The world side', 'plWs', { ...column({ rowGap: sp(12) }), ...PANEL }, ['plTask', 'plStage', 'plPredictLine', 'plControls', 'plOwl']),
     group('plTask', 'The task', 'plLeft', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(14), flexWrap: 'nowrap' }), ['plFace', 'plTaskText', 'plDots']),
@@ -1477,6 +1483,7 @@ function pageCommon(p: string, title: string, urlPath: string, page: string, mai
       wire(`${p}Fam`, 'face', `${p}Bar`, 'face'),
       wire(`${p}Fam`, 'botName', `${p}Bar`, 'botName'),
       wire(`${p}Fam`, 'profileId', `${p}Bar`, 'profileId'),
+      wire(`${p}Fam`, 'hasProfile', `${p}Bar`, 'hasProfile'),
       wire(`${p}Words`, 'words', `${p}Bar`, 'words'),
       wire(`${p}Store`, 'model', `${p}Bar`, 'model'),
       wire(`${p}Bar`, 'model', `${p}Store`, 'model'),
@@ -1511,6 +1518,9 @@ const PAGE_PROFILES: CgComponent = (() => {
         closed: { type: 'boolean', by: { closed: true, open: false } }
       }),
       navigate('prGoIsland', C.pageIsland, 'To the island'),
+      withStates('prLeaving', 'Stay, or go once written', ['stay', 'go'], { go: { type: 'boolean', by: { stay: false, go: true } } }),
+      gate('prGoGate', 'A player chosen or made?'),
+      gate('prAddOk', 'Was a player made?'),
       setVariable('prLangEn', 'gardenLang', 'English before anyone is chosen', { setWith: 'string', value: 'en' }),
       setVariable('prLangFr', 'gardenLang', 'French before anyone is chosen', { setWith: 'string', value: 'fr' })
     ],
@@ -1543,7 +1553,14 @@ const PAGE_PROFILES: CgComponent = (() => {
       wire('prAdd', 'model', 'prStore', 'model'),
       wire('prAdd', 'ran', 'prStore', 'write'),
       wire('prFam', 'canAdd', 'prNew', 'mounted'),
-      wire('prStore', 'written', 'prGoIsland', 'navigate'),
+      // 🔴 Only a choice or a new player leaves Profiles (s2 drive: any write did, a language tap included).
+      wire('prSelect', 'ran', 'prLeaving', 'to-go'),
+      wire('prAdd', 'ok', 'prAddOk', 'condition'),
+      wire('prAdd', 'ran', 'prAddOk', 'eval'),
+      wire('prAddOk', 'ontrue', 'prLeaving', 'to-go'),
+      wire('prLeaving', 'go', 'prGoGate', 'condition'),
+      wire('prStore', 'written', 'prGoGate', 'eval'),
+      wire('prGoGate', 'ontrue', 'prGoIsland', 'navigate'),
       wire('prBar', 'pickedEn', 'prLangEn', 'do'),
       wire('prBar', 'pickedFr', 'prLangFr', 'do')
     ]

@@ -133,3 +133,24 @@ resolves `@nodegx/export` to its source (as `jest.config.js` does). On the prima
    goes to Profiles through the bar's who pill, now `.bg-who`, if a family survived), and `typeInto` reports a FAIL line.
 
 Gate after: **45/45**; `npm run template:garden` ×2 → tree `68a665a7…` both, exit 0 both; engine pre-step 105/105; arms 9/9.
+
+### 7.2 The second drive (48/94), two findings, and the lane's own re-drive: 121/121
+
+- **🔴 Product defect: FR on an empty Profiles sent the child to the island.** The bar's language tap ran `Logic/Update
+  profile` on a family with nobody in it (`changed: false`) and wrote the store anyway; Profiles navigated on ANY store
+  write. The pink face was the bar's avatar with no one behind it. Fix: the bar writes only through a "did it change"
+  gate; Profiles leaves only when a choice or a new player (`Add profile.ok`) is written (`prLeaving` → `prGoGate`); the
+  bar shows no face until someone is chosen (`hasProfile` → `brWho.mounted`). Gate row (graph + script) added; drive
+  clause: FR on an empty Profiles stays on `/` with 0 profiles stored.
+- **🔴 AC4 defect hidden by the instrument: the page was 506 px wide at 390.** The five content-sized tabs made the bar
+  506 px; mobile Chrome shrank the whole page to fit (innerWidth 506, innerHeight 1096), so nothing scrolled sideways, the
+  AC4 readings were in the wrong space, and every CDP press landed ~0.77× off — the tulip card's tap opened Sami's letter
+  and Teach was never pressed (no pad). Fix: under 600 px the tabs take the bar's width and wrap. Measured at a true 390 ×
+  844, Play's bottom was then 849 and the owl's top 965 (FR), so under 600 px only: the bar is two rows (tulip,
+  switches, face; then the tabs at 14 px), the workshop title is 26 px, its general line is dropped, the controls are a
+  little tighter → Play 664–702, owl top 806, world 392–640 (EN and FR). New drive clauses: the page lays out at 390 ×
+  844, and the workshop's H1 is the tulip request's title (not just the path). `tap` now settles and measures again
+  without scrolling before it presses.
+
+Re-drive on the worktree (`drive-wt.sh`: assemble → primary's `nodegx-deploy.cjs` → drive): **121/121, exit 0, 0 console
+errors, 0 network errors.** Gate **47/47**; `template:garden` ×2 → `464d7895…` both, exit 0; engine pre-step 105/105.

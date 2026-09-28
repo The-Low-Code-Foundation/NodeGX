@@ -70,6 +70,12 @@
       "toProperty": "profileId"
     },
     {
+      "fromId": "wsFam",
+      "fromProperty": "hasProfile",
+      "toId": "wsBar",
+      "toProperty": "hasProfile"
+    },
+    {
       "fromId": "wsWords",
       "fromProperty": "words",
       "toId": "wsBar",

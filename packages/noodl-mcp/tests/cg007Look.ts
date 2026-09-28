@@ -178,6 +178,23 @@ button:focus-visible, input:focus-visible, .bg-press:focus-visible { outline: 3p
 .bg-brand { font-family: 'Fredoka', sans-serif; font-weight: 700; }
 .bg-brand-mark { width: 38px; min-width: 38px; height: 38px; }
 .bg-tabs { margin-left: auto; }
+/* A phone: the five tabs wrap inside the bar. Content-sized, they measured 506 px wide and the whole page shrank to fit (s2 drive at 390: innerWidth 506). */
+@media (max-width: 600px) { .bg-tabs { width: 100% !important; max-width: 100% !important; margin-left: 0 !important; flex-wrap: wrap !important; } .bg-tab { padding-left: 10px !important; padding-right: 10px !important; } }
+/*
+ * AC4 on a phone: the world, the controls and the owl without scrolling to find Play. Measured at a true 390 x 844
+ * (s2 drive, FR): Play's bottom at 849, the owl's top at 965. So, under 600 px only: the bar is two rows (the tulip,
+ * the switches and the face; then the tabs, smaller), the workshop's title is 26 px and its general line is dropped
+ * (the task card below says what the islander wants), and the controls are a little tighter.
+ */
+@media (max-width: 600px) {
+  .bg-brand { display: none !important; }
+  .bg-tabs { order: 5; }
+  .bg-tab { padding-top: 6px !important; padding-bottom: 6px !important; padding-left: 8px !important; padding-right: 8px !important; }
+  .bg-tab * { font-size: 14px !important; }
+  .bg-ws-title { font-size: 26px !important; }
+  .bg-ws-sub { display: none !important; }
+  .bg-controls .bg-btn { padding: 9px 14px !important; font-size: 15px !important; }
+}
 .bg-press { cursor: pointer; user-select: none; transition: transform 100ms, filter 100ms; }
 .bg-press:active { transform: scale(0.97); }
 .bg-tab { border-radius: 999px; }

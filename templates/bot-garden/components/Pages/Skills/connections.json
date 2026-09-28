@@ -70,6 +70,12 @@
       "toProperty": "profileId"
     },
     {
+      "fromId": "skFam",
+      "fromProperty": "hasProfile",
+      "toId": "skBar",
+      "toProperty": "hasProfile"
+    },
+    {
       "fromId": "skWords",
       "fromProperty": "words",
       "toId": "skBar",

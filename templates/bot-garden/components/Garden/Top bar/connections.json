@@ -53,6 +53,12 @@
     },
     {
       "fromId": "brIn",
+      "fromProperty": "hasProfile",
+      "toId": "brWho",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "brIn",
       "fromProperty": "name",
       "toId": "brWhoName",
       "toProperty": "text"
@@ -209,9 +215,15 @@
     },
     {
       "fromId": "brSetEn",
+      "fromProperty": "changed",
+      "toId": "brChanged",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "brSetEn",
       "fromProperty": "ran",
-      "toId": "brOut",
-      "toProperty": "write"
+      "toId": "brChanged",
+      "toProperty": "eval"
     },
     {
       "fromId": "brIn",
@@ -233,9 +245,15 @@
     },
     {
       "fromId": "brSetFr",
+      "fromProperty": "changed",
+      "toId": "brChanged",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "brSetFr",
       "fromProperty": "ran",
-      "toId": "brOut",
-      "toProperty": "write"
+      "toId": "brChanged",
+      "toProperty": "eval"
     },
     {
       "fromId": "brIn",
@@ -257,9 +275,15 @@
     },
     {
       "fromId": "brSetB1",
+      "fromProperty": "changed",
+      "toId": "brChanged",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "brSetB1",
       "fromProperty": "ran",
-      "toId": "brOut",
-      "toProperty": "write"
+      "toId": "brChanged",
+      "toProperty": "eval"
     },
     {
       "fromId": "brIn",
@@ -281,7 +305,19 @@
     },
     {
       "fromId": "brSetB2",
+      "fromProperty": "changed",
+      "toId": "brChanged",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "brSetB2",
       "fromProperty": "ran",
+      "toId": "brChanged",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "brChanged",
+      "fromProperty": "ontrue",
       "toId": "brOut",
       "toProperty": "write"
     },

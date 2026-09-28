@@ -70,6 +70,12 @@
       "toProperty": "profileId"
     },
     {
+      "fromId": "isFam",
+      "fromProperty": "hasProfile",
+      "toId": "isBar",
+      "toProperty": "hasProfile"
+    },
+    {
       "fromId": "isWords",
       "fromProperty": "words",
       "toId": "isBar",

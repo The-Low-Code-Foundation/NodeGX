@@ -256,6 +256,41 @@
       "y": 1480
     },
     {
+      "id": "prLeaving",
+      "type": "States",
+      "label": "Stay, or go once written",
+      "parameters": {
+        "states": "stay,go",
+        "values": "go",
+        "useTransitions": false,
+        "type-go": "boolean",
+        "value-stay-go": false,
+        "value-go-go": true
+      },
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "prGoGate",
+      "type": "Condition",
+      "label": "A player chosen or made?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "prAddOk",
+      "type": "Condition",
+      "label": "Was a player made?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 470,
+      "y": 1840
+    },
+    {
       "id": "prLangEn",
       "type": "Set Variable",
       "label": "English before anyone is chosen",

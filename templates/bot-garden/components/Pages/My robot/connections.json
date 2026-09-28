@@ -70,6 +70,12 @@
       "toProperty": "profileId"
     },
     {
+      "fromId": "rbFam",
+      "fromProperty": "hasProfile",
+      "toId": "rbBar",
+      "toProperty": "hasProfile"
+    },
+    {
       "fromId": "rbWords",
       "fromProperty": "words",
       "toId": "rbBar",

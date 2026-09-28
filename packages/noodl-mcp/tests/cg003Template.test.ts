@@ -290,6 +290,25 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       for (const n of navs) expect(PAGES as readonly string[]).toContain(String(params(n).target));
     });
 
+    it('🔴 a language tap with nobody chosen writes nothing and stays on Profiles (s2 drive: it went to the island)', () => {
+      // The bar writes only through its "did it change" gate.
+      const bar = connectionsOf(built, C.bar);
+      expect(bar.filter((c) => c.toId === 'brOut' && c.toProperty === 'write').map((c) => `${c.fromId}.${c.fromProperty}`)).toEqual(['brChanged.ontrue']);
+      // Profiles leaves only through its gate, and the gate opens only on a choice or a player made.
+      const pr = connectionsOf(built, C.pageProfiles);
+      expect(pr.filter((c) => c.toId === 'prGoIsland').map((c) => `${c.fromId}.${c.fromProperty}`)).toEqual(['prGoGate.ontrue']);
+      expect(pr.filter((c) => c.fromId === 'prStore' && c.fromProperty === 'written').map((c) => `${c.toId}.${c.toProperty}`)).toEqual(['prGoGate.eval']);
+      expect(pr.filter((c) => c.toId === 'prLeaving' && c.toProperty === 'to-go').map((c) => `${c.fromId}.${c.fromProperty}`).sort()).toEqual(['prAddOk.ontrue', 'prSelect.ran']);
+      // And the script says so: a language on an empty family changes nothing.
+      expect(run(UPDATE_PROFILE_SCRIPT, { model: undefined, field: 'lang', value: 'fr' }).changed).toBe(false);
+      // The bar shows no face with nobody chosen.
+      expect(bar.some((c) => c.fromId === 'brIn' && c.fromProperty === 'hasProfile' && c.toId === 'brWho' && c.toProperty === 'mounted')).toBe(true);
+    });
+
+    it('AC4: on a phone the tabs wrap inside the bar (content-sized, they made the page 506 px wide)', () => {
+      expect(GARDEN_CSS).toMatch(/@media \(max-width: 600px\) \{ \.bg-tabs \{ width: 100% !important;/);
+    });
+
     it('no backtick and no dollar-brace inside any glue script (README §7)', () => {
       for (const g of GLUE_SCRIPTS) expect({ c: g.component, bad: /`|\$\{/.test(g.script) }).toEqual({ c: g.component, bad: false });
       expect(/`/.test(GARDEN_CSS)).toBe(false);

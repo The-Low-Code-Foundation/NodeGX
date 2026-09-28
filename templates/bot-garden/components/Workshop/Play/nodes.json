@@ -150,7 +150,8 @@
         },
         "fontWeight": "600",
         "color": "var(--ink)",
-        "lineHeight": 1.15
+        "lineHeight": 1.15,
+        "cssClassName": "bg-ws-title"
       },
       "x": 160,
       "y": 400
@@ -171,7 +172,8 @@
         "maxWidth": {
           "value": 640,
           "unit": "px"
-        }
+        },
+        "cssClassName": "bg-ws-sub"
       },
       "x": 160,
       "y": 520

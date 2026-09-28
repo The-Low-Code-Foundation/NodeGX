@@ -70,6 +70,12 @@
       "toProperty": "profileId"
     },
     {
+      "fromId": "guFam",
+      "fromProperty": "hasProfile",
+      "toId": "guBar",
+      "toProperty": "hasProfile"
+    },
+    {
       "fromId": "guWords",
       "fromProperty": "words",
       "toId": "guBar",

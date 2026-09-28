@@ -382,8 +382,8 @@
     "Garden/Top bar": {
       "path": "Garden/Top bar",
       "type": "visual",
-      "nodeCount": 33,
-      "connectionCount": 53,
+      "nodeCount": 34,
+      "connectionCount": 59,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -526,8 +526,8 @@
     "Pages/Profiles": {
       "path": "Pages/Profiles",
       "type": "page",
-      "nodeCount": 20,
-      "connectionCount": 45,
+      "nodeCount": 23,
+      "connectionCount": 52,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -535,7 +535,7 @@
       "path": "Pages/Island",
       "type": "page",
       "nodeCount": 24,
-      "connectionCount": 41,
+      "connectionCount": 42,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -543,7 +543,7 @@
       "path": "Pages/Workshop",
       "type": "page",
       "nodeCount": 16,
-      "connectionCount": 39,
+      "connectionCount": 40,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -551,7 +551,7 @@
       "path": "Pages/My robot",
       "type": "page",
       "nodeCount": 14,
-      "connectionCount": 36,
+      "connectionCount": 37,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -559,7 +559,7 @@
       "path": "Pages/Skills",
       "type": "page",
       "nodeCount": 12,
-      "connectionCount": 23,
+      "connectionCount": 24,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -567,14 +567,14 @@
       "path": "Pages/Grown-ups",
       "type": "page",
       "nodeCount": 13,
-      "connectionCount": 27,
+      "connectionCount": 28,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     }
   },
   "stats": {
     "totalComponents": 71,
-    "totalNodes": 561,
-    "totalConnections": 1595
+    "totalNodes": 565,
+    "totalConnections": 1613
   }
 }

@@ -70,6 +70,12 @@
       "toProperty": "profileId"
     },
     {
+      "fromId": "prFam",
+      "fromProperty": "hasProfile",
+      "toId": "prBar",
+      "toProperty": "hasProfile"
+    },
+    {
       "fromId": "prWords",
       "fromProperty": "words",
       "toId": "prBar",
@@ -256,8 +262,44 @@
       "toProperty": "mounted"
     },
     {
+      "fromId": "prSelect",
+      "fromProperty": "ran",
+      "toId": "prLeaving",
+      "toProperty": "to-go"
+    },
+    {
+      "fromId": "prAdd",
+      "fromProperty": "ok",
+      "toId": "prAddOk",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "prAdd",
+      "fromProperty": "ran",
+      "toId": "prAddOk",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "prAddOk",
+      "fromProperty": "ontrue",
+      "toId": "prLeaving",
+      "toProperty": "to-go"
+    },
+    {
+      "fromId": "prLeaving",
+      "fromProperty": "go",
+      "toId": "prGoGate",
+      "toProperty": "condition"
+    },
+    {
       "fromId": "prStore",
       "fromProperty": "written",
+      "toId": "prGoGate",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "prGoGate",
+      "fromProperty": "ontrue",
       "toId": "prGoIsland",
       "toProperty": "navigate"
     },
