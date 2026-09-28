@@ -176,7 +176,8 @@ test('the template table is whole: every rung has both languages, a known shape,
 });
 
 test('.gitignore keeps the model, node_modules and the build out of git', () => {
-  const ignore = read('.gitignore').split('\n');
+  // A Windows checkout has CRLF endings (the first windows-latest run: 'node_modules/\r' !== 'node_modules/').
+  const ignore = read('.gitignore').split(/\r?\n/);
   for (const e of ['node_modules/', 'build-output/', 'dist/', 'model/']) assert.ok(ignore.includes(e), e);
 });
 
