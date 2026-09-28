@@ -1,0 +1,13 @@
+{
+  "label": "Garden 3D Kit",
+  "description": "One node for Olive’s Island (the bot-garden template): Garden 3D, the same ports as Garden Kit’s Garden (Map, Things, Robots, Bubble, Step Ms, Celebrate, Label; Tile X, Tile Y, Tile Tapped, Ready) drawn as a little flat-shaded island in three.js — tile boxes with a height per kind, cone-on-cylinder trees, icosahedron rocks, a box-and-prism house, stem-and-bulb tulips, robots as a box body with a visor, eyes and a hat — that pans with one finger, zooms with a pinch or a wheel, and reports the tapped tile. Plus Camera (plot, island, follow), Focus, Frame Ms (a rolling p95) and Supported (WebGL2 present), so a page can fall back to the flat Garden. three.js 0.158.0 is vendored beside the node (MIT). The kit draws; the engine decides.",
+  "type": "module",
+  "tags": [
+    "UI",
+    "Utility"
+  ],
+  "version": "1.0.0",
+  "minEditorVersion": "0.1.0",
+  "runtimeVersion": "2.7.0",
+  "icon": "icon.png"
+}

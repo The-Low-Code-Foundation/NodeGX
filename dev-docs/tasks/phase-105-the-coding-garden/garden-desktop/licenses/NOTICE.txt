@@ -12,5 +12,9 @@ Olive's Island (L'île d'Olive) ships, beside its own code, the following third-
 3. llama.cpp / ggml (https://github.com/ggml-org/llama.cpp), copyright (c) 2023-2026 The ggml authors.
    MIT License — LICENSE-llama.cpp.txt.
 
+4. three.js 0.158.0 (https://github.com/mrdoob/three.js), copyright (c) 2010-2023 three.js authors.
+   MIT License — LICENSE-three.js.txt. Vendored as noodl_modules/garden-3d-kit/three.min.js (651,651 bytes) for the
+   Garden 3D node (P106 IG-007); loaded from the app's own files, never from a CDN.
+
 Nothing in this app sends anything off the computer it runs on: the game, its backend and the model all live on
 127.0.0.1 (P105 CG-004 AC9).

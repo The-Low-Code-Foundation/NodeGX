@@ -1,0 +1,1558 @@
+// @ts-check
+/**
+ * Garden 3D Kit — a NodeGX node kit for Olive’s Island (Phase 106, IG-007).
+ *
+ * One React node, `Garden 3D`, on EXACTLY the ports of garden-kit’s `Garden` (Map, Things, Robots, Bubble, Step Ms,
+ * Celebrate, Label in; Tile X, Tile Y, Tile Tapped, Ready out) plus Camera, Focus, Frame Ms and Supported. The page
+ * swaps the node; the graph above it is untouched. This file draws a flat-shaded little island with three.js: tile
+ * boxes with a height per kind, cone-on-cylinder trees, icosahedron rocks, a box-and-prism house, stem-and-bulb
+ * tulips, robots as a box body with a visor, eyes and a hat. One directional light, one hemisphere light, no shadow
+ * maps, no textures, no post-processing. Primitives only: nothing is fetched (CG-001 AC10 holds for this kit too).
+ *
+ * Hand-written in the shape of `garden-kit`: no SDK, no npm install, no bundler for THIS file. `build.mjs` copies it
+ * verbatim under a banner into `project/noodl_modules/garden-3d-kit/index.js`, the file a project installs. three.js is
+ * vendored BESIDE it as `three.min.js` (0.158.0, MIT, LICENSE.txt) and listed in manifest.json `dependencies`, the
+ * maplibre way, so the page loads it first and this file reads the `THREE` global. It reads it at MOUNT, never at
+ * definition: the kit catalog extractor loads `main` alone, and the node must register there without three.js.
+ *
+ * ── The rule this file follows ───────────────────────────────────────────────
+ *
+ *   The kit draws. The engine (CG-002) interprets.
+ *
+ * Nothing here runs a program or knows what a wall is. The tiles the map names are drawn; the robots go where the
+ * graph puts them, gliding over Step Ms; a bump count that rises recoils; Celebrate hops; a Bubble is a DOM overlay
+ * projected from the robot’s head (its text stays selectable and translatable). A tapped tile reports its x and y.
+ *
+ * ── Where the pure parts live (the kit gate grades them without a browser) ──
+ *
+ *   Garden3D.world   parseMap / parseThings / parseRobots / rose — garden-kit’s helpers when that kit is on the page
+ *                    (found through window.__noodl_modules at render time), else the copies below (`LOCAL_WORLD`).
+ *   Garden3D.scene   buildScene(world, THREE) — every mesh of a world, instanced tiles counted as one each.
+ *   Garden3D.camera  pose / project / rayFromNdc / pickTile / frameRect / clampCamera — hand-rolled maths, no THREE.
+ *   Garden3D.engine  create({ THREE, root, canvas, overlay, … }) — the browser half; `Supported` is decided here.
+ *
+ * ── The JSON contract (garden-kit’s, verbatim; the new ports after it) ──────
+ *
+ * Map:      { rows: ["GGTGGGTH", ...], legend: { G: "grass", ... } } or just the rows. Kinds: grass path water tree
+ *           rock house bed. A bed draws a dry tulip; a Thing waters it.
+ * Things:   [{ kind: tulip | puddle | letter | bowl | label, x, y, watered?, full?, text? }]
+ * Robots:   [{ x, y, d, colour, eyes, hat, name, bump? }]  d 0..3 clockwise from up; bump is a COUNT that rises.
+ * Bubble:   { robot, text, style: plain | olive, ms }
+ * Camera:   plot | island | follow — plot frames Focus (the whole map when Focus is empty), island frames the whole
+ *           map, follow keeps robot 0 in the middle.
+ * Focus:    { x, y, w, h } in tiles.
+ * Frame Ms: the rolling p95 of the last 60 frame intervals, measured only after Ready and only while the document
+ *           is visible (a frame throttle never fires in a hidden window; without the guard the fallback would fire
+ *           on every minimised app).
+ * Supported: true when a WebGL2 context could be made and three.js is on the page; false draws nothing, throws
+ *           nothing, and Ready never fires (the page’s fallback rule swaps the node).
+ *
+ * Hooks for IG-002 / IG-005 (the vocabulary both renderers will share): THING_BUILDERS is a table keyed by thing
+ * kind — a rock (three sizes by `left`), a stone, a post box, a sign and a note are one entry each; the robot builder
+ * reads `colour`, `eyes` and `hat` today and has a named place for `accessory`, `can` (0..canMax) and `load`.
+ */
+(function () {
+  // ✅ React is a global the runtime installs before this file runs. Read it bare; never window.React.
+  var h = typeof React !== 'undefined' ? React.createElement : null;
+
+  /** A JSON port: an object as it is, text parsed, anything else (or bad text) as the fallback. */
+  function readJson(v, fallback) {
+    if (v === undefined || v === null || v === '') return fallback;
+    if (typeof v === 'string') {
+      try {
+        return JSON.parse(v);
+      } catch (e) {
+        return fallback;
+      }
+    }
+    return v;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // The world helpers — garden-kit’s when it is on the page, these copies when it is not
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // COPIED from library/modules/garden-kit/src/kit.js (the 2D `Garden` node’s world.* helpers), so that this kit
+  // stands alone in a project that installs it without garden-kit. When garden-kit IS on the page its own helpers are
+  // used instead (see `worldHelpers`), and the kit gate pins these copies to the originals on a shared set of inputs.
+  var DEFAULT_LEGEND = { G: 'grass', P: 'path', W: 'water', T: 'tree', R: 'rock', H: 'house', F: 'bed', '.': 'grass', ' ': 'grass' };
+  var KINDS = ['grass', 'path', 'water', 'tree', 'rock', 'house', 'bed'];
+
+  function parseMap(v) {
+    var m = v;
+    if (typeof v === 'string') {
+      try {
+        m = JSON.parse(v);
+      } catch (e) {
+        m = v;
+      }
+    }
+    var rows = null;
+    var legend = DEFAULT_LEGEND;
+    if (typeof m === 'string') rows = m.split('\n');
+    else if (Array.isArray(m)) rows = m;
+    else if (m && typeof m === 'object') {
+      if (typeof m.rows === 'string') rows = m.rows.split('\n');
+      else if (Array.isArray(m.rows)) rows = m.rows;
+      if (m.legend && typeof m.legend === 'object') {
+        legend = {};
+        for (var k in DEFAULT_LEGEND) legend[k] = DEFAULT_LEGEND[k];
+        for (var c in m.legend) legend[c] = m.legend[c];
+      }
+    }
+    if (!rows) rows = [];
+    rows = rows.map(function (r) {
+      return String(r === undefined || r === null ? '' : r);
+    });
+    var w = 0;
+    for (var i = 0; i < rows.length; i++) if (rows[i].length > w) w = rows[i].length;
+    var cells = [];
+    for (var y = 0; y < rows.length; y++) {
+      for (var x = 0; x < w; x++) {
+        var ch = x < rows[y].length ? rows[y].charAt(x) : 'G';
+        var kind = legend[ch];
+        if (KINDS.indexOf(kind) === -1) kind = 'grass';
+        cells.push({ x: x, y: y, ch: ch, kind: kind });
+      }
+    }
+    return { w: w, h: rows.length, rows: rows, legend: legend, cells: cells };
+  }
+
+  function parseThings(v) {
+    var list = readJson(v, []);
+    if (!Array.isArray(list)) return [];
+    return list.filter(function (t) {
+      return t && typeof t === 'object' && typeof t.kind === 'string' && isFinite(Number(t.x)) && isFinite(Number(t.y));
+    });
+  }
+
+  function parseRobots(v) {
+    var list = readJson(v, []);
+    if (list && !Array.isArray(list) && typeof list === 'object') list = [list];
+    if (!Array.isArray(list)) return [];
+    return list
+      .filter(function (r) {
+        return r && typeof r === 'object';
+      })
+      .map(function (r, i) {
+        var d = Math.round(Number(r.d));
+        if (!isFinite(d)) d = 0;
+        d = ((d % 4) + 4) % 4;
+        return {
+          x: isFinite(Number(r.x)) ? Number(r.x) : 0,
+          y: isFinite(Number(r.y)) ? Number(r.y) : 0,
+          d: d,
+          colour: typeof r.colour === 'string' && r.colour ? r.colour : typeof r.color === 'string' && r.color ? r.color : '#FF7A59',
+          eyes: r.eyes === 'happy' || r.eyes === 'wink' ? r.eyes : 'round',
+          hat: r.hat === 'cap' || r.hat === 'sun' || r.hat === 'crown' ? r.hat : 'none',
+          name: typeof r.name === 'string' ? r.name : i === 0 ? 'Pip' : '',
+          bump: isFinite(Number(r.bump)) ? Number(r.bump) : 0
+        };
+      });
+  }
+
+  /** A rising count is a new event; a mount, the same value, a fall or junk is not (the Boost-count rule). */
+  function rose(before, after) {
+    var a = Number(before);
+    var b = Number(after);
+    if (!isFinite(b)) return false;
+    return b > (isFinite(a) ? a : 0);
+  }
+
+  var LOCAL_WORLD = { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, rose: rose, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS, source: 'local' };
+
+  /**
+   * garden-kit’s `Garden.world` if that kit is on the page. Modules land in `window.__noodl_modules` in load order and
+   * garden-3d-kit sorts BEFORE garden-kit, so this is read at render time, never at definition.
+   */
+  function siblingWorld() {
+    var list = null;
+    if (typeof window !== 'undefined' && window.__noodl_modules) list = window.__noodl_modules;
+    else if (typeof globalThis !== 'undefined' && globalThis.__noodl_modules) list = globalThis.__noodl_modules;
+    if (!Array.isArray(list)) return null;
+    for (var i = 0; i < list.length; i++) {
+      var m = list[i];
+      var nodes = m && Array.isArray(m.reactNodes) ? m.reactNodes : [];
+      for (var j = 0; j < nodes.length; j++) {
+        var n = nodes[j];
+        if (n && n.name === 'garden-kit.Garden' && n.world && typeof n.world.parseMap === 'function') return n.world;
+      }
+    }
+    return null;
+  }
+
+  function worldHelpers() {
+    var s = siblingWorld();
+    return s ? { parseMap: s.parseMap, parseThings: s.parseThings, parseRobots: s.parseRobots, rose: s.rose || rose, source: 'sibling' } : LOCAL_WORLD;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // The look — the mockup’s palette as hex numbers, a height per tile kind
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  var PALETTE = {
+    background: 0xbfe8cc,
+    grass: 0xbde6c9,
+    grassAlt: 0xc3e8ce,
+    path: 0xf1dfb5,
+    water: 0x7cc6f0,
+    bed: 0xc79a63,
+    ground: 0xa8d9b4,
+    trunk: 0xa9773f,
+    canopy: 0x3e9b62,
+    canopyLight: 0x48af70,
+    rock: 0x9c9aa6,
+    rockLight: 0xb7b5c2,
+    wall: 0xffe3b3,
+    roof: 0xe86a5e,
+    door: 0x8b5a2b,
+    window: 0x7cc6f0,
+    stem: 0x3fa66b,
+    tulip: 0xff6b9a,
+    tulipDry: 0xd9a3b6,
+    stemDry: 0x9cc7a8,
+    puddle: 0x7cc6f0,
+    letter: 0xfff7e8,
+    letterInk: 0xe86a5e,
+    bowl: 0x7cc6f0,
+    bowlRim: 0x4fa7dc,
+    kibble: 0xc79a63,
+    ink: 0x2e2a3d,
+    visor: 0xffffff,
+    cap: 0x3e63c8,
+    sun: 0xffd166,
+    sunCrown: 0x7a4b1f,
+    crown: 0xffd166,
+    can: 0x4fa7dc,
+    bulb: 0xffd166
+  };
+
+  /** How tall each tile box is: water lowest, path, grass, bed. Tree, rock and house sit on a grass-height tile. */
+  var TILE_HEIGHT = { water: 0.14, path: 0.3, grass: 0.4, bed: 0.46, tree: 0.4, rock: 0.4, house: 0.4 };
+  var TILE_COLOUR = { water: PALETTE.water, path: PALETTE.path, grass: PALETTE.grass, bed: PALETTE.bed, tree: PALETTE.grass, rock: PALETTE.grass, house: PALETTE.grass };
+
+  function tileHeight(kind) {
+    return TILE_HEIGHT[kind] === undefined ? TILE_HEIGHT.grass : TILE_HEIGHT[kind];
+  }
+
+  /** Tile (x, y) → world (x, z): the map is centred on the origin, row 0 far (−z), the last row near (+z). */
+  function tileCentre(world, x, y) {
+    return { x: x - world.w / 2 + 0.5, z: y - world.h / 2 + 0.5 };
+  }
+
+  function kindAt(world, x, y) {
+    if (x < 0 || y < 0 || x >= world.w || y >= world.h) return null;
+    var c = world.cells[y * world.w + x];
+    return c ? c.kind : null;
+  }
+
+  function hexToInt(colour, fallback) {
+    if (typeof colour !== 'string') return fallback;
+    var m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(colour.trim());
+    if (!m) return fallback;
+    var s = m[1];
+    if (s.length === 3) s = s.charAt(0) + s.charAt(0) + s.charAt(1) + s.charAt(1) + s.charAt(2) + s.charAt(2);
+    return parseInt(s, 16);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // The scene — buildScene(world, THREE): every mesh of a world, from primitives
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * A small material cache per THREE (a stub in the gate, the real one in the page): one Lambert per colour, flat
+   * shaded. Every mesh of one colour shares it, which is what keeps the draw count small.
+   */
+  function materials(THREE) {
+    var cache = {};
+    return function (colour, extra) {
+      var key = colour + (extra ? JSON.stringify(extra) : '');
+      if (!cache[key]) {
+        var opts = { color: colour, flatShading: true };
+        if (extra) for (var k in extra) opts[k] = extra[k];
+        cache[key] = new THREE.MeshLambertMaterial(opts);
+      }
+      return cache[key];
+    };
+  }
+
+  function mesh(THREE, geo, mat, x, y, z) {
+    var m = new THREE.Mesh(geo, mat);
+    m.position.set(x || 0, y || 0, z || 0);
+    return m;
+  }
+
+  /**
+   * Instanced boxes for the tiles, one InstancedMesh per kind, alternate grass a shade lighter (the 2D kit’s
+   * nth-child(odd)). Returns the meshes and, per tile, the top height the picker and the robots stand on.
+   */
+  function buildTiles(world, THREE, mat, out) {
+    var byKind = {};
+    world.cells.forEach(function (c) {
+      (byKind[c.kind] = byKind[c.kind] || []).push(c);
+    });
+    var dummy = new THREE.Object3D();
+    var meshes = [];
+    for (var kind in byKind) {
+      var cells = byKind[kind];
+      var height = tileHeight(kind);
+      var geo = new THREE.BoxGeometry(1, height, 1);
+      var im = new THREE.InstancedMesh(geo, mat(TILE_COLOUR[kind]), cells.length);
+      im.name = 'tiles-' + kind;
+      for (var i = 0; i < cells.length; i++) {
+        var c = cells[i];
+        var p = tileCentre(world, c.x, c.y);
+        dummy.position.set(p.x, height / 2, p.z);
+        dummy.rotation.set(0, 0, 0);
+        dummy.scale.set(1, 1, 1);
+        dummy.updateMatrix();
+        im.setMatrixAt(i, dummy.matrix);
+        if (kind === 'grass' || kind === 'tree' || kind === 'rock' || kind === 'house') {
+          im.setColorAt(i, new THREE.Color((c.x + c.y) % 2 ? PALETTE.grassAlt : PALETTE.grass));
+        }
+      }
+      im.instanceMatrix.needsUpdate = true;
+      if (im.instanceColor) im.instanceColor.needsUpdate = true;
+      meshes.push(im);
+      out.meshCount++;
+    }
+    return meshes;
+  }
+
+  /** The decorations a tile KIND carries (tree, rock, house), instanced per part so a forest is a handful of draws. */
+  function buildTileDecor(world, THREE, mat, out) {
+    var trees = [];
+    var rocks = [];
+    var houses = [];
+    world.cells.forEach(function (c) {
+      if (c.kind === 'tree') trees.push(c);
+      else if (c.kind === 'rock') rocks.push(c);
+      else if (c.kind === 'house') houses.push(c);
+    });
+    var dummy = new THREE.Object3D();
+    var meshes = [];
+    var instanced = function (geo, colour, cells, place) {
+      if (!cells.length) return;
+      var im = new THREE.InstancedMesh(geo, mat(colour), cells.length);
+      for (var i = 0; i < cells.length; i++) {
+        var p = tileCentre(world, cells[i].x, cells[i].y);
+        place(dummy, p, cells[i], i);
+        dummy.updateMatrix();
+        im.setMatrixAt(i, dummy.matrix);
+      }
+      im.instanceMatrix.needsUpdate = true;
+      meshes.push(im);
+      out.meshCount++;
+    };
+    var top = tileHeight('grass');
+    // A tree: a cylinder trunk under two cones, the upper one lighter (the 2D sprite’s two greens).
+    instanced(new THREE.CylinderGeometry(0.07, 0.09, 0.32, 6), PALETTE.trunk, trees, function (d, p) {
+      d.position.set(p.x, top + 0.16, p.z);
+      d.rotation.set(0, 0, 0);
+      d.scale.set(1, 1, 1);
+    });
+    instanced(new THREE.ConeGeometry(0.34, 0.5, 7), PALETTE.canopy, trees, function (d, p, c) {
+      d.position.set(p.x, top + 0.5, p.z);
+      d.rotation.set(0, ((c.x * 7 + c.y * 3) % 5) * 0.25, 0);
+      d.scale.set(1, 1, 1);
+    });
+    instanced(new THREE.ConeGeometry(0.24, 0.42, 7), PALETTE.canopyLight, trees, function (d, p, c) {
+      d.position.set(p.x, top + 0.82, p.z);
+      d.rotation.set(0, ((c.x * 3 + c.y * 5) % 5) * 0.25, 0);
+      d.scale.set(1, 1, 1);
+    });
+    // A rock: a flat icosahedron, a touch of random yaw and squash per tile so no two are the same.
+    instanced(new THREE.IcosahedronGeometry(0.3, 0), PALETTE.rock, rocks, function (d, p, c) {
+      d.position.set(p.x, top + 0.16, p.z);
+      d.rotation.set(0, ((c.x * 5 + c.y * 11) % 7) * 0.4, 0);
+      d.scale.set(1.1, 0.7, 1);
+    });
+    // A house: a box under a triangular prism (a 3-sided cylinder on its side), a door in front, two windows.
+    instanced(new THREE.BoxGeometry(0.72, 0.5, 0.62), PALETTE.wall, houses, function (d, p) {
+      d.position.set(p.x, top + 0.25, p.z);
+      d.rotation.set(0, 0, 0);
+      d.scale.set(1, 1, 1);
+    });
+    instanced(new THREE.CylinderGeometry(0.46, 0.46, 0.84, 3), PALETTE.roof, houses, function (d, p) {
+      d.position.set(p.x, top + 0.66, p.z);
+      d.rotation.set(0, 0, Math.PI / 2);
+      d.scale.set(0.9, 1, 1);
+    });
+    instanced(new THREE.BoxGeometry(0.16, 0.24, 0.04), PALETTE.door, houses, function (d, p) {
+      d.position.set(p.x, top + 0.12, p.z + 0.32);
+      d.rotation.set(0, 0, 0);
+      d.scale.set(1, 1, 1);
+    });
+    instanced(new THREE.BoxGeometry(0.12, 0.12, 0.04), PALETTE.window, houses, function (d, p, c, i) {
+      d.position.set(p.x + (i % 2 ? 0.22 : -0.22), top + 0.32, p.z + 0.32);
+      d.rotation.set(0, 0, 0);
+      d.scale.set(1, 1, 1);
+    });
+    return meshes;
+  }
+
+  /**
+   * The things a page places on tiles, one builder per kind. Each returns a Group at the tile’s centre, at the tile’s
+   * top, with `userData.kind`; a builder that needs a per-frame update sets `userData.animate(t, now)`.
+   *
+   * Hooks (IG-002 / IG-005): `rock` (three sizes by `left`), `stone`, `postbox`, `sign`, `note` are one entry each
+   * here; the 2D kit draws them in `SPRITES`. Add the entry, nothing else changes.
+   */
+  var THING_BUILDERS = {
+    tulip: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      var wet = !!(t.watered === true || t.state === 'watered' || t.state === 'wet');
+      var stem = mesh(THREE, new THREE.CylinderGeometry(0.025, 0.03, 0.34, 5), mat(wet ? PALETTE.stem : PALETTE.stemDry), 0, 0.17, 0);
+      var head = mesh(THREE, new THREE.ConeGeometry(0.12, 0.2, 6), mat(wet ? PALETTE.tulip : PALETTE.tulipDry), 0, 0.42, 0);
+      var leaf = mesh(THREE, new THREE.BoxGeometry(0.16, 0.03, 0.06), mat(wet ? PALETTE.stem : PALETTE.stemDry), 0.06, 0.16, 0);
+      leaf.rotation.z = 0.6;
+      g.add(stem, head, leaf);
+      out.meshCount += 3;
+      // Dry: tilted 18° and lower, the 2D kit’s .gd-dry. Wet: upright.
+      g.rotation.z = wet ? 0 : 0.31;
+      g.position.y = wet ? 0 : -0.04;
+      g.userData.wet = wet;
+      return g;
+    },
+    puddle: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      var disc = mesh(THREE, new THREE.CylinderGeometry(0.3, 0.3, 0.02, 12), mat(PALETTE.puddle, { transparent: true, opacity: 0.75 }), 0, 0.01, 0.12);
+      g.add(disc);
+      out.meshCount += 1;
+      return g;
+    },
+    letter: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      var paper = mesh(THREE, new THREE.BoxGeometry(0.5, 0.04, 0.34), mat(PALETTE.letter), 0, 0.02, 0);
+      var flap = mesh(THREE, new THREE.BoxGeometry(0.34, 0.02, 0.16), mat(PALETTE.letterInk), 0, 0.05, -0.04);
+      flap.rotation.y = 0.78;
+      g.add(paper, flap);
+      out.meshCount += 2;
+      return g;
+    },
+    bowl: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      var bowl = mesh(THREE, new THREE.CylinderGeometry(0.3, 0.2, 0.18, 10), mat(PALETTE.bowl), 0, 0.09, 0);
+      var rim = mesh(THREE, new THREE.CylinderGeometry(0.31, 0.31, 0.04, 10), mat(PALETTE.bowlRim), 0, 0.18, 0);
+      g.add(bowl, rim);
+      out.meshCount += 2;
+      if (t.full) {
+        g.add(mesh(THREE, new THREE.CylinderGeometry(0.2, 0.2, 0.06, 8), mat(PALETTE.kibble), 0, 0.22, 0));
+        out.meshCount += 1;
+      }
+      return g;
+    },
+    label: function (THREE) {
+      // A label is text: it is a DOM overlay (see the engine), not a mesh. An empty group holds its place.
+      return new THREE.Group();
+    }
+  };
+
+  /**
+   * A robot: a box body in its colour, a white visor on the front (−z at yaw 0), two eyes, a mouth, two arms, an
+   * antenna with a bulb, the can on its right, and a hat. Yaw 0 faces d = 0 (up, −z); d turns clockwise seen from
+   * above, so rotation.y = −d·π/2.
+   *
+   * Hooks (IG-002 / IG-005): `accessory` (can | hod | satchel | bell) chooses what hangs on the right; `can` 0..canMax
+   * changes the can’s fill; `load` (stone | letter) sits on the back. Today only the 2D kit’s colour, eyes and hat are
+   * read, and the can is always drawn.
+   */
+  function buildRobot(THREE, mat, r, out) {
+    var g = new THREE.Group();
+    var body = hexToInt(r.colour, PALETTE.ink);
+    var bodyMat = mat(body);
+    var ink = mat(PALETTE.ink);
+    g.add(mesh(THREE, new THREE.BoxGeometry(0.5, 0.56, 0.44), bodyMat, 0, 0.36, 0));
+    var visor = mesh(THREE, new THREE.BoxGeometry(0.36, 0.28, 0.06), mat(PALETTE.visor), 0, 0.46, -0.22);
+    visor.name = 'visor';
+    g.add(visor);
+    if (r.eyes === 'wink') {
+      g.add(mesh(THREE, new THREE.BoxGeometry(0.07, 0.07, 0.03), ink, -0.09, 0.48, -0.26));
+      g.add(mesh(THREE, new THREE.BoxGeometry(0.1, 0.025, 0.03), ink, 0.09, 0.48, -0.26));
+    } else if (r.eyes === 'happy') {
+      g.add(mesh(THREE, new THREE.BoxGeometry(0.1, 0.03, 0.03), ink, -0.09, 0.5, -0.26));
+      g.add(mesh(THREE, new THREE.BoxGeometry(0.1, 0.03, 0.03), ink, 0.09, 0.5, -0.26));
+    } else {
+      g.add(mesh(THREE, new THREE.BoxGeometry(0.07, 0.07, 0.03), ink, -0.09, 0.48, -0.26));
+      g.add(mesh(THREE, new THREE.BoxGeometry(0.07, 0.07, 0.03), ink, 0.09, 0.48, -0.26));
+    }
+    g.add(mesh(THREE, new THREE.BoxGeometry(0.14, 0.03, 0.03), ink, 0, 0.36, -0.26));
+    g.add(mesh(THREE, new THREE.BoxGeometry(0.08, 0.22, 0.1), bodyMat, -0.3, 0.34, 0));
+    g.add(mesh(THREE, new THREE.BoxGeometry(0.08, 0.22, 0.1), bodyMat, 0.3, 0.34, 0));
+    g.add(mesh(THREE, new THREE.CylinderGeometry(0.015, 0.015, 0.14, 4), ink, 0, 0.71, 0));
+    g.add(mesh(THREE, new THREE.SphereGeometry(0.045, 6, 4), mat(PALETTE.bulb), 0, 0.8, 0));
+    var can = mesh(THREE, new THREE.BoxGeometry(0.1, 0.16, 0.12), mat(PALETTE.can), 0.3, 0.2, 0.06);
+    can.name = 'can';
+    g.add(can);
+    out.meshCount += 11;
+    if (r.hat === 'cap') {
+      g.add(mesh(THREE, new THREE.BoxGeometry(0.5, 0.08, 0.44), mat(PALETTE.cap), 0, 0.68, 0));
+      g.add(mesh(THREE, new THREE.BoxGeometry(0.5, 0.04, 0.2), mat(PALETTE.cap), 0, 0.66, -0.3));
+      out.meshCount += 2;
+    } else if (r.hat === 'sun') {
+      g.add(mesh(THREE, new THREE.CylinderGeometry(0.42, 0.42, 0.04, 8), mat(PALETTE.sun), 0, 0.66, 0));
+      g.add(mesh(THREE, new THREE.CylinderGeometry(0.2, 0.2, 0.12, 8), mat(PALETTE.sunCrown), 0, 0.72, 0));
+      out.meshCount += 2;
+    } else if (r.hat === 'crown') {
+      g.add(mesh(THREE, new THREE.CylinderGeometry(0.2, 0.18, 0.14, 5), mat(PALETTE.crown), 0, 0.71, 0));
+      out.meshCount += 1;
+    }
+    g.userData.head = { x: 0, y: 0.86, z: 0 };
+    g.name = 'robot';
+    return g;
+  }
+
+  /**
+   * Every mesh of a world, pure in THREE: `{ root, tiles, decor, things, robots, lights, meshCount }`. Instanced
+   * tiles and instanced decorations count as one mesh each. The engine adds `root` to its scene; the gate counts.
+   */
+  function buildScene(world, THREE) {
+    var out = { meshCount: 0 };
+    var mat = materials(THREE);
+    var root = new THREE.Group();
+    root.name = 'garden';
+    var tiles = buildTiles(world.map, THREE, mat, out);
+    var decor = buildTileDecor(world.map, THREE, mat, out);
+    tiles.forEach(function (m) {
+      root.add(m);
+    });
+    decor.forEach(function (m) {
+      root.add(m);
+    });
+    // A tulip bed draws a dry tulip until a Thing waters it: the bed cells with no tulip Thing get one.
+    var thingsAt = {};
+    world.things.forEach(function (t) {
+      (thingsAt[Number(t.x) + ',' + Number(t.y)] = thingsAt[Number(t.x) + ',' + Number(t.y)] || []).push(t);
+    });
+    var things = [];
+    var placeThing = function (t) {
+      var build = THING_BUILDERS[t.kind];
+      if (!build) return;
+      var x = Number(t.x);
+      var y = Number(t.y);
+      var g = build(THREE, mat, t, out);
+      var p = tileCentre(world.map, x, y);
+      var k = kindAt(world.map, x, y);
+      g.position.set(p.x, (g.position.y || 0) + tileHeight(k || 'grass'), p.z);
+      g.userData.kind = t.kind;
+      g.userData.x = x;
+      g.userData.y = y;
+      g.userData.text = t.text;
+      g.userData.key = t.kind + ':' + x + ',' + y;
+      root.add(g);
+      things.push(g);
+    };
+    world.map.cells.forEach(function (c) {
+      var here = thingsAt[c.x + ',' + c.y] || [];
+      var hasTulip = here.some(function (t) {
+        return t.kind === 'tulip';
+      });
+      if (c.kind === 'bed' && !hasTulip) placeThing({ kind: 'tulip', x: c.x, y: c.y, watered: false });
+      here.forEach(placeThing);
+    });
+    // Robots, two on one tile drawn smaller and apart (the 2D kit’s robotPlaces: −90%/−10% offsets, scale .78).
+    var byTile = {};
+    world.robots.forEach(function (r, i) {
+      (byTile[r.x + ',' + r.y] = byTile[r.x + ',' + r.y] || []).push(i);
+    });
+    var robots = world.robots.map(function (r, i) {
+      var g = buildRobot(THREE, mat, r, out);
+      var mates = byTile[r.x + ',' + r.y];
+      var share = mates.length > 1 ? mates.indexOf(i) : -1;
+      var offset = share === -1 ? [0, 0] : share === 0 ? [-0.22, -0.22] : share === 1 ? [0.22, 0.22] : [0, 0];
+      var p = tileCentre(world.map, r.x, r.y);
+      var k = kindAt(world.map, r.x, r.y);
+      g.position.set(p.x + offset[0], tileHeight(k || 'grass'), p.z + offset[1]);
+      g.rotation.y = (-r.d * Math.PI) / 2;
+      if (share !== -1) g.scale.set(0.78, 0.78, 0.78);
+      g.userData.index = i;
+      g.userData.share = share;
+      g.userData.offset = offset;
+      root.add(g);
+      return g;
+    });
+    var sun = new THREE.DirectionalLight(0xffffff, 2.2);
+    sun.position.set(5, 10, 6);
+    var sky = new THREE.HemisphereLight(0xffffff, 0x9ccfae, 1.4);
+    root.add(sun, sky);
+    return { root: root, tiles: tiles, decor: decor, things: things, robots: robots, lights: [sun, sky], meshCount: out.meshCount };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // The camera — pose, projection, picking and bounds, hand-rolled so the gate can grade them without THREE
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /** Tilt from straight down; 35° shows the sides of things and keeps a tile a tile for a tap. Vertical field of view. */
+  var CAMERA = { tiltDeg: 35, fovDeg: 40, near: 0.1, far: 200, minTiles: 3, margin: 0.92, objectHeight: 1.3 };
+
+  /** A camera state is a target on the ground and a distance: `{ tx, tz, dist }`. Position and basis follow. */
+  function pose(state) {
+    var tilt = (CAMERA.tiltDeg * Math.PI) / 180;
+    var s = Math.sin(tilt);
+    var c = Math.cos(tilt);
+    var position = [state.tx, state.dist * c, state.tz + state.dist * s];
+    // forward = target − position, normalised; right = (1,0,0); up = right × forward.
+    var forward = [0, -c, -s];
+    var right = [1, 0, 0];
+    var up = [0, s, -c];
+    return { position: position, target: [state.tx, 0, state.tz], forward: forward, right: right, up: up };
+  }
+
+  function tanHalf() {
+    return Math.tan((CAMERA.fovDeg * Math.PI) / 360);
+  }
+
+  /** A world point → normalised device coordinates `{ x, y, depth }` (x, y in −1..1 on screen; depth > 0 in front). */
+  function project(state, aspect, point) {
+    var p = pose(state);
+    var d = [point[0] - p.position[0], point[1] - p.position[1], point[2] - p.position[2]];
+    var xc = d[0] * p.right[0] + d[1] * p.right[1] + d[2] * p.right[2];
+    var yc = d[0] * p.up[0] + d[1] * p.up[1] + d[2] * p.up[2];
+    var zc = d[0] * p.forward[0] + d[1] * p.forward[1] + d[2] * p.forward[2];
+    var t = tanHalf();
+    if (zc <= 0) return { x: 0, y: 0, depth: zc };
+    return { x: xc / (zc * t * aspect), y: yc / (zc * t), depth: zc };
+  }
+
+  /** NDC (x, y in −1..1) → a ray `{ origin, dir }` from the camera. */
+  function rayFromNdc(state, aspect, nx, ny) {
+    var p = pose(state);
+    var t = tanHalf();
+    var dir = [
+      p.forward[0] + p.right[0] * nx * t * aspect + p.up[0] * ny * t,
+      p.forward[1] + p.right[1] * nx * t * aspect + p.up[1] * ny * t,
+      p.forward[2] + p.right[2] * nx * t * aspect + p.up[2] * ny * t
+    ];
+    var len = Math.sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]) || 1;
+    return { origin: p.position.slice(), dir: [dir[0] / len, dir[1] / len, dir[2] / len] };
+  }
+
+  /**
+   * The tile a ray lands on, or null. Each distinct tile top is a plane; the highest plane is hit first along a ray
+   * that goes down, so the planes are tried tallest first and the first whose tile really is that tall wins.
+   */
+  function pickTile(ray, map) {
+    if (!map || !map.w || !map.h || ray.dir[1] >= 0) return null;
+    var heights = [];
+    map.cells.forEach(function (c) {
+      var hh = tileHeight(c.kind);
+      if (heights.indexOf(hh) === -1) heights.push(hh);
+    });
+    heights.sort(function (a, b) {
+      return b - a;
+    });
+    for (var i = 0; i < heights.length; i++) {
+      var t = (heights[i] - ray.origin[1]) / ray.dir[1];
+      if (t < 0) continue;
+      var px = ray.origin[0] + ray.dir[0] * t;
+      var pz = ray.origin[2] + ray.dir[2] * t;
+      var x = Math.floor(px + map.w / 2);
+      var y = Math.floor(pz + map.h / 2);
+      var kind = kindAt(map, x, y);
+      if (kind && tileHeight(kind) === heights[i]) return { x: x, y: y };
+    }
+    return null;
+  }
+
+  /** A rectangle of tiles `{ x, y, w, h }` clamped into the map; the whole map when it is empty or junk. */
+  function focusRect(map, focus) {
+    var f = readJson(focus, null);
+    var whole = { x: 0, y: 0, w: map.w, h: map.h };
+    if (!f || typeof f !== 'object') return whole;
+    var x = Number(f.x);
+    var y = Number(f.y);
+    var w = Number(f.w);
+    var hh = Number(f.h);
+    if (!isFinite(x) || !isFinite(y) || !isFinite(w) || !isFinite(hh) || w <= 0 || hh <= 0) return whole;
+    x = Math.max(0, Math.min(map.w, x));
+    y = Math.max(0, Math.min(map.h, y));
+    w = Math.max(1, Math.min(map.w - x, w));
+    hh = Math.max(1, Math.min(map.h - y, hh));
+    return { x: x, y: y, w: w, h: hh };
+  }
+
+  /**
+   * The camera state that frames a rectangle of tiles: the target at its centre, the distance the smallest at which
+   * its eight corners (ground and object height) sit inside the view with a margin. Bisection: the projection is not
+   * linear in the distance and thirty halvings are cheaper than being clever.
+   */
+  function frameRect(map, rect, aspect) {
+    var cx = rect.x + rect.w / 2 - map.w / 2;
+    var cz = rect.y + rect.h / 2 - map.h / 2;
+    var corners = [];
+    [0, CAMERA.objectHeight].forEach(function (y) {
+      corners.push([cx - rect.w / 2, y, cz - rect.h / 2], [cx + rect.w / 2, y, cz - rect.h / 2], [cx - rect.w / 2, y, cz + rect.h / 2], [cx + rect.w / 2, y, cz + rect.h / 2]);
+    });
+    var fits = function (dist) {
+      var st = { tx: cx, tz: cz, dist: dist };
+      for (var i = 0; i < corners.length; i++) {
+        var n = project(st, aspect, corners[i]);
+        if (n.depth <= 0 || Math.abs(n.x) > CAMERA.margin || Math.abs(n.y) > CAMERA.margin) return false;
+      }
+      return true;
+    };
+    var lo = 0.5;
+    var hi = 400;
+    for (var i = 0; i < 40; i++) {
+      var mid = (lo + hi) / 2;
+      if (fits(mid)) hi = mid;
+      else lo = mid;
+    }
+    return { tx: cx, tz: cz, dist: hi };
+  }
+
+  /** The zoom range of a map: from a `minTiles` square to the whole map and a quarter beyond. */
+  function zoomBounds(map, aspect) {
+    var small = Math.min(CAMERA.minTiles, Math.max(1, Math.min(map.w, map.h)));
+    var minDist = frameRect(map, { x: 0, y: 0, w: small, h: small }, aspect).dist;
+    var maxDist = frameRect(map, { x: 0, y: 0, w: Math.max(1, map.w), h: Math.max(1, map.h) }, aspect).dist * 1.25;
+    return { minDist: minDist, maxDist: Math.max(maxDist, minDist) };
+  }
+
+  /** The state, held inside the map: the target never leaves the map and the distance never leaves the zoom range. */
+  function clampCamera(state, map, aspect) {
+    var z = zoomBounds(map, aspect);
+    var dist = Math.max(z.minDist, Math.min(z.maxDist, isFinite(state.dist) ? state.dist : z.maxDist));
+    var hw = Math.max(0.5, map.w / 2);
+    var hh = Math.max(0.5, map.h / 2);
+    return { tx: Math.max(-hw, Math.min(hw, isFinite(state.tx) ? state.tx : 0)), tz: Math.max(-hh, Math.min(hh, isFinite(state.tz) ? state.tz : 0)), dist: dist };
+  }
+
+  /** Screen pixels per world unit on the ground at the target, for a pan that keeps the ground under the finger. */
+  function pixelsPerUnit(state, heightPx) {
+    return heightPx / (2 * state.dist * tanHalf());
+  }
+
+  var CAMERA_API = { CAMERA: CAMERA, pose: pose, project: project, rayFromNdc: rayFromNdc, pickTile: pickTile, focusRect: focusRect, frameRect: frameRect, zoomBounds: zoomBounds, clampCamera: clampCamera, pixelsPerUnit: pixelsPerUnit, tileCentre: tileCentre, tileHeight: tileHeight, kindAt: kindAt };
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // The engine — the browser half. Supported is decided here; a page with no THREE or no WebGL2 gets a quiet no.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  var TAP_SLOP_PX = 8;
+  var FRAME_WINDOW = 60;
+  var FRAME_REPORT_MS = 500;
+  var TURN_MS = 300;
+  var BUMP_MS = 350;
+  var HOP_MS = 1400;
+  var TULIP_MS = 500;
+  var POP_MS = 300;
+  var CAMERA_MS = 400;
+
+  function easeOut(t) {
+    return 1 - (1 - t) * (1 - t);
+  }
+
+  function shortestYaw(from, to) {
+    var d = to - from;
+    while (d > Math.PI) d -= 2 * Math.PI;
+    while (d < -Math.PI) d += 2 * Math.PI;
+    return d;
+  }
+
+  function p95(list) {
+    if (!list.length) return 0;
+    var sorted = list.slice().sort(function (a, b) {
+      return a - b;
+    });
+    return sorted[Math.min(sorted.length - 1, Math.floor(0.95 * sorted.length))];
+  }
+
+  /**
+   * Decide `Supported` and, when it is true, own the renderer, the scene, the loop, the input and the overlay.
+   *
+   * @param {object} o
+   * @param {any} o.THREE  the global, or undefined
+   * @param {any} o.root   the node’s element (attributes a drive reads are written on it)
+   * @param {any} o.canvas the canvas to draw on (may be null when unsupported)
+   * @param {any} o.overlay the DOM layer for names, labels and the bubble
+   * @param {Function} [o.onTap]      (x, y)
+   * @param {Function} [o.onFrameMs]  (ms)
+   * @param {Function} [o.onReady]    ()
+   * @param {Function} [o.now]        a clock, for the gate
+   * @param {Function} [o.raf]        requestAnimationFrame, for the gate
+   * @param {Function} [o.caf]        cancelAnimationFrame
+   * @param {any} [o.doc]             document, for visibility
+   * @param {Function} [o.getContext] (canvas) → a WebGL2 context or null (defaults to canvas.getContext('webgl2'))
+   * @param {boolean} [o.reducedMotion]
+   */
+  function createEngine(o) {
+    var THREE = o.THREE;
+    var eng = {
+      supported: false,
+      reason: '',
+      world: null,
+      built: null,
+      meshCount: 0,
+      state: { tx: 0, tz: 0, dist: 10 },
+      cameraMode: 'plot',
+      focus: null,
+      aspect: 4 / 3,
+      ready: false,
+      frames: [],
+      frameMs: 0,
+      drawCalls: 0,
+      destroy: function () {}
+    };
+    var setAttr = function (name, value) {
+      if (o.root && typeof o.root.setAttribute === 'function') o.root.setAttribute(name, String(value));
+    };
+
+    // ── Supported: three.js on the page, a canvas, a WebGL2 context, and a renderer that constructs ──
+    var gl = null;
+    var renderer = null;
+    try {
+      if (!THREE || typeof THREE.WebGLRenderer !== 'function') eng.reason = 'no THREE';
+      else if (!o.canvas) eng.reason = 'no canvas';
+      else {
+        gl = o.getContext ? o.getContext(o.canvas) : typeof o.canvas.getContext === 'function' ? o.canvas.getContext('webgl2', { antialias: true, alpha: false, powerPreference: 'low-power' }) : null;
+        if (!gl) eng.reason = 'no WebGL2';
+        else {
+          renderer = new THREE.WebGLRenderer({ canvas: o.canvas, context: gl, antialias: true, alpha: false });
+          eng.supported = true;
+        }
+      }
+    } catch (e) {
+      eng.reason = 'renderer threw: ' + (e && e.message ? e.message : String(e));
+      eng.supported = false;
+      renderer = null;
+    }
+    setAttr('data-supported', eng.supported ? 'true' : 'false');
+    if (!eng.supported) {
+      setAttr('data-unsupported-reason', eng.reason);
+      return eng;
+    }
+
+    // ── The scene, the camera, the loop ──
+    var scene = new THREE.Scene();
+    scene.background = new THREE.Color(PALETTE.background);
+    var camera = new THREE.PerspectiveCamera(CAMERA.fovDeg, eng.aspect, CAMERA.near, CAMERA.far);
+    var now = o.now || function () {
+      return typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now();
+    };
+    var raf = o.raf || (typeof requestAnimationFrame === 'function' ? requestAnimationFrame : null);
+    var caf = o.caf || (typeof cancelAnimationFrame === 'function' ? cancelAnimationFrame : function () {});
+    var doc = o.doc || (typeof document !== 'undefined' ? document : null);
+    var reduced = !!o.reducedMotion;
+    var rafId = 0;
+    var lastFrame = 0;
+    var lastReport = 0;
+    var destroyed = false;
+    var width = 1;
+    var height = 1;
+    var anims = { robots: [], camera: null, hop: 0, tulips: {}, pops: {} };
+    var overlayEls = { names: [], labels: [], bubble: null };
+    var stepMs = 380;
+    var bubble = null;
+    var bubbleUntil = 0;
+    var listeners = [];
+
+    var visible = function () {
+      return !doc || doc.visibilityState === undefined || doc.visibilityState === 'visible';
+    };
+
+    var resize = function () {
+      var w = o.root && o.root.clientWidth ? o.root.clientWidth : o.canvas.clientWidth || o.canvas.width || 640;
+      var hh = o.root && o.root.clientHeight ? o.root.clientHeight : o.canvas.clientHeight || o.canvas.height || 480;
+      if (w < 1) w = 1;
+      if (hh < 1) hh = 1;
+      width = w;
+      height = hh;
+      eng.aspect = w / hh;
+      var dpr = typeof devicePixelRatio === 'number' ? Math.min(2, devicePixelRatio) : 1;
+      renderer.setPixelRatio(dpr);
+      renderer.setSize(w, hh, false);
+      camera.aspect = eng.aspect;
+      camera.updateProjectionMatrix();
+      if (eng.world) eng.state = clampCamera(eng.state, eng.world.map, eng.aspect);
+    };
+
+    var applyCamera = function () {
+      var p = pose(eng.state);
+      camera.position.set(p.position[0], p.position[1], p.position[2]);
+      camera.lookAt(p.target[0], p.target[1], p.target[2]);
+    };
+
+    /** The state the Camera and Focus ports ask for, from the current world. */
+    var goalState = function () {
+      var map = eng.world.map;
+      if (eng.cameraMode === 'island') return frameRect(map, { x: 0, y: 0, w: Math.max(1, map.w), h: Math.max(1, map.h) }, eng.aspect);
+      if (eng.cameraMode === 'follow' && eng.built && eng.built.robots.length) {
+        var r = eng.built.robots[0];
+        return { tx: r.position.x, tz: r.position.z, dist: eng.state.dist };
+      }
+      return frameRect(map, focusRect(map, eng.focus), eng.aspect);
+    };
+
+    var glideCamera = function (to, ms) {
+      to = clampCamera(to, eng.world.map, eng.aspect);
+      if (reduced || !ms) {
+        eng.state = to;
+        anims.camera = null;
+        return;
+      }
+      anims.camera = { from: { tx: eng.state.tx, tz: eng.state.tz, dist: eng.state.dist }, to: to, start: now(), ms: ms };
+    };
+
+    // ── The overlay: a pill per robot name, a pill per label, one bubble; positioned from projected points ──
+    var el = function (className, attrs) {
+      if (!doc || typeof doc.createElement !== 'function') return null;
+      var e = doc.createElement('div');
+      e.className = className;
+      for (var k in attrs) e.setAttribute(k, String(attrs[k]));
+      return e;
+    };
+    var screenOf = function (point) {
+      var n = project(eng.state, eng.aspect, point);
+      return { sx: ((n.x + 1) / 2) * width, sy: ((1 - n.y) / 2) * height, depth: n.depth };
+    };
+    var place = function (e, sx, sy) {
+      e.style.left = sx.toFixed(1) + 'px';
+      e.style.top = sy.toFixed(1) + 'px';
+    };
+    var rebuildOverlay = function () {
+      if (!o.overlay) return;
+      while (o.overlay.firstChild) o.overlay.removeChild(o.overlay.firstChild);
+      overlayEls = { names: [], labels: [], bubble: null };
+      eng.built.robots.forEach(function (g, i) {
+        var r = eng.world.robots[i];
+        var e = el('gd3-name', { 'data-robot': i, 'data-x': r.x, 'data-y': r.y, 'data-d': r.d });
+        if (!e) return;
+        if (g.userData.share !== -1) e.setAttribute('data-share', String(g.userData.share));
+        e.textContent = r.name || '';
+        if (!r.name) e.style.visibility = 'hidden';
+        o.overlay.appendChild(e);
+        overlayEls.names.push(e);
+      });
+      eng.built.things.forEach(function (g) {
+        if (g.userData.kind !== 'label') return;
+        var e = el('gd3-label', { 'data-label': g.userData.x + ',' + g.userData.y });
+        if (!e) return;
+        e.textContent = String(g.userData.text || '');
+        o.overlay.appendChild(e);
+        overlayEls.labels.push({ el: e, g: g });
+      });
+      if (bubble) {
+        var b = el('gd3-bubble' + (bubble.style === 'olive' ? ' gd3-olive' : ''), { 'data-bubble': bubble.robot });
+        if (b) {
+          if (bubble.style === 'olive') {
+            var small = doc.createElement('small');
+            small.textContent = 'Olive';
+            b.appendChild(small);
+          }
+          b.appendChild(doc.createTextNode(String(bubble.text)));
+          o.overlay.appendChild(b);
+          overlayEls.bubble = b;
+        }
+      }
+    };
+    var positionOverlay = function () {
+      overlayEls.names.forEach(function (e, i) {
+        var g = eng.built.robots[i];
+        if (!g) return;
+        var s = screenOf([g.position.x, g.position.y + 0.02, g.position.z + 0.3]);
+        place(e, s.sx, s.sy + 6);
+        e.setAttribute('data-sx', s.sx.toFixed(1));
+        e.setAttribute('data-sy', s.sy.toFixed(1));
+      });
+      overlayEls.labels.forEach(function (l) {
+        var s = screenOf([l.g.position.x, l.g.position.y, l.g.position.z + 0.4]);
+        place(l.el, s.sx, s.sy);
+      });
+      if (overlayEls.bubble) {
+        var g = eng.built.robots[bubble.robot];
+        if (g) {
+          var head = g.userData.head;
+          var s = screenOf([g.position.x + head.x, g.position.y + head.y * g.scale.y, g.position.z + head.z]);
+          place(overlayEls.bubble, s.sx, s.sy - 8);
+        }
+      }
+    };
+
+    // ── The world: rebuild the scene when the map changes; move robots and things when they change ──
+    var disposeGroup = function (g) {
+      if (!g) return;
+      if (typeof g.traverse === 'function') {
+        g.traverse(function (obj) {
+          if (obj.geometry && obj.geometry.dispose) obj.geometry.dispose();
+        });
+      }
+    };
+    var setWorld = function (world) {
+      var first = !eng.world;
+      var mapChanged = first || !eng.world || JSON.stringify(eng.world.map.rows) !== JSON.stringify(world.map.rows) || JSON.stringify(eng.world.map.legend) !== JSON.stringify(world.map.legend);
+      var thingsChanged = first || JSON.stringify(eng.world.things) !== JSON.stringify(world.things);
+      var previous = eng.world;
+      eng.world = world;
+      if (mapChanged || thingsChanged) {
+        var oldBuilt = eng.built;
+        eng.built = buildScene(world, THREE);
+        eng.meshCount = eng.built.meshCount;
+        if (oldBuilt) {
+          scene.remove(oldBuilt.root);
+          disposeGroup(oldBuilt.root);
+        }
+        scene.add(eng.built.root);
+        // Robots keep their glide: the new groups start where the old ones were.
+        anims.robots = eng.built.robots.map(function (g, i) {
+          var old = oldBuilt && oldBuilt.robots[i];
+          var goal = { x: g.position.x, z: g.position.z, yaw: g.rotation.y, tileY: g.position.y };
+          var a = { goal: goal, from: null, start: 0, ms: 0, yawFrom: g.rotation.y, yawStart: 0, bump: 0, bumpStart: 0, seenBump: world.robots[i].bump };
+          if (old && !mapChanged) {
+            g.position.set(old.position.x, old.position.y, old.position.z);
+            g.rotation.y = old.rotation.y;
+            var oa = anims.robots[i];
+            if (oa) {
+              a.from = oa.from;
+              a.start = oa.start;
+              a.ms = oa.ms;
+              a.yawFrom = oa.yawFrom;
+              a.yawStart = oa.yawStart;
+              a.bump = oa.bump;
+              a.bumpStart = oa.bumpStart;
+              a.seenBump = oa.seenBump;
+            }
+          }
+          return a;
+        });
+        // A tulip that just got watered stands up over TULIP_MS; a puddle that just appeared pops.
+        var t0 = now();
+        eng.built.things.forEach(function (g) {
+          var key = g.userData.key;
+          if (g.userData.kind === 'tulip') {
+            var was = previous && previous.things.some(function (t) {
+              return t.kind === 'tulip' && Number(t.x) === g.userData.x && Number(t.y) === g.userData.y && (t.watered === true || t.state === 'watered' || t.state === 'wet');
+            });
+            if (g.userData.wet && !was && !first) anims.tulips[key] = t0;
+          } else if (g.userData.kind === 'puddle') {
+            var had = previous && previous.things.some(function (t) {
+              return t.kind === 'puddle' && Number(t.x) === g.userData.x && Number(t.y) === g.userData.y;
+            });
+            if (!had && !first) anims.pops[key] = t0;
+          }
+        });
+        setAttr('data-w', world.map.w);
+        setAttr('data-h', world.map.h);
+        setAttr('data-meshes', eng.meshCount);
+        rebuildOverlay();
+        if (mapChanged) {
+          eng.state = clampCamera(goalState(), world.map, eng.aspect);
+          anims.camera = null;
+        }
+      }
+      // Robots: a new tile is a glide, a new d a turn, a risen bump a recoil.
+      world.robots.forEach(function (r, i) {
+        var g = eng.built.robots[i];
+        var a = anims.robots[i];
+        if (!g || !a) return;
+        var p = tileCentre(world.map, r.x, r.y);
+        var goal = { x: p.x + g.userData.offset[0], z: p.z + g.userData.offset[1], yaw: (-r.d * Math.PI) / 2, tileY: tileHeight(kindAt(world.map, r.x, r.y) || 'grass') };
+        if (Math.abs(goal.x - a.goal.x) > 1e-6 || Math.abs(goal.z - a.goal.z) > 1e-6) {
+          a.from = { x: g.position.x, z: g.position.z, y: g.position.y };
+          a.start = now();
+          a.ms = reduced ? 0 : stepMs;
+        }
+        if (Math.abs(shortestYaw(a.goal.yaw, goal.yaw)) > 1e-6) {
+          a.yawFrom = g.rotation.y;
+          a.yawStart = now();
+        }
+        if (a.seenBump !== r.bump) {
+          if (rose(a.seenBump, r.bump)) {
+            a.bump++;
+            a.bumpStart = now();
+          }
+          a.seenBump = r.bump;
+        }
+        a.goal = goal;
+        var e = overlayEls.names[i];
+        if (e) {
+          e.setAttribute('data-x', String(r.x));
+          e.setAttribute('data-y', String(r.y));
+          e.setAttribute('data-d', String(r.d));
+          if (e.textContent !== (r.name || '')) e.textContent = r.name || '';
+        }
+      });
+    };
+
+    var animate = function (t) {
+      // Camera glide.
+      if (anims.camera) {
+        var k = Math.min(1, (t - anims.camera.start) / anims.camera.ms);
+        var e = easeOut(k);
+        var f = anims.camera.from;
+        var to = anims.camera.to;
+        eng.state = { tx: f.tx + (to.tx - f.tx) * e, tz: f.tz + (to.tz - f.tz) * e, dist: f.dist + (to.dist - f.dist) * e };
+        if (k >= 1) anims.camera = null;
+      }
+      if (eng.cameraMode === 'follow' && eng.built.robots.length && !anims.camera) {
+        var r0 = eng.built.robots[0];
+        eng.state = clampCamera({ tx: r0.position.x, tz: r0.position.z, dist: eng.state.dist }, eng.world.map, eng.aspect);
+      }
+      // Robots.
+      var hop = anims.hop ? Math.min(1, (t - anims.hop) / HOP_MS) : 1;
+      if (hop >= 1) anims.hop = 0;
+      eng.built.robots.forEach(function (g, i) {
+        var a = anims.robots[i];
+        var x = a.goal.x;
+        var z = a.goal.z;
+        var y = a.goal.tileY;
+        if (a.from && a.ms > 0) {
+          var k2 = Math.min(1, (t - a.start) / a.ms);
+          var e2 = k2 < 0.5 ? 2 * k2 * k2 : 1 - Math.pow(-2 * k2 + 2, 2) / 2;
+          x = a.from.x + (a.goal.x - a.from.x) * e2;
+          z = a.from.z + (a.goal.z - a.from.z) * e2;
+          y = a.from.y + (a.goal.tileY - a.from.y) * e2;
+          if (k2 >= 1) a.from = null;
+        }
+        var yaw = a.goal.yaw;
+        if (a.yawStart && !reduced) {
+          var k3 = Math.min(1, (t - a.yawStart) / TURN_MS);
+          yaw = a.yawFrom + shortestYaw(a.yawFrom, a.goal.yaw) * easeOut(k3);
+          if (k3 >= 1) a.yawStart = 0;
+        }
+        var recoil = 0;
+        if (a.bumpStart && !reduced) {
+          var k4 = Math.min(1, (t - a.bumpStart) / BUMP_MS);
+          recoil = k4 < 0.3 ? (-0.12 * k4) / 0.3 : k4 < 0.6 ? -0.12 + ((0.2 * (k4 - 0.3)) / 0.3) : 0.08 * (1 - (k4 - 0.6) / 0.4);
+          if (k4 >= 1) a.bumpStart = 0;
+        }
+        var hopY = 0;
+        if (hop < 1 && !reduced) hopY = 0.22 * Math.abs(Math.sin(hop * Math.PI * 2));
+        // Recoil is along the facing direction: −z at yaw 0 rotated by yaw.
+        g.position.set(x - Math.sin(yaw) * recoil, y + hopY, z - Math.cos(yaw) * recoil);
+        g.rotation.y = yaw;
+        g.userData.gliding = !!a.from;
+        g.userData.bumping = !!a.bumpStart;
+      });
+      // Tulips and puddles.
+      eng.built.things.forEach(function (g) {
+        var key = g.userData.key;
+        if (anims.tulips[key] !== undefined) {
+          var k5 = Math.min(1, (t - anims.tulips[key]) / TULIP_MS);
+          var back = 1 - easeOut(k5);
+          g.rotation.z = 0.31 * back;
+          if (k5 >= 1) delete anims.tulips[key];
+        }
+        if (anims.pops[key] !== undefined) {
+          var k6 = Math.min(1, (t - anims.pops[key]) / POP_MS);
+          var s = 0.2 + 0.8 * easeOut(k6);
+          g.scale.set(s, 1, s);
+          if (k6 >= 1) delete anims.pops[key];
+        }
+      });
+    };
+
+    var frame = function () {
+      rafId = 0;
+      if (destroyed || !eng.world) return;
+      var t = now();
+      if (lastFrame && eng.ready && visible()) {
+        eng.frames.push(t - lastFrame);
+        if (eng.frames.length > FRAME_WINDOW) eng.frames.shift();
+        if (t - lastReport >= FRAME_REPORT_MS) {
+          lastReport = t;
+          var ms = Math.round(p95(eng.frames) * 10) / 10;
+          if (ms !== eng.frameMs) {
+            eng.frameMs = ms;
+            setAttr('data-frame-ms', ms);
+            if (typeof o.onFrameMs === 'function') o.onFrameMs(ms);
+          }
+        }
+      }
+      lastFrame = t;
+      if (bubble && bubbleUntil && t >= bubbleUntil) {
+        bubble = null;
+        bubbleUntil = 0;
+        rebuildOverlay();
+      }
+      animate(t);
+      applyCamera();
+      renderer.render(scene, camera);
+      var calls = renderer.info && renderer.info.render ? renderer.info.render.calls : 0;
+      if (calls !== eng.drawCalls) {
+        eng.drawCalls = calls;
+        setAttr('data-draw-calls', calls);
+      }
+      positionOverlay();
+      if (!eng.ready) {
+        eng.ready = true;
+        setAttr('data-ready', 'true');
+        if (typeof o.onReady === 'function') o.onReady();
+      }
+      schedule();
+    };
+    var schedule = function () {
+      if (destroyed || rafId || !raf) return;
+      if (!visible()) return;
+      rafId = raf(frame);
+    };
+    var onVisibility = function () {
+      if (visible()) {
+        lastFrame = 0;
+        eng.frames = [];
+        schedule();
+      }
+    };
+    if (doc && typeof doc.addEventListener === 'function') {
+      doc.addEventListener('visibilitychange', onVisibility);
+      listeners.push([doc, 'visibilitychange', onVisibility]);
+    }
+
+    // ── Input: one pointer pans, two pinch, a wheel zooms, a short still press taps a tile. Pen is a finger. ──
+    var pointers = {};
+    var press = null;
+    var pinch = null;
+    var count = function () {
+      var n = 0;
+      for (var k in pointers) n++;
+      return n;
+    };
+    var local = function (ev) {
+      var r = o.canvas.getBoundingClientRect ? o.canvas.getBoundingClientRect() : { left: 0, top: 0 };
+      return { x: ev.clientX - r.left, y: ev.clientY - r.top };
+    };
+    var onDown = function (ev) {
+      if (ev.button !== undefined && ev.button !== 0 && ev.pointerType === 'mouse') return;
+      var p = local(ev);
+      pointers[ev.pointerId] = p;
+      if (count() === 1) {
+        press = { x: p.x, y: p.y, moved: 0, id: ev.pointerId };
+        pinch = null;
+      } else if (count() === 2) {
+        var ids = Object.keys(pointers);
+        var a = pointers[ids[0]];
+        var b = pointers[ids[1]];
+        pinch = { d0: Math.hypot(a.x - b.x, a.y - b.y), dist0: eng.state.dist, happened: true };
+      }
+      try {
+        if (o.canvas.setPointerCapture) o.canvas.setPointerCapture(ev.pointerId);
+      } catch (e) {
+        /* a synthetic pointer has no capture */
+      }
+    };
+    var onMove = function (ev) {
+      var prev = pointers[ev.pointerId];
+      if (!prev) return;
+      var p = local(ev);
+      pointers[ev.pointerId] = p;
+      if (count() === 1 && press) {
+        press.moved = Math.max(press.moved, Math.hypot(p.x - press.x, p.y - press.y));
+        if (press.moved > TAP_SLOP_PX) {
+          var ppu = pixelsPerUnit(eng.state, height);
+          var tilt = (CAMERA.tiltDeg * Math.PI) / 180;
+          var dx = p.x - prev.x;
+          var dy = p.y - prev.y;
+          eng.state = clampCamera({ tx: eng.state.tx - dx / ppu, tz: eng.state.tz - dy / (ppu * Math.cos(tilt)), dist: eng.state.dist }, eng.world.map, eng.aspect);
+          anims.camera = null;
+          if (eng.cameraMode === 'follow') eng.cameraMode = 'plot-held';
+        }
+      } else if (count() === 2 && pinch) {
+        var ids = Object.keys(pointers);
+        var a = pointers[ids[0]];
+        var b = pointers[ids[1]];
+        var d1 = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+        eng.state = clampCamera({ tx: eng.state.tx, tz: eng.state.tz, dist: (pinch.dist0 * pinch.d0) / d1 }, eng.world.map, eng.aspect);
+        anims.camera = null;
+        if (press) press.moved = TAP_SLOP_PX + 1;
+      }
+    };
+    var onUp = function (ev) {
+      var p = pointers[ev.pointerId];
+      delete pointers[ev.pointerId];
+      if (press && press.id === ev.pointerId) {
+        if (press.moved <= TAP_SLOP_PX && !(pinch && pinch.happened) && p && ev.type !== 'pointercancel') tap(p.x, p.y);
+        press = null;
+      }
+      if (count() < 2) pinch = null;
+    };
+    var onWheel = function (ev) {
+      if (ev.preventDefault) ev.preventDefault();
+      var factor = Math.exp((ev.deltaY || 0) * 0.0012);
+      eng.state = clampCamera({ tx: eng.state.tx, tz: eng.state.tz, dist: eng.state.dist * factor }, eng.world.map, eng.aspect);
+      anims.camera = null;
+    };
+    var tap = function (sx, sy) {
+      if (!eng.world) return;
+      var nx = (sx / width) * 2 - 1;
+      var ny = 1 - (sy / height) * 2;
+      var hit = pickTile(rayFromNdc(eng.state, eng.aspect, nx, ny), eng.world.map);
+      if (hit && typeof o.onTap === 'function') o.onTap(hit.x, hit.y);
+    };
+    if (o.canvas && typeof o.canvas.addEventListener === 'function') {
+      o.canvas.addEventListener('pointerdown', onDown);
+      o.canvas.addEventListener('pointermove', onMove);
+      o.canvas.addEventListener('pointerup', onUp);
+      o.canvas.addEventListener('pointercancel', onUp);
+      o.canvas.addEventListener('wheel', onWheel, { passive: false });
+      listeners.push([o.canvas, 'pointerdown', onDown], [o.canvas, 'pointermove', onMove], [o.canvas, 'pointerup', onUp], [o.canvas, 'pointercancel', onUp], [o.canvas, 'wheel', onWheel]);
+    }
+    var ro = null;
+    if (typeof ResizeObserver === 'function' && o.root) {
+      ro = new ResizeObserver(function () {
+        resize();
+      });
+      ro.observe(o.root);
+    } else if (typeof window !== 'undefined' && window.addEventListener) {
+      window.addEventListener('resize', resize);
+      listeners.push([window, 'resize', resize]);
+    }
+
+    // ── The API the node wires ──
+    eng.setWorld = function (world) {
+      setWorld(world);
+      schedule();
+    };
+    eng.setStepMs = function (ms) {
+      stepMs = ms;
+    };
+    eng.setCamera = function (mode, focus) {
+      var changed = mode !== eng.cameraMode || JSON.stringify(focus || null) !== JSON.stringify(eng.focus || null);
+      eng.cameraMode = mode === 'island' || mode === 'follow' ? mode : 'plot';
+      eng.focus = focus;
+      setAttr('data-camera', eng.cameraMode);
+      if (eng.world && changed) glideCamera(goalState(), CAMERA_MS);
+      schedule();
+    };
+    eng.setBubble = function (b) {
+      bubble = b && typeof b === 'object' && b.text ? { robot: Math.max(0, Math.min((eng.world ? eng.world.robots.length : 1) - 1, Number(b.robot) || 0)), text: b.text, style: b.style === 'olive' ? 'olive' : 'plain' } : null;
+      var ms = bubble ? Number(b.ms) : 0;
+      if (bubble && (!isFinite(ms) || ms <= 0)) ms = bubble.style === 'olive' ? 3200 : 1100;
+      bubbleUntil = bubble ? now() + ms : 0;
+      if (eng.built) rebuildOverlay();
+      schedule();
+    };
+    eng.celebrate = function () {
+      anims.hop = now();
+      schedule();
+    };
+    eng.resize = function () {
+      resize();
+      schedule();
+    };
+    /** Screen coordinates (in canvas px) of a tile’s centre, for a drive that taps tiles. */
+    eng.screenOfTile = function (x, y) {
+      var p = tileCentre(eng.world.map, x, y);
+      return screenOf([p.x, tileHeight(kindAt(eng.world.map, x, y) || 'grass'), p.z]);
+    };
+    eng.pick = function (sx, sy) {
+      var nx = (sx / width) * 2 - 1;
+      var ny = 1 - (sy / height) * 2;
+      return pickTile(rayFromNdc(eng.state, eng.aspect, nx, ny), eng.world.map);
+    };
+    eng.robotAt = function (i) {
+      var g = eng.built && eng.built.robots[i];
+      return g ? { x: g.position.x, y: g.position.y, z: g.position.z, yaw: g.rotation.y, gliding: !!g.userData.gliding } : null;
+    };
+    eng.frame = frame;
+    eng.destroy = function () {
+      destroyed = true;
+      if (rafId) caf(rafId);
+      listeners.forEach(function (l) {
+        l[0].removeEventListener(l[1], l[2]);
+      });
+      if (ro) ro.disconnect();
+      if (eng.built) disposeGroup(eng.built.root);
+      if (renderer && renderer.dispose) renderer.dispose();
+    };
+    resize();
+    return eng;
+  }
+
+  var ENGINE_API = { create: createEngine, TAP_SLOP_PX: TAP_SLOP_PX, FRAME_WINDOW: FRAME_WINDOW, p95: p95 };
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Garden 3D — the React node
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  var WORLD_CSS =
+    '.gd3-world{position:relative;width:100%;max-width:640px;margin:0 auto;border-radius:16px;overflow:hidden;background:#BFE8CC;border:4px solid #A8D9B4;box-sizing:border-box;-webkit-tap-highlight-color:transparent;font-family:inherit;touch-action:none;user-select:none;-webkit-user-select:none}\n' +
+    '.gd3-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}\n' +
+    '.gd3-overlay{position:absolute;inset:0;pointer-events:none;overflow:hidden}\n' +
+    '.gd3-name{position:absolute;transform:translate(-50%,0);background:#fff;border-radius:999px;padding:1px 8px;font-size:12px;font-weight:800;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);color:#2E2A3D}\n' +
+    '.gd3-label{position:absolute;transform:translate(-50%,0);background:#fff;border-radius:999px;padding:1px 7px;font-size:11px;font-weight:800;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15)}\n' +
+    '.gd3-bubble{position:absolute;transform:translate(-30%,-100%);background:#fff;border-radius:14px;padding:8px 12px;font-weight:800;font-size:14px;box-shadow:0 6px 18px rgba(72,52,20,.10);max-width:230px;color:#2E2A3D;pointer-events:none}\n' +
+    '.gd3-bubble:after{content:"";position:absolute;left:34%;bottom:-8px;border:8px solid transparent;border-top-color:#fff;border-bottom:0}\n' +
+    '.gd3-bubble.gd3-olive{background:#EEE8FF;color:#4A2FA6}.gd3-bubble.gd3-olive:after{border-top-color:#EEE8FF}\n' +
+    '.gd3-bubble small{display:block;font-weight:700;color:#6E6784;font-size:11px}.gd3-bubble.gd3-olive small{color:#6A5AA8}\n' +
+    '.gd3-fallback{position:absolute;inset:0;display:grid;place-items:center;color:#6E6784;font-size:13px;font-weight:700}';
+
+  /** @type {import('./types/node-kit').ReactNodeDefinition} */
+  var Garden3D = {
+    name: 'garden-3d-kit.Garden3D',
+    displayNodeName: 'Garden 3D',
+    docs:
+      'The tile world in the round: a flat-shaded three.js island from the same Map, Things, Robots and Bubble as ' +
+      'Garden (tile boxes with a height per kind, cone trees, icosahedron rocks, a box-and-prism house, stem-and-bulb ' +
+      'tulips, robots as a box body with a visor, eyes and a hat). One finger or a drag pans, a pinch or a wheel zooms, ' +
+      'a tap reports the tile. Camera frames the Focus rectangle, the whole island, or follows robot 0. Supported is ' +
+      'false when there is no WebGL2 (or no three.js): nothing is drawn, nothing throws, Ready never fires, and the ' +
+      'page swaps in Garden. Frame Ms is the rolling p95 of the last 60 frames, measured after Ready while visible. ' +
+      'It draws; the engine decides where a robot may go.',
+    ssr: { compat: 'safe' },
+    noodlNodeAsProp: true,
+
+    /** The pure parts, for the kit gate. */
+    world: LOCAL_WORLD,
+    worldHelpers: worldHelpers,
+    scene: { buildScene: buildScene, buildRobot: buildRobot, THING_BUILDERS: THING_BUILDERS, PALETTE: PALETTE, TILE_HEIGHT: TILE_HEIGHT },
+    camera: CAMERA_API,
+    engine: ENGINE_API,
+    css: WORLD_CSS,
+
+    getReactComponent: function () {
+      return function Garden3DComponent(props) {
+        var root = React.useRef(null);
+        var canvas = React.useRef(null);
+        var overlay = React.useRef(null);
+        var engine = React.useRef(null);
+        var helpers = worldHelpers();
+        var grid = helpers.parseMap(props.map);
+        var things = helpers.parseThings(props.things);
+        var robots = helpers.parseRobots(props.robots);
+        var stepMs = Math.max(0, Number(props.stepMs));
+        if (!isFinite(stepMs)) stepMs = 380;
+        var cameraMode = props.camera === 'island' || props.camera === 'follow' ? props.camera : 'plot';
+        var focus = readJson(props.focus, null);
+        var focusKey = JSON.stringify(focus);
+        var mapKey = JSON.stringify(grid.rows) + JSON.stringify(grid.legend);
+        var thingsKey = JSON.stringify(things);
+        var robotsKey = JSON.stringify(robots);
+        var supportedState = React.useState(null);
+
+        // Mount: decide Supported once, on the real page. Everything browser-only lives here.
+        React.useEffect(function () {
+          props.noodlNode && props.noodlNode.setDOMElement(root.current);
+          var reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+          var eng = createEngine({
+            THREE: typeof THREE !== 'undefined' ? THREE : undefined,
+            root: root.current,
+            canvas: canvas.current,
+            overlay: overlay.current,
+            reducedMotion: reduced,
+            onTap: function (x, y) {
+              if (typeof props.onTileX === 'function') props.onTileX(x);
+              if (typeof props.onTileY === 'function') props.onTileY(y);
+              if (typeof props.onTileTapped === 'function') props.onTileTapped();
+            },
+            onFrameMs: function (ms) {
+              if (typeof props.onFrameMs === 'function') props.onFrameMs(ms);
+            },
+            onReady: function () {
+              if (typeof props.onReady === 'function') props.onReady();
+            }
+          });
+          engine.current = eng;
+          if (root.current) {
+            root.current.gd3 = eng;
+            root.current.setAttribute('data-helpers', helpers.source);
+          }
+          if (typeof props.onSupported === 'function') props.onSupported(eng.supported);
+          supportedState[1](eng.supported);
+          return function () {
+            eng.destroy();
+            engine.current = null;
+          };
+        }, []);
+
+        React.useEffect(
+          function () {
+            var eng = engine.current;
+            if (!eng || !eng.supported) return;
+            eng.setStepMs(stepMs);
+            eng.setWorld({ map: grid, things: things, robots: robots });
+          },
+          [mapKey, thingsKey, robotsKey, stepMs, supportedState[0]]
+        );
+
+        React.useEffect(
+          function () {
+            var eng = engine.current;
+            if (!eng || !eng.supported) return;
+            eng.setCamera(cameraMode, focus);
+          },
+          [cameraMode, focusKey, supportedState[0]]
+        );
+
+        // Celebrate is a signal: a count that rises. The robots hop.
+        var cheers = React.useRef(null);
+        if (cheers.current === null) cheers.current = { seen: props.celebrate, n: 0 };
+        if (cheers.current.seen !== props.celebrate) {
+          if (helpers.rose(cheers.current.seen, props.celebrate)) cheers.current.n++;
+          cheers.current.seen = props.celebrate;
+        }
+        var cheerN = cheers.current.n;
+        React.useEffect(
+          function () {
+            var eng = engine.current;
+            if (!cheerN || !eng || !eng.supported) return;
+            eng.celebrate();
+          },
+          [cheerN]
+        );
+
+        var bubble = readJson(props.bubble, null);
+        var bubbleKey = bubble && typeof bubble === 'object' && bubble.text ? JSON.stringify(bubble) : '';
+        React.useEffect(
+          function () {
+            var eng = engine.current;
+            if (!eng || !eng.supported) return;
+            eng.setBubble(bubbleKey ? bubble : null);
+          },
+          [bubbleKey, supportedState[0]]
+        );
+
+        var worldStyle = Object.assign({ aspectRatio: Math.max(1, grid.w) + ' / ' + Math.max(1, grid.h) }, props.style);
+        if (worldStyle.display !== 'none') worldStyle.display = 'block';
+        return h(
+          'div',
+          {
+            ref: root,
+            className: 'gd3-world',
+            'data-gd3-world': 'true',
+            'data-w': String(grid.w),
+            'data-h': String(grid.h),
+            'data-camera': cameraMode,
+            role: 'group',
+            'aria-label': props.label || 'garden',
+            style: worldStyle
+          },
+          h('style', { key: 'css' }, WORLD_CSS),
+          h('canvas', { key: 'canvas', ref: canvas, className: 'gd3-canvas', 'data-gd3-canvas': 'true', 'aria-hidden': 'true' }),
+          h('div', { key: 'overlay', ref: overlay, className: 'gd3-overlay', 'data-gd3-overlay': 'true' }),
+          supportedState[0] === false ? h('div', { key: 'fallback', className: 'gd3-fallback', 'data-gd3-fallback': 'true' }) : null
+        );
+      };
+    },
+
+    defaultCss: { display: 'block' },
+
+    inputProps: {
+      map: { type: 'object', displayName: 'Map', group: 'World', default: '{"rows":["GGTGGGTH","GGGGGGGG","GGFGFGFG","PPPPPPPP","GWWGGRGG","GGGGGTGG"]}', description: 'Rows of characters and a legend, as an object or JSON: { rows: ["GGTG…"], legend: { G: "grass" } }. Kinds: grass, path, water, tree, rock, house, bed (a tulip bed, dry until a Thing waters it). The mockup’s legend is the default.' },
+      things: { type: 'object', displayName: 'Things', group: 'World', description: 'A list, as an object or JSON: { kind, x, y } with kind tulip (watered true/false), puddle, letter, bowl (full true/false) or label (text).' },
+      robots: { type: 'object', displayName: 'Robots', group: 'World', default: '[{"x":0,"y":3,"d":1,"colour":"#FF7A59","eyes":"round","hat":"none","name":"Pip"}]', description: 'One or two, as a list or JSON: { x, y, d, colour, eyes, hat, name, bump }. d is 0 up, 1 right, 2 down, 3 left. bump is a count: raise it once per bump.' },
+      bubble: { type: 'object', displayName: 'Bubble', group: 'World', description: '{ robot, text, style, ms }: a line over a robot for ms (1100 plain, 3200 olive by default). A new object shows a new bubble.' },
+      stepMs: { type: 'number', displayName: 'Step Ms', group: 'World', default: 380, description: 'How long a robot takes to glide one tile.' },
+      celebrate: { type: 'signal', displayName: 'Celebrate', group: 'World', description: 'The robots hop for a moment.' },
+      label: { type: 'string', displayName: 'Label', group: 'World', default: 'The garden', description: 'What a screen reader calls the world.' },
+      camera: { type: { name: 'enum', enums: [{ value: 'plot', label: 'Plot' }, { value: 'island', label: 'Island' }, { value: 'follow', label: 'Follow' }] }, displayName: 'Camera', group: 'Camera', default: 'plot', description: 'plot frames the Focus rectangle (the whole map when Focus is empty); island frames the whole map; follow keeps robot 0 in the middle. A finger can always pan and zoom within the map.' },
+      focus: { type: 'object', displayName: 'Focus', group: 'Camera', description: '{ x, y, w, h } in tiles: the rectangle the plot camera frames.' }
+    },
+
+    outputProps: {
+      onTileX: { type: 'number', displayName: 'Tile X', group: 'Taps', description: 'The column of the last tapped tile.' },
+      onTileY: { type: 'number', displayName: 'Tile Y', group: 'Taps', description: 'The row of the last tapped tile.' },
+      onTileTapped: { type: 'signal', displayName: 'Tile Tapped', group: 'Taps', description: 'A tile was tapped. Tile X and Tile Y already hold it.' },
+      onReady: { type: 'signal', displayName: 'Ready', group: 'Events', description: 'The world is on the page.' },
+      onFrameMs: { type: 'number', displayName: 'Frame Ms', group: 'Events', description: 'The rolling p95 of the last 60 frame intervals in ms, measured after Ready and only while the page is visible. Above 33 is under 30 fps.' },
+      onSupported: { type: 'boolean', displayName: 'Supported', group: 'Events', description: 'True when a WebGL2 context could be made and three.js is on the page. False: nothing is drawn, nothing throws, Ready never fires — swap in Garden.' }
+    }
+  };
+
+  /** @type {import('./types/node-kit').NodeKitModule} */
+  var kit = {
+    nodes: [],
+    reactNodes: h ? [Garden3D] : []
+  };
+
+  Noodl.defineModule(kit);
+})();

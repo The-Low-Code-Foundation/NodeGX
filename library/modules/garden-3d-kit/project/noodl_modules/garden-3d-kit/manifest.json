@@ -1,0 +1,6 @@
+{
+  "name": "Garden 3D Kit",
+  "main": "index.js",
+  "dependencies": ["three.min.js"],
+  "nodeKitTypes": "1.0.0"
+}
