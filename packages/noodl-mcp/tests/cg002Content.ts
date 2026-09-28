@@ -131,6 +131,12 @@ export interface GardenRequest {
   schedule?: ReadonlyArray<{ tick: number; event: string }>;
   goal: Goal | ReadonlyArray<Goal>;
   palette: ReadonlyArray<BlockType>;
+  /**
+   * The Olive rungs this request offers as `ask:<rung>` blocks (ids of `olive-templates.json`), band 10-12 requests only
+   * (Richard's ruling 4, 2026-09-28: Olive's lessons are band 10-12; band 7-9 keeps the owl's hints and offers no rung).
+   * CG-005 s3: each rung sits with the islander §3 frames it with and the trick it fits; the rest are free play's.
+   */
+  rungs?: ReadonlyArray<string>;
   reward: { kind: 'hat' | 'sticker' | 'seed' | 'item'; id: string; from: 'sami' | 'mamie' | 'biscuit' };
   copyKeys: { title: string; blurb: string; line: string; reward: string; gift: string };
   referenceProgram: ReadonlyArray<Block>;
@@ -230,6 +236,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     robotStart: { x: 0, y: 3, d: 1, carry: ['food', 'food'] },
     goal: [{ name: 'bowl_has', args: [4, 2, 1] }, { name: 'bowl_has', args: [2, 2, 1] }, { name: 'uses', args: ['if', 1] }],
     palette: ['fwd', 'left', 'right', 'put', 'repeat', 'if'],
+    rungs: ['what-wants', 'is-it-a'],
     reward: { kind: 'hat', id: 'crown', from: 'biscuit' },
     copyKeys: { title: 'rqBowlTitle', blurb: 'rqBowlBlurb', line: 'rqBowlLine', reward: 'hatCrown', gift: 'giftCrown' },
     referenceProgram: [
@@ -249,6 +256,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     robotStart: { x: 0, y: 3, d: 1 },
     goal: [{ name: 'thing_at', args: ['letter', 7, 3] }, { name: 'said', args: [1] }],
     palette: ['fwd', 'left', 'right', 'pick', 'put', 'say', 'repeat'],
+    rungs: ['say-thanks', 'translate', 'letter'],
     reward: { kind: 'sticker', id: 'letter', from: 'sami' },
     copyKeys: { title: 'rqLetterTitle', blurb: 'rqLetterBlurb', line: 'rqLetterLine', reward: 'stickerLetter', gift: 'giftLetter' },
     referenceProgram: [blk('pick'), blk('repeat', { n: 6, body: b1('fwd') }), blk('put'), blk('say', { slots: { text: 'thanksSami' } })]
@@ -263,6 +271,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     robotStart: { x: 0, y: 3, d: 1 },
     goal: [{ name: 'robot_at', args: [7, 3] }, { name: 'facing', args: [0] }, { name: 'uses', args: ['until', 1] }],
     palette: ['fwd', 'left', 'right', 'until'],
+    rungs: ['words-to-blocks', 'count-in-words'],
     reward: { kind: 'sticker', id: 'paw', from: 'biscuit' },
     copyKeys: { title: 'rqWallTitle', blurb: 'rqWallBlurb', line: 'rqWallLine', reward: 'stickerPaw', gift: 'giftPaw' },
     referenceProgram: [blk('until', { slots: { sensor: 'wall_ahead' }, body: [blk('fwd')] }), blk('left')]
@@ -278,6 +287,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     schedule: [{ tick: 1, event: 'meow' }, { tick: 4, event: 'meow' }],
     goal: [{ name: 'handled', args: ['meow', 2] }, { name: 'robot_at', args: [2, 3] }],
     palette: ['fwd', 'left', 'right', 'when'],
+    rungs: ['narrate-run'],
     reward: { kind: 'item', id: 'bell', from: 'biscuit' },
     copyKeys: { title: 'rqMeowTitle', blurb: 'rqMeowBlurb', line: 'rqMeowLine', reward: 'itemBell', gift: 'giftBell' },
     referenceProgram: [blk('when', { slots: { event: 'meow' }, body: [blk('fwd')] })]
@@ -298,6 +308,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     robotStart: { x: 0, y: 3, d: 1, basket: 6 },
     goal: [{ name: 'carrying', args: ['egg', 4] }, { name: 'uses', args: ['count_inc', 1] }, { name: 'senses', args: ['count_is', 1] }, { name: 'thing_at', args: ['egg', 5, 3] }],
     palette: ['fwd', 'left', 'right', 'pick', 'until', 'count_inc'],
+    rungs: ['count-tulips', 'maths-seeds', 'maths'],
     reward: { kind: 'item', id: 'basket', from: 'mamie' },
     copyKeys: { title: 'rqEggsTitle', blurb: 'rqEggsBlurb', line: 'rqEggsLine', reward: 'itemBasket', gift: 'giftBasket' },
     referenceProgram: [blk('until', { slots: { sensor: 'count_is', arg: 4 }, body: b1('pick', 'count_inc', 'fwd') })]
@@ -319,6 +330,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     robotStart: { x: 0, y: 3, d: 1 },
     goal: [{ name: 'every_tulip_watered' }, { name: 'uses', args: ['do', 2] }],
     palette: ['fwd', 'left', 'right', 'water', 'repeat', 'trick', 'do'],
+    rungs: ['name-one', 'name-three', 'name-trick', 'explain-program'],
     reward: { kind: 'item', id: 'gnome', from: 'mamie' },
     copyKeys: { title: 'rqRowsTitle', blurb: 'rqRowsBlurb', line: 'rqRowsLine', reward: 'itemGnome', gift: 'giftGnome' },
     referenceProgram: [

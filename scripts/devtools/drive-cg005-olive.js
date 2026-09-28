@@ -8,7 +8,7 @@
  * `drive-deployed.js` (`origin` mode, so what is graded is exactly what the stub serves).
  *
  *   node scripts/devtools/drive-cg005-olive.js route [--json <file>]
- *   node scripts/devtools/drive-cg005-olive.js pages <deploy-dir> [--workshop <url-path>] [--skills <url-path>] [--shots <dir>] [--json <file>]
+ *   node scripts/devtools/drive-cg005-olive.js pages <deploy-dir> [--shots <dir>] [--json <file>]
  *
  * 🔴 No Electron here. Should a later version launch the shell instead of the stub server, launch it through
  * `garden-desktop/drive-lib.js` `launch()` (on darwin it passes `-ApplePersistenceIgnoreState YES`; without it the third
@@ -19,16 +19,25 @@
  *   R-AC5  exam with words-to-blocks switched to fail → status withholds it; switched to pass, exam re-run → offered
  *   R-AC2  a hung rung → the shell's timeout (--timeout 1500) answers {fallback, reason:'timeout'} in 1.5–4 s
  *   R-AC6  a 41-character text slot and a listed word are refused by the route and the stub's call log does not grow
- *   P-AC6  band 10–12: the text field's maxLength is 40 and typing 41 characters leaves 40; a listed word shows the
- *          inline refusal and pressing Play sends nothing (the stub's call log does not grow). (Band 7–9's picker is
- *          graded in cg005Olive.test.ts; a page drive of it needs a band-1 profile hook from CG-003.)
- *   P-AC3  mutant on, a hint shown: the owl row keeps the WRITTEN line (never "Hou hou"); mutant off: the voiced line
- *   P-AC2  a hung rung, Play: the owl row shows thinking; the robot sprite's left/top still change while parked
- *          (a sprite moved by an earlier block is mid-transition), then after the page's 12 s the row says resting
- *   P-AC5  exam fail → the palette has no [data-pal="ask:words-to-blocks"] and Skills says "can't do this here yet";
- *          pass + re-run + reload → the block is back
+ * Part P (session 3, lane HOOKS: the pages now carry CG-005's hooks) makes a band 10–12 player through the Profiles
+ * form, then enters FREE PLAY from the island for each clause (free play offers every rung the exam passed; a reload of
+ * /workshop has no request and goes to the island, CG-003 AC8). The owl's line is `.bg-owl-say`, the row `.bg-owl`.
+ *   P-AC6  a new ask block says "Fill in every slot first."; the text field's maxLength is 40 and 41 characters leave
+ *          40; a listed word shows the refusal under the block list (`.bg-slot-msg`); Play sends nothing to the model
+ *          (the stub's calls, the hint voicings apart, do not grow) and the owl does not claim she is resting
+ *   P-AC1  words-to-blocks: her blocks come as a card (`.bg-proposal`, Use them / No thanks) and are not in the
+ *          program; Use them places them; a new run proposes again; No thanks changes nothing
+ *   P-AC3  mutant on: the owl's line keeps the WRITTEN line, silently; mutant off: the voiced line ("Hoo hoo") replaces it
+ *   P-AC2  a hung rung, Play: the row says thinking; the page keeps animating while parked (the robot walked first,
+ *          ≥ 20 animation frames in 600 ms, the thinking dots' animation advances), then after the page's 12 s: resting.
+ *          (A sprite mid-transition WHILE parked is unreachable by construction: the park comes a tick, 420 ms, after the
+ *          last move, and the glide is 380 ms.)
+ *   P-AC5  exam fail → no [data-pal="ask:words-to-blocks"] (poem still offered) and Skills' `.bg-olive-held` says
+ *          "can't do this here yet: words into blocks"; pass + re-run → the block is back and Skills says nothing
+ *   P-390  free play at 390×844: Play and the owl on screen at scroll 0, no sideways scroll
+ *   P-S3-R5 the hooks' words (slot line, card, buttons, the owl's line and tags) ≥ 4.5:1 on their ground
  * A page clause whose hook is not on the page is reported SKIP with the hook it looked for, never PASS.
- * Exits 0 when nothing FAILED (SKIPs are listed), 1 when a clause failed, 2 on a usage error.
+ * Exits 0 when nothing FAILED (SKIPs are listed — session 3 expects none), 1 when a clause failed, 2 on a usage error.
  */
 const fs = require('fs');
 const os = require('os');
@@ -49,7 +58,7 @@ const MODE = process.argv[2];
 const JSON_OUT = arg('--json');
 const SHOTS = arg('--shots');
 if (MODE !== 'route' && MODE !== 'pages') {
-  console.error('usage: drive-cg005-olive.js route | pages <deploy-dir> [--workshop <path>] [--skills <path>] [--shots <dir>] [--json <file>]');
+  console.error('usage: drive-cg005-olive.js route | pages <deploy-dir> [--shots <dir>] [--json <file>]');
   process.exit(2);
 }
 
@@ -157,105 +166,224 @@ async function pagesPart() {
     process.exit(2);
   }
   if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
-  const WORKSHOP = arg('--workshop') || '/workshop';
-  const SKILLS = arg('--skills') || '/skills';
   const stub = await startStub(path.resolve(DIR), []);
   const port = stub.port;
+  /** What reached the (stub) model, the hint voicings apart: a refused slot must add nothing here. */
+  const asked = async () => (await req(port, 'GET', '/__stub/calls')).body.calls.filter((c) => c.rung !== 'voice-hint').length;
   try {
     await withDeployedSite({ origin: `http://127.0.0.1:${port}` }, async (page) => {
+      const { client } = page;
       const ev = (e) => page.evaluate(e);
       const shot = async (n) => SHOTS && page.screenshot(path.join(SHOTS, `${n}.png`));
-      const has = (sel) => ev(`!!document.querySelector(${JSON.stringify(sel)})`);
-      const text = (sel) => ev(`(document.querySelector(${JSON.stringify(sel)}) || {}).textContent || ''`);
-      const bodyText = () => ev('document.body.innerText');
-      const click = (sel) => ev(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return false; e.click(); return true; })()`);
-      const clickText = (t) => ev(`(() => { const e = [...document.querySelectorAll('button,[role=button]')].find((b) => b.textContent.trim() === ${JSON.stringify(t)}); if (!e) return false; e.click(); return true; })()`);
-      const OWL = '[data-owl-row]';
+      const has = (sel) => ev(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); return !!e && e.offsetParent !== null; })()`);
+      const text = (sel) => ev(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); return e && e.offsetParent !== null ? e.innerText.trim() : ''; })()`);
+      const until = async (expr, ok, ms = 8000) => {
+        const end = Date.now() + ms;
+        let last = await ev(expr);
+        while (!ok(last) && Date.now() < end) {
+          await wait(150);
+          last = await ev(expr);
+        }
+        return last;
+      };
+      // A press is a real CDP mouse event at the element's centre, after elementFromPoint says a finger would hit it.
+      const tap = async (finder, label) => {
+        let p = null;
+        for (let i = 0; i < 20; i++) {
+          p = await ev(`(() => { const el = (${finder}); if (!el) return { found: false }; el.scrollIntoView({ block: 'center', inline: 'center' }); return { found: true }; })()`);
+          if (p.found) break;
+          await wait(150);
+        }
+        await wait(200);
+        if (p.found) p = await ev(`(() => { const el = (${finder}); const r = el.getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2; const at = document.elementFromPoint(x, y); return { found: true, x, y, hit: !!at && (el === at || el.contains(at)) }; })()`);
+        if (!p.found || !p.hit) {
+          check(`tap ${label}`, false, p);
+          return false;
+        }
+        for (const type of ['mousePressed', 'mouseReleased']) await client.send('Input.dispatchMouseEvent', { type, x: p.x, y: p.y, button: 'left', clickCount: 1 });
+        await wait(250);
+        return true;
+      };
+      const first = (sel) => `[...document.querySelectorAll(${JSON.stringify(sel)})].find((e) => e.offsetParent !== null)`;
+      const byText = (sel, ...needles) => `[...document.querySelectorAll(${JSON.stringify(sel)})].find((e) => e.offsetParent !== null && ${JSON.stringify(needles)}.some((n) => e.innerText.includes(n)))`;
+      const blocks = () => ev(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`);
+      const OWL = '.bg-owl';
+      const SAY = '.bg-owl-say';
 
-      await page.navigate(WORKSHOP);
-      await wait(1500);
-      await shot('workshop');
+      // A fresh family: one band 10–12 player (Olive's rungs are band 10–12 only, ruling 4), in English.
+      await page.setViewport({ width: 1368, height: 912, mobile: false });
+      const origin = await ev('location.origin');
+      await client.send('Storage.clearDataForOrigin', { origin, storageTypes: 'local_storage,indexeddb,cache_storage,service_workers' });
+      await page.navigate('/');
+      await wait(1200);
+      await tap(first('button.bg-profile-new'), 'new player (the card)');
+      await ev(`(() => { const el = [...document.querySelectorAll('input')].find((e) => e.offsetParent !== null); if (!el) return; el.focus(); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(el, 'Ada'); el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); el.blur(); })()`);
+      await wait(250);
+      await tap(byText('.bg-seg-btn', '10–12'), 'band 10–12 in the form');
+      await tap(byText('.bg-seg-btn', 'English'), 'English in the form');
+      await tap(first('button.bg-btn.bg-i-play'), 'create (Let’s go!)');
+      const landed = await until('location.pathname', (p) => p === '/island');
+      check('P setup: a band 10–12 player lands on the island', landed === '/island', landed);
 
-      // P-AC6 band 10–12
-      if (!(await has('[data-pal="ask:poem"]'))) skip('P-AC6 band 10–12 text slot', '[data-pal="ask:poem"] in the Workshop palette (a request offering the poem rung, band 2)');
+      /** Free play: every rung this computer's exam passed, for band 10–12. Entered from the island (a reload of /workshop has no request, AC8). */
+      const enterFree = async (tag) => {
+        await page.navigate('/island');
+        await wait(1100);
+        await tap(byText('.bg-quest', 'Free play', 'Jeu libre'), `free play (${tag})`);
+        await until('location.pathname', (p) => p === '/workshop');
+        return until(`!!document.querySelector('.gd-palette [data-pal="fwd"]')`, Boolean, 6000);
+      };
+      /** Add a rung's block and fill its first slot with the first word offered. */
+      const addAsk = async (rung, slot) => {
+        await tap(first(`.gd-palette [data-pal="ask:${rung}"]`), `palette ask:${rung}`);
+        if (!slot) return;
+        await tap(first(`.gd-prog .gd-slot[data-slot="${slot}"]`), `slot ${slot}`);
+        await tap(first('.gd-picker .gd-opt'), `the first word for ${slot}`);
+      };
+      const play = () => tap(first('.bg-controls .bg-i-play'), 'Play');
+
+      // ── P-AC6: band 10–12's text slot: 40 characters, the 41st refused; a listed word refused inline; Play sends nothing ──
+      await enterFree('P-AC6');
+      await shot('workshop-free');
+      if (!(await has('.gd-palette [data-pal="ask:poem"]'))) skip('P-AC6 band 10–12 text slot', '[data-pal="ask:poem"] in free play at band 10–12');
       else {
-        await click('[data-pal="ask:poem"]');
-        await wait(300);
-        await click('.gd-prog .gd-slot[data-slot="flower"]');
-        await wait(300);
+        await addAsk('poem');
+        const missing = await until(`(document.querySelector('.bg-slot-msg') || {}).innerText || ''`, Boolean, 3000);
+        await tap(first('.gd-prog .gd-slot[data-slot="flower"]'), 'the flower slot');
         const max = await ev(`(document.querySelector('.gd-slot-text') || {}).maxLength`);
         await ev(`document.querySelector('.gd-slot-text') && document.querySelector('.gd-slot-text').focus()`);
-        await page.client.send('Input.insertText', { text: 'T'.repeat(41) });
+        await client.send('Input.insertText', { text: 'T'.repeat(41) });
         await wait(300);
         const len = await ev(`(document.querySelector('.gd-slot-text') || { value: '' }).value.length`);
         check('P-AC6 the text field holds 40 and refuses the 41st', max === 40 && len === 40, { max, len });
-        await ev(`(() => { const i = document.querySelector('.gd-slot-text'); if (!i) return; const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, ''); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
-        await page.client.send('Input.insertText', { text: 'Tulla la stupide' });
-        await wait(400);
-        const inline = (await bodyText()).includes('Olive ne peut pas utiliser ce mot.') || (await bodyText()).includes('Olive can’t use that word.');
-        const before = await calls(port);
-        const played = (await clickText('Play')) || (await clickText('Jouer'));
-        await wait(1500);
-        const after = await calls(port);
+        await ev(`(() => { const i = document.querySelector('.gd-slot-text'); if (!i) return; i.focus(); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, ''); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+        await client.send('Input.insertText', { text: 'Tulla la stupide' });
+        const line = await until(`(document.querySelector('.bg-slot-msg') || {}).innerText || ''`, (t) => /can’t use that word|ne peut pas utiliser ce mot/.test(t), 3000);
+        const beside = await ev(`(() => { const m = document.querySelector('.bg-slot-msg'), b = document.querySelector('.bg-blocks-box'); if (!m || !b) return null; const r = m.getBoundingClientRect(), q = b.getBoundingClientRect(); return { gap: Math.round(r.top - q.bottom), left: Math.round(r.left - q.left) }; })()`);
+        const before = await asked();
+        const pressed = await play();
+        await wait(2000);
+        const after = await asked();
+        const row = await text(OWL);
         await shot('ac6-listed-word');
-        check('P-AC6 a listed word is refused inline and Play sends nothing', inline && played && after === before, { inline, played, before, after });
+        check('P-AC6 a new ask block says what it needs first ("Fill in every slot first.")', /Fill in every slot first|Remplis d’abord toutes les cases/.test(missing), missing);
+        check('P-AC6 a listed word is refused inline, under the block list', /can’t use that word|ne peut pas utiliser ce mot/.test(line) && !!beside && beside.gap >= 0 && beside.gap < 40, { line, beside });
+        check('P-AC6 … and Play sends nothing to Olive (the stub’s calls, the voicings apart, do not grow); the owl does not claim she is resting', pressed && after === before && !/resting|se repose/i.test(row), { before, after, row });
       }
 
-      // P-AC3
-      if (!(await has(OWL))) skip('P-AC3 the voiced hint', `${OWL} (the owl row)`);
+      // ── P-AC1: Olive's blocks are a proposal: "Use them" places them, "No thanks" leaves the program alone ──
+      await enterFree('P-AC1');
+      if (!(await has('.gd-palette [data-pal="ask:words-to-blocks"]'))) skip('P-AC1 the proposal card', '[data-pal="ask:words-to-blocks"] in free play');
       else {
-        await setStub(port, { mutant: true });
-        await page.navigate(WORKSHOP);
-        await wait(3000);
-        const mutantRow = await text(OWL);
-        await setStub(port, { mutant: false });
-        await page.navigate(WORKSHOP);
-        await wait(3000);
-        const cleanRow = await text(OWL);
-        await shot('ac3-owl-row');
-        check('P-AC3 mutant: the written line stays; clean: the voiced line replaces it', !/Hou hou|Hoo hoo/.test(mutantRow) && mutantRow.trim().length > 0 && /Hou hou|Hoo hoo/.test(cleanRow), { mutantRow, cleanRow });
+        await addAsk('words-to-blocks', 'route');
+        const n0 = await blocks();
+        await play();
+        const card = await until(`(() => { const c = document.querySelector('.bg-proposal'); return c && c.offsetParent !== null ? c.innerText : ''; })()`, Boolean, 8000);
+        const n1 = await blocks();
+        await shot('ac1-proposal');
+        check('P-AC1 Olive’s blocks come as a card in her row — "Use them" / "No thanks" — and are NOT in the program yet', !!card && /Use them|Je les prends/.test(card) && /No thanks|Non merci/.test(card) && n1 === n0, { card, n0, n1 });
+        await tap(first('.bg-proposal .bg-prop-use'), 'Use them');
+        const n2 = await until(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`, (n) => n > n0, 4000);
+        const gone = !(await has('.bg-proposal'));
+        check('P-AC1 "Use them" places her blocks after the ask, and the card goes', n2 > n0 && gone, { n0, n2, gone });
+        await play();
+        const again = await until(`(() => { const c = document.querySelector('.bg-proposal'); return !!c && c.offsetParent !== null; })()`, Boolean, 8000);
+        const n3 = await blocks();
+        if (again) await tap(first('.bg-proposal .bg-prop-no'), 'No thanks');
+        await wait(500);
+        const n4 = await blocks();
+        check('P-AC1 a new run proposes again; "No thanks" hides it and changes nothing', again && n4 === n3 && !(await has('.bg-proposal')), { again, n3, n4 });
       }
 
-      // P-AC2
-      if (!(await has('[data-pal="ask:count-tulips"]')) || !(await has('.gd-bot[data-robot="0"]'))) skip('P-AC2 thinking, the world keeps animating, then resting', '[data-pal="ask:count-tulips"] and .gd-bot[data-robot="0"]');
+      // ── P-AC3: the voiced hint. Mutant: the written line stays, silently. Clean: Olive's voicing replaces it ──
+      await setStub(port, { mutant: true });
+      await enterFree('P-AC3 mutant');
+      await wait(2500);
+      const mutantRow = await text(SAY);
+      const mutantOwl = await text(OWL);
+      await setStub(port, { mutant: false });
+      await enterFree('P-AC3 clean');
+      const cleanRow = await until(`(document.querySelector(${JSON.stringify(SAY)}) || {}).innerText || ''`, (t) => /Hou hou|Hoo hoo/.test(t), 5000);
+      await shot('ac3-owl-row');
+      check('P-AC3 mutant: the written line stays and the owl does not say she is resting (dropped silently)', mutantRow.length > 0 && !/Hou hou|Hoo hoo/.test(mutantRow) && !/resting|se repose/i.test(mutantOwl), { mutantRow, mutantOwl });
+      check('P-AC3 clean: the voiced line replaces the written one', /Hou hou|Hoo hoo/.test(cleanRow), { cleanRow });
+
+      // ── P-AC2: a hung rung. Thinking while parked, the page alive (the robot moved first, animation frames, the dots); resting after the 12 s ──
+      await setStub(port, { hang: ['count-tulips'] });
+      await enterFree('P-AC2');
+      if (!(await has('.gd-palette [data-pal="ask:count-tulips"]'))) skip('P-AC2 thinking, the page alive, then resting', '[data-pal="ask:count-tulips"] in free play');
       else {
-        await setStub(port, { hang: ['count-tulips'] });
-        await page.navigate(WORKSHOP);
-        await wait(1500);
-        await click('[data-pal="fwd"]');
-        await click('[data-pal="ask:count-tulips"]');
-        await wait(300);
-        const played = (await clickText('Play')) || (await clickText('Jouer'));
-        const samples = [];
-        for (let i = 0; i < 8; i++) {
-          samples.push(await ev(`(() => { const b = document.querySelector('.gd-bot[data-robot="0"]'); const c = getComputedStyle(b); return c.left + ',' + c.top; })()`));
-          await wait(60);
-        }
-        const thinking = await text(OWL);
-        await wait(13000);
-        const resting = await text(OWL);
+        await tap(first('.gd-palette [data-pal="fwd"]'), 'palette fwd');
+        await addAsk('count-tulips', 'list');
+        const x0 = await ev(`(document.querySelector('.bg-stage .gd-bot') || { getAttribute: () => null }).getAttribute('data-x')`);
+        await play();
+        const thinking = await until(`(document.querySelector(${JSON.stringify(OWL)}) || {}).innerText || ''`, (t) => /réfléchit|thinking/i.test(t), 4000);
+        // Ends on a timer, never on a frame: a throttled rAF must read as few frames, not hang the drive.
+        const live = await ev(`new Promise((done) => { let frames = 0; const dots = document.getAnimations().filter((a) => a.animationName === 'bg-dots'); const c0 = dots.map((a) => a.currentTime); const tick = () => { frames++; requestAnimationFrame(tick); }; requestAnimationFrame(tick); setTimeout(() => done({ frames, dots: dots.length, moved: dots.some((a, i) => a.currentTime !== c0[i]) }), 600); })`);
+        const x1 = await ev(`(document.querySelector('.bg-stage .gd-bot') || { getAttribute: () => null }).getAttribute('data-x')`);
+        const stillParked = /réfléchit|thinking/i.test(await text(OWL));
+        const resting = await until(`(document.querySelector(${JSON.stringify(OWL)}) || {}).innerText || ''`, (t) => /se repose|resting/i.test(t), 16000);
         await setStub(port, { hang: [] });
         await shot('ac2-resting');
-        check('P-AC2 parked: thinking, the sprite still moving; after 12 s: resting', played && new Set(samples).size > 1 && /réfléchit|thinking/i.test(thinking) && /se repose|resting/i.test(resting), { played, samples, thinking, resting });
+        check('P-AC2 parked: the owl says she is thinking; the page keeps animating (the robot walked first, ≥ 20 frames in 600 ms, the dots move)', /réfléchit|thinking/i.test(thinking) && stillParked && x1 !== x0 && live.frames >= 20 && live.dots > 0 && live.moved, { thinking, x0, x1, live, stillParked });
+        check('P-AC2 after the page’s 12 s: the run resumes on the written answer and the owl says she is resting', /se repose|resting/i.test(resting), { resting });
       }
 
-      // P-AC5
+      // ── P-AC5: the exam gate on the page ──
       await setStub(port, { exam: { 'words-to-blocks': 'fail' } });
       await req(port, 'POST', '/__garden/olive/exam', {});
-      await page.navigate(WORKSHOP);
-      await wait(1500);
-      const heldPal = await has('[data-pal="ask:words-to-blocks"]');
-      await page.navigate(SKILLS);
-      await wait(1500);
-      const skillsText = await bodyText();
+      await enterFree('P-AC5 failed');
+      await wait(800);
+      const heldPal = await has('.gd-palette [data-pal="ask:words-to-blocks"]');
+      const otherPal = await has('.gd-palette [data-pal="ask:poem"]');
+      await page.navigate('/skills');
+      const skillsLine = await until(`(document.querySelector('.bg-olive-held') || {}).innerText || ''`, Boolean, 5000);
       await shot('ac5-skills');
       await setStub(port, { exam: { 'words-to-blocks': 'pass' } });
       await req(port, 'POST', '/__garden/olive/exam', {});
-      await page.navigate(WORKSHOP);
+      await enterFree('P-AC5 passed');
+      await wait(800);
+      const backPal = await has('.gd-palette [data-pal="ask:words-to-blocks"]');
+      await page.navigate('/skills');
       await wait(1500);
-      const backPal = await has('[data-pal="ask:words-to-blocks"]');
-      if (!backPal && !heldPal) skip('P-AC5 the exam gate on the page', '[data-pal="ask:words-to-blocks"] (a request offering rung 3)');
-      else check('P-AC5 withheld after a failed exam, offered after a passing re-run; Skills says so', heldPal === false && backPal === true && /can’t do this here yet|ne sait pas encore faire ça ici/.test(skillsText), { heldPal, backPal, skills: skillsText.slice(0, 200) });
+      const skillsAfter = await has('.bg-olive-held');
+      check('P-AC5 withheld after a failed exam (the other rungs still offered), offered after a passing re-run; Skills says so, then stops saying it', heldPal === false && otherPal === true && backPal === true && /can’t do this here yet|ne sait pas encore faire ça ici/.test(skillsLine) && /words into blocks|des mots en blocs/.test(skillsLine) && skillsAfter === false, { heldPal, otherPal, backPal, skillsLine, skillsAfter });
+
+      // ── P-390: the Workshop still fits a phone with the hooks in (Play and the owl on screen at scroll 0) ──
+      await page.setViewport({ width: 390, height: 844, mobile: true });
+      await enterFree('P-390');
+      await wait(900);
+      await ev('window.scrollTo(0, 0)');
+      const fit = await ev(`(() => { const box = (s) => { const e = [...document.querySelectorAll(s)].find((x) => x.offsetParent !== null); if (!e) return null; const r = e.getBoundingClientRect(); return { top: r.top, bottom: r.bottom }; }; return { play: box('.bg-controls .bg-i-play'), owl: box('.bg-owl'), vw: innerWidth, vh: innerHeight, sx: document.scrollingElement.scrollWidth }; })()`);
+      await shot('workshop-free-390');
+      check('P-390 free play at 390×844: Play and the owl on screen at scroll 0, nothing wider than the phone', !!fit.play && fit.play.bottom <= fit.vh && !!fit.owl && fit.owl.top < fit.vh && fit.vw === 390 && fit.sx <= 390, fit);
+      await page.setViewport({ width: 1368, height: 912, mobile: false });
+
+      // ── P-S3-R5: the new pieces' words at ≥ 4.5:1 on their ground (the slot line, the proposal card, the tags, the Skills line) ──
+      await enterFree('contrast');
+      await addAsk('words-to-blocks', 'route');
+      await play();
+      await until(`!!document.querySelector('.bg-proposal')`, Boolean, 8000);
+      await tap(first('.gd-palette [data-pal="ask:poem"]'), 'palette ask:poem (for the slot line)');
+      await wait(600);
+      const ratios = await ev(`(() => {
+        const parse = (c) => { const m = String(c).match(/rgba?\\(([^)]+)\\)/); if (!m) return null; const p = m[1].split(/[ ,\\/]+/).filter(Boolean).map(Number); return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 }; };
+        const lum = (c) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); };
+        const ground = (el) => { for (let e = el; e; e = e.parentElement) { const bg = parse(getComputedStyle(e).backgroundColor); if (bg && bg.a >= 0.999) return bg; } return { r: 255, g: 255, b: 255, a: 1 }; };
+        const out = {};
+        for (const sel of ['.bg-slot-msg', '.bg-proposal', '.bg-prop-blocks', '.bg-prop-use', '.bg-prop-no', '.bg-owl-say', '.bg-owl-tag']) {
+          const el = [...document.querySelectorAll(sel)].find((e) => e.offsetParent !== null);
+          if (!el) { out[sel] = null; continue; }
+          const leaf = [...el.querySelectorAll('*')].concat([el]).find((e) => [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())) || el;
+          const fg = parse(getComputedStyle(leaf).color), bg = ground(leaf);
+          const x = lum(fg), y = lum(bg);
+          out[sel] = Math.round(((Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)) * 100) / 100;
+        }
+        return out;
+      })()`);
+      await shot('contrast-hooks');
+      const measured = Object.entries(ratios).filter(([, r]) => r !== null);
+      check(`P-S3-R5 the hooks’ words ≥ 4.5:1 on their ground (${measured.length} measured)`, measured.length >= 5 && measured.every(([, r]) => r >= 4.5), ratios);
 
       check('P console: 0 errors', page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));
     });

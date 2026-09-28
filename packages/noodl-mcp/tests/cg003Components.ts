@@ -100,6 +100,7 @@ export const C = {
   sticker: '/Robot/Sticker',
   options: '/Robot/Options',
   skill: '/Skills/Card',
+  skOlive: '/Skills/Olive line',
   profile: '/Profiles/Card',
   form: '/Profiles/Form',
   guOlive: '/Grown/Olive panel',
@@ -299,7 +300,11 @@ const TYPE: Readonly<Record<string, string>> = {
   found: 'boolean', offer: 'boolean', met: 'boolean', ok: 'boolean', hasProfile: 'boolean', older: 'boolean',
   younger: 'boolean', show: 'boolean', changed: 'boolean', recorded: 'boolean', empty: 'boolean', hit: 'boolean',
   asked: 'boolean', waiting: 'boolean', folded: 'boolean', canAdd: 'boolean', isEmpty: 'boolean', isFree: 'boolean',
-  pins: 'array', marks: 'array', migrated: 'boolean', open: 'number', sub: 'string'
+  pins: 'array', marks: 'array', migrated: 'boolean', open: 'number', sub: 'string',
+  // CG-005 s3 — the page hooks.
+  voiceSig: 'string', sig: 'string', due: 'boolean', blockId: 'string', blocksText: 'string', handled: 'string',
+  accept: 'boolean', proposal: 'object', exam: 'object', held: 'array', thinking: 'boolean', resting: 'boolean',
+  thinkingText: 'string', restingText: 'string', message: 'string'
 };
 const typeOf = (name: string) => TYPE[name] ?? '*';
 
@@ -749,15 +754,27 @@ const PLAY: CgComponent = {
     place('plAsk', BUTTON_NODE, 'Ask Olive', 'plControls', { ...btn('ask', 'owlc', { cssClassName: 'bg-ask-push' }), label: 'Ask Olive' }),
     group('plOwl', 'The owl', 'plLeft', { width: pct(100), sizeMode: 'contentHeight', backgroundColor: 'var(--violet-2)', borderRadius: px(16), ...pad(12), cssClassName: 'bg-owl' }, ['plOwlPic', 'plOwlCol']),
     group('plOwlPic', 'Olive', 'plOwl', { sizeMode: 'explicit', width: px(64), height: px(64), cssClassName: 'bg-owl-pic bg-sp-owl' }),
-    group('plOwlCol', 'What she says', 'plOwl', column({ rowGap: sp(4) }), ['plOwlSay', 'plOwlMeta']),
+    group('plOwlCol', 'What she says', 'plOwl', column({ rowGap: sp(4) }), ['plOwlSay', 'plOwlThinking', 'plOwlResting', 'plProposal', 'plOwlMeta']),
     text('plOwlSay', 'The hint', 'plOwlCol', '', { ...T_BODY, fontWeight: '700', cssClassName: 'bg-owl-say' }),
+    // CG-005 s3: the owl's two small tags — thinking (dots, no clock) while a question is out; resting after a fallback.
+    text('plOwlThinking', 'Olive is thinking', 'plOwlCol', '', { fontSize: px(13), fontWeight: '800', color: 'var(--violet-ink)', cssClassName: 'bg-owl-tag bg-owl-thinking', mounted: false }),
+    text('plOwlResting', 'Olive is resting', 'plOwlCol', '', { fontSize: px(13), fontWeight: '800', color: 'var(--violet-ink)', cssClassName: 'bg-owl-tag bg-owl-resting', mounted: false }),
+    // CG-005 s3, AC1: Olive's blocks are a PROPOSAL — nothing enters the program without "Use them".
+    group('plProposal', 'Olive suggests blocks', 'plOwlCol', { ...column({ rowGap: sp(6) }), backgroundColor: 'var(--card)', borderRadius: px(14), ...pad(10, 12), cssClassName: 'bg-proposal', mounted: false }, ['plPropH', 'plPropBlocks', 'plPropBtns']),
+    text('plPropH', 'Olive suggests these blocks', 'plProposal', '', { fontSize: px(14), fontWeight: '800', color: 'var(--ink)' }),
+    text('plPropBlocks', 'The blocks she suggests', 'plProposal', '', { ...T_BODY, cssClassName: 'bg-prop-blocks' }),
+    group('plPropBtns', 'Use them, or not', 'plProposal', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(10) }), ['plUse', 'plNoThanks']),
+    place('plUse', BUTTON_NODE, 'Use them', 'plPropBtns', { ...btn('ask', '', { ...pad(8, 14), fontSize: px(14), cssClassName: 'bg-prop-use' }), label: 'Use them' }),
+    place('plNoThanks', BUTTON_NODE, 'No thanks', 'plPropBtns', { ...btn('quiet', '', { ...pad(8, 14), fontSize: px(14), cssClassName: 'bg-prop-no' }), label: 'No thanks' }),
     text('plOwlMeta', 'Where she lives', 'plOwlCol', '', { fontSize: px(12), color: 'var(--violet-meta)', cssClassName: 'bg-owl-meta' }),
-    group('plRight', 'The steps side', 'plWs', { ...column({ rowGap: sp(10) }), ...PANEL }, ['plStepsHead', 'plBlocksBox', 'plTidy']),
+    group('plRight', 'The steps side', 'plWs', { ...column({ rowGap: sp(10) }), ...PANEL }, ['plStepsHead', 'plBlocksBox', 'plSlotMsg', 'plTidy']),
     group('plStepsHead', 'The steps’ head', 'plRight', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'space-between', flexWrap: 'nowrap' }), ['plStepsH', 'plCount']),
     text('plStepsH', 'Pip’s steps', 'plStepsHead', '', { ...T_H2, fontSize: px(20) }),
     text('plCount', 'How many blocks', 'plStepsHead', '', { sizeMode: 'contentSize', fontSize: px(13), fontWeight: '800', color: 'var(--ink-2)', mounted: false }),
     group('plBlocksBox', 'The steps, scrolling in their own box', 'plRight', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-blocks-box' }, ['plBlocks']),
     place('plBlocks', KIT_BLOCKS, 'The blocks', 'plBlocksBox', { ...BLOCK_COLOURS }),
+    // CG-005 s3, AC6: an ask block's slot refused — in words, beside the picker, before anything is sent.
+    text('plSlotMsg', 'Why Olive cannot be asked yet', 'plRight', '', { fontSize: px(14), fontWeight: '800', color: 'var(--coral)', cssClassName: 'bg-slot-msg', mounted: false }),
     group('plTidy', 'The fold offer', 'plRight', { ...row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(10) }), backgroundColor: 'var(--tidy)', borderStyle: 'solid', borderWidth: px(2), borderColor: 'var(--tidy-edge)', borderRadius: px(14), ...pad(10, 12), cssClassName: 'bg-tidy', mounted: false }, ['plTidyText', 'plFoldBtn', 'plNotNow']),
     text('plTidyText', 'What was spotted', 'plTidy', '', { ...T_BODY, fontWeight: '700' }),
     place('plFoldBtn', BUTTON_NODE, 'Fold it', 'plTidy', { ...btn('fold', 'tidy', { ...pad(8, 14), fontSize: px(14) }), label: 'Fold it' }),
@@ -769,6 +786,16 @@ const PLAY: CgComponent = {
     logic('plLine', L('Hint line'), 'The owl’s line'),
     logic('plOwlRow', L('Owl row'), 'The written line, voiced only for the same key'),
     logic('plAskOlive', L('Ask Olive'), 'Ask Olive for a parked run'),
+    // CG-005 s3: the voiced hint — a second Ask Olive, asked once per new line by Voice hint (fed the line's signature only).
+    logic('plVoiceHint', L('Voice hint'), 'A new line to voice'),
+    logic('plAskVoice', L('Ask Olive'), 'Ask Olive to voice the hint'),
+    logic('plStatus', L('Olive status'), 'Her exam on this computer', { nonce: 1 }),
+    logic('plSlots', L('Olive slots'), 'May this ask be sent?'),
+    logic('plPropCard', L('Proposal card'), 'The blocks Olive proposed, until answered'),
+    logic('plAccept', L('Accept proposal'), 'Use them', { accept: true }),
+    variable('plPropDoneVar', 'gardenProposalDone', 'The proposal the child answered'),
+    setVariable('plSetPropDone', 'gardenProposalDone', 'Answered'),
+    setVariable('plSetProgAccept', 'gardenProgram', 'What Use them placed'),
     // ── The world, the program, the run ──
     logic('plStart', L('Start world'), 'The world this request starts from'),
     logic('plNonce', COUNTER_NODE, 'Start over, counted', { startValue: 0 }),
@@ -886,7 +913,9 @@ const PLAY: CgComponent = {
     wire('plRunner', 'running', 'plBlocks', 'locked'),
     wire('plIn', 'band', 'plPalette', 'band'),
     wire('plStart', 'allowed', 'plPalette', 'allowed'),
+    // The request's rungs (band 10-12 requests only, ruling 4) and this computer's exam: a rung it failed is withheld (AC5).
     wire('plStart', 'rungs', 'plPalette', 'rungs'),
+    wire('plStatus', 'exam', 'plPalette', 'exam'),
     wire('plIn', 'lang', 'plPalette', 'lang'),
     wire('plIn', 'words', 'plPalette', 'words'),
     wire('plPalette', 'palette', 'plKitPal', 'palette'),
@@ -1011,6 +1040,44 @@ const PLAY: CgComponent = {
     wire('plRunner', 'waiting', 'plOwlRow', 'waiting'),
     wire('plAskOlive', 'answer', 'plOwlRow', 'answer'),
     wire('plOwlRow', 'text', 'plOwlSay', 'text'),
+    wire('plOwlRow', 'thinking', 'plOwlThinking', 'mounted'),
+    wire('plOwlRow', 'thinkingText', 'plOwlThinking', 'text'),
+    wire('plOwlRow', 'resting', 'plOwlResting', 'mounted'),
+    wire('plOwlRow', 'restingText', 'plOwlResting', 'text'),
+    // The voiced hint (AC3): the row's signature → Voice hint → the second Ask Olive → back to the row, which keeps the
+    // written line unless the answer is for THIS line and clean. Voice hint reads the signature only, so it cannot loop.
+    wire('plOwlRow', 'voiceSig', 'plVoiceHint', 'sig'),
+    wire('plVoiceHint', 'request', 'plAskVoice', 'request'),
+    wire('plIn', 'band', 'plAskVoice', 'band'),
+    wire('plVoiceHint', 'ran', 'plAskVoice', 'go'),
+    wire('plAskVoice', 'answer', 'plOwlRow', 'voiced'),
+    // The slot line (AC6): the ask block the child is on, or the first one Olive could not be asked with.
+    wire('plRead', 'program', 'plSlots', 'program'),
+    wire('plBlocks', 'onSelected', 'plSlots', 'selected'),
+    wire('plIn', 'band', 'plSlots', 'band'),
+    wire('plIn', 'lang', 'plSlots', 'lang'),
+    wire('plIn', 'words', 'plSlots', 'words'),
+    wire('plSlots', 'message', 'plSlotMsg', 'text'),
+    wire('plSlots', 'show', 'plSlotMsg', 'mounted'),
+    // The proposal (AC1): shown from the run, placed only by Use them; either answer hides it.
+    wire('plT', 'oliveProposes', 'plPropH', 'text'),
+    wire('plT', 'oliveAccept', 'plUse', 'label'),
+    wire('plT', 'oliveDecline', 'plNoThanks', 'label'),
+    wire('plRunner', 'run', 'plPropCard', 'run'),
+    wire('plRead', 'program', 'plPropCard', 'program'),
+    wire('plPropDoneVar', 'value', 'plPropCard', 'handled'),
+    wire('plIn', 'words', 'plPropCard', 'words'),
+    wire('plIn', 'lang', 'plPropCard', 'lang'),
+    wire('plPropCard', 'show', 'plProposal', 'mounted'),
+    wire('plPropCard', 'blocksText', 'plPropBlocks', 'text'),
+    wire('plRead', 'program', 'plAccept', 'program'),
+    wire('plPropCard', 'proposal', 'plAccept', 'proposal'),
+    wire('plUse', 'onClick', 'plAccept', 'go'),
+    wire('plAccept', 'program', 'plSetProgAccept', 'value'),
+    wire('plAccept', 'ran', 'plSetProgAccept', 'do'),
+    wire('plPropCard', 'sig', 'plSetPropDone', 'value'),
+    wire('plAccept', 'ran', 'plSetPropDone', 'do'),
+    wire('plNoThanks', 'onClick', 'plSetPropDone', 'do'),
     // A run parked on an ask block: Olive is asked once; her answer (or the written one) resumes it.
     wire('plRunner', 'request', 'plAskOlive', 'request'),
     wire('plRunner', 'run', 'plAskOlive', 'run'),
@@ -1816,8 +1883,33 @@ const PAGE_ROBOT: CgComponent = (() => {
   };
 })();
 
+/**
+ * What Olive cannot do on this computer (CG-005 AC5): the rungs its exam failed, in words — "Olive can't do this here
+ * yet: words into blocks" — from the shell's status door. Band 10-12 only (the rungs are theirs); nothing to say, no line.
+ */
+const SKILL_OLIVE: CgComponent = {
+  path: 'Skills/Olive line',
+  description: 'The rungs this computer’s exam failed, said as Olive can’t do this here yet. Shows nothing when there is nothing to say (no exam, every rung passed, band 7–9).',
+  nodes: [
+    inputs('soIn', [['band', 'number'], ['lang', 'string'], ['words', 'array'], ['botName', 'string']]),
+    group('soBox', 'What Olive cannot do here', undefined, { ...row({ width: pct(100), sizeMode: 'contentHeight', flexWrap: 'nowrap' }), backgroundColor: 'var(--violet-2)', borderRadius: px(16), ...pad(10, 14), cssClassName: 'bg-olive-held', mounted: false }, ['soText']),
+    text('soText', 'Olive can’t do this here yet', 'soBox', '', { fontSize: px(15), fontWeight: '800', color: 'var(--violet-ink)' }),
+    logic('soStatus', L('Olive status'), 'Her exam on this computer', { nonce: 1 }),
+    logic('soHeld', L('Olive held'), 'What it failed, in words')
+  ],
+  connections: [
+    wire('soStatus', 'exam', 'soHeld', 'exam'),
+    wire('soIn', 'band', 'soHeld', 'band'),
+    wire('soIn', 'lang', 'soHeld', 'lang'),
+    wire('soIn', 'words', 'soHeld', 'words'),
+    wire('soIn', 'botName', 'soHeld', 'botName'),
+    wire('soHeld', 'text', 'soText', 'text'),
+    wire('soHeld', 'show', 'soBox', 'mounted')
+  ]
+};
+
 const PAGE_SKILLS: CgComponent = (() => {
-  const base = pageCommon('sk', 'Skills', 'skills', 'skills', ['skHead', 'skPath']);
+  const base = pageCommon('sk', 'Skills', 'skills', 'skills', ['skHead', 'skOlive', 'skPath']);
   return {
     path: 'Pages/Skills',
     description: 'Skills: the seven tricks, each a block, seed / sprouted / blooming, with where it sits in the programme. No score; nothing wilts.',
@@ -1825,6 +1917,7 @@ const PAGE_SKILLS: CgComponent = (() => {
     nodes: [
       ...base.nodes,
       place('skHead', C.head, 'The head', 'skWrap'),
+      place('skOlive', C.skOlive, 'What Olive cannot do here', 'skWrap'),
       group('skPath', 'The seven tricks', 'skWrap', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-path' }, ['skEach']),
       { ...logic('skEach', FOR_EACH_NODE, 'One card per trick', { template: C.skill, templateType: 'explicit' }), parent: 'skPath' },
       logic('skRows', L('Skill rows'), 'The tricks, grown or not')
@@ -1836,7 +1929,11 @@ const PAGE_SKILLS: CgComponent = (() => {
       wire('skWords', 'words', 'skRows', 'words'),
       wire('skFam', 'lang', 'skRows', 'lang'),
       wire('skFam', 'botName', 'skRows', 'botName'),
-      wire('skRows', 'rows', 'skEach', 'items')
+      wire('skRows', 'rows', 'skEach', 'items'),
+      wire('skFam', 'band', 'skOlive', 'band'),
+      wire('skFam', 'lang', 'skOlive', 'lang'),
+      wire('skFam', 'botName', 'skOlive', 'botName'),
+      wire('skWords', 'words', 'skOlive', 'words')
     ]
   };
 })();
@@ -1887,6 +1984,7 @@ export const CG003_COMPONENTS: ReadonlyArray<CgComponent> = [
   STICKER,
   OPTIONS,
   SKILL,
+  SKILL_OLIVE,
   PROFILE,
   FORM,
   GU_OLIVE,

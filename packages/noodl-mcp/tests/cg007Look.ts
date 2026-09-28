@@ -281,10 +281,19 @@ ${owlColourRule}
 .bg-owl { display: grid !important; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; align-items: start; }
 .bg-owl-pic { width: 64px; height: 64px; }
 .bg-owl-meta::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); margin-right: 6px; }
+/* The owl's two tags (CG-005 s3): thinking — three dots that fill in turn, no clock — and resting, still. */
+.bg-owl-tag { letter-spacing: 0.01em; }
+.bg-owl-thinking::after { content: '...'; display: inline-block; overflow: hidden; vertical-align: bottom; width: 0; animation: bg-dots 1.2s steps(4, end) infinite; }
+@keyframes bg-dots { to { width: 1.1em; } }
+/* Olive's proposal (CG-005 s3, AC1): a white card in her row, her blocks in words, Use them / No thanks. */
+.bg-proposal { box-shadow: var(--shadow-soft); animation: bg-pop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.bg-prop-blocks { font-weight: 700; }
 
 /* The steps (the mockup's .script). The block list scrolls in its own box (AC4). */
 .bg-blocks-box { max-height: min(52vh, 460px); overflow-y: auto !important; overscroll-behavior: contain; }
 @media (max-width: 980px) { .bg-blocks-box { max-height: 38vh; } }
+/* An ask block Olive cannot be asked with yet (CG-005 AC6): the reason, in words, under the block list. */
+.bg-slot-msg::before { content: '!'; display: inline-block; width: 18px; height: 18px; margin-right: 6px; border-radius: 50%; background: var(--coral); color: var(--on-fill); font-size: 12px; line-height: 18px; text-align: center; }
 .bg-tidy { animation: bg-pop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 
 /* The win card: fixed, centred, over whatever is scrolled (AC7; P95 R6: every positioning property !important). */

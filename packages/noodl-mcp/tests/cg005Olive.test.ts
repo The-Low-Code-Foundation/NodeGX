@@ -15,7 +15,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { HINTS, WORDS, WORD_KEYS } from './cg002Content';
+import { HINTS, REQUESTS, WORDS, WORD_KEYS } from './cg002Content';
 import { APPLY_DELTA_SCRIPT, DIAL_TEMPERATURE, GOAL_SCRIPT, NEW_RUN_SCRIPT, PALETTE_SCRIPT, STEP_SCRIPT, portsOf, runScript } from './cg002Scripts';
 import {
   ACCEPT_PROPOSAL_SCRIPT,
@@ -28,6 +28,8 @@ import {
   OLIVE_WORDS,
   OWL_ROW_SCRIPT,
   PALETTE_RUNG_IDS,
+  PROPOSAL_CARD_SCRIPT,
+  VOICE_HINT_SCRIPT,
   SHELL_DIR,
   rungWordKey,
   runOliveScript,
@@ -51,11 +53,11 @@ const WORD_ROWS = [...WORD_KEYS.map((key) => ({ key, ...WORDS[key] })), ...Objec
 type Shell = { port: number; url: string; engine: any; olive: any; close: () => Promise<void> };
 
 /** The shell's route on a loopback relay, the model replaced by the stub (or absent). */
-async function startShell(o: { stub?: Record<string, unknown>; noModel?: boolean; timeoutMs?: number } = {}): Promise<Shell> {
+async function startShell(o: { stub?: Record<string, unknown>; noModel?: boolean; timeoutMs?: number; engine?: any } = {}): Promise<Shell> {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cg005-data-'));
   const appDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cg005-app-'));
   fs.writeFileSync(path.join(appDir, 'index.html'), '<html></html>');
-  const engine = createStubEngine(o.stub || {});
+  const engine = o.engine || createStubEngine(o.stub || {});
   const owl = createOwl({ modelPath: o.noModel ? path.join(dataDir, 'no-model.gguf') : path.join(SHELL_DIR, 'olive-stub.js'), engine, timeoutMs: o.timeoutMs });
   await owl.load();
   const olive = createOliveDoors({ owl, templates: T, dataDir, header: gardenConfig.header, prefix: gardenConfig.doorPrefix });
@@ -202,7 +204,12 @@ describe('CG-005 — Olive in the game', () => {
         expect(out.answer).toMatchObject({ ok: false, fallback: true, reason: 'timeout', value: 6, sent: true, seq: 1, run: parked.run.runId });
         const resumed = runScript(STEP_SCRIPT, { run: parked.run, world: WORLD(), answer: out.answer });
         expect([resumed.waiting, resumed.run.lastAnswer.fallback, resumed.run.lastAnswer.reason]).toEqual([false, true, 'timeout']);
-        const row = runScript(OWL_ROW_SCRIPT, { waiting: false, answer: resumed.run.lastAnswer, hintKey: 'hintStart', written: 'Coucou', lang: 'fr', words: WORD_ROWS });
+        // s3: the hint after the run is voiced too, so while THAT is out the owl still thinks; once its answer is in
+        // (here the fallback a slow model gives), she rests.
+        const line = { waiting: false, answer: resumed.run.lastAnswer, hintKey: 'hintStart', written: 'Coucou', lang: 'fr', words: WORD_ROWS };
+        const out1 = runScript(OWL_ROW_SCRIPT, line);
+        expect([out1.thinking, out1.resting]).toEqual([true, false]);
+        const row = runScript(OWL_ROW_SCRIPT, { ...line, voiced: { seq: out1.voiceSig, ok: false, fallback: true, reason: 'timeout', rung: 'voice-hint', key: 'hintStart' } });
         expect([row.thinking, row.resting, row.restingText, row.text]).toEqual([false, true, 'Olive se repose', 'Coucou']);
         const en = runScript(OWL_ROW_SCRIPT, { answer: resumed.run.lastAnswer, lang: 'en', words: WORD_ROWS });
         expect(en.restingText).toBe('Olive is resting');
@@ -266,10 +273,17 @@ describe('CG-005 — Olive in the game', () => {
     };
 
     it('the owl row builds the voice request for a key Olive may voice, and none for one she may not', () => {
-      expect(runScript(OWL_ROW_SCRIPT, { hintKey: 'hintPattern', vars: { n: 3 }, lang: 'en', botName: 'Pip' }).voiceRequest).toEqual({ rung: 'voice-hint', slots: { key: 'hintPattern', b: 'Pip', n: '3' }, lang: 'en' });
-      expect(runScript(OWL_ROW_SCRIPT, { hintKey: 'oliveResting', lang: 'en' }).voiceRequest).toBe(null);
+      // s3: the request carries its own signature (seq), the line as text, so its answer can be told from a late one.
+      const sigOf = (r: Record<string, unknown>) => JSON.stringify(r);
+      const pattern = runScript(OWL_ROW_SCRIPT, { hintKey: 'hintPattern', vars: { n: 3 }, lang: 'en', botName: 'Pip' });
+      const want = { rung: 'voice-hint', slots: { key: 'hintPattern', b: 'Pip', n: '3' }, lang: 'en' };
+      expect(pattern.voiceRequest).toEqual({ ...want, seq: sigOf(want) });
+      expect(pattern.voiceSig).toBe(sigOf(want));
+      const resting = runScript(OWL_ROW_SCRIPT, { hintKey: 'oliveResting', lang: 'en' });
+      expect([resting.voiceRequest, resting.voiceSig]).toEqual([null, '']);
       // hintMissed counts {w} of {t}: both ride along, so the voiced line says the same numbers as the written one (CG-006 s3).
-      expect(runScript(OWL_ROW_SCRIPT, { hintKey: 'hintMissed', vars: { w: 2, t: 4 }, lang: 'fr', botName: 'Bo' }).voiceRequest).toEqual({ rung: 'voice-hint', slots: { key: 'hintMissed', b: 'Bo', w: '2', t: '4' }, lang: 'fr' });
+      const missed = { rung: 'voice-hint', slots: { key: 'hintMissed', b: 'Bo', w: '2', t: '4' }, lang: 'fr' };
+      expect(runScript(OWL_ROW_SCRIPT, { hintKey: 'hintMissed', vars: { w: 2, t: 4 }, lang: 'fr', botName: 'Bo' }).voiceRequest).toEqual({ ...missed, seq: sigOf(missed) });
     });
 
     it('a clean voiced line for the SAME key replaces the written one', async () => {
@@ -302,11 +316,12 @@ describe('CG-005 — Olive in the game', () => {
         await mutant.close();
       }
       // The page checks too: a shell that let a listed word through (an older one) still cannot put it on screen.
-      const leaked = { ok: true, rung: 'voice-hint', key: 'hintWet', lang: 'fr', text: 'Quelle flaque, espèce de crétin !' };
+      const seq = runScript(OWL_ROW_SCRIPT, { hintKey: 'hintWet', written, lang: 'fr', words: WORD_ROWS }).voiceSig;
+      const leaked = { ok: true, rung: 'voice-hint', key: 'hintWet', lang: 'fr', seq, text: 'Quelle flaque, Pip, espèce de crétin !' };
       const row = runScript(OWL_ROW_SCRIPT, { hintKey: 'hintWet', written, voiced: leaked, lang: 'fr', words: WORD_ROWS });
       expect([row.text, row.voiced]).toEqual([written, false]);
-      const clean = { ...leaked, text: 'Quelle flaque, mon ami !' };
-      expect(runScript(OWL_ROW_SCRIPT, { hintKey: 'hintWet', written, voiced: clean, lang: 'fr', words: WORD_ROWS }).text).toBe('Quelle flaque, mon ami !');
+      const clean = { ...leaked, text: 'Quelle flaque, Pip, mon ami !' };
+      expect(runScript(OWL_ROW_SCRIPT, { hintKey: 'hintWet', written, voiced: clean, lang: 'fr', words: WORD_ROWS }).text).toBe('Quelle flaque, Pip, mon ami !');
     });
   });
 
@@ -514,6 +529,131 @@ describe('CG-005 — Olive in the game', () => {
     });
   });
 
+  describe('s3 — the page hooks (CG-005 §8): the voiced hint, the slot line, the proposal card, the requests’ rungs', () => {
+    /** The voiced hint as the page wires it: the row's signature → Voice hint → the second Ask Olive → the row. */
+    const chain = async (sh: Shell, key: string, o: { written: string; lang?: string; vars?: Record<string, unknown>; botName?: string }) => {
+      const base = { hintKey: key, written: o.written, vars: o.vars, lang: o.lang || 'fr', words: WORD_ROWS, botName: o.botName || 'Pip' };
+      const row0 = runScript(OWL_ROW_SCRIPT, base);
+      const vh = runScript(VOICE_HINT_SCRIPT, { sig: row0.voiceSig });
+      const ask = await runOliveScript(ASK_OLIVE_SCRIPT, { request: vh.request, band: 2, url: sh.url }, { fetch });
+      const row1 = runScript(OWL_ROW_SCRIPT, { ...base, voiced: ask.answer });
+      return { base, row0, vh, ask, row1 };
+    };
+
+    it('the voiced hint through the real route: written at once and "thinking" while it is out, then the voiced line; the answer never asks again', async () => {
+      const written = T.hints.hintWet.fr.replace(/\{b\}/g, 'Pip');
+      const c = await chain(shell, 'hintWet', { written });
+      expect([c.row0.text, c.row0.voiced, c.row0.thinking, c.row0.thinkingText]).toEqual([written, false, true, 'Olive réfléchit']);
+      expect(c.vh).toEqual({ request: c.row0.voiceRequest, due: true });
+      expect(c.ask.answer).toMatchObject({ ok: true, rung: 'voice-hint', key: 'hintWet', seq: c.row0.voiceSig });
+      expect([c.row1.text, c.row1.voiced, c.row1.thinking, c.row1.resting]).toEqual(['Hou hou ! ' + written, true, false, false]);
+      // Voice hint reads the signature ONLY, and Olive's answer changes the row's text, never its signature: one ask per line.
+      expect(portsOf(VOICE_HINT_SCRIPT).inputs).toEqual(['sig']);
+      expect(c.row1.voiceSig).toBe(c.row0.voiceSig);
+      // Nothing to voice (a key Olive may not voice), a signature for another rung, junk: nothing is asked.
+      expect(runScript(VOICE_HINT_SCRIPT, { sig: '' })).toEqual({ request: null, due: false });
+      expect(runScript(VOICE_HINT_SCRIPT, { sig: JSON.stringify({ rung: 'poem', slots: { flower: 'x' }, lang: 'fr' }) }).request).toBe(null);
+      expect(runScript(VOICE_HINT_SCRIPT, { sig: 'not json' }).request).toBe(null);
+    });
+
+    it('🔴 an UNFAITHFUL voicing (the shell’s rule of 2026-09-28, two of its real replies): the route refuses it, the page keeps the written line, silently', async () => {
+      const replies: Record<string, string> = { fr: 'C’est une excellente question ! La réponse est : **Un tulipe !**', en: 'Pip was standing in front of a tree, having just watered a puddle where no tulips were growing.' };
+      const engine = { async load() { return { gpu: 'test', async generate(g: any) { return replies[g.lang === 'en' ? 'en' : 'fr']; }, async dispose() {} }; } };
+      const sh = await startShell({ engine });
+      try {
+        for (const lang of ['fr', 'en']) {
+          const written = (T.hints.hintWet[lang] as string).replace(/\{b\}/g, 'Pip');
+          const c = await chain(sh, 'hintWet', { written, lang });
+          expect({ lang, answer: c.ask.answer }).toMatchObject({ lang, answer: { ok: false, fallback: true, reason: 'unfaithful', seq: c.row0.voiceSig } });
+          expect({ lang, row: [c.row1.text, c.row1.voiced, c.row1.thinking, c.row1.resting] }).toEqual({ lang, row: [written, false, false, false] });
+        }
+      } finally {
+        await sh.close();
+      }
+    });
+
+    it('🔴 the page’s own copy of that rule, each part alone, and a LATE answer: the written line stays', () => {
+      const written = 'A puddle! Pip watered where there is no tulip. Where was Pip facing?';
+      const base = { hintKey: 'hintWet', written, lang: 'en', words: WORD_ROWS, botName: 'Pip' };
+      const seq = runScript(OWL_ROW_SCRIPT, base).voiceSig;
+      const v = (text: string, s = seq) => ({ ok: true, rung: 'voice-hint', key: 'hintWet', lang: 'en', seq: s, text });
+      const good = 'Oops, a puddle! Where was Pip looking?';
+      expect(runScript(OWL_ROW_SCRIPT, { ...base, voiced: v(good) }).text).toBe(good);
+      for (const bad of ['Oops, a **puddle**! Where was Pip looking?', '# Where was Pip looking?', 'Oops, a puddle! Pip was looking at the sky.', 'Oops, a puddle! Where was the robot looking?'])
+        expect({ bad, text: runScript(OWL_ROW_SCRIPT, { ...base, voiced: v(bad) }).text }).toEqual({ bad, text: written });
+      // A renamed robot: the voicing must name HER robot, not Pip.
+      const bolt = { ...base, botName: 'Bolt', written: written.replace(/Pip/g, 'Bolt') };
+      const boltSeq = runScript(OWL_ROW_SCRIPT, bolt).voiceSig;
+      expect(runScript(OWL_ROW_SCRIPT, { ...bolt, voiced: v(good, boltSeq) }).text).toBe(bolt.written);
+      expect(runScript(OWL_ROW_SCRIPT, { ...bolt, voiced: v(good.replace('Pip', 'Bolt'), boltSeq) }).text).toBe(good.replace('Pip', 'Bolt'));
+      // Late: Olive voiced "1 of 3" while the row moved on to "2 of 3" (the same key): not shown, and the new line is still out.
+      const missed = (w: number) => ({ hintKey: 'hintMissed', vars: { w, t: 3 }, written: 'Pip did ' + w + ' of 3. Which one did Pip walk past?', lang: 'en', words: WORD_ROWS, botName: 'Pip' });
+      const late = { ok: true, rung: 'voice-hint', key: 'hintMissed', lang: 'en', seq: runScript(OWL_ROW_SCRIPT, missed(1)).voiceSig, text: 'Hoo hoo! Pip did 1 of 3. Which one did Pip walk past?' };
+      const now = runScript(OWL_ROW_SCRIPT, { ...missed(2), voiced: late });
+      expect([now.text, now.voiced, now.thinking]).toEqual([missed(2).written, false, true]);
+      expect(runScript(OWL_ROW_SCRIPT, { ...missed(1), voiced: late }).text).toBe(late.text);
+    });
+
+    it('the slot line: the ask block the child is on, else the first one Olive cannot be asked with — its reason in words, EN and FR', () => {
+      const at = (program: unknown, o: Record<string, unknown> = {}) => runScript(OLIVE_SLOTS_SCRIPT, { program, band: 2, lang: 'en', words: WORD_ROWS, ...o });
+      const good = { id: 2, t: 'ask:poem', slots: { flower: 'Tulla' } };
+      const bad = { id: 5, t: 'ask:poem', slots: { flower: 'Tulla la stupide' } };
+      expect(at([{ id: 1, t: 'fwd' }])).toMatchObject({ show: false, message: '', blockId: '' });
+      expect(at([{ id: 1, t: 'fwd' }, good])).toMatchObject({ show: false, ok: true, blockId: '2' });
+      expect(at([good, { id: 4, t: 'repeat', n: 2, body: [bad] }])).toMatchObject({ show: true, reason: 'blocklist', blockId: '5', message: 'Olive can’t use that word.' });
+      expect(at([good, bad], { lang: 'fr' }).message).toBe('Olive ne peut pas utiliser ce mot.');
+      expect(at([{ id: 7, t: 'ask:poem' }])).toMatchObject({ show: true, reason: 'missing-slot', message: 'Fill in every slot first.' });
+      expect(at([{ id: 7, t: 'ask:poem', slots: { flower: 'T'.repeat(41) } }], { lang: 'fr' })).toMatchObject({ show: true, reason: 'too-long', message: 'Trop long : 40 lettres au plus.' });
+      // The kit's JSON text is read too, and the block the child is on is judged first.
+      expect(at(JSON.stringify([bad, good]), { selected: '2' })).toMatchObject({ show: false, blockId: '2' });
+      expect(at(JSON.stringify([bad, good]), { selected: '' })).toMatchObject({ show: true, blockId: '5' });
+      // Band 7–9 is offered no rung (ruling 4); an ask block that got there anyway is said so.
+      expect(at([good], { band: 1 })).toMatchObject({ show: true, reason: 'not-in-band', message: 'Pick a word from the list.' });
+    });
+
+    it('a refused slot is not Olive resting: the owl rests only when a question she was SENT came back as the written line', async () => {
+      const refused = await runOliveScript(ASK_OLIVE_SCRIPT, { request: { seq: 1, rung: 'poem', slots: { flower: 'Tulla la stupide' }, lang: 'en' }, band: 2, url: shell.url }, { fetch });
+      expect([refused.sent, refused.answer.fallback]).toEqual([false, true]);
+      expect(runScript(OWL_ROW_SCRIPT, { answer: refused.answer, lang: 'en', words: WORD_ROWS }).resting).toBe(false);
+      const none = await runOliveScript(ASK_OLIVE_SCRIPT, { request: { seq: 1, rung: 'poem', slots: { flower: 'Tulla' }, lang: 'en' }, band: 2 }, { fetch: () => Promise.reject(new TypeError('no shell')) });
+      expect([none.sent, none.answer.fallback]).toEqual([true, true]);
+      expect(runScript(OWL_ROW_SCRIPT, { answer: none.answer, lang: 'en', words: WORD_ROWS })).toMatchObject({ resting: true, restingText: 'Olive is resting' });
+    });
+
+    it('🔴 the proposal card: shown from the run, placed only by Use them, gone after either answer; a new run shows it again; Start over hides it', async () => {
+      const program = [{ id: 1, t: 'ask:words-to-blocks', slots: { route: T.lists.routes.fr[1] } }, { id: 2, t: 'fwd' }];
+      const p = await play(shell, program);
+      const card = (o: Record<string, unknown>) => runScript(PROPOSAL_CARD_SCRIPT, { run: p.run, program, handled: '', words: WORD_ROWS, lang: 'en', ...o });
+      const shown = card({});
+      expect(shown).toMatchObject({ show: true, proposal: { askId: 1, blocks: ['fwd', 'left', 'water'] }, blocksText: [WORDS.bFwd.en, WORDS.bLeft.en, WORDS.bWater.en].join(' · ') });
+      expect(card({ lang: 'fr' }).blocksText).toBe([WORDS.bFwd.fr, WORDS.bLeft.fr, WORDS.bWater.fr].join(' · '));
+      expect(program).toHaveLength(2);
+      // Use them: Accept proposal places the card's proposal; then the card is answered (the proposal itself stays readable).
+      const used = runScript(ACCEPT_PROPOSAL_SCRIPT, { program, proposal: shown.proposal, accept: true });
+      expect(used.added).toBe(3);
+      expect(card({ program: used.program, handled: shown.sig })).toMatchObject({ show: false, proposal: shown.proposal });
+      // No thanks: answered, the program untouched.
+      expect(card({ handled: shown.sig }).show).toBe(false);
+      // A new run that proposes again is a new proposal.
+      const again = await play(shell, program);
+      expect(card({ run: again.run, handled: shown.sig }).show).toBe(true);
+      // Start over (the ask gone), or no run: nothing to accept.
+      expect(card({ program: [] })).toMatchObject({ show: false, proposal: null });
+      expect(card({ run: null })).toMatchObject({ show: false, proposal: null, sig: '' });
+    });
+
+    it('ruling 4 on the requests: only band 10–12 requests name rungs, each a band-2 rung of the table; the palette offers exactly them at 10–12 and none at 7–9', () => {
+      const withRungs = REQUESTS.filter((r) => (r.rungs || []).length > 0);
+      expect(withRungs.length).toBeGreaterThanOrEqual(3);
+      for (const r of REQUESTS) for (const id of r.rungs || []) expect({ r: r.id, id, band: r.band, rungBand: T.rungs[id] ? T.rungs[id].band : null }).toEqual({ r: r.id, id, band: 2, rungBand: 2 });
+      for (const r of withRungs) {
+        const two = runScript(PALETTE_SCRIPT, { band: 2, lang: 'en', words: WORD_ROWS, allowed: r.palette, rungs: r.rungs });
+        expect({ r: r.id, offered: two.offered }).toEqual({ r: r.id, offered: r.rungs });
+        expect({ r: r.id, offered: runScript(PALETTE_SCRIPT, { band: 1, lang: 'en', words: WORD_ROWS, allowed: r.palette, rungs: r.rungs }).offered }).toEqual({ r: r.id, offered: [] });
+      }
+    });
+  });
+
   describe('the scripts', () => {
     it('no backtick, no dollar-brace; only Ask Olive reaches the network, and only the shell’s route', () => {
       const all = [...OLIVE_SCRIPTS, { component: 'Logic/Palette', script: PALETTE_SCRIPT, seam: '' }];
@@ -529,9 +669,11 @@ describe('CG-005 — Olive in the game', () => {
     it('the ports each Olive component publishes', () => {
       const expected: Record<string, string[]> = {
         'Logic/Ask Olive': ['answer', 'sent', 'fallback', 'refused', 'refusedSlot'],
-        'Logic/Olive slots': ['slots', 'ok', 'reason', 'slot', 'message'],
-        'Logic/Owl row': ['text', 'voiced', 'thinking', 'thinkingText', 'resting', 'restingText', 'voiceRequest'],
-        'Logic/Accept proposal': ['program', 'added', 'accepted']
+        'Logic/Olive slots': ['slots', 'ok', 'reason', 'slot', 'message', 'show', 'blockId'],
+        'Logic/Owl row': ['text', 'voiced', 'thinking', 'thinkingText', 'resting', 'restingText', 'voiceRequest', 'voiceSig'],
+        'Logic/Accept proposal': ['program', 'added', 'accepted'],
+        'Logic/Voice hint': ['request', 'due'],
+        'Logic/Proposal card': ['show', 'proposal', 'blocksText', 'sig']
       };
       expect(OLIVE_SCRIPTS.map((s) => s.component)).toEqual(Object.keys(expected));
       for (const { component, script } of OLIVE_SCRIPTS) {

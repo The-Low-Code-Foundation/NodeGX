@@ -28,7 +28,7 @@ import { buildEffectiveTokens, checkFontFaces, getPreset } from '../src/editor-d
 import { REQUESTS, WORDS, WORD_KEYS } from './cg002Content';
 import { APPLY_DELTA_SCRIPT, COMPLETE_REQUEST_SCRIPT, FIND_REPEAT_SCRIPT, FOLD_SCRIPT, FUNCTION_SCRIPTS, GOAL_SCRIPT, NEW_RUN_SCRIPT, PALETTE_SCRIPT, STEP_SCRIPT, ADD_PROFILE_SCRIPT, TRANSLATE_SCRIPT, portsOf, runScript } from './cg002Scripts';
 import { PAGE_WORDS, PAGE_WORD_KEYS } from './cg003Content';
-import { OLIVE_SCRIPTS, OLIVE_WORD_KEYS } from './cg005Olive';
+import { OLIVE_SCRIPTS, OLIVE_WORDS, OLIVE_WORD_KEYS } from './cg005Olive';
 import { C, CG003_COMPONENTS, GAME_NAME, LOGIC_COMPONENTS, LOGIC_SPECS, PAGES, REQUIRED_MODULES, STORAGE_KEY } from './cg003Components';
 import {
   ALL_WORDS_JSON,
@@ -37,6 +37,7 @@ import {
   GLUE_SCRIPTS,
   ISLAND_ROWS_SCRIPT,
   KIT_PALETTE_SCRIPT,
+  OLIVE_HELD_SCRIPT,
   OLIVE_STATUS_SCRIPT,
   READ_PROGRAM_SCRIPT,
   RECORD_STEP_SCRIPT,
@@ -150,7 +151,10 @@ const CONTRAST_PAIRS: ReadonlyArray<[string, string, string]> = [
   ['ink-2 on the tidy box (Not now)', '--ink-2', '--tidy'],
   ['ink on rep (the trick learnt)', '--ink', '--rep'],
   ['ink on sun (an open pin’s badge)', '--ink', '--sun'],
-  ['ink on card (a pin’s name)', '--ink', '--card']
+  ['ink on card (a pin’s name)', '--ink', '--card'],
+  // CG-005 s3 (lane HOOKS): the owl's tags and the Skills line; a refused slot's reason; the proposal card's words.
+  ['violet ink on violet-2 (the owl’s thinking / resting tags, what Olive can’t do here)', '--violet-ink', '--violet-2'],
+  ['coral on card (why an ask block cannot be sent yet)', '--coral', '--card']
 ];
 function contrastTable(value: (token: string) => string): Array<{ name: string; ratio: number }> {
   return CONTRAST_PAIRS.map(([name, fg, bg]) => ({ name, ratio: contrast(value(fg), value(bg)) }));
@@ -505,6 +509,82 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       const conns = connectionsOf(built, C.options);
       expect(conns.filter((c) => c.toId === 'opSetName').map((c) => `${c.fromId}.${c.fromProperty}>${c.toProperty}`).sort()).toEqual(['opIn.model>model', 'opIn.profileId>profileId', 'opName.onBlur>go', 'opName.onEnter>go', 'opName.onTextChanged>value']);
       expect(connectionsOf(built, C.pageProfiles).some((c) => c.fromId === 'prForm' && c.fromProperty === 'robotName' && c.toId === 'prAdd' && c.toProperty === 'robotName')).toBe(true);
+    });
+  });
+
+  describe('s3 — CG-005’s page hooks in the graph (lane HOOKS)', () => {
+    const play = () => nodesOf(built, C.play);
+    const conns = () => connectionsOf(built, C.play);
+    const node = (id: string) => play().find((n) => n.id === id)!;
+    const into = (id: string, port?: string) => conns().filter((c) => c.toId === id && (port === undefined || c.toProperty === port)).map((c) => `${c.fromId}.${c.fromProperty}>${c.toProperty}`).sort();
+    const has = (from: string, fp: string, to: string, tp: string) => conns().some((c) => c.fromId === from && c.fromProperty === fp && c.toId === to && c.toProperty === tp);
+
+    it('hook 1: the Workshop palette is fed the request’s rungs and this computer’s exam (a rung it failed is withheld, AC5)', () => {
+      expect(node('plStatus').type).toBe('/Logic/Olive status');
+      expect(into('plPalette', 'rungs')).toEqual(['plStart.rungs>rungs']);
+      expect(into('plPalette', 'exam')).toEqual(['plStatus.exam>exam']);
+    });
+
+    it('hook 2: the owl row the drives read — the line is .bg-owl-say, the row .bg-owl (its tags inside it)', () => {
+      expect([params(node('plOwl')).cssClassName, params(node('plOwlSay')).cssClassName]).toEqual(['bg-owl', 'bg-owl-say']);
+      expect(into('plOwlSay', 'text')).toEqual(['plOwlRow.text>text']);
+      expect((node('plOwlCol').children ?? []).map((n) => n.id)).toEqual(['plOwlSay', 'plOwlThinking', 'plOwlResting', 'plProposal', 'plOwlMeta']);
+    });
+
+    it('hook 3: an ask block Olive cannot be asked with says why, in words, under the block list (AC6)', () => {
+      expect(node('plSlots').type).toBe('/Logic/Olive slots');
+      expect(into('plSlots')).toEqual(['plBlocks.onSelected>selected', 'plIn.band>band', 'plIn.lang>lang', 'plIn.words>words', 'plRead.program>program']);
+      expect([into('plSlotMsg', 'text'), into('plSlotMsg', 'mounted')]).toEqual([['plSlots.message>text'], ['plSlots.show>mounted']]);
+      expect(params(node('plSlotMsg')).mounted).toBe(false);
+      const right = (node('plRight').children ?? []).map((n) => n.id);
+      expect(right.indexOf('plSlotMsg')).toBe(right.indexOf('plBlocksBox') + 1);
+    });
+
+    it('🔴 hook 4: the voiced hint — the row’s signature, and ONLY it, asks the second Ask Olive; its answer goes back to the row alone (no loop)', () => {
+      expect([node('plVoiceHint').type, node('plAskVoice').type]).toEqual(['/Logic/Voice hint', '/Logic/Ask Olive']);
+      expect(into('plVoiceHint')).toEqual(['plOwlRow.voiceSig>sig']);
+      expect(into('plAskVoice')).toEqual(['plIn.band>band', 'plVoiceHint.ran>go', 'plVoiceHint.request>request']);
+      expect(conns().filter((c) => c.fromId === 'plAskVoice').map((c) => `${c.fromProperty}>${c.toId}.${c.toProperty}`)).toEqual(['answer>plOwlRow.voiced']);
+      expect(into('plOwlRow', 'voiced')).toEqual(['plAskVoice.answer>voiced']);
+      // The program's Ask Olive stays the runner's: its answer resumes the run and tells the row (resting).
+      expect(into('plRunner', 'answer')).toEqual(['plAskOlive.answer>answer']);
+    });
+
+    it('hook 5: the thinking and resting tags are the row’s, in violet ink on the owl’s violet', () => {
+      for (const [id, flag] of [['plOwlThinking', 'thinking'], ['plOwlResting', 'resting']] as const) {
+        expect([into(id, 'mounted'), into(id, 'text')]).toEqual([[`plOwlRow.${flag}>mounted`], [`plOwlRow.${flag}Text>text`]]);
+        expect([params(node(id)).mounted, params(node(id)).color]).toEqual([false, 'var(--violet-ink)']);
+      }
+      expect(GARDEN_CSS).toMatch(/\.bg-owl-thinking::after \{[^}]*animation: bg-dots/);
+      expect(GARDEN_CSS).toMatch(/@keyframes bg-dots/);
+    });
+
+    it('🔴 hook 6: Olive’s blocks enter the program ONLY through "Use them" (AC1); either answer hides the card', () => {
+      expect([node('plPropCard').type, node('plAccept').type, params(node('plAccept')).accept]).toEqual(['/Logic/Proposal card', '/Logic/Accept proposal', true]);
+      expect(into('plAccept', 'go')).toEqual(['plUse.onClick>go']);
+      expect(into('plAccept', 'proposal')).toEqual(['plPropCard.proposal>proposal']);
+      // Every writer of the program, by name: the kit, the pad, the fold, the reset — and Use them.
+      const writers = play().filter((n) => n.type === 'Set Variable' && params(n).name === 'gardenProgram').map((n) => n.id).sort();
+      expect(writers).toEqual(['plSetProgAccept', 'plSetProgClear', 'plSetProgFold', 'plSetProgKit', 'plSetProgRec']);
+      expect([into('plSetProgAccept', 'do'), into('plSetProgAccept', 'value')]).toEqual([['plAccept.ran>do'], ['plAccept.program>value']]);
+      expect(into('plSetPropDone', 'do')).toEqual(['plAccept.ran>do', 'plNoThanks.onClick>do']);
+      expect(into('plProposal', 'mounted')).toEqual(['plPropCard.show>mounted']);
+      expect([into('plUse', 'label'), into('plNoThanks', 'label'), into('plPropH', 'text')]).toEqual([['plT.oliveAccept>label'], ['plT.oliveDecline>label'], ['plT.oliveProposes>text']]);
+      expect(into('plPropCard', 'run')).toEqual(['plRunner.run>run']);
+    });
+
+    it('hook 7: Skills says what Olive cannot do on this computer, from the status door, for the kid’s band', () => {
+      const sk = connectionsOf(built, C.pageSkills);
+      expect(nodesOf(built, C.pageSkills).some((n) => n.id === 'skOlive' && n.type === C.skOlive)).toBe(true);
+      expect(sk.filter((c) => c.toId === 'skOlive').map((c) => `${c.fromId}.${c.fromProperty}>${c.toProperty}`).sort()).toEqual(['skFam.band>band', 'skFam.botName>botName', 'skFam.lang>lang', 'skWords.words>words']);
+      const so = connectionsOf(built, C.skOlive);
+      expect(so.some((c) => c.fromId === 'soStatus' && c.fromProperty === 'exam' && c.toId === 'soHeld' && c.toProperty === 'exam')).toBe(true);
+      expect(so.some((c) => c.fromId === 'soHeld' && c.fromProperty === 'show' && c.toId === 'soBox' && c.toProperty === 'mounted')).toBe(true);
+    });
+
+    it('the pages stay small with the hooks in: every page ≤ 32 nodes, the Workshop’s hooks inside Workshop/Play', () => {
+      for (const page of PAGES) expect({ page, n: nodesOf(built, page).length <= 32 }).toEqual({ page, n: true });
+      expect(has('plStart', 'rungs', 'plPalette', 'rungs')).toBe(true);
     });
   });
 
@@ -902,6 +982,27 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     expect(r.done.island.done).toEqual(['tulips-three']);
     expect(r.done.profiles[0].hats).toEqual(['sun']);
     expect(r.done.profiles[0].tricks.n2).toBe('bloom');
+  });
+
+  it('s3 hooks: free play offers every rung (the palette keeps them to band 10–12); a request offers its own', () => {
+    expect(run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'free' }).rungs).toBe('all');
+    expect(run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'wall-until' }).rungs).toEqual(['words-to-blocks', 'count-in-words']);
+    expect(run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'tulips-three' }).rungs).toEqual([]);
+    const free = (band: number) => run(PALETTE_SCRIPT, { band, lang: 'en', words: WORD_ROWS, allowed: [], rungs: 'all' }).offered;
+    expect([free(1).length, free(2).length]).toEqual([0, 20]);
+  });
+
+  it('s3 hooks: the status door hands the exam on; Olive held says what it failed, in words, band 10–12 only', async () => {
+    const exam = { passed: 19, failed: 1, rungs: { 'words-to-blocks': { pass: false }, poem: { pass: true } } };
+    const up = async () => ({ ok: true, json: async () => ({ model: 'ready', exam }) });
+    expect((await runAsync(OLIVE_STATUS_SCRIPT, { nonce: 1 }, up)).exam).toEqual(exam);
+    expect((await runAsync(OLIVE_STATUS_SCRIPT, { nonce: 1 }, async () => { throw new Error('no shell'); })).exam).toBe(null);
+    const held = (o: Record<string, unknown>) => run(OLIVE_HELD_SCRIPT, { exam, band: 2, lang: 'en', words: WORD_ROWS, botName: 'Pip', ...o });
+    expect(held({})).toEqual({ held: ['words-to-blocks'], show: true, text: WORDS.oliveCant.en + ': ' + OLIVE_WORDS.rungWordsToBlocks.en });
+    expect(held({ lang: 'fr' }).text).toBe(WORDS.oliveCant.fr + ' : ' + OLIVE_WORDS.rungWordsToBlocks.fr);
+    expect(held({ band: 1 })).toEqual({ held: [], show: false, text: '' });
+    expect(held({ exam: null }).show).toBe(false);
+    expect(held({ exam: { rungs: { poem: { pass: true } } } }).show).toBe(false);
   });
 
   it('Olive: no shell is the written line and "not running"; an answer is her text', async () => {

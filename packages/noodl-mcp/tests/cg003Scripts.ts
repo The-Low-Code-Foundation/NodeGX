@@ -23,6 +23,7 @@
  * | {@link WIN_SUMMARY_SCRIPT} | the win card's words, and the tricks the win blooms |
  * | {@link BAR_STATE_SCRIPT} | which tab, band and language is lit on the bar |
  * | {@link OLIVE_STATUS_SCRIPT} / {@link TRY_OLIVE_SCRIPT} | the shell's Olive doors (CG-004), with the written line when there is no shell |
+ * | {@link OLIVE_HELD_SCRIPT} | the rungs this computer's exam failed, in words, for Skills ("Olive can't do this here yet") |
  * | {@link TRANSLATE_ALL_SCRIPT} | every word, the engine's AND the pages', one output per key |
  *
  * 🔴 No backtick and no dollar-brace inside any script text (README §7): these are template literals.
@@ -31,7 +32,7 @@
  * @module noodl-mcp/tests/cg003Scripts
  */
 import { WORDS, WORD_KEYS } from './cg002Content';
-import { OLIVE_WORDS, OLIVE_WORD_KEYS } from './cg005Olive';
+import { OLIVE_SLIM, OLIVE_WORDS, OLIVE_WORD_KEYS, PALETTE_RUNG_IDS, rungWordKey } from './cg005Olive';
 import { ENGINE, FOLD_HELPERS, MANY_BLOCKS, ROBOT_NAME_MAX, SAVE_HELPERS } from './cg002Scripts';
 import { EYES, HATS, ISLANDERS, ISLAND_PINS, PAGE_WORDS, PAGE_WORD_KEYS, REQUEST_SUBS, SKILL_BLOCKS } from './cg003Content';
 import { ROBOT_PAINTS } from './cg007Look';
@@ -91,6 +92,8 @@ export const FREE_PLAY = {
   robotStart: { x: 0, y: 3, d: 1 },
   goal: [] as unknown[],
   palette: [] as string[],
+  // CG-005 s3: free play offers every rung the exam passed — at band 10-12 only (the rung table's band: ruling 4).
+  rungs: 'all' as const,
   reward: null,
   copyKeys: { title: 'sandH', blurb: 'isFree', line: 'sandP', reward: '' }
 };
@@ -491,7 +494,7 @@ Outputs.frOn = lang === 'fr';
 // ── Olive (CG-004's doors; the page never waits, and a missing shell is the written line) ──
 
 export const OLIVE_STATUS_SCRIPT = `
-var out = { running: false, model: 'none', passed: 0, total: 0, hasExam: false };
+var out = { running: false, model: 'none', passed: 0, total: 0, hasExam: false, exam: null };
 try {
   if (typeof fetch === 'function') {
     var ctl = typeof AbortController === 'function' ? new AbortController() : null;
@@ -502,7 +505,7 @@ try {
       var s = await res.json();
       out.model = String(s && s.model || 'none');
       out.running = out.model === 'ready' || out.model === 'loading' || out.model === 'unloaded';
-      if (s && s.exam) { out.hasExam = true; out.passed = Number(s.exam.passed) || 0; out.total = (Number(s.exam.passed) || 0) + (Number(s.exam.failed) || 0); }
+      if (s && s.exam) { out.hasExam = true; out.passed = Number(s.exam.passed) || 0; out.total = (Number(s.exam.passed) || 0) + (Number(s.exam.failed) || 0); out.exam = JSON.parse(JSON.stringify(s.exam)); }
     }
   }
 } catch (e) { out.running = false; }
@@ -514,7 +517,29 @@ Outputs.noExam = !out.hasExam;
 Outputs.passed = out.passed;
 Outputs.total = out.total;
 Outputs.examVars = { p: out.passed, t: out.total };
+// The exam as the shell reports it, for the palette's gate and Skills (CG-005 AC5): a rung it failed is withheld.
+Outputs.exam = out.exam;
 Outputs.checked = Inputs.nonce;
+`;
+
+/**
+ * The rungs this computer's exam failed, as Skills says them: "Olive can't do this here yet: words into blocks". Band
+ * 10-12 only (the rungs are theirs, ruling 4); nothing to say — no exam, or every rung passed — shows nothing.
+ */
+export const OLIVE_HELD_SCRIPT = `${WORD_HELPER}
+var ORDER = ${JSON.stringify(PALETTE_RUNG_IDS)};
+var BAND = ${JSON.stringify(Object.fromEntries(PALETTE_RUNG_IDS.map((id) => [id, Number(OLIVE_SLIM.rungs[id].band) || 1])))};
+var TITLE = ${JSON.stringify(Object.fromEntries(PALETTE_RUNG_IDS.map((id) => [id, rungWordKey(id)])))};
+var lang = langOf(Inputs.lang), band = Number(Inputs.band) === 1 ? 1 : 2;
+var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
+var rungs = Inputs.exam && Inputs.exam.rungs && typeof Inputs.exam.rungs === 'object' ? Inputs.exam.rungs : {};
+var held = [];
+for (var i = 0; i < ORDER.length; i++) { var id = ORDER[i]; if (BAND[id] <= band && rungs[id] && rungs[id].pass === false) held.push(id); }
+var names = [];
+for (var j = 0; j < held.length; j++) names.push(w[TITLE[held[j]]] || held[j]);
+Outputs.held = held;
+Outputs.show = held.length > 0;
+Outputs.text = held.length ? (w.oliveCant || '') + (lang === 'fr' ? ' : ' : ': ') + names.join(', ') : '';
 `;
 
 /** The grown-ups' Try Olive: a thank-you rung, slots only, never a prompt; the written line when she does not answer. */
@@ -571,5 +596,6 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Win summary', script: WIN_SUMMARY_SCRIPT, seam: 'the win card’s words and the tricks it blooms' },
   { component: 'Logic/Bar state', script: BAR_STATE_SCRIPT, seam: 'which tab, band and language is lit' },
   { component: 'Logic/Olive status', script: OLIVE_STATUS_SCRIPT, seam: 'where Olive runs, from the shell’s status door' },
-  { component: 'Logic/Try Olive', script: TRY_OLIVE_SCRIPT, seam: 'the grown-ups\u2019 Try Olive: one thank-you asked of her, the written line when she does not answer' }
+  { component: 'Logic/Try Olive', script: TRY_OLIVE_SCRIPT, seam: 'the grown-ups\u2019 Try Olive: one thank-you asked of her, the written line when she does not answer' },
+  { component: 'Logic/Olive held', script: OLIVE_HELD_SCRIPT, seam: 'the rungs this computer\u2019s exam failed, in words, for Skills' }
 ];

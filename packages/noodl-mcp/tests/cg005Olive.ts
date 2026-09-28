@@ -278,6 +278,29 @@ function oliveWithheld(exam) {
   for (var id in rungs) if (rungs[id] && rungs[id].pass === false) out.push(id);
   return out.sort();
 }
+/**
+ * The page's own copy of the shell's rule (olive-check.js, reason unfaithful, 2026-09-28): a voiced hint is the game's
+ * hint in other words, or it is not shown. It keeps the written line's question, the robot's name, and plain text. The
+ * shell refuses such a voicing first; this is for a shell that let one through (an older one), like the blocklist here.
+ */
+function oliveFaithful(text, written, name) {
+  var out = String(text || ''), line = String(written || ''), who = String(name || '');
+  if (/\\*\\*|__|^#|\\x60/m.test(out)) return false;
+  if (line.indexOf('?') !== -1 && out.indexOf('?') === -1) return false;
+  if (who && fold(line).indexOf(fold(who)) !== -1 && fold(out).indexOf(fold(who)) === -1) return false;
+  return true;
+}
+/** Every ask block of a program, depth first: { id, rung, slots }. */
+function oliveAskBlocks(list, out) {
+  var l = Array.isArray(list) ? list : [];
+  for (var i = 0; i < l.length; i++) {
+    var b = l[i];
+    if (!b) continue;
+    if (typeof b.t === 'string' && b.t.indexOf('ask:') === 0) out.push({ id: b.id, rung: b.t.slice(4), slots: b.slots && typeof b.slots === 'object' ? b.slots : {} });
+    if (Array.isArray(b.body)) oliveAskBlocks(b.body, out);
+  }
+  return out;
+}
 function oliveWords(rows, lang) {
   var word = {};
   var list = Array.isArray(rows) ? rows : [];
@@ -363,55 +386,134 @@ if (req) {
 /**
  * For one `ask` block: the picker entries the kit draws (`{key, label, options, text?, max?}`), and whether the slots
  * filled so far may be sent — the reason and its words when not, shown inline before anything is sent (AC6).
+ *
+ * On the page (CG-005 s3) the block is found in the PROGRAM: the ask block the child has selected, else the first ask
+ * block whose slots would be refused, else the first ask block. `blockId` names it; `show` says the line is up (a
+ * program with no ask block, or with every ask block sendable, shows nothing). `rung` + `slots` still judge one block
+ * when no program is given.
  */
 export const OLIVE_SLOTS_SCRIPT = `${OLIVE_HELPERS}
 var lang = String(Inputs.lang) === 'en' ? 'en' : 'fr';
 var band = Number(Inputs.band) === 1 ? 1 : 2;
 var slots = Inputs.slots && typeof Inputs.slots === 'object' ? Inputs.slots : {};
 var rung = String(Inputs.rung || slots.rung || '');
+var blockId = '';
+var prog = Inputs.program;
+if (typeof prog === 'string' && prog) { try { prog = JSON.parse(prog); } catch (e) { prog = null; } }
+if (Array.isArray(prog)) {
+  var asks = oliveAskBlocks(prog, []), pick = null, sel = Inputs.selected === undefined || Inputs.selected === null ? '' : String(Inputs.selected);
+  for (var a = 0; a < asks.length && !pick; a++) if (sel !== '' && String(asks[a].id) === sel) pick = asks[a];
+  for (var f = 0; f < asks.length && !pick; f++) if (!oliveCheckForBand(asks[f].rung, asks[f].slots, band, lang, Inputs.narrow).ok) pick = asks[f];
+  if (!pick && asks.length) pick = asks[0];
+  rung = pick ? pick.rung : '';
+  slots = pick ? pick.slots : {};
+  blockId = pick ? String(pick.id) : '';
+}
 if (rung.indexOf('ask:') === 0) rung = rung.slice(4);
 var word = oliveWords(Inputs.words, lang);
-var c = oliveCheckForBand(rung, slots, band, lang, Inputs.narrow);
+var c = rung ? oliveCheckForBand(rung, slots, band, lang, Inputs.narrow) : { ok: true };
 Outputs.slots = olivePickerSlots(rung, band, lang, Inputs.narrow, word);
 Outputs.ok = c.ok;
 Outputs.reason = c.ok ? '' : String(c.reason);
 Outputs.slot = c.ok ? '' : String(c.slot || '');
 Outputs.message = c.ok ? '' : word[OLIVE_REASON_WORD[c.reason]] || String(c.reason);
+Outputs.show = !c.ok;
+Outputs.blockId = blockId;
 `;
 
 // ── The owl row ─────────────────────────────────────────────────────────────
 
 /**
  * The owl row under the world. The written hint line shows at once; Olive's voiced line replaces it ONLY when it
- * voices the SAME key, in the same language, and passes the blocklist here too — otherwise it is dropped silently
- * (AC3). "Thinking" (dots, no clock) while a run is parked on Olive; "Olive is resting" when the last answer the
- * program used was a fallback (AC2, AC4). `voiceRequest` is the request that voices the current key (null for a key
- * Olive may not voice), for a second `Logic/Ask Olive`.
+ * answers THIS voice request (its `seq` is the request's signature: the same key, the same numbers, the same robot,
+ * the same language), is clean here too (the blocklist) and is still the hint (the shell's `unfaithful` rule, mirrored)
+ * — otherwise it is dropped silently (AC3). "Thinking" (dots, no clock) while a run is parked on Olive or while the
+ * current voicing is out (TPL-012: on the tablet a hint takes 5–10 s); "Olive is resting" when the last answer the
+ * program used was a fallback and nothing is out (AC2, AC4).
+ *
+ * `voiceRequest` is the request that voices the current key (null for a key Olive may not voice); `voiceSig` is its
+ * signature as TEXT, so `Logic/Voice hint` — fed that text alone — fires once per new line and never on its own answer.
  */
 export const OWL_ROW_SCRIPT = `${OLIVE_HELPERS}
 var lang = String(Inputs.lang) === 'en' ? 'en' : 'fr';
 var word = oliveWords(Inputs.words, lang);
 var key = String(Inputs.hintKey || '');
 var written = String(Inputs.written || '');
-var v = Inputs.voiced && typeof Inputs.voiced === 'object' ? Inputs.voiced : null;
-var vText = v && typeof v.text === 'string' ? v.text.trim() : '';
-var useVoiced = !!v && v.ok === true && v.rung === 'voice-hint' && key !== '' && String(v.key) === key && (v.lang === undefined || v.lang === lang) && vText !== '' && !blocked(vText, lang);
-var a = Inputs.answer && typeof Inputs.answer === 'object' ? Inputs.answer : null;
-var waiting = Inputs.waiting === true;
-var resting = !waiting && !!a && a.fallback === true;
+var name = String(Inputs.botName || 'Pip');
 var keys = oliveListOf('hintKeys', lang);
 var vars = Inputs.vars && typeof Inputs.vars === 'object' ? Inputs.vars : {};
-var voiceSlots = { key: key, b: String(Inputs.botName || 'Pip') };
+var voiceSlots = { key: key, b: name };
 if (vars.n !== undefined && vars.n !== null && vars.n !== '') voiceSlots.n = String(vars.n);
 if (vars.w !== undefined && vars.w !== null && vars.w !== '') voiceSlots.w = String(vars.w);
 if (vars.t !== undefined && vars.t !== null && vars.t !== '') voiceSlots.t = String(vars.t);
+var voiceable = key !== '' && keys.indexOf(key) !== -1;
+var sig = voiceable ? JSON.stringify({ rung: 'voice-hint', slots: voiceSlots, lang: lang }) : '';
+var v = Inputs.voiced && typeof Inputs.voiced === 'object' ? Inputs.voiced : null;
+var mine = !!v && sig !== '' && String(v.seq) === sig;
+var vText = v && typeof v.text === 'string' ? v.text.trim() : '';
+var useVoiced = mine && v.ok === true && v.rung === 'voice-hint' && String(v.key) === key && (v.lang === undefined || v.lang === lang) && vText !== '' && !blocked(vText, lang) && oliveFaithful(vText, written, name);
+var a = Inputs.answer && typeof Inputs.answer === 'object' ? Inputs.answer : null;
+var waiting = Inputs.waiting === true;
+var voicing = voiceable && !mine;
+var thinking = waiting || voicing;
+// Resting is Olive not answering a question that was SENT: a slot the rules refused never left the page (the slot line says why).
+var resting = !thinking && !!a && a.fallback === true && a.sent !== false;
 Outputs.text = useVoiced ? vText : written;
 Outputs.voiced = useVoiced;
-Outputs.thinking = waiting;
-Outputs.thinkingText = waiting ? word.oliveThinkingTag || '' : '';
+Outputs.thinking = thinking;
+Outputs.thinkingText = thinking ? word.oliveThinkingTag || '' : '';
 Outputs.resting = resting;
 Outputs.restingText = resting ? word.oliveRestingTag || '' : '';
-Outputs.voiceRequest = keys.indexOf(key) !== -1 ? { rung: 'voice-hint', slots: voiceSlots, lang: lang } : null;
+Outputs.voiceRequest = voiceable ? { rung: 'voice-hint', slots: voiceSlots, lang: lang, seq: sig } : null;
+Outputs.voiceSig = sig;
+`;
+
+// ── Voice hint: one ask per new line ────────────────────────────────────────
+
+/**
+ * The second `Logic/Ask Olive`'s trigger (CG-005 s3). Fed ONLY the owl row's `voiceSig` (text), it runs when the line
+ * to voice changes — a new key, new numbers, the robot renamed, the other language — and never on Olive's answer
+ * (the answer changes the row, not the signature), so the page asks once per line and cannot loop. `request` is the
+ * voice request rebuilt from the signature, stamped with it (`seq`), so the row can tell its own answer from a late one.
+ */
+export const VOICE_HINT_SCRIPT = `
+var sig = typeof Inputs.sig === 'string' ? Inputs.sig : '';
+var req = null;
+if (sig) { try { req = JSON.parse(sig); } catch (e) { req = null; } }
+if (req && typeof req === 'object' && req.rung === 'voice-hint') req.seq = sig; else req = null;
+Outputs.request = req;
+Outputs.due = !!req;
+`;
+
+// ── The proposal card ───────────────────────────────────────────────────────
+
+/**
+ * "Olive suggests these blocks — Use them / No thanks" (CG-005 s3, AC1). A `blocks` answer is latched in the RUN
+ * (`run.proposal`: the Step publishes it on one tick only). The card shows while that proposal is for an ask block still
+ * in the program and the child has not answered it (`handled` is the signature of the last one she answered: the run,
+ * the ask, the blocks). A new run that proposes again shows it again; Start over (the ask gone) hides it. Nothing here
+ * writes the program: `Logic/Accept proposal`, on "Use them" only, does.
+ */
+export const PROPOSAL_CARD_SCRIPT = `${OLIVE_HELPERS}
+var lang = String(Inputs.lang) === 'en' ? 'en' : 'fr';
+var word = oliveWords(Inputs.words, lang);
+var LABEL = { fwd: 'bFwd', left: 'bLeft', right: 'bRight', water: 'bWater' };
+var run = Inputs.run && typeof Inputs.run === 'object' ? Inputs.run : null;
+var p = run && run.proposal && typeof run.proposal === 'object' && Array.isArray(run.proposal.blocks) ? run.proposal : null;
+var prog = Inputs.program;
+if (typeof prog === 'string' && prog) { try { prog = JSON.parse(prog); } catch (e) { prog = []; } }
+var asks = oliveAskBlocks(Array.isArray(prog) ? prog : [], []);
+var here = false;
+for (var i = 0; p && i < asks.length; i++) if (String(asks[i].id) === String(p.askId)) here = true;
+var sig = p ? String(run.runId || '') + '|' + String(p.askId) + '|' + p.blocks.join(',') : '';
+var names = [];
+for (var j = 0; p && j < p.blocks.length; j++) names.push(word[LABEL[p.blocks[j]]] || String(p.blocks[j]));
+var show = !!p && p.blocks.length > 0 && here && sig !== String(Inputs.handled || '');
+Outputs.show = show;
+// The proposal itself does not depend on the answer: "Use them" marks it answered AFTER Accept proposal has placed it.
+Outputs.proposal = p && here ? { askId: p.askId, blocks: p.blocks.slice() } : null;
+Outputs.blocksText = show ? names.join(' · ') : '';
+Outputs.sig = sig;
 `;
 
 // ── Accept a proposal ───────────────────────────────────────────────────────
@@ -445,7 +547,9 @@ export const OLIVE_SCRIPTS: ReadonlyArray<{ component: string; script: string; s
   { component: 'Logic/Ask Olive', script: ASK_OLIVE_SCRIPT, seam: 'the parked request sent to Olive, or its written answer; never a slot the rules refuse', async: true },
   { component: 'Logic/Olive slots', script: OLIVE_SLOTS_SCRIPT, seam: 'the picker for an ask block in a band, and the inline refusal' },
   { component: 'Logic/Owl row', script: OWL_ROW_SCRIPT, seam: 'the written hint, voiced only for the same key; thinking; resting' },
-  { component: 'Logic/Accept proposal', script: ACCEPT_PROPOSAL_SCRIPT, seam: 'the blocks Olive proposed, placed only when the child accepts' }
+  { component: 'Logic/Accept proposal', script: ACCEPT_PROPOSAL_SCRIPT, seam: 'the blocks Olive proposed, placed only when the child accepts' },
+  { component: 'Logic/Voice hint', script: VOICE_HINT_SCRIPT, seam: 'the voice request for a new hint line, once per line' },
+  { component: 'Logic/Proposal card', script: PROPOSAL_CARD_SCRIPT, seam: 'the blocks Olive proposed, offered until the child answers' }
 ];
 
 /**
