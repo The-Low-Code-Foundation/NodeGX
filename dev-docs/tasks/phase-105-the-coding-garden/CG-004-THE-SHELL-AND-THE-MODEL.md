@@ -290,3 +290,93 @@ folder); productName reverted; the French dialog naming the English game.
 **Residuals:** the three drives of `EXPECTED-DRIVE.md` (model, no model, packaged name) — owner orchestrator; whether
 Electron creates an empty `<appData>/Olive's Island` folder before `main.js` runs (harmless, unmeasured) — owner CG-008's
 tablet run; the backups ruling above — Richard.
+
+### 8.1 Backups of the real save (lane BACKUP, 2026-09-28, Richard's ruling R14)
+
+**R14, as asked:** "The desktop app makes a nightly 'Olive's Island backups' folder in Documents, but it copies the wrong
+thing … What should the app do?" → **"Back up the real save"**: each night the app writes the family's save (the same
+thing the save code holds) into the backups folder, and a parent can restore it. Small, on this computer only.
+
+Base `b16751f28`; shell suite **80/80** at base, **89/89** after (`node --test tests/*.test.js`).
+
+**Re-measured first** (the finding above was a claim until then):
+- **Where the family lives:** the runtime's persisted Global store writes `localStorage[ 'noodl_store_' + storageKey ]`
+  (`packages/noodl-runtime/…/agent/globalstore.ts` `STORAGE_KEY_PREFIX`, `persistNow`), the template's App store
+  persists under `STORAGE_KEY = 'bot-garden'` (`cg003Components.ts`) and writes the one key `model` → the entry is
+  **`noodl_store_bot-garden`** = `{"model":{v:3,family,profiles,island}}`. The packaged build (`build-output/app`, project
+  `templates/bot-garden`) carries `noodl_store_`. (§8's "key `bot-garden`" is the storage key without the runtime's prefix.)
+- **What the SQLite copy held:** a drive home's `local.db` (after launch 1 of s3's drive): 11 tables, `_Schema` 9 rows,
+  **every other table 0 rows** (`_User`, `_Session`, `_Role`, `_Files`, `_Audit`, …); the backups folder of that home was
+  empty (19:00 never came during a drive). BUILD.json: `policySource: shell-closed`, `workflows: []`. It held nothing a
+  family needs.
+- **🔴 The save code is one-way.** The Grown-ups page SHOWS the code (`Grown/House panel`: `ghEncode` → `ghCode`) but no
+  page places `Logic/Decode save code` and no input takes a code (`saveCodePaste` / `saveCodeBad` are words nothing
+  uses; grep of `cg003Components.ts` and `templates/bot-garden`). "The save code on the Grown-ups page is the only real
+  copy" was true, and nothing could bring it back. So the restore could not be "paste the code into Grown-ups".
+
+**Decisions:**
+1. **What a backup holds — both, one file:** `island-backup-YYYY-MM-DD.json` = `{ kind: "olive-island-backup", v: 1, at,
+   players, saveCode, store }`. `store` is the stored JSON itself, and it is what a restore writes back: the page runs
+   the save-model migration on every load (`Read family` → `migrated` → re-save, CG-002 §8), so a backup made today
+   restores after a save-model change by the SAME path every upgrade already has to keep working (AC8) — no second
+   decoder to keep in step. `saveCode` is the Grown-ups code for the same family (so a parent who copies codes, or a
+   future paste box, has it), packed by the shell (`copies.js saveCodeOf`, v3 only; any other version → `null`, never a
+   guess) and **byte-identical to the page's own encoder**: `copies.test.js` runs the TEMPLATE's `Logic/Encode save code`
+   and `Logic/Decode save code` scripts in a vm against it, on a family the template's own `Add profile` / `Complete
+   request` made plus the edges the page normalises (7 players → 6, 30-char names, a string band, no tricks, a repeated
+   request).
+2. **The read:** `webContents.executeJavaScript(readExpression('bot-garden'))` — one constant built from garden.json's
+   key at load, `(() => { try { return window.localStorage.getItem("noodl_store_bot-garden"); } catch (e) { return null; } })()`:
+   it reads one key, writes nothing, never throws. Never built from page data (the test feeds two different families and
+   records the same single string both times).
+3. **When:** after the page loads if the day has no backup yet (the old policy's "run once on start" for a missed
+   evening; 2 s after load, past the page's own on-load re-save), every day at `backups.dailyAt` 19:00 while open, and
+   **at quit** — the window's `close` and the app's `before-quit` both pass through `createLeaving`, which holds the
+   first one, runs one backup, and lets the quit/close go when it settles or after **3 s**. A later run the same day
+   replaces the day's file. **A family with no players writes nothing** (not even the folder). Retention: the newest
+   **31 days** (`keepDays`); a restore's safety copy counts in its day; no other file in the folder is ever touched (an
+   old build's `.ngxbackup.tar.gz` stays). A `README.txt` (EN + FR) says what the files are and how to restore.
+4. **The restore — the shell's menu, one item** (the fewest new surfaces, given no paste box exists): "Restore a backup…
+   / Restaurer une sauvegarde…" (Mac: in the app menu beside Quit; Windows: the window's one
+   menu, `autoHideMenuBar`, shown by Alt — out of the children's way). A file picker opens on the backups folder; a file
+   that is not a backup (`kind`), or a backup of nobody, is refused before anything is touched; a confirm dialog names
+   the day and the players (Cancel is the default); then the family now is kept as
+   `island-backup-<today>-before-restore.json`, the store is written back
+   (`restoreExpression`: the shell's re-serialisation passed as a JSON string literal — a name made of code stays a name,
+   tested with `"); globalThis.pwned = 1; (" </script>`), the page reloads, and the players are read back: the
+   dialog says "The islands are back." with the names, or that it could not (with the log's path). No page door
+   restores: a page that could restore could be made to.
+5. **The backend's SQLite backup — stopped.** `main.js` no longer seeds `backups.json` (the backend then has no schedule,
+   `BackupConfigStore.defaults().schedule = null`); one an older build seeded is switched off in place
+   (`schedule.enabled = false`, everything else kept, logged once). The relay's POST `copy` / `restore` doors (which ran
+   the backend CLI) are gone with it — no page ever called them; `GET /__garden/copies` stays, read-only, listing the
+   island backups (Olive's route test still reads it). `runBackendCli`, `restoreCopy`, the `restarting` flag: removed.
+
+| # | Deliverable | Status | Reading |
+|---|---|---|---|
+| 1 | Re-measure; the decision written | ✅ | above; `$SCRATCH/MEASURED.md` |
+| 2 | The copy: fixed read, dated file, schedule + quit, nothing for no players, local only | ✅ unit · 🟡 drive | `copies.test.js`: a family → `island-backup-2026-09-28.json` whose `store` deep-equals the stored JSON, `players` [Ada, Béa ✿], `saveCode` `BG1.…`, README EN+FR; the evaluated expressions `=== [READ]` for two families; no players / no entry / not JSON / no model / no window → `wrote: null` with the reason, the folder empty; runIfNoneToday reads the page once a day; the evening timer 18:00 → +1 h, 20:30 → next day 19:00; `createLeaving`: one backup for a quit and a close together, then everything passes; a hung backup given up at the bound. `config.test.js` (fake Electron): `backupsFolder()` = `<documents>/Olive's Island backups`, and under `GARDEN_HOME` `<home>/Documents/…`; before a window, `run` → `no-window`, no folder. The quit wiring in `main.js` (the `close` / `before-quit` holds) is graded by the drive clause only. |
+| 3 | The restore a parent can do | ✅ unit (core) · ⬜ the native dialogs (a person's 2-minute check, `EXPECTED-DRIVE.md`) | `copies.test.js`: a vm page holding a later family → restore → safety copy holds the later family, storage holds the day's JSON exactly, one reload, the players read back; hostile name stays data; not-a-backup / empty refused; the menu template (Mac: item, separator, quit; Windows: the item) and its click. |
+| 4 | The SQLite backup decided | ✅ measured + unit | 0 rows measured; `retireBackendBackups`: none → nothing written; seeded → `enabled: false`, the rest deep-equal; again → `already`; `main.js` code has no `backups.json` / cron / backend CLI backup (config test). |
+| 5 | Unit tests, arms | ✅ **89/89**, arms **14/14** | `$SCRATCH/arms.out`, each file copied to `$SCRATCH/arms/` first and restored by copy, 89/89 after: the read also writes; the expression varies per call; a no-player family written; retention 30; a string band packed as 2; seven players packed; the store embedded as code; no safety copy before a restore; the quit waits forever; the SQLite schedule left on; the POST copy door still answering; backups under userData; the storage key drifting from the page; main.js seeding backups.json again. |
+| 6 | The drive clause | 🟡 prepared | `drive-upgrade.js`: `disk1.noBackendBackup`, `disk1.island` (the files in `<home A>/Documents/Olive's Island backups`, each read as stored AND decoded by the template's own decoder), clause `islandBackup` = exactly one day file + README + both readings hold Ada with Bolt; the control (home B) now also needs `noBackup`. Run on synthetic homes by `$SCRATCH/probe-drive-clause.js` (the drive's own functions, no launch): a copies.js-written Ada/Bolt → `holds Ada/Bolt: true`, Ada/Robo `false`; a fresh home → `files: []`. Command + readout: `$SCRATCH/EXPECTED-DRIVE.md` (re-package `npm run dist:mac` first — a shell change). |
+
+**Findings (new):**
+- 🔴 **Grown-ups has no way to take a save code back** (above). Owner: the pages (CG-003 / the orchestrator) — a paste
+  box wired to `Logic/Decode save code` → the App store's write, using the existing `saveCodePaste` / `saveCodeBad`
+  words. Until then the backup's `saveCode` is for moving by hand only in the sense that nothing can read it back in-app.
+- On a Mac the shell had NO menu (`setApplicationMenu(null)`), which on macOS leaves no Quit item for Cmd+Q (Electron's
+  documented behaviour, not measured here); the new menu carries `role: quit`. There is still no Edit menu, so Cmd+C /
+  Cmd+V in the page's text boxes are expected not to work on a Mac (unmeasured; Windows is unaffected). Owner: NONE for
+  the tablet (Windows); CG-008 if the Mac build is shipped to a family.
+
+**Residuals:** the drive (orchestrator, `EXPECTED-DRIVE.md`); the restore dialogs in the packaged app, a person's check
+(Richard or the orchestrator); whether the drive's `Browser.close` passes through `before-quit` (inferred from s2's logs,
+graded by the clause — if it does not, the instrument's quit changes, `EXPECTED-DRIVE.md` says how).
+
+**Where a merge could touch:** `garden.json` `backups` changed shape (`cron` / `retention` → `dailyAt` / `keepDays` /
+`storageKey`); `copies.js` exports changed (`createShellDoors` takes `{ folder }` only; `listCopies` lists island
+backups; `isCopyName`, `ARCHIVE_EXT` gone); `tests/helpers.js` `withRelay` and `loadMainWithFakeElectron` (returns
+`exports`); `main.js` exports `{ islandBackups, backupsFolder }`. Nothing outside `garden-desktop/` but this file; the
+sibling lane (HOOKS) edits only the pages — but the pages' STORAGE_KEY and App store (`persist: true, storageKey`) are
+now a contract `copies.test.js` reads from `cg003Components.ts`.
