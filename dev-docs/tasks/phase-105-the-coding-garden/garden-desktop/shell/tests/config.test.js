@@ -68,6 +68,17 @@ test('package.json ships every module main.js requires, and unpacks node-llama-c
   assert.ok(pkg.build.nsis.artifactName.startsWith('BotGarden-Setup-'));
 });
 
+test('no build.files exclusion drops a file node-llama-cpp reads at run time (AC5)', () => {
+  // 2026-09-28, the first packaged Mac app: `!node_modules/node-llama-cpp/llama/**` shipped an owl that could not load —
+  // "ENOENT, node_modules/node-llama-cpp/llama/binariesGithubRelease.json not found in …/app.asar", status `failed`,
+  // every ask a fallback. Only the 34 MB llama.cpp source bundle may be left out.
+  const glob = (p) => new RegExp('^' + p.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*\*/g, '\u0000').replace(/\*/g, '[^/]*').replace(/\u0000/g, '.*') + '$');
+  const excluded = pkg.build.files.filter((p) => p.startsWith('!')).map((p) => glob(p.slice(1)));
+  const runtime = ['binariesGithubRelease.json', 'llama.cpp.info.json', 'package.json'].map((f) => `node_modules/node-llama-cpp/llama/${f}`);
+  for (const f of runtime) assert.ok(!excluded.some((re) => re.test(f)), `${f} is shipped`);
+  assert.ok(excluded.some((re) => re.test('node_modules/node-llama-cpp/llama/gitRelease.bundle')), 'the source bundle stays out');
+});
+
 test('the template table is whole: every rung has both languages, a known shape, a dial temperature, ≤ 64 tokens, slots that exist', () => {
   const rungs = Object.entries(templates.rungs);
   assert.equal(rungs.length, 15, 'twelve rungs (two each for rungs 2 and 8) plus the hint voicing');

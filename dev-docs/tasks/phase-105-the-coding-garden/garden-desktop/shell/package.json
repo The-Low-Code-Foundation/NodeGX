@@ -29,7 +29,7 @@
       "exam.js", "timings.js", "model-check.js", "garden.json", "package.json",
       "node_modules/**/*",
       "!node_modules/@node-llama-cpp/*/bins/**/*.a",
-      "!node_modules/node-llama-cpp/llama/**"
+      "!node_modules/node-llama-cpp/llama/gitRelease.bundle"
     ],
     "asarUnpack": [
       "node_modules/node-llama-cpp/bins/**/*",

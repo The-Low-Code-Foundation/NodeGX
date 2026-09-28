@@ -137,6 +137,12 @@ async function launch(home, EXE, extraEnv = {}) {
   delete env.ELECTRON_RUN_AS_NODE;
   const cmd = EXE || path.join(SHELL, 'node_modules', '.bin', 'electron');
   const args = EXE ? [`--remote-debugging-port=${CDP_PORT}`] : ['.', `--remote-debugging-port=${CDP_PORT}`];
+  // macOS counts a launch the drive ends with Browser.close as an unexpected quit. After two of them in a row AppKit
+  // opens its "reopen windows?" alert BEFORE applicationDidFinishLaunching, so Electron never emits `ready`: no relay, no
+  // window, CDP bound, 0 % CPU (2026-09-27, launch 3 of the upgrade drive, twice; the main thread sampled inside
+  // NSPersistentUIRestorer promptToIgnorePersistentStateWithCrashHistory -> NSAlert runModal). Session 1 read the same
+  // leavings as a locked screen. This argument tells AppKit to skip window restoration and its prompt.
+  if (process.platform === 'darwin') args.push('-ApplePersistenceIgnoreState', 'YES');
   const t0 = Date.now();
   // The previous launch's app can outlive its launcher's exit by a second or two and still hold the relay's fixed
   // origin port and the CDP port: a launch spawned into that window starts, cannot bind either, and never serves the

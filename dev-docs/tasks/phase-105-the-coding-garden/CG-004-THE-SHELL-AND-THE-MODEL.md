@@ -1,6 +1,6 @@
 # CG-004 — The shell and the model: Electron, a local backend, an owl in the main process
 
-**Opened 2026-09-27**, scoped from TPL-012 §2.4–§2.5 and briefing §3–§4, §C2. **Status: 🟡 built in session 1 (lane C, 2026-09-27) — AC1, AC3, AC4, AC6, AC7 measured; AC2 19/20 per run; AC8 measured for launches 1–2 on the Mac, the control launch and AC9's verdict blocked by a locked screen (§7.1); AC5 prepared. Was: ⬜ not
+**Opened 2026-09-27**, scoped from TPL-012 §2.4–§2.5 and briefing §3–§4, §C2. **Status: 🟢 on the Mac, session 2 (2026-09-28) — AC1, AC3, AC4 (node + Electron), AC6, AC7, AC8, AC9 measured; AC5 measured on the Mac (packaged, Metal), Windows owed to CG-008; AC2 19/20 per run (§7.2). Was: ⬜ not
 started.** Depends on nothing. Lane C.
 
 ## 1. The person sentence
@@ -101,12 +101,12 @@ answers 200 (HEAD, 2026-09-27).
 | 1 shell unit tests | ✅ measured | `cd garden-desktop/shell && node --test tests/*.test.js` → **59/59** (Nightbook's 23 + 36 new: config, checks, owl with a fake engine, route, model check, exam). Slot refusals named `not-in-list` / `too-long` (41st char) / `control-char` / `regex` / `blocklist` / `missing-slot` / `unknown-slot`; outputs `blocklist` / `must-contain` / `cap` / `grammar`; two concurrent POSTs served in order (`calls[1].start >= calls[0].end`); the timeout → `{ok:false, fallback:true, reason:'timeout'}` (default **12 000 ms**, `DEFAULTS.timeoutMs`). |
 | 2 contract test, real model | 🟡 measured, 19/20 per run | `node garden-desktop/tests/olive-contract.mjs [--cpu]`, plain node, the exam through the route. **Metal: 19/20** asserted probes as the ladder says (2 runs with majority sampling; the single-sample run before it was 20/20); **CPU 2 threads: 19/20** (last run; 18/20 the run before). Every 🎓 probe is recorded as failing in every Metal run; the reds move between P02, P05, P07, P18 (table below). Linux runner: prepared in the workflow, not run. |
 | 3 status < 1 s during a completion | ✅ measured | inside the contract test: a 64-token poem in flight, `GET /__garden/olive/status` → **2 ms** (Metal), **2 ms** (CPU); the poem itself 422–742 ms. Unit test: 400 ms fake completion, status < 1000 ms, `busy:1 queued:1`. |
-| 4 no model | ✅ measured (node) / 🟡 Electron prepared | `owl.test.js`, `olive-route.test.js`: a missing path → `status.model = 'none'`, every ask `{ok:false, fallback:true, reason:'no-model'}` in < 50 ms. In Electron: `drive-laneC.sh` step 5 (the model folder moved away), predicted readout in `$SCRATCH/EXPECTED-DRIVE.md`. |
-| 5 asarUnpack / Metal / Windows CPU | 🟡 half measured | `package.json` `build.asarUnpack`: `node-llama-cpp/bins/**`, `@node-llama-cpp/**` (asserted by `config.test.js`); the Mac loads with **Metal** (`gpu: metal`, contract test) and CPU-only with `--cpu` (`gpu: cpu`, threads 2). Packaging not run in the lane; **Windows x64 is unmeasurable on this Mac** — the workflow's Windows job runs `npm ci` there (`@node-llama-cpp/win-x64`), checks `app.asar.unpacked/…/win-x64/bins` and drives the installed app. |
+| 4 no model | ✅ measured (node) · ✅ Electron s2 (§7.2) | `owl.test.js`, `olive-route.test.js`: a missing path → `status.model = 'none'`, every ask `{ok:false, fallback:true, reason:'no-model'}` in < 50 ms. In Electron: `drive-laneC.sh` step 5 (the model folder moved away), predicted readout in `$SCRATCH/EXPECTED-DRIVE.md`. |
+| 5 asarUnpack / Metal / Windows CPU | ✅ Mac packaged s2 (§7.2) · ⬜ Windows (CG-008) | `package.json` `build.asarUnpack`: `node-llama-cpp/bins/**`, `@node-llama-cpp/**` (asserted by `config.test.js`); the Mac loads with **Metal** (`gpu: metal`, contract test) and CPU-only with `--cpu` (`gpu: cpu`, threads 2). Packaging not run in the lane; **Windows x64 is unmeasurable on this Mac** — the workflow's Windows job runs `npm ci` there (`@node-llama-cpp/win-x64`), checks `app.asar.unpacked/…/win-x64/bins` and drives the installed app. |
 | 6 sha256 at build and first launch | ✅ measured | build: `fetch-model.mjs --from <18-byte file>` → "DOES NOT MATCH … refusing the model", exit **1**, nothing left in the folder; launch: `model-check.test.js` 3/3 (match remembered on size+mtime, mismatch → `sha256-mismatch`, a changed file re-hashed); `main.js` builds a **refused** owl on a mismatch and `status.model = 'refused'` with the reason for the Grown-ups page (`owl.test.js`). |
 | 7 timings.log | ✅ measured | contract test: `{"model-load":1, "olive":50, "exam-probe":23}` lines, each with `ms`; `olive-route.test.js` asserts the three kinds after a fake run. |
-| 8 upgrade | 🟡 prepared | `garden-desktop/drive-upgrade.js` (three launches: 0.0.1 with policy A → 0.0.2 with policy B → fresh control; `GARDEN_VERSION`, `GARDEN_POLICY_DIR` overrides in `main.js`); predicted readout in `EXPECTED-DRIVE.md`. Two steps are `STEP-NEEDS-CG-003` (a profile written and read back). |
-| 9 loopback only | 🟡 prepared | `drive-lib.js` `watchNetwork` (CDP `Network.enable`, armed right after launch) → `hosts` / `offLoopback`; `drive-upgrade.js` fails on any host but 127.0.0.1. |
+| 8 upgrade | ✅ measured s2, PASS (§7.2) | `garden-desktop/drive-upgrade.js` (three launches: 0.0.1 with policy A → 0.0.2 with policy B → fresh control; `GARDEN_VERSION`, `GARDEN_POLICY_DIR` overrides in `main.js`); predicted readout in `EXPECTED-DRIVE.md`. Two steps are `STEP-NEEDS-CG-003` (a profile written and read back). |
+| 9 loopback only | ✅ measured s2: 150 requests, all 127.0.0.1 (§7.2) | `drive-lib.js` `watchNetwork` (CDP `Network.enable`, armed right after launch) → `hosts` / `offLoopback`; `drive-upgrade.js` fails on any host but 127.0.0.1. |
 
 **Arms: 10/10 killed** (`$SCRATCH/mut-summary.txt`): a slot over 40 chars accepted, a control char accepted, the
 blocklist skipped, must-contain skipped, the queue running two at once, the timeout never firing, the sha check
@@ -205,3 +205,52 @@ directly; check the lock state first.
 
 Residual for the drive, owner CG-008: `quit()` returns `code: 1` from `Browser.close` every time — the launcher's exit
 code, not the app's; the installed-app drive should read the app's own exit.
+
+### 7.2 Session 2 — the control launch, AC4 in Electron, the packaged Mac app (orchestrator, 2026-09-27 22:16 → 2026-09-28 07:14)
+
+**The locked screen was not the blocker.** With the screen UNLOCKED (`IOConsoleLocked = No`) launch 3 hung twice in a row,
+exactly as in §7.1: CDP bound, the relay port not bound, no log, no data folder. `/usr/bin/sample` of the main process:
+`-[NSApplication _handleAEOpenEvent:]` → `NSPersistentUIRestorer promptToIgnorePersistentStateWithCrashHistory` →
+`NSAlert runModal` — AppKit's "reopen windows?" alert, shown BEFORE `applicationDidFinishLaunching`, so Electron never
+emits `ready`. The drive ends launches 1 and 2 with `Browser.close` (the launcher exits 1); macOS counts two unexpected
+quits of the dev binary's shared bundle id `com.github.Electron` and prompts on the third. Six fresh-home launches ended by
+SIGTERM opened in 1 s each (so a fresh home is not the cause). **Fix, in the instrument:** `drive-lib.js` passes
+`-ApplePersistenceIgnoreState YES` on darwin. The screenshot of the hang is a dimmed wallpaper with no menu bar — the
+picture §7.1 read as a lock.
+
+**AC8 + AC9 — `drive-upgrade.js`, PASS, exit 0** (`scratchpad/cg004-drive/run3/drive-upgrade.json` of session 2):
+launch 1 drawn at 1449 ms, `model: ready`, 15 exam rungs; disk after 0.0.1 all true, no backend left; launch 2
+`examKept: true`; disk after 0.0.2 `policyIsB`, `oldPolicyKeptAs: [security.before-0.0.2-…json]`, `oldPolicyIsA`,
+`launchLines [[0.0.1, first], [0.0.2, replaced]]`; **launch 3 (the fresh-home control) `examAtDiffers: true`,
+`noOldPolicy: true`**, quit code 0; `hosts {"127.0.0.1": 150}`, `offLoopback []`, `backendsLeftRunning []`. The two
+`STEP-NEEDS-CG-003` clauses (a profile kept across the upgrade) still wait for the pages.
+
+**AC4 in Electron:** `drive-upgrade.js` with `build-output/model` moved away drew the page at 996 ms with `status.model =
+"none"` and the reason ("no model file at …"), then stopped — the drive waits for exam results, and with no model no
+exam runs (§7.1's prediction "every reply a fallback" was the instrument's guess, not the product's rule). Graded directly
+instead: the dev shell with `GARDEN_MODEL_PATH=/nonexistent.gguf`, three `POST /__garden/olive` → `{"ok":false,
+"fallback":true,"reason":"no-model"}` in **0.8–1.6 ms** each; without the `x-garden` header → **403**; the page → 200.
+Owner of the drive's no-model branch (skip the exam wait when `model` is `none`): CG-008.
+
+**AC5 on the Mac — a packaging defect found and fixed.** `npm run dist:mac` first failed inside electron-builder
+(`Yallist is not a constructor`): the primary checkout's `shell/node_modules` had been MOVED from session 1's worktree and
+lost 22 of its 87 nested packages (`node_modules/.package-lock.json` still listed them). `npm ci` in `shell/`: **380
+packages in 9 s, exit 0, neither lockfile changed** — the first real install of the `--package-lock-only` lockfile
+(§7 residual) is clean. `dist:mac` then built `dist/mac-arm64/Bot Garden.app` (835 MB, unsigned), and the packaged app
+**could not load the model**: `owl: load failed: ENOENT, node_modules/node-llama-cpp/llama/binariesGithubRelease.json
+not found in …/app.asar`, status `failed`, every ask `reason: load-failed`. Cause: `build.files` excluded
+`node_modules/node-llama-cpp/llama/**`; node-llama-cpp reads three small JSON files there at run time. Fix: exclude only
+`llama/gitRelease.bundle` (the 34 MB source bundle). Gate: `config.test.js` "no build.files exclusion drops a file
+node-llama-cpp reads at run time" — the old line restored → 1 failure naming `binariesGithubRelease.json`; suite **60/60**.
+Re-packaged and launched (`GARDEN_HOME` throwaway): sha256 matches (1249 ms), **`owl: loaded in 21942 ms on metal`** (the
+first launch of a new bundle builds its Metal shader cache; §7's dev reading was 6.8 s on its first ever load), `gpu:
+metal`, `app.asar.unpacked/node_modules/@node-llama-cpp/mac-arm64-metal/bins/mac-arm64-metal` present; `say-thanks` EN in
+747 ms, FR "Merci Mamie Rose, c'est un grand plaisir !" in 1106 ms. A slot from the other language's list is refused
+`not-in-list` before the model is asked. Windows x64: CG-008.
+
+**Traps paid for here (in memory):** `/opt/homebrew/bin/sample` is a broken shim — `/usr/bin/sample`; this shell's
+environment carries `ELECTRON_RUN_AS_NODE=1`, so a packaged binary launched from it runs as Node (`bad option:
+-ApplePersistenceIgnoreState`) — `env -u ELECTRON_RUN_AS_NODE`; `pgrep -f <absolute path>` misses an Electron started by
+a relative path and matches the backend (the same binary in Node mode); a hung main ignores SIGTERM; `curl` to a hung
+app's CDP port never returns without `-m`.
+
