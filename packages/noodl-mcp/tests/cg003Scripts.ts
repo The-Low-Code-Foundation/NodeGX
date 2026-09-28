@@ -31,7 +31,7 @@
  *
  * @module noodl-mcp/tests/cg003Scripts
  */
-import { WORDS, WORD_KEYS } from './cg002Content';
+import { OLIVE_RUNGS, WORDS, WORD_KEYS } from './cg002Content';
 import { OLIVE_SLIM, OLIVE_WORDS, OLIVE_WORD_KEYS, PALETTE_RUNG_IDS, rungWordKey } from './cg005Olive';
 import { ENGINE, FOLD_HELPERS, MANY_BLOCKS, ROBOT_NAME_MAX, SAVE_HELPERS } from './cg002Scripts';
 import { EYES, HATS, ISLANDERS, ISLAND_PINS, PAGE_WORDS, PAGE_WORD_KEYS, REQUEST_SUBS, SKILL_BLOCKS } from './cg003Content';
@@ -542,6 +542,23 @@ Outputs.show = held.length > 0;
 Outputs.text = held.length ? (w.oliveCant || '') + (lang === 'fr' ? ' : ' : ': ') + names.join(', ') : '';
 `;
 
+/**
+ * The rung this run asked Olive (CG-005 §8 residual): the parked ask's answer → `Choose hint`'s `oliveRung` (1–18, the
+ * rung table's number for the answer's rung) and `oliveFallback` (she did not answer; the written line was used). Only
+ * an answer to THIS run counts: an answer from a run since reset (another program, Start over) says nothing, or its
+ * lesson line would follow the child into the next run. A voiced hint is not a rung. An ask REFUSED before sending (a
+ * listed word, an empty slot: `sent` false) is neither: she was not asked, so she is not resting (CG-005 AC6).
+ */
+export const OLIVE_PLAYED_SCRIPT = `
+var RUNG_OF = ${JSON.stringify(Object.fromEntries(OLIVE_RUNGS.flatMap((r) => r.table.map((t) => [t, r.n]))))};
+var a = Inputs.answer && typeof Inputs.answer === 'object' ? Inputs.answer : null;
+var run = Inputs.run && typeof Inputs.run === 'object' ? Inputs.run : null;
+var runId = run && run.runId !== undefined && run.runId !== null ? String(run.runId) : '';
+var mine = !!a && a.sent === true && runId !== '' && String(a.run) === runId && String(a.rung) !== 'voice-hint';
+Outputs.oliveRung = mine ? RUNG_OF[String(a.rung)] || 0 : 0;
+Outputs.oliveFallback = mine && a.fallback === true;
+`;
+
 /** The grown-ups' Try Olive: a thank-you rung, slots only, never a prompt; the written line when she does not answer. */
 export const TRY_OLIVE_SCRIPT = `
 var lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';
@@ -597,5 +614,6 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Bar state', script: BAR_STATE_SCRIPT, seam: 'which tab, band and language is lit' },
   { component: 'Logic/Olive status', script: OLIVE_STATUS_SCRIPT, seam: 'where Olive runs, from the shell’s status door' },
   { component: 'Logic/Try Olive', script: TRY_OLIVE_SCRIPT, seam: 'the grown-ups\u2019 Try Olive: one thank-you asked of her, the written line when she does not answer' },
-  { component: 'Logic/Olive held', script: OLIVE_HELD_SCRIPT, seam: 'the rungs this computer\u2019s exam failed, in words, for Skills' }
+  { component: 'Logic/Olive held', script: OLIVE_HELD_SCRIPT, seam: 'the rungs this computer\u2019s exam failed, in words, for Skills' },
+  { component: 'Logic/Olive played', script: OLIVE_PLAYED_SCRIPT, seam: 'the rung this run asked Olive, and whether she answered, for the after-run hint' }
 ];

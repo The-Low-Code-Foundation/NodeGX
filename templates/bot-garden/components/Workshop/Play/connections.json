@@ -1018,6 +1018,30 @@
       "toProperty": "predictAsked"
     },
     {
+      "fromId": "plAskOlive",
+      "fromProperty": "answer",
+      "toId": "plPlayed",
+      "toProperty": "answer"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "run",
+      "toId": "plPlayed",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "plPlayed",
+      "fromProperty": "oliveRung",
+      "toId": "plChoose",
+      "toProperty": "oliveRung"
+    },
+    {
+      "fromId": "plPlayed",
+      "fromProperty": "oliveFallback",
+      "toId": "plChoose",
+      "toProperty": "oliveFallback"
+    },
+    {
       "fromId": "plAsk",
       "fromProperty": "onClick",
       "toId": "plChoose",

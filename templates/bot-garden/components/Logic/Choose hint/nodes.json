@@ -26,12 +26,12 @@
         {
           "name": "oliveFallback",
           "plug": "output",
-          "type": "*"
+          "type": "boolean"
         },
         {
           "name": "oliveRung",
           "plug": "output",
-          "type": "*"
+          "type": "number"
         },
         {
           "name": "predictAsked",

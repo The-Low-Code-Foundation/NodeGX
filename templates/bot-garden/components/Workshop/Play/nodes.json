@@ -1806,11 +1806,18 @@
       "y": 2680
     },
     {
+      "id": "plPlayed",
+      "type": "/Logic/Olive played",
+      "label": "The rung this run asked",
+      "x": 710,
+      "y": 9760
+    },
+    {
       "id": "plGoal",
       "type": "/Logic/Goal met",
       "label": "Was the request done?",
       "x": 710,
-      "y": 9760
+      "y": 9880
     },
     {
       "id": "plMetGate",
@@ -1820,7 +1827,7 @@
         "runOnChange-condition": false
       },
       "x": 710,
-      "y": 9880
+      "y": 10000
     },
     {
       "id": "plWonVar",
@@ -1842,7 +1849,7 @@
         "value": true
       },
       "x": 710,
-      "y": 10000
+      "y": 10120
     },
     {
       "id": "plClearWon",

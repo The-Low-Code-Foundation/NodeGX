@@ -284,6 +284,11 @@ async function pagesPart() {
         const n1 = await blocks();
         await shot('ac1-proposal');
         check('P-AC1 Olive’s blocks come as a card in her row — "Use them" / "No thanks" — and are NOT in the program yet', !!card && /Use them|Je les prends/.test(card) && /No thanks|Non merci/.test(card) && n1 === n0, { card, n0, n1 });
+        // P-S4 (CG-005 §8 residual): after a run that asked Olive, the owl says THAT rung's lesson (rung 3: words into blocks).
+        await runOver();
+        const lesson = await until(`(document.querySelector(${JSON.stringify(SAY)}) || {}).innerText || ''`, (t) => /turned the words into blocks|a transformé les mots en blocs/.test(t), 4000);
+        await shot('s4-rung-lesson');
+        check('P-S4 after the run, the owl says the rung’s lesson line (oliveRung3), not the start or missed line', /turned the words into blocks|a transformé les mots en blocs/.test(lesson), { lesson });
         await tap(first('.bg-proposal .bg-prop-use'), 'Use them');
         const n2 = await until(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`, (n) => n > n0, 4000);
         const gone = !(await has('.bg-proposal'));

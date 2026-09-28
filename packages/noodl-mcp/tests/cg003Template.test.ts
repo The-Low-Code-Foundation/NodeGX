@@ -38,6 +38,7 @@ import {
   ISLAND_ROWS_SCRIPT,
   KIT_PALETTE_SCRIPT,
   OLIVE_HELD_SCRIPT,
+  OLIVE_PLAYED_SCRIPT,
   OLIVE_STATUS_SCRIPT,
   READ_PROGRAM_SCRIPT,
   RECORD_STEP_SCRIPT,
@@ -53,8 +54,9 @@ import { DARKENED_FILLS, GARDEN_CSS, GARDEN_PRESET, GARDEN_TOKENS, tokenValue } 
 import { reducedMotionReport } from './reducedMotion';
 import { RESERVED_ROW_FIELD_NAMES } from '../../noodl-editor/src/editor/src/validation';
 import { FAMILY_SCRIPT, ISLAND_PINS_SCRIPT, LOOK_ROWS_SCRIPT, REQUEST_CARD_SCRIPT, SELECT_PROFILE_SCRIPT, SKILL_ROWS_SCRIPT } from './cg003Scripts';
-import { HINT_LINE_SCRIPT } from './cg002Scripts';
-import { HINTS, HINT_KEYS } from './cg002Content';
+import { CHOOSE_HINT_SCRIPT, HINT_LINE_SCRIPT } from './cg002Scripts';
+import { HINTS, HINT_KEYS, OLIVE_RUNGS } from './cg002Content';
+import { PALETTE_RUNG_IDS } from './cg005Olive';
 import { ISLAND_PINS, REQUEST_SUBS } from './cg003Content';
 
 jest.setTimeout(600_000);
@@ -1005,6 +1007,35 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     expect(held({ exam: { rungs: { poem: { pass: true } } } }).show).toBe(false);
   });
 
+  it('s4: Olive played — the rung THIS run asked is Choose hint\u2019s oliveRung; a stale answer, a voiced hint say nothing', () => {
+    const r = { runId: 'run-a', tick: 3, bumps: 0, puddles: 0 };
+    const played = (answer: unknown, runNow: unknown = r) => run(OLIVE_PLAYED_SCRIPT, { answer, run: runNow });
+    // Every rung the palette can offer has its number (so none of the 18 lesson lines is unreachable).
+    const rungN = (id: string) => OLIVE_RUNGS.find((x) => x.table.includes(id))?.n;
+    for (const id of PALETTE_RUNG_IDS) expect({ id, n: played({ run: 'run-a', sent: true, rung: id, fallback: false }).oliveRung }).toEqual({ id, n: rungN(id) });
+    expect(new Set(PALETTE_RUNG_IDS.map(rungN))).toEqual(new Set(OLIVE_RUNGS.map((x) => x.n)));
+    expect(played({ run: 'run-a', sent: true, rung: 'count-in-words', fallback: false })).toEqual({ oliveRung: 4, oliveFallback: false });
+    expect(played({ run: 'run-a', sent: true, rung: 'count-in-words', fallback: true })).toEqual({ oliveRung: 4, oliveFallback: true });
+    expect(played({ run: 'run-old', sent: true, rung: 'count-in-words', fallback: true })).toEqual({ oliveRung: 0, oliveFallback: false });
+    expect(played({ run: 'run-a', sent: true, rung: 'voice-hint', key: 'hintWet', fallback: true })).toEqual({ oliveRung: 0, oliveFallback: false });
+    expect(played(null)).toEqual({ oliveRung: 0, oliveFallback: false });
+    // Refused before sending (a listed word): she was not asked — no lesson, and NOT resting (the s4 drive's P-AC6 red).
+    expect(played({ run: 'run-a', sent: false, rung: 'poem', fallback: true, reason: 'blocklist' })).toEqual({ oliveRung: 0, oliveFallback: false });
+    expect(played({ run: 'run-a', sent: true, rung: 'count-in-words' }, null)).toEqual({ oliveRung: 0, oliveFallback: false });
+    // The consequence: Choose hint, fed these, says the rung's lesson after a run that missed; resting when she did not answer.
+    const t = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'tulips-three' });
+    const choose = (o: Record<string, unknown>) => run(CHOOSE_HINT_SCRIPT, { program: [{ id: 1, t: 'fwd' }], run: r, world: t.world, goalMet: false, ...o }).key;
+    expect(choose({})).toBe('hintMissed');
+    expect(choose(played({ run: 'run-a', sent: true, rung: 'count-in-words', fallback: false }))).toBe('oliveRung4');
+    expect(choose(played({ run: 'run-a', sent: true, rung: 'count-in-words', fallback: true }))).toBe('oliveResting');
+    expect(choose(played({ run: 'run-old', sent: true, rung: 'count-in-words', fallback: false }))).toBe('hintMissed');
+    // The graph: the Workshop feeds Choose hint from Olive played, and Olive played from the parked ask and the run.
+    const ws = CG003_COMPONENTS.find((c) => c.nodes.some((n) => n.id === 'plChoose'));
+    const wires = (ws?.connections ?? []) as Array<{ fromId: string; fromProperty: string; toId: string; toProperty: string }>;
+    const has = (f: string, fp: string, to: string, tp: string) => wires.some((w) => w.fromId === f && w.fromProperty === fp && w.toId === to && w.toProperty === tp);
+    expect([has('plAskOlive', 'answer', 'plPlayed', 'answer'), has('plRunner', 'run', 'plPlayed', 'run'), has('plPlayed', 'oliveRung', 'plChoose', 'oliveRung'), has('plPlayed', 'oliveFallback', 'plChoose', 'oliveFallback')]).toEqual([true, true, true, true]);
+  });
+
   it('Olive: no shell is the written line and "not running"; an answer is her text', async () => {
     const down = async () => {
       throw new Error('no shell');
@@ -1047,6 +1078,14 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
       const m = mutate(KIT_PALETTE_SCRIPT, 'band === 1 ? String(e.caption || e.label || e.id)', 'band === 9 ? String(e.caption || e.label || e.id)');
       const pal = run(PALETTE_SCRIPT, { band: 1, allowed: [], lang: 'fr', words: WORD_ROWS }).palette;
       expect(run(m, { palette: pal, band: 1, lang: 'fr', words: WORD_ROWS }).palette.find((e: { id: string }) => e.id === 'left').label).not.toBe(WORDS.cLeft.fr);
+    });
+    it('Olive played counts an answer from another run → killed', () => {
+      const m = mutate(OLIVE_PLAYED_SCRIPT, "runId !== '' && String(a.run) === runId && ", '');
+      expect(run(m, { answer: { run: 'run-old', sent: true, rung: 'count-in-words', fallback: false }, run: { runId: 'run-a' } }).oliveRung).toBe(4); // the check above expects 0: killed
+    });
+    it('Olive played counts a refused (unsent) ask as resting → killed', () => {
+      const m = mutate(OLIVE_PLAYED_SCRIPT, 'a.sent === true && ', '');
+      expect(run(m, { answer: { run: 'run-a', sent: false, rung: 'poem', fallback: true }, run: { runId: 'run-a' } }).oliveFallback).toBe(true); // the check above expects false: killed
     });
     it('Tidy line ignores Not now → killed', () => {
       const m = mutate(TIDY_LINE_SCRIPT, '&& program !== dismissed', '');

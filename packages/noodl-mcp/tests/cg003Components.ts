@@ -304,7 +304,9 @@ const TYPE: Readonly<Record<string, string>> = {
   // CG-005 s3 — the page hooks.
   voiceSig: 'string', sig: 'string', due: 'boolean', blockId: 'string', blocksText: 'string', handled: 'string',
   accept: 'boolean', proposal: 'object', exam: 'object', held: 'array', thinking: 'boolean', resting: 'boolean',
-  thinkingText: 'string', restingText: 'string', message: 'string'
+  thinkingText: 'string', restingText: 'string', message: 'string',
+  // s4 — the after-run rung line.
+  oliveRung: 'number', oliveFallback: 'boolean'
 };
 const typeOf = (name: string) => TYPE[name] ?? '*';
 
@@ -835,6 +837,7 @@ const PLAY: CgComponent = {
     logic('plFold', L('Fold'), 'Fold it'),
     // ── Hints and the win ──
     logic('plChoose', L('Choose hint'), 'Which hint'),
+    logic('plPlayed', L('Olive played'), 'The rung this run asked'),
     logic('plGoal', L('Goal met'), 'Was the request done?'),
     gate('plMetGate', 'Done?'),
     variable('plWonVar', 'gardenWon', 'The win card up'),
@@ -1025,6 +1028,11 @@ const PLAY: CgComponent = {
     wire('plWorldVar', 'value', 'plChoose', 'world'),
     wire('plGoal', 'met', 'plChoose', 'goalMet'),
     wire('plMissVar', 'value', 'plChoose', 'predictAsked'),
+    // The rung this run asked (the lesson line after the run) and whether she answered (Olive is resting).
+    wire('plAskOlive', 'answer', 'plPlayed', 'answer'),
+    wire('plRunner', 'run', 'plPlayed', 'run'),
+    wire('plPlayed', 'oliveRung', 'plChoose', 'oliveRung'),
+    wire('plPlayed', 'oliveFallback', 'plChoose', 'oliveFallback'),
     wire('plAsk', 'onClick', 'plChoose', 'go'),
     wire('plIn', 'hints', 'plLine', 'hints'),
     wire('plChoose', 'key', 'plLine', 'key'),

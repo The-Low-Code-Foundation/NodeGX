@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7fa0af01-5d12-5f10-8676-24334cb07482",
+  "name": "Olive played",
+  "path": "/Logic/Olive played",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The rung this run asked Olive, and whether she answered, for the after-run hint. Runs when an input changes; Ran after each run."
+}

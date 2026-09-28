@@ -589,6 +589,9 @@ withDeployedSite({ dir: DIR }, async (page) => {
   const badSaid = await until('document.body.innerText', (t) => t.includes(w('en', 'saveCodeBad')), 4000);
   check('S4-PASTE: a bad code is refused in words', badSaid.includes(w('en', 'saveCodeBad')) && !badSaid.includes(w('en', 'saveCodeDone')), badSaid.slice(-300));
   check('S4-PASTE: … and the stored family is untouched', (await stored()) === beforeBad, { before: (beforeBad || '').length, after: ((await stored()) || '').length });
+  // The bar's pick after a refused code. 🔴 A regression check, NOT a proof about the null: the control (s4, Decode
+  // publishing null again, GARDEN_SKIP_ENGINE_GATE=1) passed it too — the bar sends a fresh model before each write.
+  // The no-null guarantee is the engine gate's (`'model' in bad` is false).
   await seg('FR');
   await wait(600);
   const afterPick = await doneOf();

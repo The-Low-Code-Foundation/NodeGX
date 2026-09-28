@@ -379,6 +379,14 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
+    "Logic/Olive played": {
+      "path": "Logic/Olive played",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 5,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
     "Logic/App store": {
       "path": "Logic/App store",
       "type": "visual",
@@ -462,8 +470,8 @@
     "Workshop/Play": {
       "path": "Workshop/Play",
       "type": "visual",
-      "nodeCount": 108,
-      "connectionCount": 253,
+      "nodeCount": 109,
+      "connectionCount": 257,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -629,8 +637,8 @@
     }
   },
   "stats": {
-    "totalComponents": 78,
-    "totalNodes": 644,
-    "totalConnections": 1800
+    "totalComponents": 79,
+    "totalNodes": 648,
+    "totalConnections": 1809
   }
 }
