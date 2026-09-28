@@ -47,6 +47,11 @@
           "name": "stop",
           "plug": "output",
           "type": "signal"
+        },
+        {
+          "name": "answered",
+          "plug": "output",
+          "type": "signal"
         }
       ],
       "x": 40,
@@ -167,6 +172,16 @@
       "y": 1480
     },
     {
+      "id": "rnPark",
+      "type": "Condition",
+      "label": "Parked on Olive?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 40,
+      "y": 1600
+    },
+    {
       "id": "rnTimer",
       "type": "Timer",
       "label": "The wait between ticks",
@@ -174,7 +189,7 @@
         "duration": 420
       },
       "x": 40,
-      "y": 1600
+      "y": 1720
     },
     {
       "id": "rnMode",
@@ -198,7 +213,7 @@
         "value-paused-idle": true
       },
       "x": 40,
-      "y": 1720
+      "y": 1840
     },
     {
       "id": "rnOut",
@@ -261,6 +276,21 @@
           "type": "number"
         },
         {
+          "name": "waiting",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "request",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "proposal",
+          "plug": "input",
+          "type": "object"
+        },
+        {
           "name": "ticked",
           "plug": "input",
           "type": "signal"
@@ -274,10 +304,15 @@
           "name": "started",
           "plug": "input",
           "type": "signal"
+        },
+        {
+          "name": "parked",
+          "plug": "input",
+          "type": "signal"
         }
       ],
       "x": 40,
-      "y": 1840
+      "y": 1960
     }
   ]
 }

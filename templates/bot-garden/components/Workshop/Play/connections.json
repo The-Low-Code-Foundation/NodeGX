@@ -382,6 +382,12 @@
       "toProperty": "allowed"
     },
     {
+      "fromId": "plStart",
+      "fromProperty": "rungs",
+      "toId": "plPalette",
+      "toProperty": "rungs"
+    },
+    {
       "fromId": "plIn",
       "fromProperty": "lang",
       "toId": "plPalette",
@@ -1038,8 +1044,92 @@
     {
       "fromId": "plLine",
       "fromProperty": "text",
+      "toId": "plOwlRow",
+      "toProperty": "written"
+    },
+    {
+      "fromId": "plChoose",
+      "fromProperty": "key",
+      "toId": "plOwlRow",
+      "toProperty": "hintKey"
+    },
+    {
+      "fromId": "plChoose",
+      "fromProperty": "vars",
+      "toId": "plOwlRow",
+      "toProperty": "vars"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plOwlRow",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "words",
+      "toId": "plOwlRow",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "botName",
+      "toId": "plOwlRow",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "waiting",
+      "toId": "plOwlRow",
+      "toProperty": "waiting"
+    },
+    {
+      "fromId": "plAskOlive",
+      "fromProperty": "answer",
+      "toId": "plOwlRow",
+      "toProperty": "answer"
+    },
+    {
+      "fromId": "plOwlRow",
+      "fromProperty": "text",
       "toId": "plOwlSay",
       "toProperty": "text"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "request",
+      "toId": "plAskOlive",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "run",
+      "toId": "plAskOlive",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "band",
+      "toId": "plAskOlive",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "parked",
+      "toId": "plAskOlive",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plAskOlive",
+      "fromProperty": "answer",
+      "toId": "plRunner",
+      "toProperty": "answer"
+    },
+    {
+      "fromId": "plAskOlive",
+      "fromProperty": "ran",
+      "toId": "plRunner",
+      "toProperty": "answered"
     },
     {
       "fromId": "plRunner",

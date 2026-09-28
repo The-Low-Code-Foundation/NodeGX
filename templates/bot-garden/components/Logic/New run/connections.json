@@ -23,6 +23,12 @@
     },
     {
       "fromId": "newrunIn",
+      "fromProperty": "runId",
+      "toId": "newrunFn",
+      "toProperty": "in-runId"
+    },
+    {
+      "fromId": "newrunIn",
       "fromProperty": "go",
       "toId": "newrunFn",
       "toProperty": "run"
@@ -44,6 +50,12 @@
       "fromProperty": "out-run",
       "toId": "newrunOut",
       "toProperty": "run"
+    },
+    {
+      "fromId": "newrunFn",
+      "fromProperty": "out-runId",
+      "toId": "newrunOut",
+      "toProperty": "runId"
     },
     {
       "fromId": "newrunFn",

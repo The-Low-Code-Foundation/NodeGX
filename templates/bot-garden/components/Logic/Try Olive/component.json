@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "676c0494-0997-5bf4-8fef-3ca41382fe81",
+  "name": "Try Olive",
+  "path": "/Logic/Try Olive",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The grown-ups’ Try Olive: one thank-you asked of her, the written line when she does not answer. Runs on Go; answers Ran once its outputs are set."
+}

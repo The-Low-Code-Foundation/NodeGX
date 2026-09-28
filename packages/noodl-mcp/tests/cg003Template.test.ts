@@ -28,10 +28,11 @@ import { buildEffectiveTokens, checkFontFaces, getPreset } from '../src/editor-d
 import { REQUESTS, WORDS, WORD_KEYS } from './cg002Content';
 import { APPLY_DELTA_SCRIPT, COMPLETE_REQUEST_SCRIPT, FIND_REPEAT_SCRIPT, FOLD_SCRIPT, FUNCTION_SCRIPTS, GOAL_SCRIPT, NEW_RUN_SCRIPT, PALETTE_SCRIPT, STEP_SCRIPT, ADD_PROFILE_SCRIPT, TRANSLATE_SCRIPT, portsOf, runScript } from './cg002Scripts';
 import { PAGE_WORDS, PAGE_WORD_KEYS } from './cg003Content';
+import { OLIVE_SCRIPTS, OLIVE_WORD_KEYS } from './cg005Olive';
 import { C, CG003_COMPONENTS, LOGIC_COMPONENTS, LOGIC_SPECS, PAGES, REQUIRED_MODULES } from './cg003Components';
 import {
   ALL_WORDS_JSON,
-  ASK_OLIVE_SCRIPT,
+  TRY_OLIVE_SCRIPT,
   DRAW_WORLD_SCRIPT,
   GLUE_SCRIPTS,
   ISLAND_ROWS_SCRIPT,
@@ -249,12 +250,18 @@ describe('CG-003 — Bot Garden, the artefact', () => {
         } else expect({ c: f.component, same: script === f.script }).toEqual({ c: f.component, same: true });
       }
       for (const g of GLUE_SCRIPTS) expect(LOGIC_SPECS.find((s) => s.path === g.component)?.script).toBe(g.script);
+      // CG-005: every Olive script is a Logic/* too, byte for byte.
+      for (const o of OLIVE_SCRIPTS) {
+        const fn = nodesOf(built, '/' + o.component).find((n) => n.type === 'JavaScriptFunction')!;
+        expect({ c: o.component, same: String(params(fn).functionScript) === o.script }).toEqual({ c: o.component, same: true });
+      }
     });
 
     it('a page word never shadows an engine word, and every word has EN and FR', () => {
-      expect(PAGE_WORD_KEYS.filter((k) => WORD_KEYS.includes(k))).toEqual([]);
+      expect(PAGE_WORD_KEYS.filter((k) => WORD_KEYS.includes(k) || OLIVE_WORD_KEYS.includes(k))).toEqual([]);
+    expect(OLIVE_WORD_KEYS.filter((k) => !WORD_ROWS.some((r) => r.key === k))).toEqual([]);
       for (const k of PAGE_WORD_KEYS) expect({ k, en: !!PAGE_WORDS[k].en, fr: !!PAGE_WORDS[k].fr }).toEqual({ k, en: true, fr: true });
-      expect(WORD_ROWS.length).toBe(WORD_KEYS.length + PAGE_WORD_KEYS.length);
+      expect(WORD_ROWS.length).toBe(WORD_KEYS.length + OLIVE_WORD_KEYS.length + PAGE_WORD_KEYS.length);
     });
 
     it('🔴 every States node has useTransitions false — D49', () => {
@@ -566,14 +573,14 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     const up = async () => ({ ok: true, json: async () => ({ model: 'ready', exam: { passed: 19, failed: 1 } }) });
     const u = await runAsync(OLIVE_STATUS_SCRIPT, { nonce: 1 }, up);
     expect([u.running, u.passed, u.total]).toEqual([true, 19, 20]);
-    const a = await runAsync(ASK_OLIVE_SCRIPT, { lang: 'en', fallback: 'written' }, down);
+    const a = await runAsync(TRY_OLIVE_SCRIPT, { lang: 'en', fallback: 'written' }, down);
     expect([a.text, a.fallback]).toEqual(['written', true]);
     let sent: { headers?: Record<string, string>; body?: string } = {};
     const answers = async (_url: string, init: { headers: Record<string, string>; body: string }) => {
       sent = init;
       return { ok: true, json: async () => ({ ok: true, text: 'Thank you, Mamie Rose!' }) };
     };
-    const b = await runAsync(ASK_OLIVE_SCRIPT, { lang: 'en', fallback: 'written', rung: 'say-thanks', slots: { to: 'Mamie Rose' } }, answers);
+    const b = await runAsync(TRY_OLIVE_SCRIPT, { lang: 'en', fallback: 'written', rung: 'say-thanks', slots: { to: 'Mamie Rose' } }, answers);
     expect([b.text, b.ok]).toEqual(['Thank you, Mamie Rose!', true]);
     expect(sent.headers?.['x-garden']).toBe('1');
     expect(Object.keys(JSON.parse(String(sent.body))).sort()).toEqual(['lang', 'rung', 'shape', 'slots', 'temperature']);

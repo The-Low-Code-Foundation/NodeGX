@@ -71,6 +71,12 @@
     },
     {
       "fromId": "startworldFn",
+      "fromProperty": "out-rungs",
+      "toId": "startworldOut",
+      "toProperty": "rungs"
+    },
+    {
+      "fromId": "startworldFn",
       "fromProperty": "out-world",
       "toId": "startworldOut",
       "toProperty": "world"

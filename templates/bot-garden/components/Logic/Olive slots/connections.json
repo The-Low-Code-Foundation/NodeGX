@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "edf9d75e-7fa2-5c02-84fc-1f7d7babfe51",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "oliveslotsIn",
+      "fromProperty": "band",
+      "toId": "oliveslotsFn",
+      "toProperty": "in-band"
+    },
+    {
+      "fromId": "oliveslotsIn",
+      "fromProperty": "lang",
+      "toId": "oliveslotsFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "oliveslotsIn",
+      "fromProperty": "narrow",
+      "toId": "oliveslotsFn",
+      "toProperty": "in-narrow"
+    },
+    {
+      "fromId": "oliveslotsIn",
+      "fromProperty": "rung",
+      "toId": "oliveslotsFn",
+      "toProperty": "in-rung"
+    },
+    {
+      "fromId": "oliveslotsIn",
+      "fromProperty": "slots",
+      "toId": "oliveslotsFn",
+      "toProperty": "in-slots"
+    },
+    {
+      "fromId": "oliveslotsIn",
+      "fromProperty": "words",
+      "toId": "oliveslotsFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "oliveslotsFn",
+      "fromProperty": "out-message",
+      "toId": "oliveslotsOut",
+      "toProperty": "message"
+    },
+    {
+      "fromId": "oliveslotsFn",
+      "fromProperty": "out-ok",
+      "toId": "oliveslotsOut",
+      "toProperty": "ok"
+    },
+    {
+      "fromId": "oliveslotsFn",
+      "fromProperty": "out-reason",
+      "toId": "oliveslotsOut",
+      "toProperty": "reason"
+    },
+    {
+      "fromId": "oliveslotsFn",
+      "fromProperty": "out-slot",
+      "toId": "oliveslotsOut",
+      "toProperty": "slot"
+    },
+    {
+      "fromId": "oliveslotsFn",
+      "fromProperty": "out-slots",
+      "toId": "oliveslotsOut",
+      "toProperty": "slots"
+    },
+    {
+      "fromId": "oliveslotsFn",
+      "fromProperty": "success",
+      "toId": "oliveslotsOut",
+      "toProperty": "ran"
+    }
+  ]
+}

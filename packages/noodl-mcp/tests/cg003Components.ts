@@ -5,8 +5,8 @@
  * ## The shape
  *
  * - `Data/*` — the requests, the hints, the words (the engine's and the pages', one table). One `Static Data` each.
- * - `Logic/*` — **generated**: one per entry of CG-002's `FUNCTION_SCRIPTS` (so a script lane C adds arrives with no
- *   edit here), one per page-glue script of `cg003Scripts.ts`, and the store. Each is `Component Inputs` → one
+ * - `Logic/*` — **generated**: one per entry of CG-002's `FUNCTION_SCRIPTS` and CG-005's `OLIVE_SCRIPTS` (so a script
+ *   either adds arrives with no edit here), one per page-glue script of `cg003Scripts.ts`, and the store. Each is `Component Inputs` → one
  *   Function → `Component Outputs`. A signal-driven one takes `go` and answers `ran` (the engine's scripts already use
  *   `run` and `done` as DATA: the run object, the done flag).
  * - `Garden/*` — the bar, a tab, a segment button, a page head: what every screen shares.
@@ -29,6 +29,7 @@
  */
 import { HINTS_JSON, REQUESTS_JSON } from './cg002Content';
 import { FUNCTION_SCRIPTS, portsOf } from './cg002Scripts';
+import { OLIVE_SCRIPTS } from './cg005Olive';
 import { PAD_KEYS } from './cg003Content';
 import { ALL_WORDS_JSON, GLUE_SCRIPTS, TRANSLATE_ALL_SCRIPT } from './cg003Scripts';
 import { DISPLAY_FONT, GARDEN_CSS } from './cg007Look';
@@ -276,7 +277,9 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
   'Logic/Record step': 'go',
   'Logic/Update profile': 'go',
   'Logic/Select profile': 'go',
-  'Logic/Ask Olive': 'go'
+  'Logic/Ask Olive': 'go',
+  'Logic/Accept proposal': 'go',
+  'Logic/Try Olive': 'go'
 };
 
 /** Port types by name; anything else is `*` (the engine passes objects, arrays and text through the same names). */
@@ -302,11 +305,13 @@ export interface LogicSpec {
   go: boolean;
   ins: string[];
   outs: string[];
-  from: 'engine' | 'glue';
+  from: 'engine' | 'olive' | 'glue';
 }
 
 export const LOGIC_SPECS: ReadonlyArray<LogicSpec> = [
   ...FUNCTION_SCRIPTS.map((f) => ({ ...f, from: 'engine' as const })),
+  // CG-005: Olive's scripts, beside the engine's (kept out of FUNCTION_SCRIPTS: Ask Olive calls fetch, CG-002 AC6).
+  ...OLIVE_SCRIPTS.map((f) => ({ component: f.component, script: f.script, seam: f.seam, from: 'olive' as const })),
   ...GLUE_SCRIPTS.map((f) => ({ ...f, from: 'glue' as const }))
 ].map((f) => {
   // 🔴 The one override: the engine's Translate words knows the engine's words only; the pages need theirs too.
@@ -538,9 +543,9 @@ const PAD: CgComponent = {
  */
 const RUNNER: CgComponent = {
   path: 'Workshop/Runner',
-  description: 'Runs a program on the world, one engine step per tick: Play runs it to the end, Step one tick (starting a fresh run when none is live), Stop halts. World, Glow Id, Running and Idle are for the page; Finished fires once the run is done.',
+  description: 'Runs a program on the world, one engine step per tick: Play runs it to the end, Step one tick (starting a fresh run when none is live), Stop halts. A run parked on Olive fires Parked with the Request and waits; Answered (the Answer set first) resumes it. Finished fires once the run is done.',
   nodes: [
-    inputs('rnIn', [['program', '*'], ['start', 'object'], ['answer', 'object'], ['lang', 'string'], ['stepMs', 'number'], ['play', 'signal'], ['step', 'signal'], ['stop', 'signal']]),
+    inputs('rnIn', [['program', '*'], ['start', 'object'], ['answer', 'object'], ['lang', 'string'], ['stepMs', 'number'], ['play', 'signal'], ['step', 'signal'], ['stop', 'signal'], ['answered', 'signal']]),
     logic('rnNew', L('New run'), 'A fresh run', { robotId: 'me' }),
     setVariable('rnSetRunNew', 'gardenRun', 'Hold the fresh run'),
     setVariable('rnSetWorldStart', 'gardenWorld', 'The world back at its start'),
@@ -553,13 +558,14 @@ const RUNNER: CgComponent = {
     gate('rnEnd', 'Is the run done?'),
     gate('rnLoop', 'Still playing?'),
     gate('rnLive', 'Is a run live?'),
+    gate('rnPark', 'Parked on Olive?'),
     logic('rnTimer', TIMER_NODE, 'The wait between ticks', { duration: TICK_MS }),
     withStates('rnMode', 'Idle, playing or paused', ['idle', 'playing', 'paused'], {
       playing: { type: 'boolean', by: { idle: false, playing: true, paused: false } },
       live: { type: 'boolean', by: { idle: false, playing: true, paused: true } },
       idle: { type: 'boolean', by: { idle: true, playing: false, paused: true } }
     }),
-    outputs('rnOut', [['world', 'object'], ['run', 'object'], ['glowId', '*'], ['running', 'boolean'], ['idle', 'boolean'], ['live', 'boolean'], ['done', 'boolean'], ['bumps', 'number'], ['puddles', 'number'], ['sayKey', 'string'], ['tick', 'number'], ['ticked', 'signal'], ['finished', 'signal'], ['started', 'signal']])
+    outputs('rnOut', [['world', 'object'], ['run', 'object'], ['glowId', '*'], ['running', 'boolean'], ['idle', 'boolean'], ['live', 'boolean'], ['done', 'boolean'], ['bumps', 'number'], ['puddles', 'number'], ['sayKey', 'string'], ['tick', 'number'], ['waiting', 'boolean'], ['request', 'object'], ['proposal', 'object'], ['ticked', 'signal'], ['finished', 'signal'], ['started', 'signal'], ['parked', 'signal']])
   ],
   connections: [
     wire('rnIn', 'program', 'rnNew', 'program'),
@@ -593,7 +599,12 @@ const RUNNER: CgComponent = {
     wire('rnEnd', 'ontrue', 'rnMode', 'to-idle'),
     wire('rnEnd', 'ontrue', 'rnOut', 'finished'),
     wire('rnMode', 'playing', 'rnLoop', 'condition'),
-    wire('rnEnd', 'onfalse', 'rnLoop', 'eval'),
+    // Parked on Olive (CG-005): no next tick until an answer arrives, so the question is asked once, not once a tick.
+    wire('rnStep', 'waiting', 'rnPark', 'condition'),
+    wire('rnEnd', 'onfalse', 'rnPark', 'eval'),
+    wire('rnPark', 'ontrue', 'rnOut', 'parked'),
+    wire('rnPark', 'onfalse', 'rnLoop', 'eval'),
+    wire('rnIn', 'answered', 'rnLoop', 'eval'),
     wire('rnLoop', 'ontrue', 'rnTimer', 'start'),
     // One step: the next tick of a live run, or a fresh run's first. The mode moves only after the test.
     wire('rnMode', 'live', 'rnLive', 'condition'),
@@ -615,6 +626,9 @@ const RUNNER: CgComponent = {
     wire('rnStep', 'puddles', 'rnOut', 'puddles'),
     wire('rnStep', 'sayKey', 'rnOut', 'sayKey'),
     wire('rnStep', 'tick', 'rnOut', 'tick'),
+    wire('rnStep', 'waiting', 'rnOut', 'waiting'),
+    wire('rnStep', 'request', 'rnOut', 'request'),
+    wire('rnStep', 'proposal', 'rnOut', 'proposal'),
     wire('rnMode', 'playing', 'rnOut', 'running'),
     wire('rnMode', 'idle', 'rnOut', 'idle'),
     wire('rnMode', 'live', 'rnOut', 'live')
@@ -699,7 +713,7 @@ const PLAY: CgComponent = {
     group('plOwl', 'The owl', 'plLeft', { width: pct(100), sizeMode: 'contentHeight', backgroundColor: 'var(--violet-2)', borderRadius: px(16), ...pad(12), cssClassName: 'bg-owl' }, ['plOwlPic', 'plOwlCol']),
     group('plOwlPic', 'Olive', 'plOwl', { sizeMode: 'explicit', width: px(64), height: px(64), cssClassName: 'bg-owl-pic bg-sp-owl' }),
     group('plOwlCol', 'What she says', 'plOwl', column({ rowGap: sp(4) }), ['plOwlSay', 'plOwlMeta']),
-    text('plOwlSay', 'The hint', 'plOwlCol', '', { ...T_BODY, fontWeight: '700' }),
+    text('plOwlSay', 'The hint', 'plOwlCol', '', { ...T_BODY, fontWeight: '700', cssClassName: 'bg-owl-say' }),
     text('plOwlMeta', 'Where she lives', 'plOwlCol', '', { fontSize: px(12), color: 'var(--violet-meta)', cssClassName: 'bg-owl-meta' }),
     group('plRight', 'The steps side', 'plWs', { ...column({ rowGap: sp(10) }), ...PANEL }, ['plStepsHead', 'plBlocksBox', 'plTidy']),
     group('plStepsHead', 'The steps’ head', 'plRight', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'space-between', flexWrap: 'nowrap' }), ['plStepsH', 'plCount']),
@@ -716,6 +730,8 @@ const PLAY: CgComponent = {
     logic('plT', L('Translate words'), 'In their language'),
     logic('plCard', L('Request card'), 'Who asks, and what'),
     logic('plLine', L('Hint line'), 'The owl’s line'),
+    logic('plOwlRow', L('Owl row'), 'The written line, voiced only for the same key'),
+    logic('plAskOlive', L('Ask Olive'), 'Ask Olive for a parked run'),
     // ── The world, the program, the run ──
     logic('plStart', L('Start world'), 'The world this request starts from'),
     logic('plNonce', COUNTER_NODE, 'Start over, counted', { startValue: 0 }),
@@ -832,6 +848,7 @@ const PLAY: CgComponent = {
     wire('plRunner', 'running', 'plBlocks', 'locked'),
     wire('plIn', 'band', 'plPalette', 'band'),
     wire('plStart', 'allowed', 'plPalette', 'allowed'),
+    wire('plStart', 'rungs', 'plPalette', 'rungs'),
     wire('plIn', 'lang', 'plPalette', 'lang'),
     wire('plIn', 'words', 'plPalette', 'words'),
     wire('plPalette', 'palette', 'plKitPal', 'palette'),
@@ -947,7 +964,22 @@ const PLAY: CgComponent = {
     wire('plChoose', 'vars', 'plLine', 'vars'),
     wire('plIn', 'lang', 'plLine', 'lang'),
     wire('plIn', 'botName', 'plLine', 'botName'),
-    wire('plLine', 'text', 'plOwlSay', 'text'),
+    wire('plLine', 'text', 'plOwlRow', 'written'),
+    wire('plChoose', 'key', 'plOwlRow', 'hintKey'),
+    wire('plChoose', 'vars', 'plOwlRow', 'vars'),
+    wire('plIn', 'lang', 'plOwlRow', 'lang'),
+    wire('plIn', 'words', 'plOwlRow', 'words'),
+    wire('plIn', 'botName', 'plOwlRow', 'botName'),
+    wire('plRunner', 'waiting', 'plOwlRow', 'waiting'),
+    wire('plAskOlive', 'answer', 'plOwlRow', 'answer'),
+    wire('plOwlRow', 'text', 'plOwlSay', 'text'),
+    // A run parked on an ask block: Olive is asked once; her answer (or the written one) resumes it.
+    wire('plRunner', 'request', 'plAskOlive', 'request'),
+    wire('plRunner', 'run', 'plAskOlive', 'run'),
+    wire('plIn', 'band', 'plAskOlive', 'band'),
+    wire('plRunner', 'parked', 'plAskOlive', 'go'),
+    wire('plAskOlive', 'answer', 'plRunner', 'answer'),
+    wire('plAskOlive', 'ran', 'plRunner', 'answered'),
     // The end of a run: was the goal met? A win shows the card and tells the page.
     wire('plRunner', 'finished', 'plGoal', 'go'),
     wire('plWorldVar', 'value', 'plGoal', 'world'),
@@ -1384,7 +1416,7 @@ const GU_HOUSE: CgComponent = {
     text('ghCode', 'The code', 'ghPanel', '', { fontSize: px(13), color: 'var(--ink)', cssClassName: 'bg-code' }),
     logic('ghT', L('Translate words'), 'In their language'),
     // The rung and its slots are parameters: who is thanked and for what, from the rung table's own lists (olive-templates.json).
-    logic('ghAskOlive', L('Ask Olive'), 'Ask her', { rung: 'say-thanks', slots: { to: 'Mamie Rose', deed: 'watered her three tulips' } }),
+    logic('ghAskOlive', L('Try Olive'), 'Ask her', { rung: 'say-thanks', slots: { to: 'Mamie Rose', deed: 'watered her three tulips' } }),
     logic('ghEncode', L('Encode save code'), 'The family as a code')
   ],
   connections: [

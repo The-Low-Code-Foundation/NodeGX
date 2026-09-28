@@ -22,7 +22,7 @@
  * | {@link LOOK_ROWS_SCRIPT} | the robot's paints, eyes, hats (worn, owned, a gift still to earn) and stickers |
  * | {@link WIN_SUMMARY_SCRIPT} | the win card's words, and the tricks the win blooms |
  * | {@link BAR_STATE_SCRIPT} | which tab, band and language is lit on the bar |
- * | {@link OLIVE_STATUS_SCRIPT} / {@link ASK_OLIVE_SCRIPT} | the shell's Olive doors (CG-004), with the written line when there is no shell |
+ * | {@link OLIVE_STATUS_SCRIPT} / {@link TRY_OLIVE_SCRIPT} | the shell's Olive doors (CG-004), with the written line when there is no shell |
  * | {@link TRANSLATE_ALL_SCRIPT} | every word, the engine's AND the pages', one output per key |
  *
  * 🔴 No backtick and no dollar-brace inside any script text (README §7): these are template literals.
@@ -31,17 +31,18 @@
  * @module noodl-mcp/tests/cg003Scripts
  */
 import { WORDS, WORD_KEYS } from './cg002Content';
+import { OLIVE_WORDS, OLIVE_WORD_KEYS } from './cg005Olive';
 import { ENGINE, FOLD_HELPERS, MANY_BLOCKS, SAVE_HELPERS } from './cg002Scripts';
 import { EYES, HATS, ISLANDERS, ISLAND_MAP, ISLAND_SPOTS, ISLAND_THINGS, PAGE_WORDS, PAGE_WORD_KEYS, SKILL_BLOCKS } from './cg003Content';
 import { ROBOT_PAINTS } from './cg007Look';
 
-/** Every word key the pages can show, the engine's first. */
-export const ALL_WORD_KEYS: ReadonlyArray<string> = [...WORD_KEYS, ...PAGE_WORD_KEYS];
+/** Every word key the pages can show: the engine's (CG-002/006), Olive's (CG-005), then the pages' own. */
+export const ALL_WORD_KEYS: ReadonlyArray<string> = [...WORD_KEYS, ...OLIVE_WORD_KEYS, ...PAGE_WORD_KEYS];
 
 /** `Data/Words`: the engine's table with the pages' rows appended. */
 export const ALL_WORDS_JSON = JSON.stringify(
   ALL_WORD_KEYS.map((key) => {
-    const w = (WORDS as Record<string, { en: string; fr: string }>)[key] ?? PAGE_WORDS[key];
+    const w = (WORDS as Record<string, { en: string; fr: string }>)[key] ?? (OLIVE_WORDS as Record<string, { en: string; fr: string }>)[key] ?? PAGE_WORDS[key];
     return { key, en: w.en, fr: w.fr };
   }),
   null,
@@ -116,12 +117,14 @@ if (req) {
   Outputs.request = JSON.parse(JSON.stringify(req));
   Outputs.goal = JSON.parse(JSON.stringify(req.goal || []));
   Outputs.allowed = (req.palette || []).slice();
+  Outputs.rungs = req.rungs === 'all' ? 'all' : Array.isArray(req.rungs) ? req.rungs.slice() : [];
   Outputs.islander = String(req.islander || '');
 } else {
   Outputs.world = null;
   Outputs.request = null;
   Outputs.goal = [];
   Outputs.allowed = [];
+  Outputs.rungs = [];
   Outputs.islander = '';
 }
 Outputs.nonce = Inputs.nonce;
@@ -239,8 +242,8 @@ for (var i = 0; i < src.length; i++) {
   if (!e || typeof e.id !== 'string') continue;
   var slots = [];
   var names = Array.isArray(e.slots) ? e.slots : [];
-  for (var s = 0; s < names.length; s++) { var made = slot(String(names[s])); if (made) slots.push(made); }
-  out.push({ id: e.id, kind: e.kind, icon: ICON[e.id] || 'pick', label: band === 1 ? String(e.caption || e.label || e.id) : String(e.label || e.id), hasBody: !!e.hasBody, hasCount: !!e.hasCount, slots: slots });
+  for (var s = 0; s < names.length; s++) { var made = names[s] && typeof names[s] === 'object' ? names[s] : slot(String(names[s])); if (made) slots.push(made); }
+  out.push({ id: e.id, kind: e.kind, icon: ICON[e.id] || (e.id.indexOf('ask:') === 0 ? 'owl' : 'pick'), label: band === 1 ? String(e.caption || e.label || e.id) : String(e.label || e.id), hasBody: !!e.hasBody, hasCount: !!e.hasCount, slots: slots });
 }
 Outputs.palette = out;
 Outputs.count = out.length;
@@ -498,7 +501,7 @@ Outputs.checked = Inputs.nonce;
 `;
 
 /** The grown-ups' Try Olive: a thank-you rung, slots only, never a prompt; the written line when she does not answer. */
-export const ASK_OLIVE_SCRIPT = `
+export const TRY_OLIVE_SCRIPT = `
 var lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';
 var written = String(Inputs.fallback || '');
 var body = { rung: String(Inputs.rung || 'say-thanks'), slots: Inputs.slots && typeof Inputs.slots === 'object' ? Inputs.slots : {}, lang: lang, shape: 'sentence', temperature: 0.8 };
@@ -551,5 +554,5 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Win summary', script: WIN_SUMMARY_SCRIPT, seam: 'the win card’s words and the tricks it blooms' },
   { component: 'Logic/Bar state', script: BAR_STATE_SCRIPT, seam: 'which tab, band and language is lit' },
   { component: 'Logic/Olive status', script: OLIVE_STATUS_SCRIPT, seam: 'where Olive runs, from the shell’s status door' },
-  { component: 'Logic/Ask Olive', script: ASK_OLIVE_SCRIPT, seam: 'one rung asked of Olive, the written line when she does not answer' }
+  { component: 'Logic/Try Olive', script: TRY_OLIVE_SCRIPT, seam: 'the grown-ups\u2019 Try Olive: one thank-you asked of her, the written line when she does not answer' }
 ];

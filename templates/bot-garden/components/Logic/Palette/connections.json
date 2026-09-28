@@ -17,9 +17,27 @@
     },
     {
       "fromId": "paletteIn",
+      "fromProperty": "exam",
+      "toId": "paletteFn",
+      "toProperty": "in-exam"
+    },
+    {
+      "fromId": "paletteIn",
       "fromProperty": "lang",
       "toId": "paletteFn",
       "toProperty": "in-lang"
+    },
+    {
+      "fromId": "paletteIn",
+      "fromProperty": "narrow",
+      "toId": "paletteFn",
+      "toProperty": "in-narrow"
+    },
+    {
+      "fromId": "paletteIn",
+      "fromProperty": "rungs",
+      "toId": "paletteFn",
+      "toProperty": "in-rungs"
     },
     {
       "fromId": "paletteIn",
@@ -41,9 +59,33 @@
     },
     {
       "fromId": "paletteFn",
+      "fromProperty": "out-heldHere",
+      "toId": "paletteOut",
+      "toProperty": "heldHere"
+    },
+    {
+      "fromId": "paletteFn",
+      "fromProperty": "out-offered",
+      "toId": "paletteOut",
+      "toProperty": "offered"
+    },
+    {
+      "fromId": "paletteFn",
+      "fromProperty": "out-olive",
+      "toId": "paletteOut",
+      "toProperty": "olive"
+    },
+    {
+      "fromId": "paletteFn",
       "fromProperty": "out-palette",
       "toId": "paletteOut",
       "toProperty": "palette"
+    },
+    {
+      "fromId": "paletteFn",
+      "fromProperty": "out-withheld",
+      "toId": "paletteOut",
+      "toProperty": "withheld"
     },
     {
       "fromId": "paletteFn",

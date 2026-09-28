@@ -5,27 +5,39 @@
   "connections": [
     {
       "fromId": "askoliveIn",
-      "fromProperty": "fallback",
+      "fromProperty": "band",
       "toId": "askoliveFn",
-      "toProperty": "in-fallback"
+      "toProperty": "in-band"
     },
     {
       "fromId": "askoliveIn",
-      "fromProperty": "lang",
+      "fromProperty": "narrow",
       "toId": "askoliveFn",
-      "toProperty": "in-lang"
+      "toProperty": "in-narrow"
     },
     {
       "fromId": "askoliveIn",
-      "fromProperty": "rung",
+      "fromProperty": "request",
       "toId": "askoliveFn",
-      "toProperty": "in-rung"
+      "toProperty": "in-request"
     },
     {
       "fromId": "askoliveIn",
-      "fromProperty": "slots",
+      "fromProperty": "run",
       "toId": "askoliveFn",
-      "toProperty": "in-slots"
+      "toProperty": "in-run"
+    },
+    {
+      "fromId": "askoliveIn",
+      "fromProperty": "timeoutMs",
+      "toId": "askoliveFn",
+      "toProperty": "in-timeoutMs"
+    },
+    {
+      "fromId": "askoliveIn",
+      "fromProperty": "url",
+      "toId": "askoliveFn",
+      "toProperty": "in-url"
     },
     {
       "fromId": "askoliveIn",
@@ -35,21 +47,33 @@
     },
     {
       "fromId": "askoliveFn",
+      "fromProperty": "out-answer",
+      "toId": "askoliveOut",
+      "toProperty": "answer"
+    },
+    {
+      "fromId": "askoliveFn",
       "fromProperty": "out-fallback",
       "toId": "askoliveOut",
       "toProperty": "fallback"
     },
     {
       "fromId": "askoliveFn",
-      "fromProperty": "out-ok",
+      "fromProperty": "out-refused",
       "toId": "askoliveOut",
-      "toProperty": "ok"
+      "toProperty": "refused"
     },
     {
       "fromId": "askoliveFn",
-      "fromProperty": "out-text",
+      "fromProperty": "out-refusedSlot",
       "toId": "askoliveOut",
-      "toProperty": "text"
+      "toProperty": "refusedSlot"
+    },
+    {
+      "fromId": "askoliveFn",
+      "fromProperty": "out-sent",
+      "toId": "askoliveOut",
+      "toProperty": "sent"
     },
     {
       "fromId": "askoliveFn",

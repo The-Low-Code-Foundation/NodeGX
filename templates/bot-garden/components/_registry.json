@@ -39,7 +39,7 @@
       "path": "Logic/New run",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 9,
+      "connectionCount": 11,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -47,7 +47,7 @@
       "path": "Logic/Step",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 16,
+      "connectionCount": 17,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -127,7 +127,7 @@
       "path": "Logic/Palette",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 8,
+      "connectionCount": 15,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 224,
+      "connectionCount": 342,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -176,6 +176,38 @@
       "type": "visual",
       "nodeCount": 3,
       "connectionCount": 28,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Ask Olive": {
+      "path": "Logic/Ask Olive",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 13,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Olive slots": {
+      "path": "Logic/Olive slots",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 12,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Owl row": {
+      "path": "Logic/Owl row",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 17,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Accept proposal": {
+      "path": "Logic/Accept proposal",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 8,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -191,7 +223,7 @@
       "path": "Logic/Start world",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 13,
+      "connectionCount": 14,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -315,8 +347,8 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
-    "Logic/Ask Olive": {
-      "path": "Logic/Ask Olive",
+    "Logic/Try Olive": {
+      "path": "Logic/Try Olive",
       "type": "visual",
       "nodeCount": 3,
       "connectionCount": 9,
@@ -382,8 +414,8 @@
     "Workshop/Runner": {
       "path": "Workshop/Runner",
       "type": "visual",
-      "nodeCount": 16,
-      "connectionCount": 50,
+      "nodeCount": 17,
+      "connectionCount": 57,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -398,8 +430,8 @@
     "Workshop/Play": {
       "path": "Workshop/Play",
       "type": "visual",
-      "nodeCount": 87,
-      "connectionCount": 202,
+      "nodeCount": 89,
+      "connectionCount": 217,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -541,8 +573,8 @@
     }
   },
   "stats": {
-    "totalComponents": 67,
-    "totalNodes": 546,
-    "totalConnections": 1391
+    "totalComponents": 71,
+    "totalNodes": 561,
+    "totalConnections": 1592
   }
 }

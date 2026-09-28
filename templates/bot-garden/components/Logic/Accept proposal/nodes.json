@@ -1,0 +1,122 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8b35a6eb-036b-5771-8646-0882bae2f2ac",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "acceptproposalIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "accept",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "program",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "proposal",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "acceptproposalFn",
+      "type": "JavaScriptFunction",
+      "label": "Accept proposal",
+      "parameters": {
+        "functionScript": "\nvar KNOWN = { fwd: 1, left: 1, right: 1, water: 1 };\nfunction oliveMaxId(list, m) { for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (Number(b.id) > m) m = Number(b.id); if (b.body) m = oliveMaxId(b.body, m); } return m; }\nfunction oliveHostOf(list, id) { for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (String(b.id) === String(id)) return { list: list, at: i }; if (b.body) { var f = oliveHostOf(b.body, id); if (f) return f; } } return null; }\nvar program = JSON.parse(JSON.stringify(Array.isArray(Inputs.program) ? Inputs.program : []));\nvar p = Inputs.proposal && typeof Inputs.proposal === 'object' ? Inputs.proposal : null;\nvar added = 0;\nif (Inputs.accept === true && p && Array.isArray(p.blocks)) {\n  var next = oliveMaxId(program, 0) + 1, blocks = [];\n  for (var i = 0; i < p.blocks.length; i++) if (KNOWN[p.blocks[i]]) blocks.push({ id: next++, t: String(p.blocks[i]) });\n  var host = p.askId === undefined || p.askId === null ? null : oliveHostOf(program, p.askId);\n  if (host) host.list.splice.apply(host.list, [host.at + 1, 0].concat(blocks));\n  else program = program.concat(blocks);\n  added = blocks.length;\n}\nOutputs.program = program;\nOutputs.added = added;\nOutputs.accepted = added > 0;\n",
+        "runOnChange-in-accept": false,
+        "runOnChange-in-program": false,
+        "runOnChange-in-proposal": false
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-program",
+          "displayName": "program",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-proposal",
+          "displayName": "proposal",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-accept",
+          "displayName": "accept",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-program",
+          "displayName": "program",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-added",
+          "displayName": "added",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-accepted",
+          "displayName": "accepted",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "acceptproposalOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "accepted",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "added",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "program",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

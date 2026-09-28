@@ -59,6 +59,12 @@
     },
     {
       "fromId": "stepFn",
+      "fromProperty": "out-proposal",
+      "toId": "stepOut",
+      "toProperty": "proposal"
+    },
+    {
+      "fromId": "stepFn",
       "fromProperty": "out-puddles",
       "toId": "stepOut",
       "toProperty": "puddles"

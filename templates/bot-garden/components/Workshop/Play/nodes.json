@@ -865,7 +865,8 @@
           "unit": "px"
         },
         "color": "var(--ink)",
-        "fontWeight": "700"
+        "fontWeight": "700",
+        "cssClassName": "bg-owl-say"
       },
       "x": 340,
       "y": 3640
@@ -1162,14 +1163,28 @@
       "type": "/Logic/Hint line",
       "label": "The owl’s line",
       "x": 590,
+      "y": 5800
+    },
+    {
+      "id": "plOwlRow",
+      "type": "/Logic/Owl row",
+      "label": "The written line, voiced only for the same key",
+      "x": 590,
       "y": 3640
+    },
+    {
+      "id": "plAskOlive",
+      "type": "/Logic/Ask Olive",
+      "label": "Ask Olive for a parked run",
+      "x": 590,
+      "y": 5920
     },
     {
       "id": "plStart",
       "type": "/Logic/Start world",
       "label": "The world this request starts from",
       "x": 590,
-      "y": 5800
+      "y": 6040
     },
     {
       "id": "plNonce",
@@ -1189,7 +1204,7 @@
         "name": "gardenWorld"
       },
       "x": 590,
-      "y": 5920
+      "y": 6160
     },
     {
       "id": "plSetWorld",
@@ -1199,7 +1214,7 @@
         "name": "gardenWorld"
       },
       "x": 590,
-      "y": 6040
+      "y": 6280
     },
     {
       "id": "plSetWorldRec",
@@ -1209,7 +1224,7 @@
         "name": "gardenWorld"
       },
       "x": 590,
-      "y": 6160
+      "y": 6400
     },
     {
       "id": "plProgVar",
@@ -1246,7 +1261,7 @@
         "name": "gardenProgram"
       },
       "x": 590,
-      "y": 6280
+      "y": 6520
     },
     {
       "id": "plSetProgFold",
@@ -1256,7 +1271,7 @@
         "name": "gardenProgram"
       },
       "x": 590,
-      "y": 6400
+      "y": 6640
     },
     {
       "id": "plSetProgClear",
@@ -1268,7 +1283,7 @@
         "value": "[]"
       },
       "x": 590,
-      "y": 6520
+      "y": 6760
     },
     {
       "id": "plTeachBumpsVar",
@@ -1278,7 +1293,7 @@
         "name": "gardenTeachBumps"
       },
       "x": 590,
-      "y": 6640
+      "y": 6880
     },
     {
       "id": "plSetTeachBumps",
@@ -1288,7 +1303,7 @@
         "name": "gardenTeachBumps"
       },
       "x": 590,
-      "y": 6760
+      "y": 7000
     },
     {
       "id": "plClearTeachBumps",
@@ -1300,7 +1315,7 @@
         "value": 0
       },
       "x": 590,
-      "y": 6880
+      "y": 7120
     },
     {
       "id": "plRecord",
@@ -1328,7 +1343,7 @@
       "type": "/Logic/Palette",
       "label": "The blocks this band may use",
       "x": 590,
-      "y": 7000
+      "y": 7240
     },
     {
       "id": "plKitPal",
@@ -1395,7 +1410,7 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 7120
+      "y": 7360
     },
     {
       "id": "plMissVar",
@@ -1405,7 +1420,7 @@
         "name": "gardenPredictMiss"
       },
       "x": 590,
-      "y": 7240
+      "y": 7480
     },
     {
       "id": "plSetMiss",
@@ -1417,7 +1432,7 @@
         "value": true
       },
       "x": 590,
-      "y": 7360
+      "y": 7600
     },
     {
       "id": "plClearMiss",
@@ -1436,7 +1451,7 @@
       "type": "/Logic/Find repeat",
       "label": "The same steps, over and over?",
       "x": 590,
-      "y": 7480
+      "y": 7720
     },
     {
       "id": "plTidyLine",
@@ -1453,7 +1468,7 @@
         "name": "gardenTidyNo"
       },
       "x": 590,
-      "y": 7600
+      "y": 7840
     },
     {
       "id": "plSetDismiss",
@@ -1484,7 +1499,7 @@
       "type": "/Logic/Goal met",
       "label": "Was the request done?",
       "x": 590,
-      "y": 7720
+      "y": 7960
     },
     {
       "id": "plMetGate",
@@ -1494,7 +1509,7 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 7840
+      "y": 8080
     },
     {
       "id": "plWonVar",
@@ -1516,7 +1531,7 @@
         "value": true
       },
       "x": 590,
-      "y": 7960
+      "y": 8200
     },
     {
       "id": "plClearWon",

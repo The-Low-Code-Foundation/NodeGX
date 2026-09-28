@@ -172,8 +172,32 @@
       "toProperty": "condition"
     },
     {
+      "fromId": "rnStep",
+      "fromProperty": "waiting",
+      "toId": "rnPark",
+      "toProperty": "condition"
+    },
+    {
       "fromId": "rnEnd",
       "fromProperty": "onfalse",
+      "toId": "rnPark",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rnPark",
+      "fromProperty": "ontrue",
+      "toId": "rnOut",
+      "toProperty": "parked"
+    },
+    {
+      "fromId": "rnPark",
+      "fromProperty": "onfalse",
+      "toId": "rnLoop",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "answered",
       "toId": "rnLoop",
       "toProperty": "eval"
     },
@@ -284,6 +308,24 @@
       "fromProperty": "tick",
       "toId": "rnOut",
       "toProperty": "tick"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "waiting",
+      "toId": "rnOut",
+      "toProperty": "waiting"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "request",
+      "toId": "rnOut",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "proposal",
+      "toId": "rnOut",
+      "toProperty": "proposal"
     },
     {
       "fromId": "rnMode",

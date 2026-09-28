@@ -380,7 +380,7 @@
     },
     {
       "id": "ghAskOlive",
-      "type": "/Logic/Ask Olive",
+      "type": "/Logic/Try Olive",
       "label": "Ask her",
       "parameters": {
         "rung": "say-thanks",

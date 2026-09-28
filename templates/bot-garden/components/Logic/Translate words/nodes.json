@@ -32,7 +32,7 @@
       "type": "JavaScriptFunction",
       "label": "Translate words",
       "parameters": {
-        "functionScript": "\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar rows = Inputs.words || [];\nvar name = String(Inputs.botName || 'Pip');\nvar map = {};\nfor (var i = 0; i < rows.length; i++) map[rows[i].key] = String(rows[i][lang] || rows[i].en || '').split('{b}').join(name);\nOutputs.lang = lang;\nOutputs.isFr = lang === 'fr';\nOutputs.brand = map.brand || '';\nOutputs.navIsland = map.navIsland || '';\nOutputs.navWorkshop = map.navWorkshop || '';\nOutputs.navRobot = map.navRobot || '';\nOutputs.navSkills = map.navSkills || '';\nOutputs.navGrown = map.navGrown || '';\nOutputs.navProfiles = map.navProfiles || '';\nOutputs.bFwd = map.bFwd || '';\nOutputs.bLeft = map.bLeft || '';\nOutputs.bRight = map.bRight || '';\nOutputs.bWater = map.bWater || '';\nOutputs.bPick = map.bPick || '';\nOutputs.bPut = map.bPut || '';\nOutputs.bSay = map.bSay || '';\nOutputs.bRepeat = map.bRepeat || '';\nOutputs.bTimes = map.bTimes || '';\nOutputs.bUntil = map.bUntil || '';\nOutputs.bIf = map.bIf || '';\nOutputs.bWhen = map.bWhen || '';\nOutputs.bCountInc = map.bCountInc || '';\nOutputs.bTrick = map.bTrick || '';\nOutputs.bDo = map.bDo || '';\nOutputs.bAsk = map.bAsk || '';\nOutputs.cFwd = map.cFwd || '';\nOutputs.cLeft = map.cLeft || '';\nOutputs.cRight = map.cRight || '';\nOutputs.cWater = map.cWater || '';\nOutputs.cPick = map.cPick || '';\nOutputs.cPut = map.cPut || '';\nOutputs.cSay = map.cSay || '';\nOutputs.cRepeat = map.cRepeat || '';\nOutputs.cUntil = map.cUntil || '';\nOutputs.cIf = map.cIf || '';\nOutputs.cWhen = map.cWhen || '';\nOutputs.cCountInc = map.cCountInc || '';\nOutputs.cTrick = map.cTrick || '';\nOutputs.cDo = map.cDo || '';\nOutputs.cAsk = map.cAsk || '';\nOutputs.sWallAhead = map.sWallAhead || '';\nOutputs.sTulipAhead = map.sTulipAhead || '';\nOutputs.sBowlEmpty = map.sBowlEmpty || '';\nOutputs.sBasketFull = map.sBasketFull || '';\nOutputs.sCountIs = map.sCountIs || '';\nOutputs.sOliveSays = map.sOliveSays || '';\nOutputs.eMeow = map.eMeow || '';\nOutputs.shWord = map.shWord || '';\nOutputs.shNumber = map.shNumber || '';\nOutputs.shYesNo = map.shYesNo || '';\nOutputs.shOneOf = map.shOneOf || '';\nOutputs.shList3 = map.shList3 || '';\nOutputs.shSentence = map.shSentence || '';\nOutputs.shCard = map.shCard || '';\nOutputs.shBlocks = map.shBlocks || '';\nOutputs.dialSame = map.dialSame || '';\nOutputs.dialSurprise = map.dialSurprise || '';\nOutputs.teach = map.teach || '';\nOutputs.teachStop = map.teachStop || '';\nOutputs.play = map.play || '';\nOutputs.step = map.step || '';\nOutputs.reset = map.reset || '';\nOutputs.predict = map.predict || '';\nOutputs.predictAsk = map.predictAsk || '';\nOutputs.ask = map.ask || '';\nOutputs.owlMeta = map.owlMeta || '';\nOutputs.scriptH = map.scriptH || '';\nOutputs.tidyGo = map.tidyGo || '';\nOutputs.tidyNo = map.tidyNo || '';\nOutputs.tidyFound = map.tidyFound || '';\nOutputs.tidyFound1 = map.tidyFound1 || '';\nOutputs.blocks = map.blocks || '';\nOutputs.block1 = map.block1 || '';\nOutputs.empty = map.empty || '';\nOutputs.recording = map.recording || '';\nOutputs.sayBump = map.sayBump || '';\nOutputs.saySplash = map.saySplash || '';\nOutputs.sayDrink = map.sayDrink || '';\nOutputs.sayPick = map.sayPick || '';\nOutputs.sayPut = map.sayPut || '';\nOutputs.thanksSami = map.thanksSami || '';\nOutputs.thanksMamie = map.thanksMamie || '';\nOutputs.thanksBiscuit = map.thanksBiscuit || '';\nOutputs.winFew = map.winFew || '';\nOutputs.winMany = map.winMany || '';\nOutputs.winLearn = map.winLearn || '';\nOutputs.winIsland = map.winIsland || '';\nOutputs.winStay = map.winStay || '';\nOutputs.isEyebrow = map.isEyebrow || '';\nOutputs.isTitle = map.isTitle || '';\nOutputs.isSub = map.isSub || '';\nOutputs.isReq = map.isReq || '';\nOutputs.isFree = map.isFree || '';\nOutputs.done = map.done || '';\nOutputs.sandH = map.sandH || '';\nOutputs.sandP = map.sandP || '';\nOutputs.islSami = map.islSami || '';\nOutputs.islMamie = map.islMamie || '';\nOutputs.islBiscuit = map.islBiscuit || '';\nOutputs.rqPathTitle = map.rqPathTitle || '';\nOutputs.rqPathBlurb = map.rqPathBlurb || '';\nOutputs.rqPathLine = map.rqPathLine || '';\nOutputs.rqTulipsTitle = map.rqTulipsTitle || '';\nOutputs.rqTulipsBlurb = map.rqTulipsBlurb || '';\nOutputs.rqTulipsLine = map.rqTulipsLine || '';\nOutputs.rqBowlTitle = map.rqBowlTitle || '';\nOutputs.rqBowlBlurb = map.rqBowlBlurb || '';\nOutputs.rqBowlLine = map.rqBowlLine || '';\nOutputs.rqLetterTitle = map.rqLetterTitle || '';\nOutputs.rqLetterBlurb = map.rqLetterBlurb || '';\nOutputs.rqLetterLine = map.rqLetterLine || '';\nOutputs.rqWallTitle = map.rqWallTitle || '';\nOutputs.rqWallBlurb = map.rqWallBlurb || '';\nOutputs.rqWallLine = map.rqWallLine || '';\nOutputs.rqMeowTitle = map.rqMeowTitle || '';\nOutputs.rqMeowBlurb = map.rqMeowBlurb || '';\nOutputs.rqMeowLine = map.rqMeowLine || '';\nOutputs.rqEggsTitle = map.rqEggsTitle || '';\nOutputs.rqEggsBlurb = map.rqEggsBlurb || '';\nOutputs.rqEggsLine = map.rqEggsLine || '';\nOutputs.rqRowsTitle = map.rqRowsTitle || '';\nOutputs.rqRowsBlurb = map.rqRowsBlurb || '';\nOutputs.rqRowsLine = map.rqRowsLine || '';\nOutputs.hatNone = map.hatNone || '';\nOutputs.hatCap = map.hatCap || '';\nOutputs.hatSun = map.hatSun || '';\nOutputs.hatCrown = map.hatCrown || '';\nOutputs.stickerLetter = map.stickerLetter || '';\nOutputs.stickerPaw = map.stickerPaw || '';\nOutputs.stickerTulip = map.stickerTulip || '';\nOutputs.itemBell = map.itemBell || '';\nOutputs.itemBasket = map.itemBasket || '';\nOutputs.itemGnome = map.itemGnome || '';\nOutputs.seeds = map.seeds || '';\nOutputs.rewardFrom = map.rewardFrom || '';\nOutputs.rbTitle = map.rbTitle || '';\nOutputs.rbSub = map.rbSub || '';\nOutputs.rbName = map.rbName || '';\nOutputs.rbColour = map.rbColour || '';\nOutputs.rbEyes = map.rbEyes || '';\nOutputs.eyeRound = map.eyeRound || '';\nOutputs.eyeHappy = map.eyeHappy || '';\nOutputs.eyeWink = map.eyeWink || '';\nOutputs.rbHat = map.rbHat || '';\nOutputs.rbStickers = map.rbStickers || '';\nOutputs.ntTitle = map.ntTitle || '';\nOutputs.ntSub = map.ntSub || '';\nOutputs.stBloom = map.stBloom || '';\nOutputs.stSprout = map.stSprout || '';\nOutputs.stSeed = map.stSeed || '';\nOutputs.n1 = map.n1 || '';\nOutputs.n1p = map.n1p || '';\nOutputs.n2 = map.n2 || '';\nOutputs.n2p = map.n2p || '';\nOutputs.n3 = map.n3 || '';\nOutputs.n3p = map.n3p || '';\nOutputs.n4 = map.n4 || '';\nOutputs.n4p = map.n4p || '';\nOutputs.n5 = map.n5 || '';\nOutputs.n5p = map.n5p || '';\nOutputs.n6 = map.n6 || '';\nOutputs.n6p = map.n6p || '';\nOutputs.n7 = map.n7 || '';\nOutputs.n7p = map.n7p || '';\nOutputs.oliveCant = map.oliveCant || '';\nOutputs.whoIsPlaying = map.whoIsPlaying || '';\nOutputs.newProfile = map.newProfile || '';\nOutputs.yourName = map.yourName || '';\nOutputs.yourBand = map.yourBand || '';\nOutputs.band1 = map.band1 || '';\nOutputs.band2 = map.band2 || '';\nOutputs.language = map.language || '';\nOutputs.robotName = map.robotName || '';\nOutputs.create = map.create || '';\nOutputs.cancel = map.cancel || '';\nOutputs.guTitle = map.guTitle || '';\nOutputs.guSub = map.guSub || '';\nOutputs.guWhereH = map.guWhereH || '';\nOutputs.guNoModel = map.guNoModel || '';\nOutputs.guRulesH = map.guRulesH || '';\nOutputs.guR1 = map.guR1 || '';\nOutputs.guR2 = map.guR2 || '';\nOutputs.guR3 = map.guR3 || '';\nOutputs.guR4 = map.guR4 || '';\nOutputs.guDataH = map.guDataH || '';\nOutputs.guD1 = map.guD1 || '';\nOutputs.guD2 = map.guD2 || '';\nOutputs.guD3 = map.guD3 || '';\nOutputs.guTryH = map.guTryH || '';\nOutputs.guTryGo = map.guTryGo || '';\nOutputs.saveCodeH = map.saveCodeH || '';\nOutputs.saveCodeCopy = map.saveCodeCopy || '';\nOutputs.saveCodePaste = map.saveCodePaste || '';\nOutputs.saveCodeBad = map.saveCodeBad || '';\nOutputs.wsEyebrowReq = map.wsEyebrowReq || '';\nOutputs.wsFreeTitle = map.wsFreeTitle || '';\nOutputs.ntEyebrow = map.ntEyebrow || '';\nOutputs.guEyebrow = map.guEyebrow || '';\nOutputs.guHere = map.guHere || '';\nOutputs.guHereOn = map.guHereOn || '';\nOutputs.guHereOff = map.guHereOff || '';\nOutputs.guExam = map.guExam || '';\nOutputs.guExamNone = map.guExamNone || '';\nOutputs.guTryPrompt = map.guTryPrompt || '';\nOutputs.guTryNote = map.guTryNote || '';\nOutputs.guSaveLine = map.guSaveLine || '';\nOutputs.winThanks = map.winThanks || '';\nOutputs.winNew = map.winNew || '';\nOutputs.pickProfile = map.pickProfile || '';\nOutputs.familyFull = map.familyFull || '';\nOutputs.stickersNone = map.stickersNone || '';\nOutputs.hatLocked = map.hatLocked || '';\nOutputs.n7Block = map.n7Block || '';\nOutputs.p1 = map.p1 || '';\nOutputs.p2 = map.p2 || '';\nOutputs.p3 = map.p3 || '';\nOutputs.p4 = map.p4 || '';\nOutputs.p5 = map.p5 || '';\nOutputs.p6 = map.p6 || '';\nOutputs.p7 = map.p7 || '';\n"
+        "functionScript": "\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar rows = Inputs.words || [];\nvar name = String(Inputs.botName || 'Pip');\nvar map = {};\nfor (var i = 0; i < rows.length; i++) map[rows[i].key] = String(rows[i][lang] || rows[i].en || '').split('{b}').join(name);\nOutputs.lang = lang;\nOutputs.isFr = lang === 'fr';\nOutputs.brand = map.brand || '';\nOutputs.navIsland = map.navIsland || '';\nOutputs.navWorkshop = map.navWorkshop || '';\nOutputs.navRobot = map.navRobot || '';\nOutputs.navSkills = map.navSkills || '';\nOutputs.navGrown = map.navGrown || '';\nOutputs.navProfiles = map.navProfiles || '';\nOutputs.bFwd = map.bFwd || '';\nOutputs.bLeft = map.bLeft || '';\nOutputs.bRight = map.bRight || '';\nOutputs.bWater = map.bWater || '';\nOutputs.bPick = map.bPick || '';\nOutputs.bPut = map.bPut || '';\nOutputs.bSay = map.bSay || '';\nOutputs.bRepeat = map.bRepeat || '';\nOutputs.bTimes = map.bTimes || '';\nOutputs.bUntil = map.bUntil || '';\nOutputs.bIf = map.bIf || '';\nOutputs.bWhen = map.bWhen || '';\nOutputs.bCountInc = map.bCountInc || '';\nOutputs.bTrick = map.bTrick || '';\nOutputs.bDo = map.bDo || '';\nOutputs.bAsk = map.bAsk || '';\nOutputs.cFwd = map.cFwd || '';\nOutputs.cLeft = map.cLeft || '';\nOutputs.cRight = map.cRight || '';\nOutputs.cWater = map.cWater || '';\nOutputs.cPick = map.cPick || '';\nOutputs.cPut = map.cPut || '';\nOutputs.cSay = map.cSay || '';\nOutputs.cRepeat = map.cRepeat || '';\nOutputs.cUntil = map.cUntil || '';\nOutputs.cIf = map.cIf || '';\nOutputs.cWhen = map.cWhen || '';\nOutputs.cCountInc = map.cCountInc || '';\nOutputs.cTrick = map.cTrick || '';\nOutputs.cDo = map.cDo || '';\nOutputs.cAsk = map.cAsk || '';\nOutputs.sWallAhead = map.sWallAhead || '';\nOutputs.sTulipAhead = map.sTulipAhead || '';\nOutputs.sBowlEmpty = map.sBowlEmpty || '';\nOutputs.sBasketFull = map.sBasketFull || '';\nOutputs.sCountIs = map.sCountIs || '';\nOutputs.sOliveSays = map.sOliveSays || '';\nOutputs.eMeow = map.eMeow || '';\nOutputs.shWord = map.shWord || '';\nOutputs.shNumber = map.shNumber || '';\nOutputs.shYesNo = map.shYesNo || '';\nOutputs.shOneOf = map.shOneOf || '';\nOutputs.shList3 = map.shList3 || '';\nOutputs.shSentence = map.shSentence || '';\nOutputs.shCard = map.shCard || '';\nOutputs.shBlocks = map.shBlocks || '';\nOutputs.dialSame = map.dialSame || '';\nOutputs.dialSurprise = map.dialSurprise || '';\nOutputs.teach = map.teach || '';\nOutputs.teachStop = map.teachStop || '';\nOutputs.play = map.play || '';\nOutputs.step = map.step || '';\nOutputs.reset = map.reset || '';\nOutputs.predict = map.predict || '';\nOutputs.predictAsk = map.predictAsk || '';\nOutputs.ask = map.ask || '';\nOutputs.owlMeta = map.owlMeta || '';\nOutputs.scriptH = map.scriptH || '';\nOutputs.tidyGo = map.tidyGo || '';\nOutputs.tidyNo = map.tidyNo || '';\nOutputs.tidyFound = map.tidyFound || '';\nOutputs.tidyFound1 = map.tidyFound1 || '';\nOutputs.blocks = map.blocks || '';\nOutputs.block1 = map.block1 || '';\nOutputs.empty = map.empty || '';\nOutputs.recording = map.recording || '';\nOutputs.sayBump = map.sayBump || '';\nOutputs.saySplash = map.saySplash || '';\nOutputs.sayDrink = map.sayDrink || '';\nOutputs.sayPick = map.sayPick || '';\nOutputs.sayPut = map.sayPut || '';\nOutputs.thanksSami = map.thanksSami || '';\nOutputs.thanksMamie = map.thanksMamie || '';\nOutputs.thanksBiscuit = map.thanksBiscuit || '';\nOutputs.winFew = map.winFew || '';\nOutputs.winMany = map.winMany || '';\nOutputs.winLearn = map.winLearn || '';\nOutputs.winIsland = map.winIsland || '';\nOutputs.winStay = map.winStay || '';\nOutputs.isEyebrow = map.isEyebrow || '';\nOutputs.isTitle = map.isTitle || '';\nOutputs.isSub = map.isSub || '';\nOutputs.isReq = map.isReq || '';\nOutputs.isFree = map.isFree || '';\nOutputs.done = map.done || '';\nOutputs.sandH = map.sandH || '';\nOutputs.sandP = map.sandP || '';\nOutputs.islSami = map.islSami || '';\nOutputs.islMamie = map.islMamie || '';\nOutputs.islBiscuit = map.islBiscuit || '';\nOutputs.rqPathTitle = map.rqPathTitle || '';\nOutputs.rqPathBlurb = map.rqPathBlurb || '';\nOutputs.rqPathLine = map.rqPathLine || '';\nOutputs.rqTulipsTitle = map.rqTulipsTitle || '';\nOutputs.rqTulipsBlurb = map.rqTulipsBlurb || '';\nOutputs.rqTulipsLine = map.rqTulipsLine || '';\nOutputs.rqBowlTitle = map.rqBowlTitle || '';\nOutputs.rqBowlBlurb = map.rqBowlBlurb || '';\nOutputs.rqBowlLine = map.rqBowlLine || '';\nOutputs.rqLetterTitle = map.rqLetterTitle || '';\nOutputs.rqLetterBlurb = map.rqLetterBlurb || '';\nOutputs.rqLetterLine = map.rqLetterLine || '';\nOutputs.rqWallTitle = map.rqWallTitle || '';\nOutputs.rqWallBlurb = map.rqWallBlurb || '';\nOutputs.rqWallLine = map.rqWallLine || '';\nOutputs.rqMeowTitle = map.rqMeowTitle || '';\nOutputs.rqMeowBlurb = map.rqMeowBlurb || '';\nOutputs.rqMeowLine = map.rqMeowLine || '';\nOutputs.rqEggsTitle = map.rqEggsTitle || '';\nOutputs.rqEggsBlurb = map.rqEggsBlurb || '';\nOutputs.rqEggsLine = map.rqEggsLine || '';\nOutputs.rqRowsTitle = map.rqRowsTitle || '';\nOutputs.rqRowsBlurb = map.rqRowsBlurb || '';\nOutputs.rqRowsLine = map.rqRowsLine || '';\nOutputs.rqDoorTitle = map.rqDoorTitle || '';\nOutputs.rqDoorBlurb = map.rqDoorBlurb || '';\nOutputs.rqDoorLine = map.rqDoorLine || '';\nOutputs.rqStonesTitle = map.rqStonesTitle || '';\nOutputs.rqStonesBlurb = map.rqStonesBlurb || '';\nOutputs.rqStonesLine = map.rqStonesLine || '';\nOutputs.hatNone = map.hatNone || '';\nOutputs.hatCap = map.hatCap || '';\nOutputs.hatSun = map.hatSun || '';\nOutputs.hatCrown = map.hatCrown || '';\nOutputs.stickerLetter = map.stickerLetter || '';\nOutputs.stickerPaw = map.stickerPaw || '';\nOutputs.stickerTulip = map.stickerTulip || '';\nOutputs.itemBell = map.itemBell || '';\nOutputs.itemBasket = map.itemBasket || '';\nOutputs.itemGnome = map.itemGnome || '';\nOutputs.seeds = map.seeds || '';\nOutputs.rewardFrom = map.rewardFrom || '';\nOutputs.giftCap = map.giftCap || '';\nOutputs.giftTulip = map.giftTulip || '';\nOutputs.giftSun = map.giftSun || '';\nOutputs.giftSeeds = map.giftSeeds || '';\nOutputs.giftPaw = map.giftPaw || '';\nOutputs.giftCrown = map.giftCrown || '';\nOutputs.giftLetter = map.giftLetter || '';\nOutputs.giftBell = map.giftBell || '';\nOutputs.giftBasket = map.giftBasket || '';\nOutputs.giftGnome = map.giftGnome || '';\nOutputs.or1Title = map.or1Title || '';\nOutputs.or1Line = map.or1Line || '';\nOutputs.or1Lesson = map.or1Lesson || '';\nOutputs.or2Title = map.or2Title || '';\nOutputs.or2Line = map.or2Line || '';\nOutputs.or2Lesson = map.or2Lesson || '';\nOutputs.or3Title = map.or3Title || '';\nOutputs.or3Line = map.or3Line || '';\nOutputs.or3Lesson = map.or3Lesson || '';\nOutputs.or4Title = map.or4Title || '';\nOutputs.or4Line = map.or4Line || '';\nOutputs.or4Lesson = map.or4Lesson || '';\nOutputs.or5Title = map.or5Title || '';\nOutputs.or5Line = map.or5Line || '';\nOutputs.or5Lesson = map.or5Lesson || '';\nOutputs.or6Title = map.or6Title || '';\nOutputs.or6Line = map.or6Line || '';\nOutputs.or6Lesson = map.or6Lesson || '';\nOutputs.or7Title = map.or7Title || '';\nOutputs.or7Line = map.or7Line || '';\nOutputs.or7Lesson = map.or7Lesson || '';\nOutputs.or8Title = map.or8Title || '';\nOutputs.or8Line = map.or8Line || '';\nOutputs.or8Lesson = map.or8Lesson || '';\nOutputs.or9Title = map.or9Title || '';\nOutputs.or9Line = map.or9Line || '';\nOutputs.or9LineG1 = map.or9LineG1 || '';\nOutputs.or9LineG2 = map.or9LineG2 || '';\nOutputs.or9Lesson = map.or9Lesson || '';\nOutputs.or10Title = map.or10Title || '';\nOutputs.or10Line = map.or10Line || '';\nOutputs.or10Lesson = map.or10Lesson || '';\nOutputs.or11Title = map.or11Title || '';\nOutputs.or11Line = map.or11Line || '';\nOutputs.or11Lesson = map.or11Lesson || '';\nOutputs.or12Title = map.or12Title || '';\nOutputs.or12Line = map.or12Line || '';\nOutputs.or12Lesson = map.or12Lesson || '';\nOutputs.mo1Title = map.mo1Title || '';\nOutputs.mo1Line = map.mo1Line || '';\nOutputs.mo2Title = map.mo2Title || '';\nOutputs.mo2Line = map.mo2Line || '';\nOutputs.mo3Title = map.mo3Title || '';\nOutputs.mo3Line = map.mo3Line || '';\nOutputs.mo4Title = map.mo4Title || '';\nOutputs.mo4Line = map.mo4Line || '';\nOutputs.mo5Title = map.mo5Title || '';\nOutputs.mo5Line = map.mo5Line || '';\nOutputs.mo6Title = map.mo6Title || '';\nOutputs.mo6Line = map.mo6Line || '';\nOutputs.mo7Title = map.mo7Title || '';\nOutputs.mo7Line = map.mo7Line || '';\nOutputs.mo8Title = map.mo8Title || '';\nOutputs.mo8Line = map.mo8Line || '';\nOutputs.mo9Title = map.mo9Title || '';\nOutputs.mo9Line = map.mo9Line || '';\nOutputs.mo10Title = map.mo10Title || '';\nOutputs.mo10Line = map.mo10Line || '';\nOutputs.mo11Title = map.mo11Title || '';\nOutputs.mo11Line = map.mo11Line || '';\nOutputs.mo12Title = map.mo12Title || '';\nOutputs.mo12Line = map.mo12Line || '';\nOutputs.mo13Title = map.mo13Title || '';\nOutputs.mo13Line = map.mo13Line || '';\nOutputs.rbTitle = map.rbTitle || '';\nOutputs.rbSub = map.rbSub || '';\nOutputs.rbName = map.rbName || '';\nOutputs.rbColour = map.rbColour || '';\nOutputs.rbEyes = map.rbEyes || '';\nOutputs.eyeRound = map.eyeRound || '';\nOutputs.eyeHappy = map.eyeHappy || '';\nOutputs.eyeWink = map.eyeWink || '';\nOutputs.rbHat = map.rbHat || '';\nOutputs.rbStickers = map.rbStickers || '';\nOutputs.ntTitle = map.ntTitle || '';\nOutputs.ntSub = map.ntSub || '';\nOutputs.stBloom = map.stBloom || '';\nOutputs.stSprout = map.stSprout || '';\nOutputs.stSeed = map.stSeed || '';\nOutputs.n1 = map.n1 || '';\nOutputs.n1p = map.n1p || '';\nOutputs.n2 = map.n2 || '';\nOutputs.n2p = map.n2p || '';\nOutputs.n3 = map.n3 || '';\nOutputs.n3p = map.n3p || '';\nOutputs.n4 = map.n4 || '';\nOutputs.n4p = map.n4p || '';\nOutputs.n5 = map.n5 || '';\nOutputs.n5p = map.n5p || '';\nOutputs.n6 = map.n6 || '';\nOutputs.n6p = map.n6p || '';\nOutputs.n7 = map.n7 || '';\nOutputs.n7p = map.n7p || '';\nOutputs.oliveCant = map.oliveCant || '';\nOutputs.whoIsPlaying = map.whoIsPlaying || '';\nOutputs.newProfile = map.newProfile || '';\nOutputs.yourName = map.yourName || '';\nOutputs.yourBand = map.yourBand || '';\nOutputs.band1 = map.band1 || '';\nOutputs.band2 = map.band2 || '';\nOutputs.language = map.language || '';\nOutputs.robotName = map.robotName || '';\nOutputs.create = map.create || '';\nOutputs.cancel = map.cancel || '';\nOutputs.guTitle = map.guTitle || '';\nOutputs.guSub = map.guSub || '';\nOutputs.guWhereH = map.guWhereH || '';\nOutputs.guNoModel = map.guNoModel || '';\nOutputs.guRulesH = map.guRulesH || '';\nOutputs.guR1 = map.guR1 || '';\nOutputs.guR2 = map.guR2 || '';\nOutputs.guR3 = map.guR3 || '';\nOutputs.guR4 = map.guR4 || '';\nOutputs.guDataH = map.guDataH || '';\nOutputs.guD1 = map.guD1 || '';\nOutputs.guD2 = map.guD2 || '';\nOutputs.guD3 = map.guD3 || '';\nOutputs.guTryH = map.guTryH || '';\nOutputs.guTryGo = map.guTryGo || '';\nOutputs.saveCodeH = map.saveCodeH || '';\nOutputs.saveCodeCopy = map.saveCodeCopy || '';\nOutputs.saveCodePaste = map.saveCodePaste || '';\nOutputs.saveCodeBad = map.saveCodeBad || '';\nOutputs.oliveThinkingTag = map.oliveThinkingTag || '';\nOutputs.oliveRestingTag = map.oliveRestingTag || '';\nOutputs.oliveProposes = map.oliveProposes || '';\nOutputs.oliveAccept = map.oliveAccept || '';\nOutputs.oliveDecline = map.oliveDecline || '';\nOutputs.dialBetween = map.dialBetween || '';\nOutputs.shTwoLines = map.shTwoLines || '';\nOutputs.slotTooLong = map.slotTooLong || '';\nOutputs.slotBlocked = map.slotBlocked || '';\nOutputs.slotNotOffered = map.slotNotOffered || '';\nOutputs.slotMissing = map.slotMissing || '';\nOutputs.slotBad = map.slotBad || '';\nOutputs.rungSayThanks = map.rungSayThanks || '';\nOutputs.rungNameOne = map.rungNameOne || '';\nOutputs.rungNameThree = map.rungNameThree || '';\nOutputs.rungWordsToBlocks = map.rungWordsToBlocks || '';\nOutputs.rungCountInWords = map.rungCountInWords || '';\nOutputs.rungWhatWants = map.rungWhatWants || '';\nOutputs.rungIsItA = map.rungIsItA || '';\nOutputs.rungCountTulips = map.rungCountTulips || '';\nOutputs.rungMathsSeeds = map.rungMathsSeeds || '';\nOutputs.rungMaths = map.rungMaths || '';\nOutputs.rungUnderFiveWords = map.rungUnderFiveWords || '';\nOutputs.rungTallTales = map.rungTallTales || '';\nOutputs.rungTranslate = map.rungTranslate || '';\nOutputs.rungPoem = map.rungPoem || '';\nOutputs.slotTo = map.slotTo || '';\nOutputs.slotDeed = map.slotDeed || '';\nOutputs.slotThing = map.slotThing || '';\nOutputs.slotRoute = map.slotRoute || '';\nOutputs.slotLine = map.slotLine || '';\nOutputs.slotKind = map.slotKind || '';\nOutputs.slotList = map.slotList || '';\nOutputs.slotA = map.slotA || '';\nOutputs.slotB = map.slotB || '';\nOutputs.slotQuestion = map.slotQuestion || '';\nOutputs.slotNote = map.slotNote || '';\nOutputs.slotFlower = map.slotFlower || '';\nOutputs.wsEyebrowReq = map.wsEyebrowReq || '';\nOutputs.wsFreeTitle = map.wsFreeTitle || '';\nOutputs.ntEyebrow = map.ntEyebrow || '';\nOutputs.guEyebrow = map.guEyebrow || '';\nOutputs.guHere = map.guHere || '';\nOutputs.guHereOn = map.guHereOn || '';\nOutputs.guHereOff = map.guHereOff || '';\nOutputs.guExam = map.guExam || '';\nOutputs.guExamNone = map.guExamNone || '';\nOutputs.guTryPrompt = map.guTryPrompt || '';\nOutputs.guTryNote = map.guTryNote || '';\nOutputs.guSaveLine = map.guSaveLine || '';\nOutputs.winThanks = map.winThanks || '';\nOutputs.winNew = map.winNew || '';\nOutputs.pickProfile = map.pickProfile || '';\nOutputs.familyFull = map.familyFull || '';\nOutputs.stickersNone = map.stickersNone || '';\nOutputs.hatLocked = map.hatLocked || '';\nOutputs.n7Block = map.n7Block || '';\nOutputs.p1 = map.p1 || '';\nOutputs.p2 = map.p2 || '';\nOutputs.p3 = map.p3 || '';\nOutputs.p4 = map.p4 || '';\nOutputs.p5 = map.p5 || '';\nOutputs.p6 = map.p6 || '';\nOutputs.p7 = map.p7 || '';\n"
       },
       "x": 40,
       "y": 160,
@@ -920,6 +920,48 @@
           "group": "Outputs"
         },
         {
+          "name": "out-rqDoorTitle",
+          "displayName": "rqDoorTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqDoorBlurb",
+          "displayName": "rqDoorBlurb",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqDoorLine",
+          "displayName": "rqDoorLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqStonesTitle",
+          "displayName": "rqStonesTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqStonesBlurb",
+          "displayName": "rqStonesBlurb",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqStonesLine",
+          "displayName": "rqStonesLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
           "name": "out-hatNone",
           "displayName": "hatNone",
           "plug": "output",
@@ -999,6 +1041,524 @@
         {
           "name": "out-rewardFrom",
           "displayName": "rewardFrom",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-giftCap",
+          "displayName": "giftCap",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-giftTulip",
+          "displayName": "giftTulip",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-giftSun",
+          "displayName": "giftSun",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-giftSeeds",
+          "displayName": "giftSeeds",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-giftPaw",
+          "displayName": "giftPaw",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-giftCrown",
+          "displayName": "giftCrown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-giftLetter",
+          "displayName": "giftLetter",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-giftBell",
+          "displayName": "giftBell",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-giftBasket",
+          "displayName": "giftBasket",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-giftGnome",
+          "displayName": "giftGnome",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or1Title",
+          "displayName": "or1Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or1Line",
+          "displayName": "or1Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or1Lesson",
+          "displayName": "or1Lesson",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or2Title",
+          "displayName": "or2Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or2Line",
+          "displayName": "or2Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or2Lesson",
+          "displayName": "or2Lesson",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or3Title",
+          "displayName": "or3Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or3Line",
+          "displayName": "or3Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or3Lesson",
+          "displayName": "or3Lesson",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or4Title",
+          "displayName": "or4Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or4Line",
+          "displayName": "or4Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or4Lesson",
+          "displayName": "or4Lesson",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or5Title",
+          "displayName": "or5Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or5Line",
+          "displayName": "or5Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or5Lesson",
+          "displayName": "or5Lesson",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or6Title",
+          "displayName": "or6Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or6Line",
+          "displayName": "or6Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or6Lesson",
+          "displayName": "or6Lesson",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or7Title",
+          "displayName": "or7Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or7Line",
+          "displayName": "or7Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or7Lesson",
+          "displayName": "or7Lesson",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or8Title",
+          "displayName": "or8Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or8Line",
+          "displayName": "or8Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or8Lesson",
+          "displayName": "or8Lesson",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or9Title",
+          "displayName": "or9Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or9Line",
+          "displayName": "or9Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or9LineG1",
+          "displayName": "or9LineG1",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or9LineG2",
+          "displayName": "or9LineG2",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or9Lesson",
+          "displayName": "or9Lesson",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or10Title",
+          "displayName": "or10Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or10Line",
+          "displayName": "or10Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or10Lesson",
+          "displayName": "or10Lesson",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or11Title",
+          "displayName": "or11Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or11Line",
+          "displayName": "or11Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or11Lesson",
+          "displayName": "or11Lesson",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or12Title",
+          "displayName": "or12Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or12Line",
+          "displayName": "or12Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-or12Lesson",
+          "displayName": "or12Lesson",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo1Title",
+          "displayName": "mo1Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo1Line",
+          "displayName": "mo1Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo2Title",
+          "displayName": "mo2Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo2Line",
+          "displayName": "mo2Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo3Title",
+          "displayName": "mo3Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo3Line",
+          "displayName": "mo3Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo4Title",
+          "displayName": "mo4Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo4Line",
+          "displayName": "mo4Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo5Title",
+          "displayName": "mo5Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo5Line",
+          "displayName": "mo5Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo6Title",
+          "displayName": "mo6Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo6Line",
+          "displayName": "mo6Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo7Title",
+          "displayName": "mo7Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo7Line",
+          "displayName": "mo7Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo8Title",
+          "displayName": "mo8Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo8Line",
+          "displayName": "mo8Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo9Title",
+          "displayName": "mo9Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo9Line",
+          "displayName": "mo9Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo10Title",
+          "displayName": "mo10Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo10Line",
+          "displayName": "mo10Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo11Title",
+          "displayName": "mo11Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo11Line",
+          "displayName": "mo11Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo12Title",
+          "displayName": "mo12Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo12Line",
+          "displayName": "mo12Line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo13Title",
+          "displayName": "mo13Title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mo13Line",
+          "displayName": "mo13Line",
           "plug": "output",
           "type": "*",
           "group": "Outputs"
@@ -1417,6 +1977,272 @@
           "group": "Outputs"
         },
         {
+          "name": "out-oliveThinkingTag",
+          "displayName": "oliveThinkingTag",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRestingTag",
+          "displayName": "oliveRestingTag",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveProposes",
+          "displayName": "oliveProposes",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveAccept",
+          "displayName": "oliveAccept",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveDecline",
+          "displayName": "oliveDecline",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-dialBetween",
+          "displayName": "dialBetween",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-shTwoLines",
+          "displayName": "shTwoLines",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-slotTooLong",
+          "displayName": "slotTooLong",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-slotBlocked",
+          "displayName": "slotBlocked",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-slotNotOffered",
+          "displayName": "slotNotOffered",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-slotMissing",
+          "displayName": "slotMissing",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-slotBad",
+          "displayName": "slotBad",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rungSayThanks",
+          "displayName": "rungSayThanks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rungNameOne",
+          "displayName": "rungNameOne",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rungNameThree",
+          "displayName": "rungNameThree",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rungWordsToBlocks",
+          "displayName": "rungWordsToBlocks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rungCountInWords",
+          "displayName": "rungCountInWords",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rungWhatWants",
+          "displayName": "rungWhatWants",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rungIsItA",
+          "displayName": "rungIsItA",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rungCountTulips",
+          "displayName": "rungCountTulips",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rungMathsSeeds",
+          "displayName": "rungMathsSeeds",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rungMaths",
+          "displayName": "rungMaths",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rungUnderFiveWords",
+          "displayName": "rungUnderFiveWords",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rungTallTales",
+          "displayName": "rungTallTales",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rungTranslate",
+          "displayName": "rungTranslate",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rungPoem",
+          "displayName": "rungPoem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-slotTo",
+          "displayName": "slotTo",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-slotDeed",
+          "displayName": "slotDeed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-slotThing",
+          "displayName": "slotThing",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-slotRoute",
+          "displayName": "slotRoute",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-slotLine",
+          "displayName": "slotLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-slotKind",
+          "displayName": "slotKind",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-slotList",
+          "displayName": "slotList",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-slotA",
+          "displayName": "slotA",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-slotB",
+          "displayName": "slotB",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-slotQuestion",
+          "displayName": "slotQuestion",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-slotNote",
+          "displayName": "slotNote",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-slotFlower",
+          "displayName": "slotFlower",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
           "name": "out-wsEyebrowReq",
           "displayName": "wsEyebrowReq",
           "plug": "output",
@@ -1801,6 +2627,11 @@
           "type": "*"
         },
         {
+          "name": "dialBetween",
+          "plug": "input",
+          "type": "*"
+        },
+        {
           "name": "dialSame",
           "plug": "input",
           "type": "*"
@@ -1842,6 +2673,56 @@
         },
         {
           "name": "familyFull",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "giftBasket",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "giftBell",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "giftCap",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "giftCrown",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "giftGnome",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "giftLetter",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "giftPaw",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "giftSeeds",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "giftSun",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "giftTulip",
           "plug": "input",
           "type": "*"
         },
@@ -2061,6 +2942,136 @@
           "type": "*"
         },
         {
+          "name": "mo10Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo10Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo11Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo11Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo12Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo12Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo13Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo13Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo1Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo1Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo2Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo2Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo3Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo3Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo4Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo4Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo5Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo5Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo6Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo6Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo7Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo7Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo8Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo8Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo9Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "mo9Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
           "name": "n1",
           "plug": "input",
           "type": "*"
@@ -2186,7 +3197,222 @@
           "type": "*"
         },
         {
+          "name": "oliveAccept",
+          "plug": "input",
+          "type": "*"
+        },
+        {
           "name": "oliveCant",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveDecline",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveProposes",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRestingTag",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveThinkingTag",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or10Lesson",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or10Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or10Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or11Lesson",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or11Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or11Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or12Lesson",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or12Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or12Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or1Lesson",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or1Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or1Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or2Lesson",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or2Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or2Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or3Lesson",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or3Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or3Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or4Lesson",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or4Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or4Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or5Lesson",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or5Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or5Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or6Lesson",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or6Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or6Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or7Lesson",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or7Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or7Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or8Lesson",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or8Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or8Title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or9Lesson",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or9Line",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or9LineG1",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or9LineG2",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "or9Title",
           "plug": "input",
           "type": "*"
         },
@@ -2321,6 +3547,21 @@
           "type": "*"
         },
         {
+          "name": "rqDoorBlurb",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqDoorLine",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqDoorTitle",
+          "plug": "input",
+          "type": "*"
+        },
+        {
           "name": "rqEggsBlurb",
           "plug": "input",
           "type": "*"
@@ -2396,6 +3637,21 @@
           "type": "*"
         },
         {
+          "name": "rqStonesBlurb",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqStonesLine",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqStonesTitle",
+          "plug": "input",
+          "type": "*"
+        },
+        {
           "name": "rqTulipsBlurb",
           "plug": "input",
           "type": "*"
@@ -2422,6 +3678,76 @@
         },
         {
           "name": "rqWallTitle",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rungCountInWords",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rungCountTulips",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rungIsItA",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rungMaths",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rungMathsSeeds",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rungNameOne",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rungNameThree",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rungPoem",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rungSayThanks",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rungTallTales",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rungTranslate",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rungUnderFiveWords",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rungWhatWants",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rungWordsToBlocks",
           "plug": "input",
           "type": "*"
         },
@@ -2551,12 +3877,102 @@
           "type": "*"
         },
         {
+          "name": "shTwoLines",
+          "plug": "input",
+          "type": "*"
+        },
+        {
           "name": "shWord",
           "plug": "input",
           "type": "*"
         },
         {
           "name": "shYesNo",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "slotA",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "slotB",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "slotBad",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "slotBlocked",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "slotDeed",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "slotFlower",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "slotKind",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "slotLine",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "slotList",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "slotMissing",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "slotNotOffered",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "slotNote",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "slotQuestion",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "slotRoute",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "slotThing",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "slotTo",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "slotTooLong",
           "plug": "input",
           "type": "*"
         },

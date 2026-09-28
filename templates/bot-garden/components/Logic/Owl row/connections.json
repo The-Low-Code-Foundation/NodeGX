@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f57236aa-270c-5d38-8b82-f18b7fa21615",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "owlrowIn",
+      "fromProperty": "answer",
+      "toId": "owlrowFn",
+      "toProperty": "in-answer"
+    },
+    {
+      "fromId": "owlrowIn",
+      "fromProperty": "botName",
+      "toId": "owlrowFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "owlrowIn",
+      "fromProperty": "hintKey",
+      "toId": "owlrowFn",
+      "toProperty": "in-hintKey"
+    },
+    {
+      "fromId": "owlrowIn",
+      "fromProperty": "lang",
+      "toId": "owlrowFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "owlrowIn",
+      "fromProperty": "vars",
+      "toId": "owlrowFn",
+      "toProperty": "in-vars"
+    },
+    {
+      "fromId": "owlrowIn",
+      "fromProperty": "voiced",
+      "toId": "owlrowFn",
+      "toProperty": "in-voiced"
+    },
+    {
+      "fromId": "owlrowIn",
+      "fromProperty": "waiting",
+      "toId": "owlrowFn",
+      "toProperty": "in-waiting"
+    },
+    {
+      "fromId": "owlrowIn",
+      "fromProperty": "words",
+      "toId": "owlrowFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "owlrowIn",
+      "fromProperty": "written",
+      "toId": "owlrowFn",
+      "toProperty": "in-written"
+    },
+    {
+      "fromId": "owlrowFn",
+      "fromProperty": "out-resting",
+      "toId": "owlrowOut",
+      "toProperty": "resting"
+    },
+    {
+      "fromId": "owlrowFn",
+      "fromProperty": "out-restingText",
+      "toId": "owlrowOut",
+      "toProperty": "restingText"
+    },
+    {
+      "fromId": "owlrowFn",
+      "fromProperty": "out-text",
+      "toId": "owlrowOut",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "owlrowFn",
+      "fromProperty": "out-thinking",
+      "toId": "owlrowOut",
+      "toProperty": "thinking"
+    },
+    {
+      "fromId": "owlrowFn",
+      "fromProperty": "out-thinkingText",
+      "toId": "owlrowOut",
+      "toProperty": "thinkingText"
+    },
+    {
+      "fromId": "owlrowFn",
+      "fromProperty": "out-voiceRequest",
+      "toId": "owlrowOut",
+      "toProperty": "voiceRequest"
+    },
+    {
+      "fromId": "owlrowFn",
+      "fromProperty": "out-voiced",
+      "toId": "owlrowOut",
+      "toProperty": "voiced"
+    },
+    {
+      "fromId": "owlrowFn",
+      "fromProperty": "success",
+      "toId": "owlrowOut",
+      "toProperty": "ran"
+    }
+  ]
+}
