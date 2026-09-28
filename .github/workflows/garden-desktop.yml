@@ -99,8 +99,10 @@ jobs:
           path: contract-linux-cpu.json
           retention-days: 30
 
+  # Not `needs: shell`: the contract test grades the MODEL on one CPU; the installed app runs its own exam on its own
+  # machine and withholds what fails there. The first run (2026-09-28, 36419321133) skipped this job because the Linux
+  # contract was red on one probe (P07, x86 CPU, 4 of 4 wrong), so the product was never built. Both jobs run; both show.
   windows:
-    needs: shell
     runs-on: windows-latest
     timeout-minutes: 90
     defaults:
