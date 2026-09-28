@@ -143,3 +143,36 @@ predictEnd returns the start (3), the run held under one global name (34; the tw
   engine is pure and every AC is graded in the spec. Requests beyond the eight are CG-006's; the Olive rungs' content
   and the stub Olive are CG-005's (the interpreter's `ask` step and the `olive_says` sensor are here for them).
 
+
+## 8. Session 3 — the save model: one island per kid (lane LOOK, 2026-09-28; ruling 8)
+
+**The model is v3** (`SAVE_VERSION = 3`): each profile carries `island: { done, placed }`; the family keeps `activeId`.
+`model.island` is the island ON SCREEN — `activeId` plus `done`/`placed` DERIVED from the active profile (the very same
+arrays, so every reader of `model.island.done` reads the playing kid's, and a writer to it writes hers). `modelOf`
+re-derives it on every read and never reads it back from a v3 model, so a stale copy in storage cannot leak into anyone's
+island. `Complete request` marks the kid who played; a sibling's island still offers the request. `activate(model, id)`
+is the one place the island on screen follows the chosen kid (Add profile, Select profile). The code packs each kid's
+island in her row (`[…, hats, done, placed]`); `d`/`pl` are gone. `ROBOT_NAME_MAX = 16` is exported for the name boxes.
+
+**The migration rule (a v1 or v2 family had one island): EVERY existing profile keeps what the family had done and
+placed.** Least surprising: nobody loses a request they finished together; from now on each kid's island moves on its
+own. It applies to a stored MODEL (`modelOf`) and to a CODE (`Decode save code`, `migrated: true`). **The migration
+owes its own save:** `migrationDue(raw)` is true for a stored model older than v3 with anyone in it; `Read family`
+publishes it as `migrated`, and every page writes the migrated model back at once (CG-003 §8), so the next read
+migrates nothing and a re-encoded code is v3.
+
+| Row (AC5, `cg002Engine.test.ts`) | Status | Numbers |
+|---|---|---|
+| one island per kid | ✅ | A finishes the tulips: A `['tulips-three']`, B `[]`; the island on screen is B's; through the store and back, A on screen reads hers (the same array); done twice = once; no profile given = the active kid |
+| a stale family-level copy never leaks | ✅ | a v3 model with `island.done` tampered reads each kid's own; `migrationDue` false |
+| v3 round-trip | ✅ | code < 600 chars, `v: 3`, no `d`/`pl`, each row's `[12]`/`[13]` her island; decode `toEqual`; re-encode byte-identical; `migrated: false` |
+| a v2 code | ✅ | two kids both get `['tulips-three','path-postbox']` and the placed stone, as two arrays (not one shared); tricks/stickers/hats kept; `migrated: true`; its re-save is v3 and not a migration |
+| a v1 code | ✅ | the family's done to the kid, `placed: []`, defaults; re-save not a migration |
+| a stored v2 model | ✅ | `migrationDue` true → `modelOf` v3 by the rule → written back: `migrationDue` false and `modelOf` unchanged; known-firing: null/empty not due, v1 due |
+| the robot's name | ✅ | kept to 16 |
+
+**Gate: 115/115** (was 105; the AC5 block is rewritten, lane CONTENT's rows untouched; the three imports this block reads
+are one separate import line). **Arms (in-spec, anchor must occur once): 5/5 killed** — the migration gives the family's
+island to the active kid only; a v3 model read from the family-level copy; Complete request marks every kid; the
+migration never due; encode drops a kid's done. Lane CONTENT's `cg006Requests.test.ts` (which reads
+`model.island.done` after the active kid completes) stays green through the derived island: 107/107 with cg005.

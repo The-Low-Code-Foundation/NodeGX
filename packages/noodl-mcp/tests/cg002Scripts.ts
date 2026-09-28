@@ -79,8 +79,14 @@ export const DIAL_TEMPERATURE = [0, 0.8, 1.2] as const;
 /** Profiles per family. Siblings share a computer; six is a family. */
 export const MAX_PROFILES = 6;
 
-/** The save model's current version. A v1 code decodes and asks for its own save. */
-export const SAVE_VERSION = 2;
+/**
+ * The save model's current version. v3 (P105 s3, ruling 8): one island per kid — each profile carries its own
+ * `island: { done, placed }`. A v1 or v2 family (one island for the family) decodes, loads and asks for its own save.
+ */
+export const SAVE_VERSION = 3;
+
+/** The robot's name, at most this long (My robot and the new-player form cut at the same length). */
+export const ROBOT_NAME_MAX = 16;
 
 /** The trick keys on the Skills page, by TPL-012 §2.3 number. */
 export const TRICK_KEYS = ['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7'] as const;
@@ -722,13 +728,22 @@ Outputs.band = band;
 // ── The save model ──────────────────────────────────────────────────────────
 
 /**
- * The family model: `{ v, family: { id, created }, profiles: [...], island: { done, placed, activeId } }`.
- * A profile is `{ id, name, band, lang, face, robot: { name, color, eye, hat }, tricks: { n1..n7 }, stickers, hats }`.
- * `modelOf` normalises whatever it is given and carries a v1 model to v2 (tricks, stickers, hats, placed), reporting it.
+ * The family model (v3): `{ v, family: { id, created }, profiles: [...], island: { activeId, done, placed } }`.
+ * A profile is `{ id, name, band, lang, face, robot: { name, color, eye, hat }, tricks: { n1..n7 }, stickers, hats,
+ * island: { done, placed } }` — ONE ISLAND PER KID (ruling 8): what a child has done and placed is hers.
+ *
+ * `model.island` is the island ON SCREEN: `activeId`, and `done`/`placed` DERIVED from the active profile (the very
+ * same arrays, so a reader of `model.island.done` reads the active kid's). It is never read back from a v3 model:
+ * `modelOf` re-derives it every time, so a stale copy in storage cannot leak into anyone's island.
+ *
+ * The migration rule for a v1/v2 family (one island for the family): EVERY existing profile keeps what the family had
+ * done and placed — nobody loses a request they finished together. `migrationDue(raw)` says a stored model is older
+ * than v3 so the page writes the migrated model back at once (an on-load migration owes its own save, P100).
  */
 export const SAVE_HELPERS = `
 var SAVE_VERSION = ${SAVE_VERSION};
 var MAX_PROFILES = ${MAX_PROFILES};
+var ROBOT_NAME_MAX = ${ROBOT_NAME_MAX};
 var TRICK_KEYS = ${JSON.stringify(TRICK_KEYS)};
 function newId(prefix) { return prefix + Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36); }
 function tricksOf(raw) {
@@ -736,29 +751,50 @@ function tricksOf(raw) {
   for (var i = 0; i < TRICK_KEYS.length; i++) { var v = raw && raw[TRICK_KEYS[i]]; out[TRICK_KEYS[i]] = v === 'bloom' || v === 'sprout' ? v : (TRICK_KEYS[i] === 'n1' ? 'sprout' : 'seed'); }
   return out;
 }
+function islandOf(raw) {
+  var i = raw && typeof raw === 'object' ? raw : {};
+  var done = [];
+  var list = Array.isArray(i.done) ? i.done : [];
+  for (var k = 0; k < list.length; k++) if (done.indexOf(String(list[k])) === -1) done.push(String(list[k]));
+  return { done: done, placed: Array.isArray(i.placed) ? JSON.parse(JSON.stringify(i.placed)) : [] };
+}
 function profileOf(raw) {
   var p = raw && typeof raw === 'object' ? raw : {};
   var robot = p.robot && typeof p.robot === 'object' ? p.robot : {};
   return {
     id: String(p.id || newId('p')), name: String(p.name || '').slice(0, 24), band: Number(p.band) === 1 ? 1 : 2, lang: p.lang === 'fr' ? 'fr' : 'en',
     face: String(p.face || ''),
-    robot: { name: String(robot.name || 'Pip').slice(0, 16), color: String(robot.color || '#FF7A59'), eye: String(robot.eye || 'round'), hat: String(robot.hat || 'none') },
-    tricks: tricksOf(p.tricks), stickers: Array.isArray(p.stickers) ? p.stickers.map(String) : [], hats: Array.isArray(p.hats) ? p.hats.map(String) : []
+    robot: { name: String(robot.name || 'Pip').slice(0, ROBOT_NAME_MAX), color: String(robot.color || '#FF7A59'), eye: String(robot.eye || 'round'), hat: String(robot.hat || 'none') },
+    tricks: tricksOf(p.tricks), stickers: Array.isArray(p.stickers) ? p.stickers.map(String) : [], hats: Array.isArray(p.hats) ? p.hats.map(String) : [],
+    island: islandOf(p.island)
   };
+}
+/** A stored model older than v3 that has anyone in it: the page writes the migrated model back at once. */
+function migrationDue(raw) {
+  return !!raw && typeof raw === 'object' && Array.isArray(raw.profiles) && raw.profiles.length > 0 && !(Number(raw.v) >= SAVE_VERSION);
 }
 function modelOf(raw) {
   var m = raw && typeof raw === 'object' ? raw : {};
   var fam = m.family && typeof m.family === 'object' ? m.family : {};
   var isl = m.island && typeof m.island === 'object' ? m.island : {};
+  var old = !(Number(m.v) >= SAVE_VERSION);
   var profiles = [];
   var list = Array.isArray(m.profiles) ? m.profiles : [];
-  for (var i = 0; i < list.length && i < MAX_PROFILES; i++) profiles.push(profileOf(list[i]));
-  return {
-    v: SAVE_VERSION,
-    family: { id: String(fam.id || newId('f')), created: Number(fam.created) || Date.now() },
-    profiles: profiles,
-    island: { done: Array.isArray(isl.done) ? isl.done.map(String) : [], placed: Array.isArray(isl.placed) ? isl.placed : [], activeId: String(isl.activeId || (profiles[0] ? profiles[0].id : '')) }
-  };
+  for (var i = 0; i < list.length && i < MAX_PROFILES; i++) {
+    var p = profileOf(list[i]);
+    // v1/v2: the family had one island. Every existing profile keeps what it had done and placed (the rule, CG-002 §8).
+    if (old) p.island = islandOf(isl);
+    profiles.push(p);
+  }
+  var model = { v: SAVE_VERSION, family: { id: String(fam.id || newId('f')), created: Number(fam.created) || Date.now() }, profiles: profiles, island: null };
+  return activate(model, String(isl.activeId || (profiles[0] ? profiles[0].id : '')));
+}
+/** The profile playing: model.island becomes its island (the same arrays), never a copy that could go stale. */
+function activate(model, id) {
+  var active = null;
+  for (var j = 0; j < model.profiles.length; j++) if (model.profiles[j].id === id) active = model.profiles[j];
+  model.island = { activeId: String(id || ''), done: active ? active.island.done : [], placed: active ? active.island.placed : [] };
+  return model;
 }
 function toB64(str) {
   var bytes = unescape(encodeURIComponent(str));
@@ -783,7 +819,7 @@ else if (model.profiles.length >= MAX_PROFILES) error = 'full';
 else {
   var p = profileOf({ name: name, band: Inputs.band, lang: Inputs.lang, face: Inputs.face, robot: { name: Inputs.robotName, color: Inputs.color, eye: Inputs.eye, hat: 'none' } });
   model.profiles.push(p);
-  model.island.activeId = p.id;
+  activate(model, p.id);
   profileId = p.id;
   ok = true;
 }
@@ -795,9 +831,10 @@ Outputs.count = model.profiles.length;
 `;
 
 /**
- * A request finished by a profile: the island marks it done (once; either
- * robot's win counts, D2), the profile's tricks bloom, and the reward is
- * given to the profile that earned it. Never a score.
+ * A request finished by a profile: THAT profile's island marks it done (once;
+ * one island per kid, ruling 8 — a sibling's island still offers it), the
+ * profile's tricks bloom, and the reward is given to the profile that earned
+ * it. Never a score.
  */
 export const COMPLETE_REQUEST_SCRIPT = `${SAVE_HELPERS}
 var model = modelOf(Inputs.model);
@@ -808,8 +845,8 @@ var reward = Inputs.reward && typeof Inputs.reward === 'object' ? Inputs.reward 
 var p = null;
 for (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === profileId) p = model.profiles[i];
 var newlyDone = false, bloomed = [];
-if (requestId && model.island.done.indexOf(requestId) === -1) { model.island.done.push(requestId); newlyDone = true; }
 if (p) {
+  if (requestId && p.island.done.indexOf(requestId) === -1) { p.island.done.push(requestId); newlyDone = true; }
   for (var t = 0; t < tricks.length; t++) { var key = 'n' + Math.floor(Number(tricks[t])); if (p.tricks[key] !== undefined && p.tricks[key] !== 'bloom') { p.tricks[key] = 'bloom'; bloomed.push(key); } }
   if (reward && reward.kind === 'hat' && p.hats.indexOf(String(reward.id)) === -1) p.hats.push(String(reward.id));
   if (reward && (reward.kind === 'sticker' || reward.kind === 'item' || reward.kind === 'seed') && p.stickers.indexOf(String(reward.id)) === -1) p.stickers.push(String(reward.id));
@@ -823,11 +860,11 @@ Outputs.found = !!p;
 /** The family as a code: base64 of the packed model with its version, like Rocket School's. */
 export const ENCODE_SAVE_SCRIPT = `${SAVE_HELPERS}
 var model = modelOf(Inputs.model);
-var packed = { v: SAVE_VERSION, f: [model.family.id, model.family.created], p: [], d: model.island.done, pl: model.island.placed, a: model.island.activeId };
+var packed = { v: SAVE_VERSION, f: [model.family.id, model.family.created], p: [], a: model.island.activeId };
 for (var i = 0; i < model.profiles.length; i++) {
   var p = model.profiles[i], tr = '';
   for (var k = 0; k < TRICK_KEYS.length; k++) tr += p.tricks[TRICK_KEYS[k]] === 'bloom' ? 'b' : p.tricks[TRICK_KEYS[k]] === 'sprout' ? 's' : '-';
-  packed.p.push([p.id, p.name, p.band, p.lang, p.face, p.robot.name, p.robot.color, p.robot.eye, p.robot.hat, tr, p.stickers, p.hats]);
+  packed.p.push([p.id, p.name, p.band, p.lang, p.face, p.robot.name, p.robot.color, p.robot.eye, p.robot.hat, tr, p.stickers, p.hats, p.island.done, p.island.placed]);
 }
 var code = 'BG1.' + toB64(JSON.stringify(packed));
 Outputs.code = code;
@@ -836,8 +873,9 @@ Outputs.length = code.length;
 
 /**
  * A code back into a model. A v1 code (no tricks, stickers, hats or placed
- * things) decodes with defaults and says `migrated`, so the page saves it at
- * once — an on-load migration owes its own save (P100).
+ * things) or a v2 code (one island for the family) decodes by the migration
+ * rule — every profile keeps what the family had done — and says `migrated`,
+ * so the page saves it at once: an on-load migration owes its own save (P100).
  */
 export const DECODE_SAVE_SCRIPT = `${SAVE_HELPERS}
 var code = String(Inputs.code || '').trim();
@@ -845,17 +883,18 @@ var ok = false, error = '', migrated = false, model = null;
 try {
   if (code.indexOf('BG1.') !== 0) throw new Error('prefix');
   var packed = JSON.parse(fromB64(code.slice(4)));
-  if (!packed || [1, 2].indexOf(packed.v) === -1 || !Array.isArray(packed.p) || !Array.isArray(packed.f)) throw new Error('shape');
-  var v2 = packed.v >= 2;
+  if (!packed || [1, 2, 3].indexOf(packed.v) === -1 || !Array.isArray(packed.p) || !Array.isArray(packed.f)) throw new Error('shape');
+  var v2 = packed.v >= 2, v3 = packed.v >= 3;
+  var family = { done: Array.isArray(packed.d) ? packed.d : [], placed: v2 && Array.isArray(packed.pl) ? packed.pl : [] };
   var profiles = [];
   for (var i = 0; i < packed.p.length; i++) {
     var a = packed.p[i];
     var tricks = {};
     if (v2 && typeof a[9] === 'string') for (var k = 0; k < TRICK_KEYS.length; k++) tricks[TRICK_KEYS[k]] = a[9].charAt(k) === 'b' ? 'bloom' : a[9].charAt(k) === 's' ? 'sprout' : 'seed';
-    profiles.push({ id: a[0], name: a[1], band: a[2], lang: a[3], face: a[4], robot: { name: a[5], color: a[6], eye: a[7], hat: a[8] }, tricks: v2 ? tricks : undefined, stickers: v2 ? a[10] : [], hats: v2 ? a[11] : [] });
+    profiles.push({ id: a[0], name: a[1], band: a[2], lang: a[3], face: a[4], robot: { name: a[5], color: a[6], eye: a[7], hat: a[8] }, tricks: v2 ? tricks : undefined, stickers: v2 ? a[10] : [], hats: v2 ? a[11] : [], island: v3 ? { done: a[12], placed: a[13] } : family });
   }
-  model = modelOf({ family: { id: packed.f[0], created: packed.f[1] }, profiles: profiles, island: { done: packed.d, placed: v2 ? packed.pl : [], activeId: packed.a } });
-  migrated = !v2;
+  model = modelOf({ v: SAVE_VERSION, family: { id: packed.f[0], created: packed.f[1] }, profiles: profiles, island: { activeId: packed.a } });
+  migrated = !v3;
   ok = true;
 } catch (e) {
   error = 'bad';
