@@ -1,6 +1,6 @@
 # CG-006 — The requests: the coding tricks, the Olive ladder, and the moments worth ring-fencing
 
-**Opened 2026-09-27**, scoped from TPL-012 §2.3 and §2.6. **Status: 🟡 session 2 — AC1, AC4, AC5 measured; AC2 §3 as data; AC2 §4 + AC6 probes prepared (model run pending); AC3 awaits Richard's FR read (§7).** Depends on CG-002
+**Opened 2026-09-27**, scoped from TPL-012 §2.3 and §2.6. **Status: 🟡 session 2 — AC1, AC4, AC5 measured; AC2 §3 as data; AC2 §4 + AC6 measured on the real model, CPU and Metal (§7.1: 6 moments promoted, 3 dropped); AC3 awaits Richard's FR read (§7).** Depends on CG-002
 (and CG-005 for §3). Lane B.
 
 ## 1. The person sentence
@@ -156,3 +156,34 @@ substrings so "beau" = "eau" (1). Restored after each (`cp` from a backup); 187/
 reference programs shifted (no gate pins them). New exports `OLIVE_RUNGS` / `OLIVE_RUNGS_JSON` are not consumed yet
 (the pages' Olive cards are CG-003/CG-005's). The gate READS lane C's `olive-templates.json`, `exam.js` and
 `olive-check.js`: a renamed rung or probe id there turns a row here red with its name — that is the gate working.
+
+### 7.1 The probe run on the real model (orchestrator, primary checkout, 2026-09-28 07:20)
+
+`zsh drive-laneB.sh` after the cherry-pick (`5a6f0031a`): gates 187/187; `probe-cg006.mjs` through the shell's own
+compose/check path, 28 probes × 3 samples, **CPU 2 threads** (the tablet's path; node-llama-cpp compiled its CPU build
+first, because the shell's `npm ci` that morning had wiped `localBuilds`) and then **Metal**. Exit 0 both. The two paths
+agree on every decision:
+
+| moment | CPU | Metal | decision (`decide()`, §4's rule) | the readout |
+|---|---|---|---|---|
+| E2 can't see the garden | FR row 0/3 · EN row 3/3 | same | **dropped** | FR with the map row in the slot: "derrière" / "devant" / "devant" — never `gauche`; EN gets `left` 3/3. A FR-only failure: re-frame (the EN row works) or keep dropped |
+| E3 explain my program | FR 3/3 · EN 2/3 | 3/3 · 3/3 | **promoted** | |
+| E4 narrate the run | 3/3 · 3/3 | same | **promoted** | |
+| E5 name my trick | 3/3 | 3/3 | **promoted** | "apt" recorded, 0/3 |
+| E6 rewrite it | polite 1/3 ❌ · poem 3/3 · shorter 🎓 obeyed 3/3 ❌ | polite 0/3 · shorter obeyed 1/3 | **dropped** | "polite" adds a preamble and a question ("Voici une version plus polie : …"); "shorter" she does ("Moi, un chouette.") — so it cannot be the 🎓 |
+| E7 word → emoji | tulipe 3/3 · lettre 0/3 | same | **dropped** | "lettre" → 🌻 / 🌻 / 🌷: only the garden's emoji. Re-frame to garden things only, or keep dropped |
+| E8 🎓 sort | red 0/3 FR and EN | same | **promoted** | reliably wrong, as the lesson needs |
+| E9 🎓 dictionary | mixed (rocher 3/3, arrosoir 0/3, chouette 0/3) | mixed (1/3, 0/3, 2/3) | **promoted** | shown as mixed, as designed |
+| E10 letter generator | FR 2/3 · EN 3/3 | 3/3 · 3/3 | **promoted** | the must-contain on the object holds |
+
+**For Richard's two rulings (measured, not chosen):**
+- **Rung 9's rule:** G1 "no letter e" — she breaks it **3/3 FR and 3/3 EN on both paths**, so it works as the 🎓.
+  G2 "never mention water" — she **keeps it 3/3** on both paths ("Pip fait planter des fleurs et des légumes dans un
+  grand sentier vert."), so it does not work as a failure. The evidence points at G1.
+- **The EN thank-you must-contain:** candidate A (a wider word list) met **2/3** on both paths ("Thank Mamie Rose for
+  trusting you with the garden."); candidate B (no must-contain for EN) met **3/3**.
+
+**Residual:** the `decision` fields in `cg006Probes.ts` `MOMENTS` still read `awaiting-probe`. The table above is the
+evidence to flip them (6 promoted, 3 dropped), and §3 gains E3 E4 E5 E8 E9 E10 as rungs. Owner: CG-006, next session,
+after Richard reads this table (E2 and E7 may be re-framed rather than dropped).
+

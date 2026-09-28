@@ -1,6 +1,6 @@
 # CG-005 — Olive in the game: the ask-Olive blocks, the fallbacks, the exam gate
 
-**Opened 2026-09-27**, scoped from TPL-012 §2.4 and §2.6. **Status: ⬜ not started.** Depends on
+**Opened 2026-09-27**, scoped from TPL-012 §2.4 and §2.6. **Status: 🟡 session 2 (2026-09-28) — AC1, AC3, AC4, AC7, AC8 measured; AC2, AC5, AC6 measured in specs and the route drive, their page clauses wait for CG-003's hooks (§7, §7.1).** Depends on
 CG-002 and CG-004. Lanes B+C. **Session 2 (2026-09-28, lane C): 🟡 AC1–AC6 and AC8 measured in the specs; AC7 and the page clauses prepared, drives pending — §7.**
 
 ## 1. The person sentence
@@ -96,7 +96,7 @@ switchable exam verdicts per rung, a mutant mode, `hang`, and `serve` for page d
 | 4 no model | ✅ measured | 18 asserted exam probes graded against the written answers by the exam's own `meetsOne`: every ✅ met, every 🎓 not met; no model through the route: 14 rungs × 2 languages → `no-model` + the written value/text, 0 engine calls; "three squares" → proposal `[fwd]`, 4 tulips → walks 6, "red tulip a flower" → walks 1, row resting. |
 | 5 exam gate | ✅ measured | exam through the doors with `words-to-blocks` switched to fail → palette `withheld [under-five-words, words-to-blocks]`, 12 offered, no `ask:words-to-blocks`; `engine.set` pass + re-run on the same doors → offered, `status.exam.at` changed. No results → nothing withheld (14 in band 10–12, 11 in band 7–9). Page clause P-AC5 prepared. |
 | 6 slots before sending | ✅ measured (spec + route drive) / 🟡 page prepared | band 7–9: options exactly the request's narrowed words, no text field on any of the 14 rungs, a typed poem name → `no-typing`, rung 8 → `not-in-band`; band 10–12: `max 40`, 40 chars ok, 41 → `too-long` "Trop long : 40 lettres au plus.", `stupide` / `Crap` → `blocklist`; four refused asks → `sent:false`, 0 fetches, 0 stub calls, then a valid one sent once. The embedded `checkSlots` equals the shell's on 11 cases. |
-| 7 the dial | 🟡 prepared | `olive-contract.mjs` now asserts, FR and EN, two runs at 0 identical and three at 1.2 ≥ 2 names; not run (real model). The stub's dial: 1 name at 0, 3 at 1.2, both languages (`olive-stub.test.js`). |
+| 7 the dial | ✅ measured s2 on the real model, Metal and CPU (§7.1) · was 🟡 prepared | `olive-contract.mjs` now asserts, FR and EN, two runs at 0 identical and three at 1.2 ≥ 2 names; not run (real model). The stub's dial: 1 name at 0, 3 at 1.2, both languages (`olive-stub.test.js`). |
 | 8 EN and FR | ✅ measured | every rung: prompt, written answer (not voice-hint), stub answer and ≥1 exam probe in each language (the 12 EN probes are RECORDED, one sample each, until a contract run says what she does in English); every palette rung's title and slot label in `OLIVE_WORDS`, none colliding with CG-002's keys. |
 
 **Numbers.** `cg005Olive.test.ts` **25/25** (0.8 s); `cg002Engine.test.ts` **97/97** after the engine edits; shell
@@ -130,3 +130,24 @@ wants an object and the rung's own temperature — both fixed without changing C
   Owner: CG-006.
 - Rung 9's rule and the EN thank-you must-contain stay Richard's rulings (unchanged; the stub's default mirrors the
   readout, so rung 9 is withheld). The first-launch exam grows by 12 single samples (~1 min on the tablet). Owner: CG-008.
+
+### 7.1 The orchestrator's runs on the merged tree (primary checkout, 2026-09-28 07:14–07:21, `af343f439`)
+
+- **Gates:** `cg005Olive` + `cg002Engine` + `cg006Requests` **212/212** after the lane B/C reconciliation (`af343f439`:
+  the EN probes P24–P34 claimed by their rungs; lane B's red pin on `lacks`/`containsAll` flipped green; the eggs goal
+  needs `senses count_is` — the no-sensor program measured `met: false, missing: ["senses"]`). Shell `node --test` **69/69**.
+- **Route drive** (`drive-laneC.sh route`, plain node, the stub): **4/4 PASS** — R-AC2 a hung rung falls back in 1.5–4 s,
+  R-AC3 the mutant's blocklisted line refused, R-AC5 withheld then offered after a passing re-run, R-AC6 41 chars and a
+  listed word refused with nothing reaching the model.
+- **AC7, the dial, real model — ✅ both paths.** Metal: FR "same every time" `["Pipette","Pipette"]`, "surprise me"
+  `["Follette","Folie","Olivette"]`; EN `["Pip","Pip"]` / `["Daisy","Tulipan","petal"]`. CPU: FR `["Pipette","Pipette"]` /
+  `["Pipotus","Ella","⟂ cap"]`; EN `["Pip","Pip"]` / `["Mignon","Ela","Ela"]`.
+- **The contract test, exit 1 on both paths, 19/20 asserted** — the same shape as session 1 (the red moves): Metal red on
+  **P15** maths-seeds (2+3 answered `[3,3]`; it was 5 on CPU and in s1); CPU red on **P02** the EN thank-you must-contain
+  (Richard's open ruling; CG-006 §7.1 measured candidate B, no must-contain for EN, at 3/3). Exam 36.8 s Metal / 48.3 s
+  CPU with the EN twins (`probes per language {"fr":20,"en":15}`); per probe 339–2523 / 503–3757 ms. P17
+  (under-five-words) is now `record`, not asserted, so it no longer pretends to be a 🎓 she fails.
+- **Owed:** the page clauses P-AC2/3/5/6 (`drive-laneC.sh pages`, `DEPLOY=`) wait for CG-003's hooks — the palette fed
+  the request's `rungs`, `[data-owl-row]`, the slot message, a second Ask Olive for the voiced hint, the "Use them / No
+  thanks" card.
+
