@@ -1,6 +1,6 @@
 # CG-007 — The look: the mockup's garden, not a wireframe of it
 
-**Opened 2026-09-27.** **Status: ⬜ not started.** Depends on CG-003. Lane A.
+**Opened 2026-09-27.** **Status: 🟡 session 2 (2026-09-28) — AC2, AC3, AC4, AC5, AC7 measured (gate + the page drive on the primary checkout); AC1's side-by-side looked at and written (§7.1); AC6 contrast 🔴 a ruling for Richard (the mockup's own white-on-fill pairs are below 4.5:1).** Depends on CG-003. Lane A.
 
 ## 1. The person sentence
 
@@ -74,3 +74,30 @@ change shows. **Owner: Richard.**
 **Residuals:** AC1's side-by-side and AC3/5/7's drive readings — the orchestrator. The kit's `icon.png` is still
 game-kit's — CG-007 next session. The block colours in the KIT's own stylesheet default to the mockup hexes when the
 page sends nothing — NONE (the page always sends the tokens).
+
+### 7.1 The side-by-side (orchestrator, primary checkout at `14e852f50`, 2026-09-28)
+
+The drive ran **121/121** (CG-003 §7.2) and wrote `cg007-ac1-*.png` beside the mockup's own screens in the same Chrome
+(`mockup-*.png`). AC3 (Fredoka and Nunito `loaded`, 0 requests off 127.0.0.1), AC5 (face ≥ 20 px at 390×844; two robots
+disjoint) and AC7 (reduced motion: nothing animates, a watered tulip still reads apart) all PASS there.
+
+**Workshop, 1368×912, looked at beside `mockup-workshop.png`:** the same page — bar with the band and language switches
+and the face, the eyebrow and Fredoka title, Mamie Rose's card, the world (tile colours, beds, the drooping tulips, water,
+rock, trees, house, Pip on the path), the four button families (coral Teach, leaf Play, quiet cream One step / Start
+over / Predict, violet Ask Olive), the violet owl row, "Pip's steps" with rounded blocks in their four colours. The
+differences, each small:
+1. The page blurb under the title is the island's general sentence ("Every request teaches Pip one new trick…") on every
+   request; the mockup gives the request its own ("Drive Pip yourself first. Pip remembers every step…").
+2. The Ask Olive button carries a plain white dot; the mockup draws the owl glyph.
+3. The progress marks beside the islander are outline rings (○○○); the mockup's are filled dots that fill as tulips drink.
+4. The palette is the request's own (5 blocks for the tulips) where the mockup shows eight — by design (CG-002 palettes).
+
+**Island:** the kit's tile world with a water border and every robot on it (not the mockup's sea with pins) — the ruling
+lane A named; the request list in cards with the trick as a coloured tag, "✓ done" greyed. **Profiles:** a screen the
+mockup does not have, and it is bare (a title, one button) — worth a design pass. **390×844:** the bar folds to two rows,
+Play and the owl on screen; the Teach pad sits over the lower right of the world and hides part of it while teaching.
+**Two robots (AC10 screenshot):** both carry the default name "Pip" in the same colour — the clause "each named" passes,
+but a child cannot tell them apart; the profile's name or the robot's own colour should show.
+
+**Owner:** Richard grades the look (README §6); items 1–3 and the two-robots label are CG-007 next session.
+

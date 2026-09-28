@@ -1,6 +1,6 @@
 # CG-002 — The engine: the interpreter, the fold, the hints, the save
 
-**Opened 2026-09-27**, scoped from TPL-012 §2–§3. **Status: 🟡 built, session 1 (2026-09-27) — AC1–AC9 measured green in the engine gate; the `template:garden` hook is owed by CG-003.** Depends on nothing. Lane B.
+**Opened 2026-09-27**, scoped from TPL-012 §2–§3. **Status: 🟢 session 1 built, session 2 wired (2026-09-28) — AC1–AC9 measured green in the engine gate (105/105 on `cline-dev` with CG-006's requests); `npm run template:garden` runs this gate before it writes anything (CG-003).** Depends on nothing. Lane B.
 
 ## 1. The person sentence
 

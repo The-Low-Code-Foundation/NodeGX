@@ -1,8 +1,7 @@
 # Phase 105 — The coding garden: teach a robot, then tidy the lesson into a loop
 
 **Scoped:** 2026-09-27, from [TPL-012](../phase-78-the-templates/TPL-012-THE-CODING-GARDEN.md) (the
-scoping, the research, the mockup, the model readout). **Status: 📋 session 1 done 2026-09-27 — CG-001 🟢, CG-002 🟢, CG-004 🟡 (the Electron control launch waits for an
-unlocked screen). Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).** **Prefix: `CG`.**
+scoping, the research, the mockup, the model readout). **Status: 📋 session 2 done 2026-09-28 — CG-001 🟢, CG-002 🟢, CG-003 🟢 (driven 121/121), CG-004 🟢 on the Mac, CG-005 🟡, CG-006 🟡, CG-007 🟡; the whole loop plays in the browser, EN and FR, desktop and phone. Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).** **Prefix: `CG`.**
 
 > *"I'd like to scope out a new template app for my kids … learn 'Scratch' … like 'Autonauts' … a kind
 > of 'LLM call' step … a safe and fully offline LLM."* — Richard, 2026-09-27
@@ -63,12 +62,12 @@ ring-fenced moments this phase adds are in [CG-006](CG-006-THE-REQUESTS.md) §4.
 | Task | What | Depends on | Lane | Status |
 |---|---|---|---|---|
 | [CG-001 — the kit](CG-001-THE-KIT.md) | `garden-kit`: `Block List` (the program editor) and `Garden` (the tile world), React nodes, touch and pen | — | A | 🟢 s1: gate 20/20, drive 28/28, AC9 p95 29.9 ms Mac ×4 |
-| [CG-002 — the engine](CG-002-THE-ENGINE.md) | interpreter, fold, hint table, save model, word table, request schema — Function scripts with a gate in both languages | — | B | 🟢 s1: gate 97/97, arms 12/12; `template:garden` hook owed by 003 |
-| [CG-003 — the pages](CG-003-THE-PAGES.md) | Profiles, Island, Workshop, My robot, Skills, Grown-ups through the plan door; driven at 1368×912 and 390×844 | 001, 002 | A+B | ⬜ |
-| [CG-004 — the shell and the model](CG-004-THE-SHELL-AND-THE-MODEL.md) | the Nightbook shell forked; node-llama-cpp in the main process; `POST /__garden/olive` on the relay; the GGUF fetched at build; Olive's exam | — | C | 🟡 s1: shell 59/59, exam 19/20 real model, upgrade drive launches 1–2 measured; control launch + packaging blocked by a LOCKED SCREEN |
-| [CG-005 — Olive in the game](CG-005-OLIVE-IN-THE-GAME.md) | the `ask Olive` block family, the thinking state, written fallbacks, rungs gated by the exam, a stub Olive for drives | 002, 004 | B+C | ⬜ |
-| [CG-006 — the requests](CG-006-THE-REQUESTS.md) | the content: seven coding tricks as requests, twelve Olive rungs, the extra ring-fenced moments, islanders, rewards, FR/EN copy | 002 (005 for the Olive rungs) | B | ⬜ |
-| [CG-007 — the look](CG-007-THE-LOOK.md) | the mockup's look in one stylesheet, bundled fonts, the robot and sprites, rendered beside the artboards | 003 | A | ⬜ |
+| [CG-002 — the engine](CG-002-THE-ENGINE.md) | interpreter, fold, hint table, save model, word table, request schema — Function scripts with a gate in both languages | — | B | 🟢 s1 gate; s2: 105/105 with CG-006's requests, run by `template:garden` before it writes |
+| [CG-003 — the pages](CG-003-THE-PAGES.md) | Profiles, Island, Workshop, My robot, Skills, Grown-ups through the plan door; driven at 1368×912 and 390×844 | 001, 002 | A+B | 🟢 s2: gate 47/47, generator 0 drift, page drive 121/121 (EN+FR, 1368 + 390), screenshots looked at |
+| [CG-004 — the shell and the model](CG-004-THE-SHELL-AND-THE-MODEL.md) | the Nightbook shell forked; node-llama-cpp in the main process; `POST /__garden/olive` on the relay; the GGUF fetched at build; Olive's exam | — | C | 🟢 Mac s2: upgrade drive PASS incl. the control launch (the s1 "locked screen" was an AppKit prompt), AC4 in Electron, packaged `Bot Garden.app` loads on Metal after a packaging fix; Windows = CG-008 |
+| [CG-005 — Olive in the game](CG-005-OLIVE-IN-THE-GAME.md) | the `ask Olive` block family, the thinking state, written fallbacks, rungs gated by the exam, a stub Olive for drives | 002, 004 | B+C | 🟡 s2: 25/25, 12/12 arms, route drive 4/4, AC7 dial on the real model ✅; page clauses 1 PASS 4 SKIP (hooks owed by the pages) |
+| [CG-006 — the requests](CG-006-THE-REQUESTS.md) | the content: seven coding tricks as requests, twelve Olive rungs, the extra ring-fenced moments, islanders, rewards, FR/EN copy | 002 (005 for the Olive rungs) | B | 🟡 s2: 82/82 (+105 engine), 10 requests, 12 rungs framed; §4 probes on the real model: 6 promoted, 3 dropped; FR copy awaits Richard |
+| [CG-007 — the look](CG-007-THE-LOOK.md) | the mockup's look in one stylesheet, bundled fonts, the robot and sprites, rendered beside the artboards | 003 | A | 🟡 s2: tokens, Fredoka offline, AC2/3/4/5/7 measured; side-by-side written (§7.1); AC6 contrast is Richard's ruling |
 | [CG-008 — the installer and the tablet](CG-008-THE-INSTALLER-AND-THE-TABLET.md) | the NSIS installer on the Windows runner, the installed app driven, the exam and the timings on the tablet | 003, 005, 007 | C | ⬜ |
 | [CG-009 — the kids' verdict](CG-009-THE-KIDS-VERDICT.md) | the two children play; their words the same day; what changes | 008 | — | ⬜ |
 
