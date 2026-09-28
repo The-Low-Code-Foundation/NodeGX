@@ -1,6 +1,6 @@
 # CG-004 — The shell and the model: Electron, a local backend, an owl in the main process
 
-**Opened 2026-09-27**, scoped from TPL-012 §2.4–§2.5 and briefing §3–§4, §C2. **Status: 🟢 on the Mac, session 2 (2026-09-28) — AC1, AC3, AC4 (node + Electron), AC6, AC7, AC8, AC9 measured; AC5 measured on the Mac (packaged, Metal), Windows owed to CG-008; AC2 19/20 per run (§7.2). Was: ⬜ not
+**Opened 2026-09-27**, scoped from TPL-012 §2.4–§2.5 and briefing §3–§4, §C2. **Status: 🟢 on the Mac, session 2 (2026-09-28) — AC1, AC3, AC4 (node + Electron), AC6, AC7, AC8, AC9 measured; AC5 measured on the Mac (packaged, Metal), Windows owed to CG-008; AC2 19/20 per run (§7.2). Session 3 (§8): renamed "Olive's Island" with the saves folder pinned (measured); build-app on the real template, AC8's family clauses and the no-model branch prepared. Was: ⬜ not
 started.** Depends on nothing. Lane C.
 
 ## 1. The person sentence
@@ -254,3 +254,39 @@ environment carries `ELECTRON_RUN_AS_NODE=1`, so a packaged binary launched from
 a relative path and matches the backend (the same binary in Node mode); a hung main ignores SIGTERM; `curl` to a hung
 app's CDP port never returns without `-m`.
 
+
+## 8. Session 3 — what was built (lane DESKTOP, 2026-09-28)
+
+Base `83888c07d`; shell suite **69/69** at base, **75/75** after. Commits `92d268961` (the name, the pin), `55fd6db92` (build-app, the drive), `e6ce41dea`
+(CG-008's workflow). Nothing here was launched: every Electron run is PREPARED, with commands and readouts in the lane's
+`EXPECTED-DRIVE.md` (orchestrator, serially, on the primary).
+
+| # | Deliverable / ruling | Status | Reading |
+|---|---|---|---|
+| 1 | **The name (ruling 7)** — "Olive's Island" / "L'île d'Olive" wherever a person sees it | ✅ measured (unit + electron-builder's own functions) · 🟡 the packaged bundle's name | `garden.json` `name`, `nameFr`; `package.json` `productName` + `build.productName`; the window title pinned by `fit.js windowTitle` (the exported page's `<title>` passes only if it is one of the two names — the template's `htmlTitle` still says "Bot Garden"); the dialogs' French halves say `nameFr`; the backups folder "Olive's Island backups" (an existing install keeps the folder its `backups.json` names); NOTICE + README headings. Kept: package `name` `garden-desktop`, `appId` `io.digitalbricks.garden`, `garden`, `/__garden/`, `island`. `config.test.js` + `fit.test.js`. |
+| 1a | **Where her saves live** | ✅ measured (fake-Electron load of `main.js`) | The island is NOT in the backend: the template keeps the family in the page's localStorage (key `bot-garden`), which Chromium writes under `sessionData` → `userData` → `<appData>/<app name>`. A rename would have opened an EMPTY island. `main.js pinUserData()` sets `userData` AND `sessionData` to `<appData>/` + `garden.json userDataDirName` = **"Bot Garden"** before anything reads them (the single-instance lock reads userData). Test: `main.js` required with `electron` intercepted — `final('userData') = final('sessionData') = <appData>/Bot Garden`, set before the first read and before the lock, no `Olive's Island` folder made; with `GARDEN_HOME` all three paths under the home. Also: `before-quit` now calls `session.defaultSession.flushStorageData()` (her last move committed before the app goes; graded by the drive's launch-2 storage clause). |
+| 1b | **The apostrophe in file names** | ✅ measured (read + `node -e` on app-builder-lib 26.15.3) | `sanitizeFileName("Olive's Island")` keeps the `'`; the oneClick per-user install folder is `getWindowsInstallationDirName → garden-desktop` (the product name is tried only for assisted/per-machine installs, and its regex `^[-_+0-9a-zA-Z .]+$` would refuse the `'` anyway); the NSIS `-D` defines escape only `$` and `"`; every NSIS use of `APP_EXECUTABLE_FILENAME` sits in a backtick or double-quoted string; the exe's `FileDescription` (Task Manager) = productName. **Chose:** the exe and the Mac bundle keep the product name (`Olive's Island.exe`, `Olive's Island.app`); only the installer FILE drops it: `artifactName OlivesIsland-Setup-${version}.${ext}` (typed, linked, globbed). No `executableName`. The workflow reads the name from `package.json` (no PowerShell single-quoted literal left to double). |
+| 2 | **`build-app.js` builds the real template** | ✅ measured (probe) · 🟡 the build itself | `--project` defaults to `templates/bot-garden` of the checkout the script sits in (primary when run there). The template ships **no `nodegx.security.json`** (measured: `ls templates/bot-garden`), which made the old script fail `missing policy`: now the shell's `CLOSED_POLICY` is shipped (every rule `nobody`, `devOpen false`; nodegx-backend's own `validateSecurityConfig` → **0 errors**, a control with an unknown key refused; without any policy the backend would mint `devOpen: true` + `signup: public`). The staged copy's `htmlTitle` = the game's name. The deploy's JSON verdict is READ (it exits 0 on a refusal — the old `execFileSync` believed the exit code). Probe in the lane (no deploy engine in the worktree): no args → passes the project check, stops at `missing deploy engine`, exit 1; `--project templates/nope` → `missing project`; bare `--project` → refused. |
+| 3 | **AC8's two `STEP-NEEDS-CG-003` clauses** | 🟡 prepared, drive pending | `drive-upgrade.js`: launch 1 → Profiles → New player "Ada", robot box (default Pip) → "Robo" → Let's go → `/island` → storage holds Ada/Robo → My robot → rename to "Bolt" (ruling 7's rename, verified not rebuilt) → storage holds Ada/Bolt; launch 2 (0.0.2) → storage still Ada/Bolt → her `.bg-profile` card shows Ada and Bolt → chosen → My robot's box says Bolt; launch 3 (fresh home) has no Ada. The storage walk accepts `robot.name` or `robotName` at any depth of any `bot-garden` key — ruling 8's save-version bump cannot break it, and no island field is read. The in-page expressions compile; the walk run in a `vm` on both save shapes returns Ada/Bolt; the words come from the template's own table in EN and FR. |
+| 4 | **No model → no exam wait** (AC4 in Electron) | 🟡 prepared | The drive waits for the owl to SETTLE (past `unloaded`/`loading`); `ready` → the exam wait as before (bound now `GARDEN_EXAM_WAIT_MS`, default 10 min); `none` → one `POST /__garden/olive` (a sample built from the table: the first rung whose slots are all lists, `say-thanks` today, passes the real slot check) must answer `{ok:false, fallback:true, reason:'no-model'}`; exam clauses become "still none". |
+
+**Arms: 9/9 killed** (`$SCRATCH/arms.out`, each file copied first, restored by `cp`, suite 75/75 after): the pin removed;
+userData pinned without sessionData; the pinned folder renamed to the new name; the page title passed through; the closed
+policy opened (`devOpen: true`); an apostrophe in the installer's name; the package renamed (would move the install
+folder); productName reverted; the French dialog naming the English game.
+
+**Findings (new):**
+- 🔴 **The nightly backups hold nothing of the game.** The backend's copy is of its own database; the family (every
+  profile, robot, request done) is in Chromium's localStorage under `userData`, which no backup reads. A parent sees an
+  "Olive's Island backups" folder in Documents that cannot bring a garden back; the save code on Grown-ups is the only
+  copy. **For Richard** (a new ruling): either the shell copies the Local Storage folder (or the page hands the save to
+  the shell's copy door), or the backups folder and cron go. Until then it is honest to say nothing about backups.
+- The primary's `shell/node_modules/electron/dist` is ABSENT (the Electron binary was never downloaded there, or was
+  lost when the folder moved, §7.2): `drive-upgrade.js` without `--exe` cannot start. The prepared drives use the
+  packaged Mac app. Owner: orchestrator (`node node_modules/electron/install.js` in `shell/` if the dev path is wanted).
+- The template still says "Bot Garden" in `settings.htmlTitle` and the `brand` word (EN and FR). The shell covers the
+  window title; the page's own words are lane LOOK's / the orchestrator's (`templates/`, `cg003*.ts`).
+
+**Residuals:** the three drives of `EXPECTED-DRIVE.md` (model, no model, packaged name) — owner orchestrator; whether
+Electron creates an empty `<appData>/Olive's Island` folder before `main.js` runs (harmless, unmeasured) — owner CG-008's
+tablet run; the backups ruling above — Richard.
