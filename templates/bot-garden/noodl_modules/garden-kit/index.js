@@ -329,13 +329,19 @@
     return next;
   }
 
-  /** One slot of a block set to a value (text, cut to 40 characters). */
-  function setSlot(list, id, key, value) {
+  /**
+   * One slot of a block set to a value. TYPED text is cut to `max` (the text field's limit, at most 40 characters); a
+   * value PICKED from the slot's options is kept whole — it is one of the list's own words (P105 s3 drive: a 45-character
+   * flower list cut to 40 was no longer on the list, and 15 options of five Olive rungs could never be sent).
+   */
+  function setSlot(list, id, key, value, max) {
     var next = normalizeList(list);
     var b = findBlock(next, id);
     if (!b || !key) return next;
     if (!b.slots) b.slots = {};
-    b.slots[String(key)] = String(value === undefined || value === null ? '' : value).slice(0, TEXT_SLOT_MAX);
+    var text = String(value === undefined || value === null ? '' : value);
+    var cut = Number(max) > 0 ? Math.min(TEXT_SLOT_MAX, Number(max)) : 0;
+    b.slots[String(key)] = cut ? text.slice(0, cut) : text;
     return normalizeList(next);
   }
 
@@ -548,9 +554,9 @@
           if (!b) return;
           publish(setCount(live.current.prog, id, (b.n || COUNT_MIN) + by));
         };
-        var pickSlot = function (id, key, value) {
+        var pickSlot = function (id, key, value, max) {
           if (live.current.locked) return;
-          publish(setSlot(live.current.prog, id, key, value));
+          publish(setSlot(live.current.prog, id, key, value, max));
         };
 
         // ── Pointers: one gesture at a time, touch, pen or mouse alike ────────
@@ -662,7 +668,7 @@
           });
           // Band 2 may type; band 1 never sees a keyboard, whatever the palette says.
           if (s.text && band === 2) {
-            items.push(h('input', { key: 'text', className: 'gd-slot-text', type: 'text', maxLength: Math.min(TEXT_SLOT_MAX, Number(s.max) || TEXT_SLOT_MAX), value: value, 'aria-label': word(s.label, lang, s.key), autoComplete: 'off', onChange: function (e) { pickSlot(b.id, s.key, e.target.value); } }));
+            items.push(h('input', { key: 'text', className: 'gd-slot-text', type: 'text', maxLength: Math.min(TEXT_SLOT_MAX, Number(s.max) || TEXT_SLOT_MAX), value: value, 'aria-label': word(s.label, lang, s.key), autoComplete: 'off', onChange: function (e) { pickSlot(b.id, s.key, e.target.value, Math.min(TEXT_SLOT_MAX, Number(s.max) || TEXT_SLOT_MAX)); } }));
           }
           return h('div', { key: 'picker', className: 'gd-picker', 'data-picker': String(b.id) }, items);
         };
