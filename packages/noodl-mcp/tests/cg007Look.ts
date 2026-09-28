@@ -316,6 +316,13 @@ ${owlColourRule}
 .bg-pin-bot .gd-world, .bg-profile-stage .gd-world { pointer-events: none; }
 .bg-pin-bot .gd-name, .bg-profile-stage .gd-name { top: 100% !important; font-size: 13px !important; padding: 3px 10px !important; box-shadow: var(--shadow-soft) !important; }
 ${pinRules}
+/* A phone (the s3 drive, 390 px): the 12:7 sea is 208 px tall and the labels keep their desktop size, so Pip covered
+   Mamie Rose's name and Sami's and Biscuit's badges met. The sea goes square, the labels smaller, Pip one step east. */
+@media (max-width: 600px) {
+  .bg-sea { aspect-ratio: 1 / 1; }
+  .bg-pin-lbl, .bg-pin-bot .gd-name { font-size: 11px !important; padding: 2px 7px !important; }
+  .bg-pin-bot { left: 46% !important; top: 38% !important; }
+}
 .bg-quest { box-shadow: var(--shadow-soft); display: grid !important; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; align-items: center; cursor: pointer; }
 .bg-tag { border-radius: 999px; }
 .bg-tag-motion { background-color: var(--block-motion); }

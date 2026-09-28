@@ -269,7 +269,9 @@ withDeployedSite({ dir: DIR }, async (page) => {
       return { sea, pins, quests: box('.bg-quest'), cells: document.querySelectorAll('.bg-sea .gd-cell').length, bots: document.querySelectorAll('.bg-sea .gd-bot').length, vw: innerWidth, vh: innerHeight, sx: document.scrollingElement.scrollWidth }; })()`);
     readings[`sea-${vp.name}`] = r;
     const inside = (p) => p && r.sea && p.l + p.w / 2 > r.sea.l && p.l + p.w / 2 < r.sea.r && p.t + p.h / 2 > r.sea.t && p.t + p.h / 2 < r.sea.b;
-    check(`S3-R6 ${vp.name}: the island is the sea (aspect 12/7) with a pin for Mamie, Biscuit, Sami, Olive and the robot, the scenery on it`, !!r.sea && Math.abs(r.sea.h / r.sea.w - 7 / 12) < 0.03 && Object.values(r.pins).every(inside), r);
+    // The mockup's 12:7 sea; square on a phone (≤ 600 px, cg007Look: at 12:7 the labels met).
+    const ratio = vp.width <= 600 ? 1 : 7 / 12;
+    check(`S3-R6 ${vp.name}: the island is the sea (aspect ${vp.width <= 600 ? '1/1' : '12/7'}) with a pin for Mamie, Biscuit, Sami, Olive and the robot, the scenery on it`, !!r.sea && Math.abs(r.sea.h / r.sea.w - ratio) < 0.03 && Object.values(r.pins).every(inside), r);
     check(`S3-R6 ${vp.name}: no tile world of the island — the kit draws one robot, on one tile`, r.cells === 1 && r.bots === 1, { cells: r.cells, bots: r.bots });
     check(`S3-R6 ${vp.name}: the requests ${vp.width > 980 ? 'beside the map (360 px column)' : 'under the map (one column)'}`, !!r.quests && (vp.width > 980 ? r.quests.l >= r.sea.r : r.quests.t >= r.sea.b), { sea: r.sea, quests: r.quests });
     check(`S3-R6 ${vp.name}: nothing wider than the screen (innerWidth ${vp.width}, no sideways scroll)`, r.vw === vp.width && r.sx <= r.vw, { vw: r.vw, sx: r.sx });
@@ -613,10 +615,27 @@ withDeployedSite({ dir: DIR }, async (page) => {
   }
   // S3-LOOK: the island and Profiles at a phone's width, for the side-by-side.
   await page.setViewport(VIEWPORTS[1]);
-  for (const [name, p] of [['island', '/island'], ['profiles', '/']]) {
+  // Profiles first: it has no tabs (a player is being chosen), and the next step taps tab 0 (s3 drive: 2 reds from ending there).
+  for (const [name, p] of [['profiles', '/'], ['island', '/island']]) {
     await page.navigate(p);
     await wait(1100);
     await shot(`look-${name}-390`);
+    if (name === 'island') {
+      // The map's name labels at a phone's width: no two overlap (s3: Pip's pin sat on "Mamie Rose" before the phone rules).
+      const r = await evaluate(`(() => {
+        // The labels, and the robot pin itself (its body is what covered a label); a label inside the robot pin is its own.
+        const els = [...document.querySelectorAll('.bg-sea .bg-pin-lbl, .bg-sea .gd-name, .bg-sea .bg-pin-bot')].filter((e) => e.offsetParent);
+        const bs = els.map((e) => { const b = e.getBoundingClientRect(); return { e, t: e.classList.contains('bg-pin-bot') ? 'robot pin' : e.textContent.trim(), l: b.left, r: b.right, t0: b.top, b: b.bottom }; });
+        const hits = [];
+        for (let i = 0; i < bs.length; i++) for (let j = i + 1; j < bs.length; j++) {
+          const a = bs[i], c = bs[j];
+          if (a.e.contains(c.e) || c.e.contains(a.e)) continue;
+          if (a.l < c.r - 1 && c.l < a.r - 1 && a.t0 < c.b - 1 && c.t0 < a.b - 1) hits.push(a.t + ' × ' + c.t);
+        }
+        return { labels: bs.map((x) => x.t), hits };
+      })()`);
+      check('S3-LOOK Island 390: no two name labels on the map overlap', r.labels.length >= 5 && r.hits.length === 0, r);
+    }
     if (name === 'profiles') {
       const r = await evaluate(`({ vw: innerWidth, sx: document.scrollingElement.scrollWidth })`);
       check('S3-LOOK Profiles 390: nothing wider than the screen', r.vw === 390 && r.sx <= 390, r);
