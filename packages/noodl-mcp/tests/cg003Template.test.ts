@@ -49,6 +49,8 @@ import {
 import { AuthoredGarden, buildGardenTemplateProject, prepareGardenArtefact, TEMPLATE_ID } from './cg003Template';
 import { GARDEN_CSS, GARDEN_PRESET, GARDEN_TOKENS, tokenValue } from './cg007Look';
 import { reducedMotionReport } from './reducedMotion';
+import { RESERVED_ROW_FIELD_NAMES } from '../../noodl-editor/src/editor/src/validation';
+import { FAMILY_SCRIPT, LOOK_ROWS_SCRIPT, SKILL_ROWS_SCRIPT } from './cg003Scripts';
 
 jest.setTimeout(600_000);
 
@@ -307,7 +309,8 @@ describe('CG-003 — Bot Garden, the artefact', () => {
 
     it('🔴 AC7: the win card is fixed and centred, every positioning property !important, and its root carries the class', () => {
       const rule = GARDEN_CSS.match(/\.bg-win \{([^}]*)\}/)![1];
-      for (const p of ['position: fixed !important', 'left: 0 !important', 'right: 0 !important', 'top: 0 !important', 'bottom: 0 !important', 'place-items: center']) expect(rule).toContain(p);
+      // Both axes, and !important: a Group writes its own alignment inline (s2 drive: the card sat at cy 182 of 912).
+      for (const p of ['position: fixed !important', 'left: 0 !important', 'right: 0 !important', 'top: 0 !important', 'bottom: 0 !important', 'height: 100vh !important', 'display: flex !important', 'align-items: center !important', 'justify-content: center !important']) expect(rule).toContain(p);
       const root = nodesOf(built, C.win).find((n) => n.id === 'wnScrim')!;
       expect(String(params(root).cssClassName)).toBe('bg-win');
     });
@@ -545,6 +548,51 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     expect(one.rows.map((r: { id: string }) => r.id)).toEqual(REQUESTS.filter((r) => r.band === 1).map((r) => r.id));
     expect(one.rows.find((r: { id: string }) => r.id === 'tulips-three').isDone).toBe(true);
     expect(run(ISLAND_ROWS_SCRIPT, { requests: REQ_ROWS, band: 2, done: [], words: WORD_ROWS, lang: 'en' }).rows).toHaveLength(REQUESTS.length);
+  });
+
+  /** Every list a repeater or the kit is handed: the rows the glue scripts publish, and every Static Data row in the graph. */
+  function everyRowList(look = LOOK_ROWS_SCRIPT): Array<{ list: string; rows: Array<Record<string, unknown>> }> {
+    const fam = run(ADD_PROFILE_SCRIPT, { name: 'A', band: 2, lang: 'en' }).model;
+    fam.profiles[0].hats.push('sun');
+    fam.profiles[0].stickers.push('letter');
+    const f = run(FAMILY_SCRIPT, { model: fam });
+    const lk = run(look, { color: '#FF7A59', eye: 'round', hat: 'none', hats: ['sun'], stickers: ['letter'], words: WORD_ROWS, lang: 'en' });
+    const pal = run(PALETTE_SCRIPT, { band: 2, allowed: [], rungs: 'all', lang: 'en', words: WORD_ROWS }).palette;
+    const out = [
+      { list: 'Read family.profiles', rows: f.profiles },
+      { list: 'Island rows.rows', rows: run(ISLAND_ROWS_SCRIPT, { requests: REQ_ROWS, band: 2, done: [], words: WORD_ROWS, lang: 'en' }).rows },
+      { list: 'Skill rows.rows', rows: run(SKILL_ROWS_SCRIPT, { tricks: {}, words: WORD_ROWS, lang: 'en' }).rows },
+      { list: 'Look rows.paints', rows: lk.paints },
+      { list: 'Look rows.eyes', rows: lk.eyes },
+      { list: 'Look rows.hats', rows: lk.hats },
+      { list: 'Look rows.stickers', rows: lk.stickers },
+      { list: 'Kit palette.palette', rows: run(KIT_PALETTE_SCRIPT, { palette: pal, band: 2, lang: 'en', words: WORD_ROWS }).palette }
+    ];
+    for (const c of CG003_COMPONENTS) {
+      for (const n of c.nodes.filter((x) => x.type === 'Static Data')) {
+        const parsed = JSON.parse(String((n.parameters as { json: string }).json));
+        if (Array.isArray(parsed)) out.push({ list: `${c.path}#${n.id}`, rows: parsed });
+      }
+    }
+    return out;
+  }
+  const RESERVED = new Set<string>([...(RESERVED_ROW_FIELD_NAMES as Iterable<string>)]);
+  const reservedIn = (lists: ReturnType<typeof everyRowList>) =>
+    lists.flatMap(({ list, rows }) => [...new Set(rows.flatMap((r) => Object.keys(r ?? {})))].filter((k) => RESERVED.has(k)).map((k) => `${list}: ${k}`));
+
+  it('🔴 no row any list carries has a field named like a Noodl Object\u2019s own member (the s2 drive: `fill`)', () => {
+    const lists = everyRowList();
+    expect(lists.length).toBeGreaterThan(10);
+    expect(lists.every((l) => l.rows.length > 0)).toBe(true);
+    expect(reservedIn(lists)).toEqual([]);
+    // Known-firing: the name the drive caught is reserved.
+    expect(RESERVED.has('fill')).toBe(true);
+  });
+
+  it('arm: the paint row field named `fill` again is caught, by list', () => {
+    const m = LOOK_ROWS_SCRIPT.replace("paint: 'var(' + PAINTS[i].token + ')'", "fill: 'var(' + PAINTS[i].token + ')'");
+    expect(m).not.toBe(LOOK_ROWS_SCRIPT);
+    expect(reservedIn(everyRowList(m))).toEqual(['Look rows.paints: fill']);
   });
 
   it('🔴 AC3 in plain JS: teach 15 steps (4 blocks after 4), fold, play to the end, the goal met, the hat owned, the trick blooming', () => {

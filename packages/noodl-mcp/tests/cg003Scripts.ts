@@ -412,7 +412,7 @@ var w = wordMap(Inputs.words, lang, name);
 var color = String(Inputs.color || '#FF7A59').toUpperCase(), eye = String(Inputs.eye || 'round'), hat = String(Inputs.hat || 'none');
 var owned = Array.isArray(Inputs.hats) ? Inputs.hats : [];
 var paints = [], eyes = [], hats = [], stickers = [];
-for (var i = 0; i < PAINTS.length; i++) paints.push({ id: PAINTS[i].hex, fill: 'var(' + PAINTS[i].token + ')', label: PAINTS[i].name[lang], selected: PAINTS[i].hex.toUpperCase() === color });
+for (var i = 0; i < PAINTS.length; i++) paints.push({ id: PAINTS[i].hex, paint: 'var(' + PAINTS[i].token + ')', label: PAINTS[i].name[lang], selected: PAINTS[i].hex.toUpperCase() === color });
 for (var j = 0; j < EYES.length; j++) eyes.push({ id: EYES[j].id, label: w[EYES[j].word] || EYES[j].id, selected: EYES[j].id === eye, locked: false });
 for (var k = 0; k < HATS.length; k++) {
   var h = HATS[k];

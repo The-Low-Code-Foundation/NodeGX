@@ -156,9 +156,32 @@ withDeployedSite({ dir: DIR }, async (page) => {
   /** Finders: by class, by text inside a scope. */
   const byText = (selector, needle) => `[...document.querySelectorAll(${JSON.stringify(selector)})].find((e) => e.offsetParent !== null && e.innerText.trim().includes(${JSON.stringify(needle)}))`;
   const first = (selector) => `[...document.querySelectorAll(${JSON.stringify(selector)})].find((e) => e.offsetParent !== null)`;
-  const typeInto = async (finder, value) => {
+  /** Types into the input the finder names; a missing input is a FAIL line, never a crash (s2's first run threw here). */
+  const typeInto = async (finder, value, label = 'an input') => {
+    const found = await evaluate(`!!(${finder})`);
+    if (!found) {
+      check(`type into ${label}`, false, 'no such input on the page');
+      return false;
+    }
     await evaluate(`(() => { const el = (${finder}); el.focus(); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(el, ${JSON.stringify(value)}); el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); el.blur(); })()`);
     await wait(250);
+    return true;
+  };
+  /**
+   * A fresh family for each pass. 🔴 s2's first run cleared localStorage from inside the live page and the EN pass's
+   * profile came back on the FR pass (the page still held and re-wrote it). The origin's storage is cleared through
+   * CDP, then the page is loaded; if a profile still shows, that is a FAIL line and the pass goes on through the UI
+   * (the bar's who pill opens Profiles).
+   */
+  const freshFamily = async (tag) => {
+    const origin = await evaluate('location.origin');
+    await client.send('Storage.clearDataForOrigin', { origin, storageTypes: 'local_storage,indexeddb,cache_storage,service_workers' });
+    await page.navigate('/');
+    await wait(900);
+    const left = await evaluate(`Object.keys(localStorage).filter((k) => /bot-garden/.test(k)).map((k) => localStorage.getItem(k).length)`);
+    const onProfiles = (await path0()) === '/';
+    check(`fresh family ${tag}: no stored family, the app opens on Profiles`, left.length === 0 && onProfiles, { left, path: await path0() });
+    if (!onProfiles) await tap(first('.bg-top .bg-who'), 'who is playing (back to Profiles)');
   };
   const blocks = () => evaluate(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`);
   const tab = (i) => tap(`document.querySelectorAll('.bg-tabs .bg-tab')[${i}]`, `tab ${i}`);
@@ -191,16 +214,14 @@ withDeployedSite({ dir: DIR }, async (page) => {
     for (const lang of LANGS) {
       const tag = `${vp.name}-${lang}`;
       await page.setViewport(vp);
-      await evaluate('localStorage.clear()');
-      await page.navigate('/');
-      await wait(800);
+      await freshFamily(tag);
       // Profiles, in the language asked for (AC9 on the Profiles screen, before anyone is chosen).
       if (lang === 'fr') await seg('FR');
       const who = await until('document.body.innerText', (t) => t.includes(w(lang, 'whoIsPlaying')));
       check(`AC3 ${tag}: Profiles says "${w(lang, 'whoIsPlaying')}"`, who.includes(w(lang, 'whoIsPlaying')), who.slice(0, 200));
       await shot(`ac3-${tag}-01-profiles`);
       await tap(byText('button.bg-btn', w(lang, 'newProfile')), 'new player');
-      await typeInto(first('input'), 'Ada');
+      if (!(await typeInto(first('input'), 'Ada', 'the name box'))) continue;
       await tap(byText('.bg-seg-btn', '10–12'), 'band 10–12 in the form');
       await tap(byText('button.bg-btn', w(lang, 'create')), 'create');
       const island = await until('location.pathname', (p) => p === '/island');
@@ -374,7 +395,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await page.navigate('/');
   await wait(800);
   await tap(byText('button.bg-btn', w('en', 'newProfile')), 'new player');
-  await typeInto(first('input'), 'Bo');
+  await typeInto(first('input'), 'Bo', 'the name box (Bo)');
   await tap(byText('button.bg-btn', w('en', 'create')), 'create Bo');
   await until('location.pathname', (p) => p === '/island');
   await wait(900);

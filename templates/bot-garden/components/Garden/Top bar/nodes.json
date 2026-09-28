@@ -368,7 +368,7 @@
         "flexWrap": "wrap",
         "columnGap": "var(--space-2)",
         "rowGap": "var(--space-2)",
-        "cssClassName": "bg-press"
+        "cssClassName": "bg-who bg-press"
       },
       "x": 100,
       "y": 1960

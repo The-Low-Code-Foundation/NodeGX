@@ -14,7 +14,7 @@
           "type": "string"
         },
         {
-          "name": "fill",
+          "name": "paint",
           "plug": "output",
           "type": "string"
         },

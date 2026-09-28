@@ -449,7 +449,7 @@ const BAR: CgComponent = {
     group('brLangSeg', 'Language', 'brBar', { ...row({ columnGap: sp(0) }), backgroundColor: 'var(--paper-2)', borderRadius: px(999), ...pad(3), cssClassName: 'bg-seg' }, ['brEn', 'brFr']),
     place('brEn', C.seg, 'EN', 'brLangSeg', { label: 'EN' }),
     place('brFr', C.seg, 'FR', 'brLangSeg', { label: 'FR' }),
-    group('brWho', 'Who is playing', 'brBar', { ...row({ columnGap: sp(8) }), cssClassName: 'bg-press' }, ['brFace', 'brWhoName']),
+    group('brWho', 'Who is playing', 'brBar', { ...row({ columnGap: sp(8) }), cssClassName: 'bg-who bg-press' }, ['brFace', 'brWhoName']),
     place('brFace', KIT_AVATAR, 'The face', 'brWho', { look: 'fun-emoji', seed: 'Pip', size: 34, background: 'var(--sun)' }),
     text('brWhoName', 'The name', 'brWho', '', { sizeMode: 'contentSize', ...T_STRONG }),
     logic('brT', L('Translate words'), 'In their language'),
@@ -1063,14 +1063,14 @@ const SWATCH: CgComponent = {
   path: 'Robot/Swatch',
   description: 'One paint for the robot (the mockup’s .sw button): a round swatch in its token, ringed when Selected. Publishes Picked with the Id (the paint).',
   nodes: [
-    inputs('swIn', [['id', 'string'], ['fill', 'string'], ['label', 'string'], ['selected', 'boolean']]),
+    inputs('swIn', [['id', 'string'], ['paint', 'string'], ['label', 'string'], ['selected', 'boolean']]),
     group('swDot', 'The swatch', undefined, { sizeMode: 'explicit', width: px(44), height: px(44), borderRadius: px(999), backgroundColor: 'var(--robot-coral)', cssClassName: 'bg-swatch bg-press' }),
     logic('swIsOn', CONDITION_NODE, 'Is it worn?'),
     withStates('swStates', 'Ringed or not', ['off', 'on'], { ring: { type: 'number', by: { off: 0, on: 4 } } }),
     outputs('swOut', [['picked', 'signal'], ['id', 'string']])
   ],
   connections: [
-    wire('swIn', 'fill', 'swDot', 'backgroundColor'),
+    wire('swIn', 'paint', 'swDot', 'backgroundColor'),
     wire('swIn', 'selected', 'swIsOn', 'condition'),
     wire('swIsOn', 'ontrue', 'swStates', 'to-on'),
     wire('swIsOn', 'onfalse', 'swStates', 'to-off'),

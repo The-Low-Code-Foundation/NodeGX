@@ -116,3 +116,20 @@ resolves `@nodegx/export` to its source (as `jest.config.js` does). On the prima
 - Olive's `ask:` blocks get their picker slots from the engine's palette as they come; the kit has no inline slot error.
   — CG-005 / lane A.
 - The kit's colour ports take `var(--block-*)` (it sets them as CSS custom properties); no kit change was made. — NONE.
+
+### 7.1 The first drive (orchestrator, `cline-dev`): 17 PASS, then three reds, and the fixes
+
+1. **🔴 AC7: the win card was fixed and centred across but pinned to the top** (`cy 182.4` of 912). Cause: `.bg-win`
+   centred with `place-items` but no `!important`, and a Group writes its own flex alignment inline. Fix: `display: flex;
+   align-items: center; justify-content: center; height: 100vh`, all `!important`. The gate now requires each of them.
+2. **🔴 Console errors, a template defect: `[collection/reserved-field-name]` — a row field named `fill`** (`Logic/Look
+   rows`' paints, handed to the swatch repeater: `row.fill` reads the Noodl Object's own member, never the colour). Renamed
+   to `paint` (the row and `Robot/Swatch`'s input). New gate row: every list a repeater or the kit is handed (8 script
+   outputs and every `Static Data` row in the graph, 11+ lists) carries no name in the editor's `RESERVED_ROW_FIELD_NAMES`;
+   known-firing `fill` is reserved; arm: the field put back to `fill` is named by list (`Look rows.paints: fill`) — killed.
+3. **Instrument fault in the drive:** the FR pass opened on the island because the EN pass's family survived
+   `localStorage.clear()` run inside the live page, then `typeInto` threw on a missing input. Now each pass clears the
+   origin's storage through CDP (`Storage.clearDataForOrigin`) before loading `/`, says `fresh family …` as a clause (and
+   goes to Profiles through the bar's who pill, now `.bg-who`, if a family survived), and `typeInto` reports a FAIL line.
+
+Gate after: **45/45**; `npm run template:garden` ×2 → tree `68a665a7…` both, exit 0 both; engine pre-step 105/105; arms 9/9.

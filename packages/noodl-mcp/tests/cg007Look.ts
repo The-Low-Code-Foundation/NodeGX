@@ -232,7 +232,8 @@ ${iconRules}
 .bg-tidy { animation: bg-pop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 
 /* The win card: fixed, centred, over whatever is scrolled (AC7; P95 R6: every positioning property !important). */
-.bg-win { position: fixed !important; left: 0 !important; right: 0 !important; top: 0 !important; bottom: 0 !important; width: auto !important; height: auto !important; z-index: 50 !important; display: grid !important; place-items: center; background: color-mix(in srgb, var(--paper) 72%, transparent); backdrop-filter: blur(2px); padding: 16px; }
+/* A Group writes its own flex alignment INLINE: every centring property here is !important too, or the card sits at the top (s2 drive: cy 182 of 912). */
+.bg-win { position: fixed !important; left: 0 !important; right: 0 !important; top: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 50 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; background: color-mix(in srgb, var(--paper) 72%, transparent); backdrop-filter: blur(2px); padding: 16px; }
 .bg-win-card { box-shadow: var(--shadow-soft); animation: bg-pop 350ms cubic-bezier(0.34, 1.56, 0.64, 1) both; max-width: 380px; }
 @keyframes bg-pop { from { transform: scale(0.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .bg-reward { border-radius: 999px; }

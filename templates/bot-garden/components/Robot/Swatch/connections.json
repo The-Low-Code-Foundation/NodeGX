@@ -5,7 +5,7 @@
   "connections": [
     {
       "fromId": "swIn",
-      "fromProperty": "fill",
+      "fromProperty": "paint",
       "toId": "swDot",
       "toProperty": "backgroundColor"
     },
