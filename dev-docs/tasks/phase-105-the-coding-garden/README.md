@@ -39,13 +39,32 @@ Rulings taken from Richard's words on 2026-09-27:
 | R3 | **One model for every child: Qwen3.5-0.8B Q4_K_M** (532 MB, Apache 2.0). The Mac only makes it faster | "take that model so every kid has the same experience" |
 | R4 | **The LLM part is reverse-engineered from the readout**: green activities on what the model does consistently, 🎓 activities on what it fails consistently | "reverse engineer the LLM part of the game from there" |
 
-Defaults taken in scoping, to be confirmed or overturned (say so in the task files when he does):
+Defaults taken in scoping, **all answered by Richard on 2026-09-28** (below):
 
 | # | Default | Alternative |
 |---|---|---|
-| D1 | Working name **"Bot Garden"**; the owl is **Olive**, the robot's default name **Pip** | Richard names it |
-| D2 | **One island per family, one robot per profile**; either robot may take any request; a sibling's robot is visible on the island | one island per profile |
-| D3 | First three requests: tulips (repeat), Biscuit's bowl (if), Sami's letter (say), as in the mockup | anything from the kids' own world |
+| D1 | ~~Working name **"Bot Garden"**~~; the owl is **Olive**, the robot's default name **Pip** | → R11 |
+| D2 | ~~**One island per family**~~, one robot per profile; a sibling's robot is visible on the island | → R12 |
+| D3 | First three requests: tulips (repeat), Biscuit's bowl (if), Sami's letter (say), as in the mockup | → R13 (kept) |
+
+Rulings taken 2026-09-28 (session 3), each asked in plain words; the question is carried with the answer:
+
+| # | The question as asked | Richard's answer | Where it lands |
+|---|---|---|---|
+| R5 | Pip was driven forward 4 times: offer `repeat 4 × forward` or the mockup's `repeat 2 × (forward, forward)`? | **repeat 4 × forward** — the higher count on a tie | CG-002 (`83888c07d`) |
+| R6 | Olive's "she breaks your rule" lesson: "never use the letter e" (broken 3/3 EN+FR, Metal+CPU) or "never mention water" (kept 3/3)? | **no letter e** | CG-006 rung 9 |
+| R7 | Sami's English thank-you: check for a thank-you word (a wider list met 2/3) or no word check in EN (3/3)? | **no word check in English**; FR keeps "merci" | CG-006 / the rung table |
+| R8 | Band 7–9's palette has no say/ask/if, so none of Olive's lessons are reachable there: Olive lessons 10–12 only, or add an "ask Olive" block for 7–9? | **Olive lessons 10–12 only**; 7–9 keeps the owl's hints | CG-006 / CG-005 |
+| R9 | White labels on the mockup's fills read 2.05–3.67:1 (floor 4.5): darker fills with white text, dark text on the current fills, or keep? | **darker fills, white text** | CG-007 |
+| R10 | Keep the Island as the game's tile world, or build the mockup's sea with pins? | **build the mockup's sea with pins** | CG-007 / CG-003 |
+| R11 | Keep "Bot Garden", Olive, Pip? then: which name? | *"Bot Garden is weird, Olive is ok, Pip is ok but let the kids rename maybe?"* → **"Olive's Island" / "L'île d'Olive"**; Pip is the default robot name and the kids rename it (built in s2: My robot + the new-player form) | every surface a person sees; internal slugs (`bot-garden`, `garden-desktop`, `garden-kit`) stay |
+| R12 | One island per family where siblings' robots are visible? | *"One island per kid I think, no cloud stuff."* → **each profile has its own island progress; a sibling's robot is not on your island; nothing leaves the computer** | CG-002 save model, CG-003 |
+| R13 | First three requests tulips / Biscuit's bowl / Sami's letter? | **keep the lessons** | — |
+
+| R14 | The nightly "backups" folder copies the backend's database, but the islands live in the app's browser storage: back up the real save, or drop the folder? | **back up the real save** (the family's save, what the save code holds), restorable by a parent; on this computer only | CG-004 / CG-008 |
+| R15 | Darker fills made the control blocks brown-orange `#A86501` (the brightest orange where white text passes): OK, or bright orange with dark text? | **brown-orange is fine** | CG-007 |
+
+Still with Richard: **the French copy read** (CG-006 AC3) — he reads the FR lines before the kids see them.
 
 ## 3. What it is, in one screen
 
