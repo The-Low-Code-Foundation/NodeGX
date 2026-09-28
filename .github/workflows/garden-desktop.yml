@@ -208,6 +208,15 @@ jobs:
       # AC8 (v2 over v1 keeps the island's family, the exam; adopts the policy) and AC9 (the wire: 127.0.0.1 only).
       # The installed app loads the model CPU-only on Windows (AC5): backend.log says "owl: loaded in N ms on cpu"; the
       # first exam on the runner's CPU is minutes (GARDEN_EXAM_WAIT_MS bounds it).
+      # s4: the SAME contract on this CPU (2 threads, the shipped win-x64 prebuilt), before the installed app is driven.
+      # Run 36423640596's first-launch exam never finished: 80 asks, 55 fell back at the 12 s limit, while the Linux
+      # runner answered in ~2 s. This separates "this CPU / this binary is slow" from "the app's own settings (it asks
+      # for a GPU, so the configured cpuThreads is not passed) or its other processes are". A reading, not a gate.
+      - name: Olive's contract on Windows CPU (a measurement, not a gate)
+        continue-on-error: true
+        timeout-minutes: 25
+        run: node $GARDEN/tests/olive-contract.mjs --cpu --out contract-win-cpu.json
+
       - name: Drive the installed app (upgrade + family + wire)
         run: node $GARDEN/drive-upgrade.js --exe "$GARDEN_EXE"
         env:
@@ -221,6 +230,9 @@ jobs:
           cp "$GARDEN"/shell/dist/*-Setup-*.exe out/ || true
           cp "$GARDEN"/shell/build-output/BUILD.json out/ || true
           cp drive-report.json out/ || true
+          cp contract-win-cpu.json out/ || true
+          # The installed app's own logs (timings.log: model load, each ask's ms), from the drive's throwaway home.
+          node -e "const r=require('./drive-report.json'),fs=require('fs'),p=require('path');const d=p.join(r.home||'','A','userData','logs');if(r.home&&fs.existsSync(d))fs.cpSync(d,'out/logs',{recursive:true})" || true
 
       - name: Upload
         if: always()
