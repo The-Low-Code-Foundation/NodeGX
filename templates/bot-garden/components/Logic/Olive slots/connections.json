@@ -23,9 +23,21 @@
     },
     {
       "fromId": "oliveslotsIn",
+      "fromProperty": "program",
+      "toId": "oliveslotsFn",
+      "toProperty": "in-program"
+    },
+    {
+      "fromId": "oliveslotsIn",
       "fromProperty": "rung",
       "toId": "oliveslotsFn",
       "toProperty": "in-rung"
+    },
+    {
+      "fromId": "oliveslotsIn",
+      "fromProperty": "selected",
+      "toId": "oliveslotsFn",
+      "toProperty": "in-selected"
     },
     {
       "fromId": "oliveslotsIn",
@@ -38,6 +50,12 @@
       "fromProperty": "words",
       "toId": "oliveslotsFn",
       "toProperty": "in-words"
+    },
+    {
+      "fromId": "oliveslotsFn",
+      "fromProperty": "out-blockId",
+      "toId": "oliveslotsOut",
+      "toProperty": "blockId"
     },
     {
       "fromId": "oliveslotsFn",
@@ -56,6 +74,12 @@
       "fromProperty": "out-reason",
       "toId": "oliveslotsOut",
       "toProperty": "reason"
+    },
+    {
+      "fromId": "oliveslotsFn",
+      "fromProperty": "out-show",
+      "toId": "oliveslotsOut",
+      "toProperty": "show"
     },
     {
       "fromId": "oliveslotsFn",

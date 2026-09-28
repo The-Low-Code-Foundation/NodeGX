@@ -1,0 +1,138 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6f452676-a190-5f95-8e20-0f3198daefb8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "oliveheldIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "exam",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "oliveheldFn",
+      "type": "JavaScriptFunction",
+      "label": "Olive held",
+      "parameters": {
+        "functionScript": "\nfunction wordMap(rows, lang, name) {\n  var map = {};\n  var list = Array.isArray(rows) ? rows : [];\n  for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || '').split('{b}').join(name);\n  return map;\n}\nfunction fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\nfunction langOf(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction nameOf(v) { var n = String(v || '').trim(); return n || 'Pip'; }\n\nvar ORDER = [\"say-thanks\",\"name-one\",\"name-three\",\"words-to-blocks\",\"count-in-words\",\"what-wants\",\"is-it-a\",\"count-tulips\",\"maths-seeds\",\"maths\",\"no-letter-e\",\"tall-tales\",\"translate\",\"poem\",\"explain-program\",\"narrate-run\",\"name-trick\",\"sort-words\",\"define\",\"letter\"];\nvar BAND = {\"say-thanks\":2,\"name-one\":2,\"name-three\":2,\"words-to-blocks\":2,\"count-in-words\":2,\"what-wants\":2,\"is-it-a\":2,\"count-tulips\":2,\"maths-seeds\":2,\"maths\":2,\"no-letter-e\":2,\"tall-tales\":2,\"translate\":2,\"poem\":2,\"explain-program\":2,\"narrate-run\":2,\"name-trick\":2,\"sort-words\":2,\"define\":2,\"letter\":2};\nvar TITLE = {\"say-thanks\":\"rungSayThanks\",\"name-one\":\"rungNameOne\",\"name-three\":\"rungNameThree\",\"words-to-blocks\":\"rungWordsToBlocks\",\"count-in-words\":\"rungCountInWords\",\"what-wants\":\"rungWhatWants\",\"is-it-a\":\"rungIsItA\",\"count-tulips\":\"rungCountTulips\",\"maths-seeds\":\"rungMathsSeeds\",\"maths\":\"rungMaths\",\"no-letter-e\":\"rungNoLetterE\",\"tall-tales\":\"rungTallTales\",\"translate\":\"rungTranslate\",\"poem\":\"rungPoem\",\"explain-program\":\"rungExplainProgram\",\"narrate-run\":\"rungNarrateRun\",\"name-trick\":\"rungNameTrick\",\"sort-words\":\"rungSortWords\",\"define\":\"rungDefine\",\"letter\":\"rungLetter\"};\nvar lang = langOf(Inputs.lang), band = Number(Inputs.band) === 1 ? 1 : 2;\nvar w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));\nvar rungs = Inputs.exam && Inputs.exam.rungs && typeof Inputs.exam.rungs === 'object' ? Inputs.exam.rungs : {};\nvar held = [];\nfor (var i = 0; i < ORDER.length; i++) { var id = ORDER[i]; if (BAND[id] <= band && rungs[id] && rungs[id].pass === false) held.push(id); }\nvar names = [];\nfor (var j = 0; j < held.length; j++) names.push(w[TITLE[held[j]]] || held[j]);\nOutputs.held = held;\nOutputs.show = held.length > 0;\nOutputs.text = held.length ? (w.oliveCant || '') + (lang === 'fr' ? ' : ' : ': ') + names.join(', ') : '';\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-band",
+          "displayName": "band",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-exam",
+          "displayName": "exam",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-held",
+          "displayName": "held",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-show",
+          "displayName": "show",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "oliveheldOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "held",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "show",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "text",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

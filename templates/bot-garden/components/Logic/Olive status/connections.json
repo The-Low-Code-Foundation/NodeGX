@@ -17,6 +17,12 @@
     },
     {
       "fromId": "olivestatusFn",
+      "fromProperty": "out-exam",
+      "toId": "olivestatusOut",
+      "toProperty": "exam"
+    },
+    {
+      "fromId": "olivestatusFn",
       "fromProperty": "out-examVars",
       "toId": "olivestatusOut",
       "toProperty": "examVars"

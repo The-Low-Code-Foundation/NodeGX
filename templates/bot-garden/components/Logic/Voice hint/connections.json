@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "11c97530-2dec-55f5-8a5d-04f8b87b9065",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "voicehintIn",
+      "fromProperty": "sig",
+      "toId": "voicehintFn",
+      "toProperty": "in-sig"
+    },
+    {
+      "fromId": "voicehintFn",
+      "fromProperty": "out-due",
+      "toId": "voicehintOut",
+      "toProperty": "due"
+    },
+    {
+      "fromId": "voicehintFn",
+      "fromProperty": "out-request",
+      "toId": "voicehintOut",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "voicehintFn",
+      "fromProperty": "success",
+      "toId": "voicehintOut",
+      "toProperty": "ran"
+    }
+  ]
+}

@@ -185,7 +185,7 @@
         {
           "name": "proposal",
           "plug": "input",
-          "type": "*"
+          "type": "object"
         },
         {
           "name": "puddles",

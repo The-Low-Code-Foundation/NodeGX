@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5ec4f487-f181-5548-8829-427cba48a7ed",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "soStatus",
+      "fromProperty": "exam",
+      "toId": "soHeld",
+      "toProperty": "exam"
+    },
+    {
+      "fromId": "soIn",
+      "fromProperty": "band",
+      "toId": "soHeld",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "soIn",
+      "fromProperty": "lang",
+      "toId": "soHeld",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "soIn",
+      "fromProperty": "words",
+      "toId": "soHeld",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "soIn",
+      "fromProperty": "botName",
+      "toId": "soHeld",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "soHeld",
+      "fromProperty": "text",
+      "toId": "soText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "soHeld",
+      "fromProperty": "show",
+      "toId": "soBox",
+      "toProperty": "mounted"
+    }
+  ]
+}

@@ -394,6 +394,12 @@
       "toProperty": "rungs"
     },
     {
+      "fromId": "plStatus",
+      "fromProperty": "exam",
+      "toId": "plPalette",
+      "toProperty": "exam"
+    },
+    {
       "fromId": "plIn",
       "fromProperty": "lang",
       "toId": "plPalette",
@@ -1100,6 +1106,210 @@
       "fromProperty": "text",
       "toId": "plOwlSay",
       "toProperty": "text"
+    },
+    {
+      "fromId": "plOwlRow",
+      "fromProperty": "thinking",
+      "toId": "plOwlThinking",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plOwlRow",
+      "fromProperty": "thinkingText",
+      "toId": "plOwlThinking",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plOwlRow",
+      "fromProperty": "resting",
+      "toId": "plOwlResting",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plOwlRow",
+      "fromProperty": "restingText",
+      "toId": "plOwlResting",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plOwlRow",
+      "fromProperty": "voiceSig",
+      "toId": "plVoiceHint",
+      "toProperty": "sig"
+    },
+    {
+      "fromId": "plVoiceHint",
+      "fromProperty": "request",
+      "toId": "plAskVoice",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "band",
+      "toId": "plAskVoice",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "plVoiceHint",
+      "fromProperty": "ran",
+      "toId": "plAskVoice",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plAskVoice",
+      "fromProperty": "answer",
+      "toId": "plOwlRow",
+      "toProperty": "voiced"
+    },
+    {
+      "fromId": "plRead",
+      "fromProperty": "program",
+      "toId": "plSlots",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "plBlocks",
+      "fromProperty": "onSelected",
+      "toId": "plSlots",
+      "toProperty": "selected"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "band",
+      "toId": "plSlots",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plSlots",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "words",
+      "toId": "plSlots",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "plSlots",
+      "fromProperty": "message",
+      "toId": "plSlotMsg",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plSlots",
+      "fromProperty": "show",
+      "toId": "plSlotMsg",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "oliveProposes",
+      "toId": "plPropH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "oliveAccept",
+      "toId": "plUse",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "oliveDecline",
+      "toId": "plNoThanks",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "run",
+      "toId": "plPropCard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "plRead",
+      "fromProperty": "program",
+      "toId": "plPropCard",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "plPropDoneVar",
+      "fromProperty": "value",
+      "toId": "plPropCard",
+      "toProperty": "handled"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "words",
+      "toId": "plPropCard",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plPropCard",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plPropCard",
+      "fromProperty": "show",
+      "toId": "plProposal",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plPropCard",
+      "fromProperty": "blocksText",
+      "toId": "plPropBlocks",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plRead",
+      "fromProperty": "program",
+      "toId": "plAccept",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "plPropCard",
+      "fromProperty": "proposal",
+      "toId": "plAccept",
+      "toProperty": "proposal"
+    },
+    {
+      "fromId": "plUse",
+      "fromProperty": "onClick",
+      "toId": "plAccept",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plAccept",
+      "fromProperty": "program",
+      "toId": "plSetProgAccept",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "plAccept",
+      "fromProperty": "ran",
+      "toId": "plSetProgAccept",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plPropCard",
+      "fromProperty": "sig",
+      "toId": "plSetPropDone",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "plAccept",
+      "fromProperty": "ran",
+      "toId": "plSetPropDone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plNoThanks",
+      "fromProperty": "onClick",
+      "toId": "plSetPropDone",
+      "toProperty": "do"
     },
     {
       "fromId": "plRunner",

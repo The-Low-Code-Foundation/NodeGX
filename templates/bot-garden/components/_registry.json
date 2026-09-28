@@ -191,7 +191,7 @@
       "path": "Logic/Olive slots",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 12,
+      "connectionCount": 16,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -199,7 +199,7 @@
       "path": "Logic/Owl row",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 17,
+      "connectionCount": 18,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -208,6 +208,22 @@
       "type": "visual",
       "nodeCount": 3,
       "connectionCount": 8,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Voice hint": {
+      "path": "Logic/Voice hint",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 4,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Proposal card": {
+      "path": "Logic/Proposal card",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 10,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -343,12 +359,20 @@
       "path": "Logic/Olive status",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 11,
+      "connectionCount": 12,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
     "Logic/Try Olive": {
       "path": "Logic/Try Olive",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 9,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Olive held": {
+      "path": "Logic/Olive held",
       "type": "visual",
       "nodeCount": 3,
       "connectionCount": 9,
@@ -438,8 +462,8 @@
     "Workshop/Play": {
       "path": "Workshop/Play",
       "type": "visual",
-      "nodeCount": 90,
-      "connectionCount": 218,
+      "nodeCount": 108,
+      "connectionCount": 253,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -504,6 +528,14 @@
       "type": "visual",
       "nodeCount": 12,
       "connectionCount": 13,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Skills/Olive line": {
+      "path": "Skills/Olive line",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 7,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -582,8 +614,8 @@
     "Pages/Skills": {
       "path": "Pages/Skills",
       "type": "page",
-      "nodeCount": 13,
-      "connectionCount": 28,
+      "nodeCount": 14,
+      "connectionCount": 32,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -597,8 +629,8 @@
     }
   },
   "stats": {
-    "totalComponents": 74,
-    "totalNodes": 602,
-    "totalConnections": 1706
+    "totalComponents": 78,
+    "totalNodes": 635,
+    "totalConnections": 1781
   }
 }

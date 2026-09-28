@@ -16,7 +16,7 @@
         {
           "name": "accept",
           "plug": "output",
-          "type": "*"
+          "type": "boolean"
         },
         {
           "name": "program",
@@ -26,7 +26,7 @@
         {
           "name": "proposal",
           "plug": "output",
-          "type": "*"
+          "type": "object"
         }
       ],
       "x": 40,

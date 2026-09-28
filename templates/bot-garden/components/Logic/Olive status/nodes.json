@@ -22,7 +22,7 @@
       "type": "JavaScriptFunction",
       "label": "Olive status",
       "parameters": {
-        "functionScript": "\nvar out = { running: false, model: 'none', passed: 0, total: 0, hasExam: false };\ntry {\n  if (typeof fetch === 'function') {\n    var ctl = typeof AbortController === 'function' ? new AbortController() : null;\n    var timer = ctl ? setTimeout(function () { ctl.abort(); }, 4000) : null;\n    var res = await fetch('/__garden/olive/status', ctl ? { signal: ctl.signal, cache: 'no-store' } : { cache: 'no-store' });\n    if (timer) clearTimeout(timer);\n    if (res && res.ok) {\n      var s = await res.json();\n      out.model = String(s && s.model || 'none');\n      out.running = out.model === 'ready' || out.model === 'loading' || out.model === 'unloaded';\n      if (s && s.exam) { out.hasExam = true; out.passed = Number(s.exam.passed) || 0; out.total = (Number(s.exam.passed) || 0) + (Number(s.exam.failed) || 0); }\n    }\n  }\n} catch (e) { out.running = false; }\nOutputs.running = out.running;\nOutputs.stopped = !out.running;\nOutputs.model = out.model;\nOutputs.hasExam = out.hasExam;\nOutputs.noExam = !out.hasExam;\nOutputs.passed = out.passed;\nOutputs.total = out.total;\nOutputs.examVars = { p: out.passed, t: out.total };\nOutputs.checked = Inputs.nonce;\n"
+        "functionScript": "\nvar out = { running: false, model: 'none', passed: 0, total: 0, hasExam: false, exam: null };\ntry {\n  if (typeof fetch === 'function') {\n    var ctl = typeof AbortController === 'function' ? new AbortController() : null;\n    var timer = ctl ? setTimeout(function () { ctl.abort(); }, 4000) : null;\n    var res = await fetch('/__garden/olive/status', ctl ? { signal: ctl.signal, cache: 'no-store' } : { cache: 'no-store' });\n    if (timer) clearTimeout(timer);\n    if (res && res.ok) {\n      var s = await res.json();\n      out.model = String(s && s.model || 'none');\n      out.running = out.model === 'ready' || out.model === 'loading' || out.model === 'unloaded';\n      if (s && s.exam) { out.hasExam = true; out.passed = Number(s.exam.passed) || 0; out.total = (Number(s.exam.passed) || 0) + (Number(s.exam.failed) || 0); out.exam = JSON.parse(JSON.stringify(s.exam)); }\n    }\n  }\n} catch (e) { out.running = false; }\nOutputs.running = out.running;\nOutputs.stopped = !out.running;\nOutputs.model = out.model;\nOutputs.hasExam = out.hasExam;\nOutputs.noExam = !out.hasExam;\nOutputs.passed = out.passed;\nOutputs.total = out.total;\nOutputs.examVars = { p: out.passed, t: out.total };\n// The exam as the shell reports it, for the palette's gate and Skills (CG-005 AC5): a rung it failed is withheld.\nOutputs.exam = out.exam;\nOutputs.checked = Inputs.nonce;\n"
       },
       "x": 40,
       "y": 160,
@@ -91,6 +91,13 @@
           "group": "Outputs"
         },
         {
+          "name": "out-exam",
+          "displayName": "exam",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
           "name": "out-checked",
           "displayName": "checked",
           "plug": "output",
@@ -108,6 +115,11 @@
           "name": "checked",
           "plug": "input",
           "type": "*"
+        },
+        {
+          "name": "exam",
+          "plug": "input",
+          "type": "object"
         },
         {
           "name": "examVars",

@@ -69,7 +69,7 @@
           "type": "number"
         }
       ],
-      "x": 590,
+      "x": 710,
       "y": 3160
     },
     {
@@ -854,6 +854,9 @@
       "parent": "plOwl",
       "children": [
         "plOwlSay",
+        "plOwlThinking",
+        "plOwlResting",
+        "plProposal",
         "plOwlMeta"
       ],
       "parameters": {
@@ -888,6 +891,199 @@
       "y": 3760
     },
     {
+      "id": "plOwlThinking",
+      "type": "Text",
+      "label": "Olive is thinking",
+      "parent": "plOwlCol",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 13,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--violet-ink)",
+        "cssClassName": "bg-owl-tag bg-owl-thinking",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 3880
+    },
+    {
+      "id": "plOwlResting",
+      "type": "Text",
+      "label": "Olive is resting",
+      "parent": "plOwlCol",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 13,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--violet-ink)",
+        "cssClassName": "bg-owl-tag bg-owl-resting",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 4000
+    },
+    {
+      "id": "plProposal",
+      "type": "Group",
+      "label": "Olive suggests blocks",
+      "parent": "plOwlCol",
+      "children": [
+        "plPropH",
+        "plPropBlocks",
+        "plPropBtns"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1-5)",
+        "backgroundColor": "var(--card)",
+        "borderRadius": {
+          "value": 14,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "cssClassName": "bg-proposal",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 4120
+    },
+    {
+      "id": "plPropH",
+      "type": "Text",
+      "label": "Olive suggests these blocks",
+      "parent": "plProposal",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)"
+      },
+      "x": 400,
+      "y": 4240
+    },
+    {
+      "id": "plPropBlocks",
+      "type": "Text",
+      "label": "The blocks she suggests",
+      "parent": "plProposal",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "cssClassName": "bg-prop-blocks"
+      },
+      "x": 400,
+      "y": 4360
+    },
+    {
+      "id": "plPropBtns",
+      "type": "Group",
+      "label": "Use them, or not",
+      "parent": "plProposal",
+      "children": [
+        "plUse",
+        "plNoThanks"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2-5)",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 400,
+      "y": 4480
+    },
+    {
+      "id": "plUse",
+      "type": "net.noodl.controls.button",
+      "label": "Use them",
+      "parent": "plPropBtns",
+      "parameters": {
+        "backgroundColor": "var(--violet)",
+        "color": "var(--on-fill)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-prop-use",
+        "label": "Use them"
+      },
+      "x": 460,
+      "y": 4600
+    },
+    {
+      "id": "plNoThanks",
+      "type": "net.noodl.controls.button",
+      "label": "No thanks",
+      "parent": "plPropBtns",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--ink-2)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-prop-no",
+        "label": "No thanks"
+      },
+      "x": 460,
+      "y": 4720
+    },
+    {
       "id": "plOwlMeta",
       "type": "Text",
       "label": "Where she lives",
@@ -903,7 +1099,7 @@
         "cssClassName": "bg-owl-meta"
       },
       "x": 340,
-      "y": 3880
+      "y": 4840
     },
     {
       "id": "plRight",
@@ -913,6 +1109,7 @@
       "children": [
         "plStepsHead",
         "plBlocksBox",
+        "plSlotMsg",
         "plTidy"
       ],
       "parameters": {
@@ -932,7 +1129,7 @@
         "paddingRight": "var(--space-3-5)"
       },
       "x": 160,
-      "y": 4000
+      "y": 4960
     },
     {
       "id": "plStepsHead",
@@ -956,7 +1153,7 @@
         "justifyContent": "space-between"
       },
       "x": 220,
-      "y": 4120
+      "y": 5080
     },
     {
       "id": "plStepsH",
@@ -977,7 +1174,7 @@
         "lineHeight": 1.2
       },
       "x": 280,
-      "y": 4240
+      "y": 5200
     },
     {
       "id": "plCount",
@@ -996,7 +1193,7 @@
         "mounted": false
       },
       "x": 280,
-      "y": 4360
+      "y": 5320
     },
     {
       "id": "plBlocksBox",
@@ -1015,7 +1212,7 @@
         "cssClassName": "bg-blocks-box"
       },
       "x": 220,
-      "y": 4480
+      "y": 5440
     },
     {
       "id": "plBlocks",
@@ -1030,7 +1227,27 @@
         "runColor": "var(--block-run)"
       },
       "x": 280,
-      "y": 4600
+      "y": 5560
+    },
+    {
+      "id": "plSlotMsg",
+      "type": "Text",
+      "label": "Why Olive cannot be asked yet",
+      "parent": "plRight",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--coral)",
+        "cssClassName": "bg-slot-msg",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 5680
     },
     {
       "id": "plTidy",
@@ -1072,7 +1289,7 @@
         "mounted": false
       },
       "x": 220,
-      "y": 4720
+      "y": 5800
     },
     {
       "id": "plTidyText",
@@ -1090,7 +1307,7 @@
         "fontWeight": "700"
       },
       "x": 280,
-      "y": 4840
+      "y": 5920
     },
     {
       "id": "plFoldBtn",
@@ -1120,7 +1337,7 @@
         "label": "Fold it"
       },
       "x": 280,
-      "y": 4960
+      "y": 6040
     },
     {
       "id": "plNotNow",
@@ -1150,7 +1367,7 @@
         "label": "Not now"
       },
       "x": 280,
-      "y": 5080
+      "y": 6160
     },
     {
       "id": "plWin",
@@ -1158,49 +1375,127 @@
       "label": "The win card",
       "parent": "plRoot",
       "x": 100,
-      "y": 5200
+      "y": 6280
     },
     {
       "id": "plT",
       "type": "/Logic/Translate words",
       "label": "In their language",
-      "x": 590,
+      "x": 710,
       "y": 2200
     },
     {
       "id": "plCard",
       "type": "/Logic/Request card",
       "label": "Who asks, and what",
-      "x": 590,
+      "x": 710,
       "y": 280
     },
     {
       "id": "plLine",
       "type": "/Logic/Hint line",
       "label": "The owl’s line",
-      "x": 590,
-      "y": 5800
+      "x": 710,
+      "y": 6880
     },
     {
       "id": "plOwlRow",
       "type": "/Logic/Owl row",
       "label": "The written line, voiced only for the same key",
-      "x": 590,
+      "x": 710,
       "y": 3760
     },
     {
       "id": "plAskOlive",
       "type": "/Logic/Ask Olive",
       "label": "Ask Olive for a parked run",
-      "x": 590,
-      "y": 5920
+      "x": 710,
+      "y": 7000
+    },
+    {
+      "id": "plVoiceHint",
+      "type": "/Logic/Voice hint",
+      "label": "A new line to voice",
+      "x": 710,
+      "y": 7120
+    },
+    {
+      "id": "plAskVoice",
+      "type": "/Logic/Ask Olive",
+      "label": "Ask Olive to voice the hint",
+      "x": 710,
+      "y": 7240
+    },
+    {
+      "id": "plStatus",
+      "type": "/Logic/Olive status",
+      "label": "Her exam on this computer",
+      "parameters": {
+        "nonce": 1
+      },
+      "x": 710,
+      "y": 7360
+    },
+    {
+      "id": "plSlots",
+      "type": "/Logic/Olive slots",
+      "label": "May this ask be sent?",
+      "x": 710,
+      "y": 6040
+    },
+    {
+      "id": "plPropCard",
+      "type": "/Logic/Proposal card",
+      "label": "The blocks Olive proposed, until answered",
+      "x": 710,
+      "y": 4120
+    },
+    {
+      "id": "plAccept",
+      "type": "/Logic/Accept proposal",
+      "label": "Use them",
+      "parameters": {
+        "accept": true
+      },
+      "x": 710,
+      "y": 4600
+    },
+    {
+      "id": "plPropDoneVar",
+      "type": "Variable2",
+      "label": "The proposal the child answered",
+      "parameters": {
+        "name": "gardenProposalDone"
+      },
+      "x": 710,
+      "y": 7480
+    },
+    {
+      "id": "plSetPropDone",
+      "type": "Set Variable",
+      "label": "Answered",
+      "parameters": {
+        "name": "gardenProposalDone"
+      },
+      "x": 710,
+      "y": 4720
+    },
+    {
+      "id": "plSetProgAccept",
+      "type": "Set Variable",
+      "label": "What Use them placed",
+      "parameters": {
+        "name": "gardenProgram"
+      },
+      "x": 710,
+      "y": 7600
     },
     {
       "id": "plStart",
       "type": "/Logic/Start world",
       "label": "The world this request starts from",
-      "x": 590,
-      "y": 6040
+      "x": 710,
+      "y": 7720
     },
     {
       "id": "plNonce",
@@ -1209,7 +1504,7 @@
       "parameters": {
         "startValue": 0
       },
-      "x": 590,
+      "x": 710,
       "y": 3040
     },
     {
@@ -1219,8 +1514,8 @@
       "parameters": {
         "name": "gardenWorld"
       },
-      "x": 590,
-      "y": 6160
+      "x": 710,
+      "y": 7840
     },
     {
       "id": "plSetWorld",
@@ -1229,8 +1524,8 @@
       "parameters": {
         "name": "gardenWorld"
       },
-      "x": 590,
-      "y": 6280
+      "x": 710,
+      "y": 7960
     },
     {
       "id": "plSetWorldRec",
@@ -1239,8 +1534,8 @@
       "parameters": {
         "name": "gardenWorld"
       },
-      "x": 590,
-      "y": 6400
+      "x": 710,
+      "y": 8080
     },
     {
       "id": "plProgVar",
@@ -1249,15 +1544,15 @@
       "parameters": {
         "name": "gardenProgram"
       },
-      "x": 590,
-      "y": 4600
+      "x": 710,
+      "y": 5560
     },
     {
       "id": "plRead",
       "type": "/Logic/Read program",
       "label": "The program as a list",
-      "x": 590,
-      "y": 6520
+      "x": 710,
+      "y": 8200
     },
     {
       "id": "plSetProgKit",
@@ -1266,8 +1561,8 @@
       "parameters": {
         "name": "gardenProgram"
       },
-      "x": 590,
-      "y": 4720
+      "x": 710,
+      "y": 5680
     },
     {
       "id": "plSetProgRec",
@@ -1276,8 +1571,8 @@
       "parameters": {
         "name": "gardenProgram"
       },
-      "x": 590,
-      "y": 6640
+      "x": 710,
+      "y": 8320
     },
     {
       "id": "plSetProgFold",
@@ -1286,8 +1581,8 @@
       "parameters": {
         "name": "gardenProgram"
       },
-      "x": 590,
-      "y": 6760
+      "x": 710,
+      "y": 8440
     },
     {
       "id": "plSetProgClear",
@@ -1298,8 +1593,8 @@
         "setWith": "string",
         "value": "[]"
       },
-      "x": 590,
-      "y": 6880
+      "x": 710,
+      "y": 8560
     },
     {
       "id": "plTeachBumpsVar",
@@ -1308,8 +1603,8 @@
       "parameters": {
         "name": "gardenTeachBumps"
       },
-      "x": 590,
-      "y": 7000
+      "x": 710,
+      "y": 8680
     },
     {
       "id": "plSetTeachBumps",
@@ -1318,8 +1613,8 @@
       "parameters": {
         "name": "gardenTeachBumps"
       },
-      "x": 590,
-      "y": 7120
+      "x": 710,
+      "y": 8800
     },
     {
       "id": "plClearTeachBumps",
@@ -1330,43 +1625,43 @@
         "setWith": "number",
         "value": 0
       },
-      "x": 590,
-      "y": 7240
+      "x": 710,
+      "y": 8920
     },
     {
       "id": "plRecord",
       "type": "/Logic/Record step",
       "label": "A pad press, recorded and driven",
-      "x": 590,
+      "x": 710,
       "y": 2320
     },
     {
       "id": "plRunner",
       "type": "/Workshop/Runner",
       "label": "The runner",
-      "x": 590,
-      "y": 4840
+      "x": 710,
+      "y": 5800
     },
     {
       "id": "plDraw",
       "type": "/Logic/Draw world",
       "label": "The world in the kit’s words",
-      "x": 590,
+      "x": 710,
       "y": 1840
     },
     {
       "id": "plPalette",
       "type": "/Logic/Palette",
       "label": "The blocks this band may use",
-      "x": 590,
-      "y": 7360
+      "x": 710,
+      "y": 9040
     },
     {
       "id": "plKitPal",
       "type": "/Logic/Kit palette",
       "label": "In the kit’s shape",
-      "x": 590,
-      "y": 4960
+      "x": 710,
+      "y": 5920
     },
     {
       "id": "plTeachMode",
@@ -1383,7 +1678,7 @@
         "value-idle-notTeaching": true,
         "value-teach-notTeaching": false
       },
-      "x": 590,
+      "x": 710,
       "y": 2440
     },
     {
@@ -1398,7 +1693,7 @@
         "value-off-predicting": false,
         "value-on-predicting": true
       },
-      "x": 590,
+      "x": 710,
       "y": 2560
     },
     {
@@ -1408,14 +1703,14 @@
       "parameters": {
         "runOnChange-condition": false
       },
-      "x": 590,
+      "x": 710,
       "y": 1960
     },
     {
       "id": "plPredictEnd",
       "type": "/Logic/Predict end",
       "label": "Where the robot really ends",
-      "x": 590,
+      "x": 710,
       "y": 2080
     },
     {
@@ -1425,8 +1720,8 @@
       "parameters": {
         "runOnChange-condition": false
       },
-      "x": 590,
-      "y": 7480
+      "x": 710,
+      "y": 9160
     },
     {
       "id": "plMissVar",
@@ -1435,8 +1730,8 @@
       "parameters": {
         "name": "gardenPredictMiss"
       },
-      "x": 590,
-      "y": 7600
+      "x": 710,
+      "y": 9280
     },
     {
       "id": "plSetMiss",
@@ -1447,8 +1742,8 @@
         "setWith": "boolean",
         "value": true
       },
-      "x": 590,
-      "y": 7720
+      "x": 710,
+      "y": 9400
     },
     {
       "id": "plClearMiss",
@@ -1459,22 +1754,22 @@
         "setWith": "boolean",
         "value": false
       },
-      "x": 590,
+      "x": 710,
       "y": 2800
     },
     {
       "id": "plFind",
       "type": "/Logic/Find repeat",
       "label": "The same steps, over and over?",
-      "x": 590,
-      "y": 7840
+      "x": 710,
+      "y": 9520
     },
     {
       "id": "plTidyLine",
       "type": "/Logic/Tidy line",
       "label": "The fold offer in words",
-      "x": 590,
-      "y": 4360
+      "x": 710,
+      "y": 5320
     },
     {
       "id": "plDismissVar",
@@ -1483,8 +1778,8 @@
       "parameters": {
         "name": "gardenTidyNo"
       },
-      "x": 590,
-      "y": 7960
+      "x": 710,
+      "y": 9640
     },
     {
       "id": "plSetDismiss",
@@ -1493,29 +1788,29 @@
       "parameters": {
         "name": "gardenTidyNo"
       },
-      "x": 590,
-      "y": 5200
+      "x": 710,
+      "y": 6280
     },
     {
       "id": "plFold",
       "type": "/Logic/Fold",
       "label": "Fold it",
-      "x": 590,
-      "y": 5080
+      "x": 710,
+      "y": 6160
     },
     {
       "id": "plChoose",
       "type": "/Logic/Choose hint",
       "label": "Which hint",
-      "x": 590,
+      "x": 710,
       "y": 2680
     },
     {
       "id": "plGoal",
       "type": "/Logic/Goal met",
       "label": "Was the request done?",
-      "x": 590,
-      "y": 8080
+      "x": 710,
+      "y": 9760
     },
     {
       "id": "plMetGate",
@@ -1524,8 +1819,8 @@
       "parameters": {
         "runOnChange-condition": false
       },
-      "x": 590,
-      "y": 8200
+      "x": 710,
+      "y": 9880
     },
     {
       "id": "plWonVar",
@@ -1534,8 +1829,8 @@
       "parameters": {
         "name": "gardenWon"
       },
-      "x": 590,
-      "y": 5320
+      "x": 710,
+      "y": 6400
     },
     {
       "id": "plSetWon",
@@ -1546,8 +1841,8 @@
         "setWith": "boolean",
         "value": true
       },
-      "x": 590,
-      "y": 8320
+      "x": 710,
+      "y": 10000
     },
     {
       "id": "plClearWon",
@@ -1558,15 +1853,15 @@
         "setWith": "boolean",
         "value": false
       },
-      "x": 590,
-      "y": 5440
+      "x": 710,
+      "y": 6520
     },
     {
       "id": "plWinSum",
       "type": "/Logic/Win summary",
       "label": "The win in words",
-      "x": 590,
-      "y": 5560
+      "x": 710,
+      "y": 6640
     },
     {
       "id": "plOut",
@@ -1614,8 +1909,8 @@
           "type": "boolean"
         }
       ],
-      "x": 590,
-      "y": 5680
+      "x": 710,
+      "y": 6760
     }
   ],
   "visualRoots": [

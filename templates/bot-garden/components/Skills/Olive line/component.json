@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5ec4f487-f181-5548-8829-427cba48a7ed",
+  "name": "Olive line",
+  "path": "/Skills/Olive line",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The rungs this computer’s exam failed, said as Olive can’t do this here yet. Shows nothing when there is nothing to say (no exam, every rung passed, band 7–9)."
+}

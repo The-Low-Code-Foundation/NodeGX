@@ -25,6 +25,7 @@
       "children": [
         "skBar",
         "skHead",
+        "skOlive",
         "skPath"
       ],
       "parameters": {
@@ -117,6 +118,14 @@
       "y": 400
     },
     {
+      "id": "skOlive",
+      "type": "/Skills/Olive line",
+      "label": "What Olive cannot do here",
+      "parent": "skWrap",
+      "x": 160,
+      "y": 520
+    },
+    {
       "id": "skPath",
       "type": "Group",
       "label": "The seven tricks",
@@ -133,7 +142,7 @@
         "cssClassName": "bg-path"
       },
       "x": 160,
-      "y": 520
+      "y": 640
     },
     {
       "id": "skEach",
@@ -145,7 +154,7 @@
         "templateType": "explicit"
       },
       "x": 220,
-      "y": 640
+      "y": 760
     },
     {
       "id": "skRows",

@@ -170,6 +170,30 @@
       "fromProperty": "rows",
       "toId": "skEach",
       "toProperty": "items"
+    },
+    {
+      "fromId": "skFam",
+      "fromProperty": "band",
+      "toId": "skOlive",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "skFam",
+      "fromProperty": "lang",
+      "toId": "skOlive",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "skFam",
+      "fromProperty": "botName",
+      "toId": "skOlive",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "skWords",
+      "fromProperty": "words",
+      "toId": "skOlive",
+      "toProperty": "words"
     }
   ]
 }

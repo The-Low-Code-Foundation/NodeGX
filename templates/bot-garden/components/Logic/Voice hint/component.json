@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "11c97530-2dec-55f5-8a5d-04f8b87b9065",
+  "name": "Voice hint",
+  "path": "/Logic/Voice hint",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The voice request for a new hint line, once per line. Runs when an input changes; Ran after each run."
+}

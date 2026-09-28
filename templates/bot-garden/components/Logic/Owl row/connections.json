@@ -95,6 +95,12 @@
     },
     {
       "fromId": "owlrowFn",
+      "fromProperty": "out-voiceSig",
+      "toId": "owlrowOut",
+      "toProperty": "voiceSig"
+    },
+    {
+      "fromId": "owlrowFn",
       "fromProperty": "out-voiced",
       "toId": "owlrowOut",
       "toProperty": "voiced"
