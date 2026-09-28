@@ -16,6 +16,10 @@
   "dependencies": {
     "node-llama-cpp": "3.21.1"
   },
+  "optionalDependencies": {
+    "@node-llama-cpp/linux-x64": "3.21.1",
+    "@node-llama-cpp/win-x64": "3.21.1"
+  },
   "devDependencies": {
     "electron": "43.2.0",
     "electron-builder": "^26.15.3"
