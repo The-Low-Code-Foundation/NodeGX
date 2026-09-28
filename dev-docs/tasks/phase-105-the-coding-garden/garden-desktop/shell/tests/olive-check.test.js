@@ -144,3 +144,23 @@ test('output: must-contain (any of, accents folded) and the trailing incomplete 
   assert.equal(tidy('Merci. Je suis Olive. 👋 </think>'), 'Merci. Je suis Olive. 👋', 'a think tag leaked as text is stripped');
   assert.equal(tidy('<think>\n\n</think>\n\nMerci !'), 'Merci !');
 });
+
+test('output: a voiced hint must still be the hint — its question, its robot, plain text — measured on six real replies (2026-09-28)', () => {
+  const wet = (lang, b = 'Pip') => compose(templates, 'voice-hint', { key: 'hintWet', b }, { lang });
+  assert.deepEqual(wet('fr').keep, { question: true, name: 'Pip' });
+  assert.equal(compose(templates, 'voice-hint', { key: 'hintDone', b: 'Pip' }, { lang: 'en' }).keep.name, null, 'hintDone names no robot, so none is required');
+  assert.equal(compose(templates, 'say-thanks', { to: 'Mamie Rose', deed: 'arrosé ses trois tulipes' }, { lang: 'fr' }).keep, null, 'only the voiced hint carries the guard');
+  // The contract runs of 2026-09-28 (Metal and CPU), P22 (FR) and P35 (EN), hintWet: every one passed the old check.
+  const kept = ['Une flaque ! Pip a arrosé là où il n’y a pas de tulipe, il regardait où ?', "Une flaque, Pip a arrosé là où il n'y a pas de tulipe, il regardait où ?", "Une flaque, Pip a arrosé là où il n'y a pas de tulipe et il regardait où ?"];
+  for (const t of kept) assert.deepEqual(checkOutput(t, wet('fr')), { ok: true, text: t });
+  const lost = [
+    ['fr', "C'est une excellente question ! La réponse est : **Un tulipe !** C'était un peu trop froid pour le sol, mais il ne s'est pas…"],
+    ['en', 'Pip was standing in the center of the garden, looking down at the puddle that had formed where the tulips had been.'],
+    ['en', 'Pip was standing in front of a tree, having just watered a puddle where no tulips were growing.']
+  ];
+  for (const [lang, t] of lost) assert.deepEqual(checkOutput(t, wet(lang)), { ok: false, reason: 'unfaithful' }, t);
+  // Each rule on its own: markdown with the question and name kept; a renamed robot the reply forgot.
+  assert.equal(checkOutput('Une **flaque** ! Pip regardait où ?', wet('fr')).reason, 'unfaithful');
+  assert.equal(checkOutput('Une flaque ! Pip regardait où ?', wet('fr', 'Bolt')).reason, 'unfaithful', 'the kid renamed the robot Bolt; "Pip" is not Bolt');
+  assert.equal(checkOutput('Une flaque ! Bolt regardait où ?', wet('fr', 'Bolt')).ok, true);
+});

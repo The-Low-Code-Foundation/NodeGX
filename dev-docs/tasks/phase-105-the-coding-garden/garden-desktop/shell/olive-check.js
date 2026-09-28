@@ -106,10 +106,15 @@ function compose(templates, rungId, values, { lang, shape, temperature, options 
   const useShape = shape && allowedShapes.includes(shape) ? shape : allowedShapes[0];
   const temp = typeof temperature === 'number' && templates.temperatures.includes(temperature) ? temperature : rung.temperature;
   const vars = { ...values };
+  let keep = null;
   if (rungId === 'voice-hint') {
     const line = (templates.hints[values.key] || {})[L] || '';
     // The line is the page's own (cg002Content.ts HINTS reads it from the table): {t} is the total a hintMissed counts.
-    vars.hint = fill(line, { b: values.b || 'Pip', n: values.n || '3', w: values.w || '0', t: values.t || '3' });
+    const name = values.b || 'Pip';
+    vars.hint = fill(line, { b: name, n: values.n || '3', w: values.w || '0', t: values.t || '3' });
+    // What a voiced hint must keep to still BE the hint (checkOutput): its question, the robot's name, plain text.
+    // Measured 2026-09-28 on the real model: 3 of 6 voicings passed every other check and had stopped being the hint.
+    keep = { question: vars.hint.includes('?'), name: vars.hint.includes(name) ? name : null };
   }
   const sys = typeof rung.system === 'string' ? templates.systems[rung.system][L] : rung.system[L];
   let enumValues = null;
@@ -133,7 +138,8 @@ function compose(templates, rungId, values, { lang, shape, temperature, options 
     // CG-005: the rung and the validated slot values ride along for the stub Olive (olive-stub.js answers by rung + slots);
     // the real engine reads only system/user/schema/temperature/maxTokens and never sees them.
     rung: rungId,
-    values: { ...values }
+    values: { ...values },
+    keep
   };
 }
 
@@ -196,9 +202,10 @@ function tidy(raw) {
 
 /**
  * Grade the model's raw text for a shape. Returns `{ok:true, value}` for a shaped answer, `{ok:true, text}` for
- * prose (trimmed to the cap), or `{ok:false, reason}`: grammar, cap, blocklist, must-contain, empty.
+ * prose (trimmed to the cap), or `{ok:false, reason}`: grammar, cap, blocklist, must-contain, unfaithful (a voiced hint
+ * that lost its question, its robot or went markdown), empty.
  */
-function checkOutput(raw, { shape, enumValues, mustContain = [], lang }) {
+function checkOutput(raw, { shape, enumValues, mustContain = [], lang, keep = null }) {
   const text = tidy(raw);
   if (!text) return { ok: false, reason: 'empty' };
   const L = lang === 'en' ? 'en' : 'fr';
@@ -264,6 +271,14 @@ function checkOutput(raw, { shape, enumValues, mustContain = [], lang }) {
   if (mustContain.length) {
     const f = fold(out);
     if (!mustContain.some((m) => f.includes(fold(m)))) return { ok: false, reason: 'must-contain' };
+  }
+  // A voiced hint is the game's hint in other words, or it is not shown (the written line is). The game chooses the
+  // hint; a rewording that drops its question, drops the robot, or brings markdown has become something else
+  // ("La réponse est : **Un tulipe !**…", "Pip was standing in front of a tree…": real replies, 2026-09-28).
+  if (keep) {
+    if (/\*\*|__|^#|`/m.test(out)) return { ok: false, reason: 'unfaithful' };
+    if (keep.question && !out.includes('?')) return { ok: false, reason: 'unfaithful' };
+    if (keep.name && !fold(out).includes(fold(keep.name))) return { ok: false, reason: 'unfaithful' };
   }
   return trimmed ? { ok: true, text: out, trimmed: true } : { ok: true, text: out };
 }
