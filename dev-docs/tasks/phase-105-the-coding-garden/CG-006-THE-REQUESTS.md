@@ -1,6 +1,6 @@
 # CG-006 — The requests: the coding tricks, the Olive ladder, and the moments worth ring-fencing
 
-**Opened 2026-09-27**, scoped from TPL-012 §2.3 and §2.6. **Status: ⬜ not started.** Depends on CG-002
+**Opened 2026-09-27**, scoped from TPL-012 §2.3 and §2.6. **Status: 🟡 session 2 — AC1, AC4, AC5 measured; AC2 §3 as data; AC2 §4 + AC6 probes prepared (model run pending); AC3 awaits Richard's FR read (§7).** Depends on CG-002
 (and CG-005 for §3). Lane B.
 
 ## 1. The person sentence
@@ -91,3 +91,68 @@ table does that from the state, and the research (TPL-012 finding 5) says a mode
 
 A documented example description is published; an inert parameter in a corpus example teaches a lie;
 the "Out:" line can hold the defect (read the goal predicate, not the blurb).
+
+## 7. Session 2 — what was built (2026-09-27/28, lane B, worktree `cg006-requests`)
+
+Three files under `packages/noodl-mcp/tests/`, plus one re-pinned line in `cg002Engine.test.ts`:
+
+- `cg002Content.ts` (owned this session) — **10 requests** (the 8 of CG-002 + `tulip-door` = §2 row 1b and
+  `path-stones` = row 2b, both band 7–9); `copyKeys.gift` on every request (the reward line that names the islander);
+  **`OLIVE_RUNGS`** (the twelve §3 rungs as requests: islander, band, block, shape, rung-table ids, exam probe ids, card
+  keys, and rung 9's `rule: 'awaiting-ruling'` with both candidates) + `OLIVE_RUNGS_JSON`; the word table **192 → 272
+  keys** (80 new, EN + FR: 6 request lines, 10 gifts, 38 rung lines, 26 moment lines); `oliveRung8` reworded (it said
+  "missed" / "raté": the AC5 gate caught it).
+- `cg006Probes.ts` — §4 as probe DATA in `exam.js`'s `PROBES` shape: **28 probes** (E2–E10: 22; rung 9 G1/G2: 4; the
+  EN thank-you A/B: 2), **13 proposed rung-table entries + 12 lists** in `olive-templates.json`'s shape (merged by
+  `mergeTemplates`, never written into the shell's file), `MOMENTS` E1–E13 with a decision each, `RULINGS` (both
+  unchosen), `meets` / `majority` / `decide`, and `EXAM_KIND_PATCH`.
+- `cg006Requests.test.ts` — **82 tests, ~4 s**: `cd packages/noodl-mcp && npx jest tests/cg006Requests.test.ts`.
+  `cg002Engine.test.ts` AC1 row count re-pinned 20 → 28: **105/105** (97 + 8 new rows).
+
+| AC | Status | Measured by |
+|---|---|---|
+| 1 | ✅ measured | the 9 §2 rows map to 9 requests with §2's islander, trick and reward; **26 runs** (4 band 7–9 rows × 2 bands × 2 langs + 5 × 2) through the shipped `Logic/*` scripts, each `met: true`, 0 bumps, 0 puddles, < 100 ticks; band 7–9 runs the unrolled recording and every block is in `BAND_PALETTE[1]`. Every request fails on an empty program AND on a named plausible wrong program (9/9). Row 2: the band 10–12 recording (15 blocks) offers `repeat 3` (len 5), band 7–9 never; row 1b: the wrong turn makes 1 puddle; row 2b: four stones at (3–6, 3), basket empty. |
+| 2 (§3) | ✅ measured as data | 12 rungs, 🎓 on 4 6 7 8 9 10, band 10–12 on 8 and 10; every rung-table id exists in `olive-templates.json` with the ladder its exam column says; every probe id exists in `exam.js` on the rung's own entries, green rungs have no `fail` probe, 🎓 rungs no `pass` probe, rungs 8 and 11 both; **0 orphan exam probes**. Card keys resolve EN + FR. The interpreter's shape consumption is CG-005's. |
+| 2 (§4) | 🟡 prepared, model run pending | offline, 28/28: slots pass the shell's own `checkSlots` on the merged table, `compose` gives the declared shape with no `{slot}` left, a hand-written canned reply passes `checkOutput` and grades as its column (green met / 🎓 not met), and grades identically under `exam.js`'s `meetsOne` for the 6 kinds it knows. **Not a measurement of Olive**: `$SCRATCH/drive-laneB.sh` + `probe-cg006.mjs` run them on the real model (CPU then Metal); predictions in `$SCRATCH/EXPECTED-DRIVE.md`. |
+| 3 | ✅ EN+FR / ⬜ Richard's read | 272 keys × 2 languages non-empty, `{b}` filled; the 114 request-facing keys EN ≠ FR, the FR uses « » and ’ (0 straight quotes) and a space before ! ? : ; (0 misses). **Richard reads the FR before the kids see it** — not gradeable here. |
+| 4 | ✅ measured | 10/10 rewards are hat/sticker/seed/item, `from` = the islander, 10 distinct ids; every gift line names the islander AND the reward in EN and FR; 0 money words/fields (known-firing: 6/6 planted prices caught); a profile that finishes all 10 holds the 3 hats on its hat rail and the 7 others on its sticker page. |
+| 5 | ✅ measured | 0 pressure words in 114 request-facing keys + 12 rung hints, EN and FR (timer, seconds, score, points, streak, in a row, missed, chrono, série, de suite, raté, manqué, vite…; whole-word, Unicode-aware); 0 time/score/streak/lives/deadline fields on requests or rungs. Known-firing: 7/7 EN + 8/8 FR planted lines caught, 0/6 false hits on the island's own phrases. |
+| 6 | 🟡 prepared | E1 E11 E12 E13 ship with their evidence named; E2–E10 each carry probes (2–3 each) and `decision: 'awaiting-probe'` — **9/9 awaiting, 0 promoted, 0 dropped**: nothing was decided without the exam. `decide()` turns an exam's rows into promoted/dropped by §4's rule (green held / 🎓 reliably red / mixed disagrees) — tested both ways. The README's board says which after the orchestrator's run. |
+
+**Arms: 10/10 killed** (`$SCRATCH/mut-summary.txt`): 1b's reference loses its turn (5 red), 2b's reward from the wrong
+islander (2), a timer in a request line (1), a 🎓 probe designed green (1), `decide` inverted (1), an FR line emptied (1),
+`lacks` ignores letters (5), `mergeTemplates` writes the shell's table (2), rung 6 marked green (1), `lacks` matching
+substrings so "beau" = "eau" (1). Restored after each (`cp` from a backup); 187/187 after.
+
+**Findings** (each measured; the owner named):
+- 🔴 **G2 "never mention water" does NOT fail on the recorded readout.** TPL-012 §2.6 and CG-004 §7 finding a list G1
+  and G2 as "failed 3/3". Re-graded from `results-2026-09-27-metal.txt` by this gate: **G1 broke its rule 3/3** (every
+  reply has an e); **G2 kept its rule 3/3** ("Pip nettoie les plantes…", "Pip secouette les branches…" ×2, no water word).
+  Both stay candidates for rung 9 (not chosen); the probe run on CPU decides. **Owner: Richard, the ruling.**
+- 🔴 **The EN thank-you evidence is thin.** The battery's three A9 replies all say "grateful" and pass the current list;
+  the two refusals in the contract test left no text (the route logs refused text since then). Candidate A (widen)
+  and B (drop for EN) both accept a reply the current list refuses (`"I really appreciate…"` → `must-contain`).
+  **Owner: Richard, the ruling; the orchestrator reads the route log after the next contract run.**
+- 🔴 **`exam.js` cannot grade two of the new kinds.** `lacks` (G1, G2) and `containsAll` (E3) fall to `meetsOne`'s
+  `default: false`, so a `mode: 'fail'` probe of those kinds passes whatever she says (measured: a reply with no e →
+  this file `true`, `exam.js` `false`). `EXAM_KIND_PATCH` is the exact case text; the gate compiles it and checks it
+  grades the same as `meets` on 30 cases. **Owner: CG-005 / lane C (`exam.js`)** before these probes go into the exam; the
+  prepared runner grades with `meets` itself, so it does not wait.
+- 🟡 **eggs-count's goal cannot say "`count = 4` used".** A program with one `count +1` and no `count = 4` anywhere
+  (`pick fwd pick fwd pick fwd pick count+1`, count ends at 1) meets the goal (measured, `$SCRATCH/loophole.log`). The
+  goal vocabulary has no predicate over a sensor slot. Fix: a `senses` goal (`[sensor, arg]` present in the program) in
+  `GOAL_SCRIPT` + one goal row here. **Owner: `cg002Scripts.ts`'s owner (lane C this session) → next session.**
+- 🟡 **The Olive rungs framed for band 7–9 cannot be placed there.** TPL-012 §2.6 offers every rung but 8 and 10 to
+  band 7–9 (and CG-005 AC6 has a band 7–9 slot picker), but `BAND_PALETTE[1]` has no `say`, `ask` or `if`: **10 of 10**
+  band 7–9 rungs are unreachable (measured). The data keeps the source's bands. **Owner: Richard (is Olive band 10–12
+  only?) or CG-005 (widen band 1's palette by `ask`).**
+- 🟡 The mockup's fold tie-break shows again: 2b's recording (`put fwd` × 4) folds to `repeat 2 { put fwd put fwd }`,
+  not `repeat 4`. The gate asserts only "offered, covers 8". **Owner: Richard, the open CG-002 ruling.**
+- E6 "shorter" is designed 🎓 but "under 5 words" was obeyed 6/6 in the contract test: at risk of being dropped by its
+  probe. Owner: the probe run.
+
+**Merge hazards:** `GardenRequest.copyKeys` gained a `gift` key (every request has one; a generator that types
+`copyKeys` must accept it — lane A). Two new requests arrive through the generator; block ids of later requests'
+reference programs shifted (no gate pins them). New exports `OLIVE_RUNGS` / `OLIVE_RUNGS_JSON` are not consumed yet
+(the pages' Olive cards are CG-003/CG-005's). The gate READS lane C's `olive-templates.json`, `exam.js` and
+`olive-check.js`: a renamed rung or probe id there turns a row here red with its name — that is the gate working.

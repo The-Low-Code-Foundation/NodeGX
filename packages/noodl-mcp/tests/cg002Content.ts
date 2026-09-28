@@ -112,7 +112,8 @@ export interface Thing {
  * tile, `B` the post box's tile); `things` sit on tiles; `robotStart` is
  * `{ x, y, d, carry? }`; `schedule` is the events the world fires, by tick;
  * `palette` is the block ids offered; `referenceProgram` reaches `goal` (the
- * gate proves it); `copyKeys` name the word-table keys the card shows.
+ * gate proves it); `copyKeys` name the word-table keys the card shows —
+ * `gift` is the reward line that names the islander it came from (CG-006 AC4).
  */
 export interface GardenRequest {
   id: string;
@@ -126,7 +127,7 @@ export interface GardenRequest {
   goal: Goal | ReadonlyArray<Goal>;
   palette: ReadonlyArray<BlockType>;
   reward: { kind: 'hat' | 'sticker' | 'seed' | 'item'; id: string; from: 'sami' | 'mamie' | 'biscuit' };
-  copyKeys: { title: string; blurb: string; line: string; reward: string };
+  copyKeys: { title: string; blurb: string; line: string; reward: string; gift: string };
   referenceProgram: ReadonlyArray<Block>;
 }
 
@@ -136,7 +137,13 @@ let nextId = 1;
 const blk = (t: BlockType, extra: Partial<Block> = {}): Block => ({ id: nextId++, t, ...extra });
 const b1 = (...types: BlockType[]) => types.map((t) => blk(t));
 
-/** The three D3 requests, then one per remaining trick, so AC1 covers all seven and `say`. */
+/**
+ * The request list (CG-006 §2): the three D3 requests, one per remaining trick,
+ * and the two band 7–9 extras (1b the tulip by the door, 2b the path stones),
+ * so every §2 row is an entry and AC1 covers all seven tricks and `say`.
+ * Four open at band 7–9 (path-postbox, tulip-door, tulips-three, path-stones);
+ * the rest need a control block and open at band 10–12.
+ */
 export const REQUESTS: ReadonlyArray<GardenRequest> = [
   {
     id: 'path-postbox',
@@ -149,8 +156,23 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     goal: { name: 'robot_at', args: [7, 3] },
     palette: ['fwd', 'left', 'right'],
     reward: { kind: 'hat', id: 'cap', from: 'sami' },
-    copyKeys: { title: 'rqPathTitle', blurb: 'rqPathBlurb', line: 'rqPathLine', reward: 'hatCap' },
+    copyKeys: { title: 'rqPathTitle', blurb: 'rqPathBlurb', line: 'rqPathLine', reward: 'hatCap', gift: 'giftCap' },
     referenceProgram: b1('fwd', 'fwd', 'fwd', 'fwd', 'fwd', 'fwd', 'fwd')
+  },
+  {
+    // CG-006 §2 row 1b: steps in order, with a turn and a water. The tulip stands under the house (7,0).
+    id: 'tulip-door',
+    islander: 'mamie',
+    band: 1,
+    tricks: [1],
+    map: ['GGTGGGTH', 'GGGGGGGF', 'GGGGGGGG', 'PPPPPPPP', 'GWWGGRGG', 'GGGGGTGG'],
+    things: [{ kind: 'tulip', x: 7, y: 1, watered: false }],
+    robotStart: { x: 4, y: 3, d: 1 },
+    goal: [{ name: 'every_tulip_watered' }, { name: 'no_puddle' }],
+    palette: ['fwd', 'left', 'right', 'water'],
+    reward: { kind: 'sticker', id: 'tulip', from: 'mamie' },
+    copyKeys: { title: 'rqDoorTitle', blurb: 'rqDoorBlurb', line: 'rqDoorLine', reward: 'stickerTulip', gift: 'giftTulip' },
+    referenceProgram: b1('fwd', 'fwd', 'fwd', 'left', 'fwd', 'water')
   },
   {
     id: 'tulips-three',
@@ -167,8 +189,28 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     goal: { name: 'every_tulip_watered' },
     palette: ['fwd', 'left', 'right', 'water', 'repeat'],
     reward: { kind: 'hat', id: 'sun', from: 'mamie' },
-    copyKeys: { title: 'rqTulipsTitle', blurb: 'rqTulipsBlurb', line: 'rqTulipsLine', reward: 'hatSun' },
+    copyKeys: { title: 'rqTulipsTitle', blurb: 'rqTulipsBlurb', line: 'rqTulipsLine', reward: 'hatSun', gift: 'giftSun' },
     referenceProgram: [blk('repeat', { n: 3, body: b1('fwd', 'fwd', 'left', 'water', 'right') })]
+  },
+  {
+    // CG-006 §2 row 2b: repeat, with put. The path stops at (2,3); four stones carry it to the post box at (7,3).
+    id: 'path-stones',
+    islander: 'sami',
+    band: 1,
+    tricks: [2],
+    map: ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPGGGGB', 'GWWGGRGG', 'GGGGGTGG'],
+    things: [],
+    robotStart: { x: 2, y: 3, d: 1, carry: ['stone', 'stone', 'stone', 'stone'], basket: 4 },
+    goal: [
+      { name: 'thing_at', args: ['stone', 3, 3] },
+      { name: 'thing_at', args: ['stone', 4, 3] },
+      { name: 'thing_at', args: ['stone', 5, 3] },
+      { name: 'thing_at', args: ['stone', 6, 3] }
+    ],
+    palette: ['fwd', 'left', 'right', 'put', 'repeat'],
+    reward: { kind: 'seed', id: 'seeds', from: 'sami' },
+    copyKeys: { title: 'rqStonesTitle', blurb: 'rqStonesBlurb', line: 'rqStonesLine', reward: 'seeds', gift: 'giftSeeds' },
+    referenceProgram: [blk('repeat', { n: 4, body: b1('put', 'fwd') })]
   },
   {
     id: 'bowl-if',
@@ -184,7 +226,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     goal: [{ name: 'bowl_has', args: [4, 2, 1] }, { name: 'bowl_has', args: [2, 2, 1] }, { name: 'uses', args: ['if', 1] }],
     palette: ['fwd', 'left', 'right', 'put', 'repeat', 'if'],
     reward: { kind: 'hat', id: 'crown', from: 'biscuit' },
-    copyKeys: { title: 'rqBowlTitle', blurb: 'rqBowlBlurb', line: 'rqBowlLine', reward: 'hatCrown' },
+    copyKeys: { title: 'rqBowlTitle', blurb: 'rqBowlBlurb', line: 'rqBowlLine', reward: 'hatCrown', gift: 'giftCrown' },
     referenceProgram: [
       blk('repeat', {
         n: 2,
@@ -203,7 +245,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     goal: [{ name: 'thing_at', args: ['letter', 7, 3] }, { name: 'said', args: [1] }],
     palette: ['fwd', 'left', 'right', 'pick', 'put', 'say', 'repeat'],
     reward: { kind: 'sticker', id: 'letter', from: 'sami' },
-    copyKeys: { title: 'rqLetterTitle', blurb: 'rqLetterBlurb', line: 'rqLetterLine', reward: 'stickerLetter' },
+    copyKeys: { title: 'rqLetterTitle', blurb: 'rqLetterBlurb', line: 'rqLetterLine', reward: 'stickerLetter', gift: 'giftLetter' },
     referenceProgram: [blk('pick'), blk('repeat', { n: 6, body: b1('fwd') }), blk('put'), blk('say', { slots: { text: 'thanksSami' } })]
   },
   {
@@ -217,7 +259,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     goal: [{ name: 'robot_at', args: [7, 3] }, { name: 'facing', args: [0] }, { name: 'uses', args: ['until', 1] }],
     palette: ['fwd', 'left', 'right', 'until'],
     reward: { kind: 'sticker', id: 'paw', from: 'biscuit' },
-    copyKeys: { title: 'rqWallTitle', blurb: 'rqWallBlurb', line: 'rqWallLine', reward: 'stickerPaw' },
+    copyKeys: { title: 'rqWallTitle', blurb: 'rqWallBlurb', line: 'rqWallLine', reward: 'stickerPaw', gift: 'giftPaw' },
     referenceProgram: [blk('until', { slots: { sensor: 'wall_ahead' }, body: [blk('fwd')] }), blk('left')]
   },
   {
@@ -232,7 +274,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     goal: [{ name: 'handled', args: ['meow', 2] }, { name: 'robot_at', args: [2, 3] }],
     palette: ['fwd', 'left', 'right', 'when'],
     reward: { kind: 'item', id: 'bell', from: 'biscuit' },
-    copyKeys: { title: 'rqMeowTitle', blurb: 'rqMeowBlurb', line: 'rqMeowLine', reward: 'itemBell' },
+    copyKeys: { title: 'rqMeowTitle', blurb: 'rqMeowBlurb', line: 'rqMeowLine', reward: 'itemBell', gift: 'giftBell' },
     referenceProgram: [blk('when', { slots: { event: 'meow' }, body: [blk('fwd')] })]
   },
   {
@@ -252,7 +294,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     goal: [{ name: 'carrying', args: ['egg', 4] }, { name: 'uses', args: ['count_inc', 1] }, { name: 'thing_at', args: ['egg', 5, 3] }],
     palette: ['fwd', 'left', 'right', 'pick', 'until', 'count_inc'],
     reward: { kind: 'item', id: 'basket', from: 'mamie' },
-    copyKeys: { title: 'rqEggsTitle', blurb: 'rqEggsBlurb', line: 'rqEggsLine', reward: 'itemBasket' },
+    copyKeys: { title: 'rqEggsTitle', blurb: 'rqEggsBlurb', line: 'rqEggsLine', reward: 'itemBasket', gift: 'giftBasket' },
     referenceProgram: [blk('until', { slots: { sensor: 'count_is', arg: 4 }, body: b1('pick', 'count_inc', 'fwd') })]
   },
   {
@@ -273,7 +315,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     goal: [{ name: 'every_tulip_watered' }, { name: 'uses', args: ['do', 2] }],
     palette: ['fwd', 'left', 'right', 'water', 'repeat', 'trick', 'do'],
     reward: { kind: 'item', id: 'gnome', from: 'mamie' },
-    copyKeys: { title: 'rqRowsTitle', blurb: 'rqRowsBlurb', line: 'rqRowsLine', reward: 'itemGnome' },
+    copyKeys: { title: 'rqRowsTitle', blurb: 'rqRowsBlurb', line: 'rqRowsLine', reward: 'itemGnome', gift: 'giftGnome' },
     referenceProgram: [
       blk('trick', { slots: { name: 'row' }, body: [blk('repeat', { n: 3, body: b1('fwd', 'fwd', 'left', 'water', 'right') })] }),
       blk('do', { slots: { name: 'row' } }),
@@ -286,6 +328,68 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
 
 /** The ids, for the gate and the island page. */
 export const REQUEST_IDS: ReadonlyArray<string> = REQUESTS.map((r) => r.id);
+
+// ── The Olive rungs, as requests (CG-006 §3) ────────────────────────────────
+
+/**
+ * One rung of the Olive ladder (TPL-012 §2.6) framed as a request: who asks,
+ * which block, what the child sees happen. `mark` is §3's column (`grad` = 🎓:
+ * Olive fails on purpose and the child fixes it with a program). `examColumn`
+ * is what the exam's probes for this rung are designed on — it differs from
+ * `mark` where the lesson is about Olive being MOSTLY right (rung 6: the probes
+ * are green, the 🎓 is the majority vote) or where one rung has a green and a
+ * red half (8: 2+3 and 14+9; 11: FR→EN and EN→FR). `table` names the entries
+ * of the shell's rung table (`garden-desktop/shell/olive-templates.json`),
+ * `probes` the exam's probe ids (`shell/exam.js`). Graded only as data this
+ * session: the interpreter's shape consumption is CG-005's.
+ *
+ * Rung 9 carries `rule: 'awaiting-ruling'`: "under 5 words" is obeyed 6/6 on
+ * the model (CG-004 §7 finding a), so the rule it teaches must change, and
+ * that is Richard's to choose. Both candidates are framed (`ruleCandidates`,
+ * each with its own line key) and probed (`cg006Probes.ts`), so either answer
+ * is one edit: point `copyKeys.line` and `table` at the chosen one.
+ */
+export interface OliveRung {
+  n: number;
+  mark: 'green' | 'grad';
+  examColumn: 'green' | 'grad' | 'both';
+  islander: 'sami' | 'mamie' | 'biscuit' | null;
+  /** The lowest band the source offers it to (TPL-012 §2.6: rungs 8 and 10 are band 10–12). */
+  band: Band;
+  /** The block the child places; null for rung 10 (canned questions, no block). */
+  block: 'say' | 'ask' | 'if' | null;
+  /** The shape card (CG-005 §2 / the rung table's `shapes`); null where the block has none. */
+  shape: 'sentence' | 'list_of_3' | 'blocks' | 'one_of' | 'yes_no' | 'integer' | 'two_lines' | null;
+  table: ReadonlyArray<string>;
+  probes: ReadonlyArray<string>;
+  copyKeys: { title: string; line: string; lesson: string; hint: string };
+  rule?: 'awaiting-ruling';
+  ruleCandidates?: ReadonlyArray<{ id: 'G1' | 'G2'; table: string; line: string; probes: ReadonlyArray<string> }>;
+}
+
+const rungKeys = (n: number) => ({ title: 'or' + n + 'Title', line: 'or' + n + 'Line', lesson: 'or' + n + 'Lesson', hint: 'oliveRung' + n });
+
+export const OLIVE_RUNGS: ReadonlyArray<OliveRung> = [
+  { n: 1, mark: 'green', examColumn: 'green', islander: 'sami', band: 1, block: 'say', shape: 'sentence', table: ['say-thanks'], probes: ['P01', 'P02'], copyKeys: rungKeys(1) },
+  { n: 2, mark: 'green', examColumn: 'green', islander: 'mamie', band: 1, block: 'ask', shape: 'list_of_3', table: ['name-three', 'name-one'], probes: ['P03', 'P04', 'P05'], copyKeys: rungKeys(2) },
+  { n: 3, mark: 'green', examColumn: 'green', islander: 'sami', band: 1, block: 'ask', shape: 'blocks', table: ['words-to-blocks'], probes: ['P06', 'P07', 'P08', 'P23'], copyKeys: rungKeys(3) },
+  { n: 4, mark: 'grad', examColumn: 'grad', islander: 'sami', band: 1, block: 'ask', shape: 'blocks', table: ['count-in-words'], probes: ['P09'], copyKeys: rungKeys(4) },
+  { n: 5, mark: 'green', examColumn: 'green', islander: 'biscuit', band: 1, block: 'ask', shape: 'one_of', table: ['what-wants'], probes: ['P10', 'P11'], copyKeys: rungKeys(5) },
+  { n: 6, mark: 'grad', examColumn: 'green', islander: null, band: 1, block: 'if', shape: 'yes_no', table: ['is-it-a'], probes: ['P12', 'P13'], copyKeys: rungKeys(6) },
+  { n: 7, mark: 'grad', examColumn: 'grad', islander: 'mamie', band: 1, block: 'ask', shape: 'integer', table: ['count-tulips'], probes: ['P14'], copyKeys: rungKeys(7) },
+  { n: 8, mark: 'grad', examColumn: 'both', islander: null, band: 2, block: 'ask', shape: 'integer', table: ['maths-seeds', 'maths'], probes: ['P15', 'P16'], copyKeys: rungKeys(8) },
+  {
+    n: 9, mark: 'grad', examColumn: 'grad', islander: null, band: 1, block: 'ask', shape: 'sentence', table: ['under-five-words'], probes: ['P17'], copyKeys: rungKeys(9),
+    rule: 'awaiting-ruling',
+    ruleCandidates: [
+      { id: 'G1', table: 'no-letter-e', line: 'or9LineG1', probes: ['R9-G1-fr', 'R9-G1-en'] },
+      { id: 'G2', table: 'no-water', line: 'or9LineG2', probes: ['R9-G2-fr', 'R9-G2-en'] }
+    ]
+  },
+  { n: 10, mark: 'grad', examColumn: 'grad', islander: null, band: 2, block: null, shape: null, table: ['tall-tales'], probes: ['P18'], copyKeys: rungKeys(10) },
+  { n: 11, mark: 'green', examColumn: 'both', islander: 'sami', band: 1, block: 'ask', shape: 'sentence', table: ['translate'], probes: ['P19', 'P20'], copyKeys: rungKeys(11) },
+  { n: 12, mark: 'green', examColumn: 'green', islander: null, band: 1, block: 'ask', shape: 'two_lines', table: ['poem'], probes: ['P21'], copyKeys: rungKeys(12) }
+];
 
 // ── The hint table ──────────────────────────────────────────────────────────
 
@@ -315,7 +419,7 @@ export const HINTS: Readonly<Record<string, Bi>> = {
   oliveRung5: s('Olive picked what Biscuit wants. Use "if Olive says…" to send {b} the right way.', 'Olive a trouvé ce que veut Biscuit. Utilise « si Olive dit… » pour envoyer {b} du bon côté.'),
   oliveRung6: s('Olive was wrong about the thing ahead. Ask three times and count the yeses.', 'Olive s’est trompée sur ce qu’il y a devant. Demande trois fois et compte les oui.'),
   oliveRung7: s('Olive guessed a number. A count block does not guess.', 'Olive a deviné un nombre. Un bloc « compter » ne devine pas.'),
-  oliveRung8: s('Olive got the small sum and missed the big one. A rule beats a guess.', 'Olive a réussi la petite somme et raté la grande. Une règle bat une devinette.'),
+  oliveRung8: s('Olive got the small sum right and the big one wrong. A rule beats a guess.', 'Olive a trouvé la petite somme, pas la grande. Une règle bat une devinette.'),
   oliveRung9: s('Olive ignored "under 5 words". The shape card kept the rule for her.', 'Olive a ignoré « moins de 5 mots ». La carte de forme a gardé la règle à sa place.'),
   oliveRung10: s('Olive answered with confidence. Check it in a book before you believe it.', 'Olive a répondu avec assurance. Vérifie dans un livre avant de la croire.'),
   oliveRung11: s('Olive translates one way better than the other. Tools have a good direction.', 'Olive traduit mieux dans un sens que dans l’autre. Les outils ont un bon sens.'),
@@ -461,6 +565,12 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   rqRowsTitle: s('Water both rows the same way', 'Arrose les deux rangées de la même façon'),
   rqRowsBlurb: s('A trick with a name', 'Une astuce avec un nom'),
   rqRowsLine: s('"Two rows of tulips. Teach {b} one trick and use it twice."', '« Deux rangées de tulipes. Apprends une astuce à {b} et utilise-la deux fois. »'),
+  rqDoorTitle: s('Water the tulip by my door', 'Arrose la tulipe près de ma porte'),
+  rqDoorBlurb: s('Steps in order', 'Des pas dans l’ordre'),
+  rqDoorLine: s('"There is one tulip by my front door, and she is thirsty. Can {b} give her a drink?"', '« Il y a une tulipe près de ma porte, et elle a soif. {b} peut lui donner à boire ? »'),
+  rqStonesTitle: s('Lay four stones on the path', 'Pose quatre pierres sur le chemin'),
+  rqStonesBlurb: s('Repeat', 'Répéter'),
+  rqStonesLine: s('"My path stops too soon. Four stones, one after the other, all the way to the post box!"', '« Mon chemin s’arrête trop tôt. Quatre pierres, l’une après l’autre, jusqu’à la boîte aux lettres ! »'),
   // Rewards.
   hatNone: s('None', 'Aucun'),
   hatCap: s('Cap', 'Casquette'),
@@ -474,6 +584,83 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   itemGnome: s('Garden gnome', 'Nain de jardin'),
   seeds: s('Seeds', 'Graines'),
   rewardFrom: s('a gift from {who}', 'un cadeau de {who}'),
+  // Each reward names the islander it came from (CG-006 AC4). Cosmetic, never bought.
+  giftCap: s('A cap, from Sami', 'Une casquette, offerte par Sami'),
+  giftTulip: s('A tulip sticker, from Mamie Rose', 'Un autocollant tulipe, offert par Mamie Rose'),
+  giftSun: s('A sunflower hat, from Mamie Rose', 'Un chapeau tournesol, offert par Mamie Rose'),
+  giftSeeds: s('A packet of seeds, from Sami', 'Un sachet de graines, offert par Sami'),
+  giftPaw: s('A paw sticker, from Biscuit', 'Un autocollant patte, offert par Biscuit'),
+  giftCrown: s('A crown, from Biscuit', 'Une couronne, offerte par Biscuit'),
+  giftLetter: s('A letter sticker, from Sami', 'Un autocollant lettre, offert par Sami'),
+  giftBell: s('A bell, from Biscuit', 'Une clochette, offerte par Biscuit'),
+  giftBasket: s('A basket, from Mamie Rose', 'Un panier, offert par Mamie Rose'),
+  giftGnome: s('A garden gnome, from Mamie Rose', 'Un nain de jardin, offert par Mamie Rose'),
+  // The Olive rungs as requests (CG-006 §3): the card's title, the line, the lesson on the Skills page.
+  or1Title: s('Say thank you to Mamie Rose', 'Dis merci à Mamie Rose'),
+  or1Line: s('"Can {b} tell Mamie Rose thank you? Twice, please!"', '« {b} peut dire merci à Mamie Rose ? Deux fois, s’il te plaît ! »'),
+  or1Lesson: s('Olive never says it the same way twice. She is not a calculator.', 'Olive ne le dit jamais deux fois pareil. Ce n’est pas une calculatrice.'),
+  or2Title: s('Name my three new tulips', 'Donne un nom à mes trois nouvelles tulipes'),
+  or2Line: s('"Three new tulips, and not one has a name! Ask Olive for three."', '« Trois nouvelles tulipes, et pas une n’a de nom ! Demandes-en trois à Olive. »'),
+  or2Lesson: s('The shape card says what comes back: here, a list of three. The dial says how surprising it is.', 'La carte de forme dit ce qui revient : ici, une liste de trois. La molette dit si c’est surprenant.'),
+  or3Title: s('My route, in words', 'Mon chemin, en mots'),
+  or3Line: s('"I wrote {b}’s route in words. Can Olive turn it into blocks?"', '« J’ai écrit le chemin de {b} avec des mots. Olive peut le changer en blocs ? »'),
+  or3Lesson: s('A program is a sentence made exact. Olive suggests, you check, {b} runs it.', 'Un programme, c’est une phrase rendue précise. Olive propose, tu vérifies, {b} le fait.'),
+  or4Title: s('Three squares, then water', 'Trois cases, puis arrose'),
+  or4Line: s('"Go forward three squares, then water." Ask Olive for the blocks, then try them.', '« Avance de trois cases, puis arrose. » Demande les blocs à Olive, puis essaie-les.'),
+  or4Lesson: s('Olive gives one step for three. She cannot count, but a repeat 3 can.', 'Olive donne un seul pas pour trois. Elle ne sait pas compter, mais un « répéter 3 », si.'),
+  or5Title: s('What does Biscuit want?', 'Qu’est-ce que Biscuit veut ?'),
+  or5Line: s('"Biscuit left me a letter. Ask Olive what Biscuit wants, and let her answer choose the way."', '« Biscuit m’a laissé une lettre. Demande à Olive ce que veut Biscuit, et laisse la réponse d’Olive choisir le chemin. »'),
+  or5Lesson: s('Olive’s answer can steer a program: if Olive says kibble, go to the bowl.', 'La réponse d’Olive peut guider un programme : si Olive dit croquettes, va à la gamelle.'),
+  or6Title: s('Is it a flower?', 'Est-ce que c’est une fleur ?'),
+  or6Line: s('"Is the thing in front of {b} a flower?" Ask Olive before you water it.', '« Ce qu’il y a devant {b}, c’est une fleur ? » Demande à Olive avant d’arroser.'),
+  or6Lesson: s('Olive is right most of the time, not every time. Ask three times and count the yeses.', 'Olive a raison presque tout le temps, pas à chaque fois. Demande trois fois et compte les oui.'),
+  or7Title: s('How many tulips do I have?', 'Combien j’ai de tulipes ?'),
+  or7Line: s('"How many tulips do I have? Ask Olive, then let {b} count them."', '« Combien j’ai de tulipes ? Demande à Olive, puis laisse {b} les compter. »'),
+  or7Lesson: s('Olive guesses a number. A program that counts does not guess.', 'Olive devine un nombre. Un programme qui compte ne devine pas.'),
+  or8Title: s('Olive’s sums', 'Les additions d’Olive'),
+  or8Line: s('Give Olive two sums, a small one and a big one. Who gets both right, Olive or you?', 'Donne deux additions à Olive, une petite et une grande. Qui trouve les deux, Olive ou toi ?'),
+  or8Lesson: s('A calculator follows a rule. Olive guesses, and big sums trip her up.', 'Une calculatrice suit une règle. Olive devine, et les grandes additions la font trébucher.'),
+  or9Title: s('Olive and the rule', 'Olive et la règle'),
+  or9Line: s('Ask Olive to answer in under 5 words, then check it with a program.', 'Demande à Olive de répondre en moins de 5 mots, puis vérifie avec un programme.'),
+  or9LineG1: s('Ask Olive to describe a tulip without the letter e, then check it with a program.', 'Demande à Olive de décrire une tulipe sans la lettre e, puis vérifie avec un programme.'),
+  or9LineG2: s('Ask Olive to talk about {b}’s work without ever mentioning water, then check it with a program.', 'Demande à Olive de parler du travail de {b} sans jamais parler d’eau, puis vérifie avec un programme.'),
+  or9Lesson: s('Olive does not keep a rule about her own words. A checking program does.', 'Olive ne respecte pas une règle sur ses propres mots. Un programme qui vérifie, si.'),
+  or10Title: s('Olive’s tall tales', 'Les histoires à dormir debout d’Olive'),
+  or10Line: s('Olive answers questions about the world. Mark each answer true or false, then look it up in a book.', 'Olive répond à des questions sur le monde. Marque chaque réponse vrai ou faux, puis vérifie dans un livre.'),
+  or10Lesson: s('Olive sounds sure of herself even when she is wrong. Check before you believe her.', 'Olive a l’air sûre d’elle, même quand elle se trompe. Vérifie avant de la croire.'),
+  or11Title: s('Translate my note', 'Traduis mon petit mot'),
+  or11Line: s('"My cousin reads French. Can Olive translate Mamie Rose’s note for him?"', '« Mon cousin lit l’anglais. Olive peut lui traduire le petit mot de Mamie Rose ? »'),
+  or11Lesson: s('Olive translates French into English well, and the other way round less well. Tools have a good direction.', 'Olive traduit bien du français vers l’anglais, et moins bien dans l’autre sens. Les outils ont un bon sens.'),
+  or12Title: s('A poem for my tulip', 'Un poème pour ma tulipe'),
+  or12Line: s('Give your tulip a name, and Olive writes her a two-line poem.', 'Donne un nom à ta tulipe, et Olive lui écrit un poème de deux lignes.'),
+  or12Lesson: s('A poem for your sticker page. Sometimes silly, always new.', 'Un poème pour ta page d’autocollants. Parfois farfelu, toujours nouveau.'),
+  // The moments worth ring-fencing (CG-006 §4): a card title and its line. E13 is a Grown-ups card.
+  mo1Title: s('Olive forgets', 'Olive oublie'),
+  mo1Line: s('Ask Olive the name she gave your tulip just before. She has no memory, but {b}’s program does.', 'Demande à Olive le nom qu’elle a donné à ta tulipe tout à l’heure. Elle n’a pas de mémoire, mais le programme de {b}, si.'),
+  mo2Title: s('Olive can’t see the garden', 'Olive ne voit pas le jardin'),
+  mo2Line: s('Ask Olive which way the tulip is. Then tell her what the row looks like, and ask again.', 'Demande à Olive de quel côté est la tulipe. Puis décris-lui la rangée, et redemande.'),
+  mo3Title: s('Explain my program', 'Explique mon programme'),
+  mo3Line: s('Olive turns your blocks back into a sentence. Is it what you meant?', 'Olive transforme tes blocs en une phrase. Est-ce bien ce que tu voulais dire ?'),
+  mo4Title: s('Olive tells the story of the run', 'Olive raconte le trajet'),
+  mo4Line: s('After a run, Olive says what {b} did. A puddle in the story is a clue.', 'Après le trajet, Olive raconte ce que {b} a fait. Une flaque dans l’histoire, c’est un indice.'),
+  mo5Title: s('Name my trick', 'Trouve un nom pour mon astuce'),
+  mo5Line: s('Olive reads the blocks inside your trick and suggests a name for it.', 'Olive lit les blocs de ton astuce et lui propose un nom.'),
+  mo6Title: s('Say it another way', 'Dis-le autrement'),
+  mo6Line: s('Ask Olive to say a line more politely, or like a poem. Then ask her to make it shorter, and count the words.', 'Demande à Olive de dire une phrase plus poliment, ou comme un poème. Puis demande-lui de la raccourcir, et compte les mots.'),
+  mo7Title: s('A word becomes a sticker', 'Un mot devient un autocollant'),
+  mo7Line: s('Olive picks a little picture for a word, for your sticker page.', 'Olive choisit une petite image pour un mot, pour ta page d’autocollants.'),
+  mo8Title: s('Put these words in order', 'Range ces mots'),
+  mo8Line: s('Ask Olive to put three words in alphabetical order. Then let a program do it.', 'Demande à Olive de ranger trois mots dans l’ordre alphabétique. Puis laisse un programme le faire.'),
+  mo9Title: s('Olive’s dictionary', 'Le dictionnaire d’Olive'),
+  mo9Line: s('Olive explains a garden word. Some answers are right and some are made up, so check them.', 'Olive explique un mot du jardin. Certaines réponses sont justes, d’autres sont inventées : vérifie-les.'),
+  mo10Title: s('Olive writes the letters', 'Olive écrit les lettres'),
+  mo10Line: s('Olive writes each islander’s request in her own words, so the island sounds a little different each time. What they ask for never changes.', 'Olive écrit chaque demande avec ses mots à elle, alors l’île sonne un peu différemment à chaque fois. Ce qu’on demande, lui, ne change jamais.'),
+  mo11Title: s('Slow blocks', 'Les blocs lents'),
+  mo11Line: s('An Olive block inside a repeat thinks on every turn. Ask once, and keep the answer.', 'Un bloc Olive dans un « répéter » réfléchit à chaque tour. Demande une fois, et garde la réponse.'),
+  mo12Title: s('Two Olives disagree', 'Deux Olive pas d’accord'),
+  mo12Line: s('Ask twice with the dial on "surprise me" and compare. Which answer do you trust?', 'Demande deux fois avec la molette sur « surprends-moi » et compare. À quelle réponse fais-tu confiance ?'),
+  mo13Title: s('The fence', 'La clôture'),
+  mo13Line: s('In Olive’s exam, the model still answers questions that are not about the garden. That is why a child never types to her freely.', 'Dans l’examen d’Olive, le modèle répond quand même aux questions qui ne parlent pas du jardin. C’est pour ça qu’un enfant ne lui écrit jamais librement.'),
   // My robot.
   rbTitle: s('Make {b} yours', '{b}, à ta façon'),
   rbSub: s('Colours, hats and a name are always free. Hats are gifts from the islanders you helped.', 'Les couleurs, les chapeaux et le nom sont toujours gratuits. Les chapeaux sont des cadeaux des habitants que tu as aidés.'),
@@ -543,5 +730,6 @@ export const WORDS: Readonly<Record<string, Bi>> = {
 export const WORD_KEYS: ReadonlyArray<string> = Object.keys(WORDS);
 
 export const REQUESTS_JSON = JSON.stringify(REQUESTS, null, 2);
+export const OLIVE_RUNGS_JSON = JSON.stringify(OLIVE_RUNGS, null, 2);
 export const HINTS_JSON = JSON.stringify(HINT_KEYS.map((key) => ({ key, en: HINTS[key].en, fr: HINTS[key].fr })), null, 2);
 export const WORDS_JSON = JSON.stringify(WORD_KEYS.map((key) => ({ key, en: WORDS[key].en, fr: WORDS[key].fr })), null, 2);

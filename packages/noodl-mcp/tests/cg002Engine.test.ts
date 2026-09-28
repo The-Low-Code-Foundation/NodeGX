@@ -194,8 +194,8 @@ describe('CG-002 — the engine', () => {
       const tricks = new Set(REQUESTS.flatMap((r) => [...r.tricks]));
       expect([...tricks].sort()).toEqual([1, 2, 3, 4, 5, 6, 7]);
       expect(new Set(ids).size).toBe(ids.length);
-      // Two requests open at band 7–9 (both bands), six at band 10–12 only: 2×2×2 + 6×2×1.
-      expect(rows).toHaveLength(20);
+      // CG-006: four requests open at band 7–9 (both bands), six at band 10–12 only: 4×2×2 + 6×2×1.
+      expect(rows).toHaveLength(28);
     });
 
     it.each(rows)('%s · %s · band %i', (_id, lang, band, r) => {
