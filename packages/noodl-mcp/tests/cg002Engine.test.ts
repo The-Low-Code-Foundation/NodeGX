@@ -340,37 +340,37 @@ describe('CG-002 — the engine', () => {
   });
 
   describe('AC3 — the fold: 30 recorded programs, and folding then unfolding restores the sequence', () => {
-    /** [notation, expected plan or null]. The tie-break is the mockup\'s: on equal coverage the LONGER sequence wins. */
+    /** [notation, expected plan or null]. The tie-break is Richard\'s (2026-09-28): on equal coverage the SHORTER sequence, the higher count, wins. */
     const FIXTURES: Array<[string, { i: number; len: number; count: number; c?: number } | null]> = [
       ['F F F', { i: 0, len: 1, count: 3 }],
-      ['F F F F', { i: 0, len: 2, count: 2 }],
+      ['F F F F', { i: 0, len: 1, count: 4 }],
       ['F L F L F L', { i: 0, len: 2, count: 3 }],
       ['F F L W R F F L W R F F L W R', { i: 0, len: 5, count: 3 }],
       ['L F F F F F F F', { i: 1, len: 1, count: 7 }],
-      ['F W F W F W F W', { i: 0, len: 4, count: 2 }],
+      ['F W F W F W F W', { i: 0, len: 2, count: 4 }],
       ['F R F R F R F', { i: 0, len: 2, count: 3 }],
       ['W', null],
       ['', null],
       ['F L', null],
       ['F F', { i: 0, len: 1, count: 2 }],
-      ['F L R F L R F L R F L R', { i: 0, len: 6, count: 2 }],
+      ['F L R F L R F L R F L R', { i: 0, len: 3, count: 4 }],
       ['S F F F S', { i: 1, len: 1, count: 3 }],
       ['F F F L L L', { i: 0, len: 1, count: 3 }],
-      ['F F F L L L L', { i: 3, len: 2, count: 2 }],
+      ['F F F L L L L', { i: 3, len: 1, count: 4 }],
       ['F W R F W R F W L', { i: 0, len: 3, count: 2 }],
-      ['r3[F F] F F F F', { i: 1, len: 2, count: 2 }],
+      ['r3[F F] F F F F', { i: 1, len: 1, count: 4 }],
       ['r2[F F F]', { i: 0, len: 1, count: 3, c: 1 }],
       ['u[F L F L]', { i: 0, len: 2, count: 2, c: 1 }],
       ['F r3[W W] L', { i: 0, len: 1, count: 2, c: 2 }],
       ['F F F r2[L]', { i: 0, len: 1, count: 3 }],
       ['i[F F] F', { i: 0, len: 1, count: 2, c: 1 }],
       ['r2[r2[F F F]]', { i: 0, len: 1, count: 3, c: 2 }],
-      ['P C F P C F P C F P C F', { i: 0, len: 6, count: 2 }],
-      ['F F F F F F', { i: 0, len: 3, count: 2 }],
+      ['P C F P C F P C F P C F', { i: 0, len: 3, count: 4 }],
+      ['F F F F F F', { i: 0, len: 1, count: 6 }],
       ['F F F F F', { i: 0, len: 1, count: 5 }],
       ['L F F L F F L F F', { i: 0, len: 3, count: 3 }],
       ['F F W F F W F F W F', { i: 0, len: 3, count: 3 }],
-      ['W W W W W W W W W', { i: 0, len: 3, count: 3 }],
+      ['W W W W W W W W W', { i: 0, len: 1, count: 9 }],
       ['F S F S F S F', { i: 0, len: 2, count: 3 }]
     ];
 
@@ -484,7 +484,7 @@ describe('CG-002 — the engine', () => {
       ['a Predict miss, even though the goal was met', { program: parse('r3[F]'), goalMet: true, run: ranRun(), predictAsked: true, predictHit: false }, 'hintPredictMiss', {}],
       ['Olive fell back, over a bump', { program: parse('F'), run: ranRun({ bumps: 1 }), oliveFallback: true }, 'oliveResting', {}],
       ['rung 4 just played, ran clean, goal unmet', { program: parse('F L'), run: ranRun(), oliveRung: 4 }, 'oliveRung4', {}],
-      ['an unfolded repetition beats a bump', { program: parse('F F F F L'), run: ranRun({ bumps: 1 }) }, 'hintPattern', { n: 2 }]
+      ['an unfolded repetition beats a bump', { program: parse('F F F F L'), run: ranRun({ bumps: 1 }) }, 'hintPattern', { n: 4 }]
     ];
 
     it('has twelve named states', () => {

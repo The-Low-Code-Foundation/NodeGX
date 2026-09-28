@@ -239,8 +239,8 @@ describe('CG-006 — the requests', () => {
       expect(end.world.things).toEqual([3, 4, 5, 6].map((x) => ({ kind: 'stone', x, y: 3 })));
       expect(end.world.robots[0]).toMatchObject({ x: 6, y: 3, carry: [] });
       const found = runScript(FIND_REPEAT, { program: unrolled(r.referenceProgram), band: 2 });
-      // The open tie-break ruling (CG-002 §7): equal cover → the longer sequence, so this is repeat 2 { put fwd put fwd }.
-      expect({ offer: found.offer, cover: found.count * found.len }).toEqual({ offer: true, cover: 8 });
+      // Richard's tie-break ruling (2026-09-28, CG-002 §7): equal cover → the higher count, so this is repeat 4 { put fwd }.
+      expect({ offer: found.offer, count: found.count, len: found.len }).toEqual({ offer: true, count: 4, len: 2 });
     });
 
     it('row 1b: the water lands on the tulip under the house, and nowhere else', () => {

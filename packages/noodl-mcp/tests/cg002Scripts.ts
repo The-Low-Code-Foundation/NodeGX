@@ -437,14 +437,14 @@ function sameBlock(a, b) {
   return JSON.stringify(a.slots || {}) === JSON.stringify(b.slots || {});
 }
 function sameRun(seq, at, from, len) { for (var k = 0; k < len; k++) if (!sameBlock(seq[at + k], seq[from + k])) return false; return true; }
-/** The mockup's findRepeat: runs of one block, repeated sequences up to six long; best coverage wins, a longer sequence on a tie. */
+/** The mockup's findRepeat: runs of one block, repeated sequences up to six long; best coverage wins, the SHORTER sequence (the higher count) on a tie — Richard's ruling 2026-09-28, the mockup kept the longer. */
 function findRepeatIn(seq) {
   var best = null;
   for (var len = 1; len <= 6; len++) {
     for (var i = 0; i + len * 2 <= seq.length; i++) {
       var count = 1;
       while (i + (count + 1) * len <= seq.length && sameRun(seq, i, i + count * len, len)) count++;
-      if (count >= 2) { var cover = len * count; if (!best || cover > best.cover || (cover === best.cover && len > best.len)) best = { i: i, len: len, count: count, cover: cover }; }
+      if (count >= 2) { var cover = len * count; if (!best || cover > best.cover || (cover === best.cover && len < best.len)) best = { i: i, len: len, count: count, cover: cover }; }
     }
   }
   return best;
