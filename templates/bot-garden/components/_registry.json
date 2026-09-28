@@ -263,7 +263,7 @@
       "path": "Logic/Tidy line",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 12,
+      "connectionCount": 14,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -431,7 +431,7 @@
       "path": "Workshop/Play",
       "type": "visual",
       "nodeCount": 89,
-      "connectionCount": 217,
+      "connectionCount": 218,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -575,6 +575,6 @@
   "stats": {
     "totalComponents": 71,
     "totalNodes": 561,
-    "totalConnections": 1592
+    "totalConnections": 1595
   }
 }

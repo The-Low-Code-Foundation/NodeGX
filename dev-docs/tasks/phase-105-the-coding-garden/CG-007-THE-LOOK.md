@@ -48,3 +48,29 @@ template gate (AC4).
 
 A green drive on identical outlined pills was "fuck all like the mockups"; look at the pictures. A
 lucide icon is a ligature (text matching must strip `icon-*`). `opacity:0` still animates.
+
+## 7. Session 2 — what was built (lane A, worktree `cg003-pages`, 2026-09-28)
+
+**Built:** `packages/noodl-mcp/tests/cg007Look.ts` — the mockup's `:root` as 71 project tokens (8 of them the robot paints) over the Playful preset
+(which ships Nunito), the four block colours and the owl's violet as tokens, one stylesheet (`GARDEN_CSS`, in App's `CSS
+Definition`, every class `bg-*`), the mockup's `<symbol>`s as CSS background sprites (islanders, owl, tulip, tree, house,
+rock) and its icons as `currentColor` masks on the buttons; `cg007Assets/noodl_modules/bot-garden-fonts/` — Fredoka
+(variable 300–700, latin + latin-ext from `@fontsource-variable/fredoka` 5.2.8, 34 KB) with `OFL-Fredoka.txt`.
+
+| AC | Status | Measured by | Numbers |
+|---|---|---|---|
+| 1 | 🟡 prepared | drive: `cg007-ac1-*.png` (6 screens, 1368×912) and `--mockup` → `mockup-*.png` (the mockup's 5 screens, same Chrome) | the comparison is the orchestrator's to look at and write here. Differences known before looking: the island is the kit's tile world (12 × 7, water border) with every robot on it, not the mockup's sea-and-blob with pins; Profiles is a screen the mockup does not have; the owl row has no thinking dots yet (CG-005) |
+| 2 | ✅ measured | gate "no button is an outlined pill" | every Button node: `borderStyle: none` and a fill; the fills used include leaf (primary), coral (teach), violet (ask) and transparent (quiet, no border) |
+| 3 | ✅ shipped · 🟡 `document.fonts` in the drive | gate AC3; drive CG-007 AC3 | 2 Fredoka faces + licence in the artefact, `checkFontFaces` silent, no `http` in the sheet; the drive reads both families `loaded` and 0 requests off 127.0.0.1 |
+| 4 | ✅ measured | gate token census ×3 | every colour parameter is `var(--…)` or transparent (0 hex); every `var(--x)` in the graph and the sheet is defined (0 missing); outside the sprite data URIs the sheet has 0 hex/rgba; the kit is fed `var(--block-motion/action/control/ask)` |
+| 5 | 🟡 prepared | drive CG-007 AC5 | the face on the world at 390×844 (the kit's floor gives 22.5 px); the two island robots' boxes disjoint |
+| 6 | 🔴 measured, a ruling | gate "AC6 … a readout" | ≥ 4.5: ink on paper 13.02, on card 13.86; ink-2 on paper 5.01, card 5.33, paper-2 4.74; owl ink on violet-2 11.63, meta 4.84. **Below 4.5, the mockup's own pairs:** white on leaf (Play) 3.05, on coral (Teach) 2.57, on violet (Ask) 3.67; the eyebrow leaf on paper 2.87; white on the blocks: motion 3.20, action 3.05, control 2.05, ask 3.67 |
+| 7 | ✅ in the sheet · 🟡 drive | gate AC7; drive CG-007 AC7 | the mockup's rule: `*, *::before, *::after { animation: none !important; transition: none !important; }` under `prefers-reduced-motion`; the sheet animates 3+ classes (known-firing); the tulip reads by the kit's opacity/pose |
+
+**Ruling owed (AC6):** the mockup's white labels on its fills do not reach 4.5:1 (control blocks 2.05, Teach 2.57). Making
+them pass is restyling the mockup (darker fills, or ink labels). The gate pins the eight failing pairs by name so a token
+change shows. **Owner: Richard.**
+
+**Residuals:** AC1's side-by-side and AC3/5/7's drive readings — the orchestrator. The kit's `icon.png` is still
+game-kit's — CG-007 next session. The block colours in the KIT's own stylesheet default to the mockup hexes when the
+page sends nothing — NONE (the page always sends the tokens).

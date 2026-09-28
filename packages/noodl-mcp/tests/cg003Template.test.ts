@@ -514,6 +514,8 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     expect(run(TIDY_LINE_SCRIPT, { ...base, programText: '[1,2]', dismissed: '[1]' }).show).toBe(true);
     expect(run(TIDY_LINE_SCRIPT, { ...base, programText: '[1]', dismissed: '' }).text).toBe('I spotted the same 5 steps, 3 times in a row.');
     expect(run(TIDY_LINE_SCRIPT, { ...base, textKey: 'tidyFound1', vars: { n: 4, len: 1 }, programText: '[1]' }).text).toBe('4 × "forward" in a row.');
+    expect(run(TIDY_LINE_SCRIPT, { ...base, blocks: 15 }).countText).toBe('15 blocks');
+    expect(run(TIDY_LINE_SCRIPT, { ...base, blocks: 1, lang: 'fr' }).countText).toBe('1 bloc');
   });
 
   it('Draw world: the engine’s things in the kit’s words, the looks on the robot, the real end when a prediction missed', () => {

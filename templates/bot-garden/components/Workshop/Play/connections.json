@@ -192,6 +192,12 @@
     {
       "fromId": "plRead",
       "fromProperty": "blocks",
+      "toId": "plTidyLine",
+      "toProperty": "blocks"
+    },
+    {
+      "fromId": "plTidyLine",
+      "fromProperty": "countText",
       "toId": "plCount",
       "toProperty": "text"
     },

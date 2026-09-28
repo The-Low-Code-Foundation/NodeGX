@@ -5,6 +5,12 @@
   "connections": [
     {
       "fromId": "tidylineIn",
+      "fromProperty": "blocks",
+      "toId": "tidylineFn",
+      "toProperty": "in-blocks"
+    },
+    {
+      "fromId": "tidylineIn",
       "fromProperty": "botName",
       "toId": "tidylineFn",
       "toProperty": "in-botName"
@@ -56,6 +62,12 @@
       "fromProperty": "words",
       "toId": "tidylineFn",
       "toProperty": "in-words"
+    },
+    {
+      "fromId": "tidylineFn",
+      "fromProperty": "out-countText",
+      "toId": "tidylineOut",
+      "toProperty": "countText"
     },
     {
       "fromId": "tidylineFn",

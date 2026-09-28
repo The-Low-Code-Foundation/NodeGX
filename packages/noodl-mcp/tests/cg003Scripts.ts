@@ -261,6 +261,8 @@ var program = String(Inputs.programText || '');
 var dismissed = String(Inputs.dismissed || '');
 Outputs.text = text;
 Outputs.show = Inputs.isOffered === true && program !== '' && program !== dismissed;
+var n = Math.max(0, Math.floor(Number(Inputs.blocks)) || 0);
+Outputs.countText = fill(n === 1 ? w.block1 : w.blocks, { n: n });
 `;
 
 // ── The family ──────────────────────────────────────────────────────────────

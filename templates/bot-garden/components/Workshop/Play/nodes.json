@@ -1163,7 +1163,7 @@
       "type": "/Logic/Hint line",
       "label": "The owl’s line",
       "x": 590,
-      "y": 5800
+      "y": 5680
     },
     {
       "id": "plOwlRow",
@@ -1177,14 +1177,14 @@
       "type": "/Logic/Ask Olive",
       "label": "Ask Olive for a parked run",
       "x": 590,
-      "y": 5920
+      "y": 5800
     },
     {
       "id": "plStart",
       "type": "/Logic/Start world",
       "label": "The world this request starts from",
       "x": 590,
-      "y": 6040
+      "y": 5920
     },
     {
       "id": "plNonce",
@@ -1204,7 +1204,7 @@
         "name": "gardenWorld"
       },
       "x": 590,
-      "y": 6160
+      "y": 6040
     },
     {
       "id": "plSetWorld",
@@ -1214,7 +1214,7 @@
         "name": "gardenWorld"
       },
       "x": 590,
-      "y": 6280
+      "y": 6160
     },
     {
       "id": "plSetWorldRec",
@@ -1224,7 +1224,7 @@
         "name": "gardenWorld"
       },
       "x": 590,
-      "y": 6400
+      "y": 6280
     },
     {
       "id": "plProgVar",
@@ -1241,7 +1241,7 @@
       "type": "/Logic/Read program",
       "label": "The program as a list",
       "x": 590,
-      "y": 4240
+      "y": 6400
     },
     {
       "id": "plSetProgKit",
@@ -1458,7 +1458,7 @@
       "type": "/Logic/Tidy line",
       "label": "The fold offer in words",
       "x": 590,
-      "y": 4960
+      "y": 4240
     },
     {
       "id": "plDismissVar",
@@ -1478,14 +1478,14 @@
         "name": "gardenTidyNo"
       },
       "x": 590,
-      "y": 5200
+      "y": 5080
     },
     {
       "id": "plFold",
       "type": "/Logic/Fold",
       "label": "Fold it",
       "x": 590,
-      "y": 5080
+      "y": 4960
     },
     {
       "id": "plChoose",
@@ -1519,7 +1519,7 @@
         "name": "gardenWon"
       },
       "x": 590,
-      "y": 5320
+      "y": 5200
     },
     {
       "id": "plSetWon",
@@ -1543,14 +1543,14 @@
         "value": false
       },
       "x": 590,
-      "y": 5440
+      "y": 5320
     },
     {
       "id": "plWinSum",
       "type": "/Logic/Win summary",
       "label": "The win in words",
       "x": 590,
-      "y": 5560
+      "y": 5440
     },
     {
       "id": "plOut",
@@ -1599,7 +1599,7 @@
         }
       ],
       "x": 590,
-      "y": 5680
+      "y": 5560
     }
   ],
   "visualRoots": [

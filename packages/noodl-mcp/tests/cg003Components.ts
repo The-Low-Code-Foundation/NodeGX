@@ -813,7 +813,8 @@ const PLAY: CgComponent = {
     // Band 10–12 only: Predict and the block count (AC5: no count at 7–9).
     wire('plIn', 'isOlder', 'plPredict', 'mounted'),
     wire('plIn', 'isOlder', 'plCount', 'mounted'),
-    wire('plRead', 'blocks', 'plCount', 'text'),
+    wire('plRead', 'blocks', 'plTidyLine', 'blocks'),
+    wire('plTidyLine', 'countText', 'plCount', 'text'),
     // The request: its world is the reset. A new request, Start over, or a mount: one path.
     wire('plIn', 'requests', 'plStart', 'requests'),
     wire('plIn', 'requestId', 'plStart', 'requestId'),

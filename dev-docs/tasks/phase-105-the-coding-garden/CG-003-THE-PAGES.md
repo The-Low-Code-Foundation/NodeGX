@@ -64,3 +64,55 @@ for AC3–AC10 with a stub Olive (CG-005).
 Opening a project writes three files into it — drive a COPY; `#hash` is not a reload; the on-disk
 editor bundle is not the one running; a `Select` inside a `Modal` closes it; a spec not in `index.ts`
 never runs; RECT ≠ VISIBLE (`el.contains(elementFromPoint)`).
+
+## 7. Session 2 — what was built (lane A, worktree `cg003-pages`, 2026-09-28)
+
+**Built** (`packages/noodl-mcp/tests/`): `cg003Components.ts` (71 components), `cg003Scripts.ts` (18 page-glue scripts),
+`cg003Content.ts` (the pages' 26 words EN+FR, the island map, the pad, eyes and hats), `cg003Template.ts` (the plan-door
+build and the artefact), `cg003Template.test.ts` (the gate); `scripts/generate-garden-template.ts` + `npm run
+template:garden` (one line in `package.json`); `templates/bot-garden/` (234 files); `scripts/devtools/drive-cg003-pages.js`
+(prepared). The look is CG-007's `cg007Look.ts`.
+
+**The shape.** `Logic/*` are generated: one per CG-002 `FUNCTION_SCRIPTS` entry (byte for byte), one per CG-005
+`OLIVE_SCRIPTS` entry (after the rebase onto `af343f439`), one per glue script; a signal-driven one takes **`go`** and
+answers **`ran`** (the engine already uses `run`/`done` as data). The one override: `Logic/Translate words` carries every
+word (engine + Olive + pages), a port-for-port superset of CG-002's, gated. The generator's **pre-step runs the engine
+gate** (`cg002Engine.test.ts`, 105/105 on the rebased tree) and writes nothing when it is red. `Workshop/Runner` is the
+tick loop (New run → Timer → Step → Apply delta → Timer … until done; One step = the next tick of a live run or a fresh
+run's first; a run parked on an `ask:` block fires Parked once, `Logic/Ask Olive` answers, Answered resumes).
+`Workshop/Play` holds the whole bench so the page is 16 nodes (pages: 12–24, all ≤ 32). The Teach pad records a block AND moves the robot with the
+engine's own `step`/`apply` (`Logic/Record step`), so what the child drives is what Play does.
+
+| AC | Status | Measured by | Numbers |
+|---|---|---|---|
+| 1 | ✅ measured | gate `AC1` ×2 | 6 pages on the router (Profiles, Island, Workshop, My robot, Skills, Grown-ups), start page Profiles; 71 components through one plan; warnings = `uncollapsible-multi-column` ×6 only, pinned to `Garden/Top bar`, `Pages/Profiles`, `Robot/Options`, `apply` — **D50** (filed): each is a wrapped row of fixed-size items (the bar, swatches/chips, profile cards) |
+| 2 | ✅ measured | gate `AC2`; the generator run twice; `measure-interfaces.py v2` | two builds byte-identical and the checked-in tree = today's (0 differing files); `npm run template:garden` ×2 → tree hash `ec5a24ad…` both (234 files, exit 0 both); floors **91 % outputs / 28 % flags / 0.23 States** per component (57 with an interface), the measurer `PASS` ×3 |
+| 3 | ✅ in plain JS · 🟡 drive prepared | gate "AC3 in plain JS" (the same scripts the Functions run); drive clauses AC3 ×~17 per viewport × language | 4 presses → 4 blocks; 15 → fold offered (len 5 × 3) → 1 repeat of 5; played to done; goal met; bloom `[1,2]`; "6 blocks. Neat!"; "Pip learned: repeat"; the family: island done `['tulips-three']`, hats `['sun']`, n2 `bloom` |
+| 4 | ✅ in the graph · 🟡 drive prepared | gate `AC4`; drive AC4 at 390×844 | the steps sit in `.bg-blocks-box` (`max-height: 38vh` under 980 px, `overflow-y: auto !important`); the drive reads Play's bottom ≤ 844 at scroll 0 |
+| 5 | ✅ in the graph · 🟡 drive prepared | gate `AC5`; drive AC5 | count and Predict `mounted: false`, mounted only by `isOlder`; pad keys 56 × 56 (param and class); band 7–9 blocks show the engine's CAPTION word (`Logic/Kit palette`) |
+| 6 | 🟡 prepared | drive AC6 | a wrong tap → `🏁` at the real end (Draw world) and `hintPredictMiss`; a hit plays from the start |
+| 7 | ✅ in the sheet · 🟡 drive prepared | gate `AC7`; drive AC7 | `.bg-win` = `position: fixed !important` + inset 0 + `place-items: center`, on the card's root |
+| 8 | ✅ in the graph · 🟡 drive prepared | gate "no script writes the location"; drive AC8 ×5 | every page switch is a `RouterNavigate` to a page; `gardenRequestId` lives in memory, so a reload of /workshop finds no request and the page's guard (a 600 ms Timer, then `found`) goes to the island; the family is stored |
+| 9 | 🟡 prepared | drive AC9 ×10 (5 screens × both ways) | the bar's EN/FR on every page writes the profile's language (or `gardenLang` on Profiles before anyone is chosen); every string is a `Translate words` output |
+| 10 | 🟡 prepared | drive AC10 | `Logic/Island world` puts every profile's robot on the island map (six path tiles); `Complete request` marks the island, so either robot's win is done for both |
+
+**Glue specs 18, arms 8/8 killed** (each mutant made in memory from an anchor that must occur once, so it can never hit the
+inlined engine — the first attempt did, and "killed" nothing): Record step ignores the selected container; records
+without moving the robot; Kit palette draws the word at band 7–9; Tidy line ignores Not now; Win summary forgets the used
+trick; Update profile wears an unowned hat; Start world shares the request's things; Island rows ignore the band.
+**Gate: `cd packages/noodl-mcp && npx jest tests/cg003Template.test.ts` → 43/43** (≈ 6 s).
+
+**Lane-only instruments, said:** the worktree has no gitignored `dist/`, so the door's kit reader was
+`NODEGX_KIT_EXTRACT=<primary>/packages/noodl-mcp/dist/kit-extract.cjs` and the generator ran with a `--require` that
+resolves `@nodegx/export` to its source (as `jest.config.js` does). On the primary checkout neither is needed.
+
+**Residuals** (owner):
+- The drive, and every 🟡 above — the orchestrator (`drive-laneA.sh`, `EXPECTED-DRIVE.md` in the lane scratch).
+- CG-005's page hooks not yet in the pages: a second `Ask Olive` for the owl row's `voiceRequest`, the "Use them / No
+  thanks" card on the Runner's `proposal` (exposed, unused), `Logic/Olive slots`' `message` beside the picker, and the
+  owl row's thinking / resting tags (the owl text is `Logic/Owl row`'s `text`, class `bg-owl-say`; there is no
+  `[data-owl-row]` attribute — a node cannot write one; lane C's clause should read `.bg-owl-say`). No request carries
+  `rungs` yet (Start world passes `request.rungs` through; free play offers none). — lane A next session / CG-005.
+- Olive's `ask:` blocks get their picker slots from the engine's palette as they come; the kit has no inline slot error.
+  — CG-005 / lane A.
+- The kit's colour ports take `var(--block-*)` (it sets them as CSS custom properties); no kit change was made. — NONE.
