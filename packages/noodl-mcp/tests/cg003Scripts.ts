@@ -104,6 +104,7 @@ export const FREE_PLAY = {
  */
 export const START_WORLD_SCRIPT = `
 var FREE = ${JSON.stringify(FREE_PLAY)};
+function countRef(list) { var n = 0; var l = Array.isArray(list) ? list : []; for (var i = 0; i < l.length; i++) { if (!l[i]) continue; n++; if (Array.isArray(l[i].body)) n += countRef(l[i].body); } return n; }
 var reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];
 var id = String(Inputs.requestId || '');
 var req = null;
@@ -112,6 +113,8 @@ if (!req && id === 'free') req = FREE;
 Outputs.found = !!req;
 Outputs.requestId = req ? req.id : '';
 Outputs.isFree = !!req && req.id === 'free';
+// IG-001 D3: the reference program's block count, for Choose hint's "Perfect!" (free play has none: 0).
+Outputs.referenceCount = req ? countRef(req.referenceProgram) : 0;
 if (req) {
   var rs = req.robotStart || {};
   var robot = { id: 'me', x: Number(rs.x) || 0, y: Number(rs.y) || 0, d: Number(rs.d) || 0, carry: Array.isArray(rs.carry) ? rs.carry.slice() : [] };

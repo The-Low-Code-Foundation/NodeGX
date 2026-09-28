@@ -1030,6 +1030,24 @@
       "toProperty": "predictAsked"
     },
     {
+      "fromId": "plStart",
+      "fromProperty": "referenceCount",
+      "toId": "plChoose",
+      "toProperty": "referenceCount"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "isFree",
+      "toId": "plChoose",
+      "toProperty": "freePlay"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "reset",
+      "toId": "plChoose",
+      "toProperty": "go"
+    },
+    {
       "fromId": "plAskOlive",
       "fromProperty": "answer",
       "toId": "plPlayed",

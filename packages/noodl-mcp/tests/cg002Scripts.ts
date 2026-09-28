@@ -635,10 +635,15 @@ Outputs.bumps = end.run.bumps;
 /**
  * The hint key for the state the game already knows. Priority, top first:
  * empty program · an unfolded repetition (cover ≥ 4, no container yet) · Olive
- * resting (a fallback answer) · a Predict miss · done (many blocks: the longer
- * line) · a bump · a puddle · the rung just played · a run that missed the goal
- * ({w} of {t} tulips; with no tulips in the world, hintNotYet — s4: "Pip did 0 of 0" on Sami's path) · the start.
- * No key says "tell me": there is no such line.
+ * resting (a fallback answer) · a Predict miss · done (over MANY_BLOCKS: the longer
+ * line; no more blocks than the request's reference program: hintPerfect — IG-001 D3;
+ * else hintDone) · a bump · a puddle · the rung just played · free play after a clean
+ * run (hintFree — IG-001 D4: free play has no goal, so it fell to "Not quite yet") · a
+ * run that missed the goal ({w} of {t} tulips; with no tulips in the world, hintNotYet —
+ * s4: "Pip did 0 of 0" on Sami's path) · the start. No key says "tell me": there is no such line.
+ *
+ * `Inputs.referenceCount` is the reference program's block count (Start world; 0 or unset never says Perfect);
+ * `Inputs.freePlay` is Start world's `isFree`.
  */
 export const CHOOSE_HINT_SCRIPT = `${ENGINE}${FOLD_HELPERS}
 var program = Array.isArray(Inputs.program) ? Inputs.program : [];
@@ -650,6 +655,8 @@ var puddles = run ? Number(run.puddles) || 0 : 0;
 var blocks = countBlocks(program);
 var rep = findRepeat(program);
 var goalMetNow = Inputs.goalMet === true;
+var referenceCount = Math.max(0, Math.floor(Number(Inputs.referenceCount)) || 0);
+var freePlay = Inputs.freePlay === true;
 var predictAsked = Inputs.predictAsked === true, predictHit = Inputs.predictHit === true;
 // The pattern hint nudges toward a repeat: only where the request has one (or nothing is restricted), as the fold.
 var allowedBlocks = Array.isArray(Inputs.allowed) ? Inputs.allowed : [];
@@ -664,10 +671,11 @@ if (!blocks) key = 'hintEmpty';
 else if (mayRepeat && rep && rep.cover >= 4 && rep.containerId === null && !hasContainer(program)) { key = 'hintPattern'; vars = { n: rep.count }; }
 else if (oliveFallback) key = 'oliveResting';
 else if (predictAsked && !predictHit) key = 'hintPredictMiss';
-else if (goalMetNow) { key = blocks > ${MANY_BLOCKS} ? 'hintDoneMany' : 'hintDone'; vars = { k: blocks }; }
+else if (goalMetNow) { key = blocks > ${MANY_BLOCKS} ? 'hintDoneMany' : referenceCount > 0 && blocks <= referenceCount ? 'hintPerfect' : 'hintDone'; vars = { k: blocks }; }
 else if (bumps > 0) key = 'hintBump';
 else if (puddles > 0) key = 'hintWet';
 else if (rung >= 1 && rung <= ${OLIVE_RUNG_MAX}) key = 'oliveRung' + rung;
+else if (freePlay && ran) key = 'hintFree';
 else if (ran && total > 0) { key = 'hintMissed'; vars = { w: done, t: total }; }
 else if (ran) key = 'hintNotYet';
 Outputs.key = key;

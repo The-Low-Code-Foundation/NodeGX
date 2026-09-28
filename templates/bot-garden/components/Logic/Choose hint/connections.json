@@ -17,6 +17,12 @@
     },
     {
       "fromId": "choosehintIn",
+      "fromProperty": "freePlay",
+      "toId": "choosehintFn",
+      "toProperty": "in-freePlay"
+    },
+    {
+      "fromId": "choosehintIn",
       "fromProperty": "goalMet",
       "toId": "choosehintFn",
       "toProperty": "in-goalMet"
@@ -50,6 +56,12 @@
       "fromProperty": "program",
       "toId": "choosehintFn",
       "toProperty": "in-program"
+    },
+    {
+      "fromId": "choosehintIn",
+      "fromProperty": "referenceCount",
+      "toId": "choosehintFn",
+      "toProperty": "in-referenceCount"
     },
     {
       "fromId": "choosehintIn",

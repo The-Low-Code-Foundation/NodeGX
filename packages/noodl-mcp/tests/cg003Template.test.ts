@@ -591,6 +591,52 @@ describe('CG-003 — Bot Garden, the artefact', () => {
     });
   });
 
+  describe('IG-001 — the fixes in the graph (Phase 106 session 1)', () => {
+    const runner = () => nodesOf(built, C.runner);
+    const rc = () => connectionsOf(built, C.runner);
+    const rnode = (id: string) => runner().find((n) => n.id === id)!;
+    const rinto = (id: string, port?: string) => rc().filter((c) => c.toId === id && (port === undefined || c.toProperty === port)).map((c) => `${c.fromId}.${c.fromProperty}>${c.toProperty}`).sort();
+    const rfrom = (id: string, port: string) => rc().filter((c) => c.fromId === id && c.fromProperty === port).map((c) => `${c.toId}.${c.toProperty}`).sort();
+    const phas = (from: string, fp: string, to: string, tp: string) => connectionsOf(built, C.play).some((c) => c.fromId === from && c.fromProperty === fp && c.toId === to && c.toProperty === tp);
+
+    it('🔴 D1: an answer resumes a LIVE run (playing or paused), never only a playing one; a Step while parked is a no-op; Stop and Play clear the parked state the page reads', () => {
+      // The answer's gate tests the mode's live flag, not playing (the whole defect: rnLoop ignored the answer in step mode).
+      expect(rinto('rnLoop', 'eval')).toEqual(['rnPark.onfalse>eval']);
+      expect(rfrom('rnIn', 'answered')).toEqual(['rnAns.eval']);
+      expect(rinto('rnAns', 'condition')).toEqual(['rnMode.live>condition']);
+      expect(rfrom('rnAns', 'ontrue')).toEqual(['rnTimer.start']);
+      // Parked is a state of the Runner's own: set by the park, cleared by the answer's tick, by Stop and by Play.
+      expect(rnode('rnWait').type).toBe('States');
+      expect([rfrom('rnPark', 'ontrue'), rfrom('rnPark', 'onfalse')]).toEqual([['rnOut.parked', 'rnWait.to-parked'], ['rnLoop.eval', 'rnWait.to-free']]);
+      expect(rfrom('rnIn', 'stop')).toContain('rnWait.to-free');
+      expect(rfrom('rnIn', 'play')).toContain('rnWait.to-free');
+      expect(rinto('rnOut', 'waiting')).toEqual(['rnWait.parked>waiting']);
+      // A Step goes through the parked gate: parked → nothing (the tag stays on, no second ask); free → the live test as before.
+      expect(rfrom('rnIn', 'step')).toEqual(['rnParked.eval']);
+      expect(rinto('rnParked', 'condition')).toEqual(['rnWait.parked>condition']);
+      expect([rfrom('rnParked', 'onfalse'), rfrom('rnParked', 'ontrue')]).toEqual([['rnLive.eval'], []]);
+    });
+
+    it('🔴 D2: Stop resets the run (an empty fresh run in gardenRun), and the Workshop re-chooses the hint once the reset has landed', () => {
+      expect(rfrom('rnIn', 'stop')).toContain('rnReset.go');
+      expect(rnode('rnReset').type).toBe('/Logic/New run');
+      expect(params(rnode('rnReset')).program).toBe('[]');
+      expect(rinto('rnSetRunReset')).toEqual(['rnReset.ran>do', 'rnReset.run>value']);
+      expect(params(rnode('rnSetRunReset')).name).toBe('gardenRun');
+      expect(rfrom('rnSetRunReset', 'done')).toEqual(['rnOut.reset']);
+      expect(phas('plRunner', 'reset', 'plChoose', 'go')).toBe(true);
+      expect(phas('plStart', 'ran', 'plRunner', 'stop')).toBe(true);
+    });
+
+    it('D3/D4: Choose hint is fed the request’s reference count and whether this is free play', () => {
+      expect(phas('plStart', 'referenceCount', 'plChoose', 'referenceCount')).toBe(true);
+      expect(phas('plStart', 'isFree', 'plChoose', 'freePlay')).toBe(true);
+      expect(run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones' }).referenceCount).toBe(3);
+      expect(run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'tulips-three' }).referenceCount).toBe(6);
+      expect(run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'free' }).referenceCount).toBe(0);
+    });
+  });
+
   describe('CG-007 — the look', () => {
     const colourKeys = /colou?r$|^backgroundColor$|^borderColor$|^fill$|^background$/i;
     const graphParams = () =>

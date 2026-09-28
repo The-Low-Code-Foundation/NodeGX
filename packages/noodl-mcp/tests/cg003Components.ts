@@ -308,7 +308,9 @@ const TYPE: Readonly<Record<string, string>> = {
   accept: 'boolean', proposal: 'object', exam: 'object', held: 'array', thinking: 'boolean', resting: 'boolean',
   thinkingText: 'string', restingText: 'string', message: 'string',
   // s4 — the after-run rung line.
-  oliveRung: 'number', oliveFallback: 'boolean'
+  oliveRung: 'number', oliveFallback: 'boolean',
+  // P106 IG-001 — the fixes: Perfect! (D3), free play's line (D4), Olive's answer spoken (D6), the pad by request (D10).
+  referenceCount: 'number', freePlay: 'boolean', sayText: 'string', sayStyle: 'string', stepMs: 'number', keys: 'array'
 };
 const typeOf = (name: string) => TYPE[name] ?? '*';
 
@@ -564,7 +566,7 @@ const PAD: CgComponent = {
  */
 const RUNNER: CgComponent = {
   path: 'Workshop/Runner',
-  description: 'Runs a program on the world, one engine step per tick: Play runs it to the end, Step one tick (starting a fresh run when none is live), Stop halts. A run parked on Olive fires Parked with the Request and waits; Answered (the Answer set first) resumes it. Finished fires once the run is done.',
+  description: 'Runs a program on the world, one engine step per tick: Play runs it to the end, Step one tick (starting a fresh run when none is live), Stop halts and resets the run. A run parked on Olive fires Parked with the Request and waits (Waiting is on; a Step meanwhile does nothing); Answered (the Answer set first) resumes it, playing or paused. Finished fires once the run is done; Reset once Stop has emptied the run.',
   nodes: [
     inputs('rnIn', [['program', '*'], ['start', 'object'], ['answer', 'object'], ['lang', 'string'], ['stepMs', 'number'], ['play', 'signal'], ['step', 'signal'], ['stop', 'signal'], ['answered', 'signal']]),
     logic('rnNew', L('New run'), 'A fresh run', { robotId: 'me' }),
@@ -580,13 +582,24 @@ const RUNNER: CgComponent = {
     gate('rnLoop', 'Still playing?'),
     gate('rnLive', 'Is a run live?'),
     gate('rnPark', 'Parked on Olive?'),
+    // IG-001 D1: an answer resumes a LIVE run (playing or paused) — the old gate tested `playing`, so in step mode the
+    // answer was ignored and "Olive is thinking" never cleared; and a Step while parked asked her again.
+    gate('rnAns', 'An answer for a live run?'),
+    gate('rnParked', 'A step while parked is a no-op'),
+    withStates('rnWait', 'Free, or parked on Olive', ['free', 'parked'], {
+      parked: { type: 'boolean', by: { free: false, parked: true } }
+    }),
+    // IG-001 D2: Stop empties the run (an empty program's fresh run: no bumps, no puddles, tick 0), so the next request's
+    // first hint cannot read the last request's run through gardenRun.
+    logic('rnReset', L('New run'), 'The run, emptied', { program: '[]', robotId: 'me' }),
+    setVariable('rnSetRunReset', 'gardenRun', 'Hold the emptied run'),
     logic('rnTimer', TIMER_NODE, 'The wait between ticks', { duration: TICK_MS }),
     withStates('rnMode', 'Idle, playing or paused', ['idle', 'playing', 'paused'], {
       playing: { type: 'boolean', by: { idle: false, playing: true, paused: false } },
       live: { type: 'boolean', by: { idle: false, playing: true, paused: true } },
       idle: { type: 'boolean', by: { idle: true, playing: false, paused: true } }
     }),
-    outputs('rnOut', [['world', 'object'], ['run', 'object'], ['glowId', '*'], ['running', 'boolean'], ['idle', 'boolean'], ['live', 'boolean'], ['done', 'boolean'], ['bumps', 'number'], ['puddles', 'number'], ['sayKey', 'string'], ['tick', 'number'], ['waiting', 'boolean'], ['request', 'object'], ['proposal', 'object'], ['ticked', 'signal'], ['finished', 'signal'], ['started', 'signal'], ['parked', 'signal']])
+    outputs('rnOut', [['world', 'object'], ['run', 'object'], ['glowId', '*'], ['running', 'boolean'], ['idle', 'boolean'], ['live', 'boolean'], ['done', 'boolean'], ['bumps', 'number'], ['puddles', 'number'], ['sayKey', 'string'], ['tick', 'number'], ['waiting', 'boolean'], ['request', 'object'], ['proposal', 'object'], ['ticked', 'signal'], ['finished', 'signal'], ['started', 'signal'], ['parked', 'signal'], ['reset', 'signal']])
   ],
   connections: [
     wire('rnIn', 'program', 'rnNew', 'program'),
@@ -595,6 +608,7 @@ const RUNNER: CgComponent = {
     wire('rnIn', 'stepMs', 'rnTimer', 'duration'),
     // Play: always fresh.
     wire('rnIn', 'play', 'rnMode', 'to-playing'),
+    wire('rnIn', 'play', 'rnWait', 'to-free'),
     wire('rnIn', 'play', 'rnSetWorldStart', 'do'),
     wire('rnIn', 'play', 'rnNew', 'go'),
     wire('rnNew', 'run', 'rnSetRunNew', 'value'),
@@ -621,23 +635,38 @@ const RUNNER: CgComponent = {
     wire('rnEnd', 'ontrue', 'rnOut', 'finished'),
     wire('rnMode', 'playing', 'rnLoop', 'condition'),
     // Parked on Olive (CG-005): no next tick until an answer arrives, so the question is asked once, not once a tick.
+    // The parked state is the Runner's own (D1): set here, cleared by the tick that consumes the answer, by Stop, by Play.
     wire('rnStep', 'waiting', 'rnPark', 'condition'),
     wire('rnEnd', 'onfalse', 'rnPark', 'eval'),
     wire('rnPark', 'ontrue', 'rnOut', 'parked'),
+    wire('rnPark', 'ontrue', 'rnWait', 'to-parked'),
+    wire('rnPark', 'onfalse', 'rnWait', 'to-free'),
     wire('rnPark', 'onfalse', 'rnLoop', 'eval'),
-    wire('rnIn', 'answered', 'rnLoop', 'eval'),
+    // The answer: one tick for any live run. Playing, the loop goes on from there; paused, that tick consumes the answer
+    // (the engine only advances past the ask) and the loop test says no more.
+    wire('rnMode', 'live', 'rnAns', 'condition'),
+    wire('rnIn', 'answered', 'rnAns', 'eval'),
+    wire('rnAns', 'ontrue', 'rnTimer', 'start'),
     wire('rnLoop', 'ontrue', 'rnTimer', 'start'),
-    // One step: the next tick of a live run, or a fresh run's first. The mode moves only after the test.
+    // One step: nothing while parked (the tag stays on, Olive is not asked twice); else the next tick of a live run, or
+    // a fresh run's first. The mode moves only after the test.
+    wire('rnWait', 'parked', 'rnParked', 'condition'),
+    wire('rnIn', 'step', 'rnParked', 'eval'),
+    wire('rnParked', 'onfalse', 'rnLive', 'eval'),
     wire('rnMode', 'live', 'rnLive', 'condition'),
-    wire('rnIn', 'step', 'rnLive', 'eval'),
     wire('rnLive', 'ontrue', 'rnMode', 'to-paused'),
     wire('rnLive', 'ontrue', 'rnTimer', 'start'),
     wire('rnLive', 'onfalse', 'rnMode', 'to-paused'),
     wire('rnLive', 'onfalse', 'rnSetWorldStart', 'do'),
     wire('rnLive', 'onfalse', 'rnNew', 'go'),
-    // Stop.
+    // Stop: the timer, the mode, the parked state — and the run itself (D2), then Reset says so.
     wire('rnIn', 'stop', 'rnTimer', 'stop'),
     wire('rnIn', 'stop', 'rnMode', 'to-idle'),
+    wire('rnIn', 'stop', 'rnWait', 'to-free'),
+    wire('rnIn', 'stop', 'rnReset', 'go'),
+    wire('rnReset', 'run', 'rnSetRunReset', 'value'),
+    wire('rnReset', 'ran', 'rnSetRunReset', 'do'),
+    wire('rnSetRunReset', 'done', 'rnOut', 'reset'),
     // What the page reads.
     wire('rnWorldVar', 'value', 'rnOut', 'world'),
     wire('rnRunVar', 'value', 'rnOut', 'run'),
@@ -647,7 +676,7 @@ const RUNNER: CgComponent = {
     wire('rnStep', 'puddles', 'rnOut', 'puddles'),
     wire('rnStep', 'sayKey', 'rnOut', 'sayKey'),
     wire('rnStep', 'tick', 'rnOut', 'tick'),
-    wire('rnStep', 'waiting', 'rnOut', 'waiting'),
+    wire('rnWait', 'parked', 'rnOut', 'waiting'),
     wire('rnStep', 'request', 'rnOut', 'request'),
     wire('rnStep', 'proposal', 'rnOut', 'proposal'),
     wire('rnMode', 'playing', 'rnOut', 'running'),
@@ -1032,6 +1061,11 @@ const PLAY: CgComponent = {
     wire('plWorldVar', 'value', 'plChoose', 'world'),
     wire('plGoal', 'met', 'plChoose', 'goalMet'),
     wire('plMissVar', 'value', 'plChoose', 'predictAsked'),
+    // IG-001 D3/D4: the request's own block count ("Perfect!") and free play's own line.
+    wire('plStart', 'referenceCount', 'plChoose', 'referenceCount'),
+    wire('plStart', 'isFree', 'plChoose', 'freePlay'),
+    // IG-001 D2: the hint is chosen again once Stop has emptied the run (a request change, Start over, Teach).
+    wire('plRunner', 'reset', 'plChoose', 'go'),
     // The rung this run asked (the lesson line after the run) and whether she answered (Olive is resting).
     wire('plAskOlive', 'answer', 'plPlayed', 'answer'),
     wire('plRunner', 'run', 'plPlayed', 'run'),

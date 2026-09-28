@@ -182,6 +182,62 @@
       "y": 1600
     },
     {
+      "id": "rnAns",
+      "type": "Condition",
+      "label": "An answer for a live run?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 40,
+      "y": 1720
+    },
+    {
+      "id": "rnParked",
+      "type": "Condition",
+      "label": "A step while parked is a no-op",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 40,
+      "y": 1840
+    },
+    {
+      "id": "rnWait",
+      "type": "States",
+      "label": "Free, or parked on Olive",
+      "parameters": {
+        "states": "free,parked",
+        "values": "parked",
+        "useTransitions": false,
+        "type-parked": "boolean",
+        "value-free-parked": false,
+        "value-parked-parked": true
+      },
+      "x": 40,
+      "y": 1960
+    },
+    {
+      "id": "rnReset",
+      "type": "/Logic/New run",
+      "label": "The run, emptied",
+      "parameters": {
+        "program": "[]",
+        "robotId": "me"
+      },
+      "x": 40,
+      "y": 2080
+    },
+    {
+      "id": "rnSetRunReset",
+      "type": "Set Variable",
+      "label": "Hold the emptied run",
+      "parameters": {
+        "name": "gardenRun"
+      },
+      "x": 40,
+      "y": 2200
+    },
+    {
       "id": "rnTimer",
       "type": "Timer",
       "label": "The wait between ticks",
@@ -189,7 +245,7 @@
         "duration": 420
       },
       "x": 40,
-      "y": 1720
+      "y": 2320
     },
     {
       "id": "rnMode",
@@ -213,7 +269,7 @@
         "value-paused-idle": true
       },
       "x": 40,
-      "y": 1840
+      "y": 2440
     },
     {
       "id": "rnOut",
@@ -309,10 +365,15 @@
           "name": "parked",
           "plug": "input",
           "type": "signal"
+        },
+        {
+          "name": "reset",
+          "plug": "input",
+          "type": "signal"
         }
       ],
       "x": 40,
-      "y": 1960
+      "y": 2560
     }
   ]
 }

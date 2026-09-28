@@ -36,6 +36,12 @@
     {
       "fromId": "rnIn",
       "fromProperty": "play",
+      "toId": "rnWait",
+      "toProperty": "to-free"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "play",
       "toId": "rnSetWorldStart",
       "toProperty": "do"
     },
@@ -191,15 +197,39 @@
     },
     {
       "fromId": "rnPark",
+      "fromProperty": "ontrue",
+      "toId": "rnWait",
+      "toProperty": "to-parked"
+    },
+    {
+      "fromId": "rnPark",
+      "fromProperty": "onfalse",
+      "toId": "rnWait",
+      "toProperty": "to-free"
+    },
+    {
+      "fromId": "rnPark",
       "fromProperty": "onfalse",
       "toId": "rnLoop",
       "toProperty": "eval"
     },
     {
+      "fromId": "rnMode",
+      "fromProperty": "live",
+      "toId": "rnAns",
+      "toProperty": "condition"
+    },
+    {
       "fromId": "rnIn",
       "fromProperty": "answered",
-      "toId": "rnLoop",
+      "toId": "rnAns",
       "toProperty": "eval"
+    },
+    {
+      "fromId": "rnAns",
+      "fromProperty": "ontrue",
+      "toId": "rnTimer",
+      "toProperty": "start"
     },
     {
       "fromId": "rnLoop",
@@ -208,16 +238,28 @@
       "toProperty": "start"
     },
     {
-      "fromId": "rnMode",
-      "fromProperty": "live",
-      "toId": "rnLive",
+      "fromId": "rnWait",
+      "fromProperty": "parked",
+      "toId": "rnParked",
       "toProperty": "condition"
     },
     {
       "fromId": "rnIn",
       "fromProperty": "step",
+      "toId": "rnParked",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rnParked",
+      "fromProperty": "onfalse",
       "toId": "rnLive",
       "toProperty": "eval"
+    },
+    {
+      "fromId": "rnMode",
+      "fromProperty": "live",
+      "toId": "rnLive",
+      "toProperty": "condition"
     },
     {
       "fromId": "rnLive",
@@ -260,6 +302,36 @@
       "fromProperty": "stop",
       "toId": "rnMode",
       "toProperty": "to-idle"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "stop",
+      "toId": "rnWait",
+      "toProperty": "to-free"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "stop",
+      "toId": "rnReset",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rnReset",
+      "fromProperty": "run",
+      "toId": "rnSetRunReset",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rnReset",
+      "fromProperty": "ran",
+      "toId": "rnSetRunReset",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rnSetRunReset",
+      "fromProperty": "done",
+      "toId": "rnOut",
+      "toProperty": "reset"
     },
     {
       "fromId": "rnWorldVar",
@@ -310,8 +382,8 @@
       "toProperty": "tick"
     },
     {
-      "fromId": "rnStep",
-      "fromProperty": "waiting",
+      "fromId": "rnWait",
+      "fromProperty": "parked",
       "toId": "rnOut",
       "toProperty": "waiting"
     },

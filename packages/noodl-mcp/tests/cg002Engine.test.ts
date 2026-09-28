@@ -51,7 +51,7 @@ import {
   runScript
 } from './cg002Scripts';
 // CG-002 §8 (s3, the save model): the helpers the v3 rows read directly.
-import { ROBOT_NAME_MAX, SAVE_HELPERS, helper } from './cg002Scripts';
+import { ENGINE, ROBOT_NAME_MAX, SAVE_HELPERS, helper } from './cg002Scripts';
 
 const WORD_ROWS = WORD_KEYS.map((key) => ({ key, ...WORDS[key] }));
 const HINT_ROWS = HINT_KEYS.map((key) => ({ key, ...HINTS[key] }));
@@ -543,6 +543,53 @@ describe('CG-002 — the engine', () => {
       const many = parse('F L W R S F R W L S P D').slice(0, MANY_BLOCKS + 1);
       expect(runScript(CHOOSE_HINT_SCRIPT, { world: world(), program: many, goalMet: true, run: ranRun() }).key).toBe('hintDoneMany');
       expect(runScript(CHOOSE_HINT_SCRIPT, { world: world(), program: many.slice(0, MANY_BLOCKS), goalMet: true, run: ranRun() }).key).toBe('hintDone');
+    });
+
+    it('🔴 IG-001 D3: a win with the request’s own block count is hintPerfect; a longer win says hintDone; over MANY_BLOCKS hintDoneMany — the line in EN and FR', () => {
+      const stones = REQUESTS.find((r) => r.id === 'path-stones')!;
+      const refCount = helper<number>(ENGINE, 'countBlocks', [...stones.referenceProgram]);
+      const w = worldOfRequest(stones);
+      // The consequence, on the engine: the reference program run to its end meets the goal.
+      const perfect = runToEnd(stones.referenceProgram, w);
+      const met = runScript(GOAL_SCRIPT, { world: perfect.world, run: perfect.run, program: stones.referenceProgram, goal: stones.goal }).met;
+      expect([perfect.done, met, refCount]).toEqual([true, true, 3]);
+      const choose = (program: ReadonlyArray<Block>, run: unknown, extra: Record<string, unknown> = {}) =>
+        runScript(CHOOSE_HINT_SCRIPT, { world: perfect.world, program, run, goalMet: true, allowed: [...stones.palette], referenceCount: refCount, ...extra });
+      expect(choose(stones.referenceProgram, perfect.run).key).toBe('hintPerfect');
+      // One block more than the reference: done, and it could be shorter.
+      expect(choose(parse('r4[D F] F'), ranRun()).key).toBe('hintDone');
+      // Eight single blocks on a request that allows repeat: the fold nudge outranks the win (the tidy offer is up too);
+      // on a palette with no repeat, hintDone; nine blocks, hintDoneMany (the constant, never the literal).
+      const eight = parse('D F D F D F D F');
+      expect(eight).toHaveLength(MANY_BLOCKS);
+      expect(choose(eight, ranRun()).key).toBe('hintPattern');
+      expect(choose(eight, ranRun(), { allowed: ['fwd', 'put'] }).key).toBe('hintDone');
+      expect(choose(parse('D F D F D F D F F'), ranRun(), { allowed: ['fwd', 'put'] }).key).toBe('hintDoneMany');
+      // No reference count (free play, an older caller): never Perfect.
+      expect(choose(stones.referenceProgram, perfect.run, { referenceCount: undefined }).key).toBe('hintDone');
+      expect(choose(stones.referenceProgram, perfect.run, { referenceCount: 0 }).key).toBe('hintDone');
+      for (const lang of ['en', 'fr'] as const) {
+        const line = runScript(HINT_LINE_SCRIPT, { hints: HINT_ROWS, key: 'hintPerfect', lang, vars: {}, botName: 'Pip' });
+        expect({ lang, found: line.found, text: line.text }).toEqual({ lang, found: true, text: expect.stringMatching(lang === 'en' ? /Perfect/ : /Parfait/) });
+      }
+    });
+
+    it('🔴 IG-001 D4: free play has its own line after a clean run; a bump or a puddle still hints; a rung’s lesson still outranks it', () => {
+      const free = (extra: Record<string, unknown>) => runScript(CHOOSE_HINT_SCRIPT, { world: world(), program: parse('F F L'), freePlay: true, ...extra });
+      expect([free({ run: ranRun() }).key, free({ run: ranRun() }).vars]).toEqual(['hintFree', {}]);
+      expect(free({ run: ranRun({ bumps: 1 }) }).key).toBe('hintBump');
+      expect(free({ run: ranRun({ puddles: 1 }) }).key).toBe('hintWet');
+      expect(free({ run: ranRun(), oliveRung: 3 }).key).toBe('oliveRung3');
+      expect(free({ run: ranRun(), oliveFallback: true }).key).toBe('oliveResting');
+      // Not run yet: the start line. Not free play: the missed line, as before.
+      expect(free({ run: runScript(NEW_RUN_SCRIPT, { program: parse('F F L'), robotId: 'pip', lang: 'en' }).run }).key).toBe('hintStart');
+      expect(runScript(CHOOSE_HINT_SCRIPT, { world: world(), program: parse('F F L'), run: ranRun(), freePlay: false }).key).toBe('hintMissed');
+      for (const key of ['hintFree', 'hintPerfect']) {
+        expect(HINT_KEYS).toContain(key);
+        expect(HINTS[key].en).not.toBe(HINTS[key].fr);
+        expect(HINTS[key].en).not.toMatch(/tell me/i);
+      }
+      expect(HINTS.hintFree.en).toContain('{b}');
     });
 
     function wateredWorld(n: number) {

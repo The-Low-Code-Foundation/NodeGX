@@ -59,6 +59,12 @@
     },
     {
       "fromId": "startworldFn",
+      "fromProperty": "out-referenceCount",
+      "toId": "startworldOut",
+      "toProperty": "referenceCount"
+    },
+    {
+      "fromId": "startworldFn",
       "fromProperty": "out-request",
       "toId": "startworldOut",
       "toProperty": "request"

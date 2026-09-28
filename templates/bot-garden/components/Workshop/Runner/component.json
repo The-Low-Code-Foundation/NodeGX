@@ -7,5 +7,5 @@
   "created": "2026-09-27T00:00:00.000Z",
   "modified": "2026-09-27T00:00:00.000Z",
   "modifiedBy": "noodl-mcp",
-  "description": "Runs a program on the world, one engine step per tick: Play runs it to the end, Step one tick (starting a fresh run when none is live), Stop halts. A run parked on Olive fires Parked with the Request and waits; Answered (the Answer set first) resumes it. Finished fires once the run is done."
+  "description": "Runs a program on the world, one engine step per tick: Play runs it to the end, Step one tick (starting a fresh run when none is live), Stop halts and resets the run. A run parked on Olive fires Parked with the Request and waits (Waiting is on; a Step meanwhile does nothing); Answered (the Answer set first) resumes it, playing or paused. Finished fires once the run is done; Reset once Stop has emptied the run."
 }

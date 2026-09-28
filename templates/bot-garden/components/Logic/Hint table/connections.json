@@ -47,6 +47,12 @@
     },
     {
       "fromId": "hinttableFn",
+      "fromProperty": "out-hintFree",
+      "toId": "hinttableOut",
+      "toProperty": "hintFree"
+    },
+    {
+      "fromId": "hinttableFn",
       "fromProperty": "out-hintMissed",
       "toId": "hinttableOut",
       "toProperty": "hintMissed"
@@ -62,6 +68,12 @@
       "fromProperty": "out-hintPattern",
       "toId": "hinttableOut",
       "toProperty": "hintPattern"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintPerfect",
+      "toId": "hinttableOut",
+      "toProperty": "hintPerfect"
     },
     {
       "fromId": "hinttableFn",

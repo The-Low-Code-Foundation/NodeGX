@@ -449,6 +449,10 @@ export const HINTS: Readonly<Record<string, Bi>> = {
   hintWet: voiced('hintWet'),
   hintDone: voiced('hintDone'),
   hintDoneMany: s('It works, with {k} blocks. The same steps come back: a repeat could hold them.', 'Ça marche, avec {k} blocs. Les mêmes pas reviennent : un « répéter » pourrait les tenir.'),
+  // IG-001 D3 (P106 s1): a win with no more blocks than the request's own reference program. Not voiced: a plain "Perfect!".
+  hintPerfect: s('Perfect! Not one block too many.', 'Parfait ! Pas un bloc de trop.'),
+  // IG-001 D4: free play has no goal, so a clean run used to fall to "Not quite yet"; this is its own line. Not voiced.
+  hintFree: s('{b} did what you said. Try a new idea, or ask an islander.', '{b} a fait ce que tu as dit. Essaie une nouvelle idée, ou va voir un habitant.'),
   hintPredictMiss: s('You tapped one tile, {b} stopped on another. Follow the steps with your finger, one by one.', 'Tu as touché une case, {b} s’est arrêté sur une autre. Suis les pas avec ton doigt, un par un.'),
   oliveThinking: s('Olive is thinking…', 'Olive réfléchit…'),
   oliveResting: s('Olive is resting. Here is her written line.', 'Olive se repose. Voici sa phrase écrite.'),

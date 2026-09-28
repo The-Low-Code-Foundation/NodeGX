@@ -111,7 +111,7 @@
       "path": "Logic/Choose hint",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 16,
+      "connectionCount": 18,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -175,7 +175,7 @@
       "path": "Logic/Hint table",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 35,
+      "connectionCount": 37,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -239,7 +239,7 @@
       "path": "Logic/Start world",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 14,
+      "connectionCount": 15,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -454,8 +454,8 @@
     "Workshop/Runner": {
       "path": "Workshop/Runner",
       "type": "visual",
-      "nodeCount": 17,
-      "connectionCount": 57,
+      "nodeCount": 22,
+      "connectionCount": 69,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -479,7 +479,7 @@
       "path": "Workshop/Play",
       "type": "visual",
       "nodeCount": 109,
-      "connectionCount": 259,
+      "connectionCount": 262,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -662,7 +662,7 @@
   },
   "stats": {
     "totalComponents": 82,
-    "totalNodes": 669,
-    "totalConnections": 1848
+    "totalNodes": 674,
+    "totalConnections": 1868
   }
 }
