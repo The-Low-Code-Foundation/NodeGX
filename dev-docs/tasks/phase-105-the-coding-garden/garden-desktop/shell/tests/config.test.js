@@ -131,9 +131,9 @@ test('no build.files exclusion drops a file node-llama-cpp reads at run time (AC
 
 test('the template table is whole: every rung has both languages, a known shape, a dial temperature, ≤ 64 tokens, slots that exist', () => {
   const rungs = Object.entries(templates.rungs);
-  assert.equal(rungs.length, 15, 'twelve rungs (two each for rungs 2 and 8) plus the hint voicing');
+  assert.equal(rungs.length, 21, 'twelve rungs (two each for rungs 2 and 8), the six promoted moments (13–18, CG-006 s3), plus the hint voicing');
   const numbers = new Set(rungs.map(([, r]) => r.n));
-  for (let n = 1; n <= 12; n++) assert.ok(numbers.has(n), `ladder rung ${n} present`);
+  for (let n = 1; n <= 18; n++) assert.ok(numbers.has(n), `ladder rung ${n} present`);
   assert.ok(templates.rungs['voice-hint']);
   for (const [id, r] of rungs) {
     assert.ok(['pass', 'fail'].includes(r.ladder), `${id} ladder`);
