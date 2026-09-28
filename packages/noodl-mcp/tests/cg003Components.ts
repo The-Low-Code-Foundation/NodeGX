@@ -1004,6 +1004,8 @@ const PLAY: CgComponent = {
     // The fold (band 10–12): offered, never applied without "Fold it".
     wire('plRead', 'program', 'plFind', 'program'),
     wire('plIn', 'band', 'plFind', 'band'),
+    wire('plStart', 'allowed', 'plFind', 'allowed'),
+    wire('plStart', 'allowed', 'plChoose', 'allowed'),
     wire('plFind', 'offer', 'plTidyLine', 'isOffered'),
     wire('plFind', 'textKey', 'plTidyLine', 'textKey'),
     wire('plFind', 'vars', 'plTidyLine', 'vars'),

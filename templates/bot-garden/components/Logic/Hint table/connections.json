@@ -53,6 +53,12 @@
     },
     {
       "fromId": "hinttableFn",
+      "fromProperty": "out-hintNotYet",
+      "toId": "hinttableOut",
+      "toProperty": "hintNotYet"
+    },
+    {
+      "fromId": "hinttableFn",
       "fromProperty": "out-hintPattern",
       "toId": "hinttableOut",
       "toProperty": "hintPattern"

@@ -5,6 +5,12 @@
   "connections": [
     {
       "fromId": "findrepeatIn",
+      "fromProperty": "allowed",
+      "toId": "findrepeatFn",
+      "toProperty": "in-allowed"
+    },
+    {
+      "fromId": "findrepeatIn",
       "fromProperty": "band",
       "toId": "findrepeatFn",
       "toProperty": "in-band"

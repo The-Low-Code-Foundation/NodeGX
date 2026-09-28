@@ -5,6 +5,12 @@
   "connections": [
     {
       "fromId": "choosehintIn",
+      "fromProperty": "allowed",
+      "toId": "choosehintFn",
+      "toProperty": "in-allowed"
+    },
+    {
+      "fromId": "choosehintIn",
       "fromProperty": "done",
       "toId": "choosehintFn",
       "toProperty": "in-done"

@@ -540,6 +540,24 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await wait(900);
   const adaDone = await evaluate(`(() => { const c = [...document.querySelectorAll('.bg-quest')].find((e) => e.innerText.includes(${JSON.stringify(w('en', 'rqTulipsTitle'))})); return c ? c.innerText : null; })()`);
   check('S3-R8: back on Ada’s island, her tulips are still done', !!adaDone && adaDone.includes(w('en', 'done')), adaDone);
+  // S4-PATH (Richard, s4): Sami's path allows forward and turns only. Five forwards taught at band 10–12 were offered a
+  // fold, and the kit drew a repeat it had no palette entry for (no count, a star); a missed run said "Pip did 0 of 0".
+  // The control is AC3's tulip pass above (the fold IS offered where repeat is allowed).
+  await tap(byText('.bg-quest', w('en', 'rqPathTitle')), 'Sami’s path');
+  await until('location.pathname', (x) => x === '/workshop');
+  await wait(900);
+  await control('rec');
+  for (let k = 0; k < 5; k++) await key('fwd');
+  await wait(900);
+  const pathState = await evaluate(`(() => { const t = document.querySelector('.bg-tidy'); return { blocks: document.querySelectorAll('.gd-prog .gd-blk[data-id]').length, tidy: !!t && t.offsetParent !== null, counts: document.querySelectorAll('.gd-prog .gd-count').length, palette: [...document.querySelectorAll('.gd-palette [data-pal]')].map((e) => e.getAttribute('data-pal')) }; })()`);
+  check('S4-PATH: five forwards on Sami’s path (no repeat in its palette) are NOT offered a fold', pathState.blocks === 5 && !pathState.tidy && !pathState.palette.includes('repeat'), pathState);
+  await shot('s4-path-no-fold');
+  await control('play');
+  const pathOwl = await until(`(document.querySelector('.bg-owl-say') || {}).innerText || ''`, (t) => /Not quite yet|Pas tout à fait/.test(t), 9000);
+  check('S4-PATH: the missed run says "Not quite yet…", never "0 of 0"', /Not quite yet|Pas tout à fait/.test(pathOwl) && !/0 of 0|0 sur 0/.test(pathOwl), pathOwl);
+  await tab(0);
+  await until('location.pathname', (p) => p === '/island');
+  await wait(900);
   await contrastClause('Island');
   // S3-RENAME: the robot renamed on My robot is the name on its pin and in the Workshop's line.
   await tab(2);

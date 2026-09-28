@@ -868,6 +868,18 @@
       "toProperty": "band"
     },
     {
+      "fromId": "plStart",
+      "fromProperty": "allowed",
+      "toId": "plFind",
+      "toProperty": "allowed"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "allowed",
+      "toId": "plChoose",
+      "toProperty": "allowed"
+    },
+    {
       "fromId": "plFind",
       "fromProperty": "offer",
       "toId": "plTidyLine",

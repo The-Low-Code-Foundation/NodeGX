@@ -417,6 +417,17 @@ describe('CG-002 — the engine', () => {
       expect(runScript(FIND_REPEAT_SCRIPT, { program: parse('F F'), band: 2 }).offer).toBe(false);
     });
 
+    it('s4: the fold is offered only where the request has a repeat block (Sami\u2019s path has none), or no list at all', () => {
+      const program = parse('F F F F F');
+      const offer = (allowed?: string[]) => runScript(FIND_REPEAT_SCRIPT, { program, band: 2, allowed }).offer;
+      expect(offer(['fwd', 'left', 'right'])).toBe(false);
+      expect(offer(['fwd', 'left', 'right', 'water', 'repeat'])).toBe(true);
+      expect(offer([])).toBe(true); // free play: nothing restricted
+      expect(offer(undefined)).toBe(true);
+      // Every band 10–12-playable request without repeat in its palette is refused, by the request table itself.
+      for (const r of REQUESTS) expect({ id: r.id, offer: offer(r.palette.slice()) }).toEqual({ id: r.id, offer: r.palette.includes('repeat') });
+    });
+
     it('the folded tulip program runs to the same end as the recording it came from', () => {
       const r = REQUESTS.find((x) => x.id === 'tulips-three')!;
       const recording = unrolled(r.referenceProgram);
@@ -488,6 +499,20 @@ describe('CG-002 — the engine', () => {
       ['rung 4 just played, ran clean, goal unmet', { program: parse('F L'), run: ranRun(), oliveRung: 4 }, 'oliveRung4', {}],
       ['an unfolded repetition beats a bump', { program: parse('F F F F L'), run: ranRun({ bumps: 1 }) }, 'hintPattern', { n: 4 }]
     ];
+
+    it('s4: a run that missed a goal with no tulips in the world says hintNotYet, never "0 of 0"', () => {
+      const noTulips = { ...world(), things: world().things.filter((t: { kind: string }) => t.kind !== 'tulip') };
+      const chosen = runScript(CHOOSE_HINT_SCRIPT, { world: noTulips, program: parse('F'), run: ranRun() });
+      expect([chosen.key, chosen.vars]).toEqual(['hintNotYet', {}]);
+      // The pattern nudge ("do this 5 times") is the fold's words: not where the request has no repeat (the s4 drive).
+      const five = { world: noTulips, program: parse('F F F F F'), run: ranRun() };
+      expect(runScript(CHOOSE_HINT_SCRIPT, { ...five, allowed: ['fwd', 'left', 'right'] }).key).toBe('hintNotYet');
+      expect(runScript(CHOOSE_HINT_SCRIPT, { ...five, allowed: ['fwd', 'repeat'] }).key).toBe('hintPattern');
+      expect(runScript(CHOOSE_HINT_SCRIPT, { ...five, allowed: [] }).key).toBe('hintPattern');
+      expect(HINTS.hintNotYet.en).not.toMatch(/tulip|\{w\}|\{t\}/);
+      expect(HINTS.hintNotYet.fr).toContain(WORDS.step.fr);
+      expect(HINTS.hintNotYet.en).toContain(WORDS.step.en);
+    });
 
     it('has twelve named states', () => {
       expect(twelveStates).toHaveLength(12);

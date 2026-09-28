@@ -550,6 +550,11 @@ Outputs.total = g.total;
 export const FIND_REPEAT_SCRIPT = `${FOLD_HELPERS}
 var program = Array.isArray(Inputs.program) ? Inputs.program : [];
 var band = Number(Inputs.band) === 1 ? 1 : 2;
+// The request's blocks (Start world's allowed): a fold makes a repeat, so it is offered only where repeat is one of
+// them, or where nothing is restricted (free play; no list given). s4: Sami's path (fwd/left/right) offered it, and
+// the kit drew a repeat it had no palette entry for — no count.
+var allowed = Array.isArray(Inputs.allowed) ? Inputs.allowed : [];
+var mayRepeat = allowed.length === 0 || allowed.indexOf('repeat') !== -1;
 var plan = findRepeat(program);
 Outputs.found = !!plan;
 Outputs.i = plan ? plan.i : -1;
@@ -557,7 +562,7 @@ Outputs.len = plan ? plan.len : 0;
 Outputs.count = plan ? plan.count : 0;
 Outputs.cover = plan ? plan.cover : 0;
 Outputs.containerId = plan ? plan.containerId : null;
-Outputs.offer = !!plan && band === 2 && plan.cover >= 3;
+Outputs.offer = !!plan && band === 2 && mayRepeat && plan.cover >= 3;
 Outputs.textKey = plan ? (plan.len === 1 ? 'tidyFound1' : 'tidyFound') : '';
 var list = plan ? (plan.containerId === null ? program : findBlock(program, plan.containerId).body) : [];
 Outputs.sample = plan ? String(list[plan.i].t) : '';
@@ -632,7 +637,8 @@ Outputs.bumps = end.run.bumps;
  * empty program · an unfolded repetition (cover ≥ 4, no container yet) · Olive
  * resting (a fallback answer) · a Predict miss · done (many blocks: the longer
  * line) · a bump · a puddle · the rung just played · a run that missed the goal
- * ({w} of {t}) · the start. No key says "tell me": there is no such line.
+ * ({w} of {t} tulips; with no tulips in the world, hintNotYet — s4: "Pip did 0 of 0" on Sami's path) · the start.
+ * No key says "tell me": there is no such line.
  */
 export const CHOOSE_HINT_SCRIPT = `${ENGINE}${FOLD_HELPERS}
 var program = Array.isArray(Inputs.program) ? Inputs.program : [];
@@ -645,6 +651,9 @@ var blocks = countBlocks(program);
 var rep = findRepeat(program);
 var goalMetNow = Inputs.goalMet === true;
 var predictAsked = Inputs.predictAsked === true, predictHit = Inputs.predictHit === true;
+// The pattern hint nudges toward a repeat: only where the request has one (or nothing is restricted), as the fold.
+var allowedBlocks = Array.isArray(Inputs.allowed) ? Inputs.allowed : [];
+var mayRepeat = allowedBlocks.length === 0 || allowedBlocks.indexOf('repeat') !== -1;
 var rung = Math.floor(Number(Inputs.oliveRung)) || 0;
 var oliveFallback = Inputs.oliveFallback === true;
 var tul = tulipsOf(w);
@@ -652,14 +661,15 @@ var done = Inputs.done === undefined || Inputs.done === null ? tul.watered : Num
 var total = Inputs.total === undefined || Inputs.total === null ? tul.total : Number(Inputs.total) || 0;
 var key = 'hintStart', vars = {};
 if (!blocks) key = 'hintEmpty';
-else if (rep && rep.cover >= 4 && rep.containerId === null && !hasContainer(program)) { key = 'hintPattern'; vars = { n: rep.count }; }
+else if (mayRepeat && rep && rep.cover >= 4 && rep.containerId === null && !hasContainer(program)) { key = 'hintPattern'; vars = { n: rep.count }; }
 else if (oliveFallback) key = 'oliveResting';
 else if (predictAsked && !predictHit) key = 'hintPredictMiss';
 else if (goalMetNow) { key = blocks > ${MANY_BLOCKS} ? 'hintDoneMany' : 'hintDone'; vars = { k: blocks }; }
 else if (bumps > 0) key = 'hintBump';
 else if (puddles > 0) key = 'hintWet';
 else if (rung >= 1 && rung <= ${OLIVE_RUNG_MAX}) key = 'oliveRung' + rung;
-else if (ran) { key = 'hintMissed'; vars = { w: done, t: total }; }
+else if (ran && total > 0) { key = 'hintMissed'; vars = { w: done, t: total }; }
+else if (ran) key = 'hintNotYet';
 Outputs.key = key;
 Outputs.vars = vars;
 Outputs.isOlive = key.indexOf('olive') === 0;

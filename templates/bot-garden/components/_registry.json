@@ -79,7 +79,7 @@
       "path": "Logic/Find repeat",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 13,
+      "connectionCount": 14,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -111,7 +111,7 @@
       "path": "Logic/Choose hint",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 15,
+      "connectionCount": 16,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -175,7 +175,7 @@
       "path": "Logic/Hint table",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 34,
+      "connectionCount": 35,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -479,7 +479,7 @@
       "path": "Workshop/Play",
       "type": "visual",
       "nodeCount": 109,
-      "connectionCount": 257,
+      "connectionCount": 259,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -663,6 +663,6 @@
   "stats": {
     "totalComponents": 82,
     "totalNodes": 669,
-    "totalConnections": 1843
+    "totalConnections": 1848
   }
 }

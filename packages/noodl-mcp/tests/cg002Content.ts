@@ -443,6 +443,8 @@ export const HINTS: Readonly<Record<string, Bi>> = {
   hintEmpty: voiced('hintEmpty'),
   hintPattern: voiced('hintPattern'),
   hintMissed: voiced('hintMissed'),
+  // A missed goal with no tulips to count (the path, the stones, the letter): hintMissed's "{w} of {t}" read "0 of 0".
+  hintNotYet: s('Not quite yet. Play it with One step and watch each block.', 'Pas tout à fait. Joue-le avec « Un pas » et regarde chaque bloc.'),
   hintBump: voiced('hintBump'),
   hintWet: voiced('hintWet'),
   hintDone: voiced('hintDone'),
