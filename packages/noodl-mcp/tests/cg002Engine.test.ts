@@ -220,7 +220,8 @@ describe('CG-002 — the engine', () => {
     });
 
     it('the goal is data: no request carries a function, and every goal name is one GOAL_SCRIPT knows', () => {
-      const known = ['every_tulip_watered', 'thing_at', 'bowl_has', 'robot_at', 'facing', 'carrying', 'uses', 'handled', 'said', 'no_puddle'];
+      const known = ['every_tulip_watered', 'thing_at', 'bowl_has', 'robot_at', 'facing', 'carrying', 'uses', 'handled', 'said', 'no_puddle', 'senses'];
+      for (const name of known) expect({ name, inScript: GOAL_SCRIPT.includes(`g.name === '${name}'`) }).toEqual({ name, inScript: true });
       for (const r of REQUESTS) {
         expect(JSON.parse(JSON.stringify(r))).toEqual(r);
         const goals = Array.isArray(r.goal) ? r.goal : [r.goal];

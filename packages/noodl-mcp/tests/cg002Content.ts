@@ -90,7 +90,7 @@ export interface Block {
 
 /** A goal predicate: a name and its args. A request's goal is one or a list (all must hold). */
 export interface Goal {
-  name: 'every_tulip_watered' | 'thing_at' | 'bowl_has' | 'robot_at' | 'facing' | 'carrying' | 'uses' | 'handled' | 'said' | 'no_puddle';
+  name: 'every_tulip_watered' | 'thing_at' | 'bowl_has' | 'robot_at' | 'facing' | 'carrying' | 'uses' | 'handled' | 'said' | 'no_puddle' | 'senses';
   args?: ReadonlyArray<string | number>;
 }
 
@@ -291,7 +291,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
       { kind: 'egg', x: 5, y: 3 }
     ],
     robotStart: { x: 0, y: 3, d: 1, basket: 6 },
-    goal: [{ name: 'carrying', args: ['egg', 4] }, { name: 'uses', args: ['count_inc', 1] }, { name: 'thing_at', args: ['egg', 5, 3] }],
+    goal: [{ name: 'carrying', args: ['egg', 4] }, { name: 'uses', args: ['count_inc', 1] }, { name: 'senses', args: ['count_is', 1] }, { name: 'thing_at', args: ['egg', 5, 3] }],
     palette: ['fwd', 'left', 'right', 'pick', 'until', 'count_inc'],
     reward: { kind: 'item', id: 'basket', from: 'mamie' },
     copyKeys: { title: 'rqEggsTitle', blurb: 'rqEggsBlurb', line: 'rqEggsLine', reward: 'itemBasket', gift: 'giftBasket' },
@@ -371,24 +371,24 @@ const rungKeys = (n: number) => ({ title: 'or' + n + 'Title', line: 'or' + n + '
 
 export const OLIVE_RUNGS: ReadonlyArray<OliveRung> = [
   { n: 1, mark: 'green', examColumn: 'green', islander: 'sami', band: 1, block: 'say', shape: 'sentence', table: ['say-thanks'], probes: ['P01', 'P02'], copyKeys: rungKeys(1) },
-  { n: 2, mark: 'green', examColumn: 'green', islander: 'mamie', band: 1, block: 'ask', shape: 'list_of_3', table: ['name-three', 'name-one'], probes: ['P03', 'P04', 'P05'], copyKeys: rungKeys(2) },
+  { n: 2, mark: 'green', examColumn: 'green', islander: 'mamie', band: 1, block: 'ask', shape: 'list_of_3', table: ['name-three', 'name-one'], probes: ['P03', 'P04', 'P05', 'P24', 'P25'], copyKeys: rungKeys(2) },
   { n: 3, mark: 'green', examColumn: 'green', islander: 'sami', band: 1, block: 'ask', shape: 'blocks', table: ['words-to-blocks'], probes: ['P06', 'P07', 'P08', 'P23'], copyKeys: rungKeys(3) },
-  { n: 4, mark: 'grad', examColumn: 'grad', islander: 'sami', band: 1, block: 'ask', shape: 'blocks', table: ['count-in-words'], probes: ['P09'], copyKeys: rungKeys(4) },
-  { n: 5, mark: 'green', examColumn: 'green', islander: 'biscuit', band: 1, block: 'ask', shape: 'one_of', table: ['what-wants'], probes: ['P10', 'P11'], copyKeys: rungKeys(5) },
-  { n: 6, mark: 'grad', examColumn: 'green', islander: null, band: 1, block: 'if', shape: 'yes_no', table: ['is-it-a'], probes: ['P12', 'P13'], copyKeys: rungKeys(6) },
-  { n: 7, mark: 'grad', examColumn: 'grad', islander: 'mamie', band: 1, block: 'ask', shape: 'integer', table: ['count-tulips'], probes: ['P14'], copyKeys: rungKeys(7) },
-  { n: 8, mark: 'grad', examColumn: 'both', islander: null, band: 2, block: 'ask', shape: 'integer', table: ['maths-seeds', 'maths'], probes: ['P15', 'P16'], copyKeys: rungKeys(8) },
+  { n: 4, mark: 'grad', examColumn: 'grad', islander: 'sami', band: 1, block: 'ask', shape: 'blocks', table: ['count-in-words'], probes: ['P09', 'P26'], copyKeys: rungKeys(4) },
+  { n: 5, mark: 'green', examColumn: 'green', islander: 'biscuit', band: 1, block: 'ask', shape: 'one_of', table: ['what-wants'], probes: ['P10', 'P11', 'P27'], copyKeys: rungKeys(5) },
+  { n: 6, mark: 'grad', examColumn: 'green', islander: null, band: 1, block: 'if', shape: 'yes_no', table: ['is-it-a'], probes: ['P12', 'P13', 'P28'], copyKeys: rungKeys(6) },
+  { n: 7, mark: 'grad', examColumn: 'grad', islander: 'mamie', band: 1, block: 'ask', shape: 'integer', table: ['count-tulips'], probes: ['P14', 'P29'], copyKeys: rungKeys(7) },
+  { n: 8, mark: 'grad', examColumn: 'both', islander: null, band: 2, block: 'ask', shape: 'integer', table: ['maths-seeds', 'maths'], probes: ['P15', 'P16', 'P30', 'P31'], copyKeys: rungKeys(8) },
   {
-    n: 9, mark: 'grad', examColumn: 'grad', islander: null, band: 1, block: 'ask', shape: 'sentence', table: ['under-five-words'], probes: ['P17'], copyKeys: rungKeys(9),
+    n: 9, mark: 'grad', examColumn: 'grad', islander: null, band: 1, block: 'ask', shape: 'sentence', table: ['under-five-words'], probes: ['P17', 'P32'], copyKeys: rungKeys(9),
     rule: 'awaiting-ruling',
     ruleCandidates: [
       { id: 'G1', table: 'no-letter-e', line: 'or9LineG1', probes: ['R9-G1-fr', 'R9-G1-en'] },
       { id: 'G2', table: 'no-water', line: 'or9LineG2', probes: ['R9-G2-fr', 'R9-G2-en'] }
     ]
   },
-  { n: 10, mark: 'grad', examColumn: 'grad', islander: null, band: 2, block: null, shape: null, table: ['tall-tales'], probes: ['P18'], copyKeys: rungKeys(10) },
+  { n: 10, mark: 'grad', examColumn: 'grad', islander: null, band: 2, block: null, shape: null, table: ['tall-tales'], probes: ['P18', 'P33'], copyKeys: rungKeys(10) },
   { n: 11, mark: 'green', examColumn: 'both', islander: 'sami', band: 1, block: 'ask', shape: 'sentence', table: ['translate'], probes: ['P19', 'P20'], copyKeys: rungKeys(11) },
-  { n: 12, mark: 'green', examColumn: 'green', islander: null, band: 1, block: 'ask', shape: 'two_lines', table: ['poem'], probes: ['P21'], copyKeys: rungKeys(12) }
+  { n: 12, mark: 'green', examColumn: 'green', islander: null, band: 1, block: 'ask', shape: 'two_lines', table: ['poem'], probes: ['P21', 'P34'], copyKeys: rungKeys(12) }
 ];
 
 // ── The hint table ──────────────────────────────────────────────────────────

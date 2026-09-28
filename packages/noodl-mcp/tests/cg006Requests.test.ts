@@ -342,11 +342,11 @@ describe('CG-006 — the requests', () => {
       expect({ id: p.id, mode: p.mode }).toEqual({ id: p.id, mode: p.column === 'grad' ? 'fail' : p.column === 'mixed' ? 'record' : 'pass' });
     });
 
-    it('🔴 exam.js does not know `lacks` / `containsAll`: a 🎓 probe of an unknown kind would pass vacuously — the patch closes it', () => {
+    it('exam.js knows `lacks` / `containsAll` (the patch, taken by CG-005): a 🎓 probe of those kinds no longer passes vacuously', () => {
       const keeps = { ok: true, text: 'Un chat noir.' };
       const lacksE: Expect = { kind: 'lacks', letters: ['e'] };
-      // This file: the reply keeps the rule (no e), so the 🎓 is NOT shown. exam.js as it stands: "not met" → 🎓 pass.
-      expect([meets(lacksE, keeps), exam.meetsOne(lacksE, keeps)]).toEqual([true, false]);
+      // The reply keeps the rule (no e), so the 🎓 is NOT shown — by this file and, since CG-005 took the patch, by exam.js.
+      expect([meets(lacksE, keeps), exam.meetsOne(lacksE, keeps)]).toEqual([true, true]);
       // The patch, compiled as the case block of meetsOne, grades exactly as this file on every new-kind probe.
       // eslint-disable-next-line @typescript-eslint/no-implied-eval
       const patched = new Function('expect', 'got', 'fold', 'switch (expect.kind) {\n' + EXAM_KIND_PATCH + '\n default: return null; }') as (e: Expect, g: unknown, f: (s: unknown) => string) => boolean | null;
