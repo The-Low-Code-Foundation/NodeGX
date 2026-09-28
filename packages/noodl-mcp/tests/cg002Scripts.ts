@@ -901,7 +901,8 @@ try {
 } catch (e) {
   error = 'bad';
 }
-Outputs.model = model;
+// A bad code publishes NO model: a null on the page's store input would be written by the next writer that fires.
+if (ok) Outputs.model = model;
 Outputs.ok = ok;
 Outputs.error = error;
 Outputs.migrated = migrated;

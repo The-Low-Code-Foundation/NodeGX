@@ -116,6 +116,96 @@
       "fromProperty": "code",
       "toId": "ghCode",
       "toProperty": "text"
+    },
+    {
+      "fromId": "ghT",
+      "fromProperty": "saveCodePaste",
+      "toId": "ghPasteH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ghT",
+      "fromProperty": "saveCodeUse",
+      "toId": "ghUse",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ghT",
+      "fromProperty": "saveCodeBad",
+      "toId": "ghBad",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ghT",
+      "fromProperty": "saveCodeDone",
+      "toId": "ghDone",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ghPaste",
+      "fromProperty": "onTextChanged",
+      "toId": "ghDecode",
+      "toProperty": "code"
+    },
+    {
+      "fromId": "ghUse",
+      "fromProperty": "onClick",
+      "toId": "ghDecode",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "ghPaste",
+      "fromProperty": "onEnter",
+      "toId": "ghDecode",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "ghDecode",
+      "fromProperty": "ok",
+      "toId": "ghIsSave",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "ghDecode",
+      "fromProperty": "ran",
+      "toId": "ghIsSave",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "ghDecode",
+      "fromProperty": "model",
+      "toId": "ghOutPorts",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "ghIsSave",
+      "fromProperty": "ontrue",
+      "toId": "ghOutPorts",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "ghIsSave",
+      "fromProperty": "ontrue",
+      "toId": "ghPasteSaid",
+      "toProperty": "to-done"
+    },
+    {
+      "fromId": "ghIsSave",
+      "fromProperty": "onfalse",
+      "toId": "ghPasteSaid",
+      "toProperty": "to-bad"
+    },
+    {
+      "fromId": "ghPasteSaid",
+      "fromProperty": "saysBad",
+      "toId": "ghBad",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ghPasteSaid",
+      "fromProperty": "saysDone",
+      "toId": "ghDone",
+      "toProperty": "mounted"
     }
   ]
 }

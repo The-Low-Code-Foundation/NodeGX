@@ -674,7 +674,10 @@ describe('CG-002 — the engine', () => {
     });
 
     it('a bad code is refused and names it; a seventh profile is refused; a nameless one too', () => {
-      expect(runScript(DECODE_SAVE_SCRIPT, { code: 'BG1.notacode' })).toMatchObject({ ok: false, error: 'bad', model: null });
+      const bad = runScript(DECODE_SAVE_SCRIPT, { code: 'BG1.notacode' });
+      expect(bad).toMatchObject({ ok: false, error: 'bad' });
+      // A refused code publishes no model at all (the Grown-ups paste box wires it into the page's store).
+      expect('model' in bad).toBe(false);
       expect(runScript(DECODE_SAVE_SCRIPT, { code: 'RS1.abc' })).toMatchObject({ ok: false, error: 'bad' });
       let model: any = null;
       for (let i = 0; i < 6; i++) model = runScript(ADD_PROFILE_SCRIPT, { model, name: 'P' + i, band: 1, lang: 'en' }).model;

@@ -577,6 +577,52 @@ withDeployedSite({ dir: DIR }, async (page) => {
   const reply = await until('document.body.innerText', (t) => t.includes('(stub)'), 6000);
   check('Grown-ups: Try Olive shows her reply', reply.includes('(stub)'), stubCalls.slice(-2));
 
+  // S4-PASTE: the paste box, the second restore path. A refused code writes nothing, and nothing it leaves behind is
+  // written by the next writer on the page (the bar's language pick); a good code IS the family, read on the island.
+  const stored = () => evaluate(`(() => { const k = Object.keys(localStorage).find((x) => /bot-garden/.test(x)); return k ? localStorage.getItem(k) : null; })()`);
+  const pasteBox = `(document.querySelector('input.bg-paste') || document.querySelector('.bg-paste input'))`;
+  const shown = await evaluate(`(() => { const e = document.querySelector('.bg-code'); return e ? e.innerText.trim() : ''; })()`);
+  check('S4-PASTE: the save code is shown', /^BG1\./.test(shown), shown.slice(0, 40));
+  const beforeBad = await stored();
+  await typeInto(pasteBox, 'BG1.this-is-not-a-save', 'the paste box (a bad code)');
+  await tap(first('.bg-paste-go'), 'replace the islands (a bad code)');
+  const badSaid = await until('document.body.innerText', (t) => t.includes(w('en', 'saveCodeBad')), 4000);
+  check('S4-PASTE: a bad code is refused in words', badSaid.includes(w('en', 'saveCodeBad')) && !badSaid.includes(w('en', 'saveCodeDone')), badSaid.slice(-300));
+  check('S4-PASTE: … and the stored family is untouched', (await stored()) === beforeBad, { before: (beforeBad || '').length, after: ((await stored()) || '').length });
+  await seg('FR');
+  await wait(600);
+  const afterPick = await doneOf();
+  check('S4-PASTE: after a refused code, the bar’s next write still writes the family (not an empty one)', !afterPick.error && !!afterPick.name && afterPick.v === 3, afterPick);
+  await seg('EN');
+  await wait(600);
+  // A good code: the one shown, with the playing kid's robot renamed, re-encoded as the game does.
+  const packed = JSON.parse(Buffer.from(shown.slice(4).replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8'));
+  const row = packed.p.find((r) => r[0] === packed.a) || packed.p[0];
+  const firstRobot = row[5];
+  row[5] = 'Remy';
+  const good = 'BG1.' + Buffer.from(JSON.stringify(packed), 'utf8').toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  await typeInto(pasteBox, good, 'the paste box (a good code)');
+  await tap(first('.bg-paste-go'), 'replace the islands (a good code)');
+  const doneSaid = await until('document.body.innerText', (t) => t.includes(w('en', 'saveCodeDone')), 4000);
+  check('S4-PASTE: a good code says the islands are back', doneSaid.includes(w('en', 'saveCodeDone')) && !doneSaid.includes(w('en', 'saveCodeBad')), doneSaid.slice(-300));
+  const restored = await doneOf();
+  readings.pasteRestored = restored;
+  check('S4-PASTE: … the stored family is the code’s (the robot is Remy)', restored.robot === 'Remy' && restored.v === 3, restored);
+  await tab(0);
+  await until('location.pathname', (p) => p === '/island');
+  await wait(900);
+  const pastedPin = await evaluate(`(() => { const n = document.querySelector('.bg-pin-bot .gd-name'); return n ? n.innerText : null; })()`);
+  check('S4-PASTE: … and the island shows it (the pin carries Remy)', pastedPin === 'Remy', pastedPin);
+  // The shown code back, so the screens after read as before.
+  await tab(4);
+  await until('location.pathname', (p) => p === '/grown-ups');
+  await wait(900);
+  await typeInto(pasteBox, shown, 'the paste box (the code shown at first)');
+  await tap(first('.bg-paste-go'), 'replace the islands (back)');
+  await wait(600);
+  const back = await doneOf();
+  check('S4-PASTE: the first code brings the first family back', back.robot === firstRobot && firstRobot !== 'Remy', { back, firstRobot });
+
   // CG-007 AC3: both faces loaded, from the deploy, nothing from Google.
   const fonts = await evaluate(`(async () => { await document.fonts.ready; return [...document.fonts].map((f) => ({ family: f.family.replace(/["']/g, ''), status: f.status })); })()`);
   readings.fonts = fonts;

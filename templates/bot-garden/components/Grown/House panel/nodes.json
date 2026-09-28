@@ -30,7 +30,7 @@
         }
       ],
       "x": 410,
-      "y": 1840
+      "y": 2320
     },
     {
       "id": "ghPanel",
@@ -46,7 +46,12 @@
         "ghOut",
         "ghCodeH",
         "ghCodeLine",
-        "ghCode"
+        "ghCode",
+        "ghPasteH",
+        "ghPaste",
+        "ghUse",
+        "ghBad",
+        "ghDone"
       ],
       "parameters": {
         "width": {
@@ -372,6 +377,141 @@
       "y": 1720
     },
     {
+      "id": "ghPasteH",
+      "type": "Text",
+      "label": "Paste a code",
+      "parent": "ghPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 1840
+    },
+    {
+      "id": "ghPaste",
+      "type": "net.noodl.controls.textinput",
+      "label": "The pasted code",
+      "parent": "ghPanel",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "backgroundColor": "var(--card)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 2,
+          "unit": "px"
+        },
+        "borderColor": "var(--line)",
+        "borderRadius": {
+          "value": 14,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "cssClassName": "bg-paste"
+      },
+      "x": 100,
+      "y": 1960
+    },
+    {
+      "id": "ghUse",
+      "type": "net.noodl.controls.button",
+      "label": "Bring the code back",
+      "parent": "ghPanel",
+      "parameters": {
+        "backgroundColor": "var(--paper-2)",
+        "color": "var(--ink)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-paste-go",
+        "label": "Replace"
+      },
+      "x": 100,
+      "y": 2080
+    },
+    {
+      "id": "ghBad",
+      "type": "Text",
+      "label": "Not a save",
+      "parent": "ghPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "fontWeight": "700",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 2200
+    },
+    {
+      "id": "ghDone",
+      "type": "Text",
+      "label": "Brought back",
+      "parent": "ghPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "fontWeight": "700",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 2320
+    },
+    {
       "id": "ghT",
       "type": "/Logic/Translate words",
       "label": "In their language",
@@ -398,6 +538,62 @@
       "label": "The family as a code",
       "x": 410,
       "y": 1720
+    },
+    {
+      "id": "ghDecode",
+      "type": "/Logic/Decode save code",
+      "label": "A code back into a family",
+      "x": 410,
+      "y": 1960
+    },
+    {
+      "id": "ghIsSave",
+      "type": "Condition",
+      "label": "Is it an island save?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 410,
+      "y": 2440
+    },
+    {
+      "id": "ghPasteSaid",
+      "type": "States",
+      "label": "What the paste box says",
+      "parameters": {
+        "states": "idle,bad,done",
+        "values": "saysBad,saysDone",
+        "useTransitions": false,
+        "type-saysBad": "boolean",
+        "value-idle-saysBad": false,
+        "value-bad-saysBad": true,
+        "value-done-saysBad": false,
+        "type-saysDone": "boolean",
+        "value-idle-saysDone": false,
+        "value-bad-saysDone": false,
+        "value-done-saysDone": true
+      },
+      "x": 410,
+      "y": 2200
+    },
+    {
+      "id": "ghOutPorts",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "write",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 2560
     }
   ],
   "visualRoots": [

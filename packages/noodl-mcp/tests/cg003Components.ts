@@ -1588,10 +1588,10 @@ const GU_RULES: CgComponent = {
 
 const GU_HOUSE: CgComponent = {
   path: 'Grown/House panel',
-  description: 'Nothing leaves the house: three lines, Try Olive (a thank-you rung, slots only; the written line when she does not answer) and the save code.',
+  description: 'Nothing leaves the house: three lines, Try Olive (a thank-you rung, slots only; the written line when she does not answer), the save code, and the paste box that brings a code back (Model and Write, on a good code only).',
   nodes: [
     inputs('ghIn', [['words', 'array'], ['lang', 'string'], ['botName', 'string'], ['model', 'object']]),
-    group('ghPanel', 'Nothing leaves the house', undefined, { ...column({ rowGap: sp(6) }), ...PANEL }, ['ghH', ...HOUSE.map((r) => `gh_${r}`), 'ghTryH', 'ghTryRow', 'ghOut', 'ghCodeH', 'ghCodeLine', 'ghCode']),
+    group('ghPanel', 'Nothing leaves the house', undefined, { ...column({ rowGap: sp(6) }), ...PANEL }, ['ghH', ...HOUSE.map((r) => `gh_${r}`), 'ghTryH', 'ghTryRow', 'ghOut', 'ghCodeH', 'ghCodeLine', 'ghCode', 'ghPasteH', 'ghPaste', 'ghUse', 'ghBad', 'ghDone']),
     text('ghH', 'Nothing leaves the house', 'ghPanel', '', T_H3),
     ...HOUSE.map((r) => text(`gh_${r}`, r, 'ghPanel', '', { ...T_MUTED, cssClassName: 'bg-li' })),
     text('ghTryH', 'Try Olive', 'ghPanel', '', { ...T_H3, marginTop: sp(8) }),
@@ -1604,10 +1604,24 @@ const GU_HOUSE: CgComponent = {
     text('ghCodeH', 'Save code', 'ghPanel', '', { ...T_H3, marginTop: sp(8) }),
     text('ghCodeLine', 'What it is for', 'ghPanel', '', T_SMALL),
     text('ghCode', 'The code', 'ghPanel', '', { fontSize: px(13), color: 'var(--ink)', cssClassName: 'bg-code' }),
+    text('ghPasteH', 'Paste a code', 'ghPanel', '', { ...T_STRONG, marginTop: sp(8) }),
+    place('ghPaste', TEXT_INPUT_NODE, 'The pasted code', 'ghPanel', { sizeMode: 'contentHeight', width: pct(100), fontSize: px(14), color: 'var(--ink)', backgroundColor: 'var(--card)', borderStyle: 'solid', borderWidth: px(2), borderColor: 'var(--line)', borderRadius: px(14), ...pad(10, 14), cssClassName: 'bg-paste' }),
+    place('ghUse', BUTTON_NODE, 'Bring the code back', 'ghPanel', { ...btn('plain', '', { cssClassName: 'bg-paste-go' }), label: 'Replace' }),
+    text('ghBad', 'Not a save', 'ghPanel', '', { ...T_BODY, fontWeight: '700', mounted: false }),
+    text('ghDone', 'Brought back', 'ghPanel', '', { ...T_BODY, fontWeight: '700', mounted: false }),
     logic('ghT', L('Translate words'), 'In their language'),
     // The rung and its slots are parameters: who is thanked and for what, from the rung table's own lists (olive-templates.json).
     logic('ghAskOlive', L('Try Olive'), 'Ask her', { rung: 'say-thanks', slots: { to: 'Mamie Rose', deed: 'watered her three tulips' } }),
-    logic('ghEncode', L('Encode save code'), 'The family as a code')
+    logic('ghEncode', L('Encode save code'), 'The family as a code'),
+    logic('ghDecode', L('Decode save code'), 'A code back into a family'),
+    gate('ghIsSave', 'Is it an island save?'),
+    withStates('ghPasteSaid', 'What the paste box says', ['idle', 'bad', 'done'], {
+      // Not `done`: that is the States node's own signal (a transition ended).
+      saysBad: { type: 'boolean', by: { idle: false, bad: true, done: false } },
+      saysDone: { type: 'boolean', by: { idle: false, bad: false, done: true } }
+    }),
+    // 🔴 Decode publishes a model on a GOOD code only, so a refused paste leaves the page's store input as it was.
+    outputs('ghOutPorts', [['model', 'object'], ['write', 'signal']])
   ],
   connections: [
     wire('ghIn', 'words', 'ghT', 'words'),
@@ -1626,7 +1640,22 @@ const GU_HOUSE: CgComponent = {
     wire('ghAsk', 'onClick', 'ghAskOlive', 'go'),
     wire('ghAskOlive', 'text', 'ghReply', 'text'),
     wire('ghIn', 'model', 'ghEncode', 'model'),
-    wire('ghEncode', 'code', 'ghCode', 'text')
+    wire('ghEncode', 'code', 'ghCode', 'text'),
+    wire('ghT', 'saveCodePaste', 'ghPasteH', 'text'),
+    wire('ghT', 'saveCodeUse', 'ghUse', 'label'),
+    wire('ghT', 'saveCodeBad', 'ghBad', 'text'),
+    wire('ghT', 'saveCodeDone', 'ghDone', 'text'),
+    wire('ghPaste', 'onTextChanged', 'ghDecode', 'code'),
+    wire('ghUse', 'onClick', 'ghDecode', 'go'),
+    wire('ghPaste', 'onEnter', 'ghDecode', 'go'),
+    wire('ghDecode', 'ok', 'ghIsSave', 'condition'),
+    wire('ghDecode', 'ran', 'ghIsSave', 'eval'),
+    wire('ghDecode', 'model', 'ghOutPorts', 'model'),
+    wire('ghIsSave', 'ontrue', 'ghOutPorts', 'write'),
+    wire('ghIsSave', 'ontrue', 'ghPasteSaid', 'to-done'),
+    wire('ghIsSave', 'onfalse', 'ghPasteSaid', 'to-bad'),
+    wire('ghPasteSaid', 'saysBad', 'ghBad', 'mounted'),
+    wire('ghPasteSaid', 'saysDone', 'ghDone', 'mounted')
   ]
 };
 
@@ -1957,7 +1986,10 @@ const PAGE_GROWN: CgComponent = (() => {
       ...(['guOlive', 'guRules', 'guHouse'] as const).flatMap((g) => [wire('guWords', 'words', g, 'words'), wire('guFam', 'lang', g, 'lang')]),
       wire('guFam', 'botName', 'guOlive', 'botName'),
       wire('guFam', 'botName', 'guHouse', 'botName'),
-      wire('guStore', 'model', 'guHouse', 'model')
+      wire('guStore', 'model', 'guHouse', 'model'),
+      // The paste box: a good code is the family, written through the one store.
+      wire('guHouse', 'model', 'guStore', 'model'),
+      wire('guHouse', 'write', 'guStore', 'write')
     ]
   };
 })();

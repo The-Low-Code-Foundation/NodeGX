@@ -194,6 +194,18 @@
       "fromProperty": "model",
       "toId": "guHouse",
       "toProperty": "model"
+    },
+    {
+      "fromId": "guHouse",
+      "fromProperty": "model",
+      "toId": "guStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "guHouse",
+      "fromProperty": "write",
+      "toId": "guStore",
+      "toProperty": "write"
     }
   ]
 }

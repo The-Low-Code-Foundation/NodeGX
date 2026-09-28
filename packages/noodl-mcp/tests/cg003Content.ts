@@ -45,7 +45,10 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   guExamNone: s('Olive’s exam has not run on this computer yet.', 'L’examen d’Olive n’a pas encore eu lieu sur cet ordinateur.'),
   guTryPrompt: s('A thank-you for Mamie Rose, from {b}', 'Un merci pour Mamie Rose, de la part de {b}'),
   guTryNote: s('A reply from the small offline model', 'Une réponse du petit modèle hors ligne'),
-  guSaveLine: s('Copy this code to move the whole garden to another computer.', 'Copie ce code pour déplacer tout le jardin vers un autre ordinateur.'),
+  guSaveLine: s('Copy this code to move every island to another computer.', 'Copie ce code pour déplacer toutes les îles vers un autre ordinateur.'),
+  // The paste box (the second restore path, beside the desktop's Restore menu): a code replaces this computer's islands.
+  saveCodeUse: s('Replace the islands with this code', 'Remplacer les îles par ce code'),
+  saveCodeDone: s('Done: the islands from the code are back.', 'C’est fait : les îles du code sont revenues.'),
   winThanks: s('“Thank you, {b}!”', '« Merci, {b} ! »'),
   winNew: s('New: {reward}', 'Nouveau : {reward}'),
   pickProfile: s('Tap your name to play. Nothing is timed and nothing runs out.', 'Touche ton prénom pour jouer. Rien n’est chronométré, rien ne s’épuise.'),

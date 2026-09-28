@@ -1727,6 +1727,12 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-saveCodeDone",
+      "toId": "translatewordsOut",
+      "toProperty": "saveCodeDone"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-saveCodeH",
       "toId": "translatewordsOut",
       "toProperty": "saveCodeH"
@@ -1736,6 +1742,12 @@
       "fromProperty": "out-saveCodePaste",
       "toId": "translatewordsOut",
       "toProperty": "saveCodePaste"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-saveCodeUse",
+      "toId": "translatewordsOut",
+      "toProperty": "saveCodeUse"
     },
     {
       "fromId": "translatewordsFn",

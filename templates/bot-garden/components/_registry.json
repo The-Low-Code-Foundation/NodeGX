@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 369,
+      "connectionCount": 371,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -574,8 +574,8 @@
     "Grown/House panel": {
       "path": "Grown/House panel",
       "type": "visual",
-      "nodeCount": 19,
-      "connectionCount": 19,
+      "nodeCount": 28,
+      "connectionCount": 34,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -623,14 +623,14 @@
       "path": "Pages/Grown-ups",
       "type": "page",
       "nodeCount": 14,
-      "connectionCount": 32,
+      "connectionCount": 34,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     }
   },
   "stats": {
     "totalComponents": 78,
-    "totalNodes": 635,
-    "totalConnections": 1781
+    "totalNodes": 644,
+    "totalConnections": 1800
   }
 }
