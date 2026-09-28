@@ -20,6 +20,24 @@ const path = require('path');
 
 const MARKER = 'app-policy.sha256';
 
+/**
+ * The policy the shell ships for an app that brings NONE (P105 s3): the garden template has no backend and no
+ * `nodegx.security.json` — the family lives in the page's localStorage. Without a policy the backend mints
+ * `defaultSecurityConfig()`, which is `devOpen: true` (row ACLs off on the loopback) and `signup: public`: a door any
+ * program on the tablet could write through, for nothing the game uses. So the shell's backend is CLOSED: every rule
+ * `nobody`, no collections, no functions, no files, no signup. It is a legal policy by the backend's own validator
+ * (`validateSecurityConfig`, measured 2026-09-28: 0 errors) and it gives the upgrade drive a shipped policy to adopt.
+ */
+const CLOSED_POLICY = Object.freeze({
+  version: 1,
+  devOpen: false,
+  defaults: { permissions: { find: 'nobody', get: 'nobody', create: 'nobody', update: 'nobody', delete: 'nobody' }, creatorOwns: true },
+  collections: {},
+  functions: {},
+  files: { upload: 'nobody', read: 'nobody', delete: 'nobody' },
+  signup: 'nobody'
+});
+
 function sha256(buf) {
   return crypto.createHash('sha256').update(buf).digest('hex');
 }
@@ -77,4 +95,4 @@ function installFunctions({ from, dataDir }) {
   return { installed: files, removed };
 }
 
-module.exports = { adoptShippedPolicy, installFunctions, MARKER };
+module.exports = { adoptShippedPolicy, installFunctions, MARKER, CLOSED_POLICY };

@@ -14,7 +14,8 @@ const read = (f) => fs.readFileSync(path.join(SHELL, f), 'utf8');
 
 test('garden.json names the app: id, name, a port that is not Nightbook’s, a data dir, the doors, the backups, the model', () => {
   assert.equal(config.appId, 'garden');
-  assert.equal(config.name, 'Bot Garden');
+  assert.equal(config.name, "Olive's Island");
+  assert.equal(config.nameFr, "L'île d'Olive");
   assert.notEqual(config.port, 47621);
   assert.ok(config.port > 1024 && config.port < 65536);
   assert.equal(config.dataDirName, 'island');
@@ -65,7 +66,56 @@ test('package.json ships every module main.js requires, and unpacks node-llama-c
   for (const t of ['app', 'backend/cli.js', 'policy', 'workflows', 'model', 'licenses']) assert.ok(to.includes(t), `extraResources ${t}`);
   assert.equal(pkg.build.appId, 'io.digitalbricks.garden');
   assert.equal(pkg.build.productName, config.name);
-  assert.ok(pkg.build.nsis.artifactName.startsWith('BotGarden-Setup-'));
+  assert.ok(pkg.build.nsis.artifactName.startsWith('OlivesIsland-Setup-'));
+});
+
+test('the name a person sees is "Olive\'s Island" (ruling 7); every internal id stays', () => {
+  assert.equal(pkg.productName, "Olive's Island", 'productName: the Mac bundle, the Windows exe, its FileDescription, the shortcut');
+  assert.equal(pkg.build.productName, config.name);
+  // Internal ids: the package name (the Windows install folder, %LOCALAPPDATA%\Programs\garden-desktop), the appId (the
+  // NSIS GUID is UUIDv5(appId): an installer of the renamed app upgrades the old one in place), the door, the data dir.
+  assert.equal(pkg.name, 'garden-desktop');
+  assert.equal(pkg.build.appId, 'io.digitalbricks.garden');
+  assert.equal(config.appId, 'garden');
+  assert.equal(config.dataDirName, 'island');
+  // The installer's FILE name carries neither the apostrophe nor a space: it is typed, linked and globbed by scripts.
+  assert.doesNotMatch(pkg.build.nsis.artifactName, /['’ ]/);
+  assert.equal(pkg.build.executableName, undefined, 'the exe keeps the product name ("Olive\'s Island.exe"), measured safe in electron-builder');
+  // Code, not comments: a comment may say why the folder keeps the old name.
+  for (const f of ['main.js', 'relay.js', 'copies.js', 'fit.js']) {
+    const code = read(f).split('\n').filter((l) => !/^\s*(\*|\/\/|\/\*)/.test(l));
+    assert.deepEqual(code.filter((l) => /Bot Garden/.test(l)), [], `${f} names the old game in code`);
+  }
+});
+
+test('the saves stay where they were: userData AND sessionData are pinned to "Bot Garden" whatever the app is called', () => {
+  const { loadMainWithFakeElectron, tmp } = require('./helpers');
+  const appData = tmp('garden-appdata-');
+  const r = loadMainWithFakeElectron({ appData });
+  assert.equal(r.name, "Olive's Island", 'the app is named for a person');
+  assert.equal(config.userDataDirName, 'Bot Garden', 'the folder every build before the rename wrote (productName "Bot Garden")');
+  const pinned = path.join(appData, 'Bot Garden');
+  assert.equal(r.final('userData'), pinned);
+  assert.equal(r.final('sessionData'), pinned, 'Local Storage (the family, key bot-garden) lives under sessionData');
+  assert.ok(fs.existsSync(pinned), 'the folder exists before Electron is handed it');
+  // Pinned BEFORE anything reads it: the first read of userData comes after the set, and before the single-instance lock.
+  const i = (pred) => r.calls.findIndex(pred);
+  const set = i((c) => c[0] === 'setPath' && c[1] === 'userData');
+  const firstRead = i((c) => c[0] === 'getPath' && c[1] === 'userData');
+  const lock = i((c) => c[0] === 'requestSingleInstanceLock');
+  assert.ok(set >= 0 && set < firstRead && firstRead < lock, JSON.stringify(r.calls));
+  assert.ok(!fs.existsSync(path.join(appData, "Olive's Island")), 'no island opened under the new name');
+});
+
+test('a drive’s GARDEN_HOME still keeps every folder under the throwaway home', () => {
+  const { loadMainWithFakeElectron, tmp } = require('./helpers');
+  const appData = tmp('garden-appdata-');
+  const home = tmp('garden-home-');
+  const r = loadMainWithFakeElectron({ appData, home });
+  assert.equal(r.final('userData'), path.join(home, 'userData'));
+  assert.equal(r.final('sessionData'), path.join(home, 'userData'));
+  assert.equal(r.final('documents'), path.join(home, 'Documents'));
+  assert.ok(!fs.existsSync(path.join(appData, 'Bot Garden')), 'the real folder untouched');
 });
 
 test('no build.files exclusion drops a file node-llama-cpp reads at run time (AC5)', () => {
@@ -110,4 +160,12 @@ test('the template table is whole: every rung has both languages, a known shape,
 test('.gitignore keeps the model, node_modules and the build out of git', () => {
   const ignore = read('.gitignore').split('\n');
   for (const e of ['node_modules/', 'build-output/', 'dist/', 'model/']) assert.ok(ignore.includes(e), e);
+});
+
+test('the French half of every dialog names the game in French ("L’île d’Olive"), the English half in English', () => {
+  const main = read('main.js');
+  const fr = [...main.matchAll(/\$\{config\.(name|nameFr)\} (s'est arrêté|n'a pas pu s'ouvrir)/g)].map((m) => m[1]);
+  const en = [...main.matchAll(/\$\{config\.(name|nameFr)\} (stopped unexpectedly|couldn't open)/g)].map((m) => m[1]);
+  assert.deepEqual(fr, ['nameFr', 'nameFr'], 'both French sentences');
+  assert.deepEqual(en, ['name', 'name'], 'both English sentences');
 });

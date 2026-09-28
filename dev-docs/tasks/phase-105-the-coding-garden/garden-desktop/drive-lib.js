@@ -1,5 +1,5 @@
 /**
- * What the Bot Garden drives share: launch the shell (or an installed exe) against a throwaway GARDEN_HOME, talk CDP
+ * What the Olive's Island (garden-desktop) drives share: launch the shell (or an installed exe) against a throwaway GARDEN_HOME, talk CDP
  * to its window, quit it the way a person does, find any backend left running for a home, and WATCH THE WIRE (AC9:
  * every request's host must be 127.0.0.1). Plain Node 22 (global WebSocket), no dependencies.
  *

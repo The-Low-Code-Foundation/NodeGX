@@ -27,3 +27,14 @@ test('maximised when the work area is smaller than the window asked for', () => 
   assert.equal(shouldMaximise({ width: 912, height: 568 }, { width: 1280, height: 860 }), true);
   assert.equal(shouldMaximise({ width: 2560, height: 1400 }, { width: 1280, height: 860 }), false);
 });
+
+test('the window says the game’s name (ruling 7): either language’s name passes, anything else is replaced', () => {
+  const { windowTitle } = require('../fit');
+  const config = require('../garden.json');
+  assert.equal(windowTitle("Olive's Island", config), "Olive's Island");
+  assert.equal(windowTitle("L'île d'Olive", config), "L'île d'Olive");
+  // The template's htmlTitle when the game was renamed, a bare URL while loading, nothing.
+  assert.equal(windowTitle('Bot Garden', config), "Olive's Island");
+  assert.equal(windowTitle('127.0.0.1:47633/', config), "Olive's Island");
+  assert.equal(windowTitle('', config), "Olive's Island");
+});

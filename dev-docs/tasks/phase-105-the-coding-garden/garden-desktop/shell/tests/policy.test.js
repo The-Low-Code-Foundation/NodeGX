@@ -83,3 +83,17 @@ test('the app’s functions are copied into the app’s workflows folder, replac
   assert.deepEqual(installFunctions({ from: path.join(f.root, 'none'), dataDir: f.dataDir }), { installed: [], removed: [] });
   assert.deepEqual(fs.readdirSync(path.join(f.dataDir, 'workflows')), ['Garden-1.workflow.json']);
 });
+
+test('an app that ships no policy gets the shell’s CLOSED one: every rule nobody, nothing open, only the backend’s keys', () => {
+  const { CLOSED_POLICY } = require('../policy');
+  // The backend's grammar (nodegx-backend security/model.ts TOP_KEYS); any other key is FATAL at its start (s1's drive).
+  assert.deepEqual(Object.keys(CLOSED_POLICY).sort(), ['collections', 'defaults', 'devOpen', 'files', 'functions', 'signup', 'version']);
+  assert.equal(CLOSED_POLICY.version, 1);
+  assert.equal(CLOSED_POLICY.devOpen, false, 'devOpen true switches row ACLs off on the loopback');
+  const rules = [...Object.values(CLOSED_POLICY.defaults.permissions), ...Object.values(CLOSED_POLICY.files), CLOSED_POLICY.signup];
+  assert.equal(rules.length, 9);
+  assert.ok(rules.every((r) => r === 'nobody'), JSON.stringify(rules));
+  assert.deepEqual(CLOSED_POLICY.collections, {});
+  assert.deepEqual(CLOSED_POLICY.functions, {});
+  assert.ok(Object.isFrozen(CLOSED_POLICY));
+});

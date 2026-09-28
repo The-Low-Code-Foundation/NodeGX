@@ -1,5 +1,5 @@
 /**
- * Bot Garden's desktop shell (P105 CG-004): one window, one backend, one owl, no network.
+ * Olive's Island's desktop shell (P105 CG-004; internally `garden-desktop`): one window, one backend, one owl, no network.
  * Forked from Nightbook's shell (TPL-011-DESKTOP DESK-1) and parameterised: everything that names the app — its id,
  * name, port, data folder, door prefix, backup policy, model file — comes from `garden.json`, so a third template does
  * not fork this file again (P105 README §8).
@@ -16,10 +16,12 @@
  * - The daily backup (one a day for a month) is written as `backups.json` before the backend's first start, into
  *   `Documents/<backups.folderName>`. Existing settings are never overwritten.
  * - Timings go to `<userData>/logs/timings.log`: one launch line, then `model-load`, `exam-probe`, `olive` (AC7).
+ * - The name a person sees is `config.name` / `config.nameFr` ("Olive's Island" / "L'île d'Olive", P105 ruling 7); the
+ *   folder her saves live in is `config.userDataDirName` ("Bot Garden"), PINNED — see pinUserData.
  */
 'use strict';
 
-const { app, BrowserWindow, dialog, Menu, screen, shell } = require('electron');
+const { app, BrowserWindow, dialog, Menu, screen, session, shell } = require('electron');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -27,7 +29,7 @@ const path = require('path');
 const { createRelay } = require('./relay');
 const { createShellDoors } = require('./copies');
 const { adoptShippedPolicy, installFunctions } = require('./policy');
-const { zoomFor, shouldMaximise } = require('./fit');
+const { zoomFor, shouldMaximise, windowTitle } = require('./fit');
 const { createOwl } = require('./owl');
 const { createOliveDoors } = require('./olive-route');
 const { checkModel } = require('./model-check');
@@ -43,12 +45,26 @@ const ORIGIN = `http://127.0.0.1:${config.port}`;
 const HOME_ENV = 'GARDEN_HOME';
 
 app.setName(config.name);
-// Drives and smoke runs only: keep every folder the app writes (data, logs, backups) under one throwaway directory
-// instead of the real userData and Documents.
-if (process.env[HOME_ENV]) {
-  app.setPath('userData', path.join(process.env[HOME_ENV], 'userData'));
-  app.setPath('documents', path.join(process.env[HOME_ENV], 'Documents'));
+
+/**
+ * Where her saves live, PINNED to the folder every build before the rename used (P105 s3, ruling 7). Electron names
+ * `userData` after the app (`<appData>/<productName>`), and the island itself is NOT in the backend's data folder: the
+ * game keeps the family in the page's localStorage (key `bot-garden`), which Chromium writes under `sessionData`
+ * (`Local Storage/`), which defaults to `userData`. Renaming the app to "Olive's Island" would have opened an EMPTY
+ * island on the next install — every profile, every robot's name, every request done, gone from sight (still on disk
+ * under "Bot Garden", unread). Both paths are set here, explicitly, before anything reads them (the single-instance
+ * lock below reads userData). `GARDEN_HOME` (drives and smoke runs only) keeps every folder the app writes under one
+ * throwaway directory instead.
+ */
+function pinUserData() {
+  const home = process.env[HOME_ENV];
+  const dir = home ? path.join(home, 'userData') : path.join(app.getPath('appData'), config.userDataDirName);
+  fs.mkdirSync(dir, { recursive: true });
+  app.setPath('userData', dir);
+  app.setPath('sessionData', dir);
+  if (home) app.setPath('documents', path.join(home, 'Documents'));
 }
+pinUserData();
 // A drive of the upgrade (AC8) launches the same build twice as two versions.
 const VERSION = process.env.GARDEN_VERSION || app.getVersion();
 
@@ -188,7 +204,7 @@ function startBackend() {
         clearTimeout(timer);
         reject(new Error(`the backend stopped before it was ready (code ${code})\n${tail.join('\n')}`));
       } else if (!quitting && !restarting) {
-        dialog.showErrorBox(config.name, `${config.name} stopped unexpectedly. Please close it and open it again.\n\n${config.name} s'est arrêté. Ferme-le et rouvre-le.`);
+        dialog.showErrorBox(config.name, `${config.name} stopped unexpectedly. Please close it and open it again.\n\n${config.nameFr} s'est arrêté. Ferme-le et rouvre-le.`);
       }
     });
   });
@@ -321,6 +337,14 @@ function createWindow() {
     backgroundColor: '#ffffff',
     webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true }
   });
+  // The game's name on the window, whatever the exported page's <title> says (fit.js windowTitle says why).
+  win.on('page-title-updated', (event, title) => {
+    const want = windowTitle(title, config);
+    if (want !== title) {
+      event.preventDefault();
+      win.setTitle(want);
+    }
+  });
   // No Node in the page (P91 R3), and the page never leaves its own origin.
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   win.webContents.on('will-navigate', (event, url) => {
@@ -371,7 +395,7 @@ async function boot() {
       const { response } = await dialog.showMessageBox({
         type: 'error',
         title: config.name,
-        message: `${config.name} couldn't open. / ${config.name} n'a pas pu s'ouvrir.`,
+        message: `${config.name} couldn't open. / ${config.nameFr} n'a pas pu s'ouvrir.`,
         detail: `A note for a grown-up is in ${path.join(LOG_DIR, 'backend.log')}`,
         buttons: ['Try again / Réessayer', 'Show the note / Voir la note', 'Close / Fermer'],
         defaultId: 0,
@@ -390,6 +414,13 @@ async function boot() {
 
 function stopBackend() {
   quitting = true;
+  // Her last move is in localStorage; Chromium commits it to disk on a delay. Write it now, before the app goes, so a
+  // request finished a second before the window closed is still done tomorrow (and after an upgrade, CG-004 AC8).
+  try {
+    session.defaultSession.flushStorageData();
+  } catch {
+    // no session yet (a start that failed before ready): nothing to flush
+  }
   if (backend && backend.exitCode === null) {
     // On Windows this ends the process at once (no SIGTERM drain). Every write is its own SQLite transaction.
     backend.kill();

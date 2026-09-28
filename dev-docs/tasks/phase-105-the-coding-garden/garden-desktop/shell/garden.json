@@ -1,13 +1,15 @@
 {
   "appId": "garden",
-  "name": "Bot Garden",
+  "name": "Olive's Island",
+  "nameFr": "L'île d'Olive",
+  "userDataDirName": "Bot Garden",
   "port": 47633,
   "dataDirName": "island",
   "doorPrefix": "/__garden/",
   "header": "x-garden",
   "policy": "nodegx.security.json",
   "backups": {
-    "folderName": "Bot Garden backups",
+    "folderName": "Olive's Island backups",
     "cron": "0 19 * * *",
     "retention": { "keepLast": 1, "keepDaily": 30, "keepWeekly": 0 }
   },

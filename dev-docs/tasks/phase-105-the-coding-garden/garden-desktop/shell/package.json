@@ -1,8 +1,8 @@
 {
   "name": "garden-desktop",
-  "productName": "Bot Garden",
+  "productName": "Olive's Island",
   "version": "0.0.1",
-  "description": "Bot Garden — the coding garden on one tablet, with its own backend and its own owl, no internet (P105 CG-004). Forked from the Nightbook shell (TPL-011) and parameterised by garden.json.",
+  "description": "Olive's Island — the coding game on one tablet, with its own backend and its own owl, no internet (P105 CG-004; internally garden-desktop). Forked from the Nightbook shell (TPL-011) and parameterised by garden.json.",
   "author": "Digital Bricks",
   "private": true,
   "main": "main.js",
@@ -22,7 +22,7 @@
   },
   "build": {
     "appId": "io.digitalbricks.garden",
-    "productName": "Bot Garden",
+    "productName": "Olive's Island",
     "npmRebuild": false,
     "files": [
       "main.js", "relay.js", "policy.js", "fit.js", "copies.js", "owl.js", "olive-route.js", "olive-check.js", "olive-templates.json",
@@ -51,7 +51,7 @@
       "oneClick": true,
       "perMachine": false,
       "deleteAppDataOnUninstall": false,
-      "artifactName": "BotGarden-Setup-${version}.${ext}"
+      "artifactName": "OlivesIsland-Setup-${version}.${ext}"
     }
   }
 }

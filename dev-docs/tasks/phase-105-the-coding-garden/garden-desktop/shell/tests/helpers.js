@@ -107,4 +107,63 @@ async function withRelay(oliveDoors, run) {
   }
 }
 
-module.exports = { wait, fakeEngine, canned, tmp, request, withRelay };
+/**
+ * Load main.js in plain Node with a FAKE `electron` (Module._load intercepts the one request), to read what its top
+ * level does to the app's paths before anything is ready. The fake app derives `userData` from its NAME until someone
+ * sets it — which is what Electron does (`<appData>/<name>`) — and refuses the single-instance lock, so main.js takes
+ * its "another copy is open" branch and never boots (no relay, no backend, no window). Every call is recorded in order.
+ */
+function loadMainWithFakeElectron({ appData, home = null }) {
+  const Module = require('module');
+  const calls = [];
+  const paths = { appData, documents: path.join(appData, 'Documents-real') };
+  const app = {
+    name: 'Electron',
+    isPackaged: false,
+    setName(n) {
+      calls.push(['setName', n]);
+      app.name = n;
+    },
+    setPath(k, v) {
+      calls.push(['setPath', k, v]);
+      paths[k] = v;
+    },
+    getPath(k) {
+      calls.push(['getPath', k]);
+      if ((k === 'userData' || k === 'sessionData') && !paths[k]) return path.join(appData, app.name);
+      return paths[k];
+    },
+    getVersion: () => '0.0.0-test',
+    getAppMetrics: () => [],
+    requestSingleInstanceLock() {
+      calls.push(['requestSingleInstanceLock']);
+      return false;
+    },
+    exit: (code) => calls.push(['exit', code]),
+    on: () => {},
+    whenReady: () => new Promise(() => {})
+  };
+  const fake = { app, BrowserWindow: function () {}, dialog: {}, Menu: {}, screen: {}, session: {}, shell: {} };
+  const load = Module._load;
+  const before = process.env.GARDEN_HOME;
+  Module._load = function (request, ...rest) {
+    return request === 'electron' ? fake : load.call(this, request, ...rest);
+  };
+  if (home) process.env.GARDEN_HOME = home;
+  else delete process.env.GARDEN_HOME;
+  const main = require.resolve('../main.js');
+  delete require.cache[main];
+  try {
+    require(main);
+  } finally {
+    Module._load = load;
+    delete require.cache[main];
+    if (before === undefined) delete process.env.GARDEN_HOME;
+    else process.env.GARDEN_HOME = before;
+  }
+  /** The path a Chromium reading happens against: the LAST set value, or the fake's name-derived default. */
+  const final = (k) => app.getPath(k);
+  return { calls, paths, final, name: app.name };
+}
+
+module.exports = { wait, fakeEngine, canned, tmp, request, withRelay, loadMainWithFakeElectron };
