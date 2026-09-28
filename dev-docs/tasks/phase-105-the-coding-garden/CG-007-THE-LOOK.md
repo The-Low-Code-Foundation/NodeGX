@@ -1,6 +1,6 @@
 # CG-007 — The look: the mockup's garden, not a wireframe of it
 
-**Opened 2026-09-27.** **Status: 🟡 session 2 (2026-09-28) — AC2, AC3, AC4, AC5, AC7 measured (gate + the page drive on the primary checkout); AC1's side-by-side looked at and written (§7.1); AC6 contrast 🔴 a ruling for Richard (the mockup's own white-on-fill pairs are below 4.5:1).** Depends on CG-003. Lane A.
+**Opened 2026-09-27.** **Status: 🟡 session 3 (2026-09-28) — every text ≥ 4.5:1 (R9, darker fills, measured live), the sea with pins (R10), the look items, Profiles redesigned, the phone map fixed; page drive 148/148 with screenshots looked at. Awaits Richard's own look against the mockup.** Depends on CG-003. Lane A.
 
 ## 1. The person sentence
 
@@ -129,3 +129,16 @@ kit's cross faded again: **3/3 killed** (`$SCRATCH/look/arms-manual.txt`).
 orchestrator's drive (EXPECTED-DRIVE.md). The robot pin draws the kit's robot at 10% of the map (≈36 px at 390): read
 the 390 screenshot. The Teach pad over the world's corner at 390 (§7.1) — unchanged, NONE this session. Richard grades
 the look against the mockup (README §6).
+
+### 8.9 The orchestrator's runs on the merged tree (primary checkout, 2026-09-28 12:12–13:50, on `cline-dev` at the commit named)
+
+- Page drive at `5d51e4018`: **147/149** — two reds were the drive (the new 390 loop ended on Profiles, which has no tabs,
+  and the next step tapped tab 0). The screenshots, looked at beside the mockup: the island at 1368 matches the mockup's map,
+  pins, cards and header (differences: the tags are the darker fills; the mockup's "Free play" card is not on the island);
+  Profiles is cards with each kid's robot; the Workshop carries the request's own line, the owl on Ask Olive, the dots.
+- 🔴→✅ **At 390 the map crowded**: the 12:7 sea is 208 px tall and the labels keep their desktop size — Pip's pin covered
+  "Mamie Rose", Sami's and Biscuit's badges met. Fixed `b16751f28`: under 600 px the sea is 1:1, labels 11 px, the robot pin
+  46 %/38 %; a new drive clause asserts no two map labels (nor the robot pin) overlap at 390 (by the old geometry it fires:
+  Pip x 104–140 vs the label 46–126 at y 82–101 — arithmetic, not a run). Page drive **148/148** at `b16751f28` and again at
+  `ff06f39b5`.
+- R15: the control blocks' brown-orange `#A86501` — Richard: fine.

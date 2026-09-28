@@ -289,3 +289,14 @@ the reply rather than the reply alone.
   palette gets them with `rungs: 'all'`). Owner: CG-003 / CG-005's page hooks.
 - AC3: Richard reads the new FR lines (the six lessons, six hints, rung 9's line and hint, `L’île d’Olive`,
   guD2 / saveCodeBad, the palette words). Owner: Richard.
+
+### 8.9 The orchestrator's runs on the merged tree (primary checkout, 2026-09-28 12:12–13:50, on `cline-dev` at the commit named)
+
+- Gates at `443a01e97`: cg006 + cg005 + cg002 **214/214**, shell **79/79** (`config.test.js` took the 21-entry table).
+- `probe-cg006.mjs` through the shipped table, 18 probes on 7 rungs: **CPU 6/7 offered** — `narrate-run` (rung 14, E4)
+  WITHHELD: E4-fr answered "Tu vois, c'est juste un peu de travail pour un robot !" ×2 (no narration); **Metal 6/7** —
+  `no-letter-e` (rung 9) WITHHELD: R9-G1-en KEPT the rule 2/3 ("A vibrant tulip sits tall against a sunny sky."), R9-G1-fr
+  broke it. 🔴 s2's "G1 broken 3/3 EN on both paths" does not reproduce on Metal: the exam withholds rung 9 on a Mac GPU and
+  offers it on CPU (the tablet's path). Ruling R6 stands (G2 is kept 3/3); if rung 9 must show everywhere, a rule she breaks
+  in EN too is a CG-006 row for the next session.
+- Still with Richard: the FR copy read (AC3), now including rungs 13–18's lines.

@@ -380,3 +380,17 @@ backups; `isCopyName`, `ARCHIVE_EXT` gone); `tests/helpers.js` `withRelay` and `
 `exports`); `main.js` exports `{ islandBackups, backupsFolder }`. Nothing outside `garden-desktop/` but this file; the
 sibling lane (HOOKS) edits only the pages — but the pages' STORAGE_KEY and App store (`persist: true, storageKey`) are
 now a contract `copies.test.js` reads from `cg003Components.ts`.
+
+### 8.9 The orchestrator's runs on the merged tree (primary checkout, 2026-09-28 12:12–13:50, on `cline-dev` at the commit named)
+
+- `build-app.js --allow-development-engine` exit 0 (project `templates/bot-garden`, `name: "Olive's Island"`, `policySource:
+  shell-closed`, `<title>Olive's Island</title>`); `npm run dist:mac` exit 0 → `Olive's Island.app`, `CFBundleName` Olive's Island,
+  `CFBundleIdentifier` io.digitalbricks.garden, policy + model inside. The apostrophe cost nothing on the Mac.
+- `drive-upgrade.js --exe …` at `6acf90060`+: **PASS 9/9** with the model (exam 21 rungs, Ada/Robo→Bolt kept across 0.0.1 →
+  0.0.2 in storage, on her card, on My robot; control home empty); **PASS 9/9 without** (model dir moved out: `withModel: false`,
+  the ask answers `no-model`), model moved back.
+- After the backup lane (`bc36c1f59`) and at `ff06f39b5` (the kit fix packaged): **PASS 10/10** — `islandBackup` true:
+  `Documents/Olive's Island backups/island-backup-2026-09-28.json` + `README.txt` after launch 1, holding `{name: Ada, robot:
+  Bolt}` as stored JSON AND as a save code; no backend backup; the control home has none.
+- 🟡 Not measured: the Restore menu's native dialogs (CDP cannot press them) — a two-minute hand check, steps in §8.1.
+  `electron-builder` printed `default Electron icon is used` — the app has no icon (owner CG-008).

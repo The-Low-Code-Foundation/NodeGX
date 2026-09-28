@@ -1,6 +1,6 @@
 # CG-002 — The engine: the interpreter, the fold, the hints, the save
 
-**Opened 2026-09-27**, scoped from TPL-012 §2–§3. **Status: 🟢 session 1 built, session 2 wired (2026-09-28) — AC1–AC9 measured green in the engine gate (105/105 on `cline-dev` with CG-006's requests); `npm run template:garden` runs this gate before it writes anything (CG-003).** Depends on nothing. Lane B.
+**Opened 2026-09-27**, scoped from TPL-012 §2–§3. **Status: 🟢 session 3 (2026-09-28) — the fold offers the higher count (R5, `83888c07d`), the save model v3 (one island per kid, R12), rungs 13–18 get their after-run line; engine 116/116 on the primary at `ff06f39b5`.** Depends on nothing. Lane B.
 
 ## 1. The person sentence
 

@@ -1,6 +1,6 @@
 # CG-003 — The pages: six screens through the plan door
 
-**Opened 2026-09-27**, scoped from TPL-012 §2.2. **Status: 🟢 session 2 (2026-09-28) — built and driven: gate 47/47, `npm run template:garden` exit 0 and 0 drift on the primary checkout, the page drive 121/121 (EN + FR, 1368×912 + 390×844, 0 console / 0 network errors, screenshots looked at). AC1–AC10 measured (§7, §7.1, §7.2). CG-005's page hooks are partly wired (§7.2).** Depends on CG-001 and
+**Opened 2026-09-27**, scoped from TPL-012 §2.2. **Status: 🟢 session 3 (2026-09-28) — one island per kid, the sea with pins, the name, the hooks' components; gate 79/79, template regenerated hash-identical, page drive 148/148 on the primary at `ff06f39b5`.** Depends on CG-001 and
 CG-002. Lanes A+B.
 
 ## 1. The person sentence

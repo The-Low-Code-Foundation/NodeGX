@@ -1,6 +1,6 @@
 # CG-005 — Olive in the game: the ask-Olive blocks, the fallbacks, the exam gate
 
-**Opened 2026-09-27**, scoped from TPL-012 §2.4 and §2.6. **Status: 🟡 session 2 (2026-09-28) — AC1, AC3, AC4, AC7, AC8 measured; AC2, AC5, AC6 measured in specs and the route drive, their page clauses wait for CG-003's hooks (§7, §7.1).** Depends on
+**Opened 2026-09-27**, scoped from TPL-012 §2.4 and §2.6. **Status: 🟢 session 3 (2026-09-28) — the page hooks built and driven: Olive page drive 16/16 (0 skip) on the primary; a voiced hint must still be the hint (`unfaithful`); the kit keeps a picked option whole; contract test 31/31 CPU, 30/31 Metal (P21 poem, variance — the exam withholds it).** Depends on
 CG-002 and CG-004. Lanes B+C. **Session 2 (2026-09-28, lane C): 🟡 AC1–AC6 and AC8 measured in the specs; AC7 and the page clauses prepared, drives pending — §7.**
 
 ## 1. The person sentence
@@ -255,3 +255,17 @@ then "Olive is resting"; the hooks' contrast 4.61–13.86. Gates: `cg005Olive` 3
 **Merge hazard:** the kit (`src/kit.js` and its built `index.js`) is lane LOOK's file, changed here on the orchestrator's
 word (a product defect the drive found): `setSlot(list, id, key, value, max?)` — the fifth argument is new and optional.
 `templates/bot-garden/noodl_modules/garden-kit/index.js` must be regenerated on the merged tree (left uncommitted).
+
+### 8.9 The orchestrator's runs on the merged tree (primary checkout, 2026-09-28 12:12–13:50, on `cline-dev` at the commit named)
+
+- **The real model through the shipped table** (`drives/drive-probes.sh`, steps 2–5, at `443a01e97`): contract **31/31 PASS on
+  CPU** (P02, the EN thank-you, now passes — R7), **30/31 on Metal** (P21 poem: one line, not two, 2/3 — variance; the exam
+  withholds the poem on that machine as designed).
+- 🔴→✅ **A voiced hint had stopped being the hint in 3 of 6 recorded voicings**, every one `ok: true` under the old check:
+  FR Metal "C'est une excellente question ! La réponse est : **Un tulipe !**…" (an answer, in markdown); EN on both paths
+  "Pip was standing in front of a tree…" (the question gone). Fixed `e1667b3e1`: `compose` carries `keep {question, name}`,
+  `checkOutput` refuses a voicing that drops the `?`, drops the robot's (renamable) name, or brings markdown → `unfaithful` →
+  the written line. Test on the six real replies; arms 3/3. The hooks lane mirrored it on the page.
+- Page clauses (`DEPLOY=… drive-olive.sh pages`) at `ff06f39b5`: **16/16, 0 skip, exit 0** (the first run on the merged tree
+  read 14 pass + 2 fail + a failed tap: two were ONE product defect in the kit — a picked option cut to 40 characters, so 15
+  options of five rungs were never sent — and one was the drive tapping a palette the kit locks during a run; §8.1).
