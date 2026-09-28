@@ -16,6 +16,8 @@
 const fs = require('fs');
 const path = require('path');
 
+const templates = require('./olive-templates.json');
+
 const RESULTS_FILE = 'olive-exam.json';
 const DEFAULT_TIMES = 3;
 
@@ -46,8 +48,34 @@ const PROBES = [
   { id: 'P20', from: 'A8', rung: 'translate', lang: 'en', slots: { note: 'Biscuit the cat is hungry.' }, mode: 'fail', expect: { kind: 'contains', any: ['faim'] } },
   { id: 'P21', from: 'A5', rung: 'poem', lang: 'fr', slots: { flower: 'Tulla' }, mode: 'pass', expect: { kind: 'lines', n: 2 } },
   { id: 'P22', from: '—', rung: 'voice-hint', lang: 'fr', slots: { key: 'hintWet', b: 'Pip' }, mode: 'record', expect: { kind: 'contains', any: ['flaque', 'tulipe', 'arros'] } },
-  { id: 'P23', from: '—', rung: 'words-to-blocks', lang: 'en', slots: { route: 'Go forward two squares then turn left.' }, mode: 'record', expect: { kind: 'equals', value: ['avancer', 'avancer', 'gauche'] } }
+  { id: 'P23', from: '—', rung: 'words-to-blocks', lang: 'en', slots: { route: 'Go forward two squares then turn left.' }, mode: 'record', expect: { kind: 'equals', value: ['avancer', 'avancer', 'gauche'] } },
+  // CG-005 AC8: every rung examined in BOTH languages. The 2026-09-27 readout was taken in French; these English twins are
+  // RECORDED (one sample each, the tablet's exam time), never asserted, until a contract run on the real model says what
+  // she does in English — then each moves to the FR probe's mode. The rung verdicts stay on the asserted FR probes.
+  { id: 'P24', from: '—', rung: 'name-three', lang: 'en', slots: { thing: 'a ginger cat' }, times: 1, mode: 'record', expect: { kind: 'items', n: 3 } },
+  { id: 'P25', from: '—', rung: 'name-one', lang: 'en', slots: { thing: 'a tulip' }, temperature: 0, times: 2, mode: 'record', expect: { kind: 'identical' } },
+  { id: 'P26', from: '—', rung: 'count-in-words', lang: 'en', slots: { route: 'Go forward three squares.' }, times: 1, mode: 'record', expect: { kind: 'equals', value: ['avancer', 'avancer', 'avancer'] } },
+  { id: 'P27', from: '—', rung: 'what-wants', lang: 'en', slots: { line: 'Biscuit meows: "I\'m so hungry, my bowl is empty, bring me some kibble!"' }, times: 1, mode: 'record', expect: { kind: 'equals', value: 'kibble' } },
+  { id: 'P28', from: '—', rung: 'is-it-a', lang: 'en', slots: { thing: 'a rose', kind: 'a flower' }, times: 1, mode: 'record', expect: { kind: 'equals', value: 'yes' } },
+  { id: 'P29', from: '—', rung: 'count-tulips', lang: 'en', slots: { list: 'tulip, tulip, rose, tulip, daisy, tulip, rose' }, times: 1, mode: 'record', expect: { kind: 'equals', value: 4 } },
+  { id: 'P30', from: '—', rung: 'maths-seeds', lang: 'en', slots: { a: '2', b: '3' }, times: 1, mode: 'record', expect: { kind: 'equals', value: 5 } },
+  { id: 'P31', from: '—', rung: 'maths', lang: 'en', slots: { a: '14', b: '9' }, times: 1, mode: 'record', expect: { kind: 'equals', value: 23 } },
+  { id: 'P32', from: '—', rung: 'under-five-words', lang: 'en', slots: { to: 'Pip' }, times: 1, mode: 'record', expect: { kind: 'wordsAtMost', n: 4 } },
+  { id: 'P33', from: '—', rung: 'tall-tales', lang: 'en', slots: { question: 'What is the capital of Australia?' }, times: 1, mode: 'record', expect: { kind: 'contains', any: ['only know the garden', 'only know about the garden'] } },
+  { id: 'P34', from: '—', rung: 'poem', lang: 'en', slots: { flower: 'Tulla' }, times: 1, mode: 'record', expect: { kind: 'lines', n: 2 } },
+  { id: 'P35', from: '—', rung: 'voice-hint', lang: 'en', slots: { key: 'hintWet', b: 'Pip' }, times: 1, mode: 'record', expect: { kind: 'contains', any: ['puddle', 'tulip', 'water'] } }
 ];
+
+/**
+ * The rung's ladder comes from the rung TABLE, not from a probe's mode. A recorded probe on a 🎓 rung is graded the
+ * 🎓 way: she passes the rung when she FAILS the probe. (Until CG-005 a recorded probe was graded `pass = met` on every
+ * rung, so rung 9 — "under 5 words", which she OBEYS 6 runs in 6 — came out `pass` and was OFFERED, the opposite of
+ * what CG-004 §7 finding (a) says the gate does.)
+ */
+function ladderOf(rung) {
+  const r = templates.rungs[rung];
+  return r && r.ladder === 'fail' ? 'fail' : 'pass';
+}
 
 function fold(s) {
   return String(s)
@@ -77,6 +105,18 @@ function meetsOne(expect, x) {
       return String(x.text || '').split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w)).length <= expect.n;
     case 'lines':
       return String(x.text || '').split('\n').filter((l) => l.trim()).length === expect.n;
+    // CG-006's kinds (lane B's EXAM_KIND_PATCH, cg006Probes.ts at ba8a8a6d6, taken verbatim): without them the default
+    // below graded every reply "not met", so a 🎓 probe of these kinds passed whatever Olive said.
+    case 'containsAll': {
+      const f = fold(got);
+      return expect.all.every((a) => f.includes(fold(a)));
+    }
+    case 'lacks': {
+      const f = fold(got);
+      if ((expect.letters || []).some((l) => f.includes(fold(l)))) return false;
+      const ws = new Set(f.split(/\s+/).flatMap((w) => w.split(/['’]/)).map((w) => w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '')).filter(Boolean));
+      return !(expect.words || []).some((w) => ws.has(fold(w)));
+    }
     default:
       return false;
   }
@@ -133,7 +173,7 @@ async function runExam({ ask, probes = PROBES, timings = null, log = () => {}, n
     }
     const ms = now() - t1;
     const wasMet = met(p.expect, replies);
-    const pass = p.mode === 'fail' ? !wasMet : wasMet;
+    const pass = p.mode === 'fail' || (p.mode === 'record' && ladderOf(p.rung) === 'fail') ? !wasMet : wasMet;
     const row = { id: p.id, from: p.from, rung: p.rung, lang: p.lang, mode: p.mode, met: wasMet, pass, ms, replies: replies.map((r) => ({ ok: r.ok, value: r.value, text: r.text, reason: r.reason, fallback: r.fallback, ms: r.ms })) };
     out.push(row);
     if (timings) timings.line({ event: 'exam-probe', id: p.id, rung: p.rung, ms, samples: replies.length, pass });
@@ -143,7 +183,7 @@ async function runExam({ ask, probes = PROBES, timings = null, log = () => {}, n
   // beside it and count only when the rung has no asserted probe (voice-hint).
   const rungs = {};
   for (const row of out) {
-    const r = (rungs[row.rung] = rungs[row.rung] || { ladder: row.mode === 'fail' ? 'fail' : 'pass', probes: [], pass: true, asserted: 0 });
+    const r = (rungs[row.rung] = rungs[row.rung] || { ladder: ladderOf(row.rung), probes: [], pass: true, asserted: 0 });
     r.probes.push(row.id);
     if (row.mode === 'record') continue;
     r.asserted++;
@@ -173,4 +213,16 @@ function writeResults(dataDir, results) {
   fs.writeFileSync(resultsPath(dataDir), JSON.stringify(results, null, 2));
 }
 
-module.exports = { PROBES, met, meetsOne, decided, runExam, readResults, writeResults, resultsPath, RESULTS_FILE, DEFAULT_TIMES };
+/**
+ * CG-005 AC5 — the exam gate: the rungs this machine's exam FAILED. A rung the exam has not graded (no results yet: the
+ * first-launch exam still running, or no model at all — AC4, the ladder runs on written lines) is not withheld; only a
+ * measured failure withholds. The page reads the same rule from `status.exam.rungs` (cg005Olive.ts `withheldRungs`).
+ */
+function withheldRungs(results) {
+  const out = [];
+  const rungs = results && results.rungs && typeof results.rungs === 'object' ? results.rungs : {};
+  for (const [id, r] of Object.entries(rungs)) if (r && r.pass === false) out.push(id);
+  return out.sort();
+}
+
+module.exports = { PROBES, met, meetsOne, decided, runExam, readResults, writeResults, resultsPath, RESULTS_FILE, DEFAULT_TIMES, ladderOf, withheldRungs };

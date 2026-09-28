@@ -26,7 +26,7 @@
     "npmRebuild": false,
     "files": [
       "main.js", "relay.js", "policy.js", "fit.js", "copies.js", "owl.js", "olive-route.js", "olive-check.js", "olive-templates.json",
-      "exam.js", "timings.js", "model-check.js", "garden.json", "package.json",
+      "exam.js", "timings.js", "model-check.js", "olive-stub.js", "olive-written.js", "garden.json", "package.json",
       "node_modules/**/*",
       "!node_modules/@node-llama-cpp/*/bins/**/*.a",
       "!node_modules/node-llama-cpp/llama/gitRelease.bundle"

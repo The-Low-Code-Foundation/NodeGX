@@ -128,7 +128,11 @@ function compose(templates, rungId, values, { lang, shape, temperature, options 
     maxTokens: cap,
     enumValues,
     mustContain: rung.mustContain ? (rung.mustContain[L] || []).map((m) => fill(m, vars)) : [],
-    lang: L
+    lang: L,
+    // CG-005: the rung and the validated slot values ride along for the stub Olive (olive-stub.js answers by rung + slots);
+    // the real engine reads only system/user/schema/temperature/maxTokens and never sees them.
+    rung: rungId,
+    values: { ...values }
   };
 }
 
@@ -263,4 +267,7 @@ function checkOutput(raw, { shape, enumValues, mustContain = [], lang }) {
   return trimmed ? { ok: true, text: out, trimmed: true } : { ok: true, text: out };
 }
 
-module.exports = { TEXT_MAX, SENTENCE_WORDS, BLOCKLIST, KEYS, blocked, words, fold, checkSlots, compose, schemaFor, checkOutput, tidy, parseLoose };
+// CONTROL is exported for CG-005: the page embeds `checkSlots` and its helpers' SOURCE (cg005Olive.ts), so it needs the
+// same constants by value. 🔴 Keep checkSlots, blocked, words and fold free of backticks and dollar-braces: they run
+// inside a template-literal Function script on the page.
+module.exports = { TEXT_MAX, SENTENCE_WORDS, BLOCKLIST, CONTROL, KEYS, blocked, words, fold, checkSlots, compose, schemaFor, checkOutput, tidy, parseLoose };

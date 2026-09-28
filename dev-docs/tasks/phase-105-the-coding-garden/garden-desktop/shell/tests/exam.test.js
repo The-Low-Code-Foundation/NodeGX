@@ -10,7 +10,7 @@ const { checkSlots } = require('../olive-check');
 const { tmp } = require('./helpers');
 
 test('every probe names a rung of the table, valid slots, and a battery probe (or none, recorded only)', () => {
-  assert.ok(PROBES.length >= 20 && PROBES.length <= 25, `${PROBES.length} probes`);
+  assert.ok(PROBES.length >= 20 && PROBES.length <= 40, `${PROBES.length} probes`); // 23 FR-led + 12 EN twins (CG-005 AC8)
   for (const p of PROBES) {
     assert.ok(templates.rungs[p.rung], `${p.id} rung ${p.rung}`);
     assert.equal(checkSlots(templates, p.rung, p.slots, p.lang).ok, true, `${p.id} slots`);

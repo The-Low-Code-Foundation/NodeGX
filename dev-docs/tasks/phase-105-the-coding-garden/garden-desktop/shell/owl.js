@@ -149,7 +149,7 @@ function createOwl(o = {}) {
     try {
       const schema = schemaFor(prompt.shape, prompt.enumValues);
       const gen = backend
-        .generate({ system: prompt.system, user: prompt.user, schema, temperature: prompt.temperature, maxTokens: Math.min(DEFAULTS.maxTokens, prompt.maxTokens || DEFAULTS.maxTokens), signal: ac.signal })
+        .generate({ system: prompt.system, user: prompt.user, schema, temperature: prompt.temperature, maxTokens: Math.min(DEFAULTS.maxTokens, prompt.maxTokens || DEFAULTS.maxTokens), signal: ac.signal, rung: prompt.rung, values: prompt.values, lang: prompt.lang })
         .then((raw) => ({ ok: true, raw: tidy(raw) }), (e) => ({ ok: false, fallback: true, reason: ac.signal.aborted ? 'timeout' : 'generate-failed', error: String((e && e.message) || e).slice(0, 200) }));
       const r = await Promise.race([gen, timeout]);
       const ms = now() - t0;

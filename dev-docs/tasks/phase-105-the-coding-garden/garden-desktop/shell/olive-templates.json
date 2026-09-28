@@ -56,6 +56,7 @@
       "fr": ["Les tulipes ont soif.", "Biscuit a faim.", "Merci pour les graines."],
       "en": ["Biscuit the cat is hungry.", "The tulips are thirsty.", "Thank you for the seeds."]
     },
+    "flower_names": { "fr": ["Tulla", "Rosette", "Pâquerette", "Bouton"], "en": ["Tulla", "Rosie", "Sunny", "Button"] },
     "hintKeys": { "fr": ["hintEmpty", "hintPattern", "hintMissed", "hintBump", "hintDone", "hintWet", "hintStart"], "en": ["hintEmpty", "hintPattern", "hintMissed", "hintBump", "hintDone", "hintWet", "hintStart"] }
   },
   "hints": {
@@ -130,13 +131,13 @@
       "user": { "fr": "Fleurs : {list}. Combien de tulipes ?", "en": "Flowers: {list}. How many tulips?" }
     },
     "maths-seeds": {
-      "n": 8, "ladder": "pass", "shape": "integer", "temperature": 0.2, "maxTokens": 16,
+      "n": 8, "band": 2, "ladder": "pass", "shape": "integer", "temperature": 0.2, "maxTokens": 16,
       "slots": { "a": { "regex": "^[0-9]$" }, "b": { "regex": "^[0-9]$" } },
       "system": "olive",
       "user": { "fr": "Pip a {a} graines, Sami lui en donne {b}. Combien de graines ?", "en": "Pip has {a} seeds, Sami gives Pip {b} more. How many seeds?" }
     },
     "maths": {
-      "n": 8, "ladder": "fail", "shape": "integer", "temperature": 0.2, "maxTokens": 16,
+      "n": 8, "band": 2, "ladder": "fail", "shape": "integer", "temperature": 0.2, "maxTokens": 16,
       "slots": { "a": { "regex": "^[0-9]{1,2}$" }, "b": { "regex": "^[0-9]{1,2}$" } },
       "system": "olive",
       "user": { "fr": "{a} + {b} = ?", "en": "{a} + {b} = ?" }
@@ -148,7 +149,7 @@
       "user": { "fr": "Dis merci à {to} en moins de 5 mots.", "en": "Say thank you to {to} in under 5 words." }
     },
     "tall-tales": {
-      "n": 10, "ladder": "fail", "shape": "sentence", "temperature": 0.8, "maxTokens": 48,
+      "n": 10, "band": 2, "ladder": "fail", "shape": "sentence", "temperature": 0.8, "maxTokens": 48,
       "slots": { "question": { "list": "questions_tall" } },
       "system": "fenced",
       "user": { "fr": "{question}", "en": "{question}" }
@@ -161,7 +162,7 @@
     },
     "poem": {
       "n": 12, "ladder": "pass", "shape": "two_lines", "temperature": 0.8, "maxTokens": 64,
-      "slots": { "flower": { "text": true } },
+      "slots": { "flower": { "text": true, "suggest": "flower_names" } },
       "system": "olive",
       "user": { "fr": "Écris un poème de deux lignes sur une tulipe qui s'appelle {flower}.", "en": "Write a two-line poem about a tulip called {flower}." }
     },
@@ -170,6 +171,377 @@
       "slots": { "key": { "list": "hintKeys" }, "b": { "text": true }, "n": { "regex": "^[0-9]{1,2}$", "optional": true }, "w": { "regex": "^[0-9]$", "optional": true } },
       "system": "olive",
       "user": { "fr": "Redis cette phrase avec tes mots, en une phrase : « {hint} »", "en": "Say this in your own words, one sentence: \"{hint}\"" }
+    }
+  },
+  "written": {
+    "_about": "What shows when Olive does not answer (no model, the 12 s timeout, a refused output): a ✅ rung's WRITTEN answer (right, so the program still works), a 🎓 rung's CANNED FAILING answer (the readout's own mistake, so the lesson survives without a model). Read by the page (cg005Olive.ts embeds it) and by nothing else: the stub Olive answers from its own table. Forms: {text} with {slot} holes, {value}, {sum:[slots]}, {number:slot}, or {by:[slots], map:{'v1|v2': answer}, else}.",
+    "say-thanks": {
+      "fr": {
+        "text": "Merci beaucoup, {to} ! J'ai {deed}."
+      },
+      "en": {
+        "text": "Thank you, {to}! I just {deed}."
+      }
+    },
+    "name-one": {
+      "fr": {
+        "value": "Pipette"
+      },
+      "en": {
+        "value": "Sunny"
+      }
+    },
+    "name-three": {
+      "fr": {
+        "value": [
+          "Rosalie",
+          "Capucine",
+          "Lila"
+        ]
+      },
+      "en": {
+        "value": [
+          "Rosie",
+          "Poppy",
+          "Lily"
+        ]
+      }
+    },
+    "words-to-blocks": {
+      "fr": {
+        "by": [
+          "route"
+        ],
+        "map": {
+          "Avance de deux cases puis tourne à gauche.": {
+            "value": [
+              "avancer",
+              "avancer",
+              "gauche"
+            ]
+          },
+          "Avance d'une case, tourne à gauche, et arrose la tulipe.": {
+            "value": [
+              "avancer",
+              "gauche",
+              "arroser"
+            ]
+          },
+          "Tourne à droite, avance, arrose.": {
+            "value": [
+              "droite",
+              "avancer",
+              "arroser"
+            ]
+          }
+        }
+      },
+      "en": {
+        "by": [
+          "route"
+        ],
+        "map": {
+          "Go forward two squares then turn left.": {
+            "value": [
+              "avancer",
+              "avancer",
+              "gauche"
+            ]
+          },
+          "Go forward one square, turn left, and water the tulip.": {
+            "value": [
+              "avancer",
+              "gauche",
+              "arroser"
+            ]
+          },
+          "Turn right, go forward, water.": {
+            "value": [
+              "droite",
+              "avancer",
+              "arroser"
+            ]
+          }
+        }
+      }
+    },
+    "count-in-words": {
+      "fr": {
+        "by": [
+          "route"
+        ],
+        "map": {
+          "Avance de trois cases.": {
+            "value": [
+              "avancer"
+            ]
+          },
+          "Avance de trois cases, puis arrose.": {
+            "value": [
+              "avancer",
+              "arroser"
+            ]
+          }
+        }
+      },
+      "en": {
+        "by": [
+          "route"
+        ],
+        "map": {
+          "Go forward three squares.": {
+            "value": [
+              "avancer"
+            ]
+          },
+          "Go forward three squares, then water.": {
+            "value": [
+              "avancer",
+              "arroser"
+            ]
+          }
+        }
+      }
+    },
+    "what-wants": {
+      "fr": {
+        "by": [
+          "line"
+        ],
+        "map": {
+          "Biscuit miaule : « J'ai tellement faim, ma gamelle est vide, apporte-moi des croquettes ! »": {
+            "value": "croquettes"
+          },
+          "Sami dit : « Peux-tu porter cette enveloppe à Mamie Rose ? »": {
+            "value": "lettre"
+          },
+          "Mamie Rose dit : « Mes graines sont restées dans la remise, tu me les apportes ? »": {
+            "value": "graines"
+          }
+        }
+      },
+      "en": {
+        "by": [
+          "line"
+        ],
+        "map": {
+          "Biscuit meows: \"I'm so hungry, my bowl is empty, bring me some kibble!\"": {
+            "value": "kibble"
+          },
+          "Sami says: \"Can you carry this envelope to Mamie Rose?\"": {
+            "value": "letter"
+          },
+          "Mamie Rose says: \"My seeds are still in the shed, will you bring them?\"": {
+            "value": "seeds"
+          }
+        }
+      }
+    },
+    "is-it-a": {
+      "fr": {
+        "by": [
+          "thing",
+          "kind"
+        ],
+        "map": {
+          "une rose|une fleur": {
+            "value": "oui"
+          },
+          "une rose|une plante": {
+            "value": "oui"
+          },
+          "un chat|un animal": {
+            "value": "oui"
+          },
+          "un pissenlit|une fleur": {
+            "value": "oui"
+          },
+          "un pissenlit|une plante": {
+            "value": "oui"
+          },
+          "une tulipe rouge|une fleur": {
+            "value": "oui"
+          },
+          "une tulipe rouge|une tulipe": {
+            "value": "oui"
+          },
+          "une tulipe rouge|une plante": {
+            "value": "oui"
+          }
+        },
+        "else": {
+          "value": "non"
+        }
+      },
+      "en": {
+        "by": [
+          "thing",
+          "kind"
+        ],
+        "map": {
+          "a rose|a flower": {
+            "value": "yes"
+          },
+          "a rose|a plant": {
+            "value": "yes"
+          },
+          "a cat|an animal": {
+            "value": "yes"
+          },
+          "a dandelion|a flower": {
+            "value": "yes"
+          },
+          "a dandelion|a plant": {
+            "value": "yes"
+          },
+          "a red tulip|a flower": {
+            "value": "yes"
+          },
+          "a red tulip|a tulip": {
+            "value": "yes"
+          },
+          "a red tulip|a plant": {
+            "value": "yes"
+          }
+        },
+        "else": {
+          "value": "no"
+        }
+      }
+    },
+    "count-tulips": {
+      "fr": {
+        "by": [
+          "list"
+        ],
+        "map": {
+          "tulipe, tulipe, rose, tulipe, marguerite, tulipe, rose": {
+            "value": 6
+          },
+          "rose, tulipe, tulipe, marguerite": {
+            "value": 3
+          }
+        }
+      },
+      "en": {
+        "by": [
+          "list"
+        ],
+        "map": {
+          "tulip, tulip, rose, tulip, daisy, tulip, rose": {
+            "value": 6
+          },
+          "rose, tulip, tulip, daisy": {
+            "value": 3
+          }
+        }
+      }
+    },
+    "maths-seeds": {
+      "fr": {
+        "sum": [
+          "a",
+          "b"
+        ]
+      },
+      "en": {
+        "sum": [
+          "a",
+          "b"
+        ]
+      }
+    },
+    "maths": {
+      "fr": {
+        "number": "a"
+      },
+      "en": {
+        "number": "a"
+      }
+    },
+    "under-five-words": {
+      "fr": {
+        "text": "Merci beaucoup {to}, tu es vraiment le plus gentil ami de toute l'île !"
+      },
+      "en": {
+        "text": "Thank you so much {to}, you are truly the kindest friend on the whole island!"
+      }
+    },
+    "tall-tales": {
+      "fr": {
+        "by": [
+          "question"
+        ],
+        "map": {
+          "Quelle est la capitale de l'Australie ?": {
+            "text": "La capitale de l'Australie, c'est Sydney !"
+          },
+          "Combien pèse la Lune ?": {
+            "text": "La Lune pèse à peu près autant qu'une grosse montagne."
+          },
+          "Qui a inventé le vélo ?": {
+            "text": "C'est Victor Hugo qui a inventé le vélo."
+          }
+        }
+      },
+      "en": {
+        "by": [
+          "question"
+        ],
+        "map": {
+          "What is the capital of Australia?": {
+            "text": "The capital of Australia is Sydney!"
+          },
+          "How much does the Moon weigh?": {
+            "text": "The Moon weighs about as much as a big mountain."
+          },
+          "Who invented the bicycle?": {
+            "text": "Victor Hugo invented the bicycle."
+          }
+        }
+      }
+    },
+    "translate": {
+      "fr": {
+        "by": [
+          "note"
+        ],
+        "map": {
+          "Les tulipes ont soif.": {
+            "text": "The tulips are thirsty."
+          },
+          "Biscuit a faim.": {
+            "text": "Biscuit is hungry."
+          },
+          "Merci pour les graines.": {
+            "text": "Thank you for the seeds."
+          }
+        }
+      },
+      "en": {
+        "by": [
+          "note"
+        ],
+        "map": {
+          "Biscuit the cat is hungry.": {
+            "text": "Le biscuit est le chat qui est en honte."
+          },
+          "The tulips are thirsty.": {
+            "text": "Les tulipes sont vif."
+          },
+          "Thank you for the seeds.": {
+            "text": "Merci de les graines vives."
+          }
+        }
+      }
+    },
+    "poem": {
+      "fr": {
+        "text": "{flower}, ma tulipe au soleil,\nTu bois la pluie et tu te réveilles."
+      },
+      "en": {
+        "text": "{flower}, my tulip in the sun,\nYou drink the rain and wake for fun."
+      }
     }
   }
 }

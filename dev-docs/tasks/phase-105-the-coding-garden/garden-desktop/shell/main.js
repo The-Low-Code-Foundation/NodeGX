@@ -249,14 +249,16 @@ async function restoreCopy(file) {
 
 /** The owl and its doors exist before the model is checked or loaded: an early ask is a fallback, not an error. */
 function createOwlAndDoors() {
-  owl = createOwl({ modelPath: MODEL_PATH, gpu: process.env.GARDEN_CPU ? false : true, threads: config.olive.cpuThreads, timeoutMs: config.olive.timeoutMs, contextSize: config.olive.contextSize, log, timings: timingsLog });
+  // GARDEN_OLIVE_STUB=1|mutant (a drive only, CG-005): the stub Olive answers instead of the model, behind the real route.
+  const stub = process.env.GARDEN_OLIVE_STUB ? require('./olive-stub').createStubEngine({ mutant: process.env.GARDEN_OLIVE_STUB === 'mutant' }) : null;
+  owl = createOwl({ modelPath: stub ? __filename : MODEL_PATH, engine: stub, gpu: process.env.GARDEN_CPU ? false : true, threads: config.olive.cpuThreads, timeoutMs: config.olive.timeoutMs, contextSize: config.olive.contextSize, log, timings: timingsLog });
   olive = createOliveDoors({ owl, templates, dataDir: DATA_DIR, header: config.header, prefix: config.doorPrefix, timings: timingsLog, log });
 }
 
 /** After the window is up: the sha256 (AC6), the load, the first exam. Never throws, never blocks the page. */
 async function wakeOwl() {
   try {
-    const check = await checkModel({ file: MODEL_PATH, expected: config.model.sha256, dataDir: DATA_DIR, log });
+    const check = process.env.GARDEN_OLIVE_STUB ? { ok: true, reason: 'stub' } : await checkModel({ file: MODEL_PATH, expected: config.model.sha256, dataDir: DATA_DIR, log });
     timings.modelCheck = check;
     if (check.reason === 'sha256-mismatch') {
       // Refuse it: a new owl in the refused state replaces the one the doors hold.

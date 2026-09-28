@@ -8,7 +8,7 @@
  * The model: `--model`, else GARDEN_MODEL_PATH, else shell/build-output/model/<garden.json model.file> (fetch-model.mjs
  * puts it there). `--cpu` forces gpu:false with garden.json's cpuThreads (what CI on Linux and the tablet run).
  *
- * Green = every ✅ probe met its expectation, every 🎓 probe was recorded as FAILING (the ladder is built on it),
+ * Green = the dial holds in FR and EN (CG-005 AC7: two runs at 0 the same name, three at 1.2 at least two names), every ✅ probe met its expectation, every 🎓 probe was recorded as FAILING (the ladder is built on it),
  * status answered under 1 s while a completion ran, and timings.log carries model-load / exam-probe / olive lines.
  * Recorded probes (mode 'record') are printed, never asserted. Exit 1 otherwise. Correctness, not timing: the ms are
  * printed for the task file, never asserted.
@@ -91,6 +91,23 @@ async function main() {
   R.statusDuringCompletion = { ms: st.ms, busy: st.body.busy, model: st.body.model, poemMs: poem.body.ms, poemOk: poem.body.ok };
   console.log(`olive-contract: status during a completion: ${st.ms} ms (busy=${st.body.busy}); the poem took ${poem.body.ms} ms`);
 
+  // CG-005 AC7: the dial on the real model, through the route, in BOTH languages. "Same every time" is the dial's
+  // temperature 0 (cg002Scripts DIAL_TEMPERATURE[0]); "surprise me" is 1.2 (DIAL_TEMPERATURE[2]). Two runs at 0 give the
+  // same word; three runs at 1.2 give at least two different words among the answers the checks let through.
+  R.dial = {};
+  for (const lang of ['fr', 'en']) {
+    const thing = templates.lists.things_one[lang][0];
+    const ask = async (temperature) => (await request(port, 'POST', P, { rung: 'name-one', slots: { thing }, lang, temperature })).body;
+    const same = [await ask(0), await ask(0)];
+    const wild = [await ask(1.2), await ask(1.2), await ask(1.2)];
+    const okWild = wild.filter((x) => x.ok).map((x) => JSON.stringify(x.value));
+    const sameOk = same.every((x) => x.ok) && new Set(same.map((x) => JSON.stringify(x.value))).size === 1;
+    const wildOk = new Set(okWild).size >= 2;
+    R.dial[lang] = { same: same.map((x) => (x.ok ? x.value : `⟂ ${x.reason}`)), surprise: wild.map((x) => (x.ok ? x.value : `⟂ ${x.reason}`)), sameOk, wildOk };
+    console.log(`olive-contract: AC7 dial ${lang}: same every time ${JSON.stringify(R.dial[lang].same)} ${sameOk ? 'ok' : 'NOT SAME'}; surprise me ${JSON.stringify(R.dial[lang].surprise)} ${wildOk ? 'ok' : 'NOT VARIED'}`);
+  }
+  const dialGreen = Object.values(R.dial).every((d) => d.sameOk && d.wildOk);
+
   // AC2: the exam through the route.
   const exam = await request(port, 'POST', P + '/exam', {});
   const res = exam.body;
@@ -118,11 +135,14 @@ async function main() {
   console.log(`olive-contract: timings.log ${JSON.stringify(events)} at ${timings.file}`);
 
   const failed = asserted.filter((p) => !p.pass);
-  const green = failed.length === 0 && st.ms < 1000 && events['model-load'] === 1 && events['exam-probe'] >= asserted.length && events.olive >= asserted.length;
+  const byLang = res.probes.reduce((m, p) => ((m[p.lang] = (m[p.lang] || 0) + 1), m), {});
+  R.byLang = byLang;
+  console.log(`olive-contract: probes per language ${JSON.stringify(byLang)} (CG-005 AC8; the EN twins are recorded, not asserted)`);
+  const green = dialGreen && failed.length === 0 && st.ms < 1000 && events['model-load'] === 1 && events['exam-probe'] >= asserted.length && events.olive >= asserted.length;
   R.verdict = green ? 'PASS' : 'FAIL';
   R.failed = failed.map((p) => p.id);
   if (OUT) fs.writeFileSync(OUT, JSON.stringify(R, null, 2));
-  console.log(`olive-contract: ${R.verdict}${failed.length ? ' — ' + failed.map((p) => `${p.id} (${p.rung}, ${p.mode})`).join(', ') : ''}`);
+  console.log(`olive-contract: ${R.verdict}${failed.length ? ' — ' + failed.map((p) => `${p.id} (${p.rung}, ${p.mode})`).join(', ') : ''}${dialGreen ? '' : ' — AC7 dial'}`);
   relay.close();
   await owl.close();
   process.exit(green ? 0 : 1);

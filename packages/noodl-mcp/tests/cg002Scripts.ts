@@ -59,6 +59,7 @@
  * @module noodl-mcp/tests/cg002Scripts
  */
 import { BAND_PALETTE, BLOCK_TYPES, HINT_KEYS, WORD_KEYS } from './cg002Content';
+import { BLOCK_WORD, OLIVE_HELPERS, RUNG_SHAPE, RUNG_TEMPERATURE } from './cg005Olive';
 
 /** An `until` gives up after this many passes, whatever its sensor says. */
 export const UNTIL_GUARD = 40;
@@ -118,6 +119,10 @@ var UNTIL_GUARD = ${UNTIL_GUARD};
 var MAX_TRICK_DEPTH = ${MAX_TRICK_DEPTH};
 var MAX_TICKS = ${MAX_TICKS};
 var DIAL_TEMPERATURE = ${JSON.stringify(DIAL_TEMPERATURE)};
+var ASK_SHAPE = ${JSON.stringify(RUNG_SHAPE)};
+var ASK_TEMPERATURE = ${JSON.stringify(RUNG_TEMPERATURE)};
+var ASK_BLOCK = ${JSON.stringify(BLOCK_WORD)};
+var ASK_RESERVED = { rung: 1, args: 1, shape: 1, dial: 1, options: 1 };
 function clone(v) { return v === undefined || v === null ? v : JSON.parse(JSON.stringify(v)); }
 function worldOf(raw) {
   var w = raw && typeof raw === 'object' ? clone(raw) : {};
@@ -197,6 +202,22 @@ function countUses(list, type) {
 }
 function countBlocks(list) { var n = 0; for (var i = 0; i < list.length; i++) { if (!list[i]) continue; n++; if (list[i].body) n += countBlocks(bodyOf(list[i])); } return n; }
 function hasContainer(list) { for (var i = 0; i < list.length; i++) if (list[i] && list[i].body) return true; return false; }
+function isAsk(b) { return b.t === 'ask' || String(b.t).indexOf('ask:') === 0; }
+/**
+ * An ask block as a step (CG-005). The rung is slots.rung, else the palette type's suffix (ask:<rung>). The slot values
+ * are slots.args (a list or an object), else every other slot key (the kit writes slots flat, as strings). No dial:
+ * the rung's own temperature. The shape: the block's, else the rung's.
+ */
+function askStep(b, slots) {
+  var rung = slots.rung !== undefined && slots.rung !== null && slots.rung !== '' ? slots.rung : String(b.t).slice(4);
+  var args;
+  if (Array.isArray(slots.args)) args = slots.args;
+  else if (slots.args && typeof slots.args === 'object') args = clone(slots.args);
+  else { args = {}; for (var k in slots) if (!ASK_RESERVED[k]) args[k] = slots[k]; }
+  var hasDial = slots.dial !== undefined && slots.dial !== null && slots.dial !== '';
+  var options = Array.isArray(slots.options) ? slots.options : typeof slots.options === 'string' && slots.options ? slots.options.split(',') : null;
+  return { id: b.id, op: 'ask', rung: rung, args: args, shape: String(slots.shape || ASK_SHAPE[rung] || 'word'), dial: hasDial ? Math.max(0, Math.min(2, Math.floor(Number(slots.dial) || 0))) : -1, options: options };
+}
 /** The program as flat steps. Static where it can be (repeat, do), dynamic where the world decides (until, if, an Olive count). */
 function flatten(list, tricks, out, depth) {
   out = out || []; depth = depth || 0;
@@ -212,16 +233,18 @@ function flatten(list, tricks, out, depth) {
     else if (b.t === 'if') out.push({ id: b.id, op: 'if', sensor: String(slots.sensor || 'tulip_ahead'), arg: slots.arg, body: body });
     else if (b.t === 'when' || b.t === 'trick') continue;
     else if (b.t === 'do') { var tr = tricks[String(slots.name || '')]; out.push({ id: b.id, op: 'noop' }); if (tr && depth < MAX_TRICK_DEPTH) flatten(tr, tricks, out, depth + 1); }
-    else if (b.t === 'ask') out.push({ id: b.id, op: 'ask', rung: slots.rung, args: Array.isArray(slots.args) ? slots.args : [], shape: String(slots.shape || 'word'), dial: Math.max(0, Math.min(2, Math.floor(Number(slots.dial) || 0))) });
+    else if (isAsk(b)) out.push(askStep(b, slots));
     else out.push({ id: b.id, op: String(b.t), text: slots.text });
   }
   return out;
 }
-function newRun(program, robotId, lang) {
+function newRun(program, robotId, lang, runId) {
   var prog = Array.isArray(program) ? program : [];
   var tricks = collectTricks(prog, {});
   return {
     robotId: String(robotId || ''), lang: String(lang) === 'fr' ? 'fr' : 'en',
+    runId: runId !== undefined && runId !== null && runId !== '' ? String(runId) : 'run' + Date.now().toString(36) + Math.floor(Math.random() * 2176782336).toString(36),
+    proposal: null, sensed: {},
     steps: flatten(prog, tricks), pc: 0, tick: 0, count: 0, bumps: 0, puddles: 0, watered: 0, said: 0, guardHits: 0,
     handled: {}, handlers: collectHandlers(prog, []), tricks: tricks, lastAnswer: null, waiting: false, askSeq: 0, done: false,
     blocks: countBlocks(prog)
@@ -298,16 +321,32 @@ function step(runIn, worldIn, answer) {
     var a = answer && typeof answer === 'object' ? answer : null;
     if (!run.waiting) { run.waiting = true; run.askSeq++; a = null; }
     else if (a && a.seq !== undefined && a.seq !== null && Number(a.seq) !== run.askSeq) a = null;
+    // The abandoned arm (CG-005): a reply stamped with ANOTHER run (the child pressed Start over while Olive thought) is
+    // dropped, even when its seq matches this run's first park.
+    else if (a && a.run !== undefined && a.run !== null && a.run !== '' && String(a.run) !== String(run.runId)) a = null;
     if (!a) {
       delta.waiting = true;
-      var req = { seq: run.askSeq, rung: s.rung, slots: s.args, lang: run.lang, shape: s.shape, temperature: DIAL_TEMPERATURE[s.dial] };
+      var req = { seq: run.askSeq, rung: s.rung, slots: s.args, lang: run.lang, shape: s.shape, temperature: s.dial >= 0 ? DIAL_TEMPERATURE[s.dial] : ASK_TEMPERATURE[s.rung] };
+      if (s.options) req.options = s.options;
       return { run: run, delta: delta, glowId: glowId, done: false, waiting: true, request: req };
     }
-    run.lastAnswer = { ok: !!a.ok, value: a.value, text: a.text, fallback: !!a.fallback };
+    run.lastAnswer = { ok: !!a.ok, value: a.value, text: a.text, fallback: !!a.fallback, reason: a.reason };
     run.waiting = false;
     delta.answered = clone(run.lastAnswer);
+    // A blocks answer is a PROPOSAL the child accepts or not: never spliced into the run (CG-005 AC1).
+    if (s.shape === 'blocks' && Array.isArray(a.value)) {
+      var proposed = [];
+      for (var q = 0; q < a.value.length; q++) if (ASK_BLOCK[a.value[q]]) proposed.push(ASK_BLOCK[a.value[q]]);
+      run.proposal = { askId: s.id, blocks: proposed };
+      delta.proposal = clone(run.proposal);
+    }
     run.pc++; run.tick++;
     return { run: run, delta: delta, glowId: glowId, done: false, waiting: false, request: null };
+  }
+  if (s.op === 'until' || s.op === 'if') {
+    // What the program READ (for a goal like "count to 4 and check it": CG-006's eggs, the senses predicate).
+    if (!run.sensed || typeof run.sensed !== 'object') run.sensed = {};
+    run.sensed[s.sensor] = (run.sensed[s.sensor] || 0) + 1;
   }
   if (s.op === 'until') {
     if (sense(w, run, s.sensor, s.arg) || s.guard >= UNTIL_GUARD) { if (s.guard >= UNTIL_GUARD) run.guardHits++; run.pc++; }
@@ -379,6 +418,7 @@ function goalMet(w, run, program, goal) {
     else if (g.name === 'facing') { ok = !!r && r.d === Number(a[0]); }
     else if (g.name === 'carrying') { var n = 0; if (r) for (var c = 0; c < r.carry.length; c++) if (r.carry[c] === String(a[0])) n++; ok = n === Number(a[1]); done += Math.min(n, Number(a[1])); total += Number(a[1]); }
     else if (g.name === 'uses') ok = countUses(prog, String(a[0])) >= (Number(a[1]) || 1);
+    else if (g.name === 'senses') ok = ((run.sensed && run.sensed[String(a[0])]) || 0) >= (Number(a[1]) || 1);
     else if (g.name === 'handled') ok = (run.handled && run.handled[String(a[0])] || 0) >= (Number(a[1]) || 1);
     else if (g.name === 'said') ok = (Number(run.said) || 0) >= (Number(a[0]) || 1);
     else if (g.name === 'no_puddle') { var pud = 0; for (var p = 0; p < w.things.length; p++) if (w.things[p].kind === 'puddle') pud++; ok = pud === 0; }
@@ -434,8 +474,9 @@ function shapeOf(list) { var out = []; for (var i = 0; i < list.length; i++) { v
 
 /** A program made ready: flattened, tricks inlined, `when` handlers armed. The run is JSON; the page holds it, never a Variable. */
 export const NEW_RUN_SCRIPT = `${ENGINE}
-var run = newRun(Inputs.program, Inputs.robotId, Inputs.lang);
+var run = newRun(Inputs.program, Inputs.robotId, Inputs.lang, Inputs.runId);
 Outputs.run = run;
+Outputs.runId = run.runId;
 Outputs.steps = run.steps.length;
 Outputs.blocks = run.blocks;
 Outputs.handlers = run.handlers.length;
@@ -459,6 +500,7 @@ Outputs.count = st.run.count;
 Outputs.bumps = st.run.bumps;
 Outputs.puddles = st.run.puddles;
 Outputs.sayKey = st.delta.sayKey || '';
+Outputs.proposal = st.delta.proposal || null;
 `;
 
 /** The world after a delta. The only writer of the world. */
@@ -635,7 +677,7 @@ Outputs.key = key;
 // ── Palette ─────────────────────────────────────────────────────────────────
 
 /** The blocks a band may use, limited to a request's list when one is given, labelled for the kit: word for band 10–12, caption for band 7–9. */
-export const PALETTE_SCRIPT = `
+export const PALETTE_SCRIPT = `${OLIVE_HELPERS}
 var BAND1 = ${BAND1};
 var ALL = ${ALL_BLOCKS};
 var META = ${JSON.stringify(BLOCK_META)};
@@ -654,7 +696,25 @@ for (var j = 0; j < ids.length; j++) {
   var m = META[id];
   out.push({ id: id, kind: m.kind, label: word['b' + LABEL[id]] || id, caption: word['c' + LABEL[id]] || id, hasBody: m.body, hasCount: m.count, slots: m.slots, band: band });
 }
+// Olive's rungs (CG-005): one entry per rung the request offers ('all' = the ladder), each with its picker. The exam
+// gate: a rung this machine's exam FAILED is withheld (the Skills page shows it as "Olive can't do this here yet").
+var rungIds = Inputs.rungs === 'all' ? OLIVE_ORDER : Array.isArray(Inputs.rungs) ? Inputs.rungs : [];
+var withheld = oliveWithheld(Inputs.exam);
+var olive = [], offered = [], heldHere = [];
+for (var r = 0; r < rungIds.length; r++) {
+  var rid = String(rungIds[r]), rr = OLIVE.rungs[rid];
+  if (!rr || rid === 'voice-hint' || (Number(rr.band) || 1) > band) continue;
+  if (withheld.indexOf(rid) !== -1) { heldHere.push(rid); continue; }
+  offered.push(rid);
+  var title = word[OLIVE_RUNG_WORD[rid]] || rid;
+  olive.push({ id: 'ask:' + rid, kind: 'ask', label: title, caption: title, hasBody: false, hasCount: false, slots: olivePickerSlots(rid, band, lang, Inputs.narrow, word), band: band, rung: rid, shape: rr.shape, shapeLabel: word[OLIVE_SHAPE_WORD[rr.shape]] || rr.shape, ladder: rr.ladder });
+}
+if (rungIds.length) { var kept = []; for (var o = 0; o < out.length; o++) if (out[o].id !== 'ask') kept.push(out[o]); out = kept.concat(olive); }
 Outputs.palette = out;
+Outputs.olive = olive;
+Outputs.offered = offered;
+Outputs.withheld = withheld;
+Outputs.heldHere = heldHere;
 Outputs.count = out.length;
 Outputs.band = band;
 `;
