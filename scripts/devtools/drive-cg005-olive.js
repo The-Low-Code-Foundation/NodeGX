@@ -195,7 +195,7 @@ async function pagesPart() {
           await wait(150);
         }
         await wait(200);
-        if (p.found) p = await ev(`(() => { const el = (${finder}); const r = el.getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2; const at = document.elementFromPoint(x, y); return { found: true, x, y, hit: !!at && (el === at || el.contains(at)) }; })()`);
+        if (p.found) p = await ev(`(() => { const el = (${finder}); const r = el.getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2; const at = document.elementFromPoint(x, y); return { found: true, x, y, hit: !!at && (el === at || el.contains(at)), at: at ? at.tagName + '.' + String(at.className || '').slice(0, 60) : null, locked: !!el.closest('.gd-locked') }; })()`);
         if (!p.found || !p.hit) {
           check(`tap ${label}`, false, p);
           return false;
@@ -241,6 +241,8 @@ async function pagesPart() {
         await tap(first('.gd-picker .gd-opt'), `the first word for ${slot}`);
       };
       const play = () => tap(first('.bg-controls .bg-i-play'), 'Play');
+      /** The block list is locked while a run plays (the kit's own rule): wait for the run to end before editing. */
+      const runOver = () => until(`!document.querySelector('.gd-locked')`, Boolean, 8000);
 
       // ── P-AC6: band 10–12's text slot: 40 characters, the 41st refused; a listed word refused inline; Play sends nothing ──
       await enterFree('P-AC6');
@@ -317,11 +319,15 @@ async function pagesPart() {
         await addAsk('count-tulips', 'list');
         const x0 = await ev(`(document.querySelector('.bg-stage .gd-bot') || { getAttribute: () => null }).getAttribute('data-x')`);
         await play();
-        const thinking = await until(`(document.querySelector(${JSON.stringify(OWL)}) || {}).innerText || ''`, (t) => /réfléchit|thinking/i.test(t), 4000);
+        // Parked = the ask block is the one running AND the owl says she is thinking (s3 run 1: the tag alone was the
+        // hint's voicing, while the ask had been refused — its list cut by the kit — and never parked).
+        const PARKED = `(() => { const b = document.querySelector('.gd-prog .gd-blk[data-t="ask:count-tulips"]'); const o = document.querySelector(${JSON.stringify(OWL)}); return !!b && b.getAttribute('data-run') === 'true' && !!o && /réfléchit|thinking/i.test(o.innerText); })()`;
+        await until(PARKED, Boolean, 4000);
+        const thinking = await text(OWL);
         // Ends on a timer, never on a frame: a throttled rAF must read as few frames, not hang the drive.
         const live = await ev(`new Promise((done) => { let frames = 0; const dots = document.getAnimations().filter((a) => a.animationName === 'bg-dots'); const c0 = dots.map((a) => a.currentTime); const tick = () => { frames++; requestAnimationFrame(tick); }; requestAnimationFrame(tick); setTimeout(() => done({ frames, dots: dots.length, moved: dots.some((a, i) => a.currentTime !== c0[i]) }), 600); })`);
         const x1 = await ev(`(document.querySelector('.bg-stage .gd-bot') || { getAttribute: () => null }).getAttribute('data-x')`);
-        const stillParked = /réfléchit|thinking/i.test(await text(OWL));
+        const stillParked = await ev(PARKED);
         const resting = await until(`(document.querySelector(${JSON.stringify(OWL)}) || {}).innerText || ''`, (t) => /se repose|resting/i.test(t), 16000);
         await setStub(port, { hang: [] });
         await shot('ac2-resting');
@@ -364,6 +370,7 @@ async function pagesPart() {
       await addAsk('words-to-blocks', 'route');
       await play();
       await until(`!!document.querySelector('.bg-proposal')`, Boolean, 8000);
+      await runOver();
       await tap(first('.gd-palette [data-pal="ask:poem"]'), 'palette ask:poem (for the slot line)');
       await wait(600);
       const ratios = await ev(`(() => {

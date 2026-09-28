@@ -11,7 +11,7 @@
 #   OUT=<pages-out> zsh dev-docs/tasks/phase-105-the-coding-garden/drives/drive-pages.sh
 #   DEPLOY=<pages-out>/deploy zsh dev-docs/tasks/phase-105-the-coding-garden/drives/drive-olive.sh pages
 # Session 3 (lane HOOKS): the page part makes a band 10–12 player and drives free play; it needs no --workshop/--skills.
-REPO=/Users/richardosborne/vscode_projects/OpenNoodl
+REPO=${REPO:-/Users/richardosborne/vscode_projects/OpenNoodl}
 OUT=${OUT:-/Users/richardosborne/vscode_projects/OpenNoodl-worktrees/p105-s3-scratch/hooks/drive}
 SHELLDIR=$REPO/dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell
 mkdir -p $OUT
@@ -29,10 +29,15 @@ case "$step" in
     ( cd $REPO && node scripts/devtools/drive-cg005-olive.js pages "$DEPLOY" --shots $OUT/shots --json $OUT/pages.json ) > $OUT/pages.log 2>&1; echo $? > $OUT/pages.exit
     ;;
   contract)
-    ( cd $REPO && node dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/tests/olive-contract.mjs --out $OUT/contract-metal.json ) > $OUT/contract-metal.log 2>&1; echo $? > $OUT/contract-metal.exit
+    ( cd $REPO && node dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/tests/olive-contract.mjs --out $OUT/contract-metal.json ) > $OUT/contract.log 2>&1; echo $? > $OUT/contract.exit
     ;;
   contract-cpu)
     ( cd $REPO && node dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/tests/olive-contract.mjs --cpu --out $OUT/contract-cpu.json ) > $OUT/contract-cpu.log 2>&1; echo $? > $OUT/contract-cpu.exit
     ;;
   *) echo "usage: zsh drive-olive.sh gates|route|pages|contract|contract-cpu"; exit 2 ;;
 esac
+# The wrapper's exit is the step's (s3: it exited 0 while pages.exit said 1). gates: both specs must be green.
+if [[ $step == gates ]]; then
+  [[ $(cat $OUT/gates-shell.exit) == 0 && $(cat $OUT/gates-jest.exit) == 0 ]]; exit $?
+fi
+code=$(cat $OUT/${step}.exit); echo "$step exit $code"; exit $code

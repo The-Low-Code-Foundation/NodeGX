@@ -76,7 +76,7 @@ interface ProgramHelpers {
   move: (list: Block[], id: unknown, containerId: unknown, index: number) => Block[];
   remove: (list: Block[], id: unknown) => Block[];
   setCount: (list: Block[], id: unknown, n: unknown) => Block[];
-  setSlot: (list: Block[], id: unknown, key: string, value: unknown) => Block[];
+  setSlot: (list: Block[], id: unknown, key: string, value: unknown, max?: number) => Block[];
   parsePalette: (v: unknown) => PaletteEntry[];
   DEFAULT_PALETTE: PaletteEntry[];
   COUNT_MIN: number;
@@ -305,7 +305,13 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       expect(P.emit(P.remove(program, 'nope'))).toBe(text);
       expect(P.emit(P.setCount(program, 'nope', 5))).toBe(text);
       expect(P.nextId(program)).toBe(5);
-      expect(P.find(P.setSlot(program, 4, 'to', 'x'.repeat(60)), 4)!.slots!.to).toHaveLength(40);
+      // Typed text is cut to the field's limit (never past 40); a value picked from the options is kept whole (P105 s3:
+      // a 45-character flower list cut to 40 was no longer on the list, so Olive could never be asked with it).
+      expect(P.find(P.setSlot(program, 4, 'to', 'x'.repeat(60), 40), 4)!.slots!.to).toHaveLength(40);
+      expect(P.find(P.setSlot(program, 4, 'to', 'x'.repeat(60), 99), 4)!.slots!.to).toHaveLength(40);
+      expect(P.find(P.setSlot(program, 4, 'to', 'x'.repeat(60), 2), 4)!.slots!.to).toHaveLength(2);
+      const option = 'Biscuit meows: "I\'m so hungry, my bowl is empty, bring me some kibble!"';
+      expect(P.find(P.setSlot(program, 4, 'to', option), 4)!.slots!.to).toBe(option);
       // The input is never mutated.
       expect(P.emit(program)).toBe(text);
     });

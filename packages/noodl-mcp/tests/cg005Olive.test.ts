@@ -642,6 +642,40 @@ describe('CG-005 — Olive in the game', () => {
       expect(card({ run: null })).toMatchObject({ show: false, proposal: null, sig: '' });
     });
 
+    it('🔴 every word the picker offers survives the kit and can be sent: each option of each rung, picked through the BUILT kit’s setSlot, is still on its list (s3 drive: a 45-character flower list was cut to 40 and refused)', () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const vm = require('vm');
+      const built = path.join(__dirname, '..', '..', '..', 'library', 'modules', 'garden-kit', 'project', 'noodl_modules', 'garden-kit', 'index.js');
+      let kit: any = null;
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const context: Record<string, any> = { Noodl: { defineModule: (m: any) => (kit = m) }, React: require('react'), console, setTimeout, clearTimeout };
+      vm.createContext(context);
+      vm.runInContext(fs.readFileSync(built, 'utf8'), context);
+      const P = kit.reactNodes.find((n: any) => n.name === 'garden-kit.BlockList').program;
+      const pageCheck = new Function('args', OLIVE_HELPERS + '; return oliveCheckForBand.apply(null, args);') as (a: unknown[]) => any;
+      const bad: string[] = [];
+      let picked = 0;
+      for (const rung of PALETTE_RUNG_IDS) {
+        for (const lang of ['en', 'fr']) {
+          const slots = runScript(OLIVE_SLOTS_SCRIPT, { rung, band: 2, lang, words: WORD_ROWS }).slots as Array<{ key: string; options: Array<{ value: string }>; text?: boolean }>;
+          const base: Record<string, string> = {};
+          for (const s of slots) base[s.key] = s.options.length ? s.options[0].value : 'Tulla';
+          for (const s of slots) {
+            for (const o of s.options) {
+              let prog = [{ id: 1, t: 'ask:' + rung, slots: { ...base } }];
+              prog = P.setSlot(prog, 1, s.key, o.value);
+              const value = prog[0].slots[s.key];
+              picked++;
+              const c = pageCheck([rung, prog[0].slots, 2, lang, null]);
+              if (value !== o.value || !c.ok) bad.push(rung + '/' + lang + '/' + s.key + ': ' + (value !== o.value ? 'cut to ' + value.length : c.reason));
+            }
+          }
+        }
+      }
+      expect(picked).toBeGreaterThan(100);
+      expect(bad).toEqual([]);
+    });
+
     it('ruling 4 on the requests: only band 10–12 requests name rungs, each a band-2 rung of the table; the palette offers exactly them at 10–12 and none at 7–9', () => {
       const withRungs = REQUESTS.filter((r) => (r.rungs || []).length > 0);
       expect(withRungs.length).toBeGreaterThanOrEqual(3);
