@@ -92,11 +92,11 @@ function request(port, method, urlPath, { headers = {}, body, accept = '*/*' } =
   });
 }
 
-/** A relay with olive's doors in front of the copies doors and no backend (503 proves a request went past both). */
+/** A relay with olive's doors in front of the backups door and no backend (503 proves a request went past both). */
 async function withRelay(oliveDoors, run) {
   const appDir = tmp('garden-app-');
   fs.writeFileSync(path.join(appDir, 'index.html'), '<html></html>');
-  const copies = createShellDoors({ folder: () => appDir, copy: async () => {}, restore: async () => {} }, { prefix: '/__garden/', header: 'x-garden' });
+  const copies = createShellDoors({ folder: () => appDir }, { prefix: '/__garden/' });
   const doors = (req, res, p) => oliveDoors.handle(req, res, p) || copies(req, res, p);
   const server = createRelay({ appDir, backendPort: () => null, shell: doors, opening: 'Bot Garden is still opening.' });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
@@ -153,8 +153,9 @@ function loadMainWithFakeElectron({ appData, home = null }) {
   else delete process.env.GARDEN_HOME;
   const main = require.resolve('../main.js');
   delete require.cache[main];
+  let exports = null;
   try {
-    require(main);
+    exports = require(main);
   } finally {
     Module._load = load;
     delete require.cache[main];
@@ -163,7 +164,7 @@ function loadMainWithFakeElectron({ appData, home = null }) {
   }
   /** The path a Chromium reading happens against: the LAST set value, or the fake's name-derived default. */
   const final = (k) => app.getPath(k);
-  return { calls, paths, final, name: app.name };
+  return { calls, paths, final, name: app.name, exports };
 }
 
 module.exports = { wait, fakeEngine, canned, tmp, request, withRelay, loadMainWithFakeElectron };

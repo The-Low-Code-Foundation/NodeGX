@@ -21,8 +21,9 @@ test('garden.json names the app: id, name, a port that is not Nightbook’s, a d
   assert.equal(config.dataDirName, 'island');
   assert.equal(config.doorPrefix, '/__garden/');
   assert.equal(config.header, 'x-garden');
-  assert.match(config.backups.cron, /^\S+ \S+ \S+ \S+ \S+$/);
-  assert.deepEqual(config.backups.retention, { keepLast: 1, keepDaily: 30, keepWeekly: 0 });
+  assert.match(config.backups.dailyAt, /^\d{1,2}:\d{2}$/);
+  assert.equal(config.backups.keepDays, 31, 'one a day for a month');
+  assert.equal(config.backups.storageKey, 'bot-garden', 'the page’s storage key (an internal slug: it stays, ruling 7)');
   assert.match(config.model.sha256, /^[0-9a-f]{64}$/);
   assert.match(config.model.url, /^https:\/\/huggingface\.co\/unsloth\/Qwen3\.5-0\.8B-GGUF\/resolve\/main\/Qwen3\.5-0\.8B-Q4_K_M\.gguf$/);
   assert.equal(config.model.file, 'Qwen3.5-0.8B-Q4_K_M.gguf');
@@ -46,7 +47,7 @@ test('no "Nightbook" is left in main.js, relay.js, package.json (or copies, poli
 test('main.js reads every name from garden.json, never from a literal', () => {
   const main = read('main.js');
   for (const literal of ['47621', "'Nightbook'", "'book'", '/__nightbook/']) assert.ok(!main.includes(literal), `literal ${literal}`);
-  for (const key of ['config.port', 'config.name', 'config.appId', 'config.dataDirName', 'config.doorPrefix', 'config.header', 'config.backups.cron', 'config.backups.folderName', 'config.policy', 'config.model.file', 'config.model.sha256', 'config.olive.timeoutMs']) {
+  for (const key of ['config.port', 'config.name', 'config.appId', 'config.dataDirName', 'config.doorPrefix', 'config.header', 'config.backups.dailyAt', 'config.backups.keepDays', 'config.backups.storageKey', 'config.backups.folderName', 'config.policy', 'config.model.file', 'config.model.sha256', 'config.olive.timeoutMs']) {
     assert.ok(main.includes(key), `main.js reads ${key}`);
   }
 });
@@ -116,6 +117,23 @@ test('a drive’s GARDEN_HOME still keeps every folder under the throwaway home'
   assert.equal(r.final('sessionData'), path.join(home, 'userData'));
   assert.equal(r.final('documents'), path.join(home, 'Documents'));
   assert.ok(!fs.existsSync(path.join(appData, 'Bot Garden')), 'the real folder untouched');
+  assert.equal(r.exports.backupsFolder(), path.join(home, 'Documents', "Olive's Island backups"), 'the island backups go under the throwaway home');
+});
+
+test('the island backups go to the pinned Documents folder, and nothing is written before there is a window (R14)', async () => {
+  const { loadMainWithFakeElectron, tmp } = require('./helpers');
+  const appData = tmp('garden-appdata-');
+  const r = loadMainWithFakeElectron({ appData });
+  const documents = r.paths.documents;
+  assert.equal(r.exports.backupsFolder(), path.join(documents, config.backups.folderName));
+  assert.equal(r.exports.islandBackups.folder(), r.exports.backupsFolder());
+  assert.equal(r.exports.islandBackups.readExpr, require('../copies').readExpression(config.backups.storageKey), 'the one read expression, for the page’s key');
+  const res = await r.exports.islandBackups.run('test');
+  assert.deepEqual(res, { wrote: null, reason: 'no-window' });
+  assert.ok(!fs.existsSync(r.exports.backupsFolder()), 'no folder made for nothing');
+  // main.js no longer seeds the backend's SQLite backup: no backups.json writer, no backend CLI backup/restore left.
+  const main = read('main.js');
+  assert.ok(!/cron|backups\.json|runBackendCli|'backup'|'restore'/.test(main.split('\n').filter((l) => !/^\s*(\/\*|\*|\/\/)/.test(l)).join('\n')), 'no SQLite backup in main.js code');
 });
 
 test('no build.files exclusion drops a file node-llama-cpp reads at run time (AC5)', () => {

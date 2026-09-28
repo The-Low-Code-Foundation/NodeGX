@@ -16,8 +16,8 @@ network. Forked from the Nightbook shell (`../../phase-78-the-templates/nightboo
 
 | File | What it does |
 |---|---|
-| `shell/garden.json` | The app: id `garden`, `name` / `nameFr` (what a person sees), `userDataDirName` (where her saves live, pinned), port `47633`, data dir `island`, the doors' prefix `/__garden/` and header `x-garden`, the backup policy, the model's file, pinned URL, sha256 and size. |
-| `shell/main.js` | One window, one instance. The backend (this binary in Node mode, `--port 0 --no-admin`), the relay on the fixed origin, the policy adopted, backups seeded, the owl woken AFTER the island is on screen, the exam run once. `GARDEN_HOME` keeps a drive's writes in a throwaway folder; `GARDEN_MODEL_PATH`, `GARDEN_CPU`, `GARDEN_VERSION`, `GARDEN_POLICY_DIR`, `GARDEN_WINDOW` are drive-only overrides. |
+| `shell/garden.json` | The app: id `garden`, `name` / `nameFr` (what a person sees), `userDataDirName` (where her saves live, pinned), port `47633`, data dir `island`, the doors' prefix `/__garden/` and header `x-garden`, the island backups (`folderName`, `dailyAt`, `keepDays`, the page's `storageKey`), the model's file, pinned URL, sha256 and size. |
+| `shell/main.js` | One window, one instance. The backend (this binary in Node mode, `--port 0 --no-admin`), the relay on the fixed origin, the policy adopted, the island backups (after the page loads, every evening, at quit) and the one menu item "Restore a backup…", the owl woken AFTER the island is on screen, the exam run once. `GARDEN_HOME` keeps a drive's writes in a throwaway folder; `GARDEN_MODEL_PATH`, `GARDEN_CPU`, `GARDEN_VERSION`, `GARDEN_POLICY_DIR`, `GARDEN_WINDOW` are drive-only overrides. |
 | `shell/relay.js` | The page's one origin. Serves a file of the app, gives a navigation `index.html`, answers the shell's doors, forwards the rest to the backend. |
 | `shell/owl.js` | The sidecar: node-llama-cpp in the main process, loaded once, one context, a queue, raw ChatML exactly as `tpl-012-olive-exam/battery.mjs` (the only harness that works for Qwen3.5), a grammar per shape, ≤ 64 tokens, a 12 s timeout → `fallback:true`. Plain Node: the contract test runs it without Electron. |
 | `shell/olive-templates.json` | Olive's prompt table: the twelve rungs of TPL-012 §2.6 (two entries each for rungs 2 and 8) plus `voice-hint`; per rung a system prompt, a user template with `{slot}` holes, the slot specs (a word list, a regex, or the ≤ 40-character text slot), shape, temperature, must-contain. The word lists in both languages. **The renderer never sends prompt text.** |
@@ -26,14 +26,27 @@ network. Forked from the Nightbook shell (`../../phase-78-the-templates/nightboo
 | `shell/exam.js` | Olive's exam: 23 probes trimmed from the battery, each with the readout's expectation, sampled up to 3× (majority), one pass/fail per rung, kept in `<data>/olive-exam.json`. A 🎓 rung passes when she FAILS as the readout says. |
 | `shell/model-check.js` | The GGUF's sha256 at first launch, remembered on size + mtime; a mismatch refuses the model (`status.model = refused`). |
 | `shell/timings.js` | `timings.log`: the launch line, `model-load`, `exam-probe`, `olive` — one JSON object per line. |
-| `shell/policy.js`, `fit.js`, `copies.js` | Nightbook's, unchanged in behaviour (the copies' prefix and header come from garden.json). `policy.js` also holds `CLOSED_POLICY`, the backend's policy for an app that ships none (every rule `nobody`); `fit.js` also holds `windowTitle` (only the game's two names reach the window). |
-| `shell/tests/*.test.js` | `node --test tests/*.test.js` — 59 tests: Nightbook's 23 plus config, the checks, the owl (fake engine), the route, the model check, the exam. |
+| `shell/copies.js` | **The island backups** (R14). The family is the page's localStorage entry `noodl_store_bot-garden`, read by ONE fixed expression; a family with players becomes `Documents/Olive's Island backups/island-backup-<day>.json` (the stored JSON + the save code, byte-identical to the page's encoder), one a day for 31 days, with a README.txt (EN/FR). The restore (the menu), the quit held for the backup (3 s at most), the backend's SQLite backup switched off, `GET /__garden/copies` (the list, read-only). |
+| `shell/policy.js`, `fit.js` | Nightbook's, unchanged in behaviour. `policy.js` also holds `CLOSED_POLICY`, the backend's policy for an app that ships none (every rule `nobody`); `fit.js` also holds `windowTitle` (only the game's two names reach the window). |
+| `shell/tests/*.test.js` | `node --test tests/*.test.js` — 89 tests: config, the island backups (the page's own encoder/decoder from `templates/bot-garden` run against the shell's), the checks, the owl (fake engine), the route, the model check, the exam, the relay, the policy. |
 | `tests/olive-contract.mjs` | The contract test: the exam against the route with the REAL model, in plain node. `--cpu` for the tablet's path. Prints per-probe ms and the per-rung table; exit 1 if a ✅ probe is not met or a 🎓 probe does not fail. |
 | `fetch-model.mjs` | The model by pinned URL + sha256 into `shell/build-output/model/` (`--from <file>` links a local copy; `--check` verifies). Never committed. |
 | `build-app.js` | Assembles `shell/build-output/` (app export with the origin baked and the page titled with the game's name, backend, policy — the project's, or the shell's closed one when it ships none, as `templates/bot-garden` does — workflows, licences; the model verified). `--project` defaults to `templates/bot-garden`. Reads the deploy engine's JSON verdict (it exits 0 on a refusal). |
 | `drive-lib.js`, `drive-upgrade.js` | The drives (Electron, CDP): a v2 over a used v1 keeps the exam, adopts the policy, and keeps a family made on the real pages (a new player, her robot named, renamed on My robot; read back in storage, on her card and on My robot) (AC8); every request's host is 127.0.0.1 (AC9); with no model it asks once and reads the fallback instead of waiting for an exam (AC4). `--exe` drives an installed app. |
 | `licenses/` | Qwen (Apache 2.0), node-llama-cpp (MIT), llama.cpp (MIT), NOTICE — shipped in `extraResources/licenses/`. |
 | `../../../../.github/workflows/garden-desktop.yml` | CI: the shell tests and the contract test on Linux CPU (the model cached on its sha); the Windows installer built from `templates/bot-garden`, installed silently, its name read back, egress blocked, and driven (`drive-upgrade.js --exe`). Started by a push to `p105-garden-desktop` (it is not on the default branch, so no dispatch). |
+
+## The island backups (R14, 2026-09-28)
+
+The game keeps the family (every player, her robot, her island) in the page's localStorage, not in the backend: the
+backend's database holds nothing of the game (measured: every data table empty), so its SQLite backup is no longer made
+(a `backups.json` an older build seeded is switched off in place). The shell reads the family out of the page with one
+fixed expression and writes it to `Documents/Olive's Island backups/island-backup-YYYY-MM-DD.json` — after the page
+loads (if the day has no backup yet), every evening at 19:00 while open, and at quit (the quit waits, 3 s at most). A
+family with no players writes nothing; the newest 31 days are kept. Each file holds the stored JSON (what a restore
+writes back — the page migrates an older save on load) and the save code (the Grown-ups page's code). **To restore:**
+the app's menu (Mac: the "Olive's Island" menu; Windows: press Alt) → "Restore a backup… / Restaurer une sauvegarde…" →
+pick a day → confirm; the family on the computer is kept first as `…-before-restore.json`. Nothing leaves the machine.
 
 ## The Olive contract (what a page sends and gets)
 

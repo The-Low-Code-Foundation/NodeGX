@@ -18,12 +18,16 @@
  *                                         | [no model] an ask falls back (`no-model`), no exam is waited for
  *                                         → Profiles: a new player "Ada" whose robot is "Robo" → the island → the
  *                                         family in storage → My robot: rename "Robo" to "Bolt" → in storage → quit
- *   disk                                  local.db, security.json = A, backups.json, olive-exam.json [model], timings.log
+ *   disk                                  local.db, security.json = A, NO backups.json (R14), olive-exam.json [model],
+ *                                         timings.log; the island backup (R14): Documents/<folderName>/island-backup-<day>.json
+ *                                         written at quit, its stored family AND its save code (decoded by the template's
+ *                                         own decoder) hold Ada with Bolt; README.txt beside it
  *   launch 2 (home A, 0.0.2, policy B)   page drawn → status.exam.at unchanged [model] → storage still holds Ada/Bolt →
  *                                         Profiles shows Ada's card with Bolt → chosen → My robot's name box says Bolt
  *   disk                                  security.json = B, security.before-0.0.2-*.json = A, local.db kept,
  *                                         olive-exam.json kept [model], timings.log has two launch lines
- *   launch 3 (home B, control)            a fresh home has no security.before-*, a different exam.at, and NO Ada
+ *   launch 3 (home B, control)            a fresh home has no security.before-*, a different exam.at, and NO Ada — and
+ *                                         no island backup (a family with no players writes nothing)
  *   wire (AC9)                            every request the page made, across all three launches: host 127.0.0.1 only
  *
  * The family: the garden template has no backend — the family is ONE localStorage entry (key `bot-garden`; P105
@@ -40,6 +44,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const vm = require('vm');
 
 const lib = require('./drive-lib');
 const { config, CDP_PORT, ORIGIN, wait, until, portListening, quit, backendsFor, watchNetwork } = lib;
@@ -123,6 +128,47 @@ const FAMILY = `(() => {
 })()`;
 const family = async (page) => (await safe(page, FAMILY)) || [];
 const holds = (fam, name, robot) => fam.some((p) => p.name === name && p.robot === robot);
+
+/**
+ * R14: the island backups a home's Documents folder holds, each read two ways — its stored family (what a restore
+ * writes back) and its save code decoded by the TEMPLATE's own `Logic/Decode save code` (what the Grown-ups page shows).
+ */
+function islandBackups(home) {
+  const dir = path.join(home, 'Documents', config.backups.folderName);
+  let names = [];
+  try {
+    names = fs.readdirSync(dir);
+  } catch {
+    return { dir, files: [], readme: false, backups: [] };
+  }
+  const files = names.filter((n) => /^island-backup-\d{4}-\d{2}-\d{2}\.json$/.test(n)).sort();
+  const decodeFile = path.join(REPO, 'templates', 'bot-garden', 'components', 'Logic', 'Decode save code', 'nodes.json');
+  const nodes = JSON.parse(fs.readFileSync(decodeFile, 'utf8'));
+  const script = (Array.isArray(nodes) ? nodes : nodes.nodes || Object.values(nodes)).find((n) => n.type === 'JavaScriptFunction').parameters.functionScript;
+  const decode = (code) => {
+    const Outputs = {};
+    vm.runInNewContext(script, { Inputs: { code }, Outputs, btoa, atob });
+    return JSON.parse(JSON.stringify(Outputs));
+  };
+  const pairs = (profiles) => (profiles || []).map((p) => ({ name: p.name, robot: p.robot && p.robot.name }));
+  const backups = files.map((name) => {
+    try {
+      const body = readJson(path.join(dir, name));
+      const decoded = body.saveCode ? decode(body.saveCode) : null;
+      return {
+        name,
+        kind: body.kind,
+        players: body.players,
+        stored: pairs(body.store && body.store.model && body.store.model.profiles),
+        code: decoded && decoded.ok ? pairs(decoded.model.profiles) : null
+      };
+    } catch (e) {
+      return { name, error: String(e && e.message).slice(0, 200) };
+    }
+  });
+  return { dir, files, readme: names.includes('README.txt'), backups };
+}
+const backupHolds = (b, name, robot) => !!b && holds(b.stored || [], name, robot) && holds(b.code || [], name, robot);
 
 /** A finder over visible elements: the first whose text includes any of the needles. */
 const byText = (selector, needles) =>
@@ -282,7 +328,9 @@ async function main() {
   R.disk1 = {
     database: fs.existsSync(path.join(d, 'data', 'local.db')),
     policyInstalled: fs.existsSync(path.join(d, 'security.json')) && hasMarker(path.join(d, 'security.json')),
-    backupPolicy: fs.existsSync(path.join(d, 'backups.json')),
+    // R14: the backend's SQLite backup (it holds nothing of the game) is no longer seeded.
+    noBackendBackup: !fs.existsSync(path.join(d, 'backups.json')),
+    island: islandBackups(homeA),
     examKept: fs.existsSync(path.join(d, 'olive-exam.json')),
     backendsLeftRunning: backendsFor(homeA),
     timingsEvents: fs.readFileSync(path.join(homeA, 'userData', 'logs', 'timings.log'), 'utf8').trim().split('\n').map((l) => JSON.parse(l).event)
@@ -332,6 +380,8 @@ async function main() {
   R.launch3.quit = await quit(app);
   await wait(1500);
   R.launch3.noOldPolicy = fs.readdirSync(data(homeB)).filter((f) => f.startsWith('security.before-')).length === 0;
+  R.launch3.island = islandBackups(homeB);
+  R.launch3.noBackup = R.launch3.island.files.length === 0;
   R.backendsLeftRunning = backendsFor(homeA).concat(backendsFor(homeB));
 
   R.offLoopback = Object.keys(R.hosts).filter((h) => !['127.0.0.1', 'about', 'data', 'blob'].includes(h));
@@ -339,12 +389,14 @@ async function main() {
   const f2 = R.launch2.family;
   R.clauses = {
     owl: R.withModel ? !!R.launch1.examAt : R.launch1.model === 'none' && R.launch1.fallsBack,
-    disk1: R.disk1.database && R.disk1.policyInstalled && R.disk1.backupPolicy && (R.withModel ? R.disk1.examKept : true) && R.disk1.backendsLeftRunning.length === 0,
+    disk1: R.disk1.database && R.disk1.policyInstalled && R.disk1.noBackendBackup && (R.withModel ? R.disk1.examKept : true) && R.disk1.backendsLeftRunning.length === 0,
+    // R14: after launch 1 made Ada/Bolt and quit, a backup of the day holds them — stored and as a save code.
+    islandBackup: R.disk1.island.files.length === 1 && R.disk1.island.readme && backupHolds(R.disk1.island.backups[0], PLAYER, ROBOT_RENAMED),
     family1: !!f1.storedAfterCreate && !!f1.storedAfterRename,
     examKept: R.launch2.examKept && R.disk2.examKept,
     disk2: R.disk2.database && R.disk2.policyIsB && R.disk2.oldPolicyIsA && R.disk2.launchLines.length === 2 && R.disk2.launchLines[1][1] === 'replaced',
     family2: !!f2.storedKept && !!f2.cardShows && !!f2.myRobotShows,
-    control: R.launch3.examAtDiffers && R.launch3.noOldPolicy && R.launch3.noFamily,
+    control: R.launch3.examAtDiffers && R.launch3.noOldPolicy && R.launch3.noFamily && R.launch3.noBackup,
     noBackendLeft: R.backendsLeftRunning.length === 0,
     wire: R.offLoopback.length === 0
   };

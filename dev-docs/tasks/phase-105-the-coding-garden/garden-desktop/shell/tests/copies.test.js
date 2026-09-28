@@ -1,140 +1,367 @@
 'use strict';
 /**
- * copies.js — the shell's three doors for "Keep it safe": listed, made, brought back; and never a path, never from
- * another site. Runs a real relay on a free port with the doors in front of a stand-in backend.
+ * copies.js — the island backups (R14 "Back up the real save"): the family read out of the page by ONE fixed
+ * expression, written as a dated file holding the stored JSON and the save code, one a day for a month; nothing for a
+ * family with no players; the save code byte-identical to the page's own encoder (the TEMPLATE's scripts run here); a
+ * restore that writes the store back as data; the quit held for the backup, bounded; the backend's SQLite copy retired.
  */
 const test = require('node:test');
-const assert = require('node:assert');
+const assert = require('node:assert/strict');
 const fs = require('fs');
 const http = require('http');
-const os = require('os');
 const path = require('path');
+const vm = require('vm');
 
-const { listCopies, isCopyName, createShellDoors, ARCHIVE_EXT } = require('../copies');
+const C = require('../copies');
 const { createRelay } = require('../relay');
+const config = require('../garden.json');
+const { tmp } = require('./helpers');
 
-function tmp() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'garden-copies-'));
+const REPO = path.resolve(__dirname, '../../../../../..');
+const KEY = C.STORE_PREFIX + config.backups.storageKey;
+const READ = C.readExpression(config.backups.storageKey);
+
+// ── The page, in a box ──────────────────────────────────────────────────────
+
+/** A page's localStorage that records every call. `throws` makes every access throw (a storage the page cannot open). */
+function fakeStorage(initial = {}, { throws = false } = {}) {
+  const map = new Map(Object.entries(initial));
+  const calls = [];
+  const s = {
+    getItem(k) {
+      calls.push(['getItem', k]);
+      if (throws) throw new Error('SecurityError');
+      return map.has(k) ? map.get(k) : null;
+    },
+    setItem(k, v) {
+      calls.push(['setItem', k, v]);
+      map.set(k, String(v));
+    },
+    removeItem(k) {
+      calls.push(['removeItem', k]);
+      map.delete(k);
+    },
+    clear() {
+      calls.push(['clear']);
+      map.clear();
+    }
+  };
+  return { s, map, calls };
 }
 
-function touch(dir, name, when) {
-  const f = path.join(dir, name);
-  fs.writeFileSync(f, 'x');
-  fs.utimesSync(f, when, when);
+/** A stand-in for Electron's webContents: evaluates what it is given against a fake page, records every expression. */
+function fakeWebContents(storage) {
+  const evaluated = [];
+  const listeners = {};
+  const ctx = vm.createContext({ window: { localStorage: storage.s } });
+  return {
+    evaluated,
+    ctx,
+    reloads: 0,
+    isDestroyed: () => false,
+    async executeJavaScript(expr) {
+      evaluated.push(expr);
+      return vm.runInContext(expr, ctx);
+    },
+    once(ev, fn) {
+      (listeners[ev] = listeners[ev] || []).push(fn);
+    },
+    reload() {
+      this.reloads++;
+      setTimeout(() => (listeners['did-finish-load'] || []).splice(0).forEach((fn) => fn()), 5);
+    }
+  };
 }
 
-function request(port, method, urlPath, { headers = {}, body } = {}) {
+/** A Logic component of the generated template, run as the page runs it (a JavaScriptFunction: Inputs → Outputs). */
+function pageScript(component) {
+  const file = path.join(REPO, 'templates', 'bot-garden', 'components', 'Logic', component, 'nodes.json');
+  assert.ok(fs.existsSync(file), `the template's ${component} (${file}) — a missing template must fail, not skip`);
+  const n = JSON.parse(fs.readFileSync(file, 'utf8'));
+  const list = Array.isArray(n) ? n : n.nodes || Object.values(n);
+  const script = list.find((x) => x.type === 'JavaScriptFunction').parameters.functionScript;
+  return (inputs) => {
+    const Outputs = {};
+    vm.runInNewContext(script, { Inputs: inputs, Outputs, btoa, atob });
+    // Out of the page's realm, so deepStrictEqual compares values, not realms.
+    return JSON.parse(JSON.stringify(Outputs));
+  };
+}
+
+/** A family the page's own scripts made: Ada (robot Bolt) with a request done, Béa (robot Zoë), both v3. */
+function pageFamily() {
+  const add = pageScript('Add profile');
+  const complete = pageScript('Complete request');
+  let m = add({ model: null, name: 'Ada', band: 2, lang: 'en', face: 'fox', robotName: 'Bolt', color: '#3366FF', eye: 'round' }).model;
+  const ada = m.island.activeId;
+  m = add({ model: m, name: 'Béa ✿', band: 1, lang: 'fr', face: 'owl', robotName: 'Zoë', color: '#FF7A59', eye: 'star' }).model;
+  m = complete({ model: m, requestId: 'tulips', profileId: ada, tricks: [1, 2], reward: { kind: 'hat', id: 'straw' } }).model;
+  return JSON.parse(JSON.stringify(m));
+}
+
+const stored = (model) => JSON.stringify({ model });
+
+// ── The read ────────────────────────────────────────────────────────────────
+
+test('the read is ONE constant expression: it asks for the family’s key and nothing else, and never throws', () => {
+  assert.equal(KEY, 'noodl_store_bot-garden');
+  const st = fakeStorage({ [KEY]: '{"model":{}}', other: 'x' });
+  const got = vm.runInContext(READ, vm.createContext({ window: { localStorage: st.s } }));
+  assert.equal(got, '{"model":{}}');
+  assert.deepEqual(st.calls, [['getItem', KEY]], 'a read, only a read, only the key');
+  const broken = fakeStorage({}, { throws: true });
+  assert.equal(vm.runInContext(READ, vm.createContext({ window: { localStorage: broken.s } })), null);
+});
+
+test('the key is the page’s: the runtime’s persisted-store prefix + the template’s storage key (read from their sources)', () => {
+  const runtime = fs.readFileSync(path.join(REPO, 'packages/noodl-runtime/src/nodes/std-library/agent/globalstore.ts'), 'utf8');
+  assert.equal(/const STORAGE_KEY_PREFIX = '([^']+)'/.exec(runtime)[1], C.STORE_PREFIX);
+  const pages = fs.readFileSync(path.join(REPO, 'packages/noodl-mcp/tests/cg003Components.ts'), 'utf8');
+  assert.equal(/export const STORAGE_KEY = '([^']+)'/.exec(pages)[1], config.backups.storageKey);
+  // …and the App store persists under it (a store that stopped persisting would leave the backups reading nothing).
+  assert.match(pages, /persist: true, storageKey: STORAGE_KEY/);
+});
+
+// ── The write ───────────────────────────────────────────────────────────────
+
+test('a family is written as the day’s file: the stored JSON, the players, the save code; the expression evaluated is the constant', async () => {
+  const dir = tmp('garden-backups-');
+  const fam = pageFamily();
+  const wc = fakeWebContents(fakeStorage({ [KEY]: stored(fam) }));
+  const b = C.createIslandBackups({ webContents: () => wc, folder: () => dir, storageKey: config.backups.storageKey, now: () => new Date(2026, 8, 28, 19, 0, 0) });
+  const r = await b.run('test');
+  assert.equal(r.wrote, path.join(dir, 'island-backup-2026-09-28.json'));
+  const body = JSON.parse(fs.readFileSync(r.wrote, 'utf8'));
+  assert.equal(body.kind, 'olive-island-backup');
+  assert.deepEqual(body.players, ['Ada', 'Béa ✿']);
+  assert.deepEqual(body.store, { model: fam }, 'the stored JSON itself');
+  assert.match(body.saveCode, /^BG1\.[A-Za-z0-9_-]+$/);
+  assert.ok(fs.readFileSync(path.join(dir, 'README.txt'), 'utf8').includes('Restaurer une sauvegarde'), 'README in FR');
+  assert.ok(fs.readFileSync(path.join(dir, 'README.txt'), 'utf8').includes('Restore a backup'), 'README in EN');
+  // The expression is the constant — the same string for a different family (it is not built from page data).
+  const wc2 = fakeWebContents(fakeStorage({ [KEY]: stored({ ...fam, profiles: fam.profiles.slice(0, 1) }) }));
+  await C.createIslandBackups({ webContents: () => wc2, folder: () => dir, storageKey: config.backups.storageKey }).run('test');
+  assert.deepEqual(wc.evaluated, [READ]);
+  assert.deepEqual(wc2.evaluated, [READ]);
+  assert.equal(b.readExpr, READ);
+});
+
+test('a family with no players, no entry, an unreadable entry, no window: nothing written', async () => {
+  const dir = tmp('garden-backups-');
+  const empty = { ...pageFamily(), profiles: [] };
+  for (const [label, entry, want] of [
+    ['no players', stored(empty), 'empty'],
+    ['no entry', undefined, 'none'],
+    ['not JSON', '{nope', 'unreadable'],
+    ['no model', '{"other":1}', 'unreadable']
+  ]) {
+    const wc = fakeWebContents(fakeStorage(entry === undefined ? {} : { [KEY]: entry }));
+    const r = await C.createIslandBackups({ webContents: () => wc, folder: () => dir, storageKey: config.backups.storageKey }).run('test');
+    assert.equal(r.wrote, null, label);
+    assert.equal(r.reason, want, label);
+  }
+  const r = await C.createIslandBackups({ webContents: () => null, folder: () => dir, storageKey: config.backups.storageKey }).run('test');
+  assert.equal(r.reason, 'no-window');
+  assert.deepEqual(fs.readdirSync(dir), [], 'not even a README');
+});
+
+test('retention: the newest 31 days are kept (a restore’s safety copy counts in its day); other files are never touched', () => {
+  const dir = tmp('garden-backups-');
+  for (let i = 0; i < 40; i++) {
+    const d = C.dayOf(new Date(2026, 7, 1 + i));
+    fs.writeFileSync(path.join(dir, `island-backup-${d}.json`), '{}');
+  }
+  fs.writeFileSync(path.join(dir, 'island-backup-2026-08-01-before-restore.json'), '{}');
+  fs.writeFileSync(path.join(dir, 'island-backup-2026-09-09-before-restore.json'), '{}');
+  fs.writeFileSync(path.join(dir, 'notes.txt'), 'mine');
+  fs.writeFileSync(path.join(dir, '2026-01-01.ngxbackup.tar.gz'), 'an old build’s');
+  const fam = C.readFamily(stored(pageFamily()));
+  C.writeBackup(dir, fam, { now: new Date(2026, 8, 10, 19, 0, 0), keepDays: config.backups.keepDays });
+  const days = [...new Set(C.listCopies(dir).map((c) => c.day))];
+  assert.equal(config.backups.keepDays, 31);
+  assert.equal(days.length, 31);
+  assert.equal(days[0], '2026-09-10', 'newest first');
+  assert.equal(days[30], '2026-08-11');
+  assert.ok(fs.existsSync(path.join(dir, 'island-backup-2026-09-09-before-restore.json')), 'a kept day keeps its safety copy');
+  assert.ok(!fs.existsSync(path.join(dir, 'island-backup-2026-08-01-before-restore.json')), 'an old day’s goes with it');
+  for (const f of ['notes.txt', '2026-01-01.ngxbackup.tar.gz', 'README.txt']) assert.ok(fs.existsSync(path.join(dir, f)), f);
+});
+
+test('the day’s backup on launch only when the day has none (the page is not even read otherwise)', async () => {
+  const dir = tmp('garden-backups-');
+  const wc = fakeWebContents(fakeStorage({ [KEY]: stored(pageFamily()) }));
+  const b = C.createIslandBackups({ webContents: () => wc, folder: () => dir, storageKey: config.backups.storageKey, now: () => new Date(2026, 8, 28, 9, 0, 0) });
+  assert.ok((await b.runIfNoneToday('launch')).wrote);
+  assert.equal((await b.runIfNoneToday('launch')).reason, 'done-today');
+  assert.equal(wc.evaluated.length, 1);
+});
+
+test('every evening at dailyAt while open, local time', () => {
+  const set = [];
+  const timers = { setTimeout: (fn, ms) => (set.push(ms), set.length), clearTimeout: () => {} };
+  const at = (h, m) => C.createIslandBackups({ webContents: () => null, folder: tmp, storageKey: 'k', dailyAt: config.backups.dailyAt, timers, now: () => new Date(2026, 8, 28, h, m) }).schedule();
+  assert.equal(config.backups.dailyAt, '19:00');
+  assert.deepEqual(at(18, 0), new Date(2026, 8, 28, 19, 0));
+  assert.deepEqual(at(20, 30), new Date(2026, 8, 29, 19, 0));
+  assert.deepEqual(set, [3_600_000, 22.5 * 3_600_000]);
+});
+
+// ── The save code ───────────────────────────────────────────────────────────
+
+test('the save code is byte-identical to the page’s own encoder, and the page’s decoder gives the family back', () => {
+  const encode = pageScript('Encode save code');
+  const decode = pageScript('Decode save code');
+  const fam = pageFamily();
+  assert.equal(C.saveCodeOf(fam), encode({ model: fam }).code);
+  // The edges the page normalises: seven players (six kept), long names, a string band, no tricks, a repeated request.
+  const edge = JSON.parse(JSON.stringify(fam));
+  for (let i = 0; i < 5; i++) edge.profiles.push({ ...JSON.parse(JSON.stringify(fam.profiles[0])), id: `px${i}`, name: 'N'.repeat(30 + i) });
+  edge.profiles[1].band = '1';
+  edge.profiles[1].robot.name = 'R'.repeat(20);
+  delete edge.profiles[2].tricks;
+  edge.profiles[0].island.done.push('tulips', 'tulips');
+  assert.equal(C.saveCodeOf(edge), encode({ model: edge }).code, 'the edges pack as the page packs them');
+  const back = decode({ code: C.saveCodeOf(fam) });
+  assert.equal(back.ok, true);
+  assert.equal(back.migrated, false);
+  assert.deepEqual(back.model.profiles.map((p) => [p.name, p.robot.name, p.island.done]), fam.profiles.map((p) => [p.name, p.robot.name, p.island.done]));
+  // A model this shell does not know is kept as stored, never packed by a guess.
+  assert.equal(C.saveCodeOf({ ...fam, v: 4 }), null);
+  assert.equal(C.saveCodeOf({ ...fam, v: 2 }), null);
+});
+
+// ── The restore ─────────────────────────────────────────────────────────────
+
+test('the restore expression writes the store as DATA: a name made of code stays a name', () => {
+  const fam = pageFamily();
+  fam.profiles[0].name = '"); globalThis.pwned = 1; (" </script>';
+  const st = fakeStorage();
+  const ctx = vm.createContext({ window: { localStorage: st.s } });
+  assert.equal(vm.runInContext(C.restoreExpression(config.backups.storageKey, { model: fam }), ctx), true);
+  assert.equal(st.map.get(KEY), stored(fam));
+  assert.equal(ctx.pwned, undefined);
+  assert.deepEqual(st.calls.map((c) => c[0] + ' ' + c[1]), [`setItem ${KEY}`, `getItem ${KEY}`]);
+});
+
+test('a restore keeps the family now first, writes the day back, reloads, and reads the players back', async () => {
+  const dir = tmp('garden-backups-');
+  const then = pageFamily();
+  const file = C.writeBackup(dir, C.readFamily(stored(then)), { now: new Date(2026, 8, 20, 19, 0, 0) });
+  const now = { ...pageFamily(), profiles: [pageFamily().profiles[1]] };
+  const st = fakeStorage({ [KEY]: stored(now) });
+  const wc = fakeWebContents(st);
+  const b = C.createIslandBackups({ webContents: () => wc, folder: () => dir, storageKey: config.backups.storageKey, now: () => new Date(2026, 8, 28, 10, 0, 0) });
+  const parsed = C.parseBackupFile(fs.readFileSync(file, 'utf8'));
+  assert.equal(parsed.ok, true);
+  const r = await b.restore(parsed);
+  assert.equal(r.ok, true);
+  assert.deepEqual(r.players, ['Ada', 'Béa ✿']);
+  assert.equal(wc.reloads, 1);
+  assert.equal(st.map.get(KEY), stored(then), 'the day is back in the page’s storage');
+  const kept = JSON.parse(fs.readFileSync(path.join(dir, 'island-backup-2026-09-28-before-restore.json'), 'utf8'));
+  assert.deepEqual(kept.players, ['Béa ✿'], 'the family before the restore was kept first');
+});
+
+test('a file that is not a backup, or a backup of nobody, is refused before anything is touched', () => {
+  assert.equal(C.parseBackupFile('hello').reason, 'not-a-backup');
+  assert.equal(C.parseBackupFile(JSON.stringify({ kind: 'other', store: { model: pageFamily() } })).reason, 'not-a-backup');
+  assert.equal(C.parseBackupFile(JSON.stringify({ kind: 'olive-island-backup', store: { model: { ...pageFamily(), profiles: [] } } })).reason, 'empty');
+});
+
+// ── The quit ────────────────────────────────────────────────────────────────
+
+test('the quit waits once for the backup, then goes; a backup that never answers is given up on', async () => {
+  const ev = () => ({ prevented: 0, preventDefault() {
+    this.prevented++;
+  } });
+  let ran = 0;
+  const again = [];
+  const l = C.createLeaving({ backup: async () => void ran++, timeoutMs: 1000 });
+  const e1 = ev();
+  assert.equal(l.hold(e1, () => again.push('quit')), true);
+  const e2 = ev();
+  assert.equal(l.hold(e2, () => again.push('close')), true, 'a close while it runs waits too');
+  await new Promise((r) => setTimeout(r, 20));
+  assert.deepEqual([e1.prevented, e2.prevented, ran], [1, 1, 1], 'one backup for both');
+  assert.deepEqual(again, ['quit', 'close']);
+  const e3 = ev();
+  assert.equal(l.hold(e3, () => again.push('late')), false, 'then everything passes');
+  assert.equal(e3.prevented, 0);
+
+  const hung = C.createLeaving({ backup: () => new Promise(() => {}), timeoutMs: 60 });
+  let went = 0;
+  const t0 = Date.now();
+  hung.hold(ev(), () => went++);
+  await new Promise((r) => setTimeout(r, 120));
+  assert.equal(went, 1);
+  assert.ok(Date.now() - t0 < 1000);
+});
+
+// ── The backend's SQLite copy, retired ──────────────────────────────────────
+
+test('the backend’s SQLite backup: never seeded; one an older build seeded is switched off, the rest kept', () => {
+  const dir = tmp('garden-data-');
+  assert.equal(C.retireBackendBackups(dir), 'none');
+  assert.ok(!fs.existsSync(path.join(dir, 'backups.json')), 'nothing written where there was nothing');
+  const seeded = { version: 1, schedule: { enabled: true, cron: '0 19 * * *', missedFirePolicy: 'run-once-on-start' }, retention: { keepLast: 1, keepDaily: 30, keepWeekly: 0 }, destination: { type: 'local', path: '/x/Bot Garden backups' }, includeSecrets: false };
+  fs.writeFileSync(path.join(dir, 'backups.json'), JSON.stringify(seeded));
+  assert.equal(C.retireBackendBackups(dir), 'retired');
+  const after = JSON.parse(fs.readFileSync(path.join(dir, 'backups.json'), 'utf8'));
+  assert.deepEqual(after, { ...seeded, schedule: { ...seeded.schedule, enabled: false } });
+  assert.equal(C.retireBackendBackups(dir), 'already');
+});
+
+// ── The door and the menu ───────────────────────────────────────────────────
+
+function get(port, p, method = 'GET') {
   return new Promise((resolve, reject) => {
-    const req = http.request({ host: '127.0.0.1', port, method, path: urlPath, headers }, (res) => {
+    const req = http.request({ host: '127.0.0.1', port, path: p, method }, (res) => {
       let raw = '';
       res.on('data', (c) => (raw += c));
-      res.on('end', () => resolve({ status: res.statusCode, body: raw ? JSON.parse(raw) : null }));
+      res.on('end', () => {
+        let body = null;
+        try {
+          body = raw ? JSON.parse(raw) : null;
+        } catch {
+          body = raw;
+        }
+        resolve({ status: res.statusCode, body });
+      });
     });
     req.on('error', reject);
-    if (body) req.write(JSON.stringify(body));
     req.end();
   });
 }
 
-async function withRelay(api, run) {
-  const appDir = tmp();
+test('the one door lists the backups (read-only); the old copy/restore doors are gone; the rest goes past', async () => {
+  const dir = tmp('garden-backups-');
+  C.writeBackup(dir, C.readFamily(stored(pageFamily())), { now: new Date(2026, 8, 28, 19, 0, 0) });
+  const appDir = tmp('garden-app-');
   fs.writeFileSync(path.join(appDir, 'index.html'), '<html></html>');
-  const server = createRelay({ appDir, backendPort: () => null, shell: createShellDoors(api) });
+  const server = createRelay({ appDir, backendPort: () => null, shell: C.createShellDoors({ folder: () => dir }, { prefix: config.doorPrefix }) });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  const port = server.address().port;
   try {
-    await run(server.address().port);
+    const list = await get(port, '/__garden/copies');
+    assert.equal(list.status, 200);
+    assert.deepEqual(list.body.copies.map((c) => c.name), ['island-backup-2026-09-28.json']);
+    assert.equal((await get(port, '/__garden/copy', 'POST')).status, 404);
+    assert.equal((await get(port, '/__garden/restore', 'POST')).status, 404);
+    assert.equal((await get(port, '/functions/savePage')).status, 503, 'past the doors to the (absent) backend');
   } finally {
     server.close();
   }
-}
-
-test('the copies in the folder, newest first; other files and a missing folder are not copies', () => {
-  const dir = tmp();
-  touch(dir, `2026-09-20${ARCHIVE_EXT}`, new Date('2026-09-20T19:00:00Z'));
-  touch(dir, `2026-09-26${ARCHIVE_EXT}`, new Date('2026-09-26T19:00:00Z'));
-  touch(dir, 'notes.txt', new Date('2026-09-27T19:00:00Z'));
-  assert.deepStrictEqual(
-    listCopies(dir).map((c) => c.name),
-    [`2026-09-26${ARCHIVE_EXT}`, `2026-09-20${ARCHIVE_EXT}`]
-  );
-  assert.deepStrictEqual(listCopies(path.join(dir, 'nope')), []);
 });
 
-test('a copy is named, never a path', () => {
-  assert.ok(isCopyName(`a${ARCHIVE_EXT}`));
-  for (const bad of [`../a${ARCHIVE_EXT}`, `x/a${ARCHIVE_EXT}`, `x\\a${ARCHIVE_EXT}`, 'a.txt', '', null]) assert.ok(!isCopyName(bad), String(bad));
-});
-
-test('GET copies lists them; POST copy makes one and answers with the new list', async () => {
-  const dir = tmp();
-  let made = 0;
-  await withRelay(
-    {
-      folder: () => dir,
-      copy: async () => {
-        made++;
-        touch(dir, `new${ARCHIVE_EXT}`, new Date());
-      },
-      restore: async () => {}
-    },
-    async (port) => {
-      assert.deepStrictEqual((await request(port, 'GET', '/__garden/copies')).body, { copies: [] });
-      const r = await request(port, 'POST', '/__garden/copy', { headers: { 'x-garden': '1' } });
-      assert.strictEqual(r.status, 200);
-      assert.strictEqual(made, 1);
-      assert.deepStrictEqual(r.body.copies.map((c) => c.name), [`new${ARCHIVE_EXT}`]);
-    }
-  );
-});
-
-test('a POST without the app’s header is refused (a page on another site cannot send it), and nothing runs', async () => {
-  let ran = 0;
-  await withRelay(
-    { folder: tmp, copy: async () => void ran++, restore: async () => void ran++ },
-    async (port) => {
-      assert.strictEqual((await request(port, 'POST', '/__garden/copy')).status, 403);
-      assert.strictEqual((await request(port, 'POST', '/__garden/restore', { body: { name: `a${ARCHIVE_EXT}` } })).status, 403);
-      assert.strictEqual(ran, 0);
-    }
-  );
-});
-
-test('restore takes only a copy that is in the list, and hands the shell its full path', async () => {
-  const dir = tmp();
-  touch(dir, `2026-09-26${ARCHIVE_EXT}`, new Date());
-  const restored = [];
-  await withRelay(
-    { folder: () => dir, copy: async () => {}, restore: async (file) => void restored.push(file) },
-    async (port) => {
-      const h = { 'x-garden': '1', 'content-type': 'application/json' };
-      assert.strictEqual((await request(port, 'POST', '/__garden/restore', { headers: h, body: { name: `other${ARCHIVE_EXT}` } })).status, 400);
-      assert.strictEqual((await request(port, 'POST', '/__garden/restore', { headers: h, body: { name: `../2026-09-26${ARCHIVE_EXT}` } })).status, 400);
-      assert.deepStrictEqual(restored, []);
-      const ok = await request(port, 'POST', '/__garden/restore', { headers: h, body: { name: `2026-09-26${ARCHIVE_EXT}` } });
-      assert.strictEqual(ok.status, 200);
-      assert.deepStrictEqual(restored, [path.join(dir, `2026-09-26${ARCHIVE_EXT}`)]);
-    }
-  );
-});
-
-test('one at a time: a second ask while a copy is being made is told so', async () => {
-  let release;
-  await withRelay(
-    { folder: tmp, copy: () => new Promise((r) => (release = r)), restore: async () => {} },
-    async (port) => {
-      const first = request(port, 'POST', '/__garden/copy', { headers: { 'x-garden': '1' } });
-      await new Promise((r) => setTimeout(r, 50));
-      assert.strictEqual((await request(port, 'POST', '/__garden/copy', { headers: { 'x-garden': '1' } })).status, 409);
-      release();
-      assert.strictEqual((await first).status, 200);
-    }
-  );
-});
-
-test('anything else still goes on to the backend (the doors answer only their own paths)', async () => {
-  await withRelay({ folder: tmp, copy: async () => {}, restore: async () => {} }, async (port) => {
-    // No backend in this test: the relay's own "still opening" answer proves the request went past the doors.
-    const r = await new Promise((resolve) => http.get({ host: '127.0.0.1', port, path: '/functions/savePage' }, (res) => resolve(res.statusCode)));
-    assert.strictEqual(r, 503);
-  });
+test('the menu: one item that restores a backup; on a Mac beside Quit', () => {
+  let asked = 0;
+  const mac = C.restoreMenu('darwin', config, () => asked++);
+  assert.equal(mac.length, 1);
+  assert.equal(mac[0].label, config.name);
+  assert.deepEqual(mac[0].submenu.map((i) => i.label || i.role || i.type), [C.RESTORE_LABEL, 'separator', 'quit']);
+  const win = C.restoreMenu('win32', config, () => asked++);
+  assert.deepEqual(win[0].submenu.map((i) => i.label), [C.RESTORE_LABEL]);
+  win[0].submenu[0].click();
+  assert.equal(asked, 1);
+  assert.match(C.RESTORE_LABEL, /Restore a backup… \/ Restaurer une sauvegarde…/);
 });

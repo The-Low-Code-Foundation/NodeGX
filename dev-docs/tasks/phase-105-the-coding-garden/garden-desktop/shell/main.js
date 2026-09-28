@@ -13,8 +13,11 @@
  *   `GARDEN_MODEL_PATH` or `build-output/model/` in dev; its sha256 checked on first launch (`model-check.js`); loaded
  *   AFTER the window shows so the island never waits on it; the exam (`exam.js`) run once when no results exist.
  *   No model, a refused model, a slow model: the game runs on its written lines (AC4).
- * - The daily backup (one a day for a month) is written as `backups.json` before the backend's first start, into
- *   `Documents/<backups.folderName>`. Existing settings are never overwritten.
+ * - The island backups (R14, `copies.js`): the family — the page's localStorage entry, the same thing the save code holds
+ *   — is read by ONE fixed expression and written to `Documents/<backups.folderName>` as one small file a day (kept a
+ *   month): after the page loads if the day has none yet, every evening at `backups.dailyAt` while open, and at quit
+ *   (the quit waits for it, 3 s at most). The menu's "Restore a backup…" brings a day back. The backend's SQLite backup
+ *   (it holds nothing of the game) is no longer seeded, and one seeded by an older build is switched off.
  * - Timings go to `<userData>/logs/timings.log`: one launch line, then `model-load`, `exam-probe`, `olive` (AC7).
  * - The name a person sees is `config.name` / `config.nameFr` ("Olive's Island" / "L'île d'Olive", P105 ruling 7); the
  *   folder her saves live in is `config.userDataDirName` ("Bot Garden"), PINNED — see pinUserData.
@@ -27,7 +30,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { createRelay } = require('./relay');
-const { createShellDoors } = require('./copies');
+const { createShellDoors, createIslandBackups, createLeaving, parseBackupFile, restoreMenu, retireBackendBackups } = require('./copies');
 const { adoptShippedPolicy, installFunctions } = require('./policy');
 const { zoomFor, shouldMaximise, windowTitle } = require('./fit');
 const { createOwl } = require('./owl');
@@ -86,8 +89,6 @@ let win = null;
 let owl = null;
 let olive = null;
 let quitting = false;
-// A restore stops the server on purpose: its exit is not the "stopped unexpectedly" one.
-let restarting = false;
 const timings = { launch: new Date(T0).toISOString(), version: VERSION };
 const timingsLog = createTimings(path.join(LOG_DIR, 'timings.log'));
 
@@ -113,27 +114,28 @@ function writeTimings() {
   }
 }
 
-/** First start only: the backup policy. Never overwrites a policy that exists. */
-function seedBackups() {
-  const file = path.join(DATA_DIR, 'backups.json');
-  if (fs.existsSync(file)) return;
-  const dest = path.join(app.getPath('documents'), config.backups.folderName);
-  fs.mkdirSync(dest, { recursive: true });
-  const policy = {
-    version: 1,
-    schedule: { enabled: true, cron: config.backups.cron, missedFirePolicy: 'run-once-on-start' },
-    retention: config.backups.retention,
-    destination: { type: 'local', path: dest },
-    includeSecrets: false
-  };
-  fs.writeFileSync(file, JSON.stringify(policy, null, 2));
-  log(`seeded backups.json -> ${dest}`);
+/** Where the island backups go: the (pinned) Documents folder, whatever an older build's backups.json named. */
+function backupsFolder() {
+  return path.join(app.getPath('documents'), config.backups.folderName);
 }
+
+const islandBackups = createIslandBackups({
+  webContents: () => (win && !win.isDestroyed() ? win.webContents : null),
+  folder: backupsFolder,
+  storageKey: config.backups.storageKey,
+  keepDays: config.backups.keepDays,
+  dailyAt: config.backups.dailyAt,
+  log
+});
+// The quit waits for the day's last backup (bounded): a window's close and the app's quit both pass through it once.
+const leaving = createLeaving({ backup: () => islandBackups.run('quit'), timeoutMs: 3000, log });
 
 function startBackend() {
   return new Promise((resolve, reject) => {
     fs.mkdirSync(DATA_DIR, { recursive: true });
-    seedBackups();
+    // R14: the backend's evening SQLite copy held nothing of the game (every table empty); an older build's is switched off.
+    const retired = retireBackendBackups(DATA_DIR);
+    if (retired === 'retired') log('backups: the backend\'s SQLite backup is switched off (the island backups replace it)');
     // A new version's rules replace the old version's (policy.js says why); the old file is kept.
     const adopted = adoptShippedPolicy({ shipped: path.join(POLICY_DIR, config.policy), dataDir: DATA_DIR, version: VERSION });
     timings.policy = adopted.action;
@@ -203,64 +205,55 @@ function startBackend() {
         settled = true;
         clearTimeout(timer);
         reject(new Error(`the backend stopped before it was ready (code ${code})\n${tail.join('\n')}`));
-      } else if (!quitting && !restarting) {
+      } else if (!quitting) {
         dialog.showErrorBox(config.name, `${config.name} stopped unexpectedly. Please close it and open it again.\n\n${config.nameFr} s'est arrêté. Ferme-le et rouvre-le.`);
       }
     });
   });
 }
 
-/** Where the copies go: the folder the backup policy names (seeded on first start), else the default one. */
-function copiesFolder() {
+/**
+ * "Restore a backup…" (the shell's menu, R14): a parent picks a day's file and confirms; copies.js keeps the family now
+ * first, writes the day back, reloads the page and reads the players back. Every step says what happened, EN / FR.
+ */
+async function restoreFromBackup() {
+  if (!win || win.isDestroyed()) return;
+  const title = `${config.name} / ${config.nameFr}`;
+  const pick = await dialog.showOpenDialog(win, {
+    title: 'Restore a backup… / Restaurer une sauvegarde…',
+    defaultPath: backupsFolder(),
+    properties: ['openFile'],
+    filters: [{ name: 'Island backups / Sauvegardes des îles', extensions: ['json'] }]
+  });
+  if (pick.canceled || !pick.filePaths.length) return;
+  let parsed;
   try {
-    const policy = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'backups.json'), 'utf8'));
-    if (policy && policy.destination && policy.destination.path) return policy.destination.path;
+    parsed = parseBackupFile(fs.readFileSync(pick.filePaths[0], 'utf8'));
   } catch {
-    // no policy yet: the folder it will name
+    parsed = { ok: false, reason: 'unreadable' };
   }
-  return path.join(app.getPath('documents'), config.backups.folderName);
-}
-
-/** The backend's own CLI (backup / restore), run by this binary in Node mode like the server. */
-function runBackendCli(args) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, [BACKEND_ENTRY, ...args], { env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' }, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
-    let tail = '';
-    const keep = (c) => {
-      tail = (tail + c.toString()).slice(-2000);
-    };
-    child.stdout.on('data', keep);
-    child.stderr.on('data', keep);
-    child.on('error', reject);
-    child.on('exit', (code) => {
-      log(`cli ${args[0]} exited ${code}: ${tail.trim().split('\n').slice(-3).join(' | ')}`);
-      code === 0 ? resolve() : reject(new Error(`${args[0]} exited ${code}`));
-    });
-  });
-}
-
-/** Stop the server and wait for it to be gone; the relay answers 503 meanwhile. */
-function stopBackendForRestore() {
-  return new Promise((resolve) => {
-    const child = backend;
-    backendPort = null;
-    if (!child || child.exitCode !== null) return resolve();
-    restarting = true;
-    child.once('exit', () => resolve());
-    child.kill();
-  });
-}
-
-/** Bring a copy back: the server stops, the CLI restores (with its safety copy first), the server starts again. */
-async function restoreCopy(file) {
-  await stopBackendForRestore();
-  try {
-    await runBackendCli(['restore', file, '--data-dir', DATA_DIR]);
-  } finally {
-    const ready = await startBackend();
-    backendPort = ready.port;
-    restarting = false;
+  if (!parsed.ok) {
+    await dialog.showMessageBox(win, { type: 'warning', title, message: "That file is not a backup of the islands. / Ce fichier n'est pas une sauvegarde des îles.", buttons: ['OK'] });
+    return;
   }
+  const when = parsed.at ? new Date(parsed.at).toLocaleString() : '?';
+  const { response } = await dialog.showMessageBox(win, {
+    type: 'question',
+    title,
+    message: `Bring back the islands of ${when}? / Ramener les îles du ${when} ?`,
+    detail: `${parsed.players.join(', ')}\n\nThe islands on this computer now are kept first, in a "before-restore" backup.\nLes îles de cet ordinateur sont d'abord gardées, dans une sauvegarde « before-restore ».`,
+    buttons: ['Bring them back / Les ramener', 'Cancel / Annuler'],
+    defaultId: 1,
+    cancelId: 1
+  });
+  if (response !== 0) return;
+  const r = await islandBackups.restore(parsed).catch((e) => ({ ok: false, reason: e && e.message }));
+  await dialog.showMessageBox(
+    win,
+    r.ok
+      ? { type: 'info', title, message: `The islands are back. / Les îles sont revenues.`, detail: r.players.join(', '), buttons: ['OK'] }
+      : { type: 'error', title, message: "The islands could not be brought back. / Les îles n'ont pas pu être ramenées.", detail: `A note for a grown-up is in ${path.join(LOG_DIR, 'backend.log')} (${r.reason})`, buttons: ['OK'] }
+  );
 }
 
 /** The owl and its doors exist before the model is checked or loaded: an early ask is a fallback, not an error. */
@@ -297,15 +290,7 @@ async function wakeOwl() {
 
 function startRelay() {
   return new Promise((resolve, reject) => {
-    const copies = createShellDoors(
-      {
-        folder: copiesFolder,
-        copy: () => runBackendCli(['backup', '--data-dir', DATA_DIR]),
-        restore: restoreCopy,
-        log
-      },
-      { prefix: config.doorPrefix, header: config.header }
-    );
+    const copies = createShellDoors({ folder: backupsFolder }, { prefix: config.doorPrefix });
     // Olive's doors first (they own `<prefix>olive*`), then the copies; `olive` is read per request because a refused
     // model replaces it.
     const doors = (req, res, urlPath) => olive.handle(req, res, urlPath) || copies(req, res, urlPath);
@@ -335,6 +320,8 @@ function createWindow() {
     show: false,
     title: config.name,
     backgroundColor: '#ffffff',
+    // The one menu (Restore a backup…) stays out of the children's way on Windows: the Alt key shows it.
+    autoHideMenuBar: true,
     webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true }
   });
   // The game's name on the window, whatever the exported page's <title> says (fit.js windowTitle says why).
@@ -363,12 +350,20 @@ function createWindow() {
   win.webContents.once('did-finish-load', () => {
     mark('pageLoadedMs');
     writeTimings();
+    // The day's backup if it has none yet (a missed evening), after the page's own on-load save has settled.
+    setTimeout(() => islandBackups.runIfNoneToday('launch'), 2000);
+  });
+  // A person closing the window: the backup first (held, bounded), then the close.
+  win.on('close', (event) => {
+    leaving.hold(event, () => {
+      if (win && !win.isDestroyed()) win.close();
+    });
   });
   win.loadURL(ORIGIN + '/');
 }
 
 async function boot() {
-  Menu.setApplicationMenu(null);
+  Menu.setApplicationMenu(Menu.buildFromTemplate(restoreMenu(process.platform, config, () => restoreFromBackup().catch((e) => log(`restore failed: ${e && e.message}`)))));
   createOwlAndDoors();
   try {
     await startRelay();
@@ -410,10 +405,12 @@ async function boot() {
   }
 
   createWindow();
+  islandBackups.schedule();
 }
 
 function stopBackend() {
   quitting = true;
+  islandBackups.stop();
   // Her last move is in localStorage; Chromium commits it to disk on a delay. Write it now, before the app goes, so a
   // request finished a second before the window closed is still done tomorrow (and after an upgrade, CG-004 AC8).
   try {
@@ -439,5 +436,12 @@ if (!app.requestSingleInstanceLock()) {
   });
   app.whenReady().then(boot);
   app.on('window-all-closed', () => app.quit());
-  app.on('before-quit', stopBackend);
+  // The quit waits once for the day's last backup (leaving.hold), then goes on to stop the backend.
+  app.on('before-quit', (event) => {
+    if (win && !win.isDestroyed() && leaving.hold(event, () => app.quit())) return;
+    stopBackend();
+  });
 }
+
+// For the tests (tests/config.test.js loads this file with a fake Electron): where the backups go.
+module.exports = { islandBackups, backupsFolder };
