@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * CG-003 / CG-007 — drive Bot Garden's six pages in a headless Chrome, on the DEPLOYED template.
+ * CG-003 / CG-007 — drive Olive's Island's six pages (template slug bot-garden) in a headless Chrome, on the DEPLOYED template.
  *
  * The project is `templates/bot-garden/` exactly as `npm run template:garden` writes it, copied (opening a project
  * writes into it — drive a COPY), deployed with `nodegx-deploy.cjs`, served by `drive-deployed.js`. Every press is a
@@ -21,6 +21,10 @@
  * Clauses — CG-003: AC3 (the whole path, EN then FR, 1368×912 then 390×844), AC4, AC5, AC6, AC7, AC8, AC9, AC10;
  * CG-007: AC1 (the six screens at 1368×912, and with --mockup the mockup's own screens beside them), AC3 (fonts
  * loaded, nothing fetched from Google), AC5 (face ≥ 20 px at 390×844; two robots apart), AC7 (reduced motion).
+ * Session 3 (lane LOOK): S3-R8 one island per kid (a sibling's win is not on yours; your robot only), S3-R6 the island is
+ * the mockup's sea with pins at 1368×912 and 390×844 (no sideways overflow, innerWidth = the viewport) and a pin opens
+ * its request, S3-R5 every text ≥ 4.5:1 measured live with getComputedStyle (with a known-firing probe), S3-RENAME the
+ * robot renamed on My robot is the name on its pin and in the Workshop's line, S3-LOOK screenshots (look-*.png).
  * Exits 0 when every clause passed, 1 when any failed, 2 on a usage error.
  */
 const fs = require('fs');
@@ -75,6 +79,69 @@ function loadWords(projectDir) {
   return out;
 }
 const WORDS = loadWords(PROJECT);
+/** The requests, from the project's own Data/Requests, so a pin's expected request is computed, not typed. */
+function loadRequests(projectDir) {
+  const nodes = JSON.parse(fs.readFileSync(path.join(projectDir, 'components', 'Data', 'Requests', 'nodes.json'), 'utf8'));
+  const list = Array.isArray(nodes) ? nodes : nodes.nodes || Object.values(nodes);
+  return JSON.parse(list.find((n) => n.type === 'Static Data').parameters.json);
+}
+const REQUESTS = loadRequests(PROJECT);
+const titleOf = (lang, id) => w(lang, (REQUESTS.find((r) => r.id === id) || { copyKeys: {} }).copyKeys.title);
+
+/**
+ * S3-R5: every text a person reads, on the ground under it, from getComputedStyle. For each visible text node: its
+ * colour (alpha × the opacity of every element between it and its ground) over the first ancestor ground that is
+ * opaque once the translucent ones above it are composited. A ground that is a picture or a gradient (the world's
+ * tiles, the sea) with no opaque colour under the text is counted apart, never guessed. Exempt, and counted: a disabled
+ * control, a hat still to earn (.bg-chip-lock), anything aria-hidden — WCAG 1.4.3's inactive components.
+ */
+const CONTRAST_JS = `(() => {
+  const parse = (c) => { const m = String(c).match(/rgba?\\(([^)]+)\\)/); if (!m) return null; const p = m[1].split(/[ ,\\/]+/).filter(Boolean).map(Number); return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 }; };
+  const over = (top, under) => ({ r: top.r * top.a + under.r * (1 - top.a), g: top.g * top.a + under.g * (1 - top.a), b: top.b * top.a + under.b * (1 - top.a), a: 1 });
+  const lum = (c) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); };
+  const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+  const hex = (c) => '#' + [c.r, c.g, c.b].map((v) => Math.round(v).toString(16).padStart(2, '0')).join('');
+  function ground(el) {
+    let stack = [], opacity = 1, e = el;
+    while (e && e.nodeType === 1) {
+      const cs = getComputedStyle(e);
+      const bg = parse(cs.backgroundColor);
+      if (bg && bg.a > 0) { stack.push(bg); if (bg.a >= 0.999) { let g = stack.pop(); while (stack.length) g = over(stack.pop(), g); return { ground: g, opacity }; } }
+      else if (cs.backgroundImage && cs.backgroundImage !== 'none' && !/^url\\("data:image\\/svg/.test(cs.backgroundImage)) return { picture: true };
+      opacity *= Number(cs.opacity);
+      e = e.parentElement;
+    }
+    let g = { r: 255, g: 255, b: 255, a: 1 }; while (stack.length) g = over(stack.pop(), g); return { ground: g, opacity };
+  }
+  function measure(el) {
+    const cs = getComputedStyle(el);
+    const fg = parse(cs.color); const at = ground(el);
+    if (!fg || at.picture) return { picture: true };
+    const ink = over({ ...fg, a: fg.a * at.opacity }, at.ground);
+    return { ratio: Math.round(ratio(ink, at.ground) * 100) / 100, fg: hex(ink), bg: hex(at.ground), size: parseFloat(cs.fontSize), weight: cs.fontWeight };
+  }
+  // Known-firing: the mockup's own control orange under white words must read under 4.5 with this very instrument.
+  const probe = document.createElement('div'); probe.textContent = 'probe'; probe.style.cssText = 'position:fixed;left:0;top:0;background:#FF9F1C;color:#fff'; document.body.appendChild(probe);
+  const known = measure(probe); probe.remove();
+  const out = { known: known.ratio, checked: 0, pictures: 0, exempt: 0, fails: [] };
+  const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  let n;
+  while ((n = walk.nextNode())) {
+    const t = n.textContent.trim();
+    const el = n.parentElement;
+    if (!t || !el || !/[A-Za-zÀ-ÿ0-9]/.test(t)) continue;
+    const r = el.getBoundingClientRect();
+    if (r.width === 0 || r.height === 0) continue;
+    const cs = getComputedStyle(el);
+    if (cs.visibility === 'hidden' || cs.display === 'none' || (el.offsetParent === null && cs.position !== 'fixed')) continue;
+    if (el.closest('[disabled], :disabled, .bg-chip-lock, [aria-hidden="true"], style, script')) { out.exempt++; continue; }
+    const m = measure(el);
+    if (m.picture) { out.pictures++; continue; }
+    out.checked++;
+    if (m.ratio < 4.5) out.fails.push({ text: t.slice(0, 40), ratio: m.ratio, fg: m.fg, bg: m.bg, cls: String(el.className || '').slice(0, 60) });
+  }
+  return out;
+})()`;
 const w = (lang, key, name = 'Pip') => String(WORDS[lang][key] || '').split('{b}').join(name);
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -189,6 +256,24 @@ withDeployedSite({ dir: DIR }, async (page) => {
     if (!onProfiles) await tap(first('.bg-top .bg-who'), 'who is playing (back to Profiles)');
   };
   const blocks = () => evaluate(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`);
+  /** S3-R5 on the screen as it stands: every text ≥ 4.5:1, and the instrument fires on the mockup's own orange. */
+  const contrastClause = async (screen) => {
+    const c = await evaluate(CONTRAST_JS);
+    readings[`contrast-${screen}`] = c;
+    check(`S3-R5 ${screen}: every text on its ground ≥ 4.5:1 (${c.checked} texts, ${c.exempt} inactive exempt, ${c.pictures} on a picture)`, c.checked > 3 && c.fails.length === 0 && c.known < 4.5, c.fails.length ? c.fails.slice(0, 6) : c);
+  };
+  /** S3-R6: the island is the mockup's sea with pins; nothing wider than the screen. */
+  const seaClause = async (vp) => {
+    const r = await evaluate(`(() => { const box = (s) => { const e = document.querySelector(s); if (!e || e.offsetParent === null) return null; const r = e.getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom, w: r.width, h: r.height }; };
+      const sea = box('.bg-sea'); const pins = {}; for (const id of ['mamie', 'biscuit', 'sami', 'olive', 'bot', 'tree1', 'rock']) pins[id] = box('.bg-pin-' + id);
+      return { sea, pins, quests: box('.bg-quest'), cells: document.querySelectorAll('.bg-sea .gd-cell').length, bots: document.querySelectorAll('.bg-sea .gd-bot').length, vw: innerWidth, vh: innerHeight, sx: document.scrollingElement.scrollWidth }; })()`);
+    readings[`sea-${vp.name}`] = r;
+    const inside = (p) => p && r.sea && p.l + p.w / 2 > r.sea.l && p.l + p.w / 2 < r.sea.r && p.t + p.h / 2 > r.sea.t && p.t + p.h / 2 < r.sea.b;
+    check(`S3-R6 ${vp.name}: the island is the sea (aspect 12/7) with a pin for Mamie, Biscuit, Sami, Olive and the robot, the scenery on it`, !!r.sea && Math.abs(r.sea.h / r.sea.w - 7 / 12) < 0.03 && Object.values(r.pins).every(inside), r);
+    check(`S3-R6 ${vp.name}: no tile world of the island — the kit draws one robot, on one tile`, r.cells === 1 && r.bots === 1, { cells: r.cells, bots: r.bots });
+    check(`S3-R6 ${vp.name}: the requests ${vp.width > 980 ? 'beside the map (360 px column)' : 'under the map (one column)'}`, !!r.quests && (vp.width > 980 ? r.quests.l >= r.sea.r : r.quests.t >= r.sea.b), { sea: r.sea, quests: r.quests });
+    check(`S3-R6 ${vp.name}: nothing wider than the screen (innerWidth ${vp.width}, no sideways scroll)`, r.vw === vp.width && r.sx <= r.vw, { vw: r.vw, sx: r.sx });
+  };
   const tab = (i) => tap(`document.querySelectorAll('.bg-tabs .bg-tab')[${i}]`, `tab ${i}`);
   const seg = (label) => tap(byText('.bg-top .bg-seg-btn', label), `seg ${label}`);
   const control = (icon) => tap(first(`.bg-controls .bg-i-${icon}`), `control ${icon}`);
@@ -203,7 +288,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await seg(to === 'fr' ? 'FR' : 'EN');
     await wait(600);
     const after = await words();
-    const same = before.filter((t) => after.includes(t) && !/Bot Garden|Olive|Pip|Ada|Bo|Mamie Rose|Sami|Biscuit|EN|FR|7–9|10–12|Ok/.test(t));
+    const same = before.filter((t) => after.includes(t) && !/Bot Garden|Olive|Pip|Rosie|Ada|Bo|Mamie Rose|Sami|Biscuit|EN|FR|7–9|10–12|Ok/.test(t));
     const marker = await evaluate('window.__gardenMarker');
     check(`AC9 ${screen}: ${from}→${to} changes every string, no reload`, marker === 42 && after.length > 0 && same.length === 0, { unchanged: same.slice(0, 8), marker });
   };
@@ -231,7 +316,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
       const who = await until('document.body.innerText', (t) => t.includes(w(lang, 'whoIsPlaying')));
       check(`AC3 ${tag}: Profiles says "${w(lang, 'whoIsPlaying')}"`, who.includes(w(lang, 'whoIsPlaying')), who.slice(0, 200));
       await shot(`ac3-${tag}-01-profiles`);
-      await tap(byText('button.bg-btn', w(lang, 'newProfile')), 'new player');
+      await tap(first('button.bg-profile-new'), 'new player (the card)');
       if (!(await typeInto(first('input'), 'Ada', 'the name box'))) continue;
       await tap(byText('.bg-seg-btn', '10–12'), 'band 10–12 in the form');
       await tap(byText('button.bg-btn', w(lang, 'create')), 'create');
@@ -239,6 +324,10 @@ withDeployedSite({ dir: DIR }, async (page) => {
       check(`AC3 ${tag}: a new profile lands on the island`, island === '/island', island);
       await wait(600);
       await shot(`ac3-${tag}-02-island`);
+      if (lang === 'en') {
+        await seaClause(vp);
+        await shot(`look-island-${vp.name}`);
+      }
 
       // AC8: a reload lands on the island with the profile kept.
       await page.navigate('/island');
@@ -290,6 +379,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
         const box = await evaluate(`(() => { const e = document.querySelector('.bg-blocks-box'); return e ? { sh: e.scrollHeight, ch: e.clientHeight, oy: getComputedStyle(e).overflowY } : null; })()`);
         check(`AC4 ${lang}: fifteen blocks scroll in their own box`, box && box.sh > box.ch && box.oy === 'auto', box);
       }
+      if (tag === '1368-en') await contrastClause('workshop, the fold offered');
       await tap(first('.bg-tidy .bg-i-tidy'), 'Fold it');
       const folded = await until(`(() => { const r = document.querySelector('.gd-prog .gd-blk[data-t="repeat"]'); return r ? document.querySelectorAll('.gd-prog .gd-blk[data-id]').length : 0; })()`, (n) => n === 6);
       check(`AC3 ${tag}: folded to one repeat holding five (6 blocks drawn)`, folded === 6, folded);
@@ -308,6 +398,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
         const again = await evaluate(`(() => { const r = document.querySelector('.bg-win-card').getBoundingClientRect(); return { cx: r.left + r.width / 2, cy: r.top + r.height / 2, vw: innerWidth, vh: innerHeight, pos: getComputedStyle(document.querySelector('.bg-win')).position }; })()`);
         check(`AC7 ${tag}: the win card is fixed and centred after scrolling`, again.pos === 'fixed' && Math.abs(again.cx - again.vw / 2) < 4 && Math.abs(again.cy - again.vh / 2) < 40, again);
         await shot(`ac3-${tag}-06-win`);
+        if (tag === '1368-en') await contrastClause('the win card');
         await tap(byText('.bg-win-card button', w(lang, 'winIsland')), 'back to the island');
         const back = await until('location.pathname', (p) => p === '/island');
         check(`AC3 ${tag}: back on the island in one tap from the win card`, back === '/island', back);
@@ -405,21 +496,73 @@ withDeployedSite({ dir: DIR }, async (page) => {
   check('CG-007 AC5: the robot’s face ≥ 20 px on the world at 390×844', face >= 20, face);
   await page.setViewport(VIEWPORTS[0]);
 
-  // AC10: a second profile sees the first one's robot, and the request done by either is done.
+  // S3-R8 (ruling 8, supersedes AC10's D2): one island per kid. Bo is new: Ada's tulips are not done on Bo's island,
+  // only Bo's robot is on it, and Mamie's pin offers Bo her first request.
+  const doneOf = () => evaluate(`(() => { const k = Object.keys(localStorage).find((x) => /bot-garden/.test(x)); try { const v = JSON.parse(localStorage.getItem(k)); const m = v.model || v; const a = m.profiles.find((p) => p.id === m.island.activeId); return { v: m.v, name: a && a.name, robot: a && a.robot.name, done: a && a.island ? a.island.done : null, band: a && a.band }; } catch (e) { return { error: String(e) }; } })()`);
+  const firstOpen = (islander, st) => (REQUESTS.find((r) => r.islander === islander && Number(r.band) <= Number(st.band) && !(st.done || []).includes(r.id)) || {}).id;
   await page.navigate('/');
   await wait(800);
-  await tap(byText('button.bg-btn', w('en', 'newProfile')), 'new player');
+  await tap(first('button.bg-profile-new'), 'new player (Bo)');
   await typeInto(first('input'), 'Bo', 'the name box (Bo)');
   await tap(byText('button.bg-btn', w('en', 'create')), 'create Bo');
   await until('location.pathname', (p) => p === '/island');
   await wait(900);
-  const two = await evaluate(`(() => { const bots = [...document.querySelectorAll('.bg-map .gd-bot')]; const boxes = bots.map((b) => { const r = b.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height, name: b.innerText }; }); return boxes; })()`);
-  const apart = two.length === 2 && !(two[0].x < two[1].x + two[1].w && two[1].x < two[0].x + two[0].w && two[0].y < two[1].y + two[1].h && two[1].y < two[0].y + two[0].h);
-  check('AC10: two profiles, two robots on the island, each named', two.length === 2, two);
-  check('CG-007 AC5: the two robots do not overlap', apart, two);
-  const doneForBo = await evaluate(`(() => { const c = [...document.querySelectorAll('.bg-quest')].find((e) => e.innerText.includes(${JSON.stringify(w('en', 'rqTulipsTitle'))})); return c ? c.innerText : null; })()`);
-  check('AC10: the tulip request Ada did is done for Bo too', !!doneForBo && doneForBo.includes(w('en', 'done')), doneForBo);
-  await shot('ac10-two-robots');
+  const bo = await doneOf();
+  readings.boStored = bo;
+  check('S3-R8: the family is stored as v3, each kid with her own island (Bo: nothing done)', bo.v === 3 && Array.isArray(bo.done) && bo.done.length === 0, bo);
+  const boIsland = await evaluate(`(() => { const c = [...document.querySelectorAll('.bg-quest')].find((e) => e.innerText.includes(${JSON.stringify(w('en', 'rqTulipsTitle'))})); return { card: c ? c.innerText : null, bots: [...document.querySelectorAll('.bg-sea .gd-bot')].map((b) => b.innerText), mamieOpen: !!document.querySelector('.bg-pin-mamie.bg-pin-open') }; })()`);
+  check('S3-R8: the tulips Ada did are NOT done on Bo’s island', !!boIsland.card && !boIsland.card.includes(w('en', 'done')), boIsland);
+  check('S3-R8: only Bo’s robot is on Bo’s island (a sibling’s robot is not)', boIsland.bots.length === 1, boIsland.bots);
+  check('S3-R8: Mamie’s pin is open for Bo', boIsland.mamieOpen, boIsland);
+  await shot('s3-r8-bo-island');
+  // S3-R6: a pin opens its request — Mamie's first request Bo has not done.
+  const expectId = firstOpen('mamie', bo);
+  await tap(first('.bg-pin-mamie.bg-pin-open'), 'Mamie’s pin');
+  const viaPin = await until(`(() => { const h = [...document.querySelectorAll('h1')].find((e) => e.offsetParent !== null); return { path: location.pathname, title: h ? h.innerText : '' }; })()`, (r) => r.path === '/workshop' && r.title.length > 0);
+  check(`S3-R6: Mamie’s pin opens her first request Bo has not done (${expectId})`, viaPin.path === '/workshop' && viaPin.title.includes(titleOf('en', expectId)), { viaPin, expectId });
+  // Back to Ada through Profiles: two cards, each kid's robot drawn with its own name; Ada's island still has her tulips done.
+  await page.navigate('/');
+  await wait(900);
+  const cards = await evaluate(`[...document.querySelectorAll('.bg-profile')].map((c) => { const r = c.getBoundingClientRect(); const b = c.querySelector('.gd-bot'); return { x: r.left, y: r.top, w: r.width, h: r.height, robot: b ? b.innerText : null, fill: b ? getComputedStyle(b.querySelector('rect[fill]') || b).fill : null, text: c.innerText }; })`);
+  readings.profileCards = cards;
+  const disjoint = cards.length === 2 && !(cards[0].x < cards[1].x + cards[1].w && cards[1].x < cards[0].x + cards[0].w && cards[0].y < cards[1].y + cards[1].h && cards[1].y < cards[0].y + cards[0].h);
+  check('S3-LOOK Profiles: a card per kid, each with her robot drawn and named, the cards apart (CG-007 AC5’s two robots)', cards.length === 2 && cards.every((c) => !!c.robot) && disjoint, cards);
+  check('S3-LOOK Profiles: the new player is a card', await evaluate(`!!document.querySelector('button.bg-profile-new')`), null);
+  await shot('look-profiles-1368');
+  await contrastClause('Profiles');
+  await tap(byText('.bg-profile h3', 'Ada'), 'Ada’s card (her name)');
+  await until('location.pathname', (p) => p === '/island');
+  await wait(900);
+  const adaDone = await evaluate(`(() => { const c = [...document.querySelectorAll('.bg-quest')].find((e) => e.innerText.includes(${JSON.stringify(w('en', 'rqTulipsTitle'))})); return c ? c.innerText : null; })()`);
+  check('S3-R8: back on Ada’s island, her tulips are still done', !!adaDone && adaDone.includes(w('en', 'done')), adaDone);
+  await contrastClause('Island');
+  // S3-RENAME: the robot renamed on My robot is the name on its pin and in the Workshop's line.
+  await tab(2);
+  await until('location.pathname', (p) => p === '/robot');
+  await wait(700);
+  await typeInto(first('.bg-panel input'), 'Rosie', 'the robot’s name (My robot)');
+  await wait(600);
+  await contrastClause('My robot');
+  await tab(0);
+  await until('location.pathname', (p) => p === '/island');
+  await wait(900);
+  const pinName = await evaluate(`(() => { const n = document.querySelector('.bg-pin-bot .gd-name'); return n ? n.innerText : null; })()`);
+  check('S3-RENAME: the island pin carries the new name', pinName === 'Rosie', { pinName, stored: await doneOf() });
+  await tap(byText('.bg-quest', w('en', 'rqTulipsTitle')), 'the tulip request (renamed)');
+  await until('location.pathname', (x) => x === '/workshop');
+  await wait(900);
+  const line = await evaluate(`(() => { const e = document.querySelector('.bg-ws-sub'); return e ? e.innerText : ''; })()`);
+  check('S3-RENAME + item 1: the Workshop’s line is the tulips’ own, with the new name in it', line === w('en', 'subTulipsThree', 'Rosie'), { line, want: w('en', 'subTulipsThree', 'Rosie') });
+  const ask = await evaluate(`(() => { const b = [...document.querySelectorAll('.bg-controls .bg-i-owlc')].find((e) => e.offsetParent !== null); if (!b) return null; const s = getComputedStyle(b, '::before'); return { image: /svg/.test(s.backgroundImage), mask: s.webkitMaskImage || s.maskImage }; })()`);
+  check('S3-LOOK item 2: Ask Olive carries the owl picture, not a white mask', !!ask && ask.image && (!ask.mask || ask.mask === 'none'), ask);
+  await shot('look-workshop-1368');
+  await contrastClause('Workshop');
+  // Rename back, so the screens after read as before.
+  await tab(2);
+  await until('location.pathname', (p) => p === '/robot');
+  await wait(600);
+  await typeInto(first('.bg-panel input'), 'Pip', 'the robot’s name back to Pip');
+  await wait(400);
 
   // Grown-ups: the stub Olive is awake; Try Olive answers.
   await tab(4);
@@ -427,7 +570,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await wait(1200);
   const gu = await text();
   check('Grown-ups: the stub shell says Olive is awake, and her exam here', gu.includes(w('en', 'guHereOn')) && /20/.test(gu), gu.slice(0, 400));
-  await tap(first('.bg-panel .bg-i-owl'), 'Try Olive');
+  await contrastClause('Grown-ups');
+  await tap(first('.bg-panel .bg-i-owlc'), 'Try Olive');
   const reply = await until('document.body.innerText', (t) => t.includes('(stub)'), 6000);
   check('Grown-ups: Try Olive shows her reply', reply.includes('(stub)'), stubCalls.slice(-2));
 
@@ -465,7 +609,21 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await page.navigate(p);
     await wait(1100);
     await shot(`cg007-ac1-${name}`);
+    if (name === 'skills') await contrastClause('Skills');
   }
+  // S3-LOOK: the island and Profiles at a phone's width, for the side-by-side.
+  await page.setViewport(VIEWPORTS[1]);
+  for (const [name, p] of [['island', '/island'], ['profiles', '/']]) {
+    await page.navigate(p);
+    await wait(1100);
+    await shot(`look-${name}-390`);
+    if (name === 'profiles') {
+      const r = await evaluate(`({ vw: innerWidth, sx: document.scrollingElement.scrollWidth })`);
+      check('S3-LOOK Profiles 390: nothing wider than the screen', r.vw === 390 && r.sx <= 390, r);
+      await contrastClause('Profiles 390');
+    }
+  }
+  await page.setViewport(VIEWPORTS[0]);
   await tab(0);
   await wait(600);
   await tap(byText('.bg-quest', w('en', 'rqTulipsTitle')), 'the workshop for the look');

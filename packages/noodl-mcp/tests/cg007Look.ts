@@ -1,5 +1,5 @@
 /**
- * CG-007 — the look of Bot Garden, as the mockup draws it (`tpl-012-mockups/bot-garden.html`): warm paper, white cards
+ * CG-007 — the look of Olive's Island (slug bot-garden), as the mockup draws it (`tpl-012-mockups/bot-garden.html`): warm paper, white cards
  * with a soft shadow, pill buttons in four fills (leaf, coral, violet, quiet), Fredoka titles over Nunito, the owl's
  * violet card, the four block colours. Ported, not restyled: every value below is the mockup's `:root` or one of its
  * component rules, and the comment beside a value says which when it is not obvious.
@@ -24,6 +24,8 @@
  *
  * @module noodl-mcp/tests/cg007Look
  */
+import { PIN_PLACES } from './cg003Content';
+
 
 /** The preset the tokens sit on. Playful ships Nunito (P88 GAM-016), the mockup's body face. */
 export const GARDEN_PRESET = 'playful';
@@ -44,6 +46,30 @@ export const ROBOT_PAINTS: ReadonlyArray<{ token: string; hex: string; name: { e
 ];
 
 /**
+ * The fills that carry white words, darkened (ruling 5, "darker fills, white text"): each is the mockup's colour at the
+ * same OKLCH hue and chroma with a lower lightness, stepped down until white on it reaches 4.5:1 (4.6 aimed, for the
+ * rounding) — and the leaf, which is also the eyebrow's ink on the paper, until it reaches 4.5:1 there too. The control
+ * orange loses some chroma on the way down (sRGB has no darker orange that saturated). The mockup's own value is kept
+ * beside each so the change is one line to read. `$SCRATCH/darken-oklch.js` is the instrument that chose them.
+ */
+export const DARKENED_FILLS: ReadonlyArray<{ token: string; mockup: string; value: string }> = [
+  { token: '--leaf', mockup: '#3FA66B', value: '#058149' },
+  { token: '--primary', mockup: '#3FA66B', value: '#058149' },
+  { token: '--coral', mockup: '#FF7A59', value: '#CB4A2A' },
+  { token: '--secondary', mockup: '#FF7A59', value: '#CB4A2A' },
+  { token: '--violet', mockup: '#8F6BFF', value: '#8059EC' },
+  { token: '--block-motion', mockup: '#4C8DFF', value: '#3170E0' },
+  { token: '--block-action', mockup: '#3FA66B', value: '#058149' },
+  { token: '--block-control', mockup: '#FF9F1C', value: '#A86501' },
+  { token: '--block-ask', mockup: '#8F6BFF', value: '#8059EC' }
+];
+const darkened = (token: string): string => {
+  const found = DARKENED_FILLS.find((f) => f.token === token);
+  if (!found) throw new Error(`no darkened fill ${token}`);
+  return found.value;
+};
+
+/**
  * The mockup's `:root`, as tokens. The standard names (`--background`, `--foreground`, `--primary` …) carry the same
  * values so the preset's own compositions and the contrast gate read the garden's colours, not Playful's.
  */
@@ -59,11 +85,11 @@ export const GARDEN_TOKENS: ReadonlyArray<{ name: string; value: string }> = [
   { name: '--border-subtle', value: '#EBDFC4' },
   { name: '--border-control', value: '#6E6784' },
   { name: '--ring', value: '#5FB4E8' },
-  { name: '--primary', value: '#3FA66B' },
-  { name: '--primary-hover', value: '#37945F' },
+  { name: '--primary', value: darkened('--primary') },
+  { name: '--primary-hover', value: '#04703F' },
   { name: '--primary-foreground', value: '#FFFFFF' },
-  { name: '--secondary', value: '#FF7A59' },
-  { name: '--secondary-hover', value: '#F2694A' },
+  { name: '--secondary', value: darkened('--secondary') },
+  { name: '--secondary-hover', value: '#B43C1E' },
   { name: '--secondary-foreground', value: '#FFFFFF' },
   { name: '--accent', value: '#FFD166' },
   { name: '--accent-foreground', value: '#2E2A3D' },
@@ -75,29 +101,30 @@ export const GARDEN_TOKENS: ReadonlyArray<{ name: string; value: string }> = [
   { name: '--ink', value: '#2E2A3D' },
   { name: '--ink-2', value: '#6E6784' },
   { name: '--line', value: '#EBDFC4' },
-  { name: '--leaf', value: '#3FA66B' },
+  { name: '--leaf', value: darkened('--leaf') },
   { name: '--leaf-2', value: '#DDF3E4' },
   { name: '--leaf-3', value: '#BFE8CC' },
   { name: '--soil', value: '#C79A63' },
   { name: '--sand', value: '#F1DFB5' },
   { name: '--pond', value: '#7CC6F0' },
   { name: '--pond-2', value: '#4FA7DC' },
-  { name: '--coral', value: '#FF7A59' },
+  { name: '--coral', value: darkened('--coral') },
   { name: '--sun', value: '#FFD166' },
-  { name: '--violet', value: '#8F6BFF' },
+  { name: '--violet', value: darkened('--violet') },
   { name: '--violet-2', value: '#EEE8FF' },
   // The bubble's and the owl row's text on violet-2 (the mockup's #4A2FA6 and #6a5aa8).
   { name: '--violet-ink', value: '#4A2FA6' },
   { name: '--violet-meta', value: '#6A5AA8' },
   { name: '--sky', value: '#5FB4E8' },
+  // The "she is awake" dot: a mark, not a ground for words — the mockup's bright green stays.
   { name: '--ok', value: '#3FA66B' },
   { name: '--off', value: '#CFC6B3' },
   { name: '--on-fill', value: '#FFFFFF' },
-  // The four block colours (the mockup's --motion --action --control --ask). The kit is fed these by name.
-  { name: '--block-motion', value: '#4C8DFF' },
-  { name: '--block-action', value: '#3FA66B' },
-  { name: '--block-control', value: '#FF9F1C' },
-  { name: '--block-ask', value: '#8F6BFF' },
+  // The four block colours (the mockup's --motion --action --control --ask, darkened for white words). The kit is fed these by name.
+  { name: '--block-motion', value: darkened('--block-motion') },
+  { name: '--block-action', value: darkened('--block-action') },
+  { name: '--block-control', value: darkened('--block-control') },
+  { name: '--block-ask', value: darkened('--block-ask') },
   { name: '--block-run', value: '#FFD166' },
   // The tidy box, the repeat's ground, a watered tulip's dot, the pad's water key (mockup literals, named once).
   { name: '--tidy', value: '#FFF4E0' },
@@ -109,6 +136,10 @@ export const GARDEN_TOKENS: ReadonlyArray<{ name: string; value: string }> = [
   { name: '--stage-bottom', value: '#FFE7BE' },
   { name: '--sea-top', value: '#9FD9F3' },
   { name: '--sea-bottom', value: '#7CC6F0' },
+  // The island's land, its inner edge and the sand under it (the mockup's .land literals, named once).
+  { name: '--land', value: '#C8EBD2' },
+  { name: '--land-edge', value: '#B4E1C2' },
+  { name: '--shore', value: '#E9D9A8' },
   { name: '--shadow-soft', value: '0 6px 18px rgba(72, 52, 20, 0.10)' },
   { name: '--shadow-key', value: '0 4px 10px rgba(0, 0, 0, 0.15)' },
   { name: '--shadow-press', value: 'inset 0 -4px 0 rgba(0, 0, 0, 0.15)' },
@@ -161,12 +192,19 @@ export const ICONS: Readonly<Record<string, string>> = {
 const spriteRules = Object.entries(SPRITES)
   .map(([name, s]) => `.bg-sp-${name} { background-image: ${uri(s)}; background-repeat: no-repeat; background-position: center; background-size: 78% 78%; }`)
   .join('\n');
+/** The owl glyph in her own colours on Ask Olive (CG-007 §7.1 item 2): a picture, not a white mask. */
+const owlColourRule = `.bg-i-owlc::before { content: ''; display: inline-block; flex: none; width: 24px; height: 24px; margin-right: 8px; background-image: ${uri(SPRITES.owl)}; background-repeat: no-repeat; background-position: center; background-size: contain; }`;
 const iconRules = Object.entries(ICONS)
   .map(([name, s]) => `.bg-i-${name}::before { content: ''; display: inline-block; flex: none; width: 20px; height: 20px; margin-right: 8px; background-color: currentColor; -webkit-mask: ${uri(s)} center / contain no-repeat; mask: ${uri(s)} center / contain no-repeat; }`)
   .join('\n');
 
+/** Where each pin stands on the island map (the mockup's numbers, `PIN_PLACES`): its centre, and its size. */
+const pinRules = Object.entries(PIN_PLACES)
+  .map(([id, [left, top, width, height]]) => `.bg-pin-${id} { left: ${left}% !important; top: ${top}% !important; width: ${width}% !important; height: ${height}% !important; }`)
+  .join('\n');
+
 /** Every class the graph names, in one sheet. Colours are `var(--token)`; the sprites keep their own paint. */
-export const GARDEN_CSS = `/* Bot Garden, the look (P105 CG-007). The mockup's rules, ported; prefixed bg- so nothing collides with a kit's gd- classes. */
+export const GARDEN_CSS = `/* Olive's Island, the look (P105 CG-007). The mockup's rules, ported; prefixed bg- so nothing collides with a kit's gd- classes. */
 html, body { background: var(--paper); }
 body { margin: 0; color: var(--ink); font-family: 'Nunito', system-ui, sans-serif; font-size: 16px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
 h1, h2, h3 { font-family: 'Fredoka', 'Nunito', sans-serif; letter-spacing: 0.005em; text-wrap: balance; }
@@ -211,6 +249,7 @@ button:focus-visible, input:focus-visible, .bg-press:focus-visible { outline: 3p
 .bg-btn:hover { filter: brightness(1.05); }
 .bg-btn[disabled], .bg-btn:disabled { opacity: 0.45; cursor: default; }
 ${iconRules}
+${owlColourRule}
 
 /* Cards (the mockup's .panel). */
 .bg-panel { box-shadow: var(--shadow-soft); }
@@ -255,12 +294,29 @@ ${iconRules}
 @keyframes bg-pop { from { transform: scale(0.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .bg-reward { border-radius: 999px; }
 
-/* The island (the mockup's .island, .quest, .tag). */
+/* The island (ruling 6: the mockup's .island, .map, .land, .pin; then .quest, .tag). */
 .bg-island { display: grid !important; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
 @media (max-width: 980px) { .bg-island { grid-template-columns: minmax(0, 1fr); } }
-.bg-map .gd-world { border-radius: 22px; }
+.bg-sea { position: relative !important; width: 100% !important; height: auto !important; aspect-ratio: 12 / 7; border-radius: 22px; overflow: hidden !important; background: linear-gradient(180deg, var(--sea-top), var(--sea-bottom)); display: block !important; }
+.bg-land { position: absolute !important; left: 5% !important; right: 5% !important; top: 6% !important; bottom: 8% !important; width: auto !important; height: auto !important; border-radius: 46% 54% 42% 58% / 50% 40% 60% 50%; background: var(--land); box-shadow: inset 0 0 0 10px var(--land-edge), 0 10px 0 var(--shore); }
+.bg-pin { position: absolute !important; display: grid !important; place-items: center; transform: translate(-50%, -50%); z-index: 1; }
+.bg-pin-pic { width: 100% !important; height: 100% !important; background-size: contain !important; }
+.bg-pin-scene { background-size: contain !important; }
+/* The name under a pin (the mockup's .pin .lbl): white pill, ink words. */
+.bg-pin-lbl { position: absolute !important; top: 100% !important; left: 50% !important; transform: translateX(-50%); white-space: nowrap !important; background: var(--card); border-radius: 999px; padding: 3px 10px; box-shadow: var(--shadow-soft); z-index: 2; }
+/* A pin with a request left for this kid: a sun badge, and it answers a tap. */
+.bg-pin-open { cursor: pointer; z-index: 3; }
+.bg-pin-open::after { content: '!'; position: absolute; top: -2px; right: -2px; width: 22px; height: 22px; border-radius: 50%; background: var(--sun); color: var(--ink); font-weight: 800; font-size: 14px; line-height: 22px; text-align: center; box-shadow: var(--shadow-key); }
+.bg-pin-open:hover .bg-pin-pic { transform: scale(1.06); }
+/* The robot's pin: the kit draws only the robot, on no ground, and its name as the pin's label. */
+.bg-pin-bot { z-index: 4; }
+.bg-pin-bot .gd-world, .bg-profile-stage .gd-world { width: 100% !important; max-width: none !important; border: 0 !important; background: transparent !important; overflow: visible !important; border-radius: 0 !important; }
+.bg-pin-bot .gd-cell, .bg-profile-stage .gd-cell { background: transparent !important; cursor: default; }
+/* A drawing, not a board: a press on the robot is a press on its card (Profiles) or nothing (the island). */
+.bg-pin-bot .gd-world, .bg-profile-stage .gd-world { pointer-events: none; }
+.bg-pin-bot .gd-name, .bg-profile-stage .gd-name { top: 100% !important; font-size: 13px !important; padding: 3px 10px !important; box-shadow: var(--shadow-soft) !important; }
+${pinRules}
 .bg-quest { box-shadow: var(--shadow-soft); display: grid !important; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; align-items: center; cursor: pointer; }
-.bg-quest-done { opacity: 0.7; }
 .bg-tag { border-radius: 999px; }
 .bg-tag-motion { background-color: var(--block-motion); }
 .bg-tag-control { background-color: var(--block-control); }
@@ -278,10 +334,10 @@ ${iconRules}
 .bg-chip-lock { opacity: 0.5; cursor: default; }
 .bg-sticker { box-shadow: var(--shadow-soft); border-radius: 12px; }
 
-/* Skills (the mockup's .path, .notion). */
+/* Skills (the mockup's .path, .notion). A seed sits flat on the paper — never faded (a faded card's words fall under 4.5:1). */
 .bg-path { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
 .bg-notion { box-shadow: var(--shadow-soft); }
-.bg-notion-seed { opacity: 0.75; }
+.bg-notion-seed { background-color: var(--paper) !important; box-shadow: none; }
 .bg-blk { border-radius: 12px; box-shadow: var(--shadow-block); }
 .bg-blk-motion { background-color: var(--block-motion); }
 .bg-blk-action { background-color: var(--block-action); }
@@ -299,9 +355,21 @@ ${iconRules}
 .bg-li::before { content: '•'; margin-right: 8px; color: var(--ink-2); }
 .bg-code { font-family: ui-monospace, Menlo, monospace; word-break: break-all; }
 
-/* Profiles. */
+/* Profiles (the design pass): a white card per kid, her robot on the My robot stage's warm ground, then her face,
+   name and band; the new player is an empty card with a plus. */
+.bg-profiles { align-items: stretch !important; }
 .bg-profile { box-shadow: var(--shadow-soft); cursor: pointer; }
-.bg-profile-on { outline: 3px solid var(--leaf); outline-offset: 2px; }
+.bg-profile-stage { background: linear-gradient(180deg, var(--stage-top), var(--stage-bottom)); display: grid !important; place-items: center; padding: 10px 0 22px; }
+.bg-profile-stage .gd-world { width: 88px !important; }
+.bg-profile-band { background: var(--paper-2); border-radius: 999px; padding: 2px 9px; align-self: flex-start; }
+.bg-profile-new { border: 2px dashed var(--line) !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 10px; cursor: pointer; box-shadow: none; }
+.bg-profile-new::before { content: '+'; width: 56px; height: 56px; border-radius: 50%; background: var(--card); color: var(--leaf); font-size: 34px; font-weight: 700; line-height: 54px; text-align: center; box-shadow: var(--shadow-soft); }
+@media (max-width: 480px) { .bg-profile, .bg-profile-new { width: calc(50% - 7px) !important; min-width: 0 !important; } }
+
+/* The workshop's progress marks (the mockup's .tulips .d): round, filled with a tulip once it drank. */
+.bg-marks { margin-left: auto; flex: none; }
+.bg-mark { border-radius: 50%; flex: none; }
+.bg-mark-lit { background-size: 62% 62% !important; }
 
 ${spriteRules}
 

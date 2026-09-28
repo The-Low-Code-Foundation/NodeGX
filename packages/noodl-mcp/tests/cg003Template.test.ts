@@ -29,7 +29,7 @@ import { REQUESTS, WORDS, WORD_KEYS } from './cg002Content';
 import { APPLY_DELTA_SCRIPT, COMPLETE_REQUEST_SCRIPT, FIND_REPEAT_SCRIPT, FOLD_SCRIPT, FUNCTION_SCRIPTS, GOAL_SCRIPT, NEW_RUN_SCRIPT, PALETTE_SCRIPT, STEP_SCRIPT, ADD_PROFILE_SCRIPT, TRANSLATE_SCRIPT, portsOf, runScript } from './cg002Scripts';
 import { PAGE_WORDS, PAGE_WORD_KEYS } from './cg003Content';
 import { OLIVE_SCRIPTS, OLIVE_WORD_KEYS } from './cg005Olive';
-import { C, CG003_COMPONENTS, LOGIC_COMPONENTS, LOGIC_SPECS, PAGES, REQUIRED_MODULES } from './cg003Components';
+import { C, CG003_COMPONENTS, GAME_NAME, LOGIC_COMPONENTS, LOGIC_SPECS, PAGES, REQUIRED_MODULES, STORAGE_KEY } from './cg003Components';
 import {
   ALL_WORDS_JSON,
   TRY_OLIVE_SCRIPT,
@@ -46,11 +46,15 @@ import {
   UPDATE_PROFILE_SCRIPT,
   WIN_SUMMARY_SCRIPT
 } from './cg003Scripts';
-import { AuthoredGarden, buildGardenTemplateProject, prepareGardenArtefact, TEMPLATE_ID } from './cg003Template';
-import { GARDEN_CSS, GARDEN_PRESET, GARDEN_TOKENS, tokenValue } from './cg007Look';
+import { AuthoredGarden, buildGardenTemplateProject, prepareGardenArtefact, START_HERE_FILE, TEMPLATE_ID } from './cg003Template';
+import { ROBOT_NAME_MAX } from './cg002Scripts';
+import { DARKENED_FILLS, GARDEN_CSS, GARDEN_PRESET, GARDEN_TOKENS, tokenValue } from './cg007Look';
 import { reducedMotionReport } from './reducedMotion';
 import { RESERVED_ROW_FIELD_NAMES } from '../../noodl-editor/src/editor/src/validation';
-import { FAMILY_SCRIPT, LOOK_ROWS_SCRIPT, SKILL_ROWS_SCRIPT } from './cg003Scripts';
+import { FAMILY_SCRIPT, ISLAND_PINS_SCRIPT, LOOK_ROWS_SCRIPT, REQUEST_CARD_SCRIPT, SELECT_PROFILE_SCRIPT, SKILL_ROWS_SCRIPT } from './cg003Scripts';
+import { HINT_LINE_SCRIPT } from './cg002Scripts';
+import { HINTS, HINT_KEYS } from './cg002Content';
+import { ISLAND_PINS, REQUEST_SUBS } from './cg003Content';
 
 jest.setTimeout(600_000);
 
@@ -58,6 +62,14 @@ const REPO = path.join(__dirname, '..', '..', '..');
 const OUTPUT = path.join(REPO, 'templates', TEMPLATE_ID);
 
 let built: AuthoredGarden;
+/** The Logic component every page reads the family through. */
+const L_FAMILY = 'Logic/Read family';
+/** The directory a person is handed, prepared from a build into a temp folder (never over the checked-in one). */
+function OUTPUT_OF(b: AuthoredGarden): string {
+  const out = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'cg003-look-')), TEMPLATE_ID);
+  prepareGardenArtefact(b, out);
+  return out;
+}
 
 const componentsOf = (b: AuthoredGarden) => b.project.components ?? [];
 function nodesOf(b: AuthoredGarden, name: string): LegacyNode[] {
@@ -87,6 +99,61 @@ function tree(dir: string): Map<string, Buffer> {
   };
   walk(dir);
   return out;
+}
+
+// ── Contrast (CG-007 AC6, ruling 5), computed from the tokens — never a hand-typed ratio ──
+
+const srgb = (hex: string) => hex.replace('#', '').match(/../g)!.map((h) => parseInt(h, 16) / 255);
+const relLum = (hex: string) => {
+  const c = srgb(hex).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+};
+const contrast = (a: string, b: string) => {
+  const [x, y] = [relLum(a), relLum(b)].sort((p, q) => q - p);
+  return Math.round(((x + 0.05) / (y + 0.05)) * 100) / 100;
+};
+/** OKLCH [L, C, h°] of a hex (Björn Ottosson's matrices), for "the same hue, a lower lightness". */
+function oklch(hex: string): [number, number, number] {
+  const [r, g, b] = srgb(hex).map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const q = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  const L = 0.2104542553 * l + 0.793617785 * m - 0.0040720468 * q;
+  const A = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * q;
+  const B = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * q;
+  return [L, Math.hypot(A, B), ((Math.atan2(B, A) * 180) / Math.PI + 360) % 360];
+}
+/** Every text the pages set, on the ground it sits on: [what a person reads, its ink token, its ground token]. */
+const CONTRAST_PAIRS: ReadonlyArray<[string, string, string]> = [
+  ['ink on paper', '--ink', '--paper'],
+  ['ink on card', '--ink', '--card'],
+  ['ink on paper-2 (plain buttons, chips, the new-player card)', '--ink', '--paper-2'],
+  ['ink-2 on paper (a done request, a seed trick)', '--ink-2', '--paper'],
+  ['ink-2 on card', '--ink-2', '--card'],
+  ['ink-2 on paper-2 (quiet buttons, the band pill)', '--ink-2', '--paper-2'],
+  ['eyebrow leaf on paper', '--leaf', '--paper'],
+  ['leaf on card (blooming, ✓ done)', '--leaf', '--card'],
+  ['white on leaf (Play, Let’s go)', '--on-fill', '--leaf'],
+  ['white on coral (Teach)', '--on-fill', '--coral'],
+  ['white on violet (Ask Olive)', '--on-fill', '--violet'],
+  ['owl text ink on violet-2', '--ink', '--violet-2'],
+  ['owl meta on violet-2', '--violet-meta', '--violet-2'],
+  ['violet ink on card (Where will it end?)', '--violet-ink', '--card'],
+  ['white on motion block', '--on-fill', '--block-motion'],
+  ['white on action block', '--on-fill', '--block-action'],
+  ['white on control block (the fold, Skills, tags)', '--on-fill', '--block-control'],
+  ['white on ask block', '--on-fill', '--block-ask'],
+  ['sprout ink (control) on card', '--block-control', '--card'],
+  ['white on ink (a pressed switch, a worn chip)', '--on-fill', '--ink'],
+  ['ink on leaf-2 (the lit tab)', '--ink', '--leaf-2'],
+  ['ink on the tidy box (the fold offer)', '--ink', '--tidy'],
+  ['ink-2 on the tidy box (Not now)', '--ink-2', '--tidy'],
+  ['ink on rep (the trick learnt)', '--ink', '--rep'],
+  ['ink on sun (an open pin’s badge)', '--ink', '--sun'],
+  ['ink on card (a pin’s name)', '--ink', '--card']
+];
+function contrastTable(value: (token: string) => string): Array<{ name: string; ratio: number }> {
+  return CONTRAST_PAIRS.map(([name, fg, bg]) => ({ name, ratio: contrast(value(fg), value(bg)) }));
 }
 
 // ── The glue, run the way the Function runs it ──────────────────────────────
@@ -163,7 +230,8 @@ describe('CG-003 — Bot Garden, the artefact', () => {
     expect([...new Set(warnings.map((d) => d.code))].sort()).toEqual(['uncollapsible-multi-column']);
     // D50 (filed): a wrapped row of fixed-size items is told to become a Columns node. The bar wraps on purpose; the
     // swatches, chips and profile cards are a wrapped row of fixed-size items. `apply` is apply_plan's re-validation.
-    expect([...new Set(warnings.map((d) => String(d.component).replace(/^\//, '')))].sort()).toEqual(['Garden/Top bar', 'Pages/Profiles', 'Robot/Options', 'apply']);
+    // s3: Profiles no longer warns — its row is the cards' repeater and the new-player card, not a wrap of fixed items.
+    expect([...new Set(warnings.map((d) => String(d.component).replace(/^\//, '')))].sort()).toEqual(['Garden/Top bar', 'Robot/Options', 'apply']);
     const project = JSON.parse(fs.readFileSync(path.join(built.projectDir, 'nodegx.project.json'), 'utf8')) as { settings: { bodyScroll?: boolean } };
     expect(project.settings.bodyScroll).toBe(true);
   });
@@ -341,6 +409,105 @@ describe('CG-003 — Bot Garden, the artefact', () => {
     });
   });
 
+  describe('s3 — the rulings in the graph (one island per kid, the sea with pins, the name)', () => {
+    it('🔴 ruling 8: every page writes an older family back as soon as it has read it (an on-load migration owes its own save)', () => {
+      for (const page of PAGES) {
+        const p = nodesOf(built, page).find((n) => n.type === '/' + L_FAMILY)!.id;
+        const conns = connectionsOf(built, page);
+        const store = nodesOf(built, page).find((n) => n.type === C.store)!.id;
+        const resave = conns.find((c) => c.fromId === p && c.fromProperty === 'migrated')!;
+        expect({ page, gate: !!resave }).toEqual({ page, gate: true });
+        expect(conns.some((c) => c.fromId === p && c.fromProperty === 'ran' && c.toId === resave.toId && c.toProperty === 'eval')).toBe(true);
+        expect(conns.some((c) => c.fromId === resave.toId && c.fromProperty === 'ontrue' && c.toId === store && c.toProperty === 'write')).toBe(true);
+        expect(conns.some((c) => c.fromId === p && c.fromProperty === 'model' && c.toId === store && c.toProperty === 'model')).toBe(true);
+      }
+    });
+
+    it('🔴 ruling 6: the Island is the sea with pins — no tile world of the island; the kit draws only this kid’s robot in its pin', () => {
+      const island = nodesOf(built, C.pageIsland);
+      expect(island.filter((n) => String(n.type).startsWith('garden-kit.'))).toEqual([]);
+      expect(island.some((n) => n.type === C.map)).toBe(true);
+      const map = nodesOf(built, C.map);
+      const kit = map.filter((n) => n.type === 'garden-kit.Garden');
+      expect(kit.map((n) => n.id)).toEqual(['mpGarden']);
+      const draw = map.find((n) => n.id === 'mpDraw')!;
+      // One tile, one robot: the robot's drawing, not a world.
+      expect((params(draw).world as { map: string[]; robots: unknown[] }).map).toEqual(['G']);
+      expect((params(draw).world as { map: string[]; robots: unknown[] }).robots).toHaveLength(1);
+      const classes = map.map((n) => String(params(n).cssClassName ?? ''));
+      for (const c of ['bg-sea', 'bg-land', 'bg-pin bg-pin-bot', 'bg-pin bg-pin-olive']) expect(classes).toContain(c);
+      expect(classes.filter((c) => /bg-pin-scene/.test(c))).toHaveLength(6);
+      expect(map.find((n) => n.type === 'For Each')!.parameters).toMatchObject({ template: C.pin });
+      // A pin answers only when open; the page sends a pin's request the way a card's goes.
+      const pin = connectionsOf(built, C.pin);
+      expect(pin.filter((c) => c.toId === 'pnOut' && c.toProperty === 'chosen').map((c) => `${c.fromId}.${c.fromProperty}`)).toEqual(['pnGate.ontrue']);
+      expect(pin.some((c) => c.fromId === 'pnIn' && c.fromProperty === 'isOpen' && c.toId === 'pnGate' && c.toProperty === 'condition')).toBe(true);
+      const page = connectionsOf(built, C.pageIsland);
+      expect(page.filter((c) => c.toId === 'isSetReq').map((c) => `${c.fromId}.${c.fromProperty}>${c.toProperty}`).sort()).toEqual(['isEach.itemOutput-id>value', 'isEach.itemOutputSignal-chosen>do', 'isMap.chosen>do', 'isMap.requestId>value']);
+      // Her island: the rows and the pins read Read family's done (the active kid's).
+      for (const id of ['isRows', 'isPins']) expect(page.some((c) => c.fromId === 'isFam' && c.fromProperty === 'done' && c.toId === id && c.toProperty === 'done')).toBe(true);
+      // The mockup's grid: the map and a 360 px column, one column under 980 px; the pins where the mockup puts them.
+      expect(GARDEN_CSS).toContain('.bg-island { display: grid !important; grid-template-columns: minmax(0, 1fr) 360px;');
+      expect(GARDEN_CSS).toContain('@media (max-width: 980px) { .bg-island { grid-template-columns: minmax(0, 1fr); } }');
+      expect(GARDEN_CSS).toMatch(/\.bg-sea \{[^}]*aspect-ratio: 12 \/ 7;/);
+      expect(GARDEN_CSS).toContain('.bg-pin-mamie { left: 24% !important; top: 30% !important; width: 11% !important; height: 19% !important; }');
+      expect(GARDEN_CSS).toMatch(/\.bg-pin \{ position: absolute !important;[^}]*transform: translate\(-50%, -50%\);/);
+    });
+
+    it('ruling 7: what a person sees says Olive’s Island; the slugs stay', () => {
+      const project = JSON.parse(fs.readFileSync(path.join(built.projectDir, 'nodegx.project.json'), 'utf8'));
+      expect([project.name, project.settings.htmlTitle]).toEqual([GAME_NAME, GAME_NAME]);
+      for (const page of PAGES) expect({ page, title: params(nodesOf(built, page).find((n) => n.type === 'Page')!).title }).toEqual({ page, title: GAME_NAME });
+      expect(params(nodesOf(built, C.bar).find((n) => n.id === 'brName')!).text).toBe(GAME_NAME);
+      // The bar still reads the brand WORD (lane CONTENT's): the read is kept.
+      expect(connectionsOf(built, C.bar).some((c) => c.fromId === 'brT' && c.fromProperty === 'brand' && c.toId === 'brName')).toBe(true);
+      // Nothing a person reads in the graph says Bot Garden (the brand word is CONTENT's, and checked there).
+      const shown = componentsOf(built).flatMap((c) => nodesOf(built, c.name).flatMap((n) => ['text', 'label', 'title', 'placeholder'].map((k) => String(params(n)[k] ?? ''))));
+      expect(shown.filter((t) => /Bot Garden/.test(t))).toEqual([]);
+      const start = fs.readFileSync(path.join(OUTPUT_OF(built), START_HERE_FILE), 'utf8');
+      expect(start.split('\n')[0]).toBe(`# ${GAME_NAME}`);
+      expect(start).not.toMatch(/Bot Garden/);
+      // The slugs a person never reads stay.
+      expect([TEMPLATE_ID, STORAGE_KEY]).toEqual(['bot-garden', 'bot-garden']);
+    });
+
+    it('item 2: Ask Olive carries the owl in her own colours, not the white mask', () => {
+      const ask = nodesOf(built, C.play).find((n) => n.id === 'plAsk')!;
+      expect(String(params(ask).cssClassName)).toContain('bg-i-owlc');
+      expect(GARDEN_CSS).toMatch(/\.bg-i-owlc::before \{[^}]*background-image: url\("data:image\/svg\+xml/);
+      expect(GARDEN_CSS.match(/\.bg-i-owlc::before \{[^}]*\}/)![0]).not.toMatch(/mask/);
+    });
+
+    it('item 3: the progress marks are dots a repeater draws from Draw world’s marks, filled as tulips drink', () => {
+      const conns = connectionsOf(built, C.play);
+      expect(conns.some((c) => c.fromId === 'plDraw' && c.fromProperty === 'marks' && c.toId === 'plMarkEach' && c.toProperty === 'items')).toBe(true);
+      expect(nodesOf(built, C.play).find((n) => n.id === 'plMarkEach')!.parameters).toMatchObject({ template: C.mark });
+      const states = nodesOf(built, C.mark).find((n) => n.type === 'States')!;
+      expect([params(states)['value-dry-ground'], params(states)['value-lit-ground']]).toEqual(['var(--paper-2)', 'var(--tulip-dot)']);
+    });
+
+    it('the Profiles page: a card per kid with her robot drawn in its colours and name, the new player as a card', () => {
+      const card = nodesOf(built, C.profile);
+      expect(card.some((n) => n.type === 'garden-kit.Garden')).toBe(true);
+      const conns = connectionsOf(built, C.profile);
+      for (const f of ['color', 'eye', 'hat']) expect(conns.some((c) => c.fromId === 'pcIn' && c.fromProperty === f && c.toId === 'pcDraw' && c.toProperty === f)).toBe(true);
+      expect(conns.some((c) => c.fromId === 'pcIn' && c.fromProperty === 'robot' && c.toId === 'pcDraw' && c.toProperty === 'botName')).toBe(true);
+      const pr = nodesOf(built, C.pageProfiles);
+      const list = pr.find((n) => n.id === 'prList')!;
+      expect((list.children ?? []).map((n) => n.id)).toEqual(['prEach', 'prNew']);
+      expect(String(params(pr.find((n) => n.id === 'prNew')!).cssClassName)).toContain('bg-profile-new');
+    });
+
+    it('rename: both name boxes cut at the length the save keeps', () => {
+      const op = nodesOf(built, C.options).find((n) => n.id === 'opName')!;
+      const pf = nodesOf(built, C.form).find((n) => n.id === 'pfBot')!;
+      expect([params(op).maxLength, params(pf).maxLength]).toEqual([ROBOT_NAME_MAX, ROBOT_NAME_MAX]);
+      const conns = connectionsOf(built, C.options);
+      expect(conns.filter((c) => c.toId === 'opSetName').map((c) => `${c.fromId}.${c.fromProperty}>${c.toProperty}`).sort()).toEqual(['opIn.model>model', 'opIn.profileId>profileId', 'opName.onBlur>go', 'opName.onEnter>go', 'opName.onTextChanged>value']);
+      expect(connectionsOf(built, C.pageProfiles).some((c) => c.fromId === 'prForm' && c.fromProperty === 'robotName' && c.toId === 'prAdd' && c.toProperty === 'robotName')).toBe(true);
+    });
+  });
+
   describe('CG-007 — the look', () => {
     const colourKeys = /colou?r$|^backgroundColor$|^borderColor$|^fill$|^background$/i;
     const graphParams = () =>
@@ -367,11 +534,13 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(GARDEN_CSS).toMatch(/data:image\/svg\+xml/);
     });
 
-    it('AC4: the stored tokens are the mockup’s :root', () => {
+    it('AC4: the stored tokens are the mockup’s :root — the fills that carry white words darkened (ruling 5), the rest as drawn', () => {
       const stored = JSON.parse(fs.readFileSync(path.join(built.projectDir, 'nodegx.project.json'), 'utf8')).metadata?.designTokens;
       const eff = buildEffectiveTokens(stored);
-      for (const [name, hex] of [['--paper', '#FFF7E8'], ['--ink', '#2E2A3D'], ['--leaf', '#3FA66B'], ['--coral', '#FF7A59'], ['--violet', '#8F6BFF'], ['--violet-2', '#EEE8FF'], ['--block-motion', '#4C8DFF'], ['--block-control', '#FF9F1C']])
-        expect({ name, value: String((eff.get(name) as { value?: string } | string | undefined) && ((eff.get(name) as { value?: string }).value ?? eff.get(name))).toUpperCase() }).toEqual({ name, value: hex });
+      const valueOf = (name: string) => String((eff.get(name) as { value?: string } | string | undefined) && ((eff.get(name) as { value?: string }).value ?? eff.get(name))).toUpperCase();
+      for (const [name, hex] of [['--paper', '#FFF7E8'], ['--ink', '#2E2A3D'], ['--violet-2', '#EEE8FF'], ['--ink-2', '#6E6784']]) expect({ name, value: valueOf(name) }).toEqual({ name, value: hex });
+      // Every darkened fill is stored as darkened, and differs from the mockup's own (the one-line diff to read).
+      for (const f of DARKENED_FILLS) expect({ name: f.token, value: valueOf(f.token), changed: f.value !== f.mockup }).toEqual({ name: f.token, value: f.value, changed: true });
     });
 
     it('🔴 AC2: no button is an outlined pill — every one has a fill and no border; the mockup’s four are all used', () => {
@@ -417,46 +586,32 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(block).toMatch(/\*, \*::before, \*::after \{ animation: none !important; transition: none !important; \}/);
     });
 
-    it('AC6: the contrast of every text on its ground, from the tokens — a readout, the failing pairs named', () => {
-      const lum = (hex: string) => {
-        const c = hex.replace('#', '').match(/../g)!.map((h) => parseInt(h, 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
-        return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
-      };
-      const ratio = (a: string, b: string) => {
-        const [x, y] = [lum(tokenValue(a)), lum(tokenValue(b))].sort((p, q) => q - p);
-        return Math.round(((x + 0.05) / (y + 0.05)) * 100) / 100;
-      };
-      const PAIRS: Array<[string, string, string]> = [
-        ['ink on paper', '--ink', '--paper'],
-        ['ink on card', '--ink', '--card'],
-        ['ink-2 on paper', '--ink-2', '--paper'],
-        ['ink-2 on card', '--ink-2', '--card'],
-        ['ink-2 on paper-2 (quiet, tabs)', '--ink-2', '--paper-2'],
-        ['eyebrow leaf on paper', '--leaf', '--paper'],
-        ['white on leaf (Play)', '--on-fill', '--leaf'],
-        ['white on coral (Teach)', '--on-fill', '--coral'],
-        ['white on violet (Ask)', '--on-fill', '--violet'],
-        ['owl text ink on violet-2', '--ink', '--violet-2'],
-        ['owl meta on violet-2', '--violet-meta', '--violet-2'],
-        ['white on motion block', '--on-fill', '--block-motion'],
-        ['white on action block', '--on-fill', '--block-action'],
-        ['white on control block', '--on-fill', '--block-control'],
-        ['white on ask block', '--on-fill', '--block-ask']
-      ];
-      const table = PAIRS.map(([name, fg, bg]) => ({ name, ratio: ratio(fg, bg) }));
+    it('🔴 AC6 (ruling 5): every text on its ground reaches 4.5:1, computed from the tokens; each darkened fill keeps its hue', () => {
+      const table = contrastTable((t) => tokenValue(t));
       fs.writeFileSync(path.join(os.tmpdir(), 'cg007-contrast.json'), JSON.stringify(table, null, 1));
-      // The mockup's white labels on its fills do not reach 4.5:1. Pinned as a readout so a token change shows here;
-      // making them pass is restyling the mockup, which is Richard's ruling (CG-007 §7), not this gate's.
-      expect(table.filter((t) => t.ratio < 4.5).map((t) => t.name)).toEqual([
-        'eyebrow leaf on paper',
-        'white on leaf (Play)',
-        'white on coral (Teach)',
-        'white on violet (Ask)',
-        'white on motion block',
-        'white on action block',
-        'white on control block',
-        'white on ask block'
-      ]);
+      expect(table.length).toBeGreaterThanOrEqual(24);
+      expect(table.filter((t) => t.ratio < 4.5).map((t) => `${t.name} ${t.ratio}`)).toEqual([]);
+      // Known-firing beside the absence: the mockup's own fills fail the same table (s2 measured eight pairs under 4.5).
+      const mockup = contrastTable((t) => DARKENED_FILLS.find((f) => f.token === t)?.mockup ?? tokenValue(t));
+      expect(mockup.filter((t) => t.ratio < 4.5).length).toBeGreaterThanOrEqual(8);
+      // Same hue (OKLCH), lower lightness: the ruling's "keep the four block colours as hues".
+      for (const f of DARKENED_FILLS) {
+        const [l0, , h0] = oklch(f.mockup);
+        const [l1, , h1] = oklch(f.value);
+        expect({ token: f.token, darker: l1 < l0, hueDrift: Math.abs(h1 - h0) < 1.5 }).toEqual({ token: f.token, darker: true, hueDrift: true });
+      }
+    });
+
+    it('arm: one fill put back to the mockup’s value is named by the contrast table', () => {
+      const table = contrastTable((t) => (t === '--block-control' ? '#FF9F1C' : tokenValue(t)));
+      expect(table.filter((t) => t.ratio < 4.5).map((t) => t.name)).toEqual(['white on control block (the fold, Skills, tags)', 'sprout ink (control) on card']);
+    });
+
+    it('🔴 AC6: nothing a person reads is faded under 4.5 — done cards and seed cards sit on the paper, not at an opacity', () => {
+      expect(GARDEN_CSS).not.toMatch(/\.bg-quest-done|\.bg-notion-seed \{[^}]*opacity/);
+      const quest = nodesOf(built, C.quest).find((n) => n.id === 'qcStates')!;
+      expect([params(quest)['value-open-ground'], params(quest)['value-done-ground']]).toEqual(['var(--card)', 'var(--paper)']);
+      expect(connectionsOf(built, C.quest).some((c) => c.toId === 'qcCard' && c.toProperty === 'opacity')).toBe(false);
     });
 
     it('the preset under the tokens is Playful, which brings Nunito', () => {
@@ -562,11 +717,125 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     expect(run(UPDATE_PROFILE_SCRIPT, { model: fam, profileId: id, field: 'lang', value: 'fr' }).model.profiles[0].lang).toBe('fr');
   });
 
-  it('Island rows: a band sees its requests and below; a request done by either robot is done (D2)', () => {
+  it('Island rows: a band sees its requests and below; a request done (by this kid) is done', () => {
     const one = run(ISLAND_ROWS_SCRIPT, { requests: REQ_ROWS, band: 1, done: ['tulips-three'], words: WORD_ROWS, lang: 'en' });
     expect(one.rows.map((r: { id: string }) => r.id)).toEqual(REQUESTS.filter((r) => r.band === 1).map((r) => r.id));
     expect(one.rows.find((r: { id: string }) => r.id === 'tulips-three').isDone).toBe(true);
     expect(run(ISLAND_ROWS_SCRIPT, { requests: REQ_ROWS, band: 2, done: [], words: WORD_ROWS, lang: 'en' }).rows).toHaveLength(REQUESTS.length);
+  });
+
+  // ── s3: one island per kid (ruling 8), the pins (ruling 6), the look items, the rename ──
+
+  /** Two kids, A then B (B, the newest, is playing); A finishes the tulips. What each one's island says, as the page reads it. */
+  function twoIslands(scripts: { family?: string; pins?: string } = {}) {
+    let model = run(ADD_PROFILE_SCRIPT, { model: null, name: 'Ada', band: 2, lang: 'en', robotName: 'Pip' }).model;
+    model = run(ADD_PROFILE_SCRIPT, { model, name: 'Bo', band: 2, lang: 'en', robotName: 'Rosie', color: '#5FB4E8' }).model;
+    const [a, b] = model.profiles.map((p: { id: string }) => p.id);
+    const tul = REQ_ROWS.find((r) => r.id === 'tulips-three')!;
+    model = run(COMPLETE_REQUEST_SCRIPT, { model, profileId: a, requestId: tul.id, tricks: tul.tricks, reward: tul.reward }).model;
+    const stored = () => JSON.parse(JSON.stringify(model));
+    const view = (id: string) => {
+      const chosen = run(SELECT_PROFILE_SCRIPT, { model: stored(), profileId: id }).model;
+      const fam = run(scripts.family ?? FAMILY_SCRIPT, { model: JSON.parse(JSON.stringify(chosen)) });
+      const rows = run(ISLAND_ROWS_SCRIPT, { requests: REQ_ROWS, band: fam.band, done: fam.done, words: WORD_ROWS, lang: 'en', botName: fam.botName });
+      const pins = run(scripts.pins ?? ISLAND_PINS_SCRIPT, { requests: REQ_ROWS, band: fam.band, done: fam.done, words: WORD_ROWS, lang: 'en', botName: fam.botName });
+      return { fam, rows, pins, tulips: rows.rows.find((r: { id: string }) => r.id === 'tulips-three'), mamie: pins.pins.find((p: { id: string }) => p.id === 'mamie') };
+    };
+    return { A: view(a), B: view(b) };
+  }
+
+  it('🔴 ruling 8: A finishes the tulips — A’s island says done, B’s island still offers them (the card and Mamie’s pin)', () => {
+    const { A, B } = twoIslands();
+    expect(A.fam.done).toEqual(['tulips-three']);
+    expect(A.tulips.isDone).toBe(true);
+    expect(B.fam.done).toEqual([]);
+    expect(B.tulips.isDone).toBe(false);
+    expect([B.mamie.isOpen, B.mamie.requestId]).toEqual([true, 'tulip-door']);
+    // Mamie's first request B has not done is the first in the list; A's next one is the next she has not done.
+    expect(A.mamie.requestId).toBe(REQ_ROWS.find((r) => r.islander === 'mamie' && r.id !== 'tulips-three')!.id);
+    // Each kid's robot, not a sibling's: Read family gives the playing kid's look.
+    expect([A.fam.botName, B.fam.botName]).toEqual(['Pip', 'Rosie']);
+  });
+
+  it('ruling 6: the pins — one per islander with a request, each labelled in the language, open while she has one left for this kid', () => {
+    const pins = run(ISLAND_PINS_SCRIPT, { requests: REQ_ROWS, band: 2, done: [], words: WORD_ROWS, lang: 'fr', botName: 'Pip' }).pins;
+    expect(pins.map((p: { id: string }) => p.id)).toEqual(ISLAND_PINS.map((p) => p.id));
+    for (const p of pins) expect({ id: p.id, label: p.label.length > 0, open: p.isOpen, cls: p.pinClass.includes('bg-pin-open') }).toEqual({ id: p.id, label: true, open: true, cls: true });
+    expect(pins.find((p: { id: string }) => p.id === 'mamie').label).toBe(WORDS.islMamie.fr);
+    // Her first request done: the pin opens her next one, not the one done.
+    const next = run(ISLAND_PINS_SCRIPT, { requests: REQ_ROWS, band: 2, done: ['tulip-door'], words: WORD_ROWS, lang: 'en' }).pins.find((p: { id: string }) => p.id === 'mamie');
+    expect(next.requestId).toBe('tulips-three');
+    // Every islander who asks has a pin (a new islander in the requests would have no pin: this names her).
+    expect([...new Set(REQ_ROWS.map((r) => r.islander))].filter((i) => !ISLAND_PINS.some((p) => p.islander === i))).toEqual([]);
+    // All of Biscuit's done: her pin is shut (no badge, no tap), and the band is honoured (Biscuit asks at band 10–12 only).
+    const biscuitAll = REQ_ROWS.filter((r) => r.islander === 'biscuit').map((r) => r.id);
+    const shut = run(ISLAND_PINS_SCRIPT, { requests: REQ_ROWS, band: 2, done: biscuitAll, words: WORD_ROWS, lang: 'en' }).pins.find((p: { id: string }) => p.id === 'biscuit');
+    expect([shut.isOpen, shut.requestId, shut.pinClass.includes('bg-pin-open')]).toEqual([false, '', false]);
+    const young = run(ISLAND_PINS_SCRIPT, { requests: REQ_ROWS, band: 1, done: [], words: WORD_ROWS, lang: 'en' }).pins.find((p: { id: string }) => p.id === 'biscuit');
+    expect(young.isOpen).toBe(REQ_ROWS.some((r) => r.islander === 'biscuit' && r.band === 1));
+  });
+
+  it('item 1: every request has its own line under the Workshop title, in both languages, with the robot’s name in it', () => {
+    expect(REQ_ROWS.map((r) => r.id).filter((id) => !REQUEST_SUBS[id])).toEqual([]);
+    for (const r of REQ_ROWS) {
+      for (const lang of ['en', 'fr']) {
+        const card = run(REQUEST_CARD_SCRIPT, { requests: REQ_ROWS, requestId: r.id, words: WORD_ROWS, lang, botName: 'Rosie' });
+        const own = String((PAGE_WORDS[REQUEST_SUBS[r.id].key] as Record<string, string>)[lang]).split('{b}').join('Rosie');
+        expect({ id: r.id, lang, sub: card.sub }).toEqual({ id: r.id, lang, sub: own });
+      }
+    }
+    // The tulips' line is the mockup's own sentence; free play keeps the island's general one.
+    expect(run(REQUEST_CARD_SCRIPT, { requests: REQ_ROWS, requestId: 'tulips-three', words: WORD_ROWS, lang: 'en', botName: 'Pip' }).sub).toBe('Drive Pip yourself first. Pip remembers every step as a block, and then you can tidy the steps up.');
+    expect(run(REQUEST_CARD_SCRIPT, { requests: REQ_ROWS, requestId: 'free', words: WORD_ROWS, lang: 'en', botName: 'Pip' }).sub).toBe(WORDS.isSub.en.split('{b}').join('Pip'));
+  });
+
+  it('item 3: the marks — one per tulip, lit as each drinks', () => {
+    const t = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'tulips-three' });
+    expect(run(DRAW_WORLD_SCRIPT, { world: t.world }).marks.map((m: { lit: boolean }) => m.lit)).toEqual([false, false, false]);
+    t.world.things.find((x: { kind: string }) => x.kind === 'tulip').watered = true;
+    const m = run(DRAW_WORLD_SCRIPT, { world: t.world }).marks;
+    expect(m.map((x: { lit: boolean }) => x.lit)).toEqual([true, false, false]);
+    expect(m[0].cls).toContain('bg-mark-lit');
+  });
+
+  it('🔴 the rename: My robot’s name is kept, cut at the save’s length, and shows on the pin, the Workshop line and a hint', () => {
+    const fam = run(ADD_PROFILE_SCRIPT, { name: 'Ada', band: 2, lang: 'en' }).model;
+    const renamed = run(UPDATE_PROFILE_SCRIPT, { model: fam, field: 'robotName', value: '  Rosie  ' });
+    expect(renamed.changed).toBe(true);
+    const read = run(FAMILY_SCRIPT, { model: JSON.parse(JSON.stringify(renamed.model)) });
+    expect(read.botName).toBe('Rosie');
+    // The pin: the robot drawn with its name (the kit writes it under the robot).
+    expect(run(DRAW_WORLD_SCRIPT, { world: { map: ['G'], things: [], robots: [{ id: 'me', x: 0, y: 0, d: 0 }] }, botName: read.botName }).robots[0].name).toBe('Rosie');
+    // The Workshop's line and title words, and the owl's hint, fill {b}.
+    expect(run(REQUEST_CARD_SCRIPT, { requests: REQ_ROWS, requestId: 'tulips-three', words: WORD_ROWS, lang: 'fr', botName: read.botName }).sub).toContain('Rosie');
+    const hintRows = HINT_KEYS.map((key) => ({ key, ...HINTS[key] }));
+    const withB = HINT_KEYS.find((k) => HINTS[k].en.includes('{b}'))!;
+    expect(run(HINT_LINE_SCRIPT, { hints: hintRows, key: withB, lang: 'en', botName: read.botName, vars: {} }).text).toContain('Rosie');
+    // Seventeen characters: kept as sixteen. Blank: the name stays.
+    expect(run(UPDATE_PROFILE_SCRIPT, { model: renamed.model, field: 'robotName', value: 'Rosie-the-Robot-2' }).model.profiles[0].robot.name).toBe('Rosie-the-Robot-'.slice(0, ROBOT_NAME_MAX));
+    expect(run(UPDATE_PROFILE_SCRIPT, { model: renamed.model, field: 'robotName', value: '   ' }).changed).toBe(false);
+  });
+
+  it('🔴 ruling 5 in the kit: white words on a block are never faded or put on a lightened chip; the defaults are the darker fills', () => {
+    const kit = fs.readFileSync(path.join(REPO, 'library', 'modules', 'garden-kit', 'src', 'kit.js'), 'utf8');
+    const rule = (sel: string) => (kit.match(new RegExp(sel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\{[^}]*\\}')) ?? [''])[0];
+    for (const sel of ['.gd-nctl button', '.gd-slot']) expect({ sel, lightened: /rgba\(255,255,255/.test(rule(sel)), found: rule(sel).length > 0 }).toEqual({ sel, lightened: false, found: true });
+    for (const sel of ['.gd-x', '.gd-band1 .gd-blk .gd-n']) expect({ sel, faded: /opacity/.test(rule(sel)), found: rule(sel).length > 0 }).toEqual({ sel, faded: false, found: true });
+    expect(rule('.gd-bubble.gd-olive small')).toContain('#6A5AA8');
+    for (const [port, token] of [['motionColor', '--block-motion'], ['actionColor', '--block-action'], ['controlColor', '--block-control'], ['askColor', '--block-ask']]) {
+      const m = kit.match(new RegExp(port + ": \\{[^}]*default: '(#[0-9A-F]{6})'"));
+      expect({ port, value: m && m[1] }).toEqual({ port, value: tokenValue(token) });
+    }
+  });
+
+  it('the kit’s own icon: garden-kit no longer ships game-kit’s picture (CG-007 §7.1)', () => {
+    const icon = (m: string) => fs.readFileSync(path.join(REPO, 'library', 'modules', m, 'icon.png'));
+    const garden = icon('garden-kit');
+    expect(garden.equals(icon('game-kit'))).toBe(false);
+    // A PNG, 680 × 384 like every module icon in the library.
+    expect(garden.subarray(1, 4).toString('latin1')).toBe('PNG');
+    expect([garden.readUInt32BE(16), garden.readUInt32BE(20)]).toEqual([680, 384]);
+    expect(JSON.parse(fs.readFileSync(path.join(REPO, 'library', 'modules', 'garden-kit', 'library.json'), 'utf8')).description).not.toMatch(/Bot Garden/);
   });
 
   /** Every list a repeater or the kit is handed: the rows the glue scripts publish, and every Static Data row in the graph. */
@@ -580,6 +849,8 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     const out = [
       { list: 'Read family.profiles', rows: f.profiles },
       { list: 'Island rows.rows', rows: run(ISLAND_ROWS_SCRIPT, { requests: REQ_ROWS, band: 2, done: [], words: WORD_ROWS, lang: 'en' }).rows },
+      { list: 'Island pins.pins', rows: run(ISLAND_PINS_SCRIPT, { requests: REQ_ROWS, band: 2, done: [], words: WORD_ROWS, lang: 'en' }).pins },
+      { list: 'Draw world.marks', rows: run(DRAW_WORLD_SCRIPT, { world: run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'tulips-three' }).world }).marks },
       { list: 'Skill rows.rows', rows: run(SKILL_ROWS_SCRIPT, { tricks: {}, words: WORD_ROWS, lang: 'en' }).rows },
       { list: 'Look rows.paints', rows: lk.paints },
       { list: 'Look rows.eyes', rows: lk.eyes },
@@ -695,6 +966,33 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
       const t = run(m, { requests: reqs, requestId: 'tulips-three' });
       t.world.things[0].watered = true;
       expect(reqs.find((r: { id: string }) => r.id === 'tulips-three').things[0].watered).toBe(true);
+    });
+    it('Read family gives the FIRST kid’s island, not the playing one’s → the ruling-8 row fails', () => {
+      const m = mutate(FAMILY_SCRIPT, 'Outputs.done = active ? active.island.done.slice() : [];', 'Outputs.done = model.profiles.length ? model.profiles[0].island.done.slice() : [];');
+      expect(twoIslands({ family: m }).B.tulips.isDone).toBe(true);
+    });
+    it('Island pins ignore what this kid has done → the pins row fails (the pin opens the request done)', () => {
+      const m = mutate(ISLAND_PINS_SCRIPT, '&& done.indexOf(r.id) === -1) requestId', ') requestId');
+      expect(run(m, { requests: REQ_ROWS, band: 2, done: ['tulip-door'], words: WORD_ROWS, lang: 'en' }).pins.find((p: { id: string }) => p.id === 'mamie').requestId).toBe('tulip-door');
+    });
+    it('Island pins open a pin with nothing left → the pins row fails', () => {
+      const m = mutate(ISLAND_PINS_SCRIPT, 'isOpen: !!requestId', 'isOpen: true');
+      expect(run(m, { requests: REQ_ROWS, band: 2, done: REQ_ROWS.filter((r) => r.islander === 'biscuit').map((r) => r.id), words: WORD_ROWS, lang: 'en' }).pins.find((p: { id: string }) => p.id === 'biscuit').isOpen).toBe(true);
+    });
+    it('Request card gives every request the general line → the item-1 row fails', () => {
+      const m = mutate(REQUEST_CARD_SCRIPT, 'Outputs.sub = (req && SUBS[req.id] && w[SUBS[req.id]]) || w.isSub', 'Outputs.sub = w.isSub');
+      expect(run(m, { requests: REQ_ROWS, requestId: 'tulips-three', words: WORD_ROWS, lang: 'en', botName: 'Pip' }).sub).not.toContain('Drive Pip yourself first');
+    });
+    it('Draw world lights no mark → the item-3 row fails', () => {
+      const m = mutate(DRAW_WORLD_SCRIPT, 'lit: d < watered', 'lit: false');
+      const t = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'tulips-three' });
+      t.world.things.forEach((x: { watered?: boolean }) => (x.watered = true));
+      expect(run(m, { world: t.world }).marks.some((x: { lit: boolean }) => x.lit)).toBe(false);
+    });
+    it('Read family never says a migration is due → nothing writes the older family back', () => {
+      const m = mutate(FAMILY_SCRIPT, 'Outputs.migrated = migrationDue(raw);', 'Outputs.migrated = false;');
+      const v2 = { v: 2, profiles: [{ id: 'p1', name: 'Sam' }], island: { done: ['tulips-three'], activeId: 'p1' } };
+      expect([run(FAMILY_SCRIPT, { model: v2 }).migrated, run(m, { model: v2 }).migrated]).toEqual([true, false]);
     });
     it('Island rows ignore the band → killed', () => {
       const m = mutate(ISLAND_ROWS_SCRIPT, 'if (!r || Number(r.band) > band) continue;', 'if (!r) continue;');

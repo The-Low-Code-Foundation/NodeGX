@@ -1,5 +1,5 @@
 /**
- * CG-003 — Bot Garden: the components, in the shape the plan door takes (TPL-007's shape, TPL-011's declaration).
+ * CG-003 — Olive's Island (the template's slug stays bot-garden): the components, in the shape the plan door takes (TPL-007's shape, TPL-011's declaration).
  *
  * ──────────────────────────────────────────────────────────────────────────────
  * ## The shape
@@ -28,7 +28,7 @@
  * @module noodl-mcp/tests/cg003Components
  */
 import { HINTS_JSON, REQUESTS_JSON } from './cg002Content';
-import { FUNCTION_SCRIPTS, portsOf } from './cg002Scripts';
+import { FUNCTION_SCRIPTS, ROBOT_NAME_MAX, portsOf } from './cg002Scripts';
 import { OLIVE_SCRIPTS } from './cg005Olive';
 import { PAD_KEYS } from './cg003Content';
 import { ALL_WORDS_JSON, GLUE_SCRIPTS, TRANSLATE_ALL_SCRIPT } from './cg003Scripts';
@@ -40,6 +40,8 @@ export const STORAGE_KEY = 'bot-garden';
 /** The glide the kit animates (the mockup's .38s) and the tick the runner waits between steps (the mockup's 420 ms). */
 export const STEP_MS = 380;
 export const TICK_MS = 420;
+/** What a person sees the game called (ruling 7). The slugs (the template, the storage key, the kits) stay bot-garden. */
+export const GAME_NAME = 'Olive’s Island';
 
 export interface CgComponent {
   path: string;
@@ -90,6 +92,9 @@ export const C = {
   win: '/Workshop/Win card',
   play: '/Workshop/Play',
   quest: '/Island/Request card',
+  pin: '/Island/Pin',
+  map: '/Island/Map',
+  mark: '/Workshop/Mark',
   swatch: '/Robot/Swatch',
   chip: '/Robot/Chip',
   sticker: '/Robot/Sticker',
@@ -293,7 +298,8 @@ const TYPE: Readonly<Record<string, string>> = {
   world: 'object', run: 'object', delta: 'object', model: 'object', vars: 'object', request: 'object', reward: 'object',
   found: 'boolean', offer: 'boolean', met: 'boolean', ok: 'boolean', hasProfile: 'boolean', older: 'boolean',
   younger: 'boolean', show: 'boolean', changed: 'boolean', recorded: 'boolean', empty: 'boolean', hit: 'boolean',
-  asked: 'boolean', waiting: 'boolean', folded: 'boolean', canAdd: 'boolean', isEmpty: 'boolean', isFree: 'boolean'
+  asked: 'boolean', waiting: 'boolean', folded: 'boolean', canAdd: 'boolean', isEmpty: 'boolean', isFree: 'boolean',
+  pins: 'array', marks: 'array', migrated: 'boolean', open: 'number', sub: 'string'
 };
 const typeOf = (name: string) => TYPE[name] ?? '*';
 
@@ -440,7 +446,7 @@ const BAR: CgComponent = {
     group('brBar', 'The bar', undefined, { ...row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(14), rowGap: sp(10) }), backgroundColor: 'var(--card)', borderRadius: 'var(--radius-bar)', ...pad(10, 14), cssClassName: 'bg-top' }, ['brBrand', 'brTabs', 'brBandSeg', 'brLangSeg', 'brWho']),
     group('brBrand', 'The brand', 'brBar', row({ columnGap: sp(10) }), ['brMark', 'brName']),
     group('brMark', 'The tulip', 'brBrand', { sizeMode: 'explicit', width: px(38), height: px(38), cssClassName: 'bg-brand-mark bg-sp-tulip' }),
-    text('brName', 'Bot Garden', 'brBrand', 'Bot Garden', { sizeMode: 'contentSize', ...DISPLAY, fontSize: px(24), fontWeight: '700', color: 'var(--ink)', cssClassName: 'bg-brand' }),
+    text('brName', 'The game’s name', 'brBrand', GAME_NAME, { sizeMode: 'contentSize', ...DISPLAY, fontSize: px(24), fontWeight: '700', color: 'var(--ink)', cssClassName: 'bg-brand' }),
     group('brTabs', 'The five screens', 'brBar', { ...row({ columnGap: sp(4), rowGap: sp(4) }), cssClassName: 'bg-tabs' }, TABS.map((t) => `brTab_${t.id}`)),
     ...TABS.map((t) => place(`brTab_${t.id}`, C.tab, `Tab: ${t.id}`, 'brTabs')),
     group('brBandSeg', 'Age band', 'brBar', { ...row({ columnGap: sp(0) }), backgroundColor: 'var(--paper-2)', borderRadius: px(999), ...pad(3), cssClassName: 'bg-seg' }, ['brBand1', 'brBand2']),
@@ -679,13 +685,36 @@ const WIN: CgComponent = {
 };
 
 /**
+ * One progress mark beside the islander (the mockup's `.tulips .d`, CG-007 §7.1 item 3): a round dot on paper, FILLED
+ * — the tulip-pink ground and a tulip in it — once that tulip has drunk. The row is Draw world's `marks`.
+ */
+const MARK: CgComponent = {
+  path: 'Workshop/Mark',
+  description: 'One progress mark (the mockup’s .tulips .d): an empty round dot, filled with a tulip once that tulip has drunk (Lit).',
+  nodes: [
+    inputs('mkIn', [['id', 'string'], ['cls', 'string'], ['lit', 'boolean']]),
+    group('mkDot', 'The mark', undefined, { sizeMode: 'explicit', width: px(26), height: px(26), borderRadius: px(999), backgroundColor: 'var(--paper-2)', cssClassName: 'bg-mark' }),
+    logic('mkIsLit', CONDITION_NODE, 'Has it drunk?'),
+    withStates('mkStates', 'Empty or filled', ['dry', 'lit'], { ground: { type: 'color', by: { dry: 'var(--paper-2)', lit: 'var(--tulip-dot)' } } })
+  ],
+  connections: [
+    wire('mkIn', 'cls', 'mkDot', 'cssClassName'),
+    wire('mkIn', 'lit', 'mkIsLit', 'condition'),
+    wire('mkIsLit', 'ontrue', 'mkStates', 'to-lit'),
+    wire('mkIsLit', 'onfalse', 'mkStates', 'to-dry'),
+    wire('mkStates', 'ground', 'mkDot', 'backgroundColor')
+  ]
+};
+
+/**
  * The whole workshop (the mockup's #s-workshop): the request's head, the task card, the world with the pad over it,
  * the controls, the owl, the steps with the fold offer, and the win card. Everything that changes lives here; the page
  * hands in the request, the family's looks and the words, and stores what Won hands back.
  */
 const PLAY: CgComponent = {
   path: 'Workshop/Play',
-  description: 'The workshop: teach the robot by driving it, see the steps as blocks, fold the repetition, play, and win. Request Id picks the request (free for free play). Won fires with Bloom, Reward and Won Request set; Island asks for the island; Found says whether the request exists (a reload has none).',
+  description: 'The workshop: teach the robot by driving it, see the steps as blocks, fold the repetition, play, and win. Request Id picks the request (free for free play); the line under the title is that request’s own. Won fires with Bloom, Reward and Won Request set; Island asks for the island; Found says whether the request exists (a reload has none).',
+  repeats: { source: 'array', rowFields: ['id', 'cls', 'lit'] },
   nodes: [
     inputs('plIn', [['requestId', 'string'], ['requests', 'array'], ['hints', 'array'], ['words', 'array'], ['lang', 'string'], ['band', 'number'], ['isOlder', 'boolean'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['stepMs', 'number']]),
     // ── What the child sees ──
@@ -696,12 +725,13 @@ const PLAY: CgComponent = {
     text('plSub', 'How it works', 'plHead', '', { ...T_MUTED, maxWidth: px(640), cssClassName: 'bg-ws-sub' }),
     group('plWs', 'World and steps', 'plRoot', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-ws' }, ['plLeft', 'plRight']),
     group('plLeft', 'The world side', 'plWs', { ...column({ rowGap: sp(12) }), ...PANEL }, ['plTask', 'plStage', 'plPredictLine', 'plControls', 'plOwl']),
-    group('plTask', 'The task', 'plLeft', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(14), flexWrap: 'nowrap' }), ['plFace', 'plTaskText', 'plDots']),
+    group('plTask', 'The task', 'plLeft', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(14), flexWrap: 'nowrap' }), ['plFace', 'plTaskText', 'plMarks']),
     group('plFace', 'The islander', 'plTask', { sizeMode: 'explicit', width: px(56), height: px(56) }),
     group('plTaskText', 'Who and what', 'plTask', { ...column({ rowGap: sp(2) }), cssClassName: 'bg-grow' }, ['plTaskH', 'plTaskP']),
     text('plTaskH', 'The islander', 'plTaskText', '', T_H2),
     text('plTaskP', 'What they said', 'plTaskText', '', T_MUTED),
-    text('plDots', 'Tulips watered', 'plTask', '', { sizeMode: 'contentSize', fontSize: px(18), color: 'var(--ink-2)', mounted: false }),
+    group('plMarks', 'Tulips watered, as dots that fill', 'plTask', { ...row({ columnGap: sp(6), flexWrap: 'nowrap' }), cssClassName: 'bg-marks', mounted: false }, ['plMarkEach']),
+    { ...logic('plMarkEach', FOR_EACH_NODE, 'One mark per tulip', { template: C.mark, templateType: 'explicit' }), parent: 'plMarks' },
     group('plStage', 'The world', 'plLeft', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-stage' }, ['plGarden', 'plRec', 'plPad']),
     place('plGarden', KIT_GARDEN, 'The garden', 'plStage', { stepMs: STEP_MS, label: 'The garden' }),
     group('plRec', 'Pip is learning', 'plStage', { ...row({ columnGap: sp(0) }), backgroundColor: 'var(--card)', borderRadius: px(999), ...pad(6, 12), cssClassName: 'bg-rec', mounted: false }, ['plRecText']),
@@ -715,7 +745,8 @@ const PLAY: CgComponent = {
     place('plStep', BUTTON_NODE, 'One step', 'plControls', { ...btn('plain', 'step'), label: 'One step' }),
     place('plReset', BUTTON_NODE, 'Start over', 'plControls', { ...btn('plain', 'reset'), label: 'Start over' }),
     place('plPredict', BUTTON_NODE, 'Predict', 'plControls', { ...btn('plain', 'predict'), label: 'Predict', mounted: false }),
-    place('plAsk', BUTTON_NODE, 'Ask Olive', 'plControls', { ...btn('ask', 'owl', { cssClassName: 'bg-ask-push' }), label: 'Ask Olive' }),
+    // The owl glyph in her own colours (CG-007 §7.1 item 2): bg-i-owlc, a picture, not the white mask bg-i-owl.
+    place('plAsk', BUTTON_NODE, 'Ask Olive', 'plControls', { ...btn('ask', 'owlc', { cssClassName: 'bg-ask-push' }), label: 'Ask Olive' }),
     group('plOwl', 'The owl', 'plLeft', { width: pct(100), sizeMode: 'contentHeight', backgroundColor: 'var(--violet-2)', borderRadius: px(16), ...pad(12), cssClassName: 'bg-owl' }, ['plOwlPic', 'plOwlCol']),
     group('plOwlPic', 'Olive', 'plOwl', { sizeMode: 'explicit', width: px(64), height: px(64), cssClassName: 'bg-owl-pic bg-sp-owl' }),
     group('plOwlCol', 'What she says', 'plOwl', column({ rowGap: sp(4) }), ['plOwlSay', 'plOwlMeta']),
@@ -797,7 +828,7 @@ const PLAY: CgComponent = {
     wire('plIn', 'botName', 'plCard', 'botName'),
     wire('plCard', 'eyebrow', 'plEyebrow', 'text'),
     wire('plCard', 'title', 'plTitle', 'text'),
-    wire('plT', 'isSub', 'plSub', 'text'),
+    wire('plCard', 'sub', 'plSub', 'text'),
     wire('plCard', 'faceClass', 'plFace', 'cssClassName'),
     wire('plCard', 'who', 'plTaskH', 'text'),
     wire('plCard', 'line', 'plTaskP', 'text'),
@@ -917,8 +948,8 @@ const PLAY: CgComponent = {
     wire('plDraw', 'things', 'plGarden', 'things'),
     wire('plDraw', 'robots', 'plGarden', 'robots'),
     wire('plDraw', 'bubble', 'plGarden', 'bubble'),
-    wire('plDraw', 'dots', 'plDots', 'text'),
-    wire('plDraw', 'hasTulips', 'plDots', 'mounted'),
+    wire('plDraw', 'marks', 'plMarkEach', 'items'),
+    wire('plDraw', 'hasTulips', 'plMarks', 'mounted'),
     // Predict (band 10–12, AC6): a tap before Play. A hit plays; a miss shows the real end and a hint — never a score.
     wire('plPredict', 'onClick', 'plPredictMode', 'to-on'),
     wire('plPredictMode', 'predicting', 'plPredictLine', 'mounted'),
@@ -1024,7 +1055,7 @@ const PLAY: CgComponent = {
 
 const QUEST: CgComponent = {
   path: 'Island/Request card',
-  description: 'One request on the island (the mockup\u2019s .quest): the islander\u2019s face, what they ask, the trick as a coloured tag, or ✓ done. Publishes Chosen with the Id.',
+  description: 'One request on the island (the mockup\u2019s .quest): the islander\u2019s face, what they ask, the trick as a coloured tag, or ✓ done (by this kid). Publishes Chosen with the Id.',
   nodes: [
     inputs('qcIn', [['id', 'string'], ['who', 'string'], ['title', 'string'], ['trick', 'string'], ['faceClass', 'string'], ['tagClass', 'string'], ['isDone', 'boolean'], ['doneWord', 'string']]),
     group('qcCard', 'The card', undefined, { width: pct(100), sizeMode: 'contentHeight', backgroundColor: 'var(--card)', borderRadius: px(16), ...pad(12), cssClassName: 'bg-quest bg-press' }, ['qcFace', 'qcText', 'qcSide']),
@@ -1038,10 +1069,11 @@ const QUEST: CgComponent = {
     text('qcTagText', 'The trick', 'qcTag', '', { sizeMode: 'contentSize', fontSize: px(12), fontWeight: '800', color: 'var(--on-fill)' }),
     text('qcDone', 'Done', 'qcSide', '', { sizeMode: 'contentSize', fontSize: px(14), fontWeight: '800', color: 'var(--leaf)', mounted: false }),
     logic('qcIsDone', CONDITION_NODE, 'Done already?'),
+    // Done sits on the paper, flat — never faded: a faded card's words fall under 4.5:1 (ruling 5; the mockup's opacity .7 gave ink-2 3.0).
     withStates('qcStates', 'Open or done', ['open', 'done'], {
       tagShown: { type: 'boolean', by: { open: true, done: false } },
       doneShown: { type: 'boolean', by: { open: false, done: true } },
-      opacity: { type: 'number', by: { open: 1, done: 0.7 } }
+      ground: { type: 'color', by: { open: 'var(--card)', done: 'var(--paper)' } }
     }),
     outputs('qcOut', [['chosen', 'signal'], ['id', 'string']])
   ],
@@ -1057,9 +1089,78 @@ const QUEST: CgComponent = {
     wire('qcIsDone', 'onfalse', 'qcStates', 'to-open'),
     wire('qcStates', 'tagShown', 'qcTag', 'mounted'),
     wire('qcStates', 'doneShown', 'qcDone', 'mounted'),
-    wire('qcStates', 'opacity', 'qcCard', 'opacity'),
+    wire('qcStates', 'ground', 'qcCard', 'backgroundColor'),
     wire('qcCard', 'onClick', 'qcOut', 'chosen'),
     wire('qcIn', 'id', 'qcOut', 'id')
+  ]
+};
+
+/** One islander on the sea (ruling 6). Where it stands is its class (`.bg-pin-<id>` in the look, the mockup's numbers). */
+const PIN: CgComponent = {
+  path: 'Island/Pin',
+  description: 'One islander on the island map (the mockup\u2019s .pin): her picture and her name; when she has a request this kid has not done, the pin is open (a sun badge) and a tap opens that request. Publishes Chosen with the Request Id — only when Is Open.',
+  nodes: [
+    inputs('pnIn', [['id', 'string'], ['label', 'string'], ['pinClass', 'string'], ['picClass', 'string'], ['requestId', 'string'], ['isOpen', 'boolean']]),
+    group('pnPin', 'The pin', undefined, { sizeMode: 'explicit', width: pct(10), height: pct(17), cssClassName: 'bg-pin' }, ['pnPic', 'pnLabel']),
+    group('pnPic', 'The picture', 'pnPin', { sizeMode: 'explicit', width: pct(100), height: pct(100), cssClassName: 'bg-pin-pic' }),
+    text('pnLabel', 'The name', 'pnPin', '', { sizeMode: 'contentSize', fontSize: px(13), fontWeight: '800', color: 'var(--ink)', cssClassName: 'bg-pin-lbl' }),
+    gate('pnGate', 'Only an open pin answers'),
+    outputs('pnOut', [['chosen', 'signal'], ['requestId', 'string']])
+  ],
+  connections: [
+    wire('pnIn', 'pinClass', 'pnPin', 'cssClassName'),
+    wire('pnIn', 'picClass', 'pnPic', 'cssClassName'),
+    wire('pnIn', 'label', 'pnLabel', 'text'),
+    wire('pnIn', 'isOpen', 'pnGate', 'condition'),
+    wire('pnPin', 'onClick', 'pnGate', 'eval'),
+    wire('pnGate', 'ontrue', 'pnOut', 'chosen'),
+    wire('pnIn', 'requestId', 'pnOut', 'requestId')
+  ]
+};
+
+/** The robot drawn alone at its size (a one-tile garden, the kit's own robot — never a second drawing of it). */
+const STAGE_WORLD = { map: ['G'], things: [], robots: [{ id: 'me', x: 0, y: 0, d: 0, carry: [] }], events: [], schedule: [] };
+
+/** The island's scenery pins, where the mockup draws them: two trees, three tulips, the rock. */
+const SCENERY: ReadonlyArray<{ id: string; sprite: string; label: string }> = [
+  { id: 'tree1', sprite: 'tree', label: 'A tree' },
+  { id: 'tree2', sprite: 'tree', label: 'Another tree' },
+  { id: 'tulip1', sprite: 'tulip', label: 'A tulip' },
+  { id: 'tulip2', sprite: 'tulip', label: 'A tulip' },
+  { id: 'tulip3', sprite: 'tulip', label: 'A tulip' },
+  { id: 'rock', sprite: 'rock', label: 'The rock' }
+];
+
+/**
+ * The island (ruling 6): the mockup's sea (lines 146–153, 302–330) — the land, the scenery, a pin per islander (Island
+ * pins), THIS kid's robot with its own name (ruling 8: a sibling's robot is not on her island), and Olive. The kit's
+ * tile world is not here; the kit only draws the robot in its pin, one tile with no ground, as on My robot.
+ */
+const MAP: CgComponent = {
+  path: 'Island/Map',
+  description: 'The island map (the mockup\u2019s .map): the sea, the land, the trees, the tulips, the rock, a pin per islander (open when she has a request left for this kid), this kid\u2019s robot with its name, and Olive. Publishes Chosen with the Request Id of an open pin.',
+  repeats: { source: 'array', rowFields: ['id', 'label', 'pinClass', 'picClass', 'requestId', 'isOpen'] },
+  nodes: [
+    inputs('mpIn', [['pins', 'array'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string']]),
+    group('mpSea', 'The sea', undefined, { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-sea' }, ['mpLand', ...SCENERY.map((x) => `mp_${x.id}`), 'mpEach', 'mpBot', 'mpOlive']),
+    group('mpLand', 'The land', 'mpSea', { sizeMode: 'explicit', width: pct(90), height: pct(86), cssClassName: 'bg-land' }),
+    ...SCENERY.map((x) => group(`mp_${x.id}`, x.label, 'mpSea', { sizeMode: 'explicit', width: pct(9), height: pct(16), cssClassName: `bg-pin bg-pin-${x.id} bg-pin-scene bg-sp-${x.sprite}` })),
+    { ...logic('mpEach', FOR_EACH_NODE, 'One pin per islander', { template: C.pin, templateType: 'explicit' }), parent: 'mpSea' },
+    group('mpBot', 'This kid’s robot', 'mpSea', { sizeMode: 'explicit', width: pct(10), height: pct(17), cssClassName: 'bg-pin bg-pin-bot' }, ['mpGarden']),
+    place('mpGarden', KIT_GARDEN, 'The robot', 'mpBot', { stepMs: STEP_MS, label: 'The robot' }),
+    logic('mpDraw', L('Draw world'), 'The robot in its looks', { world: STAGE_WORLD }),
+    group('mpOlive', 'Olive', 'mpSea', { sizeMode: 'explicit', width: pct(8), height: pct(14), cssClassName: 'bg-pin bg-pin-olive' }, ['mpOlivePic', 'mpOliveName']),
+    group('mpOlivePic', 'Her picture', 'mpOlive', { sizeMode: 'explicit', width: pct(100), height: pct(100), cssClassName: 'bg-pin-pic bg-sp-owl' }),
+    text('mpOliveName', 'Olive', 'mpOlive', 'Olive', { sizeMode: 'contentSize', fontSize: px(13), fontWeight: '800', color: 'var(--ink)', cssClassName: 'bg-pin-lbl' }),
+    outputs('mpOut', [['chosen', 'signal'], ['requestId', 'string']])
+  ],
+  connections: [
+    wire('mpIn', 'pins', 'mpEach', 'items'),
+    ...(['botName', 'color', 'eye', 'hat'] as const).map((f) => wire('mpIn', f, 'mpDraw', f)),
+    wire('mpDraw', 'map', 'mpGarden', 'map'),
+    wire('mpDraw', 'robots', 'mpGarden', 'robots'),
+    wire('mpEach', 'itemOutput-requestId', 'mpOut', 'requestId'),
+    wire('mpEach', 'itemOutputSignal-chosen', 'mpOut', 'chosen')
   ]
 };
 
@@ -1148,7 +1249,7 @@ const OPTIONS: CgComponent = {
     inputs('opIn', [['model', 'object'], ['profileId', 'string'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['hats', '*'], ['stickers', '*'], ['words', 'array'], ['lang', 'string']]),
     group('opPanel', 'The options', undefined, { ...column({ rowGap: sp(8) }), ...PANEL }, ['opNameL', 'opName', 'opColourL', 'opColourRow', 'opEyesL', 'opEyesRow', 'opHatL', 'opHatRow', 'opStickL', 'opStickRow', 'opNoStick']),
     text('opNameL', 'Name', 'opPanel', '', { ...T_H3, fontSize: px(16) }),
-    place('opName', TEXT_INPUT_NODE, 'The robot’s name', 'opPanel', { sizeMode: 'contentHeight', width: pct(100), maxWidth: px(320), fontSize: px(22), fontWeight: '800', color: 'var(--ink)', backgroundColor: 'var(--card)', borderStyle: 'solid', borderWidth: px(2), borderColor: 'var(--line)', borderRadius: px(14), ...pad(10, 14), maxLength: 14 }),
+    place('opName', TEXT_INPUT_NODE, 'The robot’s name', 'opPanel', { sizeMode: 'contentHeight', width: pct(100), maxWidth: px(320), fontSize: px(22), fontWeight: '800', color: 'var(--ink)', backgroundColor: 'var(--card)', borderStyle: 'solid', borderWidth: px(2), borderColor: 'var(--line)', borderRadius: px(14), ...pad(10, 14), maxLength: ROBOT_NAME_MAX }),
     ...choiceRow('op', 'Colour', 'opPanel', 'Colour', C.swatch),
     ...choiceRow('op', 'Eyes', 'opPanel', 'Eyes', C.chip),
     ...choiceRow('op', 'Hat', 'opPanel', 'Hat', C.chip),
@@ -1231,16 +1332,26 @@ const SKILL: CgComponent = {
 
 // ── Profiles/* ──────────────────────────────────────────────────────────────
 
+/**
+ * One player (CG-007 s3's design pass: the mockup has no Profiles screen, so it is built from the mockup's own parts —
+ * a white card like its .quest/.notion, the robot on the My robot stage's warm ground in ITS OWN colours with its name,
+ * then the child's face, name and band in the mockup's type). Each kid's robot is on her own card, so two robots on one
+ * screen are told apart by their name, their colour and the child under them (CG-007 §7.1 item 4).
+ */
 const PROFILE: CgComponent = {
   path: 'Profiles/Card',
-  description: 'One player (the only "login"): a face, a name, the band and the robot’s name. Selected rings it. Publishes Chosen with the Id.',
+  description: 'One player (the only "login"): her robot on its stage in its own colours and name, her face, her name and her band. Selected rings it. Publishes Chosen with the Id.',
   nodes: [
-    inputs('pcIn', [['id', 'string'], ['name', 'string'], ['face', 'string'], ['band', 'string'], ['robot', 'string'], ['selected', 'boolean']]),
-    group('pcCard', 'The card', undefined, { ...column({ alignItems: 'center', rowGap: sp(6) }), width: px(160), backgroundColor: 'var(--card)', borderRadius: 'var(--radius-card)', ...pad(16, 12), borderStyle: 'solid', borderWidth: px(3), borderColor: 'transparent', cssClassName: 'bg-profile bg-press' }, ['pcFace', 'pcName', 'pcBand', 'pcRobot']),
-    place('pcFace', KIT_AVATAR, 'The face', 'pcCard', { look: 'fun-emoji', seed: 'Pip', size: 72, background: 'var(--sun)' }),
-    text('pcName', 'The name', 'pcCard', '', { ...T_H3, textAlignX: 'center' }),
-    text('pcBand', 'The band', 'pcCard', '', { ...T_SMALL, textAlignX: 'center' }),
-    text('pcRobot', 'The robot', 'pcCard', '', { ...T_SMALL, textAlignX: 'center' }),
+    inputs('pcIn', [['id', 'string'], ['name', 'string'], ['face', 'string'], ['band', 'string'], ['robot', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['selected', 'boolean']]),
+    group('pcCard', 'The card', undefined, { ...column({ rowGap: sp(12) }), width: px(208), backgroundColor: 'var(--card)', borderRadius: 'var(--radius-card)', ...pad(12), borderStyle: 'solid', borderWidth: px(3), borderColor: 'transparent', cssClassName: 'bg-profile bg-press' }, ['pcStage', 'pcWho']),
+    group('pcStage', 'Her robot, on its stage', 'pcCard', { width: pct(100), sizeMode: 'explicit', height: px(136), borderRadius: px(14), cssClassName: 'bg-profile-stage' }, ['pcGarden']),
+    place('pcGarden', KIT_GARDEN, 'Her robot', 'pcStage', { stepMs: STEP_MS, label: 'Her robot' }),
+    logic('pcDraw', L('Draw world'), 'The robot in its looks', { world: STAGE_WORLD }),
+    group('pcWho', 'Who she is', 'pcCard', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(10), flexWrap: 'nowrap' }), ['pcFace', 'pcText']),
+    place('pcFace', KIT_AVATAR, 'The face', 'pcWho', { look: 'fun-emoji', seed: 'Pip', size: 44, background: 'var(--sun)' }),
+    group('pcText', 'Name and band', 'pcWho', { ...column({ rowGap: sp(2) }), cssClassName: 'bg-grow' }, ['pcName', 'pcBand']),
+    text('pcName', 'The name', 'pcText', '', { ...T_H3, fontSize: px(20) }),
+    text('pcBand', 'The band', 'pcText', '', { sizeMode: 'contentSize', fontSize: px(13), fontWeight: '800', color: 'var(--ink-2)', cssClassName: 'bg-profile-band' }),
     logic('pcIsOn', CONDITION_NODE, 'The one playing?'),
     withStates('pcStates', 'Chosen or not', ['off', 'on'], { edge: { type: 'color', by: { off: 'transparent', on: 'var(--leaf)' } } }),
     outputs('pcOut', [['chosen', 'signal'], ['id', 'string']])
@@ -1249,7 +1360,12 @@ const PROFILE: CgComponent = {
     wire('pcIn', 'face', 'pcFace', 'seed'),
     wire('pcIn', 'name', 'pcName', 'text'),
     wire('pcIn', 'band', 'pcBand', 'text'),
-    wire('pcIn', 'robot', 'pcRobot', 'text'),
+    wire('pcIn', 'robot', 'pcDraw', 'botName'),
+    wire('pcIn', 'color', 'pcDraw', 'color'),
+    wire('pcIn', 'eye', 'pcDraw', 'eye'),
+    wire('pcIn', 'hat', 'pcDraw', 'hat'),
+    wire('pcDraw', 'map', 'pcGarden', 'map'),
+    wire('pcDraw', 'robots', 'pcGarden', 'robots'),
     wire('pcIn', 'selected', 'pcIsOn', 'condition'),
     wire('pcIsOn', 'ontrue', 'pcStates', 'to-on'),
     wire('pcIsOn', 'onfalse', 'pcStates', 'to-off'),
@@ -1281,7 +1397,7 @@ const FORM: CgComponent = {
     place('pfEn', C.seg, 'English', 'pfLangRow', { label: 'English' }),
     place('pfFr', C.seg, 'Français', 'pfLangRow', { label: 'Français' }),
     text('pfBotL', 'Your robot’s name', 'pfCard', '', { ...T_H3, fontSize: px(16) }),
-    place('pfBot', TEXT_INPUT_NODE, 'The robot’s name', 'pfCard', { sizeMode: 'contentHeight', width: pct(100), fontSize: px(20), fontWeight: '800', color: 'var(--ink)', backgroundColor: 'var(--card)', borderStyle: 'solid', borderWidth: px(2), borderColor: 'var(--line)', borderRadius: px(14), ...pad(10, 14), maxLength: 14, startValue: 'Pip' }),
+    place('pfBot', TEXT_INPUT_NODE, 'The robot’s name', 'pfCard', { sizeMode: 'contentHeight', width: pct(100), fontSize: px(20), fontWeight: '800', color: 'var(--ink)', backgroundColor: 'var(--card)', borderStyle: 'solid', borderWidth: px(2), borderColor: 'var(--line)', borderRadius: px(14), ...pad(10, 14), maxLength: ROBOT_NAME_MAX, startValue: 'Pip' }),
     group('pfButtons', 'Go or not', 'pfCard', row(), ['pfGo', 'pfCancel']),
     place('pfGo', BUTTON_NODE, 'Let’s go', 'pfButtons', { ...btn('primary', 'play'), label: 'Let’s go!' }),
     place('pfCancel', BUTTON_NODE, 'Cancel', 'pfButtons', { ...btn('quiet'), label: 'Cancel' }),
@@ -1414,7 +1530,7 @@ const GU_HOUSE: CgComponent = {
     text('ghTryH', 'Try Olive', 'ghPanel', '', { ...T_H3, marginTop: sp(8) }),
     group('ghTryRow', 'The ask', 'ghPanel', row({ width: pct(100), sizeMode: 'contentHeight' }), ['ghPrompt', 'ghAsk']),
     text('ghPrompt', 'What she is asked', 'ghTryRow', '', { ...T_BODY, fontWeight: '700' }),
-    place('ghAsk', BUTTON_NODE, 'Ask', 'ghTryRow', { ...btn('ask', 'owl'), label: 'Ask' }),
+    place('ghAsk', BUTTON_NODE, 'Ask', 'ghTryRow', { ...btn('ask', 'owlc'), label: 'Ask' }),
     group('ghOut', 'Her reply', 'ghPanel', { ...column({ rowGap: sp(2) }), backgroundColor: 'var(--violet-2)', borderRadius: px(12), ...pad(10, 12) }, ['ghNote', 'ghReply']),
     text('ghNote', 'Where it came from', 'ghOut', '', { fontSize: px(12), fontWeight: '700', color: 'var(--violet-meta)' }),
     text('ghReply', 'The reply', 'ghOut', '—', { ...T_BODY, fontWeight: '700' }),
@@ -1462,17 +1578,24 @@ export const APP_WIRES: unknown[] = [];
 function pageCommon(p: string, title: string, urlPath: string, page: string, main: string[], opts: { tabs?: boolean; band?: boolean } = {}): { nodes: N[]; connections: unknown[] } {
   return {
     nodes: [
-      { id: `${p}Page`, type: 'Page', label: title, parameters: { title: 'Bot Garden', urlPath }, children: [`${p}Wrap`] },
+      { id: `${p}Page`, type: 'Page', label: title, parameters: { title: GAME_NAME, urlPath }, children: [`${p}Wrap`] },
       group(`${p}Wrap`, 'The screen', `${p}Page`, { ...column({ rowGap: sp(14), maxWidth: px(1360) }), ...pad(12, 16), paddingBottom: sp(40) }, [`${p}Bar`, ...main]),
       place(`${p}Bar`, C.bar, 'The bar', `${p}Wrap`, { page, showTabs: opts.tabs !== false, showBand: opts.band !== false }),
       logic(`${p}Store`, C.store, 'The family, stored'),
       logic(`${p}Fam`, L('Read family'), 'Who is playing'),
       variable(`${p}LangVar`, 'gardenLang', 'The language before anyone is chosen'),
       logic(`${p}Words`, C.words, 'The words'),
-      logic(`${p}T`, L('Translate words'), 'In their language')
+      logic(`${p}T`, L('Translate words'), 'In their language'),
+      gate(`${p}Resave`, 'An older family, migrated: write it back')
     ],
     connections: [
       wire(`${p}Store`, 'model', `${p}Fam`, 'model'),
+      // 🔴 An on-load migration owes its own save (P100): a stored v1/v2 family is read as v3 by the rule, and written
+      // back at once, so the next read migrates nothing (CG-002 §8). Every writer sets the model before it writes.
+      wire(`${p}Fam`, 'model', `${p}Store`, 'model'),
+      wire(`${p}Fam`, 'migrated', `${p}Resave`, 'condition'),
+      wire(`${p}Fam`, 'ran', `${p}Resave`, 'eval'),
+      wire(`${p}Resave`, 'ontrue', `${p}Store`, 'write'),
       wire(`${p}LangVar`, 'value', `${p}Fam`, 'fallbackLang'),
       wire(`${p}Words`, 'words', `${p}T`, 'words'),
       wire(`${p}Fam`, 'lang', `${p}T`, 'lang'),
@@ -1498,18 +1621,19 @@ function headWires(p: string, eyebrow: string, title: string, sub: string): unkn
 }
 
 const PAGE_PROFILES: CgComponent = (() => {
-  const base = pageCommon('pr', 'Profiles', '', 'profiles', ['prHead', 'prList', 'prFull', 'prNew', 'prForm'], { tabs: false, band: false });
+  const base = pageCommon('pr', 'Profiles', '', 'profiles', ['prHead', 'prList', 'prFull', 'prForm'], { tabs: false, band: false });
   return {
     path: 'Pages/Profiles',
-    description: 'Who is playing: the family’s players as cards (up to six), and the new-player form. Choosing one is the only login; it goes to the island.',
-    repeats: { source: 'array', rowFields: ['id', 'name', 'face', 'band', 'robot', 'selected'] },
+    description: 'Who is playing: the family’s players as cards (up to six), each with her own robot drawn in its colours, the new player as a card, and the new-player form. Choosing one is the only login; it goes to her island.',
+    repeats: { source: 'array', rowFields: ['id', 'name', 'face', 'band', 'robot', 'color', 'eye', 'hat', 'selected'] },
     nodes: [
       ...base.nodes,
       place('prHead', C.head, 'The head', 'prWrap'),
-      group('prList', 'The players', 'prWrap', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(14), rowGap: sp(14) }), ['prEach']),
+      group('prList', 'The players', 'prWrap', { ...row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(14), rowGap: sp(14), alignItems: 'stretch' }), cssClassName: 'bg-profiles' }, ['prEach', 'prNew']),
       { ...logic('prEach', FOR_EACH_NODE, 'One card per player', { template: C.profile, templateType: 'explicit' }), parent: 'prList' },
       text('prFull', 'The family is full', 'prWrap', '', { ...T_SMALL, mounted: false }),
-      place('prNew', BUTTON_NODE, 'New player', 'prWrap', { ...btn('primary'), label: 'New player' }),
+      // The new player is a card beside the others (the design pass): a real button, drawn as an empty card with a +.
+      place('prNew', BUTTON_NODE, 'New player', 'prList', { backgroundColor: 'var(--paper-2)', color: 'var(--ink)', borderStyle: 'none', borderRadius: 'var(--radius-card)', fontSize: px(18), fontWeight: '700', fontFamily: DISPLAY_FONT, sizeMode: 'explicit', width: px(208), height: px(222), cssClassName: 'bg-profile-new bg-press', label: 'New player' }),
       place('prForm', C.form, 'The form', 'prWrap'),
       logic('prSelect', L('Select profile'), 'Choose one'),
       logic('prAdd', L('Add profile'), 'Make one'),
@@ -1571,14 +1695,13 @@ const PAGE_ISLAND: CgComponent = (() => {
   const base = pageCommon('is', 'Island', 'island', 'island', ['isHead', 'isGrid']);
   return {
     path: 'Pages/Island',
-    description: 'The island: the map with every robot of the family on it (D2), and the islanders’ open requests tagged with the trick they teach, then free play. Nothing is timed; nothing is counted.',
+    description: 'Her island (one per kid, ruling 8): the mockup’s sea with a pin per islander — a pin with a request she has not done opens it — her robot with its name, Olive; beside it the islanders’ requests tagged with the trick they teach, then free play. Nothing is timed; nothing is counted.',
     repeats: { source: 'array', rowFields: ['id', 'who', 'title', 'trick', 'faceClass', 'tagClass', 'isDone', 'doneWord'] },
     nodes: [
       ...base.nodes,
       place('isHead', C.head, 'The head', 'isWrap'),
       group('isGrid', 'Map and requests', 'isWrap', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-island' }, ['isMap', 'isQuests']),
-      group('isMap', 'The map', 'isGrid', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-map' }, ['isGarden']),
-      place('isGarden', KIT_GARDEN, 'The island', 'isMap', { stepMs: STEP_MS, label: 'The island' }),
+      place('isMap', C.map, 'The island map', 'isGrid'),
       group('isQuests', 'The requests', 'isGrid', column({ rowGap: sp(10) }), ['isReqL', 'isList', 'isFreeL', 'isFree']),
       text('isReqL', 'Requests', 'isQuests', '', T_EYEBROW),
       group('isList', 'The open requests', 'isQuests', column({ rowGap: sp(10) }), ['isEach']),
@@ -1587,7 +1710,7 @@ const PAGE_ISLAND: CgComponent = (() => {
       place('isFree', C.quest, 'Free play', 'isQuests', { id: 'free', faceClass: 'bg-face bg-sp-owl', tagClass: 'bg-tag bg-tag-motion', isDone: false, doneWord: '' }),
       logic('isRequests', C.requests, 'The requests'),
       logic('isRows', L('Island rows'), 'Who needs a hand'),
-      logic('isWorld', L('Island world'), 'The island and its robots'),
+      logic('isPins', L('Island pins'), 'The islanders on the sea'),
       setVariable('isSetReq', 'gardenRequestId', 'This request'),
       setVariable('isSetFree', 'gardenRequestId', 'Free play', { setWith: 'string', value: 'free' }),
       navigate('isGoWorkshop', C.pageWorkshop, 'To the workshop')
@@ -1600,21 +1723,19 @@ const PAGE_ISLAND: CgComponent = (() => {
       wire('isT', 'sandH', 'isFree', 'who'),
       wire('isT', 'sandP', 'isFree', 'title'),
       wire('isT', 'isFree', 'isFree', 'trick'),
-      wire('isRequests', 'requests', 'isRows', 'requests'),
-      wire('isFam', 'done', 'isRows', 'done'),
-      wire('isFam', 'band', 'isRows', 'band'),
-      wire('isWords', 'words', 'isRows', 'words'),
-      wire('isFam', 'lang', 'isRows', 'lang'),
-      wire('isFam', 'botName', 'isRows', 'botName'),
+      // Her island: what SHE has done (Read family's done is the active kid's).
+      ...(['rows', 'pins'] as const).flatMap((x) => {
+        const id = x === 'rows' ? 'isRows' : 'isPins';
+        return [wire('isRequests', 'requests', id, 'requests'), wire('isFam', 'done', id, 'done'), wire('isFam', 'band', id, 'band'), wire('isWords', 'words', id, 'words'), wire('isFam', 'lang', id, 'lang'), wire('isFam', 'botName', id, 'botName')];
+      }),
       wire('isRows', 'rows', 'isEach', 'items'),
-      wire('isStore', 'model', 'isWorld', 'model'),
-      wire('isWords', 'words', 'isWorld', 'words'),
-      wire('isFam', 'lang', 'isWorld', 'lang'),
-      wire('isWorld', 'map', 'isGarden', 'map'),
-      wire('isWorld', 'things', 'isGarden', 'things'),
-      wire('isWorld', 'robots', 'isGarden', 'robots'),
+      wire('isPins', 'pins', 'isMap', 'pins'),
+      ...(['botName', 'color', 'eye', 'hat'] as const).map((f) => wire('isFam', f, 'isMap', f)),
       wire('isEach', 'itemOutput-id', 'isSetReq', 'value'),
       wire('isEach', 'itemOutputSignal-chosen', 'isSetReq', 'do'),
+      // A pin with a request left opens it, the same way a card does (the list stays the accessible path).
+      wire('isMap', 'requestId', 'isSetReq', 'value'),
+      wire('isMap', 'chosen', 'isSetReq', 'do'),
       wire('isSetReq', 'done', 'isGoWorkshop', 'navigate'),
       wire('isFree', 'chosen', 'isSetFree', 'do'),
       wire('isSetFree', 'done', 'isGoWorkshop', 'navigate')
@@ -1627,7 +1748,7 @@ const PAGE_WORKSHOP: CgComponent = (() => {
   const base = pageCommon('ws', 'Workshop', 'workshop', 'workshop', ['wsPlay']);
   return {
     path: 'Pages/Workshop',
-    description: 'The workshop for the chosen request: the robot, the blocks and the owl on one screen. A win is stored for the profile that earned it (the hat, the tricks) and for the island (done for both robots, D2). With no request (a reload), the island.',
+    description: 'The workshop for the chosen request: the robot, the blocks and the owl on one screen. A win is stored for the kid who earned it — her island, her tricks, her hat (one island per kid, ruling 8). With no request (a reload), the island.',
     nodes: [
       ...base.nodes,
       place('wsPlay', C.play, 'The workshop', 'wsWrap', { stepMs: TICK_MS }),
@@ -1647,7 +1768,7 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       wire('wsWords', 'words', 'wsPlay', 'words'),
       ...(['lang', 'band', 'botName', 'color', 'eye', 'hat'] as const).map((f) => wire('wsFam', f, 'wsPlay', f)),
       wire('wsFam', 'older', 'wsPlay', 'isOlder'),
-      // A win: stored, and the island marks it done.
+      // A win: stored on HER island (Complete request marks the profile that played).
       wire('wsStore', 'model', 'wsComplete', 'model'),
       wire('wsPlay', 'wonRequest', 'wsComplete', 'requestId'),
       wire('wsFam', 'profileId', 'wsComplete', 'profileId'),
@@ -1665,9 +1786,6 @@ const PAGE_WORKSHOP: CgComponent = (() => {
     ]
   };
 })();
-
-/** The robot on its stage: a one-tile garden, the kit's own robot at its size (never a second drawing of it). */
-const STAGE_WORLD = { map: ['G'], things: [], robots: [{ id: 'me', x: 0, y: 0, d: 0, carry: [] }], events: [], schedule: [] };
 
 const PAGE_ROBOT: CgComponent = (() => {
   const base = pageCommon('rb', 'My robot', 'robot', 'robot', ['rbHead', 'rbGrid']);
@@ -1759,8 +1877,11 @@ export const CG003_COMPONENTS: ReadonlyArray<CgComponent> = [
   PAD,
   RUNNER,
   WIN,
+  MARK,
   PLAY,
   QUEST,
+  PIN,
+  MAP,
   SWATCH,
   CHIP,
   STICKER,

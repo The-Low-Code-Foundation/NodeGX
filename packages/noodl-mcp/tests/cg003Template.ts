@@ -1,5 +1,5 @@
 /**
- * CG-003 — Bot Garden as a project a family starts from, authored through the real MCP server's PLAN DOOR
+ * CG-003 — Olive's Island (slug `bot-garden`) as a project a family starts from, authored through the real MCP server's PLAN DOOR
  * (`create_plan` → `stage_plan_operation` × N → `apply_plan`), every interface declared.
  *
  * `cg003Components.ts` is what the door is given; this file is the composition, and the one place the directory a person
@@ -26,11 +26,12 @@ import { createServer } from '../src/server';
 
 import { pinRunOnValueChangeDefaultsInDirectory, readAsLegacyProject } from './templateArtefact';
 import { copyTree, pinComponentFiles, pinRegistry, pinRootNode } from './templatePins';
-import { APP_NODES, APP_WIRES, C, CG003_COMPONENTS, CgComponent, PAGES, REQUIRED_MODULES } from './cg003Components';
+import { APP_NODES, APP_WIRES, C, CG003_COMPONENTS, CgComponent, GAME_NAME, PAGES, REQUIRED_MODULES } from './cg003Components';
 import { GARDEN_PRESET, GARDEN_TOKENS } from './cg007Look';
 
 export const TEMPLATE_ID = 'bot-garden';
-export const TEMPLATE_PROJECT_NAME = 'Bot Garden';
+/** What a person sees the project called (ruling 7). The template's id, its folder and the storage key stay bot-garden. */
+export const TEMPLATE_PROJECT_NAME = GAME_NAME;
 export const TEMPLATE_EPOCH = '2026-09-27T00:00:00.000Z';
 export const START_HERE_FILE = 'docs/START-HERE.md';
 
@@ -164,7 +165,7 @@ export async function buildGardenTemplateProject(options: BuildOptions = {}): Pr
       'create_plan',
       {
         request:
-          'Bot Garden — a kids’ coding game: teach a robot by driving it, the game folds the repetition into a loop, an offline owl helps. Six screens, EN and FR, two age bands, the family saved on this computer, no account.',
+          'Olive’s Island — a kids’ coding game: teach a robot by driving it, the game folds the repetition into a loop, an offline owl helps. Six screens, EN and FR, two age bands, one island per kid, the family saved on this computer, no account.',
         scroll: 'page',
         operations: components.map((c) => ({ kind: 'create', target: c.path, intent: c.description, ...declaration(c) }))
       },
@@ -198,7 +199,7 @@ export function prepareGardenArtefact(built: AuthoredGarden, output: string): vo
   fs.rmSync(output, { recursive: true, force: true });
   copyTree(built.projectDir, output);
 
-  if (fs.existsSync(path.join(output, 'components', '__cloud__'))) throw new Error('refusing to write: Bot Garden ships no backend, and a __cloud__ component was authored');
+  if (fs.existsSync(path.join(output, 'components', '__cloud__'))) throw new Error('refusing to write: Olive’s Island ships no backend, and a __cloud__ component was authored');
   for (const name of [...REQUIRED_MODULES, 'bot-garden-fonts']) {
     if (!fs.existsSync(path.join(output, 'noodl_modules', name, 'manifest.json'))) throw new Error(`refusing to write: noodl_modules/${name} is missing`);
   }
@@ -222,15 +223,17 @@ function writeStartHere(output: string): void {
     'small robot by hand, watches her steps appear as blocks, and lets the game fold the repetition into a loop.',
     'Nothing is timed, scored or streaked; the reward is a hat.',
     '',
-    'There is no backend and no account. The family lives on this computer (localStorage, key `bot-garden`), and',
-    'the Grown-ups screen shows a save code that carries the whole garden to another computer.',
+    'There is no backend and no account. The family lives on this computer (localStorage, key `bot-garden`): one',
+    'island per kid, each with her own requests done and her own robot. The Grown-ups screen shows a save code that',
+    'carries the whole family to another computer.',
     '',
     '## The first thing to change',
     '',
     'Open **Data/Requests** and find the node labelled **"EDIT — the requests: this list IS the island"**. It is a',
     '`Static Data` node holding a JSON array; one entry is one islander asking for help: its map (rows of letters),',
     'the things on it, where the robot starts, the goal (a named check, never code), the blocks offered, and the',
-    'reward. Add one and it is on the island. Every word is one row in **Data/Words**, English and French.',
+    'reward. Add one and it is on the island. Every word is one row in **Data/Words**, English and French (a request’s',
+    'line under the Workshop title too).',
     '',
     '## How it works, in the graph',
     '',

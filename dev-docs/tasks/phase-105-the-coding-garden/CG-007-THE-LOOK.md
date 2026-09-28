@@ -101,3 +101,31 @@ but a child cannot tell them apart; the profile's name or the robot's own colour
 
 **Owner:** Richard grades the look (README §6); items 1–3 and the two-robots label are CG-007 next session.
 
+
+## 8. Session 3 — what was built (lane LOOK, worktree `cg-s3-look`, 2026-09-28)
+
+Richard's rulings 5 (contrast: darker fills, white text), 6 (the island is the mockup's sea with pins) and 7 (the name is
+"Olive's Island" / "L'île d'Olive") are in the look; the four §7.1 items and a design pass on Profiles are done. Gates:
+`cg003Template.test.ts` **69/69** (47 → 69), `cg002Engine.test.ts` 115/115, `cg001GardenKit.test.ts` 20/20 (kit rebuilt).
+The page drive is 🟡 prepared (`$SCRATCH/look/EXPECTED-DRIVE.md`: ≈147 clauses, 29 new).
+
+| Item | Status | Measured by | Numbers |
+|---|---|---|---|
+| AC6 / ruling 5 — every text ≥ 4.5:1 | ✅ tokens · 🟡 live drive | gate "AC6 (ruling 5)": 26 pairs computed from `GARDEN_TOKENS` (no hand-typed ratio); known-firing: the same table on the mockup's fills fails ≥ 8; arm: `--block-control` back to `#FF9F1C` names exactly its two pairs | darkened in OKLCH (same hue ±1.5°, lower L; `DARKENED_FILLS` keeps the mockup value beside each): leaf/primary/action `#3FA66B→#058149` (white 4.95, eyebrow on paper 4.65), coral `#FF7A59→#CB4A2A` (4.61), violet/ask `#8F6BFF→#8059EC` (4.61), motion `#4C8DFF→#3170E0` (4.64), control `#FF9F1C→#A86501` (4.64; chroma trimmed, sRGB has no darker orange that saturated). Lowest pair now 4.61. Two faded texts found on the way and fixed: a done request card (opacity .7 → ink-2 at 3.0) and a seed trick (.75) now sit flat on the paper instead. The kit: `.gd-nctl`/`.gd-slot` chips were white-translucent over the block (lowering white's contrast) → `rgba(0,0,0,.2)`; `.gd-x` (.7) and band-1 captions (.92) no longer faded; Olive's bubble meta `#6E6784`→`#6A5AA8` on violet-2 (4.48→4.84); the kit's colour-port defaults are the darker fills (gate: equal to the tokens) |
+| ruling 6 — the sea with pins | ✅ graph · 🟡 drive | gate "ruling 6": Pages/Island has no kit node; `Island/Map` = `.bg-sea` + `.bg-land` + 6 scenery pins + a pin repeater (`Island/Pin`) + the robot's pin + Olive's; the kit in `Island/Map` is one Garden drawing one robot on one tile | the mockup's lines 146–153 ported (`.bg-sea` aspect 12/7, the land's radii and shore, `.pin` translate(-50%,-50%), `.lbl` pill); the pins' places are the mockup's numbers (`PIN_PLACES`, one class each); Sami, whom the mockup's map leaves out, stands on the east shore (85%, 40%). Grid `minmax(0,1fr) 360px`, one column under 980 px (gate reads the sheet). A pin with a request this kid has not done carries a sun "!" badge and opens that request (gate: the pin's Chosen passes only through its Is Open gate; arm killed); the list stays the accessible path |
+| ruling 7 — the name | ✅ | gate "ruling 7" | project name and `htmlTitle`, every Page title, the bar's default text (`GAME_NAME`), START-HERE's first line say "Olive's Island"; no text/label/title in the graph says "Bot Garden"; the bar still reads the `brand` WORD (lane CONTENT's) — the read is pinned. Slugs stay (`bot-garden` template, storage key, `bot-garden-fonts`). The kit's library description says Olive's Island |
+| §7.1 item 1 — the request's own line | ✅ gate · 🟡 drive | gate "item 1": every request in `REQUESTS` has a line, EN and FR, `{b}` filled; arm killed | 10 lines in `cg003Content.ts` (`REQUEST_SUBS`), the tulips' is the mockup's own sentence; free play keeps the island's general line |
+| item 2 — the owl on Ask Olive | ✅ gate · 🟡 drive | gate "item 2" | `.bg-i-owlc::before` is the owl sprite in her colours (no mask); Ask Olive and Try Olive wear it |
+| item 3 — filled progress dots | ✅ gate · 🟡 drive | gate "item 3" + glue row; arm killed | `Draw world.marks` (one per tulip, `lit` as it drinks) → `Workshop/Mark` repeater: a 26 px round dot on paper-2, filled with tulip-pink and a tulip when lit |
+| item 4 — two robots told apart | ✅ by construction · 🟡 drive | the Workshop world always has one robot (`Start world`); the island draws this kid's only (ruling 8) | the one screen with several robots is Profiles: each kid's robot on her own card, in its colours, with its name, above her face and name (drive: cards disjoint, each robot named) |
+| Profiles design pass | ✅ graph · 🟡 screenshots | gate "the Profiles page" | a white card per kid (208 px): her robot on the My robot stage's warm gradient, drawn by the kit in its colours with its name pill; her face (44 px), her name (Fredoka 20), her band as a paper-2 pill; the new player is a card beside them (dashed edge, a + in leaf); two cards a row under 480 px. Profiles no longer raises D50 (the gate's pin moved) |
+| the kit's `icon.png` | ✅ | gate "the kit's own icon" | it WAS game-kit's picture byte for byte (md5 17c5b4bc…); now its own 680 × 384: the robot and the four blocks in the darkened colours (`$SCRATCH/look/icon.svg`, rasterized with rsvg-convert) |
+
+**Arms (this file's rules):** in-spec — the contrast table on a reverted fill; manual (file copied to `$SCRATCH`, mutated,
+the row run, copied back, `cmp` identical) — a pin answering when shut, the new-player button outside the cards, the
+kit's cross faded again: **3/3 killed** (`$SCRATCH/look/arms-manual.txt`).
+
+**Residuals:** the live contrast readout, the screenshots beside `mockup-island.png`, and the rename on the pin — the
+orchestrator's drive (EXPECTED-DRIVE.md). The robot pin draws the kit's robot at 10% of the map (≈36 px at 390): read
+the 390 screenshot. The Teach pad over the world's corner at 390 (§7.1) — unchanged, NONE this session. Richard grades
+the look against the mockup (README §6).

@@ -348,26 +348,26 @@
     '.gd-blk .gd-ic{width:20px;height:20px;flex:none}\n' +
     '.gd-motion{background:var(--gd-motion)}.gd-action{background:var(--gd-action)}.gd-control{background:var(--gd-control)}.gd-ask{background:var(--gd-ask)}\n' +
     '.gd-palette .gd-blk:hover{filter:brightness(1.06)}\n' +
-    '.gd-band1 .gd-blk{padding:10px 12px;flex-direction:column;gap:3px}.gd-band1 .gd-blk .gd-ic{width:26px;height:26px}.gd-band1 .gd-blk .gd-n{font-size:11px;opacity:.92}\n' +
+    '.gd-band1 .gd-blk{padding:10px 12px;flex-direction:column;gap:3px}.gd-band1 .gd-blk .gd-ic{width:26px;height:26px}.gd-band1 .gd-blk .gd-n{font-size:11px}\n' +
     '.gd-band1 .gd-hd .gd-blk{flex-direction:row;gap:7px}\n' +
     '.gd-band2 .gd-blk .gd-n{font-size:15px}\n' +
     '.gd-prog{display:flex;flex-direction:column;gap:6px;min-height:120px}\n' +
     '.gd-row{display:flex;align-items:center;gap:6px}\n' +
     '.gd-prog .gd-blk{touch-action:none}\n' +
     '.gd-blk.gd-run{outline:3px solid var(--gd-run);outline-offset:2px;transform:scale(1.03)}\n' +
-    '.gd-x{margin-left:4px;opacity:.7;font-size:13px;background:none;border:0;color:inherit;font-weight:800;cursor:pointer;padding:0 2px;font-family:inherit;touch-action:manipulation}\n' +
+    '.gd-x{margin-left:4px;font-size:13px;background:none;border:0;color:inherit;font-weight:800;cursor:pointer;padding:0 2px;font-family:inherit;touch-action:manipulation}\n' +
     '.gd-rep{border-radius:14px;background:#FFF0DA;padding:6px;display:flex;flex-direction:column;gap:6px;border:2px solid transparent}\n' +
     '.gd-rep[data-sel="1"]{border-color:var(--gd-control)}\n' +
     '.gd-hd{display:flex;align-items:center;gap:6px}\n' +
     '.gd-body{margin-left:22px;display:flex;flex-direction:column;gap:6px;border-left:4px solid var(--gd-control);padding-left:8px;min-height:16px}\n' +
     '.gd-dots{font-size:13px;color:#6E6784;font-weight:700}\n' +
     '.gd-nctl{display:inline-flex;gap:2px;margin-left:2px;align-items:center}\n' +
-    '.gd-nctl button{width:26px;height:26px;border-radius:8px;background:rgba(255,255,255,.35);color:#fff;font-weight:800;border:0;font-size:16px;font-family:inherit;cursor:pointer;touch-action:manipulation}\n' +
+    '.gd-nctl button{width:26px;height:26px;border-radius:8px;background:rgba(0,0,0,.2);color:#fff;font-weight:800;border:0;font-size:16px;font-family:inherit;cursor:pointer;touch-action:manipulation}\n' +
     '.gd-count{min-width:22px;text-align:center}\n' +
     '.gd-empty{color:#6E6784;font-weight:700;padding:18px 10px;border:2px dashed #EBDFC4;border-radius:14px;text-align:center}\n' +
     '.gd-drag{opacity:.85;z-index:5;pointer-events:none;box-shadow:0 8px 18px rgba(0,0,0,.2)}\n' +
     '.gd-dropline{height:4px;border-radius:2px;background:var(--gd-run);margin:-3px 0}\n' +
-    '.gd-slot{background:rgba(255,255,255,.28);border:0;border-radius:8px;color:#fff;font-weight:800;font-family:inherit;font-size:13px;padding:3px 8px;cursor:pointer;touch-action:manipulation}\n' +
+    '.gd-slot{background:rgba(0,0,0,.2);border:0;border-radius:8px;color:#fff;font-weight:800;font-family:inherit;font-size:13px;padding:3px 8px;cursor:pointer;touch-action:manipulation}\n' +
     '.gd-picker{display:flex;flex-wrap:wrap;gap:6px;padding:8px;border-radius:12px;background:#EEE8FF}\n' +
     '.gd-opt{border:0;border-radius:999px;background:#fff;color:#4A2FA6;font-weight:800;font-family:inherit;font-size:14px;padding:7px 12px;cursor:pointer;touch-action:manipulation}\n' +
     '.gd-opt[aria-pressed="true"]{background:#4A2FA6;color:#fff}\n' +
@@ -765,10 +765,11 @@
       runningId: { type: 'string', displayName: 'Running Id', group: 'Program', default: '', description: 'The id of the block to glow. Empty glows none.' },
       locked: { type: 'boolean', displayName: 'Locked', group: 'Program', default: false, description: 'True while a run plays: no add, move, remove or count change.' },
       showPalette: { type: 'boolean', displayName: 'Show Palette', group: 'Program', default: true },
-      motionColor: { type: 'color', displayName: 'Motion Blocks', group: 'Style', default: '#4C8DFF' },
-      actionColor: { type: 'color', displayName: 'Action Blocks', group: 'Style', default: '#3FA66B' },
-      controlColor: { type: 'color', displayName: 'Control Blocks', group: 'Style', default: '#FF9F1C' },
-      askColor: { type: 'color', displayName: 'Ask Blocks', group: 'Style', default: '#8F6BFF' },
+      // White words on these reach 4.5:1 (P105 s3 ruling 5: the mockup's hues, darker — the template's tokens are the same).
+      motionColor: { type: 'color', displayName: 'Motion Blocks', group: 'Style', default: '#3170E0' },
+      actionColor: { type: 'color', displayName: 'Action Blocks', group: 'Style', default: '#058149' },
+      controlColor: { type: 'color', displayName: 'Control Blocks', group: 'Style', default: '#A86501' },
+      askColor: { type: 'color', displayName: 'Ask Blocks', group: 'Style', default: '#8059EC' },
       runColor: { type: 'color', displayName: 'Running Glow', group: 'Style', default: '#FFD166' }
     },
 
@@ -1006,7 +1007,7 @@
     '.gd-bubble{position:absolute;z-index:5;background:#fff;border-radius:14px;padding:8px 12px;font-weight:800;font-size:14px;box-shadow:0 6px 18px rgba(72,52,20,.10);max-width:230px;pointer-events:none;transform:translate(-30%,-115%);color:#2E2A3D}\n' +
     '.gd-bubble:after{content:"";position:absolute;left:34%;bottom:-8px;border:8px solid transparent;border-top-color:#fff;border-bottom:0}\n' +
     '.gd-bubble.gd-olive{background:#EEE8FF;color:#4A2FA6}.gd-bubble.gd-olive:after{border-top-color:#EEE8FF}\n' +
-    '.gd-bubble small{display:block;font-weight:700;color:#6E6784;font-size:11px}\n' +
+    '.gd-bubble small{display:block;font-weight:700;color:#6E6784;font-size:11px}.gd-bubble.gd-olive small{color:#6A5AA8}\n' +
     '@media (prefers-reduced-motion: reduce){.gd-puddle{animation:none}.gd-bump{animation:none}.gd-cheer .gd-turn{animation:none}.gd-bot{transition:none}.gd-turn{transition:none}}';
 
   /** A rising count is a new event; a mount, the same value, a fall or junk is not (the Boost-count rule). */

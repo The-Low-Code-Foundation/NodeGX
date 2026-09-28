@@ -13,9 +13,9 @@
  * | {@link RECORD_STEP_SCRIPT} | a Teach pad press: the block appended, and the robot moved by the engine's own step |
  * | {@link KIT_PALETTE_SCRIPT} | the engine's palette in the kit's shape: an icon, the band's word, slots with their options |
  * | {@link TIDY_LINE_SCRIPT} | the fold offer's sentence, and whether it shows ("Not now" hides it until the program changes) |
- * | {@link FAMILY_SCRIPT} | the family model, read: the active profile, field by field, and the profile rows |
- * | {@link ISLAND_WORLD_SCRIPT} | the island in overview: its map, its islanders, every profile's robot (D2) |
- * | {@link ISLAND_ROWS_SCRIPT} | the requests on the island for this band, each done or not (done by either robot, D2) |
+ * | {@link FAMILY_SCRIPT} | the family model, read: the active profile, field by field, HER island, the profile rows, and whether a stored model is older than v3 (then the page writes it back) |
+ * | {@link ISLAND_PINS_SCRIPT} | the islanders on the mockup's sea as pins: each one's open request for this kid, if any (a pin with one opens it) |
+ * | {@link ISLAND_ROWS_SCRIPT} | the requests on the island for this band, each done or not — by THIS kid (one island per kid, ruling 8) |
  * | {@link UPDATE_PROFILE_SCRIPT} | the family with one field of one profile changed (the field is a parameter) |
  * | {@link SELECT_PROFILE_SCRIPT} | the family with another profile active |
  * | {@link SKILL_ROWS_SCRIPT} | the seven tricks as cards: seed, sprouted or blooming |
@@ -32,8 +32,8 @@
  */
 import { WORDS, WORD_KEYS } from './cg002Content';
 import { OLIVE_WORDS, OLIVE_WORD_KEYS } from './cg005Olive';
-import { ENGINE, FOLD_HELPERS, MANY_BLOCKS, SAVE_HELPERS } from './cg002Scripts';
-import { EYES, HATS, ISLANDERS, ISLAND_MAP, ISLAND_SPOTS, ISLAND_THINGS, PAGE_WORDS, PAGE_WORD_KEYS, SKILL_BLOCKS } from './cg003Content';
+import { ENGINE, FOLD_HELPERS, MANY_BLOCKS, ROBOT_NAME_MAX, SAVE_HELPERS } from './cg002Scripts';
+import { EYES, HATS, ISLANDERS, ISLAND_PINS, PAGE_WORDS, PAGE_WORD_KEYS, REQUEST_SUBS, SKILL_BLOCKS } from './cg003Content';
 import { ROBOT_PAINTS } from './cg007Look';
 
 /** Every word key the pages can show: the engine's (CG-002/006), Olive's (CG-005), then the pages' own. */
@@ -130,8 +130,12 @@ if (req) {
 Outputs.nonce = Inputs.nonce;
 `;
 
+/** Each request's own line under the title (CG-007 §7.1 item 1): its word key, by request id. */
+const SUB_KEYS: Readonly<Record<string, string>> = Object.fromEntries(Object.entries(REQUEST_SUBS).map(([id, r]) => [id, r.key]));
+
 export const REQUEST_CARD_SCRIPT = `${WORD_HELPER}
 var ISLANDERS = ${JSON.stringify(ISLANDERS)};
+var SUBS = ${JSON.stringify(SUB_KEYS)};
 var lang = langOf(Inputs.lang), name = nameOf(Inputs.botName);
 var w = wordMap(Inputs.words, lang, name);
 var reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];
@@ -146,7 +150,7 @@ Outputs.title = req ? (w[req.copyKeys.title] || '') : (w.wsFreeTitle || '');
 Outputs.line = req ? (w[req.copyKeys.line] || '') : (w.sandP || '');
 Outputs.faceClass = 'bg-face bg-sp-' + (isl ? isl.sprite : 'owl');
 Outputs.rewardWord = req && req.copyKeys.reward ? (w[req.copyKeys.reward] || '') : '';
-Outputs.sub = w.isSub || '';
+Outputs.sub = (req && SUBS[req.id] && w[SUBS[req.id]]) || w.isSub || '';
 `;
 
 export const DRAW_WORLD_SCRIPT = `${WORD_HELPER}
@@ -179,9 +183,9 @@ Outputs.things = things;
 Outputs.robots = robots;
 Outputs.watered = watered;
 Outputs.total = total;
-var dots = '';
-for (var d = 0; d < total; d++) dots += d < watered ? '🌷' : '○';
-Outputs.dots = dots;
+var marks = [];
+for (var d = 0; d < total; d++) marks.push({ id: 'm' + d, lit: d < watered, cls: d < watered ? 'bg-mark bg-mark-lit bg-sp-tulip' : 'bg-mark' });
+Outputs.marks = marks;
 Outputs.hasTulips = total > 0;
 Outputs.bubble = say && w[say] ? { robot: 0, text: w[say], style: 'plain', n: Number(Inputs.sayN) || 0 } : null;
 `;
@@ -270,6 +274,8 @@ Outputs.countText = fill(n === 1 ? w.block1 : w.blocks, { n: n });
 export const FAMILY_SCRIPT = `${SAVE_HELPERS}
 var raw = Inputs.model && typeof Inputs.model === 'object' ? Inputs.model : null;
 var model = modelOf(raw || {});
+// A stored family older than v3 is migrated here on every read until it is written back: the page writes it at once.
+Outputs.migrated = migrationDue(raw);
 var active = null;
 for (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === model.island.activeId) active = model.profiles[i];
 var fallback = String(Inputs.fallbackLang) === 'fr' ? 'fr' : 'en';
@@ -288,11 +294,12 @@ Outputs.hat = active ? active.robot.hat : 'none';
 Outputs.hats = active ? active.hats.slice() : [];
 Outputs.stickers = active ? active.stickers.slice() : [];
 Outputs.tricks = active ? JSON.parse(JSON.stringify(active.tricks)) : {};
-Outputs.done = model.island.done.slice();
+// One island per kid (ruling 8): what THIS kid has done, never a sibling's.
+Outputs.done = active ? active.island.done.slice() : [];
 var rows = [];
 for (var j = 0; j < model.profiles.length; j++) {
   var p = model.profiles[j];
-  rows.push({ id: p.id, name: p.name, face: p.face || p.name, band: p.band === 1 ? '7–9' : '10–12', robot: p.robot.name, selected: p.id === model.island.activeId });
+  rows.push({ id: p.id, name: p.name, face: p.face || p.name, band: p.band === 1 ? '7–9' : '10–12', robot: p.robot.name, color: p.robot.color, eye: p.robot.eye, hat: p.robot.hat, selected: p.id === model.island.activeId });
 }
 Outputs.profiles = rows;
 Outputs.count = rows.length;
@@ -301,28 +308,36 @@ Outputs.isEmpty = rows.length === 0;
 Outputs.model = model;
 `;
 
-export const ISLAND_WORLD_SCRIPT = `${SAVE_HELPERS}${WORD_HELPER}
-var MAP = ${JSON.stringify(ISLAND_MAP)};
-var THINGS = ${JSON.stringify(ISLAND_THINGS)};
-var SPOTS = ${JSON.stringify(ISLAND_SPOTS)};
-var model = modelOf(Inputs.model && typeof Inputs.model === 'object' ? Inputs.model : {});
-var lang = langOf(Inputs.lang);
-var w = wordMap(Inputs.words, lang, 'Pip');
-var things = [];
-for (var i = 0; i < THINGS.length; i++) {
-  var t = THINGS[i];
-  if (t.kind === 'label') things.push({ kind: 'label', x: t.x, y: t.y, text: w[t.who] || '' });
-  else things.push({ kind: t.kind, x: t.x, y: t.y, full: !!t.full });
+/**
+ * The islanders on the sea (ruling 6), as pins: each one's label in the language and, for THIS kid, the first request
+ * of theirs she has not done in her band. A pin with one is open (tappable, it opens that request); the list beside the
+ * map stays the path a screen reader and a keyboard take. The robot's pin and Olive's are drawn by Island/Map.
+ */
+export const ISLAND_PINS_SCRIPT = `${WORD_HELPER}
+var ISLANDERS = ${JSON.stringify(ISLANDERS)};
+var PINS = ${JSON.stringify(ISLAND_PINS)};
+var lang = langOf(Inputs.lang), name = nameOf(Inputs.botName);
+var w = wordMap(Inputs.words, lang, name);
+var band = Number(Inputs.band) === 1 ? 1 : 2;
+var done = Array.isArray(Inputs.done) ? Inputs.done : [];
+var reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];
+var pins = [], open = 0;
+for (var i = 0; i < PINS.length; i++) {
+  var pin = PINS[i], isl = ISLANDERS[pin.islander] || { nameKey: '' };
+  var requestId = '';
+  for (var k = 0; k < reqs.length && !requestId; k++) {
+    var r = reqs[k];
+    if (r && r.islander === pin.islander && Number(r.band) <= band && done.indexOf(r.id) === -1) requestId = String(r.id);
+  }
+  if (requestId) open++;
+  pins.push({
+    id: pin.id, label: w[isl.nameKey] || '', requestId: requestId, isOpen: !!requestId,
+    pinClass: 'bg-pin bg-pin-' + pin.id + (requestId ? ' bg-pin-open bg-press' : ''), picClass: 'bg-pin-pic bg-sp-' + pin.sprite
+  });
 }
-var robots = [];
-for (var j = 0; j < model.profiles.length && j < SPOTS.length; j++) {
-  var p = model.profiles[j];
-  robots.push({ x: SPOTS[j].x, y: SPOTS[j].y, d: 2, colour: p.robot.color, eyes: p.robot.eye, hat: p.robot.hat, name: p.robot.name, bump: 0 });
-}
-Outputs.map = { rows: MAP.slice() };
-Outputs.things = things;
-Outputs.robots = robots;
-Outputs.robotCount = robots.length;
+Outputs.pins = pins;
+Outputs.open = open;
+Outputs.count = pins.length;
 `;
 
 export const ISLAND_ROWS_SCRIPT = `${WORD_HELPER}
@@ -364,7 +379,7 @@ if (p) {
   if (field === 'name') { var n = String(v || '').trim().slice(0, 24); if (n && n !== p.name) { p.name = n; changed = true; } }
   else if (field === 'band') { var b = Number(v) === 1 ? 1 : 2; if (b !== p.band) { p.band = b; changed = true; } }
   else if (field === 'lang') { var l = String(v) === 'fr' ? 'fr' : 'en'; if (l !== p.lang) { p.lang = l; changed = true; } }
-  else if (field === 'robotName') { var rn = String(v || '').trim().slice(0, 16); if (rn && rn !== p.robot.name) { p.robot.name = rn; changed = true; } }
+  else if (field === 'robotName') { var rn = String(v || '').trim().slice(0, ROBOT_NAME_MAX); if (rn && rn !== p.robot.name) { p.robot.name = rn; changed = true; } }
   else if (field === 'color') { var c = String(v || ''); if (/^#[0-9A-Fa-f]{6}$/.test(c) && c !== p.robot.color) { p.robot.color = c; changed = true; } }
   else if (field === 'eye') { var e = String(v || ''); if ((e === 'round' || e === 'happy' || e === 'wink') && e !== p.robot.eye) { p.robot.eye = e; changed = true; } }
   else if (field === 'hat') { var h = String(v || ''); if ((h === 'none' || p.hats.indexOf(h) !== -1) && h !== p.robot.hat) { p.robot.hat = h; changed = true; } }
@@ -378,7 +393,7 @@ var model = modelOf(Inputs.model && typeof Inputs.model === 'object' ? Inputs.mo
 var id = String(Inputs.profileId || '');
 var found = false;
 for (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === id) found = true;
-if (found) model.island.activeId = id;
+if (found) activate(model, id);
 Outputs.model = model;
 Outputs.found = found;
 `;
@@ -547,8 +562,8 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Kit palette', script: KIT_PALETTE_SCRIPT, seam: 'the engine’s palette in the kit’s shape' },
   { component: 'Logic/Tidy line', script: TIDY_LINE_SCRIPT, seam: 'the fold offer’s sentence, and whether it shows' },
   { component: 'Logic/Read family', script: FAMILY_SCRIPT, seam: 'the family read: the active profile and the profile rows' },
-  { component: 'Logic/Island world', script: ISLAND_WORLD_SCRIPT, seam: 'the island in overview, every robot on it' },
-  { component: 'Logic/Island rows', script: ISLAND_ROWS_SCRIPT, seam: 'the requests on the island for this band' },
+  { component: 'Logic/Island pins', script: ISLAND_PINS_SCRIPT, seam: 'the islanders on the sea as pins, each one open when she has a request left' },
+  { component: 'Logic/Island rows', script: ISLAND_ROWS_SCRIPT, seam: 'the requests on the island for this band, done or not by this kid' },
   { component: 'Logic/Update profile', script: UPDATE_PROFILE_SCRIPT, seam: 'the family with one field of one profile changed' },
   { component: 'Logic/Select profile', script: SELECT_PROFILE_SCRIPT, seam: 'the family with another profile active' },
   { component: 'Logic/Skill rows', script: SKILL_ROWS_SCRIPT, seam: 'the seven tricks as cards' },

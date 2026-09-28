@@ -154,3 +154,34 @@ Gate after: **45/45**; `npm run template:garden` ×2 → tree `68a665a7…` both
 
 Re-drive on the worktree (`drive-wt.sh`: assemble → primary's `nodegx-deploy.cjs` → drive): **121/121, exit 0, 0 console
 errors, 0 network errors.** Gate **47/47**; `template:garden` ×2 → `464d7895…` both, exit 0; engine pre-step 105/105.
+
+## 8. Session 3 — what was built (lane LOOK, worktree `cg-s3-look`, 2026-09-28)
+
+Rulings 6, 7 and 8 in the pages (the look's half is CG-007 §8, the save model's CG-002 §8). **Gate:
+`cd packages/noodl-mcp && npx jest tests/cg003Template.test.ts` → 69/69** (was 47; `npm run template:garden` exit 0,
+engine pre-step 115/115, 74 components through one plan, warnings `uncollapsible-multi-column` ×4 only). In the lane the
+generator ran with `NODEGX_KIT_EXTRACT=<primary>/packages/noodl-mcp/dist/kit-extract.cjs` and a `--require` resolving
+`@nodegx/export` to its source (the worktree has no `dist/`, as in s2); on the primary neither is needed. The generated
+`templates/bot-garden/` is left uncommitted for the orchestrator to regenerate on the merged tree.
+
+| AC / ruling | Status | Measured by | Numbers |
+|---|---|---|---|
+| ruling 8 — one island per kid (supersedes AC10's D2) | ✅ glue · 🟡 drive | glue row "A finishes the tulips — B's island still offers them": Read family's `done` is the ACTIVE kid's; Island rows and Island pins read it | A: done `['tulips-three']`, tulips card done, Mamie's pin opens `tulip-door`; B: done `[]`, tulips open, Mamie's pin open. Arms killed: Read family reads the first kid's island; the pins ignore what she did; a pin opens with nothing left |
+| — the migration's own save | ✅ graph | gate "every page writes an older family back": on all six pages `Read family.migrated` → a gate → the store's Write, with `Read family.model` set first | arm (manual): the write wire removed → red. `Read family` never saying due → in-spec arm |
+| ruling 6 — the Island page | ✅ graph · 🟡 drive | gate "ruling 6"; drive S3-R6 ×9 | `Pages/Island` = the bar, the head, `Island/Map` beside the requests list; 24 nodes (≤ 32). The kit's tile world left the page; `Logic/Island world` is replaced by `Logic/Island pins` |
+| — a pin opens its request | ✅ graph · 🟡 drive | `Island/Map.requestId/chosen` → the same `gardenRequestId` Set as a card; drive: Mamie's pin → `/workshop` titled with her first request Bo has not done | — |
+| ruling 7 — the name | ✅ | gate "ruling 7" (CG-007 §8) | — |
+| the rename (verify, not rebuild) | ✅ gate · 🟡 drive | glue row "the rename": Update profile `robotName` → Read family → the pin's robot name, the Workshop's line, a hint with `{b}`; 17 chars kept as 16; blank changes nothing. Graph row: My robot's box writes on blur/enter; the form's box feeds Add profile; both boxes cut at `ROBOT_NAME_MAX` = 16 (they cut at 14 before, the save at 16) | drive S3-RENAME: "Rosie" typed on My robot is the pin's name and in the tulips' line |
+| AC9 on the new strings | 🟡 drive | the s2 language clauses run over the new Island and Profiles unchanged (pins' names are names: excluded like before) | — |
+
+**Glue added/changed** (`cg003Scripts.ts`): `Logic/Island pins` (new), `Read family` (+`migrated`, `done` = hers, rows
+carry the robot's colour/eyes/hat), `Select profile` (the island on screen follows the chosen kid), `Request card`
+(`sub` = the request's own line), `Draw world` (`marks` rows replace the `🌷○○` text), `Update profile` (the name's
+length from the save). **Components added:** `Island/Pin`, `Island/Map`, `Workshop/Mark`; `Profiles/Card` redrawn
+(CG-007 §8). **Arms: 6 in-spec (glue) + 2 manual (graph: no write-back, rows reading the family) — 8/8 killed.**
+
+**Merge hazards:** `REQUEST_SUBS` names the ten requests of `cg002Content.ts`; a request lane CONTENT adds without a
+line makes the gate row "item 1" name it (a line owed in `cg003Content.ts`). An islander added to the requests without
+a pin makes the pins row name her (`ISLAND_PINS`, `PIN_PLACES`).
+
+**Residuals:** the drive (≈147 clauses) and its screenshots — the orchestrator, `$SCRATCH/look/EXPECTED-DRIVE.md`.
