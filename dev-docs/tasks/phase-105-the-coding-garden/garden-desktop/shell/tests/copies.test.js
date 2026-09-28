@@ -353,13 +353,15 @@ test('the one door lists the backups (read-only); the old copy/restore doors are
   }
 });
 
-test('the menu: one item that restores a backup; on a Mac beside Quit', () => {
+test('the menu: one item that restores a backup; on a Mac beside Quit, and the Edit menu (Cmd+C/V in a text box)', () => {
   let asked = 0;
   const mac = C.restoreMenu('darwin', config, () => asked++);
-  assert.equal(mac.length, 1);
+  assert.equal(mac.length, 2);
+  assert.deepEqual(mac[1], { role: 'editMenu' });
   assert.equal(mac[0].label, config.name);
   assert.deepEqual(mac[0].submenu.map((i) => i.label || i.role || i.type), [C.RESTORE_LABEL, 'separator', 'quit']);
   const win = C.restoreMenu('win32', config, () => asked++);
+  assert.equal(win.length, 1);
   assert.deepEqual(win[0].submenu.map((i) => i.label), [C.RESTORE_LABEL]);
   win[0].submenu[0].click();
   assert.equal(asked, 1);

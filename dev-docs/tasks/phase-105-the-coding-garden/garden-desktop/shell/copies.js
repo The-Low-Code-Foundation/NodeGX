@@ -415,10 +415,12 @@ const RESTORE_LABEL = 'Restore a backup… / Restaurer une sauvegarde…';
 /**
  * The shell's whole menu: one item that restores a backup. On a Mac it sits in the app's menu with Quit (Cmd+Q);
  * elsewhere it is the window's one menu, hidden until Alt (`autoHideMenuBar` in main.js).
+ * 🔴 On a Mac the Edit menu IS the clipboard: without its roles Cmd+C / Cmd+V do nothing in a text box (and Electron
+ * has no right-click menu), so a parent could not paste a save code into Grown-ups. Windows needs no menu for Ctrl+V.
  */
 function restoreMenu(platform, config, onRestore) {
   const item = { label: RESTORE_LABEL, click: () => onRestore() };
-  if (platform === 'darwin') return [{ label: config.name, submenu: [item, { type: 'separator' }, { role: 'quit' }] }];
+  if (platform === 'darwin') return [{ label: config.name, submenu: [item, { type: 'separator' }, { role: 'quit' }] }, { role: 'editMenu' }];
   return [{ label: config.name, submenu: [item] }];
 }
 
