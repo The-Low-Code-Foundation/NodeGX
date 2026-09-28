@@ -194,6 +194,30 @@
       "fromProperty": "words",
       "toId": "skOlive",
       "toProperty": "words"
+    },
+    {
+      "fromId": "skFam",
+      "fromProperty": "band",
+      "toId": "skRungs",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "skFam",
+      "fromProperty": "lang",
+      "toId": "skRungs",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "skFam",
+      "fromProperty": "botName",
+      "toId": "skRungs",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "skWords",
+      "fromProperty": "words",
+      "toId": "skRungs",
+      "toProperty": "words"
     }
   ]
 }

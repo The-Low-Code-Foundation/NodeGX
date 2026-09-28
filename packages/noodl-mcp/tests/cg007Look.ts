@@ -337,6 +337,9 @@ ${pinRules}
 .bg-tag-motion { background-color: var(--block-motion); }
 .bg-tag-control { background-color: var(--block-control); }
 .bg-tag-ask { background-color: var(--block-ask); }
+/* The mockup's .go: free play's green arrow on the card, no fill. */
+.bg-go { background-color: transparent !important; padding: 0 4px !important; }
+.bg-go * { color: var(--leaf) !important; font-size: 22px !important; }
 
 /* My robot (the mockup's .robo, .stage, .sw, .hats). */
 .bg-robo { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6f20affd-34ec-51f4-84f1-c01c9836139b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rungrowsIn",
+      "fromProperty": "band",
+      "toId": "rungrowsFn",
+      "toProperty": "in-band"
+    },
+    {
+      "fromId": "rungrowsIn",
+      "fromProperty": "botName",
+      "toId": "rungrowsFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "rungrowsIn",
+      "fromProperty": "exam",
+      "toId": "rungrowsFn",
+      "toProperty": "in-exam"
+    },
+    {
+      "fromId": "rungrowsIn",
+      "fromProperty": "lang",
+      "toId": "rungrowsFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "rungrowsIn",
+      "fromProperty": "words",
+      "toId": "rungrowsFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "rungrowsFn",
+      "fromProperty": "out-count",
+      "toId": "rungrowsOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "rungrowsFn",
+      "fromProperty": "out-rows",
+      "toId": "rungrowsOut",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "rungrowsFn",
+      "fromProperty": "out-show",
+      "toId": "rungrowsOut",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "rungrowsFn",
+      "fromProperty": "success",
+      "toId": "rungrowsOut",
+      "toProperty": "ran"
+    }
+  ]
+}

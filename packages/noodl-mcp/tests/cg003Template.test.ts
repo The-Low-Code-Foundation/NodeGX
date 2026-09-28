@@ -39,6 +39,7 @@ import {
   KIT_PALETTE_SCRIPT,
   OLIVE_HELD_SCRIPT,
   OLIVE_PLAYED_SCRIPT,
+  RUNG_ROWS_SCRIPT,
   OLIVE_STATUS_SCRIPT,
   READ_PROGRAM_SCRIPT,
   RECORD_STEP_SCRIPT,
@@ -1036,6 +1037,25 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     expect([has('plAskOlive', 'answer', 'plPlayed', 'answer'), has('plRunner', 'run', 'plPlayed', 'run'), has('plPlayed', 'oliveRung', 'plChoose', 'oliveRung'), has('plPlayed', 'oliveFallback', 'plChoose', 'oliveFallback')]).toEqual([true, true, true, true]);
   });
 
+  it('s4: Rung rows — Olive\u2019s eighteen lessons at band 10–12, marked, the withheld ones said; nothing at 7–9', () => {
+    const rows = (o: Record<string, unknown>) => run(RUNG_ROWS_SCRIPT, { band: 2, lang: 'en', words: WORD_ROWS, botName: 'Pip', exam: null, ...o });
+    const en = rows({});
+    expect([en.count, en.show]).toEqual([18, true]);
+    for (const r of en.rows) expect({ n: r.n, title: !!r.title, lesson: !!r.lesson, mark: !!r.markText }).toEqual({ n: r.n, title: true, lesson: true, mark: true });
+    const r4 = en.rows.find((r: { n: number }) => r.n === 4);
+    expect([r4.title, r4.lesson, r4.markText, r4.markClass, r4.isHeld]).toEqual([WORDS.or4Title.en, WORDS.or4Lesson.en, PAGE_WORDS.rungGrad.en, 'bg-tag bg-tag-control', false]);
+    const r1 = en.rows.find((r: { n: number }) => r.n === 1);
+    expect([r1.markText, r1.markClass]).toEqual([PAGE_WORDS.rungGreen.en, 'bg-tag bg-tag-ask']);
+    // The moments promoted to rungs 13–18 carry the moment's own title.
+    expect(en.rows.find((r: { n: number }) => r.n === 13).title).toBe(WORDS.mo3Title.en);
+    // A rung whose ANY table entry the exam failed says so (rung 8: maths-seeds or maths).
+    const held = rows({ lang: 'fr', exam: { rungs: { 'words-to-blocks': { pass: false }, maths: { pass: false }, poem: { pass: true } } } });
+    expect(held.rows.filter((r: { isHeld: boolean }) => r.isHeld).map((r: { n: number }) => r.n)).toEqual([3, 8]);
+    expect(held.rows.find((r: { n: number }) => r.n === 3).heldText).toBe(WORDS.oliveCant.fr);
+    expect(held.rows.find((r: { n: number }) => r.n === 12).heldText).toBe('');
+    expect(rows({ band: 1 })).toEqual({ rows: [], show: false, count: 0 });
+  });
+
   it('Olive: no shell is the written line and "not running"; an answer is her text', async () => {
     const down = async () => {
       throw new Error('no shell');
@@ -1082,6 +1102,10 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     it('Olive played counts an answer from another run → killed', () => {
       const m = mutate(OLIVE_PLAYED_SCRIPT, "runId !== '' && String(a.run) === runId && ", '');
       expect(run(m, { answer: { run: 'run-old', sent: true, rung: 'count-in-words', fallback: false }, run: { runId: 'run-a' } }).oliveRung).toBe(4); // the check above expects 0: killed
+    });
+    it('Rung rows shows the lessons at band 7–9 → killed', () => {
+      const m = mutate(RUNG_ROWS_SCRIPT, 'if (band === 2) for', 'if (true) for');
+      expect(run(m, { band: 1, lang: 'en', words: WORD_ROWS, exam: null }).count).toBe(18); // the check above expects 0: killed
     });
     it('Olive played counts a refused (unsent) ask as resting → killed', () => {
       const m = mutate(OLIVE_PLAYED_SCRIPT, 'a.sent === true && ', '');

@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 371,
+      "connectionCount": 375,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -379,6 +379,14 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
+    "Logic/Rung rows": {
+      "path": "Logic/Rung rows",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 9,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
     "Logic/Olive played": {
       "path": "Logic/Olive played",
       "type": "visual",
@@ -547,6 +555,22 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
+    "Skills/Rung card": {
+      "path": "Skills/Rung card",
+      "type": "visual",
+      "nodeCount": 8,
+      "connectionCount": 6,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Skills/Olive lessons": {
+      "path": "Skills/Olive lessons",
+      "type": "visual",
+      "nodeCount": 9,
+      "connectionCount": 12,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
     "Profiles/Card": {
       "path": "Profiles/Card",
       "type": "visual",
@@ -599,7 +623,7 @@
       "path": "Pages/Island",
       "type": "page",
       "nodeCount": 24,
-      "connectionCount": 53,
+      "connectionCount": 52,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -622,8 +646,8 @@
     "Pages/Skills": {
       "path": "Pages/Skills",
       "type": "page",
-      "nodeCount": 14,
-      "connectionCount": 32,
+      "nodeCount": 15,
+      "connectionCount": 36,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -637,8 +661,8 @@
     }
   },
   "stats": {
-    "totalComponents": 79,
-    "totalNodes": 648,
-    "totalConnections": 1809
+    "totalComponents": 82,
+    "totalNodes": 669,
+    "totalConnections": 1843
   }
 }

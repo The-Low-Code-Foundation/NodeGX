@@ -101,6 +101,8 @@ export const C = {
   options: '/Robot/Options',
   skill: '/Skills/Card',
   skOlive: '/Skills/Olive line',
+  rungCard: '/Skills/Rung card',
+  skRungs: '/Skills/Olive lessons',
   profile: '/Profiles/Card',
   form: '/Profiles/Form',
   guOlive: '/Grown/Olive panel',
@@ -1811,7 +1813,8 @@ const PAGE_ISLAND: CgComponent = (() => {
       group('isList', 'The open requests', 'isQuests', column({ rowGap: sp(10) }), ['isEach']),
       { ...logic('isEach', FOR_EACH_NODE, 'One card per request', { template: C.quest, templateType: 'explicit' }), parent: 'isList' },
       text('isFreeL', 'Free play', 'isQuests', '', { ...T_EYEBROW, marginTop: sp(8) }),
-      place('isFree', C.quest, 'Free play', 'isQuests', { id: 'free', faceClass: 'bg-face bg-sp-owl', tagClass: 'bg-tag bg-tag-motion', isDone: false, doneWord: '' }),
+      // The mockup's free play card ends in its green arrow (.go), not a trick tag.
+      place('isFree', C.quest, 'Free play', 'isQuests', { id: 'free', faceClass: 'bg-face bg-sp-owl', tagClass: 'bg-go', trick: '→', isDone: false, doneWord: '' }),
       logic('isRequests', C.requests, 'The requests'),
       logic('isRows', L('Island rows'), 'Who needs a hand'),
       logic('isPins', L('Island pins'), 'The islanders on the sea'),
@@ -1826,7 +1829,6 @@ const PAGE_ISLAND: CgComponent = (() => {
       wire('isT', 'isFree', 'isFreeL', 'text'),
       wire('isT', 'sandH', 'isFree', 'who'),
       wire('isT', 'sandP', 'isFree', 'title'),
-      wire('isT', 'isFree', 'isFree', 'trick'),
       // Her island: what SHE has done (Read family's done is the active kid's).
       ...(['rows', 'pins'] as const).flatMap((x) => {
         const id = x === 'rows' ? 'isRows' : 'isPins';
@@ -1924,6 +1926,61 @@ const PAGE_ROBOT: CgComponent = (() => {
  * What Olive cannot do on this computer (CG-005 AC5): the rungs its exam failed, in words — "Olive can't do this here
  * yet: words into blocks" — from the shell's status door. Band 10-12 only (the rungs are theirs); nothing to say, no line.
  */
+const RUNG_CARD: CgComponent = {
+  path: 'Skills/Rung card',
+  description: 'One of Olive\u2019s lessons: the rung\u2019s title, whether she does it or a program does it better (the tag), the lesson, and "Olive can\u2019t do this here yet" where this computer\u2019s exam withheld it. No progress, no score.',
+  nodes: [
+    inputs('rcIn', [['id', 'string'], ['title', 'string'], ['lesson', 'string'], ['markText', 'string'], ['markClass', 'string'], ['isHeld', 'boolean'], ['heldText', 'string']]),
+    group('rcCard', 'The card', undefined, { ...column({ rowGap: sp(8) }), backgroundColor: 'var(--card)', borderRadius: 'var(--radius-card)', ...pad(14), cssClassName: 'bg-notion bg-rung' }, ['rcMarkRow', 'rcTitle', 'rcLesson', 'rcHeld']),
+    group('rcMarkRow', 'Hers or a program\u2019s', 'rcCard', row(), ['rcMark']),
+    // The tag's fill is its class (bg-tag-ask: Olive's violet; bg-tag-control: a program's block colour).
+    group('rcMark', 'The tag', 'rcMarkRow', { sizeMode: 'contentSize', ...pad(4, 9), cssClassName: 'bg-tag bg-tag-ask' }, ['rcMarkText']),
+    text('rcMarkText', 'Hers or a program\u2019s', 'rcMark', '', { sizeMode: 'contentSize', fontSize: px(12), fontWeight: '800', color: 'var(--on-fill)' }),
+    text('rcTitle', 'The lesson\u2019s title', 'rcCard', '', T_H3),
+    text('rcLesson', 'The lesson', 'rcCard', '', T_SMALL),
+    text('rcHeld', 'Not on this computer', 'rcCard', '', { fontSize: px(14), fontWeight: '800', color: 'var(--violet-ink)', mounted: false })
+  ],
+  connections: [
+    wire('rcIn', 'markClass', 'rcMark', 'cssClassName'),
+    wire('rcIn', 'markText', 'rcMarkText', 'text'),
+    wire('rcIn', 'title', 'rcTitle', 'text'),
+    wire('rcIn', 'lesson', 'rcLesson', 'text'),
+    wire('rcIn', 'heldText', 'rcHeld', 'text'),
+    wire('rcIn', 'isHeld', 'rcHeld', 'mounted')
+  ]
+};
+
+const SKILL_RUNGS: CgComponent = {
+  path: 'Skills/Olive lessons',
+  description: 'Olive\u2019s eighteen lessons as cards, band 10\u201312 only (ruling 8); the ones this computer\u2019s exam withheld say so. Shows nothing at 7\u20139.',
+  repeats: { source: 'array', rowFields: ['id', 'n', 'title', 'lesson', 'markText', 'markClass', 'isHeld', 'heldText'] },
+  nodes: [
+    inputs('srIn', [['band', 'number'], ['lang', 'string'], ['words', 'array'], ['botName', 'string']]),
+    group('srBox', 'Olive\u2019s lessons', undefined, { ...column({ rowGap: sp(10) }), mounted: false }, ['srH', 'srSub', 'srGrid']),
+    text('srH', 'Olive\u2019s lessons', 'srBox', '', { ...T_H2, marginTop: sp(8) }),
+    text('srSub', 'What she does and what a program does', 'srBox', '', T_MUTED),
+    group('srGrid', 'The eighteen lessons', 'srBox', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-path' }, ['srEach']),
+    { ...logic('srEach', FOR_EACH_NODE, 'One card per lesson', { template: C.rungCard, templateType: 'explicit' }), parent: 'srGrid' },
+    logic('srT', L('Translate words'), 'In their language'),
+    logic('srStatus', L('Olive status'), 'Her exam on this computer', { nonce: 1 }),
+    logic('srRows', L('Rung rows'), 'The lessons, marked')
+  ],
+  connections: [
+    wire('srIn', 'words', 'srT', 'words'),
+    wire('srIn', 'lang', 'srT', 'lang'),
+    wire('srIn', 'botName', 'srT', 'botName'),
+    wire('srT', 'skRungsH', 'srH', 'text'),
+    wire('srT', 'skRungsSub', 'srSub', 'text'),
+    wire('srStatus', 'exam', 'srRows', 'exam'),
+    wire('srIn', 'band', 'srRows', 'band'),
+    wire('srIn', 'lang', 'srRows', 'lang'),
+    wire('srIn', 'words', 'srRows', 'words'),
+    wire('srIn', 'botName', 'srRows', 'botName'),
+    wire('srRows', 'rows', 'srEach', 'items'),
+    wire('srRows', 'show', 'srBox', 'mounted')
+  ]
+};
+
 const SKILL_OLIVE: CgComponent = {
   path: 'Skills/Olive line',
   description: 'The rungs this computer’s exam failed, said as Olive can’t do this here yet. Shows nothing when there is nothing to say (no exam, every rung passed, band 7–9).',
@@ -1946,7 +2003,7 @@ const SKILL_OLIVE: CgComponent = {
 };
 
 const PAGE_SKILLS: CgComponent = (() => {
-  const base = pageCommon('sk', 'Skills', 'skills', 'skills', ['skHead', 'skOlive', 'skPath']);
+  const base = pageCommon('sk', 'Skills', 'skills', 'skills', ['skHead', 'skOlive', 'skPath', 'skRungs']);
   return {
     path: 'Pages/Skills',
     description: 'Skills: the seven tricks, each a block, seed / sprouted / blooming, with where it sits in the programme. No score; nothing wilts.',
@@ -1957,7 +2014,8 @@ const PAGE_SKILLS: CgComponent = (() => {
       place('skOlive', C.skOlive, 'What Olive cannot do here', 'skWrap'),
       group('skPath', 'The seven tricks', 'skWrap', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-path' }, ['skEach']),
       { ...logic('skEach', FOR_EACH_NODE, 'One card per trick', { template: C.skill, templateType: 'explicit' }), parent: 'skPath' },
-      logic('skRows', L('Skill rows'), 'The tricks, grown or not')
+      logic('skRows', L('Skill rows'), 'The tricks, grown or not'),
+      place('skRungs', C.skRungs, 'Olive\u2019s lessons', 'skWrap')
     ],
     connections: [
       ...base.connections,
@@ -1970,7 +2028,9 @@ const PAGE_SKILLS: CgComponent = (() => {
       wire('skFam', 'band', 'skOlive', 'band'),
       wire('skFam', 'lang', 'skOlive', 'lang'),
       wire('skFam', 'botName', 'skOlive', 'botName'),
-      wire('skWords', 'words', 'skOlive', 'words')
+      wire('skWords', 'words', 'skOlive', 'words'),
+      ...(['band', 'lang', 'botName'] as const).map((f) => wire('skFam', f, 'skRungs', f)),
+      wire('skWords', 'words', 'skRungs', 'words')
     ]
   };
 })();
@@ -2025,6 +2085,8 @@ export const CG003_COMPONENTS: ReadonlyArray<CgComponent> = [
   OPTIONS,
   SKILL,
   SKILL_OLIVE,
+  RUNG_CARD,
+  SKILL_RUNGS,
   PROFILE,
   FORM,
   GU_OLIVE,

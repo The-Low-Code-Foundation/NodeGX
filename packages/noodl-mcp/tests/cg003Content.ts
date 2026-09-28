@@ -46,6 +46,11 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   guTryPrompt: s('A thank-you for Mamie Rose, from {b}', 'Un merci pour Mamie Rose, de la part de {b}'),
   guTryNote: s('A reply from the small offline model', 'Une réponse du petit modèle hors ligne'),
   guSaveLine: s('Copy this code to move every island to another computer.', 'Copie ce code pour déplacer toutes les îles vers un autre ordinateur.'),
+  // Olive's lessons on Skills (band 10–12): the section and the two marks.
+  skRungsH: s('Olive’s lessons', 'Les leçons d’Olive'),
+  skRungsSub: s('What a small model does well, and what a program does better.', 'Ce qu’un petit modèle fait bien, et ce qu’un programme fait mieux.'),
+  rungGreen: s('Olive does this', 'Olive sait faire'),
+  rungGrad: s('A program does it better', 'Un programme fait mieux'),
   // The paste box (the second restore path, beside the desktop's Restore menu): a code replaces this computer's islands.
   saveCodeUse: s('Replace the islands with this code', 'Remplacer les îles par ce code'),
   saveCodeDone: s('Done: the islands from the code are back.', 'C’est fait : les îles du code sont revenues.'),

@@ -1571,6 +1571,18 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-rungGrad",
+      "toId": "translatewordsOut",
+      "toProperty": "rungGrad"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-rungGreen",
+      "toId": "translatewordsOut",
+      "toProperty": "rungGreen"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-rungIsItA",
       "toId": "translatewordsOut",
       "toProperty": "rungIsItA"
@@ -1844,6 +1856,18 @@
       "fromProperty": "out-shYesNo",
       "toId": "translatewordsOut",
       "toProperty": "shYesNo"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-skRungsH",
+      "toId": "translatewordsOut",
+      "toProperty": "skRungsH"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-skRungsSub",
+      "toId": "translatewordsOut",
+      "toProperty": "skRungsSub"
     },
     {
       "fromId": "translatewordsFn",

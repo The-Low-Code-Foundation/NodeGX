@@ -1,0 +1,155 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f708ac25-e30a-5099-8f67-ac45233d4e22",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "srIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "srBox",
+      "type": "Group",
+      "label": "Olive’s lessons",
+      "children": [
+        "srH",
+        "srSub",
+        "srGrid"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2-5)",
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "srH",
+      "type": "Text",
+      "label": "Olive’s lessons",
+      "parent": "srBox",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h2",
+        "fontSize": {
+          "value": 22,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2,
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "srSub",
+      "type": "Text",
+      "label": "What she does and what a program does",
+      "parent": "srBox",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "srGrid",
+      "type": "Group",
+      "label": "The eighteen lessons",
+      "parent": "srBox",
+      "children": [
+        "srEach"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "bg-path"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "srEach",
+      "type": "For Each",
+      "label": "One card per lesson",
+      "parent": "srGrid",
+      "parameters": {
+        "template": "/Skills/Rung card",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "srT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "srStatus",
+      "type": "/Logic/Olive status",
+      "label": "Her exam on this computer",
+      "parameters": {
+        "nonce": 1
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "srRows",
+      "type": "/Logic/Rung rows",
+      "label": "The lessons, marked",
+      "x": 410,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "srBox"
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6f20affd-34ec-51f4-84f1-c01c9836139b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rungrowsIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "exam",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rungrowsFn",
+      "type": "JavaScriptFunction",
+      "label": "Rung rows",
+      "parameters": {
+        "functionScript": "\nfunction wordMap(rows, lang, name) {\n  var map = {};\n  var list = Array.isArray(rows) ? rows : [];\n  for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || '').split('{b}').join(name);\n  return map;\n}\nfunction fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\nfunction langOf(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction nameOf(v) { var n = String(v || '').trim(); return n || 'Pip'; }\n\nvar RUNGS = [{\"n\":1,\"mark\":\"green\",\"table\":[\"say-thanks\"],\"title\":\"or1Title\",\"lesson\":\"or1Lesson\"},{\"n\":2,\"mark\":\"green\",\"table\":[\"name-three\",\"name-one\"],\"title\":\"or2Title\",\"lesson\":\"or2Lesson\"},{\"n\":3,\"mark\":\"green\",\"table\":[\"words-to-blocks\"],\"title\":\"or3Title\",\"lesson\":\"or3Lesson\"},{\"n\":4,\"mark\":\"grad\",\"table\":[\"count-in-words\"],\"title\":\"or4Title\",\"lesson\":\"or4Lesson\"},{\"n\":5,\"mark\":\"green\",\"table\":[\"what-wants\"],\"title\":\"or5Title\",\"lesson\":\"or5Lesson\"},{\"n\":6,\"mark\":\"grad\",\"table\":[\"is-it-a\"],\"title\":\"or6Title\",\"lesson\":\"or6Lesson\"},{\"n\":7,\"mark\":\"grad\",\"table\":[\"count-tulips\"],\"title\":\"or7Title\",\"lesson\":\"or7Lesson\"},{\"n\":8,\"mark\":\"grad\",\"table\":[\"maths-seeds\",\"maths\"],\"title\":\"or8Title\",\"lesson\":\"or8Lesson\"},{\"n\":9,\"mark\":\"grad\",\"table\":[\"no-letter-e\"],\"title\":\"or9Title\",\"lesson\":\"or9Lesson\"},{\"n\":10,\"mark\":\"grad\",\"table\":[\"tall-tales\"],\"title\":\"or10Title\",\"lesson\":\"or10Lesson\"},{\"n\":11,\"mark\":\"green\",\"table\":[\"translate\"],\"title\":\"or11Title\",\"lesson\":\"or11Lesson\"},{\"n\":12,\"mark\":\"green\",\"table\":[\"poem\"],\"title\":\"or12Title\",\"lesson\":\"or12Lesson\"},{\"n\":13,\"mark\":\"green\",\"table\":[\"explain-program\"],\"title\":\"mo3Title\",\"lesson\":\"or13Lesson\"},{\"n\":14,\"mark\":\"green\",\"table\":[\"narrate-run\"],\"title\":\"mo4Title\",\"lesson\":\"or14Lesson\"},{\"n\":15,\"mark\":\"green\",\"table\":[\"name-trick\"],\"title\":\"mo5Title\",\"lesson\":\"or15Lesson\"},{\"n\":16,\"mark\":\"grad\",\"table\":[\"sort-words\"],\"title\":\"mo8Title\",\"lesson\":\"or16Lesson\"},{\"n\":17,\"mark\":\"grad\",\"table\":[\"define\"],\"title\":\"mo9Title\",\"lesson\":\"or17Lesson\"},{\"n\":18,\"mark\":\"green\",\"table\":[\"letter\"],\"title\":\"mo10Title\",\"lesson\":\"or18Lesson\"}];\nvar lang = langOf(Inputs.lang), band = Number(Inputs.band) === 1 ? 1 : 2;\nvar w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));\nvar exam = Inputs.exam && Inputs.exam.rungs && typeof Inputs.exam.rungs === 'object' ? Inputs.exam.rungs : {};\nvar rows = [];\nif (band === 2) for (var i = 0; i < RUNGS.length; i++) {\n  var r = RUNGS[i], held = false;\n  for (var t = 0; t < r.table.length; t++) if (exam[r.table[t]] && exam[r.table[t]].pass === false) held = true;\n  var green = r.mark === 'green';\n  rows.push({ id: 'rung' + r.n, n: r.n, title: w[r.title] || '', lesson: w[r.lesson] || '', markText: green ? w.rungGreen || '' : w.rungGrad || '', markClass: green ? 'bg-tag bg-tag-ask' : 'bg-tag bg-tag-control', isHeld: held, heldText: held ? w.oliveCant || '' : '' });\n}\nOutputs.rows = rows;\nOutputs.show = rows.length > 0;\nOutputs.count = rows.length;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-band",
+          "displayName": "band",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-exam",
+          "displayName": "exam",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-show",
+          "displayName": "show",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "rungrowsOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "rows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "show",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

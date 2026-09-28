@@ -559,6 +559,29 @@ Outputs.oliveRung = mine ? RUNG_OF[String(a.rung)] || 0 : 0;
 Outputs.oliveFallback = mine && a.fallback === true;
 `;
 
+/**
+ * Olive's eighteen lessons as Skills cards (CG-006 §4, CG-005 §8 residual): the rung's title and lesson, whether it is a
+ * thing she does (green) or a thing a program does better (🎓), and "Olive can't do this here yet" where this computer's
+ * exam failed any of its rung-table entries. Band 10–12 only (ruling 8): at 7–9 there are no rows and nothing shows.
+ * No progress is kept per rung: the cards say what the lesson is, never how far a child got.
+ */
+export const RUNG_ROWS_SCRIPT = `${WORD_HELPER}
+var RUNGS = ${JSON.stringify(OLIVE_RUNGS.map((r) => ({ n: r.n, mark: r.mark, table: r.table, title: r.copyKeys.title, lesson: r.copyKeys.lesson })))};
+var lang = langOf(Inputs.lang), band = Number(Inputs.band) === 1 ? 1 : 2;
+var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
+var exam = Inputs.exam && Inputs.exam.rungs && typeof Inputs.exam.rungs === 'object' ? Inputs.exam.rungs : {};
+var rows = [];
+if (band === 2) for (var i = 0; i < RUNGS.length; i++) {
+  var r = RUNGS[i], held = false;
+  for (var t = 0; t < r.table.length; t++) if (exam[r.table[t]] && exam[r.table[t]].pass === false) held = true;
+  var green = r.mark === 'green';
+  rows.push({ id: 'rung' + r.n, n: r.n, title: w[r.title] || '', lesson: w[r.lesson] || '', markText: green ? w.rungGreen || '' : w.rungGrad || '', markClass: green ? 'bg-tag bg-tag-ask' : 'bg-tag bg-tag-control', isHeld: held, heldText: held ? w.oliveCant || '' : '' });
+}
+Outputs.rows = rows;
+Outputs.show = rows.length > 0;
+Outputs.count = rows.length;
+`;
+
 /** The grown-ups' Try Olive: a thank-you rung, slots only, never a prompt; the written line when she does not answer. */
 export const TRY_OLIVE_SCRIPT = `
 var lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';
@@ -615,5 +638,6 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Olive status', script: OLIVE_STATUS_SCRIPT, seam: 'where Olive runs, from the shell’s status door' },
   { component: 'Logic/Try Olive', script: TRY_OLIVE_SCRIPT, seam: 'the grown-ups\u2019 Try Olive: one thank-you asked of her, the written line when she does not answer' },
   { component: 'Logic/Olive held', script: OLIVE_HELD_SCRIPT, seam: 'the rungs this computer\u2019s exam failed, in words, for Skills' },
+  { component: 'Logic/Rung rows', script: RUNG_ROWS_SCRIPT, seam: 'Olive\u2019s eighteen lessons as Skills cards, band 10\u201312, marked where this computer\u2019s exam withheld them' },
   { component: 'Logic/Olive played', script: OLIVE_PLAYED_SCRIPT, seam: 'the rung this run asked Olive, and whether she answered, for the after-run hint' }
 ];

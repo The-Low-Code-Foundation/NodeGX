@@ -229,7 +229,8 @@ async function pagesPart() {
       const enterFree = async (tag) => {
         await page.navigate('/island');
         await wait(1100);
-        await tap(byText('.bg-quest', 'Free play', 'Jeu libre'), `free play (${tag})`);
+        // The card's own line: its tag became the mockup's arrow in s4 ("Free play" is the heading above the card).
+        await tap(byText('.bg-quest', 'No request', 'Sans demande'), `free play (${tag})`);
         await until('location.pathname', (p) => p === '/workshop');
         return until(`!!document.querySelector('.gd-palette [data-pal="fwd"]')`, Boolean, 6000);
       };

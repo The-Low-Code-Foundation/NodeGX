@@ -1,0 +1,202 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3ccd7f74-54dd-5545-8ac9-d6c3e018ac25",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rcIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lesson",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "markText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "markClass",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "isHeld",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "heldText",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "rcCard",
+      "type": "Group",
+      "label": "The card",
+      "children": [
+        "rcMarkRow",
+        "rcTitle",
+        "rcLesson",
+        "rcHeld"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--card)",
+        "borderRadius": "var(--radius-card)",
+        "paddingTop": "var(--space-3-5)",
+        "paddingBottom": "var(--space-3-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "cssClassName": "bg-notion bg-rung"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rcMarkRow",
+      "type": "Group",
+      "label": "Hers or a program’s",
+      "parent": "rcCard",
+      "children": [
+        "rcMark"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "rcMark",
+      "type": "Group",
+      "label": "The tag",
+      "parent": "rcMarkRow",
+      "children": [
+        "rcMarkText"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "paddingLeft": {
+          "value": 9,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 9,
+          "unit": "px"
+        },
+        "cssClassName": "bg-tag bg-tag-ask"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "rcMarkText",
+      "type": "Text",
+      "label": "Hers or a program’s",
+      "parent": "rcMark",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--on-fill)"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "rcTitle",
+      "type": "Text",
+      "label": "The lesson’s title",
+      "parent": "rcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "rcLesson",
+      "type": "Text",
+      "label": "The lesson",
+      "parent": "rcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "rcHeld",
+      "type": "Text",
+      "label": "Not on this computer",
+      "parent": "rcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--violet-ink)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "rcCard"
+  ]
+}

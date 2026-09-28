@@ -246,7 +246,8 @@
       "parameters": {
         "id": "free",
         "faceClass": "bg-face bg-sp-owl",
-        "tagClass": "bg-tag bg-tag-motion",
+        "tagClass": "bg-go",
+        "trick": "→",
         "isDone": false,
         "doneWord": ""
       },

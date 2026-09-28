@@ -26,7 +26,8 @@
         "skBar",
         "skHead",
         "skOlive",
-        "skPath"
+        "skPath",
+        "skRungs"
       ],
       "parameters": {
         "width": {
@@ -162,6 +163,14 @@
       "label": "The tricks, grown or not",
       "x": 470,
       "y": 760
+    },
+    {
+      "id": "skRungs",
+      "type": "/Skills/Olive lessons",
+      "label": "Olive’s lessons",
+      "parent": "skWrap",
+      "x": 160,
+      "y": 880
     }
   ],
   "visualRoots": [

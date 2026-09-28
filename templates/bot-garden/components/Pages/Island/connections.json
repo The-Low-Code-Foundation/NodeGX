@@ -166,12 +166,6 @@
       "toProperty": "title"
     },
     {
-      "fromId": "isT",
-      "fromProperty": "isFree",
-      "toId": "isFree",
-      "toProperty": "trick"
-    },
-    {
       "fromId": "isRequests",
       "fromProperty": "requests",
       "toId": "isRows",

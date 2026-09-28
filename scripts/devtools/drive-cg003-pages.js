@@ -422,6 +422,9 @@ withDeployedSite({ dir: DIR }, async (page) => {
       await wait(700);
       const bloom = await evaluate(`(() => { const c = [...document.querySelectorAll('.bg-notion')].find((e) => e.innerText.includes(${JSON.stringify(w(lang, 'n2p'))})); return c ? c.className : null; })()`);
       check(`AC3 ${tag}: Skills shows Repeat blooming`, !!bloom && bloom.includes('bg-notion-bloom'), bloom);
+      // S4: Olive's eighteen lessons as cards (band 10–12), each with its tag and its lesson.
+      const rungCards = await evaluate(`[...document.querySelectorAll('.bg-rung')].filter((e) => e.offsetParent !== null).map((e) => e.innerText.trim().split('\\n').length)`);
+      check(`S4 ${tag}: Skills shows Olive’s 18 lessons, each with a tag, a title and a lesson`, rungCards.length === 18 && rungCards.every((n) => n >= 3), rungCards);
       await shot(`ac3-${tag}-08-skills`);
       check(`AC3 ${tag}: 0 console errors so far`, page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));
       check(`AC3 ${tag}: 0 network errors so far`, page.networkErrors.length === 0, page.networkErrors.slice(0, 5));
@@ -660,7 +663,18 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await page.navigate(p);
     await wait(1100);
     await shot(`cg007-ac1-${name}`);
-    if (name === 'skills') await contrastClause('Skills');
+    if (name === 'skills') {
+      await contrastClause('Skills');
+      // S4: the lessons are band 10–12's (ruling 8): at 7–9 the section is gone, and back at 10–12 it returns.
+      const visibleRungs = () => evaluate(`[...document.querySelectorAll('.bg-rung')].filter((e) => e.offsetParent !== null).length`);
+      const older = await visibleRungs();
+      await seg('7–9');
+      await wait(700);
+      const younger = await visibleRungs();
+      await seg('10–12');
+      await wait(700);
+      check('S4: Olive’s lessons show at 10–12 (18), not at 7–9 (0), and come back', older === 18 && younger === 0 && (await visibleRungs()) === 18, { older, younger });
+    }
   }
   // S3-LOOK: the island and Profiles at a phone's width, for the side-by-side.
   await page.setViewport(VIEWPORTS[1]);
