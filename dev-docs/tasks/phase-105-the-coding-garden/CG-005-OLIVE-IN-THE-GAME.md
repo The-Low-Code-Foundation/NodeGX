@@ -218,3 +218,40 @@ regenerated in the lane and left uncommitted.
   after an ask): the tags carry "resting" now; the after-run lesson line is not on the page. Owner: CG-003 / CG-006.
 - The Skills page shows only what the exam withheld; the eighteen rungs as Skills cards (CG-006 §8 residual) are not built. Owner: CG-003.
 - Which request carries which rung is a content choice made here; Richard or CG-006 may move any (one array each). Owner: CG-006.
+
+### 8.1 The page drive, run: 14/17 on the primary, three reds, and 16/16 after (lane HOOKS, 2026-09-28)
+
+The orchestrator's first run of `drive-olive.sh pages` (primary, `e0939f9cd`) read 14 PASS, 3 FAIL, and the wrapper exited 0
+over a `pages.exit` of 1. Each red, from its evidence:
+
+1. **P-AC2 "parked" (`stillParked: false`) and 2. P-AC2 "resting" absent (the owl said "Pip did 0 of 3") — 🔴 PRODUCT,
+   one defect.** The screenshot showed the count-tulips block holding "tulip, tulip, rose, tulip, daisy, tulip," and the
+   slot line "Pick a word from the list.": the KIT cut every slot value to 40 characters, picked options included
+   (`setSlot`). The flower list is 45 characters, so the cut value was no longer on its list, the ask was refused before
+   sending (`not-in-list`), nothing parked, and — rightly — no "resting" (a refused slot is not Olive resting). The
+   "thinking" the clause saw was the hint's voicing. Reach: **15 options of five rungs** were unsendable from the picker
+   (every `what-wants` line, both `flowerlists`, three `routes`, both `traces`, both `trick_bodies`). **Fix
+   (`library/modules/garden-kit/src/kit.js`, rebuilt):** typed text is cut to the field's limit (≤ 40); a value picked from
+   the options is kept whole. Gates: `cg001GardenKit` 20/20 (its setSlot row now pins both); new `cg005Olive` row "every
+   word the picker offers survives the kit and can be sent" — every option of every rung, EN and FR, picked through the
+   BUILT kit, still on its list and passing the page's check. Arm: the old cut restored → both specs red, listing the
+   15 cut options (killed; restored and `cmp`-checked). The drive's parked clause now also requires the ask block to be
+   the one running (`data-run="true"`), so a voicing's tag can no longer pass for a park.
+3. **`tap palette ask:poem` not hit at (1131, 456) — INSTRUMENT.** Control run with the old timing: `elementFromPoint` →
+   `DIV.gd-blocks gd-band2 gd-locked`, `locked: true`. The drive tapped the palette while the words-to-blocks run was
+   still playing; the kit locks the palette during a run (`.gd-locked … pointer-events: none`), by design. Nothing
+   covers the block. Fix in the drive: wait for the run to end before editing (`runOver`). The tap now reports what it
+   hit and whether the list was locked.
+4. **The wrapper's exit** is now the step's (`drive-olive.sh`: `exit $(cat $OUT/<step>.exit)`; gates: both specs), and
+   `REPO` may be set, so it drives a worktree. `contract` now writes `contract.log`/`contract.exit`.
+
+**Re-driven in the lane** (worktree rebased onto `e0939f9cd`, template regenerated — only the kit's copy changed; assembled,
+deployed with the primary's `nodegx-deploy.cjs`, `p105-s3-scratch/hooks/drive-wt.sh`): **main page drive 148/148, exit 0;
+Olive page drive `{"pass":16,"fail":0,"skip":0}`, wrapper exit 0** (the 17th line of the first run was the failed tap,
+not a clause). P-AC2 now reads parked with the whole list in the block, x 0 → 1, 36 frames in 600 ms, the dots moving,
+then "Olive is resting"; the hooks' contrast 4.61–13.86. Gates: `cg005Olive` 34/34, `cg001GardenKit` 20/20, `cg002Engine`
+115/115, `cg006Requests` 84/84, `cg003Template` 79/79. Arms 17/17.
+
+**Merge hazard:** the kit (`src/kit.js` and its built `index.js`) is lane LOOK's file, changed here on the orchestrator's
+word (a product defect the drive found): `setSlot(list, id, key, value, max?)` — the fifth argument is new and optional.
+`templates/bot-garden/noodl_modules/garden-kit/index.js` must be regenerated on the merged tree (left uncommitted).
