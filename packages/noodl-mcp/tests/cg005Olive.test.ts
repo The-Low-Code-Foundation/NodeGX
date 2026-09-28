@@ -268,6 +268,8 @@ describe('CG-005 — Olive in the game', () => {
     it('the owl row builds the voice request for a key Olive may voice, and none for one she may not', () => {
       expect(runScript(OWL_ROW_SCRIPT, { hintKey: 'hintPattern', vars: { n: 3 }, lang: 'en', botName: 'Pip' }).voiceRequest).toEqual({ rung: 'voice-hint', slots: { key: 'hintPattern', b: 'Pip', n: '3' }, lang: 'en' });
       expect(runScript(OWL_ROW_SCRIPT, { hintKey: 'oliveResting', lang: 'en' }).voiceRequest).toBe(null);
+      // hintMissed counts {w} of {t}: both ride along, so the voiced line says the same numbers as the written one (CG-006 s3).
+      expect(runScript(OWL_ROW_SCRIPT, { hintKey: 'hintMissed', vars: { w: 2, t: 4 }, lang: 'fr', botName: 'Bo' }).voiceRequest).toEqual({ rung: 'voice-hint', slots: { key: 'hintMissed', b: 'Bo', w: '2', t: '4' }, lang: 'fr' });
     });
 
     it('a clean voiced line for the SAME key replaces the written one', async () => {
@@ -318,7 +320,7 @@ describe('CG-005 — Olive in the game', () => {
         expect({ id: p.id, rung: p.rung, met: meetsOne(p.expect, { ok: true, ...w }) }).toEqual({ id: p.id, rung: p.rung, met: p.mode === 'pass' });
         graded++;
       }
-      expect(graded).toBe(18);
+      expect(graded).toBe(29); // 18 until CG-006 s3; + rung 9's two and the promoted moments' nine asserted probes
     });
 
     it('through the route with NO model: every palette rung, in both languages, answers at once with its written answer, and the programs still run', async () => {
@@ -339,7 +341,7 @@ describe('CG-005 — Olive in the game', () => {
             n++;
           }
         }
-        expect(n).toBe(28);
+        expect(n).toBe(40); // 20 palette rungs × 2 languages (14 until CG-006 s3)
         expect(none.engine.calls).toHaveLength(0);
         // 🎓 the lessons survive: one avancer for "three squares", 6 for 4 tulips, 14 for 14 + 9.
         const counted = await play(none, [{ id: 1, t: 'ask:count-in-words', slots: { route: 'Avance de trois cases.' } }]);
@@ -365,28 +367,28 @@ describe('CG-005 — Olive in the game', () => {
         const exam = (await fetch(`${sh.url}/exam`, { method: 'POST', headers: { [gardenConfig.header]: '1' } })).status;
         expect(exam).toBe(200);
         const pal1 = runScript(PALETTE_SCRIPT, { band: 2, lang: 'en', words: WORD_ROWS, rungs: 'all', exam: await status() });
-        expect(pal1.withheld).toEqual(['under-five-words', 'words-to-blocks']);
+        // Since CG-006 s3 the readout agrees with the ladder on every rung (rung 9 = "no letter e"): only the switch withholds.
+        expect(pal1.withheld).toEqual(['words-to-blocks']);
         expect(pal1.offered).not.toContain('words-to-blocks');
         expect(pal1.palette.map((p: any) => p.id)).not.toContain('ask:words-to-blocks');
-        expect(pal1.offered).toHaveLength(12);
+        expect(pal1.offered).toHaveLength(19);
         sh.engine.set({ exam: { 'words-to-blocks': 'pass' } });
         await fetch(`${sh.url}/exam`, { method: 'POST', headers: { [gardenConfig.header]: '1' } });
         const pal2 = runScript(PALETTE_SCRIPT, { band: 2, lang: 'en', words: WORD_ROWS, rungs: 'all', exam: await status() });
-        expect(pal2.withheld).toEqual(['under-five-words']);
+        expect(pal2.withheld).toEqual([]);
         expect(pal2.palette.find((p: any) => p.id === 'ask:words-to-blocks')).toMatchObject({ kind: 'ask', rung: 'words-to-blocks', label: 'words into blocks', shape: 'blocks', shapeLabel: 'blocks' });
       } finally {
         await sh.close();
       }
     });
 
-    it('no exam yet (first launch, or no model) withholds nothing; band 7–9 never sees the band 10–12 rungs; a request names its rungs', () => {
+    it('no exam yet (first launch, or no model) withholds nothing; band 7–9 is offered NO rung (Richard’s ruling 4); a request names its rungs', () => {
       const all2 = runScript(PALETTE_SCRIPT, { band: 2, lang: 'fr', words: WORD_ROWS, rungs: 'all', exam: null });
       expect(all2.offered).toEqual(PALETTE_RUNG_IDS);
-      expect(all2.offered).toHaveLength(14);
+      expect(all2.offered).toHaveLength(20);
       expect(all2.palette.filter((p: any) => p.id === 'ask')).toHaveLength(0);
       const all1 = runScript(PALETTE_SCRIPT, { band: 1, lang: 'fr', words: WORD_ROWS, rungs: 'all' });
-      expect(all1.offered).toHaveLength(11);
-      for (const r of ['maths-seeds', 'maths', 'tall-tales']) expect(all1.offered).not.toContain(r);
+      expect([all1.offered, all1.olive]).toEqual([[], []]);
       const one = runScript(PALETTE_SCRIPT, { band: 2, lang: 'fr', words: WORD_ROWS, allowed: ['fwd', 'repeat'], rungs: ['count-tulips'] });
       expect(one.palette.map((p: any) => p.id)).toEqual(['fwd', 'repeat', 'ask:count-tulips']);
       expect(one.palette[2]).toMatchObject({ label: 'combien de tulipes ?', shapeLabel: 'un nombre', ladder: 'fail' });
@@ -400,21 +402,22 @@ describe('CG-005 — Olive in the game', () => {
   describe('AC6 — the slots are validated before anything is sent', () => {
     const slotsOf = (inputs: Record<string, unknown>) => runScript(OLIVE_SLOTS_SCRIPT, { words: WORD_ROWS, ...inputs });
 
-    it('band 7–9: the picker offers only the request’s words, never a keyboard; a text slot becomes its suggested names', () => {
+    it('band 7–9 (ruling 4): every rung refuses as not-in-band, before any other rule — a suggested name, a narrowed word, a valid list word alike', () => {
+      for (const rung of PALETTE_RUNG_IDS) expect({ rung, reason: slotsOf({ rung, band: 1, lang: 'fr' }).reason }).toEqual({ rung, reason: 'not-in-band' });
+      expect(slotsOf({ rung: 'poem', band: 1, lang: 'en', slots: { flower: 'Sunny' } })).toMatchObject({ ok: false, reason: 'not-in-band', message: 'Pick a word from the list.' });
+      expect(slotsOf({ rung: 'is-it-a', band: 1, lang: 'fr', slots: { thing: 'une rose', kind: 'une fleur' } }).reason).toBe('not-in-band');
+    });
+
+    it('band 10–12: the picker offers only the request’s words when it narrows them; a list slot never gets a keyboard', () => {
       const narrow = { 'is-it-a': { thing: ['une rose', 'un rocher'] } };
-      const p = slotsOf({ rung: 'is-it-a', band: 1, lang: 'fr', narrow, slots: { thing: 'une rose', kind: 'une fleur' } });
+      const p = slotsOf({ rung: 'is-it-a', band: 2, lang: 'fr', narrow, slots: { thing: 'une rose', kind: 'une fleur' } });
       expect(p.slots).toEqual([
         { key: 'thing', label: 'quoi', options: [{ value: 'une rose', label: 'une rose' }, { value: 'un rocher', label: 'un rocher' }] },
         { key: 'kind', label: 'est-ce', options: T.lists.kinds.fr.map((v: string) => ({ value: v, label: v })) }
       ]);
       expect(p.ok).toBe(true);
-      expect(slotsOf({ rung: 'is-it-a', band: 1, lang: 'fr', narrow, slots: { thing: 'un chat', kind: 'une fleur' } })).toMatchObject({ ok: false, reason: 'not-offered', slot: 'thing', message: 'Choisis un mot dans la liste.' });
-      const poem = slotsOf({ rung: 'ask:poem', band: 1, lang: 'en', slots: { flower: 'Bob' } });
-      expect(poem.slots).toEqual([{ key: 'flower', label: 'the tulip’s name', options: T.lists.flower_names.en.map((v: string) => ({ value: v, label: v })) }]);
-      expect(poem).toMatchObject({ ok: false, reason: 'no-typing', slot: 'flower' });
-      expect(slotsOf({ rung: 'poem', band: 1, lang: 'en', slots: { flower: 'Sunny' } }).ok).toBe(true);
-      for (const rung of PALETTE_RUNG_IDS) for (const e of slotsOf({ rung, band: 1, lang: 'fr' }).slots) expect({ rung, key: e.key, text: e.text }).toEqual({ rung, key: e.key, text: undefined });
-      expect(slotsOf({ rung: 'maths', band: 1, lang: 'fr', slots: { a: '1', b: '2' } }).reason).toBe('not-in-band');
+      expect(slotsOf({ rung: 'is-it-a', band: 2, lang: 'fr', narrow, slots: { thing: 'un chat', kind: 'une fleur' } })).toMatchObject({ ok: false, reason: 'not-offered', slot: 'thing', message: 'Choisis un mot dans la liste.' });
+      for (const rung of PALETTE_RUNG_IDS) for (const e of slotsOf({ rung, band: 2, lang: 'fr' }).slots) if (T.rungs[rung].slots[e.key].list) expect({ rung, key: e.key, text: e.text }).toEqual({ rung, key: e.key, text: undefined });
     });
 
     it('band 10–12: the text slot takes 40 characters, refuses the 41st and a listed word, inline', () => {
@@ -434,8 +437,8 @@ describe('CG-005 — Olive in the game', () => {
       const asks = [
         { req: { seq: 1, rung: 'poem', slots: { flower: 'T'.repeat(41) }, lang: 'fr' }, band: 2, reason: 'too-long' },
         { req: { seq: 1, rung: 'poem', slots: { flower: 'Merde' }, lang: 'fr' }, band: 2, reason: 'blocklist' },
-        { req: { seq: 1, rung: 'poem', slots: { flower: 'Bob' }, lang: 'en' }, band: 1, reason: 'no-typing' },
-        { req: { seq: 1, rung: 'is-it-a', slots: { thing: 'un chat', kind: 'une fleur' }, lang: 'fr' }, band: 1, reason: 'not-offered', narrow: { 'is-it-a': { thing: ['une rose'] } } }
+        { req: { seq: 1, rung: 'poem', slots: { flower: 'Sunny' }, lang: 'en' }, band: 1, reason: 'not-in-band' },
+        { req: { seq: 1, rung: 'is-it-a', slots: { thing: 'un chat', kind: 'une fleur' }, lang: 'fr' }, band: 2, reason: 'not-offered', narrow: { 'is-it-a': { thing: ['une rose'] } } }
       ];
       for (const a of asks) {
         const out = await runOliveScript(ASK_OLIVE_SCRIPT, { request: a.req, band: a.band, narrow: a.narrow, url: shell.url }, { fetch: c.fetch });

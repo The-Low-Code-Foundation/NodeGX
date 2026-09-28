@@ -158,10 +158,17 @@ export const OLIVE_WORDS: Readonly<Record<string, Bi>> = {
   rungCountTulips: s('how many tulips?', 'combien de tulipes ?'),
   rungMathsSeeds: s('add the seeds', 'compter les graines'),
   rungMaths: s('a sum', 'une addition'),
-  rungUnderFiveWords: s('in under 5 words', 'en moins de 5 mots'),
+  rungNoLetterE: s('without the letter e', 'sans la lettre e'),
   rungTallTales: s('ask a question', 'poser une question'),
   rungTranslate: s('translate', 'traduire'),
   rungPoem: s('a poem', 'un poème'),
+  // Rungs 13–18, CG-006 §4's moments promoted on the real-model readings (CG-006 §7.1).
+  rungExplainProgram: s('explain my program', 'explique mon programme'),
+  rungNarrateRun: s('tell the run', 'raconte le trajet'),
+  rungNameTrick: s('name my trick', 'nomme mon astuce'),
+  rungSortWords: s('sort the words', 'range les mots'),
+  rungDefine: s('what is it?', 'c’est quoi ?'),
+  rungLetter: s('write a request', 'écris une demande'),
   // The slots, as the picker names them.
   slotTo: s('to whom', 'à qui'),
   slotDeed: s('what Pip did', 'ce que Pip a fait'),
@@ -174,7 +181,14 @@ export const OLIVE_WORDS: Readonly<Record<string, Bi>> = {
   slotB: s('second number', 'deuxième nombre'),
   slotQuestion: s('the question', 'la question'),
   slotNote: s('the note', 'le mot'),
-  slotFlower: s('the tulip’s name', 'le nom de la tulipe')
+  slotFlower: s('the tulip’s name', 'le nom de la tulipe'),
+  slotProgram: s('the blocks', 'les blocs'),
+  slotTrace: s('the run', 'le trajet'),
+  slotBody: s('the trick', 'l’astuce'),
+  slotWords: s('the words', 'les mots'),
+  slotWord: s('the word', 'le mot à expliquer'),
+  slotWho: s('who asks', 'qui demande'),
+  slotObject: s('what they want', 'ce qu’on veut')
 };
 
 export const OLIVE_WORD_KEYS: ReadonlyArray<string> = Object.keys(OLIVE_WORDS);
@@ -390,6 +404,7 @@ var vars = Inputs.vars && typeof Inputs.vars === 'object' ? Inputs.vars : {};
 var voiceSlots = { key: key, b: String(Inputs.botName || 'Pip') };
 if (vars.n !== undefined && vars.n !== null && vars.n !== '') voiceSlots.n = String(vars.n);
 if (vars.w !== undefined && vars.w !== null && vars.w !== '') voiceSlots.w = String(vars.w);
+if (vars.t !== undefined && vars.t !== null && vars.t !== '') voiceSlots.t = String(vars.t);
 Outputs.text = useVoiced ? vText : written;
 Outputs.voiced = useVoiced;
 Outputs.thinking = waiting;

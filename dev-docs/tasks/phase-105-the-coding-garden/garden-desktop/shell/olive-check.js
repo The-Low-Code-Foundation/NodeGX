@@ -108,7 +108,8 @@ function compose(templates, rungId, values, { lang, shape, temperature, options 
   const vars = { ...values };
   if (rungId === 'voice-hint') {
     const line = (templates.hints[values.key] || {})[L] || '';
-    vars.hint = fill(line, { b: values.b || 'Pip', n: values.n || '3', w: values.w || '0' });
+    // The line is the page's own (cg002Content.ts HINTS reads it from the table): {t} is the total a hintMissed counts.
+    vars.hint = fill(line, { b: values.b || 'Pip', n: values.n || '3', w: values.w || '0', t: values.t || '3' });
   }
   const sys = typeof rung.system === 'string' ? templates.systems[rung.system][L] : rung.system[L];
   let enumValues = null;

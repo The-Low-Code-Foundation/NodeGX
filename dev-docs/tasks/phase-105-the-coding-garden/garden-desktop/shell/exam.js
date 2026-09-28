@@ -10,6 +10,10 @@
  *
  * `runExam({ask, ...})` takes the route's own ask function, so the exam goes through every check the game's asks go
  * through. Plain Node.
+ *
+ * `from`: an ASSERTED probe is one somebody measured on the real model — a battery probe id (A1–H9, the 2026-09-27
+ * readout) or `CG-006 §7.1` (the moment and rung-9 probes run on CPU and Metal, 2026-09-28). A probe nobody measured is
+ * `record`.
  */
 'use strict';
 
@@ -39,10 +43,11 @@ const PROBES = [
   { id: 'P14', from: 'E2', rung: 'count-tulips', lang: 'fr', slots: { list: 'tulipe, tulipe, rose, tulipe, marguerite, tulipe, rose' }, mode: 'fail', expect: { kind: 'equals', value: 4 } },
   { id: 'P15', from: 'E3', rung: 'maths-seeds', lang: 'fr', slots: { a: '2', b: '3' }, mode: 'pass', expect: { kind: 'equals', value: 5 } },
   { id: 'P16', from: 'E5', rung: 'maths', lang: 'fr', slots: { a: '14', b: '9' }, mode: 'fail', expect: { kind: 'equals', value: 23 } },
-  // B5 does NOT reproduce: the battery saw 7 words 3/3 (2026-09-27 readout); the contract test saw "Merci à Pip !" and
-  // "Merci, Pip." ×3 the same day — 4/4 obeyed. Recorded, not asserted: the exam's rung verdict still decides whether
-  // rung 9 is offered on a machine (CG-005's gate), and CG-006 owns the redesign of the rung.
-  { id: 'P17', from: 'B5', rung: 'under-five-words', lang: 'fr', slots: { to: 'Pip' }, times: 3, mode: 'record', expect: { kind: 'wordsAtMost', n: 4 } },
+  // Rung 9 is G1 "no letter e" (Richard's ruling 2, 2026-09-28): she broke it 3/3 FR and 3/3 EN on CPU and Metal
+  // (CG-006 §7.1). "Under 5 words" (P17/P32 until s3) was obeyed 6/6 and is retired; G2 "never mention water" was kept
+  // 3/3 and is dropped. 🎓: the rung passes when she BREAKS the rule (a reply with an e).
+  { id: 'R9-G1-fr', from: 'G1', rung: 'no-letter-e', lang: 'fr', slots: {}, times: 3, mode: 'fail', expect: { kind: 'lacks', letters: ['e'] } },
+  { id: 'R9-G1-en', from: 'CG-006 §7.1', rung: 'no-letter-e', lang: 'en', slots: {}, times: 3, mode: 'fail', expect: { kind: 'lacks', letters: ['e'] } },
   { id: 'P18', from: 'H1', rung: 'tall-tales', lang: 'fr', slots: { question: "Quelle est la capitale de l'Australie ?" }, times: 3, mode: 'fail', expect: { kind: 'contains', any: ['connais que le jardin', 'ne connais que', "n'en connais que", 'only know the garden'] } },
   { id: 'P19', from: 'A7', rung: 'translate', lang: 'fr', slots: { note: 'Les tulipes ont soif.' }, mode: 'pass', expect: { kind: 'contains', any: ['thirsty'] } },
   { id: 'P20', from: 'A8', rung: 'translate', lang: 'en', slots: { note: 'Biscuit the cat is hungry.' }, mode: 'fail', expect: { kind: 'contains', any: ['faim'] } },
@@ -60,10 +65,37 @@ const PROBES = [
   { id: 'P29', from: '—', rung: 'count-tulips', lang: 'en', slots: { list: 'tulip, tulip, rose, tulip, daisy, tulip, rose' }, times: 1, mode: 'record', expect: { kind: 'equals', value: 4 } },
   { id: 'P30', from: '—', rung: 'maths-seeds', lang: 'en', slots: { a: '2', b: '3' }, times: 1, mode: 'record', expect: { kind: 'equals', value: 5 } },
   { id: 'P31', from: '—', rung: 'maths', lang: 'en', slots: { a: '14', b: '9' }, times: 1, mode: 'record', expect: { kind: 'equals', value: 23 } },
-  { id: 'P32', from: '—', rung: 'under-five-words', lang: 'en', slots: { to: 'Pip' }, times: 1, mode: 'record', expect: { kind: 'wordsAtMost', n: 4 } },
   { id: 'P33', from: '—', rung: 'tall-tales', lang: 'en', slots: { question: 'What is the capital of Australia?' }, times: 1, mode: 'record', expect: { kind: 'contains', any: ['only know the garden', 'only know about the garden'] } },
   { id: 'P34', from: '—', rung: 'poem', lang: 'en', slots: { flower: 'Tulla' }, times: 1, mode: 'record', expect: { kind: 'lines', n: 2 } },
-  { id: 'P35', from: '—', rung: 'voice-hint', lang: 'en', slots: { key: 'hintWet', b: 'Pip' }, times: 1, mode: 'record', expect: { kind: 'contains', any: ['puddle', 'tulip', 'water'] } }
+  { id: 'P35', from: '—', rung: 'voice-hint', lang: 'en', slots: { key: 'hintWet', b: 'Pip' }, times: 1, mode: 'record', expect: { kind: 'contains', any: ['puddle', 'tulip', 'water'] } },
+  // CG-006 §4's moments promoted to rungs 13–18 (s3), each probe as measured in CG-006 §7.1 (CPU and Metal agreed on
+  // every decision). The EN twins nobody measured (E5-en, E9-en) are recorded, one sample.
+  // 13 — E3 explain my program (✅).
+  { id: 'E3-fr', from: 'CG-006 §7.1', rung: 'explain-program', lang: 'fr', slots: { program: 'avancer, avancer, gauche, arroser' }, mode: 'pass', expect: { kind: 'containsAll', all: ['avance', 'gauche', 'arros'] } },
+  { id: 'E3-en', from: 'CG-006 §7.1', rung: 'explain-program', lang: 'en', slots: { program: 'forward, forward, turn left, water' }, mode: 'pass', expect: { kind: 'containsAll', all: ['forward', 'left', 'water'] } },
+  // The round trip is lossy: does "avancer, avancer" come back as "deux fois"? Recorded: the lesson either way.
+  { id: 'E3-count', from: '—', rung: 'explain-program', lang: 'fr', slots: { program: 'avancer, avancer, gauche, arroser' }, times: 1, mode: 'record', expect: { kind: 'contains', any: ['deux'] } },
+  // 14 — E4 Olive narrates the run (✅).
+  { id: 'E4-fr', from: 'CG-006 §7.1', rung: 'narrate-run', lang: 'fr', slots: { trace: "avancé, avancé, tourné à droite, arrosé l'herbe, une flaque" }, mode: 'pass', expect: { kind: 'contains', any: ['flaque'] } },
+  { id: 'E4-en', from: 'CG-006 §7.1', rung: 'narrate-run', lang: 'en', slots: { trace: 'moved, moved, turned right, watered the grass, a puddle' }, mode: 'pass', expect: { kind: 'contains', any: ['puddle'] } },
+  // 15 — E5 name my trick (✅: a one-word name comes back; how apt it is, is recorded).
+  { id: 'E5-fr', from: 'CG-006 §7.1', rung: 'name-trick', lang: 'fr', slots: { body: 'avancer, avancer, gauche, arroser, droite' }, mode: 'pass', expect: { kind: 'ok' } },
+  { id: 'E5-apt', from: '—', rung: 'name-trick', lang: 'fr', slots: { body: 'avancer, avancer, gauche, arroser, droite' }, times: 1, mode: 'record', expect: { kind: 'contains', any: ['arros', 'rang', 'tulip', 'pluie', 'goutte'] } },
+  { id: 'E5-en', from: '—', rung: 'name-trick', lang: 'en', slots: { body: 'forward, forward, turn left, water, turn right' }, times: 1, mode: 'record', expect: { kind: 'ok' } },
+  // 16 — E8 🎓 sort these words: reliably wrong (0/3 FR and EN, both paths), so the program sorts. The input is in
+  // neither order, so a copy of it is not a sort.
+  { id: 'E8-fr', from: 'CG-006 §7.1', rung: 'sort-words', lang: 'fr', slots: { words: 'tulipe, arrosoir, chat' }, mode: 'fail', expect: { kind: 'equals', value: ['arrosoir', 'chat', 'tulipe'] } },
+  { id: 'E8-en', from: 'CG-006 §7.1', rung: 'sort-words', lang: 'en', slots: { words: 'tulip, bucket, cat' }, mode: 'fail', expect: { kind: 'equals', value: ['bucket', 'cat', 'tulip'] } },
+  // 17 — E9 🎓 Olive's dictionary: MIXED by design (the rung's `verdict: 'mixed'`): offered when her definitions
+  // DISAGREE — some right, some made up. Recorded; the rung verdict reads the set. `arroser`, not `arros`: the headword
+  // "arrosoir" itself contains "arros", so the old expectation met whenever she repeated the word.
+  { id: 'E9-arrosoir', from: 'CG-006 §7.1', rung: 'define', lang: 'fr', slots: { word: 'un arrosoir' }, mode: 'record', expect: { kind: 'contains', any: ['arroser', "l'eau", 'l’eau', 'de l eau'] } },
+  { id: 'E9-chouette', from: 'CG-006 §7.1', rung: 'define', lang: 'fr', slots: { word: 'une chouette' }, mode: 'record', expect: { kind: 'contains', any: ['oiseau'] } },
+  { id: 'E9-rocher', from: 'CG-006 §7.1', rung: 'define', lang: 'fr', slots: { word: 'un rocher' }, mode: 'record', expect: { kind: 'contains', any: ['pierre', 'caillou'] } },
+  { id: 'E9-en', from: '—', rung: 'define', lang: 'en', slots: { word: 'a rock' }, times: 1, mode: 'record', expect: { kind: 'contains', any: ['stone'] } },
+  // 18 — E10 the letter generator (✅, with the rung's must-contain on the object: the data is the truth).
+  { id: 'E10-fr', from: 'CG-006 §7.1', rung: 'letter', lang: 'fr', slots: { who: 'Biscuit', object: 'croquettes' }, mode: 'pass', expect: { kind: 'contains', any: ['croquettes'] } },
+  { id: 'E10-en', from: 'CG-006 §7.1', rung: 'letter', lang: 'en', slots: { who: 'Biscuit', object: 'kibble' }, mode: 'pass', expect: { kind: 'contains', any: ['kibble'] } }
 ];
 
 /**
@@ -76,6 +108,23 @@ function ladderOf(rung) {
   const r = templates.rungs[rung];
   return r && r.ladder === 'fail' ? 'fail' : 'pass';
 }
+
+/**
+ * A rung whose table entry says `verdict: 'mixed'` (define, CG-006 E9) is graded on its RECORDED probes as a set: it
+ * passes when they DISAGREE (at least one met and one not) — "some of her answers are right, some made up" is the
+ * lesson; all right or all wrong and the lesson does not show.
+ */
+function verdictOf(rung) {
+  const r = templates.rungs[rung];
+  return r && r.verdict === 'mixed' ? 'mixed' : 'ladder';
+}
+
+/**
+ * Every expectation kind `meetsOne`/`met` grade. 🔴 A probe of any other kind can never pass (runExam): before CG-005
+ * a kind `meetsOne` did not know fell to its `default: false`, so a 🎓 probe of it "failed as designed" whatever
+ * Olive said — a vacuous pass. `exam.test.js` also grades every kind the PROBES use both ways.
+ */
+const KINDS = Object.freeze(['ok', 'equals', 'items', 'contains', 'wordsAtMost', 'lines', 'containsAll', 'lacks', 'identical', 'distinct']);
 
 function fold(s) {
   return String(s)
@@ -164,6 +213,7 @@ function decided(expect, replies, times) {
 async function runExam({ ask, probes = PROBES, timings = null, log = () => {}, now = () => Date.now() }) {
   const t0 = now();
   const out = [];
+  const graded = new Set(); // the ids of the probes whose kind the exam knows
   for (const p of probes) {
     const replies = [];
     const times = p.times || DEFAULT_TIMES;
@@ -173,14 +223,16 @@ async function runExam({ ask, probes = PROBES, timings = null, log = () => {}, n
     }
     const ms = now() - t1;
     const wasMet = met(p.expect, replies);
-    const pass = p.mode === 'fail' || (p.mode === 'record' && ladderOf(p.rung) === 'fail') ? !wasMet : wasMet;
+    const known = KINDS.includes(p.expect && p.expect.kind);
+    if (known) graded.add(p.id);
+    const pass = known && (p.mode === 'fail' || (p.mode === 'record' && ladderOf(p.rung) === 'fail') ? !wasMet : wasMet);
     const row = { id: p.id, from: p.from, rung: p.rung, lang: p.lang, mode: p.mode, met: wasMet, pass, ms, replies: replies.map((r) => ({ ok: r.ok, value: r.value, text: r.text, reason: r.reason, fallback: r.fallback, ms: r.ms })) };
     out.push(row);
     if (timings) timings.line({ event: 'exam-probe', id: p.id, rung: p.rung, ms, samples: replies.length, pass });
     log(`exam ${p.id} ${p.rung} ${p.mode} ${pass ? 'PASS' : 'FAIL'} ${ms} ms ${JSON.stringify(row.replies.map((r) => r.value !== undefined ? r.value : r.text !== undefined ? r.text : r.reason)).slice(0, 160)}`);
   }
   // One verdict per rung: every asserted probe of the rung behaved as the ladder expects. Recorded probes are kept
-  // beside it and count only when the rung has no asserted probe (voice-hint).
+  // beside it and count only when the rung has no asserted probe (voice-hint), or when the rung is graded as a mixed set.
   const rungs = {};
   for (const row of out) {
     const r = (rungs[row.rung] = rungs[row.rung] || { ladder: ladderOf(row.rung), probes: [], pass: true, asserted: 0 });
@@ -190,7 +242,13 @@ async function runExam({ ask, probes = PROBES, timings = null, log = () => {}, n
     if (!row.pass) r.pass = false;
   }
   for (const [name, r] of Object.entries(rungs)) {
-    if (r.asserted === 0) r.pass = out.filter((x) => x.rung === name).every((x) => x.pass);
+    if (verdictOf(name) === 'mixed') {
+      // An unknown kind is never "not met" here either: it would fake the disagreement.
+      const set = out.filter((x) => x.rung === name && x.mode === 'record' && graded.has(x.id));
+      const yes = set.filter((x) => x.met).length;
+      r.verdict = 'mixed';
+      r.pass = (r.asserted === 0 || r.pass) && yes > 0 && yes < set.length;
+    } else if (r.asserted === 0) r.pass = out.filter((x) => x.rung === name).every((x) => x.pass);
   }
   const asserted = out.filter((x) => x.mode !== 'record');
   return { at: new Date().toISOString(), ms: now() - t0, probes: out, rungs, passed: asserted.filter((x) => x.pass).length, failed: asserted.filter((x) => !x.pass).length };
@@ -225,4 +283,4 @@ function withheldRungs(results) {
   return out.sort();
 }
 
-module.exports = { PROBES, met, meetsOne, decided, runExam, readResults, writeResults, resultsPath, RESULTS_FILE, DEFAULT_TIMES, ladderOf, withheldRungs };
+module.exports = { PROBES, KINDS, met, meetsOne, decided, runExam, readResults, writeResults, resultsPath, RESULTS_FILE, DEFAULT_TIMES, ladderOf, verdictOf, withheldRungs };

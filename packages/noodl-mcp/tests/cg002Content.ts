@@ -13,7 +13,10 @@
  *   reference program to its goal.
  * - {@link HINTS} — every hint key CG-002 §2 names, each with an EN and an FR
  *   written line. Olive (CG-005) may voice a key; the table is the truth. There
- *   is no "tell me" line, by ruling (TPL-012 finding 5).
+ *   is no "tell me" line, by ruling (TPL-012 finding 5). 🔴 The seven lines Olive
+ *   may VOICE are read from the shell's rung table (`olive-templates.json`
+ *   `hints`), the one source for them (CG-006 s3): the line the page writes and
+ *   the line the shell asks Olive to say again cannot drift. Edit them THERE.
  * - {@link WORDS} — the interface, both bands' block labels, the sensors, the
  *   islanders, the rewards. One `Static Data`, mined into `Logic/Translate words`
  *   one line per key.
@@ -34,6 +37,8 @@
  *
  * @module noodl-mcp/tests/cg002Content
  */
+import * as fs from 'fs';
+import * as path from 'path';
 
 export type Lang = 'en' | 'fr';
 export type Band = 1 | 2;
@@ -343,52 +348,59 @@ export const REQUEST_IDS: ReadonlyArray<string> = REQUESTS.map((r) => r.id);
  * `probes` the exam's probe ids (`shell/exam.js`). Graded only as data this
  * session: the interpreter's shape consumption is CG-005's.
  *
- * Rung 9 carries `rule: 'awaiting-ruling'`: "under 5 words" is obeyed 6/6 on
- * the model (CG-004 §7 finding a), so the rule it teaches must change, and
- * that is Richard's to choose. Both candidates are framed (`ruleCandidates`,
- * each with its own line key) and probed (`cg006Probes.ts`), so either answer
- * is one edit: point `copyKeys.line` and `table` at the chosen one.
+ * Richard's rulings of 2026-09-28 (CG-006 §8): rung 9's rule is G1 "never use
+ * the letter e" (she breaks it 3/3 EN and FR on CPU and Metal; "under 5 words"
+ * was obeyed 6/6 and G2 "never mention water" kept 3/3); every rung is band
+ * 10–12 (band 7–9 keeps the owl's hints, game-chosen, and offers no rung — the
+ * page's gate reads the band from the rung TABLE, so `band` here must equal the
+ * table's, which the gate asserts). Rungs 13–18 are CG-006 §4's moments E3 E4
+ * E5 E8 E9 E10, promoted on the readings of §7.1; their title and line are the
+ * moment's own word keys (`mo3Title` …). `examColumn: 'mixed'` (rung 17, E9) is
+ * offered when her answers DISAGREE (`verdict: 'mixed'` in the table).
  */
 export interface OliveRung {
   n: number;
   mark: 'green' | 'grad';
-  examColumn: 'green' | 'grad' | 'both';
+  examColumn: 'green' | 'grad' | 'both' | 'mixed';
   islander: 'sami' | 'mamie' | 'biscuit' | null;
-  /** The lowest band the source offers it to (TPL-012 §2.6: rungs 8 and 10 are band 10–12). */
+  /** The band it is offered to: 2 (10–12) for every rung, by Richard's ruling 4 (2026-09-28). Equal to the table's. */
   band: Band;
   /** The block the child places; null for rung 10 (canned questions, no block). */
   block: 'say' | 'ask' | 'if' | null;
   /** The shape card (CG-005 §2 / the rung table's `shapes`); null where the block has none. */
-  shape: 'sentence' | 'list_of_3' | 'blocks' | 'one_of' | 'yes_no' | 'integer' | 'two_lines' | null;
+  shape: 'sentence' | 'one_word' | 'list_of_3' | 'blocks' | 'one_of' | 'yes_no' | 'integer' | 'two_lines' | null;
   table: ReadonlyArray<string>;
   probes: ReadonlyArray<string>;
   copyKeys: { title: string; line: string; lesson: string; hint: string };
-  rule?: 'awaiting-ruling';
-  ruleCandidates?: ReadonlyArray<{ id: 'G1' | 'G2'; table: string; line: string; probes: ReadonlyArray<string> }>;
+  /** The §4 moment a rung 13–18 was promoted from. */
+  moment?: 'E3' | 'E4' | 'E5' | 'E8' | 'E9' | 'E10';
 }
 
 const rungKeys = (n: number) => ({ title: 'or' + n + 'Title', line: 'or' + n + 'Line', lesson: 'or' + n + 'Lesson', hint: 'oliveRung' + n });
 
+/** A promoted moment's card: the moment's own title and line, the rung's lesson and after-run hint. */
+const momentKeys = (n: number, e: number) => ({ title: 'mo' + e + 'Title', line: 'mo' + e + 'Line', lesson: 'or' + n + 'Lesson', hint: 'oliveRung' + n });
+
 export const OLIVE_RUNGS: ReadonlyArray<OliveRung> = [
-  { n: 1, mark: 'green', examColumn: 'green', islander: 'sami', band: 1, block: 'say', shape: 'sentence', table: ['say-thanks'], probes: ['P01', 'P02'], copyKeys: rungKeys(1) },
-  { n: 2, mark: 'green', examColumn: 'green', islander: 'mamie', band: 1, block: 'ask', shape: 'list_of_3', table: ['name-three', 'name-one'], probes: ['P03', 'P04', 'P05', 'P24', 'P25'], copyKeys: rungKeys(2) },
-  { n: 3, mark: 'green', examColumn: 'green', islander: 'sami', band: 1, block: 'ask', shape: 'blocks', table: ['words-to-blocks'], probes: ['P06', 'P07', 'P08', 'P23'], copyKeys: rungKeys(3) },
-  { n: 4, mark: 'grad', examColumn: 'grad', islander: 'sami', band: 1, block: 'ask', shape: 'blocks', table: ['count-in-words'], probes: ['P09', 'P26'], copyKeys: rungKeys(4) },
-  { n: 5, mark: 'green', examColumn: 'green', islander: 'biscuit', band: 1, block: 'ask', shape: 'one_of', table: ['what-wants'], probes: ['P10', 'P11', 'P27'], copyKeys: rungKeys(5) },
-  { n: 6, mark: 'grad', examColumn: 'green', islander: null, band: 1, block: 'if', shape: 'yes_no', table: ['is-it-a'], probes: ['P12', 'P13', 'P28'], copyKeys: rungKeys(6) },
-  { n: 7, mark: 'grad', examColumn: 'grad', islander: 'mamie', band: 1, block: 'ask', shape: 'integer', table: ['count-tulips'], probes: ['P14', 'P29'], copyKeys: rungKeys(7) },
+  { n: 1, mark: 'green', examColumn: 'green', islander: 'sami', band: 2, block: 'say', shape: 'sentence', table: ['say-thanks'], probes: ['P01', 'P02'], copyKeys: rungKeys(1) },
+  { n: 2, mark: 'green', examColumn: 'green', islander: 'mamie', band: 2, block: 'ask', shape: 'list_of_3', table: ['name-three', 'name-one'], probes: ['P03', 'P04', 'P05', 'P24', 'P25'], copyKeys: rungKeys(2) },
+  { n: 3, mark: 'green', examColumn: 'green', islander: 'sami', band: 2, block: 'ask', shape: 'blocks', table: ['words-to-blocks'], probes: ['P06', 'P07', 'P08', 'P23'], copyKeys: rungKeys(3) },
+  { n: 4, mark: 'grad', examColumn: 'grad', islander: 'sami', band: 2, block: 'ask', shape: 'blocks', table: ['count-in-words'], probes: ['P09', 'P26'], copyKeys: rungKeys(4) },
+  { n: 5, mark: 'green', examColumn: 'green', islander: 'biscuit', band: 2, block: 'ask', shape: 'one_of', table: ['what-wants'], probes: ['P10', 'P11', 'P27'], copyKeys: rungKeys(5) },
+  { n: 6, mark: 'grad', examColumn: 'green', islander: null, band: 2, block: 'if', shape: 'yes_no', table: ['is-it-a'], probes: ['P12', 'P13', 'P28'], copyKeys: rungKeys(6) },
+  { n: 7, mark: 'grad', examColumn: 'grad', islander: 'mamie', band: 2, block: 'ask', shape: 'integer', table: ['count-tulips'], probes: ['P14', 'P29'], copyKeys: rungKeys(7) },
   { n: 8, mark: 'grad', examColumn: 'both', islander: null, band: 2, block: 'ask', shape: 'integer', table: ['maths-seeds', 'maths'], probes: ['P15', 'P16', 'P30', 'P31'], copyKeys: rungKeys(8) },
-  {
-    n: 9, mark: 'grad', examColumn: 'grad', islander: null, band: 1, block: 'ask', shape: 'sentence', table: ['under-five-words'], probes: ['P17', 'P32'], copyKeys: rungKeys(9),
-    rule: 'awaiting-ruling',
-    ruleCandidates: [
-      { id: 'G1', table: 'no-letter-e', line: 'or9LineG1', probes: ['R9-G1-fr', 'R9-G1-en'] },
-      { id: 'G2', table: 'no-water', line: 'or9LineG2', probes: ['R9-G2-fr', 'R9-G2-en'] }
-    ]
-  },
+  { n: 9, mark: 'grad', examColumn: 'grad', islander: null, band: 2, block: 'ask', shape: 'sentence', table: ['no-letter-e'], probes: ['R9-G1-fr', 'R9-G1-en'], copyKeys: rungKeys(9) },
   { n: 10, mark: 'grad', examColumn: 'grad', islander: null, band: 2, block: null, shape: null, table: ['tall-tales'], probes: ['P18', 'P33'], copyKeys: rungKeys(10) },
-  { n: 11, mark: 'green', examColumn: 'both', islander: 'sami', band: 1, block: 'ask', shape: 'sentence', table: ['translate'], probes: ['P19', 'P20'], copyKeys: rungKeys(11) },
-  { n: 12, mark: 'green', examColumn: 'green', islander: null, band: 1, block: 'ask', shape: 'two_lines', table: ['poem'], probes: ['P21', 'P34'], copyKeys: rungKeys(12) }
+  { n: 11, mark: 'green', examColumn: 'both', islander: 'sami', band: 2, block: 'ask', shape: 'sentence', table: ['translate'], probes: ['P19', 'P20'], copyKeys: rungKeys(11) },
+  { n: 12, mark: 'green', examColumn: 'green', islander: null, band: 2, block: 'ask', shape: 'two_lines', table: ['poem'], probes: ['P21', 'P34'], copyKeys: rungKeys(12) },
+  // CG-006 §4's moments, promoted on the real-model readings of §7.1 (CPU and Metal agreed on every decision).
+  { n: 13, mark: 'green', examColumn: 'green', islander: null, band: 2, block: 'ask', shape: 'sentence', table: ['explain-program'], probes: ['E3-fr', 'E3-en', 'E3-count'], copyKeys: momentKeys(13, 3), moment: 'E3' },
+  { n: 14, mark: 'green', examColumn: 'green', islander: null, band: 2, block: 'ask', shape: 'sentence', table: ['narrate-run'], probes: ['E4-fr', 'E4-en'], copyKeys: momentKeys(14, 4), moment: 'E4' },
+  { n: 15, mark: 'green', examColumn: 'green', islander: null, band: 2, block: 'ask', shape: 'one_word', table: ['name-trick'], probes: ['E5-fr', 'E5-apt', 'E5-en'], copyKeys: momentKeys(15, 5), moment: 'E5' },
+  { n: 16, mark: 'grad', examColumn: 'grad', islander: null, band: 2, block: 'ask', shape: 'list_of_3', table: ['sort-words'], probes: ['E8-fr', 'E8-en'], copyKeys: momentKeys(16, 8), moment: 'E8' },
+  { n: 17, mark: 'grad', examColumn: 'mixed', islander: null, band: 2, block: 'ask', shape: 'sentence', table: ['define'], probes: ['E9-arrosoir', 'E9-chouette', 'E9-rocher', 'E9-en'], copyKeys: momentKeys(17, 9), moment: 'E9' },
+  { n: 18, mark: 'green', examColumn: 'green', islander: null, band: 2, block: 'ask', shape: 'sentence', table: ['letter'], probes: ['E10-fr', 'E10-en'], copyKeys: momentKeys(18, 10), moment: 'E10' }
 ];
 
 // ── The hint table ──────────────────────────────────────────────────────────
@@ -400,14 +412,28 @@ export const OLIVE_RUNGS: ReadonlyArray<OliveRung> = [
  * per rung). `{b}` is the robot's name; `{n}`, `{w}`, `{t}`, `{k}`, `{x}`, `{y}`
  * are filled by the page from `CHOOSE_HINT_SCRIPT`'s `vars`. Never a "tell me".
  */
+/** The shell's rung table: the ONE source of the seven hint lines Olive may voice (its `hints`, keyed by `lists.hintKeys`). */
+const SHELL_TABLE_PATH = path.join(__dirname, '..', '..', '..', 'dev-docs', 'tasks', 'phase-105-the-coding-garden', 'garden-desktop', 'shell', 'olive-templates.json');
+const SHELL_HINTS: Readonly<Record<string, Bi>> = JSON.parse(fs.readFileSync(SHELL_TABLE_PATH, 'utf8')).hints;
+
+/** The keys Olive may voice, in the order the page's table lists them. */
+export const VOICED_HINT_KEYS = ['hintStart', 'hintEmpty', 'hintPattern', 'hintMissed', 'hintBump', 'hintWet', 'hintDone'] as const;
+
+/** One voiced line, from the shell's table, as a fresh object (never a shared reference a script could mutate). */
+function voiced(key: (typeof VOICED_HINT_KEYS)[number]): Bi {
+  const b = SHELL_HINTS[key];
+  if (!b || !b.en || !b.fr) throw new Error(`olive-templates.json hints has no ${key} in both languages`);
+  return s(b.en, b.fr);
+}
+
 export const HINTS: Readonly<Record<string, Bi>> = {
-  hintStart: s('Hello! Someone on the island is waiting. Press Teach and show {b} what to do.', 'Coucou ! Quelqu’un t’attend sur l’île. Appuie sur Apprendre et montre à {b} quoi faire.'),
-  hintEmpty: s('Drive {b} yourself first: press Teach and use the arrows. {b} remembers every step.', 'Conduis {b} toi-même d’abord : appuie sur Apprendre et utilise les flèches. {b} retient chaque pas.'),
-  hintPattern: s('Look at the steps: the same little dance, over and over. What if {b} could "do this {n} times"?', 'Regarde les pas : la même petite danse, encore et encore. Et si {b} pouvait « faire ça {n} fois » ?'),
-  hintMissed: s('{b} did {w} of {t}. Which one did {b} walk past?', '{b} en a fait {w} sur {t}. Lequel a-t-il raté ?'),
-  hintBump: s('{b} bumped into something. Which step sent {b} the wrong way?', '{b} s’est cogné. Quel pas l’a envoyé du mauvais côté ?'),
-  hintWet: s('A puddle! {b} watered where there is no tulip. Where was {b} facing?', 'Une flaque ! {b} a arrosé là où il n’y a pas de tulipe. Il regardait où ?'),
-  hintDone: s('Perfect! Could you do it with fewer blocks? A repeat counts as one.', 'Parfait ! Tu peux le faire avec moins de blocs ? Un « répéter » compte pour un.'),
+  hintStart: voiced('hintStart'),
+  hintEmpty: voiced('hintEmpty'),
+  hintPattern: voiced('hintPattern'),
+  hintMissed: voiced('hintMissed'),
+  hintBump: voiced('hintBump'),
+  hintWet: voiced('hintWet'),
+  hintDone: voiced('hintDone'),
   hintDoneMany: s('It works, with {k} blocks. The same steps come back: a repeat could hold them.', 'Ça marche, avec {k} blocs. Les mêmes pas reviennent : un « répéter » pourrait les tenir.'),
   hintPredictMiss: s('You tapped one tile, {b} stopped on another. Follow the steps with your finger, one by one.', 'Tu as touché une case, {b} s’est arrêté sur une autre. Suis les pas avec ton doigt, un par un.'),
   oliveThinking: s('Olive is thinking…', 'Olive réfléchit…'),
@@ -420,10 +446,16 @@ export const HINTS: Readonly<Record<string, Bi>> = {
   oliveRung6: s('Olive was wrong about the thing ahead. Ask three times and count the yeses.', 'Olive s’est trompée sur ce qu’il y a devant. Demande trois fois et compte les oui.'),
   oliveRung7: s('Olive guessed a number. A count block does not guess.', 'Olive a deviné un nombre. Un bloc « compter » ne devine pas.'),
   oliveRung8: s('Olive got the small sum right and the big one wrong. A rule beats a guess.', 'Olive a trouvé la petite somme, pas la grande. Une règle bat une devinette.'),
-  oliveRung9: s('Olive ignored "under 5 words". The shape card kept the rule for her.', 'Olive a ignoré « moins de 5 mots ». La carte de forme a gardé la règle à sa place.'),
+  oliveRung9: s('Olive used the letter e anyway. A program that checks every letter catches it.', 'Olive a quand même utilisé la lettre e. Un programme qui vérifie chaque lettre la prend sur le fait.'),
   oliveRung10: s('Olive answered with confidence. Check it in a book before you believe it.', 'Olive a répondu avec assurance. Vérifie dans un livre avant de la croire.'),
   oliveRung11: s('Olive translates one way better than the other. Tools have a good direction.', 'Olive traduit mieux dans un sens que dans l’autre. Les outils ont un bon sens.'),
-  oliveRung12: s('A poem for the tulip. Sometimes silly, always hers.', 'Un poème pour la tulipe. Parfois farfelu, toujours le sien.')
+  oliveRung12: s('A poem for the tulip. Sometimes silly, always hers.', 'Un poème pour la tulipe. Parfois farfelu, toujours le sien.'),
+  oliveRung13: s('Olive read your blocks back. Does her sentence say what {b} did?', 'Olive a relu tes blocs. Sa phrase dit-elle bien ce que {b} a fait ?'),
+  oliveRung14: s('Olive told the story of the run. Find the step the puddle came from.', 'Olive a raconté le trajet. Trouve le pas d’où vient la flaque.'),
+  oliveRung15: s('Olive suggested a name. Keep it, or give your trick a better one.', 'Olive a proposé un nom. Garde-le, ou trouve mieux pour ton astuce.'),
+  oliveRung16: s('Olive’s order is not alphabetical. A program that sorts gets it right every time.', 'L’ordre d’Olive n’est pas alphabétique. Un programme qui range ne se trompe jamais.'),
+  oliveRung17: s('Some of Olive’s answers are made up. Which ones? Check in a book.', 'Certaines réponses d’Olive sont inventées. Lesquelles ? Vérifie dans un livre.'),
+  oliveRung18: s('Olive wrote the letter her way. The thing asked for is always in it: the check makes sure.', 'Olive a écrit la lettre à sa façon. La chose demandée y est toujours : la vérification s’en assure.')
 };
 
 export const HINT_KEYS: ReadonlyArray<string> = Object.keys(HINTS);
@@ -436,7 +468,7 @@ export const HINT_KEYS: ReadonlyArray<string> = Object.keys(HINTS);
  * the robot's name.
  */
 export const WORDS: Readonly<Record<string, Bi>> = {
-  brand: s('Bot Garden', 'Bot Garden'),
+  brand: s('Olive’s Island', 'L’île d’Olive'),
   navIsland: s('Island', 'Île'),
   navWorkshop: s('Workshop', 'Atelier'),
   navRobot: s('My robot', 'Mon robot'),
@@ -621,9 +653,7 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   or8Line: s('Give Olive two sums, a small one and a big one. Who gets both right, Olive or you?', 'Donne deux additions à Olive, une petite et une grande. Qui trouve les deux, Olive ou toi ?'),
   or8Lesson: s('A calculator follows a rule. Olive guesses, and big sums trip her up.', 'Une calculatrice suit une règle. Olive devine, et les grandes additions la font trébucher.'),
   or9Title: s('Olive and the rule', 'Olive et la règle'),
-  or9Line: s('Ask Olive to answer in under 5 words, then check it with a program.', 'Demande à Olive de répondre en moins de 5 mots, puis vérifie avec un programme.'),
-  or9LineG1: s('Ask Olive to describe a tulip without the letter e, then check it with a program.', 'Demande à Olive de décrire une tulipe sans la lettre e, puis vérifie avec un programme.'),
-  or9LineG2: s('Ask Olive to talk about {b}’s work without ever mentioning water, then check it with a program.', 'Demande à Olive de parler du travail de {b} sans jamais parler d’eau, puis vérifie avec un programme.'),
+  or9Line: s('Ask Olive to describe a tulip without the letter e, then check it with a program.', 'Demande à Olive de décrire une tulipe sans la lettre e, puis vérifie avec un programme.'),
   or9Lesson: s('Olive does not keep a rule about her own words. A checking program does.', 'Olive ne respecte pas une règle sur ses propres mots. Un programme qui vérifie, si.'),
   or10Title: s('Olive’s tall tales', 'Les histoires à dormir debout d’Olive'),
   or10Line: s('Olive answers questions about the world. Mark each answer true or false, then look it up in a book.', 'Olive répond à des questions sur le monde. Marque chaque réponse vrai ou faux, puis vérifie dans un livre.'),
@@ -634,6 +664,13 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   or12Title: s('A poem for my tulip', 'Un poème pour ma tulipe'),
   or12Line: s('Give your tulip a name, and Olive writes her a two-line poem.', 'Donne un nom à ta tulipe, et Olive lui écrit un poème de deux lignes.'),
   or12Lesson: s('A poem for your sticker page. Sometimes silly, always new.', 'Un poème pour ta page d’autocollants. Parfois farfelu, toujours nouveau.'),
+  // Rungs 13–18, the promoted moments (their card title and line are the moment's mo*Title / mo*Line below).
+  or13Lesson: s('Reading a program is a skill. Olive’s sentence is close, but words to blocks and back loses a little on the way.', 'Lire un programme, ça s’apprend. La phrase d’Olive est proche, mais des mots aux blocs et retour, un peu se perd en chemin.'),
+  or14Lesson: s('A run tells a story. The puddle in Olive’s story shows which step to fix.', 'Un trajet raconte une histoire. La flaque dans l’histoire d’Olive montre le pas à corriger.'),
+  or15Lesson: s('A good name says what a trick does. Olive suggests one; you decide.', 'Un bon nom dit ce que fait une astuce. Olive en propose un ; c’est toi qui choisis.'),
+  or16Lesson: s('Olive cannot put words in order. Sorting is a rule, and a program follows rules.', 'Olive ne sait pas ranger des mots. Ranger, c’est une règle, et un programme suit les règles.'),
+  or17Lesson: s('Some of Olive’s answers are true and some are made up, and she sounds just as sure. Check in a book.', 'Certaines réponses d’Olive sont vraies, d’autres inventées, et elle a l’air aussi sûre. Vérifie dans un livre.'),
+  or18Lesson: s('Olive writes the words; the request says what is asked. A check makes sure the thing asked for is always there.', 'Olive écrit les mots ; la demande dit ce qui est demandé. Une vérification s’assure que la chose demandée est toujours là.'),
   // The moments worth ring-fencing (CG-006 §4): a card title and its line. E13 is a Grown-ups card.
   mo1Title: s('Olive forgets', 'Olive oublie'),
   mo1Line: s('Ask Olive the name she gave your tulip just before. She has no memory, but {b}’s program does.', 'Demande à Olive le nom qu’elle a donné à ta tulipe tout à l’heure. Elle n’a pas de mémoire, mais le programme de {b}, si.'),
@@ -716,14 +753,14 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   guR4: s('Every line is checked against a word list before it is shown. A refused line falls back to a written one.', 'Chaque phrase est vérifiée avec une liste de mots avant d’être montrée. Une phrase refusée est remplacée par une phrase écrite.'),
   guDataH: s('Nothing leaves the house', 'Rien ne sort de la maison'),
   guD1: s('No account, no internet, no adverts. The game is installed like any other program.', 'Pas de compte, pas d’internet, pas de pub. Le jeu s’installe comme n’importe quel programme.'),
-  guD2: s('Saved on this computer. A save code moves a garden to another computer.', 'Sauvegardé sur cet ordinateur. Un code de sauvegarde déplace un jardin vers un autre ordinateur.'),
+  guD2: s('Saved on this computer. A save code moves the family’s islands to another computer.', 'Sauvegardé sur cet ordinateur. Un code de sauvegarde déplace les îles de la famille vers un autre ordinateur.'),
   guD3: s('No timers, streaks, points or "you missed a day". Rewards are cosmetic and always earnable.', 'Pas de chrono, de série, de points ni de « tu as raté un jour ». Les récompenses sont décoratives et toujours gagnables.'),
   guTryH: s('Try Olive', 'Essayer Olive'),
   guTryGo: s('Ask', 'Demander'),
   saveCodeH: s('Save code', 'Code de sauvegarde'),
   saveCodeCopy: s('Copy the code', 'Copier le code'),
   saveCodePaste: s('Paste a code', 'Coller un code'),
-  saveCodeBad: s('That code is not a garden.', 'Ce code n’est pas un jardin.')
+  saveCodeBad: s('That code is not an island save.', 'Ce code n’est pas une sauvegarde de l’île.')
 };
 
 /** The word keys, for the generated translate script and the gate. */

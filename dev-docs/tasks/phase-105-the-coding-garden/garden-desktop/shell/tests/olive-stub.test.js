@@ -84,7 +84,15 @@ test('AC4: the written answers cover EVERY list value of a keyed rung, ✅ right
   assert.deepEqual(W('count-in-words', { route: 'Avance de trois cases.' }).value, ['avancer']);
   assert.equal(W('count-tulips', { list: templates.lists.flowerlists.fr[0] }).value, 6, '4 tulips, she says 6');
   assert.equal(W('maths', { a: '14', b: '9' }).value, 14);
-  assert.ok(W('under-five-words', { to: 'Pip' }).text.split(' ').length > 4);
+  assert.match(W('no-letter-e', {}).text, /e/, 'rung 9: she uses an e anyway');
+  assert.match(W('no-letter-e', {}, 'en').text, /e/);
+  assert.deepEqual(W('sort-words', { words: templates.lists.word_triples.fr[0] }).value, ['tulipe', 'arrosoir', 'chat'], 'not sorted: the program sorts');
+  // ✅ the promoted moments' written answers are right:
+  assert.match(W('narrate-run', { trace: templates.lists.traces.en[0] }, 'en').text, /puddle/);
+  assert.match(W('letter', { who: 'Biscuit', object: 'kibble' }, 'en').text, /kibble/);
+  // 🎓 mixed: some definitions right, some made up.
+  assert.match(W('define', { word: 'un rocher' }).text, /pierre/);
+  assert.doesNotMatch(W('define', { word: 'une chouette' }).text, /oiseau/);
   assert.match(W('tall-tales', { question: templates.lists.questions_tall.en[0] }, 'en').text, /Sydney/);
 });
 
@@ -144,34 +152,38 @@ test('AC5: the exam through the doors withholds a rung the stub fails, and offer
   await withRelay(olive, async (port) => {
     const first = await request(port, 'POST', '/__garden/olive/exam', { headers: H });
     assert.equal(first.status, 200);
-    assert.deepEqual(withheldRungs(first.body), ['under-five-words', 'words-to-blocks']);
+    assert.deepEqual(withheldRungs(first.body), ['words-to-blocks']);
     const s1 = await request(port, 'GET', '/__garden/olive/status');
-    assert.deepEqual(withheldRungs(s1.body.exam), ['under-five-words', 'words-to-blocks'], 'status carries the verdicts the page gates on');
+    assert.deepEqual(withheldRungs(s1.body.exam), ['words-to-blocks'], 'status carries the verdicts the page gates on');
     const wrong = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'words-to-blocks', slots: { route: templates.lists.routes.fr[0] }, lang: 'fr' } });
     assert.deepEqual(wrong.body.value, ['droite'], 'the switched stub is wrong on purpose');
     // The switch (what the drive's POST /__stub/set does), then a re-run on the SAME doors.
     engine.set({ exam: { 'words-to-blocks': 'pass' } });
     const second = await request(port, 'POST', '/__garden/olive/exam', { headers: H });
-    assert.deepEqual(withheldRungs(second.body), ['under-five-words'], 'offered again; rung 9 stays withheld (the readout: she obeys "under 5 words")');
+    assert.deepEqual(withheldRungs(second.body), [], 'offered again; since rung 9 is "no letter e" nothing else is withheld');
     const s2 = await request(port, 'GET', '/__garden/olive/status');
-    assert.deepEqual(withheldRungs(s2.body.exam), ['under-five-words']);
+    assert.deepEqual(withheldRungs(s2.body.exam), []);
     assert.notEqual(s2.body.exam.at, s1.body.exam.at, 'the kept results are the re-run');
   });
-  assert.deepEqual(DEFAULT_EXAM, { 'under-five-words': 'fail' });
+  assert.deepEqual(DEFAULT_EXAM, {});
 });
 
-test('🔴 the exam grades a RECORDED probe on a 🎓 rung the 🎓 way: she obeys "under 5 words", so rung 9 is withheld (it was offered before CG-005)', async () => {
-  assert.equal(ladderOf('under-five-words'), 'fail');
+test('🔴 the exam gate on rung 9 and the six promoted rungs: each is offered ONLY when its probes behave as its column says, and withheld when they do not', async () => {
+  assert.equal(ladderOf('no-letter-e'), 'fail');
   assert.equal(ladderOf('voice-hint'), 'pass');
   const { olive } = await stubDoors();
   const r = await olive.runExam();
-  const p17 = r.probes.find((p) => p.id === 'P17');
-  assert.deepEqual({ met: p17.met, pass: p17.pass }, { met: true, pass: false });
-  assert.deepEqual(r.rungs['under-five-words'], { ladder: 'fail', probes: ['P17', 'P32'], pass: false, asserted: 0 });
-  // Switch the stub to the battery's reading (7 words, 3/3): the lesson holds and the rung is offered.
-  const { olive: holds } = await stubDoors({ stub: { exam: { 'under-five-words': 'pass' } } });
-  assert.equal((await holds.runExam()).rungs['under-five-words'].pass, true);
-  assert.equal(r.failed, 0, 'every asserted probe behaves as the ladder says on the default stub');
+  assert.equal(r.failed, 0, 'every asserted probe behaves as the ladder says on the default stub (the readout)');
+  assert.deepEqual(withheldRungs(r), [], 'nothing withheld on the readout');
+  assert.deepEqual(r.rungs['no-letter-e'], { ladder: 'fail', probes: ['R9-G1-fr', 'R9-G1-en'], pass: true, asserted: 2 });
+  assert.deepEqual(r.rungs.define, { ladder: 'fail', probes: ['E9-arrosoir', 'E9-chouette', 'E9-rocher', 'E9-en'], pass: true, asserted: 0, verdict: 'mixed' });
+  // Each one switched to what would break its lesson (✅ wrong, 🎓 right, mixed all right) → withheld, alone.
+  const switched = {};
+  for (const rung of ['no-letter-e', 'explain-program', 'narrate-run', 'name-trick', 'sort-words', 'define', 'letter']) {
+    const { olive: o } = await stubDoors({ stub: { exam: { [rung]: 'fail' } } });
+    switched[rung] = withheldRungs(await o.runExam());
+  }
+  assert.deepEqual(switched, { 'no-letter-e': ['no-letter-e'], 'explain-program': ['explain-program'], 'narrate-run': ['narrate-run'], 'name-trick': ['name-trick'], 'sort-words': ['sort-words'], define: ['define'], letter: ['letter'] });
 });
 
 test('AC4 in the route: no model → every rung falls back at once with reason no-model, in both languages', async () => {
@@ -196,7 +208,7 @@ test('CG-006’s kinds: `lacks` and `containsAll` grade replies (before, every r
   assert.equal(meetsOne({ kind: 'containsAll', all: ['Mamie', 'tulipes'] }, t('Merci Mamie pour les tulipes')), true);
   assert.equal(meetsOne({ kind: 'containsAll', all: ['Mamie', 'tulipes'] }, t('Merci Mamie')), false);
   // The vacuous 🎓 pass is gone: Olive OBEYING "no letter e" now fails the 🎓 probe.
-  const probe = { id: 'G1', from: 'G1', rung: 'under-five-words', lang: 'fr', slots: { to: 'Pip' }, mode: 'fail', expect: { kind: 'lacks', letters: ['e'] } };
+  const probe = { id: 'G1', from: 'G1', rung: 'no-letter-e', lang: 'fr', slots: {}, mode: 'fail', expect: { kind: 'lacks', letters: ['e'] } };
   const obeyed = await runExam({ ask: async () => t('Mrci Pip !'), probes: [probe] });
   const ignored = await runExam({ ask: async () => t('Merci Pip !'), probes: [probe] });
   assert.deepEqual([obeyed.probes[0].pass, ignored.probes[0].pass], [false, true]);

@@ -7,9 +7,9 @@
  * - Deterministic: the answer is a table keyed by rung + slot values (+ language; + a per-key call counter where the
  *   ladder says a sampled model varies: "say thanks" twice gives two lines, a name at "surprise me" changes).
  * - Switchable exam answers: `exam: { <rung>: 'pass' | 'fail' }` makes the stub answer so Olive's exam grades that rung
- *   as asked (a ✅ rung fails by being wrong; a 🎓 rung fails by being RIGHT, so the lesson would not hold). The
- *   default is the 2026-09-27 readout: every rung as the ladder says, except rung 9 ("under 5 words"), which she obeys
- *   (CG-004 §7 finding a) and so fails.
+ *   as asked (a ✅ rung fails by being wrong; a 🎓 rung fails by being RIGHT, so the lesson would not hold; the mixed
+ *   rung fails by being all right). The default is the readout: since CG-006 s3 (rung 9 = "no letter e", which she
+ *   breaks 3/3; the six promoted moments as CG-006 §7.1 measured them) every rung behaves as the ladder says.
  * - A mutant mode: every prose answer and every name carries a blocklisted word, so a drive can prove the checks drop
  *   it (CG-005 AC3). Shaped answers (yes/no, one-of, a number, blocks) stay clean: the grammar makes a word impossible.
  * - `hang: [rungs]`: those rungs never answer until the owl's timeout aborts them (CG-005 AC2).
@@ -27,8 +27,8 @@ const templates = require('./olive-templates.json');
 const { KEYS } = require('./olive-check');
 const { writtenAnswer } = require('./olive-written');
 
-/** The readout's own verdicts where they differ from the ladder. */
-const DEFAULT_EXAM = Object.freeze({ 'under-five-words': 'fail' });
+/** The readout's own verdicts where they differ from the ladder: none since rung 9 became "no letter e" (CG-006 s3). */
+const DEFAULT_EXAM = Object.freeze({});
 
 const SHAPE_OF_KEY = Object.fromEntries(Object.entries(KEYS).map(([shape, key]) => [key, shape]));
 
@@ -81,7 +81,8 @@ const ANSWERS = {
     holds: (v) => ({ value: Number(v.a) >= 10 ? Number(v.a) : Number(v.a) + Number(v.b) }),
     breaks: (v) => ({ value: Number(v.a) + Number(v.b) })
   },
-  'under-five-words': { holds: (v, L) => W('under-five-words', v, L), breaks: (v, L) => ({ text: fill(L === 'en' ? 'Thanks, {to}!' : 'Merci, {to} !', v) }) },
+  // Rung 9 🎓: holds = she uses an e anyway (the written canned line); breaks = she keeps the rule (no e at all).
+  'no-letter-e': { holds: (v, L) => W('no-letter-e', v, L), breaks: (v, L) => ({ text: L === 'en' ? 'A pink bud, soft and round.' : 'Un bouton rond au parfum doux.' }) },
   'tall-tales': { holds: (v, L) => W('tall-tales', v, L), breaks: (v, L) => ({ text: L === 'en' ? 'I only know the garden.' : 'Je ne connais que le jardin.' }) },
   translate: {
     holds: (v, L) => W('translate', v, L),
@@ -91,9 +92,25 @@ const ANSWERS = {
     holds: (v, L) => ({ text: fill(L === 'en' ? '{flower} sways in the breeze,\nOlive loves her with ease.' : "{flower} danse au vent,\nOlive l'aime tant.", v) }),
     breaks: (v, L) => ({ text: fill(L === 'en' ? '{flower} is a tulip.' : '{flower} est une tulipe.', v) })
   },
+  // The six promoted moments (CG-006 §7.1), rungs 13–18.
+  'explain-program': { holds: (v, L) => W('explain-program', v, L), breaks: (v, L) => ({ text: L === 'en' ? 'Pip is a very busy robot.' : 'Pip est un robot très occupé.' }) },
+  'narrate-run': { holds: (v, L) => W('narrate-run', v, L), breaks: (v, L) => ({ text: L === 'en' ? 'Pip went for a nice walk.' : 'Pip a fait une belle promenade.' }) },
+  // A ✅ `ok` probe fails only on a refusal: two words are over the one-word cap.
+  'name-trick': { holds: (v, L) => W('name-trick', v, L), breaks: (v, L) => ({ value: L === 'en' ? 'Big Sprinkler' : 'Grand Arroseur' }) },
+  'sort-words': {
+    holds: (v, L) => W('sort-words', v, L),
+    breaks: (v) => ({ value: String(v.words).split(',').map((w) => w.trim()).sort((a, b) => a.localeCompare(b)) })
+  },
+  // 🎓 mixed: holds = the written set (some right, some made up); breaks = every definition right, so they AGREE.
+  define: {
+    holds: (v, L) => W('define', v, L),
+    breaks: (v, L) => ({ text: (L === 'en' ? { 'a watering can': 'A watering can is what you use to water the plants.', 'a dandelion': 'A dandelion is a yellow flower.', 'an owl': 'An owl is a bird that flies at night.', 'a rock': 'A rock is a big stone.' } : { 'un arrosoir': "Un arrosoir sert à arroser les plantes avec de l'eau.", 'un pissenlit': 'Un pissenlit est une fleur jaune.', 'une chouette': 'Une chouette est un oiseau de nuit.', 'un rocher': 'Un rocher est une grosse pierre.' })[v.word] || '' })
+  },
+  // A ✅ must-contain rung fails by leaving the object out (the route refuses it: must-contain).
+  letter: { holds: (v, L) => W('letter', v, L), breaks: (v, L) => ({ text: fill(L === 'en' ? '{who}: "Pip, come and help me, please!"' : '{who} : « Pip, viens m’aider, s’il te plaît ! »', v) }) },
   'voice-hint': {
     holds: (v, L) => {
-      const line = ((templates.hints[v.key] || {})[L === 'en' ? 'en' : 'fr'] || '').replace(/\{(\w+)\}/g, (m, k) => ({ b: v.b || 'Pip', n: v.n || '3', w: v.w || '0' })[k] || m);
+      const line = ((templates.hints[v.key] || {})[L === 'en' ? 'en' : 'fr'] || '').replace(/\{(\w+)\}/g, (m, k) => ({ b: v.b || 'Pip', n: v.n || '3', w: v.w || '0', t: v.t || '3' })[k] || m);
       return { text: (L === 'en' ? 'Hoo hoo! ' : 'Hou hou ! ') + line };
     },
     breaks: (v, L) => ({ text: L === 'en' ? 'Hoo hoo! Look closely.' : 'Hou hou ! Regarde bien.' })
@@ -228,7 +245,7 @@ async function serve(argv) {
     }
     return send(res, 404, { error: 'no such stub door' }), true;
   };
-  const relay = createRelay({ appDir, backendPort: () => null, shell: (q, s, p) => control(q, s, p) || olive.handle(q, s, p), opening: 'Bot Garden (stub Olive) is still opening.' });
+  const relay = createRelay({ appDir, backendPort: () => null, shell: (q, s, p) => control(q, s, p) || olive.handle(q, s, p), opening: 'Olive’s Island (stub Olive) is still opening.' });
   const port = Number(opt('--port')) || 0;
   await new Promise((r) => relay.listen(port, '127.0.0.1', r));
   console.log(JSON.stringify({ ok: true, port: relay.address().port, appDir, dataDir, model: owl.status().model, stub: engine.snapshot() }));

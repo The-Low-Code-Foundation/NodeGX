@@ -17,6 +17,11 @@
  * - **AC5** no request text carries a timer, a score, a streak or a "missed";
  * - **AC6** §4's add-probe rows each carry a probe and a decision.
  *
+ * Session 3 adds Richard's rulings of 2026-09-28: rung 9 = G1 "no letter e"; no
+ * EN must-contain on the thank-you; every rung band 10–12 (band 7–9 keeps the
+ * hints); the six measured moments promoted to rungs 13–18 in the SHIPPED
+ * tables; the voiced hint lines from one source; the name Olive's Island.
+ *
  * The engine is not re-implemented: every run goes through the shipped
  * `Logic/*` scripts (`FUNCTION_SCRIPTS`) with `runScript`, as `cg002Engine.test.ts` does.
  *
@@ -24,9 +29,10 @@
  */
 import fs from 'fs';
 import path from 'path';
-import { BAND_PALETTE, Block, GardenRequest, HINTS, OLIVE_RUNGS, REQUESTS, WORDS, WORD_KEYS } from './cg002Content';
-import { FUNCTION_SCRIPTS, MAX_TICKS, runScript } from './cg002Scripts';
-import { EXAM_KINDS, EXAM_KIND_PATCH, Expect, MOMENTS, PROBES, PROPOSED_LISTS, PROPOSED_RUNGS, RULINGS, decide, fold, meets, mergeTemplates } from './cg006Probes';
+import { BAND_PALETTE, Block, GardenRequest, HINTS, OLIVE_RUNGS, REQUESTS, VOICED_HINT_KEYS, WORDS, WORD_KEYS } from './cg002Content';
+import { FUNCTION_SCRIPTS, MAX_TICKS, PALETTE_SCRIPT, runScript } from './cg002Scripts';
+import { OLIVE_SLOTS_SCRIPT, OLIVE_WORDS, PALETTE_RUNG_IDS } from './cg005Olive';
+import { DROPPED_LISTS, DROPPED_RUNGS, Expect, MOMENTS, PROBES, decide, meets, mergeTemplates } from './cg006Probes';
 
 const REPO = path.resolve(__dirname, '..', '..', '..');
 const SHELL = path.join(REPO, 'dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell');
@@ -140,7 +146,6 @@ function requestFacingKeys(): string[] {
     keys.add(r.copyKeys.title);
     keys.add(r.copyKeys.line);
     keys.add(r.copyKeys.lesson);
-    for (const c of r.ruleCandidates ?? []) keys.add(c.line);
   }
   for (const m of MOMENTS) {
     keys.add(m.copyKeys.title);
@@ -251,36 +256,45 @@ describe('CG-006 — the requests', () => {
     });
   });
 
-  describe('AC2 (§3) — the twelve Olive rungs, framed as requests and graded as data', () => {
-    it('twelve rungs, 1–12, 🎓 exactly where §3 marks it (4, 6, 7, 8, 9, 10); 8 and 10 are band 10–12', () => {
-      expect(OLIVE_RUNGS.map((r) => r.n)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
-      expect(OLIVE_RUNGS.filter((r) => r.mark === 'grad').map((r) => r.n)).toEqual([4, 6, 7, 8, 9, 10]);
-      expect(OLIVE_RUNGS.filter((r) => r.band === 2).map((r) => r.n)).toEqual([8, 10]);
-      // §3's islanders.
-      expect(OLIVE_RUNGS.map((r) => r.islander)).toEqual(['sami', 'mamie', 'sami', 'sami', 'biscuit', null, 'mamie', null, null, null, 'sami', null]);
+  describe('AC2 (§3) — the Olive rungs, framed as requests and graded as data (twelve + the six promoted moments)', () => {
+    it('eighteen rungs, 1–18: 🎓 exactly where §3 marks it (4, 6, 7, 8, 9, 10) and on the promoted 🎓 moments (16 = E8, 17 = E9)', () => {
+      expect(OLIVE_RUNGS.map((r) => r.n)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]);
+      expect(OLIVE_RUNGS.filter((r) => r.mark === 'grad').map((r) => r.n)).toEqual([4, 6, 7, 8, 9, 10, 16, 17]);
+      // §3's islanders; the promoted moments are Olive's own tools, asked by nobody in particular.
+      expect(OLIVE_RUNGS.map((r) => r.islander)).toEqual(['sami', 'mamie', 'sami', 'sami', 'biscuit', null, 'mamie', null, null, null, 'sami', null, null, null, null, null, null, null]);
       // §3's blocks: say (1), none (10), `if Olive says` (6), ask for the rest.
-      expect(OLIVE_RUNGS.map((r) => r.block)).toEqual(['say', 'ask', 'ask', 'ask', 'ask', 'if', 'ask', 'ask', 'ask', null, 'ask', 'ask']);
+      expect(OLIVE_RUNGS.map((r) => r.block)).toEqual(['say', 'ask', 'ask', 'ask', 'ask', 'if', 'ask', 'ask', 'ask', null, 'ask', 'ask', 'ask', 'ask', 'ask', 'ask', 'ask', 'ask']);
+      expect(OLIVE_RUNGS.filter((r) => r.moment).map((r) => [r.n, r.moment, r.examColumn])).toEqual([[13, 'E3', 'green'], [14, 'E4', 'green'], [15, 'E5', 'green'], [16, 'E8', 'grad'], [17, 'E9', 'mixed'], [18, 'E10', 'green']]);
     });
 
-    it('every rung names rung-table entries that exist, with the ladder its exam column says, and a shape the table knows', () => {
+    it('every rung names rung-table entries that exist in the SHIPPED table, with the ladder its exam column says, the band it says, and a shape the table knows', () => {
       for (const r of OLIVE_RUNGS) {
         for (const id of r.table) expect({ n: r.n, id, inTable: !!TEMPLATES.rungs[id] }).toEqual({ n: r.n, id, inTable: true });
         const ladders = new Set(r.table.map((id) => TEMPLATES.rungs[id].ladder));
         if (r.examColumn === 'green') expect({ n: r.n, ladders: [...ladders] }).toEqual({ n: r.n, ladders: ['pass'] });
-        if (r.examColumn === 'grad') expect({ n: r.n, ladders: [...ladders] }).toEqual({ n: r.n, ladders: ['fail'] });
-        if (r.shape) expect({ n: r.n, shape: r.shape, known: !!TEMPLATES.shapes[r.shape] }).toEqual({ n: r.n, shape: r.shape, known: true });
+        if (r.examColumn === 'grad' || r.examColumn === 'mixed') expect({ n: r.n, ladders: [...ladders] }).toEqual({ n: r.n, ladders: ['fail'] });
+        // The page gates on the TABLE's band (cg005Olive OLIVE_SLIM): the rung's own band must be the same number.
+        for (const id of r.table) expect({ n: r.n, id, band: TEMPLATES.rungs[id].band, n2: TEMPLATES.rungs[id].n }).toEqual({ n: r.n, id, band: r.band, n2: r.n });
+        const mixed = r.table.filter((id) => TEMPLATES.rungs[id].verdict === 'mixed').length > 0;
+        expect({ n: r.n, mixed }).toEqual({ n: r.n, mixed: r.examColumn === 'mixed' });
+        if (r.shape) expect({ n: r.n, shape: r.shape, known: !!TEMPLATES.shapes[r.shape], same: r.table.some((id) => TEMPLATES.rungs[id].shape === r.shape) }).toEqual({ n: r.n, shape: r.shape, known: true, same: true });
       }
+      // Every table rung but the hint voicing belongs to exactly one rung here.
+      const claimed = OLIVE_RUNGS.flatMap((r) => r.table);
+      expect(new Set(claimed).size).toBe(claimed.length);
+      expect(Object.keys(TEMPLATES.rungs).filter((id) => id !== 'voice-hint' && !claimed.includes(id))).toEqual([]);
     });
 
-    it('every rung names exam probes that exist, on its own rung-table entries, designed on its column (green stays green, 🎓 stays red)', () => {
+    it('every rung names exam probes that exist, on its own rung-table entries, designed on its column (green stays green, 🎓 stays red, mixed is recorded)', () => {
       const probes = new Map<string, any>(exam.PROBES.map((p: any) => [p.id, p]));
       for (const r of OLIVE_RUNGS) {
         const mine = r.probes.map((id) => probes.get(id));
         for (const [i, p] of mine.entries()) expect({ n: r.n, id: r.probes[i], exists: !!p, onRung: !!p && r.table.includes(p.rung) }).toEqual({ n: r.n, id: r.probes[i], exists: true, onRung: true });
         const modes = new Set(mine.map((p) => p.mode));
-        if (r.examColumn === 'green') expect({ n: r.n, fail: modes.has('fail') }).toEqual({ n: r.n, fail: false });
-        if (r.examColumn === 'grad') expect({ n: r.n, pass: modes.has('pass') }).toEqual({ n: r.n, pass: false });
+        if (r.examColumn === 'green') expect({ n: r.n, fail: modes.has('fail'), pass: modes.has('pass') }).toEqual({ n: r.n, fail: false, pass: true });
+        if (r.examColumn === 'grad') expect({ n: r.n, pass: modes.has('pass'), fail: modes.has('fail') }).toEqual({ n: r.n, pass: false, fail: true });
         if (r.examColumn === 'both') expect({ n: r.n, pass: modes.has('pass'), fail: modes.has('fail') }).toEqual({ n: r.n, pass: true, fail: true });
+        if (r.examColumn === 'mixed') expect({ n: r.n, modes: [...modes] }).toEqual({ n: r.n, modes: ['record'] });
       }
       // Every exam probe on a ladder rung belongs to a rung here (voice-hint is not a rung).
       const claimed = new Set(OLIVE_RUNGS.flatMap((r) => r.probes));
@@ -288,45 +302,109 @@ describe('CG-006 — the requests', () => {
       expect(orphans).toEqual([]);
     });
 
-    it('rung 9 waits for Richard: the rule is not chosen, both candidates are framed and probed, either answer is one edit', () => {
+    it('ruling 2: rung 9 is G1 "never use the letter e" — the rung, its probes, its line and its hint; "under 5 words" and G2 are gone', () => {
       const nine = OLIVE_RUNGS.find((r) => r.n === 9)!;
-      expect(nine.rule).toBe('awaiting-ruling');
-      expect(nine.ruleCandidates!.map((c) => c.id)).toEqual(['G1', 'G2']);
-      for (const c of nine.ruleCandidates!) {
-        expect({ id: c.id, rung: !!PROPOSED_RUNGS[c.table], line: !!WORDS[c.line], probes: c.probes.every((p) => PROBES.some((x) => x.id === p && x.rung === c.table)) }).toEqual({ id: c.id, rung: true, line: true, probes: true });
+      expect({ table: nine.table, probes: nine.probes, line: nine.copyKeys.line }).toEqual({ table: ['no-letter-e'], probes: ['R9-G1-fr', 'R9-G1-en'], line: 'or9Line' });
+      expect(Object.keys(nine)).not.toContain('rule');
+      const probes = exam.PROBES.filter((p: any) => p.rung === 'no-letter-e');
+      expect(probes.map((p: any) => [p.id, p.lang, p.mode, p.expect])).toEqual([
+        ['R9-G1-fr', 'fr', 'fail', { kind: 'lacks', letters: ['e'] }],
+        ['R9-G1-en', 'en', 'fail', { kind: 'lacks', letters: ['e'] }]
+      ]);
+      expect(TEMPLATES.rungs['no-letter-e']).toMatchObject({ n: 9, band: 2, ladder: 'fail', shape: 'sentence', slots: {} });
+      // Retired everywhere: the table, the exam, the words, the palette's words, the probe data.
+      const everything = JSON.stringify([TEMPLATES, exam.PROBES, WORDS, HINTS, OLIVE_WORDS, PROBES, DROPPED_RUNGS]);
+      for (const gone of ['under-five-words', 'UnderFiveWords', 'no-water', 'or9LineG1', 'or9LineG2', 'say-thanks-en-wide', 'say-thanks-en-none', 'TY-A-en', 'TY-B-en', 'R9-G2']) expect({ gone, found: everything.includes(gone) }).toEqual({ gone, found: false });
+      for (const lang of ['en', 'fr'] as const) {
+        expect(WORDS.or9Line[lang]).toMatch(lang === 'en' ? /letter e/ : /lettre e/);
+        expect(HINTS.oliveRung9[lang]).toMatch(lang === 'en' ? /letter e/ : /lettre e/);
       }
-      expect([RULINGS.rung9.chosen, RULINGS.thanksEn.chosen]).toEqual([null, null]);
-      expect(RULINGS.rung9.candidates.map((c) => c.table)).toEqual(nine.ruleCandidates!.map((c) => c.table));
+    });
+
+    it('ruling 4: Olive\'s lessons are band 10–12 only — band 7–9 is offered no rung and every slot refuses there; band 10–12 reaches every one; the hints stay in both bands', () => {
+      const W = [...WORD_ROWS, ...Object.keys(OLIVE_WORDS).map((key) => ({ key, ...OLIVE_WORDS[key] }))];
+      expect(OLIVE_RUNGS.filter((r) => r.band !== 2).map((r) => r.n)).toEqual([]);
+      for (const lang of ['en', 'fr']) {
+        const b1 = runScript(PALETTE_SCRIPT, { band: 1, lang, words: W, rungs: 'all', exam: null });
+        const b2 = runScript(PALETTE_SCRIPT, { band: 2, lang, words: W, rungs: 'all', exam: null });
+        // Base (83888c07d) offered 11 rungs to band 7–9 and 14 to band 10–12.
+        expect({ lang, band1: b1.offered, olive1: b1.olive.length, band2: b2.offered }).toEqual({ lang, band1: [], olive1: 0, band2: PALETTE_RUNG_IDS });
+        expect(b2.offered).toHaveLength(20);
+        expect(new Set(b2.offered.map((id: string) => TEMPLATES.rungs[id].n))).toEqual(new Set(OLIVE_RUNGS.map((r) => r.n)));
+      }
+      // The picker refuses at band 7–9 before the shell's own rules run: nothing a band-1 page sends reaches Olive.
+      for (const rung of PALETTE_RUNG_IDS) expect({ rung, reason: runScript(OLIVE_SLOTS_SCRIPT, { rung, band: 1, lang: 'fr', words: W, slots: {} }).reason }).toEqual({ rung, reason: 'not-in-band' });
+      // The owl's hints are game-chosen in both bands: the voicing rung is band 7–9.
+      expect(TEMPLATES.rungs['voice-hint'].band).toBe(1);
     });
 
     it('every rung\'s card resolves in both languages: title, line, lesson, and the hint the table says after the run', () => {
       for (const lang of ['en', 'fr'] as const) {
         const words = runScript(TRANSLATE, { lang, words: WORD_ROWS, botName: 'Pip' });
         for (const r of OLIVE_RUNGS) {
-          for (const key of [r.copyKeys.title, r.copyKeys.line, r.copyKeys.lesson, ...(r.ruleCandidates ?? []).map((c) => c.line)]) expect({ n: r.n, key, text: words[key] }).toEqual({ n: r.n, key, text: expect.stringMatching(/^[^{}]*\S[^{}]*$/) });
+          for (const key of [r.copyKeys.title, r.copyKeys.line, r.copyKeys.lesson]) expect({ n: r.n, key, text: words[key] }).toEqual({ n: r.n, key, text: expect.stringMatching(/^[^{}]*\S[^{}]*$/) });
           expect({ n: r.n, hint: !!HINTS[r.copyKeys.hint]?.[lang] }).toEqual({ n: r.n, hint: true });
         }
       }
+      // A promoted rung's card IS its moment's (one word key, not a copy).
+      for (const m of MOMENTS.filter((x) => x.rung)) {
+        const r = OLIVE_RUNGS.find((x) => x.n === m.rung!.n)!;
+        expect({ id: m.id, title: r.copyKeys.title, line: r.copyKeys.line, table: r.table, moment: r.moment }).toEqual({ id: m.id, title: m.copyKeys.title, line: m.copyKeys.line, table: [m.rung!.table], moment: m.id });
+      }
+    });
+
+    it('one source for the voiced hints: the page\'s seven lines ARE the shell\'s table (derived), and every placeholder is one the shell fills', () => {
+      expect([...VOICED_HINT_KEYS].sort()).toEqual([...TEMPLATES.lists.hintKeys.en].sort());
+      expect([...VOICED_HINT_KEYS].sort()).toEqual([...TEMPLATES.lists.hintKeys.fr].sort());
+      for (const key of VOICED_HINT_KEYS) expect({ key, page: HINTS[key] }).toEqual({ key, page: { en: TEMPLATES.hints[key].en, fr: TEMPLATES.hints[key].fr } });
+      const slots = Object.keys(TEMPLATES.rungs['voice-hint'].slots);
+      for (const key of VOICED_HINT_KEYS) {
+        for (const lang of ['en', 'fr'] as const) {
+          const holes = [...HINTS[key][lang].matchAll(/\{(\w+)\}/g)].map((m) => m[1]);
+          expect({ key, lang, unknown: holes.filter((h) => !slots.includes(h)) }).toEqual({ key, lang, unknown: [] });
+          const v = check.checkSlots(TEMPLATES, 'voice-hint', { key, b: 'Bo', n: '4', w: '2', t: '5' }, lang).values;
+          const user = check.compose(TEMPLATES, 'voice-hint', v, { lang }).user;
+          // The page's line with the same values, exactly, inside the prompt.
+          expect({ key, lang, filled: user.includes(HINTS[key][lang].replace(/\{b\}/g, 'Bo').replace(/\{n\}/g, '4').replace(/\{w\}/g, '2').replace(/\{t\}/g, '5')) }).toEqual({ key, lang, filled: true });
+        }
+      }
+    });
+
+    it('ruling 7: the game is called Olive’s Island / L’île d’Olive, and no word says "Bot Garden"', () => {
+      expect(WORDS.brand).toEqual({ en: 'Olive’s Island', fr: 'L’île d’Olive' });
+      const said = WORD_KEYS.flatMap((k) => ['en', 'fr'].map((l) => [k, (WORDS[k] as any)[l]])).filter(([, t]) => /bot garden|jardin des bots/i.test(t));
+      expect(said).toEqual([]);
+      // The save code moves islands now, not "a garden".
+      expect([WORDS.guD2.en, WORDS.saveCodeBad.en].filter((t) => /garden/i.test(t))).toEqual([]);
     });
   });
 
   describe('AC2 (§4) — the moments\' probes are well-formed against the shell\'s own checks (offline, canned replies; the model is the exam\'s)', () => {
     const merged = mergeTemplates(TEMPLATES);
 
-    it('the merged table adds lists and rungs and never overwrites the shell\'s', () => {
+    it('the promoted moments are in the SHIPPED table; the dropped ones only in the merged evidence, which never overwrites the shell\'s', () => {
       const before = JSON.stringify(TEMPLATES);
       mergeTemplates(TEMPLATES);
       expect(JSON.stringify(TEMPLATES)).toBe(before);
-      for (const id of Object.keys(PROPOSED_RUNGS)) expect({ id, clash: !!TEMPLATES.rungs[id] }).toEqual({ id, clash: false });
-      for (const name of Object.keys(PROPOSED_LISTS)) expect({ name, clash: !!TEMPLATES.lists[name] }).toEqual({ name, clash: false });
-      expect(Object.keys(merged.rungs).length).toBe(Object.keys(TEMPLATES.rungs).length + Object.keys(PROPOSED_RUNGS).length);
+      for (const id of Object.keys(DROPPED_RUNGS)) expect({ id, shipped: !!TEMPLATES.rungs[id] }).toEqual({ id, shipped: false });
+      for (const name of Object.keys(DROPPED_LISTS)) expect({ name, shipped: !!TEMPLATES.lists[name] }).toEqual({ name, shipped: false });
+      expect(Object.keys(merged.rungs).length).toBe(Object.keys(TEMPLATES.rungs).length + 3);
+      // A shipped probe is the exam's own entry, field for field; a dropped one is in no exam.
+      const examIds = new Map<string, any>(exam.PROBES.map((p: any) => [p.id, p]));
+      for (const p of PROBES) {
+        const { moment, column, canned, shipped, ...rest } = p;
+        if (shipped) expect({ id: p.id, same: JSON.stringify(rest) === JSON.stringify(examIds.get(p.id)) }).toEqual({ id: p.id, same: true });
+        else expect({ id: p.id, inExam: examIds.has(p.id), rungShipped: !!TEMPLATES.rungs[p.rung] }).toEqual({ id: p.id, inExam: false, rungShipped: false });
+      }
+      expect(PROBES.filter((p) => p.shipped).length).toBe(18); // the six moments' 16 + rung 9's 2
     });
 
-    it.each(PROBES.map((p) => [p.id, p] as const))('%s: slots pass checkSlots, compose gives its shape, the canned reply grades as its column', (_id, p) => {
-      const slots = check.checkSlots(merged, p.rung, p.slots, p.lang);
+    it.each(PROBES.map((p) => [p.id, p] as const))('%s: slots pass checkSlots, compose gives its shape, the canned reply grades as its column — on the SHIPPED table when shipped', (_id, p) => {
+      const table = p.shipped ? TEMPLATES : merged;
+      const slots = check.checkSlots(table, p.rung, p.slots, p.lang);
       expect({ id: p.id, ok: slots.ok, reason: slots.reason }).toEqual({ id: p.id, ok: true, reason: undefined });
-      const prompt = check.compose(merged, p.rung, slots.values, { lang: p.lang, shape: p.shape, temperature: p.temperature });
-      expect(prompt.shape).toBe(p.shape ?? merged.rungs[p.rung].shape);
+      const prompt = check.compose(table, p.rung, slots.values, { lang: p.lang, shape: p.shape, temperature: p.temperature });
+      expect(prompt.shape).toBe(p.shape ?? table.rungs[p.rung].shape);
       expect(prompt.user).not.toMatch(/\{\w+\}/);
       expect(prompt.system).not.toMatch(/\{\w+\}/);
       const reply = check.checkOutput(p.canned, prompt);
@@ -336,27 +414,17 @@ describe('CG-006 — the requests', () => {
       const verdict = meets(p.expect, reply);
       if (p.column === 'green') expect({ id: p.id, met: verdict }).toEqual({ id: p.id, met: true });
       if (p.column === 'grad') expect({ id: p.id, met: verdict }).toEqual({ id: p.id, met: false });
-      // Where the exam knows the kind, this file grades exactly as `exam.js` does.
-      if ((EXAM_KINDS as readonly string[]).includes(p.expect.kind)) expect(exam.meetsOne(p.expect, reply)).toBe(verdict);
+      // The exam grades every kind these probes use (a kind it does not know can never pass: exam.test.js).
+      expect({ id: p.id, known: exam.KINDS.includes(p.expect.kind) }).toEqual({ id: p.id, known: true });
       // The mode says the same as the column: a 🎓 probe is asserted as failing; a mixed one is recorded.
       expect({ id: p.id, mode: p.mode }).toEqual({ id: p.id, mode: p.column === 'grad' ? 'fail' : p.column === 'mixed' ? 'record' : 'pass' });
     });
 
-    it('exam.js knows `lacks` / `containsAll` (the patch, taken by CG-005): a 🎓 probe of those kinds no longer passes vacuously', () => {
+    it('one grader: this file\'s `meets` IS the exam\'s `meetsOne` (the EXAM_KIND_PATCH of s2 is in exam.js; nothing is copied back here)', () => {
       const keeps = { ok: true, text: 'Un chat noir.' };
       const lacksE: Expect = { kind: 'lacks', letters: ['e'] };
-      // The reply keeps the rule (no e), so the 🎓 is NOT shown — by this file and, since CG-005 took the patch, by exam.js.
       expect([meets(lacksE, keeps), exam.meetsOne(lacksE, keeps)]).toEqual([true, true]);
-      // The patch, compiled as the case block of meetsOne, grades exactly as this file on every new-kind probe.
-      // eslint-disable-next-line @typescript-eslint/no-implied-eval
-      const patched = new Function('expect', 'got', 'fold', 'switch (expect.kind) {\n' + EXAM_KIND_PATCH + '\n default: return null; }') as (e: Expect, g: unknown, f: (s: unknown) => string) => boolean | null;
-      const newKind = PROBES.filter((p) => !(EXAM_KINDS as readonly string[]).includes(p.expect.kind));
-      expect(newKind.map((p) => p.id)).toEqual(['E3-fr', 'E3-en', 'R9-G1-fr', 'R9-G1-en', 'R9-G2-fr', 'R9-G2-en']);
-      for (const p of newKind) {
-        for (const text of [p.canned, 'Un chat noir.', 'Pip avance, tourne à gauche et arrose.', 'Pip marche au soleil.', 'Pip waters it.']) {
-          expect({ id: p.id, text, patched: patched(p.expect, text, fold) }).toEqual({ id: p.id, text, patched: meets(p.expect, { ok: true, text }) });
-        }
-      }
+      for (const p of PROBES) for (const text of [p.canned, 'Un chat noir.', 'Pip avance, tourne à gauche et arrose.', 'Pip waters it.']) expect({ id: p.id, text, same: meets(p.expect, { ok: true, text }) === exam.meetsOne(p.expect, { ok: true, text }) }).toEqual({ id: p.id, text, same: true });
     });
 
     it('`lacks` reads whole words: "beau" and "oiseau" are not "eau"; "l’eau" is', () => {
@@ -383,9 +451,10 @@ describe('CG-006 — the requests', () => {
       return out;
     }
 
-    it('the recorded readout, graded by the same checks: G1 breaks its rule 3/3; G2 KEEPS its rule 3/3; B5 broke "under 5" 3/3', () => {
+    it('the recorded readout that decided ruling 2, graded by the shipped grader: G1 breaks its rule 3/3 (kept); G2 KEEPS its rule 3/3 (dropped); B5 broke "under 5" 3/3 in the battery', () => {
       const g1 = PROBES.find((p) => p.id === 'R9-G1-fr')!;
-      const g2 = PROBES.find((p) => p.id === 'R9-G2-fr')!;
+      // G2 "never mention water" is retired; its rule, whole words (accents folded), is kept here as the record of why.
+      const g2 = { expect: { kind: 'lacks', words: ['eau', 'eaux', 'arroser', 'arrose', 'arroses', 'arrosent', 'arrosé', 'arrosée', 'arrosés', 'arrosage', 'arrosoir', 'pluie', 'mouiller', 'mouillé'] } as Expect };
       const g1r = recorded('G1');
       const g2r = recorded('G2');
       const b5r = recorded('B5');
@@ -397,16 +466,18 @@ describe('CG-006 — the requests', () => {
       expect(kept({ kind: 'wordsAtMost', n: 4 }, b5r)).toBe(0);
     });
 
-    it('the EN thank-you: the recorded A9 replies pass the current list (all say "grateful"); a reply without thank/grateful is refused by the current list and accepted by both candidates', () => {
+    it('ruling 3: the EN thank-you has no must-contain — the recorded A9 replies and a thank-you without "thank" both pass in EN; FR still needs "merci"', () => {
       const a9 = recorded('A9');
       expect(a9).toHaveLength(3);
-      const prompt = (rung: string) => check.compose(mergeTemplates(TEMPLATES), rung, { to: 'Mamie Rose', deed: 'watered her three tulips' }, { lang: 'en' });
-      for (const t of a9) expect({ t, now: check.checkOutput(t, prompt('say-thanks')).ok }).toEqual({ t, now: true });
-      const appreciate = PROBES.find((p) => p.id === 'TY-A-en')!.canned;
-      expect([check.checkOutput(appreciate, prompt('say-thanks')).reason, check.checkOutput(appreciate, prompt('say-thanks-en-wide')).ok, check.checkOutput(appreciate, prompt('say-thanks-en-none')).ok]).toEqual(['must-contain', true, true]);
-      // FR is untouched by either candidate: "merci" stays required.
-      const fr = (rung: string) => check.compose(mergeTemplates(TEMPLATES), rung, { to: 'Mamie Rose', deed: 'arrosé ses trois tulipes' }, { lang: 'fr' });
-      for (const rung of ['say-thanks', 'say-thanks-en-wide', 'say-thanks-en-none']) expect({ rung, fr: fr(rung).mustContain }).toEqual({ rung, fr: ['merci'] });
+      const en = check.compose(TEMPLATES, 'say-thanks', { to: 'Mamie Rose', deed: 'watered her three tulips' }, { lang: 'en' });
+      const fr = check.compose(TEMPLATES, 'say-thanks', { to: 'Mamie Rose', deed: 'arrosé ses trois tulipes' }, { lang: 'fr' });
+      expect([en.mustContain, fr.mustContain]).toEqual([[], ['merci']]);
+      for (const t of a9) expect({ t, ok: check.checkOutput(t, en).ok }).toEqual({ t, ok: true });
+      // The reply the old list refused (CG-006 §7: "I really appreciate…" → must-contain), and §7.1's candidate-A miss.
+      for (const t of ['I really appreciate you trusting me with your garden, Mamie Rose!', 'Thank Mamie Rose for trusting you with the garden.']) expect({ t, ok: check.checkOutput(t, en).ok }).toEqual({ t, ok: true });
+      expect(check.checkOutput('Bonjour Mamie Rose, quel beau jardin !', fr).reason).toBe('must-contain');
+      // The exam's EN thank-you probe is graded `ok` (a thank-you came back through every check) — P02, the CPU red of s2.
+      expect(exam.PROBES.find((p: any) => p.id === 'P02')).toMatchObject({ rung: 'say-thanks', lang: 'en', mode: 'pass', expect: { kind: 'ok' } });
     });
   });
 
@@ -513,18 +584,36 @@ describe('CG-006 — the requests', () => {
         if (m.status === 'add-probe') {
           const mine = PROBES.filter((p) => p.moment === m.id).map((p) => p.id);
           expect({ id: m.id, probes: m.probes }).toEqual({ id: m.id, probes: mine });
-          expect({ id: m.id, some: m.probes.length > 0, decision: ['promoted', 'dropped', 'awaiting-probe'].includes(m.decision) }).toEqual({ id: m.id, some: true, decision: true });
+          expect({ id: m.id, some: m.probes.length > 0, decision: ['promoted', 'dropped'].includes(m.decision), evidence: /§7\.1/.test(m.evidence ?? '') }).toEqual({ id: m.id, some: true, decision: true, evidence: true });
         } else expect({ id: m.id, evidence: !!m.evidence, decision: m.decision }).toEqual({ id: m.id, evidence: true, decision: 'ships' });
         for (const key of [m.copyKeys.title, m.copyKeys.line]) expect({ key, en: !!WORDS[key]?.en, fr: !!WORDS[key]?.fr }).toEqual({ key, en: true, fr: true });
       }
       // No probe without a home, no id twice.
-      const homes = new Set([...MOMENTS.map((m) => m.id), 'rung9', 'thanks-en']);
+      const homes = new Set([...MOMENTS.map((m) => m.id), 'rung9']);
       expect(PROBES.filter((p) => !homes.has(p.moment)).map((p) => p.id)).toEqual([]);
       expect(new Set(PROBES.map((p) => p.id)).size).toBe(PROBES.length);
     });
 
-    it('this session decided nothing it did not measure: every add-probe row is awaiting its probe', () => {
-      expect(MOMENTS.filter((m) => m.status === 'add-probe').map((m) => m.decision)).toEqual(Array(9).fill('awaiting-probe'));
+    it('the decisions are the real model\'s (CG-006 §7.1): E3 E4 E5 E8 E9 E10 promoted to rungs 13–18, E2 E6 E7 dropped; each promoted probe as shipped', () => {
+      expect(MOMENTS.filter((m) => m.status === 'add-probe').map((m) => [m.id, m.decision, m.rung?.n ?? null])).toEqual([
+        ['E2', 'dropped', null], ['E3', 'promoted', 13], ['E4', 'promoted', 14], ['E5', 'promoted', 15], ['E6', 'dropped', null],
+        ['E7', 'dropped', null], ['E8', 'promoted', 16], ['E9', 'promoted', 17], ['E10', 'promoted', 18]
+      ]);
+      // A promoted moment's probes are all shipped (in the exam, on its rung); a dropped one's are all evidence.
+      for (const m of MOMENTS.filter((x) => x.status === 'add-probe')) {
+        const mine = PROBES.filter((p) => p.moment === m.id);
+        expect({ id: m.id, shipped: [...new Set(mine.map((p) => p.shipped))] }).toEqual({ id: m.id, shipped: [m.decision === 'promoted'] });
+        if (m.rung) for (const p of mine) expect({ id: p.id, rung: p.rung }).toEqual({ id: p.id, rung: m.rung.table });
+      }
+      // decide() over the §7.1 readout (majority per probe on the CPU path; Metal agreed on every decision) reproduces
+      // every decision. Only what §7.1 measured is here: E3-count and E5-en were not run (recorded, and decide() reads
+      // no recorded probe of a green moment); E9-en was not run either, so both of its values are tried.
+      const measured: Record<string, boolean> = { 'E2-empty': false, 'E2-row-fr': false, 'E2-row-en': true, 'E3-fr': true, 'E3-en': true, 'E4-fr': true, 'E4-en': true, 'E5-fr': true, 'E5-apt': false, 'E6-polite': false, 'E6-poem': true, 'E6-shorter': true, 'E7-tulipe': true, 'E7-lettre': false, 'E8-fr': false, 'E8-en': false, 'E9-arrosoir': false, 'E9-chouette': false, 'E9-rocher': true, 'E10-fr': true, 'E10-en': true };
+      for (const e9en of [true, false]) {
+        const readout = { ...measured, 'E9-en': e9en };
+        const rows = PROBES.filter((p) => p.id in readout).map((p) => ({ id: p.id, mode: p.mode, met: readout[p.id], pass: p.mode === 'fail' ? !readout[p.id] : readout[p.id] }));
+        for (const m of MOMENTS.filter((x) => x.status === 'add-probe')) expect({ id: m.id, e9en, decided: decide(m, rows) }).toEqual({ id: m.id, e9en, decided: m.decision });
+      }
     });
 
     it('decide(): no rows → awaiting; the column held → promoted; contradicted → dropped; mixed needs disagreement', () => {
@@ -544,8 +633,9 @@ describe('CG-006 — the requests', () => {
       expect(decide(e8, [row('E8-fr', true), row('E8-en', true)])).toBe('promoted');
       expect(decide(e8, [{ id: 'E8-fr', mode: 'fail', met: true, pass: false }, row('E8-en', true)])).toBe('dropped');
       const rec = (id: string, met: boolean) => ({ id, mode: 'record' as const, met, pass: met });
-      expect(decide(e9, [rec('E9-arrosoir', true), rec('E9-chouette', false), rec('E9-rocher', true)])).toBe('promoted');
-      expect(decide(e9, [rec('E9-arrosoir', true), rec('E9-chouette', true), rec('E9-rocher', true)])).toBe('dropped');
+      expect(decide(e9, [rec('E9-arrosoir', true), rec('E9-chouette', false), rec('E9-rocher', true), rec('E9-en', true)])).toBe('promoted');
+      expect(decide(e9, [rec('E9-arrosoir', true), rec('E9-chouette', true), rec('E9-rocher', true), rec('E9-en', true)])).toBe('dropped');
+      expect(decide(e9, [rec('E9-arrosoir', true), rec('E9-chouette', false), rec('E9-rocher', true)])).toBe('awaiting-probe');
       expect(decide(MOMENTS.find((m) => m.id === 'E1')!, [])).toBe('ships');
     });
   });

@@ -57,16 +57,23 @@
       "en": ["Biscuit the cat is hungry.", "The tulips are thirsty.", "Thank you for the seeds."]
     },
     "flower_names": { "fr": ["Tulla", "Rosette", "Pâquerette", "Bouton"], "en": ["Tulla", "Rosie", "Sunny", "Button"] },
+    "programs": { "fr": ["avancer, avancer, gauche, arroser", "droite, avancer, arroser"], "en": ["forward, forward, turn left, water", "turn right, forward, water"] },
+    "traces": { "fr": ["avancé, avancé, tourné à droite, arrosé l'herbe, une flaque"], "en": ["moved, moved, turned right, watered the grass, a puddle"] },
+    "trick_bodies": { "fr": ["avancer, avancer, gauche, arroser, droite"], "en": ["forward, forward, turn left, water, turn right"] },
+    "word_triples": { "fr": ["tulipe, arrosoir, chat"], "en": ["tulip, bucket, cat"] },
+    "garden_words": { "fr": ["un arrosoir", "un pissenlit", "une chouette", "un rocher"], "en": ["a watering can", "a dandelion", "an owl", "a rock"] },
+    "request_objects": { "fr": ["croquettes", "graines", "lettre", "œufs"], "en": ["kibble", "seeds", "letter", "eggs"] },
     "hintKeys": { "fr": ["hintEmpty", "hintPattern", "hintMissed", "hintBump", "hintDone", "hintWet", "hintStart"], "en": ["hintEmpty", "hintPattern", "hintMissed", "hintBump", "hintDone", "hintWet", "hintStart"] }
   },
   "hints": {
-    "hintEmpty": { "en": "Drive {b} yourself first: press Teach and use the arrows. {b} remembers every step.", "fr": "Conduis {b} toi-même d'abord : appuie sur Apprendre et utilise les flèches. {b} retient chaque pas." },
-    "hintPattern": { "en": "Look at the steps: the same little dance, over and over. What if {b} could do this {n} times?", "fr": "Regarde les pas : la même petite danse, encore et encore. Et si {b} pouvait faire ça {n} fois ?" },
-    "hintMissed": { "en": "{b} watered {w} of 3 tulips. Which one did {b} walk past?", "fr": "{b} a arrosé {w} tulipes sur 3. Laquelle a-t-il ratée ?" },
-    "hintBump": { "en": "{b} bumped into something. Which step sent {b} the wrong way?", "fr": "{b} s'est cogné. Quel pas l'a envoyé du mauvais côté ?" },
-    "hintDone": { "en": "Perfect! Could you do it with fewer blocks? A repeat counts as one.", "fr": "Parfait ! Tu peux le faire avec moins de blocs ? Un répéter compte pour un." },
-    "hintWet": { "en": "A puddle! {b} watered where there is no tulip. Where was {b} facing?", "fr": "Une flaque ! {b} a arrosé là où il n'y a pas de tulipe. Il regardait où ?" },
-    "hintStart": { "en": "Hello! Mamie Rose is waiting. Press Teach and show {b} what to do.", "fr": "Coucou ! Mamie Rose attend. Appuie sur Apprendre et montre à {b} quoi faire." }
+    "_about": "The hint lines Olive may voice (the voice-hint rung). The ONE source: cg002Content.ts HINTS takes these seven keys from this object, so the line the page writes and the line Olive is asked to say again cannot drift (CG-006 s3). Placeholders: {b} the robot, {n} a repeat count, {w} done, {t} total — each a voice-hint slot compose fills.",
+    "hintStart": { "en": "Hello! Someone on the island is waiting. Press Teach and show {b} what to do.", "fr": "Coucou ! Quelqu’un t’attend sur l’île. Appuie sur Apprendre et montre à {b} quoi faire." },
+    "hintEmpty": { "en": "Drive {b} yourself first: press Teach and use the arrows. {b} remembers every step.", "fr": "Conduis {b} toi-même d’abord : appuie sur Apprendre et utilise les flèches. {b} retient chaque pas." },
+    "hintPattern": { "en": "Look at the steps: the same little dance, over and over. What if {b} could \"do this {n} times\"?", "fr": "Regarde les pas : la même petite danse, encore et encore. Et si {b} pouvait « faire ça {n} fois » ?" },
+    "hintMissed": { "en": "{b} did {w} of {t}. Which one did {b} walk past?", "fr": "{b} en a fait {w} sur {t}. Lequel a-t-il raté ?" },
+    "hintBump": { "en": "{b} bumped into something. Which step sent {b} the wrong way?", "fr": "{b} s’est cogné. Quel pas l’a envoyé du mauvais côté ?" },
+    "hintWet": { "en": "A puddle! {b} watered where there is no tulip. Where was {b} facing?", "fr": "Une flaque ! {b} a arrosé là où il n’y a pas de tulipe. Il regardait où ?" },
+    "hintDone": { "en": "Perfect! Could you do it with fewer blocks? A repeat counts as one.", "fr": "Parfait ! Tu peux le faire avec moins de blocs ? Un « répéter » compte pour un." }
   },
   "systems": {
     "olive": { "fr": "Tu es Olive, une chouette gentille qui aide Pip le robot dans le jardin de l'île. Réponds en français, très court.", "en": "You are Olive, a kind owl who helps Pip the robot in the island garden. Answer in English, very short." },
@@ -81,51 +88,51 @@
   },
   "rungs": {
     "say-thanks": {
-      "n": 1, "ladder": "pass", "shape": "sentence", "temperature": 0.8, "maxTokens": 48,
+      "n": 1, "band": 2, "ladder": "pass", "shape": "sentence", "temperature": 0.8, "maxTokens": 48,
       "slots": { "to": { "list": "islanders" }, "deed": { "list": "deeds" } },
       "system": { "fr": "Tu es Pip, un petit robot jardinier. Tu parles à {to}. Réponds en français, une phrase, à la première personne.", "en": "You are Pip, a small gardening robot, speaking to {to}. One sentence, first person, in English." },
       "user": { "fr": "Tu as {deed}. Dis merci à {to}.", "en": "You just {deed}. Thank {to} for trusting you with the garden." },
-      "mustContain": { "fr": ["merci"], "en": ["thank", "grateful"] }
+      "mustContain": { "fr": ["merci"] }
     },
     "name-one": {
-      "n": 2, "ladder": "pass", "shape": "one_word", "temperature": 0.8, "maxTokens": 24,
+      "n": 2, "band": 2, "ladder": "pass", "shape": "one_word", "temperature": 0.8, "maxTokens": 24,
       "slots": { "thing": { "list": "things_one" } },
       "system": "olive",
       "user": { "fr": "Donne un prénom pour {thing}.", "en": "Give a first name for {thing}." }
     },
     "name-three": {
-      "n": 2, "ladder": "pass", "shape": "list_of_3", "temperature": 0.8, "maxTokens": 48,
+      "n": 2, "band": 2, "ladder": "pass", "shape": "list_of_3", "temperature": 0.8, "maxTokens": 48,
       "slots": { "thing": { "list": "things_three" } },
       "system": "olive",
       "user": { "fr": "Propose 3 noms pour {thing}.", "en": "Suggest 3 names for {thing}." }
     },
     "words-to-blocks": {
-      "n": 3, "ladder": "pass", "shape": "blocks", "temperature": 0.2, "maxTokens": 64,
+      "n": 3, "band": 2, "ladder": "pass", "shape": "blocks", "temperature": 0.2, "maxTokens": 64,
       "slots": { "route": { "list": "routes" } },
       "system": "blocks",
       "user": { "fr": "Consigne : « {route} »", "en": "Instruction: \"{route}\"" }
     },
     "count-in-words": {
-      "n": 4, "ladder": "fail", "shape": "blocks", "temperature": 0.2, "maxTokens": 64,
+      "n": 4, "band": 2, "ladder": "fail", "shape": "blocks", "temperature": 0.2, "maxTokens": 64,
       "slots": { "route": { "list": "routes_counted" } },
       "system": "blocks",
       "user": { "fr": "Consigne : « {route} »", "en": "Instruction: \"{route}\"" }
     },
     "what-wants": {
-      "n": 5, "ladder": "pass", "shape": "one_of", "temperature": 0.2, "maxTokens": 24,
+      "n": 5, "band": 2, "ladder": "pass", "shape": "one_of", "temperature": 0.2, "maxTokens": 24,
       "slots": { "line": { "list": "lines" } },
       "options": "wants",
       "system": { "fr": "Quel objet la personne demande-t-elle ?", "en": "Which object is the person asking for?" },
       "user": { "fr": "{line}", "en": "{line}" }
     },
     "is-it-a": {
-      "n": 6, "ladder": "pass", "shape": "yes_no", "temperature": 0.2, "maxTokens": 16,
+      "n": 6, "band": 2, "ladder": "pass", "shape": "yes_no", "temperature": 0.2, "maxTokens": 16,
       "slots": { "thing": { "list": "things_ahead" }, "kind": { "list": "kinds" } },
       "system": { "fr": "Réponds seulement oui ou non.", "en": "Answer only yes or no." },
       "user": { "fr": "Devant Pip il y a {thing}. Est-ce {kind} ?", "en": "In front of Pip there is {thing}. Is it {kind}?" }
     },
     "count-tulips": {
-      "n": 7, "ladder": "fail", "shape": "integer", "temperature": 0.2, "maxTokens": 16,
+      "n": 7, "band": 2, "ladder": "fail", "shape": "integer", "temperature": 0.2, "maxTokens": 16,
       "slots": { "list": { "list": "flowerlists" } },
       "system": "olive",
       "user": { "fr": "Fleurs : {list}. Combien de tulipes ?", "en": "Flowers: {list}. How many tulips?" }
@@ -142,11 +149,11 @@
       "system": "olive",
       "user": { "fr": "{a} + {b} = ?", "en": "{a} + {b} = ?" }
     },
-    "under-five-words": {
-      "n": 9, "ladder": "fail", "shape": "sentence", "temperature": 0.8, "maxTokens": 48,
-      "slots": { "to": { "list": "islanders" } },
+    "no-letter-e": {
+      "n": 9, "band": 2, "ladder": "fail", "shape": "sentence", "temperature": 0.8, "maxTokens": 48,
+      "slots": {},
       "system": "olive",
-      "user": { "fr": "Dis merci à {to} en moins de 5 mots.", "en": "Say thank you to {to} in under 5 words." }
+      "user": { "fr": "Décris une tulipe en une phrase SANS utiliser la lettre e.", "en": "Describe a tulip in one sentence WITHOUT using the letter e." }
     },
     "tall-tales": {
       "n": 10, "band": 2, "ladder": "fail", "shape": "sentence", "temperature": 0.8, "maxTokens": 48,
@@ -155,20 +162,57 @@
       "user": { "fr": "{question}", "en": "{question}" }
     },
     "translate": {
-      "n": 11, "ladder": "pass", "shape": "sentence", "temperature": 0.2, "maxTokens": 48,
+      "n": 11, "band": 2, "ladder": "pass", "shape": "sentence", "temperature": 0.2, "maxTokens": 48,
       "slots": { "note": { "list": "notes" } },
       "system": { "fr": "Translate the French sentence to English. Output only the translation.", "en": "Traduis la phrase anglaise en français. Écris seulement la traduction." },
       "user": { "fr": "{note}", "en": "{note}" }
     },
     "poem": {
-      "n": 12, "ladder": "pass", "shape": "two_lines", "temperature": 0.8, "maxTokens": 64,
+      "n": 12, "band": 2, "ladder": "pass", "shape": "two_lines", "temperature": 0.8, "maxTokens": 64,
       "slots": { "flower": { "text": true, "suggest": "flower_names" } },
       "system": "olive",
       "user": { "fr": "Écris un poème de deux lignes sur une tulipe qui s'appelle {flower}.", "en": "Write a two-line poem about a tulip called {flower}." }
     },
+    "explain-program": {
+      "n": 13, "band": 2, "ladder": "pass", "shape": "sentence", "temperature": 0.2, "maxTokens": 48,
+      "slots": { "program": { "list": "programs" } },
+      "system": "olive",
+      "user": { "fr": "Voici les blocs de Pip, dans l’ordre : {program}. Dis en une phrase ce que fait Pip.", "en": "Here are Pip's blocks, in order: {program}. Say in one sentence what Pip does." }
+    },
+    "narrate-run": {
+      "n": 14, "band": 2, "ladder": "pass", "shape": "sentence", "temperature": 0.5, "maxTokens": 48,
+      "slots": { "trace": { "list": "traces" } },
+      "system": "olive",
+      "user": { "fr": "Voici ce que Pip a fait : {trace}. Raconte-le en une phrase.", "en": "This is what Pip did: {trace}. Tell it in one sentence." }
+    },
+    "name-trick": {
+      "n": 15, "band": 2, "ladder": "pass", "shape": "one_word", "temperature": 0.8, "maxTokens": 24,
+      "slots": { "body": { "list": "trick_bodies" } },
+      "system": "olive",
+      "user": { "fr": "Voici une astuce de Pip : {body}. Donne-lui un nom court.", "en": "Here is one of Pip's tricks: {body}. Give it a short name." }
+    },
+    "sort-words": {
+      "n": 16, "band": 2, "ladder": "fail", "shape": "list_of_3", "temperature": 0.2, "maxTokens": 48,
+      "slots": { "words": { "list": "word_triples" } },
+      "system": "olive",
+      "user": { "fr": "Range ces trois mots dans l’ordre alphabétique : {words}.", "en": "Put these three words in alphabetical order: {words}." }
+    },
+    "define": {
+      "n": 17, "band": 2, "ladder": "fail", "verdict": "mixed", "shape": "sentence", "temperature": 0.5, "maxTokens": 48,
+      "slots": { "word": { "list": "garden_words" } },
+      "system": "olive",
+      "user": { "fr": "Explique à un enfant ce que c’est, {word}, en une phrase.", "en": "Explain to a child what {word} is, in one sentence." }
+    },
+    "letter": {
+      "n": 18, "band": 2, "ladder": "pass", "shape": "sentence", "temperature": 0.8, "maxTokens": 48,
+      "slots": { "who": { "list": "islanders" }, "object": { "list": "request_objects" } },
+      "system": "olive",
+      "user": { "fr": "Ce que {who} veut : {object}. Écris la demande de {who} à Pip, en une phrase, comme si {who} parlait.", "en": "What {who} wants: {object}. Write {who}'s request to Pip in one sentence, as if {who} were speaking." },
+      "mustContain": { "fr": ["{object}"], "en": ["{object}"] }
+    },
     "voice-hint": {
-      "n": 0, "ladder": "pass", "shape": "sentence", "temperature": 0.5, "maxTokens": 48,
-      "slots": { "key": { "list": "hintKeys" }, "b": { "text": true }, "n": { "regex": "^[0-9]{1,2}$", "optional": true }, "w": { "regex": "^[0-9]$", "optional": true } },
+      "n": 0, "band": 1, "ladder": "pass", "shape": "sentence", "temperature": 0.5, "maxTokens": 48,
+      "slots": { "key": { "list": "hintKeys" }, "b": { "text": true }, "n": { "regex": "^[0-9]{1,2}$", "optional": true }, "w": { "regex": "^[0-9]{1,2}$", "optional": true }, "t": { "regex": "^[0-9]{1,2}$", "optional": true } },
       "system": "olive",
       "user": { "fr": "Redis cette phrase avec tes mots, en une phrase : « {hint} »", "en": "Say this in your own words, one sentence: \"{hint}\"" }
     }
@@ -459,12 +503,12 @@
         "number": "a"
       }
     },
-    "under-five-words": {
+    "no-letter-e": {
       "fr": {
-        "text": "Merci beaucoup {to}, tu es vraiment le plus gentil ami de toute l'île !"
+        "text": "La tulipe est une belle fleur rouge qui se lève vers le soleil."
       },
       "en": {
-        "text": "Thank you so much {to}, you are truly the kindest friend on the whole island!"
+        "text": "The tulip is a lovely red flower that opens in the sun."
       }
     },
     "tall-tales": {
@@ -541,6 +585,86 @@
       },
       "en": {
         "text": "{flower}, my tulip in the sun,\nYou drink the rain and wake for fun."
+      }
+    },
+    "explain-program": {
+      "fr": {
+        "by": ["program"],
+        "map": {
+          "avancer, avancer, gauche, arroser": { "text": "Pip avance deux fois, tourne à gauche et arrose." },
+          "droite, avancer, arroser": { "text": "Pip tourne à droite, avance d'une case et arrose." }
+        }
+      },
+      "en": {
+        "by": ["program"],
+        "map": {
+          "forward, forward, turn left, water": { "text": "Pip goes forward twice, turns left and waters." },
+          "turn right, forward, water": { "text": "Pip turns right, goes forward one square and waters." }
+        }
+      }
+    },
+    "narrate-run": {
+      "fr": {
+        "by": ["trace"],
+        "map": {
+          "avancé, avancé, tourné à droite, arrosé l'herbe, une flaque": { "text": "Pip a avancé deux fois, a tourné à droite et a arrosé l'herbe : une flaque !" }
+        }
+      },
+      "en": {
+        "by": ["trace"],
+        "map": {
+          "moved, moved, turned right, watered the grass, a puddle": { "text": "Pip moved twice, turned right and watered the grass: a puddle!" }
+        }
+      }
+    },
+    "name-trick": {
+      "fr": {
+        "value": "Arroseur"
+      },
+      "en": {
+        "value": "Sprinkler"
+      }
+    },
+    "sort-words": {
+      "fr": {
+        "by": ["words"],
+        "map": {
+          "tulipe, arrosoir, chat": { "value": ["tulipe", "arrosoir", "chat"] }
+        }
+      },
+      "en": {
+        "by": ["words"],
+        "map": {
+          "tulip, bucket, cat": { "value": ["tulip", "bucket", "cat"] }
+        }
+      }
+    },
+    "define": {
+      "fr": {
+        "by": ["word"],
+        "map": {
+          "un arrosoir": { "text": "C'est un petit chapeau que les fleurs portent quand il pleut." },
+          "un pissenlit": { "text": "Un pissenlit, c'est une fleur jaune qui devient une boule toute blanche." },
+          "une chouette": { "text": "C'est une fleur qui ne s'ouvre que la nuit." },
+          "un rocher": { "text": "Un rocher, c'est une grosse pierre très dure." }
+        }
+      },
+      "en": {
+        "by": ["word"],
+        "map": {
+          "a watering can": { "text": "It is a little hat that flowers wear when it rains." },
+          "a dandelion": { "text": "A dandelion is a yellow flower that turns into a white fluffy ball." },
+          "an owl": { "text": "It is a flower that only opens at night." },
+          "a rock": { "text": "A rock is a big, very hard stone." }
+        }
+      }
+    },
+    "letter": {
+      "fr": {
+        "text": "{who} : « Pip, il me faut ceci : {object}. Tu m'aides ? »"
+      },
+      "en": {
+        "text": "{who}: \"Pip, I need this: {object}. Will you help me?\""
       }
     }
   }

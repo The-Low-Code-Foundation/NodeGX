@@ -64,9 +64,31 @@ test('shape, temperature and options are taken from the request only when the ta
 });
 
 test('the hint voicing substitutes the written line for the key; the key itself never reaches the prompt as free text', () => {
-  const v = checkSlots(templates, 'voice-hint', { key: 'hintMissed', b: 'Pip', w: '2' }, 'en').values;
+  const v = checkSlots(templates, 'voice-hint', { key: 'hintMissed', b: 'Pip', w: '2', t: '4' }, 'en').values;
   const p = compose(templates, 'voice-hint', v, { lang: 'en' });
-  assert.equal(p.user, 'Say this in your own words, one sentence: "Pip watered 2 of 3 tulips. Which one did Pip walk past?"');
+  assert.equal(p.user, 'Say this in your own words, one sentence: "Pip did 2 of 4. Which one did Pip walk past?"');
+  // Every voiced line, every key, both languages: each placeholder is a voice-hint slot compose fills — nothing left.
+  const slots = new Set(Object.keys(templates.rungs['voice-hint'].slots));
+  for (const key of templates.lists.hintKeys.fr) {
+    for (const L of ['fr', 'en']) {
+      for (const [, name] of templates.hints[key][L].matchAll(/\{(\w+)\}/g)) assert.ok(slots.has(name), `${key} ${L}: {${name}} is a slot`);
+      const all = checkSlots(templates, 'voice-hint', { key, b: 'Bo', n: '4', w: '1', t: '3' }, L).values;
+      assert.doesNotMatch(compose(templates, 'voice-hint', all, { lang: L }).user, /\{\w+\}/, `${key} ${L}`);
+      assert.doesNotMatch(compose(templates, 'voice-hint', { key, b: 'Bo' }, { lang: L }).user, /\{\w+\}/, `${key} ${L}, optional slots absent`);
+    }
+  }
+});
+
+test('the rulings of 2026-09-28 in the table: the EN thank-you has no must-contain (FR keeps merci); every lesson is band 10–12; the hints stay in band 7–9', () => {
+  const v = (L) => checkSlots(templates, 'say-thanks', L === 'en' ? { to: 'Mamie Rose', deed: 'watered her three tulips' } : { to: 'Mamie Rose', deed: 'arrosé ses trois tulipes' }, L).values;
+  const en = compose(templates, 'say-thanks', v('en'), { lang: 'en' });
+  const fr = compose(templates, 'say-thanks', v('fr'), { lang: 'fr' });
+  assert.deepEqual([en.mustContain, fr.mustContain], [[], ['merci']]);
+  assert.deepEqual(checkOutput('I really appreciate you trusting me with your garden, Mamie Rose!', en), { ok: true, text: 'I really appreciate you trusting me with your garden, Mamie Rose!' });
+  assert.equal(checkOutput('Bonjour Mamie Rose, quel beau jardin !', fr).reason, 'must-contain');
+  const bands = Object.entries(templates.rungs).map(([id, r]) => [id, r.band]);
+  assert.deepEqual(bands.filter(([id]) => id !== 'voice-hint').filter(([, b]) => b !== 2), [], 'every rung a child places is band 10–12');
+  assert.equal(templates.rungs['voice-hint'].band, 1, 'the owl voices hints in band 7–9 too');
 });
 
 test('output: the grammar shapes are parsed (with the readout’s missing brace repaired), enums and integers held', () => {

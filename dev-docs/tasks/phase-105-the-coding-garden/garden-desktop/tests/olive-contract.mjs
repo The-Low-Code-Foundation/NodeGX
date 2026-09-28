@@ -10,7 +10,9 @@
  *
  * Green = the dial holds in FR and EN (CG-005 AC7: two runs at 0 the same name, three at 1.2 at least two names), every ✅ probe met its expectation, every 🎓 probe was recorded as FAILING (the ladder is built on it),
  * status answered under 1 s while a completion ran, and timings.log carries model-load / exam-probe / olive lines.
- * Recorded probes (mode 'record') are printed, never asserted. Exit 1 otherwise. Correctness, not timing: the ms are
+ * Recorded probes (mode 'record') are printed, never asserted (the mixed rung, define, is graded on its recorded set).
+ * Since CG-006 s3 the exam carries rung 9 = "no letter e" (R9-G1-*) and rungs 13–18 (E3-* … E10-*), and P02 (the EN
+ * thank-you) has no must-contain to miss (Richard's ruling 3). Exit 1 otherwise. Correctness, not timing: the ms are
  * printed for the task file, never asserted.
  */
 import { createRequire } from 'node:module';
@@ -137,7 +139,7 @@ async function main() {
   const failed = asserted.filter((p) => !p.pass);
   const byLang = res.probes.reduce((m, p) => ((m[p.lang] = (m[p.lang] || 0) + 1), m), {});
   R.byLang = byLang;
-  console.log(`olive-contract: probes per language ${JSON.stringify(byLang)} (CG-005 AC8; the EN twins are recorded, not asserted)`);
+  console.log(`olive-contract: probes per language ${JSON.stringify(byLang)} (CG-005 AC8: the EN twins nobody measured are recorded; rung 9 and the promoted moments' EN probes, measured in CG-006 §7.1, are asserted)`);
   const green = dialGreen && failed.length === 0 && st.ms < 1000 && events['model-load'] === 1 && events['exam-probe'] >= asserted.length && events.olive >= asserted.length;
   R.verdict = green ? 'PASS' : 'FAIL';
   R.failed = failed.map((p) => p.id);
