@@ -1,0 +1,222 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "734550b9-cc8a-5879-8508-347b3f521a74",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "winsummaryIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "program",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "request",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "winsummaryFn",
+      "type": "JavaScriptFunction",
+      "label": "Win summary",
+      "parameters": {
+        "functionScript": "\nfunction wordMap(rows, lang, name) {\n  var map = {};\n  var list = Array.isArray(rows) ? rows : [];\n  for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || '').split('{b}').join(name);\n  return map;\n}\nfunction fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\nfunction langOf(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction nameOf(v) { var n = String(v || '').trim(); return n || 'Pip'; }\n\nvar USE = { repeat: 2, until: 3, 'if': 4, when: 5, count_inc: 6, trick: 7, 'do': 7 };\nvar lang = langOf(Inputs.lang), name = nameOf(Inputs.botName);\nvar w = wordMap(Inputs.words, lang, name);\nvar prog = Array.isArray(Inputs.program) ? Inputs.program : [];\nvar req = Inputs.request && typeof Inputs.request === 'object' ? Inputs.request : null;\nvar used = {}, blocks = 0;\nfunction walk(l) { for (var i = 0; i < l.length; i++) { var b = l[i]; if (!b) continue; blocks++; if (USE[b.t]) used[USE[b.t]] = true; if (Array.isArray(b.body)) walk(b.body); } }\nwalk(prog);\nvar bloom = [1];\nvar asked = req && Array.isArray(req.tricks) ? req.tricks : [];\nfor (var a = 0; a < asked.length; a++) if (bloom.indexOf(Number(asked[a])) === -1) bloom.push(Number(asked[a]));\nfor (var u in used) if (bloom.indexOf(Number(u)) === -1) bloom.push(Number(u));\nvar learnt = 0;\nfor (var t = 0; t < asked.length; t++) if (used[asked[t]]) learnt = Number(asked[t]);\nOutputs.bloom = bloom;\nOutputs.thanks = fill(w.winThanks, {});\nOutputs.line = fill(blocks > 8 ? w.winMany : w.winFew, { k: blocks });\nOutputs.rewardText = req && req.copyKeys && req.copyKeys.reward ? fill(w.winNew, { reward: w[req.copyKeys.reward] || '' }) : '';\nOutputs.hasReward = !!(req && req.reward);\nOutputs.learnText = learnt ? fill(w.winLearn, { trick: String(w['n' + learnt] || '').toLowerCase() }) : '';\nOutputs.hasLearn = learnt > 0;\nOutputs.blocks = blocks;\nOutputs.reward = req && req.reward ? JSON.parse(JSON.stringify(req.reward)) : null;\nOutputs.requestId = req ? String(req.id) : '';\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-program",
+          "displayName": "program",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-request",
+          "displayName": "request",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-bloom",
+          "displayName": "bloom",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-thanks",
+          "displayName": "thanks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-line",
+          "displayName": "line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rewardText",
+          "displayName": "rewardText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasReward",
+          "displayName": "hasReward",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-learnText",
+          "displayName": "learnText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasLearn",
+          "displayName": "hasLearn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blocks",
+          "displayName": "blocks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-reward",
+          "displayName": "reward",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-requestId",
+          "displayName": "requestId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "winsummaryOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "blocks",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "bloom",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasLearn",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hasReward",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "learnText",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "line",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "requestId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "reward",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "rewardText",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "thanks",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

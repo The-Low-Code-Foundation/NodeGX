@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0d4db588-cc81-5eed-8559-0fc22f3db146",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "goIn",
+      "fromProperty": "words",
+      "toId": "goT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "goIn",
+      "fromProperty": "lang",
+      "toId": "goT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "goIn",
+      "fromProperty": "botName",
+      "toId": "goT",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "goT",
+      "fromProperty": "guWhereH",
+      "toId": "goH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "goT",
+      "fromProperty": "guHere",
+      "toId": "goModelH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "goT",
+      "fromProperty": "guHereOn",
+      "toId": "goModelOn",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "goT",
+      "fromProperty": "guHereOff",
+      "toId": "goModelOff",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "goT",
+      "fromProperty": "guNoModel",
+      "toId": "goNoneText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "goT",
+      "fromProperty": "guExamNone",
+      "toId": "goNoExam",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "goStatus",
+      "fromProperty": "running",
+      "toId": "goIsOn",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "goIsOn",
+      "fromProperty": "ontrue",
+      "toId": "goStates",
+      "toProperty": "to-on"
+    },
+    {
+      "fromId": "goIsOn",
+      "fromProperty": "onfalse",
+      "toId": "goStates",
+      "toProperty": "to-off"
+    },
+    {
+      "fromId": "goStates",
+      "fromProperty": "dot",
+      "toId": "goDot",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "goStates",
+      "fromProperty": "awake",
+      "toId": "goModelOn",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "goStates",
+      "fromProperty": "asleep",
+      "toId": "goModelOff",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "goStatus",
+      "fromProperty": "hasExam",
+      "toId": "goExam",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "goStatus",
+      "fromProperty": "noExam",
+      "toId": "goNoExam",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "goIn",
+      "fromProperty": "words",
+      "toId": "goExamLine",
+      "toProperty": "hints"
+    },
+    {
+      "fromId": "goIn",
+      "fromProperty": "lang",
+      "toId": "goExamLine",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "goIn",
+      "fromProperty": "botName",
+      "toId": "goExamLine",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "goStatus",
+      "fromProperty": "examVars",
+      "toId": "goExamLine",
+      "toProperty": "vars"
+    },
+    {
+      "fromId": "goExamLine",
+      "fromProperty": "text",
+      "toId": "goExam",
+      "toProperty": "text"
+    }
+  ]
+}

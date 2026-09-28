@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b2e45e19-8c36-5d23-805a-b2db0ce9ce4a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tidylineIn",
+      "fromProperty": "botName",
+      "toId": "tidylineFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "tidylineIn",
+      "fromProperty": "dismissed",
+      "toId": "tidylineFn",
+      "toProperty": "in-dismissed"
+    },
+    {
+      "fromId": "tidylineIn",
+      "fromProperty": "isOffered",
+      "toId": "tidylineFn",
+      "toProperty": "in-isOffered"
+    },
+    {
+      "fromId": "tidylineIn",
+      "fromProperty": "lang",
+      "toId": "tidylineFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "tidylineIn",
+      "fromProperty": "programText",
+      "toId": "tidylineFn",
+      "toProperty": "in-programText"
+    },
+    {
+      "fromId": "tidylineIn",
+      "fromProperty": "sample",
+      "toId": "tidylineFn",
+      "toProperty": "in-sample"
+    },
+    {
+      "fromId": "tidylineIn",
+      "fromProperty": "textKey",
+      "toId": "tidylineFn",
+      "toProperty": "in-textKey"
+    },
+    {
+      "fromId": "tidylineIn",
+      "fromProperty": "vars",
+      "toId": "tidylineFn",
+      "toProperty": "in-vars"
+    },
+    {
+      "fromId": "tidylineIn",
+      "fromProperty": "words",
+      "toId": "tidylineFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "tidylineFn",
+      "fromProperty": "out-show",
+      "toId": "tidylineOut",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "tidylineFn",
+      "fromProperty": "out-text",
+      "toId": "tidylineOut",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tidylineFn",
+      "fromProperty": "success",
+      "toId": "tidylineOut",
+      "toProperty": "ran"
+    }
+  ]
+}

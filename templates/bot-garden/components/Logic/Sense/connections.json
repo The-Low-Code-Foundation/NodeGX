@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7e45b2d5-97e1-584b-8d88-d7b1bf5295f8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "senseIn",
+      "fromProperty": "answer",
+      "toId": "senseFn",
+      "toProperty": "in-answer"
+    },
+    {
+      "fromId": "senseIn",
+      "fromProperty": "arg",
+      "toId": "senseFn",
+      "toProperty": "in-arg"
+    },
+    {
+      "fromId": "senseIn",
+      "fromProperty": "count",
+      "toId": "senseFn",
+      "toProperty": "in-count"
+    },
+    {
+      "fromId": "senseIn",
+      "fromProperty": "robotId",
+      "toId": "senseFn",
+      "toProperty": "in-robotId"
+    },
+    {
+      "fromId": "senseIn",
+      "fromProperty": "run",
+      "toId": "senseFn",
+      "toProperty": "in-run"
+    },
+    {
+      "fromId": "senseIn",
+      "fromProperty": "sensor",
+      "toId": "senseFn",
+      "toProperty": "in-sensor"
+    },
+    {
+      "fromId": "senseIn",
+      "fromProperty": "world",
+      "toId": "senseFn",
+      "toProperty": "in-world"
+    },
+    {
+      "fromId": "senseFn",
+      "fromProperty": "out-sensor",
+      "toId": "senseOut",
+      "toProperty": "sensor"
+    },
+    {
+      "fromId": "senseFn",
+      "fromProperty": "out-value",
+      "toId": "senseOut",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "senseFn",
+      "fromProperty": "success",
+      "toId": "senseOut",
+      "toProperty": "ran"
+    }
+  ]
+}

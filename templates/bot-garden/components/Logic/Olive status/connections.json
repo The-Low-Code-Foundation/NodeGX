@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ce5fbd53-d148-58fa-89ea-7c8caecf2714",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "olivestatusIn",
+      "fromProperty": "nonce",
+      "toId": "olivestatusFn",
+      "toProperty": "in-nonce"
+    },
+    {
+      "fromId": "olivestatusFn",
+      "fromProperty": "out-checked",
+      "toId": "olivestatusOut",
+      "toProperty": "checked"
+    },
+    {
+      "fromId": "olivestatusFn",
+      "fromProperty": "out-examVars",
+      "toId": "olivestatusOut",
+      "toProperty": "examVars"
+    },
+    {
+      "fromId": "olivestatusFn",
+      "fromProperty": "out-hasExam",
+      "toId": "olivestatusOut",
+      "toProperty": "hasExam"
+    },
+    {
+      "fromId": "olivestatusFn",
+      "fromProperty": "out-model",
+      "toId": "olivestatusOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "olivestatusFn",
+      "fromProperty": "out-noExam",
+      "toId": "olivestatusOut",
+      "toProperty": "noExam"
+    },
+    {
+      "fromId": "olivestatusFn",
+      "fromProperty": "out-passed",
+      "toId": "olivestatusOut",
+      "toProperty": "passed"
+    },
+    {
+      "fromId": "olivestatusFn",
+      "fromProperty": "out-running",
+      "toId": "olivestatusOut",
+      "toProperty": "running"
+    },
+    {
+      "fromId": "olivestatusFn",
+      "fromProperty": "out-stopped",
+      "toId": "olivestatusOut",
+      "toProperty": "stopped"
+    },
+    {
+      "fromId": "olivestatusFn",
+      "fromProperty": "out-total",
+      "toId": "olivestatusOut",
+      "toProperty": "total"
+    },
+    {
+      "fromId": "olivestatusFn",
+      "fromProperty": "success",
+      "toId": "olivestatusOut",
+      "toProperty": "ran"
+    }
+  ]
+}

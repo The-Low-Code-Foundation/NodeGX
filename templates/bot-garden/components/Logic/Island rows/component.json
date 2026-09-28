@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "666b9d87-ca90-5182-87cf-f1e1531c17e0",
+  "name": "Island rows",
+  "path": "/Logic/Island rows",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The requests on the island for this band. Runs when an input changes; Ran after each run."
+}

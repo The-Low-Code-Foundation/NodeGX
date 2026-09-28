@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b35cb050-fda5-50ab-8fa1-69a85d699f8d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "kitpaletteIn",
+      "fromProperty": "band",
+      "toId": "kitpaletteFn",
+      "toProperty": "in-band"
+    },
+    {
+      "fromId": "kitpaletteIn",
+      "fromProperty": "botName",
+      "toId": "kitpaletteFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "kitpaletteIn",
+      "fromProperty": "lang",
+      "toId": "kitpaletteFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "kitpaletteIn",
+      "fromProperty": "palette",
+      "toId": "kitpaletteFn",
+      "toProperty": "in-palette"
+    },
+    {
+      "fromId": "kitpaletteIn",
+      "fromProperty": "words",
+      "toId": "kitpaletteFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "kitpaletteFn",
+      "fromProperty": "out-count",
+      "toId": "kitpaletteOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "kitpaletteFn",
+      "fromProperty": "out-palette",
+      "toId": "kitpaletteOut",
+      "toProperty": "palette"
+    },
+    {
+      "fromId": "kitpaletteFn",
+      "fromProperty": "success",
+      "toId": "kitpaletteOut",
+      "toProperty": "ran"
+    }
+  ]
+}

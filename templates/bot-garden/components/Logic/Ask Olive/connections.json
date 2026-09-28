@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e77095c8-4e4f-5b11-8cf5-e78cdc1cf82c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "askoliveIn",
+      "fromProperty": "fallback",
+      "toId": "askoliveFn",
+      "toProperty": "in-fallback"
+    },
+    {
+      "fromId": "askoliveIn",
+      "fromProperty": "lang",
+      "toId": "askoliveFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "askoliveIn",
+      "fromProperty": "rung",
+      "toId": "askoliveFn",
+      "toProperty": "in-rung"
+    },
+    {
+      "fromId": "askoliveIn",
+      "fromProperty": "slots",
+      "toId": "askoliveFn",
+      "toProperty": "in-slots"
+    },
+    {
+      "fromId": "askoliveIn",
+      "fromProperty": "go",
+      "toId": "askoliveFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "askoliveFn",
+      "fromProperty": "out-fallback",
+      "toId": "askoliveOut",
+      "toProperty": "fallback"
+    },
+    {
+      "fromId": "askoliveFn",
+      "fromProperty": "out-ok",
+      "toId": "askoliveOut",
+      "toProperty": "ok"
+    },
+    {
+      "fromId": "askoliveFn",
+      "fromProperty": "out-text",
+      "toId": "askoliveOut",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "askoliveFn",
+      "fromProperty": "success",
+      "toId": "askoliveOut",
+      "toProperty": "ran"
+    }
+  ]
+}

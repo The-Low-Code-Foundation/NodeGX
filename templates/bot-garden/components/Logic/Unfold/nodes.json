@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "219ffd70-d1b5-534c-87bb-868b4e826f90",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "unfoldIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "program",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "repeatId",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "unfoldFn",
+      "type": "JavaScriptFunction",
+      "label": "Unfold",
+      "parameters": {
+        "functionScript": "\nfunction sameBlock(a, b) {\n  if (!a || !b || a.body || b.body) return false;\n  if (a.t !== b.t || (Number(a.n) || 0) !== (Number(b.n) || 0)) return false;\n  return JSON.stringify(a.slots || {}) === JSON.stringify(b.slots || {});\n}\nfunction sameRun(seq, at, from, len) { for (var k = 0; k < len; k++) if (!sameBlock(seq[at + k], seq[from + k])) return false; return true; }\n/** The mockup's findRepeat: runs of one block, repeated sequences up to six long; best coverage wins, a longer sequence on a tie. */\nfunction findRepeatIn(seq) {\n  var best = null;\n  for (var len = 1; len <= 6; len++) {\n    for (var i = 0; i + len * 2 <= seq.length; i++) {\n      var count = 1;\n      while (i + (count + 1) * len <= seq.length && sameRun(seq, i, i + count * len, len)) count++;\n      if (count >= 2) { var cover = len * count; if (!best || cover > best.cover || (cover === best.cover && len > best.len)) best = { i: i, len: len, count: count, cover: cover }; }\n    }\n  }\n  return best;\n}\n/** Top level first; then a second pass inside each container, depth-first. */\nfunction findRepeat(list) {\n  var top = findRepeatIn(list);\n  if (top) { top.containerId = null; return top; }\n  for (var i = 0; i < list.length; i++) {\n    var b = list[i];\n    if (!b || !Array.isArray(b.body)) continue;\n    var inner = findRepeatIn(b.body);\n    if (inner) { inner.containerId = b.id; return inner; }\n    var deeper = findRepeat(b.body);\n    if (deeper) return deeper;\n  }\n  return null;\n}\nfunction findBlock(list, id) { for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (b.id === id) return b; if (b.body) { var f = findBlock(b.body, id); if (f) return f; } } return null; }\nfunction parentListOf(list, id) { for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (b.id === id) return list; if (b.body) { var f = parentListOf(b.body, id); if (f) return f; } } return null; }\nfunction maxId(list, m) { m = m || 0; for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (Number(b.id) > m) m = Number(b.id); if (b.body) m = maxId(b.body, m); } return m; }\nfunction reId(block, next) { var c = JSON.parse(JSON.stringify(block)); c.id = next.n++; if (c.body) for (var i = 0; i < c.body.length; i++) c.body[i] = reId(c.body[i], next); return c; }\nfunction shapeOf(list) { var out = []; for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; var s = { t: b.t }; if (b.n !== undefined) s.n = b.n; if (b.slots) s.slots = b.slots; if (b.body) s.body = shapeOf(b.body); out.push(s); } return out; }\n\nvar program = JSON.parse(JSON.stringify(Array.isArray(Inputs.program) ? Inputs.program : []));\nvar repeatId = Number(Inputs.repeatId);\nvar host = parentListOf(program, repeatId);\nvar unfolded = false;\nif (host) {\n  var at = -1;\n  for (var i = 0; i < host.length; i++) if (host[i] && host[i].id === repeatId) at = i;\n  var rep = host[at];\n  if (rep && rep.t === 'repeat') {\n    var next = { n: maxId(program) + 1 }, body = Array.isArray(rep.body) ? rep.body : [], n = Math.max(0, Math.floor(Number(rep.n)) || 0), out = [];\n    for (var k = 0; k < n; k++) for (var j = 0; j < body.length; j++) out.push(reId(body[j], next));\n    host.splice.apply(host, [at, 1].concat(out));\n    unfolded = true;\n  }\n}\nOutputs.program = program;\nOutputs.unfolded = unfolded;\n",
+        "runOnChange-in-program": false,
+        "runOnChange-in-repeatId": false
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-program",
+          "displayName": "program",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-repeatId",
+          "displayName": "repeatId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-program",
+          "displayName": "program",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-unfolded",
+          "displayName": "unfolded",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "unfoldOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "program",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "unfolded",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

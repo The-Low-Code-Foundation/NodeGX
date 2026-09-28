@@ -1,0 +1,211 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "018abab9-856c-5885-8469-e94eca7cb017",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "addprofileIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "color",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "eye",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "face",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "robotName",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "addprofileFn",
+      "type": "JavaScriptFunction",
+      "label": "Add profile",
+      "parameters": {
+        "functionScript": "\nvar SAVE_VERSION = 2;\nvar MAX_PROFILES = 6;\nvar TRICK_KEYS = [\"n1\",\"n2\",\"n3\",\"n4\",\"n5\",\"n6\",\"n7\"];\nfunction newId(prefix) { return prefix + Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36); }\nfunction tricksOf(raw) {\n  var out = {};\n  for (var i = 0; i < TRICK_KEYS.length; i++) { var v = raw && raw[TRICK_KEYS[i]]; out[TRICK_KEYS[i]] = v === 'bloom' || v === 'sprout' ? v : (TRICK_KEYS[i] === 'n1' ? 'sprout' : 'seed'); }\n  return out;\n}\nfunction profileOf(raw) {\n  var p = raw && typeof raw === 'object' ? raw : {};\n  var robot = p.robot && typeof p.robot === 'object' ? p.robot : {};\n  return {\n    id: String(p.id || newId('p')), name: String(p.name || '').slice(0, 24), band: Number(p.band) === 1 ? 1 : 2, lang: p.lang === 'fr' ? 'fr' : 'en',\n    face: String(p.face || ''),\n    robot: { name: String(robot.name || 'Pip').slice(0, 16), color: String(robot.color || '#FF7A59'), eye: String(robot.eye || 'round'), hat: String(robot.hat || 'none') },\n    tricks: tricksOf(p.tricks), stickers: Array.isArray(p.stickers) ? p.stickers.map(String) : [], hats: Array.isArray(p.hats) ? p.hats.map(String) : []\n  };\n}\nfunction modelOf(raw) {\n  var m = raw && typeof raw === 'object' ? raw : {};\n  var fam = m.family && typeof m.family === 'object' ? m.family : {};\n  var isl = m.island && typeof m.island === 'object' ? m.island : {};\n  var profiles = [];\n  var list = Array.isArray(m.profiles) ? m.profiles : [];\n  for (var i = 0; i < list.length && i < MAX_PROFILES; i++) profiles.push(profileOf(list[i]));\n  return {\n    v: SAVE_VERSION,\n    family: { id: String(fam.id || newId('f')), created: Number(fam.created) || Date.now() },\n    profiles: profiles,\n    island: { done: Array.isArray(isl.done) ? isl.done.map(String) : [], placed: Array.isArray(isl.placed) ? isl.placed : [], activeId: String(isl.activeId || (profiles[0] ? profiles[0].id : '')) }\n  };\n}\nfunction toB64(str) {\n  var bytes = unescape(encodeURIComponent(str));\n  var b64 = typeof btoa === 'function' ? btoa(bytes) : Buffer.from(bytes, 'binary').toString('base64');\n  return b64.replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');\n}\nfunction fromB64(code) {\n  var b64 = String(code || '').trim().replace(/-/g, '+').replace(/_/g, '/');\n  while (b64.length % 4) b64 += '=';\n  var bytes = typeof atob === 'function' ? atob(b64) : Buffer.from(b64, 'base64').toString('binary');\n  return decodeURIComponent(escape(bytes));\n}\n\nvar model = modelOf(Inputs.model);\nvar name = String(Inputs.name || '').trim().slice(0, 24);\nvar ok = false, profileId = '', error = '';\nif (!name) error = 'name';\nelse if (model.profiles.length >= MAX_PROFILES) error = 'full';\nelse {\n  var p = profileOf({ name: name, band: Inputs.band, lang: Inputs.lang, face: Inputs.face, robot: { name: Inputs.robotName, color: Inputs.color, eye: Inputs.eye, hat: 'none' } });\n  model.profiles.push(p);\n  model.island.activeId = p.id;\n  profileId = p.id;\n  ok = true;\n}\nOutputs.model = model;\nOutputs.ok = ok;\nOutputs.error = error;\nOutputs.profileId = profileId;\nOutputs.count = model.profiles.length;\n",
+        "runOnChange-in-band": false,
+        "runOnChange-in-color": false,
+        "runOnChange-in-eye": false,
+        "runOnChange-in-face": false,
+        "runOnChange-in-lang": false,
+        "runOnChange-in-model": false,
+        "runOnChange-in-name": false,
+        "runOnChange-in-robotName": false
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-band",
+          "displayName": "band",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-face",
+          "displayName": "face",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-robotName",
+          "displayName": "robotName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-color",
+          "displayName": "color",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-eye",
+          "displayName": "eye",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-model",
+          "displayName": "model",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "displayName": "error",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-profileId",
+          "displayName": "profileId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "addprofileOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "error",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ok",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "profileId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

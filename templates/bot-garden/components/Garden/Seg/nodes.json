@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "bad30db0-1066-53bb-8c7c-0e52fd911956",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sgIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "isOn",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "sgPill",
+      "type": "Group",
+      "label": "The half",
+      "children": [
+        "sgText"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "backgroundColor": "transparent",
+        "cssClassName": "bg-seg-btn bg-press"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "sgText",
+      "type": "Text",
+      "label": "The word",
+      "parent": "sgPill",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink-2)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "sgIsOn",
+      "type": "Condition",
+      "label": "Is it pressed?",
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "sgStates",
+      "type": "States",
+      "label": "Pressed or not",
+      "parameters": {
+        "states": "off,on",
+        "values": "bg,fg",
+        "useTransitions": false,
+        "type-bg": "color",
+        "value-off-bg": "transparent",
+        "value-on-bg": "var(--ink)",
+        "type-fg": "color",
+        "value-off-fg": "var(--ink-2)",
+        "value-on-fg": "var(--on-fill)"
+      },
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "sgOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "clicked",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "sgPill"
+  ]
+}

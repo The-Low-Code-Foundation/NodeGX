@@ -1,0 +1,429 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8658fcf0-5f09-57c3-80c8-1a8647968589",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "wnIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "show",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "faceClass",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "thanks",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "line",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rewardText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasReward",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "learnText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasLearn",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "islandWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "stayWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 530,
+      "y": 40
+    },
+    {
+      "id": "wnScrim",
+      "type": "Group",
+      "label": "Over the page",
+      "children": [
+        "wnCard"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "bg-win",
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "wnCard",
+      "type": "Group",
+      "label": "The card",
+      "parent": "wnScrim",
+      "children": [
+        "wnFace",
+        "wnThanks",
+        "wnLine",
+        "wnRewards",
+        "wnButtons"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--card)",
+        "borderRadius": "var(--radius-bar)",
+        "paddingTop": {
+          "value": 22,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 22,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 26,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 26,
+          "unit": "px"
+        },
+        "maxWidth": {
+          "value": 380,
+          "unit": "px"
+        },
+        "cssClassName": "bg-win-card"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "wnFace",
+      "type": "Group",
+      "label": "The islander",
+      "parent": "wnCard",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 72,
+          "unit": "px"
+        },
+        "height": {
+          "value": 72,
+          "unit": "px"
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "wnThanks",
+      "type": "Text",
+      "label": "Thank you",
+      "parent": "wnCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 26,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2,
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "wnLine",
+      "type": "Text",
+      "label": "How many blocks",
+      "parent": "wnCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "fontWeight": "700",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "wnRewards",
+      "type": "Group",
+      "label": "What was earned",
+      "parent": "wnCard",
+      "children": [
+        "wnReward",
+        "wnLearn"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "justifyContent": "center"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "wnReward",
+      "type": "Group",
+      "label": "The reward",
+      "parent": "wnRewards",
+      "children": [
+        "wnRewardText"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--paper-2)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "cssClassName": "bg-reward",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "wnRewardText",
+      "type": "Text",
+      "label": "The reward",
+      "parent": "wnReward",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "wnLearn",
+      "type": "Group",
+      "label": "The trick learnt",
+      "parent": "wnRewards",
+      "children": [
+        "wnLearnText"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--rep)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "cssClassName": "bg-reward",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "wnLearnText",
+      "type": "Text",
+      "label": "The trick",
+      "parent": "wnLearn",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "wnButtons",
+      "type": "Group",
+      "label": "The two ways on",
+      "parent": "wnCard",
+      "children": [
+        "wnIsland",
+        "wnStay"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "justifyContent": "center"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "wnIsland",
+      "type": "net.noodl.controls.button",
+      "label": "Back to the island",
+      "parent": "wnButtons",
+      "parameters": {
+        "backgroundColor": "var(--leaf)",
+        "color": "var(--on-fill)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn",
+        "label": "Back to the island"
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "wnStay",
+      "type": "net.noodl.controls.button",
+      "label": "Keep tinkering",
+      "parent": "wnButtons",
+      "parameters": {
+        "backgroundColor": "var(--paper-2)",
+        "color": "var(--ink)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn",
+        "label": "Keep tinkering"
+      },
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "wnOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "island",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "stay",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 530,
+      "y": 1360
+    }
+  ],
+  "visualRoots": [
+    "wnScrim"
+  ]
+}

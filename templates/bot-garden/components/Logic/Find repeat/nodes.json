@@ -1,0 +1,186 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "64718844-2dc2-55e0-8e25-4d9e196e7be7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "findrepeatIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "program",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "findrepeatFn",
+      "type": "JavaScriptFunction",
+      "label": "Find repeat",
+      "parameters": {
+        "functionScript": "\nfunction sameBlock(a, b) {\n  if (!a || !b || a.body || b.body) return false;\n  if (a.t !== b.t || (Number(a.n) || 0) !== (Number(b.n) || 0)) return false;\n  return JSON.stringify(a.slots || {}) === JSON.stringify(b.slots || {});\n}\nfunction sameRun(seq, at, from, len) { for (var k = 0; k < len; k++) if (!sameBlock(seq[at + k], seq[from + k])) return false; return true; }\n/** The mockup's findRepeat: runs of one block, repeated sequences up to six long; best coverage wins, a longer sequence on a tie. */\nfunction findRepeatIn(seq) {\n  var best = null;\n  for (var len = 1; len <= 6; len++) {\n    for (var i = 0; i + len * 2 <= seq.length; i++) {\n      var count = 1;\n      while (i + (count + 1) * len <= seq.length && sameRun(seq, i, i + count * len, len)) count++;\n      if (count >= 2) { var cover = len * count; if (!best || cover > best.cover || (cover === best.cover && len > best.len)) best = { i: i, len: len, count: count, cover: cover }; }\n    }\n  }\n  return best;\n}\n/** Top level first; then a second pass inside each container, depth-first. */\nfunction findRepeat(list) {\n  var top = findRepeatIn(list);\n  if (top) { top.containerId = null; return top; }\n  for (var i = 0; i < list.length; i++) {\n    var b = list[i];\n    if (!b || !Array.isArray(b.body)) continue;\n    var inner = findRepeatIn(b.body);\n    if (inner) { inner.containerId = b.id; return inner; }\n    var deeper = findRepeat(b.body);\n    if (deeper) return deeper;\n  }\n  return null;\n}\nfunction findBlock(list, id) { for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (b.id === id) return b; if (b.body) { var f = findBlock(b.body, id); if (f) return f; } } return null; }\nfunction parentListOf(list, id) { for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (b.id === id) return list; if (b.body) { var f = parentListOf(b.body, id); if (f) return f; } } return null; }\nfunction maxId(list, m) { m = m || 0; for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (Number(b.id) > m) m = Number(b.id); if (b.body) m = maxId(b.body, m); } return m; }\nfunction reId(block, next) { var c = JSON.parse(JSON.stringify(block)); c.id = next.n++; if (c.body) for (var i = 0; i < c.body.length; i++) c.body[i] = reId(c.body[i], next); return c; }\nfunction shapeOf(list) { var out = []; for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; var s = { t: b.t }; if (b.n !== undefined) s.n = b.n; if (b.slots) s.slots = b.slots; if (b.body) s.body = shapeOf(b.body); out.push(s); } return out; }\n\nvar program = Array.isArray(Inputs.program) ? Inputs.program : [];\nvar band = Number(Inputs.band) === 1 ? 1 : 2;\nvar plan = findRepeat(program);\nOutputs.found = !!plan;\nOutputs.i = plan ? plan.i : -1;\nOutputs.len = plan ? plan.len : 0;\nOutputs.count = plan ? plan.count : 0;\nOutputs.cover = plan ? plan.cover : 0;\nOutputs.containerId = plan ? plan.containerId : null;\nOutputs.offer = !!plan && band === 2 && plan.cover >= 3;\nOutputs.textKey = plan ? (plan.len === 1 ? 'tidyFound1' : 'tidyFound') : '';\nvar list = plan ? (plan.containerId === null ? program : findBlock(program, plan.containerId).body) : [];\nOutputs.sample = plan ? String(list[plan.i].t) : '';\nOutputs.vars = plan ? { n: plan.count, len: plan.len } : {};\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-program",
+          "displayName": "program",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-band",
+          "displayName": "band",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-found",
+          "displayName": "found",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-i",
+          "displayName": "i",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-len",
+          "displayName": "len",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cover",
+          "displayName": "cover",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-containerId",
+          "displayName": "containerId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-offer",
+          "displayName": "offer",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-textKey",
+          "displayName": "textKey",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sample",
+          "displayName": "sample",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-vars",
+          "displayName": "vars",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "findrepeatOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "containerId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "cover",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "found",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "i",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "len",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "offer",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "sample",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "textKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "vars",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "35ffee3b-96dd-5f7d-894e-dd05189c23d0",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "recordstepIn",
+      "fromProperty": "bumps",
+      "toId": "recordstepFn",
+      "toProperty": "in-bumps"
+    },
+    {
+      "fromId": "recordstepIn",
+      "fromProperty": "lang",
+      "toId": "recordstepFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "recordstepIn",
+      "fromProperty": "op",
+      "toId": "recordstepFn",
+      "toProperty": "in-op"
+    },
+    {
+      "fromId": "recordstepIn",
+      "fromProperty": "program",
+      "toId": "recordstepFn",
+      "toProperty": "in-program"
+    },
+    {
+      "fromId": "recordstepIn",
+      "fromProperty": "selected",
+      "toId": "recordstepFn",
+      "toProperty": "in-selected"
+    },
+    {
+      "fromId": "recordstepIn",
+      "fromProperty": "world",
+      "toId": "recordstepFn",
+      "toProperty": "in-world"
+    },
+    {
+      "fromId": "recordstepIn",
+      "fromProperty": "go",
+      "toId": "recordstepFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "recordstepFn",
+      "fromProperty": "out-blocks",
+      "toId": "recordstepOut",
+      "toProperty": "blocks"
+    },
+    {
+      "fromId": "recordstepFn",
+      "fromProperty": "out-bumps",
+      "toId": "recordstepOut",
+      "toProperty": "bumps"
+    },
+    {
+      "fromId": "recordstepFn",
+      "fromProperty": "out-program",
+      "toId": "recordstepOut",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "recordstepFn",
+      "fromProperty": "out-recorded",
+      "toId": "recordstepOut",
+      "toProperty": "recorded"
+    },
+    {
+      "fromId": "recordstepFn",
+      "fromProperty": "out-sayKey",
+      "toId": "recordstepOut",
+      "toProperty": "sayKey"
+    },
+    {
+      "fromId": "recordstepFn",
+      "fromProperty": "out-sayN",
+      "toId": "recordstepOut",
+      "toProperty": "sayN"
+    },
+    {
+      "fromId": "recordstepFn",
+      "fromProperty": "out-world",
+      "toId": "recordstepOut",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "recordstepFn",
+      "fromProperty": "success",
+      "toId": "recordstepOut",
+      "toProperty": "ran"
+    }
+  ]
+}

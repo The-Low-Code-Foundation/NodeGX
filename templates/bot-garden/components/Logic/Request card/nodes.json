@@ -1,0 +1,186 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "404f7106-b24a-5bec-83d0-639650c2aae3",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "requestcardIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "requestId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "requests",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "requestcardFn",
+      "type": "JavaScriptFunction",
+      "label": "Request card",
+      "parameters": {
+        "functionScript": "\nfunction wordMap(rows, lang, name) {\n  var map = {};\n  var list = Array.isArray(rows) ? rows : [];\n  for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || '').split('{b}').join(name);\n  return map;\n}\nfunction fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\nfunction langOf(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction nameOf(v) { var n = String(v || '').trim(); return n || 'Pip'; }\n\nvar ISLANDERS = {\"mamie\":{\"sprite\":\"granny\",\"nameKey\":\"islMamie\"},\"sami\":{\"sprite\":\"postie\",\"nameKey\":\"islSami\"},\"biscuit\":{\"sprite\":\"cat\",\"nameKey\":\"islBiscuit\"}};\nvar lang = langOf(Inputs.lang), name = nameOf(Inputs.botName);\nvar w = wordMap(Inputs.words, lang, name);\nvar reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];\nvar id = String(Inputs.requestId || '');\nvar req = null;\nfor (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].id === id) req = reqs[i];\nvar isl = req ? ISLANDERS[req.islander] : null;\nvar who = isl ? (w[isl.nameKey] || '') : '';\nOutputs.who = who || w.isFree || '';\nOutputs.eyebrow = req ? fill(w.wsEyebrowReq, { who: who }) : (w.isFree || '');\nOutputs.title = req ? (w[req.copyKeys.title] || '') : (w.wsFreeTitle || '');\nOutputs.line = req ? (w[req.copyKeys.line] || '') : (w.sandP || '');\nOutputs.faceClass = 'bg-face bg-sp-' + (isl ? isl.sprite : 'owl');\nOutputs.rewardWord = req && req.copyKeys.reward ? (w[req.copyKeys.reward] || '') : '';\nOutputs.sub = w.isSub || '';\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-requests",
+          "displayName": "requests",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-requestId",
+          "displayName": "requestId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-who",
+          "displayName": "who",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-eyebrow",
+          "displayName": "eyebrow",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-line",
+          "displayName": "line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-faceClass",
+          "displayName": "faceClass",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rewardWord",
+          "displayName": "rewardWord",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sub",
+          "displayName": "sub",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "requestcardOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "eyebrow",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "faceClass",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "line",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rewardWord",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "sub",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "title",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "who",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

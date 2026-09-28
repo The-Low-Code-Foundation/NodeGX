@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8658fcf0-5f09-57c3-80c8-1a8647968589",
+  "name": "Win card",
+  "path": "/Workshop/Win card",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The win card (the mockup’s .win): fixed and centred, so it meets the child wherever the block list is scrolled. Publishes Island (back to the island) or Stay (keep tinkering)."
+}

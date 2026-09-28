@@ -1,0 +1,175 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "346f2d39-d56a-5246-85d0-40358b562fa7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hinttableIn",
+      "fromProperty": "botName",
+      "toId": "hinttableFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "hinttableIn",
+      "fromProperty": "hints",
+      "toId": "hinttableFn",
+      "toProperty": "in-hints"
+    },
+    {
+      "fromId": "hinttableIn",
+      "fromProperty": "lang",
+      "toId": "hinttableFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintBump",
+      "toId": "hinttableOut",
+      "toProperty": "hintBump"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintDone",
+      "toId": "hinttableOut",
+      "toProperty": "hintDone"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintDoneMany",
+      "toId": "hinttableOut",
+      "toProperty": "hintDoneMany"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintEmpty",
+      "toId": "hinttableOut",
+      "toProperty": "hintEmpty"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintMissed",
+      "toId": "hinttableOut",
+      "toProperty": "hintMissed"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintPattern",
+      "toId": "hinttableOut",
+      "toProperty": "hintPattern"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintPredictMiss",
+      "toId": "hinttableOut",
+      "toProperty": "hintPredictMiss"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintStart",
+      "toId": "hinttableOut",
+      "toProperty": "hintStart"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintWet",
+      "toId": "hinttableOut",
+      "toProperty": "hintWet"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-lang",
+      "toId": "hinttableOut",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveResting",
+      "toId": "hinttableOut",
+      "toProperty": "oliveResting"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung1",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung1"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung10",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung10"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung11",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung11"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung12",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung12"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung2",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung2"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung3",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung3"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung4",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung4"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung5",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung5"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung6",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung6"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung7",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung7"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung8",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung8"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung9",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung9"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveThinking",
+      "toId": "hinttableOut",
+      "toProperty": "oliveThinking"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "success",
+      "toId": "hinttableOut",
+      "toProperty": "ran"
+    }
+  ]
+}

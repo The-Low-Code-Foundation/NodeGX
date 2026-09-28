@@ -1,0 +1,306 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e5621322-696d-5d66-8e0a-b0484f1eae34",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "drawworldIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bumps",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "color",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "endX",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "endY",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "eye",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "hat",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sayKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sayN",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "showEnd",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "teachBumps",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "world",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "drawworldFn",
+      "type": "JavaScriptFunction",
+      "label": "Draw world",
+      "parameters": {
+        "functionScript": "\nfunction wordMap(rows, lang, name) {\n  var map = {};\n  var list = Array.isArray(rows) ? rows : [];\n  for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || '').split('{b}').join(name);\n  return map;\n}\nfunction fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\nfunction langOf(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction nameOf(v) { var n = String(v || '').trim(); return n || 'Pip'; }\n\nvar GLYPH = { egg: '🥚', stone: '🪨', food: '🍖' };\nvar world = Inputs.world && typeof Inputs.world === 'object' ? Inputs.world : { map: [], things: [], robots: [] };\nvar rows = Array.isArray(world.map) ? world.map.slice() : [];\nvar things = [];\nvar list = Array.isArray(world.things) ? world.things : [];\nvar watered = 0, total = 0;\nfor (var i = 0; i < list.length; i++) {\n  var t = list[i];\n  if (!t) continue;\n  if (t.kind === 'tulip') { total++; if (t.watered) watered++; things.push({ kind: 'tulip', x: t.x, y: t.y, watered: !!t.watered }); }\n  else if (t.kind === 'puddle' || t.kind === 'letter') things.push({ kind: t.kind, x: t.x, y: t.y });\n  else if (t.kind === 'bowl') things.push({ kind: 'bowl', x: t.x, y: t.y, full: (Number(t.food) || 0) > 0 });\n  else if (t.kind === 'label') things.push({ kind: 'label', x: t.x, y: t.y, text: String(t.text || '') });\n  else if (GLYPH[t.kind]) things.push({ kind: 'label', x: t.x, y: t.y, text: GLYPH[t.kind] });\n}\nfor (var y = 0; y < rows.length; y++) for (var x = 0; x < String(rows[y]).length; x++) if (String(rows[y]).charAt(x) === 'B') things.push({ kind: 'label', x: x, y: y, text: '📮' });\nif (Inputs.showEnd === true && Inputs.endX !== undefined && Inputs.endX !== null && Number(Inputs.endX) >= 0) things.push({ kind: 'label', x: Number(Inputs.endX), y: Number(Inputs.endY), text: '🏁' });\nvar bump = (Number(Inputs.bumps) || 0) + (Number(Inputs.teachBumps) || 0);\nvar robots = [];\nvar rl = Array.isArray(world.robots) ? world.robots : [];\nfor (var r = 0; r < rl.length; r++) robots.push({ x: rl[r].x, y: rl[r].y, d: rl[r].d, colour: String(Inputs.color || '#FF7A59'), eyes: String(Inputs.eye || 'round'), hat: String(Inputs.hat || 'none'), name: nameOf(Inputs.botName), bump: bump });\nvar lang = langOf(Inputs.lang);\nvar w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));\nvar say = String(Inputs.sayKey || '');\nOutputs.map = { rows: rows, legend: { B: 'path' } };\nOutputs.things = things;\nOutputs.robots = robots;\nOutputs.watered = watered;\nOutputs.total = total;\nvar dots = '';\nfor (var d = 0; d < total; d++) dots += d < watered ? '🌷' : '○';\nOutputs.dots = dots;\nOutputs.hasTulips = total > 0;\nOutputs.bubble = say && w[say] ? { robot: 0, text: w[say], style: 'plain', n: Number(Inputs.sayN) || 0 } : null;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-world",
+          "displayName": "world",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-showEnd",
+          "displayName": "showEnd",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-endX",
+          "displayName": "endX",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-endY",
+          "displayName": "endY",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-bumps",
+          "displayName": "bumps",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-teachBumps",
+          "displayName": "teachBumps",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-color",
+          "displayName": "color",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-eye",
+          "displayName": "eye",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-hat",
+          "displayName": "hat",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-sayKey",
+          "displayName": "sayKey",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-sayN",
+          "displayName": "sayN",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-map",
+          "displayName": "map",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-things",
+          "displayName": "things",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-robots",
+          "displayName": "robots",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-watered",
+          "displayName": "watered",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-total",
+          "displayName": "total",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-dots",
+          "displayName": "dots",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasTulips",
+          "displayName": "hasTulips",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bubble",
+          "displayName": "bubble",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "drawworldOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "bubble",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "dots",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hasTulips",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "map",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "robots",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "things",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "total",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "watered",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

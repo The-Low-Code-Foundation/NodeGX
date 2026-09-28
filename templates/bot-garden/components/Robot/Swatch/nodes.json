@@ -1,0 +1,104 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "fbfbff33-be70-5867-8c19-7962b00c313c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "swIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fill",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "selected",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 290,
+      "y": 40
+    },
+    {
+      "id": "swDot",
+      "type": "Group",
+      "label": "The swatch",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 44,
+          "unit": "px"
+        },
+        "height": {
+          "value": 44,
+          "unit": "px"
+        },
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--robot-coral)",
+        "cssClassName": "bg-swatch bg-press"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "swIsOn",
+      "type": "Condition",
+      "label": "Is it worn?",
+      "x": 290,
+      "y": 400
+    },
+    {
+      "id": "swStates",
+      "type": "States",
+      "label": "Ringed or not",
+      "parameters": {
+        "states": "off,on",
+        "values": "ring",
+        "useTransitions": false,
+        "type-ring": "number",
+        "value-off-ring": 0,
+        "value-on-ring": 4
+      },
+      "x": 290,
+      "y": 160
+    },
+    {
+      "id": "swOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "picked",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 290,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "swDot"
+  ]
+}

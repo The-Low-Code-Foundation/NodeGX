@@ -1,0 +1,158 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d34448ca-ffda-587d-8e9c-292ab50e9af9",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "guPage",
+      "type": "Page",
+      "label": "Grown-ups",
+      "children": [
+        "guWrap"
+      ],
+      "parameters": {
+        "title": "Bot Garden",
+        "urlPath": "grown-ups"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "guWrap",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "guPage",
+      "children": [
+        "guBar",
+        "guHead",
+        "guGrid"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3-5)",
+        "maxWidth": {
+          "value": 1360,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-10)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "guBar",
+      "type": "/Garden/Top bar",
+      "label": "The bar",
+      "parent": "guWrap",
+      "parameters": {
+        "page": "grown",
+        "showTabs": true,
+        "showBand": true
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "guStore",
+      "type": "/Logic/App store",
+      "label": "The family, stored",
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "guFam",
+      "type": "/Logic/Read family",
+      "label": "Who is playing",
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "guLangVar",
+      "type": "Variable2",
+      "label": "The language before anyone is chosen",
+      "parameters": {
+        "name": "gardenLang"
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "guWords",
+      "type": "/Data/Words",
+      "label": "The words",
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "guT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "guHead",
+      "type": "/Garden/Page head",
+      "label": "The head",
+      "parent": "guWrap",
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "guGrid",
+      "type": "Group",
+      "label": "Three panels",
+      "parent": "guWrap",
+      "children": [
+        "guOlive",
+        "guRules",
+        "guHouse"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "bg-gu"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "guOlive",
+      "type": "/Grown/Olive panel",
+      "label": "Where Olive lives",
+      "parent": "guGrid",
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "guRules",
+      "type": "/Grown/Rules panel",
+      "label": "What she may do",
+      "parent": "guGrid",
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "guHouse",
+      "type": "/Grown/House panel",
+      "label": "Nothing leaves the house",
+      "parent": "guGrid",
+      "x": 220,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "guPage"
+  ]
+}

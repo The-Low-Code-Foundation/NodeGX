@@ -1,0 +1,114 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2bb83363-3958-596c-81e4-c510d91a1334",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "skillrowsIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tricks",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "skillrowsFn",
+      "type": "JavaScriptFunction",
+      "label": "Skill rows",
+      "parameters": {
+        "functionScript": "\nfunction wordMap(rows, lang, name) {\n  var map = {};\n  var list = Array.isArray(rows) ? rows : [];\n  for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || '').split('{b}').join(name);\n  return map;\n}\nfunction fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\nfunction langOf(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction nameOf(v) { var n = String(v || '').trim(); return n || 'Pip'; }\n\nvar BLOCKS = [{\"key\":\"n1\",\"kind\":\"motion\",\"word\":\"bFwd\"},{\"key\":\"n2\",\"kind\":\"control\",\"word\":\"bRepeat\"},{\"key\":\"n3\",\"kind\":\"control\",\"word\":\"bUntil\"},{\"key\":\"n4\",\"kind\":\"control\",\"word\":\"bIf\"},{\"key\":\"n5\",\"kind\":\"control\",\"word\":\"bWhen\"},{\"key\":\"n6\",\"kind\":\"control\",\"word\":\"bCountInc\"},{\"key\":\"n7\",\"kind\":\"ask\",\"word\":\"n7Block\"}];\nvar lang = langOf(Inputs.lang), name = nameOf(Inputs.botName);\nvar w = wordMap(Inputs.words, lang, name);\nvar tricks = Inputs.tricks && typeof Inputs.tricks === 'object' ? Inputs.tricks : {};\nvar rows = [], blooming = 0;\nfor (var i = 0; i < BLOCKS.length; i++) {\n  var b = BLOCKS[i];\n  var st = tricks[b.key] === 'bloom' ? 'bloom' : tricks[b.key] === 'sprout' ? 'sprout' : (b.key === 'n1' ? 'sprout' : 'seed');\n  if (st === 'bloom') blooming++;\n  rows.push({\n    id: b.key, cardClass: 'bg-notion bg-notion-' + st, stateClass: 'bg-caps bg-st-' + st, isBlooming: st === 'bloom',\n    stateText: (st === 'bloom' ? '🌷 ' + (w.stBloom || '') : st === 'sprout' ? '🌱 ' + (w.stSprout || '') : '• ' + (w.stSeed || '')),\n    title: w[b.key] || '', text: w[b.key + 'p'] || '', blockWord: w[b.word] || '', blockClass: 'bg-blk bg-blk-' + b.kind, prog: w['p' + (i + 1)] || ''\n  });\n}\nOutputs.rows = rows;\nOutputs.blooming = blooming;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-tricks",
+          "displayName": "tricks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blooming",
+          "displayName": "blooming",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "skillrowsOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "blooming",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

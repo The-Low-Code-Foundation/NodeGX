@@ -1,0 +1,198 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "fef49f0d-0fea-58c8-8b70-fc2ca54c7e12",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pcIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "face",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "robot",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "selected",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "pcCard",
+      "type": "Group",
+      "label": "The card",
+      "children": [
+        "pcFace",
+        "pcName",
+        "pcBand",
+        "pcRobot"
+      ],
+      "parameters": {
+        "width": {
+          "value": 160,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-1-5)",
+        "backgroundColor": "var(--card)",
+        "borderRadius": "var(--radius-card)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 3,
+          "unit": "px"
+        },
+        "borderColor": "transparent",
+        "cssClassName": "bg-profile bg-press"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pcFace",
+      "type": "game-kit.Avatar",
+      "label": "The face",
+      "parent": "pcCard",
+      "parameters": {
+        "look": "fun-emoji",
+        "seed": "Pip",
+        "size": 72,
+        "background": "var(--sun)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pcName",
+      "type": "Text",
+      "label": "The name",
+      "parent": "pcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2,
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "pcBand",
+      "type": "Text",
+      "label": "The band",
+      "parent": "pcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "pcRobot",
+      "type": "Text",
+      "label": "The robot",
+      "parent": "pcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "pcIsOn",
+      "type": "Condition",
+      "label": "The one playing?",
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "pcStates",
+      "type": "States",
+      "label": "Chosen or not",
+      "parameters": {
+        "states": "off,on",
+        "values": "edge",
+        "useTransitions": false,
+        "type-edge": "color",
+        "value-off-edge": "transparent",
+        "value-on-edge": "var(--leaf)"
+      },
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "pcOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "chosen",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "pcCard"
+  ]
+}

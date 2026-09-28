@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3a597373-946c-5b49-8aee-6c18e03f12ce",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tbIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "selected",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "tbPill",
+      "type": "Group",
+      "label": "The pill",
+      "children": [
+        "tbText"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingTop": {
+          "value": 9,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 9,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "backgroundColor": "transparent",
+        "cssClassName": "bg-tab bg-press"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "tbText",
+      "type": "Text",
+      "label": "The word",
+      "parent": "tbPill",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink-2)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "tbIsOn",
+      "type": "Condition",
+      "label": "Is it this screen?",
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "tbStates",
+      "type": "States",
+      "label": "Lit or not",
+      "parameters": {
+        "states": "off,on",
+        "values": "bg,fg",
+        "useTransitions": false,
+        "type-bg": "color",
+        "value-off-bg": "transparent",
+        "value-on-bg": "var(--leaf-2)",
+        "type-fg": "color",
+        "value-off-fg": "var(--ink-2)",
+        "value-on-fg": "var(--ink)"
+      },
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "tbOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "clicked",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "tbPill"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "219ffd70-d1b5-534c-87bb-868b4e826f90",
+  "name": "Unfold",
+  "path": "/Logic/Unfold",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A repeat laid back out as its steps. Runs on Go; answers Ran once its outputs are set."
+}

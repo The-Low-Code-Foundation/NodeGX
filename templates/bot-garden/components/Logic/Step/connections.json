@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5f8baf29-42fb-5827-8974-0a10aefe10b0",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "stepIn",
+      "fromProperty": "answer",
+      "toId": "stepFn",
+      "toProperty": "in-answer"
+    },
+    {
+      "fromId": "stepIn",
+      "fromProperty": "run",
+      "toId": "stepFn",
+      "toProperty": "in-run"
+    },
+    {
+      "fromId": "stepIn",
+      "fromProperty": "world",
+      "toId": "stepFn",
+      "toProperty": "in-world"
+    },
+    {
+      "fromId": "stepIn",
+      "fromProperty": "go",
+      "toId": "stepFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "stepFn",
+      "fromProperty": "out-bumps",
+      "toId": "stepOut",
+      "toProperty": "bumps"
+    },
+    {
+      "fromId": "stepFn",
+      "fromProperty": "out-count",
+      "toId": "stepOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "stepFn",
+      "fromProperty": "out-delta",
+      "toId": "stepOut",
+      "toProperty": "delta"
+    },
+    {
+      "fromId": "stepFn",
+      "fromProperty": "out-done",
+      "toId": "stepOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "stepFn",
+      "fromProperty": "out-glowId",
+      "toId": "stepOut",
+      "toProperty": "glowId"
+    },
+    {
+      "fromId": "stepFn",
+      "fromProperty": "out-puddles",
+      "toId": "stepOut",
+      "toProperty": "puddles"
+    },
+    {
+      "fromId": "stepFn",
+      "fromProperty": "out-request",
+      "toId": "stepOut",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "stepFn",
+      "fromProperty": "out-run",
+      "toId": "stepOut",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "stepFn",
+      "fromProperty": "out-sayKey",
+      "toId": "stepOut",
+      "toProperty": "sayKey"
+    },
+    {
+      "fromId": "stepFn",
+      "fromProperty": "out-tick",
+      "toId": "stepOut",
+      "toProperty": "tick"
+    },
+    {
+      "fromId": "stepFn",
+      "fromProperty": "out-waiting",
+      "toId": "stepOut",
+      "toProperty": "waiting"
+    },
+    {
+      "fromId": "stepFn",
+      "fromProperty": "success",
+      "toId": "stepOut",
+      "toProperty": "ran"
+    }
+  ]
+}

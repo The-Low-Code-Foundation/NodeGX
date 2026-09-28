@@ -1,0 +1,286 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3510682f-3040-51bf-843a-bcbe3f2c899f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "prPage",
+      "type": "Page",
+      "label": "Profiles",
+      "children": [
+        "prWrap"
+      ],
+      "parameters": {
+        "title": "Bot Garden",
+        "urlPath": ""
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "prWrap",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "prPage",
+      "children": [
+        "prBar",
+        "prHead",
+        "prList",
+        "prFull",
+        "prNew",
+        "prForm"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3-5)",
+        "maxWidth": {
+          "value": 1360,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-10)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "prBar",
+      "type": "/Garden/Top bar",
+      "label": "The bar",
+      "parent": "prWrap",
+      "parameters": {
+        "page": "profiles",
+        "showTabs": false,
+        "showBand": false
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "prStore",
+      "type": "/Logic/App store",
+      "label": "The family, stored",
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "prFam",
+      "type": "/Logic/Read family",
+      "label": "Who is playing",
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "prLangVar",
+      "type": "Variable2",
+      "label": "The language before anyone is chosen",
+      "parameters": {
+        "name": "gardenLang"
+      },
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "prWords",
+      "type": "/Data/Words",
+      "label": "The words",
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "prT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "prHead",
+      "type": "/Garden/Page head",
+      "label": "The head",
+      "parent": "prWrap",
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "prList",
+      "type": "Group",
+      "label": "The players",
+      "parent": "prWrap",
+      "children": [
+        "prEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3-5)",
+        "rowGap": "var(--space-3-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "prEach",
+      "type": "For Each",
+      "label": "One card per player",
+      "parent": "prList",
+      "parameters": {
+        "template": "/Profiles/Card",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "prFull",
+      "type": "Text",
+      "label": "The family is full",
+      "parent": "prWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "prNew",
+      "type": "net.noodl.controls.button",
+      "label": "New player",
+      "parent": "prWrap",
+      "parameters": {
+        "backgroundColor": "var(--leaf)",
+        "color": "var(--on-fill)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn",
+        "label": "New player"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "prForm",
+      "type": "/Profiles/Form",
+      "label": "The form",
+      "parent": "prWrap",
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "prSelect",
+      "type": "/Logic/Select profile",
+      "label": "Choose one",
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "prAdd",
+      "type": "/Logic/Add profile",
+      "label": "Make one",
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "prFormMode",
+      "type": "States",
+      "label": "The form open or not",
+      "parameters": {
+        "states": "closed,open",
+        "values": "open,closed",
+        "useTransitions": false,
+        "type-open": "boolean",
+        "value-closed-open": false,
+        "value-open-open": true,
+        "type-closed": "boolean",
+        "value-closed-closed": true,
+        "value-open-closed": false
+      },
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "prGoIsland",
+      "type": "RouterNavigate",
+      "label": "To the island",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Island"
+      },
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "prLangEn",
+      "type": "Set Variable",
+      "label": "English before anyone is chosen",
+      "parameters": {
+        "name": "gardenLang",
+        "setWith": "string",
+        "value": "en"
+      },
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "prLangFr",
+      "type": "Set Variable",
+      "label": "French before anyone is chosen",
+      "parameters": {
+        "name": "gardenLang",
+        "setWith": "string",
+        "value": "fr"
+      },
+      "x": 470,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "prPage"
+  ]
+}

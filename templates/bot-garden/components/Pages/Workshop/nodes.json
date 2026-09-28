@@ -1,0 +1,177 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4b911db9-5959-5323-8d27-3b622c31b574",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "wsPage",
+      "type": "Page",
+      "label": "Workshop",
+      "children": [
+        "wsWrap"
+      ],
+      "parameters": {
+        "title": "Bot Garden",
+        "urlPath": "workshop"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "wsWrap",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "wsPage",
+      "children": [
+        "wsBar",
+        "wsPlay"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3-5)",
+        "maxWidth": {
+          "value": 1360,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-10)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "wsBar",
+      "type": "/Garden/Top bar",
+      "label": "The bar",
+      "parent": "wsWrap",
+      "parameters": {
+        "page": "workshop",
+        "showTabs": true,
+        "showBand": true
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "wsStore",
+      "type": "/Logic/App store",
+      "label": "The family, stored",
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "wsFam",
+      "type": "/Logic/Read family",
+      "label": "Who is playing",
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "wsLangVar",
+      "type": "Variable2",
+      "label": "The language before anyone is chosen",
+      "parameters": {
+        "name": "gardenLang"
+      },
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "wsWords",
+      "type": "/Data/Words",
+      "label": "The words",
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "wsT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 410,
+      "y": 1480
+    },
+    {
+      "id": "wsPlay",
+      "type": "/Workshop/Play",
+      "label": "The workshop",
+      "parent": "wsWrap",
+      "parameters": {
+        "stepMs": 420
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "wsReqVar",
+      "type": "Variable2",
+      "label": "The chosen request",
+      "parameters": {
+        "name": "gardenRequestId"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "wsRequests",
+      "type": "/Data/Requests",
+      "label": "The requests",
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "wsHints",
+      "type": "/Data/Hints",
+      "label": "The hints",
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "wsComplete",
+      "type": "/Logic/Complete request",
+      "label": "Done: the island, the tricks, the reward",
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "wsGuardWait",
+      "type": "Timer",
+      "label": "A moment for the request to arrive",
+      "parameters": {
+        "duration": 600
+      },
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "wsGuard",
+      "type": "Condition",
+      "label": "Is there a request?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "wsGoIsland",
+      "type": "RouterNavigate",
+      "label": "To the island",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Island"
+      },
+      "x": 410,
+      "y": 1240
+    }
+  ],
+  "visualRoots": [
+    "wsPage"
+  ]
+}

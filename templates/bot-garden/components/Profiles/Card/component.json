@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "fef49f0d-0fea-58c8-8b70-fc2ca54c7e12",
+  "name": "Card",
+  "path": "/Profiles/Card",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One player (the only \"login\"): a face, a name, the band and the robot’s name. Selected rings it. Publishes Chosen with the Id."
+}

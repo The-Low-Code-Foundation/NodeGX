@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6d5d3f54-646e-5db8-873a-1b442cc06b37",
+  "name": "Apply delta",
+  "path": "/Logic/Apply delta",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The world after a delta. Runs on Go; answers Ran once its outputs are set."
+}

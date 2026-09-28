@@ -1,0 +1,283 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2cacce1b-cd6c-529b-8569-d5ebbfb1da9a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rnIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "program",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "start",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "answer",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "stepMs",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "play",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "step",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "stop",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rnNew",
+      "type": "/Logic/New run",
+      "label": "A fresh run",
+      "parameters": {
+        "robotId": "me"
+      },
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "rnSetRunNew",
+      "type": "Set Variable",
+      "label": "Hold the fresh run",
+      "parameters": {
+        "name": "gardenRun"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "rnSetWorldStart",
+      "type": "Set Variable",
+      "label": "The world back at its start",
+      "parameters": {
+        "name": "gardenWorld"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "rnRunVar",
+      "type": "Variable2",
+      "label": "The run",
+      "parameters": {
+        "name": "gardenRun"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "rnWorldVar",
+      "type": "Variable2",
+      "label": "The world",
+      "parameters": {
+        "name": "gardenWorld"
+      },
+      "x": 40,
+      "y": 640
+    },
+    {
+      "id": "rnStep",
+      "type": "/Logic/Step",
+      "label": "One tick",
+      "x": 40,
+      "y": 760
+    },
+    {
+      "id": "rnApply",
+      "type": "/Logic/Apply delta",
+      "label": "The world after it",
+      "x": 40,
+      "y": 880
+    },
+    {
+      "id": "rnSetRunStep",
+      "type": "Set Variable",
+      "label": "Hold the run after the tick",
+      "parameters": {
+        "name": "gardenRun"
+      },
+      "x": 40,
+      "y": 1000
+    },
+    {
+      "id": "rnSetWorldApply",
+      "type": "Set Variable",
+      "label": "Hold the world after the tick",
+      "parameters": {
+        "name": "gardenWorld"
+      },
+      "x": 40,
+      "y": 1120
+    },
+    {
+      "id": "rnEnd",
+      "type": "Condition",
+      "label": "Is the run done?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 40,
+      "y": 1240
+    },
+    {
+      "id": "rnLoop",
+      "type": "Condition",
+      "label": "Still playing?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 40,
+      "y": 1360
+    },
+    {
+      "id": "rnLive",
+      "type": "Condition",
+      "label": "Is a run live?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 40,
+      "y": 1480
+    },
+    {
+      "id": "rnTimer",
+      "type": "Timer",
+      "label": "The wait between ticks",
+      "parameters": {
+        "duration": 420
+      },
+      "x": 40,
+      "y": 1600
+    },
+    {
+      "id": "rnMode",
+      "type": "States",
+      "label": "Idle, playing or paused",
+      "parameters": {
+        "states": "idle,playing,paused",
+        "values": "playing,live,idle",
+        "useTransitions": false,
+        "type-playing": "boolean",
+        "value-idle-playing": false,
+        "value-playing-playing": true,
+        "value-paused-playing": false,
+        "type-live": "boolean",
+        "value-idle-live": false,
+        "value-playing-live": true,
+        "value-paused-live": true,
+        "type-idle": "boolean",
+        "value-idle-idle": true,
+        "value-playing-idle": false,
+        "value-paused-idle": true
+      },
+      "x": 40,
+      "y": 1720
+    },
+    {
+      "id": "rnOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "world",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "run",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "glowId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "running",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "idle",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "live",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "bumps",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "puddles",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "sayKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "tick",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "ticked",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "finished",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "started",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 1840
+    }
+  ]
+}

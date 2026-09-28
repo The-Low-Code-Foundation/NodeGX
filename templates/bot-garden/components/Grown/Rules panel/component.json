@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "169961a3-9ace-5661-8b19-e52a6e31e43c",
+  "name": "Rules panel",
+  "path": "/Grown/Rules panel",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What Olive is allowed to do: four lines, the same in the shell’s own checks (CG-004)."
+}

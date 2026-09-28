@@ -1,0 +1,1593 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b4577814-8256-5b17-8887-3d483e8de369",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "plIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "requestId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "requests",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hints",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "isOlder",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "color",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "eye",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hat",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "stepMs",
+          "plug": "output",
+          "type": "number"
+        }
+      ],
+      "x": 590,
+      "y": 3040
+    },
+    {
+      "id": "plRoot",
+      "type": "Group",
+      "label": "The workshop",
+      "children": [
+        "plHead",
+        "plWs",
+        "plWin"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "plHead",
+      "type": "Group",
+      "label": "The head",
+      "parent": "plRoot",
+      "children": [
+        "plEyebrow",
+        "plTitle",
+        "plSub"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-0-5)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "plEyebrow",
+      "type": "Text",
+      "label": "Whose request",
+      "parent": "plHead",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--leaf)",
+        "cssClassName": "bg-eyebrow"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "plTitle",
+      "type": "Text",
+      "label": "The request",
+      "parent": "plHead",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h1",
+        "fontSize": {
+          "value": 34,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.15
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "plSub",
+      "type": "Text",
+      "label": "How it works",
+      "parent": "plHead",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "maxWidth": {
+          "value": 640,
+          "unit": "px"
+        }
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "plWs",
+      "type": "Group",
+      "label": "World and steps",
+      "parent": "plRoot",
+      "children": [
+        "plLeft",
+        "plRight"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "bg-ws"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "plLeft",
+      "type": "Group",
+      "label": "The world side",
+      "parent": "plWs",
+      "children": [
+        "plTask",
+        "plStage",
+        "plPredictLine",
+        "plControls",
+        "plOwl"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "backgroundColor": "var(--card)",
+        "borderRadius": "var(--radius-card)",
+        "cssClassName": "bg-panel",
+        "paddingTop": "var(--space-3-5)",
+        "paddingBottom": "var(--space-3-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "plTask",
+      "type": "Group",
+      "label": "The task",
+      "parent": "plLeft",
+      "children": [
+        "plFace",
+        "plTaskText",
+        "plDots"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "nowrap",
+        "columnGap": "var(--space-3-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "plFace",
+      "type": "Group",
+      "label": "The islander",
+      "parent": "plTask",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 56,
+          "unit": "px"
+        },
+        "height": {
+          "value": 56,
+          "unit": "px"
+        }
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "plTaskText",
+      "type": "Group",
+      "label": "Who and what",
+      "parent": "plTask",
+      "children": [
+        "plTaskH",
+        "plTaskP"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-0-5)",
+        "cssClassName": "bg-grow"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "plTaskH",
+      "type": "Text",
+      "label": "The islander",
+      "parent": "plTaskText",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h2",
+        "fontSize": {
+          "value": 22,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2
+      },
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "plTaskP",
+      "type": "Text",
+      "label": "What they said",
+      "parent": "plTaskText",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)"
+      },
+      "x": 340,
+      "y": 1360
+    },
+    {
+      "id": "plDots",
+      "type": "Text",
+      "label": "Tulips watered",
+      "parent": "plTask",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 18,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "plStage",
+      "type": "Group",
+      "label": "The world",
+      "parent": "plLeft",
+      "children": [
+        "plGarden",
+        "plRec",
+        "plPad"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "bg-stage"
+      },
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "plGarden",
+      "type": "garden-kit.Garden",
+      "label": "The garden",
+      "parent": "plStage",
+      "parameters": {
+        "stepMs": 380,
+        "label": "The garden"
+      },
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "plRec",
+      "type": "Group",
+      "label": "Pip is learning",
+      "parent": "plStage",
+      "children": [
+        "plRecText"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-0)",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--card)",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "cssClassName": "bg-rec",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1840
+    },
+    {
+      "id": "plRecText",
+      "type": "Text",
+      "label": "Recording",
+      "parent": "plRec",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)"
+      },
+      "x": 340,
+      "y": 1960
+    },
+    {
+      "id": "plPad",
+      "type": "/Workshop/Pad",
+      "label": "The Teach pad",
+      "parent": "plStage",
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "plPredictLine",
+      "type": "Text",
+      "label": "Where will it end?",
+      "parent": "plLeft",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--violet-ink)",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 2200
+    },
+    {
+      "id": "plControls",
+      "type": "Group",
+      "label": "The controls",
+      "parent": "plLeft",
+      "children": [
+        "plTeach",
+        "plStop",
+        "plPlay",
+        "plStep",
+        "plReset",
+        "plPredict",
+        "plAsk"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "cssClassName": "bg-controls"
+      },
+      "x": 220,
+      "y": 2320
+    },
+    {
+      "id": "plTeach",
+      "type": "net.noodl.controls.button",
+      "label": "Teach",
+      "parent": "plControls",
+      "parameters": {
+        "backgroundColor": "var(--coral)",
+        "color": "var(--on-fill)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-i-rec",
+        "label": "Teach Pip"
+      },
+      "x": 280,
+      "y": 2440
+    },
+    {
+      "id": "plStop",
+      "type": "net.noodl.controls.button",
+      "label": "Done teaching",
+      "parent": "plControls",
+      "parameters": {
+        "backgroundColor": "var(--leaf)",
+        "color": "var(--on-fill)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-i-rec",
+        "label": "Done teaching",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 2560
+    },
+    {
+      "id": "plPlay",
+      "type": "net.noodl.controls.button",
+      "label": "Play",
+      "parent": "plControls",
+      "parameters": {
+        "backgroundColor": "var(--leaf)",
+        "color": "var(--on-fill)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-i-play",
+        "label": "Play"
+      },
+      "x": 280,
+      "y": 2680
+    },
+    {
+      "id": "plStep",
+      "type": "net.noodl.controls.button",
+      "label": "One step",
+      "parent": "plControls",
+      "parameters": {
+        "backgroundColor": "var(--paper-2)",
+        "color": "var(--ink)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-i-step",
+        "label": "One step"
+      },
+      "x": 280,
+      "y": 2800
+    },
+    {
+      "id": "plReset",
+      "type": "net.noodl.controls.button",
+      "label": "Start over",
+      "parent": "plControls",
+      "parameters": {
+        "backgroundColor": "var(--paper-2)",
+        "color": "var(--ink)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-i-reset",
+        "label": "Start over"
+      },
+      "x": 280,
+      "y": 2920
+    },
+    {
+      "id": "plPredict",
+      "type": "net.noodl.controls.button",
+      "label": "Predict",
+      "parent": "plControls",
+      "parameters": {
+        "backgroundColor": "var(--paper-2)",
+        "color": "var(--ink)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-i-predict",
+        "label": "Predict",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 3040
+    },
+    {
+      "id": "plAsk",
+      "type": "net.noodl.controls.button",
+      "label": "Ask Olive",
+      "parent": "plControls",
+      "parameters": {
+        "backgroundColor": "var(--violet)",
+        "color": "var(--on-fill)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-i-owl bg-ask-push",
+        "label": "Ask Olive"
+      },
+      "x": 280,
+      "y": 3160
+    },
+    {
+      "id": "plOwl",
+      "type": "Group",
+      "label": "The owl",
+      "parent": "plLeft",
+      "children": [
+        "plOwlPic",
+        "plOwlCol"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--violet-2)",
+        "borderRadius": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "cssClassName": "bg-owl"
+      },
+      "x": 220,
+      "y": 3280
+    },
+    {
+      "id": "plOwlPic",
+      "type": "Group",
+      "label": "Olive",
+      "parent": "plOwl",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 64,
+          "unit": "px"
+        },
+        "height": {
+          "value": 64,
+          "unit": "px"
+        },
+        "cssClassName": "bg-owl-pic bg-sp-owl"
+      },
+      "x": 280,
+      "y": 3400
+    },
+    {
+      "id": "plOwlCol",
+      "type": "Group",
+      "label": "What she says",
+      "parent": "plOwl",
+      "children": [
+        "plOwlSay",
+        "plOwlMeta"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)"
+      },
+      "x": 280,
+      "y": 3520
+    },
+    {
+      "id": "plOwlSay",
+      "type": "Text",
+      "label": "The hint",
+      "parent": "plOwlCol",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "fontWeight": "700"
+      },
+      "x": 340,
+      "y": 3640
+    },
+    {
+      "id": "plOwlMeta",
+      "type": "Text",
+      "label": "Where she lives",
+      "parent": "plOwlCol",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "color": "var(--violet-meta)",
+        "cssClassName": "bg-owl-meta"
+      },
+      "x": 340,
+      "y": 3760
+    },
+    {
+      "id": "plRight",
+      "type": "Group",
+      "label": "The steps side",
+      "parent": "plWs",
+      "children": [
+        "plStepsHead",
+        "plBlocksBox",
+        "plTidy"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2-5)",
+        "backgroundColor": "var(--card)",
+        "borderRadius": "var(--radius-card)",
+        "cssClassName": "bg-panel",
+        "paddingTop": "var(--space-3-5)",
+        "paddingBottom": "var(--space-3-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)"
+      },
+      "x": 160,
+      "y": 3880
+    },
+    {
+      "id": "plStepsHead",
+      "type": "Group",
+      "label": "The steps’ head",
+      "parent": "plRight",
+      "children": [
+        "plStepsH",
+        "plCount"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "nowrap",
+        "columnGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "justifyContent": "space-between"
+      },
+      "x": 220,
+      "y": 4000
+    },
+    {
+      "id": "plStepsH",
+      "type": "Text",
+      "label": "Pip’s steps",
+      "parent": "plStepsHead",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h2",
+        "fontSize": {
+          "value": 20,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2
+      },
+      "x": 280,
+      "y": 4120
+    },
+    {
+      "id": "plCount",
+      "type": "Text",
+      "label": "How many blocks",
+      "parent": "plStepsHead",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 13,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink-2)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 4240
+    },
+    {
+      "id": "plBlocksBox",
+      "type": "Group",
+      "label": "The steps, scrolling in their own box",
+      "parent": "plRight",
+      "children": [
+        "plBlocks"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "bg-blocks-box"
+      },
+      "x": 220,
+      "y": 4360
+    },
+    {
+      "id": "plBlocks",
+      "type": "garden-kit.BlockList",
+      "label": "The blocks",
+      "parent": "plBlocksBox",
+      "parameters": {
+        "motionColor": "var(--block-motion)",
+        "actionColor": "var(--block-action)",
+        "controlColor": "var(--block-control)",
+        "askColor": "var(--block-ask)",
+        "runColor": "var(--block-run)"
+      },
+      "x": 280,
+      "y": 4480
+    },
+    {
+      "id": "plTidy",
+      "type": "Group",
+      "label": "The fold offer",
+      "parent": "plRight",
+      "children": [
+        "plTidyText",
+        "plFoldBtn",
+        "plNotNow"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2-5)",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--tidy)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 2,
+          "unit": "px"
+        },
+        "borderColor": "var(--tidy-edge)",
+        "borderRadius": {
+          "value": 14,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "cssClassName": "bg-tidy",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 4600
+    },
+    {
+      "id": "plTidyText",
+      "type": "Text",
+      "label": "What was spotted",
+      "parent": "plTidy",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "fontWeight": "700"
+      },
+      "x": 280,
+      "y": 4720
+    },
+    {
+      "id": "plFoldBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Fold it",
+      "parent": "plTidy",
+      "parameters": {
+        "backgroundColor": "var(--block-control)",
+        "color": "var(--on-fill)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-i-tidy",
+        "label": "Fold it"
+      },
+      "x": 280,
+      "y": 4840
+    },
+    {
+      "id": "plNotNow",
+      "type": "net.noodl.controls.button",
+      "label": "Not now",
+      "parent": "plTidy",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--ink-2)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn",
+        "label": "Not now"
+      },
+      "x": 280,
+      "y": 4960
+    },
+    {
+      "id": "plWin",
+      "type": "/Workshop/Win card",
+      "label": "The win card",
+      "parent": "plRoot",
+      "x": 100,
+      "y": 5080
+    },
+    {
+      "id": "plT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 590,
+      "y": 520
+    },
+    {
+      "id": "plCard",
+      "type": "/Logic/Request card",
+      "label": "Who asks, and what",
+      "x": 590,
+      "y": 280
+    },
+    {
+      "id": "plLine",
+      "type": "/Logic/Hint line",
+      "label": "The owl’s line",
+      "x": 590,
+      "y": 3640
+    },
+    {
+      "id": "plStart",
+      "type": "/Logic/Start world",
+      "label": "The world this request starts from",
+      "x": 590,
+      "y": 5800
+    },
+    {
+      "id": "plNonce",
+      "type": "Counter",
+      "label": "Start over, counted",
+      "parameters": {
+        "startValue": 0
+      },
+      "x": 590,
+      "y": 2920
+    },
+    {
+      "id": "plWorldVar",
+      "type": "Variable2",
+      "label": "The world",
+      "parameters": {
+        "name": "gardenWorld"
+      },
+      "x": 590,
+      "y": 5920
+    },
+    {
+      "id": "plSetWorld",
+      "type": "Set Variable",
+      "label": "The world at its start",
+      "parameters": {
+        "name": "gardenWorld"
+      },
+      "x": 590,
+      "y": 6040
+    },
+    {
+      "id": "plSetWorldRec",
+      "type": "Set Variable",
+      "label": "The world after a pad press",
+      "parameters": {
+        "name": "gardenWorld"
+      },
+      "x": 590,
+      "y": 6160
+    },
+    {
+      "id": "plProgVar",
+      "type": "Variable2",
+      "label": "The program",
+      "parameters": {
+        "name": "gardenProgram"
+      },
+      "x": 590,
+      "y": 4480
+    },
+    {
+      "id": "plRead",
+      "type": "/Logic/Read program",
+      "label": "The program as a list",
+      "x": 590,
+      "y": 4240
+    },
+    {
+      "id": "plSetProgKit",
+      "type": "Set Variable",
+      "label": "What the block list edited",
+      "parameters": {
+        "name": "gardenProgram"
+      },
+      "x": 590,
+      "y": 4600
+    },
+    {
+      "id": "plSetProgRec",
+      "type": "Set Variable",
+      "label": "What the pad recorded",
+      "parameters": {
+        "name": "gardenProgram"
+      },
+      "x": 590,
+      "y": 6280
+    },
+    {
+      "id": "plSetProgFold",
+      "type": "Set Variable",
+      "label": "What the fold made",
+      "parameters": {
+        "name": "gardenProgram"
+      },
+      "x": 590,
+      "y": 6400
+    },
+    {
+      "id": "plSetProgClear",
+      "type": "Set Variable",
+      "label": "No steps",
+      "parameters": {
+        "name": "gardenProgram",
+        "setWith": "string",
+        "value": "[]"
+      },
+      "x": 590,
+      "y": 6520
+    },
+    {
+      "id": "plTeachBumpsVar",
+      "type": "Variable2",
+      "label": "Bumps while teaching",
+      "parameters": {
+        "name": "gardenTeachBumps"
+      },
+      "x": 590,
+      "y": 6640
+    },
+    {
+      "id": "plSetTeachBumps",
+      "type": "Set Variable",
+      "label": "Count a bump",
+      "parameters": {
+        "name": "gardenTeachBumps"
+      },
+      "x": 590,
+      "y": 6760
+    },
+    {
+      "id": "plClearTeachBumps",
+      "type": "Set Variable",
+      "label": "No bumps",
+      "parameters": {
+        "name": "gardenTeachBumps",
+        "setWith": "number",
+        "value": 0
+      },
+      "x": 590,
+      "y": 6880
+    },
+    {
+      "id": "plRecord",
+      "type": "/Logic/Record step",
+      "label": "A pad press, recorded and driven",
+      "x": 590,
+      "y": 2080
+    },
+    {
+      "id": "plRunner",
+      "type": "/Workshop/Runner",
+      "label": "The runner",
+      "x": 590,
+      "y": 4720
+    },
+    {
+      "id": "plDraw",
+      "type": "/Logic/Draw world",
+      "label": "The world in the kit’s words",
+      "x": 590,
+      "y": 1720
+    },
+    {
+      "id": "plPalette",
+      "type": "/Logic/Palette",
+      "label": "The blocks this band may use",
+      "x": 590,
+      "y": 7000
+    },
+    {
+      "id": "plKitPal",
+      "type": "/Logic/Kit palette",
+      "label": "In the kit’s shape",
+      "x": 590,
+      "y": 4840
+    },
+    {
+      "id": "plTeachMode",
+      "type": "States",
+      "label": "Teaching or not",
+      "parameters": {
+        "states": "idle,teach",
+        "values": "teaching,notTeaching",
+        "useTransitions": false,
+        "type-teaching": "boolean",
+        "value-idle-teaching": false,
+        "value-teach-teaching": true,
+        "type-notTeaching": "boolean",
+        "value-idle-notTeaching": true,
+        "value-teach-notTeaching": false
+      },
+      "x": 590,
+      "y": 2200
+    },
+    {
+      "id": "plPredictMode",
+      "type": "States",
+      "label": "Waiting for a tap or not",
+      "parameters": {
+        "states": "off,on",
+        "values": "predicting",
+        "useTransitions": false,
+        "type-predicting": "boolean",
+        "value-off-predicting": false,
+        "value-on-predicting": true
+      },
+      "x": 590,
+      "y": 2320
+    },
+    {
+      "id": "plPredictGate",
+      "type": "Condition",
+      "label": "Was the tap a prediction?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 590,
+      "y": 1840
+    },
+    {
+      "id": "plPredictEnd",
+      "type": "/Logic/Predict end",
+      "label": "Where the robot really ends",
+      "x": 590,
+      "y": 1960
+    },
+    {
+      "id": "plHitGate",
+      "type": "Condition",
+      "label": "Did the tap hit?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 590,
+      "y": 7120
+    },
+    {
+      "id": "plMissVar",
+      "type": "Variable2",
+      "label": "A missed prediction on show",
+      "parameters": {
+        "name": "gardenPredictMiss"
+      },
+      "x": 590,
+      "y": 7240
+    },
+    {
+      "id": "plSetMiss",
+      "type": "Set Variable",
+      "label": "Show the real end",
+      "parameters": {
+        "name": "gardenPredictMiss",
+        "setWith": "boolean",
+        "value": true
+      },
+      "x": 590,
+      "y": 7360
+    },
+    {
+      "id": "plClearMiss",
+      "type": "Set Variable",
+      "label": "Hide it",
+      "parameters": {
+        "name": "gardenPredictMiss",
+        "setWith": "boolean",
+        "value": false
+      },
+      "x": 590,
+      "y": 2680
+    },
+    {
+      "id": "plFind",
+      "type": "/Logic/Find repeat",
+      "label": "The same steps, over and over?",
+      "x": 590,
+      "y": 7480
+    },
+    {
+      "id": "plTidyLine",
+      "type": "/Logic/Tidy line",
+      "label": "The fold offer in words",
+      "x": 590,
+      "y": 4960
+    },
+    {
+      "id": "plDismissVar",
+      "type": "Variable2",
+      "label": "The program the child said Not now to",
+      "parameters": {
+        "name": "gardenTidyNo"
+      },
+      "x": 590,
+      "y": 7600
+    },
+    {
+      "id": "plSetDismiss",
+      "type": "Set Variable",
+      "label": "Not now",
+      "parameters": {
+        "name": "gardenTidyNo"
+      },
+      "x": 590,
+      "y": 5200
+    },
+    {
+      "id": "plFold",
+      "type": "/Logic/Fold",
+      "label": "Fold it",
+      "x": 590,
+      "y": 5080
+    },
+    {
+      "id": "plChoose",
+      "type": "/Logic/Choose hint",
+      "label": "Which hint",
+      "x": 590,
+      "y": 2560
+    },
+    {
+      "id": "plGoal",
+      "type": "/Logic/Goal met",
+      "label": "Was the request done?",
+      "x": 590,
+      "y": 7720
+    },
+    {
+      "id": "plMetGate",
+      "type": "Condition",
+      "label": "Done?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 590,
+      "y": 7840
+    },
+    {
+      "id": "plWonVar",
+      "type": "Variable2",
+      "label": "The win card up",
+      "parameters": {
+        "name": "gardenWon"
+      },
+      "x": 590,
+      "y": 5320
+    },
+    {
+      "id": "plSetWon",
+      "type": "Set Variable",
+      "label": "Show it",
+      "parameters": {
+        "name": "gardenWon",
+        "setWith": "boolean",
+        "value": true
+      },
+      "x": 590,
+      "y": 7960
+    },
+    {
+      "id": "plClearWon",
+      "type": "Set Variable",
+      "label": "Hide it",
+      "parameters": {
+        "name": "gardenWon",
+        "setWith": "boolean",
+        "value": false
+      },
+      "x": 590,
+      "y": 5440
+    },
+    {
+      "id": "plWinSum",
+      "type": "/Logic/Win summary",
+      "label": "The win in words",
+      "x": 590,
+      "y": 5560
+    },
+    {
+      "id": "plOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "won",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "bloom",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "reward",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "wonRequest",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "island",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "found",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "blocks",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "running",
+          "plug": "input",
+          "type": "boolean"
+        }
+      ],
+      "x": 590,
+      "y": 5680
+    }
+  ],
+  "visualRoots": [
+    "plRoot"
+  ]
+}

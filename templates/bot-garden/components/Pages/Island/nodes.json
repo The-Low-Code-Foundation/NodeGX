@@ -1,0 +1,327 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "13d04a24-c95a-522d-8e52-36ab1dda6269",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "isPage",
+      "type": "Page",
+      "label": "Island",
+      "children": [
+        "isWrap"
+      ],
+      "parameters": {
+        "title": "Bot Garden",
+        "urlPath": "island"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "isWrap",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "isPage",
+      "children": [
+        "isBar",
+        "isHead",
+        "isGrid"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3-5)",
+        "maxWidth": {
+          "value": 1360,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-10)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "isBar",
+      "type": "/Garden/Top bar",
+      "label": "The bar",
+      "parent": "isWrap",
+      "parameters": {
+        "page": "island",
+        "showTabs": true,
+        "showBand": true
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "isStore",
+      "type": "/Logic/App store",
+      "label": "The family, stored",
+      "x": 590,
+      "y": 280
+    },
+    {
+      "id": "isFam",
+      "type": "/Logic/Read family",
+      "label": "Who is playing",
+      "x": 590,
+      "y": 400
+    },
+    {
+      "id": "isLangVar",
+      "type": "Variable2",
+      "label": "The language before anyone is chosen",
+      "parameters": {
+        "name": "gardenLang"
+      },
+      "x": 590,
+      "y": 1600
+    },
+    {
+      "id": "isWords",
+      "type": "/Data/Words",
+      "label": "The words",
+      "x": 590,
+      "y": 520
+    },
+    {
+      "id": "isT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 590,
+      "y": 640
+    },
+    {
+      "id": "isHead",
+      "type": "/Garden/Page head",
+      "label": "The head",
+      "parent": "isWrap",
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "isGrid",
+      "type": "Group",
+      "label": "Map and requests",
+      "parent": "isWrap",
+      "children": [
+        "isMap",
+        "isQuests"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "bg-island"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "isMap",
+      "type": "Group",
+      "label": "The map",
+      "parent": "isGrid",
+      "children": [
+        "isGarden"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "bg-map"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "isGarden",
+      "type": "garden-kit.Garden",
+      "label": "The island",
+      "parent": "isMap",
+      "parameters": {
+        "stepMs": 380,
+        "label": "The island"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "isQuests",
+      "type": "Group",
+      "label": "The requests",
+      "parent": "isGrid",
+      "children": [
+        "isReqL",
+        "isList",
+        "isFreeL",
+        "isFree"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2-5)"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "isReqL",
+      "type": "Text",
+      "label": "Requests",
+      "parent": "isQuests",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--leaf)",
+        "cssClassName": "bg-eyebrow"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "isList",
+      "type": "Group",
+      "label": "The open requests",
+      "parent": "isQuests",
+      "children": [
+        "isEach"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2-5)"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "isEach",
+      "type": "For Each",
+      "label": "One card per request",
+      "parent": "isList",
+      "parameters": {
+        "template": "/Island/Request card",
+        "templateType": "explicit"
+      },
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "isFreeL",
+      "type": "Text",
+      "label": "Free play",
+      "parent": "isQuests",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--leaf)",
+        "cssClassName": "bg-eyebrow",
+        "marginTop": "var(--space-2)"
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "isFree",
+      "type": "/Island/Request card",
+      "label": "Free play",
+      "parent": "isQuests",
+      "parameters": {
+        "id": "free",
+        "faceClass": "bg-face bg-sp-owl",
+        "tagClass": "bg-tag bg-tag-motion",
+        "isDone": false,
+        "doneWord": ""
+      },
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "isRequests",
+      "type": "/Data/Requests",
+      "label": "The requests",
+      "x": 590,
+      "y": 1720
+    },
+    {
+      "id": "isRows",
+      "type": "/Logic/Island rows",
+      "label": "Who needs a hand",
+      "x": 590,
+      "y": 1240
+    },
+    {
+      "id": "isWorld",
+      "type": "/Logic/Island world",
+      "label": "The island and its robots",
+      "x": 590,
+      "y": 760
+    },
+    {
+      "id": "isSetReq",
+      "type": "Set Variable",
+      "label": "This request",
+      "parameters": {
+        "name": "gardenRequestId"
+      },
+      "x": 590,
+      "y": 1360
+    },
+    {
+      "id": "isSetFree",
+      "type": "Set Variable",
+      "label": "Free play",
+      "parameters": {
+        "name": "gardenRequestId",
+        "setWith": "string",
+        "value": "free"
+      },
+      "x": 590,
+      "y": 1480
+    },
+    {
+      "id": "isGoWorkshop",
+      "type": "RouterNavigate",
+      "label": "To the workshop",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Workshop"
+      },
+      "x": 590,
+      "y": 1840
+    }
+  ],
+  "visualRoots": [
+    "isPage"
+  ]
+}

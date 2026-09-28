@@ -1,0 +1,150 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "666b9d87-ca90-5182-87cf-f1e1531c17e0",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "islandrowsIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "done",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "requests",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "islandrowsFn",
+      "type": "JavaScriptFunction",
+      "label": "Island rows",
+      "parameters": {
+        "functionScript": "\nfunction wordMap(rows, lang, name) {\n  var map = {};\n  var list = Array.isArray(rows) ? rows : [];\n  for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || '').split('{b}').join(name);\n  return map;\n}\nfunction fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\nfunction langOf(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction nameOf(v) { var n = String(v || '').trim(); return n || 'Pip'; }\n\nvar ISLANDERS = {\"mamie\":{\"sprite\":\"granny\",\"nameKey\":\"islMamie\"},\"sami\":{\"sprite\":\"postie\",\"nameKey\":\"islSami\"},\"biscuit\":{\"sprite\":\"cat\",\"nameKey\":\"islBiscuit\"}};\nvar KIND = { 1: 'motion', 2: 'control', 3: 'control', 4: 'control', 5: 'control', 6: 'control', 7: 'ask' };\nvar lang = langOf(Inputs.lang), name = nameOf(Inputs.botName);\nvar w = wordMap(Inputs.words, lang, name);\nvar band = Number(Inputs.band) === 1 ? 1 : 2;\nvar done = Array.isArray(Inputs.done) ? Inputs.done : [];\nvar reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];\nvar rows = [], open = 0;\nfor (var i = 0; i < reqs.length; i++) {\n  var r = reqs[i];\n  if (!r || Number(r.band) > band) continue;\n  var isl = ISLANDERS[r.islander] || { sprite: 'owl', nameKey: '' };\n  var isDone = done.indexOf(r.id) !== -1;\n  if (!isDone) open++;\n  var trick = Array.isArray(r.tricks) && r.tricks.length ? Number(r.tricks[0]) : 1;\n  var kind = r.palette && r.palette.indexOf('say') !== -1 ? 'ask' : (KIND[trick] || 'control');\n  rows.push({\n    id: r.id, who: w[isl.nameKey] || '', title: w[r.copyKeys.title] || '', trick: w[r.copyKeys.blurb] || '',\n    faceClass: 'bg-face bg-sp-' + isl.sprite, tagClass: 'bg-tag bg-tag-' + kind, isDone: isDone, doneWord: '✓ ' + (w.done || '')\n  });\n}\nOutputs.rows = rows;\nOutputs.count = rows.length;\nOutputs.open = open;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-band",
+          "displayName": "band",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-done",
+          "displayName": "done",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-requests",
+          "displayName": "requests",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-open",
+          "displayName": "open",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "islandrowsOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "open",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

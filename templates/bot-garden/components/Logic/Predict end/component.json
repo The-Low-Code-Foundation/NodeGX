@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5c653766-8493-5326-8983-a0522058feb3",
+  "name": "Predict end",
+  "path": "/Logic/Predict end",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The tile the robot ends on, and whether the tap hit it. Runs on Go; answers Ran once its outputs are set."
+}

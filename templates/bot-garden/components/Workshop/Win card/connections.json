@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8658fcf0-5f09-57c3-80c8-1a8647968589",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "wnIn",
+      "fromProperty": "show",
+      "toId": "wnScrim",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wnIn",
+      "fromProperty": "faceClass",
+      "toId": "wnFace",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "wnIn",
+      "fromProperty": "thanks",
+      "toId": "wnThanks",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wnIn",
+      "fromProperty": "line",
+      "toId": "wnLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wnIn",
+      "fromProperty": "rewardText",
+      "toId": "wnRewardText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wnIn",
+      "fromProperty": "hasReward",
+      "toId": "wnReward",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wnIn",
+      "fromProperty": "learnText",
+      "toId": "wnLearnText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wnIn",
+      "fromProperty": "hasLearn",
+      "toId": "wnLearn",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wnIn",
+      "fromProperty": "islandWord",
+      "toId": "wnIsland",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "wnIn",
+      "fromProperty": "stayWord",
+      "toId": "wnStay",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "wnIsland",
+      "fromProperty": "onClick",
+      "toId": "wnOut",
+      "toProperty": "island"
+    },
+    {
+      "fromId": "wnStay",
+      "fromProperty": "onClick",
+      "toId": "wnOut",
+      "toProperty": "stay"
+    }
+  ]
+}

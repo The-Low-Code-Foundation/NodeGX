@@ -1,0 +1,198 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "899e86c3-c9cc-5227-83b4-13d2d5c6745d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rbPage",
+      "type": "Page",
+      "label": "My robot",
+      "children": [
+        "rbWrap"
+      ],
+      "parameters": {
+        "title": "Bot Garden",
+        "urlPath": "robot"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rbWrap",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "rbPage",
+      "children": [
+        "rbBar",
+        "rbHead",
+        "rbGrid"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3-5)",
+        "maxWidth": {
+          "value": 1360,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-10)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "rbBar",
+      "type": "/Garden/Top bar",
+      "label": "The bar",
+      "parent": "rbWrap",
+      "parameters": {
+        "page": "robot",
+        "showTabs": true,
+        "showBand": true
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "rbStore",
+      "type": "/Logic/App store",
+      "label": "The family, stored",
+      "x": 530,
+      "y": 280
+    },
+    {
+      "id": "rbFam",
+      "type": "/Logic/Read family",
+      "label": "Who is playing",
+      "x": 530,
+      "y": 400
+    },
+    {
+      "id": "rbLangVar",
+      "type": "Variable2",
+      "label": "The language before anyone is chosen",
+      "parameters": {
+        "name": "gardenLang"
+      },
+      "x": 530,
+      "y": 880
+    },
+    {
+      "id": "rbWords",
+      "type": "/Data/Words",
+      "label": "The words",
+      "x": 530,
+      "y": 520
+    },
+    {
+      "id": "rbT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 530,
+      "y": 640
+    },
+    {
+      "id": "rbHead",
+      "type": "/Garden/Page head",
+      "label": "The head",
+      "parent": "rbWrap",
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "rbGrid",
+      "type": "Group",
+      "label": "Stage and options",
+      "parent": "rbWrap",
+      "children": [
+        "rbStage",
+        "rbOptions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "bg-robo"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "rbStage",
+      "type": "Group",
+      "label": "The stage",
+      "parent": "rbGrid",
+      "children": [
+        "rbGarden"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "bg-robo-stage"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "rbGarden",
+      "type": "garden-kit.Garden",
+      "label": "The robot",
+      "parent": "rbStage",
+      "parameters": {
+        "stepMs": 380,
+        "label": "My robot"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "rbDraw",
+      "type": "/Logic/Draw world",
+      "label": "The robot in its looks",
+      "parameters": {
+        "world": {
+          "map": [
+            "G"
+          ],
+          "things": [],
+          "robots": [
+            {
+              "id": "me",
+              "x": 0,
+              "y": 0,
+              "d": 0,
+              "carry": []
+            }
+          ],
+          "events": [],
+          "schedule": []
+        }
+      },
+      "x": 530,
+      "y": 760
+    },
+    {
+      "id": "rbOptions",
+      "type": "/Robot/Options",
+      "label": "The options",
+      "parent": "rbGrid",
+      "x": 220,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "rbPage"
+  ]
+}

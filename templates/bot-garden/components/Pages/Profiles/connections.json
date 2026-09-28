@@ -1,0 +1,277 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3510682f-3040-51bf-843a-bcbe3f2c899f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "prStore",
+      "fromProperty": "model",
+      "toId": "prFam",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "prLangVar",
+      "fromProperty": "value",
+      "toId": "prFam",
+      "toProperty": "fallbackLang"
+    },
+    {
+      "fromId": "prWords",
+      "fromProperty": "words",
+      "toId": "prT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "prFam",
+      "fromProperty": "lang",
+      "toId": "prT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "prFam",
+      "fromProperty": "botName",
+      "toId": "prT",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "prFam",
+      "fromProperty": "band",
+      "toId": "prBar",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "prFam",
+      "fromProperty": "lang",
+      "toId": "prBar",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "prFam",
+      "fromProperty": "name",
+      "toId": "prBar",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "prFam",
+      "fromProperty": "face",
+      "toId": "prBar",
+      "toProperty": "face"
+    },
+    {
+      "fromId": "prFam",
+      "fromProperty": "botName",
+      "toId": "prBar",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "prFam",
+      "fromProperty": "profileId",
+      "toId": "prBar",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "prWords",
+      "fromProperty": "words",
+      "toId": "prBar",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "prStore",
+      "fromProperty": "model",
+      "toId": "prBar",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "prBar",
+      "fromProperty": "model",
+      "toId": "prStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "prBar",
+      "fromProperty": "write",
+      "toId": "prStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "prT",
+      "fromProperty": "brand",
+      "toId": "prHead",
+      "toProperty": "eyebrow"
+    },
+    {
+      "fromId": "prT",
+      "fromProperty": "whoIsPlaying",
+      "toId": "prHead",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "prT",
+      "fromProperty": "pickProfile",
+      "toId": "prHead",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "prFam",
+      "fromProperty": "profiles",
+      "toId": "prEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "prT",
+      "fromProperty": "familyFull",
+      "toId": "prFull",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "prT",
+      "fromProperty": "newProfile",
+      "toId": "prNew",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "prStore",
+      "fromProperty": "model",
+      "toId": "prSelect",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "prEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "prSelect",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "prEach",
+      "fromProperty": "itemOutputSignal-chosen",
+      "toId": "prSelect",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "prSelect",
+      "fromProperty": "model",
+      "toId": "prStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "prSelect",
+      "fromProperty": "ran",
+      "toId": "prStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "prNew",
+      "fromProperty": "onClick",
+      "toId": "prFormMode",
+      "toProperty": "to-open"
+    },
+    {
+      "fromId": "prNew",
+      "fromProperty": "onClick",
+      "toId": "prForm",
+      "toProperty": "reset"
+    },
+    {
+      "fromId": "prFormMode",
+      "fromProperty": "open",
+      "toId": "prForm",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "prFam",
+      "fromProperty": "lang",
+      "toId": "prForm",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "prWords",
+      "fromProperty": "words",
+      "toId": "prForm",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "prForm",
+      "fromProperty": "cancel",
+      "toId": "prFormMode",
+      "toProperty": "to-closed"
+    },
+    {
+      "fromId": "prStore",
+      "fromProperty": "model",
+      "toId": "prAdd",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "prForm",
+      "fromProperty": "name",
+      "toId": "prAdd",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "prForm",
+      "fromProperty": "name",
+      "toId": "prAdd",
+      "toProperty": "face"
+    },
+    {
+      "fromId": "prForm",
+      "fromProperty": "band",
+      "toId": "prAdd",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "prForm",
+      "fromProperty": "lang",
+      "toId": "prAdd",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "prForm",
+      "fromProperty": "robotName",
+      "toId": "prAdd",
+      "toProperty": "robotName"
+    },
+    {
+      "fromId": "prForm",
+      "fromProperty": "create",
+      "toId": "prAdd",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "prAdd",
+      "fromProperty": "model",
+      "toId": "prStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "prAdd",
+      "fromProperty": "ran",
+      "toId": "prStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "prFam",
+      "fromProperty": "canAdd",
+      "toId": "prNew",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prStore",
+      "fromProperty": "written",
+      "toId": "prGoIsland",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "prBar",
+      "fromProperty": "pickedEn",
+      "toId": "prLangEn",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "prBar",
+      "fromProperty": "pickedFr",
+      "toId": "prLangFr",
+      "toProperty": "do"
+    }
+  ]
+}

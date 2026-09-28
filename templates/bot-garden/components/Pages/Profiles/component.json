@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3510682f-3040-51bf-843a-bcbe3f2c899f",
+  "name": "Profiles",
+  "path": "/Pages/Profiles",
+  "type": "page",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Who is playing: the family’s players as cards (up to six), and the new-player form. Choosing one is the only login; it goes to the island."
+}

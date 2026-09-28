@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4b911db9-5959-5323-8d27-3b622c31b574",
+  "name": "Workshop",
+  "path": "/Pages/Workshop",
+  "type": "page",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The workshop for the chosen request: the robot, the blocks and the owl on one screen. A win is stored for the profile that earned it (the hat, the tricks) and for the island (done for both robots, D2). With no request (a reload), the island."
+}

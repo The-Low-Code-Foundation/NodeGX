@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "404f7106-b24a-5bec-83d0-639650c2aae3",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "requestcardIn",
+      "fromProperty": "botName",
+      "toId": "requestcardFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "requestcardIn",
+      "fromProperty": "lang",
+      "toId": "requestcardFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "requestcardIn",
+      "fromProperty": "requestId",
+      "toId": "requestcardFn",
+      "toProperty": "in-requestId"
+    },
+    {
+      "fromId": "requestcardIn",
+      "fromProperty": "requests",
+      "toId": "requestcardFn",
+      "toProperty": "in-requests"
+    },
+    {
+      "fromId": "requestcardIn",
+      "fromProperty": "words",
+      "toId": "requestcardFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "requestcardFn",
+      "fromProperty": "out-eyebrow",
+      "toId": "requestcardOut",
+      "toProperty": "eyebrow"
+    },
+    {
+      "fromId": "requestcardFn",
+      "fromProperty": "out-faceClass",
+      "toId": "requestcardOut",
+      "toProperty": "faceClass"
+    },
+    {
+      "fromId": "requestcardFn",
+      "fromProperty": "out-line",
+      "toId": "requestcardOut",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "requestcardFn",
+      "fromProperty": "out-rewardWord",
+      "toId": "requestcardOut",
+      "toProperty": "rewardWord"
+    },
+    {
+      "fromId": "requestcardFn",
+      "fromProperty": "out-sub",
+      "toId": "requestcardOut",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "requestcardFn",
+      "fromProperty": "out-title",
+      "toId": "requestcardOut",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "requestcardFn",
+      "fromProperty": "out-who",
+      "toId": "requestcardOut",
+      "toProperty": "who"
+    },
+    {
+      "fromId": "requestcardFn",
+      "fromProperty": "success",
+      "toId": "requestcardOut",
+      "toProperty": "ran"
+    }
+  ]
+}

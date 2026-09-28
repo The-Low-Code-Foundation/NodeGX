@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "1570cc17-cea8-57aa-8dc5-f547ba764e78",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pkIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "op",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cls",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 290,
+      "y": 40
+    },
+    {
+      "id": "pkKey",
+      "type": "net.noodl.controls.button",
+      "label": "The key",
+      "parameters": {
+        "backgroundColor": "var(--card)",
+        "color": "var(--ink)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 14,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "width": {
+          "value": 56,
+          "unit": "px"
+        },
+        "height": {
+          "value": 56,
+          "unit": "px"
+        },
+        "label": ""
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pkOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "pressed",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "op",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 290,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "pkKey"
+  ]
+}

@@ -1,0 +1,2718 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7f675072-4f9a-56b6-872a-5b7a58d3c9b3",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "translatewordsIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "translatewordsFn",
+      "type": "JavaScriptFunction",
+      "label": "Translate words",
+      "parameters": {
+        "functionScript": "\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar rows = Inputs.words || [];\nvar name = String(Inputs.botName || 'Pip');\nvar map = {};\nfor (var i = 0; i < rows.length; i++) map[rows[i].key] = String(rows[i][lang] || rows[i].en || '').split('{b}').join(name);\nOutputs.lang = lang;\nOutputs.isFr = lang === 'fr';\nOutputs.brand = map.brand || '';\nOutputs.navIsland = map.navIsland || '';\nOutputs.navWorkshop = map.navWorkshop || '';\nOutputs.navRobot = map.navRobot || '';\nOutputs.navSkills = map.navSkills || '';\nOutputs.navGrown = map.navGrown || '';\nOutputs.navProfiles = map.navProfiles || '';\nOutputs.bFwd = map.bFwd || '';\nOutputs.bLeft = map.bLeft || '';\nOutputs.bRight = map.bRight || '';\nOutputs.bWater = map.bWater || '';\nOutputs.bPick = map.bPick || '';\nOutputs.bPut = map.bPut || '';\nOutputs.bSay = map.bSay || '';\nOutputs.bRepeat = map.bRepeat || '';\nOutputs.bTimes = map.bTimes || '';\nOutputs.bUntil = map.bUntil || '';\nOutputs.bIf = map.bIf || '';\nOutputs.bWhen = map.bWhen || '';\nOutputs.bCountInc = map.bCountInc || '';\nOutputs.bTrick = map.bTrick || '';\nOutputs.bDo = map.bDo || '';\nOutputs.bAsk = map.bAsk || '';\nOutputs.cFwd = map.cFwd || '';\nOutputs.cLeft = map.cLeft || '';\nOutputs.cRight = map.cRight || '';\nOutputs.cWater = map.cWater || '';\nOutputs.cPick = map.cPick || '';\nOutputs.cPut = map.cPut || '';\nOutputs.cSay = map.cSay || '';\nOutputs.cRepeat = map.cRepeat || '';\nOutputs.cUntil = map.cUntil || '';\nOutputs.cIf = map.cIf || '';\nOutputs.cWhen = map.cWhen || '';\nOutputs.cCountInc = map.cCountInc || '';\nOutputs.cTrick = map.cTrick || '';\nOutputs.cDo = map.cDo || '';\nOutputs.cAsk = map.cAsk || '';\nOutputs.sWallAhead = map.sWallAhead || '';\nOutputs.sTulipAhead = map.sTulipAhead || '';\nOutputs.sBowlEmpty = map.sBowlEmpty || '';\nOutputs.sBasketFull = map.sBasketFull || '';\nOutputs.sCountIs = map.sCountIs || '';\nOutputs.sOliveSays = map.sOliveSays || '';\nOutputs.eMeow = map.eMeow || '';\nOutputs.shWord = map.shWord || '';\nOutputs.shNumber = map.shNumber || '';\nOutputs.shYesNo = map.shYesNo || '';\nOutputs.shOneOf = map.shOneOf || '';\nOutputs.shList3 = map.shList3 || '';\nOutputs.shSentence = map.shSentence || '';\nOutputs.shCard = map.shCard || '';\nOutputs.shBlocks = map.shBlocks || '';\nOutputs.dialSame = map.dialSame || '';\nOutputs.dialSurprise = map.dialSurprise || '';\nOutputs.teach = map.teach || '';\nOutputs.teachStop = map.teachStop || '';\nOutputs.play = map.play || '';\nOutputs.step = map.step || '';\nOutputs.reset = map.reset || '';\nOutputs.predict = map.predict || '';\nOutputs.predictAsk = map.predictAsk || '';\nOutputs.ask = map.ask || '';\nOutputs.owlMeta = map.owlMeta || '';\nOutputs.scriptH = map.scriptH || '';\nOutputs.tidyGo = map.tidyGo || '';\nOutputs.tidyNo = map.tidyNo || '';\nOutputs.tidyFound = map.tidyFound || '';\nOutputs.tidyFound1 = map.tidyFound1 || '';\nOutputs.blocks = map.blocks || '';\nOutputs.block1 = map.block1 || '';\nOutputs.empty = map.empty || '';\nOutputs.recording = map.recording || '';\nOutputs.sayBump = map.sayBump || '';\nOutputs.saySplash = map.saySplash || '';\nOutputs.sayDrink = map.sayDrink || '';\nOutputs.sayPick = map.sayPick || '';\nOutputs.sayPut = map.sayPut || '';\nOutputs.thanksSami = map.thanksSami || '';\nOutputs.thanksMamie = map.thanksMamie || '';\nOutputs.thanksBiscuit = map.thanksBiscuit || '';\nOutputs.winFew = map.winFew || '';\nOutputs.winMany = map.winMany || '';\nOutputs.winLearn = map.winLearn || '';\nOutputs.winIsland = map.winIsland || '';\nOutputs.winStay = map.winStay || '';\nOutputs.isEyebrow = map.isEyebrow || '';\nOutputs.isTitle = map.isTitle || '';\nOutputs.isSub = map.isSub || '';\nOutputs.isReq = map.isReq || '';\nOutputs.isFree = map.isFree || '';\nOutputs.done = map.done || '';\nOutputs.sandH = map.sandH || '';\nOutputs.sandP = map.sandP || '';\nOutputs.islSami = map.islSami || '';\nOutputs.islMamie = map.islMamie || '';\nOutputs.islBiscuit = map.islBiscuit || '';\nOutputs.rqPathTitle = map.rqPathTitle || '';\nOutputs.rqPathBlurb = map.rqPathBlurb || '';\nOutputs.rqPathLine = map.rqPathLine || '';\nOutputs.rqTulipsTitle = map.rqTulipsTitle || '';\nOutputs.rqTulipsBlurb = map.rqTulipsBlurb || '';\nOutputs.rqTulipsLine = map.rqTulipsLine || '';\nOutputs.rqBowlTitle = map.rqBowlTitle || '';\nOutputs.rqBowlBlurb = map.rqBowlBlurb || '';\nOutputs.rqBowlLine = map.rqBowlLine || '';\nOutputs.rqLetterTitle = map.rqLetterTitle || '';\nOutputs.rqLetterBlurb = map.rqLetterBlurb || '';\nOutputs.rqLetterLine = map.rqLetterLine || '';\nOutputs.rqWallTitle = map.rqWallTitle || '';\nOutputs.rqWallBlurb = map.rqWallBlurb || '';\nOutputs.rqWallLine = map.rqWallLine || '';\nOutputs.rqMeowTitle = map.rqMeowTitle || '';\nOutputs.rqMeowBlurb = map.rqMeowBlurb || '';\nOutputs.rqMeowLine = map.rqMeowLine || '';\nOutputs.rqEggsTitle = map.rqEggsTitle || '';\nOutputs.rqEggsBlurb = map.rqEggsBlurb || '';\nOutputs.rqEggsLine = map.rqEggsLine || '';\nOutputs.rqRowsTitle = map.rqRowsTitle || '';\nOutputs.rqRowsBlurb = map.rqRowsBlurb || '';\nOutputs.rqRowsLine = map.rqRowsLine || '';\nOutputs.hatNone = map.hatNone || '';\nOutputs.hatCap = map.hatCap || '';\nOutputs.hatSun = map.hatSun || '';\nOutputs.hatCrown = map.hatCrown || '';\nOutputs.stickerLetter = map.stickerLetter || '';\nOutputs.stickerPaw = map.stickerPaw || '';\nOutputs.stickerTulip = map.stickerTulip || '';\nOutputs.itemBell = map.itemBell || '';\nOutputs.itemBasket = map.itemBasket || '';\nOutputs.itemGnome = map.itemGnome || '';\nOutputs.seeds = map.seeds || '';\nOutputs.rewardFrom = map.rewardFrom || '';\nOutputs.rbTitle = map.rbTitle || '';\nOutputs.rbSub = map.rbSub || '';\nOutputs.rbName = map.rbName || '';\nOutputs.rbColour = map.rbColour || '';\nOutputs.rbEyes = map.rbEyes || '';\nOutputs.eyeRound = map.eyeRound || '';\nOutputs.eyeHappy = map.eyeHappy || '';\nOutputs.eyeWink = map.eyeWink || '';\nOutputs.rbHat = map.rbHat || '';\nOutputs.rbStickers = map.rbStickers || '';\nOutputs.ntTitle = map.ntTitle || '';\nOutputs.ntSub = map.ntSub || '';\nOutputs.stBloom = map.stBloom || '';\nOutputs.stSprout = map.stSprout || '';\nOutputs.stSeed = map.stSeed || '';\nOutputs.n1 = map.n1 || '';\nOutputs.n1p = map.n1p || '';\nOutputs.n2 = map.n2 || '';\nOutputs.n2p = map.n2p || '';\nOutputs.n3 = map.n3 || '';\nOutputs.n3p = map.n3p || '';\nOutputs.n4 = map.n4 || '';\nOutputs.n4p = map.n4p || '';\nOutputs.n5 = map.n5 || '';\nOutputs.n5p = map.n5p || '';\nOutputs.n6 = map.n6 || '';\nOutputs.n6p = map.n6p || '';\nOutputs.n7 = map.n7 || '';\nOutputs.n7p = map.n7p || '';\nOutputs.oliveCant = map.oliveCant || '';\nOutputs.whoIsPlaying = map.whoIsPlaying || '';\nOutputs.newProfile = map.newProfile || '';\nOutputs.yourName = map.yourName || '';\nOutputs.yourBand = map.yourBand || '';\nOutputs.band1 = map.band1 || '';\nOutputs.band2 = map.band2 || '';\nOutputs.language = map.language || '';\nOutputs.robotName = map.robotName || '';\nOutputs.create = map.create || '';\nOutputs.cancel = map.cancel || '';\nOutputs.guTitle = map.guTitle || '';\nOutputs.guSub = map.guSub || '';\nOutputs.guWhereH = map.guWhereH || '';\nOutputs.guNoModel = map.guNoModel || '';\nOutputs.guRulesH = map.guRulesH || '';\nOutputs.guR1 = map.guR1 || '';\nOutputs.guR2 = map.guR2 || '';\nOutputs.guR3 = map.guR3 || '';\nOutputs.guR4 = map.guR4 || '';\nOutputs.guDataH = map.guDataH || '';\nOutputs.guD1 = map.guD1 || '';\nOutputs.guD2 = map.guD2 || '';\nOutputs.guD3 = map.guD3 || '';\nOutputs.guTryH = map.guTryH || '';\nOutputs.guTryGo = map.guTryGo || '';\nOutputs.saveCodeH = map.saveCodeH || '';\nOutputs.saveCodeCopy = map.saveCodeCopy || '';\nOutputs.saveCodePaste = map.saveCodePaste || '';\nOutputs.saveCodeBad = map.saveCodeBad || '';\nOutputs.wsEyebrowReq = map.wsEyebrowReq || '';\nOutputs.wsFreeTitle = map.wsFreeTitle || '';\nOutputs.ntEyebrow = map.ntEyebrow || '';\nOutputs.guEyebrow = map.guEyebrow || '';\nOutputs.guHere = map.guHere || '';\nOutputs.guHereOn = map.guHereOn || '';\nOutputs.guHereOff = map.guHereOff || '';\nOutputs.guExam = map.guExam || '';\nOutputs.guExamNone = map.guExamNone || '';\nOutputs.guTryPrompt = map.guTryPrompt || '';\nOutputs.guTryNote = map.guTryNote || '';\nOutputs.guSaveLine = map.guSaveLine || '';\nOutputs.winThanks = map.winThanks || '';\nOutputs.winNew = map.winNew || '';\nOutputs.pickProfile = map.pickProfile || '';\nOutputs.familyFull = map.familyFull || '';\nOutputs.stickersNone = map.stickersNone || '';\nOutputs.hatLocked = map.hatLocked || '';\nOutputs.n7Block = map.n7Block || '';\nOutputs.p1 = map.p1 || '';\nOutputs.p2 = map.p2 || '';\nOutputs.p3 = map.p3 || '';\nOutputs.p4 = map.p4 || '';\nOutputs.p5 = map.p5 || '';\nOutputs.p6 = map.p6 || '';\nOutputs.p7 = map.p7 || '';\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-lang",
+          "displayName": "lang",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isFr",
+          "displayName": "isFr",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-brand",
+          "displayName": "brand",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-navIsland",
+          "displayName": "navIsland",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-navWorkshop",
+          "displayName": "navWorkshop",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-navRobot",
+          "displayName": "navRobot",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-navSkills",
+          "displayName": "navSkills",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-navGrown",
+          "displayName": "navGrown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-navProfiles",
+          "displayName": "navProfiles",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bFwd",
+          "displayName": "bFwd",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bLeft",
+          "displayName": "bLeft",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bRight",
+          "displayName": "bRight",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bWater",
+          "displayName": "bWater",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bPick",
+          "displayName": "bPick",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bPut",
+          "displayName": "bPut",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bSay",
+          "displayName": "bSay",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bRepeat",
+          "displayName": "bRepeat",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bTimes",
+          "displayName": "bTimes",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bUntil",
+          "displayName": "bUntil",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bIf",
+          "displayName": "bIf",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bWhen",
+          "displayName": "bWhen",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bCountInc",
+          "displayName": "bCountInc",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bTrick",
+          "displayName": "bTrick",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bDo",
+          "displayName": "bDo",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bAsk",
+          "displayName": "bAsk",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cFwd",
+          "displayName": "cFwd",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cLeft",
+          "displayName": "cLeft",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cRight",
+          "displayName": "cRight",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cWater",
+          "displayName": "cWater",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cPick",
+          "displayName": "cPick",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cPut",
+          "displayName": "cPut",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cSay",
+          "displayName": "cSay",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cRepeat",
+          "displayName": "cRepeat",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cUntil",
+          "displayName": "cUntil",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cIf",
+          "displayName": "cIf",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cWhen",
+          "displayName": "cWhen",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cCountInc",
+          "displayName": "cCountInc",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cTrick",
+          "displayName": "cTrick",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cDo",
+          "displayName": "cDo",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cAsk",
+          "displayName": "cAsk",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sWallAhead",
+          "displayName": "sWallAhead",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sTulipAhead",
+          "displayName": "sTulipAhead",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sBowlEmpty",
+          "displayName": "sBowlEmpty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sBasketFull",
+          "displayName": "sBasketFull",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sCountIs",
+          "displayName": "sCountIs",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sOliveSays",
+          "displayName": "sOliveSays",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-eMeow",
+          "displayName": "eMeow",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-shWord",
+          "displayName": "shWord",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-shNumber",
+          "displayName": "shNumber",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-shYesNo",
+          "displayName": "shYesNo",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-shOneOf",
+          "displayName": "shOneOf",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-shList3",
+          "displayName": "shList3",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-shSentence",
+          "displayName": "shSentence",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-shCard",
+          "displayName": "shCard",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-shBlocks",
+          "displayName": "shBlocks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-dialSame",
+          "displayName": "dialSame",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-dialSurprise",
+          "displayName": "dialSurprise",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-teach",
+          "displayName": "teach",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-teachStop",
+          "displayName": "teachStop",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-play",
+          "displayName": "play",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-step",
+          "displayName": "step",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-reset",
+          "displayName": "reset",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-predict",
+          "displayName": "predict",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-predictAsk",
+          "displayName": "predictAsk",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ask",
+          "displayName": "ask",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-owlMeta",
+          "displayName": "owlMeta",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-scriptH",
+          "displayName": "scriptH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tidyGo",
+          "displayName": "tidyGo",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tidyNo",
+          "displayName": "tidyNo",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tidyFound",
+          "displayName": "tidyFound",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tidyFound1",
+          "displayName": "tidyFound1",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blocks",
+          "displayName": "blocks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-block1",
+          "displayName": "block1",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-recording",
+          "displayName": "recording",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sayBump",
+          "displayName": "sayBump",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-saySplash",
+          "displayName": "saySplash",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sayDrink",
+          "displayName": "sayDrink",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sayPick",
+          "displayName": "sayPick",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sayPut",
+          "displayName": "sayPut",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-thanksSami",
+          "displayName": "thanksSami",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-thanksMamie",
+          "displayName": "thanksMamie",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-thanksBiscuit",
+          "displayName": "thanksBiscuit",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-winFew",
+          "displayName": "winFew",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-winMany",
+          "displayName": "winMany",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-winLearn",
+          "displayName": "winLearn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-winIsland",
+          "displayName": "winIsland",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-winStay",
+          "displayName": "winStay",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isEyebrow",
+          "displayName": "isEyebrow",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isTitle",
+          "displayName": "isTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isSub",
+          "displayName": "isSub",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isReq",
+          "displayName": "isReq",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isFree",
+          "displayName": "isFree",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sandH",
+          "displayName": "sandH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sandP",
+          "displayName": "sandP",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-islSami",
+          "displayName": "islSami",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-islMamie",
+          "displayName": "islMamie",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-islBiscuit",
+          "displayName": "islBiscuit",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqPathTitle",
+          "displayName": "rqPathTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqPathBlurb",
+          "displayName": "rqPathBlurb",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqPathLine",
+          "displayName": "rqPathLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqTulipsTitle",
+          "displayName": "rqTulipsTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqTulipsBlurb",
+          "displayName": "rqTulipsBlurb",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqTulipsLine",
+          "displayName": "rqTulipsLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqBowlTitle",
+          "displayName": "rqBowlTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqBowlBlurb",
+          "displayName": "rqBowlBlurb",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqBowlLine",
+          "displayName": "rqBowlLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqLetterTitle",
+          "displayName": "rqLetterTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqLetterBlurb",
+          "displayName": "rqLetterBlurb",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqLetterLine",
+          "displayName": "rqLetterLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqWallTitle",
+          "displayName": "rqWallTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqWallBlurb",
+          "displayName": "rqWallBlurb",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqWallLine",
+          "displayName": "rqWallLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqMeowTitle",
+          "displayName": "rqMeowTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqMeowBlurb",
+          "displayName": "rqMeowBlurb",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqMeowLine",
+          "displayName": "rqMeowLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqEggsTitle",
+          "displayName": "rqEggsTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqEggsBlurb",
+          "displayName": "rqEggsBlurb",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqEggsLine",
+          "displayName": "rqEggsLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqRowsTitle",
+          "displayName": "rqRowsTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqRowsBlurb",
+          "displayName": "rqRowsBlurb",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rqRowsLine",
+          "displayName": "rqRowsLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hatNone",
+          "displayName": "hatNone",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hatCap",
+          "displayName": "hatCap",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hatSun",
+          "displayName": "hatSun",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hatCrown",
+          "displayName": "hatCrown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stickerLetter",
+          "displayName": "stickerLetter",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stickerPaw",
+          "displayName": "stickerPaw",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stickerTulip",
+          "displayName": "stickerTulip",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-itemBell",
+          "displayName": "itemBell",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-itemBasket",
+          "displayName": "itemBasket",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-itemGnome",
+          "displayName": "itemGnome",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-seeds",
+          "displayName": "seeds",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rewardFrom",
+          "displayName": "rewardFrom",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rbTitle",
+          "displayName": "rbTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rbSub",
+          "displayName": "rbSub",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rbName",
+          "displayName": "rbName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rbColour",
+          "displayName": "rbColour",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rbEyes",
+          "displayName": "rbEyes",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-eyeRound",
+          "displayName": "eyeRound",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-eyeHappy",
+          "displayName": "eyeHappy",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-eyeWink",
+          "displayName": "eyeWink",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rbHat",
+          "displayName": "rbHat",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rbStickers",
+          "displayName": "rbStickers",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ntTitle",
+          "displayName": "ntTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ntSub",
+          "displayName": "ntSub",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stBloom",
+          "displayName": "stBloom",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stSprout",
+          "displayName": "stSprout",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stSeed",
+          "displayName": "stSeed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-n1",
+          "displayName": "n1",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-n1p",
+          "displayName": "n1p",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-n2",
+          "displayName": "n2",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-n2p",
+          "displayName": "n2p",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-n3",
+          "displayName": "n3",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-n3p",
+          "displayName": "n3p",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-n4",
+          "displayName": "n4",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-n4p",
+          "displayName": "n4p",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-n5",
+          "displayName": "n5",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-n5p",
+          "displayName": "n5p",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-n6",
+          "displayName": "n6",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-n6p",
+          "displayName": "n6p",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-n7",
+          "displayName": "n7",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-n7p",
+          "displayName": "n7p",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveCant",
+          "displayName": "oliveCant",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-whoIsPlaying",
+          "displayName": "whoIsPlaying",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-newProfile",
+          "displayName": "newProfile",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-yourName",
+          "displayName": "yourName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-yourBand",
+          "displayName": "yourBand",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-band1",
+          "displayName": "band1",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-band2",
+          "displayName": "band2",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-language",
+          "displayName": "language",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-robotName",
+          "displayName": "robotName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-create",
+          "displayName": "create",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cancel",
+          "displayName": "cancel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guTitle",
+          "displayName": "guTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guSub",
+          "displayName": "guSub",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guWhereH",
+          "displayName": "guWhereH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guNoModel",
+          "displayName": "guNoModel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guRulesH",
+          "displayName": "guRulesH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guR1",
+          "displayName": "guR1",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guR2",
+          "displayName": "guR2",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guR3",
+          "displayName": "guR3",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guR4",
+          "displayName": "guR4",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guDataH",
+          "displayName": "guDataH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guD1",
+          "displayName": "guD1",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guD2",
+          "displayName": "guD2",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guD3",
+          "displayName": "guD3",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guTryH",
+          "displayName": "guTryH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guTryGo",
+          "displayName": "guTryGo",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-saveCodeH",
+          "displayName": "saveCodeH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-saveCodeCopy",
+          "displayName": "saveCodeCopy",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-saveCodePaste",
+          "displayName": "saveCodePaste",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-saveCodeBad",
+          "displayName": "saveCodeBad",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-wsEyebrowReq",
+          "displayName": "wsEyebrowReq",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-wsFreeTitle",
+          "displayName": "wsFreeTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ntEyebrow",
+          "displayName": "ntEyebrow",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guEyebrow",
+          "displayName": "guEyebrow",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guHere",
+          "displayName": "guHere",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guHereOn",
+          "displayName": "guHereOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guHereOff",
+          "displayName": "guHereOff",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guExam",
+          "displayName": "guExam",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guExamNone",
+          "displayName": "guExamNone",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guTryPrompt",
+          "displayName": "guTryPrompt",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guTryNote",
+          "displayName": "guTryNote",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-guSaveLine",
+          "displayName": "guSaveLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-winThanks",
+          "displayName": "winThanks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-winNew",
+          "displayName": "winNew",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pickProfile",
+          "displayName": "pickProfile",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-familyFull",
+          "displayName": "familyFull",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stickersNone",
+          "displayName": "stickersNone",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hatLocked",
+          "displayName": "hatLocked",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-n7Block",
+          "displayName": "n7Block",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-p1",
+          "displayName": "p1",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-p2",
+          "displayName": "p2",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-p3",
+          "displayName": "p3",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-p4",
+          "displayName": "p4",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-p5",
+          "displayName": "p5",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-p6",
+          "displayName": "p6",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-p7",
+          "displayName": "p7",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "translatewordsOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "ask",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "bAsk",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "bCountInc",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "bDo",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "bFwd",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "bIf",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "bLeft",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "bPick",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "bPut",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "bRepeat",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "bRight",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "bSay",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "bTimes",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "bTrick",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "bUntil",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "bWater",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "bWhen",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "band1",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "band2",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "block1",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "blocks",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "brand",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "cAsk",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "cCountInc",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "cDo",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "cFwd",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "cIf",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "cLeft",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "cPick",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "cPut",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "cRepeat",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "cRight",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "cSay",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "cTrick",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "cUntil",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "cWater",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "cWhen",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "cancel",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "create",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "dialSame",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "dialSurprise",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "eMeow",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "empty",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "eyeHappy",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "eyeRound",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "eyeWink",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "familyFull",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guD1",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guD2",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guD3",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guDataH",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guExam",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guExamNone",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guEyebrow",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guHere",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guHereOff",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guHereOn",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guNoModel",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guR1",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guR2",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guR3",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guR4",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guRulesH",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guSaveLine",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guSub",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guTitle",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guTryGo",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guTryH",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guTryNote",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guTryPrompt",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "guWhereH",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hatCap",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hatCrown",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hatLocked",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hatNone",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hatSun",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "isEyebrow",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "isFr",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "isFree",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "isReq",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "isSub",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "isTitle",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "islBiscuit",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "islMamie",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "islSami",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "itemBasket",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "itemBell",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "itemGnome",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "lang",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "language",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "n1",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "n1p",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "n2",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "n2p",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "n3",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "n3p",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "n4",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "n4p",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "n5",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "n5p",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "n6",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "n6p",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "n7",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "n7Block",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "n7p",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "navGrown",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "navIsland",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "navProfiles",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "navRobot",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "navSkills",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "navWorkshop",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "newProfile",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ntEyebrow",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ntSub",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ntTitle",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveCant",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "owlMeta",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "p1",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "p2",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "p3",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "p4",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "p5",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "p6",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "p7",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "pickProfile",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "play",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "predict",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "predictAsk",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rbColour",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rbEyes",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rbHat",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rbName",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rbStickers",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rbSub",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rbTitle",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "recording",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "reset",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rewardFrom",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "robotName",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqBowlBlurb",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqBowlLine",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqBowlTitle",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqEggsBlurb",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqEggsLine",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqEggsTitle",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqLetterBlurb",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqLetterLine",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqLetterTitle",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqMeowBlurb",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqMeowLine",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqMeowTitle",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqPathBlurb",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqPathLine",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqPathTitle",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqRowsBlurb",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqRowsLine",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqRowsTitle",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqTulipsBlurb",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqTulipsLine",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqTulipsTitle",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqWallBlurb",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqWallLine",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rqWallTitle",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "sBasketFull",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "sBowlEmpty",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "sCountIs",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "sOliveSays",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "sTulipAhead",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "sWallAhead",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "sandH",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "sandP",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "saveCodeBad",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "saveCodeCopy",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "saveCodeH",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "saveCodePaste",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "sayBump",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "sayDrink",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "sayPick",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "sayPut",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "saySplash",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "scriptH",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "seeds",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "shBlocks",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "shCard",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "shList3",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "shNumber",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "shOneOf",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "shSentence",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "shWord",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "shYesNo",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "stBloom",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "stSeed",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "stSprout",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "step",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "stickerLetter",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "stickerPaw",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "stickerTulip",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "stickersNone",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "teach",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "teachStop",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "thanksBiscuit",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "thanksMamie",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "thanksSami",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "tidyFound",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "tidyFound1",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "tidyGo",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "tidyNo",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "whoIsPlaying",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "winFew",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "winIsland",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "winLearn",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "winMany",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "winNew",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "winStay",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "winThanks",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "wsEyebrowReq",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "wsFreeTitle",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "yourBand",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "yourName",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

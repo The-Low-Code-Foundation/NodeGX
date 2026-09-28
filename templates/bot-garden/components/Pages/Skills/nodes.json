@@ -1,0 +1,151 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "afe90186-5e7f-5251-8e9f-33212b12c546",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "skPage",
+      "type": "Page",
+      "label": "Skills",
+      "children": [
+        "skWrap"
+      ],
+      "parameters": {
+        "title": "Bot Garden",
+        "urlPath": "skills"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "skWrap",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "skPage",
+      "children": [
+        "skBar",
+        "skHead",
+        "skPath"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3-5)",
+        "maxWidth": {
+          "value": 1360,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-10)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "skBar",
+      "type": "/Garden/Top bar",
+      "label": "The bar",
+      "parent": "skWrap",
+      "parameters": {
+        "page": "skills",
+        "showTabs": true,
+        "showBand": true
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "skStore",
+      "type": "/Logic/App store",
+      "label": "The family, stored",
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "skFam",
+      "type": "/Logic/Read family",
+      "label": "Who is playing",
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "skLangVar",
+      "type": "Variable2",
+      "label": "The language before anyone is chosen",
+      "parameters": {
+        "name": "gardenLang"
+      },
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "skWords",
+      "type": "/Data/Words",
+      "label": "The words",
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "skT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "skHead",
+      "type": "/Garden/Page head",
+      "label": "The head",
+      "parent": "skWrap",
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "skPath",
+      "type": "Group",
+      "label": "The seven tricks",
+      "parent": "skWrap",
+      "children": [
+        "skEach"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "bg-path"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "skEach",
+      "type": "For Each",
+      "label": "One card per trick",
+      "parent": "skPath",
+      "parameters": {
+        "template": "/Skills/Card",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "skRows",
+      "type": "/Logic/Skill rows",
+      "label": "The tricks, grown or not",
+      "x": 470,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "skPage"
+  ]
+}

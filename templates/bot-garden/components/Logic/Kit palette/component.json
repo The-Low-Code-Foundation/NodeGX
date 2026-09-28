@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b35cb050-fda5-50ab-8fa1-69a85d699f8d",
+  "name": "Kit palette",
+  "path": "/Logic/Kit palette",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The engine’s palette in the kit’s shape. Runs when an input changes; Ran after each run."
+}

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3e01f9a9-0f70-5fdf-8d6b-37c28a3e4084",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "barstateIn",
+      "fromProperty": "band",
+      "toId": "barstateFn",
+      "toProperty": "in-band"
+    },
+    {
+      "fromId": "barstateIn",
+      "fromProperty": "lang",
+      "toId": "barstateFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "barstateIn",
+      "fromProperty": "page",
+      "toId": "barstateFn",
+      "toProperty": "in-page"
+    },
+    {
+      "fromId": "barstateFn",
+      "fromProperty": "out-band1On",
+      "toId": "barstateOut",
+      "toProperty": "band1On"
+    },
+    {
+      "fromId": "barstateFn",
+      "fromProperty": "out-band2On",
+      "toId": "barstateOut",
+      "toProperty": "band2On"
+    },
+    {
+      "fromId": "barstateFn",
+      "fromProperty": "out-enOn",
+      "toId": "barstateOut",
+      "toProperty": "enOn"
+    },
+    {
+      "fromId": "barstateFn",
+      "fromProperty": "out-frOn",
+      "toId": "barstateOut",
+      "toProperty": "frOn"
+    },
+    {
+      "fromId": "barstateFn",
+      "fromProperty": "out-grownOn",
+      "toId": "barstateOut",
+      "toProperty": "grownOn"
+    },
+    {
+      "fromId": "barstateFn",
+      "fromProperty": "out-islandOn",
+      "toId": "barstateOut",
+      "toProperty": "islandOn"
+    },
+    {
+      "fromId": "barstateFn",
+      "fromProperty": "out-robotOn",
+      "toId": "barstateOut",
+      "toProperty": "robotOn"
+    },
+    {
+      "fromId": "barstateFn",
+      "fromProperty": "out-skillsOn",
+      "toId": "barstateOut",
+      "toProperty": "skillsOn"
+    },
+    {
+      "fromId": "barstateFn",
+      "fromProperty": "out-workshopOn",
+      "toId": "barstateOut",
+      "toProperty": "workshopOn"
+    },
+    {
+      "fromId": "barstateFn",
+      "fromProperty": "success",
+      "toId": "barstateOut",
+      "toProperty": "ran"
+    }
+  ]
+}

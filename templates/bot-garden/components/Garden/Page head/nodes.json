@@ -1,0 +1,116 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "489ec11b-263f-5630-851f-c46c60797fcd",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hdIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "eyebrow",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sub",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "hdWrap",
+      "type": "Group",
+      "label": "The head",
+      "children": [
+        "hdEyebrow",
+        "hdTitle",
+        "hdSub"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-0-5)",
+        "maxWidth": {
+          "value": 760,
+          "unit": "px"
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hdEyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "parent": "hdWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--leaf)",
+        "cssClassName": "bg-eyebrow"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "hdTitle",
+      "type": "Text",
+      "label": "Title",
+      "parent": "hdWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h1",
+        "fontSize": {
+          "value": 34,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.15
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "hdSub",
+      "type": "Text",
+      "label": "The line",
+      "parent": "hdWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)"
+      },
+      "x": 100,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "hdWrap"
+  ]
+}

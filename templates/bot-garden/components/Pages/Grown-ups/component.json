@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d34448ca-ffda-587d-8e9c-292ab50e9af9",
+  "name": "Grown-ups",
+  "path": "/Pages/Grown-ups",
+  "type": "page",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "For grown-ups: where Olive runs, what she may do, that nothing leaves the house, Try Olive, and the save code."
+}

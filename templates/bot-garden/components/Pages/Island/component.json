@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "13d04a24-c95a-522d-8e52-36ab1dda6269",
+  "name": "Island",
+  "path": "/Pages/Island",
+  "type": "page",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The island: the map with every robot of the family on it (D2), and the islanders’ open requests tagged with the trick they teach, then free play. Nothing is timed; nothing is counted."
+}

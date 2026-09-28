@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "549dcaea-c475-5af4-8e15-291c705c5be0",
+  "name": "Encode save code",
+  "path": "/Logic/Encode save code",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The family as a code. Runs when an input changes; Ran after each run."
+}

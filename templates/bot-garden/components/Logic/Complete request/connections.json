@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "eab4d0e5-e1e9-547b-89c1-e7ff16eebfda",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "completerequesIn",
+      "fromProperty": "model",
+      "toId": "completerequesFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "completerequesIn",
+      "fromProperty": "profileId",
+      "toId": "completerequesFn",
+      "toProperty": "in-profileId"
+    },
+    {
+      "fromId": "completerequesIn",
+      "fromProperty": "requestId",
+      "toId": "completerequesFn",
+      "toProperty": "in-requestId"
+    },
+    {
+      "fromId": "completerequesIn",
+      "fromProperty": "reward",
+      "toId": "completerequesFn",
+      "toProperty": "in-reward"
+    },
+    {
+      "fromId": "completerequesIn",
+      "fromProperty": "tricks",
+      "toId": "completerequesFn",
+      "toProperty": "in-tricks"
+    },
+    {
+      "fromId": "completerequesIn",
+      "fromProperty": "go",
+      "toId": "completerequesFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "completerequesFn",
+      "fromProperty": "out-bloomed",
+      "toId": "completerequesOut",
+      "toProperty": "bloomed"
+    },
+    {
+      "fromId": "completerequesFn",
+      "fromProperty": "out-found",
+      "toId": "completerequesOut",
+      "toProperty": "found"
+    },
+    {
+      "fromId": "completerequesFn",
+      "fromProperty": "out-model",
+      "toId": "completerequesOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "completerequesFn",
+      "fromProperty": "out-newlyDone",
+      "toId": "completerequesOut",
+      "toProperty": "newlyDone"
+    },
+    {
+      "fromId": "completerequesFn",
+      "fromProperty": "success",
+      "toId": "completerequesOut",
+      "toProperty": "ran"
+    }
+  ]
+}

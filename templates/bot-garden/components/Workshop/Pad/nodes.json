@@ -1,0 +1,81 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "74211808-b73d-5864-8e91-eb80b4f96e96",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pdIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "show",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "pdBox",
+      "type": "Group",
+      "label": "The pad",
+      "children": [
+        "pdEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-pad",
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pdKeys",
+      "type": "Static Data",
+      "label": "The four keys",
+      "parameters": {
+        "type": "json",
+        "json": "[{\"op\":\"fwd\",\"cls\":\"bg-key bg-key-fwd bg-i-fwd bg-press\",\"label\":\"fwd\"},{\"op\":\"left\",\"cls\":\"bg-key bg-key-left bg-i-left bg-press\",\"label\":\"left\"},{\"op\":\"water\",\"cls\":\"bg-key bg-key-water bg-i-water bg-press\",\"label\":\"water\"},{\"op\":\"right\",\"cls\":\"bg-key bg-key-right bg-i-right bg-press\",\"label\":\"right\"}]"
+      },
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "pdEach",
+      "type": "For Each",
+      "label": "One key per row",
+      "parent": "pdBox",
+      "parameters": {
+        "template": "/Workshop/Pad key",
+        "templateType": "explicit"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pdOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "op",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pressed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "pdBox"
+  ]
+}

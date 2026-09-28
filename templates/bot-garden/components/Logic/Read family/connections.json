@@ -1,0 +1,151 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "50154228-717d-55ca-8d4d-2f2cbfef4702",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "readfamilyIn",
+      "fromProperty": "fallbackLang",
+      "toId": "readfamilyFn",
+      "toProperty": "in-fallbackLang"
+    },
+    {
+      "fromId": "readfamilyIn",
+      "fromProperty": "model",
+      "toId": "readfamilyFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-band",
+      "toId": "readfamilyOut",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-botName",
+      "toId": "readfamilyOut",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-canAdd",
+      "toId": "readfamilyOut",
+      "toProperty": "canAdd"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-color",
+      "toId": "readfamilyOut",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-count",
+      "toId": "readfamilyOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-done",
+      "toId": "readfamilyOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-eye",
+      "toId": "readfamilyOut",
+      "toProperty": "eye"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-face",
+      "toId": "readfamilyOut",
+      "toProperty": "face"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-hasProfile",
+      "toId": "readfamilyOut",
+      "toProperty": "hasProfile"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-hat",
+      "toId": "readfamilyOut",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-hats",
+      "toId": "readfamilyOut",
+      "toProperty": "hats"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-isEmpty",
+      "toId": "readfamilyOut",
+      "toProperty": "isEmpty"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-lang",
+      "toId": "readfamilyOut",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-model",
+      "toId": "readfamilyOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-name",
+      "toId": "readfamilyOut",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-older",
+      "toId": "readfamilyOut",
+      "toProperty": "older"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-profileId",
+      "toId": "readfamilyOut",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-profiles",
+      "toId": "readfamilyOut",
+      "toProperty": "profiles"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-stickers",
+      "toId": "readfamilyOut",
+      "toProperty": "stickers"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-tricks",
+      "toId": "readfamilyOut",
+      "toProperty": "tricks"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-younger",
+      "toId": "readfamilyOut",
+      "toProperty": "younger"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "success",
+      "toId": "readfamilyOut",
+      "toProperty": "ran"
+    }
+  ]
+}

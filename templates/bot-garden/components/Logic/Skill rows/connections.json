@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2bb83363-3958-596c-81e4-c510d91a1334",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "skillrowsIn",
+      "fromProperty": "botName",
+      "toId": "skillrowsFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "skillrowsIn",
+      "fromProperty": "lang",
+      "toId": "skillrowsFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "skillrowsIn",
+      "fromProperty": "tricks",
+      "toId": "skillrowsFn",
+      "toProperty": "in-tricks"
+    },
+    {
+      "fromId": "skillrowsIn",
+      "fromProperty": "words",
+      "toId": "skillrowsFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "skillrowsFn",
+      "fromProperty": "out-blooming",
+      "toId": "skillrowsOut",
+      "toProperty": "blooming"
+    },
+    {
+      "fromId": "skillrowsFn",
+      "fromProperty": "out-rows",
+      "toId": "skillrowsOut",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "skillrowsFn",
+      "fromProperty": "success",
+      "toId": "skillrowsOut",
+      "toProperty": "ran"
+    }
+  ]
+}

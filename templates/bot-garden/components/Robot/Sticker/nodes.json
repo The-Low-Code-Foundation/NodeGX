@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "1e606ac1-edf4-5c5f-8460-66b3445cb86e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "stIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "stBox",
+      "type": "Group",
+      "label": "The sticker",
+      "children": [
+        "stText"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--card)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "cssClassName": "bg-sticker"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "stText",
+      "type": "Text",
+      "label": "The sticker",
+      "parent": "stBox",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)"
+      },
+      "x": 100,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "stBox"
+  ]
+}

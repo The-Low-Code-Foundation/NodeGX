@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "afe90186-5e7f-5251-8e9f-33212b12c546",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "skStore",
+      "fromProperty": "model",
+      "toId": "skFam",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "skLangVar",
+      "fromProperty": "value",
+      "toId": "skFam",
+      "toProperty": "fallbackLang"
+    },
+    {
+      "fromId": "skWords",
+      "fromProperty": "words",
+      "toId": "skT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "skFam",
+      "fromProperty": "lang",
+      "toId": "skT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "skFam",
+      "fromProperty": "botName",
+      "toId": "skT",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "skFam",
+      "fromProperty": "band",
+      "toId": "skBar",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "skFam",
+      "fromProperty": "lang",
+      "toId": "skBar",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "skFam",
+      "fromProperty": "name",
+      "toId": "skBar",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "skFam",
+      "fromProperty": "face",
+      "toId": "skBar",
+      "toProperty": "face"
+    },
+    {
+      "fromId": "skFam",
+      "fromProperty": "botName",
+      "toId": "skBar",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "skFam",
+      "fromProperty": "profileId",
+      "toId": "skBar",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "skWords",
+      "fromProperty": "words",
+      "toId": "skBar",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "skStore",
+      "fromProperty": "model",
+      "toId": "skBar",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "skBar",
+      "fromProperty": "model",
+      "toId": "skStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "skBar",
+      "fromProperty": "write",
+      "toId": "skStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "skT",
+      "fromProperty": "ntEyebrow",
+      "toId": "skHead",
+      "toProperty": "eyebrow"
+    },
+    {
+      "fromId": "skT",
+      "fromProperty": "ntTitle",
+      "toId": "skHead",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "skT",
+      "fromProperty": "ntSub",
+      "toId": "skHead",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "skFam",
+      "fromProperty": "tricks",
+      "toId": "skRows",
+      "toProperty": "tricks"
+    },
+    {
+      "fromId": "skWords",
+      "fromProperty": "words",
+      "toId": "skRows",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "skFam",
+      "fromProperty": "lang",
+      "toId": "skRows",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "skFam",
+      "fromProperty": "botName",
+      "toId": "skRows",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "skRows",
+      "fromProperty": "rows",
+      "toId": "skEach",
+      "toProperty": "items"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "bf272402-686f-53e0-8ab7-c1d64676d41f",
+  "name": "House panel",
+  "path": "/Grown/House panel",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Nothing leaves the house: three lines, Try Olive (a thank-you rung, slots only; the written line when she does not answer) and the save code."
+}

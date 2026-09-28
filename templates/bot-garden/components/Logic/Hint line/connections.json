@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c36f08fc-5600-526d-8fb6-14bde310b673",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hintlineIn",
+      "fromProperty": "botName",
+      "toId": "hintlineFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "hintlineIn",
+      "fromProperty": "hints",
+      "toId": "hintlineFn",
+      "toProperty": "in-hints"
+    },
+    {
+      "fromId": "hintlineIn",
+      "fromProperty": "key",
+      "toId": "hintlineFn",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "hintlineIn",
+      "fromProperty": "lang",
+      "toId": "hintlineFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "hintlineIn",
+      "fromProperty": "vars",
+      "toId": "hintlineFn",
+      "toProperty": "in-vars"
+    },
+    {
+      "fromId": "hintlineFn",
+      "fromProperty": "out-found",
+      "toId": "hintlineOut",
+      "toProperty": "found"
+    },
+    {
+      "fromId": "hintlineFn",
+      "fromProperty": "out-key",
+      "toId": "hintlineOut",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "hintlineFn",
+      "fromProperty": "out-text",
+      "toId": "hintlineOut",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hintlineFn",
+      "fromProperty": "success",
+      "toId": "hintlineOut",
+      "toProperty": "ran"
+    }
+  ]
+}

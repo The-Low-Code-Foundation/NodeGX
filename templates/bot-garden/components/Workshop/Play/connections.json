@@ -1,0 +1,1219 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b4577814-8256-5b17-8887-3d483e8de369",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "plIn",
+      "fromProperty": "words",
+      "toId": "plT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "botName",
+      "toId": "plT",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "requests",
+      "toId": "plCard",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "requestId",
+      "toId": "plCard",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "words",
+      "toId": "plCard",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plCard",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "botName",
+      "toId": "plCard",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "plCard",
+      "fromProperty": "eyebrow",
+      "toId": "plEyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plCard",
+      "fromProperty": "title",
+      "toId": "plTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "isSub",
+      "toId": "plSub",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plCard",
+      "fromProperty": "faceClass",
+      "toId": "plFace",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "plCard",
+      "fromProperty": "who",
+      "toId": "plTaskH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plCard",
+      "fromProperty": "line",
+      "toId": "plTaskP",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "recording",
+      "toId": "plRecText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "teach",
+      "toId": "plTeach",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "teachStop",
+      "toId": "plStop",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "play",
+      "toId": "plPlay",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "step",
+      "toId": "plStep",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "reset",
+      "toId": "plReset",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "predict",
+      "toId": "plPredict",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "predictAsk",
+      "toId": "plPredictLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "ask",
+      "toId": "plAsk",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "owlMeta",
+      "toId": "plOwlMeta",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "scriptH",
+      "toId": "plStepsH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "tidyGo",
+      "toId": "plFoldBtn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "tidyNo",
+      "toId": "plNotNow",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "winIsland",
+      "toId": "plWin",
+      "toProperty": "islandWord"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "winStay",
+      "toId": "plWin",
+      "toProperty": "stayWord"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "isOlder",
+      "toId": "plPredict",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "isOlder",
+      "toId": "plCount",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plRead",
+      "fromProperty": "blocks",
+      "toId": "plCount",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "requests",
+      "toId": "plStart",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "requestId",
+      "toId": "plStart",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "plNonce",
+      "fromProperty": "currentCount",
+      "toId": "plStart",
+      "toProperty": "nonce"
+    },
+    {
+      "fromId": "plReset",
+      "fromProperty": "onClick",
+      "toId": "plNonce",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "world",
+      "toId": "plSetWorld",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "ran",
+      "toId": "plSetWorld",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "ran",
+      "toId": "plSetProgClear",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "ran",
+      "toId": "plClearTeachBumps",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "ran",
+      "toId": "plClearWon",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "ran",
+      "toId": "plClearMiss",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "ran",
+      "toId": "plTeachMode",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "ran",
+      "toId": "plPredictMode",
+      "toProperty": "to-off"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "ran",
+      "toId": "plRunner",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "ran",
+      "toId": "plChoose",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "found",
+      "toId": "plOut",
+      "toProperty": "found"
+    },
+    {
+      "fromId": "plProgVar",
+      "fromProperty": "value",
+      "toId": "plRead",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "plProgVar",
+      "fromProperty": "value",
+      "toId": "plBlocks",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "plBlocks",
+      "fromProperty": "onProgram",
+      "toId": "plSetProgKit",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "plBlocks",
+      "fromProperty": "onChanged",
+      "toId": "plSetProgKit",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plRecord",
+      "fromProperty": "program",
+      "toId": "plSetProgRec",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "plRecord",
+      "fromProperty": "ran",
+      "toId": "plSetProgRec",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plFold",
+      "fromProperty": "program",
+      "toId": "plSetProgFold",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "plFold",
+      "fromProperty": "ran",
+      "toId": "plSetProgFold",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plRead",
+      "fromProperty": "blocks",
+      "toId": "plOut",
+      "toProperty": "blocks"
+    },
+    {
+      "fromId": "plKitPal",
+      "fromProperty": "palette",
+      "toId": "plBlocks",
+      "toProperty": "palette"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "band",
+      "toId": "plBlocks",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plBlocks",
+      "toProperty": "language"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "glowId",
+      "toId": "plBlocks",
+      "toProperty": "runningId"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "running",
+      "toId": "plBlocks",
+      "toProperty": "locked"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "band",
+      "toId": "plPalette",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "allowed",
+      "toId": "plPalette",
+      "toProperty": "allowed"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plPalette",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "words",
+      "toId": "plPalette",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "plPalette",
+      "fromProperty": "palette",
+      "toId": "plKitPal",
+      "toProperty": "palette"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "band",
+      "toId": "plKitPal",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plKitPal",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "words",
+      "toId": "plKitPal",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "botName",
+      "toId": "plKitPal",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "plTeach",
+      "fromProperty": "onClick",
+      "toId": "plTeachMode",
+      "toProperty": "to-teach"
+    },
+    {
+      "fromId": "plTeach",
+      "fromProperty": "onClick",
+      "toId": "plRunner",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "plStop",
+      "fromProperty": "onClick",
+      "toId": "plTeachMode",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "plStop",
+      "fromProperty": "onClick",
+      "toId": "plChoose",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plTeachMode",
+      "fromProperty": "teaching",
+      "toId": "plPad",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "plTeachMode",
+      "fromProperty": "teaching",
+      "toId": "plRec",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plTeachMode",
+      "fromProperty": "teaching",
+      "toId": "plStop",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plTeachMode",
+      "fromProperty": "notTeaching",
+      "toId": "plTeach",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plPad",
+      "fromProperty": "op",
+      "toId": "plRecord",
+      "toProperty": "op"
+    },
+    {
+      "fromId": "plPad",
+      "fromProperty": "pressed",
+      "toId": "plRecord",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plRead",
+      "fromProperty": "program",
+      "toId": "plRecord",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "plWorldVar",
+      "fromProperty": "value",
+      "toId": "plRecord",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "plBlocks",
+      "fromProperty": "onSelected",
+      "toId": "plRecord",
+      "toProperty": "selected"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plRecord",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plTeachBumpsVar",
+      "fromProperty": "value",
+      "toId": "plRecord",
+      "toProperty": "bumps"
+    },
+    {
+      "fromId": "plRecord",
+      "fromProperty": "world",
+      "toId": "plSetWorldRec",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "plRecord",
+      "fromProperty": "ran",
+      "toId": "plSetWorldRec",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plRecord",
+      "fromProperty": "bumps",
+      "toId": "plSetTeachBumps",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "plRecord",
+      "fromProperty": "ran",
+      "toId": "plSetTeachBumps",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plRead",
+      "fromProperty": "program",
+      "toId": "plRunner",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "world",
+      "toId": "plRunner",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plRunner",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "stepMs",
+      "toId": "plRunner",
+      "toProperty": "stepMs"
+    },
+    {
+      "fromId": "plPlay",
+      "fromProperty": "onClick",
+      "toId": "plRunner",
+      "toProperty": "play"
+    },
+    {
+      "fromId": "plPlay",
+      "fromProperty": "onClick",
+      "toId": "plTeachMode",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "plPlay",
+      "fromProperty": "onClick",
+      "toId": "plPredictMode",
+      "toProperty": "to-off"
+    },
+    {
+      "fromId": "plPlay",
+      "fromProperty": "onClick",
+      "toId": "plClearMiss",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plStep",
+      "fromProperty": "onClick",
+      "toId": "plRunner",
+      "toProperty": "step"
+    },
+    {
+      "fromId": "plStep",
+      "fromProperty": "onClick",
+      "toId": "plTeachMode",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "idle",
+      "toId": "plTeach",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "idle",
+      "toId": "plStep",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "idle",
+      "toId": "plReset",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "running",
+      "toId": "plOut",
+      "toProperty": "running"
+    },
+    {
+      "fromId": "plWorldVar",
+      "fromProperty": "value",
+      "toId": "plDraw",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "botName",
+      "toId": "plDraw",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "color",
+      "toId": "plDraw",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "eye",
+      "toId": "plDraw",
+      "toProperty": "eye"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "hat",
+      "toId": "plDraw",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "bumps",
+      "toId": "plDraw",
+      "toProperty": "bumps"
+    },
+    {
+      "fromId": "plTeachBumpsVar",
+      "fromProperty": "value",
+      "toId": "plDraw",
+      "toProperty": "teachBumps"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "sayKey",
+      "toId": "plDraw",
+      "toProperty": "sayKey"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "tick",
+      "toId": "plDraw",
+      "toProperty": "sayN"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "words",
+      "toId": "plDraw",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plDraw",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plPredictEnd",
+      "fromProperty": "x",
+      "toId": "plDraw",
+      "toProperty": "endX"
+    },
+    {
+      "fromId": "plPredictEnd",
+      "fromProperty": "y",
+      "toId": "plDraw",
+      "toProperty": "endY"
+    },
+    {
+      "fromId": "plMissVar",
+      "fromProperty": "value",
+      "toId": "plDraw",
+      "toProperty": "showEnd"
+    },
+    {
+      "fromId": "plDraw",
+      "fromProperty": "map",
+      "toId": "plGarden",
+      "toProperty": "map"
+    },
+    {
+      "fromId": "plDraw",
+      "fromProperty": "things",
+      "toId": "plGarden",
+      "toProperty": "things"
+    },
+    {
+      "fromId": "plDraw",
+      "fromProperty": "robots",
+      "toId": "plGarden",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "plDraw",
+      "fromProperty": "bubble",
+      "toId": "plGarden",
+      "toProperty": "bubble"
+    },
+    {
+      "fromId": "plDraw",
+      "fromProperty": "dots",
+      "toId": "plDots",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plDraw",
+      "fromProperty": "hasTulips",
+      "toId": "plDots",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plPredict",
+      "fromProperty": "onClick",
+      "toId": "plPredictMode",
+      "toProperty": "to-on"
+    },
+    {
+      "fromId": "plPredictMode",
+      "fromProperty": "predicting",
+      "toId": "plPredictLine",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plPredictMode",
+      "fromProperty": "predicting",
+      "toId": "plPredictGate",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "plGarden",
+      "fromProperty": "onTileTapped",
+      "toId": "plPredictGate",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "plPredictGate",
+      "fromProperty": "ontrue",
+      "toId": "plPredictMode",
+      "toProperty": "to-off"
+    },
+    {
+      "fromId": "plPredictGate",
+      "fromProperty": "ontrue",
+      "toId": "plPredictEnd",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plRead",
+      "fromProperty": "program",
+      "toId": "plPredictEnd",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "world",
+      "toId": "plPredictEnd",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "plGarden",
+      "fromProperty": "onTileX",
+      "toId": "plPredictEnd",
+      "toProperty": "tapX"
+    },
+    {
+      "fromId": "plGarden",
+      "fromProperty": "onTileY",
+      "toId": "plPredictEnd",
+      "toProperty": "tapY"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plPredictEnd",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plPredictEnd",
+      "fromProperty": "hit",
+      "toId": "plHitGate",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "plPredictEnd",
+      "fromProperty": "ran",
+      "toId": "plHitGate",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "plHitGate",
+      "fromProperty": "ontrue",
+      "toId": "plRunner",
+      "toProperty": "play"
+    },
+    {
+      "fromId": "plHitGate",
+      "fromProperty": "onfalse",
+      "toId": "plSetMiss",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plSetMiss",
+      "fromProperty": "done",
+      "toId": "plChoose",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plRead",
+      "fromProperty": "program",
+      "toId": "plFind",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "band",
+      "toId": "plFind",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "plFind",
+      "fromProperty": "offer",
+      "toId": "plTidyLine",
+      "toProperty": "isOffered"
+    },
+    {
+      "fromId": "plFind",
+      "fromProperty": "textKey",
+      "toId": "plTidyLine",
+      "toProperty": "textKey"
+    },
+    {
+      "fromId": "plFind",
+      "fromProperty": "vars",
+      "toId": "plTidyLine",
+      "toProperty": "vars"
+    },
+    {
+      "fromId": "plFind",
+      "fromProperty": "sample",
+      "toId": "plTidyLine",
+      "toProperty": "sample"
+    },
+    {
+      "fromId": "plRead",
+      "fromProperty": "text",
+      "toId": "plTidyLine",
+      "toProperty": "programText"
+    },
+    {
+      "fromId": "plDismissVar",
+      "fromProperty": "value",
+      "toId": "plTidyLine",
+      "toProperty": "dismissed"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "words",
+      "toId": "plTidyLine",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plTidyLine",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "botName",
+      "toId": "plTidyLine",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "plTidyLine",
+      "fromProperty": "show",
+      "toId": "plTidy",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plTidyLine",
+      "fromProperty": "text",
+      "toId": "plTidyText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plRead",
+      "fromProperty": "text",
+      "toId": "plSetDismiss",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "plNotNow",
+      "fromProperty": "onClick",
+      "toId": "plSetDismiss",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plRead",
+      "fromProperty": "program",
+      "toId": "plFold",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "plFind",
+      "fromProperty": "i",
+      "toId": "plFold",
+      "toProperty": "i"
+    },
+    {
+      "fromId": "plFind",
+      "fromProperty": "len",
+      "toId": "plFold",
+      "toProperty": "len"
+    },
+    {
+      "fromId": "plFind",
+      "fromProperty": "count",
+      "toId": "plFold",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "plFind",
+      "fromProperty": "containerId",
+      "toId": "plFold",
+      "toProperty": "containerId"
+    },
+    {
+      "fromId": "plFoldBtn",
+      "fromProperty": "onClick",
+      "toId": "plFold",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plFold",
+      "fromProperty": "ran",
+      "toId": "plChoose",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plRead",
+      "fromProperty": "program",
+      "toId": "plChoose",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "run",
+      "toId": "plChoose",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "plWorldVar",
+      "fromProperty": "value",
+      "toId": "plChoose",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "plGoal",
+      "fromProperty": "met",
+      "toId": "plChoose",
+      "toProperty": "goalMet"
+    },
+    {
+      "fromId": "plMissVar",
+      "fromProperty": "value",
+      "toId": "plChoose",
+      "toProperty": "predictAsked"
+    },
+    {
+      "fromId": "plAsk",
+      "fromProperty": "onClick",
+      "toId": "plChoose",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "hints",
+      "toId": "plLine",
+      "toProperty": "hints"
+    },
+    {
+      "fromId": "plChoose",
+      "fromProperty": "key",
+      "toId": "plLine",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "plChoose",
+      "fromProperty": "vars",
+      "toId": "plLine",
+      "toProperty": "vars"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plLine",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "botName",
+      "toId": "plLine",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "plLine",
+      "fromProperty": "text",
+      "toId": "plOwlSay",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "finished",
+      "toId": "plGoal",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plWorldVar",
+      "fromProperty": "value",
+      "toId": "plGoal",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "run",
+      "toId": "plGoal",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "plRead",
+      "fromProperty": "program",
+      "toId": "plGoal",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "goal",
+      "toId": "plGoal",
+      "toProperty": "goal"
+    },
+    {
+      "fromId": "plGoal",
+      "fromProperty": "met",
+      "toId": "plMetGate",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "plGoal",
+      "fromProperty": "ran",
+      "toId": "plMetGate",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "plGoal",
+      "fromProperty": "ran",
+      "toId": "plChoose",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plMetGate",
+      "fromProperty": "ontrue",
+      "toId": "plSetWon",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plMetGate",
+      "fromProperty": "ontrue",
+      "toId": "plOut",
+      "toProperty": "won"
+    },
+    {
+      "fromId": "plWonVar",
+      "fromProperty": "value",
+      "toId": "plWin",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "plRead",
+      "fromProperty": "program",
+      "toId": "plWinSum",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "request",
+      "toId": "plWinSum",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "words",
+      "toId": "plWinSum",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plWinSum",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "botName",
+      "toId": "plWinSum",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "plCard",
+      "fromProperty": "faceClass",
+      "toId": "plWin",
+      "toProperty": "faceClass"
+    },
+    {
+      "fromId": "plWinSum",
+      "fromProperty": "thanks",
+      "toId": "plWin",
+      "toProperty": "thanks"
+    },
+    {
+      "fromId": "plWinSum",
+      "fromProperty": "line",
+      "toId": "plWin",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "plWinSum",
+      "fromProperty": "rewardText",
+      "toId": "plWin",
+      "toProperty": "rewardText"
+    },
+    {
+      "fromId": "plWinSum",
+      "fromProperty": "hasReward",
+      "toId": "plWin",
+      "toProperty": "hasReward"
+    },
+    {
+      "fromId": "plWinSum",
+      "fromProperty": "learnText",
+      "toId": "plWin",
+      "toProperty": "learnText"
+    },
+    {
+      "fromId": "plWinSum",
+      "fromProperty": "hasLearn",
+      "toId": "plWin",
+      "toProperty": "hasLearn"
+    },
+    {
+      "fromId": "plWinSum",
+      "fromProperty": "bloom",
+      "toId": "plOut",
+      "toProperty": "bloom"
+    },
+    {
+      "fromId": "plWinSum",
+      "fromProperty": "reward",
+      "toId": "plOut",
+      "toProperty": "reward"
+    },
+    {
+      "fromId": "plWinSum",
+      "fromProperty": "requestId",
+      "toId": "plOut",
+      "toProperty": "wonRequest"
+    },
+    {
+      "fromId": "plWin",
+      "fromProperty": "stay",
+      "toId": "plClearWon",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plWin",
+      "fromProperty": "island",
+      "toId": "plClearWon",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plWin",
+      "fromProperty": "island",
+      "toId": "plOut",
+      "toProperty": "island"
+    }
+  ]
+}

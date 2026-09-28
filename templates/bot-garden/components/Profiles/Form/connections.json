@@ -1,0 +1,181 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "548e1d5c-9ad5-58f9-802b-8eb1da95ac08",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pfIn",
+      "fromProperty": "open",
+      "toId": "pfCard",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pfIn",
+      "fromProperty": "words",
+      "toId": "pfT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "pfIn",
+      "fromProperty": "lang",
+      "toId": "pfT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "pfT",
+      "fromProperty": "yourName",
+      "toId": "pfNameL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pfT",
+      "fromProperty": "yourBand",
+      "toId": "pfBandL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pfT",
+      "fromProperty": "language",
+      "toId": "pfLangL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pfT",
+      "fromProperty": "robotName",
+      "toId": "pfBotL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pfT",
+      "fromProperty": "create",
+      "toId": "pfGo",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pfT",
+      "fromProperty": "cancel",
+      "toId": "pfCancel",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pfIn",
+      "fromProperty": "reset",
+      "toId": "pfSetB2",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pfIn",
+      "fromProperty": "lang",
+      "toId": "pfSetLangNow",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pfIn",
+      "fromProperty": "reset",
+      "toId": "pfSetLangNow",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pfB1",
+      "fromProperty": "clicked",
+      "toId": "pfSetB1",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pfB2",
+      "fromProperty": "clicked",
+      "toId": "pfSetB2",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pfEn",
+      "fromProperty": "clicked",
+      "toId": "pfSetEn",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pfFr",
+      "fromProperty": "clicked",
+      "toId": "pfSetFr",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pfBandVar",
+      "fromProperty": "value",
+      "toId": "pfLit",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "pfLangVar",
+      "fromProperty": "value",
+      "toId": "pfLit",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "pfLit",
+      "fromProperty": "band1On",
+      "toId": "pfB1",
+      "toProperty": "isOn"
+    },
+    {
+      "fromId": "pfLit",
+      "fromProperty": "band2On",
+      "toId": "pfB2",
+      "toProperty": "isOn"
+    },
+    {
+      "fromId": "pfLit",
+      "fromProperty": "enOn",
+      "toId": "pfEn",
+      "toProperty": "isOn"
+    },
+    {
+      "fromId": "pfLit",
+      "fromProperty": "frOn",
+      "toId": "pfFr",
+      "toProperty": "isOn"
+    },
+    {
+      "fromId": "pfName",
+      "fromProperty": "onTextChanged",
+      "toId": "pfOut",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "pfBot",
+      "fromProperty": "onTextChanged",
+      "toId": "pfOut",
+      "toProperty": "robotName"
+    },
+    {
+      "fromId": "pfIn",
+      "fromProperty": "reset",
+      "toId": "pfName",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "pfBandVar",
+      "fromProperty": "value",
+      "toId": "pfOut",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "pfLangVar",
+      "fromProperty": "value",
+      "toId": "pfOut",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "pfGo",
+      "fromProperty": "onClick",
+      "toId": "pfOut",
+      "toProperty": "create"
+    },
+    {
+      "fromId": "pfCancel",
+      "fromProperty": "onClick",
+      "toId": "pfOut",
+      "toProperty": "cancel"
+    }
+  ]
+}

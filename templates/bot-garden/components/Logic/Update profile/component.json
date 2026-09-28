@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6536ef1b-eda6-5413-8132-b424ce9eba75",
+  "name": "Update profile",
+  "path": "/Logic/Update profile",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The family with one field of one profile changed. Runs on Go; answers Ran once its outputs are set."
+}

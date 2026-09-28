@@ -1,0 +1,373 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0d4db588-cc81-5eed-8559-0fc22f3db146",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "goIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "goPanel",
+      "type": "Group",
+      "label": "Where Olive lives",
+      "children": [
+        "goH",
+        "goModel",
+        "goNone",
+        "goExam",
+        "goNoExam"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--card)",
+        "borderRadius": "var(--radius-card)",
+        "cssClassName": "bg-panel",
+        "paddingTop": "var(--space-3-5)",
+        "paddingBottom": "var(--space-3-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "goH",
+      "type": "Text",
+      "label": "Where Olive lives",
+      "parent": "goPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "goModel",
+      "type": "Group",
+      "label": "This computer",
+      "parent": "goPanel",
+      "children": [
+        "goDot",
+        "goModelText"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "nowrap",
+        "columnGap": "var(--space-2-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--paper-2)",
+        "borderRadius": {
+          "value": 12,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "goDot",
+      "type": "Group",
+      "label": "Awake or not",
+      "parent": "goModel",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 10,
+          "unit": "px"
+        },
+        "height": {
+          "value": 10,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--off)",
+        "cssClassName": "bg-dot"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "goModelText",
+      "type": "Group",
+      "label": "The model",
+      "parent": "goModel",
+      "children": [
+        "goModelH",
+        "goModelOn",
+        "goModelOff"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-0-5)"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "goModelH",
+      "type": "Text",
+      "label": "This computer",
+      "parent": "goModelText",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "goModelOn",
+      "type": "Text",
+      "label": "Awake",
+      "parent": "goModelText",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "goModelOff",
+      "type": "Text",
+      "label": "Not running",
+      "parent": "goModelText",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "goNone",
+      "type": "Group",
+      "label": "No model at all",
+      "parent": "goPanel",
+      "children": [
+        "goNoneDot",
+        "goNoneText"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "nowrap",
+        "columnGap": "var(--space-2-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--paper-2)",
+        "borderRadius": {
+          "value": 12,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "goNoneDot",
+      "type": "Group",
+      "label": "Off",
+      "parent": "goNone",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 10,
+          "unit": "px"
+        },
+        "height": {
+          "value": 10,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--off)",
+        "cssClassName": "bg-dot"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "goNoneText",
+      "type": "Text",
+      "label": "No model at all",
+      "parent": "goNone",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "goExam",
+      "type": "Text",
+      "label": "Her exam here",
+      "parent": "goPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 1360
+    },
+    {
+      "id": "goNoExam",
+      "type": "Text",
+      "label": "No exam yet",
+      "parent": "goPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)"
+      },
+      "x": 100,
+      "y": 1480
+    },
+    {
+      "id": "goT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "goStatus",
+      "type": "/Logic/Olive status",
+      "label": "Ask the shell",
+      "parameters": {
+        "nonce": 1
+      },
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "goExamLine",
+      "type": "/Logic/Hint line",
+      "label": "The exam in words",
+      "parameters": {
+        "key": "guExam"
+      },
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "goIsOn",
+      "type": "Condition",
+      "label": "Is she awake?",
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "goStates",
+      "type": "States",
+      "label": "Awake or not",
+      "parameters": {
+        "states": "off,on",
+        "values": "dot,awake,asleep",
+        "useTransitions": false,
+        "type-dot": "color",
+        "value-off-dot": "var(--off)",
+        "value-on-dot": "var(--ok)",
+        "type-awake": "boolean",
+        "value-off-awake": false,
+        "value-on-awake": true,
+        "type-asleep": "boolean",
+        "value-off-asleep": true,
+        "value-on-asleep": false
+      },
+      "x": 470,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "goPanel"
+  ]
+}

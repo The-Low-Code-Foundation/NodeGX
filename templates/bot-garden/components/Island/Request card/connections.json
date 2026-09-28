@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "539fecf6-5b61-5813-80ba-dfdbd55f1fc5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "qcIn",
+      "fromProperty": "faceClass",
+      "toId": "qcFace",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "qcIn",
+      "fromProperty": "tagClass",
+      "toId": "qcTag",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "qcIn",
+      "fromProperty": "who",
+      "toId": "qcWho",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "qcIn",
+      "fromProperty": "title",
+      "toId": "qcTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "qcIn",
+      "fromProperty": "trick",
+      "toId": "qcTagText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "qcIn",
+      "fromProperty": "doneWord",
+      "toId": "qcDone",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "qcIn",
+      "fromProperty": "isDone",
+      "toId": "qcIsDone",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "qcIsDone",
+      "fromProperty": "ontrue",
+      "toId": "qcStates",
+      "toProperty": "to-done"
+    },
+    {
+      "fromId": "qcIsDone",
+      "fromProperty": "onfalse",
+      "toId": "qcStates",
+      "toProperty": "to-open"
+    },
+    {
+      "fromId": "qcStates",
+      "fromProperty": "tagShown",
+      "toId": "qcTag",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "qcStates",
+      "fromProperty": "doneShown",
+      "toId": "qcDone",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "qcStates",
+      "fromProperty": "opacity",
+      "toId": "qcCard",
+      "toProperty": "opacity"
+    },
+    {
+      "fromId": "qcCard",
+      "fromProperty": "onClick",
+      "toId": "qcOut",
+      "toProperty": "chosen"
+    },
+    {
+      "fromId": "qcIn",
+      "fromProperty": "id",
+      "toId": "qcOut",
+      "toProperty": "id"
+    }
+  ]
+}

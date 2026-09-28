@@ -1,0 +1,366 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "346f2d39-d56a-5246-85d0-40358b562fa7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hinttableIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hints",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hinttableFn",
+      "type": "JavaScriptFunction",
+      "label": "Hint table",
+      "parameters": {
+        "functionScript": "\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar rows = Inputs.hints || [];\nvar name = String(Inputs.botName || 'Pip');\nvar map = {};\nfor (var i = 0; i < rows.length; i++) map[rows[i].key] = String(rows[i][lang] || rows[i].en || '').split('{b}').join(name);\nOutputs.lang = lang;\nOutputs.hintStart = map.hintStart || '';\nOutputs.hintEmpty = map.hintEmpty || '';\nOutputs.hintPattern = map.hintPattern || '';\nOutputs.hintMissed = map.hintMissed || '';\nOutputs.hintBump = map.hintBump || '';\nOutputs.hintWet = map.hintWet || '';\nOutputs.hintDone = map.hintDone || '';\nOutputs.hintDoneMany = map.hintDoneMany || '';\nOutputs.hintPredictMiss = map.hintPredictMiss || '';\nOutputs.oliveThinking = map.oliveThinking || '';\nOutputs.oliveResting = map.oliveResting || '';\nOutputs.oliveRung1 = map.oliveRung1 || '';\nOutputs.oliveRung2 = map.oliveRung2 || '';\nOutputs.oliveRung3 = map.oliveRung3 || '';\nOutputs.oliveRung4 = map.oliveRung4 || '';\nOutputs.oliveRung5 = map.oliveRung5 || '';\nOutputs.oliveRung6 = map.oliveRung6 || '';\nOutputs.oliveRung7 = map.oliveRung7 || '';\nOutputs.oliveRung8 = map.oliveRung8 || '';\nOutputs.oliveRung9 = map.oliveRung9 || '';\nOutputs.oliveRung10 = map.oliveRung10 || '';\nOutputs.oliveRung11 = map.oliveRung11 || '';\nOutputs.oliveRung12 = map.oliveRung12 || '';\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-hints",
+          "displayName": "hints",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-lang",
+          "displayName": "lang",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintStart",
+          "displayName": "hintStart",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintEmpty",
+          "displayName": "hintEmpty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintPattern",
+          "displayName": "hintPattern",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintMissed",
+          "displayName": "hintMissed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintBump",
+          "displayName": "hintBump",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintWet",
+          "displayName": "hintWet",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintDone",
+          "displayName": "hintDone",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintDoneMany",
+          "displayName": "hintDoneMany",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintPredictMiss",
+          "displayName": "hintPredictMiss",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveThinking",
+          "displayName": "oliveThinking",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveResting",
+          "displayName": "oliveResting",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung1",
+          "displayName": "oliveRung1",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung2",
+          "displayName": "oliveRung2",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung3",
+          "displayName": "oliveRung3",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung4",
+          "displayName": "oliveRung4",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung5",
+          "displayName": "oliveRung5",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung6",
+          "displayName": "oliveRung6",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung7",
+          "displayName": "oliveRung7",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung8",
+          "displayName": "oliveRung8",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung9",
+          "displayName": "oliveRung9",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung10",
+          "displayName": "oliveRung10",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung11",
+          "displayName": "oliveRung11",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung12",
+          "displayName": "oliveRung12",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "hinttableOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "hintBump",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintDone",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintDoneMany",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintEmpty",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintMissed",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintPattern",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintPredictMiss",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintStart",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintWet",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "lang",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "oliveResting",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung1",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung10",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung11",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung12",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung2",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung3",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung4",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung5",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung6",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung7",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung8",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung9",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveThinking",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

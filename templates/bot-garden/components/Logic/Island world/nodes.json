@@ -1,0 +1,126 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a973d229-d6cd-5971-88cc-450fc63ff825",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "islandworldIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "islandworldFn",
+      "type": "JavaScriptFunction",
+      "label": "Island world",
+      "parameters": {
+        "functionScript": "\nvar SAVE_VERSION = 2;\nvar MAX_PROFILES = 6;\nvar TRICK_KEYS = [\"n1\",\"n2\",\"n3\",\"n4\",\"n5\",\"n6\",\"n7\"];\nfunction newId(prefix) { return prefix + Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36); }\nfunction tricksOf(raw) {\n  var out = {};\n  for (var i = 0; i < TRICK_KEYS.length; i++) { var v = raw && raw[TRICK_KEYS[i]]; out[TRICK_KEYS[i]] = v === 'bloom' || v === 'sprout' ? v : (TRICK_KEYS[i] === 'n1' ? 'sprout' : 'seed'); }\n  return out;\n}\nfunction profileOf(raw) {\n  var p = raw && typeof raw === 'object' ? raw : {};\n  var robot = p.robot && typeof p.robot === 'object' ? p.robot : {};\n  return {\n    id: String(p.id || newId('p')), name: String(p.name || '').slice(0, 24), band: Number(p.band) === 1 ? 1 : 2, lang: p.lang === 'fr' ? 'fr' : 'en',\n    face: String(p.face || ''),\n    robot: { name: String(robot.name || 'Pip').slice(0, 16), color: String(robot.color || '#FF7A59'), eye: String(robot.eye || 'round'), hat: String(robot.hat || 'none') },\n    tricks: tricksOf(p.tricks), stickers: Array.isArray(p.stickers) ? p.stickers.map(String) : [], hats: Array.isArray(p.hats) ? p.hats.map(String) : []\n  };\n}\nfunction modelOf(raw) {\n  var m = raw && typeof raw === 'object' ? raw : {};\n  var fam = m.family && typeof m.family === 'object' ? m.family : {};\n  var isl = m.island && typeof m.island === 'object' ? m.island : {};\n  var profiles = [];\n  var list = Array.isArray(m.profiles) ? m.profiles : [];\n  for (var i = 0; i < list.length && i < MAX_PROFILES; i++) profiles.push(profileOf(list[i]));\n  return {\n    v: SAVE_VERSION,\n    family: { id: String(fam.id || newId('f')), created: Number(fam.created) || Date.now() },\n    profiles: profiles,\n    island: { done: Array.isArray(isl.done) ? isl.done.map(String) : [], placed: Array.isArray(isl.placed) ? isl.placed : [], activeId: String(isl.activeId || (profiles[0] ? profiles[0].id : '')) }\n  };\n}\nfunction toB64(str) {\n  var bytes = unescape(encodeURIComponent(str));\n  var b64 = typeof btoa === 'function' ? btoa(bytes) : Buffer.from(bytes, 'binary').toString('base64');\n  return b64.replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');\n}\nfunction fromB64(code) {\n  var b64 = String(code || '').trim().replace(/-/g, '+').replace(/_/g, '/');\n  while (b64.length % 4) b64 += '=';\n  var bytes = typeof atob === 'function' ? atob(b64) : Buffer.from(b64, 'base64').toString('binary');\n  return decodeURIComponent(escape(bytes));\n}\n\nfunction wordMap(rows, lang, name) {\n  var map = {};\n  var list = Array.isArray(rows) ? rows : [];\n  for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || '').split('{b}').join(name);\n  return map;\n}\nfunction fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\nfunction langOf(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction nameOf(v) { var n = String(v || '').trim(); return n || 'Pip'; }\n\nvar MAP = [\"WWWWWWWWWWWW\",\"WGGTGGGGTHGW\",\"WGGGGFGFGGGW\",\"WPPPPPPPPPPW\",\"WGRGGGGGGTGW\",\"WGGTGGGGGGGW\",\"WWWWWWWWWWWW\"];\nvar THINGS = [{\"kind\":\"label\",\"x\":9,\"y\":1,\"who\":\"islMamie\"},{\"kind\":\"bowl\",\"x\":8,\"y\":4,\"full\":false},{\"kind\":\"label\",\"x\":8,\"y\":4,\"who\":\"islBiscuit\"},{\"kind\":\"letter\",\"x\":3,\"y\":4},{\"kind\":\"label\",\"x\":3,\"y\":4,\"who\":\"islSami\"}];\nvar SPOTS = [{\"x\":2,\"y\":3},{\"x\":4,\"y\":3},{\"x\":6,\"y\":3},{\"x\":8,\"y\":3},{\"x\":10,\"y\":3},{\"x\":1,\"y\":3}];\nvar model = modelOf(Inputs.model && typeof Inputs.model === 'object' ? Inputs.model : {});\nvar lang = langOf(Inputs.lang);\nvar w = wordMap(Inputs.words, lang, 'Pip');\nvar things = [];\nfor (var i = 0; i < THINGS.length; i++) {\n  var t = THINGS[i];\n  if (t.kind === 'label') things.push({ kind: 'label', x: t.x, y: t.y, text: w[t.who] || '' });\n  else things.push({ kind: t.kind, x: t.x, y: t.y, full: !!t.full });\n}\nvar robots = [];\nfor (var j = 0; j < model.profiles.length && j < SPOTS.length; j++) {\n  var p = model.profiles[j];\n  robots.push({ x: SPOTS[j].x, y: SPOTS[j].y, d: 2, colour: p.robot.color, eyes: p.robot.eye, hat: p.robot.hat, name: p.robot.name, bump: 0 });\n}\nOutputs.map = { rows: MAP.slice() };\nOutputs.things = things;\nOutputs.robots = robots;\nOutputs.robotCount = robots.length;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-map",
+          "displayName": "map",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-things",
+          "displayName": "things",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-robots",
+          "displayName": "robots",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-robotCount",
+          "displayName": "robotCount",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "islandworldOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "map",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "robotCount",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "robots",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "things",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

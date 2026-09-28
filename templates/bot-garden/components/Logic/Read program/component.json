@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3def5462-2fee-5eb1-860e-84aec2d51544",
+  "name": "Read program",
+  "path": "/Logic/Read program",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The program as a list, whatever held it. Runs when an input changes; Ran after each run."
+}

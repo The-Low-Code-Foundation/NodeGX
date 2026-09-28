@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "673eed2f-920a-52aa-8c3f-65b2bbbc5e1e",
+  "name": "Chip",
+  "path": "/Robot/Chip",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One choice for the robot (eyes, a hat): a pill, ink when Selected, faded and deaf when Locked (a hat still to earn). Publishes Picked with the Id."
+}

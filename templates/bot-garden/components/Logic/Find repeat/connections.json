@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "64718844-2dc2-55e0-8e25-4d9e196e7be7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "findrepeatIn",
+      "fromProperty": "band",
+      "toId": "findrepeatFn",
+      "toProperty": "in-band"
+    },
+    {
+      "fromId": "findrepeatIn",
+      "fromProperty": "program",
+      "toId": "findrepeatFn",
+      "toProperty": "in-program"
+    },
+    {
+      "fromId": "findrepeatFn",
+      "fromProperty": "out-containerId",
+      "toId": "findrepeatOut",
+      "toProperty": "containerId"
+    },
+    {
+      "fromId": "findrepeatFn",
+      "fromProperty": "out-count",
+      "toId": "findrepeatOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "findrepeatFn",
+      "fromProperty": "out-cover",
+      "toId": "findrepeatOut",
+      "toProperty": "cover"
+    },
+    {
+      "fromId": "findrepeatFn",
+      "fromProperty": "out-found",
+      "toId": "findrepeatOut",
+      "toProperty": "found"
+    },
+    {
+      "fromId": "findrepeatFn",
+      "fromProperty": "out-i",
+      "toId": "findrepeatOut",
+      "toProperty": "i"
+    },
+    {
+      "fromId": "findrepeatFn",
+      "fromProperty": "out-len",
+      "toId": "findrepeatOut",
+      "toProperty": "len"
+    },
+    {
+      "fromId": "findrepeatFn",
+      "fromProperty": "out-offer",
+      "toId": "findrepeatOut",
+      "toProperty": "offer"
+    },
+    {
+      "fromId": "findrepeatFn",
+      "fromProperty": "out-sample",
+      "toId": "findrepeatOut",
+      "toProperty": "sample"
+    },
+    {
+      "fromId": "findrepeatFn",
+      "fromProperty": "out-textKey",
+      "toId": "findrepeatOut",
+      "toProperty": "textKey"
+    },
+    {
+      "fromId": "findrepeatFn",
+      "fromProperty": "out-vars",
+      "toId": "findrepeatOut",
+      "toProperty": "vars"
+    },
+    {
+      "fromId": "findrepeatFn",
+      "fromProperty": "success",
+      "toId": "findrepeatOut",
+      "toProperty": "ran"
+    }
+  ]
+}

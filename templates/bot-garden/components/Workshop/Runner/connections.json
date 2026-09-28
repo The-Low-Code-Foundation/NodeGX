@@ -1,0 +1,307 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2cacce1b-cd6c-529b-8569-d5ebbfb1da9a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rnIn",
+      "fromProperty": "program",
+      "toId": "rnNew",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "lang",
+      "toId": "rnNew",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "start",
+      "toId": "rnSetWorldStart",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "stepMs",
+      "toId": "rnTimer",
+      "toProperty": "duration"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "play",
+      "toId": "rnMode",
+      "toProperty": "to-playing"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "play",
+      "toId": "rnSetWorldStart",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "play",
+      "toId": "rnNew",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rnNew",
+      "fromProperty": "run",
+      "toId": "rnSetRunNew",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rnNew",
+      "fromProperty": "ran",
+      "toId": "rnSetRunNew",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rnSetRunNew",
+      "fromProperty": "done",
+      "toId": "rnTimer",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "rnSetRunNew",
+      "fromProperty": "done",
+      "toId": "rnOut",
+      "toProperty": "started"
+    },
+    {
+      "fromId": "rnTimer",
+      "fromProperty": "timerFinished",
+      "toId": "rnStep",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rnRunVar",
+      "fromProperty": "value",
+      "toId": "rnStep",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rnWorldVar",
+      "fromProperty": "value",
+      "toId": "rnStep",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "answer",
+      "toId": "rnStep",
+      "toProperty": "answer"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "run",
+      "toId": "rnSetRunStep",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "ran",
+      "toId": "rnSetRunStep",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rnWorldVar",
+      "fromProperty": "value",
+      "toId": "rnApply",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "delta",
+      "toId": "rnApply",
+      "toProperty": "delta"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "ran",
+      "toId": "rnApply",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rnApply",
+      "fromProperty": "world",
+      "toId": "rnSetWorldApply",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rnApply",
+      "fromProperty": "ran",
+      "toId": "rnSetWorldApply",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "done",
+      "toId": "rnEnd",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rnSetWorldApply",
+      "fromProperty": "done",
+      "toId": "rnEnd",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rnSetWorldApply",
+      "fromProperty": "done",
+      "toId": "rnOut",
+      "toProperty": "ticked"
+    },
+    {
+      "fromId": "rnEnd",
+      "fromProperty": "ontrue",
+      "toId": "rnMode",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "rnEnd",
+      "fromProperty": "ontrue",
+      "toId": "rnOut",
+      "toProperty": "finished"
+    },
+    {
+      "fromId": "rnMode",
+      "fromProperty": "playing",
+      "toId": "rnLoop",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rnEnd",
+      "fromProperty": "onfalse",
+      "toId": "rnLoop",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rnLoop",
+      "fromProperty": "ontrue",
+      "toId": "rnTimer",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "rnMode",
+      "fromProperty": "live",
+      "toId": "rnLive",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "step",
+      "toId": "rnLive",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rnLive",
+      "fromProperty": "ontrue",
+      "toId": "rnMode",
+      "toProperty": "to-paused"
+    },
+    {
+      "fromId": "rnLive",
+      "fromProperty": "ontrue",
+      "toId": "rnTimer",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "rnLive",
+      "fromProperty": "onfalse",
+      "toId": "rnMode",
+      "toProperty": "to-paused"
+    },
+    {
+      "fromId": "rnLive",
+      "fromProperty": "onfalse",
+      "toId": "rnSetWorldStart",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rnLive",
+      "fromProperty": "onfalse",
+      "toId": "rnNew",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "stop",
+      "toId": "rnTimer",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "stop",
+      "toId": "rnMode",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "rnWorldVar",
+      "fromProperty": "value",
+      "toId": "rnOut",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "rnRunVar",
+      "fromProperty": "value",
+      "toId": "rnOut",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "glowId",
+      "toId": "rnOut",
+      "toProperty": "glowId"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "done",
+      "toId": "rnOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "bumps",
+      "toId": "rnOut",
+      "toProperty": "bumps"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "puddles",
+      "toId": "rnOut",
+      "toProperty": "puddles"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "sayKey",
+      "toId": "rnOut",
+      "toProperty": "sayKey"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "tick",
+      "toId": "rnOut",
+      "toProperty": "tick"
+    },
+    {
+      "fromId": "rnMode",
+      "fromProperty": "playing",
+      "toId": "rnOut",
+      "toProperty": "running"
+    },
+    {
+      "fromId": "rnMode",
+      "fromProperty": "idle",
+      "toId": "rnOut",
+      "toProperty": "idle"
+    },
+    {
+      "fromId": "rnMode",
+      "fromProperty": "live",
+      "toId": "rnOut",
+      "toProperty": "live"
+    }
+  ]
+}

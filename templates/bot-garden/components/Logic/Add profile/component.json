@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "018abab9-856c-5885-8469-e94eca7cb017",
+  "name": "Add profile",
+  "path": "/Logic/Add profile",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The family with one more profile. Runs on Go; answers Ran once its outputs are set."
+}

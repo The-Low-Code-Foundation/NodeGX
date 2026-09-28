@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "666b9d87-ca90-5182-87cf-f1e1531c17e0",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "islandrowsIn",
+      "fromProperty": "band",
+      "toId": "islandrowsFn",
+      "toProperty": "in-band"
+    },
+    {
+      "fromId": "islandrowsIn",
+      "fromProperty": "botName",
+      "toId": "islandrowsFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "islandrowsIn",
+      "fromProperty": "done",
+      "toId": "islandrowsFn",
+      "toProperty": "in-done"
+    },
+    {
+      "fromId": "islandrowsIn",
+      "fromProperty": "lang",
+      "toId": "islandrowsFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "islandrowsIn",
+      "fromProperty": "requests",
+      "toId": "islandrowsFn",
+      "toProperty": "in-requests"
+    },
+    {
+      "fromId": "islandrowsIn",
+      "fromProperty": "words",
+      "toId": "islandrowsFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "islandrowsFn",
+      "fromProperty": "out-count",
+      "toId": "islandrowsOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "islandrowsFn",
+      "fromProperty": "out-open",
+      "toId": "islandrowsOut",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "islandrowsFn",
+      "fromProperty": "out-rows",
+      "toId": "islandrowsOut",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "islandrowsFn",
+      "fromProperty": "success",
+      "toId": "islandrowsOut",
+      "toProperty": "ran"
+    }
+  ]
+}

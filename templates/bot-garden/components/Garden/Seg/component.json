@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "bad30db0-1066-53bb-8c7c-0e52fd911956",
+  "name": "Seg",
+  "path": "/Garden/Seg",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One half of a two-way switch on the bar (band, language): ink when Is On (the mockup’s .seg button). Publishes Clicked."
+}

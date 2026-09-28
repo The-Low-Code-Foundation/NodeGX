@@ -1,0 +1,482 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "9c30498a-8ce4-54d3-8105-c07ccac929ce",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "opIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "profileId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "color",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "eye",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hat",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hats",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "stickers",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "opPanel",
+      "type": "Group",
+      "label": "The options",
+      "children": [
+        "opNameL",
+        "opName",
+        "opColourL",
+        "opColourRow",
+        "opEyesL",
+        "opEyesRow",
+        "opHatL",
+        "opHatRow",
+        "opStickL",
+        "opStickRow",
+        "opNoStick"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--card)",
+        "borderRadius": "var(--radius-card)",
+        "cssClassName": "bg-panel",
+        "paddingTop": "var(--space-3-5)",
+        "paddingBottom": "var(--space-3-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "opNameL",
+      "type": "Text",
+      "label": "Name",
+      "parent": "opPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "opName",
+      "type": "net.noodl.controls.textinput",
+      "label": "The robot’s name",
+      "parent": "opPanel",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 320,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 22,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "backgroundColor": "var(--card)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 2,
+          "unit": "px"
+        },
+        "borderColor": "var(--line)",
+        "borderRadius": {
+          "value": 14,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "maxLength": 14
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "opColourL",
+      "type": "Text",
+      "label": "Colour",
+      "parent": "opPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "opColourRow",
+      "type": "Group",
+      "label": "Colour: the choices",
+      "parent": "opPanel",
+      "children": [
+        "opColourEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2-5)",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "opColourEach",
+      "type": "For Each",
+      "label": "One per colour",
+      "parent": "opColourRow",
+      "parameters": {
+        "template": "/Robot/Swatch",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "opEyesL",
+      "type": "Text",
+      "label": "Eyes",
+      "parent": "opPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "opEyesRow",
+      "type": "Group",
+      "label": "Eyes: the choices",
+      "parent": "opPanel",
+      "children": [
+        "opEyesEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2-5)",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "opEyesEach",
+      "type": "For Each",
+      "label": "One per eyes",
+      "parent": "opEyesRow",
+      "parameters": {
+        "template": "/Robot/Chip",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "opHatL",
+      "type": "Text",
+      "label": "Hat",
+      "parent": "opPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2
+      },
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "opHatRow",
+      "type": "Group",
+      "label": "Hat: the choices",
+      "parent": "opPanel",
+      "children": [
+        "opHatEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2-5)",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 1240
+    },
+    {
+      "id": "opHatEach",
+      "type": "For Each",
+      "label": "One per hat",
+      "parent": "opHatRow",
+      "parameters": {
+        "template": "/Robot/Chip",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "opStickL",
+      "type": "Text",
+      "label": "Stickers",
+      "parent": "opPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2
+      },
+      "x": 100,
+      "y": 1480
+    },
+    {
+      "id": "opStickRow",
+      "type": "Group",
+      "label": "Stickers: the choices",
+      "parent": "opPanel",
+      "children": [
+        "opStickEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2-5)",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 1600
+    },
+    {
+      "id": "opStickEach",
+      "type": "For Each",
+      "label": "One per stickers",
+      "parent": "opStickRow",
+      "parameters": {
+        "template": "/Robot/Sticker",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "opNoStick",
+      "type": "Text",
+      "label": "No stickers yet",
+      "parent": "opPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 1840
+    },
+    {
+      "id": "opT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "opRows",
+      "type": "/Logic/Look rows",
+      "label": "What there is to wear",
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "opSetName",
+      "type": "/Logic/Update profile",
+      "label": "The name",
+      "parameters": {
+        "field": "robotName"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "opSetColour",
+      "type": "/Logic/Update profile",
+      "label": "The paint",
+      "parameters": {
+        "field": "color"
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "opSetEye",
+      "type": "/Logic/Update profile",
+      "label": "The eyes",
+      "parameters": {
+        "field": "eye"
+      },
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "opSetHat",
+      "type": "/Logic/Update profile",
+      "label": "The hat",
+      "parameters": {
+        "field": "hat"
+      },
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "opOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "write",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 1480
+    }
+  ],
+  "visualRoots": [
+    "opPanel"
+  ]
+}

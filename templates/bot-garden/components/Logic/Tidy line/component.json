@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b2e45e19-8c36-5d23-805a-b2db0ce9ce4a",
+  "name": "Tidy line",
+  "path": "/Logic/Tidy line",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The fold offer’s sentence, and whether it shows. Runs when an input changes; Ran after each run."
+}

@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "477b7953-652b-528d-8140-d08d332c1158",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "choosehintIn",
+      "fromProperty": "done",
+      "toId": "choosehintFn",
+      "toProperty": "in-done"
+    },
+    {
+      "fromId": "choosehintIn",
+      "fromProperty": "goalMet",
+      "toId": "choosehintFn",
+      "toProperty": "in-goalMet"
+    },
+    {
+      "fromId": "choosehintIn",
+      "fromProperty": "oliveFallback",
+      "toId": "choosehintFn",
+      "toProperty": "in-oliveFallback"
+    },
+    {
+      "fromId": "choosehintIn",
+      "fromProperty": "oliveRung",
+      "toId": "choosehintFn",
+      "toProperty": "in-oliveRung"
+    },
+    {
+      "fromId": "choosehintIn",
+      "fromProperty": "predictAsked",
+      "toId": "choosehintFn",
+      "toProperty": "in-predictAsked"
+    },
+    {
+      "fromId": "choosehintIn",
+      "fromProperty": "predictHit",
+      "toId": "choosehintFn",
+      "toProperty": "in-predictHit"
+    },
+    {
+      "fromId": "choosehintIn",
+      "fromProperty": "program",
+      "toId": "choosehintFn",
+      "toProperty": "in-program"
+    },
+    {
+      "fromId": "choosehintIn",
+      "fromProperty": "run",
+      "toId": "choosehintFn",
+      "toProperty": "in-run"
+    },
+    {
+      "fromId": "choosehintIn",
+      "fromProperty": "total",
+      "toId": "choosehintFn",
+      "toProperty": "in-total"
+    },
+    {
+      "fromId": "choosehintIn",
+      "fromProperty": "world",
+      "toId": "choosehintFn",
+      "toProperty": "in-world"
+    },
+    {
+      "fromId": "choosehintIn",
+      "fromProperty": "go",
+      "toId": "choosehintFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "choosehintFn",
+      "fromProperty": "out-isOlive",
+      "toId": "choosehintOut",
+      "toProperty": "isOlive"
+    },
+    {
+      "fromId": "choosehintFn",
+      "fromProperty": "out-key",
+      "toId": "choosehintOut",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "choosehintFn",
+      "fromProperty": "out-vars",
+      "toId": "choosehintOut",
+      "toProperty": "vars"
+    },
+    {
+      "fromId": "choosehintFn",
+      "fromProperty": "success",
+      "toId": "choosehintOut",
+      "toProperty": "ran"
+    }
+  ]
+}

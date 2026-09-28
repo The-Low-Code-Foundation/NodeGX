@@ -1,0 +1,126 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "fdc0d50f-755f-5015-8d7f-a5f2fb736c4b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "paletteIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "allowed",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "paletteFn",
+      "type": "JavaScriptFunction",
+      "label": "Palette",
+      "parameters": {
+        "functionScript": "\nvar BAND1 = [\"fwd\",\"left\",\"right\",\"water\",\"pick\",\"put\"];\nvar ALL = [\"fwd\",\"left\",\"right\",\"water\",\"pick\",\"put\",\"say\",\"repeat\",\"until\",\"if\",\"when\",\"count_inc\",\"trick\",\"do\",\"ask\"];\nvar META = {\"fwd\":{\"kind\":\"motion\",\"body\":false,\"count\":false,\"slots\":[]},\"left\":{\"kind\":\"motion\",\"body\":false,\"count\":false,\"slots\":[]},\"right\":{\"kind\":\"motion\",\"body\":false,\"count\":false,\"slots\":[]},\"water\":{\"kind\":\"action\",\"body\":false,\"count\":false,\"slots\":[]},\"pick\":{\"kind\":\"action\",\"body\":false,\"count\":false,\"slots\":[]},\"put\":{\"kind\":\"action\",\"body\":false,\"count\":false,\"slots\":[]},\"say\":{\"kind\":\"ask\",\"body\":false,\"count\":false,\"slots\":[\"text\"]},\"repeat\":{\"kind\":\"control\",\"body\":true,\"count\":true,\"slots\":[]},\"until\":{\"kind\":\"control\",\"body\":true,\"count\":false,\"slots\":[\"sensor\",\"arg\"]},\"if\":{\"kind\":\"control\",\"body\":true,\"count\":false,\"slots\":[\"sensor\",\"arg\"]},\"when\":{\"kind\":\"control\",\"body\":true,\"count\":false,\"slots\":[\"event\"]},\"count_inc\":{\"kind\":\"control\",\"body\":false,\"count\":false,\"slots\":[]},\"trick\":{\"kind\":\"ask\",\"body\":true,\"count\":false,\"slots\":[\"name\"]},\"do\":{\"kind\":\"ask\",\"body\":false,\"count\":false,\"slots\":[\"name\"]},\"ask\":{\"kind\":\"ask\",\"body\":false,\"count\":false,\"slots\":[\"rung\",\"args\",\"shape\",\"dial\"]}};\nvar LABEL = { fwd: 'Fwd', left: 'Left', right: 'Right', water: 'Water', pick: 'Pick', put: 'Put', say: 'Say', repeat: 'Repeat', until: 'Until', 'if': 'If', when: 'When', count_inc: 'CountInc', trick: 'Trick', 'do': 'Do', ask: 'Ask' };\nvar band = Number(Inputs.band) === 1 ? 1 : 2;\nvar allowed = Array.isArray(Inputs.allowed) && Inputs.allowed.length ? Inputs.allowed : null;\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar rows = Array.isArray(Inputs.words) ? Inputs.words : [];\nvar word = {};\nfor (var i = 0; i < rows.length; i++) word[rows[i].key] = rows[i][lang] || rows[i].en || '';\nvar ids = band === 1 ? BAND1 : ALL;\nvar out = [];\nfor (var j = 0; j < ids.length; j++) {\n  var id = ids[j];\n  if (allowed && allowed.indexOf(id) === -1) continue;\n  var m = META[id];\n  out.push({ id: id, kind: m.kind, label: word['b' + LABEL[id]] || id, caption: word['c' + LABEL[id]] || id, hasBody: m.body, hasCount: m.count, slots: m.slots, band: band });\n}\nOutputs.palette = out;\nOutputs.count = out.length;\nOutputs.band = band;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-band",
+          "displayName": "band",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-allowed",
+          "displayName": "allowed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-palette",
+          "displayName": "palette",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-band",
+          "displayName": "band",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "paletteOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "band",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "palette",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

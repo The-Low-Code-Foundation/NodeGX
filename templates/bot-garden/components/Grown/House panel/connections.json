@@ -1,0 +1,121 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "bf272402-686f-53e0-8ab7-c1d64676d41f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ghIn",
+      "fromProperty": "words",
+      "toId": "ghT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "ghIn",
+      "fromProperty": "lang",
+      "toId": "ghT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "ghIn",
+      "fromProperty": "botName",
+      "toId": "ghT",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "ghT",
+      "fromProperty": "guDataH",
+      "toId": "ghH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ghT",
+      "fromProperty": "guD1",
+      "toId": "gh_guD1",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ghT",
+      "fromProperty": "guD2",
+      "toId": "gh_guD2",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ghT",
+      "fromProperty": "guD3",
+      "toId": "gh_guD3",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ghT",
+      "fromProperty": "guTryH",
+      "toId": "ghTryH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ghT",
+      "fromProperty": "guTryPrompt",
+      "toId": "ghPrompt",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ghT",
+      "fromProperty": "guTryGo",
+      "toId": "ghAsk",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ghT",
+      "fromProperty": "guTryNote",
+      "toId": "ghNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ghT",
+      "fromProperty": "saveCodeH",
+      "toId": "ghCodeH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ghT",
+      "fromProperty": "guSaveLine",
+      "toId": "ghCodeLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ghIn",
+      "fromProperty": "lang",
+      "toId": "ghAskOlive",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "ghT",
+      "fromProperty": "thanksMamie",
+      "toId": "ghAskOlive",
+      "toProperty": "fallback"
+    },
+    {
+      "fromId": "ghAsk",
+      "fromProperty": "onClick",
+      "toId": "ghAskOlive",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "ghAskOlive",
+      "fromProperty": "text",
+      "toId": "ghReply",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ghIn",
+      "fromProperty": "model",
+      "toId": "ghEncode",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "ghEncode",
+      "fromProperty": "code",
+      "toId": "ghCode",
+      "toProperty": "text"
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "fef49f0d-0fea-58c8-8b70-fc2ca54c7e12",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pcIn",
+      "fromProperty": "face",
+      "toId": "pcFace",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "name",
+      "toId": "pcName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "band",
+      "toId": "pcBand",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "robot",
+      "toId": "pcRobot",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "selected",
+      "toId": "pcIsOn",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "pcIsOn",
+      "fromProperty": "ontrue",
+      "toId": "pcStates",
+      "toProperty": "to-on"
+    },
+    {
+      "fromId": "pcIsOn",
+      "fromProperty": "onfalse",
+      "toId": "pcStates",
+      "toProperty": "to-off"
+    },
+    {
+      "fromId": "pcStates",
+      "fromProperty": "edge",
+      "toId": "pcCard",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "pcCard",
+      "fromProperty": "onClick",
+      "toId": "pcOut",
+      "toProperty": "chosen"
+    },
+    {
+      "fromId": "pcFace",
+      "fromProperty": "onClick",
+      "toId": "pcOut",
+      "toProperty": "chosen"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "id",
+      "toId": "pcOut",
+      "toProperty": "id"
+    }
+  ]
+}

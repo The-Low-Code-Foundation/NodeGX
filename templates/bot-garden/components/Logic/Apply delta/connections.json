@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6d5d3f54-646e-5db8-873a-1b442cc06b37",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "applydeltaIn",
+      "fromProperty": "delta",
+      "toId": "applydeltaFn",
+      "toProperty": "in-delta"
+    },
+    {
+      "fromId": "applydeltaIn",
+      "fromProperty": "world",
+      "toId": "applydeltaFn",
+      "toProperty": "in-world"
+    },
+    {
+      "fromId": "applydeltaIn",
+      "fromProperty": "go",
+      "toId": "applydeltaFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "applydeltaFn",
+      "fromProperty": "out-robots",
+      "toId": "applydeltaOut",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "applydeltaFn",
+      "fromProperty": "out-things",
+      "toId": "applydeltaOut",
+      "toProperty": "things"
+    },
+    {
+      "fromId": "applydeltaFn",
+      "fromProperty": "out-tulips",
+      "toId": "applydeltaOut",
+      "toProperty": "tulips"
+    },
+    {
+      "fromId": "applydeltaFn",
+      "fromProperty": "out-world",
+      "toId": "applydeltaOut",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "applydeltaFn",
+      "fromProperty": "success",
+      "toId": "applydeltaOut",
+      "toProperty": "ran"
+    }
+  ]
+}

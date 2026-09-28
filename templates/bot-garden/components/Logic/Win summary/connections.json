@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "734550b9-cc8a-5879-8508-347b3f521a74",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "winsummaryIn",
+      "fromProperty": "botName",
+      "toId": "winsummaryFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "winsummaryIn",
+      "fromProperty": "lang",
+      "toId": "winsummaryFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "winsummaryIn",
+      "fromProperty": "program",
+      "toId": "winsummaryFn",
+      "toProperty": "in-program"
+    },
+    {
+      "fromId": "winsummaryIn",
+      "fromProperty": "request",
+      "toId": "winsummaryFn",
+      "toProperty": "in-request"
+    },
+    {
+      "fromId": "winsummaryIn",
+      "fromProperty": "words",
+      "toId": "winsummaryFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "winsummaryFn",
+      "fromProperty": "out-blocks",
+      "toId": "winsummaryOut",
+      "toProperty": "blocks"
+    },
+    {
+      "fromId": "winsummaryFn",
+      "fromProperty": "out-bloom",
+      "toId": "winsummaryOut",
+      "toProperty": "bloom"
+    },
+    {
+      "fromId": "winsummaryFn",
+      "fromProperty": "out-hasLearn",
+      "toId": "winsummaryOut",
+      "toProperty": "hasLearn"
+    },
+    {
+      "fromId": "winsummaryFn",
+      "fromProperty": "out-hasReward",
+      "toId": "winsummaryOut",
+      "toProperty": "hasReward"
+    },
+    {
+      "fromId": "winsummaryFn",
+      "fromProperty": "out-learnText",
+      "toId": "winsummaryOut",
+      "toProperty": "learnText"
+    },
+    {
+      "fromId": "winsummaryFn",
+      "fromProperty": "out-line",
+      "toId": "winsummaryOut",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "winsummaryFn",
+      "fromProperty": "out-requestId",
+      "toId": "winsummaryOut",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "winsummaryFn",
+      "fromProperty": "out-reward",
+      "toId": "winsummaryOut",
+      "toProperty": "reward"
+    },
+    {
+      "fromId": "winsummaryFn",
+      "fromProperty": "out-rewardText",
+      "toId": "winsummaryOut",
+      "toProperty": "rewardText"
+    },
+    {
+      "fromId": "winsummaryFn",
+      "fromProperty": "out-thanks",
+      "toId": "winsummaryOut",
+      "toProperty": "thanks"
+    },
+    {
+      "fromId": "winsummaryFn",
+      "fromProperty": "success",
+      "toId": "winsummaryOut",
+      "toProperty": "ran"
+    }
+  ]
+}

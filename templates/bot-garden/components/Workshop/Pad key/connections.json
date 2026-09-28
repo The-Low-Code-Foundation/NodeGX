@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1570cc17-cea8-57aa-8dc5-f547ba764e78",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pkIn",
+      "fromProperty": "cls",
+      "toId": "pkKey",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "pkIn",
+      "fromProperty": "label",
+      "toId": "pkKey",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pkKey",
+      "fromProperty": "onClick",
+      "toId": "pkOut",
+      "toProperty": "pressed"
+    },
+    {
+      "fromId": "pkIn",
+      "fromProperty": "op",
+      "toId": "pkOut",
+      "toProperty": "op"
+    }
+  ]
+}

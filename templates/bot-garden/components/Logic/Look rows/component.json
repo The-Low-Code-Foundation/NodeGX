@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1fcc2cc6-5f20-5ed6-8915-6e6bf7704884",
+  "name": "Look rows",
+  "path": "/Logic/Look rows",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The robot’s paints, eyes, hats and stickers. Runs when an input changes; Ran after each run."
+}

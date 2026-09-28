@@ -1,0 +1,169 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d34448ca-ffda-587d-8e9c-292ab50e9af9",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "guStore",
+      "fromProperty": "model",
+      "toId": "guFam",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "guLangVar",
+      "fromProperty": "value",
+      "toId": "guFam",
+      "toProperty": "fallbackLang"
+    },
+    {
+      "fromId": "guWords",
+      "fromProperty": "words",
+      "toId": "guT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "guFam",
+      "fromProperty": "lang",
+      "toId": "guT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "guFam",
+      "fromProperty": "botName",
+      "toId": "guT",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "guFam",
+      "fromProperty": "band",
+      "toId": "guBar",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "guFam",
+      "fromProperty": "lang",
+      "toId": "guBar",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "guFam",
+      "fromProperty": "name",
+      "toId": "guBar",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "guFam",
+      "fromProperty": "face",
+      "toId": "guBar",
+      "toProperty": "face"
+    },
+    {
+      "fromId": "guFam",
+      "fromProperty": "botName",
+      "toId": "guBar",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "guFam",
+      "fromProperty": "profileId",
+      "toId": "guBar",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "guWords",
+      "fromProperty": "words",
+      "toId": "guBar",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "guStore",
+      "fromProperty": "model",
+      "toId": "guBar",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "guBar",
+      "fromProperty": "model",
+      "toId": "guStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "guBar",
+      "fromProperty": "write",
+      "toId": "guStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "guT",
+      "fromProperty": "guEyebrow",
+      "toId": "guHead",
+      "toProperty": "eyebrow"
+    },
+    {
+      "fromId": "guT",
+      "fromProperty": "guTitle",
+      "toId": "guHead",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "guT",
+      "fromProperty": "guSub",
+      "toId": "guHead",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "guWords",
+      "fromProperty": "words",
+      "toId": "guOlive",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "guFam",
+      "fromProperty": "lang",
+      "toId": "guOlive",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "guWords",
+      "fromProperty": "words",
+      "toId": "guRules",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "guFam",
+      "fromProperty": "lang",
+      "toId": "guRules",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "guWords",
+      "fromProperty": "words",
+      "toId": "guHouse",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "guFam",
+      "fromProperty": "lang",
+      "toId": "guHouse",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "guFam",
+      "fromProperty": "botName",
+      "toId": "guOlive",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "guFam",
+      "fromProperty": "botName",
+      "toId": "guHouse",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "guStore",
+      "fromProperty": "model",
+      "toId": "guHouse",
+      "toProperty": "model"
+    }
+  ]
+}

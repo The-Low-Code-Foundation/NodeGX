@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "489ec11b-263f-5630-851f-c46c60797fcd",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hdIn",
+      "fromProperty": "eyebrow",
+      "toId": "hdEyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "title",
+      "toId": "hdTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hdIn",
+      "fromProperty": "sub",
+      "toId": "hdSub",
+      "toProperty": "text"
+    }
+  ]
+}

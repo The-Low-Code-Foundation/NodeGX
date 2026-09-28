@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2bb83363-3958-596c-81e4-c510d91a1334",
+  "name": "Skill rows",
+  "path": "/Logic/Skill rows",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The seven tricks as cards. Runs when an input changes; Ran after each run."
+}

@@ -1,0 +1,156 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "673eed2f-920a-52aa-8c3f-65b2bbbc5e1e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cpIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "selected",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "locked",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "cpPill",
+      "type": "Group",
+      "label": "The pill",
+      "children": [
+        "cpText"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "backgroundColor": "var(--paper-2)",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "cssClassName": "bg-chip bg-press"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "cpText",
+      "type": "Text",
+      "label": "The word",
+      "parent": "cpPill",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "cpIsOn",
+      "type": "Condition",
+      "label": "Is it worn?",
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "cpStates",
+      "type": "States",
+      "label": "Worn or not",
+      "parameters": {
+        "states": "off,on",
+        "values": "bg,fg",
+        "useTransitions": false,
+        "type-bg": "color",
+        "value-off-bg": "var(--paper-2)",
+        "value-on-bg": "var(--ink)",
+        "type-fg": "color",
+        "value-off-fg": "var(--ink)",
+        "value-on-fg": "var(--on-fill)"
+      },
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "cpIsLocked",
+      "type": "Condition",
+      "label": "Still to earn?",
+      "x": 350,
+      "y": 640
+    },
+    {
+      "id": "cpLock",
+      "type": "States",
+      "label": "Earned or not",
+      "parameters": {
+        "states": "open,locked",
+        "values": "opacity",
+        "useTransitions": false,
+        "type-opacity": "number",
+        "value-open-opacity": 1,
+        "value-locked-opacity": 0.5
+      },
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "cpGate",
+      "type": "Condition",
+      "label": "Only an earned one answers",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "cpOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "picked",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "cpPill"
+  ]
+}

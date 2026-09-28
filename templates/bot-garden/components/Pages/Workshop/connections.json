@@ -1,0 +1,241 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4b911db9-5959-5323-8d27-3b622c31b574",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "wsStore",
+      "fromProperty": "model",
+      "toId": "wsFam",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsLangVar",
+      "fromProperty": "value",
+      "toId": "wsFam",
+      "toProperty": "fallbackLang"
+    },
+    {
+      "fromId": "wsWords",
+      "fromProperty": "words",
+      "toId": "wsT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "lang",
+      "toId": "wsT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "botName",
+      "toId": "wsT",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "band",
+      "toId": "wsBar",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "lang",
+      "toId": "wsBar",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "name",
+      "toId": "wsBar",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "face",
+      "toId": "wsBar",
+      "toProperty": "face"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "botName",
+      "toId": "wsBar",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "profileId",
+      "toId": "wsBar",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "wsWords",
+      "fromProperty": "words",
+      "toId": "wsBar",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "wsStore",
+      "fromProperty": "model",
+      "toId": "wsBar",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsBar",
+      "fromProperty": "model",
+      "toId": "wsStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsBar",
+      "fromProperty": "write",
+      "toId": "wsStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "wsReqVar",
+      "fromProperty": "value",
+      "toId": "wsPlay",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "wsRequests",
+      "fromProperty": "requests",
+      "toId": "wsPlay",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "wsHints",
+      "fromProperty": "hints",
+      "toId": "wsPlay",
+      "toProperty": "hints"
+    },
+    {
+      "fromId": "wsWords",
+      "fromProperty": "words",
+      "toId": "wsPlay",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "lang",
+      "toId": "wsPlay",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "band",
+      "toId": "wsPlay",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "botName",
+      "toId": "wsPlay",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "color",
+      "toId": "wsPlay",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "eye",
+      "toId": "wsPlay",
+      "toProperty": "eye"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "hat",
+      "toId": "wsPlay",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "older",
+      "toId": "wsPlay",
+      "toProperty": "isOlder"
+    },
+    {
+      "fromId": "wsStore",
+      "fromProperty": "model",
+      "toId": "wsComplete",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "wonRequest",
+      "toId": "wsComplete",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "profileId",
+      "toId": "wsComplete",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "bloom",
+      "toId": "wsComplete",
+      "toProperty": "tricks"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "reward",
+      "toId": "wsComplete",
+      "toProperty": "reward"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "won",
+      "toId": "wsComplete",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "wsComplete",
+      "fromProperty": "model",
+      "toId": "wsStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsComplete",
+      "fromProperty": "ran",
+      "toId": "wsStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "island",
+      "toId": "wsGoIsland",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "wsPage",
+      "fromProperty": "didMount",
+      "toId": "wsGuardWait",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "found",
+      "toId": "wsGuard",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "wsGuardWait",
+      "fromProperty": "timerFinished",
+      "toId": "wsGuard",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "wsGuard",
+      "fromProperty": "onfalse",
+      "toId": "wsGoIsland",
+      "toProperty": "navigate"
+    }
+  ]
+}

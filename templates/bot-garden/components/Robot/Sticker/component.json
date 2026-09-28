@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1e606ac1-edf4-5c5f-8460-66b3445cb86e",
+  "name": "Sticker",
+  "path": "/Robot/Sticker",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One sticker on the robot’s shell (the mockup’s .stickers span)."
+}

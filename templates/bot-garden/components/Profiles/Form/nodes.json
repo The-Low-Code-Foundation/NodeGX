@@ -1,0 +1,600 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "548e1d5c-9ad5-58f9-802b-8eb1da95ac08",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pfIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "open",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "reset",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "pfCard",
+      "type": "Group",
+      "label": "The form",
+      "children": [
+        "pfNameL",
+        "pfName",
+        "pfBandL",
+        "pfBandRow",
+        "pfLangL",
+        "pfLangRow",
+        "pfBotL",
+        "pfBot",
+        "pfButtons"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "backgroundColor": "var(--card)",
+        "borderRadius": "var(--radius-card)",
+        "cssClassName": "bg-panel",
+        "paddingTop": "var(--space-3-5)",
+        "paddingBottom": "var(--space-3-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "maxWidth": {
+          "value": 520,
+          "unit": "px"
+        },
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pfNameL",
+      "type": "Text",
+      "label": "Your name",
+      "parent": "pfCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pfName",
+      "type": "net.noodl.controls.textinput",
+      "label": "The name",
+      "parent": "pfCard",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontSize": {
+          "value": 20,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "backgroundColor": "var(--card)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 2,
+          "unit": "px"
+        },
+        "borderColor": "var(--line)",
+        "borderRadius": {
+          "value": 14,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "maxLength": 24
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "pfBandL",
+      "type": "Text",
+      "label": "Your age",
+      "parent": "pfCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "pfBandRow",
+      "type": "Group",
+      "label": "The two bands",
+      "parent": "pfCard",
+      "children": [
+        "pfB1",
+        "pfB2"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-0)",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--paper-2)",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 3,
+          "unit": "px"
+        },
+        "cssClassName": "bg-seg"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "pfB1",
+      "type": "/Garden/Seg",
+      "label": "7–9",
+      "parent": "pfBandRow",
+      "parameters": {
+        "label": "7–9"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "pfB2",
+      "type": "/Garden/Seg",
+      "label": "10–12",
+      "parent": "pfBandRow",
+      "parameters": {
+        "label": "10–12"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "pfLangL",
+      "type": "Text",
+      "label": "Language",
+      "parent": "pfCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "pfLangRow",
+      "type": "Group",
+      "label": "The two languages",
+      "parent": "pfCard",
+      "children": [
+        "pfEn",
+        "pfFr"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-0)",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--paper-2)",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 3,
+          "unit": "px"
+        },
+        "cssClassName": "bg-seg"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "pfEn",
+      "type": "/Garden/Seg",
+      "label": "English",
+      "parent": "pfLangRow",
+      "parameters": {
+        "label": "English"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "pfFr",
+      "type": "/Garden/Seg",
+      "label": "Français",
+      "parent": "pfLangRow",
+      "parameters": {
+        "label": "Français"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "pfBotL",
+      "type": "Text",
+      "label": "Your robot’s name",
+      "parent": "pfCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2
+      },
+      "x": 100,
+      "y": 1360
+    },
+    {
+      "id": "pfBot",
+      "type": "net.noodl.controls.textinput",
+      "label": "The robot’s name",
+      "parent": "pfCard",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontSize": {
+          "value": 20,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "backgroundColor": "var(--card)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 2,
+          "unit": "px"
+        },
+        "borderColor": "var(--line)",
+        "borderRadius": {
+          "value": 14,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "maxLength": 14,
+        "startValue": "Pip"
+      },
+      "x": 100,
+      "y": 1480
+    },
+    {
+      "id": "pfButtons",
+      "type": "Group",
+      "label": "Go or not",
+      "parent": "pfCard",
+      "children": [
+        "pfGo",
+        "pfCancel"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 1600
+    },
+    {
+      "id": "pfGo",
+      "type": "net.noodl.controls.button",
+      "label": "Let’s go",
+      "parent": "pfButtons",
+      "parameters": {
+        "backgroundColor": "var(--leaf)",
+        "color": "var(--on-fill)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-i-play",
+        "label": "Let’s go!"
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "pfCancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "parent": "pfButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--ink-2)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn",
+        "label": "Cancel"
+      },
+      "x": 160,
+      "y": 1840
+    },
+    {
+      "id": "pfT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "pfLit",
+      "type": "/Logic/Bar state",
+      "label": "Which is pressed",
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "pfBandVar",
+      "type": "Variable2",
+      "label": "The chosen band",
+      "parameters": {
+        "name": "gardenNewBand"
+      },
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "pfSetB1",
+      "type": "Set Variable",
+      "label": "Band 7–9",
+      "parameters": {
+        "name": "gardenNewBand",
+        "setWith": "number",
+        "value": 1
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "pfSetB2",
+      "type": "Set Variable",
+      "label": "Band 10–12",
+      "parameters": {
+        "name": "gardenNewBand",
+        "setWith": "number",
+        "value": 2
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "pfLangVar",
+      "type": "Variable2",
+      "label": "The chosen language",
+      "parameters": {
+        "name": "gardenNewLang"
+      },
+      "x": 410,
+      "y": 1480
+    },
+    {
+      "id": "pfSetEn",
+      "type": "Set Variable",
+      "label": "English",
+      "parameters": {
+        "name": "gardenNewLang",
+        "setWith": "string",
+        "value": "en"
+      },
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "pfSetFr",
+      "type": "Set Variable",
+      "label": "French",
+      "parameters": {
+        "name": "gardenNewLang",
+        "setWith": "string",
+        "value": "fr"
+      },
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "pfSetLangNow",
+      "type": "Set Variable",
+      "label": "The language on screen",
+      "parameters": {
+        "name": "gardenNewLang"
+      },
+      "x": 410,
+      "y": 1600
+    },
+    {
+      "id": "pfOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "create",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cancel",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "name",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "band",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "lang",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "robotName",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "pfCard"
+  ]
+}

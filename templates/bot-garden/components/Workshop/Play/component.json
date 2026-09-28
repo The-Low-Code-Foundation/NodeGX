@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b4577814-8256-5b17-8887-3d483e8de369",
+  "name": "Play",
+  "path": "/Workshop/Play",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The workshop: teach the robot by driving it, see the steps as blocks, fold the repetition, play, and win. Request Id picks the request (free for free play). Won fires with Bloom, Reward and Won Request set; Island asks for the island; Found says whether the request exists (a reload has none)."
+}

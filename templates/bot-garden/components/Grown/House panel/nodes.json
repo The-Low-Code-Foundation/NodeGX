@@ -1,0 +1,406 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "bf272402-686f-53e0-8ab7-c1d64676d41f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ghIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 410,
+      "y": 1840
+    },
+    {
+      "id": "ghPanel",
+      "type": "Group",
+      "label": "Nothing leaves the house",
+      "children": [
+        "ghH",
+        "gh_guD1",
+        "gh_guD2",
+        "gh_guD3",
+        "ghTryH",
+        "ghTryRow",
+        "ghOut",
+        "ghCodeH",
+        "ghCodeLine",
+        "ghCode"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1-5)",
+        "backgroundColor": "var(--card)",
+        "borderRadius": "var(--radius-card)",
+        "cssClassName": "bg-panel",
+        "paddingTop": "var(--space-3-5)",
+        "paddingBottom": "var(--space-3-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ghH",
+      "type": "Text",
+      "label": "Nothing leaves the house",
+      "parent": "ghPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "gh_guD1",
+      "type": "Text",
+      "label": "guD1",
+      "parent": "ghPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-li"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "gh_guD2",
+      "type": "Text",
+      "label": "guD2",
+      "parent": "ghPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-li"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "gh_guD3",
+      "type": "Text",
+      "label": "guD3",
+      "parent": "ghPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-li"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "ghTryH",
+      "type": "Text",
+      "label": "Try Olive",
+      "parent": "ghPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2,
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "ghTryRow",
+      "type": "Group",
+      "label": "The ask",
+      "parent": "ghPanel",
+      "children": [
+        "ghPrompt",
+        "ghAsk"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "ghPrompt",
+      "type": "Text",
+      "label": "What she is asked",
+      "parent": "ghTryRow",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "fontWeight": "700"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "ghAsk",
+      "type": "net.noodl.controls.button",
+      "label": "Ask",
+      "parent": "ghTryRow",
+      "parameters": {
+        "backgroundColor": "var(--violet)",
+        "color": "var(--on-fill)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-i-owl",
+        "label": "Ask"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "ghOut",
+      "type": "Group",
+      "label": "Her reply",
+      "parent": "ghPanel",
+      "children": [
+        "ghNote",
+        "ghReply"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-0-5)",
+        "backgroundColor": "var(--violet-2)",
+        "borderRadius": {
+          "value": 12,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)"
+      },
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "ghNote",
+      "type": "Text",
+      "label": "Where it came from",
+      "parent": "ghOut",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "700",
+        "color": "var(--violet-meta)"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "ghReply",
+      "type": "Text",
+      "label": "The reply",
+      "parent": "ghOut",
+      "parameters": {
+        "text": "—",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "fontWeight": "700"
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "ghCodeH",
+      "type": "Text",
+      "label": "Save code",
+      "parent": "ghPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2,
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 1480
+    },
+    {
+      "id": "ghCodeLine",
+      "type": "Text",
+      "label": "What it is for",
+      "parent": "ghPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)"
+      },
+      "x": 100,
+      "y": 1600
+    },
+    {
+      "id": "ghCode",
+      "type": "Text",
+      "label": "The code",
+      "parent": "ghPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 13,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "cssClassName": "bg-code"
+      },
+      "x": 100,
+      "y": 1720
+    },
+    {
+      "id": "ghT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "ghAskOlive",
+      "type": "/Logic/Ask Olive",
+      "label": "Ask her",
+      "parameters": {
+        "rung": "say-thanks",
+        "slots": {
+          "to": "Mamie Rose",
+          "deed": "watered her three tulips"
+        }
+      },
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "ghEncode",
+      "type": "/Logic/Encode save code",
+      "label": "The family as a code",
+      "x": 410,
+      "y": 1720
+    }
+  ],
+  "visualRoots": [
+    "ghPanel"
+  ]
+}

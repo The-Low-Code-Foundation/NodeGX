@@ -1,0 +1,210 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "1fcc2cc6-5f20-5ed6-8915-6e6bf7704884",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lookrowsIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "color",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "eye",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "hat",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "hats",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "stickers",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "lookrowsFn",
+      "type": "JavaScriptFunction",
+      "label": "Look rows",
+      "parameters": {
+        "functionScript": "\nfunction wordMap(rows, lang, name) {\n  var map = {};\n  var list = Array.isArray(rows) ? rows : [];\n  for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || '').split('{b}').join(name);\n  return map;\n}\nfunction fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\nfunction langOf(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction nameOf(v) { var n = String(v || '').trim(); return n || 'Pip'; }\n\nvar PAINTS = [{\"token\":\"--robot-coral\",\"hex\":\"#FF7A59\",\"name\":{\"en\":\"coral\",\"fr\":\"corail\"}},{\"token\":\"--robot-orange\",\"hex\":\"#FFB347\",\"name\":{\"en\":\"orange\",\"fr\":\"orange\"}},{\"token\":\"--robot-sun\",\"hex\":\"#FFD166\",\"name\":{\"en\":\"sunny\",\"fr\":\"soleil\"}},{\"token\":\"--robot-leaf\",\"hex\":\"#3FA66B\",\"name\":{\"en\":\"leaf\",\"fr\":\"feuille\"}},{\"token\":\"--robot-sky\",\"hex\":\"#5FB4E8\",\"name\":{\"en\":\"sky\",\"fr\":\"ciel\"}},{\"token\":\"--robot-violet\",\"hex\":\"#8F6BFF\",\"name\":{\"en\":\"violet\",\"fr\":\"violet\"}},{\"token\":\"--robot-pink\",\"hex\":\"#F06BA8\",\"name\":{\"en\":\"pink\",\"fr\":\"rose\"}},{\"token\":\"--robot-slate\",\"hex\":\"#7A8CA3\",\"name\":{\"en\":\"slate\",\"fr\":\"ardoise\"}}];\nvar EYES = [{\"id\":\"round\",\"word\":\"eyeRound\"},{\"id\":\"happy\",\"word\":\"eyeHappy\"},{\"id\":\"wink\",\"word\":\"eyeWink\"}];\nvar HATS = [{\"id\":\"none\",\"word\":\"hatNone\",\"free\":true,\"from\":\"\"},{\"id\":\"cap\",\"word\":\"hatCap\",\"free\":false,\"from\":\"islSami\"},{\"id\":\"sun\",\"word\":\"hatSun\",\"free\":false,\"from\":\"islMamie\"},{\"id\":\"crown\",\"word\":\"hatCrown\",\"free\":false,\"from\":\"islBiscuit\"}];\nvar lang = langOf(Inputs.lang), name = nameOf(Inputs.botName);\nvar w = wordMap(Inputs.words, lang, name);\nvar color = String(Inputs.color || '#FF7A59').toUpperCase(), eye = String(Inputs.eye || 'round'), hat = String(Inputs.hat || 'none');\nvar owned = Array.isArray(Inputs.hats) ? Inputs.hats : [];\nvar paints = [], eyes = [], hats = [], stickers = [];\nfor (var i = 0; i < PAINTS.length; i++) paints.push({ id: PAINTS[i].hex, fill: 'var(' + PAINTS[i].token + ')', label: PAINTS[i].name[lang], selected: PAINTS[i].hex.toUpperCase() === color });\nfor (var j = 0; j < EYES.length; j++) eyes.push({ id: EYES[j].id, label: w[EYES[j].word] || EYES[j].id, selected: EYES[j].id === eye, locked: false });\nfor (var k = 0; k < HATS.length; k++) {\n  var h = HATS[k];\n  var has = h.free || owned.indexOf(h.id) !== -1;\n  hats.push({ id: h.id, label: (h.id === 'sun' ? '🌻 ' : h.id === 'crown' ? '👑 ' : '') + (w[h.word] || h.id) + (has || !h.from ? '' : ' · ' + fill(w.hatLocked, { who: w[h.from] || '' })), selected: h.id === hat, locked: !has });\n}\nvar st = Array.isArray(Inputs.stickers) ? Inputs.stickers : [];\nvar STICKER = { letter: ['✉️', 'stickerLetter'], paw: ['🐾', 'stickerPaw'], tulip: ['🌷', 'stickerTulip'], bell: ['🔔', 'itemBell'], basket: ['🧺', 'itemBasket'], gnome: ['🧙', 'itemGnome'], seeds: ['🌱', 'seeds'] };\nfor (var s = 0; s < st.length; s++) { var d = STICKER[st[s]] || ['⭐', '']; stickers.push({ id: String(st[s]), label: d[0] + ' ' + (w[d[1]] || String(st[s])) }); }\nOutputs.paints = paints;\nOutputs.eyes = eyes;\nOutputs.hats = hats;\nOutputs.stickers = stickers;\nOutputs.hasStickers = stickers.length > 0;\nOutputs.noStickers = stickers.length === 0;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-color",
+          "displayName": "color",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-eye",
+          "displayName": "eye",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-hat",
+          "displayName": "hat",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-hats",
+          "displayName": "hats",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-stickers",
+          "displayName": "stickers",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-paints",
+          "displayName": "paints",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-eyes",
+          "displayName": "eyes",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hats",
+          "displayName": "hats",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stickers",
+          "displayName": "stickers",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasStickers",
+          "displayName": "hasStickers",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-noStickers",
+          "displayName": "noStickers",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "lookrowsOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "eyes",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasStickers",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hats",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "noStickers",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "paints",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "stickers",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

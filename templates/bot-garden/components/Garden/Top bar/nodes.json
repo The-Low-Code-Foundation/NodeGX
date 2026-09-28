@@ -1,0 +1,565 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "44726b7f-fb62-5606-84cd-8c1075bd9764",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "brIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "page",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "face",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "profileId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "showTabs",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "showBand",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "brBar",
+      "type": "Group",
+      "label": "The bar",
+      "children": [
+        "brBrand",
+        "brTabs",
+        "brBandSeg",
+        "brLangSeg",
+        "brWho"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3-5)",
+        "rowGap": "var(--space-2-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--card)",
+        "borderRadius": "var(--radius-bar)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "cssClassName": "bg-top"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "brBrand",
+      "type": "Group",
+      "label": "The brand",
+      "parent": "brBar",
+      "children": [
+        "brMark",
+        "brName"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2-5)",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "brMark",
+      "type": "Group",
+      "label": "The tulip",
+      "parent": "brBrand",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 38,
+          "unit": "px"
+        },
+        "height": {
+          "value": 38,
+          "unit": "px"
+        },
+        "cssClassName": "bg-brand-mark bg-sp-tulip"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "brName",
+      "type": "Text",
+      "label": "Bot Garden",
+      "parent": "brBrand",
+      "parameters": {
+        "text": "Bot Garden",
+        "sizeMode": "contentSize",
+        "fontFamily": "Fredoka",
+        "fontSize": {
+          "value": 24,
+          "unit": "px"
+        },
+        "fontWeight": "700",
+        "color": "var(--ink)",
+        "cssClassName": "bg-brand"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "brTabs",
+      "type": "Group",
+      "label": "The five screens",
+      "parent": "brBar",
+      "children": [
+        "brTab_island",
+        "brTab_workshop",
+        "brTab_robot",
+        "brTab_skills",
+        "brTab_grown"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-1)",
+        "rowGap": "var(--space-1)",
+        "cssClassName": "bg-tabs"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "brTab_island",
+      "type": "/Garden/Tab",
+      "label": "Tab: island",
+      "parent": "brTabs",
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "brTab_workshop",
+      "type": "/Garden/Tab",
+      "label": "Tab: workshop",
+      "parent": "brTabs",
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "brTab_robot",
+      "type": "/Garden/Tab",
+      "label": "Tab: robot",
+      "parent": "brTabs",
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "brTab_skills",
+      "type": "/Garden/Tab",
+      "label": "Tab: skills",
+      "parent": "brTabs",
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "brTab_grown",
+      "type": "/Garden/Tab",
+      "label": "Tab: grown",
+      "parent": "brTabs",
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "brBandSeg",
+      "type": "Group",
+      "label": "Age band",
+      "parent": "brBar",
+      "children": [
+        "brBand1",
+        "brBand2"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-0)",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--paper-2)",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 3,
+          "unit": "px"
+        },
+        "cssClassName": "bg-seg"
+      },
+      "x": 100,
+      "y": 1240
+    },
+    {
+      "id": "brBand1",
+      "type": "/Garden/Seg",
+      "label": "7–9",
+      "parent": "brBandSeg",
+      "parameters": {
+        "label": "7–9"
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "brBand2",
+      "type": "/Garden/Seg",
+      "label": "10–12",
+      "parent": "brBandSeg",
+      "parameters": {
+        "label": "10–12"
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "brLangSeg",
+      "type": "Group",
+      "label": "Language",
+      "parent": "brBar",
+      "children": [
+        "brEn",
+        "brFr"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-0)",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--paper-2)",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 3,
+          "unit": "px"
+        },
+        "cssClassName": "bg-seg"
+      },
+      "x": 100,
+      "y": 1600
+    },
+    {
+      "id": "brEn",
+      "type": "/Garden/Seg",
+      "label": "EN",
+      "parent": "brLangSeg",
+      "parameters": {
+        "label": "EN"
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "brFr",
+      "type": "/Garden/Seg",
+      "label": "FR",
+      "parent": "brLangSeg",
+      "parameters": {
+        "label": "FR"
+      },
+      "x": 160,
+      "y": 1840
+    },
+    {
+      "id": "brWho",
+      "type": "Group",
+      "label": "Who is playing",
+      "parent": "brBar",
+      "children": [
+        "brFace",
+        "brWhoName"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "cssClassName": "bg-press"
+      },
+      "x": 100,
+      "y": 1960
+    },
+    {
+      "id": "brFace",
+      "type": "game-kit.Avatar",
+      "label": "The face",
+      "parent": "brWho",
+      "parameters": {
+        "look": "fun-emoji",
+        "seed": "Pip",
+        "size": 34,
+        "background": "var(--sun)"
+      },
+      "x": 160,
+      "y": 2080
+    },
+    {
+      "id": "brWhoName",
+      "type": "Text",
+      "label": "The name",
+      "parent": "brWho",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)"
+      },
+      "x": 160,
+      "y": 2200
+    },
+    {
+      "id": "brT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "brLit",
+      "type": "/Logic/Bar state",
+      "label": "What is lit",
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "brSetEn",
+      "type": "/Logic/Update profile",
+      "label": "English",
+      "parameters": {
+        "field": "lang",
+        "value": "en"
+      },
+      "x": 410,
+      "y": 1720
+    },
+    {
+      "id": "brSetFr",
+      "type": "/Logic/Update profile",
+      "label": "French",
+      "parameters": {
+        "field": "lang",
+        "value": "fr"
+      },
+      "x": 410,
+      "y": 1960
+    },
+    {
+      "id": "brSetB1",
+      "type": "/Logic/Update profile",
+      "label": "Band 7–9",
+      "parameters": {
+        "field": "band",
+        "value": 1
+      },
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "brSetB2",
+      "type": "/Logic/Update profile",
+      "label": "Band 10–12",
+      "parameters": {
+        "field": "band",
+        "value": 2
+      },
+      "x": 410,
+      "y": 1480
+    },
+    {
+      "id": "brGo_island",
+      "type": "RouterNavigate",
+      "label": "To island",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Island"
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "brGo_workshop",
+      "type": "RouterNavigate",
+      "label": "To workshop",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Workshop"
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "brGo_robot",
+      "type": "RouterNavigate",
+      "label": "To robot",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/My robot"
+      },
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "brGo_skills",
+      "type": "RouterNavigate",
+      "label": "To skills",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Skills"
+      },
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "brGo_grown",
+      "type": "RouterNavigate",
+      "label": "To grown",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Grown-ups"
+      },
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "brGoProfiles",
+      "type": "RouterNavigate",
+      "label": "To the profiles",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Profiles"
+      },
+      "x": 410,
+      "y": 2080
+    },
+    {
+      "id": "brOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "write",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "pickedEn",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "pickedFr",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 1840
+    }
+  ],
+  "visualRoots": [
+    "brBar"
+  ]
+}

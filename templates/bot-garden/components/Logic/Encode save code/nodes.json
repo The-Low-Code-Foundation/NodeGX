@@ -1,0 +1,78 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "549dcaea-c475-5af4-8e15-291c705c5be0",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "encodesavecodeIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "encodesavecodeFn",
+      "type": "JavaScriptFunction",
+      "label": "Encode save code",
+      "parameters": {
+        "functionScript": "\nvar SAVE_VERSION = 2;\nvar MAX_PROFILES = 6;\nvar TRICK_KEYS = [\"n1\",\"n2\",\"n3\",\"n4\",\"n5\",\"n6\",\"n7\"];\nfunction newId(prefix) { return prefix + Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36); }\nfunction tricksOf(raw) {\n  var out = {};\n  for (var i = 0; i < TRICK_KEYS.length; i++) { var v = raw && raw[TRICK_KEYS[i]]; out[TRICK_KEYS[i]] = v === 'bloom' || v === 'sprout' ? v : (TRICK_KEYS[i] === 'n1' ? 'sprout' : 'seed'); }\n  return out;\n}\nfunction profileOf(raw) {\n  var p = raw && typeof raw === 'object' ? raw : {};\n  var robot = p.robot && typeof p.robot === 'object' ? p.robot : {};\n  return {\n    id: String(p.id || newId('p')), name: String(p.name || '').slice(0, 24), band: Number(p.band) === 1 ? 1 : 2, lang: p.lang === 'fr' ? 'fr' : 'en',\n    face: String(p.face || ''),\n    robot: { name: String(robot.name || 'Pip').slice(0, 16), color: String(robot.color || '#FF7A59'), eye: String(robot.eye || 'round'), hat: String(robot.hat || 'none') },\n    tricks: tricksOf(p.tricks), stickers: Array.isArray(p.stickers) ? p.stickers.map(String) : [], hats: Array.isArray(p.hats) ? p.hats.map(String) : []\n  };\n}\nfunction modelOf(raw) {\n  var m = raw && typeof raw === 'object' ? raw : {};\n  var fam = m.family && typeof m.family === 'object' ? m.family : {};\n  var isl = m.island && typeof m.island === 'object' ? m.island : {};\n  var profiles = [];\n  var list = Array.isArray(m.profiles) ? m.profiles : [];\n  for (var i = 0; i < list.length && i < MAX_PROFILES; i++) profiles.push(profileOf(list[i]));\n  return {\n    v: SAVE_VERSION,\n    family: { id: String(fam.id || newId('f')), created: Number(fam.created) || Date.now() },\n    profiles: profiles,\n    island: { done: Array.isArray(isl.done) ? isl.done.map(String) : [], placed: Array.isArray(isl.placed) ? isl.placed : [], activeId: String(isl.activeId || (profiles[0] ? profiles[0].id : '')) }\n  };\n}\nfunction toB64(str) {\n  var bytes = unescape(encodeURIComponent(str));\n  var b64 = typeof btoa === 'function' ? btoa(bytes) : Buffer.from(bytes, 'binary').toString('base64');\n  return b64.replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');\n}\nfunction fromB64(code) {\n  var b64 = String(code || '').trim().replace(/-/g, '+').replace(/_/g, '/');\n  while (b64.length % 4) b64 += '=';\n  var bytes = typeof atob === 'function' ? atob(b64) : Buffer.from(b64, 'base64').toString('binary');\n  return decodeURIComponent(escape(bytes));\n}\n\nvar model = modelOf(Inputs.model);\nvar packed = { v: SAVE_VERSION, f: [model.family.id, model.family.created], p: [], d: model.island.done, pl: model.island.placed, a: model.island.activeId };\nfor (var i = 0; i < model.profiles.length; i++) {\n  var p = model.profiles[i], tr = '';\n  for (var k = 0; k < TRICK_KEYS.length; k++) tr += p.tricks[TRICK_KEYS[k]] === 'bloom' ? 'b' : p.tricks[TRICK_KEYS[k]] === 'sprout' ? 's' : '-';\n  packed.p.push([p.id, p.name, p.band, p.lang, p.face, p.robot.name, p.robot.color, p.robot.eye, p.robot.hat, tr, p.stickers, p.hats]);\n}\nvar code = 'BG1.' + toB64(JSON.stringify(packed));\nOutputs.code = code;\nOutputs.length = code.length;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-code",
+          "displayName": "code",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-length",
+          "displayName": "length",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "encodesavecodeOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "code",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "length",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

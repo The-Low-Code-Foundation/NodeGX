@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5c653766-8493-5326-8983-a0522058feb3",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "predictendIn",
+      "fromProperty": "lang",
+      "toId": "predictendFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "predictendIn",
+      "fromProperty": "program",
+      "toId": "predictendFn",
+      "toProperty": "in-program"
+    },
+    {
+      "fromId": "predictendIn",
+      "fromProperty": "robotId",
+      "toId": "predictendFn",
+      "toProperty": "in-robotId"
+    },
+    {
+      "fromId": "predictendIn",
+      "fromProperty": "tapX",
+      "toId": "predictendFn",
+      "toProperty": "in-tapX"
+    },
+    {
+      "fromId": "predictendIn",
+      "fromProperty": "tapY",
+      "toId": "predictendFn",
+      "toProperty": "in-tapY"
+    },
+    {
+      "fromId": "predictendIn",
+      "fromProperty": "world",
+      "toId": "predictendFn",
+      "toProperty": "in-world"
+    },
+    {
+      "fromId": "predictendIn",
+      "fromProperty": "go",
+      "toId": "predictendFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "predictendFn",
+      "fromProperty": "out-asked",
+      "toId": "predictendOut",
+      "toProperty": "asked"
+    },
+    {
+      "fromId": "predictendFn",
+      "fromProperty": "out-bumps",
+      "toId": "predictendOut",
+      "toProperty": "bumps"
+    },
+    {
+      "fromId": "predictendFn",
+      "fromProperty": "out-d",
+      "toId": "predictendOut",
+      "toProperty": "d"
+    },
+    {
+      "fromId": "predictendFn",
+      "fromProperty": "out-hit",
+      "toId": "predictendOut",
+      "toProperty": "hit"
+    },
+    {
+      "fromId": "predictendFn",
+      "fromProperty": "out-known",
+      "toId": "predictendOut",
+      "toProperty": "known"
+    },
+    {
+      "fromId": "predictendFn",
+      "fromProperty": "out-ticks",
+      "toId": "predictendOut",
+      "toProperty": "ticks"
+    },
+    {
+      "fromId": "predictendFn",
+      "fromProperty": "out-x",
+      "toId": "predictendOut",
+      "toProperty": "x"
+    },
+    {
+      "fromId": "predictendFn",
+      "fromProperty": "out-y",
+      "toId": "predictendOut",
+      "toProperty": "y"
+    },
+    {
+      "fromId": "predictendFn",
+      "fromProperty": "success",
+      "toId": "predictendOut",
+      "toProperty": "ran"
+    }
+  ]
+}

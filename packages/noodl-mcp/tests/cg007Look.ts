@@ -1,0 +1,294 @@
+/**
+ * CG-007 — the look of Bot Garden, as the mockup draws it (`tpl-012-mockups/bot-garden.html`): warm paper, white cards
+ * with a soft shadow, pill buttons in four fills (leaf, coral, violet, quiet), Fredoka titles over Nunito, the owl's
+ * violet card, the four block colours. Ported, not restyled: every value below is the mockup's `:root` or one of its
+ * component rules, and the comment beside a value says which when it is not obvious.
+ *
+ * ## What lives where
+ *
+ * - **Tokens** ({@link GARDEN_TOKENS}) — the mockup's `:root`, written as project tokens over the Playful preset (which
+ *   brings Nunito). A colour the graph sets is `var(--token)`, never a hex (the template gate walks every parameter).
+ *   The four block colours and the owl's violet are tokens, and the kit is fed `var(--block-*)` on its colour ports, so
+ *   a token change re-skins the blocks too (AC4).
+ * - **One stylesheet** ({@link GARDEN_CSS}), in App's `CSS Definition` node, reached by `cssClassName`. A node writes its
+ *   own parameters INLINE, so a rule that must beat a parameter says `!important` (TPL-011's lesson), and every
+ *   positioning property of an overlay is `!important` too (a Group writes `position` inline, P95 R6).
+ * - **Sprites** — the mockup's `<symbol>`s (the islanders, the owl, the tulip, the tree, the house, the rock) as CSS
+ *   background images, and its button icons as CSS masks painted in `currentColor`. A graph node cannot hold an inline
+ *   `<svg>`, and an `Icon` component renders an empty span; a class can carry a picture.
+ * - **Fonts** — Fredoka bundled in `cg007Assets/noodl_modules/bot-garden-fonts` (OFL, beside its licence); Nunito from
+ *   the Playful preset's own module. Nothing is fetched (the mockup's Google Fonts link is the trap AC3 names).
+ *
+ * 🔴 NO BACKTICKS anywhere inside {@link GARDEN_CSS}: it is a template literal, and a backtick in one of its comments
+ * ends the string early and the error names something two files away (README §7).
+ *
+ * @module noodl-mcp/tests/cg007Look
+ */
+
+/** The preset the tokens sit on. Playful ships Nunito (P88 GAM-016), the mockup's body face. */
+export const GARDEN_PRESET = 'playful';
+
+/** The title face, bundled in `bot-garden-fonts` (a variable font, weights 300–700). */
+export const DISPLAY_FONT = 'Fredoka';
+
+/** The robot paints the My robot page offers: the mockup's `COLORS`, each a token so the swatch never carries a hex. */
+export const ROBOT_PAINTS: ReadonlyArray<{ token: string; hex: string; name: { en: string; fr: string } }> = [
+  { token: '--robot-coral', hex: '#FF7A59', name: { en: 'coral', fr: 'corail' } },
+  { token: '--robot-orange', hex: '#FFB347', name: { en: 'orange', fr: 'orange' } },
+  { token: '--robot-sun', hex: '#FFD166', name: { en: 'sunny', fr: 'soleil' } },
+  { token: '--robot-leaf', hex: '#3FA66B', name: { en: 'leaf', fr: 'feuille' } },
+  { token: '--robot-sky', hex: '#5FB4E8', name: { en: 'sky', fr: 'ciel' } },
+  { token: '--robot-violet', hex: '#8F6BFF', name: { en: 'violet', fr: 'violet' } },
+  { token: '--robot-pink', hex: '#F06BA8', name: { en: 'pink', fr: 'rose' } },
+  { token: '--robot-slate', hex: '#7A8CA3', name: { en: 'slate', fr: 'ardoise' } }
+];
+
+/**
+ * The mockup's `:root`, as tokens. The standard names (`--background`, `--foreground`, `--primary` …) carry the same
+ * values so the preset's own compositions and the contrast gate read the garden's colours, not Playful's.
+ */
+export const GARDEN_TOKENS: ReadonlyArray<{ name: string; value: string }> = [
+  // The standard roles, pointed at the mockup.
+  { name: '--background', value: '#FFF7E8' },
+  { name: '--foreground', value: '#2E2A3D' },
+  { name: '--surface', value: '#FFFFFF' },
+  { name: '--surface-raised', value: '#FFFFFF' },
+  { name: '--muted', value: '#FFF0D3' },
+  { name: '--muted-foreground', value: '#6E6784' },
+  { name: '--border', value: '#EBDFC4' },
+  { name: '--border-subtle', value: '#EBDFC4' },
+  { name: '--border-control', value: '#6E6784' },
+  { name: '--ring', value: '#5FB4E8' },
+  { name: '--primary', value: '#3FA66B' },
+  { name: '--primary-hover', value: '#37945F' },
+  { name: '--primary-foreground', value: '#FFFFFF' },
+  { name: '--secondary', value: '#FF7A59' },
+  { name: '--secondary-hover', value: '#F2694A' },
+  { name: '--secondary-foreground', value: '#FFFFFF' },
+  { name: '--accent', value: '#FFD166' },
+  { name: '--accent-foreground', value: '#2E2A3D' },
+  { name: '--font-sans', value: '"Nunito", system-ui, sans-serif' },
+  // The mockup's own names.
+  { name: '--paper', value: '#FFF7E8' },
+  { name: '--paper-2', value: '#FFF0D3' },
+  { name: '--card', value: '#FFFFFF' },
+  { name: '--ink', value: '#2E2A3D' },
+  { name: '--ink-2', value: '#6E6784' },
+  { name: '--line', value: '#EBDFC4' },
+  { name: '--leaf', value: '#3FA66B' },
+  { name: '--leaf-2', value: '#DDF3E4' },
+  { name: '--leaf-3', value: '#BFE8CC' },
+  { name: '--soil', value: '#C79A63' },
+  { name: '--sand', value: '#F1DFB5' },
+  { name: '--pond', value: '#7CC6F0' },
+  { name: '--pond-2', value: '#4FA7DC' },
+  { name: '--coral', value: '#FF7A59' },
+  { name: '--sun', value: '#FFD166' },
+  { name: '--violet', value: '#8F6BFF' },
+  { name: '--violet-2', value: '#EEE8FF' },
+  // The bubble's and the owl row's text on violet-2 (the mockup's #4A2FA6 and #6a5aa8).
+  { name: '--violet-ink', value: '#4A2FA6' },
+  { name: '--violet-meta', value: '#6A5AA8' },
+  { name: '--sky', value: '#5FB4E8' },
+  { name: '--ok', value: '#3FA66B' },
+  { name: '--off', value: '#CFC6B3' },
+  { name: '--on-fill', value: '#FFFFFF' },
+  // The four block colours (the mockup's --motion --action --control --ask). The kit is fed these by name.
+  { name: '--block-motion', value: '#4C8DFF' },
+  { name: '--block-action', value: '#3FA66B' },
+  { name: '--block-control', value: '#FF9F1C' },
+  { name: '--block-ask', value: '#8F6BFF' },
+  { name: '--block-run', value: '#FFD166' },
+  // The tidy box, the repeat's ground, a watered tulip's dot, the pad's water key (mockup literals, named once).
+  { name: '--tidy', value: '#FFF4E0' },
+  { name: '--tidy-edge', value: '#FFD9A3' },
+  { name: '--rep', value: '#FFF0DA' },
+  { name: '--tulip-dot', value: '#FFD9E2' },
+  { name: '--water-key', value: '#E4F4FF' },
+  { name: '--stage-top', value: '#FFF3DE' },
+  { name: '--stage-bottom', value: '#FFE7BE' },
+  { name: '--sea-top', value: '#9FD9F3' },
+  { name: '--sea-bottom', value: '#7CC6F0' },
+  { name: '--shadow-soft', value: '0 6px 18px rgba(72, 52, 20, 0.10)' },
+  { name: '--shadow-key', value: '0 4px 10px rgba(0, 0, 0, 0.15)' },
+  { name: '--shadow-press', value: 'inset 0 -4px 0 rgba(0, 0, 0, 0.15)' },
+  { name: '--shadow-block', value: 'inset 0 -3px 0 rgba(0, 0, 0, 0.18)' },
+  { name: '--world-edge', value: '#A8D9B4' },
+  { name: '--radius-card', value: '18px' },
+  { name: '--radius-bar', value: '22px' },
+  ...ROBOT_PAINTS.map((p) => ({ name: p.token, value: p.hex }))
+];
+
+/** A token's value, for the gate and for the contrast table. */
+export function tokenValue(name: string): string {
+  const found = GARDEN_TOKENS.find((t) => t.name === name);
+  if (!found) throw new Error(`no garden token ${name}`);
+  return found.value;
+}
+
+// ── The sprites: the mockup's <symbol>s, verbatim, as data URIs ──────────────
+
+const svg = (viewBox: string, body: string) => `<svg xmlns='http://www.w3.org/2000/svg' viewBox='${viewBox}'>${body}</svg>`;
+const uri = (s: string) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
+
+/** Pictures drawn as a background (their own colours). */
+export const SPRITES: Readonly<Record<string, string>> = {
+  tulip: svg('0 0 48 64', "<path d='M24 62V30' stroke='#3FA66B' stroke-width='4' stroke-linecap='round'/><path d='M24 48c-6-2-10-8-12-14 6 0 11 4 12 8-1-4 6-8 12-8-2 6-6 12-12 14z' fill='#3FA66B'/><path d='M10 12c0 14 6 22 14 24 8-2 14-10 14-24-4 4-8 6-14 2-6 4-10 2-14-2z' fill='#FF6B9A'/><path d='M24 14v22' stroke='#E04E7E' stroke-width='2'/>"),
+  tree: svg('0 0 64 64', "<rect x='28' y='40' width='8' height='18' rx='3' fill='#A9773F'/><circle cx='32' cy='26' r='16' fill='#3E9B62'/><circle cx='20' cy='34' r='11' fill='#48AF70'/><circle cx='44' cy='34' r='11' fill='#48AF70'/><circle cx='26' cy='20' r='3' fill='#FFD166'/><circle cx='40' cy='30' r='3' fill='#FFD166'/>"),
+  house: svg('0 0 64 64', "<path d='M8 30L32 8l24 22v28H8z' fill='#FFE3B3'/><path d='M4 32L32 6l28 26-4 4L32 14 8 36z' fill='#E86A5E'/><rect x='26' y='38' width='12' height='18' rx='2' fill='#8B5A2B'/><rect x='12' y='36' width='9' height='9' rx='2' fill='#7CC6F0'/><rect x='43' y='36' width='9' height='9' rx='2' fill='#7CC6F0'/>"),
+  granny: svg('0 0 64 64', "<circle cx='32' cy='30' r='18' fill='#F7D3B5'/><path d='M14 26c0-14 36-14 36 0 0 4-2 6-4 6-4-8-24-8-28 0-2 0-4-2-4-6z' fill='#E9E4EF'/><circle cx='25' cy='30' r='2.5' fill='#2E2A3D'/><circle cx='39' cy='30' r='2.5' fill='#2E2A3D'/><circle cx='25' cy='30' r='5' fill='none' stroke='#2E2A3D' stroke-width='1.5'/><circle cx='39' cy='30' r='5' fill='none' stroke='#2E2A3D' stroke-width='1.5'/><path d='M30 30h4' stroke='#2E2A3D' stroke-width='1.5'/><path d='M26 38q6 5 12 0' stroke='#C0574A' stroke-width='2' fill='none' stroke-linecap='round'/><path d='M14 62c2-12 34-12 36 0z' fill='#8F6BFF'/>"),
+  cat: svg('0 0 64 64', "<path d='M14 30l4-16 10 8h8l10-8 4 16z' fill='#F3B76A'/><ellipse cx='32' cy='38' rx='18' ry='16' fill='#F3B76A'/><circle cx='25' cy='36' r='3' fill='#2E2A3D'/><circle cx='39' cy='36' r='3' fill='#2E2A3D'/><path d='M29 43h6l-3 3z' fill='#E06B8A'/><path d='M10 40h10M10 46h10M44 40h10M44 46h10' stroke='#2E2A3D' stroke-width='1.5'/>"),
+  postie: svg('0 0 64 64', "<circle cx='32' cy='28' r='16' fill='#C98A5E'/><path d='M14 24c2-12 34-12 36 0z' fill='#3E63C8'/><rect x='10' y='20' width='44' height='6' rx='3' fill='#3E63C8'/><circle cx='26' cy='30' r='2.5' fill='#2E2A3D'/><circle cx='38' cy='30' r='2.5' fill='#2E2A3D'/><path d='M27 37q5 4 10 0' stroke='#7A3F2D' stroke-width='2' fill='none' stroke-linecap='round'/><path d='M14 62c2-12 34-12 36 0z' fill='#3E63C8'/>"),
+  owl: svg('0 0 64 64', "<ellipse cx='32' cy='36' rx='22' ry='24' fill='#8F6BFF'/><path d='M12 18l8 8h24l8-8-6 2-4-4-6 4-6-4-4 4z' fill='#8F6BFF'/><ellipse cx='32' cy='42' rx='14' ry='14' fill='#EEE8FF'/><circle cx='24' cy='32' r='8' fill='#fff'/><circle cx='40' cy='32' r='8' fill='#fff'/><circle cx='25' cy='33' r='4' fill='#2E2A3D'/><circle cx='39' cy='33' r='4' fill='#2E2A3D'/><path d='M32 38l-4 5h8z' fill='#FFB347'/><path d='M26 58l-3 4M38 58l3 4' stroke='#FFB347' stroke-width='3' stroke-linecap='round'/>"),
+  rock: svg('0 0 64 64', "<path d='M12 48l6-18 14-8 16 6 6 16-8 6H20z' fill='#9C9AA6'/><path d='M20 40l6-10 12-2 8 8-4 8H24z' fill='#B7B5C2'/>")
+};
+
+/** Icons painted in the button's own text colour (a mask), the mockup's `i-*` symbols. */
+export const ICONS: Readonly<Record<string, string>> = {
+  fwd: svg('0 0 24 24', "<path d='M12 4l7 8h-4v8H9v-8H5z'/>"),
+  left: svg('0 0 24 24', "<path d='M9 6L3 11l6 5v-3h6a4 4 0 010 8h-2v-3h2a1 1 0 000-2H9v3z' transform='scale(1,-1) translate(0,-24)'/>"),
+  right: svg('0 0 24 24', "<path d='M15 6l6 5-6 5v-3H9a4 4 0 000 8h2v-3H9a1 1 0 010-2h6v3z' transform='scale(1,-1) translate(0,-24)'/>"),
+  water: svg('0 0 24 24', "<path d='M12 3s6 7 6 11a6 6 0 01-12 0c0-4 6-11 6-11z'/>"),
+  play: svg('0 0 24 24', "<path d='M7 4l13 8-13 8z'/>"),
+  step: svg('0 0 24 24', "<path d='M5 4l10 8-10 8z'/><rect x='17' y='4' width='3' height='16'/>"),
+  rec: svg('0 0 24 24', "<circle cx='12' cy='12' r='7'/>"),
+  reset: svg('0 0 24 24', "<path d='M12 5a7 7 0 106.3 4H16l4-5 2 5h-1.6A9 9 0 1112 3z'/>"),
+  tidy: svg('0 0 24 24', "<path d='M4 6h16v3H4zm0 5h10v3H4zm0 5h6v3H4z'/><path d='M17 12l4 4-4 4v-3h-3v-2h3z'/>"),
+  predict: svg('0 0 24 24', "<path d='M12 2a7 7 0 017 7c0 5-7 13-7 13S5 14 5 9a7 7 0 017-7zm0 4a3 3 0 100 6 3 3 0 000-6z'/>"),
+  owl: svg('0 0 64 64', "<ellipse cx='32' cy='36' rx='22' ry='24'/><path d='M12 18l8 8h24l8-8-6 2-4-4-6 4-6-4-4 4z'/>")
+};
+
+const spriteRules = Object.entries(SPRITES)
+  .map(([name, s]) => `.bg-sp-${name} { background-image: ${uri(s)}; background-repeat: no-repeat; background-position: center; background-size: 78% 78%; }`)
+  .join('\n');
+const iconRules = Object.entries(ICONS)
+  .map(([name, s]) => `.bg-i-${name}::before { content: ''; display: inline-block; flex: none; width: 20px; height: 20px; margin-right: 8px; background-color: currentColor; -webkit-mask: ${uri(s)} center / contain no-repeat; mask: ${uri(s)} center / contain no-repeat; }`)
+  .join('\n');
+
+/** Every class the graph names, in one sheet. Colours are `var(--token)`; the sprites keep their own paint. */
+export const GARDEN_CSS = `/* Bot Garden, the look (P105 CG-007). The mockup's rules, ported; prefixed bg- so nothing collides with a kit's gd- classes. */
+html, body { background: var(--paper); }
+body { margin: 0; color: var(--ink); font-family: 'Nunito', system-ui, sans-serif; font-size: 16px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: 'Fredoka', 'Nunito', sans-serif; letter-spacing: 0.005em; text-wrap: balance; }
+button, input { font-family: inherit; }
+button:focus-visible, input:focus-visible, .bg-press:focus-visible { outline: 3px solid var(--sky) !important; outline-offset: 2px; }
+
+/* The top bar: one white rounded card (the mockup's .top). */
+.bg-top { box-shadow: var(--shadow-soft); border-radius: var(--radius-bar); }
+.bg-brand { font-family: 'Fredoka', sans-serif; font-weight: 700; }
+.bg-brand-mark { width: 38px; min-width: 38px; height: 38px; }
+.bg-tabs { margin-left: auto; }
+.bg-press { cursor: pointer; user-select: none; transition: transform 100ms, filter 100ms; }
+.bg-press:active { transform: scale(0.97); }
+.bg-tab { border-radius: 999px; }
+.bg-seg { border-radius: 999px; }
+.bg-seg-btn { border-radius: 999px; }
+.bg-who-face { width: 34px; min-width: 34px; height: 34px; border-radius: 50%; }
+
+/* Page heads (the mockup's .head, .eyebrow). */
+.bg-eyebrow { text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* Buttons: pills with a fill, never an outline (AC2). The fill and the ink are node ports; the class is the shape, the press and the icon. */
+.bg-btn { cursor: pointer; display: inline-flex !important; align-items: center; white-space: nowrap; transition: transform 100ms, filter 100ms; }
+.bg-btn:active { transform: scale(0.97); }
+.bg-btn:hover { filter: brightness(1.05); }
+.bg-btn[disabled], .bg-btn:disabled { opacity: 0.45; cursor: default; }
+${iconRules}
+
+/* Cards (the mockup's .panel). */
+.bg-panel { box-shadow: var(--shadow-soft); }
+.bg-grow { flex: 1 1 0 !important; min-width: 0 !important; width: auto !important; }
+.bg-face { border-radius: 50%; background-color: var(--paper-2); }
+
+/* The workshop: world and steps side by side, one column under 980px (the mockup's .ws). */
+.bg-ws { display: grid !important; grid-template-columns: minmax(0, 1fr) 400px; gap: 16px; align-items: start; }
+@media (max-width: 980px) { .bg-ws { grid-template-columns: minmax(0, 1fr); } }
+.bg-stage { position: relative !important; width: 100%; max-width: 640px; margin: 0 auto; }
+.bg-stage .gd-world { border: 4px solid var(--world-edge); border-radius: 16px; }
+.bg-rec { position: absolute !important; left: 10px !important; top: 10px !important; z-index: 6; box-shadow: var(--shadow-soft); pointer-events: none; }
+.bg-rec::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--coral); margin-right: 8px; animation: bg-blink 1s infinite; }
+@keyframes bg-blink { 50% { opacity: 0.2; } }
+/* The pad, over the world's corner (the mockup's .pad), each key 56 px for a finger (AC5). */
+.bg-pad { position: absolute !important; right: 10px !important; bottom: 10px !important; z-index: 6; display: grid !important; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(2, 56px); gap: 6px; }
+.bg-key { width: 56px !important; height: 56px !important; min-width: 56px; min-height: 56px; border-radius: 14px; box-shadow: var(--shadow-key); display: grid !important; place-items: center; cursor: pointer; font-size: 0 !important; }
+.bg-key::before { margin: 0 !important; width: 26px !important; height: 26px !important; }
+.bg-key:active { transform: scale(0.94); }
+.bg-key-fwd { grid-column: 2; grid-row: 1; }
+.bg-key-left { grid-column: 1; grid-row: 2; }
+.bg-key-water { grid-column: 2; grid-row: 2; color: var(--pond-2); background-color: var(--water-key) !important; }
+.bg-key-right { grid-column: 3; grid-row: 2; }
+.bg-controls { margin-top: 12px; }
+.bg-ask-push { margin-left: auto !important; }
+@media (max-width: 480px) { .bg-ask-push { margin-left: 0 !important; } }
+
+/* The owl row (the mockup's .owl). */
+.bg-owl { display: grid !important; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; align-items: start; }
+.bg-owl-pic { width: 64px; height: 64px; }
+.bg-owl-meta::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); margin-right: 6px; }
+
+/* The steps (the mockup's .script). The block list scrolls in its own box (AC4). */
+.bg-blocks-box { max-height: min(52vh, 460px); overflow-y: auto !important; overscroll-behavior: contain; }
+@media (max-width: 980px) { .bg-blocks-box { max-height: 38vh; } }
+.bg-tidy { animation: bg-pop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+/* The win card: fixed, centred, over whatever is scrolled (AC7; P95 R6: every positioning property !important). */
+.bg-win { position: fixed !important; left: 0 !important; right: 0 !important; top: 0 !important; bottom: 0 !important; width: auto !important; height: auto !important; z-index: 50 !important; display: grid !important; place-items: center; background: color-mix(in srgb, var(--paper) 72%, transparent); backdrop-filter: blur(2px); padding: 16px; }
+.bg-win-card { box-shadow: var(--shadow-soft); animation: bg-pop 350ms cubic-bezier(0.34, 1.56, 0.64, 1) both; max-width: 380px; }
+@keyframes bg-pop { from { transform: scale(0.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.bg-reward { border-radius: 999px; }
+
+/* The island (the mockup's .island, .quest, .tag). */
+.bg-island { display: grid !important; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
+@media (max-width: 980px) { .bg-island { grid-template-columns: minmax(0, 1fr); } }
+.bg-map .gd-world { border-radius: 22px; }
+.bg-quest { box-shadow: var(--shadow-soft); display: grid !important; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; align-items: center; cursor: pointer; }
+.bg-quest-done { opacity: 0.7; }
+.bg-tag { border-radius: 999px; }
+.bg-tag-motion { background-color: var(--block-motion); }
+.bg-tag-control { background-color: var(--block-control); }
+.bg-tag-ask { background-color: var(--block-ask); }
+
+/* My robot (the mockup's .robo, .stage, .sw, .hats). */
+.bg-robo { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+@media (max-width: 820px) { .bg-robo { grid-template-columns: minmax(0, 1fr); } }
+.bg-robo-stage { background: linear-gradient(180deg, var(--stage-top), var(--stage-bottom)); border-radius: 22px; aspect-ratio: 1 / 1; max-height: 520px; display: grid !important; place-items: center; }
+.bg-robo-stage .gd-world { width: 62% !important; background: transparent; }
+.bg-robo-stage .gd-cell { background: transparent !important; }
+.bg-swatch { width: 44px !important; height: 44px !important; min-width: 44px; border-radius: 50%; box-shadow: var(--shadow-press); cursor: pointer; }
+.bg-swatch-on { outline: 4px solid var(--ink); outline-offset: 3px; }
+.bg-chip { border-radius: 999px; cursor: pointer; }
+.bg-chip-lock { opacity: 0.5; cursor: default; }
+.bg-sticker { box-shadow: var(--shadow-soft); border-radius: 12px; }
+
+/* Skills (the mockup's .path, .notion). */
+.bg-path { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.bg-notion { box-shadow: var(--shadow-soft); }
+.bg-notion-seed { opacity: 0.75; }
+.bg-blk { border-radius: 12px; box-shadow: var(--shadow-block); }
+.bg-blk-motion { background-color: var(--block-motion); }
+.bg-blk-action { background-color: var(--block-action); }
+.bg-blk-control { background-color: var(--block-control); }
+.bg-blk-ask { background-color: var(--block-ask); }
+.bg-st-bloom { color: var(--leaf); }
+.bg-st-sprout { color: var(--block-control); }
+.bg-st-seed { color: var(--ink-2); }
+.bg-prog { border-top: 1px solid var(--line); padding-top: 8px; margin-top: auto; }
+.bg-caps { text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* Grown-ups (the mockup's .gu, .model, .out). */
+.bg-gu { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; align-items: start; }
+.bg-dot { width: 10px; min-width: 10px; height: 10px; border-radius: 50%; }
+.bg-li::before { content: '•'; margin-right: 8px; color: var(--ink-2); }
+.bg-code { font-family: ui-monospace, Menlo, monospace; word-break: break-all; }
+
+/* Profiles. */
+.bg-profile { box-shadow: var(--shadow-soft); cursor: pointer; }
+.bg-profile-on { outline: 3px solid var(--leaf); outline-offset: 2px; }
+
+${spriteRules}
+
+/* Reduced motion: the mockup's own rule. Every animation and transition stops; the tulip still reads by opacity and pose. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+`;

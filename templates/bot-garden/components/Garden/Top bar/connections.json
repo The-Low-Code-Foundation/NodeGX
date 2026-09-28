@@ -1,0 +1,325 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "44726b7f-fb62-5606-84cd-8c1075bd9764",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "brIn",
+      "fromProperty": "words",
+      "toId": "brT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "lang",
+      "toId": "brT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "botName",
+      "toId": "brT",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "page",
+      "toId": "brLit",
+      "toProperty": "page"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "band",
+      "toId": "brLit",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "lang",
+      "toId": "brLit",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "showTabs",
+      "toId": "brTabs",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "showBand",
+      "toId": "brBandSeg",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "name",
+      "toId": "brWhoName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "face",
+      "toId": "brFace",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "brT",
+      "fromProperty": "brand",
+      "toId": "brName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "brT",
+      "fromProperty": "navIsland",
+      "toId": "brTab_island",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "brLit",
+      "fromProperty": "islandOn",
+      "toId": "brTab_island",
+      "toProperty": "selected"
+    },
+    {
+      "fromId": "brTab_island",
+      "fromProperty": "clicked",
+      "toId": "brGo_island",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "brT",
+      "fromProperty": "navWorkshop",
+      "toId": "brTab_workshop",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "brLit",
+      "fromProperty": "workshopOn",
+      "toId": "brTab_workshop",
+      "toProperty": "selected"
+    },
+    {
+      "fromId": "brTab_workshop",
+      "fromProperty": "clicked",
+      "toId": "brGo_workshop",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "brT",
+      "fromProperty": "navRobot",
+      "toId": "brTab_robot",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "brLit",
+      "fromProperty": "robotOn",
+      "toId": "brTab_robot",
+      "toProperty": "selected"
+    },
+    {
+      "fromId": "brTab_robot",
+      "fromProperty": "clicked",
+      "toId": "brGo_robot",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "brT",
+      "fromProperty": "navSkills",
+      "toId": "brTab_skills",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "brLit",
+      "fromProperty": "skillsOn",
+      "toId": "brTab_skills",
+      "toProperty": "selected"
+    },
+    {
+      "fromId": "brTab_skills",
+      "fromProperty": "clicked",
+      "toId": "brGo_skills",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "brT",
+      "fromProperty": "navGrown",
+      "toId": "brTab_grown",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "brLit",
+      "fromProperty": "grownOn",
+      "toId": "brTab_grown",
+      "toProperty": "selected"
+    },
+    {
+      "fromId": "brTab_grown",
+      "fromProperty": "clicked",
+      "toId": "brGo_grown",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "brLit",
+      "fromProperty": "band1On",
+      "toId": "brBand1",
+      "toProperty": "isOn"
+    },
+    {
+      "fromId": "brLit",
+      "fromProperty": "band2On",
+      "toId": "brBand2",
+      "toProperty": "isOn"
+    },
+    {
+      "fromId": "brLit",
+      "fromProperty": "enOn",
+      "toId": "brEn",
+      "toProperty": "isOn"
+    },
+    {
+      "fromId": "brLit",
+      "fromProperty": "frOn",
+      "toId": "brFr",
+      "toProperty": "isOn"
+    },
+    {
+      "fromId": "brWho",
+      "fromProperty": "onClick",
+      "toId": "brGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "model",
+      "toId": "brSetEn",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "profileId",
+      "toId": "brSetEn",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "brSetEn",
+      "fromProperty": "model",
+      "toId": "brOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "brSetEn",
+      "fromProperty": "ran",
+      "toId": "brOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "model",
+      "toId": "brSetFr",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "profileId",
+      "toId": "brSetFr",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "brSetFr",
+      "fromProperty": "model",
+      "toId": "brOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "brSetFr",
+      "fromProperty": "ran",
+      "toId": "brOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "model",
+      "toId": "brSetB1",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "profileId",
+      "toId": "brSetB1",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "brSetB1",
+      "fromProperty": "model",
+      "toId": "brOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "brSetB1",
+      "fromProperty": "ran",
+      "toId": "brOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "model",
+      "toId": "brSetB2",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "profileId",
+      "toId": "brSetB2",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "brSetB2",
+      "fromProperty": "model",
+      "toId": "brOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "brSetB2",
+      "fromProperty": "ran",
+      "toId": "brOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "brEn",
+      "fromProperty": "clicked",
+      "toId": "brSetEn",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "brEn",
+      "fromProperty": "clicked",
+      "toId": "brOut",
+      "toProperty": "pickedEn"
+    },
+    {
+      "fromId": "brFr",
+      "fromProperty": "clicked",
+      "toId": "brSetFr",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "brFr",
+      "fromProperty": "clicked",
+      "toId": "brOut",
+      "toProperty": "pickedFr"
+    },
+    {
+      "fromId": "brBand1",
+      "fromProperty": "clicked",
+      "toId": "brSetB1",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "brBand2",
+      "fromProperty": "clicked",
+      "toId": "brSetB2",
+      "toProperty": "go"
+    }
+  ]
+}

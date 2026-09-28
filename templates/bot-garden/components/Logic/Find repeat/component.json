@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "64718844-2dc2-55e0-8e25-4d9e196e7be7",
+  "name": "Find repeat",
+  "path": "/Logic/Find repeat",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The best repetition in a recording, and whether to offer the fold. Runs when an input changes; Ran after each run."
+}

@@ -1,0 +1,138 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c36f08fc-5600-526d-8fb6-14bde310b673",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hintlineIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hints",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "key",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "vars",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hintlineFn",
+      "type": "JavaScriptFunction",
+      "label": "Hint line",
+      "parameters": {
+        "functionScript": "\nvar rows = Array.isArray(Inputs.hints) ? Inputs.hints : [];\nvar key = String(Inputs.key || 'hintStart');\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar vars = Inputs.vars && typeof Inputs.vars === 'object' ? Inputs.vars : {};\nvar name = String(Inputs.botName || 'Pip');\nvar row = null;\nfor (var i = 0; i < rows.length; i++) if (rows[i].key === key) row = rows[i];\nvar text = row ? String(row[lang] || row.en || '') : '';\ntext = text.split('{b}').join(name);\nfor (var k in vars) text = text.split('{' + k + '}').join(String(vars[k]));\nOutputs.text = text;\nOutputs.found = !!row;\nOutputs.key = key;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-hints",
+          "displayName": "hints",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-key",
+          "displayName": "key",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-vars",
+          "displayName": "vars",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-found",
+          "displayName": "found",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-key",
+          "displayName": "key",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "hintlineOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "found",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "key",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "text",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

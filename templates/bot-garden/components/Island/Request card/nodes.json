@@ -1,0 +1,290 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "539fecf6-5b61-5813-80ba-dfdbd55f1fc5",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "qcIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "who",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "trick",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "faceClass",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tagClass",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "isDone",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "doneWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "qcCard",
+      "type": "Group",
+      "label": "The card",
+      "children": [
+        "qcFace",
+        "qcText",
+        "qcSide"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--card)",
+        "borderRadius": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "cssClassName": "bg-quest bg-press"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "qcFace",
+      "type": "Group",
+      "label": "The islander",
+      "parent": "qcCard",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 52,
+          "unit": "px"
+        },
+        "height": {
+          "value": 52,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "qcText",
+      "type": "Group",
+      "label": "Who and what",
+      "parent": "qcCard",
+      "children": [
+        "qcWho",
+        "qcTitle"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-0-5)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "qcWho",
+      "type": "Text",
+      "label": "Who asks",
+      "parent": "qcText",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 17,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "qcTitle",
+      "type": "Text",
+      "label": "What they ask",
+      "parent": "qcText",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "qcSide",
+      "type": "Group",
+      "label": "The trick, or done",
+      "parent": "qcCard",
+      "children": [
+        "qcTag",
+        "qcDone"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "qcTag",
+      "type": "Group",
+      "label": "The trick",
+      "parent": "qcSide",
+      "children": [
+        "qcTagText"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "paddingLeft": {
+          "value": 9,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 9,
+          "unit": "px"
+        },
+        "cssClassName": "bg-tag bg-tag-control"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "qcTagText",
+      "type": "Text",
+      "label": "The trick",
+      "parent": "qcTag",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--on-fill)"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "qcDone",
+      "type": "Text",
+      "label": "Done",
+      "parent": "qcSide",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--leaf)",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "qcIsDone",
+      "type": "Condition",
+      "label": "Done already?",
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "qcStates",
+      "type": "States",
+      "label": "Open or done",
+      "parameters": {
+        "states": "open,done",
+        "values": "tagShown,doneShown,opacity",
+        "useTransitions": false,
+        "type-tagShown": "boolean",
+        "value-open-tagShown": true,
+        "value-done-tagShown": false,
+        "type-doneShown": "boolean",
+        "value-open-doneShown": false,
+        "value-done-doneShown": true,
+        "type-opacity": "number",
+        "value-open-opacity": 1,
+        "value-done-opacity": 0.7
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "qcOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "chosen",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "qcCard"
+  ]
+}

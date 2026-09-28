@@ -1,0 +1,186 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3e01f9a9-0f70-5fdf-8d6b-37c28a3e4084",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "barstateIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "page",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "barstateFn",
+      "type": "JavaScriptFunction",
+      "label": "Bar state",
+      "parameters": {
+        "functionScript": "\nvar page = String(Inputs.page || '');\nvar band = Number(Inputs.band) === 1 ? 1 : 2;\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nOutputs.islandOn = page === 'island';\nOutputs.workshopOn = page === 'workshop';\nOutputs.robotOn = page === 'robot';\nOutputs.skillsOn = page === 'skills';\nOutputs.grownOn = page === 'grown';\nOutputs.band1On = band === 1;\nOutputs.band2On = band === 2;\nOutputs.enOn = lang === 'en';\nOutputs.frOn = lang === 'fr';\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-page",
+          "displayName": "page",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-band",
+          "displayName": "band",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-islandOn",
+          "displayName": "islandOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-workshopOn",
+          "displayName": "workshopOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-robotOn",
+          "displayName": "robotOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-skillsOn",
+          "displayName": "skillsOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-grownOn",
+          "displayName": "grownOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-band1On",
+          "displayName": "band1On",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-band2On",
+          "displayName": "band2On",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-enOn",
+          "displayName": "enOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-frOn",
+          "displayName": "frOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "barstateOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "band1On",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "band2On",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "enOn",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "frOn",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "grownOn",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "islandOn",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "robotOn",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "skillsOn",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "workshopOn",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

@@ -1,0 +1,162 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ce5fbd53-d148-58fa-89ea-7c8caecf2714",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "olivestatusIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "nonce",
+          "plug": "output",
+          "type": "number"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "olivestatusFn",
+      "type": "JavaScriptFunction",
+      "label": "Olive status",
+      "parameters": {
+        "functionScript": "\nvar out = { running: false, model: 'none', passed: 0, total: 0, hasExam: false };\ntry {\n  if (typeof fetch === 'function') {\n    var ctl = typeof AbortController === 'function' ? new AbortController() : null;\n    var timer = ctl ? setTimeout(function () { ctl.abort(); }, 4000) : null;\n    var res = await fetch('/__garden/olive/status', ctl ? { signal: ctl.signal, cache: 'no-store' } : { cache: 'no-store' });\n    if (timer) clearTimeout(timer);\n    if (res && res.ok) {\n      var s = await res.json();\n      out.model = String(s && s.model || 'none');\n      out.running = out.model === 'ready' || out.model === 'loading' || out.model === 'unloaded';\n      if (s && s.exam) { out.hasExam = true; out.passed = Number(s.exam.passed) || 0; out.total = (Number(s.exam.passed) || 0) + (Number(s.exam.failed) || 0); }\n    }\n  }\n} catch (e) { out.running = false; }\nOutputs.running = out.running;\nOutputs.stopped = !out.running;\nOutputs.model = out.model;\nOutputs.hasExam = out.hasExam;\nOutputs.noExam = !out.hasExam;\nOutputs.passed = out.passed;\nOutputs.total = out.total;\nOutputs.examVars = { p: out.passed, t: out.total };\nOutputs.checked = Inputs.nonce;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-nonce",
+          "displayName": "nonce",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-running",
+          "displayName": "running",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stopped",
+          "displayName": "stopped",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-model",
+          "displayName": "model",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasExam",
+          "displayName": "hasExam",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-noExam",
+          "displayName": "noExam",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-passed",
+          "displayName": "passed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-total",
+          "displayName": "total",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-examVars",
+          "displayName": "examVars",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-checked",
+          "displayName": "checked",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "olivestatusOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "checked",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "examVars",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hasExam",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "noExam",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "passed",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "running",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "stopped",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "total",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

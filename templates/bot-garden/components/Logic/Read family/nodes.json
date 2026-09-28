@@ -1,0 +1,318 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "50154228-717d-55ca-8d4d-2f2cbfef4702",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "readfamilyIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "fallbackLang",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "readfamilyFn",
+      "type": "JavaScriptFunction",
+      "label": "Read family",
+      "parameters": {
+        "functionScript": "\nvar SAVE_VERSION = 2;\nvar MAX_PROFILES = 6;\nvar TRICK_KEYS = [\"n1\",\"n2\",\"n3\",\"n4\",\"n5\",\"n6\",\"n7\"];\nfunction newId(prefix) { return prefix + Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36); }\nfunction tricksOf(raw) {\n  var out = {};\n  for (var i = 0; i < TRICK_KEYS.length; i++) { var v = raw && raw[TRICK_KEYS[i]]; out[TRICK_KEYS[i]] = v === 'bloom' || v === 'sprout' ? v : (TRICK_KEYS[i] === 'n1' ? 'sprout' : 'seed'); }\n  return out;\n}\nfunction profileOf(raw) {\n  var p = raw && typeof raw === 'object' ? raw : {};\n  var robot = p.robot && typeof p.robot === 'object' ? p.robot : {};\n  return {\n    id: String(p.id || newId('p')), name: String(p.name || '').slice(0, 24), band: Number(p.band) === 1 ? 1 : 2, lang: p.lang === 'fr' ? 'fr' : 'en',\n    face: String(p.face || ''),\n    robot: { name: String(robot.name || 'Pip').slice(0, 16), color: String(robot.color || '#FF7A59'), eye: String(robot.eye || 'round'), hat: String(robot.hat || 'none') },\n    tricks: tricksOf(p.tricks), stickers: Array.isArray(p.stickers) ? p.stickers.map(String) : [], hats: Array.isArray(p.hats) ? p.hats.map(String) : []\n  };\n}\nfunction modelOf(raw) {\n  var m = raw && typeof raw === 'object' ? raw : {};\n  var fam = m.family && typeof m.family === 'object' ? m.family : {};\n  var isl = m.island && typeof m.island === 'object' ? m.island : {};\n  var profiles = [];\n  var list = Array.isArray(m.profiles) ? m.profiles : [];\n  for (var i = 0; i < list.length && i < MAX_PROFILES; i++) profiles.push(profileOf(list[i]));\n  return {\n    v: SAVE_VERSION,\n    family: { id: String(fam.id || newId('f')), created: Number(fam.created) || Date.now() },\n    profiles: profiles,\n    island: { done: Array.isArray(isl.done) ? isl.done.map(String) : [], placed: Array.isArray(isl.placed) ? isl.placed : [], activeId: String(isl.activeId || (profiles[0] ? profiles[0].id : '')) }\n  };\n}\nfunction toB64(str) {\n  var bytes = unescape(encodeURIComponent(str));\n  var b64 = typeof btoa === 'function' ? btoa(bytes) : Buffer.from(bytes, 'binary').toString('base64');\n  return b64.replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');\n}\nfunction fromB64(code) {\n  var b64 = String(code || '').trim().replace(/-/g, '+').replace(/_/g, '/');\n  while (b64.length % 4) b64 += '=';\n  var bytes = typeof atob === 'function' ? atob(b64) : Buffer.from(b64, 'base64').toString('binary');\n  return decodeURIComponent(escape(bytes));\n}\n\nvar raw = Inputs.model && typeof Inputs.model === 'object' ? Inputs.model : null;\nvar model = modelOf(raw || {});\nvar active = null;\nfor (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === model.island.activeId) active = model.profiles[i];\nvar fallback = String(Inputs.fallbackLang) === 'fr' ? 'fr' : 'en';\nOutputs.hasProfile = !!active;\nOutputs.profileId = active ? active.id : '';\nOutputs.name = active ? active.name : '';\nOutputs.band = active ? active.band : 2;\nOutputs.older = active ? active.band === 2 : true;\nOutputs.younger = !!active && active.band === 1;\nOutputs.lang = active ? active.lang : fallback;\nOutputs.face = active ? (active.face || active.name) : '';\nOutputs.botName = active ? active.robot.name : 'Pip';\nOutputs.color = active ? active.robot.color : '#FF7A59';\nOutputs.eye = active ? active.robot.eye : 'round';\nOutputs.hat = active ? active.robot.hat : 'none';\nOutputs.hats = active ? active.hats.slice() : [];\nOutputs.stickers = active ? active.stickers.slice() : [];\nOutputs.tricks = active ? JSON.parse(JSON.stringify(active.tricks)) : {};\nOutputs.done = model.island.done.slice();\nvar rows = [];\nfor (var j = 0; j < model.profiles.length; j++) {\n  var p = model.profiles[j];\n  rows.push({ id: p.id, name: p.name, face: p.face || p.name, band: p.band === 1 ? '7–9' : '10–12', robot: p.robot.name, selected: p.id === model.island.activeId });\n}\nOutputs.profiles = rows;\nOutputs.count = rows.length;\nOutputs.canAdd = rows.length < MAX_PROFILES;\nOutputs.isEmpty = rows.length === 0;\nOutputs.model = model;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-fallbackLang",
+          "displayName": "fallbackLang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-hasProfile",
+          "displayName": "hasProfile",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-profileId",
+          "displayName": "profileId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-band",
+          "displayName": "band",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-older",
+          "displayName": "older",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-younger",
+          "displayName": "younger",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lang",
+          "displayName": "lang",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-face",
+          "displayName": "face",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-botName",
+          "displayName": "botName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-color",
+          "displayName": "color",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-eye",
+          "displayName": "eye",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hat",
+          "displayName": "hat",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hats",
+          "displayName": "hats",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stickers",
+          "displayName": "stickers",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tricks",
+          "displayName": "tricks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-profiles",
+          "displayName": "profiles",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-canAdd",
+          "displayName": "canAdd",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isEmpty",
+          "displayName": "isEmpty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-model",
+          "displayName": "model",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "readfamilyOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "band",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "botName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "canAdd",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "color",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "eye",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "face",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hasProfile",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "hat",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hats",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "isEmpty",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "lang",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "name",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "older",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "profileId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "profiles",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "stickers",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "tricks",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "younger",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

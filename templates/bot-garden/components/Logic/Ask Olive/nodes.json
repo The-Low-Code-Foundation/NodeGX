@@ -1,0 +1,135 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e77095c8-4e4f-5b11-8cf5-e78cdc1cf82c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "askoliveIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "fallback",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rung",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "slots",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "askoliveFn",
+      "type": "JavaScriptFunction",
+      "label": "Ask Olive",
+      "parameters": {
+        "functionScript": "\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar written = String(Inputs.fallback || '');\nvar body = { rung: String(Inputs.rung || 'say-thanks'), slots: Inputs.slots && typeof Inputs.slots === 'object' ? Inputs.slots : {}, lang: lang, shape: 'sentence', temperature: 0.8 };\nvar text = written, ok = false;\ntry {\n  if (typeof fetch === 'function') {\n    var ctl = typeof AbortController === 'function' ? new AbortController() : null;\n    var timer = ctl ? setTimeout(function () { ctl.abort(); }, 20000) : null;\n    var res = await fetch('/__garden/olive', { method: 'POST', headers: { 'content-type': 'application/json', 'x-garden': '1' }, body: JSON.stringify(body), signal: ctl ? ctl.signal : undefined });\n    if (timer) clearTimeout(timer);\n    if (res && res.ok) {\n      var a = await res.json();\n      if (a && a.ok && (a.text || a.value !== undefined)) { text = String(a.text !== undefined ? a.text : a.value); ok = true; }\n    }\n  }\n} catch (e) { ok = false; }\nOutputs.text = text;\nOutputs.ok = ok;\nOutputs.fallback = !ok;\n",
+        "runOnChange-in-fallback": false,
+        "runOnChange-in-lang": false,
+        "runOnChange-in-rung": false,
+        "runOnChange-in-slots": false
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-fallback",
+          "displayName": "fallback",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rung",
+          "displayName": "rung",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-slots",
+          "displayName": "slots",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-fallback",
+          "displayName": "fallback",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "askoliveOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "fallback",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ok",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "text",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

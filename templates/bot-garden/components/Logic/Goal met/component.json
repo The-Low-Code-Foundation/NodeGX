@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f5e7cda7-9f68-575b-8d09-1a146cb8ec7c",
+  "name": "Goal met",
+  "path": "/Logic/Goal met",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Is the goal met, and how much of it. Runs on Go; answers Ran once its outputs are set."
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e60b4745-9392-5285-8b18-572a3417f50f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "asIn",
+      "fromProperty": "model",
+      "toId": "asWrite",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "asIn",
+      "fromProperty": "write",
+      "toId": "asWrite",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "asWrite",
+      "fromProperty": "done",
+      "toId": "asOut",
+      "toProperty": "written"
+    },
+    {
+      "fromId": "asWrite",
+      "fromProperty": "done",
+      "toId": "asKeep",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "asRead",
+      "fromProperty": "value",
+      "toId": "asOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "asRead",
+      "fromProperty": "changed",
+      "toId": "asOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "asStore",
+      "fromProperty": "ready",
+      "toId": "asOut",
+      "toProperty": "ready"
+    },
+    {
+      "fromId": "asStore",
+      "fromProperty": "error",
+      "toId": "asOut",
+      "toProperty": "error"
+    }
+  ]
+}

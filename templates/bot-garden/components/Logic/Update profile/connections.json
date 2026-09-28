@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6536ef1b-eda6-5413-8132-b424ce9eba75",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "updateprofileIn",
+      "fromProperty": "field",
+      "toId": "updateprofileFn",
+      "toProperty": "in-field"
+    },
+    {
+      "fromId": "updateprofileIn",
+      "fromProperty": "model",
+      "toId": "updateprofileFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "updateprofileIn",
+      "fromProperty": "profileId",
+      "toId": "updateprofileFn",
+      "toProperty": "in-profileId"
+    },
+    {
+      "fromId": "updateprofileIn",
+      "fromProperty": "value",
+      "toId": "updateprofileFn",
+      "toProperty": "in-value"
+    },
+    {
+      "fromId": "updateprofileIn",
+      "fromProperty": "go",
+      "toId": "updateprofileFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "updateprofileFn",
+      "fromProperty": "out-changed",
+      "toId": "updateprofileOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "updateprofileFn",
+      "fromProperty": "out-model",
+      "toId": "updateprofileOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "updateprofileFn",
+      "fromProperty": "success",
+      "toId": "updateprofileOut",
+      "toProperty": "ran"
+    }
+  ]
+}

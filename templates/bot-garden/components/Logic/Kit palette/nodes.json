@@ -1,0 +1,126 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b35cb050-fda5-50ab-8fa1-69a85d699f8d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "kitpaletteIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "palette",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "kitpaletteFn",
+      "type": "JavaScriptFunction",
+      "label": "Kit palette",
+      "parameters": {
+        "functionScript": "\nfunction wordMap(rows, lang, name) {\n  var map = {};\n  var list = Array.isArray(rows) ? rows : [];\n  for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || '').split('{b}').join(name);\n  return map;\n}\nfunction fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\nfunction langOf(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction nameOf(v) { var n = String(v || '').trim(); return n || 'Pip'; }\n\nvar ICON = { fwd: 'fwd', left: 'left', right: 'right', water: 'water', pick: 'pick', put: 'put', say: 'say', repeat: 'loop', until: 'wall', 'if': 'if', when: 'if', count_inc: 'count', trick: 'loop', 'do': 'fwd', ask: 'owl' };\nvar SENSORS = [['wall_ahead', 'sWallAhead'], ['tulip_ahead', 'sTulipAhead'], ['bowl_empty', 'sBowlEmpty'], ['basket_full', 'sBasketFull'], ['count_is', 'sCountIs']];\nvar EVENTS = [['meow', 'eMeow']];\nvar SAYS = [['thanksMamie', 'thanksMamie'], ['thanksSami', 'thanksSami'], ['thanksBiscuit', 'thanksBiscuit']];\nvar TRICK_NAMES = ['row', 'hop', 'zigzag'];\nvar lang = langOf(Inputs.lang), band = Number(Inputs.band) === 1 ? 1 : 2;\nvar w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));\nfunction opts(pairs) { var out = []; for (var i = 0; i < pairs.length; i++) out.push({ value: pairs[i][0], label: w[pairs[i][1]] || pairs[i][0] }); return out; }\nfunction slot(key) {\n  if (key === 'sensor') return { key: 'sensor', label: w.bIf || key, options: opts(SENSORS) };\n  if (key === 'arg') { var n = []; for (var k = 1; k <= 9; k++) n.push({ value: String(k), label: String(k) }); return { key: 'arg', label: '#', options: n }; }\n  if (key === 'event') return { key: 'event', label: w.bWhen || key, options: opts(EVENTS) };\n  if (key === 'name') { var t = []; for (var j = 0; j < TRICK_NAMES.length; j++) t.push({ value: TRICK_NAMES[j], label: TRICK_NAMES[j] }); return { key: 'name', label: w.bTrick || key, options: t }; }\n  if (key === 'text') return { key: 'text', label: w.bSay || key, options: opts(SAYS), text: true, max: 40 };\n  return null;\n}\nvar src = Array.isArray(Inputs.palette) ? Inputs.palette : [];\nvar out = [];\nfor (var i = 0; i < src.length; i++) {\n  var e = src[i];\n  if (!e || typeof e.id !== 'string') continue;\n  var slots = [];\n  var names = Array.isArray(e.slots) ? e.slots : [];\n  for (var s = 0; s < names.length; s++) { var made = slot(String(names[s])); if (made) slots.push(made); }\n  out.push({ id: e.id, kind: e.kind, icon: ICON[e.id] || 'pick', label: band === 1 ? String(e.caption || e.label || e.id) : String(e.label || e.id), hasBody: !!e.hasBody, hasCount: !!e.hasCount, slots: slots });\n}\nOutputs.palette = out;\nOutputs.count = out.length;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-band",
+          "displayName": "band",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-palette",
+          "displayName": "palette",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-palette",
+          "displayName": "palette",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "kitpaletteOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "palette",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

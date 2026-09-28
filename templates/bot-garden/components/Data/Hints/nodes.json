@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2663d172-56b7-521c-843e-c8d083c3e695",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "datahintsData",
+      "type": "Static Data",
+      "label": "EDIT — the hint table, EN and FR",
+      "parameters": {
+        "type": "json",
+        "json": "[\n  {\n    \"key\": \"hintStart\",\n    \"en\": \"Hello! Someone on the island is waiting. Press Teach and show {b} what to do.\",\n    \"fr\": \"Coucou ! Quelqu’un t’attend sur l’île. Appuie sur Apprendre et montre à {b} quoi faire.\"\n  },\n  {\n    \"key\": \"hintEmpty\",\n    \"en\": \"Drive {b} yourself first: press Teach and use the arrows. {b} remembers every step.\",\n    \"fr\": \"Conduis {b} toi-même d’abord : appuie sur Apprendre et utilise les flèches. {b} retient chaque pas.\"\n  },\n  {\n    \"key\": \"hintPattern\",\n    \"en\": \"Look at the steps: the same little dance, over and over. What if {b} could \\\"do this {n} times\\\"?\",\n    \"fr\": \"Regarde les pas : la même petite danse, encore et encore. Et si {b} pouvait « faire ça {n} fois » ?\"\n  },\n  {\n    \"key\": \"hintMissed\",\n    \"en\": \"{b} did {w} of {t}. Which one did {b} walk past?\",\n    \"fr\": \"{b} en a fait {w} sur {t}. Lequel a-t-il raté ?\"\n  },\n  {\n    \"key\": \"hintBump\",\n    \"en\": \"{b} bumped into something. Which step sent {b} the wrong way?\",\n    \"fr\": \"{b} s’est cogné. Quel pas l’a envoyé du mauvais côté ?\"\n  },\n  {\n    \"key\": \"hintWet\",\n    \"en\": \"A puddle! {b} watered where there is no tulip. Where was {b} facing?\",\n    \"fr\": \"Une flaque ! {b} a arrosé là où il n’y a pas de tulipe. Il regardait où ?\"\n  },\n  {\n    \"key\": \"hintDone\",\n    \"en\": \"Perfect! Could you do it with fewer blocks? A repeat counts as one.\",\n    \"fr\": \"Parfait ! Tu peux le faire avec moins de blocs ? Un « répéter » compte pour un.\"\n  },\n  {\n    \"key\": \"hintDoneMany\",\n    \"en\": \"It works, with {k} blocks. The same steps come back: a repeat could hold them.\",\n    \"fr\": \"Ça marche, avec {k} blocs. Les mêmes pas reviennent : un « répéter » pourrait les tenir.\"\n  },\n  {\n    \"key\": \"hintPredictMiss\",\n    \"en\": \"You tapped one tile, {b} stopped on another. Follow the steps with your finger, one by one.\",\n    \"fr\": \"Tu as touché une case, {b} s’est arrêté sur une autre. Suis les pas avec ton doigt, un par un.\"\n  },\n  {\n    \"key\": \"oliveThinking\",\n    \"en\": \"Olive is thinking…\",\n    \"fr\": \"Olive réfléchit…\"\n  },\n  {\n    \"key\": \"oliveResting\",\n    \"en\": \"Olive is resting. Here is her written line.\",\n    \"fr\": \"Olive se repose. Voici sa phrase écrite.\"\n  },\n  {\n    \"key\": \"oliveRung1\",\n    \"en\": \"Run it twice: Olive never says a thank-you the same way.\",\n    \"fr\": \"Lance-le deux fois : Olive ne dit jamais un merci de la même façon.\"\n  },\n  {\n    \"key\": \"oliveRung2\",\n    \"en\": \"Turn the dial: \\\"same every time\\\" or \\\"surprise me\\\". Olive changes her mind.\",\n    \"fr\": \"Tourne la molette : « pareil à chaque fois » ou « surprends-moi ». Olive change d’avis.\"\n  },\n  {\n    \"key\": \"oliveRung3\",\n    \"en\": \"Olive turned the words into blocks. Place them and see if {b} agrees.\",\n    \"fr\": \"Olive a transformé les mots en blocs. Pose-les et vois si {b} est d’accord.\"\n  },\n  {\n    \"key\": \"oliveRung4\",\n    \"en\": \"Olive gave one step for \\\"three squares\\\". Olive cannot count: a repeat can.\",\n    \"fr\": \"Olive a donné un seul pas pour « trois cases ». Olive ne sait pas compter : un « répéter », si.\"\n  },\n  {\n    \"key\": \"oliveRung5\",\n    \"en\": \"Olive picked what Biscuit wants. Use \\\"if Olive says…\\\" to send {b} the right way.\",\n    \"fr\": \"Olive a trouvé ce que veut Biscuit. Utilise « si Olive dit… » pour envoyer {b} du bon côté.\"\n  },\n  {\n    \"key\": \"oliveRung6\",\n    \"en\": \"Olive was wrong about the thing ahead. Ask three times and count the yeses.\",\n    \"fr\": \"Olive s’est trompée sur ce qu’il y a devant. Demande trois fois et compte les oui.\"\n  },\n  {\n    \"key\": \"oliveRung7\",\n    \"en\": \"Olive guessed a number. A count block does not guess.\",\n    \"fr\": \"Olive a deviné un nombre. Un bloc « compter » ne devine pas.\"\n  },\n  {\n    \"key\": \"oliveRung8\",\n    \"en\": \"Olive got the small sum and missed the big one. A rule beats a guess.\",\n    \"fr\": \"Olive a réussi la petite somme et raté la grande. Une règle bat une devinette.\"\n  },\n  {\n    \"key\": \"oliveRung9\",\n    \"en\": \"Olive ignored \\\"under 5 words\\\". The shape card kept the rule for her.\",\n    \"fr\": \"Olive a ignoré « moins de 5 mots ». La carte de forme a gardé la règle à sa place.\"\n  },\n  {\n    \"key\": \"oliveRung10\",\n    \"en\": \"Olive answered with confidence. Check it in a book before you believe it.\",\n    \"fr\": \"Olive a répondu avec assurance. Vérifie dans un livre avant de la croire.\"\n  },\n  {\n    \"key\": \"oliveRung11\",\n    \"en\": \"Olive translates one way better than the other. Tools have a good direction.\",\n    \"fr\": \"Olive traduit mieux dans un sens que dans l’autre. Les outils ont un bon sens.\"\n  },\n  {\n    \"key\": \"oliveRung12\",\n    \"en\": \"A poem for the tulip. Sometimes silly, always hers.\",\n    \"fr\": \"Un poème pour la tulipe. Parfois farfelu, toujours le sien.\"\n  }\n]"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "datahintsOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "hints",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    }
+  ]
+}

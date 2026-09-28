@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c43e1853-e980-5f95-8f3c-046e8aadbac7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "newrunIn",
+      "fromProperty": "lang",
+      "toId": "newrunFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "newrunIn",
+      "fromProperty": "program",
+      "toId": "newrunFn",
+      "toProperty": "in-program"
+    },
+    {
+      "fromId": "newrunIn",
+      "fromProperty": "robotId",
+      "toId": "newrunFn",
+      "toProperty": "in-robotId"
+    },
+    {
+      "fromId": "newrunIn",
+      "fromProperty": "go",
+      "toId": "newrunFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "newrunFn",
+      "fromProperty": "out-blocks",
+      "toId": "newrunOut",
+      "toProperty": "blocks"
+    },
+    {
+      "fromId": "newrunFn",
+      "fromProperty": "out-handlers",
+      "toId": "newrunOut",
+      "toProperty": "handlers"
+    },
+    {
+      "fromId": "newrunFn",
+      "fromProperty": "out-run",
+      "toId": "newrunOut",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "newrunFn",
+      "fromProperty": "out-steps",
+      "toId": "newrunOut",
+      "toProperty": "steps"
+    },
+    {
+      "fromId": "newrunFn",
+      "fromProperty": "success",
+      "toId": "newrunOut",
+      "toProperty": "ran"
+    }
+  ]
+}

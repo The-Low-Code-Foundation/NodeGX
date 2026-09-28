@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e5621322-696d-5d66-8e0a-b0484f1eae34",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "drawworldIn",
+      "fromProperty": "botName",
+      "toId": "drawworldFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "drawworldIn",
+      "fromProperty": "bumps",
+      "toId": "drawworldFn",
+      "toProperty": "in-bumps"
+    },
+    {
+      "fromId": "drawworldIn",
+      "fromProperty": "color",
+      "toId": "drawworldFn",
+      "toProperty": "in-color"
+    },
+    {
+      "fromId": "drawworldIn",
+      "fromProperty": "endX",
+      "toId": "drawworldFn",
+      "toProperty": "in-endX"
+    },
+    {
+      "fromId": "drawworldIn",
+      "fromProperty": "endY",
+      "toId": "drawworldFn",
+      "toProperty": "in-endY"
+    },
+    {
+      "fromId": "drawworldIn",
+      "fromProperty": "eye",
+      "toId": "drawworldFn",
+      "toProperty": "in-eye"
+    },
+    {
+      "fromId": "drawworldIn",
+      "fromProperty": "hat",
+      "toId": "drawworldFn",
+      "toProperty": "in-hat"
+    },
+    {
+      "fromId": "drawworldIn",
+      "fromProperty": "lang",
+      "toId": "drawworldFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "drawworldIn",
+      "fromProperty": "sayKey",
+      "toId": "drawworldFn",
+      "toProperty": "in-sayKey"
+    },
+    {
+      "fromId": "drawworldIn",
+      "fromProperty": "sayN",
+      "toId": "drawworldFn",
+      "toProperty": "in-sayN"
+    },
+    {
+      "fromId": "drawworldIn",
+      "fromProperty": "showEnd",
+      "toId": "drawworldFn",
+      "toProperty": "in-showEnd"
+    },
+    {
+      "fromId": "drawworldIn",
+      "fromProperty": "teachBumps",
+      "toId": "drawworldFn",
+      "toProperty": "in-teachBumps"
+    },
+    {
+      "fromId": "drawworldIn",
+      "fromProperty": "words",
+      "toId": "drawworldFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "drawworldIn",
+      "fromProperty": "world",
+      "toId": "drawworldFn",
+      "toProperty": "in-world"
+    },
+    {
+      "fromId": "drawworldFn",
+      "fromProperty": "out-bubble",
+      "toId": "drawworldOut",
+      "toProperty": "bubble"
+    },
+    {
+      "fromId": "drawworldFn",
+      "fromProperty": "out-dots",
+      "toId": "drawworldOut",
+      "toProperty": "dots"
+    },
+    {
+      "fromId": "drawworldFn",
+      "fromProperty": "out-hasTulips",
+      "toId": "drawworldOut",
+      "toProperty": "hasTulips"
+    },
+    {
+      "fromId": "drawworldFn",
+      "fromProperty": "out-map",
+      "toId": "drawworldOut",
+      "toProperty": "map"
+    },
+    {
+      "fromId": "drawworldFn",
+      "fromProperty": "out-robots",
+      "toId": "drawworldOut",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "drawworldFn",
+      "fromProperty": "out-things",
+      "toId": "drawworldOut",
+      "toProperty": "things"
+    },
+    {
+      "fromId": "drawworldFn",
+      "fromProperty": "out-total",
+      "toId": "drawworldOut",
+      "toProperty": "total"
+    },
+    {
+      "fromId": "drawworldFn",
+      "fromProperty": "out-watered",
+      "toId": "drawworldOut",
+      "toProperty": "watered"
+    },
+    {
+      "fromId": "drawworldFn",
+      "fromProperty": "success",
+      "toId": "drawworldOut",
+      "toProperty": "ran"
+    }
+  ]
+}

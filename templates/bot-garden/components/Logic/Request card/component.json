@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "404f7106-b24a-5bec-83d0-639650c2aae3",
+  "name": "Request card",
+  "path": "/Logic/Request card",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Who is asking and what, in the child’s language. Runs when an input changes; Ran after each run."
+}
