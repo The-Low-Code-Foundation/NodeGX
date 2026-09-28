@@ -201,6 +201,8 @@ async function withDeployedSite(options, fn) {
   const base = origin || `http://127.0.0.1:${servePort}`;
 
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'nodegx-deployed-'));
+  // IG-007: a WebGL drive needs a GL context. `gpu: true` drops `--disable-gpu`; `chromeArgs` appends flags such as
+  // `--use-angle=swiftshader` (software GL, so the reading is about the page, not this Mac's GPU).
   const proc = spawn(
     chrome,
     [
@@ -210,7 +212,8 @@ async function withDeployedSite(options, fn) {
       '--no-first-run',
       '--no-default-browser-check',
       '--hide-scrollbars',
-      '--disable-gpu',
+      ...(options.gpu ? [] : ['--disable-gpu']),
+      ...(Array.isArray(options.chromeArgs) ? options.chromeArgs : []),
       'about:blank'
     ],
     { stdio: 'ignore' }

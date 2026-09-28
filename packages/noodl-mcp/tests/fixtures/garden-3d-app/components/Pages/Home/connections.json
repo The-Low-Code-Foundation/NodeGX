@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "vMap",
+      "fromProperty": "value",
+      "toId": "garden3d",
+      "toProperty": "map"
+    },
+    {
+      "fromId": "vThings",
+      "fromProperty": "value",
+      "toId": "garden3d",
+      "toProperty": "things"
+    },
+    {
+      "fromId": "vRobots",
+      "fromProperty": "value",
+      "toId": "garden3d",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "vBubble",
+      "fromProperty": "value",
+      "toId": "garden3d",
+      "toProperty": "bubble"
+    },
+    {
+      "fromId": "vStep",
+      "fromProperty": "value",
+      "toId": "garden3d",
+      "toProperty": "stepMs"
+    },
+    {
+      "fromId": "vCamera",
+      "fromProperty": "value",
+      "toId": "garden3d",
+      "toProperty": "camera"
+    },
+    {
+      "fromId": "vFocus",
+      "fromProperty": "value",
+      "toId": "garden3d",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "vCelebrate",
+      "fromProperty": "value",
+      "toId": "garden3d",
+      "toProperty": "celebrate"
+    },
+    {
+      "fromId": "garden3d",
+      "fromProperty": "onTileX",
+      "toId": "vTileX",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "garden3d",
+      "fromProperty": "onTileY",
+      "toId": "vTileY",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "garden3d",
+      "fromProperty": "onSupported",
+      "toId": "vSupported",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "garden3d",
+      "fromProperty": "onFrameMs",
+      "toId": "vFrameMs",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "garden3d",
+      "fromProperty": "onTileTapped",
+      "toId": "tapCounter",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "tapCounter",
+      "fromProperty": "currentCount",
+      "toId": "vTaps",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "garden3d",
+      "fromProperty": "onReady",
+      "toId": "readyCounter",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "readyCounter",
+      "fromProperty": "currentCount",
+      "toId": "vReady",
+      "toProperty": "value"
+    }
+  ]
+}

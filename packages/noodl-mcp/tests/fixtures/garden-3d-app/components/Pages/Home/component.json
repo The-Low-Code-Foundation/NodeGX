@@ -1,0 +1,8 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c_home",
+  "name": "Home",
+  "path": "/Pages/Home",
+  "type": "page",
+  "description": "A marker and Garden 3D under a Group root (D53) on the tulips 8x6 world with one robot. Every kit port is fed by a Variable the drive sets through Noodl.Variables; Tile X, Tile Y, Supported and Frame Ms are written back into Variables, and the Tile Tapped and Ready signals count through a Counter each into a Variable, so the drive reads the ports, not the DOM."
+}

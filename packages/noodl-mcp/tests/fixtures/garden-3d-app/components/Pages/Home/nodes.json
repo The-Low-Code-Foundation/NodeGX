@@ -1,0 +1,188 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "parameters": {
+        "title": "Home"
+      },
+      "children": [
+        "layout"
+      ]
+    },
+    {
+      "id": "layout",
+      "type": "Group",
+      "label": "Layout",
+      "parent": "page",
+      "children": [
+        "marker",
+        "wrapG"
+      ]
+    },
+    {
+      "id": "marker",
+      "type": "Text",
+      "label": "Marker",
+      "parent": "layout",
+      "parameters": {
+        "text": "ig007 page drew"
+      }
+    },
+    {
+      "id": "wrapG",
+      "type": "Group",
+      "label": "Garden wrap",
+      "parent": "layout",
+      "children": [
+        "garden3d"
+      ]
+    },
+    {
+      "id": "garden3d",
+      "type": "garden-3d-kit.Garden3D",
+      "label": "Garden 3D",
+      "parent": "wrapG",
+      "parameters": {
+        "stepMs": 380,
+        "map": "{\"rows\":[\"GGTGGGTH\",\"GGGGGGGG\",\"GGFGFGFG\",\"PPPPPPPP\",\"GWWGGRGG\",\"GGGGGTGG\"]}",
+        "robots": "[{\"x\":0,\"y\":3,\"d\":1,\"colour\":\"#FF7A59\",\"eyes\":\"round\",\"hat\":\"none\",\"name\":\"Pip\"}]"
+      }
+    },
+    {
+      "id": "vMap",
+      "type": "Variable2",
+      "label": "map",
+      "parameters": {
+        "name": "map"
+      }
+    },
+    {
+      "id": "vThings",
+      "type": "Variable2",
+      "label": "things",
+      "parameters": {
+        "name": "things"
+      }
+    },
+    {
+      "id": "vRobots",
+      "type": "Variable2",
+      "label": "robots",
+      "parameters": {
+        "name": "robots"
+      }
+    },
+    {
+      "id": "vBubble",
+      "type": "Variable2",
+      "label": "bubble",
+      "parameters": {
+        "name": "bubble"
+      }
+    },
+    {
+      "id": "vStep",
+      "type": "Variable2",
+      "label": "stepMs",
+      "parameters": {
+        "name": "stepMs"
+      }
+    },
+    {
+      "id": "vCamera",
+      "type": "Variable2",
+      "label": "camera",
+      "parameters": {
+        "name": "camera"
+      }
+    },
+    {
+      "id": "vFocus",
+      "type": "Variable2",
+      "label": "focus",
+      "parameters": {
+        "name": "focus"
+      }
+    },
+    {
+      "id": "vCelebrate",
+      "type": "Variable2",
+      "label": "celebrate",
+      "parameters": {
+        "name": "celebrate"
+      }
+    },
+    {
+      "id": "vTileX",
+      "type": "Variable2",
+      "label": "tileX",
+      "parameters": {
+        "name": "tileX"
+      }
+    },
+    {
+      "id": "vTileY",
+      "type": "Variable2",
+      "label": "tileY",
+      "parameters": {
+        "name": "tileY"
+      }
+    },
+    {
+      "id": "vSupported",
+      "type": "Variable2",
+      "label": "supported",
+      "parameters": {
+        "name": "supported"
+      }
+    },
+    {
+      "id": "vFrameMs",
+      "type": "Variable2",
+      "label": "frameMs",
+      "parameters": {
+        "name": "frameMs"
+      }
+    },
+    {
+      "id": "tapCounter",
+      "type": "Counter",
+      "label": "taps",
+      "parameters": {
+        "startValue": 0
+      }
+    },
+    {
+      "id": "vTaps",
+      "type": "Variable2",
+      "label": "taps",
+      "parameters": {
+        "name": "taps"
+      }
+    },
+    {
+      "id": "readyCounter",
+      "type": "Counter",
+      "label": "ready",
+      "parameters": {
+        "startValue": 0
+      }
+    },
+    {
+      "id": "vReady",
+      "type": "Variable2",
+      "label": "ready",
+      "parameters": {
+        "name": "ready"
+      }
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

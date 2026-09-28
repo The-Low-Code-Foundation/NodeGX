@@ -487,7 +487,9 @@
     var can = mesh(THREE, new THREE.BoxGeometry(0.1, 0.16, 0.12), mat(PALETTE.can), 0.3, 0.2, 0.06);
     can.name = 'can';
     g.add(can);
-    out.meshCount += 11;
+    // Body, visor, two eyes, mouth, two arms, antenna, bulb, can: ten. (The gate checks this against the constructor
+    // count, which is how a first "eleven" was caught.)
+    out.meshCount += 10;
     if (r.hat === 'cap') {
       g.add(mesh(THREE, new THREE.BoxGeometry(0.5, 0.08, 0.44), mat(PALETTE.cap), 0, 0.68, 0));
       g.add(mesh(THREE, new THREE.BoxGeometry(0.5, 0.04, 0.2), mat(PALETTE.cap), 0, 0.66, -0.3));
@@ -1344,7 +1346,7 @@
     };
     eng.robotAt = function (i) {
       var g = eng.built && eng.built.robots[i];
-      return g ? { x: g.position.x, y: g.position.y, z: g.position.z, yaw: g.rotation.y, gliding: !!g.userData.gliding } : null;
+      return g ? { x: g.position.x, y: g.position.y, z: g.position.z, yaw: g.rotation.y, gliding: !!g.userData.gliding, bumping: !!g.userData.bumping } : null;
     };
     eng.frame = frame;
     eng.destroy = function () {
