@@ -497,17 +497,18 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       expect(counts.Mesh + (counts.InstancedMesh || 0)).toBe(built.meshCount);
     });
 
-    it('🔴 the camera is the mockup’s (island-3d.html makeView): 35° from straight down, turned 0.42 rad, a 38° lens, aimed at the tile tops', () => {
+    it('🔴 the camera is the mockup’s (island-3d.html makeView, measured running: dist 10.75 for its 8×6 at aspect 1.436): 35° from straight down, turned 0.42 rad, a 38° lens, aimed at the tile tops', () => {
       const C = node().camera;
       expect([C.CAMERA.tiltDeg, C.CAMERA.yawRad, C.CAMERA.fovDeg, C.CAMERA.targetY]).toEqual([35, 0.42, 38, 0.4]);
       const p = C.pose({ tx: 1, tz: 2, dist: 10 });
       const s = Math.sin((35 * Math.PI) / 180);
       const c = Math.cos((35 * Math.PI) / 180);
       expect(p.position[0]).toBeCloseTo(1 + 10 * s * Math.sin(0.42));
-      expect(p.position[1]).toBeCloseTo(0.4 + 10 * c);
+      expect(p.position[1]).toBeCloseTo(10 * c);
       expect(p.position[2]).toBeCloseTo(2 + 10 * s * Math.cos(0.42));
       // Forward points at the target; right is level (no roll) and square to forward; up completes the frame.
-      const toTarget = [1 - p.position[0], 0.4 - p.position[1], 2 - p.position[2]].map((v) => v / 10);
+      const range = Math.hypot(1 - p.position[0], 0.4 - p.position[1], 2 - p.position[2]);
+      const toTarget = [1 - p.position[0], 0.4 - p.position[1], 2 - p.position[2]].map((v) => v / range);
       p.forward.forEach((v: number, i: number) => expect(v).toBeCloseTo(toTarget[i]));
       expect(p.right[1]).toBeCloseTo(0);
       expect(p.right[0] * p.forward[0] + p.right[2] * p.forward[2]).toBeCloseTo(0);
@@ -515,9 +516,109 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       // The target projects to the centre of the screen.
       const n = C.project({ tx: 1, tz: 2, dist: 10 }, 1.5, [1, 0.4, 2]);
       expect([n.x, n.y]).toEqual([expect.closeTo(0, 6), expect.closeTo(0, 6)]);
+      // The framing is the mockup's v.fit: max(width across, tilted depth down) × 1.18 + 1.2, at the rectangle's centre.
+      // Measured in the running mockup (P106 s2): views.ws.dist 10.7466 at aspect 1.4359 (a 672×468 stage).
+      const map = W().parseMap(MOCKUP);
+      const aspect = 672 / 468;
+      expect(C.fitRect(map, { x: 0, y: 0, w: 8, h: 6 }, aspect).dist).toBeCloseTo(10.746556042188667, 6);
+      const tan = Math.tan((38 * Math.PI) / 360);
+      const want = Math.max(8 / (2 * tan * aspect), (6 * c) / (2 * tan)) * 1.18 + 1.2;
+      const fit = C.fitRect(map, { x: 0, y: 0, w: 8, h: 6 }, aspect);
+      expect([fit.tx, fit.tz]).toEqual([0, 0]);
+      expect(fit.dist).toBeCloseTo(want, 6);
+      // It fills the stage (closer than everything-inside-a-margin) and stays inside the zoom range a pinch has.
+      const z = C.zoomBounds(map, aspect);
+      expect(fit.dist).toBeLessThan(C.frameRect(map, { x: 0, y: 0, w: 8, h: 6 }, aspect).dist);
+      expect(C.clampCamera(fit, map, aspect)).toEqual(fit);
+      expect(z.maxDist).toBeGreaterThan(fit.dist);
     });
 
-    it('🔴 Too Slow fires once when Frame Ms stays above 50 ms for 3 s of visible time; fast frames never; a hidden spell restarts the count', () => {
+    it('🔴 a rebuild (Start over, a tulip watered again) makes new meshes but no new geometry and no new material: the engine shares its caches', () => {
+      const { THREE, counts } = threeStub();
+      const dom = fakeDom();
+      const eng = node().engine.create({ THREE, root: dom.root, canvas: dom.canvas, overlay: dom.overlay, doc: dom.doc, now: () => 0, raf: () => 1, caf: () => {} });
+      const made = () => Object.entries(counts).filter(([k]) => /Geometry$|Material$/.test(k)).reduce((n, [, v]) => n + v, 0);
+      const robots = W().parseRobots([{ x: 0, y: 3, d: 1, name: 'Pip', can: 1, carry: ['stone'] }]);
+      const dry = { map: W().parseMap(MOCKUP), things: W().parseThings([{ kind: 'tulip', x: 2, y: 2 }]), robots };
+      const wet = { map: W().parseMap(MOCKUP), things: W().parseThings([{ kind: 'tulip', x: 2, y: 2, watered: true }]), robots };
+      // The first dry and wet builds meet every colour and shape once; a Start over and a second watering meet none.
+      eng.setWorld(dry);
+      eng.setWorld(wet);
+      const meshes0 = counts.Mesh;
+      const before = made();
+      eng.setWorld(dry);
+      eng.setWorld(wet);
+      expect(counts.Mesh).toBeGreaterThan(meshes0);
+      expect(made()).toBe(before);
+      eng.destroy();
+    });
+
+    it('🔴 the first framing waits for the stage: a resize re-frames until a finger moves the camera, never after', () => {
+      const { THREE } = threeStub();
+      const dom = fakeDom();
+      // Not laid out yet: the root has no size, the canvas its default 300×150 (the page's first render).
+      Object.assign(dom.root, { clientWidth: 0, clientHeight: 0 });
+      Object.assign(dom.canvas, { width: 300, height: 150 });
+      const eng = node().engine.create({ THREE, root: dom.root, canvas: dom.canvas, overlay: dom.overlay, doc: dom.doc, now: () => 0, raf: () => 1, caf: () => {} });
+      const C = node().camera;
+      eng.setWorld({ map: W().parseMap(MOCKUP), things: [], robots: [] });
+      const early = { ...eng.state };
+      Object.assign(dom.root, { clientWidth: 632, clientHeight: 472 });
+      eng.resize();
+      const want = C.fitRect(eng.world.map, { x: 0, y: 0, w: 8, h: 6 }, 632 / 472);
+      expect(eng.state.dist).toBeCloseTo(want.dist, 6);
+      expect(Math.abs(early.dist - want.dist)).toBeGreaterThan(0.5);
+      // A wheel is the hand: after it, a resize keeps the child's view (clamped), never re-frames.
+      dom.handlers.wheel({ deltaY: -300, preventDefault() {} });
+      const held = eng.state.dist;
+      Object.assign(dom.root, { clientWidth: 600, clientHeight: 450 });
+      eng.resize();
+      expect(eng.state.dist).toBeCloseTo(held, 6);
+      eng.destroy();
+    });
+
+    it('🔴 on demand: a still scene draws no frame; a glide draws until it lands; a finger down keeps drawing; a still spell is never timed', () => {
+      const { THREE } = threeStub();
+      const dom = fakeDom();
+      const frames: Array<() => void> = [];
+      let t = 0;
+      const eng = node().engine.create({ THREE, root: dom.root, canvas: dom.canvas, overlay: dom.overlay, doc: dom.doc, now: () => t, raf: (f: () => void) => (frames.push(f), frames.length), caf: () => {} });
+      const at = (x: number) => ({ map: W().parseMap(MOCKUP), things: [], robots: W().parseRobots([{ x, y: 3, d: 1 }]) });
+      const drain = (dt: number, max = 500) => {
+        let n = 0;
+        while (frames.length && n < max) {
+          t += dt;
+          frames.shift()!();
+          n++;
+        }
+        return n;
+      };
+      eng.setStepMs(380);
+      eng.setWorld(at(0));
+      expect(drain(16)).toBe(1);
+      // A glide of 380 ms draws about 24 frames at 16 ms, then stops by itself.
+      eng.setWorld(at(1));
+      const glide = drain(16);
+      expect(glide).toBeGreaterThanOrEqual(22);
+      expect(glide).toBeLessThanOrEqual(27);
+      expect(dom.root.attrs['data-idle']).toBe('true');
+      const sampled = eng.frames.length;
+      // Ten still seconds: nothing drawn, nothing sampled; the next glide's first frame is not a 10 s interval.
+      t += 10000;
+      eng.setWorld(at(2));
+      drain(16);
+      expect(Math.max(...eng.frames)).toBeLessThan(100);
+      expect(eng.frames.length).toBeGreaterThan(sampled);
+      // A finger held on the canvas keeps the frames coming (a pan follows it); lifted, they stop.
+      dom.handlers.pointerdown({ type: 'pointerdown', clientX: 100, clientY: 100, pointerId: 1, pointerType: 'touch', button: 0 });
+      expect(drain(16, 40)).toBe(40);
+      dom.handlers.pointerup({ type: 'pointerup', clientX: 100, clientY: 100, pointerId: 1, pointerType: 'touch', button: 0 });
+      expect(drain(16, 40)).toBeLessThanOrEqual(2);
+      expect(frames.length).toBe(0);
+      eng.destroy();
+    });
+
+    it('🔴 Too Slow fires once when Frame Ms stays above 50 ms for 3 s of moving, visible time; fast frames never; a hidden spell restarts the count', () => {
       const E = node().engine;
       expect(E.SLOW).toEqual({ ms: 50, forMs: 3000 });
       const make = () => {
@@ -527,7 +628,10 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
         const clock = { t: 0 };
         const fired: number[] = [];
         const eng = E.create({ THREE, root: dom.root, canvas: dom.canvas, overlay: dom.overlay, doc: dom.doc, now: () => clock.t, raf: (f: () => void) => (frames.push(f), frames.length), caf: () => {}, onTooSlow: () => fired.push(clock.t) });
-        eng.setWorld({ map: W().parseMap(MOCKUP), things: [], robots: [] });
+        // A glide that never ends keeps the frames coming (the scene is drawn on demand).
+        eng.setStepMs(1e9);
+        eng.setWorld({ map: W().parseMap(MOCKUP), things: [], robots: W().parseRobots([{ x: 0, y: 3, d: 1 }]) });
+        eng.setWorld({ map: W().parseMap(MOCKUP), things: [], robots: W().parseRobots([{ x: 1, y: 3, d: 1 }]) });
         /** Draw frames `dt` apart for `ms` of the engine's clock (only the frames the engine scheduled). */
         const run = (dt: number, ms: number) => {
           const end = clock.t + ms;
@@ -618,7 +722,7 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       expect(Object.keys(dom3.handlers)).toEqual([]);
     });
 
-    it('🔴 with a renderer: the first frame draws, Ready fires once, draw calls and meshes are on the root', () => {
+    it('🔴 with a renderer: the first frame draws, Ready fires once, draw calls and meshes are on the root; a still scene asks for no second frame', () => {
       const { THREE, counts } = threeStub();
       const dom = fakeDom();
       const frames: Array<() => void> = [];
@@ -652,6 +756,11 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       expect(dom.overlay.children[0].textContent).toBe('Pip');
       expect(dom.overlay.children[0].attrs['data-robot']).toBe('0');
       expect(dom.overlay.children[0].style.left).toMatch(/px$/);
+      // On demand (P106 s2): nothing moves, so nothing more is drawn until something changes.
+      expect(frames.length).toBe(0);
+      expect(dom.root.attrs['data-idle']).toBe('true');
+      eng.setWorld({ map: W.parseMap(MOCKUP), things: [], robots: W.parseRobots([{ x: 1, y: 3, d: 1, name: 'Pip' }]) });
+      expect(frames.length).toBe(1);
       t = 32;
       frames.shift()!();
       expect(ready).toBe(1);
@@ -676,7 +785,10 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
         onFrameMs: (ms: number) => reports.push(ms)
       });
       const W = node().world;
-      eng.setWorld({ map: W.parseMap(MOCKUP), things: [], robots: [] });
+      // A glide that never ends keeps the frames coming (the scene is drawn on demand).
+      eng.setStepMs(1e9);
+      eng.setWorld({ map: W.parseMap(MOCKUP), things: [], robots: W.parseRobots([{ x: 0, y: 3, d: 1 }]) });
+      eng.setWorld({ map: W.parseMap(MOCKUP), things: [], robots: W.parseRobots([{ x: 1, y: 3, d: 1 }]) });
       const step = () => frames.shift()!();
       // Hidden: frames are scheduled only while visible, so nothing is sampled.
       dom.doc.visibilityState = 'hidden';
@@ -802,11 +914,11 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       eng.destroy();
     });
 
-    it('Camera: island frames the whole map, plot frames Focus closer, follow keeps robot 0 in the middle', () => {
+    it('Camera: island frames the whole map (the mockup’s fit), plot frames Focus closer, follow keeps robot 0 in the middle', () => {
       const { eng, tick } = engineOn();
       const C = node().camera;
       const map = eng.world.map;
-      const island = C.frameRect(map, { x: 0, y: 0, w: 8, h: 6 }, eng.aspect);
+      const island = C.fitRect(map, { x: 0, y: 0, w: 8, h: 6 }, eng.aspect);
       eng.setCamera('island', null);
       tick(500);
       expect(eng.state.dist).toBeCloseTo(island.dist);

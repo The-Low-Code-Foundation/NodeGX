@@ -271,11 +271,15 @@ withDeployedSite({ dir: DIR, gpu: true, chromeArgs: ['--use-angle=swiftshader', 
   const after = await robot(0);
   const pillAfter = await rect('.gd3-name[data-robot="0"]');
   const afterShot = await shot('glide-after');
-  const region = pillBefore && pillAfter ? { x: Math.min(pillBefore.x, pillAfter.x) - 40, y: Math.min(pillBefore.y, pillAfter.y) - 90, w: Math.abs(pillAfter.x - pillBefore.x) + pillBefore.w + 80, h: 130 } : canvasRect;
+  const region = pillBefore && pillAfter ? { x: Math.min(pillBefore.x, pillAfter.x) - 40, y: Math.min(pillBefore.y, pillAfter.y) - 90, w: Math.abs(pillAfter.x - pillBefore.x) + pillBefore.w + 80, h: Math.abs(pillAfter.y - pillBefore.y) + 130 } : canvasRect;
   const diff = differing(before, afterShot, region);
   const midDiff = differing(before, midShot, region);
   readings.glide = { pillBefore, pillAfter, mid, after, region, diff, midDiff, dataX: await evaluate(`document.querySelector('.gd3-name[data-robot="0"]').getAttribute('data-x')`) };
-  check('GLIDE: a Robots write glides the robot two tiles — the name pill moved > 40 px, it reported gliding mid-way, and the shots differ in its region', pillBefore && pillAfter && pillAfter.x - pillBefore.x > 40 && Math.abs(pillAfter.y - pillBefore.y) < 6 && mid && mid.gliding === true && after && after.gliding === false && diff.fraction > 0.02 && midDiff.fraction > 0.005 && readings.glide.dataX === '2', readings.glide);
+  // P106 s2: the camera is turned 0.42 rad (the mockup's), so two tiles along +x run right AND down the screen: the pill
+  // moves where the node's own projection says the tile centre went (± 12 px), > 40 px in all.
+  readings.glide.expected = await evaluate(`(() => { const r = ${ROOT}.gd3; const a = r.screenOfTile(0, 3); const b = r.screenOfTile(2, 3); return { dx: b.sx - a.sx, dy: b.sy - a.sy }; })()`);
+  const moved = pillBefore && pillAfter ? { dx: pillAfter.x - pillBefore.x, dy: pillAfter.y - pillBefore.y } : null;
+  check('GLIDE: a Robots write glides the robot two tiles — the name pill moved > 40 px the way the tiles run on screen, it reported gliding mid-way, and the shots differ in its region', moved && Math.hypot(moved.dx, moved.dy) > 40 && Math.abs(moved.dx - readings.glide.expected.dx) < 12 && Math.abs(moved.dy - readings.glide.expected.dy) < 12 && mid && mid.gliding === true && after && after.gliding === false && diff.fraction > 0.02 && midDiff.fraction > 0.005 && readings.glide.dataX === '2', readings.glide);
 
   // ── TURN / BUMP / HOP ────────────────────────────────────────────────────
   const yaw0 = (await robot(0)).yaw;

@@ -43,9 +43,10 @@
  * Camera:   plot | island | follow — plot frames Focus (the whole map when Focus is empty), island frames the whole
  *           map, follow keeps robot 0 in the middle.
  * Focus:    { x, y, w, h } in tiles.
- * Frame Ms: the rolling p95 of the last 60 frame intervals, measured only after Ready and only while the document
- *           is visible (a frame throttle never fires in a hidden window; without the guard the fallback would fire
- *           on every minimised app).
+ * Frame Ms: the rolling p95 of the last 60 frame intervals, measured only after Ready, only while the document is
+ *           visible (a frame throttle never fires in a hidden window; without the guard the fallback would fire on
+ *           every minimised app) and only while the scene moves: it is drawn ON DEMAND (a glide, a turn, a bump, a
+ *           hop, a camera glide, a finger on it), so a still scene draws nothing and is never timed.
  * Supported: true when a WebGL2 context could be made and three.js is on the page; false draws nothing, throws
  *           nothing, and Ready never fires (the page’s fallback rule swaps the node).
  * Too Slow: a signal, once, when Frame Ms has stayed above 50 ms for 3 s of visible time (the rule's other cue).
@@ -312,6 +313,20 @@
     };
   }
 
+  /**
+   * A geometry by kind and arguments, made once per engine (`out.geos`, the engine's cache) and shared by every build
+   * after it: a rebuild when a tulip is watered makes Mesh objects, never new GPU buffers. With no cache (the gate's
+   * single build) it is a plain constructor call.
+   */
+  function G(THREE, out, kind) {
+    var args = Array.prototype.slice.call(arguments, 3);
+    var key = kind + '(' + args.join(',') + ')';
+    if (out.geos && out.geos[key]) return out.geos[key];
+    var geo = new (Function.prototype.bind.apply(THREE[kind], [null].concat(args)))();
+    if (out.geos) out.geos[key] = geo;
+    return geo;
+  }
+
   function mesh(THREE, geo, mat, x, y, z) {
     var m = new THREE.Mesh(geo, mat);
     m.position.set(x || 0, y || 0, z || 0);
@@ -332,7 +347,7 @@
     for (var kind in byKind) {
       var cells = byKind[kind];
       var height = tileHeight(kind);
-      var geo = new THREE.BoxGeometry(1, height, 1);
+      var geo = G(THREE, out, 'BoxGeometry', 1, height, 1);
       var im = new THREE.InstancedMesh(geo, mat(TILE_COLOUR[kind]), cells.length);
       im.name = 'tiles-' + kind;
       for (var i = 0; i < cells.length; i++) {
@@ -365,12 +380,12 @@
   function buildGround(map, THREE, mat, out) {
     var w = Math.max(1, map.w);
     var hh = Math.max(1, map.h);
-    var sea = mesh(THREE, new THREE.PlaneGeometry(400, 400), mat(PALETTE.sea), 0, -0.06, 0);
+    var sea = mesh(THREE, G(THREE, out, 'PlaneGeometry', 400, 400), mat(PALETTE.sea), 0, -0.06, 0);
     sea.rotation.x = -Math.PI / 2;
     sea.name = 'sea';
-    var sand = mesh(THREE, new THREE.BoxGeometry(w + 1.4, 0.3, hh + 1.4), mat(PALETTE.sand), 0, -0.16, 0);
+    var sand = mesh(THREE, G(THREE, out, 'BoxGeometry', w + 1.4, 0.3, hh + 1.4), mat(PALETTE.sand), 0, -0.16, 0);
     sand.name = 'sand';
-    var base = mesh(THREE, new THREE.BoxGeometry(w, 0.06, hh), mat(PALETTE.base), 0, 0, 0);
+    var base = mesh(THREE, G(THREE, out, 'BoxGeometry', w, 0.06, hh), mat(PALETTE.base), 0, 0, 0);
     base.name = 'base';
     out.meshCount += 3;
     return [sea, sand, base];
@@ -411,9 +426,9 @@
       return ((c.x * 31 + c.y * 17) % 6) * 0.5;
     };
     [
-      [new THREE.CylinderGeometry(0.07, 0.1, 0.36, 6), PALETTE.trunk, 0.18],
-      [new THREE.ConeGeometry(0.4, 0.62, 6), PALETTE.canopy, 0.6],
-      [new THREE.ConeGeometry(0.3, 0.5, 6), PALETTE.canopyLight, 0.95]
+      [G(THREE, out, 'CylinderGeometry', 0.07, 0.1, 0.36, 6), PALETTE.trunk, 0.18],
+      [G(THREE, out, 'ConeGeometry', 0.4, 0.62, 6), PALETTE.canopy, 0.6],
+      [G(THREE, out, 'ConeGeometry', 0.3, 0.5, 6), PALETTE.canopyLight, 0.95]
     ].forEach(function (part) {
       instanced(part[0], part[1], trees, function (d, p, c) {
         var k = treeScale(c);
@@ -423,29 +438,29 @@
       });
     });
     // A rock tile (map R): a big flat icosahedron, the same as a rock thing at left 3; it yields nothing (brief §4).
-    instanced(new THREE.IcosahedronGeometry(1, 0), PALETTE.rock, rocks, function (d, p, c) {
+    instanced(G(THREE, out, 'IcosahedronGeometry', 1, 0), PALETTE.rock, rocks, function (d, p, c) {
       d.position.set(p.x, top + ROCK_SIZES.big * 0.75, p.z);
       d.rotation.set(0.3, (c.x + c.y) * 0.7, 0.2);
       d.scale.set(ROCK_SIZES.big, ROCK_SIZES.big * 0.75, ROCK_SIZES.big);
     });
     // A house (the mockup's): a box under a gabled roof whose gables face the front, a door and two windows. The roof is
     // a three-sided cylinder lying front to back, apex up (rotation.x = −90°), squashed to 0.4 tall.
-    instanced(new THREE.BoxGeometry(0.8, 0.5, 0.66), PALETTE.wall, houses, function (d, p) {
+    instanced(G(THREE, out, 'BoxGeometry', 0.8, 0.5, 0.66), PALETTE.wall, houses, function (d, p) {
       d.position.set(p.x, top + 0.25, p.z);
       d.rotation.set(0, 0, 0);
       d.scale.set(1, 1, 1);
     });
-    instanced(new THREE.CylinderGeometry(ROOF.r, ROOF.r, 0.8, 3), PALETTE.roof, houses, function (d, p) {
+    instanced(G(THREE, out, 'CylinderGeometry', ROOF.r, ROOF.r, 0.8, 3), PALETTE.roof, houses, function (d, p) {
       d.position.set(p.x, top + 0.5 + ROOF.r * 0.5 * ROOF.squash, p.z);
       d.rotation.set(-Math.PI / 2, 0, 0);
       d.scale.set(1, 1, ROOF.squash);
     });
-    instanced(new THREE.BoxGeometry(0.18, 0.28, 0.04), PALETTE.door, houses, function (d, p) {
+    instanced(G(THREE, out, 'BoxGeometry', 0.18, 0.28, 0.04), PALETTE.door, houses, function (d, p) {
       d.position.set(p.x, top + 0.14, p.z + 0.34);
       d.rotation.set(0, 0, 0);
       d.scale.set(1, 1, 1);
     });
-    instanced(new THREE.BoxGeometry(0.14, 0.14, 0.04), PALETTE.window, houses.concat(houses), function (d, p, c, i) {
+    instanced(G(THREE, out, 'BoxGeometry', 0.14, 0.14, 0.04), PALETTE.window, houses.concat(houses), function (d, p, c, i) {
       d.position.set(p.x + (i < houses.length ? -0.24 : 0.24), top + 0.3, p.z + 0.34);
       d.rotation.set(0, 0, 0);
       d.scale.set(1, 1, 1);
@@ -464,11 +479,11 @@
       var wet = !!(t.watered === true || t.state === 'watered' || t.state === 'wet');
       var yellow = t.colour === 'yellow';
       var petal = yellow ? (wet ? PALETTE.yellow : PALETTE.yellowDry) : wet ? PALETTE.tulip : PALETTE.tulipDry;
-      g.add(mesh(THREE, new THREE.CylinderGeometry(0.025, 0.03, 0.34, 5), mat(PALETTE.stem), 0, 0.17, 0));
-      g.add(mesh(THREE, new THREE.CylinderGeometry(0.12, 0.05, 0.2, 5), mat(petal), 0, 0.42, 0));
-      var l1 = mesh(THREE, new THREE.BoxGeometry(0.05, 0.16, 0.02), mat(PALETTE.stem), -0.07, 0.14, 0);
+      g.add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.025, 0.03, 0.34, 5), mat(PALETTE.stem), 0, 0.17, 0));
+      g.add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.12, 0.05, 0.2, 5), mat(petal), 0, 0.42, 0));
+      var l1 = mesh(THREE, G(THREE, out, 'BoxGeometry', 0.05, 0.16, 0.02), mat(PALETTE.stem), -0.07, 0.14, 0);
       l1.rotation.z = 0.7;
-      var l2 = mesh(THREE, new THREE.BoxGeometry(0.05, 0.16, 0.02), mat(PALETTE.stem), 0.07, 0.14, 0);
+      var l2 = mesh(THREE, G(THREE, out, 'BoxGeometry', 0.05, 0.16, 0.02), mat(PALETTE.stem), 0.07, 0.14, 0);
       l2.rotation.z = -0.7;
       g.add(l1, l2);
       out.meshCount += 4;
@@ -479,14 +494,14 @@
     },
     puddle: function (THREE, mat, t, out) {
       var g = new THREE.Group();
-      g.add(mesh(THREE, new THREE.CylinderGeometry(0.3, 0.3, 0.02, 8), mat(PALETTE.puddle), 0, 0.01, 0));
+      g.add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.3, 0.3, 0.02, 8), mat(PALETTE.puddle), 0, 0.01, 0));
       out.meshCount += 1;
       return g;
     },
     letter: function (THREE, mat, t, out) {
       var g = new THREE.Group();
-      var paper = mesh(THREE, new THREE.BoxGeometry(0.3, 0.02, 0.2), mat(PALETTE.letter), 0, 0.02, 0);
-      var flap = mesh(THREE, new THREE.BoxGeometry(0.2, 0.02, 0.08), mat(PALETTE.letterInk), 0, 0.035, -0.04);
+      var paper = mesh(THREE, G(THREE, out, 'BoxGeometry', 0.3, 0.02, 0.2), mat(PALETTE.letter), 0, 0.02, 0);
+      var flap = mesh(THREE, G(THREE, out, 'BoxGeometry', 0.2, 0.02, 0.08), mat(PALETTE.letterInk), 0, 0.035, -0.04);
       g.add(paper, flap);
       g.rotation.y = 0.4;
       out.meshCount += 2;
@@ -494,10 +509,10 @@
     },
     bowl: function (THREE, mat, t, out) {
       var g = new THREE.Group();
-      g.add(mesh(THREE, new THREE.CylinderGeometry(0.22, 0.15, 0.12, 8), mat(PALETTE.bowl), 0, 0.06, 0));
+      g.add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.22, 0.15, 0.12, 8), mat(PALETTE.bowl), 0, 0.06, 0));
       out.meshCount += 1;
       if (t.full) {
-        g.add(mesh(THREE, new THREE.CylinderGeometry(0.16, 0.16, 0.06, 8), mat(PALETTE.kibble), 0, 0.14, 0));
+        g.add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.16, 0.16, 0.06, 8), mat(PALETTE.kibble), 0, 0.14, 0));
         out.meshCount += 1;
       }
       return g;
@@ -509,9 +524,9 @@
     postbox: function (THREE, mat, t, out) {
       // The post box (IG-001 D9, the mockup's): an iron post, a red box, a white slot on its front.
       var g = new THREE.Group();
-      g.add(mesh(THREE, new THREE.BoxGeometry(0.08, 0.4, 0.08), mat(PALETTE.iron), 0, 0.2, 0));
-      g.add(mesh(THREE, new THREE.BoxGeometry(0.34, 0.4, 0.3), mat(PALETTE.roof), 0, 0.6, 0));
-      g.add(mesh(THREE, new THREE.BoxGeometry(0.2, 0.04, 0.04), mat(PALETTE.paper), 0, 0.68, -0.15));
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.08, 0.4, 0.08), mat(PALETTE.iron), 0, 0.2, 0));
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.34, 0.4, 0.3), mat(PALETTE.roof), 0, 0.6, 0));
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.2, 0.04, 0.04), mat(PALETTE.paper), 0, 0.68, -0.15));
       out.meshCount += 3;
       return g;
     },
@@ -524,13 +539,13 @@
       g.userData.size = size;
       if (size === 'none') return g;
       var r = ROCK_SIZES[size];
-      var main = mesh(THREE, new THREE.IcosahedronGeometry(1, 0), mat(PALETTE.rock), 0, r * 0.75, 0);
+      var main = mesh(THREE, G(THREE, out, 'IcosahedronGeometry', 1, 0), mat(PALETTE.rock), 0, r * 0.75, 0);
       main.scale.set(r, r * 0.75, r);
       main.rotation.set(0.3, (Number(t.x) + Number(t.y)) * 0.7, 0.2);
       g.add(main);
       out.meshCount += 1;
       if (left >= 2) {
-        var pebble = mesh(THREE, new THREE.IcosahedronGeometry(1, 0), mat(PALETTE.rockLight), 0.22, 0.09, 0.16);
+        var pebble = mesh(THREE, G(THREE, out, 'IcosahedronGeometry', 1, 0), mat(PALETTE.rockLight), 0.22, 0.09, 0.16);
         pebble.scale.set(0.12, 0.09, 0.12);
         g.add(pebble);
         out.meshCount += 1;
@@ -540,7 +555,7 @@
     // A stone (IG-001 D9; IG-002 picks it from a rock): a small flat pebble.
     stone: function (THREE, mat, t, out) {
       var g = new THREE.Group();
-      var m = mesh(THREE, new THREE.IcosahedronGeometry(1, 0), mat(PALETTE.rockLight), 0, 0.07, 0);
+      var m = mesh(THREE, G(THREE, out, 'IcosahedronGeometry', 1, 0), mat(PALETTE.rockLight), 0, 0.07, 0);
       m.scale.set(0.14, 0.08, 0.14);
       m.rotation.y = (Number(t.x) * 3 + Number(t.y)) * 0.6;
       g.add(m);
@@ -550,23 +565,23 @@
     // A sign (brief §4): a post with a board. Its text is Olive's to read, never drawn on the tile.
     sign: function (THREE, mat, t, out) {
       var g = new THREE.Group();
-      g.add(mesh(THREE, new THREE.BoxGeometry(0.05, 0.5, 0.05), mat(PALETTE.trunk), 0, 0.25, 0));
-      g.add(mesh(THREE, new THREE.BoxGeometry(0.44, 0.26, 0.04), mat(PALETTE.paper), 0, 0.5, 0));
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.05, 0.5, 0.05), mat(PALETTE.trunk), 0, 0.25, 0));
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.44, 0.26, 0.04), mat(PALETTE.paper), 0, 0.5, 0));
       out.meshCount += 2;
       return g;
     },
     // A note (brief §4): a paper on the ground with a coral heading line. Its text is never drawn on the tile.
     note: function (THREE, mat, t, out) {
       var g = new THREE.Group();
-      g.add(mesh(THREE, new THREE.BoxGeometry(0.34, 0.02, 0.44), mat(PALETTE.paper), 0, 0.02, 0));
-      g.add(mesh(THREE, new THREE.BoxGeometry(0.22, 0.02, 0.03), mat(PALETTE.coral), 0, 0.03, -0.1));
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.34, 0.02, 0.44), mat(PALETTE.paper), 0, 0.02, 0));
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.22, 0.02, 0.03), mat(PALETTE.coral), 0, 0.03, -0.1));
       g.rotation.y = -0.3;
       out.meshCount += 2;
       return g;
     },
     egg: function (THREE, mat, t, out) {
       var g = new THREE.Group();
-      var egg = mesh(THREE, new THREE.SphereGeometry(0.14, 8, 6), mat(PALETTE.letter), 0, 0.16, 0);
+      var egg = mesh(THREE, G(THREE, out, 'SphereGeometry', 0.14, 8, 6), mat(PALETTE.letter), 0, 0.16, 0);
       egg.scale.y = 1.3;
       g.add(egg);
       out.meshCount += 1;
@@ -574,14 +589,14 @@
     },
     food: function (THREE, mat, t, out) {
       var g = new THREE.Group();
-      g.add(mesh(THREE, new THREE.CylinderGeometry(0.16, 0.16, 0.1, 8), mat(PALETTE.kibble), 0, 0.05, 0));
+      g.add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.16, 0.16, 0.1, 8), mat(PALETTE.kibble), 0, 0.05, 0));
       out.meshCount += 1;
       return g;
     },
     flag: function (THREE, mat, t, out) {
       var g = new THREE.Group();
-      var pole = mesh(THREE, new THREE.CylinderGeometry(0.02, 0.02, 0.6, 5), mat(PALETTE.ink), 0, 0.3, 0);
-      var cloth = mesh(THREE, new THREE.BoxGeometry(0.26, 0.16, 0.02), mat(PALETTE.sun), 0.14, 0.5, 0);
+      var pole = mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.02, 0.02, 0.6, 5), mat(PALETTE.ink), 0, 0.3, 0);
+      var cloth = mesh(THREE, G(THREE, out, 'BoxGeometry', 0.26, 0.16, 0.02), mat(PALETTE.sun), 0.14, 0.5, 0);
       g.add(pole, cloth);
       out.meshCount += 2;
       return g;
@@ -614,30 +629,30 @@
       out.meshCount += 1;
       return m;
     };
-    add(mesh(THREE, new THREE.BoxGeometry(0.5, 0.5, 0.44), bodyMat, 0, 0.37, 0));
-    add(mesh(THREE, new THREE.BoxGeometry(0.36, 0.18, 0.06), mat(PALETTE.visor), 0, 0.46, -0.23)).name = 'visor';
+    add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.5, 0.5, 0.44), bodyMat, 0, 0.37, 0));
+    add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.36, 0.18, 0.06), mat(PALETTE.visor), 0, 0.46, -0.23)).name = 'visor';
     if (r.eyes === 'happy') {
-      add(mesh(THREE, new THREE.BoxGeometry(0.08, 0.03, 0.02), ink, -0.09, 0.47, -0.27));
-      add(mesh(THREE, new THREE.BoxGeometry(0.08, 0.03, 0.02), ink, 0.09, 0.47, -0.27));
+      add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.08, 0.03, 0.02), ink, -0.09, 0.47, -0.27));
+      add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.08, 0.03, 0.02), ink, 0.09, 0.47, -0.27));
     } else {
-      add(mesh(THREE, new THREE.BoxGeometry(0.07, 0.07, 0.02), ink, -0.09, 0.46, -0.27));
-      add(mesh(THREE, new THREE.BoxGeometry(r.eyes === 'wink' ? 0.09 : 0.07, r.eyes === 'wink' ? 0.03 : 0.07, 0.02), ink, 0.09, 0.46, -0.27));
+      add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.07, 0.07, 0.02), ink, -0.09, 0.46, -0.27));
+      add(mesh(THREE, G(THREE, out, 'BoxGeometry', r.eyes === 'wink' ? 0.09 : 0.07, r.eyes === 'wink' ? 0.03 : 0.07, 0.02), ink, 0.09, 0.46, -0.27));
     }
-    add(mesh(THREE, new THREE.BoxGeometry(0.16, 0.05, 0.02), ink, 0, 0.28, -0.23));
-    add(mesh(THREE, new THREE.BoxGeometry(0.1, 0.2, 0.28), mat(PALETTE.wheel), -0.3, 0.12, 0));
-    add(mesh(THREE, new THREE.BoxGeometry(0.1, 0.2, 0.28), mat(PALETTE.wheel), 0.3, 0.12, 0));
-    add(mesh(THREE, new THREE.CylinderGeometry(0.015, 0.015, 0.16, 4), ink, 0, 0.7, 0));
-    add(mesh(THREE, new THREE.SphereGeometry(0.045, 5, 4), mat(PALETTE.bulb), 0, 0.8, 0));
+    add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.16, 0.05, 0.02), ink, 0, 0.28, -0.23));
+    add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.1, 0.2, 0.28), mat(PALETTE.wheel), -0.3, 0.12, 0));
+    add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.1, 0.2, 0.28), mat(PALETTE.wheel), 0.3, 0.12, 0));
+    add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.015, 0.015, 0.16, 4), ink, 0, 0.7, 0));
+    add(mesh(THREE, G(THREE, out, 'SphereGeometry', 0.045, 5, 4), mat(PALETTE.bulb), 0, 0.8, 0));
     if (r.hat === 'cap') {
-      add(mesh(THREE, new THREE.BoxGeometry(0.42, 0.09, 0.42), mat(PALETTE.cap), 0, 0.66, 0));
-      add(mesh(THREE, new THREE.BoxGeometry(0.34, 0.03, 0.2), mat(PALETTE.cap), 0, 0.63, -0.3));
+      add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.42, 0.09, 0.42), mat(PALETTE.cap), 0, 0.66, 0));
+      add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.34, 0.03, 0.2), mat(PALETTE.cap), 0, 0.63, -0.3));
     } else if (r.hat === 'sun') {
       // The sunflower: a brown heart and eight petals, tipped a little (the mockup's).
       var sun = new THREE.Group();
-      sun.add(mesh(THREE, new THREE.CylinderGeometry(0.1, 0.1, 0.05, 8), mat(PALETTE.sunCrown), 0, 0, 0));
+      sun.add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.1, 0.1, 0.05, 8), mat(PALETTE.sunCrown), 0, 0, 0));
       out.meshCount += 1;
       for (var i = 0; i < 8; i++) {
-        var petal = mesh(THREE, new THREE.BoxGeometry(0.08, 0.03, 0.16), mat(PALETTE.sun), Math.sin((i * Math.PI) / 4) * 0.16, 0, Math.cos((i * Math.PI) / 4) * 0.16);
+        var petal = mesh(THREE, G(THREE, out, 'BoxGeometry', 0.08, 0.03, 0.16), mat(PALETTE.sun), Math.sin((i * Math.PI) / 4) * 0.16, 0, Math.cos((i * Math.PI) / 4) * 0.16);
         petal.rotation.y = (i * Math.PI) / 4;
         sun.add(petal);
         out.meshCount += 1;
@@ -646,20 +661,20 @@
       sun.rotation.z = -0.25;
       g.add(sun);
     } else if (r.hat === 'crown') {
-      add(mesh(THREE, new THREE.CylinderGeometry(0.17, 0.14, 0.14, 5, 1, true), mat(PALETTE.crown, { side: THREE.DoubleSide }), 0, 0.68, 0));
+      add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.17, 0.14, 0.14, 5, 1, true), mat(PALETTE.crown, { side: THREE.DoubleSide }), 0, 0.68, 0));
     }
     // The can, on the right: its body, its spout, and the level when there is one.
     var can = new THREE.Group();
     can.name = 'can';
-    can.add(mesh(THREE, new THREE.BoxGeometry(0.16, 0.2, 0.16), mat(PALETTE.can), 0, 0.1, 0));
-    var spout = mesh(THREE, new THREE.CylinderGeometry(0.02, 0.03, 0.18, 4), mat(PALETTE.can), 0, 0.16, -0.12);
+    can.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.16, 0.2, 0.16), mat(PALETTE.can), 0, 0.1, 0));
+    var spout = mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.02, 0.03, 0.18, 4), mat(PALETTE.can), 0, 0.16, -0.12);
     spout.rotation.x = 0.9;
     can.add(spout);
     out.meshCount += 2;
     if (r.can !== null && r.can !== undefined && isFinite(Number(r.can))) {
       var max = Number(r.canMax) > 0 ? Number(r.canMax) : 3;
       var share = Math.max(0, Math.min(1, Number(r.can) / max));
-      var level = mesh(THREE, new THREE.BoxGeometry(0.17, 0.2, 0.17), mat(PALETTE.canWater), 0, 0.1 * share, 0);
+      var level = mesh(THREE, G(THREE, out, 'BoxGeometry', 0.17, 0.2, 0.17), mat(PALETTE.canWater), 0, 0.1 * share, 0);
       level.name = 'level';
       level.scale.y = share;
       level.visible = share > 0;
@@ -677,17 +692,17 @@
       back.name = 'load';
       back.userData.load = load;
       if (load === 'stone') {
-        var st = mesh(THREE, new THREE.IcosahedronGeometry(1, 0), mat(PALETTE.rockLight), 0, 0, 0);
+        var st = mesh(THREE, G(THREE, out, 'IcosahedronGeometry', 1, 0), mat(PALETTE.rockLight), 0, 0, 0);
         st.scale.set(0.13, 0.1, 0.13);
         back.add(st);
         out.meshCount += 1;
       } else if (load === 'letter') {
-        back.add(mesh(THREE, new THREE.BoxGeometry(0.28, 0.2, 0.03), mat(PALETTE.letter), 0, 0, 0));
-        back.add(mesh(THREE, new THREE.BoxGeometry(0.2, 0.08, 0.02), mat(PALETTE.letterInk), 0, 0.04, 0.02));
+        back.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.28, 0.2, 0.03), mat(PALETTE.letter), 0, 0, 0));
+        back.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.2, 0.08, 0.02), mat(PALETTE.letterInk), 0, 0.04, 0.02));
         out.meshCount += 2;
       } else {
-        back.add(mesh(THREE, new THREE.BoxGeometry(0.24, 0.18, 0.18), mat(PALETTE.parcel), 0, 0, 0));
-        back.add(mesh(THREE, new THREE.BoxGeometry(0.25, 0.04, 0.19), mat(PALETTE.coral), 0, 0, 0));
+        back.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.24, 0.18, 0.18), mat(PALETTE.parcel), 0, 0, 0));
+        back.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.25, 0.04, 0.19), mat(PALETTE.coral), 0, 0, 0));
         out.meshCount += 2;
       }
       back.position.set(0, 0.46, 0.3);
@@ -702,9 +717,9 @@
    * Every mesh of a world, pure in THREE: `{ root, tiles, decor, things, robots, lights, meshCount }`. Instanced
    * tiles and instanced decorations count as one mesh each. The engine adds `root` to its scene; the gate counts.
    */
-  function buildScene(world, THREE) {
-    var out = { meshCount: 0 };
-    var mat = materials(THREE);
+  function buildScene(world, THREE, shared) {
+    var out = { meshCount: 0, geos: shared ? shared.geos : null };
+    var mat = shared ? shared.mat : materials(THREE);
     var root = new THREE.Group();
     root.name = 'garden';
     var ground = buildGround(world.map, THREE, mat, out);
@@ -791,11 +806,12 @@
    * the mockup's source: its 35° is from the vertical, as here. The angles are the look Richard grades; the maths below
    * takes any.
    */
-  var CAMERA = { tiltDeg: 35, yawRad: 0.42, fovDeg: 38, targetY: 0.4, near: 0.1, far: 200, minTiles: 3, margin: 0.92, objectHeight: 1.3 };
+  var CAMERA = { tiltDeg: 35, yawRad: 0.42, fovDeg: 38, targetY: 0.4, fitScale: 1.18, fitPad: 1.2, near: 0.1, far: 200, minTiles: 3, margin: 0.92, objectHeight: 1.3 };
 
   /**
-   * A camera state is a target on the ground and a distance: `{ tx, tz, dist }`. Position and basis follow: the camera
-   * sits `dist` from the target, 35° off the vertical, on the side the yaw turns it to (yaw 0 = straight in from +z).
+   * A camera state is a target on the ground and a distance: `{ tx, tz, dist }`. Position and basis follow, exactly as
+   * the mockup places its camera (island-3d.html `v.apply`): at (tx + d·sin35·sin yaw, d·cos35, tz + d·sin35·cos yaw),
+   * looking at (tx, 0.4, tz) — the tile tops. Forward points at that target; right is level; up = right × forward.
    */
   function pose(state) {
     var tilt = (CAMERA.tiltDeg * Math.PI) / 180;
@@ -804,12 +820,16 @@
     var sy = Math.sin(CAMERA.yawRad);
     var cy = Math.cos(CAMERA.yawRad);
     var ty = CAMERA.targetY;
-    var position = [state.tx + state.dist * s * sy, ty + state.dist * c, state.tz + state.dist * s * cy];
-    // forward = (target − position) / dist; right is level, square to forward; up = right × forward.
-    var forward = [-s * sy, -c, -s * cy];
-    var right = [cy, 0, -sy];
-    var up = [-c * sy, s, -c * cy];
-    return { position: position, target: [state.tx, ty, state.tz], forward: forward, right: right, up: up };
+    var position = [state.tx + state.dist * s * sy, state.dist * c, state.tz + state.dist * s * cy];
+    var f = [state.tx - position[0], ty - position[1], state.tz - position[2]];
+    var fl = Math.sqrt(f[0] * f[0] + f[1] * f[1] + f[2] * f[2]) || 1;
+    var forward = [f[0] / fl, f[1] / fl, f[2] / fl];
+    // right = forward × (0, 1, 0), normalised: level, whatever the pitch.
+    var r = [-forward[2], 0, forward[0]];
+    var rl = Math.sqrt(r[0] * r[0] + r[2] * r[2]) || 1;
+    var right = [r[0] / rl, 0, r[2] / rl];
+    var up = [right[1] * forward[2] - right[2] * forward[1], right[2] * forward[0] - right[0] * forward[2], right[0] * forward[1] - right[1] * forward[0]];
+    return { position: position, target: [state.tx, ty, state.tz], forward: forward, right: right, up: up, range: fl };
   }
 
   function tanHalf() {
@@ -915,6 +935,20 @@
     return { tx: cx, tz: cz, dist: hi };
   }
 
+  /**
+   * The mockup's framing (island-3d.html `v.fit`): the target at the rectangle's centre, the distance at which its width
+   * fills the view across or its depth (foreshortened by the tilt) fills it down, whichever is further, × 1.18 + 1.2.
+   * It fills the stage and lets the corners of the turned rectangle run off it — the look Richard grades (IG-007 AC5).
+   * `frameRect` (everything inside a margin) stays the zoom-out bound, so a pinch can always show the whole map.
+   */
+  function fitRect(map, rect, aspect) {
+    var t = tanHalf();
+    var tilt = (CAMERA.tiltDeg * Math.PI) / 180;
+    var across = rect.w / (2 * t * aspect);
+    var down = (rect.h * Math.cos(tilt)) / (2 * t);
+    return { tx: rect.x + rect.w / 2 - map.w / 2, tz: rect.y + rect.h / 2 - map.h / 2, dist: Math.max(across, down) * CAMERA.fitScale + CAMERA.fitPad };
+  }
+
   /** The zoom range of a map: from a `minTiles` square to the whole map and a quarter beyond. */
   function zoomBounds(map, aspect) {
     var small = Math.min(CAMERA.minTiles, Math.max(1, Math.min(map.w, map.h)));
@@ -932,12 +966,12 @@
     return { tx: Math.max(-hw, Math.min(hw, isFinite(state.tx) ? state.tx : 0)), tz: Math.max(-hh, Math.min(hh, isFinite(state.tz) ? state.tz : 0)), dist: dist };
   }
 
-  /** Screen pixels per world unit on the ground at the target, for a pan that keeps the ground under the finger. */
+  /** Screen pixels per world unit at the target, for a pan that keeps the ground under the finger. */
   function pixelsPerUnit(state, heightPx) {
-    return heightPx / (2 * state.dist * tanHalf());
+    return heightPx / (2 * pose(state).range * tanHalf());
   }
 
-  var CAMERA_API = { CAMERA: CAMERA, pose: pose, project: project, rayFromNdc: rayFromNdc, pickTile: pickTile, focusRect: focusRect, frameRect: frameRect, zoomBounds: zoomBounds, clampCamera: clampCamera, pixelsPerUnit: pixelsPerUnit, tileCentre: tileCentre, tileHeight: tileHeight, kindAt: kindAt };
+  var CAMERA_API = { CAMERA: CAMERA, pose: pose, project: project, rayFromNdc: rayFromNdc, pickTile: pickTile, focusRect: focusRect, frameRect: frameRect, fitRect: fitRect, zoomBounds: zoomBounds, clampCamera: clampCamera, pixelsPerUnit: pixelsPerUnit, tileCentre: tileCentre, tileHeight: tileHeight, kindAt: kindAt };
 
   // ═══════════════════════════════════════════════════════════════════════════
   // The engine — the browser half. Supported is decided here; a page with no THREE or no WebGL2 gets a quiet no.
@@ -953,10 +987,11 @@
   var POP_MS = 300;
   var CAMERA_MS = 400;
   /**
-   * The fallback's cue (IG-007 AC4): Frame Ms above `ms` for `forMs` of VISIBLE time after Ready fires Too Slow, once.
-   * It is decided here, where the frames are: a hidden window draws no frame and so counts no time (a frame throttle
-   * never fires in a hidden window — without that the fallback would fire on every minimised app), and coming back
-   * into view starts the count again.
+   * The fallback's cue (IG-007 AC4): Frame Ms above `ms` for `forMs` of SAMPLED time after Ready fires Too Slow, once.
+   * It is decided here, where the frames are. Sampled time is the intervals between frames of one busy, visible spell:
+   * a hidden window draws no frame and counts no time (a frame throttle never fires in a hidden window — without that
+   * the fallback would fire on every minimised app; coming back into view starts the count again), and a still scene
+   * draws no frame either (nothing is timed under the win card's blur).
    */
   var SLOW = { ms: 50, forMs: 3000 };
 
@@ -1013,6 +1048,7 @@
       ready: false,
       frames: [],
       frameMs: 0,
+      handMoved: false,
       drawCalls: 0,
       destroy: function () {}
     };
@@ -1059,8 +1095,9 @@
     var rafId = 0;
     var lastFrame = 0;
     var lastReport = 0;
-    var slowSince = 0;
+    var slowFor = 0;
     var tooSlow = false;
+    var bubbleTimer = null;
     var destroyed = false;
     var width = 1;
     var height = 1;
@@ -1089,7 +1126,12 @@
       renderer.setSize(w, hh, false);
       camera.aspect = eng.aspect;
       camera.updateProjectionMatrix();
-      if (eng.world) eng.state = clampCamera(eng.state, eng.world.map, eng.aspect);
+      // 🔴 The first framing happens at the first world, often before the stage is laid out (a 300×150 canvas): until a
+      // finger has moved the camera, a new size re-frames (s1's and s2's first shots sat far out, at 14.9 not 11.4).
+      if (eng.world && !eng.handMoved) {
+        eng.state = clampCamera(goalState(), eng.world.map, eng.aspect);
+        anims.camera = null;
+      } else if (eng.world) eng.state = clampCamera(eng.state, eng.world.map, eng.aspect);
     };
 
     var applyCamera = function () {
@@ -1101,12 +1143,12 @@
     /** The state the Camera and Focus ports ask for, from the current world. */
     var goalState = function () {
       var map = eng.world.map;
-      if (eng.cameraMode === 'island') return frameRect(map, { x: 0, y: 0, w: Math.max(1, map.w), h: Math.max(1, map.h) }, eng.aspect);
+      if (eng.cameraMode === 'island') return fitRect(map, { x: 0, y: 0, w: Math.max(1, map.w), h: Math.max(1, map.h) }, eng.aspect);
       if (eng.cameraMode === 'follow' && eng.built && eng.built.robots.length) {
         var r = eng.built.robots[0];
         return { tx: r.position.x, tz: r.position.z, dist: eng.state.dist };
       }
-      return frameRect(map, focusRect(map, eng.focus), eng.aspect);
+      return fitRect(map, focusRect(map, eng.focus), eng.aspect);
     };
 
     var glideCamera = function (to, ms) {
@@ -1195,13 +1237,18 @@
     };
 
     // ── The world: rebuild the scene when the map changes; move robots and things when they change ──
+    // The engine's caches (G, materials): every build shares them, so a rebuild uploads nothing new. A dropped build
+    // gives back only its instanced meshes' own buffers; the shared geometry goes with the engine.
+    var shared = { geos: {}, mat: materials(THREE) };
     var disposeGroup = function (g) {
-      if (!g) return;
-      if (typeof g.traverse === 'function') {
-        g.traverse(function (obj) {
-          if (obj.geometry && obj.geometry.dispose) obj.geometry.dispose();
-        });
-      }
+      if (!g || typeof g.traverse !== 'function') return;
+      g.traverse(function (obj) {
+        if (obj.isInstancedMesh && typeof obj.dispose === 'function') obj.dispose();
+      });
+    };
+    var disposeShared = function () {
+      for (var k in shared.geos) if (shared.geos[k] && shared.geos[k].dispose) shared.geos[k].dispose();
+      shared.geos = {};
     };
     var setWorld = function (world) {
       var first = !eng.world;
@@ -1211,7 +1258,7 @@
       eng.world = world;
       if (mapChanged || thingsChanged) {
         var oldBuilt = eng.built;
-        eng.built = buildScene(world, THREE);
+        eng.built = buildScene(world, THREE, shared);
         eng.meshCount = eng.built.meshCount;
         if (oldBuilt) {
           scene.remove(oldBuilt.root);
@@ -1262,6 +1309,7 @@
         rebuildOverlay();
         if (mapChanged) {
           eng.state = clampCamera(goalState(), world.map, eng.aspect);
+          eng.handMoved = false;
           anims.camera = null;
         }
       }
@@ -1371,8 +1419,11 @@
       rafId = 0;
       if (destroyed || !eng.world) return;
       var t = now();
+      // A sample is the interval between two frames of one busy, visible spell: the first frame after an idle or a
+      // hidden spell is not one (lastFrame is 0 then), so a still scene and a minimised app add nothing.
       if (lastFrame && eng.ready && visible()) {
-        eng.frames.push(t - lastFrame);
+        var dt = t - lastFrame;
+        eng.frames.push(dt);
         if (eng.frames.length > FRAME_WINDOW) eng.frames.shift();
         if (t - lastReport >= FRAME_REPORT_MS) {
           lastReport = t;
@@ -1382,16 +1433,17 @@
             setAttr('data-frame-ms', ms);
             if (typeof o.onFrameMs === 'function') o.onFrameMs(ms);
           }
-          // Too Slow: the readout above SLOW.ms at every report for SLOW.forMs of the frames' own (visible) time.
-          if (!tooSlow) {
-            if (ms <= SLOW.ms) slowSince = 0;
-            else if (!slowSince) slowSince = t;
-            else if (t - slowSince >= SLOW.forMs) {
-              tooSlow = true;
-              eng.tooSlow = true;
-              setAttr('data-too-slow', 'true');
-              if (typeof o.onTooSlow === 'function') o.onTooSlow(ms);
-            }
+        }
+        // Too Slow: the sampled time (moving, visible) the readout has stayed above SLOW.ms, added up across the short
+        // still gaps between two glides; a readout at or under SLOW.ms starts it again.
+        if (!tooSlow) {
+          if (eng.frameMs > SLOW.ms) slowFor += dt;
+          else slowFor = 0;
+          if (slowFor >= SLOW.forMs) {
+            tooSlow = true;
+            eng.tooSlow = true;
+            setAttr('data-too-slow', 'true');
+            if (typeof o.onTooSlow === 'function') o.onTooSlow(eng.frameMs);
           }
         }
       }
@@ -1415,17 +1467,37 @@
         setAttr('data-ready', 'true');
         if (typeof o.onReady === 'function') o.onReady();
       }
-      schedule();
+      // On demand: another frame only while something moves or a finger is down. A still scene draws nothing — the
+      // CPU is Olive's while she thinks (AC3), and nothing under the win card's blur is timed.
+      if (busy()) schedule();
+      else {
+        lastFrame = 0;
+        setAttr('data-idle', 'true');
+      }
+    };
+    /** Anything that changes the picture from one frame to the next. */
+    var busy = function () {
+      if (anims.camera || anims.hop) return true;
+      var k;
+      for (k in anims.tulips) return true;
+      for (k in anims.pops) return true;
+      for (var i = 0; i < anims.robots.length; i++) {
+        var a = anims.robots[i];
+        if (a && (a.from || a.yawStart || a.bumpStart)) return true;
+      }
+      for (k in pointers) return true;
+      return false;
     };
     var schedule = function () {
       if (destroyed || rafId || !raf) return;
       if (!visible()) return;
+      if (o.root && typeof o.root.removeAttribute === 'function') o.root.removeAttribute('data-idle');
       rafId = raf(frame);
     };
     var onVisibility = function () {
       if (visible()) {
         lastFrame = 0;
-        slowSince = 0;
+        slowFor = 0;
         eng.frames = [];
         schedule();
       }
@@ -1461,6 +1533,7 @@
         var b = pointers[ids[1]];
         pinch = { d0: Math.hypot(a.x - b.x, a.y - b.y), dist0: eng.state.dist, happened: true };
       }
+      schedule();
       try {
         if (o.canvas.setPointerCapture) o.canvas.setPointerCapture(ev.pointerId);
       } catch (e) {
@@ -1486,6 +1559,7 @@
           var along = dy / (ppu * Math.cos(tilt));
           eng.state = clampCamera({ tx: eng.state.tx - (cy * dx) / ppu - sy * along, tz: eng.state.tz + (sy * dx) / ppu - cy * along, dist: eng.state.dist }, eng.world.map, eng.aspect);
           anims.camera = null;
+          eng.handMoved = true;
           if (eng.cameraMode === 'follow') eng.cameraMode = 'plot-held';
         }
       } else if (count() === 2 && pinch) {
@@ -1495,6 +1569,7 @@
         var d1 = Math.hypot(a.x - b.x, a.y - b.y) || 1;
         eng.state = clampCamera({ tx: eng.state.tx, tz: eng.state.tz, dist: (pinch.dist0 * pinch.d0) / d1 }, eng.world.map, eng.aspect);
         anims.camera = null;
+        eng.handMoved = true;
         if (press) press.moved = TAP_SLOP_PX + 1;
       }
     };
@@ -1506,12 +1581,15 @@
         press = null;
       }
       if (count() < 2) pinch = null;
+      schedule();
     };
     var onWheel = function (ev) {
       if (ev.preventDefault) ev.preventDefault();
       var factor = Math.exp((ev.deltaY || 0) * 0.0012);
       eng.state = clampCamera({ tx: eng.state.tx, tz: eng.state.tz, dist: eng.state.dist * factor }, eng.world.map, eng.aspect);
       anims.camera = null;
+      eng.handMoved = true;
+      schedule();
     };
     var tap = function (sx, sy) {
       if (!eng.world) return;
@@ -1530,13 +1608,19 @@
     }
     var ro = null;
     if (typeof ResizeObserver === 'function' && o.root) {
+      // A resize clears the canvas: draw once more (on demand, nothing else would).
       ro = new ResizeObserver(function () {
         resize();
+        schedule();
       });
       ro.observe(o.root);
     } else if (typeof window !== 'undefined' && window.addEventListener) {
-      window.addEventListener('resize', resize);
-      listeners.push([window, 'resize', resize]);
+      var onResize = function () {
+        resize();
+        schedule();
+      };
+      window.addEventListener('resize', onResize);
+      listeners.push([window, 'resize', onResize]);
     }
 
     // ── The API the node wires ──
@@ -1552,7 +1636,10 @@
       eng.cameraMode = mode === 'island' || mode === 'follow' ? mode : 'plot';
       eng.focus = focus;
       setAttr('data-camera', eng.cameraMode);
-      if (eng.world && changed) glideCamera(goalState(), CAMERA_MS);
+      if (eng.world && changed) {
+        eng.handMoved = false;
+        glideCamera(goalState(), CAMERA_MS);
+      }
       schedule();
     };
     eng.setBubble = function (b) {
@@ -1560,6 +1647,15 @@
       var ms = bubble ? Number(b.ms) : 0;
       if (bubble && (!isFinite(ms) || ms <= 0)) ms = bubble.style === 'olive' ? 3200 : 1100;
       bubbleUntil = bubble ? now() + ms : 0;
+      // The bubble goes on a timer, not on a frame: a still scene draws none (coalesce on a timer, never on rAF).
+      if (bubbleTimer) clearTimeout(bubbleTimer);
+      bubbleTimer = bubble && typeof setTimeout === 'function' ? setTimeout(function () {
+        bubbleTimer = null;
+        if (destroyed) return;
+        bubble = null;
+        bubbleUntil = 0;
+        if (eng.built) rebuildOverlay();
+      }, ms) : null;
       if (eng.built) rebuildOverlay();
       schedule();
     };
@@ -1588,12 +1684,14 @@
     eng.frame = frame;
     eng.destroy = function () {
       destroyed = true;
+      if (bubbleTimer) clearTimeout(bubbleTimer);
       if (rafId) caf(rafId);
       listeners.forEach(function (l) {
         l[0].removeEventListener(l[1], l[2]);
       });
       if (ro) ro.disconnect();
       if (eng.built) disposeGroup(eng.built.root);
+      disposeShared();
       if (renderer && renderer.dispose) renderer.dispose();
     };
     resize();
@@ -1789,9 +1887,9 @@
       onTileY: { type: 'number', displayName: 'Tile Y', group: 'Taps', description: 'The row of the last tapped tile.' },
       onTileTapped: { type: 'signal', displayName: 'Tile Tapped', group: 'Taps', description: 'A tile was tapped. Tile X and Tile Y already hold it.' },
       onReady: { type: 'signal', displayName: 'Ready', group: 'Events', description: 'The world is on the page.' },
-      onFrameMs: { type: 'number', displayName: 'Frame Ms', group: 'Events', description: 'The rolling p95 of the last 60 frame intervals in ms, measured after Ready and only while the page is visible. Above 33 is under 30 fps.' },
+      onFrameMs: { type: 'number', displayName: 'Frame Ms', group: 'Events', description: 'The rolling p95 of the last 60 frame intervals in ms, measured after Ready, only while the page is visible and only while something moves (the scene is drawn on demand). Above 33 is under 30 fps.' },
       onSupported: { type: 'boolean', displayName: 'Supported', group: 'Events', description: 'True when a WebGL2 context could be made and three.js is on the page. False: nothing is drawn, nothing throws, Ready never fires — swap in Garden.' },
-      onTooSlow: { type: 'signal', displayName: 'Too Slow', group: 'Events', description: 'Fires once when Frame Ms has stayed above 50 ms (under 20 fps) for 3 s of visible time after Ready — the page’s cue to swap in Garden. A hidden window counts no time.' }
+      onTooSlow: { type: 'signal', displayName: 'Too Slow', group: 'Events', description: 'Fires once when Frame Ms has stayed above 50 ms (under 20 fps) for 3 s of moving, visible time after Ready — the page’s cue to swap in Garden. A hidden window and a still scene count no time.' }
     }
   };
 
