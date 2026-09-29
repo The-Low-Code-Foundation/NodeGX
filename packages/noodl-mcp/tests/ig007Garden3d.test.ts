@@ -621,6 +621,57 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       eng.destroy();
     });
 
+    it('🔴 a Robots write that changes only the can, or only carry, redraws the level and the load (a move alone rebuilds nothing)', () => {
+      const { THREE } = threeStub();
+      const dom = fakeDom();
+      const eng = node().engine.create({ THREE, root: dom.root, canvas: dom.canvas, overlay: dom.overlay, doc: dom.doc, now: () => 0, raf: () => 1, caf: () => {} });
+      const things = W().parseThings([{ kind: 'tulip', x: 3, y: 1 }]);
+      const world = (r: Record<string, unknown>) => ({ map: W().parseMap(MOCKUP), things, robots: W().parseRobots([{ x: 1, y: 1, d: 3, can: 0, canMax: 3, carry: [], ...r }]) });
+      const levelOf = () => named(eng.built.robots[0], 'level');
+      const loadOf = () => (named(eng.built.robots[0], 'load') ? named(eng.built.robots[0], 'load').userData.load : null);
+      eng.setWorld(world({}));
+      expect([levelOf().userData.can, levelOf().visible]).toEqual([0, false]);
+      // fill: only the can changes (IG-002's fetch-and-return) — the drawn level follows.
+      eng.setWorld(world({ can: 3 }));
+      expect([levelOf().userData.can, levelOf().visible, levelOf().scale.y]).toEqual([3, true, 1]);
+      // a pick: only carry changes — the load on the back follows.
+      eng.setWorld(world({ can: 3, carry: ['stone'] }));
+      expect(loadOf()).toBe('stone');
+      eng.setWorld(world({ can: 3, carry: ['stone', 'letter'] }));
+      expect(loadOf()).toBe('letter');
+      // A move alone keeps the built scene (no rebuild for a glide) and still glides.
+      const built = eng.built;
+      eng.setWorld(world({ x: 2, can: 3, carry: ['stone', 'letter'] }));
+      expect(eng.built).toBe(built);
+      expect(eng.robotAt(0).gliding === true || eng.robotAt(0).x !== undefined).toBe(true);
+      // A look change mid-glide keeps the glide: the rebuilt robot starts where the old one was drawn.
+      const x0 = eng.robotAt(0).x;
+      eng.setWorld(world({ x: 2, can: 2, carry: ['stone', 'letter'] }));
+      expect(eng.built).not.toBe(built);
+      expect(eng.robotAt(0).x).toBeCloseTo(x0, 6);
+      expect(levelOf().userData.can).toBe(2);
+      eng.destroy();
+      // A move and a look change in ONE write (a step that also fills): the robot glides there, it never jumps.
+      const clock = { t: 0 };
+      const e2 = node().engine.create({ THREE, root: dom.root, canvas: dom.canvas, overlay: dom.overlay, doc: dom.doc, now: () => clock.t, raf: () => 1, caf: () => {} });
+      e2.setWorld(world({ x: 2, can: 2 }));
+      clock.t = 1000;
+      e2.frame();
+      const settled = e2.robotAt(0);
+      e2.setWorld(world({ x: 3, can: 1 }));
+      clock.t = 1100;
+      e2.frame();
+      const moving = e2.robotAt(0);
+      expect(moving.gliding).toBe(true);
+      expect(moving.x).toBeGreaterThan(settled.x);
+      expect(moving.x).toBeLessThan(settled.x + 0.9);
+      clock.t = 2000;
+      e2.frame();
+      expect(e2.robotAt(0).x).toBeCloseTo(settled.x + 1, 6);
+      expect(named(e2.built.robots[0], 'level').userData.can).toBe(1);
+      e2.destroy();
+    });
+
     it('🔴 Too Slow fires once when Frame Ms stays above 50 ms for 3 s of moving, visible time; fast frames never; a hidden spell restarts the count', () => {
       const E = node().engine;
       expect(E.SLOW).toEqual({ ms: 50, forMs: 3000 });

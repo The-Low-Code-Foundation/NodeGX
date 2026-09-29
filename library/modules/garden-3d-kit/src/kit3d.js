@@ -1262,13 +1262,25 @@
       for (var k in shared.geos) if (shared.geos[k] && shared.geos[k].dispose) shared.geos[k].dispose();
       shared.geos = {};
     };
+    /** What of the robots the scene builder draws, beyond where they stand and face. */
+    var lookKey = function (robots) {
+      return JSON.stringify(
+        (robots || []).map(function (r) {
+          return [r.colour, r.eyes, r.hat, r.name, r.can, r.canMax, r.carry];
+        })
+      );
+    };
     var setWorld = function (world) {
       var first = !eng.world;
       var mapChanged = first || !eng.world || JSON.stringify(eng.world.map.rows) !== JSON.stringify(world.map.rows) || JSON.stringify(eng.world.map.legend) !== JSON.stringify(world.map.legend);
       var thingsChanged = first || JSON.stringify(eng.world.things) !== JSON.stringify(world.things);
+      // 🔴 A robot's own look (its can level, its load, its colour, eyes, hat, name) and how many robots there are are
+      // part of the built scene too: a Robots write that changes only those (a fill, a pick) rebuilds, reusing the
+      // engine's shared geometry and materials, and the robots keep their glide below. A move or a turn alone does not.
+      var robotsChanged = first || lookKey(eng.world.robots) !== lookKey(world.robots);
       var previous = eng.world;
       eng.world = world;
-      if (mapChanged || thingsChanged) {
+      if (mapChanged || thingsChanged || robotsChanged) {
         var oldBuilt = eng.built;
         eng.built = buildScene(world, THREE, shared);
         eng.meshCount = eng.built.meshCount;
@@ -1287,6 +1299,9 @@
             g.rotation.y = old.rotation.y;
             var oa = anims.robots[i];
             if (oa) {
+              // The OLD goal: a move that arrives in the same write as a look or thing change is then seen as a move
+              // below and glides from where the robot is drawn, instead of jumping there.
+              a.goal = oa.goal;
               a.from = oa.from;
               a.start = oa.start;
               a.ms = oa.ms;
