@@ -318,9 +318,23 @@ ${owlColourRule}
 .bg-proposal { box-shadow: var(--shadow-soft); animation: bg-pop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 .bg-prop-blocks { font-weight: 700; }
 
-/* The steps (the mockup's .script). The block list scrolls in its own box (AC4). */
-.bg-blocks-box { max-height: min(52vh, 460px); overflow-y: auto !important; overscroll-behavior: contain; }
-@media (max-width: 980px) { .bg-blocks-box { max-height: 38vh; } }
+/* The steps (the mockup's .script). P108 IW-001 F6: the drawer and the program are TWO boxes, and the program's is the
+   one that scrolls (AC4). Beside the world (over 980 px) the steps panel is a screen tall — never shorter than the world's
+   column (contain: size, so a long program never makes the row, and the page, taller) — with the drawer a strip on the
+   left (Scratch's side) and the program taking all the rest of the height; under 980 px the drawer sits over the program. */
+.bg-blocks-box { display: flex !important; flex-direction: column; min-height: 0; }
+.bg-blocks-box > .gd-blocks { display: flex !important; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+.bg-blocks-box .gd-palette { flex: none; margin: 0 0 10px; padding: 10px; background: var(--paper-2); border-radius: 14px; border-bottom: 0; }
+.bg-blocks-box .gd-prog { flex: 1 1 auto; min-height: 120px; max-height: 60vh; overflow-y: auto; overscroll-behavior: contain; padding: 6px; border: 2px dashed var(--paper-2); border-radius: 14px; gap: 3px; }
+.bg-blocks-box .gd-prog .gd-blk { padding-top: 6px; padding-bottom: 6px; max-width: 100%; flex-wrap: wrap; }
+@media (min-width: 981px) {
+  .bg-steps { align-self: stretch !important; contain: size; min-height: calc(100vh - 16px); display: flex !important; flex-direction: column !important; }
+  .bg-steps > .bg-blocks-box { flex: 1 1 0 !important; min-height: 0 !important; }
+  .bg-blocks-box > .gd-blocks { display: grid !important; grid-template-columns: minmax(132px, 40%) minmax(0, 1fr); gap: 10px; height: 100%; }
+  .bg-blocks-box .gd-palette { margin: 0; flex-direction: column; flex-wrap: nowrap; align-items: stretch; overflow-y: auto; overscroll-behavior: contain; min-height: 0; }
+  .bg-blocks-box .gd-palette .gd-pal-item > .gd-blk { flex: 1 1 auto; min-width: 0; }
+  .bg-blocks-box .gd-prog { max-height: none; min-height: 0; }
+}
 /* An ask block Olive cannot be asked with yet (CG-005 AC6): the reason, in words, under the block list. */
 .bg-slot-msg::before { content: '!'; display: inline-block; width: 18px; height: 18px; margin-right: 6px; border-radius: 50%; background: var(--coral); color: var(--on-fill); font-size: 12px; line-height: 18px; text-align: center; }
 .bg-tidy { animation: bg-pop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }

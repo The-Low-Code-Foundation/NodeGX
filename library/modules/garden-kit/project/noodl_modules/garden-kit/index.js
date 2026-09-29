@@ -358,7 +358,7 @@
   /** The blocks' stylesheet: the mockup's .blk / .prog / .rep rules, prefixed gd-. The colours are CSS variables the ports set on the root. */
   var BLOCKS_CSS =
     '.gd-blocks{position:relative;font-family:inherit;color:#2E2A3D;-webkit-tap-highlight-color:transparent}\n' +
-    '.gd-palette{display:flex;flex-wrap:wrap;gap:12px 14px;margin:0 0 12px;padding:8px 8px 12px 0;border-bottom:2px dashed #EBDFC4}\n' +
+    '.gd-palette{display:flex;flex-wrap:wrap;gap:6px 8px;margin:0 0 12px;padding-bottom:12px;border-bottom:2px dashed #EBDFC4}\n' +
     '.gd-blk{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:12px;color:#fff;font-weight:800;font-size:15px;line-height:1.2;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;border:0;font-family:inherit;cursor:pointer;position:relative;text-align:left}\n' +
     '.gd-blk .gd-ic{width:20px;height:20px;flex:none}\n' +
     '.gd-motion{background:var(--gd-motion)}.gd-action{background:var(--gd-action)}.gd-control{background:var(--gd-control)}.gd-ask{background:var(--gd-ask)}\n' +
@@ -373,10 +373,10 @@
     // white steps panel, inside a repeat (#FFF0DA) and against every block fill; the sun outline was 1.44:1 on white.
     '.gd-blk.gd-run{outline:3px solid var(--gd-run);outline-offset:4px;box-shadow:0 0 0 4px #fff,inset 0 -3px 0 rgba(0,0,0,.18);transform:scale(1.04)}\n' +
     '.gd-x{margin-left:4px;font-size:13px;background:none;border:0;color:inherit;font-weight:800;cursor:pointer;padding:0 2px;font-family:inherit;touch-action:manipulation}\n' +
-    // P108 IW-001 F4: the ? on a DRAWER block (Show Help) — the block's card. Violet ink on white, 24 px, on the block's
-    // top-right corner; the tap target is the 24 px disc plus its 4 px halo.
-    '.gd-pal-item{position:relative;display:inline-flex}\n' +
-    '.gd-pal-item .gd-help{position:absolute;top:-8px;right:-8px;margin:0;box-shadow:0 0 0 3px #fff,0 1px 3px rgba(0,0,0,.25);z-index:1}\n' +
+    // P108 IW-001 F4: the ? on a DRAWER block (Show Help) — the block's card. Violet ink on white, 24 px, tucked against
+    // the block's right edge (never over its word), a white ring so it reads on every block colour.
+    '.gd-pal-item{display:inline-flex;align-items:center}\n' +
+    '.gd-pal-item .gd-help{margin-left:-6px;position:relative;z-index:1;box-shadow:0 0 0 2px #fff,0 1px 3px rgba(0,0,0,.25)}\n' +
     '.gd-locked .gd-pal-item .gd-help{pointer-events:auto}\n' +
     // F5: a tapped simple block is selected (a ring), never removed.
     '.gd-row[data-sel="1"]>.gd-blk{outline:3px solid var(--gd-control);outline-offset:2px}\n' +

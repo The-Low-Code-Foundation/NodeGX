@@ -1203,7 +1203,7 @@
         "rowGap": "var(--space-2-5)",
         "backgroundColor": "var(--card)",
         "borderRadius": "var(--radius-card)",
-        "cssClassName": "bg-panel",
+        "cssClassName": "bg-panel bg-steps",
         "paddingTop": "var(--space-3-5)",
         "paddingBottom": "var(--space-3-5)",
         "paddingLeft": "var(--space-3-5)",

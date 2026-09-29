@@ -903,7 +903,8 @@ const PLAY: CgComponent = {
     place('plUse', BUTTON_NODE, 'Use them', 'plPropBtns', { ...btn('ask', '', { ...pad(8, 14), fontSize: px(14), cssClassName: 'bg-prop-use' }), label: 'Use them' }),
     place('plNoThanks', BUTTON_NODE, 'No thanks', 'plPropBtns', { ...btn('quiet', '', { ...pad(8, 14), fontSize: px(14), cssClassName: 'bg-prop-no' }), label: 'No thanks' }),
     text('plOwlMeta', 'Where she lives', 'plOwlCol', '', { fontSize: px(12), color: 'var(--violet-meta)', cssClassName: 'bg-owl-meta' }),
-    group('plRight', 'The steps side', 'plWs', { ...column({ rowGap: sp(10) }), ...PANEL }, ['plStepsHead', 'plCardBox', 'plStepsNote', 'plBlocksBox', 'plSlotMsg', 'plTidy']),
+    // P108 IW-001 F6: bg-steps — a screen tall beside the world, the program box taking the rest of it (cg007Look).
+    group('plRight', 'The steps side', 'plWs', { ...column({ rowGap: sp(10) }), ...PANEL, cssClassName: 'bg-panel bg-steps' }, ['plStepsHead', 'plCardBox', 'plStepsNote', 'plBlocksBox', 'plSlotMsg', 'plTidy']),
     group('plStepsHead', 'The steps’ head', 'plRight', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'space-between', flexWrap: 'nowrap' }), ['plStepsH', 'plCount']),
     text('plStepsH', 'Pip’s steps', 'plStepsHead', '', { ...T_H2, fontSize: px(20) }),
     text('plCount', 'How many blocks', 'plStepsHead', '', { sizeMode: 'contentSize', fontSize: px(13), fontWeight: '800', color: 'var(--ink-2)', mounted: false }),

@@ -437,10 +437,14 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(String(params(root).cssClassName)).toBe('bg-win');
     });
 
-    it('AC4: the block list scrolls in its own box', () => {
+    it('AC4, P108 IW-001 F6: the drawer and the program are two boxes, the program box scrolls on its own and takes the steps panel’s height (a screen tall beside the world, less 16 px), no longer min(52vh, 460px)', () => {
       const box = nodesOf(built, C.play).find((n) => n.id === 'plBlocksBox')!;
       expect(params(box).cssClassName).toBe('bg-blocks-box');
-      expect(GARDEN_CSS).toMatch(/\.bg-blocks-box \{ max-height: [^;]+; overflow-y: auto !important;/);
+      expect(String(params(nodesOf(built, C.play).find((n) => n.id === 'plRight')!).cssClassName)).toBe('bg-panel bg-steps');
+      expect(GARDEN_CSS).not.toContain('min(52vh, 460px)');
+      expect(GARDEN_CSS).toMatch(/\.bg-blocks-box \.gd-prog \{ flex: 1 1 auto; min-height: 120px; max-height: 60vh; overflow-y: auto;/);
+      expect(GARDEN_CSS).toMatch(/\.bg-steps \{ align-self: stretch !important; contain: size; min-height: calc\(100vh - 16px\);/);
+      expect(GARDEN_CSS).toMatch(/\.bg-blocks-box > \.gd-blocks \{ display: grid !important; grid-template-columns: minmax\(132px, 40%\) minmax\(0, 1fr\);/);
     });
   });
 
