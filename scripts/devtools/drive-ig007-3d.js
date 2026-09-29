@@ -384,6 +384,31 @@ withDeployedSite({ dir: DIR, gpu: true, chromeArgs: ['--use-angle=swiftshader', 
   readings.island = { meshes: islandAttrs['data-meshes'], drawCalls: islandAttrs['data-draw-calls'], w: islandAttrs['data-w'], h: islandAttrs['data-h'], colours: distinctColours(big, await rect('[data-gd3-canvas]')), pills: await evaluate(`document.querySelectorAll('.gd3-name').length`) };
   check(`ISLAND: a 24×16 map with 30 things and three robots draws ≤ ${MESH_BUDGET} meshes, three name pills, and is not one colour`, Number(readings.island.meshes) <= MESH_BUDGET && Number(readings.island.meshes) > 50 && readings.island.w === '24' && readings.island.pills === 3 && readings.island.colours >= 200, readings.island);
 
+  // ── VOCAB (P106 s2, the common brief's §4) ─────────────────────────────
+  // Drawn through the engine with the kit's OWN helpers: on this branch garden-kit's parseRobots (the sibling helper a
+  // page with both kits uses) does not carry can / canMax / carry yet — lane A adds them; after the merge the ports do.
+  await setVar('bubble', '');
+  const vocab = await evaluate(`(() => {
+    const node = window.__noodl_modules.find((m) => m.reactNodes && m.reactNodes.some((n) => n.name === 'garden-3d-kit.Garden3D')).reactNodes.find((n) => n.name === 'garden-3d-kit.Garden3D');
+    const W = node.world;
+    const eng = ${ROOT}.gd3;
+    eng.setWorld({
+      map: W.parseMap({ rows: ['GGGGGGGG', 'GGGGGGGG', 'PPPPPPPB', 'GGGGGGGG', 'GWWGGGGG', 'GGGGGTGG'] }),
+      things: W.parseThings([{ kind: 'rock', x: 1, y: 1, left: 4 }, { kind: 'rock', x: 2, y: 1, left: 2 }, { kind: 'rock', x: 3, y: 1, left: 1 }, { kind: 'sign', x: 5, y: 1, text: 'Tulips this way' }, { kind: 'note', x: 6, y: 3, text: 'the red ones' }, { kind: 'stone', x: 4, y: 3 }, { kind: 'stone', x: 5, y: 3 }]),
+      robots: W.parseRobots([{ x: 1, y: 2, d: 1, name: 'Pip', can: 2, canMax: 3, carry: ['stone'] }, { x: 3, y: 3, d: 2, name: 'Cobble', colour: '#3E63C8', hat: 'cap', eyes: 'happy', can: 0, carry: ['letter'] }, { x: 5, y: 4, d: 3, name: 'Pocket', colour: '#8F6BFF', hat: 'sun', eyes: 'wink', carry: ['cake'] }])
+    });
+    const things = eng.built.things.map((g) => g.userData.kind + (g.userData.size ? ':' + g.userData.size : ''));
+    const bots = eng.built.robots.map((g) => { let level = null; let load = null; g.traverse((o) => { if (o.name === 'level') level = { share: +o.scale.y.toFixed(2), visible: o.visible }; if (o.name === 'load') load = o.userData.load; }); return { level, load }; });
+    const labels = [...document.querySelectorAll('.gd3-label')].map((e) => e.textContent);
+    return { things, bots, labels, meshes: eng.meshCount };
+  })()`);
+  await setJson('focus', { x: 0, y: 0, w: 8, h: 6 });
+  await setVar('camera', 'plot');
+  await wait(900);
+  await shot('vocab-8x6');
+  readings.vocab = vocab;
+  check('VOCAB: rocks big / medium / small by left, a sign and a note (their text not on the tile), stones; the can at 2 of 3, empty at 0, none at null; the loads stone, letter, parcel', JSON.stringify(vocab.things.filter((k) => k.startsWith('rock'))) === JSON.stringify(['rock:big', 'rock:medium', 'rock:small']) && vocab.things.includes('sign') && vocab.things.includes('note') && vocab.labels.length === 0 && vocab.bots[0].level && vocab.bots[0].level.share === 0.67 && vocab.bots[1].level && vocab.bots[1].level.visible === false && vocab.bots[2].level === null && JSON.stringify(vocab.bots.map((b) => b.load)) === JSON.stringify(['stone', 'letter', 'parcel']), vocab);
+
   check('0 console errors through the whole drive', page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));
   return { dir: DIR, results, readings, consoleErrors: page.consoleErrors.slice(), networkErrors: page.networkErrors.slice() };
 })

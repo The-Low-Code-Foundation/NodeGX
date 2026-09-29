@@ -483,15 +483,18 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
         { x: 0, y: 0, can: 2, canMax: 4, carry: ['letter', 'stone'] },
         { x: 1, y: 0, can: null, carry: ['stone', 'letter'] },
         { x: 2, y: 0, can: 0, canMax: 3, carry: ['cake'] },
-        { x: 3, y: 0, can: 7, canMax: 3, carry: [] }
+        { x: 3, y: 0, can: 7, canMax: 3, carry: [] },
+        { x: 4, y: 0, carry: ['stone', 'egg'] },
+        { x: 5, y: 0, carry: ['food'] }
       ]);
-      const [a, b, c, d] = built.robots;
+      const [a, b, c, d, e, f] = built.robots;
       expect(named(a, 'level').scale.y).toBeCloseTo(0.5);
       expect(named(a, 'level').visible).not.toBe(false);
       expect(named(b, 'level')).toBeNull();
       expect(named(c, 'level').visible).toBe(false);
       expect(named(d, 'level').scale.y).toBeCloseTo(1);
-      expect([a, b, c, d].map((g: any) => (named(g, 'load') ? named(g, 'load').userData.load : null))).toEqual(['stone', 'letter', 'parcel', null]);
+      // stone, letter, egg and food as themselves (the 2D kit's, lane A), anything else the parcel, nothing when empty.
+      expect([a, b, c, d, e, f].map((g: any) => (named(g, 'load') ? named(g, 'load').userData.load : null))).toEqual(['stone', 'letter', 'parcel', null, 'egg', 'food']);
       for (const g of [a, b, c, d]) expect(named(g, 'can')).not.toBeNull();
       // The honest count again: what the builder says it made is what was constructed.
       expect(counts.Mesh + (counts.InstancedMesh || 0)).toBe(built.meshCount);

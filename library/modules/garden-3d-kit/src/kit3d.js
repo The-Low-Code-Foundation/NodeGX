@@ -55,7 +55,7 @@
  * kind — a rock (big at `left` ≥ 3, medium at 2, small at 1, nothing at 0), a stone, a post box, a sign and a note
  * (their `text` is never drawn on the tile) are one entry each; a robot draws `colour`, `eyes`, `hat`, its can with the
  * level `can` of `canMax` (no level at all when `can` is null) and its load on its back: the LAST entry of `carry`
- * (`stone`, `letter`, anything else a parcel, nothing when `carry` is empty). `accessory` (IG-005) is not in the
+ * (`stone`, `letter`, `egg`, `food` as themselves, anything else a parcel, nothing when `carry` is empty). `accessory` (IG-005) is not in the
  * port's vocabulary yet: every robot carries the can.
  *
  * The look is the mockup's (`tpl-012-mockups/island-3d.html`, IG-000): its palette, tile heights, the sea and the sand
@@ -603,12 +603,16 @@
     }
   };
 
-  /** The load a robot shows on its back: the LAST entry of `carry` (brief §4). Anything but stone or letter is a parcel. */
+  /**
+   * The load a robot shows on its back: the LAST entry of `carry` (brief §4). stone, letter, egg and food are drawn as
+   * themselves (as the 2D kit draws them, lane A's IG-002); anything else is the generic parcel.
+   */
+  var LOADS = ['stone', 'letter', 'egg', 'food'];
   function loadOf(r) {
     var carry = Array.isArray(r.carry) ? r.carry : [];
     if (!carry.length) return null;
     var last = String(carry[carry.length - 1]);
-    return last === 'stone' || last === 'letter' ? last : 'parcel';
+    return LOADS.indexOf(last) !== -1 ? last : 'parcel';
   }
 
   /**
@@ -695,6 +699,14 @@
         var st = mesh(THREE, G(THREE, out, 'IcosahedronGeometry', 1, 0), mat(PALETTE.rockLight), 0, 0, 0);
         st.scale.set(0.13, 0.1, 0.13);
         back.add(st);
+        out.meshCount += 1;
+      } else if (load === 'egg') {
+        var egg = mesh(THREE, G(THREE, out, 'SphereGeometry', 0.1, 8, 6), mat(PALETTE.letter), 0, 0, 0);
+        egg.scale.y = 1.3;
+        back.add(egg);
+        out.meshCount += 1;
+      } else if (load === 'food') {
+        back.add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.13, 0.13, 0.08, 8), mat(PALETTE.kibble), 0, 0, 0));
         out.meshCount += 1;
       } else if (load === 'letter') {
         back.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.28, 0.2, 0.03), mat(PALETTE.letter), 0, 0, 0));
