@@ -1,7 +1,7 @@
 # Phase 106 — The island grows: a world, the right robot for the job, Olive where a rule cannot decide
 
 **Scoped:** 2026-09-28, from Richard's first play of the packaged "Olive's Island" (P105 s4 build) on the Mac.
-**Status: 📋 scoped into IG-000–IG-008 (2026-09-28); Richard ruled the same day: *"So if we can go 3D and a bit more 'open world' let's do it. I like your thinking."* — R1–R8 taken as recommended (§3). Nothing built. Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).** **Prefix: `IG`.**
+**Status: 🟡 session 1 built (2026-09-28/29): IG-001 ✅ (the ten fixes, driven), IG-000 🟡 (the 3D mockup published, Richard grades), IG-007 🟡 (the `Garden 3D` node and its gate; placement and the tablet next) — see [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md). Scoped into IG-000–IG-008 (2026-09-28); Richard ruled the same day: *"So if we can go 3D and a bit more 'open world' let's do it. I like your thinking."* — R1–R8 taken as recommended (§3). Nothing built. Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).** **Prefix: `IG`.**
 Parent: [Phase 105](../phase-105-the-coding-garden/README.md) (the game as it stands: CG-001–CG-008).
 
 ## 0. Richard's words, verbatim, the same day
@@ -255,14 +255,14 @@ Each was measured above; none blocks a ruling and every one is on the surface Ri
 
 | Task | What | Depends on | Lane | Status |
 |---|---|---|---|---|
-| [IG-000 — the mockup](IG-000-THE-MOCKUP.md) | the island in flat-shaded 3D, Drive/Teach/Play, the robot cards, Olive reads — an artifact Richard grades; the first frame-time reading on the tablet | — | M | ⬜ |
-| [IG-001 — the fixes](IG-001-THE-FIXES.md) | §4 D1–D10, each driven: the stuck thinking, the run leak, "fewer blocks", free play's hint, the ring, answers shown, `olive_says`, the button, the sprites, the pad | — | A | ⬜ |
+| [IG-000 — the mockup](IG-000-THE-MOCKUP.md) | the island in flat-shaded 3D, Drive/Teach/Play, the robot cards, Olive reads — an artifact Richard grades; the first frame-time reading on the tablet | — | M | 🟡 built, published (s1) — Richard grades, tablet reads |
+| [IG-001 — the fixes](IG-001-THE-FIXES.md) | §4 D1–D10, each driven: the stuck thinking, the run leak, "fewer blocks", free play's hint, the ring, answers shown, `olive_says`, the button, the sprites, the pad | — | A | ✅ s1, 11/11 ACs |
 | [IG-002 — resources](IG-002-RESOURCES-AND-SPRITES.md) | `fill` and the can, stones from rocks, the load drawn; tulips and path rewritten as fetch-and-return (R3) | 001 | A | ⬜ |
 | [IG-003 — Drive, Teach, Play](IG-003-DRIVE-TEACH-PLAY.md) | the Drive state, the pad by request, Predict cut and re-entered as an islander challenge (R4, R5) | 001 | B | ⬜ |
 | [IG-004 — the island as a world](IG-004-THE-ISLAND-AS-A-WORLD.md) | 24×16 per kid, plots from requests, save v4, pinned programs, the island tick, the Island page on the renderer (R1) | 002, 007 | B | ⬜ |
 | [IG-005 — robots for the job](IG-005-ROBOTS-FOR-THE-JOB.md) | Pip, Cobble, Pocket, Echo: palette per robot, unlocked by islanders, upgrades, My robots (R8) | 004 | B | ⬜ |
 | [IG-006 — Olive reads](IG-006-OLIVE-READS.md) | `read`, `is it a…?` as an if-sensor with the vote, `say`; a card per block; five lessons on Skills; the exam re-cut (R6, R7) | 001, 002 | C | ⬜ |
-| [IG-007 — Garden 3D](IG-007-GARDEN-3D.md) | `garden-3d-kit`: `Garden 3D` on the same ports, three.js vendored, primitives, pan/zoom, the 2D fallback by rule; **gate = tablet frame time with Olive in flight** (R2) | 000 for the look | D (worktree) | ⬜ |
+| [IG-007 — Garden 3D](IG-007-GARDEN-3D.md) | `garden-3d-kit`: `Garden 3D` on the same ports, three.js vendored, primitives, pan/zoom, the 2D fallback by rule; **gate = tablet frame time with Olive in flight** (R2) | 000 for the look | D (worktree) | 🟡 s1: module, node, gate, Mac drive; placement, fallback, tablet next |
 | [IG-008 — the kids' verdict](IG-008-THE-KIDS-VERDICT.md) | the two children play; their words the same day | all | — | ⬜ |
 
 ### Order and lanes

@@ -1,6 +1,6 @@
 # IG-000 — The mockup: the island as a 3D world, the robots, the three modes
 
-**Opened 2026-09-28**, from the ruling "go 3D and a bit more open world". **Status: ⬜ not started.** Depends on
+**Opened 2026-09-28**, from the ruling "go 3D and a bit more open world". **Status: 🟡 built and published in session 1 (2026-09-28, lane M, §7); awaiting Richard's grade (AC4) and the tablet's frame-time reading (AC1).** Depends on
 nothing. Lane M (its own worktree is not needed: it writes only under `tpl-012-mockups/` and an artifact).
 
 ## 1. The person sentence
