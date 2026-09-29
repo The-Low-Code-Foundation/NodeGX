@@ -1,0 +1,1887 @@
+{
+  "dir": "../ig005-robots-scratch/pages/deploy",
+  "mode": "2d",
+  "results": [
+    {
+      "name": "IG-005 AC5 1368-en: the stones stay padlocked on the island — \"🔒 This job needs Cobble, who lays stones. Sami lends Cobble after “Walk the path to the post box”.\" — one line, no way in",
+      "ok": true,
+      "saw": {
+        "stay": "/island",
+        "lock": {
+          "up": true,
+          "who": "Sami",
+          "title": "Lay four stones on the path",
+          "line": "🔒 This job needs Cobble, who lays stones. Sami lends Cobble after “Walk the path to the post box”.",
+          "open": null,
+          "home": null
+        },
+        "want": "🔒 This job needs Cobble, who lays stones. Sami lends Cobble after “Walk the path to the post box”."
+      }
+    },
+    {
+      "name": "IG-005 AC5 1368-en: the stones’ plot is fenced (a padlock over it) while Cobble is not lent",
+      "ok": true,
+      "saw": [
+        "10,8,8,6",
+        "1,15,8,6",
+        "19,8,8,6",
+        "19,1,8,6",
+        "28,8,8,6",
+        "37,8,8,6"
+      ]
+    },
+    {
+      "name": "IG-005 AC2 1368-en: path-postbox won (Teach, the pad, Play) and the win card says \"Sami lends you Cobble! Cobble lays stones.\"",
+      "ok": true,
+      "saw": {
+        "won": true,
+        "gift": "Sami lends you Cobble! Cobble lays stones.",
+        "want": "Sami lends you Cobble! Cobble lays stones."
+      }
+    },
+    {
+      "name": "IG-005 AC2 1368-en: the save has Cobble in island.robots, the catalogue’s name in her language, not named by the child",
+      "ok": true,
+      "saw": [
+        {
+          "id": "r1"
+        },
+        {
+          "id": "cobble",
+          "kind": "cobble",
+          "name": "Cobble",
+          "color": "#7A8CA3",
+          "eye": "round",
+          "hat": "none"
+        }
+      ]
+    },
+    {
+      "name": "IG-005 AC2 1368-en: My robots has a card per robot of the catalogue (4), Pip’s first",
+      "ok": true,
+      "saw": [
+        "bg-panel bg-robot-card bg-robot-pip",
+        "bg-panel bg-robot-card bg-robot-cobble",
+        "bg-panel bg-robot-card bg-robot-pocket bg-robot-locked",
+        "bg-panel bg-robot-card bg-robot-echo bg-robot-locked"
+      ]
+    },
+    {
+      "name": "IG-005 AC2 1368-en: Cobble’s card — named \"Cobble\", \"Lent by Sami\", \"carries a hod\", drawn with his hod, at home",
+      "ok": true,
+      "saw": {
+        "cls": "bg-panel bg-robot-card bg-robot-cobble",
+        "name": "Cobble",
+        "tag": "Lent by Sami",
+        "wears": "carries a hod",
+        "where": "At home",
+        "blocks": [
+          "forward",
+          "turn left",
+          "turn right",
+          "pick up",
+          "put down",
+          "repeat",
+          "until",
+          "if",
+          "when",
+          "count +1"
+        ],
+        "drawn": "hod",
+        "locked": false
+      }
+    },
+    {
+      "name": "IG-005 1368-en: the robots not lent yet (2) are locked cards that say who lends them and after what",
+      "ok": true,
+      "saw": [
+        {
+          "cls": "bg-panel bg-robot-card bg-robot-pocket bg-robot-locked",
+          "name": "Pocket",
+          "tag": "Locked",
+          "wears": "carries a satchel",
+          "where": "Biscuit lends Pocket after “Feed me, but only if my bowl is empty”.",
+          "blocks": [
+            "forward",
+            "turn left",
+            "turn right",
+            "pick up",
+            "put down",
+            "say",
+            "say thank you",
+            "repeat",
+            "until",
+            "if",
+            "when",
+            "count +1"
+          ],
+          "drawn": "satchel",
+          "locked": true
+        },
+        {
+          "cls": "bg-panel bg-robot-card bg-robot-echo bg-robot-locked",
+          "name": "Echo",
+          "tag": "Locked",
+          "wears": "wears a bell",
+          "where": "Mamie Rose lends Echo after “Water the flowers my note asks for”.",
+          "blocks": [
+            "forward",
+            "turn left",
+            "turn right",
+            "water",
+            "say",
+            "read the note",
+            "is it a…?",
+            "say thank you",
+            "repeat",
+            "until",
+            "if",
+            "when",
+            "count +1"
+          ],
+          "drawn": "bell",
+          "locked": true
+        }
+      ]
+    },
+    {
+      "name": "IG-005 1368-en: each card shows what its robot can do as block chips (Cobble: his own blocks among them)",
+      "ok": true,
+      "saw": [
+        "forward",
+        "turn left",
+        "turn right",
+        "pick up",
+        "put down",
+        "repeat",
+        "until",
+        "if",
+        "when",
+        "count +1"
+      ]
+    },
+    {
+      "name": "IG-005 1368-en: the stones open in the Workshop with Cobble — his name, his hod, his colour",
+      "ok": true,
+      "saw": [
+        {
+          "x": 2,
+          "y": 3,
+          "name": "Cobble",
+          "accessory": "hod",
+          "drawn": "hod",
+          "colour": "#7A8CA3"
+        }
+      ]
+    },
+    {
+      "name": "IG-005 AC1 1368-en: the palette is band × request × robot (fwd left right pick put repeat)",
+      "ok": true,
+      "saw": {
+        "pal": [
+          "fwd",
+          "left",
+          "right",
+          "pick",
+          "put",
+          "repeat"
+        ],
+        "wantPal": [
+          "fwd",
+          "left",
+          "right",
+          "pick",
+          "put",
+          "repeat"
+        ]
+      }
+    },
+    {
+      "name": "IG-005 1368-en: the stones won by Cobble (Teach, the pad, Play)",
+      "ok": true,
+      "saw": {
+        "won": true,
+        "gift": "Sami gives you Bigger basket · 8 things."
+      }
+    },
+    {
+      "name": "IG-005 AC4 1368-en: two robots at work at once — Pip on path-postbox (coral, the can), Cobble on the stones (his colour, his hod)",
+      "ok": true,
+      "saw": [
+        {
+          "x": 3,
+          "y": 11,
+          "name": "Pip",
+          "accessory": "can",
+          "drawn": "can",
+          "colour": "#FF7A59"
+        },
+        {
+          "x": 12,
+          "y": 11,
+          "name": "Cobble",
+          "accessory": "hod",
+          "drawn": "hod",
+          "colour": "#7A8CA3"
+        }
+      ]
+    },
+    {
+      "name": "IG-005 1368-en: Cobble renamed \"Rocky\" on his card — stored on his row, and the island names him so",
+      "ok": true,
+      "saw": {
+        "renamed": {
+          "x": 12,
+          "y": 11,
+          "name": "Rocky",
+          "accessory": "hod",
+          "drawn": "hod",
+          "colour": "#7A8CA3"
+        },
+        "robots": [
+          {
+            "id": "r1"
+          },
+          {
+            "id": "cobble",
+            "kind": "cobble",
+            "name": "Rocky",
+            "color": "#7A8CA3",
+            "eye": "round",
+            "hat": "none"
+          }
+        ]
+      }
+    },
+    {
+      "name": "IG-005 AC6: the Grown-ups save code (v4) carries three robots — Pip as his id, the two lent as [id, kind, name, colour, eyes, hat]",
+      "ok": true,
+      "saw": [
+        "r1",
+        [
+          "cobble",
+          "cobble",
+          "Rocky",
+          "#7A8CA3",
+          "round",
+          "none"
+        ],
+        [
+          "pocket",
+          "pocket",
+          "Pocket",
+          "#3FA66B",
+          "wink",
+          "none"
+        ]
+      ]
+    },
+    {
+      "name": "IG-005 AC6: pasted back through the Grown-ups box, the code restores the same three robots (their names, colours, eyes), and their plots",
+      "ok": true,
+      "saw": {
+        "before": "[{\"robot\":{\"name\":\"Pip\",\"color\":\"#FF7A59\",\"eye\":\"round\",\"hat\":\"none\"},\"robots\":[{\"id\":\"r1\"},{\"id\":\"cobble\",\"kind\":\"cobble\",\"name\":\"Rocky\",\"color\":\"#7A8CA3\",\"eye\":\"round\",\"hat\":\"none\"},{\"id\":\"pocket\",\"kind\":\"pocket\",\"name\":\"Pocket\",\"color\":\"#3FA66B\",\"eye\":\"wink\",\"hat\":\"none\"}],\"plots\":{\"path-postbox\":{\"program\":[{\"id\":1,\"t\":\"fwd\"},{\"id\":2,\"t\":\"fwd\"},{\"id\":3,\"t\":\"fwd\"},{\"id\":4,\"t\":\"fwd\"},{\"id\":5,\"t\":\"fwd\"},{\"id\":6,\"t\":\"fwd\"},{\"id\":7,\"t\":\"fwd\"}],\"robotId\":\"r1\",\"wonAt\":1790697391658},\"path-stones\":{\"program\":[{\"id\":1,\"t\":\"left\"},{\"id\":2,\"t\":\"pick\"},{\"id\":3,\"t\":\"pick\"},{\"id\":4,\"t\":\"pick\"},{\"id\":5,\"t\":\"pick\"},{\"id\":6,\"t\":\"right\"},{\"id\":7,\"t\":\"put\"},{\"id\":8,\"t\":\"fwd\"},{\"id\":9,\"t\":\"put\"},{\"id\":10,\"t\":\"fwd\"},{\"id\":11,\"t\":\"put\"},{\"id\":12,\"t\":\"fwd\"},{\"id\":13,\"t\":\"put\"},{\"id\":14,\"t\":\"fwd\"}],\"robotId\":\"cobble\",\"wonAt\":1790697415409}},\"stickers\":[\"seeds\",\"basket+\"]}]",
+        "after": "[{\"robot\":{\"name\":\"Pip\",\"color\":\"#FF7A59\",\"eye\":\"round\",\"hat\":\"none\"},\"robots\":[{\"id\":\"r1\"},{\"id\":\"cobble\",\"kind\":\"cobble\",\"name\":\"Rocky\",\"color\":\"#7A8CA3\",\"eye\":\"round\",\"hat\":\"none\"},{\"id\":\"pocket\",\"kind\":\"pocket\",\"name\":\"Pocket\",\"color\":\"#3FA66B\",\"eye\":\"wink\",\"hat\":\"none\"}],\"plots\":{\"path-postbox\":{\"program\":[{\"id\":1,\"t\":\"fwd\"},{\"id\":2,\"t\":\"fwd\"},{\"id\":3,\"t\":\"fwd\"},{\"id\":4,\"t\":\"fwd\"},{\"id\":5,\"t\":\"fwd\"},{\"id\":6,\"t\":\"fwd\"},{\"id\":7,\"t\":\"fwd\"}],\"robotId\":\"r1\",\"wonAt\":1790697391658},\"path-stones\":{\"program\":[{\"id\":1,\"t\":\"left\"},{\"id\":2,\"t\":\"pick\"},{\"id\":3,\"t\":\"pick\"},{\"id\":4,\"t\":\"pick\"},{\"id\":5,\"t\":\"pick\"},{\"id\":6,\"t\":\"right\"},{\"id\":7,\"t\":\"put\"},{\"id\":8,\"t\":\"fwd\"},{\"id\":9,\"t\":\"put\"},{\"id\":10,\"t\":\"fwd\"},{\"id\":11,\"t\":\"put\"},{\"id\":12,\"t\":\"fwd\"},{\"id\":13,\"t\":\"put\"},{\"id\":14,\"t\":\"fwd\"}],\"robotId\":\"cobble\",\"wonAt\":1790697415409}},\"stickers\":[\"seeds\",\"basket+\"]}]"
+      }
+    },
+    {
+      "name": "IG-005 AC6: … and the island shows the three: two at work, Pocket at home in its colour and satchel",
+      "ok": true,
+      "saw": [
+        {
+          "x": 3,
+          "y": 11,
+          "name": "Pip",
+          "accessory": "can",
+          "drawn": "can",
+          "colour": "#FF7A59"
+        },
+        {
+          "x": 12,
+          "y": 11,
+          "name": "Rocky",
+          "accessory": "hod",
+          "drawn": "hod",
+          "colour": "#7A8CA3"
+        },
+        {
+          "x": 39,
+          "y": 17,
+          "name": "Pocket",
+          "accessory": "satchel",
+          "drawn": "satchel",
+          "colour": "#3FA66B"
+        }
+      ]
+    },
+    {
+      "name": "IG-005 AC3 1368-en: before can+ one fill gives 3 and pours 3 waters, the next dry; after it one fill gives 6 and pours 6",
+      "ok": true,
+      "saw": {
+        "before": {
+          "full": {
+            "can": 3,
+            "max": 3
+          },
+          "seen": [
+            {
+              "can": 2,
+              "max": 3
+            },
+            {
+              "can": 1,
+              "max": 3
+            },
+            {
+              "can": 0,
+              "max": 3
+            },
+            {
+              "can": 0,
+              "max": 3
+            }
+          ],
+          "wet": 3
+        },
+        "after": {
+          "full": {
+            "can": 6,
+            "max": 6
+          },
+          "seen": [
+            {
+              "can": 5,
+              "max": 6
+            },
+            {
+              "can": 4,
+              "max": 6
+            },
+            {
+              "can": 3,
+              "max": 6
+            },
+            {
+              "can": 2,
+              "max": 6
+            },
+            {
+              "can": 1,
+              "max": 6
+            },
+            {
+              "can": 0,
+              "max": 6
+            },
+            {
+              "can": 0,
+              "max": 6
+            }
+          ],
+          "wet": 6
+        }
+      }
+    },
+    {
+      "name": "IG-005 1368-en: 0 console errors, 0 network errors so far",
+      "ok": true,
+      "saw": {
+        "console": [],
+        "network": []
+      }
+    },
+    {
+      "name": "IG-005 AC5 1368-fr: the stones stay padlocked on the island — \"🔒 Ce travail a besoin de Cobble, qui pose des pierres. Sami te prête Cobble après « Suis le chemin jusqu’à la boîte aux lettres ».\" — one line, no way in",
+      "ok": true,
+      "saw": {
+        "stay": "/island",
+        "lock": {
+          "up": true,
+          "who": "Sami",
+          "title": "Pose quatre pierres sur le chemin",
+          "line": "🔒 Ce travail a besoin de Cobble, qui pose des pierres. Sami te prête Cobble après « Suis le chemin jusqu’à la boîte aux lettres ».",
+          "open": null,
+          "home": null
+        },
+        "want": "🔒 Ce travail a besoin de Cobble, qui pose des pierres. Sami te prête Cobble après « Suis le chemin jusqu’à la boîte aux lettres »."
+      }
+    },
+    {
+      "name": "IG-005 AC5 1368-fr: the stones’ plot is fenced (a padlock over it) while Cobble is not lent",
+      "ok": true,
+      "saw": [
+        "10,8,8,6",
+        "1,15,8,6",
+        "19,8,8,6",
+        "19,1,8,6",
+        "28,8,8,6",
+        "37,8,8,6"
+      ]
+    },
+    {
+      "name": "IG-005 AC2 1368-fr: path-postbox won (Teach, the pad, Play) and the win card says \"Sami te prête Cobble ! Cobble pose des pierres.\"",
+      "ok": true,
+      "saw": {
+        "won": true,
+        "gift": "Sami te prête Cobble ! Cobble pose des pierres.",
+        "want": "Sami te prête Cobble ! Cobble pose des pierres."
+      }
+    },
+    {
+      "name": "IG-005 AC2 1368-fr: the save has Cobble in island.robots, the catalogue’s name in her language, not named by the child",
+      "ok": true,
+      "saw": [
+        {
+          "id": "r1"
+        },
+        {
+          "id": "cobble",
+          "kind": "cobble",
+          "name": "Cobble",
+          "color": "#7A8CA3",
+          "eye": "round",
+          "hat": "none"
+        }
+      ]
+    },
+    {
+      "name": "IG-005 AC2 1368-fr: My robots has a card per robot of the catalogue (4), Pip’s first",
+      "ok": true,
+      "saw": [
+        "bg-panel bg-robot-card bg-robot-pip",
+        "bg-panel bg-robot-card bg-robot-cobble",
+        "bg-panel bg-robot-card bg-robot-pocket bg-robot-locked",
+        "bg-panel bg-robot-card bg-robot-echo bg-robot-locked"
+      ]
+    },
+    {
+      "name": "IG-005 AC2 1368-fr: Cobble’s card — named \"Cobble\", \"Prêté par Sami\", \"porte une hotte\", drawn with his hod, at home",
+      "ok": true,
+      "saw": {
+        "cls": "bg-panel bg-robot-card bg-robot-cobble",
+        "name": "Cobble",
+        "tag": "Prêté par Sami",
+        "wears": "porte une hotte",
+        "where": "À la maison",
+        "blocks": [
+          "avancer",
+          "tourner à gauche",
+          "tourner à droite",
+          "ramasser",
+          "poser",
+          "répéter",
+          "jusqu’à",
+          "si",
+          "quand",
+          "compter +1"
+        ],
+        "drawn": "hod",
+        "locked": false
+      }
+    },
+    {
+      "name": "IG-005 1368-fr: the robots not lent yet (2) are locked cards that say who lends them and after what",
+      "ok": true,
+      "saw": [
+        {
+          "cls": "bg-panel bg-robot-card bg-robot-pocket bg-robot-locked",
+          "name": "Poche",
+          "tag": "Verrouillé",
+          "wears": "porte une sacoche",
+          "where": "Biscuit te prête Poche après « Nourris-moi, mais seulement si ma gamelle est vide ».",
+          "blocks": [
+            "avancer",
+            "tourner à gauche",
+            "tourner à droite",
+            "ramasser",
+            "poser",
+            "dire",
+            "dire merci",
+            "répéter",
+            "jusqu’à",
+            "si",
+            "quand",
+            "compter +1"
+          ],
+          "drawn": "satchel",
+          "locked": true
+        },
+        {
+          "cls": "bg-panel bg-robot-card bg-robot-echo bg-robot-locked",
+          "name": "Écho",
+          "tag": "Verrouillé",
+          "wears": "porte une clochette",
+          "where": "Mamie Rose te prête Écho après « Arrose les fleurs que demande mon mot ».",
+          "blocks": [
+            "avancer",
+            "tourner à gauche",
+            "tourner à droite",
+            "arroser",
+            "dire",
+            "lire le mot",
+            "est-ce un… ?",
+            "dire merci",
+            "répéter",
+            "jusqu’à",
+            "si",
+            "quand",
+            "compter +1"
+          ],
+          "drawn": "bell",
+          "locked": true
+        }
+      ]
+    },
+    {
+      "name": "IG-005 1368-fr: each card shows what its robot can do as block chips (Cobble: his own blocks among them)",
+      "ok": true,
+      "saw": [
+        "avancer",
+        "tourner à gauche",
+        "tourner à droite",
+        "ramasser",
+        "poser",
+        "répéter",
+        "jusqu’à",
+        "si",
+        "quand",
+        "compter +1"
+      ]
+    },
+    {
+      "name": "IG-005 1368-fr: the stones open in the Workshop with Cobble — his name, his hod, his colour",
+      "ok": true,
+      "saw": [
+        {
+          "x": 2,
+          "y": 3,
+          "name": "Cobble",
+          "accessory": "hod",
+          "drawn": "hod",
+          "colour": "#7A8CA3"
+        }
+      ]
+    },
+    {
+      "name": "IG-005 AC1 1368-fr: the palette is band × request × robot (fwd left right pick put repeat)",
+      "ok": true,
+      "saw": {
+        "pal": [
+          "fwd",
+          "left",
+          "right",
+          "pick",
+          "put",
+          "repeat"
+        ],
+        "wantPal": [
+          "fwd",
+          "left",
+          "right",
+          "pick",
+          "put",
+          "repeat"
+        ]
+      }
+    },
+    {
+      "name": "IG-005 1368-fr: the stones won by Cobble (Teach, the pad, Play)",
+      "ok": true,
+      "saw": {
+        "won": true,
+        "gift": "Sami te donne Plus grand panier · 8 choses."
+      }
+    },
+    {
+      "name": "IG-005 AC4 1368-fr: two robots at work at once — Pip on path-postbox (coral, the can), Cobble on the stones (his colour, his hod)",
+      "ok": true,
+      "saw": [
+        {
+          "x": 3,
+          "y": 11,
+          "name": "Pip",
+          "accessory": "can",
+          "drawn": "can",
+          "colour": "#FF7A59"
+        },
+        {
+          "x": 12,
+          "y": 11,
+          "name": "Cobble",
+          "accessory": "hod",
+          "drawn": "hod",
+          "colour": "#7A8CA3"
+        }
+      ]
+    },
+    {
+      "name": "IG-005 1368-fr: 0 console errors, 0 network errors so far",
+      "ok": true,
+      "saw": {
+        "console": [],
+        "network": []
+      }
+    },
+    {
+      "name": "IG-005 AC5 390-en: the stones stay padlocked on the island — \"🔒 This job needs Cobble, who lays stones. Sami lends Cobble after “Walk the path to the post box”.\" — one line, no way in",
+      "ok": true,
+      "saw": {
+        "stay": "/island",
+        "lock": {
+          "up": true,
+          "who": "Sami",
+          "title": "Lay four stones on the path",
+          "line": "🔒 This job needs Cobble, who lays stones. Sami lends Cobble after “Walk the path to the post box”.",
+          "open": null,
+          "home": null
+        },
+        "want": "🔒 This job needs Cobble, who lays stones. Sami lends Cobble after “Walk the path to the post box”."
+      }
+    },
+    {
+      "name": "IG-005 AC5 390-en: the stones’ plot is fenced (a padlock over it) while Cobble is not lent",
+      "ok": true,
+      "saw": [
+        "10,8,8,6",
+        "1,15,8,6",
+        "19,8,8,6",
+        "19,1,8,6",
+        "28,8,8,6",
+        "37,8,8,6"
+      ]
+    },
+    {
+      "name": "IG-005 AC2 390-en: path-postbox won (Teach, the pad, Play) and the win card says \"Sami lends you Cobble! Cobble lays stones.\"",
+      "ok": true,
+      "saw": {
+        "won": true,
+        "gift": "Sami lends you Cobble! Cobble lays stones.",
+        "want": "Sami lends you Cobble! Cobble lays stones."
+      }
+    },
+    {
+      "name": "IG-005 AC2 390-en: the save has Cobble in island.robots, the catalogue’s name in her language, not named by the child",
+      "ok": true,
+      "saw": [
+        {
+          "id": "r1"
+        },
+        {
+          "id": "cobble",
+          "kind": "cobble",
+          "name": "Cobble",
+          "color": "#7A8CA3",
+          "eye": "round",
+          "hat": "none"
+        }
+      ]
+    },
+    {
+      "name": "IG-005 AC2 390-en: My robots has a card per robot of the catalogue (4), Pip’s first",
+      "ok": true,
+      "saw": [
+        "bg-panel bg-robot-card bg-robot-pip",
+        "bg-panel bg-robot-card bg-robot-cobble",
+        "bg-panel bg-robot-card bg-robot-pocket bg-robot-locked",
+        "bg-panel bg-robot-card bg-robot-echo bg-robot-locked"
+      ]
+    },
+    {
+      "name": "IG-005 AC2 390-en: Cobble’s card — named \"Cobble\", \"Lent by Sami\", \"carries a hod\", drawn with his hod, at home",
+      "ok": true,
+      "saw": {
+        "cls": "bg-panel bg-robot-card bg-robot-cobble",
+        "name": "Cobble",
+        "tag": "Lent by Sami",
+        "wears": "carries a hod",
+        "where": "At home",
+        "blocks": [
+          "forward",
+          "turn left",
+          "turn right",
+          "pick up",
+          "put down",
+          "repeat",
+          "until",
+          "if",
+          "when",
+          "count +1"
+        ],
+        "drawn": "hod",
+        "locked": false
+      }
+    },
+    {
+      "name": "IG-005 390-en: the robots not lent yet (2) are locked cards that say who lends them and after what",
+      "ok": true,
+      "saw": [
+        {
+          "cls": "bg-panel bg-robot-card bg-robot-pocket bg-robot-locked",
+          "name": "Pocket",
+          "tag": "Locked",
+          "wears": "carries a satchel",
+          "where": "Biscuit lends Pocket after “Feed me, but only if my bowl is empty”.",
+          "blocks": [
+            "forward",
+            "turn left",
+            "turn right",
+            "pick up",
+            "put down",
+            "say",
+            "say thank you",
+            "repeat",
+            "until",
+            "if",
+            "when",
+            "count +1"
+          ],
+          "drawn": "satchel",
+          "locked": true
+        },
+        {
+          "cls": "bg-panel bg-robot-card bg-robot-echo bg-robot-locked",
+          "name": "Echo",
+          "tag": "Locked",
+          "wears": "wears a bell",
+          "where": "Mamie Rose lends Echo after “Water the flowers my note asks for”.",
+          "blocks": [
+            "forward",
+            "turn left",
+            "turn right",
+            "water",
+            "say",
+            "read the note",
+            "is it a…?",
+            "say thank you",
+            "repeat",
+            "until",
+            "if",
+            "when",
+            "count +1"
+          ],
+          "drawn": "bell",
+          "locked": true
+        }
+      ]
+    },
+    {
+      "name": "IG-005 390-en: each card shows what its robot can do as block chips (Cobble: his own blocks among them)",
+      "ok": true,
+      "saw": [
+        "forward",
+        "turn left",
+        "turn right",
+        "pick up",
+        "put down",
+        "repeat",
+        "until",
+        "if",
+        "when",
+        "count +1"
+      ]
+    },
+    {
+      "name": "IG-005 390-en: the stones open in the Workshop with Cobble — his name, his hod, his colour",
+      "ok": true,
+      "saw": [
+        {
+          "x": 2,
+          "y": 3,
+          "name": "Cobble",
+          "accessory": "hod",
+          "drawn": "hod",
+          "colour": "#7A8CA3"
+        }
+      ]
+    },
+    {
+      "name": "IG-005 AC1 390-en: the palette is band × request × robot (fwd left right pick put repeat)",
+      "ok": true,
+      "saw": {
+        "pal": [
+          "fwd",
+          "left",
+          "right",
+          "pick",
+          "put",
+          "repeat"
+        ],
+        "wantPal": [
+          "fwd",
+          "left",
+          "right",
+          "pick",
+          "put",
+          "repeat"
+        ]
+      }
+    },
+    {
+      "name": "IG-005 390-en: the stones won by Cobble (Teach, the pad, Play)",
+      "ok": true,
+      "saw": {
+        "won": true,
+        "gift": "Sami gives you Bigger basket · 8 things."
+      }
+    },
+    {
+      "name": "IG-005 AC4 390-en: two robots at work at once — Pip on path-postbox (coral, the can), Cobble on the stones (his colour, his hod)",
+      "ok": true,
+      "saw": [
+        {
+          "x": 3,
+          "y": 11,
+          "name": "Pip",
+          "accessory": "can",
+          "drawn": "can",
+          "colour": "#FF7A59"
+        },
+        {
+          "x": 12,
+          "y": 11,
+          "name": "Cobble",
+          "accessory": "hod",
+          "drawn": "hod",
+          "colour": "#7A8CA3"
+        }
+      ]
+    },
+    {
+      "name": "IG-005 390-en: 0 console errors, 0 network errors so far",
+      "ok": true,
+      "saw": {
+        "console": [],
+        "network": []
+      }
+    },
+    {
+      "name": "IG-005 AC5 390-fr: the stones stay padlocked on the island — \"🔒 Ce travail a besoin de Cobble, qui pose des pierres. Sami te prête Cobble après « Suis le chemin jusqu’à la boîte aux lettres ».\" — one line, no way in",
+      "ok": true,
+      "saw": {
+        "stay": "/island",
+        "lock": {
+          "up": true,
+          "who": "Sami",
+          "title": "Pose quatre pierres sur le chemin",
+          "line": "🔒 Ce travail a besoin de Cobble, qui pose des pierres. Sami te prête Cobble après « Suis le chemin jusqu’à la boîte aux lettres ».",
+          "open": null,
+          "home": null
+        },
+        "want": "🔒 Ce travail a besoin de Cobble, qui pose des pierres. Sami te prête Cobble après « Suis le chemin jusqu’à la boîte aux lettres »."
+      }
+    },
+    {
+      "name": "IG-005 AC5 390-fr: the stones’ plot is fenced (a padlock over it) while Cobble is not lent",
+      "ok": true,
+      "saw": [
+        "10,8,8,6",
+        "1,15,8,6",
+        "19,8,8,6",
+        "19,1,8,6",
+        "28,8,8,6",
+        "37,8,8,6"
+      ]
+    },
+    {
+      "name": "IG-005 AC2 390-fr: path-postbox won (Teach, the pad, Play) and the win card says \"Sami te prête Cobble ! Cobble pose des pierres.\"",
+      "ok": true,
+      "saw": {
+        "won": true,
+        "gift": "Sami te prête Cobble ! Cobble pose des pierres.",
+        "want": "Sami te prête Cobble ! Cobble pose des pierres."
+      }
+    },
+    {
+      "name": "IG-005 AC2 390-fr: the save has Cobble in island.robots, the catalogue’s name in her language, not named by the child",
+      "ok": true,
+      "saw": [
+        {
+          "id": "r1"
+        },
+        {
+          "id": "cobble",
+          "kind": "cobble",
+          "name": "Cobble",
+          "color": "#7A8CA3",
+          "eye": "round",
+          "hat": "none"
+        }
+      ]
+    },
+    {
+      "name": "IG-005 AC2 390-fr: My robots has a card per robot of the catalogue (4), Pip’s first",
+      "ok": true,
+      "saw": [
+        "bg-panel bg-robot-card bg-robot-pip",
+        "bg-panel bg-robot-card bg-robot-cobble",
+        "bg-panel bg-robot-card bg-robot-pocket bg-robot-locked",
+        "bg-panel bg-robot-card bg-robot-echo bg-robot-locked"
+      ]
+    },
+    {
+      "name": "IG-005 AC2 390-fr: Cobble’s card — named \"Cobble\", \"Prêté par Sami\", \"porte une hotte\", drawn with his hod, at home",
+      "ok": true,
+      "saw": {
+        "cls": "bg-panel bg-robot-card bg-robot-cobble",
+        "name": "Cobble",
+        "tag": "Prêté par Sami",
+        "wears": "porte une hotte",
+        "where": "À la maison",
+        "blocks": [
+          "avancer",
+          "tourner à gauche",
+          "tourner à droite",
+          "ramasser",
+          "poser",
+          "répéter",
+          "jusqu’à",
+          "si",
+          "quand",
+          "compter +1"
+        ],
+        "drawn": "hod",
+        "locked": false
+      }
+    },
+    {
+      "name": "IG-005 390-fr: the robots not lent yet (2) are locked cards that say who lends them and after what",
+      "ok": true,
+      "saw": [
+        {
+          "cls": "bg-panel bg-robot-card bg-robot-pocket bg-robot-locked",
+          "name": "Poche",
+          "tag": "Verrouillé",
+          "wears": "porte une sacoche",
+          "where": "Biscuit te prête Poche après « Nourris-moi, mais seulement si ma gamelle est vide ».",
+          "blocks": [
+            "avancer",
+            "tourner à gauche",
+            "tourner à droite",
+            "ramasser",
+            "poser",
+            "dire",
+            "dire merci",
+            "répéter",
+            "jusqu’à",
+            "si",
+            "quand",
+            "compter +1"
+          ],
+          "drawn": "satchel",
+          "locked": true
+        },
+        {
+          "cls": "bg-panel bg-robot-card bg-robot-echo bg-robot-locked",
+          "name": "Écho",
+          "tag": "Verrouillé",
+          "wears": "porte une clochette",
+          "where": "Mamie Rose te prête Écho après « Arrose les fleurs que demande mon mot ».",
+          "blocks": [
+            "avancer",
+            "tourner à gauche",
+            "tourner à droite",
+            "arroser",
+            "dire",
+            "lire le mot",
+            "est-ce un… ?",
+            "dire merci",
+            "répéter",
+            "jusqu’à",
+            "si",
+            "quand",
+            "compter +1"
+          ],
+          "drawn": "bell",
+          "locked": true
+        }
+      ]
+    },
+    {
+      "name": "IG-005 390-fr: each card shows what its robot can do as block chips (Cobble: his own blocks among them)",
+      "ok": true,
+      "saw": [
+        "avancer",
+        "tourner à gauche",
+        "tourner à droite",
+        "ramasser",
+        "poser",
+        "répéter",
+        "jusqu’à",
+        "si",
+        "quand",
+        "compter +1"
+      ]
+    },
+    {
+      "name": "IG-005 390-fr: the stones open in the Workshop with Cobble — his name, his hod, his colour",
+      "ok": true,
+      "saw": [
+        {
+          "x": 2,
+          "y": 3,
+          "name": "Cobble",
+          "accessory": "hod",
+          "drawn": "hod",
+          "colour": "#7A8CA3"
+        }
+      ]
+    },
+    {
+      "name": "IG-005 AC1 390-fr: the palette is band × request × robot (fwd left right pick put repeat)",
+      "ok": true,
+      "saw": {
+        "pal": [
+          "fwd",
+          "left",
+          "right",
+          "pick",
+          "put",
+          "repeat"
+        ],
+        "wantPal": [
+          "fwd",
+          "left",
+          "right",
+          "pick",
+          "put",
+          "repeat"
+        ]
+      }
+    },
+    {
+      "name": "IG-005 390-fr: the stones won by Cobble (Teach, the pad, Play)",
+      "ok": true,
+      "saw": {
+        "won": true,
+        "gift": "Sami te donne Plus grand panier · 8 choses."
+      }
+    },
+    {
+      "name": "IG-005 AC4 390-fr: two robots at work at once — Pip on path-postbox (coral, the can), Cobble on the stones (his colour, his hod)",
+      "ok": true,
+      "saw": [
+        {
+          "x": 3,
+          "y": 11,
+          "name": "Pip",
+          "accessory": "can",
+          "drawn": "can",
+          "colour": "#FF7A59"
+        },
+        {
+          "x": 12,
+          "y": 11,
+          "name": "Cobble",
+          "accessory": "hod",
+          "drawn": "hod",
+          "colour": "#7A8CA3"
+        }
+      ]
+    },
+    {
+      "name": "IG-005 AC3 390-fr: before can+ one fill gives 3 and pours 3 waters, the next dry; after it one fill gives 6 and pours 6",
+      "ok": true,
+      "saw": {
+        "before": {
+          "full": {
+            "can": 3,
+            "max": 3
+          },
+          "seen": [
+            {
+              "can": 2,
+              "max": 3
+            },
+            {
+              "can": 1,
+              "max": 3
+            },
+            {
+              "can": 0,
+              "max": 3
+            },
+            {
+              "can": 0,
+              "max": 3
+            }
+          ],
+          "wet": 3
+        },
+        "after": {
+          "full": {
+            "can": 6,
+            "max": 6
+          },
+          "seen": [
+            {
+              "can": 5,
+              "max": 6
+            },
+            {
+              "can": 4,
+              "max": 6
+            },
+            {
+              "can": 3,
+              "max": 6
+            },
+            {
+              "can": 2,
+              "max": 6
+            },
+            {
+              "can": 1,
+              "max": 6
+            },
+            {
+              "can": 0,
+              "max": 6
+            },
+            {
+              "can": 0,
+              "max": 6
+            }
+          ],
+          "wet": 6
+        }
+      }
+    },
+    {
+      "name": "IG-005 390-fr: 0 console errors, 0 network errors so far",
+      "ok": true,
+      "saw": {
+        "console": [],
+        "network": []
+      }
+    },
+    {
+      "name": "0 console errors through the whole drive",
+      "ok": true,
+      "saw": []
+    },
+    {
+      "name": "0 network errors through the whole drive",
+      "ok": true,
+      "saw": []
+    }
+  ],
+  "readings": {
+    "lock-1368-en": {
+      "up": true,
+      "who": "Sami",
+      "title": "Lay four stones on the path",
+      "line": "🔒 This job needs Cobble, who lays stones. Sami lends Cobble after “Walk the path to the post box”.",
+      "open": null,
+      "home": null
+    },
+    "lend-1368-en": {
+      "won": true,
+      "gift": "Sami lends you Cobble! Cobble lays stones."
+    },
+    "cards-1368-en": [
+      {
+        "cls": "bg-panel bg-robot-card bg-robot-pip",
+        "name": "Pip",
+        "tag": "Yours",
+        "wears": "carries the can",
+        "where": "At work on “Walk the path to the post box”",
+        "blocks": [
+          "forward",
+          "turn left",
+          "turn right",
+          "water",
+          "fill the can",
+          "read the note",
+          "repeat",
+          "until",
+          "if",
+          "when",
+          "count +1"
+        ],
+        "drawn": "can",
+        "locked": false
+      },
+      {
+        "cls": "bg-panel bg-robot-card bg-robot-cobble",
+        "name": "Cobble",
+        "tag": "Lent by Sami",
+        "wears": "carries a hod",
+        "where": "At home",
+        "blocks": [
+          "forward",
+          "turn left",
+          "turn right",
+          "pick up",
+          "put down",
+          "repeat",
+          "until",
+          "if",
+          "when",
+          "count +1"
+        ],
+        "drawn": "hod",
+        "locked": false
+      },
+      {
+        "cls": "bg-panel bg-robot-card bg-robot-pocket bg-robot-locked",
+        "name": "Pocket",
+        "tag": "Locked",
+        "wears": "carries a satchel",
+        "where": "Biscuit lends Pocket after “Feed me, but only if my bowl is empty”.",
+        "blocks": [
+          "forward",
+          "turn left",
+          "turn right",
+          "pick up",
+          "put down",
+          "say",
+          "say thank you",
+          "repeat",
+          "until",
+          "if",
+          "when",
+          "count +1"
+        ],
+        "drawn": "satchel",
+        "locked": true
+      },
+      {
+        "cls": "bg-panel bg-robot-card bg-robot-echo bg-robot-locked",
+        "name": "Echo",
+        "tag": "Locked",
+        "wears": "wears a bell",
+        "where": "Mamie Rose lends Echo after “Water the flowers my note asks for”.",
+        "blocks": [
+          "forward",
+          "turn left",
+          "turn right",
+          "water",
+          "say",
+          "read the note",
+          "is it a…?",
+          "say thank you",
+          "repeat",
+          "until",
+          "if",
+          "when",
+          "count +1"
+        ],
+        "drawn": "bell",
+        "locked": true
+      }
+    ],
+    "ws-1368-en": {
+      "wsBots": [
+        {
+          "x": 2,
+          "y": 3,
+          "name": "Cobble",
+          "accessory": "hod",
+          "drawn": "hod",
+          "colour": "#7A8CA3"
+        }
+      ],
+      "pal": [
+        "fwd",
+        "left",
+        "right",
+        "pick",
+        "put",
+        "repeat"
+      ]
+    },
+    "two-1368-en": [
+      {
+        "x": 3,
+        "y": 11,
+        "name": "Pip",
+        "accessory": "can",
+        "drawn": "can",
+        "colour": "#FF7A59"
+      },
+      {
+        "x": 12,
+        "y": 11,
+        "name": "Cobble",
+        "accessory": "hod",
+        "drawn": "hod",
+        "colour": "#7A8CA3"
+      }
+    ],
+    "code": [
+      "r1",
+      [
+        "cobble",
+        "cobble",
+        "Rocky",
+        "#7A8CA3",
+        "round",
+        "none"
+      ],
+      [
+        "pocket",
+        "pocket",
+        "Pocket",
+        "#3FA66B",
+        "wink",
+        "none"
+      ]
+    ],
+    "can-1368-en": {
+      "before": {
+        "full": {
+          "can": 3,
+          "max": 3
+        },
+        "seen": [
+          {
+            "can": 2,
+            "max": 3
+          },
+          {
+            "can": 1,
+            "max": 3
+          },
+          {
+            "can": 0,
+            "max": 3
+          },
+          {
+            "can": 0,
+            "max": 3
+          }
+        ],
+        "wet": 3
+      },
+      "after": {
+        "full": {
+          "can": 6,
+          "max": 6
+        },
+        "seen": [
+          {
+            "can": 5,
+            "max": 6
+          },
+          {
+            "can": 4,
+            "max": 6
+          },
+          {
+            "can": 3,
+            "max": 6
+          },
+          {
+            "can": 2,
+            "max": 6
+          },
+          {
+            "can": 1,
+            "max": 6
+          },
+          {
+            "can": 0,
+            "max": 6
+          },
+          {
+            "can": 0,
+            "max": 6
+          }
+        ],
+        "wet": 6
+      }
+    },
+    "lock-1368-fr": {
+      "up": true,
+      "who": "Sami",
+      "title": "Pose quatre pierres sur le chemin",
+      "line": "🔒 Ce travail a besoin de Cobble, qui pose des pierres. Sami te prête Cobble après « Suis le chemin jusqu’à la boîte aux lettres ».",
+      "open": null,
+      "home": null
+    },
+    "lend-1368-fr": {
+      "won": true,
+      "gift": "Sami te prête Cobble ! Cobble pose des pierres."
+    },
+    "cards-1368-fr": [
+      {
+        "cls": "bg-panel bg-robot-card bg-robot-pip",
+        "name": "Pip",
+        "tag": "À toi",
+        "wears": "porte l’arrosoir",
+        "where": "Au travail sur « Suis le chemin jusqu’à la boîte aux lettres »",
+        "blocks": [
+          "avancer",
+          "tourner à gauche",
+          "tourner à droite",
+          "arroser",
+          "remplir l’arrosoir",
+          "lire le mot",
+          "répéter",
+          "jusqu’à",
+          "si",
+          "quand",
+          "compter +1"
+        ],
+        "drawn": "can",
+        "locked": false
+      },
+      {
+        "cls": "bg-panel bg-robot-card bg-robot-cobble",
+        "name": "Cobble",
+        "tag": "Prêté par Sami",
+        "wears": "porte une hotte",
+        "where": "À la maison",
+        "blocks": [
+          "avancer",
+          "tourner à gauche",
+          "tourner à droite",
+          "ramasser",
+          "poser",
+          "répéter",
+          "jusqu’à",
+          "si",
+          "quand",
+          "compter +1"
+        ],
+        "drawn": "hod",
+        "locked": false
+      },
+      {
+        "cls": "bg-panel bg-robot-card bg-robot-pocket bg-robot-locked",
+        "name": "Poche",
+        "tag": "Verrouillé",
+        "wears": "porte une sacoche",
+        "where": "Biscuit te prête Poche après « Nourris-moi, mais seulement si ma gamelle est vide ».",
+        "blocks": [
+          "avancer",
+          "tourner à gauche",
+          "tourner à droite",
+          "ramasser",
+          "poser",
+          "dire",
+          "dire merci",
+          "répéter",
+          "jusqu’à",
+          "si",
+          "quand",
+          "compter +1"
+        ],
+        "drawn": "satchel",
+        "locked": true
+      },
+      {
+        "cls": "bg-panel bg-robot-card bg-robot-echo bg-robot-locked",
+        "name": "Écho",
+        "tag": "Verrouillé",
+        "wears": "porte une clochette",
+        "where": "Mamie Rose te prête Écho après « Arrose les fleurs que demande mon mot ».",
+        "blocks": [
+          "avancer",
+          "tourner à gauche",
+          "tourner à droite",
+          "arroser",
+          "dire",
+          "lire le mot",
+          "est-ce un… ?",
+          "dire merci",
+          "répéter",
+          "jusqu’à",
+          "si",
+          "quand",
+          "compter +1"
+        ],
+        "drawn": "bell",
+        "locked": true
+      }
+    ],
+    "ws-1368-fr": {
+      "wsBots": [
+        {
+          "x": 2,
+          "y": 3,
+          "name": "Cobble",
+          "accessory": "hod",
+          "drawn": "hod",
+          "colour": "#7A8CA3"
+        }
+      ],
+      "pal": [
+        "fwd",
+        "left",
+        "right",
+        "pick",
+        "put",
+        "repeat"
+      ]
+    },
+    "two-1368-fr": [
+      {
+        "x": 3,
+        "y": 11,
+        "name": "Pip",
+        "accessory": "can",
+        "drawn": "can",
+        "colour": "#FF7A59"
+      },
+      {
+        "x": 12,
+        "y": 11,
+        "name": "Cobble",
+        "accessory": "hod",
+        "drawn": "hod",
+        "colour": "#7A8CA3"
+      }
+    ],
+    "lock-390-en": {
+      "up": true,
+      "who": "Sami",
+      "title": "Lay four stones on the path",
+      "line": "🔒 This job needs Cobble, who lays stones. Sami lends Cobble after “Walk the path to the post box”.",
+      "open": null,
+      "home": null
+    },
+    "lend-390-en": {
+      "won": true,
+      "gift": "Sami lends you Cobble! Cobble lays stones."
+    },
+    "cards-390-en": [
+      {
+        "cls": "bg-panel bg-robot-card bg-robot-pip",
+        "name": "Pip",
+        "tag": "Yours",
+        "wears": "carries the can",
+        "where": "At work on “Walk the path to the post box”",
+        "blocks": [
+          "forward",
+          "turn left",
+          "turn right",
+          "water",
+          "fill the can",
+          "read the note",
+          "repeat",
+          "until",
+          "if",
+          "when",
+          "count +1"
+        ],
+        "drawn": "can",
+        "locked": false
+      },
+      {
+        "cls": "bg-panel bg-robot-card bg-robot-cobble",
+        "name": "Cobble",
+        "tag": "Lent by Sami",
+        "wears": "carries a hod",
+        "where": "At home",
+        "blocks": [
+          "forward",
+          "turn left",
+          "turn right",
+          "pick up",
+          "put down",
+          "repeat",
+          "until",
+          "if",
+          "when",
+          "count +1"
+        ],
+        "drawn": "hod",
+        "locked": false
+      },
+      {
+        "cls": "bg-panel bg-robot-card bg-robot-pocket bg-robot-locked",
+        "name": "Pocket",
+        "tag": "Locked",
+        "wears": "carries a satchel",
+        "where": "Biscuit lends Pocket after “Feed me, but only if my bowl is empty”.",
+        "blocks": [
+          "forward",
+          "turn left",
+          "turn right",
+          "pick up",
+          "put down",
+          "say",
+          "say thank you",
+          "repeat",
+          "until",
+          "if",
+          "when",
+          "count +1"
+        ],
+        "drawn": "satchel",
+        "locked": true
+      },
+      {
+        "cls": "bg-panel bg-robot-card bg-robot-echo bg-robot-locked",
+        "name": "Echo",
+        "tag": "Locked",
+        "wears": "wears a bell",
+        "where": "Mamie Rose lends Echo after “Water the flowers my note asks for”.",
+        "blocks": [
+          "forward",
+          "turn left",
+          "turn right",
+          "water",
+          "say",
+          "read the note",
+          "is it a…?",
+          "say thank you",
+          "repeat",
+          "until",
+          "if",
+          "when",
+          "count +1"
+        ],
+        "drawn": "bell",
+        "locked": true
+      }
+    ],
+    "ws-390-en": {
+      "wsBots": [
+        {
+          "x": 2,
+          "y": 3,
+          "name": "Cobble",
+          "accessory": "hod",
+          "drawn": "hod",
+          "colour": "#7A8CA3"
+        }
+      ],
+      "pal": [
+        "fwd",
+        "left",
+        "right",
+        "pick",
+        "put",
+        "repeat"
+      ]
+    },
+    "two-390-en": [
+      {
+        "x": 3,
+        "y": 11,
+        "name": "Pip",
+        "accessory": "can",
+        "drawn": "can",
+        "colour": "#FF7A59"
+      },
+      {
+        "x": 12,
+        "y": 11,
+        "name": "Cobble",
+        "accessory": "hod",
+        "drawn": "hod",
+        "colour": "#7A8CA3"
+      }
+    ],
+    "lock-390-fr": {
+      "up": true,
+      "who": "Sami",
+      "title": "Pose quatre pierres sur le chemin",
+      "line": "🔒 Ce travail a besoin de Cobble, qui pose des pierres. Sami te prête Cobble après « Suis le chemin jusqu’à la boîte aux lettres ».",
+      "open": null,
+      "home": null
+    },
+    "lend-390-fr": {
+      "won": true,
+      "gift": "Sami te prête Cobble ! Cobble pose des pierres."
+    },
+    "cards-390-fr": [
+      {
+        "cls": "bg-panel bg-robot-card bg-robot-pip",
+        "name": "Pip",
+        "tag": "À toi",
+        "wears": "porte l’arrosoir",
+        "where": "Au travail sur « Suis le chemin jusqu’à la boîte aux lettres »",
+        "blocks": [
+          "avancer",
+          "tourner à gauche",
+          "tourner à droite",
+          "arroser",
+          "remplir l’arrosoir",
+          "lire le mot",
+          "répéter",
+          "jusqu’à",
+          "si",
+          "quand",
+          "compter +1"
+        ],
+        "drawn": "can",
+        "locked": false
+      },
+      {
+        "cls": "bg-panel bg-robot-card bg-robot-cobble",
+        "name": "Cobble",
+        "tag": "Prêté par Sami",
+        "wears": "porte une hotte",
+        "where": "À la maison",
+        "blocks": [
+          "avancer",
+          "tourner à gauche",
+          "tourner à droite",
+          "ramasser",
+          "poser",
+          "répéter",
+          "jusqu’à",
+          "si",
+          "quand",
+          "compter +1"
+        ],
+        "drawn": "hod",
+        "locked": false
+      },
+      {
+        "cls": "bg-panel bg-robot-card bg-robot-pocket bg-robot-locked",
+        "name": "Poche",
+        "tag": "Verrouillé",
+        "wears": "porte une sacoche",
+        "where": "Biscuit te prête Poche après « Nourris-moi, mais seulement si ma gamelle est vide ».",
+        "blocks": [
+          "avancer",
+          "tourner à gauche",
+          "tourner à droite",
+          "ramasser",
+          "poser",
+          "dire",
+          "dire merci",
+          "répéter",
+          "jusqu’à",
+          "si",
+          "quand",
+          "compter +1"
+        ],
+        "drawn": "satchel",
+        "locked": true
+      },
+      {
+        "cls": "bg-panel bg-robot-card bg-robot-echo bg-robot-locked",
+        "name": "Écho",
+        "tag": "Verrouillé",
+        "wears": "porte une clochette",
+        "where": "Mamie Rose te prête Écho après « Arrose les fleurs que demande mon mot ».",
+        "blocks": [
+          "avancer",
+          "tourner à gauche",
+          "tourner à droite",
+          "arroser",
+          "dire",
+          "lire le mot",
+          "est-ce un… ?",
+          "dire merci",
+          "répéter",
+          "jusqu’à",
+          "si",
+          "quand",
+          "compter +1"
+        ],
+        "drawn": "bell",
+        "locked": true
+      }
+    ],
+    "ws-390-fr": {
+      "wsBots": [
+        {
+          "x": 2,
+          "y": 3,
+          "name": "Cobble",
+          "accessory": "hod",
+          "drawn": "hod",
+          "colour": "#7A8CA3"
+        }
+      ],
+      "pal": [
+        "fwd",
+        "left",
+        "right",
+        "pick",
+        "put",
+        "repeat"
+      ]
+    },
+    "two-390-fr": [
+      {
+        "x": 3,
+        "y": 11,
+        "name": "Pip",
+        "accessory": "can",
+        "drawn": "can",
+        "colour": "#FF7A59"
+      },
+      {
+        "x": 12,
+        "y": 11,
+        "name": "Cobble",
+        "accessory": "hod",
+        "drawn": "hod",
+        "colour": "#7A8CA3"
+      }
+    ],
+    "can-390-fr": {
+      "before": {
+        "full": {
+          "can": 3,
+          "max": 3
+        },
+        "seen": [
+          {
+            "can": 2,
+            "max": 3
+          },
+          {
+            "can": 1,
+            "max": 3
+          },
+          {
+            "can": 0,
+            "max": 3
+          },
+          {
+            "can": 0,
+            "max": 3
+          }
+        ],
+        "wet": 3
+      },
+      "after": {
+        "full": {
+          "can": 6,
+          "max": 6
+        },
+        "seen": [
+          {
+            "can": 5,
+            "max": 6
+          },
+          {
+            "can": 4,
+            "max": 6
+          },
+          {
+            "can": 3,
+            "max": 6
+          },
+          {
+            "can": 2,
+            "max": 6
+          },
+          {
+            "can": 1,
+            "max": 6
+          },
+          {
+            "can": 0,
+            "max": 6
+          },
+          {
+            "can": 0,
+            "max": 6
+          }
+        ],
+        "wet": 6
+      }
+    }
+  },
+  "consoleErrors": [],
+  "networkErrors": []
+}
