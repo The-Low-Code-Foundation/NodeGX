@@ -158,3 +158,75 @@ lines, n1p — the END of `REQUESTS` untouched); `cg003Scripts.ts` (Start world,
 `ICON` and the `SENSORS` line — lane C's `olive_read` may land on the same line, Tidy line `LABEL`, Win summary);
 `scripts/devtools/drive-cg003-pages.js`; `cg005Olive.test.ts`, `cg006Requests.test.ts` (small hunks for the two requests).
 
+
+## 7. Session 3 (2026-09-29, lane F, worktree `p106-s3-leftovers` cut from `f182a2d9e`) — items (a) and (b)
+
+### (a) The fold nudge offered `turn right, forward` ×2 inside the tulips dance — FIXED (`2fc7cd535`)
+
+- **Measured first** (a scratch script over the engine's own `FIND_REPEAT_SCRIPT` and `CHOOSE_HINT_SCRIPT`): every
+  request whose palette has `repeat`, its reference program laid out and recorded ONE PRESS AT A TIME, the finder asked
+  after each press. 65 presses got a fold offer or the "do this n times" hint; **9 were a run the reference does not
+  hold, all on the tulips, presses 9–17**: `i 5, len 2, count 2` (right, forward ×2 — the end of the first dance), both
+  the tidy offer and `hintPattern`. From press 18 the nine-block body ×2 wins on coverage, at 27 ×3. Every other
+  request's offers were one of its own repeats (path-stones' picks and `put, fwd`; the letter's forwards; the rows
+  trick's body). The three requests whose repeat body holds an `if` or an Olive block (`bowl-if`, `mamie-note`,
+  `rock-flower`) are never offered a fold (`sameBlock` refuses a block with a body) — pre-existing, not changed.
+- **The rule chosen, from that measurement:** "prefer the fold that covers the most" already held (press 18 on), so the
+  defect was only the window before the long body repeats. **A run seen only twice that does not start the list is held
+  back** (`findRepeatIn`, `FOLD_HELPERS`, one line): it may be the tail of a longer body still being recorded; seen a
+  third time, or from the list's start, it is offered. It sits in the helper both the tidy offer and Choose hint read,
+  so the two never disagree. All 30 AC3 fixtures are unchanged (none expects a count-2 run away from the start).
+- **Gate (red first):** `cg002Engine` "P106 s3 lane F (a)" — (1) every request with a repeat, press by press: every
+  offer and every `hintPattern` is one of the reference's own repeat bodies, beside a known-firing count (> 40 offers);
+  (2) the tulips: no offer and no `hintPattern` at presses 9–17, the nine-block body ×2 at 18 and ×3 at 27; `K L R F R F`
+  held, `K L R F R F R F` offered ×3, `R F R F K L` offered. Red on the base at press 9 (both clauses), green after.
+- **On the page** (a scratch drive, `p106-s3-leftovers-scratch/look/fold-press9.js`, the tulips taught through the pad
+  at 1368×912 on the 2D node, `.bg-tidy` read after each press): no fold offered at presses 1–17; "I spotted the same 9
+  steps, 2 times in a row. Fold it / Not now" from 18; "… 3 times …" at 27. Shot `look/after/fold-press9.png` LOOKED at:
+  nine blocks in the steps, no tidy bar.
+
+### (b) Dry red and dry yellow tulips read mauve and tan — FIXED in both kits (`3adc7db5c`)
+
+- **Measured before** (the same deploy twice, only the two kit files swapped for `f182a2d9e`'s; Mamie's note opened
+  with every row dry; `p106-s3-leftovers-scratch/look/mamie-look.js`):
+  - 2D (computed style + a screenshot pixel at the petal): `.gd-tulip.gd-dry` = `opacity .55`, `filter: saturate(0.3)`,
+    `rotate(18deg)`. Dry red **#ba8d7d** (hue 16°, a brown), dry yellow **#d4b88e** (hue 36°, tan). CIE76 ΔE between
+    them **20.0**; the dry red is ΔE 20.5 from the bed itself.
+  - 3D (the petal's material colour, read off the running scene): dry red **#e6b7c6** (pale mauve), dry yellow
+    **#ebd9a9** (cream), ΔE 34.8, both tilted 0.31 rad.
+- **Changed:** 2D — the `saturate(.3)` filter is dropped from `.gd-tulip.gd-dry`; the droop (`rotate(18deg)
+  translateY(6%)`) and the fade (`opacity .55`) stay, so the reduced-motion page clause still reads dry apart from wet
+  by opacity. 3D — `PALETTE.tulipDry` / `yellowDry` are now exactly the 2D composite (the petal at .55 over the bed
+  `#C79A63`), so the two renderers show the same dry colour; the tilt stays. Nothing else of the look was touched; every
+  class name and data attribute is the same (`gd-tulip gd-dry [gd-yellow]`, `data-sprite="tulip|tulipYellow"`).
+- **Measured after:** 2D dry red **#e67f81** (hue 359°), dry yellow **#e5b864** (hue 39°) on screen — the model in the
+  gate predicts #e68081 / #e6b865 (within 1 unit per channel); ΔE **46.7** (was 20.0); dry vs wet still ΔE 25 (red) and
+  13 (yellow) plus the droop. 3D materials **#e68081 / #e6b865**, tilt 0.31, wet ones upright.
+- **Gates (red first):** `cg001GardenKit` "P106 s3 lane F (b)" reads the BUILT kit's CSS and sprite table: droop and
+  fade present, no `saturate|grayscale|sepia|hue-rotate`, each dry petal within 30° of its wet hue, dry red vs dry yellow
+  ΔE ≥ 40, dry vs wet ΔE ≥ 10, and the class names/attributes on a render (red: the filter was there). `ig007Garden3d`
+  "P106 s3 lane F (b)" builds a scene with red/yellow × dry/wet tulips and reads each petal's material colour: equal to
+  the 2D kit's dry composite and wet fill, the same hue/ΔE bars, dry tilted and wet upright (red: #e6b7c6 ≠ #ba8e7d).
+  The colour maths is one helper, `packages/noodl-mcp/tests/dryTulipLook.ts`.
+- **Screenshots LOOKED at** (`p106-s3-leftovers-scratch/look/{before,after}/mamie-note-dry-{2d,3d}.png`, 1368×912):
+  before, 2D — the top row a dusty brown-mauve, the bottom a pale tan, the rows read as two shades of one dead colour;
+  after, 2D — the top row pink-red, the bottom amber-yellow, both drooping and faded, told apart at a glance. 3D before —
+  small pale lilac heads vs cream; after — coral-red vs amber (the heads are small at the Workshop framing: the colour
+  helps, the size is the look Richard grades). The page drive's own `pages/shots/ig006-ac2-note-1368-en.png` after the
+  run: the watered red upright and bright, the two dry reds drooping pink, the three dry yellows drooping amber.
+
+### Readings (this lane's final tree; exit code first)
+
+- Garden specs, one file each: `cg001GardenKit` exit 0 **28/28** (27) · `cg002Engine` exit 0 **139/139** (137) ·
+  `cg003Template` exit 0 **103/103** (103) · `cg005Olive` exit 0 **41/41** · `cg006Requests` exit 0 **83/83** ·
+  `ig007Garden3d` exit 0 **31/31** (30) — **425** (421 on the merged tree).
+- Both kits rebuilt twice: the same sha256 (`19cb70c3…` 2D, `f0e796b9…` 3D). `template:garden` exit 0; a second run
+  exit 0 with 0 further drift, after each item.
+- Page drive (`drive-pages.sh` repointed to this worktree): generate 0 · assemble 0 · deploy 0 · drive 0,
+  **323/323**, 0 console errors, 0 network errors — against the merged reading 327: the four missing are the
+  orchestrator's "`<tag>` merge: the red row draws red and the yellow row yellow…" clauses, which are an **uncommitted
+  edit in the primary checkout's `scripts/devtools/drive-cg003-pages.js`** (+3 lines, not in `f182a2d9e`); every other
+  clause name matches. Log/JSON `p106-s3-leftovers-scratch/pages/drive.{log,json}`, shots `pages/shots/`.
+
+**Could not verify:** the tablet; the 3D node at 390×844 and in FR for the dry look (the scratch drive is 1368×912 EN);
+the dry colours under the win card's blur; a child telling the rows apart (IG-008).
