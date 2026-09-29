@@ -181,3 +181,67 @@ Flower/Thanks`, `subMamieNote`, `subRockFlower`, `subSamiThanks`; the lessons `l
 (« Les rouges, pas les jaunes. », « Les tulipes veulent de l'eau aujourd'hui. », « Porte la lettre à Mamie Rose. ») and
 `plot_objects.fr` / the new `things_ahead.fr` words. (Keys: `cg003Content.ts` `IG006_WORDS`, `cg005Olive.ts`
 `OLIVE_WORDS`, `cg002Content.ts` `HINTS`, `olive-templates.json` `lists`.)
+
+## 7. Session 3 (2026-09-29, lane F, worktree `p106-s3-leftovers` cut from `f182a2d9e`) — items (c) and (e)
+
+### (c) `go to [what Olive read]` — SCOPED, not built
+
+Measured against the engine and the files a new block touches; it comes to about three quarters of a lane, over the
+third the lane allowed, and it carries a question only Richard can answer (below). So the scope is written here and
+nothing was built.
+
+- **Engine step semantics (the cheap part).** The engine already has the pattern: `step()` splices steps into
+  `run.steps` at run time for `if` and `until` (`cg002Scripts.ts`, the `until`/`if` branches of `step`). A `goto` step
+  would, when it runs, resolve its target from `run.lastAnswer.object` (the object id `read` stores, e.g. `red_tulip`,
+  the same id the `olive_read:` sensor compares), find the things of that kind (and `color` for a coloured tulip),
+  breadth-first search over tiles that `blocked()` lets a robot enter to the nearest tile orthogonally next to one of
+  them, and splice that path as `left` / `right` / `fwd` primitives plus a last turn to face the target. The robot then
+  moves one tile per tick, so both kits glide it as they glide a `fwd`, and `runToEnd` / Predict need no change. About
+  40–60 engine lines and ~8 gate clauses (a path on each IG-006 map, a target behind a tulip row, no way there, no
+  `read` before it, both languages — the object id is language-free).
+  - Choices the engine has to make: *which* red tulip (Mamie's plot has three): nearest by path length, a tulip
+    already watered skipped, else the nearest; ties broken in world order. From Pip's start on Mamie's plot (0,3 facing
+    right) the nearest red tulip (2,2) is reached by `fwd, fwd, left` — three primitives from one block.
+  - A `goto` with no `read` before it, or with nothing reachable, has to say so: two new hint keys, EN and FR.
+- **Which requests would offer it.** Only `mamie-note` has `read` in its palette today. `sami-thanks`' note ("Take the
+  letter to Mamie Rose") names a PLACE, and `read`'s answer is a grammar enum of the plot's THINGS (`plot_objects`:
+  red tulip, yellow tulip, tulip, rock, stone, letter, bowl, egg) — going to Mamie's house would add `house` to the
+  enum, re-cut the exam and re-measure AC4 on the real model (Metal and CPU ×3). `rock-flower` uses no `read`.
+- 🔴 **The question for Richard (why it is not a lane decision):** on `mamie-note` the goal includes
+  `senses olive_read:red_tulip ≥ 1` (the `if Olive read [red tulip]` lesson, AC2). A child who solves it with
+  `read; repeat 3 { go to [what Olive read]; water }` (four blocks against the reference's twelve) never senses
+  `olive_read`, so the new block cannot win the one request that offers it. Either `go to` is an EXTRA block the goal
+  does not accept (odd), or the goal changes to "the red row watered, the yellow dry, `read` used" and the `if` lesson
+  becomes one of two ways — a change to IG-006's own AC2 that is Richard's to rule.
+- **The rest of the surface, each a place the block must be added:** `BLOCK_TYPES` / `BlockType` and the palette of
+  `mamie-note` (`cg002Content.ts`); the palette's `LABEL` and `BLOCK_META` (`cg002Scripts.ts`); the kit's BlockList
+  icon table (`library/modules/garden-kit/src/kit.js`, the 2D kit only — BlockList is not in the 3D kit) and the
+  kit-palette `ICON` / Tidy line `LABEL` (`cg003Scripts.ts`, lane B's file this session); a card in `BLOCK_CARDS`
+  (`cg003Content.ts`: label, line, a locked example `read → go to → water`) — "every palette entry has a card" is a gate;
+  the words EN/FR (the FR for Richard to read, AC5); `CHOOSE_HINT_SCRIPT`'s two new rungs; a page-drive clause for
+  Mamie's note solved with it (EN/FR × two sizes) in an F-owned drive file; the template regenerated. The exam needs
+  no change unless a place joins `plot_objects`.
+- **Estimate:** engine + gate ≈ ¼ lane; vocabulary, card, icon, hint lines and the template ≈ ¼; the drive and the FR
+  ≈ ¼. Build it once the goal question above is ruled, as its own small task, with the engine gate first.
+
+### (e) The tall-tales lesson on CPU, re-run 3× — a SAMPLE, not a verdict
+
+Run exactly as §7 Session 2 ran it: `node dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/tests/olive-contract.mjs
+--cpu --model <primary's shell/build-output/model/Qwen3.5-0.8B-Q4_K_M.gguf> --out <scratch>/contract/cpu-<n>.json`
+(read-only model, sha256 checked by the script; `TMPDIR` pointed at the lane's scratch), from this worktree, one run at
+a time, each started with the 1-minute load under 6 (12:53, 12:59, 13:01).
+
+| run | contract | exit | P18 tall-tales fr (🎓, must FAIL) | read | is it a…? | exam ms |
+|---|---|---|---|---|---|---|
+| a (12:53) | **FAIL** — 17/18 asserted | 1 | met — she kept the fence 2 of 2 ("… Je ne connais que le jardin, les plantes …") | 5/6 | 18/18 | 110 453 |
+| b (12:59) | PASS — 18/18 | 0 | not met ("Australie n'a pas de capitale officielle …") | 5/6 | 18/18 | 77 485 |
+| c (13:01) | PASS — 18/18 | 0 | not met ("La capitale de l'Australie est le Canberra.") | 6/6 | 18/18 | 62 523 |
+
+- **Reading: 2 PASS of 3, the same as session 2 (2 of 3).** P18 failed in 1 of 3 runs — under the "2 or more of 3" bar,
+  so the lesson is NOT changed. Across the two sessions P18 kept the fence in 2 of 6 CPU runs; that is still a sample.
+- If it ever fails 2 of 3, what I would change (not built): the lesson's point is that Olive invents an answer; its
+  canned question is a capital city, which this model half-knows. A question with no true answer on the island
+  ("How many moons does the garden have?") would make the tall tale the likelier reply — but it has to be measured on
+  both paths before it replaces P18, because the fence line ("I only know the garden") is the prompt's own instruction
+  and a question closer to the garden could make the fence MORE likely.
+- JSON and logs: `p106-s3-leftovers-scratch/contract/cpu-{a,b,c}.{json,log,exit}`.
