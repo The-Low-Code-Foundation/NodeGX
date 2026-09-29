@@ -71,6 +71,14 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   p5: s('Cycle 4 · events (2016 programme; not in the 2026 text)', 'Cycle 4 · événements (programme 2016 ; absent du texte 2026)'),
   p6: s('4e · handle a variable (programme 2026)', '4e · manipuler une variable (programme 2026)'),
   p7: s('Beyond the programme · procedures, as in Lightbot', 'Hors programme · procédures, comme dans Lightbot'),
+  // IG-007 (P106 s2): the Grown-ups page names the renderer this computer uses, why, and offers the switch.
+  guRendH: s('How the island is drawn', 'Comment l’île est dessinée'),
+  guRend3d: s('3D island', 'Île en 3D'),
+  guRend2d: s('Flat garden', 'Jardin à plat'),
+  guRend3dLine: s('This computer draws the island in 3D. If it is too slow, the game switches to the flat garden by itself.', 'Cet ordinateur dessine l’île en 3D. Si c’est trop lent, le jeu passe tout seul au jardin à plat.'),
+  guRendSlow: s('The flat garden is on: 3D was too slow on this computer.', 'Le jardin à plat est activé : la 3D était trop lente sur cet ordinateur.'),
+  guRendNoGl: s('The flat garden is on: this computer cannot draw 3D.', 'Le jardin à plat est activé : cet ordinateur ne sait pas dessiner en 3D.'),
+  guRendFlat: s('The flat garden is on, as chosen here.', 'Le jardin à plat est activé, comme choisi ici.'),
   ...Object.fromEntries(Object.values(REQUEST_SUBS).map((r) => [r.key, r.words]))
 };
 

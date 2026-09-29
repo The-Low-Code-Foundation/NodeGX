@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 382,
+      "connectionCount": 389,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -403,6 +403,22 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
+    "Logic/Renderer": {
+      "path": "Logic/Renderer",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 9,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Renderer choice": {
+      "path": "Logic/Renderer choice",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 6,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
     "Logic/App store": {
       "path": "Logic/App store",
       "type": "visual",
@@ -486,8 +502,8 @@
     "Workshop/Play": {
       "path": "Workshop/Play",
       "type": "visual",
-      "nodeCount": 109,
-      "connectionCount": 267,
+      "nodeCount": 118,
+      "connectionCount": 291,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -619,6 +635,14 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
+    "Grown/Renderer panel": {
+      "path": "Grown/Renderer panel",
+      "type": "visual",
+      "nodeCount": 13,
+      "connectionCount": 19,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
     "Pages/Profiles": {
       "path": "Pages/Profiles",
       "type": "page",
@@ -662,15 +686,15 @@
     "Pages/Grown-ups": {
       "path": "Pages/Grown-ups",
       "type": "page",
-      "nodeCount": 14,
-      "connectionCount": 34,
+      "nodeCount": 15,
+      "connectionCount": 36,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     }
   },
   "stats": {
-    "totalComponents": 83,
-    "totalNodes": 677,
-    "totalConnections": 1895
+    "totalComponents": 86,
+    "totalNodes": 706,
+    "totalConnections": 1962
   }
 }

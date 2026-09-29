@@ -649,6 +649,42 @@ Outputs.ok = ok;
 Outputs.fallback = !ok;
 `;
 
+/**
+ * IG-007 (P106 s2) — which renderer draws the world on THIS computer, read from the store's `renderer` key (kept beside
+ * the family in the same persisted store, never inside the family model: the save code carries the islands to another
+ * computer, and a tablet's "too slow" is not the Mac's). `{ mode: '3d' | '2d', why: '' | 'unsupported' | 'slow' |
+ * 'grown-up' }`; nothing stored yet is 3D. The line is the Grown-ups page's sentence for it.
+ */
+export const RENDERER_SCRIPT = `${WORD_HELPER}
+var r = Inputs.stored && typeof Inputs.stored === 'object' ? Inputs.stored : {};
+var mode = r.mode === '2d' ? '2d' : '3d';
+var why = r.why === 'unsupported' || r.why === 'slow' || r.why === 'grown-up' ? r.why : '';
+var lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';
+var w = wordMap(Inputs.words, lang, 'Pip');
+Outputs.use3d = mode === '3d';
+Outputs.use2d = mode === '2d';
+Outputs.mode = mode;
+Outputs.why = why;
+Outputs.line = mode === '3d' ? (w.guRend3dLine || '') : (w[why === 'slow' ? 'guRendSlow' : why === 'unsupported' ? 'guRendNoGl' : 'guRendFlat'] || '');
+`;
+
+/**
+ * IG-007 AC4 — the fallback rule's write. `event` is a parameter per placement: `unsupported` (Garden 3D said
+ * Supported false), `slow` (it fired Too Slow: Frame Ms above 50 ms for 3 s of visible time), `use3d` / `use2d` (the
+ * Grown-ups switch). The next `renderer` value is a fresh object; Changed says whether it differs from the stored one.
+ */
+export const RENDERER_CHOICE_SCRIPT = `
+var before = Inputs.stored && typeof Inputs.stored === 'object' ? Inputs.stored : {};
+var event = String(Inputs.event || '');
+var next = event === 'unsupported' ? { mode: '2d', why: 'unsupported' }
+  : event === 'slow' ? { mode: '2d', why: 'slow' }
+  : event === 'use2d' ? { mode: '2d', why: 'grown-up' }
+  : event === 'use3d' ? { mode: '3d', why: 'grown-up' }
+  : { mode: before.mode === '2d' ? '2d' : '3d', why: String(before.why || '') };
+Outputs.renderer = next;
+Outputs.changed = next.mode !== (before.mode === '2d' ? '2d' : '3d') || next.why !== String(before.why || '');
+`;
+
 /** Every word, the engine's and the pages', one output per key (`Outputs[key]` in a loop mints no port). */
 export const TRANSLATE_ALL_SCRIPT = `
 var lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';
@@ -684,5 +720,8 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Try Olive', script: TRY_OLIVE_SCRIPT, seam: 'the grown-ups\u2019 Try Olive: one thank-you asked of her, the written line when she does not answer' },
   { component: 'Logic/Olive held', script: OLIVE_HELD_SCRIPT, seam: 'the rungs this computer\u2019s exam failed, in words, for Skills' },
   { component: 'Logic/Rung rows', script: RUNG_ROWS_SCRIPT, seam: 'Olive\u2019s eighteen lessons as Skills cards, band 10\u201312, marked where this computer\u2019s exam withheld them' },
-  { component: 'Logic/Olive played', script: OLIVE_PLAYED_SCRIPT, seam: 'the rung this run asked Olive, and whether she answered, for the after-run hint' }
+  { component: 'Logic/Olive played', script: OLIVE_PLAYED_SCRIPT, seam: 'the rung this run asked Olive, and whether she answered, for the after-run hint' },
+  // IG-007 (P106 s2): the renderer this computer uses, and the fallback rule's write.
+  { component: 'Logic/Renderer', script: RENDERER_SCRIPT, seam: 'which renderer draws the world on this computer, and the grown-ups\u2019 line for it' },
+  { component: 'Logic/Renderer choice', script: RENDERER_CHOICE_SCRIPT, seam: 'the renderer after a fallback or the grown-ups\u2019 switch' }
 ];

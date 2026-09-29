@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "18366e50-1953-5498-823d-9a6e248ccb26",
+  "name": "Renderer",
+  "path": "/Logic/Renderer",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Which renderer draws the world on this computer, and the grown-ups’ line for it. Runs when an input changes; Ran after each run."
+}

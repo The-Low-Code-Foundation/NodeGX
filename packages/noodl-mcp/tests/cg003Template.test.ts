@@ -43,6 +43,8 @@ import {
   RUNG_ROWS_SCRIPT,
   OLIVE_STATUS_SCRIPT,
   READ_PROGRAM_SCRIPT,
+  RENDERER_CHOICE_SCRIPT,
+  RENDERER_SCRIPT,
   RECORD_STEP_SCRIPT,
   START_WORLD_SCRIPT,
   TIDY_LINE_SCRIPT,
@@ -228,7 +230,7 @@ describe('CG-003 — Bot Garden, the artefact', () => {
   });
 
   it('AC1: every screen of the mockup has its page, authored through one plan, kits installed first', () => {
-    expect(built.modules).toEqual(['garden-kit', 'game-kit', 'bot-garden-fonts']);
+    expect(built.modules).toEqual(['garden-kit', 'game-kit', 'garden-3d-kit', 'bot-garden-fonts']);
     expect(built.order).toHaveLength(CG003_COMPONENTS.length + 1);
     expect(componentsOf(built).map((c) => c.name).sort()).toEqual([...CG003_COMPONENTS.map((c) => '/' + c.path), '/' + C.app].sort());
     const router = nodesOf(built, '/' + C.app).find((n) => n.type === 'Router')!;
@@ -716,6 +718,96 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(GARDEN_CSS).toMatch(/\.bg-key-mid \{ grid-column: 2; grid-row: 2; \}/);
       expect(GARDEN_CSS).toMatch(/\.bg-key-r3a \{ grid-column: 1; grid-row: 3; \}/);
       expect(GARDEN_CSS).toMatch(/\.bg-pad \{[^}]*grid-auto-rows: 56px/);
+    });
+  });
+
+  describe('IG-007 — Garden 3D on the Workshop behind the renderer States node; the fallback rule; the Grown-ups switch (P106 s2)', () => {
+    const play = () => nodesOf(built, C.play);
+    const pc = () => connectionsOf(built, C.play);
+    const pnode = (id: string) => play().find((n) => n.id === id)!;
+    const into = (id: string, skip: string[] = []) => pc().filter((c) => c.toId === id && !skip.includes(c.toProperty)).map((c) => `${c.fromId}.${c.fromProperty}>${c.toProperty}`).sort();
+    const from = (id: string, skip: string[] = []) => pc().filter((c) => c.fromId === id && !skip.includes(c.fromProperty)).map((c) => `${c.fromProperty}>${c.toId}.${c.toProperty}`).sort();
+    const WORLD_PORTS_3D_ONLY = ['onSupported', 'onTooSlow', 'onFrameMs', 'onReady'];
+
+    it('🔴 AC6: the template carries garden-3d-kit (three.js beside it, its manifest naming it), installed before authoring', () => {
+      expect(built.modules).toContain('garden-3d-kit');
+      const dir = path.join(OUTPUT, 'noodl_modules', 'garden-3d-kit');
+      expect(JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8')).dependencies).toEqual(['three.min.js']);
+      expect(fs.statSync(path.join(dir, 'three.min.js')).size).toBe(651651);
+      expect(fs.existsSync(path.join(dir, 'LICENSE.txt'))).toBe(true);
+    });
+
+    it('🔴 AC1: Garden 3D sits beside Garden on the stage, under EXACTLY Garden’s wires, in and out, with Garden’s parameters', () => {
+      const g2 = pnode('plGarden');
+      const g3 = pnode('plGarden3d');
+      expect(g3.type).toBe('garden-3d-kit.Garden3D');
+      const stage = pnode('plStage');
+      expect((stage.children ?? []).map((n) => n.id)).toEqual(['plGarden', 'plGarden3d', 'plRec', 'plPad']);
+      expect({ stepMs: params(g3).stepMs, label: params(g3).label }).toEqual({ stepMs: params(g2).stepMs, label: params(g2).label });
+      expect(params(g3).camera).toBe('plot');
+      // Every wire into Garden goes into Garden 3D too (the renderer's `mounted` apart); every wire out of Garden comes
+      // out of Garden 3D to the same place (Garden 3D's own outputs apart — only the rule reads them).
+      expect(into('plGarden3d', ['mounted'])).toEqual(into('plGarden', ['mounted']));
+      expect(into('plGarden', ['mounted']).length).toBe(4);
+      expect(from('plGarden3d', WORLD_PORTS_3D_ONLY)).toEqual(from('plGarden'));
+      expect(from('plGarden').length).toBe(3);
+    });
+
+    it('🔴 AC1/AC4: the renderer States node (no transitions, 2d then 3d) mounts exactly one of the two, driven by signals from the stored choice', () => {
+      const r = pnode('plRenderer');
+      expect(r.type).toBe('States');
+      expect([params(r).states, params(r).useTransitions]).toEqual(['2d,3d', false]);
+      expect([params(r)['value-2d-show2d'], params(r)['value-2d-show3d'], params(r)['value-3d-show2d'], params(r)['value-3d-show3d']]).toEqual([true, false, false, true]);
+      expect(into('plGarden', [])).toContain('plRenderer.show2d>mounted');
+      expect(into('plGarden3d', [])).toContain('plRenderer.show3d>mounted');
+      expect(params(pnode('plGarden3d')).mounted).toBe(false);
+      expect(into('plRenderer')).toEqual(['plRendIs3d.onfalse>to-2d', 'plRendIs3d.ontrue>to-3d']);
+      expect(into('plRendIs3d')).toEqual(['plRendRead.use3d>condition']);
+      expect(pnode('plRendRead').type).toBe('/Logic/Renderer');
+      expect(into('plRendRead')).toEqual(['plIn.lang>lang', 'plIn.words>words', 'plRendStore.value>stored']);
+      expect([pnode('plRendStore').type, params(pnode('plRendStore')).storeName, params(pnode('plRendStore')).keys]).toEqual(['net.noodl.GlobalStore.Subscribe', 'garden', 'renderer']);
+    });
+
+    it('🔴 AC4: the rule — Supported false, or Too Slow, writes 2d with its reason into the store’s renderer key', () => {
+      expect(from('plGarden3d').filter((w) => /^on(Supported|TooSlow)/.test(w))).toEqual(['onSupported>plRendOk.condition', 'onTooSlow>plRendSlow.go']);
+      expect(from('plRendOk')).toEqual(['onfalse>plRendNoGl.go']);
+      expect([pnode('plRendNoGl').type, params(pnode('plRendNoGl')).event, pnode('plRendSlow').type, params(pnode('plRendSlow')).event]).toEqual(['/Logic/Renderer choice', 'unsupported', '/Logic/Renderer choice', 'slow']);
+      const w = pnode('plRendWrite');
+      expect([w.type, params(w).storeName, params(w).key]).toEqual(['net.noodl.GlobalStore.Set', 'garden', 'renderer']);
+      expect(into('plRendWrite')).toEqual(['plRendNoGl.ran>set', 'plRendNoGl.renderer>value', 'plRendSlow.ran>set', 'plRendSlow.renderer>value']);
+    });
+
+    it('🔴 AC4: the Grown-ups page names the renderer and holds the switch, written through the same key', () => {
+      const page = nodesOf(built, C.pageGrown);
+      expect(page.find((n) => n.id === 'guRenderer')!.type).toBe(C.guRenderer);
+      const panel = nodesOf(built, C.guRenderer);
+      const gc = connectionsOf(built, C.guRenderer);
+      const gin = (id: string) => gc.filter((c) => c.toId === id).map((c) => `${c.fromId}.${c.fromProperty}>${c.toProperty}`).sort();
+      expect(gin('grdLine')).toEqual(['grdRead.line>text']);
+      expect([gin('grd3d'), gin('grd2d')]).toEqual([['grdRead.use3d>isOn', 'grdT.guRend3d>label'], ['grdRead.use2d>isOn', 'grdT.guRend2d>label']]);
+      expect(panel.filter((n) => n.type === '/Logic/Renderer choice').map((n) => params(n).event).sort()).toEqual(['use2d', 'use3d']);
+      const set = panel.find((n) => n.type === 'net.noodl.GlobalStore.Set')!;
+      expect([params(set).storeName, params(set).key]).toEqual(['garden', 'renderer']);
+      for (const key of ['guRendH', 'guRend3d', 'guRend2d', 'guRend3dLine', 'guRendSlow', 'guRendNoGl', 'guRendFlat']) {
+        const word = PAGE_WORDS[key];
+        expect({ key, both: !!word && !!word.en && !!word.fr && word.en !== word.fr }).toEqual({ key, both: true });
+      }
+    });
+
+    it('🔴 the glue: nothing stored is 3D; each stored reason reads as its own line; each event writes its own choice', () => {
+      const words = JSON.parse(ALL_WORDS_JSON);
+      const read = (stored: unknown, lang = 'en') => run(RENDERER_SCRIPT, { stored, words, lang });
+      expect([read(undefined).use3d, read(undefined).use2d, read(undefined).line]).toEqual([true, false, PAGE_WORDS.guRend3dLine.en]);
+      expect(read({ mode: '2d', why: 'slow' }).line).toBe(PAGE_WORDS.guRendSlow.en);
+      expect(read({ mode: '2d', why: 'unsupported' }, 'fr').line).toBe(PAGE_WORDS.guRendNoGl.fr);
+      expect(read({ mode: '2d', why: 'grown-up' }).line).toBe(PAGE_WORDS.guRendFlat.en);
+      expect([read({ mode: '2d' }).use2d, read({ mode: 'junk' }).use3d, read('text').use3d]).toEqual([true, true, true]);
+      const choose = (event: string, stored?: unknown) => run(RENDERER_CHOICE_SCRIPT, { event, stored });
+      expect(choose('unsupported').renderer).toEqual({ mode: '2d', why: 'unsupported' });
+      expect(choose('slow', { mode: '3d', why: 'grown-up' }).renderer).toEqual({ mode: '2d', why: 'slow' });
+      expect(choose('use3d', { mode: '2d', why: 'slow' })).toMatchObject({ renderer: { mode: '3d', why: 'grown-up' }, changed: true });
+      expect(choose('use2d', { mode: '2d', why: 'grown-up' })).toMatchObject({ renderer: { mode: '2d', why: 'grown-up' }, changed: false });
+      expect(choose('', undefined).renderer).toEqual({ mode: '3d', why: '' });
     });
   });
 

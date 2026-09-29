@@ -773,6 +773,150 @@
     },
     {
       "fromId": "plDraw",
+      "fromProperty": "map",
+      "toId": "plGarden3d",
+      "toProperty": "map"
+    },
+    {
+      "fromId": "plDraw",
+      "fromProperty": "things",
+      "toId": "plGarden3d",
+      "toProperty": "things"
+    },
+    {
+      "fromId": "plDraw",
+      "fromProperty": "robots",
+      "toId": "plGarden3d",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "plDraw",
+      "fromProperty": "bubble",
+      "toId": "plGarden3d",
+      "toProperty": "bubble"
+    },
+    {
+      "fromId": "plGarden3d",
+      "fromProperty": "onTileTapped",
+      "toId": "plPredictGate",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "plGarden3d",
+      "fromProperty": "onTileX",
+      "toId": "plPredictEnd",
+      "toProperty": "tapX"
+    },
+    {
+      "fromId": "plGarden3d",
+      "fromProperty": "onTileY",
+      "toId": "plPredictEnd",
+      "toProperty": "tapY"
+    },
+    {
+      "fromId": "plRendStore",
+      "fromProperty": "value",
+      "toId": "plRendRead",
+      "toProperty": "stored"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "words",
+      "toId": "plRendRead",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plRendRead",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plRendRead",
+      "fromProperty": "use3d",
+      "toId": "plRendIs3d",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "plRendIs3d",
+      "fromProperty": "ontrue",
+      "toId": "plRenderer",
+      "toProperty": "to-3d"
+    },
+    {
+      "fromId": "plRendIs3d",
+      "fromProperty": "onfalse",
+      "toId": "plRenderer",
+      "toProperty": "to-2d"
+    },
+    {
+      "fromId": "plRenderer",
+      "fromProperty": "show2d",
+      "toId": "plGarden",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plRenderer",
+      "fromProperty": "show3d",
+      "toId": "plGarden3d",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plGarden3d",
+      "fromProperty": "onSupported",
+      "toId": "plRendOk",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "plRendStore",
+      "fromProperty": "value",
+      "toId": "plRendNoGl",
+      "toProperty": "stored"
+    },
+    {
+      "fromId": "plRendOk",
+      "fromProperty": "onfalse",
+      "toId": "plRendNoGl",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plRendStore",
+      "fromProperty": "value",
+      "toId": "plRendSlow",
+      "toProperty": "stored"
+    },
+    {
+      "fromId": "plGarden3d",
+      "fromProperty": "onTooSlow",
+      "toId": "plRendSlow",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plRendNoGl",
+      "fromProperty": "renderer",
+      "toId": "plRendWrite",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "plRendSlow",
+      "fromProperty": "renderer",
+      "toId": "plRendWrite",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "plRendNoGl",
+      "fromProperty": "ran",
+      "toId": "plRendWrite",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "plRendSlow",
+      "fromProperty": "ran",
+      "toId": "plRendWrite",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "plDraw",
       "fromProperty": "marks",
       "toId": "plMarkEach",
       "toProperty": "items"

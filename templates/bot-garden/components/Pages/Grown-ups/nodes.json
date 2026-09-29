@@ -124,7 +124,8 @@
       "children": [
         "guOlive",
         "guRules",
-        "guHouse"
+        "guHouse",
+        "guRenderer"
       ],
       "parameters": {
         "width": {
@@ -160,6 +161,14 @@
       "parent": "guGrid",
       "x": 220,
       "y": 880
+    },
+    {
+      "id": "guRenderer",
+      "type": "/Grown/Renderer panel",
+      "label": "How the island is drawn",
+      "parent": "guGrid",
+      "x": 220,
+      "y": 1000
     }
   ],
   "visualRoots": [

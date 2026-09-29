@@ -70,6 +70,8 @@ const STORE_SUBSCRIBE_NODE = 'net.noodl.GlobalStore.Subscribe';
 const CSS_NODE = 'CSS Definition';
 export const KIT_GARDEN = 'garden-kit.Garden';
 export const KIT_BLOCKS = 'garden-kit.BlockList';
+/** IG-007 (P106 s2): the 3D world on the Workshop, under the 2D Garden's exact wires, behind the `renderer` States node. */
+export const KIT_GARDEN_3D = 'garden-3d-kit.Garden3D';
 const KIT_AVATAR = 'game-kit.Avatar';
 const KIT_KEEP = 'game-kit.KeepStorage';
 
@@ -107,6 +109,7 @@ export const C = {
   guOlive: '/Grown/Olive panel',
   guRules: '/Grown/Rules panel',
   guHouse: '/Grown/House panel',
+  guRenderer: '/Grown/Renderer panel',
   pageProfiles: '/Pages/Profiles',
   pageIsland: '/Pages/Island',
   pageWorkshop: '/Pages/Workshop',
@@ -287,7 +290,8 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
   'Logic/Select profile': 'go',
   'Logic/Ask Olive': 'go',
   'Logic/Accept proposal': 'go',
-  'Logic/Try Olive': 'go'
+  'Logic/Try Olive': 'go',
+  'Logic/Renderer choice': 'go'
 };
 
 /** Port types by name; anything else is `*` (the engine passes objects, arrays and text through the same names). */
@@ -310,7 +314,9 @@ const TYPE: Readonly<Record<string, string>> = {
   // s4 — the after-run rung line.
   oliveRung: 'number', oliveFallback: 'boolean',
   // P106 IG-001 — the fixes: Perfect! (D3), free play's line (D4), Olive's answer spoken (D6), the pad by request (D10).
-  referenceCount: 'number', freePlay: 'boolean', sayText: 'string', sayStyle: 'string', stepMs: 'number', keys: 'array'
+  referenceCount: 'number', freePlay: 'boolean', sayText: 'string', sayStyle: 'string', stepMs: 'number', keys: 'array',
+  // P106 IG-007 — the renderer this computer uses, and the fallback rule's write.
+  stored: 'object', event: 'string', renderer: 'object', use3d: 'boolean', use2d: 'boolean', mode: 'string', why: 'string'
 };
 const typeOf = (name: string) => TYPE[name] ?? '*';
 
@@ -774,8 +780,20 @@ const PLAY: CgComponent = {
     text('plTaskP', 'What they said', 'plTaskText', '', T_MUTED),
     group('plMarks', 'Tulips watered, as dots that fill', 'plTask', { ...row({ columnGap: sp(6), flexWrap: 'nowrap' }), cssClassName: 'bg-marks', mounted: false }, ['plMarkEach']),
     { ...logic('plMarkEach', FOR_EACH_NODE, 'One mark per tulip', { template: C.mark, templateType: 'explicit' }), parent: 'plMarks' },
-    group('plStage', 'The world', 'plLeft', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-stage' }, ['plGarden', 'plRec', 'plPad']),
+    group('plStage', 'The world', 'plLeft', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-stage' }, ['plGarden', 'plGarden3d', 'plRec', 'plPad']),
     place('plGarden', KIT_GARDEN, 'The garden', 'plStage', { stepMs: STEP_MS, label: 'The garden' }),
+    // IG-007 (P106 s2): the same world in 3D, on EXACTLY the Garden's wires; the `renderer` States node mounts one of the
+    // two. It starts on 2d (the cheap one) until this computer's choice is read; the rule then writes 2d for good when
+    // the 3D node says Supported false or fires Too Slow (Frame Ms above 50 ms for 3 s of visible time).
+    place('plGarden3d', KIT_GARDEN_3D, 'The garden in 3D', 'plStage', { stepMs: STEP_MS, label: 'The garden', camera: 'plot', mounted: false }),
+    withStates('plRenderer', 'renderer', ['2d', '3d'], { show2d: { type: 'boolean', by: { '2d': true, '3d': false } }, show3d: { type: 'boolean', by: { '2d': false, '3d': true } } }),
+    logic('plRendStore', STORE_SUBSCRIBE_NODE, 'This computer’s renderer', { storeName: STORE_NAME, keys: 'renderer' }),
+    logic('plRendRead', L('Renderer'), 'Draw in 3D here?'),
+    logic('plRendIs3d', CONDITION_NODE, 'In 3D?'),
+    logic('plRendOk', CONDITION_NODE, 'Can this computer draw 3D?'),
+    logic('plRendNoGl', L('Renderer choice'), 'No 3D here: the flat garden', { event: 'unsupported' }),
+    logic('plRendSlow', L('Renderer choice'), 'Too slow here: the flat garden', { event: 'slow' }),
+    logic('plRendWrite', STORE_SET_NODE, 'Keep the choice on this computer', { storeName: STORE_NAME, key: 'renderer', merge: false }),
     group('plRec', 'Pip is learning', 'plStage', { ...row({ columnGap: sp(0) }), backgroundColor: 'var(--card)', borderRadius: px(999), ...pad(6, 12), cssClassName: 'bg-rec', mounted: false }, ['plRecText']),
     text('plRecText', 'Recording', 'plRec', '', { sizeMode: 'contentSize', fontSize: px(14), fontWeight: '800', color: 'var(--ink)' }),
     place('plPad', C.pad, 'The Teach pad', 'plStage'),
@@ -1020,6 +1038,32 @@ const PLAY: CgComponent = {
     wire('plDraw', 'things', 'plGarden', 'things'),
     wire('plDraw', 'robots', 'plGarden', 'robots'),
     wire('plDraw', 'bubble', 'plGarden', 'bubble'),
+    // IG-007: the 3D node on the same wires, in and out; the renderer States node mounts one of the two.
+    wire('plDraw', 'map', 'plGarden3d', 'map'),
+    wire('plDraw', 'things', 'plGarden3d', 'things'),
+    wire('plDraw', 'robots', 'plGarden3d', 'robots'),
+    wire('plDraw', 'bubble', 'plGarden3d', 'bubble'),
+    wire('plGarden3d', 'onTileTapped', 'plPredictGate', 'eval'),
+    wire('plGarden3d', 'onTileX', 'plPredictEnd', 'tapX'),
+    wire('plGarden3d', 'onTileY', 'plPredictEnd', 'tapY'),
+    wire('plRendStore', 'value', 'plRendRead', 'stored'),
+    wire('plIn', 'words', 'plRendRead', 'words'),
+    wire('plIn', 'lang', 'plRendRead', 'lang'),
+    wire('plRendRead', 'use3d', 'plRendIs3d', 'condition'),
+    wire('plRendIs3d', 'ontrue', 'plRenderer', 'to-3d'),
+    wire('plRendIs3d', 'onfalse', 'plRenderer', 'to-2d'),
+    wire('plRenderer', 'show2d', 'plGarden', 'mounted'),
+    wire('plRenderer', 'show3d', 'plGarden3d', 'mounted'),
+    // The rule: Supported false, or Too Slow, writes 2d with its reason; the read above swaps the node.
+    wire('plGarden3d', 'onSupported', 'plRendOk', 'condition'),
+    wire('plRendStore', 'value', 'plRendNoGl', 'stored'),
+    wire('plRendOk', 'onfalse', 'plRendNoGl', 'go'),
+    wire('plRendStore', 'value', 'plRendSlow', 'stored'),
+    wire('plGarden3d', 'onTooSlow', 'plRendSlow', 'go'),
+    wire('plRendNoGl', 'renderer', 'plRendWrite', 'value'),
+    wire('plRendSlow', 'renderer', 'plRendWrite', 'value'),
+    wire('plRendNoGl', 'ran', 'plRendWrite', 'set'),
+    wire('plRendSlow', 'ran', 'plRendWrite', 'set'),
     wire('plDraw', 'marks', 'plMarkEach', 'items'),
     wire('plDraw', 'hasTulips', 'plMarks', 'mounted'),
     // Predict (band 10–12, AC6): a tap before Play. A hit plays; a miss shows the real end and a hint — never a score.
@@ -1626,6 +1670,51 @@ const GU_OLIVE: CgComponent = {
   ]
 };
 
+/**
+ * IG-007 AC4 (P106 s2): which renderer this computer uses, in words (and why, when the rule chose the flat garden),
+ * and a two-way switch. The choice lives in the store's `renderer` key on this computer, beside the family.
+ */
+const GU_RENDER: CgComponent = {
+  path: 'Grown/Renderer panel',
+  description: 'How the island is drawn on this computer: in 3D, or the flat garden and why (it cannot draw 3D, 3D was too slow, or it was chosen here), with the switch. The choice is kept on this computer.',
+  nodes: [
+    inputs('grdIn', [['words', 'array'], ['lang', 'string']]),
+    group('grdPanel', 'How the island is drawn', undefined, { ...column({ rowGap: sp(8) }), ...PANEL, cssClassName: 'bg-panel bg-renderer' }, ['grdH', 'grdLine', 'grdSwitch']),
+    text('grdH', 'How the island is drawn', 'grdPanel', '', T_H3),
+    text('grdLine', 'Which one runs, and why', 'grdPanel', '', { ...T_SMALL, cssClassName: 'bg-renderer-line' }),
+    group('grdSwitch', 'The switch', 'grdPanel', { ...row({ columnGap: sp(0) }), backgroundColor: 'var(--paper-2)', borderRadius: px(999), ...pad(3), cssClassName: 'bg-seg bg-renderer-switch' }, ['grd3d', 'grd2d']),
+    place('grd3d', C.seg, '3D island', 'grdSwitch', { label: '3D island' }),
+    place('grd2d', C.seg, 'Flat garden', 'grdSwitch', { label: 'Flat garden' }),
+    logic('grdT', L('Translate words'), 'In their language'),
+    logic('grdStore', STORE_SUBSCRIBE_NODE, 'This computer’s renderer', { storeName: STORE_NAME, keys: 'renderer' }),
+    logic('grdRead', L('Renderer'), 'Which one runs here'),
+    logic('grdTo3d', L('Renderer choice'), 'Switch to 3D', { event: 'use3d' }),
+    logic('grdTo2d', L('Renderer choice'), 'Switch to the flat garden', { event: 'use2d' }),
+    logic('grdWrite', STORE_SET_NODE, 'Keep the choice on this computer', { storeName: STORE_NAME, key: 'renderer', merge: false })
+  ],
+  connections: [
+    wire('grdIn', 'words', 'grdT', 'words'),
+    wire('grdIn', 'lang', 'grdT', 'lang'),
+    wire('grdT', 'guRendH', 'grdH', 'text'),
+    wire('grdT', 'guRend3d', 'grd3d', 'label'),
+    wire('grdT', 'guRend2d', 'grd2d', 'label'),
+    wire('grdStore', 'value', 'grdRead', 'stored'),
+    wire('grdIn', 'words', 'grdRead', 'words'),
+    wire('grdIn', 'lang', 'grdRead', 'lang'),
+    wire('grdRead', 'line', 'grdLine', 'text'),
+    wire('grdRead', 'use3d', 'grd3d', 'isOn'),
+    wire('grdRead', 'use2d', 'grd2d', 'isOn'),
+    wire('grdStore', 'value', 'grdTo3d', 'stored'),
+    wire('grdStore', 'value', 'grdTo2d', 'stored'),
+    wire('grd3d', 'clicked', 'grdTo3d', 'go'),
+    wire('grd2d', 'clicked', 'grdTo2d', 'go'),
+    wire('grdTo3d', 'renderer', 'grdWrite', 'value'),
+    wire('grdTo2d', 'renderer', 'grdWrite', 'value'),
+    wire('grdTo3d', 'ran', 'grdWrite', 'set'),
+    wire('grdTo2d', 'ran', 'grdWrite', 'set')
+  ]
+};
+
 const RULES = ['guR1', 'guR2', 'guR3', 'guR4'];
 const HOUSE = ['guD1', 'guD2', 'guD3'];
 
@@ -2085,19 +2174,20 @@ const PAGE_GROWN: CgComponent = (() => {
   const base = pageCommon('gu', 'Grown-ups', 'grown-ups', 'grown', ['guHead', 'guGrid']);
   return {
     path: 'Pages/Grown-ups',
-    description: 'For grown-ups: where Olive runs, what she may do, that nothing leaves the house, Try Olive, and the save code.',
+    description: 'For grown-ups: where Olive runs, what she may do, that nothing leaves the house, Try Olive, the save code, and how the island is drawn on this computer (3D or flat, with the switch).',
     nodes: [
       ...base.nodes,
       place('guHead', C.head, 'The head', 'guWrap'),
-      group('guGrid', 'Three panels', 'guWrap', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-gu' }, ['guOlive', 'guRules', 'guHouse']),
+      group('guGrid', 'Three panels', 'guWrap', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-gu' }, ['guOlive', 'guRules', 'guHouse', 'guRenderer']),
       place('guOlive', C.guOlive, 'Where Olive lives', 'guGrid'),
       place('guRules', C.guRules, 'What she may do', 'guGrid'),
-      place('guHouse', C.guHouse, 'Nothing leaves the house', 'guGrid')
+      place('guHouse', C.guHouse, 'Nothing leaves the house', 'guGrid'),
+      place('guRenderer', C.guRenderer, 'How the island is drawn', 'guGrid')
     ],
     connections: [
       ...base.connections,
       ...headWires('gu', 'guEyebrow', 'guTitle', 'guSub'),
-      ...(['guOlive', 'guRules', 'guHouse'] as const).flatMap((g) => [wire('guWords', 'words', g, 'words'), wire('guFam', 'lang', g, 'lang')]),
+      ...(['guOlive', 'guRules', 'guHouse', 'guRenderer'] as const).flatMap((g) => [wire('guWords', 'words', g, 'words'), wire('guFam', 'lang', g, 'lang')]),
       wire('guFam', 'botName', 'guOlive', 'botName'),
       wire('guFam', 'botName', 'guHouse', 'botName'),
       wire('guStore', 'model', 'guHouse', 'model'),
@@ -2138,6 +2228,7 @@ export const CG003_COMPONENTS: ReadonlyArray<CgComponent> = [
   GU_OLIVE,
   GU_RULES,
   GU_HOUSE,
+  GU_RENDER,
   PAGE_PROFILES,
   PAGE_ISLAND,
   PAGE_WORKSHOP,
@@ -2146,6 +2237,6 @@ export const CG003_COMPONENTS: ReadonlyArray<CgComponent> = [
   PAGE_GROWN
 ];
 
-export const REQUIRED_MODULES = ['garden-kit', 'game-kit'] as const;
+export const REQUIRED_MODULES = ['garden-kit', 'game-kit', 'garden-3d-kit'] as const;
 
 export const PAGES = [C.pageProfiles, C.pageIsland, C.pageWorkshop, C.pageRobot, C.pageSkills, C.pageGrown] as const;

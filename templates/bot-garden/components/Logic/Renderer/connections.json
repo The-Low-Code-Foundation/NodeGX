@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "18366e50-1953-5498-823d-9a6e248ccb26",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rendererIn",
+      "fromProperty": "lang",
+      "toId": "rendererFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "rendererIn",
+      "fromProperty": "stored",
+      "toId": "rendererFn",
+      "toProperty": "in-stored"
+    },
+    {
+      "fromId": "rendererIn",
+      "fromProperty": "words",
+      "toId": "rendererFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "rendererFn",
+      "fromProperty": "out-line",
+      "toId": "rendererOut",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "rendererFn",
+      "fromProperty": "out-mode",
+      "toId": "rendererOut",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "rendererFn",
+      "fromProperty": "out-use2d",
+      "toId": "rendererOut",
+      "toProperty": "use2d"
+    },
+    {
+      "fromId": "rendererFn",
+      "fromProperty": "out-use3d",
+      "toId": "rendererOut",
+      "toProperty": "use3d"
+    },
+    {
+      "fromId": "rendererFn",
+      "fromProperty": "out-why",
+      "toId": "rendererOut",
+      "toProperty": "why"
+    },
+    {
+      "fromId": "rendererFn",
+      "fromProperty": "success",
+      "toId": "rendererOut",
+      "toProperty": "ran"
+    }
+  ]
+}

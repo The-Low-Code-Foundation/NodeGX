@@ -1,0 +1,217 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e538ff79-af3c-5879-8897-78433ba038bc",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "grdIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "grdPanel",
+      "type": "Group",
+      "label": "How the island is drawn",
+      "children": [
+        "grdH",
+        "grdLine",
+        "grdSwitch"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--card)",
+        "borderRadius": "var(--radius-card)",
+        "cssClassName": "bg-panel bg-renderer",
+        "paddingTop": "var(--space-3-5)",
+        "paddingBottom": "var(--space-3-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "grdH",
+      "type": "Text",
+      "label": "How the island is drawn",
+      "parent": "grdPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "grdLine",
+      "type": "Text",
+      "label": "Which one runs, and why",
+      "parent": "grdPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-renderer-line"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "grdSwitch",
+      "type": "Group",
+      "label": "The switch",
+      "parent": "grdPanel",
+      "children": [
+        "grd3d",
+        "grd2d"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-0)",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--paper-2)",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 3,
+          "unit": "px"
+        },
+        "cssClassName": "bg-seg bg-renderer-switch"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "grd3d",
+      "type": "/Garden/Seg",
+      "label": "3D island",
+      "parent": "grdSwitch",
+      "parameters": {
+        "label": "3D island"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "grd2d",
+      "type": "/Garden/Seg",
+      "label": "Flat garden",
+      "parent": "grdSwitch",
+      "parameters": {
+        "label": "Flat garden"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "grdT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "grdStore",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "label": "This computer’s renderer",
+      "parameters": {
+        "storeName": "garden",
+        "keys": "renderer"
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "grdRead",
+      "type": "/Logic/Renderer",
+      "label": "Which one runs here",
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "grdTo3d",
+      "type": "/Logic/Renderer choice",
+      "label": "Switch to 3D",
+      "parameters": {
+        "event": "use3d"
+      },
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "grdTo2d",
+      "type": "/Logic/Renderer choice",
+      "label": "Switch to the flat garden",
+      "parameters": {
+        "event": "use2d"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "grdWrite",
+      "type": "net.noodl.GlobalStore.Set",
+      "label": "Keep the choice on this computer",
+      "parameters": {
+        "storeName": "garden",
+        "key": "renderer",
+        "merge": false
+      },
+      "x": 410,
+      "y": 1000
+    }
+  ],
+  "visualRoots": [
+    "grdPanel"
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e538ff79-af3c-5879-8897-78433ba038bc",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "grdIn",
+      "fromProperty": "words",
+      "toId": "grdT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "grdIn",
+      "fromProperty": "lang",
+      "toId": "grdT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "grdT",
+      "fromProperty": "guRendH",
+      "toId": "grdH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "grdT",
+      "fromProperty": "guRend3d",
+      "toId": "grd3d",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "grdT",
+      "fromProperty": "guRend2d",
+      "toId": "grd2d",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "grdStore",
+      "fromProperty": "value",
+      "toId": "grdRead",
+      "toProperty": "stored"
+    },
+    {
+      "fromId": "grdIn",
+      "fromProperty": "words",
+      "toId": "grdRead",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "grdIn",
+      "fromProperty": "lang",
+      "toId": "grdRead",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "grdRead",
+      "fromProperty": "line",
+      "toId": "grdLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "grdRead",
+      "fromProperty": "use3d",
+      "toId": "grd3d",
+      "toProperty": "isOn"
+    },
+    {
+      "fromId": "grdRead",
+      "fromProperty": "use2d",
+      "toId": "grd2d",
+      "toProperty": "isOn"
+    },
+    {
+      "fromId": "grdStore",
+      "fromProperty": "value",
+      "toId": "grdTo3d",
+      "toProperty": "stored"
+    },
+    {
+      "fromId": "grdStore",
+      "fromProperty": "value",
+      "toId": "grdTo2d",
+      "toProperty": "stored"
+    },
+    {
+      "fromId": "grd3d",
+      "fromProperty": "clicked",
+      "toId": "grdTo3d",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "grd2d",
+      "fromProperty": "clicked",
+      "toId": "grdTo2d",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "grdTo3d",
+      "fromProperty": "renderer",
+      "toId": "grdWrite",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "grdTo2d",
+      "fromProperty": "renderer",
+      "toId": "grdWrite",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "grdTo3d",
+      "fromProperty": "ran",
+      "toId": "grdWrite",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "grdTo2d",
+      "fromProperty": "ran",
+      "toId": "grdWrite",
+      "toProperty": "set"
+    }
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "18366e50-1953-5498-823d-9a6e248ccb26",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rendererIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "stored",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rendererFn",
+      "type": "JavaScriptFunction",
+      "label": "Renderer",
+      "parameters": {
+        "functionScript": "\nfunction wordMap(rows, lang, name) {\n  var map = {};\n  var list = Array.isArray(rows) ? rows : [];\n  for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || '').split('{b}').join(name);\n  return map;\n}\nfunction fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\nfunction langOf(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction nameOf(v) { var n = String(v || '').trim(); return n || 'Pip'; }\n\nvar r = Inputs.stored && typeof Inputs.stored === 'object' ? Inputs.stored : {};\nvar mode = r.mode === '2d' ? '2d' : '3d';\nvar why = r.why === 'unsupported' || r.why === 'slow' || r.why === 'grown-up' ? r.why : '';\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar w = wordMap(Inputs.words, lang, 'Pip');\nOutputs.use3d = mode === '3d';\nOutputs.use2d = mode === '2d';\nOutputs.mode = mode;\nOutputs.why = why;\nOutputs.line = mode === '3d' ? (w.guRend3dLine || '') : (w[why === 'slow' ? 'guRendSlow' : why === 'unsupported' ? 'guRendNoGl' : 'guRendFlat'] || '');\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-stored",
+          "displayName": "stored",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-use3d",
+          "displayName": "use3d",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-use2d",
+          "displayName": "use2d",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mode",
+          "displayName": "mode",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-why",
+          "displayName": "why",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-line",
+          "displayName": "line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "rendererOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "line",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "mode",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "use2d",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "use3d",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "why",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

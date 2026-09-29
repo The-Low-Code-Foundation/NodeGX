@@ -479,6 +479,48 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-guRend2d",
+      "toId": "translatewordsOut",
+      "toProperty": "guRend2d"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-guRend3d",
+      "toId": "translatewordsOut",
+      "toProperty": "guRend3d"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-guRend3dLine",
+      "toId": "translatewordsOut",
+      "toProperty": "guRend3dLine"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-guRendFlat",
+      "toId": "translatewordsOut",
+      "toProperty": "guRendFlat"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-guRendH",
+      "toId": "translatewordsOut",
+      "toProperty": "guRendH"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-guRendNoGl",
+      "toId": "translatewordsOut",
+      "toProperty": "guRendNoGl"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-guRendSlow",
+      "toId": "translatewordsOut",
+      "toProperty": "guRendSlow"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-guRulesH",
       "toId": "translatewordsOut",
       "toProperty": "guRulesH"

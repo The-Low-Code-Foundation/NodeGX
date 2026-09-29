@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b46bd4a7-97cb-50be-8d93-429059eb3ced",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rendererchoiceIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "event",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "stored",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rendererchoiceFn",
+      "type": "JavaScriptFunction",
+      "label": "Renderer choice",
+      "parameters": {
+        "functionScript": "\nvar before = Inputs.stored && typeof Inputs.stored === 'object' ? Inputs.stored : {};\nvar event = String(Inputs.event || '');\nvar next = event === 'unsupported' ? { mode: '2d', why: 'unsupported' }\n  : event === 'slow' ? { mode: '2d', why: 'slow' }\n  : event === 'use2d' ? { mode: '2d', why: 'grown-up' }\n  : event === 'use3d' ? { mode: '3d', why: 'grown-up' }\n  : { mode: before.mode === '2d' ? '2d' : '3d', why: String(before.why || '') };\nOutputs.renderer = next;\nOutputs.changed = next.mode !== (before.mode === '2d' ? '2d' : '3d') || next.why !== String(before.why || '');\n",
+        "runOnChange-in-event": false,
+        "runOnChange-in-stored": false
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-stored",
+          "displayName": "stored",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-event",
+          "displayName": "event",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-renderer",
+          "displayName": "renderer",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-changed",
+          "displayName": "changed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "rendererchoiceOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "renderer",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}
