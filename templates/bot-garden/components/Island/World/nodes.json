@@ -220,7 +220,7 @@
         "fontWeight": "800",
         "fontFamily": "Nunito",
         "sizeMode": "contentSize",
-        "cssClassName": "bg-btn bg-i-predict bg-isle-find",
+        "cssClassName": "bg-btn bg-i-find bg-isle-find",
         "label": "Find my robots"
       },
       "x": 160,

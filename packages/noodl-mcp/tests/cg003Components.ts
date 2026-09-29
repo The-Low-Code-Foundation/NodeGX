@@ -1485,7 +1485,7 @@ const ISLE_WORLD: CgComponent = {
     place('iwGarden', KIT_GARDEN, 'The island, flat', 'iwScroll', { stepMs: STEP_MS, label: 'The island' }),
     // IG-007's rule on the island too: the 3D node on EXACTLY the flat one's wires, one of the two mounted.
     place('iwGarden3d', KIT_GARDEN_3D, 'The island in 3D', 'iwScroll', { stepMs: STEP_MS, label: 'The island', camera: 'island', mounted: false }),
-    place('iwFind', BUTTON_NODE, 'Find my robots', 'iwIsle', { ...btn('plain', 'predict', { cssClassName: 'bg-isle-find' }), label: 'Find my robots' }),
+    place('iwFind', BUTTON_NODE, 'Find my robots', 'iwIsle', { ...btn('plain', 'find', { cssClassName: 'bg-isle-find' }), label: 'Find my robots' }),
     text('iwTap', 'How to use it', 'iwIsle', '', { ...T_SMALL, sizeMode: 'contentSize', cssClassName: 'bg-isle-tap' }),
     group('iwCard', 'The plot card', 'iwRoot', { ...row({ width: pct(100), sizeMode: 'contentHeight', flexWrap: 'nowrap', alignItems: 'flex-start', columnGap: sp(12) }), ...PANEL, cssClassName: 'bg-panel bg-plot-card', mounted: false }, ['iwCardFace', 'iwCardText']),
     group('iwCardFace', 'Who asks', 'iwCard', { sizeMode: 'explicit', width: px(52), height: px(52) }),

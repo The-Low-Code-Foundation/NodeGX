@@ -870,6 +870,15 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(withPredict).toEqual([]);
     });
 
+    it('🔴 the merge (IG-003 × IG-004): every bg-i-<icon> class the artefact puts on a node has its icon rule — the island’s Find my robots wore Predict’s icon, which IG-003 took away', () => {
+      const used = new Set<string>();
+      for (const [, buf] of tree(OUTPUT_OF(built)).entries()) for (const m of buf.toString('utf8').matchAll(/\bbg-i-([a-z0-9]+)\b/g)) used.add(m[1]);
+      // Known-firing beside the absence: the bar's own icons are among those read.
+      expect(['drive', 'rec', 'play', 'step', 'reset'].every((i) => used.has(i))).toBe(true);
+      expect([...used].filter((i) => !GARDEN_CSS.includes(`.bg-i-${i}::before`)).sort()).toEqual([]);
+      expect(String(params(nodesOf(built, C.isleWorld).find((n) => n.id === 'iwFind')!).cssClassName)).toBe('bg-btn bg-i-find bg-isle-find');
+    });
+
     it('🔴 AC1–3: one States node drive | teach | play (no transitions, opens in Drive); the pad shows in Drive and Teach and records only in Teach; a request and Start over open in Drive', () => {
       const m = pnode('plMode');
       expect([m.type, params(m).states, params(m).useTransitions]).toEqual(['States', 'drive,teach,play', false]);

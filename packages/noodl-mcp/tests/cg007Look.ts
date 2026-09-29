@@ -190,6 +190,8 @@ export const ICONS: Readonly<Record<string, string>> = {
   tidy: svg('0 0 24 24', "<path d='M4 6h16v3H4zm0 5h10v3H4zm0 5h6v3H4z'/><path d='M17 12l4 4-4 4v-3h-3v-2h3z'/>"),
   // P106 IG-003: Drive (the mockup's i-drive: a wheel). Predict left the bar with its icon.
   drive: svg('0 0 24 24', "<circle cx='12' cy='12' r='8' fill='none' stroke='black' stroke-width='3'/><circle cx='12' cy='12' r='2.5'/><path d='M12 4v5M4 12h5M12 20v-5M20 12h-5' stroke='black' stroke-width='3'/>"),
+  // The merge of P106 s3 (IG-003 × IG-004): the island's Find my robots — a map pin (Predict's old icon, which left the bar).
+  find: svg('0 0 24 24', "<path d='M12 2a7 7 0 017 7c0 5-7 13-7 13S5 14 5 9a7 7 0 017-7zm0 4a3 3 0 100 6 3 3 0 000-6z'/>"),
   // IG-001 D10: the pad's action keys beyond water — pick up (up off the ground), put down (down onto it), fill (a drop into the can).
   pick: svg('0 0 24 24', "<path d='M12 3l6 7h-4v6h-4v-6H6z'/><path d='M4 19h16v2H4z'/>"),
   put: svg('0 0 24 24', "<path d='M12 17l6-7h-4V4h-4v6H6z'/><path d='M4 19h16v2H4z'/>"),
