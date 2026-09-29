@@ -697,6 +697,9 @@ withDeployedSite({ dir: DIR }, async (page) => {
         await openReq(lang, 'mamie-note');
         const note = await evaluate(`({ things: document.querySelectorAll('.bg-stage .gd-thing').length, tulips: document.querySelectorAll('.bg-stage .gd-tulip').length })`);
         readings[`ig006-note-world-${vp.name}-${lang}`] = note;
+        // The merge (IG-006 × IG-002): the rows the note names are the colours a child sees, and the note itself is drawn.
+        const colours = await evaluate(`(() => { const s = (x, y) => { const e = document.querySelector('.bg-stage .gd-cell[data-x="' + x + '"][data-y="' + y + '"] .gd-tulip'); return e ? e.getAttribute('data-sprite') : null; }; return { red: [s(2, 2), s(4, 2), s(6, 2)], yellow: [s(2, 4), s(4, 4), s(6, 4)], note: document.querySelectorAll('.bg-stage svg[data-sprite="note"]').length }; })()`);
+        check(`${tag} merge: the red row draws red and the yellow row yellow, and the note is drawn on the plot`, colours.red.every((v) => v === 'tulip') && colours.yellow.every((v) => v === 'tulipYellow') && colours.note === 1, colours);
         for (const op of ['olive:read', 'fwd', 'fwd']) await palTap(op);
         await ifInto('olive_read:red_tulip', ['left', 'water', 'right'], 'if red');
         await ifInto('olive_read:yellow_tulip', ['right', 'water', 'left'], 'if yellow');
