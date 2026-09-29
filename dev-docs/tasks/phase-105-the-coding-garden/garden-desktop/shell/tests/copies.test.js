@@ -96,6 +96,8 @@ function pageFamily() {
   const ada = m.island.activeId;
   m = add({ model: m, name: 'Béa ✿', band: 1, lang: 'fr', face: 'owl', robotName: 'Zoë', color: '#FF7A59', eye: 'star' }).model;
   m = complete({ model: m, requestId: 'tulips', profileId: ada, tricks: [1, 2], reward: { kind: 'hat', id: 'straw' } }).model;
+  // P106 IG-004 (v4): a won plot keeps its program and the robot pinned to it — the code carries both.
+  m = complete({ model: m, requestId: 'path', profileId: ada, tricks: [1], reward: null, program: [{ id: 1, t: 'fwd' }, { id: 2, t: 'repeat', n: 2, body: [{ id: 3, t: 'left' }] }], now: 1759000000000 }).model;
   return JSON.parse(JSON.stringify(m));
 }
 
@@ -225,8 +227,12 @@ test('the save code is byte-identical to the page’s own encoder, and the page�
   assert.equal(back.ok, true);
   assert.equal(back.migrated, false);
   assert.deepEqual(back.model.profiles.map((p) => [p.name, p.robot.name, p.island.done]), fam.profiles.map((p) => [p.name, p.robot.name, p.island.done]));
-  // A model this shell does not know is kept as stored, never packed by a guess.
-  assert.equal(C.saveCodeOf({ ...fam, v: 4 }), null);
+  // P106 IG-004: the pinned plot rode through the code (program, robot, when).
+  assert.deepEqual(back.model.profiles[0].island.plots, fam.profiles[0].island.plots);
+  assert.equal(fam.profiles[0].island.plots.path.robotId, 'r1');
+  // A model this shell does not know is kept as stored, never packed by a guess (v3 is migrated by the page on load).
+  assert.equal(C.saveCodeOf({ ...fam, v: 5 }), null);
+  assert.equal(C.saveCodeOf({ ...fam, v: 3 }), null);
   assert.equal(C.saveCodeOf({ ...fam, v: 2 }), null);
 });
 

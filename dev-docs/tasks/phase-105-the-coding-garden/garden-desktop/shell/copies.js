@@ -9,7 +9,7 @@
  *   from garden.json's key, never from page data) and gets that entry as a string.
  * - WRITE: a family with at least one player becomes `island-backup-YYYY-MM-DD.json` in `Documents/<folderName>`: the
  *   stored JSON itself (what a restore writes back; the page migrates an older save on load, as it does after any
- *   upgrade) and the save code (the same code the Grown-ups page shows, `BG1.` + the packed v3 model, byte-identical to
+ *   upgrade) and the save code (the same code the Grown-ups page shows, `BG1.` + the packed v4 model, byte-identical to
  *   the page's own encoder — `tests/copies.test.js` runs the template's encoder and decoder against this one). One file
  *   a day (a later run the same day replaces it), the newest `keepDays` days kept, and a `README.txt` in EN and FR.
  *   No players → nothing written. Nothing leaves the machine.
@@ -75,9 +75,10 @@ function readFamily(raw) {
   return { ok: true, store, model, players };
 }
 
-// ── The save code (the page's `Logic/Encode save code`, v3 only) ─────────────
+// ── The save code (the page's `Logic/Encode save code`, v4 only — P106 IG-004) ─
 
-const SAVE_VERSION = 3;
+const SAVE_VERSION = 4;
+const FIRST_ROBOT_ID = 'r1';
 const MAX_PROFILES = 6;
 const ROBOT_NAME_MAX = 16;
 const TRICK_KEYS = ['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7'];
@@ -92,15 +93,66 @@ function trickLetters(raw) {
   return out;
 }
 
+/** P106 IG-004: the page's robotsOf — every { id } row once, the first robot always there and first. */
+function robotsOf(raw) {
+  const out = [{ id: FIRST_ROBOT_ID }];
+  const seen = { [FIRST_ROBOT_ID]: 1 };
+  for (const r of Array.isArray(raw) ? raw : []) {
+    const id = r && typeof r === 'object' ? String(r.id || '') : typeof r === 'string' ? r : '';
+    if (!id || seen[id]) continue;
+    seen[id] = 1;
+    out.push({ id });
+  }
+  return out;
+}
+
+function programOf(v) {
+  let p = v;
+  if (typeof p === 'string') {
+    try {
+      p = JSON.parse(p);
+    } catch {
+      p = null;
+    }
+  }
+  return Array.isArray(p) ? JSON.parse(JSON.stringify(p)) : null;
+}
+
+/** The page's plotsOf: a plot pinned only to a robot of this island with a program; a robot pinned twice keeps its latest. */
+function plotsOf(raw, robots) {
+  const out = {};
+  const ids = [];
+  const src = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  for (const id of Object.keys(src)) {
+    const p = src[id];
+    if (!id || id === 'free' || !p || typeof p !== 'object') continue;
+    const plot = { program: programOf(p.program), robotId: String(p.robotId || ''), wonAt: Number(p.wonAt) || 0 };
+    const pinned = Array.isArray(plot.program) && plot.program.length && plot.robotId && robots.some((r) => r.id === plot.robotId);
+    if (!pinned) plot.robotId = '';
+    out[id] = plot;
+    ids.push(id);
+  }
+  ids.sort((a, b) => out[b].wonAt - out[a].wonAt);
+  const taken = {};
+  for (const id of ids) {
+    const q = out[id];
+    if (!q.robotId) continue;
+    if (taken[q.robotId]) q.robotId = '';
+    else taken[q.robotId] = id;
+  }
+  return out;
+}
+
 function islandOf(raw) {
   const i = raw && typeof raw === 'object' ? raw : {};
   const done = [];
   for (const d of Array.isArray(i.done) ? i.done : []) if (!done.includes(String(d))) done.push(String(d));
-  return { done, placed: Array.isArray(i.placed) ? JSON.parse(JSON.stringify(i.placed)) : [] };
+  const robots = robotsOf(i.robots);
+  return { done, plots: plotsOf(i.plots, robots), robots };
 }
 
 /**
- * The save code of a v3 model, exactly as the page packs it (profileOf's defaults, six players at most), or null for
+ * The save code of a v4 model, exactly as the page packs it (profileOf's defaults, six players at most), or null for
  * any other version or a model missing an id: a model this shell does not know is kept as stored, never packed by a
  * guess (the page would mint a random id where one is missing).
  */
@@ -116,6 +168,9 @@ function saveCodeOf(model) {
     if (!x.id) return null;
     const r = x.robot && typeof x.robot === 'object' ? x.robot : {};
     const island = islandOf(x.island);
+    const plots = Object.keys(island.plots)
+      .map((id) => [id, island.plots[id].program, island.plots[id].robotId, island.plots[id].wonAt])
+      .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
     p.push([
       String(x.id),
       String(x.name || '').slice(0, 24),
@@ -130,7 +185,8 @@ function saveCodeOf(model) {
       Array.isArray(x.stickers) ? x.stickers.map(String) : [],
       Array.isArray(x.hats) ? x.hats.map(String) : [],
       island.done,
-      island.placed
+      plots,
+      island.robots.map((r) => r.id)
     ]);
   }
   const packed = { v: SAVE_VERSION, f: [String(fam.id), Number(fam.created)], p, a: String(isl.activeId || (list[0] ? list[0].id : '')) };

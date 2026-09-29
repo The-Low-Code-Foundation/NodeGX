@@ -11,9 +11,21 @@
     },
     {
       "fromId": "completerequesIn",
+      "fromProperty": "now",
+      "toId": "completerequesFn",
+      "toProperty": "in-now"
+    },
+    {
+      "fromId": "completerequesIn",
       "fromProperty": "profileId",
       "toId": "completerequesFn",
       "toProperty": "in-profileId"
+    },
+    {
+      "fromId": "completerequesIn",
+      "fromProperty": "program",
+      "toId": "completerequesFn",
+      "toProperty": "in-program"
     },
     {
       "fromId": "completerequesIn",
@@ -26,6 +38,12 @@
       "fromProperty": "reward",
       "toId": "completerequesFn",
       "toProperty": "in-reward"
+    },
+    {
+      "fromId": "completerequesIn",
+      "fromProperty": "robotId",
+      "toId": "completerequesFn",
+      "toProperty": "in-robotId"
     },
     {
       "fromId": "completerequesIn",
@@ -62,6 +80,12 @@
       "fromProperty": "out-newlyDone",
       "toId": "completerequesOut",
       "toProperty": "newlyDone"
+    },
+    {
+      "fromId": "completerequesFn",
+      "fromProperty": "out-pinned",
+      "toId": "completerequesOut",
+      "toProperty": "pinned"
     },
     {
       "fromId": "completerequesFn",

@@ -1,0 +1,121 @@
+{
+  "note": "v3 save codes written by the P105 v3 encoder (cg002Scripts.ts at f182a2d9e, SAVE_VERSION 3), one family per band. The IG-004 engine gate decodes each with the v4 decoder: every profile, done request, hat and sticker survives.",
+  "band1": {
+    "code": "BG1.eyJ2IjozLCJmIjpbImZhbS1iYW5kMSIsMTc1ODAwMDAwMDAwMF0sInAiOltbInAtbGVhIiwiTMOpYSIsMSwiZnIiLCJMw6lhIiwiUGlwIiwiI0ZGN0E1OSIsImhhcHB5Iiwic3VuIiwiYmItLS0tLSIsWyJ0dWxpcCJdLFsic3VuIl0sWyJ0dWxpcC1kb29yIiwidHVsaXBzLXRocmVlIl0sW11dXSwiYSI6InAtbGVhIn0",
+    "profiles": [
+      {
+        "id": "p-lea",
+        "name": "Léa",
+        "band": 1,
+        "lang": "fr",
+        "face": "Léa",
+        "robot": {
+          "name": "Pip",
+          "color": "#FF7A59",
+          "eye": "happy",
+          "hat": "sun"
+        },
+        "tricks": {
+          "n1": "bloom",
+          "n2": "bloom",
+          "n3": "seed",
+          "n4": "seed",
+          "n5": "seed",
+          "n6": "seed",
+          "n7": "seed"
+        },
+        "stickers": [
+          "tulip"
+        ],
+        "hats": [
+          "sun"
+        ],
+        "island": {
+          "done": [
+            "tulip-door",
+            "tulips-three"
+          ],
+          "placed": []
+        }
+      }
+    ]
+  },
+  "band2": {
+    "code": "BG1.eyJ2IjozLCJmIjpbImZhbS1iYW5kMiIsMTc1ODAwMDAwMDAwMF0sInAiOltbInAtc2FtIiwiU2FtIiwyLCJlbiIsIlNhbSIsIlJvc2llIiwiIzVGQjRFOCIsIndpbmsiLCJjcm93biIsImJiYmItYi0iLFsicGF3IiwiYmFza2V0Il0sWyJjYXAiLCJzdW4iLCJjcm93biJdLFsicGF0aC1wb3N0Ym94IiwidHVsaXBzLXRocmVlIiwiYm93bC1pZiIsIndhbGwtdW50aWwiLCJlZ2dzLWNvdW50Il0sW11dLFsicC1ub2EiLCJOb2EiLDEsImVuIiwiTm9hIiwiQm8iLCIjM0ZBNjZCIiwicm91bmQiLCJub25lIiwiYi0tLS0tLSIsW10sWyJjYXAiXSxbInBhdGgtcG9zdGJveCJdLFtdXV0sImEiOiJwLXNhbSJ9",
+    "profiles": [
+      {
+        "id": "p-sam",
+        "name": "Sam",
+        "band": 2,
+        "lang": "en",
+        "face": "Sam",
+        "robot": {
+          "name": "Rosie",
+          "color": "#5FB4E8",
+          "eye": "wink",
+          "hat": "crown"
+        },
+        "tricks": {
+          "n1": "bloom",
+          "n2": "bloom",
+          "n3": "bloom",
+          "n4": "bloom",
+          "n5": "seed",
+          "n6": "bloom",
+          "n7": "seed"
+        },
+        "stickers": [
+          "paw",
+          "basket"
+        ],
+        "hats": [
+          "cap",
+          "sun",
+          "crown"
+        ],
+        "island": {
+          "done": [
+            "path-postbox",
+            "tulips-three",
+            "bowl-if",
+            "wall-until",
+            "eggs-count"
+          ],
+          "placed": []
+        }
+      },
+      {
+        "id": "p-noa",
+        "name": "Noa",
+        "band": 1,
+        "lang": "en",
+        "face": "Noa",
+        "robot": {
+          "name": "Bo",
+          "color": "#3FA66B",
+          "eye": "round",
+          "hat": "none"
+        },
+        "tricks": {
+          "n1": "bloom",
+          "n2": "seed",
+          "n3": "seed",
+          "n4": "seed",
+          "n5": "seed",
+          "n6": "seed",
+          "n7": "seed"
+        },
+        "stickers": [],
+        "hats": [
+          "cap"
+        ],
+        "island": {
+          "done": [
+            "path-postbox"
+          ],
+          "placed": []
+        }
+      }
+    ]
+  }
+}

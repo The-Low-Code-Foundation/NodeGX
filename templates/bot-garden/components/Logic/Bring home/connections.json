@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ace70b17-7be3-53b9-8eed-41999c2e53dc",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "bringhomeIn",
+      "fromProperty": "model",
+      "toId": "bringhomeFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "bringhomeIn",
+      "fromProperty": "profileId",
+      "toId": "bringhomeFn",
+      "toProperty": "in-profileId"
+    },
+    {
+      "fromId": "bringhomeIn",
+      "fromProperty": "robotId",
+      "toId": "bringhomeFn",
+      "toProperty": "in-robotId"
+    },
+    {
+      "fromId": "bringhomeIn",
+      "fromProperty": "go",
+      "toId": "bringhomeFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "bringhomeFn",
+      "fromProperty": "out-found",
+      "toId": "bringhomeOut",
+      "toProperty": "found"
+    },
+    {
+      "fromId": "bringhomeFn",
+      "fromProperty": "out-freed",
+      "toId": "bringhomeOut",
+      "toProperty": "freed"
+    },
+    {
+      "fromId": "bringhomeFn",
+      "fromProperty": "out-model",
+      "toId": "bringhomeOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "bringhomeFn",
+      "fromProperty": "success",
+      "toId": "bringhomeOut",
+      "toProperty": "ran"
+    }
+  ]
+}

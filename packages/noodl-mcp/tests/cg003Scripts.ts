@@ -340,7 +340,7 @@ Outputs.countText = fill(n === 1 ? w.block1 : w.blocks, { n: n });
 export const FAMILY_SCRIPT = `${SAVE_HELPERS}
 var raw = Inputs.model && typeof Inputs.model === 'object' ? Inputs.model : null;
 var model = modelOf(raw || {});
-// A stored family older than v3 is migrated here on every read until it is written back: the page writes it at once.
+// A stored family older than v4 is migrated here on every read until it is written back: the page writes it at once.
 Outputs.migrated = migrationDue(raw);
 var active = null;
 for (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === model.island.activeId) active = model.profiles[i];
@@ -362,6 +362,9 @@ Outputs.stickers = active ? active.stickers.slice() : [];
 Outputs.tricks = active ? JSON.parse(JSON.stringify(active.tricks)) : {};
 // One island per kid (ruling 8): what THIS kid has done, never a sibling's.
 Outputs.done = active ? active.island.done.slice() : [];
+// P106 IG-004: her plots (a won plot's program and the robot pinned to it) and her robots (v4: the one).
+Outputs.plots = active ? JSON.parse(JSON.stringify(active.island.plots)) : {};
+Outputs.robots = active ? JSON.parse(JSON.stringify(active.island.robots)) : [];
 var rows = [];
 for (var j = 0; j < model.profiles.length; j++) {
   var p = model.profiles[j];

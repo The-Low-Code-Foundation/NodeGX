@@ -119,6 +119,12 @@
     },
     {
       "fromId": "readfamilyFn",
+      "fromProperty": "out-plots",
+      "toId": "readfamilyOut",
+      "toProperty": "plots"
+    },
+    {
+      "fromId": "readfamilyFn",
       "fromProperty": "out-profileId",
       "toId": "readfamilyOut",
       "toProperty": "profileId"
@@ -128,6 +134,12 @@
       "fromProperty": "out-profiles",
       "toId": "readfamilyOut",
       "toProperty": "profiles"
+    },
+    {
+      "fromId": "readfamilyFn",
+      "fromProperty": "out-robots",
+      "toId": "readfamilyOut",
+      "toProperty": "robots"
     },
     {
       "fromId": "readfamilyFn",

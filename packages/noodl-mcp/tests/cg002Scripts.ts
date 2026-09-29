@@ -91,8 +91,13 @@ export const MAX_PROFILES = 6;
 /**
  * The save model's current version. v3 (P105 s3, ruling 8): one island per kid — each profile carries its own
  * `island: { done, placed }`. A v1 or v2 family (one island for the family) decodes, loads and asks for its own save.
+ * v4 (P106 IG-004, R1): `island: { done, plots, robots }` — a won plot keeps its program and the robot pinned to it;
+ * `placed` (never written by anything) is dropped. A v3 family decodes, loads and asks for its own save.
  */
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
+
+/** IG-004: the one robot a v4 profile has (its look is `profile.robot`); IG-005 adds more under `island.robots`. */
+export const FIRST_ROBOT_ID = 'r1';
 
 /** The robot's name, at most this long (My robot and the new-player form cut at the same length). */
 export const ROBOT_NAME_MAX = 16;
@@ -836,27 +841,79 @@ Outputs.band = band;
 // ── The save model ──────────────────────────────────────────────────────────
 
 /**
- * The family model (v3): `{ v, family: { id, created }, profiles: [...], island: { activeId, done, placed } }`.
+ * The family model (v4): `{ v, family: { id, created }, profiles: [...], island: { activeId, done, plots, robots } }`.
  * A profile is `{ id, name, band, lang, face, robot: { name, color, eye, hat }, tricks: { n1..n7 }, stickers, hats,
- * island: { done, placed } }` — ONE ISLAND PER KID (ruling 8): what a child has done and placed is hers.
+ * island: { done, plots, robots } }` — ONE ISLAND PER KID (ruling 8): what a child has done, and the robots she left
+ * working on it, are hers. P106 IG-004 (R1): `plots[requestId] = { program, robotId, wonAt }` — a plot is PINNED while
+ * its program is a non-empty list and its robotId names one of `robots` (a robot works one plot at a time); a robot
+ * brought home leaves `{ program: null, robotId: '', wonAt }`. `robots` is `[{ id: 'r1' }]` in v4 (its look is
+ * `profile.robot`); IG-005 adds more. v3's `placed` was never written by anything: it is dropped, never migrated.
  *
- * `model.island` is the island ON SCREEN: `activeId`, and `done`/`placed` DERIVED from the active profile (the very
- * same arrays, so a reader of `model.island.done` reads the active kid's). It is never read back from a v3 model:
- * `modelOf` re-derives it every time, so a stale copy in storage cannot leak into anyone's island.
+ * `model.island` is the island ON SCREEN: `activeId`, and `done`/`plots`/`robots` DERIVED from the active profile (the
+ * very same objects, so a reader of `model.island.done` reads the active kid's). It is never read back from a stored
+ * model: `modelOf` re-derives it every time, so a stale copy in storage cannot leak into anyone's island.
  *
  * The migration rule for a v1/v2 family (one island for the family): EVERY existing profile keeps what the family had
- * done and placed — nobody loses a request they finished together. `migrationDue(raw)` says a stored model is older
- * than v3 so the page writes the migrated model back at once (an on-load migration owes its own save, P100).
+ * done — nobody loses a request they finished together. A v3 profile keeps its own `done`. `migrationDue(raw)` says a
+ * stored model is older than v4 so the page writes the migrated model back at once (an on-load migration owes its own
+ * save, P100).
  */
 export const SAVE_HELPERS = `
 var SAVE_VERSION = ${SAVE_VERSION};
 var MAX_PROFILES = ${MAX_PROFILES};
 var ROBOT_NAME_MAX = ${ROBOT_NAME_MAX};
 var TRICK_KEYS = ${JSON.stringify(TRICK_KEYS)};
+var FIRST_ROBOT_ID = ${JSON.stringify(FIRST_ROBOT_ID)};
 function newId(prefix) { return prefix + Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36); }
 function tricksOf(raw) {
   var out = {};
   for (var i = 0; i < TRICK_KEYS.length; i++) { var v = raw && raw[TRICK_KEYS[i]]; out[TRICK_KEYS[i]] = v === 'bloom' || v === 'sprout' ? v : (TRICK_KEYS[i] === 'n1' ? 'sprout' : 'seed'); }
+  return out;
+}
+/** IG-004: the robots of an island — every { id } row once, the first robot always there and first. */
+function robotsOf(raw) {
+  var out = [{ id: FIRST_ROBOT_ID }], seen = {};
+  seen[FIRST_ROBOT_ID] = 1;
+  var list = Array.isArray(raw) ? raw : [];
+  for (var i = 0; i < list.length; i++) {
+    var r = list[i], id = r && typeof r === 'object' ? String(r.id || '') : typeof r === 'string' ? r : '';
+    if (!id || seen[id]) continue;
+    seen[id] = 1;
+    out.push({ id: id });
+  }
+  return out;
+}
+/** IG-004: a program as the save keeps it — a list (JSON text is read), else null. */
+function programOf(v) {
+  var p = v;
+  if (typeof p === 'string') { try { p = JSON.parse(p); } catch (e) { p = null; } }
+  return Array.isArray(p) ? JSON.parse(JSON.stringify(p)) : null;
+}
+/** IG-004: is this plot pinned (a program to run, and a robot of this island running it)? */
+function pinnedPlot(plot, robots) {
+  if (!plot || !Array.isArray(plot.program) || !plot.program.length || !plot.robotId) return false;
+  for (var i = 0; i < robots.length; i++) if (robots[i].id === plot.robotId) return true;
+  return false;
+}
+/** IG-004: the plots of an island. A robot pinned twice keeps the plot it won last; the other plot lets it go. */
+function plotsOf(raw, robots) {
+  var out = {}, ids = [];
+  var src = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  for (var id in src) {
+    var p = src[id];
+    if (!id || id === 'free' || !p || typeof p !== 'object') continue;
+    out[id] = { program: programOf(p.program), robotId: String(p.robotId || ''), wonAt: Number(p.wonAt) || 0 };
+    if (!pinnedPlot(out[id], robots)) out[id].robotId = '';
+    ids.push(id);
+  }
+  ids.sort(function (a, b) { return out[b].wonAt - out[a].wonAt; });
+  var taken = {};
+  for (var k = 0; k < ids.length; k++) {
+    var q = out[ids[k]];
+    if (!q.robotId) continue;
+    if (taken[q.robotId]) q.robotId = '';
+    else taken[q.robotId] = ids[k];
+  }
   return out;
 }
 function islandOf(raw) {
@@ -864,7 +921,15 @@ function islandOf(raw) {
   var done = [];
   var list = Array.isArray(i.done) ? i.done : [];
   for (var k = 0; k < list.length; k++) if (done.indexOf(String(list[k])) === -1) done.push(String(list[k]));
-  return { done: done, placed: Array.isArray(i.placed) ? JSON.parse(JSON.stringify(i.placed)) : [] };
+  var robots = robotsOf(i.robots);
+  // v3's placed is not read: nothing ever wrote it (IG-004).
+  return { done: done, plots: plotsOf(i.plots, robots), robots: robots };
+}
+/** IG-004: the plot a robot is pinned to on an island, or ''. */
+function plotOfRobot(island, robotId) {
+  var plots = island && island.plots ? island.plots : {};
+  for (var id in plots) if (plots[id] && plots[id].robotId === robotId && Array.isArray(plots[id].program) && plots[id].program.length) return id;
+  return '';
 }
 function profileOf(raw) {
   var p = raw && typeof raw === 'object' ? raw : {};
@@ -877,7 +942,7 @@ function profileOf(raw) {
     island: islandOf(p.island)
   };
 }
-/** A stored model older than v3 that has anyone in it: the page writes the migrated model back at once. */
+/** A stored model older than v4 that has anyone in it: the page writes the migrated model back at once. */
 function migrationDue(raw) {
   return !!raw && typeof raw === 'object' && Array.isArray(raw.profiles) && raw.profiles.length > 0 && !(Number(raw.v) >= SAVE_VERSION);
 }
@@ -885,23 +950,24 @@ function modelOf(raw) {
   var m = raw && typeof raw === 'object' ? raw : {};
   var fam = m.family && typeof m.family === 'object' ? m.family : {};
   var isl = m.island && typeof m.island === 'object' ? m.island : {};
-  var old = !(Number(m.v) >= SAVE_VERSION);
+  // v1/v2 had ONE island for the family; v3 (ruling 8) and v4 keep one per profile.
+  var old = !(Number(m.v) >= 3);
   var profiles = [];
   var list = Array.isArray(m.profiles) ? m.profiles : [];
   for (var i = 0; i < list.length && i < MAX_PROFILES; i++) {
     var p = profileOf(list[i]);
-    // v1/v2: the family had one island. Every existing profile keeps what it had done and placed (the rule, CG-002 §8).
-    if (old) p.island = islandOf(isl);
+    // v1/v2: the family had one island. Every existing profile keeps what it had done (the rule, CG-002 §8).
+    if (old) p.island = islandOf({ done: isl.done });
     profiles.push(p);
   }
   var model = { v: SAVE_VERSION, family: { id: String(fam.id || newId('f')), created: Number(fam.created) || Date.now() }, profiles: profiles, island: null };
   return activate(model, String(isl.activeId || (profiles[0] ? profiles[0].id : '')));
 }
-/** The profile playing: model.island becomes its island (the same arrays), never a copy that could go stale. */
+/** The profile playing: model.island becomes its island (the same objects), never a copy that could go stale. */
 function activate(model, id) {
   var active = null;
   for (var j = 0; j < model.profiles.length; j++) if (model.profiles[j].id === id) active = model.profiles[j];
-  model.island = { activeId: String(id || ''), done: active ? active.island.done : [], placed: active ? active.island.placed : [] };
+  model.island = { activeId: String(id || ''), done: active ? active.island.done : [], plots: active ? active.island.plots : {}, robots: active ? active.island.robots : [{ id: FIRST_ROBOT_ID }] };
   return model;
 }
 function toB64(str) {
@@ -942,7 +1008,10 @@ Outputs.count = model.profiles.length;
  * A request finished by a profile: THAT profile's island marks it done (once;
  * one island per kid, ruling 8 — a sibling's island still offers it), the
  * profile's tricks bloom, and the reward is given to the profile that earned
- * it. Never a score.
+ * it. Never a score. P106 IG-004 (R1): the program that won is kept in the plot
+ * with the robot that ran it — the robot is PINNED there (taken off any other
+ * plot first: a robot works one plot). No program (or free play) pins nothing.
+ * `Inputs.robotId` defaults to the island's first robot; `Inputs.now` to the clock.
  */
 export const COMPLETE_REQUEST_SCRIPT = `${SAVE_HELPERS}
 var model = modelOf(Inputs.model);
@@ -950,18 +1019,49 @@ var requestId = String(Inputs.requestId || '');
 var profileId = String(Inputs.profileId || model.island.activeId);
 var tricks = Array.isArray(Inputs.tricks) ? Inputs.tricks : [];
 var reward = Inputs.reward && typeof Inputs.reward === 'object' ? Inputs.reward : null;
+var program = programOf(Inputs.program);
 var p = null;
 for (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === profileId) p = model.profiles[i];
-var newlyDone = false, bloomed = [];
+var newlyDone = false, bloomed = [], pinned = '';
 if (p) {
   if (requestId && p.island.done.indexOf(requestId) === -1) { p.island.done.push(requestId); newlyDone = true; }
   for (var t = 0; t < tricks.length; t++) { var key = 'n' + Math.floor(Number(tricks[t])); if (p.tricks[key] !== undefined && p.tricks[key] !== 'bloom') { p.tricks[key] = 'bloom'; bloomed.push(key); } }
   if (reward && reward.kind === 'hat' && p.hats.indexOf(String(reward.id)) === -1) p.hats.push(String(reward.id));
   if (reward && (reward.kind === 'sticker' || reward.kind === 'item' || reward.kind === 'seed') && p.stickers.indexOf(String(reward.id)) === -1) p.stickers.push(String(reward.id));
+  var robotId = String(Inputs.robotId || p.island.robots[0].id);
+  var known = false;
+  for (var r = 0; r < p.island.robots.length; r++) if (p.island.robots[r].id === robotId) known = true;
+  if (requestId && requestId !== 'free' && program && program.length && known) {
+    for (var other in p.island.plots) if (other !== requestId && p.island.plots[other].robotId === robotId) p.island.plots[other].robotId = '';
+    p.island.plots[requestId] = { program: program, robotId: robotId, wonAt: Number(Inputs.now) > 0 ? Number(Inputs.now) : Date.now() };
+    pinned = robotId;
+  }
 }
 Outputs.model = model;
 Outputs.newlyDone = newlyDone;
 Outputs.bloomed = bloomed;
+Outputs.found = !!p;
+Outputs.pinned = pinned;
+`;
+
+/**
+ * P106 IG-004 — "bring {name} home": the robot leaves the plot it was pinned to. The plot keeps its win (`done`, its
+ * `wonAt`) and is drawn as it was won; its program is cleared and nobody runs it. `Inputs.robotId` (default: the
+ * island's first robot); `Outputs.freed` is the request the robot left ('' when it was already home).
+ */
+export const BRING_HOME_SCRIPT = `${SAVE_HELPERS}
+var model = modelOf(Inputs.model);
+var profileId = String(Inputs.profileId || model.island.activeId);
+var p = null;
+for (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === profileId) p = model.profiles[i];
+var freed = '';
+if (p) {
+  var robotId = String(Inputs.robotId || p.island.robots[0].id);
+  freed = plotOfRobot(p.island, robotId);
+  if (freed) p.island.plots[freed] = { program: null, robotId: '', wonAt: p.island.plots[freed].wonAt };
+}
+Outputs.model = model;
+Outputs.freed = freed;
 Outputs.found = !!p;
 `;
 
@@ -972,7 +1072,13 @@ var packed = { v: SAVE_VERSION, f: [model.family.id, model.family.created], p: [
 for (var i = 0; i < model.profiles.length; i++) {
   var p = model.profiles[i], tr = '';
   for (var k = 0; k < TRICK_KEYS.length; k++) tr += p.tricks[TRICK_KEYS[k]] === 'bloom' ? 'b' : p.tricks[TRICK_KEYS[k]] === 'sprout' ? 's' : '-';
-  packed.p.push([p.id, p.name, p.band, p.lang, p.face, p.robot.name, p.robot.color, p.robot.eye, p.robot.hat, tr, p.stickers, p.hats, p.island.done, p.island.placed]);
+  // IG-004: the plots as [requestId, program, robotId, wonAt] rows (sorted: the same island is the same code), the robots as ids.
+  var plots = [];
+  for (var id in p.island.plots) plots.push([id, p.island.plots[id].program, p.island.plots[id].robotId, p.island.plots[id].wonAt]);
+  plots.sort(function (x, y) { return x[0] < y[0] ? -1 : x[0] > y[0] ? 1 : 0; });
+  var robots = [];
+  for (var r = 0; r < p.island.robots.length; r++) robots.push(p.island.robots[r].id);
+  packed.p.push([p.id, p.name, p.band, p.lang, p.face, p.robot.name, p.robot.color, p.robot.eye, p.robot.hat, tr, p.stickers, p.hats, p.island.done, plots, robots]);
 }
 var code = 'BG1.' + toB64(JSON.stringify(packed));
 Outputs.code = code;
@@ -982,8 +1088,10 @@ Outputs.length = code.length;
 /**
  * A code back into a model. A v1 code (no tricks, stickers, hats or placed
  * things) or a v2 code (one island for the family) decodes by the migration
- * rule — every profile keeps what the family had done — and says `migrated`,
- * so the page saves it at once: an on-load migration owes its own save (P100).
+ * rule — every profile keeps what the family had done; a v3 code (one island
+ * per kid, row 13 = the never-written `placed`, dropped) keeps each kid's own.
+ * Anything older than v4 says `migrated`, so the page saves it at once: an
+ * on-load migration owes its own save (P100).
  */
 export const DECODE_SAVE_SCRIPT = `${SAVE_HELPERS}
 var code = String(Inputs.code || '').trim();
@@ -991,18 +1099,21 @@ var ok = false, error = '', migrated = false, model = null;
 try {
   if (code.indexOf('BG1.') !== 0) throw new Error('prefix');
   var packed = JSON.parse(fromB64(code.slice(4)));
-  if (!packed || [1, 2, 3].indexOf(packed.v) === -1 || !Array.isArray(packed.p) || !Array.isArray(packed.f)) throw new Error('shape');
-  var v2 = packed.v >= 2, v3 = packed.v >= 3;
-  var family = { done: Array.isArray(packed.d) ? packed.d : [], placed: v2 && Array.isArray(packed.pl) ? packed.pl : [] };
+  if (!packed || [1, 2, 3, 4].indexOf(packed.v) === -1 || !Array.isArray(packed.p) || !Array.isArray(packed.f)) throw new Error('shape');
+  var v2 = packed.v >= 2, v3 = packed.v >= 3, v4 = packed.v >= 4;
+  var family = { done: Array.isArray(packed.d) ? packed.d : [] };
   var profiles = [];
   for (var i = 0; i < packed.p.length; i++) {
     var a = packed.p[i];
     var tricks = {};
     if (v2 && typeof a[9] === 'string') for (var k = 0; k < TRICK_KEYS.length; k++) tricks[TRICK_KEYS[k]] = a[9].charAt(k) === 'b' ? 'bloom' : a[9].charAt(k) === 's' ? 'sprout' : 'seed';
-    profiles.push({ id: a[0], name: a[1], band: a[2], lang: a[3], face: a[4], robot: { name: a[5], color: a[6], eye: a[7], hat: a[8] }, tricks: v2 ? tricks : undefined, stickers: v2 ? a[10] : [], hats: v2 ? a[11] : [], island: v3 ? { done: a[12], placed: a[13] } : family });
+    var plots = {};
+    if (v4 && Array.isArray(a[13])) for (var q = 0; q < a[13].length; q++) { var row = a[13][q]; if (Array.isArray(row) && row[0]) plots[String(row[0])] = { program: row[1], robotId: row[2], wonAt: row[3] }; }
+    var island = v4 ? { done: a[12], plots: plots, robots: a[14] } : v3 ? { done: a[12] } : family;
+    profiles.push({ id: a[0], name: a[1], band: a[2], lang: a[3], face: a[4], robot: { name: a[5], color: a[6], eye: a[7], hat: a[8] }, tricks: v2 ? tricks : undefined, stickers: v2 ? a[10] : [], hats: v2 ? a[11] : [], island: island });
   }
   model = modelOf({ v: SAVE_VERSION, family: { id: packed.f[0], created: packed.f[1] }, profiles: profiles, island: { activeId: packed.a } });
-  migrated = !v3;
+  migrated = !v4;
   ok = true;
 } catch (e) {
   error = 'bad';
@@ -1062,7 +1173,9 @@ export const FUNCTION_SCRIPTS: ReadonlyArray<{ component: string; script: string
   { component: 'Logic/Encode save code', script: ENCODE_SAVE_SCRIPT, seam: 'the family as a code' },
   { component: 'Logic/Decode save code', script: DECODE_SAVE_SCRIPT, seam: 'a code back into a family, migrated if it is old' },
   { component: 'Logic/Translate words', script: TRANSLATE_SCRIPT, seam: 'every interface word in the chosen language' },
-  { component: 'Logic/Hint table', script: HINT_TABLE_SCRIPT, seam: 'every hint line in the chosen language' }
+  { component: 'Logic/Hint table', script: HINT_TABLE_SCRIPT, seam: 'every hint line in the chosen language' },
+  // P106 IG-004 (lane E): the robot leaves its plot.
+  { component: 'Logic/Bring home', script: BRING_HOME_SCRIPT, seam: 'the family with a robot brought home from its plot, the plot kept as won' }
 ];
 
 /**

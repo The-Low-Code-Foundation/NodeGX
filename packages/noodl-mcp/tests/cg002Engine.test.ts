@@ -26,6 +26,7 @@ import { BAND_PALETTE, Block, BlockType, GardenRequest, HINTS, HINT_KEYS, OLIVE_
 import {
   ADD_PROFILE_SCRIPT,
   APPLY_DELTA_SCRIPT,
+  BRING_HOME_SCRIPT,
   CHOOSE_HINT_SCRIPT,
   COMPLETE_REQUEST_SCRIPT,
   DECODE_SAVE_SCRIPT,
@@ -642,8 +643,8 @@ describe('CG-002 — the engine', () => {
 
   describe('AC5 — the save: one island per kid (v3, ruling 8); a code round-trips; a v1 or v2 family migrates by the rule and asks for its own save', () => {
     const TULIPS = REQUESTS.find((r) => r.id === 'tulips-three')!;
-    const complete = (model: any, profileId: string, r: GardenRequest = TULIPS, script = COMPLETE_REQUEST_SCRIPT) =>
-      runScript(script, { model, profileId, requestId: r.id, tricks: r.tricks, reward: r.reward });
+    const complete = (model: any, profileId: string, r: GardenRequest = TULIPS, script = COMPLETE_REQUEST_SCRIPT, program?: unknown) =>
+      runScript(script, { model, profileId, requestId: r.id, tricks: r.tricks, reward: r.reward, program, now: 1759000000000 });
     const twoKids = () => {
       let model: any = runScript(ADD_PROFILE_SCRIPT, { model: null, name: 'Léa', band: 2, lang: 'fr', face: 'f3', robotName: 'Pip', color: '#FF7A59', eye: 'wink' }).model;
       model = runScript(ADD_PROFILE_SCRIPT, { model, name: 'Maya', band: 1, lang: 'en', face: 'f1', robotName: 'Bo', color: '#5FB4E8', eye: 'happy' }).model;
@@ -658,7 +659,8 @@ describe('CG-002 — the engine', () => {
       const again = complete(model, model.profiles[1].id);
       expect([again.newlyDone, again.bloomed]).toEqual([true, ['n2']]);
       model = again.model;
-      model.profiles[0].island.placed = [{ kind: 'stone', x: 3, y: 3 }];
+      // IG-004: A's tulips won with a program: the plot keeps it, and A's robot is pinned there.
+      model = complete(model, model.profiles[0].id, TULIPS, COMPLETE_REQUEST_SCRIPT, TULIPS.referenceProgram).model;
       return model;
     };
     const v2Code = () => {
@@ -680,7 +682,7 @@ describe('CG-002 — the engine', () => {
       expect(model.profiles[0].island.done).toEqual(['tulips-three']);
       expect(model.profiles[1].island.done).toEqual([]);
       // B is on screen: B's island, not A's.
-      expect(model.island).toEqual({ activeId: b, done: [], placed: [] });
+      expect(model.island).toEqual({ activeId: b, done: [], plots: {}, robots: [{ id: 'r1' }] });
       // Through the store and back (the page reads what it stored), then A on screen.
       const stored = JSON.parse(JSON.stringify(model));
       const read = helper<any>(SAVE_HELPERS, 'modelOf', stored);
@@ -700,26 +702,31 @@ describe('CG-002 — the engine', () => {
       const model = family();
       const tampered = JSON.parse(JSON.stringify(model));
       tampered.island.done = ['rows-trick', 'eggs-count'];
-      tampered.island.placed = [{ kind: 'gnome', x: 0, y: 0 }];
+      tampered.island.plots = { 'rows-trick': { program: [{ id: 1, t: 'fwd' }], robotId: 'r1', wonAt: 1 } };
       const read = helper<any>(SAVE_HELPERS, 'modelOf', tampered);
       expect(read.profiles.map((p: any) => p.island.done)).toEqual([['tulips-three'], ['tulips-three']]);
+      expect(Object.keys(read.island.plots)).toEqual([]);
       expect(read.island.done).toEqual(read.profiles[1].island.done);
       expect(helper<boolean>(SAVE_HELPERS, 'migrationDue', tampered)).toBe(false);
     });
 
-    it('🔴 the model written as a code decodes to an identical model (v3, each kid’s island in her row)', () => {
+    it('🔴 the model written as a code decodes to an identical model (v4, each kid’s island in her row: done, plots, robots)', () => {
       const model = family();
       expect(model.v).toBe(SAVE_VERSION);
-      expect(SAVE_VERSION).toBe(3);
+      expect(SAVE_VERSION).toBe(4);
       expect(model.profiles[0].hats).toEqual(['sun']);
       expect(model.profiles[0].tricks).toEqual({ n1: 'sprout', n2: 'bloom', n3: 'seed', n4: 'seed', n5: 'seed', n6: 'seed', n7: 'seed' });
       const enc = runScript(ENCODE_SAVE_SCRIPT, { model });
       expect(enc.code).toMatch(/^BG1\.[A-Za-z0-9_-]+$/);
-      expect(enc.length).toBeLessThan(600);
+      // A pinned program rides in the code: two kids, one tulips program (the ten-block reference), well under a paste box.
+      expect(enc.length).toBeLessThan(1200);
       const packed = JSON.parse(Buffer.from(enc.code.slice(4), 'base64url').toString('utf8'));
-      expect(packed.v).toBe(3);
+      expect(packed.v).toBe(4);
       expect([packed.d, packed.pl]).toEqual([undefined, undefined]);
-      expect(packed.p.map((row: unknown[]) => [row[12], row[13]])).toEqual([[['tulips-three'], [{ kind: 'stone', x: 3, y: 3 }]], [['tulips-three'], []]]);
+      expect(packed.p.map((row: unknown[]) => [row[12], row[13], row[14]])).toEqual([
+        [['tulips-three'], [['tulips-three', JSON.parse(JSON.stringify(TULIPS.referenceProgram)), 'r1', 1759000000000]], ['r1']],
+        [['tulips-three'], [], ['r1']]
+      ]);
       const dec = runScript(DECODE_SAVE_SCRIPT, { code: enc.code });
       expect([dec.ok, dec.error, dec.migrated, dec.profiles]).toEqual([true, '', false, 2]);
       expect(dec.model).toEqual(model);
@@ -731,17 +738,18 @@ describe('CG-002 — the engine', () => {
       const dec = runScript(DECODE_SAVE_SCRIPT, { code: v2Code() });
       expect([dec.ok, dec.migrated, dec.profiles]).toEqual([true, true, 2]);
       expect(dec.model.v).toBe(SAVE_VERSION);
+      // IG-004: v2's `pl` (placed things) is dropped — nothing ever wrote it.
       expect(dec.model.profiles.map((p: any) => p.island)).toEqual([
-        { done: ['tulips-three', 'path-postbox'], placed: [{ kind: 'stone', x: 1, y: 3 }] },
-        { done: ['tulips-three', 'path-postbox'], placed: [{ kind: 'stone', x: 1, y: 3 }] }
+        { done: ['tulips-three', 'path-postbox'], plots: {}, robots: [{ id: 'r1' }] },
+        { done: ['tulips-three', 'path-postbox'], plots: {}, robots: [{ id: 'r1' }] }
       ]);
       // Two islands, not one shared: finishing a request on one leaves the other as it was.
       expect(dec.model.profiles[0].island.done).not.toBe(dec.model.profiles[1].island.done);
       expect(dec.model.profiles[0]).toMatchObject({ tricks: { n1: 'sprout', n2: 'bloom' }, stickers: ['letter'], hats: ['cap'] });
-      expect(dec.model.island).toEqual({ activeId: 'p2', done: ['tulips-three', 'path-postbox'], placed: [{ kind: 'stone', x: 1, y: 3 }] });
-      // Saved again, it is a v3 code, and decoding THAT is no longer a migration.
+      expect(dec.model.island).toEqual({ activeId: 'p2', done: ['tulips-three', 'path-postbox'], plots: {}, robots: [{ id: 'r1' }] });
+      // Saved again, it is a v4 code, and decoding THAT is no longer a migration.
       const enc = runScript(ENCODE_SAVE_SCRIPT, { model: dec.model });
-      expect(JSON.parse(Buffer.from(enc.code.slice(4), 'base64url').toString('utf8')).v).toBe(3);
+      expect(JSON.parse(Buffer.from(enc.code.slice(4), 'base64url').toString('utf8')).v).toBe(4);
       const again = runScript(DECODE_SAVE_SCRIPT, { code: enc.code });
       expect([again.migrated, again.model]).toEqual([false, dec.model]);
     });
@@ -756,14 +764,14 @@ describe('CG-002 — the engine', () => {
         id: 'p1', name: 'Sam', band: 2, lang: 'en', face: 'f2',
         robot: { name: 'Pip', color: '#FF7A59', eye: 'round', hat: 'cap' },
         tricks: { n1: 'sprout', n2: 'seed', n3: 'seed', n4: 'seed', n5: 'seed', n6: 'seed', n7: 'seed' }, stickers: [], hats: [],
-        island: { done: ['path-postbox'], placed: [] }
+        island: { done: ['path-postbox'], plots: {}, robots: [{ id: 'r1' }] }
       });
-      expect(dec.model.island).toEqual({ activeId: 'p1', done: ['path-postbox'], placed: [] });
+      expect(dec.model.island).toEqual({ activeId: 'p1', done: ['path-postbox'], plots: {}, robots: [{ id: 'r1' }] });
       const enc = runScript(ENCODE_SAVE_SCRIPT, { model: dec.model });
       expect(runScript(DECODE_SAVE_SCRIPT, { code: enc.code }).migrated).toBe(false);
     });
 
-    it('🔴 a STORED v2 model (what localStorage holds today) loads by the same rule and says its migration is due; the v3 it becomes does not', () => {
+    it('🔴 a STORED v2 model loads by the same rule and says its migration is due; the v4 it becomes does not', () => {
       const stored = {
         v: 2, family: { id: 'fam2', created: 1700000000000 },
         profiles: [{ id: 'p1', name: 'Sam', robot: { name: 'Pip' } }, { id: 'p2', name: 'Noa', robot: { name: 'Bo' } }],
@@ -771,13 +779,13 @@ describe('CG-002 — the engine', () => {
       };
       expect(helper<boolean>(SAVE_HELPERS, 'migrationDue', stored)).toBe(true);
       const model = helper<any>(SAVE_HELPERS, 'modelOf', stored);
-      expect([model.v, model.profiles.map((p: any) => p.island.done)]).toEqual([3, [['tulips-three'], ['tulips-three']]]);
-      // Written back (the page does it at once), it is v3: loading it again migrates nothing and changes nothing.
+      expect([model.v, model.profiles.map((p: any) => p.island.done)]).toEqual([4, [['tulips-three'], ['tulips-three']]]);
+      // Written back (the page does it at once), it is v4: loading it again migrates nothing and changes nothing.
       const written = JSON.parse(JSON.stringify(model));
       expect(helper<boolean>(SAVE_HELPERS, 'migrationDue', written)).toBe(false);
       expect(helper<any>(SAVE_HELPERS, 'modelOf', written)).toEqual(model);
       // Known-firing beside the absence: nobody stored, nothing due; a v1 model is due too.
-      expect([helper<boolean>(SAVE_HELPERS, 'migrationDue', null), helper<boolean>(SAVE_HELPERS, 'migrationDue', { v: 2, profiles: [] }), helper<boolean>(SAVE_HELPERS, 'migrationDue', { v: 1, profiles: [{ id: 'x' }] })]).toEqual([false, false, true]);
+      expect([helper<boolean>(SAVE_HELPERS, 'migrationDue', null), helper<boolean>(SAVE_HELPERS, 'migrationDue', { v: 2, profiles: [] }), helper<boolean>(SAVE_HELPERS, 'migrationDue', { v: 1, profiles: [{ id: 'x' }] }), helper<boolean>(SAVE_HELPERS, 'migrationDue', { v: 3, profiles: [{ id: 'x' }] })]).toEqual([false, false, true, true]);
     });
 
     it(`the robot's name is kept to ${ROBOT_NAME_MAX} characters`, () => {
@@ -805,15 +813,15 @@ describe('CG-002 — the engine', () => {
         return script.replace(from, to);
       };
       it('the migration gives the family’s island to the ACTIVE kid only → the v2 rule row fails', () => {
-        const m = mutate(DECODE_SAVE_SCRIPT, 'if (old) p.island = islandOf(isl);', "if (old && p.id === String(isl.activeId)) p.island = islandOf(isl);");
-        // Decode passes v3 to modelOf with the family island per profile, so the rule lives in decode's own row: mutate there too.
-        const m2 = mutate(m, 'island: v3 ? { done: a[12], placed: a[13] } : family', "island: v3 ? { done: a[12], placed: a[13] } : (a[0] === packed.a ? family : {})");
+        const m = mutate(DECODE_SAVE_SCRIPT, 'if (old) p.island = islandOf({ done: isl.done });', "if (old && p.id === String(isl.activeId)) p.island = islandOf({ done: isl.done });");
+        // Decode hands modelOf the family island per profile, so the rule lives in decode's own row: mutate there too.
+        const m2 = mutate(m, ': v3 ? { done: a[12] } : family;', ': v3 ? { done: a[12] } : (a[0] === packed.a ? family : {});');
         expect(runScript(m2, { code: v2Code() }).model.profiles.map((p: any) => p.island.done)).not.toEqual([['tulips-three', 'path-postbox'], ['tulips-three', 'path-postbox']]);
         const stored = { v: 2, profiles: [{ id: 'p1' }, { id: 'p2' }], island: { done: ['tulips-three'], activeId: 'p1' } };
-        expect(helper<any>(mutate(SAVE_HELPERS, 'if (old) p.island = islandOf(isl);', "if (old && p.id === String(isl.activeId)) p.island = islandOf(isl);"), 'modelOf', stored).profiles[1].island.done).toEqual([]);
+        expect(helper<any>(mutate(SAVE_HELPERS, 'if (old) p.island = islandOf({ done: isl.done });', "if (old && p.id === String(isl.activeId)) p.island = islandOf({ done: isl.done });"), 'modelOf', stored).profiles[1].island.done).toEqual([]);
       });
       it('a v3 model read from the family-level copy (no per-profile read) → the stale-copy row fails', () => {
-        const m = mutate(SAVE_HELPERS, 'if (old) p.island = islandOf(isl);', 'p.island = islandOf(isl.done ? isl : p.island);');
+        const m = mutate(SAVE_HELPERS, 'if (old) p.island = islandOf({ done: isl.done });', 'p.island = islandOf(isl.done ? isl : p.island);');
         const tampered = JSON.parse(JSON.stringify(family()));
         tampered.island.done = ['rows-trick'];
         expect(helper<any>(m, 'modelOf', tampered).profiles[0].island.done).toEqual(['rows-trick']);
@@ -828,9 +836,127 @@ describe('CG-002 — the engine', () => {
         expect(helper<boolean>(m, 'migrationDue', { v: 2, profiles: [{ id: 'p1' }] })).toBe(false);
       });
       it('encode drops a kid’s own island → the round-trip row fails', () => {
-        const m = mutate(ENCODE_SAVE_SCRIPT, 'p.hats, p.island.done, p.island.placed]', 'p.hats, [], p.island.placed]');
+        const m = mutate(ENCODE_SAVE_SCRIPT, 'p.hats, p.island.done, plots, robots]', 'p.hats, [], plots, robots]');
         const model = family();
         expect(runScript(DECODE_SAVE_SCRIPT, { code: runScript(m, { model }).code }).model).not.toEqual(model);
+      });
+    });
+  });
+
+  describe('IG-004 AC1 — save v4: a won plot keeps its program and its robot; v3 codes (one per band, P105’s encoder) restore every profile', () => {
+    // The fixtures were written by the v3 encoder itself (cg002Scripts.ts at f182a2d9e): authentic P105 codes.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const V3 = require('./fixtures/ig004-v3-saves.json') as Record<'band1' | 'band2', { code: string; profiles: any[] }>;
+    const req = (id: string) => REQUESTS.find((r) => r.id === id)!;
+    const win = (model: any, id: string, program: unknown, extra: Record<string, unknown> = {}) =>
+      runScript(COMPLETE_REQUEST_SCRIPT, { model, requestId: id, tricks: id === 'free' ? [] : req(id).tricks, reward: id === 'free' ? null : req(id).reward, program, now: 1759000000000, ...extra });
+    const kid = () => runScript(ADD_PROFILE_SCRIPT, { model: null, name: 'Ada', band: 2, lang: 'en', robotName: 'Pip' }).model;
+    const TULIP_PROG = JSON.parse(JSON.stringify(req('tulips-three').referenceProgram));
+    const STONE_PROG = JSON.parse(JSON.stringify(req('path-stones').referenceProgram));
+
+    for (const band of ['band1', 'band2'] as const) {
+      it(`🔴 a v3 code from P105 (${band === 'band1' ? 'band 7–9' : 'band 10–12, two kids'}) restores every profile, done request, hat, sticker and trick; it says migrated; the v4 code it becomes does not`, () => {
+        const fx = V3[band];
+        const packed = JSON.parse(Buffer.from(fx.code.slice(4), 'base64url').toString('utf8'));
+        expect(packed.v).toBe(3);
+        const dec = runScript(DECODE_SAVE_SCRIPT, { code: fx.code });
+        expect([dec.ok, dec.error, dec.migrated, dec.profiles]).toEqual([true, '', true, fx.profiles.length]);
+        expect(dec.model.v).toBe(4);
+        for (const [i, want] of fx.profiles.entries()) {
+          const got = dec.model.profiles[i];
+          const { island, ...rest } = want;
+          expect({ ...got, island: undefined }).toEqual({ ...rest, island: undefined });
+          // Every done request kept; placed (v3's never-written list) gone; no plot pinned (v3 kept no program); the one robot.
+          expect(got.island).toEqual({ done: island.done, plots: {}, robots: [{ id: 'r1' }] });
+          expect('placed' in got.island).toBe(false);
+        }
+        expect(fx.profiles.some((p) => p.hats.length > 0 && p.stickers.length > 0)).toBe(true);
+        // Written back as a code it is v4, and reading THAT migrates nothing and changes nothing.
+        const again = runScript(ENCODE_SAVE_SCRIPT, { model: dec.model });
+        expect(JSON.parse(Buffer.from(again.code.slice(4), 'base64url').toString('utf8')).v).toBe(4);
+        const back = runScript(DECODE_SAVE_SCRIPT, { code: again.code });
+        expect([back.migrated, back.model]).toEqual([false, dec.model]);
+      });
+    }
+
+    it('🔴 a STORED v3 model (what localStorage holds before IG-004) is due its migration, loads as v4 with placed dropped, and once written back is not due', () => {
+      const stored = { v: 3, family: { id: 'f3', created: 1 }, profiles: V3.band2.profiles.map((p) => ({ ...p, island: { ...p.island, placed: [{ kind: 'stone', x: 1, y: 1 }] } })), island: { activeId: 'p-noa', done: [], placed: [] } };
+      expect(helper<boolean>(SAVE_HELPERS, 'migrationDue', stored)).toBe(true);
+      const model = helper<any>(SAVE_HELPERS, 'modelOf', stored);
+      expect(model.v).toBe(4);
+      expect(model.profiles.map((p: any) => p.island.done)).toEqual(V3.band2.profiles.map((p) => p.island.done));
+      expect(model.profiles.every((p: any) => !('placed' in p.island))).toBe(true);
+      expect(model.island).toEqual({ activeId: 'p-noa', done: ['path-postbox'], plots: {}, robots: [{ id: 'r1' }] });
+      const written = JSON.parse(JSON.stringify(model));
+      expect(helper<boolean>(SAVE_HELPERS, 'migrationDue', written)).toBe(false);
+      expect(helper<any>(SAVE_HELPERS, 'modelOf', written)).toEqual(model);
+    });
+
+    it('🔴 Complete request pins the program and the robot to the plot; a win elsewhere moves the robot; no program, free play or an unknown robot pins nothing', () => {
+      let model = kid();
+      const a = win(model, 'tulips-three', TULIP_PROG);
+      expect([a.newlyDone, a.pinned]).toEqual([true, 'r1']);
+      expect(a.model.island.plots).toEqual({ 'tulips-three': { program: TULIP_PROG, robotId: 'r1', wonAt: 1759000000000 } });
+      // The program as the kit hands it (JSON text) is kept as a list.
+      expect(win(kid(), 'tulips-three', JSON.stringify(TULIP_PROG)).model.island.plots['tulips-three'].program).toEqual(TULIP_PROG);
+      model = a.model;
+      // The same robot wins the stones: it works ONE plot — the tulips keep their program, no robot on them.
+      const b = win(model, 'path-stones', STONE_PROG, { now: 1759000000500 });
+      expect(b.model.island.plots['tulips-three'].robotId).toBe('');
+      expect(b.model.island.plots['path-stones']).toEqual({ program: STONE_PROG, robotId: 'r1', wonAt: 1759000000500 });
+      expect(helper<string>(SAVE_HELPERS, 'plotOfRobot', b.model.island, 'r1')).toBe('path-stones');
+      // Known-firing beside each absence: the same call WITH a program pins.
+      expect(win(kid(), 'tulips-three', undefined).model.island.plots).toEqual({});
+      expect(win(kid(), 'tulips-three', []).model.island.plots).toEqual({});
+      expect(win(kid(), 'free', TULIP_PROG).model.island.plots).toEqual({});
+      expect(win(kid(), 'tulips-three', TULIP_PROG, { robotId: 'r9' }).model.island.plots).toEqual({});
+    });
+
+    it('🔴 bring the robot home: the plot keeps its win (done, wonAt) and loses its program; the robot is free; a second call frees nothing', () => {
+      const pinned = win(kid(), 'tulips-three', TULIP_PROG).model;
+      const home = runScript(BRING_HOME_SCRIPT, { model: pinned });
+      expect([home.freed, home.found]).toEqual(['tulips-three', true]);
+      expect(home.model.island.plots['tulips-three']).toEqual({ program: null, robotId: '', wonAt: 1759000000000 });
+      expect(home.model.island.done).toEqual(['tulips-three']);
+      expect(helper<string>(SAVE_HELPERS, 'plotOfRobot', home.model.island, 'r1')).toBe('');
+      expect(runScript(BRING_HOME_SCRIPT, { model: home.model }).freed).toBe('');
+      // Through the code and back, the brought-home plot is the same.
+      const code = runScript(ENCODE_SAVE_SCRIPT, { model: home.model }).code;
+      expect(runScript(DECODE_SAVE_SCRIPT, { code }).model).toEqual(home.model);
+    });
+
+    it('a robot pinned to two plots (a hand-edited save) keeps the one won last; a robot the island does not have pins nothing; `free` is never a plot', () => {
+      const raw = { v: 4, profiles: [{ id: 'p', name: 'A', island: { done: ['a', 'b'], robots: [{ id: 'r1' }, { id: 'r2' }, 'r2', { id: '' }], plots: { a: { program: [{ id: 1, t: 'fwd' }], robotId: 'r1', wonAt: 5 }, b: { program: [{ id: 1, t: 'left' }], robotId: 'r1', wonAt: 9 }, c: { program: [{ id: 1, t: 'fwd' }], robotId: 'r7', wonAt: 1 }, free: { program: [{ id: 1, t: 'fwd' }], robotId: 'r2', wonAt: 1 } } } }], island: { activeId: 'p' } };
+      const m = helper<any>(SAVE_HELPERS, 'modelOf', raw);
+      expect(m.island.robots).toEqual([{ id: 'r1' }, { id: 'r2' }]);
+      expect(Object.keys(m.island.plots).sort()).toEqual(['a', 'b', 'c']);
+      expect([m.island.plots.a.robotId, m.island.plots.b.robotId, m.island.plots.c.robotId]).toEqual(['', 'r1', '']);
+    });
+
+    describe('arms: each v4 rule mutated, and the row that kills it', () => {
+      const mutate = (script: string, from: string, to: string) => {
+        if (script.split(from).length !== 2) throw new Error(`the arm's anchor must occur exactly once: ${from}`);
+        return script.replace(from, to);
+      };
+      it('Complete request leaves the robot on its old plot → the one-plot-per-robot row fails', () => {
+        const m = mutate(COMPLETE_REQUEST_SCRIPT, "if (other !== requestId && p.island.plots[other].robotId === robotId) p.island.plots[other].robotId = '';", '{}');
+        const first = runScript(m, { model: kid(), requestId: 'tulips-three', program: TULIP_PROG, now: 1 }).model;
+        const twice = runScript(m, { model: first, requestId: 'path-stones', program: STONE_PROG, now: 2 }).model;
+        // modelOf's own guard still unpins the older one on the NEXT read; the script's own output has both pinned.
+        expect([twice.island.plots['tulips-three'].robotId, twice.island.plots['path-stones'].robotId]).toEqual(['r1', 'r1']);
+      });
+      it('Bring home keeps the program → the bring-home row fails', () => {
+        const m = mutate(BRING_HOME_SCRIPT, '{ program: null, robotId: \'\', wonAt', '{ program: p.island.plots[freed].program, robotId: \'\', wonAt');
+        expect(runScript(m, { model: win(kid(), 'tulips-three', TULIP_PROG).model }).model.island.plots['tulips-three'].program).toEqual(TULIP_PROG);
+      });
+      it('decode ignores a v4 row’s plots → the round-trip row fails', () => {
+        const m = mutate(DECODE_SAVE_SCRIPT, 'var island = v4 ? { done: a[12], plots: plots, robots: a[14] }', 'var island = v4 ? { done: a[12] }');
+        const model = win(kid(), 'tulips-three', TULIP_PROG).model;
+        expect(runScript(m, { code: runScript(ENCODE_SAVE_SCRIPT, { model }).code }).model).not.toEqual(model);
+      });
+      it('migrationDue stops at v3 → the stored-v3 row fails', () => {
+        const m = mutate(SAVE_HELPERS, '!(Number(raw.v) >= SAVE_VERSION);\n}', '!(Number(raw.v) >= 3);\n}');
+        expect(helper<boolean>(m, 'migrationDue', { v: 3, profiles: [{ id: 'p' }] })).toBe(false);
       });
     });
   });
@@ -1359,11 +1485,13 @@ describe('CG-002 — the engine', () => {
         'Logic/Hint line': ['text', 'found', 'key'],
         'Logic/Palette': ['palette', 'count', 'band'],
         'Logic/Add profile': ['model', 'ok', 'error', 'profileId', 'count'],
-        'Logic/Complete request': ['model', 'newlyDone', 'bloomed', 'found'],
+        'Logic/Complete request': ['model', 'newlyDone', 'bloomed', 'found', 'pinned'],
         'Logic/Encode save code': ['code', 'length'],
         'Logic/Decode save code': ['model', 'ok', 'error', 'migrated', 'profiles'],
         'Logic/Translate words': ['lang', 'isFr', ...WORD_KEYS],
-        'Logic/Hint table': ['lang', ...HINT_KEYS]
+        'Logic/Hint table': ['lang', ...HINT_KEYS],
+        // P106 IG-004.
+        'Logic/Bring home': ['model', 'freed', 'found']
       };
       expect(Object.keys(expected).sort()).toEqual(FUNCTION_SCRIPTS.map((f) => f.component).sort());
       for (const { component, script } of FUNCTION_SCRIPTS) {

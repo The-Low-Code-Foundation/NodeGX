@@ -77,3 +77,33 @@ A `Variable` is global by NAME (P105 D57): the pinned runs need an id each, not 
 tick and the Workshop Runner must never both step the same robot: the Workshop takes the plot's robot OUT
 of the tick while the request is open. `island.placed` was never written by anything — do not migrate it,
 drop it. An on-load migration owes its own save (`an-on-load-migration-owes-its-own-save`).
+
+## 7. Session 3 (2026-09-29, lane E, worktree `ig004-world` cut from `f182a2d9e`)
+
+### 7.1 The save model v4 — the exact shape (written before the page was built)
+
+```
+model   = { v: 4, family: { id, created }, profiles: [profile…], island }        // island is DERIVED, never read back
+profile = { id, name, band, lang, face, robot: { name, color, eye, hat }, tricks: { n1…n7 }, stickers, hats,
+            island: { done: [requestId…],
+                      plots: { [requestId]: { program: Block[] | null, robotId: string, wonAt: number } },
+                      robots: [{ id: 'r1' }] } }
+model.island = { activeId, done, plots, robots }                                 // the active kid's, the SAME objects
+```
+
+- **A plot is pinned** when `program` is a non-empty list AND `robotId` names one of `island.robots`. `Complete request`
+  writes `{ program, robotId, wonAt }` for the request won (any other plot holding that robot is unpinned first: a robot
+  works one plot). **Bring home** writes `{ program: null, robotId: '', wonAt }`: the robot is free, the plot stays won
+  (`done` keeps it) and is drawn in its won look (§7.3). Free play (`free`) is never a plot.
+- **`robots`**: v4 ships the one robot the profile already has, id `r1`; its look stays `profile.robot` (one source, no
+  copy to drift). IG-005 adds robots here (with their own looks). `modelOf` keeps any `{ id }` rows and always puts `r1`
+  first.
+- **`placed` is dropped**: never written by anything (README §1), never migrated. A v3 profile `island: { done, placed }`
+  reads as `{ done, plots: {}, robots: [{ id: 'r1' }] }`.
+- **Migration**: `migrationDue` is true for a stored model with profiles and `v < 4`; every page's Read family says
+  `migrated` and the page writes the model back at once (an on-load migration owes its own save). v1/v2 (one family
+  island) keep their rule: every profile gets the family's `done`.
+- **The save code** `BG1.<base64url(JSON)>`: `{ v: 4, f: [id, created], a: activeId, p: [row…] }`, a row
+  `[id, name, band, lang, face, robotName, color, eye, hat, tricks, stickers, hats, done, plots, robots]` with
+  `plots = [[requestId, program | null, robotId, wonAt]…]` and `robots = [id…]`. Decode reads v1, v2, v3 (row index 13
+  = `placed`, ignored) and v4; anything older than v4 says `migrated`.

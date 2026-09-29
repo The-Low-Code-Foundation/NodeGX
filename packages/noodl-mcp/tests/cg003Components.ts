@@ -303,7 +303,9 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
   'Logic/Card seen': 'go',
   'Logic/Olive lesson': 'go',
   // P106 IG-003 (lane B).
-  'Logic/Teach start': 'go'
+  'Logic/Teach start': 'go',
+  // P106 IG-004 (lane E).
+  'Logic/Bring home': 'go'
 };
 
 /** Port types by name; anything else is `*` (the engine passes objects, arrays and text through the same names). */
@@ -332,7 +334,9 @@ const TYPE: Readonly<Record<string, string>> = {
   // P106 IG-003 — Drive · Teach · Play and the Predict challenge.
   record: 'string', moved: 'boolean', resumed: 'boolean', atEntry: 'number', badge: 'string', note: 'string', showLine: 'boolean',
   driving: 'boolean', challenge: 'string', cardLine: 'string', programText: 'string', askedFor: 'string', outcome: 'string',
-  armed: 'boolean', showTick: 'boolean', live: 'boolean', start: 'object'
+  armed: 'boolean', showTick: 'boolean', live: 'boolean', start: 'object',
+  // P106 IG-004 (lane E) — the plots, the pinned robot, the one brought home.
+  plots: 'object', pinned: 'string', freed: 'string'
 };
 const typeOf = (name: string) => TYPE[name] ?? '*';
 
