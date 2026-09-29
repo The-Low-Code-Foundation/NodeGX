@@ -16,9 +16,13 @@
  *
  * Clauses (each beside a known-firing half):
  *   R-AC3  mutant on → voice-hint answers {fallback, reason:'blocklist'}; mutant off → the stub's "Hou hou ! …" line
- *   R-AC5  exam with words-to-blocks switched to fail → status withholds it; switched to pass, exam re-run → offered
+ *   R-AC5  exam with read switched to fail → status withholds it; switched to pass, exam re-run → offered (IG-006)
  *   R-AC2  a hung rung → the shell's timeout (--timeout 1500) answers {fallback, reason:'timeout'} in 1.5–4 s
  *   R-AC6  a 41-character text slot and a listed word are refused by the route and the stub's call log does not grow
+ *   R-IG006 read answers one of the plot's things (the enum the page sends); a scripted vote comes back in turn
+ * P106 IG-006 (session 2, lane C) re-cut the page part to the three blocks (olive:<rung>): P-AC6 an is-it-a block with
+ * its kind unset; P-IG6-AC2 Mamie's note through the real route; P-IG6-AC3 the vote; P-IG6-AC6 the five lessons on
+ * Skills through the route (the stub's readout answers); every first palette tap opens its card (Got it, then place).
  * Part P (session 3, lane HOOKS: the pages now carry CG-005's hooks) makes a band 10–12 player through the Profiles
  * form, then enters FREE PLAY from the island for each clause (free play offers every rung the exam passed; a reload of
  * /workshop has no request and goes to the island, CG-003 AC8). The owl's line is `.bg-owl-say`, the row `.bg-owl`.
@@ -32,7 +36,7 @@
  *          ≥ 20 animation frames in 600 ms, the thinking dots' animation advances), then after the page's 12 s: resting.
  *          (A sprite mid-transition WHILE parked is unreachable by construction: the park comes a tick, 420 ms, after the
  *          last move, and the glide is 380 ms.)
- *   P-AC5  exam fail → no [data-pal="ask:words-to-blocks"] (poem still offered) and Skills' `.bg-olive-held` says
+ *   P-AC5  exam fail → no [data-pal="olive:read"] (is it a…? still offered) and Skills' `.bg-olive-held` says
  *          "can't do this here yet: words into blocks"; pass + re-run → the block is back and Skills says nothing
  *   P-390  free play at 390×844: Play and the owl on screen at scroll 0, no sideways scroll
  *   P-S3-R5 the hooks' words (slot line, card, buttons, the owl's line and tags) ≥ 4.5:1 on their ground
@@ -132,13 +136,13 @@ async function routePart() {
     const good = await olive(port, { rung: 'voice-hint', slots: { key: 'hintWet', b: 'Pip' }, lang: 'fr' });
     check('R-AC3 mutant → blocklist refusal; clean → the voiced line', bad.ok === false && bad.reason === 'blocklist' && bad.text === undefined && good.ok === true && good.text === 'Hou hou ! ' + templates.hints.hintWet.fr.replace(/\{b\}/g, 'Pip'), { bad, good });
     // R-AC5
-    await setStub(port, { exam: { 'words-to-blocks': 'fail' } });
+    await setStub(port, { exam: { read: 'fail' } });
     const e1 = await req(port, 'POST', '/__garden/olive/exam', {});
     const s1 = (await req(port, 'GET', '/__garden/olive/status')).body.exam;
-    await setStub(port, { exam: { 'words-to-blocks': 'pass' } });
+    await setStub(port, { exam: { read: 'pass' } });
     await req(port, 'POST', '/__garden/olive/exam', {});
     const s2 = (await req(port, 'GET', '/__garden/olive/status')).body.exam;
-    check('R-AC5 exam fail withholds words-to-blocks; pass + re-run offers it', e1.status === 200 && withheldOf(s1).includes('words-to-blocks') && !withheldOf(s2).includes('words-to-blocks') && s1.at !== s2.at, { first: withheldOf(s1), second: withheldOf(s2) });
+    check('R-AC5 exam fail withholds read (its count under 5 of 6); pass + re-run offers it', e1.status === 200 && withheldOf(s1).includes('read') && !withheldOf(s2).includes('read') && s1.at !== s2.at && s2.rungs.read.score.met >= 5, { first: withheldOf(s1), second: withheldOf(s2), score: s2.rungs.read.score });
     // R-AC2
     await setStub(port, { hang: ['count-tulips'] });
     const t0 = Date.now();
@@ -148,11 +152,20 @@ async function routePart() {
     check('R-AC2 a hung rung → timeout fallback in 1.5–4 s', hung.fallback === true && hung.reason === 'timeout' && took >= 1400 && took < 4000, { hung, took });
     // R-AC6
     const before = await calls(port);
-    const long = await olive(port, { rung: 'poem', slots: { flower: 'T'.repeat(41) }, lang: 'fr' });
-    const word = await olive(port, { rung: 'poem', slots: { flower: 'Tulla la stupide' }, lang: 'fr' });
+    // IG-006: no block has a text slot; the one left is the hint voicing's robot name.
+    const long = await olive(port, { rung: 'voice-hint', slots: { key: 'hintWet', b: 'T'.repeat(41) }, lang: 'fr' });
+    const word = await olive(port, { rung: 'voice-hint', slots: { key: 'hintWet', b: 'Tulla la stupide' }, lang: 'fr' });
     const after = await calls(port);
-    const ok40 = await olive(port, { rung: 'poem', slots: { flower: 'T'.repeat(40) }, lang: 'fr' });
+    const ok40 = await olive(port, { rung: 'voice-hint', slots: { key: 'hintWet', b: 'T'.repeat(40) }, lang: 'fr' });
     check('R-AC6 41 chars and a listed word refused, nothing reached the model; 40 chars answered', long.reason === 'too-long' && word.reason === 'blocklist' && after === before && ok40.ok === true && (await calls(port)) === after + 1, { long, word, before, after, ok40 });
+    // R-IG006: read picks one of the things the page sends (the enum); a scripted vote comes back in turn.
+    const read = await olive(port, { rung: 'read', slots: { note: templates.lists.notes_read.en[0] }, lang: 'en', options: ['yellow tulip', 'red tulip'] });
+    const notOnPlot = await olive(port, { rung: 'read', slots: { note: 'Water the rock.' }, lang: 'en' });
+    await setStub(port, { answers: { 'is-it-a': ['yes', 'no', 'yes'] } });
+    const vote = [];
+    for (let i = 0; i < 3; i++) vote.push((await olive(port, { rung: 'is-it-a', slots: { thing: 'a rock', kind: 'a flower' }, lang: 'en' })).value);
+    await setStub(port, { answers: {} });
+    check('R-IG006 read answers the thing the note names, from the plot’s own list; a note not on the table never reaches her; the vote comes back in turn', read.ok && read.value === 'red tulip' && notOnPlot.reason === 'not-in-list' && JSON.stringify(vote) === JSON.stringify(['yes', 'no', 'yes']), { read, notOnPlot, vote });
   } finally {
     stub.proc.kill();
   }
@@ -206,7 +219,21 @@ async function pagesPart() {
       };
       const first = (sel) => `[...document.querySelectorAll(${JSON.stringify(sel)})].find((e) => e.offsetParent !== null)`;
       const byText = (sel, ...needles) => `[...document.querySelectorAll(${JSON.stringify(sel)})].find((e) => e.offsetParent !== null && ${JSON.stringify(needles)}.some((n) => e.innerText.includes(n)))`;
-      const blocks = () => ev(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`);
+      // IG-006: the steps' own list (a block's card draws its example with a second Block List).
+      const blocks = () => ev(`document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-id]').length`);
+      const CARD_UP = `(() => { const e = document.querySelector('.bg-card-help'); return !!e && e.offsetParent !== null; })()`;
+      /** A palette tap that places the block: a first tap on a kind opens its card (IG-006 AC5) — Got it, then tap again. */
+      const palTap = async (id) => {
+        const n0 = await blocks();
+        await tap(first(`.bg-blocks-box .gd-palette [data-pal="${id}"]`), `palette ${id}`);
+        await wait(200);
+        if ((await blocks()) === n0 && (await ev(CARD_UP))) {
+          await tap(first('.bg-card-help .bg-card-ok'), `Got it (${id})`);
+          await until(CARD_UP, (v) => v === false, 2000);
+          await tap(first(`.bg-blocks-box .gd-palette [data-pal="${id}"]`), `palette ${id} (its card seen)`);
+          await wait(200);
+        }
+      };
       const OWL = '.bg-owl';
       const SAY = '.bg-owl-say';
 
@@ -234,74 +261,103 @@ async function pagesPart() {
         await until('location.pathname', (p) => p === '/workshop');
         return until(`!!document.querySelector('.gd-palette [data-pal="fwd"]')`, Boolean, 6000);
       };
-      /** Add a rung's block and fill its first slot with the first word offered. */
-      const addAsk = async (rung, slot) => {
-        await tap(first(`.gd-palette [data-pal="ask:${rung}"]`), `palette ask:${rung}`);
-        if (!slot) return;
-        await tap(first(`.gd-prog .gd-slot[data-slot="${slot}"]`), `slot ${slot}`);
-        await tap(first('.gd-picker .gd-opt'), `the first word for ${slot}`);
+      /** Add an Olive block and fill its slots with the first word offered (IG-006: olive:<rung>). */
+      const addAsk = async (rung, ...slots) => {
+        await palTap(`olive:${rung}`);
+        for (const slot of slots) {
+          await tap(first(`.bg-blocks-box .gd-prog .gd-blk[data-t="olive:${rung}"] .gd-slot[data-slot="${slot}"]`), `slot ${slot}`);
+          await tap(first('.bg-blocks-box .gd-picker .gd-opt'), `the first word for ${slot}`);
+        }
+      };
+      const openRequest = async (title, tag) => {
+        await page.navigate('/island');
+        await wait(1100);
+        await tap(byText('.bg-quest', title), `the request (${tag})`);
+        await until('location.pathname', (p) => p === '/workshop');
+        return until(`!!document.querySelector('.bg-blocks-box .gd-palette [data-pal="fwd"]')`, Boolean, 6000);
       };
       const play = () => tap(first('.bg-controls .bg-i-play'), 'Play');
       /** The block list is locked while a run plays (the kit's own rule): wait for the run to end before editing. */
       const runOver = () => until(`!document.querySelector('.gd-locked')`, Boolean, 8000);
 
-      // ── P-AC6: band 10–12's text slot: 40 characters, the 41st refused; a listed word refused inline; Play sends nothing ──
+      // ── P-AC6 (IG-006): no block has a keyboard; an is-it-a block with its kind unset says so inline, and Play sends nothing ──
       await enterFree('P-AC6');
       await shot('workshop-free');
-      if (!(await has('.gd-palette [data-pal="ask:poem"]'))) skip('P-AC6 band 10–12 text slot', '[data-pal="ask:poem"] in free play at band 10–12');
-      else {
-        await addAsk('poem');
-        const missing = await until(`(document.querySelector('.bg-slot-msg') || {}).innerText || ''`, Boolean, 3000);
-        await tap(first('.gd-prog .gd-slot[data-slot="flower"]'), 'the flower slot');
-        const max = await ev(`(document.querySelector('.gd-slot-text') || {}).maxLength`);
-        await ev(`document.querySelector('.gd-slot-text') && document.querySelector('.gd-slot-text').focus()`);
-        await client.send('Input.insertText', { text: 'T'.repeat(41) });
-        await wait(300);
-        const len = await ev(`(document.querySelector('.gd-slot-text') || { value: '' }).value.length`);
-        check('P-AC6 the text field holds 40 and refuses the 41st', max === 40 && len === 40, { max, len });
-        await ev(`(() => { const i = document.querySelector('.gd-slot-text'); if (!i) return; i.focus(); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, ''); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
-        await client.send('Input.insertText', { text: 'Tulla la stupide' });
-        const line = await until(`(document.querySelector('.bg-slot-msg') || {}).innerText || ''`, (t) => /can’t use that word|ne peut pas utiliser ce mot/.test(t), 3000);
-        const beside = await ev(`(() => { const m = document.querySelector('.bg-slot-msg'), b = document.querySelector('.bg-blocks-box'); if (!m || !b) return null; const r = m.getBoundingClientRect(), q = b.getBoundingClientRect(); return { gap: Math.round(r.top - q.bottom), left: Math.round(r.left - q.left) }; })()`);
-        const before = await asked();
-        const pressed = await play();
-        await wait(2000);
-        const after = await asked();
-        const row = await text(OWL);
-        await shot('ac6-listed-word');
-        check('P-AC6 a new ask block says what it needs first ("Fill in every slot first.")', /Fill in every slot first|Remplis d’abord toutes les cases/.test(missing), missing);
-        check('P-AC6 a listed word is refused inline, under the block list', /can’t use that word|ne peut pas utiliser ce mot/.test(line) && !!beside && beside.gap >= 0 && beside.gap < 40, { line, beside });
-        check('P-AC6 … and Play sends nothing to Olive (the stub’s calls, the voicings apart, do not grow); the owl does not claim she is resting', pressed && after === before && !/resting|se repose/i.test(row), { before, after, row });
-      }
+      await addAsk('is-it-a');
+      const missing = await until(`(document.querySelector('.bg-slot-msg') || {}).innerText || ''`, Boolean, 3000);
+      await tap(first('.bg-blocks-box .gd-prog .gd-blk[data-t="olive:is-it-a"] .gd-slot[data-slot="kind"]'), 'the kind slot');
+      const keyboard = await ev(`!!document.querySelector('.bg-blocks-box .gd-slot-text')`);
+      const offered = await ev(`[...document.querySelectorAll('.bg-blocks-box .gd-picker .gd-opt')].map((o) => o.getAttribute('data-opt'))`);
+      await tap(first('.bg-blocks-box .gd-prog .gd-blk[data-t="olive:is-it-a"] .gd-slot[data-slot="kind"]'), 'the kind slot (closed)');
+      const beside = await ev(`(() => { const m = document.querySelector('.bg-slot-msg'), b = document.querySelector('.bg-blocks-box'); if (!m || !b) return null; const r = m.getBoundingClientRect(), q = b.getBoundingClientRect(); return { gap: Math.round(r.top - q.bottom), left: Math.round(r.left - q.left) }; })()`);
+      const before6 = await asked();
+      const pressed6 = await play();
+      await wait(2000);
+      const after6 = await asked();
+      const row6 = await text(OWL);
+      await shot('ac6-kind-unset');
+      check('P-AC6 a new is-it-a block says what it needs first ("Fill in every slot first."), under the block list', /Fill in every slot first|Remplis d’abord toutes les cases/.test(missing) && !!beside && beside.gap >= 0 && beside.gap < 40, { missing, beside });
+      check('P-AC6 IG-006: its only slot is a list — no keyboard — and it offers the four kinds (the thing ahead is the engine’s)', keyboard === false && JSON.stringify(offered) === JSON.stringify(templates.lists.kinds.en), { keyboard, offered });
+      check('P-AC6 … and Play sends nothing to Olive (the stub’s calls, the voicings apart, do not grow); the owl does not claim she is resting', pressed6 && after6 === before6 && !/resting|se repose/i.test(row6), { before6, after6, row6 });
+      await runOver();
 
-      // ── P-AC1: Olive's blocks are a proposal: "Use them" places them, "No thanks" leaves the program alone ──
-      await enterFree('P-AC1');
-      if (!(await has('.gd-palette [data-pal="ask:words-to-blocks"]'))) skip('P-AC1 the proposal card', '[data-pal="ask:words-to-blocks"] in free play');
-      else {
-        await addAsk('words-to-blocks', 'route');
-        const n0 = await blocks();
-        await play();
-        const card = await until(`(() => { const c = document.querySelector('.bg-proposal'); return c && c.offsetParent !== null ? c.innerText : ''; })()`, Boolean, 8000);
-        const n1 = await blocks();
-        await shot('ac1-proposal');
-        check('P-AC1 Olive’s blocks come as a card in her row — "Use them" / "No thanks" — and are NOT in the program yet', !!card && /Use them|Je les prends/.test(card) && /No thanks|Non merci/.test(card) && n1 === n0, { card, n0, n1 });
-        // P-S4 (CG-005 §8 residual): after a run that asked Olive, the owl says THAT rung's lesson (rung 3: words into blocks).
-        await runOver();
-        const lesson = await until(`(document.querySelector(${JSON.stringify(SAY)}) || {}).innerText || ''`, (t) => /turned the words into blocks|a transformé les mots en blocs/.test(t), 4000);
-        await shot('s4-rung-lesson');
-        check('P-S4 after the run, the owl says the rung’s lesson line (oliveRung3), not the start or missed line', /turned the words into blocks|a transformé les mots en blocs/.test(lesson), { lesson });
-        await tap(first('.bg-proposal .bg-prop-use'), 'Use them');
-        const n2 = await until(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`, (n) => n > n0, 4000);
-        const gone = !(await has('.bg-proposal'));
-        check('P-AC1 "Use them" places her blocks after the ask, and the card goes', n2 > n0 && gone, { n0, n2, gone });
-        await play();
-        const again = await until(`(() => { const c = document.querySelector('.bg-proposal'); return !!c && c.offsetParent !== null; })()`, Boolean, 8000);
-        const n3 = await blocks();
-        if (again) await tap(first('.bg-proposal .bg-prop-no'), 'No thanks');
-        await wait(500);
-        const n4 = await blocks();
-        check('P-AC1 a new run proposes again; "No thanks" hides it and changes nothing', again && n4 === n3 && !(await has('.bg-proposal')), { again, n3, n4 });
-      }
+      // ── P-IG6-AC2: Mamie's note through the real route: read → if Olive read the red tulip → the red row, not the yellow ──
+      await openRequest('Water the flowers my note asks for', 'Mamie’s note');
+      for (const op of ['read']) await addAsk(op);
+      for (const op of ['fwd', 'fwd', 'if']) await palTap(op);
+      await tap(first('.bg-blocks-box .gd-prog .gd-blk[data-t="if"] .gd-slot[data-slot="sensor"]'), 'the if’s sensor');
+      await tap(first('.bg-blocks-box .gd-picker .gd-opt[data-opt="olive_read:red_tulip"]'), 'Olive read “red tulip”');
+      await tap(first('.bg-blocks-box .gd-prog .gd-blk[data-t="if"] .gd-n'), 'the if (the place new blocks go)');
+      for (const op of ['left', 'water']) await palTap(op);
+      const reads0 = (await req(port, 'GET', '/__stub/calls')).body.calls.filter((c) => c.rung === 'read').length;
+      await play();
+      const readBubble = await until(`[...document.querySelectorAll('.bg-stage .gd-bubble.gd-olive')].map((e) => e.innerText).join('|')`, (t) => t.includes('Olive read: red tulip'), 8000);
+      await runOver();
+      await wait(700);
+      const readCalls = (await req(port, 'GET', '/__stub/calls')).body.calls.filter((c) => c.rung === 'read').slice(reads0);
+      const tulipAt = (x, y) => ev(`(() => { const t = document.querySelector('.bg-stage .gd-cell[data-x="${x}"][data-y="${y}"] .gd-tulip'); return t ? (t.getAttribute('class').includes('gd-wet') ? 'wet' : 'dry') : 'none'; })()`);
+      const rowsNote = { red: await tulipAt(2, 2), yellow: await tulipAt(2, 4) };
+      const lineNote = await text(SAY);
+      await shot('ig006-ac2-note-route');
+      check('P-IG6-AC2 through the shell’s route: read is sent the note and the plot’s things; the bubble says “Olive read: red tulip”', readCalls.length === 1 && readCalls[0].values.note === 'The red ones, not the yellow.' && readBubble.includes('Olive read: red tulip'), { readCalls, readBubble });
+      check('P-IG6-AC2 “if Olive read red tulip” waters the red row and not the yellow', rowsNote.red === 'wet' && rowsNote.yellow === 'dry', rowsNote);
+      check('P-IG6-AC7 after the run, the owl names the block asked (read the note)', /Olive read the note/.test(lineNote), lineNote);
+
+      // ── P-IG6-AC3: the rock and the flowers — ask 3 times, "2 of 3 said yes", the majority waters ──
+      await openRequest('Water the flowers, not the rocks', 'the rock and the flowers');
+      for (const op of ['fwd', 'left']) await palTap(op);
+      await addAsk('is-it-a');
+      await tap(first('.bg-blocks-box .gd-prog .gd-blk[data-t="olive:is-it-a"] .gd-slot[data-slot="kind"]'), 'kind');
+      await tap(first('.bg-blocks-box .gd-picker .gd-opt[data-opt="a flower"]'), 'a flower');
+      await tap(first('.bg-blocks-box .gd-prog .gd-blk[data-t="olive:is-it-a"] .gd-slot[data-slot="times"]'), 'times');
+      await tap(first('.bg-blocks-box .gd-picker .gd-opt[data-opt="3"]'), 'ask 3 times');
+      await palTap('if');
+      await tap(first('.bg-blocks-box .gd-prog .gd-blk[data-t="if"] .gd-slot[data-slot="sensor"]'), 'the if’s sensor');
+      await tap(first('.bg-blocks-box .gd-picker .gd-opt[data-opt="olive_says:yes"]'), 'Olive says yes');
+      await tap(first('.bg-blocks-box .gd-prog .gd-blk[data-t="if"] .gd-n'), 'the if (the place new blocks go)');
+      await palTap('water');
+      await setStub(port, { answers: { 'is-it-a': ['yes', 'no', 'yes'] } });
+      const isa0 = (await req(port, 'GET', '/__stub/calls')).body.calls.filter((c) => c.rung === 'is-it-a').length;
+      await play();
+      const voteBubble = await until(`[...document.querySelectorAll('.bg-stage .gd-bubble.gd-olive')].map((e) => e.innerText).join('|')`, (t) => t.includes('2 of 3 said yes'), 10000);
+      await runOver();
+      await wait(700);
+      const voteCalls = (await req(port, 'GET', '/__stub/calls')).body.calls.filter((c) => c.rung === 'is-it-a').slice(isa0);
+      const wetVote = await tulipAt(1, 2);
+      await setStub(port, { answers: {} });
+      await shot('ig006-ac3-vote-route');
+      check('P-IG6-AC3 ask 3 times through the route: three asks about “a red tulip” (the engine names it), “2 of 3 said yes”, the tulip watered', voteCalls.length === 3 && voteCalls.every((c) => c.values.thing === 'a red tulip' && c.values.kind === 'a flower') && voteBubble.includes('2 of 3 said yes') && wetVote === 'wet', { voteCalls: voteCalls.map((c) => c.values), voteBubble, wetVote });
+
+      // ── P-IG6-AC6: Olive's five lessons on Skills, through the shell's route (the stub answers as the readout did) ──
+      await page.navigate('/skills');
+      await wait(1500);
+      const nLessons = await ev(`[...document.querySelectorAll('.bg-lesson')].filter((e) => e.offsetParent !== null).length`);
+      for (let i = 0; i < nLessons; i++) await tap(`[...document.querySelectorAll('.bg-lesson')].filter((e) => e.offsetParent !== null)[${i}].querySelector('.bg-lesson-ask')`, `Ask Olive (lesson ${i + 1})`);
+      await wait(1500);
+      const lessonText = await ev(`[...document.querySelectorAll('.bg-lesson')].filter((e) => e.offsetParent !== null).map((e) => ({ text: e.innerText, marked: [...e.querySelectorAll('.bg-letter')].filter((x) => getComputedStyle(x).backgroundColor !== 'rgba(0, 0, 0, 0)').length }))`);
+      await shot('ig006-ac6-lessons-route');
+      const L = (i, ...needles) => !!lessonText[i] && needles.every((n) => lessonText[i].text.includes(n));
+      check('P-IG6-AC6 five lessons through the route: 6 tulips vs the program’s 4; 14 vs 23; every e marked; the book under each tall tale; the direction both ways', nLessons === 5 && L(0, 'Olive: 6', 'counts the word “tulip”: 4') && L(1, 'Olive: 14', '14 + 9 = 23') && lessonText[2].marked > 0 && L(2, `${lessonText[2].marked} × e`) && L(3, 'Canberra', 'Karl Drais') && L(4, 'The tulips are thirsty.', 'Les tulipes sont vif.'), lessonText);
 
       // ── P-AC3: the voiced hint. Mutant: the written line stays, silently. Clean: Olive's voicing replaces it ──
       await setStub(port, { mutant: true });
@@ -317,17 +373,17 @@ async function pagesPart() {
       check('P-AC3 clean: the voiced line replaces the written one', /Hou hou|Hoo hoo/.test(cleanRow), { cleanRow });
 
       // ── P-AC2: a hung rung. Thinking while parked, the page alive (the robot moved first, animation frames, the dots); resting after the 12 s ──
-      await setStub(port, { hang: ['count-tulips'] });
+      await setStub(port, { hang: ['is-it-a'] });
       await enterFree('P-AC2');
-      if (!(await has('.gd-palette [data-pal="ask:count-tulips"]'))) skip('P-AC2 thinking, the page alive, then resting', '[data-pal="ask:count-tulips"] in free play');
+      if (!(await has('.gd-palette [data-pal="olive:is-it-a"]'))) skip('P-AC2 thinking, the page alive, then resting', '[data-pal="olive:is-it-a"] in free play');
       else {
-        await tap(first('.gd-palette [data-pal="fwd"]'), 'palette fwd');
-        await addAsk('count-tulips', 'list');
+        await palTap('fwd');
+        await addAsk('is-it-a', 'kind');
         const x0 = await ev(`(document.querySelector('.bg-stage .gd-bot') || { getAttribute: () => null }).getAttribute('data-x')`);
         await play();
         // Parked = the ask block is the one running AND the owl says she is thinking (s3 run 1: the tag alone was the
         // hint's voicing, while the ask had been refused — its list cut by the kit — and never parked).
-        const PARKED = `(() => { const b = document.querySelector('.gd-prog .gd-blk[data-t="ask:count-tulips"]'); const o = document.querySelector(${JSON.stringify(OWL)}); return !!b && b.getAttribute('data-run') === 'true' && !!o && /réfléchit|thinking/i.test(o.innerText); })()`;
+        const PARKED = `(() => { const b = document.querySelector('.bg-blocks-box .gd-prog .gd-blk[data-t="olive:is-it-a"]'); const o = document.querySelector(${JSON.stringify(OWL)}); return !!b && b.getAttribute('data-run') === 'true' && !!o && /réfléchit|thinking/i.test(o.innerText); })()`;
         await until(PARKED, Boolean, 4000);
         const thinking = await text(OWL);
         // Ends on a timer, never on a frame: a throttled rAF must read as few frames, not hang the drive.
@@ -342,24 +398,24 @@ async function pagesPart() {
       }
 
       // ── P-AC5: the exam gate on the page ──
-      await setStub(port, { exam: { 'words-to-blocks': 'fail' } });
+      await setStub(port, { exam: { read: 'fail' } });
       await req(port, 'POST', '/__garden/olive/exam', {});
       await enterFree('P-AC5 failed');
       await wait(800);
-      const heldPal = await has('.gd-palette [data-pal="ask:words-to-blocks"]');
-      const otherPal = await has('.gd-palette [data-pal="ask:poem"]');
+      const heldPal = await has('.gd-palette [data-pal="olive:read"]');
+      const otherPal = await has('.gd-palette [data-pal="olive:is-it-a"]');
       await page.navigate('/skills');
       const skillsLine = await until(`(document.querySelector('.bg-olive-held') || {}).innerText || ''`, Boolean, 5000);
       await shot('ac5-skills');
-      await setStub(port, { exam: { 'words-to-blocks': 'pass' } });
+      await setStub(port, { exam: { read: 'pass' } });
       await req(port, 'POST', '/__garden/olive/exam', {});
       await enterFree('P-AC5 passed');
       await wait(800);
-      const backPal = await has('.gd-palette [data-pal="ask:words-to-blocks"]');
+      const backPal = await has('.gd-palette [data-pal="olive:read"]');
       await page.navigate('/skills');
       await wait(1500);
       const skillsAfter = await has('.bg-olive-held');
-      check('P-AC5 withheld after a failed exam (the other rungs still offered), offered after a passing re-run; Skills says so, then stops saying it', heldPal === false && otherPal === true && backPal === true && /can’t do this here yet|ne sait pas encore faire ça ici/.test(skillsLine) && /words into blocks|des mots en blocs/.test(skillsLine) && skillsAfter === false, { heldPal, otherPal, backPal, skillsLine, skillsAfter });
+      check('P-AC5 withheld after a failed exam (the other rungs still offered), offered after a passing re-run; Skills says so, then stops saying it', heldPal === false && otherPal === true && backPal === true && /can’t do this here yet|ne sait pas encore faire ça ici/.test(skillsLine) && /read the note|lire le mot/.test(skillsLine) && skillsAfter === false, { heldPal, otherPal, backPal, skillsLine, skillsAfter });
 
       // ── P-390: the Workshop still fits a phone with the hooks in (Play and the owl on screen at scroll 0) ──
       await page.setViewport({ width: 390, height: 844, mobile: true });
@@ -373,18 +429,16 @@ async function pagesPart() {
 
       // ── P-S3-R5: the new pieces' words at ≥ 4.5:1 on their ground (the slot line, the proposal card, the tags, the Skills line) ──
       await enterFree('contrast');
-      await addAsk('words-to-blocks', 'route');
-      await play();
-      await until(`!!document.querySelector('.bg-proposal')`, Boolean, 8000);
-      await runOver();
-      await tap(first('.gd-palette [data-pal="ask:poem"]'), 'palette ask:poem (for the slot line)');
+      await addAsk('is-it-a');
       await wait(600);
+      await tap(first('.bg-blocks-box .gd-palette [data-pal="olive:say-thanks"]'), 'say (its card, for the contrast)');
+      await until(CARD_UP, Boolean, 2000);
       const ratios = await ev(`(() => {
         const parse = (c) => { const m = String(c).match(/rgba?\\(([^)]+)\\)/); if (!m) return null; const p = m[1].split(/[ ,\\/]+/).filter(Boolean).map(Number); return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 }; };
         const lum = (c) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); };
         const ground = (el) => { for (let e = el; e; e = e.parentElement) { const bg = parse(getComputedStyle(e).backgroundColor); if (bg && bg.a >= 0.999) return bg; } return { r: 255, g: 255, b: 255, a: 1 }; };
         const out = {};
-        for (const sel of ['.bg-slot-msg', '.bg-proposal', '.bg-prop-blocks', '.bg-prop-use', '.bg-prop-no', '.bg-owl-say', '.bg-owl-tag']) {
+        for (const sel of ['.bg-slot-msg', '.bg-card-title', '.bg-card-line', '.bg-card-ok', '.bg-help-chip', '.bg-owl-say', '.bg-owl-tag']) {
           const el = [...document.querySelectorAll(sel)].find((e) => e.offsetParent !== null);
           if (!el) { out[sel] = null; continue; }
           const leaf = [...el.querySelectorAll('*')].concat([el]).find((e) => [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())) || el;
@@ -395,6 +449,7 @@ async function pagesPart() {
         return out;
       })()`);
       await shot('contrast-hooks');
+      await tap(first('.bg-card-help .bg-card-ok'), 'Got it (after the contrast)');
       const measured = Object.entries(ratios).filter(([, r]) => r !== null);
       check(`P-S3-R5 the hooks’ words ≥ 4.5:1 on their ground (${measured.length} measured)`, measured.length >= 5 && measured.every(([, r]) => r >= 4.5), ratios);
 
@@ -404,19 +459,20 @@ async function pagesPart() {
       const step = () => tap(first('.bg-controls .bg-i-step'), 'One step');
       const reset = () => tap(first('.bg-controls .bg-i-reset'), 'Start over');
       await enterFree('IG-001');
-      await setStub(port, { answers: { poem: 'Tulla the tulip' } });
-      await addAsk('poem', 'flower');
+      // IG-006: the parked block is Olive's thank-you (the poem rung was cut with the other twelve).
+      await setStub(port, { answers: { 'say-thanks': 'Tulla the tulip' } });
+      await addAsk('say-thanks', 'to', 'deed');
       await wait(1200);
-      await setStub(port, { delayFor: { poem: 1500 } }); // the poem alone is held: the hint voicings answer at once
-      const poem0 = await asksOf('poem');
+      await setStub(port, { delayFor: { 'say-thanks': 1500 } }); // the thank-you alone is held: the hint voicings answer at once
+      const poem0 = await asksOf('say-thanks');
       await step();
       const tagOn = await until(owlThinking, Boolean, 2000);
       await step(); // while parked: a no-op
       await wait(300);
-      const poemMid = await asksOf('poem');
+      const poemMid = await asksOf('say-thanks');
       const tagOff = await until(owlThinking, (v) => v === false, 6000);
       const bubble = await until(`(() => { const b = document.querySelector('.gd-bubble.gd-olive'); return b ? b.innerText : ''; })()`, Boolean, 2500);
-      const poemAfter = await asksOf('poem');
+      const poemAfter = await asksOf('say-thanks');
       await setStub(port, { delayFor: {} });
       await shot('ig001-ac1-parked-step');
       check('IG-001 AC1: One step parks on Olive (thinking on); a Step while parked asks nothing more; the tag clears when she answers, with no further press; exactly one ask sent', tagOn === true && poemMid === poem0 + 1 && tagOff === false && poemAfter === poem0 + 1, { tagOn, poem0, poemMid, tagOff, poemAfter });
@@ -424,40 +480,39 @@ async function pagesPart() {
       // Start over while parked: the tag is off within one tick.
       await reset();
       await wait(400);
-      await addAsk('poem', 'flower');
+      await addAsk('say-thanks', 'to', 'deed');
       await wait(1200);
-      await setStub(port, { delayFor: { poem: 1500 } });
+      await setStub(port, { delayFor: { 'say-thanks': 1500 } });
       await step();
       const parkedAgain = await until(owlThinking, Boolean, 2000);
-      const poemBeforeReset = await asksOf('poem');
+      const poemBeforeReset = await asksOf('say-thanks');
       await reset();
       // Through the shell the new line's voicing queues behind the held poem ask (the owl answers one at a time), so
       // the tag is the voicing's until that drains (≤ 1.5 s + the voicing); the one-tick reading is the page drive's
       // (drive-cg003-pages.js, an in-page stub with no queue). Here: it clears once the queue drains, and nothing was asked again.
       const cleared = await until(owlThinking, (v) => v === false, 3200);
       await setStub(port, { delayFor: {} });
-      check('IG-001 AC1: Start over while parked — the tag clears once the held ask drains through the shell’s queue (≤ 3.2 s), and Olive is not asked again', parkedAgain === true && cleared === false && (await asksOf('poem')) === poemBeforeReset, { parkedAgain, cleared });
+      check('IG-001 AC1: Start over while parked — the tag clears once the held ask drains through the shell’s queue (≤ 3.2 s), and Olive is not asked again', parkedAgain === true && cleared === false && (await asksOf('say-thanks')) === poemBeforeReset, { parkedAgain, cleared });
       // AC6: a say block shows its line, plain.
       await wait(400);
-      await tap(first('.gd-palette [data-pal="say"]'), 'palette say');
+      await setStub(port, { answers: {} });
+      await palTap('say');
       await step();
       const plain = await until(`(() => { const b = document.querySelector('.gd-bubble:not(.gd-olive)'); return b ? b.innerText : ''; })()`, Boolean, 2500);
       check('IG-001 AC6: a say block shows its line in the plain bubble', /Mamie Rose/.test(plain) && !/Tulla/.test(plain), { plain });
       // AC7: fwd, fwd, left (facing the first tulip), ask Olive is-it-a, if Olive says yes → water. Yes waters; no does not.
       await reset();
       await wait(400);
-      for (const op of ['fwd', 'fwd', 'left']) await tap(first(`.gd-palette [data-pal="${op}"]`), `palette ${op}`);
-      await addAsk('is-it-a', 'thing');
-      await tap(first('.gd-prog .gd-blk[data-t="ask:is-it-a"] .gd-slot[data-slot="kind"]'), 'slot kind');
-      await tap(first('.gd-picker .gd-opt'), 'the first kind');
-      await tap(first('.gd-palette [data-pal="if"]'), 'palette if');
+      for (const op of ['fwd', 'fwd', 'left']) await palTap(op);
+      await addAsk('is-it-a', 'kind');
+      await palTap('if');
       // A tap on the block's WORD selects it (its centre is the sensor slot, a button the kit keeps out of block taps).
       await tap(first('.gd-prog .gd-blk[data-t="if"] .gd-n'), 'the if block’s word (select it as the place new blocks go)');
-      await tap(first('.gd-palette [data-pal="water"]'), 'palette water (into the if)');
+      await palTap('water');
       const sensorOpen = await ev(`(() => { const s = document.querySelector('.gd-prog .gd-blk[data-t="if"] .gd-slot[data-slot="sensor"]'); return s ? s.getAttribute('aria-expanded') : null; })()`);
       if (sensorOpen !== 'true') await tap(first('.gd-prog .gd-blk[data-t="if"] .gd-slot[data-slot="sensor"]'), 'the if’s sensor slot');
       await tap(first('.gd-picker .gd-opt[data-opt="olive_says:yes"]'), 'Olive says yes');
-      const shape = await ev(`(() => { const i = document.querySelector('.gd-prog .gd-blk[data-t="if"]'); const rep = i && i.closest('.gd-rep'); const body = rep && rep.querySelector('.gd-body'); const s = i && i.querySelector('.gd-slot[data-slot="sensor"]'); return { sensor: s && s.getAttribute('data-value'), label: s && s.innerText, inBody: !!body && !!body.querySelector('.gd-blk[data-t="water"]'), blocks: document.querySelectorAll('.gd-prog .gd-blk[data-id]').length }; })()`);
+      const shape = await ev(`(() => { const i = document.querySelector('.bg-blocks-box .gd-prog .gd-blk[data-t="if"]'); const rep = i && i.closest('.gd-rep'); const body = rep && rep.querySelector('.gd-body'); const s = i && i.querySelector('.gd-slot[data-slot="sensor"]'); return { sensor: s && s.getAttribute('data-value'), label: s && s.innerText, inBody: !!body && !!body.querySelector('.gd-blk[data-t="water"]'), blocks: document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-id]').length }; })()`);
       const wet = () => ev(`document.querySelectorAll('.bg-stage .gd-wet').length`);
       await setStub(port, { answers: { 'is-it-a': 'yes' } });
       await play();
@@ -471,7 +526,7 @@ async function pagesPart() {
       await wait(600);
       const wetNo = await wet();
       await setStub(port, { answers: {} });
-      check('IG-001 AC7: the picker offers "Olive says yes"; ask Olive is-it-a → if Olive says yes → water waters when the stub says yes and not when it says no', shape.sensor === 'olive_says:yes' && shape.label === 'Olive says yes' && shape.inBody && shape.blocks === 6 && wetYes === 1 && wetNo === 0, { shape, wetYes, wetNo });
+      check('IG-001 AC7: the picker offers "Olive says yes"; is it a…? → if Olive says yes → water waters when the stub says yes and not when it says no', shape.sensor === 'olive_says:yes' && shape.label === 'Olive says yes' && shape.inBody && shape.blocks === 6 && wetYes === 1 && wetNo === 0, { shape, wetYes, wetNo });
 
       check('P console: 0 errors', page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));
     });

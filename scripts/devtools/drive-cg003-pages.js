@@ -172,10 +172,19 @@ const check = (name, ok, saw) => {
 const STUB = {
   status: { model: 'ready', reason: '', gpu: false, loadMs: 1, lastMs: 1, asked: 0, fallbacks: 0, busy: false, queued: 0, exam: { at: '2026-09-28T00:00:00.000Z', ms: 1, passed: 20, failed: 0, rungs: {} } },
   /** IG-001 (P106 s1): a scripted reply per rung (text, or a value for a shaped rung) and a hold before ONE rung's reply (never the hint voicings, or "thinking" would be the voicing), so a drive can watch a parked run. */
-  plan: { answers: {}, delayMs: 0, delayRung: '' },
+  /** IG-006 (P106 s2): a LIST scripts a rung's replies in turn (the vote); `fallback` names a rung that does not answer. */
+  plan: { answers: {}, delayMs: 0, delayRung: '', counts: {}, fallback: '' },
+  /** The rungs whose answer is a shaped VALUE (an enum word, a number), never prose. */
+  shaped: { read: 1, 'is-it-a': 1, 'count-tulips': 1, maths: 1 },
   olive: (body) => {
-    const scripted = body && STUB.plan.answers[body.rung];
-    if (scripted !== undefined) return { ok: true, ...(typeof scripted === 'string' && !/^(yes|no|oui|non)$/.test(scripted) ? { text: scripted } : { value: scripted }), ms: 5 };
+    if (body && STUB.plan.fallback && body.rung === STUB.plan.fallback) return { ok: false, fallback: true, reason: 'no-model', ms: 5 };
+    let scripted = body && STUB.plan.answers[body.rung];
+    if (Array.isArray(scripted)) {
+      const k = STUB.plan.counts[body.rung] || 0;
+      STUB.plan.counts[body.rung] = k + 1;
+      scripted = scripted[k % scripted.length];
+    }
+    if (scripted !== undefined) return { ok: true, ...(typeof scripted === 'string' && !/^(yes|no|oui|non)$/.test(scripted) && !STUB.shaped[body.rung] ? { text: scripted } : { value: scripted }), ms: 5 };
     return { ok: true, text: body && body.lang === 'fr' ? 'Merci, Mamie Rose ! (stub)' : 'Thank you, Mamie Rose! (stub)', ms: 5 };
   }
 };
@@ -281,7 +290,22 @@ withDeployedSite({ dir: DIR }, async (page) => {
     check(`fresh family ${tag}: no stored family, the app opens on Profiles`, left.length === 0 && onProfiles, { left, path: await path0() });
     if (!onProfiles) await tap(first('.bg-top .bg-who'), 'who is playing (back to Profiles)');
   };
-  const blocks = () => evaluate(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`);
+  // IG-006: scoped to the steps' own list — a block's card draws its example with a second Block List.
+  const blocks = () => evaluate(`document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-id]').length`);
+  const CARD_UP = `(() => { const e = document.querySelector('.bg-card-help'); return !!e && e.offsetParent !== null; })()`;
+  const CARD = `(() => { const e = document.querySelector('.bg-card-help'); if (!e || e.offsetParent === null) return { up: false }; const t = (s) => { const x = e.querySelector(s); return x ? x.innerText.trim() : ''; }; return { up: true, title: t('.bg-card-title'), line: t('.bg-card-line'), example: e.querySelectorAll('.bg-card-eg .gd-blk[data-id]').length, eg: [...e.querySelectorAll('.bg-card-eg .gd-blk[data-id]')].map((b) => b.getAttribute('data-t')) }; })()`;
+  /** A palette tap that places the block: the first tap on a kind opens its card (IG-006 AC5) — Got it, then tap again. */
+  const palTap = async (id) => {
+    const n0 = await blocks();
+    await tap(first(`.bg-blocks-box .gd-palette [data-pal="${id}"]`), `palette ${id}`);
+    await wait(200);
+    if ((await blocks()) === n0 && (await evaluate(CARD_UP))) {
+      await tap(first('.bg-card-help .bg-card-ok'), `Got it (${id})`);
+      await until(CARD_UP, (v) => v === false, 2000);
+      await tap(first(`.bg-blocks-box .gd-palette [data-pal="${id}"]`), `palette ${id} (its card seen)`);
+      await wait(200);
+    }
+  };
   /** S3-R5 on the screen as it stands: every text ≥ 4.5:1, and the instrument fires on the mockup's own orange. */
   const contrastClause = async (screen) => {
     const c = await evaluate(CONTRAST_JS);
@@ -452,9 +476,9 @@ withDeployedSite({ dir: DIR }, async (page) => {
       await wait(700);
       const bloom = await evaluate(`(() => { const c = [...document.querySelectorAll('.bg-notion')].find((e) => e.innerText.includes(${JSON.stringify(w(lang, 'n2p'))})); return c ? c.className : null; })()`);
       check(`AC3 ${tag}: Skills shows Repeat blooming`, !!bloom && bloom.includes('bg-notion-bloom'), bloom);
-      // S4: Olive's eighteen lessons as cards (band 10–12), each with its tag and its lesson.
-      const rungCards = await evaluate(`[...document.querySelectorAll('.bg-rung')].filter((e) => e.offsetParent !== null).map((e) => e.innerText.trim().split('\\n').length)`);
-      check(`S4 ${tag}: Skills shows Olive’s 18 lessons, each with a tag, a title and a lesson`, rungCards.length === 18 && rungCards.every((n) => n >= 3), rungCards);
+      // IG-006 (R7): Olive's FIVE lessons as cards (band 10–12), each with a title, its lesson, its question and Ask Olive.
+      const lessonCards = await evaluate(`[...document.querySelectorAll('.bg-lesson')].filter((e) => e.offsetParent !== null).map((e) => ({ lines: e.innerText.trim().split('\\n').length, ask: !!e.querySelector('.bg-lesson-ask') }))`);
+      check(`IG-006 AC6 ${tag}: Skills shows Olive’s 5 lessons, each with a title, a lesson, a question and Ask Olive`, lessonCards.length === 5 && lessonCards.every((c) => c.lines >= 4 && c.ask), lessonCards);
       await shot(`ac3-${tag}-08-skills`);
       check(`AC3 ${tag}: 0 console errors so far`, page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));
       check(`AC3 ${tag}: 0 network errors so far`, page.networkErrors.length === 0, page.networkErrors.slice(0, 5));
@@ -575,6 +599,186 @@ withDeployedSite({ dir: DIR }, async (page) => {
         if (won) await tap(byText('.bg-win-card button', w(lang, 'winStay')), 'Keep tinkering');
         await wait(400);
         check(`IG-002 ${tag}: 0 console errors so far`, page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));
+      }
+    }
+  }
+
+  // ── IG-006 (P106 s2): Olive reads — AC1 the palette, AC5 the cards, AC2 Mamie's note, AC3 the vote, AC7 the after-run
+  // line, AC6 the lessons; at both sizes, in both languages, on the stub (the page's in-Chrome one, scripted per rung). ──
+  {
+    const oliveIds = () => evaluate(`[...document.querySelectorAll('.bg-blocks-box .gd-palette [data-pal^="olive:"]')].filter((e) => e.offsetParent !== null).map((e) => [e.getAttribute('data-pal'), e.innerText.trim()])`);
+    const owlSay = () => evaluate(`(document.querySelector('.bg-owl-say') || {}).innerText || ''`);
+    const openReq = async (lang, id) => {
+      await tab(0);
+      await until('location.pathname', (p) => p === '/island');
+      await wait(700);
+      await tap(byText('.bg-quest', id === 'free' ? w(lang, 'sandP').slice(0, 10) : titleOf(lang, id)), `open ${id}`);
+      await until('location.pathname', (p) => p === '/workshop');
+      await until(`!!document.querySelector('.bg-blocks-box .gd-palette [data-pal="fwd"]')`, Boolean, 6000);
+      await wait(700);
+    };
+    /** The id of the last top-level container of a kind in the steps' list. */
+    const lastRep = (t) => evaluate(`(() => { const r = [...document.querySelectorAll('.bg-blocks-box .gd-prog > .gd-rep')].filter((e) => { const b = e.querySelector(':scope > .gd-hd .gd-blk'); return b && b.getAttribute('data-t') === ${JSON.stringify(t)}; }); return r.length ? r[r.length - 1].getAttribute('data-rep') : ''; })()`);
+    /** Tap a container's icon: the kit takes it as the place new blocks go (tap again to let go). */
+    const pickRep = (id, label) => tap(`document.querySelector('.bg-blocks-box .gd-rep[data-rep="${id}"] > .gd-hd .gd-blk > svg')`, label);
+    const repSelected = (id) => evaluate(`(document.querySelector('.bg-blocks-box .gd-rep[data-rep="${id}"]') || {}).getAttribute ? document.querySelector('.bg-blocks-box .gd-rep[data-rep="${id}"]').getAttribute('data-sel') : ''`);
+    const slotOn = async (blockSel, key, value, label) => {
+      await tap(first(`${blockSel} .gd-slot[data-slot="${key}"]`), `${label}: slot ${key}`);
+      await tap(first(`.bg-blocks-box .gd-picker .gd-opt[data-opt="${value}"]`), `${label}: ${value}`);
+    };
+    const ifInto = async (sensor, body, label) => {
+      await palTap('if');
+      const id = await lastRep('if');
+      await slotOn(`.bg-blocks-box .gd-rep[data-rep="${id}"] > .gd-hd`, 'sensor', sensor, label);
+      await pickRep(id, `${label}: take the if`);
+      if ((await repSelected(id)) !== '1') await pickRep(id, `${label}: take the if (again)`);
+      for (const op of body) await palTap(op);
+      await pickRep(id, `${label}: let the if go`);
+      return id;
+    };
+    const cellTulip = (x, y) => evaluate(`(() => { const t = document.querySelector('.bg-stage .gd-cell[data-x="${x}"][data-y="${y}"] .gd-tulip'); return t ? (t.getAttribute('class').includes('gd-wet') ? 'wet' : 'dry') : 'none'; })()`);
+    const bubbleAfterPlay = async (want, ms = 9000) => {
+      await control('play');
+      const b = await until(`[...document.querySelectorAll('.bg-stage .gd-bubble.gd-olive')].map((e) => e.innerText.trim()).join(' | ')`, (t) => t.includes(want), ms);
+      await until(`!document.querySelector('.bg-blocks-box .gd-locked')`, Boolean, 15000);
+      await wait(900);
+      return b;
+    };
+    for (const vp of VIEWPORTS) {
+      for (const lang of LANGS) {
+        const tag = `IG-006 ${vp.name}-${lang}`;
+        const shots = (vp.name === '1368' && lang === 'en') || (vp.name === '390' && lang === 'fr');
+        await page.setViewport(vp);
+        // A reload: the cards a child has seen are this session's, so each pass starts with none seen.
+        await page.navigate('/island');
+        await wait(1100);
+        await seg(lang === 'fr' ? 'FR' : 'EN');
+        await wait(600);
+        // AC1 — free play at 10–12: exactly the three, labelled, the owl's colour; 7–9: none.
+        await openReq(lang, 'free');
+        const olive = await oliveIds();
+        const want = [['olive:say-thanks', w(lang, 'rungSayThanks')], ['olive:read', w(lang, 'rungRead')], ['olive:is-it-a', w(lang, 'rungIsItA')]];
+        check(`${tag} AC1: band 10–12 lists exactly say, read, is it a…? under Olive`, JSON.stringify(olive) === JSON.stringify(want), { olive, want });
+        const anyAsk = await evaluate(`[...document.querySelectorAll('[data-pal], [data-t]')].map((e) => e.getAttribute('data-pal') || e.getAttribute('data-t')).filter((v) => /^ask:/.test(v))`);
+        check(`${tag} AC1: no ask:<rung> block anywhere on the page`, anyAsk.length === 0, anyAsk);
+        await seg('7–9');
+        await wait(700);
+        const young = await oliveIds();
+        await seg('10–12');
+        await wait(700);
+        check(`${tag} AC1: band 7–9 lists no Olive block`, young.length === 0, young);
+        // AC5 — the first tap opens the card and places nothing; Got it; the next tap places it; its ? reopens it.
+        const n0 = await blocks();
+        await tap(first('.bg-blocks-box .gd-palette [data-pal="olive:read"]'), 'read (first tap)');
+        const card = await until(CARD, (c) => c.up, 2500);
+        check(`${tag} AC5: the first tap on “read” opens its card — title, line, the example as blocks — and places nothing`, card.up && card.title === w(lang, 'rungRead') && card.line === w(lang, 'cdOliveRead') && JSON.stringify(card.eg) === JSON.stringify(['olive:read', 'if', 'water']) && (await blocks()) === n0, card);
+        if (shots) await shot(`ig006-ac5-card-${vp.name}-${lang}`);
+        await tap(first('.bg-card-help .bg-card-ok'), 'Got it');
+        const closed = await until(CARD, (c) => !c.up, 2000);
+        check(`${tag} AC5: “Got it” closes the card and places nothing`, !closed.up && (await blocks()) === n0, closed);
+        await tap(first('.bg-blocks-box .gd-palette [data-pal="olive:read"]'), 'read (next tap)');
+        const placed = await until(`document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-t="olive:read"]').length`, (n) => n === 1, 2000);
+        check(`${tag} AC5: the next tap places the block, no card`, placed === 1 && !(await evaluate(CARD_UP)), placed);
+        const chips = await until(`[...document.querySelectorAll('.bg-help-chip')].filter((e) => e.offsetParent !== null).map((e) => e.innerText.trim())`, (l) => l.length > 0, 2000);
+        await tap(byText('.bg-help-chip', w(lang, 'rungRead')), 'the ? of read');
+        const again = await until(CARD, (c) => c.up, 2000);
+        check(`${tag} AC5: a ? beside the placed kind reopens its card`, chips.includes('? ' + w(lang, 'rungRead')) && again.up && again.title === w(lang, 'rungRead'), { chips, again });
+        await tap(first('.bg-card-help .bg-card-ok'), 'Got it (again)');
+        await until(CARD_UP, (v) => v === false, 2000);
+        await tap(first('.bg-blocks-box .gd-palette [data-pal="fwd"]'), 'forward (first tap)');
+        const fwdCard = await until(CARD, (c) => c.up, 2000);
+        check(`${tag} AC5: a plain block has its card too — forward’s`, fwdCard.up && fwdCard.title === w(lang, 'bFwd') && fwdCard.line === w(lang, 'cdFwd') && (await blocks()) === 1, fwdCard);
+        await tap(first('.bg-card-help .bg-card-ok'), 'Got it (forward)');
+        await until(CARD_UP, (v) => v === false, 2000);
+
+        // AC2 — Mamie's note: read; forward twice; if Olive read the red tulip { left, water, right }; if the yellow { right,
+        // water, left }. The stub says "red tulip": the red one is watered, the yellow one not; the bubble says what she read.
+        STUB.plan.answers.read = lang === 'fr' ? 'tulipe rouge' : 'red tulip';
+        await openReq(lang, 'mamie-note');
+        const note = await evaluate(`({ things: document.querySelectorAll('.bg-stage .gd-thing').length, tulips: document.querySelectorAll('.bg-stage .gd-tulip').length })`);
+        readings[`ig006-note-world-${vp.name}-${lang}`] = note;
+        for (const op of ['olive:read', 'fwd', 'fwd']) await palTap(op);
+        await ifInto('olive_read:red_tulip', ['left', 'water', 'right'], 'if red');
+        await ifInto('olive_read:yellow_tulip', ['right', 'water', 'left'], 'if yellow');
+        const prog = await evaluate(`[...document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-id]')].map((b) => b.getAttribute('data-t')).join(' ')`);
+        const readsBefore = stubCalls.filter((c) => c.body && c.body.rung === 'read').length;
+        const readBubble = await bubbleAfterPlay(w(lang, 'oliveReadSay').replace('{x}', STUB.plan.answers.read));
+        const readCall = stubCalls.filter((c) => c.body && c.body.rung === 'read').slice(readsBefore);
+        const rows = { red: await cellTulip(2, 2), yellow: await cellTulip(2, 4) };
+        if (shots) await shot(`ig006-ac2-note-${vp.name}-${lang}`);
+        check(`${tag} AC2: the program is built through the kit (read, forward ×2, two ifs)`, prog === 'olive:read fwd fwd if left water right if right water left', prog);
+        check(`${tag} AC2: read sends the note on the plot, in the language, with the plot’s two tulips as the choices — once`, readCall.length === 1 && readCall[0].body.slots.note === (lang === 'fr' ? 'Les rouges, pas les jaunes.' : 'The red ones, not the yellow.') && JSON.stringify(readCall[0].body.options) === JSON.stringify(lang === 'fr' ? ['tulipe rouge', 'tulipe jaune'] : ['red tulip', 'yellow tulip']), readCall.map((c) => c.body));
+        check(`${tag} AC2: the bubble says “${w(lang, 'oliveReadSay').replace('{x}', STUB.plan.answers.read)}”`, readBubble.includes(w(lang, 'oliveReadSay').replace('{x}', STUB.plan.answers.read)), readBubble);
+        check(`${tag} AC2: “if Olive read the red tulip” — the red row is watered and the yellow one is not`, rows.red === 'wet' && rows.yellow === 'dry', rows);
+        const noteLine = await owlSay();
+        check(`${tag} AC7: after the run the owl names the block asked (read the note)`, noteLine.includes(lang === 'fr' ? 'Olive a lu le mot' : 'Olive read the note'), noteLine);
+        delete STUB.plan.answers.read;
+
+        // AC3 — the rock and the flowers: forward, left, is it a…? (a flower, 3 times), if Olive says yes { water }. The
+        // stub says yes, no, yes: three asks about the red tulip the ENGINE names, "2 of 3 said yes", and the tulip drinks.
+        const yes = lang === 'fr' ? 'oui' : 'yes', no = lang === 'fr' ? 'non' : 'no';
+        STUB.plan.answers['is-it-a'] = [yes, no, yes];
+        STUB.plan.counts['is-it-a'] = 0;
+        await openReq(lang, 'rock-flower');
+        for (const op of ['fwd', 'left', 'olive:is-it-a']) await palTap(op);
+        const isa = '.bg-blocks-box .gd-prog .gd-blk[data-t="olive:is-it-a"]';
+        await slotOn(isa, 'kind', lang === 'fr' ? 'une fleur' : 'a flower', 'is it a…?');
+        await slotOn(isa, 'times', '3', 'is it a…?');
+        await ifInto('olive_says:yes', ['water'], 'if Olive says yes');
+        const asked0 = stubCalls.filter((c) => c.body && c.body.rung === 'is-it-a').length;
+        const vote = await bubbleAfterPlay(w(lang, 'oliveVote').replace('{n}', '2').replace('{of}', '3').replace('{x}', yes));
+        const votes = stubCalls.filter((c) => c.body && c.body.rung === 'is-it-a').slice(asked0).map((c) => c.body.slots);
+        const flower = await cellTulip(1, 2);
+        if (shots) await shot(`ig006-ac3-vote-${vp.name}-${lang}`);
+        check(`${tag} AC3: ask 3 times — three asks, each about the thing the engine names ahead (${lang === 'fr' ? 'une tulipe rouge' : 'a red tulip'}), never a slot`, votes.length === 3 && votes.every((v) => v.thing === (lang === 'fr' ? 'une tulipe rouge' : 'a red tulip') && v.kind === (lang === 'fr' ? 'une fleur' : 'a flower')), votes);
+        check(`${tag} AC3: the robot shows “${w(lang, 'oliveVote').replace('{n}', '2').replace('{of}', '3').replace('{x}', yes)}”, and the majority waters`, vote.includes(w(lang, 'oliveVote').replace('{n}', '2').replace('{of}', '3').replace('{x}', yes)) && flower === 'wet', { vote, flower });
+        const isaLine = await owlSay();
+        check(`${tag} AC7: after the run the owl names the block asked (is it a…?)`, isaLine.includes(lang === 'fr' ? 'Olive a dit si ce qui est devant' : 'Olive said whether the thing ahead'), isaLine);
+        STUB.plan.answers['is-it-a'] = [yes, no, no];
+        STUB.plan.counts['is-it-a'] = 0;
+        const one = await bubbleAfterPlay(w(lang, 'oliveVote1').replace('{n}', '1').replace('{of}', '3').replace('{x}', yes));
+        check(`${tag} AC3: 1 of 3 said yes — the majority is no, the tulip stays dry`, one.includes(w(lang, 'oliveVote1').replace('{n}', '1').replace('{of}', '3').replace('{x}', yes)) && (await cellTulip(1, 2)) === 'dry', { one });
+        // AC7 — she does not answer (the fallback): the line says she was resting, and names the block.
+        STUB.plan.fallback = 'is-it-a';
+        await control('play');
+        await until(`!document.querySelector('.bg-blocks-box .gd-locked')`, Boolean, 15000);
+        const rest = await until(`(document.querySelector('.bg-owl-say') || {}).innerText || ''`, (t) => /resting|repose/.test(t), 4000);
+        check(`${tag} AC7: when the written answer stood in, the owl says she was resting — and names “${w(lang, 'rungIsItA')}”`, /resting|repose/.test(rest) && rest.includes(w(lang, 'rungIsItA')), rest);
+        STUB.plan.fallback = '';
+        delete STUB.plan.answers['is-it-a'];
+        if (shots) await shot(`ig006-ac7-resting-${vp.name}-${lang}`);
+
+        // AC6 — Olive's lessons on Skills: each card asks its canned question; the check sits under her answer.
+        STUB.plan.answers['count-tulips'] = 6;
+        STUB.plan.answers.maths = 14;
+        STUB.plan.answers['no-letter-e'] = lang === 'fr' ? 'La tulipe est une belle fleur rouge.' : 'The tulip is a lovely red flower.';
+        STUB.plan.answers['tall-tales'] = lang === 'fr' ? 'Sydney !' : 'Sydney!';
+        STUB.plan.answers.translate = 'Les tulipes sont vif.';
+        await tab(3);
+        await until('location.pathname', (p) => p === '/skills');
+        await wait(900);
+        const cards = await evaluate(`[...document.querySelectorAll('.bg-lesson')].filter((e) => e.offsetParent !== null).length`);
+        for (let i = 0; i < 5; i++) await tap(`[...document.querySelectorAll('.bg-lesson')].filter((e) => e.offsetParent !== null)[${i}].querySelector('.bg-lesson-ask')`, `Ask Olive (lesson ${i + 1})`);
+        await wait(900);
+        const lessons = await evaluate(`[...document.querySelectorAll('.bg-lesson')].filter((e) => e.offsetParent !== null).map((e) => ({ text: e.innerText, marked: [...e.querySelectorAll('.bg-letter')].filter((x) => x.offsetParent !== null && getComputedStyle(x).backgroundColor !== 'rgba(0, 0, 0, 0)').map((x) => x.innerText.trim()) }))`);
+        const hasAll = (i, needles) => !!lessons[i] && needles.every((n) => lessons[i].text.includes(n));
+        const saysX = (x) => w(lang, 'oliveSaysBubble').replace('{x}', x);
+        check(`${tag} AC6: five lessons, each answered by Ask Olive`, cards === 5 && lessons.length === 5, { cards, n: lessons.length });
+        check(`${tag} AC6: count the tulips — Olive says 6, the program counts 4`, hasAll(0, [saysX('6'), w(lang, 'lsCheck7').replace('{n}', '4')]), lessons[0] && lessons[0].text);
+        check(`${tag} AC6: 14 + 9 — Olive says 14, the rule says 23`, hasAll(1, [saysX('14'), w(lang, 'lsCheck8').replace('{n}', '23')]), lessons[1] && lessons[1].text);
+        const eWant = [...STUB.plan.answers['no-letter-e']].filter((c) => c.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase() === 'e').length;
+        check(`${tag} AC6: no letter e — the page marks EVERY e in her sentence (${eWant}) and says so`, !!lessons[2] && lessons[2].marked.length === eWant && lessons[2].marked.every((c) => /^[eéèêëE]$/.test(c)) && lessons[2].text.includes(w(lang, 'lsCheck9').replace('{n}', String(eWant))), lessons[2]);
+        check(`${tag} AC6: tall tales — three questions, each with the book’s answer under hers`, hasAll(3, [w(lang, 'lsTrue1'), w(lang, 'lsTrue2'), w(lang, 'lsTrue3')]) && (lessons[3].text.match(new RegExp(saysX('Sydney').replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length === 3, lessons[3] && lessons[3].text);
+        check(`${tag} AC6: the direction — French → English and English → French, each with a person’s translation`, hasAll(4, ['Les tulipes ont soif.', 'The tulips are thirsty.']), lessons[4] && lessons[4].text);
+        if (shots) await shot(`ig006-ac6-lessons-${vp.name}-${lang}`);
+        await seg('7–9');
+        await wait(700);
+        const none = await evaluate(`[...document.querySelectorAll('.bg-lesson')].filter((e) => e.offsetParent !== null).length`);
+        await seg('10–12');
+        await wait(600);
+        check(`${tag} AC6: no lesson at band 7–9`, none === 0, none);
+        for (const k of ['count-tulips', 'maths', 'no-letter-e', 'tall-tales', 'translate']) delete STUB.plan.answers[k];
+        check(`${tag}: 0 console errors so far`, page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));
       }
     }
   }
@@ -807,13 +1011,14 @@ withDeployedSite({ dir: DIR }, async (page) => {
     const owlExpr = `(document.querySelector('.bg-owl-say') || {}).innerText || ''`;
     const thinkingExpr = `(() => { const e = document.querySelector('.bg-owl-thinking'); return !!e && e.offsetParent !== null; })()`;
     const owlSay = () => evaluate(owlExpr);
-    const pal = (id) => tap(first(`.gd-palette [data-pal="${id}"]`), `palette ${id}`);
+    const pal = (id) => palTap(id);
     const pickSlot = async (blockSel, slot, opt) => {
       await tap(first(`${blockSel} .gd-slot[data-slot="${slot}"]`), `slot ${slot}`);
       await tap(opt ? first(`.gd-picker .gd-opt[data-opt="${opt}"]`) : first('.gd-picker .gd-opt'), `option ${opt || 'first'} for ${slot}`);
     };
     const runOver = () => until(`!document.querySelector('.gd-locked')`, Boolean, 12000);
-    const poemAsks = () => stubCalls.filter((c) => c.body && c.body.rung === 'poem').length;
+    // IG-006: the eighteen-rung family is gone; the parked ask is the say block (Olive's thank-you).
+    const poemAsks = () => stubCalls.filter((c) => c.body && c.body.rung === 'say-thanks').length;
     /** D5: the running block's ring, read live — its outline colour against the first opaque ground behind it, and the halo. */
     const ringOf = () =>
       evaluate(`(() => { const el = document.querySelector('.gd-blk.gd-run'); if (!el) return null; const cs = getComputedStyle(el);
@@ -845,11 +1050,12 @@ withDeployedSite({ dir: DIR }, async (page) => {
     // D1 + D6 + D5 (on white): fwd, ask Olive · a poem. One step runs fwd (the ring on the white panel); One step parks
     // (thinking on); a third press while parked asks nothing more; the stub's held answer clears the tag with no press and
     // is spoken in the olive bubble.
-    await pal('ask:poem');
-    await pickSlot('.gd-prog .gd-blk[data-t="ask:poem"]', 'flower');
+    await pal('olive:say-thanks');
+    await pickSlot('.gd-prog .gd-blk[data-t="olive:say-thanks"]', 'to');
+    await pickSlot('.gd-prog .gd-blk[data-t="olive:say-thanks"]', 'deed');
     await wait(700);
-    STUB.plan.answers.poem = 'Tulla the tulip';
-    STUB.plan.delayRung = 'poem';
+    STUB.plan.answers['say-thanks'] = 'Tulla the tulip';
+    STUB.plan.delayRung = 'say-thanks';
     STUB.plan.delayMs = 1500;
     const asks0 = poemAsks();
     await control('step');
@@ -870,14 +1076,16 @@ withDeployedSite({ dir: DIR }, async (page) => {
     // Start over while parked: the tag is off within one tick.
     await control('reset');
     await wait(400);
-    await pal('ask:poem');
-    await pickSlot('.gd-prog .gd-blk[data-t="ask:poem"]', 'flower');
+    await pal('olive:say-thanks');
+    await pickSlot('.gd-prog .gd-blk[data-t="olive:say-thanks"]', 'to');
+    await pickSlot('.gd-prog .gd-blk[data-t="olive:say-thanks"]', 'deed');
     await wait(700);
     await control('step');
     const parkedAgain = await until(thinkingExpr, Boolean, 2000);
     await control('reset');
     const cleared = await until(thinkingExpr, (v) => v === false, 700);
     STUB.plan.delayMs = 0;
+    delete STUB.plan.answers['say-thanks'];
     check('IG-001 D1: Start over while parked — the tag is off within one tick', parkedAgain === true && cleared === false, { parkedAgain, cleared });
     // D6: a say block shows its line, plain.
     await wait(400);
@@ -1029,15 +1237,15 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await shot(`cg007-ac1-${name}`);
     if (name === 'skills') {
       await contrastClause('Skills');
-      // S4: the lessons are band 10–12's (ruling 8): at 7–9 the section is gone, and back at 10–12 it returns.
-      const visibleRungs = () => evaluate(`[...document.querySelectorAll('.bg-rung')].filter((e) => e.offsetParent !== null).length`);
+      // S4 / IG-006 AC6: the lessons are band 10–12's (ruling 8): at 7–9 the section is gone, and back at 10–12 it returns.
+      const visibleRungs = () => evaluate(`[...document.querySelectorAll('.bg-lesson')].filter((e) => e.offsetParent !== null).length`);
       const older = await visibleRungs();
       await seg('7–9');
       await wait(700);
       const younger = await visibleRungs();
       await seg('10–12');
       await wait(700);
-      check('S4: Olive’s lessons show at 10–12 (18), not at 7–9 (0), and come back', older === 18 && younger === 0 && (await visibleRungs()) === 18, { older, younger });
+      check('S4 / IG-006 AC6: Olive’s lessons show at 10–12 (5), not at 7–9 (0), and come back', older === 5 && younger === 0 && (await visibleRungs()) === 5, { older, younger });
     }
   }
   // S3-LOOK: the island and Profiles at a phone's width, for the side-by-side.
