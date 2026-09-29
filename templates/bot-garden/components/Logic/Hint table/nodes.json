@@ -32,7 +32,7 @@
       "type": "JavaScriptFunction",
       "label": "Hint table",
       "parameters": {
-        "functionScript": "\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar rows = Inputs.hints || [];\nvar name = String(Inputs.botName || 'Pip');\nvar map = {};\nfor (var i = 0; i < rows.length; i++) map[rows[i].key] = String(rows[i][lang] || rows[i].en || '').split('{b}').join(name);\nOutputs.lang = lang;\nOutputs.hintStart = map.hintStart || '';\nOutputs.hintEmpty = map.hintEmpty || '';\nOutputs.hintPattern = map.hintPattern || '';\nOutputs.hintMissed = map.hintMissed || '';\nOutputs.hintNotYet = map.hintNotYet || '';\nOutputs.hintBump = map.hintBump || '';\nOutputs.hintWet = map.hintWet || '';\nOutputs.hintDone = map.hintDone || '';\nOutputs.hintDoneMany = map.hintDoneMany || '';\nOutputs.hintPerfect = map.hintPerfect || '';\nOutputs.hintFree = map.hintFree || '';\nOutputs.hintDry = map.hintDry || '';\nOutputs.hintRockGone = map.hintRockGone || '';\nOutputs.hintPredictMiss = map.hintPredictMiss || '';\nOutputs.oliveThinking = map.oliveThinking || '';\nOutputs.oliveResting = map.oliveResting || '';\nOutputs.oliveRung1 = map.oliveRung1 || '';\nOutputs.oliveRung2 = map.oliveRung2 || '';\nOutputs.oliveRung3 = map.oliveRung3 || '';\nOutputs.oliveResting1 = map.oliveResting1 || '';\nOutputs.oliveResting2 = map.oliveResting2 || '';\nOutputs.oliveResting3 = map.oliveResting3 || '';\n"
+        "functionScript": "\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar rows = Inputs.hints || [];\nvar name = String(Inputs.botName || 'Pip');\nvar map = {};\nfor (var i = 0; i < rows.length; i++) map[rows[i].key] = String(rows[i][lang] || rows[i].en || '').split('{b}').join(name);\nOutputs.lang = lang;\nOutputs.hintStart = map.hintStart || '';\nOutputs.hintEmpty = map.hintEmpty || '';\nOutputs.hintPattern = map.hintPattern || '';\nOutputs.hintMissed = map.hintMissed || '';\nOutputs.hintNotYet = map.hintNotYet || '';\nOutputs.hintBump = map.hintBump || '';\nOutputs.hintWet = map.hintWet || '';\nOutputs.hintDone = map.hintDone || '';\nOutputs.hintDoneMany = map.hintDoneMany || '';\nOutputs.hintPerfect = map.hintPerfect || '';\nOutputs.hintFree = map.hintFree || '';\nOutputs.hintDry = map.hintDry || '';\nOutputs.hintRockGone = map.hintRockGone || '';\nOutputs.hintPredictMiss = map.hintPredictMiss || '';\nOutputs.hintDriveReady = map.hintDriveReady || '';\nOutputs.oliveThinking = map.oliveThinking || '';\nOutputs.oliveResting = map.oliveResting || '';\nOutputs.oliveRung1 = map.oliveRung1 || '';\nOutputs.oliveRung2 = map.oliveRung2 || '';\nOutputs.oliveRung3 = map.oliveRung3 || '';\nOutputs.oliveResting1 = map.oliveResting1 || '';\nOutputs.oliveResting2 = map.oliveResting2 || '';\nOutputs.oliveResting3 = map.oliveResting3 || '';\n"
       },
       "x": 40,
       "y": 160,
@@ -164,6 +164,13 @@
           "group": "Outputs"
         },
         {
+          "name": "out-hintDriveReady",
+          "displayName": "hintDriveReady",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
           "name": "out-oliveThinking",
           "displayName": "oliveThinking",
           "plug": "output",
@@ -238,6 +245,11 @@
         },
         {
           "name": "hintDoneMany",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintDriveReady",
           "plug": "input",
           "type": "*"
         },

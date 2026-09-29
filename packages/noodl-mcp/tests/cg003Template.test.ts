@@ -59,7 +59,8 @@ import {
   WIN_SUMMARY_SCRIPT,
   TEACH_START_SCRIPT,
   MODE_LINE_SCRIPT,
-  CHALLENGE_SCRIPT
+  CHALLENGE_SCRIPT,
+  GLOW_SCRIPT
 } from './cg003Scripts';
 import { AuthoredGarden, buildGardenTemplateProject, prepareGardenArtefact, START_HERE_FILE, TEMPLATE_ID } from './cg003Template';
 import { ROBOT_NAME_MAX } from './cg002Scripts';
@@ -672,6 +673,23 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(rfrom('rnSetRunReset', 'done')).toEqual(['rnOut.reset']);
       expect(phas('plRunner', 'reset', 'plChoose', 'go')).toBe(true);
       expect(phas('plStart', 'ran', 'plRunner', 'stop')).toBe(true);
+    });
+
+    it('🔴 P106 s4 (d): the running ring shows only while a run is live — Stop (Start over, Teach, Drive) and a run that ends take it off, so a new program’s block with the same id never glows', () => {
+      // The ring the page draws is the Runner's Glow Id, and that is Glow's answer, not Step's raw one (which Stop never touched).
+      expect(rinto('rnOut', 'glowId')).toEqual(['rnGlow.id>glowId']);
+      expect(rnode('rnGlow').type).toBe('/Logic/Glow');
+      expect(rinto('rnGlow')).toEqual(['rnMode.live>live', 'rnStep.glowId>glowId']);
+      expect(phas('plRunner', 'glowId', 'plBlocks', 'runningId')).toBe(true);
+      expect(run(GLOW_SCRIPT, { glowId: 3, live: true }).id).toBe('3');
+      expect(run(GLOW_SCRIPT, { glowId: 3, live: false }).id).toBe('');
+      expect(run(GLOW_SCRIPT, { glowId: null, live: true }).id).toBe('');
+      // One step, Start over, One step: the same block id, the ring back on — Live goes false then true, so Glow re-answers.
+      expect([run(GLOW_SCRIPT, { glowId: 1, live: true }).id, run(GLOW_SCRIPT, { glowId: 1, live: false }).id, run(GLOW_SCRIPT, { glowId: 1, live: true }).id]).toEqual(['1', '', '1']);
+    });
+
+    it('🔴 P106 s4 (c): Choose hint knows the mode, so Drive with a program says Play or Teach', () => {
+      expect(phas('plMode', 'mode', 'plChoose', 'mode')).toBe(true);
     });
 
     it('D3/D4: Choose hint is fed the request’s reference count and whether this is free play', () => {

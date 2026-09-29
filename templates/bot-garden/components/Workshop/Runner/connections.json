@@ -348,6 +348,18 @@
     {
       "fromId": "rnStep",
       "fromProperty": "glowId",
+      "toId": "rnGlow",
+      "toProperty": "glowId"
+    },
+    {
+      "fromId": "rnMode",
+      "fromProperty": "live",
+      "toId": "rnGlow",
+      "toProperty": "live"
+    },
+    {
+      "fromId": "rnGlow",
+      "fromProperty": "id",
       "toId": "rnOut",
       "toProperty": "glowId"
     },

@@ -629,6 +629,8 @@ const RUNNER: CgComponent = {
     variable('rnWorldVar', 'gardenWorld', 'The world'),
     logic('rnStep', L('Step'), 'One tick'),
     logic('rnApply', L('Apply delta'), 'The world after it'),
+    // P106 s4 (lane G): the ring is on while a run is live, off once it stops (Stop never touched Step's Glow Id).
+    logic('rnGlow', L('Glow'), 'The block to ring'),
     setVariable('rnSetRunStep', 'gardenRun', 'Hold the run after the tick'),
     setVariable('rnSetWorldApply', 'gardenWorld', 'Hold the world after the tick'),
     gate('rnEnd', 'Is the run done?'),
@@ -723,7 +725,9 @@ const RUNNER: CgComponent = {
     // What the page reads.
     wire('rnWorldVar', 'value', 'rnOut', 'world'),
     wire('rnRunVar', 'value', 'rnOut', 'run'),
-    wire('rnStep', 'glowId', 'rnOut', 'glowId'),
+    wire('rnStep', 'glowId', 'rnGlow', 'glowId'),
+    wire('rnMode', 'live', 'rnGlow', 'live'),
+    wire('rnGlow', 'id', 'rnOut', 'glowId'),
     wire('rnStep', 'done', 'rnOut', 'done'),
     wire('rnStep', 'bumps', 'rnOut', 'bumps'),
     wire('rnStep', 'puddles', 'rnOut', 'puddles'),
@@ -1304,6 +1308,8 @@ const PLAY: CgComponent = {
     wire('plStart', 'isFree', 'plChoose', 'freePlay'),
     // IG-001 D2: the hint is chosen again once Stop has emptied the run (a request change, Start over, Teach).
     wire('plRunner', 'reset', 'plChoose', 'go'),
+    // P106 s4 (lane G): Drive with a program says Play or Teach, not the start line.
+    wire('plMode', 'mode', 'plChoose', 'mode'),
     // The rung this run asked (the lesson line after the run) and whether she answered (Olive is resting).
     wire('plAskOlive', 'answer', 'plPlayed', 'answer'),
     wire('plRunner', 'run', 'plPlayed', 'run'),

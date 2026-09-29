@@ -1159,6 +1159,18 @@ Outputs.count = cards.length;
 Outputs.owned = mine.length;
 `;
 
+// ── P106 s4 (lane G): the running ring ─────
+
+/**
+ * `Logic/Glow` (the Runner's): the block the page rings is Step's Glow Id while a run is live (playing or paused on One
+ * step), and none otherwise. Step's own answer is left as it was by Stop, so without this a Start over after One step
+ * kept the ring, and a new program's block with the same id wore it (P105, found by IG-003 s3).
+ */
+export const GLOW_SCRIPT = `
+var g = Inputs.glowId;
+Outputs.id = Inputs.live === true && g !== null && g !== undefined && g !== '' ? String(g) : '';
+`;
+
 /** The glue, as the generator places it: one `Logic/*` each. */
 export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; seam: string }> = [
   { component: 'Logic/Read program', script: READ_PROGRAM_SCRIPT, seam: 'the program as a list, whatever held it' },
@@ -1205,5 +1217,7 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   // P106 IG-005 (lane B): robots for the job.
   { component: 'Logic/Job robot', script: JOB_ROBOT_SCRIPT, seam: 'the robot this request needs, hers of that kind, its look, its step time' },
   { component: 'Logic/Gift line', script: GIFT_LINE_SCRIPT, seam: 'the win card\u2019s line for the robot lent and the upgrade given' },
-  { component: 'Logic/Robot cards', script: ROBOT_CARDS_SCRIPT, seam: 'My robots: a card per robot, owned or still to be lent' }
+  { component: 'Logic/Robot cards', script: ROBOT_CARDS_SCRIPT, seam: 'My robots: a card per robot, owned or still to be lent' },
+  // P106 s4 (lane G).
+  { component: 'Logic/Glow', script: GLOW_SCRIPT, seam: 'the block the page rings: Step\u2019s while a run is live, none once it stops' }
 ];

@@ -122,6 +122,13 @@
       "y": 880
     },
     {
+      "id": "rnGlow",
+      "type": "/Logic/Glow",
+      "label": "The block to ring",
+      "x": 40,
+      "y": 1000
+    },
+    {
       "id": "rnSetRunStep",
       "type": "Set Variable",
       "label": "Hold the run after the tick",
@@ -129,7 +136,7 @@
         "name": "gardenRun"
       },
       "x": 40,
-      "y": 1000
+      "y": 1120
     },
     {
       "id": "rnSetWorldApply",
@@ -139,7 +146,7 @@
         "name": "gardenWorld"
       },
       "x": 40,
-      "y": 1120
+      "y": 1240
     },
     {
       "id": "rnEnd",
@@ -149,7 +156,7 @@
         "runOnChange-condition": false
       },
       "x": 40,
-      "y": 1240
+      "y": 1360
     },
     {
       "id": "rnLoop",
@@ -159,7 +166,7 @@
         "runOnChange-condition": false
       },
       "x": 40,
-      "y": 1360
+      "y": 1480
     },
     {
       "id": "rnLive",
@@ -169,7 +176,7 @@
         "runOnChange-condition": false
       },
       "x": 40,
-      "y": 1480
+      "y": 1600
     },
     {
       "id": "rnPark",
@@ -179,7 +186,7 @@
         "runOnChange-condition": false
       },
       "x": 40,
-      "y": 1600
+      "y": 1720
     },
     {
       "id": "rnAns",
@@ -189,7 +196,7 @@
         "runOnChange-condition": false
       },
       "x": 40,
-      "y": 1720
+      "y": 1840
     },
     {
       "id": "rnParked",
@@ -199,7 +206,7 @@
         "runOnChange-condition": false
       },
       "x": 40,
-      "y": 1840
+      "y": 1960
     },
     {
       "id": "rnWait",
@@ -214,7 +221,7 @@
         "value-parked-parked": true
       },
       "x": 40,
-      "y": 1960
+      "y": 2080
     },
     {
       "id": "rnReset",
@@ -225,7 +232,7 @@
         "robotId": "me"
       },
       "x": 40,
-      "y": 2080
+      "y": 2200
     },
     {
       "id": "rnSetRunReset",
@@ -235,7 +242,7 @@
         "name": "gardenRun"
       },
       "x": 40,
-      "y": 2200
+      "y": 2320
     },
     {
       "id": "rnTimer",
@@ -245,7 +252,7 @@
         "duration": 420
       },
       "x": 40,
-      "y": 2320
+      "y": 2440
     },
     {
       "id": "rnMode",
@@ -269,7 +276,7 @@
         "value-paused-idle": true
       },
       "x": 40,
-      "y": 2440
+      "y": 2560
     },
     {
       "id": "rnOut",
@@ -383,7 +390,7 @@
         }
       ],
       "x": 40,
-      "y": 2560
+      "y": 2680
     }
   ]
 }

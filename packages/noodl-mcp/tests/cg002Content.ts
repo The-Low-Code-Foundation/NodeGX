@@ -479,6 +479,8 @@ export const HINTS: Readonly<Record<string, Bi>> = {
   hintDry: s('The can is empty. Where is the pond?', 'L’arrosoir est vide. Où est la mare ?'),
   hintRockGone: s('Nothing left in that rock! {b} has the stones: where do they go?', 'Plus rien dans ce rocher ! {b} a les pierres : où vont-elles ?'),
   hintPredictMiss: s('You tapped one tile, {b} stopped on another. Follow the steps with your finger, one by one.', 'Tu as touché une case, {b} s’est arrêté sur une autre. Suis les pas avec ton doigt, un par un.'),
+  // P106 s4: a program not run yet, while just driving — "press Teach and show" read as if the steps were not there.
+  hintDriveReady: s('{b} still knows your steps. Press Play to watch them, or Teach to change them.', '{b} connaît toujours tes pas. Appuie sur Jouer pour les regarder, ou sur Apprendre pour les changer.'),
   oliveThinking: s('Olive is thinking…', 'Olive réfléchit…'),
   oliveResting: s('Olive is resting. Here is her written line.', 'Olive se repose. Voici sa phrase écrite.'),
   // P106 IG-006 AC7: after a run, the line names the block Olive was asked — and says she was resting when the written

@@ -728,7 +728,8 @@ Outputs.bumps = end.run.bumps;
  * (hintRockGone) · water from an empty can (hintDry) — IG-002 · a bump · a puddle · the rung just played · free play after a clean
  * run (hintFree — IG-001 D4: free play has no goal, so it fell to "Not quite yet") · a
  * run that missed the goal ({w} of {t} tulips; with no tulips in the world, hintNotYet —
- * s4: "Pip did 0 of 0" on Sami's path) · the start. No key says "tell me": there is no such line.
+ * s4: "Pip did 0 of 0" on Sami's path) · the start — or, in Drive (`Inputs.mode`, P106 s4), hintDriveReady. No key says
+ * "tell me": there is no such line.
  *
  * `Inputs.referenceCount` is the reference program's block count (Start world; 0 or unset never says Perfect);
  * `Inputs.freePlay` is Start world's `isFree`.
@@ -772,6 +773,8 @@ else if (rung >= 1 && rung <= ${OLIVE_RUNG_MAX}) key = 'oliveRung' + rung;
 else if (freePlay && ran) key = 'hintFree';
 else if (ran && total > 0) { key = 'hintMissed'; vars = { w: done, t: total }; }
 else if (ran) key = 'hintNotYet';
+// P106 s4: a program not run yet, in Drive: Play it or Teach more — the start line ("press Teach and show") is Teach's.
+else if (String(Inputs.mode || '') === 'drive') key = 'hintDriveReady';
 Outputs.key = key;
 Outputs.vars = vars;
 Outputs.isOlive = key.indexOf('olive') === 0;

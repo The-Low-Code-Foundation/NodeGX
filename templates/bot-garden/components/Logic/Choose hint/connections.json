@@ -29,6 +29,12 @@
     },
     {
       "fromId": "choosehintIn",
+      "fromProperty": "mode",
+      "toId": "choosehintFn",
+      "toProperty": "in-mode"
+    },
+    {
+      "fromId": "choosehintIn",
       "fromProperty": "oliveFallback",
       "toId": "choosehintFn",
       "toProperty": "in-oliveFallback"

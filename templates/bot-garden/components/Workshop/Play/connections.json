@@ -1552,6 +1552,12 @@
       "toProperty": "go"
     },
     {
+      "fromId": "plMode",
+      "fromProperty": "mode",
+      "toId": "plChoose",
+      "toProperty": "mode"
+    },
+    {
       "fromId": "plAskOlive",
       "fromProperty": "answer",
       "toId": "plPlayed",

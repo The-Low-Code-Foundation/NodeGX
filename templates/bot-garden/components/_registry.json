@@ -111,7 +111,7 @@
       "path": "Logic/Choose hint",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 18,
+      "connectionCount": 19,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -175,7 +175,7 @@
       "path": "Logic/Hint table",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 27,
+      "connectionCount": 28,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -563,6 +563,14 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
+    "Logic/Glow": {
+      "path": "Logic/Glow",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 4,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
     "Logic/App store": {
       "path": "Logic/App store",
       "type": "visual",
@@ -622,8 +630,8 @@
     "Workshop/Runner": {
       "path": "Workshop/Runner",
       "type": "visual",
-      "nodeCount": 22,
-      "connectionCount": 71,
+      "nodeCount": 23,
+      "connectionCount": 73,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -655,7 +663,7 @@
       "path": "Workshop/Play",
       "type": "visual",
       "nodeCount": 155,
-      "connectionCount": 387,
+      "connectionCount": 388,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -869,8 +877,8 @@
     }
   },
   "stats": {
-    "totalComponents": 108,
-    "totalNodes": 882,
-    "totalConnections": 2567
+    "totalComponents": 109,
+    "totalNodes": 886,
+    "totalConnections": 2576
   }
 }

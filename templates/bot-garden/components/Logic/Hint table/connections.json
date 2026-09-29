@@ -41,6 +41,12 @@
     },
     {
       "fromId": "hinttableFn",
+      "fromProperty": "out-hintDriveReady",
+      "toId": "hinttableOut",
+      "toProperty": "hintDriveReady"
+    },
+    {
+      "fromId": "hinttableFn",
       "fromProperty": "out-hintDry",
       "toId": "hinttableOut",
       "toProperty": "hintDry"
