@@ -553,6 +553,95 @@ describe('CG-001 — garden-kit, the built artefact', () => {
     });
   });
 
+  describe('IG-002 (P106 s2) — the rock by what is left, the sign, the note, the can’s level and the load on the back', () => {
+    const cellOf = (html: string, x: number, y: number) => {
+      const at = html.indexOf(`data-x="${x}" data-y="${y}"`);
+      return html.slice(html.lastIndexOf('<button', at), html.indexOf('</button>', at));
+    };
+    const robotOf = (html: string) => {
+      const at = html.indexOf('data-robot="0"');
+      return html.slice(html.lastIndexOf('<div', at), html.indexOf('class="gd-name"', at) === -1 ? html.length : html.indexOf('class="gd-name"', at));
+    };
+
+    it('🔴 parseRobots carries can, canMax and carry exactly as the s2 brief §4 writes them (the 3D kit copies the same lines)', () => {
+      const parse = (node('garden-kit.Garden').world as { parseRobots: (v: unknown) => Array<Record<string, unknown>> }).parseRobots;
+      const pick = (r: Record<string, unknown>) => ({ can: r.can, canMax: r.canMax, carry: r.carry });
+      expect(pick(parse({ x: 1, y: 1, can: 2, canMax: 3, carry: ['stone'] })[0])).toEqual({ can: 2, canMax: 3, carry: ['stone'] });
+      expect(pick(parse({})[0])).toEqual({ can: null, canMax: 3, carry: [] });
+      expect(parse([{ can: null }, { can: '' }, { can: '1' }, { can: -2 }, { can: 2.7 }, { can: 'x' }]).map((r) => r.can)).toEqual([null, null, 1, 0, 2, null]);
+      expect(parse([{ canMax: 0 }, { canMax: 5 }, { canMax: '4' }, { canMax: -1 }]).map((r) => r.canMax)).toEqual([3, 5, 4, 3]);
+      expect(parse([{ carry: 'stone' }, { carry: ['letter', 7] }]).map((r) => r.carry)).toEqual([[], ['letter', '7']]);
+      const src = fs.readFileSync(path.join(KIT_DIR, 'src', 'kit.js'), 'utf8');
+      for (const line of [
+        "          can: isFinite(Number(r.can)) && r.can !== null && r.can !== '' ? Math.max(0, Math.floor(Number(r.can))) : null,",
+        '          canMax: isFinite(Number(r.canMax)) && Number(r.canMax) > 0 ? Math.floor(Number(r.canMax)) : 3,',
+        '          carry: Array.isArray(r.carry) ? r.carry.map(String) : []'
+      ])
+        expect({ line: line.trim().slice(0, 12), present: src.includes(line + '\n') }).toEqual({ line: line.trim().slice(0, 12), present: true });
+    });
+
+    it('🔴 a rock is an inline sprite at three sizes by what is left — ≥ 3 big, 2 medium, 1 small, 0 nothing; a sign and a note are sprites and their text is not drawn', () => {
+      const sprites = (node('garden-kit.Garden').sprite as { sprites: Record<string, unknown> }).sprites;
+      for (const k of ['rockBig', 'rockMid', 'rockSmall', 'sign', 'note', 'parcel']) expect({ k, has: !!sprites[k] }).toEqual({ k, has: true });
+      const things = [4, 3, 2, 1, 0].map((left, x) => ({ kind: 'rock', x, y: 0, left }));
+      const html = render('garden-kit.Garden', { map: { rows: ['GGGGGGG'] }, things: [...things, { kind: 'sign', x: 5, y: 0, text: 'Tulips this way' }, { kind: 'note', x: 6, y: 0, text: 'The red ones' }] });
+      expect(cellOf(html, 0, 0)).toContain('class="gd-sprite gd-thing gd-boulder gd-boulder-big" data-sprite="rockBig"');
+      expect(cellOf(html, 1, 0)).toContain('gd-boulder-big');
+      expect(cellOf(html, 2, 0)).toContain('class="gd-sprite gd-thing gd-boulder gd-boulder-mid" data-sprite="rockMid"');
+      expect(cellOf(html, 3, 0)).toContain('class="gd-sprite gd-thing gd-boulder gd-boulder-small" data-sprite="rockSmall"');
+      expect(cellOf(html, 4, 0)).not.toContain('gd-boulder');
+      expect(cellOf(html, 0, 0)).toContain('data-left="4"');
+      expect(cellOf(html, 5, 0)).toContain('class="gd-sprite gd-thing gd-sign" data-sprite="sign"');
+      expect(cellOf(html, 6, 0)).toContain('class="gd-sprite gd-thing gd-note" data-sprite="note"');
+      for (const text of ['Tulips this way', 'The red ones']) expect(html).not.toContain(text);
+      expect(html).not.toContain('class="gd-label"');
+      // A rock that names no count is a whole one; the map's R tile is still the decorative rock sprite.
+      expect(cellOf(render('garden-kit.Garden', { map: { rows: ['GR'] }, things: [{ kind: 'rock', x: 0, y: 0 }] }), 0, 0)).toContain('gd-boulder-big');
+      expect(cellOf(render('garden-kit.Garden', { map: { rows: ['GR'] }, things: [] }), 1, 0)).toContain('data-sprite="rock"');
+    });
+
+    it('🔴 the can’s level on the robot: canMax drops, can of them full; 3, 2, 1, 0 as it pours; none when the robot has no can', () => {
+      const gauge = (robot: Record<string, unknown>) => {
+        const html = robotOf(render('garden-kit.Garden', { map: { rows: ['GGG'] }, things: [], robots: [{ x: 1, y: 0, d: 1, name: 'Pip', ...robot }] }));
+        return { can: (/class="gd-can" data-can="(\d+)" data-can-max="(\d+)"/.exec(html) || []).slice(1).join('/'), full: (html.match(/gd-drop gd-drop-full/g) || []).length, empty: (html.match(/gd-drop gd-drop-empty/g) || []).length };
+      };
+      expect([3, 2, 1, 0].map((can) => gauge({ can }))).toEqual([
+        { can: '3/3', full: 3, empty: 0 },
+        { can: '2/3', full: 2, empty: 1 },
+        { can: '1/3', full: 1, empty: 2 },
+        { can: '0/3', full: 0, empty: 3 }
+      ]);
+      expect(gauge({ can: 4, canMax: 5 })).toEqual({ can: '4/5', full: 4, empty: 1 });
+      expect(gauge({})).toEqual({ can: '', full: 0, empty: 0 });
+      expect(gauge({ can: null })).toEqual({ can: '', full: 0, empty: 0 });
+    });
+
+    it('🔴 the load on the robot’s back is the last thing it carries — a stone, a letter as themselves, anything else a parcel — and nothing when it carries nothing', () => {
+      const load = (carry: unknown) => {
+        const html = robotOf(render('garden-kit.Garden', { map: { rows: ['GGG'] }, things: [], robots: [{ x: 1, y: 0, d: 2, carry }] }));
+        const m = /class="gd-load gd-load-(\w+)" data-load="\w+"[^>]*><svg[^>]*data-sprite="(\w+)"/.exec(html);
+        return m ? `${m[1]}:${m[2]}` : null;
+      };
+      expect(load(['stone'])).toBe('stone:stone');
+      expect(load(['stone', 'stone', 'letter'])).toBe('letter:letter');
+      expect(load(['letter', 'stone'])).toBe('stone:stone');
+      expect(load(['widget'])).toBe('parcel:parcel');
+      expect(load([])).toBeNull();
+      expect(load(undefined)).toBeNull();
+      // The load turns with the robot (inside .gd-turn); the gauge stays upright (outside it).
+      const html = render('garden-kit.Garden', { map: { rows: ['GGG'] }, things: [], robots: [{ x: 1, y: 0, d: 1, carry: ['stone'], can: 1 }] });
+      expect(html).toMatch(/class="gd-turn"[^>]*>[\s\S]*?<svg[^>]*data-robot-svg="true"[\s\S]*?<\/svg><div class="gd-load gd-load-stone"/);
+      expect(html).toMatch(/<\/div><div class="gd-can"/);
+      const css = node('garden-kit.Garden').css as string;
+      for (const rule of ['.gd-can{', '.gd-load{', '.gd-load>svg{']) expect(css).toContain(rule);
+    });
+
+    it('the fill block has its own icon (a drop into the can)', () => {
+      const html = render('garden-kit.BlockList', { palette: [{ id: 'fill', kind: 'action', icon: 'fill', label: 'fill the can', hasBody: false, hasCount: false, slots: [] }], program: '[{"id":1,"t":"fill"}]' });
+      expect(html).toContain('data-icon="fill"');
+    });
+  });
+
   describe('AC10 — what the kit bundles is written down, and nothing is fetched', () => {
     it('the README credits the source of the sprites, the licence, the borrowed icon, and says nothing is fetched', () => {
       const readme = fs.readFileSync(README, 'utf8');

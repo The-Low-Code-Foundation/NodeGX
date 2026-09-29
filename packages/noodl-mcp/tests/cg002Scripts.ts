@@ -72,6 +72,13 @@ export const MAX_TICKS = 2000;
 
 /** A finished request with more blocks than this is "done, but it could be shorter" (the mockup's `winMany`). */
 export const MANY_BLOCKS = 8;
+/**
+ * The longest repeated sequence the fold looks for. The mockup's was six; IG-002's fetch-and-return dance (fill, turn
+ * round, walk, water, step down, walk back) is nine, and a child's own route with a turn more is a little longer.
+ */
+export const FOLD_MAX_LEN = 12;
+/** IG-002: what `fill` fills a robot's can to when the robot names no `canMax` (IG-005 upgrades it as a number). */
+export const CAN_MAX = 3;
 /** The highest Olive rung (18 since CG-006 s3 promoted six moments): a rung after the last one has no hint line of its own. */
 export const OLIVE_RUNG_MAX = Math.max(...OLIVE_RUNGS.map((r) => r.n));
 
@@ -103,6 +110,7 @@ export const BLOCK_META: Readonly<Record<string, { kind: 'motion' | 'action' | '
   left: { kind: 'motion', body: false, count: false, slots: [] },
   right: { kind: 'motion', body: false, count: false, slots: [] },
   water: { kind: 'action', body: false, count: false, slots: [] },
+  fill: { kind: 'action', body: false, count: false, slots: [] },
   pick: { kind: 'action', body: false, count: false, slots: [] },
   put: { kind: 'action', body: false, count: false, slots: [] },
   say: { kind: 'ask', body: false, count: false, slots: ['text'] },
@@ -121,7 +129,9 @@ export const BLOCK_META: Readonly<Record<string, { kind: 'motion' | 'action' | '
 export const ENGINE = `
 var DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0];
 var BLOCKING_TILES = { W: 1, R: 1, T: 1, H: 1 };
-var BLOCKING_THINGS = { tulip: 1, bowl: 1 };
+// IG-002: a rock (a mineable thing on grass) and a sign block a move like a tulip; a note on the ground does not.
+var BLOCKING_THINGS = { tulip: 1, bowl: 1, rock: 1, sign: 1 };
+var CAN_MAX = ${CAN_MAX};
 var PICKABLE = { letter: 1, egg: 1, stone: 1, food: 1 };
 var UNTIL_GUARD = ${UNTIL_GUARD};
 var MAX_TRICK_DEPTH = ${MAX_TRICK_DEPTH};
@@ -166,6 +176,11 @@ function blocked(w, x, y) {
 function robotOf(w, id) { for (var i = 0; i < w.robots.length; i++) if (w.robots[i].id === id) return w.robots[i]; return w.robots[0] || null; }
 function front(r) { return { x: r.x + DX[r.d], y: r.y + DY[r.d] }; }
 function basketOf(r) { return Math.max(1, Math.floor(Number(r.basket)) || 4); }
+/** IG-002: the can. null = this robot has no can (water is free, as before IG-002); a number is the waters it holds. */
+function canOf(r) { if (!r || r.can === undefined || r.can === null || r.can === '' || !isFinite(Number(r.can))) return null; return Math.max(0, Math.floor(Number(r.can))); }
+function canMaxOf(r) { return Number(r.canMax) > 0 ? Math.floor(Number(r.canMax)) : CAN_MAX; }
+/** A tile whose rock was mined to nothing (the world's spent list: the rock thing itself is gone). */
+function spentAt(w, x, y) { return Array.isArray(w.spent) && w.spent.indexOf(x + ',' + y) !== -1; }
 function tulipsOf(w) { var n = 0, wet = 0; for (var i = 0; i < w.things.length; i++) if (w.things[i].kind === 'tulip') { n++; if (w.things[i].watered) wet++; } return { total: n, watered: wet }; }
 /** The last Olive answer, read as a word. yes/oui/true and no/non/false are one word each. */
 function oliveSays(run, arg) {
@@ -189,6 +204,7 @@ function sense(w, run, name, arg) {
   if (name === 'tulip_ahead') return thingsAt(w, f.x, f.y, 'tulip').length > 0;
   if (name === 'bowl_empty') { var b = thingsAt(w, f.x, f.y, 'bowl'); return b.length > 0 && !(Number(b[0].food) > 0); }
   if (name === 'basket_full') return r.carry.length >= basketOf(r);
+  if (name === 'can_empty') { var cn = canOf(r); return cn !== null && cn <= 0; }
   if (name === 'count_is') return (Number(run.count) || 0) === Number(arg);
   if (name === 'olive_says') return oliveSays(run, arg);
   // IG-001 D7: the picker offers "Olive says yes" / "Olive says no" as one sensor value each (olive_says:yes, olive_says:no).
@@ -255,7 +271,7 @@ function newRun(program, robotId, lang, runId) {
     robotId: String(robotId || ''), lang: String(lang) === 'fr' ? 'fr' : 'en',
     runId: runId !== undefined && runId !== null && runId !== '' ? String(runId) : 'run' + Date.now().toString(36) + Math.floor(Math.random() * 2176782336).toString(36),
     proposal: null, sensed: {},
-    steps: flatten(prog, tricks), pc: 0, tick: 0, count: 0, bumps: 0, puddles: 0, watered: 0, said: 0, guardHits: 0,
+    steps: flatten(prog, tricks), pc: 0, tick: 0, count: 0, bumps: 0, puddles: 0, watered: 0, said: 0, guardHits: 0, dries: 0, rockGone: 0,
     handled: {}, handlers: collectHandlers(prog, []), tricks: tricks, lastAnswer: null, waiting: false, askSeq: 0, done: false,
     blocks: countBlocks(prog)
   };
@@ -271,16 +287,30 @@ function exec(w, run, s, delta) {
     delta.move = { id: r.id, x: f.x, y: f.y }; return;
   }
   if (s.op === 'water') {
+    // IG-002: a robot with a can spends one water per pour; an EMPTY can pours nothing — no water, no puddle — and the
+    // dry event is the error message. A robot with no can (null) waters for free, as before.
+    var can = canOf(r);
+    if (can !== null && can <= 0) { run.dries++; delta.dry = { id: r.id, x: f.x, y: f.y }; delta.sayKey = 'sayDry'; return; }
     var tul = thingsAt(w, f.x, f.y, 'tulip');
-    if (tul.length) { if (!tul[0].watered) run.watered++; delta.water = { x: f.x, y: f.y }; delta.sayKey = 'sayDrink'; return; }
+    if (tul.length) { if (!tul[0].watered) run.watered++; delta.water = { x: f.x, y: f.y }; delta.sayKey = 'sayDrink'; if (can !== null) delta.can = { id: r.id, can: can - 1 }; return; }
     var c = tileAt(w, f.x, f.y);
-    if (c !== '' && c !== 'W') { if (!thingsAt(w, f.x, f.y, 'puddle').length) { run.puddles++; delta.puddle = { x: f.x, y: f.y }; } delta.splash = { x: f.x, y: f.y }; delta.sayKey = 'saySplash'; return; }
+    if (c !== '' && c !== 'W') { if (!thingsAt(w, f.x, f.y, 'puddle').length) { run.puddles++; delta.puddle = { x: f.x, y: f.y }; } delta.splash = { x: f.x, y: f.y }; delta.sayKey = 'saySplash'; if (can !== null) delta.can = { id: r.id, can: can - 1 }; return; }
+    delta.nothing = true; return;
+  }
+  // IG-002: fill at the water ahead fills the can to canMax; with no water ahead it is a no-op (no bump).
+  if (s.op === 'fill') {
+    if (tileAt(w, f.x, f.y) === 'W') { delta.fill = { id: r.id, x: f.x, y: f.y }; delta.can = { id: r.id, can: canMaxOf(r) }; delta.sayKey = 'sayFill'; return; }
     delta.nothing = true; return;
   }
   if (s.op === 'pick') {
-    var th = thingsAt(w, f.x, f.y), it = null;
+    var th = thingsAt(w, f.x, f.y), it = null, rock = null;
     for (var i = 0; i < th.length && !it; i++) if (PICKABLE[th[i].kind]) it = th[i];
+    for (var ri = 0; ri < th.length && !rock; ri++) if (th[ri].kind === 'rock' && Number(th[ri].left) > 0) rock = th[ri];
     if (it && r.carry.length < basketOf(r)) { delta.pick = { id: r.id, kind: it.kind, x: f.x, y: f.y }; delta.sayKey = 'sayPick'; return; }
+    // IG-002: a rock ahead gives one stone per pick (the basket bounds it); apply shrinks the rock and removes it at 0.
+    if (!it && rock && r.carry.length < basketOf(r)) { delta.pick = { id: r.id, kind: 'stone', x: f.x, y: f.y, rock: true }; delta.sayKey = 'sayPick'; return; }
+    // A pick where a rock was used up: a bump with nothing carried (the rockGone hint names why).
+    if (!it && !rock && spentAt(w, f.x, f.y)) { run.rockGone++; run.bumps++; delta.bump = { id: r.id, x: f.x, y: f.y }; delta.rockGone = { x: f.x, y: f.y }; delta.sayKey = 'sayBump'; return; }
     delta.nothing = true; return;
   }
   if (s.op === 'put') {
@@ -403,7 +433,21 @@ function apply(worldIn, delta) {
   if (d.move) { var rm = robotOf(w, d.move.id) || r; if (rm) { rm.x = d.move.x; rm.y = d.move.y; } }
   if (d.water) { var tul = thingsAt(w, d.water.x, d.water.y, 'tulip'); for (var i = 0; i < tul.length; i++) tul[i].watered = true; }
   if (d.puddle) w.things.push({ kind: 'puddle', x: d.puddle.x, y: d.puddle.y });
-  if (d.pick) { var rp = robotOf(w, d.pick.id) || r; for (var j = 0; j < w.things.length; j++) if (w.things[j].x === d.pick.x && w.things[j].y === d.pick.y && w.things[j].kind === d.pick.kind) { w.things.splice(j, 1); break; } if (rp) rp.carry.push(d.pick.kind); }
+  if (d.pick) {
+    var rp = robotOf(w, d.pick.id) || r;
+    if (d.pick.rock) {
+      // IG-002: the rock ahead gives a stone and shrinks; at 0 it is removed and its tile remembered as spent.
+      for (var k = 0; k < w.things.length; k++) {
+        var rk = w.things[k];
+        if (rk.x !== d.pick.x || rk.y !== d.pick.y || rk.kind !== 'rock') continue;
+        rk.left = Math.max(0, Math.floor(Number(rk.left)) - 1);
+        if (!(rk.left > 0)) { w.things.splice(k, 1); w.spent = (Array.isArray(w.spent) ? w.spent : []).concat([d.pick.x + ',' + d.pick.y]); }
+        break;
+      }
+    } else for (var j = 0; j < w.things.length; j++) if (w.things[j].x === d.pick.x && w.things[j].y === d.pick.y && w.things[j].kind === d.pick.kind) { w.things.splice(j, 1); break; }
+    if (rp) rp.carry.push(d.pick.kind);
+  }
+  if (d.can) { var rc = robotOf(w, d.can.id) || r; if (rc) rc.can = Math.max(0, Math.floor(Number(d.can.can)) || 0); }
   if (d.put) { var ru = robotOf(w, d.put.id) || r; if (ru) ru.carry.pop(); w.things.push({ kind: d.put.kind, x: d.put.x, y: d.put.y }); }
   if (d.feed) { var rf = robotOf(w, d.feed.id) || r; if (rf) rf.carry.pop(); var bowl = thingsAt(w, d.feed.x, d.feed.y, 'bowl'); if (bowl.length) bowl[0].food = (Number(bowl[0].food) || 0) + 1; }
   return w;
@@ -452,10 +496,10 @@ function sameBlock(a, b) {
   return JSON.stringify(a.slots || {}) === JSON.stringify(b.slots || {});
 }
 function sameRun(seq, at, from, len) { for (var k = 0; k < len; k++) if (!sameBlock(seq[at + k], seq[from + k])) return false; return true; }
-/** The mockup's findRepeat: runs of one block, repeated sequences up to six long; best coverage wins, the SHORTER sequence (the higher count) on a tie — Richard's ruling 2026-09-28, the mockup kept the longer. */
+/** The mockup's findRepeat: runs of one block, repeated sequences up to FOLD_MAX_LEN long (the mockup: six; IG-002: the fetch-and-return dance is nine); best coverage wins, the SHORTER sequence (the higher count) on a tie — Richard's ruling 2026-09-28, the mockup kept the longer. */
 function findRepeatIn(seq) {
   var best = null;
-  for (var len = 1; len <= 6; len++) {
+  for (var len = 1; len <= ${FOLD_MAX_LEN}; len++) {
     for (var i = 0; i + len * 2 <= seq.length; i++) {
       var count = 1;
       while (i + (count + 1) * len <= seq.length && sameRun(seq, i, i + count * len, len)) count++;
@@ -644,9 +688,10 @@ Outputs.bumps = end.run.bumps;
 /**
  * The hint key for the state the game already knows. Priority, top first:
  * empty program · an unfolded repetition (cover ≥ 4, no container yet) · Olive
- * resting (a fallback answer) · a Predict miss · done (over MANY_BLOCKS: the longer
- * line; no more blocks than the request's reference program: hintPerfect — IG-001 D3;
- * else hintDone) · a bump · a puddle · the rung just played · free play after a clean
+ * resting (a fallback answer) · a Predict miss · done (no more blocks than the request's
+ * reference program: hintPerfect — IG-001 D3, and first since IG-002, whose tulips reference
+ * is ten blocks; over MANY_BLOCKS: the longer line; else hintDone) · a pick at a rock used up
+ * (hintRockGone) · water from an empty can (hintDry) — IG-002 · a bump · a puddle · the rung just played · free play after a clean
  * run (hintFree — IG-001 D4: free play has no goal, so it fell to "Not quite yet") · a
  * run that missed the goal ({w} of {t} tulips; with no tulips in the world, hintNotYet —
  * s4: "Pip did 0 of 0" on Sami's path) · the start. No key says "tell me": there is no such line.
@@ -661,6 +706,8 @@ var w = worldOf(Inputs.world);
 var ran = !!run && Number(run.tick) > 0;
 var bumps = run ? Number(run.bumps) || 0 : 0;
 var puddles = run ? Number(run.puddles) || 0 : 0;
+var dries = run ? Number(run.dries) || 0 : 0;
+var rockGone = run ? Number(run.rockGone) || 0 : 0;
 var blocks = countBlocks(program);
 var rep = findRepeat(program);
 var goalMetNow = Inputs.goalMet === true;
@@ -680,7 +727,9 @@ if (!blocks) key = 'hintEmpty';
 else if (mayRepeat && rep && rep.cover >= 4 && rep.containerId === null && !hasContainer(program)) { key = 'hintPattern'; vars = { n: rep.count }; }
 else if (oliveFallback) key = 'oliveResting';
 else if (predictAsked && !predictHit) key = 'hintPredictMiss';
-else if (goalMetNow) { key = blocks > ${MANY_BLOCKS} ? 'hintDoneMany' : referenceCount > 0 && blocks <= referenceCount ? 'hintPerfect' : 'hintDone'; vars = { k: blocks }; }
+else if (goalMetNow) { key = referenceCount > 0 && blocks <= referenceCount ? 'hintPerfect' : blocks > ${MANY_BLOCKS} ? 'hintDoneMany' : 'hintDone'; vars = { k: blocks }; }
+else if (rockGone > 0) key = 'hintRockGone';
+else if (dries > 0) key = 'hintDry';
 else if (bumps > 0) key = 'hintBump';
 else if (puddles > 0) key = 'hintWet';
 else if (rung >= 1 && rung <= ${OLIVE_RUNG_MAX}) key = 'oliveRung' + rung;
@@ -716,7 +765,7 @@ export const PALETTE_SCRIPT = `${OLIVE_HELPERS}
 var BAND1 = ${BAND1};
 var ALL = ${ALL_BLOCKS};
 var META = ${JSON.stringify(BLOCK_META)};
-var LABEL = { fwd: 'Fwd', left: 'Left', right: 'Right', water: 'Water', pick: 'Pick', put: 'Put', say: 'Say', repeat: 'Repeat', until: 'Until', 'if': 'If', when: 'When', count_inc: 'CountInc', trick: 'Trick', 'do': 'Do', ask: 'Ask' };
+var LABEL = { fwd: 'Fwd', left: 'Left', right: 'Right', water: 'Water', fill: 'Fill', pick: 'Pick', put: 'Put', say: 'Say', repeat: 'Repeat', until: 'Until', 'if': 'If', when: 'When', count_inc: 'CountInc', trick: 'Trick', 'do': 'Do', ask: 'Ask' };
 var band = Number(Inputs.band) === 1 ? 1 : 2;
 var allowed = Array.isArray(Inputs.allowed) && Inputs.allowed.length ? Inputs.allowed : null;
 var lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';

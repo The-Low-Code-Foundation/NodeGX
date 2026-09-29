@@ -82,6 +82,12 @@
       ['path', { d: 'M12 3s6 7 6 11a6 6 0 01-12 0c0-4 6-11 6-11z', fill: 'currentColor' }],
       ['path', { d: 'M9.5 15.5a2.5 2.5 0 002 2.4', stroke: '#fff', strokeWidth: 1.6, strokeLinecap: 'round', fill: 'none' }]
     ],
+    // IG-002 (P106 s2): fill — a drop falling into the can.
+    fill: [
+      ['path', { d: 'M4 11h12l-1.4 9.2a1 1 0 01-1 .8H6.4a1 1 0 01-1-.8z', fill: 'currentColor' }],
+      ['path', { d: 'M16 13h2.2a1.8 1.8 0 010 3.6H15.6', stroke: 'currentColor', strokeWidth: 1.8, fill: 'none' }],
+      ['path', { d: 'M10 1.5s3.2 3.6 3.2 5.6a3.2 3.2 0 01-6.4 0c0-2 3.2-5.6 3.2-5.6z', fill: 'currentColor' }]
+    ],
     loop: [['path', { d: 'M17 4l3 3-3 3V8H8a3 3 0 000 6h1v2H8a5 5 0 010-10h9zM7 20l-3-3 3-3v2h9a3 3 0 000-6h-1V8h1a5 5 0 010 10H7z', fill: 'currentColor' }]],
     'if': [
       ['path', { d: 'M12 2l10 10-10 10L2 12z', fill: 'currentColor' }],
@@ -876,7 +882,10 @@
           eyes: r.eyes === 'happy' || r.eyes === 'wink' ? r.eyes : 'round',
           hat: r.hat === 'cap' || r.hat === 'sun' || r.hat === 'crown' ? r.hat : 'none',
           name: typeof r.name === 'string' ? r.name : i === 0 ? 'Pip' : '',
-          bump: isFinite(Number(r.bump)) ? Number(r.bump) : 0
+          bump: isFinite(Number(r.bump)) ? Number(r.bump) : 0,
+          can: isFinite(Number(r.can)) && r.can !== null && r.can !== '' ? Math.max(0, Math.floor(Number(r.can))) : null,
+          canMax: isFinite(Number(r.canMax)) && Number(r.canMax) > 0 ? Math.floor(Number(r.canMax)) : 3,
+          carry: Array.isArray(r.carry) ? r.carry.map(String) : []
         };
       });
   }
@@ -1010,17 +1019,69 @@
     food: { box: '0 0 64 64', shapes: [
       ['ellipse', { cx: 32, cy: 50, rx: 18, ry: 3, fill: 'rgba(0,0,0,.12)' }],
       ['path', { d: 'M17 40a5 5 0 01-3-9 5 5 0 013-9c2 0 4 1 5 3h20c1-2 3-3 5-3a5 5 0 013 9 5 5 0 01-3 9c-2 0-4-1-5-3H22c-1 2-3 3-5 3z', fill: '#FFF0DA', stroke: '#C79A63', strokeWidth: 2, strokeLinejoin: 'round' }]
+    ] },
+    // IG-002 (P106 s2, the s2 brief §4's vocabulary): a mineable rock at three sizes by what is left (≥ 3 big, 2 medium,
+    // 1 small), a sign on a post and a paper note on the ground (their text is never drawn on the tile), and the parcel
+    // a robot carries when its load has no sprite of its own.
+    rockBig: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 55, rx: 25, ry: 4, fill: 'rgba(0,0,0,.14)' }],
+      ['path', { d: 'M6 53l5-21 14-15 18 2 13 15 2 19z', fill: '#8E8B9A' }],
+      ['path', { d: 'M14 45l5-15 11-8 13 3 7 10-3 10z', fill: '#B3B0BE' }],
+      ['path', { d: 'M23 26l8-5 8 2', stroke: '#fff', strokeWidth: 2.5, strokeLinecap: 'round', fill: 'none', opacity: 0.6 }]
+    ] },
+    rockMid: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 55, rx: 19, ry: 3.5, fill: 'rgba(0,0,0,.14)' }],
+      ['path', { d: 'M13 53l4-15 11-10 13 2 9 11 2 12z', fill: '#8E8B9A' }],
+      ['path', { d: 'M20 47l4-10 8-6 10 2 5 8-2 6z', fill: '#B3B0BE' }]
+    ] },
+    rockSmall: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 55, rx: 13, ry: 3, fill: 'rgba(0,0,0,.14)' }],
+      ['path', { d: 'M20 54l3-10 8-6 9 2 5 8 1 6z', fill: '#8E8B9A' }],
+      ['path', { d: 'M25 50l3-6 6-3 6 2 2 5z', fill: '#B3B0BE' }]
+    ] },
+    sign: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 58, rx: 12, ry: 3, fill: 'rgba(0,0,0,.12)' }],
+      ['rect', { x: 29, y: 26, width: 6, height: 32, rx: 2, fill: '#A9773F' }],
+      ['rect', { x: 9, y: 10, width: 46, height: 24, rx: 4, fill: '#E8C48A', stroke: '#8B5A2B', strokeWidth: 3 }],
+      ['path', { d: 'M17 19h30M17 26h20', stroke: '#7A4B1F', strokeWidth: 2.5, strokeLinecap: 'round' }]
+    ] },
+    note: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 51, rx: 19, ry: 3, fill: 'rgba(0,0,0,.10)' }],
+      ['path', { d: 'M14 23l31-7 5 27-31 7z', fill: '#FFFDF6', stroke: '#C79A63', strokeWidth: 2, strokeLinejoin: 'round' }],
+      ['path', { d: 'M21 29l19-4.2M22.2 35.4l19-4.2M23.4 41.8l12-2.6', stroke: '#6E6784', strokeWidth: 2, strokeLinecap: 'round' }]
+    ] },
+    parcel: { box: '0 0 64 64', shapes: [
+      ['rect', { x: 13, y: 20, width: 38, height: 30, rx: 3, fill: '#D9A566', stroke: '#8B5A2B', strokeWidth: 2 }],
+      ['path', { d: 'M32 20v30M13 33h38', stroke: '#8B5A2B', strokeWidth: 2 }]
     ] }
   };
-  /** The thing kinds drawn as a sprite of the same name (a tulip, a puddle and a bowl have rules of their own). */
-  var THING_SPRITES = { letter: 1, stone: 1, postbox: 1, flag: 1, egg: 1, food: 1 };
+  /** The thing kinds drawn as a sprite of the same name (a tulip, a puddle, a bowl and a rock have rules of their own). */
+  var THING_SPRITES = { letter: 1, stone: 1, postbox: 1, flag: 1, egg: 1, food: 1, sign: 1, note: 1 };
 
-  function spriteEl(name, key, extraClass) {
+  /** IG-002: a rock's size by the stones left in it — ≥ 3 big, 2 medium, 1 small; 0 (used up) draws nothing. A rock that names no count is a whole one. */
+  function rockSize(left) {
+    var n = Number(left);
+    if (left === undefined || left === null || left === '' || !isFinite(n)) n = 4;
+    return n >= 3 ? 'big' : n >= 2 ? 'mid' : n >= 1 ? 'small' : '';
+  }
+  var ROCK_SPRITE = { big: 'rockBig', mid: 'rockMid', small: 'rockSmall' };
+  /** IG-002: the loads that are drawn as themselves on a robot's back; anything else carried is the generic parcel. */
+  var LOAD_SPRITES = { stone: 1, letter: 1, egg: 1, food: 1 };
+  /** The load on a robot's back: the LAST thing it carries (what the next put lays down), or null when it carries nothing. */
+  function loadOf(carry) {
+    if (!Array.isArray(carry) || !carry.length) return null;
+    var k = String(carry[carry.length - 1]);
+    return LOAD_SPRITES[k] ? k : 'parcel';
+  }
+
+  function spriteEl(name, key, extraClass, extraProps) {
     var s = SPRITES[name];
     if (!s) return null;
+    var props = { key: key, viewBox: s.box, className: 'gd-sprite' + (extraClass ? ' ' + extraClass : ''), 'data-sprite': name, 'aria-hidden': 'true' };
+    if (extraProps) for (var ek in extraProps) props[ek] = extraProps[ek];
     return h(
       'svg',
-      { key: key, viewBox: s.box, className: 'gd-sprite' + (extraClass ? ' ' + extraClass : ''), 'data-sprite': name, 'aria-hidden': 'true' },
+      props,
       s.shapes.map(function (sh, i) {
         var p = {};
         for (var k in sh[1]) p[k] = sh[1][k];
@@ -1049,6 +1110,10 @@
     '@keyframes gd-bump{30%{transform:var(--gd-rot) translateX(-8%)}60%{transform:var(--gd-rot) translateX(6%)}}\n' +
     '.gd-cheer .gd-turn{animation:gd-cheer .7s ease 2}\n' +
     '@keyframes gd-cheer{50%{transform:var(--gd-rot) translateY(-12%)}}\n' +
+    '.gd-can{position:absolute;left:-3%;top:50%;transform:translateY(-50%);display:flex;flex-direction:column-reverse;gap:1px;padding:3px 2px;background:#fff;border-radius:999px;box-shadow:0 1px 4px rgba(0,0,0,.22);z-index:4;pointer-events:none}\n' +
+    '.gd-can>svg{width:9px;height:11px;display:block}\n' +
+    '.gd-load{position:absolute;left:50%;bottom:-6%;width:44%;height:44%;transform:translateX(-50%);pointer-events:none}\n' +
+    '.gd-load>svg{width:100%;height:100%;display:block;overflow:visible}\n' +
     '.gd-name{position:absolute;top:92%;left:50%;transform:translateX(-50%);background:#fff;border-radius:999px;padding:1px 8px;font-size:12px;font-weight:800;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);z-index:4;color:#2E2A3D}\n' +
     '.gd-bubble{position:absolute;z-index:5;background:#fff;border-radius:14px;padding:8px 12px;font-weight:800;font-size:14px;box-shadow:0 6px 18px rgba(72,52,20,.10);max-width:230px;pointer-events:none;transform:translate(-30%,-115%);color:#2E2A3D}\n' +
     '.gd-bubble:after{content:"";position:absolute;left:34%;bottom:-8px;border:8px solid transparent;border-top-color:#fff;border-bottom:0}\n' +
@@ -1101,7 +1166,7 @@
     displayNodeName: 'Garden',
     docs:
       'The tile world: a CSS grid of tiles from a Map of rows and a legend (grass, path, water, tree, rock, house, ' +
-      'bed, postbox), Things on tiles (tulips dry or watered, puddles, letters, bowls, stones, eggs, food, a flag, labels) and one or two Robots that glide ' +
+      'bed, postbox), Things on tiles (tulips dry or watered, puddles, letters, bowls, stones, eggs, food, a flag, labels, a rock drawn by the stones left in it, a sign, a note) and one or two Robots that glide ' +
       'to where the graph puts them in Step Ms, turn to face d (0 up, clockwise), bump in place when their bump count ' +
       'rises, and speak a Bubble. Every sprite is inline SVG; nothing is fetched. A tapped tile reports its x and y. ' +
       'It draws; the engine decides where a robot may go.',
@@ -1109,7 +1174,7 @@
     noodlNodeAsProp: true,
 
     /** The pure parts, for the kit gate. */
-    world: { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, robotPlaces: robotPlaces, rose: rose, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS },
+    world: { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, robotPlaces: robotPlaces, rose: rose, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS, rockSize: rockSize, loadOf: loadOf },
     sprite: { minPx: ROBOT_MIN_PX, svgPct: ROBOT_SVG_PCT, face: { x: FACE_X, y: FACE_Y, w: FACE_W, h: FACE_H }, faceFraction: FACE_FRACTION, robotSvg: robotSvg, sprites: SPRITES },
     css: WORLD_CSS,
 
@@ -1208,6 +1273,10 @@
             else if (t.kind === 'puddle') extras.push(h('div', { key: 'puddle-' + i, className: 'gd-puddle', 'data-puddle': 'true' }));
             else if (t.kind === 'letter') extras.push(spriteEl('letter', 'letter-' + i, 'gd-thing'));
             else if (t.kind === 'bowl') extras.push(spriteEl(t.full ? 'bowlFull' : 'bowl', 'bowl-' + i, 'gd-thing gd-bowl' + (t.full ? ' gd-full' : '')));
+            else if (t.kind === 'rock') {
+              var size = rockSize(t.left);
+              if (size) extras.push(spriteEl(ROCK_SPRITE[size], 'rock-' + i, 'gd-thing gd-boulder gd-boulder-' + size, { 'data-left': String(t.left === undefined ? '' : t.left) }));
+            }
             else if (THING_SPRITES[t.kind]) extras.push(spriteEl(t.kind, t.kind + '-' + i, 'gd-thing gd-' + t.kind));
             else if (t.kind === 'label') extras.push(h('span', { key: 'label-' + i, className: 'gd-label' }, String(t.text || '')));
           });
@@ -1234,6 +1303,19 @@
           var p = places[i];
           var rot = 'rotate(' + r.d * 90 + 'deg)';
           var bumpN = bumps.current.n[i] || 0;
+          // IG-002: the can's level upright beside the robot (canMax drops, can of them full; none when it has no can),
+          // and the load on its back, turning with it (the last thing carried).
+          var canEl = null;
+          if (r.can !== null) {
+            var drops = [];
+            for (var di = 0; di < r.canMax; di++) {
+              var full = di < r.can;
+              drops.push(h('svg', { key: 'drop-' + di, viewBox: '0 0 12 14', className: 'gd-drop ' + (full ? 'gd-drop-full' : 'gd-drop-empty'), 'aria-hidden': 'true' }, h('path', { d: 'M6 1s5 5.4 5 8.4a5 5 0 01-10 0C1 6.4 6 1 6 1z', fill: full ? '#2B7FC0' : '#fff', stroke: full ? '#2B7FC0' : '#8E8B9A', strokeWidth: 1.5 })));
+            }
+            canEl = h('div', { key: 'can', className: 'gd-can', 'data-can': String(Math.min(r.can, r.canMax)), 'data-can-max': String(r.canMax), title: Math.min(r.can, r.canMax) + '/' + r.canMax }, drops);
+          }
+          var load = loadOf(r.carry);
+          var loadEl = load ? h('div', { key: 'load', className: 'gd-load gd-load-' + load, 'data-load': load, 'data-carry': String(r.carry.length) }, spriteEl(load, 'load-svg')) : null;
           return h(
             'div',
             {
@@ -1246,7 +1328,8 @@
               'data-share': p.share === -1 ? undefined : String(p.share),
               style: { left: p.left.toFixed(4) + '%', top: p.top.toFixed(4) + '%', width: sizeW, height: sizeH, transform: p.transform }
             },
-            h('div', { key: 'turn-' + bumpN, className: 'gd-turn' + (bumpN ? ' gd-bump' : ''), 'data-bump': bumpN ? String(bumpN) : undefined, style: { '--gd-rot': rot } }, robotSvg(r, 'svg')),
+            h('div', { key: 'turn-' + bumpN, className: 'gd-turn' + (bumpN ? ' gd-bump' : ''), 'data-bump': bumpN ? String(bumpN) : undefined, style: { '--gd-rot': rot } }, robotSvg(r, 'svg'), loadEl),
+            canEl,
             r.name ? h('span', { key: 'name', className: 'gd-name' }, r.name) : null
           );
         });

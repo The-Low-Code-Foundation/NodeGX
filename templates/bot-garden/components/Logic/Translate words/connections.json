@@ -47,6 +47,12 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-bFill",
+      "toId": "translatewordsOut",
+      "toProperty": "bFill"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-bFwd",
       "toId": "translatewordsOut",
       "toProperty": "bFwd"
@@ -170,6 +176,12 @@
       "fromProperty": "out-cDo",
       "toId": "translatewordsOut",
       "toProperty": "cDo"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-cFill",
+      "toId": "translatewordsOut",
+      "toProperty": "cFill"
     },
     {
       "fromId": "translatewordsFn",
@@ -1691,6 +1703,12 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-sCanEmpty",
+      "toId": "translatewordsOut",
+      "toProperty": "sCanEmpty"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-sCountIs",
       "toId": "translatewordsOut",
       "toProperty": "sCountIs"
@@ -1784,6 +1802,18 @@
       "fromProperty": "out-sayDrink",
       "toId": "translatewordsOut",
       "toProperty": "sayDrink"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-sayDry",
+      "toId": "translatewordsOut",
+      "toProperty": "sayDry"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-sayFill",
+      "toId": "translatewordsOut",
+      "toProperty": "sayFill"
     },
     {
       "fromId": "translatewordsFn",

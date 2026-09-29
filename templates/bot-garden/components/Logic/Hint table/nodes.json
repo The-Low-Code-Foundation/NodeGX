@@ -32,7 +32,7 @@
       "type": "JavaScriptFunction",
       "label": "Hint table",
       "parameters": {
-        "functionScript": "\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar rows = Inputs.hints || [];\nvar name = String(Inputs.botName || 'Pip');\nvar map = {};\nfor (var i = 0; i < rows.length; i++) map[rows[i].key] = String(rows[i][lang] || rows[i].en || '').split('{b}').join(name);\nOutputs.lang = lang;\nOutputs.hintStart = map.hintStart || '';\nOutputs.hintEmpty = map.hintEmpty || '';\nOutputs.hintPattern = map.hintPattern || '';\nOutputs.hintMissed = map.hintMissed || '';\nOutputs.hintNotYet = map.hintNotYet || '';\nOutputs.hintBump = map.hintBump || '';\nOutputs.hintWet = map.hintWet || '';\nOutputs.hintDone = map.hintDone || '';\nOutputs.hintDoneMany = map.hintDoneMany || '';\nOutputs.hintPerfect = map.hintPerfect || '';\nOutputs.hintFree = map.hintFree || '';\nOutputs.hintPredictMiss = map.hintPredictMiss || '';\nOutputs.oliveThinking = map.oliveThinking || '';\nOutputs.oliveResting = map.oliveResting || '';\nOutputs.oliveRung1 = map.oliveRung1 || '';\nOutputs.oliveRung2 = map.oliveRung2 || '';\nOutputs.oliveRung3 = map.oliveRung3 || '';\nOutputs.oliveRung4 = map.oliveRung4 || '';\nOutputs.oliveRung5 = map.oliveRung5 || '';\nOutputs.oliveRung6 = map.oliveRung6 || '';\nOutputs.oliveRung7 = map.oliveRung7 || '';\nOutputs.oliveRung8 = map.oliveRung8 || '';\nOutputs.oliveRung9 = map.oliveRung9 || '';\nOutputs.oliveRung10 = map.oliveRung10 || '';\nOutputs.oliveRung11 = map.oliveRung11 || '';\nOutputs.oliveRung12 = map.oliveRung12 || '';\nOutputs.oliveRung13 = map.oliveRung13 || '';\nOutputs.oliveRung14 = map.oliveRung14 || '';\nOutputs.oliveRung15 = map.oliveRung15 || '';\nOutputs.oliveRung16 = map.oliveRung16 || '';\nOutputs.oliveRung17 = map.oliveRung17 || '';\nOutputs.oliveRung18 = map.oliveRung18 || '';\n"
+        "functionScript": "\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar rows = Inputs.hints || [];\nvar name = String(Inputs.botName || 'Pip');\nvar map = {};\nfor (var i = 0; i < rows.length; i++) map[rows[i].key] = String(rows[i][lang] || rows[i].en || '').split('{b}').join(name);\nOutputs.lang = lang;\nOutputs.hintStart = map.hintStart || '';\nOutputs.hintEmpty = map.hintEmpty || '';\nOutputs.hintPattern = map.hintPattern || '';\nOutputs.hintMissed = map.hintMissed || '';\nOutputs.hintNotYet = map.hintNotYet || '';\nOutputs.hintBump = map.hintBump || '';\nOutputs.hintWet = map.hintWet || '';\nOutputs.hintDone = map.hintDone || '';\nOutputs.hintDoneMany = map.hintDoneMany || '';\nOutputs.hintPerfect = map.hintPerfect || '';\nOutputs.hintFree = map.hintFree || '';\nOutputs.hintDry = map.hintDry || '';\nOutputs.hintRockGone = map.hintRockGone || '';\nOutputs.hintPredictMiss = map.hintPredictMiss || '';\nOutputs.oliveThinking = map.oliveThinking || '';\nOutputs.oliveResting = map.oliveResting || '';\nOutputs.oliveRung1 = map.oliveRung1 || '';\nOutputs.oliveRung2 = map.oliveRung2 || '';\nOutputs.oliveRung3 = map.oliveRung3 || '';\nOutputs.oliveRung4 = map.oliveRung4 || '';\nOutputs.oliveRung5 = map.oliveRung5 || '';\nOutputs.oliveRung6 = map.oliveRung6 || '';\nOutputs.oliveRung7 = map.oliveRung7 || '';\nOutputs.oliveRung8 = map.oliveRung8 || '';\nOutputs.oliveRung9 = map.oliveRung9 || '';\nOutputs.oliveRung10 = map.oliveRung10 || '';\nOutputs.oliveRung11 = map.oliveRung11 || '';\nOutputs.oliveRung12 = map.oliveRung12 || '';\nOutputs.oliveRung13 = map.oliveRung13 || '';\nOutputs.oliveRung14 = map.oliveRung14 || '';\nOutputs.oliveRung15 = map.oliveRung15 || '';\nOutputs.oliveRung16 = map.oliveRung16 || '';\nOutputs.oliveRung17 = map.oliveRung17 || '';\nOutputs.oliveRung18 = map.oliveRung18 || '';\n"
       },
       "x": 40,
       "y": 160,
@@ -138,6 +138,20 @@
         {
           "name": "out-hintFree",
           "displayName": "hintFree",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintDry",
+          "displayName": "hintDry",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintRockGone",
+          "displayName": "hintRockGone",
           "plug": "output",
           "type": "*",
           "group": "Outputs"
@@ -312,6 +326,11 @@
           "type": "*"
         },
         {
+          "name": "hintDry",
+          "plug": "input",
+          "type": "*"
+        },
+        {
           "name": "hintEmpty",
           "plug": "input",
           "type": "*"
@@ -343,6 +362,11 @@
         },
         {
           "name": "hintPredictMiss",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintRockGone",
           "plug": "input",
           "type": "*"
         },

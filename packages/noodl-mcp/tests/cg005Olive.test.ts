@@ -15,7 +15,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { HINTS, REQUESTS, WORDS, WORD_KEYS } from './cg002Content';
+import { BAND_PALETTE, HINTS, REQUESTS, WORDS, WORD_KEYS } from './cg002Content';
 import { APPLY_DELTA_SCRIPT, DIAL_TEMPERATURE, GOAL_SCRIPT, NEW_RUN_SCRIPT, PALETTE_SCRIPT, STEP_SCRIPT, portsOf, runScript } from './cg002Scripts';
 import {
   ACCEPT_PROPOSAL_SCRIPT,
@@ -409,8 +409,8 @@ describe('CG-005 — Olive in the game', () => {
       expect(one.palette[2]).toMatchObject({ label: 'combien de tulipes ?', shapeLabel: 'un nombre', ladder: 'fail' });
       const held = runScript(PALETTE_SCRIPT, { band: 2, lang: 'fr', words: WORD_ROWS, rungs: ['count-tulips'], exam: { rungs: { 'count-tulips': { pass: false } } } });
       expect([held.offered, held.heldHere, held.withheld]).toEqual([[], ['count-tulips'], ['count-tulips']]);
-      // No rungs named: the CG-002 palette, unchanged.
-      expect(runScript(PALETTE_SCRIPT, { band: 2, lang: 'en', words: WORD_ROWS }).count).toBe(15);
+      // No rungs named: the CG-002 palette, unchanged (every block type; 16 since IG-002's fill — the constant, not a literal).
+      expect(runScript(PALETTE_SCRIPT, { band: 2, lang: 'en', words: WORD_ROWS }).count).toBe(BAND_PALETTE[2].length);
     });
   });
 

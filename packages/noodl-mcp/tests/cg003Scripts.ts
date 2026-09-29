@@ -33,7 +33,7 @@
  */
 import { OLIVE_RUNGS, WORDS, WORD_KEYS } from './cg002Content';
 import { OLIVE_SLIM, OLIVE_WORDS, OLIVE_WORD_KEYS, PALETTE_RUNG_IDS, rungWordKey } from './cg005Olive';
-import { BLOCK_META, ENGINE, FOLD_HELPERS, MANY_BLOCKS, ROBOT_NAME_MAX, SAVE_HELPERS } from './cg002Scripts';
+import { BLOCK_META, CAN_MAX, ENGINE, FOLD_HELPERS, MANY_BLOCKS, ROBOT_NAME_MAX, SAVE_HELPERS } from './cg002Scripts';
 import { EYES, HATS, ISLANDERS, ISLAND_PINS, PAD_KEYS, PAGE_WORDS, PAGE_WORD_KEYS, REQUEST_SUBS, SKILL_BLOCKS } from './cg003Content';
 import { ROBOT_PAINTS } from './cg007Look';
 
@@ -119,6 +119,9 @@ if (req) {
   var rs = req.robotStart || {};
   var robot = { id: 'me', x: Number(rs.x) || 0, y: Number(rs.y) || 0, d: Number(rs.d) || 0, carry: Array.isArray(rs.carry) ? rs.carry.slice() : [] };
   if (rs.basket !== undefined) robot.basket = rs.basket;
+  // IG-002: the can — a number where the request has a pond to fetch from (0: empty), null where it has none (free water).
+  robot.can = rs.can === undefined || rs.can === null || rs.can === '' ? null : Math.max(0, Math.floor(Number(rs.can)) || 0);
+  robot.canMax = Number(rs.canMax) > 0 ? Math.floor(Number(rs.canMax)) : ${CAN_MAX};
   Outputs.world = { map: (req.map || []).slice(), things: JSON.parse(JSON.stringify(req.things || [])), robots: [robot], events: [], schedule: JSON.parse(JSON.stringify(req.schedule || [])) };
   Outputs.request = JSON.parse(JSON.stringify(req));
   Outputs.goal = JSON.parse(JSON.stringify(req.goal || []));
@@ -175,12 +178,16 @@ for (var i = 0; i < list.length; i++) {
   else if (t.kind === 'puddle' || t.kind === 'letter' || SPRITE_THINGS[t.kind]) things.push({ kind: t.kind, x: t.x, y: t.y });
   else if (t.kind === 'bowl') things.push({ kind: 'bowl', x: t.x, y: t.y, full: (Number(t.food) || 0) > 0 });
   else if (t.kind === 'label') things.push({ kind: 'label', x: t.x, y: t.y, text: String(t.text || '') });
+  // IG-002: a rock drawn at its size by what is left; a sign and a note carry their text (the kit does not draw it).
+  else if (t.kind === 'rock') things.push({ kind: 'rock', x: t.x, y: t.y, left: Math.max(0, Math.floor(Number(t.left)) || 0) });
+  else if (t.kind === 'sign' || t.kind === 'note') things.push({ kind: t.kind, x: t.x, y: t.y, text: String(t.text || '') });
 }
 if (Inputs.showEnd === true && Inputs.endX !== undefined && Inputs.endX !== null && Number(Inputs.endX) >= 0) things.push({ kind: 'flag', x: Number(Inputs.endX), y: Number(Inputs.endY) });
 var bump = (Number(Inputs.bumps) || 0) + (Number(Inputs.teachBumps) || 0);
 var robots = [];
 var rl = Array.isArray(world.robots) ? world.robots : [];
-for (var r = 0; r < rl.length; r++) robots.push({ x: rl[r].x, y: rl[r].y, d: rl[r].d, colour: String(Inputs.color || '#FF7A59'), eyes: String(Inputs.eye || 'round'), hat: String(Inputs.hat || 'none'), name: nameOf(Inputs.botName), bump: bump });
+// IG-002: the can's level (null: no can, no drops) and the load on the robot's back (the last thing carried).
+for (var r = 0; r < rl.length; r++) robots.push({ x: rl[r].x, y: rl[r].y, d: rl[r].d, colour: String(Inputs.color || '#FF7A59'), eyes: String(Inputs.eye || 'round'), hat: String(Inputs.hat || 'none'), name: nameOf(Inputs.botName), bump: bump, can: rl[r].can === undefined || rl[r].can === null ? null : rl[r].can, canMax: Number(rl[r].canMax) > 0 ? Number(rl[r].canMax) : ${CAN_MAX}, carry: Array.isArray(rl[r].carry) ? rl[r].carry.slice() : [] });
 var lang = langOf(Inputs.lang);
 var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
 var say = String(Inputs.sayKey || '');
@@ -206,8 +213,8 @@ else if (say) Outputs.bubble = { robot: 0, text: w[say] || say, style: 'plain', 
 
 /**
  * IG-001 D10: the Teach pad by request — one key per allowed step, in the pad's order; with no list (free play) every
- * step the engine knows (`fill` joins when IG-002 makes it a block). The first action takes the d-pad's centre (the
- * mockup's water key), the rest a third row.
+ * step the engine knows (IG-002: `fill` is a block now, so it is a key where allowed). The first action takes the
+ * d-pad's centre (the mockup's water key), the rest a third row.
  */
 export const PAD_KEYS_SCRIPT = `
 var PAD = ${JSON.stringify(PAD_KEYS.map((k) => [k.op, k.place, k.icon]))};
@@ -231,7 +238,7 @@ Outputs.count = keys.length;
  * robot moves by the ENGINE's own step and apply, so what the child drives is exactly what Play will do.
  */
 export const RECORD_STEP_SCRIPT = `${ENGINE}${FOLD_HELPERS}
-var OPS = { fwd: 1, left: 1, right: 1, water: 1, pick: 1, put: 1 };
+var OPS = { fwd: 1, left: 1, right: 1, water: 1, fill: 1, pick: 1, put: 1 };
 var op = String(Inputs.op || '');
 var raw = Inputs.program, prog = [];
 if (Array.isArray(raw)) prog = JSON.parse(JSON.stringify(raw));
@@ -259,9 +266,9 @@ Outputs.blocks = countBlocks(prog);
 `;
 
 export const KIT_PALETTE_SCRIPT = `${WORD_HELPER}
-var ICON = { fwd: 'fwd', left: 'left', right: 'right', water: 'water', pick: 'pick', put: 'put', say: 'say', repeat: 'loop', until: 'wall', 'if': 'if', when: 'if', count_inc: 'count', trick: 'loop', 'do': 'fwd', ask: 'owl' };
+var ICON = { fwd: 'fwd', left: 'left', right: 'right', water: 'water', fill: 'fill', pick: 'pick', put: 'put', say: 'say', repeat: 'loop', until: 'wall', 'if': 'if', when: 'if', count_inc: 'count', trick: 'loop', 'do': 'fwd', ask: 'owl' };
 // IG-001 D7: "Olive says yes" / "Olive says no" — one value each, so "if Olive says yes" can be built from the picker.
-var SENSORS = [['wall_ahead', 'sWallAhead'], ['tulip_ahead', 'sTulipAhead'], ['bowl_empty', 'sBowlEmpty'], ['basket_full', 'sBasketFull'], ['count_is', 'sCountIs'], ['olive_says:yes', 'sOliveSaysYes'], ['olive_says:no', 'sOliveSaysNo']];
+var SENSORS = [['wall_ahead', 'sWallAhead'], ['tulip_ahead', 'sTulipAhead'], ['bowl_empty', 'sBowlEmpty'], ['basket_full', 'sBasketFull'], ['count_is', 'sCountIs'], ['olive_says:yes', 'sOliveSaysYes'], ['olive_says:no', 'sOliveSaysNo'], ['can_empty', 'sCanEmpty']];
 var EVENTS = [['meow', 'eMeow']];
 var SAYS = [['thanksMamie', 'thanksMamie'], ['thanksSami', 'thanksSami'], ['thanksBiscuit', 'thanksBiscuit']];
 var TRICK_NAMES = ['row', 'hop', 'zigzag'];
@@ -292,7 +299,7 @@ Outputs.count = out.length;
 
 /** The fold offer's sentence. "Not now" keeps it hidden until the program is a different program. */
 export const TIDY_LINE_SCRIPT = `${WORD_HELPER}
-var LABEL = { fwd: 'bFwd', left: 'bLeft', right: 'bRight', water: 'bWater', pick: 'bPick', put: 'bPut', say: 'bSay', repeat: 'bRepeat', until: 'bUntil', 'if': 'bIf', when: 'bWhen', count_inc: 'bCountInc', trick: 'bTrick', 'do': 'bDo', ask: 'bAsk' };
+var LABEL = { fwd: 'bFwd', left: 'bLeft', right: 'bRight', water: 'bWater', fill: 'bFill', pick: 'bPick', put: 'bPut', say: 'bSay', repeat: 'bRepeat', until: 'bUntil', 'if': 'bIf', when: 'bWhen', count_inc: 'bCountInc', trick: 'bTrick', 'do': 'bDo', ask: 'bAsk' };
 var lang = langOf(Inputs.lang);
 var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
 var vars = Inputs.vars && typeof Inputs.vars === 'object' ? Inputs.vars : {};
@@ -490,6 +497,9 @@ var w = wordMap(Inputs.words, lang, name);
 var prog = Array.isArray(Inputs.program) ? Inputs.program : [];
 var req = Inputs.request && typeof Inputs.request === 'object' ? Inputs.request : null;
 var used = {}, blocks = 0;
+// IG-002: a win with no more blocks than the request's own reference is never "it could be shorter" (the tulips' is ten).
+function countRef(l) { var n = 0; var a = Array.isArray(l) ? l : []; for (var i = 0; i < a.length; i++) { if (!a[i]) continue; n++; if (Array.isArray(a[i].body)) n += countRef(a[i].body); } return n; }
+var refBlocks = req ? countRef(req.referenceProgram) : 0;
 function walk(l) { for (var i = 0; i < l.length; i++) { var b = l[i]; if (!b) continue; blocks++; if (USE[b.t]) used[USE[b.t]] = true; if (Array.isArray(b.body)) walk(b.body); } }
 walk(prog);
 var bloom = [1];
@@ -500,7 +510,7 @@ var learnt = 0;
 for (var t = 0; t < asked.length; t++) if (used[asked[t]]) learnt = Number(asked[t]);
 Outputs.bloom = bloom;
 Outputs.thanks = fill(w.winThanks, {});
-Outputs.line = fill(blocks > ${MANY_BLOCKS} ? w.winMany : w.winFew, { k: blocks });
+Outputs.line = fill(blocks > ${MANY_BLOCKS} && !(refBlocks > 0 && blocks <= refBlocks) ? w.winMany : w.winFew, { k: blocks });
 Outputs.rewardText = req && req.copyKeys && req.copyKeys.reward ? fill(w.winNew, { reward: w[req.copyKeys.reward] || '' }) : '';
 Outputs.hasReward = !!(req && req.reward);
 Outputs.learnText = learnt ? fill(w.winLearn, { trick: String(w['n' + learnt] || '').toLowerCase() }) : '';

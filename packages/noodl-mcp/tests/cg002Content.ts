@@ -54,17 +54,18 @@ const s = (en: string, fr: string): Bi => ({ en, fr });
 // ── The program model (typed here so the content can carry reference programs) ──
 
 /**
- * Every block type the engine knows. The band-1 palette is the first six; the
- * rest arrive in band 10–12 (TPL-012 §2.2).
+ * Every block type the engine knows. The band-1 palette is the first seven; the
+ * rest arrive in band 10–12 (TPL-012 §2.2). IG-002 (P106 s2): `fill` fills the
+ * robot's can at the pond ahead.
  */
 export const BLOCK_TYPES = [
-  'fwd', 'left', 'right', 'water', 'pick', 'put',
+  'fwd', 'left', 'right', 'water', 'fill', 'pick', 'put',
   'say', 'repeat', 'until', 'if', 'when', 'count_inc', 'trick', 'do', 'ask'
 ] as const;
 export type BlockType = (typeof BLOCK_TYPES)[number];
 
-/** The sensors a `until` / `if` block may read. `count_is` and `olive_says` take an arg. */
-export const SENSORS = ['wall_ahead', 'tulip_ahead', 'bowl_empty', 'basket_full', 'count_is', 'olive_says'] as const;
+/** The sensors a `until` / `if` block may read. `count_is` and `olive_says` take an arg. IG-002: `can_empty`. */
+export const SENSORS = ['wall_ahead', 'tulip_ahead', 'bowl_empty', 'basket_full', 'count_is', 'olive_says', 'can_empty'] as const;
 export type Sensor = (typeof SENSORS)[number];
 
 /** The events a `when` block may arm. The world fires them (a request's schedule). */
@@ -72,7 +73,7 @@ export const EVENTS = ['meow'] as const;
 
 /** The palette a band may use, by block id (CG-001's `Palette` is built from this plus the labels). */
 export const BAND_PALETTE: Readonly<Record<Band, ReadonlyArray<BlockType>>> = {
-  1: ['fwd', 'left', 'right', 'water', 'pick', 'put'],
+  1: ['fwd', 'left', 'right', 'water', 'fill', 'pick', 'put'],
   2: [...BLOCK_TYPES]
 };
 
@@ -99,14 +100,21 @@ export interface Goal {
   args?: ReadonlyArray<string | number>;
 }
 
-/** A thing on a tile. `watered` on a tulip, `food` on a bowl, `text` on a label. */
+/**
+ * A thing on a tile. `watered` on a tulip, `food` on a bowl, `text` on a label, a sign or a note. IG-002 (P106 s2, the
+ * shared vocabulary of the s2 brief §4): a `rock` is a mineable rock on a grass tile with `left` stones (a request
+ * places 4; `pick` takes one, and at 0 the engine removes it) and blocks a move like a tulip; a `sign` (a post with a
+ * board, blocks a move) and a `note` (paper on the ground, does not block) carry `text` in the request's language, which
+ * the kit never draws on the tile. The map's `R` tile stays a decorative rock that yields nothing.
+ */
 export interface Thing {
-  kind: 'tulip' | 'bowl' | 'letter' | 'egg' | 'stone' | 'food' | 'label' | 'puddle';
+  kind: 'tulip' | 'bowl' | 'letter' | 'egg' | 'stone' | 'food' | 'label' | 'puddle' | 'rock' | 'sign' | 'note';
   x: number;
   y: number;
   watered?: boolean;
   food?: number;
   text?: string;
+  left?: number;
 }
 
 /**
@@ -127,7 +135,11 @@ export interface GardenRequest {
   tricks: ReadonlyArray<number>;
   map: ReadonlyArray<string>;
   things: ReadonlyArray<Thing>;
-  robotStart: { x: number; y: number; d: number; carry?: ReadonlyArray<string>; basket?: number };
+  /**
+   * IG-002: `can` is the robot's can at the start — a number (0 on a request with a pond to fetch from) or absent/null
+   * (no can: water is free, as before IG-002); `canMax` is what `fill` fills it to (default 3, IG-005 upgrades it).
+   */
+  robotStart: { x: number; y: number; d: number; carry?: ReadonlyArray<string>; basket?: number; can?: number | null; canMax?: number };
   schedule?: ReadonlyArray<{ tick: number; event: string }>;
   goal: Goal | ReadonlyArray<Goal>;
   palette: ReadonlyArray<BlockType>;
@@ -141,8 +153,6 @@ export interface GardenRequest {
   copyKeys: { title: string; blurb: string; line: string; reward: string; gift: string };
   referenceProgram: ReadonlyArray<Block>;
 }
-
-const MOCKUP_MAP = ['GGTGGGTH', 'GGGGGGGG', 'GGFGFGFG', 'PPPPPPPP', 'GWWGGRGG', 'GGGGGTGG'] as const;
 
 let nextId = 1;
 const blk = (t: BlockType, extra: Partial<Block> = {}): Block => ({ id: nextId++, t, ...extra });
@@ -186,42 +196,47 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     referenceProgram: b1('fwd', 'fwd', 'fwd', 'left', 'fwd', 'water')
   },
   {
+    // IG-002 (P106 s2, ruling R3): fetch and return. The pond is the left edge (x 0, rows 1–4), the three tulips stand in
+    // the bed at x 3, and the robot starts at (1,1) facing the pond with an EMPTY can of three. Each pass fills the can,
+    // turns round, walks to a tulip, waters it, steps down a row and walks back to the pond: the nine-block body the fold
+    // finds in the recorded dance (IG-002 AC2). The tulips stay first in `things` (the engine gate's watered-world helper).
     id: 'tulips-three',
     islander: 'mamie',
     band: 1,
     tricks: [2],
-    map: MOCKUP_MAP,
+    map: ['GGTGGGTH', 'WGGFGGGG', 'WGGFGGGG', 'WGGFPPPP', 'WGGGGRGG', 'GGGGGTGG'],
     things: [
-      { kind: 'tulip', x: 2, y: 2, watered: false },
-      { kind: 'tulip', x: 4, y: 2, watered: false },
-      { kind: 'tulip', x: 6, y: 2, watered: false }
+      { kind: 'tulip', x: 3, y: 1, watered: false },
+      { kind: 'tulip', x: 3, y: 2, watered: false },
+      { kind: 'tulip', x: 3, y: 3, watered: false }
     ],
-    robotStart: { x: 0, y: 3, d: 1 },
+    robotStart: { x: 1, y: 1, d: 3, can: 0, canMax: 3 },
     goal: { name: 'every_tulip_watered' },
-    palette: ['fwd', 'left', 'right', 'water', 'repeat'],
+    palette: ['fwd', 'left', 'right', 'water', 'fill', 'repeat'],
     reward: { kind: 'hat', id: 'sun', from: 'mamie' },
     copyKeys: { title: 'rqTulipsTitle', blurb: 'rqTulipsBlurb', line: 'rqTulipsLine', reward: 'hatSun', gift: 'giftSun' },
-    referenceProgram: [blk('repeat', { n: 3, body: b1('fwd', 'fwd', 'left', 'water', 'right') })]
+    referenceProgram: [blk('repeat', { n: 3, body: b1('fill', 'left', 'left', 'fwd', 'water', 'right', 'fwd', 'right', 'fwd') })]
   },
   {
-    // CG-006 §2 row 2b: repeat, with put. The path stops at (2,3); four stones carry it to the post box at (7,3).
+    // CG-006 §2 row 2b, rewritten by IG-002 (R3): the basket starts EMPTY and a rock of four stands on the grass beside
+    // the start (2,2). Turn to it, pick four stones, turn back, and lay them from (3,3) to (6,3), towards the post box.
     id: 'path-stones',
     islander: 'sami',
     band: 1,
     tricks: [2],
     map: ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPGGGGB', 'GWWGGRGG', 'GGGGGTGG'],
-    things: [],
-    robotStart: { x: 2, y: 3, d: 1, carry: ['stone', 'stone', 'stone', 'stone'], basket: 4 },
+    things: [{ kind: 'rock', x: 2, y: 2, left: 4 }],
+    robotStart: { x: 2, y: 3, d: 1, basket: 4 },
     goal: [
       { name: 'thing_at', args: ['stone', 3, 3] },
       { name: 'thing_at', args: ['stone', 4, 3] },
       { name: 'thing_at', args: ['stone', 5, 3] },
       { name: 'thing_at', args: ['stone', 6, 3] }
     ],
-    palette: ['fwd', 'left', 'right', 'put', 'repeat'],
+    palette: ['fwd', 'left', 'right', 'pick', 'put', 'repeat'],
     reward: { kind: 'seed', id: 'seeds', from: 'sami' },
     copyKeys: { title: 'rqStonesTitle', blurb: 'rqStonesBlurb', line: 'rqStonesLine', reward: 'seeds', gift: 'giftSeeds' },
-    referenceProgram: [blk('repeat', { n: 4, body: b1('put', 'fwd') })]
+    referenceProgram: [blk('left'), blk('repeat', { n: 4, body: b1('pick') }), blk('right'), blk('repeat', { n: 4, body: b1('put', 'fwd') })]
   },
   {
     id: 'bowl-if',
@@ -453,6 +468,10 @@ export const HINTS: Readonly<Record<string, Bi>> = {
   hintPerfect: s('Perfect! Not one block too many.', 'Parfait ! Pas un bloc de trop.'),
   // IG-001 D4: free play has no goal, so a clean run used to fall to "Not quite yet"; this is its own line. Not voiced.
   hintFree: s('{b} did what you said. Try a new idea, or ask an islander.', '{b} a fait ce que tu as dit. Essaie une nouvelle idée, ou va voir un habitant.'),
+  // IG-002 (P106 s2): `water` with an empty can pours nothing (the tulip stays dry); a `pick` where a rock was used up.
+  // Not voiced (as hintPerfect/hintFree: the shell's hintKeys table is untouched).
+  hintDry: s('The can is empty. Where is the pond?', 'L’arrosoir est vide. Où est la mare ?'),
+  hintRockGone: s('Nothing left in that rock! {b} has the stones: where do they go?', 'Plus rien dans ce rocher ! {b} a les pierres : où vont-elles ?'),
   hintPredictMiss: s('You tapped one tile, {b} stopped on another. Follow the steps with your finger, one by one.', 'Tu as touché une case, {b} s’est arrêté sur une autre. Suis les pas avec ton doigt, un par un.'),
   oliveThinking: s('Olive is thinking…', 'Olive réfléchit…'),
   oliveResting: s('Olive is resting. Here is her written line.', 'Olive se repose. Voici sa phrase écrite.'),
@@ -498,6 +517,7 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   bLeft: s('turn left', 'tourner à gauche'),
   bRight: s('turn right', 'tourner à droite'),
   bWater: s('water', 'arroser'),
+  bFill: s('fill the can', 'remplir l’arrosoir'),
   bPick: s('pick up', 'ramasser'),
   bPut: s('put down', 'poser'),
   bSay: s('say', 'dire'),
@@ -515,6 +535,7 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   cLeft: s('left', 'gauche'),
   cRight: s('right', 'droite'),
   cWater: s('water', 'eau'),
+  cFill: s('fill', 'remplis'),
   cPick: s('take', 'prends'),
   cPut: s('drop', 'pose'),
   cSay: s('say', 'dis'),
@@ -533,6 +554,7 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   sBasketFull: s('the basket is full', 'le panier est plein'),
   sCountIs: s('the count is', 'le compte est'),
   sOliveSays: s('Olive says', 'Olive dit'),
+  sCanEmpty: s('the can is empty', 'l’arrosoir est vide'),
   eMeow: s('Biscuit meows', 'Biscuit miaule'),
   // Olive shapes and the dial (CG-005 §2).
   shWord: s('a word', 'un mot'),
@@ -569,6 +591,8 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   sayDrink: s('Glug glug!', 'Glou glou !'),
   sayPick: s('Got it!', 'Je l’ai !'),
   sayPut: s('There.', 'Voilà.'),
+  sayFill: s('Full!', 'Plein !'),
+  sayDry: s('Empty…', 'Vide…'),
   thanksSami: s('Thank you, Sami. Your letter is on its way!', 'Merci, Sami. Ta lettre est en route !'),
   thanksMamie: s('Dear Mamie Rose, your tulips are drinking and so am I.', 'Chère Mamie Rose, tes tulipes boivent et moi aussi.'),
   thanksBiscuit: s('Biscuit, your bowl is full. Purr away!', 'Biscuit, ta gamelle est pleine. Ronronne !'),
@@ -596,7 +620,7 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   rqPathLine: s('"The post box is at the end of the path. Can {b} walk there?"', '« La boîte aux lettres est au bout du chemin. {b} peut y aller ? »'),
   rqTulipsTitle: s('Water my three tulips', 'Arrose mes trois tulipes'),
   rqTulipsBlurb: s('Repeat', 'Répéter'),
-  rqTulipsLine: s('"My three tulips are so thirsty. Can {b} water them for me?"', '« Mes trois tulipes ont tellement soif. {b} peut les arroser pour moi ? »'),
+  rqTulipsLine: s('"My three tulips are so thirsty. The can is empty: fill it at the pond, water one tulip, and come back for more!"', '« Mes trois tulipes ont tellement soif. L’arrosoir est vide : remplis-le à la mare, arrose une tulipe, et reviens en chercher ! »'),
   rqBowlTitle: s('Feed me, but only if my bowl is empty', 'Nourris-moi, mais seulement si ma gamelle est vide'),
   rqBowlBlurb: s('If', 'Si'),
   rqBowlLine: s('"Two bowls. One is full already. Fill only the empty one, {b}!"', '« Deux gamelles. L’une est déjà pleine. Remplis seulement la vide, {b} ! »'),
@@ -620,7 +644,7 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   rqDoorLine: s('"There is one tulip by my front door, and she is thirsty. Can {b} give her a drink?"', '« Il y a une tulipe près de ma porte, et elle a soif. {b} peut lui donner à boire ? »'),
   rqStonesTitle: s('Lay four stones on the path', 'Pose quatre pierres sur le chemin'),
   rqStonesBlurb: s('Repeat', 'Répéter'),
-  rqStonesLine: s('"My path stops too soon. Four stones, one after the other, all the way to the post box!"', '« Mon chemin s’arrête trop tôt. Quatre pierres, l’une après l’autre, jusqu’à la boîte aux lettres ! »'),
+  rqStonesLine: s('"My path stops too soon. Take four stones from the rock by {b}, then lay them one after the other, all the way to the post box!"', '« Mon chemin s’arrête trop tôt. Prends quatre pierres dans le rocher à côté de {b}, puis pose-les l’une après l’autre jusqu’à la boîte aux lettres ! »'),
   // Rewards.
   hatNone: s('None', 'Aucun'),
   hatCap: s('Cap', 'Casquette'),
@@ -734,7 +758,7 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   stSprout: s('Sprouted', 'Germée'),
   stSeed: s('Seed', 'Graine'),
   n1: s('Steps in order', 'Des pas dans l’ordre'),
-  n1p: s('{b} does exactly what you say, one step after another.', '{b} fait exactement ce que tu dis, un pas après l’autre.'),
+  n1p: s('{b} does exactly what you say, one step after another: forward, turn, fill, water, pick, put.', '{b} fait exactement ce que tu dis, un pas après l’autre : avancer, tourner, remplir, arroser, ramasser, poser.'),
   n2: s('Repeat', 'Répéter'),
   n2p: s('Do the same dance several times, without saying it several times.', 'Faire la même danse plusieurs fois, sans la dire plusieurs fois.'),
   n3: s('Repeat until', 'Répéter jusqu’à'),

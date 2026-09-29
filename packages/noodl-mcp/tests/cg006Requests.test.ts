@@ -66,6 +66,9 @@ function worldOfRequest(r: GardenRequest) {
   const robot: Record<string, unknown> = { id: 'pip', x: r.robotStart.x, y: r.robotStart.y, d: r.robotStart.d };
   if (r.robotStart.carry) robot.carry = [...r.robotStart.carry];
   if (r.robotStart.basket) robot.basket = r.robotStart.basket;
+  // IG-002: the can, as Start world passes it.
+  if (r.robotStart.can !== undefined) robot.can = r.robotStart.can;
+  if (r.robotStart.canMax !== undefined) robot.canMax = r.robotStart.canMax;
   return { map: [...r.map], things: r.things.map((t) => ({ ...t })), robots: [robot], schedule: r.schedule ? r.schedule.map((s) => ({ ...s })) : [] };
 }
 
@@ -208,8 +211,9 @@ describe('CG-006 — the requests', () => {
       const wrong: Record<string, Block[]> = {
         'path-postbox': prog('fwd', 'fwd', 'fwd', 'fwd', 'fwd', 'fwd'),
         'tulip-door': prog('fwd', 'fwd', 'fwd', 'right', 'fwd', 'water'),
-        'tulips-three': prog('fwd', 'fwd', 'left', 'water', 'right', 'fwd', 'fwd', 'left', 'water', 'right'),
-        'path-stones': [{ id: 1, t: 'repeat', n: 4, body: prog('fwd', 'put') }],
+        // IG-002: the old dance, and the new one without the pond (the can starts empty: dry).
+        'tulips-three': [{ id: 1, t: 'repeat', n: 3, body: prog('left', 'left', 'fwd', 'water', 'right', 'fwd', 'right', 'fwd') }],
+        'path-stones': [{ id: 1, t: 'left' }, { id: 2, t: 'repeat', n: 4, body: prog('pick') }, { id: 9, t: 'right' }, { id: 10, t: 'repeat', n: 4, body: prog('fwd', 'put') }],
         'wall-until': prog('fwd', 'fwd', 'fwd', 'fwd', 'fwd', 'fwd', 'fwd', 'left'),
         'bowl-if': [{ id: 1, t: 'repeat', n: 2, body: prog('fwd', 'fwd', 'left', 'put', 'right') }],
         'meow-when': prog('fwd', 'fwd'),
@@ -232,9 +236,10 @@ describe('CG-006 — the requests', () => {
     it('row 2 "the fold offered": the band 10–12 recording of the tulips offers repeat 3; band 7–9 is never offered one', () => {
       const r = byId('tulips-three');
       const recording = unrolled(r.referenceProgram);
-      expect(recording).toHaveLength(15);
+      // IG-002: the fetch-and-return dance, nine blocks a pass (fill, turn round, walk, water, step down, walk back).
+      expect(recording).toHaveLength(27);
       const b2 = runScript(FIND_REPEAT, { program: recording, band: 2 });
-      expect({ found: b2.found, offer: b2.offer, count: b2.count, len: b2.len }).toEqual({ found: true, offer: true, count: 3, len: 5 });
+      expect({ found: b2.found, offer: b2.offer, count: b2.count, len: b2.len }).toEqual({ found: true, offer: true, count: 3, len: 9 });
       expect(runScript(FIND_REPEAT, { program: recording, band: 1 }).offer).toBe(false);
     });
 

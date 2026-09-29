@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 377,
+      "connectionCount": 382,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -175,7 +175,7 @@
       "path": "Logic/Hint table",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 37,
+      "connectionCount": 39,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -671,6 +671,6 @@
   "stats": {
     "totalComponents": 83,
     "totalNodes": 677,
-    "totalConnections": 1888
+    "totalConnections": 1895
   }
 }
