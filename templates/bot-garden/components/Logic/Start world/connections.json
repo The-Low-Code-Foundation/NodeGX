@@ -34,6 +34,12 @@
       "toProperty": "in-robotKey"
     },
     {
+      "fromId": "startworldIn",
+      "fromProperty": "seed",
+      "toId": "startworldFn",
+      "toProperty": "in-seed"
+    },
+    {
       "fromId": "startworldFn",
       "fromProperty": "out-allowed",
       "toId": "startworldOut",

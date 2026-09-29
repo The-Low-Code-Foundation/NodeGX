@@ -40,6 +40,8 @@ import { FREE_PLAY_PLOT, ISLAND_BASE, ISLAND_HOME, PLOT_H, PLOT_W } from './cg00
 import { FIND_ROBOTS_SCRIPT, ISLAND_TICK_SCRIPT, PLOT_AT_SCRIPT, islandChooseScript, islandWorldScript } from './ig004Island';
 // P106 IG-005 (lane B): the robot catalogue and its upgrades.
 import { ROBOTS_JSON, UPGRADES_JSON } from './cg002Content';
+// P108 IW-002 (lane J): Start world's seed line lays a request's seeded layout with the engine's own helpers.
+import { SEED_HELPERS } from './cg002Scripts';
 
 /** P106 IG-005 (lane B): the islanders' name keys, for the lock line and the gifts. */
 const ISLANDER_WORDS = Object.fromEntries(Object.entries(ISLANDERS).map(([id, i]) => [id, i.nameKey]));
@@ -165,9 +167,11 @@ if (req) {
   Outputs.challenge = '';
   Outputs.needs = '';
 }
+// P108 IW-002 (lane J): the run's seed (Inputs.seed, else one picked), the job copied in, the seeded layout laid.
+if (req && Outputs.world) Outputs.world = seedWorld(Outputs.world, req, Inputs.seed);
 Outputs.nonce = Inputs.nonce;
 Outputs.robotKey = String(Inputs.robotKey || '');
-`;
+${SEED_HELPERS}`;
 
 /** Each request's own line under the title (CG-007 §7.1 item 1): its word key, by request id. */
 const SUB_KEYS: Readonly<Record<string, string>> = Object.fromEntries(Object.entries(REQUEST_SUBS).map(([id, r]) => [id, r.key]));

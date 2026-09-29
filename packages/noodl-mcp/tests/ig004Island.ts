@@ -27,6 +27,11 @@
  * to the request's start, the robot to its start tile — and the run restarts: the robot is seen working forever, the plot
  * is seen done. No Olive on the tick: an ask takes the fallback, as `runToEnd` does.
  *
+ * P108 IW-002: a plot whose request carries a `job` is never reset. Its robot works until the job is done, walks home
+ * (the engine's walk, `step`'s home op) and WAITS there; wear (only here, on the island tick: `wearOf`) takes a drink, a
+ * stone or a food; when that reopens the job the robot starts its program again on the plot as it stands (D3). A program
+ * that ends with the job not done walks home and starts again. A plot with no job keeps the hold-and-reset above.
+ *
  * 🔴 No backtick and no dollar-brace inside any script text (README §7): these are template literals.
  *
  * @module noodl-mcp/tests/ig004Island
@@ -65,11 +70,41 @@ function islLook(bot) { return { name: String(bot.name || ''), colour: String(bo
 function islView(plot, live) {
   var w = { map: plot.map.slice(), things: live.things, robots: [live.robot], events: [], schedule: islClone(plot.schedule || []) };
   if (live.spent && live.spent.length) w.spent = live.spent.slice();
+  // P108 IW-002: a job plot carries its job and its seed (the wear's draws go on from it).
+  if (plot.job) { w.job = islClone(plot.job); w.seed = Number(live.seed) >>> 0; }
   return w;
 }
 function islRun(plot, lap) { return newRun(plot.program, plot.robotId, 'en', 'island-' + plot.id + '-' + lap); }
+/** P108 IW-002: a plot's seed, from its request's name (djb2): the island lays a plot the same way every build. */
+function islSeedOf(id) { var h = 5381, t = String(id); for (var i = 0; i < t.length; i++) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0; return h; }
+/** IW-002: a run that is only the walk home (a program that ended with the job not done goes home before it starts again). */
+function islHomeRun(plot, lap) { var run = newRun([], plot.robotId, 'en', 'island-' + plot.id + '-' + lap + '-home'); run.steps = [{ id: null, op: 'home', guard: 0 }]; return run; }
+/**
+ * IW-002: one tick of a job plot — wear first (only here), then the robot: working, walking home, or waiting at home
+ * until a worn target reopens the job. The plot is never reset: the next lap starts on the plot as it stands.
+ */
+function islStepJob(plot, cur) {
+  var w = worldOf(islView(plot, cur)), age = (Number(cur.age) || 0) + 1, lap = Number(cur.lap) || 0, run = cur.run, phase = cur.phase || 'work';
+  var worn = wearOf(w, age);
+  for (var i = 0; i < worn.length; i++) w = apply(w, worn[i]);
+  var delta = null;
+  if (phase === 'wait' && !jobDone(w)) { lap++; run = islRun(plot, lap); phase = 'work'; }
+  if (phase !== 'wait') {
+    var r = step(run, w, null);
+    if (r.waiting && r.request) r = step(r.run, w, { seq: r.request.seq, ok: false, fallback: true });
+    w = apply(w, r.delta);
+    run = r.run; delta = r.delta;
+    if (r.done) {
+      if (jobDone(w)) phase = 'wait';
+      else if (phase === 'return') { lap++; run = islRun(plot, lap); phase = 'work'; }
+      else { phase = 'return'; run = islHomeRun(plot, lap); }
+    }
+  }
+  return { run: run, things: w.things, robot: w.robots[0], spent: Array.isArray(w.spent) ? w.spent : [], hold: 0, lap: lap, phase: phase, age: age, seed: Number(w.seed) >>> 0, worn: worn, delta: delta };
+}
 /** One tick of one pinned plot. A finished run holds the plot done, then the plot resets and the run restarts. */
 function islStepPlot(plot, cur) {
+  if (plot.job) return islStepJob(plot, cur);
   if (cur.hold > 0) {
     if (cur.hold > 1) return { run: cur.run, things: cur.things, robot: cur.robot, spent: cur.spent, hold: cur.hold - 1, lap: cur.lap };
     var st = islClone(plot.start);
@@ -153,14 +188,23 @@ var freeReq = islClone(FREE); freeReq.plot = FREE_PLOT;
 list.push(freeReq);
 var plots = [], still = [], deco = [], live = {}, cards = [], busy = {};
 function hasRobot(id) { return !!rowOf(id); }
-function wonThings(req) {
+function wonThings(req, laid) {
   var st = islStart(req, 'me');
-  var end = runToEnd(req.referenceProgram || [], { map: req.map.slice(), things: st.things, robots: [st.robot], events: [], schedule: islClone(req.schedule || []) }, 'me', 'en');
+  var wv = { map: laid ? laid.map.slice() : req.map.slice(), things: laid ? islClone(laid.things) : st.things, robots: [st.robot], events: [], schedule: islClone(req.schedule || []) };
+  if (laid && laid.job) { wv.job = islClone(laid.job); wv.seed = laid.seed; }
+  var end = runToEnd(req.referenceProgram || [], wv, 'me', 'en');
   return end.world.things;
+}
+/** P108 IW-002: a request with a job or a seeded layout, laid from its plot's seed (ids minted for its targets); else null. */
+function islLaid(req) {
+  if (!req.job && !req.seeded) return null;
+  return worldOf(seedWorld({ map: (Array.isArray(req.map) ? req.map : []).slice(), things: islClone(req.things || []), robots: [] }, req, islSeedOf(req.id)));
 }
 for (var p = 0; p < list.length; p++) {
   var req = list[p], px = Math.floor(Number(req.plot.x)), py = Math.floor(Number(req.plot.y));
   var map = Array.isArray(req.map) ? req.map : [];
+  var laid = islLaid(req);
+  if (laid) map = laid.map;
   for (var y = 0; y < map.length; y++) for (var x = 0; x < String(map[y]).length; x++) if (rows[py + y] && py + y < H && px + x < W) rows[py + y][px + x] = String(map[y]).charAt(x);
   var sv = saved[req.id], isFree = req.id === 'free';
   // IG-005: a plot is also locked while she has no robot of the kind it needs (the lock line names who lends it).
@@ -170,11 +214,14 @@ for (var p = 0; p < list.length; p++) {
   var robotId = status === 'working' ? String(sv.robotId) : '';
   if (robotId) busy[robotId] = req.id;
   var start = islStart(req, robotId || 'me', robotId ? rowOf(robotId) : null);
+  if (laid) start.things = islClone(laid.things);
   var plot = { id: req.id, x: px, y: py, w: PW, h: PH, map: map.slice(), schedule: islClone(req.schedule || []), status: status, islander: String(req.islander || ''), band: Number(req.band) || 1, robotId: robotId, program: robotId ? islClone(sv.program) : null, start: start };
+  // P108 IW-002: a job plot's job (its targets by id) and its seed; its tick is the job tick (islStepJob), never a reset.
+  if (laid && laid.job) { plot.job = laid.job; plot.seed = Number(laid.seed) >>> 0; }
   plots.push(plot);
   cards.push({ id: req.id, x: px, y: py, w: PW, h: PH, status: status, islander: plot.islander, band: plot.band, robotId: robotId, door: null, needs: needs, lock: lock });
-  if (status === 'working') { live[req.id] = { run: islRun(plot, 0), things: islClone(start.things), robot: islClone(start.robot), spent: [], hold: 0, lap: 0 }; continue; }
-  var shown = status === 'won' ? wonThings(req) : start.things;
+  if (status === 'working') { live[req.id] = { run: islRun(plot, 0), things: islClone(start.things), robot: islClone(start.robot), spent: [], hold: 0, lap: 0 }; if (plot.job) { live[req.id].phase = 'work'; live[req.id].age = 0; live[req.id].seed = plot.seed; } continue; }
+  var shown = status === 'won' ? wonThings(req, laid) : start.things;
   for (var t = 0; t < shown.length; t++) { var th = islClone(shown[t]); th.x = Number(th.x) + px; th.y = Number(th.y) + py; still.push(th); }
   if (status === 'locked') { deco.push({ kind: 'fence', x: px, y: py, w: PW, h: PH }); deco.push({ kind: 'padlock', x: px + Math.floor(PW / 2), y: py + Math.floor(PH / 2) }); }
 }

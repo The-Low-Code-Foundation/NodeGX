@@ -16,6 +16,8 @@ import { ADD_PROFILE_SCRIPT, APPLY_DELTA_SCRIPT, BRING_HOME_SCRIPT, COMPLETE_REQ
 import { ALL_WORDS_JSON, DRAW_WORLD_SCRIPT, FAMILY_SCRIPT, FREE_PLAY, ISLAND_CHOOSE_SCRIPT, ISLAND_PINS_SCRIPT, ISLAND_ROWS_SCRIPT, ISLAND_WORLD_SCRIPT, START_WORLD_SCRIPT } from './cg003Scripts';
 import { PAGE_WORDS } from './cg003Content';
 import { ISLAND_HOLD_TICKS, ISLAND_TICK_SCRIPT, PLOT_AT_SCRIPT, islandWorldScript } from './ig004Island';
+// P108 IW-002 (lane J): the job tick — the wear clock it runs.
+import { WEAR } from './cg002Content';
 
 /** Run a script in a bare vm context — no jest, no Buffer, no window: only what the script brings. */
 const compiled = new Map<string, vm.Script>();
@@ -420,5 +422,166 @@ describe('IG-004 — the island as a world', () => {
         expect({ who: p.who, x: p.x, y: p.y }).toEqual({ who: p.who, x: at.plot.x + 2, y: at.plot.y + 6 });
       }
     });
+  });
+});
+
+// ── P108 IW-002 (lane J): the island tick for a plot whose request carries a job — work, done, home, wait, wear, again ──
+describe('IW-002 (P108 s1) — the job tick: a job plot is never reset; its robot works, walks home, waits, and goes back when wear reopens the job', () => {
+  /** Two tulips of two drinks at 3,1 and 3,2; the robot starts (and lives) at 1,1 facing them. Free water (no can). */
+  const BED_MAP = ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPP', 'GWWGGRGG', 'GGGGGTGG'];
+  const BED_THINGS = [
+    { kind: 'tulip', id: 'ta', x: 3, y: 1, need: 2, have: 0, watered: false },
+    { kind: 'tulip', id: 'tb', x: 3, y: 2, need: 2, have: 0, watered: false }
+  ];
+  const prog = (...t: string[]) => t.map((x, i) => ({ id: i + 1, t: x }));
+  /** Forward, two drinks, down a row, two drinks: the job is done on its last pour. */
+  const BED_PROGRAM = prog('fwd', 'water', 'water', 'right', 'fwd', 'left', 'water', 'water');
+  const jobReq = (id: string, plot: { x: number; y: number }, program = BED_PROGRAM) => ({
+    id,
+    islander: 'mamie',
+    band: 1,
+    plot,
+    tricks: [2],
+    map: BED_MAP,
+    things: BED_THINGS,
+    robotStart: { x: 1, y: 1, d: 1 },
+    goal: { name: 'job_done' },
+    palette: ['fwd', 'left', 'right', 'water'],
+    reward: { kind: 'hat', id: 'sun', from: 'mamie' },
+    copyKeys: { title: 'rqTulipsTitle', blurb: 'rqTulipsBlurb', line: 'rqTulipsLine', reward: 'hatSun', gift: 'giftSun' },
+    referenceProgram: program,
+    job: { targets: ['ta', 'tb'], home: { x: 1, y: 1, d: 1 } }
+  });
+  const JOB_PLOT = { x: 10, y: 8 };
+  /** The synthetic island with the fixtures on it (a fixture takes the slot of the synthetic request it sits on). */
+  const built = (reqs: Array<{ plot: { x: number; y: number } }>, plots: Record<string, unknown>) => bare(SYN_WORLD, { requests: [...SYN_REQUESTS.filter((r) => !reqs.some((q) => q.plot.x === r.plot.x && q.plot.y === r.plot.y)), ...reqs], plots, robots: [{ id: 'r1' }, { id: 'r2', kind: 'cobble' }, { id: 'r3' }], done: Object.keys(plots), band: 2, pins: [] });
+  const drinks = (cur: any) => cur.things.filter((t: any) => t.kind === 'tulip').map((t: any) => t.have);
+  const pose = (cur: any) => ({ x: cur.robot.x, y: cur.robot.y, d: cur.robot.d });
+
+  it('🔴 AC5 work → done → the robot walks home and waits; the plot is never reset; wear takes a drink at WEAR.tulip and the robot starts its program again on the plot as it stands', () => {
+    const is = built([jobReq('job-bed', JOB_PLOT)], { 'job-bed': pinned(BED_PROGRAM, 'r1') });
+    let state = is.state;
+    expect(state.plots.find((p: any) => p.id === 'job-bed').job).toEqual({ targets: ['ta', 'tb'], home: { x: 1, y: 1, d: 1 } });
+    const seen: any[] = [];
+    let t = 0;
+    for (; t < 60 && state.live['job-bed'].phase !== 'wait'; t++) {
+      const out = bare(ISLAND_TICK_SCRIPT, { state });
+      state = out.state;
+      seen.push({ ...pose(state.live['job-bed']), drinks: drinks(state.live['job-bed']), jobDone: !!(state.live['job-bed'].delta || {}).jobDone, home: !!(state.live['job-bed'].delta || {}).home });
+      // The composed world: the robot on its plot, in island coordinates.
+      expect(out.world.robots.find((r: any) => r.id === 'r1')).toMatchObject({ x: state.live['job-bed'].robot.x + JOB_PLOT.x, y: state.live['job-bed'].robot.y + JOB_PLOT.y, plot: 'job-bed' });
+    }
+    const cur = state.live['job-bed'];
+    // Done and home: both tulips full, the robot back on its home tile facing its start, lap 0 (nothing was reset).
+    expect({ phase: cur.phase, lap: cur.lap, drinks: drinks(cur), at: pose(cur) }).toEqual({ phase: 'wait', lap: 0, drinks: [2, 2], at: { x: 1, y: 1, d: 1 } });
+    // Seen walking home: after the jobDone tick the robot left the tulips (2,2) for home (1,1) through 2,1; then the home event once.
+    const done = seen.findIndex((s) => s.jobDone);
+    expect(done).toBeGreaterThan(0);
+    expect(seen.slice(done).map((s) => `${s.x},${s.y}`).filter((p, i, a) => i === 0 || a[i - 1] !== p)).toEqual(['2,2', '2,1', '1,1']);
+    expect(seen.filter((s) => s.home)).toHaveLength(1);
+    // Waiting: nothing moves and nothing wears until WEAR.tulip island ticks have passed on this plot.
+    const waitedAt = cur.age;
+    for (let a = waitedAt + 1; a < WEAR.tulip; a++) {
+      state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+      const w = state.live['job-bed'];
+      expect({ a, phase: w.phase, at: pose(w), drinks: drinks(w) }).toEqual({ a, phase: 'wait', at: { x: 1, y: 1, d: 1 }, drinks: [2, 2] });
+    }
+    // The wear tick: one tulip loses a drink and droops; the job is open again; the robot starts its program (lap 1): its first step.
+    state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+    const again = state.live['job-bed'];
+    expect(again.age).toBe(WEAR.tulip);
+    expect(again.worn.filter((d: any) => d.wear)).toHaveLength(1);
+    expect([again.phase, again.lap, again.run.runId, pose(again)]).toEqual(['work', 1, 'island-job-bed-1', { x: 2, y: 1, d: 1 }]);
+    expect(drinks(again).sort()).toEqual([1, 2]);
+    expect(again.things.filter((x: any) => x.droop)).toHaveLength(1);
+    // Never reset: the other tulip keeps its two drinks (the start had none) — and it goes back to work until both are full again.
+    for (t = 0; t < 60 && state.live['job-bed'].phase !== 'wait'; t++) state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+    const back = state.live['job-bed'];
+    expect({ phase: back.phase, lap: back.lap, drinks: drinks(back), droop: back.things.filter((x: any) => x.droop).length, at: pose(back) }).toEqual({ phase: 'wait', lap: 1, drinks: [2, 2], droop: 0, at: { x: 1, y: 1, d: 1 } });
+  });
+
+  it('🔴 beside it, a plot with no job keeps today’s hold-and-reset (the island drive’s ISLAND_HOLD_TICKS): the job plot’s drinks never go back to the start', () => {
+    const is = built([jobReq('job-bed', JOB_PLOT)], { 'job-bed': pinned(BED_PROGRAM, 'r1'), 'tulips-three': pinned(ref('tulips-three'), 'r3') });
+    let state = is.state;
+    let resets = 0;
+    let everStart = 0;
+    let drank = false;
+    for (let t = 0; t < 3 * WEAR.tulip; t++) {
+      const lapBefore = state.live['tulips-three'].lap;
+      state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+      if (state.live['tulips-three'].lap > lapBefore) resets++;
+      const d = drinks(state.live['job-bed']);
+      if (d.some((x: number) => x > 0)) drank = true;
+      if (drank && d.every((x: number) => x === 0)) everStart++;
+      expect(state.live['job-bed'].hold).toBe(0);
+    }
+    // Known-firing: the plot with no job was reset many times; the job plot never once went back to its start.
+    expect(resets).toBeGreaterThan(3);
+    // One lap per wear of a tulip in the window (each reopened the job).
+    expect([drank, everStart, state.live['job-bed'].lap]).toEqual([true, 0, Math.floor((3 * WEAR.tulip) / WEAR.tulip)]);
+  });
+
+  it('🔴 a program that ends with the job NOT done walks home and starts again (lap after lap), never resetting what it did', () => {
+    // Only the first tulip: the job is never done, so the robot goes home and again.
+    const half = prog('fwd', 'water', 'water');
+    let state = built([jobReq('job-half', JOB_PLOT, half)], { 'job-half': pinned(half, 'r1') }).state;
+    const phases: string[] = [];
+    for (let t = 0; t < 40; t++) {
+      state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+      const c = state.live['job-half'];
+      if (phases[phases.length - 1] !== c.phase) phases.push(c.phase);
+    }
+    const c = state.live['job-half'];
+    expect(phases.slice(0, 4)).toEqual(['work', 'return', 'work', 'return']);
+    expect(c.lap).toBeGreaterThanOrEqual(3);
+    expect(drinks(c)).toEqual([2, 0]);
+  });
+
+  it('🔴 AC3 (engine side): an island left with no tick does not wear; the held state handed back to the tick (same build) goes on with its meters as left', () => {
+    const is = built([jobReq('job-bed', JOB_PLOT)], { 'job-bed': pinned(BED_PROGRAM, 'r1') });
+    let state = is.state;
+    for (let t = 0; t < 30; t++) state = bare(ISLAND_TICK_SCRIPT, { state, built: is.state }).state;
+    const left = JSON.parse(JSON.stringify(state.live['job-bed']));
+    expect([left.phase, drinks(left)]).toEqual(['wait', [2, 2]]);
+    // "The page closed": no tick for as long as you like — the state is data; nothing runs it. Then one tick with the same build:
+    const next = bare(ISLAND_TICK_SCRIPT, { state, built: is.state }).state.live['job-bed'];
+    expect([next.age, next.phase, drinks(next), next.lap]).toEqual([left.age + 1, 'wait', [2, 2], 0]);
+  });
+
+  it('arm: the tick ignores the job (a job plot held and reset like any other) → the never-reset row fails', () => {
+    const anchor = '  if (plot.job) return islStepJob(plot, cur);\n';
+    expect(ISLAND_TICK_SCRIPT.split(anchor)).toHaveLength(2);
+    const m = ISLAND_TICK_SCRIPT.replace(anchor, '');
+    let state = built([jobReq('job-bed', JOB_PLOT)], { 'job-bed': pinned(BED_PROGRAM, 'r1') }).state;
+    let backToStart = 0;
+    let drank = false;
+    for (let t = 0; t < 40; t++) {
+      state = bare(m, { state }).state;
+      const d = drinks(state.live['job-bed']);
+      if (d.some((x: number) => x > 0)) drank = true;
+      if (drank && d.every((x: number) => x === 0)) backToStart++;
+    }
+    expect([drank, backToStart > 0]).toEqual([true, true]);
+  });
+
+  it(`🔴 the tick with two job plots and a hold-and-reset plot stays under 5 ms (p95), 300 ticks`, () => {
+    let state = built([jobReq('job-bed', JOB_PLOT), jobReq('job-two', { x: 1, y: 8 })], { 'job-bed': pinned(BED_PROGRAM, 'r1'), 'job-two': pinned(BED_PROGRAM, 'r2'), 'tulips-three': pinned(ref('tulips-three'), 'r3') }).state;
+    const script = new vm.Script(`(function (Inputs, Outputs) {\n${ISLAND_TICK_SCRIPT}\n})(Inputs, Outputs);`);
+    const ctx = vm.createContext({ Inputs: {}, Outputs: {} });
+    const ms: number[] = [];
+    for (let t = 0; t < 300; t++) {
+      ctx.Inputs = { state };
+      ctx.Outputs = {};
+      const t0 = process.hrtime.bigint();
+      script.runInContext(ctx);
+      ms.push(Number(process.hrtime.bigint() - t0) / 1e6);
+      state = ctx.Outputs.state;
+    }
+    const sorted = [...ms].sort((a, b) => a - b);
+    const p95 = sorted[Math.floor(ms.length * 0.95)];
+    // eslint-disable-next-line no-console
+    console.log(`IW-002 job tick: 300 ticks × (2 job plots + 1 reset plot) — p95 ${p95.toFixed(3)} ms, max ${sorted[sorted.length - 1].toFixed(3)} ms, job laps ${state.live['job-bed'].lap}/${state.live['job-two'].lap}`);
+    expect(p95).toBeLessThan(5);
+    expect(state.live['job-bed'].lap).toBeGreaterThanOrEqual(3);
   });
 });

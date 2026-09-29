@@ -96,7 +96,7 @@ export interface Block {
 
 /** A goal predicate: a name and its args. A request's goal is one or a list (all must hold). */
 export interface Goal {
-  name: 'every_tulip_watered' | 'thing_at' | 'bowl_has' | 'robot_at' | 'facing' | 'carrying' | 'uses' | 'handled' | 'said' | 'no_puddle' | 'senses';
+  name: 'every_tulip_watered' | 'thing_at' | 'bowl_has' | 'robot_at' | 'facing' | 'carrying' | 'uses' | 'handled' | 'said' | 'no_puddle' | 'senses' | 'job_done';
   args?: ReadonlyArray<string | number>;
 }
 
@@ -159,6 +159,10 @@ export interface GardenRequest {
   reward: { kind: 'hat' | 'sticker' | 'seed' | 'item' | 'robot'; id: string; from: 'sami' | 'mamie' | 'biscuit' };
   copyKeys: { title: string; blurb: string; line: string; reward: string; gift: string };
   referenceProgram: ReadonlyArray<Block>;
+  /** P108 IW-002: the finish line — target thing ids (or `[x, y]` tiles; the engine mints `t<n>`), and the robot's home tile. */
+  job?: JobSpec;
+  /** P108 IW-002: a layout laid from the world's seed (a wall's column, eggs on some of these tiles). */
+  seeded?: SeededSpec;
 }
 
 let nextId = 1;
@@ -800,7 +804,11 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   saveCodeH: s('Save code', 'Code de sauvegarde'),
   saveCodeCopy: s('Copy the code', 'Copier le code'),
   saveCodePaste: s('Paste a code', 'Coller un code'),
-  saveCodeBad: s('That code is not an island save.', 'Ce code n’est pas une sauvegarde de l’île.')
+  saveCodeBad: s('That code is not an island save.', 'Ce code n’est pas une sauvegarde de l’île.'),
+  // ── P108 IW-002 (lane J): what the robot says at a job's new moments (the sayKeys of brief §4.2) ──
+  sayFull: s('It’s full!', 'C’est plein !'),
+  sayNoCan: s('I need the can.', 'Il me faut l’arrosoir.'),
+  sayHome: s('Home! All done.', 'À la maison ! Tout est fait.')
 };
 
 /** The word keys, for the generated translate script and the gate. */
@@ -1020,3 +1028,71 @@ export const needsOf = (r: { needs?: RobotKind }): RobotKind => r.needs ?? 'pip'
 
 export const ROBOTS_JSON = JSON.stringify(ROBOTS);
 export const UPGRADES_JSON = JSON.stringify(UPGRADES);
+
+// ── P108 IW-002 (lane J): the job model — its vocabulary, the wear clock, the seeded layouts ─────────────────────
+
+/** A job (P108 IW-002, brief §4.2): every target full is the finish line; then the robot walks to `home` (and faces `d`). */
+export interface JobSpec {
+  targets: ReadonlyArray<string | readonly [number, number]>;
+  home: { x: number; y: number; d?: number };
+}
+/**
+ * A seeded layout: `wallAt: [lo, hi]` puts one wall tile (`L`) at a column from lo to hi on row `wallRow` (default the
+ * robot's start row); `eggs: { count, among }` lays `count` eggs on distinct tiles of `among`. The world's `seed` picks.
+ */
+export interface SeededSpec {
+  wallAt?: readonly [number, number];
+  wallRow?: number;
+  eggs?: { count: number; among: ReadonlyArray<readonly [number, number]> };
+}
+
+/** The wall tile (brief §4.2): blocking, drawn by both kits (session 2). The map edge stays blocked too. */
+export const WALL_TILE = 'L';
+/** A path site's look by `have / need`: 0 · under half · under full · full (the tile then reads as path, `P`). */
+export const SITE_STAGES = ['dirt', 'gravel', 'cobbles', 'path'] as const;
+/** The most eggs a hen's pen holds before she stops laying (a `hen` may name its own `capacity`). */
+export const HEN_CAPACITY = 4;
+
+/** What a job thing is for (README §4.1): a target has a meter, a container counts an item, a carrier is held, a source gives. */
+export type JobRole = 'target' | 'container' | 'carrier' | 'source';
+export interface JobKind {
+  kind: 'tulip' | 'site' | 'basket' | 'bowl' | 'store' | 'can' | 'rock' | 'hen' | 'postbox';
+  role: JobRole;
+  /** The fields the engine reads and writes on it (renderers draw from these). */
+  fields: ReadonlyArray<string>;
+  /** A container's item when it names none; a site's too. */
+  item?: string;
+  /** Does it stop a robot walking onto its tile (the engine's BLOCKING_THINGS)? */
+  blocks: boolean;
+  /** The wear clock that touches it, a key of WEAR (none: it never wears). */
+  wear?: keyof typeof WEAR;
+}
+
+/**
+ * Wear (R2, D7): island ticks between two wears of one thing of each kind. Wear runs ONLY in the island tick (only while
+ * a page is open; the tick is `STEP_MS × 2` = 760 ms, about 78 a minute), never in the Workshop. The numbers, measured
+ * 2026-09-29: the longest reference run is 41 ticks (rows-trick; tulips-three 31, path-stones 23) and the walk home on
+ * an 8 × 6 plot is at most 12 moves plus turns, so a target wears no sooner than 60 ticks (~46 s): a job that finishes
+ * is SEEN done, its robot at home, before it reopens — and a child sees the robot go back within a minute of play.
+ * The path wears slowest (stone: 120 ticks, ~1.5 min); Biscuit eats every 60; Mamie takes an egg every 90. Sources run
+ * faster than the targets they feed so a reopened job never waits on them: the rock regrows a stone every 30 ticks (four
+ * in two minutes, one path square's worth), the hen lays every 20 (a pen of four in about a minute), a letter every 90.
+ */
+export const WEAR = { tulip: 60, site: 120, bowl: 60, basket: 90, store: 120, rock: 30, hen: 20, postbox: 90 } as const;
+
+/** The job vocabulary (brief §4.2) — ONE table the engine, the mockup and both renderers read by these names. */
+export const JOB_VOCABULARY: ReadonlyArray<JobKind> = [
+  { kind: 'tulip', role: 'target', fields: ['have', 'need', 'watered', 'droop'], blocks: true, wear: 'tulip' },
+  { kind: 'site', role: 'target', fields: ['have', 'need', 'item', 'stage', 'walked'], item: 'stone', blocks: false, wear: 'site' },
+  { kind: 'basket', role: 'container', fields: ['count', 'capacity', 'item'], item: 'egg', blocks: true, wear: 'basket' },
+  { kind: 'bowl', role: 'container', fields: ['count', 'capacity', 'item', 'food'], item: 'food', blocks: true, wear: 'bowl' },
+  { kind: 'store', role: 'container', fields: ['count', 'capacity', 'item'], item: 'stone', blocks: true, wear: 'store' },
+  { kind: 'can', role: 'carrier', fields: ['level', 'max'], blocks: true },
+  { kind: 'rock', role: 'source', fields: ['left', 'max'], blocks: true, wear: 'rock' },
+  { kind: 'hen', role: 'source', fields: ['pen', 'capacity'], blocks: true, wear: 'hen' },
+  { kind: 'postbox', role: 'source', fields: [], blocks: true, wear: 'postbox' }
+];
+/** The kinds by role, for the engine (`JOB_KINDS[kind]` is its role). */
+export const JOB_KINDS: Readonly<Record<string, JobRole>> = Object.fromEntries(JOB_VOCABULARY.map((k) => [k.kind, k.role]));
+/** A container's (or a site's) item when it names none. */
+export const JOB_ITEMS: Readonly<Record<string, string>> = Object.fromEntries(JOB_VOCABULARY.filter((k) => k.item).map((k) => [k.kind, k.item as string]));

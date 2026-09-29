@@ -2399,6 +2399,24 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-sayFull",
+      "toId": "translatewordsOut",
+      "toProperty": "sayFull"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-sayHome",
+      "toId": "translatewordsOut",
+      "toProperty": "sayHome"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-sayNoCan",
+      "toId": "translatewordsOut",
+      "toProperty": "sayNoCan"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-sayPick",
       "toId": "translatewordsOut",
       "toProperty": "sayPick"

@@ -62,6 +62,8 @@ import { BAND_PALETTE, BLOCK_TYPES, HINT_KEYS, OLIVE_RUNGS, WORD_KEYS } from './
 // P106 IG-005: the robot catalogue, the upgrades, and the moves and controls every robot has.
 import { ROBOTS_JSON, ROBOT_CONTROLS, ROBOT_MOVES, UPGRADES_JSON } from './cg002Content';
 import { BLOCK_WORD, OLIVE_ENGINE, OLIVE_HELPERS, RUNG_SHAPE, RUNG_TEMPERATURE } from './cg005Olive';
+// P108 IW-002: the job model's vocabulary, its wear clock and its seeded layouts.
+import { HEN_CAPACITY, JOB_ITEMS, JOB_KINDS, SITE_STAGES, WALL_TILE, WEAR } from './cg002Content';
 
 /** An `until` gives up after this many passes, whatever its sensor says. */
 export const UNTIL_GUARD = 40;
@@ -131,13 +133,66 @@ export const BLOCK_META: Readonly<Record<string, { kind: 'motion' | 'action' | '
   ask: { kind: 'ask', body: false, count: false, slots: ['rung', 'args', 'shape', 'dial'] }
 };
 
+// ── P108 IW-002: the seed — mulberry32 over the world's own seed, and the layouts a request lays from it ──────
+
+/**
+ * The seed helpers: the engine carries them, and so does `Start world` (its seed line), so the world a run starts on is
+ * already laid. `rngOf(w)` draws from `w.seed` and writes the state back, so a world JSON is always its own replay.
+ */
+export const SEED_HELPERS = `
+function rngOf(w) {
+  return function () {
+    var a = ((Number(w.seed) >>> 0) + 0x6D2B79F5) >>> 0;
+    w.seed = a;
+    var t = Math.imul(a ^ (a >>> 15), a | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+/** A request's seeded layout on its world: a wall tile at one column of wallAt (on wallRow, else the robot's row); eggs on count of the tiles among. */
+function layOut(w, seeded, rs) {
+  var rnd = rngOf(w), sd = seeded && typeof seeded === 'object' ? seeded : {};
+  if (Array.isArray(sd.wallAt) && sd.wallAt.length === 2 && Array.isArray(w.map)) {
+    var lo = Math.floor(Number(sd.wallAt[0])), hi = Math.floor(Number(sd.wallAt[1]));
+    if (hi < lo) { var sw = lo; lo = hi; hi = sw; }
+    var wx = lo + Math.floor(rnd() * (hi - lo + 1));
+    var wy = sd.wallRow !== undefined && sd.wallRow !== null && sd.wallRow !== '' ? Math.floor(Number(sd.wallRow)) : Math.floor(Number(rs && rs.y) || 0);
+    if (wy >= 0 && wy < w.map.length && wx >= 0 && wx < String(w.map[wy]).length) { var row = String(w.map[wy]); w.map[wy] = row.slice(0, wx) + ${JSON.stringify(WALL_TILE)} + row.slice(wx + 1); }
+  }
+  if (sd.eggs && typeof sd.eggs === 'object' && Array.isArray(sd.eggs.among)) {
+    var pool = sd.eggs.among.slice(), n = Math.max(0, Math.min(pool.length, Math.floor(Number(sd.eggs.count)) || 0));
+    if (!Array.isArray(w.things)) w.things = [];
+    for (var e = 0; e < n; e++) {
+      var k = e + Math.floor(rnd() * (pool.length - e)), pk = pool[k];
+      pool[k] = pool[e]; pool[e] = pk;
+      w.things.push({ kind: 'egg', x: Math.floor(Number(pk[0])), y: Math.floor(Number(pk[1])) });
+    }
+  }
+  return w;
+}
+/** The world a run starts on, given its seed (none: one is picked): the job copied in, the seeded layout laid. A request with neither is untouched. */
+function seedWorld(world, req, seed) {
+  if (!world || !req || (!req.seeded && !req.job)) return world;
+  world.seed = seed !== undefined && seed !== null && seed !== '' && isFinite(Number(seed)) ? Number(seed) >>> 0 : (Date.now() ^ Math.floor(Math.random() * 4294967296)) >>> 0;
+  if (req.job) world.job = JSON.parse(JSON.stringify(req.job));
+  if (req.seeded) layOut(world, req.seeded, req.robotStart);
+  return world;
+}
+`;
+
 // ── The engine helpers, shared by every script that runs a program ─────────
 
 export const ENGINE = `
 var DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0];
-var BLOCKING_TILES = { W: 1, R: 1, T: 1, H: 1 };
+var BLOCKING_TILES = { W: 1, R: 1, T: 1, H: 1, L: 1 };
 // IG-002: a rock (a mineable thing on grass) and a sign block a move like a tulip; a note on the ground does not.
-var BLOCKING_THINGS = { tulip: 1, bowl: 1, rock: 1, sign: 1 };
+var BLOCKING_THINGS = { tulip: 1, bowl: 1, rock: 1, sign: 1, basket: 1, store: 1, can: 1, hen: 1, postbox: 1 };
+// P108 IW-002: the job model (brief §4.2) — its kinds and their roles, a container's item, the wear clock (island ticks only).
+var JOB_KINDS = ${JSON.stringify(JOB_KINDS)};
+var JOB_ITEMS = ${JSON.stringify(JOB_ITEMS)};
+var WEAR = ${JSON.stringify(WEAR)};
+var HEN_CAPACITY = ${HEN_CAPACITY};
+var SITE_STAGES = ${JSON.stringify(SITE_STAGES)};
 var CAN_MAX = ${CAN_MAX};
 var PICKABLE = { letter: 1, egg: 1, stone: 1, food: 1 };
 var UNTIL_GUARD = ${UNTIL_GUARD};
@@ -149,6 +204,7 @@ var ASK_TEMPERATURE = ${JSON.stringify(RUNG_TEMPERATURE)};
 var ASK_BLOCK = ${JSON.stringify(BLOCK_WORD)};
 var ASK_RESERVED = { rung: 1, args: 1, shape: 1, dial: 1, options: 1, times: 1 };
 ${OLIVE_ENGINE}
+${SEED_HELPERS}
 function clone(v) { return v === undefined || v === null ? v : JSON.parse(JSON.stringify(v)); }
 function worldOf(raw) {
   var w = raw && typeof raw === 'object' ? clone(raw) : {};
@@ -165,9 +221,28 @@ function worldOf(raw) {
     r.x = Number(r.x) || 0; r.y = Number(r.y) || 0; r.d = ((Number(r.d) || 0) % 4 + 4) % 4;
     if (!Array.isArray(r.carry)) r.carry = [];
   }
+  // P108 IW-002: a job names its targets by id; one named by its tile [x, y] is given an id (t + its index) here.
+  var jb = jobOf(w);
+  if (jb) {
+    for (var ti = 0; ti < jb.targets.length; ti++) {
+      var tg = jb.targets[ti];
+      if (!Array.isArray(tg)) { jb.targets[ti] = String(tg); continue; }
+      var hit = null;
+      for (var q = 0; q < w.things.length && !hit; q++) { var cand = w.things[q]; if (cand && cand.x === Number(tg[0]) && cand.y === Number(tg[1]) && (JOB_KINDS[cand.kind] === 'target' || JOB_KINDS[cand.kind] === 'container')) hit = cand; }
+      if (hit && !hit.id) hit.id = 't' + w.things.indexOf(hit);
+      jb.targets[ti] = hit ? String(hit.id) : '';
+    }
+  }
+  for (var si = 0; si < w.things.length; si++) if (w.things[si] && w.things[si].kind === 'site') w.things[si].stage = stageOf(w.things[si]);
   return w;
 }
-function tileAt(w, x, y) { if (x < 0 || y < 0 || y >= w.h || x >= w.w) return ''; return String(w.map[y]).charAt(x); }
+/** IW-002: a full path site reads as path (P) whatever the map says under it; the site thing stays (wear can take a stone back). */
+function tileAt(w, x, y) {
+  if (x < 0 || y < 0 || y >= w.h || x >= w.w) return '';
+  var c = String(w.map[y]).charAt(x);
+  if (c !== 'P' && Array.isArray(w.things)) for (var i = 0; i < w.things.length; i++) { var t = w.things[i]; if (t && t.kind === 'site' && t.x === x && t.y === y && isFull(t)) return 'P'; }
+  return c;
+}
 function thingsAt(w, x, y, kind) {
   var out = [];
   for (var i = 0; i < w.things.length; i++) { var t = w.things[i]; if (t.x === x && t.y === y && (!kind || t.kind === kind)) out.push(t); }
@@ -190,6 +265,150 @@ function canMaxOf(r) { return Number(r.canMax) > 0 ? Math.floor(Number(r.canMax)
 /** A tile whose rock was mined to nothing (the world's spent list: the rock thing itself is gone). */
 function spentAt(w, x, y) { return Array.isArray(w.spent) && w.spent.indexOf(x + ',' + y) !== -1; }
 function tulipsOf(w) { var n = 0, wet = 0; for (var i = 0; i < w.things.length; i++) if (w.things[i].kind === 'tulip') { n++; if (w.things[i].watered) wet++; } return { total: n, watered: wet }; }
+// ── P108 IW-002: the job model — meters, containers, the can as a thing, the finish line, the walk home, wear ──
+function jobOf(w) { return w && w.job && typeof w.job === 'object' && Array.isArray(w.job.targets) ? w.job : null; }
+function thingById(w, id) { if (id === undefined || id === null || id === '') return null; for (var i = 0; i < w.things.length; i++) if (w.things[i] && String(w.things[i].id) === String(id)) return w.things[i]; return null; }
+/** The thing a delta names: by its id, else the first of its kind on its tile. */
+function thingOf(w, ref, kinds) {
+  var t = ref && ref.id ? thingById(w, ref.id) : null;
+  if (t) return t;
+  for (var i = 0; i < w.things.length; i++) { var c = w.things[i]; if (c && c.x === ref.x && c.y === ref.y && (kinds ? kinds[c.kind] : c.kind === ref.kind)) return c; }
+  return null;
+}
+function itemOf(t) { return String((t && t.item) || JOB_ITEMS[t && t.kind] || ''); }
+/** A tulip with a meter (have or need set). One without keeps today's watered flag: need 1, one pour. */
+function hasMeter(t) { return !!t && ((t.need !== undefined && t.need !== null) || (t.have !== undefined && t.have !== null)); }
+/** A thing's meter: a tulip's drinks, a site's stones, a container's count of its capacity (none: never full). */
+function meterOf(t) {
+  if (!t) return { have: 0, need: 0 };
+  if (t.kind === 'tulip') {
+    var nd = Number(t.need) > 0 ? Math.floor(Number(t.need)) : 1;
+    var hv = t.have !== undefined && t.have !== null && isFinite(Number(t.have)) ? Math.max(0, Math.floor(Number(t.have))) : (t.watered ? nd : 0);
+    return { have: Math.min(hv, nd), need: nd };
+  }
+  if (t.kind === 'site') { var sn = Number(t.need) > 0 ? Math.floor(Number(t.need)) : 1; return { have: Math.max(0, Math.min(sn, Math.floor(Number(t.have)) || 0)), need: sn }; }
+  if (JOB_KINDS[t.kind] === 'container') {
+    var cn = t.count !== undefined && t.count !== null ? t.count : t.food;
+    return { have: Math.max(0, Math.floor(Number(cn)) || 0), need: Number(t.capacity) > 0 ? Math.floor(Number(t.capacity)) : Infinity };
+  }
+  return { have: 0, need: 0 };
+}
+function isFull(t) { var m = meterOf(t); return m.need > 0 && m.have >= m.need; }
+function meterDelta(t, x, y, have) { var m = meterOf(t); return { id: String(t.id || ''), x: x, y: y, have: have, need: isFinite(m.need) ? m.need : 0 }; }
+/** A site's look: dirt (0) · gravel (under half) · cobbles (under full) · path (full). */
+function stageOf(t) { var m = meterOf(t); return SITE_STAGES[m.have <= 0 ? 0 : m.have * 2 < m.need ? 1 : m.have < m.need ? 2 : 3]; }
+/** Write a meter (never below 0, never above the need): a tulip's drinks and watered flag, a site's stones and stage, a container's count (a bowl's food too). */
+function setMeter(t, have) {
+  var m = meterOf(t), h = Math.max(0, Math.floor(Number(have)) || 0);
+  if (isFinite(m.need)) h = Math.min(m.need, h);
+  if (t.kind === 'tulip') { if (hasMeter(t)) t.have = h; t.watered = h >= m.need; }
+  else if (t.kind === 'site') { t.have = h; t.stage = stageOf(t); }
+  else if (JOB_KINDS[t.kind] === 'container') { t.count = h; if (t.kind === 'bowl') t.food = h; }
+}
+/** A can world: a can lies on the map, or a robot holds one, or a robot row says it needs one. There, fill and water need the can in hand. */
+function canWorld(w) {
+  for (var i = 0; i < w.things.length; i++) if (w.things[i] && w.things[i].kind === 'can') return true;
+  for (var j = 0; j < w.robots.length; j++) if (w.robots[j].holds === 'can' || w.robots[j].needsCan === true) return true;
+  return false;
+}
+/** How much of the job is done: its targets, and how many are full. */
+function jobProgress(w) {
+  var j = jobOf(w), full = 0, total = 0;
+  if (!j) return { full: 0, total: 0 };
+  for (var i = 0; i < j.targets.length; i++) { total++; if (isFull(thingById(w, j.targets[i]))) full++; }
+  return { full: full, total: total };
+}
+function jobDone(w) { var p = jobProgress(w); return p.total > 0 && p.full === p.total; }
+/** The robot's home: its own (r.home as a tile) or the job's. */
+function homeOf(w, r) {
+  if (r && r.home && typeof r.home === 'object' && isFinite(Number(r.home.x)) && isFinite(Number(r.home.y))) return r.home;
+  var j = jobOf(w);
+  return j && j.home && typeof j.home === 'object' && isFinite(Number(j.home.x)) && isFinite(Number(j.home.y)) ? j.home : null;
+}
+/** The first tile of a shortest path from one tile to another over tiles that do not block (breadth first; up, right, down, left). */
+function bfsNext(w, fx, fy, tx, ty) {
+  if (fx === tx && fy === ty) return null;
+  var from = {}, start = fx + ',' + fy, q = [[fx, fy]], head = 0;
+  from[start] = '';
+  while (head < q.length) {
+    var c = q[head++];
+    if (c[0] === tx && c[1] === ty) break;
+    for (var d = 0; d < 4; d++) {
+      var nx = c[0] + DX[d], ny = c[1] + DY[d], k = nx + ',' + ny;
+      if (from[k] !== undefined || blocked(w, nx, ny)) continue;
+      from[k] = c[0] + ',' + c[1];
+      q.push([nx, ny]);
+    }
+  }
+  var cur = tx + ',' + ty;
+  if (from[cur] === undefined) return null;
+  while (from[cur] !== start) cur = from[cur];
+  var p = cur.split(',');
+  return { x: Number(p[0]), y: Number(p[1]) };
+}
+/** One tick of the walk home (the engine's, not the child's program): a turn or a step on the shortest path; at home, face home.d, then the home event. */
+function homeStep(w, run, s, delta) {
+  var r = robotOf(w, run.robotId), hm = r ? homeOf(w, r) : null;
+  delta.op = 'home';
+  s.guard = (Number(s.guard) || 0) + 1;
+  if (!r || !hm || s.guard > (w.w * w.h + 4) * 3) { delta.nothing = true; if (r) delta.lost = { id: r.id, x: r.x, y: r.y }; run.pc++; return; }
+  var hx = Math.floor(Number(hm.x)), hy = Math.floor(Number(hm.y)), want = r.d;
+  if (r.x === hx && r.y === hy) {
+    if (hm.d !== undefined && hm.d !== null && hm.d !== '' && isFinite(Number(hm.d))) want = ((Math.floor(Number(hm.d)) % 4) + 4) % 4;
+    if (want === r.d) { delta.home = { id: r.id, x: r.x, y: r.y }; delta.sayKey = 'sayHome'; run.pc++; return; }
+  } else {
+    var nx = bfsNext(w, r.x, r.y, hx, hy);
+    if (!nx) { delta.nothing = true; delta.lost = { id: r.id, x: r.x, y: r.y }; run.pc++; return; }
+    for (var d = 0; d < 4; d++) if (r.x + DX[d] === nx.x && r.y + DY[d] === nx.y) want = d;
+    if (want === r.d) { delta.move = { id: r.id, x: nx.x, y: nx.y }; return; }
+  }
+  delta.turn = { id: r.id, d: (want - r.d + 4) % 4 === 3 ? (r.d + 3) % 4 : (r.d + 1) % 4 };
+}
+/**
+ * Wear (R2, D7): what the world loses and grows at island tick age — ONLY the island tick calls this, never step or
+ * runToEnd. One thing of each worn kind per period (a tulip, a bowl, a basket, a store: picked by the seed; a site: the
+ * most walked), never below 0; a rock with a max regrows a stone; a hen lays on a free tile of her pen; a letter comes.
+ * Returns deltas for apply (the only writer); the last carries the seed when a draw was made.
+ */
+function wearOf(worldIn, age) {
+  var w = worldOf(worldIn), out = [], n = Math.floor(Number(age)) || 0, drew = false;
+  if (n <= 0) return out;
+  var rnd = rngOf(w);
+  function due(kind) { return Number(WEAR[kind]) > 0 && n % Number(WEAR[kind]) === 0; }
+  var picked = ['tulip', 'bowl', 'basket', 'store'];
+  for (var k = 0; k < picked.length; k++) {
+    if (!due(picked[k])) continue;
+    var pool = [];
+    for (var i = 0; i < w.things.length; i++) if (w.things[i] && w.things[i].kind === picked[k] && meterOf(w.things[i]).have > 0) pool.push(w.things[i]);
+    if (!pool.length) continue;
+    var t = pool[Math.floor(rnd() * pool.length)];
+    drew = true;
+    out.push({ wear: { id: String(t.id || ''), kind: t.kind, x: t.x, y: t.y, have: meterOf(t).have - 1 } });
+  }
+  if (due('site')) {
+    var best = null;
+    for (var s2 = 0; s2 < w.things.length; s2++) { var st = w.things[s2]; if (st && st.kind === 'site' && meterOf(st).have > 0 && (!best || (Number(st.walked) || 0) > (Number(best.walked) || 0))) best = st; }
+    if (best) out.push({ wear: { id: String(best.id || ''), kind: 'site', x: best.x, y: best.y, have: meterOf(best).have - 1 } });
+  }
+  if (due('rock')) for (var r2 = 0; r2 < w.things.length; r2++) { var rk = w.things[r2]; if (rk && rk.kind === 'rock' && Number(rk.max) > 0 && (Math.floor(Number(rk.left)) || 0) < Math.floor(Number(rk.max))) out.push({ regrow: { id: String(rk.id || ''), x: rk.x, y: rk.y, left: (Math.floor(Number(rk.left)) || 0) + 1 } }); }
+  if (due('hen')) for (var h = 0; h < w.things.length; h++) {
+    var hen = w.things[h];
+    if (!hen || hen.kind !== 'hen' || !Array.isArray(hen.pen) || hen.pen.length !== 4) continue;
+    var x0 = Math.min(hen.pen[0], hen.pen[2]), x1 = Math.max(hen.pen[0], hen.pen[2]), y0 = Math.min(hen.pen[1], hen.pen[3]), y1 = Math.max(hen.pen[1], hen.pen[3]);
+    var cap = Number(hen.capacity) > 0 ? Math.floor(Number(hen.capacity)) : HEN_CAPACITY, eggs = 0, free = [];
+    for (var py = y0; py <= y1; py++) for (var px = x0; px <= x1; px++) {
+      eggs += thingsAt(w, px, py, 'egg').length;
+      if (tileAt(w, px, py) !== '' && !blocked(w, px, py) && !thingsAt(w, px, py).length) free.push({ x: px, y: py });
+    }
+    if (eggs >= cap || !free.length) continue;
+    var at = free[Math.floor(rnd() * free.length)];
+    drew = true;
+    out.push({ lay: { x: at.x, y: at.y } });
+  }
+  if (due('postbox')) for (var b = 0; b < w.things.length; b++) { var pb = w.things[b]; if (pb && pb.kind === 'postbox' && !thingsAt(w, pb.x, pb.y, 'letter').length) out.push({ letter: { x: pb.x, y: pb.y } }); }
+  if (drew) out.push({ seed: w.seed });
+  return out;
+}
 /** The last Olive answer, read as a word. yes/oui/true and no/non/false are one word each. */
 function oliveSays(run, arg) {
   var a = run && run.lastAnswer;
@@ -301,9 +520,20 @@ function exec(w, run, s, delta) {
   if (s.op === 'water') {
     // IG-002: a robot with a can spends one water per pour; an EMPTY can pours nothing — no water, no puddle — and the
     // dry event is the error message. A robot with no can (null) waters for free, as before.
+    // P108 IW-002: in a can world the can must be in hand (else noCan, and nothing changes).
+    if (canWorld(w) && r.holds !== 'can') { run.noCans = (Number(run.noCans) || 0) + 1; delta.noCan = { id: r.id }; delta.sayKey = 'sayNoCan'; return; }
     var can = canOf(r);
     if (can !== null && can <= 0) { run.dries++; delta.dry = { id: r.id, x: f.x, y: f.y }; delta.sayKey = 'sayDry'; return; }
     var tul = thingsAt(w, f.x, f.y, 'tulip');
+    // IW-002: a tulip with a meter takes one drink up to its need; a full one refuses (nothing spent) and says so.
+    if (tul.length && hasMeter(tul[0])) {
+      var tm = meterOf(tul[0]);
+      if (tm.have >= tm.need) { delta.full = { id: String(tul[0].id || ''), x: f.x, y: f.y }; delta.sayKey = 'sayFull'; return; }
+      if (tm.have + 1 >= tm.need) run.watered++;
+      delta.water = { x: f.x, y: f.y }; delta.meter = meterDelta(tul[0], f.x, f.y, tm.have + 1); delta.sayKey = 'sayDrink';
+      if (can !== null) delta.can = { id: r.id, can: can - 1 };
+      return;
+    }
     if (tul.length) { if (!tul[0].watered) run.watered++; delta.water = { x: f.x, y: f.y }; delta.sayKey = 'sayDrink'; if (can !== null) delta.can = { id: r.id, can: can - 1 }; return; }
     var c = tileAt(w, f.x, f.y);
     if (c !== '' && c !== 'W') { if (!thingsAt(w, f.x, f.y, 'puddle').length) { run.puddles++; delta.puddle = { x: f.x, y: f.y }; } delta.splash = { x: f.x, y: f.y }; delta.sayKey = 'saySplash'; if (can !== null) delta.can = { id: r.id, can: can - 1 }; return; }
@@ -311,24 +541,49 @@ function exec(w, run, s, delta) {
   }
   // IG-002: fill at the water ahead fills the can to canMax; with no water ahead it is a no-op (no bump).
   if (s.op === 'fill') {
+    if (canWorld(w) && r.holds !== 'can') { run.noCans = (Number(run.noCans) || 0) + 1; delta.noCan = { id: r.id }; delta.sayKey = 'sayNoCan'; return; }
     if (tileAt(w, f.x, f.y) === 'W') { delta.fill = { id: r.id, x: f.x, y: f.y }; delta.can = { id: r.id, can: canMaxOf(r) }; delta.sayKey = 'sayFill'; return; }
     delta.nothing = true; return;
   }
   if (s.op === 'pick') {
-    var th = thingsAt(w, f.x, f.y), it = null, rock = null;
+    var th = thingsAt(w, f.x, f.y), it = null, rock = null, box = null, rock0 = null, canT = null;
     for (var i = 0; i < th.length && !it; i++) if (PICKABLE[th[i].kind]) it = th[i];
     for (var ri = 0; ri < th.length && !rock; ri++) if (th[ri].kind === 'rock' && Number(th[ri].left) > 0) rock = th[ri];
+    // P108 IW-002: the can is a thing the robot picks up (it holds it; the can leaves the map with its level)…
+    for (var ci = 0; ci < th.length && !canT; ci++) if (th[ci].kind === 'can') canT = th[ci];
+    if (canT && r.holds !== 'can') { delta.holds = { id: r.id, what: 'can', x: f.x, y: f.y, level: Math.max(0, Math.floor(Number(canT.level)) || 0), max: Number(canT.max) > 0 ? Math.floor(Number(canT.max)) : 0 }; delta.sayKey = 'sayPick'; return; }
+    // …a container gives one of its item; a rock with a max stays on the map at 0 (it regrows on island ticks).
+    for (var bi = 0; bi < th.length && !box; bi++) if (JOB_KINDS[th[bi].kind] === 'container' && meterOf(th[bi]).have > 0) box = th[bi];
+    for (var r0 = 0; r0 < th.length && !rock0; r0++) if (th[r0].kind === 'rock' && !(Number(th[r0].left) > 0) && Number(th[r0].max) > 0) rock0 = th[r0];
     if (it && r.carry.length < basketOf(r)) { delta.pick = { id: r.id, kind: it.kind, x: f.x, y: f.y }; delta.sayKey = 'sayPick'; return; }
     // IG-002: a rock ahead gives one stone per pick (the basket bounds it); apply shrinks the rock and removes it at 0.
     if (!it && rock && r.carry.length < basketOf(r)) { delta.pick = { id: r.id, kind: 'stone', x: f.x, y: f.y, rock: true }; delta.sayKey = 'sayPick'; return; }
+    if (!it && !rock && box && r.carry.length < basketOf(r)) { delta.pick = { id: r.id, kind: itemOf(box), x: f.x, y: f.y, box: true, from: String(box.id || '') }; delta.meter = meterDelta(box, f.x, f.y, meterOf(box).have - 1); delta.sayKey = 'sayPick'; return; }
     // A pick where a rock was used up: a bump with nothing carried (the rockGone hint names why).
-    if (!it && !rock && spentAt(w, f.x, f.y)) { run.rockGone++; run.bumps++; delta.bump = { id: r.id, x: f.x, y: f.y }; delta.rockGone = { x: f.x, y: f.y }; delta.sayKey = 'sayBump'; return; }
+    if (!it && !rock && (spentAt(w, f.x, f.y) || rock0)) { run.rockGone++; run.bumps++; delta.bump = { id: r.id, x: f.x, y: f.y }; delta.rockGone = { x: f.x, y: f.y }; delta.sayKey = 'sayBump'; return; }
     delta.nothing = true; return;
   }
   if (s.op === 'put') {
+    // P108 IW-002: a site, a basket or a store ahead takes its own item, one at a time, to its need; a full one refuses
+    // (the item stays carried) and says so. Anything else carried is not put there.
+    var top = r.carry.length ? String(r.carry[r.carry.length - 1]) : '', into = null, ahead = thingsAt(w, f.x, f.y);
+    for (var ai = 0; ai < ahead.length && !into; ai++) if (ahead[ai].kind === 'site' || ahead[ai].kind === 'basket' || ahead[ai].kind === 'store') into = ahead[ai];
+    if (into && top) {
+      if (top !== itemOf(into)) { delta.nothing = true; return; }
+      var im = meterOf(into);
+      if (im.have >= im.need) { delta.full = { id: String(into.id || ''), x: f.x, y: f.y }; delta.sayKey = 'sayFull'; return; }
+      delta.stow = { id: r.id, kind: top, x: f.x, y: f.y, into: String(into.id || ''), target: into.kind };
+      delta.meter = meterDelta(into, f.x, f.y, im.have + 1); delta.sayKey = 'sayPut';
+      return;
+    }
+    // The can put back down, with its level, on a free tile ahead.
+    if (r.holds === 'can' && tileAt(w, f.x, f.y) !== '' && !blocked(w, f.x, f.y) && !ahead.length) { delta.holds = { id: r.id, what: '', x: f.x, y: f.y, level: canOf(r) || 0, max: canMaxOf(r) }; delta.sayKey = 'sayPut'; return; }
     if (!r.carry.length) { delta.nothing = true; return; }
     var kind = String(r.carry[r.carry.length - 1]);
     var bowl = thingsAt(w, f.x, f.y, 'bowl');
+    // IW-002: a bowl with a capacity refuses when full and shows its meter; one without fills as before.
+    if (bowl.length && kind === itemOf(bowl[0]) && isFull(bowl[0])) { delta.full = { id: String(bowl[0].id || ''), x: f.x, y: f.y }; delta.sayKey = 'sayFull'; return; }
+    if (bowl.length && kind === itemOf(bowl[0]) && Number(bowl[0].capacity) > 0) delta.meter = meterDelta(bowl[0], f.x, f.y, meterOf(bowl[0]).have + 1);
     if (bowl.length) { if (kind === 'food') { delta.feed = { id: r.id, x: f.x, y: f.y }; delta.sayKey = 'sayPut'; return; } delta.nothing = true; return; }
     if (tileAt(w, f.x, f.y) !== '' && !blocked(w, f.x, f.y)) { delta.put = { id: r.id, kind: kind, x: f.x, y: f.y }; delta.sayKey = 'sayPut'; return; }
     delta.nothing = true; return;
@@ -359,6 +614,9 @@ function step(runIn, worldIn, answer) {
       }
     }
   }
+  // P108 IW-002: the finish line. The tick the job's last target is full, the walk home is appended (the engine's own
+  // steps, after whatever is left of the child's program); the run ends at home.
+  if (!run.jobDone && jobDone(w)) { run.jobDone = true; run.steps.push({ id: null, op: 'home', guard: 0 }); delta.jobDone = true; }
   if (run.pc >= run.steps.length) {
     var pending = false;
     for (var p = 0; p < w.schedule.length; p++) if (Number(w.schedule[p].tick) > run.tick) pending = true;
@@ -441,6 +699,8 @@ function step(runIn, worldIn, answer) {
     run.steps.splice.apply(run.steps, [run.pc + 1, 0].concat(body));
     run.pc++;
     delta.repeat = n;
+  } else if (s.op === 'home') {
+    homeStep(w, run, s, delta);
   } else if (s.op === 'noop') {
     run.pc++;
     delta.noop = true;
@@ -458,8 +718,16 @@ function apply(worldIn, delta) {
   if (d.events) w.events = [];
   var r = d.robot !== undefined ? robotOf(w, d.robot) : null;
   if (d.turn) { var rt = robotOf(w, d.turn.id) || r; if (rt) rt.d = d.turn.d; }
-  if (d.move) { var rm = robotOf(w, d.move.id) || r; if (rm) { rm.x = d.move.x; rm.y = d.move.y; } }
-  if (d.water) { var tul = thingsAt(w, d.water.x, d.water.y, 'tulip'); for (var i = 0; i < tul.length; i++) tul[i].watered = true; }
+  if (d.move) {
+    var rm = robotOf(w, d.move.id) || r; if (rm) { rm.x = d.move.x; rm.y = d.move.y; }
+    // IW-002: a site remembers how often it is walked on (wear takes its stone from the most walked).
+    var ws = thingsAt(w, d.move.x, d.move.y, 'site'); for (var wi = 0; wi < ws.length; wi++) ws[wi].walked = (Number(ws[wi].walked) || 0) + 1;
+  }
+  if (d.water) {
+    var tul = thingsAt(w, d.water.x, d.water.y, 'tulip');
+    // IW-002: a tulip with a meter takes one drink up to its need; the rest are watered as before. Full again: no droop.
+    for (var i = 0; i < tul.length; i++) { if (hasMeter(tul[i])) setMeter(tul[i], meterOf(tul[i]).have + 1); else tul[i].watered = true; if (tul[i].droop && tul[i].watered) tul[i].droop = false; }
+  }
   if (d.puddle) w.things.push({ kind: 'puddle', x: d.puddle.x, y: d.puddle.y });
   if (d.pick) {
     var rp = robotOf(w, d.pick.id) || r;
@@ -469,15 +737,30 @@ function apply(worldIn, delta) {
         var rk = w.things[k];
         if (rk.x !== d.pick.x || rk.y !== d.pick.y || rk.kind !== 'rock') continue;
         rk.left = Math.max(0, Math.floor(Number(rk.left)) - 1);
-        if (!(rk.left > 0)) { w.things.splice(k, 1); w.spent = (Array.isArray(w.spent) ? w.spent : []).concat([d.pick.x + ',' + d.pick.y]); }
+        if (!(rk.left > 0) && !(Number(rk.max) > 0)) { w.things.splice(k, 1); w.spent = (Array.isArray(w.spent) ? w.spent : []).concat([d.pick.x + ',' + d.pick.y]); }
         break;
       }
-    } else for (var j = 0; j < w.things.length; j++) if (w.things[j].x === d.pick.x && w.things[j].y === d.pick.y && w.things[j].kind === d.pick.kind) { w.things.splice(j, 1); break; }
+    } else if (d.pick.box) { var bx = thingOf(w, { id: d.pick.from, x: d.pick.x, y: d.pick.y }, { basket: 1, bowl: 1, store: 1 }); if (bx) setMeter(bx, meterOf(bx).have - 1); }
+    else for (var j = 0; j < w.things.length; j++) if (w.things[j].x === d.pick.x && w.things[j].y === d.pick.y && w.things[j].kind === d.pick.kind) { w.things.splice(j, 1); break; }
     if (rp) rp.carry.push(d.pick.kind);
   }
   if (d.can) { var rc = robotOf(w, d.can.id) || r; if (rc) rc.can = Math.max(0, Math.floor(Number(d.can.can)) || 0); }
   if (d.put) { var ru = robotOf(w, d.put.id) || r; if (ru) ru.carry.pop(); w.things.push({ kind: d.put.kind, x: d.put.x, y: d.put.y }); }
-  if (d.feed) { var rf = robotOf(w, d.feed.id) || r; if (rf) rf.carry.pop(); var bowl = thingsAt(w, d.feed.x, d.feed.y, 'bowl'); if (bowl.length) bowl[0].food = (Number(bowl[0].food) || 0) + 1; }
+  if (d.feed) { var rf = robotOf(w, d.feed.id) || r; if (rf) rf.carry.pop(); var bowl = thingsAt(w, d.feed.x, d.feed.y, 'bowl'); if (bowl.length) setMeter(bowl[0], meterOf(bowl[0]).have + 1); }
+  // ── P108 IW-002: the job model's deltas ──
+  if (d.stow) { var rs = robotOf(w, d.stow.id) || r; var into = thingOf(w, { id: d.stow.into, x: d.stow.x, y: d.stow.y }, { site: 1, basket: 1, store: 1 }); if (rs && into) { rs.carry.pop(); setMeter(into, meterOf(into).have + 1); } }
+  if (d.holds) {
+    var rh = robotOf(w, d.holds.id) || r;
+    if (d.holds.what === 'can') {
+      for (var hc = 0; hc < w.things.length; hc++) if (w.things[hc].kind === 'can' && w.things[hc].x === d.holds.x && w.things[hc].y === d.holds.y) { w.things.splice(hc, 1); break; }
+      if (rh) { rh.holds = 'can'; rh.can = Math.max(0, Math.floor(Number(d.holds.level)) || 0); if (Number(d.holds.max) > 0) rh.canMax = Math.floor(Number(d.holds.max)); }
+    } else if (rh) { w.things.push({ kind: 'can', x: d.holds.x, y: d.holds.y, level: canOf(rh) || 0, max: canMaxOf(rh) }); delete rh.holds; rh.can = null; }
+  }
+  if (d.wear) { var wt = thingOf(w, d.wear); if (wt) { setMeter(wt, d.wear.have); if (wt.kind === 'tulip') wt.droop = true; } }
+  if (d.regrow) { var rg = thingOf(w, { id: d.regrow.id, x: d.regrow.x, y: d.regrow.y, kind: 'rock' }); if (rg) rg.left = Math.max(0, Math.min(Math.floor(Number(rg.max)) || 0, Math.floor(Number(d.regrow.left)) || 0)); }
+  if (d.lay) w.things.push({ kind: 'egg', x: d.lay.x, y: d.lay.y });
+  if (d.letter) w.things.push({ kind: 'letter', x: d.letter.x, y: d.letter.y });
+  if (d.seed !== undefined && d.seed !== null && isFinite(Number(d.seed))) w.seed = Number(d.seed) >>> 0;
   return w;
 }
 /** Run a program to its end with no Olive (every ask takes the fallback). For Predict and the gate. */
@@ -511,6 +794,8 @@ function goalMet(w, run, program, goal) {
     else if (g.name === 'no_puddle') { var pud = 0; for (var p = 0; p < w.things.length; p++) if (w.things[p].kind === 'puddle') pud++; ok = pud === 0; }
     // IG-006: exactly n tulips of one colour watered (Mamie's note: the red row, and none of the yellow).
     else if (g.name === 'tulips_watered') { var tw = 0; for (var q = 0; q < w.things.length; q++) if (w.things[q].kind === 'tulip' && String(w.things[q].color || '') === String(a[0]) && w.things[q].watered) tw++; ok = tw === (Number(a[1]) || 0); done += Math.min(tw, Number(a[1]) || 0); total += Number(a[1]) || 0; }
+    // P108 IW-002: the finish line — every target of the job full, and the robot at its home.
+    else if (g.name === 'job_done') { var jp = jobProgress(w), jh = homeOf(w, r); done += jp.full; total += jp.total; ok = jp.total > 0 && jp.full === jp.total && !!r && (!jh || (r.x === Math.floor(Number(jh.x)) && r.y === Math.floor(Number(jh.y)))); }
     if (!ok) missing.push(String(g.name));
   }
   return { met: goals.length > 0 && missing.length === 0, missing: missing, done: done, total: total };
