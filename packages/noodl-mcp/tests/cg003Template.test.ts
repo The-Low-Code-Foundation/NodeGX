@@ -1311,7 +1311,9 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
   it('ruling 6: the pins — one per islander with a request, each labelled in the language, open while she has one left for this kid', () => {
     const pins = run(ISLAND_PINS_SCRIPT, { requests: REQ_ROWS, band: 2, done: [], words: WORD_ROWS, lang: 'fr', botName: 'Pip' }).pins;
     expect(pins.map((p: { id: string }) => p.id)).toEqual(ISLAND_PINS.map((p) => p.id));
-    for (const p of pins) expect({ id: p.id, label: p.label.length > 0, open: p.isOpen, cls: p.pinClass.includes('bg-pin-open') }).toEqual({ id: p.id, label: true, open: true, cls: true });
+    for (const p of pins) expect({ id: p.id, label: p.label.length > 0, open: p.isOpen }).toEqual({ id: p.id, label: true, open: true });
+    // P106 s4 (e): the sea's pin classes went with the sea — nothing drew them since IG-004's island.
+    for (const p of pins) expect(Object.keys(p).sort()).toEqual(['id', 'isOpen', 'label', 'requestId']);
     expect(pins.find((p: { id: string }) => p.id === 'mamie').label).toBe(WORDS.islMamie.fr);
     // Her first request done: the pin opens her next one, not the one done.
     const next = run(ISLAND_PINS_SCRIPT, { requests: REQ_ROWS, band: 2, done: ['tulip-door'], words: WORD_ROWS, lang: 'en' }).pins.find((p: { id: string }) => p.id === 'mamie');
@@ -1321,7 +1323,7 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     // All of Biscuit's done: her pin is shut (no badge, no tap), and the band is honoured (Biscuit asks at band 10–12 only).
     const biscuitAll = REQ_ROWS.filter((r) => r.islander === 'biscuit').map((r) => r.id);
     const shut = run(ISLAND_PINS_SCRIPT, { requests: REQ_ROWS, band: 2, done: biscuitAll, words: WORD_ROWS, lang: 'en' }).pins.find((p: { id: string }) => p.id === 'biscuit');
-    expect([shut.isOpen, shut.requestId, shut.pinClass.includes('bg-pin-open')]).toEqual([false, '', false]);
+    expect([shut.isOpen, shut.requestId]).toEqual([false, '']);
     const young = run(ISLAND_PINS_SCRIPT, { requests: REQ_ROWS, band: 1, done: [], words: WORD_ROWS, lang: 'en' }).pins.find((p: { id: string }) => p.id === 'biscuit');
     expect(young.isOpen).toBe(REQ_ROWS.some((r) => r.islander === 'biscuit' && r.band === 1));
   });

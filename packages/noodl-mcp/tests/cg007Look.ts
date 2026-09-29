@@ -24,7 +24,6 @@
  *
  * @module noodl-mcp/tests/cg007Look
  */
-import { PIN_PLACES } from './cg003Content';
 
 
 /** The preset the tokens sit on. Playful ships Nunito (P88 GAM-016), the mockup's body face. */
@@ -208,11 +207,6 @@ const iconRules = Object.entries(ICONS)
   .map(([name, s]) => `.bg-i-${name}::before { content: ''; display: inline-block; flex: none; width: 20px; height: 20px; margin-right: 8px; background-color: currentColor; -webkit-mask: ${uri(s)} center / contain no-repeat; mask: ${uri(s)} center / contain no-repeat; }`)
   .join('\n');
 
-/** Where each pin stands on the island map (the mockup's numbers, `PIN_PLACES`): its centre, and its size. */
-const pinRules = Object.entries(PIN_PLACES)
-  .map(([id, [left, top, width, height]]) => `.bg-pin-${id} { left: ${left}% !important; top: ${top}% !important; width: ${width}% !important; height: ${height}% !important; }`)
-  .join('\n');
-
 /** Every class the graph names, in one sheet. Colours are `var(--token)`; the sprites keep their own paint. */
 export const GARDEN_CSS = `/* Olive's Island, the look (P105 CG-007). The mockup's rules, ported; prefixed bg- so nothing collides with a kit's gd- classes. */
 html, body { background: var(--paper); }
@@ -324,35 +318,15 @@ ${owlColourRule}
 @keyframes bg-pop { from { transform: scale(0.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .bg-reward { border-radius: 999px; }
 
-/* The island (ruling 6: the mockup's .island, .map, .land, .pin; then .quest, .tag). */
+/* The island page's two columns, then .quest, .tag (P106 s4: the P105 sea with pins went with IG-004's island). */
 .bg-island { display: grid !important; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
 @media (max-width: 980px) { .bg-island { grid-template-columns: minmax(0, 1fr); } }
-.bg-sea { position: relative !important; width: 100% !important; height: auto !important; aspect-ratio: 12 / 7; border-radius: 22px; overflow: hidden !important; background: linear-gradient(180deg, var(--sea-top), var(--sea-bottom)); display: block !important; }
-.bg-land { position: absolute !important; left: 5% !important; right: 5% !important; top: 6% !important; bottom: 8% !important; width: auto !important; height: auto !important; border-radius: 46% 54% 42% 58% / 50% 40% 60% 50%; background: var(--land); box-shadow: inset 0 0 0 10px var(--land-edge), 0 10px 0 var(--shore); }
-.bg-pin { position: absolute !important; display: grid !important; place-items: center; transform: translate(-50%, -50%); z-index: 1; }
-.bg-pin-pic { width: 100% !important; height: 100% !important; background-size: contain !important; }
-.bg-pin-scene { background-size: contain !important; }
-/* The name under a pin (the mockup's .pin .lbl): white pill, ink words. */
-.bg-pin-lbl { position: absolute !important; top: 100% !important; left: 50% !important; transform: translateX(-50%); white-space: nowrap !important; background: var(--card); border-radius: 999px; padding: 3px 10px; box-shadow: var(--shadow-soft); z-index: 2; }
-/* A pin with a request left for this kid: a sun badge, and it answers a tap. */
-.bg-pin-open { cursor: pointer; z-index: 3; }
-.bg-pin-open::after { content: '!'; position: absolute; top: -2px; right: -2px; width: 22px; height: 22px; border-radius: 50%; background: var(--sun); color: var(--ink); font-weight: 800; font-size: 14px; line-height: 22px; text-align: center; box-shadow: var(--shadow-key); }
-.bg-pin-open:hover .bg-pin-pic { transform: scale(1.06); }
-/* The robot's pin: the kit draws only the robot, on no ground, and its name as the pin's label. */
-.bg-pin-bot { z-index: 4; }
-.bg-pin-bot .gd-world, .bg-profile-stage .gd-world { width: 100% !important; max-width: none !important; border: 0 !important; background: transparent !important; overflow: visible !important; border-radius: 0 !important; }
-.bg-pin-bot .gd-cell, .bg-profile-stage .gd-cell { background: transparent !important; cursor: default; }
-/* A drawing, not a board: a press on the robot is a press on its card (Profiles) or nothing (the island). */
-.bg-pin-bot .gd-world, .bg-profile-stage .gd-world { pointer-events: none; }
-.bg-pin-bot .gd-name, .bg-profile-stage .gd-name { top: 100% !important; font-size: 13px !important; padding: 3px 10px !important; box-shadow: var(--shadow-soft) !important; }
-${pinRules}
-/* A phone (the s3 drive, 390 px): the 12:7 sea is 208 px tall and the labels keep their desktop size, so Pip covered
-   Mamie Rose's name and Sami's and Biscuit's badges met. The sea goes square, the labels smaller, Pip one step east. */
-@media (max-width: 600px) {
-  .bg-sea { aspect-ratio: 1 / 1; }
-  .bg-pin-lbl, .bg-pin-bot .gd-name { font-size: 11px !important; padding: 2px 7px !important; }
-  .bg-pin-bot { left: 46% !important; top: 38% !important; }
-}
+/* The robot on the Profiles card: the kit draws only the robot, on no ground, and its name as its label. A drawing, not a
+   board: a press on the robot is a press on its card. */
+.bg-profile-stage .gd-world { width: 100% !important; max-width: none !important; border: 0 !important; background: transparent !important; overflow: visible !important; border-radius: 0 !important; }
+.bg-profile-stage .gd-cell { background: transparent !important; cursor: default; }
+.bg-profile-stage .gd-world { pointer-events: none; }
+.bg-profile-stage .gd-name { top: 100% !important; font-size: 13px !important; padding: 3px 10px !important; box-shadow: var(--shadow-soft) !important; }
 .bg-quest { box-shadow: var(--shadow-soft); display: grid !important; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; align-items: center; cursor: pointer; }
 .bg-tag { border-radius: 999px; }
 .bg-tag-motion { background-color: var(--block-motion); }

@@ -146,32 +146,14 @@ export const SKILL_BLOCKS: ReadonlyArray<{ key: string; kind: string; word: stri
 ];
 
 /**
- * The island (ruling 6): the MOCKUP's sea with pins, not a tile world (`bot-garden.html` lines 302–330). Each islander
- * who can ask is a pin, where the mockup puts it (Sami, whom the mockup's map leaves out, on the free east shore); the
- * scenery pins and the robot's and Olive's are drawn by `Island/Map` itself. The place of every pin is its class in the
- * look (`.bg-pin-<id>`), so the numbers live in one sheet with the mockup's. Only the playing kid's robot is on it
- * (ruling 8): one island per kid.
+ * The islanders who ask, one row each: `Logic/Island pins` names each one's next request for this kid, and the island
+ * (IG-004) stands her by that request's plot with its title as her bubble. The P105 sea with pins is gone (P106 s4).
  */
 export const ISLAND_PINS: ReadonlyArray<{ id: string; islander: string; sprite: string }> = [
   { id: 'mamie', islander: 'mamie', sprite: 'house' },
   { id: 'biscuit', islander: 'biscuit', sprite: 'cat' },
   { id: 'sami', islander: 'sami', sprite: 'postie' }
 ];
-
-/** Where the mockup puts each pin on the map: left, top (its centre), width, height, in % of the map. */
-export const PIN_PLACES: Readonly<Record<string, [number, number, number, number]>> = {
-  mamie: [24, 30, 11, 19],
-  tree1: [62, 26, 9, 16],
-  tree2: [72, 34, 9, 16],
-  tulip1: [40, 56, 7, 12],
-  tulip2: [46, 60, 7, 12],
-  tulip3: [52, 56, 7, 12],
-  biscuit: [78, 66, 10, 17],
-  rock: [20, 70, 11, 19],
-  bot: [34, 40, 10, 17],
-  olive: [60, 76, 8, 14],
-  sami: [85, 40, 10, 17]
-};
 
 /**
  * The Teach pad's keys in the pad's order (the mockup's `.pad`): the op each records, its fixed place on the d-pad (the

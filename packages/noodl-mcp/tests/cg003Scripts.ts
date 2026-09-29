@@ -415,9 +415,9 @@ Outputs.model = model;
 `;
 
 /**
- * The islanders on the sea (ruling 6), as pins: each one's label in the language and, for THIS kid, the first request
- * of theirs she has not done in her band. A pin with one is open (tappable, it opens that request); the list beside the
- * map stays the path a screen reader and a keyboard take. The robot's pin and Olive's are drawn by Island/Map.
+ * Each islander who asks: her label in the language and, for THIS kid, the first request of hers she has not done in
+ * her band (open while there is one). `Logic/Island world` stands her by that request's plot (IG-004). The P105 sea's
+ * pin classes went with the sea (P106 s4).
  */
 export const ISLAND_PINS_SCRIPT = `${WORD_HELPER}
 var ISLANDERS = ${JSON.stringify(ISLANDERS)};
@@ -437,8 +437,7 @@ for (var i = 0; i < PINS.length; i++) {
   }
   if (requestId) open++;
   pins.push({
-    id: pin.id, label: w[isl.nameKey] || '', requestId: requestId, isOpen: !!requestId,
-    pinClass: 'bg-pin bg-pin-' + pin.id + (requestId ? ' bg-pin-open bg-press' : ''), picClass: 'bg-pin-pic bg-sp-' + pin.sprite
+    id: pin.id, label: w[isl.nameKey] || '', requestId: requestId, isOpen: !!requestId
   });
 }
 Outputs.pins = pins;
