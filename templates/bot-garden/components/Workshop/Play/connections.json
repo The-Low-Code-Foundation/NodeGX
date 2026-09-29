@@ -137,12 +137,6 @@
     },
     {
       "fromId": "plT",
-      "fromProperty": "ask",
-      "toId": "plAsk",
-      "toProperty": "label"
-    },
-    {
-      "fromId": "plT",
       "fromProperty": "owlMeta",
       "toId": "plOwlMeta",
       "toProperty": "text"
@@ -472,6 +466,12 @@
       "toProperty": "show"
     },
     {
+      "fromId": "plStart",
+      "fromProperty": "allowed",
+      "toId": "plPad",
+      "toProperty": "allowed"
+    },
+    {
       "fromId": "plTeachMode",
       "fromProperty": "teaching",
       "toId": "plRec",
@@ -686,6 +686,30 @@
       "fromProperty": "sayKey",
       "toId": "plDraw",
       "toProperty": "sayKey"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "sayText",
+      "toId": "plDraw",
+      "toProperty": "sayText"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "sayStyle",
+      "toId": "plDraw",
+      "toProperty": "sayStyle"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "run",
+      "toId": "plDraw",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "stepMs",
+      "toId": "plDraw",
+      "toProperty": "stepMs"
     },
     {
       "fromId": "plRunner",
@@ -1072,8 +1096,14 @@
       "toProperty": "oliveFallback"
     },
     {
-      "fromId": "plAsk",
-      "fromProperty": "onClick",
+      "fromId": "plRead",
+      "fromProperty": "ran",
+      "toId": "plHintLater",
+      "toProperty": "restart"
+    },
+    {
+      "fromId": "plHintLater",
+      "fromProperty": "timerFinished",
       "toId": "plChoose",
       "toProperty": "go"
     },

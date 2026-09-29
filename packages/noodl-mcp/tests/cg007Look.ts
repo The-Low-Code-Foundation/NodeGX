@@ -189,6 +189,10 @@ export const ICONS: Readonly<Record<string, string>> = {
   reset: svg('0 0 24 24', "<path d='M12 5a7 7 0 106.3 4H16l4-5 2 5h-1.6A9 9 0 1112 3z'/>"),
   tidy: svg('0 0 24 24', "<path d='M4 6h16v3H4zm0 5h10v3H4zm0 5h6v3H4z'/><path d='M17 12l4 4-4 4v-3h-3v-2h3z'/>"),
   predict: svg('0 0 24 24', "<path d='M12 2a7 7 0 017 7c0 5-7 13-7 13S5 14 5 9a7 7 0 017-7zm0 4a3 3 0 100 6 3 3 0 000-6z'/>"),
+  // IG-001 D10: the pad's action keys beyond water — pick up (up off the ground), put down (down onto it), fill (a drop into the can).
+  pick: svg('0 0 24 24', "<path d='M12 3l6 7h-4v6h-4v-6H6z'/><path d='M4 19h16v2H4z'/>"),
+  put: svg('0 0 24 24', "<path d='M12 17l6-7h-4V4h-4v6H6z'/><path d='M4 19h16v2H4z'/>"),
+  fill: svg('0 0 24 24', "<path d='M5 10h11v9a2 2 0 01-2 2H7a2 2 0 01-2-2z'/><path d='M16 12l4-3v7l-4-2z'/><path d='M10.5 2s3 3.2 3 5.2a3 3 0 01-6 0c0-2 3-5.2 3-5.2z'/>"),
   owl: svg('0 0 64 64', "<ellipse cx='32' cy='36' rx='22' ry='24'/><path d='M12 18l8 8h24l8-8-6 2-4-4-6 4-6-4-4 4z'/>")
 };
 
@@ -268,13 +272,18 @@ ${owlColourRule}
 .bg-rec::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--coral); margin-right: 8px; animation: bg-blink 1s infinite; }
 @keyframes bg-blink { 50% { opacity: 0.2; } }
 /* The pad, over the world's corner (the mockup's .pad), each key 56 px for a finger (AC5). */
-.bg-pad { position: absolute !important; right: 10px !important; bottom: 10px !important; z-index: 6; display: grid !important; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(2, 56px); gap: 6px; }
+.bg-pad { position: absolute !important; right: 10px !important; bottom: 10px !important; z-index: 6; display: grid !important; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(2, 56px); grid-auto-rows: 56px; gap: 6px; }
 .bg-key { width: 56px !important; height: 56px !important; min-width: 56px; min-height: 56px; border-radius: 14px; box-shadow: var(--shadow-key); display: grid !important; place-items: center; cursor: pointer; font-size: 0 !important; }
 .bg-key::before { margin: 0 !important; width: 26px !important; height: 26px !important; }
 .bg-key:active { transform: scale(0.94); }
+/* IG-001 D10: the places on the pad — the motions fixed, the first allowed action in the centre, more on a third row. */
 .bg-key-fwd { grid-column: 2; grid-row: 1; }
 .bg-key-left { grid-column: 1; grid-row: 2; }
-.bg-key-water { grid-column: 2; grid-row: 2; color: var(--pond-2); background-color: var(--water-key) !important; }
+.bg-key-mid { grid-column: 2; grid-row: 2; }
+.bg-key-r3a { grid-column: 1; grid-row: 3; }
+.bg-key-r3b { grid-column: 2; grid-row: 3; }
+.bg-key-r3c { grid-column: 3; grid-row: 3; }
+.bg-key-water { color: var(--pond-2); background-color: var(--water-key) !important; }
 .bg-key-right { grid-column: 3; grid-row: 2; }
 .bg-controls { margin-top: 12px; }
 .bg-ask-push { margin-left: auto !important; }

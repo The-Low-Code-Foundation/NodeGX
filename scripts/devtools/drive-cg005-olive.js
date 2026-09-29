@@ -398,6 +398,81 @@ async function pagesPart() {
       const measured = Object.entries(ratios).filter(([, r]) => r !== null);
       check(`P-S3-R5 the hooks’ words ≥ 4.5:1 on their ground (${measured.length} measured)`, measured.length >= 5 && measured.every(([, r]) => r >= 4.5), ratios);
 
+      // ── IG-001 (P106 s1): AC1 the parked step, AC6 what Olive said, AC7 "if Olive says yes" — the stub scripted through the real route ──
+      const owlThinking = `(() => { const e = document.querySelector('.bg-owl-thinking'); return !!e && e.offsetParent !== null; })()`;
+      const asksOf = async (rung) => (await req(port, 'GET', '/__stub/calls')).body.calls.filter((c) => c.rung === rung).length;
+      const step = () => tap(first('.bg-controls .bg-i-step'), 'One step');
+      const reset = () => tap(first('.bg-controls .bg-i-reset'), 'Start over');
+      await enterFree('IG-001');
+      await setStub(port, { answers: { poem: 'Tulla the tulip' } });
+      await addAsk('poem', 'flower');
+      await wait(1200);
+      await setStub(port, { delayFor: { poem: 1500 } }); // the poem alone is held: the hint voicings answer at once
+      const poem0 = await asksOf('poem');
+      await step();
+      const tagOn = await until(owlThinking, Boolean, 2000);
+      await step(); // while parked: a no-op
+      await wait(300);
+      const poemMid = await asksOf('poem');
+      const tagOff = await until(owlThinking, (v) => v === false, 6000);
+      const bubble = await until(`(() => { const b = document.querySelector('.gd-bubble.gd-olive'); return b ? b.innerText : ''; })()`, Boolean, 2500);
+      const poemAfter = await asksOf('poem');
+      await setStub(port, { delayFor: {} });
+      await shot('ig001-ac1-parked-step');
+      check('IG-001 AC1: One step parks on Olive (thinking on); a Step while parked asks nothing more; the tag clears when she answers, with no further press; exactly one ask sent', tagOn === true && poemMid === poem0 + 1 && tagOff === false && poemAfter === poem0 + 1, { tagOn, poem0, poemMid, tagOff, poemAfter });
+      check('IG-001 AC6: what Olive said ("Tulla the tulip") is on the robot, in the olive bubble', /Tulla the tulip/.test(bubble), { bubble });
+      // Start over while parked: the tag is off within one tick.
+      await reset();
+      await wait(400);
+      await addAsk('poem', 'flower');
+      await wait(1200);
+      await setStub(port, { delayFor: { poem: 1500 } });
+      await step();
+      const parkedAgain = await until(owlThinking, Boolean, 2000);
+      const poemBeforeReset = await asksOf('poem');
+      await reset();
+      // Through the shell the new line's voicing queues behind the held poem ask (the owl answers one at a time), so
+      // the tag is the voicing's until that drains (≤ 1.5 s + the voicing); the one-tick reading is the page drive's
+      // (drive-cg003-pages.js, an in-page stub with no queue). Here: it clears once the queue drains, and nothing was asked again.
+      const cleared = await until(owlThinking, (v) => v === false, 3200);
+      await setStub(port, { delayFor: {} });
+      check('IG-001 AC1: Start over while parked — the tag clears once the held ask drains through the shell’s queue (≤ 3.2 s), and Olive is not asked again', parkedAgain === true && cleared === false && (await asksOf('poem')) === poemBeforeReset, { parkedAgain, cleared });
+      // AC6: a say block shows its line, plain.
+      await wait(400);
+      await tap(first('.gd-palette [data-pal="say"]'), 'palette say');
+      await step();
+      const plain = await until(`(() => { const b = document.querySelector('.gd-bubble:not(.gd-olive)'); return b ? b.innerText : ''; })()`, Boolean, 2500);
+      check('IG-001 AC6: a say block shows its line in the plain bubble', /Mamie Rose/.test(plain) && !/Tulla/.test(plain), { plain });
+      // AC7: fwd, fwd, left (facing the first tulip), ask Olive is-it-a, if Olive says yes → water. Yes waters; no does not.
+      await reset();
+      await wait(400);
+      for (const op of ['fwd', 'fwd', 'left']) await tap(first(`.gd-palette [data-pal="${op}"]`), `palette ${op}`);
+      await addAsk('is-it-a', 'thing');
+      await tap(first('.gd-prog .gd-blk[data-t="ask:is-it-a"] .gd-slot[data-slot="kind"]'), 'slot kind');
+      await tap(first('.gd-picker .gd-opt'), 'the first kind');
+      await tap(first('.gd-palette [data-pal="if"]'), 'palette if');
+      // A tap on the block's WORD selects it (its centre is the sensor slot, a button the kit keeps out of block taps).
+      await tap(first('.gd-prog .gd-blk[data-t="if"] .gd-n'), 'the if block’s word (select it as the place new blocks go)');
+      await tap(first('.gd-palette [data-pal="water"]'), 'palette water (into the if)');
+      const sensorOpen = await ev(`(() => { const s = document.querySelector('.gd-prog .gd-blk[data-t="if"] .gd-slot[data-slot="sensor"]'); return s ? s.getAttribute('aria-expanded') : null; })()`);
+      if (sensorOpen !== 'true') await tap(first('.gd-prog .gd-blk[data-t="if"] .gd-slot[data-slot="sensor"]'), 'the if’s sensor slot');
+      await tap(first('.gd-picker .gd-opt[data-opt="olive_says:yes"]'), 'Olive says yes');
+      const shape = await ev(`(() => { const i = document.querySelector('.gd-prog .gd-blk[data-t="if"]'); const rep = i && i.closest('.gd-rep'); const body = rep && rep.querySelector('.gd-body'); const s = i && i.querySelector('.gd-slot[data-slot="sensor"]'); return { sensor: s && s.getAttribute('data-value'), label: s && s.innerText, inBody: !!body && !!body.querySelector('.gd-blk[data-t="water"]'), blocks: document.querySelectorAll('.gd-prog .gd-blk[data-id]').length }; })()`);
+      const wet = () => ev(`document.querySelectorAll('.bg-stage .gd-wet').length`);
+      await setStub(port, { answers: { 'is-it-a': 'yes' } });
+      await play();
+      await runOver();
+      await wait(600);
+      const wetYes = await wet();
+      await shot('ig001-ac7-olive-says-yes');
+      await setStub(port, { answers: { 'is-it-a': 'no' } });
+      await play();
+      await runOver();
+      await wait(600);
+      const wetNo = await wet();
+      await setStub(port, { answers: {} });
+      check('IG-001 AC7: the picker offers "Olive says yes"; ask Olive is-it-a → if Olive says yes → water waters when the stub says yes and not when it says no', shape.sensor === 'olive_says:yes' && shape.label === 'Olive says yes' && shape.inBody && shape.blocks === 6 && wetYes === 1 && wetNo === 0, { shape, wetYes, wetNo });
+
       check('P console: 0 errors', page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));
     });
   } finally {

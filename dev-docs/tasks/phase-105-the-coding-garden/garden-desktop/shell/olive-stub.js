@@ -18,7 +18,8 @@
  *                            [--hang rung,rung] [--timeout ms] [--data <dir>] [--no-model]
  *
  * `serve` answers the app and Olive's doors on one loopback origin, like the shell, plus two drive-only doors:
- * `POST /__stub/set {exam?, mutant?, delayMs?, hang?}` (header x-garden: 1) and `GET /__stub/calls` (what reached the
+ * `POST /__stub/set {exam?, mutant?, delayMs?, hang?, answers?, delayFor?}` (header x-garden: 1; `answers` scripts a
+ * rung's reply and `delayFor` holds one rung's replies, IG-001) and `GET /__stub/calls` (what reached the
  * "model": rung, lang, values — so a drive can count what was SENT). Plain Node, no dependencies.
  */
 'use strict';
@@ -133,7 +134,7 @@ function rawOf(answer, schema) {
  * @returns an `engine` for `createOwl({engine})`, plus `calls`, `state` and `set()` for a drive.
  */
 function createStubEngine(o = {}) {
-  const state = { exam: { ...DEFAULT_EXAM, ...(o.exam || {}) }, mutant: !!o.mutant, delayMs: Number(o.delayMs) || 0, hang: new Set(o.hang || []) };
+  const state = { exam: { ...DEFAULT_EXAM, ...(o.exam || {}) }, mutant: !!o.mutant, delayMs: Number(o.delayMs) || 0, hang: new Set(o.hang || []), answers: { ...(o.answers || {}) }, delayFor: { ...(o.delayFor || {}) } };
   const counters = new Map();
   const calls = [];
 
@@ -142,11 +143,16 @@ function createStubEngine(o = {}) {
     if (p.mutant !== undefined) state.mutant = !!p.mutant;
     if (p.delayMs !== undefined) state.delayMs = Number(p.delayMs) || 0;
     if (Array.isArray(p.hang)) state.hang = new Set(p.hang);
+    // IG-001 (P106 s1): scripted answers by rung, replacing the whole set (`{}` clears them).
+    if (p.answers && typeof p.answers === 'object') state.answers = { ...p.answers };
+    // A hold on ONE rung's replies (`delayFor: { poem: 1500 }`), so a drive can watch a run parked on it while the hint
+    // voicings answer at once (a hold on everything makes "thinking" the voicing's, not the park's).
+    if (p.delayFor && typeof p.delayFor === 'object') state.delayFor = { ...p.delayFor };
     return snapshot();
   }
 
   function snapshot() {
-    return { exam: { ...state.exam }, mutant: state.mutant, delayMs: state.delayMs, hang: [...state.hang] };
+    return { exam: { ...state.exam }, mutant: state.mutant, delayMs: state.delayMs, hang: [...state.hang], answers: { ...state.answers }, delayFor: { ...state.delayFor } };
   }
 
   /** The answer for one call, before it becomes raw text. Exposed for tests. */
@@ -158,7 +164,11 @@ function createStubEngine(o = {}) {
     const table = ANSWERS[rung];
     if (!table) return { text: '' };
     const mode = state.exam[rung] === 'fail' ? 'breaks' : 'holds';
-    const a = { ...(table[mode](values, L, temperature, i) || { text: '' }) };
+    // A scripted answer (`answers: { 'is-it-a': 'no', poem: 'Tulla the tulip' }`) beats the table, so a drive can say what
+    // Olive answers and watch what the program does with it: a shaped rung takes it as its value, prose as its text.
+    // The route's checks still run on it.
+    const scripted = state.answers[rung];
+    const a = scripted !== undefined ? (schema ? { value: scripted } : { text: String(scripted) }) : { ...(table[mode](values, L, temperature, i) || { text: '' }) };
     if (state.mutant) {
       const shape = schema ? SHAPE_OF_KEY[Object.keys(schema.properties)[0]] : 'prose';
       if (shape === 'prose') a.text = `${a.text} ${MUTANT_WORD[L]}`;
@@ -188,7 +198,8 @@ function createStubEngine(o = {}) {
           const call = { rung: g.rung, lang: g.lang, values: g.values, temperature: g.temperature, at: Date.now() };
           calls.push(call);
           if (state.hang.has(g.rung)) await wait(Infinity, g.signal);
-          if (state.delayMs) await wait(state.delayMs, g.signal);
+          const hold = Number(state.delayFor[g.rung]) || state.delayMs;
+          if (hold) await wait(hold, g.signal);
           return rawOf(answer(g), g.schema);
         },
         async dispose() {}

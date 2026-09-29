@@ -1,0 +1,78 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "63e9051a-f9d8-5757-8870-a233eab9b179",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "padkeysIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "allowed",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "padkeysFn",
+      "type": "JavaScriptFunction",
+      "label": "Pad keys",
+      "parameters": {
+        "functionScript": "\nvar PAD = [[\"fwd\",\"bg-key-fwd\",\"fwd\"],[\"left\",\"bg-key-left\",\"left\"],[\"water\",\"\",\"water\"],[\"right\",\"bg-key-right\",\"right\"],[\"fill\",\"\",\"fill\"],[\"pick\",\"\",\"pick\"],[\"put\",\"\",\"put\"]];\nvar KNOWN = [\"fwd\",\"left\",\"right\",\"water\",\"pick\",\"put\",\"say\",\"repeat\",\"until\",\"if\",\"when\",\"count_inc\",\"trick\",\"do\",\"ask\"];\nvar allowed = Array.isArray(Inputs.allowed) ? Inputs.allowed : [];\nvar slots = ['bg-key-mid', 'bg-key-r3a', 'bg-key-r3b', 'bg-key-r3c'], used = 0;\nvar keys = [];\nfor (var i = 0; i < PAD.length; i++) {\n  var op = PAD[i][0];\n  var ok = allowed.length ? allowed.indexOf(op) !== -1 : KNOWN.indexOf(op) !== -1;\n  if (!ok) continue;\n  var place = PAD[i][1] || slots[Math.min(used++, slots.length - 1)];\n  keys.push({ op: op, cls: 'bg-key bg-key-' + op + (place === 'bg-key-' + op ? '' : ' ' + place) + ' bg-i-' + PAD[i][2] + ' bg-press', label: op });\n}\nOutputs.keys = keys;\nOutputs.count = keys.length;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-allowed",
+          "displayName": "allowed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-keys",
+          "displayName": "keys",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "padkeysOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "keys",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "63e9051a-f9d8-5757-8870-a233eab9b179",
+  "name": "Pad keys",
+  "path": "/Logic/Pad keys",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The Teach pad’s keys: one per step the request allows. Runs when an input changes; Ran after each run."
+}

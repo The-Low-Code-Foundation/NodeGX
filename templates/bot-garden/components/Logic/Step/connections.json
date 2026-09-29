@@ -89,6 +89,18 @@
     },
     {
       "fromId": "stepFn",
+      "fromProperty": "out-sayStyle",
+      "toId": "stepOut",
+      "toProperty": "sayStyle"
+    },
+    {
+      "fromId": "stepFn",
+      "fromProperty": "out-sayText",
+      "toId": "stepOut",
+      "toProperty": "sayText"
+    },
+    {
+      "fromId": "stepFn",
       "fromProperty": "out-tick",
       "toId": "stepOut",
       "toProperty": "tick"

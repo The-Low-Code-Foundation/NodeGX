@@ -10,8 +10,14 @@
       "toProperty": "mounted"
     },
     {
+      "fromId": "pdIn",
+      "fromProperty": "allowed",
+      "toId": "pdKeys",
+      "toProperty": "allowed"
+    },
+    {
       "fromId": "pdKeys",
-      "fromProperty": "items",
+      "fromProperty": "keys",
       "toId": "pdEach",
       "toProperty": "items"
     },

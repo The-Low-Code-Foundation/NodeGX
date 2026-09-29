@@ -53,6 +53,12 @@
     },
     {
       "fromId": "drawworldIn",
+      "fromProperty": "run",
+      "toId": "drawworldFn",
+      "toProperty": "in-run"
+    },
+    {
+      "fromId": "drawworldIn",
       "fromProperty": "sayKey",
       "toId": "drawworldFn",
       "toProperty": "in-sayKey"
@@ -65,9 +71,27 @@
     },
     {
       "fromId": "drawworldIn",
+      "fromProperty": "sayStyle",
+      "toId": "drawworldFn",
+      "toProperty": "in-sayStyle"
+    },
+    {
+      "fromId": "drawworldIn",
+      "fromProperty": "sayText",
+      "toId": "drawworldFn",
+      "toProperty": "in-sayText"
+    },
+    {
+      "fromId": "drawworldIn",
       "fromProperty": "showEnd",
       "toId": "drawworldFn",
       "toProperty": "in-showEnd"
+    },
+    {
+      "fromId": "drawworldIn",
+      "fromProperty": "stepMs",
+      "toId": "drawworldFn",
+      "toProperty": "in-stepMs"
     },
     {
       "fromId": "drawworldIn",

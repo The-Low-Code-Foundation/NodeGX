@@ -12,6 +12,11 @@
           "name": "show",
           "plug": "output",
           "type": "boolean"
+        },
+        {
+          "name": "allowed",
+          "plug": "output",
+          "type": "array"
         }
       ],
       "x": 350,
@@ -34,12 +39,8 @@
     },
     {
       "id": "pdKeys",
-      "type": "Static Data",
-      "label": "The four keys",
-      "parameters": {
-        "type": "json",
-        "json": "[{\"op\":\"fwd\",\"cls\":\"bg-key bg-key-fwd bg-i-fwd bg-press\",\"label\":\"fwd\"},{\"op\":\"left\",\"cls\":\"bg-key bg-key-left bg-i-left bg-press\",\"label\":\"left\"},{\"op\":\"water\",\"cls\":\"bg-key bg-key-water bg-i-water bg-press\",\"label\":\"water\"},{\"op\":\"right\",\"cls\":\"bg-key bg-key-right bg-i-right bg-press\",\"label\":\"right\"}]"
-      },
+      "type": "/Logic/Pad keys",
+      "label": "One key per allowed step",
       "x": 350,
       "y": 160
     },

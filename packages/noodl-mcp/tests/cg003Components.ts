@@ -30,7 +30,6 @@
 import { HINTS_JSON, REQUESTS_JSON } from './cg002Content';
 import { FUNCTION_SCRIPTS, ROBOT_NAME_MAX, portsOf } from './cg002Scripts';
 import { OLIVE_SCRIPTS } from './cg005Olive';
-import { PAD_KEYS } from './cg003Content';
 import { ALL_WORDS_JSON, GLUE_SCRIPTS, TRANSLATE_ALL_SCRIPT } from './cg003Scripts';
 import { DISPLAY_FONT, GARDEN_CSS } from './cg007Look';
 
@@ -542,18 +541,20 @@ const PAD_KEY: CgComponent = {
 
 const PAD: CgComponent = {
   path: 'Workshop/Pad',
-  description: 'The Teach pad over the world’s corner (the mockup’s .pad): forward, left, water, right. Publishes Pressed with the Op, the op first.',
-  repeats: { source: 'static', rowFields: ['op', 'cls', 'label'] },
+  description: 'The Teach pad over the world’s corner (the mockup’s .pad): one key per step the request allows (Allowed; every step with no list) — forward, left and right on the d-pad, the first action in its centre, more actions on a third row. Publishes Pressed with the Op, the op first.',
+  repeats: { source: 'array', rowFields: ['op', 'cls', 'label'] },
   nodes: [
-    inputs('pdIn', [['show', 'boolean']]),
+    inputs('pdIn', [['show', 'boolean'], ['allowed', 'array']]),
     group('pdBox', 'The pad', undefined, { sizeMode: 'contentSize', cssClassName: 'bg-pad', mounted: false }, ['pdEach']),
-    { id: 'pdKeys', type: STATIC_DATA_NODE, label: 'The four keys', parameters: { type: 'json', json: JSON.stringify(PAD_KEYS.map((k) => ({ op: k.op, cls: k.cls, label: k.op }))) } },
+    // IG-001 D10: the keys follow the request (the pad was fixed to fwd left water right, so the stones' put came only from the palette).
+    logic('pdKeys', L('Pad keys'), 'One key per allowed step'),
     { ...logic('pdEach', FOR_EACH_NODE, 'One key per row', { template: C.padKey, templateType: 'explicit' }), parent: 'pdBox' },
     outputs('pdOut', [['op', 'string'], ['pressed', 'signal']])
   ],
   connections: [
     wire('pdIn', 'show', 'pdBox', 'mounted'),
-    wire('pdKeys', 'items', 'pdEach', 'items'),
+    wire('pdIn', 'allowed', 'pdKeys', 'allowed'),
+    wire('pdKeys', 'keys', 'pdEach', 'items'),
     wire('pdEach', 'itemOutput-op', 'pdOut', 'op'),
     wire('pdEach', 'itemOutputSignal-pressed', 'pdOut', 'pressed')
   ]
@@ -600,7 +601,7 @@ const RUNNER: CgComponent = {
       live: { type: 'boolean', by: { idle: false, playing: true, paused: true } },
       idle: { type: 'boolean', by: { idle: true, playing: false, paused: true } }
     }),
-    outputs('rnOut', [['world', 'object'], ['run', 'object'], ['glowId', '*'], ['running', 'boolean'], ['idle', 'boolean'], ['live', 'boolean'], ['done', 'boolean'], ['bumps', 'number'], ['puddles', 'number'], ['sayKey', 'string'], ['tick', 'number'], ['waiting', 'boolean'], ['request', 'object'], ['proposal', 'object'], ['ticked', 'signal'], ['finished', 'signal'], ['started', 'signal'], ['parked', 'signal'], ['reset', 'signal']])
+    outputs('rnOut', [['world', 'object'], ['run', 'object'], ['glowId', '*'], ['running', 'boolean'], ['idle', 'boolean'], ['live', 'boolean'], ['done', 'boolean'], ['bumps', 'number'], ['puddles', 'number'], ['sayKey', 'string'], ['sayText', 'string'], ['sayStyle', 'string'], ['tick', 'number'], ['waiting', 'boolean'], ['request', 'object'], ['proposal', 'object'], ['ticked', 'signal'], ['finished', 'signal'], ['started', 'signal'], ['parked', 'signal'], ['reset', 'signal']])
   ],
   connections: [
     wire('rnIn', 'program', 'rnNew', 'program'),
@@ -676,6 +677,8 @@ const RUNNER: CgComponent = {
     wire('rnStep', 'bumps', 'rnOut', 'bumps'),
     wire('rnStep', 'puddles', 'rnOut', 'puddles'),
     wire('rnStep', 'sayKey', 'rnOut', 'sayKey'),
+    wire('rnStep', 'sayText', 'rnOut', 'sayText'),
+    wire('rnStep', 'sayStyle', 'rnOut', 'sayStyle'),
     wire('rnStep', 'tick', 'rnOut', 'tick'),
     wire('rnWait', 'parked', 'rnOut', 'waiting'),
     wire('rnStep', 'request', 'rnOut', 'request'),
@@ -777,15 +780,14 @@ const PLAY: CgComponent = {
     text('plRecText', 'Recording', 'plRec', '', { sizeMode: 'contentSize', fontSize: px(14), fontWeight: '800', color: 'var(--ink)' }),
     place('plPad', C.pad, 'The Teach pad', 'plStage'),
     text('plPredictLine', 'Where will it end?', 'plLeft', '', { ...T_STRONG, color: 'var(--violet-ink)', mounted: false }),
-    group('plControls', 'The controls', 'plLeft', { ...row({ width: pct(100), sizeMode: 'contentHeight' }), cssClassName: 'bg-controls' }, ['plTeach', 'plStop', 'plPlay', 'plStep', 'plReset', 'plPredict', 'plAsk']),
+    // IG-001 D8: no "Ask Olive" — it only re-chose the hint; the hint now follows every edit by itself (plHintLater).
+    group('plControls', 'The controls', 'plLeft', { ...row({ width: pct(100), sizeMode: 'contentHeight' }), cssClassName: 'bg-controls' }, ['plTeach', 'plStop', 'plPlay', 'plStep', 'plReset', 'plPredict']),
     place('plTeach', BUTTON_NODE, 'Teach', 'plControls', { ...btn('teach', 'rec'), label: 'Teach Pip' }),
     place('plStop', BUTTON_NODE, 'Done teaching', 'plControls', { ...btn('primary', 'rec'), label: 'Done teaching', mounted: false }),
     place('plPlay', BUTTON_NODE, 'Play', 'plControls', { ...btn('primary', 'play'), label: 'Play' }),
     place('plStep', BUTTON_NODE, 'One step', 'plControls', { ...btn('plain', 'step'), label: 'One step' }),
     place('plReset', BUTTON_NODE, 'Start over', 'plControls', { ...btn('plain', 'reset'), label: 'Start over' }),
     place('plPredict', BUTTON_NODE, 'Predict', 'plControls', { ...btn('plain', 'predict'), label: 'Predict', mounted: false }),
-    // The owl glyph in her own colours (CG-007 §7.1 item 2): bg-i-owlc, a picture, not the white mask bg-i-owl.
-    place('plAsk', BUTTON_NODE, 'Ask Olive', 'plControls', { ...btn('ask', 'owlc', { cssClassName: 'bg-ask-push' }), label: 'Ask Olive' }),
     group('plOwl', 'The owl', 'plLeft', { width: pct(100), sizeMode: 'contentHeight', backgroundColor: 'var(--violet-2)', borderRadius: px(16), ...pad(12), cssClassName: 'bg-owl' }, ['plOwlPic', 'plOwlCol']),
     group('plOwlPic', 'Olive', 'plOwl', { sizeMode: 'explicit', width: px(64), height: px(64), cssClassName: 'bg-owl-pic bg-sp-owl' }),
     group('plOwlCol', 'What she says', 'plOwl', column({ rowGap: sp(4) }), ['plOwlSay', 'plOwlThinking', 'plOwlResting', 'plProposal', 'plOwlMeta']),
@@ -869,6 +871,8 @@ const PLAY: CgComponent = {
     logic('plFold', L('Fold'), 'Fold it'),
     // ── Hints and the win ──
     logic('plChoose', L('Choose hint'), 'Which hint'),
+    // IG-001 D8: an edit re-chooses the hint one step later (restarted on every edit, so a burst of taps asks once).
+    logic('plHintLater', TIMER_NODE, 'The hint follows an edit, one step later', { duration: TICK_MS }),
     logic('plPlayed', L('Olive played'), 'The rung this run asked'),
     logic('plGoal', L('Goal met'), 'Was the request done?'),
     gate('plMetGate', 'Done?'),
@@ -902,7 +906,6 @@ const PLAY: CgComponent = {
     wire('plT', 'reset', 'plReset', 'label'),
     wire('plT', 'predict', 'plPredict', 'label'),
     wire('plT', 'predictAsk', 'plPredictLine', 'text'),
-    wire('plT', 'ask', 'plAsk', 'label'),
     wire('plT', 'owlMeta', 'plOwlMeta', 'text'),
     wire('plT', 'scriptH', 'plStepsH', 'text'),
     wire('plT', 'tidyGo', 'plFoldBtn', 'label'),
@@ -964,6 +967,7 @@ const PLAY: CgComponent = {
     wire('plStop', 'onClick', 'plTeachMode', 'to-idle'),
     wire('plStop', 'onClick', 'plChoose', 'go'),
     wire('plTeachMode', 'teaching', 'plPad', 'show'),
+    wire('plStart', 'allowed', 'plPad', 'allowed'),
     wire('plTeachMode', 'teaching', 'plRec', 'mounted'),
     wire('plTeachMode', 'teaching', 'plStop', 'mounted'),
     wire('plTeachMode', 'notTeaching', 'plTeach', 'mounted'),
@@ -1002,6 +1006,10 @@ const PLAY: CgComponent = {
     wire('plRunner', 'bumps', 'plDraw', 'bumps'),
     wire('plTeachBumpsVar', 'value', 'plDraw', 'teachBumps'),
     wire('plRunner', 'sayKey', 'plDraw', 'sayKey'),
+    wire('plRunner', 'sayText', 'plDraw', 'sayText'),
+    wire('plRunner', 'sayStyle', 'plDraw', 'sayStyle'),
+    wire('plRunner', 'run', 'plDraw', 'run'),
+    wire('plIn', 'stepMs', 'plDraw', 'stepMs'),
     wire('plRunner', 'tick', 'plDraw', 'sayN'),
     wire('plIn', 'words', 'plDraw', 'words'),
     wire('plIn', 'lang', 'plDraw', 'lang'),
@@ -1072,7 +1080,8 @@ const PLAY: CgComponent = {
     wire('plRunner', 'run', 'plPlayed', 'run'),
     wire('plPlayed', 'oliveRung', 'plChoose', 'oliveRung'),
     wire('plPlayed', 'oliveFallback', 'plChoose', 'oliveFallback'),
-    wire('plAsk', 'onClick', 'plChoose', 'go'),
+    wire('plRead', 'ran', 'plHintLater', 'restart'),
+    wire('plHintLater', 'timerFinished', 'plChoose', 'go'),
     wire('plIn', 'hints', 'plLine', 'hints'),
     wire('plChoose', 'key', 'plLine', 'key'),
     wire('plChoose', 'vars', 'plLine', 'vars'),

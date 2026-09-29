@@ -213,3 +213,27 @@ test('CG-006’s kinds: `lacks` and `containsAll` grade replies (before, every r
   const ignored = await runExam({ ask: async () => t('Merci Pip !'), probes: [probe] });
   assert.deepEqual([obeyed.probes[0].pass, ignored.probes[0].pass], [false, true]);
 });
+
+test('IG-001 (P106 s1): a scripted answer by rung beats the table — a shaped rung takes it as its value, prose as its text — and the route still checks it', async () => {
+  const { engine, olive } = await stubDoors({ stub: { answers: { 'is-it-a': 'no' } } });
+  const yesNo = { properties: { answer: { enum: ['yes', 'no'] } } };
+  assert.deepEqual(engine.answer({ rung: 'is-it-a', values: { thing: 'a tulip', kind: 'a flower' }, lang: 'en', schema: yesNo }), { value: 'no' });
+  engine.set({ answers: { 'is-it-a': 'yes', poem: 'Tulla the tulip' } });
+  assert.deepEqual(engine.answer({ rung: 'is-it-a', values: { thing: 'a tulip', kind: 'a flower' }, lang: 'en', schema: yesNo }), { value: 'yes' });
+  assert.deepEqual(engine.answer({ rung: 'poem', values: { flower: 'Tulla' }, lang: 'en' }), { text: 'Tulla the tulip' });
+  assert.deepEqual(engine.snapshot().answers, { 'is-it-a': 'yes', poem: 'Tulla the tulip' });
+  assert.deepEqual(engine.set({ delayFor: { poem: 20 } }).delayFor, { poem: 20 });
+  engine.set({ delayFor: {} });
+  // Through the real route: the scripted reply arrives as the answer, in both shapes.
+  await withRelay(olive, async (port) => {
+    const said = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'poem', slots: { flower: 'Tulla' }, lang: 'en' } });
+    assert.equal(said.body.ok, true);
+    assert.equal(said.body.text, 'Tulla the tulip');
+    const no = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'is-it-a', slots: { thing: templates.lists.things_ahead.en[0], kind: templates.lists.kinds.en[0] }, lang: 'en' } });
+    assert.equal(no.body.ok, true);
+    assert.equal(no.body.value, 'yes');
+  });
+  // Cleared: the table answers again.
+  engine.set({ answers: {} });
+  assert.notDeepEqual(engine.answer({ rung: 'poem', values: { flower: 'Tulla' }, lang: 'en' }), { text: 'Tulla the tulip' });
+});

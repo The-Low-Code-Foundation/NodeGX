@@ -991,11 +991,53 @@ describe('CG-002 — the engine', () => {
     });
   });
 
+  describe('IG-001 (P106 s1) — D6 what Olive said is spoken; D7 the sensor the picker offers', () => {
+    it('🔴 D6: a non-blocks answer is spoken on the tick that consumes it (sayText, olive style); a blocks answer is the proposal, unspoken; `say` carries its word key, plain', () => {
+      const w = MOCKUP_WORLD();
+      const program: Block[] = [{ id: 1, t: 'ask:poem', slots: { flower: 'Tulla' } }, { id: 2, t: 'say', slots: { text: 'thanksMamie' } }, { id: 3, t: 'say' }];
+      const run = runScript(NEW_RUN_SCRIPT, { program, robotId: 'pip', lang: 'en' }).run;
+      let t = tick(run, w);
+      expect([t.st.waiting, t.st.sayText, t.st.sayStyle]).toEqual([true, '', '']);
+      t = tick(t.run, t.world, { seq: t.st.request.seq, ok: true, text: 'Tulla the tulip' });
+      expect([t.st.delta.sayText, t.st.delta.sayStyle, t.st.sayText, t.st.sayStyle, t.st.sayKey]).toEqual(['Tulla the tulip', 'olive', 'Tulla the tulip', 'olive', '']);
+      // The next tick says nothing of Olive's; `say` speaks its word key, plain — and the block with no text its default.
+      t = tick(t.run, t.world);
+      expect([t.st.delta.sayKey, t.st.delta.sayStyle, t.st.sayKey, t.st.sayText]).toEqual(['thanksMamie', 'plain', 'thanksMamie', '']);
+      t = tick(t.run, t.world);
+      expect([t.st.delta.sayKey, t.st.delta.say.text]).toEqual(['thanksMamie', 'thanksMamie']);
+      // A number (an integer rung) is spoken as its digits; the written (fallback) answer is spoken too.
+      const count: Block[] = [{ id: 1, t: 'ask:count-tulips', slots: { list: 'tulipe, rose' } }];
+      let c = tick(runScript(NEW_RUN_SCRIPT, { program: count, robotId: 'pip', lang: 'fr' }).run, w);
+      c = tick(c.run, c.world, { seq: c.st.request.seq, ok: false, fallback: true, value: 6 });
+      expect([c.st.sayText, c.st.sayStyle]).toEqual(['6', 'olive']);
+      // A blocks answer is the proposal card, never a bubble.
+      const asks: Block[] = [{ id: 1, t: 'ask:words-to-blocks', slots: { route: 'x' } }];
+      let u = tick(runScript(NEW_RUN_SCRIPT, { program: asks, robotId: 'pip', lang: 'en' }).run, w);
+      u = tick(u.run, u.world, { seq: u.st.request.seq, ok: true, value: ['avancer', 'gauche'] });
+      expect([u.st.proposal.blocks, u.st.sayText, 'sayText' in u.st.delta]).toEqual([['fwd', 'left'], '', false]);
+    });
+
+    it('🔴 D7: the picker’s sensor "Olive says yes / no" (olive_says:yes, olive_says:no) reads the last answer; an `if` on it runs its body only when she said so', () => {
+      const w = MOCKUP_WORLD();
+      const d0 = w.robots[0].d as number;
+      const prog = (arg: string): Block[] => [{ id: 1, t: 'ask:is-it-a', slots: { thing: 'a tulip', kind: 'a flower' } }, { id: 2, t: 'if', slots: { sensor: 'olive_says:' + arg }, body: [{ id: 3, t: 'left' }] }];
+      for (const [said, arg, turned] of [['yes', 'yes', true], ['no', 'yes', false], ['no', 'no', true], ['oui', 'yes', true], ['non', 'no', true], ['yes', 'no', false]] as const) {
+        const end = runToEnd(prog(arg), w, 'pip', 'en', [{ ok: true, value: said }]);
+        expect({ said, arg, done: end.done, d: end.world.robots[0].d }).toEqual({ said, arg, done: true, d: turned ? (d0 + 3) % 4 : d0 });
+      }
+      // Sense reads the same spelling, and the older one (sensor olive_says with an arg) still works.
+      expect(runScript(SENSE_SCRIPT, { world: w, sensor: 'olive_says:yes', robotId: 'pip', answer: { value: 'yes' } }).value).toBe(true);
+      expect(runScript(SENSE_SCRIPT, { world: w, sensor: 'olive_says:no', robotId: 'pip', answer: { value: 'yes' } }).value).toBe(false);
+      expect(runScript(SENSE_SCRIPT, { world: w, sensor: 'olive_says', arg: 'no', robotId: 'pip', answer: { value: 'no' } }).value).toBe(true);
+      expect(runScript(SENSE_SCRIPT, { world: w, sensor: 'olive_says:yes', robotId: 'pip', answer: null }).value).toBe(false);
+    });
+  });
+
   describe('the ports the graph wires', () => {
     it('every script mints the outputs its component publishes, and every input is a real name', () => {
       const expected: Record<string, string[]> = {
         'Logic/New run': ['run', 'steps', 'blocks', 'handlers'],
-        'Logic/Step': ['run', 'delta', 'glowId', 'done', 'waiting', 'request', 'tick', 'count', 'bumps', 'puddles', 'sayKey'],
+        'Logic/Step': ['run', 'delta', 'glowId', 'done', 'waiting', 'request', 'tick', 'count', 'bumps', 'puddles', 'sayKey', 'sayText', 'sayStyle'],
         'Logic/Apply delta': ['world', 'things', 'robots', 'tulips'],
         'Logic/Sense': ['value', 'sensor'],
         'Logic/Goal met': ['met', 'missing', 'done', 'total'],

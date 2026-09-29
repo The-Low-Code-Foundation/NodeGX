@@ -29,9 +29,10 @@ import { REQUESTS, WORDS, WORD_KEYS } from './cg002Content';
 import { APPLY_DELTA_SCRIPT, COMPLETE_REQUEST_SCRIPT, FIND_REPEAT_SCRIPT, FOLD_SCRIPT, FUNCTION_SCRIPTS, GOAL_SCRIPT, NEW_RUN_SCRIPT, PALETTE_SCRIPT, STEP_SCRIPT, ADD_PROFILE_SCRIPT, TRANSLATE_SCRIPT, portsOf, runScript } from './cg002Scripts';
 import { PAGE_WORDS, PAGE_WORD_KEYS } from './cg003Content';
 import { OLIVE_SCRIPTS, OLIVE_WORDS, OLIVE_WORD_KEYS } from './cg005Olive';
-import { C, CG003_COMPONENTS, GAME_NAME, LOGIC_COMPONENTS, LOGIC_SPECS, PAGES, REQUIRED_MODULES, STORAGE_KEY } from './cg003Components';
+import { C, CG003_COMPONENTS, GAME_NAME, LOGIC_COMPONENTS, LOGIC_SPECS, PAGES, REQUIRED_MODULES, STORAGE_KEY, TICK_MS } from './cg003Components';
 import {
   ALL_WORDS_JSON,
+  PAD_KEYS_SCRIPT,
   TRY_OLIVE_SCRIPT,
   DRAW_WORLD_SCRIPT,
   GLUE_SCRIPTS,
@@ -478,9 +479,10 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect([TEMPLATE_ID, STORAGE_KEY]).toEqual(['bot-garden', 'bot-garden']);
     });
 
-    it('item 2: Ask Olive carries the owl in her own colours, not the white mask', () => {
-      const ask = nodesOf(built, C.play).find((n) => n.id === 'plAsk')!;
-      expect(String(params(ask).cssClassName)).toContain('bg-i-owlc');
+    it('item 2: the owl in her own colours (a picture, not the white mask) — on the grown-ups’ Try Olive; the Workshop’s Ask Olive went in IG-001 D8', () => {
+      const owl = componentsOf(built).flatMap((c) => nodesOf(built, c.name)).find((n) => String(params(n).cssClassName ?? '').includes('bg-i-owlc'));
+      expect(owl && owl.id).toBe('ghAsk');
+      expect(nodesOf(built, C.play).some((n) => n.id === 'plAsk')).toBe(false);
       expect(GARDEN_CSS).toMatch(/\.bg-i-owlc::before \{[^}]*background-image: url\("data:image\/svg\+xml/);
       expect(GARDEN_CSS.match(/\.bg-i-owlc::before \{[^}]*\}/)![0]).not.toMatch(/mask/);
     });
@@ -634,6 +636,71 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones' }).referenceCount).toBe(3);
       expect(run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'tulips-three' }).referenceCount).toBe(6);
       expect(run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'free' }).referenceCount).toBe(0);
+    });
+
+    const play = () => nodesOf(built, C.play);
+    const pnode = (id: string) => play().find((n) => n.id === id)!;
+    const pinto = (id: string, port?: string) => connectionsOf(built, C.play).filter((c) => c.toId === id && (port === undefined || c.toProperty === port)).map((c) => `${c.fromId}.${c.fromProperty}>${c.toProperty}`).sort();
+
+    it('🔴 D6: what Olive said reaches Draw world from the Runner and becomes the olive bubble for Step Ms × 3; `say` speaks its line plain; nothing to say leaves the last bubble to the kit’s own timer', () => {
+      expect(rinto('rnOut', 'sayText')).toEqual(['rnStep.sayText>sayText']);
+      expect(rinto('rnOut', 'sayStyle')).toEqual(['rnStep.sayStyle>sayStyle']);
+      expect([pinto('plDraw', 'sayText'), pinto('plDraw', 'sayStyle'), pinto('plDraw', 'stepMs'), pinto('plDraw', 'run')]).toEqual([['plRunner.sayText>sayText'], ['plRunner.sayStyle>sayStyle'], ['plIn.stepMs>stepMs'], ['plRunner.run>run']]);
+      const base = { world: run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'tulips-three' }).world, words: WORD_ROWS, lang: 'en', botName: 'Pip', stepMs: 380, sayN: 4, run: { runId: 'r1' } };
+      expect(run(DRAW_WORLD_SCRIPT, { ...base, sayText: 'Tulla the tulip', sayStyle: 'olive' }).bubble).toEqual({ robot: 0, text: 'Tulla the tulip', style: 'olive', ms: 1140, n: 'r1:4' });
+      expect(run(DRAW_WORLD_SCRIPT, { ...base, sayKey: 'thanksMamie' }).bubble).toEqual({ robot: 0, text: WORDS.thanksMamie.en, style: 'plain', n: 'r1:4' });
+      expect(run(DRAW_WORLD_SCRIPT, { ...base, sayKey: 'sayDrink', lang: 'fr' }).bubble.text).toBe(WORDS.sayDrink.fr);
+      // A free text typed on a say block is spoken as itself.
+      expect(run(DRAW_WORLD_SCRIPT, { ...base, sayKey: 'Hello there' }).bubble.text).toBe('Hello there');
+      // Nothing to say: the port is left alone (a null would hide the bubble on the very next tick, 420 ms in).
+      expect('bubble' in run(DRAW_WORLD_SCRIPT, { ...base })).toBe(false);
+      expect('bubble' in run(DRAW_WORLD_SCRIPT, { ...base, sayKey: '', sayText: '' })).toBe(false);
+    });
+
+    it('🔴 D7: the picker’s sensors offer "Olive says yes" and "Olive says no", in both languages; the kit’s repeat keeps its number', () => {
+      const pal = run(PALETTE_SCRIPT, { band: 2, allowed: [], lang: 'en', words: WORD_ROWS }).palette;
+      for (const lang of ['en', 'fr'] as const) {
+        const kit = run(KIT_PALETTE_SCRIPT, { palette: pal, band: 2, lang, words: WORD_ROWS }).palette;
+        const sensor = kit.find((e: { id: string }) => e.id === 'if').slots.find((s: { key: string }) => s.key === 'sensor');
+        const opts = Object.fromEntries(sensor.options.map((o: { value: string; label: string }) => [o.value, o.label]));
+        expect({ lang, yes: opts['olive_says:yes'], no: opts['olive_says:no'] }).toEqual({ lang, yes: PAGE_WORDS.sOliveSaysYes[lang], no: PAGE_WORDS.sOliveSaysNo[lang] });
+        expect(kit.find((e: { id: string }) => e.id === 'until').slots.find((s: { key: string }) => s.key === 'sensor').options.map((o: { value: string }) => o.value)).toContain('olive_says:yes');
+        expect(kit.find((e: { id: string }) => e.id === 'repeat')).toMatchObject({ hasCount: true, slots: [] });
+      }
+    });
+
+    it('🔴 D8: no Ask Olive on the bar; the hint follows every program edit one step later (a Timer restarted by Read program, then Choose hint)', () => {
+      expect(play().some((n) => n.id === 'plAsk')).toBe(false);
+      expect((pnode('plControls').children as string[]) ?? []).not.toContain('plAsk');
+      expect([pnode('plHintLater').type, params(pnode('plHintLater')).duration]).toEqual(['Timer', TICK_MS]);
+      expect(pinto('plHintLater', 'restart')).toEqual(['plRead.ran>restart']);
+      expect(pinto('plChoose', 'go')).toContain('plHintLater.timerFinished>go');
+      // The generated artefact carries no plAsk at all (AC8).
+      const withAsk = [...tree(OUTPUT_OF(built)).entries()].filter(([, buf]) => /\bplAsk\b/.test(buf.toString('utf8'))).map(([f]) => f);
+      expect(withAsk).toEqual([]);
+    });
+
+    it('🔴 D10: the pad draws one key per allowed step — the stones put and no water, the tulips water, free play every step the engine knows', () => {
+      const keys = (id: string) => run(PAD_KEYS_SCRIPT, { allowed: run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: id }).allowed }).keys as Array<{ op: string; cls: string; label: string }>;
+      expect(keys('path-stones').map((k) => k.op)).toEqual(['fwd', 'left', 'right', 'put']);
+      expect(keys('tulips-three').map((k) => k.op)).toEqual(['fwd', 'left', 'water', 'right']);
+      expect(keys('letter-say').map((k) => k.op)).toEqual(['fwd', 'left', 'right', 'pick', 'put']);
+      expect(keys('free').map((k) => k.op)).toEqual(['fwd', 'left', 'water', 'right', 'pick', 'put']);
+      // The first action takes the d-pad's centre, the rest a third row; every key names its op, its place and its icon.
+      const at = (id: string, op: string) => keys(id).find((k) => k.op === op)!.cls;
+      expect(at('path-stones', 'put')).toBe('bg-key bg-key-put bg-key-mid bg-i-put bg-press');
+      expect(at('tulips-three', 'water')).toContain('bg-key-mid');
+      expect([at('free', 'water'), at('free', 'pick'), at('free', 'put')].map((c) => c.split(' ')[2])).toEqual(['bg-key-mid', 'bg-key-r3a', 'bg-key-r3b']);
+      expect(at('free', 'fwd')).toBe('bg-key bg-key-fwd bg-i-fwd bg-press');
+      // The graph: the request's allowed list reaches the pad; the pad's rows come from Logic/Pad keys, not a static table.
+      expect(phas('plStart', 'allowed', 'plPad', 'allowed')).toBe(true);
+      const pad = nodesOf(built, C.pad);
+      expect([pad.some((n) => n.type === '/Logic/Pad keys'), pad.some((n) => n.type === 'Static Data')]).toEqual([true, false]);
+      expect(connectionsOf(built, C.pad).some((c) => c.fromId === 'pdKeys' && c.fromProperty === 'keys' && c.toId === 'pdEach' && c.toProperty === 'items')).toBe(true);
+      for (const icon of ['pick', 'put', 'fill']) expect(GARDEN_CSS).toContain(`.bg-i-${icon}::before`);
+      expect(GARDEN_CSS).toMatch(/\.bg-key-mid \{ grid-column: 2; grid-row: 2; \}/);
+      expect(GARDEN_CSS).toMatch(/\.bg-key-r3a \{ grid-column: 1; grid-row: 3; \}/);
+      expect(GARDEN_CSS).toMatch(/\.bg-pad \{[^}]*grid-auto-rows: 56px/);
     });
   });
 

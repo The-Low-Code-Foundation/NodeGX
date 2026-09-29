@@ -47,7 +47,7 @@
       "path": "Logic/Step",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 17,
+      "connectionCount": 19,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 375,
+      "connectionCount": 377,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -255,7 +255,7 @@
       "path": "Logic/Draw world",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 23,
+      "connectionCount": 27,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -272,6 +272,14 @@
       "type": "visual",
       "nodeCount": 3,
       "connectionCount": 8,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Pad keys": {
+      "path": "Logic/Pad keys",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 4,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -447,7 +455,7 @@
       "path": "Workshop/Pad",
       "type": "visual",
       "nodeCount": 5,
-      "connectionCount": 4,
+      "connectionCount": 5,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -455,7 +463,7 @@
       "path": "Workshop/Runner",
       "type": "visual",
       "nodeCount": 22,
-      "connectionCount": 69,
+      "connectionCount": 71,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -479,7 +487,7 @@
       "path": "Workshop/Play",
       "type": "visual",
       "nodeCount": 109,
-      "connectionCount": 262,
+      "connectionCount": 267,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -661,8 +669,8 @@
     }
   },
   "stats": {
-    "totalComponents": 82,
-    "totalNodes": 674,
-    "totalConnections": 1868
+    "totalComponents": 83,
+    "totalNodes": 677,
+    "totalConnections": 1888
   }
 }

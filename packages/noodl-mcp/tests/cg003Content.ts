@@ -61,6 +61,9 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   stickersNone: s('No stickers yet. Help an islander to earn one.', 'Pas encore d’autocollant. Aide un habitant pour en gagner un.'),
   hatLocked: s('a gift from {who}', 'un cadeau de {who}'),
   n7Block: s('water a row', 'arroser une rangée'),
+  // IG-001 D7 (P106 s1): the picker's two Olive sensors.
+  sOliveSaysYes: s('Olive says yes', 'Olive dit oui'),
+  sOliveSaysNo: s('Olive says no', 'Olive dit non'),
   p1: s('CP–CE2 · moves on a grid, up to 15 instructions (programme 2025)', 'CP–CE2 · déplacements sur quadrillage, 15 instructions max (programme 2025)'),
   p2: s('6e · "repeat n times" (programme 2025); 5e · simple loop', '6e · « répéter n fois » (programme 2025) ; 5e · boucle simple'),
   p3: s('3e · conditional loop (programme 2026)', '3e · boucle conditionnelle (programme 2026)'),
@@ -119,12 +122,19 @@ export const PIN_PLACES: Readonly<Record<string, [number, number, number, number
   sami: [85, 40, 10, 17]
 };
 
-/** The Teach pad, one row per key (the mockup's `.pad`): the op it records, its icon class, its word for a screen reader. */
-export const PAD_KEYS: ReadonlyArray<{ op: string; cls: string; word: string }> = [
-  { op: 'fwd', cls: 'bg-key bg-key-fwd bg-i-fwd bg-press', word: 'bFwd' },
-  { op: 'left', cls: 'bg-key bg-key-left bg-i-left bg-press', word: 'bLeft' },
-  { op: 'water', cls: 'bg-key bg-key-water bg-i-water bg-press', word: 'bWater' },
-  { op: 'right', cls: 'bg-key bg-key-right bg-i-right bg-press', word: 'bRight' }
+/**
+ * The Teach pad's keys in the pad's order (the mockup's `.pad`): the op each records, its fixed place on the d-pad (the
+ * motions; an action's place is given at run time: the first allowed action takes the centre, the rest a third row),
+ * its icon and its word. IG-001 D10: `Logic/Pad keys` draws one key per step the request allows, from this table.
+ */
+export const PAD_KEYS: ReadonlyArray<{ op: string; place: string; icon: string; word: string }> = [
+  { op: 'fwd', place: 'bg-key-fwd', icon: 'fwd', word: 'bFwd' },
+  { op: 'left', place: 'bg-key-left', icon: 'left', word: 'bLeft' },
+  { op: 'water', place: '', icon: 'water', word: 'bWater' },
+  { op: 'right', place: 'bg-key-right', icon: 'right', word: 'bRight' },
+  { op: 'fill', place: '', icon: 'fill', word: 'bFill' },
+  { op: 'pick', place: '', icon: 'pick', word: 'bPick' },
+  { op: 'put', place: '', icon: 'put', word: 'bPut' }
 ];
 
 /** The eyes and hats the robot can wear (the mockup's `#eyes` and `#hats`). A hat other than none/cap is a gift. */

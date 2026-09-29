@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "63e9051a-f9d8-5757-8870-a233eab9b179",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "padkeysIn",
+      "fromProperty": "allowed",
+      "toId": "padkeysFn",
+      "toProperty": "in-allowed"
+    },
+    {
+      "fromId": "padkeysFn",
+      "fromProperty": "out-count",
+      "toId": "padkeysOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "padkeysFn",
+      "fromProperty": "out-keys",
+      "toId": "padkeysOut",
+      "toProperty": "keys"
+    },
+    {
+      "fromId": "padkeysFn",
+      "fromProperty": "success",
+      "toId": "padkeysOut",
+      "toProperty": "ran"
+    }
+  ]
+}

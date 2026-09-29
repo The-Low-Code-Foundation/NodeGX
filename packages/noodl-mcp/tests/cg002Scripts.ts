@@ -191,6 +191,8 @@ function sense(w, run, name, arg) {
   if (name === 'basket_full') return r.carry.length >= basketOf(r);
   if (name === 'count_is') return (Number(run.count) || 0) === Number(arg);
   if (name === 'olive_says') return oliveSays(run, arg);
+  // IG-001 D7: the picker offers "Olive says yes" / "Olive says no" as one sensor value each (olive_says:yes, olive_says:no).
+  if (name.indexOf('olive_says:') === 0) return oliveSays(run, name.slice(11));
   return false;
 }
 function slotsOf(b) { return b && b.slots && typeof b.slots === 'object' ? b.slots : {}; }
@@ -289,7 +291,8 @@ function exec(w, run, s, delta) {
     if (tileAt(w, f.x, f.y) !== '' && !blocked(w, f.x, f.y)) { delta.put = { id: r.id, kind: kind, x: f.x, y: f.y }; delta.sayKey = 'sayPut'; return; }
     delta.nothing = true; return;
   }
-  if (s.op === 'say') { run.said++; delta.say = { id: r.id, text: s.text === undefined || s.text === null ? 'thanksMamie' : String(s.text) }; return; }
+  // IG-001 D6: a say block speaks its line — the word key (or a typed text) as the plain bubble's sayKey.
+  if (s.op === 'say') { run.said++; var said = s.text === undefined || s.text === null || s.text === '' ? 'thanksMamie' : String(s.text); delta.say = { id: r.id, text: said }; delta.sayKey = said; delta.sayStyle = 'plain'; return; }
   if (s.op === 'count_inc') { run.count = (Number(run.count) || 0) + 1; delta.count = run.count; return; }
   delta.nothing = true;
 }
@@ -347,6 +350,10 @@ function step(runIn, worldIn, answer) {
       for (var q = 0; q < a.value.length; q++) if (ASK_BLOCK[a.value[q]]) proposed.push(ASK_BLOCK[a.value[q]]);
       run.proposal = { askId: s.id, blocks: proposed };
       delta.proposal = clone(run.proposal);
+    } else {
+      // IG-001 D6: every other answer (hers or the written one) is spoken by the robot, in the olive bubble.
+      var spoken = a.value !== undefined && a.value !== null ? a.value : a.text;
+      if (spoken !== undefined && spoken !== null && String(spoken) !== '') { delta.sayText = Array.isArray(spoken) ? spoken.join(', ') : String(spoken); delta.sayStyle = 'olive'; }
     }
     run.pc++; run.tick++;
     return { run: run, delta: delta, glowId: glowId, done: false, waiting: false, request: null };
@@ -508,6 +515,8 @@ Outputs.count = st.run.count;
 Outputs.bumps = st.run.bumps;
 Outputs.puddles = st.run.puddles;
 Outputs.sayKey = st.delta.sayKey || '';
+Outputs.sayText = st.delta.sayText || '';
+Outputs.sayStyle = st.delta.sayStyle || '';
 Outputs.proposal = st.delta.proposal || null;
 `;
 

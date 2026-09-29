@@ -33,8 +33,8 @@
  */
 import { OLIVE_RUNGS, WORDS, WORD_KEYS } from './cg002Content';
 import { OLIVE_SLIM, OLIVE_WORDS, OLIVE_WORD_KEYS, PALETTE_RUNG_IDS, rungWordKey } from './cg005Olive';
-import { ENGINE, FOLD_HELPERS, MANY_BLOCKS, ROBOT_NAME_MAX, SAVE_HELPERS } from './cg002Scripts';
-import { EYES, HATS, ISLANDERS, ISLAND_PINS, PAGE_WORDS, PAGE_WORD_KEYS, REQUEST_SUBS, SKILL_BLOCKS } from './cg003Content';
+import { BLOCK_META, ENGINE, FOLD_HELPERS, MANY_BLOCKS, ROBOT_NAME_MAX, SAVE_HELPERS } from './cg002Scripts';
+import { EYES, HATS, ISLANDERS, ISLAND_PINS, PAD_KEYS, PAGE_WORDS, PAGE_WORD_KEYS, REQUEST_SUBS, SKILL_BLOCKS } from './cg003Content';
 import { ROBOT_PAINTS } from './cg007Look';
 
 /** Every word key the pages can show: the engine's (CG-002/006), Olive's (CG-005), then the pages' own. */
@@ -184,6 +184,13 @@ for (var r = 0; r < rl.length; r++) robots.push({ x: rl[r].x, y: rl[r].y, d: rl[
 var lang = langOf(Inputs.lang);
 var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
 var say = String(Inputs.sayKey || '');
+// IG-001 D6: what Olive said (sayText, olive style, Step Ms × 3) or a say block's line (its word, or the text itself),
+// keyed by run and tick so the same line on a later tick is a new bubble. Nothing to say leaves the port alone: the
+// kit's own timer hides a bubble, and a null here would hide it on the very next tick.
+var sayText = String(Inputs.sayText || ''), sayStyle = String(Inputs.sayStyle || '');
+var stepMs = Number(Inputs.stepMs) > 0 ? Number(Inputs.stepMs) : 380;
+var runId = Inputs.run && typeof Inputs.run === 'object' && Inputs.run.runId ? String(Inputs.run.runId) : '';
+var sayN = runId + ':' + (Number(Inputs.sayN) || 0);
 Outputs.map = { rows: rows, legend: { B: 'postbox' } };
 Outputs.things = things;
 Outputs.robots = robots;
@@ -193,7 +200,30 @@ var marks = [];
 for (var d = 0; d < total; d++) marks.push({ id: 'm' + d, lit: d < watered, cls: d < watered ? 'bg-mark bg-mark-lit bg-sp-tulip' : 'bg-mark' });
 Outputs.marks = marks;
 Outputs.hasTulips = total > 0;
-Outputs.bubble = say && w[say] ? { robot: 0, text: w[say], style: 'plain', n: Number(Inputs.sayN) || 0 } : null;
+if (sayText) Outputs.bubble = { robot: 0, text: sayText, style: sayStyle === 'olive' ? 'olive' : 'plain', ms: sayStyle === 'olive' ? stepMs * 3 : 0, n: sayN };
+else if (say) Outputs.bubble = { robot: 0, text: w[say] || say, style: 'plain', n: sayN };
+`;
+
+/**
+ * IG-001 D10: the Teach pad by request — one key per allowed step, in the pad's order; with no list (free play) every
+ * step the engine knows (`fill` joins when IG-002 makes it a block). The first action takes the d-pad's centre (the
+ * mockup's water key), the rest a third row.
+ */
+export const PAD_KEYS_SCRIPT = `
+var PAD = ${JSON.stringify(PAD_KEYS.map((k) => [k.op, k.place, k.icon]))};
+var KNOWN = ${JSON.stringify(Object.keys(BLOCK_META))};
+var allowed = Array.isArray(Inputs.allowed) ? Inputs.allowed : [];
+var slots = ['bg-key-mid', 'bg-key-r3a', 'bg-key-r3b', 'bg-key-r3c'], used = 0;
+var keys = [];
+for (var i = 0; i < PAD.length; i++) {
+  var op = PAD[i][0];
+  var ok = allowed.length ? allowed.indexOf(op) !== -1 : KNOWN.indexOf(op) !== -1;
+  if (!ok) continue;
+  var place = PAD[i][1] || slots[Math.min(used++, slots.length - 1)];
+  keys.push({ op: op, cls: 'bg-key bg-key-' + op + (place === 'bg-key-' + op ? '' : ' ' + place) + ' bg-i-' + PAD[i][2] + ' bg-press', label: op });
+}
+Outputs.keys = keys;
+Outputs.count = keys.length;
 `;
 
 /**
@@ -230,7 +260,8 @@ Outputs.blocks = countBlocks(prog);
 
 export const KIT_PALETTE_SCRIPT = `${WORD_HELPER}
 var ICON = { fwd: 'fwd', left: 'left', right: 'right', water: 'water', pick: 'pick', put: 'put', say: 'say', repeat: 'loop', until: 'wall', 'if': 'if', when: 'if', count_inc: 'count', trick: 'loop', 'do': 'fwd', ask: 'owl' };
-var SENSORS = [['wall_ahead', 'sWallAhead'], ['tulip_ahead', 'sTulipAhead'], ['bowl_empty', 'sBowlEmpty'], ['basket_full', 'sBasketFull'], ['count_is', 'sCountIs']];
+// IG-001 D7: "Olive says yes" / "Olive says no" — one value each, so "if Olive says yes" can be built from the picker.
+var SENSORS = [['wall_ahead', 'sWallAhead'], ['tulip_ahead', 'sTulipAhead'], ['bowl_empty', 'sBowlEmpty'], ['basket_full', 'sBasketFull'], ['count_is', 'sCountIs'], ['olive_says:yes', 'sOliveSaysYes'], ['olive_says:no', 'sOliveSaysNo']];
 var EVENTS = [['meow', 'eMeow']];
 var SAYS = [['thanksMamie', 'thanksMamie'], ['thanksSami', 'thanksSami'], ['thanksBiscuit', 'thanksBiscuit']];
 var TRICK_NAMES = ['row', 'hop', 'zigzag'];
@@ -628,6 +659,7 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Draw world', script: DRAW_WORLD_SCRIPT, seam: 'the engine’s world in the kit’s words' },
   { component: 'Logic/Record step', script: RECORD_STEP_SCRIPT, seam: 'a Teach pad press: the block appended, the robot moved by the engine' },
   { component: 'Logic/Kit palette', script: KIT_PALETTE_SCRIPT, seam: 'the engine’s palette in the kit’s shape' },
+  { component: 'Logic/Pad keys', script: PAD_KEYS_SCRIPT, seam: 'the Teach pad’s keys: one per step the request allows' },
   { component: 'Logic/Tidy line', script: TIDY_LINE_SCRIPT, seam: 'the fold offer’s sentence, and whether it shows' },
   { component: 'Logic/Read family', script: FAMILY_SCRIPT, seam: 'the family read: the active profile and the profile rows' },
   { component: 'Logic/Island pins', script: ISLAND_PINS_SCRIPT, seam: 'the islanders on the sea as pins, each one open when she has a request left' },

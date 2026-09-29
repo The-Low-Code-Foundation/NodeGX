@@ -154,7 +154,13 @@ const check = (name, ok, saw) => {
 
 const STUB = {
   status: { model: 'ready', reason: '', gpu: false, loadMs: 1, lastMs: 1, asked: 0, fallbacks: 0, busy: false, queued: 0, exam: { at: '2026-09-28T00:00:00.000Z', ms: 1, passed: 20, failed: 0, rungs: {} } },
-  olive: (body) => ({ ok: true, text: body && body.lang === 'fr' ? 'Merci, Mamie Rose ! (stub)' : 'Thank you, Mamie Rose! (stub)', ms: 5 })
+  /** IG-001 (P106 s1): a scripted reply per rung (text, or a value for a shaped rung) and a hold before ONE rung's reply (never the hint voicings, or "thinking" would be the voicing), so a drive can watch a parked run. */
+  plan: { answers: {}, delayMs: 0, delayRung: '' },
+  olive: (body) => {
+    const scripted = body && STUB.plan.answers[body.rung];
+    if (scripted !== undefined) return { ok: true, ...(typeof scripted === 'string' && !/^(yes|no|oui|non)$/.test(scripted) ? { text: scripted } : { value: scripted }), ms: 5 };
+    return { ok: true, text: body && body.lang === 'fr' ? 'Merci, Mamie Rose ! (stub)' : 'Thank you, Mamie Rose! (stub)', ms: 5 };
+  }
 };
 
 withDeployedSite({ dir: DIR }, async (page) => {
@@ -174,12 +180,15 @@ withDeployedSite({ dir: DIR }, async (page) => {
       }
       const answer = /\/__garden\/olive\/status/.test(request.url) ? STUB.status : STUB.olive(body);
       stubCalls.push({ url: request.url, method: request.method, body });
-      client.send('Fetch.fulfillRequest', {
-        requestId,
-        responseCode: 200,
-        responseHeaders: [{ name: 'content-type', value: 'application/json' }],
-        body: Buffer.from(JSON.stringify(answer)).toString('base64')
-      });
+      const fulfil = () =>
+        client.send('Fetch.fulfillRequest', {
+          requestId,
+          responseCode: 200,
+          responseHeaders: [{ name: 'content-type', value: 'application/json' }],
+          body: Buffer.from(JSON.stringify(answer)).toString('base64')
+        });
+      if (STUB.plan.delayMs > 0 && body && body.rung === STUB.plan.delayRung) setTimeout(fulfil, STUB.plan.delayMs);
+      else fulfil();
     }
   });
   await client.send('Fetch.enable', { patterns: [{ urlPattern: '*/__garden/*', requestStage: 'Request' }] });
@@ -472,8 +481,9 @@ withDeployedSite({ dir: DIR }, async (page) => {
   const asked = await until(`document.body.innerText.includes(${JSON.stringify(w('en', 'predictAsk'))})`, Boolean);
   check('AC6: Predict asks where the robot will end', asked, asked);
   await tap(`document.querySelector('.gd-cell[data-x="5"][data-y="3"]')`, 'a wrong tile');
-  const miss = await until(`(() => { const f = [...document.querySelectorAll('.gd-label')].find((e) => e.innerText.includes('🏁')); const say = document.querySelector('.bg-owl-say'); return { flag: f ? f.closest('.gd-cell').getAttribute('data-x') + ',' + f.closest('.gd-cell').getAttribute('data-y') : null, say: say ? say.innerText : '' }; })()`, (r) => !!r.flag);
-  check('AC6: a wrong tap marks the real end (2,3)', miss.flag === '2,3', miss);
+  // IG-001 D9: the real end is the kit's flag sprite on its tile (it was a 🏁 in a label pill).
+  const miss = await until(`(() => { const f = document.querySelector('.bg-stage svg.gd-thing.gd-flag[data-sprite="flag"]'); const say = document.querySelector('.bg-owl-say'); return { flag: f ? f.closest('.gd-cell').getAttribute('data-x') + ',' + f.closest('.gd-cell').getAttribute('data-y') : null, pills: document.querySelectorAll('.bg-stage .gd-label').length, say: say ? say.innerText : '' }; })()`, (r) => !!r.flag);
+  check('AC6: a wrong tap marks the real end (2,3) with the flag sprite, no pill (IG-001 D9)', miss.flag === '2,3' && miss.pills === 0, miss);
   check('AC6: … and says the Predict hint, with no score in it', miss.say === w('en', 'hintPredictMiss').replace(/\{b\}/g, 'Pip') || miss.say.includes(w('en', 'hintPredictMiss').split('{b}')[0].trim()), miss.say);
   check('AC6: … and no number is shown as a score', !/\b\d+\s*(\/|%|points?|pts)\b/.test(miss.say), miss.say);
   await shot('ac6-miss');
@@ -576,8 +586,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await wait(900);
   const line = await evaluate(`(() => { const e = document.querySelector('.bg-ws-sub'); return e ? e.innerText : ''; })()`);
   check('S3-RENAME + item 1: the Workshop’s line is the tulips’ own, with the new name in it', line === w('en', 'subTulipsThree', 'Rosie'), { line, want: w('en', 'subTulipsThree', 'Rosie') });
-  const ask = await evaluate(`(() => { const b = [...document.querySelectorAll('.bg-controls .bg-i-owlc')].find((e) => e.offsetParent !== null); if (!b) return null; const s = getComputedStyle(b, '::before'); return { image: /svg/.test(s.backgroundImage), mask: s.webkitMaskImage || s.maskImage }; })()`);
-  check('S3-LOOK item 2: Ask Olive carries the owl picture, not a white mask', !!ask && ask.image && (!ask.mask || ask.mask === 'none'), ask);
+  // IG-001 D8: the bar has no Ask Olive (it was a hint refresh); the owl picture lives on the grown-ups' Try Olive (below).
+  check('IG-001 D8: no Ask Olive button on the Workshop bar', !(await evaluate(`[...document.querySelectorAll('.bg-controls .bg-i-owlc, .bg-controls .bg-ask-push')].some((e) => e.offsetParent !== null)`)), null);
   await shot('look-workshop-1368');
   await contrastClause('Workshop');
   // Rename back, so the screens after read as before.
@@ -594,6 +604,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
   const gu = await text();
   check('Grown-ups: the stub shell says Olive is awake, and her exam here', gu.includes(w('en', 'guHereOn')) && /20/.test(gu), gu.slice(0, 400));
   await contrastClause('Grown-ups');
+  const ask = await evaluate(`(() => { const b = [...document.querySelectorAll('.bg-panel .bg-i-owlc')].find((e) => e.offsetParent !== null); if (!b) return null; const s = getComputedStyle(b, '::before'); return { image: /svg/.test(s.backgroundImage), mask: s.webkitMaskImage || s.maskImage }; })()`);
+  check('S3-LOOK item 2: Try Olive carries the owl picture, not a white mask', !!ask && ask.image && (!ask.mask || ask.mask === 'none'), ask);
   await tap(first('.bg-panel .bg-i-owlc'), 'Try Olive');
   const reply = await until('document.body.innerText', (t) => t.includes('(stub)'), 6000);
   check('Grown-ups: Try Olive shows her reply', reply.includes('(stub)'), stubCalls.slice(-2));
@@ -646,6 +658,188 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await wait(600);
   const back = await doneOf();
   check('S4-PASTE: the first code brings the first family back', back.robot === firstRobot && firstRobot !== 'Remy', { back, firstRobot });
+
+  // ── IG-001 (P106 s1): the ten fixes, driven. EN, 1368×912, band 10–12, the first family (the robot Pip). ──
+  {
+    const hintNodes = JSON.parse(fs.readFileSync(path.join(PROJECT, 'components', 'Data', 'Hints', 'nodes.json'), 'utf8'));
+    const hintRows = JSON.parse((Array.isArray(hintNodes) ? hintNodes : hintNodes.nodes || Object.values(hintNodes)).find((n) => n.type === 'Static Data').parameters.json);
+    const hint = (key) => String((hintRows.find((r) => r.key === key) || {}).en || '').split('{b}').join('Pip');
+    const owlExpr = `(document.querySelector('.bg-owl-say') || {}).innerText || ''`;
+    const thinkingExpr = `(() => { const e = document.querySelector('.bg-owl-thinking'); return !!e && e.offsetParent !== null; })()`;
+    const owlSay = () => evaluate(owlExpr);
+    const pal = (id) => tap(first(`.gd-palette [data-pal="${id}"]`), `palette ${id}`);
+    const pickSlot = async (blockSel, slot, opt) => {
+      await tap(first(`${blockSel} .gd-slot[data-slot="${slot}"]`), `slot ${slot}`);
+      await tap(opt ? first(`.gd-picker .gd-opt[data-opt="${opt}"]`) : first('.gd-picker .gd-opt'), `option ${opt || 'first'} for ${slot}`);
+    };
+    const runOver = () => until(`!document.querySelector('.gd-locked')`, Boolean, 12000);
+    const poemAsks = () => stubCalls.filter((c) => c.body && c.body.rung === 'poem').length;
+    /** D5: the running block's ring, read live — its outline colour against the first opaque ground behind it, and the halo. */
+    const ringOf = () =>
+      evaluate(`(() => { const el = document.querySelector('.gd-blk.gd-run'); if (!el) return null; const cs = getComputedStyle(el);
+        const parse = (c) => { const m = String(c).match(/rgba?\\(([^)]+)\\)/); if (!m) return null; const p = m[1].split(/[ ,\\/]+/).filter(Boolean).map(Number); return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 }; };
+        const lum = (c) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); };
+        const ratio = (a, b) => { const x = lum(a), y = lum(b); return Math.round(((Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)) * 100) / 100; };
+        let ground = null, groundOf = '';
+        for (let e = el.parentElement; e; e = e.parentElement) { const bg = parse(getComputedStyle(e).backgroundColor); if (bg && bg.a >= 0.999) { ground = bg; groundOf = String(e.className || '').slice(0, 40); break; } }
+        const ring = parse(cs.outlineColor);
+        return { id: el.getAttribute('data-id'), ring: cs.outlineColor, width: cs.outlineWidth, halo: cs.boxShadow, ground: cs.outlineColor && ground ? [ground.r, ground.g, ground.b] : null, groundOf, inRep: !!el.closest('.gd-rep'), ratio: ring && ground ? ratio(ring, ground) : null, transform: cs.transform }; })()`);
+    const ringOk = (r) => !!r && r.ratio >= 3 && r.width === '3px' && /rgb\(255, 255, 255\) 0px 0px 0px 4px/.test(r.halo);
+    const enterFree = async (label) => {
+      await tab(0);
+      await until('location.pathname', (p) => p === '/island');
+      await wait(700);
+      await tap(byText('.bg-quest', 'No request'), label);
+      await until('location.pathname', (p) => p === '/workshop');
+      await until(`!!document.querySelector('.gd-palette [data-pal="fwd"]')`, Boolean, 6000);
+      await wait(600);
+    };
+
+    // D8: an edit changes the hint within one step, with no press.
+    await enterFree('free play (IG-001 D8)');
+    const emptyLine = await until(owlExpr, (t) => t.includes(hint('hintEmpty').slice(0, 24)), 4000);
+    await pal('fwd');
+    const edited = await until(owlExpr, (t) => t !== emptyLine && t.length > 0, 1500);
+    check('IG-001 D8: editing a block changes the hint within one step, with no press (empty → a program not run yet)', emptyLine.includes(hint('hintEmpty').slice(0, 24)) && edited.includes(hint('hintStart').slice(0, 24)), { emptyLine, edited });
+
+    // D1 + D6 + D5 (on white): fwd, ask Olive · a poem. One step runs fwd (the ring on the white panel); One step parks
+    // (thinking on); a third press while parked asks nothing more; the stub's held answer clears the tag with no press and
+    // is spoken in the olive bubble.
+    await pal('ask:poem');
+    await pickSlot('.gd-prog .gd-blk[data-t="ask:poem"]', 'flower');
+    await wait(700);
+    STUB.plan.answers.poem = 'Tulla the tulip';
+    STUB.plan.delayRung = 'poem';
+    STUB.plan.delayMs = 1500;
+    const asks0 = poemAsks();
+    await control('step');
+    const ringWhite = await until(`!!document.querySelector('.gd-blk.gd-run')`, Boolean, 2000) ? await ringOf() : null;
+    readings.ringWhite = ringWhite;
+    await control('step');
+    const tagOn = await until(thinkingExpr, Boolean, 2000);
+    await control('step');
+    await wait(300);
+    const asksMid = poemAsks();
+    const tagOff = await until(thinkingExpr, (v) => v === false, 6000);
+    const bubble = await until(`(() => { const b = document.querySelector('.gd-bubble.gd-olive'); return b ? b.innerText : ''; })()`, Boolean, 2500);
+    const asksAfter = poemAsks();
+    await shot('ig001-d1-d6-olive-bubble');
+    check('IG-001 D1: One step parks on Olive (the tag on); a Step while parked asks nothing more; the tag clears when she answers, with no further press; exactly one ask sent', tagOn === true && asksMid === asks0 + 1 && tagOff === false && asksAfter === asks0 + 1, { tagOn, asks0, asksMid, tagOff, asksAfter });
+    check('IG-001 D6: what Olive said is on the robot, in the olive bubble', /Tulla the tulip/.test(bubble), { bubble });
+    check(`IG-001 D5: the running ring on the steps panel (white) is 3 px, ≥ 3:1, over a 4 px white halo (${ringWhite && ringWhite.ratio}:1)`, ringOk(ringWhite) && !ringWhite.inRep, ringWhite);
+    // Start over while parked: the tag is off within one tick.
+    await control('reset');
+    await wait(400);
+    await pal('ask:poem');
+    await pickSlot('.gd-prog .gd-blk[data-t="ask:poem"]', 'flower');
+    await wait(700);
+    await control('step');
+    const parkedAgain = await until(thinkingExpr, Boolean, 2000);
+    await control('reset');
+    const cleared = await until(thinkingExpr, (v) => v === false, 700);
+    STUB.plan.delayMs = 0;
+    check('IG-001 D1: Start over while parked — the tag is off within one tick', parkedAgain === true && cleared === false, { parkedAgain, cleared });
+    // D6: a say block shows its line, plain.
+    await wait(400);
+    await pal('say');
+    await control('step');
+    const plain = await until(`(() => { const b = document.querySelector('.gd-bubble:not(.gd-olive)'); return b ? b.innerText : ''; })()`, Boolean, 2500);
+    check('IG-001 D6: a say block shows its line in the plain bubble', plain === w('en', 'thanksMamie'), { plain, want: w('en', 'thanksMamie') });
+    // D4: free play — a clean run says hintFree; a run that bumps says hintBump.
+    await control('reset');
+    await wait(400);
+    for (const op of ['fwd', 'fwd', 'left']) await pal(op);
+    await control('play');
+    const freeLine = await until(owlExpr, (t) => t.includes(hint('hintFree').slice(0, 20)) || /bumped/.test(t), 9000);
+    check('IG-001 D4: a clean run in free play says its own line ("did what you said…")', freeLine.includes(hint('hintFree').slice(0, 20)), { freeLine, want: hint('hintFree') });
+    await runOver();
+    await control('reset');
+    await wait(400);
+    // Up three, left, forward: a bump at the map's edge with no run of four (four forwards would be the fold nudge, which
+    // outranks a bump by the ladder's design).
+    for (const op of ['left', 'fwd', 'fwd', 'fwd', 'left', 'fwd']) await pal(op);
+    await control('play');
+    const bumpLine = await until(owlExpr, (t) => t.includes(hint('hintBump').slice(0, 16)), 9000);
+    check('IG-001 D4: a run that bumps in free play still says the bump line', bumpLine.includes(hint('hintBump').slice(0, 16)), { bumpLine });
+    await runOver();
+
+    // D2: request A (the tulips) driven to a bump, then request B opened and "Done teaching": never the bump line.
+    await tab(0);
+    await until('location.pathname', (p) => p === '/island');
+    await wait(700);
+    await tap(byText('.bg-quest', w('en', 'rqTulipsTitle')), 'the tulips (IG-001 D2, request A)');
+    await until('location.pathname', (p) => p === '/workshop');
+    await wait(900);
+    await control('rec');
+    for (const op of ['left', 'fwd', 'fwd', 'fwd', 'left', 'fwd']) await key(op);
+    await control('rec');
+    await control('play');
+    const aBump = await until(owlExpr, (t) => t.includes(hint('hintBump').slice(0, 16)), 9000);
+    await runOver();
+    await tab(0);
+    await until('location.pathname', (p) => p === '/island');
+    await wait(700);
+    await tap(byText('.bg-quest', w('en', 'rqPathTitle')), 'Sami’s path (IG-001 D2, request B)');
+    await until('location.pathname', (p) => p === '/workshop');
+    await wait(900);
+    await control('rec');
+    await control('rec');
+    await wait(900);
+    const bLine = await owlSay();
+    check('IG-001 D2: after a bump on request A, request B’s first hint is the start/empty line, never the bump (the run is reset)', aBump.includes(hint('hintBump').slice(0, 16)) && !/bumped/.test(bLine) && (bLine.includes(hint('hintEmpty').slice(0, 24)) || bLine.includes(hint('hintStart').slice(0, 24))), { aBump, bLine });
+
+    // D9 + D10 + D5 (inside a repeat) + D3: the stones. The post box is a sprite on its tile, no pill; the pad shows put and
+    // no water; put, fwd × 4 lays four stone sprites; the fold makes the reference program; One step glows the repeat
+    // inside its ground; Play wins with "Perfect!".
+    await tab(0);
+    await until('location.pathname', (p) => p === '/island');
+    await wait(700);
+    await tap(byText('.bg-quest', w('en', 'rqStonesTitle')), 'the stones (IG-001 D9/D10/D3)');
+    await until('location.pathname', (p) => p === '/workshop');
+    await wait(900);
+    const stonesWorld = await evaluate(`(() => ({ postbox: !!document.querySelector('.bg-stage .gd-cell.gd-postbox svg[data-sprite="postbox"]'), labels: document.querySelectorAll('.bg-stage .gd-label').length, stones: document.querySelectorAll('.bg-stage .gd-thing.gd-stone').length }))()`);
+    check('IG-001 D9: the stones request draws the post box as a sprite on its own tile and no label pill at all', stonesWorld.postbox && stonesWorld.labels === 0 && stonesWorld.stones === 0, stonesWorld);
+    await control('rec');
+    await until(`!!document.querySelector('.bg-pad .bg-key-put')`, Boolean, 3000);
+    const padOps = await evaluate(`[...document.querySelectorAll('.bg-pad .bg-key')].filter((e) => e.offsetParent !== null).map((e) => (e.className.match(/bg-key-(fwd|left|right|water|pick|put|fill)/) || [])[1])`);
+    check('IG-001 D10: the stones’ pad shows fwd left right put and not water', JSON.stringify(padOps) === JSON.stringify(['fwd', 'left', 'right', 'put']), padOps);
+    for (let k = 0; k < 4; k++) {
+      await key('put');
+      await key('fwd');
+    }
+    const laid = await until(`document.querySelectorAll('.bg-stage .gd-thing.gd-stone').length`, (n) => n === 4, 3000);
+    await shot('ig001-d9-stones');
+    check('IG-001 D9: four stones laid are four stone sprites (svg, the kit’s class), no pill', laid === 4 && (await evaluate(`document.querySelectorAll('.bg-stage svg.gd-thing.gd-stone[data-sprite="stone"]').length`)) === 4 && (await evaluate(`document.querySelectorAll('.bg-stage .gd-label').length`)) === 0, { laid });
+    await until(`(() => { const e = document.querySelector('.bg-tidy'); return !!e && e.offsetParent !== null; })()`, Boolean, 3000);
+    await tap(first('.bg-tidy .bg-i-tidy'), 'Fold it (the stones)');
+    const three = await until(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`, (n) => n === 3, 3000);
+    await control('step');
+    const ringRep = await until(`!!document.querySelector('.gd-rep .gd-blk.gd-run')`, Boolean, 2000) ? await ringOf() : null;
+    readings.ringRep = ringRep;
+    await shot('ig001-d5-ring-in-repeat');
+    check(`IG-001 D5: the running ring inside a repeat (on #FFF0DA) is 3 px, ≥ 3:1, over a 4 px white halo (${ringRep && ringRep.ratio}:1)`, three === 3 && ringOk(ringRep) && ringRep.inRep, ringRep);
+    await control('play');
+    const perfect = await until(owlExpr, (t) => t.includes(hint('hintPerfect').slice(0, 8)), 12000);
+    const wonStones = await until(`(() => { const e = document.querySelector('.bg-win-card'); return !!e && e.offsetParent !== null; })()`, Boolean, 6000);
+    await shot('ig001-d3-perfect');
+    check('IG-001 D3: repeat 4 × (put, fwd) — the reference program — wins with "Perfect!"', wonStones && perfect.includes(hint('hintPerfect').slice(0, 8)), { perfect, wonStones, want: hint('hintPerfect') });
+    if (wonStones) await tap(byText('.bg-win-card button', w('en', 'winStay')), 'Keep tinkering');
+    // D10: the tulips' pad shows water.
+    await tab(0);
+    await until('location.pathname', (p) => p === '/island');
+    await wait(700);
+    await tap(byText('.bg-quest', w('en', 'rqTulipsTitle')), 'the tulips (IG-001 D10)');
+    await until('location.pathname', (p) => p === '/workshop');
+    await wait(900);
+    await control('rec');
+    await until(`!!document.querySelector('.bg-pad .bg-key-fwd')`, Boolean, 3000);
+    const tulipOps = await evaluate(`[...document.querySelectorAll('.bg-pad .bg-key')].filter((e) => e.offsetParent !== null).map((e) => (e.className.match(/bg-key-(fwd|left|right|water|pick|put|fill)/) || [])[1])`);
+    check('IG-001 D10: the tulips’ pad shows water (fwd left water right)', JSON.stringify(tulipOps) === JSON.stringify(['fwd', 'left', 'water', 'right']), tulipOps);
+    await control('rec');
+    await tab(0);
+    await until('location.pathname', (p) => p === '/island');
+    await wait(600);
+  }
 
   // CG-007 AC3: both faces loaded, from the deploy, nothing from Google.
   const fonts = await evaluate(`(async () => { await document.fonts.ready; return [...document.fonts].map((f) => ({ family: f.family.replace(/["']/g, ''), status: f.status })); })()`);

@@ -327,6 +327,16 @@
           "type": "string"
         },
         {
+          "name": "sayText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "sayStyle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
           "name": "tick",
           "plug": "input",
           "type": "number"

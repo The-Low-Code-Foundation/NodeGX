@@ -7,5 +7,5 @@
   "created": "2026-09-27T00:00:00.000Z",
   "modified": "2026-09-27T00:00:00.000Z",
   "modifiedBy": "noodl-mcp",
-  "description": "The Teach pad over the world’s corner (the mockup’s .pad): forward, left, water, right. Publishes Pressed with the Op, the op first."
+  "description": "The Teach pad over the world’s corner (the mockup’s .pad): one key per step the request allows (Allowed; every step with no list) — forward, left and right on the d-pad, the first action in its centre, more actions on a third row. Publishes Pressed with the Op, the op first."
 }

@@ -377,6 +377,18 @@
     },
     {
       "fromId": "rnStep",
+      "fromProperty": "sayText",
+      "toId": "rnOut",
+      "toProperty": "sayText"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "sayStyle",
+      "toId": "rnOut",
+      "toProperty": "sayStyle"
+    },
+    {
+      "fromId": "rnStep",
       "fromProperty": "tick",
       "toId": "rnOut",
       "toProperty": "tick"
