@@ -34,7 +34,7 @@
  * ── The JSON contract (garden-kit’s, verbatim; the new ports after it) ──────
  *
  * Map:      { rows: ["GGTGGGTH", ...], legend: { G: "grass", ... } } or just the rows. Kinds: grass path water tree
- *           rock house bed. A bed draws a dry tulip; a Thing waters it.
+ *           rock house bed postbox. A bed draws a dry tulip; a Thing waters it. A postbox tile is path wearing the box.
  * Things:   [{ kind: tulip | puddle | letter | bowl | label, x, y, watered?, full?, text? }]
  * Robots:   [{ x, y, d, colour, eyes, hat, name, bump? }]  d 0..3 clockwise from up; bump is a COUNT that rises.
  * Bubble:   { robot, text, style: plain | olive, ms }
@@ -75,8 +75,8 @@
   // COPIED from library/modules/garden-kit/src/kit.js (the 2D `Garden` node’s world.* helpers), so that this kit
   // stands alone in a project that installs it without garden-kit. When garden-kit IS on the page its own helpers are
   // used instead (see `worldHelpers`), and the kit gate pins these copies to the originals on a shared set of inputs.
-  var DEFAULT_LEGEND = { G: 'grass', P: 'path', W: 'water', T: 'tree', R: 'rock', H: 'house', F: 'bed', '.': 'grass', ' ': 'grass' };
-  var KINDS = ['grass', 'path', 'water', 'tree', 'rock', 'house', 'bed'];
+  var DEFAULT_LEGEND = { G: 'grass', P: 'path', W: 'water', T: 'tree', R: 'rock', H: 'house', F: 'bed', B: 'postbox', '.': 'grass', ' ': 'grass' };
+  var KINDS = ['grass', 'path', 'water', 'tree', 'rock', 'house', 'bed', 'postbox'];
 
   function parseMap(v) {
     var m = v;
@@ -228,8 +228,8 @@
   };
 
   /** How tall each tile box is: water lowest, path, grass, bed. Tree, rock and house sit on a grass-height tile. */
-  var TILE_HEIGHT = { water: 0.14, path: 0.3, grass: 0.4, bed: 0.46, tree: 0.4, rock: 0.4, house: 0.4 };
-  var TILE_COLOUR = { water: PALETTE.water, path: PALETTE.path, grass: PALETTE.grass, bed: PALETTE.bed, tree: PALETTE.grass, rock: PALETTE.grass, house: PALETTE.grass };
+  var TILE_HEIGHT = { water: 0.14, path: 0.3, grass: 0.4, bed: 0.46, tree: 0.4, rock: 0.4, house: 0.4, postbox: 0.3 };
+  var TILE_COLOUR = { water: PALETTE.water, path: PALETTE.path, grass: PALETTE.grass, bed: PALETTE.bed, tree: PALETTE.grass, rock: PALETTE.grass, house: PALETTE.grass, postbox: PALETTE.path };
 
   function tileHeight(kind) {
     return TILE_HEIGHT[kind] === undefined ? TILE_HEIGHT.grass : TILE_HEIGHT[kind];
@@ -445,6 +445,45 @@
     label: function (THREE) {
       // A label is text: it is a DOM overlay (see the engine), not a mesh. An empty group holds its place.
       return new THREE.Group();
+    },
+    postbox: function (THREE, mat, t, out) {
+      // The post box (IG-001 D9): a post and a red box, the 2D kit’s `postbox` sprite in the round.
+      var g = new THREE.Group();
+      var post = mesh(THREE, new THREE.CylinderGeometry(0.05, 0.05, 0.36, 6), mat(PALETTE.ink), 0, 0.18, 0);
+      var box = mesh(THREE, new THREE.BoxGeometry(0.34, 0.3, 0.26), mat(PALETTE.roof), 0, 0.5, 0);
+      g.add(post, box);
+      out.meshCount += 2;
+      return g;
+    },
+    // The four thing kinds IG-001 D9 gave the 2D kit as sprites (stone, egg, food, flag): one small primitive each, so a
+    // thing a page sends never draws nothing. IG-002 sizes the stone by the rock it came from.
+    stone: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      g.add(mesh(THREE, new THREE.DodecahedronGeometry(0.16, 0), mat(PALETTE.rock), 0, 0.12, 0));
+      out.meshCount += 1;
+      return g;
+    },
+    egg: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      var egg = mesh(THREE, new THREE.SphereGeometry(0.14, 8, 6), mat(PALETTE.letter), 0, 0.16, 0);
+      egg.scale.y = 1.3;
+      g.add(egg);
+      out.meshCount += 1;
+      return g;
+    },
+    food: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      g.add(mesh(THREE, new THREE.CylinderGeometry(0.16, 0.16, 0.1, 8), mat(PALETTE.kibble), 0, 0.05, 0));
+      out.meshCount += 1;
+      return g;
+    },
+    flag: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      var pole = mesh(THREE, new THREE.CylinderGeometry(0.02, 0.02, 0.6, 5), mat(PALETTE.ink), 0, 0.3, 0);
+      var cloth = mesh(THREE, new THREE.BoxGeometry(0.26, 0.16, 0.02), mat(PALETTE.sun), 0.14, 0.5, 0);
+      g.add(pole, cloth);
+      out.meshCount += 2;
+      return g;
     }
   };
 
@@ -550,6 +589,8 @@
         return t.kind === 'tulip';
       });
       if (c.kind === 'bed' && !hasTulip) placeThing({ kind: 'tulip', x: c.x, y: c.y, watered: false });
+      // A postbox TILE (legend B, IG-001 D9) is a path tile wearing the post box, as the 2D kit draws it.
+      if (c.kind === 'postbox') placeThing({ kind: 'postbox', x: c.x, y: c.y });
       here.forEach(placeThing);
     });
     // Robots, two on one tile drawn smaller and apart (the 2D kit’s robotPlaces: −90%/−10% offsets, scale .78).
@@ -1529,8 +1570,8 @@
     defaultCss: { display: 'block' },
 
     inputProps: {
-      map: { type: 'object', displayName: 'Map', group: 'World', default: '{"rows":["GGTGGGTH","GGGGGGGG","GGFGFGFG","PPPPPPPP","GWWGGRGG","GGGGGTGG"]}', description: 'Rows of characters and a legend, as an object or JSON: { rows: ["GGTG…"], legend: { G: "grass" } }. Kinds: grass, path, water, tree, rock, house, bed (a tulip bed, dry until a Thing waters it). The mockup’s legend is the default.' },
-      things: { type: 'object', displayName: 'Things', group: 'World', description: 'A list, as an object or JSON: { kind, x, y } with kind tulip (watered true/false), puddle, letter, bowl (full true/false) or label (text).' },
+      map: { type: 'object', displayName: 'Map', group: 'World', default: '{"rows":["GGTGGGTH","GGGGGGGG","GGFGFGFG","PPPPPPPP","GWWGGRGG","GGGGGTGG"]}', description: 'Rows of characters and a legend, as an object or JSON: { rows: ["GGTG…"], legend: { G: "grass" } }. Kinds: grass, path, water, tree, rock, house, bed (a tulip bed, dry until a Thing waters it), postbox (the post box, on path). The mockup’s legend is the default.' },
+      things: { type: 'object', displayName: 'Things', group: 'World', description: 'A list, as an object or JSON: { kind, x, y } with kind tulip (watered true/false), puddle, letter, bowl (full true/false), stone, egg, food, flag or label (text).' },
       robots: { type: 'object', displayName: 'Robots', group: 'World', default: '[{"x":0,"y":3,"d":1,"colour":"#FF7A59","eyes":"round","hat":"none","name":"Pip"}]', description: 'One or two, as a list or JSON: { x, y, d, colour, eyes, hat, name, bump }. d is 0 up, 1 right, 2 down, 3 left. bump is a count: raise it once per bump.' },
       bubble: { type: 'object', displayName: 'Bubble', group: 'World', description: '{ robot, text, style, ms }: a line over a robot for ms (1100 plain, 3200 olive by default). A new object shows a new bubble.' },
       stepMs: { type: 'number', displayName: 'Step Ms', group: 'World', default: 380, description: 'How long a robot takes to glide one tile.' },
