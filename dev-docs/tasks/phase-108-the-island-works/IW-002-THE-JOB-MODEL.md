@@ -1,6 +1,6 @@
 # IW-002 — The job model: sources, carriers, meters, a finish line, wear
 
-**Opened 2026-09-29** from README §4.1. **Status: ⬜.** Depends on nothing (engine first). Lanes J (engine) then D (drawing).
+**Opened 2026-09-29** from README §4.1. **Status: 🟡 s1 — the ENGINE half built (lane J, §6); AC6 drawing (lane D) and the page/island drive clauses (once IW-003 gives a request a `job`) owed.** Depends on nothing (engine first). Lanes J (engine) then D (drawing).
 
 ## 1. The person sentence
 

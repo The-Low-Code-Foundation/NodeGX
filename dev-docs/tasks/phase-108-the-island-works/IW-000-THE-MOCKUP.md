@@ -1,6 +1,6 @@
 # IW-000 — The mockup: three missions as jobs, on real Blockly
 
-**Opened 2026-09-29** from README §0 and rulings R1–R3. **Status: ⬜.** Depends on nothing. Lane M.
+**Opened 2026-09-29** from README §0 and rulings R1–R3. **Status: 🟡 built and published** (https://claude.ai/artifact/FQwh2xGNTKXxau4wtiMuX3, 2026-09-29, private); Richard's look grade given (§7); AC5 (the tablet by touch) and the children's words owed. Depends on nothing. Lane M.
 
 ## 1. The person sentence
 
@@ -195,4 +195,5 @@ inside the claude.ai artifact frame (the drive opened the file from disk; for th
 **Richard's lines (AC5 and AC6 — leave for him):**
 - AC5, on the tablet, by touch, 10 tries each: drag from the drawer ___/10 · drop into a `repeat` ___/10 · drag back to
   delete ___/10; stats line `drag: press→lift … · lift→drop …` _____
-- AC6, the look, verbatim: _____ · the children's words: _____
+- AC6, the look, verbatim: *"Just FYI the improvements in the artifact are perfect, exactly what I wanted"* (Richard, 2026-09-29,
+  on the published artifact) · the children's words: _____ (IW-009 §2)

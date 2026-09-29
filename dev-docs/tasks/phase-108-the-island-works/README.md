@@ -1,7 +1,7 @@
 # Phase 108 — The island works: jobs with a finish line, real blocks, and something to build
 
 **Scoped:** 2026-09-29, from Richard's notes after playing Olive's Island at the end of P106 session 4.
-**Status: ⬜ scoped, nothing built. Rulings R1–R4 given the same day (§3). Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).**
+**Status: 🟡 session 1 merged 2026-09-30 — IW-001 ✅, IW-002 engine 🟡, IW-000 🟡 published and graded by Richard. Rulings R1–R4 (§3); R5 open (§3). Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).**
 **Prefix: `IW`.** Parent: [Phase 106](../phase-106-the-island-grows/README.md) (the world, the robots, 3D, Olive reads).
 Grandparent: [Phase 105](../phase-105-the-coding-garden/README.md). Research: [TPL-012 briefing](../phase-78-the-templates/tpl-012-research-briefing.md),
 Rocket School's [rewards research](../phase-87-the-first-play-test/rkt-010-rewards-research.md), and §5 below (new, 2026-09-29).
@@ -142,6 +142,18 @@ Paths are shortened: **C** = `packages/noodl-mcp/tests/cg002Content.ts`, **E** =
 | D7 | No real-time clocks: wear and regrowth count **island ticks while a page is open** | R2; one of the children dislikes time pressure (§5). |
 | D8 | No leaderboards, no sibling comparison, shells private to each profile | rkt-010 §1.3–1.4. |
 
+**Open, asked after session 1 (2026-09-30):**
+
+| # | Question | Options |
+|---|---|---|
+| R5 | **The run cap is 14 minutes long.** A run that never ends (`repeat 9 { until the wall is ahead { turn left } }`) stops by itself only at the engine's `MAX_TICKS` = 2000 ticks — at 420 ms a tick, about 14 minutes; that very program ends earlier, by the `until` guard, after 742 ticks (~5 min). Stop (built) is what gets a child out. Should the Workshop also give up sooner? The longest reference run today is 41 ticks (`rows-trick`, IW-002 §6), so a cap of 200 leaves five times that. | **a page cap of ~200 ticks (≈1½ min) with Olive's "going round and round" line (recommended)** / stop at the first `until` guard hit / keep 2000 (IW-001 §6 deviation 1) |
+
+**Found in session 1, not this phase's to fix:** a `For Each` fed a new list while it is still rebuilding after its
+mount keeps BOTH sets of rows (`packages/noodl-viewer-react/src/nodes/std-library/data/foreach.tsx`, `scheduleRefresh`
+queues the async refresh without awaiting it). Lane A saw the pad draw ten keys for five and worked round it with a
+settle latch (`Logic/Latch`, `PAD_SETTLE_MS` 120) — IW-001 §6 deviation 6. Any other repeater fed twice in quick
+succession can show it. Owner: the runtime (P99, "the ones nobody owned").
+
 ## 4. The design
 
 ### 4.1 The job model (engine: IW-002)
@@ -244,9 +256,9 @@ A sensed `until` before the 3e text is an inference, not a source.
 
 | Task | What | Depends on | Status |
 |---|---|---|---|
-| [IW-000 — the mockup](IW-000-THE-MOCKUP.md) | three missions as jobs on real Blockly (tulips with can + meters, Cobble's path by the stone, Mamie's eggs to the basket with a tapped variable) — an artifact Richard and the children play; Blockly by touch on the tablet | — | ⬜ |
-| [IW-001 — the Workshop fixes](IW-001-THE-WORKSHOP-FIXES.md) | Stop + a run cap; drawer tap places the block; `?` on the drawer; tap no longer deletes; a taller program area; the pad = the drawer's actions; cards seen saved | — | ⬜ |
-| [IW-002 — the job model](IW-002-THE-JOB-MODEL.md) | sources that refill, carriers with levels, targets with meters, finish line + home, wear on ticks, walls, containers, the can as a thing, seeded layouts; both renderers draw it | — | ⬜ |
+| [IW-000 — the mockup](IW-000-THE-MOCKUP.md) | three missions as jobs on real Blockly (tulips with can + meters, Cobble's path by the stone, Mamie's eggs to the basket with a tapped variable) — an artifact Richard and the children play; Blockly by touch on the tablet | — | 🟡 s1: published https://claude.ai/artifact/FQwh2xGNTKXxau4wtiMuX3, drive 61/61; Richard: *"perfect, exactly what I wanted"*; tablet AC5 + the children owed |
+| [IW-001 — the Workshop fixes](IW-001-THE-WORKSHOP-FIXES.md) | Stop + a run cap; drawer tap places the block; `?` on the drawer; tap no longer deletes; a taller program area; the pad = the drawer's actions; cards seen saved | — | ✅ s1 (lane A): AC1–AC8 driven, `drive-iw001-workshop.js` 38/38; R5 asks about the cap |
+| [IW-002 — the job model](IW-002-THE-JOB-MODEL.md) | sources that refill, carriers with levels, targets with meters, finish line + home, wear on ticks, walls, containers, the can as a thing, seeded layouts; both renderers draw it | — | 🟡 s1 (lane J): the engine half, specs +38; drawing (lane D) + drive clauses owed |
 | [IW-003 — the missions as jobs](IW-003-THE-MISSIONS-AS-JOBS.md) | all 13 rewritten on the job model + the envelope mission (Olive reads, `go to`) + the first build site; `until` missions vary their distance | 002, 004, 005 | ⬜ |
 | [IW-004 — real blocks](IW-004-REAL-BLOCKS.md) | Blockly 12 vendored, Zelos, the kid customisations, thing + state conditions picked on the island, value blocks by band, values drawn on things, brain size, Teach/fold/hints/cards on Blockly, stored programs migrated | 000 (look), 001 | ⬜ |
 | [IW-005 — seek and regrow](IW-005-SEEK-AND-REGROW.md) | `go to nearest`, `if here/ahead has`, reservation, `go to [what Olive read]`; regrowth rules | 002 | ⬜ |

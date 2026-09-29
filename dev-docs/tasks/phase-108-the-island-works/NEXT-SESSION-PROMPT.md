@@ -1,28 +1,52 @@
 # Phase 108 — next session
 
-> ### ⬜ 2026-09-29 (scoped, nothing built) — SESSION 1 = IW-001 ∥ IW-000 ∥ IW-002 (engine) — START HERE
+> ### ⬜ SESSION 2 = IW-004 (lane B) ∥ IW-005 (lane J) ∥ IW-002's drawing (lane D) — START HERE
 >
-> **Read first:** [README.md](README.md) §0 (Richard's words), §1 (what was measured, with file:line), §3 (R1–R4 ruled
-> the same day + defaults D1–D8), §6 (the board and the order). The design is §4; the research §5.
+> **Read first:** [README.md](README.md) §0 (Richard's words), §1 (the readings, file:line), §3 (R1–R4 ruled, D1–D8,
+> **R5 open**), §6 (the board). Then the §6/§7 "Session 1" blocks of IW-000, IW-001, IW-002.
 >
 > **Rulings already given (do not re-ask):** R1 scored play is IN (shells; nothing earned is ever taken away);
 > R2 wear and regrowth only while the game is open, things pause and never die; R3 real Blockly 12, customised
-> Scratch-style for kids (IW-004 §2 lists how); R4 the order is ours (§6).
+> Scratch-style for kids; R4 the order is ours (§6). **The mockup is graded:** Richard, 2026-09-29, on
+> https://claude.ai/artifact/FQwh2xGNTKXxau4wtiMuX3 — *"the improvements in the artifact are perfect, exactly what I
+> wanted"*. IW-004 builds THAT design (`dev-docs/tasks/phase-78-the-templates/tpl-012-mockups/island-jobs.html`;
+> the block type names it inherits are in IW-000 §7).
 >
-> **Session 1, three lanes (the P18 parallel-lanes recipe; worktrees from `make-worktree.sh`, which misses
-> `noodl-mcp/dist`, `nodegx-export/dist`, `nodegx-core/dist` for a garden lane):**
-> 1. **Lane A — IW-001 the Workshop fixes** (first job; Richard feels it the same day): Stop + run cap, the first
->    drawer tap places, `?` on the drawer, no tap-delete, the taller program box, the pad = the drawer, cards saved.
-> 2. **Lane M — IW-000 the mockup** (an artifact from P106 IG-000's page, three jobs on Blockly 12 from the CDN).
->    Publish; Richard and the children play it (IW-009 §2); the tablet reads drag-by-touch.
-> 3. **Lane J — IW-002 the job model, engine only** (meters, containers, the can as a thing, walls, sources, finish
->    line + home, wear on ticks, seeded layouts, the island tick). The 13 missions keep winning as they are.
+> **Session 1 (2026-09-29/30) — merged on `cline-dev` (regeneration `2e50fc3aa`, then this handoff).** Three lanes in worktrees + a merge worktree
+> (`p108-s1-merge`), brief `../OpenNoodl-worktrees/p108-COMMON-BRIEF-s1.md`. Its §4.2 job vocabulary held: the merge
+> was the exact source union (numstat-proved); only generated files conflicted, then regenerated.
+> - **IW-001 ✅** (lane A): Stop in Play's place, the run cap in the Runner, the first drawer tap places + opens the
+>   card, `?` on the drawer, a tap selects never deletes, drawer and program in two boxes, the pad = the drawer's
+>   actions, `cardsSeen` on the profile (save stays v4; row 15 written only when non-empty).
+> - **IW-002 🟡** (lane J): the engine half — tile `L`, targets with `have/need`, sites by stage, containers, the can
+>   as a thing, sources that refill, `job` + a BFS walk home + `job_done`, `WEAR` on the island tick only, `w.seed` +
+>   mulberry32, `Start world`'s `seed` port. The island tick's new loop applies only to a request with a `job` (none
+>   yet — IW-003). IW-002 §6 has the WEAR numbers and seven deviations.
+> - **IW-000 🟡** (lane M): published, drive 61/61; the tablet reading and the children still owed.
 >
-> Write the **shared vocabulary** (thing kinds, tile code `L`, event names, word-key prefixes `iw1`/`iw2`/`iw0`) into
-> the common brief BEFORE launching lanes — P106 s2 showed that is what keeps the pinned-copy gate green at the merge.
+> **Merged readings:** garden specs **551** (cg002 199, cg003Template 134, cg005 41, cg006 83, ig004Island 21,
+> cg001 35, ig007 38; each exit 0) · `template:garden` exit 0 · page drive **331/331** (`--mockup`) ·
+> IW-001 drive **38/38** · modes **90/90** · island **65/65** (AC6 p95 16.8 ms at CPU ×4) + 3D **5/5** · robots
+> **60/60** + 3D **4/4** · Workshop 3D **24/24** + nogl **8/8** · Olive page **22/22** · shell **91/91** — every exit 0.
 >
-> **Open P106 items that still stand:** IG-004 AC7 (packaged upgrade drive — now becomes IW-006's v4→v5 drive), the
-> lend chain played, R11, R12, Richard's grades and FR reads (P106 NEXT-SESSION-PROMPT). P106 R10 is superseded (D6).
+> **Session 2, three lanes (same recipe; write the shared contract into a NEW brief before launching):**
+> 1. **Lane B — IW-004 real blocks on the kit:** `garden-kit.Blocks` on `BlockList`'s ports, Blockly 12.3.1 vendored
+>    as three.js was, the mockup's customisations, thing + state conditions picked on the island, the Blockly ↔
+>    engine translator, brain size. IW-001's `?`-on-drawer, tap-adds, Stop and pad carry over; its F5/F6 layout goes.
+> 2. **Lane J — IW-005 seek and regrow in the engine:** `go to nearest` with reservation, `if here/ahead has`,
+>    `go to [what Olive read]`, on IW-002's vocabulary (brief s1 §4.2).
+> 3. **Lane D — IW-002's drawing in both kits:** the `L` wall, meters, the can level, site stages, the basket count,
+>    the hen, the droop — reading `JOB_VOCABULARY` from `cg002Content.ts`; the pinned-copy gate green; screenshots looked at.
+>
+> **Open for Richard:** **R5** (README §3): the page's run cap is 2000 ticks ≈ 14 min; recommended ~200. The mockup
+> on the tablet (IW-000 AC5: drag from the drawer / into a `repeat` / back to delete, 10 tries each) and the
+> children's first sitting (IW-009 §2). P106's R11, R12 and IG-004 AC7 still stand (AC7 becomes IW-006's v4→v5 drive).
+>
+> **Traps paid for in session 1:** a `For Each` fed twice while it rebuilds keeps BOTH row sets (README §3, "found in
+> session 1"; runtime-owned) — a repeater lane B or D feeds quickly needs lane A's settle latch until it is fixed.
+> The live meters are NOT in the save (v4 = program + robot): after a restart a job plot starts from its request's
+> start until IW-006's v5. The Workshop 3D drive can fail once when Garden 3D falls back to 2D ("Too Slow" under
+> software GL) — rerun before believing a red.
 >
 > **Before any heavy job:** one heavy job on the box at a time; check for a peer's suite first.
 >
