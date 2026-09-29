@@ -1137,4 +1137,38 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       for (const s of shared) expect(g3in).toContain(s);
     }, 60_000);
   });
+  describe('IG-004 (P106 s3) — the island’s vocabulary in 3D: an islander (her bubble in the overlay), a fence round a locked plot, its padlock', () => {
+    const W = () => node().world;
+    const meshesIn = (g: any) => {
+      let n = 0;
+      g.traverse((o: any) => {
+        if (o.type === 'Mesh' || o.type === 'InstancedMesh') n++;
+      });
+      return n;
+    };
+    it('🔴 each islander, the fence and the padlock draw something; the fence’s posts are one instanced mesh; the count the builder gives is what it made', () => {
+      const s = threeStub();
+      const map = W().parseMap({ rows: ['GGGGGGGGGG', 'GGGGGGGGGG', 'GGGGGGGGGG', 'GGGGGGGGGG'] });
+      const things = [{ kind: 'islander', who: 'mamie', x: 0, y: 0 }, { kind: 'islander', who: 'sami', x: 1, y: 0 }, { kind: 'islander', who: 'biscuit', x: 2, y: 0 }, { kind: 'fence', x: 1, y: 1, w: 8, h: 3 }, { kind: 'padlock', x: 5, y: 2 }];
+      const built = node().scene.buildScene({ map, things: W().parseThings(things), robots: [] }, s.THREE);
+      const by = (k: string) => built.things.filter((g: any) => g.userData.kind === k);
+      expect(by('islander').map((g: any) => [g.userData.who, meshesIn(g) > 0])).toEqual([['mamie', true], ['sami', true], ['biscuit', true]]);
+      const fence = by('fence')[0];
+      expect([fence.userData.w, fence.userData.h, fence.userData.posts]).toEqual([8, 3, 2 * 9 + 2 * 2]);
+      expect(fence.children.filter((c: any) => c.type === 'InstancedMesh')).toHaveLength(1);
+      expect(meshesIn(fence)).toBe(5);
+      expect(meshesIn(by('padlock')[0])).toBe(5);
+      expect(s.counts.Mesh + (s.counts.InstancedMesh || 0)).toBe(built.meshCount);
+    });
+    it('🔴 an islander with a line says it in the overlay (her own element, over her head); one with none says nothing', () => {
+      const { THREE } = threeStub();
+      const dom = fakeDom();
+      const frames: Array<() => void> = [];
+      const eng = node().engine.create({ THREE, root: dom.root, canvas: dom.canvas, overlay: dom.overlay, doc: dom.doc, now: () => 0, raf: (f: () => void) => (frames.push(f), 1), caf: () => {} });
+      eng.setWorld({ map: W().parseMap({ rows: ['GGGG', 'GGGG'] }), things: W().parseThings([{ kind: 'islander', who: 'sami', x: 1, y: 1, say: 'Lay four stones on the path' }, { kind: 'islander', who: 'mamie', x: 2, y: 1, say: '' }]), robots: [] });
+      const says = dom.overlay.children.filter((c: any) => c.className === 'gd3-isl-say');
+      expect(says.map((c: any) => c.textContent)).toEqual(['Lay four stones on the path']);
+      eng.destroy();
+    });
+  });
 });

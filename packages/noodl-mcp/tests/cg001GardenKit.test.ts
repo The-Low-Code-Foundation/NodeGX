@@ -723,4 +723,30 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       }
     });
   });
+  describe('IG-004 (P106 s3) — the island’s vocabulary: an islander (with her bubble), a fence round a locked plot, its padlock', () => {
+    const cellOf = (html: string, x: number, y: number) => {
+      const at = html.indexOf(`data-x="${x}" data-y="${y}"`);
+      return html.slice(html.lastIndexOf('<button', at), html.indexOf('</button>', at));
+    };
+    it('🔴 each islander is her own sprite on her tile; her bubble is her line, only when she has one; an unknown one draws nothing', () => {
+      const html = render('garden-kit.Garden', { map: { rows: ['GGGG'] }, things: [{ kind: 'islander', who: 'mamie', x: 0, y: 0, say: 'Water my three tulips' }, { kind: 'islander', who: 'sami', x: 1, y: 0 }, { kind: 'islander', who: 'biscuit', x: 2, y: 0, say: '' }, { kind: 'islander', who: 'nobody', x: 3, y: 0 }] });
+      expect(cellOf(html, 0, 0)).toContain('class="gd-sprite gd-thing gd-islander gd-islander-mamie" data-sprite="islMamie"');
+      expect(cellOf(html, 0, 0)).toContain('<span class="gd-isl-say" data-who="mamie">Water my three tulips</span>');
+      expect(cellOf(html, 1, 0)).toContain('data-sprite="islSami"');
+      expect(cellOf(html, 2, 0)).toContain('data-sprite="islBiscuit"');
+      expect((html.match(/class="gd-isl-say"/g) || []).length).toBe(1);
+      expect(cellOf(html, 3, 0)).not.toContain('gd-islander');
+    });
+    it('🔴 a fence spans w × h tiles from (x, y) as ONE element over the grid; the padlock is a sprite on its tile; neither is a label', () => {
+      const html = render('garden-kit.Garden', { map: { rows: ['GGGGGGGGGG', 'GGGGGGGGGG', 'GGGGGGGGGG', 'GGGGGGGGGG'] }, things: [{ kind: 'fence', x: 1, y: 1, w: 8, h: 3 }, { kind: 'padlock', x: 5, y: 2 }] });
+      const fence = /<div class="gd-fence" data-fence="1,1,8,3" style="([^"]*)"/.exec(html);
+      expect(fence).not.toBeNull();
+      expect(fence![1]).toContain('left:10.0000%;top:25.0000%;width:80.0000%;height:75.0000%');
+      expect((html.match(/class="gd-fence"/g) || []).length).toBe(1);
+      expect(cellOf(html, 5, 2)).toContain('class="gd-sprite gd-thing gd-padlock" data-sprite="padlock"');
+      expect(html).not.toContain('class="gd-label"');
+      const css = node('garden-kit.Garden').css as string;
+      for (const rule of ['.gd-fence{', '.gd-isl-say{', '.gd-cell>.gd-islander{', '.gd-cell>.gd-padlock{']) expect({ rule, has: css.includes(rule) }).toEqual({ rule, has: true });
+    });
+  });
 });

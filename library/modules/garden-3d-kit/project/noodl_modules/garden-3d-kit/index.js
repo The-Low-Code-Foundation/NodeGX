@@ -253,7 +253,17 @@
     iron: 0x8e8ca0,
     paper: 0xffffff,
     coral: 0xff7a59,
-    parcel: 0xc98a5e
+    parcel: 0xc98a5e,
+    // P106 IG-004 (lane E): the islanders, the fence round a locked plot and its padlock — the mockup's colours.
+    skin: 0xf7d3b5,
+    granny: 0x8f6bff,
+    hair: 0xe9e4ef,
+    postie: 0x3e63c8,
+    satchel: 0xc98a5e,
+    cat: 0xf3b76a,
+    nose: 0xe06b8a,
+    fence: 0xa9773f,
+    gold: 0xffd166
   };
 
   /**
@@ -619,6 +629,91 @@
       g.rotation.y = 0.42;
       out.meshCount += 3;
       return g;
+    },
+    // P106 IG-004 (lane E) — an islander standing by her plot (the mockup's): Mamie Rose in her violet dress and white
+    // hair, Sami in his blue cap with a satchel, Biscuit the cat. `who` is sami | mamie | biscuit. Her bubble is a DOM
+    // overlay (the engine), never text on a tile.
+    islander: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      var add = function (m) {
+        g.add(m);
+        out.meshCount += 1;
+        return m;
+      };
+      if (t.who === 'biscuit') {
+        add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.42, 0.22, 0.22), mat(PALETTE.cat), 0, 0.11, 0));
+        add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.24, 0.22, 0.22), mat(PALETTE.cat), 0.28, 0.24, 0));
+        add(mesh(THREE, G(THREE, out, 'ConeGeometry', 0.05, 0.1, 4), mat(PALETTE.cat), 0.2, 0.4, -0.07));
+        add(mesh(THREE, G(THREE, out, 'ConeGeometry', 0.05, 0.1, 4), mat(PALETTE.cat), 0.2, 0.4, 0.07));
+        add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.03, 0.03, 0.03), mat(PALETTE.ink), 0.41, 0.28, -0.06));
+        add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.03, 0.03, 0.03), mat(PALETTE.ink), 0.41, 0.28, 0.06));
+        add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.04, 0.03, 0.03), mat(PALETTE.nose), 0.41, 0.22, 0));
+        add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.28, 0.05, 0.05), mat(PALETTE.cat), -0.3, 0.2, 0)).rotation.z = 0.6;
+        g.rotation.y = -0.6;
+      } else {
+        var postie = t.who === 'sami';
+        add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.14, 0.2, 0.42, 6), mat(postie ? PALETTE.postie : PALETTE.granny), 0, 0.21, 0));
+        add(mesh(THREE, G(THREE, out, 'SphereGeometry', 0.15, 6, 5), mat(PALETTE.skin), 0, 0.55, 0));
+        if (postie) {
+          add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.34, 0.06, 0.34), mat(PALETTE.postie), 0, 0.66, 0));
+          add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.2, 0.08, 0.2), mat(PALETTE.postie), 0, 0.72, 0));
+          add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.18, 0.2, 0.08), mat(PALETTE.satchel), 0.16, 0.26, 0));
+        } else {
+          add(mesh(THREE, G(THREE, out, 'SphereGeometry', 0.16, 6, 4), mat(PALETTE.hair), 0, 0.6, 0.02)).scale.set(1, 0.7, 1);
+          add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.1, 0.02, 0.1), mat(PALETTE.ink), 0, 0.53, -0.14));
+        }
+        add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.03, 0.03, 0.02), mat(PALETTE.ink), -0.05, 0.57, -0.14));
+        add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.03, 0.03, 0.02), mat(PALETTE.ink), 0.05, 0.57, -0.14));
+      }
+      g.userData.who = t.who;
+      return g;
+    },
+    // A fence round a locked plot: the rectangle of w × h tiles from its (x, y) tile — a post at every tile corner of
+    // its edge (ONE instanced mesh) and a rail along each side. The group sits on tile (x, y)'s centre, so the corner is
+    // half a tile up and left of it.
+    fence: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      var w = Math.max(1, Math.floor(Number(t.w)) || 1);
+      var d = Math.max(1, Math.floor(Number(t.h)) || 1);
+      var corners = [];
+      for (var i = 0; i <= w; i++) corners.push([i - 0.5, -0.5], [i - 0.5, d - 0.5]);
+      for (var j = 1; j < d; j++) corners.push([-0.5, j - 0.5], [w - 0.5, j - 0.5]);
+      var posts = new THREE.InstancedMesh(G(THREE, out, 'BoxGeometry', 0.07, 0.4, 0.07), mat(PALETTE.fence), corners.length);
+      var dummy = new THREE.Object3D();
+      for (var k = 0; k < corners.length; k++) {
+        dummy.position.set(corners[k][0], 0.2, corners[k][1]);
+        dummy.rotation.set(0, 0, 0);
+        dummy.scale.set(1, 1, 1);
+        dummy.updateMatrix();
+        posts.setMatrixAt(k, dummy.matrix);
+      }
+      posts.instanceMatrix.needsUpdate = true;
+      g.add(posts);
+      out.meshCount += 1;
+      var rail = function (x, z, sx, sz) {
+        g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', sx, 0.05, sz), mat(PALETTE.fence), x, 0.3, z));
+        out.meshCount += 1;
+      };
+      rail(w / 2 - 0.5, -0.5, w, 0.04);
+      rail(w / 2 - 0.5, d - 0.5, w, 0.04);
+      rail(-0.5, d / 2 - 0.5, 0.04, d);
+      rail(w - 0.5, d / 2 - 0.5, 0.04, d);
+      g.userData.w = w;
+      g.userData.h = d;
+      g.userData.posts = corners.length;
+      return g;
+    },
+    // A padlock over a locked plot: a gold body, a keyhole, a shackle (three boxes), floating at the top-left corner of
+    // its tile — the page puts it on the plot's middle tile, so it floats over the middle of the plot.
+    padlock: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.56, 0.44, 0.2), mat(PALETTE.gold), -0.5, 1.12, -0.5));
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.1, 0.14, 0.06), mat(PALETTE.ink), -0.5, 1.1, -0.39));
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.06, 0.24, 0.06), mat(PALETTE.iron), -0.66, 1.42, -0.5));
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.06, 0.24, 0.06), mat(PALETTE.iron), -0.34, 1.42, -0.5));
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.38, 0.06, 0.06), mat(PALETTE.iron), -0.5, 1.54, -0.5));
+      out.meshCount += 5;
+      return g;
     }
   };
 
@@ -784,6 +879,8 @@
       g.userData.x = x;
       g.userData.y = y;
       g.userData.text = t.text;
+      // IG-004: an islander's bubble (her open request, in the child's words) is drawn by the overlay.
+      if (t.kind === 'islander') g.userData.say = typeof t.say === 'string' ? t.say : '';
       g.userData.key = t.kind + ':' + x + ',' + y;
       root.add(g);
       things.push(g);
@@ -1133,7 +1230,7 @@
     var width = 1;
     var height = 1;
     var anims = { robots: [], camera: null, hop: 0, tulips: {}, pops: {} };
-    var overlayEls = { names: [], labels: [], bubble: null };
+    var overlayEls = { names: [], labels: [], bubble: null, says: [] };
     var stepMs = 380;
     var bubble = null;
     var bubbleUntil = 0;
@@ -1211,7 +1308,7 @@
     var rebuildOverlay = function () {
       if (!o.overlay) return;
       while (o.overlay.firstChild) o.overlay.removeChild(o.overlay.firstChild);
-      overlayEls = { names: [], labels: [], bubble: null };
+      overlayEls = { names: [], labels: [], bubble: null, says: [] };
       eng.built.robots.forEach(function (g, i) {
         var r = eng.world.robots[i];
         var e = el('gd3-name', { 'data-robot': i, 'data-x': r.x, 'data-y': r.y, 'data-d': r.d });
@@ -1221,6 +1318,15 @@
         if (!r.name) e.style.visibility = 'hidden';
         o.overlay.appendChild(e);
         overlayEls.names.push(e);
+      });
+      // IG-004: an islander with an open request says it, in a bubble over her head.
+      eng.built.things.forEach(function (g) {
+        if (g.userData.kind !== 'islander' || !g.userData.say) return;
+        var e = el('gd3-isl-say', { 'data-who': g.userData.who || '', 'data-x': g.userData.x, 'data-y': g.userData.y });
+        if (!e) return;
+        e.textContent = String(g.userData.say);
+        o.overlay.appendChild(e);
+        overlayEls.says.push({ el: e, g: g });
       });
       eng.built.things.forEach(function (g) {
         if (g.userData.kind !== 'label') return;
@@ -1255,6 +1361,10 @@
       });
       overlayEls.labels.forEach(function (l) {
         var s = screenOf([l.g.position.x, l.g.position.y, l.g.position.z + 0.4]);
+        place(l.el, s.sx, s.sy);
+      });
+      overlayEls.says.forEach(function (l) {
+        var s = screenOf([l.g.position.x, l.g.position.y + 0.95, l.g.position.z]);
         place(l.el, s.sx, s.sy);
       });
       if (overlayEls.bubble) {
@@ -1760,7 +1870,9 @@
     '.gd3-bubble:after{content:"";position:absolute;left:34%;bottom:-8px;border:8px solid transparent;border-top-color:#fff;border-bottom:0}\n' +
     '.gd3-bubble.gd3-olive{background:#EEE8FF;color:#4A2FA6}.gd3-bubble.gd3-olive:after{border-top-color:#EEE8FF}\n' +
     '.gd3-bubble small{display:block;font-weight:700;color:#6E6784;font-size:11px}.gd3-bubble.gd3-olive small{color:#6A5AA8}\n' +
-    '.gd3-fallback{position:absolute;inset:0;display:grid;place-items:center;color:#6E6784;font-size:13px;font-weight:700}';
+    '.gd3-fallback{position:absolute;inset:0;display:grid;place-items:center;color:#6E6784;font-size:13px;font-weight:700}\n' +
+    '.gd3-isl-say{position:absolute;transform:translate(-30%,-100%);background:#fff;border-radius:12px;padding:5px 9px;font-weight:800;font-size:12px;box-shadow:0 6px 18px rgba(72,52,20,.12);max-width:180px;color:#2E2A3D;pointer-events:none}\n' +
+    '.gd3-isl-say:after{content:"";position:absolute;left:30%;bottom:-6px;border:6px solid transparent;border-top-color:#fff;border-bottom:0}';
 
   /** @type {import('./types/node-kit').ReactNodeDefinition} */
   var Garden3D = {
