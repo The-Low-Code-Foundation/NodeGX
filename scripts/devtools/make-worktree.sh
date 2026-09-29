@@ -135,7 +135,14 @@ done
 # and the total drops from **2349 to 2303** while the failure count stays at
 # zero. That is the shape to watch for: a green board with 46 fewer tests in it.
 # Always compare the TOTAL against primary's, never just the failures.
-for artifact in packages/nodegx-backend/dist packages/noodl-runtime/dist-types; do
+#
+# ⚠️ The garden lanes (P105/P106) need five more: `noodl-preview/dist` (the
+# deploy tool the page drives use), `noodl-mcp/dist` (the kit extractor),
+# `nodegx-export/dist` and `nodegx-core/dist`, and the P105 desktop shell's own
+# `node_modules`. P106 session 1 linked them by hand in three lanes.
+for artifact in packages/nodegx-backend/dist packages/noodl-runtime/dist-types \
+  packages/noodl-preview/dist packages/noodl-mcp/dist packages/nodegx-export/dist packages/nodegx-core/dist \
+  dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/node_modules; do
   if [ -d "$PRIMARY/$artifact" ] && [ ! -e "$WT/$artifact" ]; then
     ln -s "$PRIMARY/$artifact" "$WT/$artifact"
     echo "make-worktree: linked $artifact from primary (gitignored build output)"
