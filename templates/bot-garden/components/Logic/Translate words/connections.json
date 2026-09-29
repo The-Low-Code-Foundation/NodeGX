@@ -299,6 +299,12 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-cdFill",
+      "toId": "translatewordsOut",
+      "toProperty": "cdFill"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-cdFwd",
       "toId": "translatewordsOut",
       "toProperty": "cdFwd"

@@ -698,8 +698,8 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect([pnode('plHintLater').type, params(pnode('plHintLater')).duration]).toEqual(['Timer', TICK_MS]);
       expect(pinto('plHintLater', 'restart')).toEqual(['plRead.ran>restart']);
       expect(pinto('plChoose', 'go')).toContain('plHintLater.timerFinished>go');
-      // P106 IG-006 AC1/AC7: no ask:<rung> id and no after-run line of a rung 4–18 anywhere in the artefact.
-      const oldFamily = [...tree(OUTPUT_OF(built)).entries()].filter(([, buf]) => /ask:[a-z]|oliveRung(?:[4-9]|1\d)\b/.test(buf.toString('utf8'))).map(([f]) => f);
+      // P106 IG-006 AC1/AC7 (a word boundary: the vendored three.min.js has setMask:function): no ask:<rung> id and no after-run line of a rung 4–18 anywhere in the artefact.
+      const oldFamily = [...tree(OUTPUT_OF(built)).entries()].filter(([, buf]) => /\bask:[a-z]|oliveRung(?:[4-9]|1\d)\b/.test(buf.toString('utf8'))).map(([f]) => f);
       expect(oldFamily).toEqual([]);
       // The generated artefact carries no plAsk at all (AC8).
       const withAsk = [...tree(OUTPUT_OF(built)).entries()].filter(([, buf]) => /\bplAsk\b/.test(buf.toString('utf8'))).map(([f]) => f);
