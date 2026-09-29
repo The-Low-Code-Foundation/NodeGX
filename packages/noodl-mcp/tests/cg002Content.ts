@@ -620,7 +620,7 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   rqPathLine: s('"The post box is at the end of the path. Can {b} walk there?"', '« La boîte aux lettres est au bout du chemin. {b} peut y aller ? »'),
   rqTulipsTitle: s('Water my three tulips', 'Arrose mes trois tulipes'),
   rqTulipsBlurb: s('Repeat', 'Répéter'),
-  rqTulipsLine: s('"My three tulips are so thirsty. The can is empty: fill it at the pond, water one tulip, and come back for more!"', '« Mes trois tulipes ont tellement soif. L’arrosoir est vide : remplis-le à la mare, arrose une tulipe, et reviens en chercher ! »'),
+  rqTulipsLine: s('"My tulips are thirsty. Fill the can at the pond, and come back!"', '« Mes tulipes ont soif. Remplis l’arrosoir à la mare, et reviens ! »'),
   rqBowlTitle: s('Feed me, but only if my bowl is empty', 'Nourris-moi, mais seulement si ma gamelle est vide'),
   rqBowlBlurb: s('If', 'Si'),
   rqBowlLine: s('"Two bowls. One is full already. Fill only the empty one, {b}!"', '« Deux gamelles. L’une est déjà pleine. Remplis seulement la vide, {b} ! »'),
@@ -644,7 +644,7 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   rqDoorLine: s('"There is one tulip by my front door, and she is thirsty. Can {b} give her a drink?"', '« Il y a une tulipe près de ma porte, et elle a soif. {b} peut lui donner à boire ? »'),
   rqStonesTitle: s('Lay four stones on the path', 'Pose quatre pierres sur le chemin'),
   rqStonesBlurb: s('Repeat', 'Répéter'),
-  rqStonesLine: s('"My path stops too soon. Take four stones from the rock by {b}, then lay them one after the other, all the way to the post box!"', '« Mon chemin s’arrête trop tôt. Prends quatre pierres dans le rocher à côté de {b}, puis pose-les l’une après l’autre jusqu’à la boîte aux lettres ! »'),
+  rqStonesLine: s('"My path stops too soon. Take four stones from the rock, and lay them all the way to the post box!"', '« Mon chemin s’arrête trop tôt. Prends quatre pierres dans le rocher, et pose-les jusqu’à la boîte aux lettres ! »'),
   // Rewards.
   hatNone: s('None', 'Aucun'),
   hatCap: s('Cap', 'Casquette'),

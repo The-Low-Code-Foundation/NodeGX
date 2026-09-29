@@ -616,7 +616,7 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       expect(gauge({ can: null })).toEqual({ can: '', full: 0, empty: 0 });
     });
 
-    it('🔴 the load on the robot’s back is the last thing it carries — a stone, a letter as themselves, anything else a parcel — and nothing when it carries nothing', () => {
+    it('🔴 the load the robot carries is the last thing in carry — a stone, a letter as themselves, anything else a parcel — and nothing when it carries nothing', () => {
       const load = (carry: unknown) => {
         const html = robotOf(render('garden-kit.Garden', { map: { rows: ['GGG'] }, things: [], robots: [{ x: 1, y: 0, d: 2, carry }] }));
         const m = /class="gd-load gd-load-(\w+)" data-load="\w+"[^>]*><svg[^>]*data-sprite="(\w+)"/.exec(html);
@@ -628,10 +628,11 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       expect(load(['widget'])).toBe('parcel:parcel');
       expect(load([])).toBeNull();
       expect(load(undefined)).toBeNull();
-      // The load turns with the robot (inside .gd-turn); the gauge stays upright (outside it).
-      const html = render('garden-kit.Garden', { map: { rows: ['GGG'] }, things: [], robots: [{ x: 1, y: 0, d: 1, carry: ['stone'], can: 1 }] });
-      expect(html).toMatch(/class="gd-turn"[^>]*>[\s\S]*?<svg[^>]*data-robot-svg="true"[\s\S]*?<\/svg><div class="gd-load gd-load-stone"/);
-      expect(html).toMatch(/<\/div><div class="gd-can"/);
+      // Both stay upright beside the robot (outside .gd-turn): the gauge at its left, the load at its right — on the literal
+      // back (turning with it) the load hid under the name tag whenever the robot faced up (the s2 page drive's shots).
+      const html = render('garden-kit.Garden', { map: { rows: ['GGG'] }, things: [], robots: [{ x: 1, y: 0, d: 0, carry: ['stone'], can: 1, name: 'Pip' }] });
+      expect(html).toMatch(/<\/svg><\/div><div class="gd-can"[\s\S]*?<\/div><div class="gd-load gd-load-stone"[\s\S]*?<span class="gd-name">Pip<\/span>/);
+      expect(html.slice(html.indexOf('class="gd-turn"'), html.indexOf('class="gd-can"'))).not.toContain('gd-load');
       const css = node('garden-kit.Garden').css as string;
       for (const rule of ['.gd-can{', '.gd-load{', '.gd-load>svg{']) expect(css).toContain(rule);
     });

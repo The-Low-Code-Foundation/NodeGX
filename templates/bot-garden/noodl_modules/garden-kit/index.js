@@ -1111,8 +1111,8 @@
     '.gd-cheer .gd-turn{animation:gd-cheer .7s ease 2}\n' +
     '@keyframes gd-cheer{50%{transform:var(--gd-rot) translateY(-12%)}}\n' +
     '.gd-can{position:absolute;left:-3%;top:50%;transform:translateY(-50%);display:flex;flex-direction:column-reverse;gap:1px;padding:3px 2px;background:#fff;border-radius:999px;box-shadow:0 1px 4px rgba(0,0,0,.22);z-index:4;pointer-events:none}\n' +
-    '.gd-can>svg{width:9px;height:11px;display:block}\n' +
-    '.gd-load{position:absolute;left:50%;bottom:-6%;width:44%;height:44%;transform:translateX(-50%);pointer-events:none}\n' +
+    '.gd-can>svg{width:11px;height:14px;display:block}\n' +
+    '.gd-load{position:absolute;right:-6%;top:50%;width:36%;height:36%;transform:translateY(-50%);box-sizing:border-box;padding:2px;background:#fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.22);z-index:4;pointer-events:none}\n' +
     '.gd-load>svg{width:100%;height:100%;display:block;overflow:visible}\n' +
     '.gd-name{position:absolute;top:92%;left:50%;transform:translateX(-50%);background:#fff;border-radius:999px;padding:1px 8px;font-size:12px;font-weight:800;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);z-index:4;color:#2E2A3D}\n' +
     '.gd-bubble{position:absolute;z-index:5;background:#fff;border-radius:14px;padding:8px 12px;font-weight:800;font-size:14px;box-shadow:0 6px 18px rgba(72,52,20,.10);max-width:230px;pointer-events:none;transform:translate(-30%,-115%);color:#2E2A3D}\n' +
@@ -1303,8 +1303,9 @@
           var p = places[i];
           var rot = 'rotate(' + r.d * 90 + 'deg)';
           var bumpN = bumps.current.n[i] || 0;
-          // IG-002: the can's level upright beside the robot (canMax drops, can of them full; none when it has no can),
-          // and the load on its back, turning with it (the last thing carried).
+          // IG-002: the can's level upright at the robot's left (canMax drops, can of them full; none when it has no can),
+          // and the load it carries (the last thing carried) upright at its right. Drawn on the literal back (turning with
+          // the robot) the load sat under the name tag whenever the robot faced up: the s2 drive's screenshots.
           var canEl = null;
           if (r.can !== null) {
             var drops = [];
@@ -1328,8 +1329,9 @@
               'data-share': p.share === -1 ? undefined : String(p.share),
               style: { left: p.left.toFixed(4) + '%', top: p.top.toFixed(4) + '%', width: sizeW, height: sizeH, transform: p.transform }
             },
-            h('div', { key: 'turn-' + bumpN, className: 'gd-turn' + (bumpN ? ' gd-bump' : ''), 'data-bump': bumpN ? String(bumpN) : undefined, style: { '--gd-rot': rot } }, robotSvg(r, 'svg'), loadEl),
+            h('div', { key: 'turn-' + bumpN, className: 'gd-turn' + (bumpN ? ' gd-bump' : ''), 'data-bump': bumpN ? String(bumpN) : undefined, style: { '--gd-rot': rot } }, robotSvg(r, 'svg')),
             canEl,
+            loadEl,
             r.name ? h('span', { key: 'name', className: 'gd-name' }, r.name) : null
           );
         });

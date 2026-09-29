@@ -25,6 +25,11 @@
  * the mockup's sea with pins at 1368×912 and 390×844 (no sideways overflow, innerWidth = the viewport) and a pin opens
  * its request, S3-R5 every text ≥ 4.5:1 measured live with getComputedStyle (with a known-firing probe), S3-RENAME the
  * robot renamed on My robot is the name on its pin and in the Workshop's line, S3-LOOK screenshots (look-*.png).
+ * P106 IG-002 (s2): the tulips are fetch-and-return (the pond at the left edge, an empty can of three, a nine-block dance
+ * folded to repeat 3) and win with "Perfect!"; the can shows 0, then 3/2/1/0 drops as the robot fills and pours, and a
+ * pour from the empty can says it; the stones' rock shrinks big/big/medium/small/gone as it is mined, the stone rides on
+ * the robot's back from the first pick until the last put, and the stones win with "Perfect!" after two folds — both
+ * sizes, EN and FR (shots ig002-*.png).
  * Exits 0 when every clause passed, 1 when any failed, 2 on a usage error.
  */
 const fs = require('fs');
@@ -87,6 +92,18 @@ function loadRequests(projectDir) {
 }
 const REQUESTS = loadRequests(PROJECT);
 const titleOf = (lang, id) => w(lang, (REQUESTS.find((r) => r.id === id) || { copyKeys: {} }).copyKeys.title);
+/** The hint lines, from the project's own Data/Hints (IG-002 reads "Perfect!" in both languages). */
+function loadHints(projectDir) {
+  const nodes = JSON.parse(fs.readFileSync(path.join(projectDir, 'components', 'Data', 'Hints', 'nodes.json'), 'utf8'));
+  return JSON.parse((Array.isArray(nodes) ? nodes : nodes.nodes || Object.values(nodes)).find((n) => n.type === 'Static Data').parameters.json);
+}
+const HINT_ROWS = loadHints(PROJECT);
+const hintIn = (lang, key, name = 'Pip') => String((HINT_ROWS.find((r) => r.key === key) || {})[lang] || '').split('{b}').join(name);
+/** IG-001 D10 / IG-002: the pad's keys for a request — the pad's own order (cg003Content PAD_KEYS), filtered by the request's blocks. */
+const PAD_ORDER = ['fwd', 'left', 'water', 'right', 'fill', 'pick', 'put'];
+const padFor = (id) => PAD_ORDER.filter((op) => ((REQUESTS.find((r) => r.id === id) || { palette: [] }).palette || []).includes(op));
+/** IG-002: the tulips' fetch-and-return dance, one pass (fill, turn round, walk, water, step down a row, walk back). */
+const TULIP_DANCE = ['fill', 'left', 'left', 'fwd', 'water', 'right', 'fwd', 'right', 'fwd'];
 
 /**
  * S3-R5: every text a person reads, on the ground under it, from getComputedStyle. For each visible text node: its
@@ -372,28 +389,28 @@ withDeployedSite({ dir: DIR }, async (page) => {
       await control('rec');
       const padShown = await until(`!!document.querySelector('.bg-pad .bg-key-fwd')`, Boolean);
       check(`AC3 ${tag}: Teach shows the pad`, padShown, padShown);
-      const taught = ['fwd', 'fwd', 'left', 'water', 'right'];
+      const taught = TULIP_DANCE;
       for (let k = 0; k < 4; k++) await key(taught[k]);
       const four = await until(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`, (n) => n === 4);
       check(`AC3 ${tag}: four pad presses, four blocks`, four === 4, four);
       if (vp.name === '1368' && lang === 'en') {
         const keys = await evaluate(`[...document.querySelectorAll('.bg-pad .bg-key')].map((e) => { const r = e.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; })`);
-        check('AC5: the pad keys are ≥ 56 px', keys.length === 4 && keys.every(([a, b]) => a >= 56 && b >= 56), keys);
+        check(`AC5: the pad keys are ≥ 56 px (the tulips' ${padFor('tulips-three').length}: ${padFor('tulips-three').join(' ')})`, keys.length === padFor('tulips-three').length && keys.every(([a, b]) => a >= 56 && b >= 56), keys);
       }
       await shot(`ac3-${tag}-04-four-blocks`);
-      for (let k = 4; k < 15; k++) await key(taught[k % 5]);
-      check(`AC3 ${tag}: fifteen presses, fifteen blocks`, (await blocks()) === 15, await blocks());
+      for (let k = 4; k < taught.length * 3; k++) await key(taught[k % taught.length]);
+      check(`AC3 ${tag}: ${taught.length * 3} presses (the fetch-and-return dance ×3), ${taught.length * 3} blocks`, (await blocks()) === taught.length * 3, await blocks());
       // The fold, offered in words, taken by the child.
       const tidy = await until(`(() => { const e = document.querySelector('.bg-tidy'); return e && e.offsetParent !== null ? e.innerText : ''; })()`, Boolean);
       check(`AC3 ${tag}: the fold is offered`, !!tidy, tidy);
       if (vp.name === '390') {
         const box = await evaluate(`(() => { const e = document.querySelector('.bg-blocks-box'); return e ? { sh: e.scrollHeight, ch: e.clientHeight, oy: getComputedStyle(e).overflowY } : null; })()`);
-        check(`AC4 ${lang}: fifteen blocks scroll in their own box`, box && box.sh > box.ch && box.oy === 'auto', box);
+        check(`AC4 ${lang}: ${taught.length * 3} blocks scroll in their own box`, box && box.sh > box.ch && box.oy === 'auto', box);
       }
       if (tag === '1368-en') await contrastClause('workshop, the fold offered');
       await tap(first('.bg-tidy .bg-i-tidy'), 'Fold it');
-      const folded = await until(`(() => { const r = document.querySelector('.gd-prog .gd-blk[data-t="repeat"]'); return r ? document.querySelectorAll('.gd-prog .gd-blk[data-id]').length : 0; })()`, (n) => n === 6);
-      check(`AC3 ${tag}: folded to one repeat holding five (6 blocks drawn)`, folded === 6, folded);
+      const folded = await until(`(() => { const r = document.querySelector('.gd-prog .gd-blk[data-t="repeat"]'); return r ? document.querySelectorAll('.gd-prog .gd-blk[data-id]').length : 0; })()`, (n) => n === taught.length + 1);
+      check(`AC3 ${tag}: folded to one repeat holding the ${taught.length}-block dance (${taught.length + 1} blocks drawn)`, folded === taught.length + 1, folded);
       await shot(`ac3-${tag}-05-folded`);
       // Play to the win.
       await control('play');
@@ -403,6 +420,10 @@ withDeployedSite({ dir: DIR }, async (page) => {
         const card = await evaluate(`(() => { const r = document.querySelector('.bg-win-card').getBoundingClientRect(); return { cx: r.left + r.width / 2, cy: r.top + r.height / 2, vw: innerWidth, vh: innerHeight, text: document.querySelector('.bg-win-card').innerText, pos: getComputedStyle(document.querySelector('.bg-win')).position }; })()`);
         readings[`win-${tag}`] = card;
         check(`AC3 ${tag}: the hat is on the win card`, card.text.includes(w(lang, 'hatSun')), card.text);
+        // IG-002 AC3: the tulips' reference program (ten blocks, over MANY_BLOCKS) is "Perfect!", and the card says Neat.
+        const owlNow = await until(`(document.querySelector('.bg-owl-say') || {}).innerText || ''`, (t) => t.includes(hintIn(lang, 'hintPerfect')), 4000);
+        const neat = w(lang, 'winFew').split('{k}').join(String(taught.length + 1));
+        check(`IG-002 AC3 ${tag}: the tulips won with their reference program say "${hintIn(lang, 'hintPerfect')}" and the card "${neat}"`, owlNow.includes(hintIn(lang, 'hintPerfect')) && card.text.includes(neat), { owlNow, card: card.text });
         // AC7: fixed and centred, even with the block list scrolled.
         await evaluate(`(() => { const b = document.querySelector('.bg-blocks-box'); if (b) b.scrollTop = b.scrollHeight; window.scrollTo(0, document.scrollingElement.scrollHeight); })()`);
         await wait(300);
@@ -437,6 +458,124 @@ withDeployedSite({ dir: DIR }, async (page) => {
       await shot(`ac3-${tag}-08-skills`);
       check(`AC3 ${tag}: 0 console errors so far`, page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));
       check(`AC3 ${tag}: 0 network errors so far`, page.networkErrors.length === 0, page.networkErrors.slice(0, 5));
+    }
+  }
+
+  // ── IG-002 (P106 s2): resources, driven by hand at both sizes, EN and FR, on the family made above (band 10–12). ──
+  // The tulips: the can is empty at the start (0 of 3 drops), full after fill, and 2, 1, 0 as the robot waters; a fourth
+  // pour from the empty can says so and leaves no puddle. The stones: the rock beside the start is big, big, medium,
+  // small, gone as it is mined; the stone rides on the robot's back from the first pick until the last put; two folds make
+  // the reference program and Play wins with "Perfect!". Every reading is an element a child sees (the kit's classes).
+  {
+    const gaugeExpr = `(() => { const g = document.querySelector('.bg-stage .gd-bot .gd-can'); return g ? { can: g.getAttribute('data-can'), max: g.getAttribute('data-can-max'), full: g.querySelectorAll('svg.gd-drop-full').length, empty: g.querySelectorAll('svg.gd-drop-empty').length } : null; })()`;
+    const rockExpr = (x, y) => `(() => { const c = document.querySelector('.bg-stage .gd-cell[data-x="${x}"][data-y="${y}"]'); const r = c && c.querySelector('svg.gd-thing.gd-boulder'); return r ? { size: ((r.getAttribute('class') || '').match(/gd-boulder-(big|mid|small)/) || [])[1], left: r.getAttribute('data-left'), sprite: r.getAttribute('data-sprite') } : null; })()`;
+    const loadExpr = `(() => { const l = document.querySelector('.bg-stage .gd-bot .gd-load'); return l ? { load: l.getAttribute('data-load'), carry: l.getAttribute('data-carry'), svg: !!l.querySelector('svg.gd-sprite[data-sprite]') } : null; })()`;
+    const bubbleExpr = `(() => { const b = document.querySelector('.bg-stage .gd-bubble'); return b ? b.innerText : ''; })()`;
+    const owlExpr = `(document.querySelector('.bg-owl-say') || {}).innerText || ''`;
+    const padOpsNow = () => evaluate(`[...document.querySelectorAll('.bg-pad .bg-key')].filter((e) => e.offsetParent !== null).map((e) => (e.className.match(/bg-key-(fwd|left|right|water|pick|put|fill)/) || [])[1])`);
+    const tidyShown = `(() => { const e = document.querySelector('.bg-tidy'); return !!e && e.offsetParent !== null; })()`;
+    const SHOT_TAGS = ['1368-en', '390-fr'];
+    for (const vp of VIEWPORTS) {
+      for (const lang of LANGS) {
+        const tag = `${vp.name}-${lang}`;
+        await page.setViewport(vp);
+        await wait(400);
+        await seg(lang === 'fr' ? 'FR' : 'EN');
+        await wait(500);
+        const openRequest = async (key, label) => {
+          await tab(0);
+          await until('location.pathname', (p) => p === '/island');
+          await wait(600);
+          await tap(byText('.bg-quest', w(lang, key)), label);
+          await until('location.pathname', (p) => p === '/workshop');
+          await wait(900);
+        };
+
+        // The tulips: the can.
+        await openRequest('rqTulipsTitle', `the tulips (IG-002 ${tag})`);
+        const g0 = await until(gaugeExpr, Boolean, 3000);
+        await control('rec');
+        await until(`!!document.querySelector('.bg-pad .bg-key-fill')`, Boolean, 3000);
+        const tulipPad = await padOpsNow();
+        check(`IG-002 ${tag}: the tulips’ pad has fill beside water (${padFor('tulips-three').join(' ')})`, JSON.stringify(tulipPad) === JSON.stringify(padFor('tulips-three')), tulipPad);
+        // Teach: fill, turn round, step, water three times — the gauge read after each press (the Teach world).
+        const pours = [];
+        await key('fill');
+        pours.push(await until(gaugeExpr, (g) => !!g && g.can === '3', 2500));
+        if (SHOT_TAGS.includes(tag)) await shot(`ig002-${tag}-can-3`);
+        for (const op of ['left', 'left', 'fwd']) await key(op);
+        for (let k = 0; k < 3; k++) {
+          await key('water');
+          pours.push(await until(gaugeExpr, (g) => !!g && g.can === String(2 - k), 2500));
+        }
+        const wetTulip = await evaluate(`!!document.querySelector('.bg-stage .gd-cell[data-x="3"][data-y="1"] .gd-wet')`);
+        if (SHOT_TAGS.includes(tag)) await shot(`ig002-${tag}-can-0`);
+        // The fourth pour, from the empty can, onto the grass above (turn first: four waters in a row would be the fold
+        // nudge, which outranks every other hint by the ladder's design). A can with water in it would make a puddle there.
+        await key('left');
+        await key('water');
+        await control('rec'); // done teaching: nine blocks, the last a pour from the empty can
+        check(`IG-002 AC4 ${tag}: the can is empty at the start (0 of 3 drops) and shows 3, 2, 1, 0 drops as the robot fills and waters`, !!g0 && g0.can === '0' && g0.full === 0 && g0.empty === 3 && pours.map((g) => (g ? g.full : -1)).join(',') === '3,2,1,0' && pours.every((g) => !!g && g.full + g.empty === 3 && g.max === '3') && wetTulip, { g0, pours, wetTulip });
+        // Play: the Runner speaks each step (a Teach press speaks nothing — the page's Record step has no bubble wire).
+        await control('play');
+        const fullSaid = await until(bubbleExpr, (t) => t === w(lang, 'sayFill'), 5000);
+        const played = [];
+        for (const want of ['2', '1', '0']) played.push(await until(gaugeExpr, (g) => !!g && g.can === want, 6000));
+        const drySaid = await until(bubbleExpr, (t) => t === w(lang, 'sayDry'), 5000);
+        if (SHOT_TAGS.includes(tag)) await shot(`ig002-${tag}-dry`);
+        const afterDry = await evaluate(gaugeExpr);
+        const puddles = await evaluate(`document.querySelectorAll('.bg-stage [data-puddle]').length`);
+        const dryHint = await until(owlExpr, (t) => t.includes(hintIn(lang, 'hintDry')), 6000);
+        readings[`ig002-can-${tag}`] = { g0, pours, played, afterDry, fullSaid, drySaid, puddles, dryHint };
+        check(`IG-002 AC1 ${tag}: played, fill says "${w(lang, 'sayFill')}", the can pours 2, 1, 0, and the fourth pour from the empty can says "${w(lang, 'sayDry')}", stays 0, makes no puddle, and the owl says "${hintIn(lang, 'hintDry')}"`, fullSaid === w(lang, 'sayFill') && played.map((g) => (g ? g.full : -1)).join(',') === '2,1,0' && drySaid === w(lang, 'sayDry') && !!afterDry && afterDry.can === '0' && puddles === 0 && dryHint.includes(hintIn(lang, 'hintDry')), { fullSaid, played, drySaid, afterDry, puddles, dryHint });
+        await until(`!document.querySelector('.gd-locked')`, Boolean, 8000);
+        await wait(300);
+
+        // The stones: the rock mined, the load on the back, the reference program, Perfect.
+        await openRequest('rqStonesTitle', `the stones (IG-002 ${tag})`);
+        const rocks = [await until(rockExpr(2, 2), Boolean, 3000)];
+        const noCan = await evaluate(gaugeExpr);
+        await control('rec');
+        await until(`!!document.querySelector('.bg-pad .bg-key-pick')`, Boolean, 3000);
+        const stonesPad = await padOpsNow();
+        check(`IG-002 ${tag}: the stones’ pad has pick and put, no water, no fill (${padFor('path-stones').join(' ')}); the robot has no can here (no drops)`, JSON.stringify(stonesPad) === JSON.stringify(padFor('path-stones')) && noCan === null, { stonesPad, noCan });
+        await key('left');
+        const loads = [];
+        for (let k = 0; k < 4; k++) {
+          await key('pick');
+          const want = [3, 2, 1, 0][k];
+          rocks.push(await until(rockExpr(2, 2), (r) => (want >= 1 ? !!r && r.left === String(want) : r === null), 2000));
+          loads.push(await until(loadExpr, (l) => !!l && l.carry === String(k + 1), 2000));
+          if (k === 1 && SHOT_TAGS.includes(tag)) await shot(`ig002-${tag}-rock-mid`);
+        }
+        if (SHOT_TAGS.includes(tag)) await shot(`ig002-${tag}-mined`);
+        check(`IG-002 AC4 ${tag}: the rock shrinks as it is mined — big (4), big (3), medium (2), small (1), then gone`, rocks.map((r) => (r ? r.size : 'gone')).join(',') === 'big,big,mid,small,gone' && rocks[0].left === '4', rocks);
+        check(`IG-002 AC4 ${tag}: after pick a stone is on the robot’s back (an svg, the kit’s class), carrying 1, 2, 3, 4`, loads.every((l, i) => !!l && l.load === 'stone' && l.svg && l.carry === String(i + 1)), loads);
+        await key('right');
+        const puts = [];
+        for (let k = 0; k < 4; k++) {
+          await key('put');
+          puts.push(await until(loadExpr, (l) => (k < 3 ? !!l && l.carry === String(3 - k) : l === null), 2000));
+          await key('fwd');
+        }
+        const laid = await evaluate(`document.querySelectorAll('.bg-stage svg.gd-thing.gd-stone[data-sprite="stone"]').length`);
+        if (SHOT_TAGS.includes(tag)) await shot(`ig002-${tag}-laid`);
+        check(`IG-002 AC4 ${tag}: put by put the load goes down (3, 2, 1) and after the fourth the back is empty; four stone sprites on the path`, puts.slice(0, 3).map((l) => (l ? l.carry : '-')).join(',') === '3,2,1' && puts[3] === null && laid === 4, { puts, laid });
+        for (let f = 0; f < 2; f++) {
+          await until(tidyShown, Boolean, 3000);
+          await tap(first('.bg-tidy .bg-i-tidy'), `Fold it (the stones ${f + 1}, ${tag})`);
+          await wait(300);
+        }
+        const seven = await until(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`, (n) => n === 7, 3000);
+        await control('play');
+        const perfect = await until(owlExpr, (t) => t.includes(hintIn(lang, 'hintPerfect')), 15000);
+        const won = await until(`(() => { const e = document.querySelector('.bg-win-card'); return !!e && e.offsetParent !== null; })()`, Boolean, 6000);
+        if (SHOT_TAGS.includes(tag)) await shot(`ig002-${tag}-stones-perfect`);
+        check(`IG-002 AC3 ${tag}: path-stones mined, laid, folded twice to the reference (7 blocks) wins with "${hintIn(lang, 'hintPerfect')}"`, seven === 7 && won && perfect.includes(hintIn(lang, 'hintPerfect')), { seven, won, perfect });
+        if (won) await tap(byText('.bg-win-card button', w(lang, 'winStay')), 'Keep tinkering');
+        await wait(400);
+        check(`IG-002 ${tag}: 0 console errors so far`, page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));
+      }
     }
   }
 
@@ -475,7 +614,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
 
   // AC6 (band 10–12): Predict, a wrong tap shows the real end and a hint, never a score; a right tap plays.
   await control('rec');
-  for (const op of ['fwd', 'fwd']) await key(op);
+  // IG-002: the tulips start at (1,1) facing the pond; turn round and step once: the end is (2,1).
+  for (const op of ['left', 'left', 'fwd']) await key(op);
   await control('rec'); // Done teaching
   await control('predict');
   const asked = await until(`document.body.innerText.includes(${JSON.stringify(w('en', 'predictAsk'))})`, Boolean);
@@ -483,13 +623,13 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await tap(`document.querySelector('.gd-cell[data-x="5"][data-y="3"]')`, 'a wrong tile');
   // IG-001 D9: the real end is the kit's flag sprite on its tile (it was a 🏁 in a label pill).
   const miss = await until(`(() => { const f = document.querySelector('.bg-stage svg.gd-thing.gd-flag[data-sprite="flag"]'); const say = document.querySelector('.bg-owl-say'); return { flag: f ? f.closest('.gd-cell').getAttribute('data-x') + ',' + f.closest('.gd-cell').getAttribute('data-y') : null, pills: document.querySelectorAll('.bg-stage .gd-label').length, say: say ? say.innerText : '' }; })()`, (r) => !!r.flag);
-  check('AC6: a wrong tap marks the real end (2,3) with the flag sprite, no pill (IG-001 D9)', miss.flag === '2,3' && miss.pills === 0, miss);
+  check('AC6: a wrong tap marks the real end (2,1) with the flag sprite, no pill (IG-001 D9)', miss.flag === '2,1' && miss.pills === 0, miss);
   check('AC6: … and says the Predict hint, with no score in it', miss.say === w('en', 'hintPredictMiss').replace(/\{b\}/g, 'Pip') || miss.say.includes(w('en', 'hintPredictMiss').split('{b}')[0].trim()), miss.say);
   check('AC6: … and no number is shown as a score', !/\b\d+\s*(\/|%|points?|pts)\b/.test(miss.say), miss.say);
   await shot('ac6-miss');
   await control('predict');
-  await tap(`document.querySelector('.gd-cell[data-x="2"][data-y="3"]')`, 'the right tile');
-  // A hit plays from the start: the robot is put back at (0,3) and walks through (1,3) to (2,3).
+  await tap(`document.querySelector('.gd-cell[data-x="2"][data-y="1"]')`, 'the right tile');
+  // A hit plays from the start: the robot is put back at (1,1), turns round and walks to (2,1).
   const via = await until(`document.querySelector('.gd-bot').getAttribute('data-x')`, (x) => x === '1', 4000);
   const moved = await until(`document.querySelector('.gd-bot').getAttribute('data-x')`, (x) => x === '2', 6000);
   check('AC6: a right tap plays the program from the start', via === '1' && moved === '2', { via, moved });
@@ -771,7 +911,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await until('location.pathname', (p) => p === '/workshop');
     await wait(900);
     await control('rec');
-    for (const op of ['left', 'fwd', 'fwd', 'fwd', 'left', 'fwd']) await key(op);
+    // IG-002: turn round and walk into the first tulip (3,1): the second forward is the bump.
+    for (const op of ['left', 'left', 'fwd', 'fwd']) await key(op);
     await control('rec');
     await control('play');
     const aBump = await until(owlExpr, (t) => t.includes(hint('hintBump').slice(0, 16)), 9000);
@@ -802,7 +943,11 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await control('rec');
     await until(`!!document.querySelector('.bg-pad .bg-key-put')`, Boolean, 3000);
     const padOps = await evaluate(`[...document.querySelectorAll('.bg-pad .bg-key')].filter((e) => e.offsetParent !== null).map((e) => (e.className.match(/bg-key-(fwd|left|right|water|pick|put|fill)/) || [])[1])`);
-    check('IG-001 D10: the stones’ pad shows fwd left right put and not water', JSON.stringify(padOps) === JSON.stringify(['fwd', 'left', 'right', 'put']), padOps);
+    check(`IG-001 D10: the stones’ pad shows ${padFor('path-stones').join(' ')} and not water (IG-002: pick, the basket starts empty)`, JSON.stringify(padOps) === JSON.stringify(padFor('path-stones')) && !padOps.includes('water'), padOps);
+    // IG-002: mine the rock beside the start first (turn to it, pick four), turn back, then lay.
+    await key('left');
+    for (let k = 0; k < 4; k++) await key('pick');
+    await key('right');
     for (let k = 0; k < 4; k++) {
       await key('put');
       await key('fwd');
@@ -810,19 +955,25 @@ withDeployedSite({ dir: DIR }, async (page) => {
     const laid = await until(`document.querySelectorAll('.bg-stage .gd-thing.gd-stone').length`, (n) => n === 4, 3000);
     await shot('ig001-d9-stones');
     check('IG-001 D9: four stones laid are four stone sprites (svg, the kit’s class), no pill', laid === 4 && (await evaluate(`document.querySelectorAll('.bg-stage svg.gd-thing.gd-stone[data-sprite="stone"]').length`)) === 4 && (await evaluate(`document.querySelectorAll('.bg-stage .gd-label').length`)) === 0, { laid });
-    await until(`(() => { const e = document.querySelector('.bg-tidy'); return !!e && e.offsetParent !== null; })()`, Boolean, 3000);
-    await tap(first('.bg-tidy .bg-i-tidy'), 'Fold it (the stones)');
-    const three = await until(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`, (n) => n === 3, 3000);
+    // IG-002: two folds — (put, fwd) × 4, then pick × 4 — make the reference program, seven blocks.
+    for (let f = 0; f < 2; f++) {
+      await until(`(() => { const e = document.querySelector('.bg-tidy'); return !!e && e.offsetParent !== null; })()`, Boolean, 3000);
+      await tap(first('.bg-tidy .bg-i-tidy'), `Fold it (the stones, ${f + 1})`);
+      await wait(300);
+    }
+    const three = await until(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`, (n) => n === 7, 3000);
+    // The first step glows the turn; the second glows the first repeat (its ground #FFF0DA).
+    await control('step');
     await control('step');
     const ringRep = await until(`!!document.querySelector('.gd-rep .gd-blk.gd-run')`, Boolean, 2000) ? await ringOf() : null;
     readings.ringRep = ringRep;
     await shot('ig001-d5-ring-in-repeat');
-    check(`IG-001 D5: the running ring inside a repeat (on #FFF0DA) is 3 px, ≥ 3:1, over a 4 px white halo (${ringRep && ringRep.ratio}:1)`, three === 3 && ringOk(ringRep) && ringRep.inRep, ringRep);
+    check(`IG-001 D5: the running ring inside a repeat (on #FFF0DA) is 3 px, ≥ 3:1, over a 4 px white halo (${ringRep && ringRep.ratio}:1)`, three === 7 && ringOk(ringRep) && ringRep.inRep, { three, ringRep });
     await control('play');
     const perfect = await until(owlExpr, (t) => t.includes(hint('hintPerfect').slice(0, 8)), 12000);
     const wonStones = await until(`(() => { const e = document.querySelector('.bg-win-card'); return !!e && e.offsetParent !== null; })()`, Boolean, 6000);
     await shot('ig001-d3-perfect');
-    check('IG-001 D3: repeat 4 × (put, fwd) — the reference program — wins with "Perfect!"', wonStones && perfect.includes(hint('hintPerfect').slice(0, 8)), { perfect, wonStones, want: hint('hintPerfect') });
+    check('IG-001 D3: the reference program (IG-002: left, repeat 4 pick, right, repeat 4 × (put, fwd)) wins with "Perfect!"', wonStones && perfect.includes(hint('hintPerfect').slice(0, 8)), { perfect, wonStones, want: hint('hintPerfect') });
     if (wonStones) await tap(byText('.bg-win-card button', w('en', 'winStay')), 'Keep tinkering');
     // D10: the tulips' pad shows water.
     await tab(0);
@@ -834,7 +985,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await control('rec');
     await until(`!!document.querySelector('.bg-pad .bg-key-fwd')`, Boolean, 3000);
     const tulipOps = await evaluate(`[...document.querySelectorAll('.bg-pad .bg-key')].filter((e) => e.offsetParent !== null).map((e) => (e.className.match(/bg-key-(fwd|left|right|water|pick|put|fill)/) || [])[1])`);
-    check('IG-001 D10: the tulips’ pad shows water (fwd left water right)', JSON.stringify(tulipOps) === JSON.stringify(['fwd', 'left', 'water', 'right']), tulipOps);
+    check(`IG-001 D10: the tulips’ pad shows water (${padFor('tulips-three').join(' ')}; IG-002: fill too)`, JSON.stringify(tulipOps) === JSON.stringify(padFor('tulips-three')) && tulipOps.includes('water'), tulipOps);
     await control('rec');
     await tab(0);
     await until('location.pathname', (p) => p === '/island');
@@ -856,7 +1007,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await until('location.pathname', (x) => x === '/workshop');
   await wait(900);
   await control('rec');
-  for (const op of ['fwd', 'fwd', 'left', 'water']) await key(op);
+  // IG-002: fill at the pond, turn round, step, water the first tulip.
+  for (const op of ['fill', 'left', 'left', 'fwd', 'water']) await key(op);
   const still = await evaluate(`(() => { const all = [...document.querySelectorAll('*')].filter((e) => { const s = getComputedStyle(e); return s.animationName !== 'none' && s.animationPlayState === 'running' && parseFloat(s.animationDuration) > 0.01; }).map((e) => e.className && e.className.baseVal !== undefined ? e.className.baseVal : e.className); const wet = document.querySelector('.gd-wet'), dry = document.querySelector('.gd-dry'); return { animated: all.slice(0, 8), wet: wet && getComputedStyle(wet).opacity, dry: dry && getComputedStyle(dry).opacity }; })()`);
   check('CG-007 AC7: under reduced motion nothing animates', still.animated.length === 0, still);
   check('CG-007 AC7: … and a watered tulip still reads apart from a dry one', still.wet !== null && still.dry !== null && still.wet !== still.dry, still);
