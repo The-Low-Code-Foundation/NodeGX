@@ -42,6 +42,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 import { extractProjectOverlay } from '../src/kitOverlay';
 import { buildKitExtractor } from './helpers';
+// P106 s3 (lane F, item b): the 2D kit's dry tulip colour, which the 3D kit's dry petal is pinned to.
+import { deltaE, dryLook, hexToRgb, hue, hueGap } from './dryTulipLook';
 
 const LIBRARY = path.join(__dirname, '..', '..', '..', 'library', 'modules');
 const KIT_DIR = path.join(LIBRARY, 'garden-3d-kit');
@@ -723,6 +725,52 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       hid.run(60, 2000);
       expect(hid.fired.length).toBe(1);
       for (const x of [fast, slow, hid]) x.eng.destroy();
+    });
+  });
+
+  describe('P106 s3 lane F (b) — a dry red and a dry yellow tulip stay apart, and both kits show the same dry colour', () => {
+    it('🔴 the dry petals drawn are the 2D kit’s dry look (its petal faded over the bed): red stays red, yellow stays yellow, far apart', () => {
+      const s = threeStub();
+      // The stub keeps no constructor arguments; for this clause the petal's material colour is what is graded.
+      const BaseMesh = s.THREE.Mesh;
+      s.THREE.Mesh = function (this: any, geo: unknown, material: unknown) {
+        BaseMesh.call(this, geo, material);
+        this.material = material;
+      };
+      const BaseMat = s.THREE.MeshLambertMaterial;
+      s.THREE.MeshLambertMaterial = function (this: any, opts: { color?: number }) {
+        BaseMat.call(this, opts);
+        this.color = opts ? opts.color : undefined;
+      };
+      const W = node().world;
+      const things = [
+        { kind: 'tulip', x: 1, y: 0, colour: 'red' },
+        { kind: 'tulip', x: 2, y: 0, colour: 'yellow' },
+        { kind: 'tulip', x: 3, y: 0, colour: 'red', watered: true },
+        { kind: 'tulip', x: 4, y: 0, colour: 'yellow', watered: true }
+      ];
+      const built = node().scene.buildScene({ map: W.parseMap({ rows: ['GFFFFG'] }), things: W.parseThings(things), robots: [] }, s.THREE);
+      const P = node().scene.PALETTE as Record<string, number>;
+      const petalAt = (x: number): string => {
+        const g = built.things.find((t: any) => t.userData.kind === 'tulip' && t.userData.x === x);
+        const colours: number[] = [];
+        g.traverse((o: any) => {
+          if (o.type === 'Mesh' && o.material && o.material.color !== P.stem) colours.push(o.material.color);
+        });
+        expect(colours).toHaveLength(1);
+        return '#' + colours[0].toString(16).padStart(6, '0');
+      };
+      const two = node2d();
+      const look = dryLook(two.css as string, (two.sprite as { sprites: Record<string, any> }).sprites);
+      // The same dry colour as the 2D kit's composite, and the same wet colour as its sprite.
+      expect({ dryRed: petalAt(1), dryYellow: petalAt(2) }).toEqual({ dryRed: look.dry.red.toLowerCase(), dryYellow: look.dry.yellow.toLowerCase() });
+      expect({ wetRed: petalAt(3), wetYellow: petalAt(4) }).toEqual({ wetRed: look.wet.red.toLowerCase(), wetYellow: look.wet.yellow.toLowerCase() });
+      const [dryRed, dryYellow] = [hexToRgb(petalAt(1)), hexToRgb(petalAt(2))];
+      expect({ red: hueGap(hue(dryRed), hue(hexToRgb(petalAt(3)))) <= 30, yellow: hueGap(hue(dryYellow), hue(hexToRgb(petalAt(4)))) <= 30 }).toEqual({ red: true, yellow: true });
+      expect(deltaE(dryRed, dryYellow)).toBeGreaterThanOrEqual(40);
+      // The droop stays: a dry tulip is tilted, a wet one upright.
+      const tilt = (x: number) => built.things.find((t: any) => t.userData.kind === 'tulip' && t.userData.x === x).rotation.z;
+      expect([tilt(1) > 0, tilt(2) > 0, tilt(3), tilt(4)]).toEqual([true, true, 0, 0]);
     });
   });
 

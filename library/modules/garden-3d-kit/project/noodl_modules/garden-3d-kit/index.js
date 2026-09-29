@@ -230,9 +230,9 @@
     window: 0x7cc6f0,
     stem: 0x3fa66b,
     tulip: 0xff6b9a,
-    tulipDry: 0xe6b7c6,
+    tulipDry: 0xe68081,
     yellow: 0xffd166,
-    yellowDry: 0xebd9a9,
+    yellowDry: 0xe6b865,
     stemDry: 0x9cc7a8,
     puddle: 0x7cc6f0,
     letter: 0xfff7e8,
@@ -490,7 +490,8 @@
       l2.rotation.z = -0.7;
       g.add(l1, l2);
       out.meshCount += 4;
-      // Dry: tilted and paler (the 2D kit's .gd-dry, the mockup's 0.32). Wet: upright.
+      // Dry: tilted, and the petal is the 2D kit's dry colour (its petal at .55 over the bed; P106 s3: faded, never
+      // desaturated, so a dry red and a dry yellow stay apart for Mamie's note). Wet: upright.
       g.rotation.z = wet ? 0 : 0.31;
       g.userData.wet = wet;
       return g;

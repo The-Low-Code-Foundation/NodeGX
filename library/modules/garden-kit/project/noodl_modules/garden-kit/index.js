@@ -1106,7 +1106,7 @@
     '.gd-path{background:#F1DFB5}.gd-postbox{background:#F1DFB5}.gd-water{background:radial-gradient(circle at 40% 40%,#9AD6F5,#6ABBE6);border-radius:10px}.gd-bed{background:#C79A63;border-radius:8px}\n' +
     '.gd-cell>.gd-sprite{position:absolute;inset:11%;width:78%;height:78%}\n' +
     '.gd-bed>.gd-tulip{transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .4s}\n' +
-    '.gd-tulip.gd-dry{opacity:.55;filter:saturate(.3);transform:rotate(18deg) translateY(6%)}\n' +
+    '.gd-tulip.gd-dry{opacity:.55;transform:rotate(18deg) translateY(6%)}\n' +
     '.gd-puddle{position:absolute;inset:auto 12% 10% 12%;height:30%;border-radius:50%;background:rgba(124,198,240,.7);animation:gd-pop .3s ease-out}\n' +
     '@keyframes gd-pop{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}\n' +
     '.gd-label{position:absolute;left:50%;bottom:4%;transform:translateX(-50%);background:#fff;border-radius:999px;padding:1px 7px;font-size:11px;font-weight:800;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);z-index:2;pointer-events:none}\n' +

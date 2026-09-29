@@ -35,6 +35,8 @@ import * as React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { reducedMotionReport } from './reducedMotion';
+// P106 s3 (lane F, item b): the dry tulip's colour as it reaches the screen.
+import { deltaE, dryLook, hexToRgb, hue, hueGap } from './dryTulipLook';
 
 const KIT_DIR = path.join(__dirname, '..', '..', '..', 'library', 'modules', 'garden-kit');
 const BUILT = path.join(KIT_DIR, 'project', 'noodl_modules', 'garden-kit', 'index.js');
@@ -645,6 +647,30 @@ describe('CG-001 — garden-kit, the built artefact', () => {
     it('the fill block has its own icon (a drop into the can)', () => {
       const html = render('garden-kit.BlockList', { palette: [{ id: 'fill', kind: 'action', icon: 'fill', label: 'fill the can', hasBody: false, hasCount: false, slots: [] }], program: '[{"id":1,"t":"fill"}]' });
       expect(html).toContain('data-icon="fill"');
+    });
+  });
+
+  describe('P106 s3 lane F (b) — a dry red and a dry yellow tulip stay apart (Mamie asks for the red row BEFORE the watering)', () => {
+    it('🔴 the dry look droops and fades, it does not desaturate: dry red stays red, dry yellow stays yellow, far apart', () => {
+      const garden = node('garden-kit.Garden');
+      const look = dryLook(garden.css as string, (garden.sprite as { sprites: Record<string, any> }).sprites);
+      // The droop and the fade stay (the reduced-motion page clause reads a dry tulip apart from a wet one by opacity).
+      expect(look.rule).toMatch(/transform:rotate\(\d+deg\)/);
+      expect(look.opacity).toBeGreaterThan(0);
+      expect(look.opacity).toBeLessThan(1);
+      // No filter that pulls the hue family toward grey or brown.
+      expect({ filters: look.filters.filter((f) => /^(saturate|grayscale|sepia|hue-rotate)/.test(f)) }).toEqual({ filters: [] });
+      const [dryRed, dryYellow] = [hexToRgb(look.dry.red), hexToRgb(look.dry.yellow)];
+      // Each dry petal within 30° of its own wet hue; the two dry petals a different colour (CIE76 ΔE ≥ 40; s2's look: 20.0).
+      expect({ red: hueGap(hue(dryRed), hue(hexToRgb(look.wet.red))) <= 30, yellow: hueGap(hue(dryYellow), hue(hexToRgb(look.wet.yellow))) <= 30 }).toEqual({ red: true, yellow: true });
+      expect(deltaE(dryRed, dryYellow)).toBeGreaterThanOrEqual(40);
+      // And dry still reads apart from wet on the bed, beside the droop.
+      expect(deltaE(dryRed, hexToRgb(look.wet.red))).toBeGreaterThanOrEqual(10);
+      expect(deltaE(dryYellow, hexToRgb(look.wet.yellow))).toBeGreaterThanOrEqual(10);
+      // The known-firing half: the class names and the data attributes are the ones the drives and the page read.
+      const html = render('garden-kit.Garden', { map: { rows: ['GGFGFGFG'] }, things: [{ kind: 'tulip', x: 2, y: 0, colour: 'yellow' }, { kind: 'tulip', x: 4, y: 0, colour: 'red' }] });
+      expect(html.match(/gd-tulip gd-dry gd-yellow"[^>]*data-sprite="tulipYellow"/g)).toHaveLength(1);
+      expect(html.match(/gd-tulip gd-dry"[^>]*data-sprite="tulip"/g)).toHaveLength(2); // the red one and the bed's own at 6,0
     });
   });
 
