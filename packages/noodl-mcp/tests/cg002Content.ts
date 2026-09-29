@@ -842,7 +842,7 @@ function IG006_REQUESTS(): GardenRequest[] {
       tricks: [4],
       map: ['GGTGGGTH', 'GGGGGGGG', 'GFGFGGGG', 'PPPPPPPP', 'GWWGGGGG', 'GGGGGTGG'],
       things: [
-        at('sign', 0, 2, { text: 'Water the tulips, never the rock.' }),
+        at('sign', 0, 2, { text: 'The tulips want water today.' }),
         at('tulip', 1, 2, { watered: false, color: 'red' }),
         at('rock', 2, 2, { left: 4 }),
         at('tulip', 3, 2, { watered: false, color: 'red' }),

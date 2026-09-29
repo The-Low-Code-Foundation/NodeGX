@@ -103,10 +103,12 @@ async function main() {
     const ask = async (temperature) => (await request(port, 'POST', P, { rung: 'say-thanks', slots, lang, temperature })).body;
     const same = [await ask(0), await ask(0)];
     const wild = [await ask(1.2), await ask(1.2), await ask(1.2)];
-    const okWild = wild.filter((x) => x.ok).map((x) => JSON.stringify(x.value));
-    const sameOk = same.every((x) => x.ok) && new Set(same.map((x) => JSON.stringify(x.value))).size === 1;
+    // A prose answer is `text`, a shaped one `value` (IG-006: the dial now reads a sentence — reading value alone was vacuous).
+    const said = (x) => (x.value !== undefined ? x.value : x.text);
+    const okWild = wild.filter((x) => x.ok).map((x) => JSON.stringify(said(x)));
+    const sameOk = same.every((x) => x.ok && said(x) !== undefined) && new Set(same.map((x) => JSON.stringify(said(x)))).size === 1;
     const wildOk = new Set(okWild).size >= 2;
-    R.dial[lang] = { same: same.map((x) => (x.ok ? x.value : `⟂ ${x.reason}`)), surprise: wild.map((x) => (x.ok ? x.value : `⟂ ${x.reason}`)), sameOk, wildOk };
+    R.dial[lang] = { same: same.map((x) => (x.ok ? said(x) : `⟂ ${x.reason}`)), surprise: wild.map((x) => (x.ok ? said(x) : `⟂ ${x.reason}`)), sameOk, wildOk };
     console.log(`olive-contract: AC7 dial ${lang}: same every time ${JSON.stringify(R.dial[lang].same)} ${sameOk ? 'ok' : 'NOT SAME'}; surprise me ${JSON.stringify(R.dial[lang].surprise)} ${wildOk ? 'ok' : 'NOT VARIED'}`);
   }
   const dialGreen = Object.values(R.dial).every((d) => d.sameOk && d.wildOk);

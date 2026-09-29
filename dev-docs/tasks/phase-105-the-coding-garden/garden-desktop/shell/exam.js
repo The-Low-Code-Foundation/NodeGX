@@ -31,12 +31,15 @@ const RESULTS_FILE = 'olive-exam.json';
 const DEFAULT_TIMES = 3;
 
 /**
- * The things on each request's plot that `read` chooses from (IG-006): the request's own objects, as the engine sends
- * them in `options` — the grammar enum. The note names ONE of them.
+ * The things on each request's plot that `read` chooses from (IG-006): the request's own objects IN THE ORDER THE ENGINE
+ * SENDS THEM (the world's things, first seen first) — the grammar enum. The note names ONE of them. Mamie's note plot:
+ * red, yellow; the rock and the flowers: red tulip, rock; Sami's: the letter (a stone beside it here, so there is a
+ * choice). Measured 2026-09-29 on Metal: with the sign's options the other way round ([rock, red tulip]) she answered
+ * "rock" 3 runs in 3 in English — a first-option pull when the note names a kind ("the tulips"), not the option itself.
  */
 const READ_OPTIONS = {
-  fr: [['tulipe rouge', 'tulipe jaune'], ['rocher', 'tulipe rouge'], ['lettre', 'pierre']],
-  en: [['red tulip', 'yellow tulip'], ['rock', 'red tulip'], ['letter', 'stone']]
+  fr: [['tulipe rouge', 'tulipe jaune'], ['tulipe rouge', 'rocher'], ['lettre', 'pierre']],
+  en: [['red tulip', 'yellow tulip'], ['red tulip', 'rock'], ['letter', 'stone']]
 };
 const READ_ANSWER = { fr: ['tulipe rouge', 'tulipe rouge', 'lettre'], en: ['red tulip', 'red tulip', 'letter'] };
 

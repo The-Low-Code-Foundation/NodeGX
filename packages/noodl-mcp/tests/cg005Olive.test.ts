@@ -44,7 +44,7 @@ const { createRelay } = require(path.join(SHELL_DIR, 'relay.js'));
 const { createStubEngine } = require(path.join(SHELL_DIR, 'olive-stub.js'));
 const { checkSlots, blocked } = require(path.join(SHELL_DIR, 'olive-check.js'));
 const { writtenAnswer } = require(path.join(SHELL_DIR, 'olive-written.js'));
-const { PROBES, meetsOne } = require(path.join(SHELL_DIR, 'exam.js'));
+const { PROBES, meetsOne, READ_OPTIONS } = require(path.join(SHELL_DIR, 'exam.js'));
 const gardenConfig = require(path.join(SHELL_DIR, 'garden.json'));
 /* eslint-enable @typescript-eslint/no-var-requires */
 
@@ -785,6 +785,17 @@ describe('CG-005 — Olive in the game', () => {
         expect([p.run.puddles > 0, runScript(GOAL_SCRIPT, { world: p.world, run: p.run, program: r.referenceProgram, goal: r.goal }).met]).toEqual([true, false]);
       } finally {
         await liar.close();
+      }
+    });
+
+    it('🔴 AC4’s read probes are the REAL requests: each note and each plot’s things in the order the engine sends them (Metal, 2026-09-29: the other order read “rock” 3/3)', () => {
+      for (const [i, id] of ['mamie-note', 'rock-flower', 'sami-thanks'].entries()) {
+        for (const lang of ['en', 'fr'] as const) {
+          const req = runScript(STEP_SCRIPT, { run: runScript(NEW_RUN_SCRIPT, { program: [{ id: 1, t: 'olive:read' }], robotId: 'pip', lang }).run, world: worldOf(request(id)) }).request;
+          expect({ id, lang, note: req.slots.note }).toEqual({ id, lang, note: T.lists.notes_read[lang][i] });
+          // The exam's options begin with the plot's own, in the plot's order (Sami's plot has one thing; the exam adds a stone).
+          expect({ id, lang, options: READ_OPTIONS[lang][i].slice(0, req.options.length) }).toEqual({ id, lang, options: req.options });
+        }
       }
     });
 

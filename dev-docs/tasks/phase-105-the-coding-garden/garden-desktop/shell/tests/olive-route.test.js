@@ -155,15 +155,15 @@ test('POST /__garden/olive/exam runs the exam through the same ask, keeps the re
     assert.equal(r.body.passed + r.body.failed, r.body.probes.filter((p) => p.mode !== 'record').length);
     const kept = readResults(dataDir);
     assert.equal(kept.at, r.body.at);
-    // The fake answers the enum's FIRST word: `read` is right on RD1 and RD3 (FR and EN), wrong on RD2 → 4 of 6, under 5
-    // → withheld; `is it a…?` says oui to all six → 6 of C1's 18 → withheld; 14 + 9 → 5 (not 23) → the 🎓 lesson holds.
-    assert.deepEqual(kept.rungs.read.score, { met: 4, of: 6, min: 5 });
-    assert.equal(kept.rungs.read.pass, false);
+    // The fake answers the enum's FIRST word: the plot's first thing is the one each note names (the engine's order), so
+    // `read` is 6 of 6; `is it a…?` says oui to all six → 6 of C1's 18 → withheld; 14 + 9 → 5 (not 23) → the 🎓 lesson holds.
+    assert.deepEqual(kept.rungs.read.score, { met: 6, of: 6, min: 5 });
+    assert.equal(kept.rungs.read.pass, true);
     assert.deepEqual(kept.rungs['is-it-a'].score, { met: 6, of: 18, min: 15 });
     assert.equal(kept.rungs['is-it-a'].pass, false);
     assert.equal(kept.rungs.maths.pass, true);
     assert.equal(kept.probes.find((p) => p.id === 'RD1-fr').pass, true);
-    assert.equal(kept.probes.find((p) => p.id === 'RD2-fr').pass, false);
+    assert.equal(kept.probes.find((p) => p.id === 'RD2-fr').pass, true);
     assert.equal(kept.probes.find((p) => p.id === 'IA3-fr').replies.length, 3, 'a C1 probe takes all three samples');
     const s = await request(port, 'GET', '/__garden/olive/status');
     assert.equal(s.body.exam.at, r.body.at);

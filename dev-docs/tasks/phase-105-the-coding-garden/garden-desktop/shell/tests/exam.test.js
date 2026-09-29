@@ -90,7 +90,8 @@ test('IG-006 AC4: read and is it a…? pass on a COUNT of right samples (5 of 6,
     return runExam({
       probes: mine,
       ask: async (q) => {
-        if (q.rung === 'read') return { ok: true, value: /jamais|never/.test(q.slots.note) ? q.options.find((o) => /rocher|rock/.test(o)) : q.options.find((o) => /rouge|red|lettre|letter/.test(o)) };
+        // The sign (RD2) answered with the rock — what the real model did on Metal to the first sign (a negation), 2026-09-29.
+        if (q.rung === 'read') return { ok: true, value: q.slots.note === templates.lists.notes_read[q.lang][1] ? q.options.find((o) => /rocher|rock/.test(o)) : q.options.find((o) => /rouge|red|lettre|letter/.test(o)) };
         const right = PROBES.find((p) => p.slots.thing === q.slots.thing && p.slots.kind === q.slots.kind && p.lang === q.lang).expect.value;
         const flip = { oui: 'non', non: 'oui', yes: 'no', no: 'yes' };
         return { ok: true, value: q.lang === 'fr' && c1++ < wrongC1 ? flip[right] : right };
