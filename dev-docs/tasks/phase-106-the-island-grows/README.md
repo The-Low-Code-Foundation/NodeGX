@@ -226,6 +226,7 @@ The generator sources are `packages/noodl-mcp/tests/cg00{2,3,5,7}*.ts`; the kit 
 | R6 | **Olive's blocks become three: read, is-it-a (as an if-sensor with a visible yes/no), say.** Every block gets a card on first tap. Yes? | **Yes** / keep the current family and wire it up / cut Olive from the Workshop altogether |
 | R7 | **The 18 lessons about the model** (counting, maths, the rule, tall tales…): move to an "Olive's lessons" page of canned exercises for band 10–12, or cut? | **Move, five lessons at most** / cut / keep as blocks |
 | R8 | **Robots for the job:** unlocked by islanders, each with its own palette, name, colour, hat slot and an upgrade (bigger can, bigger basket). Rewards become robots and upgrades. Yes? | **Yes** / one robot that gains abilities (today) |
+| R9 | **Ruled 2026-09-29 (s3), NOT the recommended option.** IG-004 as written did not add up: every request an 8×6 plot on a 24×16 island, but there are 12 requests + free play = 13 plots (576+ tiles) and 24×16 has 384 (room for about six; the mockup shows three). How do the requests sit on the island? | six places, requests share one (recommended) / **a bigger island, one plot per request (≈36–46 × 22, ≈800–1000 tiles) — RULED**; the 2D fallback draws ≈2× the tiles, so IG-004 AC6's 2D frame gate is the risk to read / 24×16 with only some requests drawn |
 
 **What does not change, unless said:** the model (R3 of P105: Qwen3.5-0.8B, one model for every child), no
 chat, no free text to the model, nothing timed or scored, one island per kid, nothing leaves the house.

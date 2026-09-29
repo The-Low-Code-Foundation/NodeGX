@@ -13,6 +13,10 @@ drawn with; the 2D `Garden` is the fallback and the test renderer). Lane B. **Th
 
 ## 2. What it is
 
+- 🔴 **Superseded by README R9 (Richard, 2026-09-29): a bigger island, ONE plot per request.** 12 requests + free
+  play = 13 plots of 8×6 do not fit 24×16 (384 tiles, room for ~6). The island grows to about 36–46 × 22
+  (≈800–1000 tiles): 13 plots on a grid of slots with 1-tile paths between, the spare slots scenery (the house,
+  the pond, the rock field). Every other sentence below that says "24×16" reads as "the island".
 - **One island per kid: a 24×16 grid** (384 tiles; the mockup IG-000 fixes the exact layout: sea around,
   the house, the pond, the rock field, six plots of 8×6 with paths between). Its base map is a Static Data
   in `cg003Content.ts`; each request's map becomes **the plot's tiles**, stamped at the request's `plot:
