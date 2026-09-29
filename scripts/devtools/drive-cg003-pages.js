@@ -1350,7 +1350,17 @@ withDeployedSite({ dir: DIR }, async (page) => {
   return { dir: DIR, results, readings, consoleErrors: page.consoleErrors.slice(), networkErrors: page.networkErrors.slice() };
 })
   .then(async (out) => {
-    if (WITH_MOCKUP && SHOTS) await mockupShots();
+    // P106 s4 (f): the side-step is a clause of its own — a failure there is recorded, and never loses the drive's JSON.
+    if (WITH_MOCKUP && SHOTS) {
+      const name = 'CG-007 AC1 (--mockup): the mockup’s own five screens shot beside the pages';
+      try {
+        await mockupShots();
+        out.results.push({ name, ok: true, saw: { shots: 5 } });
+      } catch (e) {
+        out.results.push({ name, ok: false, saw: String((e && e.message) || e) });
+      }
+      console.log(`${out.results[out.results.length - 1].ok ? 'PASS' : 'FAIL'} ${name}`);
+    }
     if (JSON_OUT) fs.writeFileSync(JSON_OUT, JSON.stringify(out, null, 1));
     const failed = out.results.filter((r) => !r.ok).length;
     console.log(`\n${out.results.length - failed}/${out.results.length} clauses passed`);
@@ -1366,6 +1376,14 @@ async function mockupShots() {
   const dir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'cg007-mockup-'));
   fs.copyFileSync(MOCKUP, path.join(dir, 'index.html'));
   await withDeployedSite({ dir }, async (page) => {
+    // P106 s4 (f): the mockup's Google font is a render-blocking stylesheet, so its script (and `go`) can arrive after the
+    // fixed boot wait — s3's merge run threw "go is not defined" here. Wait for it, up to 30 s, and say so if it never comes.
+    let ready = false;
+    for (let i = 0; i < 60 && !ready; i++) {
+      ready = (await page.evaluate(`typeof go === 'function' && document.querySelectorAll('.screen').length > 0`)) === true;
+      if (!ready) await wait(500);
+    }
+    if (!ready) throw new Error('the mockup page never defined go() in 30 s (its Google font stylesheet blocks its script)');
     await page.setViewport({ width: 1368, height: 912, mobile: false });
     for (const screen of ['island', 'workshop', 'robot', 'notions', 'grownups']) {
       await page.evaluate(`go(${JSON.stringify(screen)})`);
