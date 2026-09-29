@@ -38,8 +38,10 @@
  *
  * Map:      { rows: ["GGTGGGTH", ...], legend: { G: "grass", ... } } or just the rows. Kinds: grass path water tree
  *           rock house bed postbox. A bed draws a dry tulip; a Thing waters it. A postbox tile is path wearing the box.
- * Things:   [{ kind: tulip | puddle | letter | bowl | label, x, y, watered?, full?, text? }]
- * Robots:   [{ x, y, d, colour, eyes, hat, name, bump? }]  d 0..3 clockwise from up; bump is a COUNT that rises.
+ * Things:   [{ kind: tulip | puddle | letter | bowl | label | stone | postbox | egg | food | flag | rock | sign | note,
+ *             x, y, watered?, full?, text?, left? }]  (rock `left` 0..4; a sign's and a note's text is not drawn)
+ * Robots:   [{ x, y, d, colour, eyes, hat, name, bump?, can?, canMax?, carry? }]  d 0..3 clockwise from up; bump is a
+ *           COUNT that rises; can 0..canMax or null; the load drawn is the last of carry.
  * Bubble:   { robot, text, style: plain | olive, ms }
  * Camera:   plot | island | follow — plot frames Focus (the whole map when Focus is empty), island frames the whole
  *           map, follow keeps robot 0 in the middle.
@@ -49,10 +51,18 @@
  *           on every minimised app).
  * Supported: true when a WebGL2 context could be made and three.js is on the page; false draws nothing, throws
  *           nothing, and Ready never fires (the page’s fallback rule swaps the node).
+ * Too Slow: a signal, once, when Frame Ms has stayed above 50 ms for 3 s of visible time (the rule's other cue).
  *
- * Hooks for IG-002 / IG-005 (the vocabulary both renderers will share): THING_BUILDERS is a table keyed by thing
- * kind — a rock (three sizes by `left`), a stone, a post box, a sign and a note are one entry each; the robot builder
- * reads `colour`, `eyes` and `hat` today and has a named place for `accessory`, `can` (0..canMax) and `load`.
+ * The vocabulary both renderers share (P106 s2, the common brief's §4): THING_BUILDERS is a table keyed by thing
+ * kind — a rock (big at `left` ≥ 3, medium at 2, small at 1, nothing at 0), a stone, a post box, a sign and a note
+ * (their `text` is never drawn on the tile) are one entry each; a robot draws `colour`, `eyes`, `hat`, its can with the
+ * level `can` of `canMax` (no level at all when `can` is null) and its load on its back: the LAST entry of `carry`
+ * (`stone`, `letter`, anything else a parcel, nothing when `carry` is empty). `accessory` (IG-005) is not in the
+ * port's vocabulary yet: every robot carries the can.
+ *
+ * The look is the mockup's (`tpl-012-mockups/island-3d.html`, IG-000): its palette, tile heights, the sea and the sand
+ * rim under the island, the tiles a hair apart so the grid reads, its lights, and its camera — 35° from straight
+ * down, turned 0.42 rad about the vertical, a 38° lens.
  */
 (function () {
   // ✅ React is a global the runtime installs before this file runs. Read it bare; never window.React.
@@ -149,7 +159,10 @@
           eyes: r.eyes === 'happy' || r.eyes === 'wink' ? r.eyes : 'round',
           hat: r.hat === 'cap' || r.hat === 'sun' || r.hat === 'crown' ? r.hat : 'none',
           name: typeof r.name === 'string' ? r.name : i === 0 ? 'Pip' : '',
-          bump: isFinite(Number(r.bump)) ? Number(r.bump) : 0
+          bump: isFinite(Number(r.bump)) ? Number(r.bump) : 0,
+          can: isFinite(Number(r.can)) && r.can !== null && r.can !== '' ? Math.max(0, Math.floor(Number(r.can))) : null,
+          canMax: isFinite(Number(r.canMax)) && Number(r.canMax) > 0 ? Math.floor(Number(r.canMax)) : 3,
+          carry: Array.isArray(r.carry) ? r.carry.map(String) : []
         };
       });
   }
@@ -194,9 +207,13 @@
   // ═══════════════════════════════════════════════════════════════════════════
 
   var PALETTE = {
-    background: 0xbfe8cc,
+    background: 0x9fd9f3,
+    sea: 0x7cc6f0,
+    sand: 0xf1dfb5,
+    base: 0x9bd3af,
+    white: 0xffffff,
     grass: 0xbde6c9,
-    grassAlt: 0xc3e8ce,
+    grassAlt: 0xb4e0c2,
     path: 0xf1dfb5,
     water: 0x7cc6f0,
     bed: 0xc79a63,
@@ -212,14 +229,16 @@
     window: 0x7cc6f0,
     stem: 0x3fa66b,
     tulip: 0xff6b9a,
-    tulipDry: 0xd9a3b6,
+    tulipDry: 0xe6b7c6,
+    yellow: 0xffd166,
+    yellowDry: 0xebd9a9,
     stemDry: 0x9cc7a8,
     puddle: 0x7cc6f0,
     letter: 0xfff7e8,
     letterInk: 0xe86a5e,
-    bowl: 0x7cc6f0,
+    bowl: 0xe86a5e,
     bowlRim: 0x4fa7dc,
-    kibble: 0xc79a63,
+    kibble: 0x8b5a2b,
     ink: 0x2e2a3d,
     visor: 0xffffff,
     cap: 0x3e63c8,
@@ -227,12 +246,29 @@
     sunCrown: 0x7a4b1f,
     crown: 0xffd166,
     can: 0x4fa7dc,
-    bulb: 0xffd166
+    canWater: 0xbfe7ff,
+    bulb: 0xffd166,
+    wheel: 0x3a3646,
+    iron: 0x8e8ca0,
+    paper: 0xffffff,
+    coral: 0xff7a59,
+    parcel: 0xc98a5e
   };
 
-  /** How tall each tile box is: water lowest, path, grass, bed. Tree, rock and house sit on a grass-height tile. */
-  var TILE_HEIGHT = { water: 0.14, path: 0.3, grass: 0.4, bed: 0.46, tree: 0.4, rock: 0.4, house: 0.4, postbox: 0.3 };
-  var TILE_COLOUR = { water: PALETTE.water, path: PALETTE.path, grass: PALETTE.grass, bed: PALETTE.bed, tree: PALETTE.grass, rock: PALETTE.grass, house: PALETTE.grass, postbox: PALETTE.path };
+  /**
+   * How tall each tile box is (the mockup's TOP): water lowest, then the bed, the path, grass. Tree, rock and house sit
+   * on a grass-height tile; a post box on path.
+   */
+  var TILE_HEIGHT = { water: 0.14, path: 0.34, grass: 0.4, bed: 0.3, tree: 0.4, rock: 0.4, house: 0.4, postbox: 0.34 };
+  /** The grassy kinds take their shade per tile (a checkerboard), so their material is white and the instance colours it. */
+  var TILE_COLOUR = { water: PALETTE.water, path: PALETTE.path, grass: PALETTE.white, bed: PALETTE.bed, tree: PALETTE.white, rock: PALETTE.white, house: PALETTE.white, postbox: PALETTE.path };
+  /** Tiles a hair apart so the grid reads on the base under them; water a hair wider so the pond is one sheet. */
+  var TILE_SIZE = 0.98;
+  var WATER_SIZE = 1.02;
+  /** A rock's radius by what is left of it (the mockup's sizes): big at left ≥ 3, medium at 2, small at 1. */
+  var ROCK_SIZES = { big: 0.32, medium: 0.24, small: 0.16 };
+  /** The roof: a triangle 0.96 wide (r·√3) squashed to 0.4 tall (1.5·r·squash). */
+  var ROOF = { r: 0.96 / Math.sqrt(3), squash: 0.4 / (1.5 * (0.96 / Math.sqrt(3))) };
 
   function tileHeight(kind) {
     return TILE_HEIGHT[kind] === undefined ? TILE_HEIGHT.grass : TILE_HEIGHT[kind];
@@ -307,9 +343,12 @@
         var p = tileCentre(world, c.x, c.y);
         dummy.position.set(p.x, height / 2, p.z);
         dummy.rotation.set(0, 0, 0);
-        dummy.scale.set(1, 1, 1);
+        var size = kind === 'water' ? WATER_SIZE : TILE_SIZE;
+        dummy.scale.set(size, 1, size);
         dummy.updateMatrix();
         im.setMatrixAt(i, dummy.matrix);
+        // 🔴 An instance colour MULTIPLIES the material's: a grass-green material under a grass-green instance drew a
+        // darker, squared green (s1's shots). The grassy kinds' material is white (TILE_COLOUR).
         if (kind === 'grass' || kind === 'tree' || kind === 'rock' || kind === 'house') {
           im.setColorAt(i, new THREE.Color((c.x + c.y) % 2 ? PALETTE.grassAlt : PALETTE.grass));
         }
@@ -320,6 +359,24 @@
       out.meshCount++;
     }
     return meshes;
+  }
+
+  /**
+   * Under the tiles (the mockup's): the sea to the horizon, a sand rim a little wider than the map, and a green base the
+   * tiles stand on, which shows between them as the grid. Three meshes whatever the map's size.
+   */
+  function buildGround(map, THREE, mat, out) {
+    var w = Math.max(1, map.w);
+    var hh = Math.max(1, map.h);
+    var sea = mesh(THREE, new THREE.PlaneGeometry(400, 400), mat(PALETTE.sea), 0, -0.06, 0);
+    sea.rotation.x = -Math.PI / 2;
+    sea.name = 'sea';
+    var sand = mesh(THREE, new THREE.BoxGeometry(w + 1.4, 0.3, hh + 1.4), mat(PALETTE.sand), 0, -0.16, 0);
+    sand.name = 'sand';
+    var base = mesh(THREE, new THREE.BoxGeometry(w, 0.06, hh), mat(PALETTE.base), 0, 0, 0);
+    base.name = 'base';
+    out.meshCount += 3;
+    return [sea, sand, base];
   }
 
   /** The decorations a tile KIND carries (tree, rock, house), instanced per part so a forest is a handful of draws. */
@@ -348,46 +405,51 @@
       out.meshCount++;
     };
     var top = tileHeight('grass');
-    // A tree: a cylinder trunk under two cones, the upper one lighter (the 2D sprite’s two greens).
-    instanced(new THREE.CylinderGeometry(0.07, 0.09, 0.32, 6), PALETTE.trunk, trees, function (d, p) {
-      d.position.set(p.x, top + 0.16, p.z);
-      d.rotation.set(0, 0, 0);
-      d.scale.set(1, 1, 1);
+    // A tree (the mockup's): a trunk under two six-sided cones, the upper one lighter, each tree a little bigger or
+    // smaller and turned by its tile, so a forest is not a row of clones.
+    var treeScale = function (c) {
+      return 0.85 + (((c.x * 31 + c.y * 17) * 7) % 5) * 0.06;
+    };
+    var treeYaw = function (c) {
+      return ((c.x * 31 + c.y * 17) % 6) * 0.5;
+    };
+    [
+      [new THREE.CylinderGeometry(0.07, 0.1, 0.36, 6), PALETTE.trunk, 0.18],
+      [new THREE.ConeGeometry(0.4, 0.62, 6), PALETTE.canopy, 0.6],
+      [new THREE.ConeGeometry(0.3, 0.5, 6), PALETTE.canopyLight, 0.95]
+    ].forEach(function (part) {
+      instanced(part[0], part[1], trees, function (d, p, c) {
+        var k = treeScale(c);
+        d.position.set(p.x, top + part[2] * k, p.z);
+        d.rotation.set(0, treeYaw(c), 0);
+        d.scale.set(k, k, k);
+      });
     });
-    instanced(new THREE.ConeGeometry(0.34, 0.5, 7), PALETTE.canopy, trees, function (d, p, c) {
-      d.position.set(p.x, top + 0.5, p.z);
-      d.rotation.set(0, ((c.x * 7 + c.y * 3) % 5) * 0.25, 0);
-      d.scale.set(1, 1, 1);
+    // A rock tile (map R): a big flat icosahedron, the same as a rock thing at left 3; it yields nothing (brief §4).
+    instanced(new THREE.IcosahedronGeometry(1, 0), PALETTE.rock, rocks, function (d, p, c) {
+      d.position.set(p.x, top + ROCK_SIZES.big * 0.75, p.z);
+      d.rotation.set(0.3, (c.x + c.y) * 0.7, 0.2);
+      d.scale.set(ROCK_SIZES.big, ROCK_SIZES.big * 0.75, ROCK_SIZES.big);
     });
-    instanced(new THREE.ConeGeometry(0.24, 0.42, 7), PALETTE.canopyLight, trees, function (d, p, c) {
-      d.position.set(p.x, top + 0.82, p.z);
-      d.rotation.set(0, ((c.x * 3 + c.y * 5) % 5) * 0.25, 0);
-      d.scale.set(1, 1, 1);
-    });
-    // A rock: a flat icosahedron, a touch of random yaw and squash per tile so no two are the same.
-    instanced(new THREE.IcosahedronGeometry(0.3, 0), PALETTE.rock, rocks, function (d, p, c) {
-      d.position.set(p.x, top + 0.16, p.z);
-      d.rotation.set(0, ((c.x * 5 + c.y * 11) % 7) * 0.4, 0);
-      d.scale.set(1.1, 0.7, 1);
-    });
-    // A house: a box under a triangular prism (a 3-sided cylinder on its side), a door in front, two windows.
-    instanced(new THREE.BoxGeometry(0.72, 0.5, 0.62), PALETTE.wall, houses, function (d, p) {
+    // A house (the mockup's): a box under a gabled roof whose gables face the front, a door and two windows. The roof is
+    // a three-sided cylinder lying front to back, apex up (rotation.x = −90°), squashed to 0.4 tall.
+    instanced(new THREE.BoxGeometry(0.8, 0.5, 0.66), PALETTE.wall, houses, function (d, p) {
       d.position.set(p.x, top + 0.25, p.z);
       d.rotation.set(0, 0, 0);
       d.scale.set(1, 1, 1);
     });
-    instanced(new THREE.CylinderGeometry(0.46, 0.46, 0.84, 3), PALETTE.roof, houses, function (d, p) {
-      d.position.set(p.x, top + 0.66, p.z);
-      d.rotation.set(0, 0, Math.PI / 2);
-      d.scale.set(0.9, 1, 1);
+    instanced(new THREE.CylinderGeometry(ROOF.r, ROOF.r, 0.8, 3), PALETTE.roof, houses, function (d, p) {
+      d.position.set(p.x, top + 0.5 + ROOF.r * 0.5 * ROOF.squash, p.z);
+      d.rotation.set(-Math.PI / 2, 0, 0);
+      d.scale.set(1, 1, ROOF.squash);
     });
-    instanced(new THREE.BoxGeometry(0.16, 0.24, 0.04), PALETTE.door, houses, function (d, p) {
-      d.position.set(p.x, top + 0.12, p.z + 0.32);
+    instanced(new THREE.BoxGeometry(0.18, 0.28, 0.04), PALETTE.door, houses, function (d, p) {
+      d.position.set(p.x, top + 0.14, p.z + 0.34);
       d.rotation.set(0, 0, 0);
       d.scale.set(1, 1, 1);
     });
-    instanced(new THREE.BoxGeometry(0.12, 0.12, 0.04), PALETTE.window, houses, function (d, p, c, i) {
-      d.position.set(p.x + (i % 2 ? 0.22 : -0.22), top + 0.32, p.z + 0.32);
+    instanced(new THREE.BoxGeometry(0.14, 0.14, 0.04), PALETTE.window, houses.concat(houses), function (d, p, c, i) {
+      d.position.set(p.x + (i < houses.length ? -0.24 : 0.24), top + 0.3, p.z + 0.34);
       d.rotation.set(0, 0, 0);
       d.scale.set(1, 1, 1);
     });
@@ -395,52 +457,50 @@
   }
 
   /**
-   * The things a page places on tiles, one builder per kind. Each returns a Group at the tile’s centre, at the tile’s
-   * top, with `userData.kind`; a builder that needs a per-frame update sets `userData.animate(t, now)`.
-   *
-   * Hooks (IG-002 / IG-005): `rock` (three sizes by `left`), `stone`, `postbox`, `sign`, `note` are one entry each
-   * here; the 2D kit draws them in `SPRITES`. Add the entry, nothing else changes.
+   * The things a page places on tiles, one builder per kind (the mockup's primitives). Each returns a Group at the tile's
+   * centre, at the tile's top, with `userData.kind`. A thing kind with no entry draws nothing: every kind the 2D kit has
+   * a sprite for has an entry here, and the brief's §4 kinds (rock, sign, note) are one or two primitives each.
    */
   var THING_BUILDERS = {
     tulip: function (THREE, mat, t, out) {
       var g = new THREE.Group();
       var wet = !!(t.watered === true || t.state === 'watered' || t.state === 'wet');
-      var stem = mesh(THREE, new THREE.CylinderGeometry(0.025, 0.03, 0.34, 5), mat(wet ? PALETTE.stem : PALETTE.stemDry), 0, 0.17, 0);
-      var head = mesh(THREE, new THREE.ConeGeometry(0.12, 0.2, 6), mat(wet ? PALETTE.tulip : PALETTE.tulipDry), 0, 0.42, 0);
-      var leaf = mesh(THREE, new THREE.BoxGeometry(0.16, 0.03, 0.06), mat(wet ? PALETTE.stem : PALETTE.stemDry), 0.06, 0.16, 0);
-      leaf.rotation.z = 0.6;
-      g.add(stem, head, leaf);
-      out.meshCount += 3;
-      // Dry: tilted 18° and lower, the 2D kit’s .gd-dry. Wet: upright.
+      var yellow = t.colour === 'yellow';
+      var petal = yellow ? (wet ? PALETTE.yellow : PALETTE.yellowDry) : wet ? PALETTE.tulip : PALETTE.tulipDry;
+      g.add(mesh(THREE, new THREE.CylinderGeometry(0.025, 0.03, 0.34, 5), mat(PALETTE.stem), 0, 0.17, 0));
+      g.add(mesh(THREE, new THREE.CylinderGeometry(0.12, 0.05, 0.2, 5), mat(petal), 0, 0.42, 0));
+      var l1 = mesh(THREE, new THREE.BoxGeometry(0.05, 0.16, 0.02), mat(PALETTE.stem), -0.07, 0.14, 0);
+      l1.rotation.z = 0.7;
+      var l2 = mesh(THREE, new THREE.BoxGeometry(0.05, 0.16, 0.02), mat(PALETTE.stem), 0.07, 0.14, 0);
+      l2.rotation.z = -0.7;
+      g.add(l1, l2);
+      out.meshCount += 4;
+      // Dry: tilted and paler (the 2D kit's .gd-dry, the mockup's 0.32). Wet: upright.
       g.rotation.z = wet ? 0 : 0.31;
-      g.position.y = wet ? 0 : -0.04;
       g.userData.wet = wet;
       return g;
     },
     puddle: function (THREE, mat, t, out) {
       var g = new THREE.Group();
-      var disc = mesh(THREE, new THREE.CylinderGeometry(0.3, 0.3, 0.02, 12), mat(PALETTE.puddle, { transparent: true, opacity: 0.75 }), 0, 0.01, 0.12);
-      g.add(disc);
+      g.add(mesh(THREE, new THREE.CylinderGeometry(0.3, 0.3, 0.02, 8), mat(PALETTE.puddle), 0, 0.01, 0));
       out.meshCount += 1;
       return g;
     },
     letter: function (THREE, mat, t, out) {
       var g = new THREE.Group();
-      var paper = mesh(THREE, new THREE.BoxGeometry(0.5, 0.04, 0.34), mat(PALETTE.letter), 0, 0.02, 0);
-      var flap = mesh(THREE, new THREE.BoxGeometry(0.34, 0.02, 0.16), mat(PALETTE.letterInk), 0, 0.05, -0.04);
-      flap.rotation.y = 0.78;
+      var paper = mesh(THREE, new THREE.BoxGeometry(0.3, 0.02, 0.2), mat(PALETTE.letter), 0, 0.02, 0);
+      var flap = mesh(THREE, new THREE.BoxGeometry(0.2, 0.02, 0.08), mat(PALETTE.letterInk), 0, 0.035, -0.04);
       g.add(paper, flap);
+      g.rotation.y = 0.4;
       out.meshCount += 2;
       return g;
     },
     bowl: function (THREE, mat, t, out) {
       var g = new THREE.Group();
-      var bowl = mesh(THREE, new THREE.CylinderGeometry(0.3, 0.2, 0.18, 10), mat(PALETTE.bowl), 0, 0.09, 0);
-      var rim = mesh(THREE, new THREE.CylinderGeometry(0.31, 0.31, 0.04, 10), mat(PALETTE.bowlRim), 0, 0.18, 0);
-      g.add(bowl, rim);
-      out.meshCount += 2;
+      g.add(mesh(THREE, new THREE.CylinderGeometry(0.22, 0.15, 0.12, 8), mat(PALETTE.bowl), 0, 0.06, 0));
+      out.meshCount += 1;
       if (t.full) {
-        g.add(mesh(THREE, new THREE.CylinderGeometry(0.2, 0.2, 0.06, 8), mat(PALETTE.kibble), 0, 0.22, 0));
+        g.add(mesh(THREE, new THREE.CylinderGeometry(0.16, 0.16, 0.06, 8), mat(PALETTE.kibble), 0, 0.14, 0));
         out.meshCount += 1;
       }
       return g;
@@ -450,20 +510,61 @@
       return new THREE.Group();
     },
     postbox: function (THREE, mat, t, out) {
-      // The post box (IG-001 D9): a post and a red box, the 2D kit’s `postbox` sprite in the round.
+      // The post box (IG-001 D9, the mockup's): an iron post, a red box, a white slot on its front.
       var g = new THREE.Group();
-      var post = mesh(THREE, new THREE.CylinderGeometry(0.05, 0.05, 0.36, 6), mat(PALETTE.ink), 0, 0.18, 0);
-      var box = mesh(THREE, new THREE.BoxGeometry(0.34, 0.3, 0.26), mat(PALETTE.roof), 0, 0.5, 0);
-      g.add(post, box);
+      g.add(mesh(THREE, new THREE.BoxGeometry(0.08, 0.4, 0.08), mat(PALETTE.iron), 0, 0.2, 0));
+      g.add(mesh(THREE, new THREE.BoxGeometry(0.34, 0.4, 0.3), mat(PALETTE.roof), 0, 0.6, 0));
+      g.add(mesh(THREE, new THREE.BoxGeometry(0.2, 0.04, 0.04), mat(PALETTE.paper), 0, 0.68, -0.15));
+      out.meshCount += 3;
+      return g;
+    },
+    // A mineable rock (brief §4): big at left ≥ 3, medium at 2, small at 1 (a pebble beside it from medium up); at 0
+    // the engine removes the thing, and a 0 that arrives anyway draws nothing. No `left` is a rock a request placed: big.
+    rock: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      var left = t.left === undefined || t.left === null || t.left === '' || !isFinite(Number(t.left)) ? 4 : Math.floor(Number(t.left));
+      var size = left >= 3 ? 'big' : left === 2 ? 'medium' : left === 1 ? 'small' : 'none';
+      g.userData.size = size;
+      if (size === 'none') return g;
+      var r = ROCK_SIZES[size];
+      var main = mesh(THREE, new THREE.IcosahedronGeometry(1, 0), mat(PALETTE.rock), 0, r * 0.75, 0);
+      main.scale.set(r, r * 0.75, r);
+      main.rotation.set(0.3, (Number(t.x) + Number(t.y)) * 0.7, 0.2);
+      g.add(main);
+      out.meshCount += 1;
+      if (left >= 2) {
+        var pebble = mesh(THREE, new THREE.IcosahedronGeometry(1, 0), mat(PALETTE.rockLight), 0.22, 0.09, 0.16);
+        pebble.scale.set(0.12, 0.09, 0.12);
+        g.add(pebble);
+        out.meshCount += 1;
+      }
+      return g;
+    },
+    // A stone (IG-001 D9; IG-002 picks it from a rock): a small flat pebble.
+    stone: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      var m = mesh(THREE, new THREE.IcosahedronGeometry(1, 0), mat(PALETTE.rockLight), 0, 0.07, 0);
+      m.scale.set(0.14, 0.08, 0.14);
+      m.rotation.y = (Number(t.x) * 3 + Number(t.y)) * 0.6;
+      g.add(m);
+      out.meshCount += 1;
+      return g;
+    },
+    // A sign (brief §4): a post with a board. Its text is Olive's to read, never drawn on the tile.
+    sign: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      g.add(mesh(THREE, new THREE.BoxGeometry(0.05, 0.5, 0.05), mat(PALETTE.trunk), 0, 0.25, 0));
+      g.add(mesh(THREE, new THREE.BoxGeometry(0.44, 0.26, 0.04), mat(PALETTE.paper), 0, 0.5, 0));
       out.meshCount += 2;
       return g;
     },
-    // The four thing kinds IG-001 D9 gave the 2D kit as sprites (stone, egg, food, flag): one small primitive each, so a
-    // thing a page sends never draws nothing. IG-002 sizes the stone by the rock it came from.
-    stone: function (THREE, mat, t, out) {
+    // A note (brief §4): a paper on the ground with a coral heading line. Its text is never drawn on the tile.
+    note: function (THREE, mat, t, out) {
       var g = new THREE.Group();
-      g.add(mesh(THREE, new THREE.DodecahedronGeometry(0.16, 0), mat(PALETTE.rock), 0, 0.12, 0));
-      out.meshCount += 1;
+      g.add(mesh(THREE, new THREE.BoxGeometry(0.34, 0.02, 0.44), mat(PALETTE.paper), 0, 0.02, 0));
+      g.add(mesh(THREE, new THREE.BoxGeometry(0.22, 0.02, 0.03), mat(PALETTE.coral), 0, 0.03, -0.1));
+      g.rotation.y = -0.3;
+      out.meshCount += 2;
       return g;
     },
     egg: function (THREE, mat, t, out) {
@@ -490,56 +591,110 @@
     }
   };
 
+  /** The load a robot shows on its back: the LAST entry of `carry` (brief §4). Anything but stone or letter is a parcel. */
+  function loadOf(r) {
+    var carry = Array.isArray(r.carry) ? r.carry : [];
+    if (!carry.length) return null;
+    var last = String(carry[carry.length - 1]);
+    return last === 'stone' || last === 'letter' ? last : 'parcel';
+  }
+
   /**
-   * A robot: a box body in its colour, a white visor on the front (−z at yaw 0), two eyes, a mouth, two arms, an
-   * antenna with a bulb, the can on its right, and a hat. Yaw 0 faces d = 0 (up, −z); d turns clockwise seen from
-   * above, so rotation.y = −d·π/2.
+   * A robot (the mockup's robotMesh): a box body in its colour, a white visor on the front (−z at yaw 0), two eyes, a
+   * mouth, two dark wheels, an antenna with a gold ball, the hat, the watering can on its right with its level, and
+   * the load on its back. Yaw 0 faces d = 0 (up, −z); d turns clockwise seen from above, so rotation.y = −d·π/2.
    *
-   * Hooks (IG-002 / IG-005): `accessory` (can | hod | satchel | bell) chooses what hangs on the right; `can` 0..canMax
-   * changes the can’s fill; `load` (stone | letter) sits on the back. Today only the 2D kit’s colour, eyes and hat are
-   * read, and the can is always drawn.
+   * The can's level is `can` of `canMax` (brief §4): a lighter band inside the can, as tall as the share left; at 0 it
+   * is hidden (no drops); when `can` is null there is no level at all (this robot has no can level to show).
    */
   function buildRobot(THREE, mat, r, out) {
     var g = new THREE.Group();
-    var body = hexToInt(r.colour, PALETTE.ink);
+    var body = hexToInt(r.colour, PALETTE.coral);
     var bodyMat = mat(body);
     var ink = mat(PALETTE.ink);
-    g.add(mesh(THREE, new THREE.BoxGeometry(0.5, 0.56, 0.44), bodyMat, 0, 0.36, 0));
-    var visor = mesh(THREE, new THREE.BoxGeometry(0.36, 0.28, 0.06), mat(PALETTE.visor), 0, 0.46, -0.22);
-    visor.name = 'visor';
-    g.add(visor);
-    if (r.eyes === 'wink') {
-      g.add(mesh(THREE, new THREE.BoxGeometry(0.07, 0.07, 0.03), ink, -0.09, 0.48, -0.26));
-      g.add(mesh(THREE, new THREE.BoxGeometry(0.1, 0.025, 0.03), ink, 0.09, 0.48, -0.26));
-    } else if (r.eyes === 'happy') {
-      g.add(mesh(THREE, new THREE.BoxGeometry(0.1, 0.03, 0.03), ink, -0.09, 0.5, -0.26));
-      g.add(mesh(THREE, new THREE.BoxGeometry(0.1, 0.03, 0.03), ink, 0.09, 0.5, -0.26));
-    } else {
-      g.add(mesh(THREE, new THREE.BoxGeometry(0.07, 0.07, 0.03), ink, -0.09, 0.48, -0.26));
-      g.add(mesh(THREE, new THREE.BoxGeometry(0.07, 0.07, 0.03), ink, 0.09, 0.48, -0.26));
-    }
-    g.add(mesh(THREE, new THREE.BoxGeometry(0.14, 0.03, 0.03), ink, 0, 0.36, -0.26));
-    g.add(mesh(THREE, new THREE.BoxGeometry(0.08, 0.22, 0.1), bodyMat, -0.3, 0.34, 0));
-    g.add(mesh(THREE, new THREE.BoxGeometry(0.08, 0.22, 0.1), bodyMat, 0.3, 0.34, 0));
-    g.add(mesh(THREE, new THREE.CylinderGeometry(0.015, 0.015, 0.14, 4), ink, 0, 0.71, 0));
-    g.add(mesh(THREE, new THREE.SphereGeometry(0.045, 6, 4), mat(PALETTE.bulb), 0, 0.8, 0));
-    var can = mesh(THREE, new THREE.BoxGeometry(0.1, 0.16, 0.12), mat(PALETTE.can), 0.3, 0.2, 0.06);
-    can.name = 'can';
-    g.add(can);
-    // Body, visor, two eyes, mouth, two arms, antenna, bulb, can: ten. (The gate checks this against the constructor
-    // count, which is how a first "eleven" was caught.)
-    out.meshCount += 10;
-    if (r.hat === 'cap') {
-      g.add(mesh(THREE, new THREE.BoxGeometry(0.5, 0.08, 0.44), mat(PALETTE.cap), 0, 0.68, 0));
-      g.add(mesh(THREE, new THREE.BoxGeometry(0.5, 0.04, 0.2), mat(PALETTE.cap), 0, 0.66, -0.3));
-      out.meshCount += 2;
-    } else if (r.hat === 'sun') {
-      g.add(mesh(THREE, new THREE.CylinderGeometry(0.42, 0.42, 0.04, 8), mat(PALETTE.sun), 0, 0.66, 0));
-      g.add(mesh(THREE, new THREE.CylinderGeometry(0.2, 0.2, 0.12, 8), mat(PALETTE.sunCrown), 0, 0.72, 0));
-      out.meshCount += 2;
-    } else if (r.hat === 'crown') {
-      g.add(mesh(THREE, new THREE.CylinderGeometry(0.2, 0.18, 0.14, 5), mat(PALETTE.crown), 0, 0.71, 0));
+    var add = function (m) {
+      g.add(m);
       out.meshCount += 1;
+      return m;
+    };
+    add(mesh(THREE, new THREE.BoxGeometry(0.5, 0.5, 0.44), bodyMat, 0, 0.37, 0));
+    add(mesh(THREE, new THREE.BoxGeometry(0.36, 0.18, 0.06), mat(PALETTE.visor), 0, 0.46, -0.23)).name = 'visor';
+    if (r.eyes === 'happy') {
+      add(mesh(THREE, new THREE.BoxGeometry(0.08, 0.03, 0.02), ink, -0.09, 0.47, -0.27));
+      add(mesh(THREE, new THREE.BoxGeometry(0.08, 0.03, 0.02), ink, 0.09, 0.47, -0.27));
+    } else {
+      add(mesh(THREE, new THREE.BoxGeometry(0.07, 0.07, 0.02), ink, -0.09, 0.46, -0.27));
+      add(mesh(THREE, new THREE.BoxGeometry(r.eyes === 'wink' ? 0.09 : 0.07, r.eyes === 'wink' ? 0.03 : 0.07, 0.02), ink, 0.09, 0.46, -0.27));
+    }
+    add(mesh(THREE, new THREE.BoxGeometry(0.16, 0.05, 0.02), ink, 0, 0.28, -0.23));
+    add(mesh(THREE, new THREE.BoxGeometry(0.1, 0.2, 0.28), mat(PALETTE.wheel), -0.3, 0.12, 0));
+    add(mesh(THREE, new THREE.BoxGeometry(0.1, 0.2, 0.28), mat(PALETTE.wheel), 0.3, 0.12, 0));
+    add(mesh(THREE, new THREE.CylinderGeometry(0.015, 0.015, 0.16, 4), ink, 0, 0.7, 0));
+    add(mesh(THREE, new THREE.SphereGeometry(0.045, 5, 4), mat(PALETTE.bulb), 0, 0.8, 0));
+    if (r.hat === 'cap') {
+      add(mesh(THREE, new THREE.BoxGeometry(0.42, 0.09, 0.42), mat(PALETTE.cap), 0, 0.66, 0));
+      add(mesh(THREE, new THREE.BoxGeometry(0.34, 0.03, 0.2), mat(PALETTE.cap), 0, 0.63, -0.3));
+    } else if (r.hat === 'sun') {
+      // The sunflower: a brown heart and eight petals, tipped a little (the mockup's).
+      var sun = new THREE.Group();
+      sun.add(mesh(THREE, new THREE.CylinderGeometry(0.1, 0.1, 0.05, 8), mat(PALETTE.sunCrown), 0, 0, 0));
+      out.meshCount += 1;
+      for (var i = 0; i < 8; i++) {
+        var petal = mesh(THREE, new THREE.BoxGeometry(0.08, 0.03, 0.16), mat(PALETTE.sun), Math.sin((i * Math.PI) / 4) * 0.16, 0, Math.cos((i * Math.PI) / 4) * 0.16);
+        petal.rotation.y = (i * Math.PI) / 4;
+        sun.add(petal);
+        out.meshCount += 1;
+      }
+      sun.position.set(0.06, 0.66, 0.06);
+      sun.rotation.z = -0.25;
+      g.add(sun);
+    } else if (r.hat === 'crown') {
+      add(mesh(THREE, new THREE.CylinderGeometry(0.17, 0.14, 0.14, 5, 1, true), mat(PALETTE.crown, { side: THREE.DoubleSide }), 0, 0.68, 0));
+    }
+    // The can, on the right: its body, its spout, and the level when there is one.
+    var can = new THREE.Group();
+    can.name = 'can';
+    can.add(mesh(THREE, new THREE.BoxGeometry(0.16, 0.2, 0.16), mat(PALETTE.can), 0, 0.1, 0));
+    var spout = mesh(THREE, new THREE.CylinderGeometry(0.02, 0.03, 0.18, 4), mat(PALETTE.can), 0, 0.16, -0.12);
+    spout.rotation.x = 0.9;
+    can.add(spout);
+    out.meshCount += 2;
+    if (r.can !== null && r.can !== undefined && isFinite(Number(r.can))) {
+      var max = Number(r.canMax) > 0 ? Number(r.canMax) : 3;
+      var share = Math.max(0, Math.min(1, Number(r.can) / max));
+      var level = mesh(THREE, new THREE.BoxGeometry(0.17, 0.2, 0.17), mat(PALETTE.canWater), 0, 0.1 * share, 0);
+      level.name = 'level';
+      level.scale.y = share;
+      level.visible = share > 0;
+      level.userData.can = Number(r.can);
+      level.userData.canMax = max;
+      can.add(level);
+      out.meshCount += 1;
+    }
+    can.position.set(0.38, 0.14, 0.02);
+    g.add(can);
+    // The load, on the back (+z): the last thing carried.
+    var load = loadOf(r);
+    if (load) {
+      var back = new THREE.Group();
+      back.name = 'load';
+      back.userData.load = load;
+      if (load === 'stone') {
+        var st = mesh(THREE, new THREE.IcosahedronGeometry(1, 0), mat(PALETTE.rockLight), 0, 0, 0);
+        st.scale.set(0.13, 0.1, 0.13);
+        back.add(st);
+        out.meshCount += 1;
+      } else if (load === 'letter') {
+        back.add(mesh(THREE, new THREE.BoxGeometry(0.28, 0.2, 0.03), mat(PALETTE.letter), 0, 0, 0));
+        back.add(mesh(THREE, new THREE.BoxGeometry(0.2, 0.08, 0.02), mat(PALETTE.letterInk), 0, 0.04, 0.02));
+        out.meshCount += 2;
+      } else {
+        back.add(mesh(THREE, new THREE.BoxGeometry(0.24, 0.18, 0.18), mat(PALETTE.parcel), 0, 0, 0));
+        back.add(mesh(THREE, new THREE.BoxGeometry(0.25, 0.04, 0.19), mat(PALETTE.coral), 0, 0, 0));
+        out.meshCount += 2;
+      }
+      back.position.set(0, 0.46, 0.3);
+      g.add(back);
     }
     g.userData.head = { x: 0, y: 0.86, z: 0 };
     g.name = 'robot';
@@ -555,6 +710,10 @@
     var mat = materials(THREE);
     var root = new THREE.Group();
     root.name = 'garden';
+    var ground = buildGround(world.map, THREE, mat, out);
+    ground.forEach(function (m) {
+      root.add(m);
+    });
     var tiles = buildTiles(world.map, THREE, mat, out);
     var decor = buildTileDecor(world.map, THREE, mat, out);
     tiles.forEach(function (m) {
@@ -617,31 +776,43 @@
       root.add(g);
       return g;
     });
-    var sun = new THREE.DirectionalLight(0xffffff, 2.2);
-    sun.position.set(5, 10, 6);
-    var sky = new THREE.HemisphereLight(0xffffff, 0x9ccfae, 1.4);
+    // The mockup's two lights: a pale sky over a soil-brown ground, and the sun from the front right.
+    var sun = new THREE.DirectionalLight(0xffffff, 2.1);
+    sun.position.set(6, 12, 4);
+    var sky = new THREE.HemisphereLight(0xe8f6ff, 0xc79a63, 1.5);
     root.add(sun, sky);
-    return { root: root, tiles: tiles, decor: decor, things: things, robots: robots, lights: [sun, sky], meshCount: out.meshCount };
+    return { root: root, ground: ground, tiles: tiles, decor: decor, things: things, robots: robots, lights: [sun, sky], meshCount: out.meshCount };
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // The camera — pose, projection, picking and bounds, hand-rolled so the gate can grade them without THREE
   // ═══════════════════════════════════════════════════════════════════════════
 
-  /** Tilt from straight down; 35° shows the sides of things and keeps a tile a tile for a tap. Vertical field of view. */
-  var CAMERA = { tiltDeg: 35, fovDeg: 40, near: 0.1, far: 200, minTiles: 3, margin: 0.92, objectHeight: 1.3 };
+  /**
+   * The mockup's camera (island-3d.html, makeView): tilted 35° from straight down, turned 0.42 rad about the vertical
+   * (the island is seen corner-on, not square), a 38° vertical lens, aimed at the tile tops (0.4 up). P106 s2 measured
+   * the mockup's source: its 35° is from the vertical, as here. The angles are the look Richard grades; the maths below
+   * takes any.
+   */
+  var CAMERA = { tiltDeg: 35, yawRad: 0.42, fovDeg: 38, targetY: 0.4, near: 0.1, far: 200, minTiles: 3, margin: 0.92, objectHeight: 1.3 };
 
-  /** A camera state is a target on the ground and a distance: `{ tx, tz, dist }`. Position and basis follow. */
+  /**
+   * A camera state is a target on the ground and a distance: `{ tx, tz, dist }`. Position and basis follow: the camera
+   * sits `dist` from the target, 35° off the vertical, on the side the yaw turns it to (yaw 0 = straight in from +z).
+   */
   function pose(state) {
     var tilt = (CAMERA.tiltDeg * Math.PI) / 180;
     var s = Math.sin(tilt);
     var c = Math.cos(tilt);
-    var position = [state.tx, state.dist * c, state.tz + state.dist * s];
-    // forward = target − position, normalised; right = (1,0,0); up = right × forward.
-    var forward = [0, -c, -s];
-    var right = [1, 0, 0];
-    var up = [0, s, -c];
-    return { position: position, target: [state.tx, 0, state.tz], forward: forward, right: right, up: up };
+    var sy = Math.sin(CAMERA.yawRad);
+    var cy = Math.cos(CAMERA.yawRad);
+    var ty = CAMERA.targetY;
+    var position = [state.tx + state.dist * s * sy, ty + state.dist * c, state.tz + state.dist * s * cy];
+    // forward = (target − position) / dist; right is level, square to forward; up = right × forward.
+    var forward = [-s * sy, -c, -s * cy];
+    var right = [cy, 0, -sy];
+    var up = [-c * sy, s, -c * cy];
+    return { position: position, target: [state.tx, ty, state.tz], forward: forward, right: right, up: up };
   }
 
   function tanHalf() {
@@ -784,6 +955,13 @@
   var TULIP_MS = 500;
   var POP_MS = 300;
   var CAMERA_MS = 400;
+  /**
+   * The fallback's cue (IG-007 AC4): Frame Ms above `ms` for `forMs` of VISIBLE time after Ready fires Too Slow, once.
+   * It is decided here, where the frames are: a hidden window draws no frame and so counts no time (a frame throttle
+   * never fires in a hidden window — without that the fallback would fire on every minimised app), and coming back
+   * into view starts the count again.
+   */
+  var SLOW = { ms: 50, forMs: 3000 };
 
   function easeOut(t) {
     return 1 - (1 - t) * (1 - t);
@@ -815,6 +993,7 @@
    * @param {Function} [o.onTap]      (x, y)
    * @param {Function} [o.onFrameMs]  (ms)
    * @param {Function} [o.onReady]    ()
+   * @param {Function} [o.onTooSlow]  (ms) — once, when Frame Ms stayed above SLOW.ms for SLOW.forMs of visible time
    * @param {Function} [o.now]        a clock, for the gate
    * @param {Function} [o.raf]        requestAnimationFrame, for the gate
    * @param {Function} [o.caf]        cancelAnimationFrame
@@ -883,6 +1062,8 @@
     var rafId = 0;
     var lastFrame = 0;
     var lastReport = 0;
+    var slowSince = 0;
+    var tooSlow = false;
     var destroyed = false;
     var width = 1;
     var height = 1;
@@ -905,7 +1086,8 @@
       width = w;
       height = hh;
       eng.aspect = w / hh;
-      var dpr = typeof devicePixelRatio === 'number' ? Math.min(2, devicePixelRatio) : 1;
+      // The mockup's cap: a retina tablet draws 1.5× at most (the pixels cost frame time on the HD 615).
+      var dpr = typeof devicePixelRatio === 'number' ? Math.min(1.5, devicePixelRatio) : 1;
       renderer.setPixelRatio(dpr);
       renderer.setSize(w, hh, false);
       camera.aspect = eng.aspect;
@@ -1203,6 +1385,17 @@
             setAttr('data-frame-ms', ms);
             if (typeof o.onFrameMs === 'function') o.onFrameMs(ms);
           }
+          // Too Slow: the readout above SLOW.ms at every report for SLOW.forMs of the frames' own (visible) time.
+          if (!tooSlow) {
+            if (ms <= SLOW.ms) slowSince = 0;
+            else if (!slowSince) slowSince = t;
+            else if (t - slowSince >= SLOW.forMs) {
+              tooSlow = true;
+              eng.tooSlow = true;
+              setAttr('data-too-slow', 'true');
+              if (typeof o.onTooSlow === 'function') o.onTooSlow(ms);
+            }
+          }
         }
       }
       lastFrame = t;
@@ -1235,6 +1428,7 @@
     var onVisibility = function () {
       if (visible()) {
         lastFrame = 0;
+        slowSince = 0;
         eng.frames = [];
         schedule();
       }
@@ -1284,11 +1478,16 @@
       if (count() === 1 && press) {
         press.moved = Math.max(press.moved, Math.hypot(p.x - press.x, p.y - press.y));
         if (press.moved > TAP_SLOP_PX) {
+          // The ground follows the finger: a sideways pixel is 1/ppu along the camera's level right; an upward one is
+          // 1/(ppu·cos tilt) along the ground under the camera's up.
           var ppu = pixelsPerUnit(eng.state, height);
           var tilt = (CAMERA.tiltDeg * Math.PI) / 180;
+          var sy = Math.sin(CAMERA.yawRad);
+          var cy = Math.cos(CAMERA.yawRad);
           var dx = p.x - prev.x;
           var dy = p.y - prev.y;
-          eng.state = clampCamera({ tx: eng.state.tx - dx / ppu, tz: eng.state.tz - dy / (ppu * Math.cos(tilt)), dist: eng.state.dist }, eng.world.map, eng.aspect);
+          var along = dy / (ppu * Math.cos(tilt));
+          eng.state = clampCamera({ tx: eng.state.tx - (cy * dx) / ppu - sy * along, tz: eng.state.tz + (sy * dx) / ppu - cy * along, dist: eng.state.dist }, eng.world.map, eng.aspect);
           anims.camera = null;
           if (eng.cameraMode === 'follow') eng.cameraMode = 'plot-held';
         }
@@ -1404,7 +1603,7 @@
     return eng;
   }
 
-  var ENGINE_API = { create: createEngine, TAP_SLOP_PX: TAP_SLOP_PX, FRAME_WINDOW: FRAME_WINDOW, p95: p95 };
+  var ENGINE_API = { create: createEngine, TAP_SLOP_PX: TAP_SLOP_PX, FRAME_WINDOW: FRAME_WINDOW, SLOW: SLOW, p95: p95 };
 
   // ═══════════════════════════════════════════════════════════════════════════
   // Garden 3D — the React node
@@ -1432,7 +1631,8 @@
       'tulips, robots as a box body with a visor, eyes and a hat). One finger or a drag pans, a pinch or a wheel zooms, ' +
       'a tap reports the tile. Camera frames the Focus rectangle, the whole island, or follows robot 0. Supported is ' +
       'false when there is no WebGL2 (or no three.js): nothing is drawn, nothing throws, Ready never fires, and the ' +
-      'page swaps in Garden. Frame Ms is the rolling p95 of the last 60 frames, measured after Ready while visible. ' +
+      'page swaps in Garden. Frame Ms is the rolling p95 of the last 60 frames, measured after Ready while visible; ' +
+      'Too Slow fires once when it stays above 50 ms for 3 s of visible time, the other cue to swap. ' +
       'It draws; the engine decides where a robot may go.',
     ssr: { compat: 'safe' },
     noodlNodeAsProp: true,
@@ -1485,6 +1685,9 @@
             },
             onReady: function () {
               if (typeof props.onReady === 'function') props.onReady();
+            },
+            onTooSlow: function () {
+              if (typeof props.onTooSlow === 'function') props.onTooSlow();
             }
           });
           engine.current = eng;
@@ -1590,7 +1793,8 @@
       onTileTapped: { type: 'signal', displayName: 'Tile Tapped', group: 'Taps', description: 'A tile was tapped. Tile X and Tile Y already hold it.' },
       onReady: { type: 'signal', displayName: 'Ready', group: 'Events', description: 'The world is on the page.' },
       onFrameMs: { type: 'number', displayName: 'Frame Ms', group: 'Events', description: 'The rolling p95 of the last 60 frame intervals in ms, measured after Ready and only while the page is visible. Above 33 is under 30 fps.' },
-      onSupported: { type: 'boolean', displayName: 'Supported', group: 'Events', description: 'True when a WebGL2 context could be made and three.js is on the page. False: nothing is drawn, nothing throws, Ready never fires — swap in Garden.' }
+      onSupported: { type: 'boolean', displayName: 'Supported', group: 'Events', description: 'True when a WebGL2 context could be made and three.js is on the page. False: nothing is drawn, nothing throws, Ready never fires — swap in Garden.' },
+      onTooSlow: { type: 'signal', displayName: 'Too Slow', group: 'Events', description: 'Fires once when Frame Ms has stayed above 50 ms (under 20 fps) for 3 s of visible time after Ready — the page’s cue to swap in Garden. A hidden window counts no time.' }
     }
   };
 

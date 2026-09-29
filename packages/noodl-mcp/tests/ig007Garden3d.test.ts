@@ -110,7 +110,7 @@ function threeStub(opts: { rendererThrows?: boolean } = {}) {
     };
   const THREE: Record<string, any> = {};
   for (const n of ['Group', 'Object3D', 'Mesh', 'InstancedMesh', 'Scene', 'PerspectiveCamera', 'DirectionalLight', 'HemisphereLight']) THREE[n] = cls(n);
-  for (const n of ['BoxGeometry', 'ConeGeometry', 'CylinderGeometry', 'IcosahedronGeometry', 'SphereGeometry', 'MeshLambertMaterial', 'Color']) THREE[n] = cls(n);
+  for (const n of ['BoxGeometry', 'ConeGeometry', 'CylinderGeometry', 'IcosahedronGeometry', 'SphereGeometry', 'PlaneGeometry', 'MeshLambertMaterial', 'Color']) THREE[n] = cls(n);
   THREE.WebGLRenderer = opts.rendererThrows
     ? function () {
         counts.WebGLRenderer = (counts.WebGLRenderer || 0) + 1;
@@ -153,6 +153,9 @@ function loadKits(first?: string): { kit: KitModule; modules: KitModule[]; conte
   return { kit, modules, context };
 }
 
+/** Every thing kind a page may send (the 2D kit's and the brief's §4 vocabulary), each drawn by the 3D kit. */
+const THING_KINDS = ['tulip', 'puddle', 'letter', 'bowl', 'label', 'rock', 'sign', 'note', 'stone', 'postbox'];
+
 /** A 24×16 island with every kind, 30 things of every kind and 3 robots (two on one tile). */
 function bigWorld(node: Record<string, any>) {
   const rows: string[] = [];
@@ -166,12 +169,44 @@ function bigWorld(node: Record<string, any>) {
   }
   const map = node.world.parseMap({ rows });
   const things = [];
-  for (let i = 0; i < 30; i++) things.push({ kind: ['tulip', 'puddle', 'letter', 'bowl', 'label'][i % 5], x: i % 24, y: (i * 3) % 16, watered: i % 2 === 0, full: i % 3 === 0, text: 'hi' });
-  const robots = node.world.parseRobots([{ x: 1, y: 1, d: 1, name: 'Pip' }, { x: 5, y: 5, d: 2, hat: 'cap', eyes: 'happy', name: 'Bo' }, { x: 5, y: 5, d: 3, hat: 'sun', eyes: 'wink', name: 'Cobble' }]);
+  // P106 s2: the brief's §4 kinds too — rock (every `left`), sign, note, stone, post box — so the budget holds with them.
+  for (let i = 0; i < 30; i++) things.push({ kind: THING_KINDS[i % THING_KINDS.length], x: i % 24, y: (i * 3) % 16, watered: i % 2 === 0, full: i % 3 === 0, left: i % 5, text: 'hi' });
+  const robots = node.world.parseRobots([
+    { x: 1, y: 1, d: 1, name: 'Pip', can: 2, canMax: 3, carry: ['stone'] },
+    { x: 5, y: 5, d: 2, hat: 'cap', eyes: 'happy', name: 'Bo', carry: ['letter'] },
+    { x: 5, y: 5, d: 3, hat: 'sun', eyes: 'wink', name: 'Cobble', can: 0, carry: ['parcel'] }
+  ]);
   return { map, things, robots };
 }
 
 const MOCKUP = { rows: ['GGTGGGTH', 'GGGGGGGG', 'GGFGFGFG', 'PPPPPPPP', 'GWWGGRGG', 'GGGGGTGG'] };
+
+/** Robot inputs that exercise the brief's §4 fields: numbers, text, null, empty, junk, a load of mixed kinds. */
+const VOCAB_ROBOTS: unknown[] = [
+  [{ can: 2, canMax: 4, carry: ['stone', 3] }, { can: null, canMax: 0 }, { can: '', canMax: -2 }, { can: '1.7', canMax: '5.9', carry: 'stone' }, { can: -3, canMax: 'x', carry: [] }],
+  '[{"can":0,"canMax":3,"carry":["letter"]},{"can":"junk"}]',
+  { can: 3 }
+];
+/** The robot list parseRobots reads (the same filter), for the §4 reference below. */
+function rawRobots(v: unknown): Array<Record<string, unknown>> {
+  let list: unknown = v;
+  if (typeof v === 'string') {
+    try {
+      list = JSON.parse(v);
+    } catch {
+      list = [];
+    }
+  }
+  if (list && !Array.isArray(list) && typeof list === 'object') list = [list];
+  return Array.isArray(list) ? (list.filter((r) => r && typeof r === 'object') as Array<Record<string, unknown>>) : [];
+}
+/** Brief §4, written a second way: `can` a whole number ≥ 0 or null; `canMax` a whole number > 0, else 3; `carry` strings. */
+function vocab(r: Record<string, unknown>) {
+  const n = (x: unknown) => (x === null || x === undefined || x === '' ? NaN : Number(x));
+  const can = Number.isFinite(n(r.can)) ? Math.max(0, Math.floor(n(r.can))) : null;
+  const canMax = Number.isFinite(n(r.canMax)) && n(r.canMax) > 0 ? Math.floor(n(r.canMax)) : 3;
+  return { can, canMax, carry: Array.isArray(r.carry) ? r.carry.map(String) : [] };
+}
 
 /** A fake DOM just wide enough for the engine's overlay and root attributes. */
 function fakeDom() {
@@ -290,13 +325,15 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       for (const k of Object.keys(b)) expect({ port: k, named: !!b[k].displayName }).toEqual({ port: k, named: true });
     });
 
-    it('every output of Garden is on Garden 3D, plus Frame Ms (number) and Supported (boolean)', () => {
+    it('every output of Garden is on Garden 3D, plus Frame Ms (number), Supported (boolean) and Too Slow (signal)', () => {
       const a = table(node2d(), 'outputProps');
       const b = table(node(), 'outputProps');
       for (const k of Object.keys(a)) expect({ port: k, def: b[k] }).toEqual({ port: k, def: a[k] });
       expect(Object.keys(a)).toEqual(['onTileX', 'onTileY', 'onTileTapped', 'onReady']);
-      expect(Object.keys(b).filter((k) => !(k in a))).toEqual(['onFrameMs', 'onSupported']);
+      expect(Object.keys(b).filter((k) => !(k in a))).toEqual(['onFrameMs', 'onSupported', 'onTooSlow']);
       expect([b.onFrameMs.type, b.onFrameMs.displayName, b.onSupported.type, b.onSupported.displayName]).toEqual(['number', 'Frame Ms', 'boolean', 'Supported']);
+      // P106 s2 (AC4): the fallback rule's cue, decided where the frames are (visible time only), fired once.
+      expect([b.onTooSlow.type, b.onTooSlow.displayName, b.onTooSlow.group]).toEqual(['signal', 'Too Slow', 'Events']);
     });
   });
 
@@ -307,6 +344,7 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       expect([world.map.w, world.map.h, world.things.length, world.robots.length]).toEqual([24, 16, 30, 3]);
       const built = node().scene.buildScene(world, THREE);
       expect(built.meshCount).toBeLessThanOrEqual(MESH_BUDGET);
+      console.log(`AC2 readout: ${built.meshCount} meshes (${counts.InstancedMesh} instanced, ${counts.Mesh} individual)`);
       expect(built.meshCount).toBeGreaterThan(50);
       // Honest arithmetic: what the builder says it made is what the stub saw constructed.
       expect(counts.Mesh + counts.InstancedMesh).toBe(built.meshCount);
@@ -383,6 +421,150 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       expect(C.focusRect(map, '{bad')).toEqual({ x: 0, y: 0, w: 24, h: 16 });
       expect(C.focusRect(map, { x: 20, y: 12, w: 8, h: 6 })).toEqual({ x: 20, y: 12, w: 4, h: 4 });
       expect(C.CAMERA.tiltDeg).toBe(35);
+    });
+  });
+
+  describe('P106 s2 — the brief’s §4 vocabulary drawn, the mockup’s camera, and the fallback’s cue', () => {
+    const W = () => node().world;
+    const small = { rows: ['GGGGGG', 'GGGGGG', 'GGGGGG'] };
+    const build = (things: unknown[], robots: unknown[] = []) => {
+      const s = threeStub();
+      const built = node().scene.buildScene({ map: W().parseMap(small), things: W().parseThings(things), robots: W().parseRobots(robots) }, s.THREE);
+      return { built, counts: s.counts };
+    };
+    const meshesIn = (g: any) => {
+      let n = 0;
+      g.traverse((o: any) => {
+        if (o.type === 'Mesh' || o.type === 'InstancedMesh') n++;
+      });
+      return n;
+    };
+    const named = (g: any, name: string) => {
+      let hit: any = null;
+      g.traverse((o: any) => {
+        if (!hit && o.name === name) hit = o;
+      });
+      return hit;
+    };
+
+    it('🔴 every thing kind draws something (label is a DOM pill); rock, sign, note and stone are one or two primitives', () => {
+      const { built } = build(THING_KINDS.map((kind, i) => ({ kind, x: i % 6, y: Math.floor(i / 6), left: 4, text: 'words' })));
+      const byKind = Object.fromEntries(built.things.map((g: any) => [g.userData.kind, meshesIn(g)]));
+      for (const kind of THING_KINDS.filter((k) => k !== 'label')) expect({ kind, drawn: byKind[kind] > 0 }).toEqual({ kind, drawn: true });
+      expect(byKind.label).toBe(0);
+      for (const kind of ['rock', 'sign', 'note', 'stone']) expect({ kind, primitives: byKind[kind] >= 1 && byKind[kind] <= 2 }).toEqual({ kind, primitives: true });
+    });
+
+    it('🔴 a rock is big at left ≥ 3, medium at 2, small at 1, gone at 0 (and big with no left, as a request places it)', () => {
+      const { built } = build([4, 3, 2, 1, 0, undefined].map((left, x) => ({ kind: 'rock', x, y: 0, left })));
+      const rocks = built.things.filter((g: any) => g.userData.kind === 'rock');
+      expect(rocks.map((g: any) => g.userData.size)).toEqual(['big', 'big', 'medium', 'small', 'none', 'big']);
+      const width = rocks.map((g: any) => (g.children[0] ? g.children[0].scale.x : 0));
+      expect(width[0]).toBe(width[1]);
+      expect(width[1]).toBeGreaterThan(width[2]);
+      expect(width[2]).toBeGreaterThan(width[3]);
+      expect(meshesIn(rocks[4])).toBe(0);
+      expect(width[5]).toBe(width[0]);
+    });
+
+    it('🔴 a sign’s and a note’s text is not drawn on the tile (a label’s is, as a pill)', () => {
+      const { THREE } = threeStub();
+      const dom = fakeDom();
+      const frames: Array<() => void> = [];
+      const eng = node().engine.create({ THREE, root: dom.root, canvas: dom.canvas, overlay: dom.overlay, doc: dom.doc, now: () => 0, raf: (f: () => void) => (frames.push(f), 1), caf: () => {} });
+      eng.setWorld({ map: W().parseMap(small), things: W().parseThings([{ kind: 'sign', x: 1, y: 1, text: 'Sign words' }, { kind: 'note', x: 2, y: 1, text: 'Note words' }, { kind: 'label', x: 3, y: 1, text: 'Label words' }]), robots: [] });
+      const texts = dom.overlay.children.map((c: any) => c.textContent);
+      expect(texts).toEqual(['Label words']);
+      eng.destroy();
+    });
+
+    it('🔴 the can shows can of canMax (full at canMax, empty at 0, nothing at null); the load on the back is the last of carry', () => {
+      const { built, counts } = build([], [
+        { x: 0, y: 0, can: 2, canMax: 4, carry: ['letter', 'stone'] },
+        { x: 1, y: 0, can: null, carry: ['stone', 'letter'] },
+        { x: 2, y: 0, can: 0, canMax: 3, carry: ['cake'] },
+        { x: 3, y: 0, can: 7, canMax: 3, carry: [] }
+      ]);
+      const [a, b, c, d] = built.robots;
+      expect(named(a, 'level').scale.y).toBeCloseTo(0.5);
+      expect(named(a, 'level').visible).not.toBe(false);
+      expect(named(b, 'level')).toBeNull();
+      expect(named(c, 'level').visible).toBe(false);
+      expect(named(d, 'level').scale.y).toBeCloseTo(1);
+      expect([a, b, c, d].map((g: any) => (named(g, 'load') ? named(g, 'load').userData.load : null))).toEqual(['stone', 'letter', 'parcel', null]);
+      for (const g of [a, b, c, d]) expect(named(g, 'can')).not.toBeNull();
+      // The honest count again: what the builder says it made is what was constructed.
+      expect(counts.Mesh + (counts.InstancedMesh || 0)).toBe(built.meshCount);
+    });
+
+    it('🔴 the camera is the mockup’s (island-3d.html makeView): 35° from straight down, turned 0.42 rad, a 38° lens, aimed at the tile tops', () => {
+      const C = node().camera;
+      expect([C.CAMERA.tiltDeg, C.CAMERA.yawRad, C.CAMERA.fovDeg, C.CAMERA.targetY]).toEqual([35, 0.42, 38, 0.4]);
+      const p = C.pose({ tx: 1, tz: 2, dist: 10 });
+      const s = Math.sin((35 * Math.PI) / 180);
+      const c = Math.cos((35 * Math.PI) / 180);
+      expect(p.position[0]).toBeCloseTo(1 + 10 * s * Math.sin(0.42));
+      expect(p.position[1]).toBeCloseTo(0.4 + 10 * c);
+      expect(p.position[2]).toBeCloseTo(2 + 10 * s * Math.cos(0.42));
+      // Forward points at the target; right is level (no roll) and square to forward; up completes the frame.
+      const toTarget = [1 - p.position[0], 0.4 - p.position[1], 2 - p.position[2]].map((v) => v / 10);
+      p.forward.forEach((v: number, i: number) => expect(v).toBeCloseTo(toTarget[i]));
+      expect(p.right[1]).toBeCloseTo(0);
+      expect(p.right[0] * p.forward[0] + p.right[2] * p.forward[2]).toBeCloseTo(0);
+      expect(p.up[0] * p.forward[0] + p.up[1] * p.forward[1] + p.up[2] * p.forward[2]).toBeCloseTo(0);
+      // The target projects to the centre of the screen.
+      const n = C.project({ tx: 1, tz: 2, dist: 10 }, 1.5, [1, 0.4, 2]);
+      expect([n.x, n.y]).toEqual([expect.closeTo(0, 6), expect.closeTo(0, 6)]);
+    });
+
+    it('🔴 Too Slow fires once when Frame Ms stays above 50 ms for 3 s of visible time; fast frames never; a hidden spell restarts the count', () => {
+      const E = node().engine;
+      expect(E.SLOW).toEqual({ ms: 50, forMs: 3000 });
+      const make = () => {
+        const { THREE } = threeStub();
+        const dom = fakeDom();
+        const frames: Array<() => void> = [];
+        const clock = { t: 0 };
+        const fired: number[] = [];
+        const eng = E.create({ THREE, root: dom.root, canvas: dom.canvas, overlay: dom.overlay, doc: dom.doc, now: () => clock.t, raf: (f: () => void) => (frames.push(f), frames.length), caf: () => {}, onTooSlow: () => fired.push(clock.t) });
+        eng.setWorld({ map: W().parseMap(MOCKUP), things: [], robots: [] });
+        /** Draw frames `dt` apart for `ms` of the engine's clock (only the frames the engine scheduled). */
+        const run = (dt: number, ms: number) => {
+          const end = clock.t + ms;
+          while (clock.t < end && frames.length) {
+            clock.t += dt;
+            frames.shift()!();
+          }
+        };
+        return { eng, dom, frames, clock, fired, run };
+      };
+      // Fast: 16 ms frames for 10 s — never.
+      const fast = make();
+      fast.run(16, 10000);
+      expect(fast.fired).toEqual([]);
+      // Slow: 60 ms frames — once, no sooner than 3 s after the first slow readout, and never again.
+      const slow = make();
+      slow.run(60, 2900);
+      expect(slow.fired).toEqual([]);
+      slow.run(60, 10000);
+      expect(slow.fired.length).toBe(1);
+      expect(slow.fired[0]).toBeGreaterThanOrEqual(3000);
+      expect(slow.fired[0]).toBeLessThan(3000 + 500 + 60 + 500);
+      expect(slow.dom.root.attrs['data-too-slow']).toBe('true');
+      // Hidden: 2 s slow, then 10 s hidden (no frames are drawn), then 2 s slow — not yet; 1.5 s more — once.
+      const hid = make();
+      hid.run(60, 2000);
+      hid.dom.doc.visibilityState = 'hidden';
+      hid.run(60, 100);
+      expect(hid.frames.length).toBe(0);
+      hid.clock.t += 10000;
+      hid.dom.doc.visibilityState = 'visible';
+      hid.dom.doc.listeners.visibilitychange.forEach((f) => f());
+      hid.run(60, 2000);
+      expect(hid.fired).toEqual([]);
+      hid.run(60, 2000);
+      expect(hid.fired.length).toBe(1);
+      for (const x of [fast, slow, hid]) x.eng.destroy();
     });
   });
 
@@ -662,8 +844,24 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       for (const m of maps) expect(JSON.stringify(b.parseMap(m))).toBe(JSON.stringify(a.parseMap(m)));
       const things = [null, '', '[{"kind":"tulip","x":1,"y":2},{"x":1},{"kind":"puddle","x":"a","y":1},7]', [{ kind: 'bowl', x: '3', y: 4, full: true }], { not: 'a list' }];
       for (const t of things) expect(JSON.stringify(b.parseThings(t))).toBe(JSON.stringify(a.parseThings(t)));
-      const robots = [null, { x: 1, y: 2 }, [{ d: -1, color: '#123', eyes: 'happy', hat: 'sun' }, { d: 6.4, hat: 'nope', bump: '2' }], '[{"x":"3","y":3,"name":"Bo"}]', 'junk', [7, null]];
-      for (const r of robots) expect(JSON.stringify(b.parseRobots(r))).toBe(JSON.stringify(a.parseRobots(r)));
+      const robots = [null, { x: 1, y: 2 }, [{ d: -1, color: '#123', eyes: 'happy', hat: 'sun' }, { d: 6.4, hat: 'nope', bump: '2' }], '[{"x":"3","y":3,"name":"Bo"}]', 'junk', [7, null], ...VOCAB_ROBOTS];
+      // P106 s2 (brief §4): the copy carries `can`, `canMax`, `carry` — garden-kit gets the same three lines in lane A.
+      // Green on both sides of the merge: every field garden-kit answers is answered the same (order-free), and the copy's
+      // only extra fields are exactly those three, each by the §4 rule. After the merge the extras are empty and the
+      // clause is full equality; if garden-kit ever answers them differently, the first half goes red.
+      for (const r of robots) {
+        const want = a.parseRobots(r) as Array<Record<string, unknown>>;
+        const got = b.parseRobots(r) as Array<Record<string, unknown>>;
+        expect(got.length).toBe(want.length);
+        got.forEach((g, i) => {
+          const shared = Object.fromEntries(Object.keys(want[i]).map((k) => [k, g[k]]));
+          expect({ input: r, i, fields: shared }).toEqual({ input: r, i, fields: want[i] });
+          const extra = Object.keys(g).filter((k) => !(k in want[i])).sort();
+          expect({ input: r, i, extra: extra.filter((k) => !['can', 'canMax', 'carry'].includes(k)) }).toEqual({ input: r, i, extra: [] });
+        });
+        const raw = (b.parseRobots(r) as Array<Record<string, unknown>>).map((g) => ({ can: g.can, canMax: g.canMax, carry: g.carry }));
+        expect({ input: r, vocab: raw }).toEqual({ input: r, vocab: rawRobots(r).map(vocab) });
+      }
       for (const [x, y] of [[0, 1], [1, 1], [2, 1], ['a', 3], [3, NaN], [null, 2]]) expect(b.rose(x, y)).toBe(a.rose(x, y));
       expect(b.DEFAULT_LEGEND).toEqual(a.DEFAULT_LEGEND);
       expect(b.KINDS).toEqual(a.KINDS);
@@ -705,12 +903,12 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       const inputs = g3.inputs.map((p) => p.name);
       const outputs = g3.outputs.map((p) => p.name);
       for (const p of ['bubble', 'camera', 'celebrate', 'focus', 'label', 'map', 'robots', 'stepMs', 'things']) expect({ port: p, present: inputs.includes(p) }).toEqual({ port: p, present: true });
-      for (const p of ['onFrameMs', 'onReady', 'onSupported', 'onTileTapped', 'onTileX', 'onTileY']) expect({ port: p, present: outputs.includes(p) }).toEqual({ port: p, present: true });
+      for (const p of ['onFrameMs', 'onReady', 'onSupported', 'onTileTapped', 'onTileX', 'onTileY', 'onTooSlow']) expect({ port: p, present: outputs.includes(p) }).toEqual({ port: p, present: true });
       const g2 = overlay.nodes.find((n) => n.typeName === 'garden-kit.Garden')!;
       expect(g2.inNodePicker).toBe(true);
       // Exactly the four new ports beyond the 2D node's, by the catalog's reading.
       expect(inputs.filter((p) => !g2.inputs.some((q) => q.name === p)).sort()).toEqual(['camera', 'focus']);
-      expect(outputs.filter((p) => !g2.outputs.some((q) => q.name === p)).sort()).toEqual(['onFrameMs', 'onSupported']);
+      expect(outputs.filter((p) => !g2.outputs.some((q) => q.name === p)).sort()).toEqual(['onFrameMs', 'onSupported', 'onTooSlow']);
       // The 3D node's ports are the 2D node's plus the four new ones, by the catalog's own reading.
       const shared = g2.inputs.map((p) => `${p.name}:${p.type.name}`);
       const g3in = g3.inputs.map((p) => `${p.name}:${p.type.name}`);
