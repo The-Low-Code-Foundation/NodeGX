@@ -1,6 +1,6 @@
 # IG-001 — The fixes: what Richard saw, each one driven
 
-**Opened 2026-09-28**, from README §4 (D1–D10, each measured to a file and line). **Status: ⬜ not started.**
+**Opened 2026-09-28**, from README §4 (D1–D10, each measured to a file and line). **Status: ✅ built and driven in session 1 (2026-09-29), branch `ig001-fixes` — §7.**
 Depends on nothing; needs no ruling. Lane A. **First job of session 1.**
 
 ## 1. The person sentence
@@ -71,3 +71,64 @@ not tick a primitive (the answer only advances `pc`). `MANY_BLOCKS` stays a cons
 to make a count gate pass. The kit's built file must still end with `src/kit.js` verbatim and contain no
 `url(`/`fetch(` (CG-001 AC10): the new sprites are inline SVG like the rest. A voiced hint must stay the hint
 (P105 `unfaithful` check): `hintPerfect` joins the voiceable list in `olive-templates.json` or is not voiced.
+
+## 7. Session 1 (2026-09-28/29, lane A, worktree `ig001-fixes` cut from `4020fd1c0`)
+
+**Built: D1–D10, in three commits on `ig001-fixes`** — `6b1cb7b28` (D1–D4: the Runner and the hint ladder),
+`0b74ff0f2` (D5, D9: the kit's ring and sprites), `7e6143426` (D6, D7, D8, D10: the page glue, the stub, the drives).
+Each defect: the gate assertion red first, then the fix, then the drive clause; the template regenerated once per
+group and committed with its source. Every line README §1/§4 cited was re-measured before it was touched and was
+still there.
+
+**Readings (all on the final tree, exit code first):**
+- `cg002Engine.test.ts` exit 0 — 122 passed / 122 (118 before; D3, D4, D6, D7).
+- `cg003Template.test.ts` exit 0 — 92 passed / 92 (84 before; D1–D10 in the graph, the ring's contrast on both grounds).
+- `cg005Olive.test.ts` exit 0 — 34 / 34 · `cg006Requests.test.ts` exit 0 — 83 / 83 · `cg001GardenKit.test.ts` exit 0 —
+  22 / 22 (20 before; D5, D9 on the BUILT file). Garden specs: 353 over the five files (337 before).
+- `npm run template:garden` exit 0, run a second time after the last commit: **0 files of drift**.
+- Page drive (`drive-cg003-pages.js`, 1368×912 and 390×844, EN and FR, the in-page stub Olive): exit 0 —
+  **179 / 179 clauses** (161 before: 16 IG-001 clauses, the item-2 owl repointed, AC6's flag split), 0 console errors,
+  0 network errors. The ring measured live: **13.86:1** on the steps panel, **12.36:1** inside a repeat (`#FFF0DA`),
+  3 px over a 4 px white halo. Log/JSON/shots: `<scratch>/pages/drive.log`, `drive.json`, `shots/ig001-*.png` (looked at:
+  the post box and stones are sprites, no pill; the ring on the repeat is plain to see; "Perfect! Not one block too
+  many." under the win card; the olive bubble "Tulla the tulip" on the robot).
+- Olive page drive (`drive-cg005-olive.js pages`, the shell's real route in front of the stub): exit 0 — **22 / 22**
+  (17 before; AC1 ×2, AC6 ×2, AC7), 0 console errors. Shot `ig001-ac7-olive-says-yes.png`: the `if` wears "Olive says
+  yes" with `water` in its body and the first tulip watered.
+- Shell `node --test tests/*.test.js` exit 0 — **90 / 90** (89 before; the stub's scripted answers).
+
+**Acceptance criteria:** 1–11 done. AC1 one-tick Start-over reading is the page drive's; AC2, AC3 (the reference
+program wins with `hintPerfect`), AC4, AC5 (live, both grounds), AC6 (olive and plain bubbles), AC7 (yes waters, no
+does not), AC8 (no `plAsk` in the artefact; the hint moves within one step of an edit), AC9 (no `.gd-label`, the
+sprites, the screenshot), AC10 (stones `fwd left right put`, tulips `water`), AC11 (all green, byte-identical, 0 errors).
+
+**Deviations, with the measurement:**
+1. AC3 says "nine single blocks win with `hintDone`". Nine blocks is above `MANY_BLOCKS` (8), so the row's own rule
+   says `hintDoneMany`; and eight single blocks on the stones (a palette with `repeat`) say `hintPattern`, because the
+   fold nudge outranks a win in the existing ladder (`an unfolded repetition beats a bump`, kept). The gate asserts:
+   the reference → `hintPerfect`; reference + one block → `hintDone`; eight singles with no repeat allowed → `hintDone`;
+   nine → `hintDoneMany`; no reference count (free play) → never Perfect. `MANY_BLOCKS` untouched.
+2. `hintPerfect` and `hintFree` are **not voiced** (the trap line allows it): two rows appended to `HINTS` only, the
+   shell's `hintKeys` untouched, so `VOICED_HINT_KEYS` and the shell's table still agree.
+3. D6 in the page: Draw world leaves `bubble` alone when there is nothing to say (a `null` there hid a bubble on the very
+   next tick, 420 ms in, so "Step Ms × 3" was unreachable in Play); the bubble is keyed by run id and tick.
+4. D9 also gave `egg` and `food` sprites: dropping `GLYPH` would have left the eggs request and the cat's food undrawn.
+5. AC1 on the Olive drive: after Start over the new line's voicing queues behind the held poem ask (the owl answers one
+   at a time), so the tag there is the voicing's for ≤ 1.5 s; that clause reads "clears once the queue drains (≤ 3.2 s)
+   and nothing was asked again". The one-tick reading is the page drive's (its in-page stub has no queue).
+6. The item-2 test and drive clause ("Ask Olive carries the owl picture") now read the grown-ups' Try Olive (`ghAsk`).
+7. D10: `fill` is in the pad table but shows only once IG-002 makes it a block type; `left`/`right` are filtered like
+   the actions (every request allows them today).
+8. The worktree lacked three gitignored build outputs the gates need — `packages/noodl-mcp/dist` (the kit extractor
+   bundle `kit-extract.cjs`, without which the door knows no module node and refuses `game-kit.KeepStorage`),
+   `packages/nodegx-export/dist` and `packages/nodegx-core/dist` (ts-node resolves `@nodegx/export` through them) —
+   symlinked read-only to the primary's. The primary's `kit-extract.cjs` (Sep 27) is newer than its source (Sep 16).
+
+**Could not verify:** the tablet (no trip); the real model (every drive is on the stub; the contract test was not
+run); the IG-001 drive section runs at 1368×912 in EN only (the pre-existing EN/FR × two-size pass still covers the
+Workshop with the new kit); band 7–9 was not driven through the new pad; the drop-line's colour is asserted by token
+(`--block-drop` = the old sun) and by the kit's sheet, not by a live drag.
+
+**Files another lane may touch:** `packages/noodl-mcp/tests/cg002Content.ts` (IG-002's: two rows appended to
+`HINTS`, nothing else); the shell's `olive-stub.js` and `tests/olive-stub.test.js` (lane C's Olive work);
+`scripts/devtools/drive-cg003-pages.js` / `drive-cg005-olive.js` (any lane adding clauses).
