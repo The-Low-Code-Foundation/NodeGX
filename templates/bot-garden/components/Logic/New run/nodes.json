@@ -26,7 +26,7 @@
         {
           "name": "robotId",
           "plug": "output",
-          "type": "*"
+          "type": "string"
         },
         {
           "name": "runId",

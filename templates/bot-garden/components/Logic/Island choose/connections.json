@@ -95,6 +95,12 @@
     },
     {
       "fromId": "islandchooseFn",
+      "fromProperty": "out-needs",
+      "toId": "islandchooseOut",
+      "toProperty": "needs"
+    },
+    {
+      "fromId": "islandchooseFn",
       "fromProperty": "out-openText",
       "toId": "islandchooseOut",
       "toProperty": "openText"
@@ -104,6 +110,12 @@
       "fromProperty": "out-requestId",
       "toId": "islandchooseOut",
       "toProperty": "requestId"
+    },
+    {
+      "fromId": "islandchooseFn",
+      "fromProperty": "out-robotId",
+      "toId": "islandchooseOut",
+      "toProperty": "robotId"
     },
     {
       "fromId": "islandchooseFn",

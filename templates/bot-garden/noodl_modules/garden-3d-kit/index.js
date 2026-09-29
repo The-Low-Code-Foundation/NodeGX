@@ -163,7 +163,10 @@
           bump: isFinite(Number(r.bump)) ? Number(r.bump) : 0,
           can: isFinite(Number(r.can)) && r.can !== null && r.can !== '' ? Math.max(0, Math.floor(Number(r.can))) : null,
           canMax: isFinite(Number(r.canMax)) && Number(r.canMax) > 0 ? Math.floor(Number(r.canMax)) : 3,
-          carry: Array.isArray(r.carry) ? r.carry.map(String) : []
+          carry: Array.isArray(r.carry) ? r.carry.map(String) : [],
+          // P106 IG-005 (brief s4 §4.3): what the robot wears for its job. Missing = the can (every robot before IG-005 was
+          // Pip with his can); '' or anything unknown = none.
+          accessory: r.accessory === undefined || r.accessory === null ? 'can' : ['can', 'hod', 'satchel', 'bell'].indexOf(r.accessory) !== -1 ? r.accessory : ''
         };
       });
   }
@@ -248,6 +251,13 @@
     crown: 0xffd166,
     can: 0x4fa7dc,
     canWater: 0xbfe7ff,
+    // P106 IG-005: the accessories — Cobble's hod, Pocket's satchel, Echo's bell.
+    hod: 0xa9773f,
+    hodPole: 0x7a4b1f,
+    satchel: 0xc98a4b,
+    satchelStrap: 0x8b5a2b,
+    bell: 0xffd166,
+    bellInk: 0xc98a00,
     bulb: 0xffd166,
     wheel: 0x3a3646,
     iron: 0x8e8ca0,
@@ -737,6 +747,62 @@
    * The can's level is `can` of `canMax` (brief §4): a lighter band inside the can, as tall as the share left; at 0 it
    * is hidden (no drops); when `can` is null there is no level at all (this robot has no can level to show).
    */
+  /** The watering can on the robot's right, with its level when there is one (IG-002; a function since IG-005). */
+  function buildCan(THREE, mat, r, out, g) {
+    var can = new THREE.Group();
+    can.name = 'can';
+    can.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.16, 0.2, 0.16), mat(PALETTE.can), 0, 0.1, 0));
+    var spout = mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.02, 0.03, 0.18, 4), mat(PALETTE.can), 0, 0.16, -0.12);
+    spout.rotation.x = 0.9;
+    can.add(spout);
+    out.meshCount += 2;
+    if (r.can !== null && r.can !== undefined && isFinite(Number(r.can))) {
+      var max = Number(r.canMax) > 0 ? Number(r.canMax) : 3;
+      var share = Math.max(0, Math.min(1, Number(r.can) / max));
+      var level = mesh(THREE, G(THREE, out, 'BoxGeometry', 0.17, 0.2, 0.17), mat(PALETTE.canWater), 0, 0.1 * share, 0);
+      level.name = 'level';
+      level.scale.y = share;
+      level.visible = share > 0;
+      level.userData.can = Number(r.can);
+      level.userData.canMax = max;
+      can.add(level);
+      out.meshCount += 1;
+    }
+    can.position.set(0.38, 0.14, 0.02);
+    g.add(can);
+  }
+
+  /**
+   * P106 IG-005: what a robot wears for its job, a few primitives each: Cobble's hod (a wooden trough on a pole, a stone
+   * in it) on his left, Pocket's satchel (a strap across, a bag at the hip) on his right, Echo's gold bell under the
+   * visor. Named `accessory` with its kind, so a gate can find it. The can is `buildCan`; '' draws nothing.
+   */
+  function accessoryGroup(THREE, mat, kind, out) {
+    if (kind !== 'hod' && kind !== 'satchel' && kind !== 'bell') return null;
+    var a = new THREE.Group();
+    a.name = 'accessory';
+    a.userData.accessory = kind;
+    var put = function (m) {
+      a.add(m);
+      out.meshCount += 1;
+      return m;
+    };
+    if (kind === 'hod') {
+      put(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.02, 0.02, 0.5, 4), mat(PALETTE.hodPole), -0.36, 0.3, 0.1));
+      var trough = put(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.2, 0.12, 0.3), mat(PALETTE.hod), -0.36, 0.6, 0.1));
+      trough.rotation.z = 0.35;
+      put(mesh(THREE, G(THREE, out, 'IcosahedronGeometry', 0.07, 0), mat(PALETTE.rockLight), -0.38, 0.69, 0.1));
+    } else if (kind === 'satchel') {
+      var strap = put(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.05, 0.62, 0.46), mat(PALETTE.satchelStrap), 0, 0.4, 0));
+      strap.rotation.z = 0.7;
+      put(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.1, 0.2, 0.26), mat(PALETTE.satchel), 0.3, 0.2, 0.05));
+    } else {
+      put(mesh(THREE, G(THREE, out, 'ConeGeometry', 0.08, 0.12, 6), mat(PALETTE.bell), 0, 0.2, -0.26));
+      put(mesh(THREE, G(THREE, out, 'SphereGeometry', 0.025, 5, 4), mat(PALETTE.bellInk), 0, 0.13, -0.26));
+    }
+    return a;
+  }
+
   function buildRobot(THREE, mat, r, out) {
     var g = new THREE.Group();
     var body = hexToInt(r.colour, PALETTE.coral);
@@ -781,28 +847,13 @@
     } else if (r.hat === 'crown') {
       add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.17, 0.14, 0.14, 5, 1, true), mat(PALETTE.crown, { side: THREE.DoubleSide }), 0, 0.68, 0));
     }
-    // The can, on the right: its body, its spout, and the level when there is one.
-    var can = new THREE.Group();
-    can.name = 'can';
-    can.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.16, 0.2, 0.16), mat(PALETTE.can), 0, 0.1, 0));
-    var spout = mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.02, 0.03, 0.18, 4), mat(PALETTE.can), 0, 0.16, -0.12);
-    spout.rotation.x = 0.9;
-    can.add(spout);
-    out.meshCount += 2;
-    if (r.can !== null && r.can !== undefined && isFinite(Number(r.can))) {
-      var max = Number(r.canMax) > 0 ? Number(r.canMax) : 3;
-      var share = Math.max(0, Math.min(1, Number(r.can) / max));
-      var level = mesh(THREE, G(THREE, out, 'BoxGeometry', 0.17, 0.2, 0.17), mat(PALETTE.canWater), 0, 0.1 * share, 0);
-      level.name = 'level';
-      level.scale.y = share;
-      level.visible = share > 0;
-      level.userData.can = Number(r.can);
-      level.userData.canMax = max;
-      can.add(level);
-      out.meshCount += 1;
-    }
-    can.position.set(0.38, 0.14, 0.02);
-    g.add(can);
+    // P106 IG-005: what the robot wears for its job (the hod, the satchel, the bell); the can is below, as before.
+    var acc = accessoryGroup(THREE, mat, r.accessory, out);
+    if (acc) g.add(acc);
+    // The can, on the right: its body, its spout, and the level when there is one. IG-005: only on a robot that carries
+    // it — the can is Pip's accessory — or one with a level to show.
+    var hasLevel = r.can !== null && r.can !== undefined && isFinite(Number(r.can));
+    if (r.accessory === 'can' || hasLevel) buildCan(THREE, mat, r, out, g);
     // The load, on the back (+z): the last thing carried.
     var load = loadOf(r);
     if (load) {

@@ -57,6 +57,16 @@
           "name": "stayWord",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "lentText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasLent",
+          "plug": "output",
+          "type": "boolean"
         }
       ],
       "x": 530,
@@ -91,6 +101,7 @@
         "wnThanks",
         "wnLine",
         "wnRewards",
+        "wnLent",
         "wnButtons"
       ],
       "parameters": {
@@ -299,6 +310,27 @@
       "y": 1120
     },
     {
+      "id": "wnLent",
+      "type": "Text",
+      "label": "A robot lent, an upgrade given",
+      "parent": "wnCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--violet-ink)",
+        "textAlignX": "center",
+        "cssClassName": "bg-win-lent",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
       "id": "wnButtons",
       "type": "Group",
       "label": "The two ways on",
@@ -317,7 +349,7 @@
         "justifyContent": "center"
       },
       "x": 160,
-      "y": 1240
+      "y": 1360
     },
     {
       "id": "wnIsland",
@@ -359,7 +391,7 @@
         "label": "Back to the island"
       },
       "x": 220,
-      "y": 1360
+      "y": 1480
     },
     {
       "id": "wnStay",
@@ -401,7 +433,7 @@
         "label": "Keep tinkering"
       },
       "x": 220,
-      "y": 1480
+      "y": 1600
     },
     {
       "id": "wnOut",
@@ -420,7 +452,7 @@
         }
       ],
       "x": 530,
-      "y": 1360
+      "y": 1480
     }
   ],
   "visualRoots": [

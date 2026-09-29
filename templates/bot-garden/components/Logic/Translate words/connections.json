@@ -857,6 +857,174 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5AtHome",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5AtHome"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5AtWork",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5AtWork"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5CanDo",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5CanDo"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5DoesCobble",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5DoesCobble"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5DoesEcho",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5DoesEcho"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5DoesPip",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5DoesPip"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5DoesPocket",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5DoesPocket"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5Fleet",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5Fleet"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5Gives",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5Gives"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5Lends",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5Lends"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5LentBy",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5LentBy"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5Locked",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5Locked"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5LockedTag",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5LockedTag"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5Sub",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5Sub"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5Title",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5Title"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5UpBasket",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5UpBasket"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5UpBoots",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5UpBoots"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5UpCan",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5UpCan"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5UpEmpty",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5UpEmpty"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5UpHas",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5UpHas"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5Upgrade",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5Upgrade"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5WearsBell",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5WearsBell"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5WearsCan",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5WearsCan"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5WearsHod",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5WearsHod"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5WearsSatchel",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5WearsSatchel"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5WhenLent",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5WhenLent"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5Where",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5Where"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig5Yours",
+      "toId": "translatewordsOut",
+      "toProperty": "ig5Yours"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-isEyebrow",
       "toId": "translatewordsOut",
       "toProperty": "isEyebrow"

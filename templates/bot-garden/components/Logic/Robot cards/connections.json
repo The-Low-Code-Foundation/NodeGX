@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "278a3dc4-d1c9-5fd8-8062-b3aa58d189f7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "robotcardsIn",
+      "fromProperty": "band",
+      "toId": "robotcardsFn",
+      "toProperty": "in-band"
+    },
+    {
+      "fromId": "robotcardsIn",
+      "fromProperty": "botName",
+      "toId": "robotcardsFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "robotcardsIn",
+      "fromProperty": "hats",
+      "toId": "robotcardsFn",
+      "toProperty": "in-hats"
+    },
+    {
+      "fromId": "robotcardsIn",
+      "fromProperty": "lang",
+      "toId": "robotcardsFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "robotcardsIn",
+      "fromProperty": "requests",
+      "toId": "robotcardsFn",
+      "toProperty": "in-requests"
+    },
+    {
+      "fromId": "robotcardsIn",
+      "fromProperty": "robots",
+      "toId": "robotcardsFn",
+      "toProperty": "in-robots"
+    },
+    {
+      "fromId": "robotcardsIn",
+      "fromProperty": "words",
+      "toId": "robotcardsFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "robotcardsFn",
+      "fromProperty": "out-cards",
+      "toId": "robotcardsOut",
+      "toProperty": "cards"
+    },
+    {
+      "fromId": "robotcardsFn",
+      "fromProperty": "out-count",
+      "toId": "robotcardsOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "robotcardsFn",
+      "fromProperty": "out-owned",
+      "toId": "robotcardsOut",
+      "toProperty": "owned"
+    },
+    {
+      "fromId": "robotcardsFn",
+      "fromProperty": "success",
+      "toId": "robotcardsOut",
+      "toProperty": "ran"
+    }
+  ]
+}

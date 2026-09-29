@@ -67,6 +67,31 @@
           "name": "stepMs",
           "plug": "output",
           "type": "number"
+        },
+        {
+          "name": "robot",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "robotKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "paletteRobot",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "giftText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasGift",
+          "plug": "output",
+          "type": "boolean"
         }
       ],
       "x": 710,

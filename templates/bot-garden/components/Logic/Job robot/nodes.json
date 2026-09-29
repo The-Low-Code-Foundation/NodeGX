@@ -1,0 +1,246 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "44d88f48-4299-51fb-85ae-e1d865e2e60b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "jobrobotIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "requestId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "requests",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "robots",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "stepMs",
+          "plug": "output",
+          "type": "number"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "jobrobotFn",
+      "type": "JavaScriptFunction",
+      "label": "Job robot",
+      "parameters": {
+        "functionScript": "\nfunction wordMap(rows, lang, name) {\n  var map = {};\n  var list = Array.isArray(rows) ? rows : [];\n  for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || '').split('{b}').join(name);\n  return map;\n}\nfunction fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\nfunction langOf(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction nameOf(v) { var n = String(v || '').trim(); return n || 'Pip'; }\n\nvar ROBOTS = [{\"id\":\"pip\",\"defaultName\":{\"en\":\"Pip\",\"fr\":\"Pip\"},\"colour\":\"#FF7A59\",\"accessory\":\"can\",\"palette\":[\"water\",\"fill\",\"olive:read\"],\"canMax\":3,\"basket\":4,\"upgrade\":\"can+\",\"lentBy\":null,\"unlockedBy\":null},{\"id\":\"cobble\",\"defaultName\":{\"en\":\"Cobble\",\"fr\":\"Cobble\"},\"colour\":\"#7A8CA3\",\"accessory\":\"hod\",\"palette\":[\"pick\",\"put\"],\"canMax\":3,\"basket\":4,\"upgrade\":\"basket+\",\"lentBy\":\"sami\",\"unlockedBy\":\"path-postbox\"},{\"id\":\"pocket\",\"defaultName\":{\"en\":\"Pocket\",\"fr\":\"Poche\"},\"colour\":\"#FFB347\",\"accessory\":\"satchel\",\"palette\":[\"pick\",\"put\",\"say\",\"olive:say-thanks\"],\"canMax\":3,\"basket\":6,\"upgrade\":\"boots\",\"lentBy\":\"biscuit\",\"unlockedBy\":\"bowl-if\"},{\"id\":\"echo\",\"defaultName\":{\"en\":\"Echo\",\"fr\":\"Écho\"},\"colour\":\"#8F6BFF\",\"accessory\":\"bell\",\"palette\":[\"water\",\"say\",\"olive:read\",\"olive:is-it-a\",\"olive:say-thanks\"],\"canMax\":3,\"basket\":4,\"upgrade\":\"can+\",\"lentBy\":\"mamie\",\"unlockedBy\":\"mamie-note\"}];\nvar lang = langOf(Inputs.lang);\nvar reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];\nvar id = String(Inputs.requestId || '');\nvar req = null;\nfor (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].id === id) req = reqs[i];\nvar kind = req && req.needs ? String(req.needs) : 'pip';\nvar mine = Array.isArray(Inputs.robots) ? Inputs.robots : [];\nvar row = null;\nfor (var j = 0; j < mine.length && !row; j++) if (mine[j] && String(mine[j].kind || '') === kind) row = mine[j];\nvar owned = !!row;\nif (!row) {\n  var spec = null;\n  for (var k = 0; k < ROBOTS.length; k++) if (ROBOTS[k].id === kind) spec = ROBOTS[k];\n  spec = spec || ROBOTS[0];\n  row = { id: '', kind: spec.id, name: spec.defaultName[lang] || spec.defaultName.en, color: spec.colour, eye: 'round', hat: 'none', accessory: spec.accessory, palette: spec.palette.slice(), canMax: spec.canMax, basket: spec.basket, stepFactor: 1 };\n}\nvar base = Number(Inputs.stepMs) > 0 ? Number(Inputs.stepMs) : 420;\nOutputs.needs = kind;\nOutputs.owned = owned;\nOutputs.robot = JSON.parse(JSON.stringify(row));\nOutputs.paletteRobot = id === 'free' ? null : JSON.parse(JSON.stringify(row));\nOutputs.robotId = String(row.id || '');\nOutputs.botName = String(row.name || 'Pip');\nOutputs.color = String(row.color || '#FF7A59');\nOutputs.eye = String(row.eye || 'round');\nOutputs.hat = String(row.hat || 'none');\nOutputs.accessory = String(row.accessory || '');\nOutputs.stepMs = Math.round(base * (Number(row.stepFactor) > 0 ? Number(row.stepFactor) : 1));\nOutputs.robotKey = JSON.stringify([row.id, row.kind, row.name, row.color, row.eye, row.hat, row.accessory]);\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-requests",
+          "displayName": "requests",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-requestId",
+          "displayName": "requestId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-robots",
+          "displayName": "robots",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-stepMs",
+          "displayName": "stepMs",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-needs",
+          "displayName": "needs",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-owned",
+          "displayName": "owned",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-robot",
+          "displayName": "robot",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-paletteRobot",
+          "displayName": "paletteRobot",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-robotId",
+          "displayName": "robotId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-botName",
+          "displayName": "botName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-color",
+          "displayName": "color",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-eye",
+          "displayName": "eye",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hat",
+          "displayName": "hat",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-accessory",
+          "displayName": "accessory",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stepMs",
+          "displayName": "stepMs",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-robotKey",
+          "displayName": "robotKey",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "jobrobotOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "accessory",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "botName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "color",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "eye",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hat",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "needs",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "owned",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "paletteRobot",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "robot",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "robotId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "robotKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "stepMs",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

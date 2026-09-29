@@ -127,7 +127,7 @@
       "path": "Logic/Palette",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 15,
+      "connectionCount": 18,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -143,7 +143,7 @@
       "path": "Logic/Complete request",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 15,
+      "connectionCount": 17,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 450,
+      "connectionCount": 478,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -184,6 +184,14 @@
       "type": "visual",
       "nodeCount": 3,
       "connectionCount": 8,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Update robot": {
+      "path": "Logic/Update robot",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 10,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -247,7 +255,7 @@
       "path": "Logic/Start world",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 16,
+      "connectionCount": 20,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -263,7 +271,7 @@
       "path": "Logic/Draw world",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 28,
+      "connectionCount": 29,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -519,7 +527,7 @@
       "path": "Logic/Island choose",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 23,
+      "connectionCount": 25,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -528,6 +536,30 @@
       "type": "visual",
       "nodeCount": 3,
       "connectionCount": 4,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Job robot": {
+      "path": "Logic/Job robot",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 18,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Gift line": {
+      "path": "Logic/Gift line",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 8,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Robot cards": {
+      "path": "Logic/Robot cards",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 11,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -598,8 +630,8 @@
     "Workshop/Win card": {
       "path": "Workshop/Win card",
       "type": "visual",
-      "nodeCount": 15,
-      "connectionCount": 12,
+      "nodeCount": 16,
+      "connectionCount": 14,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -623,7 +655,7 @@
       "path": "Workshop/Play",
       "type": "visual",
       "nodeCount": 155,
-      "connectionCount": 381,
+      "connectionCount": 387,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -639,7 +671,7 @@
       "path": "Island/World",
       "type": "visual",
       "nodeCount": 45,
-      "connectionCount": 97,
+      "connectionCount": 98,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -672,6 +704,22 @@
       "type": "visual",
       "nodeCount": 24,
       "connectionCount": 48,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Robot/Ability": {
+      "path": "Robot/Ability",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 2,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Robot/Card": {
+      "path": "Robot/Card",
+      "type": "visual",
+      "nodeCount": 31,
+      "connectionCount": 42,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -790,16 +838,16 @@
     "Pages/Workshop": {
       "path": "Pages/Workshop",
       "type": "page",
-      "nodeCount": 18,
-      "connectionCount": 45,
+      "nodeCount": 20,
+      "connectionCount": 61,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
     "Pages/My robot": {
       "path": "Pages/My robot",
       "type": "page",
-      "nodeCount": 15,
-      "connectionCount": 41,
+      "nodeCount": 23,
+      "connectionCount": 71,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -821,8 +869,8 @@
     }
   },
   "stats": {
-    "totalComponents": 102,
-    "totalNodes": 825,
-    "totalConnections": 2380
+    "totalComponents": 108,
+    "totalNodes": 882,
+    "totalConnections": 2566
   }
 }

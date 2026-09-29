@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9916918b-6839-5366-8dcf-9be055ffe73e",
+  "name": "Update robot",
+  "path": "/Logic/Update robot",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The family with one field of one robot changed. Runs on Go; answers Ran once its outputs are set."
+}

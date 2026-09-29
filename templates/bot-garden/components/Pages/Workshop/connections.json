@@ -160,28 +160,124 @@
       "toProperty": "band"
     },
     {
+      "fromId": "wsRequests",
+      "fromProperty": "requests",
+      "toId": "wsJob",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "wsReqVar",
+      "fromProperty": "value",
+      "toId": "wsJob",
+      "toProperty": "requestId"
+    },
+    {
       "fromId": "wsFam",
+      "fromProperty": "robots",
+      "toId": "wsJob",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "lang",
+      "toId": "wsJob",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "wsJob",
       "fromProperty": "botName",
       "toId": "wsPlay",
       "toProperty": "botName"
     },
     {
-      "fromId": "wsFam",
+      "fromId": "wsJob",
       "fromProperty": "color",
       "toId": "wsPlay",
       "toProperty": "color"
     },
     {
-      "fromId": "wsFam",
+      "fromId": "wsJob",
       "fromProperty": "eye",
       "toId": "wsPlay",
       "toProperty": "eye"
     },
     {
-      "fromId": "wsFam",
+      "fromId": "wsJob",
       "fromProperty": "hat",
       "toId": "wsPlay",
       "toProperty": "hat"
+    },
+    {
+      "fromId": "wsJob",
+      "fromProperty": "robot",
+      "toId": "wsPlay",
+      "toProperty": "robot"
+    },
+    {
+      "fromId": "wsJob",
+      "fromProperty": "robotKey",
+      "toId": "wsPlay",
+      "toProperty": "robotKey"
+    },
+    {
+      "fromId": "wsJob",
+      "fromProperty": "paletteRobot",
+      "toId": "wsPlay",
+      "toProperty": "paletteRobot"
+    },
+    {
+      "fromId": "wsJob",
+      "fromProperty": "stepMs",
+      "toId": "wsPlay",
+      "toProperty": "stepMs"
+    },
+    {
+      "fromId": "wsJob",
+      "fromProperty": "robotId",
+      "toId": "wsComplete",
+      "toProperty": "robotId"
+    },
+    {
+      "fromId": "wsComplete",
+      "fromProperty": "lent",
+      "toId": "wsGift",
+      "toProperty": "lent"
+    },
+    {
+      "fromId": "wsComplete",
+      "fromProperty": "upgraded",
+      "toId": "wsGift",
+      "toProperty": "upgraded"
+    },
+    {
+      "fromId": "wsWords",
+      "fromProperty": "words",
+      "toId": "wsGift",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "lang",
+      "toId": "wsGift",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "wsJob",
+      "fromProperty": "botName",
+      "toId": "wsGift",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "wsGift",
+      "fromProperty": "text",
+      "toId": "wsPlay",
+      "toProperty": "giftText"
+    },
+    {
+      "fromId": "wsGift",
+      "fromProperty": "has",
+      "toId": "wsPlay",
+      "toProperty": "hasGift"
     },
     {
       "fromId": "wsFam",

@@ -42,7 +42,8 @@ const SYN_PLOTS: Record<string, { x: number; y: number }> = { 'tulips-three': { 
 const SYN_REQUESTS = REQUESTS.filter((r) => SYN_PLOTS[r.id]).map((r) => ({ ...JSON.parse(JSON.stringify(r)), plot: SYN_PLOTS[r.id] }));
 const SYN_WORLD = islandWorldScript({ free: FREE_PLAY, base: SYN_BASE, home: { x: 12, y: 10 }, freePlot: { x: 19, y: 8 }, plotW: 8, plotH: 6 });
 
-function island(plots: Record<string, unknown>, robots: Array<{ id: string }> = [{ id: 'r1' }, { id: 'r2' }, { id: 'r3' }], extra: Record<string, unknown> = {}) {
+// P106 IG-005: the stones need Cobble — r2 is a Cobble (a plot needing a robot she lacks is padlocked, never worked).
+function island(plots: Record<string, unknown>, robots: Array<{ id: string; kind?: string }> = [{ id: 'r1' }, { id: 'r2', kind: 'cobble' }, { id: 'r3' }], extra: Record<string, unknown> = {}) {
   return bare(SYN_WORLD, { requests: SYN_REQUESTS, plots, robots, done: Object.keys(plots), band: 2, pins: [], ...extra });
 }
 const pinned = (program: unknown, robotId: string) => ({ program, robotId, wonAt: 1 });
@@ -248,15 +249,17 @@ describe('IG-004 — the island as a world', () => {
       expect(seen.size).toBeGreaterThan(3);
     });
 
-    it('🔴 AC3: open path-stones while the robot works the tulips → “at work on the tulips” and “bring Pip home”; home → the robot is free, the tulips STAY watered', () => {
+    // P106 IG-005: "another plot" is another of PIP's jobs (the door's tulip): the stones need Cobble, a robot she has
+    // not been lent yet, so they are padlocked whether Pip works or not (IG-005 AC5, its own clause).
+    it('🔴 AC3: open the tulip by the door while Pip works the tulips → “at work on the tulips” and “bring Pip home”; home → the robot is free, the tulips STAY watered', () => {
       const pinned = winTulips(kid());
       const before = islandOf(pinned);
-      const stonesRow = before.rows.find((r: any) => r.id === 'path-stones');
+      const stonesRow = before.rows.find((r: any) => r.id === 'tulip-door');
       expect(stonesRow.blocked).toBe(true);
       expect(before.rows.find((r: any) => r.id === 'tulips-three')).toMatchObject({ blocked: false, isDone: true });
       expect(before.rows.find((r: any) => r.id === 'tulips-three').doneWord).toBe('✓ ' + w('en', 'done') + ' · ' + w('en', 'ig4Working'));
       for (const lang of ['en', 'fr'] as const) {
-        const c = islandOf(pinned, lang).card('path-stones');
+        const c = islandOf(pinned, lang).card('tulip-door');
         expect({ lang, open: c.canOpen, blocked: c.blocked, home: c.showHome, where: c.workingAt }).toEqual({ lang, open: false, blocked: true, home: true, where: 'tulips-three' });
         expect(c.line).toBe(w(lang, 'ig4AtWork').split('{plot}').join(w(lang, 'rqTulipsTitle')));
         expect(c.line).toContain(w(lang, 'rqTulipsTitle'));
@@ -274,8 +277,8 @@ describe('IG-004 — the island as a world', () => {
       expect(wetOn(after.world.world.things, TULIPS.plot)).toBe(3);
       const bot = after.world.world.robots.find((r: any) => r.id === 'r1');
       expect([bot.x, bot.y, bot.home]).toEqual([ISLAND_HOME.x, ISLAND_HOME.y, true]);
-      expect(after.rows.find((r: any) => r.id === 'path-stones').blocked).toBe(false);
-      expect(after.card('path-stones')).toMatchObject({ canOpen: true, showHome: false, blocked: false });
+      expect(after.rows.find((r: any) => r.id === 'tulip-door').blocked).toBe(false);
+      expect(after.card('tulip-door')).toMatchObject({ canOpen: true, showHome: false, blocked: false });
       // Known-firing beside "stay watered": before the win nothing on the tulips' plot is watered.
       expect(wetOn(islandOf(kid()).world.world.things, TULIPS.plot)).toBe(0);
     });
@@ -286,9 +289,12 @@ describe('IG-004 — the island as a world', () => {
       expect(young.world.cards.find((c: any) => c.id === 'bowl-if').status).toBe('locked');
       const deco = young.world.world.things.filter((t: any) => (t.kind === 'fence' || t.kind === 'padlock') && inPlot(t, bowl.plot));
       expect(deco).toEqual([{ kind: 'fence', x: bowl.plot.x, y: bowl.plot.y, w: 8, h: 6 }, { kind: 'padlock', x: bowl.plot.x + 4, y: bowl.plot.y + 3 }]);
-      // Every band-2 request is locked at 7–9 (fenced), none at 10–12.
-      expect(young.world.world.things.filter((t: any) => t.kind === 'fence').length).toBe(REQ_ROWS.filter((r: any) => r.band === 2).length);
-      expect(islandOf(kid(2)).world.world.things.filter((t: any) => t.kind === 'fence' || t.kind === 'padlock')).toEqual([]);
+      // Every band-2 request is locked at 7–9 (fenced); P106 IG-005: so is every request whose robot she has not been
+      // lent yet (a new kid has Pip only) — at 10–12 those are the only fences.
+      const lacks = (r: any) => (r.needs || 'pip') !== 'pip';
+      expect(young.world.world.things.filter((t: any) => t.kind === 'fence').length).toBe(REQ_ROWS.filter((r: any) => r.band === 2 || lacks(r)).length);
+      expect(islandOf(kid(2)).world.world.things.filter((t: any) => t.kind === 'fence').length).toBe(REQ_ROWS.filter(lacks).length);
+      expect(islandOf(kid(2)).world.cards.filter((c: any) => c.status === 'locked').map((c: any) => [c.id, c.lock])).toEqual(REQ_ROWS.filter(lacks).map((r: any) => [r.id, 'robot']));
       const lines = (['en', 'fr'] as const).map((lang) => islandOf(kid(1), lang).card('bowl-if'));
       for (const [i, lang] of (['en', 'fr'] as const).entries()) {
         expect(lines[i]).toMatchObject({ canOpen: false, blocked: true, showHome: false, status: 'locked' });
@@ -305,12 +311,14 @@ describe('IG-004 — the island as a world', () => {
         const people = drawn.filter((t: any) => t.kind === 'islander');
         expect(people.map((p: any) => [p.who, p.say])).toEqual([['sami', w(lang, 'rqPathTitle')], ['mamie', w(lang, 'rqDoorTitle')], ['biscuit', '']]);
         const fences = drawn.filter((t: any) => t.kind === 'fence');
-        expect(fences.length).toBe(REQ_ROWS.filter((r: any) => r.band === 2).length);
+        // IG-005: the band's locks and the stones' (Cobble is not lent yet).
+        expect(fences.length).toBe(REQ_ROWS.filter((r: any) => r.band === 2 || (r.needs || 'pip') !== 'pip').length);
         expect(fences.every((f: any) => f.w === 8 && f.h === 6)).toBe(true);
         expect(drawn.filter((t: any) => t.kind === 'padlock').length).toBe(fences.length);
       }
-      // The robot at home is drawn with her look and name, like any robot.
-      expect(runScript(DRAW_WORLD_SCRIPT, { world: is.world.world, words: WORD_ROWS, lang: 'en', botName: 'Rosie' }).robots).toMatchObject([{ x: ISLAND_HOME.x, y: ISLAND_HOME.y, name: 'Rosie' }]);
+      // The robot at home is drawn with her look and name, like any robot. IG-005: its OWN look (the family's robot row),
+      // whatever name the page hands Draw world — Pip, with his can.
+      expect(runScript(DRAW_WORLD_SCRIPT, { world: is.world.world, words: WORD_ROWS, lang: 'en', botName: 'Rosie' }).robots).toMatchObject([{ x: ISLAND_HOME.x, y: ISLAND_HOME.y, name: 'Pip', accessory: 'can' }]);
     });
 
     it('AC4: every plot is drawn — open plots their start things, the garden its dry tulips; the islanders stand by their next plot, a bubble while it is open; a tap names the plot', () => {
@@ -333,6 +341,67 @@ describe('IG-004 — the island as a world', () => {
       const at = (x: number, y: number) => runScript(PLOT_AT_SCRIPT, { cards: is.world.cards, x, y }).requestId;
       const mamie = people.find((p: any) => p.who === 'mamie');
       expect([at(TULIPS.plot.x + 3, TULIPS.plot.y + 2), at(mamie.x, mamie.y), at(TULIPS.plot.x - 1, TULIPS.plot.y), at(FREE_PLAY_PLOT.x, FREE_PLAY_PLOT.y)]).toEqual(['tulips-three', 'tulip-door', '', 'free']);
+    });
+  });
+  describe('IG-005 (P106 s4) — robots for the job on the island: each at work on its plot in its own look; a plot padlocked for the robot it needs', () => {
+    const WORD_ROWS = JSON.parse(ALL_WORDS_JSON);
+    const REQ_ROWS = JSON.parse(JSON.stringify(REQUESTS));
+    const w = (lang: 'en' | 'fr', key: string) => String((WORDS as any)[key]?.[lang] ?? (PAGE_WORDS as any)[key]?.[lang] ?? '');
+    const fill = (s: string, v: Record<string, string>) => Object.entries(v).reduce((a, [k, x]) => a.split('{' + k + '}').join(x), s);
+    const kid = (lang: 'en' | 'fr' = 'en', band = 2) => runScript(ADD_PROFILE_SCRIPT, { model: null, name: 'Ada', band, lang, robotName: 'Pip' }).model;
+    const win = (model: any, id: string, robotId = 'r1') => runScript(COMPLETE_REQUEST_SCRIPT, { model, requestId: id, tricks: req(id).tricks, reward: req(id).reward, program: JSON.stringify(req(id).referenceProgram), robotId }).model;
+    function islandOf(model: any, lang: 'en' | 'fr' = 'en') {
+      const fam = runScript(FAMILY_SCRIPT, { model: JSON.parse(JSON.stringify(model)) });
+      const pins = runScript(ISLAND_PINS_SCRIPT, { requests: REQ_ROWS, band: fam.band, done: fam.done, words: WORD_ROWS, lang, botName: fam.botName }).pins;
+      const world = runScript(ISLAND_WORLD_SCRIPT, { requests: REQ_ROWS, plots: fam.plots, robots: fam.robots, done: fam.done, band: fam.band, pins });
+      const rows = runScript(ISLAND_ROWS_SCRIPT, { requests: REQ_ROWS, band: fam.band, done: fam.done, plots: fam.plots, robots: fam.robots, words: WORD_ROWS, lang, botName: fam.botName }).rows;
+      const card = (requestId: string) => runScript(ISLAND_CHOOSE_SCRIPT, { requestId, cards: world.cards, requests: REQ_ROWS, plots: fam.plots, robots: fam.robots, words: WORD_ROWS, lang, botName: fam.botName });
+      return { fam, world, rows, card };
+    }
+
+    it('🔴 AC5: the stones are padlocked until Sami lends Cobble; the line names Cobble, what he does, Sami and the request — EN and FR; the post-box walk opens them', () => {
+      for (const band of [1, 2]) {
+        for (const lang of ['en', 'fr'] as const) {
+          const is = islandOf(kid(lang, band), lang);
+          const c = is.card('path-stones');
+          expect({ band, lang, status: c.status, open: c.canOpen, blocked: c.blocked, home: c.showHome }).toEqual({ band, lang, status: 'locked', open: false, blocked: true, home: false });
+          expect(c.line).toBe(fill(w(lang, 'ig5Locked'), { r: 'Cobble', does: w(lang, 'ig5DoesCobble'), who: w(lang, 'islSami'), q: w(lang, 'rqPathTitle') }));
+          expect(c.line).not.toMatch(/[{}]/);
+          expect(is.rows.find((r: any) => r.id === 'path-stones').blocked).toBe(true);
+          expect(is.world.world.things.filter((x: any) => x.kind === 'padlock' && x.x === req('path-stones').plot.x + 4 && x.y === req('path-stones').plot.y + 3)).toHaveLength(1);
+        }
+      }
+      // Known-firing beside the lock: after the post-box walk (Cobble lent) the stones open, no fence on them.
+      const lent = islandOf(win(kid(), 'path-postbox'));
+      expect(lent.card('path-stones')).toMatchObject({ status: 'open', canOpen: true, blocked: false });
+      expect(lent.rows.find((r: any) => r.id === 'path-stones').blocked).toBe(false);
+      // The band's own lock keeps its line where the band is the reason (the bowl at 7–9).
+      expect(islandOf(kid('en', 1)).card('bowl-if').line).toBe(fill(w('en', 'ig4Locked'), { who: w('en', 'islBiscuit'), trick: w('en', 'rqBowlBlurb') }));
+    });
+
+    it('🔴 AC4: two robots on the island at once, each on its own plot, each in its colour with its accessory — and each brought home by its own card', () => {
+      // The post box won first (Cobble lent; Pip then taught the tulips and works there), then Cobble wins the stones.
+      let m = win(kid(), 'path-postbox');
+      m = win(m, 'tulips-three');
+      m = runScript(COMPLETE_REQUEST_SCRIPT, { model: m, requestId: 'path-stones', tricks: req('path-stones').tricks, reward: req('path-stones').reward, program: JSON.stringify(req('path-stones').referenceProgram), robotId: 'cobble' }).model;
+      const is = islandOf(m);
+      expect(is.world.working).toBe(2);
+      const drawn = runScript(DRAW_WORLD_SCRIPT, { world: is.world.world, words: WORD_ROWS, lang: 'en', botName: 'Pip' }).robots;
+      const at = (p: { x: number; y: number }) => drawn.find((r: any) => r.x >= p.x && r.x < p.x + 8 && r.y >= p.y && r.y < p.y + 6);
+      expect(at(req('tulips-three').plot)).toMatchObject({ name: 'Pip', colour: '#FF7A59', accessory: 'can' });
+      expect(at(req('path-stones').plot)).toMatchObject({ name: 'Cobble', colour: '#7A8CA3', accessory: 'hod' });
+      // Each ticks on its own plot.
+      let state = is.world.state;
+      for (let t = 0; t < 6; t++) state = runScript(ISLAND_TICK_SCRIPT, { state }).state;
+      expect(Object.keys(state.live).sort()).toEqual(['path-stones', 'tulips-three']);
+      // Biscuit's bowl is Cobble's job too: its card says Cobble is at work on the stones, and bringing home is HIS.
+      const bowl = is.card('bowl-if');
+      expect({ home: bowl.showHome, where: bowl.workingAt, robot: bowl.robotId, text: bowl.homeText }).toEqual({ home: true, where: 'path-stones', robot: 'cobble', text: 'Bring Cobble home' });
+      const home = runScript(BRING_HOME_SCRIPT, { model: m, robotId: bowl.robotId });
+      expect(home.freed).toBe('path-stones');
+      expect(islandOf(home.model).world.working).toBe(1);
+      // Known-firing: the tulips' card names Pip, and his home is Pip's.
+      expect(is.card('tulip-door')).toMatchObject({ robotId: 'r1', workingAt: 'tulips-three', homeText: 'Bring Pip home' });
     });
   });
 });

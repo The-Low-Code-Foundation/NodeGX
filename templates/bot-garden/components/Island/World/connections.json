@@ -412,6 +412,12 @@
       "toProperty": "model"
     },
     {
+      "fromId": "iwChoose",
+      "fromProperty": "robotId",
+      "toId": "iwHome",
+      "toProperty": "robotId"
+    },
+    {
       "fromId": "iwHomeBtn",
       "fromProperty": "onClick",
       "toId": "iwHome",

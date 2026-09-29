@@ -107,6 +107,9 @@ export const C = {
   lessonLine: '/Skills/Lesson line',
   letterBit: '/Skills/Letter bit',
   helpChip: '/Workshop/Help chip',
+  // P106 IG-005: My robots — a card per robot, its blocks as chips.
+  robotCard: '/Robot/Card',
+  ability: '/Robot/Ability',
   skRungs: '/Skills/Olive lessons',
   profile: '/Profiles/Card',
   form: '/Profiles/Form',
@@ -309,7 +312,18 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
   'Logic/Island tick': 'go',
   'Logic/Plot at': 'go',
   'Logic/Island choose': 'go',
-  'Logic/Find robots': 'go'
+  'Logic/Find robots': 'go',
+  // P106 IG-005 (lane B).
+  'Logic/Update robot': 'go'
+};
+
+/**
+ * P106 IG-005: inputs of a reactive script that must NOT re-run it by themselves. Start world's Robot: a win that
+ * upgrades the job robot changes the row, and a re-run would reset the world under the win card; Robot Key (its id,
+ * kind and look as text) is what re-runs it, and the row is read as it stands when it does.
+ */
+const QUIET: Readonly<Record<string, ReadonlyArray<string>>> = {
+  'Logic/Start world': ['robot']
 };
 
 /** Port types by name; anything else is `*` (the engine passes objects, arrays and text through the same names). */
@@ -342,7 +356,10 @@ const TYPE: Readonly<Record<string, string>> = {
   // P106 IG-004 (lane E) — the plots, the pinned robot, the one brought home.
   plots: 'object', pinned: 'string', freed: 'string', state: 'object', cards: 'array', focus: 'object', working: 'number',
   canOpen: 'boolean', blocked: 'boolean', showHome: 'boolean', status: 'string', workingAt: 'string',
-  homeText: 'string', openText: 'string', what: 'string'
+  homeText: 'string', openText: 'string', what: 'string',
+  // P106 IG-005 (lane B) — the robot for the job, what a win lends and gives, My robots.
+  robot: 'object', robotKey: 'string', needs: 'string', refused: 'boolean', lent: 'array', upgraded: 'array', owned: 'boolean',
+  paletteRobot: 'object', robotId: 'string', accessory: 'string', has: 'boolean', giftText: 'string', hasGift: 'boolean'
 };
 const typeOf = (name: string) => TYPE[name] ?? '*';
 
@@ -376,7 +393,7 @@ function logicComponent(spec: LogicSpec): CgComponent {
   const inPorts: Array<[string, string]> = spec.ins.map((n) => [n, typeOf(n)]);
   if (spec.go) inPorts.unshift(['go', 'signal']);
   const outPorts: Array<[string, string]> = [...spec.outs.map((n) => [n, typeOf(n)] as [string, string]), ['ran', 'signal']];
-  const unticked = spec.go ? spec.ins.map((n) => `in-${n}`) : [];
+  const unticked = spec.go ? spec.ins.map((n) => `in-${n}`) : (QUIET[spec.path] ?? []).map((n) => `in-${n}`);
   const connections: unknown[] = [];
   for (const n of spec.ins) connections.push(wire(`${id}In`, n, fn, `in-${n}`));
   if (spec.go) connections.push(wire(`${id}In`, 'go', fn, 'run'));
@@ -728,9 +745,9 @@ const WIN: CgComponent = {
   path: 'Workshop/Win card',
   description: 'The win card (the mockup’s .win): fixed and centred, so it meets the child wherever the block list is scrolled. Publishes Island (back to the island) or Stay (keep tinkering).',
   nodes: [
-    inputs('wnIn', [['show', 'boolean'], ['faceClass', 'string'], ['thanks', 'string'], ['line', 'string'], ['rewardText', 'string'], ['hasReward', 'boolean'], ['learnText', 'string'], ['hasLearn', 'boolean'], ['islandWord', 'string'], ['stayWord', 'string']]),
+    inputs('wnIn', [['show', 'boolean'], ['faceClass', 'string'], ['thanks', 'string'], ['line', 'string'], ['rewardText', 'string'], ['hasReward', 'boolean'], ['learnText', 'string'], ['hasLearn', 'boolean'], ['islandWord', 'string'], ['stayWord', 'string'], ['lentText', 'string'], ['hasLent', 'boolean']]),
     group('wnScrim', 'Over the page', undefined, { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-win', mounted: false }, ['wnCard']),
-    group('wnCard', 'The card', 'wnScrim', { ...column({ alignItems: 'center', rowGap: sp(8) }), backgroundColor: 'var(--card)', borderRadius: 'var(--radius-bar)', ...pad(22, 26), maxWidth: px(380), cssClassName: 'bg-win-card' }, ['wnFace', 'wnThanks', 'wnLine', 'wnRewards', 'wnButtons']),
+    group('wnCard', 'The card', 'wnScrim', { ...column({ alignItems: 'center', rowGap: sp(8) }), backgroundColor: 'var(--card)', borderRadius: 'var(--radius-bar)', ...pad(22, 26), maxWidth: px(380), cssClassName: 'bg-win-card' }, ['wnFace', 'wnThanks', 'wnLine', 'wnRewards', 'wnLent', 'wnButtons']),
     group('wnFace', 'The islander', 'wnCard', { sizeMode: 'explicit', width: px(72), height: px(72) }),
     text('wnThanks', 'Thank you', 'wnCard', '', { ...T_H3, fontSize: px(26), textAlignX: 'center' }),
     text('wnLine', 'How many blocks', 'wnCard', '', { ...T_MUTED, fontWeight: '700', textAlignX: 'center' }),
@@ -739,6 +756,8 @@ const WIN: CgComponent = {
     text('wnRewardText', 'The reward', 'wnReward', '', { sizeMode: 'contentSize', ...T_STRONG }),
     group('wnLearn', 'The trick learnt', 'wnRewards', { ...row(), backgroundColor: 'var(--rep)', ...pad(8, 14), cssClassName: 'bg-reward', mounted: false }, ['wnLearnText']),
     text('wnLearnText', 'The trick', 'wnLearn', '', { sizeMode: 'contentSize', ...T_STRONG }),
+    // P106 IG-005: the robot an islander lends after this win, the upgrade she gives (Gift line).
+    text('wnLent', 'A robot lent, an upgrade given', 'wnCard', '', { ...T_STRONG, textAlignX: 'center', color: 'var(--violet-ink)', cssClassName: 'bg-win-lent', mounted: false }),
     group('wnButtons', 'The two ways on', 'wnCard', row({ justifyContent: 'center' }), ['wnIsland', 'wnStay']),
     place('wnIsland', BUTTON_NODE, 'Back to the island', 'wnButtons', { ...btn('primary'), label: 'Back to the island' }),
     place('wnStay', BUTTON_NODE, 'Keep tinkering', 'wnButtons', { ...btn('plain'), label: 'Keep tinkering' }),
@@ -753,6 +772,8 @@ const WIN: CgComponent = {
     wire('wnIn', 'hasReward', 'wnReward', 'mounted'),
     wire('wnIn', 'learnText', 'wnLearnText', 'text'),
     wire('wnIn', 'hasLearn', 'wnLearn', 'mounted'),
+    wire('wnIn', 'lentText', 'wnLent', 'text'),
+    wire('wnIn', 'hasLent', 'wnLent', 'mounted'),
     wire('wnIn', 'islandWord', 'wnIsland', 'label'),
     wire('wnIn', 'stayWord', 'wnStay', 'label'),
     wire('wnIsland', 'onClick', 'wnOut', 'island'),
@@ -805,7 +826,7 @@ const PLAY: CgComponent = {
   description: 'The workshop: drive the robot freely (nothing remembered), teach it by driving it again (every press a block), see the steps as blocks, fold the repetition, play, and win. Request Id picks the request (free for free play); the line under the title is that request’s own. Won fires with Bloom, Reward and Won Request set; Island asks for the island; Found says whether the request exists (a reload has none).',
   repeats: { source: 'array', rowFields: ['id', 'cls', 'lit'] },
   nodes: [
-    inputs('plIn', [['requestId', 'string'], ['requests', 'array'], ['hints', 'array'], ['words', 'array'], ['lang', 'string'], ['band', 'number'], ['isOlder', 'boolean'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['stepMs', 'number']]),
+    inputs('plIn', [['requestId', 'string'], ['requests', 'array'], ['hints', 'array'], ['words', 'array'], ['lang', 'string'], ['band', 'number'], ['isOlder', 'boolean'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['stepMs', 'number'], ['robot', 'object'], ['robotKey', 'string'], ['paletteRobot', 'object'], ['giftText', 'string'], ['hasGift', 'boolean']]),
     // ── What the child sees ──
     group('plRoot', 'The workshop', undefined, column({ rowGap: sp(12) }), ['plHead', 'plWs', 'plWin']),
     group('plHead', 'The head', 'plRoot', column({ rowGap: sp(2) }), ['plEyebrow', 'plTitle', 'plSub']),
@@ -1031,6 +1052,9 @@ const PLAY: CgComponent = {
     wire('plIn', 'requests', 'plStart', 'requests'),
     wire('plIn', 'requestId', 'plStart', 'requestId'),
     wire('plNonce', 'currentCount', 'plStart', 'nonce'),
+    // P106 IG-005: the robot doing the job — its can, basket and look on the world; its key re-runs the start.
+    wire('plIn', 'robot', 'plStart', 'robot'),
+    wire('plIn', 'robotKey', 'plStart', 'robotKey'),
     wire('plReset', 'onClick', 'plNonce', 'increase'),
     wire('plStart', 'world', 'plSetWorld', 'value'),
     wire('plStart', 'ran', 'plSetWorld', 'do'),
@@ -1075,6 +1099,9 @@ const PLAY: CgComponent = {
     wire('plStatus', 'exam', 'plPalette', 'exam'),
     wire('plIn', 'lang', 'plPalette', 'lang'),
     wire('plIn', 'words', 'plPalette', 'words'),
+    // P106 IG-005 (R8): band × request × robot — the robot's blocks, and the kind the request needs.
+    wire('plIn', 'paletteRobot', 'plPalette', 'robot'),
+    wire('plStart', 'needs', 'plPalette', 'needs'),
     wire('plPalette', 'palette', 'plKitPal', 'palette'),
     wire('plIn', 'band', 'plKitPal', 'band'),
     wire('plIn', 'lang', 'plKitPal', 'lang'),
@@ -1407,6 +1434,8 @@ const PLAY: CgComponent = {
     wire('plWinSum', 'hasReward', 'plWin', 'hasReward'),
     wire('plWinSum', 'learnText', 'plWin', 'learnText'),
     wire('plWinSum', 'hasLearn', 'plWin', 'hasLearn'),
+    wire('plIn', 'giftText', 'plWin', 'lentText'),
+    wire('plIn', 'hasGift', 'plWin', 'hasLent'),
     wire('plWinSum', 'bloom', 'plOut', 'bloom'),
     wire('plWinSum', 'reward', 'plOut', 'reward'),
     wire('plWinSum', 'requestId', 'plOut', 'wonRequest'),
@@ -1583,6 +1612,8 @@ const ISLE_WORLD: CgComponent = {
     wire('iwOpen', 'onClick', 'iwOut', 'open'),
     // Bring the robot home: the family written, then the card asked again once the family is read back.
     wire('iwIn', 'model', 'iwHome', 'model'),
+    // P106 IG-005: the robot brought home is the one this plot's job needs (the card named it).
+    wire('iwChoose', 'robotId', 'iwHome', 'robotId'),
     wire('iwHomeBtn', 'onClick', 'iwHome', 'go'),
     wire('iwHome', 'model', 'iwOut', 'model'),
     wire('iwHome', 'ran', 'iwOut', 'write'),
@@ -1743,6 +1774,101 @@ const OPTIONS: CgComponent = {
     wire('opEyesEach', 'itemOutputSignal-picked', 'opSetEye', 'go'),
     wire('opHatEach', 'itemOutput-id', 'opSetHat', 'value'),
     wire('opHatEach', 'itemOutputSignal-picked', 'opSetHat', 'go')
+  ]
+};
+
+/** P106 IG-005: one block a robot can place, as a chip in its block colour (the mockup's robot cards). */
+const ABILITY: CgComponent = {
+  path: 'Robot/Ability',
+  description: 'One block a robot can place (the mockup’s robot cards): a pill in the block’s colour, its word in the band’s form.',
+  nodes: [
+    inputs('abIn', [['id', 'string'], ['label', 'string'], ['cls', 'string']]),
+    // The fill is its class (bg-blk-<kind>, the block tokens): a parameter would beat the class.
+    group('abPill', 'The block', undefined, { sizeMode: 'contentSize', ...pad(5, 10), borderRadius: px(10), cssClassName: 'bg-ability bg-blk bg-blk-motion' }, ['abText']),
+    text('abText', 'Its word', 'abPill', '', { sizeMode: 'contentSize', fontSize: px(14), fontWeight: '800', color: 'var(--on-fill)' })
+  ],
+  connections: [wire('abIn', 'cls', 'abPill', 'cssClassName'), wire('abIn', 'label', 'abText', 'text')]
+};
+
+/**
+ * P106 IG-005 — one robot on My robots (the mockup's 09-robots): drawn in its look with the accessory of its job, its
+ * name (a box to change it, when it is hers), whose it is, what it wears, its colours and hats (ringed, worn; a hat
+ * still to earn is faded and deaf), what it can do as block chips, its upgrade slot, and where it works. A robot not
+ * lent yet shows who lends it and after what, and nothing to pick. Publishes Name / Colour / Hat with the robot's Id.
+ */
+const ROBOT_CARD: CgComponent = {
+  path: 'Robot/Card',
+  description: 'One robot of My robots: its drawing, name, tag (Yours, Lent by …, Locked), what it wears, colours, hats, its blocks as chips, its upgrade and where it works. Publishes Named, Coloured or Hatted with the Id and the value.',
+  nodes: [
+    inputs('rcIn', [['id', 'string'], ['kind', 'string'], ['name', 'string'], ['owned', 'boolean'], ['locked', 'boolean'], ['tag', 'string'], ['tagClass', 'string'], ['cardClass', 'string'], ['wears', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['accessory', 'string'], ['paints', 'array'], ['hats', 'array'], ['abilities', 'array'], ['upgradeText', 'string'], ['upgradeClass', 'string'], ['whereText', 'string'], ['colourWord', 'string'], ['hatWord', 'string'], ['canDoWord', 'string'], ['upgradeWord', 'string'], ['whereWord', 'string'], ['nameWord', 'string']]),
+    group('rcCard', 'The card', undefined, { ...column({ rowGap: sp(10) }), ...PANEL, cssClassName: 'bg-panel bg-robot-card' }, ['rcTop', 'rcColourL', 'rcColourRow', 'rcHatL', 'rcHatRow', 'rcCanL', 'rcCanRow', 'rcUpL', 'rcUp', 'rcWhereL', 'rcWhere']),
+    group('rcTop', 'The robot, its name, whose', 'rcCard', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(12), flexWrap: 'nowrap', alignItems: 'flex-start' }), ['rcStage', 'rcWho']),
+    group('rcStage', 'The robot, drawn', 'rcTop', { sizeMode: 'explicit', width: px(88), height: px(88), borderRadius: px(14), cssClassName: 'bg-robot-stage' }, ['rcGarden']),
+    place('rcGarden', KIT_GARDEN, 'The robot', 'rcStage', { stepMs: STEP_MS, label: 'The robot' }),
+    logic('rcDraw', L('Draw world'), 'The robot in its looks', { world: STAGE_WORLD }),
+    group('rcWho', 'Its name', 'rcTop', { ...column({ rowGap: sp(4) }), cssClassName: 'bg-grow' }, ['rcHeadRow', 'rcName', 'rcNameText', 'rcWears']),
+    group('rcHeadRow', 'Name, and whose', 'rcWho', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'space-between', flexWrap: 'nowrap' }), ['rcNameL', 'rcTag']),
+    text('rcNameL', 'Name', 'rcHeadRow', '', { sizeMode: 'contentSize', fontSize: px(12), fontWeight: '800', color: 'var(--ink-2)', cssClassName: 'bg-caps' }),
+    group('rcTag', 'Whose it is', 'rcHeadRow', { sizeMode: 'contentSize', ...pad(3, 9), borderRadius: px(999), cssClassName: 'bg-robot-tag' }, ['rcTagText']),
+    text('rcTagText', 'Whose it is', 'rcTag', '', { sizeMode: 'contentSize', fontSize: px(12), fontWeight: '800', color: 'var(--ink)' }),
+    place('rcName', TEXT_INPUT_NODE, 'The robot’s name', 'rcWho', { sizeMode: 'contentHeight', width: pct(100), fontSize: px(20), fontWeight: '800', color: 'var(--ink)', backgroundColor: 'var(--card)', borderStyle: 'solid', borderWidth: px(2), borderColor: 'var(--line)', borderRadius: px(14), ...pad(8, 12), maxLength: ROBOT_NAME_MAX, cssClassName: 'bg-robot-name' }),
+    text('rcNameText', 'Its name (not lent yet)', 'rcWho', '', { ...T_H3, fontSize: px(20), mounted: false }),
+    text('rcWears', 'What it wears', 'rcWho', '', { ...T_SMALL, cssClassName: 'bg-robot-wears' }),
+    text('rcColourL', 'Colour', 'rcCard', '', { fontSize: px(12), fontWeight: '800', color: 'var(--ink-2)', cssClassName: 'bg-caps' }),
+    group('rcColourRow', 'Its colours', 'rcCard', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(8), rowGap: sp(8) }), ['rcColourEach']),
+    { ...logic('rcColourEach', FOR_EACH_NODE, 'One per paint', { template: C.swatch, templateType: 'explicit' }), parent: 'rcColourRow' },
+    text('rcHatL', 'Hat', 'rcCard', '', { fontSize: px(12), fontWeight: '800', color: 'var(--ink-2)', cssClassName: 'bg-caps' }),
+    group('rcHatRow', 'Its hats', 'rcCard', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(8), rowGap: sp(8) }), ['rcHatEach']),
+    { ...logic('rcHatEach', FOR_EACH_NODE, 'One per hat', { template: C.chip, templateType: 'explicit' }), parent: 'rcHatRow' },
+    text('rcCanL', 'What it can do', 'rcCard', '', { fontSize: px(12), fontWeight: '800', color: 'var(--ink-2)', cssClassName: 'bg-caps' }),
+    group('rcCanRow', 'Its blocks', 'rcCard', { ...row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(6), rowGap: sp(6) }), cssClassName: 'bg-robot-abilities' }, ['rcCanEach']),
+    { ...logic('rcCanEach', FOR_EACH_NODE, 'One chip per block', { template: C.ability, templateType: 'explicit' }), parent: 'rcCanRow' },
+    text('rcUpL', 'Upgrade', 'rcCard', '', { fontSize: px(12), fontWeight: '800', color: 'var(--ink-2)', cssClassName: 'bg-caps' }),
+    group('rcUp', 'Its upgrade', 'rcCard', { width: pct(100), sizeMode: 'contentHeight', ...pad(8, 12), borderRadius: px(14), cssClassName: 'bg-robot-up' }, ['rcUpText']),
+    text('rcUpText', 'The upgrade', 'rcUp', '', { ...T_SMALL, fontWeight: '800', color: 'var(--ink)' }),
+    text('rcWhereL', 'Where it works', 'rcCard', '', { fontSize: px(12), fontWeight: '800', color: 'var(--ink-2)', cssClassName: 'bg-caps' }),
+    text('rcWhere', 'Where it works', 'rcCard', '', { ...T_BODY, cssClassName: 'bg-robot-where' }),
+    logic('rcIsOwned', CONDITION_NODE, 'Hers?'),
+    withStates('rcOwn', 'Hers, or still to be lent', ['locked', 'owned'], { owned: { type: 'boolean', by: { locked: false, owned: true } }, locked: { type: 'boolean', by: { locked: true, owned: false } } }),
+    outputs('rcOut', [['id', 'string'], ['name', 'string'], ['named', 'signal'], ['colour', 'string'], ['coloured', 'signal'], ['hat', 'string'], ['hatted', 'signal']])
+  ],
+  connections: [
+    wire('rcIn', 'cardClass', 'rcCard', 'cssClassName'),
+    wire('rcIn', 'tagClass', 'rcTag', 'cssClassName'),
+    wire('rcIn', 'tag', 'rcTagText', 'text'),
+    wire('rcIn', 'nameWord', 'rcNameL', 'text'),
+    wire('rcIn', 'name', 'rcName', 'startValue'),
+    wire('rcIn', 'name', 'rcNameText', 'text'),
+    wire('rcIn', 'wears', 'rcWears', 'text'),
+    wire('rcIn', 'colourWord', 'rcColourL', 'text'),
+    wire('rcIn', 'hatWord', 'rcHatL', 'text'),
+    wire('rcIn', 'canDoWord', 'rcCanL', 'text'),
+    wire('rcIn', 'upgradeWord', 'rcUpL', 'text'),
+    wire('rcIn', 'whereWord', 'rcWhereL', 'text'),
+    wire('rcIn', 'paints', 'rcColourEach', 'items'),
+    wire('rcIn', 'hats', 'rcHatEach', 'items'),
+    wire('rcIn', 'abilities', 'rcCanEach', 'items'),
+    wire('rcIn', 'upgradeText', 'rcUpText', 'text'),
+    wire('rcIn', 'upgradeClass', 'rcUp', 'cssClassName'),
+    wire('rcIn', 'whereText', 'rcWhere', 'text'),
+    // Drawn in its look, with the accessory of its job.
+    ...(['name', 'color', 'eye', 'hat', 'accessory'] as const).map((f) => wire('rcIn', f, 'rcDraw', f === 'name' ? 'botName' : f)),
+    wire('rcDraw', 'map', 'rcGarden', 'map'),
+    wire('rcDraw', 'robots', 'rcGarden', 'robots'),
+    // Hers: the name box, the colours, the hats. Not lent yet: the name as words, nothing to pick.
+    wire('rcIn', 'owned', 'rcIsOwned', 'condition'),
+    wire('rcIsOwned', 'ontrue', 'rcOwn', 'to-owned'),
+    wire('rcIsOwned', 'onfalse', 'rcOwn', 'to-locked'),
+    ...(['rcName', 'rcColourL', 'rcColourRow', 'rcHatL', 'rcHatRow'] as const).map((n) => wire('rcOwn', 'owned', n, 'mounted')),
+    wire('rcOwn', 'locked', 'rcNameText', 'mounted'),
+    wire('rcIn', 'id', 'rcOut', 'id'),
+    wire('rcName', 'onTextChanged', 'rcOut', 'name'),
+    wire('rcName', 'onBlur', 'rcOut', 'named'),
+    wire('rcName', 'onEnter', 'rcOut', 'named'),
+    wire('rcColourEach', 'itemOutput-id', 'rcOut', 'colour'),
+    wire('rcColourEach', 'itemOutputSignal-picked', 'rcOut', 'coloured'),
+    wire('rcHatEach', 'itemOutput-id', 'rcOut', 'hat'),
+    wire('rcHatEach', 'itemOutputSignal-picked', 'rcOut', 'hatted')
   ]
 };
 
@@ -2303,6 +2429,9 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       logic('wsComplete', L('Complete request'), 'Done: the island, the tricks, the reward'),
       // P106 IG-004: the program that won stays on the plot, the robot pinned to it (Complete request writes both).
       variable('wsProgVar', 'gardenProgram', 'The program that won'),
+      // P106 IG-005: the robot this request needs (hers of that kind), and what a win lent and gave, for the card.
+      logic('wsJob', L('Job robot'), 'The robot for this job', { stepMs: TICK_MS }),
+      logic('wsGift', L('Gift line'), 'What the win lent and gave'),
       logic('wsGuardWait', TIMER_NODE, 'A moment for the request to arrive', { duration: 600 }),
       gate('wsGuard', 'Is there a request?'),
       navigate('wsGoIsland', C.pageIsland, 'To the island')
@@ -2313,7 +2442,21 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       wire('wsRequests', 'requests', 'wsPlay', 'requests'),
       wire('wsHints', 'hints', 'wsPlay', 'hints'),
       wire('wsWords', 'words', 'wsPlay', 'words'),
-      ...(['lang', 'band', 'botName', 'color', 'eye', 'hat'] as const).map((f) => wire('wsFam', f, 'wsPlay', f)),
+      ...(['lang', 'band'] as const).map((f) => wire('wsFam', f, 'wsPlay', f)),
+      // P106 IG-005: the Workshop's robot is the job's — its name in every line, its look, its palette, its boots.
+      wire('wsRequests', 'requests', 'wsJob', 'requests'),
+      wire('wsReqVar', 'value', 'wsJob', 'requestId'),
+      wire('wsFam', 'robots', 'wsJob', 'robots'),
+      wire('wsFam', 'lang', 'wsJob', 'lang'),
+      ...(['botName', 'color', 'eye', 'hat', 'robot', 'robotKey', 'paletteRobot', 'stepMs'] as const).map((f) => wire('wsJob', f, 'wsPlay', f)),
+      wire('wsJob', 'robotId', 'wsComplete', 'robotId'),
+      wire('wsComplete', 'lent', 'wsGift', 'lent'),
+      wire('wsComplete', 'upgraded', 'wsGift', 'upgraded'),
+      wire('wsWords', 'words', 'wsGift', 'words'),
+      wire('wsFam', 'lang', 'wsGift', 'lang'),
+      wire('wsJob', 'botName', 'wsGift', 'botName'),
+      wire('wsGift', 'text', 'wsPlay', 'giftText'),
+      wire('wsGift', 'has', 'wsPlay', 'hasGift'),
       wire('wsFam', 'older', 'wsPlay', 'isOlder'),
       // A win: stored on HER island (Complete request marks the profile that played).
       wire('wsStore', 'model', 'wsComplete', 'model'),
@@ -2336,12 +2479,22 @@ const PAGE_WORKSHOP: CgComponent = (() => {
 })();
 
 const PAGE_ROBOT: CgComponent = (() => {
-  const base = pageCommon('rb', 'My robot', 'robot', 'robot', ['rbHead', 'rbGrid']);
+  const base = pageCommon('rb', 'My robot', 'robot', 'robot', ['rbHead', 'rbGrid', 'rbFleetL', 'rbFleet']);
   return {
     path: 'Pages/My robot',
-    description: 'My robot: the robot big on its stage, and the name, paint, eyes, hat (gifts, never bought) and stickers.',
+    description: 'My robots (P106 IG-005): Pip big on his stage with his name, paint, eyes, hat (gifts, never bought) and stickers; then a card per robot of the island — the ones she has, each with its name, look, blocks, upgrade and where it works, and the ones an islander will lend, with who and after what.',
+    repeats: { source: 'array', rowFields: ['id', 'kind', 'name', 'owned', 'locked', 'tag', 'tagClass', 'cardClass', 'wears', 'color', 'eye', 'hat', 'accessory', 'paints', 'hats', 'abilities', 'upgradeText', 'upgradeClass', 'whereText', 'nameWord', 'colourWord', 'hatWord', 'canDoWord', 'upgradeWord', 'whereWord'] },
     nodes: [
       ...base.nodes,
+      // P106 IG-005: the fleet — a card per robot (Robot cards), written through Update robot (one per field).
+      text('rbFleetL', 'Your robots', 'rbWrap', '', { ...T_H2, marginTop: sp(8) }),
+      group('rbFleet', 'The robots', 'rbWrap', { ...row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(14), rowGap: sp(14), alignItems: 'stretch' }), cssClassName: 'bg-robots' }, ['rbFleetEach']),
+      { ...logic('rbFleetEach', FOR_EACH_NODE, 'One card per robot', { template: C.robotCard, templateType: 'explicit' }), parent: 'rbFleet' },
+      logic('rbCards', L('Robot cards'), 'Her robots and the ones to be lent'),
+      logic('rbRequests', C.requests, 'The requests'),
+      logic('rbSetName', L('Update robot'), 'A robot’s name', { field: 'name' }),
+      logic('rbSetColour', L('Update robot'), 'A robot’s paint', { field: 'color' }),
+      logic('rbSetHat', L('Update robot'), 'A robot’s hat', { field: 'hat' }),
       place('rbHead', C.head, 'The head', 'rbWrap'),
       group('rbGrid', 'Stage and options', 'rbWrap', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-robo' }, ['rbStage', 'rbOptions']),
       group('rbStage', 'The stage', 'rbGrid', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-robo-stage' }, ['rbGarden']),
@@ -2351,7 +2504,27 @@ const PAGE_ROBOT: CgComponent = (() => {
     ],
     connections: [
       ...base.connections,
-      ...headWires('rb', 'navRobot', 'rbTitle', 'rbSub'),
+      ...headWires('rb', 'navRobot', 'ig5Title', 'ig5Sub'),
+      wire('rbT', 'ig5Fleet', 'rbFleetL', 'text'),
+      ...(['robots', 'hats', 'band', 'lang', 'botName'] as const).map((f) => wire('rbFam', f, 'rbCards', f)),
+      wire('rbWords', 'words', 'rbCards', 'words'),
+      wire('rbRequests', 'requests', 'rbCards', 'requests'),
+      wire('rbCards', 'cards', 'rbFleetEach', 'items'),
+      ...(
+        [
+          ['rbSetName', 'name', 'named'],
+          ['rbSetColour', 'colour', 'coloured'],
+          ['rbSetHat', 'hat', 'hatted']
+        ] as const
+      ).flatMap(([u, value, signal]) => [
+        wire('rbStore', 'model', u, 'model'),
+        wire('rbFam', 'profileId', u, 'profileId'),
+        wire('rbFleetEach', 'itemOutput-id', u, 'robotId'),
+        wire('rbFleetEach', `itemOutput-${value}`, u, 'value'),
+        wire('rbFleetEach', `itemOutputSignal-${signal}`, u, 'go'),
+        wire(u, 'model', 'rbStore', 'model'),
+        wire(u, 'ran', 'rbStore', 'write')
+      ]),
       ...(['botName', 'color', 'eye', 'hat'] as const).map((f) => wire('rbFam', f, 'rbDraw', f)),
       wire('rbDraw', 'map', 'rbGarden', 'map'),
       wire('rbDraw', 'robots', 'rbGarden', 'robots'),
@@ -2563,6 +2736,9 @@ export const CG003_COMPONENTS: ReadonlyArray<CgComponent> = [
   CHIP,
   STICKER,
   OPTIONS,
+  // P106 IG-005.
+  ABILITY,
+  ROBOT_CARD,
   SKILL,
   SKILL_OLIVE,
   LESSON_LINE,

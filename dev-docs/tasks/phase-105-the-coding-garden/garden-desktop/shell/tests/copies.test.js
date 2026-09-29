@@ -230,6 +230,21 @@ test('the save code is byte-identical to the pageâ€™s own encoder, and the pageâ
   // P106 IG-004: the pinned plot rode through the code (program, robot, when).
   assert.deepEqual(back.model.profiles[0].island.plots, fam.profiles[0].island.plots);
   assert.equal(fam.profiles[0].island.plots.path.robotId, 'r1');
+  // P106 IG-005: a family with lent robots (Sami's post-box walk lends Cobble, Biscuit's bowl Pocket), one renamed and
+  // recoloured, and rows a hand-edit broke (an unknown kind, a bad colour, a long name): packed as the page packs them.
+  const complete = pageScript('Complete request');
+  const lent = JSON.parse(JSON.stringify(fam));
+  const ada = lent.profiles[0].id;
+  let m = complete({ model: lent, requestId: 'path-postbox', profileId: ada, tricks: [1], reward: null }).model;
+  m = complete({ model: m, requestId: 'bowl-if', profileId: ada, tricks: [4], reward: null }).model;
+  const lentRobots = m.profiles[0].island.robots;
+  assert.deepEqual(lentRobots.map((r) => r.id), ['r1', 'cobble', 'pocket'], 'the page lent both');
+  lentRobots[1].name = 'Rocky';
+  lentRobots[2].color = '#3FA66B';
+  m.profiles[1].island.robots = [{ id: 'r1' }, { id: 'echo', kind: 'dragon', name: 'E'.repeat(20), color: 'violet', eye: 'star', hat: '' }, 'pocket'];
+  assert.equal(C.saveCodeOf(m), encode({ model: m }).code, 'lent robots pack as the page packs them');
+  const round = decode({ code: C.saveCodeOf(m) });
+  assert.deepEqual(round.model.profiles[0].island.robots, lentRobots.map((r) => ({ ...r })), 'and the page reads them back');
   // A model this shell does not know is kept as stored, never packed by a guess (v3 is migrated by the page on load).
   assert.equal(C.saveCodeOf({ ...fam, v: 5 }), null);
   assert.equal(C.saveCodeOf({ ...fam, v: 3 }), null);

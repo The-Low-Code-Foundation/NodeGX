@@ -160,7 +160,7 @@
         {
           "name": "refused",
           "plug": "input",
-          "type": "*"
+          "type": "boolean"
         },
         {
           "name": "refusedSlot",

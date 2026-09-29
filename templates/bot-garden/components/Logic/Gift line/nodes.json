@@ -1,0 +1,126 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "043ee402-adb1-562c-8520-e526664d56ec",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "giftlineIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lent",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "upgraded",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "giftlineFn",
+      "type": "JavaScriptFunction",
+      "label": "Gift line",
+      "parameters": {
+        "functionScript": "\nfunction wordMap(rows, lang, name) {\n  var map = {};\n  var list = Array.isArray(rows) ? rows : [];\n  for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || '').split('{b}').join(name);\n  return map;\n}\nfunction fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\nfunction langOf(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction nameOf(v) { var n = String(v || '').trim(); return n || 'Pip'; }\n\nvar ROBOTS = [{\"id\":\"pip\",\"defaultName\":{\"en\":\"Pip\",\"fr\":\"Pip\"},\"colour\":\"#FF7A59\",\"accessory\":\"can\",\"palette\":[\"water\",\"fill\",\"olive:read\"],\"canMax\":3,\"basket\":4,\"upgrade\":\"can+\",\"lentBy\":null,\"unlockedBy\":null},{\"id\":\"cobble\",\"defaultName\":{\"en\":\"Cobble\",\"fr\":\"Cobble\"},\"colour\":\"#7A8CA3\",\"accessory\":\"hod\",\"palette\":[\"pick\",\"put\"],\"canMax\":3,\"basket\":4,\"upgrade\":\"basket+\",\"lentBy\":\"sami\",\"unlockedBy\":\"path-postbox\"},{\"id\":\"pocket\",\"defaultName\":{\"en\":\"Pocket\",\"fr\":\"Poche\"},\"colour\":\"#FFB347\",\"accessory\":\"satchel\",\"palette\":[\"pick\",\"put\",\"say\",\"olive:say-thanks\"],\"canMax\":3,\"basket\":6,\"upgrade\":\"boots\",\"lentBy\":\"biscuit\",\"unlockedBy\":\"bowl-if\"},{\"id\":\"echo\",\"defaultName\":{\"en\":\"Echo\",\"fr\":\"Écho\"},\"colour\":\"#8F6BFF\",\"accessory\":\"bell\",\"palette\":[\"water\",\"say\",\"olive:read\",\"olive:is-it-a\",\"olive:say-thanks\"],\"canMax\":3,\"basket\":4,\"upgrade\":\"can+\",\"lentBy\":\"mamie\",\"unlockedBy\":\"mamie-note\"}];\nvar UPGRADES = [{\"id\":\"can+\",\"from\":\"mamie\",\"unlockedBy\":\"rows-trick\",\"fits\":[\"pip\",\"echo\"],\"canMax\":6},{\"id\":\"basket+\",\"from\":\"sami\",\"unlockedBy\":\"path-stones\",\"fits\":[\"cobble\"],\"basket\":8},{\"id\":\"boots\",\"from\":\"biscuit\",\"unlockedBy\":\"wall-until\",\"fits\":[\"pocket\"],\"stepFactor\":0.7}];\nvar WHO = {\"mamie\":\"islMamie\",\"sami\":\"islSami\",\"biscuit\":\"islBiscuit\"};\nvar RW = {\"does\":{\"pip\":\"ig5DoesPip\",\"cobble\":\"ig5DoesCobble\",\"pocket\":\"ig5DoesPocket\",\"echo\":\"ig5DoesEcho\"},\"wears\":{\"can\":\"ig5WearsCan\",\"hod\":\"ig5WearsHod\",\"satchel\":\"ig5WearsSatchel\",\"bell\":\"ig5WearsBell\"},\"upgrade\":{\"can+\":\"ig5UpCan\",\"basket+\":\"ig5UpBasket\",\"boots\":\"ig5UpBoots\"}};\nvar lang = langOf(Inputs.lang);\nvar w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));\nvar lent = Array.isArray(Inputs.lent) ? Inputs.lent : [];\nvar upgraded = Array.isArray(Inputs.upgraded) ? Inputs.upgraded : [];\nvar out = [];\nfor (var i = 0; i < lent.length; i++) for (var j = 0; j < ROBOTS.length; j++) if (ROBOTS[j].id === lent[i]) {\n  var r = ROBOTS[j], nm = r.defaultName[lang] || r.defaultName.en;\n  out.push(fill(w.ig5Lends, { who: w[WHO[r.lentBy]] || '', r: nm, does: w[RW.does[r.id]] || '' }));\n}\nfor (var u = 0; u < upgraded.length; u++) for (var k = 0; k < UPGRADES.length; k++) if (UPGRADES[k].id === upgraded[u]) out.push(fill(w.ig5Gives, { who: w[WHO[UPGRADES[k].from]] || '', up: w[RW.upgrade[UPGRADES[k].id]] || '' }));\nOutputs.text = out.join(' ');\nOutputs.has = out.length > 0;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lent",
+          "displayName": "lent",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-upgraded",
+          "displayName": "upgraded",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-has",
+          "displayName": "has",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "giftlineOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "has",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "text",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

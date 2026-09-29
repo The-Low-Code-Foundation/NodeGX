@@ -30,6 +30,7 @@
 import fs from 'fs';
 import path from 'path';
 import { BAND_PALETTE, Block, GardenRequest, HINTS, OLIVE_RUNGS, REQUESTS, VOICED_HINT_KEYS, WORDS, WORD_KEYS } from './cg002Content';
+import { UPGRADES } from './cg002Content';
 import { FUNCTION_SCRIPTS, MAX_TICKS, PALETTE_SCRIPT, runScript } from './cg002Scripts';
 import { OLIVE_LESSON_IDS, OLIVE_SLOTS_SCRIPT, OLIVE_WORDS, PALETTE_RUNG_IDS } from './cg005Olive';
 import { DROPPED_LISTS, DROPPED_RUNGS, Expect, MOMENTS, PROBES, RETIRED_RUNGS, decide, meets, mergeTemplates } from './cg006Probes';
@@ -535,7 +536,8 @@ describe('CG-006 — the requests', () => {
       for (const r of REQUESTS) model = runScript(COMPLETE, { model, profileId: model.profiles[0].id, requestId: r.id, tricks: r.tricks, reward: r.reward }).model;
       const p = model.profiles[0];
       expect([...p.hats].sort()).toEqual(REQUESTS.filter((r) => r.reward.kind === 'hat').map((r) => r.reward.id).sort());
-      expect([...p.stickers].sort()).toEqual(REQUESTS.filter((r) => r.reward.kind !== 'hat').map((r) => r.reward.id).sort());
+      // P106 IG-005: the upgrades (items) the catalogue gives after their requests are on the sticker page too.
+      expect([...p.stickers].sort()).toEqual([...REQUESTS.filter((r) => r.reward.kind !== 'hat').map((r) => r.reward.id), ...UPGRADES.map((u) => u.id)].sort());
       expect(model.island.done).toHaveLength(REQUESTS.length);
     });
   });

@@ -1066,7 +1066,9 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       for (const m of maps) expect(JSON.stringify(b.parseMap(m))).toBe(JSON.stringify(a.parseMap(m)));
       const things = [null, '', '[{"kind":"tulip","x":1,"y":2},{"x":1},{"kind":"puddle","x":"a","y":1},7]', [{ kind: 'bowl', x: '3', y: 4, full: true }], { not: 'a list' }];
       for (const t of things) expect(JSON.stringify(b.parseThings(t))).toBe(JSON.stringify(a.parseThings(t)));
-      const robots = [null, { x: 1, y: 2 }, [{ d: -1, color: '#123', eyes: 'happy', hat: 'sun' }, { d: 6.4, hat: 'nope', bump: '2' }], '[{"x":"3","y":3,"name":"Bo"}]', 'junk', [7, null], ...VOCAB_ROBOTS];
+      const robots = [null, { x: 1, y: 2 }, [{ d: -1, color: '#123', eyes: 'happy', hat: 'sun' }, { d: 6.4, hat: 'nope', bump: '2' }], '[{"x":"3","y":3,"name":"Bo"}]', 'junk', [7, null], ...VOCAB_ROBOTS,
+        // P106 IG-005 (brief s4 §4.3): the accessory, every shape.
+        [{ accessory: 'hod' }, { accessory: 'satchel' }, { accessory: 'bell' }, { accessory: 'can' }, { accessory: '' }, { accessory: 'jetpack' }, { accessory: null }, {}]];
       // P106 s2 (brief §4): the copy carries `can`, `canMax`, `carry` — garden-kit gets the same three lines in lane A.
       // Green on both sides of the merge: every field garden-kit answers is answered the same (order-free), and the copy's
       // only extra fields are exactly those three, each by the §4 rule. After the merge the extras are empty and the
@@ -1169,6 +1171,39 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       const says = dom.overlay.children.filter((c: any) => c.className === 'gd3-isl-say');
       expect(says.map((c: any) => c.textContent)).toEqual(['Lay four stones on the path']);
       eng.destroy();
+    });
+  });
+  describe('IG-005 (P106 s4) — robots for the job: each robot wears its accessory in 3D, in its own colour', () => {
+    it('🔴 Cobble’s hod, Pocket’s satchel and Echo’s bell are an `accessory` group on the robot; Pip keeps his can; \'\' wears nothing', () => {
+      const W = node().world;
+      const s = node().scene;
+      // The stub keeps no constructor arguments; the body's material colour is graded here (as the dry-petal clause does).
+      const st = threeStub();
+      const BaseMesh = st.THREE.Mesh;
+      st.THREE.Mesh = function (this: any, geo: unknown, material: unknown) {
+        BaseMesh.call(this, geo, material);
+        this.material = material;
+      };
+      const BaseMat = st.THREE.MeshLambertMaterial;
+      st.THREE.MeshLambertMaterial = function (this: any, opts: { color?: number }) {
+        BaseMat.call(this, opts);
+        this.color = opts ? opts.color : undefined;
+      };
+      const built = s.buildScene({ map: W.parseMap({ rows: ['GGGGG'] }), things: [], robots: W.parseRobots([
+        { x: 0, y: 0, name: 'Pip', colour: '#FF7A59', accessory: 'can' },
+        { x: 1, y: 0, name: 'Cobble', colour: '#7A8CA3', accessory: 'hod' },
+        { x: 2, y: 0, name: 'Pocket', colour: '#FFB347', accessory: 'satchel' },
+        { x: 3, y: 0, name: 'Echo', colour: '#8F6BFF', accessory: 'bell' },
+        { x: 4, y: 0, name: 'Bare', accessory: '' }
+      ]) }, st.THREE);
+      const named = (g: any, n: string): any => { let f: any = null; g.traverse((o: any) => { if (!f && o.name === n) f = o; }); return f; };
+      const acc = built.robots.map((g: any) => (named(g, 'accessory') ? named(g, 'accessory').userData.accessory : null));
+      const can = built.robots.map((g: any) => !!named(g, 'can'));
+      expect(acc).toEqual([null, 'hod', 'satchel', 'bell', null]);
+      expect(can).toEqual([true, false, false, false, false]);
+      // Each body in its own colour (the first mesh of the robot is its body box).
+      const body = (g: any) => { let m: any = null; g.traverse((o: any) => { if (!m && o.type === 'Mesh') m = o; }); return '#' + Number(m.material.color).toString(16).padStart(6, '0'); };
+      expect(built.robots.slice(0, 4).map(body)).toEqual(['#ff7a59', '#7a8ca3', '#ffb347', '#8f6bff']);
     });
   });
 });

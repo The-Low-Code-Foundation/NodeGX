@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "043ee402-adb1-562c-8520-e526664d56ec",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "giftlineIn",
+      "fromProperty": "botName",
+      "toId": "giftlineFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "giftlineIn",
+      "fromProperty": "lang",
+      "toId": "giftlineFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "giftlineIn",
+      "fromProperty": "lent",
+      "toId": "giftlineFn",
+      "toProperty": "in-lent"
+    },
+    {
+      "fromId": "giftlineIn",
+      "fromProperty": "upgraded",
+      "toId": "giftlineFn",
+      "toProperty": "in-upgraded"
+    },
+    {
+      "fromId": "giftlineIn",
+      "fromProperty": "words",
+      "toId": "giftlineFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "giftlineFn",
+      "fromProperty": "out-has",
+      "toId": "giftlineOut",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "giftlineFn",
+      "fromProperty": "out-text",
+      "toId": "giftlineOut",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "giftlineFn",
+      "fromProperty": "success",
+      "toId": "giftlineOut",
+      "toProperty": "ran"
+    }
+  ]
+}

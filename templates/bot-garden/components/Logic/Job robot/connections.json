@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "44d88f48-4299-51fb-85ae-e1d865e2e60b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "jobrobotIn",
+      "fromProperty": "lang",
+      "toId": "jobrobotFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "jobrobotIn",
+      "fromProperty": "requestId",
+      "toId": "jobrobotFn",
+      "toProperty": "in-requestId"
+    },
+    {
+      "fromId": "jobrobotIn",
+      "fromProperty": "requests",
+      "toId": "jobrobotFn",
+      "toProperty": "in-requests"
+    },
+    {
+      "fromId": "jobrobotIn",
+      "fromProperty": "robots",
+      "toId": "jobrobotFn",
+      "toProperty": "in-robots"
+    },
+    {
+      "fromId": "jobrobotIn",
+      "fromProperty": "stepMs",
+      "toId": "jobrobotFn",
+      "toProperty": "in-stepMs"
+    },
+    {
+      "fromId": "jobrobotFn",
+      "fromProperty": "out-accessory",
+      "toId": "jobrobotOut",
+      "toProperty": "accessory"
+    },
+    {
+      "fromId": "jobrobotFn",
+      "fromProperty": "out-botName",
+      "toId": "jobrobotOut",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "jobrobotFn",
+      "fromProperty": "out-color",
+      "toId": "jobrobotOut",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "jobrobotFn",
+      "fromProperty": "out-eye",
+      "toId": "jobrobotOut",
+      "toProperty": "eye"
+    },
+    {
+      "fromId": "jobrobotFn",
+      "fromProperty": "out-hat",
+      "toId": "jobrobotOut",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "jobrobotFn",
+      "fromProperty": "out-needs",
+      "toId": "jobrobotOut",
+      "toProperty": "needs"
+    },
+    {
+      "fromId": "jobrobotFn",
+      "fromProperty": "out-owned",
+      "toId": "jobrobotOut",
+      "toProperty": "owned"
+    },
+    {
+      "fromId": "jobrobotFn",
+      "fromProperty": "out-paletteRobot",
+      "toId": "jobrobotOut",
+      "toProperty": "paletteRobot"
+    },
+    {
+      "fromId": "jobrobotFn",
+      "fromProperty": "out-robot",
+      "toId": "jobrobotOut",
+      "toProperty": "robot"
+    },
+    {
+      "fromId": "jobrobotFn",
+      "fromProperty": "out-robotId",
+      "toId": "jobrobotOut",
+      "toProperty": "robotId"
+    },
+    {
+      "fromId": "jobrobotFn",
+      "fromProperty": "out-robotKey",
+      "toId": "jobrobotOut",
+      "toProperty": "robotKey"
+    },
+    {
+      "fromId": "jobrobotFn",
+      "fromProperty": "out-stepMs",
+      "toId": "jobrobotOut",
+      "toProperty": "stepMs"
+    },
+    {
+      "fromId": "jobrobotFn",
+      "fromProperty": "success",
+      "toId": "jobrobotOut",
+      "toProperty": "ran"
+    }
+  ]
+}

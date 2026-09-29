@@ -22,6 +22,16 @@
           "name": "requests",
           "plug": "output",
           "type": "array"
+        },
+        {
+          "name": "robot",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "robotKey",
+          "plug": "output",
+          "type": "string"
         }
       ],
       "x": 40,
@@ -32,7 +42,8 @@
       "type": "JavaScriptFunction",
       "label": "Start world",
       "parameters": {
-        "functionScript": "\nvar FREE = {\"id\":\"free\",\"islander\":\"\",\"band\":1,\"tricks\":[],\"map\":[\"GGTGGGTH\",\"GGGGGGGG\",\"GGFGFGFG\",\"PPPPPPPP\",\"GWWGGRGG\",\"GGGGGTGG\"],\"things\":[{\"kind\":\"tulip\",\"x\":2,\"y\":2,\"watered\":false},{\"kind\":\"tulip\",\"x\":4,\"y\":2,\"watered\":false},{\"kind\":\"tulip\",\"x\":6,\"y\":2,\"watered\":false}],\"robotStart\":{\"x\":0,\"y\":3,\"d\":1},\"goal\":[],\"palette\":[],\"rungs\":\"all\",\"reward\":null,\"copyKeys\":{\"title\":\"sandH\",\"blurb\":\"isFree\",\"line\":\"sandP\",\"reward\":\"\"}};\nfunction countRef(list) { var n = 0; var l = Array.isArray(list) ? list : []; for (var i = 0; i < l.length; i++) { if (!l[i]) continue; n++; if (Array.isArray(l[i].body)) n += countRef(l[i].body); } return n; }\nvar reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];\nvar id = String(Inputs.requestId || '');\nvar req = null;\nfor (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].id === id) req = reqs[i];\nif (!req && id === 'free') req = FREE;\nOutputs.found = !!req;\nOutputs.requestId = req ? req.id : '';\nOutputs.isFree = !!req && req.id === 'free';\n// IG-001 D3: the reference program's block count, for Choose hint's \"Perfect!\" (free play has none: 0).\nOutputs.referenceCount = req ? countRef(req.referenceProgram) : 0;\nif (req) {\n  var rs = req.robotStart || {};\n  var robot = { id: 'me', x: Number(rs.x) || 0, y: Number(rs.y) || 0, d: Number(rs.d) || 0, carry: Array.isArray(rs.carry) ? rs.carry.slice() : [] };\n  if (rs.basket !== undefined) robot.basket = rs.basket;\n  // IG-002: the can — a number where the request has a pond to fetch from (0: empty), null where it has none (free water).\n  robot.can = rs.can === undefined || rs.can === null || rs.can === '' ? null : Math.max(0, Math.floor(Number(rs.can)) || 0);\n  robot.canMax = Number(rs.canMax) > 0 ? Math.floor(Number(rs.canMax)) : 3;\n  Outputs.world = { map: (req.map || []).slice(), things: JSON.parse(JSON.stringify(req.things || [])), robots: [robot], events: [], schedule: JSON.parse(JSON.stringify(req.schedule || [])) };\n  Outputs.request = JSON.parse(JSON.stringify(req));\n  Outputs.goal = JSON.parse(JSON.stringify(req.goal || []));\n  Outputs.allowed = (req.palette || []).slice();\n  Outputs.rungs = req.rungs === 'all' ? 'all' : Array.isArray(req.rungs) ? req.rungs.slice() : [];\n  Outputs.islander = String(req.islander || '');\n  // IG-003 (R5): the islander's challenge on this request ('predict'), or none.\n  Outputs.challenge = req.challenge === 'predict' ? 'predict' : '';\n} else {\n  Outputs.world = null;\n  Outputs.request = null;\n  Outputs.goal = [];\n  Outputs.allowed = [];\n  Outputs.rungs = [];\n  Outputs.islander = '';\n  Outputs.challenge = '';\n}\nOutputs.nonce = Inputs.nonce;\n"
+        "functionScript": "\nvar FREE = {\"id\":\"free\",\"islander\":\"\",\"band\":1,\"tricks\":[],\"map\":[\"GGTGGGTH\",\"GGGGGGGG\",\"GGFGFGFG\",\"PPPPPPPP\",\"GWWGGRGG\",\"GGGGGTGG\"],\"things\":[{\"kind\":\"tulip\",\"x\":2,\"y\":2,\"watered\":false},{\"kind\":\"tulip\",\"x\":4,\"y\":2,\"watered\":false},{\"kind\":\"tulip\",\"x\":6,\"y\":2,\"watered\":false}],\"robotStart\":{\"x\":0,\"y\":3,\"d\":1},\"goal\":[],\"palette\":[],\"rungs\":\"all\",\"reward\":null,\"copyKeys\":{\"title\":\"sandH\",\"blurb\":\"isFree\",\"line\":\"sandP\",\"reward\":\"\"}};\nfunction countRef(list) { var n = 0; var l = Array.isArray(list) ? list : []; for (var i = 0; i < l.length; i++) { if (!l[i]) continue; n++; if (Array.isArray(l[i].body)) n += countRef(l[i].body); } return n; }\nvar reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];\nvar id = String(Inputs.requestId || '');\nvar req = null;\nfor (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].id === id) req = reqs[i];\nif (!req && id === 'free') req = FREE;\n// P106 IG-005: the robot doing the job (Job robot's row). It does not re-run this script by itself (the page marks it\n// quiet): Robot Key — its id, kind and look as text — does, so a win that upgrades it never resets the world under the\n// win card; the upgrade is on the robot the next time the request opens. No robot: the world as before IG-005.\nvar bot = Inputs.robot && typeof Inputs.robot === 'object' ? Inputs.robot : null;\nOutputs.found = !!req;\nOutputs.requestId = req ? req.id : '';\nOutputs.isFree = !!req && req.id === 'free';\n// IG-001 D3: the reference program's block count, for Choose hint's \"Perfect!\" (free play has none: 0).\nOutputs.referenceCount = req ? countRef(req.referenceProgram) : 0;\nif (req) {\n  var rs = req.robotStart || {};\n  var robot = { id: 'me', x: Number(rs.x) || 0, y: Number(rs.y) || 0, d: Number(rs.d) || 0, carry: Array.isArray(rs.carry) ? rs.carry.slice() : [] };\n  if (rs.basket !== undefined) robot.basket = rs.basket;\n  // IG-002: the can — a number where the request has a pond to fetch from (0: empty), null where it has none (free water).\n  robot.can = rs.can === undefined || rs.can === null || rs.can === '' ? null : Math.max(0, Math.floor(Number(rs.can)) || 0);\n  robot.canMax = Number(rs.canMax) > 0 ? Math.floor(Number(rs.canMax)) : 3;\n  // IG-005: the robot's own can (an upgrade makes it 6) and basket (never smaller than the request's), and its look.\n  if (bot) {\n    if (Number(bot.canMax) > 0) robot.canMax = Math.floor(Number(bot.canMax));\n    if (Number(bot.basket) > 0) robot.basket = Math.max(Math.floor(Number(bot.basket)), Number(rs.basket) > 0 ? Math.floor(Number(rs.basket)) : 0);\n    robot.look = { name: String(bot.name || ''), colour: String(bot.color || ''), eyes: String(bot.eye || 'round'), hat: String(bot.hat || 'none'), accessory: String(bot.accessory || '') };\n  }\n  Outputs.world = { map: (req.map || []).slice(), things: JSON.parse(JSON.stringify(req.things || [])), robots: [robot], events: [], schedule: JSON.parse(JSON.stringify(req.schedule || [])) };\n  Outputs.request = JSON.parse(JSON.stringify(req));\n  Outputs.goal = JSON.parse(JSON.stringify(req.goal || []));\n  Outputs.allowed = (req.palette || []).slice();\n  Outputs.rungs = req.rungs === 'all' ? 'all' : Array.isArray(req.rungs) ? req.rungs.slice() : [];\n  Outputs.islander = String(req.islander || '');\n  // IG-003 (R5): the islander's challenge on this request ('predict'), or none.\n  Outputs.challenge = req.challenge === 'predict' ? 'predict' : '';\n  // IG-005: the robot kind this request needs (free play: none — the garden takes every block).\n  Outputs.needs = req.id === 'free' ? '' : String(req.needs || 'pip');\n} else {\n  Outputs.world = null;\n  Outputs.request = null;\n  Outputs.goal = [];\n  Outputs.allowed = [];\n  Outputs.rungs = [];\n  Outputs.islander = '';\n  Outputs.challenge = '';\n  Outputs.needs = '';\n}\nOutputs.nonce = Inputs.nonce;\nOutputs.robotKey = String(Inputs.robotKey || '');\n",
+        "runOnChange-in-robot": false
       },
       "x": 40,
       "y": 160,
@@ -52,8 +63,22 @@
           "group": "Inputs"
         },
         {
+          "name": "in-robot",
+          "displayName": "robot",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
           "name": "in-nonce",
           "displayName": "nonce",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-robotKey",
+          "displayName": "robotKey",
           "plug": "input",
           "type": "*",
           "group": "Inputs"
@@ -136,8 +161,22 @@
           "group": "Outputs"
         },
         {
+          "name": "out-needs",
+          "displayName": "needs",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
           "name": "out-nonce",
           "displayName": "nonce",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-robotKey",
+          "displayName": "robotKey",
           "plug": "output",
           "type": "*",
           "group": "Outputs"
@@ -180,6 +219,11 @@
           "type": "string"
         },
         {
+          "name": "needs",
+          "plug": "input",
+          "type": "string"
+        },
+        {
           "name": "nonce",
           "plug": "input",
           "type": "number"
@@ -196,6 +240,11 @@
         },
         {
           "name": "requestId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "robotKey",
           "plug": "input",
           "type": "string"
         },

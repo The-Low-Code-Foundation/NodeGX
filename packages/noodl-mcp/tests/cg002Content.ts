@@ -154,7 +154,9 @@ export interface GardenRequest {
   rungs?: ReadonlyArray<string>;
   /** P106 IG-003 (R5): an islander's challenge — `predict`: before Play, tap where the robot will stop (band 10–12 only). */
   challenge?: 'predict';
-  reward: { kind: 'hat' | 'sticker' | 'seed' | 'item'; id: string; from: 'sami' | 'mamie' | 'biscuit' };
+  /** P106 IG-005 (R8): the robot kind this request needs (default `pip`); its plot is padlocked until that robot is owned. */
+  needs?: RobotKind;
+  reward: { kind: 'hat' | 'sticker' | 'seed' | 'item' | 'robot'; id: string; from: 'sami' | 'mamie' | 'biscuit' };
   copyKeys: { title: string; blurb: string; line: string; reward: string; gift: string };
   referenceProgram: ReadonlyArray<Block>;
 }
@@ -244,6 +246,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
       { name: 'thing_at', args: ['stone', 6, 3] }
     ],
     palette: ['fwd', 'left', 'right', 'pick', 'put', 'repeat'],
+    needs: 'cobble',
     reward: { kind: 'seed', id: 'seeds', from: 'sami' },
     copyKeys: { title: 'rqStonesTitle', blurb: 'rqStonesBlurb', line: 'rqStonesLine', reward: 'seeds', gift: 'giftSeeds' },
     referenceProgram: [blk('left'), blk('repeat', { n: 4, body: b1('pick') }), blk('right'), blk('repeat', { n: 4, body: b1('put', 'fwd') })]
@@ -262,6 +265,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     robotStart: { x: 0, y: 3, d: 1, carry: ['food', 'food'] },
     goal: [{ name: 'bowl_has', args: [4, 2, 1] }, { name: 'bowl_has', args: [2, 2, 1] }, { name: 'uses', args: ['if', 1] }],
     palette: ['fwd', 'left', 'right', 'put', 'repeat', 'if'],
+    needs: 'cobble',
     rungs: ['is-it-a'],
     reward: { kind: 'hat', id: 'crown', from: 'biscuit' },
     copyKeys: { title: 'rqBowlTitle', blurb: 'rqBowlBlurb', line: 'rqBowlLine', reward: 'hatCrown', gift: 'giftCrown' },
@@ -283,6 +287,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     robotStart: { x: 0, y: 3, d: 1 },
     goal: [{ name: 'thing_at', args: ['letter', 7, 3] }, { name: 'said', args: [1] }],
     palette: ['fwd', 'left', 'right', 'pick', 'put', 'say', 'repeat'],
+    needs: 'pocket',
     rungs: ['say-thanks'],
     reward: { kind: 'sticker', id: 'letter', from: 'sami' },
     copyKeys: { title: 'rqLetterTitle', blurb: 'rqLetterBlurb', line: 'rqLetterLine', reward: 'stickerLetter', gift: 'giftLetter' },
@@ -336,6 +341,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     robotStart: { x: 0, y: 3, d: 1, basket: 6 },
     goal: [{ name: 'carrying', args: ['egg', 4] }, { name: 'uses', args: ['count_inc', 1] }, { name: 'senses', args: ['count_is', 1] }, { name: 'thing_at', args: ['egg', 5, 3] }],
     palette: ['fwd', 'left', 'right', 'pick', 'until', 'count_inc'],
+    needs: 'pocket',
     reward: { kind: 'item', id: 'basket', from: 'mamie' },
     copyKeys: { title: 'rqEggsTitle', blurb: 'rqEggsBlurb', line: 'rqEggsLine', reward: 'itemBasket', gift: 'giftBasket' },
     referenceProgram: [blk('until', { slots: { sensor: 'count_is', arg: 4 }, body: b1('pick', 'count_inc', 'fwd') })]
@@ -498,7 +504,7 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   brand: s('Olive’s Island', 'L’île d’Olive'),
   navIsland: s('Island', 'Île'),
   navWorkshop: s('Workshop', 'Atelier'),
-  navRobot: s('My robot', 'Mon robot'),
+  navRobot: s('My robots', 'Mes robots'),
   navSkills: s('Skills', 'Astuces'),
   navGrown: s('Grown-ups', 'Parents'),
   navProfiles: s('Profiles', 'Profils'),
@@ -869,6 +875,7 @@ function IG006_REQUESTS(): GardenRequest[] {
       robotStart: { x: 0, y: 3, d: 1 },
       goal: goal([{ name: 'every_tulip_watered' }, { name: 'no_puddle' }, { name: 'uses', args: ['olive:is-it-a', 1] }, { name: 'senses', args: ['olive_says:yes', 1] }]),
       palette: ['fwd', 'left', 'right', 'water', 'repeat', 'if'],
+      needs: 'echo',
       rungs: ['is-it-a'],
       reward: { kind: 'sticker', id: 'flower', from: 'sami' },
       copyKeys: { title: 'rqFlowerTitle', blurb: 'rqFlowerBlurb', line: 'rqFlowerLine', reward: 'stickerFlower', gift: 'giftFlower' },
@@ -890,6 +897,7 @@ function IG006_REQUESTS(): GardenRequest[] {
       robotStart: { x: 0, y: 3, d: 1 },
       goal: goal([{ name: 'thing_at', args: ['letter', 7, 3] }, { name: 'said', args: [1] }, { name: 'uses', args: ['olive:say-thanks', 1] }]),
       palette: ['fwd', 'left', 'right', 'pick', 'put', 'repeat'],
+      needs: 'pocket',
       challenge: 'predict',
       rungs: ['say-thanks'],
       reward: { kind: 'sticker', id: 'thanks', from: 'sami' },
@@ -941,3 +949,72 @@ export const ISLAND_BASE: ReadonlyArray<string> = (() => {
   ISLAND_HOME_MAP.forEach((r, y) => r.split('').forEach((c, x) => (rows[ISLAND_HOME_PLOT.y + y][ISLAND_HOME_PLOT.x + x] = c)));
   return rows.map((r) => r.join(''));
 })();
+
+// ── P106 IG-005 (lane B): robots for the job — the catalogue, the upgrades, and what each robot can do ─────────────
+
+/** The robot kinds (R8): Pip from the start, then one lent by each islander. */
+export type RobotKind = 'pip' | 'cobble' | 'pocket' | 'echo';
+/** The upgrades, given as `item` rewards (they sit on the sticker page too): a bigger can, a bigger basket, boots. */
+export type UpgradeId = 'can+' | 'basket+' | 'boots';
+
+/**
+ * One robot of the catalogue. `palette` is what it can do BEYOND the moves every robot has (`ROBOT_MOVES`) and the
+ * controls of the band (`ROBOT_CONTROLS`): its actions and its Olive blocks. `canMax` is what `fill` fills its can to
+ * where a request has a pond (IG-002), `basket` what it carries; `upgrade` the one slot it has. `lentBy` / `unlockedBy`:
+ * the islander who lends it and the request whose win does (null for Pip, who is there from the start).
+ */
+export interface RobotSpec {
+  id: RobotKind;
+  defaultName: Bi;
+  colour: string;
+  accessory: 'can' | 'hod' | 'satchel' | 'bell';
+  palette: ReadonlyArray<string>;
+  canMax: number;
+  basket: number;
+  upgrade: UpgradeId;
+  lentBy: 'sami' | 'mamie' | 'biscuit' | null;
+  unlockedBy: string | null;
+}
+
+/** Every robot has these moves: forward and the two turns. */
+export const ROBOT_MOVES: ReadonlyArray<string> = ['fwd', 'left', 'right'];
+/** And the controls of the band (band 7–9 has none): the palette's band filter still decides which show. */
+export const ROBOT_CONTROLS: ReadonlyArray<string> = ['repeat', 'until', 'if', 'when', 'count_inc', 'trick', 'do'];
+
+/**
+ * The catalogue (IG-005 §2). Each request's `needs` is one of these, and every request's reference program uses only
+ * what its robot can do (the engine gate proves it, both bands). Who lends whom is a chain with no loop: Pip wins Sami's
+ * post-box walk and Mamie's note; Sami's walk lends Cobble (the stones, Biscuit's bowl); the bowl lends Pocket (the
+ * eggs, the letters); the note lends Echo (the rocks and the flowers). Pip reads with Olive (the note is the child's
+ * first Olive job); Echo has every Olive block — a palette choice, not an engine rule (IG-005 §6).
+ */
+export const ROBOTS: ReadonlyArray<RobotSpec> = [
+  { id: 'pip', defaultName: s('Pip', 'Pip'), colour: '#FF7A59', accessory: 'can', palette: ['water', 'fill', 'olive:read'], canMax: 3, basket: 4, upgrade: 'can+', lentBy: null, unlockedBy: null },
+  { id: 'cobble', defaultName: s('Cobble', 'Cobble'), colour: '#7A8CA3', accessory: 'hod', palette: ['pick', 'put'], canMax: 3, basket: 4, upgrade: 'basket+', lentBy: 'sami', unlockedBy: 'path-postbox' },
+  { id: 'pocket', defaultName: s('Pocket', 'Poche'), colour: '#FFB347', accessory: 'satchel', palette: ['pick', 'put', 'say', 'olive:say-thanks'], canMax: 3, basket: 6, upgrade: 'boots', lentBy: 'biscuit', unlockedBy: 'bowl-if' },
+  { id: 'echo', defaultName: s('Echo', 'Écho'), colour: '#8F6BFF', accessory: 'bell', palette: ['water', 'say', 'olive:read', 'olive:is-it-a', 'olive:say-thanks'], canMax: 3, basket: 4, upgrade: 'can+', lentBy: 'mamie', unlockedBy: 'mamie-note' }
+];
+
+/** One upgrade: who gives it, after which request, which robots it fits, and what it changes. */
+export interface UpgradeSpec {
+  id: UpgradeId;
+  from: 'sami' | 'mamie' | 'biscuit';
+  unlockedBy: string;
+  fits: ReadonlyArray<RobotKind>;
+  canMax?: number;
+  basket?: number;
+  stepFactor?: number;
+}
+
+/** The upgrades (IG-005 §2): Mamie's bigger can (3 → 6), Sami's bigger basket (4 → 8), Biscuit's boots (Step Ms × 0.7). */
+export const UPGRADES: ReadonlyArray<UpgradeSpec> = [
+  { id: 'can+', from: 'mamie', unlockedBy: 'rows-trick', fits: ['pip', 'echo'], canMax: 6 },
+  { id: 'basket+', from: 'sami', unlockedBy: 'path-stones', fits: ['cobble'], basket: 8 },
+  { id: 'boots', from: 'biscuit', unlockedBy: 'wall-until', fits: ['pocket'], stepFactor: 0.7 }
+];
+
+/** The robot a request needs (Pip when it names none). */
+export const needsOf = (r: { needs?: RobotKind }): RobotKind => r.needs ?? 'pip';
+
+export const ROBOTS_JSON = JSON.stringify(ROBOTS);
+export const UPGRADES_JSON = JSON.stringify(UPGRADES);

@@ -71,6 +71,12 @@
     },
     {
       "fromId": "completerequesFn",
+      "fromProperty": "out-lent",
+      "toId": "completerequesOut",
+      "toProperty": "lent"
+    },
+    {
+      "fromId": "completerequesFn",
       "fromProperty": "out-model",
       "toId": "completerequesOut",
       "toProperty": "model"
@@ -86,6 +92,12 @@
       "fromProperty": "out-pinned",
       "toId": "completerequesOut",
       "toProperty": "pinned"
+    },
+    {
+      "fromId": "completerequesFn",
+      "fromProperty": "out-upgraded",
+      "toId": "completerequesOut",
+      "toProperty": "upgraded"
     },
     {
       "fromId": "completerequesFn",

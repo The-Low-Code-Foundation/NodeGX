@@ -38,6 +38,17 @@ import { BLOCK_CARDS, CardBlock, EYES, HATS, IG006_WORDS, IG006_WORD_KEYS, ISLAN
 import { ROBOT_PAINTS } from './cg007Look';
 import { FREE_PLAY_PLOT, ISLAND_BASE, ISLAND_HOME, PLOT_H, PLOT_W } from './cg002Content';
 import { FIND_ROBOTS_SCRIPT, ISLAND_TICK_SCRIPT, PLOT_AT_SCRIPT, islandChooseScript, islandWorldScript } from './ig004Island';
+// P106 IG-005 (lane B): the robot catalogue and its upgrades.
+import { ROBOTS_JSON, UPGRADES_JSON } from './cg002Content';
+
+/** P106 IG-005 (lane B): the islanders' name keys, for the lock line and the gifts. */
+const ISLANDER_WORDS = Object.fromEntries(Object.entries(ISLANDERS).map(([id, i]) => [id, i.nameKey]));
+/** The word for what each robot does, what it wears, and each upgrade — by kind / id. */
+const ROBOT_WORDS = {
+  does: { pip: 'ig5DoesPip', cobble: 'ig5DoesCobble', pocket: 'ig5DoesPocket', echo: 'ig5DoesEcho' },
+  wears: { can: 'ig5WearsCan', hod: 'ig5WearsHod', satchel: 'ig5WearsSatchel', bell: 'ig5WearsBell' },
+  upgrade: { 'can+': 'ig5UpCan', 'basket+': 'ig5UpBasket', boots: 'ig5UpBoots' }
+};
 
 /** Every word key the pages can show: the engine's (CG-002/006), Olive's (CG-005), then the pages' own. */
 export const ALL_WORD_KEYS: ReadonlyArray<string> = [...WORD_KEYS, ...OLIVE_WORD_KEYS, ...PAGE_WORD_KEYS, ...IG006_WORD_KEYS];
@@ -112,6 +123,10 @@ var id = String(Inputs.requestId || '');
 var req = null;
 for (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].id === id) req = reqs[i];
 if (!req && id === 'free') req = FREE;
+// P106 IG-005: the robot doing the job (Job robot's row). It does not re-run this script by itself (the page marks it
+// quiet): Robot Key — its id, kind and look as text — does, so a win that upgrades it never resets the world under the
+// win card; the upgrade is on the robot the next time the request opens. No robot: the world as before IG-005.
+var bot = Inputs.robot && typeof Inputs.robot === 'object' ? Inputs.robot : null;
 Outputs.found = !!req;
 Outputs.requestId = req ? req.id : '';
 Outputs.isFree = !!req && req.id === 'free';
@@ -124,6 +139,12 @@ if (req) {
   // IG-002: the can — a number where the request has a pond to fetch from (0: empty), null where it has none (free water).
   robot.can = rs.can === undefined || rs.can === null || rs.can === '' ? null : Math.max(0, Math.floor(Number(rs.can)) || 0);
   robot.canMax = Number(rs.canMax) > 0 ? Math.floor(Number(rs.canMax)) : ${CAN_MAX};
+  // IG-005: the robot's own can (an upgrade makes it 6) and basket (never smaller than the request's), and its look.
+  if (bot) {
+    if (Number(bot.canMax) > 0) robot.canMax = Math.floor(Number(bot.canMax));
+    if (Number(bot.basket) > 0) robot.basket = Math.max(Math.floor(Number(bot.basket)), Number(rs.basket) > 0 ? Math.floor(Number(rs.basket)) : 0);
+    robot.look = { name: String(bot.name || ''), colour: String(bot.color || ''), eyes: String(bot.eye || 'round'), hat: String(bot.hat || 'none'), accessory: String(bot.accessory || '') };
+  }
   Outputs.world = { map: (req.map || []).slice(), things: JSON.parse(JSON.stringify(req.things || [])), robots: [robot], events: [], schedule: JSON.parse(JSON.stringify(req.schedule || [])) };
   Outputs.request = JSON.parse(JSON.stringify(req));
   Outputs.goal = JSON.parse(JSON.stringify(req.goal || []));
@@ -132,6 +153,8 @@ if (req) {
   Outputs.islander = String(req.islander || '');
   // IG-003 (R5): the islander's challenge on this request ('predict'), or none.
   Outputs.challenge = req.challenge === 'predict' ? 'predict' : '';
+  // IG-005: the robot kind this request needs (free play: none — the garden takes every block).
+  Outputs.needs = req.id === 'free' ? '' : String(req.needs || 'pip');
 } else {
   Outputs.world = null;
   Outputs.request = null;
@@ -140,8 +163,10 @@ if (req) {
   Outputs.rungs = [];
   Outputs.islander = '';
   Outputs.challenge = '';
+  Outputs.needs = '';
 }
 Outputs.nonce = Inputs.nonce;
+Outputs.robotKey = String(Inputs.robotKey || '');
 `;
 
 /** Each request's own line under the title (CG-007 §7.1 item 1): its word key, by request id. */
@@ -198,7 +223,12 @@ var bump = (Number(Inputs.bumps) || 0) + (Number(Inputs.teachBumps) || 0);
 var robots = [];
 var rl = Array.isArray(world.robots) ? world.robots : [];
 // IG-002: the can's level (null: no can, no drops) and the load on the robot's back (the last thing carried).
-for (var r = 0; r < rl.length; r++) robots.push({ x: rl[r].x, y: rl[r].y, d: rl[r].d, colour: String(Inputs.color || '#FF7A59'), eyes: String(Inputs.eye || 'round'), hat: String(Inputs.hat || 'none'), name: nameOf(Inputs.botName), bump: bump, can: rl[r].can === undefined || rl[r].can === null ? null : rl[r].can, canMax: Number(rl[r].canMax) > 0 ? Number(rl[r].canMax) : ${CAN_MAX}, carry: Array.isArray(rl[r].carry) ? rl[r].carry.slice() : [] });
+// P106 IG-005: a robot carrying its own look (the island's robots, the Workshop's job robot) is drawn in it — its name,
+// colour, eyes, hat and the accessory of its job; one without is drawn in the page's look (Pip's, with his can).
+for (var r = 0; r < rl.length; r++) {
+  var lk = rl[r].look && typeof rl[r].look === 'object' ? rl[r].look : {};
+  robots.push({ x: rl[r].x, y: rl[r].y, d: rl[r].d, colour: String(lk.colour || Inputs.color || '#FF7A59'), eyes: String(lk.eyes || Inputs.eye || 'round'), hat: String(lk.hat || Inputs.hat || 'none'), name: nameOf(lk.name || Inputs.botName), bump: bump, can: rl[r].can === undefined || rl[r].can === null ? null : rl[r].can, canMax: Number(rl[r].canMax) > 0 ? Number(rl[r].canMax) : ${CAN_MAX}, carry: Array.isArray(rl[r].carry) ? rl[r].carry.slice() : [], accessory: lk.accessory !== undefined ? String(lk.accessory) : Inputs.accessory !== undefined && Inputs.accessory !== null ? String(Inputs.accessory) : 'can' });
+}
 var lang = langOf(Inputs.lang);
 var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
 var say = String(Inputs.sayKey || '');
@@ -370,7 +400,8 @@ Outputs.tricks = active ? JSON.parse(JSON.stringify(active.tricks)) : {};
 Outputs.done = active ? active.island.done.slice() : [];
 // P106 IG-004: her plots (a won plot's program and the robot pinned to it) and her robots (v4: the one).
 Outputs.plots = active ? JSON.parse(JSON.stringify(active.island.plots)) : {};
-Outputs.robots = active ? JSON.parse(JSON.stringify(active.island.robots)) : [];
+// IG-005: each robot resolved for the pages — its look, what it can do, its upgrades applied, where it works.
+Outputs.robots = active ? robotRowsOf(active) : [];
 var rows = [];
 for (var j = 0; j < model.profiles.length; j++) {
   var p = model.profiles[j];
@@ -423,24 +454,29 @@ var w = wordMap(Inputs.words, lang, name);
 var band = Number(Inputs.band) === 1 ? 1 : 2;
 var done = Array.isArray(Inputs.done) ? Inputs.done : [];
 var reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];
-// P106 IG-004: where her robot is at work (v4: her one robot). Another request is blocked until it comes home.
+// P106 IG-004: where her robot is at work. Another request is blocked until it comes home. IG-005: the robot a request
+// NEEDS — blocked while that robot works another plot, or while she has no robot of that kind yet (a padlock's card).
 var plots = Inputs.plots && typeof Inputs.plots === 'object' ? Inputs.plots : {};
 var mine = Array.isArray(Inputs.robots) && Inputs.robots.length ? Inputs.robots : [{ id: 'r1' }];
-var workingAt = '';
-for (var pk in plots) if (plots[pk] && plots[pk].robotId === mine[0].id && Array.isArray(plots[pk].program) && plots[pk].program.length) workingAt = pk;
+function kindOfRow(m) { return m && m.kind ? String(m.kind) : m && m.id !== 'r1' && m.id ? String(m.id) : 'pip'; }
+function jobOf(r) { var k = r && r.needs ? String(r.needs) : 'pip'; for (var q = 0; q < mine.length; q++) if (kindOfRow(mine[q]) === k) return mine[q]; return null; }
+function workOf(bot) { if (!bot) return ''; for (var pk in plots) if (plots[pk] && plots[pk].robotId === bot.id && Array.isArray(plots[pk].program) && plots[pk].program.length) return pk; return ''; }
 var rows = [], open = 0;
 for (var i = 0; i < reqs.length; i++) {
   var r = reqs[i];
   if (!r || Number(r.band) > band) continue;
   var isl = ISLANDERS[r.islander] || { sprite: 'owl', nameKey: '' };
   var isDone = done.indexOf(r.id) !== -1;
+  var job = jobOf(r), workingAt = workOf(job);
+  var botName = job && job.name ? String(job.name) : name;
+  var wRaw = wordMap(Inputs.words, lang, '{b}');
   if (!isDone) open++;
   var trick = Array.isArray(r.tricks) && r.tricks.length ? Number(r.tricks[0]) : 1;
   var kind = r.palette && r.palette.indexOf('say') !== -1 ? 'ask' : (KIND[trick] || 'control');
   rows.push({
     id: r.id, who: w[isl.nameKey] || '', title: w[r.copyKeys.title] || '', trick: w[r.copyKeys.blurb] || '',
-    faceClass: 'bg-face bg-sp-' + isl.sprite, tagClass: 'bg-tag bg-tag-' + kind, isDone: isDone, doneWord: '✓ ' + (w.done || '') + (workingAt === r.id ? ' · ' + (w.ig4Working || '') : ''),
-    blocked: !!workingAt && workingAt !== r.id
+    faceClass: 'bg-face bg-sp-' + isl.sprite, tagClass: 'bg-tag bg-tag-' + kind, isDone: isDone, doneWord: '✓ ' + (w.done || '') + (workingAt === r.id ? ' · ' + String(wRaw.ig4Working || '').split('{b}').join(botName) : ''),
+    blocked: !job || (!!workingAt && workingAt !== r.id)
   });
 }
 Outputs.rows = rows;
@@ -516,7 +552,7 @@ for (var k = 0; k < HATS.length; k++) {
   hats.push({ id: h.id, label: (h.id === 'sun' ? '🌻 ' : h.id === 'crown' ? '👑 ' : '') + (w[h.word] || h.id) + (has || !h.from ? '' : ' · ' + fill(w.hatLocked, { who: w[h.from] || '' })), selected: h.id === hat, locked: !has });
 }
 var st = Array.isArray(Inputs.stickers) ? Inputs.stickers : [];
-var STICKER = { letter: ['✉️', 'stickerLetter'], paw: ['🐾', 'stickerPaw'], tulip: ['🌷', 'stickerTulip'], bell: ['🔔', 'itemBell'], basket: ['🧺', 'itemBasket'], gnome: ['🧙', 'itemGnome'], seeds: ['🌱', 'seeds'], note: ['📝', 'stickerNote'], flower: ['🌹', 'stickerFlower'], thanks: ['💐', 'stickerThanks'] };
+var STICKER = { 'can+': ['🪣', 'ig5UpCan'], 'basket+': ['🧺', 'ig5UpBasket'], boots: ['🥾', 'ig5UpBoots'], letter: ['✉️', 'stickerLetter'], paw: ['🐾', 'stickerPaw'], tulip: ['🌷', 'stickerTulip'], bell: ['🔔', 'itemBell'], basket: ['🧺', 'itemBasket'], gnome: ['🧙', 'itemGnome'], seeds: ['🌱', 'seeds'], note: ['📝', 'stickerNote'], flower: ['🌹', 'stickerFlower'], thanks: ['💐', 'stickerThanks'] };
 for (var s = 0; s < st.length; s++) { var d = STICKER[st[s]] || ['⭐', '']; stickers.push({ id: String(st[s]), label: d[0] + ' ' + (w[d[1]] || String(st[s])) }); }
 Outputs.paints = paints;
 Outputs.eyes = eyes;
@@ -987,7 +1023,136 @@ Outputs.line = hit ? w.ig3PredictRight || '' : armed ? w.ig3PredictAsk || '' : S
 /** `Logic/Island world`: the island for this kid, from the requests' plots, her save and the islanders' next requests. */
 export const ISLAND_WORLD_SCRIPT = islandWorldScript({ free: FREE_PLAY, base: ISLAND_BASE, home: ISLAND_HOME, freePlot: FREE_PLAY_PLOT, plotW: PLOT_W, plotH: PLOT_H });
 /** `Logic/Island choose`: the plot card's words and what it offers. */
-export const ISLAND_CHOOSE_SCRIPT = islandChooseScript({ free: FREE_PLAY, islanders: ISLANDERS, wordHelper: WORD_HELPER });
+export const ISLAND_CHOOSE_SCRIPT = islandChooseScript({ free: FREE_PLAY, islanders: ISLANDERS, wordHelper: WORD_HELPER, robots: JSON.parse(ROBOTS_JSON), robotWords: ROBOT_WORDS });
+
+// ── P106 IG-005 (lane B): robots for the job ──────────────────────────────────────────────────────────────────────
+
+/**
+ * `Logic/Job robot` — the robot doing this request: the kind it needs (Pip when it names none; free play: Pip), and
+ * her robot of that kind — its row (look, what it can do, the upgrades), its id for the win to pin, its words' name,
+ * and the Workshop's step time with its boots. With no robot of that kind (the plot is padlocked; the island never
+ * opens it) the catalogue's robot, `owned` false. `robotKey` is the text Start world re-runs on (id, kind, look).
+ * `paletteRobot` is the row, except in free play (the garden offers every block, whoever drives).
+ */
+export const JOB_ROBOT_SCRIPT = `${WORD_HELPER}
+var ROBOTS = ${ROBOTS_JSON};
+var lang = langOf(Inputs.lang);
+var reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];
+var id = String(Inputs.requestId || '');
+var req = null;
+for (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].id === id) req = reqs[i];
+var kind = req && req.needs ? String(req.needs) : 'pip';
+var mine = Array.isArray(Inputs.robots) ? Inputs.robots : [];
+var row = null;
+for (var j = 0; j < mine.length && !row; j++) if (mine[j] && String(mine[j].kind || '') === kind) row = mine[j];
+var owned = !!row;
+if (!row) {
+  var spec = null;
+  for (var k = 0; k < ROBOTS.length; k++) if (ROBOTS[k].id === kind) spec = ROBOTS[k];
+  spec = spec || ROBOTS[0];
+  row = { id: '', kind: spec.id, name: spec.defaultName[lang] || spec.defaultName.en, color: spec.colour, eye: 'round', hat: 'none', accessory: spec.accessory, palette: spec.palette.slice(), canMax: spec.canMax, basket: spec.basket, stepFactor: 1 };
+}
+var base = Number(Inputs.stepMs) > 0 ? Number(Inputs.stepMs) : 420;
+Outputs.needs = kind;
+Outputs.owned = owned;
+Outputs.robot = JSON.parse(JSON.stringify(row));
+Outputs.paletteRobot = id === 'free' ? null : JSON.parse(JSON.stringify(row));
+Outputs.robotId = String(row.id || '');
+Outputs.botName = String(row.name || 'Pip');
+Outputs.color = String(row.color || '#FF7A59');
+Outputs.eye = String(row.eye || 'round');
+Outputs.hat = String(row.hat || 'none');
+Outputs.accessory = String(row.accessory || '');
+Outputs.stepMs = Math.round(base * (Number(row.stepFactor) > 0 ? Number(row.stepFactor) : 1));
+Outputs.robotKey = JSON.stringify([row.id, row.kind, row.name, row.color, row.eye, row.hat, row.accessory]);
+`;
+
+/**
+ * `Logic/Gift line` — the win card's line for what the win lent and gave (Complete request's Lent and Upgraded):
+ * "Sami lends you Cobble! Cobble lays stones." / "Mamie Rose gives you Bigger can · 6 waters." Nothing when nothing.
+ */
+export const GIFT_LINE_SCRIPT = `${WORD_HELPER}
+var ROBOTS = ${ROBOTS_JSON};
+var UPGRADES = ${UPGRADES_JSON};
+var WHO = ${JSON.stringify(ISLANDER_WORDS)};
+var RW = ${JSON.stringify(ROBOT_WORDS)};
+var lang = langOf(Inputs.lang);
+var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
+var lent = Array.isArray(Inputs.lent) ? Inputs.lent : [];
+var upgraded = Array.isArray(Inputs.upgraded) ? Inputs.upgraded : [];
+var out = [];
+for (var i = 0; i < lent.length; i++) for (var j = 0; j < ROBOTS.length; j++) if (ROBOTS[j].id === lent[i]) {
+  var r = ROBOTS[j], nm = r.defaultName[lang] || r.defaultName.en;
+  out.push(fill(w.ig5Lends, { who: w[WHO[r.lentBy]] || '', r: nm, does: w[RW.does[r.id]] || '' }));
+}
+for (var u = 0; u < upgraded.length; u++) for (var k = 0; k < UPGRADES.length; k++) if (UPGRADES[k].id === upgraded[u]) out.push(fill(w.ig5Gives, { who: w[WHO[UPGRADES[k].from]] || '', up: w[RW.upgrade[UPGRADES[k].id]] || '' }));
+Outputs.text = out.join(' ');
+Outputs.has = out.length > 0;
+`;
+
+/**
+ * `Logic/Robot cards` — My robots (the mockup's 09-robots): one card per robot of the catalogue, in its order. An owned
+ * robot: its name, whose it is (Yours / Lent by …), what it wears, its colours and hats to pick (ringed and worn), its
+ * blocks as chips (the moves, its own, the controls of her band), its upgrade (owned, or the empty slot and who gives
+ * it), where it works. A robot not lent yet: Locked, who lends it and after what, its blocks — nothing to pick.
+ */
+export const ROBOT_CARDS_SCRIPT = `${WORD_HELPER}
+var ROBOTS = ${ROBOTS_JSON};
+var UPGRADES = ${UPGRADES_JSON};
+var WHO = ${JSON.stringify(ISLANDER_WORDS)};
+var RW = ${JSON.stringify(ROBOT_WORDS)};
+var PAINTS = ${JSON.stringify(ROBOT_PAINTS)};
+var HATS = ${JSON.stringify(HATS)};
+var META = ${JSON.stringify(BLOCK_META)};
+var MOVES = ['fwd', 'left', 'right'];
+var CONTROLS = ['repeat', 'until', 'if', 'when', 'count_inc'];
+var LABEL = { fwd: 'bFwd', left: 'bLeft', right: 'bRight', water: 'bWater', fill: 'bFill', pick: 'bPick', put: 'bPut', say: 'bSay', repeat: 'bRepeat', until: 'bUntil', 'if': 'bIf', when: 'bWhen', count_inc: 'bCountInc' };
+var OLIVE_WORD = ${JSON.stringify(Object.fromEntries(PALETTE_RUNG_IDS.map((id) => ['olive:' + id, rungWordKey(id)])))};
+var lang = langOf(Inputs.lang), band = Number(Inputs.band) === 1 ? 1 : 2;
+var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
+var mine = Array.isArray(Inputs.robots) ? Inputs.robots : [];
+var owned = Array.isArray(Inputs.hats) ? Inputs.hats : [];
+var reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];
+function titleOf(id) { for (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].id === id) return w[reqs[i].copyKeys.title] || id; return id; }
+function blockWord(id) { if (id.indexOf('olive:') === 0) return w[OLIVE_WORD[id]] || id; var k = LABEL[id]; if (band === 1 && k && w['c' + k.slice(1)]) k = 'c' + k.slice(1); return w[k] || id; }
+function kindClass(id) { return 'bg-ability bg-blk bg-blk-' + (id.indexOf('olive:') === 0 ? 'ask' : META[id] ? META[id].kind : 'action'); }
+var cards = [];
+for (var i = 0; i < ROBOTS.length; i++) {
+  var spec = ROBOTS[i], row = null;
+  for (var j = 0; j < mine.length && !row; j++) if (mine[j] && String(mine[j].kind || '') === spec.id) row = mine[j];
+  var has = !!row;
+  var look = row || { id: '', name: spec.defaultName[lang] || spec.defaultName.en, color: spec.colour, eye: 'round', hat: 'none', canMax: spec.canMax, basket: spec.basket, upgraded: false, working: '' };
+  var abilities = [], ids = MOVES.slice();
+  for (var a = 0; a < spec.palette.length; a++) if (band === 2 || spec.palette[a].indexOf('olive:') !== 0) ids.push(spec.palette[a]);
+  if (band === 2) ids = ids.concat(CONTROLS);
+  for (var b = 0; b < ids.length; b++) if (!(band === 1 && ids[b] === 'say')) abilities.push({ id: ids[b], label: blockWord(ids[b]), cls: kindClass(ids[b]) });
+  var up = null;
+  for (var u = 0; u < UPGRADES.length; u++) if (UPGRADES[u].id === spec.upgrade) up = UPGRADES[u];
+  var upWord = up ? w[RW.upgrade[up.id]] || '' : '', upWho = up ? w[WHO[up.from]] || '' : '';
+  var paints = [], hats = [];
+  if (has) {
+    for (var q = 0; q < PAINTS.length; q++) paints.push({ id: PAINTS[q].hex, paint: 'var(' + PAINTS[q].token + ')', label: PAINTS[q].name[lang], selected: PAINTS[q].hex.toUpperCase() === String(look.color).toUpperCase() });
+    for (var h = 0; h < HATS.length; h++) { var hs = HATS[h], got = hs.free || owned.indexOf(hs.id) !== -1; hats.push({ id: hs.id, label: (hs.id === 'sun' ? '🌻 ' : hs.id === 'crown' ? '👑 ' : '') + (w[hs.word] || hs.id) + (got || !hs.from ? '' : ' · ' + fill(w.hatLocked, { who: w[hs.from] || '' })), selected: hs.id === look.hat, locked: !got }); }
+  }
+  var lender = spec.lentBy ? w[WHO[spec.lentBy]] || '' : '';
+  var nm = String(look.name || spec.defaultName.en);
+  cards.push({
+    id: has ? String(row.id) : spec.id, kind: spec.id, name: nm, owned: has, locked: !has,
+    tag: !has ? (w.ig5LockedTag || '') : spec.lentBy ? fill(w.ig5LentBy, { who: lender }) : (w.ig5Yours || ''),
+    tagClass: 'bg-robot-tag ' + (!has ? 'bg-robot-tag-locked' : spec.lentBy ? 'bg-robot-tag-lent' : 'bg-robot-tag-yours'),
+    cardClass: 'bg-panel bg-robot-card bg-robot-' + spec.id + (has ? '' : ' bg-robot-locked'),
+    wears: w[RW.wears[spec.accessory]] || '', color: String(look.color), eye: String(look.eye || 'round'), hat: String(look.hat || 'none'), accessory: spec.accessory,
+    paints: paints, hats: hats, abilities: abilities,
+    upgradeText: up ? fill(has && look.upgraded ? w.ig5UpHas : w.ig5UpEmpty, { up: upWord, who: upWho }) : '',
+    upgradeClass: 'bg-robot-up' + (has && look.upgraded ? ' bg-robot-up-on' : ''),
+    whereText: !has ? fill(w.ig5WhenLent, { who: lender, r: nm, q: titleOf(spec.unlockedBy) }) : look.working ? fill(w.ig5AtWork, { plot: titleOf(look.working) }) : (w.ig5AtHome || ''),
+    nameWord: w.rbName || '', colourWord: w.rbColour || '', hatWord: w.rbHat || '', canDoWord: w.ig5CanDo || '', upgradeWord: w.ig5Upgrade || '', whereWord: w.ig5Where || ''
+  });
+}
+Outputs.cards = cards;
+Outputs.count = cards.length;
+Outputs.owned = mine.length;
+`;
 
 /** The glue, as the generator places it: one `Logic/*` each. */
 export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; seam: string }> = [
@@ -1031,5 +1196,9 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Island tick', script: ISLAND_TICK_SCRIPT, seam: 'one tick of the island: every pinned run stepped in turn on its own plot' },
   { component: 'Logic/Plot at', script: PLOT_AT_SCRIPT, seam: 'which plot a tapped tile is on' },
   { component: 'Logic/Island choose', script: ISLAND_CHOOSE_SCRIPT, seam: 'the plot card: who asks, what, whether it opens, and bring the robot home' },
-  { component: 'Logic/Find robots', script: FIND_ROBOTS_SCRIPT, seam: 'the flat island\u2019s find my robots, and the plot card scrolled into view' }
+  { component: 'Logic/Find robots', script: FIND_ROBOTS_SCRIPT, seam: 'the flat island\u2019s find my robots, and the plot card scrolled into view' },
+  // P106 IG-005 (lane B): robots for the job.
+  { component: 'Logic/Job robot', script: JOB_ROBOT_SCRIPT, seam: 'the robot this request needs, hers of that kind, its look, its step time' },
+  { component: 'Logic/Gift line', script: GIFT_LINE_SCRIPT, seam: 'the win card\u2019s line for the robot lent and the upgrade given' },
+  { component: 'Logic/Robot cards', script: ROBOT_CARDS_SCRIPT, seam: 'My robots: a card per robot, owned or still to be lent' }
 ];

@@ -904,7 +904,10 @@
           bump: isFinite(Number(r.bump)) ? Number(r.bump) : 0,
           can: isFinite(Number(r.can)) && r.can !== null && r.can !== '' ? Math.max(0, Math.floor(Number(r.can))) : null,
           canMax: isFinite(Number(r.canMax)) && Number(r.canMax) > 0 ? Math.floor(Number(r.canMax)) : 3,
-          carry: Array.isArray(r.carry) ? r.carry.map(String) : []
+          carry: Array.isArray(r.carry) ? r.carry.map(String) : [],
+          // P106 IG-005 (brief s4 §4.3): what the robot wears for its job. Missing = the can (every robot before IG-005 was
+          // Pip with his can); '' or anything unknown = none.
+          accessory: r.accessory === undefined || r.accessory === null ? 'can' : ['can', 'hod', 'satchel', 'bell'].indexOf(r.accessory) !== -1 ? r.accessory : ''
         };
       });
   }
@@ -962,9 +965,26 @@
       h('rect', { key: 'a2', x: 54, y: 26, width: 6, height: 16, rx: 3, fill: r.colour, stroke: 'rgba(0,0,0,.15)' }),
       h('path', { key: 'ant', d: 'M32 8V3', stroke: ink, strokeWidth: 2 }),
       h('circle', { key: 'bulb', cx: 32, cy: 2.5, r: 2.5, fill: '#FFD166' }),
-      h('path', { key: 'can', d: 'M52 44l6 2v6l-6 2z', fill: '#4FA7DC' }),
+      accessorySvg(r.accessory),
       hat
     );
+  }
+
+  /**
+   * P106 IG-005: what a robot wears for its job, drawn on the robot (it turns with it): Pip's can on his right arm,
+   * Cobble's hod (a wooden trough on a pole, a stone in it) on his left, Pocket's satchel (a strap across, the bag at
+   * the hip), Echo's bell on his left arm. '' draws nothing.
+   */
+  function accessorySvg(kind) {
+    var a = { key: 'acc', className: 'gd-acc gd-acc-' + kind, 'data-accessory': kind };
+    if (kind === 'can') return h('g', a, h('path', { d: 'M52 44l6 2v6l-6 2z', fill: '#4FA7DC' }), h('path', { d: 'M58 46l4-3', stroke: '#4FA7DC', strokeWidth: 2, strokeLinecap: 'round' }));
+    if (kind === 'hod')
+      return h('g', a, h('path', { d: 'M6 34v20', stroke: '#7A4B1F', strokeWidth: 3, strokeLinecap: 'round' }), h('path', { d: 'M0 24h14l-3 10H3z', fill: '#A9773F', stroke: '#7A4B1F', strokeWidth: 1.5 }), h('circle', { cx: 7, cy: 23, r: 3.5, fill: '#9C9AA6' }));
+    if (kind === 'satchel')
+      return h('g', a, h('path', { d: 'M16 10L50 46', stroke: '#8B5A2B', strokeWidth: 3.5, strokeLinecap: 'round' }), h('rect', { x: 44, y: 40, width: 17, height: 14, rx: 3, fill: '#C98A4B', stroke: '#8B5A2B', strokeWidth: 1.5 }), h('path', { d: 'M44 45h17', stroke: '#8B5A2B', strokeWidth: 1.5 }));
+    if (kind === 'bell')
+      return h('g', a, h('path', { d: 'M1 50q6-14 12 0z', fill: '#FFD166', stroke: '#C98A00', strokeWidth: 1.5 }), h('circle', { cx: 7, cy: 51.5, r: 1.8, fill: '#C98A00' }), h('path', { d: 'M7 37v3', stroke: '#C98A00', strokeWidth: 1.5 }));
+    return null;
   }
 
   /** The tile and thing sprites, the mockup’s symbols inline. */
@@ -1409,6 +1429,7 @@
               'data-x': String(r.x),
               'data-y': String(r.y),
               'data-d': String(r.d),
+              'data-accessory': r.accessory || undefined,
               'data-share': p.share === -1 ? undefined : String(p.share),
               style: { left: p.left.toFixed(4) + '%', top: p.top.toFixed(4) + '%', width: sizeW, height: sizeH, transform: p.transform }
             },

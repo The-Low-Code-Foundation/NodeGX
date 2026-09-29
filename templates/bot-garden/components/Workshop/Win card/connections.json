@@ -53,6 +53,18 @@
     },
     {
       "fromId": "wnIn",
+      "fromProperty": "lentText",
+      "toId": "wnLent",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wnIn",
+      "fromProperty": "hasLent",
+      "toId": "wnLent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wnIn",
       "fromProperty": "islandWord",
       "toId": "wnIsland",
       "toProperty": "label"

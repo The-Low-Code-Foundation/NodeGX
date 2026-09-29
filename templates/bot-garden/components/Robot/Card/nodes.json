@@ -1,0 +1,799 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b8f4dbd1-4851-56ab-8049-86bc8e9ddced",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rcIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "owned",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "locked",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "tag",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tagClass",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cardClass",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "wears",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "color",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "eye",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hat",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "accessory",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "paints",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hats",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "abilities",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "upgradeText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "upgradeClass",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "whereText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "colourWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hatWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "canDoWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "upgradeWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "whereWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "nameWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 590,
+      "y": 40
+    },
+    {
+      "id": "rcCard",
+      "type": "Group",
+      "label": "The card",
+      "children": [
+        "rcTop",
+        "rcColourL",
+        "rcColourRow",
+        "rcHatL",
+        "rcHatRow",
+        "rcCanL",
+        "rcCanRow",
+        "rcUpL",
+        "rcUp",
+        "rcWhereL",
+        "rcWhere"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2-5)",
+        "backgroundColor": "var(--card)",
+        "borderRadius": "var(--radius-card)",
+        "cssClassName": "bg-panel bg-robot-card",
+        "paddingTop": "var(--space-3-5)",
+        "paddingBottom": "var(--space-3-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rcTop",
+      "type": "Group",
+      "label": "The robot, its name, whose",
+      "parent": "rcCard",
+      "children": [
+        "rcStage",
+        "rcWho"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "flexWrap": "nowrap",
+        "columnGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "rcStage",
+      "type": "Group",
+      "label": "The robot, drawn",
+      "parent": "rcTop",
+      "children": [
+        "rcGarden"
+      ],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 88,
+          "unit": "px"
+        },
+        "height": {
+          "value": 88,
+          "unit": "px"
+        },
+        "borderRadius": {
+          "value": 14,
+          "unit": "px"
+        },
+        "cssClassName": "bg-robot-stage"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "rcGarden",
+      "type": "garden-kit.Garden",
+      "label": "The robot",
+      "parent": "rcStage",
+      "parameters": {
+        "stepMs": 380,
+        "label": "The robot"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "rcDraw",
+      "type": "/Logic/Draw world",
+      "label": "The robot in its looks",
+      "parameters": {
+        "world": {
+          "map": [
+            "G"
+          ],
+          "things": [],
+          "robots": [
+            {
+              "id": "me",
+              "x": 0,
+              "y": 0,
+              "d": 0,
+              "carry": []
+            }
+          ],
+          "events": [],
+          "schedule": []
+        }
+      },
+      "x": 590,
+      "y": 400
+    },
+    {
+      "id": "rcWho",
+      "type": "Group",
+      "label": "Its name",
+      "parent": "rcTop",
+      "children": [
+        "rcHeadRow",
+        "rcName",
+        "rcNameText",
+        "rcWears"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "cssClassName": "bg-grow"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "rcHeadRow",
+      "type": "Group",
+      "label": "Name, and whose",
+      "parent": "rcWho",
+      "children": [
+        "rcNameL",
+        "rcTag"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "nowrap",
+        "columnGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "justifyContent": "space-between"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "rcNameL",
+      "type": "Text",
+      "label": "Name",
+      "parent": "rcHeadRow",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-caps"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "rcTag",
+      "type": "Group",
+      "label": "Whose it is",
+      "parent": "rcHeadRow",
+      "children": [
+        "rcTagText"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingTop": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 3,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 9,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 9,
+          "unit": "px"
+        },
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "cssClassName": "bg-robot-tag"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "rcTagText",
+      "type": "Text",
+      "label": "Whose it is",
+      "parent": "rcTag",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)"
+      },
+      "x": 340,
+      "y": 1000
+    },
+    {
+      "id": "rcName",
+      "type": "net.noodl.controls.textinput",
+      "label": "The robot’s name",
+      "parent": "rcWho",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontSize": {
+          "value": 20,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "backgroundColor": "var(--card)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 2,
+          "unit": "px"
+        },
+        "borderColor": "var(--line)",
+        "borderRadius": {
+          "value": 14,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "maxLength": 16,
+        "cssClassName": "bg-robot-name"
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "rcNameText",
+      "type": "Text",
+      "label": "Its name (not lent yet)",
+      "parent": "rcWho",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 20,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2,
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "rcWears",
+      "type": "Text",
+      "label": "What it wears",
+      "parent": "rcWho",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-robot-wears"
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "rcColourL",
+      "type": "Text",
+      "label": "Colour",
+      "parent": "rcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-caps"
+      },
+      "x": 100,
+      "y": 1480
+    },
+    {
+      "id": "rcColourRow",
+      "type": "Group",
+      "label": "Its colours",
+      "parent": "rcCard",
+      "children": [
+        "rcColourEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 1600
+    },
+    {
+      "id": "rcColourEach",
+      "type": "For Each",
+      "label": "One per paint",
+      "parent": "rcColourRow",
+      "parameters": {
+        "template": "/Robot/Swatch",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "rcHatL",
+      "type": "Text",
+      "label": "Hat",
+      "parent": "rcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-caps"
+      },
+      "x": 100,
+      "y": 1840
+    },
+    {
+      "id": "rcHatRow",
+      "type": "Group",
+      "label": "Its hats",
+      "parent": "rcCard",
+      "children": [
+        "rcHatEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 1960
+    },
+    {
+      "id": "rcHatEach",
+      "type": "For Each",
+      "label": "One per hat",
+      "parent": "rcHatRow",
+      "parameters": {
+        "template": "/Robot/Chip",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 2080
+    },
+    {
+      "id": "rcCanL",
+      "type": "Text",
+      "label": "What it can do",
+      "parent": "rcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-caps"
+      },
+      "x": 100,
+      "y": 2200
+    },
+    {
+      "id": "rcCanRow",
+      "type": "Group",
+      "label": "Its blocks",
+      "parent": "rcCard",
+      "children": [
+        "rcCanEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-1-5)",
+        "rowGap": "var(--space-1-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "cssClassName": "bg-robot-abilities"
+      },
+      "x": 100,
+      "y": 2320
+    },
+    {
+      "id": "rcCanEach",
+      "type": "For Each",
+      "label": "One chip per block",
+      "parent": "rcCanRow",
+      "parameters": {
+        "template": "/Robot/Ability",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 2440
+    },
+    {
+      "id": "rcUpL",
+      "type": "Text",
+      "label": "Upgrade",
+      "parent": "rcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-caps"
+      },
+      "x": 100,
+      "y": 2560
+    },
+    {
+      "id": "rcUp",
+      "type": "Group",
+      "label": "Its upgrade",
+      "parent": "rcCard",
+      "children": [
+        "rcUpText"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "borderRadius": {
+          "value": 14,
+          "unit": "px"
+        },
+        "cssClassName": "bg-robot-up"
+      },
+      "x": 100,
+      "y": 2680
+    },
+    {
+      "id": "rcUpText",
+      "type": "Text",
+      "label": "The upgrade",
+      "parent": "rcUp",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "fontWeight": "800"
+      },
+      "x": 160,
+      "y": 2800
+    },
+    {
+      "id": "rcWhereL",
+      "type": "Text",
+      "label": "Where it works",
+      "parent": "rcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-caps"
+      },
+      "x": 100,
+      "y": 2920
+    },
+    {
+      "id": "rcWhere",
+      "type": "Text",
+      "label": "Where it works",
+      "parent": "rcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "cssClassName": "bg-robot-where"
+      },
+      "x": 100,
+      "y": 3040
+    },
+    {
+      "id": "rcIsOwned",
+      "type": "Condition",
+      "label": "Hers?",
+      "x": 590,
+      "y": 1360
+    },
+    {
+      "id": "rcOwn",
+      "type": "States",
+      "label": "Hers, or still to be lent",
+      "parameters": {
+        "states": "locked,owned",
+        "values": "owned,locked",
+        "useTransitions": false,
+        "type-owned": "boolean",
+        "value-locked-owned": false,
+        "value-owned-owned": true,
+        "type-locked": "boolean",
+        "value-locked-locked": true,
+        "value-owned-locked": false
+      },
+      "x": 590,
+      "y": 1120
+    },
+    {
+      "id": "rcOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "named",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "colour",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "coloured",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "hat",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hatted",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 590,
+      "y": 1240
+    }
+  ],
+  "visualRoots": [
+    "rcCard"
+  ]
+}

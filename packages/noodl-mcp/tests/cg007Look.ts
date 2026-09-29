@@ -424,6 +424,26 @@ ${pinRules}
 .bg-mark { border-radius: 50%; flex: none; }
 .bg-mark-lit { background-size: 62% 62% !important; }
 
+/* P106 IG-005 (lane B): My robots (the mockup's 09-robots) — a card per robot in a row that wraps, its drawing on the
+   stage's warm ground, whose it is as a small tag (mint yours, violet lent, grey locked), its blocks as chips in their
+   block colours, the upgrade slot dashed while empty; a robot not lent yet sits on the paper. The win card's lent line. */
+.bg-robots { align-items: stretch !important; }
+.bg-robot-card { width: 300px !important; min-width: 0 !important; box-shadow: var(--shadow-soft); }
+@media (max-width: 480px) { .bg-robot-card { width: 100% !important; } }
+.bg-robot-locked { background-color: var(--paper-2) !important; box-shadow: none; }
+.bg-robot-stage { background: linear-gradient(180deg, var(--stage-top), var(--stage-bottom)); display: grid !important; place-items: center; flex: none; }
+.bg-robot-stage .gd-world { width: 64px !important; max-width: none !important; border: 0 !important; background: transparent !important; overflow: visible !important; border-radius: 0 !important; pointer-events: none; }
+.bg-robot-stage .gd-cell { background: transparent !important; cursor: default; }
+.bg-robot-stage .gd-name { display: none !important; }
+.bg-robot-tag { flex: none; }
+.bg-robot-tag-yours { background-color: var(--leaf-2); }
+.bg-robot-tag-lent { background-color: var(--violet-2); }
+.bg-robot-tag-locked { background-color: var(--line); }
+.bg-robot-up { background-color: var(--paper-2); border: 2px dashed var(--line); }
+.bg-robot-up-on { border-style: solid; border-color: transparent; background-color: var(--leaf-2); }
+.bg-ability { box-shadow: none !important; }
+.bg-win-lent { background-color: var(--violet-2); border-radius: 14px; padding: 8px 12px; }
+
 ${spriteRules}
 
 /* Reduced motion: the mockup's own rule. Every animation and transition stops; the tulip still reads by opacity and pose. */

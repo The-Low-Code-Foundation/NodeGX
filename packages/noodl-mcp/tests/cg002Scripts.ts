@@ -59,6 +59,8 @@
  * @module noodl-mcp/tests/cg002Scripts
  */
 import { BAND_PALETTE, BLOCK_TYPES, HINT_KEYS, OLIVE_RUNGS, WORD_KEYS } from './cg002Content';
+// P106 IG-005: the robot catalogue, the upgrades, and the moves and controls every robot has.
+import { ROBOTS_JSON, ROBOT_CONTROLS, ROBOT_MOVES, UPGRADES_JSON } from './cg002Content';
 import { BLOCK_WORD, OLIVE_ENGINE, OLIVE_HELPERS, RUNG_SHAPE, RUNG_TEMPERATURE } from './cg005Olive';
 
 /** An `until` gives up after this many passes, whatever its sensor says. */
@@ -803,6 +805,17 @@ var LABEL = { fwd: 'Fwd', left: 'Left', right: 'Right', water: 'Water', fill: 'F
 var band = Number(Inputs.band) === 1 ? 1 : 2;
 var allowed = Array.isArray(Inputs.allowed) && Inputs.allowed.length ? Inputs.allowed : null;
 var lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';
+// P106 IG-005 (R8): the palette is band × request × ROBOT. Robot is the robot doing the job (a row with its kind and
+// palette, or a catalogue kind); it keeps every move, the controls of the band and what it can do. Needs is the kind
+// the request asks for: another robot is refused (no palette at all). No robot (free play) filters nothing.
+var ROBOTS = ${ROBOTS_JSON};
+var CAN_ALWAYS = ${JSON.stringify([...ROBOT_MOVES, ...ROBOT_CONTROLS])};
+var bot = Inputs.robot && typeof Inputs.robot === 'object' ? Inputs.robot : null;
+if (!bot && typeof Inputs.robot === 'string' && Inputs.robot) for (var rk = 0; rk < ROBOTS.length; rk++) if (ROBOTS[rk].id === Inputs.robot) bot = ROBOTS[rk];
+var botKind = bot ? String(bot.kind || bot.id || '') : '';
+var needs = String(Inputs.needs || '');
+var refused = !!bot && needs !== '' && botKind !== needs;
+var botCan = bot ? CAN_ALWAYS.concat(Array.isArray(bot.palette) ? bot.palette : []) : null;
 var rows = Array.isArray(Inputs.words) ? Inputs.words : [];
 var word = {};
 for (var i = 0; i < rows.length; i++) word[rows[i].key] = rows[i][lang] || rows[i].en || '';
@@ -811,6 +824,7 @@ var out = [];
 for (var j = 0; j < ids.length; j++) {
   var id = ids[j];
   if (allowed && allowed.indexOf(id) === -1) continue;
+  if (refused || (botCan && botCan.indexOf(id) === -1)) continue;
   var m = META[id];
   out.push({ id: id, kind: m.kind, label: word['b' + LABEL[id]] || id, caption: word['c' + LABEL[id]] || id, hasBody: m.body, hasCount: m.count, slots: m.slots, band: band });
 }
@@ -823,6 +837,7 @@ for (var r = 0; r < rungIds.length; r++) {
   var rid = String(rungIds[r]), rr = OLIVE.rungs[rid];
   // IG-006: only a BLOCK is placed (a lesson is asked on Skills, the voicing is the owl row's).
   if (!rr || rid === 'voice-hint' || rr.use !== 'block' || (Number(rr.band) || 1) > band) continue;
+  if (refused || (botCan && botCan.indexOf('olive:' + rid) === -1)) continue;
   if (withheld.indexOf(rid) !== -1) { heldHere.push(rid); continue; }
   offered.push(rid);
   var title = word[OLIVE_RUNG_WORD[rid]] || rid;
@@ -836,6 +851,7 @@ Outputs.withheld = withheld;
 Outputs.heldHere = heldHere;
 Outputs.count = out.length;
 Outputs.band = band;
+Outputs.refused = refused;
 `;
 
 // ── The save model ──────────────────────────────────────────────────────────
@@ -864,6 +880,8 @@ var MAX_PROFILES = ${MAX_PROFILES};
 var ROBOT_NAME_MAX = ${ROBOT_NAME_MAX};
 var TRICK_KEYS = ${JSON.stringify(TRICK_KEYS)};
 var FIRST_ROBOT_ID = ${JSON.stringify(FIRST_ROBOT_ID)};
+var ROBOTS = ${ROBOTS_JSON};
+var UPGRADES = ${UPGRADES_JSON};
 function newId(prefix) { return prefix + Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36); }
 function tricksOf(raw) {
   var out = {};
@@ -879,9 +897,75 @@ function robotsOf(raw) {
     var r = list[i], id = r && typeof r === 'object' ? String(r.id || '') : typeof r === 'string' ? r : '';
     if (!id || seen[id]) continue;
     seen[id] = 1;
-    out.push({ id: id });
+    // IG-005: a lent robot's row keeps its own kind and look (each field only when it is there and sound); r1's look
+    // stays profile.robot (one source). A v4 row from session 3 is { id } and reads as it did.
+    out.push(id === FIRST_ROBOT_ID ? { id: id } : robotFields(id, r));
   }
   return out;
+}
+/** IG-005: a robot row's own fields, each kept only when it is there and sound (kind, name, color, eye, hat). */
+function robotFields(id, r) {
+  var row = { id: id };
+  if (!r || typeof r !== 'object') return row;
+  if (robotSpec(r.kind)) row.kind = String(r.kind);
+  var n = typeof r.name === 'string' ? r.name.trim().slice(0, ROBOT_NAME_MAX) : '';
+  if (n) row.name = n;
+  if (typeof r.color === 'string' && /^#[0-9A-Fa-f]{6}$/.test(r.color)) row.color = r.color;
+  if (r.eye === 'round' || r.eye === 'happy' || r.eye === 'wink') row.eye = r.eye;
+  if (typeof r.hat === 'string' && r.hat) row.hat = r.hat;
+  return row;
+}
+/** IG-005: the catalogue's entry for a robot kind, or null. */
+function robotSpec(kind) { for (var i = 0; i < ROBOTS.length; i++) if (ROBOTS[i].id === String(kind)) return ROBOTS[i]; return null; }
+/** IG-005: a row's kind — its own, else its id when that is a kind (a lent robot's id IS its kind), else Pip. */
+function robotKindOf(row) {
+  if (!row) return 'pip';
+  if (row.id === FIRST_ROBOT_ID) return 'pip';
+  if (robotSpec(row.kind)) return String(row.kind);
+  return robotSpec(row.id) ? String(row.id) : 'pip';
+}
+/**
+ * IG-005: a robot as the pages use it — its look (r1's is profile.robot; a lent one's its row, else the catalogue's
+ * name in the profile's language and colour), what it can do, its can and basket with the upgrades the profile owns
+ * applied, its step factor (boots), and the plot it works ('' at home).
+ */
+function robotRow(p, row) {
+  var kind = robotKindOf(row), spec = robotSpec(kind) || ROBOTS[0], first = row.id === FIRST_ROBOT_ID;
+  var lang = p && p.lang === 'fr' ? 'fr' : 'en';
+  var look = first && p ? p.robot : row;
+  var out = {
+    id: String(row.id), kind: kind,
+    name: String((look && look.name) || spec.defaultName[lang] || spec.defaultName.en).slice(0, ROBOT_NAME_MAX),
+    color: String((look && look.color) || spec.colour), eye: String((look && look.eye) || 'round'), hat: String((look && look.hat) || 'none'),
+    accessory: spec.accessory, palette: spec.palette.slice(), canMax: spec.canMax, basket: spec.basket, stepFactor: 1,
+    upgrade: spec.upgrade, upgraded: false, lentBy: spec.lentBy || '', working: p ? plotOfRobot(p.island, String(row.id)) : ''
+  };
+  var owned = p && Array.isArray(p.stickers) ? p.stickers : [];
+  for (var u = 0; u < UPGRADES.length; u++) {
+    var up = UPGRADES[u];
+    if (owned.indexOf(up.id) === -1 || up.fits.indexOf(kind) === -1) continue;
+    if (up.canMax) out.canMax = up.canMax;
+    if (up.basket) out.basket = up.basket;
+    if (up.stepFactor) out.stepFactor = up.stepFactor;
+    if (up.id === spec.upgrade) out.upgraded = true;
+  }
+  return out;
+}
+/** IG-005: every robot of a profile, resolved (r1 first). */
+function robotRowsOf(p) { var out = []; var list = p && p.island ? p.island.robots : [{ id: FIRST_ROBOT_ID }]; for (var i = 0; i < list.length; i++) out.push(robotRow(p, list[i])); return out; }
+/** IG-005: the robot of a profile that does a job needing this kind ('' when she has none of that kind). */
+function jobRobotId(p, kind) {
+  var want = robotSpec(kind) ? String(kind) : 'pip';
+  var list = p && p.island ? p.island.robots : [{ id: FIRST_ROBOT_ID }];
+  for (var i = 0; i < list.length; i++) if (robotKindOf(list[i]) === want) return String(list[i].id);
+  return '';
+}
+/** IG-005: lend a robot of this kind to a profile (once): its id is its kind, its name the catalogue's in her language. */
+function lendRobot(p, kind) {
+  var spec = robotSpec(kind);
+  if (!p || !spec || spec.id === 'pip' || jobRobotId(p, spec.id)) return false;
+  p.island.robots.push({ id: spec.id, kind: spec.id, name: spec.defaultName[p.lang === 'fr' ? 'fr' : 'en'], color: spec.colour, eye: 'round', hat: 'none' });
+  return true;
 }
 /** IG-004: a program as the save keeps it — a list (JSON text is read), else null. */
 function programOf(v) {
@@ -1022,12 +1106,17 @@ var reward = Inputs.reward && typeof Inputs.reward === 'object' ? Inputs.reward 
 var program = programOf(Inputs.program);
 var p = null;
 for (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === profileId) p = model.profiles[i];
-var newlyDone = false, bloomed = [], pinned = '';
+var newlyDone = false, bloomed = [], pinned = '', lent = [], upgraded = [];
 if (p) {
   if (requestId && p.island.done.indexOf(requestId) === -1) { p.island.done.push(requestId); newlyDone = true; }
   for (var t = 0; t < tricks.length; t++) { var key = 'n' + Math.floor(Number(tricks[t])); if (p.tricks[key] !== undefined && p.tricks[key] !== 'bloom') { p.tricks[key] = 'bloom'; bloomed.push(key); } }
   if (reward && reward.kind === 'hat' && p.hats.indexOf(String(reward.id)) === -1) p.hats.push(String(reward.id));
   if (reward && (reward.kind === 'sticker' || reward.kind === 'item' || reward.kind === 'seed') && p.stickers.indexOf(String(reward.id)) === -1) p.stickers.push(String(reward.id));
+  // P106 IG-005: a robot reward lends that robot (its name the catalogue's, in her language); the catalogue's own gifts
+  // for this request — the robot an islander lends after it, the upgrade she gives — come with every first win.
+  if (reward && reward.kind === 'robot' && lendRobot(p, reward.id)) lent.push(String(reward.id));
+  for (var g = 0; g < ROBOTS.length; g++) if (requestId && ROBOTS[g].unlockedBy === requestId && lendRobot(p, ROBOTS[g].id)) lent.push(ROBOTS[g].id);
+  for (var u = 0; u < UPGRADES.length; u++) if (requestId && UPGRADES[u].unlockedBy === requestId && p.stickers.indexOf(UPGRADES[u].id) === -1) { p.stickers.push(UPGRADES[u].id); upgraded.push(UPGRADES[u].id); }
   var robotId = String(Inputs.robotId || p.island.robots[0].id);
   var known = false;
   for (var r = 0; r < p.island.robots.length; r++) if (p.island.robots[r].id === robotId) known = true;
@@ -1042,6 +1131,8 @@ Outputs.newlyDone = newlyDone;
 Outputs.bloomed = bloomed;
 Outputs.found = !!p;
 Outputs.pinned = pinned;
+Outputs.lent = lent;
+Outputs.upgraded = upgraded;
 `;
 
 /**
@@ -1065,6 +1156,35 @@ Outputs.freed = freed;
 Outputs.found = !!p;
 `;
 
+/**
+ * P106 IG-005 — one field of one robot on My robots (`field` is a parameter, placed once per field, like Update
+ * profile): `name`, `color`, `eye` or `hat` (a hat she owns, or none). The first robot's look is the profile's own
+ * (`profile.robot`), so renaming Pip here is renaming him everywhere; a lent robot's look is its row.
+ */
+export const UPDATE_ROBOT_SCRIPT = `${SAVE_HELPERS}
+var model = modelOf(Inputs.model && typeof Inputs.model === 'object' ? Inputs.model : {});
+var id = String(Inputs.profileId || model.island.activeId);
+var robotId = String(Inputs.robotId || FIRST_ROBOT_ID);
+var field = String(Inputs.field || '');
+var v = Inputs.value;
+var p = null, row = null, changed = false;
+for (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === id) p = model.profiles[i];
+if (p) for (var r = 0; r < p.island.robots.length; r++) if (p.island.robots[r].id === robotId) row = p.island.robots[r];
+if (p && row) {
+  // The look being changed: r1's is the profile's; a lent robot's row starts from what the pages show for it.
+  var cur = robotRow(p, row);
+  var look = row.id === FIRST_ROBOT_ID ? p.robot : row;
+  if (row.id !== FIRST_ROBOT_ID) { row.kind = cur.kind; row.name = cur.name; row.color = cur.color; row.eye = cur.eye; row.hat = cur.hat; }
+  if (field === 'name') { var n = String(v || '').trim().slice(0, ROBOT_NAME_MAX); if (n && n !== cur.name) { look.name = n; changed = true; } }
+  else if (field === 'color') { var c = String(v || ''); if (/^#[0-9A-Fa-f]{6}$/.test(c) && c !== cur.color) { look.color = c; changed = true; } }
+  else if (field === 'eye') { var e = String(v || ''); if ((e === 'round' || e === 'happy' || e === 'wink') && e !== cur.eye) { look.eye = e; changed = true; } }
+  else if (field === 'hat') { var h = String(v || ''); if ((h === 'none' || p.hats.indexOf(h) !== -1) && h !== cur.hat) { look.hat = h; changed = true; } }
+}
+Outputs.model = model;
+Outputs.changed = changed;
+Outputs.found = !!row;
+`;
+
 /** The family as a code: base64 of the packed model with its version, like Rocket School's. */
 export const ENCODE_SAVE_SCRIPT = `${SAVE_HELPERS}
 var model = modelOf(Inputs.model);
@@ -1077,7 +1197,8 @@ for (var i = 0; i < model.profiles.length; i++) {
   for (var id in p.island.plots) plots.push([id, p.island.plots[id].program, p.island.plots[id].robotId, p.island.plots[id].wonAt]);
   plots.sort(function (x, y) { return x[0] < y[0] ? -1 : x[0] > y[0] ? 1 : 0; });
   var robots = [];
-  for (var r = 0; r < p.island.robots.length; r++) robots.push(p.island.robots[r].id);
+  // IG-005: r1 (and any row with nothing of its own) is its id, as in session 3; a lent robot is [id, kind, name, color, eye, hat].
+  for (var r = 0; r < p.island.robots.length; r++) { var rb = p.island.robots[r]; robots.push(rb.id === FIRST_ROBOT_ID || !rb.kind ? rb.id : [rb.id, rb.kind, rb.name || '', rb.color || '', rb.eye || '', rb.hat || '']); }
   packed.p.push([p.id, p.name, p.band, p.lang, p.face, p.robot.name, p.robot.color, p.robot.eye, p.robot.hat, tr, p.stickers, p.hats, p.island.done, plots, robots]);
 }
 var code = 'BG1.' + toB64(JSON.stringify(packed));
@@ -1109,7 +1230,10 @@ try {
     if (v2 && typeof a[9] === 'string') for (var k = 0; k < TRICK_KEYS.length; k++) tricks[TRICK_KEYS[k]] = a[9].charAt(k) === 'b' ? 'bloom' : a[9].charAt(k) === 's' ? 'sprout' : 'seed';
     var plots = {};
     if (v4 && Array.isArray(a[13])) for (var q = 0; q < a[13].length; q++) { var row = a[13][q]; if (Array.isArray(row) && row[0]) plots[String(row[0])] = { program: row[1], robotId: row[2], wonAt: row[3] }; }
-    var island = v4 ? { done: a[12], plots: plots, robots: a[14] } : v3 ? { done: a[12] } : family;
+    // IG-005: a robot is its id (session 3, and r1) or [id, kind, name, color, eye, hat] (a lent robot and its look).
+    var robots = [];
+    if (v4 && Array.isArray(a[14])) for (var rb = 0; rb < a[14].length; rb++) { var ro = a[14][rb]; robots.push(Array.isArray(ro) ? { id: ro[0], kind: ro[1], name: ro[2], color: ro[3], eye: ro[4], hat: ro[5] } : ro); }
+    var island = v4 ? { done: a[12], plots: plots, robots: robots } : v3 ? { done: a[12] } : family;
     profiles.push({ id: a[0], name: a[1], band: a[2], lang: a[3], face: a[4], robot: { name: a[5], color: a[6], eye: a[7], hat: a[8] }, tricks: v2 ? tricks : undefined, stickers: v2 ? a[10] : [], hats: v2 ? a[11] : [], island: island });
   }
   model = modelOf({ v: SAVE_VERSION, family: { id: packed.f[0], created: packed.f[1] }, profiles: profiles, island: { activeId: packed.a } });
@@ -1175,7 +1299,9 @@ export const FUNCTION_SCRIPTS: ReadonlyArray<{ component: string; script: string
   { component: 'Logic/Translate words', script: TRANSLATE_SCRIPT, seam: 'every interface word in the chosen language' },
   { component: 'Logic/Hint table', script: HINT_TABLE_SCRIPT, seam: 'every hint line in the chosen language' },
   // P106 IG-004 (lane E): the robot leaves its plot.
-  { component: 'Logic/Bring home', script: BRING_HOME_SCRIPT, seam: 'the family with a robot brought home from its plot, the plot kept as won' }
+  { component: 'Logic/Bring home', script: BRING_HOME_SCRIPT, seam: 'the family with a robot brought home from its plot, the plot kept as won' },
+  // P106 IG-005 (lane B): a robot's own name, colour, eyes and hat.
+  { component: 'Logic/Update robot', script: UPDATE_ROBOT_SCRIPT, seam: 'the family with one field of one robot changed' }
 ];
 
 /**

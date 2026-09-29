@@ -35,6 +35,18 @@
     },
     {
       "fromId": "paletteIn",
+      "fromProperty": "needs",
+      "toId": "paletteFn",
+      "toProperty": "in-needs"
+    },
+    {
+      "fromId": "paletteIn",
+      "fromProperty": "robot",
+      "toId": "paletteFn",
+      "toProperty": "in-robot"
+    },
+    {
+      "fromId": "paletteIn",
       "fromProperty": "rungs",
       "toId": "paletteFn",
       "toProperty": "in-rungs"
@@ -80,6 +92,12 @@
       "fromProperty": "out-palette",
       "toId": "paletteOut",
       "toProperty": "palette"
+    },
+    {
+      "fromId": "paletteFn",
+      "fromProperty": "out-refused",
+      "toId": "paletteOut",
+      "toProperty": "refused"
     },
     {
       "fromId": "paletteFn",

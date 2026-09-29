@@ -5,6 +5,12 @@
   "connections": [
     {
       "fromId": "drawworldIn",
+      "fromProperty": "accessory",
+      "toId": "drawworldFn",
+      "toProperty": "in-accessory"
+    },
+    {
+      "fromId": "drawworldIn",
       "fromProperty": "botName",
       "toId": "drawworldFn",
       "toProperty": "in-botName"

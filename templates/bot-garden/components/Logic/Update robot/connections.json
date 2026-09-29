@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9916918b-6839-5366-8dcf-9be055ffe73e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "updaterobotIn",
+      "fromProperty": "field",
+      "toId": "updaterobotFn",
+      "toProperty": "in-field"
+    },
+    {
+      "fromId": "updaterobotIn",
+      "fromProperty": "model",
+      "toId": "updaterobotFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "updaterobotIn",
+      "fromProperty": "profileId",
+      "toId": "updaterobotFn",
+      "toProperty": "in-profileId"
+    },
+    {
+      "fromId": "updaterobotIn",
+      "fromProperty": "robotId",
+      "toId": "updaterobotFn",
+      "toProperty": "in-robotId"
+    },
+    {
+      "fromId": "updaterobotIn",
+      "fromProperty": "value",
+      "toId": "updaterobotFn",
+      "toProperty": "in-value"
+    },
+    {
+      "fromId": "updaterobotIn",
+      "fromProperty": "go",
+      "toId": "updaterobotFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "updaterobotFn",
+      "fromProperty": "out-changed",
+      "toId": "updaterobotOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "updaterobotFn",
+      "fromProperty": "out-found",
+      "toId": "updaterobotOut",
+      "toProperty": "found"
+    },
+    {
+      "fromId": "updaterobotFn",
+      "fromProperty": "out-model",
+      "toId": "updaterobotOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "updaterobotFn",
+      "fromProperty": "success",
+      "toId": "updaterobotOut",
+      "toProperty": "ran"
+    }
+  ]
+}

@@ -67,6 +67,8 @@ import { DARKENED_FILLS, GARDEN_CSS, GARDEN_PRESET, GARDEN_TOKENS, tokenValue } 
 import { reducedMotionReport } from './reducedMotion';
 import { RESERVED_ROW_FIELD_NAMES } from '../../noodl-editor/src/editor/src/validation';
 import { FAMILY_SCRIPT, ISLAND_PINS_SCRIPT, LOOK_ROWS_SCRIPT, REQUEST_CARD_SCRIPT, SELECT_PROFILE_SCRIPT, SKILL_ROWS_SCRIPT } from './cg003Scripts';
+// P106 IG-005: robots for the job.
+import { GIFT_LINE_SCRIPT, JOB_ROBOT_SCRIPT, ROBOT_CARDS_SCRIPT } from './cg003Scripts';
 import { CHOOSE_HINT_SCRIPT, HINT_LINE_SCRIPT, PREDICT_END_SCRIPT } from './cg002Scripts';
 import { HINTS, HINT_KEYS, OLIVE_RUNGS } from './cg002Content';
 import { PALETTE_RUNG_IDS } from './cg005Olive';
@@ -256,7 +258,8 @@ describe('CG-003 — Bot Garden, the artefact', () => {
     // D50 (filed): a wrapped row of fixed-size items is told to become a Columns node. The bar wraps on purpose; the
     // swatches, chips and profile cards are a wrapped row of fixed-size items. `apply` is apply_plan's re-validation.
     // s3: Profiles no longer warns — its row is the cards' repeater and the new-player card, not a wrap of fixed items.
-    expect([...new Set(warnings.map((d) => String(d.component).replace(/^\//, '')))].sort()).toEqual(['Garden/Top bar', 'Robot/Options', 'apply']);
+    // P106 IG-005: Robot/Card's colour and hat rows are the same wrapped rows of swatches and chips as Robot/Options'.
+    expect([...new Set(warnings.map((d) => String(d.component).replace(/^\//, '')))].sort()).toEqual(['Garden/Top bar', 'Robot/Card', 'Robot/Options', 'apply']);
     const project = JSON.parse(fs.readFileSync(path.join(built.projectDir, 'nodegx.project.json'), 'utf8')) as { settings: { bodyScroll?: boolean } };
     expect(project.settings.bodyScroll).toBe(true);
   });
@@ -945,6 +948,44 @@ describe('CG-003 — Bot Garden, the artefact', () => {
     });
   });
 
+  describe('IG-005 — robots for the job in the graph: the Workshop’s robot is the job’s, My robots, the island’s home is the job robot’s (P106 s4)', () => {
+    const conns = (name: string) => connectionsOf(built, name);
+    const into = (name: string, id: string, port: string) => conns(name).filter((c) => c.toId === id && c.toProperty === port).map((c) => `${c.fromId}.${c.fromProperty}`).sort();
+    const nodeIn = (name: string, id: string) => nodesOf(built, name).find((n) => n.id === id)!;
+
+    it('🔴 the Workshop: Job robot reads her robots and the request, and gives the Workshop its robot (name, look, row, key, palette robot, step time); the win pins THAT robot', () => {
+      const ws = C.pageWorkshop;
+      expect(String(nodeIn(ws, 'wsJob').type)).toBe('/Logic/Job robot');
+      expect([into(ws, 'wsJob', 'robots'), into(ws, 'wsJob', 'requestId'), into(ws, 'wsJob', 'requests')]).toEqual([['wsFam.robots'], ['wsReqVar.value'], ['wsRequests.requests']]);
+      for (const f of ['botName', 'color', 'eye', 'hat', 'robot', 'robotKey', 'paletteRobot', 'stepMs']) expect({ f, from: into(ws, 'wsPlay', f) }).toEqual({ f, from: [`wsJob.${f}`] });
+      expect(into(ws, 'wsComplete', 'robotId')).toEqual(['wsJob.robotId']);
+      expect([into(ws, 'wsGift', 'lent'), into(ws, 'wsGift', 'upgraded'), into(ws, 'wsPlay', 'giftText')]).toEqual([['wsComplete.lent'], ['wsComplete.upgraded'], ['wsGift.text']]);
+      const pl = C.play;
+      expect([into(pl, 'plPalette', 'robot'), into(pl, 'plPalette', 'needs'), into(pl, 'plStart', 'robot'), into(pl, 'plStart', 'robotKey'), into(pl, 'plWin', 'lentText')]).toEqual([['plIn.paletteRobot'], ['plStart.needs'], ['plIn.robot'], ['plIn.robotKey'], ['plIn.giftText']]);
+    });
+
+    it('🔴 Start world does not re-run on its Robot input (a win that upgrades the robot never resets the world under the win card); Robot Key does', () => {
+      const fn = nodesOf(built, '/Logic/Start world').find((n) => n.type === 'JavaScriptFunction')!;
+      expect(params(fn)['runOnChange-in-robot']).toBe(false);
+      expect(params(fn)['runOnChange-in-robotKey']).toBeUndefined();
+      // Known-firing: an ordinary reactive script sets no such flag.
+      expect(Object.keys(params(nodesOf(built, '/Logic/Draw world').find((n) => n.type === 'JavaScriptFunction')!)).filter((k) => k.startsWith('runOnChange-'))).toEqual([]);
+    });
+
+    it('🔴 My robots: a card per robot (Robot cards → the fleet), each card’s name, colour and hat written through Update robot with the card’s robot id; the island’s Bring home takes the job robot', () => {
+      const rb = C.pageRobot;
+      expect(String(nodeIn(rb, 'rbFleetEach').type)).toBe('For Each');
+      expect(params(nodeIn(rb, 'rbFleetEach')).template).toBe(C.robotCard);
+      expect(into(rb, 'rbFleetEach', 'items')).toEqual(['rbCards.cards']);
+      for (const [u, value, signal, field] of [['rbSetName', 'name', 'named', 'name'], ['rbSetColour', 'colour', 'coloured', 'color'], ['rbSetHat', 'hat', 'hatted', 'hat']]) {
+        expect({ u, field: params(nodeIn(rb, u)).field, id: into(rb, u, 'robotId'), value: into(rb, u, 'value'), go: into(rb, u, 'go') }).toEqual({ u, field, id: ['rbFleetEach.itemOutput-id'], value: [`rbFleetEach.itemOutput-${value}`], go: [`rbFleetEach.itemOutputSignal-${signal}`] });
+      }
+      // The head: My robots, the right robot for the job.
+      expect([into(rb, 'rbHead', 'eyebrow'), into(rb, 'rbHead', 'title')]).toEqual([['rbT.navRobot'], ['rbT.ig5Title']]);
+      expect(into(C.isleWorld, 'iwHome', 'robotId')).toEqual(['iwChoose.robotId']);
+    });
+  });
+
   describe('CG-007 — the look', () => {
     const colourKeys = /colou?r$|^backgroundColor$|^borderColor$|^fill$|^background$/i;
     const graphParams = () =>
@@ -1180,7 +1221,8 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     ]);
     expect(d.map).toEqual({ rows: ['GGB'], legend: { B: 'postbox' } });
     // IG-002: a robot with no can draws no drops (can null), canMax 3, and carries nothing.
-    expect(d.robots).toEqual([{ x: 0, y: 0, d: 1, colour: '#8F6BFF', eyes: 'wink', hat: 'sun', name: 'Bo', bump: 3, can: null, canMax: 3, carry: [] }]);
+    // IG-005: a robot with no look of its own wears the page's look and Pip's can.
+    expect(d.robots).toEqual([{ x: 0, y: 0, d: 1, colour: '#8F6BFF', eyes: 'wink', hat: 'sun', name: 'Bo', bump: 3, can: null, canMax: 3, carry: [], accessory: 'can' }]);
     expect(run(DRAW_WORLD_SCRIPT, { world: w, showEnd: false, endX: 1, endY: 0 }).things).toHaveLength(2);
     const stones = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones' }).world;
     stones.things.push({ kind: 'stone', x: 3, y: 3 });
@@ -1757,6 +1799,88 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     it('Island rows ignore the band → killed', () => {
       const m = mutate(ISLAND_ROWS_SCRIPT, 'if (!r || Number(r.band) > band) continue;', 'if (!r) continue;');
       expect(run(m, { requests: REQ_ROWS, band: 1, done: [], words: WORD_ROWS }).rows.length).toBeGreaterThan(REQUESTS.filter((r) => r.band === 1).length);
+    });
+  });
+  describe('IG-005 — robots for the job, the glue (P106 s4)', () => {
+    const kid = (lang = 'en') => run(ADD_PROFILE_SCRIPT, { model: null, name: 'Ada', band: 2, lang, robotName: 'Pip' }).model;
+    const win = (model: any, id: string) => run(COMPLETE_REQUEST_SCRIPT, { model, requestId: id, tricks: [], reward: null }).model;
+    const robotsOf = (model: any) => run(FAMILY_SCRIPT, { model }).robots;
+
+    it('🔴 Job robot: the stones need Cobble — hers once Sami lent him (his name, look, hod, id); not lent yet, the catalogue’s Cobble, not owned; free play is Pip with no palette filter', () => {
+      const lent = robotsOf(win(kid(), 'path-postbox'));
+      const job = run(JOB_ROBOT_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones', robots: lent, lang: 'en', stepMs: TICK_MS });
+      expect([job.needs, job.owned, job.robotId, job.botName, job.color, job.accessory, job.stepMs]).toEqual(['cobble', true, 'cobble', 'Cobble', '#7A8CA3', 'hod', TICK_MS]);
+      expect(job.paletteRobot).toMatchObject({ kind: 'cobble', palette: ['pick', 'put'] });
+      const none = run(JOB_ROBOT_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones', robots: robotsOf(kid()), lang: 'fr', stepMs: TICK_MS });
+      expect([none.owned, none.robotId, none.botName]).toEqual([false, '', 'Cobble']);
+      const free = run(JOB_ROBOT_SCRIPT, { requests: REQ_ROWS, requestId: 'free', robots: lent, lang: 'en', stepMs: TICK_MS });
+      expect([free.needs, free.robotId, free.botName, free.paletteRobot]).toEqual(['pip', 'r1', 'Pip', null]);
+      // Biscuit's boots: Pocket's steps × 0.7.
+      let m = win(win(win(kid(), 'path-postbox'), 'bowl-if'), 'wall-until');
+      expect(run(JOB_ROBOT_SCRIPT, { requests: REQ_ROWS, requestId: 'eggs-count', robots: robotsOf(m), lang: 'en', stepMs: TICK_MS }).stepMs).toBe(Math.round(TICK_MS * 0.7));
+      // The key changes with the look, not with an upgrade (the world is not reset under the win card).
+      const k1 = run(JOB_ROBOT_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones', robots: robotsOf(m), lang: 'en' }).robotKey;
+      m = win(m, 'path-stones');
+      expect(run(JOB_ROBOT_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones', robots: robotsOf(m), lang: 'en' }).robotKey).toBe(k1);
+    });
+
+    it('🔴 Start world puts the job robot on the world: its can (6 with can+), its basket (8 with basket+), its look for Draw world; and says which robot the request needs', () => {
+      let m = win(kid(), 'path-postbox');
+      m = win(win(m, 'rows-trick'), 'path-stones');
+      const rows = robotsOf(m);
+      const pip = rows.find((r: any) => r.kind === 'pip');
+      const cobble = rows.find((r: any) => r.kind === 'cobble');
+      const tul = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'tulips-three', robot: pip, robotKey: 'k' });
+      expect([tul.needs, tul.world.robots[0].can, tul.world.robots[0].canMax, tul.world.robots[0].look.accessory]).toEqual(['pip', 0, 6, 'can']);
+      const st = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones', robot: cobble, robotKey: 'k' });
+      expect([st.needs, st.world.robots[0].basket, st.world.robots[0].look]).toEqual(['cobble', 8, { name: 'Cobble', colour: '#7A8CA3', eyes: 'round', hat: 'none', accessory: 'hod' }]);
+      const drawn = run(DRAW_WORLD_SCRIPT, { world: st.world, words: WORD_ROWS, lang: 'en', botName: 'Pip', color: '#FF7A59' }).robots[0];
+      expect([drawn.name, drawn.colour, drawn.accessory]).toEqual(['Cobble', '#7A8CA3', 'hod']);
+      // No robot: the world as before IG-005.
+      expect(run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones' }).world.robots[0]).toEqual({ id: 'me', x: 2, y: 3, d: 1, carry: [], basket: 4, can: null, canMax: 3 });
+      expect(run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'free' }).needs).toBe('');
+    });
+
+    it('🔴 Gift line: “Sami lends you Cobble! Cobble lays stones.” and Mamie’s bigger can, in both languages; nothing when nothing was given', () => {
+      const en = run(GIFT_LINE_SCRIPT, { lent: ['cobble'], upgraded: [], words: WORD_ROWS, lang: 'en' });
+      expect([en.text, en.has]).toEqual(['Sami lends you Cobble! Cobble lays stones.', true]);
+      expect(run(GIFT_LINE_SCRIPT, { lent: ['pocket'], upgraded: [], words: WORD_ROWS, lang: 'fr' }).text).toBe('Biscuit te prête Poche ! Poche porte les lettres et la nourriture.');
+      expect(run(GIFT_LINE_SCRIPT, { lent: [], upgraded: ['can+'], words: WORD_ROWS, lang: 'en' }).text).toBe('Mamie Rose gives you Bigger can · 6 waters.');
+      expect(run(GIFT_LINE_SCRIPT, { lent: [], upgraded: [], words: WORD_ROWS, lang: 'en' })).toMatchObject({ text: '', has: false });
+    });
+
+    it('🔴 Robot cards: four robots — hers with her name, colours, hats, blocks, upgrade and where; the others locked with who lends them and after what', () => {
+      let m = win(kid(), 'path-postbox');
+      m = run(COMPLETE_REQUEST_SCRIPT, { model: m, requestId: 'tulips-three', tricks: [], reward: { kind: 'hat', id: 'sun', from: 'mamie' }, program: '[{"id":1,"t":"fwd"}]' }).model;
+      const fam = run(FAMILY_SCRIPT, { model: m });
+      const cards = run(ROBOT_CARDS_SCRIPT, { robots: fam.robots, hats: fam.hats, band: 2, lang: 'en', words: WORD_ROWS, requests: REQ_ROWS }).cards;
+      expect(cards.map((c: any) => [c.kind, c.name, c.owned, c.tag])).toEqual([['pip', 'Pip', true, 'Yours'], ['cobble', 'Cobble', true, 'Lent by Sami'], ['pocket', 'Pocket', false, 'Locked'], ['echo', 'Echo', false, 'Locked']]);
+      expect(cards[0].whereText).toBe('At work on “Water my three tulips”');
+      expect(cards[1].whereText).toBe('At home');
+      expect(cards[2].whereText).toBe('Biscuit lends Pocket after “Feed me, but only if my bowl is empty”.');
+      // Cobble's blocks: the moves, his own, the controls of 10–12 — each in its word and its block colour.
+      const LBL: Record<string, string> = { fwd: 'bFwd', left: 'bLeft', right: 'bRight', pick: 'bPick', put: 'bPut', repeat: 'bRepeat', until: 'bUntil', if: 'bIf', when: 'bWhen', count_inc: 'bCountInc' };
+      expect(cards[1].abilities.map((a: any) => a.id)).toEqual(['fwd', 'left', 'right', 'pick', 'put', 'repeat', 'until', 'if', 'when', 'count_inc']);
+      expect(cards[1].abilities.map((a: any) => a.label)).toEqual(cards[1].abilities.map((a: any) => (WORDS as any)[LBL[a.id]].en));
+      expect(cards[1].abilities.map((a: any) => a.cls.split(' ').pop())).toEqual(['bg-blk-motion', 'bg-blk-motion', 'bg-blk-motion', 'bg-blk-action', 'bg-blk-action', 'bg-blk-control', 'bg-blk-control', 'bg-blk-control', 'bg-blk-control', 'bg-blk-control']);
+      expect(cards[0].abilities.map((a: any) => a.id)).toContain('olive:read');
+      expect(cards[0].upgradeText).toBe('Empty slot · Bigger can · 6 waters · from Mamie Rose');
+      expect(cards[0].hats.find((h: any) => h.id === 'sun')).toMatchObject({ locked: false });
+      expect(cards[2].paints).toEqual([]);
+      expect(cards[1].paints.find((p: any) => p.selected).id).toBe('#7A8CA3');
+      // At 7–9 the blocks are the captions and no control or Olive block.
+      const young = run(ROBOT_CARDS_SCRIPT, { robots: fam.robots, hats: fam.hats, band: 1, lang: 'en', words: WORD_ROWS, requests: REQ_ROWS }).cards;
+      expect(young[0].abilities.map((a: any) => a.id)).toEqual(['fwd', 'left', 'right', 'water', 'fill']);
+    });
+
+    it('🔴 Island rows: a request is blocked while she has no robot of its kind, or while that robot works another plot — never for another robot’s work', () => {
+      const rowsOf = (m: any) => run(ISLAND_ROWS_SCRIPT, { requests: REQ_ROWS, band: 2, done: [], plots: run(FAMILY_SCRIPT, { model: m }).plots, robots: robotsOf(m), words: WORD_ROWS, lang: 'en' }).rows;
+      const blocked = (m: any) => rowsOf(m).filter((r: any) => r.blocked).map((r: any) => r.id).sort();
+      expect(blocked(kid())).toEqual(REQUESTS.filter((r) => (r.needs ?? 'pip') !== 'pip').map((r) => r.id).sort());
+      const m = run(COMPLETE_REQUEST_SCRIPT, { model: win(kid(), 'path-postbox'), requestId: 'path-stones', tricks: [], reward: null, program: '[{"id":1,"t":"fwd"}]', robotId: 'cobble' }).model;
+      // Cobble works the stones: the bowl (his) is blocked; Pip's jobs are not.
+      expect(blocked(m)).toEqual(['bowl-if', 'eggs-count', 'letter-say', 'rock-flower', 'sami-thanks']);
+      expect(rowsOf(m).find((r: any) => r.id === 'path-stones').doneWord).toBe('✓ ' + WORD_ROWS.find((x) => x.key === 'done')!.en + ' · Cobble works here');
     });
   });
 });

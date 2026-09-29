@@ -583,7 +583,7 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       for (const line of [
         "          can: isFinite(Number(r.can)) && r.can !== null && r.can !== '' ? Math.max(0, Math.floor(Number(r.can))) : null,",
         '          canMax: isFinite(Number(r.canMax)) && Number(r.canMax) > 0 ? Math.floor(Number(r.canMax)) : 3,',
-        '          carry: Array.isArray(r.carry) ? r.carry.map(String) : []'
+        '          carry: Array.isArray(r.carry) ? r.carry.map(String) : [],'
       ])
         expect({ line: line.trim().slice(0, 12), present: src.includes(line + '\n') }).toEqual({ line: line.trim().slice(0, 12), present: true });
     });
@@ -747,6 +747,30 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       expect(html).not.toContain('class="gd-label"');
       const css = node('garden-kit.Garden').css as string;
       for (const rule of ['.gd-fence{', '.gd-isl-say{', '.gd-cell>.gd-islander{', '.gd-cell>.gd-padlock{']) expect({ rule, has: css.includes(rule) }).toEqual({ rule, has: true });
+    });
+  });
+  describe('IG-005 (P106 s4) — robots for the job: each robot wears its accessory, in its own colour', () => {
+    it('🔴 the can, the hod, the satchel and the bell are each an element on the robot (its kind on it); \'\' draws none; a robot with no field keeps the can', () => {
+      const html = render('garden-kit.Garden', {
+        map: { rows: ['GGGGGG'] },
+        robots: [
+          { x: 0, y: 0, d: 1, name: 'Pip', colour: '#FF7A59', accessory: 'can' },
+          { x: 1, y: 0, d: 1, name: 'Cobble', colour: '#7A8CA3', accessory: 'hod' },
+          { x: 2, y: 0, d: 1, name: 'Pocket', colour: '#FFB347', accessory: 'satchel' },
+          { x: 3, y: 0, d: 1, name: 'Echo', colour: '#8F6BFF', accessory: 'bell' },
+          { x: 4, y: 0, d: 1, name: 'Bare', accessory: '' },
+          { x: 5, y: 0, d: 1, name: 'Old' }
+        ]
+      });
+      const bots = html.split('class="gd-bot"').slice(1);
+      expect(bots).toHaveLength(6);
+      const acc = bots.map((b) => (/class="gd-acc gd-acc-(\w+)" data-accessory="(\w+)"/.exec(b) || [])[1] || null);
+      expect(acc).toEqual(['can', 'hod', 'satchel', 'bell', null, 'can']);
+      // Each in its colour: the body is the robot's own paint.
+      expect(bots.slice(0, 4).map((b) => (/<rect x="10" y="8" width="44" height="48" rx="16" fill="([^"]+)"/.exec(b) || [])[1])).toEqual(['#FF7A59', '#7A8CA3', '#FFB347', '#8F6BFF']);
+      expect(bots[1]).toContain('data-accessory="hod"');
+      const W = node('garden-kit.Garden').world;
+      expect(W.parseRobots([{ accessory: 'hod' }, { accessory: 'jetpack' }, { accessory: '' }, {}, { accessory: null }]).map((r: any) => r.accessory)).toEqual(['hod', '', '', 'can', 'can']);
     });
   });
 });

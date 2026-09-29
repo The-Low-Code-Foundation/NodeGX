@@ -81,7 +81,7 @@
         "name": "gardenLang"
       },
       "x": 410,
-      "y": 1360
+      "y": 1600
     },
     {
       "id": "wsWords",
@@ -95,7 +95,7 @@
       "type": "/Logic/Translate words",
       "label": "In their language",
       "x": 410,
-      "y": 1480
+      "y": 1720
     },
     {
       "id": "wsResave",
@@ -105,7 +105,7 @@
         "runOnChange-condition": false
       },
       "x": 410,
-      "y": 1600
+      "y": 1840
     },
     {
       "id": "wsPlay",
@@ -157,7 +157,24 @@
         "name": "gardenProgram"
       },
       "x": 410,
-      "y": 1720
+      "y": 1960
+    },
+    {
+      "id": "wsJob",
+      "type": "/Logic/Job robot",
+      "label": "The robot for this job",
+      "parameters": {
+        "stepMs": 420
+      },
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "wsGift",
+      "type": "/Logic/Gift line",
+      "label": "What the win lent and gave",
+      "x": 410,
+      "y": 1240
     },
     {
       "id": "wsGuardWait",
@@ -177,7 +194,7 @@
         "runOnChange-condition": false
       },
       "x": 410,
-      "y": 1120
+      "y": 1360
     },
     {
       "id": "wsGoIsland",
@@ -188,7 +205,7 @@
         "target": "/Pages/Island"
       },
       "x": 410,
-      "y": 1240
+      "y": 1480
     }
   ],
   "visualRoots": [

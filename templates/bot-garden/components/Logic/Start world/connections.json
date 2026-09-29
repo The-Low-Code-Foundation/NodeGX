@@ -22,6 +22,18 @@
       "toProperty": "in-requests"
     },
     {
+      "fromId": "startworldIn",
+      "fromProperty": "robot",
+      "toId": "startworldFn",
+      "toProperty": "in-robot"
+    },
+    {
+      "fromId": "startworldIn",
+      "fromProperty": "robotKey",
+      "toId": "startworldFn",
+      "toProperty": "in-robotKey"
+    },
+    {
       "fromId": "startworldFn",
       "fromProperty": "out-allowed",
       "toId": "startworldOut",
@@ -59,6 +71,12 @@
     },
     {
       "fromId": "startworldFn",
+      "fromProperty": "out-needs",
+      "toId": "startworldOut",
+      "toProperty": "needs"
+    },
+    {
+      "fromId": "startworldFn",
       "fromProperty": "out-nonce",
       "toId": "startworldOut",
       "toProperty": "nonce"
@@ -80,6 +98,12 @@
       "fromProperty": "out-requestId",
       "toId": "startworldOut",
       "toProperty": "requestId"
+    },
+    {
+      "fromId": "startworldFn",
+      "fromProperty": "out-robotKey",
+      "toId": "startworldOut",
+      "toProperty": "robotKey"
     },
     {
       "fromId": "startworldFn",

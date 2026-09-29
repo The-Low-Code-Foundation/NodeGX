@@ -1,0 +1,259 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b8f4dbd1-4851-56ab-8049-86bc8e9ddced",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rcIn",
+      "fromProperty": "cardClass",
+      "toId": "rcCard",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "tagClass",
+      "toId": "rcTag",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "tag",
+      "toId": "rcTagText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "nameWord",
+      "toId": "rcNameL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "name",
+      "toId": "rcName",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "name",
+      "toId": "rcNameText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "wears",
+      "toId": "rcWears",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "colourWord",
+      "toId": "rcColourL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "hatWord",
+      "toId": "rcHatL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "canDoWord",
+      "toId": "rcCanL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "upgradeWord",
+      "toId": "rcUpL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "whereWord",
+      "toId": "rcWhereL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "paints",
+      "toId": "rcColourEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "hats",
+      "toId": "rcHatEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "abilities",
+      "toId": "rcCanEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "upgradeText",
+      "toId": "rcUpText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "upgradeClass",
+      "toId": "rcUp",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "whereText",
+      "toId": "rcWhere",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "name",
+      "toId": "rcDraw",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "color",
+      "toId": "rcDraw",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "eye",
+      "toId": "rcDraw",
+      "toProperty": "eye"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "hat",
+      "toId": "rcDraw",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "accessory",
+      "toId": "rcDraw",
+      "toProperty": "accessory"
+    },
+    {
+      "fromId": "rcDraw",
+      "fromProperty": "map",
+      "toId": "rcGarden",
+      "toProperty": "map"
+    },
+    {
+      "fromId": "rcDraw",
+      "fromProperty": "robots",
+      "toId": "rcGarden",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "owned",
+      "toId": "rcIsOwned",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rcIsOwned",
+      "fromProperty": "ontrue",
+      "toId": "rcOwn",
+      "toProperty": "to-owned"
+    },
+    {
+      "fromId": "rcIsOwned",
+      "fromProperty": "onfalse",
+      "toId": "rcOwn",
+      "toProperty": "to-locked"
+    },
+    {
+      "fromId": "rcOwn",
+      "fromProperty": "owned",
+      "toId": "rcName",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rcOwn",
+      "fromProperty": "owned",
+      "toId": "rcColourL",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rcOwn",
+      "fromProperty": "owned",
+      "toId": "rcColourRow",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rcOwn",
+      "fromProperty": "owned",
+      "toId": "rcHatL",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rcOwn",
+      "fromProperty": "owned",
+      "toId": "rcHatRow",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rcOwn",
+      "fromProperty": "locked",
+      "toId": "rcNameText",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "id",
+      "toId": "rcOut",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "rcName",
+      "fromProperty": "onTextChanged",
+      "toId": "rcOut",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "rcName",
+      "fromProperty": "onBlur",
+      "toId": "rcOut",
+      "toProperty": "named"
+    },
+    {
+      "fromId": "rcName",
+      "fromProperty": "onEnter",
+      "toId": "rcOut",
+      "toProperty": "named"
+    },
+    {
+      "fromId": "rcColourEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "rcOut",
+      "toProperty": "colour"
+    },
+    {
+      "fromId": "rcColourEach",
+      "fromProperty": "itemOutputSignal-picked",
+      "toId": "rcOut",
+      "toProperty": "coloured"
+    },
+    {
+      "fromId": "rcHatEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "rcOut",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "rcHatEach",
+      "fromProperty": "itemOutputSignal-picked",
+      "toId": "rcOut",
+      "toProperty": "hatted"
+    }
+  ]
+}

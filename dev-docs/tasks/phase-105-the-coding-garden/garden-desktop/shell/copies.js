@@ -93,7 +93,10 @@ function trickLetters(raw) {
   return out;
 }
 
-/** P106 IG-004: the page's robotsOf — every { id } row once, the first robot always there and first. */
+/** P106 IG-005: the robot kinds of the page's catalogue (`cg002Content.ts` ROBOTS) — a row's kind is kept only when it is one. */
+const ROBOT_KINDS = ['pip', 'cobble', 'pocket', 'echo'];
+
+/** P106 IG-004/005: the page's robotsOf — every row once, the first robot always there and first, a lent robot's look kept. */
 function robotsOf(raw) {
   const out = [{ id: FIRST_ROBOT_ID }];
   const seen = { [FIRST_ROBOT_ID]: 1 };
@@ -101,9 +104,22 @@ function robotsOf(raw) {
     const id = r && typeof r === 'object' ? String(r.id || '') : typeof r === 'string' ? r : '';
     if (!id || seen[id]) continue;
     seen[id] = 1;
-    out.push({ id });
+    out.push(id === FIRST_ROBOT_ID ? { id } : robotFields(id, r));
   }
   return out;
+}
+
+/** P106 IG-005: the page's robotFields — each field of a lent robot's row only when it is there and sound. */
+function robotFields(id, r) {
+  const row = { id };
+  if (!r || typeof r !== 'object') return row;
+  if (ROBOT_KINDS.includes(String(r.kind))) row.kind = String(r.kind);
+  const n = typeof r.name === 'string' ? r.name.trim().slice(0, ROBOT_NAME_MAX) : '';
+  if (n) row.name = n;
+  if (typeof r.color === 'string' && /^#[0-9A-Fa-f]{6}$/.test(r.color)) row.color = r.color;
+  if (r.eye === 'round' || r.eye === 'happy' || r.eye === 'wink') row.eye = r.eye;
+  if (typeof r.hat === 'string' && r.hat) row.hat = r.hat;
+  return row;
 }
 
 function programOf(v) {
@@ -186,7 +202,8 @@ function saveCodeOf(model) {
       Array.isArray(x.hats) ? x.hats.map(String) : [],
       island.done,
       plots,
-      island.robots.map((r) => r.id)
+      // P106 IG-005: r1 (and a row with no kind) is its id; a lent robot is [id, kind, name, color, eye, hat].
+      island.robots.map((r) => (r.id === FIRST_ROBOT_ID || !r.kind ? r.id : [r.id, r.kind, r.name || '', r.color || '', r.eye || '', r.hat || '']))
     ]);
   }
   const packed = { v: SAVE_VERSION, f: [String(fam.id), Number(fam.created)], p, a: String(isl.activeId || (list[0] ? list[0].id : '')) };

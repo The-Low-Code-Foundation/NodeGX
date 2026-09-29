@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b8f4dbd1-4851-56ab-8049-86bc8e9ddced",
+  "name": "Card",
+  "path": "/Robot/Card",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One robot of My robots: its drawing, name, tag (Yours, Lent by …, Locked), what it wears, colours, hats, its blocks as chips, its upgrade and where it works. Publishes Named, Coloured or Hatted with the Id and the value."
+}

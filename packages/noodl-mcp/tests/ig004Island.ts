@@ -42,15 +42,25 @@ var ISLAND_HOLD = ${ISLAND_HOLD_TICKS};
 function islClone(v) { return v === undefined || v === null ? v : JSON.parse(JSON.stringify(v)); }
 /** A short, stable name for what an island was built from (djb2 over the text): the tick's guard against a stale state. */
 function islHash(text) { var h = 5381, t = String(text); for (var i = 0; i < t.length; i++) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0; return h.toString(36) + ':' + t.length; }
-/** A request's start in its plot's own coordinates: its things and its one robot — Start world's robot, field for field. */
-function islStart(req, robotId) {
+/**
+ * A request's start in its plot's own coordinates: its things and its one robot — Start world's robot, field for field.
+ * P106 IG-005: bot is the robot row working it (Read family's): its can and basket (upgrades applied) and its look.
+ */
+function islStart(req, robotId, bot) {
   var rs = req.robotStart || {};
   var robot = { id: String(robotId || 'me'), x: Number(rs.x) || 0, y: Number(rs.y) || 0, d: Number(rs.d) || 0, carry: Array.isArray(rs.carry) ? rs.carry.slice() : [] };
   if (rs.basket !== undefined) robot.basket = rs.basket;
   robot.can = rs.can === undefined || rs.can === null || rs.can === '' ? null : Math.max(0, Math.floor(Number(rs.can)) || 0);
   robot.canMax = Number(rs.canMax) > 0 ? Math.floor(Number(rs.canMax)) : CAN_MAX;
+  if (bot && typeof bot === 'object') {
+    if (Number(bot.canMax) > 0) robot.canMax = Math.floor(Number(bot.canMax));
+    if (Number(bot.basket) > 0) robot.basket = Math.max(Math.floor(Number(bot.basket)), Number(rs.basket) > 0 ? Math.floor(Number(rs.basket)) : 0);
+    robot.look = islLook(bot);
+  }
   return { things: islClone(req.things || []), robot: robot, spent: [] };
 }
+/** IG-005: a robot row's look as Draw world reads it: its name, colour, eyes, hat and the accessory of its job. */
+function islLook(bot) { return { name: String(bot.name || ''), colour: String(bot.color || ''), eyes: String(bot.eye || 'round'), hat: String(bot.hat || 'none'), accessory: String(bot.accessory || '') }; }
 /** The plot's window of the island as the engine's world: the request's map, what stands on the plot, its robot. */
 function islView(plot, live) {
   var w = { map: plot.map.slice(), things: live.things, robots: [live.robot], events: [], schedule: islClone(plot.schedule || []) };
@@ -130,6 +140,10 @@ var done = Array.isArray(Inputs.done) ? Inputs.done : [];
 var band = Number(Inputs.band) === 1 ? 1 : 2;
 var mine = Array.isArray(Inputs.robots) && Inputs.robots.length ? Inputs.robots : [{ id: 'r1' }];
 var pins = Array.isArray(Inputs.pins) ? Inputs.pins : [];
+// P106 IG-005: a robot row's kind (Read family gives it; a bare { id } row is Pip, or its id when that is a kind).
+function kindOf(m) { return m && m.kind ? String(m.kind) : m && m.id && m.id !== 'r1' ? String(m.id) : 'pip'; }
+function rowOf(id) { for (var q = 0; q < mine.length; q++) if (mine[q] && mine[q].id === id) return mine[q]; return null; }
+function ownsKind(k) { for (var q = 0; q < mine.length; q++) if (kindOf(mine[q]) === k) return true; return false; }
 var rows = [];
 for (var b = 0; b < BASE.length; b++) rows.push(String(BASE[b]).split(''));
 var H = rows.length, W = H ? rows[0].length : 0;
@@ -138,7 +152,7 @@ for (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].plot && isFinite(Nu
 var freeReq = islClone(FREE); freeReq.plot = FREE_PLOT;
 list.push(freeReq);
 var plots = [], still = [], deco = [], live = {}, cards = [], busy = {};
-function hasRobot(id) { for (var q = 0; q < mine.length; q++) if (mine[q] && mine[q].id === id) return true; return false; }
+function hasRobot(id) { return !!rowOf(id); }
 function wonThings(req) {
   var st = islStart(req, 'me');
   var end = runToEnd(req.referenceProgram || [], { map: req.map.slice(), things: st.things, robots: [st.robot], events: [], schedule: islClone(req.schedule || []) }, 'me', 'en');
@@ -149,13 +163,16 @@ for (var p = 0; p < list.length; p++) {
   var map = Array.isArray(req.map) ? req.map : [];
   for (var y = 0; y < map.length; y++) for (var x = 0; x < String(map[y]).length; x++) if (rows[py + y] && py + y < H && px + x < W) rows[py + y][px + x] = String(map[y]).charAt(x);
   var sv = saved[req.id], isFree = req.id === 'free';
-  var status = isFree ? 'free' : Number(req.band) > band ? 'locked' : (sv && Array.isArray(sv.program) && sv.program.length && sv.robotId && hasRobot(sv.robotId) && !busy[sv.robotId]) ? 'working' : done.indexOf(req.id) !== -1 ? 'won' : 'open';
+  // IG-005: a plot is also locked while she has no robot of the kind it needs (the lock line names who lends it).
+  var needs = isFree ? '' : String(req.needs || 'pip');
+  var lock = isFree ? '' : Number(req.band) > band ? 'band' : !ownsKind(needs) ? 'robot' : '';
+  var status = isFree ? 'free' : lock ? 'locked' : (sv && Array.isArray(sv.program) && sv.program.length && sv.robotId && hasRobot(sv.robotId) && !busy[sv.robotId]) ? 'working' : done.indexOf(req.id) !== -1 ? 'won' : 'open';
   var robotId = status === 'working' ? String(sv.robotId) : '';
   if (robotId) busy[robotId] = req.id;
-  var start = islStart(req, robotId || 'me');
+  var start = islStart(req, robotId || 'me', robotId ? rowOf(robotId) : null);
   var plot = { id: req.id, x: px, y: py, w: PW, h: PH, map: map.slice(), schedule: islClone(req.schedule || []), status: status, islander: String(req.islander || ''), band: Number(req.band) || 1, robotId: robotId, program: robotId ? islClone(sv.program) : null, start: start };
   plots.push(plot);
-  cards.push({ id: req.id, x: px, y: py, w: PW, h: PH, status: status, islander: plot.islander, band: plot.band, robotId: robotId, door: null });
+  cards.push({ id: req.id, x: px, y: py, w: PW, h: PH, status: status, islander: plot.islander, band: plot.band, robotId: robotId, door: null, needs: needs, lock: lock });
   if (status === 'working') { live[req.id] = { run: islRun(plot, 0), things: islClone(start.things), robot: islClone(start.robot), spent: [], hold: 0, lap: 0 }; continue; }
   var shown = status === 'won' ? wonThings(req) : start.things;
   for (var t = 0; t < shown.length; t++) { var th = islClone(shown[t]); th.x = Number(th.x) + px; th.y = Number(th.y) + py; still.push(th); }
@@ -184,7 +201,10 @@ for (var n = 0; n < ISL.length; n++) {
 var home = [], homeN = 0;
 for (var m = 0; m < mine.length; m++) {
   if (!mine[m] || busy[mine[m].id]) continue;
-  home.push({ id: String(mine[m].id), x: HOME.x + homeN, y: HOME.y, d: 2, carry: [], can: null, home: true });
+  // IG-005: each in its own look (Draw world draws a robot's look over the page's).
+  var hr = { id: String(mine[m].id), x: HOME.x + homeN, y: HOME.y, d: 2, carry: [], can: null, home: true };
+  if (mine[m].name || mine[m].kind) hr.look = islLook(mine[m]);
+  home.push(hr);
   homeN++;
 }
 // The build's name: what it was built from. A tick handed a state from an OLDER build (its Set Variable landed after
@@ -242,11 +262,12 @@ Outputs.found = !!id;
  * who asks and what; a locked plot's one-line reason (the band, and the block it needs); where the robot is at work and
  * "bring {b} home"; whether the plot opens now. Free play always opens (the garden is never pinned).
  */
-export const islandChooseScript = (o: { free: unknown; islanders: unknown; wordHelper: string }): string => `${o.wordHelper}
+export const islandChooseScript = (o: { free: unknown; islanders: unknown; wordHelper: string; robots?: unknown; robotWords?: unknown }): string => `${o.wordHelper}
 var FREE = ${JSON.stringify(o.free)};
 var ISLANDERS = ${JSON.stringify(o.islanders)};
+var ROBOTS = ${JSON.stringify(o.robots ?? [])};
+var ROBOT_WORDS = ${JSON.stringify(o.robotWords ?? { does: {} })};
 var lang = langOf(Inputs.lang), name = nameOf(Inputs.botName);
-var w = wordMap(Inputs.words, lang, name);
 var id = String(Inputs.requestId || '');
 var cards = Array.isArray(Inputs.cards) ? Inputs.cards : [];
 var reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];
@@ -256,9 +277,17 @@ var card = null, req = null;
 for (var i = 0; i < cards.length; i++) if (cards[i] && cards[i].id === id) card = cards[i];
 for (var j = 0; j < reqs.length; j++) if (reqs[j] && reqs[j].id === id) req = reqs[j];
 if (!req && id === 'free') req = FREE;
-// Where her robot is at work (v4: her one robot; IG-005 picks the robot for the job).
-var robotId = String(mine[0].id || 'r1'), workingAt = '';
-for (var k in plots) if (plots[k] && plots[k].robotId === robotId && Array.isArray(plots[k].program) && plots[k].program.length) workingAt = k;
+// P106 IG-005: the robot for this job — hers of the kind the request needs (free play: Pip) — and where IT is at work.
+function kindOf(m) { return m && m.kind ? String(m.kind) : m && m.id && m.id !== 'r1' ? String(m.id) : 'pip'; }
+var needs = req && req.id !== 'free' && req.needs ? String(req.needs) : 'pip';
+var job = null;
+for (var q = 0; q < mine.length && !job; q++) if (kindOf(mine[q]) === needs) job = mine[q];
+var spec = null;
+for (var s = 0; s < ROBOTS.length; s++) if (ROBOTS[s].id === needs) spec = ROBOTS[s];
+var jobName = job && job.name ? String(job.name) : job ? name : spec ? String(spec.defaultName[lang] || spec.defaultName.en) : name;
+var w = wordMap(Inputs.words, lang, jobName);
+var robotId = job ? String(job.id || 'r1') : '', workingAt = '';
+if (robotId) for (var k in plots) if (plots[k] && plots[k].robotId === robotId && Array.isArray(plots[k].program) && plots[k].program.length) workingAt = k;
 var workReq = null;
 for (var m = 0; m < reqs.length; m++) if (reqs[m] && reqs[m].id === workingAt) workReq = reqs[m];
 var status = card ? card.status : id === 'free' ? 'free' : '';
@@ -268,6 +297,13 @@ var title = req ? (id === 'free' ? (w.sandH || '') : (w[req.copyKeys.title] || '
 var workTitle = workReq ? (w[workReq.copyKeys.title] || '') : '';
 var canOpen = false, showHome = false, line = '';
 if (!req) line = '';
+else if (status === 'locked' && card && card.lock === 'robot' && spec) {
+  // IG-005 (AC5): the robot it needs, what that robot does, who lends it and after which request.
+  var lender = spec.lentBy && ISLANDERS[spec.lentBy] ? w[ISLANDERS[spec.lentBy].nameKey] || '' : '';
+  var after = null;
+  for (var a = 0; a < reqs.length; a++) if (reqs[a] && reqs[a].id === spec.unlockedBy) after = reqs[a];
+  line = fill(w.ig5Locked, { r: jobName, does: w[ROBOT_WORDS.does[spec.id]] || '', who: lender, q: after ? w[after.copyKeys.title] || '' : '' });
+}
 else if (status === 'locked') line = fill(w.ig4Locked, { who: who, trick: w[req.copyKeys.blurb] || '' });
 else if (id === 'free') { canOpen = true; line = w.sandP || ''; }
 else if (workingAt && workingAt === id) { canOpen = true; showHome = true; line = w.ig4WorksHere || ''; }
@@ -287,6 +323,8 @@ Outputs.line = line;
 Outputs.faceClass = 'bg-face bg-sp-' + (isl ? isl.sprite : 'owl');
 Outputs.homeText = w.ig4Home || '';
 Outputs.openText = w.ig4Open || '';
+Outputs.robotId = robotId;
+Outputs.needs = needs;
 `;
 
 /**

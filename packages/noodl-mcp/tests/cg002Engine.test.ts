@@ -23,6 +23,8 @@
  * @module noodl-mcp/tests/cg002Engine.test
  */
 import { BAND_PALETTE, Block, BlockType, GardenRequest, HINTS, HINT_KEYS, OLIVE_RUNGS, REQUESTS, WORDS, WORD_KEYS } from './cg002Content';
+// P106 IG-005: the robot catalogue and the upgrades.
+import { ROBOTS, UPGRADES, needsOf } from './cg002Content';
 // P106 IG-004: the island's content gate (AC4) runs HERE, in the gate the generator runs first.
 import { FREE_PLAY_PLOT, ISLAND_BASE, ISLAND_H, ISLAND_HOME_MAP, ISLAND_HOME_PLOT, ISLAND_W, PLOT_H, PLOT_W } from './cg002Content';
 import { islandProblems } from './ig004Island';
@@ -56,7 +58,7 @@ import {
   runScript
 } from './cg002Scripts';
 // CG-002 §8 (s3, the save model): the helpers the v3 rows read directly.
-import { ENGINE, ROBOT_NAME_MAX, SAVE_HELPERS, helper } from './cg002Scripts';
+import { ENGINE, ROBOT_NAME_MAX, SAVE_HELPERS, UPDATE_ROBOT_SCRIPT, helper } from './cg002Scripts';
 // P106 IG-006: the page's own fallback for an Olive step is the rung's WRITTEN answer (cg005Olive's Ask Olive).
 import { OLIVE_TABLE, OLIVE_WORDS } from './cg005Olive';
 import { IG006_WORDS } from './cg003Content';
@@ -954,7 +956,7 @@ describe('CG-002 — the engine', () => {
         expect(runScript(m, { model: win(kid(), 'tulips-three', TULIP_PROG).model }).model.island.plots['tulips-three'].program).toEqual(TULIP_PROG);
       });
       it('decode ignores a v4 row’s plots → the round-trip row fails', () => {
-        const m = mutate(DECODE_SAVE_SCRIPT, 'var island = v4 ? { done: a[12], plots: plots, robots: a[14] }', 'var island = v4 ? { done: a[12] }');
+        const m = mutate(DECODE_SAVE_SCRIPT, 'var island = v4 ? { done: a[12], plots: plots, robots: robots }', 'var island = v4 ? { done: a[12] }');
         const model = win(kid(), 'tulips-three', TULIP_PROG).model;
         expect(runScript(m, { code: runScript(ENCODE_SAVE_SCRIPT, { model }).code }).model).not.toEqual(model);
       });
@@ -1519,6 +1521,144 @@ describe('CG-002 — the engine', () => {
     });
   });
 
+  describe('IG-005 (P106 s4) — robots for the job: a palette per robot, lent by islanders, upgrades, the save with three robots', () => {
+    const req = (id: string) => REQUESTS.find((r) => r.id === id)!;
+    const spec = (k: string) => ROBOTS.find((r) => r.id === k)!;
+    const pal = (band: 1 | 2, r: GardenRequest, robot: unknown, extra: Record<string, unknown> = {}) =>
+      runScript(PALETTE_SCRIPT, { band, words: WORD_ROWS, lang: 'en', allowed: r.palette, rungs: r.rungs ?? [], robot, needs: needsOf(r), ...extra });
+    const kid = (lang = 'en', band = 2) => runScript(ADD_PROFILE_SCRIPT, { model: null, name: 'Ada', band, lang, robotName: 'Pip' }).model;
+    const win = (model: any, id: string, extra: Record<string, unknown> = {}) =>
+      runScript(COMPLETE_REQUEST_SCRIPT, { model, requestId: id, tricks: req(id).tricks, reward: req(id).reward, program: JSON.parse(JSON.stringify(req(id).referenceProgram)), now: 1759100000000, ...extra });
+    const rows = (model: any) => helper<any[]>(SAVE_HELPERS, 'robotRowsOf', model.profiles[0]);
+
+    it('🔴 AC1: band 7–9 × tulips × Pip is fwd left right water fill; × path-stones × Cobble is fwd left right pick put; Cobble on the tulips is refused', () => {
+      expect(pal(1, req('tulips-three'), spec('pip')).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'water', 'fill']);
+      expect(pal(1, req('path-stones'), spec('cobble')).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'pick', 'put']);
+      const refused = pal(1, req('tulips-three'), spec('cobble'));
+      expect([refused.refused, refused.count, refused.palette]).toEqual([true, 0, []]);
+      // Known-firing beside the refusal: the same robot on its own job is not refused; a kind name works as a robot too.
+      expect(pal(1, req('path-stones'), 'cobble').refused).toBe(false);
+      expect(pal(2, req('tulips-three'), spec('pip')).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'water', 'fill', 'repeat']);
+      // The robot narrows the request: Pip on the stones' list keeps the moves and the repeat, never pick or put.
+      expect(pal(2, req('path-stones'), spec('pip'), { needs: '' }).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'repeat']);
+      // Echo carries Olive's blocks as a PALETTE choice: Pip (read only) on the flowers loses is it a…?; Echo keeps it.
+      const olive = (robot: string) => pal(2, req('rock-flower'), spec(robot), { needs: '' }).palette.map((p: any) => p.id).filter((id: string) => id.startsWith('olive:'));
+      expect([olive('pip'), olive('echo')]).toEqual([[], ['olive:is-it-a']]);
+      // No robot (free play): nothing filtered, as before IG-005.
+      expect(runScript(PALETTE_SCRIPT, { band: 2, words: WORD_ROWS, lang: 'en' }).count).toBe(BAND_PALETTE[2].length);
+    });
+
+    it('🔴 every request, every band it allows: its robot is a robot of the catalogue and can place every block of the reference program', () => {
+      for (const r of REQUESTS) {
+        const kind = needsOf(r);
+        expect({ id: r.id, kind, known: !!ROBOTS.find((x) => x.id === kind) }).toEqual({ id: r.id, kind, known: true });
+        for (const band of [1, 2] as const) {
+          if (band < r.band) continue;
+          const program = band === 1 ? unrolled(r.referenceProgram) : r.referenceProgram;
+          const ids = new Set<string>(pal(band, r, spec(kind)).palette.map((p: any) => p.id));
+          for (const t of typesIn(program)) expect({ id: r.id, band, block: t, placeable: ids.has(t) }).toEqual({ id: r.id, band, block: t, placeable: true });
+        }
+      }
+    });
+
+    it('🔴 the lending chain has no loop: at each band, starting with Pip, every robot a request needs is lent by a request some owned robot can win', () => {
+      for (const band of [1, 2] as const) {
+        const owned = new Set<string>(['pip']);
+        let grew = true;
+        while (grew) {
+          grew = false;
+          for (const r of REQUESTS) if (r.band <= band && owned.has(needsOf(r))) for (const x of ROBOTS) if (x.unlockedBy === r.id && !owned.has(x.id)) { owned.add(x.id); grew = true; }
+        }
+        for (const r of REQUESTS.filter((x) => x.band <= band)) expect({ band, id: r.id, needs: needsOf(r), reachable: owned.has(needsOf(r)) }).toEqual({ band, id: r.id, needs: needsOf(r), reachable: true });
+      }
+      // The person sentence: at 7–9 the stones need Cobble, whom Sami lends after his first request (the post-box walk).
+      expect([needsOf(req('path-stones')), spec('cobble').unlockedBy, req('path-postbox').band, spec('cobble').lentBy]).toEqual(['cobble', 'path-postbox', 1, 'sami']);
+      for (const x of ROBOTS.filter((y) => y.unlockedBy)) expect({ robot: x.id, lender: req(x.unlockedBy!).islander, needs: needsOf(req(x.unlockedBy!)) === x.id }).toEqual({ robot: x.id, lender: x.lentBy, needs: false });
+      for (const u of UPGRADES) expect({ u: u.id, from: req(u.unlockedBy).islander }).toEqual({ u: u.id, from: u.from });
+    });
+
+    it('🔴 AC2: a robot reward adds the robot to island.robots with its default name in her language; Sami’s first request lends Cobble, “Cobble” in both', () => {
+      const en = win(kid('en'), 'path-postbox');
+      expect(en.lent).toEqual(['cobble']);
+      expect(en.model.island.robots).toEqual([{ id: 'r1' }, { id: 'cobble', kind: 'cobble', name: 'Cobble', color: spec('cobble').colour, eye: 'round', hat: 'none' }]);
+      expect(win(kid('fr'), 'path-postbox').model.island.robots[1].name).toBe('Cobble');
+      // A reward of kind robot (the kind itself): Pocket, named in French for a French profile.
+      const fr = runScript(COMPLETE_REQUEST_SCRIPT, { model: kid('fr'), requestId: 'x', reward: { kind: 'robot', id: 'pocket', from: 'biscuit' } });
+      expect([fr.lent, fr.model.island.robots.map((r: any) => r.name)]).toEqual([['pocket'], [undefined, 'Poche']]);
+      // Once: a second win lends nothing more; the reward the request always gave (the cap) is still given.
+      const twice = win(en.model, 'path-postbox');
+      expect([twice.lent, twice.model.island.robots.length, twice.model.profiles[0].hats]).toEqual([[], 2, ['cap']]);
+      // The robot works: she now has a robot for the stones, and not for the eggs.
+      expect([helper<string>(SAVE_HELPERS, 'jobRobotId', en.model.profiles[0], 'cobble'), helper<string>(SAVE_HELPERS, 'jobRobotId', en.model.profiles[0], 'pocket')]).toEqual(['cobble', '']);
+    });
+
+    it('🔴 AC3: can+ on Pip makes fill give 6 — six tulips on one fill after the upgrade, three before', () => {
+      const won = win(kid(), 'rows-trick');
+      expect(won.upgraded).toEqual(['can+']);
+      const before = rows(kid())[0];
+      const after = rows(won.model)[0];
+      expect([before.kind, before.canMax, before.upgraded, after.canMax, after.upgraded]).toEqual(['pip', 3, false, 6, true]);
+      // Six tulips in a row below the path, the pond at its start: fill once, then water, step, water… six times.
+      const world = (canMax: number) => ({ map: ['WGGGGGGG', 'GFFFFFFG'], things: [1, 2, 3, 4, 5, 6].map((x) => ({ kind: 'tulip', x, y: 1, watered: false })), robots: [{ id: 'pip', x: 1, y: 0, d: 3, can: 0, canMax }] });
+      const prog = parse('K L r6[W L F R]');
+      const wet = (canMax: number) => runToEnd(prog, world(canMax)).world.things.filter((t: any) => t.watered).length;
+      expect([wet(before.canMax), wet(after.canMax)]).toEqual([3, 6]);
+      // The can+ is Pip's and Echo's slot; Cobble keeps his, and Sami's basket+ makes his basket 8, Biscuit's boots Pocket's steps × 0.7.
+      let m = win(win(win(win(kid(), 'path-postbox').model, 'bowl-if').model, 'path-stones').model, 'wall-until').model;
+      const byKind = Object.fromEntries(rows(m).map((r: any) => [r.kind, r]));
+      expect([byKind.cobble.basket, byKind.cobble.upgraded, byKind.pocket.stepFactor, byKind.pocket.upgraded, byKind.pip.canMax]).toEqual([8, true, 0.7, true, 3]);
+    });
+
+    it('🔴 AC6: the save code round-trips with three robots (renamed, recoloured, a hat); a session-3 v4 code (robots as ids) restores as it did', () => {
+      let m = win(win(kid(), 'path-postbox').model, 'bowl-if').model;
+      m = runScript(UPDATE_ROBOT_SCRIPT, { model: m, robotId: 'cobble', field: 'name', value: 'Rocky' }).model;
+      m = runScript(UPDATE_ROBOT_SCRIPT, { model: m, robotId: 'pocket', field: 'color', value: '#3FA66B' }).model;
+      m = runScript(UPDATE_ROBOT_SCRIPT, { model: m, robotId: 'cobble', field: 'hat', value: 'cap' }).model;
+      expect(m.island.robots.map((r: any) => r.id)).toEqual(['r1', 'cobble', 'pocket']);
+      const code = runScript(ENCODE_SAVE_SCRIPT, { model: m }).code;
+      const back = runScript(DECODE_SAVE_SCRIPT, { code });
+      expect([back.ok, back.migrated, back.model]).toEqual([true, false, m]);
+      expect(rows(back.model).map((r: any) => [r.name, r.color, r.hat, r.accessory])).toEqual([['Pip', '#FF7A59', 'none', 'can'], ['Rocky', spec('cobble').colour, 'cap', 'hod'], ['Pocket', '#3FA66B', 'none', 'satchel']]);
+      // Session 3's encoder packed robots as ids: that code (hand-packed the same way) reads as it did — r1 alone, v4, not migrated.
+      const s3 = { v: 4, f: ['f1', 1], a: 'p1', p: [['p1', 'Ada', 2, 'en', 'Ada', 'Pip', '#FF7A59', 'round', 'none', 'sssssss', [], [], ['tulips-three'], [['tulips-three', [{ id: 1, t: 'fwd' }], 'r1', 5]], ['r1']]] };
+      const old = runScript(DECODE_SAVE_SCRIPT, { code: 'BG1.' + Buffer.from(JSON.stringify(s3)).toString('base64url') });
+      expect([old.ok, old.migrated, old.model.island.robots, old.model.island.plots['tulips-three'].robotId]).toEqual([true, false, [{ id: 'r1' }], 'r1']);
+    });
+
+    it('Update robot: r1’s look is the profile’s own (renaming Pip here renames him everywhere); a hat she does not own, a bad colour or an unknown robot change nothing', () => {
+      const m = win(kid(), 'path-postbox').model;
+      const pip = runScript(UPDATE_ROBOT_SCRIPT, { model: m, robotId: 'r1', field: 'name', value: 'Rosie' });
+      expect([pip.changed, pip.model.profiles[0].robot.name, pip.model.island.robots[0]]).toEqual([true, 'Rosie', { id: 'r1' }]);
+      expect(runScript(UPDATE_ROBOT_SCRIPT, { model: m, robotId: 'cobble', field: 'hat', value: 'crown' }).changed).toBe(false);
+      expect(runScript(UPDATE_ROBOT_SCRIPT, { model: m, robotId: 'cobble', field: 'color', value: 'red' }).changed).toBe(false);
+      expect(runScript(UPDATE_ROBOT_SCRIPT, { model: m, robotId: 'echo', field: 'name', value: 'X' }).found).toBe(false);
+      // Known-firing: an owned hat on Cobble changes it.
+      expect(runScript(UPDATE_ROBOT_SCRIPT, { model: m, robotId: 'cobble', field: 'hat', value: 'cap' }).changed).toBe(true);
+    });
+
+    describe('arms: each IG-005 rule mutated, and the row that kills it', () => {
+      const mutate = (script: string, from: string, to: string) => {
+        if (script.split(from).length !== 2) throw new Error(`the arm's anchor must occur exactly once: ${from}`);
+        return script.replace(from, to);
+      };
+      it('the palette ignores the robot → AC1’s Cobble-on-tulips row fails', () => {
+        const m = mutate(PALETTE_SCRIPT, "var refused = !!bot && needs !== '' && botKind !== needs;", 'var refused = false;');
+        expect(runScript(m, { band: 1, words: WORD_ROWS, lang: 'en', allowed: req('tulips-three').palette, robot: spec('cobble'), needs: 'pip' }).count).toBeGreaterThan(0);
+      });
+      it('decode reads a robot row as its id only → the three-robot round trip fails', () => {
+        const m = mutate(DECODE_SAVE_SCRIPT, 'robots.push(Array.isArray(ro) ?', 'robots.push(false ?');
+        const model = win(kid(), 'path-postbox').model;
+        const got = runScript(m, { code: runScript(ENCODE_SAVE_SCRIPT, { model }).code });
+        expect([got.ok, got.model.island.robots]).toEqual([true, [{ id: 'r1' }]]);
+        expect(got.model).not.toEqual(model);
+      });
+      it('the upgrades are not applied → AC3’s six-tulip row reads 3', () => {
+        const m = mutate(SAVE_HELPERS, 'if (up.canMax) out.canMax = up.canMax;', '');
+        expect(helper<any[]>(m, 'robotRowsOf', win(kid(), 'rows-trick').model.profiles[0])[0].canMax).toBe(3);
+      });
+    });
+  });
+
   describe('the ports the graph wires', () => {
     it('every script mints the outputs its component publishes, and every input is a real name', () => {
       const expected: Record<string, string[]> = {
@@ -1533,15 +1673,17 @@ describe('CG-002 — the engine', () => {
         'Logic/Predict end': ['x', 'y', 'd', 'ticks', 'known', 'asked', 'hit', 'bumps'],
         'Logic/Choose hint': ['key', 'vars', 'isOlive'],
         'Logic/Hint line': ['text', 'found', 'key'],
-        'Logic/Palette': ['palette', 'count', 'band'],
+        'Logic/Palette': ['palette', 'count', 'band', 'refused'],
         'Logic/Add profile': ['model', 'ok', 'error', 'profileId', 'count'],
-        'Logic/Complete request': ['model', 'newlyDone', 'bloomed', 'found', 'pinned'],
+        'Logic/Complete request': ['model', 'newlyDone', 'bloomed', 'found', 'pinned', 'lent', 'upgraded'],
         'Logic/Encode save code': ['code', 'length'],
         'Logic/Decode save code': ['model', 'ok', 'error', 'migrated', 'profiles'],
         'Logic/Translate words': ['lang', 'isFr', ...WORD_KEYS],
         'Logic/Hint table': ['lang', ...HINT_KEYS],
         // P106 IG-004.
-        'Logic/Bring home': ['model', 'freed', 'found']
+        'Logic/Bring home': ['model', 'freed', 'found'],
+        // P106 IG-005.
+        'Logic/Update robot': ['model', 'changed', 'found']
       };
       expect(Object.keys(expected).sort()).toEqual(FUNCTION_SCRIPTS.map((f) => f.component).sort());
       for (const { component, script } of FUNCTION_SCRIPTS) {

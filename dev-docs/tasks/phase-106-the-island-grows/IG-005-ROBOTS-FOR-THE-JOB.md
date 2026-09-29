@@ -61,3 +61,32 @@ As IG-001 §5.
 Echo carrying the Olive blocks is a palette choice, not an engine rule: the engine's ask blocks stay usable by
 any robot in tests. A hat is per profile (owned) and per robot (worn): two fields. The kit's `HATS` list draws
 only `cap sun crown`; a new hat owes both renderers.
+
+## 7. Session 4 (2026-09-29, lane B, worktree `ig005-robots` cut from `7ed9f065e`)
+
+### 7.1 The save model — v4 stays v4, the robot rows gain optional fields (written before the page was built)
+
+```
+profile.island.robots = [ { id: 'r1' },                                                    // Pip: his look stays profile.robot
+                          { id, kind, name, color, eye, hat } … ]                          // a lent robot: its id IS its kind
+code row[14] (robots)  = [ 'r1', [id, kind, name, color, eye, hat] … ]                     // a string = an id (session 3's shape)
+upgrades               = item ids in profile.stickers: 'can+' | 'basket+' | 'boots'       // owned per profile, no new field
+```
+
+- **The version stays 4.** Every new field is optional: a row `{ id }` (session 3's) reads exactly as before, and a
+  session-3 code (robots packed as ids) decodes to the same model and says not migrated (engine gate). No migration, so
+  no on-load save is owed.
+- **A lent robot's row** is written once by `Complete request` (`lendRobot`): `{ id: kind, kind, name: the catalogue's
+  defaultName in the profile's language, color: the catalogue's colour, eye: 'round', hat: 'none' }`. `modelOf` keeps
+  each field only when it is sound (kind in the catalogue, a name of 1–16 characters, `#RRGGBB`, a known eye, a hat
+  string); a row missing its kind reads its kind from its id when that is a kind, else Pip.
+- **r1 stays `{ id: 'r1' }`** and its look stays `profile.robot` (one source: renaming Pip on My robots, in the new-player
+  form or in a v3 code is the same field). `robotsOf` still puts r1 first.
+- **The save code** packs r1 (and any row with no kind) as its id, a lent robot as `[id, kind, name, color, eye, hat]`;
+  decode reads either. The P105 shell's `copies.js` packs the same bytes (its test pins it).
+- **Upgrades are items** (`Complete request` pushes the catalogue's upgrade for the request won into `stickers`, as every
+  `item` reward is kept): owned per profile; each fits the robots its catalogue row names (`can+` → Pip and Echo, `basket+`
+  → Cobble, `boots` → Pocket). A hat stays per profile (owned, `hats`) and per robot (worn, the row's `hat`).
+- **What the pages read** is `robotRow(profile, row)` (Read family's `robots` output): `{ id, kind, name, color, eye, hat,
+  accessory, palette, canMax, basket, stepFactor, upgrade, upgraded, lentBy, working }` — the look, what it can do, the
+  upgrades applied, the plot it works. Nothing of that is stored.

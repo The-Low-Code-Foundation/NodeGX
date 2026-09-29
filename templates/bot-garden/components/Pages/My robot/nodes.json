@@ -25,7 +25,9 @@
       "children": [
         "rbBar",
         "rbHead",
-        "rbGrid"
+        "rbGrid",
+        "rbFleetL",
+        "rbFleet"
       ],
       "parameters": {
         "width": {
@@ -82,7 +84,7 @@
         "name": "gardenLang"
       },
       "x": 530,
-      "y": 880
+      "y": 1720
     },
     {
       "id": "rbWords",
@@ -106,7 +108,109 @@
         "runOnChange-condition": false
       },
       "x": 530,
+      "y": 1840
+    },
+    {
+      "id": "rbFleetL",
+      "type": "Text",
+      "label": "Your robots",
+      "parent": "rbWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h2",
+        "fontSize": {
+          "value": 22,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2,
+        "marginTop": "var(--space-2)"
+      },
+      "x": 160,
       "y": 1000
+    },
+    {
+      "id": "rbFleet",
+      "type": "Group",
+      "label": "The robots",
+      "parent": "rbWrap",
+      "children": [
+        "rbFleetEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "stretch",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3-5)",
+        "rowGap": "var(--space-3-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "cssClassName": "bg-robots"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "rbFleetEach",
+      "type": "For Each",
+      "label": "One card per robot",
+      "parent": "rbFleet",
+      "parameters": {
+        "template": "/Robot/Card",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "rbCards",
+      "type": "/Logic/Robot cards",
+      "label": "Her robots and the ones to be lent",
+      "x": 530,
+      "y": 1240
+    },
+    {
+      "id": "rbRequests",
+      "type": "/Data/Requests",
+      "label": "The requests",
+      "x": 530,
+      "y": 1960
+    },
+    {
+      "id": "rbSetName",
+      "type": "/Logic/Update robot",
+      "label": "A robot’s name",
+      "parameters": {
+        "field": "name"
+      },
+      "x": 530,
+      "y": 1360
+    },
+    {
+      "id": "rbSetColour",
+      "type": "/Logic/Update robot",
+      "label": "A robot’s paint",
+      "parameters": {
+        "field": "color"
+      },
+      "x": 530,
+      "y": 1480
+    },
+    {
+      "id": "rbSetHat",
+      "type": "/Logic/Update robot",
+      "label": "A robot’s hat",
+      "parameters": {
+        "field": "hat"
+      },
+      "x": 530,
+      "y": 1600
     },
     {
       "id": "rbHead",

@@ -131,15 +131,195 @@
     },
     {
       "fromId": "rbT",
-      "fromProperty": "rbTitle",
+      "fromProperty": "ig5Title",
       "toId": "rbHead",
       "toProperty": "title"
     },
     {
       "fromId": "rbT",
-      "fromProperty": "rbSub",
+      "fromProperty": "ig5Sub",
       "toId": "rbHead",
       "toProperty": "sub"
+    },
+    {
+      "fromId": "rbT",
+      "fromProperty": "ig5Fleet",
+      "toId": "rbFleetL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "robots",
+      "toId": "rbCards",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "hats",
+      "toId": "rbCards",
+      "toProperty": "hats"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "band",
+      "toId": "rbCards",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "lang",
+      "toId": "rbCards",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "botName",
+      "toId": "rbCards",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "rbWords",
+      "fromProperty": "words",
+      "toId": "rbCards",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "rbRequests",
+      "fromProperty": "requests",
+      "toId": "rbCards",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "rbCards",
+      "fromProperty": "cards",
+      "toId": "rbFleetEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rbStore",
+      "fromProperty": "model",
+      "toId": "rbSetName",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "profileId",
+      "toId": "rbSetName",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "rbSetName",
+      "toProperty": "robotId"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-name",
+      "toId": "rbSetName",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutputSignal-named",
+      "toId": "rbSetName",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rbSetName",
+      "fromProperty": "model",
+      "toId": "rbStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbSetName",
+      "fromProperty": "ran",
+      "toId": "rbStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "rbStore",
+      "fromProperty": "model",
+      "toId": "rbSetColour",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "profileId",
+      "toId": "rbSetColour",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "rbSetColour",
+      "toProperty": "robotId"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-colour",
+      "toId": "rbSetColour",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutputSignal-coloured",
+      "toId": "rbSetColour",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rbSetColour",
+      "fromProperty": "model",
+      "toId": "rbStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbSetColour",
+      "fromProperty": "ran",
+      "toId": "rbStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "rbStore",
+      "fromProperty": "model",
+      "toId": "rbSetHat",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "profileId",
+      "toId": "rbSetHat",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "rbSetHat",
+      "toProperty": "robotId"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-hat",
+      "toId": "rbSetHat",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutputSignal-hatted",
+      "toId": "rbSetHat",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rbSetHat",
+      "fromProperty": "model",
+      "toId": "rbStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbSetHat",
+      "fromProperty": "ran",
+      "toId": "rbStore",
+      "toProperty": "write"
     },
     {
       "fromId": "rbFam",
