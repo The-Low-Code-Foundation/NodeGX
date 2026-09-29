@@ -1024,11 +1024,11 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       eng.destroy();
     });
 
-    it('Camera: island frames the whole map (the mockup’s fit), plot frames Focus closer, follow keeps robot 0 in the middle', () => {
+    it('Camera: island frames the whole map (every corner inside the margin — P106 s4 (a)), plot frames Focus closer, follow keeps robot 0 in the middle', () => {
       const { eng, tick } = engineOn();
       const C = node().camera;
       const map = eng.world.map;
-      const island = C.fitRect(map, { x: 0, y: 0, w: 8, h: 6 }, eng.aspect);
+      const island = C.frameRect(map, { x: 0, y: 0, w: 8, h: 6 }, eng.aspect);
       eng.setCamera('island', null);
       tick(500);
       expect(eng.state.dist).toBeCloseTo(island.dist);
@@ -1046,6 +1046,37 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       expect(eng.state.tx).toBeCloseTo(r.x);
       expect(eng.state.tz).toBeCloseTo(r.z);
       eng.destroy();
+    });
+  });
+
+  describe('P106 s4 (a) — the island camera shows the whole 46 × 22 island, and a robot’s name is never under a bubble', () => {
+    it('🔴 at the Island page’s stage (1368: 952 × 590) every corner of the 46 × 22 island, ground and object height, projects inside the view; the mockup’s fit (the plot look) ran a corner off it', () => {
+      const C = node().camera;
+      const map = { w: 46, h: 22 };
+      const aspect = 952 / 590;
+      const whole = { x: 0, y: 0, w: 46, h: 22 };
+      const inside = (st: { tx: number; tz: number; dist: number }) => {
+        const out: number[][] = [];
+        for (const y of [0, C.CAMERA.objectHeight]) for (const [x, z] of [[-23, -11], [23, -11], [-23, 11], [23, 11]]) {
+          const n = C.project(st, aspect, [x, y, z]);
+          if (!(n.depth > 0 && Math.abs(n.x) <= 1 && Math.abs(n.y) <= 1)) out.push([x, y, z]);
+        }
+        return out;
+      };
+      // Known-firing: the plot framing clips the island (s3's shot: the bottom-right corner off the stage).
+      expect(inside(C.fitRect(map, whole, aspect)).length).toBeGreaterThan(0);
+      expect(inside(C.frameRect(map, whole, aspect))).toEqual([]);
+    });
+
+    it('🔴 the engine’s island camera is that framing', () => {
+      const built = fs.readFileSync(BUILT, 'utf8');
+      expect(built).toMatch(/if \(eng\.cameraMode === 'island'\) return frameRect\(map, \{ x: 0, y: 0, w: Math\.max\(1, map\.w\), h: Math\.max\(1, map\.h\) \}, eng\.aspect\);/);
+    });
+
+    it('🔴 a robot’s name draws above an islander’s bubble (the bubbles are added after the names, so without it the later one covered Pip at work)', () => {
+      const built = fs.readFileSync(BUILT, 'utf8');
+      const z = (cls: string) => Number((built.match(new RegExp(`'\\.${cls}\\{[^}]*z-index:(\\d+)`)) || [])[1]);
+      expect([z('gd3-name'), z('gd3-isl-say')]).toEqual([2, 1]);
     });
   });
 

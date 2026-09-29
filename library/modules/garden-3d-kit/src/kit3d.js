@@ -1115,7 +1115,8 @@
    * The mockup's framing (island-3d.html `v.fit`): the target at the rectangle's centre, the distance at which its width
    * fills the view across or its depth (foreshortened by the tilt) fills it down, whichever is further, × 1.18 + 1.2.
    * It fills the stage and lets the corners of the turned rectangle run off it — the look Richard grades (IG-007 AC5).
-   * `frameRect` (everything inside a margin) stays the zoom-out bound, so a pinch can always show the whole map.
+   * `frameRect` (everything inside a margin) stays the zoom-out bound, so a pinch can always show the whole map, and it
+   * frames the Island camera (P106 s4).
    */
   function fitRect(map, rect, aspect) {
     var t = tanHalf();
@@ -1319,7 +1320,9 @@
     /** The state the Camera and Focus ports ask for, from the current world. */
     var goalState = function () {
       var map = eng.world.map;
-      if (eng.cameraMode === 'island') return fitRect(map, { x: 0, y: 0, w: Math.max(1, map.w), h: Math.max(1, map.h) }, eng.aspect);
+      // P106 s4 (a): the island is seen whole — every corner inside the margin (frameRect). The mockup's fit is the plot's
+      // look and ran the 46 × 22 island's corner off the stage.
+      if (eng.cameraMode === 'island') return frameRect(map, { x: 0, y: 0, w: Math.max(1, map.w), h: Math.max(1, map.h) }, eng.aspect);
       if (eng.cameraMode === 'follow' && eng.built && eng.built.robots.length) {
         var r = eng.built.robots[0];
         return { tx: r.position.x, tz: r.position.z, dist: eng.state.dist };
@@ -1912,14 +1915,14 @@
     '.gd3-world{position:relative;width:100%;max-width:640px;margin:0 auto;border-radius:16px;overflow:hidden;background:#BFE8CC;border:4px solid #A8D9B4;box-sizing:border-box;-webkit-tap-highlight-color:transparent;font-family:inherit;touch-action:none;user-select:none;-webkit-user-select:none}\n' +
     '.gd3-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}\n' +
     '.gd3-overlay{position:absolute;inset:0;pointer-events:none;overflow:hidden}\n' +
-    '.gd3-name{position:absolute;transform:translate(-50%,0);background:#fff;border-radius:999px;padding:1px 8px;font-size:12px;font-weight:800;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);color:#2E2A3D}\n' +
+    '.gd3-name{position:absolute;transform:translate(-50%,0);background:#fff;border-radius:999px;padding:1px 8px;font-size:12px;font-weight:800;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);color:#2E2A3D;z-index:2}\n' +
     '.gd3-label{position:absolute;transform:translate(-50%,0);background:#fff;border-radius:999px;padding:1px 7px;font-size:11px;font-weight:800;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15)}\n' +
     '.gd3-bubble{position:absolute;transform:translate(-30%,-100%);background:#fff;border-radius:14px;padding:8px 12px;font-weight:800;font-size:14px;box-shadow:0 6px 18px rgba(72,52,20,.10);max-width:230px;color:#2E2A3D;pointer-events:none}\n' +
     '.gd3-bubble:after{content:"";position:absolute;left:34%;bottom:-8px;border:8px solid transparent;border-top-color:#fff;border-bottom:0}\n' +
     '.gd3-bubble.gd3-olive{background:#EEE8FF;color:#4A2FA6}.gd3-bubble.gd3-olive:after{border-top-color:#EEE8FF}\n' +
     '.gd3-bubble small{display:block;font-weight:700;color:#6E6784;font-size:11px}.gd3-bubble.gd3-olive small{color:#6A5AA8}\n' +
     '.gd3-fallback{position:absolute;inset:0;display:grid;place-items:center;color:#6E6784;font-size:13px;font-weight:700}\n' +
-    '.gd3-isl-say{position:absolute;transform:translate(-30%,-100%);background:#fff;border-radius:12px;padding:5px 9px;font-weight:800;font-size:12px;box-shadow:0 6px 18px rgba(72,52,20,.12);max-width:180px;color:#2E2A3D;pointer-events:none}\n' +
+    '.gd3-isl-say{position:absolute;transform:translate(-30%,-100%);background:#fff;border-radius:12px;padding:5px 9px;font-weight:800;font-size:12px;box-shadow:0 6px 18px rgba(72,52,20,.12);max-width:180px;color:#2E2A3D;pointer-events:none;z-index:1}\n' +
     '.gd3-isl-say:after{content:"";position:absolute;left:30%;bottom:-6px;border:6px solid transparent;border-top-color:#fff;border-bottom:0}';
 
   /** @type {import('./types/node-kit').ReactNodeDefinition} */
