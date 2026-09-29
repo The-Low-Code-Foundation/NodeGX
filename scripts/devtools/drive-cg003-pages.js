@@ -91,6 +91,13 @@ function loadRequests(projectDir) {
   return JSON.parse(list.find((n) => n.type === 'Static Data').parameters.json);
 }
 const REQUESTS = loadRequests(PROJECT);
+// IG-005: the robots' names (the catalogue the page ships, in Logic/Job robot), in both languages.
+const ROBOT_NAMES = (() => {
+  const nodes = JSON.parse(fs.readFileSync(path.join(PROJECT, 'components', 'Logic', 'Job robot', 'nodes.json'), 'utf8'));
+  const list = Array.isArray(nodes) ? nodes : nodes.nodes || Object.values(nodes);
+  const robots = JSON.parse(/var ROBOTS = (\[.*?\]);\n/.exec(String(list.find((n) => n.type === 'JavaScriptFunction').parameters.functionScript))[1]);
+  return robots.flatMap((r) => [r.defaultName.en, r.defaultName.fr]);
+})();
 const titleOf = (lang, id) => w(lang, (REQUESTS.find((r) => r.id === id) || { copyKeys: {} }).copyKeys.title);
 /** The hint lines, from the project's own Data/Hints (IG-002 reads "Perfect!" in both languages). */
 function loadHints(projectDir) {
@@ -269,18 +276,34 @@ withDeployedSite({ dir: DIR }, async (page) => {
    * This takes it home and taps the card again, so a clause that only wants the Workshop still gets there; every time
    * it had to is counted (readings.broughtHome). The island's own clauses (drive-ig004-island.js) grade the card itself.
    */
-  const openQuest = async (needle, label) => {
+  const openQuest = async (needle, label, lent = false) => {
     const ok = await tap(byText('.bg-quest', needle), label);
     if (!ok) return false;
     const where = await until('location.pathname', (p) => p === '/workshop', 1500);
     if (where === '/workshop') return true;
     const home = await evaluate(`(() => { const b = document.querySelector('.bg-bring-home'); return !!b && b.offsetParent !== null; })()`);
+    // IG-005 (P106 s4): a plot padlocked for a robot she has not been lent yet (a new family has Pip only). A clause that
+    // only wants the Workshop gets there: the robots the requests need (read from the request data) are written into
+    // her stored island as a lent robot's row, and the island is read again; every time it had to is counted
+    // (readings.lent). drive-ig005-robots.js grades the lock, the lending and the robots themselves.
+    if (!home && !lent && (await evaluate(`((document.querySelector('.bg-plot-line') || {}).innerText || '').indexOf('🔒') === 0`))) {
+      readings.lent = (readings.lent || 0) + 1;
+      await lendRobots();
+      return openQuest(needle, `${label} (robots lent)`, true);
+    }
     if (!home) return true;
     readings.broughtHome = (readings.broughtHome || 0) + 1;
     await tap(first('.bg-bring-home'), `bring the robot home (for ${label})`);
     await until(`(() => { const b = document.querySelector('.bg-plot-open'); return !!b && b.offsetParent !== null; })()`, Boolean, 4000);
     await wait(300);
     return tap(byText('.bg-quest', needle), `${label} (the robot home)`);
+  };
+  /** IG-005: every robot a request needs (the request data's `needs`), lent to the playing kid in her stored island. */
+  const NEEDED_ROBOTS = [...new Set(REQUESTS.map((r) => r.needs).filter(Boolean))];
+  const lendRobots = async () => {
+    await evaluate(`(() => { const k = Object.keys(localStorage).find((x) => /bot-garden/.test(x)); const v = JSON.parse(localStorage.getItem(k)); const m = v.model || v; const a = m.profiles.find((p) => p.id === m.island.activeId); a.island.robots = a.island.robots || [{ id: 'r1' }]; for (const kind of ${JSON.stringify(NEEDED_ROBOTS)}) if (!a.island.robots.some((r) => (r.kind || r.id) === kind)) a.island.robots.push({ id: kind, kind }); localStorage.setItem(k, JSON.stringify(v)); })()`);
+    await page.navigate('/island');
+    await wait(1100);
   };
   /** Types into the input the finder names; a missing input is a FAIL line, never a crash (s2's first run threw here). */
   const typeInto = async (finder, value, label = 'an input') => {
@@ -362,7 +385,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await seg(to === 'fr' ? 'FR' : 'EN');
     await wait(600);
     const after = await words();
-    const same = before.filter((t) => after.includes(t) && !/Bot Garden|Olive|Pip|Rosie|Ada|Bo|Mamie Rose|Sami|Biscuit|EN|FR|7–9|10–12|Ok/.test(t));
+    // IG-005: a robot's name is a name in both languages (the catalogue's, as Pip's is), like the islanders'.
+    const same = before.filter((t) => after.includes(t) && !/Bot Garden|Olive|Pip|Rosie|Ada|Bo|Mamie Rose|Sami|Biscuit|EN|FR|7–9|10–12|Ok/.test(t) && !ROBOT_NAMES.includes(t));
     const marker = await evaluate('window.__gardenMarker');
     check(`AC9 ${screen}: ${from}→${to} changes every string, no reload`, marker === 42 && after.length > 0 && same.length === 0, { unchanged: same.slice(0, 8), marker });
   };
@@ -957,8 +981,9 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await tab(0);
   await until('location.pathname', (p) => p === '/island');
   await wait(900);
-  const pinName = await evaluate(`(() => { const n = document.querySelector('.bg-isle .gd-bot .gd-name'); return n ? n.innerText : null; })()`);
-  check('S3-RENAME: the robot on the island carries the new name (IG-004: on the island itself, was its pin)', pinName === 'Rosie', { pinName, stored: await doneOf() });
+  // IG-005 (P106 s4): her island can hold more than one robot (the lent ones): Pip is the one renamed, among them.
+  const pinNames = await evaluate(`[...document.querySelectorAll('.bg-isle .gd-bot .gd-name')].map((n) => n.innerText)`);
+  check('S3-RENAME: the robot on the island carries the new name (IG-004: on the island itself, was its pin; IG-005: among her robots)', pinNames.includes('Rosie') && !pinNames.includes('Pip'), { pinNames, stored: await doneOf() });
   await openQuest(w('en', 'rqTulipsTitle'), 'the tulip request (renamed)');
   await until('location.pathname', (x) => x === '/workshop');
   await wait(900);
@@ -1025,8 +1050,9 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await tab(0);
   await until('location.pathname', (p) => p === '/island');
   await wait(900);
-  const pastedPin = await evaluate(`(() => { const n = document.querySelector('.bg-isle .gd-bot .gd-name'); return n ? n.innerText : null; })()`);
-  check('S4-PASTE: … and the island shows it (the robot on the island is Remy)', pastedPin === 'Remy', pastedPin);
+  // IG-005: Pip (renamed Remy by the code) among her robots on the island.
+  const pastedPin = await evaluate(`[...document.querySelectorAll('.bg-isle .gd-bot .gd-name')].map((n) => n.innerText)`);
+  check('S4-PASTE: … and the island shows it (the robot on the island is Remy)', pastedPin.includes('Remy'), pastedPin);
   // The shown code back, so the screens after read as before.
   await tab(4);
   await until('location.pathname', (p) => p === '/grown-ups');

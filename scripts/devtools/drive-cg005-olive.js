@@ -269,10 +269,24 @@ async function pagesPart() {
           await tap(first('.bg-blocks-box .gd-picker .gd-opt'), `the first word for ${slot}`);
         }
       };
+      // P106 IG-005: a request is padlocked until the robot it needs is lent (a new family has Pip only). This drive grades
+      // Olive, not the lending: the robots the requests need (the template's request data) are written into her stored
+      // island as lent rows, and the island read again. drive-ig005-robots.js grades the lock and the lending.
+      const NEEDED = (() => {
+        const nodes = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'templates', 'bot-garden', 'components', 'Data', 'Requests', 'nodes.json'), 'utf8'));
+        const list = Array.isArray(nodes) ? nodes : nodes.nodes || Object.values(nodes);
+        return [...new Set(JSON.parse(list.find((n) => n.type === 'Static Data').parameters.json).map((r) => r.needs).filter(Boolean))];
+      })();
       const openRequest = async (title, tag) => {
         await page.navigate('/island');
         await wait(1100);
         await tap(byText('.bg-quest', title), `the request (${tag})`);
+        if ((await until('location.pathname', (p) => p === '/workshop', 1500)) !== '/workshop' && (await ev(`((document.querySelector('.bg-plot-line') || {}).innerText || '').indexOf('🔒') === 0`))) {
+          await ev(`(() => { const k = Object.keys(localStorage).find((x) => /bot-garden/.test(x)); const v = JSON.parse(localStorage.getItem(k)); const m = v.model || v; const a = m.profiles.find((p) => p.id === m.island.activeId); a.island.robots = a.island.robots || [{ id: 'r1' }]; for (const kind of ${JSON.stringify(NEEDED)}) if (!a.island.robots.some((r) => (r.kind || r.id) === kind)) a.island.robots.push({ id: kind, kind }); localStorage.setItem(k, JSON.stringify(v)); })()`);
+          await page.navigate('/island');
+          await wait(1100);
+          await tap(byText('.bg-quest', title), `the request (${tag}, robots lent)`);
+        }
         await until('location.pathname', (p) => p === '/workshop');
         return until(`!!document.querySelector('.bg-blocks-box .gd-palette [data-pal="fwd"]')`, Boolean, 6000);
       };

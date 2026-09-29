@@ -76,6 +76,10 @@ const byTitle = (key) => REQUESTS.find((r) => r.copyKeys && r.copyKeys.title ===
 const TULIPS = byTitle('rqTulipsTitle');
 const STONES = byTitle('rqStonesTitle');
 const PATH = byTitle('rqPathTitle');
+// P106 IG-005: the robot a request needs (Pip when it names none), and ANOTHER of the tulips' robot's jobs at 7–9 — the
+// plot whose card says "at work on the tulips" (the stones need another robot: they are padlocked until it is lent).
+const needsOf = (r) => r.needs || 'pip';
+const ANOTHER = REQUESTS.find((r) => Number(r.band) === 1 && r.id !== TULIPS.id && needsOf(r) === needsOf(TULIPS));
 const WORLD_SCRIPT = functionScript('Logic/Island world');
 const HOME = JSON.parse(/var HOME = (\{[^}]*\});/.exec(WORLD_SCRIPT)[1]);
 const PLOT_W = Number(/var PW = (\d+)/.exec(WORLD_SCRIPT)[1]);
@@ -299,14 +303,15 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
         check('IG-004 AC7: … and the island still shows her robot at work on the tulips’ plot', onPlot(again), again);
       }
 
-      // AC3: the stones' card while the robot works the tulips → the plot card says so and offers home.
-      await tap(byText('.bg-quest', titleOf(lang, STONES)), `the stones (${tag})`);
+      // AC3: another of the robot's jobs while it works the tulips → the plot card says so and offers home. (IG-005: was the
+      // stones; they need another robot now, so their card is a padlock — drive-ig005-robots.js grades that.)
+      await tap(byText('.bg-quest', titleOf(lang, ANOTHER)), `${ANOTHER.id} (${tag})`);
       await wait(700);
       const stay = await path0();
       const blocked = await until(CARD, (c) => c.up, 3000);
       readings[`blocked-${tag}`] = blocked;
       const atWork = fill(w(lang, 'ig4AtWork'), { plot: titleOf(lang, TULIPS) });
-      check(`IG-004 AC3 ${tag}: the stones’ card while the robot works the tulips stays on the island and says "${atWork}"`, stay === '/island' && blocked.up && blocked.line === atWork && blocked.line.includes(titleOf(lang, TULIPS)), { stay, blocked, want: atWork });
+      check(`IG-004 AC3 ${tag}: ${ANOTHER.id}’s card (the same robot’s job) while the robot works the tulips stays on the island and says "${atWork}"`, stay === '/island' && blocked.up && blocked.line === atWork && blocked.line.includes(titleOf(lang, TULIPS)), { stay, blocked, want: atWork });
       check(`IG-004 AC3 ${tag}: … and offers "${w(lang, 'ig4Home')}" (no way in yet)`, blocked.home === w(lang, 'ig4Home') && blocked.open === null, blocked);
       if (shots) await shot(`ig004-${tag}-03-at-work`);
       await tap(first('.bg-bring-home'), `bring Pip home (${tag})`);
@@ -320,9 +325,9 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
       check(`IG-004 AC3 ${tag}: brought home — the robot is at home (${HOME.x},${HOME.y}) and the card offers "${w(lang, 'ig4Open')}"`, home.length === 1 && home[0].x === HOME.x && home[0].y === HOME.y && freed.open === w(lang, 'ig4Open') && freed.home === null, { home, freed });
       check(`IG-004 AC3 ${tag}: … the tulips STAY watered (all ${TULIP_COUNT} drawn wet on their plot) and the plot keeps its win without a program`, wet.length === TULIP_COUNT && wet.every((t) => t === 'wet') && !!plot2 && plot2.program === null && plot2.robotId === '' && saved2.island.done.includes(TULIPS.id), { wet, plot2 });
       if (shots) await shot(`ig004-${tag}-04-home`);
-      await tap(first('.bg-plot-open'), `Go and help (the stones, ${tag})`);
+      await tap(first('.bg-plot-open'), `Go and help (${ANOTHER.id}, ${tag})`);
       const ws = await until(`(() => { const h = [...document.querySelectorAll('h1')].find((e) => e.offsetParent !== null); return { path: location.pathname, title: h ? h.innerText : '' }; })()`, (r) => r.path === '/workshop' && r.title.length > 0, 5000);
-      check(`IG-004 ${tag}: Go and help opens the stones in the Workshop`, ws.path === '/workshop' && ws.title.includes(titleOf(lang, STONES)), ws);
+      check(`IG-004 ${tag}: Go and help opens ${ANOTHER.id} in the Workshop`, ws.path === '/workshop' && ws.title.includes(titleOf(lang, ANOTHER)), ws);
 
       // AC5: at 7–9, the plots the band cannot do are fenced; a tap says why, in one line, in the language.
       await tab(0);
@@ -330,11 +335,12 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
       await wait(700);
       await seg('7–9');
       await wait(1200);
-      const locked = REQUESTS.filter((r) => Number(r.band) === 2);
+      // IG-005: and every plot whose robot she has not been lent (this kid has Pip only).
+      const locked = REQUESTS.filter((r) => Number(r.band) === 2 || needsOf(r) !== 'pip');
       const fences = await evaluate(`[...document.querySelectorAll('.bg-isle .gd-fence')].map((f) => f.getAttribute('data-fence'))`);
       const padlocks = await evaluate(`document.querySelectorAll('.bg-isle .gd-padlock').length`);
-      check(`IG-004 AC5 ${tag}: at 7–9 every plot the band cannot do (${locked.length}) is fenced and padlocked`, fences.length === locked.length && padlocks === locked.length && locked.every((r) => fences.includes(`${r.plot.x},${r.plot.y},${PLOT_W},${PLOT_H}`)), { fences, padlocks });
-      const lockedReq = locked[0];
+      check(`IG-004 AC5 ${tag}: at 7–9 every plot the band cannot do or her robots cannot (${locked.length}) is fenced and padlocked`, fences.length === locked.length && padlocks === locked.length && locked.every((r) => fences.includes(`${r.plot.x},${r.plot.y},${PLOT_W},${PLOT_H}`)), { fences, padlocks });
+      const lockedReq = locked.find((r) => Number(r.band) === 2);
       await tap(cellOf(lockedReq.plot.x + 1, lockedReq.plot.y + 1), `a locked plot (${lockedReq.id}, ${tag})`);
       const why = await until(CARD, (c) => c.up, 3000);
       const reason = fill(w(lang, 'ig4Locked'), { who: w(lang, islanderWord(lockedReq.islander)), trick: w(lang, lockedReq.copyKeys.blurb) });
@@ -371,10 +377,12 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     await page.navigate('/island');
     await wait(900);
     const three = [TULIPS, STONES, PATH];
+    // IG-005: each plot's robot is of the kind it needs (the stones' is lent; a second Pip is a row of Pip's kind).
+    const PERF_ROBOTS = three.map((r, i) => (i === 0 ? { id: 'r1' } : { id: needsOf(r) === 'pip' ? 'r' + (i + 1) : needsOf(r), kind: needsOf(r) }));
     await evaluate(`(() => { const k = Object.keys(localStorage).find((x) => /bot-garden/.test(x)); const v = JSON.parse(localStorage.getItem(k)); const m = v.model; const a = m.profiles.find((p) => p.id === m.island.activeId);
-      a.island.robots = [{ id: 'r1' }, { id: 'r2' }, { id: 'r3' }];
+      a.island.robots = ${JSON.stringify(PERF_ROBOTS)};
       a.island.done = ${JSON.stringify(three.map((r) => r.id))};
-      a.island.plots = { ${three.map((r, i) => `${JSON.stringify(r.id)}: { program: ${JSON.stringify(r.referenceProgram)}, robotId: 'r${i + 1}', wonAt: ${i + 1} }`).join(', ')} };
+      a.island.plots = { ${three.map((r, i) => `${JSON.stringify(r.id)}: { program: ${JSON.stringify(r.referenceProgram)}, robotId: ${JSON.stringify(PERF_ROBOTS[i].id)}, wonAt: ${i + 1} }`).join(', ')} };
       localStorage.setItem(k, JSON.stringify(v)); })()`);
     await page.navigate('/island');
     await wait(2500);
