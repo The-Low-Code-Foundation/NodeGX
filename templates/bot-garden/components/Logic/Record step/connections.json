@@ -29,6 +29,12 @@
     },
     {
       "fromId": "recordstepIn",
+      "fromProperty": "record",
+      "toId": "recordstepFn",
+      "toProperty": "in-record"
+    },
+    {
+      "fromId": "recordstepIn",
       "fromProperty": "selected",
       "toId": "recordstepFn",
       "toProperty": "in-selected"
@@ -56,6 +62,12 @@
       "fromProperty": "out-bumps",
       "toId": "recordstepOut",
       "toProperty": "bumps"
+    },
+    {
+      "fromId": "recordstepFn",
+      "fromProperty": "out-moved",
+      "toId": "recordstepOut",
+      "toProperty": "moved"
     },
     {
       "fromId": "recordstepFn",

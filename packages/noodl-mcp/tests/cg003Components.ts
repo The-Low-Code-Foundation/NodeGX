@@ -217,14 +217,16 @@ const PANEL: N = { backgroundColor: 'var(--card)', borderRadius: 'var(--radius-c
  * The mockup's four buttons (AC2): a pill with a FILL and no border. `kind` picks the fill; `icon` a mask class.
  * Every one is a Button node with the fill as a parameter, so no default outline can survive.
  */
-type BtnKind = 'primary' | 'teach' | 'ask' | 'plain' | 'quiet' | 'fold';
+type BtnKind = 'primary' | 'teach' | 'ask' | 'plain' | 'quiet' | 'fold' | 'drive';
 const FILL: Record<BtnKind, [string, string]> = {
   primary: ['var(--leaf)', 'var(--on-fill)'],
   teach: ['var(--coral)', 'var(--on-fill)'],
   ask: ['var(--violet)', 'var(--on-fill)'],
   plain: ['var(--paper-2)', 'var(--ink)'],
   quiet: ['transparent', 'var(--ink-2)'],
-  fold: ['var(--block-control)', 'var(--on-fill)']
+  fold: ['var(--block-control)', 'var(--on-fill)'],
+  // P106 IG-003: Drive, the mockup's .btn.drive (the motion blue, white words).
+  drive: ['var(--block-motion)', 'var(--on-fill)']
 };
 export function btn(kind: BtnKind, icon = '', extra: N = {}): N {
   const [bg, fg] = FILL[kind];
@@ -299,7 +301,9 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
   // P106 IG-006 (lane C).
   'Logic/Card gate': 'go',
   'Logic/Card seen': 'go',
-  'Logic/Olive lesson': 'go'
+  'Logic/Olive lesson': 'go',
+  // P106 IG-003 (lane B).
+  'Logic/Teach start': 'go'
 };
 
 /** Port types by name; anything else is `*` (the engine passes objects, arrays and text through the same names). */
@@ -324,7 +328,11 @@ const TYPE: Readonly<Record<string, string>> = {
   // P106 IG-001 — the fixes: Perfect! (D3), free play's line (D4), Olive's answer spoken (D6), the pad by request (D10).
   referenceCount: 'number', freePlay: 'boolean', sayText: 'string', sayStyle: 'string', stepMs: 'number', keys: 'array',
   // P106 IG-007 — the renderer this computer uses, and the fallback rule's write.
-  stored: 'object', event: 'string', renderer: 'object', use3d: 'boolean', use2d: 'boolean', mode: 'string', why: 'string'
+  stored: 'object', event: 'string', renderer: 'object', use3d: 'boolean', use2d: 'boolean', mode: 'string', why: 'string',
+  // P106 IG-003 — Drive · Teach · Play and the Predict challenge.
+  record: 'string', moved: 'boolean', resumed: 'boolean', atEntry: 'number', badge: 'string', note: 'string', showLine: 'boolean',
+  driving: 'boolean', challenge: 'string', cardLine: 'string', programText: 'string', askedFor: 'string', outcome: 'string',
+  armed: 'boolean', showTick: 'boolean', live: 'boolean', start: 'object'
 };
 const typeOf = (name: string) => TYPE[name] ?? '*';
 
@@ -558,7 +566,7 @@ const PAD: CgComponent = {
   description: 'The Teach pad over the world’s corner (the mockup’s .pad): one key per step the request allows (Allowed; every step with no list) — forward, left and right on the d-pad, the first action in its centre, more actions on a third row. Publishes Pressed with the Op, the op first.',
   repeats: { source: 'array', rowFields: ['op', 'cls', 'label'] },
   nodes: [
-    inputs('pdIn', [['show', 'boolean'], ['allowed', 'array']]),
+    inputs('pdIn', [['show', 'boolean'], ['allowed', 'array'], ['words', 'array'], ['lang', 'string']]),
     group('pdBox', 'The pad', undefined, { sizeMode: 'contentSize', cssClassName: 'bg-pad', mounted: false }, ['pdEach']),
     // IG-001 D10: the keys follow the request (the pad was fixed to fwd left water right, so the stones' put came only from the palette).
     logic('pdKeys', L('Pad keys'), 'One key per allowed step'),
@@ -568,6 +576,8 @@ const PAD: CgComponent = {
   connections: [
     wire('pdIn', 'show', 'pdBox', 'mounted'),
     wire('pdIn', 'allowed', 'pdKeys', 'allowed'),
+    wire('pdIn', 'words', 'pdKeys', 'words'),
+    wire('pdIn', 'lang', 'pdKeys', 'lang'),
     wire('pdKeys', 'keys', 'pdEach', 'items'),
     wire('pdEach', 'itemOutput-op', 'pdOut', 'op'),
     wire('pdEach', 'itemOutputSignal-pressed', 'pdOut', 'pressed')
@@ -782,7 +792,7 @@ const HELP_CHIP: CgComponent = {
  */
 const PLAY: CgComponent = {
   path: 'Workshop/Play',
-  description: 'The workshop: teach the robot by driving it, see the steps as blocks, fold the repetition, play, and win. Request Id picks the request (free for free play); the line under the title is that request’s own. Won fires with Bloom, Reward and Won Request set; Island asks for the island; Found says whether the request exists (a reload has none).',
+  description: 'The workshop: drive the robot freely (nothing remembered), teach it by driving it again (every press a block), see the steps as blocks, fold the repetition, play, and win. Request Id picks the request (free for free play); the line under the title is that request’s own. Won fires with Bloom, Reward and Won Request set; Island asks for the island; Found says whether the request exists (a reload has none).',
   repeats: { source: 'array', rowFields: ['id', 'cls', 'lit'] },
   nodes: [
     inputs('plIn', [['requestId', 'string'], ['requests', 'array'], ['hints', 'array'], ['words', 'array'], ['lang', 'string'], ['band', 'number'], ['isOlder', 'boolean'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['stepMs', 'number']]),
@@ -793,7 +803,7 @@ const PLAY: CgComponent = {
     text('plTitle', 'The request', 'plHead', '', { ...T_H1, cssClassName: 'bg-ws-title' }),
     text('plSub', 'How it works', 'plHead', '', { ...T_MUTED, maxWidth: px(640), cssClassName: 'bg-ws-sub' }),
     group('plWs', 'World and steps', 'plRoot', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-ws' }, ['plLeft', 'plRight']),
-    group('plLeft', 'The world side', 'plWs', { ...column({ rowGap: sp(12) }), ...PANEL }, ['plTask', 'plStage', 'plPredictLine', 'plControls', 'plOwl']),
+    group('plLeft', 'The world side', 'plWs', { ...column({ rowGap: sp(12) }), ...PANEL }, ['plTask', 'plStage', 'plModeLine', 'plControls', 'plOwl']),
     group('plTask', 'The task', 'plLeft', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(14), flexWrap: 'nowrap' }), ['plFace', 'plTaskText', 'plMarks']),
     group('plFace', 'The islander', 'plTask', { sizeMode: 'explicit', width: px(56), height: px(56) }),
     group('plTaskText', 'Who and what', 'plTask', { ...column({ rowGap: sp(2) }), cssClassName: 'bg-grow' }, ['plTaskH', 'plTaskP']),
@@ -817,16 +827,17 @@ const PLAY: CgComponent = {
     logic('plRendWrite', STORE_SET_NODE, 'Keep the choice on this computer', { storeName: STORE_NAME, key: 'renderer', merge: false }),
     group('plRec', 'Pip is learning', 'plStage', { ...row({ columnGap: sp(0) }), backgroundColor: 'var(--card)', borderRadius: px(999), ...pad(6, 12), cssClassName: 'bg-rec', mounted: false }, ['plRecText']),
     text('plRecText', 'Recording', 'plRec', '', { sizeMode: 'contentSize', fontSize: px(14), fontWeight: '800', color: 'var(--ink)' }),
-    place('plPad', C.pad, 'The Teach pad', 'plStage'),
-    text('plPredictLine', 'Where will it end?', 'plLeft', '', { ...T_STRONG, color: 'var(--violet-ink)', mounted: false }),
+    place('plPad', C.pad, 'The pad', 'plStage'),
+    // P106 IG-003: one line under the world saying what the mode does (Drive: nothing is remembered; Teach: back to the start).
+    text('plModeLine', 'What this mode does', 'plLeft', '', { ...T_STRONG, cssClassName: 'bg-mode-line', mounted: false }),
     // IG-001 D8: no "Ask Olive" — it only re-chose the hint; the hint now follows every edit by itself (plHintLater).
-    group('plControls', 'The controls', 'plLeft', { ...row({ width: pct(100), sizeMode: 'contentHeight' }), cssClassName: 'bg-controls' }, ['plTeach', 'plStop', 'plPlay', 'plStep', 'plReset', 'plPredict']),
-    place('plTeach', BUTTON_NODE, 'Teach', 'plControls', { ...btn('teach', 'rec'), label: 'Teach Pip' }),
-    place('plStop', BUTTON_NODE, 'Done teaching', 'plControls', { ...btn('primary', 'rec'), label: 'Done teaching', mounted: false }),
+    // P106 IG-003 (R4, R5): Drive · Teach · Play · One step · Start over. Predict left the bar (the islander's challenge now).
+    group('plControls', 'The controls', 'plLeft', { ...row({ width: pct(100), sizeMode: 'contentHeight' }), cssClassName: 'bg-controls' }, ['plDrive', 'plTeach', 'plPlay', 'plStep', 'plReset']),
+    place('plDrive', BUTTON_NODE, 'Drive', 'plControls', { ...btn('drive', 'drive'), label: 'Drive' }),
+    place('plTeach', BUTTON_NODE, 'Teach', 'plControls', { ...btn('teach', 'rec'), label: 'Teach' }),
     place('plPlay', BUTTON_NODE, 'Play', 'plControls', { ...btn('primary', 'play'), label: 'Play' }),
     place('plStep', BUTTON_NODE, 'One step', 'plControls', { ...btn('plain', 'step'), label: 'One step' }),
     place('plReset', BUTTON_NODE, 'Start over', 'plControls', { ...btn('plain', 'reset'), label: 'Start over' }),
-    place('plPredict', BUTTON_NODE, 'Predict', 'plControls', { ...btn('plain', 'predict'), label: 'Predict', mounted: false }),
     group('plOwl', 'The owl', 'plLeft', { width: pct(100), sizeMode: 'contentHeight', backgroundColor: 'var(--violet-2)', borderRadius: px(16), ...pad(12), cssClassName: 'bg-owl' }, ['plOwlPic', 'plOwlCol']),
     group('plOwlPic', 'Olive', 'plOwl', { sizeMode: 'explicit', width: px(64), height: px(64), cssClassName: 'bg-owl-pic bg-sp-owl' }),
     group('plOwlCol', 'What she says', 'plOwl', column({ rowGap: sp(4) }), ['plOwlSay', 'plOwlThinking', 'plOwlResting', 'plProposal', 'plOwlMeta']),
@@ -842,12 +853,14 @@ const PLAY: CgComponent = {
     place('plUse', BUTTON_NODE, 'Use them', 'plPropBtns', { ...btn('ask', '', { ...pad(8, 14), fontSize: px(14), cssClassName: 'bg-prop-use' }), label: 'Use them' }),
     place('plNoThanks', BUTTON_NODE, 'No thanks', 'plPropBtns', { ...btn('quiet', '', { ...pad(8, 14), fontSize: px(14), cssClassName: 'bg-prop-no' }), label: 'No thanks' }),
     text('plOwlMeta', 'Where she lives', 'plOwlCol', '', { fontSize: px(12), color: 'var(--violet-meta)', cssClassName: 'bg-owl-meta' }),
-    group('plRight', 'The steps side', 'plWs', { ...column({ rowGap: sp(10) }), ...PANEL }, ['plStepsHead', 'plCardBox', 'plBlocksBox', 'plSlotMsg', 'plHelps', 'plTidy']),
+    group('plRight', 'The steps side', 'plWs', { ...column({ rowGap: sp(10) }), ...PANEL }, ['plStepsHead', 'plCardBox', 'plStepsNote', 'plBlocksBox', 'plSlotMsg', 'plHelps', 'plTidy']),
     group('plStepsHead', 'The steps’ head', 'plRight', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'space-between', flexWrap: 'nowrap' }), ['plStepsH', 'plCount']),
     text('plStepsH', 'Pip’s steps', 'plStepsHead', '', { ...T_H2, fontSize: px(20) }),
     text('plCount', 'How many blocks', 'plStepsHead', '', { sizeMode: 'contentSize', fontSize: px(13), fontWeight: '800', color: 'var(--ink-2)', mounted: false }),
     group('plBlocksBox', 'The steps, scrolling in their own box', 'plRight', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-blocks-box' }, ['plBlocks']),
-    place('plBlocks', KIT_BLOCKS, 'The blocks', 'plBlocksBox', { ...BLOCK_COLOURS }),
+    // P106 IG-003: while driving the steps sit on the paper with a note (never faded: ruling 5); a ? on every placed block.
+    text('plStepsNote', 'Nothing is remembered while driving', 'plRight', '', { ...T_SMALL, cssClassName: 'bg-steps-note', mounted: false }),
+    place('plBlocks', KIT_BLOCKS, 'The blocks', 'plBlocksBox', { ...BLOCK_COLOURS, showHelp: true }),
     // P106 IG-006 AC5: a block's card. The first tap on a palette block opens it and places nothing; "Got it", and the
     // next tap places the block. The example is drawn by a second Block List, locked, with no palette.
     group('plCardBox', 'The block’s card', 'plRight', { ...column({ rowGap: sp(8) }), backgroundColor: 'var(--violet-2)', borderRadius: px(16), ...pad(12), cssClassName: 'bg-card-help', mounted: false }, ['plCardTitle', 'plCardLine', 'plCardEgWord', 'plCardEgBox', 'plCardOk']),
@@ -916,15 +929,39 @@ const PLAY: CgComponent = {
     setVariable('plSetSeen', 'gardenCardsSeen', 'One more card seen'),
     logic('plCardInfo', L('Block card'), 'The card’s words and example'),
     logic('plHelpRows', L('Help chips'), 'The ? for each kind of block'),
-    // ── Teach, predict, fold ──
-    withStates('plTeachMode', 'Teaching or not', ['idle', 'teach'], {
-      teaching: { type: 'boolean', by: { idle: false, teach: true } },
-      notTeaching: { type: 'boolean', by: { idle: true, teach: false } }
+    // ── Drive, teach, play (P106 IG-003); the islander's challenge; the fold ──
+    withStates('plMode', 'Drive, teach or play', ['drive', 'teach', 'play'], {
+      mode: { type: 'string', by: { drive: 'drive', teach: 'teach', play: 'play' } },
+      teaching: { type: 'boolean', by: { drive: false, teach: true, play: false } },
+      padShown: { type: 'boolean', by: { drive: true, teach: true, play: false } },
+      // 🔴 A string, never a boolean: the page drive measured a `false` from this node's FIRST state never reaching Record
+      // step (the input stayed unset and an unset Record records), so four Drive presses recorded four blocks.
+      record: { type: 'string', by: { drive: 'no', teach: 'yes', play: 'no' } },
+      driveCls: { type: 'string', by: { drive: 'bg-btn bg-i-drive bg-mode-on', teach: 'bg-btn bg-i-drive', play: 'bg-btn bg-i-drive' } },
+      teachCls: { type: 'string', by: { drive: 'bg-btn bg-i-rec', teach: 'bg-btn bg-i-rec bg-mode-on', play: 'bg-btn bg-i-rec' } },
+      recCls: { type: 'string', by: { drive: 'bg-rec bg-rec-drive', teach: 'bg-rec', play: 'bg-rec' } },
+      boxCls: { type: 'string', by: { drive: 'bg-blocks-box bg-driving', teach: 'bg-blocks-box', play: 'bg-blocks-box' } }
     }),
-    withStates('plPredictMode', 'Waiting for a tap or not', ['off', 'on'], { predicting: { type: 'boolean', by: { off: false, on: true } } }),
-    gate('plPredictGate', 'Was the tap a prediction?'),
-    logic('plPredictEnd', L('Predict end'), 'Where the robot really ends'),
+    gate('plTeachGate', 'Teaching already?'),
+    logic('plTeachStart', L('Teach start'), 'Where the robot stands when Teach begins'),
+    setVariable('plSetWorldTeach', 'gardenWorld', 'The world where the steps end'),
+    gate('plRecGate', 'Was the press recorded?'),
+    logic('plModeWords', L('Mode line'), 'What the mode says'),
+    logic('plChallenge', L('Challenge'), 'The islander’s challenge'),
+    variable('plAskedForVar', 'gardenChallengeFor', 'The program the challenge was settled for'),
+    setVariable('plSetAskedFor', 'gardenChallengeFor', 'Settled for this program'),
+    setVariable('plClearAskedFor', 'gardenChallengeFor', 'Not settled', { setWith: 'string', value: '' }),
+    variable('plOutcomeVar', 'gardenChallengeOutcome', 'How the challenge went'),
+    setVariable('plSetHit', 'gardenChallengeOutcome', 'You were right', { setWith: 'string', value: 'hit' }),
+    setVariable('plSetMissed', 'gardenChallengeOutcome', 'A miss', { setWith: 'string', value: 'miss' }),
+    setVariable('plClearOutcome', 'gardenChallengeOutcome', 'No outcome', { setWith: 'string', value: '' }),
+    gate('plDriveGate', 'Is the challenge asked?'),
+    setVariable('plSetWorldAsk', 'gardenWorld', 'The robot at the start, for the challenge'),
+    gate('plGuessGate', 'Was the tap a guess?'),
+    logic('plGuessEnd', L('Predict end'), 'Where the robot really ends'),
     gate('plHitGate', 'Did the tap hit?'),
+    logic('plGuessWait', TIMER_NODE, 'The tick, a moment, then Play', { duration: 700 }),
+    setVariable('plSetCardBlock', 'gardenCardOpen', 'Open it from a block’s ?'),
     variable('plMissVar', 'gardenPredictMiss', 'A missed prediction on show'),
     setVariable('plSetMiss', 'gardenPredictMiss', 'Show the real end', { setWith: 'boolean', value: true }),
     setVariable('plClearMiss', 'gardenPredictMiss', 'Hide it', { setWith: 'boolean', value: false }),
@@ -961,23 +998,22 @@ const PLAY: CgComponent = {
     wire('plCard', 'sub', 'plSub', 'text'),
     wire('plCard', 'faceClass', 'plFace', 'cssClassName'),
     wire('plCard', 'who', 'plTaskH', 'text'),
-    wire('plCard', 'line', 'plTaskP', 'text'),
-    wire('plT', 'recording', 'plRecText', 'text'),
-    wire('plT', 'teach', 'plTeach', 'label'),
-    wire('plT', 'teachStop', 'plStop', 'label'),
+    // P106 IG-003: the islander's line, or the challenge's (Before you press Play…, You were right!).
+    wire('plCard', 'line', 'plChallenge', 'cardLine'),
+    wire('plChallenge', 'line', 'plTaskP', 'text'),
+    wire('plModeWords', 'badge', 'plRecText', 'text'),
+    wire('plT', 'ig3Drive', 'plDrive', 'label'),
+    wire('plT', 'ig3Teach', 'plTeach', 'label'),
     wire('plT', 'play', 'plPlay', 'label'),
     wire('plT', 'step', 'plStep', 'label'),
     wire('plT', 'reset', 'plReset', 'label'),
-    wire('plT', 'predict', 'plPredict', 'label'),
-    wire('plT', 'predictAsk', 'plPredictLine', 'text'),
     wire('plT', 'owlMeta', 'plOwlMeta', 'text'),
     wire('plT', 'scriptH', 'plStepsH', 'text'),
     wire('plT', 'tidyGo', 'plFoldBtn', 'label'),
     wire('plT', 'tidyNo', 'plNotNow', 'label'),
     wire('plT', 'winIsland', 'plWin', 'islandWord'),
     wire('plT', 'winStay', 'plWin', 'stayWord'),
-    // Band 10–12 only: Predict and the block count (AC5: no count at 7–9).
-    wire('plIn', 'isOlder', 'plPredict', 'mounted'),
+    // Band 10–12 only: the block count (AC5: no count at 7–9). The challenge reads the band itself (IG-003).
     wire('plIn', 'isOlder', 'plCount', 'mounted'),
     wire('plRead', 'blocks', 'plTidyLine', 'blocks'),
     wire('plTidyLine', 'countText', 'plCount', 'text'),
@@ -992,8 +1028,10 @@ const PLAY: CgComponent = {
     wire('plStart', 'ran', 'plClearTeachBumps', 'do'),
     wire('plStart', 'ran', 'plClearWon', 'do'),
     wire('plStart', 'ran', 'plClearMiss', 'do'),
-    wire('plStart', 'ran', 'plTeachMode', 'to-idle'),
-    wire('plStart', 'ran', 'plPredictMode', 'to-off'),
+    // P106 IG-003: a request (and Start over) opens in Drive, the challenge unsettled.
+    wire('plStart', 'ran', 'plMode', 'to-drive'),
+    wire('plStart', 'ran', 'plClearAskedFor', 'do'),
+    wire('plStart', 'ran', 'plClearOutcome', 'do'),
     wire('plStart', 'ran', 'plRunner', 'stop'),
     wire('plStart', 'ran', 'plChoose', 'go'),
     wire('plStart', 'found', 'plOut', 'found'),
@@ -1006,7 +1044,11 @@ const PLAY: CgComponent = {
     wire('plCardGate', 'program', 'plSetProgKit', 'value'),
     wire('plCardGate', 'ran', 'plSetProgKit', 'do'),
     wire('plRecord', 'program', 'plSetProgRec', 'value'),
-    wire('plRecord', 'ran', 'plSetProgRec', 'do'),
+    // P106 IG-003: only a recorded press writes the program (a Drive press moves the robot and leaves the steps alone,
+    // so no program change reaches the hint: AC5).
+    wire('plRecord', 'recorded', 'plRecGate', 'condition'),
+    wire('plRecord', 'ran', 'plRecGate', 'eval'),
+    wire('plRecGate', 'ontrue', 'plSetProgRec', 'do'),
     wire('plFold', 'program', 'plSetProgFold', 'value'),
     wire('plFold', 'ran', 'plSetProgFold', 'do'),
     wire('plRead', 'blocks', 'plOut', 'blocks'),
@@ -1028,16 +1070,46 @@ const PLAY: CgComponent = {
     wire('plIn', 'lang', 'plKitPal', 'lang'),
     wire('plIn', 'words', 'plKitPal', 'words'),
     wire('plIn', 'botName', 'plKitPal', 'botName'),
-    // Teach: the pad shows, each press is a block AND a step of the robot (the engine's step, not a copy of it).
-    wire('plTeach', 'onClick', 'plTeachMode', 'to-teach'),
-    wire('plTeach', 'onClick', 'plRunner', 'stop'),
-    wire('plStop', 'onClick', 'plTeachMode', 'to-idle'),
-    wire('plStop', 'onClick', 'plChoose', 'go'),
-    wire('plTeachMode', 'teaching', 'plPad', 'show'),
+    // P106 IG-003 (R4). Drive: the pad shows, a press is a step of the robot and nothing is recorded; the Runner stops.
+    // Teach (from Drive or Play; a second press changes nothing): the Runner stops, the run is emptied, the robot goes
+    // back to the start and along the steps already there, and every press after is a block AND a step of the robot
+    // (the engine's step, not a copy of it). Teach → Drive keeps the program.
+    wire('plDrive', 'onClick', 'plMode', 'to-drive'),
+    wire('plDrive', 'onClick', 'plRunner', 'stop'),
+    wire('plTeach', 'onClick', 'plTeachGate', 'eval'),
+    wire('plMode', 'teaching', 'plTeachGate', 'condition'),
+    wire('plTeachGate', 'onfalse', 'plMode', 'to-teach'),
+    wire('plTeachGate', 'onfalse', 'plRunner', 'stop'),
+    wire('plTeachGate', 'onfalse', 'plClearMiss', 'do'),
+    wire('plTeachGate', 'onfalse', 'plClearOutcome', 'do'),
+    wire('plTeachGate', 'onfalse', 'plClearTeachBumps', 'do'),
+    wire('plTeachGate', 'onfalse', 'plTeachStart', 'go'),
+    wire('plStart', 'world', 'plTeachStart', 'start'),
+    wire('plRead', 'program', 'plTeachStart', 'program'),
+    wire('plIn', 'lang', 'plTeachStart', 'lang'),
+    wire('plTeachStart', 'world', 'plSetWorldTeach', 'value'),
+    wire('plTeachStart', 'ran', 'plSetWorldTeach', 'do'),
+    wire('plMode', 'padShown', 'plPad', 'show'),
+    wire('plMode', 'record', 'plRecord', 'record'),
     wire('plStart', 'allowed', 'plPad', 'allowed'),
-    wire('plTeachMode', 'teaching', 'plRec', 'mounted'),
-    wire('plTeachMode', 'teaching', 'plStop', 'mounted'),
-    wire('plTeachMode', 'notTeaching', 'plTeach', 'mounted'),
+    wire('plIn', 'words', 'plPad', 'words'),
+    wire('plIn', 'lang', 'plPad', 'lang'),
+    wire('plMode', 'padShown', 'plRec', 'mounted'),
+    wire('plMode', 'recCls', 'plRec', 'cssClassName'),
+    wire('plMode', 'driveCls', 'plDrive', 'cssClassName'),
+    wire('plMode', 'teachCls', 'plTeach', 'cssClassName'),
+    wire('plMode', 'boxCls', 'plBlocksBox', 'cssClassName'),
+    // What the mode says: the tag on the world, the line under it, the steps panel's note while driving.
+    wire('plMode', 'mode', 'plModeWords', 'mode'),
+    wire('plRead', 'blocks', 'plModeWords', 'blocks'),
+    wire('plTeachStart', 'blocks', 'plModeWords', 'atEntry'),
+    wire('plIn', 'words', 'plModeWords', 'words'),
+    wire('plIn', 'lang', 'plModeWords', 'lang'),
+    wire('plIn', 'botName', 'plModeWords', 'botName'),
+    wire('plModeWords', 'line', 'plModeLine', 'text'),
+    wire('plModeWords', 'showLine', 'plModeLine', 'mounted'),
+    wire('plModeWords', 'note', 'plStepsNote', 'text'),
+    wire('plModeWords', 'driving', 'plStepsNote', 'mounted'),
     wire('plPad', 'op', 'plRecord', 'op'),
     wire('plPad', 'pressed', 'plRecord', 'go'),
     wire('plRead', 'program', 'plRecord', 'program'),
@@ -1055,11 +1127,17 @@ const PLAY: CgComponent = {
     wire('plIn', 'lang', 'plRunner', 'lang'),
     wire('plIn', 'stepMs', 'plRunner', 'stepMs'),
     wire('plPlay', 'onClick', 'plRunner', 'play'),
-    wire('plPlay', 'onClick', 'plTeachMode', 'to-idle'),
-    wire('plPlay', 'onClick', 'plPredictMode', 'to-off'),
+    wire('plPlay', 'onClick', 'plMode', 'to-play'),
     wire('plPlay', 'onClick', 'plClearMiss', 'do'),
     wire('plStep', 'onClick', 'plRunner', 'step'),
-    wire('plStep', 'onClick', 'plTeachMode', 'to-idle'),
+    wire('plStep', 'onClick', 'plMode', 'to-play'),
+    // IG-003: Play or One step settles the challenge for this program, unanswered (One step cancels it for that run).
+    wire('plRead', 'text', 'plSetAskedFor', 'value'),
+    wire('plPlay', 'onClick', 'plSetAskedFor', 'do'),
+    wire('plPlay', 'onClick', 'plClearOutcome', 'do'),
+    wire('plStep', 'onClick', 'plSetAskedFor', 'do'),
+    wire('plStep', 'onClick', 'plClearOutcome', 'do'),
+    wire('plRunner', 'idle', 'plDrive', 'enabled'),
     wire('plRunner', 'idle', 'plTeach', 'enabled'),
     wire('plRunner', 'idle', 'plStep', 'enabled'),
     wire('plRunner', 'idle', 'plReset', 'enabled'),
@@ -1080,9 +1158,10 @@ const PLAY: CgComponent = {
     wire('plRunner', 'tick', 'plDraw', 'sayN'),
     wire('plIn', 'words', 'plDraw', 'words'),
     wire('plIn', 'lang', 'plDraw', 'lang'),
-    wire('plPredictEnd', 'x', 'plDraw', 'endX'),
-    wire('plPredictEnd', 'y', 'plDraw', 'endY'),
+    wire('plGuessEnd', 'x', 'plDraw', 'endX'),
+    wire('plGuessEnd', 'y', 'plDraw', 'endY'),
     wire('plMissVar', 'value', 'plDraw', 'showEnd'),
+    wire('plChallenge', 'showTick', 'plDraw', 'showTick'),
     wire('plDraw', 'map', 'plGarden', 'map'),
     wire('plDraw', 'things', 'plGarden', 'things'),
     wire('plDraw', 'robots', 'plGarden', 'robots'),
@@ -1092,9 +1171,9 @@ const PLAY: CgComponent = {
     wire('plDraw', 'things', 'plGarden3d', 'things'),
     wire('plDraw', 'robots', 'plGarden3d', 'robots'),
     wire('plDraw', 'bubble', 'plGarden3d', 'bubble'),
-    wire('plGarden3d', 'onTileTapped', 'plPredictGate', 'eval'),
-    wire('plGarden3d', 'onTileX', 'plPredictEnd', 'tapX'),
-    wire('plGarden3d', 'onTileY', 'plPredictEnd', 'tapY'),
+    wire('plGarden3d', 'onTileTapped', 'plGuessGate', 'eval'),
+    wire('plGarden3d', 'onTileX', 'plGuessEnd', 'tapX'),
+    wire('plGarden3d', 'onTileY', 'plGuessEnd', 'tapY'),
     wire('plRendStore', 'value', 'plRendRead', 'stored'),
     wire('plIn', 'words', 'plRendRead', 'words'),
     wire('plIn', 'lang', 'plRendRead', 'lang'),
@@ -1115,21 +1194,41 @@ const PLAY: CgComponent = {
     wire('plRendSlow', 'ran', 'plRendWrite', 'set'),
     wire('plDraw', 'marks', 'plMarkEach', 'items'),
     wire('plDraw', 'hasTulips', 'plMarks', 'mounted'),
-    // Predict (band 10–12, AC6): a tap before Play. A hit plays; a miss shows the real end and a hint — never a score.
-    wire('plPredict', 'onClick', 'plPredictMode', 'to-on'),
-    wire('plPredictMode', 'predicting', 'plPredictLine', 'mounted'),
-    wire('plPredictMode', 'predicting', 'plPredictGate', 'condition'),
-    wire('plGarden', 'onTileTapped', 'plPredictGate', 'eval'),
-    wire('plPredictGate', 'ontrue', 'plPredictMode', 'to-off'),
-    wire('plPredictGate', 'ontrue', 'plPredictEnd', 'go'),
-    wire('plRead', 'program', 'plPredictEnd', 'program'),
-    wire('plStart', 'world', 'plPredictEnd', 'world'),
-    wire('plGarden', 'onTileX', 'plPredictEnd', 'tapX'),
-    wire('plGarden', 'onTileY', 'plPredictEnd', 'tapY'),
-    wire('plIn', 'lang', 'plPredictEnd', 'lang'),
-    wire('plPredictEnd', 'hit', 'plHitGate', 'condition'),
-    wire('plPredictEnd', 'ran', 'plHitGate', 'eval'),
-    wire('plHitGate', 'ontrue', 'plRunner', 'play'),
+    // P106 IG-003 (R5): the islander's challenge, band 10–12, on a request that carries it — no button. While it is
+    // armed (a program not yet played, stepped or answered), a tap on a tile of EITHER renderer is the guess: a hit says
+    // "You were right!", puts the tick on the tile and then plays; a miss shows the flag on the real end and the miss
+    // hint. Either settles it for this program. Pressing Drive while it is armed puts the robot back at the start.
+    wire('plStart', 'challenge', 'plChallenge', 'challenge'),
+    wire('plIn', 'band', 'plChallenge', 'band'),
+    wire('plRead', 'blocks', 'plChallenge', 'blocks'),
+    wire('plRead', 'text', 'plChallenge', 'programText'),
+    wire('plAskedForVar', 'value', 'plChallenge', 'askedFor'),
+    wire('plOutcomeVar', 'value', 'plChallenge', 'outcome'),
+    wire('plRunner', 'live', 'plChallenge', 'live'),
+    wire('plIn', 'words', 'plChallenge', 'words'),
+    wire('plIn', 'lang', 'plChallenge', 'lang'),
+    wire('plIn', 'botName', 'plChallenge', 'botName'),
+    wire('plChallenge', 'armed', 'plDriveGate', 'condition'),
+    wire('plDrive', 'onClick', 'plDriveGate', 'eval'),
+    wire('plStart', 'world', 'plSetWorldAsk', 'value'),
+    wire('plDriveGate', 'ontrue', 'plSetWorldAsk', 'do'),
+    wire('plChallenge', 'armed', 'plGuessGate', 'condition'),
+    wire('plGarden', 'onTileTapped', 'plGuessGate', 'eval'),
+    wire('plGuessGate', 'ontrue', 'plGuessEnd', 'go'),
+    wire('plRead', 'program', 'plGuessEnd', 'program'),
+    wire('plStart', 'world', 'plGuessEnd', 'world'),
+    wire('plGarden', 'onTileX', 'plGuessEnd', 'tapX'),
+    wire('plGarden', 'onTileY', 'plGuessEnd', 'tapY'),
+    wire('plIn', 'lang', 'plGuessEnd', 'lang'),
+    wire('plGuessEnd', 'ran', 'plSetAskedFor', 'do'),
+    wire('plGuessEnd', 'hit', 'plHitGate', 'condition'),
+    wire('plGuessEnd', 'ran', 'plHitGate', 'eval'),
+    wire('plHitGate', 'ontrue', 'plSetHit', 'do'),
+    wire('plHitGate', 'ontrue', 'plClearMiss', 'do'),
+    wire('plHitGate', 'ontrue', 'plGuessWait', 'start'),
+    wire('plGuessWait', 'timerFinished', 'plMode', 'to-play'),
+    wire('plGuessWait', 'timerFinished', 'plRunner', 'play'),
+    wire('plHitGate', 'onfalse', 'plSetMissed', 'do'),
     wire('plHitGate', 'onfalse', 'plSetMiss', 'do'),
     wire('plSetMiss', 'done', 'plChoose', 'go'),
     // The fold (band 10–12): offered, never applied without "Fold it".
@@ -1245,6 +1344,9 @@ const PLAY: CgComponent = {
     wire('plHelpRows', 'helpsText', 'plHelpsH', 'text'),
     wire('plHelpEach', 'itemOutput-id', 'plSetCardHelp', 'value'),
     wire('plHelpEach', 'itemOutputSignal-chosen', 'plSetCardHelp', 'do'),
+    // P106 IG-003 (IG-006 deviation 2): the ? on the placed block itself opens the same card.
+    wire('plBlocks', 'onHelpBlock', 'plSetCardBlock', 'value'),
+    wire('plBlocks', 'onHelp', 'plSetCardBlock', 'do'),
     // The proposal (AC1): shown from the run, placed only by Use them; either answer hides it.
     wire('plT', 'oliveProposes', 'plPropH', 'text'),
     wire('plT', 'oliveAccept', 'plUse', 'label'),

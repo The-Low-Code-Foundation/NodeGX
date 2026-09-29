@@ -56,7 +56,10 @@ import {
   TIDY_LINE_SCRIPT,
   TRANSLATE_ALL_SCRIPT,
   UPDATE_PROFILE_SCRIPT,
-  WIN_SUMMARY_SCRIPT
+  WIN_SUMMARY_SCRIPT,
+  TEACH_START_SCRIPT,
+  MODE_LINE_SCRIPT,
+  CHALLENGE_SCRIPT
 } from './cg003Scripts';
 import { AuthoredGarden, buildGardenTemplateProject, prepareGardenArtefact, START_HERE_FILE, TEMPLATE_ID } from './cg003Template';
 import { ROBOT_NAME_MAX } from './cg002Scripts';
@@ -64,7 +67,7 @@ import { DARKENED_FILLS, GARDEN_CSS, GARDEN_PRESET, GARDEN_TOKENS, tokenValue } 
 import { reducedMotionReport } from './reducedMotion';
 import { RESERVED_ROW_FIELD_NAMES } from '../../noodl-editor/src/editor/src/validation';
 import { FAMILY_SCRIPT, ISLAND_PINS_SCRIPT, LOOK_ROWS_SCRIPT, REQUEST_CARD_SCRIPT, SELECT_PROFILE_SCRIPT, SKILL_ROWS_SCRIPT } from './cg003Scripts';
-import { CHOOSE_HINT_SCRIPT, HINT_LINE_SCRIPT } from './cg002Scripts';
+import { CHOOSE_HINT_SCRIPT, HINT_LINE_SCRIPT, PREDICT_END_SCRIPT } from './cg002Scripts';
 import { HINTS, HINT_KEYS, OLIVE_RUNGS } from './cg002Content';
 import { PALETTE_RUNG_IDS } from './cg005Olive';
 import { ISLAND_PINS, REQUEST_SUBS } from './cg003Content';
@@ -407,13 +410,14 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(/`/.test(GARDEN_CSS)).toBe(false);
     });
 
-    it('🔴 AC5: at 7–9 no count and no Predict is mounted; the pad keys are 56 px', () => {
+    it('🔴 AC5: at 7–9 no count is mounted (and no Predict: IG-003 moved it into the islander’s challenge, band 10–12); the pad keys are 56 px', () => {
       const play = nodesOf(built, C.play);
       const conns = connectionsOf(built, C.play);
-      for (const id of ['plCount', 'plPredict']) {
+      for (const id of ['plCount']) {
         expect(params(play.find((n) => n.id === id)!).mounted).toBe(false);
         expect(conns.some((c) => c.fromId === 'plIn' && c.fromProperty === 'isOlder' && c.toId === id && c.toProperty === 'mounted')).toBe(true);
       }
+      expect(play.some((n) => /^plPredict/.test(String(n.id)))).toBe(false);
       const key = nodesOf(built, C.padKey).find((n) => n.type === 'net.noodl.controls.button')!;
       expect([params(key).width, params(key).height]).toEqual([{ value: 56, unit: 'px' }, { value: 56, unit: 'px' }]);
       expect(GARDEN_CSS).toMatch(/\.bg-key \{ width: 56px !important; height: 56px !important;/);
@@ -721,6 +725,10 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(at('tulips-three', 'fill')).toBe('bg-key bg-key-fill bg-key-r3a bg-i-fill bg-press');
       expect([at('free', 'water'), at('free', 'fill'), at('free', 'pick'), at('free', 'put')].map((c) => c.split(' ')[2])).toEqual(['bg-key-mid', 'bg-key-r3a', 'bg-key-r3b', 'bg-key-r3c']);
       expect(at('free', 'fwd')).toBe('bg-key bg-key-fwd bg-i-fwd bg-press');
+      // IG-003: the pad is up from the moment a request opens (Drive); each key is labelled in the child's language.
+      const labels = (lang: string) => run(PAD_KEYS_SCRIPT, { allowed: [], words: WORD_ROWS, lang }).keys.map((k: { label: string }) => k.label);
+      expect([labels('en')[0], labels('fr')[0], labels('fr')[4]]).toEqual([WORDS.bFwd.en, WORDS.bFwd.fr, WORDS.bFill.fr]);
+      expect(connectionsOf(built, C.pad).filter((c) => c.toId === 'pdKeys').map((c) => c.toProperty).sort()).toEqual(['allowed', 'lang', 'words']);
       // The graph: the request's allowed list reaches the pad; the pad's rows come from Logic/Pad keys, not a static table.
       expect(phas('plStart', 'allowed', 'plPad', 'allowed')).toBe(true);
       const pad = nodesOf(built, C.pad);
@@ -820,6 +828,91 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(choose('use3d', { mode: '2d', why: 'slow' })).toMatchObject({ renderer: { mode: '3d', why: 'grown-up' }, changed: true });
       expect(choose('use2d', { mode: '2d', why: 'grown-up' })).toMatchObject({ renderer: { mode: '2d', why: 'grown-up' }, changed: false });
       expect(choose('', undefined).renderer).toEqual({ mode: '3d', why: '' });
+    });
+  });
+
+  describe('IG-003 — Drive · Teach · Play on the bar; the Predict challenge; the ? on a placed block (P106 s3)', () => {
+    const play = () => nodesOf(built, C.play);
+    const pc = () => connectionsOf(built, C.play);
+    const pnode = (id: string) => play().find((n) => n.id === id)!;
+    const from = (id: string, port: string) => pc().filter((c) => c.fromId === id && c.fromProperty === port).map((c) => `${c.toId}.${c.toProperty}`).sort();
+    const into = (id: string, port?: string) => pc().filter((c) => c.toId === id && (port === undefined || c.toProperty === port)).map((c) => `${c.fromId}.${c.fromProperty}`).sort();
+
+    it('🔴 AC4: the bar is Drive · Teach · Play · One step · Start over (Drive’s icon new, Teach’s kept); no Predict button, line, icon or plPredict anywhere in the artefact', () => {
+      expect((pnode('plControls').children ?? []).map((n) => n.id)).toEqual(['plDrive', 'plTeach', 'plPlay', 'plStep', 'plReset']);
+      const cls = (id: string) => String(params(pnode(id)).cssClassName);
+      expect([cls('plDrive'), cls('plTeach'), cls('plPlay'), cls('plStep'), cls('plReset')]).toEqual(['bg-btn bg-i-drive', 'bg-btn bg-i-rec', 'bg-btn bg-i-play', 'bg-btn bg-i-step', 'bg-btn bg-i-reset']);
+      expect(params(pnode('plDrive')).backgroundColor).toBe('var(--block-motion)');
+      expect([from('plT', 'ig3Drive'), from('plT', 'ig3Teach')]).toEqual([['plDrive.label'], ['plTeach.label']]);
+      expect(GARDEN_CSS).toContain('.bg-i-drive::before');
+      expect(GARDEN_CSS).not.toContain('bg-i-predict');
+      const withPredict = [...tree(OUTPUT_OF(built)).entries()].filter(([, buf]) => /plPredict|bg-i-predict|plStop\b|plTeachMode/.test(buf.toString('utf8'))).map(([f]) => f);
+      expect(withPredict).toEqual([]);
+    });
+
+    it('🔴 AC1–3: one States node drive | teach | play (no transitions, opens in Drive); the pad shows in Drive and Teach and records only in Teach; a request and Start over open in Drive', () => {
+      const m = pnode('plMode');
+      expect([m.type, params(m).states, params(m).useTransitions]).toEqual(['States', 'drive,teach,play', false]);
+      const v = (state: string, value: string) => params(m)[`value-${state}-${value}`];
+      expect(['drive', 'teach', 'play'].map((st) => [v(st, 'mode'), v(st, 'padShown'), v(st, 'record')])).toEqual([['drive', true, 'no'], ['teach', true, 'yes'], ['play', false, 'no']]);
+      // 🔴 Record is a string: a boolean false from the first state never reached Record step, and unset records (the drive's red).
+      expect(params(m)['type-record']).toBe('string');
+      expect(run(RECORD_STEP_SCRIPT, { op: 'fwd', program: '[]', world: run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'free' }).world, record: 'no', lang: 'en' })).toMatchObject({ recorded: false, moved: true, program: '[]' });
+      expect([into('plPad', 'show'), into('plRecord', 'record'), into('plRec', 'mounted')]).toEqual([['plMode.padShown'], ['plMode.record'], ['plMode.padShown']]);
+      expect(from('plStart', 'ran')).toContain('plMode.to-drive');
+      // A Drive press writes no program: the program Variable is set only through the recorded gate (AC1, AC5).
+      expect(into('plSetProgRec', 'do')).toEqual(['plRecGate.ontrue']);
+      expect([into('plRecGate', 'condition'), into('plRecGate', 'eval')]).toEqual([['plRecord.recorded'], ['plRecord.ran']]);
+      // The steps: on the paper with a note while driving; the tag on the world says the mode.
+      expect(v('drive', 'boxCls')).toBe('bg-blocks-box bg-driving');
+      expect(v('teach', 'boxCls')).toBe('bg-blocks-box');
+      expect([into('plBlocksBox', 'cssClassName'), into('plStepsNote', 'mounted'), into('plRecText', 'text')]).toEqual([['plMode.boxCls'], ['plModeWords.driving'], ['plModeWords.badge']]);
+      expect(GARDEN_CSS).toMatch(/\.bg-driving \.gd-prog \{[^}]*background: var\(--paper-2\)/);
+      expect(GARDEN_CSS).not.toMatch(/\.bg-driving[^{]*\{[^}]*opacity/);
+    });
+
+    it('🔴 AC2/AC3/AC5: every transition stops the Runner; Teach (once — a second press changes nothing) empties the run, clears a miss, and puts the robot back at the start and along the steps already there; Drive keeps the program', () => {
+      expect(from('plDrive', 'onClick')).toEqual(['plDriveGate.eval', 'plMode.to-drive', 'plRunner.stop']);
+      expect(from('plTeach', 'onClick')).toEqual(['plTeachGate.eval']);
+      expect(into('plTeachGate', 'condition')).toEqual(['plMode.teaching']);
+      expect(from('plTeachGate', 'ontrue')).toEqual([]);
+      expect(from('plTeachGate', 'onfalse')).toEqual(['plClearMiss.do', 'plClearOutcome.do', 'plClearTeachBumps.do', 'plMode.to-teach', 'plRunner.stop', 'plTeachStart.go']);
+      expect([into('plTeachStart', 'start'), into('plTeachStart', 'program')]).toEqual([['plStart.world'], ['plRead.program']]);
+      expect([into('plSetWorldTeach', 'value'), into('plSetWorldTeach', 'do'), params(pnode('plSetWorldTeach')).name]).toEqual([['plTeachStart.world'], ['plTeachStart.ran'], 'gardenWorld']);
+      // No transition writes the program: Drive and Teach keep it (only Start over clears it).
+      for (const src of ['plDrive', 'plTeachGate', 'plTeachStart']) expect(pc().filter((c) => c.fromId === src && /^plSetProg/.test(c.toId))).toEqual([]);
+      // The Runner's own reset re-chooses the hint (IG-001 D2), and Choose hint no longer reads a met goal without a run.
+      expect(pc().some((c) => c.fromId === 'plRunner' && c.fromProperty === 'reset' && c.toId === 'plChoose' && c.toProperty === 'go')).toBe(true);
+      expect(pnode('plTeachStart').type).toBe('/Logic/Teach start');
+      expect(from('plPlay', 'onClick')).toEqual(expect.arrayContaining(['plMode.to-play', 'plRunner.play']));
+      expect(from('plStep', 'onClick')).toEqual(expect.arrayContaining(['plMode.to-play', 'plRunner.step']));
+    });
+
+    it('🔴 AC4: the challenge — its line on the islander’s card, armed from the request and the band; a tap on EITHER renderer is the guess; a hit ticks the tile and then plays, a miss flags the real end; Play and One step settle it', () => {
+      expect([into('plTaskP', 'text'), into('plChallenge', 'cardLine'), into('plChallenge', 'challenge'), into('plChallenge', 'band')]).toEqual([['plChallenge.line'], ['plCard.line'], ['plStart.challenge'], ['plIn.band']]);
+      for (const g of ['plGarden', 'plGarden3d']) {
+        expect(from(g, 'onTileTapped')).toEqual(['plGuessGate.eval']);
+        expect([from(g, 'onTileX'), from(g, 'onTileY')]).toEqual([['plGuessEnd.tapX'], ['plGuessEnd.tapY']]);
+      }
+      expect(into('plGuessGate', 'condition')).toEqual(['plChallenge.armed']);
+      expect(from('plGuessGate', 'ontrue')).toEqual(['plGuessEnd.go']);
+      expect([pnode('plGuessEnd').type, into('plGuessEnd', 'world'), into('plGuessEnd', 'program')]).toEqual(['/Logic/Predict end', ['plStart.world'], ['plRead.program']]);
+      expect(from('plHitGate', 'ontrue')).toEqual(['plClearMiss.do', 'plGuessWait.start', 'plSetHit.do']);
+      expect(from('plGuessWait', 'timerFinished')).toEqual(['plMode.to-play', 'plRunner.play']);
+      expect(from('plHitGate', 'onfalse')).toEqual(['plSetMiss.do', 'plSetMissed.do']);
+      expect(into('plDraw', 'showTick')).toEqual(['plChallenge.showTick']);
+      expect(into('plSetAskedFor', 'do')).toEqual(['plGuessEnd.ran', 'plPlay.onClick', 'plStep.onClick']);
+      expect(into('plSetAskedFor', 'value')).toEqual(['plRead.text']);
+      // Drive while it is asked: the robot goes back to the start (the question is about Play, which starts there).
+      expect([into('plDriveGate', 'condition'), from('plDriveGate', 'ontrue'), into('plSetWorldAsk', 'value')]).toEqual([['plChallenge.armed'], ['plSetWorldAsk.do'], ['plStart.world']]);
+    });
+
+    it('🔴 IG-006 deviation 2: a ? on every placed block opens the same card as the palette’s first tap', () => {
+      expect(params(pnode('plBlocks')).showHelp).toBe(true);
+      expect(params(pnode('plCardEg')).showHelp).toBeUndefined();
+      expect([into('plSetCardBlock', 'value'), into('plSetCardBlock', 'do'), params(pnode('plSetCardBlock')).name]).toEqual([['plBlocks.onHelpBlock'], ['plBlocks.onHelp'], 'gardenCardOpen']);
+      // The card opens for a block's kind as it is (the chips' help: prefix is not needed).
+      for (const t of ['fwd', 'olive:read', 'repeat']) expect(run(BLOCK_CARD_SCRIPT, { cardOpen: t, lang: 'en', band: 2, words: WORD_ROWS })).toMatchObject({ show: true, cardId: t });
     });
   });
 
@@ -1474,6 +1567,78 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     expect([b.text, b.ok]).toEqual(['Thank you, Mamie Rose!', true]);
     expect(sent.headers?.['x-garden']).toBe('1');
     expect(Object.keys(JSON.parse(String(sent.body))).sort()).toEqual(['lang', 'rung', 'shape', 'slots', 'temperature']);
+  });
+
+  it('🔴 IG-003 AC1–3 in plain JS: four Drive presses move the robot four tiles and record nothing; Teach puts it back at the start and the same presses record four blocks to the same tile; Play from the start ends there; Drive keeps the program', () => {
+    const start = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'free' });
+    const press = (op: string, program: unknown, world: unknown, record?: boolean) => run(RECORD_STEP_SCRIPT, { op, program, world, selected: '', lang: 'en', bumps: 0, ...(record === undefined ? {} : { record }) });
+    let world = start.world;
+    const program = '[]';
+    for (let k = 0; k < 4; k++) {
+      const p = press('fwd', program, world, false);
+      expect([p.recorded, p.moved, p.program]).toEqual([false, true, '[]']);
+      world = p.world;
+    }
+    expect([world.robots[0].x, world.robots[0].y]).toEqual([4, 3]);
+    // Teach: the start, then the four presses recorded.
+    const teach = run(TEACH_START_SCRIPT, { start: start.world, program: [], lang: 'en' });
+    expect([teach.world.robots[0].x, teach.world.robots[0].y, teach.blocks, teach.resumed]).toEqual([0, 3, 0, false]);
+    let taught: unknown = '[]';
+    world = teach.world;
+    for (let k = 0; k < 4; k++) {
+      const p = press('fwd', taught, world, true);
+      expect(p.recorded).toBe(true);
+      taught = p.program;
+      world = p.world;
+    }
+    const read = run(READ_PROGRAM_SCRIPT, { program: taught });
+    expect([read.blocks, world.robots[0].x, world.robots[0].y]).toEqual([4, 4, 3]);
+    // Play replays from the start and ends there.
+    const end = run(PREDICT_END_SCRIPT, { program: read.program, world: start.world, lang: 'en' });
+    expect([end.x, end.y]).toEqual([4, 3]);
+    // Teach → Drive keeps the program; a Drive press leaves it as it is; Teach again resumes where the four blocks end.
+    const drove = press('left', taught, world, false);
+    expect([drove.recorded, drove.program]).toEqual([false, JSON.stringify(read.program)]);
+    const again = run(TEACH_START_SCRIPT, { start: start.world, program: read.program, lang: 'en' });
+    expect([again.world.robots[0].x, again.world.robots[0].y, again.world.robots[0].d, again.blocks, again.resumed]).toEqual([4, 3, 1, 4, true]);
+    // Unset Record is Teach (the P105 callers).
+    expect(press('fwd', '[]', start.world).recorded).toBe(true);
+    expect(run(TEACH_START_SCRIPT, { program: [] }).world).toBeNull();
+  });
+
+  it('🔴 IG-003: what the mode says — the tag, the line under the world, the steps note — in both languages; Play says none of it', () => {
+    const say = (mode: string, blocks = 0, atEntry = 0, lang = 'en') => run(MODE_LINE_SCRIPT, { mode, blocks, atEntry, words: WORD_ROWS, lang, botName: 'Bo' });
+    const W = (key: string, lang: 'en' | 'fr' = 'en') => (IG006_WORDS[key] ?? WORDS[key])[lang].split('{b}').join('Bo');
+    for (const lang of ['en', 'fr'] as const) {
+      expect(say('drive', 0, 0, lang)).toMatchObject({ badge: W('ig3DrivingTag', lang), line: W('ig3Driving', lang), showLine: true, driving: true, note: W('ig3StepsDriving', lang) });
+      expect(say('teach', 0, 0, lang)).toMatchObject({ badge: W('recording', lang), line: W('ig3TeachOn', lang), showLine: true, driving: false, note: '' });
+      expect(say('teach', 4, 4, lang).line).toBe(W('ig3TeachGoOn', lang));
+      expect(say('teach', 5, 4, lang)).toMatchObject({ line: '', showLine: false, badge: W('recording', lang) });
+      expect(say('play', 3, 0, lang)).toMatchObject({ badge: '', line: '', showLine: false, driving: false, note: '' });
+    }
+    expect(W('ig3TeachOn')).toBe('Back to the start. Now show Bo the moves.');
+  });
+
+  it('🔴 IG-003 AC4: the challenge — on the tulips at band 10–12 with blocks not yet played it asks; a hit says so and ticks; settled or at band 7–9 or on free play the card keeps its own line', () => {
+    const tulips = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'tulips-three' });
+    expect([tulips.challenge, run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'sami-thanks' }).challenge, run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'free' }).challenge, run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'mamie-note' }).challenge]).toEqual(['predict', 'predict', '', '']);
+    const base = { challenge: 'predict', band: 2, blocks: 3, programText: '[1,2,3]', askedFor: '', outcome: '', live: false, cardLine: 'Mamie’s line', words: WORD_ROWS, lang: 'en', botName: 'Bo' };
+    const W = (key: string, lang: 'en' | 'fr' = 'en') => IG006_WORDS[key][lang].split('{b}').join('Bo');
+    expect(run(CHALLENGE_SCRIPT, base)).toEqual({ armed: true, showTick: false, line: W('ig3PredictAsk') });
+    expect(run(CHALLENGE_SCRIPT, { ...base, lang: 'fr' }).line).toBe(W('ig3PredictAsk', 'fr'));
+    expect(W('ig3PredictAsk')).toBe('Before you press Play, tap where Bo will stop.');
+    // A right tap: settled for this program, the outcome hit.
+    expect(run(CHALLENGE_SCRIPT, { ...base, askedFor: '[1,2,3]', outcome: 'hit' })).toEqual({ armed: false, showTick: true, line: W('ig3PredictRight') });
+    // A miss, a Play, a One step: settled, the islander's own line.
+    for (const outcome of ['miss', '']) expect(run(CHALLENGE_SCRIPT, { ...base, askedFor: '[1,2,3]', outcome })).toEqual({ armed: false, showTick: false, line: 'Mamie’s line' });
+    // The program changed since: asked again.
+    expect(run(CHALLENGE_SCRIPT, { ...base, askedFor: '[1,2]', outcome: 'hit' })).toMatchObject({ armed: true, showTick: false });
+    // Nothing at band 7–9, with no blocks, while a run is live, or on a request with no challenge.
+    for (const extra of [{ band: 1 }, { blocks: 0, programText: '[]' }, { live: true }, { challenge: '' }]) expect(run(CHALLENGE_SCRIPT, { ...base, ...extra })).toEqual({ armed: false, showTick: false, line: 'Mamie’s line' });
+    // Draw world puts the tick on the end tile (the flag on a miss, as before).
+    const w = { map: ['GGG'], things: [], robots: [{ id: 'me', x: 0, y: 0, d: 1 }] };
+    expect(run(DRAW_WORLD_SCRIPT, { world: w, showTick: true, endX: 2, endY: 0 }).things).toEqual([{ kind: 'tick', x: 2, y: 0 }]);
+    expect(run(DRAW_WORLD_SCRIPT, { world: w, showTick: false, endX: 2, endY: 0 }).things).toEqual([]);
   });
 
   describe('arms: each rule-bearing glue script mutated, and the check that kills it', () => {

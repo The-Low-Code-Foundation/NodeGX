@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e177abec-1ea8-5ee1-842f-28adfe6b6fe0",
+  "name": "Mode line",
+  "path": "/Logic/Mode line",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What the Workshop says the mode is: the tag on the world, the line under it, the steps note. Runs when an input changes; Ran after each run."
+}

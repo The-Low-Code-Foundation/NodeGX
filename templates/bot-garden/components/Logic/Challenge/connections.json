@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6aa316d3-b3c5-5810-8450-185c1ff726da",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "challengeIn",
+      "fromProperty": "askedFor",
+      "toId": "challengeFn",
+      "toProperty": "in-askedFor"
+    },
+    {
+      "fromId": "challengeIn",
+      "fromProperty": "band",
+      "toId": "challengeFn",
+      "toProperty": "in-band"
+    },
+    {
+      "fromId": "challengeIn",
+      "fromProperty": "blocks",
+      "toId": "challengeFn",
+      "toProperty": "in-blocks"
+    },
+    {
+      "fromId": "challengeIn",
+      "fromProperty": "botName",
+      "toId": "challengeFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "challengeIn",
+      "fromProperty": "cardLine",
+      "toId": "challengeFn",
+      "toProperty": "in-cardLine"
+    },
+    {
+      "fromId": "challengeIn",
+      "fromProperty": "challenge",
+      "toId": "challengeFn",
+      "toProperty": "in-challenge"
+    },
+    {
+      "fromId": "challengeIn",
+      "fromProperty": "lang",
+      "toId": "challengeFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "challengeIn",
+      "fromProperty": "live",
+      "toId": "challengeFn",
+      "toProperty": "in-live"
+    },
+    {
+      "fromId": "challengeIn",
+      "fromProperty": "outcome",
+      "toId": "challengeFn",
+      "toProperty": "in-outcome"
+    },
+    {
+      "fromId": "challengeIn",
+      "fromProperty": "programText",
+      "toId": "challengeFn",
+      "toProperty": "in-programText"
+    },
+    {
+      "fromId": "challengeIn",
+      "fromProperty": "words",
+      "toId": "challengeFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "challengeFn",
+      "fromProperty": "out-armed",
+      "toId": "challengeOut",
+      "toProperty": "armed"
+    },
+    {
+      "fromId": "challengeFn",
+      "fromProperty": "out-line",
+      "toId": "challengeOut",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "challengeFn",
+      "fromProperty": "out-showTick",
+      "toId": "challengeOut",
+      "toProperty": "showTick"
+    },
+    {
+      "fromId": "challengeFn",
+      "fromProperty": "success",
+      "toId": "challengeOut",
+      "toProperty": "ran"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6aa316d3-b3c5-5810-8450-185c1ff726da",
+  "name": "Challenge",
+  "path": "/Logic/Challenge",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The islander’s Predict challenge: armed, the card’s line, the tick on a right tap. Runs when an input changes; Ran after each run."
+}

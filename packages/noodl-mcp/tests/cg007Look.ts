@@ -188,7 +188,8 @@ export const ICONS: Readonly<Record<string, string>> = {
   rec: svg('0 0 24 24', "<circle cx='12' cy='12' r='7'/>"),
   reset: svg('0 0 24 24', "<path d='M12 5a7 7 0 106.3 4H16l4-5 2 5h-1.6A9 9 0 1112 3z'/>"),
   tidy: svg('0 0 24 24', "<path d='M4 6h16v3H4zm0 5h10v3H4zm0 5h6v3H4z'/><path d='M17 12l4 4-4 4v-3h-3v-2h3z'/>"),
-  predict: svg('0 0 24 24', "<path d='M12 2a7 7 0 017 7c0 5-7 13-7 13S5 14 5 9a7 7 0 017-7zm0 4a3 3 0 100 6 3 3 0 000-6z'/>"),
+  // P106 IG-003: Drive (the mockup's i-drive: a wheel). Predict left the bar with its icon.
+  drive: svg('0 0 24 24', "<circle cx='12' cy='12' r='8' fill='none' stroke='black' stroke-width='3'/><circle cx='12' cy='12' r='2.5'/><path d='M12 4v5M4 12h5M12 20v-5M20 12h-5' stroke='black' stroke-width='3'/>"),
   // IG-001 D10: the pad's action keys beyond water — pick up (up off the ground), put down (down onto it), fill (a drop into the can).
   pick: svg('0 0 24 24', "<path d='M12 3l6 7h-4v6h-4v-6H6z'/><path d='M4 19h16v2H4z'/>"),
   put: svg('0 0 24 24', "<path d='M12 17l6-7h-4V4h-4v6H6z'/><path d='M4 19h16v2H4z'/>"),
@@ -271,6 +272,12 @@ ${owlColourRule}
 .bg-rec { position: absolute !important; left: 10px !important; top: 10px !important; z-index: 6; box-shadow: var(--shadow-soft); pointer-events: none; }
 .bg-rec::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--coral); margin-right: 8px; animation: bg-blink 1s infinite; }
 @keyframes bg-blink { 50% { opacity: 0.2; } }
+/* P106 IG-003: Drive · Teach · Play. The mode on is ringed (the mockup's aria-pressed ring: ink, then white); the tag on
+   the world is blue and still while driving; the steps sit on the paper while driving, never faded (ruling 5). */
+.bg-mode-on { box-shadow: 0 0 0 3px var(--ink), 0 0 0 6px var(--card) !important; }
+.bg-rec-drive::before { background: var(--block-motion); animation: none; }
+.bg-driving .gd-prog { background: var(--paper-2); border-radius: 14px; padding: 8px; }
+.bg-steps-note { font-weight: 700; }
 /* The pad, over the world's corner (the mockup's .pad), each key 56 px for a finger (AC5). */
 .bg-pad { position: absolute !important; right: 10px !important; bottom: 10px !important; z-index: 6; display: grid !important; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(2, 56px); grid-auto-rows: 56px; gap: 6px; }
 .bg-key { width: 56px !important; height: 56px !important; min-width: 56px; min-height: 56px; border-radius: 14px; box-shadow: var(--shadow-key); display: grid !important; place-items: center; cursor: pointer; font-size: 0 !important; }

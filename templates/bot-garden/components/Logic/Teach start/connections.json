@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "07b9145c-f1dc-599f-837b-bd1f6ef10a5d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "teachstartIn",
+      "fromProperty": "lang",
+      "toId": "teachstartFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "teachstartIn",
+      "fromProperty": "program",
+      "toId": "teachstartFn",
+      "toProperty": "in-program"
+    },
+    {
+      "fromId": "teachstartIn",
+      "fromProperty": "start",
+      "toId": "teachstartFn",
+      "toProperty": "in-start"
+    },
+    {
+      "fromId": "teachstartIn",
+      "fromProperty": "go",
+      "toId": "teachstartFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "teachstartFn",
+      "fromProperty": "out-blocks",
+      "toId": "teachstartOut",
+      "toProperty": "blocks"
+    },
+    {
+      "fromId": "teachstartFn",
+      "fromProperty": "out-resumed",
+      "toId": "teachstartOut",
+      "toProperty": "resumed"
+    },
+    {
+      "fromId": "teachstartFn",
+      "fromProperty": "out-world",
+      "toId": "teachstartOut",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "teachstartFn",
+      "fromProperty": "success",
+      "toId": "teachstartOut",
+      "toProperty": "ran"
+    }
+  ]
+}

@@ -128,6 +128,8 @@ if (req) {
   Outputs.allowed = (req.palette || []).slice();
   Outputs.rungs = req.rungs === 'all' ? 'all' : Array.isArray(req.rungs) ? req.rungs.slice() : [];
   Outputs.islander = String(req.islander || '');
+  // IG-003 (R5): the islander's challenge on this request ('predict'), or none.
+  Outputs.challenge = req.challenge === 'predict' ? 'predict' : '';
 } else {
   Outputs.world = null;
   Outputs.request = null;
@@ -135,6 +137,7 @@ if (req) {
   Outputs.allowed = [];
   Outputs.rungs = [];
   Outputs.islander = '';
+  Outputs.challenge = '';
 }
 Outputs.nonce = Inputs.nonce;
 `;
@@ -183,6 +186,8 @@ for (var i = 0; i < list.length; i++) {
   else if (t.kind === 'sign' || t.kind === 'note') things.push({ kind: t.kind, x: t.x, y: t.y, text: String(t.text || '') });
 }
 if (Inputs.showEnd === true && Inputs.endX !== undefined && Inputs.endX !== null && Number(Inputs.endX) >= 0) things.push({ kind: 'flag', x: Number(Inputs.endX), y: Number(Inputs.endY) });
+// IG-003 (R5): the challenge was right: a tick on the tile the child tapped (the real end).
+if (Inputs.showTick === true && Inputs.endX !== undefined && Inputs.endX !== null && Number(Inputs.endX) >= 0) things.push({ kind: 'tick', x: Number(Inputs.endX), y: Number(Inputs.endY) });
 var bump = (Number(Inputs.bumps) || 0) + (Number(Inputs.teachBumps) || 0);
 var robots = [];
 var rl = Array.isArray(world.robots) ? world.robots : [];
@@ -216,8 +221,11 @@ else if (say) Outputs.bubble = { robot: 0, text: w[say] || say, style: 'plain', 
  * step the engine knows (IG-002: `fill` is a block now, so it is a key where allowed). The first action takes the
  * d-pad's centre (the mockup's water key), the rest a third row.
  */
-export const PAD_KEYS_SCRIPT = `
-var PAD = ${JSON.stringify(PAD_KEYS.map((k) => [k.op, k.place, k.icon]))};
+export const PAD_KEYS_SCRIPT = `${WORD_HELPER}
+var PAD = ${JSON.stringify(PAD_KEYS.map((k) => [k.op, k.place, k.icon, k.word]))};
+// IG-003: the key's label (what a screen reader says; the key shows its icon) is the step's word in the child's language —
+// the pad is up from the moment a request opens (Drive), and an English op name there was the one word a switch left.
+var W = wordMap(Inputs.words, langOf(Inputs.lang), 'Pip');
 var KNOWN = ${JSON.stringify(Object.keys(BLOCK_META))};
 var allowed = Array.isArray(Inputs.allowed) ? Inputs.allowed : [];
 var slots = ['bg-key-mid', 'bg-key-r3a', 'bg-key-r3b', 'bg-key-r3c'], used = 0;
@@ -227,18 +235,22 @@ for (var i = 0; i < PAD.length; i++) {
   var ok = allowed.length ? allowed.indexOf(op) !== -1 : KNOWN.indexOf(op) !== -1;
   if (!ok) continue;
   var place = PAD[i][1] || slots[Math.min(used++, slots.length - 1)];
-  keys.push({ op: op, cls: 'bg-key bg-key-' + op + (place === 'bg-key-' + op ? '' : ' ' + place) + ' bg-i-' + PAD[i][2] + ' bg-press', label: op });
+  keys.push({ op: op, cls: 'bg-key bg-key-' + op + (place === 'bg-key-' + op ? '' : ' ' + place) + ' bg-i-' + PAD[i][2] + ' bg-press', label: W[PAD[i][3]] || op });
 }
 Outputs.keys = keys;
 Outputs.count = keys.length;
 `;
 
 /**
- * A Teach pad press. The block is appended (into the container the kit has selected, like a palette tap), and the
- * robot moves by the ENGINE's own step and apply, so what the child drives is exactly what Play will do.
+ * A pad press. Teach (Record true, or unset): the block is appended (into the container the kit has selected, like a
+ * palette tap), and the robot moves by the ENGINE's own step and apply, so what the child drives is exactly what Play
+ * will do. Drive (IG-003, Record false): the robot moves the same way and NOTHING is recorded — the program comes back
+ * as it came in, and Recorded is false (the page writes the program only when a press was recorded).
  */
 export const RECORD_STEP_SCRIPT = `${ENGINE}${FOLD_HELPERS}
 var OPS = { fwd: 1, left: 1, right: 1, water: 1, fill: 1, pick: 1, put: 1 };
+// Record is 'yes' / 'no' from the Workshop's mode (a string: a States node's first-state false never arrives); false works too.
+var record = Inputs.record !== false && String(Inputs.record) !== 'no';
 var op = String(Inputs.op || '');
 var raw = Inputs.program, prog = [];
 if (Array.isArray(raw)) prog = JSON.parse(JSON.stringify(raw));
@@ -250,7 +262,7 @@ if (ok) {
   var id = maxId(prog) + 1;
   var host = null, sel = Inputs.selected;
   if (sel !== undefined && sel !== null && sel !== '') { var c = findBlock(prog, Number(sel)); if (c && Array.isArray(c.body) && c.t !== 'if') host = c.body; }
-  (host || prog).push({ id: id, t: op });
+  if (record) (host || prog).push({ id: id, t: op });
   var st = step(newRun([{ id: id, t: op }], w.robots[0].id, Inputs.lang), w, null);
   w = apply(w, st.delta);
   sayKey = st.delta.sayKey || '';
@@ -258,7 +270,8 @@ if (ok) {
 }
 Outputs.program = JSON.stringify(prog);
 Outputs.world = w;
-Outputs.recorded = ok;
+Outputs.recorded = ok && record;
+Outputs.moved = ok;
 Outputs.sayKey = sayKey;
 Outputs.sayN = countBlocks(prog);
 Outputs.bumps = (Number(Inputs.bumps) || 0) + (bumped ? 1 : 0);
@@ -895,6 +908,65 @@ Outputs.fallback = fallback;
 Outputs.asked = asks.length > 0;
 `;
 
+// ── P106 IG-003 (lane B): Drive · Teach · Play, and the islander's Predict challenge ──────────────────────────────
+
+/**
+ * Entering Teach: the robot goes back to the request's start, then along the program already there (run with no Olive,
+ * every ask taking the fallback), so the next press is recorded exactly where Play will be when it reaches it. With no
+ * program that IS the start (the task's "Drive → Teach resets the robot to the start"). At Entry is the program's block
+ * count when Teach began (the mode line says "back to the start" until a press is recorded).
+ */
+export const TEACH_START_SCRIPT = `${ENGINE}
+var start = Inputs.start && typeof Inputs.start === 'object' ? Inputs.start : null;
+var program = Array.isArray(Inputs.program) ? Inputs.program : [];
+var n = countBlocks(program);
+if (start) {
+  var w0 = worldOf(start);
+  var rid = w0.robots.length ? w0.robots[0].id : 'me';
+  Outputs.world = n ? runToEnd(program, w0, rid, Inputs.lang).world : w0;
+} else Outputs.world = null;
+Outputs.blocks = n;
+Outputs.resumed = n > 0;
+`;
+
+/**
+ * What the Workshop says the mode is: a short tag on the world (Just driving / {b} is learning…), one line under it
+ * (drive: nothing is remembered; teach: back to the start — or where the steps end when there were steps — until a press
+ * is recorded, then the tag alone), and the steps panel's note while driving. Play shows none of them.
+ */
+export const MODE_LINE_SCRIPT = `${WORD_HELPER}
+var lang = langOf(Inputs.lang), w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
+var mode = String(Inputs.mode || '');
+var blocks = Math.max(0, Math.floor(Number(Inputs.blocks)) || 0), atEntry = Math.max(0, Math.floor(Number(Inputs.atEntry)) || 0);
+var badge = '', line = '';
+if (mode === 'drive') { badge = w.ig3DrivingTag || ''; line = w.ig3Driving || ''; }
+else if (mode === 'teach') { badge = w.recording || ''; line = blocks > atEntry ? '' : atEntry > 0 ? w.ig3TeachGoOn || '' : w.ig3TeachOn || ''; }
+Outputs.badge = badge;
+Outputs.line = line;
+Outputs.showLine = line !== '';
+Outputs.driving = mode === 'drive';
+Outputs.note = mode === 'drive' ? w.ig3StepsDriving || '' : '';
+`;
+
+/**
+ * The islander's Predict challenge (R5), band 10–12 only, on a request that carries it. Armed while the program has
+ * blocks and has not been played, stepped or answered as it stands (Asked For holds the program text the challenge was
+ * last settled for) and no run is live: the islander's card line asks. A right tap settles it with Outcome hit — the
+ * card says "You were right!" and the tick shows on the tile — until the program changes. Anything else: the card's line.
+ */
+export const CHALLENGE_SCRIPT = `${WORD_HELPER}
+var lang = langOf(Inputs.lang), w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
+var on = String(Inputs.challenge || '') === 'predict' && Number(Inputs.band) === 2;
+var text = String(Inputs.programText || '');
+var settled = text !== '' && String(Inputs.askedFor || '') === text;
+var blocks = Math.max(0, Math.floor(Number(Inputs.blocks)) || 0);
+var hit = on && settled && String(Inputs.outcome || '') === 'hit';
+var armed = on && blocks > 0 && !settled && Inputs.live !== true;
+Outputs.armed = armed;
+Outputs.showTick = hit;
+Outputs.line = hit ? w.ig3PredictRight || '' : armed ? w.ig3PredictAsk || '' : String(Inputs.cardLine || '');
+`;
+
 /** The glue, as the generator places it: one `Logic/*` each. */
 export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; seam: string }> = [
   { component: 'Logic/Read program', script: READ_PROGRAM_SCRIPT, seam: 'the program as a list, whatever held it' },
@@ -927,5 +999,9 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Olive lesson', script: OLIVE_LESSON_SCRIPT, seam: 'a lesson asked of Olive, her answer, and the page’s check underneath' },
   // IG-007 (P106 s2): the renderer this computer uses, and the fallback rule's write.
   { component: 'Logic/Renderer', script: RENDERER_SCRIPT, seam: 'which renderer draws the world on this computer, and the grown-ups\u2019 line for it' },
-  { component: 'Logic/Renderer choice', script: RENDERER_CHOICE_SCRIPT, seam: 'the renderer after a fallback or the grown-ups\u2019 switch' }
+  { component: 'Logic/Renderer choice', script: RENDERER_CHOICE_SCRIPT, seam: 'the renderer after a fallback or the grown-ups\u2019 switch' },
+  // P106 IG-003 (lane B): Drive · Teach · Play, and the Predict challenge.
+  { component: 'Logic/Teach start', script: TEACH_START_SCRIPT, seam: 'where the robot stands when Teach begins: the start, then along the steps already there' },
+  { component: 'Logic/Mode line', script: MODE_LINE_SCRIPT, seam: 'what the Workshop says the mode is: the tag on the world, the line under it, the steps note' },
+  { component: 'Logic/Challenge', script: CHALLENGE_SCRIPT, seam: 'the islander\u2019s Predict challenge: armed, the card\u2019s line, the tick on a right tap' }
 ];

@@ -16,6 +16,18 @@
       "toProperty": "allowed"
     },
     {
+      "fromId": "pdIn",
+      "fromProperty": "words",
+      "toId": "pdKeys",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "lang",
+      "toId": "pdKeys",
+      "toProperty": "lang"
+    },
+    {
       "fromId": "pdKeys",
       "fromProperty": "keys",
       "toId": "pdEach",

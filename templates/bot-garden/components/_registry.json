@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 440,
+      "connectionCount": 441,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -239,7 +239,7 @@
       "path": "Logic/Start world",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 15,
+      "connectionCount": 16,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -255,7 +255,7 @@
       "path": "Logic/Draw world",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 27,
+      "connectionCount": 28,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -263,7 +263,7 @@
       "path": "Logic/Record step",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 15,
+      "connectionCount": 17,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -279,7 +279,7 @@
       "path": "Logic/Pad keys",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 4,
+      "connectionCount": 6,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -459,6 +459,30 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
+    "Logic/Teach start": {
+      "path": "Logic/Teach start",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 8,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Mode line": {
+      "path": "Logic/Mode line",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 12,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Challenge": {
+      "path": "Logic/Challenge",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 15,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
     "Logic/App store": {
       "path": "Logic/App store",
       "type": "visual",
@@ -511,7 +535,7 @@
       "path": "Workshop/Pad",
       "type": "visual",
       "nodeCount": 5,
-      "connectionCount": 5,
+      "connectionCount": 7,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -550,8 +574,8 @@
     "Workshop/Play": {
       "path": "Workshop/Play",
       "type": "visual",
-      "nodeCount": 139,
-      "connectionCount": 329,
+      "nodeCount": 155,
+      "connectionCount": 381,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -757,8 +781,8 @@
     }
   },
   "stats": {
-    "totalComponents": 94,
-    "totalNodes": 758,
-    "totalConnections": 2103
+    "totalComponents": 97,
+    "totalNodes": 783,
+    "totalConnections": 2199
   }
 }

@@ -10,6 +10,18 @@
       "toProperty": "in-allowed"
     },
     {
+      "fromId": "padkeysIn",
+      "fromProperty": "lang",
+      "toId": "padkeysFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "padkeysIn",
+      "fromProperty": "words",
+      "toId": "padkeysFn",
+      "toProperty": "in-words"
+    },
+    {
       "fromId": "padkeysFn",
       "fromProperty": "out-count",
       "toId": "padkeysOut",

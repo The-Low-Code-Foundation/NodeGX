@@ -17,6 +17,16 @@
           "name": "allowed",
           "plug": "output",
           "type": "array"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
         }
       ],
       "x": 350,

@@ -89,6 +89,12 @@
     },
     {
       "fromId": "drawworldIn",
+      "fromProperty": "showTick",
+      "toId": "drawworldFn",
+      "toProperty": "in-showTick"
+    },
+    {
+      "fromId": "drawworldIn",
       "fromProperty": "stepMs",
       "toId": "drawworldFn",
       "toProperty": "in-stepMs"

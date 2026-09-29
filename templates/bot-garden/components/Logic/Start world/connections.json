@@ -29,6 +29,12 @@
     },
     {
       "fromId": "startworldFn",
+      "fromProperty": "out-challenge",
+      "toId": "startworldOut",
+      "toProperty": "challenge"
+    },
+    {
+      "fromId": "startworldFn",
       "fromProperty": "out-found",
       "toId": "startworldOut",
       "toProperty": "found"

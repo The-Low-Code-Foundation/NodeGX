@@ -227,6 +227,7 @@ export const IG006_WORDS: Readonly<Record<string, Bi>> = {
   // P106 s3 lane B (IG-003): Drive · Teach · Play, and the islander's Predict challenge (R4, R5).
   ig3Drive: s('Drive', 'Conduire'),
   ig3Teach: s('Teach', 'Apprendre'),
+  ig3DrivingTag: s('Just driving', 'Juste conduire'),
   ig3Driving: s('Just driving: nothing is remembered.', 'Juste conduire : rien n’est retenu.'),
   ig3TeachOn: s('Back to the start. Now show {b} the moves.', 'Retour au départ. Maintenant, montre les gestes à {b}.'),
   ig3TeachGoOn: s('{b} is where your steps end. Show {b} what comes next.', '{b} est là où tes pas finissent. Montre-lui la suite.'),

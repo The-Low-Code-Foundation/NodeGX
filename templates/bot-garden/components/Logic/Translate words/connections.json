@@ -761,6 +761,12 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-ig3DrivingTag",
+      "toId": "translatewordsOut",
+      "toProperty": "ig3DrivingTag"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-ig3PredictAsk",
       "toId": "translatewordsOut",
       "toProperty": "ig3PredictAsk"
