@@ -225,7 +225,10 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
   await tap(byText('.bg-seg-btn', '10–12'), 'band 10–12 in the form');
   await tap(byText('button.bg-btn', w('create')), 'create');
   const island = await until('location.pathname', (p) => p === '/island');
-  check(`BOOT (${MODE}): a new profile lands on the island; nothing is stored for the renderer yet`, island === '/island' && (await stored()) === null, { island, stored: await stored() });
+  // IG-004 (P106 s3): the Island is drawn behind the SAME renderer rule now (Island/World), so the island is where the
+  // rule first applies: in 3D nothing is stored (it draws); with no WebGL2 the island writes { 2d, unsupported } itself.
+  const boot = MODE === '3d' ? await stored() : await until(`(() => { const k = Object.keys(localStorage).find((x) => /bot-garden/.test(x)); try { return k ? JSON.parse(localStorage.getItem(k)).renderer || null : null; } catch (e) { return null; } })()`, (v) => !!v, 6000);
+  check(`BOOT (${MODE}): a new profile lands on the island; the renderer rule applies there first (IG-004): ${MODE === '3d' ? 'nothing stored, 3D draws' : '{ 2d, unsupported } stored by the island'}`, island === '/island' && (MODE === '3d' ? boot === null : !!boot && boot.mode === '2d' && boot.why === 'unsupported'), { island, stored: boot });
   await wait(600);
   await openTulips();
 

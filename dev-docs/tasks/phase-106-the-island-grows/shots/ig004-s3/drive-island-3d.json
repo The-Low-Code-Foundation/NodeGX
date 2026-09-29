@@ -1,0 +1,89 @@
+{
+  "dir": "../ig004-world-scratch/pages/deploy",
+  "mode": "3d",
+  "results": [
+    {
+      "name": "3D: a new player lands on the island",
+      "ok": true,
+      "saw": "/island"
+    },
+    {
+      "name": "3D: the island is drawn by Garden 3D (swiftshader), the whole island framed, 46 wide as the requests need",
+      "ok": true,
+      "saw": {
+        "w": "46",
+        "h": "22",
+        "meshes": "173",
+        "camera": "island"
+      }
+    },
+    {
+      "name": "3D: the islanders say their requests in the overlay (three bubbles)",
+      "ok": true,
+      "saw": [
+        [
+          "mamie",
+          "Water the tulip by my door"
+        ],
+        [
+          "sami",
+          "Walk the path to the post box"
+        ],
+        [
+          "biscuit",
+          "Feed me, but only if my bowl is empty"
+        ]
+      ]
+    },
+    {
+      "name": "3D: her robot is named on the island, on the tulips’ plot",
+      "ok": true,
+      "saw": [
+        [
+          "Pip",
+          "12",
+          "2"
+        ]
+      ]
+    },
+    {
+      "name": "3D: 0 console errors",
+      "ok": true,
+      "saw": []
+    }
+  ],
+  "readings": {
+    "gl": {
+      "w": "46",
+      "h": "22",
+      "meshes": "173",
+      "camera": "island"
+    },
+    "gl3d": {
+      "says": [
+        [
+          "mamie",
+          "Water the tulip by my door"
+        ],
+        [
+          "sami",
+          "Walk the path to the post box"
+        ],
+        [
+          "biscuit",
+          "Feed me, but only if my bowl is empty"
+        ]
+      ],
+      "name": [
+        [
+          "Pip",
+          "12",
+          "2"
+        ]
+      ],
+      "renderer": null
+    }
+  },
+  "consoleErrors": [],
+  "networkErrors": []
+}

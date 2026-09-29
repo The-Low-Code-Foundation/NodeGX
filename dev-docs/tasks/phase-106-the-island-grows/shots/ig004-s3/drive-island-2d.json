@@ -1,0 +1,1702 @@
+{
+  "dir": "../ig004-world-scratch/pages/deploy",
+  "mode": "2d",
+  "results": [
+    {
+      "name": "IG-004 1368-en: before any win her robot is at home (39,17), and the tulips’ plot is drawn with its 3 tulips dry",
+      "ok": true,
+      "saw": {
+        "before": [
+          {
+            "x": 39,
+            "y": 17,
+            "d": 2,
+            "name": "Pip"
+          }
+        ],
+        "dry0": [
+          "dry",
+          "dry",
+          "dry"
+        ]
+      }
+    },
+    {
+      "name": "IG-004 AC3 1368-en: the tulips won (Teach, 27 pad presses, Play)",
+      "ok": true,
+      "saw": true
+    },
+    {
+      "name": "IG-004 AC3 1368-en: her robot is on the tulips’ plot and stepping (two reads 2.3 s apart differ)",
+      "ok": true,
+      "saw": {
+        "a": [
+          {
+            "x": 11,
+            "y": 2,
+            "d": 2,
+            "name": "Pip"
+          }
+        ],
+        "b": [
+          {
+            "x": 12,
+            "y": 2,
+            "d": 1,
+            "name": "Pip"
+          }
+        ],
+        "plot": {
+          "x": 10,
+          "y": 1
+        }
+      }
+    },
+    {
+      "name": "IG-004 1368-en: \"Find my robots\" brings her robot into the island's view (nothing of the page over it) and rings it",
+      "ok": true,
+      "saw": {
+        "inBox": true,
+        "ringed": true,
+        "onTop": true,
+        "scrollLeft": 0
+      }
+    },
+    {
+      "name": "IG-004 AC3 1368-en: the save is v4 and the tulips’ plot keeps the program that won and the robot pinned there",
+      "ok": true,
+      "saw": {
+        "v": 4,
+        "plot": {
+          "program": [
+            {
+              "id": 1,
+              "t": "fill"
+            },
+            {
+              "id": 2,
+              "t": "left"
+            },
+            {
+              "id": 3,
+              "t": "left"
+            },
+            {
+              "id": 4,
+              "t": "fwd"
+            },
+            {
+              "id": 5,
+              "t": "water"
+            },
+            {
+              "id": 6,
+              "t": "right"
+            },
+            {
+              "id": 7,
+              "t": "fwd"
+            },
+            {
+              "id": 8,
+              "t": "right"
+            },
+            {
+              "id": 9,
+              "t": "fwd"
+            },
+            {
+              "id": 10,
+              "t": "fill"
+            },
+            {
+              "id": 11,
+              "t": "left"
+            },
+            {
+              "id": 12,
+              "t": "left"
+            },
+            {
+              "id": 13,
+              "t": "fwd"
+            },
+            {
+              "id": 14,
+              "t": "water"
+            },
+            {
+              "id": 15,
+              "t": "right"
+            },
+            {
+              "id": 16,
+              "t": "fwd"
+            },
+            {
+              "id": 17,
+              "t": "right"
+            },
+            {
+              "id": 18,
+              "t": "fwd"
+            },
+            {
+              "id": 19,
+              "t": "fill"
+            },
+            {
+              "id": 20,
+              "t": "left"
+            },
+            {
+              "id": 21,
+              "t": "left"
+            },
+            {
+              "id": 22,
+              "t": "fwd"
+            },
+            {
+              "id": 23,
+              "t": "water"
+            },
+            {
+              "id": 24,
+              "t": "right"
+            },
+            {
+              "id": 25,
+              "t": "fwd"
+            },
+            {
+              "id": 26,
+              "t": "right"
+            },
+            {
+              "id": 27,
+              "t": "fwd"
+            }
+          ],
+          "robotId": "r1",
+          "wonAt": 1790684003384
+        }
+      }
+    },
+    {
+      "name": "IG-004 AC3 1368-en: the tulips’ card says done and that the robot works there",
+      "ok": true,
+      "saw": "Mamie Rose\nWater my three tulips\n✓ done · Pip works here"
+    },
+    {
+      "name": "IG-004 AC7: the Grown-ups save code is v4 and carries the tulips’ plot, its program and its robot",
+      "ok": true,
+      "saw": {
+        "v": 4,
+        "pinnedRow": [
+          "tulips-three",
+          [
+            {
+              "id": 1,
+              "t": "fill"
+            },
+            {
+              "id": 2,
+              "t": "left"
+            },
+            {
+              "id": 3,
+              "t": "left"
+            },
+            {
+              "id": 4,
+              "t": "fwd"
+            },
+            {
+              "id": 5,
+              "t": "water"
+            },
+            {
+              "id": 6,
+              "t": "right"
+            },
+            {
+              "id": 7,
+              "t": "fwd"
+            },
+            {
+              "id": 8,
+              "t": "right"
+            },
+            {
+              "id": 9,
+              "t": "fwd"
+            },
+            {
+              "id": 10,
+              "t": "fill"
+            },
+            {
+              "id": 11,
+              "t": "left"
+            },
+            {
+              "id": 12,
+              "t": "left"
+            },
+            {
+              "id": 13,
+              "t": "fwd"
+            },
+            {
+              "id": 14,
+              "t": "water"
+            },
+            {
+              "id": 15,
+              "t": "right"
+            },
+            {
+              "id": 16,
+              "t": "fwd"
+            },
+            {
+              "id": 17,
+              "t": "right"
+            },
+            {
+              "id": 18,
+              "t": "fwd"
+            },
+            {
+              "id": 19,
+              "t": "fill"
+            },
+            {
+              "id": 20,
+              "t": "left"
+            },
+            {
+              "id": 21,
+              "t": "left"
+            },
+            {
+              "id": 22,
+              "t": "fwd"
+            },
+            {
+              "id": 23,
+              "t": "water"
+            },
+            {
+              "id": 24,
+              "t": "right"
+            },
+            {
+              "id": 25,
+              "t": "fwd"
+            },
+            {
+              "id": 26,
+              "t": "right"
+            },
+            {
+              "id": 27,
+              "t": "fwd"
+            }
+          ],
+          "r1",
+          1790684003384
+        ]
+      }
+    },
+    {
+      "name": "IG-004 AC7: pasted back through the Grown-ups box, the code restores the same family (plots, robots, done, hats, stickers)",
+      "ok": true,
+      "saw": {
+        "before": "[{\"id\":\"pmumn04alj0g\",\"name\":\"Ada\",\"robot\":{\"name\":\"Pip\",\"color\":\"#FF7A59\",\"eye\":\"round\",\"hat\":\"none\"},\"done\":[\"tulips-three\"],\"plots\":{\"tulips-three\":{\"program\":[{\"id\":1,\"t\":\"fill\"},{\"id\":2,\"t\":\"left\"},{\"id\":3,\"t\":\"left\"},{\"id\":4,\"t\":\"fwd\"},{\"id\":5,\"t\":\"water\"},{\"id\":6,\"t\":\"right\"},{\"id\":7,\"t\":\"fwd\"},{\"id\":8,\"t\":\"right\"},{\"id\":9,\"t\":\"fwd\"},{\"id\":10,\"t\":\"fill\"},{\"id\":11,\"t\":\"left\"},{\"id\":12,\"t\":\"left\"},{\"id\":13,\"t\":\"fwd\"},{\"id\":14,\"t\":\"water\"},{\"id\":15,\"t\":\"right\"},{\"id\":16,\"t\":\"fwd\"},{\"id\":17,\"t\":\"right\"},{\"id\":18,\"t\":\"fwd\"},{\"id\":19,\"t\":\"fill\"},{\"id\":20,\"t\":\"left\"},{\"id\":21,\"t\":\"left\"},{\"id\":22,\"t\":\"fwd\"},{\"id\":23,\"t\":\"water\"},{\"id\":24,\"t\":\"right\"},{\"id\":25,\"t\":\"fwd\"},{\"id\":26,\"t\":\"right\"},{\"id\":27,\"t\":\"fwd\"}],\"robotId\":\"r1\",\"wonAt\":1790684003384}},\"robots\":[{\"id\":\"r1\"}],\"hats\":[\"sun\"],\"stickers\":[]}]",
+        "after": "[{\"id\":\"pmumn04alj0g\",\"name\":\"Ada\",\"robot\":{\"name\":\"Pip\",\"color\":\"#FF7A59\",\"eye\":\"round\",\"hat\":\"none\"},\"done\":[\"tulips-three\"],\"plots\":{\"tulips-three\":{\"program\":[{\"id\":1,\"t\":\"fill\"},{\"id\":2,\"t\":\"left\"},{\"id\":3,\"t\":\"left\"},{\"id\":4,\"t\":\"fwd\"},{\"id\":5,\"t\":\"water\"},{\"id\":6,\"t\":\"right\"},{\"id\":7,\"t\":\"fwd\"},{\"id\":8,\"t\":\"right\"},{\"id\":9,\"t\":\"fwd\"},{\"id\":10,\"t\":\"fill\"},{\"id\":11,\"t\":\"left\"},{\"id\":12,\"t\":\"left\"},{\"id\":13,\"t\":\"fwd\"},{\"id\":14,\"t\":\"water\"},{\"id\":15,\"t\":\"right\"},{\"id\":16,\"t\":\"fwd\"},{\"id\":17,\"t\":\"right\"},{\"id\":18,\"t\":\"fwd\"},{\"id\":19,\"t\":\"fill\"},{\"id\":20,\"t\":\"left\"},{\"id\":21,\"t\":\"left\"},{\"id\":22,\"t\":\"fwd\"},{\"id\":23,\"t\":\"water\"},{\"id\":24,\"t\":\"right\"},{\"id\":25,\"t\":\"fwd\"},{\"id\":26,\"t\":\"right\"},{\"id\":27,\"t\":\"fwd\"}],\"robotId\":\"r1\",\"wonAt\":1790684003384}},\"robots\":[{\"id\":\"r1\"}],\"hats\":[\"sun\"],\"stickers\":[]}]"
+      }
+    },
+    {
+      "name": "IG-004 AC7: … and the island still shows her robot at work on the tulips’ plot",
+      "ok": true,
+      "saw": [
+        {
+          "x": 11,
+          "y": 2,
+          "d": 2,
+          "name": "Pip"
+        }
+      ]
+    },
+    {
+      "name": "IG-004 AC3 1368-en: the stones’ card while the robot works the tulips stays on the island and says \"Pip is at work on “Water my three tulips”. Bring Pip home first, then this plot is yours.\"",
+      "ok": true,
+      "saw": {
+        "stay": "/island",
+        "blocked": {
+          "up": true,
+          "who": "Sami",
+          "title": "Lay four stones on the path",
+          "line": "Pip is at work on “Water my three tulips”. Bring Pip home first, then this plot is yours.",
+          "open": null,
+          "home": "Bring Pip home"
+        },
+        "want": "Pip is at work on “Water my three tulips”. Bring Pip home first, then this plot is yours."
+      }
+    },
+    {
+      "name": "IG-004 AC3 1368-en: … and offers \"Bring Pip home\" (no way in yet)",
+      "ok": true,
+      "saw": {
+        "up": true,
+        "who": "Sami",
+        "title": "Lay four stones on the path",
+        "line": "Pip is at work on “Water my three tulips”. Bring Pip home first, then this plot is yours.",
+        "open": null,
+        "home": "Bring Pip home"
+      }
+    },
+    {
+      "name": "IG-004 AC3 1368-en: brought home — the robot is at home (39,17) and the card offers \"Go and help\"",
+      "ok": true,
+      "saw": {
+        "home": [
+          {
+            "x": 39,
+            "y": 17,
+            "d": 2,
+            "name": "Pip"
+          }
+        ],
+        "freed": {
+          "up": true,
+          "who": "Sami",
+          "title": "Lay four stones on the path",
+          "line": "\"My path stops too soon. Take four stones from the rock, and lay them all the way to the post box!\"",
+          "open": "Go and help",
+          "home": null
+        }
+      }
+    },
+    {
+      "name": "IG-004 AC3 1368-en: … the tulips STAY watered (all 3 drawn wet on their plot) and the plot keeps its win without a program",
+      "ok": true,
+      "saw": {
+        "wet": [
+          "wet",
+          "wet",
+          "wet"
+        ],
+        "plot2": {
+          "program": null,
+          "robotId": "",
+          "wonAt": 1790684003384
+        }
+      }
+    },
+    {
+      "name": "IG-004 1368-en: Go and help opens the stones in the Workshop",
+      "ok": true,
+      "saw": {
+        "path": "/workshop",
+        "title": "Lay four stones on the path"
+      }
+    },
+    {
+      "name": "IG-004 AC5 1368-en: at 7–9 every plot the band cannot do (9) is fenced and padlocked",
+      "ok": true,
+      "saw": {
+        "fences": [
+          "1,15,8,6",
+          "19,8,8,6",
+          "10,15,8,6",
+          "19,15,8,6",
+          "19,1,8,6",
+          "28,1,8,6",
+          "37,1,8,6",
+          "28,8,8,6",
+          "37,8,8,6"
+        ],
+        "padlocks": 9
+      }
+    },
+    {
+      "name": "IG-004 AC5 1368-en: a tap on a locked plot says why in one line — \"🔒 Biscuit asks this at 10–12: it needs “If”.\" — with no way in",
+      "ok": true,
+      "saw": {
+        "why": {
+          "up": true,
+          "who": "Biscuit",
+          "title": "Feed me, but only if my bowl is empty",
+          "line": "🔒 Biscuit asks this at 10–12: it needs “If”.",
+          "open": null,
+          "home": null
+        },
+        "want": "🔒 Biscuit asks this at 10–12: it needs “If”."
+      }
+    },
+    {
+      "name": "IG-004 1368-en: 0 console errors, 0 network errors so far",
+      "ok": true,
+      "saw": {
+        "console": [],
+        "network": []
+      }
+    },
+    {
+      "name": "IG-004 1368-fr: before any win her robot is at home (39,17), and the tulips’ plot is drawn with its 3 tulips dry",
+      "ok": true,
+      "saw": {
+        "before": [
+          {
+            "x": 39,
+            "y": 17,
+            "d": 2,
+            "name": "Pip"
+          }
+        ],
+        "dry0": [
+          "dry",
+          "dry",
+          "dry"
+        ]
+      }
+    },
+    {
+      "name": "IG-004 AC3 1368-fr: the tulips won (Teach, 27 pad presses, Play)",
+      "ok": true,
+      "saw": true
+    },
+    {
+      "name": "IG-004 AC3 1368-fr: her robot is on the tulips’ plot and stepping (two reads 2.3 s apart differ)",
+      "ok": true,
+      "saw": {
+        "a": [
+          {
+            "x": 11,
+            "y": 2,
+            "d": 2,
+            "name": "Pip"
+          }
+        ],
+        "b": [
+          {
+            "x": 12,
+            "y": 2,
+            "d": 1,
+            "name": "Pip"
+          }
+        ],
+        "plot": {
+          "x": 10,
+          "y": 1
+        }
+      }
+    },
+    {
+      "name": "IG-004 1368-fr: \"Trouve mes robots\" brings her robot into the island's view (nothing of the page over it) and rings it",
+      "ok": true,
+      "saw": {
+        "inBox": true,
+        "ringed": true,
+        "onTop": true,
+        "scrollLeft": 0
+      }
+    },
+    {
+      "name": "IG-004 AC3 1368-fr: the save is v4 and the tulips’ plot keeps the program that won and the robot pinned there",
+      "ok": true,
+      "saw": {
+        "v": 4,
+        "plot": {
+          "program": [
+            {
+              "id": 1,
+              "t": "fill"
+            },
+            {
+              "id": 2,
+              "t": "left"
+            },
+            {
+              "id": 3,
+              "t": "left"
+            },
+            {
+              "id": 4,
+              "t": "fwd"
+            },
+            {
+              "id": 5,
+              "t": "water"
+            },
+            {
+              "id": 6,
+              "t": "right"
+            },
+            {
+              "id": 7,
+              "t": "fwd"
+            },
+            {
+              "id": 8,
+              "t": "right"
+            },
+            {
+              "id": 9,
+              "t": "fwd"
+            },
+            {
+              "id": 10,
+              "t": "fill"
+            },
+            {
+              "id": 11,
+              "t": "left"
+            },
+            {
+              "id": 12,
+              "t": "left"
+            },
+            {
+              "id": 13,
+              "t": "fwd"
+            },
+            {
+              "id": 14,
+              "t": "water"
+            },
+            {
+              "id": 15,
+              "t": "right"
+            },
+            {
+              "id": 16,
+              "t": "fwd"
+            },
+            {
+              "id": 17,
+              "t": "right"
+            },
+            {
+              "id": 18,
+              "t": "fwd"
+            },
+            {
+              "id": 19,
+              "t": "fill"
+            },
+            {
+              "id": 20,
+              "t": "left"
+            },
+            {
+              "id": 21,
+              "t": "left"
+            },
+            {
+              "id": 22,
+              "t": "fwd"
+            },
+            {
+              "id": 23,
+              "t": "water"
+            },
+            {
+              "id": 24,
+              "t": "right"
+            },
+            {
+              "id": 25,
+              "t": "fwd"
+            },
+            {
+              "id": 26,
+              "t": "right"
+            },
+            {
+              "id": 27,
+              "t": "fwd"
+            }
+          ],
+          "robotId": "r1",
+          "wonAt": 1790684055298
+        }
+      }
+    },
+    {
+      "name": "IG-004 AC3 1368-fr: the tulips’ card says done and that the robot works there",
+      "ok": true,
+      "saw": "Mamie Rose\nArrose mes trois tulipes\n✓ fait · Pip travaille ici"
+    },
+    {
+      "name": "IG-004 AC3 1368-fr: the stones’ card while the robot works the tulips stays on the island and says \"Pip travaille sur « Arrose mes trois tulipes ». Ramène d’abord Pip à la maison, et ce jardin est à toi.\"",
+      "ok": true,
+      "saw": {
+        "stay": "/island",
+        "blocked": {
+          "up": true,
+          "who": "Sami",
+          "title": "Pose quatre pierres sur le chemin",
+          "line": "Pip travaille sur « Arrose mes trois tulipes ». Ramène d’abord Pip à la maison, et ce jardin est à toi.",
+          "open": null,
+          "home": "Ramène Pip à la maison"
+        },
+        "want": "Pip travaille sur « Arrose mes trois tulipes ». Ramène d’abord Pip à la maison, et ce jardin est à toi."
+      }
+    },
+    {
+      "name": "IG-004 AC3 1368-fr: … and offers \"Ramène Pip à la maison\" (no way in yet)",
+      "ok": true,
+      "saw": {
+        "up": true,
+        "who": "Sami",
+        "title": "Pose quatre pierres sur le chemin",
+        "line": "Pip travaille sur « Arrose mes trois tulipes ». Ramène d’abord Pip à la maison, et ce jardin est à toi.",
+        "open": null,
+        "home": "Ramène Pip à la maison"
+      }
+    },
+    {
+      "name": "IG-004 AC3 1368-fr: brought home — the robot is at home (39,17) and the card offers \"Aller aider\"",
+      "ok": true,
+      "saw": {
+        "home": [
+          {
+            "x": 39,
+            "y": 17,
+            "d": 2,
+            "name": "Pip"
+          }
+        ],
+        "freed": {
+          "up": true,
+          "who": "Sami",
+          "title": "Pose quatre pierres sur le chemin",
+          "line": "« Mon chemin s’arrête trop tôt. Prends quatre pierres dans le rocher, et pose-les jusqu’à la boîte aux lettres ! »",
+          "open": "Aller aider",
+          "home": null
+        }
+      }
+    },
+    {
+      "name": "IG-004 AC3 1368-fr: … the tulips STAY watered (all 3 drawn wet on their plot) and the plot keeps its win without a program",
+      "ok": true,
+      "saw": {
+        "wet": [
+          "wet",
+          "wet",
+          "wet"
+        ],
+        "plot2": {
+          "program": null,
+          "robotId": "",
+          "wonAt": 1790684055298
+        }
+      }
+    },
+    {
+      "name": "IG-004 1368-fr: Go and help opens the stones in the Workshop",
+      "ok": true,
+      "saw": {
+        "path": "/workshop",
+        "title": "Pose quatre pierres sur le chemin"
+      }
+    },
+    {
+      "name": "IG-004 AC5 1368-fr: at 7–9 every plot the band cannot do (9) is fenced and padlocked",
+      "ok": true,
+      "saw": {
+        "fences": [
+          "1,15,8,6",
+          "19,8,8,6",
+          "10,15,8,6",
+          "19,15,8,6",
+          "19,1,8,6",
+          "28,1,8,6",
+          "37,1,8,6",
+          "28,8,8,6",
+          "37,8,8,6"
+        ],
+        "padlocks": 9
+      }
+    },
+    {
+      "name": "IG-004 AC5 1368-fr: a tap on a locked plot says why in one line — \"🔒 Biscuit le demande en 10–12 : il faut « Si ».\" — with no way in",
+      "ok": true,
+      "saw": {
+        "why": {
+          "up": true,
+          "who": "Biscuit",
+          "title": "Nourris-moi, mais seulement si ma gamelle est vide",
+          "line": "🔒 Biscuit le demande en 10–12 : il faut « Si ».",
+          "open": null,
+          "home": null
+        },
+        "want": "🔒 Biscuit le demande en 10–12 : il faut « Si »."
+      }
+    },
+    {
+      "name": "IG-004 1368-fr: 0 console errors, 0 network errors so far",
+      "ok": true,
+      "saw": {
+        "console": [],
+        "network": []
+      }
+    },
+    {
+      "name": "IG-004 390-en: before any win her robot is at home (39,17), and the tulips’ plot is drawn with its 3 tulips dry",
+      "ok": true,
+      "saw": {
+        "before": [
+          {
+            "x": 39,
+            "y": 17,
+            "d": 2,
+            "name": "Pip"
+          }
+        ],
+        "dry0": [
+          "dry",
+          "dry",
+          "dry"
+        ]
+      }
+    },
+    {
+      "name": "IG-004 AC3 390-en: the tulips won (Teach, 27 pad presses, Play)",
+      "ok": true,
+      "saw": true
+    },
+    {
+      "name": "IG-004 AC3 390-en: her robot is on the tulips’ plot and stepping (two reads 2.3 s apart differ)",
+      "ok": true,
+      "saw": {
+        "a": [
+          {
+            "x": 11,
+            "y": 2,
+            "d": 2,
+            "name": "Pip"
+          }
+        ],
+        "b": [
+          {
+            "x": 12,
+            "y": 2,
+            "d": 1,
+            "name": "Pip"
+          }
+        ],
+        "plot": {
+          "x": 10,
+          "y": 1
+        }
+      }
+    },
+    {
+      "name": "IG-004 390-en: \"Find my robots\" brings her robot into the island's view (nothing of the page over it) and rings it",
+      "ok": true,
+      "saw": {
+        "inBox": true,
+        "ringed": true,
+        "onTop": true,
+        "scrollLeft": 31
+      }
+    },
+    {
+      "name": "IG-004 AC3 390-en: the save is v4 and the tulips’ plot keeps the program that won and the robot pinned there",
+      "ok": true,
+      "saw": {
+        "v": 4,
+        "plot": {
+          "program": [
+            {
+              "id": 1,
+              "t": "fill"
+            },
+            {
+              "id": 2,
+              "t": "left"
+            },
+            {
+              "id": 3,
+              "t": "left"
+            },
+            {
+              "id": 4,
+              "t": "fwd"
+            },
+            {
+              "id": 5,
+              "t": "water"
+            },
+            {
+              "id": 6,
+              "t": "right"
+            },
+            {
+              "id": 7,
+              "t": "fwd"
+            },
+            {
+              "id": 8,
+              "t": "right"
+            },
+            {
+              "id": 9,
+              "t": "fwd"
+            },
+            {
+              "id": 10,
+              "t": "fill"
+            },
+            {
+              "id": 11,
+              "t": "left"
+            },
+            {
+              "id": 12,
+              "t": "left"
+            },
+            {
+              "id": 13,
+              "t": "fwd"
+            },
+            {
+              "id": 14,
+              "t": "water"
+            },
+            {
+              "id": 15,
+              "t": "right"
+            },
+            {
+              "id": 16,
+              "t": "fwd"
+            },
+            {
+              "id": 17,
+              "t": "right"
+            },
+            {
+              "id": 18,
+              "t": "fwd"
+            },
+            {
+              "id": 19,
+              "t": "fill"
+            },
+            {
+              "id": 20,
+              "t": "left"
+            },
+            {
+              "id": 21,
+              "t": "left"
+            },
+            {
+              "id": 22,
+              "t": "fwd"
+            },
+            {
+              "id": 23,
+              "t": "water"
+            },
+            {
+              "id": 24,
+              "t": "right"
+            },
+            {
+              "id": 25,
+              "t": "fwd"
+            },
+            {
+              "id": 26,
+              "t": "right"
+            },
+            {
+              "id": 27,
+              "t": "fwd"
+            }
+          ],
+          "robotId": "r1",
+          "wonAt": 1790684101598
+        }
+      }
+    },
+    {
+      "name": "IG-004 AC3 390-en: the tulips’ card says done and that the robot works there",
+      "ok": true,
+      "saw": "Mamie Rose\nWater my three tulips\n✓ done · Pip works here"
+    },
+    {
+      "name": "IG-004 AC3 390-en: the stones’ card while the robot works the tulips stays on the island and says \"Pip is at work on “Water my three tulips”. Bring Pip home first, then this plot is yours.\"",
+      "ok": true,
+      "saw": {
+        "stay": "/island",
+        "blocked": {
+          "up": true,
+          "who": "Sami",
+          "title": "Lay four stones on the path",
+          "line": "Pip is at work on “Water my three tulips”. Bring Pip home first, then this plot is yours.",
+          "open": null,
+          "home": "Bring Pip home"
+        },
+        "want": "Pip is at work on “Water my three tulips”. Bring Pip home first, then this plot is yours."
+      }
+    },
+    {
+      "name": "IG-004 AC3 390-en: … and offers \"Bring Pip home\" (no way in yet)",
+      "ok": true,
+      "saw": {
+        "up": true,
+        "who": "Sami",
+        "title": "Lay four stones on the path",
+        "line": "Pip is at work on “Water my three tulips”. Bring Pip home first, then this plot is yours.",
+        "open": null,
+        "home": "Bring Pip home"
+      }
+    },
+    {
+      "name": "IG-004 AC3 390-en: brought home — the robot is at home (39,17) and the card offers \"Go and help\"",
+      "ok": true,
+      "saw": {
+        "home": [
+          {
+            "x": 39,
+            "y": 17,
+            "d": 2,
+            "name": "Pip"
+          }
+        ],
+        "freed": {
+          "up": true,
+          "who": "Sami",
+          "title": "Lay four stones on the path",
+          "line": "\"My path stops too soon. Take four stones from the rock, and lay them all the way to the post box!\"",
+          "open": "Go and help",
+          "home": null
+        }
+      }
+    },
+    {
+      "name": "IG-004 AC3 390-en: … the tulips STAY watered (all 3 drawn wet on their plot) and the plot keeps its win without a program",
+      "ok": true,
+      "saw": {
+        "wet": [
+          "wet",
+          "wet",
+          "wet"
+        ],
+        "plot2": {
+          "program": null,
+          "robotId": "",
+          "wonAt": 1790684101598
+        }
+      }
+    },
+    {
+      "name": "IG-004 390-en: Go and help opens the stones in the Workshop",
+      "ok": true,
+      "saw": {
+        "path": "/workshop",
+        "title": "Lay four stones on the path"
+      }
+    },
+    {
+      "name": "IG-004 AC5 390-en: at 7–9 every plot the band cannot do (9) is fenced and padlocked",
+      "ok": true,
+      "saw": {
+        "fences": [
+          "1,15,8,6",
+          "19,8,8,6",
+          "10,15,8,6",
+          "19,15,8,6",
+          "19,1,8,6",
+          "28,1,8,6",
+          "37,1,8,6",
+          "28,8,8,6",
+          "37,8,8,6"
+        ],
+        "padlocks": 9
+      }
+    },
+    {
+      "name": "IG-004 AC5 390-en: a tap on a locked plot says why in one line — \"🔒 Biscuit asks this at 10–12: it needs “If”.\" — with no way in",
+      "ok": true,
+      "saw": {
+        "why": {
+          "up": true,
+          "who": "Biscuit",
+          "title": "Feed me, but only if my bowl is empty",
+          "line": "🔒 Biscuit asks this at 10–12: it needs “If”.",
+          "open": null,
+          "home": null
+        },
+        "want": "🔒 Biscuit asks this at 10–12: it needs “If”."
+      }
+    },
+    {
+      "name": "IG-004 390-en: 0 console errors, 0 network errors so far",
+      "ok": true,
+      "saw": {
+        "console": [],
+        "network": []
+      }
+    },
+    {
+      "name": "IG-004 390-fr: before any win her robot is at home (39,17), and the tulips’ plot is drawn with its 3 tulips dry",
+      "ok": true,
+      "saw": {
+        "before": [
+          {
+            "x": 39,
+            "y": 17,
+            "d": 2,
+            "name": "Pip"
+          }
+        ],
+        "dry0": [
+          "dry",
+          "dry",
+          "dry"
+        ]
+      }
+    },
+    {
+      "name": "IG-004 AC3 390-fr: the tulips won (Teach, 27 pad presses, Play)",
+      "ok": true,
+      "saw": true
+    },
+    {
+      "name": "IG-004 AC3 390-fr: her robot is on the tulips’ plot and stepping (two reads 2.3 s apart differ)",
+      "ok": true,
+      "saw": {
+        "a": [
+          {
+            "x": 11,
+            "y": 2,
+            "d": 2,
+            "name": "Pip"
+          }
+        ],
+        "b": [
+          {
+            "x": 12,
+            "y": 2,
+            "d": 1,
+            "name": "Pip"
+          }
+        ],
+        "plot": {
+          "x": 10,
+          "y": 1
+        }
+      }
+    },
+    {
+      "name": "IG-004 390-fr: \"Trouve mes robots\" brings her robot into the island's view (nothing of the page over it) and rings it",
+      "ok": true,
+      "saw": {
+        "inBox": true,
+        "ringed": true,
+        "onTop": true,
+        "scrollLeft": 31
+      }
+    },
+    {
+      "name": "IG-004 AC3 390-fr: the save is v4 and the tulips’ plot keeps the program that won and the robot pinned there",
+      "ok": true,
+      "saw": {
+        "v": 4,
+        "plot": {
+          "program": [
+            {
+              "id": 1,
+              "t": "fill"
+            },
+            {
+              "id": 2,
+              "t": "left"
+            },
+            {
+              "id": 3,
+              "t": "left"
+            },
+            {
+              "id": 4,
+              "t": "fwd"
+            },
+            {
+              "id": 5,
+              "t": "water"
+            },
+            {
+              "id": 6,
+              "t": "right"
+            },
+            {
+              "id": 7,
+              "t": "fwd"
+            },
+            {
+              "id": 8,
+              "t": "right"
+            },
+            {
+              "id": 9,
+              "t": "fwd"
+            },
+            {
+              "id": 10,
+              "t": "fill"
+            },
+            {
+              "id": 11,
+              "t": "left"
+            },
+            {
+              "id": 12,
+              "t": "left"
+            },
+            {
+              "id": 13,
+              "t": "fwd"
+            },
+            {
+              "id": 14,
+              "t": "water"
+            },
+            {
+              "id": 15,
+              "t": "right"
+            },
+            {
+              "id": 16,
+              "t": "fwd"
+            },
+            {
+              "id": 17,
+              "t": "right"
+            },
+            {
+              "id": 18,
+              "t": "fwd"
+            },
+            {
+              "id": 19,
+              "t": "fill"
+            },
+            {
+              "id": 20,
+              "t": "left"
+            },
+            {
+              "id": 21,
+              "t": "left"
+            },
+            {
+              "id": 22,
+              "t": "fwd"
+            },
+            {
+              "id": 23,
+              "t": "water"
+            },
+            {
+              "id": 24,
+              "t": "right"
+            },
+            {
+              "id": 25,
+              "t": "fwd"
+            },
+            {
+              "id": 26,
+              "t": "right"
+            },
+            {
+              "id": 27,
+              "t": "fwd"
+            }
+          ],
+          "robotId": "r1",
+          "wonAt": 1790684148846
+        }
+      }
+    },
+    {
+      "name": "IG-004 AC3 390-fr: the tulips’ card says done and that the robot works there",
+      "ok": true,
+      "saw": "Mamie Rose\nArrose mes trois tulipes\n✓ fait · Pip travaille ici"
+    },
+    {
+      "name": "IG-004 AC3 390-fr: the stones’ card while the robot works the tulips stays on the island and says \"Pip travaille sur « Arrose mes trois tulipes ». Ramène d’abord Pip à la maison, et ce jardin est à toi.\"",
+      "ok": true,
+      "saw": {
+        "stay": "/island",
+        "blocked": {
+          "up": true,
+          "who": "Sami",
+          "title": "Pose quatre pierres sur le chemin",
+          "line": "Pip travaille sur « Arrose mes trois tulipes ». Ramène d’abord Pip à la maison, et ce jardin est à toi.",
+          "open": null,
+          "home": "Ramène Pip à la maison"
+        },
+        "want": "Pip travaille sur « Arrose mes trois tulipes ». Ramène d’abord Pip à la maison, et ce jardin est à toi."
+      }
+    },
+    {
+      "name": "IG-004 AC3 390-fr: … and offers \"Ramène Pip à la maison\" (no way in yet)",
+      "ok": true,
+      "saw": {
+        "up": true,
+        "who": "Sami",
+        "title": "Pose quatre pierres sur le chemin",
+        "line": "Pip travaille sur « Arrose mes trois tulipes ». Ramène d’abord Pip à la maison, et ce jardin est à toi.",
+        "open": null,
+        "home": "Ramène Pip à la maison"
+      }
+    },
+    {
+      "name": "IG-004 AC3 390-fr: brought home — the robot is at home (39,17) and the card offers \"Aller aider\"",
+      "ok": true,
+      "saw": {
+        "home": [
+          {
+            "x": 39,
+            "y": 17,
+            "d": 2,
+            "name": "Pip"
+          }
+        ],
+        "freed": {
+          "up": true,
+          "who": "Sami",
+          "title": "Pose quatre pierres sur le chemin",
+          "line": "« Mon chemin s’arrête trop tôt. Prends quatre pierres dans le rocher, et pose-les jusqu’à la boîte aux lettres ! »",
+          "open": "Aller aider",
+          "home": null
+        }
+      }
+    },
+    {
+      "name": "IG-004 AC3 390-fr: … the tulips STAY watered (all 3 drawn wet on their plot) and the plot keeps its win without a program",
+      "ok": true,
+      "saw": {
+        "wet": [
+          "wet",
+          "wet",
+          "wet"
+        ],
+        "plot2": {
+          "program": null,
+          "robotId": "",
+          "wonAt": 1790684148846
+        }
+      }
+    },
+    {
+      "name": "IG-004 390-fr: Go and help opens the stones in the Workshop",
+      "ok": true,
+      "saw": {
+        "path": "/workshop",
+        "title": "Pose quatre pierres sur le chemin"
+      }
+    },
+    {
+      "name": "IG-004 AC5 390-fr: at 7–9 every plot the band cannot do (9) is fenced and padlocked",
+      "ok": true,
+      "saw": {
+        "fences": [
+          "1,15,8,6",
+          "19,8,8,6",
+          "10,15,8,6",
+          "19,15,8,6",
+          "19,1,8,6",
+          "28,1,8,6",
+          "37,1,8,6",
+          "28,8,8,6",
+          "37,8,8,6"
+        ],
+        "padlocks": 9
+      }
+    },
+    {
+      "name": "IG-004 AC5 390-fr: a tap on a locked plot says why in one line — \"🔒 Biscuit le demande en 10–12 : il faut « Si ».\" — with no way in",
+      "ok": true,
+      "saw": {
+        "why": {
+          "up": true,
+          "who": "Biscuit",
+          "title": "Nourris-moi, mais seulement si ma gamelle est vide",
+          "line": "🔒 Biscuit le demande en 10–12 : il faut « Si ».",
+          "open": null,
+          "home": null
+        },
+        "want": "🔒 Biscuit le demande en 10–12 : il faut « Si »."
+      }
+    },
+    {
+      "name": "IG-004 390-fr: 0 console errors, 0 network errors so far",
+      "ok": true,
+      "saw": {
+        "console": [],
+        "network": []
+      }
+    },
+    {
+      "name": "IG-004 AC6: three robots at work, each on its own plot",
+      "ok": true,
+      "saw": [
+        {
+          "x": 5,
+          "y": 11,
+          "d": 1,
+          "name": "Pip"
+        },
+        {
+          "x": 11,
+          "y": 2,
+          "d": 1,
+          "name": "Pip"
+        },
+        {
+          "x": 12,
+          "y": 11,
+          "d": 0,
+          "name": "Pip"
+        }
+      ]
+    },
+    {
+      "name": "IG-004 AC6: the CPU throttle is on (a fixed loop 120 ms → 481 ms, ×4.0)",
+      "ok": true,
+      "saw": {
+        "loop1": 120.29999995231628,
+        "loop4": 481.39999985694885,
+        "ratio": 4.001662510787722
+      }
+    },
+    {
+      "name": "IG-004 AC6 (the Mac, 2D, CPU ×4, three robots animating): p95 frame 16.7 ms ≤ 50 ms (1201 frames, 23 robot moves in 20 s)",
+      "ok": true,
+      "saw": {
+        "frames": 1201,
+        "p50": 16.69999999999891,
+        "p95": 16.700000000000728,
+        "p99": 16.80000000000109,
+        "max": 16.80000000000291,
+        "over25": 0,
+        "over50": 0,
+        "moves": 23,
+        "hidden": false
+      }
+    },
+    {
+      "name": "0 console errors through the whole drive",
+      "ok": true,
+      "saw": []
+    },
+    {
+      "name": "0 network errors through the whole drive",
+      "ok": true,
+      "saw": []
+    }
+  ],
+  "readings": {
+    "stepping-1368-en": {
+      "a": [
+        {
+          "x": 11,
+          "y": 2,
+          "d": 2,
+          "name": "Pip"
+        }
+      ],
+      "b": [
+        {
+          "x": 12,
+          "y": 2,
+          "d": 1,
+          "name": "Pip"
+        }
+      ]
+    },
+    "find-1368-en": {
+      "inBox": true,
+      "ringed": true,
+      "onTop": true,
+      "scrollLeft": 0
+    },
+    "blocked-1368-en": {
+      "up": true,
+      "who": "Sami",
+      "title": "Lay four stones on the path",
+      "line": "Pip is at work on “Water my three tulips”. Bring Pip home first, then this plot is yours.",
+      "open": null,
+      "home": "Bring Pip home"
+    },
+    "home-1368-en": {
+      "freed": {
+        "up": true,
+        "who": "Sami",
+        "title": "Lay four stones on the path",
+        "line": "\"My path stops too soon. Take four stones from the rock, and lay them all the way to the post box!\"",
+        "open": "Go and help",
+        "home": null
+      },
+      "home": [
+        {
+          "x": 39,
+          "y": 17,
+          "d": 2,
+          "name": "Pip"
+        }
+      ],
+      "wet": [
+        "wet",
+        "wet",
+        "wet"
+      ],
+      "plot2": {
+        "program": null,
+        "robotId": "",
+        "wonAt": 1790684003384
+      }
+    },
+    "locked-1368-en": {
+      "up": true,
+      "who": "Biscuit",
+      "title": "Feed me, but only if my bowl is empty",
+      "line": "🔒 Biscuit asks this at 10–12: it needs “If”.",
+      "open": null,
+      "home": null
+    },
+    "stepping-1368-fr": {
+      "a": [
+        {
+          "x": 11,
+          "y": 2,
+          "d": 2,
+          "name": "Pip"
+        }
+      ],
+      "b": [
+        {
+          "x": 12,
+          "y": 2,
+          "d": 1,
+          "name": "Pip"
+        }
+      ]
+    },
+    "find-1368-fr": {
+      "inBox": true,
+      "ringed": true,
+      "onTop": true,
+      "scrollLeft": 0
+    },
+    "blocked-1368-fr": {
+      "up": true,
+      "who": "Sami",
+      "title": "Pose quatre pierres sur le chemin",
+      "line": "Pip travaille sur « Arrose mes trois tulipes ». Ramène d’abord Pip à la maison, et ce jardin est à toi.",
+      "open": null,
+      "home": "Ramène Pip à la maison"
+    },
+    "home-1368-fr": {
+      "freed": {
+        "up": true,
+        "who": "Sami",
+        "title": "Pose quatre pierres sur le chemin",
+        "line": "« Mon chemin s’arrête trop tôt. Prends quatre pierres dans le rocher, et pose-les jusqu’à la boîte aux lettres ! »",
+        "open": "Aller aider",
+        "home": null
+      },
+      "home": [
+        {
+          "x": 39,
+          "y": 17,
+          "d": 2,
+          "name": "Pip"
+        }
+      ],
+      "wet": [
+        "wet",
+        "wet",
+        "wet"
+      ],
+      "plot2": {
+        "program": null,
+        "robotId": "",
+        "wonAt": 1790684055298
+      }
+    },
+    "locked-1368-fr": {
+      "up": true,
+      "who": "Biscuit",
+      "title": "Nourris-moi, mais seulement si ma gamelle est vide",
+      "line": "🔒 Biscuit le demande en 10–12 : il faut « Si ».",
+      "open": null,
+      "home": null
+    },
+    "stepping-390-en": {
+      "a": [
+        {
+          "x": 11,
+          "y": 2,
+          "d": 2,
+          "name": "Pip"
+        }
+      ],
+      "b": [
+        {
+          "x": 12,
+          "y": 2,
+          "d": 1,
+          "name": "Pip"
+        }
+      ]
+    },
+    "find-390-en": {
+      "inBox": true,
+      "ringed": true,
+      "onTop": true,
+      "scrollLeft": 31
+    },
+    "blocked-390-en": {
+      "up": true,
+      "who": "Sami",
+      "title": "Lay four stones on the path",
+      "line": "Pip is at work on “Water my three tulips”. Bring Pip home first, then this plot is yours.",
+      "open": null,
+      "home": "Bring Pip home"
+    },
+    "home-390-en": {
+      "freed": {
+        "up": true,
+        "who": "Sami",
+        "title": "Lay four stones on the path",
+        "line": "\"My path stops too soon. Take four stones from the rock, and lay them all the way to the post box!\"",
+        "open": "Go and help",
+        "home": null
+      },
+      "home": [
+        {
+          "x": 39,
+          "y": 17,
+          "d": 2,
+          "name": "Pip"
+        }
+      ],
+      "wet": [
+        "wet",
+        "wet",
+        "wet"
+      ],
+      "plot2": {
+        "program": null,
+        "robotId": "",
+        "wonAt": 1790684101598
+      }
+    },
+    "locked-390-en": {
+      "up": true,
+      "who": "Biscuit",
+      "title": "Feed me, but only if my bowl is empty",
+      "line": "🔒 Biscuit asks this at 10–12: it needs “If”.",
+      "open": null,
+      "home": null
+    },
+    "stepping-390-fr": {
+      "a": [
+        {
+          "x": 11,
+          "y": 2,
+          "d": 2,
+          "name": "Pip"
+        }
+      ],
+      "b": [
+        {
+          "x": 12,
+          "y": 2,
+          "d": 1,
+          "name": "Pip"
+        }
+      ]
+    },
+    "find-390-fr": {
+      "inBox": true,
+      "ringed": true,
+      "onTop": true,
+      "scrollLeft": 31
+    },
+    "blocked-390-fr": {
+      "up": true,
+      "who": "Sami",
+      "title": "Pose quatre pierres sur le chemin",
+      "line": "Pip travaille sur « Arrose mes trois tulipes ». Ramène d’abord Pip à la maison, et ce jardin est à toi.",
+      "open": null,
+      "home": "Ramène Pip à la maison"
+    },
+    "home-390-fr": {
+      "freed": {
+        "up": true,
+        "who": "Sami",
+        "title": "Pose quatre pierres sur le chemin",
+        "line": "« Mon chemin s’arrête trop tôt. Prends quatre pierres dans le rocher, et pose-les jusqu’à la boîte aux lettres ! »",
+        "open": "Aller aider",
+        "home": null
+      },
+      "home": [
+        {
+          "x": 39,
+          "y": 17,
+          "d": 2,
+          "name": "Pip"
+        }
+      ],
+      "wet": [
+        "wet",
+        "wet",
+        "wet"
+      ],
+      "plot2": {
+        "program": null,
+        "robotId": "",
+        "wonAt": 1790684148846
+      }
+    },
+    "locked-390-fr": {
+      "up": true,
+      "who": "Biscuit",
+      "title": "Nourris-moi, mais seulement si ma gamelle est vide",
+      "line": "🔒 Biscuit le demande en 10–12 : il faut « Si ».",
+      "open": null,
+      "home": null
+    },
+    "throttle": {
+      "loop1": 120.29999995231628,
+      "loop4": 481.39999985694885,
+      "ratio": 4.001662510787722
+    },
+    "ac6": {
+      "frames": 1201,
+      "p50": 16.69999999999891,
+      "p95": 16.700000000000728,
+      "p99": 16.80000000000109,
+      "max": 16.80000000000291,
+      "over25": 0,
+      "over50": 0,
+      "moves": 23,
+      "hidden": false
+    }
+  },
+  "consoleErrors": [],
+  "networkErrors": []
+}
