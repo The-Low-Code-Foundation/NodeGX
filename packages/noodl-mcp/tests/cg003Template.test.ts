@@ -1357,7 +1357,7 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     };
     const ask = (lesson: string, lang = 'en', f: unknown = shell) => runAsync(OLIVE_LESSON_SCRIPT, { lesson, lang, w: lang === 'en' ? W : WF }, f);
     const count = await ask('count-tulips');
-    expect(count.lines).toEqual([{ id: 'l0', q: '', a: 'Olive: 6', check: 'The program counts the word “tulip”: 4.' }]);
+    expect(count.lines).toEqual([{ id: 'count-tulips:l0', q: '', a: 'Olive: 6', check: 'The program counts the word “tulip”: 4.' }]);
     expect(sent[0]).toEqual({ rung: 'count-tulips', slots: { list: 'tulip, tulip, rose, tulip, daisy, tulip, rose' }, lang: 'en', header: '1' });
     expect((await ask('maths')).lines[0]).toMatchObject({ a: 'Olive: 14', check: 'The rule adds them: 14 + 9 = 23.' });
     const e = await ask('no-letter-e');
@@ -1376,6 +1376,7 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
       ['How much does the Moon weigh?', 'In a book: the Moon weighs about 73 billion billion tonnes, far more than a mountain.'],
       ['Who invented the bicycle?', 'In a book: the first bicycle was made in Germany, by Karl Drais, in 1817.']
     ]);
+    expect(new Set([...(await ask('maths')).lines, ...count.lines, ...e.letters].map((x: any) => x.id)).size).toBe(2 + e.letters.length);
     const tr = await ask('translate');
     expect(tr.lines.map((l: any) => [l.q, l.check])).toEqual([
       ['French → English: “Les tulipes ont soif.”', 'In a book: The tulips are thirsty.'],
@@ -1441,7 +1442,10 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
       expect({ id, t: b.t, k, v, shown: !!slot && slot.options.some((o: any) => o.value === v) }).toEqual({ id, t: b.t, k, v, shown: true });
     }
     const chips = run(HELP_CHIPS_SCRIPT, { program: [{ id: 1, t: 'fwd' }, { id: 2, t: 'repeat', n: 2, body: [{ id: 3, t: 'fwd' }, { id: 4, t: 'olive:read' }] }], lang: 'en', band: 2, words: WORD_ROWS });
-    expect([chips.show, chips.rows]).toEqual([true, [{ id: 'fwd', label: '? forward' }, { id: 'repeat', label: '? repeat' }, { id: 'olive:read', label: '? read the note' }]]);
+    expect([chips.show, chips.rows]).toEqual([true, [{ id: 'help:fwd', label: '? forward' }, { id: 'help:repeat', label: '? repeat' }, { id: 'help:olive:read', label: '? read the note' }]]);
+    // 🔴 A repeater's row is a Noodl Object, global by id (the s2 drive: five lesson cards showed one card's lines): the
+    // chip opens its block's card through the help: id, and each lesson's rows are its own.
+    expect(run(BLOCK_CARD_SCRIPT, { cardOpen: 'help:olive:read', lang: 'en', band: 2, words: WORD_ROWS })).toMatchObject({ show: true, cardId: 'olive:read' });
     expect(run(HELP_CHIPS_SCRIPT, { program: [], lang: 'en', words: WORD_ROWS })).toMatchObject({ show: false, rows: [] });
   });
 

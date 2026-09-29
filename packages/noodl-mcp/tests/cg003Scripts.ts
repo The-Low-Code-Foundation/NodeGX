@@ -768,7 +768,8 @@ var CARDS = ${JSON.stringify(CARDS_DRAWN)};
 var PALETTE = ${JSON.stringify(CARD_PALETTE)};
 var lang = langOf(Inputs.lang), band = Number(Inputs.band) === 1 ? 1 : 2;
 var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
-var id = String(Inputs.cardOpen || '');
+// A ? chip's row id is help:<block> (a row is a Noodl Object, global by id): the card is the block's.
+var id = String(Inputs.cardOpen || '').replace(/^help:/, '');
 var c = CARDS[id] || null;
 var label = c ? c.label : '';
 if (c && band === 1 && w['c' + label.slice(1)] && label.charAt(0) === 'b') label = 'c' + label.slice(1);
@@ -789,7 +790,7 @@ var lang = langOf(Inputs.lang), band = Number(Inputs.band) === 1 ? 1 : 2;
 var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
 var prog = Array.isArray(Inputs.program) ? Inputs.program : [];
 var rows = [], seen = {};
-function walk(list) { for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; var t = String(b.t); if (CARDS[t] && !seen[t]) { seen[t] = 1; var k = CARDS[t]; if (band === 1 && k.charAt(0) === 'b' && w['c' + k.slice(1)]) k = 'c' + k.slice(1); rows.push({ id: t, label: '? ' + (w[k] || t) }); } if (Array.isArray(b.body)) walk(b.body); } }
+function walk(list) { for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; var t = String(b.t); if (CARDS[t] && !seen[t]) { seen[t] = 1; var k = CARDS[t]; if (band === 1 && k.charAt(0) === 'b' && w['c' + k.slice(1)]) k = 'c' + k.slice(1); rows.push({ id: 'help:' + t, label: '? ' + (w[k] || t) }); } if (Array.isArray(b.body)) walk(b.body); } }
 walk(prog);
 Outputs.rows = rows;
 Outputs.show = rows.length > 0;
@@ -867,7 +868,8 @@ for (var i = 0; i < asks.length; i++) {
   if (reply && reply.ok === true && (reply.value !== undefined || typeof reply.text === 'string')) said = reply.value !== undefined ? reply.value : reply.text;
   else { fallback = true; var wr = writtenAnswer(OLIVE, lesson, slots, L); said = wr ? (wr.value !== undefined ? wr.value : wr.text) : ''; }
   said = String(said === undefined || said === null ? '' : said);
-  var line = { id: 'l' + i, q: '', a: fillIn(W.oliveSaysBubble || '{x}', { x: said }), check: '' };
+  // A repeater's row is a Noodl Object, global by id: every card's rows carry the lesson in their id, or five cards share one row.
+  var line = { id: lesson + ':l' + i, q: '', a: fillIn(W.oliveSaysBubble || '{x}', { x: said }), check: '' };
   if (lesson === 'count-tulips') { var n = 0, parts = String(slots.list).split(','); for (var p = 0; p < parts.length; p++) if (/^(tulip|tulipe)$/.test(parts[p].trim())) n++; line.check = fillIn(W.lsCheck7, { n: n }); }
   else if (lesson === 'maths') line.check = fillIn(W.lsCheck8, { n: Number(slots.a) + Number(slots.b) });
   else if (lesson === 'no-letter-e') {
@@ -878,7 +880,7 @@ for (var i = 0; i < asks.length; i++) {
       else run += ch;
     }
     if (run) parts2.push({ text: run, e: false });
-    for (var q = 0; q < parts2.length; q++) letters.push({ id: 'c' + q, text: parts2[q].text, isE: parts2[q].e, ground: parts2[q].e ? 'var(--sun)' : 'transparent' });
+    for (var q = 0; q < parts2.length; q++) letters.push({ id: lesson + ':c' + q, text: parts2[q].text, isE: parts2[q].e, ground: parts2[q].e ? 'var(--sun)' : 'transparent' });
     line.a = '';
     line.check = eCount ? fillIn(W.lsCheck9, { n: eCount }) : W.lsCheck9None || '';
   } else if (lesson === 'tall-tales') { line.q = listed(a.q, L); line.check = fillIn(W.lsBook, { x: W[a.book] || '' }); }
