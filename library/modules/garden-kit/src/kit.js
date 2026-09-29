@@ -31,7 +31,7 @@
  * Program:         Block[]  — emitted as JSON TEXT (a Variable keeps it byte-identical); read back as text or an object.
  * Map:             { rows: ["GGTGGGTH", ...], legend: { G: "grass", ... } }  or just the rows (the mockup's legend).
  *                  Kinds: grass path water tree rock house bed. A bed draws a dry tulip; a Thing waters it.
- * Things:          [{ kind: tulip | puddle | letter | bowl | label, x, y, watered?, full?, text? }]
+ * Things:          [{ kind: tulip | puddle | letter | bowl | label, x, y, watered?, colour? (red | yellow), full?, text? }]
  * Robots:          [{ x, y, d, colour, eyes, hat, name, bump? }]   d 0..3 clockwise from up; bump is a COUNT that
  *                  rises once per bump, so the same robot can bump twice in a row (the Boost-count pattern).
  * Bubble:          { robot, text, style: plain | olive, ms }
@@ -953,6 +953,13 @@
       ['path', { d: 'M10 12c0 14 6 22 14 24 8-2 14-10 14-24-4 4-8 6-14 2-6 4-10 2-14-2z', fill: '#FF6B9A' }],
       ['path', { d: 'M24 14v22', stroke: '#E04E7E', strokeWidth: 2 }]
     ] },
+    // IG-006: Mamie's note says "the red ones, not the yellow" — the second colour a row can be (the 3D kit's yellow).
+    tulipYellow: { box: '0 0 48 64', shapes: [
+      ['path', { d: 'M24 62V30', stroke: '#3FA66B', strokeWidth: 4, strokeLinecap: 'round' }],
+      ['path', { d: 'M24 48c-6-2-10-8-12-14 6 0 11 4 12 8-1-4 6-8 12-8-2 6-6 12-12 14z', fill: '#3FA66B' }],
+      ['path', { d: 'M10 12c0 14 6 22 14 24 8-2 14-10 14-24-4 4-8 6-14 2-6 4-10 2-14-2z', fill: '#FFD166' }],
+      ['path', { d: 'M24 14v22', stroke: '#C98A00', strokeWidth: 2 }]
+    ] },
     tree: { box: '0 0 64 64', shapes: [
       ['rect', { x: 28, y: 40, width: 8, height: 18, rx: 3, fill: '#A9773F' }],
       ['circle', { cx: 32, cy: 26, r: 16, fill: '#3E9B62' }],
@@ -1283,7 +1290,8 @@
           if (c.kind === 'postbox') kids.push(spriteEl('postbox', 'postbox'));
           if (c.kind === 'bed' || tulip) {
             var wet = !!(tulip && (tulip.watered === true || tulip.state === 'watered' || tulip.state === 'wet'));
-            kids.push(spriteEl('tulip', 'tulip', 'gd-tulip ' + (wet ? 'gd-wet' : 'gd-dry')));
+            var yellow = !!(tulip && tulip.colour === 'yellow');
+            kids.push(spriteEl(yellow ? 'tulipYellow' : 'tulip', 'tulip', 'gd-tulip ' + (wet ? 'gd-wet' : 'gd-dry') + (yellow ? ' gd-yellow' : '')));
           }
           kids = kids.concat(extras);
           return h(

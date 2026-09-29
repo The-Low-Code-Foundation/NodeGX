@@ -1069,6 +1069,11 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     const cd = run(DRAW_WORLD_SCRIPT, { world: carrying });
     expect(cd.robots[0]).toMatchObject({ can: 2, canMax: 3, carry: ['stone', 'letter'] });
     expect(cd.things).toEqual([{ kind: 'sign', x: 2, y: 0, text: 'Tulips' }, { kind: 'note', x: 1, y: 0, text: 'Red ones' }]);
+    // IG-006 × IG-002 (the merge): Mamie's note says "the red ones, not the yellow" — the kits get each tulip's colour
+    // (their spelling, as the robots'), or the two rows draw alike and the child cannot see which row the note means.
+    const mamie = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'mamie-note' }).world;
+    const tulipColours = run(DRAW_WORLD_SCRIPT, { world: mamie }).things.filter((t: any) => t.kind === 'tulip').map((t: any) => `${t.x},${t.y}:${t.colour}`);
+    expect(tulipColours).toEqual(['2,2:red', '4,2:red', '6,2:red', '2,4:yellow', '4,4:yellow', '6,4:yellow']);
     expect(DRAW_WORLD_SCRIPT).not.toMatch(/GLYPH|🪨|📮|🏁/);
   });
 

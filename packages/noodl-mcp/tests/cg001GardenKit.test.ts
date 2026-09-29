@@ -404,6 +404,11 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       expect(watered.match(/gd-tulip gd-dry/g)).toHaveLength(2);
       expect(watered.match(/gd-tulip gd-wet/g)).toHaveLength(1);
       expect(watered).toContain('data-puddle="true"');
+      // P106 (IG-006's red and yellow rows): a tulip with colour yellow draws the yellow sprite; red or none, the pink one.
+      const rows = render('garden-kit.Garden', { map: MOCKUP, things: [{ kind: 'tulip', x: 2, y: 2, colour: 'yellow' }, { kind: 'tulip', x: 4, y: 2, colour: 'red', watered: true }] });
+      expect(rows.match(/gd-tulip gd-dry gd-yellow"[^>]*data-sprite="tulipYellow"/g)).toHaveLength(1);
+      expect(rows.match(/gd-tulip gd-wet"[^>]*data-sprite="tulip"/g)).toHaveLength(1);
+      expect(rows.match(/data-sprite="tulip"/g)).toHaveLength(2); // the red one and the mockup bed's own at 6,2
       // The first cell is 0,0 and the last is 7,5.
       expect(html.indexOf('data-x="0" data-y="0"')).toBeLessThan(html.indexOf('data-x="7" data-y="5"'));
       const big = render('garden-kit.Garden', { map: { rows: Array.from({ length: 8 }, () => 'GGGGGGGGGGGG') } });
