@@ -268,6 +268,16 @@ fixture drive's vocabulary clause). This docs commit follows.
 - JSON: `shots/ig007-s2/drive-workshop-3d.json`, `drive-workshop-nogl.json`, `drive-fixture-3d.json`. Logs are in
   the lane's scratch folder.
 
+- **On the merged tree** (`d445ec639`, IG-002's fetch-and-return tulips; merged deploy, read-only, 2026-09-29 12:00):
+  the Workshop drive no longer types any tile or press. It reads the tulip request from the template (start, can,
+  the reference program laid out as 27 presses, the fold to 10), and every press now also compares the can level.
+  - `--mode nogl`: exit 0, **8 / 8**.
+  - `--mode 3d`: exit 1, **19 / 23**. Tile, facing and wet tulips agree at all 27 presses.
+  - 🔴 **Defect, in this kit:** the 3D can level is stale after `fill`, `left` and `fwd` (engine 3, drawn 0 or 2)
+    until a watering changes Things. `kit3d.js` `setWorld` rebuilds only when the map or Things change; a robot's
+    own fields (`can`, `canMax`, `carry`, and also `colour`, `eyes`, `hat`, `name`) never reach the drawn robot on
+    their own. Not fixed (the orchestrator's rule: report it, do not fix, on this pass).
+
 **AC5, what was compared (looked at, not graded — the grade is Richard's).** The side-by-side images
 `shots/ig007-s2/sbs-*.png` put the mockup on the left and the node on the right. `mockup-running-workshop.png` is
 the mockup captured at the node's viewport.

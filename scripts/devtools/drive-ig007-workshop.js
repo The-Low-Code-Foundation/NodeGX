@@ -11,7 +11,7 @@
  *   node scripts/devtools/drive-ig007-workshop.js <deploy-dir> --mode nogl [--shots <dir>] [--json <file>]
  *
  * --mode 3d    Chrome with SOFTWARE WebGL (`--use-angle=swiftshader`): the Workshop draws Garden 3D. AC1 — the tulips
- *              request end to end (the pad drives Pip, Teach records fifteen presses, the fold, Play, the win), and at
+ *              request end to end (the pad drives Pip through the request's reference program, the fold, Play, the win), and at
  *              every step the ENGINE's world (Noodl.Variables.gardenWorld) is what the 3D node draws: Pip's tile and
  *              facing, the watered tulips. Predict's tap goes through the 3D canvas (Tile Tapped on the same wires).
  *              AC4's slow arm: a main-thread hog makes every frame > 50 ms; Too Slow fires, the page writes
@@ -55,6 +55,28 @@ function loadWords() {
 }
 const WORDS = loadWords();
 const w = (key, name = 'Pip') => String(WORDS[key] || '').split('{b}').join(name);
+
+/**
+ * The tulip request, from the template's own Data/Requests (the one whose title is rqTulipsTitle): where Pip starts,
+ * his can, and the reference program. IG-002 (P106 s2) rewrote it as fetch-and-return; nothing below types a tile or a
+ * press — the presses are the reference program laid out, the fold is its first repeat, the ends are the engine's.
+ */
+function loadTulips() {
+  const REPO = path.join(__dirname, '..', '..');
+  const nodes = JSON.parse(fs.readFileSync(path.join(REPO, 'templates', 'bot-garden', 'components', 'Data', 'Requests', 'nodes.json'), 'utf8'));
+  const list = Array.isArray(nodes) ? nodes : nodes.nodes || Object.values(nodes);
+  const rows = JSON.parse(list.find((n) => n.type === 'Static Data').parameters.json);
+  return rows.find((r) => r.copyKeys && r.copyKeys.title === 'rqTulipsTitle');
+}
+const TULIPS = loadTulips();
+/** A program as the pad presses that record it: a repeat laid out n times. */
+const layOut = (blocks) => blocks.flatMap((b) => (b.t === 'repeat' ? Array.from({ length: Number(b.n) || 0 }, () => layOut(b.body || [])).flat() : [b.t]));
+const PRESSES = layOut(TULIPS.referenceProgram);
+const FIRST_REPEAT = TULIPS.referenceProgram.find((b) => b.t === 'repeat');
+/** Blocks drawn once the fold is taken: the blocks outside the repeat, the repeat, and its body. */
+const FOLDED = TULIPS.referenceProgram.length + (FIRST_REPEAT ? FIRST_REPEAT.body.length : 0);
+const START = TULIPS.robotStart;
+const TULIP_COUNT = TULIPS.things.filter((t) => t.kind === 'tulip').length;
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const results = [];
@@ -165,19 +187,20 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
       const r = eng && eng.robotAt(0);
       const map = eng && eng.world && eng.world.map;
       return {
-        engine: bot ? { x: bot.x, y: bot.y, d: bot.d, wet: tulips.filter((t) => t.watered === true || t.state === 'watered' || t.state === 'wet').length, tulips: tulips.length } : null,
-        drawn: r && map ? { x: Math.round(r.x + map.w / 2 - 0.5), y: Math.round(r.z + map.h / 2 - 0.5), d: ((Math.round(-r.yaw / (Math.PI / 2)) % 4) + 4) % 4, gliding: r.gliding, wet: drawn.filter((g) => g.userData.wet).length, tulips: drawn.length } : null
+        engine: bot ? { x: bot.x, y: bot.y, d: bot.d, wet: tulips.filter((t) => t.watered === true || t.state === 'watered' || t.state === 'wet').length, tulips: tulips.length, can: bot.can === undefined ? null : bot.can } : null,
+        drawn: r && map ? { x: Math.round(r.x + map.w / 2 - 0.5), y: Math.round(r.z + map.h / 2 - 0.5), d: ((Math.round(-r.yaw / (Math.PI / 2)) % 4) + 4) % 4, gliding: r.gliding, wet: drawn.filter((g) => g.userData.wet).length, tulips: drawn.length, can: (() => { let lv = null; const g = eng.built && eng.built.robots[0]; if (g) g.traverse((o) => { if (o.name === 'level') lv = o.userData.can; }); return lv; })() } : null
       };
     })()`);
   /** Wait until the 3D node has settled on the engine's world (a glide takes Step Ms). */
   const agree = async (label, ms = 4000) => {
     const end = Date.now() + ms;
     let last = await pair();
-    while (Date.now() < end && !(last.engine && last.drawn && !last.drawn.gliding && last.engine.x === last.drawn.x && last.engine.y === last.drawn.y && last.engine.d === last.drawn.d && last.engine.wet === last.drawn.wet)) {
+    const same = (l) => !!(l.engine && l.drawn && l.engine.x === l.drawn.x && l.engine.y === l.drawn.y && l.engine.d === l.drawn.d && l.engine.wet === l.drawn.wet && l.engine.can === l.drawn.can);
+    while (Date.now() < end && !(same(last) && !last.drawn.gliding)) {
       await wait(120);
       last = await pair();
     }
-    const ok = !!(last.engine && last.drawn && last.engine.x === last.drawn.x && last.engine.y === last.drawn.y && last.engine.d === last.drawn.d && last.engine.wet === last.drawn.wet);
+    const ok = same(last);
     (readings.agree = readings.agree || []).push({ label, ...last });
     return { ok, last };
   };
@@ -215,44 +238,54 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     await wait(800);
     await shot('ac1-3d-01-start');
     const start = await agree('start');
-    check('AC1: the 3D node draws the engine’s start — Pip on 0,3 facing right, three dry tulips', start.ok && start.last.engine.x === 0 && start.last.engine.y === 3 && start.last.engine.d === 1 && start.last.drawn.tulips === 3 && start.last.engine.wet === 0, start.last);
+    check(`AC1: the 3D node draws the engine’s start — Pip on ${START.x},${START.y} facing d ${START.d}, the can at ${START.can} of ${START.canMax}, ${TULIP_COUNT} dry tulips (the request's own start)`, start.ok && start.last.engine.x === START.x && start.last.engine.y === START.y && start.last.engine.d === START.d && start.last.engine.can === START.can && start.last.drawn.tulips === TULIP_COUNT && start.last.engine.wet === 0, start.last);
 
-    // Drive with the pad: Teach, and every press moves Pip in the engine and in 3D.
+    // Drive with the pad: Teach, then the reference program laid out press by press; after every press the engine
+    // and the 3D node agree (tile, facing, wet tulips, the can's level).
     await control('rec');
     const padShown = await until(`!!document.querySelector('.bg-pad .bg-key-fwd')`, Boolean);
     check('AC1: Teach shows the pad over the 3D world (the pad keys are on top: elementFromPoint)', padShown && (await where(first('.bg-pad .bg-key-fwd'), false)).hit, padShown);
-    await key('fwd');
-    await wait(120);
-    const mid = await pair();
-    readings.midGlide = mid;
-    await shot('ac1-3d-02-mid-glide');
-    await key('fwd');
-    const two = await agree('two forwards');
-    check('AC1: two forwards — the engine has Pip on 2,3 and the 3D node glides him there (mid-way it was gliding)', two.ok && two.last.engine.x === 2 && two.last.engine.y === 3 && mid.drawn && mid.drawn.gliding === true, { two: two.last, mid });
-    await key('left');
-    const turned = await agree('left');
-    check('AC1: a left turn — the engine faces up (d 0) and so does the 3D node', turned.ok && turned.last.engine.d === 0, turned.last);
-    await key('water');
-    const watered = await agree('water');
-    check('AC1: water — the engine’s first tulip is wet and the 3D node stands it up (1 of 3)', watered.ok && watered.last.engine.wet === 1 && watered.last.drawn.wet === 1, watered.last);
-    await shot('ac1-3d-03-first-tulip');
-    const taught = ['fwd', 'fwd', 'left', 'water', 'right'];
-    for (let k = 4; k < 15; k++) await key(taught[k % 5]);
-    const fifteen = await evaluate(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`);
-    const after15 = await agree('fifteen presses');
-    check('AC1: fifteen presses, fifteen blocks; the 3D node agrees with the engine (three tulips wet)', fifteen === 15 && after15.ok && after15.last.engine.wet === 3, { fifteen, pair: after15.last });
+    const steps = [];
+    let midGlide = null;
+    for (let k = 0; k < PRESSES.length; k++) {
+      const before = (await pair()).engine;
+      await key(PRESSES[k]);
+      if (PRESSES[k] === 'fwd' && !midGlide) {
+        await wait(120);
+        midGlide = await pair();
+        readings.midGlide = midGlide;
+        await shot('ac1-3d-02-mid-glide');
+      }
+      const a = await agree(`press ${k + 1} ${PRESSES[k]}`);
+      steps.push({ k: k + 1, op: PRESSES[k], ok: a.ok, before, after: a.last.engine, drawn: a.last.drawn });
+      if (k === FIRST_REPEAT.body.length - 1) await shot('ac1-3d-03-first-tulip');
+    }
+    readings.steps = steps;
+    const bad = steps.filter((x) => !x.ok);
+    check(`AC1: all ${PRESSES.length} presses of the reference program — after EVERY press the 3D node draws what the engine holds (tile, facing, wet tulips, can level)`, bad.length === 0 && steps.length === PRESSES.length, bad.slice(0, 3));
+    const fill = steps.find((x) => x.op === 'fill');
+    check('AC1: fill — the engine’s can goes to canMax and the 3D can’s level shows it', !!fill && fill.ok && fill.after.can === START.canMax && fill.drawn.can === START.canMax, fill);
+    const fwd = steps.find((x) => x.op === 'fwd' && (x.after.x !== x.before.x || x.after.y !== x.before.y));
+    check('AC1: a forward — the engine moves Pip one tile and the 3D node glides him there (mid-way it was gliding)', !!fwd && fwd.ok && Math.abs(fwd.after.x - fwd.before.x) + Math.abs(fwd.after.y - fwd.before.y) === 1 && midGlide && midGlide.drawn && midGlide.drawn.gliding === true, { fwd, midGlide });
+    const turn = steps.find((x) => x.op === 'left' || x.op === 'right');
+    check('AC1: a turn — the engine’s facing changes by a quarter and the 3D node’s does too', !!turn && turn.ok && ((turn.after.d - turn.before.d + 4) % 4 === (turn.op === 'left' ? 3 : 1)), turn);
+    const water = steps.find((x) => x.op === 'water');
+    check('AC1: water — one more tulip wet and one drop less in the can, in the engine and in 3D', !!water && water.ok && water.after.wet === water.before.wet + 1 && water.after.can === water.before.can - 1 && water.drawn.wet === water.after.wet, water);
+    const blocks = await evaluate(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`);
+    const last = steps[steps.length - 1] || {};
+    check(`AC1: ${PRESSES.length} presses, ${PRESSES.length} blocks; at the end all ${TULIP_COUNT} tulips are wet in both`, blocks === PRESSES.length && last.ok && last.after.wet === TULIP_COUNT && last.drawn.wet === TULIP_COUNT, { blocks, last });
     await shot('ac1-3d-04-taught');
     // The fold.
     const tidy = await until(`(() => { const e = document.querySelector('.bg-tidy'); return e && e.offsetParent !== null ? e.innerText : ''; })()`, Boolean);
     await tap(first('.bg-tidy .bg-i-tidy'), 'Fold it');
-    const folded = await until(`(() => { const r = document.querySelector('.gd-prog .gd-blk[data-t="repeat"]'); return r ? document.querySelectorAll('.gd-prog .gd-blk[data-id]').length : 0; })()`, (n) => n === 6);
-    check('AC1: the fold is offered and taken — one repeat holding five (6 blocks)', !!tidy && folded === 6, { tidy, folded });
+    const folded = await until(`(() => { const r = document.querySelector('.gd-prog .gd-blk[data-t="repeat"]'); return r ? document.querySelectorAll('.gd-prog .gd-blk[data-id]').length : 0; })()`, (n) => n === FOLDED);
+    check(`AC1: the fold is offered and taken — the reference program's shape (${FOLDED} blocks: a repeat holding ${FIRST_REPEAT.body.length})`, !!tidy && folded === FOLDED, { tidy, folded });
     // Play: the world is reset to its start, then the program runs; sample the pair while it plays.
     await control('play');
     const samples = [];
     const t0 = Date.now();
     let won = false;
-    while (Date.now() - t0 < 20000 && !won) {
+    while (Date.now() - t0 < 60000 && !won) {
       const p = await pair();
       if (p.engine && p.drawn) samples.push(p);
       won = await evaluate(`(() => { const e = document.querySelector('.bg-win-card'); return !!e && e.offsetParent !== null; })()`);
@@ -261,7 +294,8 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     }
     const settled = await agree('after the win', 3000);
     readings.play = { samples: samples.length, distinctTiles: [...new Set(samples.map((s) => `${s.engine.x},${s.engine.y}`))].length, won, settled: settled.last };
-    check('AC1: Play runs the folded program to the win card; the 3D node ends where the engine ends, all three tulips wet in both', won && settled.ok && settled.last.engine.wet === 3 && settled.last.drawn.wet === 3 && readings.play.distinctTiles >= 4, readings.play);
+    check(`AC1: Play runs the folded program to the win card; the 3D node ends where the engine ends (can too), all ${TULIP_COUNT} tulips wet in both`, won && settled.ok && settled.last.engine.wet === TULIP_COUNT && settled.last.drawn.wet === TULIP_COUNT && readings.play.distinctTiles >= 4, readings.play);
+    const endTile = settled.last.engine;
     await shot('ac1-3d-06-win');
     // The win card's backdrop blur over a MOVING canvas made every software-GL frame slow and tripped the rule (run 3
     // of this drive): the scene is drawn on demand now, so under the card it is still, draws nothing and is not timed.
@@ -277,7 +311,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     const keep = await evaluate(`!![...document.querySelectorAll('.bg-win-card button')].find((b) => b.offsetParent !== null && !b.innerText.includes(${JSON.stringify(w('winIsland'))}))`);
     if (keep) {
       await tap(`[...document.querySelectorAll('.bg-win-card button')].find((b) => b.offsetParent !== null && !b.innerText.includes(${JSON.stringify(w('winIsland'))}))`, 'keep tinkering');
-      const pipAt = () => evaluate(`(() => { const r = ${ROOT}; const c = r.querySelector('[data-gd3-canvas]').getBoundingClientRect(); const s = r.gd3.screenOfTile(6, 3); return { x: c.left + s.sx, y: c.top + s.sy, cx: c.left + c.width / 2, cy: c.top + c.height / 2 }; })()`);
+      const pipAt = () => evaluate(`(() => { const r = ${ROOT}; const c = r.querySelector('[data-gd3-canvas]').getBoundingClientRect(); const s = r.gd3.screenOfTile(${endTile.x}, ${endTile.y}); return { x: c.left + s.sx, y: c.top + s.sy, cx: c.left + c.width / 2, cy: c.top + c.height / 2 }; })()`);
       let pip = await pipAt();
       for (let i = 0; i < 2; i++) await client.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: Math.round(pip.cx), y: Math.round(pip.cy), deltaX: 0, deltaY: -240 });
       await wait(300);
@@ -299,28 +333,32 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     await wait(600);
     await openTulips();
     await until(`(() => { const e = ${ROOT}; return e && e.getAttribute('data-ready'); })()`, (v) => v === 'true', 12000);
+    // The first presses of the reference program (up to its first forward): the real end is where the engine has Pip
+    // when teaching is done; the wrong tile is any other tile on the canvas.
     await control('rec');
-    await key('fwd');
-    await key('fwd');
+    const firstFwd = PRESSES.indexOf('fwd');
+    for (const op of PRESSES.slice(0, firstFwd + 1)) await key(op);
+    const realEnd = (await pair()).engine;
     await control('rec');
     await control('predict');
     const asked = await until(`document.body.innerText.includes(${JSON.stringify(w('predictAsk'))})`, Boolean);
     const tilePoint = async (x, y) =>
       evaluate(`(() => { const r = ${ROOT}; const c = r.querySelector('[data-gd3-canvas]').getBoundingClientRect(); const s = r.gd3.screenOfTile(${x}, ${y}); return { x: c.left + s.sx, y: c.top + s.sy, top: (() => { const at = document.elementFromPoint(c.left + s.sx, c.top + s.sy); return at ? (at.getAttribute('data-gd3-canvas') ? 'canvas' : at.className) : null; })() }; })()`);
-    const miss = await tilePoint(5, 3);
+    const wrong = { x: (realEnd.x + 3) % 8, y: (realEnd.y + 2) % 6 };
+    const miss = await tilePoint(wrong.x, wrong.y);
     for (const type of ['mousePressed', 'mouseReleased']) await client.send('Input.dispatchMouseEvent', { type, x: Math.round(miss.x), y: Math.round(miss.y), button: 'left', clickCount: 1 });
     const flag = await until(`(() => { const e = ${ROOT}; const f = e && e.gd3.built ? e.gd3.built.things.find((g) => g.userData.kind === 'flag') : null; return f ? f.userData.x + ',' + f.userData.y : null; })()`, Boolean, 4000);
     await shot('ac1-3d-07-predict-miss');
-    check('AC1: Predict through the 3D canvas — a tap on tile 5,3 (the canvas is on top there) comes out of Tile Tapped, and the real end 2,3 is drawn as the flag in 3D', asked && miss.top === 'canvas' && flag === '2,3', { asked, miss, flag });
+    check(`AC1: Predict through the 3D canvas — a tap on tile ${wrong.x},${wrong.y} (the canvas is on top there) comes out of Tile Tapped, and the real end ${realEnd.x},${realEnd.y} is drawn as the flag in 3D`, asked && miss.top === 'canvas' && flag === `${realEnd.x},${realEnd.y}`, { asked, wrong, miss, flag, realEnd });
     await control('predict');
     const stillThere = { worlds: await worlds(), stored: await stored(), attrs: await attrs() };
     readings.beforeHit = stillThere;
     if (!stillThere.worlds.gd3) throw new Error('the 3D node is gone before the Predict hit: ' + JSON.stringify(stillThere));
-    const hit = await tilePoint(2, 3);
+    const hit = await tilePoint(realEnd.x, realEnd.y);
     for (const type of ['mousePressed', 'mouseReleased']) await client.send('Input.dispatchMouseEvent', { type, x: Math.round(hit.x), y: Math.round(hit.y), button: 'left', clickCount: 1 });
-    const moved = await until(`(() => { const W = Noodl.Variables.gardenWorld; return W && W.robots && W.robots[0] ? W.robots[0].x : null; })()`, (x) => x === 2, 6000);
+    const moved = await until(`(() => { const W = Noodl.Variables.gardenWorld; const b = W && W.robots && W.robots[0]; return b ? b.x + ',' + b.y : null; })()`, (v) => v === `${realEnd.x},${realEnd.y}`, 8000);
     const afterHit = await agree('predict hit');
-    check('AC1: a right tap on 2,3 plays from the start; the engine and the 3D node end on 2,3', moved === 2 && afterHit.ok && afterHit.last.drawn.x === 2, afterHit.last);
+    check(`AC1: a right tap on ${realEnd.x},${realEnd.y} plays from the start; the engine and the 3D node end there`, moved === `${realEnd.x},${realEnd.y}` && afterHit.ok && afterHit.last.drawn.x === realEnd.x && afterHit.last.drawn.y === realEnd.y, afterHit.last);
 
     // ── AC4, the slow arm: a main-thread hog (a slow computer, or Olive on the same CPU) while a finger is held on the
     // world (the scene is drawn on demand: a held finger keeps it drawing, as a child panning while Olive thinks) ──
@@ -375,17 +413,17 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     check('AC4: with 3D APIs disabled there is no WebGL2 (the forced arm is real)', readings.nogl.webgl2 === false, readings.nogl.webgl2);
     check('AC4: Supported false — the page writes { 2d, unsupported } and the Workshop draws the 2D Garden (the 3D node tried once and is gone)', settled.gd === 1 && settled.gd3 === 0 && settled.stored && settled.stored.mode === '2d' && settled.stored.why === 'unsupported' && m.gd3 === 1, readings.nogl);
     await shot('ac4-nogl-01-workshop-2d');
-    // The same path on 2D: teach fifteen, fold, play, win.
+    // The same path on 2D: the reference program pressed, the fold, play, win.
     await control('rec');
     await until(`!!document.querySelector('.bg-pad .bg-key-fwd')`, Boolean);
-    const taught = ['fwd', 'fwd', 'left', 'water', 'right'];
-    for (let k = 0; k < 15; k++) await key(taught[k % 5]);
+    for (const op of PRESSES) await key(op);
+    const taughtN = await evaluate(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`);
     await until(`(() => { const e = document.querySelector('.bg-tidy'); return e && e.offsetParent !== null; })()`, Boolean);
     await tap(first('.bg-tidy .bg-i-tidy'), 'Fold it');
-    await until(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`, (n) => n === 6);
+    const foldedN = await until(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`, (n) => n === FOLDED);
     await control('play');
-    const won = await until(`(() => { const e = document.querySelector('.bg-win-card'); return !!e && e.offsetParent !== null; })()`, Boolean, 20000);
-    check('AC4: the tulips pass end to end on the 2D Garden (teach 15, fold to 6, play, the win card)', won, won);
+    const won = await until(`(() => { const e = document.querySelector('.bg-win-card'); return !!e && e.offsetParent !== null; })()`, Boolean, 60000);
+    check(`AC4: the tulips pass end to end on the 2D Garden (teach ${PRESSES.length}, fold to ${FOLDED}, play, the win card)`, won && taughtN === PRESSES.length && foldedN === FOLDED, { won, taughtN, foldedN });
     await shot('ac4-nogl-02-win');
     await tap(byText('.bg-win-card button', w('winIsland')), 'back to the island');
     await until('location.pathname', (p) => p === '/island');
