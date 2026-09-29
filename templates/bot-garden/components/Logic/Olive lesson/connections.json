@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4e208a58-c085-5d2d-8c78-b54d46fcc82c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "olivelessonIn",
+      "fromProperty": "lang",
+      "toId": "olivelessonFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "olivelessonIn",
+      "fromProperty": "lesson",
+      "toId": "olivelessonFn",
+      "toProperty": "in-lesson"
+    },
+    {
+      "fromId": "olivelessonIn",
+      "fromProperty": "timeoutMs",
+      "toId": "olivelessonFn",
+      "toProperty": "in-timeoutMs"
+    },
+    {
+      "fromId": "olivelessonIn",
+      "fromProperty": "url",
+      "toId": "olivelessonFn",
+      "toProperty": "in-url"
+    },
+    {
+      "fromId": "olivelessonIn",
+      "fromProperty": "w",
+      "toId": "olivelessonFn",
+      "toProperty": "in-w"
+    },
+    {
+      "fromId": "olivelessonIn",
+      "fromProperty": "go",
+      "toId": "olivelessonFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "olivelessonFn",
+      "fromProperty": "out-asked",
+      "toId": "olivelessonOut",
+      "toProperty": "asked"
+    },
+    {
+      "fromId": "olivelessonFn",
+      "fromProperty": "out-eCount",
+      "toId": "olivelessonOut",
+      "toProperty": "eCount"
+    },
+    {
+      "fromId": "olivelessonFn",
+      "fromProperty": "out-fallback",
+      "toId": "olivelessonOut",
+      "toProperty": "fallback"
+    },
+    {
+      "fromId": "olivelessonFn",
+      "fromProperty": "out-hasLetters",
+      "toId": "olivelessonOut",
+      "toProperty": "hasLetters"
+    },
+    {
+      "fromId": "olivelessonFn",
+      "fromProperty": "out-letters",
+      "toId": "olivelessonOut",
+      "toProperty": "letters"
+    },
+    {
+      "fromId": "olivelessonFn",
+      "fromProperty": "out-lines",
+      "toId": "olivelessonOut",
+      "toProperty": "lines"
+    },
+    {
+      "fromId": "olivelessonFn",
+      "fromProperty": "success",
+      "toId": "olivelessonOut",
+      "toProperty": "ran"
+    }
+  ]
+}

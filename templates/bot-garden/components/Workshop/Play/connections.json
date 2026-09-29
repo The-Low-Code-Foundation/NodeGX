@@ -300,12 +300,24 @@
     {
       "fromId": "plBlocks",
       "fromProperty": "onProgram",
-      "toId": "plSetProgKit",
-      "toProperty": "value"
+      "toId": "plCardGate",
+      "toProperty": "program"
     },
     {
       "fromId": "plBlocks",
       "fromProperty": "onChanged",
+      "toId": "plCardGate",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plCardGate",
+      "fromProperty": "program",
+      "toId": "plSetProgKit",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "plCardGate",
+      "fromProperty": "ran",
       "toId": "plSetProgKit",
       "toProperty": "do"
     },
@@ -1430,6 +1442,222 @@
       "fromProperty": "show",
       "toId": "plSlotMsg",
       "toProperty": "mounted"
+    },
+    {
+      "fromId": "plProgVar",
+      "fromProperty": "value",
+      "toId": "plCardGate",
+      "toProperty": "before"
+    },
+    {
+      "fromId": "plSeenVar",
+      "fromProperty": "value",
+      "toId": "plCardGate",
+      "toProperty": "seen"
+    },
+    {
+      "fromId": "plCardGate",
+      "fromProperty": "hold",
+      "toId": "plCardHold",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "plCardGate",
+      "fromProperty": "ran",
+      "toId": "plCardHold",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "plCardGate",
+      "fromProperty": "cardId",
+      "toId": "plSetCardOpen",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "plCardHold",
+      "fromProperty": "ontrue",
+      "toId": "plSetCardOpen",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plCardOpenVar",
+      "fromProperty": "value",
+      "toId": "plCardInfo",
+      "toProperty": "cardOpen"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plCardInfo",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "band",
+      "toId": "plCardInfo",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "words",
+      "toId": "plCardInfo",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "botName",
+      "toId": "plCardInfo",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "plCardInfo",
+      "fromProperty": "show",
+      "toId": "plCardBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plCardInfo",
+      "fromProperty": "title",
+      "toId": "plCardTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plCardInfo",
+      "fromProperty": "line",
+      "toId": "plCardLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plCardInfo",
+      "fromProperty": "exampleWord",
+      "toId": "plCardEgWord",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plCardInfo",
+      "fromProperty": "example",
+      "toId": "plCardEg",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "plCardInfo",
+      "fromProperty": "palette",
+      "toId": "plCardEg",
+      "toProperty": "palette"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "band",
+      "toId": "plCardEg",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plCardEg",
+      "toProperty": "language"
+    },
+    {
+      "fromId": "plCardInfo",
+      "fromProperty": "gotIt",
+      "toId": "plCardOk",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "plCardOk",
+      "fromProperty": "onClick",
+      "toId": "plSeenAdd",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plSeenVar",
+      "fromProperty": "value",
+      "toId": "plSeenAdd",
+      "toProperty": "seen"
+    },
+    {
+      "fromId": "plCardInfo",
+      "fromProperty": "cardId",
+      "toId": "plSeenAdd",
+      "toProperty": "cardId"
+    },
+    {
+      "fromId": "plSeenAdd",
+      "fromProperty": "seen",
+      "toId": "plSetSeen",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "plSeenAdd",
+      "fromProperty": "ran",
+      "toId": "plSetSeen",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plSetSeen",
+      "fromProperty": "done",
+      "toId": "plClearCardOpen",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "plRead",
+      "fromProperty": "program",
+      "toId": "plHelpRows",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plHelpRows",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "band",
+      "toId": "plHelpRows",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "words",
+      "toId": "plHelpRows",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "botName",
+      "toId": "plHelpRows",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "plHelpRows",
+      "fromProperty": "rows",
+      "toId": "plHelpEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "plHelpRows",
+      "fromProperty": "show",
+      "toId": "plHelps",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plHelpRows",
+      "fromProperty": "helpsText",
+      "toId": "plHelpsH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plHelpEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "plSetCardHelp",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "plHelpEach",
+      "fromProperty": "itemOutputSignal-chosen",
+      "toId": "plSetCardHelp",
+      "toProperty": "do"
     },
     {
       "fromId": "plT",

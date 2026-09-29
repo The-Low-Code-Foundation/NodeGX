@@ -74,26 +74,23 @@ test('AC4: the written answers cover EVERY list value of a keyed rung, ✅ right
     }
   }
   const W = (rung, v, L = 'fr') => writtenAnswer(templates, rung, v, L);
-  // ✅ right:
-  assert.deepEqual(W('words-to-blocks', { route: templates.lists.routes.fr[1] }).value, ['avancer', 'gauche', 'arroser']);
-  assert.equal(W('maths-seeds', { a: '2', b: '3' }).value, 5);
+  // ✅ right: the blocks' written answers keep the program working.
   assert.equal(W('is-it-a', { thing: 'une rose', kind: 'une fleur' }).value, 'oui');
   assert.equal(W('is-it-a', { thing: 'a rock', kind: 'a flower' }, 'en').value, 'no');
-  assert.equal(W('what-wants', { line: templates.lists.lines.en[0] }, 'en').value, 'kibble');
-  // 🎓 the readout's mistakes:
-  assert.deepEqual(W('count-in-words', { route: 'Avance de trois cases.' }).value, ['avancer']);
+  assert.equal(W('is-it-a', { thing: 'une tulipe jaune', kind: 'une fleur' }).value, 'oui', 'every tulip the engine names is a flower');
+  assert.equal(W('read', { note: templates.lists.notes_read.en[0] }, 'en').value, 'red tulip', 'Mamie’s note: the red ones');
+  assert.equal(W('read', { note: templates.lists.notes_read.fr[0] }).value, 'tulipe rouge');
+  assert.equal(W('read', { note: templates.lists.notes_read.en[2] }, 'en').value, 'letter');
+  for (const L of LANGS) for (const note of templates.lists.notes_read[L]) assert.ok(templates.lists.plot_objects[L].includes(W('read', { note }, L).value), `${L} "${note}" names a thing the plot list knows`);
+  assert.match(W('say-thanks', { to: 'Sami', deed: 'carried her letter' }, 'en').text, /Sami/);
+  // 🎓 the lessons: the readout's mistakes.
   assert.equal(W('count-tulips', { list: templates.lists.flowerlists.fr[0] }).value, 6, '4 tulips, she says 6');
   assert.equal(W('maths', { a: '14', b: '9' }).value, 14);
   assert.match(W('no-letter-e', {}).text, /e/, 'rung 9: she uses an e anyway');
   assert.match(W('no-letter-e', {}, 'en').text, /e/);
-  assert.deepEqual(W('sort-words', { words: templates.lists.word_triples.fr[0] }).value, ['tulipe', 'arrosoir', 'chat'], 'not sorted: the program sorts');
-  // ✅ the promoted moments' written answers are right:
-  assert.match(W('narrate-run', { trace: templates.lists.traces.en[0] }, 'en').text, /puddle/);
-  assert.match(W('letter', { who: 'Biscuit', object: 'kibble' }, 'en').text, /kibble/);
-  // 🎓 mixed: some definitions right, some made up.
-  assert.match(W('define', { word: 'un rocher' }).text, /pierre/);
-  assert.doesNotMatch(W('define', { word: 'une chouette' }).text, /oiseau/);
   assert.match(W('tall-tales', { question: templates.lists.questions_tall.en[0] }, 'en').text, /Sydney/);
+  assert.match(W('translate', { note: 'Les tulipes ont soif.' }).text, /thirsty/, 'FR → EN is right');
+  assert.doesNotMatch(W('translate', { note: 'The tulips are thirsty.' }, 'en').text, /soif/, 'EN → FR is the wobbly direction');
 });
 
 test('AC3: the mutant stub’s blocklisted word never leaves the route — the voiced hint and a sentence come back as refusals', async () => {
@@ -102,8 +99,8 @@ test('AC3: the mutant stub’s blocklisted word never leaves the route — the v
     for (const L of LANGS) {
       const r = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'voice-hint', slots: { key: 'hintWet', b: 'Pip' }, lang: L } });
       assert.deepEqual({ ok: r.body.ok, fallback: r.body.fallback, reason: r.body.reason, text: r.body.text }, { ok: false, fallback: true, reason: 'blocklist', text: undefined }, `voice-hint ${L}`);
-      const n = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'name-one', slots: { thing: templates.lists.things_one[L][0] }, lang: L } });
-      assert.equal(n.body.reason, 'blocklist', `name-one ${L}`);
+      const n = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'say-thanks', slots: firstSlots('say-thanks', L), lang: L } });
+      assert.equal(n.body.reason, 'blocklist', `say-thanks ${L}`);
     }
     // Known-firing beside it: the stub DID produce the word (the route saw it and refused it).
     const raw = engine.answer({ rung: 'voice-hint', values: { key: 'hintWet', b: 'Pip' }, lang: 'fr', temperature: 0.5 });
@@ -128,39 +125,40 @@ test('AC2: a rung that hangs times out through the route (fallback, reason timeo
   });
 });
 
-test('the dial on the stub: temperature 0 gives one name, "surprise me" (1.2) gives three different ones; say-thanks twice gives two lines', async () => {
+test('the dial on the stub: say-thanks twice gives two lines (the sampled model); read and is it a…? answer the same every time', async () => {
   const { olive } = await stubDoors();
   await withRelay(olive, async (port) => {
     const ask = (body) => request(port, 'POST', '/__garden/olive', { headers: H, body }).then((r) => r.body);
     for (const L of LANGS) {
-      const thing = templates.lists.things_one[L][0];
-      const same = [await ask({ rung: 'name-one', slots: { thing }, lang: L, temperature: 0 }), await ask({ rung: 'name-one', slots: { thing }, lang: L, temperature: 0 })];
-      assert.equal(new Set(same.map((x) => x.value)).size, 1, `${L} same every time`);
-      const wild = [];
-      for (let i = 0; i < 3; i++) wild.push(await ask({ rung: 'name-one', slots: { thing }, lang: L, temperature: 1.2 }));
-      assert.equal(new Set(wild.map((x) => x.value)).size, 3, `${L} surprise me`);
       const slots = firstSlots('say-thanks', L);
       const t1 = await ask({ rung: 'say-thanks', slots, lang: L });
       const t2 = await ask({ rung: 'say-thanks', slots, lang: L });
       assert.ok(t1.ok && t2.ok && t1.text !== t2.text, `${L} two thank-yous differ: ${t1.text} / ${t2.text}`);
+      const note = templates.lists.notes_read[L][0];
+      const options = L === 'en' ? ['yellow tulip', 'red tulip'] : ['tulipe jaune', 'tulipe rouge'];
+      const r1 = await ask({ rung: 'read', slots: { note }, lang: L, options });
+      const r2 = await ask({ rung: 'read', slots: { note }, lang: L, options });
+      assert.deepEqual([r1.value, r2.value], L === 'en' ? ['red tulip', 'red tulip'] : ['tulipe rouge', 'tulipe rouge'], `${L} read: the note’s object`);
     }
   });
 });
 
-test('AC5: the exam through the doors withholds a rung the stub fails, and offers it again after a re-run that passes', async () => {
-  const { olive, engine } = await stubDoors({ stub: { exam: { 'words-to-blocks': 'fail' } } });
+test('AC5: the exam through the doors withholds a block the stub fails, and offers it again after a re-run that passes', async () => {
+  const { olive, engine } = await stubDoors({ stub: { exam: { read: 'fail' } } });
   await withRelay(olive, async (port) => {
     const first = await request(port, 'POST', '/__garden/olive/exam', { headers: H });
     assert.equal(first.status, 200);
-    assert.deepEqual(withheldRungs(first.body), ['words-to-blocks']);
+    assert.deepEqual(withheldRungs(first.body), ['read']);
+    assert.deepEqual(first.body.rungs.read.score, { met: 0, of: 6, min: 5 });
     const s1 = await request(port, 'GET', '/__garden/olive/status');
-    assert.deepEqual(withheldRungs(s1.body.exam), ['words-to-blocks'], 'status carries the verdicts the page gates on');
-    const wrong = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'words-to-blocks', slots: { route: templates.lists.routes.fr[0] }, lang: 'fr' } });
-    assert.deepEqual(wrong.body.value, ['droite'], 'the switched stub is wrong on purpose');
+    assert.deepEqual(withheldRungs(s1.body.exam), ['read'], 'status carries the verdicts the page gates on');
+    const wrong = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'read', slots: { note: templates.lists.notes_read.fr[0] }, lang: 'fr', options: ['tulipe rouge', 'tulipe jaune'] } });
+    assert.equal(wrong.body.value, 'tulipe jaune', 'the switched stub is wrong on purpose (another thing on the plot)');
     // The switch (what the drive's POST /__stub/set does), then a re-run on the SAME doors.
-    engine.set({ exam: { 'words-to-blocks': 'pass' } });
+    engine.set({ exam: { read: 'pass' } });
     const second = await request(port, 'POST', '/__garden/olive/exam', { headers: H });
-    assert.deepEqual(withheldRungs(second.body), [], 'offered again; since rung 9 is "no letter e" nothing else is withheld');
+    assert.deepEqual(withheldRungs(second.body), [], 'offered again; nothing else is withheld on the readout');
+    assert.deepEqual(second.body.rungs.read.score, { met: 6, of: 6, min: 5 });
     const s2 = await request(port, 'GET', '/__garden/olive/status');
     assert.deepEqual(withheldRungs(s2.body.exam), []);
     assert.notEqual(s2.body.exam.at, s1.body.exam.at, 'the kept results are the re-run');
@@ -168,7 +166,7 @@ test('AC5: the exam through the doors withholds a rung the stub fails, and offer
   assert.deepEqual(DEFAULT_EXAM, {});
 });
 
-test('🔴 the exam gate on rung 9 and the six promoted rungs: each is offered ONLY when its probes behave as its column says, and withheld when they do not', async () => {
+test('🔴 the exam gate on the blocks and the lessons: each is offered ONLY when its probes behave as its column says, and withheld when they do not', async () => {
   assert.equal(ladderOf('no-letter-e'), 'fail');
   assert.equal(ladderOf('voice-hint'), 'pass');
   const { olive } = await stubDoors();
@@ -176,14 +174,14 @@ test('🔴 the exam gate on rung 9 and the six promoted rungs: each is offered O
   assert.equal(r.failed, 0, 'every asserted probe behaves as the ladder says on the default stub (the readout)');
   assert.deepEqual(withheldRungs(r), [], 'nothing withheld on the readout');
   assert.deepEqual(r.rungs['no-letter-e'], { ladder: 'fail', probes: ['R9-G1-fr', 'R9-G1-en'], pass: true, asserted: 2 });
-  assert.deepEqual(r.rungs.define, { ladder: 'fail', probes: ['E9-arrosoir', 'E9-chouette', 'E9-rocher', 'E9-en'], pass: true, asserted: 0, verdict: 'mixed' });
-  // Each one switched to what would break its lesson (✅ wrong, 🎓 right, mixed all right) → withheld, alone.
+  assert.deepEqual(r.rungs['is-it-a'].score, { met: 18, of: 18, min: 15 });
+  // Each one switched to what would break it (✅ wrong, 🎓 right) → withheld, alone.
   const switched = {};
-  for (const rung of ['no-letter-e', 'explain-program', 'narrate-run', 'name-trick', 'sort-words', 'define', 'letter']) {
+  for (const rung of ['say-thanks', 'read', 'is-it-a', 'count-tulips', 'maths', 'no-letter-e', 'tall-tales']) {
     const { olive: o } = await stubDoors({ stub: { exam: { [rung]: 'fail' } } });
     switched[rung] = withheldRungs(await o.runExam());
   }
-  assert.deepEqual(switched, { 'no-letter-e': ['no-letter-e'], 'explain-program': ['explain-program'], 'narrate-run': ['narrate-run'], 'name-trick': ['name-trick'], 'sort-words': ['sort-words'], define: ['define'], letter: ['letter'] });
+  assert.deepEqual(switched, { 'say-thanks': ['say-thanks'], read: ['read'], 'is-it-a': ['is-it-a'], 'count-tulips': ['count-tulips'], maths: ['maths'], 'no-letter-e': ['no-letter-e'], 'tall-tales': ['tall-tales'] });
 });
 
 test('AC4 in the route: no model → every rung falls back at once with reason no-model, in both languages', async () => {
@@ -218,22 +216,37 @@ test('IG-001 (P106 s1): a scripted answer by rung beats the table — a shaped r
   const { engine, olive } = await stubDoors({ stub: { answers: { 'is-it-a': 'no' } } });
   const yesNo = { properties: { answer: { enum: ['yes', 'no'] } } };
   assert.deepEqual(engine.answer({ rung: 'is-it-a', values: { thing: 'a tulip', kind: 'a flower' }, lang: 'en', schema: yesNo }), { value: 'no' });
-  engine.set({ answers: { 'is-it-a': 'yes', poem: 'Tulla the tulip' } });
+  engine.set({ answers: { 'is-it-a': 'yes', 'say-thanks': 'Thank you, Sami!' } });
   assert.deepEqual(engine.answer({ rung: 'is-it-a', values: { thing: 'a tulip', kind: 'a flower' }, lang: 'en', schema: yesNo }), { value: 'yes' });
-  assert.deepEqual(engine.answer({ rung: 'poem', values: { flower: 'Tulla' }, lang: 'en' }), { text: 'Tulla the tulip' });
-  assert.deepEqual(engine.snapshot().answers, { 'is-it-a': 'yes', poem: 'Tulla the tulip' });
-  assert.deepEqual(engine.set({ delayFor: { poem: 20 } }).delayFor, { poem: 20 });
+  assert.deepEqual(engine.answer({ rung: 'say-thanks', values: { to: 'Sami', deed: 'carried her letter' }, lang: 'en' }), { text: 'Thank you, Sami!' });
+  assert.deepEqual(engine.snapshot().answers, { 'is-it-a': 'yes', 'say-thanks': 'Thank you, Sami!' });
+  assert.deepEqual(engine.set({ delayFor: { 'say-thanks': 20 } }).delayFor, { 'say-thanks': 20 });
   engine.set({ delayFor: {} });
   // Through the real route: the scripted reply arrives as the answer, in both shapes.
   await withRelay(olive, async (port) => {
-    const said = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'poem', slots: { flower: 'Tulla' }, lang: 'en' } });
+    const said = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'say-thanks', slots: { to: 'Sami', deed: 'carried her letter' }, lang: 'en' } });
     assert.equal(said.body.ok, true);
-    assert.equal(said.body.text, 'Tulla the tulip');
+    assert.equal(said.body.text, 'Thank you, Sami!');
     const no = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'is-it-a', slots: { thing: templates.lists.things_ahead.en[0], kind: templates.lists.kinds.en[0] }, lang: 'en' } });
     assert.equal(no.body.ok, true);
     assert.equal(no.body.value, 'yes');
   });
   // Cleared: the table answers again.
   engine.set({ answers: {} });
-  assert.notDeepEqual(engine.answer({ rung: 'poem', values: { flower: 'Tulla' }, lang: 'en' }), { text: 'Tulla the tulip' });
+  assert.notDeepEqual(engine.answer({ rung: 'say-thanks', values: { to: 'Sami', deed: 'carried her letter' }, lang: 'en' }), { text: 'Thank you, Sami!' });
+});
+
+test('IG-006: a scripted LIST answers in turn (the vote: yes, no, no), from the first again after the last; a new script starts over', async () => {
+  const { engine, olive } = await stubDoors({ stub: { answers: { 'is-it-a': ['oui', 'non', 'non'] } } });
+  await withRelay(olive, async (port) => {
+    const ask = () => request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'is-it-a', slots: { thing: 'un rocher', kind: 'une fleur' }, lang: 'fr' } }).then((r) => r.body.value);
+    assert.deepEqual([await ask(), await ask(), await ask(), await ask()], ['oui', 'non', 'non', 'oui']);
+    engine.set({ answers: { 'is-it-a': ['non', 'oui'] } });
+    assert.deepEqual([await ask(), await ask()], ['non', 'oui']);
+    // A scripted word outside the enum is still checked by the route: refused, never shown.
+    engine.set({ answers: { 'is-it-a': ['peut-être'] } });
+    const r = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'is-it-a', slots: { thing: 'un rocher', kind: 'une fleur' }, lang: 'fr' } });
+    assert.deepEqual({ ok: r.body.ok, reason: r.body.reason }, { ok: false, reason: 'grammar' });
+  });
+  assert.equal(engine.calls.filter((c) => c.rung === 'is-it-a').length, 7, 'every ask reached the stub');
 });

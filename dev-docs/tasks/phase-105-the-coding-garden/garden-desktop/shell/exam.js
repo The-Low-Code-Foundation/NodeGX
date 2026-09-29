@@ -14,6 +14,11 @@
  * `from`: an ASSERTED probe is one somebody measured on the real model — a battery probe id (A1–H9, the 2026-09-27
  * readout) or `CG-006 §7.1` (the moment and rung-9 probes run on CPU and Metal, 2026-09-28). A probe nobody measured is
  * `record`.
+ *
+ * P106 IG-006 (rulings R6/R7) re-cut the exam to what ships: the three BLOCKS (say, read, is it a…?) and the five
+ * LESSONS (count the tulips, 14 + 9, no letter e, tall tales, the direction), plus the hint voicing. The thirteen other
+ * rungs and their probes went with their palette entries. `read` and `is it a…?` are SCORED (a count of right samples,
+ * AC4), not graded per probe.
  */
 'use strict';
 
@@ -25,78 +30,72 @@ const templates = require('./olive-templates.json');
 const RESULTS_FILE = 'olive-exam.json';
 const DEFAULT_TIMES = 3;
 
-/** id, rung, request, mode, expect, from (the battery probe it is trimmed from). Repeats: `times`. */
+/**
+ * The things on each request's plot that `read` chooses from (IG-006): the request's own objects, as the engine sends
+ * them in `options` — the grammar enum. The note names ONE of them.
+ */
+const READ_OPTIONS = {
+  fr: [['tulipe rouge', 'tulipe jaune'], ['rocher', 'tulipe rouge'], ['lettre', 'pierre']],
+  en: [['red tulip', 'yellow tulip'], ['rock', 'red tulip'], ['letter', 'stone']]
+};
+const READ_ANSWER = { fr: ['tulipe rouge', 'tulipe rouge', 'lettre'], en: ['red tulip', 'red tulip', 'letter'] };
+
+/**
+ * `is it a…?` on TPL-012's C1 table (six questions, three samples each = 18; the readout 16/18), as the engine asks it:
+ * "Devant Pip il y a {thing}. Est-ce {kind} ?" with the thing the ENGINE names. `all`: every sample is taken (no early
+ * majority stop), so the rung's score is counted over the 18 (IG-006 AC4).
+ */
+const IS_IT_A = [
+  ['une rose', 'une fleur', 'oui', 'a rose', 'a flower', 'yes'],
+  ['une tulipe rouge', 'une tulipe', 'oui', 'a red tulip', 'a tulip', 'yes'],
+  ['un chat', 'une fleur', 'non', 'a cat', 'a flower', 'no'],
+  ['un pissenlit', 'une tulipe', 'non', 'a dandelion', 'a tulip', 'no'],
+  ['un rocher', 'une plante', 'non', 'a rock', 'a plant', 'no'],
+  ['un arrosoir', 'un animal', 'non', 'a watering can', 'an animal', 'no']
+];
+
+/** id, rung, request, mode, expect, from (the battery probe it is trimmed from). Repeats: `times`; `all`: no early stop. */
 const PROBES = [
+  // say — the thank-you (rung 1 of TPL-012; the block `say … to …`).
   { id: 'P01', from: 'A2', rung: 'say-thanks', lang: 'fr', slots: { to: 'Mamie Rose', deed: 'arrosé ses trois tulipes' }, mode: 'pass', expect: { kind: 'ok' } },
   { id: 'P02', from: 'A9', rung: 'say-thanks', lang: 'en', slots: { to: 'Mamie Rose', deed: 'watered her three tulips' }, mode: 'pass', expect: { kind: 'ok' } },
-  { id: 'P03', from: 'B3', rung: 'name-three', lang: 'fr', slots: { thing: 'un chat roux' }, mode: 'pass', expect: { kind: 'items', n: 3 } },
-  { id: 'P04', from: 'F1', rung: 'name-one', lang: 'fr', slots: { thing: 'une tulipe' }, temperature: 0, times: 3, mode: 'pass', expect: { kind: 'identical' } },
-  { id: 'P05', from: 'F2', rung: 'name-one', lang: 'fr', slots: { thing: 'une tulipe' }, temperature: 1.2, times: 3, mode: 'pass', expect: { kind: 'distinct', atLeast: 2 } },
-  { id: 'P06', from: 'D1', rung: 'words-to-blocks', lang: 'fr', slots: { route: 'Avance de deux cases puis tourne à gauche.' }, mode: 'pass', expect: { kind: 'equals', value: ['avancer', 'avancer', 'gauche'] } },
-  { id: 'P07', from: 'D2', rung: 'words-to-blocks', lang: 'fr', slots: { route: "Avance d'une case, tourne à gauche, et arrose la tulipe." }, mode: 'pass', expect: { kind: 'equals', value: ['avancer', 'gauche', 'arroser'] } },
-  { id: 'P08', from: 'D4', rung: 'words-to-blocks', lang: 'fr', slots: { route: 'Tourne à droite, avance, arrose.' }, mode: 'pass', expect: { kind: 'equals', value: ['droite', 'avancer', 'arroser'] } },
-  { id: 'P09', from: 'D3', rung: 'count-in-words', lang: 'fr', slots: { route: 'Avance de trois cases.' }, mode: 'fail', expect: { kind: 'equals', value: ['avancer', 'avancer', 'avancer'] } },
-  { id: 'P10', from: 'C5', rung: 'what-wants', lang: 'fr', slots: { line: "Biscuit miaule : « J'ai tellement faim, ma gamelle est vide, apporte-moi des croquettes ! »" }, mode: 'pass', expect: { kind: 'equals', value: 'croquettes' } },
-  { id: 'P11', from: 'C6', rung: 'what-wants', lang: 'fr', slots: { line: 'Sami dit : « Peux-tu porter cette enveloppe à Mamie Rose ? »' }, mode: 'pass', expect: { kind: 'equals', value: 'lettre' } },
-  { id: 'P12', from: 'C1', rung: 'is-it-a', lang: 'fr', slots: { thing: 'une rose', kind: 'une fleur' }, mode: 'pass', expect: { kind: 'equals', value: 'oui' } },
-  { id: 'P13', from: 'C1', rung: 'is-it-a', lang: 'fr', slots: { thing: 'un chat', kind: 'une fleur' }, mode: 'pass', expect: { kind: 'equals', value: 'non' } },
+  // read — the three requests' notes, each with the objects on its plot (C5/C6: pick the named object, 6/6). The FR
+  // three stand on C5/C6 (measured in French); the EN twins are recorded until a run on the real model says otherwise.
+  ...[0, 1, 2].map((i) => ({ id: `RD${i + 1}-fr`, from: 'C5', rung: 'read', lang: 'fr', slots: { note: templates.lists.notes_read.fr[i] }, options: READ_OPTIONS.fr[i], times: 1, mode: 'pass', expect: { kind: 'equals', value: READ_ANSWER.fr[i] } })),
+  ...[0, 1, 2].map((i) => ({ id: `RD${i + 1}-en`, from: '—', rung: 'read', lang: 'en', slots: { note: templates.lists.notes_read.en[i] }, options: READ_OPTIONS.en[i], times: 1, mode: 'record', expect: { kind: 'equals', value: READ_ANSWER.en[i] } })),
+  // is it a…? — C1's six, three samples each (asserted, FR); the EN twins one sample each (recorded).
+  ...IS_IT_A.map((q, i) => ({ id: `IA${i + 1}-fr`, from: 'C1', rung: 'is-it-a', lang: 'fr', slots: { thing: q[0], kind: q[1] }, times: 3, all: true, mode: 'pass', expect: { kind: 'equals', value: q[2] } })),
+  ...IS_IT_A.map((q, i) => ({ id: `IA${i + 1}-en`, from: '—', rung: 'is-it-a', lang: 'en', slots: { thing: q[3], kind: q[4] }, times: 1, mode: 'record', expect: { kind: 'equals', value: q[5] } })),
+  // The five lessons (R7), each on the failure the readout measured.
+  // count the tulips — 4 in the list; she says 6, 7, 7 (E2).
   { id: 'P14', from: 'E2', rung: 'count-tulips', lang: 'fr', slots: { list: 'tulipe, tulipe, rose, tulipe, marguerite, tulipe, rose' }, mode: 'fail', expect: { kind: 'equals', value: 4 } },
-  { id: 'P15', from: 'E3', rung: 'maths-seeds', lang: 'fr', slots: { a: '2', b: '3' }, mode: 'pass', expect: { kind: 'equals', value: 5 } },
+  { id: 'P29', from: '—', rung: 'count-tulips', lang: 'en', slots: { list: 'tulip, tulip, rose, tulip, daisy, tulip, rose' }, times: 1, mode: 'record', expect: { kind: 'equals', value: 4 } },
+  // 14 + 9 — she says 14, three times (E5).
   { id: 'P16', from: 'E5', rung: 'maths', lang: 'fr', slots: { a: '14', b: '9' }, mode: 'fail', expect: { kind: 'equals', value: 23 } },
-  // Rung 9 is G1 "no letter e" (Richard's ruling 2, 2026-09-28): she broke it 3/3 FR and 3/3 EN on CPU and Metal
-  // (CG-006 §7.1). "Under 5 words" (P17/P32 until s3) was obeyed 6/6 and is retired; G2 "never mention water" was kept
-  // 3/3 and is dropped. 🎓: the rung passes when she BREAKS the rule (a reply with an e).
+  { id: 'P31', from: '—', rung: 'maths', lang: 'en', slots: { a: '14', b: '9' }, times: 1, mode: 'record', expect: { kind: 'equals', value: 23 } },
+  // no letter e — G1 (Richard's ruling 2): she broke it 3/3 FR and 3/3 EN on CPU and Metal (CG-006 §7.1).
   { id: 'R9-G1-fr', from: 'G1', rung: 'no-letter-e', lang: 'fr', slots: {}, times: 3, mode: 'fail', expect: { kind: 'lacks', letters: ['e'] } },
   { id: 'R9-G1-en', from: 'CG-006 §7.1', rung: 'no-letter-e', lang: 'en', slots: {}, times: 3, mode: 'fail', expect: { kind: 'lacks', letters: ['e'] } },
+  // tall tales — the fence does not hold (H1): she answers a question about the world.
   { id: 'P18', from: 'H1', rung: 'tall-tales', lang: 'fr', slots: { question: "Quelle est la capitale de l'Australie ?" }, times: 3, mode: 'fail', expect: { kind: 'contains', any: ['connais que le jardin', 'ne connais que', "n'en connais que", 'only know the garden'] } },
+  { id: 'P33', from: '—', rung: 'tall-tales', lang: 'en', slots: { question: 'What is the capital of Australia?' }, times: 1, mode: 'record', expect: { kind: 'contains', any: ['only know the garden', 'only know about the garden'] } },
+  // the direction — FR → EN works (A7), EN → FR is wobbly (A8).
   { id: 'P19', from: 'A7', rung: 'translate', lang: 'fr', slots: { note: 'Les tulipes ont soif.' }, mode: 'pass', expect: { kind: 'contains', any: ['thirsty'] } },
   { id: 'P20', from: 'A8', rung: 'translate', lang: 'en', slots: { note: 'Biscuit the cat is hungry.' }, mode: 'fail', expect: { kind: 'contains', any: ['faim'] } },
-  { id: 'P21', from: 'A5', rung: 'poem', lang: 'fr', slots: { flower: 'Tulla' }, mode: 'pass', expect: { kind: 'lines', n: 2 } },
+  // The hint voicing (not a block, not a lesson): recorded.
   { id: 'P22', from: '—', rung: 'voice-hint', lang: 'fr', slots: { key: 'hintWet', b: 'Pip' }, mode: 'record', expect: { kind: 'contains', any: ['flaque', 'tulipe', 'arros'] } },
-  { id: 'P23', from: '—', rung: 'words-to-blocks', lang: 'en', slots: { route: 'Go forward two squares then turn left.' }, mode: 'record', expect: { kind: 'equals', value: ['avancer', 'avancer', 'gauche'] } },
-  // CG-005 AC8: every rung examined in BOTH languages. The 2026-09-27 readout was taken in French; these English twins are
-  // RECORDED (one sample each, the tablet's exam time), never asserted, until a contract run on the real model says what
-  // she does in English — then each moves to the FR probe's mode. The rung verdicts stay on the asserted FR probes.
-  { id: 'P24', from: '—', rung: 'name-three', lang: 'en', slots: { thing: 'a ginger cat' }, times: 1, mode: 'record', expect: { kind: 'items', n: 3 } },
-  { id: 'P25', from: '—', rung: 'name-one', lang: 'en', slots: { thing: 'a tulip' }, temperature: 0, times: 2, mode: 'record', expect: { kind: 'identical' } },
-  { id: 'P26', from: '—', rung: 'count-in-words', lang: 'en', slots: { route: 'Go forward three squares.' }, times: 1, mode: 'record', expect: { kind: 'equals', value: ['avancer', 'avancer', 'avancer'] } },
-  { id: 'P27', from: '—', rung: 'what-wants', lang: 'en', slots: { line: 'Biscuit meows: "I\'m so hungry, my bowl is empty, bring me some kibble!"' }, times: 1, mode: 'record', expect: { kind: 'equals', value: 'kibble' } },
-  { id: 'P28', from: '—', rung: 'is-it-a', lang: 'en', slots: { thing: 'a rose', kind: 'a flower' }, times: 1, mode: 'record', expect: { kind: 'equals', value: 'yes' } },
-  { id: 'P29', from: '—', rung: 'count-tulips', lang: 'en', slots: { list: 'tulip, tulip, rose, tulip, daisy, tulip, rose' }, times: 1, mode: 'record', expect: { kind: 'equals', value: 4 } },
-  { id: 'P30', from: '—', rung: 'maths-seeds', lang: 'en', slots: { a: '2', b: '3' }, times: 1, mode: 'record', expect: { kind: 'equals', value: 5 } },
-  { id: 'P31', from: '—', rung: 'maths', lang: 'en', slots: { a: '14', b: '9' }, times: 1, mode: 'record', expect: { kind: 'equals', value: 23 } },
-  { id: 'P33', from: '—', rung: 'tall-tales', lang: 'en', slots: { question: 'What is the capital of Australia?' }, times: 1, mode: 'record', expect: { kind: 'contains', any: ['only know the garden', 'only know about the garden'] } },
-  { id: 'P34', from: '—', rung: 'poem', lang: 'en', slots: { flower: 'Tulla' }, times: 1, mode: 'record', expect: { kind: 'lines', n: 2 } },
-  { id: 'P35', from: '—', rung: 'voice-hint', lang: 'en', slots: { key: 'hintWet', b: 'Pip' }, times: 1, mode: 'record', expect: { kind: 'contains', any: ['puddle', 'tulip', 'water'] } },
-  // CG-006 §4's moments promoted to rungs 13–18 (s3), each probe as measured in CG-006 §7.1 (CPU and Metal agreed on
-  // every decision). The EN twins nobody measured (E5-en, E9-en) are recorded, one sample.
-  // 13 — E3 explain my program (✅).
-  { id: 'E3-fr', from: 'CG-006 §7.1', rung: 'explain-program', lang: 'fr', slots: { program: 'avancer, avancer, gauche, arroser' }, mode: 'pass', expect: { kind: 'containsAll', all: ['avance', 'gauche', 'arros'] } },
-  { id: 'E3-en', from: 'CG-006 §7.1', rung: 'explain-program', lang: 'en', slots: { program: 'forward, forward, turn left, water' }, mode: 'pass', expect: { kind: 'containsAll', all: ['forward', 'left', 'water'] } },
-  // The round trip is lossy: does "avancer, avancer" come back as "deux fois"? Recorded: the lesson either way.
-  { id: 'E3-count', from: '—', rung: 'explain-program', lang: 'fr', slots: { program: 'avancer, avancer, gauche, arroser' }, times: 1, mode: 'record', expect: { kind: 'contains', any: ['deux'] } },
-  // 14 — E4 Olive narrates the run (✅).
-  { id: 'E4-fr', from: 'CG-006 §7.1', rung: 'narrate-run', lang: 'fr', slots: { trace: "avancé, avancé, tourné à droite, arrosé l'herbe, une flaque" }, mode: 'pass', expect: { kind: 'contains', any: ['flaque'] } },
-  { id: 'E4-en', from: 'CG-006 §7.1', rung: 'narrate-run', lang: 'en', slots: { trace: 'moved, moved, turned right, watered the grass, a puddle' }, mode: 'pass', expect: { kind: 'contains', any: ['puddle'] } },
-  // 15 — E5 name my trick (✅: a one-word name comes back; how apt it is, is recorded).
-  { id: 'E5-fr', from: 'CG-006 §7.1', rung: 'name-trick', lang: 'fr', slots: { body: 'avancer, avancer, gauche, arroser, droite' }, mode: 'pass', expect: { kind: 'ok' } },
-  { id: 'E5-apt', from: '—', rung: 'name-trick', lang: 'fr', slots: { body: 'avancer, avancer, gauche, arroser, droite' }, times: 1, mode: 'record', expect: { kind: 'contains', any: ['arros', 'rang', 'tulip', 'pluie', 'goutte'] } },
-  { id: 'E5-en', from: '—', rung: 'name-trick', lang: 'en', slots: { body: 'forward, forward, turn left, water, turn right' }, times: 1, mode: 'record', expect: { kind: 'ok' } },
-  // 16 — E8 🎓 sort these words: reliably wrong (0/3 FR and EN, both paths), so the program sorts. The input is in
-  // neither order, so a copy of it is not a sort.
-  { id: 'E8-fr', from: 'CG-006 §7.1', rung: 'sort-words', lang: 'fr', slots: { words: 'tulipe, arrosoir, chat' }, mode: 'fail', expect: { kind: 'equals', value: ['arrosoir', 'chat', 'tulipe'] } },
-  { id: 'E8-en', from: 'CG-006 §7.1', rung: 'sort-words', lang: 'en', slots: { words: 'tulip, bucket, cat' }, mode: 'fail', expect: { kind: 'equals', value: ['bucket', 'cat', 'tulip'] } },
-  // 17 — E9 🎓 Olive's dictionary: MIXED by design (the rung's `verdict: 'mixed'`): offered when her definitions
-  // DISAGREE — some right, some made up. Recorded; the rung verdict reads the set. `arroser`, not `arros`: the headword
-  // "arrosoir" itself contains "arros", so the old expectation met whenever she repeated the word.
-  { id: 'E9-arrosoir', from: 'CG-006 §7.1', rung: 'define', lang: 'fr', slots: { word: 'un arrosoir' }, mode: 'record', expect: { kind: 'contains', any: ['arroser', "l'eau", 'l’eau', 'de l eau'] } },
-  { id: 'E9-chouette', from: 'CG-006 §7.1', rung: 'define', lang: 'fr', slots: { word: 'une chouette' }, mode: 'record', expect: { kind: 'contains', any: ['oiseau'] } },
-  { id: 'E9-rocher', from: 'CG-006 §7.1', rung: 'define', lang: 'fr', slots: { word: 'un rocher' }, mode: 'record', expect: { kind: 'contains', any: ['pierre', 'caillou'] } },
-  { id: 'E9-en', from: '—', rung: 'define', lang: 'en', slots: { word: 'a rock' }, times: 1, mode: 'record', expect: { kind: 'contains', any: ['stone'] } },
-  // 18 — E10 the letter generator (✅, with the rung's must-contain on the object: the data is the truth).
-  { id: 'E10-fr', from: 'CG-006 §7.1', rung: 'letter', lang: 'fr', slots: { who: 'Biscuit', object: 'croquettes' }, mode: 'pass', expect: { kind: 'contains', any: ['croquettes'] } },
-  { id: 'E10-en', from: 'CG-006 §7.1', rung: 'letter', lang: 'en', slots: { who: 'Biscuit', object: 'kibble' }, mode: 'pass', expect: { kind: 'contains', any: ['kibble'] } }
+  { id: 'P35', from: '—', rung: 'voice-hint', lang: 'en', slots: { key: 'hintWet', b: 'Pip' }, times: 1, mode: 'record', expect: { kind: 'contains', any: ['puddle', 'tulip', 'water'] } }
 ];
+
+/**
+ * IG-006 AC4: the two blocks built on Olive's passing column are graded on a COUNT of samples, not per probe — `read`
+ * picks the named object in at least 5 of its 6 samples (the three notes, FR and EN), `is it a…?` answers right in at
+ * least 15 of C1's 18 (FR). The rung passes on the count; the probes still carry their own rows.
+ */
+const SCORED = Object.freeze({
+  read: { probes: /^RD\d-(fr|en)$/, min: 5, of: 6 },
+  'is-it-a': { probes: /^IA\d-fr$/, min: 15, of: 18 }
+});
 
 /**
  * The rung's ladder comes from the rung TABLE, not from a probe's mode. A recorded probe on a 🎓 rung is graded the
@@ -218,7 +217,7 @@ async function runExam({ ask, probes = PROBES, timings = null, log = () => {}, n
     const replies = [];
     const times = p.times || DEFAULT_TIMES;
     const t1 = now();
-    while (replies.length < times && !decided(p.expect, replies, times)) {
+    while (replies.length < times && (p.all || !decided(p.expect, replies, times))) {
       replies.push(await ask({ rung: p.rung, slots: p.slots, lang: p.lang, shape: p.shape, temperature: p.temperature, options: p.options }));
     }
     const ms = now() - t1;
@@ -249,6 +248,25 @@ async function runExam({ ask, probes = PROBES, timings = null, log = () => {}, n
       r.verdict = 'mixed';
       r.pass = (r.asserted === 0 || r.pass) && yes > 0 && yes < set.length;
     } else if (r.asserted === 0) r.pass = out.filter((x) => x.rung === name).every((x) => x.pass);
+    // IG-006 AC4: a scored rung passes on its count of right samples, over the probes the score names.
+    const sc = SCORED[name];
+    if (sc) {
+      const byId = new Map(probes.map((q) => [q.id, q]));
+      let met = 0;
+      let of = 0;
+      for (const row of out) {
+        if (row.rung !== name || !sc.probes.test(row.id)) continue;
+        const q = byId.get(row.id);
+        for (const reply of row.replies) {
+          of++;
+          if (meetsOne(q.expect, reply)) met++;
+        }
+      }
+      if (of > 0) {
+        r.score = { met, of, min: sc.min };
+        r.pass = met >= sc.min;
+      }
+    }
   }
   const asserted = out.filter((x) => x.mode !== 'record');
   return { at: new Date().toISOString(), ms: now() - t0, probes: out, rungs, passed: asserted.filter((x) => x.pass).length, failed: asserted.filter((x) => !x.pass).length };
@@ -283,4 +301,4 @@ function withheldRungs(results) {
   return out.sort();
 }
 
-module.exports = { PROBES, KINDS, met, meetsOne, decided, runExam, readResults, writeResults, resultsPath, RESULTS_FILE, DEFAULT_TIMES, ladderOf, verdictOf, withheldRungs };
+module.exports = { PROBES, SCORED, READ_OPTIONS, IS_IT_A, KINDS, met, meetsOne, decided, runExam, readResults, writeResults, resultsPath, RESULTS_FILE, DEFAULT_TIMES, ladderOf, verdictOf, withheldRungs };

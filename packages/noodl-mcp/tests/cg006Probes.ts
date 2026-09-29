@@ -130,6 +130,239 @@ export const DROPPED_RUNGS: Readonly<Record<string, RungTemplate>> = {
   }
 };
 
+
+// ── P106 IG-006 (R6/R7): the promoted moments' rungs 13–18 LEFT the shipped table with the other cut rungs ─────────
+// Their tables and exam probes are kept here verbatim (as shipped at f784833b8), so the readings of CG-006 §7.1 stay
+// re-runnable (`mergeTemplates`, probe-cg006.mjs) and this file's decisions stay graded. They are not in the exam.
+
+/** The retired rungs' lists (the shipped table's before IG-006). */
+export const RETIRED_LISTS: Readonly<Record<string, BiList>> = {
+  "programs": {
+    "fr": [
+      "avancer, avancer, gauche, arroser",
+      "droite, avancer, arroser"
+    ],
+    "en": [
+      "forward, forward, turn left, water",
+      "turn right, forward, water"
+    ]
+  },
+  "traces": {
+    "fr": [
+      "avancé, avancé, tourné à droite, arrosé l'herbe, une flaque"
+    ],
+    "en": [
+      "moved, moved, turned right, watered the grass, a puddle"
+    ]
+  },
+  "trick_bodies": {
+    "fr": [
+      "avancer, avancer, gauche, arroser, droite"
+    ],
+    "en": [
+      "forward, forward, turn left, water, turn right"
+    ]
+  },
+  "word_triples": {
+    "fr": [
+      "tulipe, arrosoir, chat"
+    ],
+    "en": [
+      "tulip, bucket, cat"
+    ]
+  },
+  "garden_words": {
+    "fr": [
+      "un arrosoir",
+      "un pissenlit",
+      "une chouette",
+      "un rocher"
+    ],
+    "en": [
+      "a watering can",
+      "a dandelion",
+      "an owl",
+      "a rock"
+    ]
+  },
+  "request_objects": {
+    "fr": [
+      "croquettes",
+      "graines",
+      "lettre",
+      "œufs"
+    ],
+    "en": [
+      "kibble",
+      "seeds",
+      "letter",
+      "eggs"
+    ]
+  }
+};
+
+/** The retired rungs 13–18, exactly as they shipped. */
+export const RETIRED_RUNGS: Readonly<Record<string, RungTemplate & { use?: string; verdict?: string }>> = {
+  "explain-program": {
+    "n": 13,
+    "band": 2,
+    "ladder": "pass",
+    "shape": "sentence",
+    "temperature": 0.2,
+    "maxTokens": 48,
+    "slots": {
+      "program": {
+        "list": "programs"
+      }
+    },
+    "system": "olive",
+    "user": {
+      "fr": "Voici les blocs de Pip, dans l’ordre : {program}. Dis en une phrase ce que fait Pip.",
+      "en": "Here are Pip's blocks, in order: {program}. Say in one sentence what Pip does."
+    },
+    "use": "retired"
+  },
+  "narrate-run": {
+    "n": 14,
+    "band": 2,
+    "ladder": "pass",
+    "shape": "sentence",
+    "temperature": 0.5,
+    "maxTokens": 48,
+    "slots": {
+      "trace": {
+        "list": "traces"
+      }
+    },
+    "system": "olive",
+    "user": {
+      "fr": "Voici ce que Pip a fait : {trace}. Raconte-le en une phrase.",
+      "en": "This is what Pip did: {trace}. Tell it in one sentence."
+    },
+    "use": "retired"
+  },
+  "name-trick": {
+    "n": 15,
+    "band": 2,
+    "ladder": "pass",
+    "shape": "one_word",
+    "temperature": 0.8,
+    "maxTokens": 24,
+    "slots": {
+      "body": {
+        "list": "trick_bodies"
+      }
+    },
+    "system": "olive",
+    "user": {
+      "fr": "Voici une astuce de Pip : {body}. Donne-lui un nom court.",
+      "en": "Here is one of Pip's tricks: {body}. Give it a short name."
+    },
+    "use": "retired"
+  },
+  "sort-words": {
+    "n": 16,
+    "band": 2,
+    "ladder": "fail",
+    "shape": "list_of_3",
+    "temperature": 0.2,
+    "maxTokens": 48,
+    "slots": {
+      "words": {
+        "list": "word_triples"
+      }
+    },
+    "system": "olive",
+    "user": {
+      "fr": "Range ces trois mots dans l’ordre alphabétique : {words}.",
+      "en": "Put these three words in alphabetical order: {words}."
+    },
+    "use": "retired"
+  },
+  "define": {
+    "n": 17,
+    "band": 2,
+    "ladder": "fail",
+    "verdict": "mixed",
+    "shape": "sentence",
+    "temperature": 0.5,
+    "maxTokens": 48,
+    "slots": {
+      "word": {
+        "list": "garden_words"
+      }
+    },
+    "system": "olive",
+    "user": {
+      "fr": "Explique à un enfant ce que c’est, {word}, en une phrase.",
+      "en": "Explain to a child what {word} is, in one sentence."
+    },
+    "use": "retired"
+  },
+  "letter": {
+    "n": 18,
+    "band": 2,
+    "ladder": "pass",
+    "shape": "sentence",
+    "temperature": 0.8,
+    "maxTokens": 48,
+    "slots": {
+      "who": {
+        "list": "islanders"
+      },
+      "object": {
+        "list": "request_objects"
+      }
+    },
+    "system": "olive",
+    "user": {
+      "fr": "Ce que {who} veut : {object}. Écris la demande de {who} à Pip, en une phrase, comme si {who} parlait.",
+      "en": "What {who} wants: {object}. Write {who}'s request to Pip in one sentence, as if {who} were speaking."
+    },
+    "mustContain": {
+      "fr": [
+        "{object}"
+      ],
+      "en": [
+        "{object}"
+      ]
+    },
+    "use": "retired"
+  }
+};
+
+/** The retired rungs' exam probes, exactly as `exam.js` carried them (CG-006 §7.1's readings). */
+export const RETIRED_PROBES: ReadonlyArray<any> = [
+  // CG-006 §4's moments promoted to rungs 13–18 (s3), each probe as measured in CG-006 §7.1 (CPU and Metal agreed on
+  // every decision). The EN twins nobody measured (E5-en, E9-en) are recorded, one sample.
+  // 13 — E3 explain my program (✅).
+  { id: 'E3-fr', from: 'CG-006 §7.1', rung: 'explain-program', lang: 'fr', slots: { program: 'avancer, avancer, gauche, arroser' }, mode: 'pass', expect: { kind: 'containsAll', all: ['avance', 'gauche', 'arros'] } },
+  { id: 'E3-en', from: 'CG-006 §7.1', rung: 'explain-program', lang: 'en', slots: { program: 'forward, forward, turn left, water' }, mode: 'pass', expect: { kind: 'containsAll', all: ['forward', 'left', 'water'] } },
+  // The round trip is lossy: does "avancer, avancer" come back as "deux fois"? Recorded: the lesson either way.
+  { id: 'E3-count', from: '—', rung: 'explain-program', lang: 'fr', slots: { program: 'avancer, avancer, gauche, arroser' }, times: 1, mode: 'record', expect: { kind: 'contains', any: ['deux'] } },
+  // 14 — E4 Olive narrates the run (✅).
+  { id: 'E4-fr', from: 'CG-006 §7.1', rung: 'narrate-run', lang: 'fr', slots: { trace: "avancé, avancé, tourné à droite, arrosé l'herbe, une flaque" }, mode: 'pass', expect: { kind: 'contains', any: ['flaque'] } },
+  { id: 'E4-en', from: 'CG-006 §7.1', rung: 'narrate-run', lang: 'en', slots: { trace: 'moved, moved, turned right, watered the grass, a puddle' }, mode: 'pass', expect: { kind: 'contains', any: ['puddle'] } },
+  // 15 — E5 name my trick (✅: a one-word name comes back; how apt it is, is recorded).
+  { id: 'E5-fr', from: 'CG-006 §7.1', rung: 'name-trick', lang: 'fr', slots: { body: 'avancer, avancer, gauche, arroser, droite' }, mode: 'pass', expect: { kind: 'ok' } },
+  { id: 'E5-apt', from: '—', rung: 'name-trick', lang: 'fr', slots: { body: 'avancer, avancer, gauche, arroser, droite' }, times: 1, mode: 'record', expect: { kind: 'contains', any: ['arros', 'rang', 'tulip', 'pluie', 'goutte'] } },
+  { id: 'E5-en', from: '—', rung: 'name-trick', lang: 'en', slots: { body: 'forward, forward, turn left, water, turn right' }, times: 1, mode: 'record', expect: { kind: 'ok' } },
+  // 16 — E8 🎓 sort these words: reliably wrong (0/3 FR and EN, both paths), so the program sorts. The input is in
+  // neither order, so a copy of it is not a sort.
+  { id: 'E8-fr', from: 'CG-006 §7.1', rung: 'sort-words', lang: 'fr', slots: { words: 'tulipe, arrosoir, chat' }, mode: 'fail', expect: { kind: 'equals', value: ['arrosoir', 'chat', 'tulipe'] } },
+  { id: 'E8-en', from: 'CG-006 §7.1', rung: 'sort-words', lang: 'en', slots: { words: 'tulip, bucket, cat' }, mode: 'fail', expect: { kind: 'equals', value: ['bucket', 'cat', 'tulip'] } },
+  // 17 — E9 🎓 Olive's dictionary: MIXED by design (the rung's `verdict: 'mixed'`): offered when her definitions
+  // DISAGREE — some right, some made up. Recorded; the rung verdict reads the set. `arroser`, not `arros`: the headword
+  // "arrosoir" itself contains "arros", so the old expectation met whenever she repeated the word.
+  { id: 'E9-arrosoir', from: 'CG-006 §7.1', rung: 'define', lang: 'fr', slots: { word: 'un arrosoir' }, mode: 'record', expect: { kind: 'contains', any: ['arroser', "l'eau", 'l’eau', 'de l eau'] } },
+  { id: 'E9-chouette', from: 'CG-006 §7.1', rung: 'define', lang: 'fr', slots: { word: 'une chouette' }, mode: 'record', expect: { kind: 'contains', any: ['oiseau'] } },
+  { id: 'E9-rocher', from: 'CG-006 §7.1', rung: 'define', lang: 'fr', slots: { word: 'un rocher' }, mode: 'record', expect: { kind: 'contains', any: ['pierre', 'caillou'] } },
+  { id: 'E9-en', from: '—', rung: 'define', lang: 'en', slots: { word: 'a rock' }, times: 1, mode: 'record', expect: { kind: 'contains', any: ['stone'] } },
+  // 18 — E10 the letter generator (✅, with the rung's must-contain on the object: the data is the truth).
+  { id: 'E10-fr', from: 'CG-006 §7.1', rung: 'letter', lang: 'fr', slots: { who: 'Biscuit', object: 'croquettes' }, mode: 'pass', expect: { kind: 'contains', any: ['croquettes'] } },
+  { id: 'E10-en', from: 'CG-006 §7.1', rung: 'letter', lang: 'en', slots: { who: 'Biscuit', object: 'kibble' }, mode: 'pass', expect: { kind: 'contains', any: ['kibble'] } }
+];
+
 /** The shipped table plus the dropped moments' lists and rungs, as a NEW object (the base is never written). */
 export function mergeTemplates(base: any): any {
   const t = JSON.parse(JSON.stringify(base));
@@ -141,16 +374,23 @@ export function mergeTemplates(base: any): any {
     if (t.rungs[id]) throw new Error('rung already in the table: ' + id);
     t.rungs[id] = JSON.parse(JSON.stringify(r));
   }
+  // IG-006: the retired rungs 13–18 and their lists, so their probes can be run again (never shipped).
+  for (const [name, list] of Object.entries(RETIRED_LISTS)) if (!t.lists[name]) t.lists[name] = JSON.parse(JSON.stringify(list));
+  for (const [id, r] of Object.entries(RETIRED_RUNGS)) if (!t.rungs[id]) t.rungs[id] = JSON.parse(JSON.stringify(r));
   return t;
 }
 
 // ── The probes ──────────────────────────────────────────────────────────────
 
-/** The exam's own probe `id`, with this file's moment / column / canned reply. Throws if the exam has no such probe. */
+/**
+ * The exam's own probe `id`, with this file's moment / column / canned reply; since IG-006, a retired rung's probe comes
+ * from RETIRED_PROBES and is `shipped: false`. Throws if neither has it.
+ */
 function shipped(id: string, moment: string, column: Column, canned: string): Probe {
-  const p = (EXAM.PROBES as any[]).find((x) => x.id === id);
+  const live = (EXAM.PROBES as any[]).find((x) => x.id === id);
+  const p = live || RETIRED_PROBES.find((x) => x.id === id);
   if (!p) throw new Error('exam.js has no probe ' + id);
-  return { ...JSON.parse(JSON.stringify(p)), moment, column, canned, shipped: true };
+  return { ...JSON.parse(JSON.stringify(p)), moment, column, canned, shipped: !!live };
 }
 
 /** A dropped moment's probe, kept as the evidence (never in the exam). */

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a41cb61e-5617-54f8-8e2c-e94c7399c8b2",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "llIn",
+      "fromProperty": "q",
+      "toId": "llQ",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "llIn",
+      "fromProperty": "a",
+      "toId": "llA",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "llIn",
+      "fromProperty": "check",
+      "toId": "llCheck",
+      "toProperty": "text"
+    }
+  ]
+}

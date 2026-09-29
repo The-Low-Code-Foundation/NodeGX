@@ -122,6 +122,9 @@ function compose(templates, rungId, values, { lang, shape, temperature, options 
     const pool = (templates.lists[rung.options] || {})[L] || [];
     enumValues = Array.isArray(options) && options.length ? options.filter((o) => pool.includes(o)) : pool;
     if (!enumValues.length) enumValues = pool;
+    // IG-006: `read` names the things on the plot in its prompt (`{objects}`), the same words the grammar allows, in
+    // the order the page sent them — so the model reads the choices it is held to.
+    vars.objects = enumValues.join(', ');
   }
   if (useShape === 'yes_no') enumValues = L === 'en' ? ['yes', 'no'] : ['oui', 'non'];
   if (useShape === 'blocks') enumValues = templates.blocks.slice();

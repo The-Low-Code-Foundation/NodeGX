@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 389,
+      "connectionCount": 431,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -175,7 +175,7 @@
       "path": "Logic/Hint table",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 39,
+      "connectionCount": 27,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -387,19 +387,59 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
-    "Logic/Rung rows": {
-      "path": "Logic/Rung rows",
+    "Logic/Olive played": {
+      "path": "Logic/Olive played",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 5,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Card gate": {
+      "path": "Logic/Card gate",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 8,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Card seen": {
+      "path": "Logic/Card seen",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 5,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Block card": {
+      "path": "Logic/Block card",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 14,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Help chips": {
+      "path": "Logic/Help chips",
       "type": "visual",
       "nodeCount": 3,
       "connectionCount": 9,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
-    "Logic/Olive played": {
-      "path": "Logic/Olive played",
+    "Logic/Lesson rows": {
+      "path": "Logic/Lesson rows",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 5,
+      "connectionCount": 9,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Olive lesson": {
+      "path": "Logic/Olive lesson",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 13,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -499,11 +539,19 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
+    "Workshop/Help chip": {
+      "path": "Workshop/Help chip",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 3,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
     "Workshop/Play": {
       "path": "Workshop/Play",
       "type": "visual",
-      "nodeCount": 118,
-      "connectionCount": 291,
+      "nodeCount": 139,
+      "connectionCount": 329,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -579,11 +627,27 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
-    "Skills/Rung card": {
-      "path": "Skills/Rung card",
+    "Skills/Lesson line": {
+      "path": "Skills/Lesson line",
       "type": "visual",
-      "nodeCount": 8,
-      "connectionCount": 6,
+      "nodeCount": 5,
+      "connectionCount": 3,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Skills/Letter bit": {
+      "path": "Skills/Letter bit",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 2,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Skills/Lesson card": {
+      "path": "Skills/Lesson card",
+      "type": "visual",
+      "nodeCount": 12,
+      "connectionCount": 13,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -693,8 +757,8 @@
     }
   },
   "stats": {
-    "totalComponents": 86,
-    "totalNodes": 706,
-    "totalConnections": 1962
+    "totalComponents": 94,
+    "totalNodes": 758,
+    "totalConnections": 2094
   }
 }

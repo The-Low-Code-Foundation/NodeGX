@@ -32,18 +32,18 @@
  * @module noodl-mcp/tests/cg003Scripts
  */
 import { OLIVE_RUNGS, WORDS, WORD_KEYS } from './cg002Content';
-import { OLIVE_SLIM, OLIVE_WORDS, OLIVE_WORD_KEYS, PALETTE_RUNG_IDS, rungWordKey } from './cg005Olive';
+import { OLIVE_HELPERS, OLIVE_LESSON_IDS, OLIVE_OBJECTS, OLIVE_SLIM, OLIVE_TABLE, OLIVE_WORDS, OLIVE_WORD_KEYS, PALETTE_RUNG_IDS, rungWordKey } from './cg005Olive';
 import { BLOCK_META, CAN_MAX, ENGINE, FOLD_HELPERS, MANY_BLOCKS, ROBOT_NAME_MAX, SAVE_HELPERS } from './cg002Scripts';
-import { EYES, HATS, ISLANDERS, ISLAND_PINS, PAD_KEYS, PAGE_WORDS, PAGE_WORD_KEYS, REQUEST_SUBS, SKILL_BLOCKS } from './cg003Content';
+import { BLOCK_CARDS, CardBlock, EYES, HATS, IG006_WORDS, IG006_WORD_KEYS, ISLANDERS, ISLAND_PINS, PAD_KEYS, PAGE_WORDS, PAGE_WORD_KEYS, REQUEST_SUBS, SKILL_BLOCKS } from './cg003Content';
 import { ROBOT_PAINTS } from './cg007Look';
 
 /** Every word key the pages can show: the engine's (CG-002/006), Olive's (CG-005), then the pages' own. */
-export const ALL_WORD_KEYS: ReadonlyArray<string> = [...WORD_KEYS, ...OLIVE_WORD_KEYS, ...PAGE_WORD_KEYS];
+export const ALL_WORD_KEYS: ReadonlyArray<string> = [...WORD_KEYS, ...OLIVE_WORD_KEYS, ...PAGE_WORD_KEYS, ...IG006_WORD_KEYS];
 
 /** `Data/Words`: the engine's table with the pages' rows appended. */
 export const ALL_WORDS_JSON = JSON.stringify(
   ALL_WORD_KEYS.map((key) => {
-    const w = (WORDS as Record<string, { en: string; fr: string }>)[key] ?? (OLIVE_WORDS as Record<string, { en: string; fr: string }>)[key] ?? PAGE_WORDS[key];
+    const w = (WORDS as Record<string, { en: string; fr: string }>)[key] ?? (OLIVE_WORDS as Record<string, { en: string; fr: string }>)[key] ?? PAGE_WORDS[key] ?? IG006_WORDS[key];
     return { key, en: w.en, fr: w.fr };
   }),
   null,
@@ -269,21 +269,30 @@ export const KIT_PALETTE_SCRIPT = `${WORD_HELPER}
 var ICON = { fwd: 'fwd', left: 'left', right: 'right', water: 'water', fill: 'fill', pick: 'pick', put: 'put', say: 'say', repeat: 'loop', until: 'wall', 'if': 'if', when: 'if', count_inc: 'count', trick: 'loop', 'do': 'fwd', ask: 'owl' };
 // IG-001 D7: "Olive says yes" / "Olive says no" — one value each, so "if Olive says yes" can be built from the picker.
 var SENSORS = [['wall_ahead', 'sWallAhead'], ['tulip_ahead', 'sTulipAhead'], ['bowl_empty', 'sBowlEmpty'], ['basket_full', 'sBasketFull'], ['count_is', 'sCountIs'], ['olive_says:yes', 'sOliveSaysYes'], ['olive_says:no', 'sOliveSaysNo'], ['can_empty', 'sCanEmpty']];
+// IG-006 AC2: "if Olive read [red tulip]" — one sensor value per thing read can name, offered once read is in the palette.
+var OLIVE_OBJECTS = ${JSON.stringify(OLIVE_OBJECTS)};
 var EVENTS = [['meow', 'eMeow']];
 var SAYS = [['thanksMamie', 'thanksMamie'], ['thanksSami', 'thanksSami'], ['thanksBiscuit', 'thanksBiscuit']];
 var TRICK_NAMES = ['row', 'hop', 'zigzag'];
 var lang = langOf(Inputs.lang), band = Number(Inputs.band) === 1 ? 1 : 2;
 var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
 function opts(pairs) { var out = []; for (var i = 0; i < pairs.length; i++) out.push({ value: pairs[i][0], label: w[pairs[i][1]] || pairs[i][0] }); return out; }
+var src = Array.isArray(Inputs.palette) ? Inputs.palette : [];
+var reads = false;
+for (var rp = 0; rp < src.length; rp++) if (src[rp] && src[rp].id === 'olive:read') reads = true;
+function sensorOpts() {
+  var out = opts(SENSORS);
+  if (reads) for (var id in OLIVE_OBJECTS) out.push({ value: 'olive_read:' + id, label: fill(w.sOliveReadX || '{x}', { x: OLIVE_OBJECTS[id][lang] }) });
+  return out;
+}
 function slot(key) {
-  if (key === 'sensor') return { key: 'sensor', label: w.bIf || key, options: opts(SENSORS) };
+  if (key === 'sensor') return { key: 'sensor', label: w.bIf || key, options: sensorOpts() };
   if (key === 'arg') { var n = []; for (var k = 1; k <= 9; k++) n.push({ value: String(k), label: String(k) }); return { key: 'arg', label: '#', options: n }; }
   if (key === 'event') return { key: 'event', label: w.bWhen || key, options: opts(EVENTS) };
   if (key === 'name') { var t = []; for (var j = 0; j < TRICK_NAMES.length; j++) t.push({ value: TRICK_NAMES[j], label: TRICK_NAMES[j] }); return { key: 'name', label: w.bTrick || key, options: t }; }
   if (key === 'text') return { key: 'text', label: w.bSay || key, options: opts(SAYS), text: true, max: 40 };
   return null;
 }
-var src = Array.isArray(Inputs.palette) ? Inputs.palette : [];
 var out = [];
 for (var i = 0; i < src.length; i++) {
   var e = src[i];
@@ -291,7 +300,7 @@ for (var i = 0; i < src.length; i++) {
   var slots = [];
   var names = Array.isArray(e.slots) ? e.slots : [];
   for (var s = 0; s < names.length; s++) { var made = names[s] && typeof names[s] === 'object' ? names[s] : slot(String(names[s])); if (made) slots.push(made); }
-  out.push({ id: e.id, kind: e.kind, icon: ICON[e.id] || (e.id.indexOf('ask:') === 0 ? 'owl' : 'pick'), label: band === 1 ? String(e.caption || e.label || e.id) : String(e.label || e.id), hasBody: !!e.hasBody, hasCount: !!e.hasCount, slots: slots });
+  out.push({ id: e.id, kind: e.kind, icon: ICON[e.id] || (e.id.indexOf('olive:') === 0 ? 'owl' : 'pick'), label: band === 1 ? String(e.caption || e.label || e.id) : String(e.label || e.id), hasBody: !!e.hasBody, hasCount: !!e.hasCount, slots: slots });
 }
 Outputs.palette = out;
 Outputs.count = out.length;
@@ -479,7 +488,7 @@ for (var k = 0; k < HATS.length; k++) {
   hats.push({ id: h.id, label: (h.id === 'sun' ? '🌻 ' : h.id === 'crown' ? '👑 ' : '') + (w[h.word] || h.id) + (has || !h.from ? '' : ' · ' + fill(w.hatLocked, { who: w[h.from] || '' })), selected: h.id === hat, locked: !has });
 }
 var st = Array.isArray(Inputs.stickers) ? Inputs.stickers : [];
-var STICKER = { letter: ['✉️', 'stickerLetter'], paw: ['🐾', 'stickerPaw'], tulip: ['🌷', 'stickerTulip'], bell: ['🔔', 'itemBell'], basket: ['🧺', 'itemBasket'], gnome: ['🧙', 'itemGnome'], seeds: ['🌱', 'seeds'] };
+var STICKER = { letter: ['✉️', 'stickerLetter'], paw: ['🐾', 'stickerPaw'], tulip: ['🌷', 'stickerTulip'], bell: ['🔔', 'itemBell'], basket: ['🧺', 'itemBasket'], gnome: ['🧙', 'itemGnome'], seeds: ['🌱', 'seeds'], note: ['📝', 'stickerNote'], flower: ['🌹', 'stickerFlower'], thanks: ['💐', 'stickerThanks'] };
 for (var s = 0; s < st.length; s++) { var d = STICKER[st[s]] || ['⭐', '']; stickers.push({ id: String(st[s]), label: d[0] + ' ' + (w[d[1]] || String(st[s])) }); }
 Outputs.paints = paints;
 Outputs.eyes = eyes;
@@ -603,29 +612,6 @@ Outputs.oliveRung = mine ? RUNG_OF[String(a.rung)] || 0 : 0;
 Outputs.oliveFallback = mine && a.fallback === true;
 `;
 
-/**
- * Olive's eighteen lessons as Skills cards (CG-006 §4, CG-005 §8 residual): the rung's title and lesson, whether it is a
- * thing she does (green) or a thing a program does better (🎓), and "Olive can't do this here yet" where this computer's
- * exam failed any of its rung-table entries. Band 10–12 only (ruling 8): at 7–9 there are no rows and nothing shows.
- * No progress is kept per rung: the cards say what the lesson is, never how far a child got.
- */
-export const RUNG_ROWS_SCRIPT = `${WORD_HELPER}
-var RUNGS = ${JSON.stringify(OLIVE_RUNGS.map((r) => ({ n: r.n, mark: r.mark, table: r.table, title: r.copyKeys.title, lesson: r.copyKeys.lesson })))};
-var lang = langOf(Inputs.lang), band = Number(Inputs.band) === 1 ? 1 : 2;
-var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
-var exam = Inputs.exam && Inputs.exam.rungs && typeof Inputs.exam.rungs === 'object' ? Inputs.exam.rungs : {};
-var rows = [];
-if (band === 2) for (var i = 0; i < RUNGS.length; i++) {
-  var r = RUNGS[i], held = false;
-  for (var t = 0; t < r.table.length; t++) if (exam[r.table[t]] && exam[r.table[t]].pass === false) held = true;
-  var green = r.mark === 'green';
-  rows.push({ id: 'rung' + r.n, n: r.n, title: w[r.title] || '', lesson: w[r.lesson] || '', markText: green ? w.rungGreen || '' : w.rungGrad || '', markClass: green ? 'bg-tag bg-tag-ask' : 'bg-tag bg-tag-control', isHeld: held, heldText: held ? w.oliveCant || '' : '' });
-}
-Outputs.rows = rows;
-Outputs.show = rows.length > 0;
-Outputs.count = rows.length;
-`;
-
 /** The grown-ups' Try Olive: a thank-you rung, slots only, never a prompt; the written line when she does not answer. */
 export const TRY_OLIVE_SCRIPT = `
 var lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';
@@ -697,6 +683,216 @@ Outputs.isFr = lang === 'fr';
 ${ALL_WORD_KEYS.map((key) => `Outputs.${key} = map.${key} || '';`).join('\n')}
 `;
 
+// ── P106 IG-006 (lane C): the cards, the `?`, Olive's lessons ───────────────
+
+/** Every word a script can show, as `{ en, fr }` (the engine's, Olive's, the pages', IG-006's). */
+const BI_WORD = (key: string): { en: string; fr: string } => {
+  const w = (WORDS as Record<string, { en: string; fr: string }>)[key] ?? (OLIVE_WORDS as Record<string, { en: string; fr: string }>)[key] ?? PAGE_WORDS[key] ?? IG006_WORDS[key];
+  if (!w) throw new Error('no word ' + key);
+  return { en: w.en, fr: w.fr };
+};
+
+/** The kit's icon per block (the same table Kit palette draws with); an Olive block is the owl. */
+const KIT_ICON: Readonly<Record<string, string>> = { fwd: 'fwd', left: 'left', right: 'right', water: 'water', pick: 'pick', put: 'put', say: 'say', repeat: 'loop', until: 'wall', if: 'if', when: 'if', count_inc: 'count', trick: 'loop', do: 'fwd', ask: 'owl' };
+
+/** A slot as the card's example shows it: the value's word in both languages (the kit reads `{ en, fr }` labels). */
+function cardSlot(key: string): { key: string; label: { en: string; fr: string }; options: Array<{ value: string; label: { en: string; fr: string } }> } | null {
+  const pairs = (list: Array<[string, string]>) => list.map(([value, word]) => ({ value, label: BI_WORD(word) }));
+  const listed = (name: string) => (OLIVE_TABLE.lists[name].en as string[]).map((en: string, i: number) => ({ value: en, label: { en, fr: OLIVE_TABLE.lists[name].fr[i] as string } }));
+  if (key === 'sensor') {
+    const base = pairs([['wall_ahead', 'sWallAhead'], ['tulip_ahead', 'sTulipAhead'], ['bowl_empty', 'sBowlEmpty'], ['basket_full', 'sBasketFull'], ['count_is', 'sCountIs'], ['olive_says:yes', 'sOliveSaysYes'], ['olive_says:no', 'sOliveSaysNo']]);
+    const x = BI_WORD('sOliveReadX');
+    const reads = Object.entries(OLIVE_OBJECTS).map(([id, o]) => ({ value: 'olive_read:' + id, label: { en: x.en.split('{x}').join(o.en), fr: x.fr.split('{x}').join(o.fr) } }));
+    return { key, label: BI_WORD('bIf'), options: [...base, ...reads] };
+  }
+  if (key === 'event') return { key, label: BI_WORD('bWhen'), options: pairs([['meow', 'eMeow']]) };
+  if (key === 'name') return { key, label: BI_WORD('bTrick'), options: ['row', 'hop', 'zigzag'].map((n) => ({ value: n, label: { en: n, fr: n } })) };
+  if (key === 'text') return { key, label: BI_WORD('bSay'), options: pairs([['thanksMamie', 'thanksMamie'], ['thanksSami', 'thanksSami'], ['thanksBiscuit', 'thanksBiscuit']]) };
+  if (key === 'to') return { key, label: BI_WORD('slotTo'), options: listed('islanders') };
+  if (key === 'deed') return { key, label: BI_WORD('slotDeed'), options: listed('deeds') };
+  if (key === 'kind') return { key, label: BI_WORD('slotKind'), options: listed('kinds') };
+  if (key === 'times') return { key, label: BI_WORD('slotTimes'), options: [{ value: '1', label: BI_WORD('timesOnce') }, { value: '3', label: BI_WORD('timesThree') }] };
+  return null;
+}
+
+/** The palette the card's example is drawn with: every block a card shows, in the kit's shape, both languages. */
+export const CARD_PALETTE = Object.entries(BLOCK_CARDS).map(([id, c]) => {
+  const olive = id.indexOf('olive:') === 0;
+  const meta = olive ? { kind: 'ask', body: false, count: false, slots: id === 'olive:say-thanks' ? ['to', 'deed'] : id === 'olive:is-it-a' ? ['kind', 'times'] : [] } : BLOCK_META[id];
+  return { id, kind: meta.kind, icon: olive ? 'owl' : KIT_ICON[id] || 'pick', label: BI_WORD(c.label), hasBody: meta.body, hasCount: meta.count, slots: meta.slots.map(cardSlot).filter(Boolean) };
+});
+
+/** The cards with their examples numbered (the kit needs an id per block). */
+const CARDS_DRAWN = Object.fromEntries(
+  Object.entries(BLOCK_CARDS).map(([id, c]) => {
+    let n = 1;
+    const number = (list: ReadonlyArray<CardBlock>): unknown[] => list.map((b) => ({ id: n++, t: b.t, ...(b.n !== undefined ? { n: b.n } : {}), ...(b.body ? { body: number(b.body) } : {}), ...(b.slots ? { slots: { ...b.slots } } : {}) }));
+    return [id, { label: c.label, line: c.line, example: number(c.example) }];
+  })
+);
+
+/**
+ * IG-006 AC5 — the first tap on a palette block opens its card and places nothing. The kit has already drawn the new
+ * block when it says so (Changed); this gate sees exactly one new block of a kind this child has not seen the card of,
+ * hands back the program as it was BEFORE (a fresh list, so the Variable changes and the kit redraws without it) and
+ * names the card to open. Anything else — a second tap, a drag, a count, a removal — goes through untouched, as text.
+ */
+export const CARD_GATE_SCRIPT = `
+var CARDS = ${JSON.stringify(Object.keys(BLOCK_CARDS))};
+function listOf(raw) { if (Array.isArray(raw)) return raw; if (typeof raw === 'string' && raw) { try { var p = JSON.parse(raw); if (Array.isArray(p)) return p; } catch (e) { return []; } } return []; }
+function flat(list, out) { for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; out.push(b); if (Array.isArray(b.body)) flat(b.body, out); } return out; }
+var now = listOf(Inputs.program), before = listOf(Inputs.before);
+var seen = Array.isArray(Inputs.seen) ? Inputs.seen : [];
+var nowAll = flat(now, []), beforeAll = flat(before, []), had = {};
+for (var i = 0; i < beforeAll.length; i++) had[String(beforeAll[i].id)] = 1;
+var added = [];
+for (var j = 0; j < nowAll.length; j++) if (!had[String(nowAll[j].id)]) added.push(nowAll[j]);
+var t = added.length === 1 ? String(added[0].t) : '';
+var hold = nowAll.length === beforeAll.length + 1 && t !== '' && CARDS.indexOf(t) !== -1 && seen.indexOf(t) === -1;
+Outputs.program = hold ? JSON.parse(JSON.stringify(before)) : typeof Inputs.program === 'string' ? Inputs.program : JSON.stringify(now);
+Outputs.hold = hold;
+Outputs.cardId = hold ? t : '';
+`;
+
+/** "Got it": the card's block is seen, so the next tap on it places it. */
+export const CARD_SEEN_SCRIPT = `
+var seen = Array.isArray(Inputs.seen) ? Inputs.seen.slice() : [];
+var id = String(Inputs.cardId || '');
+if (id && seen.indexOf(id) === -1) seen.push(id);
+Outputs.seen = seen;
+`;
+
+/** The open card's words and its example, drawn as blocks by a second, locked Block List. */
+export const BLOCK_CARD_SCRIPT = `${WORD_HELPER}
+var CARDS = ${JSON.stringify(CARDS_DRAWN)};
+var PALETTE = ${JSON.stringify(CARD_PALETTE)};
+var lang = langOf(Inputs.lang), band = Number(Inputs.band) === 1 ? 1 : 2;
+var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
+var id = String(Inputs.cardOpen || '');
+var c = CARDS[id] || null;
+var label = c ? c.label : '';
+if (c && band === 1 && w['c' + label.slice(1)] && label.charAt(0) === 'b') label = 'c' + label.slice(1);
+Outputs.show = !!c;
+Outputs.title = c ? (w[label] || id) : '';
+Outputs.line = c ? (w[c.line] || '') : '';
+Outputs.example = c ? JSON.parse(JSON.stringify(c.example)) : [];
+Outputs.palette = PALETTE;
+Outputs.gotIt = w.cardGotIt || '';
+Outputs.exampleWord = w.cardExample || '';
+Outputs.cardId = c ? id : '';
+`;
+
+/** The ? for each kind of block placed (first placed first): a tap opens that block's card again. */
+export const HELP_CHIPS_SCRIPT = `${WORD_HELPER}
+var CARDS = ${JSON.stringify(Object.fromEntries(Object.entries(BLOCK_CARDS).map(([id, c]) => [id, c.label])))};
+var lang = langOf(Inputs.lang), band = Number(Inputs.band) === 1 ? 1 : 2;
+var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
+var prog = Array.isArray(Inputs.program) ? Inputs.program : [];
+var rows = [], seen = {};
+function walk(list) { for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; var t = String(b.t); if (CARDS[t] && !seen[t]) { seen[t] = 1; var k = CARDS[t]; if (band === 1 && k.charAt(0) === 'b' && w['c' + k.slice(1)]) k = 'c' + k.slice(1); rows.push({ id: t, label: '? ' + (w[k] || t) }); } if (Array.isArray(b.body)) walk(b.body); } }
+walk(prog);
+Outputs.rows = rows;
+Outputs.show = rows.length > 0;
+Outputs.helpsText = rows.length ? w.cardHelpsH || '' : '';
+`;
+
+/** Olive's five lessons (R7) as they are asked on Skills: the rung, the canned slots, and in which language. */
+const LESSONS: ReadonlyArray<{ id: string; title: string; lesson: string; asks: ReadonlyArray<{ slots: Record<string, string>; lang?: 'en' | 'fr'; q?: string; book?: string }> }> = [
+  { id: 'count-tulips', title: 'or7Title', lesson: 'or7Lesson', asks: [{ slots: { list: '@flowerlists' } }] },
+  { id: 'maths', title: 'or8Title', lesson: 'or8Lesson', asks: [{ slots: { a: '14', b: '9' } }] },
+  { id: 'no-letter-e', title: 'or9Title', lesson: 'or9Lesson', asks: [{ slots: {} }] },
+  { id: 'tall-tales', title: 'or10Title', lesson: 'or10Lesson', asks: [0, 1, 2].map((i) => ({ slots: { question: '@questions_tall:' + i }, q: '@questions_tall:' + i, book: 'lsTrue' + (i + 1) })) },
+  { id: 'translate', title: 'or11Title', lesson: 'or11Lesson', asks: [{ slots: { note: 'Les tulipes ont soif.' }, lang: 'fr', q: 'lsFrEn', book: 'The tulips are thirsty.' }, { slots: { note: 'The tulips are thirsty.' }, lang: 'en', q: 'lsEnFr', book: 'Les tulipes ont soif.' }] }
+];
+const LESSON_QUESTION: Readonly<Record<string, string>> = { 'count-tulips': 'lsQ7', maths: 'lsQ8', 'no-letter-e': 'lsQ9', 'tall-tales': 'lsQ10', translate: 'lsQ11' };
+if (LESSONS.map((l) => l.id).join() !== OLIVE_LESSON_IDS.join()) throw new Error('IG-006: the Skills lessons are not the rung table’s five');
+
+/** The words each lesson card carries in its row (a repeated card has no word table of its own). */
+const LESSON_WORD_KEYS = ['oliveSaysBubble', 'lsCheck7', 'lsCheck8', 'lsCheck9', 'lsCheck9None', 'lsBook', 'lsTrue1', 'lsTrue2', 'lsTrue3', 'lsFrEn', 'lsEnFr'];
+
+/**
+ * The five lesson cards, band 10–12 only (at 7–9 there are no rows and nothing shows): title, lesson, the canned
+ * question, the Ask Olive word, and the few words the card's answers need; "Olive can't do this here yet" where this
+ * computer's exam withheld the lesson.
+ */
+export const LESSON_ROWS_SCRIPT = `${WORD_HELPER}
+var LESSONS = ${JSON.stringify(LESSONS.map((l) => ({ id: l.id, title: l.title, lesson: l.lesson })))};
+var QUESTION = ${JSON.stringify(LESSON_QUESTION)};
+var KEYS = ${JSON.stringify(LESSON_WORD_KEYS)};
+var FLOWERS = ${JSON.stringify(OLIVE_TABLE.lists.flowerlists)};
+var lang = langOf(Inputs.lang), band = Number(Inputs.band) === 1 ? 1 : 2;
+var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
+var exam = Inputs.exam && Inputs.exam.rungs && typeof Inputs.exam.rungs === 'object' ? Inputs.exam.rungs : {};
+var few = {};
+for (var k = 0; k < KEYS.length; k++) few[KEYS[k]] = w[KEYS[k]] || '';
+var rows = [];
+if (band === 2) for (var i = 0; i < LESSONS.length; i++) {
+  var l = LESSONS[i], held = !!exam[l.id] && exam[l.id].pass === false;
+  rows.push({ id: l.id, title: w[l.title] || '', lesson: w[l.lesson] || '', question: fill(w[QUESTION[l.id]], { list: FLOWERS[lang][0] }), askWord: w.lsAsk || '', lang: lang, w: few, isHeld: held, heldText: held ? w.oliveCant || '' : '' });
+}
+Outputs.rows = rows;
+Outputs.show = rows.length > 0;
+Outputs.count = rows.length;
+`;
+
+/**
+ * "Ask Olive" on a lesson card: each canned question sent to the shell (never a word the child typed), her answer — or
+ * her written one when she does not answer — and the page's CHECK underneath: the program's count (4), the rule's sum
+ * (23), every letter e in her sentence found and marked (Letters), the book's answer, the translation a person gives.
+ */
+export const OLIVE_LESSON_SCRIPT = `${OLIVE_HELPERS}
+var ASKS = ${JSON.stringify(Object.fromEntries(LESSONS.map((l) => [l.id, l.asks])))};
+var lesson = String(Inputs.lesson || '');
+var lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';
+var W = Inputs.w && typeof Inputs.w === 'object' ? Inputs.w : {};
+function fillIn(t, vars) { var out = String(t || ''); for (var k in vars) out = out.split('{' + k + '}').join(String(vars[k])); return out; }
+function listed(v, L) { var m = /^@(\\w+)(?::(\\d+))?$/.exec(String(v)); if (!m) return String(v); var l = oliveListOf(m[1], L); return l[Number(m[2]) || 0] || ''; }
+function isE(ch) { return fold(ch) === 'e'; }
+var asks = ASKS[lesson] || [];
+var lines = [], letters = [], fallback = false, eCount = 0;
+for (var i = 0; i < asks.length; i++) {
+  var a = asks[i], L = a.lang || lang, slots = {};
+  for (var s in a.slots) slots[s] = listed(a.slots[s], L);
+  var reply = null;
+  try {
+    var ctl = typeof AbortController === 'function' ? new AbortController() : null;
+    var timer = ctl ? setTimeout(function () { ctl.abort(); }, Number(Inputs.timeoutMs) > 0 ? Number(Inputs.timeoutMs) : OLIVE_TIMEOUT_MS) : null;
+    var headers = { 'content-type': 'application/json' };
+    headers[OLIVE_HEADER] = '1';
+    var res = await fetch(String(Inputs.url || OLIVE_URL), { method: 'POST', headers: headers, body: JSON.stringify({ rung: lesson, slots: slots, lang: L }), signal: ctl ? ctl.signal : undefined });
+    if (timer) clearTimeout(timer);
+    if (res && res.ok) reply = await res.json();
+  } catch (e) { reply = null; }
+  var said;
+  if (reply && reply.ok === true && (reply.value !== undefined || typeof reply.text === 'string')) said = reply.value !== undefined ? reply.value : reply.text;
+  else { fallback = true; var wr = writtenAnswer(OLIVE, lesson, slots, L); said = wr ? (wr.value !== undefined ? wr.value : wr.text) : ''; }
+  said = String(said === undefined || said === null ? '' : said);
+  var line = { id: 'l' + i, q: '', a: fillIn(W.oliveSaysBubble || '{x}', { x: said }), check: '' };
+  if (lesson === 'count-tulips') { var n = 0, parts = String(slots.list).split(','); for (var p = 0; p < parts.length; p++) if (/^(tulip|tulipe)$/.test(parts[p].trim())) n++; line.check = fillIn(W.lsCheck7, { n: n }); }
+  else if (lesson === 'maths') line.check = fillIn(W.lsCheck8, { n: Number(slots.a) + Number(slots.b) });
+  else if (lesson === 'no-letter-e') {
+    var run = '', parts2 = [], chars = Array.from ? Array.from(said) : said.split('');
+    for (var c = 0; c < chars.length; c++) {
+      var ch = chars[c];
+      if (isE(ch) || ch === ' ') { if (run) parts2.push({ text: run, e: false }); run = ''; parts2.push({ text: ch === ' ' ? '\\u00a0' : ch, e: ch !== ' ' }); if (ch !== ' ') eCount++; }
+      else run += ch;
+    }
+    if (run) parts2.push({ text: run, e: false });
+    for (var q = 0; q < parts2.length; q++) letters.push({ id: 'c' + q, text: parts2[q].text, isE: parts2[q].e, ground: parts2[q].e ? 'var(--sun)' : 'transparent' });
+    line.a = '';
+    line.check = eCount ? fillIn(W.lsCheck9, { n: eCount }) : W.lsCheck9None || '';
+  } else if (lesson === 'tall-tales') { line.q = listed(a.q, L); line.check = fillIn(W.lsBook, { x: W[a.book] || '' }); }
+  else if (lesson === 'translate') { line.q = fillIn(W[a.q], { q: slots.note }); line.check = fillIn(W.lsBook, { x: a.book }); }
+  lines.push(line);
+}
+Outputs.lines = lines;
+Outputs.letters = letters;
+Outputs.hasLetters = letters.length > 0;
+Outputs.eCount = eCount;
+Outputs.fallback = fallback;
+Outputs.asked = asks.length > 0;
+`;
+
 /** The glue, as the generator places it: one `Logic/*` each. */
 export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; seam: string }> = [
   { component: 'Logic/Read program', script: READ_PROGRAM_SCRIPT, seam: 'the program as a list, whatever held it' },
@@ -719,8 +915,14 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Olive status', script: OLIVE_STATUS_SCRIPT, seam: 'where Olive runs, from the shell’s status door' },
   { component: 'Logic/Try Olive', script: TRY_OLIVE_SCRIPT, seam: 'the grown-ups\u2019 Try Olive: one thank-you asked of her, the written line when she does not answer' },
   { component: 'Logic/Olive held', script: OLIVE_HELD_SCRIPT, seam: 'the rungs this computer\u2019s exam failed, in words, for Skills' },
-  { component: 'Logic/Rung rows', script: RUNG_ROWS_SCRIPT, seam: 'Olive\u2019s eighteen lessons as Skills cards, band 10\u201312, marked where this computer\u2019s exam withheld them' },
   { component: 'Logic/Olive played', script: OLIVE_PLAYED_SCRIPT, seam: 'the rung this run asked Olive, and whether she answered, for the after-run hint' },
+  // P106 IG-006 (lane C).
+  { component: 'Logic/Card gate', script: CARD_GATE_SCRIPT, seam: 'the first tap on a palette block opens its card and places nothing' },
+  { component: 'Logic/Card seen', script: CARD_SEEN_SCRIPT, seam: 'Got it: the block’s card is seen, the next tap places it' },
+  { component: 'Logic/Block card', script: BLOCK_CARD_SCRIPT, seam: 'the open card’s words and its example as blocks' },
+  { component: 'Logic/Help chips', script: HELP_CHIPS_SCRIPT, seam: 'a ? for each kind of block placed, to open its card again' },
+  { component: 'Logic/Lesson rows', script: LESSON_ROWS_SCRIPT, seam: 'Olive’s five lessons as Skills cards, band 10–12' },
+  { component: 'Logic/Olive lesson', script: OLIVE_LESSON_SCRIPT, seam: 'a lesson asked of Olive, her answer, and the page’s check underneath' },
   // IG-007 (P106 s2): the renderer this computer uses, and the fallback rule's write.
   { component: 'Logic/Renderer', script: RENDERER_SCRIPT, seam: 'which renderer draws the world on this computer, and the grown-ups\u2019 line for it' },
   { component: 'Logic/Renderer choice', script: RENDERER_CHOICE_SCRIPT, seam: 'the renderer after a fallback or the grown-ups\u2019 switch' }

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3ffc002a-a5fd-5675-8122-a29c066e46b5",
+  "name": "Card gate",
+  "path": "/Logic/Card gate",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The first tap on a palette block opens its card and places nothing. Runs on Go; answers Ran once its outputs are set."
+}

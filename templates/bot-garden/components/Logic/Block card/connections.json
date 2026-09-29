@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "da08cbd1-0f5f-5966-85d7-3adb8a1e674d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "blockcardIn",
+      "fromProperty": "band",
+      "toId": "blockcardFn",
+      "toProperty": "in-band"
+    },
+    {
+      "fromId": "blockcardIn",
+      "fromProperty": "botName",
+      "toId": "blockcardFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "blockcardIn",
+      "fromProperty": "cardOpen",
+      "toId": "blockcardFn",
+      "toProperty": "in-cardOpen"
+    },
+    {
+      "fromId": "blockcardIn",
+      "fromProperty": "lang",
+      "toId": "blockcardFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "blockcardIn",
+      "fromProperty": "words",
+      "toId": "blockcardFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "blockcardFn",
+      "fromProperty": "out-cardId",
+      "toId": "blockcardOut",
+      "toProperty": "cardId"
+    },
+    {
+      "fromId": "blockcardFn",
+      "fromProperty": "out-example",
+      "toId": "blockcardOut",
+      "toProperty": "example"
+    },
+    {
+      "fromId": "blockcardFn",
+      "fromProperty": "out-exampleWord",
+      "toId": "blockcardOut",
+      "toProperty": "exampleWord"
+    },
+    {
+      "fromId": "blockcardFn",
+      "fromProperty": "out-gotIt",
+      "toId": "blockcardOut",
+      "toProperty": "gotIt"
+    },
+    {
+      "fromId": "blockcardFn",
+      "fromProperty": "out-line",
+      "toId": "blockcardOut",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "blockcardFn",
+      "fromProperty": "out-palette",
+      "toId": "blockcardOut",
+      "toProperty": "palette"
+    },
+    {
+      "fromId": "blockcardFn",
+      "fromProperty": "out-show",
+      "toId": "blockcardOut",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "blockcardFn",
+      "fromProperty": "out-title",
+      "toId": "blockcardOut",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "blockcardFn",
+      "fromProperty": "success",
+      "toId": "blockcardOut",
+      "toProperty": "ran"
+    }
+  ]
+}

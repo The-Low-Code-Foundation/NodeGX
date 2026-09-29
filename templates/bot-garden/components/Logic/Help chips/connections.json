@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e8f33691-558a-5449-8951-4d20c753b71a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "helpchipsIn",
+      "fromProperty": "band",
+      "toId": "helpchipsFn",
+      "toProperty": "in-band"
+    },
+    {
+      "fromId": "helpchipsIn",
+      "fromProperty": "botName",
+      "toId": "helpchipsFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "helpchipsIn",
+      "fromProperty": "lang",
+      "toId": "helpchipsFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "helpchipsIn",
+      "fromProperty": "program",
+      "toId": "helpchipsFn",
+      "toProperty": "in-program"
+    },
+    {
+      "fromId": "helpchipsIn",
+      "fromProperty": "words",
+      "toId": "helpchipsFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "helpchipsFn",
+      "fromProperty": "out-helpsText",
+      "toId": "helpchipsOut",
+      "toProperty": "helpsText"
+    },
+    {
+      "fromId": "helpchipsFn",
+      "fromProperty": "out-rows",
+      "toId": "helpchipsOut",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "helpchipsFn",
+      "fromProperty": "out-show",
+      "toId": "helpchipsOut",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "helpchipsFn",
+      "fromProperty": "success",
+      "toId": "helpchipsOut",
+      "toProperty": "ran"
+    }
+  ]
+}

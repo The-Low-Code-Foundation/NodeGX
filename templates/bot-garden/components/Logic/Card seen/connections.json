@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2697c70d-19f6-5588-8c85-6586f1f870b5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cardseenIn",
+      "fromProperty": "cardId",
+      "toId": "cardseenFn",
+      "toProperty": "in-cardId"
+    },
+    {
+      "fromId": "cardseenIn",
+      "fromProperty": "seen",
+      "toId": "cardseenFn",
+      "toProperty": "in-seen"
+    },
+    {
+      "fromId": "cardseenIn",
+      "fromProperty": "go",
+      "toId": "cardseenFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cardseenFn",
+      "fromProperty": "out-seen",
+      "toId": "cardseenOut",
+      "toProperty": "seen"
+    },
+    {
+      "fromId": "cardseenFn",
+      "fromProperty": "success",
+      "toId": "cardseenOut",
+      "toProperty": "ran"
+    }
+  ]
+}

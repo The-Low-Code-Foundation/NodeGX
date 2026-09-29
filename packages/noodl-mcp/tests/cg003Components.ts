@@ -102,7 +102,11 @@ export const C = {
   options: '/Robot/Options',
   skill: '/Skills/Card',
   skOlive: '/Skills/Olive line',
-  rungCard: '/Skills/Rung card',
+  // P106 IG-006: Olive's lessons on Skills (the eighteen rung cards left with their rungs); the Workshop's ? chip.
+  lessonCard: '/Skills/Lesson card',
+  lessonLine: '/Skills/Lesson line',
+  letterBit: '/Skills/Letter bit',
+  helpChip: '/Workshop/Help chip',
   skRungs: '/Skills/Olive lessons',
   profile: '/Profiles/Card',
   form: '/Profiles/Form',
@@ -291,7 +295,11 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
   'Logic/Ask Olive': 'go',
   'Logic/Accept proposal': 'go',
   'Logic/Try Olive': 'go',
-  'Logic/Renderer choice': 'go'
+  'Logic/Renderer choice': 'go',
+  // P106 IG-006 (lane C).
+  'Logic/Card gate': 'go',
+  'Logic/Card seen': 'go',
+  'Logic/Olive lesson': 'go'
 };
 
 /** Port types by name; anything else is `*` (the engine passes objects, arrays and text through the same names). */
@@ -754,6 +762,19 @@ const MARK: CgComponent = {
   ]
 };
 
+/** IG-006 AC5: one ? for a kind of block the program holds; a tap asks for that block's card (Chosen, with the Id). */
+const HELP_CHIP: CgComponent = {
+  path: 'Workshop/Help chip',
+  description: 'A ? with a block’s name, for a kind of block in the program. A tap publishes Chosen with the Id (the block’s kind), and the Workshop opens that block’s card again.',
+  nodes: [
+    inputs('hcIn', [['id', 'string'], ['label', 'string']]),
+    group('hcChip', 'The ?', undefined, { sizeMode: 'contentSize', backgroundColor: 'var(--card)', borderStyle: 'solid', borderWidth: px(2), borderColor: 'var(--violet-2)', borderRadius: px(999), ...pad(4, 10), cssClassName: 'bg-help-chip bg-press' }, ['hcText']),
+    text('hcText', 'The block’s name', 'hcChip', '', { sizeMode: 'contentSize', fontSize: px(14), fontWeight: '800', color: 'var(--violet-ink)' }),
+    outputs('hcOut', [['chosen', 'signal'], ['id', 'string']])
+  ],
+  connections: [wire('hcIn', 'label', 'hcText', 'text'), wire('hcChip', 'onClick', 'hcOut', 'chosen'), wire('hcIn', 'id', 'hcOut', 'id')]
+};
+
 /**
  * The whole workshop (the mockup's #s-workshop): the request's head, the task card, the world with the pad over it,
  * the controls, the owl, the steps with the fold offer, and the win card. Everything that changes lives here; the page
@@ -821,12 +842,25 @@ const PLAY: CgComponent = {
     place('plUse', BUTTON_NODE, 'Use them', 'plPropBtns', { ...btn('ask', '', { ...pad(8, 14), fontSize: px(14), cssClassName: 'bg-prop-use' }), label: 'Use them' }),
     place('plNoThanks', BUTTON_NODE, 'No thanks', 'plPropBtns', { ...btn('quiet', '', { ...pad(8, 14), fontSize: px(14), cssClassName: 'bg-prop-no' }), label: 'No thanks' }),
     text('plOwlMeta', 'Where she lives', 'plOwlCol', '', { fontSize: px(12), color: 'var(--violet-meta)', cssClassName: 'bg-owl-meta' }),
-    group('plRight', 'The steps side', 'plWs', { ...column({ rowGap: sp(10) }), ...PANEL }, ['plStepsHead', 'plBlocksBox', 'plSlotMsg', 'plTidy']),
+    group('plRight', 'The steps side', 'plWs', { ...column({ rowGap: sp(10) }), ...PANEL }, ['plStepsHead', 'plCardBox', 'plBlocksBox', 'plSlotMsg', 'plHelps', 'plTidy']),
     group('plStepsHead', 'The steps’ head', 'plRight', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'space-between', flexWrap: 'nowrap' }), ['plStepsH', 'plCount']),
     text('plStepsH', 'Pip’s steps', 'plStepsHead', '', { ...T_H2, fontSize: px(20) }),
     text('plCount', 'How many blocks', 'plStepsHead', '', { sizeMode: 'contentSize', fontSize: px(13), fontWeight: '800', color: 'var(--ink-2)', mounted: false }),
     group('plBlocksBox', 'The steps, scrolling in their own box', 'plRight', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-blocks-box' }, ['plBlocks']),
     place('plBlocks', KIT_BLOCKS, 'The blocks', 'plBlocksBox', { ...BLOCK_COLOURS }),
+    // P106 IG-006 AC5: a block's card. The first tap on a palette block opens it and places nothing; "Got it", and the
+    // next tap places the block. The example is drawn by a second Block List, locked, with no palette.
+    group('plCardBox', 'The block’s card', 'plRight', { ...column({ rowGap: sp(8) }), backgroundColor: 'var(--violet-2)', borderRadius: px(16), ...pad(12), cssClassName: 'bg-card-help', mounted: false }, ['plCardTitle', 'plCardLine', 'plCardEgWord', 'plCardEgBox', 'plCardOk']),
+    text('plCardTitle', 'The block', 'plCardBox', '', { ...T_H3, cssClassName: 'bg-card-title' }),
+    text('plCardLine', 'What it does', 'plCardBox', '', { ...T_BODY, cssClassName: 'bg-card-line' }),
+    text('plCardEgWord', 'For example', 'plCardBox', '', T_SMALL),
+    group('plCardEgBox', 'The example', 'plCardBox', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-card-eg' }, ['plCardEg']),
+    place('plCardEg', KIT_BLOCKS, 'The example, as blocks', 'plCardEgBox', { ...BLOCK_COLOURS, showPalette: false, locked: true }),
+    place('plCardOk', BUTTON_NODE, 'Got it', 'plCardBox', { ...btn('primary', '', { ...pad(8, 14), fontSize: px(14), cssClassName: 'bg-card-ok' }), label: 'Got it' }),
+    // IG-006 AC5: a ? for each kind of block placed — the card again, whenever.
+    group('plHelps', 'A ? for each kind of block placed', 'plRight', { ...row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(6), rowGap: sp(6) }), cssClassName: 'bg-helps', mounted: false }, ['plHelpsH', 'plHelpEach']),
+    text('plHelpsH', 'What does a block do?', 'plHelps', '', { ...T_SMALL, width: pct(100) }),
+    { ...logic('plHelpEach', FOR_EACH_NODE, 'One ? per kind of block', { template: C.helpChip, templateType: 'explicit' }), parent: 'plHelps' },
     // CG-005 s3, AC6: an ask block's slot refused — in words, beside the picker, before anything is sent.
     text('plSlotMsg', 'Why Olive cannot be asked yet', 'plRight', '', { fontSize: px(14), fontWeight: '800', color: 'var(--coral)', cssClassName: 'bg-slot-msg', mounted: false }),
     group('plTidy', 'The fold offer', 'plRight', { ...row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(10) }), backgroundColor: 'var(--tidy)', borderStyle: 'solid', borderWidth: px(2), borderColor: 'var(--tidy-edge)', borderRadius: px(14), ...pad(10, 12), cssClassName: 'bg-tidy', mounted: false }, ['plTidyText', 'plFoldBtn', 'plNotNow']),
@@ -870,6 +904,18 @@ const PLAY: CgComponent = {
     logic('plDraw', L('Draw world'), 'The world in the kit’s words'),
     logic('plPalette', L('Palette'), 'The blocks this band may use'),
     logic('plKitPal', L('Kit palette'), 'In the kit’s shape'),
+    // ── P106 IG-006: the cards ──
+    logic('plCardGate', L('Card gate'), 'A first tap opens the card'),
+    gate('plCardHold', 'Held for the card?'),
+    variable('plCardOpenVar', 'gardenCardOpen', 'The card open'),
+    setVariable('plSetCardOpen', 'gardenCardOpen', 'Open the card'),
+    setVariable('plSetCardHelp', 'gardenCardOpen', 'Open it from a ?'),
+    setVariable('plClearCardOpen', 'gardenCardOpen', 'Close the card', { setWith: 'string', value: '' }),
+    variable('plSeenVar', 'gardenCardsSeen', 'The cards seen'),
+    logic('plSeenAdd', L('Card seen'), 'Got it'),
+    setVariable('plSetSeen', 'gardenCardsSeen', 'One more card seen'),
+    logic('plCardInfo', L('Block card'), 'The card’s words and example'),
+    logic('plHelpRows', L('Help chips'), 'The ? for each kind of block'),
     // ── Teach, predict, fold ──
     withStates('plTeachMode', 'Teaching or not', ['idle', 'teach'], {
       teaching: { type: 'boolean', by: { idle: false, teach: true } },
@@ -954,8 +1000,11 @@ const PLAY: CgComponent = {
     // The program: one Variable, four writers (the kit, the pad, the fold, the reset).
     wire('plProgVar', 'value', 'plRead', 'program'),
     wire('plProgVar', 'value', 'plBlocks', 'program'),
-    wire('plBlocks', 'onProgram', 'plSetProgKit', 'value'),
-    wire('plBlocks', 'onChanged', 'plSetProgKit', 'do'),
+    // IG-006 AC5: every kit edit passes the card gate first (a first tap on a block's kind is held for its card).
+    wire('plBlocks', 'onProgram', 'plCardGate', 'program'),
+    wire('plBlocks', 'onChanged', 'plCardGate', 'go'),
+    wire('plCardGate', 'program', 'plSetProgKit', 'value'),
+    wire('plCardGate', 'ran', 'plSetProgKit', 'do'),
     wire('plRecord', 'program', 'plSetProgRec', 'value'),
     wire('plRecord', 'ran', 'plSetProgRec', 'do'),
     wire('plFold', 'program', 'plSetProgFold', 'value'),
@@ -1159,6 +1208,43 @@ const PLAY: CgComponent = {
     wire('plIn', 'words', 'plSlots', 'words'),
     wire('plSlots', 'message', 'plSlotMsg', 'text'),
     wire('plSlots', 'show', 'plSlotMsg', 'mounted'),
+    // IG-006 AC5: the card gate, the card, Got it, and the ? chips.
+    wire('plProgVar', 'value', 'plCardGate', 'before'),
+    wire('plSeenVar', 'value', 'plCardGate', 'seen'),
+    wire('plCardGate', 'hold', 'plCardHold', 'condition'),
+    wire('plCardGate', 'ran', 'plCardHold', 'eval'),
+    wire('plCardGate', 'cardId', 'plSetCardOpen', 'value'),
+    wire('plCardHold', 'ontrue', 'plSetCardOpen', 'do'),
+    wire('plCardOpenVar', 'value', 'plCardInfo', 'cardOpen'),
+    wire('plIn', 'lang', 'plCardInfo', 'lang'),
+    wire('plIn', 'band', 'plCardInfo', 'band'),
+    wire('plIn', 'words', 'plCardInfo', 'words'),
+    wire('plIn', 'botName', 'plCardInfo', 'botName'),
+    wire('plCardInfo', 'show', 'plCardBox', 'mounted'),
+    wire('plCardInfo', 'title', 'plCardTitle', 'text'),
+    wire('plCardInfo', 'line', 'plCardLine', 'text'),
+    wire('plCardInfo', 'exampleWord', 'plCardEgWord', 'text'),
+    wire('plCardInfo', 'example', 'plCardEg', 'program'),
+    wire('plCardInfo', 'palette', 'plCardEg', 'palette'),
+    wire('plIn', 'band', 'plCardEg', 'band'),
+    wire('plIn', 'lang', 'plCardEg', 'language'),
+    wire('plCardInfo', 'gotIt', 'plCardOk', 'label'),
+    wire('plCardOk', 'onClick', 'plSeenAdd', 'go'),
+    wire('plSeenVar', 'value', 'plSeenAdd', 'seen'),
+    wire('plCardInfo', 'cardId', 'plSeenAdd', 'cardId'),
+    wire('plSeenAdd', 'seen', 'plSetSeen', 'value'),
+    wire('plSeenAdd', 'ran', 'plSetSeen', 'do'),
+    wire('plSetSeen', 'done', 'plClearCardOpen', 'do'),
+    wire('plRead', 'program', 'plHelpRows', 'program'),
+    wire('plIn', 'lang', 'plHelpRows', 'lang'),
+    wire('plIn', 'band', 'plHelpRows', 'band'),
+    wire('plIn', 'words', 'plHelpRows', 'words'),
+    wire('plIn', 'botName', 'plHelpRows', 'botName'),
+    wire('plHelpRows', 'rows', 'plHelpEach', 'items'),
+    wire('plHelpRows', 'show', 'plHelps', 'mounted'),
+    wire('plHelpRows', 'helpsText', 'plHelpsH', 'text'),
+    wire('plHelpEach', 'itemOutput-id', 'plSetCardHelp', 'value'),
+    wire('plHelpEach', 'itemOutputSignal-chosen', 'plSetCardHelp', 'do'),
     // The proposal (AC1): shown from the run, placed only by Use them; either answer hides it.
     wire('plT', 'oliveProposes', 'plPropH', 'text'),
     wire('plT', 'oliveAccept', 'plUse', 'label'),
@@ -2057,48 +2143,85 @@ const PAGE_ROBOT: CgComponent = (() => {
   };
 })();
 
-/**
- * What Olive cannot do on this computer (CG-005 AC5): the rungs its exam failed, in words — "Olive can't do this here
- * yet: words into blocks" — from the shell's status door. Band 10-12 only (the rungs are theirs); nothing to say, no line.
- */
-const RUNG_CARD: CgComponent = {
-  path: 'Skills/Rung card',
-  description: 'One of Olive\u2019s lessons: the rung\u2019s title, whether she does it or a program does it better (the tag), the lesson, and "Olive can\u2019t do this here yet" where this computer\u2019s exam withheld it. No progress, no score.',
+/** IG-006 AC6: one line under a lesson — the question (tall tales, the direction), Olive's answer, and the page's check. */
+const LESSON_LINE: CgComponent = {
+  path: 'Skills/Lesson line',
+  description: 'One answer on a lesson card: the question when the card asks several, what Olive said, and the check the page did underneath (the program’s count, the rule’s sum, the book).',
   nodes: [
-    inputs('rcIn', [['id', 'string'], ['title', 'string'], ['lesson', 'string'], ['markText', 'string'], ['markClass', 'string'], ['isHeld', 'boolean'], ['heldText', 'string']]),
-    group('rcCard', 'The card', undefined, { ...column({ rowGap: sp(8) }), backgroundColor: 'var(--card)', borderRadius: 'var(--radius-card)', ...pad(14), cssClassName: 'bg-notion bg-rung' }, ['rcMarkRow', 'rcTitle', 'rcLesson', 'rcHeld']),
-    group('rcMarkRow', 'Hers or a program\u2019s', 'rcCard', row(), ['rcMark']),
-    // The tag's fill is its class (bg-tag-ask: Olive's violet; bg-tag-control: a program's block colour).
-    group('rcMark', 'The tag', 'rcMarkRow', { sizeMode: 'contentSize', ...pad(4, 9), cssClassName: 'bg-tag bg-tag-ask' }, ['rcMarkText']),
-    text('rcMarkText', 'Hers or a program\u2019s', 'rcMark', '', { sizeMode: 'contentSize', fontSize: px(12), fontWeight: '800', color: 'var(--on-fill)' }),
-    text('rcTitle', 'The lesson\u2019s title', 'rcCard', '', T_H3),
-    text('rcLesson', 'The lesson', 'rcCard', '', T_SMALL),
-    text('rcHeld', 'Not on this computer', 'rcCard', '', { fontSize: px(14), fontWeight: '800', color: 'var(--violet-ink)', mounted: false })
+    inputs('llIn', [['id', 'string'], ['q', 'string'], ['a', 'string'], ['check', 'string']]),
+    group('llBox', 'The answer', undefined, { ...column({ rowGap: sp(2) }), cssClassName: 'bg-lesson-line' }, ['llQ', 'llA', 'llCheck']),
+    text('llQ', 'The question', 'llBox', '', T_SMALL),
+    text('llA', 'What Olive said', 'llBox', '', { ...T_BODY, fontWeight: '700', cssClassName: 'bg-lesson-said' }),
+    text('llCheck', 'The check', 'llBox', '', { fontSize: px(15), fontWeight: '800', color: 'var(--ink)', cssClassName: 'bg-lesson-check' })
+  ],
+  connections: [wire('llIn', 'q', 'llQ', 'text'), wire('llIn', 'a', 'llA', 'text'), wire('llIn', 'check', 'llCheck', 'text')]
+};
+
+/** IG-006 AC6: a piece of Olive's sentence on the letter-e lesson; an e the page found is marked (the sun under it). */
+const LETTER_BIT: CgComponent = {
+  path: 'Skills/Letter bit',
+  description: 'A piece of Olive’s sentence as the page checked it: a letter e it found is marked on the sun; the rest is plain.',
+  nodes: [
+    inputs('lbIn', [['id', 'string'], ['text', 'string'], ['ground', 'string'], ['isE', 'boolean']]),
+    group('lbBox', 'A piece of her sentence', undefined, { sizeMode: 'contentSize', borderRadius: px(4), cssClassName: 'bg-letter' }, ['lbText']),
+    text('lbText', 'The letters', 'lbBox', '', { sizeMode: 'contentSize', fontSize: px(17), fontWeight: '700', color: 'var(--ink)' })
+  ],
+  connections: [wire('lbIn', 'text', 'lbText', 'text'), wire('lbIn', 'ground', 'lbBox', 'backgroundColor')]
+};
+
+/**
+ * One of Olive's five lessons (R7) as a card on Skills: the title, what it teaches, the canned question, "Ask Olive", and
+ * underneath her answer and the page's check. No block, no program, no score.
+ */
+const LESSON_CARD: CgComponent = {
+  path: 'Skills/Lesson card',
+  description: 'One of Olive’s lessons: the title, the lesson, the canned question and Ask Olive; underneath, what she said and the check the page does (the count, the sum, every letter e marked, the book, a person’s translation). "Olive can’t do this here yet" where this computer’s exam withheld it.',
+  repeats: { source: 'array', rowFields: ['id', 'q', 'a', 'check', 'text', 'ground', 'isE'] },
+  nodes: [
+    inputs('lcIn', [['id', 'string'], ['title', 'string'], ['lesson', 'string'], ['question', 'string'], ['askWord', 'string'], ['lang', 'string'], ['w', 'object'], ['isHeld', 'boolean'], ['heldText', 'string']]),
+    group('lcCard', 'The card', undefined, { ...column({ rowGap: sp(8) }), backgroundColor: 'var(--card)', borderRadius: 'var(--radius-card)', ...pad(14), cssClassName: 'bg-notion bg-lesson' }, ['lcTitle', 'lcLesson', 'lcQuestion', 'lcAsk', 'lcLetters', 'lcLines', 'lcHeld']),
+    text('lcTitle', 'The lesson’s title', 'lcCard', '', T_H3),
+    text('lcLesson', 'The lesson', 'lcCard', '', T_SMALL),
+    text('lcQuestion', 'The question', 'lcCard', '', { ...T_BODY, fontWeight: '700', cssClassName: 'bg-lesson-q' }),
+    place('lcAsk', BUTTON_NODE, 'Ask Olive', 'lcCard', { ...btn('ask', '', { ...pad(8, 14), fontSize: px(14), cssClassName: 'bg-lesson-ask' }), label: 'Ask Olive' }),
+    group('lcLetters', 'Her sentence, every e marked', 'lcCard', { ...row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(0), rowGap: sp(2) }), cssClassName: 'bg-letters', mounted: false }, ['lcLetterEach']),
+    { ...logic('lcLetterEach', FOR_EACH_NODE, 'One piece per run of letters', { template: C.letterBit, templateType: 'explicit' }), parent: 'lcLetters' },
+    group('lcLines', 'Her answers and the checks', 'lcCard', column({ rowGap: sp(8) }), ['lcEach']),
+    { ...logic('lcEach', FOR_EACH_NODE, 'One line per answer', { template: C.lessonLine, templateType: 'explicit' }), parent: 'lcLines' },
+    text('lcHeld', 'Not on this computer', 'lcCard', '', { fontSize: px(14), fontWeight: '800', color: 'var(--violet-ink)', mounted: false }),
+    logic('lcAskOlive', L('Olive lesson'), 'Ask Olive, then check')
   ],
   connections: [
-    wire('rcIn', 'markClass', 'rcMark', 'cssClassName'),
-    wire('rcIn', 'markText', 'rcMarkText', 'text'),
-    wire('rcIn', 'title', 'rcTitle', 'text'),
-    wire('rcIn', 'lesson', 'rcLesson', 'text'),
-    wire('rcIn', 'heldText', 'rcHeld', 'text'),
-    wire('rcIn', 'isHeld', 'rcHeld', 'mounted')
+    wire('lcIn', 'title', 'lcTitle', 'text'),
+    wire('lcIn', 'lesson', 'lcLesson', 'text'),
+    wire('lcIn', 'question', 'lcQuestion', 'text'),
+    wire('lcIn', 'askWord', 'lcAsk', 'label'),
+    wire('lcIn', 'heldText', 'lcHeld', 'text'),
+    wire('lcIn', 'isHeld', 'lcHeld', 'mounted'),
+    wire('lcIn', 'id', 'lcAskOlive', 'lesson'),
+    wire('lcIn', 'lang', 'lcAskOlive', 'lang'),
+    wire('lcIn', 'w', 'lcAskOlive', 'w'),
+    wire('lcAsk', 'onClick', 'lcAskOlive', 'go'),
+    wire('lcAskOlive', 'lines', 'lcEach', 'items'),
+    wire('lcAskOlive', 'letters', 'lcLetterEach', 'items'),
+    wire('lcAskOlive', 'hasLetters', 'lcLetters', 'mounted')
   ]
 };
 
 const SKILL_RUNGS: CgComponent = {
   path: 'Skills/Olive lessons',
-  description: 'Olive\u2019s eighteen lessons as cards, band 10\u201312 only (ruling 8); the ones this computer\u2019s exam withheld say so. Shows nothing at 7\u20139.',
-  repeats: { source: 'array', rowFields: ['id', 'n', 'title', 'lesson', 'markText', 'markClass', 'isHeld', 'heldText'] },
+  description: 'Olive\u2019s five lessons (IG-006, R7), band 10\u201312 only: count the tulips, 14 + 9, no letter e, tall tales, the direction — each a card with Ask Olive and the check underneath. Shows nothing at 7\u20139.',
+  repeats: { source: 'array', rowFields: ['id', 'title', 'lesson', 'question', 'askWord', 'lang', 'w', 'isHeld', 'heldText'] },
   nodes: [
     inputs('srIn', [['band', 'number'], ['lang', 'string'], ['words', 'array'], ['botName', 'string']]),
-    group('srBox', 'Olive\u2019s lessons', undefined, { ...column({ rowGap: sp(10) }), mounted: false }, ['srH', 'srSub', 'srGrid']),
+    group('srBox', 'Olive\u2019s lessons', undefined, { ...column({ rowGap: sp(10) }), cssClassName: 'bg-lessons', mounted: false }, ['srH', 'srSub', 'srGrid']),
     text('srH', 'Olive\u2019s lessons', 'srBox', '', { ...T_H2, marginTop: sp(8) }),
     text('srSub', 'What she does and what a program does', 'srBox', '', T_MUTED),
-    group('srGrid', 'The eighteen lessons', 'srBox', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-path' }, ['srEach']),
-    { ...logic('srEach', FOR_EACH_NODE, 'One card per lesson', { template: C.rungCard, templateType: 'explicit' }), parent: 'srGrid' },
+    group('srGrid', 'The five lessons', 'srBox', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-path' }, ['srEach']),
+    { ...logic('srEach', FOR_EACH_NODE, 'One card per lesson', { template: C.lessonCard, templateType: 'explicit' }), parent: 'srGrid' },
     logic('srT', L('Translate words'), 'In their language'),
     logic('srStatus', L('Olive status'), 'Her exam on this computer', { nonce: 1 }),
-    logic('srRows', L('Rung rows'), 'The lessons, marked')
+    logic('srRows', L('Lesson rows'), 'The five lessons')
   ],
   connections: [
     wire('srIn', 'words', 'srT', 'words'),
@@ -2211,6 +2334,7 @@ export const CG003_COMPONENTS: ReadonlyArray<CgComponent> = [
   RUNNER,
   WIN,
   MARK,
+  HELP_CHIP,
   PLAY,
   QUEST,
   PIN,
@@ -2221,7 +2345,9 @@ export const CG003_COMPONENTS: ReadonlyArray<CgComponent> = [
   OPTIONS,
   SKILL,
   SKILL_OLIVE,
-  RUNG_CARD,
+  LESSON_LINE,
+  LETTER_BIT,
+  LESSON_CARD,
   SKILL_RUNGS,
   PROFILE,
   FORM,

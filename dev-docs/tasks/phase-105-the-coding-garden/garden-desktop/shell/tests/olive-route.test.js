@@ -31,14 +31,12 @@ test('POST /__garden/olive answers {ok, value|text, ms}; the shaped ones carry v
     assert.equal(say.body.text, 'Merci Mamie Rose, ton jardin est magnifique !');
     assert.equal(typeof say.body.ms, 'number');
     assert.equal(say.body.value, undefined);
-    const blocks = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'words-to-blocks', slots: { route: templates.lists.routes.fr[0] }, lang: 'fr' } });
-    assert.deepEqual(blocks.body.value, ['avancer', 'avancer', 'gauche']);
     const yn = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'is-it-a', slots: { thing: 'a rose', kind: 'a flower' }, lang: 'en' } });
     assert.equal(yn.body.value, 'yes');
     const n = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'maths', slots: { a: '2', b: '3' }, lang: 'fr' } });
     assert.equal(n.body.value, 5);
-    const one = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'what-wants', slots: { line: templates.lists.lines.fr[0] }, lang: 'fr', options: ['lettre', 'croquettes'] } });
-    assert.equal(one.body.value, 'lettre', 'the enum is the request’s options (the fake answers the first)');
+    const one = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'read', slots: { note: templates.lists.notes_read.fr[0] }, lang: 'fr', options: ['tulipe jaune', 'tulipe rouge'] } });
+    assert.equal(one.body.value, 'tulipe jaune', 'the enum is the request’s options (the fake answers the first)');
   });
 });
 
@@ -55,9 +53,9 @@ test('a refused slot never reaches the model: the answer is a named fallback and
       assert.equal(r.status, 200);
       assert.deepEqual({ ok: r.body.ok, fallback: r.body.fallback, reason: r.body.reason }, { ok: false, fallback: true, reason });
     }
-    const p = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'poem', slots: { flower: 'x'.repeat(41) }, lang: 'fr' } });
+    const p = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'voice-hint', slots: { key: 'hintWet', b: 'x'.repeat(41) }, lang: 'fr' } });
     assert.equal(p.body.reason, 'too-long');
-    const c = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'poem', slots: { flower: 'Tul\u0001la' }, lang: 'fr' } });
+    const c = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'voice-hint', slots: { key: 'hintWet', b: 'Tul\u0001la' }, lang: 'fr' } });
     assert.equal(c.body.reason, 'control-char');
     const bad = await request(port, 'POST', '/__garden/olive', { headers: H, body: '{not json' });
     assert.equal(bad.status, 400);
@@ -74,9 +72,9 @@ test('a refused output is a fallback with its reason: blocklist, must-contain, c
     assert.equal((await ask()).body.reason, 'blocklist');
     reply = () => 'Bonjour Mamie Rose, quel beau jardin.';
     assert.equal((await ask()).body.reason, 'must-contain');
-    reply = () => '{ "prenom": "Fleur de l\'île" }';
-    const one = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'name-one', slots: { thing: 'une tulipe' }, lang: 'fr' } });
-    assert.equal(one.body.reason, 'cap');
+    reply = () => '{ "objet": "dynamite" }';
+    const one = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'read', slots: { note: templates.lists.notes_read.fr[0] }, lang: 'fr', options: ['tulipe rouge', 'tulipe jaune'] } });
+    assert.equal(one.body.reason, 'grammar', 'a thing that is not on the plot is refused: the enum is the plot');
     reply = () => Array.from({ length: 40 }, (_, i) => `merci${i}`).join(' ');
     const long = await ask();
     assert.equal(long.body.ok, true);
@@ -106,9 +104,9 @@ test('two concurrent POSTs are served in order (the queue), and status answers u
   const engine = fakeEngine({ delay: 400 });
   const { olive } = await doors({ engine });
   await withRelay(olive, async (port) => {
-    const body = (u) => ({ rung: 'poem', slots: { flower: u }, lang: 'fr' });
-    const a = request(port, 'POST', '/__garden/olive', { headers: H, body: body('Alpha') });
-    const b = request(port, 'POST', '/__garden/olive', { headers: H, body: body('Beta') });
+    const body = (u) => ({ rung: 'say-thanks', slots: { to: u, deed: 'porté sa lettre' }, lang: 'fr' });
+    const a = request(port, 'POST', '/__garden/olive', { headers: H, body: body('Mamie Rose') });
+    const b = request(port, 'POST', '/__garden/olive', { headers: H, body: body('Sami') });
     await wait(100);
     const s = await request(port, 'GET', '/__garden/olive/status');
     assert.ok(s.ms < 1000, `status took ${s.ms} ms during a completion`);
@@ -118,7 +116,7 @@ test('two concurrent POSTs are served in order (the queue), and status answers u
     assert.equal(ra.body.ok, true);
     assert.equal(rb.body.ok, true);
     assert.equal(engine.calls.length, 2);
-    assert.ok(engine.calls[0].user.includes('Alpha') && engine.calls[1].user.includes('Beta'));
+    assert.ok(engine.calls[0].user.includes('Mamie Rose') && engine.calls[1].user.includes('Sami'));
     assert.ok(engine.calls[1].start >= engine.calls[0].end, 'never two at once');
   });
 });
@@ -126,7 +124,7 @@ test('two concurrent POSTs are served in order (the queue), and status answers u
 test('the timeout through the route: fallback:true, reason timeout, and the ms says when', async () => {
   const { olive } = await doors({ delay: 5_000, timeoutMs: 100 });
   await withRelay(olive, async (port) => {
-    const r = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'poem', slots: { flower: 'Tulla' }, lang: 'fr' } });
+    const r = await request(port, 'POST', '/__garden/olive', { headers: H, body: { rung: 'say-thanks', slots: { to: 'Sami', deed: 'porté sa lettre' }, lang: 'fr' } });
     assert.deepEqual({ ok: r.body.ok, fallback: r.body.fallback, reason: r.body.reason }, { ok: false, fallback: true, reason: 'timeout' });
     assert.ok(r.body.ms >= 100 && r.body.ms < 2000, `ms ${r.body.ms}`);
   });
@@ -157,14 +155,19 @@ test('POST /__garden/olive/exam runs the exam through the same ask, keeps the re
     assert.equal(r.body.passed + r.body.failed, r.body.probes.filter((p) => p.mode !== 'record').length);
     const kept = readResults(dataDir);
     assert.equal(kept.at, r.body.at);
-    // The fake answers D1's blocks for every route: P06 met, P07/P08 not → rung 3 fails; P09 (🎓, three avancer expected) not met → rung 4 passes.
-    assert.equal(kept.rungs['words-to-blocks'].pass, false);
-    assert.equal(kept.rungs['count-in-words'].pass, true);
-    assert.equal(kept.probes.find((p) => p.id === 'P06').pass, true);
-    assert.equal(kept.probes.find((p) => p.id === 'P07').pass, false);
+    // The fake answers the enum's FIRST word: `read` is right on RD1 and RD3 (FR and EN), wrong on RD2 → 4 of 6, under 5
+    // → withheld; `is it a…?` says oui to all six → 6 of C1's 18 → withheld; 14 + 9 → 5 (not 23) → the 🎓 lesson holds.
+    assert.deepEqual(kept.rungs.read.score, { met: 4, of: 6, min: 5 });
+    assert.equal(kept.rungs.read.pass, false);
+    assert.deepEqual(kept.rungs['is-it-a'].score, { met: 6, of: 18, min: 15 });
+    assert.equal(kept.rungs['is-it-a'].pass, false);
+    assert.equal(kept.rungs.maths.pass, true);
+    assert.equal(kept.probes.find((p) => p.id === 'RD1-fr').pass, true);
+    assert.equal(kept.probes.find((p) => p.id === 'RD2-fr').pass, false);
+    assert.equal(kept.probes.find((p) => p.id === 'IA3-fr').replies.length, 3, 'a C1 probe takes all three samples');
     const s = await request(port, 'GET', '/__garden/olive/status');
     assert.equal(s.body.exam.at, r.body.at);
-    assert.ok(Object.keys(s.body.exam.rungs).length >= 12);
+    assert.equal(Object.keys(s.body.exam.rungs).length, 9, 'three blocks, five lessons, the voicing');
   });
   const lines = timings.read();
   const events = new Set(lines.map((l) => l.event));

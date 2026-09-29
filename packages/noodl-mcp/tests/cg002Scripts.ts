@@ -59,7 +59,7 @@
  * @module noodl-mcp/tests/cg002Scripts
  */
 import { BAND_PALETTE, BLOCK_TYPES, HINT_KEYS, OLIVE_RUNGS, WORD_KEYS } from './cg002Content';
-import { BLOCK_WORD, OLIVE_HELPERS, RUNG_SHAPE, RUNG_TEMPERATURE } from './cg005Olive';
+import { BLOCK_WORD, OLIVE_ENGINE, OLIVE_HELPERS, RUNG_SHAPE, RUNG_TEMPERATURE } from './cg005Olive';
 
 /** An `until` gives up after this many passes, whatever its sensor says. */
 export const UNTIL_GUARD = 40;
@@ -140,7 +140,8 @@ var DIAL_TEMPERATURE = ${JSON.stringify(DIAL_TEMPERATURE)};
 var ASK_SHAPE = ${JSON.stringify(RUNG_SHAPE)};
 var ASK_TEMPERATURE = ${JSON.stringify(RUNG_TEMPERATURE)};
 var ASK_BLOCK = ${JSON.stringify(BLOCK_WORD)};
-var ASK_RESERVED = { rung: 1, args: 1, shape: 1, dial: 1, options: 1 };
+var ASK_RESERVED = { rung: 1, args: 1, shape: 1, dial: 1, options: 1, times: 1 };
+${OLIVE_ENGINE}
 function clone(v) { return v === undefined || v === null ? v : JSON.parse(JSON.stringify(v)); }
 function worldOf(raw) {
   var w = raw && typeof raw === 'object' ? clone(raw) : {};
@@ -209,6 +210,8 @@ function sense(w, run, name, arg) {
   if (name === 'olive_says') return oliveSays(run, arg);
   // IG-001 D7: the picker offers "Olive says yes" / "Olive says no" as one sensor value each (olive_says:yes, olive_says:no).
   if (name.indexOf('olive_says:') === 0) return oliveSays(run, name.slice(11));
+  // IG-006 AC2: "if Olive read [red tulip]" — the thing her last read answer named (its id, so either language matches).
+  if (name.indexOf('olive_read:') === 0) return !!run.lastAnswer && run.lastAnswer.object === name.slice(11);
   return false;
 }
 function slotsOf(b) { return b && b.slots && typeof b.slots === 'object' ? b.slots : {}; }
@@ -228,21 +231,23 @@ function countUses(list, type) {
 }
 function countBlocks(list) { var n = 0; for (var i = 0; i < list.length; i++) { if (!list[i]) continue; n++; if (list[i].body) n += countBlocks(bodyOf(list[i])); } return n; }
 function hasContainer(list) { for (var i = 0; i < list.length; i++) if (list[i] && list[i].body) return true; return false; }
-function isAsk(b) { return b.t === 'ask' || String(b.t).indexOf('ask:') === 0; }
+function isAsk(b) { return b.t === 'ask' || String(b.t).indexOf('olive:') === 0; }
 /**
  * An ask block as a step (CG-005). The rung is slots.rung, else the palette type's suffix (ask:<rung>). The slot values
  * are slots.args (a list or an object), else every other slot key (the kit writes slots flat, as strings). No dial:
  * the rung's own temperature. The shape: the block's, else the rung's.
  */
 function askStep(b, slots) {
-  var rung = slots.rung !== undefined && slots.rung !== null && slots.rung !== '' ? slots.rung : String(b.t).slice(4);
+  var rung = slots.rung !== undefined && slots.rung !== null && slots.rung !== '' ? slots.rung : String(b.t).replace(/^olive:/, '');
   var args;
   if (Array.isArray(slots.args)) args = slots.args;
   else if (slots.args && typeof slots.args === 'object') args = clone(slots.args);
   else { args = {}; for (var k in slots) if (!ASK_RESERVED[k]) args[k] = slots[k]; }
   var hasDial = slots.dial !== undefined && slots.dial !== null && slots.dial !== '';
   var options = Array.isArray(slots.options) ? slots.options : typeof slots.options === 'string' && slots.options ? slots.options.split(',') : null;
-  return { id: b.id, op: 'ask', rung: rung, args: args, shape: String(slots.shape || ASK_SHAPE[rung] || 'word'), dial: hasDial ? Math.max(0, Math.min(2, Math.floor(Number(slots.dial) || 0))) : -1, options: options };
+  // IG-006: times — is it a…? asked once, or 3 times and the majority (the vote).
+  var times = Math.floor(Number(slots.times)) === 3 ? 3 : 1;
+  return { id: b.id, op: 'ask', rung: rung, args: args, shape: String(slots.shape || ASK_SHAPE[rung] || 'word'), dial: hasDial ? Math.max(0, Math.min(2, Math.floor(Number(slots.dial) || 0))) : -1, options: options, times: times };
 }
 /** The program as flat steps. Static where it can be (repeat, do), dynamic where the world decides (until, if, an Olive count). */
 function flatten(list, tricks, out, depth) {
@@ -367,11 +372,25 @@ function step(runIn, worldIn, answer) {
     else if (a && a.run !== undefined && a.run !== null && a.run !== '' && String(a.run) !== String(run.runId)) a = null;
     if (!a) {
       delta.waiting = true;
-      var req = { seq: run.askSeq, rung: s.rung, slots: s.args, lang: run.lang, shape: s.shape, temperature: s.dial >= 0 ? DIAL_TEMPERATURE[s.dial] : ASK_TEMPERATURE[s.rung] };
-      if (s.options) req.options = s.options;
+      // IG-006: the note on the plot, the things on it, the thing ahead — named by the engine from the world.
+      var ctx = oliveRequestOf(s, w, run);
+      var req = { seq: run.askSeq, rung: s.rung, slots: ctx.slots, lang: run.lang, shape: s.shape, temperature: s.dial >= 0 ? DIAL_TEMPERATURE[s.dial] : ASK_TEMPERATURE[s.rung] };
+      if (ctx.options) req.options = ctx.options;
       return { run: run, delta: delta, glowId: glowId, done: false, waiting: true, request: req };
     }
     run.lastAnswer = { ok: !!a.ok, value: a.value, text: a.text, fallback: !!a.fallback, reason: a.reason };
+    // IG-006 AC3: the vote asks again until its last answer; the run stays parked on the same block.
+    var olive = oliveAnswered(run, s, a);
+    if (olive.again) {
+      run.askSeq++;
+      delta.waiting = true;
+      delta.vote = olive.vote;
+      var again = oliveRequestOf(s, w, run);
+      var req2 = { seq: run.askSeq, rung: s.rung, slots: again.slots, lang: run.lang, shape: s.shape, temperature: s.dial >= 0 ? DIAL_TEMPERATURE[s.dial] : ASK_TEMPERATURE[s.rung] };
+      if (again.options) req2.options = again.options;
+      return { run: run, delta: delta, glowId: glowId, done: false, waiting: true, request: req2 };
+    }
+    if (olive.vote) delta.vote = olive.vote;
     run.waiting = false;
     delta.answered = clone(run.lastAnswer);
     // A blocks answer is a PROPOSAL the child accepts or not: never spliced into the run (CG-005 AC1).
@@ -385,6 +404,8 @@ function step(runIn, worldIn, answer) {
       var spoken = a.value !== undefined && a.value !== null ? a.value : a.text;
       if (spoken !== undefined && spoken !== null && String(spoken) !== '') { delta.sayText = Array.isArray(spoken) ? spoken.join(', ') : String(spoken); delta.sayStyle = 'olive'; }
     }
+    // IG-006 AC2/AC3: read and is it a…? say WHAT she answered ("Olive read: red tulip", "Olive: yes", "2 of 3 said yes").
+    if (olive.say) { delta.sayText = olive.say; delta.sayStyle = 'olive'; }
     run.pc++; run.tick++;
     return { run: run, delta: delta, glowId: glowId, done: false, waiting: false, request: null };
   }
@@ -481,6 +502,8 @@ function goalMet(w, run, program, goal) {
     else if (g.name === 'handled') ok = (run.handled && run.handled[String(a[0])] || 0) >= (Number(a[1]) || 1);
     else if (g.name === 'said') ok = (Number(run.said) || 0) >= (Number(a[0]) || 1);
     else if (g.name === 'no_puddle') { var pud = 0; for (var p = 0; p < w.things.length; p++) if (w.things[p].kind === 'puddle') pud++; ok = pud === 0; }
+    // IG-006: exactly n tulips of one colour watered (Mamie's note: the red row, and none of the yellow).
+    else if (g.name === 'tulips_watered') { var tw = 0; for (var q = 0; q < w.things.length; q++) if (w.things[q].kind === 'tulip' && String(w.things[q].color || '') === String(a[0]) && w.things[q].watered) tw++; ok = tw === (Number(a[1]) || 0); done += Math.min(tw, Number(a[1]) || 0); total += Number(a[1]) || 0; }
     if (!ok) missing.push(String(g.name));
   }
   return { met: goals.length > 0 && missing.length === 0, missing: missing, done: done, total: total };
@@ -725,7 +748,7 @@ var total = Inputs.total === undefined || Inputs.total === null ? tul.total : Nu
 var key = 'hintStart', vars = {};
 if (!blocks) key = 'hintEmpty';
 else if (mayRepeat && rep && rep.cover >= 4 && rep.containerId === null && !hasContainer(program)) { key = 'hintPattern'; vars = { n: rep.count }; }
-else if (oliveFallback) key = 'oliveResting';
+else if (oliveFallback) key = rung >= 1 && rung <= ${OLIVE_RUNG_MAX} ? 'oliveResting' + rung : 'oliveResting';
 else if (predictAsked && !predictHit) key = 'hintPredictMiss';
 else if (goalMetNow) { key = referenceCount > 0 && blocks <= referenceCount ? 'hintPerfect' : blocks > ${MANY_BLOCKS} ? 'hintDoneMany' : 'hintDone'; vars = { k: blocks }; }
 else if (rockGone > 0) key = 'hintRockGone';
@@ -787,11 +810,12 @@ var withheld = oliveWithheld(Inputs.exam);
 var olive = [], offered = [], heldHere = [];
 for (var r = 0; r < rungIds.length; r++) {
   var rid = String(rungIds[r]), rr = OLIVE.rungs[rid];
-  if (!rr || rid === 'voice-hint' || (Number(rr.band) || 1) > band) continue;
+  // IG-006: only a BLOCK is placed (a lesson is asked on Skills, the voicing is the owl row's).
+  if (!rr || rid === 'voice-hint' || rr.use !== 'block' || (Number(rr.band) || 1) > band) continue;
   if (withheld.indexOf(rid) !== -1) { heldHere.push(rid); continue; }
   offered.push(rid);
   var title = word[OLIVE_RUNG_WORD[rid]] || rid;
-  olive.push({ id: 'ask:' + rid, kind: 'ask', label: title, caption: title, hasBody: false, hasCount: false, slots: olivePickerSlots(rid, band, lang, Inputs.narrow, word), band: band, rung: rid, shape: rr.shape, shapeLabel: word[OLIVE_SHAPE_WORD[rr.shape]] || rr.shape, ladder: rr.ladder });
+  olive.push({ id: 'olive:' + rid, kind: 'ask', label: title, caption: title, hasBody: false, hasCount: false, slots: olivePickerSlots(rid, band, lang, Inputs.narrow, word), band: band, rung: rid, shape: rr.shape, shapeLabel: word[OLIVE_SHAPE_WORD[rr.shape]] || rr.shape, ladder: rr.ladder });
 }
 if (rungIds.length) { var kept = []; for (var o = 0; o < out.length; o++) if (out[o].id !== 'ask') kept.push(out[o]); out = kept.concat(olive); }
 Outputs.palette = out;

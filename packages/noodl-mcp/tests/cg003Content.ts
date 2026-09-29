@@ -29,7 +29,11 @@ export const REQUEST_SUBS: Readonly<Record<string, { key: string; words: Bi }>> 
   'wall-until': { key: 'subWallUntil', words: s('No need to count the steps. {b} can keep going until the wall, then stop by itself.', 'Pas besoin de compter les pas. {b} peut avancer jusqu’au mur, puis s’arrêter tout seul.') },
   'meow-when': { key: 'subMeowWhen', words: s('Nobody knows when Biscuit will meow. Teach {b} what to do whenever it happens.', 'Personne ne sait quand Biscuit va miauler. Apprends à {b} quoi faire chaque fois que ça arrive.') },
   'eggs-count': { key: 'subEggsCount', words: s('Four eggs, not five. {b} can count while picking, and stop when the count is right.', 'Quatre œufs, pas cinq. {b} peut compter en ramassant, et s’arrêter quand le compte est bon.') },
-  'rows-trick': { key: 'subRowsTrick', words: s('Two rows, the same job. Teach {b} the job once, as a trick with a name, then use it twice.', 'Deux rangées, le même travail. Apprends le travail une fois à {b}, comme une astuce avec un nom, puis utilise-la deux fois.') }
+  'rows-trick': { key: 'subRowsTrick', words: s('Two rows, the same job. Teach {b} the job once, as a trick with a name, then use it twice.', 'Deux rangées, le même travail. Apprends le travail une fois à {b}, comme une astuce avec un nom, puis utilise-la deux fois.') },
+  // P106 IG-006 (lane C): Olive's three requests.
+  'mamie-note': { key: 'subMamieNote', words: s('A program cannot read Mamie’s note, but Olive can. Ask her, then let “if Olive read…” choose the row.', 'Un programme ne sait pas lire le mot de Mamie, Olive si. Demande-lui, puis laisse « si Olive a lu… » choisir la rangée.') },
+  'rock-flower': { key: 'subRockFlower', words: s('Olive is right most of the time, not every time. Ask three times, and the count decides.', 'Olive a raison presque tout le temps, pas à chaque fois. Demande trois fois, et le compte décide.') },
+  'sami-thanks': { key: 'subSamiThanks', words: s('The letter is {b}’s job; the kind words are Olive’s. Put her thank-you at the end.', 'La lettre, c’est le travail de {b} ; les mots gentils, ceux d’Olive. Mets son merci à la fin.') }
 };
 
 /** Page words, EN and FR. `{b}` is the robot's name; `{who}`, `{k}`, `{reward}` are filled by the script that shows them. */
@@ -157,3 +161,102 @@ export const HATS: ReadonlyArray<{ id: string; word: string; free: boolean; from
   { id: 'sun', word: 'hatSun', free: false, from: 'islMamie' },
   { id: 'crown', word: 'hatCrown', free: false, from: 'islBiscuit' }
 ];
+
+/**
+ * P106 IG-006 (lane C) — the page words Olive's three blocks, their cards, the three requests and Olive's lessons need.
+ * 🔴 The FR lines are Richard's to read before the kids see them (IG-006 AC5).
+ */
+export const IG006_WORDS: Readonly<Record<string, Bi>> = {
+  // The three requests (cg002Content.ts IG006_REQUESTS): title, blurb, the islander's line, the reward, the gift.
+  rqNoteTitle: s('Water the flowers my note asks for', 'Arrose les fleurs que demande mon mot'),
+  rqNoteBlurb: s('Olive reads', 'Olive lit'),
+  rqNoteLine: s('"I left a note by the tulips. Ask Olive to read it: it says which row wants water today."', '« J’ai laissé un mot près des tulipes. Demande à Olive de le lire : il dit quelle rangée veut de l’eau aujourd’hui. »'),
+  stickerNote: s('Note sticker', 'Autocollant petit mot'),
+  giftNote: s('A note sticker, from Mamie Rose', 'Un autocollant petit mot, offert par Mamie Rose'),
+  rqFlowerTitle: s('Water the flowers, not the rocks', 'Arrose les fleurs, pas les rochers'),
+  rqFlowerBlurb: s('Is it a…?', 'Est-ce un… ?'),
+  rqFlowerLine: s('"Flowers and rocks, side by side. Ask Olive if each one is a flower before {b} waters it. If she gets one wrong, ask three times."', '« Des fleurs et des rochers, côte à côte. Demande à Olive si chacun est une fleur avant que {b} l’arrose. Si elle se trompe, demande trois fois. »'),
+  stickerFlower: s('Rose sticker', 'Autocollant rose'),
+  giftFlower: s('A rose sticker, from Sami', 'Un autocollant rose, offert par Sami'),
+  rqThanksTitle: s('Carry my letter, then say thank you', 'Porte ma lettre, puis dis merci'),
+  rqThanksBlurb: s('Olive says it', 'Olive le dit'),
+  rqThanksLine: s('"Take my letter to the post box, then let Olive find the words to thank Mamie Rose."', '« Porte ma lettre jusqu’à la boîte aux lettres, puis laisse Olive trouver les mots pour remercier Mamie Rose. »'),
+  stickerThanks: s('Bouquet sticker', 'Autocollant bouquet'),
+  giftThanks: s('A bouquet sticker, from Sami', 'Un autocollant bouquet, offert par Sami'),
+  // The cards (AC5): what every palette block does, in one line. {b} is the robot's name.
+  cardGotIt: s('Got it', 'Compris'),
+  cardExample: s('For example:', 'Par exemple :'),
+  cardHelpsH: s('What does a block do? Tap its ?', 'Que fait un bloc ? Touche son ?'),
+  cdFwd: s('{b} takes one step forward, to the next square.', '{b} avance d’une case.'),
+  cdLeft: s('{b} turns a quarter turn to the left, without moving.', '{b} tourne d’un quart de tour à gauche, sans avancer.'),
+  cdRight: s('{b} turns a quarter turn to the right, without moving.', '{b} tourne d’un quart de tour à droite, sans avancer.'),
+  cdWater: s('{b} waters the square in front. A tulip drinks; anywhere else, a puddle.', '{b} arrose la case devant lui. Une tulipe boit ; ailleurs, c’est une flaque.'),
+  cdPick: s('{b} picks up the thing in front and keeps it in the basket.', '{b} ramasse ce qu’il y a devant lui et le garde dans son panier.'),
+  cdPut: s('{b} puts down the last thing it picked up, on the square in front.', '{b} pose la dernière chose ramassée sur la case devant lui.'),
+  cdSay: s('{b} says a line out loud, in a bubble.', '{b} dit une phrase à voix haute, dans une bulle.'),
+  cdRepeat: s('The blocks inside run again and again, as many times as the number says.', 'Les blocs à l’intérieur recommencent, autant de fois que le dit le nombre.'),
+  cdUntil: s('The blocks inside run again and again, until what you chose is true.', 'Les blocs à l’intérieur recommencent, jusqu’à ce que ce que tu as choisi soit vrai.'),
+  cdIf: s('The blocks inside run only if what you chose is true right now.', 'Les blocs à l’intérieur ne se font que si ce que tu as choisi est vrai à ce moment-là.'),
+  cdWhen: s('The blocks inside run each time something happens, like Biscuit meowing.', 'Les blocs à l’intérieur se font chaque fois que quelque chose arrive, comme Biscuit qui miaule.'),
+  cdCountInc: s('{b} adds one to the number it keeps in mind.', '{b} ajoute un au nombre qu’il garde en tête.'),
+  cdTrick: s('Give some blocks a name. Then one “do” block runs them all.', 'Donne un nom à des blocs. Ensuite, un seul bloc « faire » les fait tous.'),
+  cdDo: s('Runs the trick with that name, all its blocks.', 'Fait l’astuce qui porte ce nom, avec tous ses blocs.'),
+  cdAsk: s('Olive answers a question, and her answer can steer the program.', 'Olive répond à une question, et sa réponse peut guider le programme.'),
+  cdOliveSay: s('Olive writes a thank-you in her own words, and {b} says it. Run it twice: it is never the same.', 'Olive écrit un merci avec ses mots, et {b} le dit. Lance-le deux fois : ce n’est jamais pareil.'),
+  cdOliveRead: s('Olive reads the note on the plot and says which thing it means. Then “if Olive read…” chooses what {b} does.', 'Olive lit le mot posé dans le jardin et dit de quelle chose il parle. Ensuite, « si Olive a lu… » choisit ce que fait {b}.'),
+  lsRead: s('Only Olive can read what an islander wrote, and her answer is always one of the things on the plot.', 'Seule Olive sait lire ce qu’un habitant a écrit, et sa réponse est toujours une des choses du jardin.'),
+  // Olive's lessons on Skills (R7): the canned question each card asks, and the check the page does underneath.
+  lsAsk: s('Ask Olive', 'Demander à Olive'),
+  lsQ7: s('Mamie’s flowers: {list}. How many tulips?', 'Les fleurs de Mamie : {list}. Combien de tulipes ?'),
+  lsCheck7: s('The program counts the word “tulip”: {n}.', 'Le programme compte le mot « tulipe » : {n}.'),
+  lsQ8: s('What is 14 + 9?', 'Combien font 14 + 9 ?'),
+  lsCheck8: s('The rule adds them: 14 + 9 = {n}.', 'La règle les additionne : 14 + 9 = {n}.'),
+  lsQ9: s('Describe a tulip without the letter e.', 'Décris une tulipe sans la lettre e.'),
+  lsCheck9: s('The page checked every letter: {n} × e.', 'La page a vérifié chaque lettre : {n} × e.'),
+  lsCheck9None: s('The page checked every letter: no e at all. She kept the rule this time.', 'La page a vérifié chaque lettre : aucun e. Cette fois, elle a tenu la règle.'),
+  lsQ10: s('Three questions about the world.', 'Trois questions sur le monde.'),
+  lsBook: s('In a book: {x}', 'Dans un livre : {x}'),
+  lsTrue1: s('the capital of Australia is Canberra.', 'la capitale de l’Australie est Canberra.'),
+  lsTrue2: s('the Moon weighs about 73 billion billion tonnes, far more than a mountain.', 'la Lune pèse environ 73 milliards de milliards de tonnes, bien plus qu’une montagne.'),
+  lsTrue3: s('the first bicycle was made in Germany, by Karl Drais, in 1817.', 'le premier vélo a été fait en Allemagne, par Karl Drais, en 1817.'),
+  lsQ11: s('French → English, then English → French.', 'Du français vers l’anglais, puis de l’anglais vers le français.'),
+  lsFrEn: s('French → English: “{q}”', 'Du français vers l’anglais : « {q} »'),
+  lsEnFr: s('English → French: “{q}”', 'De l’anglais vers le français : « {q} »'),
+  lsWobbly: s('Olive is better one way than the other.', 'Olive est meilleure dans un sens que dans l’autre.')
+};
+export const IG006_WORD_KEYS: ReadonlyArray<string> = Object.keys(IG006_WORDS);
+
+/** A block of a card's example (ids are given when the card is drawn). */
+export interface CardBlock {
+  t: string;
+  n?: number;
+  slots?: Record<string, string>;
+  body?: ReadonlyArray<CardBlock>;
+}
+
+/**
+ * P106 IG-006 AC5 — a card for EVERY palette block (not only Olive's): its label (the palette's own word), one line of
+ * what it does, and an example drawn as blocks. The first tap on a palette block opens its card (and places nothing);
+ * the `?` beside a placed block's kind opens it again. The unrendered `or6Line` ("Is the thing in front of {b} a
+ * flower?") is `is it a…?`'s line; the other rungs' lines did not fit a block and stay unrendered.
+ */
+export const BLOCK_CARDS: Readonly<Record<string, { label: string; line: string; example: ReadonlyArray<CardBlock> }>> = {
+  fwd: { label: 'bFwd', line: 'cdFwd', example: [{ t: 'fwd' }, { t: 'fwd' }] },
+  left: { label: 'bLeft', line: 'cdLeft', example: [{ t: 'left' }, { t: 'fwd' }] },
+  right: { label: 'bRight', line: 'cdRight', example: [{ t: 'right' }, { t: 'fwd' }] },
+  water: { label: 'bWater', line: 'cdWater', example: [{ t: 'fwd' }, { t: 'water' }] },
+  pick: { label: 'bPick', line: 'cdPick', example: [{ t: 'pick' }, { t: 'fwd' }, { t: 'put' }] },
+  put: { label: 'bPut', line: 'cdPut', example: [{ t: 'pick' }, { t: 'fwd' }, { t: 'put' }] },
+  say: { label: 'bSay', line: 'cdSay', example: [{ t: 'say', slots: { text: 'thanksMamie' } }] },
+  repeat: { label: 'bRepeat', line: 'cdRepeat', example: [{ t: 'repeat', n: 3, body: [{ t: 'fwd' }] }] },
+  until: { label: 'bUntil', line: 'cdUntil', example: [{ t: 'until', slots: { sensor: 'wall_ahead' }, body: [{ t: 'fwd' }] }] },
+  if: { label: 'bIf', line: 'cdIf', example: [{ t: 'if', slots: { sensor: 'tulip_ahead' }, body: [{ t: 'water' }] }] },
+  when: { label: 'bWhen', line: 'cdWhen', example: [{ t: 'when', slots: { event: 'meow' }, body: [{ t: 'fwd' }] }] },
+  count_inc: { label: 'bCountInc', line: 'cdCountInc', example: [{ t: 'pick' }, { t: 'count_inc' }] },
+  trick: { label: 'bTrick', line: 'cdTrick', example: [{ t: 'trick', slots: { name: 'row' }, body: [{ t: 'fwd' }, { t: 'water' }] }, { t: 'do', slots: { name: 'row' } }] },
+  do: { label: 'bDo', line: 'cdDo', example: [{ t: 'do', slots: { name: 'row' } }] },
+  ask: { label: 'bAsk', line: 'cdAsk', example: [{ t: 'ask' }] },
+  'olive:say-thanks': { label: 'rungSayThanks', line: 'cdOliveSay', example: [{ t: 'olive:say-thanks', slots: { to: 'Mamie Rose', deed: 'watered her three tulips' } }] },
+  'olive:read': { label: 'rungRead', line: 'cdOliveRead', example: [{ t: 'olive:read' }, { t: 'if', slots: { sensor: 'olive_read:red_tulip' }, body: [{ t: 'water' }] }] },
+  'olive:is-it-a': { label: 'rungIsItA', line: 'or6Line', example: [{ t: 'olive:is-it-a', slots: { kind: 'a flower', times: '3' } }, { t: 'if', slots: { sensor: 'olive_says:yes' }, body: [{ t: 'water' }] }] }
+};

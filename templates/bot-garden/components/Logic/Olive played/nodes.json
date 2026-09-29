@@ -27,7 +27,7 @@
       "type": "JavaScriptFunction",
       "label": "Olive played",
       "parameters": {
-        "functionScript": "\nvar RUNG_OF = {\"say-thanks\":1,\"name-three\":2,\"name-one\":2,\"words-to-blocks\":3,\"count-in-words\":4,\"what-wants\":5,\"is-it-a\":6,\"count-tulips\":7,\"maths-seeds\":8,\"maths\":8,\"no-letter-e\":9,\"tall-tales\":10,\"translate\":11,\"poem\":12,\"explain-program\":13,\"narrate-run\":14,\"name-trick\":15,\"sort-words\":16,\"define\":17,\"letter\":18};\nvar a = Inputs.answer && typeof Inputs.answer === 'object' ? Inputs.answer : null;\nvar run = Inputs.run && typeof Inputs.run === 'object' ? Inputs.run : null;\nvar runId = run && run.runId !== undefined && run.runId !== null ? String(run.runId) : '';\nvar mine = !!a && a.sent === true && runId !== '' && String(a.run) === runId && String(a.rung) !== 'voice-hint';\nOutputs.oliveRung = mine ? RUNG_OF[String(a.rung)] || 0 : 0;\nOutputs.oliveFallback = mine && a.fallback === true;\n"
+        "functionScript": "\nvar RUNG_OF = {\"say-thanks\":1,\"read\":2,\"is-it-a\":3};\nvar a = Inputs.answer && typeof Inputs.answer === 'object' ? Inputs.answer : null;\nvar run = Inputs.run && typeof Inputs.run === 'object' ? Inputs.run : null;\nvar runId = run && run.runId !== undefined && run.runId !== null ? String(run.runId) : '';\nvar mine = !!a && a.sent === true && runId !== '' && String(a.run) === runId && String(a.rung) !== 'voice-hint';\nOutputs.oliveRung = mine ? RUNG_OF[String(a.rung)] || 0 : 0;\nOutputs.oliveFallback = mine && a.fallback === true;\n"
       },
       "x": 40,
       "y": 160,

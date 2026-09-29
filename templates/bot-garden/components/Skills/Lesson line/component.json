@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a41cb61e-5617-54f8-8e2c-e94c7399c8b2",
+  "name": "Lesson line",
+  "path": "/Skills/Lesson line",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One answer on a lesson card: the question when the card asks several, what Olive said, and the check the page did underneath (the program’s count, the rule’s sum, the book)."
+}

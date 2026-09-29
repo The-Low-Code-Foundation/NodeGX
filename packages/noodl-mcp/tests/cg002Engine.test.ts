@@ -52,6 +52,13 @@ import {
 } from './cg002Scripts';
 // CG-002 §8 (s3, the save model): the helpers the v3 rows read directly.
 import { ENGINE, ROBOT_NAME_MAX, SAVE_HELPERS, helper } from './cg002Scripts';
+// P106 IG-006: the page's own fallback for an Olive step is the rung's WRITTEN answer (cg005Olive's Ask Olive).
+import { OLIVE_TABLE, OLIVE_WORDS } from './cg005Olive';
+import { IG006_WORDS } from './cg003Content';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { writtenAnswer } = require('../../../dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/olive-written.js');
+/** What the page answers a parked Olive step with when she does not: the written answer, as Ask Olive does. */
+const written = (req: { rung: string; slots: Record<string, string>; lang: string }) => ({ ok: false, fallback: true, ...(writtenAnswer(OLIVE_TABLE, req.rung, req.slots, req.lang) || {}) });
 
 const WORD_ROWS = WORD_KEYS.map((key) => ({ key, ...WORDS[key] }));
 const HINT_ROWS = HINT_KEYS.map((key) => ({ key, ...HINTS[key] }));
@@ -87,7 +94,7 @@ function runToEnd(program: ReadonlyArray<Block>, world: any, robotId = 'pip', la
   while (ticks < cap) {
     let t = tick(run, world);
     if (t.st.waiting) {
-      const a = answers[asked] ?? { ok: false, fallback: true };
+      const a = answers[asked] ?? written(t.st.request);
       asked++;
       t = tick(t.st.run, t.world, { seq: t.st.request.seq, ...a });
     }
@@ -213,15 +220,17 @@ describe('CG-002 — the engine', () => {
       const tricks = new Set(REQUESTS.flatMap((r) => [...r.tricks]));
       expect([...tricks].sort()).toEqual([1, 2, 3, 4, 5, 6, 7]);
       expect(new Set(ids).size).toBe(ids.length);
-      // CG-006: four requests open at band 7–9 (both bands), six at band 10–12 only: 4×2×2 + 6×2×1.
-      expect(rows).toHaveLength(28);
+      // CG-006: four requests open at band 7–9 (both bands), six at band 10–12 only; IG-006 adds three at 10–12: 4×2×2 + 9×2×1.
+      expect(rows).toHaveLength(34);
     });
 
     it.each(rows)('%s · %s · band %i', (_id, lang, band, r) => {
       const program = band === 1 ? unrolled(r.referenceProgram) : r.referenceProgram;
       // Every block the band's child could have placed is in that band's palette, and in the request's own.
       const palette = new Set<string>(BAND_PALETTE[band as 1 | 2]);
-      for (const t of typesIn(program)) expect({ block: t, inBand: palette.has(t), inRequest: r.palette.includes(t as BlockType) }).toEqual({ block: t, inBand: true, inRequest: true });
+      // IG-006: an Olive block (olive:<rung>) is offered by the request's rungs, band 10–12 only.
+      const olive = (t: string) => t.startsWith('olive:') && band === 2 && (r.rungs ?? []).includes(t.slice(6));
+      for (const t of typesIn(program)) expect({ block: t, inBand: palette.has(t) || olive(t), inRequest: r.palette.includes(t as BlockType) || olive(t) }).toEqual({ block: t, inBand: true, inRequest: true });
       const end = runToEnd(program, worldOfRequest(r), 'pip', lang);
       const goal = runScript(GOAL_SCRIPT, { world: end.world, run: end.run, program, goal: r.goal });
       expect({ id: r.id, lang, band, done: end.done, ticks: end.ticks, met: goal.met, missing: goal.missing }).toEqual({ id: r.id, lang, band, done: true, ticks: end.ticks, met: true, missing: [] });
@@ -229,17 +238,20 @@ describe('CG-002 — the engine', () => {
       expect(end.run.bumps).toBe(0);
       expect(end.run.puddles).toBe(0);
       // The card's copy resolves in the language: title, blurb, the islander's line, the reward.
-      const words = runScript(TRANSLATE_SCRIPT, { lang, words: WORD_ROWS, botName: 'Pip' });
+      // (IG-006's three requests keep their copy in the page's word table, cg003Content IG006_WORDS: the page's Translate carries both.)
+      const words = { ...Object.fromEntries(Object.entries(IG006_WORDS).map(([k, v]) => [k, v[lang as 'en' | 'fr'].split('{b}').join('Pip')])), ...runScript(TRANSLATE_SCRIPT, { lang, words: WORD_ROWS, botName: 'Pip' }) };
       for (const key of Object.values(r.copyKeys)) expect({ key, text: words[key] }).toEqual({ key, text: expect.stringMatching(/\S/) });
       expect(words[r.copyKeys.line]).not.toContain('{b}');
       // A `say` says its line in the language (the delta carries the key; the page resolves it).
       const said = end.deltas.filter((d) => d.say);
       for (const d of said) expect(words[d.say.text]).toMatch(/\S/);
-      if (r.goal instanceof Array && r.goal.some((g) => g.name === 'said')) expect(said.length).toBeGreaterThan(0);
+      // (IG-006: a thank-you Olive wrote is said too — the olive bubble on the tick her answer is consumed.)
+      const oliveSaid = end.deltas.filter((d) => d.answered && d.sayText);
+      if (r.goal instanceof Array && r.goal.some((g) => g.name === 'said')) expect(said.length + oliveSaid.length).toBeGreaterThan(0);
     });
 
     it('the goal is data: no request carries a function, and every goal name is one GOAL_SCRIPT knows', () => {
-      const known = ['every_tulip_watered', 'thing_at', 'bowl_has', 'robot_at', 'facing', 'carrying', 'uses', 'handled', 'said', 'no_puddle', 'senses'];
+      const known = ['every_tulip_watered', 'thing_at', 'bowl_has', 'robot_at', 'facing', 'carrying', 'uses', 'handled', 'said', 'no_puddle', 'senses', 'tulips_watered'];
       for (const name of known) expect({ name, inScript: GOAL_SCRIPT.includes(`g.name === '${name}'`) }).toEqual({ name, inScript: true });
       for (const r of REQUESTS) {
         expect(JSON.parse(JSON.stringify(r))).toEqual(r);
@@ -481,7 +493,10 @@ describe('CG-002 — the engine', () => {
 
   describe('AC4 — every hint key has a line in both languages; twelve named states pick the expected key; no "tell me"', () => {
     it('every key resolves to a non-empty line in EN and FR, the two differ, and none says "tell me"', () => {
-      expect(HINT_KEYS.length).toBeGreaterThanOrEqual(21);
+      // IG-006 AC7: an after-run line per Olive block (1–3) and a resting line per block; no rung 4–18 line is left.
+      expect(HINT_KEYS.filter((k) => /^oliveRung\d+$/.test(k))).toEqual(OLIVE_RUNGS.map((r) => 'oliveRung' + r.n));
+      expect(HINT_KEYS.filter((k) => /^oliveResting\d+$/.test(k))).toEqual(OLIVE_RUNGS.map((r) => 'oliveResting' + r.n));
+      expect(HINT_KEYS).toEqual(expect.arrayContaining(['hintStart', 'hintEmpty', 'hintPattern', 'hintMissed', 'hintNotYet', 'hintBump', 'hintWet', 'hintDone', 'hintDoneMany', 'hintPerfect', 'hintFree', 'hintPredictMiss', 'oliveThinking', 'oliveResting']));
       for (const key of HINT_KEYS) {
         for (const lang of ['en', 'fr'] as const) {
           const line = runScript(HINT_LINE_SCRIPT, { hints: HINT_ROWS, key, lang, vars: { n: 3, w: 2, t: 3, k: 12 }, botName: 'Pip' });
@@ -513,7 +528,7 @@ describe('CG-002 — the engine', () => {
       ['a program, not run yet', { program: parse('F L'), run: runScript(NEW_RUN_SCRIPT, { program: parse('F L'), robotId: 'pip', lang: 'en' }).run }, 'hintStart', {}],
       ['a Predict miss, even though the goal was met', { program: parse('r3[F]'), goalMet: true, run: ranRun(), predictAsked: true, predictHit: false }, 'hintPredictMiss', {}],
       ['Olive fell back, over a bump', { program: parse('F'), run: ranRun({ bumps: 1 }), oliveFallback: true }, 'oliveResting', {}],
-      ['rung 4 just played, ran clean, goal unmet', { program: parse('F L'), run: ranRun(), oliveRung: 4 }, 'oliveRung4', {}],
+      ['rung 3 (is it a…?) just played, ran clean, goal unmet', { program: parse('F L'), run: ranRun(), oliveRung: 3 }, 'oliveRung3', {}],
       ['an unfolded repetition beats a bump', { program: parse('F F F F L'), run: ranRun({ bumps: 1 }) }, 'hintPattern', { n: 4 }]
     ];
 
@@ -542,9 +557,17 @@ describe('CG-002 — the engine', () => {
       expect(HINT_KEYS).toContain(chosen.key);
     });
 
-    it('every Olive rung, 1 to the last (18 since CG-006 s3), has its own after-run line — none falls through to hintMissed', () => {
+    it('every Olive block, rungs 1–3 (IG-006), has its own after-run line and its own resting line — none falls through to hintMissed', () => {
       const ns = OLIVE_RUNGS.map((r) => r.n);
-      expect(Math.max(...ns)).toBe(18);
+      expect(ns).toEqual([1, 2, 3]);
+      for (const n of ns) {
+        const rest = runScript(CHOOSE_HINT_SCRIPT, { world: world(), program: parse('F L'), run: ranRun(), oliveRung: n, oliveFallback: true });
+        expect({ n, key: rest.key }).toEqual({ n, key: 'oliveResting' + n });
+        for (const lang of ['en', 'fr'] as const) expect(HINTS['oliveResting' + n][lang]).toMatch(lang === 'en' ? /resting/ : /repose/);
+      }
+      // A rung past the last (an old run's number) is not a block: it says the plain resting line, and no rung line.
+      expect(runScript(CHOOSE_HINT_SCRIPT, { world: world(), program: parse('F L'), run: ranRun(), oliveRung: 6, oliveFallback: true }).key).toBe('oliveResting');
+      expect(runScript(CHOOSE_HINT_SCRIPT, { world: world(), program: parse('F L'), run: ranRun(), oliveRung: 6 }).key).not.toMatch(/^oliveRung/);
       for (const n of ns) {
         const chosen = runScript(CHOOSE_HINT_SCRIPT, { world: world(), program: parse('F L'), run: ranRun(), oliveRung: n });
         expect({ n, key: chosen.key }).toEqual({ n, key: 'oliveRung' + n });
@@ -1010,35 +1033,31 @@ describe('CG-002 — the engine', () => {
   });
 
   describe('IG-001 (P106 s1) — D6 what Olive said is spoken; D7 the sensor the picker offers', () => {
-    it('🔴 D6: a non-blocks answer is spoken on the tick that consumes it (sayText, olive style); a blocks answer is the proposal, unspoken; `say` carries its word key, plain', () => {
+    it('🔴 D6: an answer is spoken on the tick that consumes it (sayText, olive style); `say` carries its word key, plain', () => {
       const w = MOCKUP_WORLD();
-      const program: Block[] = [{ id: 1, t: 'ask:poem', slots: { flower: 'Tulla' } }, { id: 2, t: 'say', slots: { text: 'thanksMamie' } }, { id: 3, t: 'say' }];
+      const program: Block[] = [{ id: 1, t: 'olive:say-thanks' as BlockType, slots: { to: 'Mamie Rose', deed: 'watered her three tulips' } }, { id: 2, t: 'say', slots: { text: 'thanksMamie' } }, { id: 3, t: 'say' }];
       const run = runScript(NEW_RUN_SCRIPT, { program, robotId: 'pip', lang: 'en' }).run;
       let t = tick(run, w);
       expect([t.st.waiting, t.st.sayText, t.st.sayStyle]).toEqual([true, '', '']);
-      t = tick(t.run, t.world, { seq: t.st.request.seq, ok: true, text: 'Tulla the tulip' });
-      expect([t.st.delta.sayText, t.st.delta.sayStyle, t.st.sayText, t.st.sayStyle, t.st.sayKey]).toEqual(['Tulla the tulip', 'olive', 'Tulla the tulip', 'olive', '']);
+      t = tick(t.run, t.world, { seq: t.st.request.seq, ok: true, text: 'Thank you, Mamie Rose!' });
+      expect([t.st.delta.sayText, t.st.delta.sayStyle, t.st.sayText, t.st.sayStyle, t.st.sayKey]).toEqual(['Thank you, Mamie Rose!', 'olive', 'Thank you, Mamie Rose!', 'olive', '']);
       // The next tick says nothing of Olive's; `say` speaks its word key, plain — and the block with no text its default.
       t = tick(t.run, t.world);
       expect([t.st.delta.sayKey, t.st.delta.sayStyle, t.st.sayKey, t.st.sayText]).toEqual(['thanksMamie', 'plain', 'thanksMamie', '']);
       t = tick(t.run, t.world);
       expect([t.st.delta.sayKey, t.st.delta.say.text]).toEqual(['thanksMamie', 'thanksMamie']);
-      // A number (an integer rung) is spoken as its digits; the written (fallback) answer is spoken too.
-      const count: Block[] = [{ id: 1, t: 'ask:count-tulips', slots: { list: 'tulipe, rose' } }];
-      let c = tick(runScript(NEW_RUN_SCRIPT, { program: count, robotId: 'pip', lang: 'fr' }).run, w);
-      c = tick(c.run, c.world, { seq: c.st.request.seq, ok: false, fallback: true, value: 6 });
-      expect([c.st.sayText, c.st.sayStyle]).toEqual(['6', 'olive']);
-      // A blocks answer is the proposal card, never a bubble.
-      const asks: Block[] = [{ id: 1, t: 'ask:words-to-blocks', slots: { route: 'x' } }];
-      let u = tick(runScript(NEW_RUN_SCRIPT, { program: asks, robotId: 'pip', lang: 'en' }).run, w);
-      u = tick(u.run, u.world, { seq: u.st.request.seq, ok: true, value: ['avancer', 'gauche'] });
-      expect([u.st.proposal.blocks, u.st.sayText, 'sayText' in u.st.delta]).toEqual([['fwd', 'left'], '', false]);
+      // The written (fallback) answer is spoken too.
+      let c = tick(runScript(NEW_RUN_SCRIPT, { program: program.slice(0, 1), robotId: 'pip', lang: 'fr' }).run, w);
+      c = tick(c.run, c.world, { seq: c.st.request.seq, ok: false, fallback: true, text: 'Merci beaucoup, Mamie Rose !' });
+      expect([c.st.sayText, c.st.sayStyle]).toEqual(['Merci beaucoup, Mamie Rose !', 'olive']);
+      // IG-006: no rung ships a blocks shape any more, so no Olive block can propose blocks.
+      expect(Object.values(OLIVE_TABLE.rungs).map((r: any) => r.shape)).not.toContain('blocks');
     });
 
     it('🔴 D7: the picker’s sensor "Olive says yes / no" (olive_says:yes, olive_says:no) reads the last answer; an `if` on it runs its body only when she said so', () => {
       const w = MOCKUP_WORLD();
       const d0 = w.robots[0].d as number;
-      const prog = (arg: string): Block[] => [{ id: 1, t: 'ask:is-it-a', slots: { thing: 'a tulip', kind: 'a flower' } }, { id: 2, t: 'if', slots: { sensor: 'olive_says:' + arg }, body: [{ id: 3, t: 'left' }] }];
+      const prog = (arg: string): Block[] => [{ id: 1, t: 'olive:is-it-a' as BlockType, slots: { kind: 'a flower' } }, { id: 2, t: 'if', slots: { sensor: 'olive_says:' + arg }, body: [{ id: 3, t: 'left' }] }];
       for (const [said, arg, turned] of [['yes', 'yes', true], ['no', 'yes', false], ['no', 'no', true], ['oui', 'yes', true], ['non', 'no', true], ['yes', 'no', false]] as const) {
         const end = runToEnd(prog(arg), w, 'pip', 'en', [{ ok: true, value: said }]);
         expect({ said, arg, done: end.done, d: end.world.robots[0].d }).toEqual({ said, arg, done: true, d: turned ? (d0 + 3) % 4 : d0 });
@@ -1228,7 +1247,10 @@ describe('CG-002 — the engine', () => {
       expect(pal(1, TULIPS().palette)).toContain('fill');
       expect(pal(2, TULIPS().palette)).toContain('fill');
       expect(pal(2, STONES().palette)).toEqual(['fwd', 'left', 'right', 'pick', 'put', 'repeat']);
-      for (const r of REQUESTS) if (r.id !== 'path-stones') expect({ id: r.id, rocks: r.things.filter((x) => x.kind === 'rock').length }).toEqual({ id: r.id, rocks: 0 });
+      // rock-flower (IG-006) places rocks as the things Olive is asked about; its palette has no pick, so none is mined.
+      const ROCKS_ON_PURPOSE = ['path-stones', 'rock-flower'];
+      expect(REQUESTS.find((r) => r.id === 'rock-flower')?.palette).not.toContain('pick');
+      for (const r of REQUESTS) if (!ROCKS_ON_PURPOSE.includes(r.id)) expect({ id: r.id, rocks: r.things.filter((x) => x.kind === 'rock').length }).toEqual({ id: r.id, rocks: 0 });
     });
   });
 

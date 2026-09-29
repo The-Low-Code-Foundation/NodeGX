@@ -49,6 +49,7 @@
         "sizeMode": "contentHeight",
         "flexDirection": "column",
         "rowGap": "var(--space-2-5)",
+        "cssClassName": "bg-lessons",
         "mounted": false
       },
       "x": 40,
@@ -96,7 +97,7 @@
     {
       "id": "srGrid",
       "type": "Group",
-      "label": "The eighteen lessons",
+      "label": "The five lessons",
       "parent": "srBox",
       "children": [
         "srEach"
@@ -118,7 +119,7 @@
       "label": "One card per lesson",
       "parent": "srGrid",
       "parameters": {
-        "template": "/Skills/Rung card",
+        "template": "/Skills/Lesson card",
         "templateType": "explicit"
       },
       "x": 160,
@@ -143,8 +144,8 @@
     },
     {
       "id": "srRows",
-      "type": "/Logic/Rung rows",
-      "label": "The lessons, marked",
+      "type": "/Logic/Lesson rows",
+      "label": "The five lessons",
       "x": 410,
       "y": 520
     }

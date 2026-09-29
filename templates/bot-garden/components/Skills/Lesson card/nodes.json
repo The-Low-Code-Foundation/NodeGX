@@ -1,0 +1,278 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "eaae4705-6f5c-5833-87bf-21fa18cf1e37",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lcIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lesson",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "question",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "askWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "w",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "isHeld",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "heldText",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "lcCard",
+      "type": "Group",
+      "label": "The card",
+      "children": [
+        "lcTitle",
+        "lcLesson",
+        "lcQuestion",
+        "lcAsk",
+        "lcLetters",
+        "lcLines",
+        "lcHeld"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--card)",
+        "borderRadius": "var(--radius-card)",
+        "paddingTop": "var(--space-3-5)",
+        "paddingBottom": "var(--space-3-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "cssClassName": "bg-notion bg-lesson"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "lcTitle",
+      "type": "Text",
+      "label": "The lesson’s title",
+      "parent": "lcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "lcLesson",
+      "type": "Text",
+      "label": "The lesson",
+      "parent": "lcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "lcQuestion",
+      "type": "Text",
+      "label": "The question",
+      "parent": "lcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "fontWeight": "700",
+        "cssClassName": "bg-lesson-q"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "lcAsk",
+      "type": "net.noodl.controls.button",
+      "label": "Ask Olive",
+      "parent": "lcCard",
+      "parameters": {
+        "backgroundColor": "var(--violet)",
+        "color": "var(--on-fill)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-lesson-ask",
+        "label": "Ask Olive"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "lcLetters",
+      "type": "Group",
+      "label": "Her sentence, every e marked",
+      "parent": "lcCard",
+      "children": [
+        "lcLetterEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-0)",
+        "rowGap": "var(--space-0-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "cssClassName": "bg-letters",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "lcLetterEach",
+      "type": "For Each",
+      "label": "One piece per run of letters",
+      "parent": "lcLetters",
+      "parameters": {
+        "template": "/Skills/Letter bit",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "lcLines",
+      "type": "Group",
+      "label": "Her answers and the checks",
+      "parent": "lcCard",
+      "children": [
+        "lcEach"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "lcEach",
+      "type": "For Each",
+      "label": "One line per answer",
+      "parent": "lcLines",
+      "parameters": {
+        "template": "/Skills/Lesson line",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "lcHeld",
+      "type": "Text",
+      "label": "Not on this computer",
+      "parent": "lcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--violet-ink)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "lcAskOlive",
+      "type": "/Logic/Olive lesson",
+      "label": "Ask Olive, then check",
+      "x": 410,
+      "y": 1000
+    }
+  ],
+  "visualRoots": [
+    "lcCard"
+  ]
+}

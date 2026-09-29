@@ -1,60 +1,60 @@
 {
   "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
-  "componentId": "6f20affd-34ec-51f4-84f1-c01c9836139b",
+  "componentId": "60268503-123c-574c-813f-0c6f89f49d7f",
   "version": 1,
   "connections": [
     {
-      "fromId": "rungrowsIn",
+      "fromId": "lessonrowsIn",
       "fromProperty": "band",
-      "toId": "rungrowsFn",
+      "toId": "lessonrowsFn",
       "toProperty": "in-band"
     },
     {
-      "fromId": "rungrowsIn",
+      "fromId": "lessonrowsIn",
       "fromProperty": "botName",
-      "toId": "rungrowsFn",
+      "toId": "lessonrowsFn",
       "toProperty": "in-botName"
     },
     {
-      "fromId": "rungrowsIn",
+      "fromId": "lessonrowsIn",
       "fromProperty": "exam",
-      "toId": "rungrowsFn",
+      "toId": "lessonrowsFn",
       "toProperty": "in-exam"
     },
     {
-      "fromId": "rungrowsIn",
+      "fromId": "lessonrowsIn",
       "fromProperty": "lang",
-      "toId": "rungrowsFn",
+      "toId": "lessonrowsFn",
       "toProperty": "in-lang"
     },
     {
-      "fromId": "rungrowsIn",
+      "fromId": "lessonrowsIn",
       "fromProperty": "words",
-      "toId": "rungrowsFn",
+      "toId": "lessonrowsFn",
       "toProperty": "in-words"
     },
     {
-      "fromId": "rungrowsFn",
+      "fromId": "lessonrowsFn",
       "fromProperty": "out-count",
-      "toId": "rungrowsOut",
+      "toId": "lessonrowsOut",
       "toProperty": "count"
     },
     {
-      "fromId": "rungrowsFn",
+      "fromId": "lessonrowsFn",
       "fromProperty": "out-rows",
-      "toId": "rungrowsOut",
+      "toId": "lessonrowsOut",
       "toProperty": "rows"
     },
     {
-      "fromId": "rungrowsFn",
+      "fromId": "lessonrowsFn",
       "fromProperty": "out-show",
-      "toId": "rungrowsOut",
+      "toId": "lessonrowsOut",
       "toProperty": "show"
     },
     {
-      "fromId": "rungrowsFn",
+      "fromId": "lessonrowsFn",
       "fromProperty": "success",
-      "toId": "rungrowsOut",
+      "toId": "lessonrowsOut",
       "toProperty": "ran"
     }
   ]

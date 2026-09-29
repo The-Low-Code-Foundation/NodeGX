@@ -4,14 +4,15 @@
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
 
-const { PROBES, KINDS, met, meetsOne, decided, runExam, readResults, writeResults, verdictOf, withheldRungs } = require('../exam');
+const { PROBES, SCORED, KINDS, met, meetsOne, decided, runExam, readResults, writeResults, verdictOf, withheldRungs } = require('../exam');
 const templates = require('../olive-templates.json');
 const { checkSlots } = require('../olive-check');
 const { tmp } = require('./helpers');
 
 test('every probe names a rung of the table, valid slots, and a measurement (a battery probe or CG-006 §7.1) when asserted', () => {
-  // 21 FR-led + 12 EN twins (CG-005 AC8) + rung 9's two + the six promoted moments' 16 (CG-006 s3).
-  assert.equal(PROBES.length, 51, `${PROBES.length} probes`);
+  // P106 IG-006: say (2), read (3 FR asserted + 3 EN recorded), is it a…? (C1's 6 FR asserted + 6 EN recorded), the five
+  // lessons (10), the hint voicing (2).
+  assert.equal(PROBES.length, 32, `${PROBES.length} probes`);
   assert.equal(new Set(PROBES.map((p) => p.id)).size, PROBES.length, 'no id twice');
   for (const p of PROBES) {
     assert.ok(templates.rungs[p.rung], `${p.id} rung ${p.rung}`);
@@ -19,17 +20,24 @@ test('every probe names a rung of the table, valid slots, and a measurement (a b
     assert.ok(['pass', 'fail', 'record'].includes(p.mode));
     assert.ok(KINDS.includes(p.expect.kind), `${p.id} kind ${p.expect.kind} is one the exam grades`);
     if (p.mode !== 'record') assert.match(p.from, /^([A-H]\d|CG-006 §7\.1)$/, `${p.id} is a measured probe`);
+    if (p.options) for (const o of p.options) assert.ok(templates.lists[templates.rungs[p.rung].options][p.lang].includes(o), `${p.id} option ${o} is a plot word`);
   }
   // Every 🎓 rung has a probe that asserts its failure; a ✅ rung may carry one 🎓 direction (translate, EN→FR).
   for (const [id, r] of Object.entries(templates.rungs)) if (r.ladder === 'fail') assert.ok(PROBES.some((p) => p.rung === id && (p.mode === 'fail' || p.mode === 'record')), `rung ${id} has a 🎓 probe`);
-  // Rung 9 is G1 "no letter e" (ruling 2): asserted as failing, both languages; "under 5 words" (P17/P32) is gone.
   assert.deepEqual(PROBES.filter((p) => p.rung === 'no-letter-e').map((p) => [p.id, p.lang, p.mode, p.expect.kind, p.times]), [['R9-G1-fr', 'fr', 'fail', 'lacks', 3], ['R9-G1-en', 'en', 'fail', 'lacks', 3]]);
-  assert.equal(templates.rungs['under-five-words'], undefined);
-  assert.ok(!PROBES.some((p) => p.id === 'P17' || p.id === 'P32'));
   assert.ok(PROBES.some((p) => p.rung === 'translate' && p.mode === 'fail' && p.lang === 'en'), 'translate: the EN→FR direction is the recorded failure');
   const rungs = new Set(PROBES.map((p) => p.rung));
   for (const id of Object.keys(templates.rungs)) assert.ok(rungs.has(id), `rung ${id} is examined`);
-  assert.ok(PROBES.some((p) => p.lang === 'en'), 'both languages');
+  for (const id of Object.keys(templates.rungs)) assert.deepEqual([...new Set(PROBES.filter((p) => p.rung === id).map((p) => p.lang))].sort(), ['en', 'fr'], `${id} in both languages`);
+  // AC4's two counts: read over its six notes (FR and EN), is it a…? over C1's 18 (six questions × three, every sample).
+  const scored = (rung) => PROBES.filter((p) => p.rung === rung && SCORED[rung].probes.test(p.id));
+  assert.deepEqual(scored('read').map((p) => p.id), ['RD1-fr', 'RD2-fr', 'RD3-fr', 'RD1-en', 'RD2-en', 'RD3-en']);
+  assert.equal(scored('read').reduce((n, p) => n + (p.times || 3), 0), SCORED.read.of);
+  assert.deepEqual(scored('is-it-a').map((p) => [p.id, p.times, p.all]), [1, 2, 3, 4, 5, 6].map((i) => [`IA${i}-fr`, 3, true]));
+  assert.equal(scored('is-it-a').reduce((n, p) => n + p.times, 0), SCORED['is-it-a'].of);
+  // The engine names the thing ahead: every C1 thing is one it can send (the list), both languages.
+  for (const p of PROBES.filter((x) => x.rung === 'is-it-a')) assert.ok(templates.lists.things_ahead[p.lang].includes(p.slots.thing));
+  assert.equal(PROBES.filter((p) => p.rung === 'is-it-a' && p.lang === 'fr' && p.expect.value === 'oui').length, 2, 'C1: two yes, four no (the readout’s own mix)');
 });
 
 /** A reply that meets `expect`, and one that does not, built from the expectation itself. */
@@ -57,7 +65,7 @@ test('🔴 every expectation kind the PROBES use is GRADED both ways — a kind 
     assert.ok(f, `${p.id}: a fixture for ${p.expect.kind}`);
     assert.deepEqual([met(p.expect, f[0]), met(p.expect, f[1])], [true, false], `${p.id} (${p.expect.kind}) tells a met reply from a not-met one`);
   }
-  assert.deepEqual([...new Set(PROBES.map((p) => p.expect.kind))].sort(), ['containsAll', 'contains', 'distinct', 'equals', 'identical', 'items', 'lacks', 'lines', 'ok'].sort());
+  assert.deepEqual([...new Set(PROBES.map((p) => p.expect.kind))].sort(), ['contains', 'equals', 'lacks', 'ok'].sort());
   // A kind the exam does not grade: the 🎓 probe does NOT pass (before CG-005 it passed whatever she said), nor ✅.
   const bogus = [{ id: 'X1', from: 'G1', rung: 'no-letter-e', lang: 'fr', slots: {}, mode: 'fail', expect: { kind: 'bogus' } }, { id: 'X2', from: 'A2', rung: 'say-thanks', lang: 'fr', slots: {}, mode: 'pass', expect: { kind: 'bogus' } }];
   const r = await runExam({ ask: async () => ({ ok: true, text: 'Un chat.' }), probes: bogus });
@@ -73,22 +81,33 @@ test('🔴 a RECORDED probe on a 🎓 rung is graded the 🎓 way (before CG-005
   assert.deepEqual([wrong.probes[0].met, wrong.probes[0].pass, wrong.rungs['count-tulips'].pass], [false, true, true]);
 });
 
-test('the MIXED rung (define, CG-006 E9) is offered only when its recorded definitions DISAGREE', async () => {
-  assert.equal(verdictOf('define'), 'mixed');
-  assert.deepEqual(Object.keys(templates.rungs).filter((id) => verdictOf(id) === 'mixed'), ['define']);
-  const mine = PROBES.filter((p) => p.rung === 'define');
-  assert.deepEqual(mine.map((p) => p.mode), ['record', 'record', 'record', 'record']);
-  const run = (right) => runExam({ ask: async (q) => ({ ok: true, text: right(q.slots.word) ? 'une grosse pierre, un oiseau, arroser, de l eau, a stone' : 'un petit chapeau' }), probes: mine });
-  const some = await run((w) => /rocher|rock/.test(w));
-  const all = await run(() => true);
-  const none = await run(() => false);
-  assert.deepEqual([some.rungs.define.pass, all.rungs.define.pass, none.rungs.define.pass], [true, false, false]);
-  assert.equal(some.rungs.define.verdict, 'mixed');
-  assert.deepEqual([withheldRungs(some), withheldRungs(all)], [[], ['define']]);
-  // An ungraded kind in the set cannot fake the disagreement.
-  const fake = mine.map((p) => ({ ...p })).concat([{ id: 'X9', from: '—', rung: 'define', lang: 'fr', slots: { word: 'un rocher' }, times: 1, mode: 'record', expect: { kind: 'bogus' } }]);
-  const faked = await runExam({ ask: async () => ({ ok: true, text: 'une grosse pierre, un oiseau, arroser, de l eau, a stone' }), probes: fake });
-  assert.equal(faked.rungs.define.pass, false);
+test('IG-006 AC4: read and is it a…? pass on a COUNT of right samples (5 of 6, 15 of 18), not probe by probe; every C1 sample is taken', async () => {
+  assert.deepEqual(Object.keys(templates.rungs).filter((id) => verdictOf(id) === 'mixed'), [], 'no mixed rung ships any more (define was cut)');
+  const mine = PROBES.filter((p) => p.rung === 'is-it-a' || p.rung === 'read');
+  // Olive wrong on exactly k of the C1 samples (in turn), and on RD2 in both languages.
+  const run = (wrongC1) => {
+    let c1 = 0;
+    return runExam({
+      probes: mine,
+      ask: async (q) => {
+        if (q.rung === 'read') return { ok: true, value: /jamais|never/.test(q.slots.note) ? q.options.find((o) => /rocher|rock/.test(o)) : q.options.find((o) => /rouge|red|lettre|letter/.test(o)) };
+        const right = PROBES.find((p) => p.slots.thing === q.slots.thing && p.slots.kind === q.slots.kind && p.lang === q.lang).expect.value;
+        const flip = { oui: 'non', non: 'oui', yes: 'no', no: 'yes' };
+        return { ok: true, value: q.lang === 'fr' && c1++ < wrongC1 ? flip[right] : right };
+      }
+    });
+  };
+  const three = await run(3);
+  const four = await run(4);
+  assert.deepEqual(three.rungs['is-it-a'].score, { met: 15, of: 18, min: 15 });
+  assert.equal(three.rungs['is-it-a'].pass, true, '15 of 18 is the bar');
+  assert.deepEqual(four.rungs['is-it-a'].score, { met: 14, of: 18, min: 15 });
+  assert.equal(four.rungs['is-it-a'].pass, false);
+  // The first C1 probe was wrong twice in three: its own row fails, yet the rung is graded on the count.
+  assert.equal(three.probes.find((p) => p.id === 'IA1-fr').pass, false);
+  assert.deepEqual(three.rungs.read.score, { met: 4, of: 6, min: 5 });
+  assert.equal(three.rungs.read.pass, false, 'RD2 wrong in both languages: 4 of 6');
+  assert.deepEqual(withheldRungs(three), ['read']);
 });
 
 test('met(): each kind', () => {
@@ -126,26 +145,26 @@ test('met(): each kind', () => {
 
 test('runExam: a ✅ probe passes when met; a 🎓 probe passes only when the model fails as the ladder says; verdict per rung', async () => {
   const probes = [
-    { id: 'T1', from: 'D1', rung: 'words-to-blocks', lang: 'fr', slots: { route: templates.lists.routes.fr[0] }, mode: 'pass', expect: { kind: 'equals', value: ['avancer', 'avancer', 'gauche'] } },
-    { id: 'T2', from: 'D3', rung: 'count-in-words', lang: 'fr', slots: { route: 'Avance de trois cases.' }, mode: 'fail', expect: { kind: 'equals', value: ['avancer', 'avancer', 'avancer'] } },
+    { id: 'T1', from: 'A2', rung: 'say-thanks', lang: 'fr', slots: { to: 'Sami', deed: 'porté sa lettre' }, mode: 'pass', expect: { kind: 'contains', any: ['merci'] } },
+    { id: 'T2', from: 'E2', rung: 'count-tulips', lang: 'fr', slots: { list: templates.lists.flowerlists.fr[0] }, mode: 'fail', expect: { kind: 'equals', value: 4 } },
     { id: 'T3', from: 'E5', rung: 'maths', lang: 'fr', slots: { a: '14', b: '9' }, mode: 'fail', expect: { kind: 'equals', value: 23 } },
     { id: 'T4', from: '—', rung: 'voice-hint', lang: 'fr', slots: { key: 'hintWet', b: 'Pip' }, mode: 'record', expect: { kind: 'contains', any: ['flaque'] } }
   ];
-  const answers = { 'words-to-blocks': { ok: true, value: ['avancer', 'avancer', 'gauche'] }, 'count-in-words': { ok: true, value: ['avancer'] }, maths: { ok: true, value: 23 }, 'voice-hint': { ok: true, text: 'Oh non, une flaque !' } };
+  const answers = { 'say-thanks': { ok: true, text: 'Merci Sami !' }, 'count-tulips': { ok: true, value: 6 }, maths: { ok: true, value: 23 }, 'voice-hint': { ok: true, text: 'Oh non, une flaque !' } };
   const lines = [];
   let asks = 0;
   const r = await runExam({ ask: async (q) => (asks++, answers[q.rung]), probes, timings: { line: (l) => lines.push(l) } });
   assert.equal(asks, 8, 'a deterministic answer decides each probe on its second sample: 4 probes × 2');
   assert.deepEqual(r.probes.map((p) => [p.id, p.met, p.pass]), [
     ['T1', true, true],
-    ['T2', false, true], // Olive gave one avancer: the lesson holds
+    ['T2', false, true], // Olive counted 6: the lesson holds
     ['T3', true, false], // Olive got 14 + 9 right: the 🎓 rung cannot teach
     ['T4', true, true]
   ]);
   assert.equal(r.passed, 2);
   assert.equal(r.failed, 1);
-  assert.deepEqual(r.rungs['words-to-blocks'], { ladder: 'pass', probes: ['T1'], pass: true, asserted: 1 });
-  assert.deepEqual(r.rungs['count-in-words'], { ladder: 'fail', probes: ['T2'], pass: true, asserted: 1 });
+  assert.deepEqual(r.rungs['say-thanks'], { ladder: 'pass', probes: ['T1'], pass: true, asserted: 1 });
+  assert.deepEqual(r.rungs['count-tulips'], { ladder: 'fail', probes: ['T2'], pass: true, asserted: 1 });
   assert.deepEqual(r.rungs.maths, { ladder: 'fail', probes: ['T3'], pass: false, asserted: 1 });
   assert.deepEqual(r.rungs['voice-hint'], { ladder: 'pass', probes: ['T4'], pass: true, asserted: 0 });
   assert.equal(lines.filter((l) => l.event === 'exam-probe').length, 4);
@@ -157,7 +176,7 @@ test('runExam: a ✅ probe passes when met; a 🎓 probe passes only when the mo
 
 test('a fallback reply never meets an expectation, so a ✅ rung fails on a timeout and a 🎓 rung "passes" (the ladder still holds)', async () => {
   const probes = [
-    { id: 'T1', from: 'D1', rung: 'words-to-blocks', lang: 'fr', slots: { route: templates.lists.routes.fr[0] }, mode: 'pass', expect: { kind: 'equals', value: ['avancer', 'avancer', 'gauche'] } },
+    { id: 'T1', from: 'A2', rung: 'say-thanks', lang: 'fr', slots: { to: 'Sami', deed: 'porté sa lettre' }, mode: 'pass', expect: { kind: 'ok' } },
     { id: 'T2', from: 'E5', rung: 'maths', lang: 'fr', slots: { a: '14', b: '9' }, mode: 'fail', expect: { kind: 'equals', value: 23 } }
   ];
   const r = await runExam({ ask: async () => ({ ok: false, fallback: true, reason: 'timeout' }), probes });

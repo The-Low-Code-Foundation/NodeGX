@@ -49,7 +49,7 @@ const gardenConfig = JSON.parse(fs.readFileSync(path.join(SHELL_DIR, 'garden.jso
 /** The rung table, as the shell reads it. */
 export const OLIVE_TABLE = JSON.parse(fs.readFileSync(path.join(SHELL_DIR, 'olive-templates.json'), 'utf8'));
 
-type Rung = { n: number; band?: number; ladder: 'pass' | 'fail'; shape: string; temperature: number; slots: Record<string, any>; options?: string };
+type Rung = { n: number; use?: 'block' | 'lesson' | 'voice'; band?: number; ladder: 'pass' | 'fail'; shape: string; temperature: number; slots: Record<string, any>; options?: string };
 
 /** The rungs, in ladder order (n, then the table's order). `voice-hint` (n 0) is the hint voicing, never a palette block. */
 export const OLIVE_RUNG_IDS: ReadonlyArray<string> = Object.keys(OLIVE_TABLE.rungs)
@@ -57,15 +57,21 @@ export const OLIVE_RUNG_IDS: ReadonlyArray<string> = Object.keys(OLIVE_TABLE.run
   .sort((a, b) => a.n - b.n || a.i - b.i)
   .map((r) => r.id);
 
-/** The rungs a child may place (every rung but the hint voicing). */
-export const PALETTE_RUNG_IDS: ReadonlyArray<string> = OLIVE_RUNG_IDS.filter((id) => id !== 'voice-hint');
+/**
+ * P106 IG-006 (R6): the rungs a child may PLACE — the three blocks (say, read, is it a…?), rungs 1–3. The eighteen-rung
+ * `ask Olive` family is gone from the palette; the five lessons (R7) are asked from the Skills page, never placed.
+ */
+export const OLIVE_BLOCK_IDS: ReadonlyArray<string> = OLIVE_RUNG_IDS.filter((id) => (OLIVE_TABLE.rungs[id] as Rung).use === 'block');
+export const PALETTE_RUNG_IDS: ReadonlyArray<string> = OLIVE_BLOCK_IDS;
+/** The five lessons (R7), in the table's order: canned questions on Skills, band 10–12, no block. */
+export const OLIVE_LESSON_IDS: ReadonlyArray<string> = Object.keys(OLIVE_TABLE.rungs).filter((id) => (OLIVE_TABLE.rungs[id] as Rung).use === 'lesson');
 
 /** What the page's scripts carry of the table: no prompt text ever reaches the page. */
 export const OLIVE_SLIM = {
   rungs: Object.fromEntries(
     Object.entries(OLIVE_TABLE.rungs as Record<string, Rung>).map(([id, r]) => [
       id,
-      { n: r.n, band: r.band || 1, ladder: r.ladder, shape: r.shape, temperature: r.temperature, slots: r.slots, ...(r.options ? { options: r.options } : {}) }
+      { n: r.n, use: r.use || 'block', band: r.band || 1, ladder: r.ladder, shape: r.shape, temperature: r.temperature, slots: r.slots, ...(r.options ? { options: r.options } : {}) }
     ])
   ),
   lists: OLIVE_TABLE.lists,
@@ -87,8 +93,73 @@ export const OLIVE_TIMEOUT_MS: number = gardenConfig.olive.timeoutMs;
 export const OLIVE_URL = `${gardenConfig.doorPrefix}olive`;
 export const OLIVE_HEADER: string = gardenConfig.header;
 
-/** The block `t` of a rung's palette entry: `ask:<rung>`. The engine reads the rung from it when `slots.rung` is unset. */
-export const askType = (rung: string) => `ask:${rung}`;
+/**
+ * The block `t` of an Olive block's palette entry: `olive:<rung>` (IG-006; the old family's prefix is gone with it). The
+ * engine reads the rung from it when `slots.rung` is unset.
+ */
+export const OLIVE_PREFIX = 'olive:';
+export const oliveType = (rung: string) => `${OLIVE_PREFIX}${rung}`;
+
+/**
+ * `is it a…?`'s vote (IG-006 AC3): the block's `times` option — once, or three times and the majority. An engine-only
+ * option (reserved: never sent to the shell as a slot).
+ */
+export const VOTE_TIMES: ReadonlyArray<number> = [1, 3];
+
+// ── What the ENGINE names (IG-006): the things on a plot, the thing ahead ──────
+
+type Bi2 = { en: string; fr: string };
+/** A list word of the rung table in both languages, by its English word (the lists are index-aligned). */
+function listWord(list: string, en: string): Bi2 {
+  const l = OLIVE_TABLE.lists[list];
+  const i = l.en.indexOf(en);
+  if (i < 0 || !l.fr[i]) throw new Error(`olive-templates.json ${list} has no "${en}" in both languages`);
+  return { en, fr: l.fr[i] };
+}
+
+/**
+ * The things `read` chooses from, by id: the table's `plot_objects` (the grammar's enum), index-aligned FR/EN. A tulip
+ * is told apart by its `color` (IG-006 adds `color: 'red' | 'yellow'` to a tulip thing — brief §4 names no colour; the
+ * 2D kit draws every tulip the same until a sprite reads it).
+ */
+export const OLIVE_OBJECTS: Readonly<Record<string, Bi2>> = {
+  red_tulip: listWord('plot_objects', 'red tulip'),
+  yellow_tulip: listWord('plot_objects', 'yellow tulip'),
+  tulip: listWord('plot_objects', 'tulip'),
+  rock: listWord('plot_objects', 'rock'),
+  stone: listWord('plot_objects', 'stone'),
+  letter: listWord('plot_objects', 'letter'),
+  bowl: listWord('plot_objects', 'bowl'),
+  egg: listWord('plot_objects', 'egg')
+};
+export const OLIVE_OBJECT_IDS: ReadonlyArray<string> = Object.keys(OLIVE_OBJECTS);
+
+/**
+ * The thing ahead as `is it a…?` sends it — the ENGINE names it from the world, never a slot the child fills (AC3): a
+ * thing on the tile ahead (an object id above, or a note/sign), else the tile itself. Every name is a `things_ahead`
+ * word, so the shell's slot check passes by construction.
+ */
+export const OLIVE_AHEAD: Readonly<Record<string, Bi2>> = {
+  red_tulip: listWord('things_ahead', 'a red tulip'),
+  yellow_tulip: listWord('things_ahead', 'a yellow tulip'),
+  tulip: listWord('things_ahead', 'a tulip'),
+  rock: listWord('things_ahead', 'a rock'),
+  stone: listWord('things_ahead', 'a stone'),
+  letter: listWord('things_ahead', 'a letter'),
+  bowl: listWord('things_ahead', 'a bowl'),
+  egg: listWord('things_ahead', 'an egg'),
+  note: listWord('things_ahead', 'a note'),
+  sign: listWord('things_ahead', 'a sign'),
+  grass: listWord('things_ahead', 'some grass'),
+  path: listWord('things_ahead', 'a path'),
+  water: listWord('things_ahead', 'some water'),
+  tree: listWord('things_ahead', 'a tree'),
+  house: listWord('things_ahead', 'a house'),
+  postbox: listWord('things_ahead', 'a post box')
+};
+/** The map's tiles as the thing ahead when nothing stands on them (the legend: G grass, P path, W water, R rock, T tree, H house, F a bed, B the post box). */
+export const OLIVE_TILE_AHEAD: Readonly<Record<string, string>> = { G: 'grass', F: 'grass', P: 'path', W: 'water', R: 'rock', T: 'tree', H: 'house', B: 'postbox' };
+
 
 /** `say-thanks` → `SayThanks`. */
 const camel = (id: string) => id.replace(/(^|-)([a-z])/g, (_m, _d, c: string) => c.toUpperCase());
@@ -147,51 +218,158 @@ export const OLIVE_WORDS: Readonly<Record<string, Bi>> = {
   slotNotOffered: s('Pick a word from the list.', 'Choisis un mot dans la liste.'),
   slotMissing: s('Fill in every slot first.', 'Remplis d’abord toutes les cases.'),
   slotBad: s('Letters, numbers and spaces only.', 'Seulement des lettres, des chiffres et des espaces.'),
-  // The rungs (TPL-012 §2.6), as the palette names them.
+  // The three blocks (IG-006, R6), as the palette names them; the five lessons (R7) by the same keys on Skills.
   rungSayThanks: s('say thank you', 'dire merci'),
-  rungNameOne: s('give a name', 'donner un prénom'),
-  rungNameThree: s('three names', 'trois noms'),
-  rungWordsToBlocks: s('words into blocks', 'des mots en blocs'),
-  rungCountInWords: s('count in words', 'compter en mots'),
-  rungWhatWants: s('what do they want?', 'que veut-il ?'),
+  rungRead: s('read the note', 'lire le mot'),
   rungIsItA: s('is it a…?', 'est-ce un… ?'),
   rungCountTulips: s('how many tulips?', 'combien de tulipes ?'),
-  rungMathsSeeds: s('add the seeds', 'compter les graines'),
   rungMaths: s('a sum', 'une addition'),
   rungNoLetterE: s('without the letter e', 'sans la lettre e'),
   rungTallTales: s('ask a question', 'poser une question'),
   rungTranslate: s('translate', 'traduire'),
-  rungPoem: s('a poem', 'un poème'),
-  // Rungs 13–18, CG-006 §4's moments promoted on the real-model readings (CG-006 §7.1).
-  rungExplainProgram: s('explain my program', 'explique mon programme'),
-  rungNarrateRun: s('tell the run', 'raconte le trajet'),
-  rungNameTrick: s('name my trick', 'nomme mon astuce'),
-  rungSortWords: s('sort the words', 'range les mots'),
-  rungDefine: s('what is it?', 'c’est quoi ?'),
-  rungLetter: s('write a request', 'écris une demande'),
-  // The slots, as the picker names them.
+  // The slots, as the picker names them (a slot the engine fills — the note, the thing ahead — is never in a picker).
   slotTo: s('to whom', 'à qui'),
   slotDeed: s('what Pip did', 'ce que Pip a fait'),
   slotThing: s('what', 'quoi'),
-  slotRoute: s('the route', 'le chemin'),
-  slotLine: s('what they said', 'ce qu’on a dit'),
   slotKind: s('is it', 'est-ce'),
   slotList: s('the flowers', 'les fleurs'),
   slotA: s('first number', 'premier nombre'),
   slotB: s('second number', 'deuxième nombre'),
   slotQuestion: s('the question', 'la question'),
   slotNote: s('the note', 'le mot'),
-  slotFlower: s('the tulip’s name', 'le nom de la tulipe'),
-  slotProgram: s('the blocks', 'les blocs'),
-  slotTrace: s('the run', 'le trajet'),
-  slotBody: s('the trick', 'l’astuce'),
-  slotWords: s('the words', 'les mots'),
-  slotWord: s('the word', 'le mot à expliquer'),
-  slotWho: s('who asks', 'qui demande'),
-  slotObject: s('what they want', 'ce qu’on veut')
+  // IG-006 AC3: is it a…? asked once, or three times and counted.
+  slotTimes: s('how many asks', 'combien de fois'),
+  timesOnce: s('ask once', 'demander une fois'),
+  timesThree: s('ask 3 times', 'demander 3 fois'),
+  // IG-006 AC2/AC3: what Olive answered, on the robot, in the olive bubble ({x} her word, {n} of {of} the vote).
+  oliveReadSay: s('Olive read: {x}', 'Olive a lu : {x}'),
+  oliveSaysBubble: s('Olive: {x}', 'Olive : {x}'),
+  oliveVote: s('{n} of {of} said {x}', '{n} sur {of} ont dit {x}'),
+  oliveVote1: s('{n} of {of} said {x}', '{n} sur {of} a dit {x}'),
+  // IG-006 AC2: the sensor the picker offers once `read` is in the palette — one value per thing she can read.
+  sOliveReadX: s('Olive read “{x}”', 'Olive a lu « {x} »')
 };
 
 export const OLIVE_WORD_KEYS: ReadonlyArray<string> = Object.keys(OLIVE_WORDS);
+
+/** The bubbles an Olive block puts on the robot (words the page's table also carries, OLIVE_WORDS). */
+const OLIVE_BUBBLE_WORDS = ['oliveReadSay', 'oliveSaysBubble', 'oliveVote', 'oliveVote1'] as const;
+
+/**
+ * The engine's half of the three blocks (spliced into `cg002Scripts.ts` ENGINE): what `read` sends (the note on the plot,
+ * the things on it), what `is it a…?` sends (the thing ahead, named by the engine), the vote, and the bubble. Pure: the
+ * world and the run in, words out. No backtick, no dollar-brace.
+ */
+export const OLIVE_ENGINE = `
+var OLIVE_OBJECT = ${JSON.stringify(OLIVE_OBJECTS)};
+var OLIVE_AHEAD = ${JSON.stringify(OLIVE_AHEAD)};
+var OLIVE_TILE_AHEAD = ${JSON.stringify(OLIVE_TILE_AHEAD)};
+var OLIVE_BUBBLE = ${JSON.stringify(Object.fromEntries(OLIVE_BUBBLE_WORDS.map((k) => [k, OLIVE_WORDS[k]])))};
+var OLIVE_YES = { yes: 1, oui: 1, 'true': 1 };
+var OLIVE_NOTES = ${JSON.stringify(OLIVE_TABLE.lists.notes_read)};
+var OLIVE_SLOT_LISTS = ${JSON.stringify(
+  Object.fromEntries(
+    OLIVE_BLOCK_IDS.map((id) => [id, Object.fromEntries(Object.entries((OLIVE_TABLE.rungs[id] as Rung).slots).filter(([, spec]) => spec.list).map(([slot, spec]) => [slot, OLIVE_TABLE.lists[spec.list]]))])
+  )
+)};
+function oliveL(lang) { return String(lang) === 'fr' ? 'fr' : 'en'; }
+function oliveFill(t, vars) { var out = String(t || ''); for (var k in vars) out = out.split('{' + k + '}').join(String(vars[k])); return out; }
+/** A thing as read's object id: a tulip by its colour, the rest by kind; '' for a thing she does not name. */
+function oliveObjectOf(t) {
+  if (!t || typeof t !== 'object') return '';
+  if (t.kind === 'tulip') return t.color === 'red' ? 'red_tulip' : t.color === 'yellow' ? 'yellow_tulip' : 'tulip';
+  return OLIVE_OBJECT[t.kind] ? String(t.kind) : '';
+}
+/** A note's text in the run's language: the table's notes are index-aligned, so either language's text finds its twin. */
+function oliveNoteIn(text, lang) {
+  var L = oliveL(lang), t = String(text || '');
+  for (var k in OLIVE_NOTES) { var i = OLIVE_NOTES[k].indexOf(t); if (i !== -1) return OLIVE_NOTES[L][i] || t; }
+  return t;
+}
+/** The note read reads: the note or sign on the tile ahead, else the first on the plot; '' when there is none. */
+function oliveNoteOf(w, r, lang) {
+  var f = r ? front(r) : null, first = null;
+  for (var i = 0; i < w.things.length; i++) {
+    var t = w.things[i];
+    if (!t || (t.kind !== 'note' && t.kind !== 'sign')) continue;
+    if (f && t.x === f.x && t.y === f.y) return oliveNoteIn(t.text, lang);
+    if (first === null) first = t.text;
+  }
+  return first === null ? '' : oliveNoteIn(first, lang);
+}
+/** The things on the plot read chooses from, in the world's order, each once, in the language. */
+function oliveObjectsOf(w, lang) {
+  var seen = {}, out = [], L = oliveL(lang);
+  for (var i = 0; i < w.things.length; i++) { var id = oliveObjectOf(w.things[i]); if (id && !seen[id]) { seen[id] = 1; out.push(OLIVE_OBJECT[id][L]); } }
+  return out;
+}
+/** The thing ahead, named: a thing on the tile ahead (not a puddle), else the tile. */
+function oliveAheadOf(w, r, lang) {
+  var L = oliveL(lang);
+  if (!r) return OLIVE_AHEAD.grass[L];
+  var f = front(r), th = thingsAt(w, f.x, f.y);
+  for (var i = 0; i < th.length; i++) {
+    var id = th[i].kind === 'note' || th[i].kind === 'sign' ? th[i].kind : oliveObjectOf(th[i]);
+    if (id && OLIVE_AHEAD[id]) return OLIVE_AHEAD[id][L];
+  }
+  var tile = OLIVE_TILE_AHEAD[tileAt(w, f.x, f.y)] || 'grass';
+  return OLIVE_AHEAD[tile][L];
+}
+/** Her word back to read's object id (either language), for the olive_read sensor. */
+function oliveObjectId(v) {
+  var got = String(v === undefined || v === null ? '' : v).trim().toLowerCase();
+  for (var id in OLIVE_OBJECT) if (OLIVE_OBJECT[id].en.toLowerCase() === got || OLIVE_OBJECT[id].fr.toLowerCase() === got) return id;
+  return '';
+}
+/**
+ * A list word in the run's language: a block keeps the word it was given in the language it was placed in; the lists
+ * are index-aligned, so "a flower" is sent as "une fleur" when the run is French (else the shell refuses it).
+ */
+function oliveInLang(rung, slot, v, lang) {
+  var lists = OLIVE_SLOT_LISTS[rung], l = lists ? lists[slot] : null, L = oliveL(lang);
+  if (!l || typeof v !== 'string') return v;
+  for (var k in l) { var i = l[k].indexOf(v); if (i !== -1) return l[L][i] || v; }
+  return v;
+}
+/** The slots and options the engine sends for an Olive step: the block's own, plus what only the world knows. */
+function oliveRequestOf(s, w, run) {
+  var args = clone(s.args) || {}, options = s.options || null, r = robotOf(w, run.robotId);
+  if (!Array.isArray(args)) for (var slot in args) args[slot] = oliveInLang(s.rung, slot, args[slot], run.lang);
+  if (s.rung === 'read' && !Array.isArray(args)) { args.note = oliveNoteOf(w, r, run.lang); options = oliveObjectsOf(w, run.lang); }
+  if (s.rung === 'is-it-a' && !Array.isArray(args)) args.thing = oliveAheadOf(w, r, run.lang);
+  return { slots: args, options: options };
+}
+/**
+ * An answer to an Olive step, before the run moves on. The vote (is it a…? asked 3 times): each answer is one vote; until
+ * the last, the step asks again ('again'); then the majority is the answer if Olive says yes reads, with the count on the
+ * robot. read: the object she named (for if Olive read), "Olive read: …" on the robot. is it a…? once: "Olive: yes".
+ */
+function oliveAnswered(run, s, a) {
+  var L = oliveL(run.lang), out = { again: false, say: '' };
+  var v = a.value !== undefined && a.value !== null ? a.value : a.text;
+  if (s.rung === 'is-it-a' && s.times > 1) {
+    var here = run.steps[run.pc];
+    if (!Array.isArray(here.votes)) here.votes = [];
+    here.votes.push(OLIVE_YES[String(v === undefined || v === null ? '' : v).trim().toLowerCase()] ? 1 : 0);
+    if (here.votes.length < s.times) { out.again = true; out.vote = { yes: sumOf(here.votes), of: here.votes.length, times: s.times }; return out; }
+    var yes = sumOf(here.votes), word = L === 'fr' ? 'oui' : 'yes';
+    run.lastAnswer.value = yes * 2 > s.times ? word : L === 'fr' ? 'non' : 'no';
+    run.lastAnswer.vote = { yes: yes, of: s.times };
+    out.vote = { yes: yes, of: s.times, times: s.times };
+    out.say = oliveFill(OLIVE_BUBBLE[yes === 1 ? 'oliveVote1' : 'oliveVote'][L], { n: yes, of: s.times, x: word });
+    here.votes = [];
+    return out;
+  }
+  // A thank-you Olive wrote is a thing the robot SAID (a request's said goal counts it, like the say block).
+  if (s.rung === 'say-thanks') run.said = (Number(run.said) || 0) + 1;
+  if (s.rung === 'read') run.lastAnswer.object = '';
+  if (v === undefined || v === null || String(v) === '') return out;
+  if (s.rung === 'read') { run.lastAnswer.object = oliveObjectId(v); out.say = oliveFill(OLIVE_BUBBLE.oliveReadSay[L], { x: String(v) }); }
+  else if (s.rung === 'is-it-a') out.say = oliveFill(OLIVE_BUBBLE.oliveSaysBubble[L], { x: String(v) });
+  return out;
+}
+function sumOf(list) { var n = 0; for (var i = 0; i < list.length; i++) n += Number(list[i]) || 0; return n; }
+`;
 
 // ── The helpers every Olive script carries ──────────────────────────────────
 
@@ -212,7 +390,8 @@ export const OLIVE_HELPERS = [
   `var OLIVE_RUNG_WORD = ${JSON.stringify(Object.fromEntries(PALETTE_RUNG_IDS.map((id) => [id, rungWordKey(id)])))};`,
   `var OLIVE_SLOT_WORD = ${JSON.stringify(Object.fromEntries([...new Set(Object.values(OLIVE_SLIM.rungs).flatMap((r) => Object.keys(r.slots)))].map((k) => [k, slotWordKey(k)])))};`,
   `var OLIVE_SHAPE_WORD = ${JSON.stringify(SHAPE_WORD)};`,
-  `var OLIVE_RESERVED = { rung: 1, args: 1, shape: 1, dial: 1, options: 1 };`,
+  `var OLIVE_RESERVED = { rung: 1, args: 1, shape: 1, dial: 1, options: 1, times: 1 };`,
+  `var OLIVE_PREFIX = ${JSON.stringify(OLIVE_PREFIX)};`,
   `var TEXT_MAX = ${oliveCheck.TEXT_MAX};`,
   `var BLOCKLIST = ${JSON.stringify(oliveCheck.BLOCKLIST)};`,
   `var CONTROL = ${String(oliveCheck.CONTROL)};`,
@@ -263,6 +442,8 @@ function olivePickerSlots(rung, band, lang, narrow, word) {
   if (!r || String(rung) === 'voice-hint') return out;
   for (var name in r.slots) {
     var spec = r.slots[name];
+    // IG-006: a slot the ENGINE fills (the note on the plot, the thing ahead) is never the child's to pick.
+    if (spec.engine) continue;
     var entry = { key: name, label: word[OLIVE_SLOT_WORD[name]] || name, options: [] };
     var pool = spec.list ? oliveListOf(spec.list, lang) : spec.suggest ? oliveListOf(spec.suggest, lang) : spec.regex ? ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] : [];
     var only = oliveNarrowOf(narrow, String(rung), name);
@@ -270,6 +451,15 @@ function olivePickerSlots(rung, band, lang, narrow, word) {
     if (band === 2 && (spec.text || spec.regex)) { entry.text = true; entry.max = spec.text ? TEXT_MAX : 2; }
     out.push(entry);
   }
+  // IG-006 AC3: is it a…? asks once, or three times and takes the majority (an engine option, never sent as a slot).
+  if (String(rung) === 'is-it-a') out.push({ key: 'times', label: word.slotTimes || 'times', options: [{ value: '1', label: word.timesOnce || '1' }, { value: '3', label: word.timesThree || '3' }] });
+  return out;
+}
+/** The block's own slots with the engine's slots stood in (their list's first word), to judge only what the child picks. */
+function oliveBlockSlots(rung, slots, lang) {
+  var r = OLIVE.rungs[String(rung)], out = oliveSlotValues(slots);
+  if (!r) return out;
+  for (var name in r.slots) if (r.slots[name].engine && (out[name] === undefined || out[name] === '')) out[name] = oliveListOf(r.slots[name].list, lang)[0] || '';
   return out;
 }
 /** The exam gate: the rungs this machine's exam FAILED (an ungraded rung is not withheld). */
@@ -296,7 +486,7 @@ function oliveAskBlocks(list, out) {
   for (var i = 0; i < l.length; i++) {
     var b = l[i];
     if (!b) continue;
-    if (typeof b.t === 'string' && b.t.indexOf('ask:') === 0) out.push({ id: b.id, rung: b.t.slice(4), slots: b.slots && typeof b.slots === 'object' ? b.slots : {} });
+    if (typeof b.t === 'string' && b.t.indexOf(OLIVE_PREFIX) === 0) out.push({ id: b.id, rung: b.t.slice(OLIVE_PREFIX.length), slots: b.slots && typeof b.slots === 'object' ? b.slots : {} });
     if (Array.isArray(b.body)) oliveAskBlocks(b.body, out);
   }
   return out;
@@ -384,7 +574,7 @@ if (req) {
 // ── Olive slots: the picker, and the inline refusal ────────────────────────
 
 /**
- * For one `ask` block: the picker entries the kit draws (`{key, label, options, text?, max?}`), and whether the slots
+ * For one Olive block: the picker entries the kit draws (`{key, label, options, text?, max?}`), and whether the slots
  * filled so far may be sent — the reason and its words when not, shown inline before anything is sent (AC6).
  *
  * On the page (CG-005 s3) the block is found in the PROGRAM: the ask block the child has selected, else the first ask
@@ -403,15 +593,15 @@ if (typeof prog === 'string' && prog) { try { prog = JSON.parse(prog); } catch (
 if (Array.isArray(prog)) {
   var asks = oliveAskBlocks(prog, []), pick = null, sel = Inputs.selected === undefined || Inputs.selected === null ? '' : String(Inputs.selected);
   for (var a = 0; a < asks.length && !pick; a++) if (sel !== '' && String(asks[a].id) === sel) pick = asks[a];
-  for (var f = 0; f < asks.length && !pick; f++) if (!oliveCheckForBand(asks[f].rung, asks[f].slots, band, lang, Inputs.narrow).ok) pick = asks[f];
+  for (var f = 0; f < asks.length && !pick; f++) if (!oliveCheckForBand(asks[f].rung, oliveBlockSlots(asks[f].rung, asks[f].slots, lang), band, lang, Inputs.narrow).ok) pick = asks[f];
   if (!pick && asks.length) pick = asks[0];
   rung = pick ? pick.rung : '';
   slots = pick ? pick.slots : {};
   blockId = pick ? String(pick.id) : '';
 }
-if (rung.indexOf('ask:') === 0) rung = rung.slice(4);
+if (rung.indexOf(OLIVE_PREFIX) === 0) rung = rung.slice(OLIVE_PREFIX.length);
 var word = oliveWords(Inputs.words, lang);
-var c = rung ? oliveCheckForBand(rung, slots, band, lang, Inputs.narrow) : { ok: true };
+var c = rung ? oliveCheckForBand(rung, oliveBlockSlots(rung, slots, lang), band, lang, Inputs.narrow) : { ok: true };
 Outputs.slots = olivePickerSlots(rung, band, lang, Inputs.narrow, word);
 Outputs.ok = c.ok;
 Outputs.reason = c.ok ? '' : String(c.reason);

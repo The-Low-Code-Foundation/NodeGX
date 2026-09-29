@@ -439,21 +439,21 @@
         "keys": "renderer"
       },
       "x": 710,
-      "y": 6880
+      "y": 7960
     },
     {
       "id": "plRendRead",
       "type": "/Logic/Renderer",
       "label": "Draw in 3D here?",
       "x": 710,
-      "y": 7000
+      "y": 8080
     },
     {
       "id": "plRendIs3d",
       "type": "Condition",
       "label": "In 3D?",
       "x": 710,
-      "y": 7120
+      "y": 8200
     },
     {
       "id": "plRendOk",
@@ -470,7 +470,7 @@
         "event": "unsupported"
       },
       "x": 710,
-      "y": 7240
+      "y": 8320
     },
     {
       "id": "plRendSlow",
@@ -492,7 +492,7 @@
         "merge": false
       },
       "x": 710,
-      "y": 7360
+      "y": 8440
     },
     {
       "id": "plRec",
@@ -1162,8 +1162,10 @@
       "parent": "plWs",
       "children": [
         "plStepsHead",
+        "plCardBox",
         "plBlocksBox",
         "plSlotMsg",
+        "plHelps",
         "plTidy"
       ],
       "parameters": {
@@ -1266,7 +1268,7 @@
         "cssClassName": "bg-blocks-box"
       },
       "x": 220,
-      "y": 5440
+      "y": 6280
     },
     {
       "id": "plBlocks",
@@ -1282,7 +1284,225 @@
         "dropColor": "var(--block-drop)"
       },
       "x": 280,
+      "y": 6400
+    },
+    {
+      "id": "plCardBox",
+      "type": "Group",
+      "label": "The block’s card",
+      "parent": "plRight",
+      "children": [
+        "plCardTitle",
+        "plCardLine",
+        "plCardEgWord",
+        "plCardEgBox",
+        "plCardOk"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--violet-2)",
+        "borderRadius": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "cssClassName": "bg-card-help",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 5440
+    },
+    {
+      "id": "plCardTitle",
+      "type": "Text",
+      "label": "The block",
+      "parent": "plCardBox",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2,
+        "cssClassName": "bg-card-title"
+      },
+      "x": 280,
       "y": 5560
+    },
+    {
+      "id": "plCardLine",
+      "type": "Text",
+      "label": "What it does",
+      "parent": "plCardBox",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "cssClassName": "bg-card-line"
+      },
+      "x": 280,
+      "y": 5680
+    },
+    {
+      "id": "plCardEgWord",
+      "type": "Text",
+      "label": "For example",
+      "parent": "plCardBox",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)"
+      },
+      "x": 280,
+      "y": 5800
+    },
+    {
+      "id": "plCardEgBox",
+      "type": "Group",
+      "label": "The example",
+      "parent": "plCardBox",
+      "children": [
+        "plCardEg"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "bg-card-eg"
+      },
+      "x": 280,
+      "y": 5920
+    },
+    {
+      "id": "plCardEg",
+      "type": "garden-kit.BlockList",
+      "label": "The example, as blocks",
+      "parent": "plCardEgBox",
+      "parameters": {
+        "motionColor": "var(--block-motion)",
+        "actionColor": "var(--block-action)",
+        "controlColor": "var(--block-control)",
+        "askColor": "var(--block-ask)",
+        "runColor": "var(--block-run)",
+        "dropColor": "var(--block-drop)",
+        "showPalette": false,
+        "locked": true
+      },
+      "x": 340,
+      "y": 6040
+    },
+    {
+      "id": "plCardOk",
+      "type": "net.noodl.controls.button",
+      "label": "Got it",
+      "parent": "plCardBox",
+      "parameters": {
+        "backgroundColor": "var(--leaf)",
+        "color": "var(--on-fill)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-card-ok",
+        "label": "Got it"
+      },
+      "x": 280,
+      "y": 6160
+    },
+    {
+      "id": "plHelps",
+      "type": "Group",
+      "label": "A ? for each kind of block placed",
+      "parent": "plRight",
+      "children": [
+        "plHelpsH",
+        "plHelpEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-1-5)",
+        "rowGap": "var(--space-1-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "cssClassName": "bg-helps",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 6640
+    },
+    {
+      "id": "plHelpsH",
+      "type": "Text",
+      "label": "What does a block do?",
+      "parent": "plHelps",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 6760
+    },
+    {
+      "id": "plHelpEach",
+      "type": "For Each",
+      "label": "One ? per kind of block",
+      "parent": "plHelps",
+      "parameters": {
+        "template": "/Workshop/Help chip",
+        "templateType": "explicit"
+      },
+      "x": 280,
+      "y": 6880
     },
     {
       "id": "plSlotMsg",
@@ -1302,7 +1522,7 @@
         "mounted": false
       },
       "x": 220,
-      "y": 5680
+      "y": 6520
     },
     {
       "id": "plTidy",
@@ -1344,7 +1564,7 @@
         "mounted": false
       },
       "x": 220,
-      "y": 5800
+      "y": 7000
     },
     {
       "id": "plTidyText",
@@ -1362,7 +1582,7 @@
         "fontWeight": "700"
       },
       "x": 280,
-      "y": 5920
+      "y": 7120
     },
     {
       "id": "plFoldBtn",
@@ -1392,7 +1612,7 @@
         "label": "Fold it"
       },
       "x": 280,
-      "y": 6040
+      "y": 7240
     },
     {
       "id": "plNotNow",
@@ -1422,7 +1642,7 @@
         "label": "Not now"
       },
       "x": 280,
-      "y": 6160
+      "y": 7360
     },
     {
       "id": "plWin",
@@ -1430,7 +1650,7 @@
       "label": "The win card",
       "parent": "plRoot",
       "x": 100,
-      "y": 6280
+      "y": 7480
     },
     {
       "id": "plT",
@@ -1451,7 +1671,7 @@
       "type": "/Logic/Hint line",
       "label": "The owl’s line",
       "x": 710,
-      "y": 7480
+      "y": 8560
     },
     {
       "id": "plOwlRow",
@@ -1465,21 +1685,21 @@
       "type": "/Logic/Ask Olive",
       "label": "Ask Olive for a parked run",
       "x": 710,
-      "y": 7600
+      "y": 8680
     },
     {
       "id": "plVoiceHint",
       "type": "/Logic/Voice hint",
       "label": "A new line to voice",
       "x": 710,
-      "y": 7720
+      "y": 8800
     },
     {
       "id": "plAskVoice",
       "type": "/Logic/Ask Olive",
       "label": "Ask Olive to voice the hint",
       "x": 710,
-      "y": 7840
+      "y": 8920
     },
     {
       "id": "plStatus",
@@ -1489,14 +1709,14 @@
         "nonce": 1
       },
       "x": 710,
-      "y": 7960
+      "y": 9040
     },
     {
       "id": "plSlots",
       "type": "/Logic/Olive slots",
       "label": "May this ask be sent?",
       "x": 710,
-      "y": 6040
+      "y": 6880
     },
     {
       "id": "plPropCard",
@@ -1523,7 +1743,7 @@
         "name": "gardenProposalDone"
       },
       "x": 710,
-      "y": 8080
+      "y": 9160
     },
     {
       "id": "plSetPropDone",
@@ -1543,7 +1763,7 @@
         "name": "gardenProgram"
       },
       "x": 710,
-      "y": 8200
+      "y": 9280
     },
     {
       "id": "plStart",
@@ -1570,7 +1790,7 @@
         "name": "gardenWorld"
       },
       "x": 710,
-      "y": 8320
+      "y": 9400
     },
     {
       "id": "plSetWorld",
@@ -1580,7 +1800,7 @@
         "name": "gardenWorld"
       },
       "x": 710,
-      "y": 8440
+      "y": 9520
     },
     {
       "id": "plSetWorldRec",
@@ -1590,7 +1810,7 @@
         "name": "gardenWorld"
       },
       "x": 710,
-      "y": 8560
+      "y": 9640
     },
     {
       "id": "plProgVar",
@@ -1600,14 +1820,14 @@
         "name": "gardenProgram"
       },
       "x": 710,
-      "y": 5560
+      "y": 6400
     },
     {
       "id": "plRead",
       "type": "/Logic/Read program",
       "label": "The program as a list",
       "x": 710,
-      "y": 8680
+      "y": 9760
     },
     {
       "id": "plSetProgKit",
@@ -1617,7 +1837,7 @@
         "name": "gardenProgram"
       },
       "x": 710,
-      "y": 5680
+      "y": 9880
     },
     {
       "id": "plSetProgRec",
@@ -1627,7 +1847,7 @@
         "name": "gardenProgram"
       },
       "x": 710,
-      "y": 8800
+      "y": 10000
     },
     {
       "id": "plSetProgFold",
@@ -1637,7 +1857,7 @@
         "name": "gardenProgram"
       },
       "x": 710,
-      "y": 8920
+      "y": 10120
     },
     {
       "id": "plSetProgClear",
@@ -1649,7 +1869,7 @@
         "value": "[]"
       },
       "x": 710,
-      "y": 9040
+      "y": 10240
     },
     {
       "id": "plTeachBumpsVar",
@@ -1659,7 +1879,7 @@
         "name": "gardenTeachBumps"
       },
       "x": 710,
-      "y": 9160
+      "y": 10360
     },
     {
       "id": "plSetTeachBumps",
@@ -1669,7 +1889,7 @@
         "name": "gardenTeachBumps"
       },
       "x": 710,
-      "y": 9280
+      "y": 10480
     },
     {
       "id": "plClearTeachBumps",
@@ -1681,7 +1901,7 @@
         "value": 0
       },
       "x": 710,
-      "y": 9400
+      "y": 10600
     },
     {
       "id": "plRecord",
@@ -1695,7 +1915,7 @@
       "type": "/Workshop/Runner",
       "label": "The runner",
       "x": 710,
-      "y": 5800
+      "y": 6520
     },
     {
       "id": "plDraw",
@@ -1709,14 +1929,114 @@
       "type": "/Logic/Palette",
       "label": "The blocks this band may use",
       "x": 710,
-      "y": 9520
+      "y": 10720
     },
     {
       "id": "plKitPal",
       "type": "/Logic/Kit palette",
       "label": "In the kit’s shape",
       "x": 710,
-      "y": 5920
+      "y": 6640
+    },
+    {
+      "id": "plCardGate",
+      "type": "/Logic/Card gate",
+      "label": "A first tap opens the card",
+      "x": 710,
+      "y": 6760
+    },
+    {
+      "id": "plCardHold",
+      "type": "Condition",
+      "label": "Held for the card?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 710,
+      "y": 10840
+    },
+    {
+      "id": "plCardOpenVar",
+      "type": "Variable2",
+      "label": "The card open",
+      "parameters": {
+        "name": "gardenCardOpen"
+      },
+      "x": 710,
+      "y": 10960
+    },
+    {
+      "id": "plSetCardOpen",
+      "type": "Set Variable",
+      "label": "Open the card",
+      "parameters": {
+        "name": "gardenCardOpen"
+      },
+      "x": 710,
+      "y": 11080
+    },
+    {
+      "id": "plSetCardHelp",
+      "type": "Set Variable",
+      "label": "Open it from a ?",
+      "parameters": {
+        "name": "gardenCardOpen"
+      },
+      "x": 710,
+      "y": 7000
+    },
+    {
+      "id": "plClearCardOpen",
+      "type": "Set Variable",
+      "label": "Close the card",
+      "parameters": {
+        "name": "gardenCardOpen",
+        "setWith": "string",
+        "value": ""
+      },
+      "x": 710,
+      "y": 11200
+    },
+    {
+      "id": "plSeenVar",
+      "type": "Variable2",
+      "label": "The cards seen",
+      "parameters": {
+        "name": "gardenCardsSeen"
+      },
+      "x": 710,
+      "y": 11320
+    },
+    {
+      "id": "plSeenAdd",
+      "type": "/Logic/Card seen",
+      "label": "Got it",
+      "x": 710,
+      "y": 6160
+    },
+    {
+      "id": "plSetSeen",
+      "type": "Set Variable",
+      "label": "One more card seen",
+      "parameters": {
+        "name": "gardenCardsSeen"
+      },
+      "x": 710,
+      "y": 11440
+    },
+    {
+      "id": "plCardInfo",
+      "type": "/Logic/Block card",
+      "label": "The card’s words and example",
+      "x": 710,
+      "y": 5440
+    },
+    {
+      "id": "plHelpRows",
+      "type": "/Logic/Help chips",
+      "label": "The ? for each kind of block",
+      "x": 710,
+      "y": 7120
     },
     {
       "id": "plTeachMode",
@@ -1776,7 +2096,7 @@
         "runOnChange-condition": false
       },
       "x": 710,
-      "y": 9640
+      "y": 11560
     },
     {
       "id": "plMissVar",
@@ -1786,7 +2106,7 @@
         "name": "gardenPredictMiss"
       },
       "x": 710,
-      "y": 9760
+      "y": 11680
     },
     {
       "id": "plSetMiss",
@@ -1798,7 +2118,7 @@
         "value": true
       },
       "x": 710,
-      "y": 9880
+      "y": 11800
     },
     {
       "id": "plClearMiss",
@@ -1817,7 +2137,7 @@
       "type": "/Logic/Find repeat",
       "label": "The same steps, over and over?",
       "x": 710,
-      "y": 10000
+      "y": 11920
     },
     {
       "id": "plTidyLine",
@@ -1834,7 +2154,7 @@
         "name": "gardenTidyNo"
       },
       "x": 710,
-      "y": 10120
+      "y": 12040
     },
     {
       "id": "plSetDismiss",
@@ -1844,14 +2164,14 @@
         "name": "gardenTidyNo"
       },
       "x": 710,
-      "y": 6280
+      "y": 7360
     },
     {
       "id": "plFold",
       "type": "/Logic/Fold",
       "label": "Fold it",
       "x": 710,
-      "y": 6160
+      "y": 7240
     },
     {
       "id": "plChoose",
@@ -1868,21 +2188,21 @@
         "duration": 420
       },
       "x": 710,
-      "y": 10240
+      "y": 12160
     },
     {
       "id": "plPlayed",
       "type": "/Logic/Olive played",
       "label": "The rung this run asked",
       "x": 710,
-      "y": 10360
+      "y": 12280
     },
     {
       "id": "plGoal",
       "type": "/Logic/Goal met",
       "label": "Was the request done?",
       "x": 710,
-      "y": 10480
+      "y": 12400
     },
     {
       "id": "plMetGate",
@@ -1892,7 +2212,7 @@
         "runOnChange-condition": false
       },
       "x": 710,
-      "y": 10600
+      "y": 12520
     },
     {
       "id": "plWonVar",
@@ -1902,7 +2222,7 @@
         "name": "gardenWon"
       },
       "x": 710,
-      "y": 6400
+      "y": 7480
     },
     {
       "id": "plSetWon",
@@ -1914,7 +2234,7 @@
         "value": true
       },
       "x": 710,
-      "y": 10720
+      "y": 12640
     },
     {
       "id": "plClearWon",
@@ -1926,14 +2246,14 @@
         "value": false
       },
       "x": 710,
-      "y": 6520
+      "y": 7600
     },
     {
       "id": "plWinSum",
       "type": "/Logic/Win summary",
       "label": "The win in words",
       "x": 710,
-      "y": 6640
+      "y": 7720
     },
     {
       "id": "plOut",
@@ -1982,7 +2302,7 @@
         }
       ],
       "x": 710,
-      "y": 6760
+      "y": 7840
     }
   ],
   "visualRoots": [

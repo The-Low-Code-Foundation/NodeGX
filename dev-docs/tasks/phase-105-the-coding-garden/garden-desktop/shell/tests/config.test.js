@@ -149,10 +149,14 @@ test('no build.files exclusion drops a file node-llama-cpp reads at run time (AC
 
 test('the template table is whole: every rung has both languages, a known shape, a dial temperature, ≤ 64 tokens, slots that exist', () => {
   const rungs = Object.entries(templates.rungs);
-  assert.equal(rungs.length, 21, 'twelve rungs (two each for rungs 2 and 8), the six promoted moments (13–18, CG-006 s3), plus the hint voicing');
-  const numbers = new Set(rungs.map(([, r]) => r.n));
-  for (let n = 1; n <= 18; n++) assert.ok(numbers.has(n), `ladder rung ${n} present`);
-  assert.ok(templates.rungs['voice-hint']);
+  // P106 IG-006 (R6/R7): three blocks, five lessons, the hint voicing — the thirteen other rungs are gone.
+  assert.equal(rungs.length, 9, 'three blocks, five lessons, the hint voicing');
+  const byUse = (u) => rungs.filter(([, r]) => r.use === u).map(([id]) => id);
+  assert.deepEqual(byUse('block'), ['say-thanks', 'read', 'is-it-a']);
+  assert.deepEqual(byUse('lesson'), ['count-tulips', 'maths', 'no-letter-e', 'tall-tales', 'translate']);
+  assert.deepEqual(byUse('voice'), ['voice-hint']);
+  assert.deepEqual(byUse('block').map((id) => templates.rungs[id].n), [1, 2, 3], 'the blocks are rungs 1–3: no rung 4–18 is a block');
+  for (const id of ['name-one', 'name-three', 'words-to-blocks', 'count-in-words', 'what-wants', 'maths-seeds', 'poem', 'explain-program', 'narrate-run', 'name-trick', 'sort-words', 'define', 'letter']) assert.equal(templates.rungs[id], undefined, `${id} is cut`);
   for (const [id, r] of rungs) {
     assert.ok(['pass', 'fail'].includes(r.ladder), `${id} ladder`);
     assert.ok(templates.shapes[r.shape], `${id} shape ${r.shape}`);
@@ -167,6 +171,8 @@ test('the template table is whole: every rung has both languages, a known shape,
         assert.ok(list && list.fr.length && list.en.length, `${id}.${slot} list ${spec.list} in both languages`);
         for (const L of ['fr', 'en']) for (const w of list[L]) assert.ok(w.length <= 120 && !/[\r\n\t\u0000-\u001f]/.test(w), `${spec.list}.${L} word "${w}" is a slot value`);
       } else assert.ok(spec.regex || spec.text, `${id}.${slot} has a list, a regex or is text`);
+      // A slot the ENGINE fills (the note on the plot, the thing ahead) is always a list: the world names it, never a child.
+      if (spec.engine) assert.ok(spec.list && r.use === 'block', `${id}.${slot} engine slot is a block's list slot`);
       for (const L of ['fr', 'en']) assert.ok(r.user[L].includes(`{${slot}}`) || sys[L].includes(`{${slot}}`) || id === 'voice-hint', `${id}.${slot} has a hole in ${L}`);
     }
     if (r.shape === 'one_of') assert.ok(templates.lists[r.options], `${id} options list`);

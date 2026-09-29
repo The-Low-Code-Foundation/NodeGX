@@ -251,7 +251,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     robotStart: { x: 0, y: 3, d: 1, carry: ['food', 'food'] },
     goal: [{ name: 'bowl_has', args: [4, 2, 1] }, { name: 'bowl_has', args: [2, 2, 1] }, { name: 'uses', args: ['if', 1] }],
     palette: ['fwd', 'left', 'right', 'put', 'repeat', 'if'],
-    rungs: ['what-wants', 'is-it-a'],
+    rungs: ['is-it-a'],
     reward: { kind: 'hat', id: 'crown', from: 'biscuit' },
     copyKeys: { title: 'rqBowlTitle', blurb: 'rqBowlBlurb', line: 'rqBowlLine', reward: 'hatCrown', gift: 'giftCrown' },
     referenceProgram: [
@@ -271,7 +271,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     robotStart: { x: 0, y: 3, d: 1 },
     goal: [{ name: 'thing_at', args: ['letter', 7, 3] }, { name: 'said', args: [1] }],
     palette: ['fwd', 'left', 'right', 'pick', 'put', 'say', 'repeat'],
-    rungs: ['say-thanks', 'translate', 'letter'],
+    rungs: ['say-thanks'],
     reward: { kind: 'sticker', id: 'letter', from: 'sami' },
     copyKeys: { title: 'rqLetterTitle', blurb: 'rqLetterBlurb', line: 'rqLetterLine', reward: 'stickerLetter', gift: 'giftLetter' },
     referenceProgram: [blk('pick'), blk('repeat', { n: 6, body: b1('fwd') }), blk('put'), blk('say', { slots: { text: 'thanksSami' } })]
@@ -286,7 +286,6 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     robotStart: { x: 0, y: 3, d: 1 },
     goal: [{ name: 'robot_at', args: [7, 3] }, { name: 'facing', args: [0] }, { name: 'uses', args: ['until', 1] }],
     palette: ['fwd', 'left', 'right', 'until'],
-    rungs: ['words-to-blocks', 'count-in-words'],
     reward: { kind: 'sticker', id: 'paw', from: 'biscuit' },
     copyKeys: { title: 'rqWallTitle', blurb: 'rqWallBlurb', line: 'rqWallLine', reward: 'stickerPaw', gift: 'giftPaw' },
     referenceProgram: [blk('until', { slots: { sensor: 'wall_ahead' }, body: [blk('fwd')] }), blk('left')]
@@ -302,7 +301,6 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     schedule: [{ tick: 1, event: 'meow' }, { tick: 4, event: 'meow' }],
     goal: [{ name: 'handled', args: ['meow', 2] }, { name: 'robot_at', args: [2, 3] }],
     palette: ['fwd', 'left', 'right', 'when'],
-    rungs: ['narrate-run'],
     reward: { kind: 'item', id: 'bell', from: 'biscuit' },
     copyKeys: { title: 'rqMeowTitle', blurb: 'rqMeowBlurb', line: 'rqMeowLine', reward: 'itemBell', gift: 'giftBell' },
     referenceProgram: [blk('when', { slots: { event: 'meow' }, body: [blk('fwd')] })]
@@ -323,7 +321,6 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     robotStart: { x: 0, y: 3, d: 1, basket: 6 },
     goal: [{ name: 'carrying', args: ['egg', 4] }, { name: 'uses', args: ['count_inc', 1] }, { name: 'senses', args: ['count_is', 1] }, { name: 'thing_at', args: ['egg', 5, 3] }],
     palette: ['fwd', 'left', 'right', 'pick', 'until', 'count_inc'],
-    rungs: ['count-tulips', 'maths-seeds', 'maths'],
     reward: { kind: 'item', id: 'basket', from: 'mamie' },
     copyKeys: { title: 'rqEggsTitle', blurb: 'rqEggsBlurb', line: 'rqEggsLine', reward: 'itemBasket', gift: 'giftBasket' },
     referenceProgram: [blk('until', { slots: { sensor: 'count_is', arg: 4 }, body: b1('pick', 'count_inc', 'fwd') })]
@@ -345,7 +342,6 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     robotStart: { x: 0, y: 3, d: 1 },
     goal: [{ name: 'every_tulip_watered' }, { name: 'uses', args: ['do', 2] }],
     palette: ['fwd', 'left', 'right', 'water', 'repeat', 'trick', 'do'],
-    rungs: ['name-one', 'name-three', 'name-trick', 'explain-program'],
     reward: { kind: 'item', id: 'gnome', from: 'mamie' },
     copyKeys: { title: 'rqRowsTitle', blurb: 'rqRowsBlurb', line: 'rqRowsLine', reward: 'itemGnome', gift: 'giftGnome' },
     referenceProgram: [
@@ -355,7 +351,9 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
       blk('right'),
       blk('do', { slots: { name: 'row' } })
     ]
-  }
+  },
+  // ── P106 IG-006 (lane C): three requests that carry Olive's three blocks, band 10–12, Pip (appended; IG-005's Echo later).
+  ...IG006_REQUESTS()
 ];
 
 /** The ids, for the gate and the island page. */
@@ -409,25 +407,11 @@ const rungKeys = (n: number) => ({ title: 'or' + n + 'Title', line: 'or' + n + '
 const momentKeys = (n: number, e: number) => ({ title: 'mo' + e + 'Title', line: 'mo' + e + 'Line', lesson: 'or' + n + 'Lesson', hint: 'oliveRung' + n });
 
 export const OLIVE_RUNGS: ReadonlyArray<OliveRung> = [
-  { n: 1, mark: 'green', examColumn: 'green', islander: 'sami', band: 2, block: 'say', shape: 'sentence', table: ['say-thanks'], probes: ['P01', 'P02'], copyKeys: rungKeys(1) },
-  { n: 2, mark: 'green', examColumn: 'green', islander: 'mamie', band: 2, block: 'ask', shape: 'list_of_3', table: ['name-three', 'name-one'], probes: ['P03', 'P04', 'P05', 'P24', 'P25'], copyKeys: rungKeys(2) },
-  { n: 3, mark: 'green', examColumn: 'green', islander: 'sami', band: 2, block: 'ask', shape: 'blocks', table: ['words-to-blocks'], probes: ['P06', 'P07', 'P08', 'P23'], copyKeys: rungKeys(3) },
-  { n: 4, mark: 'grad', examColumn: 'grad', islander: 'sami', band: 2, block: 'ask', shape: 'blocks', table: ['count-in-words'], probes: ['P09', 'P26'], copyKeys: rungKeys(4) },
-  { n: 5, mark: 'green', examColumn: 'green', islander: 'biscuit', band: 2, block: 'ask', shape: 'one_of', table: ['what-wants'], probes: ['P10', 'P11', 'P27'], copyKeys: rungKeys(5) },
-  { n: 6, mark: 'grad', examColumn: 'green', islander: null, band: 2, block: 'if', shape: 'yes_no', table: ['is-it-a'], probes: ['P12', 'P13', 'P28'], copyKeys: rungKeys(6) },
-  { n: 7, mark: 'grad', examColumn: 'grad', islander: 'mamie', band: 2, block: 'ask', shape: 'integer', table: ['count-tulips'], probes: ['P14', 'P29'], copyKeys: rungKeys(7) },
-  { n: 8, mark: 'grad', examColumn: 'both', islander: null, band: 2, block: 'ask', shape: 'integer', table: ['maths-seeds', 'maths'], probes: ['P15', 'P16', 'P30', 'P31'], copyKeys: rungKeys(8) },
-  { n: 9, mark: 'grad', examColumn: 'grad', islander: null, band: 2, block: 'ask', shape: 'sentence', table: ['no-letter-e'], probes: ['R9-G1-fr', 'R9-G1-en'], copyKeys: rungKeys(9) },
-  { n: 10, mark: 'grad', examColumn: 'grad', islander: null, band: 2, block: null, shape: null, table: ['tall-tales'], probes: ['P18', 'P33'], copyKeys: rungKeys(10) },
-  { n: 11, mark: 'green', examColumn: 'both', islander: 'sami', band: 2, block: 'ask', shape: 'sentence', table: ['translate'], probes: ['P19', 'P20'], copyKeys: rungKeys(11) },
-  { n: 12, mark: 'green', examColumn: 'green', islander: null, band: 2, block: 'ask', shape: 'two_lines', table: ['poem'], probes: ['P21', 'P34'], copyKeys: rungKeys(12) },
-  // CG-006 §4's moments, promoted on the real-model readings of §7.1 (CPU and Metal agreed on every decision).
-  { n: 13, mark: 'green', examColumn: 'green', islander: null, band: 2, block: 'ask', shape: 'sentence', table: ['explain-program'], probes: ['E3-fr', 'E3-en', 'E3-count'], copyKeys: momentKeys(13, 3), moment: 'E3' },
-  { n: 14, mark: 'green', examColumn: 'green', islander: null, band: 2, block: 'ask', shape: 'sentence', table: ['narrate-run'], probes: ['E4-fr', 'E4-en'], copyKeys: momentKeys(14, 4), moment: 'E4' },
-  { n: 15, mark: 'green', examColumn: 'green', islander: null, band: 2, block: 'ask', shape: 'one_word', table: ['name-trick'], probes: ['E5-fr', 'E5-apt', 'E5-en'], copyKeys: momentKeys(15, 5), moment: 'E5' },
-  { n: 16, mark: 'grad', examColumn: 'grad', islander: null, band: 2, block: 'ask', shape: 'list_of_3', table: ['sort-words'], probes: ['E8-fr', 'E8-en'], copyKeys: momentKeys(16, 8), moment: 'E8' },
-  { n: 17, mark: 'grad', examColumn: 'mixed', islander: null, band: 2, block: 'ask', shape: 'sentence', table: ['define'], probes: ['E9-arrosoir', 'E9-chouette', 'E9-rocher', 'E9-en'], copyKeys: momentKeys(17, 9), moment: 'E9' },
-  { n: 18, mark: 'green', examColumn: 'green', islander: null, band: 2, block: 'ask', shape: 'sentence', table: ['letter'], probes: ['E10-fr', 'E10-en'], copyKeys: momentKeys(18, 10), moment: 'E10' }
+  // P106 IG-006 (R6): the ladder is three blocks — say, read, is it a…? — each on a column the model passes. The other
+  // rungs left the palette; five survive as Olive's lessons on Skills (cg005Olive.ts OLIVE_LESSON_IDS, R7).
+  { n: 1, mark: 'green', examColumn: 'green', islander: 'sami', band: 2, block: 'say', shape: 'sentence', table: ['say-thanks'], probes: ['P01', 'P02'], copyKeys: { title: 'rungSayThanks', line: 'cdOliveSay', lesson: 'or1Lesson', hint: 'oliveRung1' } },
+  { n: 2, mark: 'green', examColumn: 'green', islander: 'mamie', band: 2, block: 'ask', shape: 'one_of', table: ['read'], probes: ['RD1-fr', 'RD2-fr', 'RD3-fr', 'RD1-en', 'RD2-en', 'RD3-en'], copyKeys: { title: 'rungRead', line: 'cdOliveRead', lesson: 'lsRead', hint: 'oliveRung2' } },
+  { n: 3, mark: 'grad', examColumn: 'green', islander: 'sami', band: 2, block: 'if', shape: 'yes_no', table: ['is-it-a'], probes: ['IA1-fr', 'IA2-fr', 'IA3-fr', 'IA4-fr', 'IA5-fr', 'IA6-fr', 'IA1-en', 'IA2-en', 'IA3-en', 'IA4-en', 'IA5-en', 'IA6-en'], copyKeys: { title: 'rungIsItA', line: 'or6Line', lesson: 'or6Lesson', hint: 'oliveRung3' } }
 ];
 
 // ── The hint table ──────────────────────────────────────────────────────────
@@ -475,24 +459,14 @@ export const HINTS: Readonly<Record<string, Bi>> = {
   hintPredictMiss: s('You tapped one tile, {b} stopped on another. Follow the steps with your finger, one by one.', 'Tu as touché une case, {b} s’est arrêté sur une autre. Suis les pas avec ton doigt, un par un.'),
   oliveThinking: s('Olive is thinking…', 'Olive réfléchit…'),
   oliveResting: s('Olive is resting. Here is her written line.', 'Olive se repose. Voici sa phrase écrite.'),
-  oliveRung1: s('Run it twice: Olive never says a thank-you the same way.', 'Lance-le deux fois : Olive ne dit jamais un merci de la même façon.'),
-  oliveRung2: s('Turn the dial: "same every time" or "surprise me". Olive changes her mind.', 'Tourne la molette : « pareil à chaque fois » ou « surprends-moi ». Olive change d’avis.'),
-  oliveRung3: s('Olive turned the words into blocks. Place them and see if {b} agrees.', 'Olive a transformé les mots en blocs. Pose-les et vois si {b} est d’accord.'),
-  oliveRung4: s('Olive gave one step for "three squares". Olive cannot count: a repeat can.', 'Olive a donné un seul pas pour « trois cases ». Olive ne sait pas compter : un « répéter », si.'),
-  oliveRung5: s('Olive picked what Biscuit wants. Use "if Olive says…" to send {b} the right way.', 'Olive a trouvé ce que veut Biscuit. Utilise « si Olive dit… » pour envoyer {b} du bon côté.'),
-  oliveRung6: s('Olive was wrong about the thing ahead. Ask three times and count the yeses.', 'Olive s’est trompée sur ce qu’il y a devant. Demande trois fois et compte les oui.'),
-  oliveRung7: s('Olive guessed a number. A count block does not guess.', 'Olive a deviné un nombre. Un bloc « compter » ne devine pas.'),
-  oliveRung8: s('Olive got the small sum right and the big one wrong. A rule beats a guess.', 'Olive a trouvé la petite somme, pas la grande. Une règle bat une devinette.'),
-  oliveRung9: s('Olive used the letter e anyway. A program that checks every letter catches it.', 'Olive a quand même utilisé la lettre e. Un programme qui vérifie chaque lettre la prend sur le fait.'),
-  oliveRung10: s('Olive answered with confidence. Check it in a book before you believe it.', 'Olive a répondu avec assurance. Vérifie dans un livre avant de la croire.'),
-  oliveRung11: s('Olive translates one way better than the other. Tools have a good direction.', 'Olive traduit mieux dans un sens que dans l’autre. Les outils ont un bon sens.'),
-  oliveRung12: s('A poem for the tulip. Sometimes silly, always hers.', 'Un poème pour la tulipe. Parfois farfelu, toujours le sien.'),
-  oliveRung13: s('Olive read your blocks back. Does her sentence say what {b} did?', 'Olive a relu tes blocs. Sa phrase dit-elle bien ce que {b} a fait ?'),
-  oliveRung14: s('Olive told the story of the run. Find the step the puddle came from.', 'Olive a raconté le trajet. Trouve le pas d’où vient la flaque.'),
-  oliveRung15: s('Olive suggested a name. Keep it, or give your trick a better one.', 'Olive a proposé un nom. Garde-le, ou trouve mieux pour ton astuce.'),
-  oliveRung16: s('Olive’s order is not alphabetical. A program that sorts gets it right every time.', 'L’ordre d’Olive n’est pas alphabétique. Un programme qui range ne se trompe jamais.'),
-  oliveRung17: s('Some of Olive’s answers are made up. Which ones? Check in a book.', 'Certaines réponses d’Olive sont inventées. Lesquelles ? Vérifie dans un livre.'),
-  oliveRung18: s('Olive wrote the letter her way. The thing asked for is always in it: the check makes sure.', 'Olive a écrit la lettre à sa façon. La chose demandée y est toujours : la vérification s’en assure.')
+  // P106 IG-006 AC7: after a run, the line names the block Olive was asked — and says she was resting when the written
+  // answer stood in. The rungs 4–18 lines left with their rungs.
+  oliveRung1: s('Olive said thank you through {b}. Run it twice: she never says it the same way.', 'Olive a dit merci par la voix de {b}. Lance-le deux fois : elle ne le dit jamais pareil.'),
+  oliveRung2: s('Olive read the note. Use “if Olive read…” to send {b} to the right row.', 'Olive a lu le mot. Utilise « si Olive a lu… » pour envoyer {b} vers la bonne rangée.'),
+  oliveRung3: s('Olive said whether the thing ahead is one. When she is wrong, ask 3 times and count the yeses.', 'Olive a dit si ce qui est devant en est un. Quand elle se trompe, demande 3 fois et compte les oui.'),
+  oliveResting1: s('Olive is resting, so {b} used her written thank-you.', 'Olive se repose, alors {b} a pris son merci écrit.'),
+  oliveResting2: s('Olive is resting, so {b} used her written answer to “read the note”.', 'Olive se repose, alors {b} a pris sa réponse écrite à « lire le mot ».'),
+  oliveResting3: s('Olive is resting, so {b} used her written answer to “is it a…?”.', 'Olive se repose, alors {b} a pris sa réponse écrite à « est-ce un… ? ».')
 };
 
 export const HINT_KEYS: ReadonlyArray<string> = Object.keys(HINTS);
@@ -812,3 +786,95 @@ export const REQUESTS_JSON = JSON.stringify(REQUESTS, null, 2);
 export const OLIVE_RUNGS_JSON = JSON.stringify(OLIVE_RUNGS, null, 2);
 export const HINTS_JSON = JSON.stringify(HINT_KEYS.map((key) => ({ key, en: HINTS[key].en, fr: HINTS[key].fr })), null, 2);
 export const WORDS_JSON = JSON.stringify(WORD_KEYS.map((key) => ({ key, en: WORDS[key].en, fr: WORDS[key].fr })), null, 2);
+
+// ── P106 IG-006 (lane C): Olive's three requests, appended to REQUESTS above (declared here, hoisted) ──────────
+
+/**
+ * P106 IG-006: Mamie's note (read → if), the rock and the flowers (is it a…? → the vote), Sami's thank-you (say). The
+ * words (title, blurb, line, reward, gift) are in the page's word table (`cg003Content.ts` PAGE_WORDS). A `note`/`sign`
+ * thing carries `text` in English — the engine sends the note in the run's language (the rung table's `notes_read`
+ * lists, index-aligned); a tulip carries `color` (IG-006's addition to brief §4's vocabulary). `olive:<rung>` is an
+ * Olive block (cg005Olive.ts `oliveType`); `tulips_watered` is IG-006's goal (so many tulips of one colour watered).
+ */
+function IG006_REQUESTS(): GardenRequest[] {
+  const at = (kind: string, x: number, y: number, extra: Record<string, unknown> = {}) => ({ kind, x, y, ...extra }) as unknown as Thing;
+  const olive = (rung: string, slots?: Record<string, string>) => blk(('olive:' + rung) as BlockType, slots ? { slots } : {});
+  const goal = (g: Array<{ name: string; args?: Array<string | number> }>) => g as unknown as GardenRequest['goal'];
+  return [
+    {
+      id: 'mamie-note',
+      islander: 'mamie',
+      band: 2,
+      tricks: [4],
+      map: ['GGTGGGTH', 'GGGGGGGG', 'GGFGFGFG', 'PPPPPPPP', 'GGFGFGFG', 'GGGGGTGG'],
+      things: [
+        at('note', 0, 2, { text: 'The red ones, not the yellow.' }),
+        at('tulip', 2, 2, { watered: false, color: 'red' }),
+        at('tulip', 4, 2, { watered: false, color: 'red' }),
+        at('tulip', 6, 2, { watered: false, color: 'red' }),
+        at('tulip', 2, 4, { watered: false, color: 'yellow' }),
+        at('tulip', 4, 4, { watered: false, color: 'yellow' }),
+        at('tulip', 6, 4, { watered: false, color: 'yellow' })
+      ],
+      robotStart: { x: 0, y: 3, d: 1 },
+      goal: goal([{ name: 'tulips_watered', args: ['red', 3] }, { name: 'tulips_watered', args: ['yellow', 0] }, { name: 'uses', args: ['olive:read', 1] }, { name: 'senses', args: ['olive_read:red_tulip', 1] }]),
+      palette: ['fwd', 'left', 'right', 'water', 'repeat', 'if'],
+      rungs: ['read'],
+      reward: { kind: 'sticker', id: 'note', from: 'mamie' },
+      copyKeys: { title: 'rqNoteTitle', blurb: 'rqNoteBlurb', line: 'rqNoteLine', reward: 'stickerNote', gift: 'giftNote' },
+      referenceProgram: [
+        olive('read'),
+        blk('repeat', {
+          n: 3,
+          body: [
+            blk('fwd'),
+            blk('fwd'),
+            blk('if', { slots: { sensor: 'olive_read:red_tulip' }, body: b1('left', 'water', 'right') }),
+            blk('if', { slots: { sensor: 'olive_read:yellow_tulip' }, body: b1('right', 'water', 'left') })
+          ]
+        })
+      ]
+    },
+    {
+      id: 'rock-flower',
+      islander: 'sami',
+      band: 2,
+      tricks: [4],
+      map: ['GGTGGGTH', 'GGGGGGGG', 'GFGFGGGG', 'PPPPPPPP', 'GWWGGGGG', 'GGGGGTGG'],
+      things: [
+        at('sign', 0, 2, { text: 'Water the tulips, never the rock.' }),
+        at('tulip', 1, 2, { watered: false, color: 'red' }),
+        at('rock', 2, 2, { left: 4 }),
+        at('tulip', 3, 2, { watered: false, color: 'red' }),
+        at('rock', 4, 2, { left: 4 })
+      ],
+      robotStart: { x: 0, y: 3, d: 1 },
+      goal: goal([{ name: 'every_tulip_watered' }, { name: 'no_puddle' }, { name: 'uses', args: ['olive:is-it-a', 1] }, { name: 'senses', args: ['olive_says:yes', 1] }]),
+      palette: ['fwd', 'left', 'right', 'water', 'repeat', 'if'],
+      rungs: ['is-it-a'],
+      reward: { kind: 'sticker', id: 'flower', from: 'sami' },
+      copyKeys: { title: 'rqFlowerTitle', blurb: 'rqFlowerBlurb', line: 'rqFlowerLine', reward: 'stickerFlower', gift: 'giftFlower' },
+      referenceProgram: [
+        blk('repeat', {
+          n: 4,
+          body: [blk('fwd'), blk('left'), olive('is-it-a', { kind: 'a flower', times: '3' }), blk('if', { slots: { sensor: 'olive_says:yes' }, body: b1('water') }), blk('right')]
+        })
+      ]
+    },
+    {
+      id: 'sami-thanks',
+      islander: 'sami',
+      band: 2,
+      tricks: [1],
+      map: ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPB', 'GWWGGRGG', 'GGGGGTGG'],
+      things: [at('note', 0, 2, { text: 'Take the letter to Mamie Rose.' }), at('letter', 1, 3)],
+      robotStart: { x: 0, y: 3, d: 1 },
+      goal: goal([{ name: 'thing_at', args: ['letter', 7, 3] }, { name: 'said', args: [1] }, { name: 'uses', args: ['olive:say-thanks', 1] }]),
+      palette: ['fwd', 'left', 'right', 'pick', 'put', 'repeat'],
+      rungs: ['say-thanks'],
+      reward: { kind: 'sticker', id: 'thanks', from: 'sami' },
+      copyKeys: { title: 'rqThanksTitle', blurb: 'rqThanksBlurb', line: 'rqThanksLine', reward: 'stickerThanks', gift: 'giftThanks' },
+      referenceProgram: [blk('pick'), blk('repeat', { n: 6, body: b1('fwd') }), blk('put'), olive('say-thanks', { to: 'Mamie Rose', deed: 'carried her letter' })]
+    }
+  ];
+}

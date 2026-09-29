@@ -1,0 +1,75 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "df6e5456-c6bd-5d6c-85e2-cf8aa2e6e662",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lbIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "text",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "ground",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "isE",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "lbBox",
+      "type": "Group",
+      "label": "A piece of her sentence",
+      "children": [
+        "lbText"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "borderRadius": {
+          "value": 4,
+          "unit": "px"
+        },
+        "cssClassName": "bg-letter"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "lbText",
+      "type": "Text",
+      "label": "The letters",
+      "parent": "lbBox",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 17,
+          "unit": "px"
+        },
+        "fontWeight": "700",
+        "color": "var(--ink)"
+      },
+      "x": 100,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "lbBox"
+  ]
+}

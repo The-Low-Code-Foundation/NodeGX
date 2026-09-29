@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3ffc002a-a5fd-5675-8122-a29c066e46b5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cardgateIn",
+      "fromProperty": "before",
+      "toId": "cardgateFn",
+      "toProperty": "in-before"
+    },
+    {
+      "fromId": "cardgateIn",
+      "fromProperty": "program",
+      "toId": "cardgateFn",
+      "toProperty": "in-program"
+    },
+    {
+      "fromId": "cardgateIn",
+      "fromProperty": "seen",
+      "toId": "cardgateFn",
+      "toProperty": "in-seen"
+    },
+    {
+      "fromId": "cardgateIn",
+      "fromProperty": "go",
+      "toId": "cardgateFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cardgateFn",
+      "fromProperty": "out-cardId",
+      "toId": "cardgateOut",
+      "toProperty": "cardId"
+    },
+    {
+      "fromId": "cardgateFn",
+      "fromProperty": "out-hold",
+      "toId": "cardgateOut",
+      "toProperty": "hold"
+    },
+    {
+      "fromId": "cardgateFn",
+      "fromProperty": "out-program",
+      "toId": "cardgateOut",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "cardgateFn",
+      "fromProperty": "success",
+      "toId": "cardgateOut",
+      "toProperty": "ran"
+    }
+  ]
+}

@@ -19,7 +19,8 @@
  *
  * `serve` answers the app and Olive's doors on one loopback origin, like the shell, plus two drive-only doors:
  * `POST /__stub/set {exam?, mutant?, delayMs?, hang?, answers?, delayFor?}` (header x-garden: 1; `answers` scripts a
- * rung's reply and `delayFor` holds one rung's replies, IG-001) and `GET /__stub/calls` (what reached the
+ * rung's reply — a list scripts its replies in turn, IG-006's vote — and `delayFor` holds one rung's replies, IG-001) and
+ * `GET /__stub/calls` (what reached the
  * "model": rung, lang, values — so a drive can count what was SENT). Plain Node, no dependencies.
  */
 'use strict';
@@ -47,36 +48,26 @@ const tulipsIn = (list) => String(list).split(',').filter((x) => /^(tulipe|tulip
  * Returns `{value}` or `{text}`; `i` counts earlier calls with the same key.
  */
 const ANSWERS = {
+  // The three blocks (IG-006).
   'say-thanks': {
     holds: (v, L, t, i) => ({ text: fill(pick(L === 'en' ? ['Thank you, {to}! I {deed} just for you.', 'Thanks a lot, {to}! I {deed} with joy.'] : ["Merci {to}, j'ai {deed} rien que pour toi !", "Merci mille fois, {to} ! J'ai {deed} avec plaisir."], t > 0 ? i : 0), v) }),
     breaks: (v, L) => ({ text: fill(L === 'en' ? 'Hello {to}, what a lovely garden.' : 'Bonjour {to}, quel beau jardin.', v) })
   },
-  'name-one': {
-    holds: (v, L, t, i) => ({ value: pick(L === 'en' ? ['Petal', 'Blossom', 'Daisy'] : ['Pipette', 'Rosalba', 'Fleurette'], t > 0 ? i : 0) }),
-    breaks: (v, L, t, i) => ({ value: pick(L === 'en' ? ['Petal', 'Blossom', 'Daisy'] : ['Pipette', 'Rosalba', 'Fleurette'], t > 0 ? 0 : i) })
-  },
-  'name-three': {
-    holds: (v, L) => ({ value: L === 'en' ? ['Ginger', 'Marmalade', 'Biscotti'] : ['La Crocette', 'Le Rouxil', 'La Goulantine'] }),
-    breaks: (v, L) => ({ value: L === 'en' ? ['Ginger', 'Marmalade'] : ['La Crocette', 'Le Rouxil'] })
-  },
-  'words-to-blocks': { holds: (v, L) => W('words-to-blocks', v, L), breaks: () => ({ value: ['droite'] }) },
-  'count-in-words': {
-    holds: (v, L) => W('count-in-words', v, L),
-    breaks: (v) => ({ value: ['avancer', 'avancer', 'avancer'].concat(/arrose|water/i.test(v.route) ? ['arroser'] : []) })
-  },
-  'what-wants': {
-    holds: (v, L) => W('what-wants', v, L),
-    breaks: (v, L) => {
-      const right = W('what-wants', v, L).value;
-      return { value: templates.lists.wants[L === 'en' ? 'en' : 'fr'].find((w) => w !== right) };
+  // read: holds = the object the note names (the written answer); breaks = another thing on the plot (the enum's next).
+  read: {
+    holds: (v, L) => W('read', v, L),
+    breaks: (v, L, t, i, schema) => {
+      const right = W('read', v, L).value;
+      const pool = schema && schema.properties && schema.properties.objet ? schema.properties.objet.enum || [] : [];
+      return { value: pool.find((o) => o !== right) || templates.lists.plot_objects[L === 'en' ? 'en' : 'fr'].find((o) => o !== right) };
     }
   },
   'is-it-a': {
     holds: (v, L) => ({ value: truthOf(v, L) }),
     breaks: (v, L) => ({ value: { oui: 'non', non: 'oui', yes: 'no', no: 'yes' }[truthOf(v, L)] })
   },
+  // The five lessons (R7).
   'count-tulips': { holds: (v, L) => W('count-tulips', v, L), breaks: (v) => ({ value: tulipsIn(v.list) }) },
-  'maths-seeds': { holds: (v) => ({ value: Number(v.a) + Number(v.b) }), breaks: (v) => ({ value: Number(v.a) + Number(v.b) + 1 }) },
   maths: {
     // The readout: 2 + 3 right, 14 + 9 → 14 every time (she repeats the first number once it has two digits).
     holds: (v) => ({ value: Number(v.a) >= 10 ? Number(v.a) : Number(v.a) + Number(v.b) }),
@@ -89,26 +80,6 @@ const ANSWERS = {
     holds: (v, L) => W('translate', v, L),
     breaks: (v, L) => ({ text: L === 'en' ? 'Biscuit le chat a faim.' : 'The biscuit is sad.' })
   },
-  poem: {
-    holds: (v, L) => ({ text: fill(L === 'en' ? '{flower} sways in the breeze,\nOlive loves her with ease.' : "{flower} danse au vent,\nOlive l'aime tant.", v) }),
-    breaks: (v, L) => ({ text: fill(L === 'en' ? '{flower} is a tulip.' : '{flower} est une tulipe.', v) })
-  },
-  // The six promoted moments (CG-006 §7.1), rungs 13–18.
-  'explain-program': { holds: (v, L) => W('explain-program', v, L), breaks: (v, L) => ({ text: L === 'en' ? 'Pip is a very busy robot.' : 'Pip est un robot très occupé.' }) },
-  'narrate-run': { holds: (v, L) => W('narrate-run', v, L), breaks: (v, L) => ({ text: L === 'en' ? 'Pip went for a nice walk.' : 'Pip a fait une belle promenade.' }) },
-  // A ✅ `ok` probe fails only on a refusal: two words are over the one-word cap.
-  'name-trick': { holds: (v, L) => W('name-trick', v, L), breaks: (v, L) => ({ value: L === 'en' ? 'Big Sprinkler' : 'Grand Arroseur' }) },
-  'sort-words': {
-    holds: (v, L) => W('sort-words', v, L),
-    breaks: (v) => ({ value: String(v.words).split(',').map((w) => w.trim()).sort((a, b) => a.localeCompare(b)) })
-  },
-  // 🎓 mixed: holds = the written set (some right, some made up); breaks = every definition right, so they AGREE.
-  define: {
-    holds: (v, L) => W('define', v, L),
-    breaks: (v, L) => ({ text: (L === 'en' ? { 'a watering can': 'A watering can is what you use to water the plants.', 'a dandelion': 'A dandelion is a yellow flower.', 'an owl': 'An owl is a bird that flies at night.', 'a rock': 'A rock is a big stone.' } : { 'un arrosoir': "Un arrosoir sert à arroser les plantes avec de l'eau.", 'un pissenlit': 'Un pissenlit est une fleur jaune.', 'une chouette': 'Une chouette est un oiseau de nuit.', 'un rocher': 'Un rocher est une grosse pierre.' })[v.word] || '' })
-  },
-  // A ✅ must-contain rung fails by leaving the object out (the route refuses it: must-contain).
-  letter: { holds: (v, L) => W('letter', v, L), breaks: (v, L) => ({ text: fill(L === 'en' ? '{who}: "Pip, come and help me, please!"' : '{who} : « Pip, viens m’aider, s’il te plaît ! »', v) }) },
   'voice-hint': {
     holds: (v, L) => {
       const line = ((templates.hints[v.key] || {})[L === 'en' ? 'en' : 'fr'] || '').replace(/\{(\w+)\}/g, (m, k) => ({ b: v.b || 'Pip', n: v.n || '3', w: v.w || '0', t: v.t || '3' })[k] || m);
@@ -136,6 +107,7 @@ function rawOf(answer, schema) {
 function createStubEngine(o = {}) {
   const state = { exam: { ...DEFAULT_EXAM, ...(o.exam || {}) }, mutant: !!o.mutant, delayMs: Number(o.delayMs) || 0, hang: new Set(o.hang || []), answers: { ...(o.answers || {}) }, delayFor: { ...(o.delayFor || {}) } };
   const counters = new Map();
+  const scriptedN = new Map();
   const calls = [];
 
   function set(p = {}) {
@@ -144,7 +116,10 @@ function createStubEngine(o = {}) {
     if (p.delayMs !== undefined) state.delayMs = Number(p.delayMs) || 0;
     if (Array.isArray(p.hang)) state.hang = new Set(p.hang);
     // IG-001 (P106 s1): scripted answers by rung, replacing the whole set (`{}` clears them).
-    if (p.answers && typeof p.answers === 'object') state.answers = { ...p.answers };
+    if (p.answers && typeof p.answers === 'object') {
+      state.answers = { ...p.answers };
+      scriptedN.clear();
+    }
     // A hold on ONE rung's replies (`delayFor: { poem: 1500 }`), so a drive can watch a run parked on it while the hint
     // voicings answer at once (a hold on everything makes "thinking" the voicing's, not the park's).
     if (p.delayFor && typeof p.delayFor === 'object') state.delayFor = { ...p.delayFor };
@@ -167,8 +142,15 @@ function createStubEngine(o = {}) {
     // A scripted answer (`answers: { 'is-it-a': 'no', poem: 'Tulla the tulip' }`) beats the table, so a drive can say what
     // Olive answers and watch what the program does with it: a shaped rung takes it as its value, prose as its text.
     // The route's checks still run on it.
-    const scripted = state.answers[rung];
-    const a = scripted !== undefined ? (schema ? { value: scripted } : { text: String(scripted) }) : { ...(table[mode](values, L, temperature, i) || { text: '' }) };
+    // IG-006: a LIST scripts the replies in turn (`answers: { 'is-it-a': ['yes', 'no', 'yes'] }` — the vote), one per call
+    // to that rung, from the first again after the last.
+    let scripted = state.answers[rung];
+    if (Array.isArray(scripted)) {
+      const k = scriptedN.get(rung) || 0;
+      scriptedN.set(rung, k + 1);
+      scripted = scripted.length ? scripted[k % scripted.length] : undefined;
+    }
+    const a = scripted !== undefined ? (schema ? { value: scripted } : { text: String(scripted) }) : { ...(table[mode](values, L, temperature, i, schema) || { text: '' }) };
     if (state.mutant) {
       const shape = schema ? SHAPE_OF_KEY[Object.keys(schema.properties)[0]] : 'prose';
       if (shape === 'prose') a.text = `${a.text} ${MUTANT_WORD[L]}`;
