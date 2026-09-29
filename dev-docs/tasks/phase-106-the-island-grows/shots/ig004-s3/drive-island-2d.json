@@ -179,7 +179,7 @@
             }
           ],
           "robotId": "r1",
-          "wonAt": 1790684003384
+          "wonAt": 1790685769522
         }
       }
     },
@@ -306,7 +306,7 @@
             }
           ],
           "r1",
-          1790684003384
+          1790685769522
         ]
       }
     },
@@ -314,8 +314,8 @@
       "name": "IG-004 AC7: pasted back through the Grown-ups box, the code restores the same family (plots, robots, done, hats, stickers)",
       "ok": true,
       "saw": {
-        "before": "[{\"id\":\"pmumn04alj0g\",\"name\":\"Ada\",\"robot\":{\"name\":\"Pip\",\"color\":\"#FF7A59\",\"eye\":\"round\",\"hat\":\"none\"},\"done\":[\"tulips-three\"],\"plots\":{\"tulips-three\":{\"program\":[{\"id\":1,\"t\":\"fill\"},{\"id\":2,\"t\":\"left\"},{\"id\":3,\"t\":\"left\"},{\"id\":4,\"t\":\"fwd\"},{\"id\":5,\"t\":\"water\"},{\"id\":6,\"t\":\"right\"},{\"id\":7,\"t\":\"fwd\"},{\"id\":8,\"t\":\"right\"},{\"id\":9,\"t\":\"fwd\"},{\"id\":10,\"t\":\"fill\"},{\"id\":11,\"t\":\"left\"},{\"id\":12,\"t\":\"left\"},{\"id\":13,\"t\":\"fwd\"},{\"id\":14,\"t\":\"water\"},{\"id\":15,\"t\":\"right\"},{\"id\":16,\"t\":\"fwd\"},{\"id\":17,\"t\":\"right\"},{\"id\":18,\"t\":\"fwd\"},{\"id\":19,\"t\":\"fill\"},{\"id\":20,\"t\":\"left\"},{\"id\":21,\"t\":\"left\"},{\"id\":22,\"t\":\"fwd\"},{\"id\":23,\"t\":\"water\"},{\"id\":24,\"t\":\"right\"},{\"id\":25,\"t\":\"fwd\"},{\"id\":26,\"t\":\"right\"},{\"id\":27,\"t\":\"fwd\"}],\"robotId\":\"r1\",\"wonAt\":1790684003384}},\"robots\":[{\"id\":\"r1\"}],\"hats\":[\"sun\"],\"stickers\":[]}]",
-        "after": "[{\"id\":\"pmumn04alj0g\",\"name\":\"Ada\",\"robot\":{\"name\":\"Pip\",\"color\":\"#FF7A59\",\"eye\":\"round\",\"hat\":\"none\"},\"done\":[\"tulips-three\"],\"plots\":{\"tulips-three\":{\"program\":[{\"id\":1,\"t\":\"fill\"},{\"id\":2,\"t\":\"left\"},{\"id\":3,\"t\":\"left\"},{\"id\":4,\"t\":\"fwd\"},{\"id\":5,\"t\":\"water\"},{\"id\":6,\"t\":\"right\"},{\"id\":7,\"t\":\"fwd\"},{\"id\":8,\"t\":\"right\"},{\"id\":9,\"t\":\"fwd\"},{\"id\":10,\"t\":\"fill\"},{\"id\":11,\"t\":\"left\"},{\"id\":12,\"t\":\"left\"},{\"id\":13,\"t\":\"fwd\"},{\"id\":14,\"t\":\"water\"},{\"id\":15,\"t\":\"right\"},{\"id\":16,\"t\":\"fwd\"},{\"id\":17,\"t\":\"right\"},{\"id\":18,\"t\":\"fwd\"},{\"id\":19,\"t\":\"fill\"},{\"id\":20,\"t\":\"left\"},{\"id\":21,\"t\":\"left\"},{\"id\":22,\"t\":\"fwd\"},{\"id\":23,\"t\":\"water\"},{\"id\":24,\"t\":\"right\"},{\"id\":25,\"t\":\"fwd\"},{\"id\":26,\"t\":\"right\"},{\"id\":27,\"t\":\"fwd\"}],\"robotId\":\"r1\",\"wonAt\":1790684003384}},\"robots\":[{\"id\":\"r1\"}],\"hats\":[\"sun\"],\"stickers\":[]}]"
+        "before": "[{\"id\":\"pmumo202k50z\",\"name\":\"Ada\",\"robot\":{\"name\":\"Pip\",\"color\":\"#FF7A59\",\"eye\":\"round\",\"hat\":\"none\"},\"done\":[\"tulips-three\"],\"plots\":{\"tulips-three\":{\"program\":[{\"id\":1,\"t\":\"fill\"},{\"id\":2,\"t\":\"left\"},{\"id\":3,\"t\":\"left\"},{\"id\":4,\"t\":\"fwd\"},{\"id\":5,\"t\":\"water\"},{\"id\":6,\"t\":\"right\"},{\"id\":7,\"t\":\"fwd\"},{\"id\":8,\"t\":\"right\"},{\"id\":9,\"t\":\"fwd\"},{\"id\":10,\"t\":\"fill\"},{\"id\":11,\"t\":\"left\"},{\"id\":12,\"t\":\"left\"},{\"id\":13,\"t\":\"fwd\"},{\"id\":14,\"t\":\"water\"},{\"id\":15,\"t\":\"right\"},{\"id\":16,\"t\":\"fwd\"},{\"id\":17,\"t\":\"right\"},{\"id\":18,\"t\":\"fwd\"},{\"id\":19,\"t\":\"fill\"},{\"id\":20,\"t\":\"left\"},{\"id\":21,\"t\":\"left\"},{\"id\":22,\"t\":\"fwd\"},{\"id\":23,\"t\":\"water\"},{\"id\":24,\"t\":\"right\"},{\"id\":25,\"t\":\"fwd\"},{\"id\":26,\"t\":\"right\"},{\"id\":27,\"t\":\"fwd\"}],\"robotId\":\"r1\",\"wonAt\":1790685769522}},\"robots\":[{\"id\":\"r1\"}],\"hats\":[\"sun\"],\"stickers\":[]}]",
+        "after": "[{\"id\":\"pmumo202k50z\",\"name\":\"Ada\",\"robot\":{\"name\":\"Pip\",\"color\":\"#FF7A59\",\"eye\":\"round\",\"hat\":\"none\"},\"done\":[\"tulips-three\"],\"plots\":{\"tulips-three\":{\"program\":[{\"id\":1,\"t\":\"fill\"},{\"id\":2,\"t\":\"left\"},{\"id\":3,\"t\":\"left\"},{\"id\":4,\"t\":\"fwd\"},{\"id\":5,\"t\":\"water\"},{\"id\":6,\"t\":\"right\"},{\"id\":7,\"t\":\"fwd\"},{\"id\":8,\"t\":\"right\"},{\"id\":9,\"t\":\"fwd\"},{\"id\":10,\"t\":\"fill\"},{\"id\":11,\"t\":\"left\"},{\"id\":12,\"t\":\"left\"},{\"id\":13,\"t\":\"fwd\"},{\"id\":14,\"t\":\"water\"},{\"id\":15,\"t\":\"right\"},{\"id\":16,\"t\":\"fwd\"},{\"id\":17,\"t\":\"right\"},{\"id\":18,\"t\":\"fwd\"},{\"id\":19,\"t\":\"fill\"},{\"id\":20,\"t\":\"left\"},{\"id\":21,\"t\":\"left\"},{\"id\":22,\"t\":\"fwd\"},{\"id\":23,\"t\":\"water\"},{\"id\":24,\"t\":\"right\"},{\"id\":25,\"t\":\"fwd\"},{\"id\":26,\"t\":\"right\"},{\"id\":27,\"t\":\"fwd\"}],\"robotId\":\"r1\",\"wonAt\":1790685769522}},\"robots\":[{\"id\":\"r1\"}],\"hats\":[\"sun\"],\"stickers\":[]}]"
       }
     },
     {
@@ -392,7 +392,7 @@
         "plot2": {
           "program": null,
           "robotId": "",
-          "wonAt": 1790684003384
+          "wonAt": 1790685769522
         }
       }
     },
@@ -622,7 +622,7 @@
             }
           ],
           "robotId": "r1",
-          "wonAt": 1790684055298
+          "wonAt": 1790685821521
         }
       }
     },
@@ -693,7 +693,7 @@
         "plot2": {
           "program": null,
           "robotId": "",
-          "wonAt": 1790684055298
+          "wonAt": 1790685821521
         }
       }
     },
@@ -923,7 +923,7 @@
             }
           ],
           "robotId": "r1",
-          "wonAt": 1790684101598
+          "wonAt": 1790685867869
         }
       }
     },
@@ -994,7 +994,7 @@
         "plot2": {
           "program": null,
           "robotId": "",
-          "wonAt": 1790684101598
+          "wonAt": 1790685867869
         }
       }
     },
@@ -1224,7 +1224,7 @@
             }
           ],
           "robotId": "r1",
-          "wonAt": 1790684148846
+          "wonAt": 1790685915236
         }
       }
     },
@@ -1295,7 +1295,7 @@
         "plot2": {
           "program": null,
           "robotId": "",
-          "wonAt": 1790684148846
+          "wonAt": 1790685915236
         }
       }
     },
@@ -1349,6 +1349,95 @@
       }
     },
     {
+      "name": "IG-004 AC1 (the page): a P105 v3 code pasted in the Grown-ups box restores every profile, done request, hat and sticker, stored as v4 (placed dropped)",
+      "ok": true,
+      "saw": {
+        "v": 4,
+        "got": [
+          {
+            "id": "p-sam",
+            "name": "Sam",
+            "band": 2,
+            "robot": "Rosie",
+            "done": [
+              "path-postbox",
+              "tulips-three",
+              "bowl-if",
+              "wall-until",
+              "eggs-count"
+            ],
+            "hats": [
+              "cap",
+              "sun",
+              "crown"
+            ],
+            "stickers": [
+              "paw",
+              "basket"
+            ],
+            "plots": {},
+            "placed": false
+          },
+          {
+            "id": "p-noa",
+            "name": "Noa",
+            "band": 1,
+            "robot": "Bo",
+            "done": [
+              "path-postbox"
+            ],
+            "hats": [
+              "cap"
+            ],
+            "stickers": [],
+            "plots": {},
+            "placed": false
+          }
+        ],
+        "want": [
+          {
+            "id": "p-sam",
+            "name": "Sam",
+            "band": 2,
+            "robot": "Rosie",
+            "done": [
+              "path-postbox",
+              "tulips-three",
+              "bowl-if",
+              "wall-until",
+              "eggs-count"
+            ],
+            "hats": [
+              "cap",
+              "sun",
+              "crown"
+            ],
+            "stickers": [
+              "paw",
+              "basket"
+            ],
+            "plots": {},
+            "placed": false
+          },
+          {
+            "id": "p-noa",
+            "name": "Noa",
+            "band": 1,
+            "robot": "Bo",
+            "done": [
+              "path-postbox"
+            ],
+            "hats": [
+              "cap"
+            ],
+            "stickers": [],
+            "plots": {},
+            "placed": false
+          }
+        ]
+      }
+    },
+    {
       "name": "IG-004 AC6: three robots at work, each on its own plot",
       "ok": true,
       "saw": [
@@ -1356,41 +1445,41 @@
           "x": 5,
           "y": 11,
           "d": 1,
-          "name": "Pip"
+          "name": "Rosie"
         },
         {
           "x": 11,
           "y": 2,
           "d": 1,
-          "name": "Pip"
+          "name": "Rosie"
         },
         {
           "x": 12,
           "y": 11,
           "d": 0,
-          "name": "Pip"
+          "name": "Rosie"
         }
       ]
     },
     {
-      "name": "IG-004 AC6: the CPU throttle is on (a fixed loop 120 ms → 481 ms, ×4.0)",
+      "name": "IG-004 AC6: the CPU throttle is on (a fixed loop 149 ms → 479 ms, ×3.2)",
       "ok": true,
       "saw": {
-        "loop1": 120.29999995231628,
-        "loop4": 481.39999985694885,
-        "ratio": 4.001662510787722
+        "loop1": 148.90000009536743,
+        "loop4": 479.09999990463257,
+        "ratio": 3.217595699112013
       }
     },
     {
-      "name": "IG-004 AC6 (the Mac, 2D, CPU ×4, three robots animating): p95 frame 16.7 ms ≤ 50 ms (1201 frames, 23 robot moves in 20 s)",
+      "name": "IG-004 AC6 (the Mac, 2D, CPU ×4, three robots animating): p95 frame 16.8 ms ≤ 50 ms (1199 frames, 23 robot moves in 20 s)",
       "ok": true,
       "saw": {
-        "frames": 1201,
+        "frames": 1199,
         "p50": 16.69999999999891,
-        "p95": 16.700000000000728,
+        "p95": 16.799999999999272,
         "p99": 16.80000000000109,
-        "max": 16.80000000000291,
-        "over25": 0,
+        "max": 50,
+        "over25": 1,
         "over50": 0,
         "moves": 23,
         "hidden": false
@@ -1465,7 +1554,7 @@
       "plot2": {
         "program": null,
         "robotId": "",
-        "wonAt": 1790684003384
+        "wonAt": 1790685769522
       }
     },
     "locked-1368-en": {
@@ -1533,7 +1622,7 @@
       "plot2": {
         "program": null,
         "robotId": "",
-        "wonAt": 1790684055298
+        "wonAt": 1790685821521
       }
     },
     "locked-1368-fr": {
@@ -1601,7 +1690,7 @@
       "plot2": {
         "program": null,
         "robotId": "",
-        "wonAt": 1790684101598
+        "wonAt": 1790685867869
       }
     },
     "locked-390-en": {
@@ -1669,7 +1758,7 @@
       "plot2": {
         "program": null,
         "robotId": "",
-        "wonAt": 1790684148846
+        "wonAt": 1790685915236
       }
     },
     "locked-390-fr": {
@@ -1681,17 +1770,17 @@
       "home": null
     },
     "throttle": {
-      "loop1": 120.29999995231628,
-      "loop4": 481.39999985694885,
-      "ratio": 4.001662510787722
+      "loop1": 148.90000009536743,
+      "loop4": 479.09999990463257,
+      "ratio": 3.217595699112013
     },
     "ac6": {
-      "frames": 1201,
+      "frames": 1199,
       "p50": 16.69999999999891,
-      "p95": 16.700000000000728,
+      "p95": 16.799999999999272,
       "p99": 16.80000000000109,
-      "max": 16.80000000000291,
-      "over25": 0,
+      "max": 50,
+      "over25": 1,
       "over50": 0,
       "moves": 23,
       "hidden": false

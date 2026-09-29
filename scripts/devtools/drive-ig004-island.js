@@ -347,6 +347,24 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     }
   }
 
+  // ── AC1 on the page: a v3 save code from P105 (the engine gate's fixture, written by the v3 encoder) pasted into the
+  // Grown-ups box restores every profile, done request, hat and sticker — stored as v4 at once. ──
+  {
+    const fx = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'packages', 'noodl-mcp', 'tests', 'fixtures', 'ig004-v3-saves.json'), 'utf8')).band2;
+    await page.setViewport(VIEWPORTS[0]);
+    await page.navigate('/grown-ups');
+    await wait(1200);
+    const pasteBox = `(document.querySelector('input.bg-paste') || document.querySelector('.bg-paste input'))`;
+    await typeInto(pasteBox, fx.code);
+    await tap(first('.bg-paste-go'), 'replace the islands (a P105 v3 code)');
+    await until('document.body.innerText', (t) => t.includes(w('en', 'saveCodeDone')) || t.includes(w('fr', 'saveCodeDone')), 4000);
+    await wait(600);
+    const m = await stored();
+    const got = m ? m.profiles.map((p) => ({ id: p.id, name: p.name, band: p.band, robot: p.robot.name, done: p.island.done, hats: p.hats, stickers: p.stickers, plots: p.island.plots, placed: 'placed' in p.island })) : null;
+    const want = fx.profiles.map((p) => ({ id: p.id, name: p.name, band: p.band, robot: p.robot.name, done: p.island.done, hats: p.hats, stickers: p.stickers, plots: {}, placed: false }));
+    check('IG-004 AC1 (the page): a P105 v3 code pasted in the Grown-ups box restores every profile, done request, hat and sticker, stored as v4 (placed dropped)', !!m && m.v === 4 && JSON.stringify(got) === JSON.stringify(want), { v: m && m.v, got, want });
+  }
+
   if (PERF) {
     // ── AC6 (the Mac half): three robots at work, the flat island, CPU ×4, 20 s of frames ──
     await page.setViewport(VIEWPORTS[0]);
