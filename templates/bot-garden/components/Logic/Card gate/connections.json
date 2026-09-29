@@ -35,15 +35,15 @@
     },
     {
       "fromId": "cardgateFn",
-      "fromProperty": "out-hold",
-      "toId": "cardgateOut",
-      "toProperty": "hold"
-    },
-    {
-      "fromId": "cardgateFn",
       "fromProperty": "out-program",
       "toId": "cardgateOut",
       "toProperty": "program"
+    },
+    {
+      "fromId": "cardgateFn",
+      "fromProperty": "out-show",
+      "toId": "cardgateOut",
+      "toProperty": "show"
     },
     {
       "fromId": "cardgateFn",

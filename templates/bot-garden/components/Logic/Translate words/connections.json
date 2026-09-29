@@ -275,12 +275,6 @@
     },
     {
       "fromId": "translatewordsFn",
-      "fromProperty": "out-cardHelpsH",
-      "toId": "translatewordsOut",
-      "toProperty": "cardHelpsH"
-    },
-    {
-      "fromId": "translatewordsFn",
       "fromProperty": "out-cdAsk",
       "toId": "translatewordsOut",
       "toProperty": "cdAsk"

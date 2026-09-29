@@ -689,22 +689,40 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       expect(cell(2)).not.toContain('nosuchkind');
     });
 
-    it('🔴 Show Help puts a ? on every placed block — simple ones and a container’s head — and none on the palette; off by default', () => {
+    it('🔴 P108 IW-001 F4: Show Help puts a ? on every PALETTE block and none on a placed one (it was backwards); off by default', () => {
       const program = '[{"id":1,"t":"fwd"},{"id":2,"t":"repeat","n":3,"body":[{"id":3,"t":"water"}]}]';
-      const on = render('garden-kit.BlockList', { program, showHelp: true });
+      const palette = [{ id: 'fwd', kind: 'motion', icon: 'fwd', label: { en: 'forward', fr: 'avance' } }, { id: 'repeat', kind: 'control', icon: 'loop', label: { en: 'repeat', fr: 'répète' }, hasBody: true, hasCount: true }];
+      const on = render('garden-kit.BlockList', { program, palette, showHelp: true });
       const helps = [...on.matchAll(/<button[^>]*class="gd-help"[^>]*data-help="([^"]+)"[^>]*>/g)].map((m) => m[1]);
-      expect(helps).toEqual(['1', '2', '3']);
-      expect(on.slice(on.indexOf('gd-palette'), on.indexOf('gd-prog'))).not.toContain('data-help');
-      // Its words, for a screen reader, in the list's language.
-      expect(on).toMatch(/class="gd-help"[^>]*aria-label="what does it do\?"/);
-      expect(render('garden-kit.BlockList', { program, showHelp: true, language: 'fr' })).toMatch(/class="gd-help"[^>]*aria-label="que fait ce bloc \?"/);
-      expect(render('garden-kit.BlockList', { program })).not.toContain('data-help');
+      expect(helps).toEqual(['fwd', 'repeat']);
+      // Each ? beside its own drawer block (a button inside a button is not a button), and nothing on the placed list.
+      expect(on).toMatch(/<span class="gd-pal-item" data-pal-item="fwd"><button[^>]*data-pal="fwd"[^>]*>.*?<\/button><button[^>]*class="gd-help"[^>]*data-help="fwd"/);
+      expect(on.slice(on.indexOf('class="gd-prog"'))).not.toContain('data-help');
+      // Its words, for a screen reader, in the list's language, naming the block.
+      expect(on).toMatch(/class="gd-help"[^>]*aria-label="what does it do\? forward"/);
+      expect(render('garden-kit.BlockList', { program, palette, showHelp: true, language: 'fr' })).toMatch(/class="gd-help"[^>]*aria-label="que fait ce bloc \? avance"/);
+      expect(render('garden-kit.BlockList', { program, palette })).not.toContain('data-help');
+      // The card's example list has no palette, so no ? at all.
+      expect(render('garden-kit.BlockList', { program, palette, showHelp: true, showPalette: false })).not.toContain('data-help');
       const props = node('garden-kit.BlockList').inputProps as Record<string, { type: string; default?: unknown }>;
       expect([props.showHelp.type, props.showHelp.default]).toEqual(['boolean', false]);
-      // A press on the ? is never the start of a drag or a tap that takes the block away.
       const src = fs.readFileSync(SOURCE, 'utf8');
       expect(src).toMatch(/t\.closest\('\[data-x\],\[data-help\],/);
       expect(node('garden-kit.BlockList').css as string).toContain('.gd-help{');
+      expect(node('garden-kit.BlockList').css as string).toContain('.gd-pal-item .gd-help{position:absolute;');
+    });
+
+    it('🔴 P108 IW-001 F5: a tap on a placed simple block selects it (a second tap lets go) and never removes it — only the cross removes', () => {
+      const src = fs.readFileSync(SOURCE, 'utf8');
+      const tap = src.slice(src.indexOf('if (!g.moved) {'), src.indexOf('// A drag. Inside the list it moves'));
+      expect(tap).toContain("select(String(g.id) === live.current.sel ? '' : g.id);");
+      expect(tap).not.toMatch(/\bremove\(/);
+      // Removal is the cross's onClick alone.
+      expect([...src.matchAll(/\bremove\(([^)]*)\)/g)].map((m) => m[1])).toEqual(['b.id']);
+      // A selected simple block wears the control ring (data-sel on its row).
+      const html = render('garden-kit.BlockList', { program: '[{"id":1,"t":"fwd"}]' });
+      expect(html).toContain('class="gd-row" data-sel="0"');
+      expect(node('garden-kit.BlockList').css as string).toContain('.gd-row[data-sel="1"]>.gd-blk{outline:3px solid var(--gd-control)');
     });
   });
 

@@ -106,7 +106,6 @@ export const C = {
   lessonCard: '/Skills/Lesson card',
   lessonLine: '/Skills/Lesson line',
   letterBit: '/Skills/Letter bit',
-  helpChip: '/Workshop/Help chip',
   // P106 IG-005: My robots — a card per robot, its blocks as chips.
   robotCard: '/Robot/Card',
   ability: '/Robot/Ability',
@@ -833,19 +832,6 @@ const MARK: CgComponent = {
   ]
 };
 
-/** IG-006 AC5: one ? for a kind of block the program holds; a tap asks for that block's card (Chosen, with the Id). */
-const HELP_CHIP: CgComponent = {
-  path: 'Workshop/Help chip',
-  description: 'A ? with a block’s name, for a kind of block in the program. A tap publishes Chosen with the Id (the block’s kind), and the Workshop opens that block’s card again.',
-  nodes: [
-    inputs('hcIn', [['id', 'string'], ['label', 'string']]),
-    group('hcChip', 'The ?', undefined, { sizeMode: 'contentSize', backgroundColor: 'var(--card)', borderStyle: 'solid', borderWidth: px(2), borderColor: 'var(--violet-2)', borderRadius: px(999), ...pad(4, 10), cssClassName: 'bg-help-chip bg-press' }, ['hcText']),
-    text('hcText', 'The block’s name', 'hcChip', '', { sizeMode: 'contentSize', fontSize: px(14), fontWeight: '800', color: 'var(--violet-ink)' }),
-    outputs('hcOut', [['chosen', 'signal'], ['id', 'string']])
-  ],
-  connections: [wire('hcIn', 'label', 'hcText', 'text'), wire('hcChip', 'onClick', 'hcOut', 'chosen'), wire('hcIn', 'id', 'hcOut', 'id')]
-};
-
 /**
  * The whole workshop (the mockup's #s-workshop): the request's head, the task card, the world with the pad over it,
  * the controls, the owl, the steps with the fold offer, and the win card. Everything that changes lives here; the page
@@ -917,16 +903,17 @@ const PLAY: CgComponent = {
     place('plUse', BUTTON_NODE, 'Use them', 'plPropBtns', { ...btn('ask', '', { ...pad(8, 14), fontSize: px(14), cssClassName: 'bg-prop-use' }), label: 'Use them' }),
     place('plNoThanks', BUTTON_NODE, 'No thanks', 'plPropBtns', { ...btn('quiet', '', { ...pad(8, 14), fontSize: px(14), cssClassName: 'bg-prop-no' }), label: 'No thanks' }),
     text('plOwlMeta', 'Where she lives', 'plOwlCol', '', { fontSize: px(12), color: 'var(--violet-meta)', cssClassName: 'bg-owl-meta' }),
-    group('plRight', 'The steps side', 'plWs', { ...column({ rowGap: sp(10) }), ...PANEL }, ['plStepsHead', 'plCardBox', 'plStepsNote', 'plBlocksBox', 'plSlotMsg', 'plHelps', 'plTidy']),
+    group('plRight', 'The steps side', 'plWs', { ...column({ rowGap: sp(10) }), ...PANEL }, ['plStepsHead', 'plCardBox', 'plStepsNote', 'plBlocksBox', 'plSlotMsg', 'plTidy']),
     group('plStepsHead', 'The steps’ head', 'plRight', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'space-between', flexWrap: 'nowrap' }), ['plStepsH', 'plCount']),
     text('plStepsH', 'Pip’s steps', 'plStepsHead', '', { ...T_H2, fontSize: px(20) }),
     text('plCount', 'How many blocks', 'plStepsHead', '', { sizeMode: 'contentSize', fontSize: px(13), fontWeight: '800', color: 'var(--ink-2)', mounted: false }),
     group('plBlocksBox', 'The steps, scrolling in their own box', 'plRight', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-blocks-box' }, ['plBlocks']),
-    // P106 IG-003: while driving the steps sit on the paper with a note (never faded: ruling 5); a ? on every placed block.
+    // P106 IG-003: while driving the steps sit on the paper with a note (never faded: ruling 5). P108 IW-001 F4: the ? is on
+    // every DRAWER block (Show Help), never on a placed one.
     text('plStepsNote', 'Nothing is remembered while driving', 'plRight', '', { ...T_SMALL, cssClassName: 'bg-steps-note', mounted: false }),
     place('plBlocks', KIT_BLOCKS, 'The blocks', 'plBlocksBox', { ...BLOCK_COLOURS, showHelp: true }),
-    // P106 IG-006 AC5: a block's card. The first tap on a palette block opens it and places nothing; "Got it", and the
-    // next tap places the block. The example is drawn by a second Block List, locked, with no palette.
+    // P106 IG-006 AC5, P108 IW-001 F3: a block's card. The first tap on a palette block PLACES it and opens its card here;
+    // "Got it" closes it and the block stays. The example is drawn by a second Block List, locked, with no palette.
     group('plCardBox', 'The block’s card', 'plRight', { ...column({ rowGap: sp(8) }), backgroundColor: 'var(--violet-2)', borderRadius: px(16), ...pad(12), cssClassName: 'bg-card-help', mounted: false }, ['plCardTitle', 'plCardLine', 'plCardEgWord', 'plCardEgBox', 'plCardOk']),
     text('plCardTitle', 'The block', 'plCardBox', '', { ...T_H3, cssClassName: 'bg-card-title' }),
     text('plCardLine', 'What it does', 'plCardBox', '', { ...T_BODY, cssClassName: 'bg-card-line' }),
@@ -934,10 +921,6 @@ const PLAY: CgComponent = {
     group('plCardEgBox', 'The example', 'plCardBox', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-card-eg' }, ['plCardEg']),
     place('plCardEg', KIT_BLOCKS, 'The example, as blocks', 'plCardEgBox', { ...BLOCK_COLOURS, showPalette: false, locked: true }),
     place('plCardOk', BUTTON_NODE, 'Got it', 'plCardBox', { ...btn('primary', '', { ...pad(8, 14), fontSize: px(14), cssClassName: 'bg-card-ok' }), label: 'Got it' }),
-    // IG-006 AC5: a ? for each kind of block placed — the card again, whenever.
-    group('plHelps', 'A ? for each kind of block placed', 'plRight', { ...row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(6), rowGap: sp(6) }), cssClassName: 'bg-helps', mounted: false }, ['plHelpsH', 'plHelpEach']),
-    text('plHelpsH', 'What does a block do?', 'plHelps', '', { ...T_SMALL, width: pct(100) }),
-    { ...logic('plHelpEach', FOR_EACH_NODE, 'One ? per kind of block', { template: C.helpChip, templateType: 'explicit' }), parent: 'plHelps' },
     // CG-005 s3, AC6: an ask block's slot refused — in words, beside the picker, before anything is sent.
     text('plSlotMsg', 'Why Olive cannot be asked yet', 'plRight', '', { fontSize: px(14), fontWeight: '800', color: 'var(--coral)', cssClassName: 'bg-slot-msg', mounted: false }),
     group('plTidy', 'The fold offer', 'plRight', { ...row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(10) }), backgroundColor: 'var(--tidy)', borderStyle: 'solid', borderWidth: px(2), borderColor: 'var(--tidy-edge)', borderRadius: px(14), ...pad(10, 12), cssClassName: 'bg-tidy', mounted: false }, ['plTidyText', 'plFoldBtn', 'plNotNow']),
@@ -982,17 +965,15 @@ const PLAY: CgComponent = {
     logic('plPalette', L('Palette'), 'The blocks this band may use'),
     logic('plKitPal', L('Kit palette'), 'In the kit’s shape'),
     // ── P106 IG-006: the cards ──
-    logic('plCardGate', L('Card gate'), 'A first tap opens the card'),
-    gate('plCardHold', 'Held for the card?'),
+    logic('plCardGate', L('Card gate'), 'A first tap places it and opens its card'),
+    gate('plCardHold', 'A first of its kind: open its card?'),
     variable('plCardOpenVar', 'gardenCardOpen', 'The card open'),
     setVariable('plSetCardOpen', 'gardenCardOpen', 'Open the card'),
-    setVariable('plSetCardHelp', 'gardenCardOpen', 'Open it from a ?'),
     setVariable('plClearCardOpen', 'gardenCardOpen', 'Close the card', { setWith: 'string', value: '' }),
     variable('plSeenVar', 'gardenCardsSeen', 'The cards seen'),
     logic('plSeenAdd', L('Card seen'), 'Got it'),
     setVariable('plSetSeen', 'gardenCardsSeen', 'One more card seen'),
     logic('plCardInfo', L('Block card'), 'The card’s words and example'),
-    logic('plHelpRows', L('Help chips'), 'The ? for each kind of block'),
     // ── Drive, teach, play (P106 IG-003); the islander's challenge; the fold ──
     withStates('plMode', 'Drive, teach or play', ['drive', 'teach', 'play'], {
       mode: { type: 'string', by: { drive: 'drive', teach: 'teach', play: 'play' } },
@@ -1105,7 +1086,7 @@ const PLAY: CgComponent = {
     // The program: one Variable, four writers (the kit, the pad, the fold, the reset).
     wire('plProgVar', 'value', 'plRead', 'program'),
     wire('plProgVar', 'value', 'plBlocks', 'program'),
-    // IG-006 AC5: every kit edit passes the card gate first (a first tap on a block's kind is held for its card).
+    // IG-006 AC5: every kit edit passes the card gate (P108 IW-001 F3: it never holds an edit back; a first of a kind opens its card).
     wire('plBlocks', 'onProgram', 'plCardGate', 'program'),
     wire('plBlocks', 'onChanged', 'plCardGate', 'go'),
     wire('plCardGate', 'program', 'plSetProgKit', 'value'),
@@ -1387,10 +1368,10 @@ const PLAY: CgComponent = {
     wire('plIn', 'words', 'plSlots', 'words'),
     wire('plSlots', 'message', 'plSlotMsg', 'text'),
     wire('plSlots', 'show', 'plSlotMsg', 'mounted'),
-    // IG-006 AC5: the card gate, the card, Got it, and the ? chips.
+    // IG-006 AC5 / P108 IW-001 F3: the card gate (a first tap places the block AND opens its card), the card, Got it.
     wire('plProgVar', 'value', 'plCardGate', 'before'),
     wire('plSeenVar', 'value', 'plCardGate', 'seen'),
-    wire('plCardGate', 'hold', 'plCardHold', 'condition'),
+    wire('plCardGate', 'show', 'plCardHold', 'condition'),
     wire('plCardGate', 'ran', 'plCardHold', 'eval'),
     wire('plCardGate', 'cardId', 'plSetCardOpen', 'value'),
     wire('plCardHold', 'ontrue', 'plSetCardOpen', 'do'),
@@ -1414,17 +1395,7 @@ const PLAY: CgComponent = {
     wire('plSeenAdd', 'seen', 'plSetSeen', 'value'),
     wire('plSeenAdd', 'ran', 'plSetSeen', 'do'),
     wire('plSetSeen', 'done', 'plClearCardOpen', 'do'),
-    wire('plRead', 'program', 'plHelpRows', 'program'),
-    wire('plIn', 'lang', 'plHelpRows', 'lang'),
-    wire('plIn', 'band', 'plHelpRows', 'band'),
-    wire('plIn', 'words', 'plHelpRows', 'words'),
-    wire('plIn', 'botName', 'plHelpRows', 'botName'),
-    wire('plHelpRows', 'rows', 'plHelpEach', 'items'),
-    wire('plHelpRows', 'show', 'plHelps', 'mounted'),
-    wire('plHelpRows', 'helpsText', 'plHelpsH', 'text'),
-    wire('plHelpEach', 'itemOutput-id', 'plSetCardHelp', 'value'),
-    wire('plHelpEach', 'itemOutputSignal-chosen', 'plSetCardHelp', 'do'),
-    // P106 IG-003 (IG-006 deviation 2): the ? on the placed block itself opens the same card.
+    // P108 IW-001 F4: the ? on a DRAWER block opens its card (it was on the placed blocks: backwards).
     wire('plBlocks', 'onHelpBlock', 'plSetCardBlock', 'value'),
     wire('plBlocks', 'onHelp', 'plSetCardBlock', 'do'),
     // The proposal (AC1): shown from the run, placed only by Use them; either answer hides it.
@@ -2772,7 +2743,6 @@ export const CG003_COMPONENTS: ReadonlyArray<CgComponent> = [
   RUNNER,
   WIN,
   MARK,
-  HELP_CHIP,
   PLAY,
   QUEST,
   ISLE_WORLD,

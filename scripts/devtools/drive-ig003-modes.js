@@ -19,7 +19,7 @@
  *   AC4  the tulips at band 10–12: a program not yet played → the islander's card asks "Before you press Play, tap where
  *        {b} will stop."; a wrong tap flags the real end and says the miss hint; a right tap says "You were right!",
  *        puts the tick on the tile, then plays; One step cancels it; at band 7–9 nothing shows.
- *   IG-006 dev. 2: the ? on a placed block opens that block's card.
+ *   IG-006 dev. 2 (P108 IW-001 F4): the ? on a DRAWER block opens that block's card.
  *
  * Usage: node scripts/devtools/drive-ig003-modes.js <deploy-dir> --project <project-dir> [--shots <dir>] [--json <file>]
  * Exits 0 when every clause passed, 1 when any failed, 2 on a usage error.
@@ -279,11 +279,11 @@ withDeployedSite({ dir: DIR }, async (page) => {
       const r1 = await seen();
       check(`AC5 ${tag}: after a run that bumped (the owl said so), Teach’s first hint is about the program — the start line — never the bump`, bumpLine.includes(hint(lang, 'hintBump').slice(0, 16)) && !r1.owl.includes(hint(lang, 'hintBump').slice(0, 16)) && r1.owl.includes(hint(lang, 'hintStart').slice(0, 20)), { bumpLine, owl: r1.owl });
 
-      // ── IG-006 deviation 2: the ? on a placed block opens that block's card ──
-      await tap(first('.bg-blocks-box .gd-prog .gd-blk[data-t="fwd"] .gd-help[data-help]'), 'the ? on a forward block');
+      // ── IG-006 deviation 2, as P108 IW-001 F4 moved it: the ? on the DRAWER's forward block opens its card ──
+      await tap(first('.bg-blocks-box .gd-palette .gd-pal-item[data-pal-item="fwd"] .gd-help[data-help]'), 'the ? on the drawer’s forward');
       const card = await until(`(() => { const e = document.querySelector('.bg-card-help'); return e && e.offsetParent !== null ? (e.querySelector('.bg-card-title') || {}).innerText || '' : ''; })()`, Boolean, 2500);
       const after = await seen();
-      check(`IG-003 / IG-006 dev. 2 ${tag}: the ? on a placed forward block opens its card ("${w(lang, 'bFwd')}") and edits nothing`, card.trim() === w(lang, 'bFwd') && after.ids === r1.ids && after.blocks === 6, { card, ids: after.ids, before: r1.ids });
+      check(`IG-003 / IG-006 dev. 2 ${tag} (IW-001 F4): the ? on the drawer’s forward opens its card ("${w(lang, 'bFwd')}") and edits nothing`, card.trim() === w(lang, 'bFwd') && after.ids === r1.ids && after.blocks === 6, { card, ids: after.ids, before: r1.ids });
       if (shots) await shot(`ig003-${tag}-04-help`);
       await tap(first('.bg-card-help .bg-card-ok'), 'Got it');
       await wait(300);

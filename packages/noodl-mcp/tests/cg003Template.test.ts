@@ -44,7 +44,6 @@ import {
   CARD_GATE_SCRIPT,
   CARD_SEEN_SCRIPT,
   BLOCK_CARD_SCRIPT,
-  HELP_CHIPS_SCRIPT,
   OLIVE_LESSON_SCRIPT,
   CARD_PALETTE,
   OLIVE_STATUS_SCRIPT,
@@ -970,7 +969,7 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect([into('plDriveGate', 'condition'), from('plDriveGate', 'ontrue'), into('plSetWorldAsk', 'value')]).toEqual([['plChallenge.armed'], ['plSetWorldAsk.do'], ['plStart.world']]);
     });
 
-    it('🔴 IG-006 deviation 2: a ? on every placed block opens the same card as the palette’s first tap', () => {
+    it('🔴 IG-006 deviation 2, P108 IW-001 F4: the ? (now on every DRAWER block, the kit’s Show Help) opens the same card as the palette’s first tap', () => {
       expect(params(pnode('plBlocks')).showHelp).toBe(true);
       expect(params(pnode('plCardEg')).showHelp).toBeUndefined();
       expect([into('plSetCardBlock', 'value'), into('plSetCardBlock', 'do'), params(pnode('plSetCardBlock')).name]).toEqual([['plBlocks.onHelpBlock'], ['plBlocks.onHelp'], 'gardenCardOpen']);
@@ -1659,25 +1658,27 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     expect(OLIVE_LESSON_SCRIPT).not.toMatch(/\bInputs\.(text|typed|prompt)\b/);
   });
 
-  it('🔴 IG-006 AC5: the card gate — a first tap on a block’s kind is held (the program as before, the card named); Got it, and the next tap places it; anything else passes as text', () => {
+  it('🔴 P108 IW-001 F3 (was IG-006 AC5’s hold): the card gate — a first tap on a block’s kind PLACES it (the program as the kit emitted it) and names its card; Got it, and the next tap opens nothing; anything else passes as text', () => {
     const before = [{ id: 1, t: 'fwd' }];
     const tapped = JSON.stringify([{ id: 1, t: 'fwd' }, { id: 2, t: 'olive:read' }]);
     const first = run(CARD_GATE_SCRIPT, { program: tapped, before: JSON.stringify(before), seen: [] });
-    expect([first.hold, first.cardId, first.program]).toEqual([true, 'olive:read', before]);
-    expect(Array.isArray(first.program)).toBe(true); // a fresh list, so the Variable changes and the kit redraws without it
+    // The block stays: the program goes through as the kit's own text, never the list from before.
+    expect([first.show, first.cardId, first.program]).toEqual([true, 'olive:read', tapped]);
     const seen = run(CARD_SEEN_SCRIPT, { seen: [], cardId: 'olive:read' }).seen;
     expect(seen).toEqual(['olive:read']);
     expect(run(CARD_SEEN_SCRIPT, { seen, cardId: 'olive:read' }).seen).toEqual(['olive:read']);
     const second = run(CARD_GATE_SCRIPT, { program: tapped, before: JSON.stringify(before), seen });
-    expect([second.hold, second.cardId, second.program]).toEqual([false, '', tapped]);
-    // Into a container too; a count change, a removal and a drag pass untouched.
+    expect([second.show, second.cardId, second.program]).toEqual([false, '', tapped]);
+    // Into a container too; a count change, a removal and a drag pass untouched and open nothing.
     const inRepeat = JSON.stringify([{ id: 1, t: 'repeat', n: 3, body: [{ id: 2, t: 'water' }] }]);
-    expect(run(CARD_GATE_SCRIPT, { program: inRepeat, before: [{ id: 1, t: 'repeat', n: 3, body: [] }], seen: ['repeat'] })).toMatchObject({ hold: true, cardId: 'water' });
+    expect(run(CARD_GATE_SCRIPT, { program: inRepeat, before: [{ id: 1, t: 'repeat', n: 3, body: [] }], seen: ['repeat'] })).toMatchObject({ show: true, cardId: 'water', program: inRepeat });
     for (const [now, was] of [
       [[{ id: 1, t: 'repeat', n: 4, body: [] }], [{ id: 1, t: 'repeat', n: 3, body: [] }]],
       [[], [{ id: 1, t: 'fwd' }]],
       [[{ id: 2, t: 'left' }, { id: 1, t: 'fwd' }], [{ id: 1, t: 'fwd' }, { id: 2, t: 'left' }]]
-    ]) expect(run(CARD_GATE_SCRIPT, { program: JSON.stringify(now), before: was, seen: [] })).toMatchObject({ hold: false, program: JSON.stringify(now) });
+    ]) expect(run(CARD_GATE_SCRIPT, { program: JSON.stringify(now), before: was, seen: [] })).toMatchObject({ show: false, program: JSON.stringify(now) });
+    // No arm hands back an older program any more (the undo is gone from the script).
+    expect(CARD_GATE_SCRIPT).not.toMatch(/Outputs\.program = [^;]*before/);
     // The graph: every kit edit passes the gate before the program Variable; Got it marks the card seen, then closes it.
     const ws = CG003_COMPONENTS.find((c) => c.path === 'Workshop/Play')!;
     const wires = ws.connections as Array<{ fromId: string; fromProperty: string; toId: string; toProperty: string }>;
@@ -1685,10 +1686,13 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     expect(into('plSetProgKit', 'value')).toEqual(['plCardGate.program']);
     expect(into('plSetProgKit', 'do')).toEqual(['plCardGate.ran']);
     expect([into('plCardGate', 'program'), into('plCardGate', 'go'), into('plCardGate', 'before'), into('plCardGate', 'seen')]).toEqual([['plBlocks.onProgram'], ['plBlocks.onChanged'], ['plProgVar.value'], ['plSeenVar.value']]);
-    expect([into('plSetCardOpen', 'do'), into('plSeenAdd', 'go'), into('plClearCardOpen', 'do'), into('plSetCardHelp', 'do')]).toEqual([['plCardHold.ontrue'], ['plCardOk.onClick'], ['plSetSeen.done'], ['plHelpEach.itemOutputSignal-chosen']]);
+    expect([into('plCardHold', 'condition'), into('plSetCardOpen', 'do'), into('plSeenAdd', 'go'), into('plClearCardOpen', 'do')]).toEqual([['plCardGate.show'], ['plCardHold.ontrue'], ['plCardOk.onClick'], ['plSetSeen.done']]);
+    // F4: the "? <block>" chips row is gone (the ? is on the drawer's blocks).
+    expect(ws.nodes.some((n: any) => /^plHelp/.test(n.id) || n.id === 'plSetCardHelp')).toBe(false);
+    expect(CG003_COMPONENTS.some((c) => c.path === 'Workshop/Help chip' || c.path === 'Logic/Help chips')).toBe(false);
   });
 
-  it('IG-006 AC5: EVERY palette block has a card — label, line, an example drawn as blocks — in both languages; the ? chips name each kind placed, once', () => {
+  it('IG-006 AC5: EVERY palette block has a card — label, line, an example drawn as blocks — in both languages', () => {
     const all = new Set<string>([...run(PALETTE_SCRIPT, { band: 2, allowed: [], lang: 'en', words: WORD_ROWS }).palette.map((e: any) => e.id), ...run(PALETTE_SCRIPT, { band: 2, allowed: [], rungs: 'all', lang: 'en', words: WORD_ROWS }).palette.map((e: any) => e.id)]);
     expect([...all].filter((id) => !BLOCK_CARDS[id])).toEqual([]);
     const types = (list: any[], out = new Set<string>()): Set<string> => { for (const b of list) { out.add(b.t); if (b.body) types(b.body, out); } return out; };
@@ -1709,12 +1713,8 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
       const slot = entry.slots.find((x: any) => x.key === k) as any;
       expect({ id, t: b.t, k, v, shown: !!slot && slot.options.some((o: any) => o.value === v) }).toEqual({ id, t: b.t, k, v, shown: true });
     }
-    const chips = run(HELP_CHIPS_SCRIPT, { program: [{ id: 1, t: 'fwd' }, { id: 2, t: 'repeat', n: 2, body: [{ id: 3, t: 'fwd' }, { id: 4, t: 'olive:read' }] }], lang: 'en', band: 2, words: WORD_ROWS });
-    expect([chips.show, chips.rows]).toEqual([true, [{ id: 'help:fwd', label: '? forward' }, { id: 'help:repeat', label: '? repeat' }, { id: 'help:olive:read', label: '? read the note' }]]);
-    // 🔴 A repeater's row is a Noodl Object, global by id (the s2 drive: five lesson cards showed one card's lines): the
-    // chip opens its block's card through the help: id, and each lesson's rows are its own.
+    // A help: prefixed id (the P106 chips' row id) still opens its block's card.
     expect(run(BLOCK_CARD_SCRIPT, { cardOpen: 'help:olive:read', lang: 'en', band: 2, words: WORD_ROWS })).toMatchObject({ show: true, cardId: 'olive:read' });
-    expect(run(HELP_CHIPS_SCRIPT, { program: [], lang: 'en', words: WORD_ROWS })).toMatchObject({ show: false, rows: [] });
   });
 
   it('Olive: no shell is the written line and "not running"; an answer is her text', async () => {
@@ -1840,9 +1840,14 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
       const m = mutate(LESSON_ROWS_SCRIPT, 'if (band === 2) for', 'if (true) for');
       expect(run(m, { band: 1, lang: 'en', words: WORD_ROWS, exam: null }).count).toBe(5); // the check above expects 0: killed
     });
-    it('Card gate places a first tap → killed', () => {
+    it('Card gate opens no card on a first tap → killed', () => {
       const m = mutate(CARD_GATE_SCRIPT, "seen.indexOf(t) === -1;", 'false;');
-      expect(run(m, { program: JSON.stringify([{ id: 1, t: 'fwd' }]), before: [], seen: [] }).hold).toBe(false); // the check above expects true: killed
+      expect(run(m, { program: JSON.stringify([{ id: 1, t: 'fwd' }]), before: [], seen: [] }).show).toBe(false); // the check above expects true: killed
+    });
+    it('P108 IW-001 F3: Card gate undoes the first tap again → killed', () => {
+      const m = mutate(CARD_GATE_SCRIPT, "Outputs.program = typeof", 'Outputs.program = first ? JSON.parse(JSON.stringify(before)) : typeof');
+      const tapped = JSON.stringify([{ id: 1, t: 'fwd' }]);
+      expect(run(m, { program: tapped, before: [], seen: [] }).program).not.toBe(tapped); // the check above expects the kit's text: killed
     });
     it('Olive played counts a refused (unsent) ask as resting → killed', () => {
       const m = mutate(OLIVE_PLAYED_SCRIPT, 'a.sent === true && ', '');

@@ -336,16 +336,16 @@ withDeployedSite({ dir: DIR }, async (page) => {
   const blocks = () => evaluate(`document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-id]').length`);
   const CARD_UP = `(() => { const e = document.querySelector('.bg-card-help'); return !!e && e.offsetParent !== null; })()`;
   const CARD = `(() => { const e = document.querySelector('.bg-card-help'); if (!e || e.offsetParent === null) return { up: false }; const t = (s) => { const x = e.querySelector(s); return x ? x.innerText.trim() : ''; }; return { up: true, title: t('.bg-card-title'), line: t('.bg-card-line'), example: e.querySelectorAll('.bg-card-eg .gd-blk[data-id]').length, eg: [...e.querySelectorAll('.bg-card-eg .gd-blk[data-id]')].map((b) => b.getAttribute('data-t')) }; })()`;
-  /** A palette tap that places the block: the first tap on a kind opens its card (IG-006 AC5) — Got it, then tap again. */
+  /**
+   * A palette tap that places the block. P108 IW-001 F3: the first tap on a kind PLACES it and opens its card beside the
+   * steps (IG-006 AC5 held it back) — Got it closes the card, and the block stays.
+   */
   const palTap = async (id) => {
-    const n0 = await blocks();
     await tap(first(`.bg-blocks-box .gd-palette [data-pal="${id}"]`), `palette ${id}`);
     await wait(200);
-    if ((await blocks()) === n0 && (await evaluate(CARD_UP))) {
+    if (await evaluate(CARD_UP)) {
       await tap(first('.bg-card-help .bg-card-ok'), `Got it (${id})`);
       await until(CARD_UP, (v) => v === false, 2000);
-      await tap(first(`.bg-blocks-box .gd-palette [data-pal="${id}"]`), `palette ${id} (its card seen)`);
-      await wait(200);
     }
   };
   /** S3-R5 on the screen as it stands: every text ≥ 4.5:1, and the instrument fires on the mockup's own orange. */
@@ -474,8 +474,9 @@ withDeployedSite({ dir: DIR }, async (page) => {
       const tidy = await until(`(() => { const e = document.querySelector('.bg-tidy'); return e && e.offsetParent !== null ? e.innerText : ''; })()`, Boolean);
       check(`AC3 ${tag}: the fold is offered`, !!tidy, tidy);
       if (vp.name === '390') {
-        const box = await evaluate(`(() => { const e = document.querySelector('.bg-blocks-box'); return e ? { sh: e.scrollHeight, ch: e.clientHeight, oy: getComputedStyle(e).overflowY } : null; })()`);
-        check(`AC4 ${lang}: ${taught.length * 3} blocks scroll in their own box`, box && box.sh > box.ch && box.oy === 'auto', box);
+        // P108 IW-001 F6: the drawer and the program are two boxes; the program's is the one that scrolls.
+        const box = await evaluate(`(() => { const e = document.querySelector('.bg-blocks-box .gd-prog'); return e ? { sh: e.scrollHeight, ch: e.clientHeight, oy: getComputedStyle(e).overflowY } : null; })()`);
+        check(`AC4 ${lang}: ${taught.length * 3} blocks scroll in their own box (IW-001 F6: the program box)`, box && box.sh > box.ch && box.oy === 'auto', box);
       }
       if (tag === '1368-en') await contrastClause('workshop, the fold offered');
       await tap(first('.bg-tidy .bg-i-tidy'), 'Fold it');
@@ -695,7 +696,11 @@ withDeployedSite({ dir: DIR }, async (page) => {
         const tag = `IG-006 ${vp.name}-${lang}`;
         const shots = (vp.name === '1368' && lang === 'en') || (vp.name === '390' && lang === 'fr');
         await page.setViewport(vp);
-        // A reload: the cards a child has seen are this session's, so each pass starts with none seen.
+        // P108 IW-001 F8: the cards a child has seen are saved on her profile now, so they survive this reload. Each pass
+        // still starts with none seen: the drive empties the active profile's saved list (a seam it names), after reading
+        // that the last pass's cards are there (a pass that saw none has nothing to read).
+        const saved = await evaluate(`(() => { const k = Object.keys(localStorage).find((x) => /bot-garden/.test(x)); if (!k) return null; const v = JSON.parse(localStorage.getItem(k)); const m = v && v.model; if (!m || !Array.isArray(m.profiles)) return null; const p = m.profiles.find((q) => q.id === (m.island || {}).activeId); const was = p && Array.isArray(p.cardsSeen) ? p.cardsSeen.slice() : []; for (const q of m.profiles) delete q.cardsSeen; localStorage.setItem(k, JSON.stringify(v)); return was; })()`);
+        if (!(vp.name === VIEWPORTS[0].name && lang === LANGS[0])) check(`${tag} IW-001 F8: the last pass's cards (read, forward) were saved on the profile`, Array.isArray(saved) && saved.includes('olive:read') && saved.includes('fwd'), saved);
         await page.navigate('/island');
         await wait(1100);
         await seg(lang === 'fr' ? 'FR' : 'EN');
@@ -713,27 +718,31 @@ withDeployedSite({ dir: DIR }, async (page) => {
         await seg('10–12');
         await wait(700);
         check(`${tag} AC1: band 7–9 lists no Olive block`, young.length === 0, young);
-        // AC5 — the first tap opens the card and places nothing; Got it; the next tap places it; its ? reopens it.
+        // AC5, as P108 IW-001 F3/F4 changed it — the first tap PLACES the block and opens its card; Got it closes it and the
+        // block stays; the next tap places another with no card; the ? on the DRAWER block reopens it.
         const n0 = await blocks();
         await tap(first('.bg-blocks-box .gd-palette [data-pal="olive:read"]'), 'read (first tap)');
         const card = await until(CARD, (c) => c.up, 2500);
-        check(`${tag} AC5: the first tap on “read” opens its card — title, line, the example as blocks — and places nothing`, card.up && card.title === w(lang, 'rungRead') && card.line === w(lang, 'cdOliveRead') && JSON.stringify(card.eg) === JSON.stringify(['olive:read', 'if', 'water']) && (await blocks()) === n0, card);
+        check(`${tag} AC5 (IW-001 F3): the first tap on “read” places it AND opens its card — title, line, the example as blocks`, card.up && card.title === w(lang, 'rungRead') && card.line === w(lang, 'cdOliveRead') && JSON.stringify(card.eg) === JSON.stringify(['olive:read', 'if', 'water']) && (await blocks()) === n0 + 1, { card, n0, now: await blocks() });
         if (shots) await shot(`ig006-ac5-card-${vp.name}-${lang}`);
         await tap(first('.bg-card-help .bg-card-ok'), 'Got it');
         const closed = await until(CARD, (c) => !c.up, 2000);
-        check(`${tag} AC5: “Got it” closes the card and places nothing`, !closed.up && (await blocks()) === n0, closed);
+        check(`${tag} AC5 (IW-001 F3): “Got it” closes the card and the block stays`, !closed.up && (await blocks()) === n0 + 1, { closed, now: await blocks() });
         await tap(first('.bg-blocks-box .gd-palette [data-pal="olive:read"]'), 'read (next tap)');
-        const placed = await until(`document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-t="olive:read"]').length`, (n) => n === 1, 2000);
-        check(`${tag} AC5: the next tap places the block, no card`, placed === 1 && !(await evaluate(CARD_UP)), placed);
-        const chips = await until(`[...document.querySelectorAll('.bg-help-chip')].filter((e) => e.offsetParent !== null).map((e) => e.innerText.trim())`, (l) => l.length > 0, 2000);
-        await tap(byText('.bg-help-chip', w(lang, 'rungRead')), 'the ? of read');
+        const placed = await until(`document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-t="olive:read"]').length`, (n) => n === 2, 2000);
+        check(`${tag} AC5: the next tap places another, no card`, placed === 2 && !(await evaluate(CARD_UP)), placed);
+        const placedHelps = await evaluate(`document.querySelectorAll('.bg-blocks-box .gd-prog .gd-help').length`);
+        await tap(first('.bg-blocks-box .gd-palette .gd-pal-item[data-pal-item="olive:read"] .gd-help'), 'the ? on the drawer’s read');
         const again = await until(CARD, (c) => c.up, 2000);
-        check(`${tag} AC5: a ? beside the placed kind reopens its card`, chips.includes('? ' + w(lang, 'rungRead')) && again.up && again.title === w(lang, 'rungRead'), { chips, again });
+        check(`${tag} AC5 (IW-001 F4): the ? on the drawer’s read reopens its card, placing nothing; no placed block carries a ?`, again.up && again.title === w(lang, 'rungRead') && (await blocks()) === n0 + 2 && placedHelps === 0, { again, placedHelps });
         await tap(first('.bg-card-help .bg-card-ok'), 'Got it (again)');
         await until(CARD_UP, (v) => v === false, 2000);
+        // Two reads are one too many for what follows (the note is read once): the cross takes the second away.
+        await tap(`[...document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-t="olive:read"] .gd-x')].pop()`, 'the second read’s cross');
+        await until(`document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-t="olive:read"]').length`, (n) => n === 1, 2000);
         await tap(first('.bg-blocks-box .gd-palette [data-pal="fwd"]'), 'forward (first tap)');
         const fwdCard = await until(CARD, (c) => c.up, 2000);
-        check(`${tag} AC5: a plain block has its card too — forward’s`, fwdCard.up && fwdCard.title === w(lang, 'bFwd') && fwdCard.line === w(lang, 'cdFwd') && (await blocks()) === 1, fwdCard);
+        check(`${tag} AC5: a plain block has its card too — forward’s (and forward is placed)`, fwdCard.up && fwdCard.title === w(lang, 'bFwd') && fwdCard.line === w(lang, 'cdFwd') && (await blocks()) === n0 + 2, fwdCard);
         await tap(first('.bg-card-help .bg-card-ok'), 'Got it (forward)');
         await until(CARD_UP, (v) => v === false, 2000);
 

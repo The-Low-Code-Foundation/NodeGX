@@ -1823,7 +1823,7 @@
     },
     {
       "fromId": "plCardGate",
-      "fromProperty": "hold",
+      "fromProperty": "show",
       "toId": "plCardHold",
       "toProperty": "condition"
     },
@@ -1963,66 +1963,6 @@
       "fromId": "plSetSeen",
       "fromProperty": "done",
       "toId": "plClearCardOpen",
-      "toProperty": "do"
-    },
-    {
-      "fromId": "plRead",
-      "fromProperty": "program",
-      "toId": "plHelpRows",
-      "toProperty": "program"
-    },
-    {
-      "fromId": "plIn",
-      "fromProperty": "lang",
-      "toId": "plHelpRows",
-      "toProperty": "lang"
-    },
-    {
-      "fromId": "plIn",
-      "fromProperty": "band",
-      "toId": "plHelpRows",
-      "toProperty": "band"
-    },
-    {
-      "fromId": "plIn",
-      "fromProperty": "words",
-      "toId": "plHelpRows",
-      "toProperty": "words"
-    },
-    {
-      "fromId": "plIn",
-      "fromProperty": "botName",
-      "toId": "plHelpRows",
-      "toProperty": "botName"
-    },
-    {
-      "fromId": "plHelpRows",
-      "fromProperty": "rows",
-      "toId": "plHelpEach",
-      "toProperty": "items"
-    },
-    {
-      "fromId": "plHelpRows",
-      "fromProperty": "show",
-      "toId": "plHelps",
-      "toProperty": "mounted"
-    },
-    {
-      "fromId": "plHelpRows",
-      "fromProperty": "helpsText",
-      "toId": "plHelpsH",
-      "toProperty": "text"
-    },
-    {
-      "fromId": "plHelpEach",
-      "fromProperty": "itemOutput-id",
-      "toId": "plSetCardHelp",
-      "toProperty": "value"
-    },
-    {
-      "fromId": "plHelpEach",
-      "fromProperty": "itemOutputSignal-chosen",
-      "toId": "plSetCardHelp",
       "toProperty": "do"
     },
     {

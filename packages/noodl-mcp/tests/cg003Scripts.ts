@@ -801,10 +801,10 @@ const CARDS_DRAWN = Object.fromEntries(
 );
 
 /**
- * IG-006 AC5 — the first tap on a palette block opens its card and places nothing. The kit has already drawn the new
- * block when it says so (Changed); this gate sees exactly one new block of a kind this child has not seen the card of,
- * hands back the program as it was BEFORE (a fresh list, so the Variable changes and the kit redraws without it) and
- * names the card to open. Anything else — a second tap, a drag, a count, a removal — goes through untouched, as text.
+ * P108 IW-001 F3 (was IG-006 AC5's "the first tap opens its card and places NOTHING"): the first tap on a palette block
+ * of a kind this child has not seen the card of PLACES it and opens its card beside the steps. The gate never undoes an
+ * edit any more: the program always goes through as the kit emitted it (text); Show is true exactly when one new block
+ * of an unseen kind was added, and Card Id names it. "Got it" marks it seen and closes the card; the block stays.
  */
 export const CARD_GATE_SCRIPT = `
 var CARDS = ${JSON.stringify(Object.keys(BLOCK_CARDS))};
@@ -817,13 +817,13 @@ for (var i = 0; i < beforeAll.length; i++) had[String(beforeAll[i].id)] = 1;
 var added = [];
 for (var j = 0; j < nowAll.length; j++) if (!had[String(nowAll[j].id)]) added.push(nowAll[j]);
 var t = added.length === 1 ? String(added[0].t) : '';
-var hold = nowAll.length === beforeAll.length + 1 && t !== '' && CARDS.indexOf(t) !== -1 && seen.indexOf(t) === -1;
-Outputs.program = hold ? JSON.parse(JSON.stringify(before)) : typeof Inputs.program === 'string' ? Inputs.program : JSON.stringify(now);
-Outputs.hold = hold;
-Outputs.cardId = hold ? t : '';
+var first = nowAll.length === beforeAll.length + 1 && t !== '' && CARDS.indexOf(t) !== -1 && seen.indexOf(t) === -1;
+Outputs.program = typeof Inputs.program === 'string' ? Inputs.program : JSON.stringify(now);
+Outputs.show = first;
+Outputs.cardId = first ? t : '';
 `;
 
-/** "Got it": the card's block is seen, so the next tap on it places it. */
+/** "Got it": the card's block is seen, so the next tap on it places it without the card (P108 IW-001 F8: per profile, saved). */
 export const CARD_SEEN_SCRIPT = `
 var seen = Array.isArray(Inputs.seen) ? Inputs.seen.slice() : [];
 var id = String(Inputs.cardId || '');
@@ -850,20 +850,6 @@ Outputs.palette = PALETTE;
 Outputs.gotIt = w.cardGotIt || '';
 Outputs.exampleWord = w.cardExample || '';
 Outputs.cardId = c ? id : '';
-`;
-
-/** The ? for each kind of block placed (first placed first): a tap opens that block's card again. */
-export const HELP_CHIPS_SCRIPT = `${WORD_HELPER}
-var CARDS = ${JSON.stringify(Object.fromEntries(Object.entries(BLOCK_CARDS).map(([id, c]) => [id, c.label])))};
-var lang = langOf(Inputs.lang), band = Number(Inputs.band) === 1 ? 1 : 2;
-var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
-var prog = Array.isArray(Inputs.program) ? Inputs.program : [];
-var rows = [], seen = {};
-function walk(list) { for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; var t = String(b.t); if (CARDS[t] && !seen[t]) { seen[t] = 1; var k = CARDS[t]; if (band === 1 && k.charAt(0) === 'b' && w['c' + k.slice(1)]) k = 'c' + k.slice(1); rows.push({ id: 'help:' + t, label: '? ' + (w[k] || t) }); } if (Array.isArray(b.body)) walk(b.body); } }
-walk(prog);
-Outputs.rows = rows;
-Outputs.show = rows.length > 0;
-Outputs.helpsText = rows.length ? w.cardHelpsH || '' : '';
 `;
 
 /** Olive's five lessons (R7) as they are asked on Skills: the rung, the canned slots, and in which language. */
@@ -1213,10 +1199,9 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Olive held', script: OLIVE_HELD_SCRIPT, seam: 'the rungs this computer\u2019s exam failed, in words, for Skills' },
   { component: 'Logic/Olive played', script: OLIVE_PLAYED_SCRIPT, seam: 'the rung this run asked Olive, and whether she answered, for the after-run hint' },
   // P106 IG-006 (lane C).
-  { component: 'Logic/Card gate', script: CARD_GATE_SCRIPT, seam: 'the first tap on a palette block opens its card and places nothing' },
+  { component: 'Logic/Card gate', script: CARD_GATE_SCRIPT, seam: 'the first tap on a palette block places it and opens its card beside it' },
   { component: 'Logic/Card seen', script: CARD_SEEN_SCRIPT, seam: 'Got it: the block’s card is seen, the next tap places it' },
   { component: 'Logic/Block card', script: BLOCK_CARD_SCRIPT, seam: 'the open card’s words and its example as blocks' },
-  { component: 'Logic/Help chips', script: HELP_CHIPS_SCRIPT, seam: 'a ? for each kind of block placed, to open its card again' },
   { component: 'Logic/Lesson rows', script: LESSON_ROWS_SCRIPT, seam: 'Olive’s five lessons as Skills cards, band 10–12' },
   { component: 'Logic/Olive lesson', script: OLIVE_LESSON_SCRIPT, seam: 'a lesson asked of Olive, her answer, and the page’s check underneath' },
   // IG-007 (P106 s2): the renderer this computer uses, and the fallback rule's write.

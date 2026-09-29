@@ -358,7 +358,7 @@
   /** The blocks' stylesheet: the mockup's .blk / .prog / .rep rules, prefixed gd-. The colours are CSS variables the ports set on the root. */
   var BLOCKS_CSS =
     '.gd-blocks{position:relative;font-family:inherit;color:#2E2A3D;-webkit-tap-highlight-color:transparent}\n' +
-    '.gd-palette{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;padding-bottom:12px;border-bottom:2px dashed #EBDFC4}\n' +
+    '.gd-palette{display:flex;flex-wrap:wrap;gap:12px 14px;margin:0 0 12px;padding:8px 8px 12px 0;border-bottom:2px dashed #EBDFC4}\n' +
     '.gd-blk{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:12px;color:#fff;font-weight:800;font-size:15px;line-height:1.2;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;border:0;font-family:inherit;cursor:pointer;position:relative;text-align:left}\n' +
     '.gd-blk .gd-ic{width:20px;height:20px;flex:none}\n' +
     '.gd-motion{background:var(--gd-motion)}.gd-action{background:var(--gd-action)}.gd-control{background:var(--gd-control)}.gd-ask{background:var(--gd-ask)}\n' +
@@ -373,7 +373,13 @@
     // white steps panel, inside a repeat (#FFF0DA) and against every block fill; the sun outline was 1.44:1 on white.
     '.gd-blk.gd-run{outline:3px solid var(--gd-run);outline-offset:4px;box-shadow:0 0 0 4px #fff,inset 0 -3px 0 rgba(0,0,0,.18);transform:scale(1.04)}\n' +
     '.gd-x{margin-left:4px;font-size:13px;background:none;border:0;color:inherit;font-weight:800;cursor:pointer;padding:0 2px;font-family:inherit;touch-action:manipulation}\n' +
-    // P106 IG-003: the ? on a placed block (Show Help) — the block's card again. Violet ink on white, 24 px.
+    // P108 IW-001 F4: the ? on a DRAWER block (Show Help) — the block's card. Violet ink on white, 24 px, on the block's
+    // top-right corner; the tap target is the 24 px disc plus its 4 px halo.
+    '.gd-pal-item{position:relative;display:inline-flex}\n' +
+    '.gd-pal-item .gd-help{position:absolute;top:-8px;right:-8px;margin:0;box-shadow:0 0 0 3px #fff,0 1px 3px rgba(0,0,0,.25);z-index:1}\n' +
+    '.gd-locked .gd-pal-item .gd-help{pointer-events:auto}\n' +
+    // F5: a tapped simple block is selected (a ring), never removed.
+    '.gd-row[data-sel="1"]>.gd-blk{outline:3px solid var(--gd-control);outline-offset:2px}\n' +
     '.gd-help{margin-left:2px;width:24px;height:24px;flex:none;border-radius:50%;border:0;background:#fff;color:#4A2FA6;font-weight:800;font-size:14px;line-height:24px;padding:0;font-family:inherit;cursor:pointer;touch-action:manipulation;text-align:center}\n' +
     '.gd-rep{border-radius:14px;background:#FFF0DA;padding:6px;display:flex;flex-direction:column;gap:6px;border:2px solid transparent}\n' +
     '.gd-rep[data-sel="1"]{border-color:var(--gd-control)}\n' +
@@ -449,8 +455,8 @@
     displayNodeName: 'Block List',
     docs:
       'The program editor a child holds. A vertical list of blocks from a Palette: tap a palette block to add it (into ' +
-      'the selected container, or at the end), drag a block to move it with a finger, a pen or a mouse, tap its cross to ' +
-      'drop it. Containers nest with a left rail; a repeat carries a count with minus and plus; an ask block opens a picker ' +
+      'the selected container, or at the end), drag a block to move it with a finger, a pen or a mouse, tap a placed ' +
+      'block to select it, tap its cross to drop it. Containers nest with a left rail; a repeat carries a count with minus and plus; an ask block opens a picker ' +
       'of garden words (band 1 never opens a keyboard; band 2 may type up to 40 characters). Running Id glows one block. ' +
       'Program is emitted as JSON text on every edit and read back the same. It draws; the engine decides what a block does.',
     ssr: { compat: 'safe' },
@@ -610,11 +616,11 @@
           }
           if (e.type === 'pointercancel') return;
           if (!g.moved) {
-            // A tap. A container's header picks it as the place new blocks go; a simple block is taken away (the mockup).
+            // A tap. A container's header picks it as the place new blocks go. P108 IW-001 F5: a tap on a simple block
+            // selects it (a second tap lets go) and NEVER takes it away — a child deleted by accident; the cross does that.
             var b = findBlock(live.current.prog, g.id);
             if (!b) return;
-            if (b.body) select(String(g.id) === live.current.sel ? '' : g.id);
-            else remove(g.id);
+            select(String(g.id) === live.current.sel ? '' : g.id);
             return;
           }
           // A drag. Inside the list it moves; outside, or onto itself, the block simply goes back.
@@ -650,19 +656,19 @@
         var xEl = function (b) {
           return h('button', { key: 'x', type: 'button', className: 'gd-x', 'data-x': String(b.id), 'aria-label': lang === 'fr' ? 'enlever' : 'remove', disabled: locked, onClick: function () { remove(b.id); } }, '✕');
         };
-        // P106 IG-003: the ? on a placed block (Show Help): Help Block is the block's kind, then Help fires. It edits nothing.
+        // P108 IW-001 F4: the ? sits on the DRAWER's blocks (Show Help), never on a placed one — it was backwards: the
+        // question "what does this block do?" is asked before placing it. Help Block is the block's kind, then Help
+        // fires; it places nothing and is never locked (a card can be read while a run plays).
         var showHelp = flag(props.showHelp, false);
-        var helpEl = function (b) {
-          if (!showHelp) return [];
-          return [
-            h('button', {
-              key: 'help', type: 'button', className: 'gd-help', 'data-help': String(b.id), 'aria-label': lang === 'fr' ? 'que fait ce bloc ?' : 'what does it do?',
-              onClick: function () {
-                if (typeof live.current.onHelpBlock === 'function') live.current.onHelpBlock(String(b.t));
-                if (typeof live.current.onHelp === 'function') live.current.onHelp();
-              }
-            }, '?')
-          ];
+        var helpEl = function (entry) {
+          if (!showHelp) return null;
+          return h('button', {
+            key: 'help', type: 'button', className: 'gd-help', 'data-help': String(entry.id), 'aria-label': (lang === 'fr' ? 'que fait ce bloc ? ' : 'what does it do? ') + word(entry.label, lang, entry.id),
+            onClick: function () {
+              if (typeof live.current.onHelpBlock === 'function') live.current.onHelpBlock(String(entry.id));
+              if (typeof live.current.onHelp === 'function') live.current.onHelp();
+            }
+          }, '?');
         };
         var slotEls = function (b, entry) {
           if (!entry || !entry.slots || !entry.slots.length) return [];
@@ -722,7 +728,7 @@
                 );
                 head.push(h('span', { key: 'times', className: 'gd-n gd-times' }, lang === 'fr' ? 'fois' : 'times'));
               }
-              head = head.concat(slotEls(b, entry)).concat(helpEl(b));
+              head = head.concat(slotEls(b, entry));
               head.push(xEl(b));
               var body = renderList(b.body, b.id);
               if (!body.length) body = [h('span', { key: 'dots', className: 'gd-dots' }, '…')];
@@ -736,7 +742,7 @@
                 )
               );
             } else {
-              out.push(h('div', { key: 'b-' + b.id, className: 'gd-row' }, blockEl(b, entry, slotEls(b, entry).concat(helpEl(b), [xEl(b)]), false), pickerEl(b, entry)));
+              out.push(h('div', { key: 'b-' + b.id, className: 'gd-row', 'data-sel': String(b.id) === sel ? '1' : '0' }, blockEl(b, entry, slotEls(b, entry).concat([xEl(b)]), false), pickerEl(b, entry)));
             }
             if (!isDragged) place++;
           }
@@ -745,12 +751,14 @@
         };
 
         var paletteEls = palette.map(function (entry) {
-          return h(
+          var tile = h(
             'button',
-            { key: 'p-' + entry.id, type: 'button', className: 'gd-blk gd-' + entry.kind, 'data-pal': entry.id, title: word(entry.label, lang, entry.id), disabled: locked, onClick: function () { add(entry); } },
+            { key: 'b', type: 'button', className: 'gd-blk gd-' + entry.kind, 'data-pal': entry.id, title: word(entry.label, lang, entry.id), disabled: locked, onClick: function () { add(entry); } },
             iconEl(entry.icon, 'ic'),
             h('span', { key: 'n', className: 'gd-n' }, word(entry.label, lang, entry.id))
           );
+          // IW-001 F4: the drawer block and its ? side by side (a button inside a button is not a button).
+          return h('span', { key: 'p-' + entry.id, className: 'gd-pal-item', 'data-pal-item': entry.id }, tile, helpEl(entry));
         });
         var rows = renderList(prog, null);
         var emptyText = lang === 'fr' ? 'Pas encore de pas. Touche un bloc.' : 'No steps yet. Tap a block.';
@@ -798,7 +806,7 @@
       runningId: { type: 'string', displayName: 'Running Id', group: 'Program', default: '', description: 'The id of the block to glow. Empty glows none.' },
       locked: { type: 'boolean', displayName: 'Locked', group: 'Program', default: false, description: 'True while a run plays: no add, move, remove or count change.' },
       showPalette: { type: 'boolean', displayName: 'Show Palette', group: 'Program', default: true },
-      showHelp: { type: 'boolean', displayName: 'Show Help', group: 'Program', default: false, description: 'A ? on every placed block. A tap sets Help Block to the block’s kind and fires Help; it edits nothing.' },
+      showHelp: { type: 'boolean', displayName: 'Show Help', group: 'Program', default: false, description: 'A ? on every block in the palette (never on a placed one). A tap sets Help Block to the block’s kind and fires Help; it places nothing.' },
       // White words on these reach 4.5:1 (P105 s3 ruling 5: the mockup's hues, darker — the template's tokens are the same).
       motionColor: { type: 'color', displayName: 'Motion Blocks', group: 'Style', default: '#3170E0' },
       actionColor: { type: 'color', displayName: 'Action Blocks', group: 'Style', default: '#058149' },
@@ -814,7 +822,7 @@
       onProgram: { type: 'string', displayName: 'Program', group: 'Program', description: 'The program as JSON text, after every edit. Read back through Program, it draws the same.' },
       onChanged: { type: 'signal', displayName: 'Changed', group: 'Program', description: 'An edit happened. Program already holds it.' },
       onSelected: { type: 'string', displayName: 'Selected', group: 'Program', description: 'The id of the container a palette tap inserts into, or empty for the end of the list.' },
-      onHelpBlock: { type: 'string', displayName: 'Help Block', group: 'Help', description: 'The kind (t) of the block whose ? was tapped (Show Help).' },
+      onHelpBlock: { type: 'string', displayName: 'Help Block', group: 'Help', description: 'The kind (palette id) of the palette block whose ? was tapped (Show Help).' },
       onHelp: { type: 'signal', displayName: 'Help', group: 'Help', description: 'A block’s ? was tapped. Help Block already holds its kind.' }
     }
   };

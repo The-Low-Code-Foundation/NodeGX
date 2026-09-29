@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 479,
+      "connectionCount": 478,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -435,14 +435,6 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
-    "Logic/Help chips": {
-      "path": "Logic/Help chips",
-      "type": "visual",
-      "nodeCount": 3,
-      "connectionCount": 9,
-      "modified": "2026-09-27T00:00:00.000Z",
-      "created": "2026-09-27T00:00:00.000Z"
-    },
     "Logic/Lesson rows": {
       "path": "Logic/Lesson rows",
       "type": "visual",
@@ -659,19 +651,11 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
-    "Workshop/Help chip": {
-      "path": "Workshop/Help chip",
-      "type": "visual",
-      "nodeCount": 4,
-      "connectionCount": 3,
-      "modified": "2026-09-27T00:00:00.000Z",
-      "created": "2026-09-27T00:00:00.000Z"
-    },
     "Workshop/Play": {
       "path": "Workshop/Play",
       "type": "visual",
-      "nodeCount": 156,
-      "connectionCount": 394,
+      "nodeCount": 151,
+      "connectionCount": 384,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -885,8 +869,8 @@
     }
   },
   "stats": {
-    "totalComponents": 110,
-    "totalNodes": 893,
-    "totalConnections": 2601
+    "totalComponents": 108,
+    "totalNodes": 881,
+    "totalConnections": 2578
   }
 }

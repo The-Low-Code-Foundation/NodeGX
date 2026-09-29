@@ -209,7 +209,6 @@ export const IG006_WORDS: Readonly<Record<string, Bi>> = {
   // The cards (AC5): what every palette block does, in one line. {b} is the robot's name.
   cardGotIt: s('Got it', 'Compris'),
   cardExample: s('For example:', 'Par exemple :'),
-  cardHelpsH: s('What does a block do? Tap its ?', 'Que fait un bloc ? Touche son ?'),
   cdFwd: s('{b} takes one step forward, to the next square.', '{b} avance d’une case.'),
   cdLeft: s('{b} turns a quarter turn to the left, without moving.', '{b} tourne d’un quart de tour à gauche, sans avancer.'),
   cdRight: s('{b} turns a quarter turn to the right, without moving.', '{b} tourne d’un quart de tour à droite, sans avancer.'),

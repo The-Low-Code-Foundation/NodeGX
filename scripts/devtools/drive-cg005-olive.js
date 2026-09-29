@@ -219,19 +219,14 @@ async function pagesPart() {
       };
       const first = (sel) => `[...document.querySelectorAll(${JSON.stringify(sel)})].find((e) => e.offsetParent !== null)`;
       const byText = (sel, ...needles) => `[...document.querySelectorAll(${JSON.stringify(sel)})].find((e) => e.offsetParent !== null && ${JSON.stringify(needles)}.some((n) => e.innerText.includes(n)))`;
-      // IG-006: the steps' own list (a block's card draws its example with a second Block List).
-      const blocks = () => ev(`document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-id]').length`);
       const CARD_UP = `(() => { const e = document.querySelector('.bg-card-help'); return !!e && e.offsetParent !== null; })()`;
-      /** A palette tap that places the block: a first tap on a kind opens its card (IG-006 AC5) — Got it, then tap again. */
+      /** A palette tap that places the block. P108 IW-001 F3: a first tap on a kind places it AND opens its card — Got it closes it. */
       const palTap = async (id) => {
-        const n0 = await blocks();
         await tap(first(`.bg-blocks-box .gd-palette [data-pal="${id}"]`), `palette ${id}`);
         await wait(200);
-        if ((await blocks()) === n0 && (await ev(CARD_UP))) {
+        if (await ev(CARD_UP)) {
           await tap(first('.bg-card-help .bg-card-ok'), `Got it (${id})`);
           await until(CARD_UP, (v) => v === false, 2000);
-          await tap(first(`.bg-blocks-box .gd-palette [data-pal="${id}"]`), `palette ${id} (its card seen)`);
-          await wait(200);
         }
       };
       const OWL = '.bg-owl';
