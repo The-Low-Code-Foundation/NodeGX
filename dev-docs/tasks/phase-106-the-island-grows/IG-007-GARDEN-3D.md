@@ -365,3 +365,33 @@ the mockup captured at the node's viewport.
 - The Workshop at 390×844 on the 3D node (the page drive runs 2D).
 - FR on the 3D Workshop (the Grown-ups words are graded EN/FR by the template gate and the page drive's language
   clause).
+
+### Session 3 (2026-09-29, lane F, worktree `p106-s3-leftovers` cut from `f182a2d9e`) — item (f), the deploy's wire checker
+
+**Finding: not a defect, a ruled design — nothing was changed.** Session 1's finding (above) guessed "the checker's own
+kit loader skips or fails the module". Measured: **the deploy has no kit loader at all, on purpose.**
+
+- `packages/noodl-preview/src/headless.ts` `bootstrapNodeLibrary()` fills the editor's `NodeLibrary` from a browser
+  runtime that registers the BUILT-IN nodes only (`registerViewerNodes`); `src/deploy.ts` reads the project, runs
+  `readWireHealth` on a second model read, then `deployToFolder`, which copies `noodl_modules` verbatim. No `src/` file
+  reads a kit's `index.js` (`noodl_modules` appears only in comments). `src/wireHealth.ts`'s header says so: "`nodegx
+  deploy` does not load a project's `noodl_modules`, so a kit node's type is an `UnknownNodeType` here … counted apart,
+  as **unchecked**, and never named as broken (GAM-024 §5)."
+- It was RULED: `phase-88-the-defects-the-games-found/GAM-024-…md` AC5, **closed by R21 (Richard, s19, 2026-09-17):
+  "unchecked is enough". No kit loading at deploy time.** `noodl-preview/tests/gam-023-…test.ts` pins it
+  ("pixel-game: the kit wires are unchecked, not broken, and the deploy says so", `uncheckedTypes:
+  ['keyboard-shortcuts.KeyboardShortcut']`).
+- **The reading on this lane's deploy** (`p106-s3-leftovers-scratch/pages/deploy.log`, the page drive's deploy of the
+  regenerated template, 2026-09-29 13:0x): `nodeTypes 161` (built-ins), wires **checked 2095, broken 0, unchecked 42**
+  (38 in s2 on lane D's branch; the four wires into IG-006's card example `plCardEg`, a BlockList, are in the list: 42 − 4 = 38), `uncheckedTypes` = `game-kit.Avatar,
+  game-kit.KeepStorage, garden-3d-kit.Garden3D, garden-kit.BlockList, garden-kit.Garden` — every kit node type, as the
+  ruling predicts. Nothing there is Garden 3D's.
+- **What checking them would take (if Richard reopens R21):** register the project's kits into the node library the
+  health pass reads, **for the health pass only** — the export shares `NodeLibrary.instance` and must stay
+  byte-identical (the R20 contract in `deploy.ts`'s comment). GAM-024 §4 already named the way: reuse the MCP's
+  contained kit extractor (`noodl-mcp/src/kitExtract/entry.js` → `dist/kit-extract.cjs`, a child process, because a
+  kit's `index.js` is project code) and add its `nodetypes` to the library, then take them out again; the fallback
+  (running kit code inside the deploy process) was itself left to a ruling. Then GAM-023's pixel-game arm flips from 4
+  unchecked to 0 and its pinned expectation changes. That spec grades `dist/nodegx-deploy.cjs`, which is linked
+  read-only from the primary checkout in a worktree, so no lane can grade it before the orchestrator's rebuild.
+  Not small, and a ruling first: **not built.**
