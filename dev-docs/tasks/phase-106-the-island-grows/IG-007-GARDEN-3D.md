@@ -278,6 +278,20 @@ fixture drive's vocabulary clause). This docs commit follows.
     own fields (`can`, `canMax`, `carry`, and also `colour`, `eyes`, `hat`, `name`) never reach the drawn robot on
     their own. Not fixed (the orchestrator's rule: report it, do not fix, on this pass).
 
+- **Fixed** (`300ed7118`). A Robots write that changes only a robot's look now rebuilds the scene from the shared
+  caches: `can`, `canMax`, `carry`, `colour`, `eyes`, `hat`, `name`, or the robot count. A move or a turn alone
+  still rebuilds nothing.
+  - A rebuild keeps each robot's old goal, so a move that arrives with a look change glides instead of jumping.
+  - The gate clause was red first, and it goes red again with the old-goal line removed.
+  - Readings:
+    - `ig007Garden3d` + `cg003Template` exit 0, **133 / 133** (30 + 103).
+    - The kit built twice gives the same sha256, `7407b199…f873`.
+    - `template:garden` exit 0; a second run exit 0 with 0 drift.
+    - A fresh deploy from the worktree (index.html fresh; the deployed kit is byte-identical to the built one).
+    - `--mode 3d`: exit 0, **23 / 23**. Tile, facing, wet tulips and the can level agree at all 27 presses. Frame
+      Ms readout 17.6 ms.
+    - `--mode nogl`: exit 0, **8 / 8**.
+
 **AC5, what was compared (looked at, not graded — the grade is Richard's).** The side-by-side images
 `shots/ig007-s2/sbs-*.png` put the mockup on the left and the node on the right. `mockup-running-workshop.png` is
 the mockup captured at the node's viewport.
