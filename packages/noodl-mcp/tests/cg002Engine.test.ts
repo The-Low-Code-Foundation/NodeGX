@@ -1254,6 +1254,55 @@ describe('CG-002 — the engine', () => {
     });
   });
 
+  describe('P106 s3 lane F (a) — the fold nudge never offers a run the reference does not hold, press by press', () => {
+    /** The body of every repeat in a program, as shapes: what an offered fold may be. */
+    const repeatBodies = (list: ReadonlyArray<Block>, out: string[] = []): string[] => {
+      for (const b of list) {
+        if (b.t === 'repeat') out.push(JSON.stringify(shape(b.body ?? [])));
+        if (b.body) repeatBodies(b.body, out);
+      }
+      return out;
+    };
+
+    it('🔴 every request with a repeat, its reference recorded one press at a time: every fold offered and every "do this n times" is one of its own repeats', () => {
+      let asked = 0;
+      for (const r of REQUESTS) {
+        if (!r.palette.includes('repeat')) continue;
+        const recording = unrolled(r.referenceProgram);
+        const bodies = repeatBodies(r.referenceProgram);
+        for (let p = 1; p <= recording.length; p++) {
+          const program = recording.slice(0, p);
+          const found = runScript(FIND_REPEAT_SCRIPT, { program, band: 2, allowed: [...r.palette] });
+          const hint = runScript(CHOOSE_HINT_SCRIPT, { program, allowed: [...r.palette] }).key;
+          if (!found.offer && hint !== 'hintPattern') continue;
+          asked++;
+          const body = JSON.stringify(shape(program.slice(found.i, found.i + found.len)));
+          expect({ id: r.id, press: p, hint, body: bodies.includes(body) ? 'the reference’s' : body }).toEqual({ id: r.id, press: p, hint, body: 'the reference’s' });
+        }
+      }
+      // Known-firing beside the absence: the nudge still fires where the reference has a repeat (65 presses measured before, s3).
+      expect(asked).toBeGreaterThan(40);
+    });
+
+    it('🔴 the tulips dance: nothing offered from the first dance to the second, the nine-block body at the second, ×3 at the third', () => {
+      const r = REQUESTS.find((x) => x.id === 'tulips-three')!;
+      const recording = unrolled(r.referenceProgram);
+      const body = r.referenceProgram[0].body!.length;
+      const at = (p: number) => runScript(FIND_REPEAT_SCRIPT, { program: recording.slice(0, p), band: 2, allowed: [...r.palette] });
+      // The first dance ends in right, forward, right, forward: a run seen twice that does not start the list is held back.
+      for (let p = body; p < body * 2; p++) {
+        expect({ press: p, offer: at(p).offer }).toEqual({ press: p, offer: false });
+        expect({ press: p, hint: runScript(CHOOSE_HINT_SCRIPT, { program: recording.slice(0, p), allowed: [...r.palette] }).key }).not.toEqual({ press: p, hint: 'hintPattern' });
+      }
+      expect([at(body * 2).offer, at(body * 2).i, at(body * 2).len, at(body * 2).count]).toEqual([true, 0, body, 2]);
+      expect([at(body * 3).offer, at(body * 3).i, at(body * 3).len, at(body * 3).count]).toEqual([true, 0, body, 3]);
+      // A run seen twice FROM the start is still the child's own loop, and a third time anywhere is too.
+      expect(runScript(FIND_REPEAT_SCRIPT, { program: parse('K L R F R F'), band: 2 }).offer).toBe(false);
+      expect(runScript(FIND_REPEAT_SCRIPT, { program: parse('K L R F R F R F'), band: 2 })).toMatchObject({ offer: true, i: 2, len: 2, count: 3 });
+      expect(runScript(FIND_REPEAT_SCRIPT, { program: parse('R F R F K L'), band: 2 })).toMatchObject({ offer: true, i: 0, len: 2, count: 2 });
+    });
+  });
+
   describe('the ports the graph wires', () => {
     it('every script mints the outputs its component publishes, and every input is a real name', () => {
       const expected: Record<string, string[]> = {

@@ -526,6 +526,10 @@ function findRepeatIn(seq) {
     for (var i = 0; i + len * 2 <= seq.length; i++) {
       var count = 1;
       while (i + (count + 1) * len <= seq.length && sameRun(seq, i, i + count * len, len)) count++;
+      // P106 s3 (lane F): a run seen only twice that does not start the list is held back. It may be the tail of a longer
+      // body the child is still recording (the tulips dance ends right, forward, right, forward), and folding it first
+      // leaves a shape the longer body can never fold into. Seen a third time, or from the list's start, it is offered.
+      if (count === 2 && i > 0) continue;
       if (count >= 2) { var cover = len * count; if (!best || cover > best.cover || (cover === best.cover && len < best.len)) best = { i: i, len: len, count: count, cover: cover }; }
     }
   }
