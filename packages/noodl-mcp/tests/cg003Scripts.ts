@@ -283,7 +283,10 @@ for (var i = 0; i < PAD.length; i++) {
   if (!ok) continue;
   var place = PAD[i][1] || slots[Math.min(used++, slots.length - 1)];
   var slug = op.replace(/[^a-z0-9]+/gi, '-');
-  keys.push({ op: op, cls: 'bg-key bg-key-' + slug + (place === 'bg-key-' + slug ? '' : ' ' + place) + ' bg-i-' + PAD[i][2] + ' bg-press', label: W[PAD[i][3]] || op });
+  // 🔴 A stable row id per key (a row is a Noodl Object, global by id): the keys arrive twice as a request opens (its
+  // allowed list, then the drawer's palette), and two lists of id-less rows in quick succession left the For Each
+  // with BOTH sets (the page drive: ten keys on the tulips, each under its twin, so no press landed).
+  keys.push({ id: 'padkey-' + slug, op: op, cls: 'bg-key bg-key-' + slug + (place === 'bg-key-' + slug ? '' : ' ' + place) + ' bg-i-' + PAD[i][2] + ' bg-press', label: W[PAD[i][3]] || op });
 }
 Outputs.keys = keys;
 Outputs.count = keys.length;
@@ -1188,6 +1191,11 @@ Outputs.id = Inputs.live === true && g !== null && g !== undefined && g !== '' ?
 
 // ── P108 IW-001 (lane A): the Workshop fixes ─────
 
+/** `Logic/Latch` (the pad's): Value in is held; Go hands it on as it stands (a Timer's end, after the value settled). */
+export const LATCH_SCRIPT = `
+Outputs.value = Inputs.value;
+`;
+
 /**
  * `Logic/Pad answer` (F7): Olive's answer to the pad's read key, spoken over the robot as the block speaks it in a run —
  * the engine's own step on the parked run the key made (Record step's Pending), with her answer. Go-driven, after Ask
@@ -1267,5 +1275,6 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Glow', script: GLOW_SCRIPT, seam: 'the block the page rings: Step\u2019s while a run is live, none once it stops' },
   // P108 IW-001 (lane A).
   { component: 'Logic/Run cap', script: RUN_CAP_SCRIPT, seam: 'a played run at the engine\u2019s tick cap stops by itself' },
-  { component: 'Logic/Pad answer', script: PAD_ANSWER_SCRIPT, seam: 'Olive\u2019s answer to the pad\u2019s read key, spoken over the robot' }
+  { component: 'Logic/Pad answer', script: PAD_ANSWER_SCRIPT, seam: 'Olive\u2019s answer to the pad\u2019s read key, spoken over the robot' },
+  { component: 'Logic/Latch', script: LATCH_SCRIPT, seam: 'a value held until Go, then handed on as it stood' }
 ];

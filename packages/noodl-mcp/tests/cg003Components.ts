@@ -39,6 +39,8 @@ export const STORAGE_KEY = 'bot-garden';
 /** The glide the kit animates (the mockup's .38s) and the tick the runner waits between steps (the mockup's 420 ms). */
 export const STEP_MS = 380;
 export const TICK_MS = 420;
+/** P108 IW-001 F7: how long the pad's keys must stay unchanged before the pad draws them (see Workshop/Pad). */
+export const PAD_SETTLE_MS = 120;
 /** What a person sees the game called (ruling 7). The slugs (the template, the storage key, the kits) stay bot-garden. */
 export const GAME_NAME = 'Olive’s Island';
 
@@ -229,8 +231,9 @@ const FILL: Record<BtnKind, [string, string]> = {
   fold: ['var(--block-control)', 'var(--on-fill)'],
   // P106 IG-003: Drive, the mockup's .btn.drive (the motion blue, white words).
   drive: ['var(--block-motion)', 'var(--on-fill)'],
-  // P108 IW-001 F1: Stop, in Play's place while a run plays (the coral of Teach: a red that says halt, white words).
-  stop: ['var(--coral)', 'var(--on-fill)']
+  // P108 IW-001 F1: Stop, in Play's place while a run plays — the ink, white words: never Teach's coral beside it (the
+  // first drive's screenshot: two coral pills side by side read as one control).
+  stop: ['var(--ink)', 'var(--on-fill)']
 };
 export function btn(kind: BtnKind, icon = '', extra: N = {}): N {
   const [bg, fg] = FILL[kind];
@@ -318,7 +321,8 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
   'Logic/Update robot': 'go',
   // P108 IW-001 (lane A).
   'Logic/Run cap': 'go',
-  'Logic/Pad answer': 'go'
+  'Logic/Pad answer': 'go',
+  'Logic/Latch': 'go'
 };
 
 /**
@@ -604,6 +608,13 @@ const PAD: CgComponent = {
     group('pdBox', 'The pad', undefined, { sizeMode: 'contentSize', cssClassName: 'bg-pad', mounted: false }, ['pdEach']),
     // IG-001 D10: the keys follow the request (the pad was fixed to fwd left water right, so the stones' put came only from the palette).
     logic('pdKeys', L('Pad keys'), 'One key per allowed step'),
+    // P108 IW-001 F7: the keys reach the For Each once they have SETTLED. As a request opens they are answered two or
+    // three times (its allowed list, then the drawer's palette, then the job robot's); a list that changed while the
+    // For Each was still rebuilding for its mount left both sets on the page (the page drive: ten keys on the tulips,
+    // each under its twin; mamie-note's read twice, so no press landed). Latch holds the last list until PAD_SETTLE_MS
+    // of quiet.
+    logic('pdSettle', TIMER_NODE, 'The keys, once they stop changing', { duration: PAD_SETTLE_MS }),
+    logic('pdHold', L('Latch'), 'The settled keys'),
     { ...logic('pdEach', FOR_EACH_NODE, 'One key per row', { template: C.padKey, templateType: 'explicit' }), parent: 'pdBox' },
     outputs('pdOut', [['op', 'string'], ['pressed', 'signal']])
   ],
@@ -614,7 +625,10 @@ const PAD: CgComponent = {
     wire('pdIn', 'palette', 'pdKeys', 'palette'),
     wire('pdIn', 'words', 'pdKeys', 'words'),
     wire('pdIn', 'lang', 'pdKeys', 'lang'),
-    wire('pdKeys', 'keys', 'pdEach', 'items'),
+    wire('pdKeys', 'keys', 'pdHold', 'value'),
+    wire('pdKeys', 'ran', 'pdSettle', 'restart'),
+    wire('pdSettle', 'timerFinished', 'pdHold', 'go'),
+    wire('pdHold', 'value', 'pdEach', 'items'),
     wire('pdEach', 'itemOutput-op', 'pdOut', 'op'),
     wire('pdEach', 'itemOutputSignal-pressed', 'pdOut', 'pressed')
   ]

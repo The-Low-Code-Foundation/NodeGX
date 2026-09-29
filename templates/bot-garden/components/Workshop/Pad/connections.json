@@ -36,6 +36,24 @@
     {
       "fromId": "pdKeys",
       "fromProperty": "keys",
+      "toId": "pdHold",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pdKeys",
+      "fromProperty": "ran",
+      "toId": "pdSettle",
+      "toProperty": "restart"
+    },
+    {
+      "fromId": "pdSettle",
+      "fromProperty": "timerFinished",
+      "toId": "pdHold",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "pdHold",
+      "fromProperty": "value",
       "toId": "pdEach",
       "toProperty": "items"
     },

@@ -57,6 +57,23 @@
       "type": "/Logic/Pad keys",
       "label": "One key per allowed step",
       "x": 350,
+      "y": 400
+    },
+    {
+      "id": "pdSettle",
+      "type": "Timer",
+      "label": "The keys, once they stop changing",
+      "parameters": {
+        "duration": 120
+      },
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "pdHold",
+      "type": "/Logic/Latch",
+      "label": "The settled keys",
+      "x": 350,
       "y": 160
     },
     {

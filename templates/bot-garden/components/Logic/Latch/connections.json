@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e0612f82-d24f-56c5-8ad9-7b99194be2eb",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "latchIn",
+      "fromProperty": "value",
+      "toId": "latchFn",
+      "toProperty": "in-value"
+    },
+    {
+      "fromId": "latchIn",
+      "fromProperty": "go",
+      "toId": "latchFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "latchFn",
+      "fromProperty": "out-value",
+      "toId": "latchOut",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "latchFn",
+      "fromProperty": "success",
+      "toId": "latchOut",
+      "toProperty": "ran"
+    }
+  ]
+}

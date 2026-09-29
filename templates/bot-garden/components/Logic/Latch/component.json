@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e0612f82-d24f-56c5-8ad9-7b99194be2eb",
+  "name": "Latch",
+  "path": "/Logic/Latch",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A value held until Go, then handed on as it stood. Runs on Go; answers Ran once its outputs are set."
+}

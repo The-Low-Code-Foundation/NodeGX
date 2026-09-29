@@ -30,6 +30,7 @@ import { APPLY_DELTA_SCRIPT, COMPLETE_REQUEST_SCRIPT, FIND_REPEAT_SCRIPT, FOLD_S
 import { BLOCK_CARDS, IG006_WORDS, IG006_WORD_KEYS, PAGE_WORDS, PAGE_WORD_KEYS } from './cg003Content';
 import { OLIVE_SCRIPTS, OLIVE_WORDS, OLIVE_WORD_KEYS } from './cg005Olive';
 import { C, CG003_COMPONENTS, GAME_NAME, LOGIC_COMPONENTS, LOGIC_SPECS, PAGES, REQUIRED_MODULES, STORAGE_KEY, TICK_MS } from './cg003Components';
+import { PAD_SETTLE_MS } from './cg003Components';
 import {
   ALL_WORDS_JSON,
   PAD_KEYS_SCRIPT,
@@ -784,7 +785,11 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(phas('plStart', 'allowed', 'plPad', 'allowed')).toBe(true);
       const pad = nodesOf(built, C.pad);
       expect([pad.some((n) => n.type === '/Logic/Pad keys'), pad.some((n) => n.type === 'Static Data')]).toEqual([true, false]);
-      expect(connectionsOf(built, C.pad).some((c) => c.fromId === 'pdKeys' && c.fromProperty === 'keys' && c.toId === 'pdEach' && c.toProperty === 'items')).toBe(true);
+      // P108 IW-001 F7: through the latch, once the keys have settled (a For Each fed a changing list while it rebuilt kept both).
+      const padWires = connectionsOf(built, C.pad).map((c) => `${c.fromId}.${c.fromProperty}>${c.toId}.${c.toProperty}`);
+      expect(padWires).toEqual(expect.arrayContaining(['pdKeys.keys>pdHold.value', 'pdKeys.ran>pdSettle.restart', 'pdSettle.timerFinished>pdHold.go', 'pdHold.value>pdEach.items']));
+      expect(padWires.filter((c) => c.endsWith('>pdEach.items'))).toEqual(['pdHold.value>pdEach.items']);
+      expect([nodesOf(built, C.pad).find((n) => n.id === 'pdSettle')!.type, params(nodesOf(built, C.pad).find((n) => n.id === 'pdSettle')!).duration, nodesOf(built, C.pad).find((n) => n.id === 'pdHold')!.type]).toEqual(['Timer', PAD_SETTLE_MS, '/Logic/Latch']);
       for (const icon of ['pick', 'put', 'fill']) expect(GARDEN_CSS).toContain(`.bg-i-${icon}::before`);
       expect(GARDEN_CSS).toMatch(/\.bg-key-mid \{ grid-column: 2; grid-row: 2; \}/);
       expect(GARDEN_CSS).toMatch(/\.bg-key-r3a \{ grid-column: 1; grid-row: 3; \}/);
@@ -1166,7 +1171,7 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect((pnode('plControls').children ?? []).map((n) => n.id)).toEqual(['plDrive', 'plTeach', 'plPlay', 'plStopRun', 'plStep', 'plReset']);
       const stop = pnode('plStopRun');
       expect([stop.type, params(stop).mounted, String(params(stop).cssClassName)]).toEqual(['net.noodl.controls.button', false, 'bg-btn bg-i-stop']);
-      expect(params(stop).backgroundColor).toBe('var(--coral)');
+      expect(params(stop).backgroundColor).toBe('var(--ink)');
       expect([pinto('plStopRun', 'mounted'), pinto('plPlay', 'mounted'), pinto('plStopRun', 'label')]).toEqual([['plRunner.running>mounted'], ['plRunner.idle>mounted'], ['plT.iw1Stop>label']]);
       expect(pfrom('plStopRun', 'onClick')).toEqual(['plRunner.stop']);
       // The Runner's Stop: the timer, the mode, the parked ask (IW-001 §5 trap), the run emptied, the cap cleared.
@@ -1226,7 +1231,7 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       const note = padOf('mamie-note', 'pip');
       expect(note.map((k) => k.op)).toEqual(['fwd', 'left', 'water', 'right', 'olive:read']);
       // A class a selector can name (no colon), a place on the pad, its icon, and its word.
-      expect(note.find((k) => k.op === 'olive:read')).toEqual({ op: 'olive:read', cls: 'bg-key bg-key-olive-read bg-key-r3a bg-i-read bg-press', label: WORDS_BY_KEY.rungRead.en });
+      expect(note.find((k) => k.op === 'olive:read')).toEqual({ id: 'padkey-olive-read', op: 'olive:read', cls: 'bg-key bg-key-olive-read bg-key-r3a bg-i-read bg-press', label: WORDS_BY_KEY.rungRead.en });
       expect(padOf('letter-say', 'pocket').find((k) => k.op === 'say')!.cls).toBe('bg-key bg-key-say bg-key-r3b bg-i-say bg-press');
       // Every action of every request's drawer is a key (the drawer's action blocks and Olive's read).
       for (const r of REQ_ROWS) {
@@ -1237,6 +1242,9 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       // Free play at 10–12 has every action, Olive's read too: seven places, none shared.
       const free = run(PAD_KEYS_SCRIPT, { palette: run(PALETTE_SCRIPT, { band: 2, allowed: [], rungs: 'all', lang: 'en', words: WORD_ROWS }).palette, words: WORD_ROWS, lang: 'en' }).keys as Array<{ cls: string }>;
       const places = free.map((k) => k.cls.split(' ').find((c) => /^bg-key-(fwd|left|right|mid|r[34][abc])$/.test(c)));
+      // 🔴 Each row has its own stable id (a For Each fed two id-less lists in quick succession kept both — ten keys).
+      expect((free as Array<{ id?: string }>).map((k) => k.id)).toEqual(free.map((k) => 'padkey-' + (k.cls.split(' ')[1] ?? '').replace(/^bg-key-/, '')));
+      expect(new Set((free as Array<{ id?: string }>).map((k) => k.id)).size).toBe(free.length);
       expect(new Set(places).size).toBe(places.length);
       for (const c of ['bg-key-r4a', 'bg-key-r4b', 'bg-key-r4c']) expect(GARDEN_CSS).toContain(`.${c} {`);
       for (const icon of ['say', 'read']) expect(GARDEN_CSS).toContain(`.bg-i-${icon}::before`);

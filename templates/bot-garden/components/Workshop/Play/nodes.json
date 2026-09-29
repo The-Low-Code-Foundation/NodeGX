@@ -761,7 +761,7 @@
       "label": "Stop",
       "parent": "plControls",
       "parameters": {
-        "backgroundColor": "var(--coral)",
+        "backgroundColor": "var(--ink)",
         "color": "var(--on-fill)",
         "borderStyle": "none",
         "borderRadius": {
