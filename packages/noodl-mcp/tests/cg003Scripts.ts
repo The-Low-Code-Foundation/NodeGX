@@ -36,6 +36,8 @@ import { OLIVE_HELPERS, OLIVE_LESSON_IDS, OLIVE_OBJECTS, OLIVE_SLIM, OLIVE_TABLE
 import { BLOCK_META, CAN_MAX, ENGINE, FOLD_HELPERS, MANY_BLOCKS, ROBOT_NAME_MAX, SAVE_HELPERS } from './cg002Scripts';
 import { BLOCK_CARDS, CardBlock, EYES, HATS, IG006_WORDS, IG006_WORD_KEYS, ISLANDERS, ISLAND_PINS, PAD_KEYS, PAGE_WORDS, PAGE_WORD_KEYS, REQUEST_SUBS, SKILL_BLOCKS } from './cg003Content';
 import { ROBOT_PAINTS } from './cg007Look';
+import { FREE_PLAY_PLOT, ISLAND_BASE, ISLAND_HOME, PLOT_H, PLOT_W } from './cg002Content';
+import { islandChooseScript, islandWorldScript } from './ig004Island';
 
 /** Every word key the pages can show: the engine's (CG-002/006), Olive's (CG-005), then the pages' own. */
 export const ALL_WORD_KEYS: ReadonlyArray<string> = [...WORD_KEYS, ...OLIVE_WORD_KEYS, ...PAGE_WORD_KEYS, ...IG006_WORD_KEYS];
@@ -969,6 +971,13 @@ Outputs.armed = armed;
 Outputs.showTick = hit;
 Outputs.line = hit ? w.ig3PredictRight || '' : armed ? w.ig3PredictAsk || '' : String(Inputs.cardLine || '');
 `;
+
+// ── P106 IG-004 (lane E): the island as a world — built here, where free play and the word helper live ─────
+
+/** `Logic/Island world`: the island for this kid, from the requests' plots, her save and the islanders' next requests. */
+export const ISLAND_WORLD_SCRIPT = islandWorldScript({ free: FREE_PLAY, base: ISLAND_BASE, home: ISLAND_HOME, freePlot: FREE_PLAY_PLOT, plotW: PLOT_W, plotH: PLOT_H });
+/** `Logic/Island choose`: the plot card's words and what it offers. */
+export const ISLAND_CHOOSE_SCRIPT = islandChooseScript({ free: FREE_PLAY, islanders: ISLANDERS, wordHelper: WORD_HELPER });
 
 /** The glue, as the generator places it: one `Logic/*` each. */
 export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; seam: string }> = [

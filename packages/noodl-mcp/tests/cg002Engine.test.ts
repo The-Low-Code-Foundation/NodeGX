@@ -23,6 +23,10 @@
  * @module noodl-mcp/tests/cg002Engine.test
  */
 import { BAND_PALETTE, Block, BlockType, GardenRequest, HINTS, HINT_KEYS, OLIVE_RUNGS, REQUESTS, WORDS, WORD_KEYS } from './cg002Content';
+// P106 IG-004: the island's content gate (AC4) runs HERE, in the gate the generator runs first.
+import { FREE_PLAY_PLOT, ISLAND_BASE, ISLAND_H, ISLAND_HOME_MAP, ISLAND_HOME_PLOT, ISLAND_W, PLOT_H, PLOT_W } from './cg002Content';
+import { islandProblems } from './ig004Island';
+import { FREE_PLAY, ISLAND_WORLD_SCRIPT } from './cg003Scripts';
 import {
   ADD_PROFILE_SCRIPT,
   APPLY_DELTA_SCRIPT,
@@ -957,6 +961,52 @@ describe('CG-002 — the engine', () => {
       it('migrationDue stops at v3 → the stored-v3 row fails', () => {
         const m = mutate(SAVE_HELPERS, '!(Number(raw.v) >= SAVE_VERSION);\n}', '!(Number(raw.v) >= 3);\n}');
         expect(helper<boolean>(m, 'migrationDue', { v: 3, profiles: [{ id: 'p' }] })).toBe(false);
+      });
+    });
+  });
+
+  describe('IG-004 AC4 — the island’s content: every plot inside it, no two overlapping, the ruled size (R9); fails here, so it fails at generate time', () => {
+    const problems = (requests: ReadonlyArray<any> = REQUESTS, freePlot = FREE_PLAY_PLOT) =>
+      islandProblems({ requests, freePlot, homePlot: ISLAND_HOME_PLOT, base: ISLAND_BASE, w: ISLAND_W, h: ISLAND_H, plotW: PLOT_W, plotH: PLOT_H });
+
+    it('🔴 every request has a plot inside the island; no two plots (free play and home too) overlap; every slot of the base is exactly one plot', () => {
+      expect(problems()).toEqual([]);
+      for (const r of REQUESTS) expect({ id: r.id, plot: Number.isInteger(r.plot?.x) && Number.isInteger(r.plot?.y) }).toEqual({ id: r.id, plot: true });
+      // One plot per request (R9), plus free play; home is the one spare slot.
+      const slots = ISLAND_BASE.join('').split('.').length - 1;
+      expect(slots).toBe((REQUESTS.length + 1) * PLOT_W * PLOT_H);
+    });
+
+    it('R9: at most 46 × 22 (the ruled 36–46 × 22), each islander’s plots side by side in one row', () => {
+      expect([ISLAND_W, ISLAND_H, ISLAND_W * ISLAND_H]).toEqual([46, 22, 1012]);
+      expect(ISLAND_W).toBeLessThanOrEqual(46);
+      expect(ISLAND_H).toBeLessThanOrEqual(22);
+      for (const who of ['mamie', 'sami', 'biscuit']) expect({ who, rows: [...new Set(REQUESTS.filter((r) => r.islander === who).map((r) => r.plot.y))] }).toEqual({ who, rows: [REQUESTS.find((r) => r.islander === who)!.plot.y] });
+    });
+
+    it('🔴 the stamped island (Logic/Island world) is ISLAND_W × ISLAND_H, every request’s map where its plot says, free play’s and home’s in theirs', () => {
+      const out = runScript(ISLAND_WORLD_SCRIPT, { requests: JSON.parse(JSON.stringify(REQUESTS)), plots: {}, done: [], band: 2, robots: [{ id: 'r1' }], pins: [] });
+      const rows: string[] = out.world.map;
+      expect([rows.length, rows.every((r) => r.length === ISLAND_W), rows.join('').length]).toEqual([ISLAND_H, true, ISLAND_W * ISLAND_H]);
+      const at = (p: { x: number; y: number }) => rows.slice(p.y, p.y + PLOT_H).map((r) => r.slice(p.x, p.x + PLOT_W));
+      for (const r of REQUESTS) expect({ id: r.id, map: at(r.plot) }).toEqual({ id: r.id, map: [...r.map] });
+      expect(at(FREE_PLAY_PLOT)).toEqual(FREE_PLAY.map);
+      expect(at(ISLAND_HOME_PLOT)).toEqual([...ISLAND_HOME_MAP]);
+      expect(rows.join('')).not.toContain('.');
+      expect(out.cards.map((c: any) => c.id)).toEqual([...REQUESTS.map((r) => r.id), 'free']);
+    });
+
+    describe('arms: a bad plot, and the check that names it', () => {
+      const moved = (id: string, plot: { x: number; y: number } | undefined) => REQUESTS.map((r) => (r.id === id ? { ...r, plot } : r));
+      it('a plot moved onto its neighbour → both named, and the slot it left is named', () => {
+        const p = problems(moved('tulips-three', { x: 5, y: 1 }));
+        expect(p).toContain('tulip-door and tulips-three overlap');
+        expect(p.some((x) => /slot tile 1[0-7],1 is under 0 plots/.test(x))).toBe(true);
+      });
+      it('a plot off the edge → named; free play on home → named; a request with no plot → named', () => {
+        expect(problems(moved('mamie-note', { x: 40, y: 1 }))).toContain('mamie-note’s plot (40, 1) is not inside the 46 × 22 island'.replace('’', "'"));
+        expect(problems(REQUESTS, ISLAND_HOME_PLOT)).toContain('free and home overlap');
+        expect(problems(moved('bowl-if', undefined))).toContain('bowl-if has no plot');
       });
     });
   });

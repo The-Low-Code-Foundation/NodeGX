@@ -295,3 +295,54 @@ if (typeof document !== 'undefined') {
 }
 Outputs.found = found;
 `;
+
+/**
+ * The island's content gate (AC4): what is wrong with a set of plots on a base map, in words — each plot inside the
+ * island, no two plots overlapping, every request's map one plot's size, the base the island's size, every `.` of the
+ * base under exactly one plot and no plot on anything else (home keeps its own tiles). Empty when the island is sound.
+ * The engine gate (cg002Engine.test.ts) runs it, and the generator runs that gate first: a bad plot fails at generate time.
+ */
+export function islandProblems(o: {
+  requests: ReadonlyArray<{ id: string; plot?: { x: number; y: number }; map: ReadonlyArray<string> }>;
+  freePlot: { x: number; y: number };
+  homePlot: { x: number; y: number };
+  base: ReadonlyArray<string>;
+  w: number;
+  h: number;
+  plotW: number;
+  plotH: number;
+}): string[] {
+  const out: string[] = [];
+  if (o.base.length !== o.h || o.base.some((r) => r.length !== o.w)) out.push(`the base map is not ${o.w} × ${o.h}`);
+  const rects: Array<{ id: string; x: number; y: number; stamped: boolean }> = [];
+  for (const r of o.requests) {
+    const p = r.plot;
+    if (!p || !Number.isInteger(p.x) || !Number.isInteger(p.y)) {
+      out.push(`${r.id} has no plot`);
+      continue;
+    }
+    if (r.map.length !== o.plotH || r.map.some((row) => row.length !== o.plotW)) out.push(`${r.id}'s map is not ${o.plotW} × ${o.plotH}`);
+    rects.push({ id: r.id, x: p.x, y: p.y, stamped: true });
+  }
+  rects.push({ id: 'free', x: o.freePlot.x, y: o.freePlot.y, stamped: true });
+  rects.push({ id: 'home', x: o.homePlot.x, y: o.homePlot.y, stamped: false });
+  for (const r of rects) if (r.x < 0 || r.y < 0 || r.x + o.plotW > o.w || r.y + o.plotH > o.h) out.push(`${r.id}'s plot (${r.x}, ${r.y}) is not inside the ${o.w} × ${o.h} island`);
+  for (let i = 0; i < rects.length; i++)
+    for (let j = i + 1; j < rects.length; j++) {
+      const a = rects[i];
+      const b = rects[j];
+      if (a.x < b.x + o.plotW && b.x < a.x + o.plotW && a.y < b.y + o.plotH && b.y < a.y + o.plotH) out.push(`${a.id} and ${b.id} overlap`);
+    }
+  const cover = new Map<string, string[]>();
+  for (const r of rects.filter((x) => x.stamped))
+    for (let y = r.y; y < r.y + o.plotH; y++)
+      for (let x = r.x; x < r.x + o.plotW; x++) {
+        const k = `${x},${y}`;
+        cover.set(k, [...(cover.get(k) ?? []), r.id]);
+        if ((o.base[y] ?? '').charAt(x) !== '.') out.push(`${r.id}'s plot covers ${k}, which the base keeps for itself`);
+      }
+  o.base.forEach((row, y) => row.split('').forEach((c, x) => {
+    if (c === '.' && (cover.get(`${x},${y}`) ?? []).length !== 1) out.push(`the base's slot tile ${x},${y} is under ${(cover.get(`${x},${y}`) ?? []).length} plots`);
+  }));
+  return [...new Set(out)];
+}

@@ -127,11 +127,14 @@ export interface Thing {
  * `palette` is the block ids offered; `referenceProgram` reaches `goal` (the
  * gate proves it); `copyKeys` name the word-table keys the card shows —
  * `gift` is the reward line that names the islander it came from (CG-006 AC4).
+ * P106 IG-004 (R1 + R9): `plot` is the island tile where the request's 8×6
+ * map's top-left sits — the request IS that plot of the island (ISLAND_BASE).
  */
 export interface GardenRequest {
   id: string;
   islander: 'sami' | 'mamie' | 'biscuit';
   band: Band;
+  plot: { x: number; y: number };
   tricks: ReadonlyArray<number>;
   map: ReadonlyArray<string>;
   things: ReadonlyArray<Thing>;
@@ -172,6 +175,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     id: 'path-postbox',
     islander: 'sami',
     band: 1,
+    plot: { x: 1, y: 8 },
     tricks: [1],
     map: ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPB', 'GWWGGRGG', 'GGGGGTGG'],
     things: [],
@@ -187,6 +191,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     id: 'tulip-door',
     islander: 'mamie',
     band: 1,
+    plot: { x: 1, y: 1 },
     tricks: [1],
     map: ['GGTGGGTH', 'GGGGGGGF', 'GGGGGGGG', 'PPPPPPPP', 'GWWGGRGG', 'GGGGGTGG'],
     things: [{ kind: 'tulip', x: 7, y: 1, watered: false }],
@@ -205,6 +210,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     id: 'tulips-three',
     islander: 'mamie',
     band: 1,
+    plot: { x: 10, y: 1 },
     tricks: [2],
     map: ['GGTGGGTH', 'WGGFGGGG', 'WGGFGGGG', 'WGGFPPPP', 'WGGGGRGG', 'GGGGGTGG'],
     things: [
@@ -226,6 +232,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     id: 'path-stones',
     islander: 'sami',
     band: 1,
+    plot: { x: 10, y: 8 },
     tricks: [2],
     map: ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPGGGGB', 'GWWGGRGG', 'GGGGGTGG'],
     things: [{ kind: 'rock', x: 2, y: 2, left: 4 }],
@@ -245,6 +252,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     id: 'bowl-if',
     islander: 'biscuit',
     band: 2,
+    plot: { x: 1, y: 15 },
     tricks: [4],
     map: ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPP', 'GWWGGRGG', 'GGGGGTGG'],
     things: [
@@ -268,6 +276,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     id: 'letter-say',
     islander: 'sami',
     band: 2,
+    plot: { x: 19, y: 8 },
     tricks: [1],
     map: ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPB', 'GWWGGRGG', 'GGGGGTGG'],
     things: [{ kind: 'letter', x: 1, y: 3 }],
@@ -283,6 +292,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     id: 'wall-until',
     islander: 'biscuit',
     band: 2,
+    plot: { x: 10, y: 15 },
     tricks: [3],
     map: ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPP', 'GWWGGRGG', 'GGGGGTGG'],
     things: [],
@@ -297,6 +307,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     id: 'meow-when',
     islander: 'biscuit',
     band: 2,
+    plot: { x: 19, y: 15 },
     tricks: [5],
     map: ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPP', 'GWWGGRGG', 'GGGGGTGG'],
     things: [{ kind: 'bowl', x: 3, y: 3, food: 0 }],
@@ -312,6 +323,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     id: 'eggs-count',
     islander: 'mamie',
     band: 2,
+    plot: { x: 19, y: 1 },
     tricks: [6],
     map: ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPP', 'GWWGGRGG', 'GGGGGTGG'],
     things: [
@@ -332,6 +344,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     id: 'rows-trick',
     islander: 'mamie',
     band: 2,
+    plot: { x: 28, y: 1 },
     tricks: [7],
     map: ['GGTGGGTH', 'GGGGGGGG', 'GGFGFGFG', 'PPPPPPPP', 'FGFGFGGG', 'GGGGGTGG'],
     things: [
@@ -808,6 +821,7 @@ function IG006_REQUESTS(): GardenRequest[] {
       id: 'mamie-note',
       islander: 'mamie',
       band: 2,
+      plot: { x: 37, y: 1 },
       tricks: [4],
       map: ['GGTGGGTH', 'GGGGGGGG', 'GGFGFGFG', 'PPPPPPPP', 'GGFGFGFG', 'GGGGGTGG'],
       things: [
@@ -842,6 +856,7 @@ function IG006_REQUESTS(): GardenRequest[] {
       id: 'rock-flower',
       islander: 'sami',
       band: 2,
+      plot: { x: 28, y: 8 },
       tricks: [4],
       map: ['GGTGGGTH', 'GGGGGGGG', 'GFGFGGGG', 'PPPPPPPP', 'GWWGGGGG', 'GGGGGTGG'],
       things: [
@@ -868,6 +883,7 @@ function IG006_REQUESTS(): GardenRequest[] {
       id: 'sami-thanks',
       islander: 'sami',
       band: 2,
+      plot: { x: 37, y: 8 },
       tricks: [1],
       map: ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPB', 'GWWGGRGG', 'GGGGGTGG'],
       things: [at('note', 0, 2, { text: 'Take the letter to Mamie Rose.' }), at('letter', 1, 3)],
@@ -882,3 +898,46 @@ function IG006_REQUESTS(): GardenRequest[] {
     }
   ];
 }
+
+// ── P106 IG-004 (lane E): the island — its size, its base map, free play's plot and the robots' home ─────────────
+
+/** A plot: every request's map is 8 × 6 (the Workshop frames exactly this). */
+export const PLOT_W = 8;
+export const PLOT_H = 6;
+/**
+ * The island (README R9, ruled 2026-09-29: a bigger island, ONE plot per request). Fifteen 8 × 6 slots in five
+ * columns and three rows, a one-tile path between every two, a one-tile shore all round: 1 + 5 × 8 + 4 + 1 = 46 wide,
+ * 1 + 3 × 6 + 2 + 1 = 22 tall, 1012 tiles. Thirteen requests + free play take fourteen slots; the fifteenth is home
+ * (the house, the pond, the rock field). Each islander's plots are one row: Mamie Rose's on top, Sami's in the middle,
+ * Biscuit's below with the garden and home. Fewer columns would need a fourth row (4 × 4 = 37 × 29 = 1073 tiles).
+ */
+export const ISLAND_W = 46;
+export const ISLAND_H = 22;
+/** Free play ("the garden", never pinned) — the brief's FREE_PLAY_PLOT. */
+export const FREE_PLAY_PLOT: { x: number; y: number } = { x: 28, y: 15 };
+/** The spare slot: home — the robots not at work stand on its path. */
+export const ISLAND_HOME_PLOT: { x: number; y: number } = { x: 37, y: 15 };
+/** Where a robot not at work stands (the next one beside it, on the home path). */
+export const ISLAND_HOME: { x: number; y: number } = { x: 39, y: 17 };
+/** The home slot's own map: the house, the path the robots wait on, the pond, the rock field (R: a rock that yields nothing). */
+export const ISLAND_HOME_MAP: ReadonlyArray<string> = ['GGTGGGWW', 'GHGGGWWW', 'GGPPPGWG', 'GGGGPGGG', 'TGRGGGRG', 'GGGRGGTG'];
+/**
+ * The island's base map, ISLAND_W × ISLAND_H: the shore (grass, a tree at each corner and along it), the paths between
+ * the slots, home stamped in its slot, and `.` where a request's plot (or free play's) is stamped by `Logic/Island
+ * world`. The content gate (cg002Engine AC4) checks every `.` is under exactly one plot and no plot sits on anything else.
+ */
+export const ISLAND_BASE: ReadonlyArray<string> = (() => {
+  const rows: string[][] = [];
+  const shoreTrees = new Set(['0,0', '45,0', '0,21', '45,21', '13,0', '31,0', '22,21', '40,21', '0,11', '45,11']);
+  for (let y = 0; y < ISLAND_H; y++) {
+    const row: string[] = [];
+    for (let x = 0; x < ISLAND_W; x++) {
+      const shore = x === 0 || y === 0 || x === ISLAND_W - 1 || y === ISLAND_H - 1;
+      const inSlot = !shore && (x - 1) % (PLOT_W + 1) < PLOT_W && (y - 1) % (PLOT_H + 1) < PLOT_H;
+      row.push(shore ? (shoreTrees.has(`${x},${y}`) ? 'T' : 'G') : inSlot ? '.' : 'P');
+    }
+    rows.push(row);
+  }
+  ISLAND_HOME_MAP.forEach((r, y) => r.split('').forEach((c, x) => (rows[ISLAND_HOME_PLOT.y + y][ISLAND_HOME_PLOT.x + x] = c)));
+  return rows.map((r) => r.join(''));
+})();
