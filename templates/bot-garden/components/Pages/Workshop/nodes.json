@@ -150,6 +150,16 @@
       "y": 1000
     },
     {
+      "id": "wsProgVar",
+      "type": "Variable2",
+      "label": "The program that won",
+      "parameters": {
+        "name": "gardenProgram"
+      },
+      "x": 410,
+      "y": 1720
+    },
+    {
       "id": "wsGuardWait",
       "type": "Timer",
       "label": "A moment for the request to arrive",

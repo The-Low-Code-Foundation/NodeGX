@@ -220,6 +220,12 @@
       "toProperty": "reward"
     },
     {
+      "fromId": "wsProgVar",
+      "fromProperty": "value",
+      "toId": "wsComplete",
+      "toProperty": "program"
+    },
+    {
       "fromId": "wsPlay",
       "fromProperty": "won",
       "toId": "wsComplete",

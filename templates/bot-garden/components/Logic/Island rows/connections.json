@@ -29,9 +29,21 @@
     },
     {
       "fromId": "islandrowsIn",
+      "fromProperty": "plots",
+      "toId": "islandrowsFn",
+      "toProperty": "in-plots"
+    },
+    {
+      "fromId": "islandrowsIn",
       "fromProperty": "requests",
       "toId": "islandrowsFn",
       "toProperty": "in-requests"
+    },
+    {
+      "fromId": "islandrowsIn",
+      "fromProperty": "robots",
+      "toId": "islandrowsFn",
+      "toProperty": "in-robots"
     },
     {
       "fromId": "islandrowsIn",

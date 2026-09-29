@@ -164,7 +164,8 @@ for (var p = 0; p < list.length; p++) {
 var ISL = ['sami', 'mamie', 'biscuit'];
 for (var n = 0; n < ISL.length; n++) {
   var who = ISL[n], pin = null, at = null, open = false;
-  for (var k = 0; k < pins.length; k++) if (pins[k] && pins[k].islander === who) pin = pins[k];
+  // Island pins names a pin by its islander (its id is hers).
+  for (var k = 0; k < pins.length; k++) if (pins[k] && (pins[k].islander || pins[k].id) === who) pin = pins[k];
   var theirs = [];
   for (var c = 0; c < cards.length; c++) if (cards[c].islander === who) theirs.push(cards[c]);
   if (!theirs.length) continue;

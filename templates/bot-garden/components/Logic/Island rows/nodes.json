@@ -29,7 +29,17 @@
           "type": "string"
         },
         {
+          "name": "plots",
+          "plug": "output",
+          "type": "object"
+        },
+        {
           "name": "requests",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "robots",
           "plug": "output",
           "type": "array"
         },
@@ -47,7 +57,7 @@
       "type": "JavaScriptFunction",
       "label": "Island rows",
       "parameters": {
-        "functionScript": "\nfunction wordMap(rows, lang, name) {\n  var map = {};\n  var list = Array.isArray(rows) ? rows : [];\n  for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || '').split('{b}').join(name);\n  return map;\n}\nfunction fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\nfunction langOf(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction nameOf(v) { var n = String(v || '').trim(); return n || 'Pip'; }\n\nvar ISLANDERS = {\"mamie\":{\"sprite\":\"granny\",\"nameKey\":\"islMamie\"},\"sami\":{\"sprite\":\"postie\",\"nameKey\":\"islSami\"},\"biscuit\":{\"sprite\":\"cat\",\"nameKey\":\"islBiscuit\"}};\nvar KIND = { 1: 'motion', 2: 'control', 3: 'control', 4: 'control', 5: 'control', 6: 'control', 7: 'ask' };\nvar lang = langOf(Inputs.lang), name = nameOf(Inputs.botName);\nvar w = wordMap(Inputs.words, lang, name);\nvar band = Number(Inputs.band) === 1 ? 1 : 2;\nvar done = Array.isArray(Inputs.done) ? Inputs.done : [];\nvar reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];\nvar rows = [], open = 0;\nfor (var i = 0; i < reqs.length; i++) {\n  var r = reqs[i];\n  if (!r || Number(r.band) > band) continue;\n  var isl = ISLANDERS[r.islander] || { sprite: 'owl', nameKey: '' };\n  var isDone = done.indexOf(r.id) !== -1;\n  if (!isDone) open++;\n  var trick = Array.isArray(r.tricks) && r.tricks.length ? Number(r.tricks[0]) : 1;\n  var kind = r.palette && r.palette.indexOf('say') !== -1 ? 'ask' : (KIND[trick] || 'control');\n  rows.push({\n    id: r.id, who: w[isl.nameKey] || '', title: w[r.copyKeys.title] || '', trick: w[r.copyKeys.blurb] || '',\n    faceClass: 'bg-face bg-sp-' + isl.sprite, tagClass: 'bg-tag bg-tag-' + kind, isDone: isDone, doneWord: '✓ ' + (w.done || '')\n  });\n}\nOutputs.rows = rows;\nOutputs.count = rows.length;\nOutputs.open = open;\n"
+        "functionScript": "\nfunction wordMap(rows, lang, name) {\n  var map = {};\n  var list = Array.isArray(rows) ? rows : [];\n  for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || '').split('{b}').join(name);\n  return map;\n}\nfunction fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\nfunction langOf(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction nameOf(v) { var n = String(v || '').trim(); return n || 'Pip'; }\n\nvar ISLANDERS = {\"mamie\":{\"sprite\":\"granny\",\"nameKey\":\"islMamie\"},\"sami\":{\"sprite\":\"postie\",\"nameKey\":\"islSami\"},\"biscuit\":{\"sprite\":\"cat\",\"nameKey\":\"islBiscuit\"}};\nvar KIND = { 1: 'motion', 2: 'control', 3: 'control', 4: 'control', 5: 'control', 6: 'control', 7: 'ask' };\nvar lang = langOf(Inputs.lang), name = nameOf(Inputs.botName);\nvar w = wordMap(Inputs.words, lang, name);\nvar band = Number(Inputs.band) === 1 ? 1 : 2;\nvar done = Array.isArray(Inputs.done) ? Inputs.done : [];\nvar reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];\n// P106 IG-004: where her robot is at work (v4: her one robot). Another request is blocked until it comes home.\nvar plots = Inputs.plots && typeof Inputs.plots === 'object' ? Inputs.plots : {};\nvar mine = Array.isArray(Inputs.robots) && Inputs.robots.length ? Inputs.robots : [{ id: 'r1' }];\nvar workingAt = '';\nfor (var pk in plots) if (plots[pk] && plots[pk].robotId === mine[0].id && Array.isArray(plots[pk].program) && plots[pk].program.length) workingAt = pk;\nvar rows = [], open = 0;\nfor (var i = 0; i < reqs.length; i++) {\n  var r = reqs[i];\n  if (!r || Number(r.band) > band) continue;\n  var isl = ISLANDERS[r.islander] || { sprite: 'owl', nameKey: '' };\n  var isDone = done.indexOf(r.id) !== -1;\n  if (!isDone) open++;\n  var trick = Array.isArray(r.tricks) && r.tricks.length ? Number(r.tricks[0]) : 1;\n  var kind = r.palette && r.palette.indexOf('say') !== -1 ? 'ask' : (KIND[trick] || 'control');\n  rows.push({\n    id: r.id, who: w[isl.nameKey] || '', title: w[r.copyKeys.title] || '', trick: w[r.copyKeys.blurb] || '',\n    faceClass: 'bg-face bg-sp-' + isl.sprite, tagClass: 'bg-tag bg-tag-' + kind, isDone: isDone, doneWord: '✓ ' + (w.done || '') + (workingAt === r.id ? ' · ' + (w.ig4Working || '') : ''),\n    blocked: !!workingAt && workingAt !== r.id\n  });\n}\nOutputs.rows = rows;\nOutputs.count = rows.length;\nOutputs.open = open;\n"
       },
       "x": 40,
       "y": 160,
@@ -90,6 +100,20 @@
         {
           "name": "in-requests",
           "displayName": "requests",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-plots",
+          "displayName": "plots",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-robots",
+          "displayName": "robots",
           "plug": "input",
           "type": "*",
           "group": "Inputs"

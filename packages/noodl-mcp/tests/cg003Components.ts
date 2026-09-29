@@ -2189,6 +2189,8 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       logic('wsRequests', C.requests, 'The requests'),
       logic('wsHints', C.hints, 'The hints'),
       logic('wsComplete', L('Complete request'), 'Done: the island, the tricks, the reward'),
+      // P106 IG-004: the program that won stays on the plot, the robot pinned to it (Complete request writes both).
+      variable('wsProgVar', 'gardenProgram', 'The program that won'),
       logic('wsGuardWait', TIMER_NODE, 'A moment for the request to arrive', { duration: 600 }),
       gate('wsGuard', 'Is there a request?'),
       navigate('wsGoIsland', C.pageIsland, 'To the island')
@@ -2207,6 +2209,7 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       wire('wsFam', 'profileId', 'wsComplete', 'profileId'),
       wire('wsPlay', 'bloom', 'wsComplete', 'tricks'),
       wire('wsPlay', 'reward', 'wsComplete', 'reward'),
+      wire('wsProgVar', 'value', 'wsComplete', 'program'),
       wire('wsPlay', 'won', 'wsComplete', 'go'),
       wire('wsComplete', 'model', 'wsStore', 'model'),
       wire('wsComplete', 'ran', 'wsStore', 'write'),

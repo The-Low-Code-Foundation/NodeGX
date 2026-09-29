@@ -419,6 +419,11 @@ var w = wordMap(Inputs.words, lang, name);
 var band = Number(Inputs.band) === 1 ? 1 : 2;
 var done = Array.isArray(Inputs.done) ? Inputs.done : [];
 var reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];
+// P106 IG-004: where her robot is at work (v4: her one robot). Another request is blocked until it comes home.
+var plots = Inputs.plots && typeof Inputs.plots === 'object' ? Inputs.plots : {};
+var mine = Array.isArray(Inputs.robots) && Inputs.robots.length ? Inputs.robots : [{ id: 'r1' }];
+var workingAt = '';
+for (var pk in plots) if (plots[pk] && plots[pk].robotId === mine[0].id && Array.isArray(plots[pk].program) && plots[pk].program.length) workingAt = pk;
 var rows = [], open = 0;
 for (var i = 0; i < reqs.length; i++) {
   var r = reqs[i];
@@ -430,7 +435,8 @@ for (var i = 0; i < reqs.length; i++) {
   var kind = r.palette && r.palette.indexOf('say') !== -1 ? 'ask' : (KIND[trick] || 'control');
   rows.push({
     id: r.id, who: w[isl.nameKey] || '', title: w[r.copyKeys.title] || '', trick: w[r.copyKeys.blurb] || '',
-    faceClass: 'bg-face bg-sp-' + isl.sprite, tagClass: 'bg-tag bg-tag-' + kind, isDone: isDone, doneWord: '✓ ' + (w.done || '')
+    faceClass: 'bg-face bg-sp-' + isl.sprite, tagClass: 'bg-tag bg-tag-' + kind, isDone: isDone, doneWord: '✓ ' + (w.done || '') + (workingAt === r.id ? ' · ' + (w.ig4Working || '') : ''),
+    blocked: !!workingAt && workingAt !== r.id
   });
 }
 Outputs.rows = rows;

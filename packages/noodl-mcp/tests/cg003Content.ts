@@ -83,6 +83,17 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   guRendSlow: s('The flat garden is on: 3D was too slow on this computer.', 'Le jardin à plat est activé : la 3D était trop lente sur cet ordinateur.'),
   guRendNoGl: s('The flat garden is on: this computer cannot draw 3D.', 'Le jardin à plat est activé : cet ordinateur ne sait pas dessiner en 3D.'),
   guRendFlat: s('The flat garden is on, as chosen here.', 'Le jardin à plat est activé, comme choisi ici.'),
+  // P106 IG-004 (lane E): the island as a world — the plots, the plot card, a locked plot's reason, find my robots.
+  ig4Plots: s('The plots', 'Les jardins'),
+  ig4Find: s('Find my robots', 'Trouve mes robots'),
+  ig4Tap: s('Tap a plot to see who asks', 'Touche un jardin pour voir qui demande'),
+  ig4Open: s('Go and help', 'Aller aider'),
+  ig4Home: s('Bring {b} home', 'Ramène {b} à la maison'),
+  ig4AtWork: s('{b} is at work on “{plot}”. Bring {b} home first, then this plot is yours.', '{b} travaille sur « {plot} ». Ramène d’abord {b} à la maison, et ce jardin est à toi.'),
+  ig4WorksHere: s('{b} is working here, on the program you taught. Go in to teach it again, or bring {b} home.', '{b} travaille ici, avec le programme que tu lui as appris. Entre pour le lui réapprendre, ou ramène {b} à la maison.'),
+  ig4Won: s('Done! {b} is home. Go in to play it again.', 'C’est fait ! {b} est à la maison. Entre pour le rejouer.'),
+  ig4Locked: s('🔒 {who} asks this at 10–12: it needs “{trick}”.', '🔒 {who} le demande en 10–12 : il faut « {trick} ».'),
+  ig4Working: s('{b} works here', '{b} travaille ici'),
   ...Object.fromEntries(Object.values(REQUEST_SUBS).map((r) => [r.key, r.words]))
 };
 
