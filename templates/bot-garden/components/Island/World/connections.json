@@ -1,0 +1,589 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "28e21b23-d318-5886-85ae-641b980defd6",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "iwIn",
+      "fromProperty": "requests",
+      "toId": "iwWorld",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "plots",
+      "toId": "iwWorld",
+      "toProperty": "plots"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "robots",
+      "toId": "iwWorld",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "done",
+      "toId": "iwWorld",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "band",
+      "toId": "iwWorld",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "pins",
+      "toId": "iwWorld",
+      "toProperty": "pins"
+    },
+    {
+      "fromId": "iwWorld",
+      "fromProperty": "state",
+      "toId": "iwSetBuilt",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwWorld",
+      "fromProperty": "ran",
+      "toId": "iwSetBuilt",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "iwSetBuilt",
+      "fromProperty": "done",
+      "toId": "iwTimer",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "iwTimer",
+      "fromProperty": "timerFinished",
+      "toId": "iwTick",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwVar",
+      "fromProperty": "value",
+      "toId": "iwTick",
+      "toProperty": "state"
+    },
+    {
+      "fromId": "iwWorld",
+      "fromProperty": "state",
+      "toId": "iwTick",
+      "toProperty": "built"
+    },
+    {
+      "fromId": "iwTick",
+      "fromProperty": "state",
+      "toId": "iwSetTick",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwTick",
+      "fromProperty": "ran",
+      "toId": "iwSetTick",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "iwSetTick",
+      "fromProperty": "done",
+      "toId": "iwTimer",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "iwWorld",
+      "fromProperty": "world",
+      "toId": "iwDraw",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "iwTick",
+      "fromProperty": "world",
+      "toId": "iwDraw",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "words",
+      "toId": "iwDraw",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "lang",
+      "toId": "iwDraw",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "botName",
+      "toId": "iwDraw",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "color",
+      "toId": "iwDraw",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "eye",
+      "toId": "iwDraw",
+      "toProperty": "eye"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "hat",
+      "toId": "iwDraw",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "iwDraw",
+      "fromProperty": "map",
+      "toId": "iwGarden",
+      "toProperty": "map"
+    },
+    {
+      "fromId": "iwDraw",
+      "fromProperty": "things",
+      "toId": "iwGarden",
+      "toProperty": "things"
+    },
+    {
+      "fromId": "iwDraw",
+      "fromProperty": "robots",
+      "toId": "iwGarden",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "iwDraw",
+      "fromProperty": "map",
+      "toId": "iwGarden3d",
+      "toProperty": "map"
+    },
+    {
+      "fromId": "iwDraw",
+      "fromProperty": "things",
+      "toId": "iwGarden3d",
+      "toProperty": "things"
+    },
+    {
+      "fromId": "iwDraw",
+      "fromProperty": "robots",
+      "toId": "iwGarden3d",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "iwWorld",
+      "fromProperty": "focus",
+      "toId": "iwGarden3d",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "iwView",
+      "fromProperty": "camera",
+      "toId": "iwGarden3d",
+      "toProperty": "camera"
+    },
+    {
+      "fromId": "iwGarden",
+      "fromProperty": "onTileX",
+      "toId": "iwAt",
+      "toProperty": "x"
+    },
+    {
+      "fromId": "iwGarden",
+      "fromProperty": "onTileY",
+      "toId": "iwAt",
+      "toProperty": "y"
+    },
+    {
+      "fromId": "iwGarden",
+      "fromProperty": "onTileTapped",
+      "toId": "iwAt",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwGarden3d",
+      "fromProperty": "onTileX",
+      "toId": "iwAt",
+      "toProperty": "x"
+    },
+    {
+      "fromId": "iwGarden3d",
+      "fromProperty": "onTileY",
+      "toId": "iwAt",
+      "toProperty": "y"
+    },
+    {
+      "fromId": "iwGarden3d",
+      "fromProperty": "onTileTapped",
+      "toId": "iwAt",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwWorld",
+      "fromProperty": "cards",
+      "toId": "iwAt",
+      "toProperty": "cards"
+    },
+    {
+      "fromId": "iwAt",
+      "fromProperty": "requestId",
+      "toId": "iwChoose",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "iwAt",
+      "fromProperty": "ran",
+      "toId": "iwChoose",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "pickId",
+      "toId": "iwChoose",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "pick",
+      "toId": "iwChoose",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwWorld",
+      "fromProperty": "cards",
+      "toId": "iwChoose",
+      "toProperty": "cards"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "requests",
+      "toId": "iwChoose",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "plots",
+      "toId": "iwChoose",
+      "toProperty": "plots"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "robots",
+      "toId": "iwChoose",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "words",
+      "toId": "iwChoose",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "lang",
+      "toId": "iwChoose",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "botName",
+      "toId": "iwChoose",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "found",
+      "toId": "iwFound",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "ran",
+      "toId": "iwFound",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "iwFound",
+      "fromProperty": "ontrue",
+      "toId": "iwCardState",
+      "toProperty": "to-shown"
+    },
+    {
+      "fromId": "iwFound",
+      "fromProperty": "onfalse",
+      "toId": "iwCardState",
+      "toProperty": "to-hidden"
+    },
+    {
+      "fromId": "iwFound",
+      "fromProperty": "ontrue",
+      "toId": "iwRevealWait",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "iwRevealWait",
+      "fromProperty": "timerFinished",
+      "toId": "iwReveal",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwCardState",
+      "fromProperty": "shown",
+      "toId": "iwCard",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "faceClass",
+      "toId": "iwCardFace",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "who",
+      "toId": "iwCardWho",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "title",
+      "toId": "iwCardTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "line",
+      "toId": "iwCardLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "canOpen",
+      "toId": "iwOpen",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "openText",
+      "toId": "iwOpen",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "showHome",
+      "toId": "iwHomeBtn",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "homeText",
+      "toId": "iwHomeBtn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "iwClose",
+      "fromProperty": "onClick",
+      "toId": "iwCardState",
+      "toProperty": "to-hidden"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "requestId",
+      "toId": "iwOut",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "iwOpen",
+      "fromProperty": "onClick",
+      "toId": "iwOut",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "model",
+      "toId": "iwHome",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwHomeBtn",
+      "fromProperty": "onClick",
+      "toId": "iwHome",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwHome",
+      "fromProperty": "model",
+      "toId": "iwOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwHome",
+      "fromProperty": "ran",
+      "toId": "iwOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "iwHome",
+      "fromProperty": "ran",
+      "toId": "iwAgain",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "iwAgain",
+      "fromProperty": "timerFinished",
+      "toId": "iwChoose",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "findText",
+      "toId": "iwFind",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "tapText",
+      "toId": "iwTap",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwView",
+      "fromProperty": "onRobots",
+      "toId": "iwViewIs",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "iwFind",
+      "fromProperty": "onClick",
+      "toId": "iwViewIs",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "iwViewIs",
+      "fromProperty": "ontrue",
+      "toId": "iwView",
+      "toProperty": "to-island"
+    },
+    {
+      "fromId": "iwViewIs",
+      "fromProperty": "onfalse",
+      "toId": "iwView",
+      "toProperty": "to-robots"
+    },
+    {
+      "fromId": "iwFind",
+      "fromProperty": "onClick",
+      "toId": "iwFindFn",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwRendStore",
+      "fromProperty": "value",
+      "toId": "iwRendRead",
+      "toProperty": "stored"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "words",
+      "toId": "iwRendRead",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "lang",
+      "toId": "iwRendRead",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "iwRendRead",
+      "fromProperty": "use3d",
+      "toId": "iwRendIs3d",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "iwRendIs3d",
+      "fromProperty": "ontrue",
+      "toId": "iwRenderer",
+      "toProperty": "to-3d"
+    },
+    {
+      "fromId": "iwRendIs3d",
+      "fromProperty": "onfalse",
+      "toId": "iwRenderer",
+      "toProperty": "to-2d"
+    },
+    {
+      "fromId": "iwRenderer",
+      "fromProperty": "show2d",
+      "toId": "iwGarden",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwRenderer",
+      "fromProperty": "show3d",
+      "toId": "iwGarden3d",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwGarden3d",
+      "fromProperty": "onSupported",
+      "toId": "iwRendOk",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "iwRendStore",
+      "fromProperty": "value",
+      "toId": "iwRendNoGl",
+      "toProperty": "stored"
+    },
+    {
+      "fromId": "iwRendOk",
+      "fromProperty": "onfalse",
+      "toId": "iwRendNoGl",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwRendStore",
+      "fromProperty": "value",
+      "toId": "iwRendSlow",
+      "toProperty": "stored"
+    },
+    {
+      "fromId": "iwGarden3d",
+      "fromProperty": "onTooSlow",
+      "toId": "iwRendSlow",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwRendNoGl",
+      "fromProperty": "renderer",
+      "toId": "iwRendWrite",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwRendSlow",
+      "fromProperty": "renderer",
+      "toId": "iwRendWrite",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwRendNoGl",
+      "fromProperty": "ran",
+      "toId": "iwRendWrite",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "iwRendSlow",
+      "fromProperty": "ran",
+      "toId": "iwRendWrite",
+      "toProperty": "set"
+    }
+  ]
+}

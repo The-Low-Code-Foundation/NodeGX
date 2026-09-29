@@ -1,0 +1,821 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "28e21b23-d318-5886-85ae-641b980defd6",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "iwIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "requests",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "color",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "eye",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hat",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "done",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "plots",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "robots",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "pins",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "findText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tapText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pickId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pick",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 530,
+      "y": 1240
+    },
+    {
+      "id": "iwRoot",
+      "type": "Group",
+      "label": "The island and its card",
+      "children": [
+        "iwIsle",
+        "iwCard"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "iwIsle",
+      "type": "Group",
+      "label": "The island on the sea",
+      "parent": "iwRoot",
+      "children": [
+        "iwScroll",
+        "iwFind",
+        "iwTap"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "bg-isle"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "iwScroll",
+      "type": "Group",
+      "label": "The island (a phone scrolls it sideways)",
+      "parent": "iwIsle",
+      "children": [
+        "iwGarden",
+        "iwGarden3d"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "bg-isle-scroll"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "iwGarden",
+      "type": "garden-kit.Garden",
+      "label": "The island, flat",
+      "parent": "iwScroll",
+      "parameters": {
+        "stepMs": 380,
+        "label": "The island"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "iwGarden3d",
+      "type": "garden-3d-kit.Garden3D",
+      "label": "The island in 3D",
+      "parent": "iwScroll",
+      "parameters": {
+        "stepMs": 380,
+        "label": "The island",
+        "camera": "island",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "iwFind",
+      "type": "net.noodl.controls.button",
+      "label": "Find my robots",
+      "parent": "iwIsle",
+      "parameters": {
+        "backgroundColor": "var(--paper-2)",
+        "color": "var(--ink)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-i-predict bg-isle-find",
+        "label": "Find my robots"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "iwTap",
+      "type": "Text",
+      "label": "How to use it",
+      "parent": "iwIsle",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-isle-tap"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "iwCard",
+      "type": "Group",
+      "label": "The plot card",
+      "parent": "iwRoot",
+      "children": [
+        "iwCardFace",
+        "iwCardText"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "flexWrap": "nowrap",
+        "columnGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--card)",
+        "borderRadius": "var(--radius-card)",
+        "cssClassName": "bg-panel bg-plot-card",
+        "paddingTop": "var(--space-3-5)",
+        "paddingBottom": "var(--space-3-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "iwCardFace",
+      "type": "Group",
+      "label": "Who asks",
+      "parent": "iwCard",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 52,
+          "unit": "px"
+        },
+        "height": {
+          "value": 52,
+          "unit": "px"
+        }
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "iwCardText",
+      "type": "Group",
+      "label": "What, and what now",
+      "parent": "iwCard",
+      "children": [
+        "iwCardWho",
+        "iwCardTitle",
+        "iwCardLine",
+        "iwCardBtns"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1-5)"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "iwCardWho",
+      "type": "Text",
+      "label": "Who asks",
+      "parent": "iwCardText",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 17,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2,
+        "cssClassName": "bg-plot-who"
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "iwCardTitle",
+      "type": "Text",
+      "label": "What",
+      "parent": "iwCardText",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "cssClassName": "bg-plot-title"
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "iwCardLine",
+      "type": "Text",
+      "label": "The line: what now",
+      "parent": "iwCardText",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "cssClassName": "bg-plot-line"
+      },
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "iwCardBtns",
+      "type": "Group",
+      "label": "What she can do",
+      "parent": "iwCardText",
+      "children": [
+        "iwOpen",
+        "iwHomeBtn",
+        "iwClose"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "iwOpen",
+      "type": "net.noodl.controls.button",
+      "label": "Go and help",
+      "parent": "iwCardBtns",
+      "parameters": {
+        "backgroundColor": "var(--leaf)",
+        "color": "var(--on-fill)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-i-play bg-plot-open",
+        "label": "Go and help",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "iwHomeBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Bring the robot home",
+      "parent": "iwCardBtns",
+      "parameters": {
+        "backgroundColor": "var(--coral)",
+        "color": "var(--on-fill)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-bring-home",
+        "label": "Bring Pip home",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1840
+    },
+    {
+      "id": "iwClose",
+      "type": "net.noodl.controls.button",
+      "label": "Close the card",
+      "parent": "iwCardBtns",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--ink-2)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-plot-close",
+        "label": "✕"
+      },
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "iwCardState",
+      "type": "States",
+      "label": "The card shown or not",
+      "parameters": {
+        "states": "hidden,shown",
+        "values": "shown",
+        "useTransitions": false,
+        "type-shown": "boolean",
+        "value-hidden-shown": false,
+        "value-shown-shown": true
+      },
+      "x": 530,
+      "y": 1600
+    },
+    {
+      "id": "iwFound",
+      "type": "Condition",
+      "label": "A plot was chosen?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 530,
+      "y": 2080
+    },
+    {
+      "id": "iwWorld",
+      "type": "/Logic/Island world",
+      "label": "Her island, as it stands",
+      "x": 530,
+      "y": 760
+    },
+    {
+      "id": "iwTick",
+      "type": "/Logic/Island tick",
+      "label": "One tick of the island",
+      "x": 530,
+      "y": 2200
+    },
+    {
+      "id": "iwVar",
+      "type": "Variable2",
+      "label": "The island, running",
+      "parameters": {
+        "name": "gardenIsland"
+      },
+      "x": 530,
+      "y": 2320
+    },
+    {
+      "id": "iwSetBuilt",
+      "type": "Set Variable",
+      "label": "The island, as built",
+      "parameters": {
+        "name": "gardenIsland"
+      },
+      "x": 530,
+      "y": 2440
+    },
+    {
+      "id": "iwSetTick",
+      "type": "Set Variable",
+      "label": "The island after a tick",
+      "parameters": {
+        "name": "gardenIsland"
+      },
+      "x": 530,
+      "y": 2560
+    },
+    {
+      "id": "iwTimer",
+      "type": "Timer",
+      "label": "The wait between island ticks",
+      "parameters": {
+        "duration": 760
+      },
+      "x": 530,
+      "y": 2680
+    },
+    {
+      "id": "iwDraw",
+      "type": "/Logic/Draw world",
+      "label": "The island in the kit’s words",
+      "parameters": {
+        "stepMs": 380
+      },
+      "x": 530,
+      "y": 400
+    },
+    {
+      "id": "iwAt",
+      "type": "/Logic/Plot at",
+      "label": "Which plot was tapped",
+      "x": 530,
+      "y": 520
+    },
+    {
+      "id": "iwChoose",
+      "type": "/Logic/Island choose",
+      "label": "The plot card",
+      "x": 530,
+      "y": 1720
+    },
+    {
+      "id": "iwHome",
+      "type": "/Logic/Bring home",
+      "label": "Bring the robot home",
+      "x": 530,
+      "y": 1960
+    },
+    {
+      "id": "iwAgain",
+      "type": "Timer",
+      "label": "A moment for the family to be read again",
+      "parameters": {
+        "duration": 400
+      },
+      "x": 530,
+      "y": 2800
+    },
+    {
+      "id": "iwRevealWait",
+      "type": "Timer",
+      "label": "A moment for the card to be drawn",
+      "parameters": {
+        "duration": 80
+      },
+      "x": 530,
+      "y": 2920
+    },
+    {
+      "id": "iwReveal",
+      "type": "/Logic/Find robots",
+      "label": "The card scrolled into view",
+      "parameters": {
+        "what": "card"
+      },
+      "x": 530,
+      "y": 3040
+    },
+    {
+      "id": "iwFindFn",
+      "type": "/Logic/Find robots",
+      "label": "The robots found on the flat island",
+      "parameters": {
+        "what": "robots"
+      },
+      "x": 530,
+      "y": 1360
+    },
+    {
+      "id": "iwView",
+      "type": "States",
+      "label": "The whole island, or framed on the robots",
+      "parameters": {
+        "states": "island,robots",
+        "values": "camera,onRobots",
+        "useTransitions": false,
+        "type-camera": "string",
+        "value-island-camera": "island",
+        "value-robots-camera": "plot",
+        "type-onRobots": "boolean",
+        "value-island-onRobots": false,
+        "value-robots-onRobots": true
+      },
+      "x": 530,
+      "y": 880
+    },
+    {
+      "id": "iwViewIs",
+      "type": "Condition",
+      "label": "Framed on the robots already?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 530,
+      "y": 1480
+    },
+    {
+      "id": "iwRenderer",
+      "type": "States",
+      "label": "renderer",
+      "parameters": {
+        "states": "2d,3d",
+        "values": "show2d,show3d",
+        "useTransitions": false,
+        "type-show2d": "boolean",
+        "value-2d-show2d": true,
+        "value-3d-show2d": false,
+        "type-show3d": "boolean",
+        "value-2d-show3d": false,
+        "value-3d-show3d": true
+      },
+      "x": 530,
+      "y": 640
+    },
+    {
+      "id": "iwRendStore",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "label": "This computer’s renderer",
+      "parameters": {
+        "storeName": "garden",
+        "keys": "renderer"
+      },
+      "x": 530,
+      "y": 3160
+    },
+    {
+      "id": "iwRendRead",
+      "type": "/Logic/Renderer",
+      "label": "Draw in 3D here?",
+      "x": 530,
+      "y": 3280
+    },
+    {
+      "id": "iwRendIs3d",
+      "type": "Condition",
+      "label": "In 3D?",
+      "x": 530,
+      "y": 3400
+    },
+    {
+      "id": "iwRendOk",
+      "type": "Condition",
+      "label": "Can this computer draw 3D?",
+      "x": 530,
+      "y": 1000
+    },
+    {
+      "id": "iwRendNoGl",
+      "type": "/Logic/Renderer choice",
+      "label": "No 3D here: the flat island",
+      "parameters": {
+        "event": "unsupported"
+      },
+      "x": 530,
+      "y": 3520
+    },
+    {
+      "id": "iwRendSlow",
+      "type": "/Logic/Renderer choice",
+      "label": "Too slow here: the flat island",
+      "parameters": {
+        "event": "slow"
+      },
+      "x": 530,
+      "y": 1120
+    },
+    {
+      "id": "iwRendWrite",
+      "type": "net.noodl.GlobalStore.Set",
+      "label": "Keep the choice on this computer",
+      "parameters": {
+        "storeName": "garden",
+        "key": "renderer",
+        "merge": false
+      },
+      "x": 530,
+      "y": 3640
+    },
+    {
+      "id": "iwOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "requestId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "open",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "write",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 530,
+      "y": 1840
+    }
+  ],
+  "visualRoots": [
+    "iwRoot"
+  ]
+}

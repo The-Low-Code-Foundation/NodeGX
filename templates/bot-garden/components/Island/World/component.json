@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "28e21b23-d318-5886-85ae-641b980defd6",
+  "name": "World",
+  "path": "/Island/World",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Her island as one world (IG-004): every plot stamped from its request, the robots she taught working on theirs (the island tick, one step every two Step Ms), the islanders by their next plot, a fenced, padlocked plot her band cannot do yet; the 3D island, or the flat one by the renderer rule. A tap on a plot or an islander opens the plot card (Pick with Pick Id does it for a request card); Open fires with the Request Id when the child goes to help; Write (with Model) when a robot is brought home."
+}

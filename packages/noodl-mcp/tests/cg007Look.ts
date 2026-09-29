@@ -359,6 +359,19 @@ ${pinRules}
 /* The mockup's .go: free play's green arrow on the card, no fill. */
 .bg-go { background-color: transparent !important; padding: 0 4px !important; }
 .bg-go * { color: var(--leaf) !important; font-size: 22px !important; }
+/* P106 IG-004 (lane E): the island as one world — the island on its sea (the flat one scrolls sideways on a phone, the 3D
+   one frames itself), "find my robots" over its corner, the plot card under it (the mockup's violet note). */
+.bg-isle { position: relative !important; width: 100% !important; box-sizing: border-box; padding: 12px !important; border-radius: 22px; background: linear-gradient(180deg, var(--sea-top), var(--sea-bottom)); }
+.bg-isle-scroll { width: 100% !important; overflow-x: auto !important; overflow-y: hidden !important; border-radius: 16px; -webkit-overflow-scrolling: touch; }
+.bg-isle-scroll .gd-world { max-width: none !important; min-width: 736px; border: 4px solid var(--world-edge); }
+.bg-isle-scroll .gd3-world { max-width: none !important; aspect-ratio: 16 / 10 !important; }
+.bg-isle-find { position: absolute !important; top: 20px !important; right: 20px !important; z-index: 7; box-shadow: var(--shadow-soft); }
+.bg-isle-tap { position: absolute !important; left: 20px !important; top: 20px !important; z-index: 7; background: var(--card); border-radius: 999px; padding: 4px 12px; box-shadow: var(--shadow-soft); pointer-events: none; }
+.bg-isle-found .gd-bot { animation: bg-found 700ms ease-in-out 3; }
+@keyframes bg-found { 50% { filter: drop-shadow(0 0 6px var(--sun)) drop-shadow(0 0 2px var(--ink)); } }
+.bg-plot-card { background-color: var(--violet-2) !important; }
+.bg-plot-card .bg-plot-line { color: var(--violet-ink) !important; }
+@media (max-width: 600px) { .bg-isle { padding: 8px !important; } .bg-isle-tap { display: none !important; } .bg-isle-find { position: static !important; margin-top: 8px; } }
 
 /* My robot (the mockup's .robo, .stage, .sw, .hats). */
 .bg-robo { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }

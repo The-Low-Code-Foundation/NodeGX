@@ -40,6 +40,8 @@ export const ISLAND_HOLD_TICKS = 3;
 export const ISLAND_ENGINE = `${ENGINE}
 var ISLAND_HOLD = ${ISLAND_HOLD_TICKS};
 function islClone(v) { return v === undefined || v === null ? v : JSON.parse(JSON.stringify(v)); }
+/** A short, stable name for what an island was built from (djb2 over the text): the tick's guard against a stale state. */
+function islHash(text) { var h = 5381, t = String(text); for (var i = 0; i < t.length; i++) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0; return h.toString(36) + ':' + t.length; }
 /** A request's start in its plot's own coordinates: its things and its one robot — Start world's robot, field for field. */
 function islStart(req, robotId) {
   var rs = req.robotStart || {};
@@ -185,7 +187,10 @@ for (var m = 0; m < mine.length; m++) {
   home.push({ id: String(mine[m].id), x: HOME.x + homeN, y: HOME.y, d: 2, carry: [], can: null, home: true });
   homeN++;
 }
-var state = { v: 1, w: W, h: H, map: rows.map(function (r) { return r.join(''); }), plots: plots, still: still, deco: deco, home: home, live: live, tick: 0 };
+// The build's name: what it was built from. A tick handed a state from an OLDER build (its Set Variable landed after
+// the rebuild's) starts again from this one — so a robot brought home never walks back to its plot.
+var build = islHash(JSON.stringify([saved, done, band, mine, pins.map(function (x) { return x ? [x.id, x.requestId, x.isOpen] : null; }), list.map(function (r) { return [r.id, r.plot, r.band]; })]));
+var state = { v: 1, build: build, w: W, h: H, map: rows.map(function (r) { return r.join(''); }), plots: plots, still: still, deco: deco, home: home, live: live, tick: 0 };
 // Find my robots: the rectangle around every plot with a robot at work and the robots at home.
 var fx0 = 1e9, fy0 = 1e9, fx1 = -1, fy1 = -1;
 for (var f = 0; f < plots.length; f++) if (plots[f].status === 'working') { fx0 = Math.min(fx0, plots[f].x); fy0 = Math.min(fy0, plots[f].y); fx1 = Math.max(fx1, plots[f].x + PW); fy1 = Math.max(fy1, plots[f].y + PH); }
@@ -198,9 +203,17 @@ Outputs.working = Object.keys(live).length;
 Outputs.found = W > 0;
 `;
 
-/** `Logic/Island tick` — one tick: every pinned run stepped in turn; the state and the composed world, fresh each tick. */
+/**
+ * `Logic/Island tick` — one tick: every pinned run stepped in turn; the state and the composed world, fresh each tick.
+ * `Inputs.state` is the state held (the Variable); `Inputs.built` the island's latest build — a held state from another
+ * build is dropped for it (s3 drive: a tick's write landed after a rebuild's and a robot brought home walked back).
+ */
 export const ISLAND_TICK_SCRIPT = `${ISLAND_ENGINE}
-var next = islTick(Inputs.state);
+// The state held by name, unless it is from an older build than the island's latest (a tick's write that landed after
+// a rebuild's): then the latest build is where the island goes on from.
+var held = Inputs.state && typeof Inputs.state === 'object' ? Inputs.state : null;
+var built = Inputs.built && typeof Inputs.built === 'object' && Array.isArray(Inputs.built.plots) ? Inputs.built : null;
+var next = islTick(built && (!held || held.build !== built.build) ? built : held);
 if (next) {
   Outputs.state = next;
   Outputs.world = islWorld(next);
@@ -279,19 +292,26 @@ Outputs.openText = w.ig4Open || '';
 /**
  * `Logic/Find robots` — the flat island's "find my robots": every robot on the island scrolled into view in the
  * island's own scroll box (a phone shows part of it) and ringed for a moment. The 3D island frames them itself (its
- * Focus). Page glue: the ONE script here that touches the page, and only its own island.
+ * Focus). With `what` = `card` (a parameter), the plot card is scrolled into view instead (a request card tapped far
+ * down a phone's list opens the plot card above it). Page glue: the ONE script here that touches the page, and only
+ * the island's own elements.
  */
 export const FIND_ROBOTS_SCRIPT = `
 var found = 0;
 if (typeof document !== 'undefined') {
-  var box = document.querySelector('.bg-isle-scroll');
-  var bots = box ? box.querySelectorAll('.gd-bot') : [];
-  found = bots.length;
-  if (bots.length && bots[0].scrollIntoView) bots[0].scrollIntoView({ block: 'nearest', inline: 'center' });
-  if (box) {
-    box.classList.remove('bg-isle-found');
-    void box.offsetWidth;
-    box.classList.add('bg-isle-found');
+  if (String(Inputs.what) === 'card') {
+    var card = document.querySelector('.bg-plot-card');
+    if (card && card.scrollIntoView) { card.scrollIntoView({ block: 'nearest' }); found = 1; }
+  } else {
+    var box = document.querySelector('.bg-isle-scroll');
+    var bots = box ? box.querySelectorAll('.gd-bot') : [];
+    found = bots.length;
+    if (bots.length && bots[0].scrollIntoView) bots[0].scrollIntoView({ block: 'nearest', inline: 'center' });
+    if (box) {
+      box.classList.remove('bg-isle-found');
+      void box.offsetWidth;
+      box.classList.add('bg-isle-found');
+    }
   }
 }
 Outputs.found = found;

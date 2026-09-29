@@ -263,6 +263,25 @@ withDeployedSite({ dir: DIR }, async (page) => {
   /** Finders: by class, by text inside a scope. */
   const byText = (selector, needle) => `[...document.querySelectorAll(${JSON.stringify(selector)})].find((e) => e.offsetParent !== null && e.innerText.trim().includes(${JSON.stringify(needle)}))`;
   const first = (selector) => `[...document.querySelectorAll(${JSON.stringify(selector)})].find((e) => e.offsetParent !== null)`;
+  /**
+   * IG-004 (P106 s3): a request card opens the Workshop — unless the robot is at work on ANOTHER plot (a won request pins
+   * it there): then the card opens the island's plot card, which says where it works and offers "bring {name} home".
+   * This takes it home and taps the card again, so a clause that only wants the Workshop still gets there; every time
+   * it had to is counted (readings.broughtHome). The island's own clauses (drive-ig004-island.js) grade the card itself.
+   */
+  const openQuest = async (needle, label) => {
+    const ok = await tap(byText('.bg-quest', needle), label);
+    if (!ok) return false;
+    const where = await until('location.pathname', (p) => p === '/workshop', 1500);
+    if (where === '/workshop') return true;
+    const home = await evaluate(`(() => { const b = document.querySelector('.bg-bring-home'); return !!b && b.offsetParent !== null; })()`);
+    if (!home) return true;
+    readings.broughtHome = (readings.broughtHome || 0) + 1;
+    await tap(first('.bg-bring-home'), `bring the robot home (for ${label})`);
+    await until(`(() => { const b = document.querySelector('.bg-plot-open'); return !!b && b.offsetParent !== null; })()`, Boolean, 4000);
+    await wait(300);
+    return tap(byText('.bg-quest', needle), `${label} (the robot home)`);
+  };
   /** Types into the input the finder names; a missing input is a FAIL line, never a crash (s2's first run threw here). */
   const typeInto = async (finder, value, label = 'an input') => {
     const found = await evaluate(`!!(${finder})`);
@@ -312,19 +331,22 @@ withDeployedSite({ dir: DIR }, async (page) => {
     readings[`contrast-${screen}`] = c;
     check(`S3-R5 ${screen}: every text on its ground ≥ 4.5:1 (${c.checked} texts, ${c.exempt} inactive exempt, ${c.pictures} on a picture)`, c.checked > 3 && c.fails.length === 0 && c.known < 4.5, c.fails.length ? c.fails.slice(0, 6) : c);
   };
-  /** S3-R6: the island is the mockup's sea with pins; nothing wider than the screen. */
-  const seaClause = async (vp) => {
+  /**
+   * IG-004 (R1 + R9, supersedes S3-R6's sea with pins): the island is ONE tile world, every request's plot on it — its
+   * size read from the requests (every plot inside it), drawn by the flat Garden here (this Chrome has no WebGL2), the
+   * three islanders on it; the requests beside it (under it on a phone); nothing wider than the screen.
+   */
+  const islandClause = async (vp) => {
     const r = await evaluate(`(() => { const box = (s) => { const e = document.querySelector(s); if (!e || e.offsetParent === null) return null; const r = e.getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom, w: r.width, h: r.height }; };
-      const sea = box('.bg-sea'); const pins = {}; for (const id of ['mamie', 'biscuit', 'sami', 'olive', 'bot', 'tree1', 'rock']) pins[id] = box('.bg-pin-' + id);
-      return { sea, pins, quests: box('.bg-quest'), cells: document.querySelectorAll('.bg-sea .gd-cell').length, bots: document.querySelectorAll('.bg-sea .gd-bot').length, vw: innerWidth, vh: innerHeight, sx: document.scrollingElement.scrollWidth }; })()`);
-    readings[`sea-${vp.name}`] = r;
-    const inside = (p) => p && r.sea && p.l + p.w / 2 > r.sea.l && p.l + p.w / 2 < r.sea.r && p.t + p.h / 2 > r.sea.t && p.t + p.h / 2 < r.sea.b;
-    // The mockup's 12:7 sea; square on a phone (≤ 600 px, cg007Look: at 12:7 the labels met).
-    const ratio = vp.width <= 600 ? 1 : 7 / 12;
-    check(`S3-R6 ${vp.name}: the island is the sea (aspect ${vp.width <= 600 ? '1/1' : '12/7'}) with a pin for Mamie, Biscuit, Sami, Olive and the robot, the scenery on it`, !!r.sea && Math.abs(r.sea.h / r.sea.w - ratio) < 0.03 && Object.values(r.pins).every(inside), r);
-    check(`S3-R6 ${vp.name}: no tile world of the island — the kit draws one robot, on one tile`, r.cells === 1 && r.bots === 1, { cells: r.cells, bots: r.bots });
-    check(`S3-R6 ${vp.name}: the requests ${vp.width > 980 ? 'beside the map (360 px column)' : 'under the map (one column)'}`, !!r.quests && (vp.width > 980 ? r.quests.l >= r.sea.r : r.quests.t >= r.sea.b), { sea: r.sea, quests: r.quests });
-    check(`S3-R6 ${vp.name}: nothing wider than the screen (innerWidth ${vp.width}, no sideways scroll)`, r.vw === vp.width && r.sx <= r.vw, { vw: r.vw, sx: r.sx });
+      const world = document.querySelector('.bg-isle .gd-world'); const scroll = document.querySelector('.bg-isle-scroll');
+      return { isle: box('.bg-isle'), quests: box('.bg-quest'), w: world ? Number(world.getAttribute('data-w')) : 0, h: world ? Number(world.getAttribute('data-h')) : 0, cells: document.querySelectorAll('.bg-isle .gd-cell').length, islanders: [...document.querySelectorAll('.bg-isle .gd-islander')].map((e) => e.getAttribute('data-who')).sort(), sea: !!document.querySelector('.bg-sea'), boxW: scroll ? scroll.clientWidth : 0, boxSW: scroll ? scroll.scrollWidth : 0, vw: innerWidth, sx: document.scrollingElement.scrollWidth }; })()`);
+    readings[`island-${vp.name}`] = r;
+    const needW = Math.max(...REQUESTS.map((q) => (q.plot ? q.plot.x + 8 : 0)));
+    const needH = Math.max(...REQUESTS.map((q) => (q.plot ? q.plot.y + 6 : 0)));
+    check(`IG-004 ${vp.name}: the island is one tile world (${r.w} × ${r.h}, every plot inside it: ≥ ${needW} × ${needH}), no sea with pins`, !r.sea && r.w >= needW && r.h >= needH && r.cells === r.w * r.h, r);
+    check(`IG-004 ${vp.name}: the three islanders stand on it`, JSON.stringify(r.islanders) === JSON.stringify(['biscuit', 'mamie', 'sami']), r.islanders);
+    check(`IG-004 ${vp.name}: the requests ${vp.width > 980 ? 'beside the island (360 px column)' : 'under the island (one column)'}`, !!r.quests && !!r.isle && (vp.width > 980 ? r.quests.l >= r.isle.r : r.quests.t >= r.isle.b), { isle: r.isle, quests: r.quests });
+    check(`IG-004 ${vp.name}: nothing wider than the screen (innerWidth ${vp.width}, no sideways page scroll${vp.width <= 600 ? '; the island scrolls in its own box' : ''})`, r.vw === vp.width && r.sx <= r.vw && (vp.width > 600 || r.boxSW > r.boxW), { vw: r.vw, sx: r.sx, box: [r.boxW, r.boxSW] });
   };
   const tab = (i) => tap(`document.querySelectorAll('.bg-tabs .bg-tab')[${i}]`, `tab ${i}`);
   const seg = (label) => tap(byText('.bg-top .bg-seg-btn', label), `seg ${label}`);
@@ -377,7 +399,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
       await wait(600);
       await shot(`ac3-${tag}-02-island`);
       if (lang === 'en') {
-        await seaClause(vp);
+        await islandClause(vp);
         await shot(`look-island-${vp.name}`);
       }
 
@@ -388,7 +410,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
       check(`AC8 ${tag}: reload /island keeps the island and the profile`, (await path0()) === '/island' && kept.includes('Ada'), { path: await path0(), hasName: kept.includes('Ada') });
 
       // The tulip request.
-      await tap(byText('.bg-quest', w(lang, 'rqTulipsTitle')), 'the tulip request');
+      await openQuest(w(lang, 'rqTulipsTitle'), 'the tulip request');
       const ws = await until('location.pathname', (p) => p === '/workshop');
       const title = await until(`(() => { const h = [...document.querySelectorAll('h1')].find((e) => e.offsetParent !== null); return h ? h.innerText : ''; })()`, (t) => t.includes(w(lang, 'rqTulipsTitle')));
       check(`AC3 ${tag}: the tulip request opens the workshop, titled with it`, ws === '/workshop' && title.includes(w(lang, 'rqTulipsTitle')), { path: ws, title });
@@ -510,7 +532,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
           await tab(0);
           await until('location.pathname', (p) => p === '/island');
           await wait(600);
-          await tap(byText('.bg-quest', w(lang, key)), label);
+          await openQuest(w(lang, key), label);
           await until('location.pathname', (p) => p === '/workshop');
           await wait(900);
         };
@@ -612,7 +634,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
       await tab(0);
       await until('location.pathname', (p) => p === '/island');
       await wait(700);
-      await tap(byText('.bg-quest', id === 'free' ? w(lang, 'sandP').slice(0, 10) : titleOf(lang, id)), `open ${id}`);
+      await openQuest(id === 'free' ? w(lang, 'sandP').slice(0, 10) : titleOf(lang, id), `open ${id}`);
       await until('location.pathname', (p) => p === '/workshop');
       await until(`!!document.querySelector('.bg-blocks-box .gd-palette [data-pal="fwd"]')`, Boolean, 6000);
       await wait(700);
@@ -813,7 +835,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   }
   await tab(0);
   await wait(600);
-  await tap(byText('.bg-quest', w('en', 'rqTulipsTitle')), 'the tulip request again');
+  await openQuest(w('en', 'rqTulipsTitle'), 'the tulip request again');
   await until('location.pathname', (x) => x === '/workshop');
   await wait(900);
   await langClause('workshop', 'en', 'fr');
@@ -876,17 +898,21 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await wait(900);
   const bo = await doneOf();
   readings.boStored = bo;
-  check('S3-R8: the family is stored as v3, each kid with her own island (Bo: nothing done)', bo.v === 3 && Array.isArray(bo.done) && bo.done.length === 0, bo);
-  const boIsland = await evaluate(`(() => { const c = [...document.querySelectorAll('.bg-quest')].find((e) => e.innerText.includes(${JSON.stringify(w('en', 'rqTulipsTitle'))})); return { card: c ? c.innerText : null, bots: [...document.querySelectorAll('.bg-sea .gd-bot')].map((b) => b.innerText), mamieOpen: !!document.querySelector('.bg-pin-mamie.bg-pin-open') }; })()`);
+  // IG-004: the family is stored as v4 (it was v3).
+  check('S3-R8: the family is stored as v4, each kid with her own island (Bo: nothing done)', bo.v === 4 && Array.isArray(bo.done) && bo.done.length === 0, bo);
+  const boIsland = await evaluate(`(() => { const c = [...document.querySelectorAll('.bg-quest')].find((e) => e.innerText.includes(${JSON.stringify(w('en', 'rqTulipsTitle'))})); const say = document.querySelector('.bg-isle .gd-isl-say[data-who="mamie"]'); return { card: c ? c.innerText : null, bots: [...document.querySelectorAll('.bg-isle .gd-bot')].map((b) => b.innerText), mamieSays: say ? say.innerText : null }; })()`);
   check('S3-R8: the tulips Ada did are NOT done on Bo’s island', !!boIsland.card && !boIsland.card.includes(w('en', 'done')), boIsland);
   check('S3-R8: only Bo’s robot is on Bo’s island (a sibling’s robot is not)', boIsland.bots.length === 1, boIsland.bots);
-  check('S3-R8: Mamie’s pin is open for Bo', boIsland.mamieOpen, boIsland);
-  await shot('s3-r8-bo-island');
-  // S3-R6: a pin opens its request — Mamie's first request Bo has not done.
+  // IG-004 (was: Mamie's pin is open): Mamie stands by her next plot for Bo, her request as her bubble.
   const expectId = firstOpen('mamie', bo);
-  await tap(first('.bg-pin-mamie.bg-pin-open'), 'Mamie’s pin');
+  check(`IG-004 (was S3-R8's pin): Mamie asks Bo for her first request (${expectId}) in her bubble`, boIsland.mamieSays === titleOf('en', expectId), { boIsland, expectId });
+  await shot('s3-r8-bo-island');
+  // IG-004 (was S3-R6's pin): a tap on Mamie opens her request's plot card; Go and help opens the Workshop on it.
+  await tap(`(() => { const e = document.querySelector('.bg-isle .gd-islander[data-who="mamie"]'); return e ? e.closest('.gd-cell') : null; })()`, 'Mamie on the island');
+  const mamieCard = await until(`(() => { const c = document.querySelector('.bg-plot-card'); return c && c.offsetParent !== null ? c.innerText : ''; })()`, (t) => t.length > 0, 3000);
+  await tap(first('.bg-plot-open'), 'Go and help (Mamie’s card)');
   const viaPin = await until(`(() => { const h = [...document.querySelectorAll('h1')].find((e) => e.offsetParent !== null); return { path: location.pathname, title: h ? h.innerText : '' }; })()`, (r) => r.path === '/workshop' && r.title.length > 0);
-  check(`S3-R6: Mamie’s pin opens her first request Bo has not done (${expectId})`, viaPin.path === '/workshop' && viaPin.title.includes(titleOf('en', expectId)), { viaPin, expectId });
+  check(`IG-004 (was S3-R6's pin): a tap on Mamie opens her card (${expectId}); Go and help opens it`, mamieCard.includes(titleOf('en', expectId)) && viaPin.path === '/workshop' && viaPin.title.includes(titleOf('en', expectId)), { mamieCard, viaPin, expectId });
   // Back to Ada through Profiles: two cards, each kid's robot drawn with its own name; Ada's island still has her tulips done.
   await page.navigate('/');
   await wait(900);
@@ -905,7 +931,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   // S4-PATH (Richard, s4): Sami's path allows forward and turns only. Five forwards taught at band 10–12 were offered a
   // fold, and the kit drew a repeat it had no palette entry for (no count, a star); a missed run said "Pip did 0 of 0".
   // The control is AC3's tulip pass above (the fold IS offered where repeat is allowed).
-  await tap(byText('.bg-quest', w('en', 'rqPathTitle')), 'Sami’s path');
+  await openQuest(w('en', 'rqPathTitle'), 'Sami’s path');
   await until('location.pathname', (x) => x === '/workshop');
   await wait(900);
   await control('rec');
@@ -931,9 +957,9 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await tab(0);
   await until('location.pathname', (p) => p === '/island');
   await wait(900);
-  const pinName = await evaluate(`(() => { const n = document.querySelector('.bg-pin-bot .gd-name'); return n ? n.innerText : null; })()`);
-  check('S3-RENAME: the island pin carries the new name', pinName === 'Rosie', { pinName, stored: await doneOf() });
-  await tap(byText('.bg-quest', w('en', 'rqTulipsTitle')), 'the tulip request (renamed)');
+  const pinName = await evaluate(`(() => { const n = document.querySelector('.bg-isle .gd-bot .gd-name'); return n ? n.innerText : null; })()`);
+  check('S3-RENAME: the robot on the island carries the new name (IG-004: on the island itself, was its pin)', pinName === 'Rosie', { pinName, stored: await doneOf() });
+  await openQuest(w('en', 'rqTulipsTitle'), 'the tulip request (renamed)');
   await until('location.pathname', (x) => x === '/workshop');
   await wait(900);
   const line = await evaluate(`(() => { const e = document.querySelector('.bg-ws-sub'); return e ? e.innerText : ''; })()`);
@@ -980,7 +1006,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await seg('FR');
   await wait(600);
   const afterPick = await doneOf();
-  check('S4-PASTE: after a refused code, the bar’s next write still writes the family (not an empty one)', !afterPick.error && !!afterPick.name && afterPick.v === 3, afterPick);
+  check('S4-PASTE: after a refused code, the bar’s next write still writes the family (not an empty one)', !afterPick.error && !!afterPick.name && afterPick.v === 4, afterPick);
   await seg('EN');
   await wait(600);
   // A good code: the one shown, with the playing kid's robot renamed, re-encoded as the game does.
@@ -995,12 +1021,12 @@ withDeployedSite({ dir: DIR }, async (page) => {
   check('S4-PASTE: a good code says the islands are back', doneSaid.includes(w('en', 'saveCodeDone')) && !doneSaid.includes(w('en', 'saveCodeBad')), doneSaid.slice(-300));
   const restored = await doneOf();
   readings.pasteRestored = restored;
-  check('S4-PASTE: … the stored family is the code’s (the robot is Remy)', restored.robot === 'Remy' && restored.v === 3, restored);
+  check('S4-PASTE: … the stored family is the code’s (the robot is Remy)', restored.robot === 'Remy' && restored.v === 4, restored);
   await tab(0);
   await until('location.pathname', (p) => p === '/island');
   await wait(900);
-  const pastedPin = await evaluate(`(() => { const n = document.querySelector('.bg-pin-bot .gd-name'); return n ? n.innerText : null; })()`);
-  check('S4-PASTE: … and the island shows it (the pin carries Remy)', pastedPin === 'Remy', pastedPin);
+  const pastedPin = await evaluate(`(() => { const n = document.querySelector('.bg-isle .gd-bot .gd-name'); return n ? n.innerText : null; })()`);
+  check('S4-PASTE: … and the island shows it (the robot on the island is Remy)', pastedPin === 'Remy', pastedPin);
   // The shown code back, so the screens after read as before.
   await tab(4);
   await until('location.pathname', (p) => p === '/grown-ups');
@@ -1042,7 +1068,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
       await tab(0);
       await until('location.pathname', (p) => p === '/island');
       await wait(700);
-      await tap(byText('.bg-quest', 'No request'), label);
+      await openQuest('No request', label);
       await until('location.pathname', (p) => p === '/workshop');
       await until(`!!document.querySelector('.gd-palette [data-pal="fwd"]')`, Boolean, 6000);
       await wait(600);
@@ -1123,7 +1149,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await tab(0);
     await until('location.pathname', (p) => p === '/island');
     await wait(700);
-    await tap(byText('.bg-quest', w('en', 'rqTulipsTitle')), 'the tulips (IG-001 D2, request A)');
+    await openQuest(w('en', 'rqTulipsTitle'), 'the tulips (IG-001 D2, request A)');
     await until('location.pathname', (p) => p === '/workshop');
     await wait(900);
     await control('rec');
@@ -1136,7 +1162,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await tab(0);
     await until('location.pathname', (p) => p === '/island');
     await wait(700);
-    await tap(byText('.bg-quest', w('en', 'rqPathTitle')), 'Sami’s path (IG-001 D2, request B)');
+    await openQuest(w('en', 'rqPathTitle'), 'Sami’s path (IG-001 D2, request B)');
     await until('location.pathname', (p) => p === '/workshop');
     await wait(900);
     await control('rec');
@@ -1151,7 +1177,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await tab(0);
     await until('location.pathname', (p) => p === '/island');
     await wait(700);
-    await tap(byText('.bg-quest', w('en', 'rqStonesTitle')), 'the stones (IG-001 D9/D10/D3)');
+    await openQuest(w('en', 'rqStonesTitle'), 'the stones (IG-001 D9/D10/D3)');
     await until('location.pathname', (p) => p === '/workshop');
     await wait(900);
     const stonesWorld = await evaluate(`(() => ({ postbox: !!document.querySelector('.bg-stage .gd-cell.gd-postbox svg[data-sprite="postbox"]'), labels: document.querySelectorAll('.bg-stage .gd-label').length, stones: document.querySelectorAll('.bg-stage .gd-thing.gd-stone').length }))()`);
@@ -1195,7 +1221,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await tab(0);
     await until('location.pathname', (p) => p === '/island');
     await wait(700);
-    await tap(byText('.bg-quest', w('en', 'rqTulipsTitle')), 'the tulips (IG-001 D10)');
+    await openQuest(w('en', 'rqTulipsTitle'), 'the tulips (IG-001 D10)');
     await until('location.pathname', (p) => p === '/workshop');
     await wait(900);
     await control('rec');
@@ -1219,7 +1245,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await client.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
   await tab(0);
   await wait(500);
-  await tap(byText('.bg-quest', w('en', 'rqTulipsTitle')), 'the tulip request (reduced motion)');
+  await openQuest(w('en', 'rqTulipsTitle'), 'the tulip request (reduced motion)');
   await until('location.pathname', (x) => x === '/workshop');
   await wait(900);
   await control('rec');
@@ -1264,11 +1290,11 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await wait(1100);
     await shot(`look-${name}-390`);
     if (name === 'island') {
-      // The map's name labels at a phone's width: no two overlap (s3: Pip's pin sat on "Mamie Rose" before the phone rules).
+      // IG-004 (was the sea's pin labels): the words on the island at a phone's width — the islanders' bubbles and the
+      // robot's name — no two overlap.
       const r = await evaluate(`(() => {
-        // The labels, and the robot pin itself (its body is what covered a label); a label inside the robot pin is its own.
-        const els = [...document.querySelectorAll('.bg-sea .bg-pin-lbl, .bg-sea .gd-name, .bg-sea .bg-pin-bot')].filter((e) => e.offsetParent);
-        const bs = els.map((e) => { const b = e.getBoundingClientRect(); return { e, t: e.classList.contains('bg-pin-bot') ? 'robot pin' : e.textContent.trim(), l: b.left, r: b.right, t0: b.top, b: b.bottom }; });
+        const els = [...document.querySelectorAll('.bg-isle .gd-isl-say, .bg-isle .gd-name')].filter((e) => e.offsetParent);
+        const bs = els.map((e) => { const b = e.getBoundingClientRect(); return { e, t: e.textContent.trim(), l: b.left, r: b.right, t0: b.top, b: b.bottom }; });
         const hits = [];
         for (let i = 0; i < bs.length; i++) for (let j = i + 1; j < bs.length; j++) {
           const a = bs[i], c = bs[j];
@@ -1277,7 +1303,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
         }
         return { labels: bs.map((x) => x.t), hits };
       })()`);
-      check('S3-LOOK Island 390: no two name labels on the map overlap', r.labels.length >= 5 && r.hits.length === 0, r);
+      check('S3-LOOK Island 390: no two words on the island overlap (the islanders’ bubbles, the robot’s name)', r.labels.length >= 3 && r.hits.length === 0, r);
     }
     if (name === 'profiles') {
       const r = await evaluate(`({ vw: innerWidth, sx: document.scrollingElement.scrollWidth })`);
@@ -1288,7 +1314,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await page.setViewport(VIEWPORTS[0]);
   await tab(0);
   await wait(600);
-  await tap(byText('.bg-quest', w('en', 'rqTulipsTitle')), 'the workshop for the look');
+  await openQuest(w('en', 'rqTulipsTitle'), 'the workshop for the look');
   await wait(1100);
   await shot('cg007-ac1-workshop');
 

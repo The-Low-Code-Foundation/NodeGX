@@ -86,6 +86,12 @@
       "fromProperty": "id",
       "toId": "qcOut",
       "toProperty": "id"
+    },
+    {
+      "fromId": "qcIn",
+      "fromProperty": "blocked",
+      "toId": "qcOut",
+      "toProperty": "blocked"
     }
   ]
 }

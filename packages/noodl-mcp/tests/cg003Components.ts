@@ -93,8 +93,8 @@ export const C = {
   win: '/Workshop/Win card',
   play: '/Workshop/Play',
   quest: '/Island/Request card',
-  pin: '/Island/Pin',
-  map: '/Island/Map',
+  // P106 IG-004: the island as one world (the sea with pins, Island/Pin and Island/Map, went with R1).
+  isleWorld: '/Island/World',
   mark: '/Workshop/Mark',
   swatch: '/Robot/Swatch',
   chip: '/Robot/Chip',
@@ -305,7 +305,11 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
   // P106 IG-003 (lane B).
   'Logic/Teach start': 'go',
   // P106 IG-004 (lane E).
-  'Logic/Bring home': 'go'
+  'Logic/Bring home': 'go',
+  'Logic/Island tick': 'go',
+  'Logic/Plot at': 'go',
+  'Logic/Island choose': 'go',
+  'Logic/Find robots': 'go'
 };
 
 /** Port types by name; anything else is `*` (the engine passes objects, arrays and text through the same names). */
@@ -336,7 +340,9 @@ const TYPE: Readonly<Record<string, string>> = {
   driving: 'boolean', challenge: 'string', cardLine: 'string', programText: 'string', askedFor: 'string', outcome: 'string',
   armed: 'boolean', showTick: 'boolean', live: 'boolean', start: 'object',
   // P106 IG-004 (lane E) — the plots, the pinned robot, the one brought home.
-  plots: 'object', pinned: 'string', freed: 'string'
+  plots: 'object', pinned: 'string', freed: 'string', state: 'object', cards: 'array', focus: 'object', working: 'number',
+  ticks: 'number', canOpen: 'boolean', blocked: 'boolean', showHome: 'boolean', status: 'string', workingAt: 'string',
+  homeText: 'string', openText: 'string', what: 'string'
 };
 const typeOf = (name: string) => TYPE[name] ?? '*';
 
@@ -1416,7 +1422,7 @@ const QUEST: CgComponent = {
   path: 'Island/Request card',
   description: 'One request on the island (the mockup\u2019s .quest): the islander\u2019s face, what they ask, the trick as a coloured tag, or ✓ done (by this kid). Publishes Chosen with the Id.',
   nodes: [
-    inputs('qcIn', [['id', 'string'], ['who', 'string'], ['title', 'string'], ['trick', 'string'], ['faceClass', 'string'], ['tagClass', 'string'], ['isDone', 'boolean'], ['doneWord', 'string']]),
+    inputs('qcIn', [['id', 'string'], ['who', 'string'], ['title', 'string'], ['trick', 'string'], ['faceClass', 'string'], ['tagClass', 'string'], ['isDone', 'boolean'], ['doneWord', 'string'], ['blocked', 'boolean']]),
     group('qcCard', 'The card', undefined, { width: pct(100), sizeMode: 'contentHeight', backgroundColor: 'var(--card)', borderRadius: px(16), ...pad(12), cssClassName: 'bg-quest bg-press' }, ['qcFace', 'qcText', 'qcSide']),
     group('qcFace', 'The islander', 'qcCard', { sizeMode: 'explicit', width: px(52), height: px(52) }),
     group('qcText', 'Who and what', 'qcCard', column({ rowGap: sp(2) }), ['qcWho', 'qcTitle']),
@@ -1434,7 +1440,7 @@ const QUEST: CgComponent = {
       doneShown: { type: 'boolean', by: { open: false, done: true } },
       ground: { type: 'color', by: { open: 'var(--card)', done: 'var(--paper)' } }
     }),
-    outputs('qcOut', [['chosen', 'signal'], ['id', 'string']])
+    outputs('qcOut', [['chosen', 'signal'], ['id', 'string'], ['blocked', 'boolean']])
   ],
   connections: [
     wire('qcIn', 'faceClass', 'qcFace', 'cssClassName'),
@@ -1450,76 +1456,164 @@ const QUEST: CgComponent = {
     wire('qcStates', 'doneShown', 'qcDone', 'mounted'),
     wire('qcStates', 'ground', 'qcCard', 'backgroundColor'),
     wire('qcCard', 'onClick', 'qcOut', 'chosen'),
-    wire('qcIn', 'id', 'qcOut', 'id')
-  ]
-};
-
-/** One islander on the sea (ruling 6). Where it stands is its class (`.bg-pin-<id>` in the look, the mockup's numbers). */
-const PIN: CgComponent = {
-  path: 'Island/Pin',
-  description: 'One islander on the island map (the mockup\u2019s .pin): her picture and her name; when she has a request this kid has not done, the pin is open (a sun badge) and a tap opens that request. Publishes Chosen with the Request Id — only when Is Open.',
-  nodes: [
-    inputs('pnIn', [['id', 'string'], ['label', 'string'], ['pinClass', 'string'], ['picClass', 'string'], ['requestId', 'string'], ['isOpen', 'boolean']]),
-    group('pnPin', 'The pin', undefined, { sizeMode: 'explicit', width: pct(10), height: pct(17), cssClassName: 'bg-pin' }, ['pnPic', 'pnLabel']),
-    group('pnPic', 'The picture', 'pnPin', { sizeMode: 'explicit', width: pct(100), height: pct(100), cssClassName: 'bg-pin-pic' }),
-    text('pnLabel', 'The name', 'pnPin', '', { sizeMode: 'contentSize', fontSize: px(13), fontWeight: '800', color: 'var(--ink)', cssClassName: 'bg-pin-lbl' }),
-    gate('pnGate', 'Only an open pin answers'),
-    outputs('pnOut', [['chosen', 'signal'], ['requestId', 'string']])
-  ],
-  connections: [
-    wire('pnIn', 'pinClass', 'pnPin', 'cssClassName'),
-    wire('pnIn', 'picClass', 'pnPic', 'cssClassName'),
-    wire('pnIn', 'label', 'pnLabel', 'text'),
-    wire('pnIn', 'isOpen', 'pnGate', 'condition'),
-    wire('pnPin', 'onClick', 'pnGate', 'eval'),
-    wire('pnGate', 'ontrue', 'pnOut', 'chosen'),
-    wire('pnIn', 'requestId', 'pnOut', 'requestId')
+    wire('qcIn', 'id', 'qcOut', 'id'),
+    // P106 IG-004: a request her robot cannot take now (it works another plot) — the page opens the plot card instead.
+    wire('qcIn', 'blocked', 'qcOut', 'blocked')
   ]
 };
 
 /** The robot drawn alone at its size (a one-tile garden, the kit's own robot — never a second drawing of it). */
 const STAGE_WORLD = { map: ['G'], things: [], robots: [{ id: 'me', x: 0, y: 0, d: 0, carry: [] }], events: [], schedule: [] };
 
-/** The island's scenery pins, where the mockup draws them: two trees, three tulips, the rock. */
-const SCENERY: ReadonlyArray<{ id: string; sprite: string; label: string }> = [
-  { id: 'tree1', sprite: 'tree', label: 'A tree' },
-  { id: 'tree2', sprite: 'tree', label: 'Another tree' },
-  { id: 'tulip1', sprite: 'tulip', label: 'A tulip' },
-  { id: 'tulip2', sprite: 'tulip', label: 'A tulip' },
-  { id: 'tulip3', sprite: 'tulip', label: 'A tulip' },
-  { id: 'rock', sprite: 'rock', label: 'The rock' }
-];
-
 /**
- * The island (ruling 6): the mockup's sea (lines 146–153, 302–330) — the land, the scenery, a pin per islander (Island
- * pins), THIS kid's robot with its own name (ruling 8: a sibling's robot is not on her island), and Olive. The kit's
- * tile world is not here; the kit only draws the robot in its pin, one tile with no ground, as on My robot.
+ * P106 IG-004 (lane E, R1 + R9) — the island as ONE world: her whole island drawn by the renderer the Workshop uses
+ * (IG-007's rule: Garden 3D, the flat Garden when this computer cannot draw 3D or draws it too slowly), every plot
+ * stamped from its request, the robots she left working stepped by the island tick, the islanders by their next plot,
+ * a fence and a padlock on a plot her band cannot do yet. A tap on a plot (or on an islander) opens its card: who
+ * asks, what, and "Go and help" — or, while her robot works another plot, where it works and "bring {b} home". The
+ * island tick runs only while this component is on the page (the Workshop never steps a pinned robot).
  */
-const MAP: CgComponent = {
-  path: 'Island/Map',
-  description: 'The island map (the mockup\u2019s .map): the sea, the land, the trees, the tulips, the rock, a pin per islander (open when she has a request left for this kid), this kid\u2019s robot with its name, and Olive. Publishes Chosen with the Request Id of an open pin.',
-  repeats: { source: 'array', rowFields: ['id', 'label', 'pinClass', 'picClass', 'requestId', 'isOpen'] },
+const ISLE_WORLD: CgComponent = {
+  path: 'Island/World',
+  description: 'Her island as one world (IG-004): every plot stamped from its request, the robots she taught working on theirs (the island tick, one step every two Step Ms), the islanders by their next plot, a fenced, padlocked plot her band cannot do yet; the 3D island, or the flat one by the renderer rule. A tap on a plot or an islander opens the plot card (Pick with Pick Id does it for a request card); Open fires with the Request Id when the child goes to help; Write (with Model) when a robot is brought home.',
   nodes: [
-    inputs('mpIn', [['pins', 'array'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string']]),
-    group('mpSea', 'The sea', undefined, { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-sea' }, ['mpLand', ...SCENERY.map((x) => `mp_${x.id}`), 'mpEach', 'mpBot', 'mpOlive']),
-    group('mpLand', 'The land', 'mpSea', { sizeMode: 'explicit', width: pct(90), height: pct(86), cssClassName: 'bg-land' }),
-    ...SCENERY.map((x) => group(`mp_${x.id}`, x.label, 'mpSea', { sizeMode: 'explicit', width: pct(9), height: pct(16), cssClassName: `bg-pin bg-pin-${x.id} bg-pin-scene bg-sp-${x.sprite}` })),
-    { ...logic('mpEach', FOR_EACH_NODE, 'One pin per islander', { template: C.pin, templateType: 'explicit' }), parent: 'mpSea' },
-    group('mpBot', 'This kid’s robot', 'mpSea', { sizeMode: 'explicit', width: pct(10), height: pct(17), cssClassName: 'bg-pin bg-pin-bot' }, ['mpGarden']),
-    place('mpGarden', KIT_GARDEN, 'The robot', 'mpBot', { stepMs: STEP_MS, label: 'The robot' }),
-    logic('mpDraw', L('Draw world'), 'The robot in its looks', { world: STAGE_WORLD }),
-    group('mpOlive', 'Olive', 'mpSea', { sizeMode: 'explicit', width: pct(8), height: pct(14), cssClassName: 'bg-pin bg-pin-olive' }, ['mpOlivePic', 'mpOliveName']),
-    group('mpOlivePic', 'Her picture', 'mpOlive', { sizeMode: 'explicit', width: pct(100), height: pct(100), cssClassName: 'bg-pin-pic bg-sp-owl' }),
-    text('mpOliveName', 'Olive', 'mpOlive', 'Olive', { sizeMode: 'contentSize', fontSize: px(13), fontWeight: '800', color: 'var(--ink)', cssClassName: 'bg-pin-lbl' }),
-    outputs('mpOut', [['chosen', 'signal'], ['requestId', 'string']])
+    inputs('iwIn', [['requests', 'array'], ['words', 'array'], ['lang', 'string'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['band', 'number'], ['done', 'array'], ['plots', 'object'], ['robots', 'array'], ['pins', 'array'], ['model', 'object'], ['findText', 'string'], ['tapText', 'string'], ['pickId', 'string'], ['pick', 'signal']]),
+    // ── What the child sees ──
+    group('iwRoot', 'The island and its card', undefined, column({ rowGap: sp(12) }), ['iwIsle', 'iwCard']),
+    group('iwIsle', 'The island on the sea', 'iwRoot', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-isle' }, ['iwScroll', 'iwFind', 'iwTap']),
+    group('iwScroll', 'The island (a phone scrolls it sideways)', 'iwIsle', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-isle-scroll' }, ['iwGarden', 'iwGarden3d']),
+    place('iwGarden', KIT_GARDEN, 'The island, flat', 'iwScroll', { stepMs: STEP_MS, label: 'The island' }),
+    // IG-007's rule on the island too: the 3D node on EXACTLY the flat one's wires, one of the two mounted.
+    place('iwGarden3d', KIT_GARDEN_3D, 'The island in 3D', 'iwScroll', { stepMs: STEP_MS, label: 'The island', camera: 'island', mounted: false }),
+    place('iwFind', BUTTON_NODE, 'Find my robots', 'iwIsle', { ...btn('plain', 'predict', { cssClassName: 'bg-isle-find' }), label: 'Find my robots' }),
+    text('iwTap', 'How to use it', 'iwIsle', '', { ...T_SMALL, sizeMode: 'contentSize', cssClassName: 'bg-isle-tap' }),
+    group('iwCard', 'The plot card', 'iwRoot', { ...row({ width: pct(100), sizeMode: 'contentHeight', flexWrap: 'nowrap', alignItems: 'flex-start', columnGap: sp(12) }), ...PANEL, cssClassName: 'bg-panel bg-plot-card', mounted: false }, ['iwCardFace', 'iwCardText']),
+    group('iwCardFace', 'Who asks', 'iwCard', { sizeMode: 'explicit', width: px(52), height: px(52) }),
+    group('iwCardText', 'What, and what now', 'iwCard', column({ rowGap: sp(6) }), ['iwCardWho', 'iwCardTitle', 'iwCardLine', 'iwCardBtns']),
+    text('iwCardWho', 'Who asks', 'iwCardText', '', { ...T_H3, fontSize: px(17), cssClassName: 'bg-plot-who' }),
+    text('iwCardTitle', 'What', 'iwCardText', '', { ...T_STRONG, cssClassName: 'bg-plot-title' }),
+    text('iwCardLine', 'The line: what now', 'iwCardText', '', { ...T_BODY, cssClassName: 'bg-plot-line' }),
+    group('iwCardBtns', 'What she can do', 'iwCardText', row({ columnGap: sp(8), rowGap: sp(8) }), ['iwOpen', 'iwHomeBtn', 'iwClose']),
+    place('iwOpen', BUTTON_NODE, 'Go and help', 'iwCardBtns', { ...btn('primary', 'play', { cssClassName: 'bg-plot-open' }), label: 'Go and help', mounted: false }),
+    place('iwHomeBtn', BUTTON_NODE, 'Bring the robot home', 'iwCardBtns', { ...btn('teach', '', { cssClassName: 'bg-bring-home' }), label: 'Bring Pip home', mounted: false }),
+    place('iwClose', BUTTON_NODE, 'Close the card', 'iwCardBtns', { ...btn('quiet', '', { cssClassName: 'bg-plot-close' }), label: '✕' }),
+    withStates('iwCardState', 'The card shown or not', ['hidden', 'shown'], { shown: { type: 'boolean', by: { hidden: false, shown: true } } }),
+    gate('iwFound', 'A plot was chosen?'),
+    // ── The island: built from her save, then ticked (the state held by name: only one island is ever on screen) ──
+    logic('iwWorld', L('Island world'), 'Her island, as it stands'),
+    logic('iwTick', L('Island tick'), 'One tick of the island'),
+    variable('iwVar', 'gardenIsland', 'The island, running'),
+    setVariable('iwSetBuilt', 'gardenIsland', 'The island, as built'),
+    setVariable('iwSetTick', 'gardenIsland', 'The island after a tick'),
+    logic('iwTimer', TIMER_NODE, 'The wait between island ticks', { duration: STEP_MS * 2 }),
+    logic('iwDraw', L('Draw world'), 'The island in the kit’s words', { stepMs: STEP_MS }),
+    // ── Taps, the card, home, find ──
+    logic('iwAt', L('Plot at'), 'Which plot was tapped'),
+    logic('iwChoose', L('Island choose'), 'The plot card'),
+    logic('iwHome', L('Bring home'), 'Bring the robot home'),
+    logic('iwAgain', TIMER_NODE, 'A moment for the family to be read again', { duration: 400 }),
+    logic('iwRevealWait', TIMER_NODE, 'A moment for the card to be drawn', { duration: 80 }),
+    logic('iwReveal', L('Find robots'), 'The card scrolled into view', { what: 'card' }),
+    logic('iwFindFn', L('Find robots'), 'The robots found on the flat island', { what: 'robots' }),
+    withStates('iwView', 'The whole island, or framed on the robots', ['island', 'robots'], {
+      camera: { type: 'string', by: { island: 'island', robots: 'plot' } },
+      onRobots: { type: 'boolean', by: { island: false, robots: true } }
+    }),
+    gate('iwViewIs', 'Framed on the robots already?'),
+    // ── The renderer rule (IG-007), the Workshop's own nodes on the island ──
+    withStates('iwRenderer', 'renderer', ['2d', '3d'], { show2d: { type: 'boolean', by: { '2d': true, '3d': false } }, show3d: { type: 'boolean', by: { '2d': false, '3d': true } } }),
+    logic('iwRendStore', STORE_SUBSCRIBE_NODE, 'This computer’s renderer', { storeName: STORE_NAME, keys: 'renderer' }),
+    logic('iwRendRead', L('Renderer'), 'Draw in 3D here?'),
+    logic('iwRendIs3d', CONDITION_NODE, 'In 3D?'),
+    logic('iwRendOk', CONDITION_NODE, 'Can this computer draw 3D?'),
+    logic('iwRendNoGl', L('Renderer choice'), 'No 3D here: the flat island', { event: 'unsupported' }),
+    logic('iwRendSlow', L('Renderer choice'), 'Too slow here: the flat island', { event: 'slow' }),
+    logic('iwRendWrite', STORE_SET_NODE, 'Keep the choice on this computer', { storeName: STORE_NAME, key: 'renderer', merge: false }),
+    outputs('iwOut', [['requestId', 'string'], ['open', 'signal'], ['model', 'object'], ['write', 'signal']])
   ],
   connections: [
-    wire('mpIn', 'pins', 'mpEach', 'items'),
-    ...(['botName', 'color', 'eye', 'hat'] as const).map((f) => wire('mpIn', f, 'mpDraw', f)),
-    wire('mpDraw', 'map', 'mpGarden', 'map'),
-    wire('mpDraw', 'robots', 'mpGarden', 'robots'),
-    wire('mpEach', 'itemOutput-requestId', 'mpOut', 'requestId'),
-    wire('mpEach', 'itemOutputSignal-chosen', 'mpOut', 'chosen')
+    // Her island, built from her save whenever it changes; the tick starts once it is held.
+    ...(['requests', 'plots', 'robots', 'done', 'band', 'pins'] as const).map((f) => wire('iwIn', f, 'iwWorld', f)),
+    wire('iwWorld', 'state', 'iwSetBuilt', 'value'),
+    wire('iwWorld', 'ran', 'iwSetBuilt', 'do'),
+    wire('iwSetBuilt', 'done', 'iwTimer', 'start'),
+    // The tick: one step of every pinned run, the state held again, the next wait.
+    wire('iwTimer', 'timerFinished', 'iwTick', 'go'),
+    wire('iwVar', 'value', 'iwTick', 'state'),
+    // The latest build too: a held state from an older build (a tick's write landing after a rebuild's) is dropped for it.
+    wire('iwWorld', 'state', 'iwTick', 'built'),
+    wire('iwTick', 'state', 'iwSetTick', 'value'),
+    wire('iwTick', 'ran', 'iwSetTick', 'do'),
+    wire('iwSetTick', 'done', 'iwTimer', 'start'),
+    // Drawn: as built, then after every tick.
+    wire('iwWorld', 'world', 'iwDraw', 'world'),
+    wire('iwTick', 'world', 'iwDraw', 'world'),
+    ...(['words', 'lang', 'botName', 'color', 'eye', 'hat'] as const).map((f) => wire('iwIn', f, 'iwDraw', f)),
+    ...(['iwGarden', 'iwGarden3d'] as const).flatMap((g) => [wire('iwDraw', 'map', g, 'map'), wire('iwDraw', 'things', g, 'things'), wire('iwDraw', 'robots', g, 'robots')]),
+    wire('iwWorld', 'focus', 'iwGarden3d', 'focus'),
+    wire('iwView', 'camera', 'iwGarden3d', 'camera'),
+    // A tap on the island (either renderer): which plot, then its card.
+    ...(['iwGarden', 'iwGarden3d'] as const).flatMap((g) => [wire(g, 'onTileX', 'iwAt', 'x'), wire(g, 'onTileY', 'iwAt', 'y'), wire(g, 'onTileTapped', 'iwAt', 'go')]),
+    wire('iwWorld', 'cards', 'iwAt', 'cards'),
+    wire('iwAt', 'requestId', 'iwChoose', 'requestId'),
+    wire('iwAt', 'ran', 'iwChoose', 'go'),
+    // A request card the robot cannot take now: the page hands its id here, and the card opens the same way.
+    wire('iwIn', 'pickId', 'iwChoose', 'requestId'),
+    wire('iwIn', 'pick', 'iwChoose', 'go'),
+    wire('iwWorld', 'cards', 'iwChoose', 'cards'),
+    ...(['requests', 'plots', 'robots', 'words', 'lang', 'botName'] as const).map((f) => wire('iwIn', f, 'iwChoose', f)),
+    wire('iwChoose', 'found', 'iwFound', 'condition'),
+    wire('iwChoose', 'ran', 'iwFound', 'eval'),
+    wire('iwFound', 'ontrue', 'iwCardState', 'to-shown'),
+    wire('iwFound', 'onfalse', 'iwCardState', 'to-hidden'),
+    wire('iwFound', 'ontrue', 'iwRevealWait', 'start'),
+    wire('iwRevealWait', 'timerFinished', 'iwReveal', 'go'),
+    wire('iwCardState', 'shown', 'iwCard', 'mounted'),
+    wire('iwChoose', 'faceClass', 'iwCardFace', 'cssClassName'),
+    wire('iwChoose', 'who', 'iwCardWho', 'text'),
+    wire('iwChoose', 'title', 'iwCardTitle', 'text'),
+    wire('iwChoose', 'line', 'iwCardLine', 'text'),
+    wire('iwChoose', 'canOpen', 'iwOpen', 'mounted'),
+    wire('iwChoose', 'openText', 'iwOpen', 'label'),
+    wire('iwChoose', 'showHome', 'iwHomeBtn', 'mounted'),
+    wire('iwChoose', 'homeText', 'iwHomeBtn', 'label'),
+    wire('iwClose', 'onClick', 'iwCardState', 'to-hidden'),
+    // Go and help: the page goes to the Workshop with this request.
+    wire('iwChoose', 'requestId', 'iwOut', 'requestId'),
+    wire('iwOpen', 'onClick', 'iwOut', 'open'),
+    // Bring the robot home: the family written, then the card asked again once the family is read back.
+    wire('iwIn', 'model', 'iwHome', 'model'),
+    wire('iwHomeBtn', 'onClick', 'iwHome', 'go'),
+    wire('iwHome', 'model', 'iwOut', 'model'),
+    wire('iwHome', 'ran', 'iwOut', 'write'),
+    wire('iwHome', 'ran', 'iwAgain', 'start'),
+    wire('iwAgain', 'timerFinished', 'iwChoose', 'go'),
+    // Find my robots: 3D frames them (and back to the whole island); the flat island scrolls to them and rings them.
+    wire('iwIn', 'findText', 'iwFind', 'label'),
+    wire('iwIn', 'tapText', 'iwTap', 'text'),
+    wire('iwView', 'onRobots', 'iwViewIs', 'condition'),
+    wire('iwFind', 'onClick', 'iwViewIs', 'eval'),
+    wire('iwViewIs', 'ontrue', 'iwView', 'to-island'),
+    wire('iwViewIs', 'onfalse', 'iwView', 'to-robots'),
+    wire('iwFind', 'onClick', 'iwFindFn', 'go'),
+    // The renderer rule: the stored choice mounts one node; no WebGL2, or too slow, writes the flat island for next time.
+    wire('iwRendStore', 'value', 'iwRendRead', 'stored'),
+    wire('iwIn', 'words', 'iwRendRead', 'words'),
+    wire('iwIn', 'lang', 'iwRendRead', 'lang'),
+    wire('iwRendRead', 'use3d', 'iwRendIs3d', 'condition'),
+    wire('iwRendIs3d', 'ontrue', 'iwRenderer', 'to-3d'),
+    wire('iwRendIs3d', 'onfalse', 'iwRenderer', 'to-2d'),
+    wire('iwRenderer', 'show2d', 'iwGarden', 'mounted'),
+    wire('iwRenderer', 'show3d', 'iwGarden3d', 'mounted'),
+    wire('iwGarden3d', 'onSupported', 'iwRendOk', 'condition'),
+    wire('iwRendStore', 'value', 'iwRendNoGl', 'stored'),
+    wire('iwRendOk', 'onfalse', 'iwRendNoGl', 'go'),
+    wire('iwRendStore', 'value', 'iwRendSlow', 'stored'),
+    wire('iwGarden3d', 'onTooSlow', 'iwRendSlow', 'go'),
+    wire('iwRendNoGl', 'renderer', 'iwRendWrite', 'value'),
+    wire('iwRendSlow', 'renderer', 'iwRendWrite', 'value'),
+    wire('iwRendNoGl', 'ran', 'iwRendWrite', 'set'),
+    wire('iwRendSlow', 'ran', 'iwRendWrite', 'set')
   ]
 };
 
@@ -2128,13 +2222,13 @@ const PAGE_ISLAND: CgComponent = (() => {
   const base = pageCommon('is', 'Island', 'island', 'island', ['isHead', 'isGrid']);
   return {
     path: 'Pages/Island',
-    description: 'Her island (one per kid, ruling 8): the mockup’s sea with a pin per islander — a pin with a request she has not done opens it — her robot with its name, Olive; beside it the islanders’ requests tagged with the trick they teach, then free play. Nothing is timed; nothing is counted.',
-    repeats: { source: 'array', rowFields: ['id', 'who', 'title', 'trick', 'faceClass', 'tagClass', 'isDone', 'doneWord'] },
+    description: 'Her island (one per kid, ruling 8), as ONE world (IG-004, R1 + R9): every request a plot of it, the robots she taught still working on theirs, the islanders by their next plot, a fenced plot her band cannot do yet — the 3D island, or the flat one by the renderer rule. A tap on a plot opens its card; beside the island the islanders’ requests tagged with the trick they teach, then free play. A request her robot cannot take now (it works another plot) opens the card instead. Nothing is timed; nothing is counted.',
+    repeats: { source: 'array', rowFields: ['id', 'who', 'title', 'trick', 'faceClass', 'tagClass', 'isDone', 'doneWord', 'blocked'] },
     nodes: [
       ...base.nodes,
       place('isHead', C.head, 'The head', 'isWrap'),
-      group('isGrid', 'Map and requests', 'isWrap', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-island' }, ['isMap', 'isQuests']),
-      place('isMap', C.map, 'The island map', 'isGrid'),
+      group('isGrid', 'The island and the requests', 'isWrap', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-island' }, ['isWorld', 'isQuests']),
+      place('isWorld', C.isleWorld, 'Her island', 'isGrid'),
       group('isQuests', 'The requests', 'isGrid', column({ rowGap: sp(10) }), ['isReqL', 'isList', 'isFreeL', 'isFree']),
       text('isReqL', 'Requests', 'isQuests', '', T_EYEBROW),
       group('isList', 'The open requests', 'isQuests', column({ rowGap: sp(10) }), ['isEach']),
@@ -2144,7 +2238,8 @@ const PAGE_ISLAND: CgComponent = (() => {
       place('isFree', C.quest, 'Free play', 'isQuests', { id: 'free', faceClass: 'bg-face bg-sp-owl', tagClass: 'bg-go', trick: '→', isDone: false, doneWord: '' }),
       logic('isRequests', C.requests, 'The requests'),
       logic('isRows', L('Island rows'), 'Who needs a hand'),
-      logic('isPins', L('Island pins'), 'The islanders on the sea'),
+      logic('isPins', L('Island pins'), 'Each islander’s next request'),
+      gate('isBlocked', 'Is her robot at work on another plot?'),
       setVariable('isSetReq', 'gardenRequestId', 'This request'),
       setVariable('isSetFree', 'gardenRequestId', 'Free play', { setWith: 'string', value: 'free' }),
       navigate('isGoWorkshop', C.pageWorkshop, 'To the workshop')
@@ -2161,14 +2256,31 @@ const PAGE_ISLAND: CgComponent = (() => {
         const id = x === 'rows' ? 'isRows' : 'isPins';
         return [wire('isRequests', 'requests', id, 'requests'), wire('isFam', 'done', id, 'done'), wire('isFam', 'band', id, 'band'), wire('isWords', 'words', id, 'words'), wire('isFam', 'lang', id, 'lang'), wire('isFam', 'botName', id, 'botName')];
       }),
+      // IG-004: the rows know where her robot works (a request it cannot take now is blocked).
+      wire('isFam', 'plots', 'isRows', 'plots'),
+      wire('isFam', 'robots', 'isRows', 'robots'),
       wire('isRows', 'rows', 'isEach', 'items'),
-      wire('isPins', 'pins', 'isMap', 'pins'),
-      ...(['botName', 'color', 'eye', 'hat'] as const).map((f) => wire('isFam', f, 'isMap', f)),
+      // The island itself: her save, the requests, the islanders' next requests, the words.
+      wire('isRequests', 'requests', 'isWorld', 'requests'),
+      wire('isWords', 'words', 'isWorld', 'words'),
+      ...(['lang', 'botName', 'color', 'eye', 'hat', 'band', 'done', 'plots', 'robots'] as const).map((f) => wire('isFam', f, 'isWorld', f)),
+      wire('isPins', 'pins', 'isWorld', 'pins'),
+      wire('isT', 'ig4Find', 'isWorld', 'findText'),
+      wire('isT', 'ig4Tap', 'isWorld', 'tapText'),
+      // Bring the robot home writes the family through the page's store, as every writer does.
+      wire('isStore', 'model', 'isWorld', 'model'),
+      wire('isWorld', 'model', 'isStore', 'model'),
+      wire('isWorld', 'write', 'isStore', 'write'),
+      // A request card: straight to the Workshop, unless her robot works another plot — then its plot card, which says so.
       wire('isEach', 'itemOutput-id', 'isSetReq', 'value'),
-      wire('isEach', 'itemOutputSignal-chosen', 'isSetReq', 'do'),
-      // A pin with a request left opens it, the same way a card does (the list stays the accessible path).
-      wire('isMap', 'requestId', 'isSetReq', 'value'),
-      wire('isMap', 'chosen', 'isSetReq', 'do'),
+      wire('isEach', 'itemOutput-blocked', 'isBlocked', 'condition'),
+      wire('isEach', 'itemOutputSignal-chosen', 'isBlocked', 'eval'),
+      wire('isBlocked', 'onfalse', 'isSetReq', 'do'),
+      wire('isEach', 'itemOutput-id', 'isWorld', 'pickId'),
+      wire('isBlocked', 'ontrue', 'isWorld', 'pick'),
+      // The plot card's Go and help goes the way a card does.
+      wire('isWorld', 'requestId', 'isSetReq', 'value'),
+      wire('isWorld', 'open', 'isSetReq', 'do'),
       wire('isSetReq', 'done', 'isGoWorkshop', 'navigate'),
       wire('isFree', 'chosen', 'isSetFree', 'do'),
       wire('isSetFree', 'done', 'isGoWorkshop', 'navigate')
@@ -2446,8 +2558,7 @@ export const CG003_COMPONENTS: ReadonlyArray<CgComponent> = [
   HELP_CHIP,
   PLAY,
   QUEST,
-  PIN,
-  MAP,
+  ISLE_WORLD,
   SWATCH,
   CHIP,
   STICKER,

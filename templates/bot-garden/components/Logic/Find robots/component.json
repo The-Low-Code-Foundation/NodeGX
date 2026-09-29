@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0b3a5341-67aa-5d75-8897-06f5cf67ab7e",
+  "name": "Find robots",
+  "path": "/Logic/Find robots",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The flat island’s find my robots, and the plot card scrolled into view. Runs on Go; answers Ran once its outputs are set."
+}

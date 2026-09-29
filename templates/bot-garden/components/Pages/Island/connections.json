@@ -238,40 +238,124 @@
       "toProperty": "botName"
     },
     {
+      "fromId": "isFam",
+      "fromProperty": "plots",
+      "toId": "isRows",
+      "toProperty": "plots"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "robots",
+      "toId": "isRows",
+      "toProperty": "robots"
+    },
+    {
       "fromId": "isRows",
       "fromProperty": "rows",
       "toId": "isEach",
       "toProperty": "items"
     },
     {
-      "fromId": "isPins",
-      "fromProperty": "pins",
-      "toId": "isMap",
-      "toProperty": "pins"
+      "fromId": "isRequests",
+      "fromProperty": "requests",
+      "toId": "isWorld",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "isWords",
+      "fromProperty": "words",
+      "toId": "isWorld",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "lang",
+      "toId": "isWorld",
+      "toProperty": "lang"
     },
     {
       "fromId": "isFam",
       "fromProperty": "botName",
-      "toId": "isMap",
+      "toId": "isWorld",
       "toProperty": "botName"
     },
     {
       "fromId": "isFam",
       "fromProperty": "color",
-      "toId": "isMap",
+      "toId": "isWorld",
       "toProperty": "color"
     },
     {
       "fromId": "isFam",
       "fromProperty": "eye",
-      "toId": "isMap",
+      "toId": "isWorld",
       "toProperty": "eye"
     },
     {
       "fromId": "isFam",
       "fromProperty": "hat",
-      "toId": "isMap",
+      "toId": "isWorld",
       "toProperty": "hat"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "band",
+      "toId": "isWorld",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "done",
+      "toId": "isWorld",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "plots",
+      "toId": "isWorld",
+      "toProperty": "plots"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "robots",
+      "toId": "isWorld",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "isPins",
+      "fromProperty": "pins",
+      "toId": "isWorld",
+      "toProperty": "pins"
+    },
+    {
+      "fromId": "isT",
+      "fromProperty": "ig4Find",
+      "toId": "isWorld",
+      "toProperty": "findText"
+    },
+    {
+      "fromId": "isT",
+      "fromProperty": "ig4Tap",
+      "toId": "isWorld",
+      "toProperty": "tapText"
+    },
+    {
+      "fromId": "isStore",
+      "fromProperty": "model",
+      "toId": "isWorld",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "isWorld",
+      "fromProperty": "model",
+      "toId": "isStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "isWorld",
+      "fromProperty": "write",
+      "toId": "isStore",
+      "toProperty": "write"
     },
     {
       "fromId": "isEach",
@@ -281,19 +365,43 @@
     },
     {
       "fromId": "isEach",
+      "fromProperty": "itemOutput-blocked",
+      "toId": "isBlocked",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "isEach",
       "fromProperty": "itemOutputSignal-chosen",
+      "toId": "isBlocked",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "isBlocked",
+      "fromProperty": "onfalse",
       "toId": "isSetReq",
       "toProperty": "do"
     },
     {
-      "fromId": "isMap",
+      "fromId": "isEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "isWorld",
+      "toProperty": "pickId"
+    },
+    {
+      "fromId": "isBlocked",
+      "fromProperty": "ontrue",
+      "toId": "isWorld",
+      "toProperty": "pick"
+    },
+    {
+      "fromId": "isWorld",
       "fromProperty": "requestId",
       "toId": "isSetReq",
       "toProperty": "value"
     },
     {
-      "fromId": "isMap",
-      "fromProperty": "chosen",
+      "fromId": "isWorld",
+      "fromProperty": "open",
       "toId": "isSetReq",
       "toProperty": "do"
     },

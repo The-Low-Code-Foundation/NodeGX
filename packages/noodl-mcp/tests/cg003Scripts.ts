@@ -37,7 +37,7 @@ import { BLOCK_META, CAN_MAX, ENGINE, FOLD_HELPERS, MANY_BLOCKS, ROBOT_NAME_MAX,
 import { BLOCK_CARDS, CardBlock, EYES, HATS, IG006_WORDS, IG006_WORD_KEYS, ISLANDERS, ISLAND_PINS, PAD_KEYS, PAGE_WORDS, PAGE_WORD_KEYS, REQUEST_SUBS, SKILL_BLOCKS } from './cg003Content';
 import { ROBOT_PAINTS } from './cg007Look';
 import { FREE_PLAY_PLOT, ISLAND_BASE, ISLAND_HOME, PLOT_H, PLOT_W } from './cg002Content';
-import { islandChooseScript, islandWorldScript } from './ig004Island';
+import { FIND_ROBOTS_SCRIPT, ISLAND_TICK_SCRIPT, PLOT_AT_SCRIPT, islandChooseScript, islandWorldScript } from './ig004Island';
 
 /** Every word key the pages can show: the engine's (CG-002/006), Olive's (CG-005), then the pages' own. */
 export const ALL_WORD_KEYS: ReadonlyArray<string> = [...WORD_KEYS, ...OLIVE_WORD_KEYS, ...PAGE_WORD_KEYS, ...IG006_WORD_KEYS];
@@ -186,6 +186,10 @@ for (var i = 0; i < list.length; i++) {
   // IG-002: a rock drawn at its size by what is left; a sign and a note carry their text (the kit does not draw it).
   else if (t.kind === 'rock') things.push({ kind: 'rock', x: t.x, y: t.y, left: Math.max(0, Math.floor(Number(t.left)) || 0) });
   else if (t.kind === 'sign' || t.kind === 'note') things.push({ kind: t.kind, x: t.x, y: t.y, text: String(t.text || '') });
+  // P106 IG-004: the island's islanders (her open request's title as her bubble), a locked plot's fence and padlock.
+  else if (t.kind === 'islander') things.push({ kind: 'islander', x: t.x, y: t.y, who: String(t.who || ''), say: t.sayKey ? String(wordMap(Inputs.words, langOf(Inputs.lang), nameOf(Inputs.botName))[t.sayKey] || '') : '' });
+  else if (t.kind === 'fence') things.push({ kind: 'fence', x: t.x, y: t.y, w: Number(t.w) || 1, h: Number(t.h) || 1 });
+  else if (t.kind === 'padlock') things.push({ kind: 'padlock', x: t.x, y: t.y });
 }
 if (Inputs.showEnd === true && Inputs.endX !== undefined && Inputs.endX !== null && Number(Inputs.endX) >= 0) things.push({ kind: 'flag', x: Number(Inputs.endX), y: Number(Inputs.endY) });
 // IG-003 (R5): the challenge was right: a tick on the tile the child tapped (the real end).
@@ -1021,5 +1025,11 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   // P106 IG-003 (lane B): Drive · Teach · Play, and the Predict challenge.
   { component: 'Logic/Teach start', script: TEACH_START_SCRIPT, seam: 'where the robot stands when Teach begins: the start, then along the steps already there' },
   { component: 'Logic/Mode line', script: MODE_LINE_SCRIPT, seam: 'what the Workshop says the mode is: the tag on the world, the line under it, the steps note' },
-  { component: 'Logic/Challenge', script: CHALLENGE_SCRIPT, seam: 'the islander\u2019s Predict challenge: armed, the card\u2019s line, the tick on a right tap' }
+  { component: 'Logic/Challenge', script: CHALLENGE_SCRIPT, seam: 'the islander\u2019s Predict challenge: armed, the card\u2019s line, the tick on a right tap' },
+  // P106 IG-004 (lane E): the island as a world.
+  { component: 'Logic/Island world', script: ISLAND_WORLD_SCRIPT, seam: 'her island as it stands: every plot stamped from its request, who works where, the islanders, the fences, and the tick\u2019s first state' },
+  { component: 'Logic/Island tick', script: ISLAND_TICK_SCRIPT, seam: 'one tick of the island: every pinned run stepped in turn on its own plot' },
+  { component: 'Logic/Plot at', script: PLOT_AT_SCRIPT, seam: 'which plot a tapped tile is on' },
+  { component: 'Logic/Island choose', script: ISLAND_CHOOSE_SCRIPT, seam: 'the plot card: who asks, what, whether it opens, and bring the robot home' },
+  { component: 'Logic/Find robots', script: FIND_ROBOTS_SCRIPT, seam: 'the flat island\u2019s find my robots, and the plot card scrolled into view' }
 ];

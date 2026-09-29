@@ -1,0 +1,72 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0b3a5341-67aa-5d75-8897-06f5cf67ab7e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "findrobotsIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "what",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "findrobotsFn",
+      "type": "JavaScriptFunction",
+      "label": "Find robots",
+      "parameters": {
+        "functionScript": "\nvar found = 0;\nif (typeof document !== 'undefined') {\n  if (String(Inputs.what) === 'card') {\n    var card = document.querySelector('.bg-plot-card');\n    if (card && card.scrollIntoView) { card.scrollIntoView({ block: 'nearest' }); found = 1; }\n  } else {\n    var box = document.querySelector('.bg-isle-scroll');\n    var bots = box ? box.querySelectorAll('.gd-bot') : [];\n    found = bots.length;\n    if (bots.length && bots[0].scrollIntoView) bots[0].scrollIntoView({ block: 'nearest', inline: 'center' });\n    if (box) {\n      box.classList.remove('bg-isle-found');\n      void box.offsetWidth;\n      box.classList.add('bg-isle-found');\n    }\n  }\n}\nOutputs.found = found;\n",
+        "runOnChange-in-what": false
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-what",
+          "displayName": "what",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-found",
+          "displayName": "found",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "findrobotsOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "found",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

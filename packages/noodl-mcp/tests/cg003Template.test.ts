@@ -452,35 +452,55 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       }
     });
 
-    it('🔴 ruling 6: the Island is the sea with pins — no tile world of the island; the kit draws only this kid’s robot in its pin', () => {
+    it('🔴 IG-004 (R1, supersedes ruling 6): the Island is ONE world on the Workshop’s renderer rule — no sea with pins; the island ticks; a request her robot cannot take opens its plot card', () => {
       const island = nodesOf(built, C.pageIsland);
-      expect(island.filter((n) => String(n.type).startsWith('garden-kit.'))).toEqual([]);
-      expect(island.some((n) => n.type === C.map)).toBe(true);
-      const map = nodesOf(built, C.map);
-      const kit = map.filter((n) => n.type === 'garden-kit.Garden');
-      expect(kit.map((n) => n.id)).toEqual(['mpGarden']);
-      const draw = map.find((n) => n.id === 'mpDraw')!;
-      // One tile, one robot: the robot's drawing, not a world.
-      expect((params(draw).world as { map: string[]; robots: unknown[] }).map).toEqual(['G']);
-      expect((params(draw).world as { map: string[]; robots: unknown[] }).robots).toHaveLength(1);
-      const classes = map.map((n) => String(params(n).cssClassName ?? ''));
-      for (const c of ['bg-sea', 'bg-land', 'bg-pin bg-pin-bot', 'bg-pin bg-pin-olive']) expect(classes).toContain(c);
-      expect(classes.filter((c) => /bg-pin-scene/.test(c))).toHaveLength(6);
-      expect(map.find((n) => n.type === 'For Each')!.parameters).toMatchObject({ template: C.pin });
-      // A pin answers only when open; the page sends a pin's request the way a card's goes.
-      const pin = connectionsOf(built, C.pin);
-      expect(pin.filter((c) => c.toId === 'pnOut' && c.toProperty === 'chosen').map((c) => `${c.fromId}.${c.fromProperty}`)).toEqual(['pnGate.ontrue']);
-      expect(pin.some((c) => c.fromId === 'pnIn' && c.fromProperty === 'isOpen' && c.toId === 'pnGate' && c.toProperty === 'condition')).toBe(true);
+      // The sea with pins went: no Island/Map, no Island/Pin anywhere in the template.
+      expect(componentsOf(built).map((c) => c.name).filter((n) => /Island\/(Map|Pin)$/.test(n))).toEqual([]);
+      expect(island.filter((n) => n.type === C.isleWorld).map((n) => n.id)).toEqual(['isWorld']);
+      const world = nodesOf(built, C.isleWorld);
+      const kit2d = world.filter((n) => n.type === 'garden-kit.Garden');
+      const kit3d = world.filter((n) => n.type === 'garden-3d-kit.Garden3D');
+      expect([kit2d.map((n) => n.id), kit3d.map((n) => n.id)]).toEqual([['iwGarden'], ['iwGarden3d']]);
+      expect(params(kit3d[0])).toMatchObject({ camera: 'island', mounted: false });
+      const conns = connectionsOf(built, C.isleWorld);
+      const into = (id: string) => conns.filter((c) => c.toId === id).map((c) => `${c.fromId}.${c.fromProperty}>${c.toProperty}`).sort();
+      // The same wires into both renderers (IG-007's rule): one of the two is mounted by the stored choice.
+      expect(into('iwGarden').filter((w) => !w.endsWith('>mounted'))).toEqual(['iwDraw.map>map', 'iwDraw.robots>robots', 'iwDraw.things>things']);
+      expect(into('iwGarden3d').filter((w) => !/>(mounted|focus|camera)$/.test(w))).toEqual(into('iwGarden').filter((w) => !w.endsWith('>mounted')));
+      expect([into('iwGarden').find((w) => w.endsWith('>mounted')), into('iwGarden3d').find((w) => w.endsWith('>mounted'))]).toEqual(['iwRenderer.show2d>mounted', 'iwRenderer.show3d>mounted']);
+      const states = world.find((n) => n.id === 'iwRenderer')!;
+      expect(params(states)).toMatchObject({ states: '2d,3d', useTransitions: false });
+      expect(conns.some((c) => c.fromId === 'iwGarden3d' && c.fromProperty === 'onTooSlow' && c.toId === 'iwRendSlow')).toBe(true);
+      expect(conns.some((c) => c.fromId === 'iwGarden3d' && c.fromProperty === 'onSupported' && c.toId === 'iwRendOk')).toBe(true);
+      // The tick: a Timer of two Step Ms, the state held in ONE Variable by name (only one island on screen), looped.
+      const timer = world.find((n) => n.id === 'iwTimer')!;
+      expect(params(timer).duration).toBe(760);
+      expect(world.filter((n) => n.type === 'Variable2').map((n) => params(n).name)).toEqual(['gardenIsland']);
+      expect(into('iwTick')).toEqual(['iwTimer.timerFinished>go', 'iwVar.value>state', 'iwWorld.state>built']);
+      expect(into('iwTimer')).toEqual(['iwSetBuilt.done>start', 'iwSetTick.done>start']);
+      // A tap on either renderer asks Plot at, then the card; the page's pick opens the same card.
+      expect(into('iwAt')).toEqual(['iwGarden.onTileTapped>go', 'iwGarden.onTileX>x', 'iwGarden.onTileY>y', 'iwGarden3d.onTileTapped>go', 'iwGarden3d.onTileX>x', 'iwGarden3d.onTileY>y', 'iwWorld.cards>cards']);
+      expect(into('iwChoose').filter((w) => />(go|requestId)$/.test(w))).toEqual(['iwAgain.timerFinished>go', 'iwAt.ran>go', 'iwAt.requestId>requestId', 'iwIn.pick>go', 'iwIn.pickId>requestId']);
+      // The Workshop does not tick the island: no Island tick anywhere but here.
+      for (const comp of componentsOf(built).filter((c) => c.name !== '/' + C.isleWorld.replace(/^\//, ''))) expect({ c: comp.name, tick: nodesOf(built, comp.name).some((n) => n.type === '/Logic/Island tick') }).toEqual({ c: comp.name, tick: false });
+      // The page: a card goes straight to the Workshop only when her robot can take it; a blocked one opens the plot card.
       const page = connectionsOf(built, C.pageIsland);
-      expect(page.filter((c) => c.toId === 'isSetReq').map((c) => `${c.fromId}.${c.fromProperty}>${c.toProperty}`).sort()).toEqual(['isEach.itemOutput-id>value', 'isEach.itemOutputSignal-chosen>do', 'isMap.chosen>do', 'isMap.requestId>value']);
-      // Her island: the rows and the pins read Read family's done (the active kid's).
-      for (const id of ['isRows', 'isPins']) expect(page.some((c) => c.fromId === 'isFam' && c.fromProperty === 'done' && c.toId === id && c.toProperty === 'done')).toBe(true);
-      // The mockup's grid: the map and a 360 px column, one column under 980 px; the pins where the mockup puts them.
+      expect(page.filter((c) => c.toId === 'isSetReq').map((c) => `${c.fromId}.${c.fromProperty}>${c.toProperty}`).sort()).toEqual(['isBlocked.onfalse>do', 'isEach.itemOutput-id>value', 'isWorld.open>do', 'isWorld.requestId>value']);
+      expect(page.filter((c) => c.toId === 'isBlocked').map((c) => `${c.fromId}.${c.fromProperty}>${c.toProperty}`).sort()).toEqual(['isEach.itemOutput-blocked>condition', 'isEach.itemOutputSignal-chosen>eval']);
+      expect(page.some((c) => c.fromId === 'isBlocked' && c.fromProperty === 'ontrue' && c.toId === 'isWorld' && c.toProperty === 'pick')).toBe(true);
+      for (const f of ['plots', 'robots', 'done', 'band']) expect(page.some((c) => c.fromId === 'isFam' && c.fromProperty === f && c.toId === 'isWorld' && c.toProperty === f)).toBe(true);
+      expect(page.some((c) => c.fromId === 'isWorld' && c.fromProperty === 'write' && c.toProperty === 'write')).toBe(true);
+      // The look: the island on its sea, a phone scrolls the flat one sideways; the 3D one keeps a 16:10 frame.
+      expect(GARDEN_CSS).toContain('.bg-isle-scroll { width: 100% !important; overflow-x: auto !important;');
+      expect(GARDEN_CSS).toContain('.bg-isle-scroll .gd-world { max-width: none !important; min-width: 736px;');
       expect(GARDEN_CSS).toContain('.bg-island { display: grid !important; grid-template-columns: minmax(0, 1fr) 360px;');
-      expect(GARDEN_CSS).toContain('@media (max-width: 980px) { .bg-island { grid-template-columns: minmax(0, 1fr); } }');
-      expect(GARDEN_CSS).toMatch(/\.bg-sea \{[^}]*aspect-ratio: 12 \/ 7;/);
-      expect(GARDEN_CSS).toContain('.bg-pin-mamie { left: 24% !important; top: 30% !important; width: 11% !important; height: 19% !important; }');
-      expect(GARDEN_CSS).toMatch(/\.bg-pin \{ position: absolute !important;[^}]*transform: translate\(-50%, -50%\);/);
+    });
+
+    it('🔴 IG-004 AC3: the Workshop’s win hands Complete request the program that won (gardenProgram), so the robot is pinned to the plot', () => {
+      const ws = connectionsOf(built, C.pageWorkshop);
+      const v = nodesOf(built, C.pageWorkshop).find((n) => n.type === 'Variable2' && params(n).name === 'gardenProgram')!;
+      expect(ws.some((c) => c.fromId === v.id && c.fromProperty === 'value' && c.toId === 'wsComplete' && c.toProperty === 'program')).toBe(true);
+      expect(ws.some((c) => c.fromId === 'wsPlay' && c.fromProperty === 'won' && c.toId === 'wsComplete' && c.toProperty === 'go')).toBe(true);
     });
 
     it('ruling 7: what a person sees says Olive’s Island; the slugs stay', () => {

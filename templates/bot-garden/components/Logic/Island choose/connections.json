@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1dae7757-7468-5fa3-809e-2fac61004c4f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "islandchooseIn",
+      "fromProperty": "botName",
+      "toId": "islandchooseFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "islandchooseIn",
+      "fromProperty": "cards",
+      "toId": "islandchooseFn",
+      "toProperty": "in-cards"
+    },
+    {
+      "fromId": "islandchooseIn",
+      "fromProperty": "lang",
+      "toId": "islandchooseFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "islandchooseIn",
+      "fromProperty": "plots",
+      "toId": "islandchooseFn",
+      "toProperty": "in-plots"
+    },
+    {
+      "fromId": "islandchooseIn",
+      "fromProperty": "requestId",
+      "toId": "islandchooseFn",
+      "toProperty": "in-requestId"
+    },
+    {
+      "fromId": "islandchooseIn",
+      "fromProperty": "requests",
+      "toId": "islandchooseFn",
+      "toProperty": "in-requests"
+    },
+    {
+      "fromId": "islandchooseIn",
+      "fromProperty": "robots",
+      "toId": "islandchooseFn",
+      "toProperty": "in-robots"
+    },
+    {
+      "fromId": "islandchooseIn",
+      "fromProperty": "words",
+      "toId": "islandchooseFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "islandchooseIn",
+      "fromProperty": "go",
+      "toId": "islandchooseFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "islandchooseFn",
+      "fromProperty": "out-blocked",
+      "toId": "islandchooseOut",
+      "toProperty": "blocked"
+    },
+    {
+      "fromId": "islandchooseFn",
+      "fromProperty": "out-canOpen",
+      "toId": "islandchooseOut",
+      "toProperty": "canOpen"
+    },
+    {
+      "fromId": "islandchooseFn",
+      "fromProperty": "out-faceClass",
+      "toId": "islandchooseOut",
+      "toProperty": "faceClass"
+    },
+    {
+      "fromId": "islandchooseFn",
+      "fromProperty": "out-found",
+      "toId": "islandchooseOut",
+      "toProperty": "found"
+    },
+    {
+      "fromId": "islandchooseFn",
+      "fromProperty": "out-homeText",
+      "toId": "islandchooseOut",
+      "toProperty": "homeText"
+    },
+    {
+      "fromId": "islandchooseFn",
+      "fromProperty": "out-line",
+      "toId": "islandchooseOut",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "islandchooseFn",
+      "fromProperty": "out-openText",
+      "toId": "islandchooseOut",
+      "toProperty": "openText"
+    },
+    {
+      "fromId": "islandchooseFn",
+      "fromProperty": "out-requestId",
+      "toId": "islandchooseOut",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "islandchooseFn",
+      "fromProperty": "out-showHome",
+      "toId": "islandchooseOut",
+      "toProperty": "showHome"
+    },
+    {
+      "fromId": "islandchooseFn",
+      "fromProperty": "out-status",
+      "toId": "islandchooseOut",
+      "toProperty": "status"
+    },
+    {
+      "fromId": "islandchooseFn",
+      "fromProperty": "out-title",
+      "toId": "islandchooseOut",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "islandchooseFn",
+      "fromProperty": "out-who",
+      "toId": "islandchooseOut",
+      "toProperty": "who"
+    },
+    {
+      "fromId": "islandchooseFn",
+      "fromProperty": "out-workingAt",
+      "toId": "islandchooseOut",
+      "toProperty": "workingAt"
+    },
+    {
+      "fromId": "islandchooseFn",
+      "fromProperty": "success",
+      "toId": "islandchooseOut",
+      "toProperty": "ran"
+    }
+  ]
+}

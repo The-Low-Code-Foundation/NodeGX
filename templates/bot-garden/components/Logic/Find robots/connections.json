@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0b3a5341-67aa-5d75-8897-06f5cf67ab7e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "findrobotsIn",
+      "fromProperty": "what",
+      "toId": "findrobotsFn",
+      "toProperty": "in-what"
+    },
+    {
+      "fromId": "findrobotsIn",
+      "fromProperty": "go",
+      "toId": "findrobotsFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "findrobotsFn",
+      "fromProperty": "out-found",
+      "toId": "findrobotsOut",
+      "toProperty": "found"
+    },
+    {
+      "fromId": "findrobotsFn",
+      "fromProperty": "success",
+      "toId": "findrobotsOut",
+      "toProperty": "ran"
+    }
+  ]
+}

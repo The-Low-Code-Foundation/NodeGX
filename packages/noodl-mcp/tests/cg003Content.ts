@@ -84,7 +84,6 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   guRendNoGl: s('The flat garden is on: this computer cannot draw 3D.', 'Le jardin à plat est activé : cet ordinateur ne sait pas dessiner en 3D.'),
   guRendFlat: s('The flat garden is on, as chosen here.', 'Le jardin à plat est activé, comme choisi ici.'),
   // P106 IG-004 (lane E): the island as a world — the plots, the plot card, a locked plot's reason, find my robots.
-  ig4Plots: s('The plots', 'Les jardins'),
   ig4Find: s('Find my robots', 'Trouve mes robots'),
   ig4Tap: s('Tap a plot to see who asks', 'Touche un jardin pour voir qui demande'),
   ig4Open: s('Go and help', 'Aller aider'),

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a973d229-d6cd-5971-88cc-450fc63ff825",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "islandworldIn",
+      "fromProperty": "band",
+      "toId": "islandworldFn",
+      "toProperty": "in-band"
+    },
+    {
+      "fromId": "islandworldIn",
+      "fromProperty": "done",
+      "toId": "islandworldFn",
+      "toProperty": "in-done"
+    },
+    {
+      "fromId": "islandworldIn",
+      "fromProperty": "pins",
+      "toId": "islandworldFn",
+      "toProperty": "in-pins"
+    },
+    {
+      "fromId": "islandworldIn",
+      "fromProperty": "plots",
+      "toId": "islandworldFn",
+      "toProperty": "in-plots"
+    },
+    {
+      "fromId": "islandworldIn",
+      "fromProperty": "requests",
+      "toId": "islandworldFn",
+      "toProperty": "in-requests"
+    },
+    {
+      "fromId": "islandworldIn",
+      "fromProperty": "robots",
+      "toId": "islandworldFn",
+      "toProperty": "in-robots"
+    },
+    {
+      "fromId": "islandworldFn",
+      "fromProperty": "out-cards",
+      "toId": "islandworldOut",
+      "toProperty": "cards"
+    },
+    {
+      "fromId": "islandworldFn",
+      "fromProperty": "out-focus",
+      "toId": "islandworldOut",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "islandworldFn",
+      "fromProperty": "out-found",
+      "toId": "islandworldOut",
+      "toProperty": "found"
+    },
+    {
+      "fromId": "islandworldFn",
+      "fromProperty": "out-state",
+      "toId": "islandworldOut",
+      "toProperty": "state"
+    },
+    {
+      "fromId": "islandworldFn",
+      "fromProperty": "out-working",
+      "toId": "islandworldOut",
+      "toProperty": "working"
+    },
+    {
+      "fromId": "islandworldFn",
+      "fromProperty": "out-world",
+      "toId": "islandworldOut",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "islandworldFn",
+      "fromProperty": "success",
+      "toId": "islandworldOut",
+      "toProperty": "ran"
+    }
+  ]
+}

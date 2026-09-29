@@ -47,6 +47,11 @@
           "name": "doneWord",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "blocked",
+          "plug": "output",
+          "type": "boolean"
         }
       ],
       "x": 470,
@@ -278,6 +283,11 @@
           "name": "id",
           "plug": "input",
           "type": "string"
+        },
+        {
+          "name": "blocked",
+          "plug": "input",
+          "type": "boolean"
         }
       ],
       "x": 470,

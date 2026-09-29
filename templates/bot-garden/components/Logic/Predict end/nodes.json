@@ -196,7 +196,7 @@
         {
           "name": "ticks",
           "plug": "input",
-          "type": "*"
+          "type": "number"
         },
         {
           "name": "x",

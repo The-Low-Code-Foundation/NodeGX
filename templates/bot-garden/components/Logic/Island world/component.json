@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a973d229-d6cd-5971-88cc-450fc63ff825",
+  "name": "Island world",
+  "path": "/Logic/Island world",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Her island as it stands: every plot stamped from its request, who works where, the islanders, the fences, and the tick’s first state. Runs when an input changes; Ran after each run."
+}

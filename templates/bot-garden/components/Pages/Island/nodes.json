@@ -119,10 +119,10 @@
     {
       "id": "isGrid",
       "type": "Group",
-      "label": "Map and requests",
+      "label": "The island and the requests",
       "parent": "isWrap",
       "children": [
-        "isMap",
+        "isWorld",
         "isQuests"
       ],
       "parameters": {
@@ -137,9 +137,9 @@
       "y": 520
     },
     {
-      "id": "isMap",
-      "type": "/Island/Map",
-      "label": "The island map",
+      "id": "isWorld",
+      "type": "/Island/World",
+      "label": "Her island",
       "parent": "isGrid",
       "x": 220,
       "y": 640
@@ -259,7 +259,7 @@
       "type": "/Data/Requests",
       "label": "The requests",
       "x": 590,
-      "y": 1720
+      "y": 760
     },
     {
       "id": "isRows",
@@ -271,9 +271,19 @@
     {
       "id": "isPins",
       "type": "/Logic/Island pins",
-      "label": "The islanders on the sea",
+      "label": "Each islander’s next request",
       "x": 590,
-      "y": 760
+      "y": 880
+    },
+    {
+      "id": "isBlocked",
+      "type": "Condition",
+      "label": "Is her robot at work on another plot?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 590,
+      "y": 1000
     },
     {
       "id": "isSetReq",
@@ -306,7 +316,7 @@
         "target": "/Pages/Workshop"
       },
       "x": 590,
-      "y": 1840
+      "y": 1720
     }
   ],
   "visualRoots": [

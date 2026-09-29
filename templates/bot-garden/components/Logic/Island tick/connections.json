@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "cc0ff807-1bfd-5fb8-85b1-31a8f5c9f7e7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "islandtickIn",
+      "fromProperty": "built",
+      "toId": "islandtickFn",
+      "toProperty": "in-built"
+    },
+    {
+      "fromId": "islandtickIn",
+      "fromProperty": "state",
+      "toId": "islandtickFn",
+      "toProperty": "in-state"
+    },
+    {
+      "fromId": "islandtickIn",
+      "fromProperty": "go",
+      "toId": "islandtickFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "islandtickFn",
+      "fromProperty": "out-ok",
+      "toId": "islandtickOut",
+      "toProperty": "ok"
+    },
+    {
+      "fromId": "islandtickFn",
+      "fromProperty": "out-state",
+      "toId": "islandtickOut",
+      "toProperty": "state"
+    },
+    {
+      "fromId": "islandtickFn",
+      "fromProperty": "out-ticks",
+      "toId": "islandtickOut",
+      "toProperty": "ticks"
+    },
+    {
+      "fromId": "islandtickFn",
+      "fromProperty": "out-world",
+      "toId": "islandtickOut",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "islandtickFn",
+      "fromProperty": "success",
+      "toId": "islandtickOut",
+      "toProperty": "ran"
+    }
+  ]
+}

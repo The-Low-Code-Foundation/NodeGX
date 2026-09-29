@@ -13,7 +13,7 @@ import * as vm from 'vm';
 
 import { FREE_PLAY_PLOT, ISLAND_HOME, REQUESTS, GardenRequest, WORDS } from './cg002Content';
 import { ADD_PROFILE_SCRIPT, APPLY_DELTA_SCRIPT, BRING_HOME_SCRIPT, COMPLETE_REQUEST_SCRIPT, NEW_RUN_SCRIPT, STEP_SCRIPT, runScript } from './cg002Scripts';
-import { ALL_WORDS_JSON, FAMILY_SCRIPT, FREE_PLAY, ISLAND_CHOOSE_SCRIPT, ISLAND_PINS_SCRIPT, ISLAND_ROWS_SCRIPT, ISLAND_WORLD_SCRIPT, START_WORLD_SCRIPT } from './cg003Scripts';
+import { ALL_WORDS_JSON, DRAW_WORLD_SCRIPT, FAMILY_SCRIPT, FREE_PLAY, ISLAND_CHOOSE_SCRIPT, ISLAND_PINS_SCRIPT, ISLAND_ROWS_SCRIPT, ISLAND_WORLD_SCRIPT, START_WORLD_SCRIPT } from './cg003Scripts';
 import { PAGE_WORDS } from './cg003Content';
 import { ISLAND_HOLD_TICKS, ISLAND_TICK_SCRIPT, PLOT_AT_SCRIPT, islandWorldScript } from './ig004Island';
 
@@ -131,6 +131,22 @@ describe('IG-004 — the island as a world', () => {
         expect(state.live['path-postbox'].run.waiting).toBe(false);
       }
       expect(seen).toEqual([0, 1, 1, 1]);
+    });
+
+    it('🔴 a held state from an OLDER build (a tick’s write landing after a rebuild’s) is dropped for the latest build: a robot brought home stays home', () => {
+      const pinnedIsland = island({ 'tulips-three': pinned(ref('tulips-three'), 'r1') }, [{ id: 'r1' }]);
+      let old = pinnedIsland.state;
+      for (let t = 0; t < 3; t++) old = bare(ISLAND_TICK_SCRIPT, { state: old, built: pinnedIsland.state }).state;
+      // Same build: the held state goes on (the robot keeps working).
+      expect(old.live['tulips-three'].run.pc).toBeGreaterThan(0);
+      // Rebuilt with the robot home; the variable still holds the old build's state.
+      const homeIsland = island({ 'tulips-three': { program: null, robotId: '', wonAt: 1 } }, [{ id: 'r1' }]);
+      expect(homeIsland.state.build).not.toBe(pinnedIsland.state.build);
+      const next = bare(ISLAND_TICK_SCRIPT, { state: old, built: homeIsland.state });
+      expect(Object.keys(next.state.live)).toEqual([]);
+      expect(next.world.robots.map((r: any) => [r.id, !!r.home])).toEqual([['r1', true]]);
+      // Known-firing: with no build handed in, the old state would have gone on with the robot at work.
+      expect(Object.keys(bare(ISLAND_TICK_SCRIPT, { state: old }).state.live)).toEqual(['tulips-three']);
     });
 
     describe('arms: the tick mutated, and the row that kills it', () => {
@@ -280,6 +296,21 @@ describe('IG-004 — the island as a world', () => {
         expect(lines[i].line.split('\n')).toHaveLength(1);
       }
       expect(lines[0].line).not.toBe(lines[1].line);
+    });
+
+    it('🔴 Draw world hands the kits the island’s own kinds: an islander with her request’s title as her bubble (in the language), a fence with its size, a padlock', () => {
+      const is = islandOf(kid(1));
+      for (const lang of ['en', 'fr'] as const) {
+        const drawn = runScript(DRAW_WORLD_SCRIPT, { world: is.world.world, words: WORD_ROWS, lang, botName: 'Pip' }).things;
+        const people = drawn.filter((t: any) => t.kind === 'islander');
+        expect(people.map((p: any) => [p.who, p.say])).toEqual([['sami', w(lang, 'rqPathTitle')], ['mamie', w(lang, 'rqDoorTitle')], ['biscuit', '']]);
+        const fences = drawn.filter((t: any) => t.kind === 'fence');
+        expect(fences.length).toBe(REQ_ROWS.filter((r: any) => r.band === 2).length);
+        expect(fences.every((f: any) => f.w === 8 && f.h === 6)).toBe(true);
+        expect(drawn.filter((t: any) => t.kind === 'padlock').length).toBe(fences.length);
+      }
+      // The robot at home is drawn with her look and name, like any robot.
+      expect(runScript(DRAW_WORLD_SCRIPT, { world: is.world.world, words: WORD_ROWS, lang: 'en', botName: 'Rosie' }).robots).toMatchObject([{ x: ISLAND_HOME.x, y: ISLAND_HOME.y, name: 'Rosie' }]);
     });
 
     it('AC4: every plot is drawn — open plots their start things, the garden its dry tulips; the islanders stand by their next plot, a bubble while it is open; a tap names the plot', () => {
