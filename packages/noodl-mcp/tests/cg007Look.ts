@@ -264,6 +264,14 @@ ${owlColourRule}
 .bg-ws { display: grid !important; grid-template-columns: minmax(0, 1fr) 400px; gap: 16px; align-items: start; }
 @media (max-width: 980px) { .bg-ws { grid-template-columns: minmax(0, 1fr); } }
 .bg-stage { position: relative !important; width: 100%; max-width: 640px; margin: 0 auto; }
+/* P106 s4 (b): with the pad on (Drive, Teach) the stage is the world and the pad side by side, so no key hides a tile (s3:
+   the pad sat on the plot's lower-right tiles — a rock, a tree, the path's end). The world keeps 640 px where it fits and
+   gives way down to 300 (1024 × 768: 352 px, the pad and the bar still on the first screen; at a 400 basis the pad
+   wrapped under the world and off it); only then does the pad wrap under it. A phone keeps the pad over the corner (the
+   media rule under the pad's): there is no room beside, and under the world it would push Play off the first screen
+   (CG-003 AC4). */
+.bg-stage:has(> .bg-pad) { max-width: 836px; display: flex !important; flex-direction: row !important; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: 16px; }
+.bg-stage:has(> .bg-pad) > :not(.bg-pad):not(.bg-rec) { flex: 1 1 300px; max-width: 640px; min-width: 0; }
 .bg-stage .gd-world { border: 4px solid var(--world-edge); border-radius: 16px; }
 .bg-rec { position: absolute !important; left: 10px !important; top: 10px !important; z-index: 6; box-shadow: var(--shadow-soft); pointer-events: none; }
 .bg-rec::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--coral); margin-right: 8px; animation: bg-blink 1s infinite; }
@@ -274,8 +282,10 @@ ${owlColourRule}
 .bg-rec-drive::before { background: var(--block-motion); animation: none; }
 .bg-driving .gd-prog { background: var(--paper-2); border-radius: 14px; padding: 8px; }
 .bg-steps-note { font-weight: 700; }
-/* The pad, over the world's corner (the mockup's .pad), each key 56 px for a finger (AC5). */
-.bg-pad { position: absolute !important; right: 10px !important; bottom: 10px !important; z-index: 6; display: grid !important; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(2, 56px); grid-auto-rows: 56px; gap: 6px; }
+/* The pad (the mockup's .pad), beside the world (P106 s4 (b), above), each key 56 px for a finger (AC5). On a phone it sits
+   over the world's corner, as it did (the mockup's). */
+.bg-pad { position: relative !important; flex: none; z-index: 6; display: grid !important; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(2, 56px); grid-auto-rows: 56px; gap: 6px; }
+@media (max-width: 600px) { .bg-stage:has(> .bg-pad) { display: block !important; max-width: 640px; } .bg-pad { position: absolute !important; right: 10px !important; bottom: 10px !important; } }
 .bg-key { width: 56px !important; height: 56px !important; min-width: 56px; min-height: 56px; border-radius: 14px; box-shadow: var(--shadow-key); display: grid !important; place-items: center; cursor: pointer; font-size: 0 !important; }
 .bg-key::before { margin: 0 !important; width: 26px !important; height: 26px !important; }
 .bg-key:active { transform: scale(0.94); }

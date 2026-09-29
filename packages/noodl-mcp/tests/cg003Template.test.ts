@@ -780,6 +780,14 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(GARDEN_CSS).toMatch(/\.bg-key-r3a \{ grid-column: 1; grid-row: 3; \}/);
       expect(GARDEN_CSS).toMatch(/\.bg-pad \{[^}]*grid-auto-rows: 56px/);
     });
+
+    it('🔴 P106 s4 (b): the pad sits beside the world, not on its tiles — absolute only in the phone rule', () => {
+      const unconditional = GARDEN_CSS.split('\n').filter((l) => /^\.bg-pad \{/.test(l));
+      expect(unconditional).toHaveLength(1);
+      expect(unconditional[0]).not.toMatch(/position: absolute/);
+      expect(GARDEN_CSS).toMatch(/\.bg-stage:has\(> \.bg-pad\) \{[^}]*display: flex !important; flex-direction: row !important; flex-wrap: wrap;/);
+      expect(GARDEN_CSS).toMatch(/@media \(max-width: 600px\) \{ \.bg-stage:has\(> \.bg-pad\) \{ display: block !important;[^}]*\} \.bg-pad \{ position: absolute !important;/);
+    });
   });
 
   describe('IG-007 — Garden 3D on the Workshop behind the renderer States node; the fallback rule; the Grown-ups switch (P106 s2)', () => {
