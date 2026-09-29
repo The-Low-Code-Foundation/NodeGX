@@ -334,6 +334,11 @@ withDeployedSite({ dir: DIR, gpu: true, chromeArgs: ['--use-angle=swiftshader', 
   check('WHEEL: a wheel up zooms in (the distance shrank) and stays above zero', zoomed.dist < stAfter.dist && zoomed.dist > 0, readings.wheel);
 
   // ── CAMERA ───────────────────────────────────────────────────────────────
+  // 🔴 Run 1: the port already read 'island' from boot, so writing 'island' after the wheel zoom changed nothing (a
+  // same-value write is not a change, in the node or in the runtime) and the "island" state read was the zoomed one.
+  // A finger's zoom holds until Camera or Focus CHANGES; the page re-frames by changing the port.
+  await setVar('camera', 'follow');
+  await wait(300);
   await setVar('camera', 'island');
   await wait(600);
   const islandState = await state();
