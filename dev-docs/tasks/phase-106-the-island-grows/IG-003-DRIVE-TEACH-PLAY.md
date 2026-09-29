@@ -210,3 +210,37 @@ appends, the `drive` button kind, `Workshop/Pad`'s two inputs, `Workshop/Play`);
 `predict`, four rules after `@keyframes bg-blink`); both kits (`SPRITES.tick`/`THING_SPRITES`, `THING_BUILDERS.tick`;
 Block List's Show Help); `drive-cg003-pages.js` (the AC6 block only). No `dist/` was written.
 
+
+## 8. Session 4 (2026-09-29, lane G — s3's leftovers (b) (c) (d) (f), worktree `p106-s4-leftovers` cut from `7ed9f065e`)
+
+- **(d) the stale running ring — fixed.** Measured: the Runner's Glow Id was wired straight from `rnStep`, and Stop
+  (Start over, Teach, Drive) never touched it, so after One step then Start over the first block of the next program
+  (same id) wore the ring. New `Logic/Glow` (`GLOW_SCRIPT`, appended to `GLUE_SCRIPTS`) inside `Workshop/Runner`: Step's
+  id while `rnMode.live` (playing or paused), `''` otherwise. A `Function` publishes only on change, so it takes Live as an
+  input rather than a reset signal: One step → Start over → One step reads `'1'`, `''`, `'1'`. The ring now also goes
+  off when a Play ends (the run is no longer live). Looked at: `09-band1` has no ringed block after One step then Start over.
+- **(c) the owl in Drive — fixed.** Measured: the line was `hintStart` ("Hello! Someone on the island is waiting. Press
+  Teach and show Pip what to do."), which Choose hint picks for any program not yet run. It is a voiced key (the shell's
+  `olive-templates.json`) and IG-003 AC5's drive pins it as Teach's first hint, so it was not reworded. Instead Choose hint
+  takes `mode` (wired from `plMode.mode`) and, in Drive with a program not run, says the new unvoiced `hintDriveReady`:
+  "{b} still knows your steps. Press Play to watch them, or Teach to change them." / « {b} connaît toujours tes pas.
+  Appuie sur Jouer pour les regarder, ou sur Apprendre pour les changer. » (the button words are the gate's). Teach and
+  no mode keep `hintStart`.
+- **(b) the pad over the plot — fixed at every width but a phone.** With the pad on, `.bg-stage:has(> .bg-pad)` lays the
+  world and the pad side by side (flex, wrap); the world keeps 640 px where it fits and gives way to 300; the pad is in
+  the flow (`position: relative`). **Deviation:** under 600 px the pad keeps the old corner overlay — there is no room
+  beside, and under the world it pushes Play below 844 px, which CG-003 AC4's drive clause forbids. **For Richard's grade:**
+  at 1024 × 768 the world is now 352 px (8 × 44 px tiles) beside the pad, where it was ~548 px under it; at 1368 it
+  keeps 640. A first try with a 400 px basis wrapped the pad under the world at 1024 × 768, off the first screen.
+  Looked at: 1368 (`07-hit`, `09-band1`), 1024 (`07-hit`), 800 portrait (`01-drive`), 390 (`07-hit`, unchanged overlay).
+- **(f) the `--mockup` side-step — fixed.** The P105 mockup (`tpl-012-mockups/bot-garden.html`) loads its Google font as a
+  render-blocking stylesheet, so its script (and `go`) could arrive after the fixed boot wait; s3's run threw `go is not
+  defined` after 327 PASS and lost the JSON. A standalone probe today saw `go` at the first read (the network was quick),
+  so the cause is inferred, not reproduced. The side-step now waits up to 30 s for `go` and is a clause of its own
+  (`CG-007 AC1 (--mockup)`), so a failure is recorded and the JSON is always written.
+- **Readings (lane G, on `541b55e74` + the D8 clause):** specs cg002Engine **157/157**, cg003Template **116/116**,
+  cg001GardenKit **32/32**, ig007Garden3d **37/37**, ig004Island **12/12**, each exit 0. Modes drive **90/90** at
+  1368/390, and **90/90** at 1024/800 (a scratch copy with those viewports). Island `--mode 3d` **5/5**. Page drive with
+  `--mockup` **327/328**, `drive.exit` 1: the mockup clause PASSED (five shots). The one FAIL was IG-001 D8, which
+  hard-coded `hintStart` as the line after the first edit in free play. Free play opens in Drive, so after (c) that line
+  is `hintDriveReady` by design. The clause now expects that ("in Drive"), and the merged tree's page drive grades it.

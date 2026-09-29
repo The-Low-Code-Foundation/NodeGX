@@ -1105,7 +1105,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
     const emptyLine = await until(owlExpr, (t) => t.includes(hint('hintEmpty').slice(0, 24)), 4000);
     await pal('fwd');
     const edited = await until(owlExpr, (t) => t !== emptyLine && t.length > 0, 1500);
-    check('IG-001 D8: editing a block changes the hint within one step, with no press (empty → a program not run yet)', emptyLine.includes(hint('hintEmpty').slice(0, 24)) && edited.includes(hint('hintStart').slice(0, 24)), { emptyLine, edited });
+    // P106 s4 (c): free play opens in Drive (IG-003), where a program not run yet says hintDriveReady, not the start line.
+    check('IG-001 D8: editing a block changes the hint within one step, with no press (empty → a program not run yet, in Drive)', emptyLine.includes(hint('hintEmpty').slice(0, 24)) && edited.includes(hint('hintDriveReady').slice(0, 24)), { emptyLine, edited });
 
     // D1 + D6 + D5 (on white): fwd, ask Olive · a poem. One step runs fwd (the ring on the white panel); One step parks
     // (thinking on); a third press while parked asks nothing more; the stub's held answer clears the tag with no press and

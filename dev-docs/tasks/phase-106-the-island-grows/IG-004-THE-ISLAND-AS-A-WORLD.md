@@ -401,3 +401,21 @@ model.island = { activeId, done, plots, robots }                                
     `openQuest` (or bring the robot home).
   - `Workshop/Play` must keep `gardenProgram` as the program that won: Complete request reads it.
 - No `dist/` was written. Nothing in a linked build output changed.
+
+## 8. Session 4 (2026-09-29, lane G — s3's leftovers (a) (e), worktree `p106-s4-leftovers` cut from `7ed9f065e`)
+
+- **(a) the 3D island's framing — fixed.** Measured: the Island camera (`camera: 'island'`) used `fitRect`, the mockup's
+  plot framing, which lets a turned rectangle's corners run off the stage (the plot look Richard grades). On the 46 × 22
+  island that put the bottom-right corner off the stage (`ig004-3d-island-1368.png`, s3). The Island camera now uses
+  `frameRect`, so every corner, ground and object height, is inside the margin. `fitRect` still frames a plot. Pip was hard
+  to find because his name pill was under Mamie's bubble: the overlay adds the bubbles after the names. Names now draw
+  at `z-index: 2`, bubbles at `1` (the 3D half of s3's 2D fix `e843cc746`). Looked at: the whole island is inside the stage
+  with sky all round, and "Pip" is readable on the tulips' plot. It still sits over the edge of Mamie's bubble, and the
+  island is small at 1368; Find my robots is the way in. Spec: `ig007Garden3d` +3; the known-firing check is that
+  `fitRect` clips the 46 × 22 island at the Island stage's aspect.
+- **(e) the dead sea — removed.** `.bg-sea`, `.bg-land`, `.bg-pin*` (and the phone rule that only moved them), `pinRules` and
+  `PIN_PLACES` are gone: no page names those classes, and Island pins' `pinClass`/`picClass` were wired nowhere (they
+  are dropped too). The four selectors that `.bg-pin-bot` shared with `.bg-profile-stage` keep their Profiles half,
+  declaration for declaration. `Logic/Island pins` stays, because Island world reads each islander's next request from it.
+  The `--sea-top/--sea-bottom` tokens stay, because `.bg-isle` paints with them. No general dead-CSS gate was added: 20
+  of 106 `bg-` classes look unused to a text scan, but most are built at run time (`bg-key-` + op, `bg-st-` + state).
