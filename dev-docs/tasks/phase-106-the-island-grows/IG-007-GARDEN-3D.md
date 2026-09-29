@@ -1,6 +1,6 @@
 # IG-007 — Garden 3D: the same ports, a flat-shaded world, graded on the tablet
 
-**Opened 2026-09-28**, from README §1 global point 2 and ruling R2 ("go 3D"). **Status: 🟡 session 1 — module, node, gate and Mac drive built; page placement, fallback and the tablet wait for IG-001 and the mockup.**
+**Opened 2026-09-28**, from README §1 global point 2 and ruling R2 ("go 3D"). **Status: 🟡 session 2 — AC1 (on the Mac, software GL), AC2, AC4 and AC6's module/manifest/picker/template done and driven; AC5 waits for Richard's grade, AC3 for the tablet, AC6's Windows installer for CG-008's workflow (§7).**
 Depends on IG-000 (the mockup it builds to) for the look; the Workshop scene can start on IG-001. Lane D, in
 a worktree (`scripts/devtools/make-worktree.sh`; a worktree has no gitignored build output — build the kit
 there before a drive).
@@ -158,3 +158,186 @@ the island is a map, the plot is where the child works (the P95 AC9 face-floor l
 **Could not verify.** Real-GPU frame time (this Mac's drive is swiftshader; the tablet is AC3); the look beside the
 mockup (IG-000 is in flight); reduced-motion in a browser (the engine reads `matchMedia`, the gate covers the flag);
 SSR of the kit under `kit-modules.js` (three.min.js through `new Function` under the React-only window shim: not run).
+
+### Session 2 (2026-09-29, lane D, worktree `ig007-placement` cut from `f784833b8`)
+
+**Built, in four commits on `ig007-placement`** — `e4589ae3f` (the vocabulary and the mockup's look in the kit),
+`85c88b7d0` (on-demand drawing, the mockup's framing, shared GPU buffers), `0545f0c69` (the Workshop placement, the
+rule, the Grown-ups switch, the template carries the kit), `deb28a761` (egg and food loads, as lane A's 2D kit; the
+fixture drive's vocabulary clause). This docs commit follows.
+
+- **AC1, the placement.** `Workshop/Play` holds `plGarden3d` (`garden-3d-kit.Garden3D`) beside `plGarden` on the stage,
+  with the same parameters (`stepMs`, `label`) and EXACTLY the Garden's wires: `plDraw.map/things/robots/bubble` in,
+  `onTileTapped → plPredictGate.eval`, `onTileX/Y → plPredictEnd.tapX/Y` out. The gate diffs the two nodes' wire sets.
+  A `States` node labelled `renderer` (`useTransitions: false`, states `2d,3d`, values `show2d`/`show3d`) mounts
+  one of the two, driven by `to-2d`/`to-3d` signals from a Condition over `Logic/Renderer`'s `use3d`, which reads
+  the store. The graph above is untouched: `Workshop/Play/connections.json` +144/−0, and `nodes.json` only gains nodes
+  (the only removed lines are auto-layout `y`s).
+- **AC4, the rule.** `Supported` false → `Logic/Renderer choice` (`event: unsupported`) → `{ mode: '2d', why:
+  'unsupported' }`. The kit's new **`Too Slow`** signal → the same choice with `event: slow` → `{ mode: '2d', why:
+  'slow' }`. Both are written through a `GlobalStore Set` into the persisted `garden` store's **`renderer`** key, so
+  the next open reads it and mounts the 2D node straight away. `Grown/Renderer panel` (a fourth panel on Grown-ups)
+  names the renderer and why, and has a two-way Seg switch (`3D island` / `Flat garden` → `{ 3d | 2d, 'grown-up' }`).
+  There are seven new words, EN and FR, appended to the page word table.
+- **The kit (vocabulary, brief §4).**
+  - `parseRobots` in the copy carries the three §4 lines verbatim.
+  - `THING_BUILDERS` draws `rock`: big at `left` ≥ 3, medium at 2, small at 1, nothing at 0, big when there is no
+    `left`; a pebble beside it from medium up.
+  - It also draws `sign` (post and board), `note` (paper and a coral line), and `stone`, `postbox` and `tulip` as the
+    mockup does. No text is drawn on a tile.
+  - `buildRobot` is the mockup's robot: a visor, eyes, a mouth, two wheels, an antenna with a gold ball, a cap,
+    sunflower or crown hat, and a can with a spout.
+  - The can's level is a light band inside the can, `can`/`canMax` tall. At 0 it is hidden (no drops). When `can` is
+    null there is no band.
+  - The load on the back is the last entry of `carry`. `stone`, `letter`, `egg` and `food` are drawn as themselves,
+    anything else as a parcel, and an empty `carry` draws nothing.
+- **The kit (look, AC5).** The ground is the sea, a sand rim and a green base, with tiles 0.98 wide so the grid shows.
+  The kit uses the mockup's palette, tile heights (water .14, bed .30, path .34, grass .40) and two lights.
+  - Trees are two six-sided cones at a size per tile. The house has a gabled roof and TWO windows (s1 drew one per
+    house).
+  - Fixed: an instance colour multiplied a green material, which is why s1's grass was a darker green than the mockup's.
+  - The camera is the mockup's exactly, taken from its source: `v.apply` sets camera y = d·cos35 and aims at y 0.4.
+    It is turned 0.42 rad, with a 38° lens.
+  - The framing is the mockup's `v.fit` (max(width across, tilted depth) × 1.18 + 1.2). `frameRect` (everything
+    inside a margin) stays the zoom-out bound.
+- **The kit (behaviour).** The scene is drawn **on demand**: a frame only while a robot glides, turns, recoils or
+  hops, a tulip stands up, the camera glides or a finger is on the world. The bubble clears on a timer.
+  - `Too Slow` fires once when the `Frame Ms` readout stays above 50 ms for 3 s of **sampled** time. Sampled time is
+    the intervals between frames of one busy, visible spell, added across the short still gaps between glides; a
+    hidden spell restarts the count.
+  - Geometries and materials are made once per engine and shared by every rebuild.
+  - Fixed: the first framing happened before the stage had its size (a 300×150 canvas), and a resize only clamped it,
+    so the Workshop sat at dist **14.9** where the fit says **11.44** (read in the page). A resize now re-frames until
+    a finger has moved the camera.
+- **AC6.** `REQUIRED_MODULES` gains `garden-3d-kit`. The template's `noodl_modules/garden-3d-kit/` carries index.js,
+  three.min.js (651,651 B), the LICENSE, the manifest and types. The deployed `index.html` loads
+  `/noodl_modules/garden-3d-kit/three.min.js` (line 334) BEFORE `/noodl_modules/garden-3d-kit/index.js` (line 347).
+- **Drives.**
+  - `scripts/devtools/drive-ig007-workshop.js` (new) runs the deployed template. `--mode 3d` uses swiftshader. `--mode
+    nogl` uses `--disable-3d-apis`.
+  - `drive-ig007-3d.js` (s1's fixture drive): its GLIDE clause now reads the turned camera's own projection, and it
+    gained a VOCAB clause.
+
+**Readings (all from the worktree; exit code first).**
+- Garden specs, one file each:
+  - `ig007Garden3d` exit 0, **29 / 29** (20 before).
+  - `cg003Template` exit 0, **98 / 98** (92 before).
+  - `cg001GardenKit` exit 0, 22 / 22 · `cg002Engine` exit 0, 122 / 122 · `cg005Olive` exit 0, 34 / 34 ·
+    `cg006Requests` exit 0, 83 / 83.
+  - Total **388** (373 before).
+- `npm run template:garden` exit 0, run again after the last commit: **0 files of drift**.
+- `node library/modules/garden-3d-kit/build.mjs` twice: the same sha256 `96b78569…380ee`.
+- Page drive (`drive-pages.sh` repointed): exit 0, **179 / 179**, 0 console errors, 0 network errors. It ran twice,
+  first with the placement uncommitted, then on `0545f0c69`'s tree; `deb28a761` came after and changes only the 3D
+  kit's loads. It runs on the 2D node:
+  that Chrome (`--disable-gpu`) has **no WebGL2** (measured: `getContext('webgl2')` = null, with and without
+  `--disable-3d-apis`). So the rule picks 2d there, and it does so deterministically.
+- Olive page drive (`drive-olive.sh pages`, on the final deploy): exit 0, **22 / 22**, 0 skip, 0 console errors.
+  Shell `node --test`: exit 0, **90 / 90**.
+- `drive-ig007-workshop.js --mode 3d` (final kit): exit 0, **21 / 21**, 0 console errors, 0 network errors.
+  - **AC1** (the tulips end to end on the 3D node, each step checked against `Noodl.Variables.gardenWorld`): Pip
+    starts on 0,3 facing right. Two forwards glide him to 2,3, and mid-way he read `gliding`. A left turn gives d 0 in
+    both. Water: 1 of 3 wet in both. Fifteen presses give fifteen blocks; the fold makes 6; Play reaches the win card
+    with 3 of 3 wet in both, and Pip ends where the engine ends.
+  - Predict through the 3D canvas: a tap on 5,3 (`elementFromPoint` = the canvas) draws the flag at 2,3 in 3D; a tap
+    on 2,3 plays and Pip ends on 2,3.
+  - **AC4**: 4 s of the win card over the still scene: `data-idle`, no Too Slow. A main-thread hog (75 ms busy loops)
+    with a finger held on the world swapped to 2D in **3.79 s**, stored `{ 2d, slow }`. The next open mounted **0**
+    3D nodes. Grown-ups read the slow line; the switch wrote `{ 3d, grown-up }` and the Workshop was 3D again.
+  - Frame Ms readout (software GL, a loaded box, NOT AC3): **17.3–28.3 ms** p95 over the final runs, 41 draw calls,
+    41 meshes.
+  - Earlier runs, each a finding, not a flake:
+    - Run 1 (before on-demand and the caches) failed at Play: the rule fired during Play.
+    - Run 2 lost the 3D node before the Predict hit, with Frame Ms reading 63.1 after two screenshots. The drive now
+      waits for Frame Ms ≤ 34 after a shot.
+    - Run 3 passed 20 / 20.
+    - Run 4 lost the node under the win card (its `backdrop-filter: blur` over a MOVING canvas) → on-demand drawing.
+    - Then 21 / 21 three times.
+- `drive-ig007-workshop.js --mode nogl`: exit 0, **8 / 8**, in three runs. WebGL2 is really absent.
+  - `{ 2d, unsupported }` is written; the 3D node mounted once and is gone; the 2D node draws.
+  - The tulips pass on 2D (15 → 6 → win).
+  - The next open mounts 0 3D nodes.
+  - Grown-ups: "The flat garden is on: this computer cannot draw 3D.", with Flat garden pressed.
+  - 0 console errors.
+- `drive-ig007-3d.js` (fixture, final kit): exit 0, **18 / 18** (17 before; +VOCAB). Frame Ms readout 17.3–42.3 ms.
+- AC2 readout: 24×16 / 30 things (now incl. rock, sign, note, stone, post box) / 3 robots (cans, loads, cap,
+  sunflower) = **238 meshes** (15 instanced, 223 individual), ≤ 500.
+- Measured in the RUNNING mockup (headless, swiftshader): `views.ws` dist **10.7466**, aspect **1.4359** (a 672×468
+  stage), yaw 0.42, fov 38, camera at (6.51, 8.80, 8.63) looking at (4, 0.4, 3). The mockup's 35° is from the
+  vertical, measured at the target's floor; the node now uses the same formula (the gate pins 10.7466).
+- JSON: `shots/ig007-s2/drive-workshop-3d.json`, `drive-workshop-nogl.json`, `drive-fixture-3d.json`. Logs are in
+  the lane's scratch folder.
+
+**AC5, what was compared (looked at, not graded — the grade is Richard's).** The side-by-side images
+`shots/ig007-s2/sbs-*.png` put the mockup on the left and the node on the right. `mockup-running-workshop.png` is
+the mockup captured at the node's viewport.
+- `sbs-ws`, the Workshop at 1368×912: the same corner-on camera, the island filling the stage with its turned
+  corners cropped, sand rim, sea, mint checkerboard with visible grid lines, the same tree, house and rock
+  primitives. What differs:
+  - Our stage is 4:3 (the map's 8:6); the mockup's is 8:5.6.
+  - The mockup's plot is Sami's stones with Cobble.
+  - The mockup has a "Just driving" chip; the node has Pip's name pill.
+- `sbs-robot`, a robot close: the node's Pip has the mockup's box body, visor, eyes, wheels and gold antenna ball,
+  and the can on its right. The mockup's Echo shows an Olive bubble.
+- `sbs-island`: the fixture's synthetic 24×16 (too many houses, water scattered) in a 640-wide page. The composition
+  and framing read like the mockup's island; its content is not the mockup's (the island page is IG-004's).
+- `sbs-vocab`: rocks shrink by `left`, the sign and the note, stones, the post box, Cobble in a cap and Pocket in a
+  sunflower with a parcel, beside the mockup's Workshop.
+- **Richard's grade, verbatim:** _____
+
+**Deviations, with the reason.**
+1. **The renderer choice is not in the profile.** It is the persisted `garden` store's own key `renderer`, stored as
+   `{ mode: '3d' | '2d', why: '' | 'unsupported' | 'slow' | 'grown-up' }` beside `model` in `noodl_store_bot-garden`.
+   - A GPU is the computer's, not the kid's, and the save code carries the family to another computer.
+   - `modelOf` rebuilds the model and drops unknown fields. It lives in `cg002Scripts.ts` (lanes A and C), so a
+     field there would have been a merge-risk hunk in the engine file.
+   - Nothing stored reads as 3D.
+2. **The States node starts on `2d`.** Its states are `2d,3d` so that the cheap node is the one mounted until the
+   choice is read. Measured: on the first open the Workshop's 2D node was NOT mounted before the 3D one (the mount
+   counter's only `.gd-world` insertion was the island page's).
+3. **The kit has one output beyond §2's list: `Too Slow` (signal).** The 3-s rule is decided where the frames are.
+   A page Function cannot tell visible, moving time from wall time, which is the trap §6 names.
+4. **On-demand drawing changes `Frame Ms`' meaning.** It is timed only while the scene moves. That is what the child
+   sees, and a still scene gives the CPU to Olive (AC3). The tablet's `timings.log` reading should be taken with
+   Pip moving or a finger panning.
+5. **Framing.** It is the mockup's `v.fit` for Plot and Island, which crops the turned corners. s1's
+   everything-inside-a-margin framing is kept as the zoom-out bound only.
+6. **"Drive" in AC1.** There is no Drive mode on this branch (IG-003 builds it). Pip is driven with the Teach pad,
+   and each press moves him in the engine and in 3D.
+7. **Lane A's note.** The 3D load draws `egg` and `food` as themselves too. `can: null` (free water) draws no level.
+
+**Merge notes (read before the merged gates).**
+- The pinned-copy clause over `parseRobots` compares every field garden-kit answers (order-free). It allows exactly
+  the extras `can`, `canMax` and `carry`, and checks them against §4 written a second way. It is green on this branch
+  and stays green after lane A's lines land. It goes red only if lane A's three lines differ from §4.
+- 🔴 **The clause that WILL go red if lane A edits a port text:** "every input of Garden is on Garden 3D with the
+  same type, name, group, default and description". If lane A changes `Garden`'s `things`/`robots` descriptions (or
+  any input's), copy the new text into `kit3d.js` `inputProps` in the merge commit, rebuild the kit, and regenerate.
+  The same holds for `DEFAULT_LEGEND`/`KINDS`/`parseThings` if lane A adds a tile kind or changes the thing filter.
+- On this branch a page with both kits uses garden-kit's `parseRobots` (the sibling helper), which does not carry
+  `can`/`carry` yet. The Workshop's 3D Pip shows no can level or load until lane A's lines land and `Logic/Draw
+  world` passes those fields into `Robots`.
+- Shared-file hunks, all appends or single-line list entries:
+  - `cg003Components.ts`: `KIT_GARDEN_3D`, `C.guRenderer`, the `DRIVE` and `TYPE` entries, `Workshop/Play` (the
+    stage's children and the new nodes and wires after `plGarden`), `GU_RENDER`, `Pages/Grown-ups` (the grid's
+    children, the place, the wire list, the description), `CG003_COMPONENTS` (+`GU_RENDER`), `REQUIRED_MODULES`.
+  - `cg003Scripts.ts`: two scripts before `TRANSLATE_ALL_SCRIPT`, two `GLUE_SCRIPTS` entries at its end.
+  - `cg003Content.ts`: seven `PAGE_WORDS` before the `REQUEST_SUBS` spread.
+  - `cg003Template.test.ts`: the AC1 module list, one describe block before "CG-007 — the look", two imports.
+
+**Not done, and why.**
+- **AC3** (the tablet) is Richard's.
+- **AC5**'s grade is Richard's.
+- **AC6**'s Windows installer is CG-008's workflow: not attempted.
+- The deploy tool's wire checker still publishes the kit wires unchecked. Re-measured this session: 38 wires, and
+  `uncheckedTypes` lists **all five** kit node types (game-kit's two and garden-kit's two as well as `Garden3D`), so
+  it is not Garden 3D's. It blocks no drive; still open.
+
+**Could not verify.**
+- A real GPU's frame time. Every 3D reading is swiftshader on a Mac with a 1-minute load of 3–6.
+- The tablet.
+- What the win card's blur costs on a real GPU.
+- Touch pinch on hardware (the gate grades the maths).
+- The Workshop at 390×844 on the 3D node (the page drive runs 2D).
+- FR on the 3D Workshop (the Grown-ups words are graded EN/FR by the template gate and the page drive's language
+  clause).

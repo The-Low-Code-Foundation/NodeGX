@@ -1,0 +1,645 @@
+{
+ "dir": "/Users/richardosborne/vscode_projects/OpenNoodl-worktrees/ig007-placement-scratch/d7/deploy",
+ "mode": "3d",
+ "results": [
+  {
+   "name": "BOOT (3d): a new profile lands on the island; nothing is stored for the renderer yet",
+   "ok": true,
+   "saw": {
+    "island": "/island",
+    "stored": null
+   }
+  },
+  {
+   "name": "AC1: the Workshop draws Garden 3D (Supported true, Ready, the 8×6 tulip plot, garden-kit’s helpers) and no 2D world",
+   "ok": true,
+   "saw": {
+    "ready": {
+     "supported": "true",
+     "ready": "true",
+     "helpers": "sibling",
+     "w": "8",
+     "h": "6"
+    },
+    "worlds": {
+     "gd": 0,
+     "gd3": 1
+    },
+    "mounts": {
+     "gd": 1,
+     "gd3": 1
+    },
+    "stored": null
+   }
+  },
+  {
+   "name": "AC1: the 3D node draws the engine’s start — Pip on 0,3 facing right, three dry tulips",
+   "ok": true,
+   "saw": {
+    "engine": {
+     "x": 0,
+     "y": 3,
+     "d": 1,
+     "wet": 0,
+     "tulips": 3
+    },
+    "drawn": {
+     "x": 0,
+     "y": 3,
+     "d": 1,
+     "gliding": false,
+     "wet": 0,
+     "tulips": 3
+    }
+   }
+  },
+  {
+   "name": "AC1: Teach shows the pad over the 3D world (the pad keys are on top: elementFromPoint)",
+   "ok": true,
+   "saw": true
+  },
+  {
+   "name": "AC1: two forwards — the engine has Pip on 2,3 and the 3D node glides him there (mid-way it was gliding)",
+   "ok": true,
+   "saw": {
+    "two": {
+     "engine": {
+      "x": 2,
+      "y": 3,
+      "d": 1,
+      "wet": 0,
+      "tulips": 3
+     },
+     "drawn": {
+      "x": 2,
+      "y": 3,
+      "d": 1,
+      "gliding": false,
+      "wet": 0,
+      "tulips": 3
+     }
+    },
+    "mid": {
+     "engine": {
+      "x": 1,
+      "y": 3,
+      "d": 1,
+      "wet": 0,
+      "tulips": 3
+     },
+     "drawn": {
+      "x": 1,
+      "y": 3,
+      "d": 1,
+      "gliding": true,
+      "wet": 0,
+      "tulips": 3
+     }
+    }
+   }
+  },
+  {
+   "name": "AC1: a left turn — the engine faces up (d 0) and so does the 3D node",
+   "ok": true,
+   "saw": {
+    "engine": {
+     "x": 2,
+     "y": 3,
+     "d": 0,
+     "wet": 0,
+     "tulips": 3
+    },
+    "drawn": {
+     "x": 2,
+     "y": 3,
+     "d": 0,
+     "gliding": false,
+     "wet": 0,
+     "tulips": 3
+    }
+   }
+  },
+  {
+   "name": "AC1: water — the engine’s first tulip is wet and the 3D node stands it up (1 of 3)",
+   "ok": true,
+   "saw": {
+    "engine": {
+     "x": 2,
+     "y": 3,
+     "d": 0,
+     "wet": 1,
+     "tulips": 3
+    },
+    "drawn": {
+     "x": 2,
+     "y": 3,
+     "d": 0,
+     "gliding": false,
+     "wet": 1,
+     "tulips": 3
+    }
+   }
+  },
+  {
+   "name": "AC1: fifteen presses, fifteen blocks; the 3D node agrees with the engine (three tulips wet)",
+   "ok": true,
+   "saw": {
+    "fifteen": 15,
+    "pair": {
+     "engine": {
+      "x": 6,
+      "y": 3,
+      "d": 1,
+      "wet": 3,
+      "tulips": 3
+     },
+     "drawn": {
+      "x": 6,
+      "y": 3,
+      "d": 1,
+      "gliding": false,
+      "wet": 3,
+      "tulips": 3
+     }
+    }
+   }
+  },
+  {
+   "name": "AC1: the fold is offered and taken — one repeat holding five (6 blocks)",
+   "ok": true,
+   "saw": {
+    "tidy": "I spotted the same 5 steps, 3 times in a row.\nFold it\nNot now",
+    "folded": 6
+   }
+  },
+  {
+   "name": "AC1: Play runs the folded program to the win card; the 3D node ends where the engine ends, all three tulips wet in both",
+   "ok": true,
+   "saw": {
+    "samples": 45,
+    "distinctTiles": 7,
+    "won": true,
+    "settled": {
+     "engine": {
+      "x": 6,
+      "y": 3,
+      "d": 1,
+      "wet": 3,
+      "tulips": 3
+     },
+     "drawn": {
+      "x": 6,
+      "y": 3,
+      "d": 1,
+      "gliding": false,
+      "wet": 3,
+      "tulips": 3
+     }
+    }
+   }
+  },
+  {
+   "name": "AC4: four seconds of the win card over the still 3D scene — nothing drawn (idle), no Too Slow, still 3D",
+   "ok": true,
+   "saw": {
+    "attrs": {
+     "class": "gd3-world",
+     "data-gd3-world": "true",
+     "data-w": "8",
+     "data-h": "6",
+     "data-camera": "plot",
+     "role": "group",
+     "aria-label": "The garden",
+     "data-supported": "true",
+     "data-helpers": "sibling",
+     "data-meshes": "41",
+     "data-draw-calls": "41",
+     "data-ready": "true",
+     "data-frame-ms": "28.3",
+     "data-idle": "true",
+     "style": "aspect-ratio: 8 / 6; display: block;"
+    },
+    "worlds": {
+     "gd": 0,
+     "gd3": 1
+    },
+    "stored": null
+   }
+  },
+  {
+   "name": "AC1: through the whole request the rule stayed on 3D (no Too Slow, nothing stored)",
+   "ok": true,
+   "saw": {
+    "frame": {
+     "frameMs": "28.3",
+     "drawCalls": "41",
+     "meshes": "41",
+     "renderer": "swiftshader (software), this Mac"
+    },
+    "stored": null
+   }
+  },
+  {
+   "name": "AC1: Predict through the 3D canvas — a tap on tile 5,3 (the canvas is on top there) comes out of Tile Tapped, and the real end 2,3 is drawn as the flag in 3D",
+   "ok": true,
+   "saw": {
+    "asked": true,
+    "miss": {
+     "x": 547.8781367445621,
+     "y": 508.4705456993584,
+     "top": "canvas"
+    },
+    "flag": "2,3"
+   }
+  },
+  {
+   "name": "AC1: a right tap on 2,3 plays from the start; the engine and the 3D node end on 2,3",
+   "ok": true,
+   "saw": {
+    "engine": {
+     "x": 2,
+     "y": 3,
+     "d": 1,
+     "wet": 0,
+     "tulips": 3
+    },
+    "drawn": {
+     "x": 2,
+     "y": 3,
+     "d": 1,
+     "gliding": false,
+     "wet": 0,
+     "tulips": 3
+    }
+   }
+  },
+  {
+   "name": "AC4: frames above 50 ms for 3 s — Too Slow fires, the page writes { 2d, slow } and swaps in the 2D Garden",
+   "ok": true,
+   "saw": {
+    "swapped": {
+     "gd": 1,
+     "gd3": 0
+    },
+    "stored": {
+     "mode": "2d",
+     "why": "slow"
+    },
+    "mountsBefore": {
+     "gd": 2,
+     "gd3": 2
+    },
+    "swapMs": 3787
+   }
+  },
+  {
+   "name": "AC4: the next Workshop open is the 2D Garden from the start — the 3D node is never mounted",
+   "ok": true,
+   "saw": {
+    "before": {
+     "gd": 4,
+     "gd3": 2
+    },
+    "after": {
+     "gd": 5,
+     "gd3": 2
+    },
+    "worlds": {
+     "gd": 1,
+     "gd3": 0
+    }
+   }
+  },
+  {
+   "name": "AC4: the Grown-ups page names the renderer and why (\"too slow\")",
+   "ok": true,
+   "saw": {
+    "line": "The flat garden is on: 3D was too slow on this computer.",
+    "want": "The flat garden is on: 3D was too slow on this computer."
+   }
+  },
+  {
+   "name": "AC4: the switch writes { 3d, grown-up } and the line says 3D",
+   "ok": true,
+   "saw": {
+    "back3d": {
+     "mode": "3d",
+     "why": "grown-up"
+    },
+    "line3d": "This computer draws the island in 3D. If it is too slow, the game switches to the flat garden by itself."
+   }
+  },
+  {
+   "name": "AC4: … and the Workshop draws Garden 3D again",
+   "ok": true,
+   "saw": {
+    "again": "true",
+    "worlds": {
+     "gd": 0,
+     "gd3": 1
+    }
+   }
+  },
+  {
+   "name": "0 console errors through the 3d drive",
+   "ok": true,
+   "saw": []
+  },
+  {
+   "name": "0 network errors through the 3d drive",
+   "ok": true,
+   "saw": []
+  }
+ ],
+ "readings": {
+  "boot3d": {
+   "ready": {
+    "supported": "true",
+    "ready": "true",
+    "helpers": "sibling",
+    "w": "8",
+    "h": "6"
+   },
+   "worlds": {
+    "gd": 0,
+    "gd3": 1
+   },
+   "mounts": {
+    "gd": 1,
+    "gd3": 1
+   },
+   "stored": null
+  },
+  "agree": [
+   {
+    "label": "start",
+    "engine": {
+     "x": 0,
+     "y": 3,
+     "d": 1,
+     "wet": 0,
+     "tulips": 3
+    },
+    "drawn": {
+     "x": 0,
+     "y": 3,
+     "d": 1,
+     "gliding": false,
+     "wet": 0,
+     "tulips": 3
+    }
+   },
+   {
+    "label": "two forwards",
+    "engine": {
+     "x": 2,
+     "y": 3,
+     "d": 1,
+     "wet": 0,
+     "tulips": 3
+    },
+    "drawn": {
+     "x": 2,
+     "y": 3,
+     "d": 1,
+     "gliding": false,
+     "wet": 0,
+     "tulips": 3
+    }
+   },
+   {
+    "label": "left",
+    "engine": {
+     "x": 2,
+     "y": 3,
+     "d": 0,
+     "wet": 0,
+     "tulips": 3
+    },
+    "drawn": {
+     "x": 2,
+     "y": 3,
+     "d": 0,
+     "gliding": false,
+     "wet": 0,
+     "tulips": 3
+    }
+   },
+   {
+    "label": "water",
+    "engine": {
+     "x": 2,
+     "y": 3,
+     "d": 0,
+     "wet": 1,
+     "tulips": 3
+    },
+    "drawn": {
+     "x": 2,
+     "y": 3,
+     "d": 0,
+     "gliding": false,
+     "wet": 1,
+     "tulips": 3
+    }
+   },
+   {
+    "label": "fifteen presses",
+    "engine": {
+     "x": 6,
+     "y": 3,
+     "d": 1,
+     "wet": 3,
+     "tulips": 3
+    },
+    "drawn": {
+     "x": 6,
+     "y": 3,
+     "d": 1,
+     "gliding": false,
+     "wet": 3,
+     "tulips": 3
+    }
+   },
+   {
+    "label": "after the win",
+    "engine": {
+     "x": 6,
+     "y": 3,
+     "d": 1,
+     "wet": 3,
+     "tulips": 3
+    },
+    "drawn": {
+     "x": 6,
+     "y": 3,
+     "d": 1,
+     "gliding": false,
+     "wet": 3,
+     "tulips": 3
+    }
+   },
+   {
+    "label": "predict hit",
+    "engine": {
+     "x": 2,
+     "y": 3,
+     "d": 1,
+     "wet": 0,
+     "tulips": 3
+    },
+    "drawn": {
+     "x": 2,
+     "y": 3,
+     "d": 1,
+     "gliding": false,
+     "wet": 0,
+     "tulips": 3
+    }
+   }
+  ],
+  "midGlide": {
+   "engine": {
+    "x": 1,
+    "y": 3,
+    "d": 1,
+    "wet": 0,
+    "tulips": 3
+   },
+   "drawn": {
+    "x": 1,
+    "y": 3,
+    "d": 1,
+    "gliding": true,
+    "wet": 0,
+    "tulips": 3
+   }
+  },
+  "play": {
+   "samples": 45,
+   "distinctTiles": 7,
+   "won": true,
+   "settled": {
+    "engine": {
+     "x": 6,
+     "y": 3,
+     "d": 1,
+     "wet": 3,
+     "tulips": 3
+    },
+    "drawn": {
+     "x": 6,
+     "y": 3,
+     "d": 1,
+     "gliding": false,
+     "wet": 3,
+     "tulips": 3
+    }
+   }
+  },
+  "underCard": {
+   "attrs": {
+    "class": "gd3-world",
+    "data-gd3-world": "true",
+    "data-w": "8",
+    "data-h": "6",
+    "data-camera": "plot",
+    "role": "group",
+    "aria-label": "The garden",
+    "data-supported": "true",
+    "data-helpers": "sibling",
+    "data-meshes": "41",
+    "data-draw-calls": "41",
+    "data-ready": "true",
+    "data-frame-ms": "28.3",
+    "data-idle": "true",
+    "style": "aspect-ratio: 8 / 6; display: block;"
+   },
+   "worlds": {
+    "gd": 0,
+    "gd3": 1
+   },
+   "stored": null
+  },
+  "frame": {
+   "frameMs": "28.3",
+   "drawCalls": "41",
+   "meshes": "41",
+   "renderer": "swiftshader (software), this Mac"
+  },
+  "closeup": {
+   "before": {
+    "x": 718.1655434839128,
+    "y": 593.9315093312192,
+    "cx": 472,
+    "cy": 450.046875
+   },
+   "after": {
+    "x": 441.801127873765,
+    "y": 435.6696737907122,
+    "cx": 472,
+    "cy": 450.046875
+   },
+   "state": {
+    "tx": 2.865358858797342,
+    "tz": 0.5822016040860837,
+    "dist": 6.951749320113322
+   }
+  },
+  "beforeHit": {
+   "worlds": {
+    "gd": 0,
+    "gd3": 1
+   },
+   "stored": null,
+   "attrs": {
+    "class": "gd3-world",
+    "data-gd3-world": "true",
+    "data-w": "8",
+    "data-h": "6",
+    "data-camera": "plot",
+    "role": "group",
+    "aria-label": "The garden",
+    "data-supported": "true",
+    "data-helpers": "sibling",
+    "data-meshes": "43",
+    "data-draw-calls": "43",
+    "data-ready": "true",
+    "data-frame-ms": "44.9",
+    "data-idle": "true",
+    "style": "aspect-ratio: 8 / 6; display: block;"
+   }
+  },
+  "slow": {
+   "swapped": {
+    "gd": 1,
+    "gd3": 0
+   },
+   "stored": {
+    "mode": "2d",
+    "why": "slow"
+   },
+   "mountsBefore": {
+    "gd": 2,
+    "gd3": 2
+   },
+   "swapMs": 3787
+  },
+  "nextOpen": {
+   "before": {
+    "gd": 4,
+    "gd3": 2
+   },
+   "after": {
+    "gd": 5,
+    "gd3": 2
+   },
+   "worlds": {
+    "gd": 1,
+    "gd3": 0
+   }
+  }
+ },
+ "consoleErrors": [],
+ "networkErrors": []
+}
