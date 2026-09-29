@@ -1,6 +1,6 @@
 # IG-006 — Olive reads: three blocks a child can see, wire and doubt
 
-**Opened 2026-09-28**, from README §1 point 6 and rulings R6, R7. **Status: ⬜ not started.** Depends on
+**Opened 2026-09-28**, from README §1 point 6 and rulings R6, R7. **Status: 🟡 built and driven in session 2 (2026-09-29, branch `ig006-olive-reads`) — AC1–7 done, AC5’s FR read is Richard’s, AC8 CPU exam 2 of 3 (§7).** Depends on
 IG-001 (D6 answers shown, D7 the sensor) and IG-002 (`note`, `sign` things). Lane C.
 
 ## 1. The person sentence
@@ -72,3 +72,112 @@ the plot, so Olive cannot name a thing that is not there; the note's text is con
 ("is the tulip dying?") is the failing column — do not add it because a request would read better. Rung 9's
 old line said "Olive used the letter e anyway" without checking: the lesson page checks. A model probe that
 passed last session is a sample: AC4 is re-run, not inherited.
+
+## 7. Session 2 (2026-09-29, lane C, worktree `ig006-olive-reads` cut from `f784833b8`)
+
+**Built** (commits `3974f1090`, `d87693044`, `c81d48ed4`, `e7d9e9198` on `ig006-olive-reads`):
+
+- **The shell** (`garden-desktop/shell/`): the rung table is three BLOCKS (`say-thanks` n1, `read` n2, `is-it-a` n3),
+  five LESSONS (`count-tulips`, `maths`, `no-letter-e`, `tall-tales`, `translate`) and the hint voicing, each marked
+  `use`. The thirteen other rungs went with their lists, written answers and probes. `read`: the note (an `engine` list
+  slot, `notes_read`) + the plot's things as the one-of enum (`plot_objects`), named in the prompt (`{objects}`).
+  `is-it-a`: `thing` is an `engine` slot (`things_ahead`, grown to the engine's names). The exam is re-cut (32 probes)
+  and `read` / `is-it-a` are SCORED (≥ 5 of 6, ≥ 15 of C1's 18, every sample taken). The stub answers the new rungs and
+  a scripted LIST answers in turn (the vote). The contract test reads a sentence in the dial (it read `value`: vacuous).
+- **The engine** (`cg005Olive.ts` `OLIVE_ENGINE`, spliced into `cg002Scripts.ts`): Olive blocks are `olive:<rung>`;
+  `read` sends the note on the tile ahead (else the first on the plot) in the run's language and the plot's things in
+  world order; `is it a…?` sends the thing ahead as the ENGINE names it (a thing, else the tile; a block's own `thing`
+  is overwritten); `times: 3` parks three times, then the majority is the answer `if Olive says yes` reads, with "2 of 3
+  said yes" on the robot; the sensor `olive_read:<id>`; bubbles "Olive read: …" / "Olive: yes" (EN/FR); a list word is
+  sent in the run's language (a slot picked in English no longer breaks a French run); a goal `tulips_watered`.
+- **The palette and the after-run line**: at band 10–12 the Olive entries are exactly `olive:say-thanks`, `olive:read`,
+  `olive:is-it-a` (a lesson is never a block); band 7–9 none. `OLIVE_RUNGS` is the three blocks; the after-run lines are
+  `oliveRung1–3` and `oliveResting1–3` (each names its block); no `oliveRung4–18` remains.
+- **Cards** (`cg003Content.ts` `BLOCK_CARDS`, every palette entry, 18): label, line, example. `Logic/Card gate` holds a
+  first palette tap (the program as before, the card named), "Got it" marks it seen, the next tap places; a `?` chip per
+  kind placed reopens it. The example is drawn by a second, locked Block List. `or6Line` is `is it a…?`'s line.
+- **Requests** (appended to `REQUESTS`, band 10–12, Pip): `mamie-note` (read → if), `rock-flower` (is it a…? ×3 → if),
+  `sami-thanks` (say). Copy in `cg003Content.ts` `IG006_WORDS`.
+- **Olive's lessons** on Skills (`Skills/Lesson card` ×5, `Logic/Lesson rows`, `Logic/Olive lesson`): the canned
+  question, Ask Olive, her answer (or her written one), and the page's check — the program's count (4), the sum (23),
+  every e marked on the sun, the book under each tall tale, a person's translation both ways. Band 10–12 only.
+
+**Readings** (the final tree, `e7d9e9198`; exit code first):
+- Shell `node --test tests/*.test.js` exit 0 — **91 / 91** (90 before).
+- Garden specs, each exit 0: cg001 **22**, cg002 **128** (122), cg003Template **96** (92), cg005 **41** (34), cg006
+  **83** (83), ig007 **20** — **390** (373 before).
+- `npm run template:garden` exit 0, twice, the artefact's checksum identical (`df755839…` both runs); `grep -rE
+  "ask:[a-z]|oliveRung([4-9]|1[0-9])"` over `templates/bot-garden`: **0 files** (also a template-gate assertion).
+- Page drive (`drive-pages.sh` repointed; generate 0, deploy 0, drive 0): **283 / 283** (179 before; the IG-006 pass at
+  1368×912 and 390×844 in EN and FR), 0 console errors, 0 network errors. Log `…-scratch/pages/drive.log`, JSON
+  `pages/drive.json`, shots `pages/shots/ig006-*.png` — LOOKED at: the read card with its example (read, if Olive read
+  “red tulip”, water) and Got it; Mamie's plot with the red tulip at (2,2) watered and the yellow at (2,4) dry; the vote
+  plot with (1,2) watered, owl line "Olive said whether the thing ahead is one…"; the resting line naming "is it a…?";
+  the five lessons with "Olive: 6 / counts 4", "14 / 23", every e on the sun, the book lines, both directions.
+- Olive drive (`drive-olive.sh`, stub server = the shell's real route): route exit 0 **5 / 5** (4 before), pages exit 0
+  **22 / 22**, 0 skip, 0 console errors. Shots `…-scratch/olive/shots/ig006-*-route.png` (looked at: the lessons
+  through the route show the readout's canned answers under each question).
+- **AC4, the real model** (Qwen3.5-0.8B Q4_K_M, the primary checkout's `shell/build-output/model/`, read-only via
+  `--model`; `olive-contract.mjs`; 2026-09-29, 10:40–10:51):
+  - Metal, first run on the first sign ("Water the tulips, never the rock."): read **4/6** (RD2 "rocher" / "rock": a
+    negation, TPL-012's failing column), is it a…? 18/18 → the sign became "The tulips want water today.".
+  - Metal ×3 with the exam's options the other way round ([rock, red tulip]): read 5/6 ×3 — EN RD2 "rock" 3/3 (a
+    first-option pull when the note names a kind); the exam now asks in the engine's own plot order (gated).
+  - **Final — Metal ×3: read 6/6, 5/6, 5/6; is it a…? 18/18, 18/18, 17/18; contract PASS ×3.**
+  - **Final — CPU (2 threads) ×3: read 5/6, 5/6, 5/6; is it a…? 17/18, 18/18, 18/18; contract PASS, PASS and one
+    FAIL — run 1's P18 (the tall-tales lesson: she kept the fence 2 of 3, so its 🎓 did not show).** The miss in every
+    5/6 is RD2-en (the sign in English → "rock"). Per call 0.35–1.6 s (Metal), 0.65–2.9 s (CPU); exam 26–44 s.
+  - JSON/logs: `…-scratch/contract/{metal-a,b,c,cpu-a,b,c,metal-1,metal-m2,m3,m4}.{json,log}`.
+
+**Acceptance criteria:** 1 ✅ (palette, both bands, the artefact grep). 2 ✅ (engine, route, page; both languages,
+both sizes). 3 ✅ (the name from the engine, "2 of 3 said yes", majority → if; also "1 of 3" → dry). 4 ✅ with the
+readings above (≥ 5/6 and ≥ 15/18 on every final run, both paths). 5 ✅ built and driven — **the FR lines are Richard's
+to read (below); not closed here**. 6 ✅. 7 ✅. 8 partly: both languages, both sizes, 0 console errors, the Olive page
+drive on the stub ✅; "the exam green 3× on both paths": Metal 3/3, **CPU 2/3** (P18, a lesson's probe, not a block).
+
+**Not done:** `go to [what Olive read]` — the engine has no `go to` block (it needs a path-finder and a palette entry);
+not built. AC5's FR read (Richard). The kit-level `?` (see deviation 2).
+
+**Deviations, with the reason:**
+1. **`cg002Content.ts` beyond the append** (lane A's file): `OLIVE_RUNGS` cut to the three blocks, the `HINTS`
+   `oliveRung1–18` lines replaced by `oliveRung1–3` + `oliveResting1–3`, four requests' `rungs:` lines removed and two
+   narrowed (`bowl-if` → `is-it-a`, `letter-say` → `say-thanks`); the three requests are ONE spread at the list's end
+   plus a function at the file's end. AC1/AC7 cannot hold otherwise. Small hunks; the tulips/path-stones entries and the
+   `Thing`/`Goal` types are untouched (my requests cast locally).
+2. **The `?` is a chip row under the steps**, one per kind placed — not a button on the block: the kit is lane A's
+   this session, and a tap on a placed simple block removes it. For the merge: a `?` in Block List's block (an `onHelp`
+   output) would put it on the block.
+3. **Vocabulary added (brief §4 has none of it):** a tulip's `color` (`red` | `yellow`) — the 2D kit draws every tulip
+   alike, so the red and yellow rows LOOK the same (shot `ig006-ac2-note-*`); a `note`/`sign`'s `text` is stored in
+   English and the engine sends its twin from `notes_read` in the run's language; goal `tulips_watered`. **On my branch
+   the note, the sign and the rocks draw NOTHING** (no sprite; and `Logic/Draw world` passes only tulip/puddle/letter/
+   bowl/label/stone/egg/food — lane A's Draw world edit must add `note`, `sign`, `rock`). I added no sprite.
+4. "The rock and the rose": no rose kind or sprite exists, so the flower is a red tulip; the request is `rock-flower`,
+   "Water the flowers, not the rocks".
+5. `read` has no slot: the engine takes the note ahead, else the first on the plot (the task's "picked from what is
+   there"; each request has one).
+6. Cards seen are per app session (a Variable), not saved per profile; the lessons are a section of the Skills page.
+7. `cg006Probes.ts`/`cg006Requests.test.ts`: the promoted moments' rungs 13–18 and their probes are kept as evidence
+   (`RETIRED_RUNGS`/`RETIRED_LISTS`/`RETIRED_PROBES`, re-runnable by `mergeTemplates`), no longer shipped.
+8. Left dead, for a later cut: the proposal card and Accept proposal (no rung answers blocks); the cut rungs' words
+   `or2–or18`/`mo*` in `WORDS` (lane A's file; `or7–11Title/Lesson` are reused by the lessons).
+9. One feature commit for §4's groups 1–6 (the template is regenerated from all of them; every commit green), then the
+   row-id fix, the drives, the AC4 fix.
+10. Found by the drive: a For Each row is a Noodl Object, global by `id` — five lesson cards showed one card's lines
+    (`l0`, `l1`…). Fixed (`<lesson>:l<i>`, `help:<block>`), gated.
+
+**Could not verify:** the tablet; the note/sign/rock sprites and a red/yellow tulip drawn (lane A, after the merge);
+the kids; "every e" on a sentence with a line wrap mid-word (the marked e is its own piece, so a word can break at an e —
+seen as "flow|er"); the vote's per-ask bubble (only the final count is spoken). Once, the Olive drive started with the
+1-min load at 7.48 (another lane's job) — it passed, but the gate was not waited on that start.
+
+**For Richard — the FR lines to read (AC5), all new this session:** the cards `cdFwd` … `cdAsk`, `cdOliveSay`,
+`cdOliveRead`, `cardGotIt` « Compris », `cardExample`, `cardHelpsH`; the blocks `rungRead` « lire le mot », `slotTimes`,
+`timesOnce`, `timesThree`, `oliveReadSay` « Olive a lu : {x} », `oliveSaysBubble`, `oliveVote` « {n} sur {of} ont dit
+{x} », `oliveVote1` « … a dit … », `sOliveReadX` « Olive a lu « {x} » »; the after-run lines `oliveRung1–3`,
+`oliveResting1–3`; the three requests `rqNote*`, `rqFlower*`, `rqThanks*`, `stickerNote/Flower/Thanks`, `giftNote/
+Flower/Thanks`, `subMamieNote`, `subRockFlower`, `subSamiThanks`; the lessons `lsRead`, `lsAsk`, `lsQ7–11`, `lsCheck7–9`,
+`lsCheck9None`, `lsBook`, `lsTrue1–3`, `lsFrEn`, `lsEnFr`, `lsWobbly`; the model's inputs `notes_read.fr`
+(« Les rouges, pas les jaunes. », « Les tulipes veulent de l'eau aujourd'hui. », « Porte la lettre à Mamie Rose. ») and
+`plot_objects.fr` / the new `things_ahead.fr` words. (Keys: `cg003Content.ts` `IG006_WORDS`, `cg005Olive.ts`
+`OLIVE_WORDS`, `cg002Content.ts` `HINTS`, `olive-templates.json` `lists`.)
