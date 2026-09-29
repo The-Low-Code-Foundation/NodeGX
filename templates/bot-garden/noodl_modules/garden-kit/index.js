@@ -1085,8 +1085,47 @@
       ['ellipse', { cx: 32, cy: 56, rx: 16, ry: 3, fill: 'rgba(0,0,0,.12)' }],
       ['circle', { cx: 32, cy: 30, r: 21, fill: '#3FA66B', stroke: '#fff', strokeWidth: 3 }],
       ['path', { d: 'M21 30l8 8 15-16', fill: 'none', stroke: '#fff', strokeWidth: 6, strokeLinecap: 'round', strokeLinejoin: 'round' }]
+    ] },
+    // P106 IG-004 (lane E): the islanders standing by their plots (the mockup's: Mamie Rose in violet with white hair,
+    // Sami in his blue cap with a satchel, Biscuit the cat), and the padlock on a locked plot.
+    islMamie: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 60, rx: 13, ry: 3, fill: 'rgba(0,0,0,.14)' }],
+      ['path', { d: 'M20 60l4-26h16l4 26z', fill: '#8F6BFF' }],
+      ['circle', { cx: 32, cy: 22, r: 10, fill: '#F7D3B5' }],
+      ['path', { d: 'M21 20a11 11 0 0122 0c-3-4-7-5-11-5s-8 1-11 5z', fill: '#E9E4EF' }],
+      ['circle', { cx: 32, cy: 9, r: 5, fill: '#E9E4EF' }],
+      ['circle', { cx: 28.5, cy: 23, r: 1.6, fill: '#2E2A3D' }],
+      ['circle', { cx: 35.5, cy: 23, r: 1.6, fill: '#2E2A3D' }]
+    ] },
+    islSami: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 60, rx: 13, ry: 3, fill: 'rgba(0,0,0,.14)' }],
+      ['path', { d: 'M20 60l4-26h16l4 26z', fill: '#3E63C8' }],
+      ['rect', { x: 38, y: 38, width: 9, height: 12, rx: 2, fill: '#C98A5E' }],
+      ['circle', { cx: 32, cy: 22, r: 10, fill: '#F7D3B5' }],
+      ['rect', { x: 21, y: 10, width: 22, height: 7, rx: 2, fill: '#3E63C8' }],
+      ['rect', { x: 18, y: 15, width: 28, height: 3, rx: 1.5, fill: '#2F4FA8' }],
+      ['circle', { cx: 28.5, cy: 23, r: 1.6, fill: '#2E2A3D' }],
+      ['circle', { cx: 35.5, cy: 23, r: 1.6, fill: '#2E2A3D' }]
+    ] },
+    islBiscuit: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 30, cy: 58, rx: 20, ry: 3, fill: 'rgba(0,0,0,.14)' }],
+      ['path', { d: 'M10 44q-6-8 0-16', stroke: '#F3B76A', strokeWidth: 4, fill: 'none', strokeLinecap: 'round' }],
+      ['rect', { x: 12, y: 38, width: 30, height: 18, rx: 7, fill: '#F3B76A' }],
+      ['rect', { x: 34, y: 26, width: 20, height: 18, rx: 6, fill: '#F3B76A' }],
+      ['path', { d: 'M36 28l2-8 5 6zM52 28l-2-8-5 6z', fill: '#F3B76A' }],
+      ['circle', { cx: 40.5, cy: 34, r: 1.6, fill: '#2E2A3D' }],
+      ['circle', { cx: 47.5, cy: 34, r: 1.6, fill: '#2E2A3D' }],
+      ['path', { d: 'M42.5 38h3l-1.5 2z', fill: '#E06B8A' }]
+    ] },
+    padlock: { box: '0 0 64 64', shapes: [
+      ['path', { d: 'M20 30V21a12 12 0 0124 0v9', fill: 'none', stroke: '#8E8CA0', strokeWidth: 6 }],
+      ['rect', { x: 12, y: 28, width: 40, height: 30, rx: 6, fill: '#FFD166', stroke: '#C98A00', strokeWidth: 2 }],
+      ['circle', { cx: 32, cy: 40, r: 4, fill: '#2E2A3D' }],
+      ['rect', { x: 30, y: 42, width: 4, height: 8, rx: 1, fill: '#2E2A3D' }]
     ] }
   };
+  /** IG-004: the islander a thing's `who` names, as its sprite. */
+  var ISLANDER_SPRITES = { mamie: 'islMamie', sami: 'islSami', biscuit: 'islBiscuit' };
   /** The thing kinds drawn as a sprite of the same name (a tulip, a puddle, a bowl and a rock have rules of their own). */
   var THING_SPRITES = { letter: 1, stone: 1, postbox: 1, flag: 1, egg: 1, food: 1, sign: 1, note: 1, tick: 1 };
 
@@ -1151,6 +1190,11 @@
     '.gd-bubble:after{content:"";position:absolute;left:34%;bottom:-8px;border:8px solid transparent;border-top-color:#fff;border-bottom:0}\n' +
     '.gd-bubble.gd-olive{background:#EEE8FF;color:#4A2FA6}.gd-bubble.gd-olive:after{border-top-color:#EEE8FF}\n' +
     '.gd-bubble small{display:block;font-weight:700;color:#6E6784;font-size:11px}.gd-bubble.gd-olive small{color:#6A5AA8}\n' +
+    '.gd-cell>.gd-islander{inset:-45% -25% 0 -25%;width:150%;height:145%;z-index:2}\n' +
+    '.gd-isl-say{position:absolute;left:50%;bottom:150%;transform:translateX(-30%);z-index:2;background:#fff;border-radius:12px;padding:5px 9px;font-weight:800;font-size:12px;line-height:1.25;box-shadow:0 6px 18px rgba(72,52,20,.12);width:max-content;max-width:170px;pointer-events:none;color:#2E2A3D;text-align:left}\n' +
+    '.gd-isl-say:after{content:"";position:absolute;left:30%;bottom:-6px;border:6px solid transparent;border-top-color:#fff;border-bottom:0}\n' +
+    '.gd-cell>.gd-padlock{inset:auto;left:-80%;top:-80%;width:160%;height:160%;z-index:3}\n' +
+    '.gd-fence{position:absolute;z-index:1;box-sizing:border-box;border:3px dashed #A9773F;border-radius:6px;background:rgba(46,42,61,.10);pointer-events:none}\n' +
     '@media (prefers-reduced-motion: reduce){.gd-puddle{animation:none}.gd-bump{animation:none}.gd-cheer .gd-turn{animation:none}.gd-bot{transition:none}.gd-turn{transition:none}}';
 
   /** A rising count is a new event; a mount, the same value, a fall or junk is not (the Boost-count rule). */
@@ -1310,6 +1354,12 @@
               if (size) extras.push(spriteEl(ROCK_SPRITE[size], 'rock-' + i, 'gd-thing gd-boulder gd-boulder-' + size, { 'data-left': String(t.left === undefined ? '' : t.left) }));
             }
             else if (THING_SPRITES[t.kind]) extras.push(spriteEl(t.kind, t.kind + '-' + i, 'gd-thing gd-' + t.kind));
+            // IG-004: an islander by her plot, her open request as a bubble; the padlock over a locked plot.
+            else if (t.kind === 'islander' && ISLANDER_SPRITES[t.who]) {
+              extras.push(spriteEl(ISLANDER_SPRITES[t.who], 'islander-' + i, 'gd-thing gd-islander gd-islander-' + t.who, { 'data-who': String(t.who) }));
+              if (t.say) extras.push(h('span', { key: 'say-' + i, className: 'gd-isl-say', 'data-who': String(t.who) }, String(t.say)));
+            }
+            else if (t.kind === 'padlock') extras.push(spriteEl('padlock', 'padlock-' + i, 'gd-thing gd-padlock'));
             else if (t.kind === 'label') extras.push(h('span', { key: 'label-' + i, className: 'gd-label' }, String(t.text || '')));
           });
           if (c.kind === 'tree') kids.push(spriteEl('tree', 'tree'));
@@ -1369,6 +1419,27 @@
           );
         });
 
+        // IG-004: a fence round a locked plot spans w × h tiles from its (x, y): one element over the grid, not a cell's.
+        var fenceEls = things
+          .filter(function (t) {
+            return t.kind === 'fence';
+          })
+          .map(function (t, i) {
+            var fw = Math.max(1, Math.floor(Number(t.w)) || 1);
+            var fh = Math.max(1, Math.floor(Number(t.h)) || 1);
+            return h('div', {
+              key: 'fence-' + i,
+              className: 'gd-fence',
+              'data-fence': Number(t.x) + ',' + Number(t.y) + ',' + fw + ',' + fh,
+              style: {
+                left: (grid.w ? (Number(t.x) * 100) / grid.w : 0).toFixed(4) + '%',
+                top: (grid.h ? (Number(t.y) * 100) / grid.h : 0).toFixed(4) + '%',
+                width: (grid.w ? (fw * 100) / grid.w : 0).toFixed(4) + '%',
+                height: (grid.h ? (fh * 100) / grid.h : 0).toFixed(4) + '%'
+              }
+            });
+          });
+
         var bubbleEl = null;
         if (shownBubble) {
           var who = Math.max(0, Math.min(robots.length - 1, Number(shownBubble.robot) || 0));
@@ -1410,6 +1481,7 @@
           },
           h('style', { key: 'css' }, WORLD_CSS),
           cellEls,
+          fenceEls,
           robotEls,
           bubbleEl
         );

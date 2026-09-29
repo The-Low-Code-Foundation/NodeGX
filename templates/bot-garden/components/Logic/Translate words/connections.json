@@ -803,6 +803,60 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-ig4AtWork",
+      "toId": "translatewordsOut",
+      "toProperty": "ig4AtWork"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig4Find",
+      "toId": "translatewordsOut",
+      "toProperty": "ig4Find"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig4Home",
+      "toId": "translatewordsOut",
+      "toProperty": "ig4Home"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig4Locked",
+      "toId": "translatewordsOut",
+      "toProperty": "ig4Locked"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig4Open",
+      "toId": "translatewordsOut",
+      "toProperty": "ig4Open"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig4Tap",
+      "toId": "translatewordsOut",
+      "toProperty": "ig4Tap"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig4Won",
+      "toId": "translatewordsOut",
+      "toProperty": "ig4Won"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig4Working",
+      "toId": "translatewordsOut",
+      "toProperty": "ig4Working"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig4WorksHere",
+      "toId": "translatewordsOut",
+      "toProperty": "ig4WorksHere"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-isEyebrow",
       "toId": "translatewordsOut",
       "toProperty": "isEyebrow"
