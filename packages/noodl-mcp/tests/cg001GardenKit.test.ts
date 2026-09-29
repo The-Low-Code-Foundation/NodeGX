@@ -709,7 +709,7 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       const src = fs.readFileSync(SOURCE, 'utf8');
       expect(src).toMatch(/t\.closest\('\[data-x\],\[data-help\],/);
       expect(node('garden-kit.BlockList').css as string).toContain('.gd-help{');
-      expect(node('garden-kit.BlockList').css as string).toContain('.gd-pal-item .gd-help{margin-left:-6px;');
+      expect(node('garden-kit.BlockList').css as string).toContain('.gd-pal-item .gd-help{margin-left:-4px;');
     });
 
     it('🔴 P108 IW-001 F5: a tap on a placed simple block selects it (a second tap lets go) and never removes it — only the cross removes', () => {

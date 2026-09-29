@@ -373,7 +373,7 @@
     // P108 IW-001 F4: the ? on a DRAWER block (Show Help) — the block's card. Violet ink on white, 24 px, tucked against
     // the block's right edge (never over its word), a white ring so it reads on every block colour.
     '.gd-pal-item{display:inline-flex;align-items:center}\n' +
-    '.gd-pal-item .gd-help{margin-left:-6px;position:relative;z-index:1;box-shadow:0 0 0 2px #fff,0 1px 3px rgba(0,0,0,.25)}\n' +
+    '.gd-pal-item .gd-help{margin-left:-4px;position:relative;z-index:1;box-shadow:0 0 0 2px #fff,0 1px 3px rgba(0,0,0,.25)}\n' +
     '.gd-locked .gd-pal-item .gd-help{pointer-events:auto}\n' +
     // F5: a tapped simple block is selected (a ring), never removed.
     '.gd-row[data-sel="1"]>.gd-blk{outline:3px solid var(--gd-control);outline-offset:2px}\n' +

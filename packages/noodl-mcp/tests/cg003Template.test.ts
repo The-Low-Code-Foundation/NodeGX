@@ -447,7 +447,7 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(GARDEN_CSS).not.toContain('min(52vh, 460px)');
       expect(GARDEN_CSS).toMatch(/\.bg-blocks-box \.gd-prog \{ flex: 1 1 auto; min-height: 120px; max-height: 60vh; overflow-y: auto;/);
       expect(GARDEN_CSS).toMatch(/\.bg-steps \{ align-self: stretch !important; contain: size; min-height: calc\(100vh - 16px\);/);
-      expect(GARDEN_CSS).toMatch(/\.bg-blocks-box > \.gd-blocks \{ display: grid !important; grid-template-columns: minmax\(132px, 40%\) minmax\(0, 1fr\);/);
+      expect(GARDEN_CSS).toMatch(/\.bg-blocks-box > \.gd-blocks \{ display: grid !important; grid-template-columns: minmax\(148px, 42%\) minmax\(0, 1fr\);/);
     });
   });
 

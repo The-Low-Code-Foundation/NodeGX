@@ -335,8 +335,8 @@ ${owlColourRule}
 @media (min-width: 981px) {
   .bg-steps { align-self: stretch !important; contain: size; min-height: calc(100vh - 16px); display: flex !important; flex-direction: column !important; }
   .bg-steps > .bg-blocks-box { flex: 1 1 0 !important; min-height: 0 !important; }
-  .bg-blocks-box > .gd-blocks { display: grid !important; grid-template-columns: minmax(132px, 40%) minmax(0, 1fr); gap: 10px; height: 100%; }
-  .bg-blocks-box .gd-palette { margin: 0; flex-direction: column; flex-wrap: nowrap; align-items: stretch; overflow-y: auto; overscroll-behavior: contain; min-height: 0; }
+  .bg-blocks-box > .gd-blocks { display: grid !important; grid-template-columns: minmax(148px, 42%) minmax(0, 1fr); gap: 10px; height: 100%; }
+  .bg-blocks-box .gd-palette { margin: 0; padding: 8px; flex-direction: column; flex-wrap: nowrap; align-items: stretch; overflow-y: auto; overscroll-behavior: contain; min-height: 0; }
   .bg-blocks-box .gd-palette .gd-pal-item > .gd-blk { flex: 1 1 auto; min-width: 0; }
   .bg-blocks-box .gd-prog { max-height: none; min-height: 0; }
 }
