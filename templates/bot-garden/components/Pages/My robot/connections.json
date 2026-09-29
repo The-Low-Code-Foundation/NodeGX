@@ -209,7 +209,7 @@
     },
     {
       "fromId": "rbFleetEach",
-      "fromProperty": "itemOutput-id",
+      "fromProperty": "itemOutput-robotId",
       "toId": "rbSetName",
       "toProperty": "robotId"
     },
@@ -251,7 +251,7 @@
     },
     {
       "fromId": "rbFleetEach",
-      "fromProperty": "itemOutput-id",
+      "fromProperty": "itemOutput-robotId",
       "toId": "rbSetColour",
       "toProperty": "robotId"
     },
@@ -293,7 +293,7 @@
     },
     {
       "fromId": "rbFleetEach",
-      "fromProperty": "itemOutput-id",
+      "fromProperty": "itemOutput-robotId",
       "toId": "rbSetHat",
       "toProperty": "robotId"
     },

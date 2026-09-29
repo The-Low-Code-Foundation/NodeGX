@@ -191,18 +191,25 @@ for (var n = 0; n < ISL.length; n++) {
   if (pin && pin.isOpen && pin.requestId) for (var c2 = 0; c2 < theirs.length; c2++) if (theirs[c2].id === pin.requestId) { at = theirs[c2]; open = true; }
   if (!at) for (var c3 = 0; c3 < theirs.length && !at; c3++) if (done.indexOf(theirs[c3].id) === -1) at = theirs[c3];
   if (!at) at = theirs[theirs.length - 1];
-  var door = { x: at.x + PW - 1, y: at.y + PH };
+  // P106 IG-005: she stands below her plot's left side (its third tile, so her bubble — drawn mostly to her right — is not
+  // cut by the island's left edge), and her bubble lies over her own open plot, where nobody works: never under a robot
+  // at work on the next plot (the 390 look drive: Sami's bubble under Cobble, who works the stones beside it).
+  var door = { x: at.x + 2, y: at.y + PH };
   at.door = door;
   var atReq = null;
   for (var r2 = 0; r2 < list.length; r2++) if (list[r2].id === at.id) atReq = list[r2];
   deco.push({ kind: 'islander', who: who, x: door.x, y: door.y, sayKey: open && atReq && atReq.copyKeys ? String(atReq.copyKeys.title || '') : '', requestId: at.id });
 }
 // Her robots not at work are at home, side by side on the home path.
+// P106 IG-005: the robots at home stand apart on the home slot (its path, then its grass), so their names never cover one
+// another on a phone's 16 px tiles (a robot is drawn 56 px at least): Pip on the path, the others 3–5 tiles away.
+var HOME_SPOTS = [[0, 0], [3, 2], [5, 0], [-1, 2]];
 var home = [], homeN = 0;
 for (var m = 0; m < mine.length; m++) {
   if (!mine[m] || busy[mine[m].id]) continue;
   // IG-005: each in its own look (Draw world draws a robot's look over the page's).
-  var hr = { id: String(mine[m].id), x: HOME.x + homeN, y: HOME.y, d: 2, carry: [], can: null, home: true };
+  var spot = HOME_SPOTS[homeN] || [homeN, 0];
+  var hr = { id: String(mine[m].id), x: HOME.x + spot[0], y: HOME.y + spot[1], d: 2, carry: [], can: null, home: true };
   if (mine[m].name || mine[m].kind) hr.look = islLook(mine[m]);
   home.push(hr);
   homeN++;

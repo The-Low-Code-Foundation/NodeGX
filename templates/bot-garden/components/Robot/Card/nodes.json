@@ -14,6 +14,11 @@
           "type": "string"
         },
         {
+          "name": "robotId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
           "name": "kind",
           "plug": "output",
           "type": "string"
@@ -755,6 +760,11 @@
       "ports": [
         {
           "name": "id",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "robotId",
           "plug": "input",
           "type": "string"
         },

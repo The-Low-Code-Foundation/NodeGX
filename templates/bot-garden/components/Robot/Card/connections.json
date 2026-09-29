@@ -214,6 +214,12 @@
       "toProperty": "id"
     },
     {
+      "fromId": "rcIn",
+      "fromProperty": "robotId",
+      "toId": "rcOut",
+      "toProperty": "robotId"
+    },
+    {
       "fromId": "rcName",
       "fromProperty": "onTextChanged",
       "toId": "rcOut",

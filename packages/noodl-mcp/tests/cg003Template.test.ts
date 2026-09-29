@@ -978,7 +978,7 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(params(nodeIn(rb, 'rbFleetEach')).template).toBe(C.robotCard);
       expect(into(rb, 'rbFleetEach', 'items')).toEqual(['rbCards.cards']);
       for (const [u, value, signal, field] of [['rbSetName', 'name', 'named', 'name'], ['rbSetColour', 'colour', 'coloured', 'color'], ['rbSetHat', 'hat', 'hatted', 'hat']]) {
-        expect({ u, field: params(nodeIn(rb, u)).field, id: into(rb, u, 'robotId'), value: into(rb, u, 'value'), go: into(rb, u, 'go') }).toEqual({ u, field, id: ['rbFleetEach.itemOutput-id'], value: [`rbFleetEach.itemOutput-${value}`], go: [`rbFleetEach.itemOutputSignal-${signal}`] });
+        expect({ u, field: params(nodeIn(rb, u)).field, id: into(rb, u, 'robotId'), value: into(rb, u, 'value'), go: into(rb, u, 'go') }).toEqual({ u, field, id: ['rbFleetEach.itemOutput-robotId'], value: [`rbFleetEach.itemOutput-${value}`], go: [`rbFleetEach.itemOutputSignal-${signal}`] });
       }
       // The head: My robots, the right robot for the job.
       expect([into(rb, 'rbHead', 'eyebrow'), into(rb, 'rbHead', 'title')]).toEqual([['rbT.navRobot'], ['rbT.ig5Title']]);
@@ -1860,17 +1860,22 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
       expect(cards[2].whereText).toBe('Biscuit lends Pocket after “Feed me, but only if my bowl is empty”.');
       // Cobble's blocks: the moves, his own, the controls of 10–12 — each in its word and its block colour.
       const LBL: Record<string, string> = { fwd: 'bFwd', left: 'bLeft', right: 'bRight', pick: 'bPick', put: 'bPut', repeat: 'bRepeat', until: 'bUntil', if: 'bIf', when: 'bWhen', count_inc: 'bCountInc' };
-      expect(cards[1].abilities.map((a: any) => a.id)).toEqual(['fwd', 'left', 'right', 'pick', 'put', 'repeat', 'until', 'if', 'when', 'count_inc']);
-      expect(cards[1].abilities.map((a: any) => a.label)).toEqual(cards[1].abilities.map((a: any) => (WORDS as any)[LBL[a.id]].en));
+      const bare = (id: string) => id.slice(id.lastIndexOf('|') + 1);
+      expect(cards[1].abilities.map((a: any) => bare(a.id))).toEqual(['fwd', 'left', 'right', 'pick', 'put', 'repeat', 'until', 'if', 'when', 'count_inc']);
+      expect(cards[1].abilities.map((a: any) => a.label)).toEqual(cards[1].abilities.map((a: any) => (WORDS as any)[LBL[bare(a.id)]].en));
+      // 🔴 Every nested row id is its card's (a repeater row is global by id): no id is shared between two cards.
+      const ids = cards.flatMap((c: any) => [...c.abilities, ...c.paints, ...c.hats].map((r: any) => r.id));
+      expect(new Set(ids).size).toBe(ids.length);
+      expect(cards.map((c: any) => [c.id, c.robotId])).toEqual([['pip', 'r1'], ['cobble', 'cobble'], ['pocket', ''], ['echo', '']]);
       expect(cards[1].abilities.map((a: any) => a.cls.split(' ').pop())).toEqual(['bg-blk-motion', 'bg-blk-motion', 'bg-blk-motion', 'bg-blk-action', 'bg-blk-action', 'bg-blk-control', 'bg-blk-control', 'bg-blk-control', 'bg-blk-control', 'bg-blk-control']);
-      expect(cards[0].abilities.map((a: any) => a.id)).toContain('olive:read');
+      expect(cards[0].abilities.map((a: any) => bare(a.id))).toContain('olive:read');
       expect(cards[0].upgradeText).toBe('Empty slot · Bigger can · 6 waters · from Mamie Rose');
-      expect(cards[0].hats.find((h: any) => h.id === 'sun')).toMatchObject({ locked: false });
+      expect(cards[0].hats.find((h: any) => h.id === 'pip|sun')).toMatchObject({ locked: false });
       expect(cards[2].paints).toEqual([]);
-      expect(cards[1].paints.find((p: any) => p.selected).id).toBe('#7A8CA3');
+      expect(cards[1].paints.find((p: any) => p.selected).id).toBe('cobble|#7A8CA3');
       // At 7–9 the blocks are the captions and no control or Olive block.
       const young = run(ROBOT_CARDS_SCRIPT, { robots: fam.robots, hats: fam.hats, band: 1, lang: 'en', words: WORD_ROWS, requests: REQ_ROWS }).cards;
-      expect(young[0].abilities.map((a: any) => a.id)).toEqual(['fwd', 'left', 'right', 'water', 'fill']);
+      expect(young[0].abilities.map((a: any) => bare(a.id))).toEqual(['fwd', 'left', 'right', 'water', 'fill']);
     });
 
     it('🔴 Island rows: a request is blocked while she has no robot of its kind, or while that robot works another plot — never for another robot’s work', () => {

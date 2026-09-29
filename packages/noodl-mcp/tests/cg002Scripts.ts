@@ -1166,7 +1166,8 @@ var model = modelOf(Inputs.model && typeof Inputs.model === 'object' ? Inputs.mo
 var id = String(Inputs.profileId || model.island.activeId);
 var robotId = String(Inputs.robotId || FIRST_ROBOT_ID);
 var field = String(Inputs.field || '');
-var v = Inputs.value;
+// A card's colour and hat rows carry their card's kind before a | (a repeater row is global by id): the value is after it.
+var v = (field === 'color' || field === 'hat') && typeof Inputs.value === 'string' ? Inputs.value.slice(Inputs.value.lastIndexOf('|') + 1) : Inputs.value;
 var p = null, row = null, changed = false;
 for (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === id) p = model.profiles[i];
 if (p) for (var r = 0; r < p.island.robots.length; r++) if (p.island.robots[r].id === robotId) row = p.island.robots[r];

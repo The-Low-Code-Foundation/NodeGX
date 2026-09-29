@@ -719,7 +719,7 @@
       "path": "Robot/Card",
       "type": "visual",
       "nodeCount": 31,
-      "connectionCount": 42,
+      "connectionCount": 43,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -871,6 +871,6 @@
   "stats": {
     "totalComponents": 108,
     "totalNodes": 882,
-    "totalConnections": 2566
+    "totalConnections": 2567
   }
 }

@@ -1800,7 +1800,7 @@ const ROBOT_CARD: CgComponent = {
   path: 'Robot/Card',
   description: 'One robot of My robots: its drawing, name, tag (Yours, Lent by …, Locked), what it wears, colours, hats, its blocks as chips, its upgrade and where it works. Publishes Named, Coloured or Hatted with the Id and the value.',
   nodes: [
-    inputs('rcIn', [['id', 'string'], ['kind', 'string'], ['name', 'string'], ['owned', 'boolean'], ['locked', 'boolean'], ['tag', 'string'], ['tagClass', 'string'], ['cardClass', 'string'], ['wears', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['accessory', 'string'], ['paints', 'array'], ['hats', 'array'], ['abilities', 'array'], ['upgradeText', 'string'], ['upgradeClass', 'string'], ['whereText', 'string'], ['colourWord', 'string'], ['hatWord', 'string'], ['canDoWord', 'string'], ['upgradeWord', 'string'], ['whereWord', 'string'], ['nameWord', 'string']]),
+    inputs('rcIn', [['id', 'string'], ['robotId', 'string'], ['kind', 'string'], ['name', 'string'], ['owned', 'boolean'], ['locked', 'boolean'], ['tag', 'string'], ['tagClass', 'string'], ['cardClass', 'string'], ['wears', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['accessory', 'string'], ['paints', 'array'], ['hats', 'array'], ['abilities', 'array'], ['upgradeText', 'string'], ['upgradeClass', 'string'], ['whereText', 'string'], ['colourWord', 'string'], ['hatWord', 'string'], ['canDoWord', 'string'], ['upgradeWord', 'string'], ['whereWord', 'string'], ['nameWord', 'string']]),
     group('rcCard', 'The card', undefined, { ...column({ rowGap: sp(10) }), ...PANEL, cssClassName: 'bg-panel bg-robot-card' }, ['rcTop', 'rcColourL', 'rcColourRow', 'rcHatL', 'rcHatRow', 'rcCanL', 'rcCanRow', 'rcUpL', 'rcUp', 'rcWhereL', 'rcWhere']),
     group('rcTop', 'The robot, its name, whose', 'rcCard', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(12), flexWrap: 'nowrap', alignItems: 'flex-start' }), ['rcStage', 'rcWho']),
     group('rcStage', 'The robot, drawn', 'rcTop', { sizeMode: 'explicit', width: px(88), height: px(88), borderRadius: px(14), cssClassName: 'bg-robot-stage' }, ['rcGarden']),
@@ -1830,7 +1830,7 @@ const ROBOT_CARD: CgComponent = {
     text('rcWhere', 'Where it works', 'rcCard', '', { ...T_BODY, cssClassName: 'bg-robot-where' }),
     logic('rcIsOwned', CONDITION_NODE, 'Hers?'),
     withStates('rcOwn', 'Hers, or still to be lent', ['locked', 'owned'], { owned: { type: 'boolean', by: { locked: false, owned: true } }, locked: { type: 'boolean', by: { locked: true, owned: false } } }),
-    outputs('rcOut', [['id', 'string'], ['name', 'string'], ['named', 'signal'], ['colour', 'string'], ['coloured', 'signal'], ['hat', 'string'], ['hatted', 'signal']])
+    outputs('rcOut', [['id', 'string'], ['robotId', 'string'], ['name', 'string'], ['named', 'signal'], ['colour', 'string'], ['coloured', 'signal'], ['hat', 'string'], ['hatted', 'signal']])
   ],
   connections: [
     wire('rcIn', 'cardClass', 'rcCard', 'cssClassName'),
@@ -1862,6 +1862,7 @@ const ROBOT_CARD: CgComponent = {
     ...(['rcName', 'rcColourL', 'rcColourRow', 'rcHatL', 'rcHatRow'] as const).map((n) => wire('rcOwn', 'owned', n, 'mounted')),
     wire('rcOwn', 'locked', 'rcNameText', 'mounted'),
     wire('rcIn', 'id', 'rcOut', 'id'),
+    wire('rcIn', 'robotId', 'rcOut', 'robotId'),
     wire('rcName', 'onTextChanged', 'rcOut', 'name'),
     wire('rcName', 'onBlur', 'rcOut', 'named'),
     wire('rcName', 'onEnter', 'rcOut', 'named'),
@@ -2483,7 +2484,7 @@ const PAGE_ROBOT: CgComponent = (() => {
   return {
     path: 'Pages/My robot',
     description: 'My robots (P106 IG-005): Pip big on his stage with his name, paint, eyes, hat (gifts, never bought) and stickers; then a card per robot of the island — the ones she has, each with its name, look, blocks, upgrade and where it works, and the ones an islander will lend, with who and after what.',
-    repeats: { source: 'array', rowFields: ['id', 'kind', 'name', 'owned', 'locked', 'tag', 'tagClass', 'cardClass', 'wears', 'color', 'eye', 'hat', 'accessory', 'paints', 'hats', 'abilities', 'upgradeText', 'upgradeClass', 'whereText', 'nameWord', 'colourWord', 'hatWord', 'canDoWord', 'upgradeWord', 'whereWord'] },
+    repeats: { source: 'array', rowFields: ['id', 'robotId', 'kind', 'name', 'owned', 'locked', 'tag', 'tagClass', 'cardClass', 'wears', 'color', 'eye', 'hat', 'accessory', 'paints', 'hats', 'abilities', 'upgradeText', 'upgradeClass', 'whereText', 'nameWord', 'colourWord', 'hatWord', 'canDoWord', 'upgradeWord', 'whereWord'] },
     nodes: [
       ...base.nodes,
       // P106 IG-005: the fleet — a card per robot (Robot cards), written through Update robot (one per field).
@@ -2519,7 +2520,7 @@ const PAGE_ROBOT: CgComponent = (() => {
       ).flatMap(([u, value, signal]) => [
         wire('rbStore', 'model', u, 'model'),
         wire('rbFam', 'profileId', u, 'profileId'),
-        wire('rbFleetEach', 'itemOutput-id', u, 'robotId'),
+        wire('rbFleetEach', 'itemOutput-robotId', u, 'robotId'),
         wire('rbFleetEach', `itemOutput-${value}`, u, 'value'),
         wire('rbFleetEach', `itemOutputSignal-${signal}`, u, 'go'),
         wire(u, 'model', 'rbStore', 'model'),

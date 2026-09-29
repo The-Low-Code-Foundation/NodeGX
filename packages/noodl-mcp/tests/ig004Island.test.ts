@@ -403,5 +403,22 @@ describe('IG-004 — the island as a world', () => {
       // Known-firing: the tulips' card names Pip, and his home is Pip's.
       expect(is.card('tulip-door')).toMatchObject({ robotId: 'r1', workingAt: 'tulips-three', homeText: 'Bring Pip home' });
     });
+
+    it('🔴 the robots at home stand apart (their names never cover one another on a phone’s 16 px tiles); an islander stands below her own plot, her bubble over it', () => {
+      let m = kid();
+      for (const id of ['path-postbox', 'bowl-if', 'mamie-note']) m = runScript(COMPLETE_REQUEST_SCRIPT, { model: m, requestId: id, tricks: [], reward: null }).model;
+      const is = islandOf(m);
+      const home = is.world.world.robots.filter((r: any) => r.home);
+      expect(home.map((r: any) => r.id)).toEqual(['r1', 'cobble', 'pocket', 'echo']);
+      expect([home[0].x, home[0].y]).toEqual([ISLAND_HOME.x, ISLAND_HOME.y]);
+      // Two names on one row are 3 tiles (48 px) apart at least; on rows 2 apart they cannot touch.
+      for (let i = 0; i < home.length; i++)
+        for (let j = i + 1; j < home.length; j++) expect({ a: home[i].id, b: home[j].id, apart: Math.abs(home[i].x - home[j].x) >= 3 || Math.abs(home[i].y - home[j].y) >= 2 }).toEqual({ a: home[i].id, b: home[j].id, apart: true });
+      // Each islander stands below her plot's third tile (her bubble, drawn to her right, lies over her own plot).
+      for (const p of is.world.world.things.filter((t: any) => t.kind === 'islander')) {
+        const at = REQUESTS.find((r) => r.id === p.requestId)!;
+        expect({ who: p.who, x: p.x, y: p.y }).toEqual({ who: p.who, x: at.plot.x + 2, y: at.plot.y + 6 });
+      }
+    });
   });
 });

@@ -1632,8 +1632,10 @@ describe('CG-002 — the engine', () => {
       expect(runScript(UPDATE_ROBOT_SCRIPT, { model: m, robotId: 'cobble', field: 'hat', value: 'crown' }).changed).toBe(false);
       expect(runScript(UPDATE_ROBOT_SCRIPT, { model: m, robotId: 'cobble', field: 'color', value: 'red' }).changed).toBe(false);
       expect(runScript(UPDATE_ROBOT_SCRIPT, { model: m, robotId: 'echo', field: 'name', value: 'X' }).found).toBe(false);
-      // Known-firing: an owned hat on Cobble changes it.
+      // Known-firing: an owned hat on Cobble changes it — also as a My robots card sends it (its row id, the card's kind first).
       expect(runScript(UPDATE_ROBOT_SCRIPT, { model: m, robotId: 'cobble', field: 'hat', value: 'cap' }).changed).toBe(true);
+      const card = runScript(UPDATE_ROBOT_SCRIPT, { model: m, robotId: 'cobble', field: 'color', value: 'cobble|#3FA66B' });
+      expect([card.changed, card.model.island.robots[1].color]).toEqual([true, '#3FA66B']);
     });
 
     describe('arms: each IG-005 rule mutated, and the row that kills it', () => {

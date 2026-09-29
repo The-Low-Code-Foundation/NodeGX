@@ -1125,19 +1125,24 @@ for (var i = 0; i < ROBOTS.length; i++) {
   var abilities = [], ids = MOVES.slice();
   for (var a = 0; a < spec.palette.length; a++) if (band === 2 || spec.palette[a].indexOf('olive:') !== 0) ids.push(spec.palette[a]);
   if (band === 2) ids = ids.concat(CONTROLS);
-  for (var b = 0; b < ids.length; b++) if (!(band === 1 && ids[b] === 'say')) abilities.push({ id: ids[b], label: blockWord(ids[b]), cls: kindClass(ids[b]) });
+  // 🔴 A repeater's row is a Noodl Object, global by id (P105 D57): every nested row id carries its card's kind, or two
+  // cards (and the Options panel's own swatches and hats) would share one row and one ring.
+  var pre = spec.id + '|';
+  for (var b = 0; b < ids.length; b++) if (!(band === 1 && ids[b] === 'say')) abilities.push({ id: pre + ids[b], label: blockWord(ids[b]), cls: kindClass(ids[b]) });
   var up = null;
   for (var u = 0; u < UPGRADES.length; u++) if (UPGRADES[u].id === spec.upgrade) up = UPGRADES[u];
   var upWord = up ? w[RW.upgrade[up.id]] || '' : '', upWho = up ? w[WHO[up.from]] || '' : '';
   var paints = [], hats = [];
   if (has) {
-    for (var q = 0; q < PAINTS.length; q++) paints.push({ id: PAINTS[q].hex, paint: 'var(' + PAINTS[q].token + ')', label: PAINTS[q].name[lang], selected: PAINTS[q].hex.toUpperCase() === String(look.color).toUpperCase() });
-    for (var h = 0; h < HATS.length; h++) { var hs = HATS[h], got = hs.free || owned.indexOf(hs.id) !== -1; hats.push({ id: hs.id, label: (hs.id === 'sun' ? '🌻 ' : hs.id === 'crown' ? '👑 ' : '') + (w[hs.word] || hs.id) + (got || !hs.from ? '' : ' · ' + fill(w.hatLocked, { who: w[hs.from] || '' })), selected: hs.id === look.hat, locked: !got }); }
+    for (var q = 0; q < PAINTS.length; q++) paints.push({ id: pre + PAINTS[q].hex, paint: 'var(' + PAINTS[q].token + ')', label: PAINTS[q].name[lang], selected: PAINTS[q].hex.toUpperCase() === String(look.color).toUpperCase() });
+    for (var h = 0; h < HATS.length; h++) { var hs = HATS[h], got = hs.free || owned.indexOf(hs.id) !== -1; hats.push({ id: pre + hs.id, label: (hs.id === 'sun' ? '🌻 ' : hs.id === 'crown' ? '👑 ' : '') + (w[hs.word] || hs.id) + (got || !hs.from ? '' : ' · ' + fill(w.hatLocked, { who: w[hs.from] || '' })), selected: hs.id === look.hat, locked: !got }); }
   }
   var lender = spec.lentBy ? w[WHO[spec.lentBy]] || '' : '';
   var nm = String(look.name || spec.defaultName.en);
+  // The card's id is its KIND (stable whether she has the robot or not: an id that changed between runs left a stale
+  // row behind in the repeater); the robot's own id rides in robotId, for Update robot.
   cards.push({
-    id: has ? String(row.id) : spec.id, kind: spec.id, name: nm, owned: has, locked: !has,
+    id: spec.id, robotId: has ? String(row.id) : '', kind: spec.id, name: nm, owned: has, locked: !has,
     tag: !has ? (w.ig5LockedTag || '') : spec.lentBy ? fill(w.ig5LentBy, { who: lender }) : (w.ig5Yours || ''),
     tagClass: 'bg-robot-tag ' + (!has ? 'bg-robot-tag-locked' : spec.lentBy ? 'bg-robot-tag-lent' : 'bg-robot-tag-yours'),
     cardClass: 'bg-panel bg-robot-card bg-robot-' + spec.id + (has ? '' : ' bg-robot-locked'),

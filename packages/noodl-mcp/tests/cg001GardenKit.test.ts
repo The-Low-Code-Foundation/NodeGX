@@ -772,5 +772,9 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       const W = node('garden-kit.Garden').world;
       expect(W.parseRobots([{ accessory: 'hod' }, { accessory: 'jetpack' }, { accessory: '' }, {}, { accessory: null }]).map((r: any) => r.accessory)).toEqual(['hod', '', '', 'can', 'can']);
     });
+    it('an islander’s bubble is at most seven tiles wide (a share of her cell), so on a phone it stays over her own plot', () => {
+      const css = node('garden-kit.Garden').css as string;
+      expect(/\.gd-isl-say\{[^}]*max-width:min\(170px,700%\)/.test(css)).toBe(true);
+    });
   });
 });
