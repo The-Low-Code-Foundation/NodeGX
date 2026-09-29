@@ -328,7 +328,8 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
       await tap(byText('.bg-win-card button', w('winIsland')), 'back to the island');
     }
 
-    // Predict through the 3D canvas: back to the island, the tulips again, two forwards, Done, Predict, a wrong tile.
+    // Predict through the 3D canvas: back to the island, the tulips again, a few presses, then the islander's challenge
+    // (P106 IG-003: Predict is no longer a button — Drive with a program not yet played asks it, Pip back at the start).
     await until('location.pathname', (p) => p === '/island');
     await wait(600);
     await openTulips();
@@ -339,9 +340,8 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     const firstFwd = PRESSES.indexOf('fwd');
     for (const op of PRESSES.slice(0, firstFwd + 1)) await key(op);
     const realEnd = (await pair()).engine;
-    await control('rec');
-    await control('predict');
-    const asked = await until(`document.body.innerText.includes(${JSON.stringify(w('predictAsk'))})`, Boolean);
+    await control('drive');
+    const asked = await until(`document.body.innerText.includes(${JSON.stringify(w('ig3PredictAsk'))})`, Boolean);
     const tilePoint = async (x, y) =>
       evaluate(`(() => { const r = ${ROOT}; const c = r.querySelector('[data-gd3-canvas]').getBoundingClientRect(); const s = r.gd3.screenOfTile(${x}, ${y}); return { x: c.left + s.sx, y: c.top + s.sy, top: (() => { const at = document.elementFromPoint(c.left + s.sx, c.top + s.sy); return at ? (at.getAttribute('data-gd3-canvas') ? 'canvas' : at.className) : null; })() }; })()`);
     const wrong = { x: (realEnd.x + 3) % 8, y: (realEnd.y + 2) % 6 };
@@ -350,7 +350,11 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     const flag = await until(`(() => { const e = ${ROOT}; const f = e && e.gd3.built ? e.gd3.built.things.find((g) => g.userData.kind === 'flag') : null; return f ? f.userData.x + ',' + f.userData.y : null; })()`, Boolean, 4000);
     await shot('ac1-3d-07-predict-miss');
     check(`AC1: Predict through the 3D canvas — a tap on tile ${wrong.x},${wrong.y} (the canvas is on top there) comes out of Tile Tapped, and the real end ${realEnd.x},${realEnd.y} is drawn as the flag in 3D`, asked && miss.top === 'canvas' && flag === `${realEnd.x},${realEnd.y}`, { asked, wrong, miss, flag, realEnd });
-    await control('predict');
+    // A miss settles the challenge for that program; one more block (a turn: the end tile stays) asks it again.
+    await control('rec');
+    await key('left');
+    await control('drive');
+    await until(`document.body.innerText.includes(${JSON.stringify(w('ig3PredictAsk'))})`, Boolean);
     const stillThere = { worlds: await worlds(), stored: await stored(), attrs: await attrs() };
     readings.beforeHit = stillThere;
     if (!stillThere.worlds.gd3) throw new Error('the 3D node is gone before the Predict hit: ' + JSON.stringify(stillThere));
@@ -358,7 +362,11 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     for (const type of ['mousePressed', 'mouseReleased']) await client.send('Input.dispatchMouseEvent', { type, x: Math.round(hit.x), y: Math.round(hit.y), button: 'left', clickCount: 1 });
     const moved = await until(`(() => { const W = Noodl.Variables.gardenWorld; const b = W && W.robots && W.robots[0]; return b ? b.x + ',' + b.y : null; })()`, (v) => v === `${realEnd.x},${realEnd.y}`, 8000);
     const afterHit = await agree('predict hit');
-    check(`AC1: a right tap on ${realEnd.x},${realEnd.y} plays from the start; the engine and the 3D node end there`, moved === `${realEnd.x},${realEnd.y}` && afterHit.ok && afterHit.last.drawn.x === realEnd.x && afterHit.last.drawn.y === realEnd.y, afterHit.last);
+    check(`AC1: a right tap on ${realEnd.x},${realEnd.y} plays from the start; the engine and the 3D node end there`, moved === `${realEnd.x},${realEnd.y}` && afterHit.ok && afterHit.last.drawn.x === realEnd.x && afterHit.last.drawn.y === realEnd.y, { ...afterHit.last, stored: await stored(), worlds: await worlds(), errors: page.consoleErrors.slice(0, 3) });
+    // P106 IG-003: the hit leaves the tick on the tile (and "You were right!" on the islander's card) — in 3D too.
+    const tick3d = await evaluate(`(() => { const e = ${ROOT}; const t = e && e.gd3.built ? e.gd3.built.things.find((g) => g.userData.kind === 'tick') : null; return t ? t.userData.x + ',' + t.userData.y : null; })()`);
+    await shot('ac1-3d-08-predict-hit');
+    check(`AC1 (IG-003): after the right tap the tick stands on ${realEnd.x},${realEnd.y} in 3D and the islander says "${w('ig3PredictRight')}"`, tick3d === `${realEnd.x},${realEnd.y}` && (await evaluate('document.body.innerText')).includes(w('ig3PredictRight')), { tick3d });
 
     // ── AC4, the slow arm: a main-thread hog (a slow computer, or Olive on the same CPU) while a finger is held on the
     // world (the scene is drawn on demand: a held finger keeps it drawing, as a child panning while Olive thinks) ──

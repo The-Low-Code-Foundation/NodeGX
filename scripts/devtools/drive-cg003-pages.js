@@ -819,14 +819,15 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await langClause('workshop', 'en', 'fr');
   await langClause('workshop', 'fr', 'en');
 
-  // AC6 (band 10–12): Predict, a wrong tap shows the real end and a hint, never a score; a right tap plays.
+  // AC6 (band 10–12), IG-003 (P106 s3): Predict is the islander's challenge now, not a button (R5). A wrong tap shows the
+  // real end and a hint, never a score; a right tap plays. The tulips carry the challenge; a program not yet played is it.
   await control('rec');
   // IG-002: the tulips start at (1,1) facing the pond; turn round and step once: the end is (2,1).
   for (const op of ['left', 'left', 'fwd']) await key(op);
-  await control('rec'); // Done teaching
-  await control('predict');
-  const asked = await until(`document.body.innerText.includes(${JSON.stringify(w('en', 'predictAsk'))})`, Boolean);
-  check('AC6: Predict asks where the robot will end', asked, asked);
+  // Drive while the challenge is asked: the robot goes back to the start, where Play will begin.
+  await control('drive');
+  const asked = await until(`document.body.innerText.includes(${JSON.stringify(w('en', 'ig3PredictAsk'))})`, Boolean);
+  check('AC6: the islander asks where the robot will end (IG-003: the challenge line, no Predict button)', asked && !(await evaluate(`!!document.querySelector('.bg-controls .bg-i-predict')`)), asked);
   await tap(`document.querySelector('.gd-cell[data-x="5"][data-y="3"]')`, 'a wrong tile');
   // IG-001 D9: the real end is the kit's flag sprite on its tile (it was a 🏁 in a label pill).
   const miss = await until(`(() => { const f = document.querySelector('.bg-stage svg.gd-thing.gd-flag[data-sprite="flag"]'); const say = document.querySelector('.bg-owl-say'); return { flag: f ? f.closest('.gd-cell').getAttribute('data-x') + ',' + f.closest('.gd-cell').getAttribute('data-y') : null, pills: document.querySelectorAll('.bg-stage .gd-label').length, say: say ? say.innerText : '' }; })()`, (r) => !!r.flag);
@@ -834,7 +835,11 @@ withDeployedSite({ dir: DIR }, async (page) => {
   check('AC6: … and says the Predict hint, with no score in it', miss.say === w('en', 'hintPredictMiss').replace(/\{b\}/g, 'Pip') || miss.say.includes(w('en', 'hintPredictMiss').split('{b}')[0].trim()), miss.say);
   check('AC6: … and no number is shown as a score', !/\b\d+\s*(\/|%|points?|pts)\b/.test(miss.say), miss.say);
   await shot('ac6-miss');
-  await control('predict');
+  // A miss settles the challenge for that program: one more block (a turn: the end tile stays 2,1) asks it again.
+  await control('rec');
+  await key('left');
+  await control('drive');
+  await until(`document.body.innerText.includes(${JSON.stringify(w('en', 'ig3PredictAsk'))})`, Boolean);
   await tap(`document.querySelector('.gd-cell[data-x="2"][data-y="1"]')`, 'the right tile');
   // A hit plays from the start: the robot is put back at (1,1), turns round and walks to (2,1).
   const via = await until(`document.querySelector('.gd-bot').getAttribute('data-x')`, (x) => x === '1', 4000);
