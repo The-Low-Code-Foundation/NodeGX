@@ -1,0 +1,1665 @@
+<title>Olive's Island Jobs</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* ── Palette, fonts and chrome carried over from IG-000 (island-3d.html), which copied P105's. Deliberately
+   single-theme (light), every colour painted explicitly, as IG-000 chose. ── */
+:root{
+  --paper:#FFF7E8; --paper-2:#FFF0D3; --card:#FFFFFF; --ink:#2E2A3D; --ink-2:#6E6784; --line:#EBDFC4;
+  --leaf:#3FA66B; --leaf-2:#DDF3E4; --soil:#C79A63; --pond:#7CC6F0;
+  --coral:#FF7A59; --sun:#FFD166; --violet:#8F6BFF; --violet-2:#EEE8FF; --violet-3:#4A2FA6; --sky:#5FB4E8;
+  --motion:#4C8DFF; --action:#3FA66B; --control:#FF9F1C; --ask:#8F6BFF;
+  --r:18px; --shadow:0 6px 18px rgba(72,52,20,.10);
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Nunito,system-ui,sans-serif;font-size:16px;line-height:1.45;overflow-x:hidden}
+h1,h2,h3{font-family:Fredoka,Nunito,sans-serif;font-weight:600;margin:0;text-wrap:balance;letter-spacing:.005em}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.wrap{max-width:1440px;margin:0 auto;padding-block:12px 28px;padding-inline:16px}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 12px;background:var(--card);border-radius:22px;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:10px;font-family:Fredoka,sans-serif;font-weight:700;font-size:22px;white-space:nowrap}
+.brand svg{width:36px;height:36px}
+.jobs{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+.job{display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;border-radius:999px;font-weight:800;color:var(--ink-2);min-height:44px}
+.job svg{width:34px;height:34px;border-radius:50%;background:var(--paper-2);flex:none}
+.job[aria-selected="true"]{background:var(--leaf-2);color:var(--ink)}
+.job .ok{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--leaf);color:#fff;font-size:12px}
+.shells{display:flex;align-items:center;gap:6px;background:#FFF0DA;border-radius:999px;padding:6px 14px;font-weight:800;font-size:16px}
+.shells b{font-family:Fredoka,sans-serif;font-size:20px;min-width:1.4em;text-align:center;font-variant-numeric:tabular-nums}
+.shells .lbl{color:var(--ink-2);font-size:13px}
+.shells.bump{animation:bump .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes bump{40%{transform:scale(1.18)}}
+.seg{display:flex;background:var(--paper-2);border-radius:999px;padding:3px}
+.seg button{padding:6px 12px;border-radius:999px;font-weight:800;color:var(--ink-2);font-size:14px;min-height:36px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+
+.panel{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:14px;min-width:0}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--leaf)}
+
+/* the Workshop, re-laid for Blockly: world left, workspace right at full height */
+.ws{display:grid;grid-template-columns:minmax(0,1fr) clamp(440px,50vw,780px);gap:16px;align-items:stretch;margin-top:14px}
+.left{display:flex;flex-direction:column;gap:12px}
+.task{display:flex;gap:12px;align-items:center}
+.task .face{width:54px;height:54px;border-radius:50%;background:var(--paper-2);display:grid;place-items:center;flex:none}
+.task .face svg{width:44px;height:44px}
+.task .tt{min-width:0}
+.task h1{font-size:23px;line-height:1.15}
+.task p{margin:2px 0 0;color:var(--ink-2);font-size:14px}
+.sum{margin-left:auto;flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-weight:800;font-size:14px}
+.sum .pill{background:var(--leaf-2);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.sum .pill.done{background:var(--leaf);color:#fff}
+.sum .day{font-size:12px;color:var(--ink-2)}
+
+.stagerow{display:flex;gap:10px;align-items:stretch}
+.stage3d{position:relative;flex:1;min-width:0;aspect-ratio:8/5.9;border-radius:16px;overflow:hidden;background:#9FD9F3;border:4px solid #A8D9B4;touch-action:none;user-select:none;-webkit-user-select:none}
+.stage3d canvas{display:block;width:100%;height:100%}
+.stage3d .ovl{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.stage3d.armed{border-color:var(--violet);cursor:crosshair}
+.chip{position:absolute;left:0;top:0;transform:translate(-50%,-100%);background:#fff;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:800;box-shadow:var(--shadow);white-space:nowrap;will-change:transform;display:flex;align-items:center;gap:5px}
+.chip.bot{background:var(--ink);color:#fff}
+.chip.watch{outline:3px solid var(--violet);outline-offset:1px}
+.pips{display:inline-flex;gap:2px}
+.pips i{width:7px;height:10px;border-radius:3px;background:#E6DCC6}
+.pips i.on{background:var(--pond)}
+.pips.st i.on{background:#8E8CA0}
+.pips.eg i.on{background:var(--sun)}
+.chip.full{background:var(--leaf);color:#fff}
+.chip.full .pips i.on{background:#fff}
+.bub{position:absolute;left:0;top:0;z-index:5;background:#fff;border-radius:14px;padding:6px 11px;font-weight:800;font-size:14px;box-shadow:var(--shadow);max-width:220px;transform:translate(-30%,-118%);will-change:transform;animation:pop .3s ease-out;white-space:nowrap}
+.bub:after{content:"";position:absolute;left:34%;bottom:-8px;border:8px solid transparent;border-top-color:#fff;border-bottom:0}
+.bub.shell{background:#FFF0DA;color:#8A5A12}
+.bub.shell:after{border-top-color:#FFF0DA}
+.bub.warn{background:#FFE6DF;color:#A33A1E}
+.bub.warn:after{border-top-color:#FFE6DF}
+@keyframes pop{from{transform:translate(-30%,-118%) scale(.4);opacity:0}to{transform:translate(-30%,-118%) scale(1);opacity:1}}
+.hud{position:absolute;right:10px;top:10px;z-index:6;display:flex;gap:6px}
+.hud button{background:#fff;border-radius:999px;padding:8px 14px;font-weight:800;font-size:14px;box-shadow:var(--shadow);display:inline-flex;gap:6px;align-items:center;min-height:40px}
+.hud button:active{transform:scale(.96)}
+.hint3d{position:absolute;left:10px;bottom:10px;z-index:6;background:rgba(255,255,255,.88);border-radius:999px;padding:4px 11px;font-size:12px;font-weight:800;color:var(--ink-2);pointer-events:none}
+.rec{position:absolute;left:10px;top:10px;z-index:6;background:#fff;border-radius:999px;padding:6px 12px;font-weight:800;font-size:14px;display:flex;gap:8px;align-items:center;box-shadow:var(--shadow)}
+.rec i{width:10px;height:10px;border-radius:50%;background:var(--coral);animation:blink 1s infinite}
+.rec.drive i{background:var(--motion);animation:none}
+@keyframes blink{50%{opacity:.2}}
+.arm{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:7;background:var(--violet);color:#fff;border-radius:18px;padding:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;box-shadow:0 8px 22px rgba(74,47,166,.35);font-weight:800;font-size:14px;width:max-content;max-width:calc(100% - 20px)}
+.stage3d.armed .hint3d{display:none}
+.arm .lead{padding:0 8px}
+.arm button{background:#fff;color:var(--violet-3);border-radius:999px;padding:5px 11px;font-weight:800;font-size:13px;min-height:34px}
+.arm button.x{background:rgba(255,255,255,.2);color:#fff}
+.arm.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(calc(-50% - 6px))}75%{transform:translateX(calc(-50% + 6px))}}
+
+/* the pad, beside the world: every action of the mission's drawer */
+.pad{display:grid;grid-template-columns:repeat(2,52px);grid-auto-rows:52px;gap:6px;align-content:start}
+.pad button{background:#fff;border-radius:14px;box-shadow:0 3px 0 rgba(0,0,0,.12),0 4px 10px rgba(0,0,0,.08);display:grid;place-items:center;position:relative;font-size:20px;border:2px solid var(--line)}
+.pad button svg{width:26px;height:26px}
+.pad button.act{background:#E9F6EE;color:#1E7A48}
+.pad button.mv{color:#2F5FBF}
+.pad button.go{background:#EAF1FF;color:#2F5FBF;font-size:19px}
+.pad button.go svg{position:absolute;left:3px;top:3px;width:15px;height:15px}
+.pad button:active{transform:scale(.94)}
+.pad.off button{opacity:.72}
+.pad .cap{grid-column:1/-1;font-size:11px;font-weight:800;color:var(--ink-2);text-align:center;line-height:1.1;align-self:end}
+
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:999px;font-weight:800;font-size:16px;background:var(--paper-2);transition:transform .1s;min-height:44px}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--leaf);color:#fff}
+.btn.teach{background:var(--coral);color:#fff}
+.btn.drive{background:var(--motion);color:#fff}
+.btn.stop{background:var(--ink);color:#fff}
+.btn.fold{background:var(--control);color:#fff}
+.btn svg{width:20px;height:20px}
+.btn[disabled]{opacity:.45;cursor:default}
+.modes .btn[aria-pressed="true"]{box-shadow:0 0 0 3px var(--ink),0 0 0 7px #fff}
+.controls .speed{margin-left:auto}
+.owl{display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:start;background:var(--violet-2);border-radius:16px;padding:12px}
+.owl svg.o{width:56px;height:56px}
+.owl .say{font-weight:700;min-height:1.45em}
+.owl .owlact{margin-top:8px}
+.owl .meta{font-size:12px;color:#6a5aa8;margin-top:6px;display:flex;gap:6px;align-items:center}
+.owl .meta .dot{width:8px;height:8px;border-radius:50%;background:var(--leaf)}
+
+/* win card */
+.win{position:absolute;inset:0;z-index:8;display:grid;place-items:center;background:rgba(255,247,232,.72);backdrop-filter:blur(2px);padding:8px;overflow:auto}
+.win .card{background:#fff;border-radius:20px;padding:12px 18px;box-shadow:var(--shadow);text-align:center;max-width:400px;animation:popc .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popc{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
+.win h3{font-size:19px;line-height:1.2}
+.win p{margin:4px 0 8px;color:var(--ink-2);font-weight:700;font-size:14px}
+.win .later{font-size:12px;margin:6px 0 0}
+.win svg{width:46px;height:46px}
+.reward{display:inline-flex;gap:8px;align-items:center;background:#FFF0DA;border-radius:999px;padding:5px 12px;font-weight:800;margin:2px;font-size:14px}
+.win .controls{justify-content:center;margin-top:8px}
+
+/* the blocks panel: the Blockly workspace fills the right column */
+.blocks{display:flex;flex-direction:column;gap:8px;min-height:calc(100vh - 110px)}
+.bhead{display:flex;align-items:center;gap:8px}
+.bhead h2{font-size:20px}
+.bhead .count{margin-left:auto;font-size:13px;color:var(--ink-2);font-weight:800}
+.bwrap{position:relative;flex:1;min-height:460px;border-radius:14px;overflow:hidden;border:2px solid var(--line);background:#FFFDF6}
+#blocklyDiv{position:absolute;inset:0}
+.zoom{position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;gap:6px;z-index:5}
+.zoom button{width:42px;height:42px;border-radius:50%;background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.15);font-size:22px;font-weight:800;display:grid;place-items:center;color:var(--ink)}
+.zoom button:active{transform:scale(.94)}
+.bhint{margin:0;font-size:13px;color:var(--ink-2);font-weight:700}
+.note{margin-top:14px;font-size:13px;color:var(--ink-2);text-align:center}
+
+/* Blockly, dressed for children (IW-004 §2). Blockly's own cursors and menu tick point at its media folder: repaint them here */
+.injectionDiv .blocklyDraggable,.injectionDiv .blocklyDraggable .blocklyField{cursor:grab!important}
+.blocklyDragging,.blocklyDragging .blocklyField{cursor:grabbing!important}
+.blocklyMenuItemSelected .blocklyMenuItemCheckbox{background:none!important}
+.blocklyMenuItemSelected .blocklyMenuItemCheckbox:before{content:"✓";font-weight:800}
+.blocklyText,.blocklyFlyoutLabelText{font-family:Fredoka,Nunito,sans-serif!important;font-weight:600!important}
+.blocklyDropDownDiv .blocklyMenuItem,.blocklyWidgetDiv .blocklyMenuItem{font-family:Nunito,sans-serif;font-weight:800;font-size:16px;min-height:40px;padding:9px 18px 9px 28px}
+.blocklyContextMenu .blocklyMenuItem{min-height:40px}
+.blocklyWidgetDiv .blocklyHtmlInput{font-family:Fredoka,sans-serif;font-weight:600}
+/* the running block: IG-001 D5's ring in SVG — a 4 px ink outline with a white halo (>= 3:1 on the paper) */
+.iw-run>.blocklyPath{stroke:#2E2A3D!important;stroke-width:4px!important;filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 3px #fff)}
+.blocklyFlyoutBackground{fill:#FFF0D3!important;fill-opacity:1!important}
+.blocklyMainBackground{stroke:none!important}
+.blocklyFlyout .blocklyPathSelected{display:none}
+.jobcard{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:baseline;background:var(--paper);border:2px dashed var(--line);border-radius:16px;padding:10px 14px;font-size:14px;font-weight:700}
+.jobcard dt{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2)}
+.jobcard dd{margin:0}
+
+/* the ? card */
+.scrim{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(46,42,61,.35);padding:16px}
+.bcard{background:#fff;border-radius:22px;padding:18px 20px;box-shadow:0 18px 40px rgba(46,42,61,.25);max-width:360px;width:100%;animation:popc .3s cubic-bezier(.34,1.56,.64,1)}
+.bcard h3{font-size:20px;margin-top:10px}
+.bcard p{margin:12px 0 14px;font-weight:700;font-size:17px;color:var(--ink)}
+.cblk{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:14px;color:#fff;font-weight:800;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.cblk img{width:24px;height:24px}
+
+.stats{position:fixed;left:12px;bottom:12px;z-index:60;background:rgba(46,42,61,.92);color:#fff;font:700 12px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;padding:8px 12px;border-radius:10px;white-space:pre;font-variant-numeric:tabular-nums;max-width:calc(100vw - 24px);overflow:hidden}
+
+@media (max-width:1240px){
+  .ws{grid-template-columns:minmax(0,1fr) clamp(400px,46vw,600px)}
+  .brand span{display:none}
+  .task h1{font-size:20px}.task p{font-size:13px}
+  .pad{grid-template-columns:repeat(2,46px);grid-auto-rows:46px;gap:5px}
+  .pad button svg{width:22px;height:22px}
+  .btn{padding:9px 14px}
+}
+@media (max-width:900px){
+  .ws{grid-template-columns:1fr}
+  .stagerow{flex-direction:column}
+  .stage3d{flex:none;width:100%}
+  .pad{grid-template-columns:repeat(auto-fill,48px);grid-auto-rows:48px;width:100%}
+  .blocks{min-height:0}
+  .bwrap{height:72vh;flex:none}
+}
+@media (max-width:560px){
+  .top{gap:8px;padding:8px}
+  .brand{display:none}
+  .jobs{margin-left:0;width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+  .job{flex-direction:column;gap:2px;padding:4px;font-size:12px;border-radius:14px;text-align:center;line-height:1.15;position:relative}
+  .job svg{width:30px;height:30px}
+  .job .ok{position:absolute;top:2px;right:6px}
+  .shells{padding:5px 10px}.shells .lbl{display:none}
+  .seg button{padding:5px 10px}
+  .pad .cap{grid-column:auto;align-self:center}
+  .task h1{font-size:19px}
+  .sum{display:none}
+  .controls .speed{margin-left:0}
+  .btn{padding:9px 14px;font-size:15px}
+  .hint3d{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-fwd" viewBox="0 0 24 24"><path d="M12 4l7 8h-4v8H9v-8H5z" fill="currentColor"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="M9 6L3 11l6 5v-3h6a4 4 0 010 8h-2v-3h2a1 1 0 000-2H9v3z" fill="currentColor" transform="scale(1,-1) translate(0,-24)"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="M15 6l6 5-6 5v-3H9a4 4 0 000 8h2v-3H9a1 1 0 010-2h6v3z" fill="currentColor" transform="scale(1,-1) translate(0,-24)"/></symbol>
+    <symbol id="i-water" viewBox="0 0 24 24"><path d="M12 3s6 7 6 11a6 6 0 01-12 0c0-4 6-11 6-11z" fill="currentColor"/></symbol>
+    <symbol id="i-fill" viewBox="0 0 24 24"><path d="M6 9h9v11H6z" fill="currentColor"/><path d="M15 12l5-3v3l-5 3z" fill="currentColor"/><path d="M8 4h5v5H8z" fill="currentColor" opacity=".7"/></symbol>
+    <symbol id="i-pick" viewBox="0 0 24 24"><path d="M12 3l2.4 5 5.6.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.6-.8z" fill="currentColor"/></symbol>
+    <symbol id="i-put" viewBox="0 0 24 24"><path d="M4 14h16v6H4zM11 3h2v7h3l-4 4-4-4h3z" fill="currentColor"/></symbol>
+    <symbol id="i-goto" viewBox="0 0 24 24"><path d="M12 2a7 7 0 017 7c0 5-7 13-7 13S5 14 5 9a7 7 0 017-7z" fill="currentColor"/><circle cx="12" cy="9" r="2.6" fill="#fff"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z" fill="currentColor"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="3" fill="currentColor"/></symbol>
+    <symbol id="i-rec" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="currentColor"/></symbol>
+    <symbol id="i-drive" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M12 4v5M4 12h5M12 20v-5M20 12h-5" stroke="currentColor" stroke-width="3"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M12 5a7 7 0 106.3 4H16l4-5 2 5h-1.6A9 9 0 1112 3z" fill="currentColor"/></symbol>
+    <symbol id="i-loop" viewBox="0 0 24 24"><path d="M17 4l3 3-3 3V8H8a3 3 0 000 6h1v2H8a5 5 0 010-10h9zM7 20l-3-3 3-3v2h9a3 3 0 000-6h-1V8h1a5 5 0 010 10H7z" fill="currentColor"/></symbol>
+    <symbol id="granny" viewBox="0 0 64 64"><circle cx="32" cy="30" r="18" fill="#F7D3B5"/><path d="M14 26c0-14 36-14 36 0 0 4-2 6-4 6-4-8-24-8-28 0-2 0-4-2-4-6z" fill="#E9E4EF"/><circle cx="25" cy="30" r="2.5" fill="#2E2A3D"/><circle cx="39" cy="30" r="2.5" fill="#2E2A3D"/><circle cx="25" cy="30" r="5" fill="none" stroke="#2E2A3D" stroke-width="1.5"/><circle cx="39" cy="30" r="5" fill="none" stroke="#2E2A3D" stroke-width="1.5"/><path d="M30 30h4" stroke="#2E2A3D" stroke-width="1.5"/><path d="M26 38q6 5 12 0" stroke="#C0574A" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M14 62c2-12 34-12 36 0z" fill="#8F6BFF"/></symbol>
+    <symbol id="postie" viewBox="0 0 64 64"><circle cx="32" cy="28" r="16" fill="#C98A5E"/><path d="M14 24c2-12 34-12 36 0z" fill="#3E63C8"/><rect x="10" y="20" width="44" height="6" rx="3" fill="#3E63C8"/><circle cx="26" cy="30" r="2.5" fill="#2E2A3D"/><circle cx="38" cy="30" r="2.5" fill="#2E2A3D"/><path d="M27 37q5 4 10 0" stroke="#7A3F2D" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M14 62c2-12 34-12 36 0z" fill="#3E63C8"/></symbol>
+    <symbol id="owl" viewBox="0 0 64 64"><ellipse cx="32" cy="36" rx="22" ry="24" fill="#8F6BFF"/><path d="M12 18l8 8h24l8-8-6 2-4-4-6 4-6-4-4 4z" fill="#8F6BFF"/><ellipse cx="32" cy="42" rx="14" ry="14" fill="#EEE8FF"/><circle cx="24" cy="32" r="8" fill="#fff"/><circle cx="40" cy="32" r="8" fill="#fff"/><circle cx="25" cy="33" r="4" fill="#2E2A3D"/><circle cx="39" cy="33" r="4" fill="#2E2A3D"/><path d="M32 38l-4 5h8z" fill="#FFB347"/><path d="M26 58l-3 4M38 58l3 4" stroke="#FFB347" stroke-width="3" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#owl"></use></svg><span data-t="iw0Brand">Olive's Island</span></div>
+    <nav class="jobs" role="tablist" aria-label="Jobs" id="jobTabs"></nav>
+    <div class="shells" id="shells"><span aria-hidden="true">🐚</span><b id="shellN">0</b><span class="lbl" data-t="iw0Shells">shells</span></div>
+    <div class="seg" role="group" aria-label="Age band"><button id="band1" aria-pressed="false">7–9</button><button id="band2" aria-pressed="true">10–12</button></div>
+    <div class="seg" role="group" aria-label="Language"><button id="langEN" aria-pressed="true">EN</button><button id="langFR" aria-pressed="false">FR</button></div>
+  </header>
+
+  <section class="ws" id="ws">
+    <div class="panel left">
+      <div class="task">
+        <div class="face"><svg viewBox="0 0 64 64" aria-hidden="true"><use id="faceUse" href="#granny"></use></svg></div>
+        <div class="tt"><div class="eyebrow" id="jobEyebrow"></div><h1 id="jobTitle"></h1><p id="jobReq"></p></div>
+        <div class="sum"><span class="pill" id="jobSum"></span><span class="day" id="jobDay"></span></div>
+      </div>
+      <div class="stagerow">
+        <div class="stage3d" id="stage" aria-label="The plot">
+          <div class="rec" id="recBadge" hidden><i></i><span id="recText"></span></div>
+          <div class="hud"><button id="btnFit"><span aria-hidden="true">⌖</span><span data-t="iw0Fit"></span></button><button id="btnTime"><span aria-hidden="true">⏳</span><span data-t="iw0Time">Time passes</span></button></div>
+          <div class="arm" id="armBar" hidden><span class="lead">👆 <span data-t="iw0Arm"></span></span><button id="armAhead"></button><button id="armCarrier"></button><button class="x" id="armCancel" data-t="iw0Cancel"></button></div>
+          <div class="hint3d" data-t="iw0Hint3d"></div>
+          <div class="win" id="win" hidden><div class="card">
+            <svg width="68" height="68" viewBox="0 0 64 64" aria-hidden="true"><use id="winFace" href="#granny"></use></svg>
+            <h3 id="winH"></h3>
+            <p id="winP"></p>
+            <div><span class="reward" id="winWork"></span><span class="reward" id="winBonus"></span></div>
+            <p class="later" id="winLater"></p>
+            <div class="controls"><button class="btn primary" id="winNext" data-t="iw0Next"></button><button class="btn" id="winStay" data-t="iw0Stay"></button></div>
+          </div></div>
+        </div>
+        <div class="pad off" id="pad" aria-label="Pad"></div>
+      </div>
+      <div class="controls modes" role="group" aria-label="Mode">
+        <button class="btn drive" id="btnDrive" aria-pressed="false"><svg><use href="#i-drive"></use></svg><span data-t="iw0Drive"></span></button>
+        <button class="btn teach" id="btnTeach" aria-pressed="false"><svg><use href="#i-rec"></use></svg><span data-t="iw0Teach"></span></button>
+        <button class="btn primary" id="btnPlay"><svg><use href="#i-play"></use></svg><span data-t="iw0Play"></span></button>
+        <button class="btn stop" id="btnStop" hidden><svg><use href="#i-stop"></use></svg><span data-t="iw0Stop"></span></button>
+        <button class="btn" id="btnReset"><svg><use href="#i-reset"></use></svg><span data-t="iw0Reset"></span></button>
+        <div class="seg speed" role="group" aria-label="Speed"><button id="spdSlow" aria-pressed="true">🐢</button><button id="spdFast" aria-pressed="false">🐇</button></div>
+      </div>
+      <div class="owl">
+        <svg class="o" viewBox="0 0 64 64" aria-hidden="true"><use href="#owl"></use></svg>
+        <div><div class="say" id="owlSay" aria-live="polite"></div><div class="owlact" id="owlAct" hidden><button class="btn fold" id="btnFold"><svg><use href="#i-loop"></use></svg><span data-t="iw0Fold"></span></button></div><div class="meta"><span class="dot"></span><span data-t="iw0OwlMeta"></span></div></div>
+      </div>
+      <dl class="jobcard" id="jobCard" aria-label="The job"></dl>
+    </div>
+
+    <div class="panel blocks">
+      <div class="bhead"><h2 id="progH"></h2><span class="count" id="blockCount"></span></div>
+      <div class="bwrap" id="bwrap"><div id="blocklyDiv"></div>
+        <div class="zoom"><button id="zIn">+</button><button id="zOut">−</button><button id="zFit">⤢</button></div>
+      </div>
+      <p class="bhint" data-t="iw0BHint"></p>
+    </div>
+  </section>
+  <p class="note" data-t="iw0Note"></p>
+</div>
+
+<div class="scrim" id="card" hidden><div class="bcard" role="dialog" aria-modal="true" aria-labelledby="cardBlk">
+  <span class="cblk" id="cardBlk"></span><p id="cardP"></p><button class="btn primary" id="cardOk" data-t="iw0GotIt"></button>
+</div></div>
+<div class="stats" id="stats" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.158.0/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/blockly@12.3.1/blockly_compressed.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/blockly@12.3.1/blocks_compressed.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/blockly@12.3.1/msg/fr.js"></script>
+<script>window.IW_MSG_FR = Object.assign({}, Blockly.Msg);</script>
+<script src="https://cdn.jsdelivr.net/npm/blockly@12.3.1/msg/en.js"></script>
+<script>window.IW_MSG_EN = Object.assign({}, Blockly.Msg);</script>
+
+<script id="scene-builder">
+/* ═══════════════════════════════════════════════════════════════════════════════════════════════
+   Garden 3D — the scene builder, copied from IG-000 (island-3d.html) and extended with the job
+   vocabulary of P108 README §4.1 / the common brief §4.2 (can, shed, well, site, basket, egg, hen,
+   a pen tile, fences with an open side, rocks sized by left/max, tulips by have/need). Pure three.js
+   over the engine's world shape; NO page code in this block. Reads only the THREE global.
+
+   var scene = GardenScene.buildScene(world, opts)
+     world  = { map, things, robots }
+       map     { rows: ["GGTGGGTH", ...] }   kinds: grass path water tree rock house bed pen(N)
+       things  [{ kind, x, y, id?, ... }]  kinds this builder draws:
+               tulip {have, need, colour?}   site {have, need}   basket {count, capacity}   can {level, max}
+               rock {left, max}   egg   hen   well (on a water tile)   shed   postbox   stone
+               fence {w, h, open?: 'n'|'e'|'s'|'w'}   islander {who: granny|postie}
+       robots  [{ x, y, d, colour, eyes, hat, name, bump?, accessory?: none|can|hod|satchel, can?, canMax?, load?, eggs? }]
+     opts   = { stepMs: 420 }
+   scene.update(world) · scene.tick(now) · scene.tileAt(ray) · scene.pointOf({robot|thing|thingId|x,y})
+   scene.celebrate(i) · scene.dispose()
+   ═══════════════════════════════════════════════════════════════════════════════════════════════ */
+var GardenScene = (function () {
+  var TOP = { grass: 0.4, path: 0.34, water: 0.14, tree: 0.4, rock: 0.4, house: 0.4, bed: 0.3, pen: 0.36 };
+  var LEGEND = { G: 'grass', P: 'path', W: 'water', T: 'tree', R: 'rock', H: 'house', F: 'bed', N: 'pen', '.': 'grass', ' ': 'grass' };
+  var C = {
+    grassA: 0xBDE6C9, grassB: 0xB4E0C2, path: 0xF1DFB5, water: 0x7CC6F0, soil: 0xC79A63, sand: 0xF1DFB5, sea: 0x7CC6F0,
+    penA: 0xF2DE9E, penB: 0xEBD58F,
+    trunk: 0xA9773F, leaf: 0x3E9B62, leaf2: 0x48AF70, rock: 0x9C9AA6, rock2: 0xB7B5C2,
+    wall: 0xFFE3B3, roof: 0xE86A5E, door: 0x8B5A2B, glass: 0x7CC6F0,
+    stem: 0x3FA66B, pink: 0xFF6B9A, pinkDry: 0xD9B3BE, yellow: 0xFFD166, yellowDry: 0xE3D3A6,
+    ink: 0x2E2A3D, white: 0xFFFFFF, can: 0x4FA7DC, canWater: 0xBFE7FF, gold: 0xFFD166, iron: 0x8E8CA0,
+    skin: 0xF7D3B5, granny: 0x8F6BFF, hair: 0xE9E4EF, postie: 0x3E63C8,
+    paper: 0xFFFFFF, coral: 0xFF7A59, wheel: 0x3A3646, cap: 0x3E63C8, hod: 0xA9773F, satchel: 0xC98A5E,
+    dirt: 0x9E7248, gravel: 0xB8AE9C, cobble: 0xA3A0AB, wicker: 0xC98A4B, egg: 0xFFF4DC, hen: 0xFFFFFF, comb: 0xE0463A, beak: 0xFFB347,
+    well: 0xA9A6B3, shed: 0xB0764A
+  };
+  var DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0];
+  var mats = {};
+  function mat(hex, extra) {
+    var key = hex + (extra ? JSON.stringify(extra) : '');
+    if (!mats[key]) {
+      var p = { color: hex, flatShading: true };
+      if (extra) for (var k in extra) p[k] = extra[k];
+      mats[key] = new THREE.MeshLambertMaterial(p);
+    }
+    return mats[key];
+  }
+  var geos = {};
+  function geo(key, make) { if (!geos[key]) geos[key] = make(); return geos[key]; }
+  function box(sx, sy, sz) { return geo('b' + sx + ',' + sy + ',' + sz, function () { return new THREE.BoxGeometry(sx, sy, sz); }); }
+  function ico() { return geo('ico', function () { return new THREE.IcosahedronGeometry(1, 0); }); }
+  function mesh(g, m, x, y, z) { var o = new THREE.Mesh(g, m); o.position.set(x || 0, y || 0, z || 0); return o; }
+  function ease(p) { return p < 0.5 ? 2 * p * p : -1 + (4 - 2 * p) * p; }
+  function lerpHex(a, b, t) { var ca = new THREE.Color(a), cb = new THREE.Color(b); return ca.lerp(cb, Math.max(0, Math.min(1, t))).getHex(); }
+
+  function parseMap(map) {
+    var rows = Array.isArray(map) ? map : (map && map.rows) || [];
+    var w = 0;
+    rows.forEach(function (r) { if (r.length > w) w = r.length; });
+    var cells = [];
+    for (var y = 0; y < rows.length; y++) {
+      cells.push([]);
+      for (var x = 0; x < w; x++) { var kind = LEGEND[rows[y][x]] || 'grass'; if (!(kind in TOP)) kind = 'grass'; cells[y].push(kind); }
+    }
+    return { w: w, h: rows.length, cells: cells };
+  }
+  function mergeBoxes(items) {
+    var pos = [], nor = [], col = [], idx = [], base = 0, tmp = new THREE.Color();
+    items.forEach(function (it) {
+      var g = new THREE.BoxGeometry(it.sx, it.sy, it.sz);
+      g.translate(it.x, it.y, it.z);
+      var p = g.attributes.position.array, n = g.attributes.normal.array, ix = g.index.array;
+      tmp.set(it.color);
+      for (var i = 0; i < p.length; i += 3) { pos.push(p[i], p[i + 1], p[i + 2]); nor.push(n[i], n[i + 1], n[i + 2]); col.push(tmp.r, tmp.g, tmp.b); }
+      for (var j = 0; j < ix.length; j++) idx.push(ix[j] + base);
+      base += p.length / 3;
+      g.dispose();
+    });
+    var out = new THREE.BufferGeometry();
+    out.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    out.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+    out.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+    out.setIndex(idx);
+    return out;
+  }
+  function prism(w, h, d) {
+    return geo('prism' + w + ',' + h + ',' + d, function () {
+      var hw = w / 2, hd = d / 2;
+      var v = [-hw, 0, hd, hw, 0, hd, 0, h, hd, hw, 0, -hd, -hw, 0, -hd, 0, h, -hd,
+        -hw, 0, hd, 0, h, hd, 0, h, -hd, -hw, 0, hd, 0, h, -hd, -hw, 0, -hd,
+        hw, 0, -hd, 0, h, -hd, 0, h, hd, hw, 0, -hd, 0, h, hd, hw, 0, hd,
+        -hw, 0, -hd, hw, 0, -hd, hw, 0, hd, -hw, 0, -hd, hw, 0, hd, -hw, 0, hd];
+      var g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
+      g.computeVertexNormals();
+      return g;
+    });
+  }
+  function at(g, x, y, top) { g.position.set(x + 0.5, top, y + 0.5); return g; }
+
+  /* ── props ── */
+  function tree(x, y, top, seed) {
+    var g = new THREE.Group(), s = 0.85 + ((seed * 7) % 5) * 0.06;
+    g.add(mesh(geo('trunk', function () { return new THREE.CylinderGeometry(0.07, 0.1, 0.36, 6); }), mat(C.trunk), 0, 0.18, 0));
+    g.add(mesh(geo('cone1', function () { return new THREE.ConeGeometry(0.4, 0.62, 6); }), mat(C.leaf), 0, 0.6, 0));
+    g.add(mesh(geo('cone2', function () { return new THREE.ConeGeometry(0.3, 0.5, 6); }), mat(C.leaf2), 0, 0.95, 0));
+    g.scale.set(s, s, s); g.rotation.y = (seed % 6) * 0.5;
+    return at(g, x, y, top);
+  }
+  function rock(x, y, top, left, max, seed) {
+    var lv = max ? Math.ceil(3 * Math.max(0, left) / max) : Math.max(0, Math.min(3, left));
+    var g = new THREE.Group();
+    var size = [0.1, 0.18, 0.26, 0.34][lv];
+    var m = mesh(ico(), mat(lv ? C.rock : C.rock2), 0, size * 0.72, 0);
+    m.scale.set(size, size * 0.72, size); m.rotation.set(0.3, (seed || 0) * 0.7, 0.2); g.add(m);
+    if (lv >= 2) { var m2 = mesh(ico(), mat(C.rock2), 0.24, 0.09, 0.16); m2.scale.set(0.12, 0.09, 0.12); g.add(m2); }
+    if (lv >= 3) { var m3 = mesh(ico(), mat(C.rock2), -0.22, 0.08, -0.14); m3.scale.set(0.1, 0.08, 0.1); g.add(m3); }
+    return at(g, x, y, top);
+  }
+  function house(x, y, top) {
+    var g = new THREE.Group();
+    g.add(mesh(box(0.8, 0.5, 0.66), mat(C.wall), 0, 0.25, 0));
+    g.add(mesh(prism(0.96, 0.4, 0.8), mat(C.roof), 0, 0.5, 0));
+    g.add(mesh(box(0.18, 0.28, 0.04), mat(C.door), 0, 0.14, 0.34));
+    g.add(mesh(box(0.14, 0.14, 0.04), mat(C.glass), -0.24, 0.3, 0.34));
+    g.add(mesh(box(0.14, 0.14, 0.04), mat(C.glass), 0.24, 0.3, 0.34));
+    return at(g, x, y, top);
+  }
+  function tulip(x, y, top, frac, colour) {
+    var g = new THREE.Group(), full = frac >= 1;
+    var petal = colour === 'yellow' ? lerpHex(C.yellowDry, C.yellow, frac) : lerpHex(C.pinkDry, C.pink, frac);
+    g.add(mesh(geo('stem', function () { return new THREE.CylinderGeometry(0.025, 0.03, 0.34, 5); }), mat(C.stem), 0, 0.17, 0));
+    g.add(mesh(geo('cup', function () { return new THREE.CylinderGeometry(0.13, 0.05, 0.22, 5); }), mat(petal), 0, 0.43, 0));
+    var l1 = mesh(box(0.05, 0.16, 0.02), mat(C.stem), -0.07, 0.14, 0); l1.rotation.z = 0.7; g.add(l1);
+    var l2 = mesh(box(0.05, 0.16, 0.02), mat(C.stem), 0.07, 0.14, 0); l2.rotation.z = -0.7; g.add(l2);
+    if (!full) { g.rotation.z = 0.38 * (1 - frac); var s = 0.86 + 0.14 * frac; g.scale.set(s, s, s); }
+    return at(g, x, y, top);
+  }
+  function stone(x, y, top) { var m = mesh(ico(), mat(C.rock2), x + 0.5, top + 0.07, y + 0.5); m.scale.set(0.14, 0.08, 0.14); m.rotation.y = (x * 3 + y) * 0.6; return m; }
+  function postbox(x, y, top) {
+    var g = new THREE.Group();
+    g.add(mesh(box(0.08, 0.4, 0.08), mat(C.iron), 0, 0.2, 0));
+    g.add(mesh(box(0.34, 0.4, 0.3), mat(C.roof), 0, 0.6, 0));
+    g.add(mesh(box(0.2, 0.04, 0.04), mat(C.paper), 0, 0.68, -0.15));
+    return at(g, x, y, top);
+  }
+  function fence(x, y, w, h, top, open) {
+    var items = [], rail = function (ax, az, sx, sz) { items.push({ x: ax, y: top + 0.3, z: az, sx: sx, sy: 0.05, sz: sz, color: C.hod }); items.push({ x: ax, y: top + 0.14, z: az, sx: sx, sy: 0.05, sz: sz, color: C.hod }); };
+    var post = function (px, pz) { items.push({ x: px, y: top + 0.2, z: pz, sx: 0.07, sy: 0.4, sz: 0.07, color: C.trunk }); };
+    var sides = { n: open !== 'n', s: open !== 's', w: open !== 'w', e: open !== 'e' };
+    for (var i = 0; i <= w; i++) { if (sides.n) post(x + i, y); if (sides.s) post(x + i, y + h); }
+    for (var j = 0; j <= h; j++) { if (sides.w) post(x, y + j); if (sides.e) post(x + w, y + j); }
+    if (sides.n) rail(x + w / 2, y, w, 0.04);
+    if (sides.s) rail(x + w / 2, y + h, w, 0.04);
+    if (sides.w) rail(x, y + h / 2, 0.04, h);
+    if (sides.e) rail(x + w, y + h / 2, 0.04, h);
+    var m = new THREE.Mesh(mergeBoxes(items), mat(C.white, { vertexColors: true }));
+    m.userData.own = true;
+    return m;
+  }
+  function islander(x, y, top, who) {
+    var g = new THREE.Group();
+    var dress = who === 'postie' ? C.postie : C.granny;
+    g.add(mesh(geo('body', function () { return new THREE.CylinderGeometry(0.14, 0.2, 0.42, 6); }), mat(dress), 0, 0.21, 0));
+    g.add(mesh(geo('head', function () { return new THREE.SphereGeometry(0.15, 6, 5); }), mat(C.skin), 0, 0.55, 0));
+    if (who === 'postie') { g.add(mesh(box(0.34, 0.06, 0.34), mat(C.postie), 0, 0.66, 0)); g.add(mesh(box(0.2, 0.08, 0.2), mat(C.postie), 0, 0.72, 0)); g.add(mesh(box(0.18, 0.2, 0.08), mat(C.satchel), 0.16, 0.26, 0)); }
+    else { g.add(mesh(geo('hair', function () { return new THREE.SphereGeometry(0.16, 6, 4, 0, Math.PI * 2, 0, Math.PI / 2); }), mat(C.hair), 0, 0.57, 0)); }
+    g.add(mesh(box(0.03, 0.03, 0.02), mat(C.ink), -0.05, 0.57, 0.14));
+    g.add(mesh(box(0.03, 0.03, 0.02), mat(C.ink), 0.05, 0.57, 0.14));
+    g.userData.idle = 'bob';
+    return at(g, x, y, top);
+  }
+  /* the job vocabulary */
+  function canProp(level, max) {
+    var g = new THREE.Group();
+    g.add(mesh(box(0.2, 0.24, 0.2), mat(C.can), 0, 0.12, 0));
+    var sp = mesh(geo('spout', function () { return new THREE.CylinderGeometry(0.022, 0.034, 0.22, 5); }), mat(C.can), 0.16, 0.2, 0); sp.rotation.z = -0.9; g.add(sp);
+    var h = mesh(geo('handle', function () { return new THREE.TorusGeometry(0.08, 0.02, 4, 10, Math.PI); }), mat(C.can), 0, 0.24, 0); g.add(h);
+    var f = max ? Math.max(0, Math.min(1, level / max)) : 0;
+    if (f > 0) { var lv = mesh(box(0.21, 0.24, 0.21), mat(C.canWater), 0, 0.12 * f, 0); lv.scale.y = f; g.add(lv); }
+    return g;
+  }
+  function shed(x, y, top) {
+    var g = new THREE.Group();
+    /* a lean-to: back wall, two front posts, a short roof over the back half so the can under it stays in sight */
+    [[-0.42, 0.02], [0.42, 0.02]].forEach(function (p) { g.add(mesh(box(0.06, 0.62, 0.06), mat(C.shed), p[0], 0.31, p[1])); });
+    g.add(mesh(box(0.9, 0.78, 0.06), mat(C.shed), 0, 0.39, -0.42));
+    var roof = mesh(box(1.0, 0.05, 0.56), mat(C.roof), 0, 0.72, -0.2); roof.rotation.x = -0.3; g.add(roof);
+    return at(g, x, y, top);
+  }
+  function well(x, y, top) {
+    var g = new THREE.Group();
+    g.add(mesh(geo('wellring', function () { return new THREE.CylinderGeometry(0.34, 0.37, 0.36, 10, 1, true); }), mat(C.well, { side: THREE.DoubleSide }), 0, 0.18, 0));
+    g.add(mesh(geo('wellwater', function () { return new THREE.CylinderGeometry(0.31, 0.31, 0.02, 10); }), mat(C.water), 0, 0.28, 0));
+    g.add(mesh(box(0.06, 0.66, 0.06), mat(C.trunk), -0.32, 0.5, 0));
+    g.add(mesh(box(0.06, 0.66, 0.06), mat(C.trunk), 0.32, 0.5, 0));
+    g.add(mesh(box(0.7, 0.04, 0.04), mat(C.trunk), 0, 0.72, 0));
+    g.add(mesh(prism(0.84, 0.24, 0.5), mat(C.roof), 0, 0.8, 0));
+    g.add(mesh(box(0.12, 0.12, 0.12), mat(C.iron), 0, 0.5, 0));
+    return at(g, x, y, top);
+  }
+  function site(x, y, top, have, need) {
+    var g = new THREE.Group(), f = need ? have / need : 0;
+    var col = f >= 1 ? C.path : f >= 0.5 ? C.cobble : f > 0 ? C.gravel : C.dirt;
+    g.add(mesh(box(0.94, 0.05, 0.94), mat(col), 0, 0.025, 0));
+    if (f < 1) {
+      var spots = [[-0.2, -0.2], [0.2, -0.2], [-0.2, 0.2], [0.2, 0.2], [0, 0], [0, -0.3], [0, 0.3], [-0.3, 0]];
+      for (var i = 0; i < Math.min(have, spots.length); i++) { var s = mesh(ico(), mat(i % 2 ? C.rock : C.rock2), spots[i][0], 0.07, spots[i][1]); s.scale.set(0.15, 0.06, 0.15); s.rotation.y = i * 0.9; g.add(s); }
+    } else {
+      g.add(mesh(box(0.94, 0.02, 0.06), mat(C.sand), 0, 0.055, -0.44)); g.add(mesh(box(0.94, 0.02, 0.06), mat(C.sand), 0, 0.055, 0.44));
+    }
+    return at(g, x, y, top);
+  }
+  function basket(x, y, top, count, capacity) {
+    var g = new THREE.Group();
+    g.add(mesh(geo('bsk', function () { return new THREE.CylinderGeometry(0.24, 0.18, 0.2, 10, 1, true); }), mat(C.wicker, { side: THREE.DoubleSide }), 0, 0.1, 0));
+    g.add(mesh(geo('bskb', function () { return new THREE.CylinderGeometry(0.18, 0.18, 0.02, 10); }), mat(C.wicker), 0, 0.01, 0));
+    var hd = mesh(geo('bskh', function () { return new THREE.TorusGeometry(0.22, 0.02, 4, 12, Math.PI); }), mat(C.wicker), 0, 0.2, 0); g.add(hd);
+    var spots = [[-0.08, -0.07], [0.08, -0.07], [-0.08, 0.08], [0.08, 0.08], [0, 0], [0, -0.14], [0, 0.14], [-0.14, 0]];
+    for (var i = 0; i < Math.min(count, spots.length); i++) { var e = mesh(ico(), mat(C.egg), spots[i][0], 0.13 + (i >= 4 ? 0.06 : 0), spots[i][1]); e.scale.set(0.065, 0.085, 0.065); g.add(e); }
+    return at(g, x, y, top);
+  }
+  function egg(x, y, top, seed) { var g = new THREE.Group(); var e = mesh(geo('eggs', function () { return new THREE.SphereGeometry(1, 8, 6); }), mat(C.egg), 0, 0.09, 0); e.scale.set(0.075, 0.1, 0.075); g.add(e); g.rotation.z = ((seed || 0) % 3 - 1) * 0.3; g.userData.idle = 'egg'; return at(g, x, y, top); }
+  function hen(x, y, top) {
+    var g = new THREE.Group();
+    var b = mesh(geo('henb', function () { return new THREE.SphereGeometry(0.18, 7, 5); }), mat(C.hen), 0, 0.2, 0); b.scale.set(1.25, 1, 1); g.add(b);
+    g.add(mesh(geo('henh', function () { return new THREE.SphereGeometry(0.1, 6, 5); }), mat(C.hen), 0.2, 0.36, 0));
+    g.add(mesh(box(0.05, 0.08, 0.1), mat(C.comb), 0.22, 0.47, 0));
+    var bk = mesh(geo('beak', function () { return new THREE.ConeGeometry(0.035, 0.08, 4); }), mat(C.beak), 0.31, 0.35, 0); bk.rotation.z = -Math.PI / 2; g.add(bk);
+    g.add(mesh(box(0.025, 0.025, 0.02), mat(C.ink), 0.26, 0.39, 0.07)); g.add(mesh(box(0.025, 0.025, 0.02), mat(C.ink), 0.26, 0.39, -0.07));
+    var tl = mesh(geo('tail', function () { return new THREE.ConeGeometry(0.08, 0.16, 5); }), mat(C.hen), -0.24, 0.3, 0); tl.rotation.z = 0.8; g.add(tl);
+    g.rotation.y = 0.5; g.userData.idle = 'peck';
+    return at(g, x, y, top);
+  }
+
+  /* ── the robot: box body + visor + eyes + antenna + hat + accessory + can level + load + an egg in hand ── */
+  function robotMesh(r) {
+    var g = new THREE.Group();
+    var body = new THREE.Color(r.colour || '#FF7A59').getHex();
+    g.add(mesh(box(0.5, 0.5, 0.44), mat(body), 0, 0.37, 0));
+    g.add(mesh(box(0.36, 0.18, 0.06), mat(C.white), 0, 0.46, -0.23));
+    if (r.eyes === 'happy') { g.add(mesh(box(0.08, 0.03, 0.02), mat(C.ink), -0.09, 0.47, -0.27)); g.add(mesh(box(0.08, 0.03, 0.02), mat(C.ink), 0.09, 0.47, -0.27)); }
+    else { g.add(mesh(box(0.07, 0.07, 0.02), mat(C.ink), -0.09, 0.46, -0.27)); g.add(mesh(box(0.07, 0.07, 0.02), mat(C.ink), 0.09, 0.46, -0.27)); }
+    g.add(mesh(box(0.16, 0.05, 0.02), mat(C.ink), 0, 0.28, -0.23));
+    g.add(mesh(box(0.1, 0.2, 0.28), mat(C.wheel), -0.3, 0.12, 0));
+    g.add(mesh(box(0.1, 0.2, 0.28), mat(C.wheel), 0.3, 0.12, 0));
+    g.add(mesh(geo('ant', function () { return new THREE.CylinderGeometry(0.015, 0.015, 0.16, 4); }), mat(C.ink), 0, 0.7, 0));
+    g.add(mesh(geo('ball', function () { return new THREE.SphereGeometry(0.045, 5, 4); }), mat(C.gold), 0, 0.8, 0));
+    if (r.hat === 'cap') { g.add(mesh(box(0.42, 0.09, 0.42), mat(C.cap), 0, 0.66, 0)); g.add(mesh(box(0.34, 0.03, 0.2), mat(C.cap), 0, 0.63, -0.3)); }
+    else if (r.hat === 'sun') {
+      var sun = new THREE.Group();
+      sun.add(mesh(geo('sunc', function () { return new THREE.CylinderGeometry(0.1, 0.1, 0.05, 8); }), mat(C.hod), 0, 0, 0));
+      for (var i = 0; i < 8; i++) { var p = mesh(box(0.08, 0.03, 0.16), mat(C.gold), Math.sin(i * Math.PI / 4) * 0.16, 0, Math.cos(i * Math.PI / 4) * 0.16); p.rotation.y = i * Math.PI / 4; sun.add(p); }
+      sun.position.set(0.06, 0.66, 0.06); sun.rotation.z = -0.25; g.add(sun);
+    }
+    var acc = r.accessory || 'none';
+    if (acc === 'can') {
+      var can = new THREE.Group();
+      can.add(mesh(box(0.16, 0.2, 0.16), mat(C.can), 0, 0.1, 0));
+      var sp = mesh(geo('spout2', function () { return new THREE.CylinderGeometry(0.02, 0.03, 0.18, 4); }), mat(C.can), 0, 0.16, -0.12); sp.rotation.x = 0.9; can.add(sp);
+      var lvl = mesh(box(0.17, 0.2, 0.17), mat(C.canWater), 0, 0.1, 0); can.add(lvl);
+      can.position.set(0.38, 0.14, 0.02); g.add(can);
+      g.userData.level = lvl;
+    } else if (acc === 'hod') {
+      var hod = new THREE.Group();
+      hod.add(mesh(box(0.34, 0.22, 0.18), mat(C.hod), 0, 0.11, 0));
+      hod.add(mesh(box(0.04, 0.34, 0.04), mat(C.trunk), 0, 0.3, -0.06));
+      var stones = [];
+      for (var s = 0; s < 4; s++) { var st = mesh(ico(), mat(C.rock2), -0.11 + (s % 2) * 0.13, 0.26 + Math.floor(s / 2) * 0.1, 0.02); st.scale.set(0.08, 0.06, 0.08); st.visible = false; stones.push(st); hod.add(st); }
+      hod.position.set(0, 0.2, 0.32); g.add(hod);
+      g.userData.stones = stones;
+    } else if (acc === 'satchel') {
+      var bag = new THREE.Group();
+      bag.add(mesh(box(0.18, 0.2, 0.1), mat(C.satchel), 0, 0.1, 0));
+      bag.add(mesh(box(0.02, 0.36, 0.04), mat(C.satchel), 0, 0.36, 0));
+      bag.position.set(-0.36, 0.14, 0.04); g.add(bag);
+    }
+    var held = mesh(geo('eggs', function () { return new THREE.SphereGeometry(1, 8, 6); }), mat(C.egg), 0, 0.34, -0.36); held.scale.set(0.075, 0.1, 0.075); held.visible = false; g.add(held);
+    g.userData.egg = held;
+    return g;
+  }
+
+  function buildScene(world, opts) {
+    opts = opts || {};
+    var stepMs = opts.stepMs || 420;
+    var grid = parseMap(world.map);
+    var w = grid.w, h = grid.h;
+    var group = new THREE.Group(), own = [];
+    var thingsGroup = new THREE.Group(), robotsGroup = new THREE.Group();
+    var idlers = [];
+    var sea = new THREE.Mesh(geo('sea', function () { return new THREE.PlaneGeometry(400, 400); }), mat(C.sea));
+    sea.rotation.x = -Math.PI / 2; sea.position.set(w / 2, -0.06, h / 2); group.add(sea);
+    group.add(mesh(box(w + 1.4, 0.3, h + 1.4), mat(C.sand), w / 2, -0.16, h / 2));
+    group.add(mesh(box(w, 0.06, h), mat(0x9BD3AF), w / 2, 0.0, h / 2));
+    var tiles = [], props = new THREE.Group();
+    for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+      var kind = grid.cells[y][x], top = TOP[kind];
+      var color = kind === 'path' ? C.path : kind === 'water' ? C.water : kind === 'bed' ? C.soil : kind === 'pen' ? ((x + y) % 2 ? C.penB : C.penA) : ((x + y) % 2 ? C.grassB : C.grassA);
+      tiles.push({ x: x + 0.5, y: top / 2, z: y + 0.5, sx: kind === 'water' ? 1.02 : 0.98, sy: top, sz: kind === 'water' ? 1.02 : 0.98, color: color });
+      if (kind === 'tree') props.add(tree(x, y, top, x * 31 + y * 17));
+      if (kind === 'house') props.add(house(x, y, top));
+    }
+    var tileMesh = new THREE.Mesh(mergeBoxes(tiles), mat(C.white, { vertexColors: true }));
+    own.push(tileMesh.geometry);
+    group.add(tileMesh); group.add(props); group.add(thingsGroup); group.add(robotsGroup);
+    function topAt(x, y) { if (x < 0 || y < 0 || x >= w || y >= h) return TOP.grass; return TOP[grid.cells[y][x]]; }
+
+    var thingsKey = null, thingAnchors = [], anchorsById = {};
+    function syncThings(things) {
+      var key = JSON.stringify(things || []);
+      if (key === thingsKey) return;
+      thingsKey = key;
+      while (thingsGroup.children.length) { var c = thingsGroup.children[0]; thingsGroup.remove(c); if (c.userData.own) c.geometry.dispose(); }
+      idlers = []; thingAnchors = []; anchorsById = {};
+      (things || []).forEach(function (t, i) {
+        var top = topAt(t.x, t.y), o = null, lift = 0.62;
+        if (t.kind === 'tulip') { o = tulip(t.x, t.y, top, t.need ? t.have / t.need : (t.watered ? 1 : 0), t.colour); lift = 0.72; }
+        else if (t.kind === 'stone') o = stone(t.x, t.y, top);
+        else if (t.kind === 'postbox') { o = postbox(t.x, t.y, top); lift = 0.95; }
+        else if (t.kind === 'rock') { o = rock(t.x, t.y, top, t.left == null ? 3 : t.left, t.max, t.x + t.y); lift = 0.72; }
+        else if (t.kind === 'fence') o = fence(t.x, t.y, t.w || 1, t.h || 1, top, t.open);
+        else if (t.kind === 'islander') { o = islander(t.x, t.y, top, t.who); lift = 0.92; }
+        else if (t.kind === 'can') { o = at(canProp(t.level, t.max), t.x, t.y, top); lift = 0.95; }
+        else if (t.kind === 'shed') { o = shed(t.x, t.y, top); lift = 1.0; }
+        else if (t.kind === 'well') { o = well(t.x, t.y, top); lift = 1.05; }
+        else if (t.kind === 'site') { o = site(t.x, t.y, top, t.have || 0, t.need || 4); lift = 0.3; }
+        else if (t.kind === 'basket') { o = basket(t.x, t.y, top, t.count || 0, t.capacity || 4); lift = 0.5; }
+        else if (t.kind === 'egg') { o = egg(t.x, t.y, top, i); lift = 0.3; }
+        else if (t.kind === 'hen') { o = hen(t.x, t.y, top); lift = 0.62; }
+        var a = { x: t.x + 0.5, y: top + lift, z: t.y + 0.5 };
+        thingAnchors[i] = a; if (t.id) anchorsById[t.id] = a;
+        if (!o) return;
+        if (o.userData.idle) { o.userData.baseY = o.position.y; o.userData.phase = i; idlers.push(o); }
+        thingsGroup.add(o);
+      });
+    }
+    var bots = [];
+    function lookKey(r) { return [r.colour, r.eyes, r.hat, r.accessory].join('|'); }
+    function syncRobots(robots) {
+      robots = robots || [];
+      while (bots.length > robots.length) { var b0 = bots.pop(); robotsGroup.remove(b0.mesh); }
+      robots.forEach(function (r, i) {
+        var b = bots[i], now = performance.now();
+        if (!b) {
+          b = { mesh: robotMesh(r), key: lookKey(r), x: r.x, z: r.y, y: topAt(r.x, r.y), yaw: -r.d * Math.PI / 2, fx: r.x, fz: r.y, fy: topAt(r.x, r.y), fyaw: -r.d * Math.PI / 2, tx: r.x, tz: r.y, ty: topAt(r.x, r.y), tyaw: -r.d * Math.PI / 2, t0: now, dur: 1, bump: r.bump || 0, bumpAt: -1e9, hopAt: -1e9, d: r.d };
+          bots.push(b); robotsGroup.add(b.mesh);
+        } else if (b.key !== lookKey(r)) { robotsGroup.remove(b.mesh); b.mesh = robotMesh(r); b.key = lookKey(r); robotsGroup.add(b.mesh); }
+        var tyaw = -r.d * Math.PI / 2;
+        if (r.x !== b.tx || r.y !== b.tz || tyaw !== b.tyaw) {
+          if (r.snap) { b.x = b.fx = b.tx = r.x; b.z = b.fz = b.tz = r.y; b.y = b.fy = b.ty = topAt(r.x, r.y); b.yaw = b.fyaw = b.tyaw = tyaw; b.t0 = now; b.dur = 1; }
+          else {
+            b.fx = b.x; b.fz = b.z; b.fy = b.y; b.fyaw = b.yaw;
+            b.tx = r.x; b.tz = r.y; b.ty = topAt(r.x, r.y);
+            var dy = tyaw - b.yaw; while (dy > Math.PI) dy -= 2 * Math.PI; while (dy < -Math.PI) dy += 2 * Math.PI;
+            b.tyaw = b.yaw + dy; b.t0 = now; b.dur = r.stepMs || stepMs;
+          }
+        }
+        if ((r.bump || 0) > b.bump) { b.bump = r.bump; b.bumpAt = now; }
+        b.d = r.d;
+        var u = b.mesh.userData;
+        if (u.level) { var max = r.canMax || 3, lv = r.can == null ? 0 : r.can; u.level.scale.y = Math.max(0.02, lv / max); u.level.position.y = 0.1 * (lv / max); }
+        if (u.stones) u.stones.forEach(function (s, k) { s.visible = k < (r.load || 0); });
+        if (u.egg) u.egg.visible = (r.eggs || 0) > 0;
+      });
+    }
+    function update(next) { syncThings(next.things); syncRobots(next.robots); }
+    update(world);
+    function tick(now) {
+      bots.forEach(function (b) {
+        var p = Math.min(1, (now - b.t0) / b.dur), e = ease(p);
+        b.x = b.fx + (b.tx - b.fx) * e; b.z = b.fz + (b.tz - b.fz) * e; b.y = b.fy + (b.ty - b.fy) * e;
+        b.yaw = b.fyaw + (b.tyaw - b.fyaw) * e;
+        var ox = 0, oz = 0, oy = 0, bt = now - b.bumpAt, ht = now - b.hopAt;
+        if (bt >= 0 && bt < 360) { var k = Math.sin(bt / 360 * Math.PI) * 0.16; ox = DX[b.d] * k; oz = DY[b.d] * k; }
+        if (ht >= 0 && ht < 900) oy = Math.abs(Math.sin(ht / 900 * Math.PI * 2)) * 0.3;
+        b.mesh.position.set(b.x + 0.5 + ox, b.y + oy, b.z + 0.5 + oz);
+        b.mesh.rotation.y = b.yaw;
+      });
+      idlers.forEach(function (o) {
+        if (o.userData.idle === 'bob') o.position.y = o.userData.baseY + Math.sin(now / 700 + o.userData.phase) * 0.02;
+        else if (o.userData.idle === 'peck') o.rotation.z = Math.max(0, Math.sin(now / 420 + o.userData.phase)) * 0.25;
+        else if (o.userData.idle === 'egg') o.position.y = o.userData.baseY + Math.max(0, Math.sin(now / 500 + o.userData.phase * 1.7)) * 0.02;
+      });
+    }
+    var plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -TOP.grass), hit = new THREE.Vector3();
+    function tileAt(ray) {
+      if (!ray.intersectPlane(plane, hit)) return null;
+      var x = Math.floor(hit.x), y = Math.floor(hit.z);
+      if (x < 0 || y < 0 || x >= w || y >= h) return null;
+      return { x: x, y: y };
+    }
+    function pointOf(sel) {
+      if (sel.robot != null && bots[sel.robot]) { var b = bots[sel.robot]; return new THREE.Vector3(b.x + 0.5, b.y + 1.0, b.z + 0.5); }
+      if (sel.thingId != null) { var a2 = anchorsById[sel.thingId]; return a2 ? new THREE.Vector3(a2.x, a2.y, a2.z) : null; }
+      if (sel.thing != null && thingAnchors[sel.thing]) { var a = thingAnchors[sel.thing]; return new THREE.Vector3(a.x, a.y, a.z); }
+      if (sel.x == null) return null;
+      return new THREE.Vector3(sel.x + 0.5, topAt(sel.x, sel.y) + 0.6, sel.y + 0.5);
+    }
+    function celebrate(i) { if (bots[i]) bots[i].hopAt = performance.now(); }
+    function dispose() { own.forEach(function (g) { g.dispose(); }); while (thingsGroup.children.length) { var c = thingsGroup.children[0]; thingsGroup.remove(c); if (c.userData.own) c.geometry.dispose(); } }
+    return { group: group, w: w, h: h, update: update, tick: tick, tileAt: tileAt, pointOf: pointOf, celebrate: celebrate, dispose: dispose, TOP: TOP };
+  }
+  return { buildScene: buildScene, TOP: TOP, LEGEND: LEGEND, COLOURS: C, parseMap: parseMap };
+})();
+</script>
+
+<script id="page">
+'use strict';
+/* ═══════════════ IW-000: three jobs on real Blockly — words, missions, the tiny job engine, the interpreter, the page ═══════════════ */
+
+/* ---------------- words (iw0… keys, EN and FR; IW-004 lifts them) ---------------- */
+const WORDS = {
+en:{iw0Brand:"Olive's Island",iw0Shells:'shells',
+ iw0Job1:"Pip's tulips",iw0Job2:"Cobble's path",iw0Job3:"Pocket's eggs",iw0Who1:'Mamie Rose',iw0Who2:'Sami',iw0Who3:'Mamie Rose',
+ iw0Eyebrow1:"Mamie Rose's job · 1 of 3",iw0Eyebrow2:"Sami's job · 2 of 3",iw0Eyebrow3:"Mamie Rose's job · 3 of 3",
+ iw0Title1:'Give each tulip three drinks',iw0Title2:'Build the path to the post box',iw0Title3:'Bring the eggs to the basket',
+ iw0Req1:'"The can is in the shed and the water is in the well. Each tulip wants three drinks; the can holds three."',
+ iw0Req2:'"Four squares are still dirt. Four stones turn a square into path. Cobble\'s hod holds four."',
+ iw0Req3:'"The hen lays somewhere new every day. Pocket carries one egg at a time to the basket by my door."',
+ iw0Sum1:'{n}/3 tulips full',iw0Sum2:'{n}/4 squares are path',iw0Sum3:'{n}/4 eggs in the basket',iw0Day:'Day {n} · the hen lays somewhere new',
+ iw0Drive:'Drive',iw0Teach:'Teach',iw0Play:'Play',iw0Stop:'Stop',iw0Reset:'Start over',iw0Time:'Time passes',iw0Fit:'Whole plot',iw0Fold:'Fold into a repeat',
+ iw0Rec:'{b} is learning…',iw0Driving:'Just driving',iw0Hint3d:'Drag to look around · wheel or pinch to zoom · tap a thing',
+ iw0ProgH:"{b}'s program",iw0Blocks:'{n} blocks',iw0Block1:'1 block',
+ iw0BHint:'Drag blocks from the drawer and snap them under ▶. To throw one away, drag it back to the drawer. Tap ? in the drawer to see what a block does.',
+ iw0ZoomIn:'Zoom in',iw0ZoomOut:'Zoom out',iw0ZoomFit:'Show all my blocks',iw0OwlMeta:'Olive lives on this computer. No internet needed.',
+ iw0GotIt:'Got it',iw0Help:'Help',iw0Arm:'Tap a thing on the island',iw0ArmAhead:"👀 what's ahead of {b}",iw0ArmHod:"🪨 {b}'s hod",iw0ArmCan:'🪣 the can {b} holds',iw0Cancel:'Cancel',
+ iw0Start:"{b}'s job",iw0Times:'times',iw0CountOf:'count of',iw0In:'in',
+ iw0B_forward1:'forward',iw0B_forward2:'move forward',iw0B_turn_left1:'left',iw0B_turn_left2:'turn left',iw0B_turn_right1:'right',iw0B_turn_right2:'turn right',
+ iw0B_pick1:'pick up',iw0B_pick2:'pick up',iw0B_put1:'put',iw0B_put2:'put down',iw0B_fill1:'fill',iw0B_fill2:'fill the can',iw0B_water1:'water',iw0B_water2:'water',
+ iw0B_go_nearest1:'go to',iw0B_go_nearest2:'go to nearest',iw0B_go_to1:'go to',iw0B_go_to2:'go to',iw0B_repeat1:'repeat',iw0B_repeat2:'repeat',
+ iw0B_until1:'until',iw0B_until2:'repeat until',iw0B_if1:'if',iw0B_if2:'if',iw0B_is1:'is …?',iw0B_is2:'thing is …?',iw0B_thing1:'👆 thing',iw0B_thing2:'👆 a thing from the island',
+ iw0B_count1:'count of',iw0B_count2:'count of',iw0B_compare1:'compare',iw0B_compare2:'compare',iw0B_start1:'start',iw0B_start2:'start',
+ iw0K_can:'🪣 can',iw0K_well:'⛲ well',iw0K_tulip:'🌷 tulip',iw0K_rock:'🪨 rock',iw0K_site:'🟫 square',iw0K_egg:'🥚 egg',iw0K_basket:'🧺 basket',
+ iw0Chip_none:'👆 tap',iw0Chip_can:'🪣 the can',iw0Chip_basket:'🧺 the basket',iw0Chip_tulip:'🌷 tulip {n}',iw0Chip_site:'🟫 square {n}',iw0Chip_rock:'🪨 rock {n}',
+ iw0Chip_well:'⛲ the well',iw0Chip_egg:'🥚 an egg',iw0Chip_ahead:'👀 ahead',iw0Chip_hod:'🪨 the hod',
+ iw0S_none:'is …',iw0S_empty:'is empty',iw0S_full:'is full',iw0S_has:'has',iw0S_wall:'is a wall',iw0S_tulip:'is a tulip',iw0S_rock:'is a rock',iw0S_nothing:'is clear',
+ iw0S_thirsty:'is thirsty',iw0S_drunk:'has had its drinks',iw0S_done:'is path',iw0S_dirt:'is not path yet',iw0S_stones:'has stones',iw0S_used:'is used up',iw0S_front:'is in front of me',
+ iw0What_egg:'🥚',iw0What_water:'💧',iw0What_stone:'🪨',
+ iw0HintStart1:'Mamie wants her tulips watered. Drag blocks under ▶, or press Teach and show Pip with the pad.',
+ iw0HintStart2:'Sami wants a real path. Drag blocks under ▶, or press Teach and show Cobble with the pad.',
+ iw0HintStart3:'Mamie wants four eggs in her basket. An "is" block has a 👆: tap it, then tap the basket on the island.',
+ iw0HintEmpty:'Nothing under ▶ yet. Drag a block from the drawer and snap it under ▶.',
+ iw0HintDrive:'Driving: try the pad. Nothing is remembered until you press Teach.',
+ iw0HintTeach:'Back to the start. Every press on the pad becomes a block.',
+ iw0HintNoCan:'{b} needs the can first: go to the can in the shed and pick it up.',
+ iw0HintEmptyCan:'The can was empty. Go to the well and fill it before watering.',
+ iw0HintBump:'{b} bumped into something. Which step sent {b} the wrong way?',
+ iw0HintHands:"{b}'s hands were full. Put something down first.",
+ iw0HintNothing:'{b} found nothing to pick up there.',
+ iw0HintGuard:'That "until" went round 40 times and its question never came true. What is it waiting for?',
+ iw0HintNoCond:'An "until" or "if" needs a question: drag an "is" block into its slot.',
+ iw0HintNoThing:'A question has an empty 👆. Tap it, then tap a thing on the island.',
+ iw0HintNotDone:'Not done yet: {n} of {m}. Which part of the job is missing?',
+ iw0HintCap:'That run was very long, so it stopped by itself.',
+ iw0HintStopped:'Stopped. {b} waits right there.',
+ iw0HintDone:'Job done! {b} walks home.',
+ iw0HintWon:'Job done. Press ⏳ Time passes to see the job wear: {b} goes back by itself.',
+ iw0HintArmed:'Now tap a thing on the island.',
+ iw0HintChip:'{thing} is in the block. Now choose what to ask about it.',
+ iw0HintFold:'Olive sees the same steps {n} times in a row. Fold them into a repeat?',
+ iw0HintFolded:'Folded! The same job in {k} blocks instead of {j}.',
+ iw0HintRunning:'{b} is working. Stop ends the run at once.',
+ iw0Wear1:'Time passes: a tulip is thirsty again.',iw0Wear2:'Time passes: a stone came loose on the busiest square, and the rocks grew a little.',iw0Wear3:'Time passes: Mamie took two eggs for breakfast, and the hen laid again.',
+ iw0GoBack:'{b} goes back to work by itself.',iw0PressPlay:'Press Play when the program is ready.',
+ iw0SayGlug:'Glug glug!',iw0SaySlurp:'Slurp!',iw0SayClack:'Clack!',iw0SayTock:'Tock.',iw0SayEgg:'Got one!',iw0SayPlop:'Plop!',iw0SayFull:'Already full!',
+ iw0SayNoCan:'I need the can.',iw0SayEmptyCan:'The can is empty.',iw0SayBump:'Boing!',iw0SayHome:'Home!',iw0SayNone:"I can't find one.",iw0SayHands:'My hands are full.',
+ iw0SayNothing:'Nothing here.',iw0SayGot:'Got the can!',iw0SaySplash:'Splash!',
+ iw0Thanks1:'Thank you, Pip!',iw0Thanks2:'My path! Thank you, Cobble!',iw0Thanks3:'Four eggs! Thank you, Pocket!',
+ iw0WinH1:'"Every tulip has had its three drinks!"',iw0WinH2:'"The path reaches my post box!"',iw0WinH3:'"Four eggs in my basket!"',
+ iw0WinP:'{b} walks home. {k} blocks did the whole job.',iw0WinTaught:'You showed {b} the whole job with the pad. {k} blocks.',
+ iw0WinWork:'+{n} 🐚 for the work',iw0WinBonus:'+{n} 🐚 finish bonus',iw0WinLater:'Later, press ⏳ Time passes: the job wears and {b} goes back by itself.',
+ iw0Next:'Next job',iw0Stay:'Keep tinkering',
+ iw0C_garden_start:'Everything snapped under this block is what {b} does when you press Play.',
+ iw0C_garden_forward:'{b} moves one square ahead.',iw0C_garden_turn_left:'{b} turns to its left on the same square.',iw0C_garden_turn_right:'{b} turns to its right on the same square.',
+ iw0C_garden_pick:'{b} picks up what is in front: the can, a stone from the rock, an egg.',
+ iw0C_garden_put:'{b} puts what it carries into the thing in front: a stone on a path square, an egg in the basket.',
+ iw0C_garden_fill:'Facing the well, {b} fills the can to the top.',iw0C_garden_water:'Facing a tulip, {b} gives it one drink from the can.',
+ iw0C_garden_go_nearest:'{b} walks to the nearest one and turns to face it.',iw0C_garden_go_to:'{b} walks to the thing you tapped on the island and faces it.',
+ iw0C_garden_repeat:'Does the blocks inside this many times.',iw0C_garden_until:'Does the blocks inside again and again, until the question is true.',
+ iw0C_garden_if:'Does the blocks inside only when the question is true.',iw0C_garden_is:'A question about a thing you tap on the island, like "is the basket full?".',
+ iw0C_garden_thing:'Tap 👆, then tap a thing on the island: it goes in the block.',iw0C_garden_count:'The number inside a thing: eggs in the basket, water in the can.',
+ iw0C_garden_compare:'Compares two numbers: the same, smaller or bigger.',
+ iw0JcSrc:'Source',iw0JcCar:'Carrier',iw0JcTgt:'Target',iw0JcFin:'Finish line',iw0JcWr:'Wear',
+ iw0JcSrc1:'⛲ the well, which never runs dry',iw0JcCar1:'🪣 the can in the shed, holds 3',iw0JcTgt1:'🌷 3 tulips × 3 drinks',iw0JcFin1:'every tulip full → Pip walks home · +5 🐚',iw0JcWr1:'a tulip gets thirsty again',
+ iw0JcSrc2:'🪨 two rocks, 8 stones each; they grow back',iw0JcCar2:'🪨 the hod, holds 4',iw0JcTgt2:'🟫 4 squares × 4 stones: dirt → gravel → cobbles → path',iw0JcFin2:'the path reaches the post box → Cobble walks home · +5 🐚',iw0JcWr2:'the busiest square loses a stone',
+ iw0JcSrc3:'🐔 the hen lays in her pen, somewhere new each day',iw0JcCar3:'✋ Pocket\'s hands, one egg at a time',iw0JcTgt3:'🧺 the basket by Mamie\'s door, 4 eggs',iw0JcFin3:'basket full → Pocket walks home · +5 🐚',iw0JcWr3:'Mamie takes two eggs for breakfast; the hen lays again',
+ iw0Note:'Interactive mockup of Phase 108: three jobs on real Blockly 12. The island rules here are a small stand-in for the game engine, and nothing leaves this page.'},
+fr:{iw0Brand:"L'île d'Olive",iw0Shells:'coquillages',
+ iw0Job1:'Les tulipes de Pip',iw0Job2:'Le chemin de Cobble',iw0Job3:'Les œufs de Pocket',iw0Who1:'Mamie Rose',iw0Who2:'Sami',iw0Who3:'Mamie Rose',
+ iw0Eyebrow1:'La mission de Mamie Rose · 1 sur 3',iw0Eyebrow2:'La mission de Sami · 2 sur 3',iw0Eyebrow3:'La mission de Mamie Rose · 3 sur 3',
+ iw0Title1:'Donne trois gorgées à chaque tulipe',iw0Title2:'Construis le chemin jusqu’à la boîte aux lettres',iw0Title3:'Rapporte les œufs dans le panier',
+ iw0Req1:'« L’arrosoir est dans la cabane et l’eau est dans le puits. Chaque tulipe veut trois gorgées ; l’arrosoir en contient trois. »',
+ iw0Req2:'« Quatre cases sont encore de la terre. Quatre pierres font d’une case un chemin. La hotte de Cobble en porte quatre. »',
+ iw0Req3:'« La poule pond à un endroit différent chaque jour. Pocket porte un œuf à la fois jusqu’au panier devant ma porte. »',
+ iw0Sum1:'{n}/3 tulipes pleines',iw0Sum2:'{n}/4 cases en chemin',iw0Sum3:'{n}/4 œufs dans le panier',iw0Day:'Jour {n} · la poule pond ailleurs',
+ iw0Drive:'Conduire',iw0Teach:'Apprendre',iw0Play:'Jouer',iw0Stop:'Stop',iw0Reset:'Recommencer',iw0Time:'Le temps passe',iw0Fit:'Toute la parcelle',iw0Fold:'Plier en un « répéter »',
+ iw0Rec:'{b} apprend…',iw0Driving:'Juste conduire',iw0Hint3d:'Glisse pour regarder · molette ou pince pour zoomer · touche une chose',
+ iw0ProgH:'Le programme de {b}',iw0Blocks:'{n} blocs',iw0Block1:'1 bloc',
+ iw0BHint:'Glisse les blocs du tiroir et accroche-les sous ▶. Pour en jeter un, remets-le dans le tiroir. Touche ? dans le tiroir pour savoir ce que fait un bloc.',
+ iw0ZoomIn:'Zoomer',iw0ZoomOut:'Dézoomer',iw0ZoomFit:'Voir tous mes blocs',iw0OwlMeta:'Olive habite dans cet ordinateur. Pas besoin d’internet.',
+ iw0GotIt:'Compris',iw0Help:'Aide',iw0Arm:'Touche une chose sur l’île',iw0ArmAhead:'👀 ce qu’il y a devant {b}',iw0ArmHod:'🪨 la hotte de {b}',iw0ArmCan:'🪣 l’arrosoir de {b}',iw0Cancel:'Annuler',
+ iw0Start:'le travail de {b}',iw0Times:'fois',iw0CountOf:'nombre de',iw0In:'dans',
+ iw0B_forward1:'avancer',iw0B_forward2:'avancer d’une case',iw0B_turn_left1:'gauche',iw0B_turn_left2:'tourner à gauche',iw0B_turn_right1:'droite',iw0B_turn_right2:'tourner à droite',
+ iw0B_pick1:'prendre',iw0B_pick2:'prendre',iw0B_put1:'poser',iw0B_put2:'poser',iw0B_fill1:'remplir',iw0B_fill2:'remplir l’arrosoir',iw0B_water1:'arroser',iw0B_water2:'arroser',
+ iw0B_go_nearest1:'aller à',iw0B_go_nearest2:'aller au plus proche',iw0B_go_to1:'aller à',iw0B_go_to2:'aller à',iw0B_repeat1:'répéter',iw0B_repeat2:'répéter',
+ iw0B_until1:'jusqu’à',iw0B_until2:'répéter jusqu’à',iw0B_if1:'si',iw0B_if2:'si',iw0B_is1:'est … ?',iw0B_is2:'la chose est … ?',iw0B_thing1:'👆 chose',iw0B_thing2:'👆 une chose de l’île',
+ iw0B_count1:'nombre de',iw0B_count2:'nombre de',iw0B_compare1:'comparer',iw0B_compare2:'comparer',iw0B_start1:'départ',iw0B_start2:'départ',
+ iw0K_can:'🪣 arrosoir',iw0K_well:'⛲ puits',iw0K_tulip:'🌷 tulipe',iw0K_rock:'🪨 rocher',iw0K_site:'🟫 case',iw0K_egg:'🥚 œuf',iw0K_basket:'🧺 panier',
+ iw0Chip_none:'👆 touche',iw0Chip_can:'🪣 l’arrosoir',iw0Chip_basket:'🧺 le panier',iw0Chip_tulip:'🌷 tulipe {n}',iw0Chip_site:'🟫 case {n}',iw0Chip_rock:'🪨 rocher {n}',
+ iw0Chip_well:'⛲ le puits',iw0Chip_egg:'🥚 un œuf',iw0Chip_ahead:'👀 devant',iw0Chip_hod:'🪨 la hotte',
+ iw0S_none:'est …',iw0S_empty:'est vide',iw0S_full:'est plein',iw0S_has:'contient',iw0S_wall:'est un mur',iw0S_tulip:'est une tulipe',iw0S_rock:'est un rocher',iw0S_nothing:'est libre',
+ iw0S_thirsty:'a soif',iw0S_drunk:'a bu ses gorgées',iw0S_done:'est un chemin',iw0S_dirt:'n’est pas encore un chemin',iw0S_stones:'a des pierres',iw0S_used:'est épuisé',iw0S_front:'est devant moi',
+ iw0What_egg:'🥚',iw0What_water:'💧',iw0What_stone:'🪨',
+ iw0HintStart1:'Mamie veut qu’on arrose ses tulipes. Glisse des blocs sous ▶, ou appuie sur Apprendre et montre à Pip avec la manette.',
+ iw0HintStart2:'Sami veut un vrai chemin. Glisse des blocs sous ▶, ou appuie sur Apprendre et montre à Cobble avec la manette.',
+ iw0HintStart3:'Mamie veut quatre œufs dans son panier. Un bloc « est » a un 👆 : touche-le, puis touche le panier sur l’île.',
+ iw0HintEmpty:'Rien sous ▶ pour l’instant. Glisse un bloc du tiroir et accroche-le sous ▶.',
+ iw0HintDrive:'Tu conduis : essaie la manette. Rien n’est retenu tant que tu n’appuies pas sur Apprendre.',
+ iw0HintTeach:'Retour au départ. Chaque appui sur la manette devient un bloc.',
+ iw0HintNoCan:'{b} doit d’abord prendre l’arrosoir : va à l’arrosoir dans la cabane et prends-le.',
+ iw0HintEmptyCan:'L’arrosoir était vide. Va au puits le remplir avant d’arroser.',
+ iw0HintBump:'{b} s’est cogné. Quel pas l’a envoyé du mauvais côté ?',
+ iw0HintHands:'{b} avait les mains pleines. Pose d’abord quelque chose.',
+ iw0HintNothing:'{b} n’a rien trouvé à prendre là.',
+ iw0HintGuard:'Ce « jusqu’à » a tourné 40 fois et sa question n’est jamais devenue vraie. Qu’attend-il ?',
+ iw0HintNoCond:'Un « jusqu’à » ou un « si » a besoin d’une question : glisse un bloc « est » dans son trou.',
+ iw0HintNoThing:'Une question a un 👆 vide. Touche-le, puis touche une chose sur l’île.',
+ iw0HintNotDone:'Pas encore fini : {n} sur {m}. Quelle partie du travail manque ?',
+ iw0HintCap:'Ce programme était très long, alors il s’est arrêté tout seul.',
+ iw0HintStopped:'Arrêté. {b} attend là où il est.',
+ iw0HintDone:'Travail fini ! {b} rentre à la maison.',
+ iw0HintWon:'Travail fini. Appuie sur ⏳ Le temps passe pour voir le travail s’user : {b} y retourne tout seul.',
+ iw0HintArmed:'Maintenant, touche une chose sur l’île.',
+ iw0HintChip:'{thing} est dans le bloc. Choisis maintenant ce que tu demandes.',
+ iw0HintFold:'Olive voit les mêmes pas {n} fois de suite. Les plier en un « répéter » ?',
+ iw0HintFolded:'Plié ! Le même travail en {k} blocs au lieu de {j}.',
+ iw0HintRunning:'{b} travaille. Stop arrête tout de suite.',
+ iw0Wear1:'Le temps passe : une tulipe a de nouveau soif.',iw0Wear2:'Le temps passe : une pierre s’est détachée sur la case la plus foulée, et les rochers ont un peu repoussé.',iw0Wear3:'Le temps passe : Mamie a pris deux œufs pour le petit-déjeuner, et la poule a pondu à nouveau.',
+ iw0GoBack:'{b} retourne au travail tout seul.',iw0PressPlay:'Appuie sur Jouer quand le programme est prêt.',
+ iw0SayGlug:'Glou glou !',iw0SaySlurp:'Slurp !',iw0SayClack:'Clac !',iw0SayTock:'Toc.',iw0SayEgg:'Un de plus !',iw0SayPlop:'Plop !',iw0SayFull:'Déjà plein !',
+ iw0SayNoCan:'Il me faut l’arrosoir.',iw0SayEmptyCan:'L’arrosoir est vide.',iw0SayBump:'Boing !',iw0SayHome:'À la maison !',iw0SayNone:'Je n’en trouve pas.',iw0SayHands:'J’ai les mains pleines.',
+ iw0SayNothing:'Rien ici.',iw0SayGot:'J’ai l’arrosoir !',iw0SaySplash:'Splash !',
+ iw0Thanks1:'Merci, Pip !',iw0Thanks2:'Mon chemin ! Merci, Cobble !',iw0Thanks3:'Quatre œufs ! Merci, Pocket !',
+ iw0WinH1:'« Chaque tulipe a bu ses trois gorgées ! »',iw0WinH2:'« Le chemin arrive à ma boîte aux lettres ! »',iw0WinH3:'« Quatre œufs dans mon panier ! »',
+ iw0WinP:'{b} rentre à la maison. {k} blocs ont fait tout le travail.',iw0WinTaught:'Tu as montré tout le travail à {b} avec la manette. {k} blocs.',
+ iw0WinWork:'+{n} 🐚 pour le travail',iw0WinBonus:'+{n} 🐚 bonus de fin',iw0WinLater:'Plus tard, appuie sur ⏳ Le temps passe : le travail s’use et {b} y retourne tout seul.',
+ iw0Next:'Mission suivante',iw0Stay:'Continuer à bricoler',
+ iw0C_garden_start:'Tout ce qui est accroché sous ce bloc, {b} le fait quand tu appuies sur Jouer.',
+ iw0C_garden_forward:'{b} avance d’une case.',iw0C_garden_turn_left:'{b} tourne à sa gauche sans changer de case.',iw0C_garden_turn_right:'{b} tourne à sa droite sans changer de case.',
+ iw0C_garden_pick:'{b} prend ce qui est devant lui : l’arrosoir, une pierre du rocher, un œuf.',
+ iw0C_garden_put:'{b} pose ce qu’il porte dans la chose devant lui : une pierre sur une case de chemin, un œuf dans le panier.',
+ iw0C_garden_fill:'Face au puits, {b} remplit l’arrosoir jusqu’en haut.',iw0C_garden_water:'Face à une tulipe, {b} lui donne une gorgée de l’arrosoir.',
+ iw0C_garden_go_nearest:'{b} va jusqu’au plus proche et se tourne vers lui.',iw0C_garden_go_to:'{b} va jusqu’à la chose que tu as touchée sur l’île et se tourne vers elle.',
+ iw0C_garden_repeat:'Fait les blocs à l’intérieur ce nombre de fois.',iw0C_garden_until:'Fait les blocs à l’intérieur encore et encore, jusqu’à ce que la question soit vraie.',
+ iw0C_garden_if:'Fait les blocs à l’intérieur seulement si la question est vraie.',iw0C_garden_is:'Une question sur une chose que tu touches sur l’île, comme « le panier est-il plein ? ».',
+ iw0C_garden_thing:'Touche 👆, puis touche une chose sur l’île : elle va dans le bloc.',iw0C_garden_count:'Le nombre dans une chose : les œufs dans le panier, l’eau dans l’arrosoir.',
+ iw0C_garden_compare:'Compare deux nombres : pareil, plus petit ou plus grand.',
+ iw0JcSrc:'Source',iw0JcCar:'Porteur',iw0JcTgt:'Cible',iw0JcFin:'Ligne d’arrivée',iw0JcWr:'Usure',
+ iw0JcSrc1:'⛲ le puits, qui ne tarit jamais',iw0JcCar1:'🪣 l’arrosoir dans la cabane, 3 gorgées',iw0JcTgt1:'🌷 3 tulipes × 3 gorgées',iw0JcFin1:'toutes les tulipes pleines → Pip rentre · +5 🐚',iw0JcWr1:'une tulipe a de nouveau soif',
+ iw0JcSrc2:'🪨 deux rochers de 8 pierres, qui repoussent',iw0JcCar2:'🪨 la hotte, 4 pierres',iw0JcTgt2:'🟫 4 cases × 4 pierres : terre → gravier → pavés → chemin',iw0JcFin2:'le chemin arrive à la boîte aux lettres → Cobble rentre · +5 🐚',iw0JcWr2:'la case la plus foulée perd une pierre',
+ iw0JcSrc3:'🐔 la poule pond dans son enclos, ailleurs chaque jour',iw0JcCar3:'✋ les mains de Pocket, un œuf à la fois',iw0JcTgt3:'🧺 le panier devant la porte de Mamie, 4 œufs',iw0JcFin3:'panier plein → Pocket rentre · +5 🐚',iw0JcWr3:'Mamie prend deux œufs pour le petit-déjeuner ; la poule pond à nouveau',
+ iw0Note:'Maquette interactive de la phase 108 : trois missions sur un vrai Blockly 12. Les règles de l’île ici sont une petite doublure du moteur du jeu, et rien ne quitte cette page.'}
+};
+let lang = 'en', band = 2;
+(function wordTableCheck(){ const en = Object.keys(WORDS.en), fr = Object.keys(WORDS.fr); const a = en.filter(k => !(k in WORDS.fr)), b = fr.filter(k => !(k in WORDS.en)); if (a.length || b.length) console.error('word table: keys missing', { missingInFR: a, missingInEN: b }); else console.info('word table ok: ' + en.length + ' keys in EN and in FR'); })();
+
+/* ---------------- robots and the three missions (the vocabulary of the common brief §4.2) ---------------- */
+const BOTS = { pip: { name: 'Pip', colour: '#FF7A59', eyes: 'round', hat: 'sun' }, cobble: { name: 'Cobble', colour: '#7A8CA3', eyes: 'happy', hat: 'cap' }, pocket: { name: 'Pocket', colour: '#FFB347', eyes: 'round', hat: 'none' } };
+const DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0];
+const MISSIONS = [
+  { id: 'tulips', n: 1, robot: 'pip', face: 'granny', repeatN: 3, canWorld: true,
+    rows: ['GGGGGGGH', 'GFGFGFGG', 'GGGGGGGG', 'GGGGGGGG', 'WGGGGGGG', 'GGGGGGTG'],
+    things: () => [
+      { kind: 'tulip', id: 't1', x: 1, y: 1, have: 0, need: 3, colour: 'pink' }, { kind: 'tulip', id: 't2', x: 3, y: 1, have: 0, need: 3, colour: 'yellow' }, { kind: 'tulip', id: 't3', x: 5, y: 1, have: 0, need: 3, colour: 'pink' },
+      { kind: 'well', id: 'well', x: 0, y: 4 }, { kind: 'shed', id: 'shed', x: 7, y: 4 }, { kind: 'can', id: 'can', x: 7, y: 4, level: 0, max: 3 },
+      { kind: 'islander', id: 'mamie', who: 'granny', x: 6, y: 1 }],
+    start: { x: 4, y: 3, d: 0 }, job: { targets: ['t1', 't2', 't3'], home: { x: 4, y: 3 } }, canHome: { x: 7, y: 4 },
+    nearest: ['can', 'well', 'tulip'], acts: ['pick', 'fill', 'water'] },
+  { id: 'path', n: 2, robot: 'cobble', face: 'postie', repeatN: 4, loadMax: 4,
+    rows: ['GGGGGGTG', 'GGGGGGGG', 'GGGGGGGG', 'HPGGGGPG', 'GGGGGGGG', 'TGGGGGGT'],
+    things: () => [
+      { kind: 'site', id: 's1', x: 2, y: 3, have: 0, need: 4, item: 'stone' }, { kind: 'site', id: 's2', x: 3, y: 3, have: 0, need: 4, item: 'stone' },
+      { kind: 'site', id: 's3', x: 4, y: 3, have: 0, need: 4, item: 'stone' }, { kind: 'site', id: 's4', x: 5, y: 3, have: 0, need: 4, item: 'stone' },
+      { kind: 'rock', id: 'r1', x: 1, y: 0, left: 8, max: 8 }, { kind: 'rock', id: 'r2', x: 4, y: 0, left: 8, max: 8 },
+      { kind: 'postbox', id: 'postbox', x: 7, y: 3 }, { kind: 'islander', id: 'sami', who: 'postie', x: 7, y: 4 }],
+    start: { x: 3, y: 5, d: 0 }, job: { targets: ['s1', 's2', 's3', 's4'], home: { x: 3, y: 5 } },
+    nearest: ['rock', 'site'], acts: ['pick', 'put'] },
+  { id: 'eggs', n: 3, robot: 'pocket', face: 'granny', repeatN: 4, eggMax: 1,
+    rows: ['NNNNGGGT', 'NNNNGGGG', 'NNNNGGHG', 'GGGGGGGG', 'GGGGGGGG', 'TGGGGGGG'],
+    things: () => [
+      { kind: 'fence', x: 0, y: 0, w: 4, h: 3, open: 'e' }, { kind: 'hen', id: 'hen', x: 1, y: 1, pen: [0, 0, 3, 2] },
+      { kind: 'basket', id: 'basket', x: 6, y: 3, count: 0, capacity: 4, item: 'egg' }, { kind: 'islander', id: 'mamie', who: 'granny', x: 7, y: 3 }],
+    seeded: { eggs: { count: 4, among: [[0, 0], [2, 0], [3, 0], [0, 1], [2, 1], [3, 1], [0, 2], [1, 2], [2, 2], [3, 2]] } },
+    start: { x: 5, y: 5, d: 0 }, job: { targets: ['basket'], home: { x: 5, y: 5 } },
+    nearest: ['egg', 'basket'], acts: ['pick', 'put'] }
+];
+let MI = 0;
+const M = () => MISSIONS[MI];
+const bot = () => BOTS[M().robot];
+const t = (k, v = {}) => { let s = WORDS[lang][k] ?? WORDS.en[k] ?? k; s = s.split('{b}').join(bot().name); for (const [a, b] of Object.entries(v)) s = s.split('{' + a + '}').join(b); return s; };
+
+/* ---------------- the tiny job engine (IW-002's names; a stand-in, not the real one) ---------------- */
+const BLOCKING_TILES = 'WTHRF', BLOCKING_THINGS = ['shed', 'well', 'islander', 'postbox', 'hen', 'rock', 'basket', 'tulip', 'can'];
+const UNTIL_GUARD = 40, MAX_TICKS = 2000;
+function rngOf(w) { return function () { w.seed = (w.seed + 0x6D2B79F5) >>> 0; let x = w.seed; x = Math.imul(x ^ (x >>> 15), x | 1); x ^= x + Math.imul(x ^ (x >>> 7), x | 61); return ((x ^ (x >>> 14)) >>> 0) / 4294967296; }; }
+function makeWorld(mi, seed) {
+  const m = MISSIONS[mi];
+  const w = { mi, map: { rows: m.rows.slice() }, things: m.things(), seed: seed >>> 0, day: 1, walked: {}, done: false, eggN: 0,
+    job: JSON.parse(JSON.stringify(m.job)),
+    robots: [{ id: m.robot, x: m.start.x, y: m.start.y, d: m.start.d, bump: 0, holds: null, can: null, canMax: null, load: 0, loadMax: m.loadMax || 0, eggs: 0, eggMax: m.eggMax || 0, home: m.job.home }] };
+  if (m.seeded && m.seeded.eggs) layEggs(w, m.seeded.eggs.count, m.seeded.eggs.among);
+  return w;
+}
+function layEggs(w, count, among) {
+  const rng = rngOf(w);
+  const free = among.filter(([x, y]) => !w.things.some(k => k.x === x && k.y === y && k.kind !== 'fence')).slice();
+  const inPen = w.things.filter(k => k.kind === 'egg').length;
+  for (let i = 0; i < count && free.length && inPen + i < 4; i++) { const j = Math.floor(rng() * free.length); const [x, y] = free.splice(j, 1)[0]; w.things.push({ kind: 'egg', id: 'e' + (++w.eggN), x, y }); }
+}
+const R0 = (w) => w.robots[0];
+const inb = (w, x, y) => x >= 0 && y >= 0 && y < w.map.rows.length && x < w.map.rows[0].length;
+const byId = (w, id) => w.things.find(k => k.id === id);
+const thingsAt = (w, x, y) => w.things.filter(k => k.x === x && k.y === y && k.kind !== 'fence');
+function blocked(w, x, y) { if (!inb(w, x, y)) return true; if (BLOCKING_TILES.includes(w.map.rows[y][x])) return true; return w.things.some(k => k.x === x && k.y === y && BLOCKING_THINGS.includes(k.kind)); }
+function isFull(k) { if (k.kind === 'tulip' || k.kind === 'site') return (k.have || 0) >= (k.need || 1); if (k.kind === 'basket') return (k.count || 0) >= (k.capacity || 4); return false; }
+function jobCount(w) { return w.job.targets.map(id => byId(w, id)).filter(Boolean); }
+function jobDone(w) { return jobCount(w).every(isFull); }
+function progress(w) { const m = MISSIONS[w.mi]; if (m.id === 'eggs') { const b = byId(w, 'basket'); return { n: b.count, m: b.capacity }; } const ts = jobCount(w); return { n: ts.filter(isFull).length, m: ts.length }; }
+function aheadKind(w) {
+  const r = R0(w), ax = r.x + DX[r.d], ay = r.y + DY[r.d];
+  if (!inb(w, ax, ay) || BLOCKING_TILES.includes(w.map.rows[ay][ax])) return 'wall';
+  const th = thingsAt(w, ax, ay);
+  if (th.some(k => k.kind === 'tulip')) return 'tulip';
+  if (th.some(k => k.kind === 'rock')) return 'rock';
+  if (th.some(k => BLOCKING_THINGS.includes(k.kind))) return 'wall';
+  return 'nothing';
+}
+/* one op: returns an event { ev, id?, what? } — the delta vocabulary of §4.2 in miniature */
+function exec(w, op) {
+  const r = R0(w), m = MISSIONS[w.mi], ax = r.x + DX[r.d], ay = r.y + DY[r.d];
+  if (op === 'left') { r.d = (r.d + 3) % 4; return { ev: 'turn' }; }
+  if (op === 'right') { r.d = (r.d + 1) % 4; return { ev: 'turn' }; }
+  if (op === 'fwd') { if (blocked(w, ax, ay)) { r.bump++; return { ev: 'bump' }; } r.x = ax; r.y = ay; const k = ax + ',' + ay; w.walked[k] = (w.walked[k] || 0) + 1; return { ev: 'move' }; }
+  const th = thingsAt(w, ax, ay);
+  if (op === 'pick') {
+    const can = th.find(k => k.kind === 'can');
+    if (can) { if (r.holds) return { ev: 'hands' }; r.holds = 'can'; r.can = can.level; r.canMax = can.max; w.things.splice(w.things.indexOf(can), 1); return { ev: 'holds', what: 'can' }; }
+    const rock = th.find(k => k.kind === 'rock');
+    if (rock) { if (rock.left <= 0) return { ev: 'nothing' }; if (r.load >= r.loadMax) return { ev: 'hands' }; rock.left--; r.load++; return { ev: 'pick', what: 'stone', id: rock.id }; }
+    const egg = th.find(k => k.kind === 'egg');
+    if (egg) { if (r.eggs >= r.eggMax) return { ev: 'hands' }; r.eggs++; w.things.splice(w.things.indexOf(egg), 1); return { ev: 'pick', what: 'egg' }; }
+    return { ev: 'nothing' };
+  }
+  if (op === 'put') {
+    const s = th.find(k => k.kind === 'site');
+    if (s && r.load > 0) { if (isFull(s)) return { ev: 'full', id: s.id }; s.have++; r.load--; return { ev: 'meter', id: s.id, what: 'stone' }; }
+    const b = th.find(k => k.kind === 'basket');
+    if (b && r.eggs > 0) { if (isFull(b)) return { ev: 'full', id: b.id }; b.count++; r.eggs--; return { ev: 'meter', id: b.id, what: 'egg' }; }
+    if (r.holds === 'can' && !blocked(w, ax, ay) && !th.length) { w.things.push({ kind: 'can', id: 'can', x: ax, y: ay, level: r.can, max: r.canMax }); r.holds = null; r.can = null; return { ev: 'put', what: 'can' }; }
+    return { ev: 'nothing' };
+  }
+  if (op === 'fill') {
+    if (m.canWorld && r.holds !== 'can') return { ev: 'noCan' };
+    if (inb(w, ax, ay) && w.map.rows[ay][ax] === 'W') { r.can = r.canMax; return { ev: 'fill' }; }
+    return { ev: 'nothing' };
+  }
+  if (op === 'water') {
+    if (m.canWorld && r.holds !== 'can') return { ev: 'noCan' };
+    if (r.can <= 0) return { ev: 'emptyCan' };
+    const tl = th.find(k => k.kind === 'tulip');
+    if (!tl) { r.can--; return { ev: 'splash' }; }
+    if (isFull(tl)) return { ev: 'full', id: tl.id };
+    tl.have++; r.can--; tl.droop = !isFull(tl); return { ev: 'meter', id: tl.id, what: 'water' };
+  }
+  return { ev: 'nothing' };
+}
+/* BFS over walkable tiles to a standing tile, then face the target. goals: [{x, y, face}] */
+function pathOps(w, goals) {
+  const r = R0(w), W = w.map.rows[0].length, key = (x, y) => y * W + x;
+  const prev = new Map([[key(r.x, r.y), null]]), dist = new Map([[key(r.x, r.y), 0]]), q = [[r.x, r.y]];
+  while (q.length) { const [x, y] = q.shift(); for (let d = 0; d < 4; d++) { const nx = x + DX[d], ny = y + DY[d]; if (blocked(w, nx, ny) || prev.has(key(nx, ny))) continue; prev.set(key(nx, ny), [x, y]); dist.set(key(nx, ny), dist.get(key(x, y)) + 1); q.push([nx, ny]); } }
+  let best = null;
+  goals.forEach(g => { const k = key(g.x, g.y); if (!dist.has(k)) return; const n = dist.get(k); if (!best || n < best.n) best = { n, g }; });
+  if (!best) return null;
+  const path = []; let cur = [best.g.x, best.g.y]; while (cur) { path.unshift(cur); cur = prev.get(key(cur[0], cur[1])); }
+  const ops = []; let d = r.d;
+  const turnTo = (dd) => { const diff = (dd - d + 4) % 4; if (diff === 1) ops.push('right'); else if (diff === 3) ops.push('left'); else if (diff === 2) { ops.push('right'); ops.push('right'); } d = dd; };
+  for (let i = 1; i < path.length; i++) { const dx = path[i][0] - path[i - 1][0], dy = path[i][1] - path[i - 1][1]; turnTo(DX.findIndex((v, k) => v === dx && DY[k] === dy)); ops.push('fwd'); }
+  if (best.g.face != null) turnTo(best.g.face);
+  return ops;
+}
+function goalsAround(w, things) { const out = []; things.forEach(k => { for (let d = 0; d < 4; d++) { const sx = k.x + DX[d], sy = k.y + DY[d]; const r = R0(w); if (!blocked(w, sx, sy) || (sx === r.x && sy === r.y)) out.push({ x: sx, y: sy, face: (d + 2) % 4 }); } }); return out; }
+function candidates(w, kind) {
+  return w.things.filter(k => k.kind === kind && (kind !== 'tulip' && kind !== 'site' || !isFull(k)) && (kind !== 'rock' || k.left > 0));
+}
+function nearestOps(w, kind) { const c = candidates(w, kind); if (!c.length) return null; return pathOps(w, goalsAround(w, c)); }
+function thingOps(w, ref) { if (!ref || ref.kind === 'ahead' || ref.kind === 'hod') return null; const k = byId(w, ref.id); if (!k) return null; return pathOps(w, goalsAround(w, [k])); }
+function homeOps(w) { const h = R0(w).home, m = MISSIONS[w.mi]; return pathOps(w, [{ x: h.x, y: h.y, face: m.start.d }]); }
+/* the robot hangs its carrier up at home, so the program can run again from the start after wear */
+function hangUp(w) { const r = R0(w), m = MISSIONS[w.mi]; if (r.holds === 'can') { w.things.push({ kind: 'can', id: 'can', x: m.canHome.x, y: m.canHome.y, level: r.can, max: r.canMax }); r.holds = null; r.can = null; } }
+/* wear (R2, D7): only when "time passes" is pressed; nothing below 0, nothing removed, nothing dies */
+function wear(w) {
+  const rng = rngOf(w), m = MISSIONS[w.mi];
+  if (m.id === 'tulips') { const full = w.things.filter(k => k.kind === 'tulip' && k.have > 0); const pool = full.length ? full : []; if (pool.length) { const k = pool[Math.floor(rng() * pool.length)]; k.have = Math.max(0, k.have - 1); k.droop = true; return { key: 'iw0Wear1', ids: [k.id] }; } }
+  if (m.id === 'path') { const sites = w.things.filter(k => k.kind === 'site' && k.have > 0); let best = null; sites.forEach(s => { const n = w.walked[s.x + ',' + s.y] || 0; if (!best || n > best.n) best = { s, n }; }); if (best) best.s.have--; w.things.filter(k => k.kind === 'rock').forEach(k => { k.left = Math.min(k.max, k.left + 2); }); return { key: 'iw0Wear2', ids: best ? [best.s.id] : [] }; }
+  if (m.id === 'eggs') { const b = byId(w, 'basket'); b.count = Math.max(0, b.count - 2); layEggs(w, 2, m.seeded.eggs.among); return { key: 'iw0Wear3', ids: ['basket'] }; }
+  return { key: 'iw0Wear1', ids: [] };
+}
+
+/* ---------------- things as chips: kinds, their states, what a chip reads ---------------- */
+const STATES = { can: ['empty', 'full', 'has'], basket: ['full', 'empty', 'has'], hod: ['full', 'empty', 'has'], ahead: ['wall', 'tulip', 'rock', 'nothing'], tulip: ['thirsty', 'drunk'], site: ['done', 'dirt'], rock: ['stones', 'used'], well: ['front'], egg: ['front'] };
+const ALL_STATES = new Set(['none'].concat(...Object.values(STATES)));
+function statesFor(kind) { const s = STATES[kind]; return s ? s.map(id => [t('iw0S_' + id), id]) : [[t('iw0S_none'), 'none']]; }
+function chipText(ref) { if (!ref) return t('iw0Chip_none'); const n = ref.id ? (ref.id.match(/\d+$/) || [''])[0] : ''; return t('iw0Chip_' + ref.kind, { n }); }
+function numOf(w, ref) {
+  const r = R0(w); if (!ref) return 0;
+  if (ref.kind === 'hod') return r.load;
+  if (ref.kind === 'can') { const k = byId(w, 'can'); return k ? k.level : (r.holds === 'can' ? r.can : 0); }
+  const k = byId(w, ref.id); if (!k) return 0;
+  if (k.kind === 'basket') return k.count; if (k.kind === 'tulip' || k.kind === 'site') return k.have; if (k.kind === 'rock') return k.left; return 0;
+}
+function stateOf(w, ref, state, N) {
+  const r = R0(w); if (!ref) return false;
+  if (ref.kind === 'ahead') return aheadKind(w) === state;
+  if (ref.kind === 'can' || ref.kind === 'basket' || ref.kind === 'hod') {
+    const n = numOf(w, ref), max = ref.kind === 'hod' ? r.loadMax : ref.kind === 'can' ? ((byId(w, 'can') || {}).max || r.canMax || 3) : (byId(w, ref.id) || {}).capacity || 4;
+    return state === 'empty' ? n <= 0 : state === 'full' ? n >= max : state === 'has' ? n === +N : false;
+  }
+  const k = byId(w, ref.id); if (!k) return false;
+  if (state === 'thirsty' || state === 'dirt') return !isFull(k);
+  if (state === 'drunk' || state === 'done') return isFull(k);
+  if (state === 'stones') return k.left > 0; if (state === 'used') return k.left <= 0;
+  if (state === 'front') return r.x + DX[r.d] === k.x && r.y + DY[r.d] === k.y;
+  return false;
+}
+
+/* ---------------- Blockly: icons, theme, the kid flyout, the blocks ---------------- */
+const ICON = {
+  forward: '<path d="M12 3l8 9h-5v9H9v-9H4z"/>',
+  turn_left: '<path d="M9 18L3 13l6-5v3h6a4 4 0 010 8h-2v-3h2a1 1 0 000-2H9v3z" transform="scale(1,-1) translate(0,-26)"/>',
+  turn_right: '<path d="M15 18l6-5-6-5v3H9a4 4 0 000 8h2v-3H9a1 1 0 010-2h6v3z" transform="scale(1,-1) translate(0,-26)"/>',
+  pick: '<path d="M12 2.5l2.5 5.2 5.8.8-4.2 4 1 5.7-5.1-2.7-5.1 2.7 1-5.7-4.2-4 5.8-.8z"/>',
+  put: '<path d="M3 15h18v6H3zM10.5 2h3v7h3.5L12 14 7 9h3.5z"/>',
+  fill: '<path d="M5 9h10v12H5z"/><path d="M15 12l6-3.5v3.5l-6 3.5z"/><path d="M7 3h6v5H7z" opacity=".75"/>',
+  water: '<path d="M12 2s7 8 7 12.5a7 7 0 01-14 0C5 10 12 2 12 2z"/>',
+  goto: '<path d="M12 1.5a7.5 7.5 0 017.5 7.5c0 5.5-7.5 13.5-7.5 13.5S4.5 14.5 4.5 9A7.5 7.5 0 0112 1.5z"/><circle cx="12" cy="9" r="2.8" fill="rgba(0,0,0,.28)"/>',
+  loop: '<path d="M17 3l4 4-4 4V8.5H8a3 3 0 000 6h1.5V17H8a5.5 5.5 0 010-11h9zM7 21l-4-4 4-4v2.5h9a3 3 0 000-6h-1.5V7H16a5.5 5.5 0 010 11H7z"/>',
+  until: '<path d="M4 4h2v17H4z"/><path d="M6 4h13l-3 4 3 4H6z"/>',
+  if: '<path d="M12 2l10 10-10 10L2 12z"/><path d="M10.6 7h2.8v6.5h-2.8zm0 8h2.8v2.6h-2.8z" fill="rgba(0,0,0,.35)"/>',
+  play: '<path d="M6 3l15 9-15 9z"/>',
+  ask: '<circle cx="12" cy="12" r="9"/>'
+};
+const svgURI = (inner, fill) => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="' + (fill || '#fff') + '">' + inner + '</svg>');
+const ICON_URI = {}; for (const k in ICON) ICON_URI[k] = svgURI(ICON[k]);
+const Q_URI = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#fff"/><path d="M9 9.2a3 3 0 115 2.3c-1 .7-1.6 1.2-1.6 2.6" stroke="#2E2A3D" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="12.4" cy="17.6" r="1.5" fill="#2E2A3D"/></svg>');
+const STYLE_OF = { garden_start: '#FF7A59', garden_forward: '#4C8DFF', garden_turn_left: '#4C8DFF', garden_turn_right: '#4C8DFF', garden_go_nearest: '#4C8DFF', garden_go_to: '#4C8DFF', garden_pick: '#3FA66B', garden_put: '#3FA66B', garden_fill: '#3FA66B', garden_water: '#3FA66B', garden_repeat: '#FF9F1C', garden_until: '#FF9F1C', garden_if: '#FF9F1C', garden_is: '#8F6BFF', garden_thing: '#4A2FA6', garden_count: '#2F8FCF', garden_compare: '#8F6BFF' };
+const ICON_OF = { garden_start: 'play', garden_forward: 'forward', garden_turn_left: 'turn_left', garden_turn_right: 'turn_right', garden_go_nearest: 'goto', garden_go_to: 'goto', garden_pick: 'pick', garden_put: 'put', garden_fill: 'fill', garden_water: 'water', garden_repeat: 'loop', garden_until: 'until', garden_if: 'if', garden_is: 'ask', garden_thing: 'ask', garden_count: 'ask', garden_compare: 'ask' };
+function shade(hex, f) { const n = parseInt(hex.slice(1), 16); const c = [n >> 16, (n >> 8) & 255, n & 255].map(v => Math.round(v * f)); return '#' + c.map(v => v.toString(16).padStart(2, '0')).join(''); }
+const blockStyles = {};
+[['hat', '#FF7A59'], ['motion', '#4C8DFF'], ['action', '#3FA66B'], ['control', '#FF9F1C'], ['sense', '#8F6BFF'], ['chip', '#4A2FA6'], ['chipEmpty', '#FF7A59'], ['value', '#2F8FCF']].forEach(([k, c]) => { blockStyles[k + '_blocks'] = { colourPrimary: c, colourSecondary: shade(c, 0.9), colourTertiary: shade(c, 0.75) }; });
+const THEME = Blockly.Theme.defineTheme('olivesIsland', {
+  base: Blockly.Themes.Classic, blockStyles,
+  componentStyles: { workspaceBackgroundColour: '#FFFDF6', toolboxBackgroundColour: '#FFF0D3', flyoutBackgroundColour: '#FFF0D3', flyoutOpacity: 1, scrollbarColour: '#D9C9A6', scrollbarOpacity: 0.7, insertionMarkerColour: '#2E2A3D', insertionMarkerOpacity: 0.28, cursorColour: '#2E2A3D' },
+  fontStyle: { family: 'Fredoka, Nunito, sans-serif', weight: '600', size: 14 }, startHats: true
+});
+/* the flyout keeps its own scale: Blockly scales it with the workspace zoom, which at a child's zoom lets the drawer eat half the workspace (IW-000 §6) */
+const NARROW = () => window.innerWidth < 560;
+const FLY_SCALE = () => NARROW() ? 0.62 : band === 1 ? 0.84 : 0.74;
+class KidFlyout extends Blockly.VerticalFlyout { getFlyoutScale() { return FLY_SCALE(); } }
+Blockly.registry.register(Blockly.registry.Type.FLYOUTS_VERTICAL_TOOLBOX, 'kidFlyout', KidFlyout, true);
+Blockly.config.snapRadius = 48; Blockly.config.connectingSnapRadius = 64; Blockly.config.dragRadius = 6; Blockly.config.flyoutDragRadius = 6;
+
+function iconField(k) { const s = band === 1 ? 30 : 24; return new Blockly.FieldImage(ICON_URI[k], s, s, ''); }
+function word(type) { return t('iw0B_' + type.replace('garden_', '') + band); }
+function helpQ(block, input) { if (block.isInFlyout) input.appendField(new Blockly.FieldImage(Q_URI, 22, 22, '?', () => openCard(block.type)), 'Q'); }
+function action(type, style) {
+  Blockly.Blocks[type] = { init() { const h = this.appendDummyInput(); h.appendField(iconField(ICON_OF[type])); h.appendField(word(type)); helpQ(this, h); this.setPreviousStatement(true); this.setNextStatement(true); this.setStyle(style + '_blocks'); this.setTooltip(() => t('iw0C_' + type)); } };
+}
+action('garden_forward', 'motion'); action('garden_turn_left', 'motion'); action('garden_turn_right', 'motion');
+action('garden_pick', 'action'); action('garden_put', 'action'); action('garden_fill', 'action'); action('garden_water', 'action');
+Blockly.Blocks.garden_start = { init() { const h = this.appendDummyInput(); h.appendField(iconField('play')); h.appendField(t('iw0Start')); this.setNextStatement(true); this.setStyle('hat_blocks'); this.setDeletable(false); this.hat = 'cap'; this.setTooltip(() => t('iw0C_garden_start')); } };
+Blockly.Blocks.garden_go_nearest = { init() { const h = this.appendDummyInput(); h.appendField(iconField('goto')); h.appendField(word('garden_go_nearest')); h.appendField(new Blockly.FieldDropdown(function () { return M().nearest.map(k => [t('iw0K_' + k), k]); }), 'KIND'); helpQ(this, h); this.setPreviousStatement(true); this.setNextStatement(true); this.setStyle('motion_blocks'); this.setTooltip(() => t('iw0C_garden_go_nearest')); } };
+Blockly.Blocks.garden_go_to = { init() { const h = this.appendValueInput('THING').setCheck('Thing'); h.appendField(iconField('goto')); h.appendField(word('garden_go_to')); if (this.isInFlyout) helpQ(this, this.appendDummyInput()); this.setInputsInline(true); this.setPreviousStatement(true); this.setNextStatement(true); this.setStyle('motion_blocks'); this.setTooltip(() => t('iw0C_garden_go_to')); } };
+Blockly.Blocks.garden_repeat = { init() { const h = this.appendDummyInput(); h.appendField(iconField('loop')); h.appendField(word('garden_repeat')); h.appendField(new Blockly.FieldNumber(M().repeatN, 1, 20, 1), 'N'); h.appendField(band === 1 ? '×' : t('iw0Times')); helpQ(this, h); this.appendStatementInput('DO'); this.setPreviousStatement(true); this.setNextStatement(true); this.setStyle('control_blocks'); this.setTooltip(() => t('iw0C_garden_repeat')); } };
+function condBlock(type) { Blockly.Blocks[type] = { init() { const h = this.appendValueInput('COND').setCheck('Boolean'); h.appendField(iconField(type === 'garden_if' ? 'if' : 'until')); h.appendField(word(type)); if (this.isInFlyout) helpQ(this, this.appendDummyInput()); this.setInputsInline(true); this.appendStatementInput('DO'); this.setPreviousStatement(true); this.setNextStatement(true); this.setStyle('control_blocks'); this.setTooltip(() => t('iw0C_' + type)); } }; }
+condBlock('garden_until'); condBlock('garden_if');
+/* the state list follows the chip's kind: a dropdown whose menu is generated from the kind held on the block (extraState, loaded before its fields) */
+class StateField extends Blockly.FieldDropdown {
+  constructor() { super(function () { const b = this.getSourceBlock(); return statesFor(b && b.kind_); }); }
+  doClassValidation_(v) { return ALL_STATES.has(v) ? v : null; }
+}
+Blockly.Blocks.garden_is = {
+  init() { this.kind_ = null; this.appendValueInput('THING').setCheck('Thing'); const s = this.appendDummyInput('S'); s.appendField(new StateField(), 'STATE'); s.appendField(new Blockly.FieldNumber(4, 0, 99, 1), 'N'); helpQ(this, s); this.getField('N').setVisible(false); this.setInputsInline(true); this.setOutput(true, 'Boolean'); this.setStyle('sense_blocks'); this.setTooltip(() => t('iw0C_garden_is')); },
+  saveExtraState() { return this.kind_ ? { kind: this.kind_ } : null; },
+  loadExtraState(s) { this.kind_ = (s && s.kind) || null; }
+};
+Blockly.Blocks.garden_thing = {
+  init() { this.thing_ = null; this.appendDummyInput().appendField(new Blockly.FieldLabel(chipText(null)), 'LABEL'); this.setOutput(true, 'Thing'); this.setOutputShape(2); this.setStyle('chipEmpty_blocks'); this.setTooltip(() => t('iw0C_garden_thing')); },
+  saveExtraState() { return this.thing_ ? { kind: this.thing_.kind, id: this.thing_.id } : null; },
+  loadExtraState(s) { this.setThing(s); },
+  setThing(s) { this.thing_ = s && s.kind ? { kind: s.kind, id: s.id || null } : null; this.getField('LABEL').setValue(chipText(this.thing_)); this.setStyle(this.thing_ ? 'chip_blocks' : 'chipEmpty_blocks'); }
+};
+Blockly.Blocks.garden_count = { init() { const h = this.appendDummyInput(); h.appendField(word('garden_count')); h.appendField(new Blockly.FieldDropdown(() => [[t('iw0What_egg'), 'egg'], [t('iw0What_water'), 'water'], [t('iw0What_stone'), 'stone']]), 'WHAT'); h.appendField(t('iw0In')); this.appendValueInput('THING').setCheck('Thing'); if (this.isInFlyout) helpQ(this, this.appendDummyInput()); this.setInputsInline(true); this.setOutput(true, 'Number'); this.setStyle('value_blocks'); this.setTooltip(() => t('iw0C_garden_count')); } };
+Blockly.Blocks.garden_compare = { init() { this.appendValueInput('A').setCheck('Number'); const o = this.appendDummyInput(); o.appendField(new Blockly.FieldDropdown([['=', 'EQ'], ['<', 'LT'], ['>', 'GT']]), 'OP'); this.appendValueInput('B').setCheck('Number'); if (this.isInFlyout) helpQ(this, this.appendDummyInput()); this.setInputsInline(true); this.setOutput(true, 'Boolean'); this.setStyle('sense_blocks'); this.setTooltip(() => t('iw0C_garden_compare')); } };
+
+/* the drawer: only this mission's blocks; the pad offers every action in it */
+const CHIP = { block: { type: 'garden_thing' } };
+function toolbox() {
+  const m = M(), B = (type, extra) => Object.assign({ kind: 'block', type }, extra || {}), gap = { kind: 'sep', gap: 14 };
+  const list = [B('garden_forward'), B('garden_turn_left'), B('garden_turn_right')];
+  m.nearest.forEach(k => list.push(B('garden_go_nearest', { fields: { KIND: k } })));
+  if (band === 2) list.push(B('garden_go_to', { inputs: { THING: CHIP } }));
+  list.push(gap); m.acts.forEach(a => list.push(B('garden_' + a)));
+  list.push(gap, B('garden_repeat', { fields: { N: m.repeatN } }), B('garden_until'));
+  if (band === 2) list.push(B('garden_if'));
+  list.push(gap, B('garden_is', { inputs: { THING: CHIP } }));
+  if (band === 2 && m.id === 'eggs') list.push(B('garden_count', { inputs: { THING: CHIP } }), B('garden_compare', { inputs: { A: { shadow: { type: 'math_number', fields: { NUM: 0 } } }, B: { shadow: { type: 'math_number', fields: { NUM: 4 } } } } }));
+  return { kind: 'flyoutToolbox', contents: list };
+}
+
+/* ---------------- inject ---------------- */
+Blockly.setLocale(window.IW_MSG_EN);
+const ws = Blockly.inject('blocklyDiv', {
+  renderer: 'zelos', theme: THEME, toolbox: toolbox(), trashcan: false, sounds: false, media: 'data:,', comments: false, disable: false, collapse: false,
+  zoom: { controls: false, wheel: true, startScale: 0.85, maxScale: 1.8, minScale: 0.45, scaleSpeed: 1.15 },
+  move: { scrollbars: true, drag: true, wheel: false }, grid: { spacing: 32, length: 2, colour: '#EFE3C8', snap: false },
+  maxInstances: { garden_start: 1 }, plugins: { flyoutsVerticalToolbox: 'kidFlyout' }
+});
+const flyWs = () => ws.getFlyout().getWorkspace();
+/* no context menu but Help and Duplicate (IW-004 §2) */
+(function trimMenus() {
+  const reg = Blockly.ContextMenuRegistry.registry;
+  const ids = reg.registeredItems ? [...reg.registeredItems.keys()] : ['undoWorkspace', 'redoWorkspace', 'cleanWorkspace', 'collapseWorkspace', 'expandWorkspace', 'workspaceDelete', 'blockDelete', 'blockComment', 'blockInline', 'blockCollapseExpand', 'blockDisable', 'blockHelp', 'commentCreate', 'commentDelete', 'commentDuplicate'];
+  ids.forEach(id => { if (id !== 'blockDuplicate') { try { reg.unregister(id); } catch (e) { /* not registered */ } } });
+  reg.register({ id: 'iwHelp', weight: 0, scopeType: Blockly.ContextMenuRegistry.ScopeType.BLOCK, displayText: () => t('iw0Help'), preconditionFn: (s) => s.block && /^garden_/.test(s.block.type) ? 'enabled' : 'hidden', callback: (s) => openCard(s.block.type) });
+})();
+let flyBucket = FLY_SCALE();
+new ResizeObserver(() => { Blockly.svgResize(ws); if (FLY_SCALE() !== flyBucket) { flyBucket = FLY_SCALE(); ws.updateToolbox(toolbox()); hookFlyout(); if (NARROW() && ws.scale > 0.7) ws.setScale(0.7); showStart(); } }).observe(document.getElementById('bwrap'));
+
+let loading = false;
+function startBlock() { return ws.getTopBlocks(false).find(b => b.type === 'garden_start') || null; }
+function ensureStart() { if (!startBlock()) { const b = ws.newBlock('garden_start'); b.initSvg(); b.render(); b.moveBy(28, 28); } }
+function saveState() { return Blockly.serialization.workspaces.save(ws); }
+/* keep ▶ in sight, right of the drawer (after a load, a zoom change or a narrow screen) */
+function showStart() { const s = startBlock(); if (!s) return; try { ws.scrollBoundsIntoView(s.getBoundingRectangleWithoutChildren ? s.getBoundingRectangleWithoutChildren() : s.getBoundingRectangle(), 24); } catch (e) { /* older Blockly */ } }
+function loadState(state) {
+  loading = true;
+  try { ws.clear(); if (state) Blockly.serialization.workspaces.load(state, ws); } catch (e) { console.warn('program not restored', e); ws.clear(); }
+  ensureStart(); loading = false; syncIsBlocks(); countBlocks(); markWatched(); setTimeout(showStart, 0);
+}
+/* the chip decides the kind; the kind decides the state list; "has" shows its number */
+function syncIsBlocks() {
+  ws.getAllBlocks(false).forEach(b => {
+    if (b.type !== 'garden_is') return;
+    const child = b.getInputTargetBlock('THING'); const kind = child && child.thing_ ? child.thing_.kind : null;
+    const f = b.getField('STATE');
+    if (kind !== b.kind_) { b.kind_ = kind; const opts = f.getOptions(false); if (!opts.some(o => o[1] === f.getValue())) f.setValue(opts[0][1]); else f.setValue(f.getValue()); }
+    const n = b.getField('N'), show = f.getValue() === 'has';
+    if (n.isVisible() !== show) { n.setVisible(show); if (b.rendered) b.queueRender(); }
+  });
+}
+function countBlocks() { const n = ws.getAllBlocks(false).filter(b => !b.isShadow() && b.type !== 'garden_start').length; document.getElementById('blockCount').textContent = n === 1 ? t('iw0Block1') : t('iw0Blocks', { n }); return n; }
+let saveTimer = null;
+ws.addChangeListener(e => {
+  if (loading || e.isUiEvent && e.type !== Blockly.Events.CLICK && e.type !== Blockly.Events.BLOCK_DRAG) return;
+  if (e.type === Blockly.Events.CLICK && e.targetType === 'block' && e.blockId) { const b = ws.getBlockById(e.blockId); if (b && b.type === 'garden_thing') arm(b.id); return; }
+  if (e.type === Blockly.Events.BLOCK_DRAG) { dragStat(e); return; }
+  if (e.type === Blockly.Events.BLOCK_MOVE || e.type === Blockly.Events.BLOCK_CREATE || e.type === Blockly.Events.BLOCK_DELETE || e.type === Blockly.Events.BLOCK_CHANGE) {
+    syncIsBlocks(); countBlocks(); markWatched(); refreshFold();
+    clearTimeout(saveTimer); saveTimer = setTimeout(persist, 400);
+  }
+});
+/* a tap on a drawer block also adds it: at the end of the selected C-block, else at the end of the program under ▶ */
+function hookFlyout() {
+  const f = flyWs(); if (f.__iwHooked) return; f.__iwHooked = true;
+  f.addChangeListener(e => { if (e.type === Blockly.Events.CLICK && e.targetType === 'block' && e.blockId) { const b = f.getBlockById(e.blockId); if (b) tapAdd(b.getRootBlock()); } });
+}
+function stripIds(j) { if (!j || typeof j !== 'object') return j; if (Array.isArray(j)) return j.map(stripIds); const o = {}; for (const k in j) { if (k === 'id' || k === 'x' || k === 'y') continue; o[k] = stripIds(j[k]); } return o; }
+function lastInChain(b) { while (b && b.getNextBlock()) b = b.getNextBlock(); return b; }
+function selectedC() { const s = Blockly.getSelected && Blockly.getSelected(); return s && s.workspace === ws && s.getInput && s.getInput('DO') ? s : null; }
+function tapAdd(flyBlock) {
+  const json = stripIds(Blockly.serialization.blocks.save(flyBlock, { addCoordinates: false }));
+  const nb = Blockly.serialization.blocks.append(json, ws);
+  if (nb.previousConnection) {
+    const c = selectedC(); let conn;
+    if (c) { const first = c.getInputTargetBlock('DO'); conn = first ? lastInChain(first).nextConnection : c.getInput('DO').connection; }
+    else conn = lastInChain(startBlock()).nextConnection;
+    conn.connect(nb.previousConnection);
+  } else {
+    const s = Blockly.getSelected && Blockly.getSelected(); let done = false;
+    if (s && s.workspace === ws && s.inputList) for (const inp of s.inputList) { if (inp.connection && inp.connection.type === Blockly.ConnectionType.INPUT_VALUE && !inp.connection.targetBlock()) { try { inp.connection.connect(nb.outputConnection); done = !!nb.outputConnection.targetBlock(); } catch (e) { done = false; } if (done) break; } }
+    if (!done) { const sb = startBlock().getBoundingRectangle(); nb.moveTo(new Blockly.utils.Coordinate(sb.right + 40, sb.top)); }
+  }
+  nb.select && nb.select();
+  return nb;
+}
+/* Teach records a pad press into the program the same way a tap does */
+function appendOp(op) {
+  const json = op.indexOf('go:') === 0 ? { type: 'garden_go_nearest', fields: { KIND: op.slice(3) } } : { type: OPBLOCK[op] };
+  const nb = Blockly.serialization.blocks.append(json, ws);
+  const c = selectedC(); let conn;
+  if (c) { const first = c.getInputTargetBlock('DO'); conn = first ? lastInChain(first).nextConnection : c.getInput('DO').connection; }
+  else conn = lastInChain(startBlock()).nextConnection;
+  conn.connect(nb.previousConnection);
+}
+const OPBLOCK = { fwd: 'garden_forward', left: 'garden_turn_left', right: 'garden_turn_right', pick: 'garden_pick', put: 'garden_put', fill: 'garden_fill', water: 'garden_water' };
+const OP_OF = { garden_forward: 'fwd', garden_turn_left: 'left', garden_turn_right: 'right', garden_pick: 'pick', garden_put: 'put', garden_fill: 'fill', garden_water: 'water' };
+
+/* ---------------- the program: Blockly JSON is the program; a small interpreter steps it ---------------- */
+function chain(j) { const out = []; while (j) { out.push(j); j = j.next && j.next.block; } return out; }
+function programList() { const s = startBlock(); if (!s) return []; const j = Blockly.serialization.blocks.save(s); return j.next ? chain(j.next.block) : []; }
+function bodyOf(j) { return j.inputs && j.inputs.DO && j.inputs.DO.block ? chain(j.inputs.DO.block) : []; }
+function inBlock(j, name) { const i = j.inputs && j.inputs[name]; return i ? (i.block || i.shadow || null) : null; }
+function refOf(j) { return j && j.type === 'garden_thing' && j.extraState && j.extraState.kind ? j.extraState : null; }
+function evalNum(j) { if (!j) return 0; if (j.type === 'math_number') return +((j.fields || {}).NUM || 0); if (j.type === 'garden_count') return numOf(world, refOf(inBlock(j, 'THING'))); return 0; }
+function evalBool(j) {
+  if (!j) { run.why = 'noCond'; return false; }
+  if (j.type === 'garden_is') { const ref = refOf(inBlock(j, 'THING')); if (!ref) { run.why = 'noThing'; return false; } return stateOf(world, ref, (j.fields || {}).STATE, (j.fields || {}).N); }
+  if (j.type === 'garden_compare') { const a = evalNum(inBlock(j, 'A')), b = evalNum(inBlock(j, 'B')), op = (j.fields || {}).OP; return op === 'LT' ? a < b : op === 'GT' ? a > b : a === b; }
+  return false;
+}
+function* runList(list) { for (const j of list) yield* runNode(j); }
+function* goOps(id, ops) { if (!ops) { yield { id, say: 'iw0SayNone' }; return; } if (!ops.length) { yield { id }; return; } for (const op of ops) yield { id, op }; }
+function* runNode(j) {
+  const id = j.id, f = j.fields || {};
+  if (j.type === 'garden_repeat') { for (let i = 0; i < (+f.N || 0); i++) { yield { id }; yield* runList(bodyOf(j)); } return; }
+  if (j.type === 'garden_until') { for (let g = 0; ; g++) { yield { id }; if (evalBool(inBlock(j, 'COND'))) return; if (g >= UNTIL_GUARD) { run.why = run.why || 'guard'; return; } yield* runList(bodyOf(j)); } }
+  if (j.type === 'garden_if') { yield { id }; if (evalBool(inBlock(j, 'COND'))) yield* runList(bodyOf(j)); return; }
+  if (j.type === 'garden_go_nearest') { yield* goOps(id, nearestOps(world, f.KIND)); return; }
+  if (j.type === 'garden_go_to') { yield* goOps(id, thingOps(world, refOf(inBlock(j, 'THING')))); return; }
+  if (OP_OF[j.type]) yield { id, op: OP_OF[j.type] };
+}
+
+/* ---------------- the 3D view (IG-000's camera: fixed tilt, pan, pinch, wheel, tap) ---------------- */
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+renderer.setClearColor(0x9FD9F3);
+const DEG = Math.PI / 180, TILT = 35 * DEG, FOV = 38;
+const view = (function () {
+  const host = document.getElementById('stage');
+  const scene = new THREE.Scene();
+  scene.add(new THREE.HemisphereLight(0xE8F6FF, 0xC79A63, 1.5));
+  const sun = new THREE.DirectionalLight(0xFFFFFF, 2.1); sun.position.set(6, 12, 4); scene.add(sun);
+  const cam = new THREE.PerspectiveCamera(FOV, 1.6, 0.1, 300);
+  const ovl = document.createElement('div'); ovl.className = 'ovl';
+  host.insertBefore(renderer.domElement, host.firstChild); host.insertBefore(ovl, renderer.domElement.nextSibling);
+  const v = { host, scene, cam, ovl, gs: null, overlays: new Map(), tx: 4, tz: 3, dist: 10, yaw: 0.42, bounds: { x0: 0, x1: 8, z0: 0, z1: 6, dMin: 4, dMax: 16 }, mapKey: null, onTap: null };
+  v.apply = () => { v.tx = Math.max(v.bounds.x0, Math.min(v.bounds.x1, v.tx)); v.tz = Math.max(v.bounds.z0, Math.min(v.bounds.z1, v.tz)); v.dist = Math.max(v.bounds.dMin, Math.min(v.bounds.dMax, v.dist));
+    cam.position.set(v.tx + v.dist * Math.sin(TILT) * Math.sin(v.yaw), v.dist * Math.cos(TILT), v.tz + v.dist * Math.sin(TILT) * Math.cos(v.yaw)); cam.lookAt(v.tx, 0.4, v.tz); };
+  v.fitAll = () => { v.moved = false; if (v.gs) v.fit(0, 0, v.gs.w, v.gs.h); };
+  v.fit = (x, y, w, h) => { v.tx = x + w / 2; v.tz = y + h / 2; const tan = Math.tan(FOV / 2 * DEG); const dw = w / (2 * tan * cam.aspect), dh = h * Math.cos(TILT) / (2 * tan); v.dist = Math.max(dw, dh) * 1.12 + 1.4; v.apply(); };
+  v.setWorld = (w) => {
+    const key = w.map.rows.join('/');
+    if (!v.gs || key !== v.mapKey) { if (v.gs) { scene.remove(v.gs.group); v.gs.dispose(); } v.gs = GardenScene.buildScene(w, { stepMs: 380 }); scene.add(v.gs.group); v.mapKey = key; v.bounds = { x0: 0, x1: v.gs.w, z0: 0, z1: v.gs.h, dMin: 4, dMax: 16 }; v.moved = false; v.resize(); v.fitAll(); }
+    else v.gs.update(w);
+  };
+  const ptrs = new Map(); let down = null, pinchD = 0;
+  host.addEventListener('pointerdown', e => { if (e.target.closest('button,.bub,.win')) return; host.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); if (ptrs.size === 1) down = { x: e.clientX, y: e.clientY, t: performance.now(), moved: 0 }; if (ptrs.size === 2) { const a = [...ptrs.values()]; pinchD = Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y); } });
+  host.addEventListener('pointermove', e => { const p = ptrs.get(e.pointerId); if (!p) return; const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
+    if (ptrs.size === 1) { if (down) down.moved += Math.hypot(dx, dy); if (armedId && down && down.moved < 12) return; const k = 2 * v.dist * Math.tan(FOV / 2 * DEG) / host.clientHeight; const rx = Math.cos(v.yaw), rz = -Math.sin(v.yaw), fx = -Math.sin(v.yaw), fz = -Math.cos(v.yaw); v.tx -= rx * dx * k + fx * dy * k / Math.cos(TILT); v.tz -= rz * dx * k + fz * dy * k / Math.cos(TILT); v.moved = true; v.apply(); }
+    else if (ptrs.size === 2) { const a = [...ptrs.values()]; const d = Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y); if (pinchD > 0 && d > 0) { v.dist *= pinchD / d; v.moved = true; v.apply(); } pinchD = d; down = null; } });
+  const up = e => { const had = ptrs.has(e.pointerId); ptrs.delete(e.pointerId); if (had && ptrs.size === 0 && down && down.moved <= 12 && performance.now() - down.t < 700 && v.onTap && v.gs) { const rect = host.getBoundingClientRect(); const nd = new THREE.Vector2(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1); const rc = new THREE.Raycaster(); rc.setFromCamera(nd, cam); const tile = v.gs.tileAt(rc.ray); if (tile) v.onTap(tile); } if (ptrs.size === 0) down = null; };
+  host.addEventListener('pointerup', up); host.addEventListener('pointercancel', up);
+  host.addEventListener('wheel', e => { e.preventDefault(); v.dist *= Math.pow(1.12, e.deltaY / 100); v.moved = true; v.apply(); }, { passive: false });
+  v.resize = () => { const w = host.clientWidth, h = host.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); if (!v.moved && v.gs) v.fit(0, 0, v.gs.w, v.gs.h); else v.apply(); };
+  v.overlay = (key, sel, cls, html) => { let o = v.overlays.get(key); if (!o) { const el = document.createElement('div'); ovl.appendChild(el); o = { el, sel, html: null }; v.overlays.set(key, o); } o.sel = sel; if (o.el.className !== cls) o.el.className = cls; if (o.html !== html) { o.el.innerHTML = html; o.html = html; } return o; };
+  v.drop = (key) => { const o = v.overlays.get(key); if (o) { o.el.remove(); v.overlays.delete(key); } };
+  let bubN = 0;
+  v.bubble = (sel, text, cls, ms) => { const key = 'bub' + (++bubN); if (sel.robot != null) for (const [k, o] of v.overlays) if (k.indexOf('bub') === 0 && o.sel.robot != null) v.drop(k); const o = v.overlay(key, sel, 'bub' + (cls ? ' ' + cls : ''), ''); o.el.textContent = text; setTimeout(() => v.drop(key), ms || 1100); return o; };
+  v.project = () => { if (!v.gs) return; const rect = host.getBoundingClientRect(); v.overlays.forEach(o => { const p = v.gs.pointOf(o.sel); if (!p) { o.el.style.display = 'none'; return; } if (o.sel.lift) p.y += o.sel.lift; p.project(cam); const vis = p.z < 1 && p.x > -1.2 && p.x < 1.2 && p.y > -1.2 && p.y < 1.2; o.el.style.display = vis ? '' : 'none'; if (vis) { o.el.style.left = ((p.x + 1) / 2 * rect.width).toFixed(1) + 'px'; o.el.style.top = ((1 - p.y) / 2 * rect.height).toFixed(1) + 'px'; } }); };
+  /* screen point of a tile's centre, for the drive and for the chip picker test */
+  v.screenOf = (x, y, lift) => { const p = v.gs.pointOf({ x, y }); p.y += (lift || 0) - 0.4; p.project(cam); const r = host.getBoundingClientRect(); return { x: r.left + (p.x + 1) / 2 * r.width, y: r.top + (1 - p.y) / 2 * r.height }; };
+  return v;
+})();
+
+/* ---------------- the world, the meters drawn on things, the robot chip ---------------- */
+let world = null, seeds = [11, 2024, 7];
+let shells = 0, won = [false, false, false], savedPrograms = {};
+function robotPort() {
+  const r = R0(world), b = bot(), m = M();
+  const accessory = m.robot === 'pip' ? (r.holds === 'can' ? 'can' : 'none') : m.robot === 'cobble' ? 'hod' : 'satchel';
+  return { x: r.x, y: r.y, d: r.d, colour: b.colour, eyes: b.eyes, hat: b.hat, name: b.name, bump: r.bump, accessory, can: r.can, canMax: r.canMax, load: r.load, eggs: r.eggs, snap: r.snap, stepMs: Math.min(380, stepMs() * 0.92) };
+}
+function pips(have, need, cls) { let s = '<i class="pips ' + (cls || '') + '">'; for (let i = 0; i < need; i++) s += '<i' + (i < have ? ' class="on"' : '') + '></i>'; return s + '</i>'; }
+let watched = new Set();
+function syncWorld() {
+  if (!world) return;
+  const port = robotPort(); R0(world).snap = false;
+  view.setWorld({ map: world.map, things: world.things, robots: [port] });
+  const seen = new Set();
+  world.things.forEach(k => {
+    let html = null, full = false;
+    if (k.kind === 'tulip') { html = '💧' + pips(k.have, k.need) + '<span>' + k.have + '/' + k.need + '</span>'; full = isFull(k); }
+    else if (k.kind === 'site') { html = '🪨' + pips(k.have, k.need, 'st') + '<span>' + k.have + '/' + k.need + '</span>'; full = isFull(k); }
+    else if (k.kind === 'basket') { html = '🥚' + pips(k.count, k.capacity, 'eg') + '<span>' + k.count + '/' + k.capacity + '</span>'; full = isFull(k); }
+    else if (k.kind === 'can') html = '🪣' + pips(k.level, k.max) + '<span>' + k.level + '/' + k.max + '</span>';
+    else if (k.kind === 'rock') html = '🪨 <span>' + k.left + '</span>';
+    if (!html) return;
+    seen.add('m' + k.id);
+    view.overlay('m' + k.id, { thingId: k.id }, 'chip meter' + (full ? ' full' : '') + (watched.has(k.id) ? ' watch' : ''), html);
+  });
+  for (const key of [...view.overlays.keys()]) if (key[0] === 'm' && !seen.has(key)) view.drop(key);
+  const r = R0(world); let extra = '';
+  if (r.holds === 'can') extra = ' · 🪣' + pips(r.can, r.canMax) + '<span>' + r.can + '/' + r.canMax + '</span>';
+  else if (M().robot === 'cobble') extra = ' · 🪨' + pips(r.load, r.loadMax, 'st');
+  else if (M().robot === 'pocket') extra = r.eggs ? ' · 🥚' : '';
+  view.overlay('bot', { robot: 0, lift: 0.05 }, 'chip bot' + ((watched.has('hod') || (watched.has('can') && r.holds === 'can')) ? ' watch' : ''), bot().name + extra);
+  const p = progress(world);
+  const sum = document.getElementById('jobSum'); sum.textContent = t('iw0Sum' + M().n, { n: p.n }); sum.classList.toggle('done', p.n >= p.m);
+  document.getElementById('jobDay').textContent = M().id === 'eggs' ? t('iw0Day', { n: world.day }) : '';
+}
+/* every chip used in the program shows its live value on its thing (IW-004's monitor): ring the meters it names */
+function markWatched() { watched = new Set(); ws.getAllBlocks(false).forEach(b => { if (b.type === 'garden_thing' && b.thing_) watched.add(b.thing_.kind === 'hod' ? 'hod' : b.thing_.id || b.thing_.kind); }); if (world) syncWorld(); }
+function resetWorld(newSeed) { if (newSeed) { seeds[MI] = (Math.imul(seeds[MI], 1664525) + 1013904223) >>> 0; } const day = world && world.mi === MI ? world.day + (newSeed ? 1 : 0) : 1; world = makeWorld(MI, seeds[MI]); world.day = day; R0(world).snap = true; view.drop('bot'); syncWorld(); }
+
+/* ---------------- runs: Play, Stop, the walk home, the pad ---------------- */
+let run = null, mode = null, fast = false, busy = false;
+const stepMs = () => fast ? 110 : 420;
+function say(key, cls, ms) { view.bubble({ robot: 0 }, t(key), cls, ms || 1000); }
+function owl(key, vars) { owl.last = [key, vars || {}]; document.getElementById('owlSay').textContent = t(key, vars || {}); }
+function addShells(n, sel) { if (!n) return; shells += n; const el = document.getElementById('shells'); document.getElementById('shellN').textContent = shells; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); if (sel) view.bubble(sel, '+' + n + ' 🐚', 'shell', 900); persist(); }
+function onEvent(e, inRun) {
+  const r = R0(world);
+  if (e.ev === 'bump') { say('iw0SayBump', 'warn'); if (run) run.last = 'bump'; }
+  else if (e.ev === 'holds') say('iw0SayGot');
+  else if (e.ev === 'pick') say(e.what === 'egg' ? 'iw0SayEgg' : 'iw0SayClack');
+  else if (e.ev === 'fill') say('iw0SayGlug');
+  else if (e.ev === 'splash') say('iw0SaySplash');
+  else if (e.ev === 'meter') { say(e.what === 'water' ? 'iw0SaySlurp' : e.what === 'egg' ? 'iw0SayPlop' : 'iw0SayTock'); addShells(1, { thingId: e.id, lift: 0.35 }); if (run) run.earned++; }
+  else if (e.ev === 'full') { say('iw0SayFull', 'warn'); }
+  else if (e.ev === 'noCan') { say('iw0SayNoCan', 'warn'); if (run) run.last = 'noCan'; }
+  else if (e.ev === 'emptyCan') { say('iw0SayEmptyCan', 'warn'); if (run) run.last = 'emptyCan'; }
+  else if (e.ev === 'hands') { say('iw0SayHands', 'warn'); if (run) run.last = 'hands'; }
+  else if (e.ev === 'nothing') { say('iw0SayNothing', 'warn'); if (run) run.last = 'nothing'; }
+  void r; void inRun;
+}
+function highlight(id) {
+  ws.getAllBlocks(false).forEach(b => { const g = b.getSvgRoot && b.getSvgRoot(); if (g) g.classList.remove('iw-run'); });
+  ws.highlightBlock(id || null);
+  if (id) { const b = ws.getBlockById(id); if (b) b.getSvgRoot().classList.add('iw-run'); }
+}
+function setRunning(on) { document.getElementById('btnPlay').hidden = on; document.getElementById('btnStop').hidden = !on; }
+function play(fromCurrent) {
+  stopRun(true); closeWin(); disarm();
+  const list = programList();
+  if (!list.length) { owl('iw0HintEmpty'); return false; }
+  setMode(null);
+  if (!fromCurrent) resetWorld(false);
+  run = { gen: runList(list), ticks: 0, earned: 0, last: null, why: null, home: null, auto: !!fromCurrent, blocks: countBlocks(), timer: null };
+  setRunning(true); owl(fromCurrent ? 'iw0GoBack' : 'iw0HintRunning');
+  run.timer = setTimeout(tick, 120);
+  return true;
+}
+function tick() {
+  if (!run) return;
+  const me = run;
+  if (++run.ticks > MAX_TICKS) { endRun('cap'); return; }
+  if (run.home) {
+    const op = run.home.shift();
+    if (op) { const e = exec(world, op); onEvent(e, true); syncWorld(); }
+    else { arriveHome(); return; }
+  } else {
+    let n; try { n = run.gen.next(); } catch (err) { console.error(err); endRun('error'); return; }
+    if (n.done) { endRun(null); return; }
+    const s = n.value; highlight(s.id);
+    if (s.say) say(s.say, 'warn');
+    if (s.op) { const e = exec(world, s.op); onEvent(e, true); }
+    if (!world.done && jobDone(world)) { world.done = true; highlight(null); owl('iw0HintDone'); run.home = homeOps(world) || []; view.bubble({ thingId: M().job.targets[M().job.targets.length - 1], lift: 0.4 }, t('iw0Thanks' + M().n), '', 1500); }
+    syncWorld();
+  }
+  if (run === me) run.timer = setTimeout(tick, stepMs());
+}
+function arriveHome() {
+  const r = run; hangUp(world); say('iw0SayHome'); view.gs.celebrate(0);
+  const bonus = 5; addShells(bonus, { robot: 0, lift: 0.4 });
+  run = null; setRunning(false); highlight(null); syncWorld();
+  const first = !won[MI]; won[MI] = true; renderTabs(); persist();
+  if (!r.auto || first) showWin(r.earned, bonus, r.taught); else owl('iw0HintWon');
+}
+function endRun(why) {
+  const r = run; if (!r) return; clearTimeout(r.timer); run = null; setRunning(false); highlight(null); syncWorld();
+  const p = progress(world), reason = why || r.why || r.last;
+  const key = reason === 'cap' ? 'iw0HintCap' : reason === 'guard' ? 'iw0HintGuard' : reason === 'noCond' ? 'iw0HintNoCond' : reason === 'noThing' ? 'iw0HintNoThing' : reason === 'noCan' ? 'iw0HintNoCan' : reason === 'emptyCan' ? 'iw0HintEmptyCan' : reason === 'bump' ? 'iw0HintBump' : reason === 'hands' ? 'iw0HintHands' : reason === 'nothing' ? 'iw0HintNothing' : 'iw0HintNotDone';
+  owl(key, { n: p.n, m: p.m });
+}
+/* Stop ends a run at once — the timer is cleared in the same handler, nothing more happens */
+function stopRun(silent) { if (!run) return false; clearTimeout(run.timer); run = null; setRunning(false); highlight(null); if (!silent) owl('iw0HintStopped'); return true; }
+function showWin(earned, bonus, taught) {
+  document.getElementById('winFace').setAttribute('href', '#' + M().face);
+  document.getElementById('winH').textContent = t('iw0WinH' + M().n);
+  document.getElementById('winP').textContent = t(taught ? 'iw0WinTaught' : 'iw0WinP', { k: countBlocks() });
+  document.getElementById('winWork').textContent = t('iw0WinWork', { n: earned }); document.getElementById('winWork').hidden = !earned;
+  document.getElementById('winBonus').textContent = t('iw0WinBonus', { n: bonus });
+  document.getElementById('winLater').textContent = t('iw0WinLater');
+  document.getElementById('win').hidden = false; owl('iw0HintWon');
+}
+function closeWin() { document.getElementById('win').hidden = true; }
+/* ⏳ time passes: the plot wears; a won job's robot goes back by itself (D3) */
+function timePasses() {
+  const res = wear(world); world.done = jobDone(world); syncWorld();
+  (res.ids || []).forEach(id => view.bubble({ thingId: id, lift: 0.35 }, '⏳', 'warn', 1200));
+  owl(res.key);
+  if (won[MI] && !world.done && !run) { setTimeout(() => { if (!run && !world.done) { play(true); owl('iw0GoBack'); } }, 900); document.getElementById('owlSay').textContent = t(res.key) + ' ' + t('iw0GoBack'); }
+  else if (!won[MI]) document.getElementById('owlSay').textContent = t(res.key) + ' ' + t('iw0PressPlay');
+}
+
+/* the pad: Drive moves, Teach moves and records; a press outside a mode starts Drive */
+function padOps(op) { if (op.indexOf('go:') === 0) return nearestOps(world, op.slice(3)); return [op]; }
+function press(op) {
+  if (run || busy) return;
+  closeWin();
+  if (!mode) setMode('drive');
+  const ops = padOps(op);
+  if (mode === 'teach') { appendOp(op); if (teachArmed) teachArmed.presses++; }
+  if (!ops) { say('iw0SayNone', 'warn'); return; }
+  busy = true; let i = 0;
+  const next = () => {
+    if (i >= ops.length) { busy = false; afterPress(); return; }
+    const e = exec(world, ops[i++]); onEvent(e, false); syncWorld();
+    setTimeout(next, ops.length > 1 ? Math.max(90, stepMs() * 0.7) : 60);
+  };
+  next();
+}
+let teachArmed = null;
+function afterPress() {
+  if (!world.done && jobDone(world)) {
+    world.done = true; if (mode === 'teach') lastTaught = true;
+    const earned = teachArmed ? teachArmed.presses : 0;
+    run = { gen: null, ticks: 0, earned: 0, last: null, why: null, auto: false, taught: mode === 'teach', home: homeOps(world) || [], timer: null };
+    setMode(null, true); setRunning(true); owl('iw0HintDone');
+    view.bubble({ thingId: M().job.targets[M().job.targets.length - 1], lift: 0.4 }, t('iw0Thanks' + M().n), '', 1500);
+    run.timer = setTimeout(tick, stepMs()); void earned;
+  }
+  refreshFold();
+}
+function setMode(m, keepRun) {
+  if (!keepRun) stopRun(true);
+  mode = m;
+  document.getElementById('btnDrive').setAttribute('aria-pressed', String(m === 'drive'));
+  document.getElementById('btnTeach').setAttribute('aria-pressed', String(m === 'teach'));
+  const rec = document.getElementById('recBadge'); rec.hidden = !m; rec.classList.toggle('drive', m === 'drive');
+  document.getElementById('recText').textContent = m === 'drive' ? t('iw0Driving') : t('iw0Rec');
+  document.getElementById('pad').classList.toggle('off', !m);
+  if (m === 'drive') owl('iw0HintDrive');
+  if (m === 'teach') { closeWin(); resetWorld(false); teachArmed = { presses: 0 }; owl('iw0HintTeach'); }
+  else teachArmed = null;
+}
+const PAD = { fwd: ['mv', 'i-fwd', 'iw0B_forward2'], left: ['mv', 'i-left', 'iw0B_turn_left2'], right: ['mv', 'i-right', 'iw0B_turn_right2'], pick: ['act', 'i-pick', 'iw0B_pick2'], put: ['act', 'i-put', 'iw0B_put2'], fill: ['act', 'i-fill', 'iw0B_fill2'], water: ['act', 'i-water', 'iw0B_water2'] };
+function renderPad() {
+  const pad = document.getElementById('pad'); pad.innerHTML = '';
+  const add = (op, cls, html, title) => { const b = document.createElement('button'); b.className = cls; b.dataset.op = op; b.title = title; b.setAttribute('aria-label', title); b.innerHTML = html; pad.appendChild(b); };
+  ['left', 'fwd', 'right'].forEach(op => add(op, PAD[op][0], '<svg><use href="#' + PAD[op][1] + '"></use></svg>', t(PAD[op][2])));
+  M().acts.forEach(op => add(op, PAD[op][0], '<svg><use href="#' + PAD[op][1] + '"></use></svg>', t(PAD[op][2])));
+  M().nearest.forEach(k => add('go:' + k, 'go', '<svg><use href="#i-goto"></use></svg>' + t('iw0K_' + k).split(' ')[0], t('iw0B_go_nearest2') + ' ' + t('iw0K_' + k)));
+}
+document.getElementById('pad').addEventListener('click', e => { const b = e.target.closest('button'); if (b) press(b.dataset.op); });
+
+/* ---------------- Teach + fold: Olive spots a repeated run of steps and offers a repeat ---------------- */
+function keyOf(j) { return JSON.stringify(stripIds(Object.assign({}, j, { next: undefined }))); }
+function chainJson(list) { let head = null; for (let i = list.length - 1; i >= 0; i--) { const n = stripIds(Object.assign({}, list[i])); delete n.next; if (head) n.next = { block: head }; head = n; } return head; }
+function sizeOf(list) { return list.reduce((n, j) => n + 1 + sizeOf(bodyOf(j)), 0); }
+function foldList(list) {
+  let seq = list.map(j => { if (!bodyOf(j).length) return j; const c = JSON.parse(JSON.stringify(j)); c.inputs.DO.block = chainJson(foldList(bodyOf(j))); return c; });
+  for (let guard = 0; guard < 20; guard++) {
+    const keys = seq.map(keyOf); let best = null;
+    for (let p = 1; p <= Math.floor(seq.length / 2); p++) for (let s = 0; s + 2 * p <= seq.length; s++) {
+      let k = 1; while (s + (k + 1) * p <= seq.length && keys.slice(s + k * p, s + (k + 1) * p).join('|') === keys.slice(s, s + p).join('|')) k++;
+      if (k >= 2) { const save = (k - 1) * sizeOf(seq.slice(s, s + p)) - 1; if (save > 0 && (!best || save > best.save)) best = { p, s, k, save }; }
+    }
+    if (!best) break;
+    const unit = foldList(seq.slice(best.s, best.s + best.p));
+    const rep = { type: 'garden_repeat', fields: { N: best.k }, inputs: { DO: { block: chainJson(unit) } } };
+    seq = seq.slice(0, best.s).concat([rep], seq.slice(best.s + best.k * best.p));
+  }
+  return seq;
+}
+let foldPlan = null;
+function refreshFold() {
+  if (loading) return;
+  const list = programList(), folded = foldList(list), a = sizeOf(list), b = sizeOf(folded);
+  foldPlan = b < a ? { folded, a, b } : null;
+  const show = !!foldPlan && (mode === 'teach' || (teachArmed === null && lastTaught));
+  document.getElementById('owlAct').hidden = !show;
+  if (show && !run) { let n = 0; folded.forEach(j => { if (j.type === 'garden_repeat') n = Math.max(n, +j.fields.N); }); owl('iw0HintFold', { n: n || 2 }); }
+}
+let lastTaught = false;
+function doFold() {
+  if (!foldPlan) return;
+  const s = startBlock(), first = s.getNextBlock();
+  loading = true; if (first) first.dispose(false); loading = false;
+  const head = Blockly.serialization.blocks.append(chainJson(foldPlan.folded), ws);
+  s.nextConnection.connect(head.previousConnection);
+  const { a, b } = foldPlan; foldPlan = null; lastTaught = false;
+  document.getElementById('owlAct').hidden = true; owl('iw0HintFolded', { k: b, j: a });
+}
+document.getElementById('btnFold').onclick = doFold;
+
+/* ---------------- a thing becomes a chip: 👆 arms the world, a tap on the island fills it ---------------- */
+let armedId = null;
+function arm(blockId) {
+  if (run) return;
+  armedId = blockId;
+  const bar = document.getElementById('armBar'); bar.hidden = false;
+  document.getElementById('stage').classList.add('armed');
+  const ab = document.getElementById('armAhead'); ab.textContent = t('iw0ArmAhead');
+  const cb = document.getElementById('armCarrier'); const r = world && R0(world);
+  cb.hidden = !(M().robot === 'cobble' || (r && r.holds === 'can'));
+  cb.textContent = M().robot === 'cobble' ? t('iw0ArmHod') : t('iw0ArmCan');
+  owl('iw0HintArmed');
+}
+function disarm() { armedId = null; document.getElementById('armBar').hidden = true; document.getElementById('stage').classList.remove('armed'); }
+function assign(ref) {
+  const b = armedId && ws.getBlockById(armedId); disarm();
+  if (!b) return;
+  Blockly.Events.setGroup(true); b.setThing(ref); Blockly.Events.fire(new (Blockly.Events.get(Blockly.Events.BLOCK_CHANGE))(b, 'mutation', null, '', JSON.stringify(ref))); Blockly.Events.setGroup(false);
+  syncIsBlocks(); markWatched(); persist();
+  owl('iw0HintChip', { thing: chipText(ref) });
+}
+const CHIPPABLE = ['can', 'basket', 'tulip', 'site', 'rock', 'well', 'egg'];
+function thingForTap(tile) {
+  const r = R0(world);
+  if (tile.x === r.x && tile.y === r.y) { if (M().robot === 'cobble') return { kind: 'hod', id: 'hod' }; if (r.holds === 'can') return { kind: 'can', id: 'can' }; return { kind: 'ahead', id: 'ahead' }; }
+  const th = thingsAt(world, tile.x, tile.y).sort((a, b) => CHIPPABLE.indexOf(a.kind) - CHIPPABLE.indexOf(b.kind)).find(k => CHIPPABLE.includes(k.kind));
+  return th ? { kind: th.kind, id: th.id } : null;
+}
+view.onTap = (tile) => {
+  const ref = thingForTap(tile);
+  if (armedId) { if (ref) assign(ref); else { const bar = document.getElementById('armBar'); bar.classList.remove('shake'); void bar.offsetWidth; bar.classList.add('shake'); } return; }
+  if (ref && ref.kind !== 'ahead') view.bubble(ref.kind === 'hod' || (ref.kind === 'can' && !byId(world, 'can')) ? { robot: 0 } : { thingId: ref.id, lift: 0.3 }, chipText(ref), '', 1100);
+};
+document.getElementById('armAhead').onclick = () => assign({ kind: 'ahead', id: 'ahead' });
+document.getElementById('armCarrier').onclick = () => assign(M().robot === 'cobble' ? { kind: 'hod', id: 'hod' } : { kind: 'can', id: 'can' });
+document.getElementById('armCancel').onclick = () => { disarm(); owl(owl.last ? owl.last[0] : 'iw0HintEmpty'); };
+
+/* ---------------- the ? card (drawer blocks only) ---------------- */
+function openCard(type) {
+  const c = document.getElementById('cardBlk'); c.style.background = STYLE_OF[type] || '#8F6BFF';
+  c.innerHTML = '<img alt="" src="' + ICON_URI[ICON_OF[type] || 'ask'] + '"><span></span>'; c.lastChild.textContent = t('iw0B_' + type.replace('garden_', '') + '2');
+  document.getElementById('cardP').textContent = t('iw0C_' + type);
+  document.getElementById('card').hidden = false; document.getElementById('cardOk').focus();
+}
+function closeCard() { document.getElementById('card').hidden = true; }
+document.getElementById('cardOk').onclick = closeCard;
+document.getElementById('card').addEventListener('click', e => { if (e.target.id === 'card') closeCard(); });
+
+/* ---------------- missions, band, language, storage ---------------- */
+function persist() { try { savedPrograms[M().id] = saveState(); localStorage.setItem('olives-island-jobs.v1', JSON.stringify({ lang, band, shells, won, programs: savedPrograms })); } catch (e) { /* storage is a convenience only */ } }
+function restore() { try { const s = JSON.parse(localStorage.getItem('olives-island-jobs.v1') || 'null'); if (!s) return; lang = s.lang === 'fr' ? 'fr' : 'en'; band = s.band === 1 ? 1 : 2; shells = +s.shells || 0; won = Array.isArray(s.won) ? s.won.slice(0, 3) : won; savedPrograms = s.programs || {}; } catch (e) { /* ignore */ } }
+function renderTabs() {
+  const nav = document.getElementById('jobTabs'); nav.innerHTML = '';
+  MISSIONS.forEach((m, i) => { const b = document.createElement('button'); b.className = 'job'; b.setAttribute('role', 'tab'); b.dataset.job = m.id; b.setAttribute('aria-selected', String(i === MI));
+    b.innerHTML = '<svg viewBox="0 0 64 64"><use href="#' + m.face + '"></use></svg><span>' + t('iw0Job' + m.n) + '</span>' + (won[i] ? '<span class="ok" aria-label="won">✓</span>' : '');
+    b.onclick = () => goMission(i); nav.appendChild(b); });
+}
+function applyWords() {
+  document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
+  document.documentElement.lang = lang;
+  const m = M();
+  document.getElementById('faceUse').setAttribute('href', '#' + m.face);
+  document.getElementById('jobEyebrow').textContent = t('iw0Eyebrow' + m.n);
+  document.getElementById('jobTitle').textContent = t('iw0Title' + m.n);
+  document.getElementById('jobReq').textContent = t('iw0Req' + m.n);
+  document.getElementById('progH').textContent = t('iw0ProgH');
+  document.getElementById('jobCard').innerHTML = ['Src', 'Car', 'Tgt', 'Fin', 'Wr'].map(k => '<dt>' + t('iw0Jc' + k) + '</dt><dd>' + t('iw0Jc' + k + m.n) + '</dd>').join('');
+  document.getElementById('recText').textContent = mode === 'drive' ? t('iw0Driving') : t('iw0Rec');
+  document.getElementById('spdSlow').setAttribute('aria-label', 'slow'); document.getElementById('spdFast').setAttribute('aria-label', 'fast');
+  [['zIn', 'iw0ZoomIn'], ['zOut', 'iw0ZoomOut'], ['zFit', 'iw0ZoomFit']].forEach(([id, k]) => { const el = document.getElementById(id); el.title = t(k); el.setAttribute('aria-label', t(k)); });
+  document.getElementById('shellN').textContent = shells;
+  renderTabs(); renderPad(); countBlocks(); if (world) syncWorld();
+  if (owl.last) owl(owl.last[0], owl.last[1]);
+}
+/* Blockly re-reads its labels at block init: save, swap the words, reload */
+function rebuild() {
+  const state = saveState();
+  Blockly.setLocale(lang === 'fr' ? window.IW_MSG_FR : window.IW_MSG_EN);
+  loading = true; ws.clear(); ws.updateToolbox(toolbox()); ws.getFlyout().reflow && ws.getFlyout().reflow(); loading = false;
+  loadState(state); hookFlyout();
+}
+function goMission(i) {
+  if (i === MI && world) return;
+  stopRun(true); disarm(); closeWin(); setMode(null);
+  if (world) savedPrograms[M().id] = saveState();
+  MI = i; lastTaught = false;
+  world = null; view.overlays.forEach((o, k) => view.drop(k));
+  loading = true; ws.clear(); ws.updateToolbox(toolbox()); loading = false;
+  loadState(savedPrograms[M().id] || null); hookFlyout();
+  resetWorld(false); applyWords(); owl('iw0HintStart' + M().n); persist();
+}
+function setBand(b) { band = b; document.getElementById('band1').setAttribute('aria-pressed', String(b === 1)); document.getElementById('band2').setAttribute('aria-pressed', String(b === 2)); rebuild(); applyWords(); persist(); }
+function setLang(l) { lang = l; document.getElementById('langEN').setAttribute('aria-pressed', String(l === 'en')); document.getElementById('langFR').setAttribute('aria-pressed', String(l === 'fr')); rebuild(); applyWords(); persist(); }
+document.getElementById('band1').onclick = () => setBand(1);
+document.getElementById('band2').onclick = () => setBand(2);
+document.getElementById('langEN').onclick = () => setLang('en');
+document.getElementById('langFR').onclick = () => setLang('fr');
+document.getElementById('btnDrive').onclick = () => { closeWin(); setMode(mode === 'drive' ? null : 'drive'); };
+document.getElementById('btnTeach').onclick = () => { if (mode === 'teach') { setMode(null); lastTaught = true; refreshFold(); } else { lastTaught = false; setMode('teach'); } };
+document.getElementById('btnPlay').onclick = () => { lastTaught = false; document.getElementById('owlAct').hidden = true; play(false); };
+document.getElementById('btnStop').onclick = () => stopRun(false);
+document.getElementById('btnReset').onclick = () => { stopRun(true); closeWin(); disarm(); setMode(null); resetWorld(true); owl('iw0HintStart' + M().n); };
+document.getElementById('btnTime').onclick = timePasses;
+document.getElementById('btnFit').onclick = () => view.fitAll();
+document.getElementById('winNext').onclick = () => { closeWin(); goMission((MI + 1) % 3); };
+document.getElementById('winStay').onclick = closeWin;
+document.getElementById('spdSlow').onclick = () => { fast = false; document.getElementById('spdSlow').setAttribute('aria-pressed', 'true'); document.getElementById('spdFast').setAttribute('aria-pressed', 'false'); };
+document.getElementById('spdFast').onclick = () => { fast = true; document.getElementById('spdFast').setAttribute('aria-pressed', 'true'); document.getElementById('spdSlow').setAttribute('aria-pressed', 'false'); };
+document.getElementById('zIn').onclick = () => ws.zoomCenter(1);
+document.getElementById('zOut').onclick = () => ws.zoomCenter(-1);
+document.getElementById('zFit').onclick = () => { ws.zoomToFit(); if (ws.scale > 1.2) ws.setScale(1.2); };
+window.addEventListener('keydown', e => { if (e.key === 'Escape') { closeCard(); disarm(); } });
+
+/* ---------------- stats line (s): frame time, fps, draw calls, and how a drag feels ---------------- */
+const frameTimes = []; let lastFrame = 0, statFrames = 0, statsOn = false; const statsEl = document.getElementById('stats');
+const drag = { downAt: 0, startAt: 0, lifts: [], drops: [] };
+document.getElementById('blocklyDiv').addEventListener('pointerdown', () => { drag.downAt = performance.now(); }, true);
+function dragStat(e) {
+  const now = performance.now();
+  if (e.isStart) { drag.startAt = now; if (drag.downAt) drag.lifts.push(now - drag.downAt); }
+  else if (drag.startAt) { drag.drops.push(now - drag.startAt); drag.startAt = 0; }
+  if (drag.lifts.length > 30) drag.lifts.shift(); if (drag.drops.length > 30) drag.drops.shift();
+}
+const med = a => { if (!a.length) return '–'; const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)].toFixed(0); };
+function statsText() {
+  const s = [...frameTimes].sort((a, b) => a - b); const p95 = s.length ? s[Math.max(0, Math.floor(s.length * 0.95) - 1)] : 0; const mean = s.length ? s.reduce((a, b) => a + b, 0) / s.length : 0;
+  return 'p95 ' + p95.toFixed(1) + ' ms · ' + (mean ? (1000 / mean).toFixed(0) : '–') + ' fps · ' + renderer.info.render.calls + ' draw calls\n'
+    + 'drag: press→lift ' + med(drag.lifts) + ' ms · lift→drop ' + med(drag.drops) + ' ms (n=' + drag.drops.length + ')\n'
+    + 'zoom: workspace ×' + ws.scale.toFixed(2) + ' · drawer ×' + flyWs().scale.toFixed(2);
+}
+window.addEventListener('keydown', e => { if (e.key === 's' && !e.target.closest('input,textarea,.blocklyHtmlInput')) { statsOn = !statsOn; statsEl.hidden = !statsOn; if (statsOn) statsEl.textContent = statsText(); } });
+function frame(now) {
+  requestAnimationFrame(frame);
+  if (!view.gs) return;
+  view.gs.tick(now); renderer.render(view.scene, view.cam); view.project();
+  if (lastFrame) { frameTimes.push(now - lastFrame); if (frameTimes.length > 90) frameTimes.shift(); }
+  lastFrame = now;
+  if (statsOn && (++statFrames % 15 === 0)) statsEl.textContent = statsText();
+}
+window.addEventListener('resize', () => view.resize());
+new ResizeObserver(() => view.resize()).observe(document.getElementById('stage'));
+
+/* ---------------- boot ---------------- */
+restore();
+if (NARROW()) ws.setScale(0.7);
+document.getElementById('band1').setAttribute('aria-pressed', String(band === 1)); document.getElementById('band2').setAttribute('aria-pressed', String(band === 2));
+document.getElementById('langEN').setAttribute('aria-pressed', String(lang === 'en')); document.getElementById('langFR').setAttribute('aria-pressed', String(lang === 'fr'));
+Blockly.setLocale(lang === 'fr' ? window.IW_MSG_FR : window.IW_MSG_EN);
+ws.updateToolbox(toolbox());
+loadState(savedPrograms[M().id] || null); hookFlyout();
+resetWorld(false); applyWords(); owl('iw0HintStart1');
+requestAnimationFrame(frame);
+
+/* a handle for the drive (headless checks read state and screen points; the page never depends on it) */
+window.__iw = {
+  ws, flyWs, world: () => world, mission: () => M().id, run: () => run, mode: () => mode, shells: () => shells, won: () => won.slice(), view, busy: () => busy, fold: () => foldPlan, progress: () => progress(world),
+  programList, countBlocks, startBlock,
+  evalCond(id) { const b = ws.getBlockById(id); const saved = run; run = run || {}; try { return evalBool(Blockly.serialization.blocks.save(b)); } finally { run = saved; } },
+  flyBlock(type, kind) { return flyWs().getTopBlocks(true).find(b => b.type === type && (!kind || b.getFieldValue('KIND') === kind)) || null; },
+  screenOfWs(w, x, y) { const c = Blockly.utils.svgMath.wsToScreenCoordinates(w, new Blockly.utils.Coordinate(x, y)); return { x: c.x, y: c.y }; },
+  tileScreen(x, y, lift) { return view.screenOf(x, y, lift); }
+};
+</script>
