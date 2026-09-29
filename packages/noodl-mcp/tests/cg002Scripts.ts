@@ -737,7 +737,9 @@ var dries = run ? Number(run.dries) || 0 : 0;
 var rockGone = run ? Number(run.rockGone) || 0 : 0;
 var blocks = countBlocks(program);
 var rep = findRepeat(program);
-var goalMetNow = Inputs.goalMet === true;
+// IG-003 (P106 s3): a win is a run's. Goal met keeps its last answer until the next run finishes, so after Stop has
+// emptied the run (Teach, Drive, Start over) a met goal with no run behind it is a leftover, never the hint.
+var goalMetNow = Inputs.goalMet === true && ran;
 var referenceCount = Math.max(0, Math.floor(Number(Inputs.referenceCount)) || 0);
 var freePlay = Inputs.freePlay === true;
 var predictAsked = Inputs.predictAsked === true, predictHit = Inputs.predictHit === true;

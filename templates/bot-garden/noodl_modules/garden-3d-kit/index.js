@@ -38,7 +38,7 @@
  *
  * Map:      { rows: ["GGTGGGTH", ...], legend: { G: "grass", ... } } or just the rows. Kinds: grass path water tree
  *           rock house bed postbox. A bed draws a dry tulip; a Thing waters it. A postbox tile is path wearing the box.
- * Things:   [{ kind: tulip | puddle | letter | bowl | label | stone | postbox | egg | food | flag | rock | sign | note,
+ * Things:   [{ kind: tulip | puddle | letter | bowl | label | stone | postbox | egg | food | flag | rock | sign | note | tick,
  *             x, y, watered?, full?, text?, left? }]  (rock `left` 0..4; a sign's and a note's text is not drawn)
  * Robots:   [{ x, y, d, colour, eyes, hat, name, bump?, can?, canMax?, carry? }]  d 0..3 clockwise from up; bump is a
  *           COUNT that rises; can 0..canMax or null; the load drawn is the last of carry.
@@ -603,6 +603,21 @@
       var cloth = mesh(THREE, G(THREE, out, 'BoxGeometry', 0.26, 0.16, 0.02), mat(PALETTE.sun), 0.14, 0.5, 0);
       g.add(pole, cloth);
       out.meshCount += 2;
+      return g;
+    },
+    // P106 IG-003 (the s3 brief §4.4): the tick on the tile a child predicted right — a green disc standing up, a white
+    // check across it (a short stroke and a long one), turned to the camera's side. It blocks nothing.
+    tick: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      var disc = mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.26, 0.26, 0.04, 16), mat(PALETTE.stem), 0, 0.42, 0);
+      disc.rotation.x = Math.PI / 2;
+      var shortStroke = mesh(THREE, G(THREE, out, 'BoxGeometry', 0.05, 0.16, 0.03), mat(PALETTE.white), -0.07, 0.39, 0.03);
+      shortStroke.rotation.z = 0.8;
+      var longStroke = mesh(THREE, G(THREE, out, 'BoxGeometry', 0.05, 0.3, 0.03), mat(PALETTE.white), 0.05, 0.44, 0.03);
+      longStroke.rotation.z = -0.65;
+      g.add(disc, shortStroke, longStroke);
+      g.rotation.y = 0.42;
+      out.meshCount += 3;
       return g;
     }
   };

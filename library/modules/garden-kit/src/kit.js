@@ -370,6 +370,8 @@
     // white steps panel, inside a repeat (#FFF0DA) and against every block fill; the sun outline was 1.44:1 on white.
     '.gd-blk.gd-run{outline:3px solid var(--gd-run);outline-offset:4px;box-shadow:0 0 0 4px #fff,inset 0 -3px 0 rgba(0,0,0,.18);transform:scale(1.04)}\n' +
     '.gd-x{margin-left:4px;font-size:13px;background:none;border:0;color:inherit;font-weight:800;cursor:pointer;padding:0 2px;font-family:inherit;touch-action:manipulation}\n' +
+    // P106 IG-003: the ? on a placed block (Show Help) — the block's card again. Violet ink on white, 24 px.
+    '.gd-help{margin-left:2px;width:24px;height:24px;flex:none;border-radius:50%;border:0;background:#fff;color:#4A2FA6;font-weight:800;font-size:14px;line-height:24px;padding:0;font-family:inherit;cursor:pointer;touch-action:manipulation;text-align:center}\n' +
     '.gd-rep{border-radius:14px;background:#FFF0DA;padding:6px;display:flex;flex-direction:column;gap:6px;border:2px solid transparent}\n' +
     '.gd-rep[data-sel="1"]{border-color:var(--gd-control)}\n' +
     '.gd-hd{display:flex;align-items:center;gap:6px}\n' +
@@ -387,7 +389,7 @@
     '.gd-opt[aria-pressed="true"]{background:#4A2FA6;color:#fff}\n' +
     '.gd-slot-text{font:inherit;font-weight:700;font-size:14px;padding:6px 10px;border-radius:10px;border:2px solid #EBDFC4;flex:1 1 160px;min-width:0}\n' +
     '.gd-locked .gd-palette,.gd-locked .gd-x,.gd-locked .gd-nctl,.gd-locked .gd-slot{opacity:.5;pointer-events:none}\n' +
-    '.gd-blk:focus-visible,.gd-x:focus-visible,.gd-opt:focus-visible{outline:3px solid #5FB4E8;outline-offset:2px}';
+    '.gd-blk:focus-visible,.gd-x:focus-visible,.gd-help:focus-visible,.gd-opt:focus-visible{outline:3px solid #5FB4E8;outline-offset:2px}';
 
   /** How far a pointer travels before a press is a drag and not a tap, in CSS px. A finger wobbles. */
   var DRAG_SLOP = 6;
@@ -499,7 +501,7 @@
 
         // The listeners are registered once; they read the latest of everything through this ref.
         var live = React.useRef({});
-        live.current = { prog: prog, sel: sel, locked: locked, band: band, onProgram: props.onProgram, onChanged: props.onChanged, onSelected: props.onSelected };
+        live.current = { prog: prog, sel: sel, locked: locked, band: band, onProgram: props.onProgram, onChanged: props.onChanged, onSelected: props.onSelected, onHelp: props.onHelp, onHelpBlock: props.onHelpBlock };
         var lastEmitted = React.useRef(null);
 
         React.useEffect(function () {
@@ -570,7 +572,7 @@
           if (live.current.locked) return;
           var t = e.target;
           if (!t || !t.closest) return;
-          if (t.closest('[data-x],[data-dec],[data-inc],[data-slot],.gd-picker,.gd-palette')) return;
+          if (t.closest('[data-x],[data-help],[data-dec],[data-inc],[data-slot],.gd-picker,.gd-palette')) return;
           var blk = t.closest('.gd-prog .gd-blk[data-id]');
           if (!blk) return;
           if (e.button !== undefined && e.button !== 0 && e.pointerType === 'mouse') return;
@@ -645,6 +647,20 @@
         var xEl = function (b) {
           return h('button', { key: 'x', type: 'button', className: 'gd-x', 'data-x': String(b.id), 'aria-label': lang === 'fr' ? 'enlever' : 'remove', disabled: locked, onClick: function () { remove(b.id); } }, '✕');
         };
+        // P106 IG-003: the ? on a placed block (Show Help): Help Block is the block's kind, then Help fires. It edits nothing.
+        var showHelp = flag(props.showHelp, false);
+        var helpEl = function (b) {
+          if (!showHelp) return [];
+          return [
+            h('button', {
+              key: 'help', type: 'button', className: 'gd-help', 'data-help': String(b.id), 'aria-label': lang === 'fr' ? 'que fait ce bloc ?' : 'what does it do?',
+              onClick: function () {
+                if (typeof live.current.onHelpBlock === 'function') live.current.onHelpBlock(String(b.t));
+                if (typeof live.current.onHelp === 'function') live.current.onHelp();
+              }
+            }, '?')
+          ];
+        };
         var slotEls = function (b, entry) {
           if (!entry || !entry.slots || !entry.slots.length) return [];
           return entry.slots.map(function (s) {
@@ -703,7 +719,7 @@
                 );
                 head.push(h('span', { key: 'times', className: 'gd-n gd-times' }, lang === 'fr' ? 'fois' : 'times'));
               }
-              head = head.concat(slotEls(b, entry));
+              head = head.concat(slotEls(b, entry)).concat(helpEl(b));
               head.push(xEl(b));
               var body = renderList(b.body, b.id);
               if (!body.length) body = [h('span', { key: 'dots', className: 'gd-dots' }, '…')];
@@ -717,7 +733,7 @@
                 )
               );
             } else {
-              out.push(h('div', { key: 'b-' + b.id, className: 'gd-row' }, blockEl(b, entry, slotEls(b, entry).concat([xEl(b)]), false), pickerEl(b, entry)));
+              out.push(h('div', { key: 'b-' + b.id, className: 'gd-row' }, blockEl(b, entry, slotEls(b, entry).concat(helpEl(b), [xEl(b)]), false), pickerEl(b, entry)));
             }
             if (!isDragged) place++;
           }
@@ -779,6 +795,7 @@
       runningId: { type: 'string', displayName: 'Running Id', group: 'Program', default: '', description: 'The id of the block to glow. Empty glows none.' },
       locked: { type: 'boolean', displayName: 'Locked', group: 'Program', default: false, description: 'True while a run plays: no add, move, remove or count change.' },
       showPalette: { type: 'boolean', displayName: 'Show Palette', group: 'Program', default: true },
+      showHelp: { type: 'boolean', displayName: 'Show Help', group: 'Program', default: false, description: 'A ? on every placed block. A tap sets Help Block to the block’s kind and fires Help; it edits nothing.' },
       // White words on these reach 4.5:1 (P105 s3 ruling 5: the mockup's hues, darker — the template's tokens are the same).
       motionColor: { type: 'color', displayName: 'Motion Blocks', group: 'Style', default: '#3170E0' },
       actionColor: { type: 'color', displayName: 'Action Blocks', group: 'Style', default: '#058149' },
@@ -793,7 +810,9 @@
     outputProps: {
       onProgram: { type: 'string', displayName: 'Program', group: 'Program', description: 'The program as JSON text, after every edit. Read back through Program, it draws the same.' },
       onChanged: { type: 'signal', displayName: 'Changed', group: 'Program', description: 'An edit happened. Program already holds it.' },
-      onSelected: { type: 'string', displayName: 'Selected', group: 'Program', description: 'The id of the container a palette tap inserts into, or empty for the end of the list.' }
+      onSelected: { type: 'string', displayName: 'Selected', group: 'Program', description: 'The id of the container a palette tap inserts into, or empty for the end of the list.' },
+      onHelpBlock: { type: 'string', displayName: 'Help Block', group: 'Help', description: 'The kind (t) of the block whose ? was tapped (Show Help).' },
+      onHelp: { type: 'signal', displayName: 'Help', group: 'Help', description: 'A block’s ? was tapped. Help Block already holds its kind.' }
     }
   };
 
@@ -1057,10 +1076,16 @@
     parcel: { box: '0 0 64 64', shapes: [
       ['rect', { x: 13, y: 20, width: 38, height: 30, rx: 3, fill: '#D9A566', stroke: '#8B5A2B', strokeWidth: 2 }],
       ['path', { d: 'M32 20v30M13 33h38', stroke: '#8B5A2B', strokeWidth: 2 }]
+    ] },
+    // P106 IG-003 (the s3 brief §4.4): the tick on the tile a child predicted right — "You were right!".
+    tick: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 56, rx: 16, ry: 3, fill: 'rgba(0,0,0,.12)' }],
+      ['circle', { cx: 32, cy: 30, r: 21, fill: '#3FA66B', stroke: '#fff', strokeWidth: 3 }],
+      ['path', { d: 'M21 30l8 8 15-16', fill: 'none', stroke: '#fff', strokeWidth: 6, strokeLinecap: 'round', strokeLinejoin: 'round' }]
     ] }
   };
   /** The thing kinds drawn as a sprite of the same name (a tulip, a puddle, a bowl and a rock have rules of their own). */
-  var THING_SPRITES = { letter: 1, stone: 1, postbox: 1, flag: 1, egg: 1, food: 1, sign: 1, note: 1 };
+  var THING_SPRITES = { letter: 1, stone: 1, postbox: 1, flag: 1, egg: 1, food: 1, sign: 1, note: 1, tick: 1 };
 
   /** IG-002: a rock's size by the stones left in it — ≥ 3 big, 2 medium, 1 small; 0 (used up) draws nothing. A rock that names no count is a whole one. */
   function rockSize(left) {

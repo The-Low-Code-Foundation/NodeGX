@@ -1303,6 +1303,46 @@ describe('CG-002 — the engine', () => {
     });
   });
 
+  describe('IG-003 (P106 s3) — Drive · Teach · Play: no leftover hint after a reset; the Predict challenge on two requests', () => {
+    const world = () => MOCKUP_WORLD();
+    /** The run the Runner holds after Stop (IG-001 D2): an empty program's fresh run, tick 0. */
+    const emptied = () => runScript(NEW_RUN_SCRIPT, { program: [], robotId: 'me', lang: 'en' }).run;
+
+    it('🔴 AC5: a goal met with no run behind it is not a win — after a reset the first hint is hintEmpty, the pattern hint or the start, never the last run’s line', () => {
+      // The Workshop's Goal met keeps its last answer until the next run finishes; Teach empties the run and asks again.
+      const after = (program: ReadonlyArray<Block>) => runScript(CHOOSE_HINT_SCRIPT, { world: world(), program, run: emptied(), goalMet: true, referenceCount: 3 }).key;
+      expect(after([])).toBe('hintEmpty');
+      expect(after(parse('F F F F'))).toBe('hintPattern');
+      expect(after(parse('F L'))).toBe('hintStart');
+      // Known-firing: the same program with the run that met it is a win.
+      const ran = { ...emptied(), tick: 3 };
+      expect(runScript(CHOOSE_HINT_SCRIPT, { world: world(), program: parse('F L'), run: ran, goalMet: true, referenceCount: 3 }).key).toBe('hintPerfect');
+    });
+
+    it('🔴 R5: the challenge is on the tulips and on sami-thanks only — the one IG-006 request whose end tile never depends on what Olive answers', () => {
+      expect(REQUESTS.filter((r) => r.challenge === 'predict').map((r) => r.id).sort()).toEqual(['sami-thanks', 'tulips-three']);
+      for (const r of REQUESTS) expect({ id: r.id, c: r.challenge === undefined || r.challenge === 'predict' }).toEqual({ id: r.id, c: true });
+      // The challenge predicts with Predict end (every ask takes the fallback); the run the child watches gets the stub
+      // Olive's scripted answers. On sami-thanks the Olive block is a thank-you: it never moves the robot, so the two ends
+      // agree for the reference program and for the same blocks with the thank-you moved to the front.
+      const thanks = REQUESTS.find((r) => r.id === 'sami-thanks')!;
+      const stub = [{ ok: true, text: 'Thank you, Mamie Rose! (stub)' }];
+      const olive = thanks.referenceProgram.find((b) => String(b.t).startsWith('olive:'))!;
+      for (const program of [thanks.referenceProgram, [olive, ...thanks.referenceProgram.filter((b) => b !== olive)]]) {
+        const p = runScript(PREDICT_END_SCRIPT, { program, world: worldOfRequest(thanks), robotId: 'pip' });
+        const real = runToEnd(program, worldOfRequest(thanks), 'pip', 'en', stub);
+        expect({ x: p.x, y: p.y, known: p.known }).toEqual({ x: real.world.robots[0].x, y: real.world.robots[0].y, known: true });
+      }
+      // Why not Mamie's note: a program that goes one step further when Olive read the red tulip ends on another tile
+      // with her real answer than with the fallback the prediction takes.
+      const note = REQUESTS.find((r) => r.id === 'mamie-note')!;
+      const readThenGo: Block[] = [{ id: 1, t: 'olive:read' as BlockType }, { id: 2, t: 'if', slots: { sensor: 'olive_read:red_tulip' }, body: [{ id: 3, t: 'fwd' }] }];
+      const guess = runScript(PREDICT_END_SCRIPT, { program: readThenGo, world: worldOfRequest(note), robotId: 'pip' });
+      const seen = runToEnd(readThenGo, worldOfRequest(note), 'pip', 'en', [{ ok: true, value: 'red tulip' }]);
+      expect(guess.x).not.toBe(seen.world.robots[0].x);
+    });
+  });
+
   describe('the ports the graph wires', () => {
     it('every script mints the outputs its component publishes, and every input is a real name', () => {
       const expected: Record<string, string[]> = {

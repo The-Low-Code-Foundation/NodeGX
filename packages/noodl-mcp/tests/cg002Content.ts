@@ -149,6 +149,8 @@ export interface GardenRequest {
    * CG-005 s3: each rung sits with the islander §3 frames it with and the trick it fits; the rest are free play's.
    */
   rungs?: ReadonlyArray<string>;
+  /** P106 IG-003 (R5): an islander's challenge — `predict`: before Play, tap where the robot will stop (band 10–12 only). */
+  challenge?: 'predict';
   reward: { kind: 'hat' | 'sticker' | 'seed' | 'item'; id: string; from: 'sami' | 'mamie' | 'biscuit' };
   copyKeys: { title: string; blurb: string; line: string; reward: string; gift: string };
   referenceProgram: ReadonlyArray<Block>;
@@ -213,6 +215,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     robotStart: { x: 1, y: 1, d: 3, can: 0, canMax: 3 },
     goal: { name: 'every_tulip_watered' },
     palette: ['fwd', 'left', 'right', 'water', 'fill', 'repeat'],
+    challenge: 'predict',
     reward: { kind: 'hat', id: 'sun', from: 'mamie' },
     copyKeys: { title: 'rqTulipsTitle', blurb: 'rqTulipsBlurb', line: 'rqTulipsLine', reward: 'hatSun', gift: 'giftSun' },
     referenceProgram: [blk('repeat', { n: 3, body: b1('fill', 'left', 'left', 'fwd', 'water', 'right', 'fwd', 'right', 'fwd') })]
@@ -871,6 +874,7 @@ function IG006_REQUESTS(): GardenRequest[] {
       robotStart: { x: 0, y: 3, d: 1 },
       goal: goal([{ name: 'thing_at', args: ['letter', 7, 3] }, { name: 'said', args: [1] }, { name: 'uses', args: ['olive:say-thanks', 1] }]),
       palette: ['fwd', 'left', 'right', 'pick', 'put', 'repeat'],
+      challenge: 'predict',
       rungs: ['say-thanks'],
       reward: { kind: 'sticker', id: 'thanks', from: 'sami' },
       copyKeys: { title: 'rqThanksTitle', blurb: 'rqThanksBlurb', line: 'rqThanksLine', reward: 'stickerThanks', gift: 'giftThanks' },

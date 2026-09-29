@@ -21,10 +21,13 @@ arrives on a port.
 | Running Id | input | string | The id of the block to glow. Empty glows none. |
 | Locked | input | boolean | True while a run plays: no edits. Default false. |
 | Show Palette | input | boolean | Default true. |
+| Show Help | input | boolean | A `?` on every placed block (P106 IG-003). Default false. |
 | Motion / Action / Control / Ask Blocks, Running Glow | input | colour | The mockup's colours by default. |
 | Program | output | string | The program as JSON text, after every edit. Byte-identical when read back through the Program input. |
 | Changed | output | signal | An edit happened. |
 | Selected | output | string | The container a palette tap inserts into, or empty. |
+| Help Block | output | string | The kind (`t`) of the block whose `?` was tapped. |
+| Help | output | signal | A block's `?` was tapped (Help Block is set first). The `?` edits nothing. |
 
 Gestures: tap a palette block to add it (into the selected container, else at the end); drag a block with
 a finger, a pen or a mouse to move it (before or after the block under the pointer, into an empty body, or

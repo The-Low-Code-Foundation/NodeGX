@@ -507,7 +507,8 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       const types = (def: Record<string, any>, side: 'inputProps' | 'outputProps') =>
         Object.fromEntries(Object.entries(def[side] as Record<string, { type: unknown }>).map(([k, p]) => [k, typeof p.type === 'string' ? p.type : 'enum']));
       expect(types(blocks, 'inputProps')).toMatchObject({ palette: 'object', program: 'object', band: 'number', language: 'enum', runningId: 'string', locked: 'boolean' });
-      expect(types(blocks, 'outputProps')).toEqual({ onProgram: 'string', onChanged: 'signal', onSelected: 'string' });
+      // P106 IG-003: the ? on a placed block publishes Help Block (the block's kind), then Help.
+      expect(types(blocks, 'outputProps')).toEqual({ onProgram: 'string', onChanged: 'signal', onSelected: 'string', onHelpBlock: 'string', onHelp: 'signal' });
       expect(types(world, 'inputProps')).toMatchObject({ map: 'object', things: 'object', robots: 'object', bubble: 'object', stepMs: 'number', celebrate: 'signal' });
       expect(types(world, 'outputProps')).toEqual({ onTileX: 'number', onTileY: 'number', onTileTapped: 'signal', onReady: 'signal' });
       for (const def of [blocks, world]) {
@@ -671,6 +672,39 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       const html = render('garden-kit.Garden', { map: { rows: ['GGFGFGFG'] }, things: [{ kind: 'tulip', x: 2, y: 0, colour: 'yellow' }, { kind: 'tulip', x: 4, y: 0, colour: 'red' }] });
       expect(html.match(/gd-tulip gd-dry gd-yellow"[^>]*data-sprite="tulipYellow"/g)).toHaveLength(1);
       expect(html.match(/gd-tulip gd-dry"[^>]*data-sprite="tulip"/g)).toHaveLength(2); // the red one and the bed's own at 6,0
+    });
+  });
+
+  describe('IG-003 (P106 s3) — the tick on the predicted tile; the ? on a placed block', () => {
+    it('🔴 a tick is an inline sprite on its tile (the challenge hit); a kind with no sprite draws nothing', () => {
+      const sprites = (node('garden-kit.Garden').sprite as { sprites: Record<string, unknown> }).sprites;
+      expect(!!sprites.tick).toBe(true);
+      const html = render('garden-kit.Garden', { map: ['GGG'], things: [{ kind: 'tick', x: 1, y: 0 }, { kind: 'nosuchkind', x: 2, y: 0 }] });
+      const cell = (x: number) => {
+        const at = html.indexOf(`data-x="${x}" data-y="0"`);
+        return html.slice(html.lastIndexOf('<button', at), html.indexOf('</button>', at));
+      };
+      expect(cell(1)).toContain('class="gd-sprite gd-thing gd-tick" data-sprite="tick"');
+      expect(cell(2)).not.toContain('gd-sprite');
+      expect(cell(2)).not.toContain('nosuchkind');
+    });
+
+    it('🔴 Show Help puts a ? on every placed block — simple ones and a container’s head — and none on the palette; off by default', () => {
+      const program = '[{"id":1,"t":"fwd"},{"id":2,"t":"repeat","n":3,"body":[{"id":3,"t":"water"}]}]';
+      const on = render('garden-kit.BlockList', { program, showHelp: true });
+      const helps = [...on.matchAll(/<button[^>]*class="gd-help"[^>]*data-help="([^"]+)"[^>]*>/g)].map((m) => m[1]);
+      expect(helps).toEqual(['1', '2', '3']);
+      expect(on.slice(on.indexOf('gd-palette'), on.indexOf('gd-prog'))).not.toContain('data-help');
+      // Its words, for a screen reader, in the list's language.
+      expect(on).toMatch(/class="gd-help"[^>]*aria-label="what does it do\?"/);
+      expect(render('garden-kit.BlockList', { program, showHelp: true, language: 'fr' })).toMatch(/class="gd-help"[^>]*aria-label="que fait ce bloc \?"/);
+      expect(render('garden-kit.BlockList', { program })).not.toContain('data-help');
+      const props = node('garden-kit.BlockList').inputProps as Record<string, { type: string; default?: unknown }>;
+      expect([props.showHelp.type, props.showHelp.default]).toEqual(['boolean', false]);
+      // A press on the ? is never the start of a drag or a tap that takes the block away.
+      const src = fs.readFileSync(SOURCE, 'utf8');
+      expect(src).toMatch(/t\.closest\('\[data-x\],\[data-help\],/);
+      expect(node('garden-kit.BlockList').css as string).toContain('.gd-help{');
     });
   });
 

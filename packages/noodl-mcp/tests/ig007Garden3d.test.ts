@@ -457,6 +457,14 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       for (const kind of ['rock', 'sign', 'note', 'stone']) expect({ kind, primitives: byKind[kind] >= 1 && byKind[kind] <= 2 }).toEqual({ kind, primitives: true });
     });
 
+    it('🔴 P106 IG-003: the tick (a challenge hit) draws on its tile, a few primitives, like the 2D kit’s sprite', () => {
+      const { built } = build([{ kind: 'tick', x: 2, y: 1 }]);
+      const tick = built.things.find((g: any) => g.userData.kind === 'tick');
+      expect(!!tick && [tick.userData.x, tick.userData.y]).toEqual([2, 1]);
+      expect(meshesIn(tick)).toBeGreaterThanOrEqual(2);
+      expect(meshesIn(tick)).toBeLessThanOrEqual(4);
+    });
+
     it('🔴 a rock is big at left ≥ 3, medium at 2, small at 1, gone at 0 (and big with no left, as a request places it)', () => {
       const { built } = build([4, 3, 2, 1, 0, undefined].map((left, x) => ({ kind: 'rock', x, y: 0, left })));
       const rocks = built.things.filter((g: any) => g.userData.kind === 'rock');

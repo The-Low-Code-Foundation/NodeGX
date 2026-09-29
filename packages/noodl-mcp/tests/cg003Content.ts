@@ -223,7 +223,16 @@ export const IG006_WORDS: Readonly<Record<string, Bi>> = {
   lsQ11: s('French → English, then English → French.', 'Du français vers l’anglais, puis de l’anglais vers le français.'),
   lsFrEn: s('French → English: “{q}”', 'Du français vers l’anglais : « {q} »'),
   lsEnFr: s('English → French: “{q}”', 'De l’anglais vers le français : « {q} »'),
-  lsWobbly: s('Olive is better one way than the other.', 'Olive est meilleure dans un sens que dans l’autre.')
+  lsWobbly: s('Olive is better one way than the other.', 'Olive est meilleure dans un sens que dans l’autre.'),
+  // P106 s3 lane B (IG-003): Drive · Teach · Play, and the islander's Predict challenge (R4, R5).
+  ig3Drive: s('Drive', 'Conduire'),
+  ig3Teach: s('Teach', 'Apprendre'),
+  ig3Driving: s('Just driving: nothing is remembered.', 'Juste conduire : rien n’est retenu.'),
+  ig3TeachOn: s('Back to the start. Now show {b} the moves.', 'Retour au départ. Maintenant, montre les gestes à {b}.'),
+  ig3TeachGoOn: s('{b} is where your steps end. Show {b} what comes next.', '{b} est là où tes pas finissent. Montre-lui la suite.'),
+  ig3StepsDriving: s('Just driving: nothing here changes. Press Teach and every move becomes a block.', 'Tu conduis : rien ne change ici. Appuie sur Apprendre et chaque geste devient un bloc.'),
+  ig3PredictAsk: s('Before you press Play, tap where {b} will stop.', 'Avant d’appuyer sur Jouer, touche la case où {b} va s’arrêter.'),
+  ig3PredictRight: s('You were right!', 'Tu avais raison !')
 };
 export const IG006_WORD_KEYS: ReadonlyArray<string> = Object.keys(IG006_WORDS);
 

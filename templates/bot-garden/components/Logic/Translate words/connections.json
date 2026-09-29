@@ -749,6 +749,54 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-ig3Drive",
+      "toId": "translatewordsOut",
+      "toProperty": "ig3Drive"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig3Driving",
+      "toId": "translatewordsOut",
+      "toProperty": "ig3Driving"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig3PredictAsk",
+      "toId": "translatewordsOut",
+      "toProperty": "ig3PredictAsk"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig3PredictRight",
+      "toId": "translatewordsOut",
+      "toProperty": "ig3PredictRight"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig3StepsDriving",
+      "toId": "translatewordsOut",
+      "toProperty": "ig3StepsDriving"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig3Teach",
+      "toId": "translatewordsOut",
+      "toProperty": "ig3Teach"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig3TeachGoOn",
+      "toId": "translatewordsOut",
+      "toProperty": "ig3TeachGoOn"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-ig3TeachOn",
+      "toId": "translatewordsOut",
+      "toProperty": "ig3TeachOn"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-isEyebrow",
       "toId": "translatewordsOut",
       "toProperty": "isEyebrow"
