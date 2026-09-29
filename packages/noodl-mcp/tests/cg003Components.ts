@@ -341,7 +341,7 @@ const TYPE: Readonly<Record<string, string>> = {
   armed: 'boolean', showTick: 'boolean', live: 'boolean', start: 'object',
   // P106 IG-004 (lane E) — the plots, the pinned robot, the one brought home.
   plots: 'object', pinned: 'string', freed: 'string', state: 'object', cards: 'array', focus: 'object', working: 'number',
-  ticks: 'number', canOpen: 'boolean', blocked: 'boolean', showHome: 'boolean', status: 'string', workingAt: 'string',
+  canOpen: 'boolean', blocked: 'boolean', showHome: 'boolean', status: 'string', workingAt: 'string',
   homeText: 'string', openText: 'string', what: 'string'
 };
 const typeOf = (name: string) => TYPE[name] ?? '*';

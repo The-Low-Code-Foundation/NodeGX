@@ -101,7 +101,7 @@
         {
           "name": "ticks",
           "plug": "input",
-          "type": "number"
+          "type": "*"
         },
         {
           "name": "world",
