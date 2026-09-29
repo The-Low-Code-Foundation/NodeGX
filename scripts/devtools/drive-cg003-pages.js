@@ -107,7 +107,8 @@ function loadHints(projectDir) {
 const HINT_ROWS = loadHints(PROJECT);
 const hintIn = (lang, key, name = 'Pip') => String((HINT_ROWS.find((r) => r.key === key) || {})[lang] || '').split('{b}').join(name);
 /** IG-001 D10 / IG-002: the pad's keys for a request — the pad's own order (cg003Content PAD_KEYS), filtered by the request's blocks. */
-const PAD_ORDER = ['fwd', 'left', 'water', 'right', 'fill', 'pick', 'put'];
+// P108 IW-001 F7: the pad's order now carries say and Olive's read (a request's palette never lists read: its rungs do).
+const PAD_ORDER = ['fwd', 'left', 'water', 'right', 'fill', 'pick', 'put', 'say', 'olive:read'];
 const padFor = (id) => PAD_ORDER.filter((op) => ((REQUESTS.find((r) => r.id === id) || { palette: [] }).palette || []).includes(op));
 /** IG-002: the tulips' fetch-and-return dance, one pass (fill, turn round, walk, water, step down a row, walk back). */
 const TULIP_DANCE = ['fill', 'left', 'left', 'fwd', 'water', 'right', 'fwd', 'right', 'fwd'];

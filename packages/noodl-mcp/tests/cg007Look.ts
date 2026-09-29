@@ -300,6 +300,11 @@ ${owlColourRule}
 .bg-key-r3a { grid-column: 1; grid-row: 3; }
 .bg-key-r3b { grid-column: 2; grid-row: 3; }
 .bg-key-r3c { grid-column: 3; grid-row: 3; }
+/* P108 IW-001 F7: a fourth row for the drawer's other actions (say, Olive's read: violet, her colour). */
+.bg-key-r4a { grid-column: 1; grid-row: 4; }
+.bg-key-r4b { grid-column: 2; grid-row: 4; }
+.bg-key-r4c { grid-column: 3; grid-row: 4; }
+.bg-key-olive-read { color: var(--violet-ink); background-color: var(--violet-2) !important; }
 .bg-key-water { color: var(--pond-2); background-color: var(--water-key) !important; }
 .bg-key-right { grid-column: 3; grid-row: 2; }
 .bg-controls { margin-top: 12px; }

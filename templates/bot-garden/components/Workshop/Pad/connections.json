@@ -17,6 +17,12 @@
     },
     {
       "fromId": "pdIn",
+      "fromProperty": "palette",
+      "toId": "pdKeys",
+      "toProperty": "palette"
+    },
+    {
+      "fromId": "pdIn",
       "fromProperty": "words",
       "toId": "pdKeys",
       "toProperty": "words"

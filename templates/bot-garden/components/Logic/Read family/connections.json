@@ -35,6 +35,12 @@
     },
     {
       "fromId": "readfamilyFn",
+      "fromProperty": "out-cardsSeen",
+      "toId": "readfamilyOut",
+      "toProperty": "cardsSeen"
+    },
+    {
+      "fromId": "readfamilyFn",
       "fromProperty": "out-color",
       "toId": "readfamilyOut",
       "toProperty": "color"

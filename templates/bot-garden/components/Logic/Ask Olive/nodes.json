@@ -150,7 +150,7 @@
         {
           "name": "answer",
           "plug": "input",
-          "type": "*"
+          "type": "object"
         },
         {
           "name": "fallback",

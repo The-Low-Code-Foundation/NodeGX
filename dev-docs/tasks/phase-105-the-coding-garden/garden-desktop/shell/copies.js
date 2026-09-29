@@ -82,6 +82,19 @@ const FIRST_ROBOT_ID = 'r1';
 const MAX_PROFILES = 6;
 const ROBOT_NAME_MAX = 16;
 const TRICK_KEYS = ['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7'];
+/** P108 IW-001 F8: the page's CARDS_MAX (cg002Scripts.ts) — the most block cards a profile keeps as seen. */
+const CARDS_MAX = 64;
+
+/** P108 IW-001 F8: the page's `cardsOf` — text ids, trimmed, once each, first seen first, at most CARDS_MAX. */
+function cardsOf(raw) {
+  const out = [];
+  for (const v of Array.isArray(raw) ? raw : []) {
+    if (out.length >= CARDS_MAX) break;
+    const id = typeof v === 'string' ? v.trim().slice(0, 40) : '';
+    if (id && !out.includes(id)) out.push(id);
+  }
+  return out;
+}
 
 function trickLetters(raw) {
   let out = '';
@@ -187,7 +200,7 @@ function saveCodeOf(model) {
     const plots = Object.keys(island.plots)
       .map((id) => [id, island.plots[id].program, island.plots[id].robotId, island.plots[id].wonAt])
       .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
-    p.push([
+    const row = [
       String(x.id),
       String(x.name || '').slice(0, 24),
       Number(x.band) === 1 ? 1 : 2,
@@ -204,7 +217,11 @@ function saveCodeOf(model) {
       plots,
       // P106 IG-005: r1 (and a row with no kind) is its id; a lent robot is [id, kind, name, color, eye, hat].
       island.robots.map((r) => (r.id === FIRST_ROBOT_ID || !r.kind ? r.id : [r.id, r.kind, r.name || '', r.color || '', r.eye || '', r.hat || '']))
-    ]);
+    ];
+    // P108 IW-001 F8: row 15, the cards seen — only when there are any, as the page packs them.
+    const seen = cardsOf(x.cardsSeen);
+    if (seen.length) row.push(seen);
+    p.push(row);
   }
   const packed = { v: SAVE_VERSION, f: [String(fam.id), Number(fam.created)], p, a: String(isl.activeId || (list[0] ? list[0].id : '')) };
   const b64 = Buffer.from(JSON.stringify(packed), 'utf8').toString('base64');

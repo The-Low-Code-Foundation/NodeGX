@@ -279,7 +279,7 @@
       "path": "Logic/Record step",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 17,
+      "connectionCount": 24,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -295,7 +295,7 @@
       "path": "Logic/Pad keys",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 6,
+      "connectionCount": 7,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -311,7 +311,7 @@
       "path": "Logic/Read family",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 27,
+      "connectionCount": 28,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -571,6 +571,14 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
+    "Logic/Pad answer": {
+      "path": "Logic/Pad answer",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 8,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
     "Logic/App store": {
       "path": "Logic/App store",
       "type": "visual",
@@ -623,7 +631,7 @@
       "path": "Workshop/Pad",
       "type": "visual",
       "nodeCount": 5,
-      "connectionCount": 7,
+      "connectionCount": 8,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -654,8 +662,8 @@
     "Workshop/Play": {
       "path": "Workshop/Play",
       "type": "visual",
-      "nodeCount": 151,
-      "connectionCount": 384,
+      "nodeCount": 152,
+      "connectionCount": 403,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -838,8 +846,8 @@
     "Pages/Workshop": {
       "path": "Pages/Workshop",
       "type": "page",
-      "nodeCount": 20,
-      "connectionCount": 61,
+      "nodeCount": 22,
+      "connectionCount": 70,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -869,8 +877,8 @@
     }
   },
   "stats": {
-    "totalComponents": 108,
-    "totalNodes": 881,
-    "totalConnections": 2578
+    "totalComponents": 109,
+    "totalNodes": 887,
+    "totalConnections": 2624
   }
 }

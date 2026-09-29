@@ -62,8 +62,8 @@ import {
   GLOW_SCRIPT
 } from './cg003Scripts';
 // P108 IW-001 (lane A): the Workshop fixes.
-import { RUN_CAP_SCRIPT } from './cg003Scripts';
-import { MAX_TICKS } from './cg002Scripts';
+import { PAD_ANSWER_SCRIPT, RUN_CAP_SCRIPT } from './cg003Scripts';
+import { DECODE_SAVE_SCRIPT, ENCODE_SAVE_SCRIPT, MAX_TICKS } from './cg002Scripts';
 import { AuthoredGarden, buildGardenTemplateProject, prepareGardenArtefact, START_HERE_FILE, TEMPLATE_ID } from './cg003Template';
 import { ROBOT_NAME_MAX } from './cg002Scripts';
 import { DARKENED_FILLS, GARDEN_CSS, GARDEN_PRESET, GARDEN_TOKENS, tokenValue } from './cg007Look';
@@ -184,6 +184,8 @@ function contrastTable(value: (token: string) => string): Array<{ name: string; 
 
 const WORD_ROWS = JSON.parse(ALL_WORDS_JSON) as Array<{ key: string; en: string; fr: string }>;
 const REQ_ROWS = JSON.parse(JSON.stringify(REQUESTS)) as Array<Record<string, any>>;
+/** P108 IW-001: a word row by key, both languages (the page's whole table). */
+const WORDS_BY_KEY: Record<string, { en: string; fr: string }> = Object.fromEntries(JSON.parse(ALL_WORDS_JSON).map((r: { key: string; en: string; fr: string }) => [r.key, r]));
 const run = (script: string, inputs: Record<string, unknown>) => runScript(script, inputs);
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 async function runAsync(script: string, inputs: Record<string, unknown>, fetchImpl: unknown): Promise<Record<string, any>> {
@@ -763,8 +765,9 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       // IG-002: the stones mine first (pick), the tulips fill at the pond; free play has every step, fill included.
       expect(keys('path-stones').map((k) => k.op)).toEqual(['fwd', 'left', 'right', 'pick', 'put']);
       expect(keys('tulips-three').map((k) => k.op)).toEqual(['fwd', 'left', 'water', 'right', 'fill']);
-      expect(keys('letter-say').map((k) => k.op)).toEqual(['fwd', 'left', 'right', 'pick', 'put']);
-      expect(keys('free').map((k) => k.op)).toEqual(['fwd', 'left', 'water', 'right', 'fill', 'pick', 'put']);
+      // P108 IW-001 F7: say is a key where it is allowed (the drawer-driven pad has its own clause below).
+      expect(keys('letter-say').map((k) => k.op)).toEqual(['fwd', 'left', 'right', 'pick', 'put', 'say']);
+      expect(keys('free').map((k) => k.op)).toEqual(['fwd', 'left', 'water', 'right', 'fill', 'pick', 'put', 'say']);
       // The first action takes the d-pad's centre, the rest a third row; every key names its op, its place and its icon.
       const at = (id: string, op: string) => keys(id).find((k) => k.op === op)!.cls;
       expect(at('path-stones', 'pick')).toBe('bg-key bg-key-pick bg-key-mid bg-i-pick bg-press');
@@ -776,7 +779,7 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       // IG-003: the pad is up from the moment a request opens (Drive); each key is labelled in the child's language.
       const labels = (lang: string) => run(PAD_KEYS_SCRIPT, { allowed: [], words: WORD_ROWS, lang }).keys.map((k: { label: string }) => k.label);
       expect([labels('en')[0], labels('fr')[0], labels('fr')[4]]).toEqual([WORDS.bFwd.en, WORDS.bFwd.fr, WORDS.bFill.fr]);
-      expect(connectionsOf(built, C.pad).filter((c) => c.toId === 'pdKeys').map((c) => c.toProperty).sort()).toEqual(['allowed', 'lang', 'words']);
+      expect(connectionsOf(built, C.pad).filter((c) => c.toId === 'pdKeys').map((c) => c.toProperty).sort()).toEqual(['allowed', 'lang', 'palette', 'words']);
       // The graph: the request's allowed list reaches the pad; the pad's rows come from Logic/Pad keys, not a static table.
       expect(phas('plStart', 'allowed', 'plPad', 'allowed')).toBe(true);
       const pad = nodesOf(built, C.pad);
@@ -824,7 +827,10 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       // Every wire into Garden goes into Garden 3D too (the renderer's `mounted` apart); every wire out of Garden comes
       // out of Garden 3D to the same place (Garden 3D's own outputs apart — only the rule reads them).
       expect(into('plGarden3d', ['mounted'])).toEqual(into('plGarden', ['mounted']));
-      expect(into('plGarden', ['mounted']).length).toBe(4);
+      // The four world ports (map, things, robots, bubble); P108 IW-001 F7 gives the bubble two more sources, the pad's say
+      // and Olive's answer to the pad's read — on BOTH renderers (the line above).
+      expect([...new Set(into('plGarden', ['mounted']).map((c) => c.split('>')[1]))].sort()).toEqual(['bubble', 'map', 'robots', 'things']);
+      expect(into('plGarden', ['mounted']).filter((c) => c.endsWith('>bubble')).sort()).toEqual(['plDraw.bubble>bubble', 'plPadAnswer.bubble>bubble', 'plRecord.bubble>bubble']);
       expect(from('plGarden3d', WORLD_PORTS_3D_ONLY)).toEqual(from('plGarden'));
       expect(from('plGarden').length).toBe(3);
     });
@@ -1208,6 +1214,79 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       const nested = [{ id: 1, t: 'fwd' }, { id: 2, t: 'fwd' }, { id: 3, t: 'fwd' }, { id: 4, t: 'repeat', n: 9, body: [{ id: 7, t: 'repeat', n: 9, body: [spin] }] }];
       const capped = run(PREDICT_END_SCRIPT, { program: nested, world, lang: 'en' });
       expect([capped.known, capped.ticks]).toEqual([false, MAX_TICKS]);
+    });
+
+    it('🔴 F7: the pad is the DRAWER’s actions — letter-say (Pocket) has pick, put and say; mamie-note has Olive’s read; each key is wired to do what its block does', () => {
+      const drawer = (id: string, robot: string) => {
+        const st = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: id });
+        return run(PALETTE_SCRIPT, { band: 2, allowed: st.allowed, rungs: st.rungs, robot, needs: st.needs, lang: 'en', words: WORD_ROWS }).palette;
+      };
+      const padOf = (id: string, robot: string) => run(PAD_KEYS_SCRIPT, { palette: drawer(id, robot), allowed: [], words: WORD_ROWS, lang: 'en' }).keys as Array<{ op: string; cls: string; label: string }>;
+      expect(padOf('letter-say', 'pocket').map((k) => k.op)).toEqual(['fwd', 'left', 'right', 'pick', 'put', 'say']);
+      const note = padOf('mamie-note', 'pip');
+      expect(note.map((k) => k.op)).toEqual(['fwd', 'left', 'water', 'right', 'olive:read']);
+      // A class a selector can name (no colon), a place on the pad, its icon, and its word.
+      expect(note.find((k) => k.op === 'olive:read')).toEqual({ op: 'olive:read', cls: 'bg-key bg-key-olive-read bg-key-r3a bg-i-read bg-press', label: WORDS_BY_KEY.rungRead.en });
+      expect(padOf('letter-say', 'pocket').find((k) => k.op === 'say')!.cls).toBe('bg-key bg-key-say bg-key-r3b bg-i-say bg-press');
+      // Every action of every request's drawer is a key (the drawer's action blocks and Olive's read).
+      for (const r of REQ_ROWS) {
+        const pal = drawer(r.id, r.needs ?? 'pip');
+        const want = pal.map((e: { id: string }) => e.id).filter((id: string) => ['water', 'fill', 'pick', 'put', 'say', 'olive:read'].includes(id));
+        expect({ id: r.id, keys: padOf(r.id, r.needs ?? 'pip').map((k) => k.op).filter((op) => !['fwd', 'left', 'right'].includes(op)) }).toEqual({ id: r.id, keys: want });
+      }
+      // Free play at 10–12 has every action, Olive's read too: seven places, none shared.
+      const free = run(PAD_KEYS_SCRIPT, { palette: run(PALETTE_SCRIPT, { band: 2, allowed: [], rungs: 'all', lang: 'en', words: WORD_ROWS }).palette, words: WORD_ROWS, lang: 'en' }).keys as Array<{ cls: string }>;
+      const places = free.map((k) => k.cls.split(' ').find((c) => /^bg-key-(fwd|left|right|mid|r[34][abc])$/.test(c)));
+      expect(new Set(places).size).toBe(places.length);
+      for (const c of ['bg-key-r4a', 'bg-key-r4b', 'bg-key-r4c']) expect(GARDEN_CSS).toContain(`.${c} {`);
+      for (const icon of ['say', 'read']) expect(GARDEN_CSS).toContain(`.bg-i-${icon}::before`);
+      // The graph: the drawer's palette reaches the pad; say's line and Olive's answer reach the garden (both renderers).
+      expect(pinto('plPad', 'palette')).toEqual(['plPalette.palette>palette']);
+      expect([pinto('plGarden', 'bubble'), pinto('plGarden3d', 'bubble')]).toEqual([['plDraw.bubble>bubble', 'plPadAnswer.bubble>bubble', 'plRecord.bubble>bubble'], ['plDraw.bubble>bubble', 'plPadAnswer.bubble>bubble', 'plRecord.bubble>bubble']]);
+      expect(pinto('plPadAsking')).toEqual(['plRecord.asking>condition', 'plRecord.ran>eval']);
+      expect([pnode('plPadAsk').type, pinto('plPadAsk')]).toEqual(['/Logic/Ask Olive', ['plIn.band>band', 'plPadAsking.ontrue>go', 'plRecord.pending>run', 'plRecord.request>request']]);
+      expect(pinto('plPadAnswer')).toEqual(['plIn.stepMs>stepMs', 'plPadAsk.answer>answer', 'plPadAsk.ran>go', 'plRecord.pending>run', 'plWorldVar.value>world']);
+      expect(pinto('plRecord', 'islander')).toEqual(['plStart.islander>islander']);
+    });
+
+    it('🔴 F7: the say key says the asker’s thank-you (recorded in Teach with it); the read key parks on Olive, and her answer is spoken as the block speaks it', () => {
+      const letter = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'letter-say' });
+      for (const lang of ['en', 'fr'] as const) {
+        const say = run(RECORD_STEP_SCRIPT, { op: 'say', program: '[]', world: letter.world, selected: '', lang, bumps: 0, record: 'yes', islander: letter.islander, words: WORD_ROWS, botName: 'Pocket' });
+        expect([say.recorded, JSON.parse(say.program), say.bubble.text, say.bubble.style, say.asking]).toEqual([true, [{ id: 1, t: 'say', slots: { text: 'thanksSami' } }], WORDS_BY_KEY.thanksSami[lang].split('{b}').join('Pocket'), 'plain', false]);
+      }
+      // Drive: the line, nothing recorded; two presses are two bubbles.
+      const d1 = run(RECORD_STEP_SCRIPT, { op: 'say', program: '[]', world: letter.world, lang: 'en', record: 'no', islander: 'sami', words: WORD_ROWS });
+      const d2 = run(RECORD_STEP_SCRIPT, { op: 'say', program: '[]', world: letter.world, lang: 'en', record: 'no', islander: 'sami', words: WORD_ROWS });
+      expect([d1.recorded, d1.program, d1.bubble.text === d2.bubble.text, d1.bubble.n === d2.bubble.n]).toEqual([false, '[]', true, false]);
+      // A move key says nothing (the port is left alone).
+      expect('bubble' in run(RECORD_STEP_SCRIPT, { op: 'fwd', program: '[]', world: letter.world, lang: 'en', words: WORD_ROWS })).toBe(false);
+      // Read: Mamie's note, the thing on the plot; the key parks, the world is as it was.
+      const note = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'mamie-note' });
+      const rd = run(RECORD_STEP_SCRIPT, { op: 'olive:read', program: '[]', world: note.world, lang: 'en', record: 'yes', islander: 'mamie', words: WORD_ROWS });
+      expect([rd.asking, rd.request.rung, rd.request.slots.note, JSON.parse(rd.program)[0].t, JSON.stringify(rd.world.robots), rd.pending.waiting]).toEqual([true, 'read', 'The red ones, not the yellow.', 'olive:read', JSON.stringify(note.world.robots), true]);
+      const heard = run(PAD_ANSWER_SCRIPT, { run: rd.pending, world: note.world, answer: { seq: rd.request.seq, run: rd.pending.runId, ok: true, value: 'red tulip' }, stepMs: 380 });
+      expect([heard.said, heard.bubble.style, heard.bubble.ms]).toEqual([WORDS_BY_KEY.oliveReadSay.en.replace('{x}', 'red tulip'), 'olive', 1140]);
+      // No answer, or no parked run: nothing to say.
+      expect(run(PAD_ANSWER_SCRIPT, { run: rd.pending, world: note.world }).said).toBe('');
+      expect(run(PAD_ANSWER_SCRIPT, { run: null, world: note.world, answer: { seq: 1, ok: true, value: 'x' } }).said).toBe('');
+    });
+
+    it('🔴 F8: the cards seen are her profile’s — Got it hands the list to the Workshop page, which writes it to HER profile when it changed; no page Variable holds them', () => {
+      // No node of any type names the old page Variable (P106's gardenCardsSeen); the known-firing arm beside it: gardenCardOpen is named.
+      expect(play().filter((n) => params(n).name === 'gardenCardsSeen').map((n) => n.id)).toEqual([]);
+      expect(play().filter((n) => params(n).name === 'gardenCardOpen').length).toBeGreaterThan(0);
+      expect([pinto('plSeenAdd', 'seen'), pfrom('plSeenAdd', 'seen'), pfrom('plSeenAdd', 'ran')]).toEqual([['plIn.cardsSeen>seen'], ['plOut.cardsSeen'], ['plClearCardOpen.do', 'plOut.cardSeen']]);
+      const ws = nodesOf(built, C.pageWorkshop);
+      const wc = connectionsOf(built, C.pageWorkshop);
+      const winto = (id: string) => wc.filter((c) => c.toId === id).map((c) => `${c.fromId}.${c.fromProperty}>${c.toProperty}`).sort();
+      const seen = ws.find((n) => n.id === 'wsSeen')!;
+      expect([seen.type, params(seen).field]).toEqual(['/Logic/Update profile', 'cardsSeen']);
+      expect(winto('wsSeen')).toEqual(['wsFam.profileId>profileId', 'wsPlay.cardSeen>go', 'wsPlay.cardsSeen>value', 'wsStore.model>model']);
+      expect(winto('wsSeenChanged')).toEqual(['wsSeen.changed>condition', 'wsSeen.ran>eval']);
+      expect(wc.filter((c) => c.fromId === 'wsSeenChanged').map((c) => `${c.fromProperty}>${c.toId}.${c.toProperty}`)).toEqual(['ontrue>wsStore.write']);
+      expect(winto('wsPlay').filter((c) => c.endsWith('>cardsSeen'))).toEqual(['wsFam.cardsSeen>cardsSeen']);
+      expect(winto('wsStore')).toContain('wsSeen.model>model');
     });
   });
 });
@@ -1689,8 +1768,9 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     const into = (id: string, port: string) => wires.filter((w) => w.toId === id && w.toProperty === port).map((w) => w.fromId + '.' + w.fromProperty).sort();
     expect(into('plSetProgKit', 'value')).toEqual(['plCardGate.program']);
     expect(into('plSetProgKit', 'do')).toEqual(['plCardGate.ran']);
-    expect([into('plCardGate', 'program'), into('plCardGate', 'go'), into('plCardGate', 'before'), into('plCardGate', 'seen')]).toEqual([['plBlocks.onProgram'], ['plBlocks.onChanged'], ['plProgVar.value'], ['plSeenVar.value']]);
-    expect([into('plCardHold', 'condition'), into('plSetCardOpen', 'do'), into('plSeenAdd', 'go'), into('plClearCardOpen', 'do')]).toEqual([['plCardGate.show'], ['plCardHold.ontrue'], ['plCardOk.onClick'], ['plSetSeen.done']]);
+    // F8: the cards seen come from HER profile (Cards Seen in), not a page Variable.
+    expect([into('plCardGate', 'program'), into('plCardGate', 'go'), into('plCardGate', 'before'), into('plCardGate', 'seen')]).toEqual([['plBlocks.onProgram'], ['plBlocks.onChanged'], ['plProgVar.value'], ['plIn.cardsSeen']]);
+    expect([into('plCardHold', 'condition'), into('plSetCardOpen', 'do'), into('plSeenAdd', 'go'), into('plClearCardOpen', 'do')]).toEqual([['plCardGate.show'], ['plCardHold.ontrue'], ['plCardOk.onClick'], ['plSeenAdd.ran']]);
     // F4: the "? <block>" chips row is gone (the ? is on the drawer's blocks).
     expect(ws.nodes.some((n: any) => /^plHelp/.test(n.id) || n.id === 'plSetCardHelp')).toBe(false);
     expect(CG003_COMPONENTS.some((c) => c.path === 'Workshop/Help chip' || c.path === 'Logic/Help chips')).toBe(false);
@@ -1995,5 +2075,46 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
       expect(blocked(m)).toEqual(['bowl-if', 'eggs-count', 'letter-say', 'rock-flower', 'sami-thanks']);
       expect(rowsOf(m).find((r: any) => r.id === 'path-stones').doneWord).toBe('✓ ' + WORD_ROWS.find((x) => x.key === 'done')!.en + ' · Cobble works here');
     });
+  });
+});
+
+describe('P108 IW-001 F8 — the cards seen, saved on the profile (lane A)', () => {
+  const kid = () => {
+    let m = run(ADD_PROFILE_SCRIPT, { model: undefined, name: 'Ada', band: 2, lang: 'en', face: 'Ada', robotName: 'Pip' }).model;
+    const ada = m.island.activeId;
+    m = run(ADD_PROFILE_SCRIPT, { model: m, name: 'Bo', band: 1, lang: 'fr', face: 'Bo', robotName: 'Zoë' }).model;
+    return { m, ada, bo: m.island.activeId };
+  };
+
+  it('🔴 Got it on her profile: Update profile writes the list (normalised), says Changed only when it changed, and Read family gives each kid her own', () => {
+    const { m, ada, bo } = kid();
+    const up = run(UPDATE_PROFILE_SCRIPT, { model: m, profileId: ada, field: 'cardsSeen', value: ['fwd', 'olive:read', 'fwd', ''] });
+    expect([up.changed, up.model.profiles.find((p: any) => p.id === ada).cardsSeen]).toEqual([true, ['fwd', 'olive:read']]);
+    expect(run(UPDATE_PROFILE_SCRIPT, { model: up.model, profileId: ada, field: 'cardsSeen', value: ['fwd', 'olive:read'] }).changed).toBe(false);
+    // Hers, not her sibling's: Bo (the active one) still has none; Ada, made active, has hers.
+    expect(run(FAMILY_SCRIPT, { model: up.model }).cardsSeen).toEqual([]);
+    expect(up.model.island.activeId).toBe(bo);
+    const asAda = run(SELECT_PROFILE_SCRIPT, { model: up.model, profileId: ada }).model;
+    expect(run(FAMILY_SCRIPT, { model: asAda }).cardsSeen).toEqual(['fwd', 'olive:read']);
+    // A win (Complete request) keeps them.
+    const won = run(COMPLETE_REQUEST_SCRIPT, { model: asAda, requestId: 'path-postbox', profileId: ada, tricks: [1], reward: null, program: '[{"id":1,"t":"fwd"}]', robotId: 'r1' }).model;
+    expect(won.profiles.find((p: any) => p.id === ada).cardsSeen).toEqual(['fwd', 'olive:read']);
+  });
+
+  it('🔴 the save stays v4 and optional: a v4 family without it reads as itself (nothing migrated, no on-load write owed); with it, the code carries it and reads it back', () => {
+    const { m, ada } = kid();
+    const stored = JSON.parse(JSON.stringify(m));
+    const read = run(FAMILY_SCRIPT, { model: stored });
+    expect([read.migrated, JSON.stringify(read.model) === JSON.stringify(stored), 'cardsSeen' in read.model.profiles[0]]).toEqual([false, true, false]);
+    // Its code is byte-for-byte what it was before the field existed (no row 15).
+    const code = run(ENCODE_SAVE_SCRIPT, { model: stored }).code;
+    expect(JSON.parse(Buffer.from(code.slice(4).replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8')).p.map((row: unknown[]) => row.length)).toEqual([15, 15]);
+    const seen = run(UPDATE_PROFILE_SCRIPT, { model: m, profileId: ada, field: 'cardsSeen', value: ['if', 'water'] }).model;
+    const code2 = run(ENCODE_SAVE_SCRIPT, { model: seen }).code;
+    const back = run(DECODE_SAVE_SCRIPT, { code: code2 });
+    expect([back.ok, back.migrated, back.model.profiles.find((p: any) => p.id === ada).cardsSeen, back.model.profiles.find((p: any) => p.id !== ada).cardsSeen]).toEqual([true, false, ['if', 'water'], undefined]);
+    // Emptied, the field goes (absent is none seen), and the code is the old code again.
+    const none = run(UPDATE_PROFILE_SCRIPT, { model: seen, profileId: ada, field: 'cardsSeen', value: [] });
+    expect([none.changed, 'cardsSeen' in none.model.profiles.find((p: any) => p.id === ada), run(ENCODE_SAVE_SCRIPT, { model: none.model }).code]).toEqual([true, false, code]);
   });
 });

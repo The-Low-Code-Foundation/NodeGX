@@ -328,7 +328,7 @@
         {
           "name": "bubble",
           "plug": "input",
-          "type": "*"
+          "type": "object"
         },
         {
           "name": "hasTulips",

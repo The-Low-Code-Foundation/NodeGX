@@ -169,7 +169,10 @@ export const PAD_KEYS: ReadonlyArray<{ op: string; place: string; icon: string; 
   { op: 'right', place: 'bg-key-right', icon: 'right', word: 'bRight' },
   { op: 'fill', place: '', icon: 'fill', word: 'bFill' },
   { op: 'pick', place: '', icon: 'pick', word: 'bPick' },
-  { op: 'put', place: '', icon: 'put', word: 'bPut' }
+  { op: 'put', place: '', icon: 'put', word: 'bPut' },
+  // P108 IW-001 F7: the pad is the drawer's actions — say, and Olive's read (a key that asks her, as the block does).
+  { op: 'say', place: '', icon: 'say', word: 'bSay' },
+  { op: 'olive:read', place: '', icon: 'read', word: 'rungRead' }
 ];
 
 /** The eyes and hats the robot can wear (the mockup's `#eyes` and `#hats`). A hat other than none/cap is a gift. */

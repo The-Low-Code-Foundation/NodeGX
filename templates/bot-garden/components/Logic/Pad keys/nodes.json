@@ -19,6 +19,11 @@
           "type": "string"
         },
         {
+          "name": "palette",
+          "plug": "output",
+          "type": "*"
+        },
+        {
           "name": "words",
           "plug": "output",
           "type": "array"
@@ -32,7 +37,7 @@
       "type": "JavaScriptFunction",
       "label": "Pad keys",
       "parameters": {
-        "functionScript": "\nfunction wordMap(rows, lang, name) {\n  var map = {};\n  var list = Array.isArray(rows) ? rows : [];\n  for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || '').split('{b}').join(name);\n  return map;\n}\nfunction fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\nfunction langOf(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction nameOf(v) { var n = String(v || '').trim(); return n || 'Pip'; }\n\nvar PAD = [[\"fwd\",\"bg-key-fwd\",\"fwd\",\"bFwd\"],[\"left\",\"bg-key-left\",\"left\",\"bLeft\"],[\"water\",\"\",\"water\",\"bWater\"],[\"right\",\"bg-key-right\",\"right\",\"bRight\"],[\"fill\",\"\",\"fill\",\"bFill\"],[\"pick\",\"\",\"pick\",\"bPick\"],[\"put\",\"\",\"put\",\"bPut\"]];\n// IG-003: the key's label (what a screen reader says; the key shows its icon) is the step's word in the child's language —\n// the pad is up from the moment a request opens (Drive), and an English op name there was the one word a switch left.\nvar W = wordMap(Inputs.words, langOf(Inputs.lang), 'Pip');\nvar KNOWN = [\"fwd\",\"left\",\"right\",\"water\",\"fill\",\"pick\",\"put\",\"say\",\"repeat\",\"until\",\"if\",\"when\",\"count_inc\",\"trick\",\"do\",\"ask\"];\nvar allowed = Array.isArray(Inputs.allowed) ? Inputs.allowed : [];\nvar slots = ['bg-key-mid', 'bg-key-r3a', 'bg-key-r3b', 'bg-key-r3c'], used = 0;\nvar keys = [];\nfor (var i = 0; i < PAD.length; i++) {\n  var op = PAD[i][0];\n  var ok = allowed.length ? allowed.indexOf(op) !== -1 : KNOWN.indexOf(op) !== -1;\n  if (!ok) continue;\n  var place = PAD[i][1] || slots[Math.min(used++, slots.length - 1)];\n  keys.push({ op: op, cls: 'bg-key bg-key-' + op + (place === 'bg-key-' + op ? '' : ' ' + place) + ' bg-i-' + PAD[i][2] + ' bg-press', label: W[PAD[i][3]] || op });\n}\nOutputs.keys = keys;\nOutputs.count = keys.length;\n"
+        "functionScript": "\nfunction wordMap(rows, lang, name) {\n  var map = {};\n  var list = Array.isArray(rows) ? rows : [];\n  for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || '').split('{b}').join(name);\n  return map;\n}\nfunction fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\nfunction langOf(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction nameOf(v) { var n = String(v || '').trim(); return n || 'Pip'; }\n\nvar PAD = [[\"fwd\",\"bg-key-fwd\",\"fwd\",\"bFwd\"],[\"left\",\"bg-key-left\",\"left\",\"bLeft\"],[\"water\",\"\",\"water\",\"bWater\"],[\"right\",\"bg-key-right\",\"right\",\"bRight\"],[\"fill\",\"\",\"fill\",\"bFill\"],[\"pick\",\"\",\"pick\",\"bPick\"],[\"put\",\"\",\"put\",\"bPut\"],[\"say\",\"\",\"say\",\"bSay\"],[\"olive:read\",\"\",\"read\",\"rungRead\"]];\n// IG-003: the key's label (what a screen reader says; the key shows its icon) is the step's word in the child's language —\n// the pad is up from the moment a request opens (Drive), and an English op name there was the one word a switch left.\nvar W = wordMap(Inputs.words, langOf(Inputs.lang), 'Pip');\nvar KNOWN = [\"fwd\",\"left\",\"right\",\"water\",\"fill\",\"pick\",\"put\",\"say\",\"repeat\",\"until\",\"if\",\"when\",\"count_inc\",\"trick\",\"do\",\"ask\"];\n// P108 IW-001 F7: the pad is the DRAWER's actions — the palette the kit shows (band x request x robot, Olive's rungs\n// included), so \"read\" is a key where the drawer has it; with no palette, the request's allowed list as before.\nvar pal = Array.isArray(Inputs.palette) ? Inputs.palette : [];\nvar drawer = [];\nfor (var p = 0; p < pal.length; p++) if (pal[p] && pal[p].id) drawer.push(String(pal[p].id));\nvar allowed = drawer.length ? drawer : Array.isArray(Inputs.allowed) ? Inputs.allowed : [];\nvar slots = ['bg-key-mid', 'bg-key-r3a', 'bg-key-r3b', 'bg-key-r3c', 'bg-key-r4a', 'bg-key-r4b', 'bg-key-r4c'], used = 0;\nvar keys = [];\nfor (var i = 0; i < PAD.length; i++) {\n  var op = PAD[i][0];\n  var ok = allowed.length ? allowed.indexOf(op) !== -1 : KNOWN.indexOf(op) !== -1;\n  if (!ok) continue;\n  var place = PAD[i][1] || slots[Math.min(used++, slots.length - 1)];\n  var slug = op.replace(/[^a-z0-9]+/gi, '-');\n  keys.push({ op: op, cls: 'bg-key bg-key-' + slug + (place === 'bg-key-' + slug ? '' : ' ' + place) + ' bg-i-' + PAD[i][2] + ' bg-press', label: W[PAD[i][3]] || op });\n}\nOutputs.keys = keys;\nOutputs.count = keys.length;\n"
       },
       "x": 40,
       "y": 160,
@@ -47,6 +52,13 @@
         {
           "name": "in-lang",
           "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-palette",
+          "displayName": "palette",
           "plug": "input",
           "type": "*",
           "group": "Inputs"

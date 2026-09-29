@@ -346,6 +346,60 @@
       "toProperty": "navigate"
     },
     {
+      "fromId": "wsFam",
+      "fromProperty": "cardsSeen",
+      "toId": "wsPlay",
+      "toProperty": "cardsSeen"
+    },
+    {
+      "fromId": "wsStore",
+      "fromProperty": "model",
+      "toId": "wsSeen",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "profileId",
+      "toId": "wsSeen",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "cardsSeen",
+      "toId": "wsSeen",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "cardSeen",
+      "toId": "wsSeen",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "wsSeen",
+      "fromProperty": "model",
+      "toId": "wsStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsSeen",
+      "fromProperty": "changed",
+      "toId": "wsSeenChanged",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "wsSeen",
+      "fromProperty": "ran",
+      "toId": "wsSeenChanged",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "wsSeenChanged",
+      "fromProperty": "ontrue",
+      "toId": "wsStore",
+      "toProperty": "write"
+    },
+    {
       "fromId": "wsPage",
       "fromProperty": "didMount",
       "toId": "wsGuardWait",

@@ -19,6 +19,11 @@
           "type": "array"
         },
         {
+          "name": "palette",
+          "plug": "output",
+          "type": "array"
+        },
+        {
           "name": "words",
           "plug": "output",
           "type": "array"

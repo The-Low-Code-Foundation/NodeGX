@@ -5,9 +5,21 @@
   "connections": [
     {
       "fromId": "recordstepIn",
+      "fromProperty": "botName",
+      "toId": "recordstepFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "recordstepIn",
       "fromProperty": "bumps",
       "toId": "recordstepFn",
       "toProperty": "in-bumps"
+    },
+    {
+      "fromId": "recordstepIn",
+      "fromProperty": "islander",
+      "toId": "recordstepFn",
+      "toProperty": "in-islander"
     },
     {
       "fromId": "recordstepIn",
@@ -41,6 +53,12 @@
     },
     {
       "fromId": "recordstepIn",
+      "fromProperty": "words",
+      "toId": "recordstepFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "recordstepIn",
       "fromProperty": "world",
       "toId": "recordstepFn",
       "toProperty": "in-world"
@@ -53,9 +71,21 @@
     },
     {
       "fromId": "recordstepFn",
+      "fromProperty": "out-asking",
+      "toId": "recordstepOut",
+      "toProperty": "asking"
+    },
+    {
+      "fromId": "recordstepFn",
       "fromProperty": "out-blocks",
       "toId": "recordstepOut",
       "toProperty": "blocks"
+    },
+    {
+      "fromId": "recordstepFn",
+      "fromProperty": "out-bubble",
+      "toId": "recordstepOut",
+      "toProperty": "bubble"
     },
     {
       "fromId": "recordstepFn",
@@ -71,6 +101,12 @@
     },
     {
       "fromId": "recordstepFn",
+      "fromProperty": "out-pending",
+      "toId": "recordstepOut",
+      "toProperty": "pending"
+    },
+    {
+      "fromId": "recordstepFn",
       "fromProperty": "out-program",
       "toId": "recordstepOut",
       "toProperty": "program"
@@ -80,6 +116,12 @@
       "fromProperty": "out-recorded",
       "toId": "recordstepOut",
       "toProperty": "recorded"
+    },
+    {
+      "fromId": "recordstepFn",
+      "fromProperty": "out-request",
+      "toId": "recordstepOut",
+      "toProperty": "request"
     },
     {
       "fromId": "recordstepFn",

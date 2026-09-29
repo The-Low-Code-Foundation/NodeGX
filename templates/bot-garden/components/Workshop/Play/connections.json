@@ -688,6 +688,120 @@
       "toProperty": "mounted"
     },
     {
+      "fromId": "plPalette",
+      "fromProperty": "palette",
+      "toId": "plPad",
+      "toProperty": "palette"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "words",
+      "toId": "plRecord",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "botName",
+      "toId": "plRecord",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "islander",
+      "toId": "plRecord",
+      "toProperty": "islander"
+    },
+    {
+      "fromId": "plRecord",
+      "fromProperty": "bubble",
+      "toId": "plGarden",
+      "toProperty": "bubble"
+    },
+    {
+      "fromId": "plRecord",
+      "fromProperty": "bubble",
+      "toId": "plGarden3d",
+      "toProperty": "bubble"
+    },
+    {
+      "fromId": "plRecord",
+      "fromProperty": "asking",
+      "toId": "plPadAsking",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "plRecord",
+      "fromProperty": "ran",
+      "toId": "plPadAsking",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "plRecord",
+      "fromProperty": "request",
+      "toId": "plPadAsk",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "plRecord",
+      "fromProperty": "pending",
+      "toId": "plPadAsk",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "band",
+      "toId": "plPadAsk",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "plPadAsking",
+      "fromProperty": "ontrue",
+      "toId": "plPadAsk",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plRecord",
+      "fromProperty": "pending",
+      "toId": "plPadAnswer",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "plWorldVar",
+      "fromProperty": "value",
+      "toId": "plPadAnswer",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "plPadAsk",
+      "fromProperty": "answer",
+      "toId": "plPadAnswer",
+      "toProperty": "answer"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "stepMs",
+      "toId": "plPadAnswer",
+      "toProperty": "stepMs"
+    },
+    {
+      "fromId": "plPadAsk",
+      "fromProperty": "ran",
+      "toId": "plPadAnswer",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plPadAnswer",
+      "fromProperty": "bubble",
+      "toId": "plGarden",
+      "toProperty": "bubble"
+    },
+    {
+      "fromId": "plPadAnswer",
+      "fromProperty": "bubble",
+      "toId": "plGarden3d",
+      "toProperty": "bubble"
+    },
+    {
       "fromId": "plPad",
       "fromProperty": "op",
       "toId": "plRecord",
@@ -1816,8 +1930,8 @@
       "toProperty": "before"
     },
     {
-      "fromId": "plSeenVar",
-      "fromProperty": "value",
+      "fromId": "plIn",
+      "fromProperty": "cardsSeen",
       "toId": "plCardGate",
       "toProperty": "seen"
     },
@@ -1936,8 +2050,8 @@
       "toProperty": "go"
     },
     {
-      "fromId": "plSeenVar",
-      "fromProperty": "value",
+      "fromId": "plIn",
+      "fromProperty": "cardsSeen",
       "toId": "plSeenAdd",
       "toProperty": "seen"
     },
@@ -1950,18 +2064,18 @@
     {
       "fromId": "plSeenAdd",
       "fromProperty": "seen",
-      "toId": "plSetSeen",
-      "toProperty": "value"
+      "toId": "plOut",
+      "toProperty": "cardsSeen"
     },
     {
       "fromId": "plSeenAdd",
       "fromProperty": "ran",
-      "toId": "plSetSeen",
-      "toProperty": "do"
+      "toId": "plOut",
+      "toProperty": "cardSeen"
     },
     {
-      "fromId": "plSetSeen",
-      "fromProperty": "done",
+      "fromId": "plSeenAdd",
+      "fromProperty": "ran",
       "toId": "plClearCardOpen",
       "toProperty": "do"
     },

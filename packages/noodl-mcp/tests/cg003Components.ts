@@ -317,7 +317,8 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
   // P106 IG-005 (lane B).
   'Logic/Update robot': 'go',
   // P108 IW-001 (lane A).
-  'Logic/Run cap': 'go'
+  'Logic/Run cap': 'go',
+  'Logic/Pad answer': 'go'
 };
 
 /**
@@ -363,8 +364,9 @@ const TYPE: Readonly<Record<string, string>> = {
   // P106 IG-005 (lane B) — the robot for the job, what a win lends and gives, My robots.
   robot: 'object', robotKey: 'string', needs: 'string', refused: 'boolean', lent: 'array', upgraded: 'array', owned: 'boolean',
   paletteRobot: 'object', robotId: 'string', accessory: 'string', has: 'boolean', giftText: 'string', hasGift: 'boolean',
-  // P108 IW-001 (lane A) — the run cap.
-  over: 'boolean', capped: 'boolean'
+  // P108 IW-001 (lane A) — the run cap; the pad's say and read.
+  over: 'boolean', capped: 'boolean', asking: 'boolean', pending: 'object', bubble: 'object', said: 'string', answer: 'object',
+  cardsSeen: 'array'
 };
 const typeOf = (name: string) => TYPE[name] ?? '*';
 
@@ -598,7 +600,7 @@ const PAD: CgComponent = {
   description: 'The Teach pad over the world’s corner (the mockup’s .pad): one key per step the request allows (Allowed; every step with no list) — forward, left and right on the d-pad, the first action in its centre, more actions on a third row. Publishes Pressed with the Op, the op first.',
   repeats: { source: 'array', rowFields: ['op', 'cls', 'label'] },
   nodes: [
-    inputs('pdIn', [['show', 'boolean'], ['allowed', 'array'], ['words', 'array'], ['lang', 'string']]),
+    inputs('pdIn', [['show', 'boolean'], ['allowed', 'array'], ['palette', 'array'], ['words', 'array'], ['lang', 'string']]),
     group('pdBox', 'The pad', undefined, { sizeMode: 'contentSize', cssClassName: 'bg-pad', mounted: false }, ['pdEach']),
     // IG-001 D10: the keys follow the request (the pad was fixed to fwd left water right, so the stones' put came only from the palette).
     logic('pdKeys', L('Pad keys'), 'One key per allowed step'),
@@ -608,6 +610,8 @@ const PAD: CgComponent = {
   connections: [
     wire('pdIn', 'show', 'pdBox', 'mounted'),
     wire('pdIn', 'allowed', 'pdKeys', 'allowed'),
+    // P108 IW-001 F7: the drawer's palette — the pad is its actions (say, Olive's read).
+    wire('pdIn', 'palette', 'pdKeys', 'palette'),
     wire('pdIn', 'words', 'pdKeys', 'words'),
     wire('pdIn', 'lang', 'pdKeys', 'lang'),
     wire('pdKeys', 'keys', 'pdEach', 'items'),
@@ -842,7 +846,7 @@ const PLAY: CgComponent = {
   description: 'The workshop: drive the robot freely (nothing remembered), teach it by driving it again (every press a block), see the steps as blocks, fold the repetition, play, and win. Request Id picks the request (free for free play); the line under the title is that request’s own. Won fires with Bloom, Reward and Won Request set; Island asks for the island; Found says whether the request exists (a reload has none).',
   repeats: { source: 'array', rowFields: ['id', 'cls', 'lit'] },
   nodes: [
-    inputs('plIn', [['requestId', 'string'], ['requests', 'array'], ['hints', 'array'], ['words', 'array'], ['lang', 'string'], ['band', 'number'], ['isOlder', 'boolean'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['stepMs', 'number'], ['robot', 'object'], ['robotKey', 'string'], ['paletteRobot', 'object'], ['giftText', 'string'], ['hasGift', 'boolean']]),
+    inputs('plIn', [['requestId', 'string'], ['requests', 'array'], ['hints', 'array'], ['words', 'array'], ['lang', 'string'], ['band', 'number'], ['isOlder', 'boolean'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['stepMs', 'number'], ['robot', 'object'], ['robotKey', 'string'], ['paletteRobot', 'object'], ['giftText', 'string'], ['hasGift', 'boolean'], ['cardsSeen', 'array']]),
     // ── What the child sees ──
     group('plRoot', 'The workshop', undefined, column({ rowGap: sp(12) }), ['plHead', 'plWs', 'plWin']),
     group('plHead', 'The head', 'plRoot', column({ rowGap: sp(2) }), ['plEyebrow', 'plTitle', 'plSub']),
@@ -961,6 +965,10 @@ const PLAY: CgComponent = {
     setVariable('plSetTeachBumps', 'gardenTeachBumps', 'Count a bump'),
     setVariable('plClearTeachBumps', 'gardenTeachBumps', 'No bumps', { setWith: 'number', value: 0 }),
     logic('plRecord', L('Record step'), 'A pad press, recorded and driven'),
+    // P108 IW-001 F7: the pad's read key asks Olive (a second Ask Olive, the pad's own), and her answer is spoken.
+    gate('plPadAsking', 'Did the key ask Olive?'),
+    logic('plPadAsk', L('Ask Olive'), 'Ask Olive for the pad’s read'),
+    logic('plPadAnswer', L('Pad answer'), 'Her answer, over the robot'),
     logic('plRunner', C.runner, 'The runner'),
     logic('plDraw', L('Draw world'), 'The world in the kit’s words'),
     logic('plPalette', L('Palette'), 'The blocks this band may use'),
@@ -971,9 +979,9 @@ const PLAY: CgComponent = {
     variable('plCardOpenVar', 'gardenCardOpen', 'The card open'),
     setVariable('plSetCardOpen', 'gardenCardOpen', 'Open the card'),
     setVariable('plClearCardOpen', 'gardenCardOpen', 'Close the card', { setWith: 'string', value: '' }),
-    variable('plSeenVar', 'gardenCardsSeen', 'The cards seen'),
+    // P108 IW-001 F8: the cards seen are HER profile's (Cards Seen in, from the save), never a page Variable any more —
+    // Got it hands the new list out (Cards Seen, Card Seen) and the Workshop page writes it to her profile.
     logic('plSeenAdd', L('Card seen'), 'Got it'),
-    setVariable('plSetSeen', 'gardenCardsSeen', 'One more card seen'),
     logic('plCardInfo', L('Block card'), 'The card’s words and example'),
     // ── Drive, teach, play (P106 IG-003); the islander's challenge; the fold ──
     withStates('plMode', 'Drive, teach or play', ['drive', 'teach', 'play'], {
@@ -1027,7 +1035,7 @@ const PLAY: CgComponent = {
     setVariable('plSetWon', 'gardenWon', 'Show it', { setWith: 'boolean', value: true }),
     setVariable('plClearWon', 'gardenWon', 'Hide it', { setWith: 'boolean', value: false }),
     logic('plWinSum', L('Win summary'), 'The win in words'),
-    outputs('plOut', [['won', 'signal'], ['bloom', 'array'], ['reward', 'object'], ['wonRequest', 'string'], ['island', 'signal'], ['found', 'boolean'], ['blocks', 'number'], ['running', 'boolean']])
+    outputs('plOut', [['won', 'signal'], ['bloom', 'array'], ['reward', 'object'], ['wonRequest', 'string'], ['island', 'signal'], ['found', 'boolean'], ['blocks', 'number'], ['running', 'boolean'], ['cardsSeen', 'array'], ['cardSeen', 'signal']])
   ],
   connections: [
     // Words.
@@ -1162,6 +1170,26 @@ const PLAY: CgComponent = {
     wire('plModeWords', 'showLine', 'plModeLine', 'mounted'),
     wire('plModeWords', 'note', 'plStepsNote', 'text'),
     wire('plModeWords', 'driving', 'plStepsNote', 'mounted'),
+    // P108 IW-001 F7: the pad's keys are the drawer's actions; say shows its line; read asks Olive and she answers.
+    wire('plPalette', 'palette', 'plPad', 'palette'),
+    wire('plIn', 'words', 'plRecord', 'words'),
+    wire('plIn', 'botName', 'plRecord', 'botName'),
+    wire('plStart', 'islander', 'plRecord', 'islander'),
+    wire('plRecord', 'bubble', 'plGarden', 'bubble'),
+    wire('plRecord', 'bubble', 'plGarden3d', 'bubble'),
+    wire('plRecord', 'asking', 'plPadAsking', 'condition'),
+    wire('plRecord', 'ran', 'plPadAsking', 'eval'),
+    wire('plRecord', 'request', 'plPadAsk', 'request'),
+    wire('plRecord', 'pending', 'plPadAsk', 'run'),
+    wire('plIn', 'band', 'plPadAsk', 'band'),
+    wire('plPadAsking', 'ontrue', 'plPadAsk', 'go'),
+    wire('plRecord', 'pending', 'plPadAnswer', 'run'),
+    wire('plWorldVar', 'value', 'plPadAnswer', 'world'),
+    wire('plPadAsk', 'answer', 'plPadAnswer', 'answer'),
+    wire('plIn', 'stepMs', 'plPadAnswer', 'stepMs'),
+    wire('plPadAsk', 'ran', 'plPadAnswer', 'go'),
+    wire('plPadAnswer', 'bubble', 'plGarden', 'bubble'),
+    wire('plPadAnswer', 'bubble', 'plGarden3d', 'bubble'),
     wire('plPad', 'op', 'plRecord', 'op'),
     wire('plPad', 'pressed', 'plRecord', 'go'),
     wire('plRead', 'program', 'plRecord', 'program'),
@@ -1371,7 +1399,7 @@ const PLAY: CgComponent = {
     wire('plSlots', 'show', 'plSlotMsg', 'mounted'),
     // IG-006 AC5 / P108 IW-001 F3: the card gate (a first tap places the block AND opens its card), the card, Got it.
     wire('plProgVar', 'value', 'plCardGate', 'before'),
-    wire('plSeenVar', 'value', 'plCardGate', 'seen'),
+    wire('plIn', 'cardsSeen', 'plCardGate', 'seen'),
     wire('plCardGate', 'show', 'plCardHold', 'condition'),
     wire('plCardGate', 'ran', 'plCardHold', 'eval'),
     wire('plCardGate', 'cardId', 'plSetCardOpen', 'value'),
@@ -1391,11 +1419,11 @@ const PLAY: CgComponent = {
     wire('plIn', 'lang', 'plCardEg', 'language'),
     wire('plCardInfo', 'gotIt', 'plCardOk', 'label'),
     wire('plCardOk', 'onClick', 'plSeenAdd', 'go'),
-    wire('plSeenVar', 'value', 'plSeenAdd', 'seen'),
+    wire('plIn', 'cardsSeen', 'plSeenAdd', 'seen'),
     wire('plCardInfo', 'cardId', 'plSeenAdd', 'cardId'),
-    wire('plSeenAdd', 'seen', 'plSetSeen', 'value'),
-    wire('plSeenAdd', 'ran', 'plSetSeen', 'do'),
-    wire('plSetSeen', 'done', 'plClearCardOpen', 'do'),
+    wire('plSeenAdd', 'seen', 'plOut', 'cardsSeen'),
+    wire('plSeenAdd', 'ran', 'plOut', 'cardSeen'),
+    wire('plSeenAdd', 'ran', 'plClearCardOpen', 'do'),
     // P108 IW-001 F4: the ? on a DRAWER block opens its card (it was on the placed blocks: backwards).
     wire('plBlocks', 'onHelpBlock', 'plSetCardBlock', 'value'),
     wire('plBlocks', 'onHelp', 'plSetCardBlock', 'do'),
@@ -2449,6 +2477,9 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       logic('wsJob', L('Job robot'), 'The robot for this job', { stepMs: TICK_MS }),
       logic('wsGift', L('Gift line'), 'What the win lent and gave'),
       logic('wsGuardWait', TIMER_NODE, 'A moment for the request to arrive', { duration: 600 }),
+      // P108 IW-001 F8: Got it writes the cards seen to HER profile (per profile, saved), when it changed anything.
+      logic('wsSeen', L('Update profile'), 'The cards she has seen', { field: 'cardsSeen' }),
+      gate('wsSeenChanged', 'Did Got it change her cards?'),
       gate('wsGuard', 'Is there a request?'),
       navigate('wsGoIsland', C.pageIsland, 'To the island')
     ],
@@ -2485,6 +2516,15 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       wire('wsComplete', 'model', 'wsStore', 'model'),
       wire('wsComplete', 'ran', 'wsStore', 'write'),
       wire('wsPlay', 'island', 'wsGoIsland', 'navigate'),
+      wire('wsFam', 'cardsSeen', 'wsPlay', 'cardsSeen'),
+      wire('wsStore', 'model', 'wsSeen', 'model'),
+      wire('wsFam', 'profileId', 'wsSeen', 'profileId'),
+      wire('wsPlay', 'cardsSeen', 'wsSeen', 'value'),
+      wire('wsPlay', 'cardSeen', 'wsSeen', 'go'),
+      wire('wsSeen', 'model', 'wsStore', 'model'),
+      wire('wsSeen', 'changed', 'wsSeenChanged', 'condition'),
+      wire('wsSeen', 'ran', 'wsSeenChanged', 'eval'),
+      wire('wsSeenChanged', 'ontrue', 'wsStore', 'write'),
       // AC8: no request after a moment (a reload, a typed URL) → the island, the profile kept (it is stored).
       wire('wsPage', 'didMount', 'wsGuardWait', 'start'),
       wire('wsPlay', 'found', 'wsGuard', 'condition'),

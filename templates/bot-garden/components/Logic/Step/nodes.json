@@ -16,7 +16,7 @@
         {
           "name": "answer",
           "plug": "output",
-          "type": "*"
+          "type": "object"
         },
         {
           "name": "run",

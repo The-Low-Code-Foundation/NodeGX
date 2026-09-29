@@ -106,6 +106,9 @@ export const FIRST_ROBOT_ID = 'r1';
 /** The robot's name, at most this long (My robot and the new-player form cut at the same length). */
 export const ROBOT_NAME_MAX = 16;
 
+/** P108 IW-001 F8: the most block cards a profile keeps as seen (more than every card there is; a hand-edit is capped). */
+export const CARDS_MAX = 64;
+
 /** The trick keys on the Skills page, by TPL-012 §2.3 number. */
 export const TRICK_KEYS = ['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7'] as const;
 
@@ -1152,7 +1155,8 @@ Outputs.refused = refused;
  * island: { done, plots, robots } }` — ONE ISLAND PER KID (ruling 8): what a child has done, and the robots she left
  * working on it, are hers. P106 IG-004 (R1): `plots[requestId] = { program, robotId, wonAt }` — a plot is PINNED while
  * its program is a non-empty list and its robotId names one of `robots` (a robot works one plot at a time); a robot
- * brought home leaves `{ program: null, robotId: '', wonAt }`. `robots` is `[{ id: 'r1' }]` in v4 (its look is
+ * brought home leaves `{ program: null, robotId: '', wonAt }`. P108 IW-001 F8: `cardsSeen` (optional, absent = none) is
+ * the block cards the child has seen — packed as row 15 only when there are any. `robots` is `[{ id: 'r1' }]` in v4 (its look is
  * `profile.robot`); IG-005 adds more. v3's `placed` was never written by anything: it is dropped, never migrated.
  *
  * `model.island` is the island ON SCREEN: `activeId`, and `done`/`plots`/`robots` DERIVED from the active profile (the
@@ -1168,6 +1172,7 @@ export const SAVE_HELPERS = `
 var SAVE_VERSION = ${SAVE_VERSION};
 var MAX_PROFILES = ${MAX_PROFILES};
 var ROBOT_NAME_MAX = ${ROBOT_NAME_MAX};
+var CARDS_MAX = ${CARDS_MAX};
 var TRICK_KEYS = ${JSON.stringify(TRICK_KEYS)};
 var FIRST_ROBOT_ID = ${JSON.stringify(FIRST_ROBOT_ID)};
 var ROBOTS = ${ROBOTS_JSON};
@@ -1308,13 +1313,27 @@ function plotOfRobot(island, robotId) {
 function profileOf(raw) {
   var p = raw && typeof raw === 'object' ? raw : {};
   var robot = p.robot && typeof p.robot === 'object' ? p.robot : {};
-  return {
+  var out = {
     id: String(p.id || newId('p')), name: String(p.name || '').slice(0, 24), band: Number(p.band) === 1 ? 1 : 2, lang: p.lang === 'fr' ? 'fr' : 'en',
     face: String(p.face || ''),
     robot: { name: String(robot.name || 'Pip').slice(0, ROBOT_NAME_MAX), color: String(robot.color || '#FF7A59'), eye: String(robot.eye || 'round'), hat: String(robot.hat || 'none') },
     tricks: tricksOf(p.tricks), stickers: Array.isArray(p.stickers) ? p.stickers.map(String) : [], hats: Array.isArray(p.hats) ? p.hats.map(String) : [],
     island: islandOf(p.island)
   };
+  // P108 IW-001 F8: the block cards this child has seen (Got it), OPTIONAL — absent is none seen, so a v4 profile without
+  // it is this very profile and nothing is migrated (the save stays v4; no on-load write is owed).
+  var seen = cardsOf(p.cardsSeen);
+  if (seen.length) out.cardsSeen = seen;
+  return out;
+}
+/** IW-001 F8: a cards-seen list as the save keeps it — text ids, trimmed, once each, first seen first, at most CARDS_MAX. */
+function cardsOf(raw) {
+  var out = [], list = Array.isArray(raw) ? raw : [];
+  for (var i = 0; i < list.length && out.length < CARDS_MAX; i++) {
+    var id = typeof list[i] === 'string' ? list[i].trim().slice(0, 40) : '';
+    if (id && out.indexOf(id) === -1) out.push(id);
+  }
+  return out;
 }
 /** A stored model older than v4 that has anyone in it: the page writes the migrated model back at once. */
 function migrationDue(raw) {
@@ -1490,7 +1509,10 @@ for (var i = 0; i < model.profiles.length; i++) {
   var robots = [];
   // IG-005: r1 (and any row with nothing of its own) is its id, as in session 3; a lent robot is [id, kind, name, color, eye, hat].
   for (var r = 0; r < p.island.robots.length; r++) { var rb = p.island.robots[r]; robots.push(rb.id === FIRST_ROBOT_ID || !rb.kind ? rb.id : [rb.id, rb.kind, rb.name || '', rb.color || '', rb.eye || '', rb.hat || '']); }
-  packed.p.push([p.id, p.name, p.band, p.lang, p.face, p.robot.name, p.robot.color, p.robot.eye, p.robot.hat, tr, p.stickers, p.hats, p.island.done, plots, robots]);
+  var row = [p.id, p.name, p.band, p.lang, p.face, p.robot.name, p.robot.color, p.robot.eye, p.robot.hat, tr, p.stickers, p.hats, p.island.done, plots, robots];
+  // P108 IW-001 F8: row 15, the cards seen — only when there are any, so a family with none packs exactly as before.
+  if (p.cardsSeen && p.cardsSeen.length) row.push(p.cardsSeen);
+  packed.p.push(row);
 }
 var code = 'BG1.' + toB64(JSON.stringify(packed));
 Outputs.code = code;
@@ -1525,7 +1547,7 @@ try {
     var robots = [];
     if (v4 && Array.isArray(a[14])) for (var rb = 0; rb < a[14].length; rb++) { var ro = a[14][rb]; robots.push(Array.isArray(ro) ? { id: ro[0], kind: ro[1], name: ro[2], color: ro[3], eye: ro[4], hat: ro[5] } : ro); }
     var island = v4 ? { done: a[12], plots: plots, robots: robots } : v3 ? { done: a[12] } : family;
-    profiles.push({ id: a[0], name: a[1], band: a[2], lang: a[3], face: a[4], robot: { name: a[5], color: a[6], eye: a[7], hat: a[8] }, tricks: v2 ? tricks : undefined, stickers: v2 ? a[10] : [], hats: v2 ? a[11] : [], island: island });
+    profiles.push({ id: a[0], name: a[1], band: a[2], lang: a[3], face: a[4], robot: { name: a[5], color: a[6], eye: a[7], hat: a[8] }, tricks: v2 ? tricks : undefined, stickers: v2 ? a[10] : [], hats: v2 ? a[11] : [], island: island, cardsSeen: v4 && Array.isArray(a[15]) ? a[15] : undefined });
   }
   model = modelOf({ v: SAVE_VERSION, family: { id: packed.f[0], created: packed.f[1] }, profiles: profiles, island: { activeId: packed.a } });
   migrated = !v4;

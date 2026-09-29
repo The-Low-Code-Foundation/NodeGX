@@ -245,6 +245,19 @@ test('the save code is byte-identical to the pageâ€™s own encoder, and the pageâ
   assert.equal(C.saveCodeOf(m), encode({ model: m }).code, 'lent robots pack as the page packs them');
   const round = decode({ code: C.saveCodeOf(m) });
   assert.deepEqual(round.model.profiles[0].island.robots, lentRobots.map((r) => ({ ...r })), 'and the page reads them back');
+  // P108 IW-001 F8: the cards a child has seen ride on her profile (row 15, only when there are any): packed as the page
+  // packs them, the page reads them back, and a sibling's stay hers; a hand-edit (repeats, blanks, a number) is normalised.
+  const seenFam = JSON.parse(JSON.stringify(fam));
+  seenFam.profiles[0].cardsSeen = ['fwd', 'olive:read', 'fwd', '  ', 7, ' repeat '];
+  assert.equal(C.saveCodeOf(seenFam), encode({ model: seenFam }).code, 'the cards seen pack as the page packs them');
+  const seenBack = decode({ code: C.saveCodeOf(seenFam) });
+  assert.deepEqual(seenBack.model.profiles.map((p) => p.cardsSeen), [['fwd', 'olive:read', 'repeat'], undefined], 'hers, and none for her sibling');
+  assert.equal(seenBack.migrated, false);
+  // None seen packs exactly as before (no row 15): the same code as a family that never had the field.
+  const noneSeen = JSON.parse(JSON.stringify(fam));
+  noneSeen.profiles[0].cardsSeen = [];
+  assert.equal(C.saveCodeOf(noneSeen), C.saveCodeOf(fam));
+  assert.equal(encode({ model: noneSeen }).code, C.saveCodeOf(fam));
   // A model this shell does not know is kept as stored, never packed by a guess (v3 is migrated by the page on load).
   assert.equal(C.saveCodeOf({ ...fam, v: 5 }), null);
   assert.equal(C.saveCodeOf({ ...fam, v: 3 }), null);

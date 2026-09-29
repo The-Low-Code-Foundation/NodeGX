@@ -269,15 +269,21 @@ var PAD = ${JSON.stringify(PAD_KEYS.map((k) => [k.op, k.place, k.icon, k.word]))
 // the pad is up from the moment a request opens (Drive), and an English op name there was the one word a switch left.
 var W = wordMap(Inputs.words, langOf(Inputs.lang), 'Pip');
 var KNOWN = ${JSON.stringify(Object.keys(BLOCK_META))};
-var allowed = Array.isArray(Inputs.allowed) ? Inputs.allowed : [];
-var slots = ['bg-key-mid', 'bg-key-r3a', 'bg-key-r3b', 'bg-key-r3c'], used = 0;
+// P108 IW-001 F7: the pad is the DRAWER's actions — the palette the kit shows (band x request x robot, Olive's rungs
+// included), so "read" is a key where the drawer has it; with no palette, the request's allowed list as before.
+var pal = Array.isArray(Inputs.palette) ? Inputs.palette : [];
+var drawer = [];
+for (var p = 0; p < pal.length; p++) if (pal[p] && pal[p].id) drawer.push(String(pal[p].id));
+var allowed = drawer.length ? drawer : Array.isArray(Inputs.allowed) ? Inputs.allowed : [];
+var slots = ['bg-key-mid', 'bg-key-r3a', 'bg-key-r3b', 'bg-key-r3c', 'bg-key-r4a', 'bg-key-r4b', 'bg-key-r4c'], used = 0;
 var keys = [];
 for (var i = 0; i < PAD.length; i++) {
   var op = PAD[i][0];
   var ok = allowed.length ? allowed.indexOf(op) !== -1 : KNOWN.indexOf(op) !== -1;
   if (!ok) continue;
   var place = PAD[i][1] || slots[Math.min(used++, slots.length - 1)];
-  keys.push({ op: op, cls: 'bg-key bg-key-' + op + (place === 'bg-key-' + op ? '' : ' ' + place) + ' bg-i-' + PAD[i][2] + ' bg-press', label: W[PAD[i][3]] || op });
+  var slug = op.replace(/[^a-z0-9]+/gi, '-');
+  keys.push({ op: op, cls: 'bg-key bg-key-' + slug + (place === 'bg-key-' + slug ? '' : ' ' + place) + ' bg-i-' + PAD[i][2] + ' bg-press', label: W[PAD[i][3]] || op });
 }
 Outputs.keys = keys;
 Outputs.count = keys.length;
@@ -290,7 +296,9 @@ Outputs.count = keys.length;
  * as it came in, and Recorded is false (the page writes the program only when a press was recorded).
  */
 export const RECORD_STEP_SCRIPT = `${ENGINE}${FOLD_HELPERS}
-var OPS = { fwd: 1, left: 1, right: 1, water: 1, fill: 1, pick: 1, put: 1 };
+var OPS = { fwd: 1, left: 1, right: 1, water: 1, fill: 1, pick: 1, put: 1, say: 1, 'olive:read': 1 };
+// P108 IW-001 F7: a say key says the thank-you of whoever asked (the request's islander), as the reference programs do.
+var SAY_OF = { mamie: 'thanksMamie', sami: 'thanksSami', biscuit: 'thanksBiscuit' };
 // Record is 'yes' / 'no' from the Workshop's mode (a string: a States node's first-state false never arrives); false works too.
 var record = Inputs.record !== false && String(Inputs.record) !== 'no';
 var op = String(Inputs.op || '');
@@ -299,17 +307,29 @@ if (Array.isArray(raw)) prog = JSON.parse(JSON.stringify(raw));
 else if (typeof raw === 'string' && raw) { try { var parsed = JSON.parse(raw); if (Array.isArray(parsed)) prog = parsed; } catch (e) { prog = []; } }
 var w = worldOf(Inputs.world);
 var ok = !!OPS[op] && w.robots.length > 0;
-var sayKey = '', bumped = false;
+var sayKey = '', bumped = false, asking = false;
 if (ok) {
   var id = maxId(prog) + 1;
+  var blk = { id: id, t: op };
+  if (op === 'say') blk.slots = { text: SAY_OF[String(Inputs.islander || '')] || 'thanksMamie' };
   var host = null, sel = Inputs.selected;
   if (sel !== undefined && sel !== null && sel !== '') { var c = findBlock(prog, Number(sel)); if (c && Array.isArray(c.body) && c.t !== 'if') host = c.body; }
-  if (record) (host || prog).push({ id: id, t: op });
-  var st = step(newRun([{ id: id, t: op }], w.robots[0].id, Inputs.lang), w, null);
-  w = apply(w, st.delta);
+  if (record) (host || prog).push(clone(blk));
+  var st = step(newRun([clone(blk)], w.robots[0].id, Inputs.lang), w, null);
+  // F7: Olive's read parks on its ask, as the block does in a run: the page asks her (Request, Pending) and her answer
+  // is spoken by Pad answer. Anything else moves the world by the engine's own step.
+  if (st.waiting) { asking = true; Outputs.request = st.request; Outputs.pending = st.run; }
+  else w = apply(w, st.delta);
   sayKey = st.delta.sayKey || '';
   bumped = !!st.delta.bump;
 }
+// F7: a say key's line over the robot (a new bubble each press); nothing to say leaves the port alone.
+if (sayKey) {
+  var WR = Array.isArray(Inputs.words) ? Inputs.words : [], lg = String(Inputs.lang) === 'fr' ? 'fr' : 'en', said = sayKey;
+  for (var q = 0; q < WR.length; q++) if (WR[q] && WR[q].key === sayKey) said = String(WR[q][lg] || WR[q].en || sayKey).split('{b}').join(String(Inputs.botName || 'Pip'));
+  Outputs.bubble = { robot: 0, text: said, style: 'plain', n: 'pad:' + id + ':' + Math.random().toString(36).slice(2, 8) };
+}
+Outputs.asking = asking;
 Outputs.program = JSON.stringify(prog);
 Outputs.world = w;
 Outputs.recorded = ok && record;
@@ -408,6 +428,8 @@ Outputs.done = active ? active.island.done.slice() : [];
 Outputs.plots = active ? JSON.parse(JSON.stringify(active.island.plots)) : {};
 // IG-005: each robot resolved for the pages — its look, what it can do, its upgrades applied, where it works.
 Outputs.robots = active ? robotRowsOf(active) : [];
+// P108 IW-001 F8: the block cards she has seen, hers (a sibling's are her own).
+Outputs.cardsSeen = active && active.cardsSeen ? active.cardsSeen.slice() : [];
 var rows = [];
 for (var j = 0; j < model.profiles.length; j++) {
   var p = model.profiles[j];
@@ -505,6 +527,8 @@ if (p) {
   else if (field === 'color') { var c = String(v || ''); if (/^#[0-9A-Fa-f]{6}$/.test(c) && c !== p.robot.color) { p.robot.color = c; changed = true; } }
   else if (field === 'eye') { var e = String(v || ''); if ((e === 'round' || e === 'happy' || e === 'wink') && e !== p.robot.eye) { p.robot.eye = e; changed = true; } }
   else if (field === 'hat') { var h = String(v || ''); if ((h === 'none' || p.hats.indexOf(h) !== -1) && h !== p.robot.hat) { p.robot.hat = h; changed = true; } }
+  // P108 IW-001 F8: the block cards she has seen (Got it), kept on her profile.
+  else if (field === 'cardsSeen') { var cs = cardsOf(v); if (JSON.stringify(cs) !== JSON.stringify(p.cardsSeen || [])) { if (cs.length) p.cardsSeen = cs; else delete p.cardsSeen; changed = true; } }
 }
 Outputs.model = model;
 Outputs.changed = changed;
@@ -1165,6 +1189,24 @@ Outputs.id = Inputs.live === true && g !== null && g !== undefined && g !== '' ?
 // ── P108 IW-001 (lane A): the Workshop fixes ─────
 
 /**
+ * `Logic/Pad answer` (F7): Olive's answer to the pad's read key, spoken over the robot as the block speaks it in a run —
+ * the engine's own step on the parked run the key made (Record step's Pending), with her answer. Go-driven, after Ask
+ * Olive; the bubble is hers (olive style, Step Ms x 3). Nothing is recorded and nothing in the world changes.
+ */
+export const PAD_ANSWER_SCRIPT = `${ENGINE}
+var pend = Inputs.run && typeof Inputs.run === 'object' ? clone(Inputs.run) : null;
+var a = Inputs.answer && typeof Inputs.answer === 'object' ? Inputs.answer : null;
+var text = '';
+if (pend && a && pend.waiting) {
+  var st = step(pend, worldOf(Inputs.world), a);
+  text = st.delta && st.delta.sayText ? String(st.delta.sayText) : '';
+}
+var ms = (Number(Inputs.stepMs) > 0 ? Number(Inputs.stepMs) : 380) * 3;
+if (text) Outputs.bubble = { robot: 0, text: text, style: 'olive', ms: ms, n: 'pad:olive:' + (a && a.seq !== undefined ? a.seq : '') + ':' + Math.random().toString(36).slice(2, 8) };
+Outputs.said = text;
+`;
+
+/**
  * `Logic/Run cap` (the Runner's, F2): is this run at the cap? The engine's `MAX_TICKS` bounded only `runToEnd`
  * (Predict, the gate); a played run on the page had no bound, so `repeat 9 { until … }` ground on with no way out.
  * Go-driven, after each tick that is neither done nor parked: Over is true once the run's tick reaches the cap.
@@ -1224,5 +1266,6 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   // P106 s4 (lane G).
   { component: 'Logic/Glow', script: GLOW_SCRIPT, seam: 'the block the page rings: Step\u2019s while a run is live, none once it stops' },
   // P108 IW-001 (lane A).
-  { component: 'Logic/Run cap', script: RUN_CAP_SCRIPT, seam: 'a played run at the engine\u2019s tick cap stops by itself' }
+  { component: 'Logic/Run cap', script: RUN_CAP_SCRIPT, seam: 'a played run at the engine\u2019s tick cap stops by itself' },
+  { component: 'Logic/Pad answer', script: PAD_ANSWER_SCRIPT, seam: 'Olive\u2019s answer to the pad\u2019s read key, spoken over the robot' }
 ];

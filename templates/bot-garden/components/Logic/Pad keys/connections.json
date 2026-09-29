@@ -17,6 +17,12 @@
     },
     {
       "fromId": "padkeysIn",
+      "fromProperty": "palette",
+      "toId": "padkeysFn",
+      "toProperty": "in-palette"
+    },
+    {
+      "fromId": "padkeysIn",
       "fromProperty": "words",
       "toId": "padkeysFn",
       "toProperty": "in-words"
