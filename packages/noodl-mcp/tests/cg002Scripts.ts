@@ -1048,6 +1048,8 @@ var key = 'hintStart', vars = {};
 if (!blocks) key = 'hintEmpty';
 else if (mayRepeat && rep && rep.cover >= 4 && rep.containerId === null && !hasContainer(program)) { key = 'hintPattern'; vars = { n: rep.count }; }
 else if (oliveFallback) key = rung >= 1 && rung <= ${OLIVE_RUNG_MAX} ? 'oliveResting' + rung : 'oliveResting';
+// P108 IW-001 F2: the Runner stopped a played run at the cap (the run is kept): a loop that never ends.
+else if (Inputs.capped === true && ran) key = 'iw1Loop';
 else if (predictAsked && !predictHit) key = 'hintPredictMiss';
 else if (goalMetNow) { key = referenceCount > 0 && blocks <= referenceCount ? 'hintPerfect' : blocks > ${MANY_BLOCKS} ? 'hintDoneMany' : 'hintDone'; vars = { k: blocks }; }
 else if (rockGone > 0) key = 'hintRockGone';

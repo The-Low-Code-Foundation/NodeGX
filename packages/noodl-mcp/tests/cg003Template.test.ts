@@ -62,6 +62,9 @@ import {
   CHALLENGE_SCRIPT,
   GLOW_SCRIPT
 } from './cg003Scripts';
+// P108 IW-001 (lane A): the Workshop fixes.
+import { RUN_CAP_SCRIPT } from './cg003Scripts';
+import { MAX_TICKS } from './cg002Scripts';
 import { AuthoredGarden, buildGardenTemplateProject, prepareGardenArtefact, START_HERE_FILE, TEMPLATE_ID } from './cg003Template';
 import { ROBOT_NAME_MAX } from './cg002Scripts';
 import { DARKENED_FILLS, GARDEN_CSS, GARDEN_PRESET, GARDEN_TOKENS, tokenValue } from './cg007Look';
@@ -648,13 +651,14 @@ describe('CG-003 — Bot Garden, the artefact', () => {
 
     it('🔴 D1: an answer resumes a LIVE run (playing or paused), never only a playing one; a Step while parked is a no-op; Stop and Play clear the parked state the page reads', () => {
       // The answer's gate tests the mode's live flag, not playing (the whole defect: rnLoop ignored the answer in step mode).
-      expect(rinto('rnLoop', 'eval')).toEqual(['rnPark.onfalse>eval']);
+      // P108 IW-001 F2: not parked goes through the run cap first, then the loop test.
+      expect(rinto('rnLoop', 'eval')).toEqual(['rnCap.onfalse>eval']);
       expect(rfrom('rnIn', 'answered')).toEqual(['rnAns.eval']);
       expect(rinto('rnAns', 'condition')).toEqual(['rnMode.live>condition']);
       expect(rfrom('rnAns', 'ontrue')).toEqual(['rnTimer.start']);
       // Parked is a state of the Runner's own: set by the park, cleared by the answer's tick, by Stop and by Play.
       expect(rnode('rnWait').type).toBe('States');
-      expect([rfrom('rnPark', 'ontrue'), rfrom('rnPark', 'onfalse')]).toEqual([['rnOut.parked', 'rnWait.to-parked'], ['rnLoop.eval', 'rnWait.to-free']]);
+      expect([rfrom('rnPark', 'ontrue'), rfrom('rnPark', 'onfalse')]).toEqual([['rnOut.parked', 'rnWait.to-parked'], ['rnCapTest.go', 'rnWait.to-free']]);
       expect(rfrom('rnIn', 'stop')).toContain('rnWait.to-free');
       expect(rfrom('rnIn', 'play')).toContain('rnWait.to-free');
       expect(rinto('rnOut', 'waiting')).toEqual(['rnWait.parked>waiting']);
@@ -888,7 +892,8 @@ describe('CG-003 — Bot Garden, the artefact', () => {
     const into = (id: string, port?: string) => pc().filter((c) => c.toId === id && (port === undefined || c.toProperty === port)).map((c) => `${c.fromId}.${c.fromProperty}`).sort();
 
     it('🔴 AC4: the bar is Drive · Teach · Play · One step · Start over (Drive’s icon new, Teach’s kept); no Predict button, line, icon or plPredict anywhere in the artefact', () => {
-      expect((pnode('plControls').children ?? []).map((n) => n.id)).toEqual(['plDrive', 'plTeach', 'plPlay', 'plStep', 'plReset']);
+      // P108 IW-001 F1: plus Stop in Play's place, shown only while a run plays (its own clause, below).
+      expect((pnode('plControls').children ?? []).map((n) => n.id)).toEqual(['plDrive', 'plTeach', 'plPlay', 'plStopRun', 'plStep', 'plReset']);
       const cls = (id: string) => String(params(pnode(id)).cssClassName);
       expect([cls('plDrive'), cls('plTeach'), cls('plPlay'), cls('plStep'), cls('plReset')]).toEqual(['bg-btn bg-i-drive', 'bg-btn bg-i-rec', 'bg-btn bg-i-play', 'bg-btn bg-i-step', 'bg-btn bg-i-reset']);
       expect(params(pnode('plDrive')).backgroundColor).toBe('var(--block-motion)');
@@ -1134,6 +1139,72 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(tokenValue('--block-drop')).toBe(tokenValue('--sun'));
       const blocks = nodesOf(built, C.play).find((n) => n.type === 'garden-kit.BlockList')!;
       expect([params(blocks).runColor, params(blocks).dropColor]).toEqual(['var(--block-run)', 'var(--block-drop)']);
+    });
+  });
+
+  describe('P108 IW-001 — the Workshop fixes in the graph (lane A)', () => {
+    const runner = () => nodesOf(built, C.runner);
+    const rc = () => connectionsOf(built, C.runner);
+    const rnode = (id: string) => runner().find((n) => n.id === id)!;
+    const rinto = (id: string, port?: string) => rc().filter((c) => c.toId === id && (port === undefined || c.toProperty === port)).map((c) => `${c.fromId}.${c.fromProperty}>${c.toProperty}`).sort();
+    const rfrom = (id: string, port: string) => rc().filter((c) => c.fromId === id && c.fromProperty === port).map((c) => `${c.toId}.${c.toProperty}`).sort();
+    const play = () => nodesOf(built, C.play);
+    const pnode = (id: string) => play().find((n) => n.id === id)!;
+    const pinto = (id: string, port?: string) => connectionsOf(built, C.play).filter((c) => c.toId === id && (port === undefined || c.toProperty === port)).map((c) => `${c.fromId}.${c.fromProperty}>${c.toProperty}`).sort();
+    const pfrom = (id: string, port: string) => connectionsOf(built, C.play).filter((c) => c.fromId === id && c.fromProperty === port).map((c) => `${c.toId}.${c.toProperty}`).sort();
+
+    it('🔴 F1: Stop sits on the bar in Play’s place — hidden until a run plays, then Play hides — and fires the Runner’s own Stop (which also frees Olive’s parked ask)', () => {
+      expect((pnode('plControls').children ?? []).map((n) => n.id)).toEqual(['plDrive', 'plTeach', 'plPlay', 'plStopRun', 'plStep', 'plReset']);
+      const stop = pnode('plStopRun');
+      expect([stop.type, params(stop).mounted, String(params(stop).cssClassName)]).toEqual(['net.noodl.controls.button', false, 'bg-btn bg-i-stop']);
+      expect(params(stop).backgroundColor).toBe('var(--coral)');
+      expect([pinto('plStopRun', 'mounted'), pinto('plPlay', 'mounted'), pinto('plStopRun', 'label')]).toEqual([['plRunner.running>mounted'], ['plRunner.idle>mounted'], ['plT.iw1Stop>label']]);
+      expect(pfrom('plStopRun', 'onClick')).toEqual(['plRunner.stop']);
+      // The Runner's Stop: the timer, the mode, the parked ask (IW-001 §5 trap), the run emptied, the cap cleared.
+      expect(rfrom('rnIn', 'stop')).toEqual(['rnCapped.to-free', 'rnMode.to-idle', 'rnReset.go', 'rnTimer.stop', 'rnWait.to-free']);
+      expect(GARDEN_CSS).toContain('.bg-i-stop::before');
+      expect([PAGE_WORDS.iw1Stop.en, PAGE_WORDS.iw1Stop.fr]).toEqual(['Stop', 'Arrêter']);
+    });
+
+    it('🔴 F2: the run cap is counted in the Runner against the engine’s MAX_TICKS — after every tick that is not done and not parked; at the cap the run stops and is KEPT, and Choose hint is asked', () => {
+      expect(rnode('rnCapTest').type).toBe('/Logic/Run cap');
+      expect(rinto('rnCapTest')).toEqual(['rnPark.onfalse>go', 'rnStep.tick>tick']);
+      expect(rinto('rnCap')).toEqual(['rnCapTest.over>condition', 'rnCapTest.ran>eval']);
+      expect(rfrom('rnCap', 'onfalse')).toEqual(['rnLoop.eval']);
+      expect(rfrom('rnCap', 'ontrue')).toEqual(['rnCapped.to-capped', 'rnMode.to-idle', 'rnOut.cap', 'rnTimer.stop']);
+      // Kept: nothing on the cap's arm empties the run (Stop's rnReset is not on it).
+      expect(rfrom('rnCap', 'ontrue')).not.toContain('rnReset.go');
+      expect(rinto('rnCapped')).toEqual(['rnCap.ontrue>to-capped', 'rnIn.play>to-free', 'rnIn.stop>to-free', 'rnLive.onfalse>to-free']);
+      expect(rinto('rnOut', 'capped')).toEqual(['rnCapped.capped>capped']);
+      expect([pinto('plChoose', 'capped'), pinto('plChoose', 'go')]).toEqual([['plRunner.capped>capped'], expect.arrayContaining(['plRunner.cap>go'])]);
+      // The script: the engine's own constant, never a copy of the number.
+      expect(RUN_CAP_SCRIPT).toContain(`var MAX = ${MAX_TICKS};`);
+      expect([run(RUN_CAP_SCRIPT, { tick: MAX_TICKS - 1 }).over, run(RUN_CAP_SCRIPT, { tick: MAX_TICKS }).over, run(RUN_CAP_SCRIPT, {}).over]).toEqual([false, true, false]);
+    });
+
+    it('🔴 F2: a capped run says the loop line (EN/FR, the robot named); an un-run program never does', () => {
+      const ran = { tick: MAX_TICKS, bumps: 0, puddles: 0 };
+      const base = { world: run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'free' }).world, program: [{ id: 1, t: 'repeat', n: 9, body: [{ id: 2, t: 'until', slots: { sensor: 'wall_ahead' }, body: [{ id: 3, t: 'left' }] }] }] };
+      expect(run(CHOOSE_HINT_SCRIPT, { ...base, run: ran, capped: true }).key).toBe('iw1Loop');
+      expect(run(CHOOSE_HINT_SCRIPT, { ...base, run: ran, capped: false }).key).not.toBe('iw1Loop');
+      expect(run(CHOOSE_HINT_SCRIPT, { ...base, run: { tick: 0 }, capped: true }).key).not.toBe('iw1Loop');
+      const hints = HINT_KEYS.map((key) => ({ key, ...HINTS[key] }));
+      for (const [lang, want] of [['en', 'Pip is going round and round — is there a loop that never ends?'], ['fr', 'Pip tourne en rond — y a-t-il une boucle qui ne s’arrête jamais ?']] as const) {
+        expect(run(HINT_LINE_SCRIPT, { hints, key: 'iw1Loop', vars: {}, lang, botName: 'Pip' }).text).toBe(want);
+      }
+    });
+
+    it('F2, measured: the AC1 program (three steps to a tile with nothing ahead in any direction, then repeat 9 { until wall_ahead { left } }) ENDS by the until guard well under the cap; one more repeat around it does not', () => {
+      const world = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'free' }).world;
+      const spin = { id: 5, t: 'until', slots: { sensor: 'wall_ahead' }, body: [{ id: 6, t: 'left' }] };
+      const ac1 = [{ id: 1, t: 'fwd' }, { id: 2, t: 'fwd' }, { id: 3, t: 'fwd' }, { id: 4, t: 'repeat', n: 9, body: [spin] }];
+      const end = run(PREDICT_END_SCRIPT, { program: ac1, world, lang: 'en' });
+      // Measured: 742 ticks (each until gives up after UNTIL_GUARD passes), at 420 ms a tick five minutes and a bit —
+      // Stop (F1) is what ends it for a child; the cap (F2) is the backstop for a run with no end at all.
+      expect([end.known, end.ticks < MAX_TICKS, end.x, end.y, end.ticks]).toEqual([true, true, 3, 3, 742]);
+      const nested = [{ id: 1, t: 'fwd' }, { id: 2, t: 'fwd' }, { id: 3, t: 'fwd' }, { id: 4, t: 'repeat', n: 9, body: [{ id: 7, t: 'repeat', n: 9, body: [spin] }] }];
+      const capped = run(PREDICT_END_SCRIPT, { program: nested, world, lang: 'en' });
+      expect([capped.known, capped.ticks]).toEqual([false, MAX_TICKS]);
     });
   });
 });

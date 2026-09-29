@@ -220,7 +220,7 @@ const PANEL: N = { backgroundColor: 'var(--card)', borderRadius: 'var(--radius-c
  * The mockup's four buttons (AC2): a pill with a FILL and no border. `kind` picks the fill; `icon` a mask class.
  * Every one is a Button node with the fill as a parameter, so no default outline can survive.
  */
-type BtnKind = 'primary' | 'teach' | 'ask' | 'plain' | 'quiet' | 'fold' | 'drive';
+type BtnKind = 'primary' | 'teach' | 'ask' | 'plain' | 'quiet' | 'fold' | 'drive' | 'stop';
 const FILL: Record<BtnKind, [string, string]> = {
   primary: ['var(--leaf)', 'var(--on-fill)'],
   teach: ['var(--coral)', 'var(--on-fill)'],
@@ -229,7 +229,9 @@ const FILL: Record<BtnKind, [string, string]> = {
   quiet: ['transparent', 'var(--ink-2)'],
   fold: ['var(--block-control)', 'var(--on-fill)'],
   // P106 IG-003: Drive, the mockup's .btn.drive (the motion blue, white words).
-  drive: ['var(--block-motion)', 'var(--on-fill)']
+  drive: ['var(--block-motion)', 'var(--on-fill)'],
+  // P108 IW-001 F1: Stop, in Play's place while a run plays (the coral of Teach: a red that says halt, white words).
+  stop: ['var(--coral)', 'var(--on-fill)']
 };
 export function btn(kind: BtnKind, icon = '', extra: N = {}): N {
   const [bg, fg] = FILL[kind];
@@ -314,7 +316,9 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
   'Logic/Island choose': 'go',
   'Logic/Find robots': 'go',
   // P106 IG-005 (lane B).
-  'Logic/Update robot': 'go'
+  'Logic/Update robot': 'go',
+  // P108 IW-001 (lane A).
+  'Logic/Run cap': 'go'
 };
 
 /**
@@ -359,7 +363,9 @@ const TYPE: Readonly<Record<string, string>> = {
   homeText: 'string', openText: 'string', what: 'string',
   // P106 IG-005 (lane B) — the robot for the job, what a win lends and gives, My robots.
   robot: 'object', robotKey: 'string', needs: 'string', refused: 'boolean', lent: 'array', upgraded: 'array', owned: 'boolean',
-  paletteRobot: 'object', robotId: 'string', accessory: 'string', has: 'boolean', giftText: 'string', hasGift: 'boolean'
+  paletteRobot: 'object', robotId: 'string', accessory: 'string', has: 'boolean', giftText: 'string', hasGift: 'boolean',
+  // P108 IW-001 (lane A) — the run cap.
+  over: 'boolean', capped: 'boolean'
 };
 const typeOf = (name: string) => TYPE[name] ?? '*';
 
@@ -619,7 +625,7 @@ const PAD: CgComponent = {
  */
 const RUNNER: CgComponent = {
   path: 'Workshop/Runner',
-  description: 'Runs a program on the world, one engine step per tick: Play runs it to the end, Step one tick (starting a fresh run when none is live), Stop halts and resets the run. A run parked on Olive fires Parked with the Request and waits (Waiting is on; a Step meanwhile does nothing); Answered (the Answer set first) resumes it, playing or paused. Finished fires once the run is done; Reset once Stop has emptied the run.',
+  description: 'Runs a program on the world, one engine step per tick: Play runs it to the end, Step one tick (starting a fresh run when none is live), Stop halts and resets the run. A run parked on Olive fires Parked with the Request and waits (Waiting is on; a Step meanwhile does nothing); Answered (the Answer set first) resumes it, playing or paused. Finished fires once the run is done; Reset once Stop has emptied the run. P108 IW-001 F2: a played run that reaches the engine\u2019s MAX_TICKS stops by itself (Capped is on, Cap fires); the run is kept, so the hint can say why.',
   nodes: [
     inputs('rnIn', [['program', '*'], ['start', 'object'], ['answer', 'object'], ['lang', 'string'], ['stepMs', 'number'], ['play', 'signal'], ['step', 'signal'], ['stop', 'signal'], ['answered', 'signal']]),
     logic('rnNew', L('New run'), 'A fresh run', { robotId: 'me' }),
@@ -649,12 +655,19 @@ const RUNNER: CgComponent = {
     logic('rnReset', L('New run'), 'The run, emptied', { program: '[]', robotId: 'me' }),
     setVariable('rnSetRunReset', 'gardenRun', 'Hold the emptied run'),
     logic('rnTimer', TIMER_NODE, 'The wait between ticks', { duration: TICK_MS }),
+    // P108 IW-001 F2: the run cap, counted here in the Runner (the engine's MAX_TICKS applied to a played run too): after
+    // each tick that is not done and not parked, Run cap reads the run's tick; at the cap the run stops, and is KEPT.
+    logic('rnCapTest', L('Run cap'), 'Round and round too long?'),
+    gate('rnCap', 'At the cap?'),
+    withStates('rnCapped', 'Stopped by the cap, or not', ['free', 'capped'], {
+      capped: { type: 'boolean', by: { free: false, capped: true } }
+    }),
     withStates('rnMode', 'Idle, playing or paused', ['idle', 'playing', 'paused'], {
       playing: { type: 'boolean', by: { idle: false, playing: true, paused: false } },
       live: { type: 'boolean', by: { idle: false, playing: true, paused: true } },
       idle: { type: 'boolean', by: { idle: true, playing: false, paused: true } }
     }),
-    outputs('rnOut', [['world', 'object'], ['run', 'object'], ['glowId', '*'], ['running', 'boolean'], ['idle', 'boolean'], ['live', 'boolean'], ['done', 'boolean'], ['bumps', 'number'], ['puddles', 'number'], ['sayKey', 'string'], ['sayText', 'string'], ['sayStyle', 'string'], ['tick', 'number'], ['waiting', 'boolean'], ['request', 'object'], ['proposal', 'object'], ['ticked', 'signal'], ['finished', 'signal'], ['started', 'signal'], ['parked', 'signal'], ['reset', 'signal']])
+    outputs('rnOut', [['world', 'object'], ['run', 'object'], ['glowId', '*'], ['running', 'boolean'], ['idle', 'boolean'], ['live', 'boolean'], ['done', 'boolean'], ['bumps', 'number'], ['puddles', 'number'], ['sayKey', 'string'], ['sayText', 'string'], ['sayStyle', 'string'], ['tick', 'number'], ['waiting', 'boolean'], ['request', 'object'], ['proposal', 'object'], ['ticked', 'signal'], ['finished', 'signal'], ['started', 'signal'], ['parked', 'signal'], ['reset', 'signal'], ['capped', 'boolean'], ['cap', 'signal']])
   ],
   connections: [
     wire('rnIn', 'program', 'rnNew', 'program'),
@@ -696,7 +709,20 @@ const RUNNER: CgComponent = {
     wire('rnPark', 'ontrue', 'rnOut', 'parked'),
     wire('rnPark', 'ontrue', 'rnWait', 'to-parked'),
     wire('rnPark', 'onfalse', 'rnWait', 'to-free'),
-    wire('rnPark', 'onfalse', 'rnLoop', 'eval'),
+    // P108 IW-001 F2: not parked → the cap first, then the next tick when playing.
+    wire('rnPark', 'onfalse', 'rnCapTest', 'go'),
+    wire('rnStep', 'tick', 'rnCapTest', 'tick'),
+    wire('rnCapTest', 'over', 'rnCap', 'condition'),
+    wire('rnCapTest', 'ran', 'rnCap', 'eval'),
+    wire('rnCap', 'onfalse', 'rnLoop', 'eval'),
+    wire('rnCap', 'ontrue', 'rnTimer', 'stop'),
+    wire('rnCap', 'ontrue', 'rnMode', 'to-idle'),
+    wire('rnCap', 'ontrue', 'rnCapped', 'to-capped'),
+    wire('rnCap', 'ontrue', 'rnOut', 'cap'),
+    wire('rnIn', 'play', 'rnCapped', 'to-free'),
+    wire('rnIn', 'stop', 'rnCapped', 'to-free'),
+    wire('rnLive', 'onfalse', 'rnCapped', 'to-free'),
+    wire('rnCapped', 'capped', 'rnOut', 'capped'),
     // The answer: one tick for any live run. Playing, the loop goes on from there; paused, that tick consumes the answer
     // (the engine only advances past the ask) and the loop test says no more.
     wire('rnMode', 'live', 'rnAns', 'condition'),
@@ -867,10 +893,13 @@ const PLAY: CgComponent = {
     text('plModeLine', 'What this mode does', 'plLeft', '', { ...T_STRONG, cssClassName: 'bg-mode-line', mounted: false }),
     // IG-001 D8: no "Ask Olive" — it only re-chose the hint; the hint now follows every edit by itself (plHintLater).
     // P106 IG-003 (R4, R5): Drive · Teach · Play · One step · Start over. Predict left the bar (the islander's challenge now).
-    group('plControls', 'The controls', 'plLeft', { ...row({ width: pct(100), sizeMode: 'contentHeight' }), cssClassName: 'bg-controls' }, ['plDrive', 'plTeach', 'plPlay', 'plStep', 'plReset']),
+    group('plControls', 'The controls', 'plLeft', { ...row({ width: pct(100), sizeMode: 'contentHeight' }), cssClassName: 'bg-controls' }, ['plDrive', 'plTeach', 'plPlay', 'plStopRun', 'plStep', 'plReset']),
     place('plDrive', BUTTON_NODE, 'Drive', 'plControls', { ...btn('drive', 'drive'), label: 'Drive' }),
     place('plTeach', BUTTON_NODE, 'Teach', 'plControls', { ...btn('teach', 'rec'), label: 'Teach' }),
     place('plPlay', BUTTON_NODE, 'Play', 'plControls', { ...btn('primary', 'play'), label: 'Play' }),
+    // P108 IW-001 F1: Stop shows instead of Play while a run plays; it fires the Runner's own Stop (timer, mode, Olive's
+    // parked ask, the run emptied), so the bar is idle again and Start over works.
+    place('plStopRun', BUTTON_NODE, 'Stop', 'plControls', { ...btn('stop', 'stop'), label: 'Stop', mounted: false }),
     place('plStep', BUTTON_NODE, 'One step', 'plControls', { ...btn('plain', 'step'), label: 'One step' }),
     place('plReset', BUTTON_NODE, 'Start over', 'plControls', { ...btn('plain', 'reset'), label: 'Start over' }),
     group('plOwl', 'The owl', 'plLeft', { width: pct(100), sizeMode: 'contentHeight', backgroundColor: 'var(--violet-2)', borderRadius: px(16), ...pad(12), cssClassName: 'bg-owl' }, ['plOwlPic', 'plOwlCol']),
@@ -1182,6 +1211,14 @@ const PLAY: CgComponent = {
     wire('plRunner', 'idle', 'plTeach', 'enabled'),
     wire('plRunner', 'idle', 'plStep', 'enabled'),
     wire('plRunner', 'idle', 'plReset', 'enabled'),
+    // P108 IW-001 F1: Play hides and Stop shows while a run plays (Idle is also true while paused: Play restarts then).
+    wire('plRunner', 'idle', 'plPlay', 'mounted'),
+    wire('plRunner', 'running', 'plStopRun', 'mounted'),
+    wire('plT', 'iw1Stop', 'plStopRun', 'label'),
+    wire('plStopRun', 'onClick', 'plRunner', 'stop'),
+    // F2: a run the cap stopped says so (the run is kept; Choose hint reads Capped).
+    wire('plRunner', 'capped', 'plChoose', 'capped'),
+    wire('plRunner', 'cap', 'plChoose', 'go'),
     wire('plRunner', 'running', 'plOut', 'running'),
     // The world as the kit draws it.
     wire('plWorldVar', 'value', 'plDraw', 'world'),

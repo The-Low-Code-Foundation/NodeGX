@@ -11,6 +11,12 @@
     },
     {
       "fromId": "choosehintIn",
+      "fromProperty": "capped",
+      "toId": "choosehintFn",
+      "toProperty": "in-capped"
+    },
+    {
+      "fromId": "choosehintIn",
       "fromProperty": "done",
       "toId": "choosehintFn",
       "toProperty": "in-done"

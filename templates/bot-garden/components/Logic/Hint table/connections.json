@@ -113,6 +113,12 @@
     },
     {
       "fromId": "hinttableFn",
+      "fromProperty": "out-iw1Loop",
+      "toId": "hinttableOut",
+      "toProperty": "iw1Loop"
+    },
+    {
+      "fromId": "hinttableFn",
       "fromProperty": "out-lang",
       "toId": "hinttableOut",
       "toProperty": "lang"

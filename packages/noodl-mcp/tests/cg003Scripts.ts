@@ -34,6 +34,8 @@
 import { OLIVE_RUNGS, WORDS, WORD_KEYS } from './cg002Content';
 import { OLIVE_HELPERS, OLIVE_LESSON_IDS, OLIVE_OBJECTS, OLIVE_SLIM, OLIVE_TABLE, OLIVE_WORDS, OLIVE_WORD_KEYS, PALETTE_RUNG_IDS, rungWordKey } from './cg005Olive';
 import { BLOCK_META, CAN_MAX, ENGINE, FOLD_HELPERS, MANY_BLOCKS, ROBOT_NAME_MAX, SAVE_HELPERS } from './cg002Scripts';
+// P108 IW-001 F2: the run cap the page's Runner applies to a played run (the engine's own constant, imported).
+import { MAX_TICKS } from './cg002Scripts';
 import { BLOCK_CARDS, CardBlock, EYES, HATS, IG006_WORDS, IG006_WORD_KEYS, ISLANDERS, ISLAND_PINS, PAD_KEYS, PAGE_WORDS, PAGE_WORD_KEYS, REQUEST_SUBS, SKILL_BLOCKS } from './cg003Content';
 import { ROBOT_PAINTS } from './cg007Look';
 import { FREE_PLAY_PLOT, ISLAND_BASE, ISLAND_HOME, PLOT_H, PLOT_W } from './cg002Content';
@@ -1174,6 +1176,19 @@ var g = Inputs.glowId;
 Outputs.id = Inputs.live === true && g !== null && g !== undefined && g !== '' ? String(g) : '';
 `;
 
+// ── P108 IW-001 (lane A): the Workshop fixes ─────
+
+/**
+ * `Logic/Run cap` (the Runner's, F2): is this run at the cap? The engine's `MAX_TICKS` bounded only `runToEnd`
+ * (Predict, the gate); a played run on the page had no bound, so `repeat 9 { until … }` ground on with no way out.
+ * Go-driven, after each tick that is neither done nor parked: Over is true once the run's tick reaches the cap.
+ */
+export const RUN_CAP_SCRIPT = `
+var MAX = ${MAX_TICKS};
+var tick = Math.floor(Number(Inputs.tick)) || 0;
+Outputs.over = tick >= MAX;
+`;
+
 /** The glue, as the generator places it: one `Logic/*` each. */
 export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; seam: string }> = [
   { component: 'Logic/Read program', script: READ_PROGRAM_SCRIPT, seam: 'the program as a list, whatever held it' },
@@ -1222,5 +1237,7 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Gift line', script: GIFT_LINE_SCRIPT, seam: 'the win card\u2019s line for the robot lent and the upgrade given' },
   { component: 'Logic/Robot cards', script: ROBOT_CARDS_SCRIPT, seam: 'My robots: a card per robot, owned or still to be lent' },
   // P106 s4 (lane G).
-  { component: 'Logic/Glow', script: GLOW_SCRIPT, seam: 'the block the page rings: Step\u2019s while a run is live, none once it stops' }
+  { component: 'Logic/Glow', script: GLOW_SCRIPT, seam: 'the block the page rings: Step\u2019s while a run is live, none once it stops' },
+  // P108 IW-001 (lane A).
+  { component: 'Logic/Run cap', script: RUN_CAP_SCRIPT, seam: 'a played run at the engine\u2019s tick cap stops by itself' }
 ];

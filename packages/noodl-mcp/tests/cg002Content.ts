@@ -494,7 +494,9 @@ export const HINTS: Readonly<Record<string, Bi>> = {
   oliveRung3: s('Olive said whether the thing ahead is one. When she is wrong, ask 3 times and count the yeses.', 'Olive a dit si ce qui est devant en est un. Quand elle se trompe, demande 3 fois et compte les oui.'),
   oliveResting1: s('Olive is resting, so {b} used her written thank-you.', 'Olive se repose, alors {b} a pris son merci écrit.'),
   oliveResting2: s('Olive is resting, so {b} used her written answer to “read the note”.', 'Olive se repose, alors {b} a pris sa réponse écrite à « lire le mot ».'),
-  oliveResting3: s('Olive is resting, so {b} used her written answer to “is it a…?”.', 'Olive se repose, alors {b} a pris sa réponse écrite à « est-ce un… ? ».')
+  oliveResting3: s('Olive is resting, so {b} used her written answer to “is it a…?”.', 'Olive se repose, alors {b} a pris sa réponse écrite à « est-ce un… ? ».'),
+  // P108 IW-001 (lane A) F2: a played run stopped by the cap (MAX_TICKS). Not voiced.
+  iw1Loop: s('{b} is going round and round — is there a loop that never ends?', '{b} tourne en rond — y a-t-il une boucle qui ne s’arrête jamais ?')
 };
 
 export const HINT_KEYS: ReadonlyArray<string> = Object.keys(HINTS);

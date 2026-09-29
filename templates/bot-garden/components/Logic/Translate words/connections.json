@@ -1097,6 +1097,12 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-iw1Stop",
+      "toId": "translatewordsOut",
+      "toProperty": "iw1Stop"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-lang",
       "toId": "translatewordsOut",
       "toProperty": "lang"

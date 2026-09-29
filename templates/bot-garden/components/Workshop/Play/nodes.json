@@ -95,7 +95,7 @@
         }
       ],
       "x": 710,
-      "y": 5200
+      "y": 5320
     },
     {
       "id": "plRoot",
@@ -464,21 +464,21 @@
         "keys": "renderer"
       },
       "x": 710,
-      "y": 8080
+      "y": 8200
     },
     {
       "id": "plRendRead",
       "type": "/Logic/Renderer",
       "label": "Draw in 3D here?",
       "x": 710,
-      "y": 8200
+      "y": 8320
     },
     {
       "id": "plRendIs3d",
       "type": "Condition",
       "label": "In 3D?",
       "x": 710,
-      "y": 8320
+      "y": 8440
     },
     {
       "id": "plRendOk",
@@ -495,7 +495,7 @@
         "event": "unsupported"
       },
       "x": 710,
-      "y": 8440
+      "y": 8560
     },
     {
       "id": "plRendSlow",
@@ -517,7 +517,7 @@
         "merge": false
       },
       "x": 710,
-      "y": 8560
+      "y": 8680
     },
     {
       "id": "plRec",
@@ -604,6 +604,7 @@
         "plDrive",
         "plTeach",
         "plPlay",
+        "plStopRun",
         "plStep",
         "plReset"
       ],
@@ -750,6 +751,49 @@
       "y": 2920
     },
     {
+      "id": "plStopRun",
+      "type": "net.noodl.controls.button",
+      "label": "Stop",
+      "parent": "plControls",
+      "parameters": {
+        "backgroundColor": "var(--coral)",
+        "color": "var(--on-fill)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-i-stop",
+        "label": "Stop",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 3040
+    },
+    {
       "id": "plStep",
       "type": "net.noodl.controls.button",
       "label": "One step",
@@ -789,7 +833,7 @@
         "label": "One step"
       },
       "x": 280,
-      "y": 3040
+      "y": 3160
     },
     {
       "id": "plReset",
@@ -831,7 +875,7 @@
         "label": "Start over"
       },
       "x": 280,
-      "y": 3160
+      "y": 3280
     },
     {
       "id": "plOwl",
@@ -860,7 +904,7 @@
         "cssClassName": "bg-owl"
       },
       "x": 220,
-      "y": 3280
+      "y": 3400
     },
     {
       "id": "plOwlPic",
@@ -880,7 +924,7 @@
         "cssClassName": "bg-owl-pic bg-sp-owl"
       },
       "x": 280,
-      "y": 3400
+      "y": 3520
     },
     {
       "id": "plOwlCol",
@@ -904,7 +948,7 @@
         "rowGap": "var(--space-1)"
       },
       "x": 280,
-      "y": 3520
+      "y": 3640
     },
     {
       "id": "plOwlSay",
@@ -923,7 +967,7 @@
         "cssClassName": "bg-owl-say"
       },
       "x": 340,
-      "y": 3640
+      "y": 3760
     },
     {
       "id": "plOwlThinking",
@@ -943,7 +987,7 @@
         "mounted": false
       },
       "x": 340,
-      "y": 3760
+      "y": 3880
     },
     {
       "id": "plOwlResting",
@@ -963,7 +1007,7 @@
         "mounted": false
       },
       "x": 340,
-      "y": 3880
+      "y": 4000
     },
     {
       "id": "plProposal",
@@ -996,7 +1040,7 @@
         "mounted": false
       },
       "x": 340,
-      "y": 4000
+      "y": 4120
     },
     {
       "id": "plPropH",
@@ -1014,7 +1058,7 @@
         "color": "var(--ink)"
       },
       "x": 400,
-      "y": 4120
+      "y": 4240
     },
     {
       "id": "plPropBlocks",
@@ -1032,7 +1076,7 @@
         "cssClassName": "bg-prop-blocks"
       },
       "x": 400,
-      "y": 4240
+      "y": 4360
     },
     {
       "id": "plPropBtns",
@@ -1056,7 +1100,7 @@
         }
       },
       "x": 400,
-      "y": 4360
+      "y": 4480
     },
     {
       "id": "plUse",
@@ -1086,7 +1130,7 @@
         "label": "Use them"
       },
       "x": 460,
-      "y": 4480
+      "y": 4600
     },
     {
       "id": "plNoThanks",
@@ -1116,7 +1160,7 @@
         "label": "No thanks"
       },
       "x": 460,
-      "y": 4600
+      "y": 4720
     },
     {
       "id": "plOwlMeta",
@@ -1134,7 +1178,7 @@
         "cssClassName": "bg-owl-meta"
       },
       "x": 340,
-      "y": 4720
+      "y": 4840
     },
     {
       "id": "plRight",
@@ -1167,7 +1211,7 @@
         "paddingRight": "var(--space-3-5)"
       },
       "x": 160,
-      "y": 4840
+      "y": 4960
     },
     {
       "id": "plStepsHead",
@@ -1191,7 +1235,7 @@
         "justifyContent": "space-between"
       },
       "x": 220,
-      "y": 4960
+      "y": 5080
     },
     {
       "id": "plStepsH",
@@ -1212,7 +1256,7 @@
         "lineHeight": 1.2
       },
       "x": 280,
-      "y": 5080
+      "y": 5200
     },
     {
       "id": "plCount",
@@ -1231,7 +1275,7 @@
         "mounted": false
       },
       "x": 280,
-      "y": 5200
+      "y": 5320
     },
     {
       "id": "plBlocksBox",
@@ -1250,7 +1294,7 @@
         "cssClassName": "bg-blocks-box"
       },
       "x": 220,
-      "y": 6280
+      "y": 6400
     },
     {
       "id": "plStepsNote",
@@ -1269,7 +1313,7 @@
         "mounted": false
       },
       "x": 220,
-      "y": 6160
+      "y": 6280
     },
     {
       "id": "plBlocks",
@@ -1286,7 +1330,7 @@
         "showHelp": true
       },
       "x": 280,
-      "y": 6400
+      "y": 6520
     },
     {
       "id": "plCardBox",
@@ -1321,7 +1365,7 @@
         "mounted": false
       },
       "x": 220,
-      "y": 5320
+      "y": 5440
     },
     {
       "id": "plCardTitle",
@@ -1343,7 +1387,7 @@
         "cssClassName": "bg-card-title"
       },
       "x": 280,
-      "y": 5440
+      "y": 5560
     },
     {
       "id": "plCardLine",
@@ -1361,7 +1405,7 @@
         "cssClassName": "bg-card-line"
       },
       "x": 280,
-      "y": 5560
+      "y": 5680
     },
     {
       "id": "plCardEgWord",
@@ -1378,7 +1422,7 @@
         "color": "var(--ink-2)"
       },
       "x": 280,
-      "y": 5680
+      "y": 5800
     },
     {
       "id": "plCardEgBox",
@@ -1397,7 +1441,7 @@
         "cssClassName": "bg-card-eg"
       },
       "x": 280,
-      "y": 5800
+      "y": 5920
     },
     {
       "id": "plCardEg",
@@ -1415,7 +1459,7 @@
         "locked": true
       },
       "x": 340,
-      "y": 5920
+      "y": 6040
     },
     {
       "id": "plCardOk",
@@ -1445,7 +1489,7 @@
         "label": "Got it"
       },
       "x": 280,
-      "y": 6040
+      "y": 6160
     },
     {
       "id": "plHelps",
@@ -1471,7 +1515,7 @@
         "mounted": false
       },
       "x": 220,
-      "y": 6640
+      "y": 6760
     },
     {
       "id": "plHelpsH",
@@ -1492,7 +1536,7 @@
         }
       },
       "x": 280,
-      "y": 6760
+      "y": 6880
     },
     {
       "id": "plHelpEach",
@@ -1504,7 +1548,7 @@
         "templateType": "explicit"
       },
       "x": 280,
-      "y": 6880
+      "y": 7000
     },
     {
       "id": "plSlotMsg",
@@ -1524,7 +1568,7 @@
         "mounted": false
       },
       "x": 220,
-      "y": 6520
+      "y": 6640
     },
     {
       "id": "plTidy",
@@ -1566,7 +1610,7 @@
         "mounted": false
       },
       "x": 220,
-      "y": 7000
+      "y": 7120
     },
     {
       "id": "plTidyText",
@@ -1584,7 +1628,7 @@
         "fontWeight": "700"
       },
       "x": 280,
-      "y": 7120
+      "y": 7240
     },
     {
       "id": "plFoldBtn",
@@ -1614,7 +1658,7 @@
         "label": "Fold it"
       },
       "x": 280,
-      "y": 7240
+      "y": 7360
     },
     {
       "id": "plNotNow",
@@ -1644,7 +1688,7 @@
         "label": "Not now"
       },
       "x": 280,
-      "y": 7360
+      "y": 7480
     },
     {
       "id": "plWin",
@@ -1652,7 +1696,7 @@
       "label": "The win card",
       "parent": "plRoot",
       "x": 100,
-      "y": 7480
+      "y": 7600
     },
     {
       "id": "plT",
@@ -1673,7 +1717,7 @@
       "type": "/Logic/Hint line",
       "label": "The owl’s line",
       "x": 710,
-      "y": 8680
+      "y": 8800
     },
     {
       "id": "plOwlRow",
@@ -1687,21 +1731,21 @@
       "type": "/Logic/Ask Olive",
       "label": "Ask Olive for a parked run",
       "x": 710,
-      "y": 8800
+      "y": 8920
     },
     {
       "id": "plVoiceHint",
       "type": "/Logic/Voice hint",
       "label": "A new line to voice",
       "x": 710,
-      "y": 8920
+      "y": 9040
     },
     {
       "id": "plAskVoice",
       "type": "/Logic/Ask Olive",
       "label": "Ask Olive to voice the hint",
       "x": 710,
-      "y": 9040
+      "y": 9160
     },
     {
       "id": "plStatus",
@@ -1711,21 +1755,21 @@
         "nonce": 1
       },
       "x": 710,
-      "y": 9160
+      "y": 9280
     },
     {
       "id": "plSlots",
       "type": "/Logic/Olive slots",
       "label": "May this ask be sent?",
       "x": 710,
-      "y": 7000
+      "y": 7120
     },
     {
       "id": "plPropCard",
       "type": "/Logic/Proposal card",
       "label": "The blocks Olive proposed, until answered",
       "x": 710,
-      "y": 4000
+      "y": 4120
     },
     {
       "id": "plAccept",
@@ -1735,7 +1779,7 @@
         "accept": true
       },
       "x": 710,
-      "y": 4480
+      "y": 4600
     },
     {
       "id": "plPropDoneVar",
@@ -1745,7 +1789,7 @@
         "name": "gardenProposalDone"
       },
       "x": 710,
-      "y": 9280
+      "y": 9400
     },
     {
       "id": "plSetPropDone",
@@ -1755,7 +1799,7 @@
         "name": "gardenProposalDone"
       },
       "x": 710,
-      "y": 4600
+      "y": 4720
     },
     {
       "id": "plSetProgAccept",
@@ -1765,7 +1809,7 @@
         "name": "gardenProgram"
       },
       "x": 710,
-      "y": 9400
+      "y": 9520
     },
     {
       "id": "plStart",
@@ -1792,7 +1836,7 @@
         "name": "gardenWorld"
       },
       "x": 710,
-      "y": 9520
+      "y": 9640
     },
     {
       "id": "plSetWorld",
@@ -1802,7 +1846,7 @@
         "name": "gardenWorld"
       },
       "x": 710,
-      "y": 9640
+      "y": 9760
     },
     {
       "id": "plSetWorldRec",
@@ -1812,7 +1856,7 @@
         "name": "gardenWorld"
       },
       "x": 710,
-      "y": 9760
+      "y": 9880
     },
     {
       "id": "plProgVar",
@@ -1822,14 +1866,14 @@
         "name": "gardenProgram"
       },
       "x": 710,
-      "y": 6400
+      "y": 6520
     },
     {
       "id": "plRead",
       "type": "/Logic/Read program",
       "label": "The program as a list",
       "x": 710,
-      "y": 9880
+      "y": 10000
     },
     {
       "id": "plSetProgKit",
@@ -1839,7 +1883,7 @@
         "name": "gardenProgram"
       },
       "x": 710,
-      "y": 10000
+      "y": 10120
     },
     {
       "id": "plSetProgRec",
@@ -1849,7 +1893,7 @@
         "name": "gardenProgram"
       },
       "x": 710,
-      "y": 10120
+      "y": 10240
     },
     {
       "id": "plSetProgFold",
@@ -1859,7 +1903,7 @@
         "name": "gardenProgram"
       },
       "x": 710,
-      "y": 10240
+      "y": 10360
     },
     {
       "id": "plSetProgClear",
@@ -1871,7 +1915,7 @@
         "value": "[]"
       },
       "x": 710,
-      "y": 10360
+      "y": 10480
     },
     {
       "id": "plTeachBumpsVar",
@@ -1881,7 +1925,7 @@
         "name": "gardenTeachBumps"
       },
       "x": 710,
-      "y": 10480
+      "y": 10600
     },
     {
       "id": "plSetTeachBumps",
@@ -1891,7 +1935,7 @@
         "name": "gardenTeachBumps"
       },
       "x": 710,
-      "y": 10600
+      "y": 10720
     },
     {
       "id": "plClearTeachBumps",
@@ -1903,7 +1947,7 @@
         "value": 0
       },
       "x": 710,
-      "y": 10720
+      "y": 10840
     },
     {
       "id": "plRecord",
@@ -1917,7 +1961,7 @@
       "type": "/Workshop/Runner",
       "label": "The runner",
       "x": 710,
-      "y": 6520
+      "y": 6640
     },
     {
       "id": "plDraw",
@@ -1931,21 +1975,21 @@
       "type": "/Logic/Palette",
       "label": "The blocks this band may use",
       "x": 710,
-      "y": 10840
+      "y": 10960
     },
     {
       "id": "plKitPal",
       "type": "/Logic/Kit palette",
       "label": "In the kit’s shape",
       "x": 710,
-      "y": 6640
+      "y": 6760
     },
     {
       "id": "plCardGate",
       "type": "/Logic/Card gate",
       "label": "A first tap opens the card",
       "x": 710,
-      "y": 6760
+      "y": 6880
     },
     {
       "id": "plCardHold",
@@ -1955,7 +1999,7 @@
         "runOnChange-condition": false
       },
       "x": 710,
-      "y": 10960
+      "y": 11080
     },
     {
       "id": "plCardOpenVar",
@@ -1965,7 +2009,7 @@
         "name": "gardenCardOpen"
       },
       "x": 710,
-      "y": 11080
+      "y": 11200
     },
     {
       "id": "plSetCardOpen",
@@ -1975,7 +2019,7 @@
         "name": "gardenCardOpen"
       },
       "x": 710,
-      "y": 11200
+      "y": 11320
     },
     {
       "id": "plSetCardHelp",
@@ -1985,7 +2029,7 @@
         "name": "gardenCardOpen"
       },
       "x": 710,
-      "y": 7120
+      "y": 7240
     },
     {
       "id": "plClearCardOpen",
@@ -1997,7 +2041,7 @@
         "value": ""
       },
       "x": 710,
-      "y": 11320
+      "y": 11440
     },
     {
       "id": "plSeenVar",
@@ -2007,14 +2051,14 @@
         "name": "gardenCardsSeen"
       },
       "x": 710,
-      "y": 11440
+      "y": 11560
     },
     {
       "id": "plSeenAdd",
       "type": "/Logic/Card seen",
       "label": "Got it",
       "x": 710,
-      "y": 6040
+      "y": 6160
     },
     {
       "id": "plSetSeen",
@@ -2024,21 +2068,21 @@
         "name": "gardenCardsSeen"
       },
       "x": 710,
-      "y": 11560
+      "y": 11680
     },
     {
       "id": "plCardInfo",
       "type": "/Logic/Block card",
       "label": "The card’s words and example",
       "x": 710,
-      "y": 5440
+      "y": 5560
     },
     {
       "id": "plHelpRows",
       "type": "/Logic/Help chips",
       "label": "The ? for each kind of block",
       "x": 710,
-      "y": 7240
+      "y": 7360
     },
     {
       "id": "plMode",
@@ -2099,7 +2143,7 @@
       "type": "/Logic/Teach start",
       "label": "Where the robot stands when Teach begins",
       "x": 710,
-      "y": 11680
+      "y": 11800
     },
     {
       "id": "plSetWorldTeach",
@@ -2109,7 +2153,7 @@
         "name": "gardenWorld"
       },
       "x": 710,
-      "y": 11800
+      "y": 11920
     },
     {
       "id": "plRecGate",
@@ -2119,7 +2163,7 @@
         "runOnChange-condition": false
       },
       "x": 710,
-      "y": 11920
+      "y": 12040
     },
     {
       "id": "plModeWords",
@@ -2143,7 +2187,7 @@
         "name": "gardenChallengeFor"
       },
       "x": 710,
-      "y": 12040
+      "y": 12160
     },
     {
       "id": "plSetAskedFor",
@@ -2165,7 +2209,7 @@
         "value": ""
       },
       "x": 710,
-      "y": 12160
+      "y": 12280
     },
     {
       "id": "plOutcomeVar",
@@ -2175,7 +2219,7 @@
         "name": "gardenChallengeOutcome"
       },
       "x": 710,
-      "y": 12280
+      "y": 12400
     },
     {
       "id": "plSetHit",
@@ -2187,7 +2231,7 @@
         "value": "hit"
       },
       "x": 710,
-      "y": 12400
+      "y": 12520
     },
     {
       "id": "plSetMissed",
@@ -2199,7 +2243,7 @@
         "value": "miss"
       },
       "x": 710,
-      "y": 12520
+      "y": 12640
     },
     {
       "id": "plClearOutcome",
@@ -2231,7 +2275,7 @@
         "name": "gardenWorld"
       },
       "x": 710,
-      "y": 12640
+      "y": 12760
     },
     {
       "id": "plGuessGate",
@@ -2258,7 +2302,7 @@
         "runOnChange-condition": false
       },
       "x": 710,
-      "y": 12760
+      "y": 12880
     },
     {
       "id": "plGuessWait",
@@ -2268,7 +2312,7 @@
         "duration": 700
       },
       "x": 710,
-      "y": 12880
+      "y": 13000
     },
     {
       "id": "plSetCardBlock",
@@ -2278,7 +2322,7 @@
         "name": "gardenCardOpen"
       },
       "x": 710,
-      "y": 6880
+      "y": 7000
     },
     {
       "id": "plMissVar",
@@ -2288,7 +2332,7 @@
         "name": "gardenPredictMiss"
       },
       "x": 710,
-      "y": 13000
+      "y": 13120
     },
     {
       "id": "plSetMiss",
@@ -2300,7 +2344,7 @@
         "value": true
       },
       "x": 710,
-      "y": 13120
+      "y": 13240
     },
     {
       "id": "plClearMiss",
@@ -2319,14 +2363,14 @@
       "type": "/Logic/Find repeat",
       "label": "The same steps, over and over?",
       "x": 710,
-      "y": 13240
+      "y": 13360
     },
     {
       "id": "plTidyLine",
       "type": "/Logic/Tidy line",
       "label": "The fold offer in words",
       "x": 710,
-      "y": 5320
+      "y": 5440
     },
     {
       "id": "plDismissVar",
@@ -2336,7 +2380,7 @@
         "name": "gardenTidyNo"
       },
       "x": 710,
-      "y": 13360
+      "y": 13480
     },
     {
       "id": "plSetDismiss",
@@ -2346,21 +2390,21 @@
         "name": "gardenTidyNo"
       },
       "x": 710,
-      "y": 7480
+      "y": 7600
     },
     {
       "id": "plFold",
       "type": "/Logic/Fold",
       "label": "Fold it",
       "x": 710,
-      "y": 7360
+      "y": 7480
     },
     {
       "id": "plChoose",
       "type": "/Logic/Choose hint",
       "label": "Which hint",
       "x": 710,
-      "y": 13480
+      "y": 13600
     },
     {
       "id": "plHintLater",
@@ -2370,21 +2414,21 @@
         "duration": 420
       },
       "x": 710,
-      "y": 13600
+      "y": 13720
     },
     {
       "id": "plPlayed",
       "type": "/Logic/Olive played",
       "label": "The rung this run asked",
       "x": 710,
-      "y": 13720
+      "y": 13840
     },
     {
       "id": "plGoal",
       "type": "/Logic/Goal met",
       "label": "Was the request done?",
       "x": 710,
-      "y": 13840
+      "y": 13960
     },
     {
       "id": "plMetGate",
@@ -2394,7 +2438,7 @@
         "runOnChange-condition": false
       },
       "x": 710,
-      "y": 13960
+      "y": 14080
     },
     {
       "id": "plWonVar",
@@ -2404,7 +2448,7 @@
         "name": "gardenWon"
       },
       "x": 710,
-      "y": 7600
+      "y": 7720
     },
     {
       "id": "plSetWon",
@@ -2416,7 +2460,7 @@
         "value": true
       },
       "x": 710,
-      "y": 14080
+      "y": 14200
     },
     {
       "id": "plClearWon",
@@ -2428,14 +2472,14 @@
         "value": false
       },
       "x": 710,
-      "y": 7720
+      "y": 7840
     },
     {
       "id": "plWinSum",
       "type": "/Logic/Win summary",
       "label": "The win in words",
       "x": 710,
-      "y": 7840
+      "y": 7960
     },
     {
       "id": "plOut",
@@ -2484,7 +2528,7 @@
         }
       ],
       "x": 710,
-      "y": 7960
+      "y": 8080
     }
   ],
   "visualRoots": [

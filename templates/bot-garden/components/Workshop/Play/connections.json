@@ -863,6 +863,42 @@
     },
     {
       "fromId": "plRunner",
+      "fromProperty": "idle",
+      "toId": "plPlay",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "running",
+      "toId": "plStopRun",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "iw1Stop",
+      "toId": "plStopRun",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "plStopRun",
+      "fromProperty": "onClick",
+      "toId": "plRunner",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "capped",
+      "toId": "plChoose",
+      "toProperty": "capped"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "cap",
+      "toId": "plChoose",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plRunner",
       "fromProperty": "running",
       "toId": "plOut",
       "toProperty": "running"

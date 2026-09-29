@@ -210,8 +210,80 @@
     {
       "fromId": "rnPark",
       "fromProperty": "onfalse",
+      "toId": "rnCapTest",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "tick",
+      "toId": "rnCapTest",
+      "toProperty": "tick"
+    },
+    {
+      "fromId": "rnCapTest",
+      "fromProperty": "over",
+      "toId": "rnCap",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rnCapTest",
+      "fromProperty": "ran",
+      "toId": "rnCap",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rnCap",
+      "fromProperty": "onfalse",
       "toId": "rnLoop",
       "toProperty": "eval"
+    },
+    {
+      "fromId": "rnCap",
+      "fromProperty": "ontrue",
+      "toId": "rnTimer",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "rnCap",
+      "fromProperty": "ontrue",
+      "toId": "rnMode",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "rnCap",
+      "fromProperty": "ontrue",
+      "toId": "rnCapped",
+      "toProperty": "to-capped"
+    },
+    {
+      "fromId": "rnCap",
+      "fromProperty": "ontrue",
+      "toId": "rnOut",
+      "toProperty": "cap"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "play",
+      "toId": "rnCapped",
+      "toProperty": "to-free"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "stop",
+      "toId": "rnCapped",
+      "toProperty": "to-free"
+    },
+    {
+      "fromId": "rnLive",
+      "fromProperty": "onfalse",
+      "toId": "rnCapped",
+      "toProperty": "to-free"
+    },
+    {
+      "fromId": "rnCapped",
+      "fromProperty": "capped",
+      "toId": "rnOut",
+      "toProperty": "capped"
     },
     {
       "fromId": "rnMode",

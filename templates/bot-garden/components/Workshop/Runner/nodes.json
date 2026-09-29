@@ -255,6 +255,38 @@
       "y": 2440
     },
     {
+      "id": "rnCapTest",
+      "type": "/Logic/Run cap",
+      "label": "Round and round too long?",
+      "x": 40,
+      "y": 2560
+    },
+    {
+      "id": "rnCap",
+      "type": "Condition",
+      "label": "At the cap?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 40,
+      "y": 2680
+    },
+    {
+      "id": "rnCapped",
+      "type": "States",
+      "label": "Stopped by the cap, or not",
+      "parameters": {
+        "states": "free,capped",
+        "values": "capped",
+        "useTransitions": false,
+        "type-capped": "boolean",
+        "value-free-capped": false,
+        "value-capped-capped": true
+      },
+      "x": 40,
+      "y": 2800
+    },
+    {
       "id": "rnMode",
       "type": "States",
       "label": "Idle, playing or paused",
@@ -276,7 +308,7 @@
         "value-paused-idle": true
       },
       "x": 40,
-      "y": 2560
+      "y": 2920
     },
     {
       "id": "rnOut",
@@ -387,10 +419,20 @@
           "name": "reset",
           "plug": "input",
           "type": "signal"
+        },
+        {
+          "name": "capped",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "cap",
+          "plug": "input",
+          "type": "signal"
         }
       ],
       "x": 40,
-      "y": 2680
+      "y": 3040
     }
   ]
 }

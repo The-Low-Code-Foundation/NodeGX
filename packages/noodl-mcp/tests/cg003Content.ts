@@ -122,6 +122,8 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   ig5AtWork: s('At work on “{plot}”', 'Au travail sur « {plot} »'),
   ig5AtHome: s('At home', 'À la maison'),
   ig5WhenLent: s('{who} lends {r} after “{q}”.', '{who} te prête {r} après « {q} ».'),
+  // P108 IW-001 (lane A): Stop on the bar while a run plays.
+  iw1Stop: s('Stop', 'Arrêter'),
   ...Object.fromEntries(Object.values(REQUEST_SUBS).map((r) => [r.key, r.words]))
 };
 

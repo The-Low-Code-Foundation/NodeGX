@@ -195,7 +195,11 @@ export const ICONS: Readonly<Record<string, string>> = {
   pick: svg('0 0 24 24', "<path d='M12 3l6 7h-4v6h-4v-6H6z'/><path d='M4 19h16v2H4z'/>"),
   put: svg('0 0 24 24', "<path d='M12 17l6-7h-4V4h-4v6H6z'/><path d='M4 19h16v2H4z'/>"),
   fill: svg('0 0 24 24', "<path d='M5 10h11v9a2 2 0 01-2 2H7a2 2 0 01-2-2z'/><path d='M16 12l4-3v7l-4-2z'/><path d='M10.5 2s3 3.2 3 5.2a3 3 0 01-6 0c0-2 3-5.2 3-5.2z'/>"),
-  owl: svg('0 0 64 64', "<ellipse cx='32' cy='36' rx='22' ry='24'/><path d='M12 18l8 8h24l8-8-6 2-4-4-6 4-6-4-4 4z'/>")
+  owl: svg('0 0 64 64', "<ellipse cx='32' cy='36' rx='22' ry='24'/><path d='M12 18l8 8h24l8-8-6 2-4-4-6 4-6-4-4 4z'/>"),
+  // P108 IW-001 F1: Stop (a square); F7: the pad's say (a speech bubble) and read (an open note).
+  stop: svg('0 0 24 24', "<rect x='5' y='5' width='14' height='14' rx='2'/>"),
+  say: svg('0 0 24 24', "<path d='M4 4h16a2 2 0 012 2v9a2 2 0 01-2 2h-9l-5 4v-4H4a2 2 0 01-2-2V6a2 2 0 012-2z'/>"),
+  read: svg('0 0 24 24', "<path d='M2 5c3-1 6-1 9 1v14c-3-2-6-2-9-1z'/><path d='M13 6c3-2 6-2 9-1v14c-3-1-6-1-9 1z'/>")
 };
 
 const spriteRules = Object.entries(SPRITES)

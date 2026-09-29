@@ -1,0 +1,72 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7b8e80ac-a71d-54f7-8bc7-779f56c25edf",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "runcapIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "tick",
+          "plug": "output",
+          "type": "number"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "runcapFn",
+      "type": "JavaScriptFunction",
+      "label": "Run cap",
+      "parameters": {
+        "functionScript": "\nvar MAX = 2000;\nvar tick = Math.floor(Number(Inputs.tick)) || 0;\nOutputs.over = tick >= MAX;\n",
+        "runOnChange-in-tick": false
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-tick",
+          "displayName": "tick",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-over",
+          "displayName": "over",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "runcapOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "over",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}
