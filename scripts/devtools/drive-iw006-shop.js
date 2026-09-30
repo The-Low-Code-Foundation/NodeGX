@@ -17,7 +17,7 @@
  *                        Animals say they come later and sell nothing; Robots, Upgrades, Helpers draw each item with its
  *                        picture, its price, its name and its line, inside the page (no sideways scroll) (screenshots)
  *   SHORT <vp>-<lang>    22 shells, a new Pip (30): the card says what she has, the cost, "You need 8 more shells." — no Buy
- *   BUY <vp>-<lang>      32 shells: the card says 32 · 30 · left 2; named "Bubbles", Buy → "It's yours!", the button says
+ *   BUY <vp>-<lang>      32 shells: the card says 32 · 30 · left 2; named "Bubbles", Buy → "It's yours!" alone on the card, the button says
  *                        🐚 2, the store holds spent 30 and a Pip named Bubbles; after a reload the button still says 🐚 2
  *   BRAIN                the bigger brain for Pip (the card's chips: her three robots at 12 blocks), Buy → r1's brain 16 in
  *                        the store; the Workshop's Blocks node then takes 13 blocks (a 12-block brain refuses the 13th —
@@ -263,8 +263,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
     const st = await evaluate(STORE);
     const bubbles = st.island.robots.find((r) => r.name === 'Bubbles');
     readings[`buy-${tag}`] = { card: c, done, btn, shells: st.shells, bubbles };
-    check(`BUY ${tag}: the card says ${w(lang, 'iw6hHave', { n: 32 })} · ${w(lang, 'iw6hCost', { n: 30 })} · ${w(lang, 'iw6hLeft', { n: 2 })}, a name box ("Pip 3"); Buy → "${w(lang, 'iw6hBought')}", the button ${w(lang, 'iw6hBtn', { n: 2 })}; the store spent 30 of 32 and a Pip named Bubbles`,
-      !!c && c.figs.join('|') === [w(lang, 'iw6hHave', { n: 32 }), w(lang, 'iw6hCost', { n: 30 }), w(lang, 'iw6hLeft', { n: 2 })].join('|') && c.buy && c.nameBox && c.placeholder === 'Pip 3' && !!done && done.done === w(lang, 'iw6hBought') && !!btn && btn.text === w(lang, 'iw6hBtn', { n: 2 }) && st.shells.earned === 32 && st.shells.spent === 30 && !!bubbles && bubbles.kind === 'pip',
+    check(`BUY ${tag}: the card says ${w(lang, 'iw6hHave', { n: 32 })} · ${w(lang, 'iw6hCost', { n: 30 })} · ${w(lang, 'iw6hLeft', { n: 2 })}, a name box ("Pip 3"); Buy → "${w(lang, 'iw6hBought')}" alone on the card, the button ${w(lang, 'iw6hBtn', { n: 2 })}; the store spent 30 of 32 and a Pip named Bubbles`,
+      !!c && c.figs.join('|') === [w(lang, 'iw6hHave', { n: 32 }), w(lang, 'iw6hCost', { n: 30 }), w(lang, 'iw6hLeft', { n: 2 })].join('|') && c.buy && c.nameBox && c.placeholder === 'Pip 3' && !!done && done.done === w(lang, 'iw6hBought') && done.figs.length === 0 && !done.short && !done.buy && !!btn && btn.text === w(lang, 'iw6hBtn', { n: 2 }) && st.shells.earned === 32 && st.shells.spent === 30 && !!bubbles && bubbles.kind === 'pip',
       readings[`buy-${tag}`]);
     await closeShop(tag);
     await page.navigate('/island');

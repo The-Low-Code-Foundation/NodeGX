@@ -179,10 +179,12 @@ if (it && shShows(p, it)) {
     else { var more = it.price - bal; out.short = shFill(more === 1 ? W.iw6hShort1 : W.iw6hShort, { n: more }); out.showShort = true; }
     out.canBuy = can && !blocked;
   }
-  // What the last Buy / Use it did, on this item's card.
-  if (String(Inputs.bought || '') === it.id) out.done = W.iw6hBought || '';
-  var used = String(Inputs.used || '').split('|');
-  if (used[0] === it.id && used[1]) out.done = shFill(W.iw6hUsed, { what: out.name, plot: titleOf(used[1], nameOfRobot(p.island.plots[used[1]] ? p.island.plots[used[1]].robotId : '')) });
+  // What the last Buy / Use it did, on this item's card — and, the moment after, only that: never "you need N more" under
+  // "It's yours!" (the drive's first look at the card just bought). A helper just bought goes on to its jobs.
+  var used = String(Inputs.used || '').split('|'), justBought = String(Inputs.bought || '') === it.id, justUsed = used[0] === it.id && !!used[1];
+  if (justBought) out.done = W.iw6hBought || '';
+  if (justUsed) out.done = shFill(W.iw6hUsed, { what: out.name, plot: titleOf(used[1], nameOfRobot(p.island.plots[used[1]] ? p.island.plots[used[1]].robotId : '')) });
+  if ((justBought && !held) || justUsed) { out.showFigures = false; out.showLeft = false; out.showShort = false; out.canBuy = false; out.showName = false; out.showRobots = false; out.none = ''; }
   out.showDone = !!out.done;
   out.showNone = !!out.none;
 }

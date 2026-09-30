@@ -161,9 +161,14 @@ describe('IW-006 AC3 — the purchase card (D4)', () => {
     expect([c.canBuy, c.showName, c.none]).toEqual([false, false, fill(word('iw6hFull'), { n: CREW_CAP })]);
   });
 
-  it('“It’s yours!” on the card of what was just bought, and on no other', () => {
+  it('🔴 “It’s yours!” on the card of what was just bought — and only that (no “you need N more” under it); on no other card', () => {
     const m = funded(kid(), 50);
-    expect(card(m, 'barrow', { bought: 'barrow' }).done).toBe(word('iw6hBought'));
+    const b = buy(m, 'robot:pip');
+    const c = card(b.model, 'robot:pip', { bought: 'robot:pip' });
+    expect([c.done, c.showDone, c.showFigures, c.showShort, c.canBuy, c.showName]).toEqual([word('iw6hBought'), true, false, false, false, false]);
+    // Known-firing: the same card a moment later (another item tapped, then this one) sells again and says it is short.
+    const again = card(b.model, 'robot:pip', { bought: 'none' });
+    expect([again.showDone, again.showFigures, again.showShort]).toEqual([false, true, true]);
     expect(card(m, 'rain', { bought: 'barrow' }).showDone).toBe(false);
   });
 });
@@ -376,6 +381,11 @@ describe('arms: each rule mutated, and the row that kills it', () => {
   it('Upgrades given on a first win again → the moved-upgrade row fails', () => {
     const m = mutate(COMPLETE_REQUEST_SCRIPT, "// P108 IW-006 (lane H): the upgrades moved to the shop", "for (var u = 0; u < UPGRADES.length; u++) if (requestId && UPGRADES[u].unlockedBy === requestId && p.stickers.indexOf(UPGRADES[u].id) === -1) { p.stickers.push(UPGRADES[u].id); upgraded.push(UPGRADES[u].id); }\n  //");
     expect(runScript(m, { model: kid(), requestId: 'rows-trick', tricks: [], reward: null }).upgraded).toEqual(['can+']);
+  });
+  it('the card just bought keeps its figures → the “only that” row fails', () => {
+    const m = mutate(SHOP_CARD_SCRIPT, 'if ((justBought && !held) || justUsed) {', 'if (false) {');
+    const b = buy(funded(kid(), 50), 'robot:pip');
+    expect(bare(m, { model: b.model, words: WORDS, lang: 'en', requests: REQUESTS, itemId: 'robot:pip', bought: 'robot:pip' }).showShort).toBe(true);
   });
   it('the card forgets the short price → the short row’s Buy shows', () => {
     const m = mutate(SHOP_CARD_SCRIPT, 'out.canBuy = can && !blocked;', 'out.canBuy = !blocked;');
