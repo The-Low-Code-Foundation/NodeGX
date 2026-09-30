@@ -1,0 +1,128 @@
+[
+  {
+    "name": "a value with a unit travels as { value, unit }, and a bare number written over it inherits the unit",
+    "clauses": [
+      "C10"
+    ],
+    "because": "C10 — a unit-carrying value is `{ value, unit }` and a bare number written over one inherits the existing unit (node.ts :341-348, :1031-1040). Two Logs pass Value straight through: the object arrives downstream intact, and the later plain 5 arrives as { value: 5, unit: 'px' }. This is the behaviour NSP-011 §6 row C6 met on Value Changed and R7 asks about: C10 wrote it down as a clause; R7 (a) would narrow its second sentence to ports that declare units.",
+    "nodes": {
+      "a": {
+        "type": "net.noodl.Log"
+      },
+      "b": {
+        "type": "net.noodl.Log"
+      }
+    },
+    "wires": [
+      {
+        "from": "a.value",
+        "to": "b.value"
+      }
+    ],
+    "steps": [
+      {
+        "node": "a",
+        "set": "value",
+        "value": {
+          "value": 12,
+          "unit": "px"
+        }
+      },
+      "settle",
+      {
+        "node": "a",
+        "set": "value",
+        "value": 5
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "b",
+        "port": "value",
+        "value": {
+          "unit": "px",
+          "value": 12
+        }
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "port": "value",
+        "value": {
+          "unit": "px",
+          "value": 5
+        }
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "port": "value",
+        "value": {
+          "unit": "px",
+          "value": 5
+        }
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "value",
+        "value": {
+          "unit": "px",
+          "value": 12
+        },
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": {
+          "unit": "px",
+          "value": 12
+        },
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": {
+          "unit": "px",
+          "value": 12
+        },
+        "subject": "b"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 5,
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": {
+          "unit": "px",
+          "value": 5
+        },
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": {
+          "unit": "px",
+          "value": 5
+        },
+        "subject": "b"
+      }
+    ]
+  }
+]

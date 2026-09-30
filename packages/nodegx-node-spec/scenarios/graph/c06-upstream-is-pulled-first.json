@@ -1,0 +1,535 @@
+[
+  {
+    "name": "a diamond into a frame-end node formats once per flip — upstream is pulled before the node's own inputs",
+    "clauses": [
+      "C6"
+    ],
+    "because": "C6 — `update` calls `_updateDependencies` first (node.ts :562-563, :650-657), so the Inverter feeding {b} has sent its new value before String Format drains, and both placeholders are pending in ONE pass; the after-inputs format runs once with (true, false). Without the pull the first pass would format (true, true) and a second pass (true, false): two changes per flip, and the Counter would read 3 at frame 2 instead of 2.",
+    "nodes": {
+      "s": {
+        "type": "Switch"
+      },
+      "i": {
+        "type": "Inverter"
+      },
+      "f": {
+        "type": "String Format",
+        "params": {
+          "format": "{a}{b}"
+        }
+      },
+      "v": {
+        "type": "Value Changed"
+      },
+      "c": {
+        "type": "Counter"
+      }
+    },
+    "wires": [
+      {
+        "from": "s.state",
+        "to": "f.a"
+      },
+      {
+        "from": "s.state",
+        "to": "i.value"
+      },
+      {
+        "from": "i.result",
+        "to": "f.b"
+      },
+      {
+        "from": "f.formatted",
+        "to": "v.value"
+      },
+      {
+        "from": "v.valueChanged",
+        "to": "c.increase"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "s",
+        "signal": "flip"
+      },
+      "settle",
+      {
+        "node": "s",
+        "signal": "flip"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "f",
+        "port": "formatted",
+        "value": "falsetrue"
+      },
+      {
+        "at": 1,
+        "subject": "c",
+        "port": "currentCount",
+        "value": 1
+      },
+      {
+        "at": 2,
+        "subject": "f",
+        "port": "formatted",
+        "value": "truefalse"
+      },
+      {
+        "at": 2,
+        "subject": "v",
+        "signal": "valueChanged",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "c",
+        "port": "currentCount",
+        "value": 2
+      },
+      {
+        "at": 3,
+        "subject": "f",
+        "port": "formatted",
+        "value": "falsetrue"
+      },
+      {
+        "at": 3,
+        "subject": "c",
+        "port": "currentCount",
+        "value": 3
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "format",
+        "value": "{a}{b}",
+        "subject": "f"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": false,
+        "subject": "s"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": true,
+        "subject": "i"
+      },
+      {
+        "t": "value",
+        "port": "formatted",
+        "value": "falsetrue",
+        "subject": "f"
+      },
+      {
+        "t": "signal",
+        "port": "valueChanged",
+        "subject": "v"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 1,
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      },
+      {
+        "t": "in",
+        "port": "flip",
+        "subject": "s"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": true,
+        "subject": "s"
+      },
+      {
+        "t": "signal",
+        "port": "switchedToOn",
+        "subject": "s"
+      },
+      {
+        "t": "signal",
+        "port": "switched",
+        "subject": "s"
+      },
+      {
+        "t": "outcome",
+        "port": "flip",
+        "value": "done",
+        "subject": "s"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": false,
+        "subject": "i"
+      },
+      {
+        "t": "value",
+        "port": "formatted",
+        "value": "truefalse",
+        "subject": "f"
+      },
+      {
+        "t": "signal",
+        "port": "valueChanged",
+        "subject": "v"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 2,
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      },
+      {
+        "t": "in",
+        "port": "flip",
+        "subject": "s"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": false,
+        "subject": "s"
+      },
+      {
+        "t": "signal",
+        "port": "switchedToOff",
+        "subject": "s"
+      },
+      {
+        "t": "signal",
+        "port": "switched",
+        "subject": "s"
+      },
+      {
+        "t": "outcome",
+        "port": "flip",
+        "value": "done",
+        "subject": "s"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": true,
+        "subject": "i"
+      },
+      {
+        "t": "value",
+        "port": "formatted",
+        "value": "falsetrue",
+        "subject": "f"
+      },
+      {
+        "t": "signal",
+        "port": "valueChanged",
+        "subject": "v"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 3,
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      }
+    ]
+  },
+  {
+    "name": "the same diamond into a per-write node: what the wire carries between the two entries of one pass",
+    "clauses": [
+      "C6",
+      "C7"
+    ],
+    "row": "NSP-008 §6 G1",
+    "because": "The clause's sentence — 'a node never computes from a half-updated upstream' — read against a node that computes in its SETTER (And, and.ts :33-49) rather than at frame end. Both of And's ports are pending in one pass (C6 held), but C7's lockstep applies one entry per port in turn, and the setter publishes after each: x AND NOT x is briefly true on the wire. The claims are written from the clause's sentence (the wire never carries true, the Counter never moves); the recorded trace says what the runtime does. It does NOT: the runtime publishes true then false inside one pass (row G1, marked `row`) — the claims stay as the clause reads, and the recorded trace is what the runtime does.",
+    "nodes": {
+      "s": {
+        "type": "Switch"
+      },
+      "i": {
+        "type": "Inverter"
+      },
+      "g": {
+        "type": "And"
+      },
+      "v": {
+        "type": "Value Changed"
+      },
+      "c": {
+        "type": "Counter"
+      }
+    },
+    "wires": [
+      {
+        "from": "s.state",
+        "to": "g.input 0"
+      },
+      {
+        "from": "s.state",
+        "to": "i.value"
+      },
+      {
+        "from": "i.result",
+        "to": "g.input 1"
+      },
+      {
+        "from": "g.result",
+        "to": "v.value"
+      },
+      {
+        "from": "v.valueChanged",
+        "to": "c.increase"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "s",
+        "signal": "flip"
+      },
+      "settle",
+      {
+        "node": "s",
+        "signal": "flip"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "g",
+        "port": "result",
+        "value": false
+      },
+      {
+        "at": 1,
+        "subject": "c",
+        "port": "currentCount",
+        "value": 1
+      },
+      {
+        "at": 2,
+        "subject": "v",
+        "signal": "valueChanged",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "c",
+        "port": "currentCount",
+        "absent": true
+      },
+      {
+        "at": 3,
+        "subject": "v",
+        "signal": "valueChanged",
+        "count": 0
+      }
+    ],
+    "expect": [
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": false,
+        "subject": "s"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": true,
+        "subject": "i"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": false,
+        "subject": "g"
+      },
+      {
+        "t": "signal",
+        "port": "valueChanged",
+        "subject": "v"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 1,
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      },
+      {
+        "t": "in",
+        "port": "flip",
+        "subject": "s"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": true,
+        "subject": "s"
+      },
+      {
+        "t": "signal",
+        "port": "switchedToOn",
+        "subject": "s"
+      },
+      {
+        "t": "signal",
+        "port": "switched",
+        "subject": "s"
+      },
+      {
+        "t": "outcome",
+        "port": "flip",
+        "value": "done",
+        "subject": "s"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": false,
+        "subject": "i"
+      },
+      {
+        "t": "signal",
+        "port": "valueChanged",
+        "subject": "v"
+      },
+      {
+        "t": "signal",
+        "port": "valueChanged",
+        "subject": "v"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 3,
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      },
+      {
+        "t": "in",
+        "port": "flip",
+        "subject": "s"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": false,
+        "subject": "s"
+      },
+      {
+        "t": "signal",
+        "port": "switchedToOff",
+        "subject": "s"
+      },
+      {
+        "t": "signal",
+        "port": "switched",
+        "subject": "s"
+      },
+      {
+        "t": "outcome",
+        "port": "flip",
+        "value": "done",
+        "subject": "s"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": true,
+        "subject": "i"
+      }
+    ]
+  }
+]

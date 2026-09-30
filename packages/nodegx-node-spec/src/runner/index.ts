@@ -6,3 +6,4 @@ export * from './mutants';
 export * from './scenario';
 export * from './conformance';
 export * from './reach';
+export * from './graph';

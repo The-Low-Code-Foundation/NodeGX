@@ -5,6 +5,7 @@ export * from './schema';
 export * from './adapter';
 export * from './adapters/interpreter';
 export * from './trace';
+export * from './graph';
 export * from './interpreter';
 export * from './nodes';
 export * from './runner';

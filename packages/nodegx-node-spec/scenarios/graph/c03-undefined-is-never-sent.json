@@ -1,0 +1,126 @@
+[
+  {
+    "name": "an output that passes through undefined leaves the wire holding the last defined value",
+    "clauses": [
+      "C3"
+    ],
+    "because": "C3 — `Node.sendValue` returns before touching the port when the value is undefined (node.ts :688-690). Inverter is the node whose output can become undefined again (inverter.ts :5-9): after `null` (result true) the downstream Inverter reads false; writing undefined sends nothing, and the downstream keeps false — no event; the control frame (true → false → true) shows the same wire still carrying values. Beside NSP-011's last-sent-value finding.",
+    "nodes": {
+      "a": {
+        "type": "Inverter"
+      },
+      "b": {
+        "type": "Inverter"
+      }
+    },
+    "wires": [
+      {
+        "from": "a.result",
+        "to": "b.value"
+      }
+    ],
+    "steps": [
+      {
+        "node": "a",
+        "set": "value",
+        "value": null
+      },
+      "settle",
+      {
+        "node": "a",
+        "set": "value"
+      },
+      "settle",
+      {
+        "node": "a",
+        "set": "value",
+        "value": true
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "a",
+        "port": "result",
+        "value": true
+      },
+      {
+        "at": 1,
+        "subject": "b",
+        "port": "result",
+        "value": false
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "port": "result",
+        "absent": true
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "port": "result",
+        "absent": true
+      },
+      {
+        "at": 3,
+        "subject": "b",
+        "port": "result",
+        "value": true
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "value",
+        "value": null,
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": true,
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": false,
+        "subject": "b"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": true,
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": false,
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": true,
+        "subject": "b"
+      }
+    ]
+  }
+]

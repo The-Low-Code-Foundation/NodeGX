@@ -30,3 +30,22 @@ And — *the And has no inputs wired or authored* when fed from Component Inputs
 Evaluate or branch wiring with value outputs has no single honest translation*; String Format — *the format string is
 wired, not literal*. A shape phase 18 could give them (a Variable feed into an And with a truthiness sink; an
 Evaluate-only Condition) would let the gate grade them; until then the P107 ledger counts them 0 on the export.
+
+## From NSP-008 (s7, 2026-09-30) — graphs between nodes, in the exporter's words
+
+NSP-008 plays CONTRACT.md C1–C11 as 2–6-node graphs on the export through a graph target
+(`packages/nodegx-export/tests/helpers/node-spec-target.ts` `exportGraphTarget`) and a gate
+(`packages/nodegx-export/tests/node-spec-graph.test.ts`). The exporter emits three of fourteen graphs whole —
+`Counter → Value Changed → Counter` and two Switches into an And — and on those it does what the runtime does (C2) or
+differs exactly where CONTRACT.md Part 2 says it does (C7's per-port queues, C8's first-update consolidation — asserted
+as DIFFERENCES, not skipped). The other graphs are refused with a sentence each; the gate prints them as `outside`.
+
+| row | shape | the exporter's sentence | the graph it stops |
+|---|---|---|---|
+| **E5** | a change pulse consumed by another node — `Counter.countChanged → Counter.increase`, a Counter wired into itself, `Switch.switched → Counter.increase` | *its countChanged / switched signal is consumed — change-conditional pulses are not translated in this slice*; *the trigger is not a rendered element event or a receiver* | C4 (two pulses in one frame), C9 (the breaker), the FB-025 graph |
+| **E6** | a value wire between two logic nodes — `Inverter → Inverter`, `Switch.state → String Format {a}`, `Inverter.result → String Format {b}`, `Log.value → Counter.startValue` | *has no deterministic translation in step 5 (deferred to EXP-003)*; the source *drives nothing statically translatable*; a String Format placeholder *fed a logic truth value — only truthiness sinks take one in this slice* | C3, C6 (the diamond), the FB-025 graph |
+
+And one reading for the exporter's own contract test: **G1** (P107 NSP-008 §6.5) — the runtime lets `x AND NOT x` carry
+`true` then `false` on the wire inside one drain pass (And publishes per setter entry under C7's lockstep); the export computes
+`switchState && !switchState` atomically and never does. CONTRACT.md C6's sentence describes the export, not the runtime.
+Awaiting R8 in P107; nothing to change here until it is ruled.
