@@ -844,11 +844,13 @@ function findRepeat(list) {
   }
   return null;
 }
-function findBlock(list, id) { for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (b.id === id) return b; if (b.body) { var f = findBlock(b.body, id); if (f) return f; } } return null; }
-function parentListOf(list, id) { for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (b.id === id) return list; if (b.body) { var f = parentListOf(b.body, id); if (f) return f; } } return null; }
-function maxId(list, m) { m = m || 0; for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (Number(b.id) > m) m = Number(b.id); if (b.body) m = maxId(b.body, m); } return m; }
-function reId(block, next) { var c = JSON.parse(JSON.stringify(block)); c.id = next.n++; if (c.body) for (var i = 0; i < c.body.length; i++) c.body[i] = reId(c.body[i], next); return c; }
-function shapeOf(list) { var out = []; for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; var s = { t: b.t }; if (b.n !== undefined) s.n = b.n; if (b.slots) s.slots = b.slots; if (b.body) s.body = shapeOf(b.body); out.push(s); } return out; }
+// P108 IW-004 (lane B): an if's else list (brief §4.3) is walked wherever a body is — the ids, the parent list, the copy,
+// the shape — so maxId never mints an id an else block already has.
+function findBlock(list, id) { for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (b.id === id) return b; if (b.body) { var f = findBlock(b.body, id); if (f) return f; } if (Array.isArray(b['else'])) { var fe = findBlock(b['else'], id); if (fe) return fe; } } return null; }
+function parentListOf(list, id) { for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (b.id === id) return list; if (b.body) { var f = parentListOf(b.body, id); if (f) return f; } if (Array.isArray(b['else'])) { var fe = parentListOf(b['else'], id); if (fe) return fe; } } return null; }
+function maxId(list, m) { m = m || 0; for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (Number(b.id) > m) m = Number(b.id); if (b.body) m = maxId(b.body, m); if (Array.isArray(b['else'])) m = maxId(b['else'], m); } return m; }
+function reId(block, next) { var c = JSON.parse(JSON.stringify(block)); c.id = next.n++; if (c.body) for (var i = 0; i < c.body.length; i++) c.body[i] = reId(c.body[i], next); if (Array.isArray(c['else'])) for (var e = 0; e < c['else'].length; e++) c['else'][e] = reId(c['else'][e], next); return c; }
+function shapeOf(list) { var out = []; for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; var s = { t: b.t }; if (b.n !== undefined) s.n = b.n; if (b.slots) s.slots = b.slots; if (b.body) s.body = shapeOf(b.body); if (Array.isArray(b['else'])) s['else'] = shapeOf(b['else']); out.push(s); } return out; }
 `;
 
 // ── New run · Step · Apply · Sense · Goal ───────────────────────────────────
@@ -962,7 +964,7 @@ Outputs.program = program;
 Outputs.repeatId = repeatId;
 Outputs.folded = repeatId > 0;
 Outputs.blocks = countBlocksFold(program);
-function countBlocksFold(list) { var n = 0; for (var j = 0; j < list.length; j++) { if (!list[j]) continue; n++; if (list[j].body) n += countBlocksFold(list[j].body); } return n; }
+function countBlocksFold(list) { var n = 0; for (var j = 0; j < list.length; j++) { if (!list[j]) continue; n++; if (list[j].body) n += countBlocksFold(list[j].body); if (Array.isArray(list[j]['else'])) n += countBlocksFold(list[j]['else']); } return n; }
 `;
 
 /** The child taps ✕ on a repeat: its body, laid out n times, takes its place. */
