@@ -837,7 +837,8 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(into('plGarden3d', ['mounted'])).toEqual(into('plGarden', ['mounted']));
       // The four world ports (map, things, robots, bubble); P108 IW-001 F7 gives the bubble two more sources, the pad's say
       // and Olive's answer to the pad's read — on BOTH renderers (the line above).
-      expect([...new Set(into('plGarden', ['mounted']).map((c) => c.split('>')[1]))].sort()).toEqual(['bubble', 'map', 'robots', 'things']);
+      // P108 IW-004: + watch and picking (lane D's world inputs, from the Blocks node).
+      expect([...new Set(into('plGarden', ['mounted']).map((c) => c.split('>')[1]))].sort()).toEqual(['bubble', 'map', 'picking', 'robots', 'things', 'watch']);
       expect(into('plGarden', ['mounted']).filter((c) => c.endsWith('>bubble')).sort()).toEqual(['plDraw.bubble>bubble', 'plPadAnswer.bubble>bubble', 'plRecord.bubble>bubble']);
       expect(from('plGarden3d', WORLD_PORTS_3D_ONLY)).toEqual(from('plGarden'));
       // Tile X / Tile Y / Tile Tapped to the challenge's guess, and (P108 IW-004) to Pick thing, the chip's pick.
@@ -2155,7 +2156,7 @@ describe('P108 IW-004 — the Workshop’s program on garden-kit.Blocks (lane B)
     expect(pnode('plCardEg').type).toBe('garden-kit.BlockList');
     // Every wire Block List had is on it still (program in and out, palette, band, language, glow, lock, selection, help).
     for (const [port, from] of [['program', 'plProgVar.value'], ['palette', 'plKitPal.palette'], ['band', 'plIn.band'], ['language', 'plIn.lang'], ['runningId', 'plRunner.glowId'], ['locked', 'plRunner.running'], ['words', 'plIn.words'], ['botName', 'plIn.botName'], ['pick', 'plPickThing.pick']]) expect({ port, from: into('plBlocks', port) }).toEqual({ port, from: [from] });
-    expect(pc().filter((c) => c.fromId === 'plBlocks').map((c) => `${c.fromProperty}>${c.toId}.${c.toProperty}`).sort()).toEqual(['onChanged>plCardGate.go', 'onHelp>plSetCardBlock.do', 'onHelpBlock>plSetCardBlock.value', 'onPicking>plPickThing.picking', 'onProgram>plCardGate.program', 'onSelected>plRecord.selected', 'onSelected>plSlots.selected'].sort());
+    expect(pc().filter((c) => c.fromId === 'plBlocks').map((c) => `${c.fromProperty}>${c.toId}.${c.toProperty}`).sort()).toEqual(['onChanged>plCardGate.go', 'onHelp>plSetCardBlock.do', 'onHelpBlock>plSetCardBlock.value', 'onPicking>plPickThing.picking', 'onProgram>plCardGate.program', 'onSelected>plRecord.selected', 'onSelected>plSlots.selected', 'onWatch>plGarden.watch', 'onWatch>plGarden3d.watch', 'onPicking>plGarden.picking', 'onPicking>plGarden3d.picking'].sort());
     // The brain holds every reference program (the longest is ten blocks).
     const count = (l: any[]): number => l.reduce((n, x) => n + 1 + (x.body ? count(x.body) : 0), 0);
     expect(Math.max(...REQUESTS.map((r) => count(r.referenceProgram as any[])))).toBeLessThanOrEqual(BRAIN_SIZE);

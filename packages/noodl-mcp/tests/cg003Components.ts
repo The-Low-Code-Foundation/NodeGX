@@ -1156,6 +1156,12 @@ const PLAY: CgComponent = {
     wire('plGarden3d', 'onTileY', 'plPickThing', 'tapY'),
     wire('plGarden3d', 'onTileTapped', 'plPickThing', 'go'),
     wire('plPickThing', 'pick', 'plBlocks', 'pick'),
+    // P108 IW-004 × IW-002 (lane D's two world inputs, brief §4.4): the chips the program uses are drawn large on the world
+    // (the monitor: "the basket reads 3/4"), and while a chip is picking the world says so (the violet frame). Both worlds.
+    wire('plBlocks', 'onWatch', 'plGarden', 'watch'),
+    wire('plBlocks', 'onWatch', 'plGarden3d', 'watch'),
+    wire('plBlocks', 'onPicking', 'plGarden', 'picking'),
+    wire('plBlocks', 'onPicking', 'plGarden3d', 'picking'),
     // IW-004 §2: the variable monitor — the run's set / change values under the world.
     wire('plRunner', 'run', 'plVarMon', 'run'),
     wire('plIn', 'words', 'plVarMon', 'words'),
