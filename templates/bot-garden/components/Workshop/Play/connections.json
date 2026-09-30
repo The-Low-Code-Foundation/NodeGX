@@ -401,6 +401,132 @@
     },
     {
       "fromId": "plIn",
+      "fromProperty": "words",
+      "toId": "plBlocks",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "botName",
+      "toId": "plBlocks",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "plBlocks",
+      "fromProperty": "onPicking",
+      "toId": "plPickThing",
+      "toProperty": "picking"
+    },
+    {
+      "fromId": "plWorldVar",
+      "fromProperty": "value",
+      "toId": "plPickThing",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "plGarden",
+      "fromProperty": "onTileX",
+      "toId": "plPickThing",
+      "toProperty": "tapX"
+    },
+    {
+      "fromId": "plGarden",
+      "fromProperty": "onTileY",
+      "toId": "plPickThing",
+      "toProperty": "tapY"
+    },
+    {
+      "fromId": "plGarden",
+      "fromProperty": "onTileTapped",
+      "toId": "plPickThing",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plGarden3d",
+      "fromProperty": "onTileX",
+      "toId": "plPickThing",
+      "toProperty": "tapX"
+    },
+    {
+      "fromId": "plGarden3d",
+      "fromProperty": "onTileY",
+      "toId": "plPickThing",
+      "toProperty": "tapY"
+    },
+    {
+      "fromId": "plGarden3d",
+      "fromProperty": "onTileTapped",
+      "toId": "plPickThing",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plPickThing",
+      "fromProperty": "pick",
+      "toId": "plBlocks",
+      "toProperty": "pick"
+    },
+    {
+      "fromId": "plBlocks",
+      "fromProperty": "onWatch",
+      "toId": "plGarden",
+      "toProperty": "watch"
+    },
+    {
+      "fromId": "plBlocks",
+      "fromProperty": "onWatch",
+      "toId": "plGarden3d",
+      "toProperty": "watch"
+    },
+    {
+      "fromId": "plBlocks",
+      "fromProperty": "onPicking",
+      "toId": "plGarden",
+      "toProperty": "picking"
+    },
+    {
+      "fromId": "plBlocks",
+      "fromProperty": "onPicking",
+      "toId": "plGarden3d",
+      "toProperty": "picking"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "run",
+      "toId": "plVarMon",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "words",
+      "toId": "plVarMon",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plVarMon",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "botName",
+      "toId": "plVarMon",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "plVarMon",
+      "fromProperty": "text",
+      "toId": "plVars",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plVarMon",
+      "fromProperty": "show",
+      "toId": "plVars",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plIn",
       "fromProperty": "band",
       "toId": "plPalette",
       "toProperty": "band"

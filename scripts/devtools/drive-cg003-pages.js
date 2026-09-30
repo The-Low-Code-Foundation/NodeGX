@@ -341,8 +341,39 @@ withDeployedSite({ dir: DIR }, async (page) => {
    * A palette tap that places the block. P108 IW-001 F3: the first tap on a kind PLACES it and opens its card beside the
    * steps (IG-006 AC5 held it back) — Got it closes the card, and the block stays.
    */
+  /**
+   * P108 IW-004: the program is Blockly (garden-kit.Blocks). A drawer block is tapped on its word (a C-block's middle is
+   * its empty mouth), after the drawer is scrolled to it as a finger scrolls it (the node's own reveal); a block is thrown
+   * away by dragging it back onto the drawer (the kit has no cross); a placed container is tapped on its word.
+   */
+  const BK = `document.querySelector('.bg-blocks-box .gd-bk')`;
+  const reveal = (id) => evaluate(`(() => { const r = ${BK}; return !!r && !!r.__gardenBlocks && r.__gardenBlocks.reveal(${JSON.stringify(id)}); })()`);
+  const palHead = (id) => first(`.bg-blocks-box .gd-palette [data-pal-head="${id}"]`);
+  const palPress = async (id, label) => {
+    await reveal(id);
+    await wait(150);
+    return tap(palHead(id), label || `palette ${id}`);
+  };
+  /** Press on an element, carry it in small steps to the drawer's middle, let go there (a finger's drag). */
+  const dragToDrawer = async (finder, label) => {
+    const p = await where(finder);
+    const d = await where(`document.querySelector('.bg-blocks-box .gd-palette')`, false);
+    if (!p.found || !p.hit || !d.found) {
+      check(`drag ${label} to the drawer`, false, { p, d });
+      return false;
+    }
+    await client.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: p.x, y: p.y, button: 'left', buttons: 1, clickCount: 1 });
+    for (let i = 1; i <= 12; i++) {
+      await client.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: p.x + ((d.x - p.x) * i) / 12, y: p.y + ((d.y - p.y) * i) / 12, button: 'left', buttons: 1 });
+      await wait(25);
+    }
+    await wait(120);
+    await client.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: d.x, y: d.y, button: 'left', buttons: 0, clickCount: 1 });
+    await wait(400);
+    return true;
+  };
   const palTap = async (id) => {
-    await tap(first(`.bg-blocks-box .gd-palette [data-pal="${id}"]`), `palette ${id}`);
+    await palPress(id);
     await wait(200);
     if (await evaluate(CARD_UP)) {
       await tap(first('.bg-card-help .bg-card-ok'), `Got it (${id})`);
@@ -475,9 +506,10 @@ withDeployedSite({ dir: DIR }, async (page) => {
       const tidy = await until(`(() => { const e = document.querySelector('.bg-tidy'); return e && e.offsetParent !== null ? e.innerText : ''; })()`, Boolean);
       check(`AC3 ${tag}: the fold is offered`, !!tidy, tidy);
       if (vp.name === '390') {
-        // P108 IW-001 F6: the drawer and the program are two boxes; the program's is the one that scrolls.
-        const box = await evaluate(`(() => { const e = document.querySelector('.bg-blocks-box .gd-prog'); return e ? { sh: e.scrollHeight, ch: e.clientHeight, oy: getComputedStyle(e).overflowY } : null; })()`);
-        check(`AC4 ${lang}: ${taught.length * 3} blocks scroll in their own box (IW-001 F6: the program box)`, box && box.sh > box.ch && box.oy === 'auto', box);
+        // P108 IW-001 F6, IW-004: the program box is Blockly's workspace — the program is taller than it, and it scrolls
+        // inside it (Blockly's own scrolling); the box keeps its height, so the page does not grow with the program.
+        const box = await evaluate(`(() => { const r = ${BK}; const ws = r && r.__gardenBlocks && r.__gardenBlocks.workspace(); if (!ws) return null; const m = ws.getMetrics(); const top = ws.getTopBlocks(false).find((b) => b.type === 'garden_start'); return { content: Math.round(top ? top.getHeightWidth().height * ws.scale : m.contentHeight), view: Math.round(m.viewHeight), sh: r.scrollHeight, ch: r.clientHeight, scrollbar: !!r.querySelector('.blocklyScrollbarVertical') }; })()`);
+        check(`AC4 ${lang}: ${taught.length * 3} blocks scroll in their own box (IW-004: the workspace scrolls them, the box keeps its height)`, !!box && box.content > box.view && box.sh <= box.ch + 1 && box.scrollbar, box);
       }
       if (tag === '1368-en') await contrastClause('workshop, the fold offered');
       await tap(first('.bg-tidy .bg-i-tidy'), 'Fold it');
@@ -654,7 +686,9 @@ withDeployedSite({ dir: DIR }, async (page) => {
   // ── IG-006 (P106 s2): Olive reads — AC1 the palette, AC5 the cards, AC2 Mamie's note, AC3 the vote, AC7 the after-run
   // line, AC6 the lessons; at both sizes, in both languages, on the stub (the page's in-Chrome one, scripted per rung). ──
   {
-    const oliveIds = () => evaluate(`[...document.querySelectorAll('.bg-blocks-box .gd-palette [data-pal^="olive:"]')].filter((e) => e.offsetParent !== null).map((e) => [e.getAttribute('data-pal'), e.innerText.trim()])`);
+    // IW-004: the drawer is Blockly's SVG — a block's name is its word (textContent; SVG has no innerText; Blockly writes
+    // its spaces as no-break spaces).
+    const oliveIds = () => evaluate(`[...document.querySelectorAll('.bg-blocks-box .gd-palette [data-pal^="olive:"]')].map((e) => [e.getAttribute('data-pal'), (e.querySelector('[data-pal-head]') || e).textContent.replace(/\u00a0/g, ' ').trim()])`);
     const owlSay = () => evaluate(`(document.querySelector('.bg-owl-say') || {}).innerText || ''`);
     const openReq = async (lang, id) => {
       await tab(0);
@@ -666,9 +700,10 @@ withDeployedSite({ dir: DIR }, async (page) => {
       await wait(700);
     };
     /** The id of the last top-level container of a kind in the steps' list. */
-    const lastRep = (t) => evaluate(`(() => { const r = [...document.querySelectorAll('.bg-blocks-box .gd-prog > .gd-rep')].filter((e) => { const b = e.querySelector(':scope > .gd-hd .gd-blk'); return b && b.getAttribute('data-t') === ${JSON.stringify(t)}; }); return r.length ? r[r.length - 1].getAttribute('data-rep') : ''; })()`);
-    /** Tap a container's icon: the kit takes it as the place new blocks go (tap again to let go). */
-    const pickRep = (id, label) => tap(`document.querySelector('.bg-blocks-box .gd-rep[data-rep="${id}"] > .gd-hd .gd-blk > svg')`, label);
+    // IW-004: Blockly nests a block's next block inside it, so "the last" is the last in document order.
+    const lastRep = (t) => evaluate(`(() => { const r = [...document.querySelectorAll('.bg-blocks-box .gd-prog .gd-rep')].filter((e) => e.getAttribute('data-t') === ${JSON.stringify(t)}); return r.length ? r[r.length - 1].getAttribute('data-rep') : ''; })()`);
+    /** Tap a container's word: the kit takes it as the place new blocks go (tap again to let go). */
+    const pickRep = (id, label) => tap(`document.querySelector('.bg-blocks-box .gd-prog [data-head="${id}"]')`, label);
     const repSelected = (id) => evaluate(`(document.querySelector('.bg-blocks-box .gd-rep[data-rep="${id}"]') || {}).getAttribute ? document.querySelector('.bg-blocks-box .gd-rep[data-rep="${id}"]').getAttribute('data-sel') : ''`);
     const slotOn = async (blockSel, key, value, label) => {
       await tap(first(`${blockSel} .gd-slot[data-slot="${key}"]`), `${label}: slot ${key}`);
@@ -677,7 +712,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
     const ifInto = async (sensor, body, label) => {
       await palTap('if');
       const id = await lastRep('if');
-      await slotOn(`.bg-blocks-box .gd-rep[data-rep="${id}"] > .gd-hd`, 'sensor', sensor, label);
+      await slotOn(`.bg-blocks-box .gd-rep[data-rep="${id}"]`, 'sensor', sensor, label);
       await pickRep(id, `${label}: take the if`);
       if ((await repSelected(id)) !== '1') await pickRep(id, `${label}: take the if (again)`);
       for (const op of body) await palTap(op);
@@ -722,14 +757,14 @@ withDeployedSite({ dir: DIR }, async (page) => {
         // AC5, as P108 IW-001 F3/F4 changed it — the first tap PLACES the block and opens its card; Got it closes it and the
         // block stays; the next tap places another with no card; the ? on the DRAWER block reopens it.
         const n0 = await blocks();
-        await tap(first('.bg-blocks-box .gd-palette [data-pal="olive:read"]'), 'read (first tap)');
+        await palPress('olive:read', 'read (first tap)');
         const card = await until(CARD, (c) => c.up, 2500);
         check(`${tag} AC5 (IW-001 F3): the first tap on “read” places it AND opens its card — title, line, the example as blocks`, card.up && card.title === w(lang, 'rungRead') && card.line === w(lang, 'cdOliveRead') && JSON.stringify(card.eg) === JSON.stringify(['olive:read', 'if', 'water']) && (await blocks()) === n0 + 1, { card, n0, now: await blocks() });
         if (shots) await shot(`ig006-ac5-card-${vp.name}-${lang}`);
         await tap(first('.bg-card-help .bg-card-ok'), 'Got it');
         const closed = await until(CARD, (c) => !c.up, 2000);
         check(`${tag} AC5 (IW-001 F3): “Got it” closes the card and the block stays`, !closed.up && (await blocks()) === n0 + 1, { closed, now: await blocks() });
-        await tap(first('.bg-blocks-box .gd-palette [data-pal="olive:read"]'), 'read (next tap)');
+        await palPress('olive:read', 'read (next tap)');
         const placed = await until(`document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-t="olive:read"]').length`, (n) => n === 2, 2000);
         check(`${tag} AC5: the next tap places another, no card`, placed === 2 && !(await evaluate(CARD_UP)), placed);
         const placedHelps = await evaluate(`document.querySelectorAll('.bg-blocks-box .gd-prog .gd-help').length`);
@@ -738,10 +773,11 @@ withDeployedSite({ dir: DIR }, async (page) => {
         check(`${tag} AC5 (IW-001 F4): the ? on the drawer’s read reopens its card, placing nothing; no placed block carries a ?`, again.up && again.title === w(lang, 'rungRead') && (await blocks()) === n0 + 2 && placedHelps === 0, { again, placedHelps });
         await tap(first('.bg-card-help .bg-card-ok'), 'Got it (again)');
         await until(CARD_UP, (v) => v === false, 2000);
-        // Two reads are one too many for what follows (the note is read once): the cross takes the second away.
-        await tap(`[...document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-t="olive:read"] .gd-x')].pop()`, 'the second read’s cross');
+        // Two reads are one too many for what follows (the note is read once): the second (the last block) is dragged back
+        // onto the drawer (IW-004: Blockly's delete; the kit has no cross).
+        await dragToDrawer(`(() => { const b = [...document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-t="olive:read"]')].pop(); return b && b.querySelector('[data-head]'); })()`, 'the second read');
         await until(`document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-t="olive:read"]').length`, (n) => n === 1, 2000);
-        await tap(first('.bg-blocks-box .gd-palette [data-pal="fwd"]'), 'forward (first tap)');
+        await palPress('fwd', 'forward (first tap)');
         const fwdCard = await until(CARD, (c) => c.up, 2000);
         check(`${tag} AC5: a plain block has its card too — forward’s (and forward is placed)`, fwdCard.up && fwdCard.title === w(lang, 'bFwd') && fwdCard.line === w(lang, 'cdFwd') && (await blocks()) === n0 + 2, fwdCard);
         await tap(first('.bg-card-help .bg-card-ok'), 'Got it (forward)');
@@ -1089,17 +1125,24 @@ withDeployedSite({ dir: DIR }, async (page) => {
     const runOver = () => until(`!document.querySelector('.gd-locked')`, Boolean, 12000);
     // IG-006: the eighteen-rung family is gone; the parked ask is the say block (Olive's thank-you).
     const poemAsks = () => stubCalls.filter((c) => c.body && c.body.rung === 'say-thanks').length;
-    /** D5: the running block's ring, read live — its outline colour against the first opaque ground behind it, and the halo. */
+    /**
+     * D5, P108 IW-004: the running block's ring, read live on Blockly — its path's stroke (the ink, 4 px) against the
+     * workspace ground behind it (the program sits on the workspace, inside a repeat too: a C-block's mouth is open), and
+     * the white halo (a drop-shadow on the path).
+     */
     const ringOf = () =>
-      evaluate(`(() => { const el = document.querySelector('.gd-blk.gd-run'); if (!el) return null; const cs = getComputedStyle(el);
+      evaluate(`(() => { const el = document.querySelector('.gd-prog .gd-blk.gd-run'); if (!el) return null; const path = el.querySelector(':scope > .blocklyPath'); if (!path) return null; const cs = getComputedStyle(path);
         const parse = (c) => { const m = String(c).match(/rgba?\\(([^)]+)\\)/); if (!m) return null; const p = m[1].split(/[ ,\\/]+/).filter(Boolean).map(Number); return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 }; };
         const lum = (c) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); };
         const ratio = (a, b) => { const x = lum(a), y = lum(b); return Math.round(((Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)) * 100) / 100; };
-        let ground = null, groundOf = '';
-        for (let e = el.parentElement; e; e = e.parentElement) { const bg = parse(getComputedStyle(e).backgroundColor); if (bg && bg.a >= 0.999) { ground = bg; groundOf = String(e.className || '').slice(0, 40); break; } }
-        const ring = parse(cs.outlineColor);
-        return { id: el.getAttribute('data-id'), ring: cs.outlineColor, width: cs.outlineWidth, halo: cs.boxShadow, ground: cs.outlineColor && ground ? [ground.r, ground.g, ground.b] : null, groundOf, inRep: !!el.closest('.gd-rep'), ratio: ring && ground ? ratio(ring, ground) : null, transform: cs.transform }; })()`);
-    const ringOk = (r) => !!r && r.ratio >= 3 && r.width === '3px' && /rgb\(255, 255, 255\) 0px 0px 0px 4px/.test(r.halo);
+        // The ground: the background rect's fill where it is a colour (driving paints it), else — under Blockly's grid
+        // pattern — the workspace SVG's own background colour, which is what shows between the grid's dots.
+        const bg = el.closest('.gd-bk').querySelector('.blocklyMainBackground');
+        const svg = el.closest('svg.blocklySvg');
+        const ground = (bg && parse(getComputedStyle(bg).fill)) || (svg && parse(getComputedStyle(svg).backgroundColor)) || null;
+        const ring = parse(cs.stroke);
+        return { id: el.getAttribute('data-id'), ring: cs.stroke, width: cs.strokeWidth, halo: cs.filter, ground: ground ? [ground.r, ground.g, ground.b] : null, groundOf: 'the workspace', inRep: el.classList.contains('gd-rep') || !!(el.parentElement && el.parentElement.closest('.gd-rep')), ratio: ring && ground ? ratio(ring, ground) : null }; })()`);
+    const ringOk = (r) => !!r && r.ratio >= 3 && r.width === '4px' && /drop-shadow\(rgb\(255, 255, 255\)/.test(r.halo);
     const enterFree = async (label) => {
       await tab(0);
       await until('location.pathname', (p) => p === '/island');
@@ -1143,7 +1186,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await shot('ig001-d1-d6-olive-bubble');
     check('IG-001 D1: One step parks on Olive (the tag on); a Step while parked asks nothing more; the tag clears when she answers, with no further press; exactly one ask sent', tagOn === true && asksMid === asks0 + 1 && tagOff === false && asksAfter === asks0 + 1, { tagOn, asks0, asksMid, tagOff, asksAfter });
     check('IG-001 D6: what Olive said is on the robot, in the olive bubble', /Tulla the tulip/.test(bubble), { bubble });
-    check(`IG-001 D5: the running ring on the steps panel (white) is 3 px, ≥ 3:1, over a 4 px white halo (${ringWhite && ringWhite.ratio}:1)`, ringOk(ringWhite) && !ringWhite.inRep, ringWhite);
+    check(`IG-001 D5 (IW-004: on Blockly): the running ring on the workspace is 4 px, ≥ 3:1, over a white halo (${ringWhite && ringWhite.ratio}:1)`, ringOk(ringWhite) && !ringWhite.inRep, ringWhite);
     // Start over while parked: the tag is off within one tick.
     await control('reset');
     await wait(400);
@@ -1244,10 +1287,10 @@ withDeployedSite({ dir: DIR }, async (page) => {
     // The first step glows the turn; the second glows the first repeat (its ground #FFF0DA).
     await control('step');
     await control('step');
-    const ringRep = await until(`!!document.querySelector('.gd-rep .gd-blk.gd-run')`, Boolean, 2000) ? await ringOf() : null;
+    const ringRep = await until(`!!document.querySelector('.gd-prog .gd-rep.gd-run, .gd-prog .gd-rep .gd-blk.gd-run')`, Boolean, 2000) ? await ringOf() : null;
     readings.ringRep = ringRep;
     await shot('ig001-d5-ring-in-repeat');
-    check(`IG-001 D5: the running ring inside a repeat (on #FFF0DA) is 3 px, ≥ 3:1, over a 4 px white halo (${ringRep && ringRep.ratio}:1)`, three === 7 && ringOk(ringRep) && ringRep.inRep, { three, ringRep });
+    check(`IG-001 D5 (IW-004: on Blockly): the running repeat's ring is 4 px, ≥ 3:1 on the workspace, over a white halo (${ringRep && ringRep.ratio}:1)`, three === 7 && ringOk(ringRep) && ringRep.inRep, { three, ringRep });
     await control('play');
     const perfect = await until(owlExpr, (t) => t.includes(hint('hintPerfect').slice(0, 8)), 12000);
     const wonStones = await until(`(() => { const e = document.querySelector('.bg-win-card'); return !!e && e.offsetParent !== null; })()`, Boolean, 6000);

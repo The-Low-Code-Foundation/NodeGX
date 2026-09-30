@@ -32,6 +32,8 @@ import { FUNCTION_SCRIPTS, ROBOT_NAME_MAX, portsOf } from './cg002Scripts';
 import { OLIVE_SCRIPTS } from './cg005Olive';
 import { ALL_WORDS_JSON, GLUE_SCRIPTS, TRANSLATE_ALL_SCRIPT } from './cg003Scripts';
 import { DISPLAY_FONT, GARDEN_CSS } from './cg007Look';
+// P108 IW-004 (lane B): the robot's brain, the Blocks node's cap.
+import { BRAIN_SIZE } from './cg002Content';
 
 export const ROUTER = 'Main';
 export const STORE_NAME = 'garden';
@@ -72,6 +74,8 @@ const STORE_SUBSCRIBE_NODE = 'net.noodl.GlobalStore.Subscribe';
 const CSS_NODE = 'CSS Definition';
 export const KIT_GARDEN = 'garden-kit.Garden';
 export const KIT_BLOCKS = 'garden-kit.BlockList';
+/** P108 IW-004: the Workshop's program on real Blockly (the card's example stays a Block List). */
+export const KIT_BLOCKLY = 'garden-kit.Blocks';
 /** IG-007 (P106 s2): the 3D world on the Workshop, under the 2D Garden's exact wires, behind the `renderer` States node. */
 export const KIT_GARDEN_3D = 'garden-3d-kit.Garden3D';
 const KIT_AVATAR = 'game-kit.Avatar';
@@ -322,7 +326,9 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
   // P108 IW-001 (lane A).
   'Logic/Run cap': 'go',
   'Logic/Pad answer': 'go',
-  'Logic/Latch': 'go'
+  'Logic/Latch': 'go',
+  // P108 IW-004 (lane B).
+  'Logic/Pick thing': 'go'
 };
 
 /**
@@ -868,7 +874,7 @@ const PLAY: CgComponent = {
     text('plTitle', 'The request', 'plHead', '', { ...T_H1, cssClassName: 'bg-ws-title' }),
     text('plSub', 'How it works', 'plHead', '', { ...T_MUTED, maxWidth: px(640), cssClassName: 'bg-ws-sub' }),
     group('plWs', 'World and steps', 'plRoot', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-ws' }, ['plLeft', 'plRight']),
-    group('plLeft', 'The world side', 'plWs', { ...column({ rowGap: sp(12) }), ...PANEL }, ['plTask', 'plStage', 'plModeLine', 'plControls', 'plOwl']),
+    group('plLeft', 'The world side', 'plWs', { ...column({ rowGap: sp(12) }), ...PANEL }, ['plTask', 'plStage', 'plVars', 'plModeLine', 'plControls', 'plOwl']),
     group('plTask', 'The task', 'plLeft', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(14), flexWrap: 'nowrap' }), ['plFace', 'plTaskText', 'plMarks']),
     group('plFace', 'The islander', 'plTask', { sizeMode: 'explicit', width: px(56), height: px(56) }),
     group('plTaskText', 'Who and what', 'plTask', { ...column({ rowGap: sp(2) }), cssClassName: 'bg-grow' }, ['plTaskH', 'plTaskP']),
@@ -893,6 +899,8 @@ const PLAY: CgComponent = {
     group('plRec', 'Pip is learning', 'plStage', { ...row({ columnGap: sp(0) }), backgroundColor: 'var(--card)', borderRadius: px(999), ...pad(6, 12), cssClassName: 'bg-rec', mounted: false }, ['plRecText']),
     text('plRecText', 'Recording', 'plRec', '', { sizeMode: 'contentSize', fontSize: px(14), fontWeight: '800', color: 'var(--ink)' }),
     place('plPad', C.pad, 'The pad', 'plStage'),
+    // P108 IW-004: what the robot remembers (set / change), under the world, while it has anything to show.
+    text('plVars', 'What the robot remembers', 'plLeft', '', { ...T_STRONG, cssClassName: 'bg-vars', mounted: false }),
     // P106 IG-003: one line under the world saying what the mode does (Drive: nothing is remembered; Teach: back to the start).
     text('plModeLine', 'What this mode does', 'plLeft', '', { ...T_STRONG, cssClassName: 'bg-mode-line', mounted: false }),
     // IG-001 D8: no "Ask Olive" — it only re-chose the hint; the hint now follows every edit by itself (plHintLater).
@@ -930,7 +938,10 @@ const PLAY: CgComponent = {
     // P106 IG-003: while driving the steps sit on the paper with a note (never faded: ruling 5). P108 IW-001 F4: the ? is on
     // every DRAWER block (Show Help), never on a placed one.
     text('plStepsNote', 'Nothing is remembered while driving', 'plRight', '', { ...T_SMALL, cssClassName: 'bg-steps-note', mounted: false }),
-    place('plBlocks', KIT_BLOCKS, 'The blocks', 'plBlocksBox', { ...BLOCK_COLOURS, showHelp: true }),
+    // P108 IW-004: the program on real Blockly (garden-kit.Blocks, Block List's ports + its own): the drawer inside the
+    // workspace on its left, a tap or a drag adds, a drag back to the drawer throws away, the ? on the drawer only, the
+    // brain holds BRAIN_SIZE blocks. Program in and out is still the engine program.
+    place('plBlocks', KIT_BLOCKLY, 'The blocks', 'plBlocksBox', { ...BLOCK_COLOURS, showHelp: true, brainSize: BRAIN_SIZE }),
     // P106 IG-006 AC5, P108 IW-001 F3: a block's card. The first tap on a palette block PLACES it and opens its card here;
     // "Got it" closes it and the block stays. The example is drawn by a second Block List, locked, with no palette.
     group('plCardBox', 'The block’s card', 'plRight', { ...column({ rowGap: sp(8) }), backgroundColor: 'var(--violet-2)', borderRadius: px(16), ...pad(12), cssClassName: 'bg-card-help', mounted: false }, ['plCardTitle', 'plCardLine', 'plCardEgWord', 'plCardEgBox', 'plCardOk']),
@@ -997,6 +1008,9 @@ const PLAY: CgComponent = {
     // Got it hands the new list out (Cards Seen, Card Seen) and the Workshop page writes it to her profile.
     logic('plSeenAdd', L('Card seen'), 'Got it'),
     logic('plCardInfo', L('Block card'), 'The card’s words and example'),
+    // ── P108 IW-004: a chip picked on the world; what the robot remembers ──
+    logic('plPickThing', L('Pick thing'), 'The thing on the tapped tile, for the chip'),
+    logic('plVarMon', L('Var monitor'), 'What the robot remembers, in words'),
     // ── Drive, teach, play (P106 IG-003); the islander's challenge; the fold ──
     withStates('plMode', 'Drive, teach or play', ['drive', 'teach', 'play'], {
       mode: { type: 'string', by: { drive: 'drive', teach: 'teach', play: 'play' } },
@@ -1129,6 +1143,32 @@ const PLAY: CgComponent = {
     wire('plIn', 'lang', 'plBlocks', 'language'),
     wire('plRunner', 'glowId', 'plBlocks', 'runningId'),
     wire('plRunner', 'running', 'plBlocks', 'locked'),
+    // P108 IW-004: the node's words (the iw4 keys) and the robot's name in them ("Pip's steps", the brain line).
+    wire('plIn', 'words', 'plBlocks', 'words'),
+    wire('plIn', 'botName', 'plBlocks', 'botName'),
+    // IW-004 AC3: a chip is picked on the world — 2D or 3D, the same wires: while Picking, the tapped tile's thing.
+    wire('plBlocks', 'onPicking', 'plPickThing', 'picking'),
+    wire('plWorldVar', 'value', 'plPickThing', 'world'),
+    wire('plGarden', 'onTileX', 'plPickThing', 'tapX'),
+    wire('plGarden', 'onTileY', 'plPickThing', 'tapY'),
+    wire('plGarden', 'onTileTapped', 'plPickThing', 'go'),
+    wire('plGarden3d', 'onTileX', 'plPickThing', 'tapX'),
+    wire('plGarden3d', 'onTileY', 'plPickThing', 'tapY'),
+    wire('plGarden3d', 'onTileTapped', 'plPickThing', 'go'),
+    wire('plPickThing', 'pick', 'plBlocks', 'pick'),
+    // P108 IW-004 × IW-002 (lane D's two world inputs, brief §4.4): the chips the program uses are drawn large on the world
+    // (the monitor: "the basket reads 3/4"), and while a chip is picking the world says so (the violet frame). Both worlds.
+    wire('plBlocks', 'onWatch', 'plGarden', 'watch'),
+    wire('plBlocks', 'onWatch', 'plGarden3d', 'watch'),
+    wire('plBlocks', 'onPicking', 'plGarden', 'picking'),
+    wire('plBlocks', 'onPicking', 'plGarden3d', 'picking'),
+    // IW-004 §2: the variable monitor — the run's set / change values under the world.
+    wire('plRunner', 'run', 'plVarMon', 'run'),
+    wire('plIn', 'words', 'plVarMon', 'words'),
+    wire('plIn', 'lang', 'plVarMon', 'lang'),
+    wire('plIn', 'botName', 'plVarMon', 'botName'),
+    wire('plVarMon', 'text', 'plVars', 'text'),
+    wire('plVarMon', 'show', 'plVars', 'mounted'),
     wire('plIn', 'band', 'plPalette', 'band'),
     wire('plStart', 'allowed', 'plPalette', 'allowed'),
     // The request's rungs (band 10-12 requests only, ruling 4) and this computer's exam: a rung it failed is withheld (AC5).

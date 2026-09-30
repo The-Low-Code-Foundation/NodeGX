@@ -1097,6 +1097,480 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4And",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4And"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4Ask",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4Ask"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4B_count_inc",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4B_count_inc"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4B_do",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4B_do"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4B_fill",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4B_fill"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4B_fwd",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4B_fwd"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4B_if",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4B_if"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4B_left",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4B_left"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4B_pick",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4B_pick"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4B_put",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4B_put"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4B_repeat",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4B_repeat"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4B_right",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4B_right"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4B_say",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4B_say"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4B_trick",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4B_trick"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4B_until",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4B_until"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4B_water",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4B_water"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4B_when",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4B_when"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4By",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4By"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4C_ahead",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4C_ahead"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4C_held",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4C_held"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4C_here",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4C_here"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4C_read",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4C_read"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4C_robot",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4C_robot"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4Change",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4Change"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4CountOf",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4CountOf"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4Else",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4Else"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4Full",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4Full"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4GoNearest",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4GoNearest"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4GoTo",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4GoTo"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4Help",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4Help"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4In",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4In"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4Is",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4Is"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4K_basket",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4K_basket"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4K_bowl",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4K_bowl"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4K_can",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4K_can"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4K_egg",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4K_egg"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4K_food",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4K_food"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4K_hen",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4K_hen"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4K_letter",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4K_letter"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4K_note",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4K_note"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4K_postbox",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4K_postbox"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4K_rock",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4K_rock"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4K_sign",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4K_sign"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4K_site",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4K_site"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4K_stone",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4K_stone"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4K_store",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4K_store"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4K_tulip",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4K_tulip"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4K_water",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4K_water"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4K_well",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4K_well"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4LevelOf",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4LevelOf"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4Monitor",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4Monitor"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4None",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4None"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4Not",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4Not"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4Or",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4Or"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4Pick",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4Pick"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4PickCancel",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4PickCancel"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4PickLine",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4PickLine"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4Read",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4Read"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4S_dirt",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4S_dirt"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4S_done",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4S_done"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4S_drunk",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4S_drunk"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4S_empty",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4S_empty"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4S_front",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4S_front"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4S_full",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4S_full"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4S_has",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4S_has"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4S_nothing",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4S_nothing"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4S_stones",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4S_stones"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4S_thirsty",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4S_thirsty"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4S_used",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4S_used"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4S_wall",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4S_wall"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4Sensor",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4Sensor"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4Set",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4Set"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4Start",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4Start"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4Times",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4Times"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4To",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4To"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4VarsH",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4VarsH"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4ZoomFit",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4ZoomFit"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4ZoomIn",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4ZoomIn"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw4ZoomOut",
+      "toId": "translatewordsOut",
+      "toProperty": "iw4ZoomOut"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-lang",
       "toId": "translatewordsOut",
       "toProperty": "lang"

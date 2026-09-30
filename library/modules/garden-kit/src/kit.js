@@ -1871,10 +1871,13 @@
     }
   };
 
+  // P108 IW-004: Blocks (src/blocks.js, above this file in index.js) — the program editor on Blockly — beside these two.
+  var blocksNode = typeof gardenKitBlocks !== 'undefined' && gardenKitBlocks ? gardenKitBlocks.node : null;
+
   /** @type {import('./types/node-kit').NodeKitModule} */
   var kit = {
     nodes: [],
-    reactNodes: h ? [BlockList, Garden] : []
+    reactNodes: h ? [BlockList, Garden].concat(blocksNode ? [blocksNode] : []) : []
   };
 
   Noodl.defineModule(kit);

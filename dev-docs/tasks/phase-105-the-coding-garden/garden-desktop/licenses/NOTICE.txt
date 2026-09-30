@@ -16,5 +16,10 @@ Olive's Island (L'île d'Olive) ships, beside its own code, the following third-
    MIT License — LICENSE-three.js.txt. Vendored as noodl_modules/garden-3d-kit/three.min.js (651,651 bytes) for the
    Garden 3D node (P106 IG-007); loaded from the app's own files, never from a CDN.
 
+5. Blockly 12.3.1 (https://github.com/google/blockly), copyright 2011 Google LLC and the Blockly authors.
+   Apache License, Version 2.0 — LICENSE-Apache-2.0.txt. Vendored as noodl_modules/garden-kit/blockly_compressed.js
+   (967,598 bytes) with Blockly's French and English messages for the Workshop's Blocks node (P108 IW-004); loaded
+   from the app's own files, never from a CDN.
+
 Nothing in this app sends anything off the computer it runs on: the game, its backend and the model all live on
 127.0.0.1 (P105 CG-004 AC9).

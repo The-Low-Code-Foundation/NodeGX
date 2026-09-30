@@ -159,7 +159,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
       drawn: bot ? { x: +bot.getAttribute('data-x'), y: +bot.getAttribute('data-y'), d: +bot.getAttribute('data-d'), bump: turn ? +(turn.getAttribute('data-bump') || 0) : 0 } : null,
       engine: r0 ? { x: r0.x, y: r0.y, d: r0.d } : null,
       driving: !!document.querySelector('.bg-blocks-box.bg-driving'),
-      progGround: box ? getComputedStyle(box).backgroundColor : '',
+      // P108 IW-004: the steps are Blockly's workspace — its ground is the workspace background's fill.
+      progGround: (() => { const g = document.querySelector('.bg-blocks-box .gd-bk .blocklyMainBackground'); return g ? getComputedStyle(g).fill : ''; })(),
       progOpacity: box ? getComputedStyle(box).opacity : '',
       flag: (() => { const f = document.querySelector('.bg-stage svg.gd-thing.gd-flag[data-sprite="flag"]'); return f ? f.closest('.gd-cell').getAttribute('data-x') + ',' + f.closest('.gd-cell').getAttribute('data-y') : null; })(),
       tick: (() => { const f = document.querySelector('.bg-stage svg.gd-thing.gd-tick[data-sprite="tick"]'); return f ? f.closest('.gd-cell').getAttribute('data-x') + ',' + f.closest('.gd-cell').getAttribute('data-y') : null; })(),

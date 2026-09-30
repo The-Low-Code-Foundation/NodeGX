@@ -162,8 +162,37 @@ withDeployedSite({ dir: DIR }, async (page) => {
   const CARD = `(() => { const e = document.querySelector('.bg-card-help'); if (!e || e.offsetParent === null) return { up: false }; const t = (s) => { const x = e.querySelector(s); return x ? x.innerText.trim() : ''; }; return { up: true, title: t('.bg-card-title') }; })()`;
   const PROG = `[...document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-id]')].map((b) => b.getAttribute('data-t') + '#' + b.getAttribute('data-id')).join(',')`;
   const blocks = () => evaluate(`document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-id]').length`);
+  /**
+   * P108 IW-004: the program is Blockly (garden-kit.Blocks). A drawer block is tapped on its word (a C-block's middle is
+   * its empty mouth) after the drawer is scrolled to it (the node's reveal, as a finger scrolls it); a block is thrown
+   * away by dragging it back onto the drawer; a placed block is tapped on its word; a slot opens the node's picker.
+   */
+  const BK = `document.querySelector('.bg-blocks-box .gd-bk')`;
+  const reveal = (id) => evaluate(`(() => { const r = ${BK}; return !!r && !!r.__gardenBlocks && r.__gardenBlocks.reveal(${JSON.stringify(id)}); })()`);
+  const palPress = async (id, label) => {
+    await reveal(id);
+    await wait(150);
+    return tap(first(`.bg-blocks-box .gd-palette [data-pal-head="${id}"]`), label || `palette ${id}`);
+  };
+  const dragToDrawer = async (finder, label) => {
+    const p = await where(finder);
+    const d = await where(`document.querySelector('.bg-blocks-box .gd-palette')`, false);
+    if (!p.found || !p.hit || !d.found) {
+      check(`drag ${label} to the drawer`, false, { p, d });
+      return false;
+    }
+    await client.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: p.x, y: p.y, button: 'left', buttons: 1, clickCount: 1 });
+    for (let i = 1; i <= 12; i++) {
+      await client.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: p.x + ((d.x - p.x) * i) / 12, y: p.y + ((d.y - p.y) * i) / 12, button: 'left', buttons: 1 });
+      await wait(25);
+    }
+    await wait(120);
+    await client.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: d.x, y: d.y, button: 'left', buttons: 0, clickCount: 1 });
+    await wait(400);
+    return true;
+  };
   const palTap = async (id) => {
-    await tap(first(`.bg-blocks-box .gd-palette [data-pal="${id}"]`), `palette ${id}`);
+    await palPress(id);
     await wait(200);
     if (await evaluate(CARD_UP)) {
       await tap(first('.bg-card-help .bg-card-ok'), `Got it (${id})`);
@@ -238,11 +267,13 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await control('rec');
     for (let k = 0; k < 3; k++) await key('fwd');
     await palTap('repeat');
-    const rep = await evaluate(`(() => { const r = [...document.querySelectorAll('.bg-blocks-box .gd-prog > .gd-rep')].pop(); return r ? r.getAttribute('data-rep') : ''; })()`);
-    for (let k = 3; k < reps; k++) await tap(first(`.bg-blocks-box [data-inc="${rep}"]`), `repeat + (${k + 1})`);
+    const rep = await evaluate(`(() => { const r = [...document.querySelectorAll('.bg-blocks-box .gd-prog .gd-rep[data-t="repeat"]')].pop(); return r ? r.getAttribute('data-rep') : ''; })()`);
+    // IW-004: the count is the repeat's slot — a tap opens the picker, a tap on the number sets it (no − / + any more).
+    await tap(first(`.bg-blocks-box .gd-rep[data-rep="${rep}"] .gd-slot[data-slot="n"]`), 'repeat: its count');
+    await tap(first(`.bg-blocks-box .gd-picker .gd-opt[data-opt="${reps}"]`), `repeat: ${reps}`);
     await palTap('until');
     const un = await evaluate(`(() => { const r = [...document.querySelectorAll('.bg-blocks-box .gd-rep[data-rep="${rep}"] .gd-rep')].pop(); return r ? r.getAttribute('data-rep') : ''; })()`);
-    await tap(first(`.bg-blocks-box .gd-rep[data-rep="${un}"] > .gd-hd .gd-slot[data-slot="sensor"]`), 'until: its sensor');
+    await tap(first(`.bg-blocks-box .gd-rep[data-rep="${un}"] .gd-slot[data-slot="sensor"]`), 'until: its sensor');
     await tap(first('.bg-blocks-box .gd-picker .gd-opt[data-opt="wall_ahead"]'), 'until: the wall is ahead');
     await palTap('left');
     const prog = await evaluate(`JSON.parse(typeof Noodl.Variables.gardenProgram === 'string' ? Noodl.Variables.gardenProgram : JSON.stringify(Noodl.Variables.gardenProgram))`);
@@ -258,7 +289,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   // ── AC3 (F3) first, on the fresh profile: the tulips' first tap on fill places it AND opens its card ──
   await openQuest('en', 'tulips-three');
   const n0 = await blocks();
-  await tap(first('.bg-blocks-box .gd-palette [data-pal="fill"]'), 'fill (first tap)');
+  await palPress('fill', 'fill (first tap)');
   const card = await until(CARD, (c) => c.up, 2500);
   const n1 = await blocks();
   check(`AC3: a fresh profile's first tap on "fill" places it (${n0} → ${n1} blocks) AND opens its card ("${w('en', 'bFill')}")`, card.up && card.title === w('en', 'bFill') && n1 === n0 + 1 && (await evaluate(PROG)).startsWith('fill#'), { card, n0, n1, prog: await evaluate(PROG) });
@@ -273,15 +304,18 @@ withDeployedSite({ dir: DIR }, async (page) => {
   const q = await evaluate(`({ drawer: document.querySelectorAll('.bg-blocks-box .gd-palette .gd-pal-item').length, drawerHelps: document.querySelectorAll('.bg-blocks-box .gd-palette .gd-pal-item .gd-help').length, placedHelps: document.querySelectorAll('.bg-blocks-box .gd-prog .gd-help').length, placed: document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-id]').length })`);
   check(`AC4 (F4): every drawer block carries a ? (${q.drawerHelps} of ${q.drawer}); none of the ${q.placed} placed blocks does`, q.drawer > 0 && q.drawerHelps === q.drawer && q.placedHelps === 0 && q.placed === 3, q);
   const before = await evaluate(PROG);
-  await tap(`[...document.querySelectorAll('.bg-blocks-box .gd-prog .gd-row > .gd-blk[data-t="fwd"] .gd-n')][0]`, 'a placed forward (its word)');
+  const fwd1 = await evaluate(`document.querySelector('.bg-blocks-box .gd-prog .gd-blk[data-t="fwd"]').getAttribute('data-id')`);
+  await tap(`document.querySelector('.bg-blocks-box .gd-prog [data-head="${fwd1}"]')`, 'a placed forward (its word)');
   await wait(500);
   const after = await evaluate(PROG);
-  const sel = await evaluate(`(() => { const r = [...document.querySelectorAll('.bg-blocks-box .gd-prog .gd-row')].find((x) => x.querySelector('.gd-blk[data-t="fwd"]')); return r ? r.getAttribute('data-sel') : null; })()`);
+  const sel = await evaluate(`(document.querySelector('.bg-blocks-box .gd-prog .gd-blk[data-id="${fwd1}"]') || { getAttribute: () => null }).getAttribute('data-sel')`);
   check('AC4 (F5): a tap on a placed forward leaves the program unchanged (it selects it: the ring)', after === before && sel === '1', { before, after, sel });
   await shot('iw001-ac4-selected');
-  await tap(`[...document.querySelectorAll('.bg-blocks-box .gd-prog .gd-row > .gd-blk[data-t="fwd"] .gd-x')][0]`, 'its cross');
+  // IW-004: the kit has no cross — a block goes back to the drawer to be thrown away (Blockly drags the blocks under it
+  // too, as Scratch does, so the LAST forward goes).
+  await dragToDrawer(`(() => { const b = [...document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-t="fwd"]')].pop(); return b && b.querySelector('[data-head="' + b.getAttribute('data-id') + '"]'); })()`, 'the last forward');
   await wait(400);
-  check('AC4 (F5): its cross still takes it away', (await blocks()) === 2 && (await evaluate(PROG)).split(',').length === 2, await evaluate(PROG));
+  check('AC4 (F5, IW-004): dragged back to the drawer, it is taken away', (await blocks()) === 2 && (await evaluate(PROG)).split(',').length === 2, await evaluate(PROG));
 
   // ── AC1 (F1): Stop ──
   await openQuest('en', 'free');
@@ -358,24 +392,39 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await page.setViewport({ width: vp.width, height: vp.height, mobile: false });
     await openQuest('en', 'free');
     await control('rec');
-    for (let i = 0; i < vp.n; i++) await palTap(SEQ[i % SEQ.length]);
+    // IW-004: the drawer stops at the robot's brain (12 blocks); Teach records past it (the fold makes the room back), so
+    // the long program is taught with the pad, as a child teaches it.
+    for (let i = 0; i < vp.n; i++) await key(SEQ[i % SEQ.length]);
     await evaluate(`window.scrollTo(0, document.querySelector('.bg-ws').getBoundingClientRect().top + scrollY - 12)`);
     await wait(600);
-    const m = await evaluate(`(() => { const R = (e) => { const r = e.getBoundingClientRect(); return { t: Math.round(r.top), b: Math.round(r.bottom), l: Math.round(r.left), r: Math.round(r.right) }; };
-      const prog = document.querySelector('.bg-blocks-box .gd-prog'), pal = document.querySelector('.bg-blocks-box .gd-palette');
-      const blks = [...prog.querySelectorAll('.gd-blk[data-id]')]; const p = prog.getBoundingClientRect();
-      return { n: blks.length, prog: R(prog), pal: R(pal), sh: prog.scrollHeight, ch: prog.clientHeight, oy: getComputedStyle(prog).overflowY, vh: innerHeight, sx: document.scrollingElement.scrollWidth, vw: innerWidth,
-        allIn: blks.every((b) => { const r = b.getBoundingClientRect(); return r.top >= Math.max(0, p.top) && r.bottom <= Math.min(innerHeight, p.bottom); }),
-        steps: R(document.querySelector('.bg-steps')), world: R(document.querySelector('.bg-stage .gd-world')), bar: R(document.querySelector('.bg-controls')) }; })()`);
-    readings[`ac5-${vp.name}`] = m;
-    check(`AC5 ${vp.width}×${vp.height}: the drawer and the program are two boxes, side by side (drawer ${m.pal.l}–${m.pal.r}, program ${m.prog.l}–${m.prog.r})`, m.pal.r <= m.prog.l, { pal: m.pal, prog: m.prog });
-    check(`AC5 ${vp.width}×${vp.height}: ${vp.n} blocks all visible — inside the program box with no scroll in it (${m.sh} ≤ ${m.ch}), and on screen with the Workshop at the top (box ${m.prog.t}–${m.prog.b} of ${m.vh})`, m.n === vp.n && m.sh <= m.ch + 1 && m.allIn && m.prog.b <= m.vh && m.sx <= m.vw, m);
+    // IW-004: the program box is Blockly's workspace, the drawer inside it on its left. Every block's box must be inside
+    // the workspace (right of the drawer) and on the screen, the page no wider than the screen.
+    const MEASURE = `(() => { const R = (e) => { const r = e.getBoundingClientRect(); return { t: Math.round(r.top), b: Math.round(r.bottom), l: Math.round(r.left), r: Math.round(r.right) }; };
+      const root = document.querySelector('.bg-blocks-box .gd-bk'), pal = root.querySelector('.gd-palette');
+      const blks = [...root.querySelectorAll('.gd-prog .gd-blk[data-id]')]; const rr = root.getBoundingClientRect(), fr = pal.getBoundingClientRect();
+      return { n: blks.length, prog: { t: Math.round(rr.top), b: Math.round(rr.bottom), l: Math.round(fr.right), r: Math.round(rr.right) }, pal: R(pal), vh: innerHeight, sx: document.scrollingElement.scrollWidth, vw: innerWidth,
+        allIn: blks.every((b) => { const r = b.getBoundingClientRect(); return r.top >= Math.max(0, rr.top) - 1 && r.bottom <= Math.min(innerHeight, rr.bottom) + 1 && r.left >= fr.right - 1 && r.right <= rr.right + 1; }),
+        steps: R(document.querySelector('.bg-steps')), world: R(document.querySelector('.bg-stage .gd-world')), bar: R(document.querySelector('.bg-controls')) }; })()`;
+    let m = await evaluate(MEASURE);
+    let fit = false;
+    if (!m.allIn) {
+      // A long program: the child presses ⤢ (the workspace's own "see all the steps"), as the mockup's.
+      await tap(first('.bg-blocks-box .gd-bk-zoom [data-zoom="fit"]'), 'see all the steps (⤢)');
+      await wait(700);
+      m = await evaluate(MEASURE);
+      fit = true;
+    }
+    readings[`ac5-${vp.name}`] = { ...m, fit };
+    check(`AC5 ${vp.width}×${vp.height} (IW-004): the drawer and the program side by side in one workspace (drawer ${m.pal.l}–${m.pal.r}, program ${m.prog.l}–${m.prog.r})`, m.pal.r <= m.prog.l + 1 && m.prog.l < m.prog.r, { pal: m.pal, prog: m.prog });
+    // IW-004: every block's box inside the workspace AND inside the screen (allIn); the workspace itself may run past the
+    // fold (it is as tall as the world's column beside it) — the blocks are what must be seen.
+    check(`AC5 ${vp.width}×${vp.height} (IW-004): ${vp.n} blocks all visible in the workspace${fit ? ' after ⤢' : ''}, and on screen with the Workshop at the top (the workspace ${m.prog.t}–${m.prog.b}, the screen 0–${m.vh})`, m.n === vp.n && m.allIn && m.prog.t >= 0 && m.sx <= m.vw, m);
     await shot(`iw001-ac5-${vp.name}`);
   }
   await page.setViewport({ width: 390, height: 844, mobile: true });
   await openQuest('en', 'free');
-  const phone = await evaluate(`(() => { const R = (e) => { const r = e.getBoundingClientRect(); return { t: Math.round(r.top), b: Math.round(r.bottom), l: Math.round(r.left), r: Math.round(r.right) }; }; return { pal: R(document.querySelector('.bg-blocks-box .gd-palette')), prog: R(document.querySelector('.bg-blocks-box .gd-prog')), sx: document.scrollingElement.scrollWidth, vw: innerWidth }; })()`);
-  check('AC5 390×844: the drawer sits over the program box (two boxes), nothing wider than the phone', phone.pal.b <= phone.prog.t && phone.sx <= phone.vw, phone);
+  const phone = await evaluate(`(() => { const R = (e) => { const r = e.getBoundingClientRect(); return { t: Math.round(r.top), b: Math.round(r.bottom), l: Math.round(r.left), r: Math.round(r.right) }; }; const root = document.querySelector('.bg-blocks-box .gd-bk'); return { pal: R(root.querySelector('.gd-palette')), prog: R(root), sx: document.scrollingElement.scrollWidth, vw: innerWidth }; })()`);
+  check('AC5 390×844 (IW-004): the drawer is a strip along the workspace’s foot (the program keeps the width), nothing wider than the phone', phone.pal.b >= phone.prog.b - 1 && phone.pal.t > phone.prog.t && phone.pal.r - phone.pal.l >= phone.prog.r - phone.prog.l - 4 && phone.sx <= phone.vw, phone);
   await evaluate(`document.querySelector('.bg-blocks-box').scrollIntoView({ block: 'start' })`);
   await wait(400);
   await shot('iw001-ac5-390');
@@ -427,7 +476,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   // ── AC7 (F8): the cards seen are saved per profile ──
   await openQuest('en', 'free');
   // count +1: a kind Ada has not tapped in the drawer yet in this drive (the pad's keys never pass the card gate).
-  await tap(first('.bg-blocks-box .gd-palette [data-pal="count_inc"]'), 'count +1 (Ada, first tap)');
+  await palPress('count_inc', 'count +1 (Ada, first tap)');
   const rc = await until(CARD, (c) => c.up, 2500);
   await tap(first('.bg-card-help .bg-card-ok'), 'Got it (count +1)');
   await until(CARD_UP, (v) => v === false, 2000);
@@ -439,7 +488,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await wait(1200);
   await openQuest('en', 'free');
   const k0 = await blocks();
-  await tap(first('.bg-blocks-box .gd-palette [data-pal="count_inc"]'), 'count +1 (Ada, after a reload)');
+  await palPress('count_inc', 'count +1 (Ada, after a reload)');
   await wait(900);
   check('AC7: after a reload the card is still seen — the tap places count +1, no card', !(await evaluate(CARD_UP)) && (await blocks()) === k0 + 1, { card: await evaluate(CARD_UP), blocks: await blocks() });
   // A sibling still sees it.
@@ -448,7 +497,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await wait(600);
   await newPlayer('Bo');
   await openQuest('en', 'free');
-  await tap(first('.bg-blocks-box .gd-palette [data-pal="count_inc"]'), 'count +1 (Bo, first tap)');
+  await palPress('count_inc', 'count +1 (Bo, first tap)');
   const bc = await until(CARD, (c) => c.up, 2500);
   check('AC7: her sibling still sees the card (per profile)', bc.up && bc.title === w('en', 'bCountInc'), bc);
   await shot('iw001-ac7-sibling-card');

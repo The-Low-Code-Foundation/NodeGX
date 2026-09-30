@@ -445,9 +445,12 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(params(box).cssClassName).toBe('bg-blocks-box');
       expect(String(params(nodesOf(built, C.play).find((n) => n.id === 'plRight')!).cssClassName)).toBe('bg-panel bg-steps');
       expect(GARDEN_CSS).not.toContain('min(52vh, 460px)');
-      expect(GARDEN_CSS).toMatch(/\.bg-blocks-box \.gd-prog \{ flex: 1 1 auto; min-height: 120px; max-height: 60vh; overflow-y: auto;/);
       expect(GARDEN_CSS).toMatch(/\.bg-steps \{ align-self: stretch !important; contain: size; min-height: calc\(100vh - 16px\);/);
-      expect(GARDEN_CSS).toMatch(/\.bg-blocks-box > \.gd-blocks \{ display: grid !important; grid-template-columns: minmax\(148px, 42%\) minmax\(0, 1fr\);/);
+      // P108 IW-004: the two boxes are one Blockly workspace (the drawer inside it on its left; Blockly scrolls the
+      // program) taking the steps panel's height beside the world, most of a screen under it.
+      expect(GARDEN_CSS).toMatch(/\.bg-blocks-box > \.gd-bk \{ flex: 1 1 auto; height: 70vh; min-height: 440px; \}/);
+      expect(GARDEN_CSS).toMatch(/@media \(min-width: 981px\) \{[^@]*\.bg-blocks-box > \.gd-bk \{ height: 100%; min-height: 420px; \}/);
+      expect(GARDEN_CSS).not.toMatch(/\.bg-blocks-box \.gd-prog \{|\.bg-blocks-box \.gd-palette \{/);
     });
   });
 
@@ -834,10 +837,12 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(into('plGarden3d', ['mounted'])).toEqual(into('plGarden', ['mounted']));
       // The four world ports (map, things, robots, bubble); P108 IW-001 F7 gives the bubble two more sources, the pad's say
       // and Olive's answer to the pad's read — on BOTH renderers (the line above).
-      expect([...new Set(into('plGarden', ['mounted']).map((c) => c.split('>')[1]))].sort()).toEqual(['bubble', 'map', 'robots', 'things']);
+      // P108 IW-004: + watch and picking (lane D's world inputs, from the Blocks node).
+      expect([...new Set(into('plGarden', ['mounted']).map((c) => c.split('>')[1]))].sort()).toEqual(['bubble', 'map', 'picking', 'robots', 'things', 'watch']);
       expect(into('plGarden', ['mounted']).filter((c) => c.endsWith('>bubble')).sort()).toEqual(['plDraw.bubble>bubble', 'plPadAnswer.bubble>bubble', 'plRecord.bubble>bubble']);
       expect(from('plGarden3d', WORLD_PORTS_3D_ONLY)).toEqual(from('plGarden'));
-      expect(from('plGarden').length).toBe(3);
+      // Tile X / Tile Y / Tile Tapped to the challenge's guess, and (P108 IW-004) to Pick thing, the chip's pick.
+      expect(from('plGarden').length).toBe(6);
     });
 
     it('🔴 AC1/AC4: the renderer States node (no transitions, 2d then 3d) mounts exactly one of the two, driven by signals from the stored choice', () => {
@@ -944,7 +949,8 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(v('drive', 'boxCls')).toBe('bg-blocks-box bg-driving');
       expect(v('teach', 'boxCls')).toBe('bg-blocks-box');
       expect([into('plBlocksBox', 'cssClassName'), into('plStepsNote', 'mounted'), into('plRecText', 'text')]).toEqual([['plMode.boxCls'], ['plModeWords.driving'], ['plModeWords.badge']]);
-      expect(GARDEN_CSS).toMatch(/\.bg-driving \.gd-prog \{[^}]*background: var\(--paper-2\)/);
+      // P108 IW-004: the steps are Blockly's workspace; on the paper = its background's fill.
+      expect(GARDEN_CSS).toMatch(/\.bg-driving \.gd-bk \.blocklyMainBackground \{ fill: var\(--paper-2\) !important; \}/);
       expect(GARDEN_CSS).not.toMatch(/\.bg-driving[^{]*\{[^}]*opacity/);
     });
 
@@ -968,8 +974,9 @@ describe('CG-003 — Bot Garden, the artefact', () => {
     it('🔴 AC4: the challenge — its line on the islander’s card, armed from the request and the band; a tap on EITHER renderer is the guess; a hit ticks the tile and then plays, a miss flags the real end; Play and One step settle it', () => {
       expect([into('plTaskP', 'text'), into('plChallenge', 'cardLine'), into('plChallenge', 'challenge'), into('plChallenge', 'band')]).toEqual([['plChallenge.line'], ['plCard.line'], ['plStart.challenge'], ['plIn.band']]);
       for (const g of ['plGarden', 'plGarden3d']) {
-        expect(from(g, 'onTileTapped')).toEqual(['plGuessGate.eval']);
-        expect([from(g, 'onTileX'), from(g, 'onTileY')]).toEqual([['plGuessEnd.tapX'], ['plGuessEnd.tapY']]);
+        // P108 IW-004: a tap also goes to Pick thing (it acts only while a chip is Picking).
+        expect(from(g, 'onTileTapped')).toEqual(['plGuessGate.eval', 'plPickThing.go']);
+        expect([from(g, 'onTileX'), from(g, 'onTileY')]).toEqual([['plGuessEnd.tapX', 'plPickThing.tapX'], ['plGuessEnd.tapY', 'plPickThing.tapY']]);
       }
       expect(into('plGuessGate', 'condition')).toEqual(['plChallenge.armed']);
       expect(from('plGuessGate', 'ontrue')).toEqual(['plGuessEnd.go']);
@@ -2178,5 +2185,75 @@ describe('P108 s2 (merge) — Draw world hands the kits the job model as the eng
     expect([out.robots[0].holds, out.robots[0].can, out.robots[0].canMax]).toEqual(['can', 2, 3]);
     // The pen is a copy: the kit never holds the engine's own array.
     expect(by('hen')[0].pen).not.toBe(world.things[8].pen);
+  });
+});
+
+// ── P108 IW-004 (lane B): real blocks on the Workshop ───────────────────────────────────────────────────────────────
+describe('P108 IW-004 — the Workshop’s program on garden-kit.Blocks (lane B)', () => {
+  /* eslint-disable @typescript-eslint/no-var-requires */
+  const { PICK_THING_SCRIPT, VAR_MONITOR_SCRIPT, BLOCK_CARD_SCRIPT } = require('./cg003Scripts');
+  const { BRAIN_SIZE } = require('./cg002Content');
+  /* eslint-enable @typescript-eslint/no-var-requires */
+  let b: AuthoredGarden;
+  beforeAll(async () => {
+    b = await buildGardenTemplateProject();
+  }, 120_000);
+  const play = () => nodesOf(b, C.play);
+  const pc = () => connectionsOf(b, C.play);
+  const pnode = (id: string) => play().find((n) => n.id === id)!;
+  const into = (id: string, port: string) => pc().filter((c) => c.toId === id && c.toProperty === port).map((c) => `${c.fromId}.${c.fromProperty}`).sort();
+
+  it('🔴 the program is garden-kit.Blocks on Block List’s wires, with the brain size, the words and the robot’s name; the card’s example stays a Block List', () => {
+    const blocks = pnode('plBlocks');
+    expect(blocks.type).toBe('garden-kit.Blocks');
+    expect([params(blocks).showHelp, params(blocks).brainSize, params(blocks).motionColor, params(blocks).runColor]).toEqual([true, BRAIN_SIZE, 'var(--block-motion)', 'var(--block-run)']);
+    expect(pnode('plCardEg').type).toBe('garden-kit.BlockList');
+    // Every wire Block List had is on it still (program in and out, palette, band, language, glow, lock, selection, help).
+    for (const [port, from] of [['program', 'plProgVar.value'], ['palette', 'plKitPal.palette'], ['band', 'plIn.band'], ['language', 'plIn.lang'], ['runningId', 'plRunner.glowId'], ['locked', 'plRunner.running'], ['words', 'plIn.words'], ['botName', 'plIn.botName'], ['pick', 'plPickThing.pick']]) expect({ port, from: into('plBlocks', port) }).toEqual({ port, from: [from] });
+    expect(pc().filter((c) => c.fromId === 'plBlocks').map((c) => `${c.fromProperty}>${c.toId}.${c.toProperty}`).sort()).toEqual(['onChanged>plCardGate.go', 'onHelp>plSetCardBlock.do', 'onHelpBlock>plSetCardBlock.value', 'onPicking>plPickThing.picking', 'onProgram>plCardGate.program', 'onSelected>plRecord.selected', 'onSelected>plSlots.selected', 'onWatch>plGarden.watch', 'onWatch>plGarden3d.watch', 'onPicking>plGarden.picking', 'onPicking>plGarden3d.picking'].sort());
+    // The brain holds every reference program (the longest is ten blocks).
+    const count = (l: any[]): number => l.reduce((n, x) => n + 1 + (x.body ? count(x.body) : 0), 0);
+    expect(Math.max(...REQUESTS.map((r) => count(r.referenceProgram as any[])))).toBeLessThanOrEqual(BRAIN_SIZE);
+  });
+
+  it('🔴 AC3: a chip is picked on EITHER world — a tap, while Picking, is the thing on that tile as a REF; the robot is what it holds, else what is ahead; nothing is picked on an empty tile or when no chip asked', () => {
+    for (const g of ['plGarden', 'plGarden3d']) for (const [from, to] of [['onTileX', 'tapX'], ['onTileY', 'tapY'], ['onTileTapped', 'go']]) expect(into('plPickThing', to)).toContain(`${g}.${from}`);
+    expect([into('plPickThing', 'picking'), into('plPickThing', 'world')]).toEqual([['plBlocks.onPicking'], ['plWorldVar.value']]);
+    const world = { things: [{ id: 't3', kind: 'basket', x: 5, y: 2, count: 0, capacity: 4 }, { kind: 'egg', x: 2, y: 3 }, { kind: 'label', x: 1, y: 1, text: 'x' }], robots: [{ id: 'pip', x: 0, y: 3, d: 1, carry: [] }, { id: 'rub', x: 7, y: 5, d: 0, carry: ['stone'] }] };
+    const pick = (x: number, y: number, picking = true) => run(PICK_THING_SCRIPT, { picking, world, tapX: x, tapY: y });
+    expect(pick(5, 2).pick.ref).toEqual({ id: 't3', kind: 'basket', x: 5, y: 2 });
+    expect(pick(2, 3).pick.ref).toEqual({ kind: 'egg', x: 2, y: 3 });
+    expect([pick(0, 3).pick.ref, pick(7, 5).pick.ref]).toEqual([{ ref: 'ahead' }, { ref: 'held' }]);
+    expect([pick(1, 1).found, pick(4, 4).found, pick(5, 2, false).found]).toEqual([false, false, false]);
+    // A new n every tap: the same thing twice still arrives.
+    expect(pick(5, 2).pick.n).not.toBe(pick(5, 2).pick.n);
+  });
+
+  it('the variable monitor: the run’s set / change values under the world, in words; none, no line', () => {
+    expect([into('plVarMon', 'run'), into('plVars', 'text'), into('plVars', 'mounted')]).toEqual([['plRunner.run'], ['plVarMon.text'], ['plVarMon.show']]);
+    const on = run(VAR_MONITOR_SCRIPT, { run: { vars: { eggs: 3, count: 1 } }, words: WORD_ROWS, lang: 'fr', botName: 'Pocket' });
+    expect([on.show, on.text]).toEqual([true, 'Ce que Pocket retient: eggs = 3 · count = 1']);
+    expect(run(VAR_MONITOR_SCRIPT, { run: { steps: [] }, words: WORD_ROWS, lang: 'en' }).show).toBe(false);
+  });
+
+  it('the card of the if/else drawer block is if’s', () => {
+    const card = run(BLOCK_CARD_SCRIPT, { cardOpen: 'if:else', lang: 'en', band: 2, words: WORD_ROWS });
+    expect([card.show, card.cardId]).toEqual([true, 'if']);
+  });
+
+  it('🔴 EN/FR: the page’s word table carries every word the Blocks node draws (its iw4 keys), the same words', () => {
+    const kitFile = path.join(REPO, 'library', 'modules', 'garden-kit', 'project', 'noodl_modules', 'garden-kit', 'index.js');
+    let captured: any = null;
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const vmod = require('vm');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const ctx: Record<string, any> = { Noodl: { defineModule: (m: any) => (captured = m) }, console, React: require('react') };
+    vmod.createContext(ctx);
+    vmod.runInContext(fs.readFileSync(kitFile, 'utf8'), ctx);
+    const kitWords = (captured.reactNodes.find((n: any) => n.name === 'garden-kit.Blocks') || {}).words as Record<string, { en: string; fr: string }>;
+    const bad = Object.keys(kitWords).filter((k) => !PAGE_WORDS[k] || PAGE_WORDS[k].en !== kitWords[k].en || PAGE_WORDS[k].fr !== kitWords[k].fr);
+    expect(Object.keys(kitWords).length).toBeGreaterThan(60);
+    expect(bad).toEqual([]);
+    expect(PAGE_WORD_KEYS.filter((k) => k.startsWith('iw4')).length).toBe(Object.keys(kitWords).length + 1);
   });
 });

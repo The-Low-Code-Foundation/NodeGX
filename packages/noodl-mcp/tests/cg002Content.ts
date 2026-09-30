@@ -1102,3 +1102,14 @@ export const JOB_VOCABULARY: ReadonlyArray<JobKind> = [
 export const JOB_KINDS: Readonly<Record<string, JobRole>> = Object.fromEntries(JOB_VOCABULARY.map((k) => [k.kind, k.role]));
 /** A container's (or a site's) item when it names none. */
 export const JOB_ITEMS: Readonly<Record<string, string>> = Object.fromEntries(JOB_VOCABULARY.filter((k) => k.item).map((k) => [k.kind, k.item as string]));
+
+// ── P108 IW-004 (lane B): the robot's brain ────────────────────────────────────────────────────────────────────────
+
+/**
+ * The most blocks a robot's program may hold (Autonauts' brain memory, README §4.2): the Workshop's Blocks node greys the
+ * drawer when the program holds this many and a tap on it says why ("fold some steps into a repeat"). 12 for every robot
+ * until IW-006 sells the bigger brains (12 → 16 → 20). Measured 2026-09-30: the longest reference program is 10 blocks
+ * (tulips-three: repeat + 9), so every request still fits with room for one mistake; Teach may record past it (the page's
+ * own recording, not the drawer) and the fold makes the room back.
+ */
+export const BRAIN_SIZE = 12;

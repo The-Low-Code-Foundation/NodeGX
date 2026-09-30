@@ -1148,11 +1148,12 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       fs.rmSync(tempDir, { recursive: true, force: true });
     });
 
-    it('🔴 the two-module fixture yields three overlay nodes, Garden 3D among them with inNodePicker true and every port', () => {
+    it('🔴 the two-module fixture yields four overlay nodes (P108 IW-004: + Blocks), Garden 3D among them with inNodePicker true and every port', () => {
       const overlay = extractProjectOverlay(project);
       expect(overlay.unavailable).toBeUndefined();
       expect(overlay.failures).toEqual([]);
-      expect(overlay.nodes.map((n) => n.typeName).sort()).toEqual(['garden-3d-kit.Garden3D', 'garden-kit.BlockList', 'garden-kit.Garden']);
+      // P108 IW-004: garden-kit now also carries Blocks (the program on Blockly).
+      expect(overlay.nodes.map((n) => n.typeName).sort()).toEqual(['garden-3d-kit.Garden3D', 'garden-kit.BlockList', 'garden-kit.Blocks', 'garden-kit.Garden']);
       const g3 = overlay.nodes.find((n) => n.typeName === 'garden-3d-kit.Garden3D')!;
       expect(g3.inNodePicker).toBe(true);
       // The bridge adds its own inputs to every React node (cssClassName, mounted, styleCss, variant); the kit's are all there.

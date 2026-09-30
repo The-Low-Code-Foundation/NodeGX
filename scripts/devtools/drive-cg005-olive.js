@@ -221,8 +221,19 @@ async function pagesPart() {
       const byText = (sel, ...needles) => `[...document.querySelectorAll(${JSON.stringify(sel)})].find((e) => e.offsetParent !== null && ${JSON.stringify(needles)}.some((n) => e.innerText.includes(n)))`;
       const CARD_UP = `(() => { const e = document.querySelector('.bg-card-help'); return !!e && e.offsetParent !== null; })()`;
       /** A palette tap that places the block. P108 IW-001 F3: a first tap on a kind places it AND opens its card — Got it closes it. */
+      /**
+       * P108 IW-004: the program is Blockly (garden-kit.Blocks). A drawer block is tapped on its word (a C-block's middle
+       * is its empty mouth), after the drawer is scrolled to it (the node's reveal, as a finger scrolls it).
+       */
+      const palPress = async (id, label) => {
+        await ev(`(() => { const r = document.querySelector('.bg-blocks-box .gd-bk'); return !!r && !!r.__gardenBlocks && r.__gardenBlocks.reveal(${JSON.stringify(id)}); })()`);
+        await wait(150);
+        return tap(first(`.bg-blocks-box .gd-palette [data-pal-head="${id}"]`), label || `palette ${id}`);
+      };
+      /** A placed block's own word (Blockly nests the next block inside it: its word, not its centre). */
+      const headOf = (t) => `(() => { const b = document.querySelector('.bg-blocks-box .gd-prog .gd-blk[data-t="${t}"]'); return b && b.querySelector('[data-head="' + b.getAttribute('data-id') + '"]'); })()`;
       const palTap = async (id) => {
-        await tap(first(`.bg-blocks-box .gd-palette [data-pal="${id}"]`), `palette ${id}`);
+        await palPress(id);
         await wait(200);
         if (await ev(CARD_UP)) {
           await tap(first('.bg-card-help .bg-card-ok'), `Got it (${id})`);
@@ -316,7 +327,7 @@ async function pagesPart() {
       for (const op of ['fwd', 'fwd', 'if']) await palTap(op);
       await tap(first('.bg-blocks-box .gd-prog .gd-blk[data-t="if"] .gd-slot[data-slot="sensor"]'), 'the if’s sensor');
       await tap(first('.bg-blocks-box .gd-picker .gd-opt[data-opt="olive_read:red_tulip"]'), 'Olive read “red tulip”');
-      await tap(first('.bg-blocks-box .gd-prog .gd-blk[data-t="if"] .gd-n'), 'the if (the place new blocks go)');
+      await tap(headOf('if'), 'the if (the place new blocks go)');
       for (const op of ['left', 'water']) await palTap(op);
       const reads0 = (await req(port, 'GET', '/__stub/calls')).body.calls.filter((c) => c.rung === 'read').length;
       await play();
@@ -343,7 +354,7 @@ async function pagesPart() {
       await palTap('if');
       await tap(first('.bg-blocks-box .gd-prog .gd-blk[data-t="if"] .gd-slot[data-slot="sensor"]'), 'the if’s sensor');
       await tap(first('.bg-blocks-box .gd-picker .gd-opt[data-opt="olive_says:yes"]'), 'Olive says yes');
-      await tap(first('.bg-blocks-box .gd-prog .gd-blk[data-t="if"] .gd-n'), 'the if (the place new blocks go)');
+      await tap(headOf('if'), 'the if (the place new blocks go)');
       await palTap('water');
       await setStub(port, { answers: { 'is-it-a': ['yes', 'no', 'yes'] } });
       const isa0 = (await req(port, 'GET', '/__stub/calls')).body.calls.filter((c) => c.rung === 'is-it-a').length;
@@ -440,7 +451,7 @@ async function pagesPart() {
       await enterFree('contrast');
       await addAsk('is-it-a');
       await wait(600);
-      await tap(first('.bg-blocks-box .gd-palette [data-pal="olive:say-thanks"]'), 'say (its card, for the contrast)');
+      await palPress('olive:say-thanks', 'say (its card, for the contrast)');
       await until(CARD_UP, Boolean, 2000);
       const ratios = await ev(`(() => {
         const parse = (c) => { const m = String(c).match(/rgba?\\(([^)]+)\\)/); if (!m) return null; const p = m[1].split(/[ ,\\/]+/).filter(Boolean).map(Number); return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 }; };
@@ -516,12 +527,14 @@ async function pagesPart() {
       await addAsk('is-it-a', 'kind');
       await palTap('if');
       // A tap on the block's WORD selects it (its centre is the sensor slot, a button the kit keeps out of block taps).
-      await tap(first('.gd-prog .gd-blk[data-t="if"] .gd-n'), 'the if block’s word (select it as the place new blocks go)');
+      await tap(headOf('if'), 'the if block’s word (select it as the place new blocks go)');
       await palTap('water');
       const sensorOpen = await ev(`(() => { const s = document.querySelector('.gd-prog .gd-blk[data-t="if"] .gd-slot[data-slot="sensor"]'); return s ? s.getAttribute('aria-expanded') : null; })()`);
       if (sensorOpen !== 'true') await tap(first('.gd-prog .gd-blk[data-t="if"] .gd-slot[data-slot="sensor"]'), 'the if’s sensor slot');
       await tap(first('.gd-picker .gd-opt[data-opt="olive_says:yes"]'), 'Olive says yes');
-      const shape = await ev(`(() => { const i = document.querySelector('.bg-blocks-box .gd-prog .gd-blk[data-t="if"]'); const rep = i && i.closest('.gd-rep'); const body = rep && rep.querySelector('.gd-body'); const s = i && i.querySelector('.gd-slot[data-slot="sensor"]'); return { sensor: s && s.getAttribute('data-value'), label: s && s.innerText, inBody: !!body && !!body.querySelector('.gd-blk[data-t="water"]'), blocks: document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-id]').length }; })()`);
+      // IW-004: Blockly nests the next block inside the if too — "in its body" is read off the program itself; its field
+      // text writes spaces as no-break spaces.
+      const shape = await ev(`(() => { const i = document.querySelector('.bg-blocks-box .gd-prog .gd-blk[data-t="if"]'); const s = i && i.querySelector('.gd-slot[data-slot="sensor"]'); const p = Noodl.Variables.gardenProgram; const l = typeof p === 'string' ? JSON.parse(p || '[]') : p || []; const b = l.find((x) => x && x.t === 'if'); return { sensor: s && s.getAttribute('data-value'), label: s && s.textContent.replace(/\u00a0/g, ' '), inBody: !!b && Array.isArray(b.body) && b.body.some((x) => x.t === 'water'), blocks: document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-id]').length }; })()`);
       const wet = () => ev(`document.querySelectorAll('.bg-stage .gd-wet').length`);
       await setStub(port, { answers: { 'is-it-a': 'yes' } });
       await play();
