@@ -135,6 +135,23 @@ export const OLIVE_OBJECTS: Readonly<Record<string, Bi2>> = {
 export const OLIVE_OBJECT_IDS: ReadonlyArray<string> = Object.keys(OLIVE_OBJECTS);
 
 /**
+ * P108 IW-003 (lane P, IW-005 dev. 6): the envelopes. A letter may carry a name (`to`); Olive's `read` of an envelope
+ * reads the table's note for that name ("For Sami." / "Pour Sami.", `notes_read`) and chooses among the doors' owners on
+ * the plot — each one a `plot_objects` word (the same in both languages) — and her written answer is the name, so
+ * `go_to {ref:'read'}` walks to the door whose `owner` it is. The names are the table's `islanders` less the robot.
+ */
+export const ENVELOPE_NAMES: ReadonlyArray<string> = ['Mamie Rose', 'Sami', 'Biscuit'];
+export const ENVELOPE_NOTES: Readonly<Record<string, { en: string; fr: string }>> = Object.fromEntries(
+  ENVELOPE_NAMES.map((name) => {
+    const l = OLIVE_TABLE.lists.notes_read;
+    const i = l.en.indexOf(`For ${name}.`);
+    if (i < 0 || !l.fr[i] || l.fr[i] !== `Pour ${name}.`) throw new Error(`olive-templates.json notes_read has no envelope for "${name}" in both languages`);
+    for (const L of ['en', 'fr']) if (!OLIVE_TABLE.lists.plot_objects[L].includes(name)) throw new Error(`olive-templates.json plot_objects has no "${name}" (${L})`);
+    return [name, { en: l.en[i], fr: l.fr[i] }];
+  })
+);
+
+/**
  * The thing ahead as `is it a…?` sends it — the ENGINE names it from the world, never a slot the child fills (AC3): a
  * thing on the tile ahead (an object id above, or a note/sign), else the tile itself. Every name is a `things_ahead`
  * word, so the shell's slot check passes by construction.
@@ -336,6 +353,8 @@ function oliveRequestOf(s, w, run) {
   var args = clone(s.args) || {}, options = s.options || null, r = robotOf(w, run.robotId);
   if (!Array.isArray(args)) for (var slot in args) args[slot] = oliveInLang(s.rung, slot, args[slot], run.lang);
   if (s.rung === 'read' && !Array.isArray(args)) { args.note = oliveNoteOf(w, r, run.lang); options = oliveObjectsOf(w, run.lang); }
+  // P108 IW-003 (lane P): an envelope in hand (or ahead) is what she reads; her choices are the doors' owners.
+  if (s.rung === 'read' && !Array.isArray(args)) options = mailRead(s, w, r, run.lang, args, options);
   if (s.rung === 'is-it-a' && !Array.isArray(args)) args.thing = oliveAheadOf(w, r, run.lang);
   return { slots: args, options: options };
 }
@@ -363,6 +382,8 @@ function oliveAnswered(run, s, a) {
   // A thank-you Olive wrote is a thing the robot SAID (a request's said goal counts it, like the say block).
   if (s.rung === 'say-thanks') run.said = (Number(run.said) || 0) + 1;
   if (s.rung === 'read') run.lastAnswer.object = '';
+  // P108 IW-003 (lane P): an envelope read with no word back (no Olive on the tick) reads the name, as the written answer does.
+  v = mailFallback(run, s, v);
   if (v === undefined || v === null || String(v) === '') return out;
   if (s.rung === 'read') { run.lastAnswer.object = oliveObjectId(v); out.say = oliveFill(OLIVE_BUBBLE.oliveReadSay[L], { x: String(v) }); }
   else if (s.rung === 'is-it-a') out.say = oliveFill(OLIVE_BUBBLE.oliveSaysBubble[L], { x: String(v) });

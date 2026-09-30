@@ -53,7 +53,22 @@ const NAIVE_M: Record<string, Block[]> = {};
 // [S] Sami's stones lane:
 const NAIVE_S: Record<string, Block[]> = {};
 // [P] the post lane:
-const NAIVE_P: Record<string, Block[]> = {};
+// envelopes: the child who skips Olive and walks the letters to the three doors in a row — the order that happens to be
+// seed 1's deal (Biscuit, Mamie Rose, Sami). On seeds 2 and 3 a door refuses the letter (wrongDoor) and the job stays open.
+const P_BOX = { id: 'postbox', kind: 'postbox', x: 2, y: 2 };
+const P_DOOR = (id: string, x: number) => ({ id, kind: 'door', x, y: 1 });
+const NAIVE_P: Record<string, Block[]> = {
+  envelopes: [
+    ['door-biscuit', 7],
+    ['door-mamie', 1],
+    ['door-sami', 4]
+  ].flatMap(([door, x], k) => [
+    { id: 10 * k + 1, t: 'go_to', slots: { thing: P_BOX } },
+    { id: 10 * k + 2, t: 'pick' },
+    { id: 10 * k + 3, t: 'go_to', slots: { thing: P_DOOR(String(door), Number(x)) } },
+    { id: 10 * k + 4, t: 'put' }
+  ]) as Block[]
+};
 // [B] Biscuit's lane:
 const NAIVE_B: Record<string, Block[]> = {};
 const NAIVE: Record<string, Block[]> = { ...NAIVE_M, ...NAIVE_S, ...NAIVE_P, ...NAIVE_B };

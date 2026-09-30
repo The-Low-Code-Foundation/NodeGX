@@ -207,6 +207,9 @@ var SPRITE_THINGS = { stone: 1, egg: 1, food: 1 };
 // things are drawn from exactly what they were before.
 var JOB_FIELDS = ['id', 'have', 'need', 'droop', 'count', 'capacity', 'item', 'level', 'max', 'stage', 'walked', 'pen'];
 var JOB_THINGS = { site: 1, basket: 1, store: 1, can: 1, hen: 1, postbox: 1 };
+// P108 IW-003 (lane P): a door (its letters and its owner's name) reaches the kits too.
+JOB_FIELDS.push('owner');
+JOB_THINGS.door = 1;
 function withJob(o, t) {
   for (var f = 0; f < JOB_FIELDS.length; f++) { var v = t[JOB_FIELDS[f]]; if (v !== undefined && v !== null) o[JOB_FIELDS[f]] = Array.isArray(v) ? v.slice() : v; }
   return o;
@@ -595,7 +598,7 @@ for (var k = 0; k < HATS.length; k++) {
   hats.push({ id: h.id, label: (h.id === 'sun' ? '🌻 ' : h.id === 'crown' ? '👑 ' : '') + (w[h.word] || h.id) + (has || !h.from ? '' : ' · ' + fill(w.hatLocked, { who: w[h.from] || '' })), selected: h.id === hat, locked: !has });
 }
 var st = Array.isArray(Inputs.stickers) ? Inputs.stickers : [];
-var STICKER = { 'can+': ['🪣', 'ig5UpCan'], 'basket+': ['🧺', 'ig5UpBasket'], boots: ['🥾', 'ig5UpBoots'], letter: ['✉️', 'stickerLetter'], paw: ['🐾', 'stickerPaw'], tulip: ['🌷', 'stickerTulip'], bell: ['🔔', 'itemBell'], basket: ['🧺', 'itemBasket'], gnome: ['🧙', 'itemGnome'], seeds: ['🌱', 'seeds'], note: ['📝', 'stickerNote'], flower: ['🌹', 'stickerFlower'], thanks: ['💐', 'stickerThanks'] };
+var STICKER = { 'can+': ['🪣', 'ig5UpCan'], 'basket+': ['🧺', 'ig5UpBasket'], boots: ['🥾', 'ig5UpBoots'], letter: ['✉️', 'stickerLetter'], paw: ['🐾', 'stickerPaw'], tulip: ['🌷', 'stickerTulip'], bell: ['🔔', 'itemBell'], basket: ['🧺', 'itemBasket'], gnome: ['🧙', 'itemGnome'], seeds: ['🌱', 'seeds'], note: ['📝', 'stickerNote'], flower: ['🌹', 'stickerFlower'], thanks: ['💐', 'stickerThanks'], envelope: ['💌', 'iw3pStickerEnvelope'] };
 for (var s = 0; s < st.length; s++) { var d = STICKER[st[s]] || ['⭐', '']; stickers.push({ id: String(st[s]), label: d[0] + ' ' + (w[d[1]] || String(st[s])) }); }
 Outputs.paints = paints;
 Outputs.eyes = eyes;

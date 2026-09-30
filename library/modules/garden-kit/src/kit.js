@@ -1202,6 +1202,28 @@
       ['path', { d: 'M29 27l5-10 11-3 8 6 1 7z', fill: '#B3B0BE' }],
       ['rect', { x: 8, y: 25, width: 48, height: 31, rx: 3, fill: '#C98A4B', stroke: '#8B5A2B', strokeWidth: 2 }],
       ['path', { d: 'M8 35.5h48M8 45.5h48M18 25v31M46 25v31', stroke: '#8B5A2B', strokeWidth: 1.8 }]
+    ] },
+    // P108 IW-003 (lane P): a front door with a letterbox — its owner's name is a plate under it (the page's words);
+    // with a letter through it (count > 0), the letter's corner shows in the slot.
+    door: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 60, rx: 20, ry: 3, fill: 'rgba(0,0,0,.14)' }],
+      ['rect', { x: 9, y: 55, width: 46, height: 6, rx: 2, fill: '#C8B79A' }],
+      ['rect', { x: 13, y: 4, width: 38, height: 53, rx: 6, fill: '#6E4A26' }],
+      ['rect', { x: 17, y: 8, width: 30, height: 47, rx: 4, fill: '#A9773F' }],
+      ['rect', { x: 21, y: 34, width: 22, height: 16, rx: 2, fill: 'none', stroke: '#8B5A2B', strokeWidth: 2 }],
+      ['rect', { x: 22, y: 22, width: 20, height: 5, rx: 2.5, fill: '#2E2A3D' }],
+      ['circle', { cx: 41, cy: 31, r: 2.6, fill: '#FFD166' }]
+    ] },
+    doorMail: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 60, rx: 20, ry: 3, fill: 'rgba(0,0,0,.14)' }],
+      ['rect', { x: 9, y: 55, width: 46, height: 6, rx: 2, fill: '#C8B79A' }],
+      ['rect', { x: 13, y: 4, width: 38, height: 53, rx: 6, fill: '#6E4A26' }],
+      ['rect', { x: 17, y: 8, width: 30, height: 47, rx: 4, fill: '#A9773F' }],
+      ['rect', { x: 21, y: 34, width: 22, height: 16, rx: 2, fill: 'none', stroke: '#8B5A2B', strokeWidth: 2 }],
+      ['rect', { x: 22, y: 22, width: 20, height: 5, rx: 2.5, fill: '#2E2A3D' }],
+      ['rect', { x: 24, y: 13, width: 16, height: 11, rx: 1.5, fill: '#FFF7E8', stroke: '#E86A5E', strokeWidth: 1.6 }],
+      ['path', { d: 'M24.5 14l7.5 5 7.5-5', fill: 'none', stroke: '#E86A5E', strokeWidth: 1.4, strokeLinejoin: 'round' }],
+      ['circle', { cx: 41, cy: 31, r: 2.6, fill: '#FFD166' }]
     ] }
   };
   /** P108 IW-002: the watering can lying on the map, its water drawn at level/max inside it (none at 0). */
@@ -1483,6 +1505,10 @@
     '.gd-picking .gd-cell>.gd-thing,.gd-picking .gd-cell>.gd-tulip{transition:transform .15s ease,filter .15s ease}\n' +
     '.gd-picking .gd-cell:hover,.gd-picking .gd-cell:active{box-shadow:inset 0 0 0 3px rgba(143,107,255,.6)}\n' +
     '.gd-picking .gd-cell:hover>.gd-thing,.gd-picking .gd-cell:active>.gd-thing,.gd-picking .gd-cell:hover>.gd-tulip,.gd-picking .gd-cell:active>.gd-tulip{transform:translateY(-12%) scale(1.1);filter:drop-shadow(0 5px 3px rgba(46,42,61,.28))}\n' +
+    // P108 IW-003 (lane P): the door's name plate — under the door, over the tile's foot; hidden on the island (a wide world).
+    '.gd-cell>.gd-door{inset:0 6% 8% 6%;width:88%;height:92%}\n' +
+    '.gd-plate{position:absolute;left:50%;bottom:-2%;transform:translateX(-50%);z-index:2;background:#FFF7E8;color:#2E2A3D;border:1.5px solid #8B5A2B;border-radius:6px;padding:0 5px;font-size:10px;font-weight:800;line-height:1.35;white-space:nowrap;pointer-events:none}\n' +
+    '.gd-world[data-wide="1"] .gd-plate{display:none}\n' +
     '@media (prefers-reduced-motion: reduce){.gd-puddle{animation:none}.gd-bump{animation:none}.gd-cheer .gd-turn{animation:none}.gd-bot{transition:none}.gd-turn{transition:none}}';
 
   /** A rising count is a new event; a mount, the same value, a fall or junk is not (the Boost-count rule). */
@@ -1681,6 +1707,11 @@
             else if (t.kind === 'store') extras.push(spriteEl(m && m.have > 0 ? 'storeFull' : 'store', 'store-' + i, 'gd-thing gd-store'));
             else if (t.kind === 'can') extras.push(canThingEl(t, 'can-' + i));
             else if (t.kind === 'hen') extras.push(spriteEl('hen', 'hen-' + i, 'gd-thing gd-hen'));
+            // P108 IW-003 (lane P): a door, its letter showing once one is through, and its owner's name on a plate.
+            else if (t.kind === 'door') {
+              extras.push(spriteEl(m && m.have > 0 ? 'doorMail' : 'door', 'door-' + i, 'gd-thing gd-door', { 'data-owner': String(t.owner || '') }));
+              if (t.owner) extras.push(h('span', { key: 'plate-' + i, className: 'gd-plate', 'data-owner': String(t.owner) }, String(t.owner)));
+            }
             else if (THING_SPRITES[t.kind]) extras.push(spriteEl(t.kind, t.kind + '-' + i, 'gd-thing gd-' + t.kind));
             // IG-004: an islander by her plot, her open request as a bubble; the padlock over a locked plot.
             else if (t.kind === 'islander' && ISLANDER_SPRITES[t.who]) {

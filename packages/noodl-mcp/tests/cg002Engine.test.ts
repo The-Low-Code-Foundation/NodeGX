@@ -69,6 +69,8 @@ import { START_WORLD_SCRIPT } from './cg003Scripts';
 // P108 IW-005 (lane J): the new statements' types and their meta.
 import { BLOCK_TYPES } from './cg002Content';
 import { BLOCK_META } from './cg002Scripts';
+// P108 IW-003 (lane P): what an envelope says, by the name on it.
+import { ENVELOPE_NOTES } from './cg005Olive';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { writtenAnswer } = require('../../../dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/olive-written.js');
 /** What the page answers a parked Olive step with when she does not: the written answer, as Ask Olive does. */
@@ -240,7 +242,9 @@ describe('CG-002 — the engine', () => {
       expect([...tricks].sort()).toEqual([1, 2, 3, 4, 5, 6, 7]);
       expect(new Set(ids).size).toBe(ids.length);
       // CG-006: four requests open at band 7–9 (both bands), six at band 10–12 only; IG-006 adds three at 10–12: 4×2×2 + 9×2×1.
-      expect(rows).toHaveLength(34);
+      // P108 IW-003 (lane P): the new missions open at band 10–12 (the envelopes), so every one past the four is 2 rows.
+      expect(REQUESTS.filter((r) => r.band === 1)).toHaveLength(4);
+      expect(rows).toHaveLength(4 * 2 * 2 + (REQUESTS.length - 4) * 2);
     });
 
     it.each(rows)('%s · %s · band %i', (_id, lang, band, r) => {
@@ -270,7 +274,8 @@ describe('CG-002 — the engine', () => {
     });
 
     it('the goal is data: no request carries a function, and every goal name is one GOAL_SCRIPT knows', () => {
-      const known = ['every_tulip_watered', 'thing_at', 'bowl_has', 'robot_at', 'facing', 'carrying', 'uses', 'handled', 'said', 'no_puddle', 'senses', 'tulips_watered'];
+      // P108 IW-003 (lane P): + job_done (IW-002's finish line), the goal of every mission now.
+      const known = ['every_tulip_watered', 'thing_at', 'bowl_has', 'robot_at', 'facing', 'carrying', 'uses', 'handled', 'said', 'no_puddle', 'senses', 'tulips_watered', 'job_done'];
       for (const name of known) expect({ name, inScript: GOAL_SCRIPT.includes(`g.name === '${name}'`) }).toEqual({ name, inScript: true });
       for (const r of REQUESTS) {
         expect(JSON.parse(JSON.stringify(r))).toEqual(r);
@@ -2047,10 +2052,12 @@ describe('IW-002 (P108 s1) — the job model: a target takes exactly its need, a
       // No seed given: one is picked (a uint32), and the layout is one the seed in the world replays.
       const picked = runScript(START_WORLD_SCRIPT, { requests: [REQ], requestId: REQ.id, nonce: 0 });
       expect(Number.isInteger(picked.world.seed) && picked.world.seed >= 0 && picked.world.seed < 2 ** 32).toBe(true);
-      // Every request today: no seed, no job on its world (the 13 start exactly as before).
+      // A request with no job and no layout starts exactly as before (no seed, no job); P108 IW-003 (lane P): one with a
+      // job starts with it and a seed on its world.
       for (const q of REQUESTS) {
         const out = runScript(START_WORLD_SCRIPT, { requests: JSON.parse(JSON.stringify(REQUESTS)), requestId: q.id, nonce: 0, seed: 9 }).world;
-        expect({ id: q.id, seed: out.seed, job: out.job, map: out.map }).toEqual({ id: q.id, seed: undefined, job: undefined, map: q.map });
+        if (!q.job && !q.seeded) expect({ id: q.id, seed: out.seed, job: out.job, map: out.map }).toEqual({ id: q.id, seed: undefined, job: undefined, map: q.map });
+        else expect({ id: q.id, seed: Number.isInteger(out.seed), job: out.job }).toEqual({ id: q.id, seed: true, job: q.job ? JSON.parse(JSON.stringify(q.job)) : undefined });
       }
       // The seed helpers are the engine's own text, in Start world too (one source).
       expect([ENGINE.includes(SEED_HELPERS), START_WORLD_SCRIPT.includes(SEED_HELPERS)]).toEqual([true, true]);
@@ -2152,8 +2159,8 @@ describe('IW-005 (P108 s2) — seek and regrow: go to nearest by path length, re
       for (const p of pal.filter((x: any) => KEY[x.id])) expect({ band, id: p.id, label: p.label, caption: p.caption }).toEqual({ band, id: p.id, label: WORDS['b' + KEY[p.id]].en, caption: WORDS['c' + KEY[p.id]].en });
     }
     expect({ en: !!WORDS.sayNone?.en, fr: !!WORDS.sayNone?.fr, differ: WORDS.sayNone?.en !== WORDS.sayNone?.fr }).toEqual({ en: true, fr: true, differ: true });
-    // Every reference program still uses only the sixteen (IW-003 moves the missions).
-    for (const r of REQUESTS) for (const t of typesIn(r.referenceProgram)) expect({ id: r.id, t, old: BLOCK_TYPES.indexOf(t as BlockType) < 16 }).toEqual({ id: r.id, t, old: true });
+    // Every reference program uses the engine's blocks (P108 IW-003 lane P: the missions now walk with go to / go to nearest).
+    for (const r of REQUESTS) for (const t of typesIn(r.referenceProgram)) expect({ id: r.id, t, known: BLOCK_TYPES.indexOf(t as BlockType) !== -1 || String(t).startsWith('olive:') }).toEqual({ id: r.id, t, known: true });
   });
 
   describe('AC1 — go to nearest: the true nearest by PATH length; ties the same way every time; none when there is none; a blocked target skipped', () => {
@@ -2642,6 +2649,193 @@ describe('IW-005 (P108 s2) — seek and regrow: go to nearest by path length, re
       const world = { map: G(3, 1), things: [], robots: [{ id: 'pip', x: 1, y: 0, d: 1 }] };
       expect(walk(api(m), prog, world).w.robots[0].x).toBe(1);
       expect(walk(E, prog, world).w.robots[0].x).toBe(2);
+    });
+  });
+});
+
+// ── P108 IW-003 (lane P): the post ──────────────────────────────────────────────────────────────────────────────────
+
+describe('IW-003 (P108 s3, lane P) — the post: a door takes letters, an addressed letter only into its owner’s door, the carry stays plain, Olive reads the envelope', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { checkSlots, compose } = require('../../../dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/olive-check.js');
+  const eng = <T = any>(name: string, ...args: unknown[]) => helper<T>(ENGINE, name, ...args);
+  const api = (text: string) => new Function(`${text}; return { newRun: newRun, step: step, apply: apply, worldOf: worldOf, wearOf: wearOf };`)() as any;
+  const E = api(ENGINE);
+  const mutate = (from: string, to: string) => {
+    if (ENGINE.split(from).length !== 2) throw new Error(`the arm's anchor must occur exactly once: ${from}`);
+    return ENGINE.replace(from, to);
+  };
+  const LANGS = ['en', 'fr'] as const;
+  const blk = (id: number, t: string, slots?: Record<string, unknown>, body?: any[]): Block => ({ id, t, ...(slots ? { slots } : {}), ...(body ? { body } : {}) }) as any;
+  const G = (w: number, h: number) => Array.from({ length: h }, () => 'G'.repeat(w));
+  const DOOR = (id: string, x: number, y: number, owner: string, count = 0) => ({ kind: 'door', id, x, y, owner, count, capacity: 1 });
+  /** A street: Sami's door at (2,0), Mamie Rose's at (0,1); a post box at (2,2) with two letters (to Sami, to nobody). */
+  const STREET = () => ({
+    map: G(4, 3),
+    things: [DOOR('ds', 2, 0, 'Sami'), DOOR('dm', 0, 1, 'Mamie Rose'), { kind: 'postbox', id: 'pb', x: 2, y: 2 }, { kind: 'letter', id: 'l1', x: 2, y: 2, to: 'Sami' }, { kind: 'letter', id: 'l2', x: 2, y: 2 }],
+    robots: [{ id: 'pip', x: 2, y: 1, d: 2, carry: [] as string[] }]
+  });
+  /** Step a program with the engine A, every ask answered by `answer(request)` (default: the shell's written answer). */
+  const walk = (A: any, program: Block[], world: any, lang = 'en', answer: (q: any) => any = (q) => written(q)) => {
+    let run = A.newRun(program, 'pip', lang);
+    let w = A.worldOf(world);
+    const deltas: any[] = [];
+    const asks: any[] = [];
+    for (let i = 0; i < 200 && !run.done; i++) {
+      let st = A.step(run, w, null);
+      if (st.waiting) {
+        asks.push(st.request);
+        st = A.step(st.run, w, { seq: st.request.seq, ...answer(st.request) });
+      }
+      run = st.run;
+      w = A.apply(w, st.delta);
+      deltas.push(st.delta);
+    }
+    return { run, w, deltas, asks };
+  };
+  const words = (lang: 'en' | 'fr') => runScript(TRANSLATE_SCRIPT, { lang, words: WORD_ROWS, botName: 'Pocket' });
+
+  it('🔴 a door takes a letter through it, to its capacity: the next is refused (full) and stays in hand; a stone never goes in', () => {
+    const w0 = { map: G(3, 2), things: [DOOR('ds', 1, 0, 'Sami')], robots: [{ id: 'pip', x: 1, y: 1, d: 0, carry: ['letter', 'letter'] }] };
+    const one = walk(E, [blk(1, 'put')], w0);
+    expect([one.deltas[0].post, one.deltas[0].meter, one.deltas[0].sayKey]).toEqual([{ id: 'pip', x: 1, y: 0, into: 'ds', owner: 'Sami', to: '' }, { id: 'ds', x: 1, y: 0, have: 1, need: 1 }, 'iw3pPosted']);
+    expect([one.w.things[0].count, one.w.robots[0].carry]).toEqual([1, ['letter']]);
+    const two = walk(E, [blk(1, 'put'), blk(2, 'put')], w0);
+    expect([two.deltas[1].full, two.deltas[1].sayKey, two.w.things[0].count, two.w.robots[0].carry]).toEqual([{ id: 'ds', x: 1, y: 0 }, 'sayFull', 1, ['letter']]);
+    const stone = walk(E, [blk(1, 'put')], { ...w0, robots: [{ id: 'pip', x: 1, y: 1, d: 0, carry: ['stone'] }] });
+    expect([stone.deltas[0].nothing, stone.w.things[0].count, stone.w.robots[0].carry, stone.w.things.length]).toEqual([true, 0, ['stone'], 1]);
+    for (const lang of LANGS) for (const k of ['iw3pPosted', 'iw3pWrongDoor']) expect({ lang, k, line: /\S/.test(words(lang)[k] ?? '') }).toEqual({ lang, k, line: true });
+  });
+
+  it('🔴 an addressed letter goes only into its owner’s door: Mamie Rose’s door refuses Sami’s letter (it stays in hand, the robot says so), Sami’s takes it', () => {
+    // pick from the post box (the letter to Sami, the first there), walk to face Mamie Rose's door, put; then Sami's.
+    const prog = [blk(1, 'pick'), blk(2, 'right'), blk(3, 'fwd'), blk(4, 'put'), blk(5, 'right'), blk(6, 'right'), blk(7, 'fwd'), blk(8, 'left'), blk(9, 'put')];
+    const out = walk(E, prog, STREET());
+    const wrong = out.deltas.find((d) => d.wrongDoor);
+    expect([wrong.wrongDoor, wrong.sayKey]).toEqual([{ id: 'pip', x: 0, y: 1, to: 'Sami', owner: 'Mamie Rose' }, 'iw3pWrongDoor']);
+    expect(out.run.wrongDoors).toBe(1);
+    const door = (id: string) => out.w.things.find((t: any) => t.id === id);
+    expect([door('dm').count, door('ds').count, out.w.robots[0].carry, 'carryTo' in out.w.robots[0]]).toEqual([0, 1, [], false]);
+    // A letter with no name goes into any door.
+    const plain = walk(E, [blk(1, 'pick'), blk(2, 'pick'), blk(3, 'left'), blk(4, 'left'), blk(5, 'put')], STREET());
+    expect([plain.deltas[4].post?.to, plain.w.things.find((t: any) => t.id === 'ds').count]).toEqual(['', 1]);
+  });
+
+  it('🔴 the carry stays plain strings; the names ride beside it (carryTo) only while an addressed letter is in hand — a letter put down keeps its name, picked again it has it', () => {
+    const w1 = walk(E, [blk(1, 'pick')], STREET()).w;
+    expect([w1.robots[0].carry, w1.robots[0].carryTo]).toEqual([['letter'], ['Sami']]);
+    const w2 = walk(E, [blk(1, 'pick'), blk(2, 'pick')], STREET()).w;
+    expect([w2.robots[0].carry, w2.robots[0].carryTo]).toEqual([['letter', 'letter'], ['Sami', '']]);
+    // The unaddressed one put on the ground: the names follow (Sami's stays), the ground letter has no name.
+    const w3 = walk(E, [blk(1, 'pick'), blk(2, 'pick'), blk(3, 'right'), blk(4, 'put')], STREET()).w;
+    expect([w3.robots[0].carry, w3.robots[0].carryTo, w3.things.filter((t: any) => t.kind === 'letter' && t.x === 1).map((t: any) => t.to)]).toEqual([['letter'], ['Sami'], [undefined]]);
+    // Sami's put on the ground keeps its name there, and the robot's carryTo goes; picked again, the name comes back.
+    const w4 = walk(E, [blk(1, 'pick'), blk(2, 'right'), blk(3, 'put')], STREET()).w;
+    expect([w4.robots[0].carry, 'carryTo' in w4.robots[0], w4.things.find((t: any) => t.kind === 'letter' && t.x === 1).to]).toEqual([[], false, 'Sami']);
+    const w5 = walk(E, [blk(1, 'pick'), blk(2, 'right'), blk(3, 'put'), blk(4, 'pick')], STREET()).w;
+    expect(w5.robots[0].carryTo).toEqual(['Sami']);
+    // The known-firing twin: a robot that only ever carries plain things has no carryTo at all (its JSON as before).
+    const plain = walk(E, [blk(1, 'pick'), blk(2, 'pick'), blk(3, 'left'), blk(4, 'left'), blk(5, 'put')], STREET()).w;
+    expect('carryTo' in plain.robots[0]).toBe(true);
+    const eggs = walk(E, [blk(1, 'pick')], { map: G(2, 2), things: [{ kind: 'egg', x: 1, y: 0 }], robots: [{ id: 'pip', x: 1, y: 1, d: 0 }] }).w;
+    expect([eggs.robots[0].carry, 'carryTo' in eggs.robots[0]]).toEqual([['egg'], false]);
+    // A letter taken back out of a door wears its owner's name.
+    const back = walk(E, [blk(1, 'pick')], { map: G(3, 2), things: [DOOR('ds', 1, 0, 'Sami', 1)], robots: [{ id: 'pip', x: 1, y: 1, d: 0 }] }).w;
+    expect([back.robots[0].carry, back.robots[0].carryTo, back.things[0].count]).toEqual([['letter'], ['Sami'], 0]);
+  });
+
+  it('🔴 wear (the island tick only): every WEAR.door ticks a full door’s owner takes the letter in, and the post box’s new letter is addressed to that owner; step + apply never wear a door', () => {
+    const full = () => ({ map: G(4, 3), things: [DOOR('ds', 2, 0, 'Sami', 1), DOOR('dm', 0, 1, 'Mamie Rose', 1), { kind: 'postbox', id: 'pb', x: 2, y: 2 }], robots: [{ id: 'pip', x: 3, y: 1, d: 0 }], seed: 7 });
+    for (let age = 1; age < WEAR.door; age++) expect({ age, worn: eng<any[]>('wearOf', full(), age).filter((d) => d.wear || d.letter) }).toEqual({ age, worn: [] });
+    const due = eng<any[]>('wearOf', full(), WEAR.door);
+    const worn = due.find((d) => d.wear);
+    const letter = due.find((d) => d.letter);
+    expect([worn.wear.kind, worn.wear.have]).toEqual(['door', 0]);
+    const owner = full().things.find((t: any) => t.id === worn.wear.id)!.owner;
+    expect(letter.letter).toEqual({ x: 2, y: 2, to: owner });
+    let w: any = full();
+    for (const d of due) w = eng('apply', w, d);
+    expect([w.things.find((t: any) => t.id === worn.wear.id).count, w.things.filter((t: any) => t.kind === 'letter').map((t: any) => t.to)]).toEqual([0, [owner]]);
+    // The same seed, the same door, twice; the Workshop's step + apply over 3 × the period take nothing in.
+    expect(eng<any[]>('wearOf', full(), WEAR.door)).toEqual(due);
+    let ws: any = full();
+    let run = eng('newRun', [], 'pip', 'en');
+    for (let i = 0; i < 3 * WEAR.door; i++) { const st = eng<any>('step', run, ws, null); run = st.run; ws = eng('apply', ws, st.delta); }
+    expect(ws.things.filter((t: any) => t.kind === 'door').map((t: any) => t.count)).toEqual([1, 1]);
+  });
+
+  it('🔴 Olive reads the envelope: the note is the name on the letter in hand (else the one ahead), her choices are the doors’ owners — both pass the shell’s own slot check, EN and FR', () => {
+    for (const lang of LANGS) {
+      const held = walk(E, [blk(1, 'pick'), blk(2, 'olive:read')], STREET(), lang).asks[0];
+      expect([held.slots, held.options]).toEqual([{ note: ENVELOPE_NOTES.Sami[lang] }, ['Sami', 'Mamie Rose']]);
+      expect(checkSlots(OLIVE_TABLE, 'read', held.slots, lang).ok).toBe(true);
+      expect(compose(OLIVE_TABLE, 'read', held.slots, { lang, options: held.options }).enumValues).toEqual(['Sami', 'Mamie Rose']);
+      expect(written(held)).toMatchObject({ value: 'Sami' });
+      // Ahead, not yet picked: the letter a pick would take.
+      const ahead = walk(E, [blk(1, 'olive:read')], STREET(), lang).asks[0];
+      expect(ahead.slots).toEqual({ note: ENVELOPE_NOTES.Sami[lang] });
+    }
+    // The known-firing twin: Mamie's note is read as before — the note on the plot, the things on it, no envelope kept.
+    const note = REQUESTS.find((r) => r.id === 'mamie-note')!;
+    const nr = walk(E, [blk(1, 'olive:read')], worldOfRequest(note)).asks[0];
+    expect(nr.slots.note).toBe(note.things.find((t) => t.kind === 'note')!.text);
+    expect(nr.options).toContain('red tulip');
+  });
+
+  it('🔴 read → go to [what Olive read] → put: the written answer (and the real model’s answer shape) sends the letter to its door; with no word back (the island, runToEnd) the name on the envelope is read', () => {
+    const prog = [blk(1, 'pick'), blk(2, 'olive:read'), blk(3, 'go_to', { thing: { ref: 'read' } }), blk(4, 'put')];
+    for (const lang of LANGS) {
+      const byWritten = walk(E, prog, STREET(), lang);
+      expect([byWritten.w.things.find((t: any) => t.id === 'ds').count, byWritten.w.things.find((t: any) => t.id === 'dm').count]).toEqual([1, 0]);
+      const byModel = walk(E, prog, STREET(), lang, () => ({ ok: true, value: 'Sami' }));
+      expect(byModel.w.things.find((t: any) => t.id === 'ds').count).toBe(1);
+      const noWord = walk(E, prog, STREET(), lang, () => ({ ok: false, fallback: true }));
+      expect([noWord.w.things.find((t: any) => t.id === 'ds').count, noWord.run.lastAnswer.value]).toEqual([1, 'Sami']);
+    }
+    // Her answer naming another door sends the letter there — and that door refuses it (it is Sami's letter).
+    const misread = walk(E, prog, STREET(), 'en', () => ({ ok: true, value: 'Mamie Rose' }));
+    expect([misread.deltas.some((d) => d.wrongDoor), misread.w.robots[0].carry]).toEqual([true, ['letter']]);
+    // The envelopes mission itself, on the engine's own runToEnd (every ask the fallback, no word): done on seeds 1–3.
+    const env = REQUESTS.find((r) => r.id === 'envelopes')!;
+    for (const seed of [1, 2, 3]) {
+      const end = eng<any>('runToEnd', env.referenceProgram, worldOfRequest(env, 'pip', seed), 'pip', 'en');
+      expect({ seed, met: runScript(GOAL_SCRIPT, { world: end.world, run: end.run, program: env.referenceProgram, goal: env.goal }).met }).toEqual({ seed, met: true });
+    }
+  });
+
+  it('🔴 the after-run line: a read of an envelope says “go to” what Olive read (iw3pRead); a read of Mamie’s note keeps oliveRung2', () => {
+    const env = REQUESTS.find((r) => r.id === 'envelopes')!;
+    const end = runToEnd(env.referenceProgram, worldOfRequest(env));
+    expect(runScript(CHOOSE_HINT_SCRIPT, { world: end.world, program: env.referenceProgram, run: end.run, goalMet: false, oliveRung: 2 }).key).toBe('iw3pRead');
+    const note = REQUESTS.find((r) => r.id === 'mamie-note')!;
+    const nend = runToEnd([blk(1, 'olive:read')], worldOfRequest(note));
+    expect(runScript(CHOOSE_HINT_SCRIPT, { world: nend.world, program: [blk(1, 'olive:read')], run: nend.run, goalMet: false, oliveRung: 2 }).key).toBe('oliveRung2');
+    for (const lang of LANGS) expect(/\{b\}/.test(HINTS.iw3pRead[lang]) && !/\{(?!b\})/.test(HINTS.iw3pRead[lang])).toBe(true);
+  });
+
+  describe('arms: each lane-P rule mutated in the engine text, and the row that kills it', () => {
+    const PROG = [blk(1, 'pick'), blk(2, 'right'), blk(3, 'fwd'), blk(4, 'put')];
+    it('the owner not checked → Sami’s letter goes through Mamie Rose’s door', () => {
+      const m = api(mutate('if (to && isSet(door.owner) && !sameName(to, door.owner))', 'if (false)'));
+      expect(walk(m, PROG, STREET()).w.things.find((t: any) => t.id === 'dm').count).toBe(1);
+      expect(walk(E, PROG, STREET()).w.things.find((t: any) => t.id === 'dm').count).toBe(0);
+    });
+    it('the name not kept on pick → the letter is plain and any door takes it', () => {
+      const m = api(mutate("if (t.kind === 'letter' && isSet(t.to)) delta.pick.to = String(t.to);", ''));
+      expect('carryTo' in walk(m, [blk(1, 'pick')], STREET()).w.robots[0]).toBe(false);
+      expect(walk(m, PROG, STREET()).w.things.find((t: any) => t.id === 'dm').count).toBe(1);
+    });
+    it('no name read when no word comes back → on the island the letter never finds its door', () => {
+      const m = api(mutate('  v = mailFallback(run, s, v);\n', '\n'));
+      const prog = [blk(1, 'pick'), blk(2, 'olive:read'), blk(3, 'go_to', { thing: { ref: 'read' } }), blk(4, 'put')];
+      expect(walk(m, prog, STREET(), 'en', () => ({ ok: false, fallback: true })).w.things.find((t: any) => t.id === 'ds').count).toBe(0);
+      expect(walk(E, prog, STREET(), 'en', () => ({ ok: false, fallback: true })).w.things.find((t: any) => t.id === 'ds').count).toBe(1);
+    });
+    it('the wear’s letter not addressed → the post box’s new letter has no name', () => {
+      const m = api(mutate('    if (to) out[k].letter.to = to;\n', '\n'));
+      const w = { map: G(4, 3), things: [DOOR('ds', 2, 0, 'Sami', 1), { kind: 'postbox', id: 'pb', x: 2, y: 2 }], robots: [{ id: 'pip', x: 3, y: 1, d: 0 }], seed: 7 };
+      expect(m.wearOf(w, WEAR.door).find((d: any) => d.letter).letter.to).toBeUndefined();
+      expect(E.wearOf(w, WEAR.door).find((d: any) => d.letter).letter.to).toBe('Sami');
     });
   });
 });

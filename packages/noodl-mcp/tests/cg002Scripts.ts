@@ -62,6 +62,8 @@ import { BAND_PALETTE, BLOCK_TYPES, HINT_KEYS, OLIVE_RUNGS, WORD_KEYS } from './
 // P106 IG-005: the robot catalogue, the upgrades, and the moves and controls every robot has.
 import { ROBOTS_JSON, ROBOT_CONTROLS, ROBOT_MOVES, UPGRADES_JSON } from './cg002Content';
 import { BLOCK_WORD, OLIVE_ENGINE, OLIVE_HELPERS, RUNG_SHAPE, RUNG_TEMPERATURE } from './cg005Olive';
+// P108 IW-003 (lane P): what an envelope says, by the name on it.
+import { ENVELOPE_NOTES } from './cg005Olive';
 // P108 IW-002: the job model's vocabulary, its wear clock and its seeded layouts.
 import { HEN_CAPACITY, JOB_ITEMS, JOB_KINDS, SITE_STAGES, WALL_TILE, WEAR } from './cg002Content';
 
@@ -431,6 +433,8 @@ function wearOf(worldIn, age) {
     out.push({ lay: { x: at.x, y: at.y } });
   }
   if (due('postbox')) for (var b = 0; b < w.things.length; b++) { var pb = w.things[b]; if (pb && pb.kind === 'postbox' && !thingsAt(w, pb.x, pb.y, 'letter').length) out.push({ letter: { x: pb.x, y: pb.y } }); }
+  // P108 IW-003 (lane P): a door's owner takes a letter in; the post box's new letter is addressed.
+  if (mailWear(w, n, rnd, out)) drew = true;
   if (drew) out.push({ seed: w.seed });
   return out;
 }
@@ -733,6 +737,121 @@ function varStep(w, run, s, delta) {
   else { var by = s.by === undefined || s.by === null ? 1 : exprNum(evalVal(w, run, s.by)); run.vars[name] = (exprNum(run.vars[name]) || 0) + (by === null ? 0 : by); }
   delta.vars = clone(run.vars);
 }
+// ── P108 IW-003 (lane P): the post — a door takes letters, an addressed letter goes only into its owner's door, and
+// Olive reads the name on an envelope (IW-005 dev. 6). The carry stays a list of plain strings (letter, stone, egg…):
+// an addressed letter keeps its name in carryTo, a list BESIDE it (carryTo[i] is the name on carry[i], '' for none),
+// which a robot has only while an addressed letter is in its hands — every other robot's JSON is exactly as before.
+/** What an envelope says, by the name on it, in both languages (the shell's notes_read entries, cg005Olive.ts). */
+var MAIL_NOTES = ${JSON.stringify(ENVELOPE_NOTES)};
+function sameName(a, b) { return isSet(a) && isSet(b) && exprText(a) === exprText(b); }
+/** The name on the thing the robot would put next (the last carried), '' when none. */
+function mailTopTo(r) { return r && Array.isArray(r.carryTo) && r.carry.length && r.carryTo.length === r.carry.length ? String(r.carryTo[r.carry.length - 1] || '') : ''; }
+/** pick: a letter taken from the post box keeps its name on the delta; a letter taken back out of a door wears its owner's. */
+function mailPick(t, delta) {
+  if (!t || !delta.pick) return;
+  if (t.kind === 'letter' && isSet(t.to)) delta.pick.to = String(t.to);
+  else if (t.kind === 'door' && isSet(t.owner)) delta.pick.to = String(t.owner);
+}
+/**
+ * put with a door ahead (a door blocks, so nothing else can be put there): only its item (a letter) goes in, one at a
+ * time, up to its capacity; a letter with a name goes only into the door whose owner is that name — else the wrongDoor
+ * event, the letter stays in hand and the robot says so. true = handled (the put is over).
+ */
+function mailPut(w, run, r, f, delta) {
+  var doors = thingsAt(w, f.x, f.y, 'door');
+  if (!doors.length) return false;
+  var door = doors[0], top = r.carry.length ? String(r.carry[r.carry.length - 1]) : '', to = mailTopTo(r);
+  if (!top || top !== itemOf(door)) { delta.nothing = true; return true; }
+  if (to && isSet(door.owner) && !sameName(to, door.owner)) { run.wrongDoors = (Number(run.wrongDoors) || 0) + 1; delta.wrongDoor = { id: r.id, x: f.x, y: f.y, to: to, owner: String(door.owner) }; delta.sayKey = 'iw3pWrongDoor'; return true; }
+  var dm = meterOf(door);
+  if (dm.have >= dm.need) { delta.full = { id: String(door.id || ''), x: f.x, y: f.y }; delta.sayKey = 'sayFull'; return true; }
+  delta.post = { id: r.id, x: f.x, y: f.y, into: String(door.id || ''), owner: String(door.owner || ''), to: to };
+  delta.meter = meterDelta(door, f.x, f.y, dm.have + 1); delta.sayKey = 'iw3pPosted';
+  return true;
+}
+/**
+ * Wear (the island tick only, from wearOf): every WEAR.door ticks a door's owner takes one letter in (the seed picks the
+ * door), and a letter the post box gets this tick is addressed to that owner (else to a door still waiting). true = a
+ * draw was made (wearOf then writes the seed back).
+ */
+function mailWear(w, n, rnd, out) {
+  var drew = false, worn = null, pool = [];
+  if (Number(WEAR.door) > 0 && n % Number(WEAR.door) === 0) {
+    for (var i = 0; i < w.things.length; i++) if (w.things[i] && w.things[i].kind === 'door' && meterOf(w.things[i]).have > 0) pool.push(w.things[i]);
+    if (pool.length) { worn = pool[Math.floor(rnd() * pool.length)]; drew = true; out.push({ wear: { id: String(worn.id || ''), kind: 'door', x: worn.x, y: worn.y, have: meterOf(worn).have - 1 } }); }
+  }
+  for (var k = 0; k < out.length; k++) {
+    if (!out[k].letter || isSet(out[k].letter.to)) continue;
+    var to = worn && isSet(worn.owner) ? String(worn.owner) : '';
+    for (var j = 0; j < w.things.length && !to; j++) { var dj = w.things[j]; if (dj && dj.kind === 'door' && isSet(dj.owner) && !isFull(dj)) to = String(dj.owner); }
+    if (to) out[k].letter.to = to;
+  }
+  return drew;
+}
+/**
+ * apply's post half (after the rest of apply): a letter posted through a door; the names beside the carry kept in step
+ * with it (both lists pop and push at their ends — a letter put on the ground keeps its name there); a letter the post
+ * box got wears its name.
+ */
+function mailApply(w, d) {
+  if (d.post) {
+    var rp = robotOf(w, d.post.id), door = thingOf(w, { id: d.post.into, x: d.post.x, y: d.post.y }, { door: 1 });
+    if (rp && door && rp.carry.length) { rp.carry.pop(); setMeter(door, meterOf(door).have + 1); }
+  }
+  if (d.put) {
+    var ru = robotOf(w, d.put.id);
+    if (ru && Array.isArray(ru.carryTo) && ru.carryTo.length > ru.carry.length && ru.carryTo[ru.carry.length]) for (var p = w.things.length - 1; p >= 0; p--) { var lp = w.things[p]; if (lp && lp.kind === d.put.kind && lp.x === d.put.x && lp.y === d.put.y) { lp.to = String(ru.carryTo[ru.carry.length]); break; } }
+  }
+  for (var i = 0; i < w.robots.length; i++) {
+    var r = w.robots[i];
+    if (!Array.isArray(r.carryTo)) continue;
+    while (r.carryTo.length > r.carry.length) r.carryTo.pop();
+    while (r.carryTo.length < r.carry.length) r.carryTo.push('');
+  }
+  if (d.pick && isSet(d.pick.to)) {
+    var rk = robotOf(w, d.pick.id);
+    if (rk && rk.carry.length) { if (!Array.isArray(rk.carryTo)) rk.carryTo = []; while (rk.carryTo.length < rk.carry.length) rk.carryTo.push(''); rk.carryTo[rk.carry.length - 1] = String(d.pick.to); }
+  }
+  for (var j = 0; j < w.robots.length; j++) { var rj = w.robots[j], any = false; if (!Array.isArray(rj.carryTo)) continue; for (var q = 0; q < rj.carryTo.length; q++) if (rj.carryTo[q]) any = true; if (!any) delete rj.carryTo; }
+  if (d.letter && isSet(d.letter.to)) for (var t = w.things.length - 1; t >= 0; t--) { var lt = w.things[t]; if (lt && lt.kind === 'letter' && lt.x === d.letter.x && lt.y === d.letter.y && !isSet(lt.to)) { lt.to = String(d.letter.to); break; } }
+}
+/** The name on the envelope Olive would read: the letter in hand (the last carried), else the letter a pick would take from the tile ahead. */
+function mailEnvelopeTo(w, r) {
+  if (!r) return '';
+  var to = mailTopTo(r);
+  if (to) return to;
+  var f = front(r), th = thingsAt(w, f.x, f.y);
+  for (var i = 0; i < th.length; i++) if (PICKABLE[th[i].kind]) return th[i].kind === 'letter' && isSet(th[i].to) ? String(th[i].to) : '';
+  return '';
+}
+/**
+ * read with an envelope: what she reads is the envelope (the table's note for that name, in the run's language) and her
+ * choices are the doors' owners on the plot. The step keeps the name (s.envelope): an ask that comes back with no word
+ * (the island's tick and runToEnd take the fallback with none) reads it, as the shell's written answer does. Returns
+ * the options.
+ */
+function mailRead(s, w, r, lang, args, options) {
+  var to = mailEnvelopeTo(w, r), note = null, L = oliveL(lang);
+  for (var k in MAIL_NOTES) if (sameName(k, to)) note = MAIL_NOTES[k];
+  if (!note) { delete s.envelope; return options; }
+  var out = [], seen = {};
+  for (var i = 0; i < w.things.length; i++) { var dr = w.things[i]; if (dr && dr.kind === 'door' && isSet(dr.owner) && MAIL_NOTES[String(dr.owner)] && !seen[String(dr.owner)]) { seen[String(dr.owner)] = 1; out.push(String(dr.owner)); } }
+  args.note = note[L];
+  s.envelope = to;
+  return out.length ? out : options;
+}
+/** An envelope read that came back with no word: the name on the envelope (the written answer's own). */
+function mailFallback(run, s, v) {
+  if (s.rung !== 'read' || !isSet(s.envelope) || (v !== undefined && v !== null && String(v) !== '')) return v;
+  run.lastAnswer.value = String(s.envelope);
+  return String(s.envelope);
+}
+/** Did this run's Olive read an envelope (the after-run line then names the door, not "the right row"). */
+function mailRan(run) {
+  var st = run && Array.isArray(run.steps) ? run.steps : [];
+  for (var i = 0; i < st.length; i++) if (st[i] && st[i].op === 'ask' && st[i].rung === 'read' && isSet(st[i].envelope)) return true;
+  return false;
+}
 function slotsOf(b) { return b && b.slots && typeof b.slots === 'object' ? b.slots : {}; }
 function bodyOf(b) { return b && Array.isArray(b.body) ? b.body : []; }
 function collectTricks(list, out) {
@@ -858,15 +977,17 @@ function exec(w, run, s, delta) {
     // …a container gives one of its item; a rock with a max stays on the map at 0 (it regrows on island ticks).
     for (var bi = 0; bi < th.length && !box; bi++) if (JOB_KINDS[th[bi].kind] === 'container' && meterOf(th[bi]).have > 0) box = th[bi];
     for (var r0 = 0; r0 < th.length && !rock0; r0++) if (th[r0].kind === 'rock' && !(Number(th[r0].left) > 0) && Number(th[r0].max) > 0) rock0 = th[r0];
-    if (it && r.carry.length < basketOf(r)) { delta.pick = { id: r.id, kind: it.kind, x: f.x, y: f.y }; delta.sayKey = 'sayPick'; return; }
+    if (it && r.carry.length < basketOf(r)) { delta.pick = { id: r.id, kind: it.kind, x: f.x, y: f.y }; mailPick(it, delta); delta.sayKey = 'sayPick'; return; }
     // IG-002: a rock ahead gives one stone per pick (the basket bounds it); apply shrinks the rock and removes it at 0.
     if (!it && rock && r.carry.length < basketOf(r)) { delta.pick = { id: r.id, kind: 'stone', x: f.x, y: f.y, rock: true }; delta.sayKey = 'sayPick'; return; }
-    if (!it && !rock && box && r.carry.length < basketOf(r)) { delta.pick = { id: r.id, kind: itemOf(box), x: f.x, y: f.y, box: true, from: String(box.id || '') }; delta.meter = meterDelta(box, f.x, f.y, meterOf(box).have - 1); delta.sayKey = 'sayPick'; return; }
+    if (!it && !rock && box && r.carry.length < basketOf(r)) { delta.pick = { id: r.id, kind: itemOf(box), x: f.x, y: f.y, box: true, from: String(box.id || '') }; delta.meter = meterDelta(box, f.x, f.y, meterOf(box).have - 1); mailPick(box, delta); delta.sayKey = 'sayPick'; return; }
     // A pick where a rock was used up: a bump with nothing carried (the rockGone hint names why).
     if (!it && !rock && (spentAt(w, f.x, f.y) || rock0)) { run.rockGone++; run.bumps++; delta.bump = { id: r.id, x: f.x, y: f.y }; delta.rockGone = { x: f.x, y: f.y }; delta.sayKey = 'sayBump'; return; }
     delta.nothing = true; return;
   }
   if (s.op === 'put') {
+    // P108 IW-003 (lane P): a door ahead takes the letter (its owner's only), or refuses.
+    if (mailPut(w, run, r, f, delta)) return;
     // P108 IW-002: a site, a basket or a store ahead takes its own item, one at a time, to its need; a full one refuses
     // (the item stays carried) and says so. Anything else carried is not put there.
     var top = r.carry.length ? String(r.carry[r.carry.length - 1]) : '', into = null, ahead = thingsAt(w, f.x, f.y);
@@ -1086,6 +1207,8 @@ function apply(worldIn, delta) {
       w.reserved[String(rv.id)] = String(d.reserve.robot);
     }
   }
+  // P108 IW-003 (lane P): a letter through a door, the names beside the carry, an addressed letter in the post box.
+  mailApply(w, d);
   return w;
 }
 /** Run a program to its end with no Olive (every ask takes the fallback). For Predict and the gate. */
@@ -1387,6 +1510,8 @@ else if (bumps > 0) key = 'hintBump';
 else if (puddles > 0) key = 'hintWet';
 // P108 IW-003 (s3 base): no can in hand; then (after Olive's line and free play) how much of the job is done.
 else if (noCans > 0) key = 'iw3NoCan';
+// P108 IW-003 (lane P): Olive read an envelope — the line names go to, not the if of Mamie's note.
+else if (rung === 2 && mailRan(run)) key = 'iw3pRead';
 else if (rung >= 1 && rung <= ${OLIVE_RUNG_MAX}) key = 'oliveRung' + rung;
 else if (freePlay && ran) key = 'hintFree';
 else if (ran && job && job.total > 0) { key = 'iw3Job'; vars = { w: job.full, t: job.total }; }

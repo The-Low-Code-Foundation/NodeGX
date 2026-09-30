@@ -840,8 +840,9 @@ describe('CG-001 — garden-kit, the built artefact', () => {
     });
 
     it('🔴 the 13 requests draw exactly as before: every start world AND the world each reference program leaves carries no meter, and Watch empty / Picking off change not one byte', () => {
-      expect(REQUESTS).toHaveLength(13);
-      for (const r of REQUESTS) {
+      // P108 IW-003 (lane P): a mission moved onto the job model wears its meters (its own rows); the rest draw as before.
+      expect(REQUESTS.length).toBeGreaterThanOrEqual(13);
+      for (const r of REQUESTS.filter((q: any) => !q.job && !q.seeded)) {
         const start = { map: [...r.map], things: r.things.map((t: any) => ({ ...t })), robots: [{ id: 'pip', ...r.robotStart, carry: [...(r.robotStart.carry || [])] }] };
         const end = play(JSON.parse(JSON.stringify(start)), r.referenceProgram);
         for (const [when, w] of [['start', start], ['end', end]] as const) {
@@ -992,6 +993,58 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       const port = (node('garden-kit.Garden').inputProps as Record<string, any>).picking;
       expect([port.type, port.default, port.displayName]).toEqual(['boolean', false, 'Picking']);
       expect((node('garden-kit.Garden').inputProps as Record<string, any>).watch.displayName).toBe('Watch');
+    });
+  });
+
+  // ── P108 IW-003 (lane P): the door, drawn from the world the engine writes ──
+  describe('IW-003 (P108 s3, lane P) — a door with its letterbox and its owner’s name; the letter shows once it is through; the island hides the plate', () => {
+    /* eslint-disable @typescript-eslint/no-var-requires */
+    const { REQUESTS } = require('./cg002Content');
+    const { ENGINE, NEW_RUN_SCRIPT, STEP_SCRIPT, APPLY_DELTA_SCRIPT, helper, runScript } = require('./cg002Scripts');
+    /* eslint-enable @typescript-eslint/no-var-requires */
+    const draw = (w: any) => render('garden-kit.Garden', { map: { rows: w.map }, things: w.things, robots: w.robots });
+    const cellOf = (html: string, x: number, y: number) => {
+      const at = html.indexOf(`data-x="${x}" data-y="${y}"`);
+      return html.slice(html.lastIndexOf('<button', at), html.indexOf('</button>', at));
+    };
+    const play = (world: any, program: unknown[], cap = 200) => {
+      let run = runScript(NEW_RUN_SCRIPT, { program, robotId: 'pip', lang: 'en' }).run;
+      let w = world;
+      for (let i = 0; i < cap && !run.done; i++) {
+        const st = runScript(STEP_SCRIPT, { run, world: w, answer: null });
+        w = runScript(APPLY_DELTA_SCRIPT, { world: w, delta: st.delta }).world;
+        run = st.run;
+      }
+      return w;
+    };
+    const start = (id: string) => {
+      const r = REQUESTS.find((q: any) => q.id === id);
+      return helper(ENGINE, 'seedWorld', { map: [...r.map], things: r.things.map((t: any) => ({ ...t })), robots: [{ id: 'pip', ...r.robotStart, carry: [] }] }, JSON.parse(JSON.stringify(r)), 1);
+    };
+
+    it('🔴 Sami’s door on the post-box walk: the door and its plate, a 0/1 letter chip; after the reference program the letter is through (the door shows it) and the chip is 1/1, green', () => {
+      const w0 = start('path-postbox');
+      const before = cellOf(draw(w0), 7, 3);
+      expect(before).toMatch(/data-sprite="door"/);
+      expect(before).toMatch(/class="gd-plate" data-owner="Sami">Sami</);
+      expect(before).toMatch(/class="gd-meter gd-m-letter" data-meter="0\/1" data-kind="door"/);
+      const r = REQUESTS.find((q: any) => q.id === 'path-postbox');
+      const after = cellOf(draw(play(w0, r.referenceProgram)), 7, 3);
+      expect(after).toMatch(/data-sprite="doorMail"/);
+      expect(after).toMatch(/class="gd-meter gd-m-letter gd-full" data-meter="1\/1" data-kind="door" data-full="true"/);
+      // The post box gave its letter: it no longer peeks from the slot.
+      expect(cellOf(draw(w0), 2, 2)).toMatch(/gd-letter-in/);
+      expect(cellOf(draw(play(w0, r.referenceProgram)), 2, 2)).not.toMatch(/gd-letter-in/);
+    });
+
+    it('🔴 the envelopes’ street: three doors, three plates in the owners’ names; on a wide world (the island) the plates are hidden by the stylesheet, the doors are not', () => {
+      const html = draw(start('envelopes'));
+      expect([...html.matchAll(/class="gd-plate" data-owner="([^"]+)"/g)].map((m) => m[1])).toEqual(['Mamie Rose', 'Sami', 'Biscuit']);
+      expect((html.match(/data-sprite="door"/g) || []).length).toBe(3);
+      const css = node('garden-kit.Garden').css as string;
+      expect(css).toMatch(/\.gd-world\[data-wide="1"\] \.gd-plate\{display:none\}/);
+      // The known-firing twin: a door with no owner draws no plate.
+      expect(draw({ map: ['GG'], things: [{ kind: 'door', x: 0, y: 0, count: 0, capacity: 1 }], robots: [] })).not.toMatch(/class="gd-plate"/);
     });
   });
 });

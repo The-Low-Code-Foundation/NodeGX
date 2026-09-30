@@ -16,12 +16,12 @@
       "en": ["watered her three tulips", "carried her letter", "filled Biscuit's bowl", "planted her seeds"]
     },
     "notes_read": {
-      "fr": ["Les rouges, pas les jaunes.", "Les tulipes veulent de l'eau aujourd'hui.", "Porte la lettre à Mamie Rose."],
-      "en": ["The red ones, not the yellow.", "The tulips want water today.", "Take the letter to Mamie Rose."]
+      "fr": ["Les rouges, pas les jaunes.", "Les tulipes veulent de l'eau aujourd'hui.", "Porte la lettre à Mamie Rose.", "Pour Mamie Rose.", "Pour Sami.", "Pour Biscuit."],
+      "en": ["The red ones, not the yellow.", "The tulips want water today.", "Take the letter to Mamie Rose.", "For Mamie Rose.", "For Sami.", "For Biscuit."]
     },
     "plot_objects": {
-      "fr": ["tulipe rouge", "tulipe jaune", "tulipe", "rocher", "pierre", "lettre", "gamelle", "œuf"],
-      "en": ["red tulip", "yellow tulip", "tulip", "rock", "stone", "letter", "bowl", "egg"]
+      "fr": ["tulipe rouge", "tulipe jaune", "tulipe", "rocher", "pierre", "lettre", "gamelle", "œuf", "Mamie Rose", "Sami", "Biscuit"],
+      "en": ["red tulip", "yellow tulip", "tulip", "rock", "stone", "letter", "bowl", "egg", "Mamie Rose", "Sami", "Biscuit"]
     },
     "things_ahead": {
       "fr": ["une rose", "un chat", "un pissenlit", "une tulipe rouge", "un rocher", "un arrosoir", "une tulipe", "une tulipe jaune", "une pierre", "un petit mot", "un panneau", "une gamelle", "un œuf", "une lettre", "de l'herbe", "un chemin", "de l'eau", "un arbre", "une maison", "une boîte aux lettres"],
@@ -129,7 +129,10 @@
         "map": {
           "Les rouges, pas les jaunes.": { "value": "tulipe rouge" },
           "Les tulipes veulent de l'eau aujourd'hui.": { "value": "tulipe rouge" },
-          "Porte la lettre à Mamie Rose.": { "value": "lettre" }
+          "Porte la lettre à Mamie Rose.": { "value": "lettre" },
+          "Pour Mamie Rose.": { "value": "Mamie Rose" },
+          "Pour Sami.": { "value": "Sami" },
+          "Pour Biscuit.": { "value": "Biscuit" }
         }
       },
       "en": {
@@ -137,7 +140,10 @@
         "map": {
           "The red ones, not the yellow.": { "value": "red tulip" },
           "The tulips want water today.": { "value": "red tulip" },
-          "Take the letter to Mamie Rose.": { "value": "letter" }
+          "Take the letter to Mamie Rose.": { "value": "letter" },
+          "For Mamie Rose.": { "value": "Mamie Rose" },
+          "For Sami.": { "value": "Sami" },
+          "For Biscuit.": { "value": "Biscuit" }
         }
       }
     },

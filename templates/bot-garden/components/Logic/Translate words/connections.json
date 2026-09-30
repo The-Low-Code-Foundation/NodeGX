@@ -1169,6 +1169,54 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3pEnvBlurb",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3pEnvBlurb"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3pEnvLine",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3pEnvLine"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3pEnvTitle",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3pEnvTitle"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3pGiftEnvelope",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3pGiftEnvelope"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3pPosted",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3pPosted"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3pStickerEnvelope",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3pStickerEnvelope"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3pSubEnvelopes",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3pSubEnvelopes"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3pWrongDoor",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3pWrongDoor"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-iw4And",
       "toId": "translatewordsOut",
       "toProperty": "iw4And"

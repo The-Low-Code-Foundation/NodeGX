@@ -191,7 +191,8 @@ describe('CG-006 — the requests', () => {
       // Every request is a §2 row, or the D3 letter (a `say` request, rung 1's stage).
       const rest = REQUESTS.map((r) => r.id).filter((id) => !SECTION2.some((s) => s[1] === id));
       // P106 IG-006 appends Olive's three (Mamie's note, the rock and the flowers, Sami's thank-you).
-      expect(rest).toEqual(['letter-say', 'mamie-note', 'rock-flower', 'sami-thanks']);
+      // P108 IW-003 (lane P): the envelopes, the last of IG006_REQUESTS().
+      expect(rest).toEqual(['letter-say', 'mamie-note', 'rock-flower', 'sami-thanks', 'envelopes']);
       // Band 7–9 gets the steps and the repeat rows (the fold is band 10–12's): 1, 1b, 2, 2b.
       expect(REQUESTS.filter((r) => r.band === 1).map((r) => r.id)).toEqual(['path-postbox', 'tulip-door', 'tulips-three', 'path-stones']);
     });

@@ -131,6 +131,12 @@
     },
     {
       "fromId": "hinttableFn",
+      "fromProperty": "out-iw3pRead",
+      "toId": "hinttableOut",
+      "toProperty": "iw3pRead"
+    },
+    {
+      "fromId": "hinttableFn",
       "fromProperty": "out-lang",
       "toId": "hinttableOut",
       "toProperty": "lang"

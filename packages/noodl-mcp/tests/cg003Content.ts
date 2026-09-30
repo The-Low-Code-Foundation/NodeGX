@@ -20,12 +20,12 @@ const s = (en: string, fr: string): Bi => ({ en, fr });
  * request with no line here falls back to the island's general sentence (`isSub`); the template gate names it.
  */
 export const REQUEST_SUBS: Readonly<Record<string, { key: string; words: Bi }>> = {
-  'path-postbox': { key: 'subPathPostbox', words: s('Drive {b} along the path, one step at a time. Every step you take becomes a block.', 'Conduis {b} sur le chemin, un pas à la fois. Chaque pas devient un bloc.') },
+  'path-postbox': { key: 'subPathPostbox', words: s('Drive {b} to the post box, pick up the letter, and carry it to Sami’s door. Every step you take becomes a block.', 'Conduis {b} jusqu’à la boîte aux lettres, prends la lettre, et porte-la à la porte de Sami. Chaque pas devient un bloc.') },
   'tulip-door': { key: 'subTulipDoor', words: s('One thirsty tulip. Walk {b} to her, turn, and water: three kinds of step, in the right order.', 'Une tulipe qui a soif. Emmène {b} jusqu’à elle, tourne, et arrose : trois sortes de pas, dans le bon ordre.') },
   'tulips-three': { key: 'subTulipsThree', words: s('Drive {b} yourself first. {b} remembers every step as a block, and then you can tidy the steps up.', 'Conduis {b} toi-même d’abord. {b} retient chaque pas comme un bloc, et ensuite tu peux ranger les pas.') },
   'path-stones': { key: 'subPathStones', words: s('Put a stone down, step, and again. When the same steps come back, fold them into a repeat.', 'Pose une pierre, avance, et encore. Quand les mêmes pas reviennent, range-les dans un « répéter ».') },
   'bowl-if': { key: 'subBowlIf', words: s('Only the empty bowl gets food. Teach {b} to look first: if the bowl is empty, then fill it.', 'Seul le bol vide reçoit à manger. Apprends à {b} à regarder d’abord : si le bol est vide, alors remplis-le.') },
-  'letter-say': { key: 'subLetterSay', words: s('Carry the letter to the post box, then give {b} something kind to say when it gets there.', 'Porte la lettre jusqu’à la boîte aux lettres, puis donne à {b} quelque chose de gentil à dire en arrivant.') },
+  'letter-say': { key: 'subLetterSay', words: s('Fetch the letter from the post box, carry it to Sami’s door, then give {b} something kind to say there.', 'Va chercher la lettre dans la boîte aux lettres, porte-la à la porte de Sami, puis donne à {b} quelque chose de gentil à dire.') },
   'wall-until': { key: 'subWallUntil', words: s('No need to count the steps. {b} can keep going until the wall, then stop by itself.', 'Pas besoin de compter les pas. {b} peut avancer jusqu’au mur, puis s’arrêter tout seul.') },
   'meow-when': { key: 'subMeowWhen', words: s('Nobody knows when Biscuit will meow. Teach {b} what to do whenever it happens.', 'Personne ne sait quand Biscuit va miauler. Apprends à {b} quoi faire chaque fois que ça arrive.') },
   'eggs-count': { key: 'subEggsCount', words: s('Four eggs, not five. {b} can count while picking, and stop when the count is right.', 'Quatre œufs, pas cinq. {b} peut compter en ramassant, et s’arrêter quand le compte est bon.') },
@@ -33,7 +33,9 @@ export const REQUEST_SUBS: Readonly<Record<string, { key: string; words: Bi }>> 
   // P106 IG-006 (lane C): Olive's three requests.
   'mamie-note': { key: 'subMamieNote', words: s('A program cannot read Mamie’s note, but Olive can. Ask her, then let “if Olive read…” choose the row.', 'Un programme ne sait pas lire le mot de Mamie, Olive si. Demande-lui, puis laisse « si Olive a lu… » choisir la rangée.') },
   'rock-flower': { key: 'subRockFlower', words: s('Olive is right most of the time, not every time. Ask three times, and the count decides.', 'Olive a raison presque tout le temps, pas à chaque fois. Demande trois fois, et le compte décide.') },
-  'sami-thanks': { key: 'subSamiThanks', words: s('The letter is {b}’s job; the kind words are Olive’s. Put her thank-you at the end.', 'La lettre, c’est le travail de {b} ; les mots gentils, ceux d’Olive. Mets son merci à la fin.') }
+  'sami-thanks': { key: 'subSamiThanks', words: s('The letter is {b}’s job; the kind words are Olive’s. Put her thank-you at the end.', 'La lettre, c’est le travail de {b} ; les mots gentils, ceux d’Olive. Mets son merci à la fin.') },
+  // P108 IW-003 (lane P): the envelopes.
+  envelopes: { key: 'iw3pSubEnvelopes', words: s('A program cannot read a name, but Olive can. {b} picks up a letter, Olive reads it, then “go to” what she read.', 'Un programme ne sait pas lire un nom, Olive si. {b} prend une lettre, Olive la lit, puis « aller à » ce qu’elle a lu.') }
 };
 
 /** Page words, EN and FR. `{b}` is the robot's name; `{who}`, `{k}`, `{reward}` are filled by the script that shows them. */
@@ -285,9 +287,9 @@ export const IG006_WORDS: Readonly<Record<string, Bi>> = {
   rqFlowerLine: s('"Flowers and rocks, side by side. Ask Olive if each one is a flower before {b} waters it. If she gets one wrong, ask three times."', '« Des fleurs et des rochers, côte à côte. Demande à Olive si chacun est une fleur avant que {b} l’arrose. Si elle se trompe, demande trois fois. »'),
   stickerFlower: s('Rose sticker', 'Autocollant rose'),
   giftFlower: s('A rose sticker, from Sami', 'Un autocollant rose, offert par Sami'),
-  rqThanksTitle: s('Carry my letter, then say thank you', 'Porte ma lettre, puis dis merci'),
+  rqThanksTitle: s('Carry the letter, then say thank you', 'Porte la lettre, puis dis merci'),
   rqThanksBlurb: s('Olive says it', 'Olive le dit'),
-  rqThanksLine: s('"Take my letter to the post box, then let Olive find the words to thank Mamie Rose."', '« Porte ma lettre jusqu’à la boîte aux lettres, puis laisse Olive trouver les mots pour remercier Mamie Rose. »'),
+  rqThanksLine: s('"There is a letter for Mamie Rose in the post box. Take it to her door, then let Olive find the words to thank her."', '« Il y a une lettre pour Mamie Rose dans la boîte aux lettres. Porte-la à sa porte, puis laisse Olive trouver les mots pour la remercier. »'),
   stickerThanks: s('Bouquet sticker', 'Autocollant bouquet'),
   giftThanks: s('A bouquet sticker, from Sami', 'Un autocollant bouquet, offert par Sami'),
   // The cards (AC5): what every palette block does, in one line. {b} is the robot's name.
