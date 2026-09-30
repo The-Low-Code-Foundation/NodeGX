@@ -308,3 +308,25 @@ count capacity item level max stage walked pen`) is copied onto the thing, the n
 pass through, and a robot's `holds: 'can'` reaches the kits. Spec (`cg003Template`, end): a job world reaches the kits with
 every field; beside it, the 13 requests are drawn with exactly the keys they had before. Red on the old script (1 of 2), green
 on the new.
+
+### Session 3 (lane M `iw003-mamie`, 2026-09-30) — the island drive's job clauses (AC3, AC5) on Mamie's plots
+
+Mamie's five missions carry jobs now (IW-003 §7), so the drive clauses session 1 owed are written, in
+`scripts/devtools/drive-iw003-mamie.js --part island` (a family written into the store as a win writes it: tulip-door
+pinned to Pip, eggs-count to Pocket; the deployed template):
+
+- **AC5 ✅** both robots SEEN walking home when their jobs are done (their drawn tiles end on their start tiles), the plots
+  never reset (each meter only rose: tulip 0/3 → 3/3, basket 0/4 → 4/4), waiting at home (the held plots say `wait`;
+  a plot whose target wore in those ticks starts again, which the next clause grades), and Pip SEEN going back after wear
+  (the tulip's meter drops, he leaves home, waters it, comes home with it full).
+- **AC3 ✅, after a fix**: the Island page closed for 53 s (longer than the tulip's wear, 60 ticks × 760 ms) and opened
+  again. **The first measurement was the defect session 1 foresaw on the page**: the Island page opened again rebuilt every
+  plot from its seed — on a deploy without the fix, the plots came back at age 1, the tulip 0/3, the basket 0/4. Fixed in
+  `Logic/Island world` (`ig004Island.ts`): the held island (`gardenIsland`) is a QUIET input, `kept` (it never makes the
+  island build again); on the same build the island goes on from it. With it: the held island is the same at 3 s and at
+  53 s while the page is closed (nothing ticks), and opened again it goes on (age 63, not 1) with the meters as left.
+  (A tick already in flight as the page closes may land: the clause allows that one.) Spec: `ig004Island` "IW-002 AC3 (the
+  page's half)", with its known-firing half (no kept state → a fresh build).
+- The island's ask on a job plot takes Olive's written answer (`islAnswer`), so Mamie's note finishes there too.
+
+Readings: see IW-003 §7 (lane M).

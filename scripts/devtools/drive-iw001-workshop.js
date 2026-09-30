@@ -463,7 +463,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await wait(600);
   const sayBlk = await evaluate(`(() => { const p = Noodl.Variables.gardenProgram; const l = typeof p === 'string' ? JSON.parse(p || '[]') : p; return l[l.length - 1]; })()`);
   check('AC6: in Teach the say key records say with Sami’s thank-you', !!sayBlk && sayBlk.t === 'say' && sayBlk.slots && sayBlk.slots.text === 'thanksSami', sayBlk);
-  // Mamie's note: the read key.
+  // Mamie's note: the read key. (P108 IW-003, lane M: the note is the day's — the red ones or the yellow ones.)
   await openQuest('en', 'mamie-note');
   const np = await padOf();
   check('AC6: mamie-note’s pad has read (Olive’s, where her drawer has it)', np.includes('olive-read') && (await evaluate(`!!document.querySelector('.bg-blocks-box .gd-palette [data-pal="olive:read"]')`)), np);
@@ -471,7 +471,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await key('olive:read');
   const heard = await until(SEEN, (s) => s.bubble.includes(w('en', 'oliveReadSay').replace('{x}', 'red tulip')), 4000);
   const readCalls = stubCalls.filter((c) => c.body && c.body.rung === 'read').slice(reads0);
-  check(`AC6: the read key asks Olive once (the note on the plot) and her answer is over the robot ("${w('en', 'oliveReadSay').replace('{x}', 'red tulip')}")`, readCalls.length === 1 && readCalls[0].body.slots && readCalls[0].body.slots.note === 'The red ones, not the yellow.' && heard.bubble.startsWith('olive:') && (await blocks()) === 0, { bubble: heard.bubble, calls: readCalls.map((c) => c.body) });
+  check(`AC6: the read key asks Olive once (the note on the plot) and her answer is over the robot ("${w('en', 'oliveReadSay').replace('{x}', 'red tulip')}")`, readCalls.length === 1 && readCalls[0].body.slots && ['The red ones, not the yellow.', 'The yellow ones, not the red.'].includes(readCalls[0].body.slots.note) && heard.bubble.startsWith('olive:') && (await blocks()) === 0, { bubble: heard.bubble, calls: readCalls.map((c) => c.body) });
   await shot('iw001-ac6-read');
   await control('rec');
   await key('olive:read');

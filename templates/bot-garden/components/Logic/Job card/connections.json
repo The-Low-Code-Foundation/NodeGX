@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "dedd0771-f4bc-5480-8d00-f84913c30ce5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "jobcardIn",
+      "fromProperty": "botName",
+      "toId": "jobcardFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "jobcardIn",
+      "fromProperty": "lang",
+      "toId": "jobcardFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "jobcardIn",
+      "fromProperty": "request",
+      "toId": "jobcardFn",
+      "toProperty": "in-request"
+    },
+    {
+      "fromId": "jobcardIn",
+      "fromProperty": "words",
+      "toId": "jobcardFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "jobcardIn",
+      "fromProperty": "world",
+      "toId": "jobcardFn",
+      "toProperty": "in-world"
+    },
+    {
+      "fromId": "jobcardFn",
+      "fromProperty": "out-car",
+      "toId": "jobcardOut",
+      "toProperty": "car"
+    },
+    {
+      "fromId": "jobcardFn",
+      "fromProperty": "out-carLabel",
+      "toId": "jobcardOut",
+      "toProperty": "carLabel"
+    },
+    {
+      "fromId": "jobcardFn",
+      "fromProperty": "out-fin",
+      "toId": "jobcardOut",
+      "toProperty": "fin"
+    },
+    {
+      "fromId": "jobcardFn",
+      "fromProperty": "out-finLabel",
+      "toId": "jobcardOut",
+      "toProperty": "finLabel"
+    },
+    {
+      "fromId": "jobcardFn",
+      "fromProperty": "out-full",
+      "toId": "jobcardOut",
+      "toProperty": "full"
+    },
+    {
+      "fromId": "jobcardFn",
+      "fromProperty": "out-rows",
+      "toId": "jobcardOut",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "jobcardFn",
+      "fromProperty": "out-show",
+      "toId": "jobcardOut",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "jobcardFn",
+      "fromProperty": "out-src",
+      "toId": "jobcardOut",
+      "toProperty": "src"
+    },
+    {
+      "fromId": "jobcardFn",
+      "fromProperty": "out-srcLabel",
+      "toId": "jobcardOut",
+      "toProperty": "srcLabel"
+    },
+    {
+      "fromId": "jobcardFn",
+      "fromProperty": "out-sum",
+      "toId": "jobcardOut",
+      "toProperty": "sum"
+    },
+    {
+      "fromId": "jobcardFn",
+      "fromProperty": "out-sumClass",
+      "toId": "jobcardOut",
+      "toProperty": "sumClass"
+    },
+    {
+      "fromId": "jobcardFn",
+      "fromProperty": "out-tgt",
+      "toId": "jobcardOut",
+      "toProperty": "tgt"
+    },
+    {
+      "fromId": "jobcardFn",
+      "fromProperty": "out-tgtLabel",
+      "toId": "jobcardOut",
+      "toProperty": "tgtLabel"
+    },
+    {
+      "fromId": "jobcardFn",
+      "fromProperty": "out-wr",
+      "toId": "jobcardOut",
+      "toProperty": "wr"
+    },
+    {
+      "fromId": "jobcardFn",
+      "fromProperty": "out-wrLabel",
+      "toId": "jobcardOut",
+      "toProperty": "wrLabel"
+    },
+    {
+      "fromId": "jobcardFn",
+      "fromProperty": "success",
+      "toId": "jobcardOut",
+      "toProperty": "ran"
+    }
+  ]
+}

@@ -37,6 +37,10 @@
  * @module noodl-mcp/tests/ig004Island
  */
 import { ENGINE } from './cg002Scripts';
+// P108 IW-003 (lane M): Olive's written answers, for an ask on a job plot (the island has no Olive; the page's fallback).
+import { OLIVE_SLIM } from './cg005Olive';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { writtenAnswer: islWritten } = require('../../../dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/olive-written.js');
 
 /** A pinned run that has finished shows its done plot for this many ticks before the plot resets and the run restarts. */
 export const ISLAND_HOLD_TICKS = 3;
@@ -81,6 +85,11 @@ function islKeep(out, w) { if (w.reserved && typeof w.reserved === 'object') out
 function islRun(plot, lap) { return newRun(plot.program, plot.robotId, 'en', 'island-' + plot.id + '-' + lap); }
 /** P108 IW-002: a plot's seed, from its request's name (djb2): the island lays a plot the same way every build. */
 function islSeedOf(id) { var h = 5381, t = String(id); for (var i = 0; i < t.length; i++) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0; return h; }
+// P108 IW-003 (lane M): no Olive on the island — an ask on a job plot takes her WRITTEN answer, the fallback the page
+// gives while she rests (Mamie's note read on the island says the day's row, so the pinned program still finishes).
+var ISL_WRITTEN = ${JSON.stringify({ written: OLIVE_SLIM.written })};
+${Function.prototype.toString.call(islWritten)}
+function islAnswer(q) { var a = writtenAnswer(ISL_WRITTEN, q.rung, q.slots, q.lang) || {}, out = { seq: q.seq, ok: false, fallback: true }; if (a.value !== undefined) out.value = a.value; if (a.text !== undefined) out.text = a.text; return out; }
 /** IW-002: a run that is only the walk home (a program that ended with the job not done goes home before it starts again). */
 function islHomeRun(plot, lap) { var run = newRun([], plot.robotId, 'en', 'island-' + plot.id + '-' + lap + '-home'); run.steps = [{ id: null, op: 'home', guard: 0 }]; return run; }
 /**
@@ -95,7 +104,7 @@ function islStepJob(plot, cur) {
   if (phase === 'wait' && !jobDone(w)) { lap++; run = islRun(plot, lap); phase = 'work'; }
   if (phase !== 'wait') {
     var r = step(run, w, null);
-    if (r.waiting && r.request) r = step(r.run, w, { seq: r.request.seq, ok: false, fallback: true });
+    if (r.waiting && r.request) r = step(r.run, w, islAnswer(r.request));
     w = apply(w, r.delta);
     run = r.run; delta = r.delta;
     if (r.done) {
@@ -301,6 +310,11 @@ for (var m = 0; m < mine.length; m++) {
 // the rebuild's) starts again from this one — so a robot brought home never walks back to its plot.
 var build = islHash(JSON.stringify([saved, done, band, mine, pins.map(function (x) { return x ? [x.id, x.requestId, x.isOpen] : null; }), list.map(function (r) { return [r.id, r.plot, r.band]; })]));
 var state = { v: 1, build: build, w: W, h: H, map: rows.map(function (r) { return r.join(''); }), plots: plots, still: still, deco: deco, home: home, live: live, tick: 0 };
+// P108 IW-003 (lane M, IW-002 AC3): the Island page opened again on the SAME island (nothing she saved changed: the same
+// build) goes on from the island it left — each plot's live state as the last tick left it (meters, robots, laps, the
+// wear's age) — never from a fresh build. Kept is the state held (quiet: it never makes the island build again).
+var kept = Inputs.kept && typeof Inputs.kept === 'object' && !Array.isArray(Inputs.kept) ? Inputs.kept : null;
+if (kept && kept.build === build && kept.live && typeof kept.live === 'object') { state.live = kept.live; state.tick = Number(kept.tick) || 0; }
 // Find my robots: the rectangle around every plot with a robot at work and the robots at home.
 var fx0 = 1e9, fy0 = 1e9, fx1 = -1, fy1 = -1;
 for (var f = 0; f < plots.length; f++) if (plots[f].status === 'working') { fx0 = Math.min(fx0, plots[f].x); fy0 = Math.min(fy0, plots[f].y); fx1 = Math.max(fx1, plots[f].x + PW); fy1 = Math.max(fy1, plots[f].y + PH); }

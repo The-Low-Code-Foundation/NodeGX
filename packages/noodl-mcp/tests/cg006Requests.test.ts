@@ -224,16 +224,18 @@ describe('CG-006 — the requests', () => {
     it('no request is met by doing nothing, and each fails for a plausible wrong program (the goal reads the world, not the blurb)', () => {
       const wrong: Record<string, Block[]> = {
         'path-postbox': prog('fwd', 'fwd', 'fwd', 'fwd', 'fwd', 'fwd'),
-        'tulip-door': prog('fwd', 'fwd', 'fwd', 'right', 'fwd', 'water'),
-        // IG-002: the old dance, and the new one without the pond (the can starts empty: dry).
-        'tulips-three': [{ id: 1, t: 'repeat', n: 3, body: prog('left', 'left', 'fwd', 'water', 'right', 'fwd', 'right', 'fwd') }],
+        // P108 IW-003 (lane M): the can picked and filled, and the pours made one tile short of the tulip.
+        'tulip-door': prog('pick', 'left', 'fill', 'left', 'fwd', 'water', 'water', 'water'),
+        // IW-003 (lane M): yesterday's dance — one drink a tulip, so each is 1 of 3 and the job is not done.
+        'tulips-three': [{ id: 1, t: 'repeat', n: 3, body: prog('fill', 'left', 'left', 'fwd', 'water', 'right', 'fwd', 'right', 'fwd') }],
         // P108 IW-003 (lane S): one trip, not four — the first square is path, three are still dirt.
         'path-stones': [{ id: 1, t: 'go_nearest', slots: { kind: 'rock' } }, { id: 2, t: 'repeat', n: 4, body: prog('pick') }, { id: 7, t: 'go_nearest', slots: { kind: 'site' } }, { id: 8, t: 'repeat', n: 4, body: prog('put') }],
         'wall-until': prog('fwd', 'fwd', 'fwd', 'fwd', 'fwd', 'fwd', 'fwd', 'left'),
         'bowl-if': [{ id: 1, t: 'repeat', n: 2, body: prog('fwd', 'fwd', 'left', 'put', 'right') }],
         'meow-when': prog('fwd', 'fwd'),
-        'eggs-count': [{ id: 1, t: 'until', slots: { sensor: 'wall_ahead' }, body: prog('pick', 'count_inc', 'fwd') }],
-        'rows-trick': [{ id: 1, t: 'repeat', n: 3, body: prog('fwd', 'fwd', 'left', 'water', 'right') }]
+        // IW-003 (lane M): four eggs picked up and never brought to the basket; the trick made and used once.
+        'eggs-count': [{ id: 1, t: 'repeat', n: 4, body: [{ id: 2, t: 'go_nearest', slots: { kind: 'egg' } }, { id: 3, t: 'pick' }] }],
+        'rows-trick': [{ id: 1, t: 'trick', slots: { name: 'row' }, body: [...prog('fill', 'left', 'left'), { id: 7, t: 'repeat', n: 3, body: prog('fwd', 'left', 'water', 'right') }] }, { id: 20, t: 'do', slots: { name: 'row' } }]
       };
       for (const [, id] of SECTION2) {
         const r = byId(id);
@@ -241,7 +243,7 @@ describe('CG-006 — the requests', () => {
       }
       // 1b's wrong turn is the README's own sentence: the puddle is the error message.
       const door = goalOf(byId('tulip-door'), wrong['tulip-door']);
-      expect([door.end.run.puddles, door.goal.missing]).toEqual([1, ['every_tulip_watered', 'no_puddle']]);
+      expect([door.end.run.puddles, door.goal.missing]).toEqual([1, ['job_done', 'no_puddle']]);
       // 2b, one trip only (P108 IW-003 lane S): one square is path, three are dirt, and the job is 1 of 4.
       const once = goalOf(byId('path-stones'), wrong['path-stones']);
       expect(once.end.world.things.filter((t: any) => t.kind === 'site').map((t: any) => t.have)).toEqual([4, 0, 0, 0]);
@@ -251,10 +253,11 @@ describe('CG-006 — the requests', () => {
     it('row 2 "the fold offered": the band 10–12 recording of the tulips offers repeat 3; band 7–9 is never offered one', () => {
       const r = byId('tulips-three');
       const recording = unrolled(r.referenceProgram);
-      // IG-002: the fetch-and-return dance, nine blocks a pass (fill, turn round, walk, water, step down, walk back).
-      expect(recording).toHaveLength(27);
+      // IG-002: the fetch-and-return dance; IW-003 (lane M): eleven blocks a pass (fill, turn round, walk, three pours,
+      // step down, walk back).
+      expect(recording).toHaveLength(33);
       const b2 = runScript(FIND_REPEAT, { program: recording, band: 2 });
-      expect({ found: b2.found, offer: b2.offer, count: b2.count, len: b2.len }).toEqual({ found: true, offer: true, count: 3, len: 9 });
+      expect({ found: b2.found, offer: b2.offer, count: b2.count, len: b2.len }).toEqual({ found: true, offer: true, count: 3, len: 11 });
       expect(runScript(FIND_REPEAT, { program: recording, band: 1 }).offer).toBe(false);
     });
 
@@ -272,8 +275,9 @@ describe('CG-006 — the requests', () => {
     it('row 1b: the water lands on the tulip under the house, and nowhere else', () => {
       const r = byId('tulip-door');
       const { end } = goalOf(r, r.referenceProgram);
-      expect(end.world.things).toEqual([{ kind: 'tulip', x: 7, y: 1, watered: true }]);
-      expect(end.deltas.filter((d) => d.water)).toEqual([expect.objectContaining({ water: { x: 7, y: 1 } })]);
+      // IW-003 (lane M): three drinks from the can Pip picked up (the can is in his hand, not on the plot).
+      expect(end.world.things).toEqual([{ kind: 'tulip', id: 'tulip', x: 6, y: 1, watered: true, have: 3, need: 3 }]);
+      expect(end.deltas.filter((d) => d.water).map((d) => d.water)).toEqual([{ x: 6, y: 1 }, { x: 6, y: 1 }, { x: 6, y: 1 }]);
     });
   });
 

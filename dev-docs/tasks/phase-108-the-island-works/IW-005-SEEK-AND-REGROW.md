@@ -180,3 +180,19 @@ model's answer naming a place (deviation 6).
 
 **Seen on the shared box:** a headless Chrome from 2026-09-23 (pid 21691, PPID 1, `nodegx-deployed-i5OaGy`) — not this
 lane's; left alone.
+
+### Session 3 (lane M `iw003-mamie`, 2026-09-30) — AC5 on the pages, and deviation 2 closed
+
+- **AC5 ✅ 2D (the island)**: eggs-count pinned to Pocket — his drawn tile SEEN walking into the hen's pen for the eggs where
+  the hen laid them, the eggs drawn there going, the basket's number on the island rising 0/4 → 4/4, and after the wear
+  (Mamie takes an egg) the hen has laid again and he walks to one of HER new eggs (island spec: every egg he picks on lap 1
+  lay there before the tick). `drive-iw003-mamie.js --part island`.
+- **AC5 ✅ 3D (the Workshop, swiftshader)**: in Garden 3D, taught with the pad's "go to the nearest 🥚" (one press walks the
+  whole way), pick up, "go to the 🧺", put, and played: Pocket's name chip SEEN walking tile by tile to stand by an egg where
+  the hen laid it. `--part look3d --mode 3d`. The whole island in 3D under software GL hands back to the flat island
+  (IG-007's Too Slow) within a few ticks — recorded as a readout, not the gate (a real GPU: could not verify).
+- **The regrown rock** of AC5 is lane S's (rocks are Cobble's).
+- **Deviation 2 closed**: `sayNone` is worded by kind — the step says `sayNone:<kind>`, the page words it from `iw3mNone<Kind>`
+  ("No more eggs here — the hen is still laying.") in Draw world and on the pad, else the plain `sayNone`.
+
+Readings: see IW-003 §7 (lane M).

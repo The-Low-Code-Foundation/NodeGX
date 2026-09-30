@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "dedd0771-f4bc-5480-8d00-f84913c30ce5",
+  "name": "Job card",
+  "path": "/Logic/Job card",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The job in five lines, and how much of it is done. Runs when an input changes; Ran after each run."
+}

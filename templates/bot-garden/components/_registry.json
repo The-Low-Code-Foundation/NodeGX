@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 591,
+      "connectionCount": 642,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -295,7 +295,7 @@
       "path": "Logic/Pad keys",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 7,
+      "connectionCount": 8,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -495,7 +495,7 @@
       "path": "Logic/Island world",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 13,
+      "connectionCount": 14,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -611,6 +611,14 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
+    "Logic/Job card": {
+      "path": "Logic/Job card",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 21,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
     "Logic/App store": {
       "path": "Logic/App store",
       "type": "visual",
@@ -663,7 +671,7 @@
       "path": "Workshop/Pad",
       "type": "visual",
       "nodeCount": 7,
-      "connectionCount": 11,
+      "connectionCount": 12,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -691,11 +699,19 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
+    "Workshop/Job line": {
+      "path": "Workshop/Job line",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 2,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
     "Workshop/Play": {
       "path": "Workshop/Play",
       "type": "visual",
-      "nodeCount": 157,
-      "connectionCount": 432,
+      "nodeCount": 161,
+      "connectionCount": 442,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -711,7 +727,7 @@
       "path": "Island/World",
       "type": "visual",
       "nodeCount": 45,
-      "connectionCount": 98,
+      "connectionCount": 99,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -909,8 +925,8 @@
     }
   },
   "stats": {
-    "totalComponents": 113,
-    "totalNodes": 906,
-    "totalConnections": 2804
+    "totalComponents": 115,
+    "totalNodes": 919,
+    "totalConnections": 2892
   }
 }

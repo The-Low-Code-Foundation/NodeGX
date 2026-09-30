@@ -37,6 +37,8 @@ import { BLOCK_META, CAN_MAX, ENGINE, FOLD_HELPERS, MANY_BLOCKS, ROBOT_NAME_MAX,
 // P108 IW-001 F2: the run cap the page's Runner applies to a played run (the engine's own constant, imported).
 import { MAX_TICKS } from './cg002Scripts';
 import { BLOCK_CARDS, CardBlock, EYES, HATS, IG006_WORDS, IG006_WORD_KEYS, ISLANDERS, ISLAND_PINS, PAD_KEYS, PAGE_WORDS, PAGE_WORD_KEYS, REQUEST_SUBS, SKILL_BLOCKS } from './cg003Content';
+// P108 IW-003 (lane M): the pad's go keys; the job card.
+import { JOB_CARDS, PAD_GO } from './cg003Content';
 import { ROBOT_PAINTS } from './cg007Look';
 import { FREE_PLAY_PLOT, ISLAND_BASE, ISLAND_HOME, PLOT_H, PLOT_W } from './cg002Content';
 import { FIND_ROBOTS_SCRIPT, ISLAND_TICK_SCRIPT, PLOT_AT_SCRIPT, islandChooseScript, islandWorldScript } from './ig004Island';
@@ -80,6 +82,9 @@ function wordMap(rows, lang, name) {
 function fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }
 function langOf(v) { return String(v) === 'fr' ? 'fr' : 'en'; }
 function nameOf(v) { var n = String(v || '').trim(); return n || 'Pip'; }
+// P108 IW-003 (lane M): sayNone:<kind> (the step's none, by what was sought) as its word key — iw3mNone<Kind> when the
+// table has one, else the plain sayNone; any other key comes back as it was.
+function noneKeyOf(key, words) { var k = String(key || ''); if (k.indexOf('sayNone:') !== 0) return k; var kind = k.slice(8), wk = 'iw3mNone' + kind.charAt(0).toUpperCase() + kind.slice(1); return words && words[wk] ? wk : 'sayNone'; }
 `;
 
 // ── The workshop ────────────────────────────────────────────────────────────
@@ -258,6 +263,8 @@ for (var r = 0; r < rl.length; r++) {
 var lang = langOf(Inputs.lang);
 var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
 var say = String(Inputs.sayKey || '');
+// P108 IW-003 (lane M): the step's sayNone:<kind> is worded by what was sought (iw3mNone<Kind>), else the plain sayNone.
+say = noneKeyOf(say, w);
 // IG-001 D6: what Olive said (sayText, olive style, Step Ms × 3) or a say block's line (its word, or the text itself),
 // keyed by run and tick so the same line on a later tick is a new bubble. Nothing to say leaves the port alone: the
 // kit's own timer hides a bubble, and a null here would hide it on the very next tick.
@@ -308,6 +315,18 @@ for (var i = 0; i < PAD.length; i++) {
   // with BOTH sets (the page drive: ten keys on the tulips, each under its twin, so no press landed).
   keys.push({ id: 'padkey-' + slug, op: op, cls: 'bg-key bg-key-' + slug + (place === 'bg-key-' + slug ? '' : ' ' + place) + ' bg-i-' + PAD[i][2] + ' bg-press', label: W[PAD[i][3]] || op });
 }
+// P108 IW-003 (lane M): go to nearest / go to — one key per kind on the plot as the request opens (PAD_GO), op
+// go_nearest:<kind> or go_to:<kind>, after the actions; its label says the whole step, its face shows the kind.
+var GO = ${JSON.stringify({ nearest: PAD_GO.nearest, to: PAD_GO.to })};
+var onPlot = Inputs.world && Array.isArray(Inputs.world.things) ? Inputs.world.things : [];
+function lying(k) { for (var q = 0; q < onPlot.length; q++) if (onPlot[q] && onPlot[q].kind === k) return true; return false; }
+var goRows = [];
+if (allowed.indexOf('go_nearest') !== -1) for (var gn = 0; gn < GO.nearest.length; gn++) if (lying(GO.nearest[gn])) goRows.push(['go_nearest', GO.nearest[gn]]);
+if (allowed.indexOf('go_to') !== -1) for (var gt = 0; gt < GO.to.length; gt++) if (lying(GO.to[gt])) goRows.push(['go_to', GO.to[gt]]);
+for (var gi = 0; gi < goRows.length; gi++) {
+  var gslug = (goRows[gi][0] === 'go_to' ? 'go-to-' : 'go-nearest-') + goRows[gi][1];
+  keys.push({ id: 'padkey-' + gslug, op: goRows[gi][0] + ':' + goRows[gi][1], cls: 'bg-key bg-key-' + gslug + ' ' + slots[Math.min(used++, slots.length - 1)] + ' bg-key-go bg-key-go-' + goRows[gi][1] + ' bg-i-go bg-press', label: (W[goRows[gi][0] === 'go_to' ? 'bGoTo' : 'bGoNearest'] || goRows[gi][0]) + ' ' + (W['iw4K_' + goRows[gi][1]] || goRows[gi][1]) });
+}
 Outputs.keys = keys;
 Outputs.count = keys.length;
 `;
@@ -329,16 +348,35 @@ var raw = Inputs.program, prog = [];
 if (Array.isArray(raw)) prog = JSON.parse(JSON.stringify(raw));
 else if (typeof raw === 'string' && raw) { try { var parsed = JSON.parse(raw); if (Array.isArray(parsed)) prog = parsed; } catch (e) { prog = []; } }
 var w = worldOf(Inputs.world);
-var ok = !!OPS[op] && w.robots.length > 0;
+// P108 IW-003 (lane M): a go key (go_nearest:<kind>, go_to:<kind>) records its block with the kind, or a chip of the first
+// thing of that kind on the plot.
+var goKey = /^(go_nearest|go_to):([a-z]+)$/.exec(op);
+var goChip = null;
+if (goKey && goKey[1] === 'go_to') for (var gc = 0; gc < w.things.length && !goChip; gc++) if (w.things[gc] && w.things[gc].kind === goKey[2]) goChip = { kind: goKey[2], x: w.things[gc].x, y: w.things[gc].y };
+if (goChip && w.things.length) for (var gd = 0; gd < w.things.length; gd++) if (w.things[gd].kind === goChip.kind && w.things[gd].x === goChip.x && w.things[gd].y === goChip.y && isSet(w.things[gd].id)) { goChip = { id: String(w.things[gd].id), kind: goChip.kind, x: goChip.x, y: goChip.y }; break; }
+var ok = (!!OPS[op] || (!!goKey && (goKey[1] === 'go_nearest' || !!goChip))) && w.robots.length > 0;
 var sayKey = '', bumped = false, asking = false;
 if (ok) {
   var id = maxId(prog) + 1;
   var blk = { id: id, t: op };
   if (op === 'say') blk.slots = { text: SAY_OF[String(Inputs.islander || '')] || 'thanksMamie' };
+  if (goKey) blk = goKey[1] === 'go_nearest' ? { id: id, t: 'go_nearest', slots: { kind: goKey[2] } } : { id: id, t: 'go_to', slots: { thing: goChip } };
   var host = null, sel = Inputs.selected;
   if (sel !== undefined && sel !== null && sel !== '') { var c = findBlock(prog, Number(sel)); if (c && Array.isArray(c.body) && c.t !== 'if') host = c.body; }
   if (record) (host || prog).push(clone(blk));
   var st = step(newRun([clone(blk)], w.robots[0].id, Inputs.lang), w, null);
+  // P108 IW-003 (lane M): a go key walks the whole way in one press (every tick of the block, the engine's own step and
+  // apply, as Play walks it); what it last said is the press's line (a none: sayNone:<kind>).
+  if (goKey) {
+    var gsay = '', gn2 = 0;
+    for (;;) {
+      if (st.delta.sayKey) gsay = st.delta.none && st.delta.sayKey === 'sayNone' ? 'sayNone:' + st.delta.none.kind : st.delta.sayKey;
+      w = apply(w, st.delta);
+      if (st.done || ++gn2 > 400) break;
+      st = step(st.run, w, null);
+    }
+    st = { delta: { sayKey: gsay }, waiting: false };
+  }
   // F7: Olive's read parks on its ask, as the block does in a run: the page asks her (Request, Pending) and her answer
   // is spoken by Pad answer. Anything else moves the world by the engine's own step.
   if (st.waiting) { asking = true; Outputs.request = st.request; Outputs.pending = st.run; }
@@ -349,7 +387,10 @@ if (ok) {
 // F7: a say key's line over the robot (a new bubble each press); nothing to say leaves the port alone.
 if (sayKey) {
   var WR = Array.isArray(Inputs.words) ? Inputs.words : [], lg = String(Inputs.lang) === 'fr' ? 'fr' : 'en', said = sayKey;
-  for (var q = 0; q < WR.length; q++) if (WR[q] && WR[q].key === sayKey) said = String(WR[q][lg] || WR[q].en || sayKey).split('{b}').join(String(Inputs.botName || 'Pip'));
+  // P108 IW-003 (lane M): sayNone:<kind> is worded by kind (iw3mNone<Kind>), else the plain sayNone.
+  var lookKey = sayKey;
+  if (lookKey.indexOf('sayNone:') === 0) { var nk = 'iw3mNone' + lookKey.charAt(8).toUpperCase() + lookKey.slice(9); lookKey = 'sayNone'; for (var nq = 0; nq < WR.length; nq++) if (WR[nq] && WR[nq].key === nk) lookKey = nk; }
+  for (var q = 0; q < WR.length; q++) if (WR[q] && WR[q].key === lookKey) said = String(WR[q][lg] || WR[q].en || sayKey).split('{b}').join(String(Inputs.botName || 'Pip'));
   Outputs.bubble = { robot: 0, text: said, style: 'plain', n: 'pad:' + id + ':' + Math.random().toString(36).slice(2, 8) };
 }
 Outputs.asking = asking;
@@ -1322,6 +1363,39 @@ Outputs.show = stale;
 Outputs.text = stale ? fill(w.iw3bTeachAgain, { b: name }) : '';
 `;
 
+/**
+ * P108 IW-003 (lane M): the job card (IW-000's graded look) — the request's five lines (source, carrier, target, finish
+ * line, wear) in the child's language, and how much of the job the world shows done: one target, its meter (the tulip's
+ * drinks, the eggs in the basket); more, how many are full. No row in JOB_CARDS: no card.
+ */
+export const JOB_CARD_SCRIPT = `${ENGINE}${WORD_HELPER}
+var CARDS = ${JSON.stringify(JOB_CARDS)};
+var req = Inputs.request && typeof Inputs.request === 'object' ? Inputs.request : null;
+var card = req && CARDS[String(req.id)] ? CARDS[String(req.id)] : null;
+var W = wordMap(Inputs.words, langOf(Inputs.lang), nameOf(Inputs.botName));
+Outputs.show = !!card;
+Outputs.srcLabel = W.iw3mJcSrc || '';
+Outputs.carLabel = W.iw3mJcCar || '';
+Outputs.tgtLabel = W.iw3mJcTgt || '';
+Outputs.finLabel = W.iw3mJcFin || '';
+Outputs.wrLabel = W.iw3mJcWr || '';
+Outputs.src = card ? W[card.src] || '' : '';
+Outputs.car = card ? W[card.car] || '' : '';
+Outputs.tgt = card ? W[card.tgt] || '' : '';
+Outputs.fin = card ? W[card.fin] || '' : '';
+Outputs.wr = card ? W[card.wr] || '' : '';
+// One row per line for the card's repeater (a stable id each: a row is a Noodl Object, global by id).
+var PARTS = [['src', 'iw3mJcSrc'], ['car', 'iw3mJcCar'], ['tgt', 'iw3mJcTgt'], ['fin', 'iw3mJcFin'], ['wr', 'iw3mJcWr']], rows = [];
+if (card) for (var pi = 0; pi < PARTS.length; pi++) rows.push({ id: 'jobline-' + PARTS[pi][0], label: W[PARTS[pi][1]] || '', text: W[card[PARTS[pi][0]]] || '' });
+Outputs.rows = rows;
+var jw = worldOf(Inputs.world), jj = jobOf(jw), jn = 0, jt = 0;
+if (jj && jj.targets.length === 1) { var one = thingById(jw, jj.targets[0]), m1 = one ? meterOf(one) : { have: 0, need: 0 }; jn = m1.have; jt = isFinite(m1.need) ? m1.need : 0; }
+else if (jj) { var jp = jobProgress(jw); jn = jp.full; jt = jp.total; }
+Outputs.sum = card && jt > 0 ? fill(W[card.sum] || '', { n: jn, t: jt }) : '';
+Outputs.full = jt > 0 && jn >= jt;
+Outputs.sumClass = 'bg-job-sum' + (jt > 0 && jn >= jt ? ' bg-job-sum-full' : '');
+`;
+
 export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; seam: string }> = [
   { component: 'Logic/Read program', script: READ_PROGRAM_SCRIPT, seam: 'the program as a list, whatever held it' },
   { component: 'Logic/Start world', script: START_WORLD_SCRIPT, seam: 'the world a request starts from, and the request' },
@@ -1377,5 +1451,7 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Pick thing', script: PICK_THING_SCRIPT, seam: 'the thing on a tapped tile, for the chip that is picking' },
   { component: 'Logic/Var monitor', script: VAR_MONITOR_SCRIPT, seam: 'what the robot remembers, as one line under the world' },
   // P108 IW-003 (lane B).
-  { component: 'Logic/Teach again', script: TEACH_AGAIN_SCRIPT, seam: 'a program pinned on this request that its rewritten job outgrew: the line that asks her to teach it again' }
+  { component: 'Logic/Teach again', script: TEACH_AGAIN_SCRIPT, seam: 'a program pinned on this request that its rewritten job outgrew: the line that asks her to teach it again' },
+  // P108 IW-003 (lane M).
+  { component: 'Logic/Job card', script: JOB_CARD_SCRIPT, seam: 'the job in five lines, and how much of it is done' }
 ];

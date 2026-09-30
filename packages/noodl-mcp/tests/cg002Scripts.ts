@@ -184,7 +184,7 @@ function layOut(w, seeded, rs) {
   var byId = function (id) { for (var q = 0; q < (w.things || []).length; q++) if (w.things[q] && String(w.things[q].id) === String(id)) return w.things[q]; return null; };
   if (Array.isArray(sd.choose)) for (var ci = 0; ci < sd.choose.length; ci++) {
     var ch = sd.choose[ci], cth = ch && byId(ch.thing);
-    if (cth && ch.field && Array.isArray(ch.among) && ch.among.length) cth[ch.field] = JSON.parse(JSON.stringify(ch.among[Math.floor(rnd() * ch.among.length)]));
+    if (cth && ch.field && Array.isArray(ch.among) && ch.among.length) { var ck = Math.floor(rnd() * ch.among.length); cth[ch.field] = JSON.parse(JSON.stringify(ch.among[ck])); chosenTargets(w, ch, ck); }
   }
   if (sd.shuffle && Array.isArray(sd.shuffle.things) && Array.isArray(sd.shuffle.values) && sd.shuffle.field) {
     var deck = sd.shuffle.values.slice();
@@ -220,6 +220,12 @@ function seedWorld(world, req, seed) {
   if (req.job) world.job = JSON.parse(JSON.stringify(req.job));
   if (req.seeded) layOut(world, req.seeded, req.robotStart);
   return world;
+}
+// P108 IW-003 (lane M): a choose may carry the job's targets for each of its values (index-aligned): the value drawn
+// sets the targets too, so the job follows the day (Mamie's note says the yellow ones: the yellow row is the job). No draw.
+function chosenTargets(w, ch, k) {
+  if (!Array.isArray(ch.targets) || !Array.isArray(ch.targets[k]) || !w.job || typeof w.job !== 'object') return;
+  w.job.targets = JSON.parse(JSON.stringify(ch.targets[k]));
 }
 `;
 
@@ -1298,7 +1304,12 @@ function goalMet(w, run, program, goal) {
 
 export const FOLD_HELPERS = `
 function sameBlock(a, b) {
-  if (!a || !b || a.body || b.body) return false;
+  if (!a || !b) return false;
+  // P108 IW-003 (lane M): two REPEATS are the same block when their shapes are (t, n, slots, body, else): pours folded
+  // into repeat 3 inside each pass of the tulips dance still let the passes fold (before, a container never matched).
+  // (s3 merge) Only a repeat: an if / until / when still never matches — with it, bowl-if's recording offered a rotated
+  // body holding its if (lane F's fold-nudge rule, red), and a pad recording never holds one anyway.
+  if (a.body || b.body) return a.t === 'repeat' && b.t === 'repeat' && !!a.body && !!b.body && JSON.stringify(shapeOf([a])) === JSON.stringify(shapeOf([b]));
   if (a.t !== b.t || (Number(a.n) || 0) !== (Number(b.n) || 0)) return false;
   return JSON.stringify(a.slots || {}) === JSON.stringify(b.slots || {});
 }
@@ -1371,7 +1382,8 @@ Outputs.tick = st.run.tick;
 Outputs.count = st.run.count;
 Outputs.bumps = st.run.bumps;
 Outputs.puddles = st.run.puddles;
-Outputs.sayKey = st.delta.sayKey || '';
+// P108 IW-003 (lane M): nothing found is said by what was sought — sayNone:<kind>, worded by the page (Draw world).
+Outputs.sayKey = st.delta.none && st.delta.sayKey === 'sayNone' && st.delta.none.kind ? 'sayNone:' + st.delta.none.kind : st.delta.sayKey || '';
 Outputs.sayText = st.delta.sayText || '';
 Outputs.sayStyle = st.delta.sayStyle || '';
 Outputs.proposal = st.delta.proposal || null;

@@ -428,7 +428,11 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
         await writeStore(`if (a.stickers.indexOf(${JSON.stringify(CAN_UP.id)}) === -1) a.stickers.push(${JSON.stringify(CAN_UP.id)})`);
         const after = await pours();
         readings[`can-${tag}`] = { before, after };
-        check(`IG-005 AC3 ${tag}: before ${CAN_UP.id} one fill gives ${specOf('pip').canMax} and pours ${specOf('pip').canMax} waters, the next dry; after it one fill gives ${CAN_UP.canMax} and pours ${CAN_UP.canMax}`, !!before.full && before.full.max === specOf('pip').canMax && before.full.can === specOf('pip').canMax && before.wet === specOf('pip').canMax && !!after.full && after.full.max === CAN_UP.canMax && after.full.can === CAN_UP.canMax && after.wet === CAN_UP.canMax && after.seen[after.seen.length - 1].can === 0, { before, after });
+        // P108 IW-003 (lane M): the first tulip wants three drinks (a meter) and refuses a fourth — nothing spent — so the
+        // bigger can waters it full and keeps the rest for the next tulip.
+        const NEED = Number((TULIPS.things.find((t) => t.kind === 'tulip') || {}).need) || 1;
+        const small = Math.min(specOf('pip').canMax, NEED), big = Math.min(CAN_UP.canMax, NEED);
+        check(`IG-005 AC3 ${tag}: before ${CAN_UP.id} one fill gives ${specOf('pip').canMax} and pours ${small} into the first tulip, the next dry; after it one fill gives ${CAN_UP.canMax}, the tulip takes its ${big} and the can keeps ${CAN_UP.canMax - big} for the next`, !!before.full && before.full.max === specOf('pip').canMax && before.full.can === specOf('pip').canMax && before.wet === small && before.seen[before.seen.length - 1].can === specOf('pip').canMax - small && !!after.full && after.full.max === CAN_UP.canMax && after.full.can === CAN_UP.canMax && after.wet === big && after.seen[after.seen.length - 1].can === CAN_UP.canMax - big, { before, after, NEED });
         if (shots) await shot(`ig005-${tag}-07-bigger-can`);
       }
       check(`IG-005 ${tag}: 0 console errors, 0 network errors so far`, page.consoleErrors.length === 0 && page.networkErrors.length === 0, { console: page.consoleErrors.slice(0, 5), network: page.networkErrors.slice(0, 5) });

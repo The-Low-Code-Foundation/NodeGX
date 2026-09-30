@@ -16,8 +16,8 @@
       "en": ["watered her three tulips", "carried her letter", "filled Biscuit's bowl", "planted her seeds"]
     },
     "notes_read": {
-      "fr": ["Les rouges, pas les jaunes.", "Les tulipes veulent de l'eau aujourd'hui.", "Porte la lettre à Mamie Rose.", "Pour Mamie Rose.", "Pour Sami.", "Pour Biscuit."],
-      "en": ["The red ones, not the yellow.", "The tulips want water today.", "Take the letter to Mamie Rose.", "For Mamie Rose.", "For Sami.", "For Biscuit."]
+      "fr": ["Les rouges, pas les jaunes.", "Les tulipes veulent de l'eau aujourd'hui.", "Porte la lettre à Mamie Rose.", "Pour Mamie Rose.", "Pour Sami.", "Pour Biscuit.", "Les jaunes, pas les rouges."],
+      "en": ["The red ones, not the yellow.", "The tulips want water today.", "Take the letter to Mamie Rose.", "For Mamie Rose.", "For Sami.", "For Biscuit.", "The yellow ones, not the red."]
     },
     "plot_objects": {
       "fr": ["tulipe rouge", "tulipe jaune", "tulipe", "rocher", "pierre", "lettre", "gamelle", "œuf", "Mamie Rose", "Sami", "Biscuit"],
@@ -132,7 +132,8 @@
           "Porte la lettre à Mamie Rose.": { "value": "lettre" },
           "Pour Mamie Rose.": { "value": "Mamie Rose" },
           "Pour Sami.": { "value": "Sami" },
-          "Pour Biscuit.": { "value": "Biscuit" }
+          "Pour Biscuit.": { "value": "Biscuit" },
+          "Les jaunes, pas les rouges.": { "value": "tulipe jaune" }
         }
       },
       "en": {
@@ -143,7 +144,8 @@
           "Take the letter to Mamie Rose.": { "value": "letter" },
           "For Mamie Rose.": { "value": "Mamie Rose" },
           "For Sami.": { "value": "Sami" },
-          "For Biscuit.": { "value": "Biscuit" }
+          "For Biscuit.": { "value": "Biscuit" },
+          "The yellow ones, not the red.": { "value": "yellow tulip" }
         }
       }
     },

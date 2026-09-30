@@ -221,7 +221,8 @@ describe('P108 IW-004 — the block gate (garden-kit.Blocks, the translator)', (
       });
     }
     it('🔴 known-firing: the memo is what keeps a stored shape — without it, a stored `arg: "4"` comes back in the contract’s order', () => {
-      const stored = asStored(REQUESTS.find((r) => r.id === 'eggs-count')?.referenceProgram ?? [{ id: 1, t: 'until', slots: { sensor: 'count_is', arg: 4 }, body: [] }]);
+      // (P108 IW-003, lane M: the eggs' old reference, as a v4 save holds it — the eggs now count with a cond.)
+      const stored = asStored([{ id: 1, t: 'until', slots: { sensor: 'count_is', arg: 4 }, body: [{ id: 2, t: 'pick' }, { id: 3, t: 'count_inc' }, { id: 4, t: 'fwd' }] }]);
       const state = T().toBlockly(stored);
       const strip = (j: any): void => {
         if (!j || typeof j !== 'object') return;

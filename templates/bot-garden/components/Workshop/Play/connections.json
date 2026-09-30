@@ -574,6 +574,60 @@
       "toProperty": "mounted"
     },
     {
+      "fromId": "plStart",
+      "fromProperty": "request",
+      "toId": "plJobCard",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "plWorldVar",
+      "fromProperty": "value",
+      "toId": "plJobCard",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "words",
+      "toId": "plJobCard",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plJobCard",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "botName",
+      "toId": "plJobCard",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "plJobCard",
+      "fromProperty": "show",
+      "toId": "plJob",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plJobCard",
+      "fromProperty": "sum",
+      "toId": "plJobSum",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plJobCard",
+      "fromProperty": "sumClass",
+      "toId": "plJobSum",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "plJobCard",
+      "fromProperty": "rows",
+      "toId": "plJobEach",
+      "toProperty": "items"
+    },
+    {
       "fromId": "plIn",
       "fromProperty": "band",
       "toId": "plPalette",
@@ -866,6 +920,12 @@
       "fromProperty": "palette",
       "toId": "plPad",
       "toProperty": "palette"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "world",
+      "toId": "plPad",
+      "toProperty": "world"
     },
     {
       "fromId": "plIn",

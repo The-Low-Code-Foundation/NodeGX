@@ -322,25 +322,37 @@ async function pagesPart() {
       await runOver();
 
       // ── P-IG6-AC2: Mamie's note through the real route: read → if Olive read the red tulip → the red row, not the yellow ──
+      // P108 IW-003 (lane M): the note is the day's (the page lays it from its seed: the red ones or the yellow ones) and Pip
+      // starts facing the well: read, fill, if red { left }, if yellow { right }, forward, left, water — the first tulip of
+      // the row the stub (answering from the shell's written table) read.
       await openRequest('Water the flowers my note asks for', 'Mamie’s note');
+      const day = await ev(`(() => { const W = Noodl.Variables.gardenWorld || {}; const n = (W.things || []).find((t) => t.kind === 'note'); return n && /^The yellow/.test(String(n.text)) ? 'yellow' : 'red'; })()`);
       for (const op of ['read']) await addAsk(op);
-      for (const op of ['fwd', 'fwd', 'if']) await palTap(op);
-      await tap(first('.bg-blocks-box .gd-prog .gd-blk[data-t="if"] .gd-slot[data-slot="sensor"]'), 'the if’s sensor');
-      await tap(first('.bg-blocks-box .gd-picker .gd-opt[data-opt="olive_read:red_tulip"]'), 'Olive read “red tulip”');
-      await tap(headOf('if'), 'the if (the place new blocks go)');
-      for (const op of ['left', 'water']) await palTap(op);
+      await palTap('fill');
+      const lastIf = () => ev(`(() => { const r = [...document.querySelectorAll('.bg-blocks-box .gd-prog .gd-rep')].filter((e) => e.getAttribute('data-t') === 'if'); return r.length ? r[r.length - 1].getAttribute('data-rep') : ''; })()`);
+      for (const [colour, turn] of [['red', 'left'], ['yellow', 'right']]) {
+        await palTap('if');
+        const id = await lastIf();
+        await tap(`document.querySelector('.bg-blocks-box .gd-prog .gd-rep[data-rep="${id}"] .gd-slot[data-slot="sensor"]')`, `the if’s sensor (${colour})`);
+        await tap(first(`.bg-blocks-box .gd-picker .gd-opt[data-opt="olive_read:${colour}_tulip"]`), `Olive read “${colour} tulip”`);
+        await tap(`document.querySelector('.bg-blocks-box .gd-prog [data-head="${id}"]')`, `the if (${colour}: the place new blocks go)`);
+        await palTap(turn);
+        await tap(`document.querySelector('.bg-blocks-box .gd-prog [data-head="${id}"]')`, `the if (${colour}: let go)`);
+      }
+      for (const op of ['fwd', 'left', 'water']) await palTap(op);
       const reads0 = (await req(port, 'GET', '/__stub/calls')).body.calls.filter((c) => c.rung === 'read').length;
       await play();
-      const readBubble = await until(`[...document.querySelectorAll('.bg-stage .gd-bubble.gd-olive')].map((e) => e.innerText).join('|')`, (t) => t.includes('Olive read: red tulip'), 8000);
+      const readBubble = await until(`[...document.querySelectorAll('.bg-stage .gd-bubble.gd-olive')].map((e) => e.innerText).join('|')`, (t) => t.includes(`Olive read: ${day} tulip`), 8000);
       await runOver();
       await wait(700);
       const readCalls = (await req(port, 'GET', '/__stub/calls')).body.calls.filter((c) => c.rung === 'read').slice(reads0);
       const tulipAt = (x, y) => ev(`(() => { const t = document.querySelector('.bg-stage .gd-cell[data-x="${x}"][data-y="${y}"] .gd-tulip'); return t ? (t.getAttribute('class').includes('gd-wet') ? 'wet' : 'dry') : 'none'; })()`);
-      const rowsNote = { red: await tulipAt(2, 2), yellow: await tulipAt(2, 4) };
+      const rowsNote = { red: await tulipAt(3, 4), yellow: await tulipAt(5, 2) };
       const lineNote = await text(SAY);
       await shot('ig006-ac2-note-route');
-      check('P-IG6-AC2 through the shell’s route: read is sent the note and the plot’s things; the bubble says “Olive read: red tulip”', readCalls.length === 1 && readCalls[0].values.note === 'The red ones, not the yellow.' && readBubble.includes('Olive read: red tulip'), { readCalls, readBubble });
-      check('P-IG6-AC2 “if Olive read red tulip” waters the red row and not the yellow', rowsNote.red === 'wet' && rowsNote.yellow === 'dry', rowsNote);
+      const dayNote = day === 'yellow' ? 'The yellow ones, not the red.' : 'The red ones, not the yellow.';
+      check(`P-IG6-AC2 through the shell’s route: read is sent the day's note (the ${day} ones) and the plot’s things; the bubble says “Olive read: ${day} tulip”`, readCalls.length === 1 && readCalls[0].values.note === dayNote && readBubble.includes(`Olive read: ${day} tulip`), { readCalls, readBubble });
+      check(`P-IG6-AC2 “if Olive read ${day} tulip” waters the ${day} row and not the other`, day === 'red' ? rowsNote.red === 'wet' && rowsNote.yellow === 'dry' : rowsNote.yellow === 'wet' && rowsNote.red === 'dry', { day, rowsNote });
       check('P-IG6-AC7 after the run, the owl names the block asked (read the note)', /Olive read the note/.test(lineNote), lineNote);
 
       // ── P-IG6-AC3: the rock and the flowers — ask 3 times, "2 of 3 said yes", the majority waters ──

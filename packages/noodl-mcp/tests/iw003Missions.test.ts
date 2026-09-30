@@ -49,7 +49,12 @@ const SEEDS = [1, 2, 3] as const;
 // one layout. Ids are any whole numbers (the engine never reads them for meaning).
 
 // [M] Mamie's lane:
-const NAIVE_M: Record<string, Block[]> = {};
+// eggs-count: the child counts the empty places in the basket on ONE morning (it had two eggs from yesterday) and writes
+// `repeat 2` — right on the day the basket held two (seed 1), two eggs short on the others.
+const NAIVE_M_BASKET = { id: 'basket', kind: 'basket', x: 6, y: 1 };
+const NAIVE_M: Record<string, Block[]> = {
+  'eggs-count': [{ id: 1, t: 'repeat', n: 2, body: [{ id: 2, t: 'go_nearest', slots: { kind: 'egg' } }, { id: 3, t: 'pick' }, { id: 4, t: 'go_to', slots: { thing: NAIVE_M_BASKET } }, { id: 5, t: 'put' }] }]
+};
 // [S] Sami's stones lane:
 /** A walk as a child records it with the pad: F forward, L left, R right, K pick up, D put down. */
 const walkS = (src: string): Block[] => src.split(' ').map((c, i) => ({ id: i + 1, t: ({ F: 'fwd', L: 'left', R: 'right', K: 'pick', D: 'put' } as Record<string, Block['t']>)[c] }));
