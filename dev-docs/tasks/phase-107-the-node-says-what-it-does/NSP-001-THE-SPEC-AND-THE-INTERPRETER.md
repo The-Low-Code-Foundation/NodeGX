@@ -148,6 +148,12 @@ export const Counter = defineNode({
   missing or unexpected outcome, a signal input with no reducer, a param that is not an input — each a `SpecError`
   naming the key (`tests/counter.test.ts`). State and inputs are deep-frozen, so a mutating reducer throws.
 
+**Added at the end of s1, from R6 (the editor is a target):** `PortMeta` (`displayName`, `group`, `description`)
+on every port declaration, `outcomes` and `inspect` on the node declaration, and `tests/catalog-parity.test.ts`
+— for every registered spec, the ports the editor draws today (the catalog) must equal the spec's, with the
+outcome ports derived from `outcomes`. Counter passes it. The test reads `node-catalog.json` as data, so the
+package still depends on nothing in the runtime.
+
 **Not in this task:** the JSON schema and canonicaliser (NSP-002), the runtime adapter (NSP-002), scenarios as JSON
 files and mutants (NSP-003). `run(spec, params, steps)` already takes a JSON-shaped `Step[]` so NSP-003 can read
 scenarios from disk without a new format.

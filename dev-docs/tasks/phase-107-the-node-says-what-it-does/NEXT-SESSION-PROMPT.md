@@ -11,6 +11,7 @@
 | NSP-001 the spec + interpreter | ✅ s1 — `packages/nodegx-node-spec`, `defineNode(decl).on(reducers)`, Counter spec, 44 tests, `tsc` clean, lerna scope green | n/a | s1 commit after `3bd71e837` |
 | NSP-002 traces + runtime adapter | — | — | — |
 | NSP-003 … NSP-019 | — | — | — |
+| NSP-020 ports without a viewer, NSP-021 the second editor | opened s1 (R6) | — | — |
 
 Built-but-undriven: 0 (nothing here is driven in the app until NSP-019).
 
@@ -55,6 +56,13 @@ Built-but-undriven: 0 (nothing here is driven in the app until NSP-019).
 R1 new package · R2 TS specs, JSON traces · R3 the runtime wins, a divergence is a row · R5 200 sequences per
 node in CI, 10,000 locally. Only **R4** (go / no-go after the pilot) remains, asked by NSP-004.
 
+## R6 — the editor is a target (ruled at the end of s1)
+
+Richard: *"make sure that the work in this phase will prepare for a future where even the editor is
+exchangeable."* So: every batch row closes on behaviour **and** catalog parity **and** `ports(params)`;
+NSP-020 (50 `runtime-discovered` nodes need ports without a viewer) and NSP-021 (the MCP server is the
+second editor; the round trip) are the graded form. README §1 third sentence, §4.7.
+
 ## What s2 does
 
 1. **NSP-002**: the JSON schema for `TraceEvent` (versioned, `subject` open), the canonicaliser (table-driven:
@@ -66,6 +74,7 @@ node in CI, 10,000 locally. Only **R4** (go / no-go after the pilot) remains, as
 2. **NSP-003** the runner — scenarios as JSON files, the in-house seeded generator (no `fast-check`),
    shrinking, mutants per reducer branch following `nodegx-backend-contract/conformance/mutants.ts`.
 3. Do not touch `noodl-runtime/src/nodes/` (R3 (a)); a divergence is a row.
+4. Keep the parity gate green as specs are added — it is the per-node precondition for NSP-018 and NSP-021.
 
 ## Before you start
 

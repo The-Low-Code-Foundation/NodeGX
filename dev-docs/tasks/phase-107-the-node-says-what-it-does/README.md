@@ -22,6 +22,16 @@ And the one this phase exists to make possible, graded by [NSP-006](NSP-006-A-ST
 > **Anyone — a person or an agent — can build NodeGX's nodes for a new target from the spec and
 > the suite alone, without reading the runtime, and knows when they are done.**
 
+And the third, added 2026-09-30 when Richard ruled that **the editor is a target too** (R6), graded
+by [NSP-020](NSP-020-PORTS-WITHOUT-A-RUNNING-VIEWER.md) and [NSP-021](NSP-021-THE-SECOND-EDITOR.md):
+
+> **Everything the editor knows about a node, it learns from the spec — so the editor, like the
+> runtime and the exporter, is one client of the spec among several, and can be replaced.**
+
+Richard's framing (s1): *"make sure that the work in this phase will prepare for a future where even
+the editor is exchangeable, planning for that as a real possibility to shape how we conduct this
+phase."* What that changes, concretely, is in §4.7 and the two tasks.
+
 ## 2. Why, in one paragraph
 
 Every node's behaviour is currently told in at least five places that can drift apart: the runtime
@@ -78,6 +88,16 @@ Full detail in NSP-001 to NSP-003. The shape:
 6. **The ledger** — *SPEC COVERAGE: N of 147 picker nodes conform on the runtime; M on the
    export*, ratcheted in PR CI like picker coverage.
 
+7. **The editor is a client** (R6). The spec carries everything an editor draws — port display names,
+   groups, descriptions, defaults, enum labels, inspect text, and `ports(params)` for the 50 nodes
+   whose ports today exist only once a viewer is running. A **catalog-parity gate** (in the package
+   from s1, `tests/catalog-parity.test.ts`) says, node by node, when a spec is complete enough for
+   an editor; NSP-018 then flips the direction so the catalog is *generated from* the specs; NSP-021
+   proves it with the editor that already exists twice (Electron and the MCP server).
+
+   **How this shapes every batch:** a node's row closes when its spec passes the conformance suite
+   *and* the parity gate *and* has `ports(params)`. Behaviour-only specs are half a row.
+
 ### Tiers (the census, NSP-000, assigns every node exactly one)
 
 | tier | what | spec shape | examples |
@@ -113,6 +133,8 @@ Full detail in NSP-001 to NSP-003. The shape:
 | [NSP-017](NSP-017-THE-ESCAPE-HATCHES.md) | The escape hatches — the Expression grammar; Function/Script contracts (**5**) | 011 | T6 |
 | [NSP-018](NSP-018-THE-SPEC-SPEAKS.md) | The spec speaks — port descriptions and `get_node_type` come from the spec | 011 | — |
 | [NSP-019](NSP-019-RICHARD-READS-IT.md) | Richard reads it — the inspector shows a node's rules; *Try this node* | 018 | — |
+| [NSP-020](NSP-020-PORTS-WITHOUT-A-RUNNING-VIEWER.md) | 🔴 **Ports without a running viewer** — `ports(params)` for every node; the 50 `runtime-discovered` nodes first (R6) | 004, each batch | all |
+| [NSP-021](NSP-021-THE-SECOND-EDITOR.md) | 🔴 **The second editor** — the MCP server and the Electron editor answer every node question from the spec; the round trip (R6) | 018, 020 | — |
 
 Batch sizes are the census's ([CENSUS.md](CENSUS.md)); the lists in each batch file are spliced from `census.json`, never typed.
 
@@ -130,7 +152,8 @@ npm run spec-ledger            # NSP-009 — ratcheted in PR CI
 
 > **SPEC COVERAGE: 0 of 147 picker nodes have a conforming spec.** (Scoped 2026-09-29.)
 
-Reported per target: *conforms on the runtime · conforms on the export · exempt with a reason*.
+Reported per target: *conforms on the runtime · conforms on the export · exempt with a reason* —
+and, from R6, *ports derivable without a viewer: N of 147* and *catalog parity: N of 147*.
 The population is the **picker** (phase 18's lesson: rank by the product surface, never by a
 corpus). The floor ratchets both ways: a fall fails CI, and a rise fails until the floor is raised
 in the same commit.
@@ -152,6 +175,13 @@ Plain words, the choices, the cost. Recommendation first.
 | **R5** | "200 generated sequences per node in CI, 10,000 locally on demand — or 1,000 in CI at ~5× the time?" | **(a) 200.** *"200 sounds more CPU friendly"* |
 
 R4 is still the pilot's go / no-go, asked **by** NSP-004 with its numbers.
+
+**R6 — Is the editor a target?** Asked by s1 as *"can we make sure the work in this phase prepares
+for a future where even the editor is exchangeable?"* — Richard's own words, 2026-09-30: **yes,
+"planning for that as a real possibility to shape how we conduct this phase."** Consequences: the
+third person sentence in §1, §4.7, NSP-020, NSP-021, port metadata + `outcomes` + `inspect` in the
+spec format, the catalog-parity gate, and NSP-018 growing from "descriptions come from the spec" to
+"the catalog comes from the spec".
 
 **R1 — Where do specs live?** ✅ ruled (a)
 - **(a) Recommended: a new package, `packages/nodegx-node-spec`, one file per node**, strict TS,

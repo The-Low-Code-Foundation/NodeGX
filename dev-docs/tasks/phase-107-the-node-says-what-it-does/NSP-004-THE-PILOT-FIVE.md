@@ -31,7 +31,9 @@ For each node:
 
 ## 4. Acceptance criteria
 
-1. Five specs, each with all mutants killed (NSP-003 AC3).
+1. Five specs, each with all mutants killed (NSP-003 AC3), **each passing the catalog-parity gate** (R6: port
+   names, kinds, display names, groups, descriptions, defaults, outcome ports equal the catalog's) and each
+   with `ports(params)` where the node has dynamic ports (String Format, And — NSP-020's first two rows).
 2. Each spec conforms on the runtime **or** every mismatch is a §6 row with its replay file.
 3. **The pilot's numbers**, written in §6:
    - divergences found, by answer;

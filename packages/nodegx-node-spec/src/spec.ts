@@ -66,7 +66,20 @@ export type Outcome = 'done' | 'unchanged' | 'failure';
 // ------------------------------------------------------------------------------------------------
 // declarations
 
-export interface ValueInputDecl {
+/**
+ * What an EDITOR needs to draw a port — the same fields the catalog carries today. The editor is
+ * a client of the spec like any target (README §1, third sentence; R6): anything it shows about a
+ * node it must be able to learn here, never from the runtime's registration code. Optional in the
+ * type so a spec can be written behaviour-first; the catalog-parity gate (tests/catalog-parity)
+ * is what says when a node's spec is complete enough for the editor.
+ */
+export interface PortMeta {
+  displayName?: string;
+  group?: string;
+  description?: string;
+}
+
+export interface ValueInputDecl extends PortMeta {
   type: ValueType;
   /** What the port holds before anything is sent to it. Also the `fallback` of a `typed-*` coercion. */
   default?: unknown;
@@ -76,7 +89,7 @@ export interface ValueInputDecl {
   enums?: readonly string[];
 }
 
-export interface SignalInputDecl {
+export interface SignalInputDecl extends PortMeta {
   type: 'signal';
   /** The input reports an outcome (ERG-001) — its reducer must return one on every path. */
   outcome?: boolean;
@@ -85,15 +98,18 @@ export interface SignalInputDecl {
 export type InputDecl = ValueInputDecl | SignalInputDecl;
 export type InputsDecl = Record<string, InputDecl>;
 
-export interface ValueOutputDecl<S> {
+export interface ValueOutputDecl<S> extends PortMeta {
   type: ValueType;
   /** The output as a function of state. Called at settle; `undefined` is never sent (C3). */
   from: (state: Readonly<S>) => unknown;
 }
 
-export interface SignalOutputDecl {
+export interface SignalOutputDecl extends PortMeta {
   type: 'signal';
 }
+
+/** The outcome ports the runtime declares for a node (ERG-001): always `done` + `completed`; `unchanged` and `failure` only when the node can. */
+export const OUTCOME_PORTS = ['done', 'unchanged', 'failure', 'completed'] as const;
 
 export type OutputDecl<S> = ValueOutputDecl<S> | SignalOutputDecl;
 export type OutputsDecl<S> = Record<string, OutputDecl<S>>;
@@ -172,6 +188,14 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
   state: S;
   inputs: I;
   outputs: O;
+  /**
+   * Which outcomes this node's `outcome: true` inputs can report. The runtime exposes one signal
+   * output per outcome named here plus `completed` (`outcome.ts`); the catalog-parity gate
+   * derives those ports from this list. Omit when no input is `outcome: true`.
+   */
+  outcomes?: readonly Outcome[];
+  /** What the editor's hover/inspect shows for an instance — the runtime's `getInspectInfo`. */
+  inspect?: (state: Readonly<S>) => string;
 }
 
 export interface NodeSpec<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> extends NodeDecl<S, I, O> {
@@ -224,13 +248,15 @@ export interface AnyNodeSpec {
   state: Readonly<Record<string, unknown>>;
   inputs: InputsDecl;
   outputs: Record<string, ErasedValueOutput | SignalOutputDecl>;
+  outcomes?: readonly Outcome[];
+  inspect?: (state: never) => string;
   on: Record<string, ErasedReducer | undefined>;
   derived?: {
     inputs: (params: Readonly<Record<string, unknown>>) => Record<string, ValueInputDecl>;
     on: (state: never, port: string, value: unknown, derived: Readonly<Record<string, unknown>>) => unknown;
   };
 }
-export interface ErasedValueOutput {
+export interface ErasedValueOutput extends PortMeta {
   type: ValueType;
   from: (state: never) => unknown;
 }

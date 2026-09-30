@@ -1,5 +1,13 @@
 # NSP-018 — The spec speaks: port descriptions and `get_node_type` come from the spec
 
+> **Grown by R6 (2026-09-30):** not only descriptions — the **catalog itself** (`node-catalog.json`:
+> ports, types, defaults, groups, display names, enum labels, dynamic-port mechanisms) is *generated
+> from the specs* for every specced node, and the runtime's registration is graded against it rather
+> than being its source. The catalog-parity gate in `packages/nodegx-node-spec/tests/catalog-parity.test.ts`
+> (s1) is the per-node precondition; `get_node_type` answers per-instance ports from NSP-020's
+> `ports(params)`. The extractor in `scripts/node-catalog/` keeps running for the unspecced remainder
+> and a merge prefers the spec — one catalog, two sources, the spec winning where it exists.
+
 **Opened 2026-09-29.** **Depends on NSP-011.**
 **Status: 📋 not started.**
 
