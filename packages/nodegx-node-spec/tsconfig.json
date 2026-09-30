@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "target": "ES2020",
+    "lib": ["ES2020"],
+    "noEmit": true,
+    // Strict, and stricter: a spec is data plus pure functions, and the type system is the first
+    // gate on it (NSP-001 AC1). `noImplicitReturns` is what turns "a reducer path with no outcome"
+    // into a compile error rather than a runtime surprise.
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "types": ["node", "jest"]
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
+}
