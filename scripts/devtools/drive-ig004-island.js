@@ -260,12 +260,23 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
       await tap(byText('.bg-win-card button', w(lang, 'winIsland')), 'back to the island');
       await until('location.pathname', (p) => p === '/island');
       await wait(1500);
+      const onPlot = (list) => list.length === 1 && inPlot(list[0].x, list[0].y, TULIPS);
+      // P108 IW-006 (lane E): the plot won in the Workshop starts DONE — her robot waits at home on it, the tulips drawn
+      // watered, the held plot waiting — until wear reopens the job. The wear is written into the save (one tulip a drink
+      // short, as the island's own wear leaves it) and the island opened again: then the robot is seen stepping.
+      const a0 = await bots();
+      const wet0 = await tulipsOn(TULIPS);
+      const held0 = await evaluate(`(() => { const s = Noodl.Variables.gardenIsland; const c = s && s.live ? s.live[${JSON.stringify(TULIPS.id)}] : null; return c ? c.phase : null; })()`);
+      readings[`startsDone-${tag}`] = { a0, wet0, held0 };
+      check(`IG-004 AC3 ${tag} (IW-006): the tulips won, her robot waits on their plot with the job done — its ${TULIP_COUNT} tulips drawn watered, the held plot waiting`, onPlot(a0) && wet0.length === TULIP_COUNT && wet0.every((t) => t === 'wet') && held0 === 'wait', readings[`startsDone-${tag}`]);
+      await evaluate(`(() => { const k = Object.keys(localStorage).find((x) => /bot-garden/.test(x)); const v = JSON.parse(localStorage.getItem(k)); const m = v.model; const a = m.profiles.find((p) => p.id === m.island.activeId); const lv = a.island.plots[${JSON.stringify(TULIPS.id)}].live; const t = lv.things.find((x) => x.kind === 'tulip'); t.have = 2; t.watered = false; localStorage.setItem(k, JSON.stringify(v)); })()`);
+      await page.navigate('/island');
+      await wait(1500);
       // The robot is ON the tulips' plot, stepping: two reads apart differ, both on the plot.
       const a = await bots();
       await wait(2300);
       const b = await bots();
       readings[`stepping-${tag}`] = { a, b };
-      const onPlot = (list) => list.length === 1 && inPlot(list[0].x, list[0].y, TULIPS);
       check(`IG-004 AC3 ${tag}: her robot is on the tulips’ plot and stepping (two reads 2.3 s apart differ)`, onPlot(a) && onPlot(b) && JSON.stringify(a) !== JSON.stringify(b), { a, b, plot: TULIPS.plot });
       if (shots) await shot(`ig004-${tag}-02-robot-at-work`);
       // Find my robots (the flat island): the robot scrolled into the island's own box (a phone shows part of it) and ringed.
