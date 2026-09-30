@@ -177,9 +177,9 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       expect(built.startsWith('/* garden-kit')).toBe(true);
     });
 
-    it('registers exactly garden-kit.BlockList and garden-kit.Garden, each documented, in a context with no window and no document', () => {
+    it('registers exactly garden-kit.BlockList and garden-kit.Garden (and, P108 IW-004, garden-kit.Blocks), each documented, in a context with no window and no document', () => {
       const names = [...kit.nodes, ...kit.reactNodes].map((n) => n.name).sort();
-      expect(names).toEqual(['garden-kit.BlockList', 'garden-kit.Garden']);
+      expect(names).toEqual(['garden-kit.BlockList', 'garden-kit.Blocks', 'garden-kit.Garden']);
       for (const n of kit.reactNodes) {
         expect(typeof n.docs).toBe('string');
         expect(n.docs.length).toBeGreaterThan(40);
@@ -794,5 +794,65 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       const css = node('garden-kit.Garden').css as string;
       expect(/\.gd-isl-say\{[^}]*max-width:min\(170px,700%\)/.test(css)).toBe(true);
     });
+  });
+});
+
+// ── P108 IW-004 (lane B): Blocks — Blockly 12.3.1 vendored beside the kit, the way garden-3d-kit vendors three.js ──────
+describe('P108 IW-004 — garden-kit.Blocks: Blockly vendored, pinned, licensed, credited; the node loads with or without it', () => {
+  const MODULE = path.join(KIT_DIR, 'project', 'noodl_modules', 'garden-kit');
+  const NOTICE_FILE = path.join(__dirname, '..', '..', '..', 'dev-docs', 'tasks', 'phase-105-the-coding-garden', 'garden-desktop', 'licenses', 'NOTICE.txt');
+  const BLOCKLY_BYTES = 967598;
+
+  it('the manifest loads Blockly, its French messages, the keep line, its English messages — in that order — before index.js', () => {
+    const manifest = JSON.parse(fs.readFileSync(path.join(MODULE, 'manifest.json'), 'utf8'));
+    expect(manifest.main).toBe('index.js');
+    expect(manifest.dependencies).toEqual(['blockly_compressed.js', 'blockly-msg-fr.js', 'blockly-msg-keep.js', 'blockly-msg-en.js']);
+    expect(fs.readdirSync(MODULE).sort()).toEqual(['LICENSE.txt', 'README.md', 'blockly-msg-en.js', 'blockly-msg-fr.js', 'blockly-msg-keep.js', 'blockly_compressed.js', 'index.js', 'manifest.json', 'types']);
+  });
+
+  it('🔴 the vendored files are Blockly 12.3.1 byte for byte (the npm package the repo pins), unmodified', () => {
+    const pkg = path.join(__dirname, '..', '..', '..', 'node_modules', 'blockly');
+    expect(fs.statSync(path.join(MODULE, 'blockly_compressed.js')).size).toBe(BLOCKLY_BYTES);
+    expect(fs.readFileSync(path.join(MODULE, 'blockly_compressed.js'), 'utf8')).toContain('VERSION$$module$build$src$core$blockly="12.3.1"');
+    if (fs.existsSync(path.join(pkg, 'package.json')) && JSON.parse(fs.readFileSync(path.join(pkg, 'package.json'), 'utf8')).version === '12.3.1') {
+      for (const [ours, theirs] of [['blockly_compressed.js', 'blockly_compressed.js'], ['blockly-msg-fr.js', 'msg/fr.js'], ['blockly-msg-en.js', 'msg/en.js']]) {
+        expect({ ours, same: fs.readFileSync(path.join(MODULE, ours)).equals(fs.readFileSync(path.join(pkg, theirs))) }).toEqual({ ours, same: true });
+      }
+    }
+    expect(fs.readFileSync(path.join(MODULE, 'blockly-msg-fr.js'), 'utf8')).toContain('Msg["DUPLICATE_BLOCK"] = "Dupliquer"');
+  });
+
+  it('the Apache licence sits beside it; the README and the shell NOTICE credit it; nothing from a CDN', () => {
+    const licence = fs.readFileSync(path.join(MODULE, 'LICENSE.txt'), 'utf8');
+    for (const words of ['Blockly 12.3.1', 'Google LLC', 'Apache License', 'Version 2.0']) expect(licence).toContain(words);
+    const readme = fs.readFileSync(README, 'utf8');
+    for (const words of ['Blockly 12.3.1', 'Apache-2.0', 'LICENSE.txt', '967,598', 'never from a CDN', 'garden-kit.Blocks', 'Brain Size']) expect(readme).toContain(words);
+    const notice = fs.readFileSync(NOTICE_FILE, 'utf8');
+    expect(notice).toContain('Blockly 12.3.1');
+    expect(notice).toContain('LICENSE-Apache-2.0.txt');
+  });
+
+  it('🔴 the keep line keeps French: with Blockly loaded as the page loads it, French is kept and English is what Blockly holds', () => {
+    const ctx: Record<string, any> = {};
+    ctx.window = ctx;
+    vm.createContext(ctx);
+    for (const f of ['blockly_compressed.js', 'blockly-msg-fr.js', 'blockly-msg-keep.js', 'blockly-msg-en.js']) vm.runInContext(fs.readFileSync(path.join(MODULE, f), 'utf8'), ctx, { filename: f });
+    expect(ctx.Blockly.gardenMsgFr.DUPLICATE_BLOCK).toBe('Dupliquer');
+    expect(ctx.Blockly.Msg.DUPLICATE_BLOCK).toBe('Duplicate');
+  });
+
+  it('the Blocks node renders its box on the server with the markers a drive reads, one stylesheet, scoped under .gd-bk', () => {
+    const blocks = loadKit().kit.reactNodes.find((n) => n.name === 'garden-kit.Blocks')!;
+    const html = renderToStaticMarkup(React.createElement(blocks.getReactComponent(), { band: 1, language: 'fr' }));
+    expect(html).toContain('data-gd-blocks="true"');
+    expect(html).toContain('data-band="1"');
+    expect(html).toContain('data-lang="fr"');
+    expect(html.match(/<style>/g)).toHaveLength(1);
+    // Blockly's own CSS is global; every rule of ours is under the node's root class, so the editor's chrome is untouched.
+    const css = blocks.css as string;
+    const selectors = css.replace(/@media[^{]*\{/g, '').split('}').map((r: string) => r.split('{')[0].trim()).filter((sel: string) => sel && !sel.startsWith('@'));
+    const loose = selectors.flatMap((sel: string) => sel.split(',').map((x) => x.trim())).filter((x: string) => x && !x.startsWith('.gd-bk'));
+    expect(loose).toEqual([]);
+    expect(reducedMotionReport(css).unstilled).toEqual([]);
   });
 });

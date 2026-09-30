@@ -1,6 +1,6 @@
 {
   "name": "Garden Kit",
   "main": "index.js",
-  "dependencies": [],
+  "dependencies": ["blockly_compressed.js", "blockly-msg-fr.js", "blockly-msg-keep.js", "blockly-msg-en.js"],
   "nodeKitTypes": "1.0.0"
 }
