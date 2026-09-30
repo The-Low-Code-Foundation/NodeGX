@@ -39,6 +39,8 @@
 import { ENGINE } from './cg002Scripts';
 // P108 IW-003 (lane M): Olive's written answers, for an ask on a job plot (the island has no Olive; the page's fallback).
 import { OLIVE_SLIM } from './cg005Olive';
+// P108 IW-008 (lane C): the crew — which of her robots does a plot's job.
+import { CREW_PICK } from './iw008Crew';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { writtenAnswer: islWritten } = require('../../../dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/olive-written.js');
 
@@ -73,6 +75,8 @@ function islLook(bot) { return { name: String(bot.name || ''), colour: String(bo
 /** The plot's window of the island as the engine's world: the request's map, what stands on the plot, its robot. */
 function islView(plot, live) {
   var w = { map: plot.map.slice(), things: live.things, robots: [live.robot], events: [], schedule: islClone(plot.schedule || []) };
+  // P108 IW-008 (lane C): the plot's second robot stands in the same world (its seeks see the first's reservations).
+  if (live.mate && live.mate.robot) w.robots.push(live.mate.robot);
   if (live.spent && live.spent.length) w.spent = live.spent.slice();
   // P108 IW-002: a job plot carries its job and its seed (the wear's draws go on from it).
   if (plot.job) { w.job = islClone(plot.job); w.seed = Number(live.seed) >>> 0; }
@@ -119,6 +123,8 @@ function islStepJob(plot, cur) {
 function islStepPlot(plot, cur) {
   // P108 IW-003 (lane B): a stale plot (teach again) is not stepped: its robot waits at home, where it started.
   if (plot.stale) return cur;
+  // P108 IW-008 (lane C): a job plot's second robot steps after the first, on the world the first left.
+  if (plot.job && plot.mate) return islWithMate(plot, cur, islStepJob(plot, cur));
   if (plot.job) return islStepJob(plot, cur);
   if (cur.hold > 0) {
     if (cur.hold > 1) return { run: cur.run, things: cur.things, robot: cur.robot, spent: cur.spent, hold: cur.hold - 1, lap: cur.lap };
@@ -158,11 +164,51 @@ function islWorld(s) {
     var r = islClone(cur.robot);
     r.x = Number(r.x) + plot.x; r.y = Number(r.y) + plot.y; r.plot = plot.id;
     robots.push(r);
+    // P108 IW-008 (lane C): and the robot that helps there.
+    if (cur.mate && cur.mate.robot) { var mr = islClone(cur.mate.robot); mr.x = Number(mr.x) + plot.x; mr.y = Number(mr.y) + plot.y; mr.plot = plot.id; delete mr.home; robots.push(mr); }
   }
   for (var d = 0; d < s.deco.length; d++) things.push(islClone(s.deco[d]));
   for (var h = 0; h < s.home.length; h++) robots.push(islClone(s.home[h]));
   return { map: s.map, things: things, robots: robots, events: [], schedule: [] };
 }
+// ── P108 IW-008 (lane C): the second robot on a job plot (IW-008 §2) — the first's machine, its own run and home ──
+/** The tile beside a start for the second robot: behind it, then its left, its right, ahead — the first free one on the plot. */
+function islBeside(map, things, r) {
+  var w = worldOf({ map: map, things: things, robots: [] });
+  var order = [(r.d + 2) % 4, (r.d + 3) % 4, (r.d + 1) % 4, r.d];
+  for (var i = 0; i < order.length; i++) { var x = r.x + DX[order[i]], y = r.y + DY[order[i]]; if (!blocked(w, x, y)) return { x: x, y: y }; }
+  return { x: r.x, y: r.y };
+}
+function islMateRun(plot, lap) { return newRun(plot.mate.program, plot.mate.robotId, 'en', 'island-' + plot.id + '-m' + lap); }
+function islMateHome(plot, lap) { var run = newRun([], plot.mate.robotId, 'en', 'island-' + plot.id + '-m' + lap + '-home'); run.steps = [{ id: null, op: 'home', guard: 0 }]; return run; }
+/**
+ * One tick of the plot's second robot, after the first's (islStepJob's own machine: work → the walk home → wait at home
+ * until wear reopens the job → work again; a program that ends with the job not done walks home and starts again). It
+ * steps on the world the first left (the same things, the same reservations), and walks home to its own tile.
+ */
+function islWithMate(plot, cur, out) {
+  if (!plot.mate || !cur.mate || !out || out === cur) return out;
+  out.mate = cur.mate;
+  var w = worldOf(islView(plot, out)), m = cur.mate, run = m.run, phase = m.phase || 'work', lap = Number(m.lap) || 0, delta = null;
+  if (phase === 'wait' && !jobDone(w)) { lap++; run = islMateRun(plot, lap); phase = 'work'; }
+  if (phase !== 'wait') {
+    var r = step(run, w, null);
+    if (r.waiting && r.request) r = step(r.run, w, islAnswer(r.request));
+    w = apply(w, r.delta);
+    run = r.run; delta = r.delta;
+    if (r.done) {
+      if (jobDone(w)) phase = 'wait';
+      else if (phase === 'return') { lap++; run = islMateRun(plot, lap); phase = 'work'; }
+      else { phase = 'return'; run = islMateHome(plot, lap); }
+    }
+  }
+  out.things = w.things;
+  out.robot = w.robots[0];
+  out.spent = Array.isArray(w.spent) ? w.spent : [];
+  out.mate = { run: run, robot: w.robots[1], phase: phase, lap: lap, delta: delta };
+  return islKeep(out, w);
+}
+
 // ── P108 IW-003 (lane B): teach again — a pinned program the rewritten job outgrew ──
 /** A request with a job or a seeded layout, laid from its plot's seed (the island's own laying), else null. */
 function islLaidOf(req) {
@@ -265,7 +311,20 @@ for (var p = 0; p < list.length; p++) {
   plots.push(plot);
   cards.push({ id: req.id, x: px, y: py, w: PW, h: PH, status: status, islander: plot.islander, band: plot.band, robotId: robotId, door: null, needs: needs, lock: lock });
   if (plot.stale) cards[cards.length - 1].stale = true;
-  if (status === 'working') { live[req.id] = { run: islRun(plot, 0), things: islClone(start.things), robot: islClone(start.robot), spent: [], hold: 0, lap: 0 }; if (plot.job) { live[req.id].phase = plot.stale ? 'teach' : 'work'; live[req.id].age = 0; live[req.id].seed = plot.seed; } continue; }
+  if (status === 'working') {
+    live[req.id] = { run: islRun(plot, 0), things: islClone(start.things), robot: islClone(start.robot), spent: [], hold: 0, lap: 0 }; if (plot.job) { live[req.id].phase = plot.stale ? 'teach' : 'work'; live[req.id].age = 0; live[req.id].seed = plot.seed; }
+    // P108 IW-008 (lane C): a robot of hers that helps on this job plot (its kind, its own program), on the tile beside.
+    if (plot.job && !plot.stale) for (var hm = 0; hm < mine.length && !plot.mate; hm++) {
+      var mh = mine[hm];
+      if (!mh || String(mh.helps || '') !== req.id || mh.id === robotId || busy[mh.id] || kindOf(mh) !== needs || !Array.isArray(mh.program) || !mh.program.length) continue;
+      var mbot = islStart(req, mh.id, mh).robot, spot = islBeside(plot.map, start.things, mbot);
+      mbot.x = spot.x; mbot.y = spot.y; mbot.home = { x: spot.x, y: spot.y, d: mbot.d };
+      plot.mate = { robotId: String(mh.id), program: islClone(mh.program) };
+      busy[mh.id] = req.id;
+      live[req.id].mate = { run: islMateRun(plot, 0), robot: mbot, phase: 'work', lap: 0 };
+    }
+    continue;
+  }
   var shown = status === 'won' ? wonThings(req, laid) : start.things;
   for (var t = 0; t < shown.length; t++) { var th = islClone(shown[t]); th.x = Number(th.x) + px; th.y = Number(th.y) + py; still.push(th); }
   if (status === 'locked') { deco.push({ kind: 'fence', x: px, y: py, w: PW, h: PH }); deco.push({ kind: 'padlock', x: px + Math.floor(PW / 2), y: py + Math.floor(PH / 2) }); }
@@ -296,6 +355,9 @@ for (var n = 0; n < ISL.length; n++) {
 // P106 IG-005: the robots at home stand apart on the home slot (its path, then its grass), so their names never cover one
 // another on a phone's 16 px tiles (a robot is drawn 56 px at least): Pip on the path, the others 3–5 tiles away.
 var HOME_SPOTS = [[0, 0], [3, 2], [5, 0], [-1, 2]];
+// P108 IW-008 (lane C): a crew of up to CREW_CAP at home — eight more spots on the home slot's grass and path, each its own
+// tile, spread over the slot (never the house, the pond, a tree or a rock).
+HOME_SPOTS.push([2, -2], [-2, -2], [5, 2], [2, 3], [-2, 3], [4, 1], [0, 3], [-2, 1]);
 var home = [], homeN = 0;
 for (var m = 0; m < mine.length; m++) {
   if (!mine[m] || busy[mine[m].id]) continue;
@@ -366,7 +428,7 @@ Outputs.found = !!id;
  * who asks and what; a locked plot's one-line reason (the band, and the block it needs); where the robot is at work and
  * "bring {b} home"; whether the plot opens now. Free play always opens (the garden is never pinned).
  */
-export const islandChooseScript = (o: { free: unknown; islanders: unknown; wordHelper: string; robots?: unknown; robotWords?: unknown }): string => `${o.wordHelper}
+export const islandChooseScript = (o: { free: unknown; islanders: unknown; wordHelper: string; robots?: unknown; robotWords?: unknown }): string => `${o.wordHelper}${CREW_PICK}
 var FREE = ${JSON.stringify(o.free)};
 var ISLANDERS = ${JSON.stringify(o.islanders)};
 var ROBOTS = ${JSON.stringify(o.robots ?? [])};
@@ -384,8 +446,8 @@ if (!req && id === 'free') req = FREE;
 // P106 IG-005: the robot for this job — hers of the kind the request needs (free play: Pip) — and where IT is at work.
 function kindOf(m) { return m && m.kind ? String(m.kind) : m && m.id && m.id !== 'r1' ? String(m.id) : 'pip'; }
 var needs = req && req.id !== 'free' && req.needs ? String(req.needs) : 'pip';
-var job = null;
-for (var q = 0; q < mine.length && !job; q++) if (kindOf(mine[q]) === needs) job = mine[q];
+// P108 IW-008 (lane C): with a crew, the robot at work HERE, else one of that kind at home, else the first (busy elsewhere).
+var job = crewPick(mine, plots, id, needs);
 var spec = null;
 for (var s = 0; s < ROBOTS.length; s++) if (ROBOTS[s].id === needs) spec = ROBOTS[s];
 var jobName = job && job.name ? String(job.name) : job ? name : spec ? String(spec.defaultName[lang] || spec.defaultName.en) : name;

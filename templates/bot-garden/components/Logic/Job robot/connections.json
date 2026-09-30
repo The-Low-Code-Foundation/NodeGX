@@ -11,6 +11,12 @@
     },
     {
       "fromId": "jobrobotIn",
+      "fromProperty": "plots",
+      "toId": "jobrobotFn",
+      "toProperty": "in-plots"
+    },
+    {
+      "fromId": "jobrobotIn",
       "fromProperty": "requestId",
       "toId": "jobrobotFn",
       "toProperty": "in-requestId"

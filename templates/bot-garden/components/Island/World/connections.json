@@ -454,6 +454,162 @@
       "toProperty": "go"
     },
     {
+      "fromId": "iwChoose",
+      "fromProperty": "requestId",
+      "toId": "iwCrewFn",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "iwWorld",
+      "fromProperty": "cards",
+      "toId": "iwCrewFn",
+      "toProperty": "cards"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "requests",
+      "toId": "iwCrewFn",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "plots",
+      "toId": "iwCrewFn",
+      "toProperty": "plots"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "robots",
+      "toId": "iwCrewFn",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "words",
+      "toId": "iwCrewFn",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "lang",
+      "toId": "iwCrewFn",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "iwCrewFn",
+      "fromProperty": "show",
+      "toId": "iwCrew",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwCrewFn",
+      "fromProperty": "rows",
+      "toId": "iwCrewEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "iwCrewFn",
+      "fromProperty": "label",
+      "toId": "iwCrewL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwCrewFn",
+      "fromProperty": "hereText",
+      "toId": "iwCrewHere",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwCrewFn",
+      "fromProperty": "line",
+      "toId": "iwCrewTap",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwCrewFn",
+      "fromProperty": "saidText",
+      "toId": "iwCrewSaid",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "model",
+      "toId": "iwAssign",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "requestId",
+      "toId": "iwAssign",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "requests",
+      "toId": "iwAssign",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "words",
+      "toId": "iwAssign",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "lang",
+      "toId": "iwAssign",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "iwCrewEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "iwAssign",
+      "toProperty": "robotId"
+    },
+    {
+      "fromId": "iwCrewEach",
+      "fromProperty": "itemOutputSignal-picked",
+      "toId": "iwAssign",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwAssign",
+      "fromProperty": "told",
+      "toId": "iwCrewFn",
+      "toProperty": "told"
+    },
+    {
+      "fromId": "iwAssign",
+      "fromProperty": "ok",
+      "toId": "iwAssignOk",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "iwAssign",
+      "fromProperty": "ran",
+      "toId": "iwAssignOk",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "iwAssign",
+      "fromProperty": "model",
+      "toId": "iwOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwAssignOk",
+      "fromProperty": "ontrue",
+      "toId": "iwOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "iwAssignOk",
+      "fromProperty": "ontrue",
+      "toId": "iwAgain",
+      "toProperty": "start"
+    },
+    {
       "fromId": "iwIn",
       "fromProperty": "findText",
       "toId": "iwFind",

@@ -330,7 +330,10 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
   'Logic/Pad answer': 'go',
   'Logic/Latch': 'go',
   // P108 IW-004 (lane B).
-  'Logic/Pick thing': 'go'
+  'Logic/Pick thing': 'go',
+  // P108 IW-008 (lane C): the crew.
+  'Logic/Copy program': 'go',
+  'Logic/Assign robot': 'go'
 };
 
 /**
@@ -1664,7 +1667,7 @@ const ISLE_WORLD: CgComponent = {
     text('iwTap', 'How to use it', 'iwIsle', '', { ...T_SMALL, sizeMode: 'contentSize', cssClassName: 'bg-isle-tap' }),
     group('iwCard', 'The plot card', 'iwRoot', { ...row({ width: pct(100), sizeMode: 'contentHeight', flexWrap: 'nowrap', alignItems: 'flex-start', columnGap: sp(12) }), ...PANEL, cssClassName: 'bg-panel bg-plot-card', mounted: false }, ['iwCardFace', 'iwCardText']),
     group('iwCardFace', 'Who asks', 'iwCard', { sizeMode: 'explicit', width: px(52), height: px(52) }),
-    group('iwCardText', 'What, and what now', 'iwCard', column({ rowGap: sp(6) }), ['iwCardWho', 'iwCardTitle', 'iwCardLine', 'iwCardBtns']),
+    group('iwCardText', 'What, and what now', 'iwCard', column({ rowGap: sp(6) }), ['iwCardWho', 'iwCardTitle', 'iwCardLine', 'iwCrew', 'iwCardBtns']),
     text('iwCardWho', 'Who asks', 'iwCardText', '', { ...T_H3, fontSize: px(17), cssClassName: 'bg-plot-who' }),
     text('iwCardTitle', 'What', 'iwCardText', '', { ...T_STRONG, cssClassName: 'bg-plot-title' }),
     text('iwCardLine', 'The line: what now', 'iwCardText', '', { ...T_BODY, cssClassName: 'bg-plot-line' }),
@@ -1672,6 +1675,17 @@ const ISLE_WORLD: CgComponent = {
     place('iwOpen', BUTTON_NODE, 'Go and help', 'iwCardBtns', { ...btn('primary', 'play', { cssClassName: 'bg-plot-open' }), label: 'Go and help', mounted: false }),
     place('iwHomeBtn', BUTTON_NODE, 'Bring the robot home', 'iwCardBtns', { ...btn('teach', '', { cssClassName: 'bg-bring-home' }), label: 'Bring Pip home', mounted: false }),
     place('iwClose', BUTTON_NODE, 'Close the card', 'iwCardBtns', { ...btn('quiet', '', { cssClassName: 'bg-plot-close' }), label: '✕' }),
+    // P108 IW-008 (lane C): the crew for this job (two robots of its kind at least): tap one to send it here, again for home.
+    group('iwCrew', 'The crew for this job', 'iwCardText', { ...column({ rowGap: sp(6) }), cssClassName: 'bg-crew', mounted: false }, ['iwCrewL', 'iwCrewHere', 'iwCrewRow', 'iwCrewTap', 'iwCrewSaid']),
+    text('iwCrewL', 'Your crew', 'iwCrew', '', { fontSize: px(12), fontWeight: '800', color: 'var(--ink-2)', cssClassName: 'bg-caps' }),
+    text('iwCrewHere', 'Who works here', 'iwCrew', '', { ...T_STRONG, cssClassName: 'bg-crew-here' }),
+    group('iwCrewRow', 'Her robots of this kind', 'iwCrew', { ...row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(8), rowGap: sp(8) }), cssClassName: 'bg-crew-row' }, ['iwCrewEach']),
+    { ...logic('iwCrewEach', FOR_EACH_NODE, 'One chip per robot of this kind', { template: C.chip, templateType: 'explicit' }), parent: 'iwCrewRow' },
+    text('iwCrewTap', 'How to send one', 'iwCrew', '', { ...T_SMALL, cssClassName: 'bg-crew-tap' }),
+    text('iwCrewSaid', 'What the last tap did', 'iwCrew', '', { ...T_BODY, cssClassName: 'bg-crew-said' }),
+    logic('iwCrewFn', L('Crew chips'), 'The crew for this job'),
+    logic('iwAssign', L('Assign robot'), 'A robot sent here, or home'),
+    gate('iwAssignOk', 'Did the robot go?'),
     withStates('iwCardState', 'The card shown or not', ['hidden', 'shown'], { shown: { type: 'boolean', by: { hidden: false, shown: true } } }),
     gate('iwFound', 'A plot was chosen?'),
     // ── The island: built from her save, then ticked (the state held by name: only one island is ever on screen) ──
@@ -1767,6 +1781,28 @@ const ISLE_WORLD: CgComponent = {
     wire('iwHome', 'ran', 'iwOut', 'write'),
     wire('iwHome', 'ran', 'iwAgain', 'start'),
     wire('iwAgain', 'timerFinished', 'iwChoose', 'go'),
+    // P108 IW-008 (lane C): the crew row — the chips of her robots of this kind; a tap sends one here (or home), the family
+    // written through the page's store as every writer does, then the card asked again once the family is read back.
+    wire('iwChoose', 'requestId', 'iwCrewFn', 'requestId'),
+    wire('iwWorld', 'cards', 'iwCrewFn', 'cards'),
+    ...(['requests', 'plots', 'robots', 'words', 'lang'] as const).map((f) => wire('iwIn', f, 'iwCrewFn', f)),
+    wire('iwCrewFn', 'show', 'iwCrew', 'mounted'),
+    wire('iwCrewFn', 'rows', 'iwCrewEach', 'items'),
+    wire('iwCrewFn', 'label', 'iwCrewL', 'text'),
+    wire('iwCrewFn', 'hereText', 'iwCrewHere', 'text'),
+    wire('iwCrewFn', 'line', 'iwCrewTap', 'text'),
+    wire('iwCrewFn', 'saidText', 'iwCrewSaid', 'text'),
+    wire('iwIn', 'model', 'iwAssign', 'model'),
+    wire('iwChoose', 'requestId', 'iwAssign', 'requestId'),
+    ...(['requests', 'words', 'lang'] as const).map((f) => wire('iwIn', f, 'iwAssign', f)),
+    wire('iwCrewEach', 'itemOutput-id', 'iwAssign', 'robotId'),
+    wire('iwCrewEach', 'itemOutputSignal-picked', 'iwAssign', 'go'),
+    wire('iwAssign', 'told', 'iwCrewFn', 'told'),
+    wire('iwAssign', 'ok', 'iwAssignOk', 'condition'),
+    wire('iwAssign', 'ran', 'iwAssignOk', 'eval'),
+    wire('iwAssign', 'model', 'iwOut', 'model'),
+    wire('iwAssignOk', 'ontrue', 'iwOut', 'write'),
+    wire('iwAssignOk', 'ontrue', 'iwAgain', 'start'),
     // Find my robots: 3D frames them (and back to the whole island); the flat island scrolls to them and rings them.
     wire('iwIn', 'findText', 'iwFind', 'label'),
     wire('iwIn', 'tapText', 'iwTap', 'text'),
@@ -1948,8 +1984,10 @@ const ROBOT_CARD: CgComponent = {
   path: 'Robot/Card',
   description: 'One robot of My robots: its drawing, name, tag (Yours, Lent by …, Locked), what it wears, colours, hats, its blocks as chips, its upgrade and where it works. Publishes Named, Coloured or Hatted with the Id and the value.',
   nodes: [
-    inputs('rcIn', [['id', 'string'], ['robotId', 'string'], ['kind', 'string'], ['name', 'string'], ['owned', 'boolean'], ['locked', 'boolean'], ['tag', 'string'], ['tagClass', 'string'], ['cardClass', 'string'], ['wears', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['accessory', 'string'], ['paints', 'array'], ['hats', 'array'], ['abilities', 'array'], ['upgradeText', 'string'], ['upgradeClass', 'string'], ['whereText', 'string'], ['colourWord', 'string'], ['hatWord', 'string'], ['canDoWord', 'string'], ['upgradeWord', 'string'], ['whereWord', 'string'], ['nameWord', 'string']]),
-    group('rcCard', 'The card', undefined, { ...column({ rowGap: sp(10) }), ...PANEL, cssClassName: 'bg-panel bg-robot-card' }, ['rcTop', 'rcColourL', 'rcColourRow', 'rcHatL', 'rcHatRow', 'rcCanL', 'rcCanRow', 'rcUpL', 'rcUp', 'rcWhereL', 'rcWhere']),
+    inputs('rcIn', [['id', 'string'], ['robotId', 'string'], ['kind', 'string'], ['name', 'string'], ['owned', 'boolean'], ['locked', 'boolean'], ['tag', 'string'], ['tagClass', 'string'], ['cardClass', 'string'], ['wears', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['accessory', 'string'], ['paints', 'array'], ['hats', 'array'], ['abilities', 'array'], ['upgradeText', 'string'], ['upgradeClass', 'string'], ['whereText', 'string'], ['colourWord', 'string'], ['hatWord', 'string'], ['canDoWord', 'string'], ['upgradeWord', 'string'], ['whereWord', 'string'], ['nameWord', 'string'],
+      // P108 IW-008 (lane C): its brain and what it knows, copy its program to another robot, what a copy said.
+      ['brainWord', 'string'], ['brainText', 'string'], ['copyWord', 'string'], ['copyChips', 'array'], ['hasCopy', 'boolean'], ['saidText', 'string'], ['hasSaid', 'boolean']]),
+    group('rcCard', 'The card', undefined, { ...column({ rowGap: sp(10) }), ...PANEL, cssClassName: 'bg-panel bg-robot-card' }, ['rcTop', 'rcColourL', 'rcColourRow', 'rcHatL', 'rcHatRow', 'rcCanL', 'rcCanRow', 'rcUpL', 'rcUp', 'rcBrainL', 'rcBrain', 'rcWhereL', 'rcWhere', 'rcCopy', 'rcSaid']),
     group('rcTop', 'The robot, its name, whose', 'rcCard', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(12), flexWrap: 'nowrap', alignItems: 'flex-start' }), ['rcStage', 'rcWho']),
     group('rcStage', 'The robot, drawn', 'rcTop', { sizeMode: 'explicit', width: px(88), height: px(88), borderRadius: px(14), cssClassName: 'bg-robot-stage' }, ['rcGarden']),
     place('rcGarden', KIT_GARDEN, 'The robot', 'rcStage', { stepMs: STEP_MS, label: 'The robot' }),
@@ -1976,9 +2014,17 @@ const ROBOT_CARD: CgComponent = {
     text('rcUpText', 'The upgrade', 'rcUp', '', { ...T_SMALL, fontWeight: '800', color: 'var(--ink)' }),
     text('rcWhereL', 'Where it works', 'rcCard', '', { fontSize: px(12), fontWeight: '800', color: 'var(--ink-2)', cssClassName: 'bg-caps' }),
     text('rcWhere', 'Where it works', 'rcCard', '', { ...T_BODY, cssClassName: 'bg-robot-where' }),
+    // P108 IW-008 (lane C): the brain (how many blocks it holds, the program it knows), copy its program to another of hers.
+    text('rcBrainL', 'Brain', 'rcCard', '', { fontSize: px(12), fontWeight: '800', color: 'var(--ink-2)', cssClassName: 'bg-caps' }),
+    text('rcBrain', 'Its brain', 'rcCard', '', { ...T_BODY, cssClassName: 'bg-robot-brain' }),
+    group('rcCopy', 'Copy its program', 'rcCard', { ...column({ rowGap: sp(6) }), cssClassName: 'bg-robot-copy', mounted: false }, ['rcCopyL', 'rcCopyRow']),
+    text('rcCopyL', 'Copy its program to', 'rcCopy', '', { fontSize: px(12), fontWeight: '800', color: 'var(--ink-2)', cssClassName: 'bg-caps' }),
+    group('rcCopyRow', 'Her other robots', 'rcCopy', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(8), rowGap: sp(8) }), ['rcCopyEach']),
+    { ...logic('rcCopyEach', FOR_EACH_NODE, 'One chip per other robot', { template: C.chip, templateType: 'explicit' }), parent: 'rcCopyRow' },
+    text('rcSaid', 'What the copy did', 'rcCard', '', { ...T_BODY, cssClassName: 'bg-robot-said', mounted: false }),
     logic('rcIsOwned', CONDITION_NODE, 'Hers?'),
     withStates('rcOwn', 'Hers, or still to be lent', ['locked', 'owned'], { owned: { type: 'boolean', by: { locked: false, owned: true } }, locked: { type: 'boolean', by: { locked: true, owned: false } } }),
-    outputs('rcOut', [['id', 'string'], ['robotId', 'string'], ['name', 'string'], ['named', 'signal'], ['colour', 'string'], ['coloured', 'signal'], ['hat', 'string'], ['hatted', 'signal']])
+    outputs('rcOut', [['id', 'string'], ['robotId', 'string'], ['name', 'string'], ['named', 'signal'], ['colour', 'string'], ['coloured', 'signal'], ['hat', 'string'], ['hatted', 'signal'], ['copyTo', 'string'], ['copied', 'signal']])
   ],
   connections: [
     wire('rcIn', 'cardClass', 'rcCard', 'cssClassName'),
@@ -2017,7 +2063,19 @@ const ROBOT_CARD: CgComponent = {
     wire('rcColourEach', 'itemOutput-id', 'rcOut', 'colour'),
     wire('rcColourEach', 'itemOutputSignal-picked', 'rcOut', 'coloured'),
     wire('rcHatEach', 'itemOutput-id', 'rcOut', 'hat'),
-    wire('rcHatEach', 'itemOutputSignal-picked', 'rcOut', 'hatted')
+    wire('rcHatEach', 'itemOutputSignal-picked', 'rcOut', 'hatted'),
+    // P108 IW-008 (lane C).
+    wire('rcIn', 'brainWord', 'rcBrainL', 'text'),
+    wire('rcIn', 'brainText', 'rcBrain', 'text'),
+    wire('rcOwn', 'owned', 'rcBrainL', 'mounted'),
+    wire('rcOwn', 'owned', 'rcBrain', 'mounted'),
+    wire('rcIn', 'copyWord', 'rcCopyL', 'text'),
+    wire('rcIn', 'copyChips', 'rcCopyEach', 'items'),
+    wire('rcIn', 'hasCopy', 'rcCopy', 'mounted'),
+    wire('rcIn', 'saidText', 'rcSaid', 'text'),
+    wire('rcIn', 'hasSaid', 'rcSaid', 'mounted'),
+    wire('rcCopyEach', 'itemOutput-id', 'rcOut', 'copyTo'),
+    wire('rcCopyEach', 'itemOutputSignal-picked', 'rcOut', 'copied')
   ]
 };
 
@@ -2600,6 +2658,8 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       wire('wsReqVar', 'value', 'wsJob', 'requestId'),
       wire('wsFam', 'robots', 'wsJob', 'robots'),
       wire('wsFam', 'lang', 'wsJob', 'lang'),
+      // P108 IW-008 (lane C): with a crew, the robot at work on this plot (else one of that kind at home) does the job.
+      wire('wsFam', 'plots', 'wsJob', 'plots'),
       ...(['botName', 'color', 'eye', 'hat', 'robot', 'robotKey', 'paletteRobot', 'stepMs'] as const).map((f) => wire('wsJob', f, 'wsPlay', f)),
       wire('wsJob', 'robotId', 'wsComplete', 'robotId'),
       wire('wsComplete', 'lent', 'wsGift', 'lent'),
@@ -2646,7 +2706,7 @@ const PAGE_ROBOT: CgComponent = (() => {
   return {
     path: 'Pages/My robot',
     description: 'My robots (P106 IG-005): Pip big on his stage with his name, paint, eyes, hat (gifts, never bought) and stickers; then a card per robot of the island — the ones she has, each with its name, look, blocks, upgrade and where it works, and the ones an islander will lend, with who and after what.',
-    repeats: { source: 'array', rowFields: ['id', 'robotId', 'kind', 'name', 'owned', 'locked', 'tag', 'tagClass', 'cardClass', 'wears', 'color', 'eye', 'hat', 'accessory', 'paints', 'hats', 'abilities', 'upgradeText', 'upgradeClass', 'whereText', 'nameWord', 'colourWord', 'hatWord', 'canDoWord', 'upgradeWord', 'whereWord'] },
+    repeats: { source: 'array', rowFields: ['id', 'robotId', 'kind', 'name', 'owned', 'locked', 'tag', 'tagClass', 'cardClass', 'wears', 'color', 'eye', 'hat', 'accessory', 'paints', 'hats', 'abilities', 'upgradeText', 'upgradeClass', 'whereText', 'nameWord', 'colourWord', 'hatWord', 'canDoWord', 'upgradeWord', 'whereWord', 'brainWord', 'brainText', 'copyWord', 'copyChips', 'hasCopy', 'saidText', 'hasSaid'] },
     nodes: [
       ...base.nodes,
       // P106 IG-005: the fleet — a card per robot (Robot cards), written through Update robot (one per field).
@@ -2658,6 +2718,9 @@ const PAGE_ROBOT: CgComponent = (() => {
       logic('rbSetName', L('Update robot'), 'A robot’s name', { field: 'name' }),
       logic('rbSetColour', L('Update robot'), 'A robot’s paint', { field: 'color' }),
       logic('rbSetHat', L('Update robot'), 'A robot’s hat', { field: 'hat' }),
+      // P108 IW-008 (lane C): one robot's program copied onto another (written only when it went).
+      logic('rbCopy', L('Copy program'), 'A program copied onto another robot'),
+      gate('rbCopyOk', 'Was it copied?'),
       place('rbHead', C.head, 'The head', 'rbWrap'),
       group('rbGrid', 'Stage and options', 'rbWrap', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-robo' }, ['rbStage', 'rbOptions']),
       group('rbStage', 'The stage', 'rbGrid', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-robo-stage' }, ['rbGarden']),
@@ -2673,6 +2736,20 @@ const PAGE_ROBOT: CgComponent = (() => {
       wire('rbWords', 'words', 'rbCards', 'words'),
       wire('rbRequests', 'requests', 'rbCards', 'requests'),
       wire('rbCards', 'cards', 'rbFleetEach', 'items'),
+      // P108 IW-008 (lane C): a card's copy chip: its robot's program onto the chip's robot; the line on the card it is said on.
+      wire('rbStore', 'model', 'rbCopy', 'model'),
+      wire('rbFam', 'profileId', 'rbCopy', 'profileId'),
+      wire('rbFam', 'lang', 'rbCopy', 'lang'),
+      wire('rbFam', 'band', 'rbCopy', 'band'),
+      wire('rbWords', 'words', 'rbCopy', 'words'),
+      wire('rbFleetEach', 'itemOutput-robotId', 'rbCopy', 'from'),
+      wire('rbFleetEach', 'itemOutput-copyTo', 'rbCopy', 'to'),
+      wire('rbFleetEach', 'itemOutputSignal-copied', 'rbCopy', 'go'),
+      wire('rbCopy', 'told', 'rbCards', 'told'),
+      wire('rbCopy', 'model', 'rbStore', 'model'),
+      wire('rbCopy', 'ok', 'rbCopyOk', 'condition'),
+      wire('rbCopy', 'ran', 'rbCopyOk', 'eval'),
+      wire('rbCopyOk', 'ontrue', 'rbStore', 'write'),
       ...(
         [
           ['rbSetName', 'name', 'named'],

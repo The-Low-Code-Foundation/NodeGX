@@ -184,6 +184,12 @@
       "toProperty": "lang"
     },
     {
+      "fromId": "wsFam",
+      "fromProperty": "plots",
+      "toId": "wsJob",
+      "toProperty": "plots"
+    },
+    {
       "fromId": "wsJob",
       "fromProperty": "botName",
       "toId": "wsPlay",

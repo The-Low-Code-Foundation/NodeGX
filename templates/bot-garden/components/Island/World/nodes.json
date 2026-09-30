@@ -94,7 +94,7 @@
           "type": "signal"
         }
       ],
-      "x": 530,
+      "x": 590,
       "y": 1240
     },
     {
@@ -303,6 +303,7 @@
         "iwCardWho",
         "iwCardTitle",
         "iwCardLine",
+        "iwCrew",
         "iwCardBtns"
       ],
       "parameters": {
@@ -395,7 +396,7 @@
         "rowGap": "var(--space-2)"
       },
       "x": 220,
-      "y": 1600
+      "y": 2440
     },
     {
       "id": "iwOpen",
@@ -438,7 +439,7 @@
         "mounted": false
       },
       "x": 280,
-      "y": 1720
+      "y": 2560
     },
     {
       "id": "iwHomeBtn",
@@ -481,7 +482,7 @@
         "mounted": false
       },
       "x": 280,
-      "y": 1840
+      "y": 2680
     },
     {
       "id": "iwClose",
@@ -523,7 +524,167 @@
         "label": "✕"
       },
       "x": 280,
+      "y": 2800
+    },
+    {
+      "id": "iwCrew",
+      "type": "Group",
+      "label": "The crew for this job",
+      "parent": "iwCardText",
+      "children": [
+        "iwCrewL",
+        "iwCrewHere",
+        "iwCrewRow",
+        "iwCrewTap",
+        "iwCrewSaid"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1-5)",
+        "cssClassName": "bg-crew",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "iwCrewL",
+      "type": "Text",
+      "label": "Your crew",
+      "parent": "iwCrew",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-caps"
+      },
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "iwCrewHere",
+      "type": "Text",
+      "label": "Who works here",
+      "parent": "iwCrew",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "cssClassName": "bg-crew-here"
+      },
+      "x": 280,
+      "y": 1840
+    },
+    {
+      "id": "iwCrewRow",
+      "type": "Group",
+      "label": "Her robots of this kind",
+      "parent": "iwCrew",
+      "children": [
+        "iwCrewEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "cssClassName": "bg-crew-row"
+      },
+      "x": 280,
       "y": 1960
+    },
+    {
+      "id": "iwCrewEach",
+      "type": "For Each",
+      "label": "One chip per robot of this kind",
+      "parent": "iwCrewRow",
+      "parameters": {
+        "template": "/Robot/Chip",
+        "templateType": "explicit"
+      },
+      "x": 340,
+      "y": 2080
+    },
+    {
+      "id": "iwCrewTap",
+      "type": "Text",
+      "label": "How to send one",
+      "parent": "iwCrew",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-crew-tap"
+      },
+      "x": 280,
+      "y": 2200
+    },
+    {
+      "id": "iwCrewSaid",
+      "type": "Text",
+      "label": "What the last tap did",
+      "parent": "iwCrew",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "cssClassName": "bg-crew-said"
+      },
+      "x": 280,
+      "y": 2320
+    },
+    {
+      "id": "iwCrewFn",
+      "type": "/Logic/Crew chips",
+      "label": "The crew for this job",
+      "x": 590,
+      "y": 1840
+    },
+    {
+      "id": "iwAssign",
+      "type": "/Logic/Assign robot",
+      "label": "A robot sent here, or home",
+      "x": 590,
+      "y": 2080
+    },
+    {
+      "id": "iwAssignOk",
+      "type": "Condition",
+      "label": "Did the robot go?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 590,
+      "y": 2800
     },
     {
       "id": "iwCardState",
@@ -537,7 +698,7 @@
         "value-hidden-shown": false,
         "value-shown-shown": true
       },
-      "x": 530,
+      "x": 590,
       "y": 1600
     },
     {
@@ -547,22 +708,22 @@
       "parameters": {
         "runOnChange-condition": false
       },
-      "x": 530,
-      "y": 2080
+      "x": 590,
+      "y": 2920
     },
     {
       "id": "iwWorld",
       "type": "/Logic/Island world",
       "label": "Her island, as it stands",
-      "x": 530,
+      "x": 590,
       "y": 760
     },
     {
       "id": "iwTick",
       "type": "/Logic/Island tick",
       "label": "One tick of the island",
-      "x": 530,
-      "y": 2200
+      "x": 590,
+      "y": 3040
     },
     {
       "id": "iwVar",
@@ -571,8 +732,8 @@
       "parameters": {
         "name": "gardenIsland"
       },
-      "x": 530,
-      "y": 2320
+      "x": 590,
+      "y": 3160
     },
     {
       "id": "iwSetBuilt",
@@ -581,8 +742,8 @@
       "parameters": {
         "name": "gardenIsland"
       },
-      "x": 530,
-      "y": 2440
+      "x": 590,
+      "y": 3280
     },
     {
       "id": "iwSetTick",
@@ -591,8 +752,8 @@
       "parameters": {
         "name": "gardenIsland"
       },
-      "x": 530,
-      "y": 2560
+      "x": 590,
+      "y": 3400
     },
     {
       "id": "iwTimer",
@@ -601,8 +762,8 @@
       "parameters": {
         "duration": 760
       },
-      "x": 530,
-      "y": 2680
+      "x": 590,
+      "y": 3520
     },
     {
       "id": "iwDraw",
@@ -611,29 +772,29 @@
       "parameters": {
         "stepMs": 380
       },
-      "x": 530,
+      "x": 590,
       "y": 400
     },
     {
       "id": "iwAt",
       "type": "/Logic/Plot at",
       "label": "Which plot was tapped",
-      "x": 530,
+      "x": 590,
       "y": 520
     },
     {
       "id": "iwChoose",
       "type": "/Logic/Island choose",
       "label": "The plot card",
-      "x": 530,
+      "x": 590,
       "y": 1720
     },
     {
       "id": "iwHome",
       "type": "/Logic/Bring home",
       "label": "Bring the robot home",
-      "x": 530,
-      "y": 1960
+      "x": 590,
+      "y": 2680
     },
     {
       "id": "iwAgain",
@@ -642,8 +803,8 @@
       "parameters": {
         "duration": 400
       },
-      "x": 530,
-      "y": 2800
+      "x": 590,
+      "y": 3640
     },
     {
       "id": "iwRevealWait",
@@ -652,8 +813,8 @@
       "parameters": {
         "duration": 80
       },
-      "x": 530,
-      "y": 2920
+      "x": 590,
+      "y": 3760
     },
     {
       "id": "iwReveal",
@@ -662,8 +823,8 @@
       "parameters": {
         "what": "card"
       },
-      "x": 530,
-      "y": 3040
+      "x": 590,
+      "y": 3880
     },
     {
       "id": "iwFindFn",
@@ -672,7 +833,7 @@
       "parameters": {
         "what": "robots"
       },
-      "x": 530,
+      "x": 590,
       "y": 1360
     },
     {
@@ -690,7 +851,7 @@
         "value-island-onRobots": false,
         "value-robots-onRobots": true
       },
-      "x": 530,
+      "x": 590,
       "y": 880
     },
     {
@@ -700,7 +861,7 @@
       "parameters": {
         "runOnChange-condition": false
       },
-      "x": 530,
+      "x": 590,
       "y": 1480
     },
     {
@@ -718,7 +879,7 @@
         "value-2d-show3d": false,
         "value-3d-show3d": true
       },
-      "x": 530,
+      "x": 590,
       "y": 640
     },
     {
@@ -729,28 +890,28 @@
         "storeName": "garden",
         "keys": "renderer"
       },
-      "x": 530,
-      "y": 3160
+      "x": 590,
+      "y": 4000
     },
     {
       "id": "iwRendRead",
       "type": "/Logic/Renderer",
       "label": "Draw in 3D here?",
-      "x": 530,
-      "y": 3280
+      "x": 590,
+      "y": 4120
     },
     {
       "id": "iwRendIs3d",
       "type": "Condition",
       "label": "In 3D?",
-      "x": 530,
-      "y": 3400
+      "x": 590,
+      "y": 4240
     },
     {
       "id": "iwRendOk",
       "type": "Condition",
       "label": "Can this computer draw 3D?",
-      "x": 530,
+      "x": 590,
       "y": 1000
     },
     {
@@ -760,8 +921,8 @@
       "parameters": {
         "event": "unsupported"
       },
-      "x": 530,
-      "y": 3520
+      "x": 590,
+      "y": 4360
     },
     {
       "id": "iwRendSlow",
@@ -770,7 +931,7 @@
       "parameters": {
         "event": "slow"
       },
-      "x": 530,
+      "x": 590,
       "y": 1120
     },
     {
@@ -782,8 +943,8 @@
         "key": "renderer",
         "merge": false
       },
-      "x": 530,
-      "y": 3640
+      "x": 590,
+      "y": 4480
     },
     {
       "id": "iwOut",
@@ -811,8 +972,8 @@
           "type": "signal"
         }
       ],
-      "x": 530,
-      "y": 1840
+      "x": 590,
+      "y": 2560
     }
   ],
   "visualRoots": [

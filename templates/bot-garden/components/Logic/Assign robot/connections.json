@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9bf3327c-8ac3-59fe-85d6-d44ca3d35ec6",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "assignrobotIn",
+      "fromProperty": "lang",
+      "toId": "assignrobotFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "assignrobotIn",
+      "fromProperty": "model",
+      "toId": "assignrobotFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "assignrobotIn",
+      "fromProperty": "now",
+      "toId": "assignrobotFn",
+      "toProperty": "in-now"
+    },
+    {
+      "fromId": "assignrobotIn",
+      "fromProperty": "profileId",
+      "toId": "assignrobotFn",
+      "toProperty": "in-profileId"
+    },
+    {
+      "fromId": "assignrobotIn",
+      "fromProperty": "requestId",
+      "toId": "assignrobotFn",
+      "toProperty": "in-requestId"
+    },
+    {
+      "fromId": "assignrobotIn",
+      "fromProperty": "requests",
+      "toId": "assignrobotFn",
+      "toProperty": "in-requests"
+    },
+    {
+      "fromId": "assignrobotIn",
+      "fromProperty": "robotId",
+      "toId": "assignrobotFn",
+      "toProperty": "in-robotId"
+    },
+    {
+      "fromId": "assignrobotIn",
+      "fromProperty": "words",
+      "toId": "assignrobotFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "assignrobotIn",
+      "fromProperty": "go",
+      "toId": "assignrobotFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "assignrobotFn",
+      "fromProperty": "out-error",
+      "toId": "assignrobotOut",
+      "toProperty": "error"
+    },
+    {
+      "fromId": "assignrobotFn",
+      "fromProperty": "out-model",
+      "toId": "assignrobotOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "assignrobotFn",
+      "fromProperty": "out-ok",
+      "toId": "assignrobotOut",
+      "toProperty": "ok"
+    },
+    {
+      "fromId": "assignrobotFn",
+      "fromProperty": "out-role",
+      "toId": "assignrobotOut",
+      "toProperty": "role"
+    },
+    {
+      "fromId": "assignrobotFn",
+      "fromProperty": "out-told",
+      "toId": "assignrobotOut",
+      "toProperty": "told"
+    },
+    {
+      "fromId": "assignrobotFn",
+      "fromProperty": "success",
+      "toId": "assignrobotOut",
+      "toProperty": "ran"
+    }
+  ]
+}

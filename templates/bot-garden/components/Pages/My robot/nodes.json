@@ -84,7 +84,7 @@
         "name": "gardenLang"
       },
       "x": 530,
-      "y": 1720
+      "y": 1840
     },
     {
       "id": "rbWords",
@@ -108,7 +108,7 @@
         "runOnChange-condition": false
       },
       "x": 530,
-      "y": 1840
+      "y": 1960
     },
     {
       "id": "rbFleetL",
@@ -180,7 +180,7 @@
       "type": "/Data/Requests",
       "label": "The requests",
       "x": 530,
-      "y": 1960
+      "y": 2080
     },
     {
       "id": "rbSetName",
@@ -211,6 +211,23 @@
       },
       "x": 530,
       "y": 1600
+    },
+    {
+      "id": "rbCopy",
+      "type": "/Logic/Copy program",
+      "label": "A program copied onto another robot",
+      "x": 530,
+      "y": 1720
+    },
+    {
+      "id": "rbCopyOk",
+      "type": "Condition",
+      "label": "Was it copied?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 530,
+      "y": 2200
     },
     {
       "id": "rbHead",

@@ -657,8 +657,11 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       expect(eng.robotAt(0).gliding === true || eng.robotAt(0).x !== undefined).toBe(true);
       // A look change mid-glide keeps the glide: the rebuilt robot starts where the old one was drawn.
       const x0 = eng.robotAt(0).x;
+      // P108 IW-008 (lane C): a look change redraws THAT robot (a new group, where the old one was drawn), never the scene.
+      const robot0 = eng.built.robots[0];
       eng.setWorld(world({ x: 2, can: 2, carry: ['stone', 'letter'] }));
-      expect(eng.built).not.toBe(built);
+      expect(eng.built.robots[0]).not.toBe(robot0);
+      expect(eng.built).toBe(built);
       expect(eng.robotAt(0).x).toBeCloseTo(x0, 6);
       expect(levelOf().userData.can).toBe(2);
       eng.destroy();

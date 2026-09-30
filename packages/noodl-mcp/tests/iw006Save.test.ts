@@ -118,6 +118,27 @@ describe('IW-006 — save v5 (session-4 base)', () => {
   });
 });
 
+// P108 IW-008 (lane C): the crew's two optional robot-row fields — the rest of their gate is iw008Crew.test.ts.
+describe('IW-008 (lane C) — save v5 with a crew: a robot row’s program and the plot it helps on', () => {
+  it('🔴 a copy that carries a program and helps on a plot round-trips (8th and 9th fields of its row); r1 carrying one is a row; nothing else moves', () => {
+    const m = win(kid(), 'tulips-three', 'r1');
+    const p = m.profiles[0];
+    earn(p, 30);
+    const copy = buy(p, 'robot:pip', { name: 'Sprout' });
+    const row = p.island.robots.find((r: any) => r.id === copy.robotId);
+    row.program = clone(req('tulips-three').referenceProgram);
+    row.helps = 'tulips-three';
+    p.island.robots[0].program = clone(req('tulip-door').referenceProgram);
+    const sound = helper<any>(SAVE_HELPERS, 'modelOf', m);
+    expect([sound.island.robots[0].program, sound.island.robots[1].helps]).toEqual([req('tulip-door').referenceProgram, 'tulips-three']);
+    const code = runScript(ENCODE_SAVE_SCRIPT, { model: sound }).code;
+    const rows = packedOf(code).p[0][14];
+    expect([rows[0].length, rows[1].length, rows[1][8]]).toEqual([8, 9, 'tulips-three']);
+    const dec = runScript(DECODE_SAVE_SCRIPT, { code });
+    expect([dec.migrated, dec.model]).toEqual([false, sound]);
+  });
+});
+
 describe('IW-006 / IW-008 — the purchase rule (buyItem) and the wallet (session-4 base)', () => {
   const funded = (n = 200) => { const m = win(kid(), 'path-postbox'); earn(m.profiles[0], n); return m; };
 

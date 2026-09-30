@@ -198,6 +198,84 @@
     {
       "fromId": "rbStore",
       "fromProperty": "model",
+      "toId": "rbCopy",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "profileId",
+      "toId": "rbCopy",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "lang",
+      "toId": "rbCopy",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "band",
+      "toId": "rbCopy",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "rbWords",
+      "fromProperty": "words",
+      "toId": "rbCopy",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-robotId",
+      "toId": "rbCopy",
+      "toProperty": "from"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-copyTo",
+      "toId": "rbCopy",
+      "toProperty": "to"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutputSignal-copied",
+      "toId": "rbCopy",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rbCopy",
+      "fromProperty": "told",
+      "toId": "rbCards",
+      "toProperty": "told"
+    },
+    {
+      "fromId": "rbCopy",
+      "fromProperty": "model",
+      "toId": "rbStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbCopy",
+      "fromProperty": "ok",
+      "toId": "rbCopyOk",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rbCopy",
+      "fromProperty": "ran",
+      "toId": "rbCopyOk",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rbCopyOk",
+      "fromProperty": "ontrue",
+      "toId": "rbStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "rbStore",
+      "fromProperty": "model",
       "toId": "rbSetName",
       "toProperty": "model"
     },
