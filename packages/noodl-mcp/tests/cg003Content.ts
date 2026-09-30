@@ -207,6 +207,10 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   iw4B_trick: s('trick', 'astuce'),
   iw4B_do: s('do trick', 'faire l’astuce'),
   iw4VarsH: s('What {b} remembers', 'Ce que {b} retient'),
+  // P108 IW-003 (lane S): Sami's bench in the blocks — the chip picked on it and its states say bench, not path square.
+  iw3sK_bench: s('🪑 bench', '🪑 banc'),
+  iw3sS_done_bench: s('is built', 'est construit'),
+  iw3sS_dirt_bench: s('is not built yet', 'n’est pas encore construit'),
   ...Object.fromEntries(Object.values(REQUEST_SUBS).map((r) => [r.key, r.words]))
 };
 
