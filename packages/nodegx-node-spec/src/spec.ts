@@ -3,8 +3,10 @@
  *
  * A node's behaviour as data plus pure functions: ports, types, defaults, state, and reducers
  * `(state, inputs, …) → { set, emit, outcome }`. No `this`, no frames, no dirty flags, no clock,
- * no randomness (those arrive through the world, NSP-007). For a pure node the spec IS the
- * reference implementation; the interpreter (`interpreter.ts`) runs it.
+ * no randomness of its own — a node that needs time, entropy or a server reads them from the
+ * WORLD it is handed (`WorldView`, world.ts; NSP-007) and asks for its effects in the patch
+ * (`after`, `request`, `abort`), so the reducer stays a pure function of what it was given. For
+ * a pure node the spec IS the reference implementation; the interpreter (`interpreter.ts`) runs it.
  *
  * Rules the TYPE SYSTEM enforces (graded by tests/types.test.ts, one `@ts-expect-error` each):
  *   1. `emit` names only declared signal outputs.
@@ -74,7 +76,45 @@ export type Outcome = 'done' | 'unchanged' | 'failure';
  * whether that was `done` or `unchanged`. Rule 3 still holds at run time: the interpreter refuses
  * a settle that leaves a deferred outcome unresolved, or resolves one nobody deferred.
  */
-export type ReducerOutcome = Outcome | 'deferred';
+export type ReducerOutcome = Outcome | 'deferred' | 'pending';
+
+/**
+ * `pending` (NSP-007) — the outcome is decided by the WORLD, frames later: HTTP Request's `Fetch`
+ * reports when the answer lands, or when its own timeout fires. A pending invocation is resolved
+ * by a world handler's `outcomes` (`WorldHandlers`), oldest first per port, and is recorded in the
+ * frame it is resolved in; unlike `deferred`, a settle may leave it open. An invocation nobody ever
+ * resolves is never recorded — which is also what the runtime does with a token nobody reports.
+ */
+
+// ------------------------------------------------------------------------------------------------
+// the world, as a spec sees it (NSP-007; world.ts is the world itself)
+
+/** What a reducer may READ of the world. Pure in the run: the same seed and the same steps read the same values. */
+export interface WorldView {
+  /** The clock, in milliseconds; moves only on an `advance` step. */
+  now(): number;
+  /** [0, 1) from the seeded source. */
+  random(): number;
+  bytes(n: number): Uint8Array;
+  /** A version-4 UUID from the seeded source — what `crypto.randomUUID` hands a node on a target. */
+  uuid(): string;
+}
+
+/** A request a reducer asks the world to make. `id` is the spec's own name for it (an `abort` and the response name it); it is not on the wire. */
+export interface SpecRequest {
+  id: string;
+  method?: unknown;
+  url: unknown;
+  headers?: Record<string, unknown>;
+  body?: unknown;
+}
+
+/** The world's answer to a `SpecRequest`, delivered to `WorldHandlers.response`. */
+export type WorldResponse = { id: string } & (
+  | { status: number; statusText: string; headers: Record<string, string>; body: string | null }
+  | { error: { name: string; message: string } }
+  | { aborted: true }
+);
 
 // ------------------------------------------------------------------------------------------------
 // declarations
@@ -105,6 +145,12 @@ export interface ValueInputDecl extends PortMeta {
   coerce?: Coercion;
   /** For `enum` ports: the accepted values. */
   enums?: readonly string[];
+  /**
+   * Values the GENERATOR draws for this port beside its type's pool (generate.ts) — a URL for a
+   * `url` port, a header name list for a `headers` port. The type's pool alone would never write
+   * a URL. Without it the pool is unchanged, so a spec that declares none generates what it did.
+   */
+  examples?: readonly unknown[];
 }
 
 export interface SignalInputDecl extends PortMeta {
@@ -173,6 +219,22 @@ export interface Patch<S, O> {
    * branch's shape for the mutants (a `send` difference is unobservable except in that case).
    */
   send?: ReadonlyArray<ValueOutputKeys<O>>;
+  /**
+   * Effects on the world (NSP-007), applied after `set` in this order. None is observable on the
+   * wire by itself; each shows through what the world later hands back.
+   *   `after`   world timers: `WorldHandlers.timer` is called with the `tag` when the clock passes
+   *             `now + ms` (the JavaScript timer rule for `ms`, world.ts). A tag already pending
+   *             is scheduled again beside it, as two `setTimeout` calls would be.
+   *   `cancel`  drops every pending timer with the tag (`clearTimeout`).
+   *   `request` a request over the wire — recorded as a `request` event in the frame it is issued
+   *             in; the answer arrives at `WorldHandlers.response` with the request's `id`.
+   *   `abort`   aborts requests by id: the answer, if still due, is dropped and `response` is
+   *             called with `{ aborted }` (an `AbortController`).
+   */
+  after?: ReadonlyArray<{ ms: unknown; tag: string }>;
+  cancel?: readonly string[];
+  request?: SpecRequest;
+  abort?: readonly string[];
 }
 
 export interface OutcomePatch<S, O> extends Patch<S, O> {
@@ -205,12 +267,16 @@ export interface AfterInputsPatch<S, I, O> extends Patch<S, O> {
 // written (the same value as its `value` argument); `state` is the state before the patch. A
 // signal reducer sees the inputs as they stand. (Asked by the stranger, NSP-006 §5.)
 
+//
+// Every reducer is handed the WORLD as its last argument (NSP-007) — `now()`, `random()`,
+// `uuid()` — and may ignore it; the eighteen specs before NSP-007 do.
+
 export type Reducers<S, I, O> = {
-  [K in OutcomeKeys<I>]: (state: Readonly<S>, inputs: Inputs<I>) => OutcomePatch<S, O>;
+  [K in OutcomeKeys<I>]: (state: Readonly<S>, inputs: Inputs<I>, world: WorldView) => OutcomePatch<S, O>;
 } & {
-  [K in PlainSignalKeys<I>]: (state: Readonly<S>, inputs: Inputs<I>) => Patch<S, O>;
+  [K in PlainSignalKeys<I>]: (state: Readonly<S>, inputs: Inputs<I>, world: WorldView) => Patch<S, O>;
 } & {
-  [K in ValueKeys<I>]?: (state: Readonly<S>, value: ValueOf<I[K]>, inputs: Inputs<I>) => Patch<S, O>;
+  [K in ValueKeys<I>]?: (state: Readonly<S>, value: ValueOf<I[K]>, inputs: Inputs<I>, world: WorldView) => Patch<S, O>;
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -234,7 +300,7 @@ export interface DerivedPorts<S, O> {
    * mentioned, as `collectPorts` (nodedefinition.ts) does.
    */
   inputs: (params: Readonly<Record<string, unknown>>) => Record<string, ValueInputDecl>;
-  on: (state: Readonly<S>, port: string, value: unknown, derived: Readonly<Record<string, unknown>>) => Patch<S, O>;
+  on: (state: Readonly<S>, port: string, value: unknown, derived: Readonly<Record<string, unknown>>, world: WorldView) => Patch<S, O>;
   /**
    * A port the target registers ON FIRST WRITE, whatever the params — the runtime's
    * `registerInputIfNeeded` (node.ts): And accepts any `input <n>`, String Format any name at
@@ -264,12 +330,37 @@ export interface DerivedPorts<S, O> {
  * Its `emit`s queue AFTER the pulses the frame's reducers already queued, and its `set` is
  * observed like any step's (NSP-006 §5).
  */
-export type AfterInputs<S, I, O> = (state: Readonly<S>, inputs: Inputs<I>) => AfterInputsPatch<S, I, O>;
+export type AfterInputs<S, I, O> = (state: Readonly<S>, inputs: Inputs<I>, world: WorldView) => AfterInputsPatch<S, I, O>;
+
+/**
+ * The world's callbacks into a spec (NSP-007): what a node does when a timer it asked for fires
+ * and when an answer to a request it made lands. Each returns an ordinary patch plus the
+ * `pending` outcomes it settles (`outcomes`, oldest pending invocation of that port first —
+ * the way `afterInputs` settles `deferred` ones). Called between steps as the world delivers:
+ * on `advance` (after what was already delivered has landed, before the clock moves) and at
+ * `settle` (after the frame-end reducer, until nothing more is due at the current time).
+ */
+export interface WorldHandlers<S, I, O> {
+  timer?: (state: Readonly<S>, inputs: Inputs<I>, tag: string, world: WorldView) => AfterInputsPatch<S, I, O>;
+  response?: (state: Readonly<S>, inputs: Inputs<I>, response: WorldResponse, world: WorldView) => AfterInputsPatch<S, I, O>;
+}
 
 /** What `.on()` takes beside the reducers. */
 export interface Extras<S, I, O> {
   derived?: DerivedPorts<S, O>;
   afterInputs?: AfterInputs<S, I, O>;
+  world?: WorldHandlers<S, I, O>;
+}
+
+/**
+ * What the GENERATOR draws from for a node that needs the world (generate.ts): the answers its
+ * network script may give, the delays before they land, the clock advances between steps. A
+ * spec with `needs` and no pool gets the defaults in generate.ts.
+ */
+export interface WorldPool {
+  responses?: readonly import('./world').Answer[];
+  delays?: readonly number[];
+  advances?: readonly number[];
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -284,6 +375,12 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
   source: string;
   /** Initial state — what the runtime's `initialize` sets. */
   state: S;
+  /**
+   * The part of the initial state that comes FROM THE WORLD (NSP-007): UUID draws its first id at
+   * creation (uuid.ts `initialize`), so its spec draws one here. Merged over `state` at mount,
+   * before the params are applied. A spec without one has a static initial state.
+   */
+  init?: (world: WorldView) => Partial<S>;
   inputs: I;
   outputs: O;
   /**
@@ -295,11 +392,15 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
   /** What the editor's hover/inspect shows for an instance — the runtime's `getInspectInfo`. */
   inspect?: (state: Readonly<S>) => string;
   /**
-   * What of the world this node's behaviour depends on (T2/T3). The runner refuses a spec that
-   * declares any of these until NSP-007 gives it a scripted world — running a clock-dependent
-   * node without a fake clock is flaky, and flaky grades nothing (NSP-003 §4).
+   * What of the world this node's behaviour depends on (T2/T3). The runner builds a scripted
+   * world for a spec that declares any (NSP-007) and refuses to play it on a target that has no
+   * seam for one (`TargetAdapter.install`) — running a clock-dependent node against the real
+   * clock is flaky, and flaky grades nothing (NSP-003 §4). `backend` is still refused: its seam
+   * arrives with NSP-014.
    */
   needs?: readonly WorldNeed[];
+  /** What the generator draws for the world of this node's sequences (`WorldPool`). */
+  worldPool?: WorldPool;
 }
 
 /** The parts of the world NSP-007 scripts. */
@@ -309,6 +410,7 @@ export interface NodeSpec<S extends object, I extends InputsDecl, O extends Outp
   on: Reducers<S, I, O>;
   derived?: DerivedPorts<S, O>;
   afterInputs?: AfterInputs<S, I, O>;
+  world?: WorldHandlers<S, I, O>;
 }
 
 export interface NodeBuilder<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> {
@@ -341,6 +443,7 @@ export function defineNode<S extends object, const I extends InputsDecl, const O
       const spec: NodeSpec<S, I, O> = { ...decl, on: reducers };
       if (extras?.derived) spec.derived = extras.derived;
       if (extras?.afterInputs) spec.afterInputs = extras.afterInputs;
+      if (extras?.world) spec.world = extras.world;
       return spec;
     }
   };
@@ -359,19 +462,25 @@ export interface AnyNodeSpec {
   version: number;
   source: string;
   state: Readonly<Record<string, unknown>>;
+  init?: (world: WorldView) => Record<string, unknown>;
   inputs: InputsDecl;
   outputs: Record<string, ErasedValueOutput | SignalOutputDecl>;
   outcomes?: readonly Outcome[];
   inspect?: (state: never) => string;
   needs?: readonly WorldNeed[];
+  worldPool?: WorldPool;
   on: Record<string, ErasedReducer | undefined>;
   derived?: {
     inputs: (params: Readonly<Record<string, unknown>>) => Record<string, ValueInputDecl>;
-    on: (state: never, port: string, value: unknown, derived: Readonly<Record<string, unknown>>) => unknown;
+    on: (state: never, port: string, value: unknown, derived: Readonly<Record<string, unknown>>, world: WorldView) => unknown;
     discover?: (port: string) => ValueInputDecl | undefined;
     candidates?: readonly string[];
   };
-  afterInputs?: (state: never, inputs: never) => unknown;
+  afterInputs?: (state: never, inputs: never, world: WorldView) => unknown;
+  world?: {
+    timer?: (state: never, inputs: never, tag: string, world: WorldView) => unknown;
+    response?: (state: never, inputs: never, response: WorldResponse, world: WorldView) => unknown;
+  };
 }
 export interface ErasedValueOutput extends PortMeta {
   type: ValueType;

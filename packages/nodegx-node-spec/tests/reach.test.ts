@@ -82,6 +82,7 @@ describe('generateSequence inside a reach', () => {
     }
     for (const s of steps) {
       if (s === 'settle') continue;
+      if ('advance' in s) throw new Error('a spec without needs never generates an advance step');
       expect(REACH.inputs).toContain('signal' in s ? s.signal : s.set);
     }
     // and the reach is exercised, not just avoided: every trigger and the param appear somewhere

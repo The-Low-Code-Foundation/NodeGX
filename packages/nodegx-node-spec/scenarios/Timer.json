@@ -1,0 +1,56 @@
+[
+  {
+    "name": "Start with Duration 100: Started and done at once; advanced 100, Finished lands",
+    "because": "timer.ts :59-61; timerscheduler.ts :185-190 (delay 0 starts at once), :139-141 and :156-159 (t >= 1 finishes). NSP-007 AC2, the firing arm",
+    "params": { "duration": 100 },
+    "steps": ["settle", { "signal": "start" }, "settle", { "advance": 100 }, "settle"]
+  },
+  {
+    "name": "Start with Duration 100, advanced only 99: Started, done, and NO Finished (the absence beside the firing arm)",
+    "because": "NSP-007 AC2 — an absence asserted beside a known-firing control (the scenario above); timerscheduler.ts :156-157 t < 1 stays running",
+    "params": { "duration": 100 },
+    "steps": ["settle", { "signal": "start" }, "settle", { "advance": 99 }, "settle", { "advance": 1 }, "settle"]
+  },
+  {
+    "name": "Duration 0 and no Start Delay: Started in one frame, Finished in the NEXT, with no time passing",
+    "because": "timerscheduler.ts :177-197 — a queued timer joins after the frame's pass, so its first read is the next frame (:130-159, t = 1 for duration 0)",
+    "params": {},
+    "steps": [{ "signal": "start" }, "settle", "settle", "settle"]
+  },
+  {
+    "name": "Start while running reports unchanged; two Starts in one frame both report done (queued is not running)",
+    "because": "timer.ts :59-64 reads _isRunning, which timerscheduler.ts :181 sets only when the timer joins at the frame",
+    "params": { "duration": 1000 },
+    "steps": [{ "signal": "start" }, { "signal": "start" }, "settle", { "signal": "start" }, "settle"]
+  },
+  {
+    "name": "Stop while queued: reports unchanged, yet the countdown is cancelled — no Started ever (D10)",
+    "because": "timer.ts :105-107 reads _isRunning (false while queued); timerscheduler.ts :108-113 removes it from the queue anyway",
+    "params": { "duration": 100 },
+    "steps": [{ "signal": "start" }, { "signal": "stop" }, "settle", { "advance": 100 }, "settle"]
+  },
+  {
+    "name": "Stop while running: done, and Finished never fires for it",
+    "because": "timer.ts :103-108; timerscheduler.ts :96-107 leaves the running set; :158 `!_wasStopped`",
+    "params": { "duration": 100 },
+    "steps": [{ "signal": "start" }, "settle", { "advance": 50 }, { "signal": "stop" }, "settle", { "advance": 100 }, "settle"]
+  },
+  {
+    "name": "Start Delay 50, Duration 0: nothing until the clock passes 50, then Started AND Finished in one frame",
+    "because": "timerscheduler.ts :180 `_start = now + delay`; :185 no first frame for a delay > 0; :132-159 one read starts and finishes it",
+    "params": { "startDelay": 50 },
+    "steps": [{ "signal": "start" }, "settle", { "advance": 49 }, "settle", { "advance": 1 }, "settle"]
+  },
+  {
+    "name": "Restart while running: done, and Started fires again at the next frame",
+    "because": "timer.ts :71-77; timerscheduler.ts :43-50 stop() then scheduleTimer; :52-57 _hasCalledOnStart false",
+    "params": { "duration": 100 },
+    "steps": [{ "signal": "start" }, "settle", { "advance": 30 }, { "signal": "restart" }, "settle", { "advance": 99 }, "settle", { "advance": 1 }, "settle"]
+  },
+  {
+    "name": "raw arithmetic: a string Duration '5' counts down 5 ms; a null Duration is t = 1 and finishes at the next frame",
+    "because": "timer.ts :85-87 assign the value raw; timerscheduler.ts :139-143 `duration > 0` and `(now - start) / (duration * 1)`",
+    "params": { "duration": "5" },
+    "steps": [{ "signal": "start" }, "settle", { "advance": 4 }, "settle", { "advance": 1 }, "settle", { "set": "duration", "value": null }, { "signal": "start" }, "settle", "settle"]
+  }
+]

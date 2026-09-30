@@ -26,7 +26,7 @@ const traceSchema = require('../schema/trace.schema.json') as Record<string, unk
 /** The JSON schema, as data — for a target that wants to embed it. */
 export const TRACE_SCHEMA = traceSchema;
 
-export const EVENT_KINDS = ['set', 'in', 'settle', 'value', 'signal', 'outcome'] as const;
+export const EVENT_KINDS = ['set', 'in', 'settle', 'value', 'signal', 'outcome', 'advance', 'request'] as const;
 export const OUTCOME_VALUES = ['done', 'unchanged', 'failure'] as const;
 
 /** Fields each kind requires and allows, beyond `t` and the always-optional `subject`. */
@@ -36,7 +36,10 @@ export const EVENT_FIELDS: Readonly<Record<(typeof EVENT_KINDS)[number], { requi
   settle: { required: [], optional: [] },
   value: { required: ['port', 'value'], optional: [] },
   signal: { required: ['port'], optional: [] },
-  outcome: { required: ['port', 'value'], optional: ['error'] }
+  outcome: { required: ['port', 'value'], optional: ['error'] },
+  // NSP-007 — the world
+  advance: { required: ['ms'], optional: [] },
+  request: { required: ['method', 'url', 'headers'], optional: ['body'] }
 });
 
 export type Validation = { ok: true; events: TraceEvent[] } | { ok: false; path: string; message: string };
@@ -63,6 +66,22 @@ export function validateTrace(input: unknown): Validation {
     if (t === 'outcome') {
       if (!(OUTCOME_VALUES as readonly unknown[]).includes(e.value)) return bad(`${at}.value`, `an outcome is one of ${OUTCOME_VALUES.join(', ')}`);
       if ('error' in e && (typeof e.error !== 'string' || e.error.length === 0)) return bad(`${at}.error`, 'error is a non-empty error code');
+    } else if (t === 'advance') {
+      if (typeof e.ms !== 'number' || !(e.ms >= 0)) return bad(`${at}.ms`, 'ms is a number of milliseconds, 0 or more');
+    } else if (t === 'request') {
+      if (typeof e.url !== 'string') return bad(`${at}.url`, 'url is a string');
+      const h = e.headers;
+      if (!h || typeof h !== 'object' || Array.isArray(h)) return bad(`${at}.headers`, 'headers is an object of strings');
+      for (const [k, v] of Object.entries(h as Record<string, unknown>)) {
+        if (typeof v !== 'string') return bad(`${at}.headers.${k}`, 'a header value is a string');
+        if (k !== k.toLowerCase()) return bad(`${at}.headers.${k}`, 'a header name is lower-cased');
+      }
+      const ncm = findNonCanonical(e.method, `${at}.method`);
+      if (ncm) return bad(ncm, 'method is not in canonical form');
+      if ('body' in e && e.body !== undefined) {
+        const ncb = findNonCanonical(e.body, `${at}.body`);
+        if (ncb) return bad(ncb, 'body is not in canonical form');
+      }
     } else if ('value' in e) {
       if (t === 'value' && e.value === undefined) return bad(`${at}.value`, 'a value event never carries undefined (C3)');
       if (e.value !== undefined) {

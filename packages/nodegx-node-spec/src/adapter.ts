@@ -52,8 +52,26 @@
  *                        - AN OUTCOME'S `port` IS THE INPUT THAT WAS INVOKED (trace.ts), never an
  *                          output name; outcomes are recorded in invocation order.
  *                        - `settle()` runs the frame-end reducer on EVERY settle, steps or none.
+ *                        And, with a world (NSP-007): a settle is a frame AT the clock's current
+ *                        time — timers the node keeps by the clock (a Delay's countdown) are read
+ *                        once per settle; answers the world has delivered land before the frame's
+ *                        observations are recorded; `outcome` events sit in the order they were
+ *                        REPORTED (trace.ts); `request` events, in issue order, close the group.
  *   trace(h)             a copy of the events so far, values in canonical form (canonical.ts).
  *   dispose(h)           tears the instance down.
+ *   install(world)       OPTIONAL, NSP-007 — points the target at a scripted world (world.ts) for
+ *                        one play and returns the function that unpoints it. A target whose nodes
+ *                        reach time, entropy and the network through JavaScript's own seams
+ *                        installs the world's globals (`installWorld`); the interpreter hands the
+ *                        world to its specs. A target without `install` cannot play a spec that
+ *                        declares `needs`, and the runner says so rather than running it flaky.
+ *   advance(h, ms)       OPTIONAL, NSP-007 — records `{ t: 'advance', ms }` and moves the world's
+ *                        clock in three moves: lets whatever the world has already delivered land
+ *                        (a target with an event loop flushes its microtasks — that is why it is
+ *                        async), `world.clock.advance(ms)` (every timer due on the way fires, its
+ *                        callback at once), then lets what the move delivered land too — so the
+ *                        next step sees the node AFTER the answer, as a person acting seconds later
+ *                        would. Only a settle records what the landing did.
  *
  * Why values sort by port NAME and not by the spec's declaration order (which NSP-001 §5 first
  * wrote): a stranger's target (NSP-006) must produce a comparable trace from the spec and the
@@ -62,6 +80,7 @@
  */
 
 import type { TraceEvent } from './trace';
+import type { World } from './world';
 
 /** Opaque to the runner; each adapter extends it with what it needs. */
 export interface Handle {
@@ -77,10 +96,13 @@ export interface TargetAdapter<H extends Handle = Handle> {
   settle(): Promise<void>;
   trace(h: H): TraceEvent[];
   dispose(h: H): void;
+  /** NSP-007 — see the contract above. */
+  install?(world: World): () => void;
+  advance?(h: H, ms: number): Promise<void>;
 }
 
-/** One scripted step of a scenario — the JSON shape NSP-003 reads from disk. */
-export type Step = { set: string; value?: unknown } | { signal: string } | 'settle';
+/** One scripted step of a scenario — the JSON shape NSP-003 reads from disk. `advance` (NSP-007) moves the world's clock by `ms`. */
+export type Step = { set: string; value?: unknown } | { signal: string } | { advance: number } | 'settle';
 
 /**
  * A target threw while a scenario was being played — inside `mount`, `set`, `signal` or `settle`.
@@ -99,20 +121,30 @@ export class PlayError extends Error {
  * Plays one scenario on one target from a fresh mount and returns the trace. Disposes the
  * instance whatever happens. A throw from the target is rethrown as a `PlayError` holding the
  * trace so far (when the handle exists and can still be read).
+ *
+ * With a `world` (NSP-007) the target is pointed at it for the whole play — before the mount,
+ * because a node may draw from the world at creation — and unpointed in `finally`. A target
+ * without `install` is played without one (the runner never hands a world to a target that
+ * cannot take it; `runConformance` refuses that pairing first).
  */
 export async function play<H extends Handle>(
   adapter: TargetAdapter<H>,
   type: string,
   params: Record<string, unknown>,
-  steps: readonly Step[]
+  steps: readonly Step[],
+  world?: World
 ): Promise<TraceEvent[]> {
   let h: H | undefined;
+  const restore = world && adapter.install ? adapter.install(world) : undefined;
   try {
     h = adapter.mount(type, params);
     for (const step of steps) {
       if (step === 'settle') await adapter.settle();
       else if ('signal' in step) adapter.signal(h, step.signal);
-      else adapter.set(h, step.set, step.value);
+      else if ('advance' in step) {
+        if (!adapter.advance) throw new Error(`${adapter.name} has no advance(): it cannot play a scenario that moves the clock`);
+        await adapter.advance(h, step.advance);
+      } else adapter.set(h, step.set, step.value);
     }
     return adapter.trace(h);
   } catch (e) {
@@ -128,5 +160,6 @@ export async function play<H extends Handle>(
     throw new PlayError(`${adapter.name} threw: ${e instanceof Error ? e.message : String(e)}`, partial, e);
   } finally {
     if (h) adapter.dispose(h);
+    if (restore) restore();
   }
 }

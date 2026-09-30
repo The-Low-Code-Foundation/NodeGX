@@ -13,12 +13,21 @@
  * the ports `derived.inputs(params)` yields for the generated params (String Format's `{name}`
  * when `format` drew `'Hello, {name}'`), plus the spec's `derived.candidates` — names the target
  * registers on first write that the generator could not invent (And's `input 0 … input 3`).
- * `enum` ports draw from their declared values plus one that is not declared.
+ * `enum` ports draw from their declared values plus one that is not declared. A port's own
+ * `examples` (spec.ts) join its pool — the only way a `url` port ever draws a URL.
+ *
+ * THE WORLD (NSP-007), for a spec that declares `needs` and only then (a spec without keeps the
+ * pinned digest): a step may be an `advance` (the clock moves by one of the spec's `advances`,
+ * or the defaults); the sequence carries a `WorldScript` — the sequence's own seed for the random
+ * source, and for a `network` spec ONE rule answering every request with one of the spec's
+ * `responses` after one of its `delays`. One rule per sequence, not one per request: a node's
+ * behaviour under one answer at a time is what a sequence grades; the mix comes from the run.
  */
 
 import type { Step } from '../adapter';
 import type { AnyNodeSpec, InputDecl } from '../spec';
 import { isSignalInput } from '../spec';
+import type { Answer, WorldScript } from '../world';
 import { mulberry32, sequenceSeed, type Rng } from './random';
 import type { Reach } from './reach';
 
@@ -26,7 +35,27 @@ export interface Sequence {
   seed: number;
   params: Record<string, unknown>;
   steps: Step[];
+  /** NSP-007: present exactly when the spec declares `needs`. */
+  world?: WorldScript;
 }
+
+/** What a `needs` spec's world draws from when it declares no `worldPool` of its own. */
+export const DEFAULT_WORLD_POOL = Object.freeze({
+  responses: Object.freeze([
+    { status: 200, body: { ok: true, n: 1 } },
+    { status: 200, body: 'plain text' },
+    { status: 201, statusText: 'Created', body: { id: 'x' } },
+    { status: 204 },
+    { status: 304 },
+    { status: 404, statusText: 'Not Found', body: { error: 'missing' } },
+    { status: 500, statusText: 'Internal Server Error', body: 'boom' },
+    { status: 200, headers: { 'content-type': 'application/json' }, body: 'not json' },
+    { error: 'fetch failed' },
+    { never: true }
+  ] as readonly Answer[]),
+  delays: Object.freeze([0, 0, 1, 10, 100, 1000]),
+  advances: Object.freeze([0, 1, 10, 99, 100, 1000, 30000])
+});
 
 export interface GenerateOptions {
   /** Steps per sequence, inclusive bounds. Short by default — a divergence found in few steps shrinks fast. */
@@ -60,11 +89,13 @@ const POOLS: Readonly<Record<string, readonly unknown[]>> = Object.freeze({
 
 export function poolFor(decl: InputDecl): readonly unknown[] {
   if (isSignalInput(decl)) return [];
+  const own = decl.examples ?? [];
   if (decl.type === 'enum') {
     const declared = decl.enums ?? [];
-    return [...declared, 'not-a-declared-value', '', null, undefined];
+    return [...declared, 'not-a-declared-value', '', null, undefined, ...own];
   }
-  return POOLS[decl.type] ?? POOLS['*'];
+  const base = POOLS[decl.type] ?? POOLS['*'];
+  return own.length > 0 ? [...own, ...base] : base;
 }
 
 /** The i-th sequence of a run; pure in (spec, runSeed, i, options). */
@@ -106,15 +137,29 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
   }
   const steppable = reach ? drivable.filter(([name]) => inReachInputs(name)) : drivable;
 
+  // NSP-007 — a world for a spec that needs one: advances among the steps, one network rule
+  const needs = spec.needs ?? [];
+  const pool = spec.worldPool ?? {};
+  const advances = needs.length > 0 ? pool.advances ?? DEFAULT_WORLD_POOL.advances : undefined;
+
   const n = minSteps + rng.int(maxSteps - minSteps + 1);
   const steps: Step[] = [];
-  for (let i = 0; i < n; i++) steps.push(oneStep(rng, steppable, signalPorts, settleChance));
+  for (let i = 0; i < n; i++) steps.push(oneStep(rng, steppable, signalPorts, settleChance, advances));
   if (steps[steps.length - 1] !== 'settle') steps.push('settle');
-  return { seed, params, steps };
+  if (needs.length === 0) return { seed, params, steps };
+
+  const world: WorldScript = { seed };
+  if (needs.includes('network')) {
+    const answer = rng.pick(pool.responses ?? DEFAULT_WORLD_POOL.responses);
+    const after = rng.pick(pool.delays ?? DEFAULT_WORLD_POOL.delays);
+    world.network = [after > 0 ? { answer, after } : { answer }];
+  }
+  return { seed, params, steps, world };
 }
 
-function oneStep(rng: Rng, valuePorts: Array<[string, InputDecl]>, signalPorts: Array<[string, InputDecl]>, settleChance: number): Step {
+function oneStep(rng: Rng, valuePorts: Array<[string, InputDecl]>, signalPorts: Array<[string, InputDecl]>, settleChance: number, advances?: readonly number[]): Step {
   if (rng.chance(settleChance) || (valuePorts.length === 0 && signalPorts.length === 0)) return 'settle';
+  if (advances && rng.chance(0.25)) return { advance: rng.pick(advances) };
   const wantSignal = signalPorts.length > 0 && (valuePorts.length === 0 || rng.chance(0.5));
   if (wantSignal) return { signal: rng.pick(signalPorts)[0] };
   const [name, decl] = rng.pick(valuePorts);

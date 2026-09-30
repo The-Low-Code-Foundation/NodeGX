@@ -13,6 +13,8 @@ import { ColorVariable } from './color';
 import { ColorBlend } from './color-blend';
 import { Condition } from './condition';
 import { Counter } from './counter';
+import { Delay } from './delay';
+import { HttpRequest } from './http';
 import { Inverter } from './inverter';
 import { Log } from './log';
 import { NumberVariable } from './number';
@@ -23,6 +25,7 @@ import { StringFormat } from './string-format';
 import { StringMapper } from './string-mapper';
 import { Substring } from './substring';
 import { Switch } from './switch';
+import { Uuid } from './uuid';
 import { ValueChanged } from './value-changed';
 
 export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
@@ -45,7 +48,11 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [Or.type]: Or,
   [StringMapper.type]: StringMapper,
   [Substring.type]: Substring,
-  [ValueChanged.type]: ValueChanged
+  [ValueChanged.type]: ValueChanged,
+  // NSP-007 — the world: clock, randomness, network
+  [Delay.type]: Delay,
+  [Uuid.type]: Uuid,
+  [HttpRequest.type]: HttpRequest
 });
 
 export function specFor(typeName: string): AnyNodeSpec | undefined {
@@ -60,6 +67,8 @@ export {
   ColorVariable,
   Condition,
   Counter,
+  Delay,
+  HttpRequest,
   Inverter,
   Log,
   NumberRemapper,
@@ -70,5 +79,6 @@ export {
   StringVariable,
   Substring,
   Switch,
+  Uuid,
   ValueChanged
 };

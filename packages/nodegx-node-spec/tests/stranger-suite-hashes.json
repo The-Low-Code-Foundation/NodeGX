@@ -6,8 +6,8 @@
   "scenarios/Inverter.json": "7f8acc1c02c208134bb90d8db49efb8047f6430dc5b8bba33fa91a8d6f5ed789",
   "scenarios/String Format.json": "dbccc31250a1de95efd5e42d1f6f24602a544115cc53762369ca06c5c186c2df",
   "scenarios/Switch.json": "f172942701154875200f79fd9658ab37c0b56cfa8a257c4a2f35f2f4daee1462",
-  "schema/trace.schema.json": "288fe969e03c68c1fb57ff245452c46fa6fdfff58340d7af24665461feafb082",
-  "src/adapter.ts": "ff654943ab7fa0c9b901d675ff7b3e9a45be99ff3127ee69e19e4894ce9f0ecf",
+  "schema/trace.schema.json": "db9f723adc80cbb3d3b74d374ebd2c2520487c8ebc7bc478d0c034c821550066",
+  "src/adapter.ts": "2bb8e74bfa2b902a2bdfd3487fff944e58c5217dda47038c790d1a073df6ece1",
   "src/canonical.ts": "151e06ca704ebc692ba3108f2d0600fc091431c2b2fb16f12aff7b1fdf601a9f",
   "src/coerce.ts": "aa5c43ff46a972680589ccfb4d9f46b89c4c3d7ffcdd1c02ecfad6af6ab71258",
   "src/nodes/and.ts": "d25fadf899b0d6cfaf8b96ea1ef1c583e31a59f019f9c88ca920b9cf76e46408",
@@ -17,6 +17,6 @@
   "src/nodes/inverter.ts": "cded868c740e9b566311077125efadccfacda3354a41263cc3fb34aefc6d9455",
   "src/nodes/string-format.ts": "f363e0359ca05bc7a16e938c0d745ca7652873084df6c55b7763d96bb4f20a5d",
   "src/nodes/switch.ts": "15896daa7c22306f9a2220a1a0daf7cf71262db7e8b587c926bd27ea107d8680",
-  "src/spec.ts": "3d873b2adf215a34ca3d2f0b2ad4cd028f32b0b651a3e93bb9e2de7c23a0c918",
-  "src/trace.ts": "84bdb7cbe97ac3140b4c368f757fe055b75eea283a661a3eee180f5d2e0fabee"
+  "src/spec.ts": "6651f38b988d57ff9bbadf60c1443bd1e52c1160379c6573f1ff7580a4b14124",
+  "src/trace.ts": "bbab071e3bd5a6a115a226559f8afb91bfca66b2b84ded27642189f1a06551a8"
 }

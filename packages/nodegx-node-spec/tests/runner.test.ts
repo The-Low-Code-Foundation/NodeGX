@@ -67,6 +67,7 @@ describe('AC2 — the seed is the only input', () => {
       expect(s.seed).toBe(sequenceSeed(99, i));
       for (const step of s.steps) {
         if (step === 'settle') continue;
+        if ('advance' in step) throw new Error('a spec without needs never generates an advance step (NSP-007)');
         const port = 'signal' in step ? step.signal : step.set;
         expect(Object.keys(inputs)).toContain(port);
         if ('signal' in step) expect(inputs[port].type).toBe('signal');
@@ -213,21 +214,41 @@ describe('AC1 (shape) — a planted divergence is caught within the budget and s
   });
 });
 
-describe('the world the runner does not have', () => {
-  test('a spec declaring `needs` is refused with the reason, and does not conform', async () => {
-    const Clocked = defineNode({
+describe('the world a target cannot be handed (NSP-007)', () => {
+  const clocked = (needs: Array<'clock' | 'backend'>) =>
+    defineNode({
       type: 'Clocked',
       version: 1,
       source: 'tests',
-      needs: ['clock'],
+      needs,
       state: { n: 0 },
       inputs: { go: { type: 'signal' } },
       outputs: { n: { type: 'number', from: (s) => s.n } }
     }).on({ go: (s) => ({ set: { n: s.n + 1 } }) }) as unknown as AnyNodeSpec;
-    const report = await runConformance(Clocked, interpreterAdapter({ resolve: () => Clocked }), { sequences: 5 });
-    expect(report.refused).toMatch(/needs clock; the runner has no world for it until NSP-007/);
+
+  test('a spec declaring `needs` is refused on a target with no install(), with the reason', async () => {
+    const Clocked = clocked(['clock']);
+    const { install: _i, advance: _a, ...noSeam } = interpreterAdapter({ resolve: () => Clocked });
+    const report = await runConformance(Clocked, noSeam, { sequences: 5 });
+    expect(report.refused).toMatch(/needs clock and interpreter has no install\(\)/);
     expect(report.generated.ran).toBe(0);
     expect(report.conforms).toBe(false);
     expect(formatReport(report)).toContain('refused:');
+  });
+
+  test('a spec needing a backend is refused on every target until NSP-014', async () => {
+    const Clocked = clocked(['backend']);
+    const report = await runConformance(Clocked, interpreterAdapter({ resolve: () => Clocked }), { sequences: 5 });
+    expect(report.refused).toMatch(/needs a backend; the world has no backend seam until NSP-014/);
+    expect(report.conforms).toBe(false);
+  });
+
+  test('a spec declaring `needs` on a target WITH install() is played, on a world per play', async () => {
+    const Clocked = clocked(['clock']);
+    const report = await runConformance(Clocked, interpreterAdapter({ resolve: () => Clocked }), { sequences: 20, seed: 3, scenarios: [{ name: 'tick', params: {}, steps: [{ signal: 'go' }, { advance: 10 }, 'settle'] }] });
+    expect(report.refused).toBeUndefined();
+    expect(report.generated.ran).toBe(20);
+    expect(report.conforms).toBe(true);
+    expect(report.scenarios).toEqual([{ name: 'tick', status: 'passed' }]);
   });
 });

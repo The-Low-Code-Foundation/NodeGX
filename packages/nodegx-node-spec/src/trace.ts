@@ -4,10 +4,23 @@
  * Inputs and outputs in one ordered stream; `settle` marks where the target drains its frame.
  * Between two settles the events are grouped canonically: `value` events SORTED BY PORT NAME
  * (changed since the last settle only), then `signal` events in emission order, then `outcome`
- * events in invocation order. "Changed" is canonical inequality with the last value RECORDED for
+ * events in the order they were REPORTED, then `request` events in the order they were issued.
+ * "Changed" is canonical inequality with the last value RECORDED for
  * the port (nothing before the first settle, so the first settle records every defined output),
  * "sorted by port name" is code-unit order, and what a frame records for an output is the last
  * DEFINED value it held after any step of the frame — adapter.ts spells the three out (NSP-006).
+ * "Reported" (NSP-007): an outcome reported at its invocation sits in invocation order; one the
+ * frame-end reducer settles (`deferred`) sits where the frame end put it, in invocation order
+ * among its kind; one the world settles (`pending` — an answer landing, a timeout firing) sits
+ * where that delivery was, which may be frames after the invocation and after a later, immediate
+ * outcome. Before NSP-007 every outcome was reported at or before its frame's end and the three
+ * readings were one.
+ *
+ * Two events for the WORLD (NSP-007): `advance` is a stimulus — the clock moved by `ms`; `request`
+ * is an observation — the node handed the world a request (`method`, `url`, `headers` with
+ * lower-cased names, `body` as it travelled: a string, `{ "$form": [[name, value], …] }`, or
+ * absent). The world's answers are not events: they are scripted (world.ts), so what they were is
+ * known from the scenario, and what the node did with them is on the wire.
  * That grouping is a rule of the FORMAT, so that a runtime which
  * pulses a signal synchronously inside a setter and delivers the value at frame end (the
  * interpreted runtime) and one that does both at once (the interpreter) produce the same trace —
@@ -36,7 +49,11 @@ export type TraceEvent =
   | (Base & { t: 'value'; port: string; value: unknown })
   | (Base & { t: 'signal'; port: string })
   /** `port` is the INPUT that was invoked (the signal whose reducer reported), never an output name. */
-  | (Base & { t: 'outcome'; port: string; value: Outcome; error?: string });
+  | (Base & { t: 'outcome'; port: string; value: Outcome; error?: string })
+  /** stimulus (NSP-007): the world's clock moved by `ms` milliseconds. */
+  | (Base & { t: 'advance'; ms: number })
+  /** observation (NSP-007): the node handed the world a request. `method` is canonical (a node may hand a non-string). */
+  | (Base & { t: 'request'; method: unknown; url: string; headers: Record<string, string>; body?: unknown });
 
 /** Trace-format version — must match the `/v1.json` in the schema's `$id` (tests/schema.test.ts). */
 export const TRACE_FORMAT_VERSION = 1;
