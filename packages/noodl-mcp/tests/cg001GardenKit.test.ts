@@ -1236,3 +1236,21 @@ describe('P108 IW-003 lane S — garden-kit draws Sami’s bench by stage (a sit
     expect(cellOf(draw(path), 1, 0)).not.toMatch(/data-bench/);
   });
 });
+
+// ── P108 IW-003 look (lane L): one Sami on the island — a vacant bench is drawn without him ─────────────────────────────
+describe('P108 IW-003 look (lane L) — garden-kit draws a built bench without Sami when it is vacant (he stands by a plot, asking)', () => {
+  let kit: KitModule;
+  beforeAll(() => {
+    ({ kit } = loadKit());
+  });
+  const node = () => kit.reactNodes.find((n) => n.name === 'garden-kit.Garden')!;
+  const draw = (things: any[]) => renderToStaticMarkup(React.createElement(node().getReactComponent(), { map: { rows: ['GGG', 'GGG'] }, things, robots: [] }));
+  const bench = (extra: Record<string, unknown> = {}) => ({ kind: 'site', id: 'bench', x: 1, y: 0, have: 8, need: 8, item: 'stone', build: 'bench', ...extra });
+
+  it('🔴 built and vacant: the bench (stage 4) and no Sami on it; built and not vacant: Sami sits (known-firing)', () => {
+    const vacant = draw([bench({ vacant: true })]);
+    const sits = draw([bench()]);
+    expect([/data-bench="4"/.test(vacant), /data-sits="bench"/.test(vacant)]).toEqual([true, false]);
+    expect([/data-bench="4"/.test(sits), /data-sits="bench"/.test(sits)]).toEqual([true, true]);
+  });
+});

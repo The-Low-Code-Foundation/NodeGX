@@ -270,7 +270,10 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   iw3mNoteTgt: s('🌷 the row Mamie’s note asks for: 3 tulips, one drink each', '🌷 la rangée que demande le mot de Mamie : 3 tulipes, une gorgée chacune'),
   iw3mNoteFin: s('that row watered → {b} walks home', 'cette rangée arrosée → {b} rentre'),
   iw3mNoteWr: s('a tulip gets thirsty again', 'une tulipe a de nouveau soif'),
-  iw3mNoteSum: s('{n}/{t} tulips of the note', '{n}/{t} tulipes du mot')
+  iw3mNoteSum: s('{n}/{t} tulips of the note', '{n}/{t} tulipes du mot'),
+  // ── P108 IW-003 look (lane L): Olive's read on the envelopes reads the envelope (the drawer's block, the pad's key, its card) ──
+  iwlReadEnvelope: s('read the envelope', 'lire l’enveloppe'),
+  iwlCdReadEnvelope: s('Olive reads the name on the envelope {b} holds. Then “go to” what Olive read takes {b} to that door.', 'Olive lit le nom sur l’enveloppe que tient {b}. Ensuite, « aller à » ce qu’Olive a lu emmène {b} à cette porte.')
 };
 
 export const PAGE_WORD_KEYS: ReadonlyArray<string> = Object.keys(PAGE_WORDS);

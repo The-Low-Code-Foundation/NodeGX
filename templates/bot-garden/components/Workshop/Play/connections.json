@@ -676,6 +676,18 @@
       "toProperty": "needs"
     },
     {
+      "fromId": "plStart",
+      "fromProperty": "request",
+      "toId": "plPalette",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "request",
+      "toId": "plCardInfo",
+      "toProperty": "request"
+    },
+    {
       "fromId": "plPalette",
       "fromProperty": "palette",
       "toId": "plKitPal",

@@ -806,12 +806,16 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(GARDEN_CSS).toMatch(/\.bg-pad \{[^}]*grid-auto-rows: 56px/);
     });
 
-    it('🔴 P106 s4 (b): the pad sits beside the world, not on its tiles — absolute only in the phone rule', () => {
+    it('🔴 P106 s4 (b): the pad sits beside the world, not on its tiles — and on a phone under it, never absolute (P108 IW-003 look, lane L)', () => {
       const unconditional = GARDEN_CSS.split('\n').filter((l) => /^\.bg-pad \{/.test(l));
       expect(unconditional).toHaveLength(1);
       expect(unconditional[0]).not.toMatch(/position: absolute/);
       expect(GARDEN_CSS).toMatch(/\.bg-stage:has\(> \.bg-pad\) \{[^}]*display: flex !important; flex-direction: row !important; flex-wrap: wrap;/);
-      expect(GARDEN_CSS).toMatch(/@media \(max-width: 600px\) \{ \.bg-stage:has\(> \.bg-pad\) \{ display: block !important;[^}]*\} \.bg-pad \{ position: absolute !important;/);
+      // P108 IW-003 look (lane L): the phone's pad sat absolute over the world's corner (five to eight keys on its tiles,
+      // sami-thanks' door under one); now the stage is a column there, the pad under the world, and no rule lifts it out.
+      expect(GARDEN_CSS).toMatch(/@media \(max-width: 600px\) \{\n  \.bg-stage:has\(> \.bg-pad\) \{ display: flex !important; flex-direction: column !important;/);
+      expect(GARDEN_CSS).toMatch(/\n  \.bg-pad \{ position: relative !important;/);
+      expect(GARDEN_CSS).not.toMatch(/\.bg-pad \{[^}]*position: absolute/);
     });
   });
 

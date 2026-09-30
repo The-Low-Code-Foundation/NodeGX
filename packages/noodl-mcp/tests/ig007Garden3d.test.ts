@@ -1544,7 +1544,8 @@ describe('P108 IW-003 (lane B) — garden-3d-kit builds Biscuit’s ball and foo
     expect(rule).toMatch(/font-size:0/);
     expect(css).toContain('.gd3-world[data-wide="1"] .gd3-meter:not(.gd3-watch):not(.gd3-meter-bot)>*{display:none}');
     expect(css).toContain('.gd3-world[data-wide="1"] .gd3-meter[data-fill="5"]{--f:50%}');
-    expect(css).toMatch(/\.gd3-meter\.gd3-full:not\(\.gd3-watch\):not\(\.gd3-meter-bot\)\{--c:#3FA66B;--f:100%\}/);
+    // P108 IW-003 look (lane L): the full green is the kit's METER_FULL (4.95:1 under white), no longer #3FA66B (3.05:1).
+    expect(css).toMatch(/\.gd3-meter\.gd3-full:not\(\.gd3-watch\):not\(\.gd3-meter-bot\)\{--c:#058149;--f:100%\}/);
   });
 });
 
@@ -1587,5 +1588,28 @@ describe('P108 IW-003 lane S — garden-3d-kit builds Sami’s bench by stage, t
     const W = node().world;
     const path = node().scene.buildScene({ map: W.parseMap({ rows: ['GGG'] }), things: W.parseThings([{ kind: 'site', x: 1, y: 0, have: 4, need: 4 }]), robots: [] }, st.THREE).things[0];
     expect([path.userData.stage, path.userData.bench]).toEqual(['path', undefined]);
+  });
+});
+
+// ── P108 IW-003 look (lane L): one Sami on the island — a vacant bench is built without him ─────────────────────────────
+describe('P108 IW-003 look (lane L) — garden-3d-kit builds a vacant bench without Sami', () => {
+  let kit: KitModule;
+  beforeAll(() => {
+    kit = loadKits().kit;
+  });
+  const node = () => kit.reactNodes.find((n) => n.name === 'garden-3d-kit.Garden3D')! as any;
+  const names = (vacant: boolean) => {
+    const st = threeStub();
+    const W = node().world;
+    const t = { kind: 'site', id: 'bench', x: 1, y: 0, have: 8, need: 8, item: 'stone', build: 'bench', ...(vacant ? { vacant: true } : {}) };
+    const g = node().scene.buildScene({ map: W.parseMap({ rows: ['GGG', 'GGG'] }), things: W.parseThings([t]), robots: [] }, st.THREE).things[0];
+    const out: string[] = [];
+    g.traverse((o: any) => o.name && out.push(o.name));
+    return [g.userData.bench, out.sort().join(' ')];
+  };
+
+  it('🔴 built and vacant: back, legs and seat, no Sami; built and not vacant: Sami on it (known-firing)', () => {
+    expect(names(true)).toEqual([4, 'back leg leg seat']);
+    expect(names(false)).toEqual([4, 'back leg leg sami seat']);
   });
 });

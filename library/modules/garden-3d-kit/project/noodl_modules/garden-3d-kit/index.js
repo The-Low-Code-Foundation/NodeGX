@@ -1136,12 +1136,15 @@
       add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.76, 0.22, 0.07), mat(PALETTE.cobble), 0, 0.56, -0.18)).name = 'back';
       // Sami sits on it: the islander (his cap, his satchel), lowered onto the seat and turned to face the path (an
       // islander faces −z; half a turn faces +z, the path and the camera).
-      var sami = THING_BUILDERS.islander(THREE, mat, { kind: 'islander', who: 'sami' }, out);
-      sami.scale.set(0.8, 0.62, 0.8);
-      sami.rotation.y = Math.PI;
-      sami.position.set(0, 0.39, -0.02);
-      sami.name = 'sami';
-      g.add(sami);
+      // P108 IW-003 look (lane L): not on a vacant bench (Sami stands by a plot, asking) — one Sami on the island.
+      if (!t.vacant) {
+        var sami = THING_BUILDERS.islander(THREE, mat, { kind: 'islander', who: 'sami' }, out);
+        sami.scale.set(0.8, 0.62, 0.8);
+        sami.rotation.y = Math.PI;
+        sami.position.set(0, 0.39, -0.02);
+        sami.name = 'sami';
+        g.add(sami);
+      }
     }
     g.userData.stage = 'bench' + st;
     g.userData.bench = st;
@@ -2520,6 +2523,12 @@
   // Garden 3D — the React node
   // ═══════════════════════════════════════════════════════════════════════════
 
+  /**
+   * P108 IW-003 look (lane L): a full meter's green. Its numbers are white on it (text: WCAG 4.5:1 — #058149 is 4.95:1,
+   * the page's own --leaf); the mockup's #3FA66B was 3.05:1. The island's compact bar wears it too (a mark: 3:1 against
+   * its white ring, 4.95:1).
+   */
+  var METER_FULL = '#058149';
   var WORLD_CSS =
     '.gd3-world{position:relative;width:100%;max-width:640px;margin:0 auto;border-radius:16px;overflow:hidden;background:#BFE8CC;border:4px solid #A8D9B4;box-sizing:border-box;-webkit-tap-highlight-color:transparent;font-family:inherit;touch-action:none;user-select:none;-webkit-user-select:none}\n' +
     '.gd3-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}\n' +
@@ -2539,7 +2548,7 @@
     '.gd3-meter-bot{background:#2E2A3D;color:#fff;z-index:2}\n' +
     '.gd3-pips{display:inline-flex;gap:2px}.gd3-pip{display:block;width:6px;height:9px;border-radius:3px;background:#E6DCC6}\n' +
     '.gd3-pip.gd3-on{background:#7CC6F0}.gd3-m-stone .gd3-pip.gd3-on{background:#8E8CA0}.gd3-m-egg .gd3-pip.gd3-on{background:#FFD166}.gd3-m-food .gd3-pip.gd3-on{background:#C79A63}.gd3-m-letter .gd3-pip.gd3-on{background:#E86A5E}\n' +
-    '.gd3-meter.gd3-full{background:#3FA66B;color:#fff}.gd3-meter.gd3-full .gd3-pip{background:rgba(255,255,255,.35)}.gd3-meter.gd3-full .gd3-pip.gd3-on{background:#fff}\n' +
+    '.gd3-meter.gd3-full{background:' + METER_FULL + ';color:#fff}.gd3-meter.gd3-full .gd3-pip{background:rgba(255,255,255,.35)}.gd3-meter.gd3-full .gd3-pip.gd3-on{background:#fff}\n' +
     '.gd3-mi{display:block;flex:none;box-sizing:border-box;width:8px;height:8px}\n' +
     '.gd3-mi-water{background:#2B7FC0;border-radius:0 50% 50% 50%;transform:rotate(45deg);margin:2px 1px 0}.gd3-meter-bot .gd3-mi-water{background:#7CC6F0}\n' +
     '.gd3-mi-stone{background:#8E8B9A;border-radius:45% 55% 40% 50%;width:10px;height:8px}\n' +
@@ -2558,7 +2567,7 @@
     '.gd3-world[data-wide="1"] .gd3-meter:not(.gd3-watch):not(.gd3-meter-bot)>*{display:none}\n' +
     '.gd3-world[data-wide="1"] .gd3-meter.gd3-m-stone{--c:#6E6B7A}.gd3-world[data-wide="1"] .gd3-meter.gd3-m-egg{--c:#E0A800}.gd3-world[data-wide="1"] .gd3-meter.gd3-m-food{--c:#A9773F}.gd3-world[data-wide="1"] .gd3-meter.gd3-m-letter,.gd3-world[data-wide="1"] .gd3-meter.gd3-m-ball{--c:#E04E4E}\n' +
     '.gd3-world[data-wide="1"] .gd3-meter[data-fill="1"]{--f:10%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="2"]{--f:20%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="3"]{--f:30%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="4"]{--f:40%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="5"]{--f:50%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="6"]{--f:60%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="7"]{--f:70%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="8"]{--f:80%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="9"]{--f:90%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="10"]{--f:100%}\n' +
-    '.gd3-world[data-wide="1"] .gd3-meter.gd3-full:not(.gd3-watch):not(.gd3-meter-bot){--c:#3FA66B;--f:100%}\n' +
+    '.gd3-world[data-wide="1"] .gd3-meter.gd3-full:not(.gd3-watch):not(.gd3-meter-bot){--c:' + METER_FULL + ';--f:100%}\n' +
     '.gd3-mi-ball{background:#E04E4E;border-radius:50%;width:8px;height:8px;box-shadow:inset 0 -2px 0 rgba(255,255,255,.6)}.gd3-m-ball .gd3-pip.gd3-on{background:#E04E4E}\n' +
     '.gd3-world.gd3-picking{border-color:#8F6BFF;box-shadow:0 0 0 3px #EEE8FF}.gd3-picking .gd3-canvas{cursor:crosshair}';
 

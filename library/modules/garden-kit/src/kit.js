@@ -1462,6 +1462,12 @@
   }
 
   /** The world’s stylesheet: the mockup’s .world / .cell / .bot / .bubble rules, prefixed gd-. */
+  /**
+   * P108 IW-003 look (lane L): a full meter's green. Its numbers are white on it (text: WCAG 4.5:1 — #058149 is 4.95:1,
+   * the page's own --leaf); the mockup's #3FA66B was 3.05:1. The island's compact bar wears it too (a mark: 3:1 against
+   * its white ring, 4.95:1).
+   */
+  var METER_FULL = '#058149';
   var WORLD_CSS =
     '.gd-world{position:relative;width:100%;max-width:640px;margin:0 auto;border-radius:16px;overflow:hidden;background:#BFE8CC;display:grid;gap:0;border:4px solid #A8D9B4;box-sizing:border-box;-webkit-tap-highlight-color:transparent;font-family:inherit}\n' +
     '.gd-cell{position:relative;min-height:0;overflow:visible;padding:0;border:0;background:none;cursor:pointer;touch-action:manipulation}\n' +
@@ -1514,7 +1520,7 @@
     '.gd-meter{position:absolute;left:50%;top:0;transform:translate(-50%,-70%);z-index:2;display:flex;align-items:center;gap:3px;background:#fff;border-radius:999px;padding:1px 7px;font-size:11px;font-weight:800;line-height:1.35;white-space:nowrap;color:#2E2A3D;box-shadow:0 2px 6px rgba(0,0,0,.18);pointer-events:none}\n' +
     '.gd-pips{display:inline-flex;gap:2px}.gd-pip{display:block;width:6px;height:9px;border-radius:3px;background:#E6DCC6}\n' +
     '.gd-pip.gd-on{background:#7CC6F0}.gd-m-stone .gd-pip.gd-on{background:#8E8CA0}.gd-m-egg .gd-pip.gd-on{background:#FFD166}.gd-m-food .gd-pip.gd-on{background:#C79A63}.gd-m-letter .gd-pip.gd-on{background:#E86A5E}\n' +
-    '.gd-meter.gd-full{background:#3FA66B;color:#fff}.gd-meter.gd-full .gd-pip{background:rgba(255,255,255,.35)}.gd-meter.gd-full .gd-pip.gd-on{background:#fff}\n' +
+    '.gd-meter.gd-full{background:' + METER_FULL + ';color:#fff}.gd-meter.gd-full .gd-pip{background:rgba(255,255,255,.35)}.gd-meter.gd-full .gd-pip.gd-on{background:#fff}\n' +
     '.gd-mi{display:block;flex:none;box-sizing:border-box;width:8px;height:8px}\n' +
     '.gd-mi-water{background:#2B7FC0;border-radius:0 50% 50% 50%;transform:rotate(45deg);margin:2px 1px 0}\n' +
     '.gd-mi-stone{background:#8E8B9A;border-radius:45% 55% 40% 50%;width:10px;height:8px}\n' +
@@ -1532,7 +1538,7 @@
     // P108 IW-003 (lane B): on the island a tile is ~14 px, so a chip with numbers covered its neighbour's; the compact
     // meter is a bar narrower than one tile (its share filled, green when full), and a watched one stays the full chip.
     '.gd-world[data-wide="1"] .gd-meter:not(.gd-watch){width:min(12px,82%);height:5px;padding:0;gap:0;font-size:0;border-radius:3px;background:linear-gradient(90deg,var(--c,#2B7FC0) 0 var(--f,0%),#E6DCC6 var(--f,0%));box-shadow:0 0 0 1.5px #fff,0 1px 3px rgba(0,0,0,.3);transform:translate(-50%,-160%)}\n' +
-    '.gd-world[data-wide="1"] .gd-meter:not(.gd-watch)>*{display:none}.gd-world[data-wide="1"] .gd-meter.gd-full:not(.gd-watch){--c:#3FA66B;--f:100%}\n' +
+    '.gd-world[data-wide="1"] .gd-meter:not(.gd-watch)>*{display:none}.gd-world[data-wide="1"] .gd-meter.gd-full:not(.gd-watch){--c:' + METER_FULL + ';--f:100%}\n' +
     '.gd-world[data-wide="1"] .gd-meter.gd-meter-top:not(.gd-watch){transform:translate(-50%,40%)}\n' +
     '.gd-world[data-wide="1"] .gd-meter.gd-m-stone{--c:#6E6B7A}.gd-world[data-wide="1"] .gd-meter.gd-m-egg{--c:#E0A800}.gd-world[data-wide="1"] .gd-meter.gd-m-food{--c:#A9773F}.gd-world[data-wide="1"] .gd-meter.gd-m-letter,.gd-world[data-wide="1"] .gd-meter.gd-m-ball{--c:#E04E4E}\n' +
     '.gd-world[data-wide="1"] .gd-meter[data-fill="1"]{--f:10%}.gd-world[data-wide="1"] .gd-meter[data-fill="2"]{--f:20%}.gd-world[data-wide="1"] .gd-meter[data-fill="3"]{--f:30%}.gd-world[data-wide="1"] .gd-meter[data-fill="4"]{--f:40%}.gd-world[data-wide="1"] .gd-meter[data-fill="5"]{--f:50%}.gd-world[data-wide="1"] .gd-meter[data-fill="6"]{--f:60%}.gd-world[data-wide="1"] .gd-meter[data-fill="7"]{--f:70%}.gd-world[data-wide="1"] .gd-meter[data-fill="8"]{--f:80%}.gd-world[data-wide="1"] .gd-meter[data-fill="9"]{--f:90%}.gd-world[data-wide="1"] .gd-meter[data-fill="10"]{--f:100%}\n' +
@@ -1584,7 +1590,8 @@
     var st = benchStage(t);
     ground.push(h('div', { key: 'site-' + i, className: 'gd-site gd-site-' + (st === 4 ? 'gravel' : 'dirt'), 'data-site': st === 4 ? 'gravel' : 'dirt' }));
     extras.push(spriteEl('bench' + st, 'bench-' + i, 'gd-thing gd-bench gd-bench-' + st, { 'data-bench': String(st) }));
-    if (st === 4) extras.push(spriteEl('islSami', 'bench-sami-' + i, 'gd-bench-sami', { 'data-who': 'sami', 'data-sits': 'bench' }));
+    // P108 IW-003 look (lane L): a vacant bench (Sami stands by a plot, asking) is drawn without him — one Sami on the island.
+    if (st === 4 && !t.vacant) extras.push(spriteEl('islSami', 'bench-sami-' + i, 'gd-bench-sami', { 'data-who': 'sami', 'data-sits': 'bench' }));
   }
 
   /** A rising count is a new event; a mount, the same value, a fall or junk is not (the Boost-count rule). */
