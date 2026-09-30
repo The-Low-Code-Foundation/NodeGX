@@ -1830,7 +1830,7 @@
         if (!e) return;
         e.textContent = String(g.userData.owner);
         o.overlay.appendChild(e);
-        overlayEls.labels.push({ el: e, g: g });
+        overlayEls.labels.push({ el: e, g: g, plate: true });
       });
       if (bubble) {
         var b = el('gd3-bubble' + (bubble.style === 'olive' ? ' gd3-olive' : ''), { 'data-bubble': bubble.robot });
@@ -1856,7 +1856,8 @@
         e.setAttribute('data-sy', s.sy.toFixed(1));
       });
       overlayEls.labels.forEach(function (l) {
-        var s = screenOf([l.g.position.x, l.g.position.y, l.g.position.z + 0.4]);
+        // P108 IW-003 (lane P): a door's plate sits on its step (centred), not a tile in front where it hid the post box.
+        var s = l.plate ? screenOf([l.g.position.x, l.g.position.y + 0.04, l.g.position.z + 0.2]) : screenOf([l.g.position.x, l.g.position.y, l.g.position.z + 0.4]);
         place(l.el, s.sx, s.sy);
       });
       overlayEls.says.forEach(function (l) {
@@ -2451,7 +2452,7 @@
     '.gd3-meter.gd3-watch .gd3-pip{width:9px;height:14px;border-radius:4px}.gd3-meter.gd3-watch .gd3-mi{width:11px;height:11px}.gd3-meter.gd3-watch .gd3-mi-egg{width:10px;height:13px}.gd3-meter.gd3-watch .gd3-mi-stone,.gd3-meter.gd3-watch .gd3-mi-food,.gd3-meter.gd3-watch .gd3-mi-letter{width:14px;height:10px}\n' +
     '.gd3-ring{position:absolute;transform:translate(-50%,-50%);box-sizing:border-box;border:3px solid #8F6BFF;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.9),inset 0 0 0 2px rgba(255,255,255,.9);pointer-events:none}\n' +
     // P108 IW-003 (lane P): the door's name plate (a label's pill, the 2D plate's colours); hidden on the island.
-    '.gd3-plate{background:#FFF7E8;color:#2E2A3D;border:1.5px solid #8B5A2B;border-radius:6px;padding:0 6px;font-size:11px;box-shadow:none}.gd3-world[data-wide="1"] .gd3-plate{display:none}\n' +
+    '.gd3-plate{transform:translate(-50%,-50%);background:#FFF7E8;color:#2E2A3D;border:1.5px solid #8B5A2B;border-radius:6px;padding:0 6px;font-size:11px;box-shadow:none}.gd3-world[data-wide="1"] .gd3-plate{display:none}\n' +
     '.gd3-world[data-wide="1"] .gd3-meter:not(.gd3-watch){font-size:9px;padding:0 4px;gap:2px}.gd3-world[data-wide="1"] .gd3-meter:not(.gd3-watch) .gd3-pips{display:none}\n' +
     '.gd3-world.gd3-picking{border-color:#8F6BFF;box-shadow:0 0 0 3px #EEE8FF}.gd3-picking .gd3-canvas{cursor:crosshair}';
 
