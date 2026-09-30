@@ -307,8 +307,9 @@ withDeployedSite({ dir: DIR }, async (page) => {
       await shot('iw003b-island-meow-when-again');
       const seq = phases.map((p) => p.split('@')[0]).filter((p, i, a) => i === 0 || a[i - 1] !== p);
       readings.island = { seq, phases: phases.slice(-6), last };
-      check('ISLAND (2D, 1368): meow-when’s Pip works, finishes with the bowl full and waits at home; Biscuit eats (WEAR.bowl) and Pip goes back and fills it again — never flagged',
-        !!last && !last.stale && seq[0] === 'work' && seq.includes('wait') && seq.lastIndexOf('work') > seq.indexOf('wait') && last.phase === 'wait' && last.lap >= 1 && last.bowl === 2 && last.at.join() === '1,3,1', readings.island);
+      // P108 IW-006 (lane E): a plot won in the Workshop starts DONE (its live job in the save) — Pip waits at home first.
+      check('ISLAND (2D, 1368): meow-when won — its plot starts done and Pip waits at home (IW-006); Biscuit eats (WEAR.bowl) and Pip goes back, fills the bowl again and waits — never flagged',
+        !!last && !last.stale && seq[0] === 'wait' && seq.includes('wait') && seq.lastIndexOf('work') > seq.indexOf('wait') && last.phase === 'wait' && last.lap >= 1 && last.bowl === 2 && last.at.join() === '1,3,1', readings.island);
     }
     await unpin('meow-when');
     await mission(lang, '1368', 'wall-until');
