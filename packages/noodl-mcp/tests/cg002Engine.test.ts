@@ -270,7 +270,7 @@ describe('CG-002 — the engine', () => {
     });
 
     it('the goal is data: no request carries a function, and every goal name is one GOAL_SCRIPT knows', () => {
-      const known = ['every_tulip_watered', 'thing_at', 'bowl_has', 'robot_at', 'facing', 'carrying', 'uses', 'handled', 'said', 'no_puddle', 'senses', 'tulips_watered'];
+      const known = ['every_tulip_watered', 'thing_at', 'bowl_has', 'robot_at', 'facing', 'carrying', 'uses', 'handled', 'said', 'no_puddle', 'senses', 'tulips_watered', 'job_done', 'no_bump'];
       for (const name of known) expect({ name, inScript: GOAL_SCRIPT.includes(`g.name === '${name}'`) }).toEqual({ name, inScript: true });
       for (const r of REQUESTS) {
         expect(JSON.parse(JSON.stringify(r))).toEqual(r);
@@ -290,12 +290,15 @@ describe('CG-002 — the engine', () => {
     });
 
     it('Biscuit\'s bowl: the full bowl is untouched and the empty one is filled — a program that feeds every bowl fails the goal', () => {
+      // P108 IW-003 (lane B): the bowls are a job now — a full bowl refuses a put (It's full!), so a greedy walk fills the
+      // job; what it misses is the if (the goal asks for it), and it hears the refusal at the full bowl.
       const r = REQUESTS.find((x) => x.id === 'bowl-if')!;
-      const greedy = parse('r2[F F L D R]');
+      const greedy = parse('L P P R r3[F F L D R]');
       const end = runToEnd(greedy, worldOfRequest(r));
       const g = runScript(GOAL_SCRIPT, { world: end.world, run: end.run, program: greedy, goal: r.goal });
       expect(g.met).toBe(false);
-      expect(g.missing).toEqual(['bowl_has', 'uses']);
+      expect(g.missing).toEqual(['uses']);
+      expect(end.deltas.filter((d: any) => d.full).length).toBe(1);
     });
   });
 
@@ -1023,7 +1026,10 @@ describe('CG-002 — the engine', () => {
       const rows: string[] = out.world.map;
       expect([rows.length, rows.every((r) => r.length === ISLAND_W), rows.join('').length]).toEqual([ISLAND_H, true, ISLAND_W * ISLAND_H]);
       const at = (p: { x: number; y: number }) => rows.slice(p.y, p.y + PLOT_H).map((r) => r.slice(p.x, p.x + PLOT_W));
-      for (const r of REQUESTS) expect({ id: r.id, map: at(r.plot) }).toEqual({ id: r.id, map: [...r.map] });
+      // P108 IW-003 (lane B): a request with a seeded wall stamps its map with the wall its plot's seed drew — one L, on a
+      // tile of its own map; everything else as the request says.
+      const unwalled = (r: GardenRequest, rows: string[]) => rows.map((row, y) => row.split('').map((c, x) => (c === 'L' && r.seeded?.wallAt ? r.map[y][x] : c)).join(''));
+      for (const r of REQUESTS) expect({ id: r.id, map: unwalled(r, at(r.plot)), walls: at(r.plot).join('').split('L').length - 1 }).toEqual({ id: r.id, map: [...r.map], walls: r.seeded?.wallAt ? 1 : 0 });
       expect(at(FREE_PLAY_PLOT)).toEqual(FREE_PLAY.map);
       expect(at(ISLAND_HOME_PLOT)).toEqual([...ISLAND_HOME_MAP]);
       expect(rows.join('')).not.toContain('.');
@@ -1753,9 +1759,9 @@ describe('CG-002 — the engine', () => {
       expect(b2.palette.find((p: any) => p.id === 'repeat')).toMatchObject({ hasBody: true, hasCount: true, label: 'repeat' });
       expect(b2.palette.find((p: any) => p.id === 'ask')).toMatchObject({ kind: 'ask', slots: ['rung', 'args', 'shape', 'dial'] });
       const r = REQUESTS.find((x) => x.id === 'wall-until')!;
-      expect(runScript(PALETTE_SCRIPT, { band: 2, words: WORD_ROWS, lang: 'en', allowed: r.palette }).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'until']);
+      expect(runScript(PALETTE_SCRIPT, { band: 2, words: WORD_ROWS, lang: 'en', allowed: r.palette }).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'pick', 'put', 'until']);
       // Band 7–9 never sees a control block, whatever the request lists.
-      expect(runScript(PALETTE_SCRIPT, { band: 1, words: WORD_ROWS, lang: 'en', allowed: r.palette }).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right']);
+      expect(runScript(PALETTE_SCRIPT, { band: 1, words: WORD_ROWS, lang: 'en', allowed: r.palette }).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'pick', 'put']);
     });
   });
 });
@@ -2048,9 +2054,11 @@ describe('IW-002 (P108 s1) — the job model: a target takes exactly its need, a
       const picked = runScript(START_WORLD_SCRIPT, { requests: [REQ], requestId: REQ.id, nonce: 0 });
       expect(Number.isInteger(picked.world.seed) && picked.world.seed >= 0 && picked.world.seed < 2 ** 32).toBe(true);
       // Every request today: no seed, no job on its world (the 13 start exactly as before).
+      // P108 IW-003: a request with no job and no layout starts exactly as before; one with a job carries it and the seed.
       for (const q of REQUESTS) {
         const out = runScript(START_WORLD_SCRIPT, { requests: JSON.parse(JSON.stringify(REQUESTS)), requestId: q.id, nonce: 0, seed: 9 }).world;
-        expect({ id: q.id, seed: out.seed, job: out.job, map: out.map }).toEqual({ id: q.id, seed: undefined, job: undefined, map: q.map });
+        if (!q.job && !q.seeded) expect({ id: q.id, seed: out.seed, job: out.job, map: out.map }).toEqual({ id: q.id, seed: undefined, job: undefined, map: q.map });
+        else expect({ id: q.id, seed: out.seed, job: out.job, map: out.map }).toEqual({ id: q.id, seed: eng<any>('seedWorld', { map: [...q.map], things: JSON.parse(JSON.stringify(q.things)), robots: [] }, JSON.parse(JSON.stringify(q)), 9).seed, job: q.job ? JSON.parse(JSON.stringify(q.job)) : undefined, map: eng<any>('seedWorld', { map: [...q.map], things: JSON.parse(JSON.stringify(q.things)), robots: [] }, JSON.parse(JSON.stringify(q)), 9).map });
       }
       // The seed helpers are the engine's own text, in Start world too (one source).
       expect([ENGINE.includes(SEED_HELPERS), START_WORLD_SCRIPT.includes(SEED_HELPERS)]).toEqual([true, true]);
@@ -2643,5 +2651,101 @@ describe('IW-005 (P108 s2) — seek and regrow: go to nearest by path length, re
       expect(walk(api(m), prog, world).w.robots[0].x).toBe(1);
       expect(walk(E, prog, world).w.robots[0].x).toBe(2);
     });
+  });
+});
+
+// ── P108 IW-003 (lane B): Biscuit's three missions as jobs — the wall is a wall, the ball comes back, the bowls empty ──
+describe('IW-003 (P108 s3, lane B) — Biscuit: a real wall with his ball by it, the bowls he empties, the treats when he meows', () => {
+  const byId = (id: string) => REQUESTS.find((x) => x.id === id)!;
+  const eng = <T = any>(name: string, ...args: unknown[]) => helper<T>(ENGINE, name, ...args);
+  const goalOn = (r: GardenRequest, program: Block[], seed: number) => {
+    const end = runToEnd(program, worldOfRequest(r, 'pip', seed));
+    return { end, goal: runScript(GOAL_SCRIPT, { world: end.world, run: end.run, program, goal: r.goal }) };
+  };
+  const wallOf = (w: any) => { const y = w.map.findIndex((row: string) => row.includes('L')); return { x: y < 0 ? -1 : w.map[y].indexOf('L'), y }; };
+
+  it('wall-until: the wall stands on the path at 5, 6 or 7 (every one over 40 seeds), the ball in the corner before it, the basket remembering that tile', () => {
+    const r = byId('wall-until');
+    const cols = new Set<number>();
+    for (let seed = 1; seed <= 40; seed++) {
+      const w = worldOfRequest(r, 'pip', seed);
+      const wall = wallOf(w);
+      const ball = w.things.find((t: any) => t.kind === 'ball');
+      const bed = w.things.find((t: any) => t.id === 'bed');
+      expect({ seed, row: wall.y, inRange: wall.x >= 5 && wall.x <= 7, walls: w.map.join('').split('L').length - 1, ball: [ball.x, ball.y], spot: bed.spot }).toEqual({ seed, row: 3, inRange: true, walls: 1, ball: [wall.x - 1, 2], spot: [wall.x - 1, 2] });
+      cols.add(wall.x);
+    }
+    expect([...cols].sort()).toEqual([5, 6, 7]);
+    // Seeds 1, 2, 3 (the gate's) lay at least two walls.
+    expect(new Set([1, 2, 3].map((s) => wallOf(worldOfRequest(r, 'pip', s)).x)).size).toBeGreaterThanOrEqual(2);
+  });
+
+  it('wall-until: until the wall wins on every seed with no bump; a fixed repeat 7 walks into the wall on every seed; a fixed repeat 4 fits one wall of three', () => {
+    const r = byId('wall-until');
+    const r7: Block[] = parse('r7[F] L P L r7[F] D');
+    const r4: Block[] = parse('r4[F] L P L r4[F] D');
+    const outcomes: boolean[] = [];
+    for (let seed = 1; seed <= 12; seed++) {
+      const ref = goalOn(r, r.referenceProgram as Block[], seed);
+      expect({ seed, met: ref.goal.met, bumps: ref.end.run.bumps, bed: ref.end.world.things.find((t: any) => t.id === 'bed').count }).toEqual({ seed, met: true, bumps: 0, bed: 1 });
+      const seven = goalOn(r, r7, seed);
+      expect({ seed, met: seven.goal.met, bumped: seven.end.run.bumps > 0, missing: seven.goal.missing.includes('no_bump') }).toEqual({ seed, met: false, bumped: true, missing: true });
+      outcomes.push(goalOn({ ...r, goal: [{ name: 'job_done' }, { name: 'no_bump' }] } as GardenRequest, r4, seed).goal.met);
+    }
+    expect([outcomes.includes(true), outcomes.includes(false)]).toEqual([true, true]);
+    // The robot comes home (the start tile, facing right) and says so.
+    const end = goalOn(r, r.referenceProgram as Block[], 1).end;
+    expect([end.world.robots[0].x, end.world.robots[0].y, end.world.robots[0].d, end.deltas.some((d: any) => d.home)]).toEqual([1, 3, 1, true]);
+  });
+
+  it('wall-until: when the basket wears, the ball rolls back to its spot by the wall, and the same program fetches it again', () => {
+    const r = byId('wall-until');
+    const won = goalOn(r, r.referenceProgram as Block[], 2).end.world;
+    const bed = won.things.find((t: any) => t.id === 'bed');
+    expect([bed.count, won.things.filter((t: any) => t.kind === 'ball').length]).toEqual([1, 0]);
+    const worn = eng<any>('apply', won, { wear: { id: 'bed', kind: 'basket', x: bed.x, y: bed.y, have: 0 } });
+    const ball = worn.things.find((t: any) => t.kind === 'ball');
+    expect([worn.things.find((t: any) => t.id === 'bed').count, ball && [ball.x, ball.y]]).toEqual([0, bed.spot]);
+    const again = runToEnd(r.referenceProgram as Block[], worn);
+    const g = runScript(GOAL_SCRIPT, { world: again.world, run: again.run, program: r.referenceProgram, goal: r.goal });
+    expect([g.met, again.run.bumps]).toEqual([true, 0]);
+    // A container with no spot (Mamie's eggs) loses its egg for good, as before.
+    const eggs = eng<any>('apply', { map: ['GG'], things: [{ kind: 'basket', id: 'k', x: 0, y: 0, count: 2, capacity: 4 }], robots: [] }, { wear: { id: 'k', kind: 'basket', x: 0, y: 0, have: 1 } });
+    expect(eggs.things).toEqual([{ kind: 'basket', id: 'k', x: 0, y: 0, count: 1, capacity: 4 }]);
+  });
+
+  it('bowl-if: every seed leaves exactly one bowl full (which one: the seed); a fixed walk that feeds yesterday’s empty bowls puts in a full one on another seed', () => {
+    const r = byId('bowl-if');
+    const full = new Set<string>();
+    for (let seed = 1; seed <= 30; seed++) {
+      const w = worldOfRequest(r, 'pip', seed);
+      const fed = w.things.filter((t: any) => t.kind === 'bowl' && t.food === 1).map((t: any) => t.id);
+      expect({ seed, fed: fed.length }).toEqual({ seed, fed: 1 });
+      full.add(fed[0]);
+    }
+    expect([...full].sort()).toEqual(['b1', 'b2', 'b3']);
+    // The reference: the full bowl untouched (no refusal), the two empty ones fed, home.
+    for (const seed of [1, 2, 3]) {
+      const { end, goal } = goalOn(r, r.referenceProgram as Block[], seed);
+      expect({ seed, met: goal.met, refused: end.deltas.filter((d: any) => d.full).length, sack: end.world.things.find((t: any) => t.id === 'sack').count }).toEqual({ seed, met: true, refused: 0, sack: 97 });
+    }
+    // A child who remembers which bowls were empty: straight to b1 and b2, no if — right on some seeds, never all.
+    const fixed = parse('L P P R F F L D R F F L D R');
+    const fixedWins = [1, 2, 3, 4, 5, 6].map((seed) => goalOn({ ...r, goal: [{ name: 'job_done' }] } as GardenRequest, fixed, seed).goal.met);
+    expect([fixedWins.includes(true), fixedWins.includes(false)]).toEqual([true, true]);
+  });
+
+  it('meow-when: each meow brings one treat from the jar to the bowl, the second after the first is done; the same steps with no when miss the event', () => {
+    const r = byId('meow-when');
+    const { end, goal } = goalOn(r, r.referenceProgram as Block[], 1);
+    expect([goal.met, end.run.handled.meow, end.world.things.find((t: any) => t.id === 'bowl').count, end.world.things.find((t: any) => t.id === 'jar').count]).toEqual([true, 2, 2, 97]);
+    // The handler (a noop and four steps) ends before the next meow: the two never interleave.
+    const ticks = (r.schedule ?? []).map((s) => s.tick);
+    expect(ticks[1] - ticks[0]).toBeGreaterThan(1 + (r.referenceProgram[0].body ?? []).length);
+    const plain = parse('L P R D L P R D');
+    const p = goalOn(r, plain, 1).goal;
+    expect([p.met, p.missing]).toEqual([false, ['handled']]);
+    // The robot never leaves home: the job is done where it stands.
+    expect([end.world.robots[0].x, end.world.robots[0].y, end.world.robots[0].d]).toEqual([1, 3, 1]);
   });
 });

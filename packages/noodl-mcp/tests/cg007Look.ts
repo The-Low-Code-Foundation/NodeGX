@@ -341,6 +341,8 @@ ${owlColourRule}
   .bg-steps > .bg-blocks-box { flex: 1 1 0 !important; min-height: 0 !important; }
   .bg-blocks-box > .gd-bk { height: 100%; min-height: 420px; }
 }
+/* P108 IW-003 (lane B): teach again — the job changed under a pinned program; a coral-edged note over the world. */
+.bg-teach-again { border-left: 4px solid var(--coral); padding: 6px 10px !important; background-color: var(--paper-2); border-radius: 10px; }
 /* IW-004: what the robot remembers (set / change), one line under the world, the monitor's violet. */
 .bg-vars { color: var(--violet-ink) !important; }
 /* An ask block Olive cannot be asked with yet (CG-005 AC6): the reason, in words, under the block list. */

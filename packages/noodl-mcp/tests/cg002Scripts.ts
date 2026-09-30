@@ -193,7 +193,23 @@ function layOut(w, seeded, rs) {
     var pl = sd.place[pi], pth = pl && byId(pl.thing);
     if (pth && Array.isArray(pl.among) && pl.among.length) { var pt = pl.among[Math.floor(rnd() * pl.among.length)]; pth.x = Math.floor(Number(pt[0])); pth.y = Math.floor(Number(pt[1])); }
   }
+  // P108 IW-003 (lane B): a thing laid beside the wall this seed drew (Biscuit's ball rolled into its corner); no draw.
+  if (Array.isArray(sd.byWall) && wx !== undefined) layByWall(w, sd.byWall, wx, wy, byId);
   return w;
+}
+/**
+ * P108 IW-003 (lane B): byWall — each { thing, dx, dy, spotOn } moves the thing with that id to the wall's tile plus
+ * (dx, dy), and writes that tile as the spot of the container spotOn names (where the thing goes back when the container
+ * wears: rollOut). Laid after place; it draws nothing from the seed, so every other layout lays exactly as before.
+ */
+function layByWall(w, list, wx, wy, byId) {
+  for (var i = 0; i < list.length; i++) {
+    var e = list[i], t = e && byId(e.thing);
+    if (!t) continue;
+    t.x = wx + (Math.floor(Number(e.dx)) || 0); t.y = wy + (Math.floor(Number(e.dy)) || 0);
+    var box = e.spotOn ? byId(e.spotOn) : null;
+    if (box) box.spot = [t.x, t.y];
+  }
 }
 /** The world a run starts on, given its seed (none: one is picked): the job copied in, the seeded layout laid. A request with neither is untouched. */
 function seedWorld(world, req, seed) {
@@ -733,6 +749,14 @@ function varStep(w, run, s, delta) {
   else { var by = s.by === undefined || s.by === null ? 1 : exprNum(evalVal(w, run, s.by)); run.vars[name] = (exprNum(run.vars[name]) || 0) + (by === null ? 0 : by); }
   delta.vars = clone(run.vars);
 }
+// P108 IW-003 (lane B): a container that remembers a spot (layByWall) puts back on it the one it lost to wear —
+// Biscuit takes his ball out of the basket and it rolls back to the wall, so the job reopens with a ball to fetch.
+function rollOut(w, t) {
+  if (!t || !Array.isArray(t.spot) || t.spot.length !== 2 || JOB_KINDS[t.kind] !== 'container') return;
+  var it = itemOf(t), sx = Math.floor(Number(t.spot[0])), sy = Math.floor(Number(t.spot[1]));
+  if (!PICKABLE[it] || !isFinite(sx) || !isFinite(sy)) return;
+  w.things.push({ kind: it, x: sx, y: sy });
+}
 function slotsOf(b) { return b && b.slots && typeof b.slots === 'object' ? b.slots : {}; }
 function bodyOf(b) { return b && Array.isArray(b.body) ? b.body : []; }
 function collectTricks(list, out) {
@@ -1071,7 +1095,7 @@ function apply(worldIn, delta) {
       if (rh) { rh.holds = 'can'; rh.can = Math.max(0, Math.floor(Number(d.holds.level)) || 0); if (Number(d.holds.max) > 0) rh.canMax = Math.floor(Number(d.holds.max)); }
     } else if (rh) { w.things.push({ kind: 'can', x: d.holds.x, y: d.holds.y, level: canOf(rh) || 0, max: canMaxOf(rh) }); delete rh.holds; rh.can = null; }
   }
-  if (d.wear) { var wt = thingOf(w, d.wear); if (wt) { setMeter(wt, d.wear.have); if (wt.kind === 'tulip') wt.droop = true; } }
+  if (d.wear) { var wt = thingOf(w, d.wear); if (wt) { setMeter(wt, d.wear.have); if (wt.kind === 'tulip') wt.droop = true; rollOut(w, wt); } }
   if (d.regrow) { var rg = thingOf(w, { id: d.regrow.id, x: d.regrow.x, y: d.regrow.y, kind: 'rock' }); if (rg) rg.left = Math.max(0, Math.min(Math.floor(Number(rg.max)) || 0, Math.floor(Number(d.regrow.left)) || 0)); }
   if (d.lay) w.things.push({ kind: 'egg', x: d.lay.x, y: d.lay.y });
   if (d.letter) w.things.push({ kind: 'letter', x: d.letter.x, y: d.letter.y });
@@ -1120,6 +1144,8 @@ function goalMet(w, run, program, goal) {
     // IG-006: exactly n tulips of one colour watered (Mamie's note: the red row, and none of the yellow).
     else if (g.name === 'tulips_watered') { var tw = 0; for (var q = 0; q < w.things.length; q++) if (w.things[q].kind === 'tulip' && String(w.things[q].color || '') === String(a[0]) && w.things[q].watered) tw++; ok = tw === (Number(a[1]) || 0); done += Math.min(tw, Number(a[1]) || 0); total += Number(a[1]) || 0; }
     // P108 IW-002: the finish line — every target of the job full, and the robot at its home.
+    // P108 IW-003 (lane B): the run bumped into nothing (Biscuit's wall: sense it, never crash into it).
+    else if (g.name === 'no_bump') ok = !(Number(run.bumps) > 0);
     else if (g.name === 'job_done') { var jp = jobProgress(w), jh = homeOf(w, r); done += jp.full; total += jp.total; ok = jp.total > 0 && jp.full === jp.total && !!r && (!jh || (r.x === Math.floor(Number(jh.x)) && r.y === Math.floor(Number(jh.y)))); }
     if (!ok) missing.push(String(g.name));
   }

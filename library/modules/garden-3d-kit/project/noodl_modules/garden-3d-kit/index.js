@@ -206,7 +206,7 @@
   /** The most pips a meter draws (the mockup's); a bigger need shows its numbers only. */
   var METER_PIPS_MAX = 8;
   /** The items a meter has an icon for (the mockup's 💧 🪨 🥚, drawn in CSS); anything else wears a plain dot. */
-  var METER_ICONS = { water: 1, stone: 1, egg: 1, food: 1, letter: 1 };
+  var METER_ICONS = { water: 1, stone: 1, egg: 1, food: 1, letter: 1, ball: 1 };
 
   function jobRow(kind) {
     for (var i = 0; i < JOB_VOCABULARY.length; i++) if (JOB_VOCABULARY[i].kind === kind) return JOB_VOCABULARY[i];
@@ -247,7 +247,8 @@
       // (the bowl requests' bowls, never full) — it keeps its old look, no meter.
       if (!wholeOf(t.capacity)) return null;
       need = wholeOf(t.capacity);
-      have = wholeOf(t.count) || 0;
+      // P108 IW-003 (lane B): the engine's rule — a bowl's count, else its food (a seeded bowl names only its food).
+      have = wholeOf(t.count) !== null ? wholeOf(t.count) : wholeOf(t.food) || 0;
       icon = String(t.item || row.item);
     } else if (t.kind === 'can') {
       if (wholeOf(t.level) === null && wholeOf(t.max) === null) return null;
@@ -432,7 +433,11 @@
     comb: 0xe0463a,
     beak: 0xffb347,
     straw: 0xf2de9e,
-    crate: 0xc98a4b
+    crate: 0xc98a4b,
+    // P108 IW-003 (lane B): Biscuit's ball and its seam; the biscuits on a store of food.
+    ball: 0xe04e4e,
+    ballSeam: 0xfff7e8,
+    biscuit: 0xf0d9b0
   };
 
   /**
@@ -955,6 +960,12 @@
       out.meshCount += 4;
       var spots = [[-0.08, -0.07], [0.08, -0.07], [-0.08, 0.08], [0.08, 0.08], [0, 0], [0, -0.14], [0, 0.14], [-0.14, 0]];
       var n = Math.min((meterOf(t) || { have: 0 }).have, spots.length);
+      // P108 IW-003 (lane B): Biscuit's basket holds his ball, not eggs.
+      if (t.item === 'ball' && n > 0) {
+        g.add(ballOf(THREE, mat, out, 0.13, 0.26));
+        g.userData.ball = true;
+        return g;
+      }
       for (var i = 0; i < n; i++) {
         var e = mesh(THREE, G(THREE, out, 'SphereGeometry', 1, 8, 6), mat(PALETTE.egg), spots[i][0], 0.2 + (i >= 4 ? 0.06 : 0), spots[i][1]);
         e.scale.set(0.065, 0.085, 0.065);
@@ -972,6 +983,14 @@
       out.meshCount += 2;
       var spots = [[-0.14, -0.1], [0.14, -0.1], [-0.14, 0.12], [0.14, 0.12], [0, 0], [0, 0.02]];
       var n = Math.min((meterOf(t) || { have: 0 }).have, spots.length);
+      // P108 IW-003 (lane B): a store of food (Biscuit's sack, his treat jar) — biscuits on the crate, by its count.
+      if (t.item === 'food') {
+        var nf = Math.min(Math.max(n, Math.floor(Number(t.count)) || 0), 4);
+        for (var f = 0; f < nf; f++) g.add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.1, 0.1, 0.05, 8), mat(PALETTE.biscuit), spots[f][0], 0.39 + f * 0.012, spots[f][1]));
+        out.meshCount += nf;
+        g.userData.food = nf;
+        return g;
+      }
       for (var i = 0; i < n; i++) {
         var st = mesh(THREE, G(THREE, out, 'IcosahedronGeometry', 1, 0), mat(i % 2 ? PALETTE.rock : PALETTE.rockLight), spots[i][0], 0.4 + (i >= 4 ? 0.07 : 0), spots[i][1]);
         st.scale.set(0.12, 0.08, 0.12);
@@ -1039,14 +1058,31 @@
         g.userData.pen = pen;
       }
       return g;
+    },
+    // P108 IW-003 (lane B): Biscuit's ball, lying on the grass by the wall.
+    ball: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      g.add(ballOf(THREE, mat, out, 0.15, 0.15));
+      return g;
     }
   };
+  /** P108 IW-003 (lane B): a red ball with a white seam, of radius r, its middle at height y (on the map, in a basket, on a back). */
+  function ballOf(THREE, mat, out, r, y) {
+    var b = new THREE.Group();
+    b.add(mesh(THREE, G(THREE, out, 'SphereGeometry', r, 10, 8), mat(PALETTE.ball), 0, y, 0));
+    var seam = mesh(THREE, G(THREE, out, 'CylinderGeometry', r * 1.02, r * 1.02, r * 0.18, 12), mat(PALETTE.ballSeam), 0, y, 0);
+    seam.rotation.x = 0.5;
+    b.add(seam);
+    out.meshCount += 2;
+    b.name = 'ball';
+    return b;
+  }
 
   /**
    * The load a robot shows on its back: the LAST entry of `carry` (brief §4). stone, letter, egg and food are drawn as
    * themselves (as the 2D kit draws them, lane A's IG-002); anything else is the generic parcel.
    */
-  var LOADS = ['stone', 'letter', 'egg', 'food'];
+  var LOADS = ['stone', 'letter', 'egg', 'food', 'ball'];
   function loadOf(r) {
     var carry = Array.isArray(r.carry) ? r.carry : [];
     if (!carry.length) return null;
@@ -1188,6 +1224,8 @@
       } else if (load === 'food') {
         back.add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.13, 0.13, 0.08, 8), mat(PALETTE.kibble), 0, 0, 0));
         out.meshCount += 1;
+      } else if (load === 'ball') {
+        back.add(ballOf(THREE, mat, out, 0.11, 0));
       } else if (load === 'letter') {
         back.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.28, 0.2, 0.03), mat(PALETTE.letter), 0, 0, 0));
         back.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.2, 0.08, 0.02), mat(PALETTE.letterInk), 0, 0.04, 0.02));
@@ -1708,6 +1746,8 @@
       };
       e.setAttribute('data-meter', m.text);
       e.setAttribute('data-kind', m.kind);
+      // P108 IW-003 (lane B): its share in tenths, for the compact bar on the island.
+      e.setAttribute('data-fill', String(m.need > 0 ? Math.max(0, Math.min(10, Math.round((10 * m.have) / m.need))) : 0));
       if (m.full) e.setAttribute('data-full', 'true');
       e.appendChild(part('i', 'gd3-mi gd3-mi-' + m.icon));
       if (m.pips) {
@@ -2421,6 +2461,13 @@
     '.gd3-meter.gd3-watch .gd3-pip{width:9px;height:14px;border-radius:4px}.gd3-meter.gd3-watch .gd3-mi{width:11px;height:11px}.gd3-meter.gd3-watch .gd3-mi-egg{width:10px;height:13px}.gd3-meter.gd3-watch .gd3-mi-stone,.gd3-meter.gd3-watch .gd3-mi-food,.gd3-meter.gd3-watch .gd3-mi-letter{width:14px;height:10px}\n' +
     '.gd3-ring{position:absolute;transform:translate(-50%,-50%);box-sizing:border-box;border:3px solid #8F6BFF;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.9),inset 0 0 0 2px rgba(255,255,255,.9);pointer-events:none}\n' +
     '.gd3-world[data-wide="1"] .gd3-meter:not(.gd3-watch){font-size:9px;padding:0 4px;gap:2px}.gd3-world[data-wide="1"] .gd3-meter:not(.gd3-watch) .gd3-pips{display:none}\n' +
+    // P108 IW-003 (lane B): the island's compact meter is a bar narrower than a tile (neighbours' chips no longer overlap).
+    '.gd3-world[data-wide="1"] .gd3-meter:not(.gd3-watch):not(.gd3-meter-bot){width:12px;height:5px;padding:0;gap:0;font-size:0;border-radius:3px;background:linear-gradient(90deg,var(--c,#2B7FC0) 0 var(--f,0%),#E6DCC6 var(--f,0%));box-shadow:0 0 0 1.5px #fff,0 1px 3px rgba(0,0,0,.3)}\n' +
+    '.gd3-world[data-wide="1"] .gd3-meter:not(.gd3-watch):not(.gd3-meter-bot)>*{display:none}\n' +
+    '.gd3-world[data-wide="1"] .gd3-meter.gd3-m-stone{--c:#6E6B7A}.gd3-world[data-wide="1"] .gd3-meter.gd3-m-egg{--c:#E0A800}.gd3-world[data-wide="1"] .gd3-meter.gd3-m-food{--c:#A9773F}.gd3-world[data-wide="1"] .gd3-meter.gd3-m-letter,.gd3-world[data-wide="1"] .gd3-meter.gd3-m-ball{--c:#E04E4E}\n' +
+    '.gd3-world[data-wide="1"] .gd3-meter[data-fill="1"]{--f:10%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="2"]{--f:20%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="3"]{--f:30%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="4"]{--f:40%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="5"]{--f:50%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="6"]{--f:60%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="7"]{--f:70%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="8"]{--f:80%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="9"]{--f:90%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="10"]{--f:100%}\n' +
+    '.gd3-world[data-wide="1"] .gd3-meter.gd3-full:not(.gd3-watch):not(.gd3-meter-bot){--c:#3FA66B;--f:100%}\n' +
+    '.gd3-mi-ball{background:#E04E4E;border-radius:50%;width:8px;height:8px;box-shadow:inset 0 -2px 0 rgba(255,255,255,.6)}.gd3-m-ball .gd3-pip.gd3-on{background:#E04E4E}\n' +
     '.gd3-world.gd3-picking{border-color:#8F6BFF;box-shadow:0 0 0 3px #EEE8FF}.gd3-picking .gd3-canvas{cursor:crosshair}';
 
   /** @type {import('./types/node-kit').ReactNodeDefinition} */

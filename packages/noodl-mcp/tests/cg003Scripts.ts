@@ -40,6 +40,8 @@ import { BLOCK_CARDS, CardBlock, EYES, HATS, IG006_WORDS, IG006_WORD_KEYS, ISLAN
 import { ROBOT_PAINTS } from './cg007Look';
 import { FREE_PLAY_PLOT, ISLAND_BASE, ISLAND_HOME, PLOT_H, PLOT_W } from './cg002Content';
 import { FIND_ROBOTS_SCRIPT, ISLAND_TICK_SCRIPT, PLOT_AT_SCRIPT, islandChooseScript, islandWorldScript } from './ig004Island';
+// P108 IW-003 (lane B): teach again — the island's own judgement, in the Workshop.
+import { ISLAND_ENGINE } from './ig004Island';
 // P106 IG-005 (lane B): the robot catalogue and its upgrades.
 import { ROBOTS_JSON, UPGRADES_JSON } from './cg002Content';
 // P108 IW-002 (lane J): Start world's seed line lays a request's seeded layout with the engine's own helpers.
@@ -221,7 +223,7 @@ for (var i = 0; i < list.length; i++) {
   if (!t) continue;
   if (t.kind === 'tulip') { total++; if (t.watered) watered++; things.push(withJob({ kind: 'tulip', x: t.x, y: t.y, watered: !!t.watered, colour: t.color === 'yellow' ? 'yellow' : 'red' }, t)); }
   else if (t.kind === 'puddle' || t.kind === 'letter' || SPRITE_THINGS[t.kind]) things.push(withJob({ kind: t.kind, x: t.x, y: t.y }, t));
-  else if (t.kind === 'bowl') things.push(withJob({ kind: 'bowl', x: t.x, y: t.y, full: (Number(t.food) || 0) > 0 }, t));
+  else if (t.kind === 'bowl') { var bw = withJob({ kind: 'bowl', x: t.x, y: t.y, full: (Number(t.food) || 0) > 0 }, t); if (bw.capacity !== undefined && bw.count === undefined) bw.count = Number(t.food) || 0; things.push(bw); }
   else if (t.kind === 'label') things.push({ kind: 'label', x: t.x, y: t.y, text: String(t.text || '') });
   // IG-002: a rock drawn at its size by what is left; a sign and a note carry their text (the kit does not draw it).
   else if (t.kind === 'rock') things.push(withJob({ kind: 'rock', x: t.x, y: t.y, left: Math.max(0, Math.floor(Number(t.left)) || 0) }, t));
@@ -231,6 +233,8 @@ for (var i = 0; i < list.length; i++) {
   else if (t.kind === 'fence') things.push({ kind: 'fence', x: t.x, y: t.y, w: Number(t.w) || 1, h: Number(t.h) || 1 });
   else if (t.kind === 'padlock') things.push({ kind: 'padlock', x: t.x, y: t.y });
   else if (JOB_THINGS[t.kind]) things.push(withJob({ kind: t.kind, x: t.x, y: t.y }, t));
+  // P108 IW-003 (lane B): Biscuit's ball, drawn by both kits.
+  else if (t.kind === 'ball') things.push(withJob({ kind: 'ball', x: t.x, y: t.y }, t));
 }
 if (Inputs.showEnd === true && Inputs.endX !== undefined && Inputs.endX !== null && Number(Inputs.endX) >= 0) things.push({ kind: 'flag', x: Number(Inputs.endX), y: Number(Inputs.endY) });
 // IG-003 (R5): the challenge was right: a tick on the tile the child tapped (the real end).
@@ -1290,6 +1294,27 @@ Outputs.text = parts.length ? (W.iw4VarsH ? W.iw4VarsH + ': ' : '') + parts.join
 `;
 
 /** The glue, as the generator places it: one `Logic/*` each. */
+/**
+ * P108 IW-003 (lane B) — `Logic/Teach again`: the request open in the Workshop has a program pinned on its plot (her save,
+ * `plots`) that no longer wins it — the mission was rewritten as a job (IW-003 §6 trap 1). The judgement is the island's
+ * own (`islStale`: the stored program run on the plot as its seed lays it, judged by the request's goal), so the island
+ * and the Workshop never disagree. `show` puts the line on the world side: "Teach Pip again — the job changed." No save
+ * change: the stored program is kept as it is (v4), and a win pins the new one over it.
+ */
+export const TEACH_AGAIN_SCRIPT = `${ISLAND_ENGINE}${WORD_HELPER}
+var lang = langOf(Inputs.lang), name = nameOf(Inputs.botName);
+var w = wordMap(Inputs.words, lang, name);
+var reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];
+var id = String(Inputs.requestId || '');
+var plots = Inputs.plots && typeof Inputs.plots === 'object' ? Inputs.plots : {};
+var req = null;
+for (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].id === id) req = reqs[i];
+var sv = req ? plots[id] : null;
+var stale = !!req && !!sv && Array.isArray(sv.program) && islStale(req, sv.program, null, null);
+Outputs.show = stale;
+Outputs.text = stale ? fill(w.iw3bTeachAgain, { b: name }) : '';
+`;
+
 export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; seam: string }> = [
   { component: 'Logic/Read program', script: READ_PROGRAM_SCRIPT, seam: 'the program as a list, whatever held it' },
   { component: 'Logic/Start world', script: START_WORLD_SCRIPT, seam: 'the world a request starts from, and the request' },
@@ -1343,5 +1368,7 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Latch', script: LATCH_SCRIPT, seam: 'a value held until Go, then handed on as it stood' },
   // P108 IW-004 (lane B).
   { component: 'Logic/Pick thing', script: PICK_THING_SCRIPT, seam: 'the thing on a tapped tile, for the chip that is picking' },
-  { component: 'Logic/Var monitor', script: VAR_MONITOR_SCRIPT, seam: 'what the robot remembers, as one line under the world' }
+  { component: 'Logic/Var monitor', script: VAR_MONITOR_SCRIPT, seam: 'what the robot remembers, as one line under the world' },
+  // P108 IW-003 (lane B).
+  { component: 'Logic/Teach again', script: TEACH_AGAIN_SCRIPT, seam: 'a program pinned on this request that its rewritten job outgrew: the line that asks her to teach it again' }
 ];

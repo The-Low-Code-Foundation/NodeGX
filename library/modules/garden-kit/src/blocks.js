@@ -271,6 +271,9 @@ var gardenKitBlocks = (function () {
 
   /** The start hat's place in the workspace (right of the drawer the flyout leaves; the node scrolls it into sight). */
   var START_AT = { x: 24, y: 24 };
+  /** P108 IW-003 (lane B): fitProgram's margin each side (workspace units) and its smallest scale (the zoom's minScale is 0.45). */
+  var FIT_MARGIN = 20;
+  var FIT_MIN = 0.5;
 
   /** The engine program → a Blockly workspace state: the ▶ hat with the program chained under it. */
   function toBlockly(program) {
@@ -1424,8 +1427,20 @@ var gardenKitBlocks = (function () {
       return wdt > 0 && wdt < 380;
     }
     ed.narrow = isNarrow();
+    /**
+     * P108 IW-003 (lane B): a snug workspace (a side drawer in under 560 px — the steps column at 1024 × 768 is 440) gives
+     * the drawer a smaller scale, so the program keeps room beside it (measured in s2: the drawer took most of the column
+     * and the program's right edge was cut: "forwar", "turn lef").
+     */
+    function isSnug() {
+      var wdt = root && root.clientWidth ? root.clientWidth : typeof window !== 'undefined' ? window.innerWidth : 1024;
+      return !isNarrow() && wdt > 0 && wdt < 560;
+    }
+    ed.snug = isSnug();
     ed.flyoutScale = function () {
-      return ed.narrow ? 0.62 : ed.ctx && ed.ctx.band === 1 ? 0.84 : 0.74;
+      if (ed.narrow) return 0.62;
+      if (ed.snug) return ed.ctx && ed.ctx.band === 1 ? 0.7 : 0.62;
+      return ed.ctx && ed.ctx.band === 1 ? 0.84 : 0.74;
     };
 
     function theme() {
@@ -2047,10 +2062,34 @@ var gardenKitBlocks = (function () {
     function showStart() {
       var s = startBlock();
       if (!s || !ed.ws) return;
+      fitProgram();
       try {
         ed.ws.scrollBoundsIntoView(s.getBoundingRectangleWithoutChildren ? s.getBoundingRectangleWithoutChildren() : s.getBoundingRectangle(), 24);
       } catch (e) {
         /* an older Blockly */
+      }
+    }
+    /**
+     * P108 IW-003 (lane B): the program whole in view. When the start stack is wider than the workspace beside the drawer
+     * (1024 × 768; a phone), the workspace zooms OUT until its widest block fits, never below FIT_MIN, never above the
+     * kids' start scale (a short program stays big); and when it fits again (a wider window), it zooms back up. Only on a
+     * load and a resize: a child's own zoom (+ − ⤢) between them is hers.
+     */
+    function fitProgram() {
+      var s = startBlock();
+      if (!s || !ed.ws) return;
+      try {
+        var start = ed.ctx && ed.ctx.band === 1 ? 0.9 : 0.8;
+        var scale = ed.ws.scale;
+        var r = s.getBoundingRectangle();
+        var view = ed.ws.getMetricsManager().getViewMetrics(true);
+        if (!view || !(view.width > 0)) return;
+        // The stack's width and the view's are in workspace units: the stack fits at scale' when wide × scale' ≤ view × scale.
+        var wide = r.right - r.left + 2 * FIT_MARGIN;
+        var want = Math.max(FIT_MIN, Math.min(start, (view.width * scale) / wide));
+        if (Math.abs(want - scale) > 0.01) ed.ws.setScale(want);
+      } catch (e) {
+        /* hidden, or an older Blockly */
       }
     }
 
@@ -2133,8 +2172,10 @@ var gardenKitBlocks = (function () {
       var p = props();
       ed.ctx = makeCtx();
       ed.narrow = isNarrow();
+      ed.snug = isSnug();
       root.classList.toggle('gd-narrow', ed.narrow);
-      ed.key = [ed.narrow, ed.ctx.band, ed.ctx.lang, JSON.stringify(ed.ctx.paletteList), ed.ctx.showHelp, JSON.stringify(ed.ctx.words), ed.ctx.botName, p.motionColor, p.actionColor, p.controlColor, p.askColor].join('|');
+      root.classList.toggle('gd-snug', ed.snug);
+      ed.key = [ed.narrow + '/' + ed.snug, ed.ctx.band, ed.ctx.lang, JSON.stringify(ed.ctx.paletteList), ed.ctx.showHelp, JSON.stringify(ed.ctx.words), ed.ctx.botName, p.motionColor, p.actionColor, p.controlColor, p.askColor].join('|');
       Bk.setLocale(messagesOf(Bk, ed.ctx.lang));
       Bk.config.snapRadius = 48;
       Bk.config.connectingSnapRadius = 64;
@@ -2203,7 +2244,7 @@ var gardenKitBlocks = (function () {
       var p = props();
       if (!ed.ws) return;
       // The view's inputs, by identity first: a render that changed none of them (a glow, a lock) costs nothing here.
-      var refs = [isNarrow(), p.palette, p.words, p.band, p.language, p.showHelp, p.botName, p.motionColor, p.actionColor, p.controlColor, p.askColor, p.brainSize];
+      var refs = [isNarrow() + '/' + isSnug(), p.palette, p.words, p.band, p.language, p.showHelp, p.botName, p.motionColor, p.actionColor, p.controlColor, p.askColor, p.brainSize];
       var same = !!ed.refs && refs.length === ed.refs.length && refs.every(function (r, i) {
         return r === ed.refs[i];
       });
@@ -2362,7 +2403,7 @@ var gardenKitBlocks = (function () {
 
     inject();
     root.__gardenBlocks = ed;
-    return { update: update, destroy: destroy, api: ed };
+    return { update: update, destroy: destroy, api: ed, fit: showStart };
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -2421,6 +2462,8 @@ var gardenKitBlocks = (function () {
                 }
                 // A workspace that turned narrow (or wide) lays its drawer out again.
                 if (editor.current) editor.current.update();
+                // P108 IW-003 (lane B): and the program is fitted to its new width.
+                if (editor.current && editor.current.fit) editor.current.fit();
               }
             });
             ro.observe(root.current);

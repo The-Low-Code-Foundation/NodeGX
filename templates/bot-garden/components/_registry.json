@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 573,
+      "connectionCount": 574,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -519,7 +519,7 @@
       "path": "Logic/Island choose",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 25,
+      "connectionCount": 26,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -600,6 +600,14 @@
       "type": "visual",
       "nodeCount": 3,
       "connectionCount": 7,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Teach again": {
+      "path": "Logic/Teach again",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 9,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -686,8 +694,8 @@
     "Workshop/Play": {
       "path": "Workshop/Play",
       "type": "visual",
-      "nodeCount": 155,
-      "connectionCount": 424,
+      "nodeCount": 157,
+      "connectionCount": 432,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -871,7 +879,7 @@
       "path": "Pages/Workshop",
       "type": "page",
       "nodeCount": 22,
-      "connectionCount": 70,
+      "connectionCount": 71,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -901,8 +909,8 @@
     }
   },
   "stats": {
-    "totalComponents": 112,
-    "totalNodes": 901,
-    "totalConnections": 2765
+    "totalComponents": 113,
+    "totalNodes": 906,
+    "totalConnections": 2785
   }
 }

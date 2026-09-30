@@ -1169,6 +1169,12 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3bTeachAgain",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3bTeachAgain"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-iw4And",
       "toId": "translatewordsOut",
       "toProperty": "iw4And"

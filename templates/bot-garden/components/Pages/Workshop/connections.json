@@ -352,6 +352,12 @@
       "toProperty": "cardsSeen"
     },
     {
+      "fromId": "wsFam",
+      "fromProperty": "plots",
+      "toId": "wsPlay",
+      "toProperty": "plots"
+    },
+    {
       "fromId": "wsStore",
       "fromProperty": "model",
       "toId": "wsSeen",

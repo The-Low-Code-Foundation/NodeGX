@@ -274,6 +274,9 @@ var gardenKitBlocks = (function () {
 
   /** The start hat's place in the workspace (right of the drawer the flyout leaves; the node scrolls it into sight). */
   var START_AT = { x: 24, y: 24 };
+  /** P108 IW-003 (lane B): fitProgram's margin each side (workspace units) and its smallest scale (the zoom's minScale is 0.45). */
+  var FIT_MARGIN = 20;
+  var FIT_MIN = 0.5;
 
   /** The engine program → a Blockly workspace state: the ▶ hat with the program chained under it. */
   function toBlockly(program) {
@@ -1427,8 +1430,20 @@ var gardenKitBlocks = (function () {
       return wdt > 0 && wdt < 380;
     }
     ed.narrow = isNarrow();
+    /**
+     * P108 IW-003 (lane B): a snug workspace (a side drawer in under 560 px — the steps column at 1024 × 768 is 440) gives
+     * the drawer a smaller scale, so the program keeps room beside it (measured in s2: the drawer took most of the column
+     * and the program's right edge was cut: "forwar", "turn lef").
+     */
+    function isSnug() {
+      var wdt = root && root.clientWidth ? root.clientWidth : typeof window !== 'undefined' ? window.innerWidth : 1024;
+      return !isNarrow() && wdt > 0 && wdt < 560;
+    }
+    ed.snug = isSnug();
     ed.flyoutScale = function () {
-      return ed.narrow ? 0.62 : ed.ctx && ed.ctx.band === 1 ? 0.84 : 0.74;
+      if (ed.narrow) return 0.62;
+      if (ed.snug) return ed.ctx && ed.ctx.band === 1 ? 0.7 : 0.62;
+      return ed.ctx && ed.ctx.band === 1 ? 0.84 : 0.74;
     };
 
     function theme() {
@@ -2050,10 +2065,34 @@ var gardenKitBlocks = (function () {
     function showStart() {
       var s = startBlock();
       if (!s || !ed.ws) return;
+      fitProgram();
       try {
         ed.ws.scrollBoundsIntoView(s.getBoundingRectangleWithoutChildren ? s.getBoundingRectangleWithoutChildren() : s.getBoundingRectangle(), 24);
       } catch (e) {
         /* an older Blockly */
+      }
+    }
+    /**
+     * P108 IW-003 (lane B): the program whole in view. When the start stack is wider than the workspace beside the drawer
+     * (1024 × 768; a phone), the workspace zooms OUT until its widest block fits, never below FIT_MIN, never above the
+     * kids' start scale (a short program stays big); and when it fits again (a wider window), it zooms back up. Only on a
+     * load and a resize: a child's own zoom (+ − ⤢) between them is hers.
+     */
+    function fitProgram() {
+      var s = startBlock();
+      if (!s || !ed.ws) return;
+      try {
+        var start = ed.ctx && ed.ctx.band === 1 ? 0.9 : 0.8;
+        var scale = ed.ws.scale;
+        var r = s.getBoundingRectangle();
+        var view = ed.ws.getMetricsManager().getViewMetrics(true);
+        if (!view || !(view.width > 0)) return;
+        // The stack's width and the view's are in workspace units: the stack fits at scale' when wide × scale' ≤ view × scale.
+        var wide = r.right - r.left + 2 * FIT_MARGIN;
+        var want = Math.max(FIT_MIN, Math.min(start, (view.width * scale) / wide));
+        if (Math.abs(want - scale) > 0.01) ed.ws.setScale(want);
+      } catch (e) {
+        /* hidden, or an older Blockly */
       }
     }
 
@@ -2136,8 +2175,10 @@ var gardenKitBlocks = (function () {
       var p = props();
       ed.ctx = makeCtx();
       ed.narrow = isNarrow();
+      ed.snug = isSnug();
       root.classList.toggle('gd-narrow', ed.narrow);
-      ed.key = [ed.narrow, ed.ctx.band, ed.ctx.lang, JSON.stringify(ed.ctx.paletteList), ed.ctx.showHelp, JSON.stringify(ed.ctx.words), ed.ctx.botName, p.motionColor, p.actionColor, p.controlColor, p.askColor].join('|');
+      root.classList.toggle('gd-snug', ed.snug);
+      ed.key = [ed.narrow + '/' + ed.snug, ed.ctx.band, ed.ctx.lang, JSON.stringify(ed.ctx.paletteList), ed.ctx.showHelp, JSON.stringify(ed.ctx.words), ed.ctx.botName, p.motionColor, p.actionColor, p.controlColor, p.askColor].join('|');
       Bk.setLocale(messagesOf(Bk, ed.ctx.lang));
       Bk.config.snapRadius = 48;
       Bk.config.connectingSnapRadius = 64;
@@ -2206,7 +2247,7 @@ var gardenKitBlocks = (function () {
       var p = props();
       if (!ed.ws) return;
       // The view's inputs, by identity first: a render that changed none of them (a glow, a lock) costs nothing here.
-      var refs = [isNarrow(), p.palette, p.words, p.band, p.language, p.showHelp, p.botName, p.motionColor, p.actionColor, p.controlColor, p.askColor, p.brainSize];
+      var refs = [isNarrow() + '/' + isSnug(), p.palette, p.words, p.band, p.language, p.showHelp, p.botName, p.motionColor, p.actionColor, p.controlColor, p.askColor, p.brainSize];
       var same = !!ed.refs && refs.length === ed.refs.length && refs.every(function (r, i) {
         return r === ed.refs[i];
       });
@@ -2365,7 +2406,7 @@ var gardenKitBlocks = (function () {
 
     inject();
     root.__gardenBlocks = ed;
-    return { update: update, destroy: destroy, api: ed };
+    return { update: update, destroy: destroy, api: ed, fit: showStart };
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -2424,6 +2465,8 @@ var gardenKitBlocks = (function () {
                 }
                 // A workspace that turned narrow (or wide) lays its drawer out again.
                 if (editor.current) editor.current.update();
+                // P108 IW-003 (lane B): and the program is fitted to its new width.
+                if (editor.current && editor.current.fit) editor.current.fit();
               }
             });
             ro.observe(root.current);
@@ -3716,6 +3759,29 @@ var gardenKitBlocks = (function () {
       ['path', { d: 'M29 27l5-10 11-3 8 6 1 7z', fill: '#B3B0BE' }],
       ['rect', { x: 8, y: 25, width: 48, height: 31, rx: 3, fill: '#C98A4B', stroke: '#8B5A2B', strokeWidth: 2 }],
       ['path', { d: 'M8 35.5h48M8 45.5h48M18 25v31M46 25v31', stroke: '#8B5A2B', strokeWidth: 1.8 }]
+    ] },
+    // P108 IW-003 (lane B): Biscuit's ball (red with a white seam), his basket with the ball in it, and a store of food
+    // (the food sack, the treat jar): the crate with biscuits on top instead of stones.
+    ball: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 56, rx: 14, ry: 3, fill: 'rgba(0,0,0,.14)' }],
+      ['circle', { cx: 32, cy: 40, r: 14, fill: '#E04E4E' }],
+      ['path', { d: 'M19 36q13 9 26 0', fill: 'none', stroke: '#FFF7E8', strokeWidth: 3, strokeLinecap: 'round' }],
+      ['circle', { cx: 27, cy: 34, r: 3, fill: '#fff', opacity: 0.55 }]
+    ] },
+    basketBall: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 56, rx: 22, ry: 3.5, fill: 'rgba(0,0,0,.14)' }],
+      ['path', { d: 'M13 31a19 19 0 0138 0', fill: 'none', stroke: '#8B5A2B', strokeWidth: 3.5, strokeLinecap: 'round' }],
+      ['circle', { cx: 32, cy: 27, r: 10, fill: '#E04E4E' }],
+      ['path', { d: 'M23 25q9 6 18 0', fill: 'none', stroke: '#FFF7E8', strokeWidth: 2.5, strokeLinecap: 'round' }],
+      ['path', { d: 'M7 31h50l-7 23H14z', fill: '#C98A4B', stroke: '#8B5A2B', strokeWidth: 2, strokeLinejoin: 'round' }],
+      ['path', { d: 'M9 38h46M11.5 46h41M20 31l3 23M32 31v23M44 31l-3 23', stroke: '#A9773F', strokeWidth: 1.6 }]
+    ] },
+    storeFood: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 57, rx: 25, ry: 3.5, fill: 'rgba(0,0,0,.14)' }],
+      ['path', { d: 'M13 25a4 4 0 01-2-7 4 4 0 012-7c2 0 3 1 4 2h10c1-1 2-2 4-2a4 4 0 012 7 4 4 0 01-2 7c-2 0-3-1-4-2H17c-1 1-2 2-4 2z', fill: '#FFF0DA', stroke: '#C79A63', strokeWidth: 1.8 }],
+      ['path', { d: 'M33 26a4 4 0 01-2-7 4 4 0 012-7c2 0 3 1 4 2h10c1-1 2-2 4-2a4 4 0 012 7 4 4 0 01-2 7c-2 0-3-1-4-2H37c-1 1-2 2-4 2z', fill: '#FFF0DA', stroke: '#C79A63', strokeWidth: 1.8 }],
+      ['rect', { x: 8, y: 25, width: 48, height: 31, rx: 3, fill: '#C98A4B', stroke: '#8B5A2B', strokeWidth: 2 }],
+      ['path', { d: 'M8 35.5h48M8 45.5h48M18 25v31M46 25v31', stroke: '#8B5A2B', strokeWidth: 1.8 }]
     ] }
   };
   /** P108 IW-002: the watering can lying on the map, its water drawn at level/max inside it (none at 0). */
@@ -3734,13 +3800,17 @@ var gardenKitBlocks = (function () {
       water
     );
   }
+  /** P108 IW-003 (lane B): a meter's share in tenths (0–10), for the compact bar a wide world (the island) draws. */
+  function fillOf(m) {
+    return String(m && m.need > 0 ? Math.max(0, Math.min(10, Math.round((10 * m.have) / m.need))) : 0);
+  }
   /** P108 IW-002: a meter chip (the mockup's): its icon, a pip per unit up to METER_PIPS_MAX, and the numbers. */
   function meterEl(m, key, watched, top) {
     var pips = [];
     for (var i = 0; i < m.pips; i++) pips.push(h('i', { key: i, className: 'gd-pip' + (i < m.have ? ' gd-on' : '') }));
     return h(
       'span',
-      { key: key, className: 'gd-meter gd-m-' + m.icon + (m.full ? ' gd-full' : '') + (watched ? ' gd-watch' : '') + (top ? ' gd-meter-top' : ''), 'data-meter': m.text, 'data-kind': m.kind, 'data-full': m.full ? 'true' : undefined, 'data-watch': watched ? 'true' : undefined },
+      { key: key, className: 'gd-meter gd-m-' + m.icon + (m.full ? ' gd-full' : '') + (watched ? ' gd-watch' : '') + (top ? ' gd-meter-top' : ''), 'data-meter': m.text, 'data-kind': m.kind, 'data-full': m.full ? 'true' : undefined, 'data-watch': watched ? 'true' : undefined, 'data-fill': fillOf(m) },
       h('i', { key: 'ic', className: 'gd-mi gd-mi-' + m.icon }),
       m.pips ? h('span', { key: 'p', className: 'gd-pips' }, pips) : null,
       h('span', { key: 't', className: 'gd-mt' }, m.text)
@@ -3759,7 +3829,7 @@ var gardenKitBlocks = (function () {
   }
   var ROCK_SPRITE = { big: 'rockBig', mid: 'rockMid', small: 'rockSmall' };
   /** IG-002: the loads that are drawn as themselves on a robot's back; anything else carried is the generic parcel. */
-  var LOAD_SPRITES = { stone: 1, letter: 1, egg: 1, food: 1 };
+  var LOAD_SPRITES = { stone: 1, letter: 1, egg: 1, food: 1, ball: 1 };
   /** The load on a robot's back: the LAST thing it carries (what the next put lays down), or null when it carries nothing. */
   function loadOf(carry) {
     if (!Array.isArray(carry) || !carry.length) return null;
@@ -3789,7 +3859,7 @@ var gardenKitBlocks = (function () {
   /** The most pips a meter draws (the mockup's); a bigger need shows its numbers only. */
   var METER_PIPS_MAX = 8;
   /** The items a meter has an icon for (the mockup's 💧 🪨 🥚, drawn in CSS); anything else wears a plain dot. */
-  var METER_ICONS = { water: 1, stone: 1, egg: 1, food: 1, letter: 1 };
+  var METER_ICONS = { water: 1, stone: 1, egg: 1, food: 1, letter: 1, ball: 1 };
 
   function jobRow(kind) {
     for (var i = 0; i < JOB_VOCABULARY.length; i++) if (JOB_VOCABULARY[i].kind === kind) return JOB_VOCABULARY[i];
@@ -3830,7 +3900,8 @@ var gardenKitBlocks = (function () {
       // (the bowl requests' bowls, never full) — it keeps its old look, no meter.
       if (!wholeOf(t.capacity)) return null;
       need = wholeOf(t.capacity);
-      have = wholeOf(t.count) || 0;
+      // P108 IW-003 (lane B): the engine's rule — a bowl's count, else its food (a seeded bowl names only its food).
+      have = wholeOf(t.count) !== null ? wholeOf(t.count) : wholeOf(t.food) || 0;
       icon = String(t.item || row.item);
     } else if (t.kind === 'can') {
       if (wholeOf(t.level) === null && wholeOf(t.max) === null) return null;
@@ -3993,6 +4064,14 @@ var gardenKitBlocks = (function () {
     '.gd-bot>.gd-ring{inset:-6%}\n' +
     '.gd-bot.gd-watch>.gd-can{outline:3px solid #8F6BFF;outline-offset:1px;transform:translateY(-50%) scale(1.4)}\n' +
     '.gd-world[data-wide="1"] .gd-meter:not(.gd-watch){font-size:9px;padding:0 4px;gap:2px}.gd-world[data-wide="1"] .gd-meter:not(.gd-watch) .gd-pips{display:none}\n' +
+    // P108 IW-003 (lane B): on the island a tile is ~14 px, so a chip with numbers covered its neighbour's; the compact
+    // meter is a bar narrower than one tile (its share filled, green when full), and a watched one stays the full chip.
+    '.gd-world[data-wide="1"] .gd-meter:not(.gd-watch){width:min(12px,82%);height:5px;padding:0;gap:0;font-size:0;border-radius:3px;background:linear-gradient(90deg,var(--c,#2B7FC0) 0 var(--f,0%),#E6DCC6 var(--f,0%));box-shadow:0 0 0 1.5px #fff,0 1px 3px rgba(0,0,0,.3);transform:translate(-50%,-160%)}\n' +
+    '.gd-world[data-wide="1"] .gd-meter:not(.gd-watch)>*{display:none}.gd-world[data-wide="1"] .gd-meter.gd-full:not(.gd-watch){--c:#3FA66B;--f:100%}\n' +
+    '.gd-world[data-wide="1"] .gd-meter.gd-meter-top:not(.gd-watch){transform:translate(-50%,40%)}\n' +
+    '.gd-world[data-wide="1"] .gd-meter.gd-m-stone{--c:#6E6B7A}.gd-world[data-wide="1"] .gd-meter.gd-m-egg{--c:#E0A800}.gd-world[data-wide="1"] .gd-meter.gd-m-food{--c:#A9773F}.gd-world[data-wide="1"] .gd-meter.gd-m-letter,.gd-world[data-wide="1"] .gd-meter.gd-m-ball{--c:#E04E4E}\n' +
+    '.gd-world[data-wide="1"] .gd-meter[data-fill="1"]{--f:10%}.gd-world[data-wide="1"] .gd-meter[data-fill="2"]{--f:20%}.gd-world[data-wide="1"] .gd-meter[data-fill="3"]{--f:30%}.gd-world[data-wide="1"] .gd-meter[data-fill="4"]{--f:40%}.gd-world[data-wide="1"] .gd-meter[data-fill="5"]{--f:50%}.gd-world[data-wide="1"] .gd-meter[data-fill="6"]{--f:60%}.gd-world[data-wide="1"] .gd-meter[data-fill="7"]{--f:70%}.gd-world[data-wide="1"] .gd-meter[data-fill="8"]{--f:80%}.gd-world[data-wide="1"] .gd-meter[data-fill="9"]{--f:90%}.gd-world[data-wide="1"] .gd-meter[data-fill="10"]{--f:100%}\n' +
+    '.gd-mi-ball{background:#E04E4E;border-radius:50%;width:8px;height:8px;box-shadow:inset 0 -2px 0 rgba(255,255,255,.6)}.gd-m-ball .gd-pip.gd-on{background:#E04E4E}\n' +
     '.gd-world.gd-picking{border-color:#8F6BFF;box-shadow:0 0 0 3px #EEE8FF;cursor:crosshair}.gd-picking .gd-cell{cursor:crosshair}\n' +
     '.gd-picking .gd-cell>.gd-thing,.gd-picking .gd-cell>.gd-tulip{transition:transform .15s ease,filter .15s ease}\n' +
     '.gd-picking .gd-cell:hover,.gd-picking .gd-cell:active{box-shadow:inset 0 0 0 3px rgba(143,107,255,.6)}\n' +
@@ -4191,8 +4270,10 @@ var gardenKitBlocks = (function () {
               else if (m) extras.push(spriteEl('rockSmall', 'rock-' + i, 'gd-thing gd-boulder gd-used', { 'data-left': '0' }));
             }
             else if (t.kind === 'site') ground.push(h('div', { key: 'site-' + i, className: 'gd-site gd-site-' + siteStage(t), 'data-site': siteStage(t) }));
-            else if (t.kind === 'basket') extras.push(spriteEl(m && m.have > 0 ? 'basketEggs' : 'basket', 'basket-' + i, 'gd-thing gd-basket'));
-            else if (t.kind === 'store') extras.push(spriteEl(m && m.have > 0 ? 'storeFull' : 'store', 'store-' + i, 'gd-thing gd-store'));
+            else if (t.kind === 'basket') extras.push(spriteEl(m && m.have > 0 ? (t.item === 'ball' ? 'basketBall' : 'basketEggs') : 'basket', 'basket-' + i, 'gd-thing gd-basket'));
+            // P108 IW-003 (lane B): a store of food (Biscuit's sack, his treat jar) shows food on top, not stones.
+            else if (t.kind === 'store') extras.push(spriteEl((m ? m.have > 0 : wholeOf(t.count) > 0) ? (t.item === 'food' ? 'storeFood' : 'storeFull') : 'store', 'store-' + i, 'gd-thing gd-store'));
+            else if (t.kind === 'ball') extras.push(spriteEl('ball', 'ball-' + i, 'gd-thing gd-ball'));
             else if (t.kind === 'can') extras.push(canThingEl(t, 'can-' + i));
             else if (t.kind === 'hen') extras.push(spriteEl('hen', 'hen-' + i, 'gd-thing gd-hen'));
             else if (THING_SPRITES[t.kind]) extras.push(spriteEl(t.kind, t.kind + '-' + i, 'gd-thing gd-' + t.kind));
