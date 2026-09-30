@@ -1,6 +1,6 @@
 # IW-005 — Seek and regrow
 
-**Opened 2026-09-29** from README §0 ("seek out trees … if square contains rock, mine") and D5, D6. **Status: 🟡 s2 — the engine built (lane J, §5): AC1–AC4 ✅ in the specs; AC5 (the drives, seen in 2D and 3D) owed with IW-003 and the drawing.**
+**Opened 2026-09-29** from README §0 ("seek out trees … if square contains rock, mine") and D5, D6. **Status: ✅ s3 — AC1–AC4 in the specs (s2), AC5 seen on the pages (s3, lane M: Pocket seeking the eggs on the island in 2D, and in the Workshop in 3D); `sayNone` worded per kind; `go to nearest` skips a used-up rock or a full target (lane S).**
 Depends on IW-002. Lane J.
 
 ## 1. The person sentence

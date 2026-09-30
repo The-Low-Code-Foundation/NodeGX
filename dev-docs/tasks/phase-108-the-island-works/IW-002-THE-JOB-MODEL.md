@@ -1,6 +1,6 @@
 # IW-002 — The job model: sources, carriers, meters, a finish line, wear
 
-**Opened 2026-09-29** from README §4.1. **Status: 🟡 s2 — the engine (s1, lane J) and the drawing in both kits (s2, lane D: AC6 ✅, AC4's kit half ✅) built, and the page now hands the kits every job field (s2 merge, §6); the page/island DRIVE clauses of AC3 and AC5 are owed once IW-003 gives a request a `job`.** Depends on nothing (engine first). Lanes J (engine) then D (drawing).
+**Opened 2026-09-29** from README §4.1. **Status: ✅ s3 — engine (s1), drawing (s2), and the drive clauses (s3, lane M): AC3 (the Island page goes on from the island it left — a real defect, fixed) and AC5 (a done plot never reset; the robot walks home and goes back) on the island drive. Keeping meters across an app restart is IW-006's save v5.** Depends on nothing (engine first). Lanes J (engine) then D (drawing).
 
 ## 1. The person sentence
 

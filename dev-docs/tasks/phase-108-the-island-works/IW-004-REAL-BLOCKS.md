@@ -1,7 +1,7 @@
 # IW-004 — Real blocks: Blockly, made for children the way Scratch made it
 
 **Opened 2026-09-29** from README §1.2 and ruling R3: *"Yep 'real' blockly, but like Scratch you can modify the blockly
-display and mechanics to make it much easier for kids to use please"*. **Status: 🟡 s2 (lane B, §6) — the Workshop on Blockly 12: AC1–AC3 and AC5–AC8 ✅; AC4 ✅ on the engine at the merge (`p108s2Join.test.ts`), on a page with IW-003; AC9 ✅ but the tablet (Richard's).** Depends on IW-000 (the look,
+display and mechanics to make it much easier for kids to use please"*. **Status: 🟡 s3 — AC1–AC8 ✅ (AC4 on a page in s3, lane M: eggs-count built from the drawer with both chips picked, the basket ringed, 0/4 → 4/4); teach again (the IW-003 trap) built by lane B; AC9 ✅ but the tablet (Richard's); the 1024 fit does not hold for the bench's program (IW-003 §7, the merge).** Depends on IW-000 (the look,
 the touch reading) and IW-001 (the bar, the pad). Lane B.
 
 ## 1. The person sentence

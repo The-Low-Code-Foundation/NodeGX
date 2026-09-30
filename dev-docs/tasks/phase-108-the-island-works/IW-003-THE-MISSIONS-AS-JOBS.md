@@ -1,6 +1,6 @@
 # IW-003 — The missions as jobs
 
-**Opened 2026-09-29** from README §0, §1.1. **Status: ⬜.** Depends on IW-002 (the job model), IW-004 (the blocks the
+**Opened 2026-09-29** from README §0, §1.1. **Status: 🟡 s3 (2026-09-30, four lanes merged, §7) — all fifteen missions are jobs (the thirteen + the envelopes + Sami's bench); AC1 ✅, AC2 ✅ (the gate `iw003Missions` 63/63), AC4 ✅, AC5 ✅ on the drives; AC3's FR lines and AC5's look beside IW-000 are Richard's read; four look items open (§7, the merge).** Depends on IW-002 (the job model), IW-004 (the blocks the
 reference programs are written in), IW-005 (`go to nearest`). One lane per islander family in session 3.
 
 ## 1. The person sentence
@@ -678,3 +678,45 @@ comme la carte le demande — avec son bloc à elle. »
 **Could not verify:** the tablet; a real GPU; the look beside IW-000 (Richard's); the other lanes' rewritten missions
 under teach again (proved on a fixture of a rewritten request and on Biscuit's three old programs); a Blockly `when`
 block shows its event slot "…" until a child picks one (the engine reads meow when none is set — IW-004's).
+
+### Session 3 merge (orchestrator, 2026-09-30, `p108-s3-merge`)
+
+Merged P → B → S → M (the order the lanes finished), then `cline-dev` (P107 s2, the training template: no shared file).
+What the merge had to decide, beyond keeping both lanes' appended blocks:
+
+- **A pinned program the rewritten job outgrew now waits (B) — and lane P's island row pinned exactly that** on path-postbox:
+  the row now asks Olive first and then runs path-postbox's own reference, so it still proves an ask never parks.
+- **The island's tick row counted resets on path-postbox**, which is a job now (it finishes and waits): re-cut to "every
+  pinned plot finished its job or went round inside the 200 ticks".
+- **Lane M's `sameBlock`** (containers match by shape, so the tulips' pours fold and the passes still fold) offered bowl-if's
+  rotated body holding its `if` (lane F's fold-nudge rule, red on the join): narrowed to REPEATS only — an if / until / when
+  never matches, as before. M's fold row and its arm green.
+- **Mamie's note changes with the day (M)**: lane P's envelope row compared the read with the request's note; it now reads
+  the laid world's. The yellow note sits after the three envelopes in `notes_read` (looked up by text, never by index).
+- **The pad's go keys (M) beside the stones (S)**: the page drive's stones-pad clauses read a go key as `go:<kind>`; the action
+  keys compare as before, and a go key must show exactly where the request offers a walk.
+- The Olive requests' order (S's bench is the last of the literal list, P's envelopes the last of `IG006_REQUESTS()`), the
+  `rest` / blocked lists, and two missing commas where two lanes' word blocks now meet.
+
+**Merged readings** (`p108-s3-merge`, `5afba75cb`; each spec file alone; every drive on one deploy; each exit 0):
+garden specs **800** — cg002Engine 259, cg003Template 148, cg005Olive 41, cg006Requests 83, ig004Island 38, cg001GardenKit 56,
+ig007Garden3d 49, iw004Blocks 59, p108s2Join 4, **iw003Missions 63/63**; shell 92/92; `template:garden` exit 0, 0 drift.
+Page drive **331/331** (`--mockup`; the first run 326/331 — the five stones-pad clauses above, fixed, re-run) · IW-001 38/38 ·
+IW-004 19/19 + 3D 3/3 · modes 90/90 · robots 60/60 + 3D 4/4 · island `--perf` 65/65 (AC6 p95 16.8 ms at CPU ×4) + 3D 5/5 ·
+Workshop 3D 24/24 + nogl 8/8 · Olive 22/22 · lane M 34/34 · 7/7 · 3/3 · 6/6 · lane S 32/32 + 3D 14/14 · lane P 17/17 +
+3D 10/10 · lane B 24/24 · kit fixtures 2D 44/44, 3D 30/30.
+
+**Looked at on the merged deploy** (`p108-s3-merge-scratch/pages/`): `mamie-ws/m3-1368-en-02-running.png` — the hen's pen,
+the basket ringed at 2/4, the job card under the world, the program the mockup's block for block; `stones/iw3s-sb-1024-en-03-mid.png`
+— the bench at 4/8 with Cobble beside it, **but the program's right edge cut off at 1024** ("what Cobble h…", "rock");
+`post/iw003-p3-envelopes-won-2d-en.png` — three doors at 1/1 green, the win card; `island-shots/ig004-1368-en-01-island.png`
+— the 55 × 22 island, every plot's meters as bars, the new column's plots (the envelopes on Mamie's row, the bench on Sami's).
+
+**Open after the merge (look items, not gates):** (1) the 1024 fit (lane B) does not hold for the bench's program;
+(2) the envelopes' read block still says "read the note"; (3) the drawer's `go to nearest` always starts on "egg"; (4) at
+390 the drive pad covers the right half of the world (sami-thanks' door under it); (5) `iw3Job` says "0 of 1 done" on the
+eggs (the basket is one target); (6) full meters are 3.05:1 in both kits (the page overrides with `--leaf`; the kits owe it);
+(7) possibly two Samis on the island (his pin and the one on the bench), not driven. **For Richard:** the FR lines (each
+lane's block above), the look beside IW-000, and sami-thanks' Predict — with home = start, a finished job always ends at
+home, so the challenge now asks "does the job get done?" more than "where does it stop?" (lane P, deviation 5).
+
