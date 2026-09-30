@@ -44,6 +44,11 @@ const PROJECT = arg('--project') || path.join(__dirname, '..', '..', 'templates'
 const SHOTS = arg('--shots');
 const JSON_OUT = arg('--json');
 const ONLY = (arg('--only') || 'fit,read,seek,pad,hint,sami').split(',');
+/** --vps 1024,390 and --langs en: a subset of FIT/READ/SEEK's sizes and languages (every one when absent). */
+const VPS = (arg('--vps') || '1024,1368,390').split(',');
+const LANGS_RUN = (arg('--langs') || 'en,fr').split(',');
+/** --ids wall-until,eggs-count: only these requests in FIT/READ/SEEK (every one when absent). */
+const IDS = arg('--ids') ? arg('--ids').split(',') : null;
 if (!DIR || DIR.startsWith('--')) {
   console.error('usage: drive-iw-look.js <deploy-dir> --project <project-dir> [--shots <dir>] [--json <file>] [--only …]');
   process.exit(2);
@@ -209,13 +214,14 @@ withDeployedSite({ dir: DIR }, async (page) => {
   // ── FIT (item 1), READ (item 2), SEEK (item 3): every request, at the three sizes, EN and FR ──
   const FIT_IDS = REQUESTS.filter((r) => Array.isArray(r.referenceProgram) && r.referenceProgram.length).map((r) => r.id);
   if (ONLY.some((o) => ['fit', 'read', 'seek'].includes(o))) {
-    for (const vp of ['1024', '1368', '390']) {
-      for (const lang of ['en', 'fr']) {
+    for (const vp of VPS) {
+      for (const lang of LANGS_RUN) {
         await page.setViewport(VIEWPORTS[vp]);
         await freshFamily(lang);
         const tag = `${vp}-${lang}`;
         let widest = null;
         for (const id of FIT_IDS) {
+          if (IDS && !IDS.includes(id)) continue;
           if (!(await openQuest(lang, id))) continue;
           if (ONLY.includes('seek') || ONLY.includes('read')) {
             const d = await evaluate(DRAWER);
@@ -251,10 +257,14 @@ withDeployedSite({ dir: DIR }, async (page) => {
           }
           if (ONLY.includes('fit')) {
             const prog = REQ(id).referenceProgram;
+            // Whether the drawer was already at the foot before this program came in (a strip is per size and palette).
+            const stripBefore = await evaluate(`(() => { const r = ${BK}; return !!(r && r.__gardenBlocks && r.__gardenBlocks.workspace().horizontalLayout); })()`);
             await putProgram(prog);
             await evaluate(`window.scrollTo(0, document.querySelector('.bg-blocks-box').getBoundingClientRect().top + scrollY - 8)`);
             await wait(500);
             const got = await evaluate(WHOLE);
+            got.stripBefore = stripBefore;
+            got.fitSeen = await evaluate(`(() => { const r = ${BK}; return r && r.__gardenBlocks ? { last: r.__gardenBlocks.fitSeen || null, flip: r.__gardenBlocks.flipSeen || null } : null; })()`);
             readings[`fit-${tag}-${id}`] = got;
             if (!widest || got.stackW > widest.got.stackW) widest = { id, got };
             if (id === 'sami-bench' || id === 'bowl-if' || id === 'eggs-count') await shot(`iwl-fit-${tag}-${id}`);

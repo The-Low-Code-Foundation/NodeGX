@@ -2127,10 +2127,11 @@ var gardenKitBlocks = (function () {
     function foot() {
       return !!ed.narrow || !!ed.strip;
     }
-    /** P108 IW-003 look (lane L): the same program, the lock and the running ring kept, the drawer at the foot. */
-    function toStrip() {
+    /** P108 IW-003 look (lane L): the same program, the lock and the running ring kept, the drawer at the foot (or back). */
+    function toStrip(on) {
       var keep = current(), wasLocked = ed.locked;
-      ed.strip = true;
+      ed.strip = !!on;
+      if (!on) ed.sideView = 0;
       ed.stripKey = isNarrow() + '/' + isSnug() + '|' + JSON.stringify(ed.ctx ? ed.ctx.paletteList : null);
       destroyWs();
       inject();
@@ -2157,11 +2158,12 @@ var gardenKitBlocks = (function () {
         if (!view || !(view.width > 0)) return;
         // The stack's width and the view's are in workspace units: the stack fits at scale' when wide × scale' ≤ view × scale.
         var wide = r.right - r.left + 2 * FIT_MARGIN;
-        // P108 IW-003 look (lane L): a side drawer with a program wider than the room beside it even at FIT_MIN (measured:
-        // the eggs' until at 1024 needs 0.36 there, and 0.46 at 1368 in French) — the drawer moves to the workspace's
-        // foot, as on a phone, and the program takes the whole width. Once per size and palette; the stack kept as it is.
-        if (!ed.narrow && !ed.strip && wide * FIT_MIN > view.width * scale + 1) {
-          toStrip();
+        // P108 IW-003 look (lane L): the drawer at the foot goes back beside the program once the program fits there at
+        // FIT_MIN again (the room beside it as measured AT FIT_MIN when it moved; 16 px of hysteresis) — a flip decided
+        // while a request opened on the last one's program, or before Start over, is undone.
+        var tight = r.right - r.left + 2 * FIT_PAD;
+        if (!ed.narrow && ed.strip && ed.sideView > 0 && tight * FIT_MIN < ed.sideView - 16) {
+          toStrip(false);
           return;
         }
         // A strip drawer (a phone, or flipped) may go to Blockly's own floor, what − reaches: the eggs' until in French
@@ -2173,8 +2175,36 @@ var gardenKitBlocks = (function () {
         var v = ed.ws.getMetricsManager().getViewMetrics(true);
         var b = s.getBoundingRectangle();
         if (b.left < v.left || b.right > v.left + v.width) ed.ws.scrollBoundsIntoView(new Bk.utils.Rect(v.top + 1, v.top + 2, b.left, b.right), FIT_PAD);
+        // P108 IW-003 look (lane L): zoomed down to FIT_MIN beside a side drawer and still not whole — once Blockly has
+        // redrawn at that zoom (the drawer's own width follows it: measured 248 px at 0.8, 191 at 0.5 on the same drawer).
+        if (!ed.narrow && !ed.strip && ed.ws.scale <= FIT_MIN + 0.01) whenDrawn(stripIfCut);
       } catch (e) {
         /* hidden, or an older Blockly */
+      }
+    }
+    /**
+     * P108 IW-003 look (lane L): a side drawer with a program wider than the room beside it even at FIT_MIN (measured on
+     * the s3 merge: Sami's bench at 1024 would need 0.32, the eggs' until 0.36 there and 0.46 at 1368 in French) — the
+     * drawer moves to the workspace's foot, as on a phone, and the program takes the whole width (FIT_MIN_STRIP there).
+     * Whole at FIT_MIN means the stack and the scroll's own room (FIT_PAD), not the fit's margin.
+     */
+    function stripIfCut() {
+      var s = startBlock();
+      if (!s || !ed.ws || ed.narrow || ed.strip || ed.ws.scale > FIT_MIN + 0.01) return;
+      try {
+        var view = ed.ws.getMetricsManager().getViewMetrics(true);
+        var r = s.getBoundingRectangle();
+        var tight = r.right - r.left + 2 * FIT_PAD;
+        var fly0 = ed.ws.getFlyout && ed.ws.getFlyout();
+        // What the check saw (a drive reads it): the stack and the room beside the drawer, in px at this zoom.
+        ed.fitSeen = { tight: Math.round(tight * ed.ws.scale), view: Math.round(view.width * ed.ws.scale), scale: +ed.ws.scale.toFixed(2), fly: fly0 && fly0.getWidth ? Math.round(fly0.getWidth()) : -1 };
+        if (tight > view.width + 1) {
+          ed.sideView = view.width * ed.ws.scale;
+          ed.flipSeen = ed.fitSeen;
+          toStrip(true);
+        }
+      } catch (e) {
+        /* hidden */
       }
     }
 
@@ -2354,7 +2384,10 @@ var gardenKitBlocks = (function () {
       if (key !== ed.key) {
         var keep = current();
         // P108 IW-003 look (lane L): a strip drawer is this size's and this palette's (another request decides again).
-        if (ed.strip && ed.stripKey !== refs[0] + '|' + JSON.stringify(next.paletteList)) ed.strip = false;
+        if (ed.strip && ed.stripKey !== refs[0] + '|' + JSON.stringify(next.paletteList)) {
+          ed.strip = false;
+          ed.sideView = 0;
+        }
         destroyWs();
         inject();
         load(keep);
