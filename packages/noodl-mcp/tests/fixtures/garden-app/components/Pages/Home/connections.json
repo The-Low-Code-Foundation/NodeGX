@@ -15,6 +15,12 @@
     { "fromId": "vLang", "fromProperty": "value", "toId": "blocks", "toProperty": "language" },
     { "fromId": "vLocked", "fromProperty": "value", "toId": "blocks", "toProperty": "locked" },
     { "fromId": "blocks", "fromProperty": "onProgram", "toId": "vProgramOut", "toProperty": "value" },
-    { "fromId": "blocks", "fromProperty": "onSelected", "toId": "vSelectedOut", "toProperty": "value" }
+    { "fromId": "blocks", "fromProperty": "onSelected", "toId": "vSelectedOut", "toProperty": "value" },
+    { "fromId": "vWatch", "fromProperty": "value", "toId": "garden", "toProperty": "watch" },
+    { "fromId": "vPicking", "fromProperty": "value", "toId": "garden", "toProperty": "picking" },
+    { "fromId": "garden", "fromProperty": "onTileX", "toId": "vTileX", "toProperty": "value" },
+    { "fromId": "garden", "fromProperty": "onTileY", "toId": "vTileY", "toProperty": "value" },
+    { "fromId": "garden", "fromProperty": "onTileTapped", "toId": "tapCounter", "toProperty": "increase" },
+    { "fromId": "tapCounter", "fromProperty": "currentCount", "toId": "vTaps", "toProperty": "value" }
   ]
 }

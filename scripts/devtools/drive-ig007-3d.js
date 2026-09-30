@@ -31,6 +31,15 @@
  *   BUBBLE a Bubble shows near the robot and does not eat a press (elementFromPoint at its centre is the canvas)
  *   FRAME  Frame Ms came out of the port as a number > 0 (a READOUT under software GL, not a pass)
  *   ISLAND a 24×16 map with three robots draws ≤ 500 meshes (screenshot)
+ * P108 IW-002 AC6 (lane D), at the end — the job world the ENGINE writes (the template's Step script; the same world
+ * drive-cg001-kit.js draws in 2D), fed through the Variables:
+ *   JOB    every new thing built (the wall tiles, the sites by stage, the basket's eggs, the store, the can and its level,
+ *          the used rock, the hen and her pen, a letter standing in the post box, the tulips part / full / drooping) and
+ *          every meter a chip in the overlay with the engine's numbers (screenshot)
+ *   WATCH  Watch rings the chips' things (DOM rings sized by the tile) and draws their meters large (screenshot)
+ *   PICK   Picking frames the world violet; the pointer over the basket lifts it (the engine's own reading) and a real
+ *          click still reports Tile X / Tile Y / Tile Tapped through the graph's Variables (screenshot)
+ *   SEEDS  IW-002 AC4's kit half: seeds 1, 2, 3 build three layouts, each the engine's; seed 2 again builds seed 2's
  *   0 console errors.
  * Exits 0 when every clause passed, 1 when any did, 2 on a usage error.
  */
@@ -184,6 +193,63 @@ const ISLAND = (() => {
   return { rows };
 })();
 
+// ── P108 IW-002 AC6 (lane D): the engine, read from the template the generator wrote (the Step component's own script,
+// cut before its first line of wiring) — so the job worlds below are the world JSON the engine writes, not a hand copy.
+function engineApi() {
+  const file = path.join(REPO, 'templates', 'bot-garden', 'components', 'Logic', 'Step', 'nodes.json');
+  const nodes = JSON.parse(fs.readFileSync(file, 'utf8')).nodes;
+  const script = nodes.map((n) => n.parameters && n.parameters.functionScript).find((t) => typeof t === 'string' && t.includes('function step('));
+  const cut = script.indexOf('\nvar st = step(');
+  if (cut === -1) throw new Error('the Step script changed shape: no "var st = step(" line');
+  // eslint-disable-next-line no-new-func
+  return new Function(`${script.slice(0, cut)}\nreturn { newRun: newRun, step: step, apply: apply, worldOf: worldOf, seedWorld: seedWorld };`)();
+}
+/** Run a program on a world as the page does (Step, then Apply delta) and return the world the engine wrote. */
+function engineRun(ENG, world, program) {
+  let run = ENG.newRun(program, 'pip', 'en', 'iw002');
+  let w = world;
+  for (let i = 0; i < 200 && !run.done; i++) {
+    const st = ENG.step(run, w, null);
+    w = ENG.apply(w, st.delta);
+    run = st.run;
+  }
+  return w;
+}
+/** One 8×6 job world with every new thing: worldOf (site stages), then Pip waters the first tulip once (1 → 2 drinks, can 2 → 1). */
+function jobWorld(ENG) {
+  const base = {
+    map: ['GGGGGGGG', 'GGGGGGGG', 'GGGGLLGG', 'PPPPPPPP', 'GGGGGGGG', 'GGGGGGGG'],
+    things: [
+      { kind: 'tulip', id: 'tu1', x: 1, y: 0, need: 3, have: 1, watered: false },
+      { kind: 'tulip', id: 'tu2', x: 2, y: 0, need: 3, have: 3, watered: true },
+      { kind: 'tulip', id: 'tu3', x: 3, y: 0, need: 3, have: 3, watered: true },
+      { kind: 'site', id: 's1', x: 4, y: 3, need: 4, have: 0, item: 'stone' },
+      { kind: 'site', id: 's2', x: 5, y: 3, need: 4, have: 1, item: 'stone' },
+      { kind: 'site', id: 's3', x: 6, y: 3, need: 4, have: 3, item: 'stone' },
+      { kind: 'site', id: 's4', x: 7, y: 3, need: 4, have: 4, item: 'stone' },
+      { kind: 'basket', id: 'b1', x: 6, y: 1, count: 3, capacity: 4, item: 'egg' },
+      { kind: 'store', id: 'st1', x: 7, y: 1, count: 2, capacity: 6, item: 'stone' },
+      { kind: 'can', x: 4, y: 4, level: 2, max: 3 },
+      { kind: 'rock', id: 'r1', x: 5, y: 4, left: 2, max: 4 },
+      { kind: 'rock', id: 'r2', x: 6, y: 4, left: 0, max: 4 },
+      { kind: 'hen', id: 'hen', x: 1, y: 5, pen: [0, 4, 2, 5] },
+      { kind: 'postbox', id: 'pb', x: 7, y: 5 }
+    ],
+    robots: [{ id: 'pip', x: 1, y: 1, d: 0, holds: 'can', can: 2, canMax: 3, name: 'Pip', colour: '#FF7A59' }]
+  };
+  let w = engineRun(ENG, ENG.worldOf(base), [{ id: 1, t: 'water' }]);
+  // The island tick's own deltas, written by apply (the only writer): the hen lays two, a letter comes, a tulip wears.
+  w = ENG.apply(w, { lay: { x: 0, y: 4 } });
+  w = ENG.apply(w, { lay: { x: 2, y: 5 } });
+  w = ENG.apply(w, { letter: { x: 7, y: 5 } });
+  w = ENG.apply(w, { wear: { id: 'tu3', kind: 'tulip', x: 3, y: 0, have: 2 } });
+  return w;
+}
+/** Start world's seeded layout for a seed: the wall at one column of 2..5 on row 0, three eggs among eight tiles of row 5. */
+function seededWorld(ENG, seed) {
+  const req = { seeded: { wallAt: [2, 5], wallRow: 0, eggs: { count: 3, among: [[0, 5], [1, 5], [2, 5], [3, 5], [4, 5], [5, 5], [6, 5], [7, 5]] } } };
+  return ENG.seedWorld({ map: ['GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPP', 'GGGGGGGG', 'GGGGGGGG'], things: [], robots: [{ id: 'pip', x: 0, y: 3, d: 1, name: 'Pip' }] }, req, seed);
+}
 withDeployedSite({ dir: DIR, gpu: true, chromeArgs: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] }, async (page) => {
   const evaluate = (expr) => page.evaluate(expr);
   const setVar = async (name, value) => {
@@ -408,6 +474,98 @@ withDeployedSite({ dir: DIR, gpu: true, chromeArgs: ['--use-angle=swiftshader', 
   await shot('vocab-8x6');
   readings.vocab = vocab;
   check('VOCAB: rocks big / medium / small by left, a sign and a note (their text not on the tile), stones; the can at 2 of 3, empty at 0, none at null; the loads stone, letter, parcel', JSON.stringify(vocab.things.filter((k) => k.startsWith('rock'))) === JSON.stringify(['rock:big', 'rock:medium', 'rock:small']) && vocab.things.includes('sign') && vocab.things.includes('note') && vocab.labels.length === 0 && vocab.bots[0].level && vocab.bots[0].level.share === 0.67 && vocab.bots[1].level && vocab.bots[1].level.visible === false && vocab.bots[2].level === null && JSON.stringify(vocab.bots.map((b) => b.load)) === JSON.stringify(['stone', 'letter', 'parcel']), vocab);
+
+  // ══ P108 IW-002 AC6 (lane D): the job model in 3D from a world the ENGINE wrote, Watch, Picking, seeds ══
+  const ENG = engineApi();
+  await page.setViewport({ width: 1024, height: 800 });
+  await setVar('bubble', '');
+  await setVar('watch', '');
+  await setVar('picking', false);
+  const job = jobWorld(ENG);
+  readings.iw002 = { engineWorld: job };
+  await setJson('map', { rows: job.map });
+  await setJson('things', job.things);
+  await setJson('robots', job.robots);
+  await setJson('focus', { x: 0, y: 0, w: 8, h: 6 });
+  await setVar('camera', 'island');
+  await wait(300);
+  await setVar('camera', 'plot');
+  await wait(900);
+  const JOB3 = `(() => {
+    const eng = ${ROOT}.gd3;
+    const by = (k) => eng.built.things.filter((g) => g.userData.kind === k);
+    const named = (g, n) => { let f = null; g.traverse((o) => { if (!f && o.name === n) f = o; }); return f; };
+    const chips = [...document.querySelectorAll('.gd3-meter')].map((c) => c.getAttribute('data-kind') + ':' + c.getAttribute('data-meter') + (c.classList.contains('gd3-full') ? ':full' : '') + (c.classList.contains('gd3-watch') ? ':watch' : ''));
+    const rings = [...document.querySelectorAll('.gd3-ring')].map((r) => { const b = r.getBoundingClientRect(); return { ring: r.getAttribute('data-ring'), at: (r.getAttribute('data-x') || 'r' + r.getAttribute('data-robot')) + ',' + (r.getAttribute('data-y') || ''), w: Math.round(b.width), h: Math.round(b.height), colour: getComputedStyle(r).borderTopColor }; });
+    return {
+      walls: eng.built.tiles.filter((m) => m.name === 'tiles-wall').length,
+      sites: by('site').map((g) => g.userData.stage),
+      eggsInBasket: by('basket').map((g) => g.userData.eggs),
+      canLevel: by('can').map((g) => +named(g, 'level').scale.y.toFixed(2)),
+      rocks: by('rock').map((g) => g.userData.size),
+      pen: by('hen').map((g) => g.userData.pen),
+      letterInBox: by('letter').map((g) => !!g.userData.inBox),
+      tulips: by('tulip').map((g) => g.userData.x + ':' + (g.userData.wet ? 'wet' : g.userData.look || 'dry')),
+      robotCan: (() => { const r = eng.built.robots[0]; const l = r && named(r, 'level'); return l ? +l.scale.y.toFixed(2) : null; })(),
+      chips, rings, meshes: eng.meshCount, watched: ${ROOT}.getAttribute('data-watched')
+    };
+  })()`;
+  const j3 = await evaluate(JOB3);
+  readings.iw002.drawn = j3;
+  await shot('iw002-3d-job-world');
+  check('IW-002 AC6 (3D): the engine’s job world builds — two wall tiles, sites dirt · gravel · cobbles · path, 3 eggs in the basket, the can at 2/3, a regrowing and a used rock, the hen’s 3×2 pen, a letter standing in the post box, tulips part · full · drooping, Pip’s can at 1/3',
+    j3.walls === 1 && JSON.stringify(j3.sites) === JSON.stringify(['dirt', 'gravel', 'cobbles', 'path']) && JSON.stringify(j3.eggsInBasket) === '[3]' && JSON.stringify(j3.canLevel) === '[0.67]' && JSON.stringify(j3.rocks) === JSON.stringify(['medium', 'used']) && JSON.stringify(j3.pen) === JSON.stringify([{ x: 0, y: 4, w: 3, h: 2 }]) && JSON.stringify(j3.letterInBox) === '[true]' && JSON.stringify(j3.tulips) === JSON.stringify(['1:part', '2:wet', '3:droop']) && j3.robotCan === 0.33, j3);
+  check('IW-002 AC6 (3D): every meter is the mockup’s chip in the overlay with the engine’s numbers — the tulips 2/3, 3/3 green, 2/3; the sites 0/4 … 4/4 green; the basket 3/4, the store 2/6, the can 2/3, the rocks 2/4 and 0/4; Pip’s held can 1/3',
+    JSON.stringify([...j3.chips].sort()) === JSON.stringify(['basket:3/4', 'can:1/3', 'can:2/3', 'rock:0/4', 'rock:2/4', 'site:0/4', 'site:1/4', 'site:3/4', 'site:4/4:full', 'store:2/6', 'tulip:2/3', 'tulip:2/3', 'tulip:3/3:full']), j3.chips);
+  await setJson('watch', [{ id: 'tu1', kind: 'tulip', x: 99, y: 99 }, { kind: 'basket', x: 6, y: 1 }, { kind: 'can', x: 1, y: 1 }, { kind: 'ahead', x: 3, y: 1 }]);
+  await wait(500);
+  const w3 = await evaluate(JOB3);
+  readings.iw002.watch = w3;
+  await shot('iw002-3d-watch');
+  check('IW-002 (brief §4.4) Watch (3D): four rings — the tulip by id, the basket, Pip holding the can, the tile ahead — violet ellipses the size of a tile on screen; the three meters watched are large, the rest not',
+    JSON.stringify(w3.rings.map((r) => r.ring + '@' + r.at).sort()) === JSON.stringify(['basket@6,1', 'robot@r0,', 'tile@3,1', 'tulip@1,0']) && w3.rings.every((r) => r.w > 20 && r.h > 10 && r.colour === 'rgb(143, 107, 255)') && w3.chips.filter((c) => c.endsWith(':watch')).length === 3 && w3.watched === '4', { rings: w3.rings, chips: w3.chips });
+  await setVar('watch', '');
+  await wait(300);
+  const unw = await evaluate(JOB3);
+  check('IW-002 Watch (3D): empty rings nothing', unw.rings.length === 0 && !unw.chips.some((c) => c.endsWith(':watch')), unw.rings);
+  // ── PICKING ──
+  const border0 = await evaluate(`getComputedStyle(${ROOT}).borderTopColor`);
+  await setVar('picking', true);
+  await wait(300);
+  const pb = await tilePoint(6, 1);
+  const baseY = await evaluate(`${ROOT}.gd3.built.things.find((g) => g.userData.kind === 'basket').position.y`);
+  await mouse('mouseMoved', pb.x, pb.y, { button: 'none' });
+  await wait(400);
+  const hover = await evaluate(`(() => { const e = ${ROOT}; const t = e.gd3.built.things; const b = t.find((g) => g.userData.kind === 'basket'); const s = t.find((g) => g.userData.kind === 'store'); return { hover: e.getAttribute('data-hover'), picking: e.getAttribute('data-picking'), cls: e.className, border: getComputedStyle(e).borderTopColor, basketY: b.position.y, basketLifted: b.userData.lifted, storeLifted: s.userData.lifted }; })()`);
+  await shot('iw002-3d-picking');
+  const tapsP = Number((await getVar('taps')) || 0);
+  await mouse('mousePressed', pb.x, pb.y);
+  await mouse('mouseReleased', pb.x + 2, pb.y + 1);
+  const tapP = await until(`({ taps: Noodl.Variables.get('taps'), x: Noodl.Variables.get('tileX'), y: Noodl.Variables.get('tileY') })`, (v) => Number(v.taps) === tapsP + 1, 3000);
+  readings.iw002.picking = { border0, baseY, hover, tapP };
+  check('IW-002 (brief §4.4) Picking (3D): the world is framed violet, the basket under the pointer is lifted (the store beside it is not), and a click still reports Tile X 6 / Tile Y 1 / Tile Tapped',
+    /gd3-picking/.test(hover.cls) && hover.border === 'rgb(143, 107, 255)' && border0 !== hover.border && hover.picking === 'true' && hover.hover === '6,1' && hover.basketLifted === true && hover.basketY > baseY + 0.1 && hover.storeLifted === false && Number(tapP.taps) === tapsP + 1 && Number(tapP.x) === 6 && Number(tapP.y) === 1, readings.iw002.picking);
+  await setVar('picking', false);
+  await wait(300);
+  const off = await evaluate(`(() => { const e = ${ROOT}; const b = e.gd3.built.things.find((g) => g.userData.kind === 'basket'); return { border: getComputedStyle(e).borderTopColor, y: b.position.y }; })()`);
+  check('IW-002 Picking (3D): off, the frame is the world’s own and the basket is down again', off.border === border0 && Math.abs(off.y - baseY) < 1e-6, off);
+  // ── SEEDS ──
+  const seeds3 = {};
+  for (const seed of [1, 2, 3, 2]) {
+    const w = seededWorld(ENG, seed);
+    await setJson('map', { rows: w.map });
+    await setJson('things', w.things);
+    await setJson('robots', w.robots);
+    await wait(700);
+    const got = await evaluate(`(() => { const eng = ${ROOT}.gd3; return { wall: eng.world.map.cells.filter((c) => c.kind === 'wall').map((c) => c.x + ',' + c.y).join(' '), eggs: eng.built.things.filter((g) => g.userData.kind === 'egg').map((g) => g.userData.x + ',' + g.userData.y).sort().join(' '), wallMesh: eng.built.tiles.filter((m) => m.name === 'tiles-wall').length }; })()`);
+    const engineSaid = { wall: w.map.map((r, y) => [...r].map((c, x) => (c === 'L' ? x + ',' + y : null)).filter(Boolean)).flat().join(' '), eggs: w.things.filter((t) => t.kind === 'egg').map((t) => t.x + ',' + t.y).sort().join(' '), wallMesh: 1 };
+    const key = seed in seeds3 ? `${seed}-again` : String(seed);
+    seeds3[key] = { got, engineSaid };
+    if (key === String(seed)) await shot(`iw002-3d-seed-${seed}`);
+  }
+  readings.iw002.seeds = seeds3;
+  const l3 = (k) => JSON.stringify(seeds3[k].got);
+  check('IW-002 AC4 (the 3D kit): seeds 1, 2, 3 build three layouts — each the wall and eggs the engine laid — and seed 2 again builds seed 2’s', new Set([l3('1'), l3('2'), l3('3')]).size === 3 && l3('2-again') === l3('2') && ['1', '2', '3'].every((k) => JSON.stringify(seeds3[k].got) === JSON.stringify(seeds3[k].engineSaid)), seeds3);
 
   check('0 console errors through the whole drive', page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));
   return { dir: DIR, results, readings, consoleErrors: page.consoleErrors.slice(), networkErrors: page.networkErrors.slice() };

@@ -190,3 +190,112 @@ framed, three bubbles, Pip named on the tulips' plot).
 the page and island drives prove only that nothing that plays today broke); the tablet's tick time with job plots (the
 spec's 300 ticks × 2 job plots + 1 reset plot read p95 0.2 ms on the Mac, gate < 5 ms).
 
+
+### Session 2 (2026-09-30, lane D `iw002-drawing`, base `a9d8850fd`) — the DRAWING half (AC6) and the two world inputs
+
+**Built** (both world kits; nothing in the engine, the pages or `cg003*`). Every name is the engine's (§6 session 1) and
+brief s2 §4.4–§4.5's; nothing renamed.
+
+- **One helper block, copied into both kits** (`garden-kit` after `loadOf`, `garden-3d-kit` before `LOCAL_WORLD`): copies
+  of `JOB_VOCABULARY`, `SITE_STAGES`, `WALL_TILE` (the one table stays `cg002Content.ts`); `meterOf(thing)` (the chip:
+  icon, have, need, pips ≤ 8, text, full — green only for a target or a container), `siteStage` (the engine's `stage`,
+  else its rule by have/need), `penOf` (a hen's `[x0,y0,x1,y1]`), `watchRefs` / `resolveWatch` (a chip → the thing with
+  its id, else the first of its kind on its tile, else — a `can` — the robot that `holds` it, else the tile). Exposed as
+  `Garden.world.job` and `Garden3D.world.job` / `.job`. `L: 'wall'` in both legends, `wall` in both `KINDS`;
+  `parseRobots` carries `holds` in both copies, and only when it is `'can'`.
+- **garden-kit (the Garden region):** sprites `wall`, `hen`, `basket` / `basketEggs`, `store` / `storeFull`, the watering
+  can drawn per thing with its water at level/max; a site is a ground layer by stage (dirt speckled, gravel dotted,
+  cobbles, path with sand edges); a tulip with drinks but not all stands half up (`gd-part`), a worn one (`droop`) hangs
+  lower than dry (`gd-droop`); a bowl with a counted capacity shows fed; a rock with a `max` at 0 stays as a faint stub; a
+  hen's pen is straw tiles plus one rail element over the grid; a letter on a post box THING peeks from its slot; a robot
+  that holds the can carries it whatever it wears. Every meter is the mockup's chip (icon, pips, numbers; green when
+  full), over its tile's top edge — inside the tile on the top row (the world clips there), compact on a wide world
+  (w > 16, the island: numbers only). **Watch** rings each resolved thing, robot or tile in violet and draws its meter
+  large (15 px); **Picking** frames the world violet (`gd-picking`, `data-picking`) and lifts the things under the
+  pointer (`:hover` / `:active`); the tiles stay the same buttons, so Tile X / Tile Y / Tile Tapped are unchanged.
+- **garden-3d-kit:** the wall tile is grass-height with a dry-stone wall on it (two instanced meshes however many); new
+  `THING_BUILDERS` `site` (the mockup's patch by stage + a stone per stone laid, sand edges at path), `basket` (wicker tub,
+  handle, an egg per egg), `store` (crate, stones heaped), `can` (body, spout, handle, its level box), `hen` (the mockup's
+  hen + her straw floor and four rails, from the hen's `pen`); tulip part / droop tilts; a fed bowl by count; a used rock
+  stub; a letter stands in a post box thing's slot. The meters are the mockup's DOM chips in the overlay, projected every
+  frame; a held can's level is an ink chip under its robot's name. `setWatch` rebuilds only the overlay (rings are DOM
+  ellipses sized by the tile on screen — never a scene rebuild); `setPicking` lifts the things on the hovered tile by
+  `PICK_LIFT` (0.14) in the frame loop, one frame per change. Ports: `watch` and `picking` with the 2D node's exact
+  definitions (the port gate diffs them).
+
+**Readings** (worktree; spec files one at a time; previous = brief s2 §3 at `a9d8850fd`):
+
+| gate | exit | total | previous |
+|---|---|---|---|
+| `cg001GardenKit.test.ts` | 0 | 45 / 45 | 35 (+10: the table's copies; the 13 requests' start AND end worlds draw byte-identical with Watch '' / [] and Picking off, no new marker, no meter; tulip, site, basket/store/bowl, can, rock/hen/pen/letter each from worlds the engine wrote via Step + Apply delta; AC4 seeds; Watch; Picking) |
+| `ig007Garden3d.test.ts` | 0 | 43 / 43 | 38 (+5; two existing port clauses gained `watch`, `picking`, as the brief foresaw) |
+| `cg003Template` · `ig004Island` · `cg005Olive` · `cg006Requests` | 0 each | 134 · 21 · 41 · 83 | same |
+| `cg002Engine` (the generator's gate) | 0 | 199 / 199 | same |
+| garden specs, seven files | 0 | **566** | 551 |
+| `npm run template:garden` | 0 | drift = the two kit copies under `templates/bot-garden/noodl_modules`, committed with the source | — |
+| kit drive 2D `drive-cg001-kit.js` | 0 | **38 / 38** (10 new) | — |
+| kit drive 3D `drive-ig007-3d.js` (swiftshader) | 0 | **25 / 25** (7 new) | — |
+| page drive `drive-pages.sh` (`--mockup`) | 0 (generate 0 · assemble 0 · deploy 0 · drive 0), template drift none | **331 / 331** | 331 / 331 |
+| island drive 2D `--perf` | 0 | **65 / 65**; AC6 p95 **16.7 ms** at CPU ×4 (1199 frames, 23 moves) | 65 / 65, 16.8 ms |
+| island drive 3D | 0 | **5 / 5** | 5 / 5 |
+| Workshop 3D · nogl | 0 · 0 | **24 / 24** · **8 / 8** | same |
+
+**The frame gate WITH meters** — the island page draws none (below), so the reading is a kit-fixture clause (METER-PERF,
+`drive-cg001-kit.js`): a 46 × 22 world, 13 plots of job things = **65 meters**, three robots stepping every 380 ms, CPU ×4
+(a fixed loop measured ×4.0), 20 s of rAF: **p95 16.8 ms** (p99 16.8, max 16.8, 1201 frames, 52 robot moves drawn,
+0 long tasks) beside the same world with no job fields: p95 16.7 ms. Gate ≤ 50 ms (IG-004 AC6's).
+
+**Mutation arms** (each source mutated, both kits rebuilt, the IW-002 clauses of both specs run, the source restored by
+copy): a container meter without a capacity → 2 red; `L` out of the 2D legend → 3 red; the 3D table copy drifts
+(`item: 'eggs'`) → 1 red; 3D Watch by id dropped → 2 red; 3D lifts every thing while picking → 1 red; 2D picking class
+always on → 1 red; 2D droop never drawn → 1 red. One arm stays green, honestly: 3D ignoring `holds` (an engine-held can
+always has a level, and the level already draws the can).
+
+**Screenshots looked at** (scratch `iw002-drawing-scratch/`): `kit2d/shots/iw002-2d-job-world.png` — two stone walls,
+the tulips half up / upright / drooping with 2/3 · 3/3 (green) · 2/3 chips, the four site squares brown → dotted gravel →
+cobbles → sand path with 0/4 … 4/4 (green), the basket with eggs 3/4, the crate with stones 2/6, the blue can 2/3, a
+medium rock 2/4 and a faint stub 0/4, the hen in a straw pen with a wooden rail and two eggs, a letter in the post box's
+slot, Pip with the can's drops at his side; `iw002-2d-watch.png` — violet rings on the tulip, Pip, the empty tile ahead
+and the basket, the basket's and the tulip's chips large, Pip's drops outlined; `iw002-2d-picking.png` — the world
+framed violet, the basket tile outlined and the basket lifted; `iw002-2d-island-meters.png` — the 46 × 22 world with
+compact number chips (neighbouring tulips' chips overlap at 14 px tiles — a look item for IW-003); `iw002-2d-seed-1/2/3`
+— the wall and three eggs where the engine laid them. 3D: `kit3d/shots/iw002-3d-job-world.png` — the same world in the
+round (grey stone wall, patches by stage with stones, wicker basket with eggs, crate, can, rocks, white hen in her
+fenced straw pen, the chips over each thing, Pip's ink chip 1/3); `iw002-3d-watch.png` — violet ellipses on the tulip,
+Pip, the tile ahead and the basket, three chips large; `iw002-3d-picking.png` — violet frame, the basket raised;
+`iw002-3d-seed-3.png` — the wall block and three eggs. Page drives: `pages/island-2d/ig004-ac6-three-robots.png` and
+`pages/ws-3d/ac1-3d-03-first-tulip.png` look as before.
+
+**Acceptance, against §3:**
+
+- **AC6 ✅ (the kits):** both renderers draw every new thing from the world JSON the engine writes (specs on engine-run
+  worlds; both fixture drives feed an engine-made world through the Variables; screenshots of each looked at); the 3D
+  pinned-copy gate covers the three tables in both kits and the helpers. **Not on the pages yet** — see below.
+- **AC4 ✅ (the kits' half):** the engine's `seedWorld` on seeds 1, 2, 3 draws three layouts in both kits, each exactly
+  the wall and eggs the engine laid; the same seed draws the same (spec + both drives).
+- AC1–AC3, AC5: unchanged from session 1 (engine; the drive halves wait for IW-003).
+
+**Deviations and choices, with reasons:**
+
+1. **A container's meter needs a `capacity`** (brief: "count/capacity"). Session 1's deviation 3 writes `count` on a fed
+   bowl with no capacity (the bowl requests); counting those would put a chip on a request of the 13.
+2. **`parseRobots` carries `holds`** (both copies; only when `'can'`, so every robot row without it parses exactly as
+   before) — the kit needs it to put the can in the hand of a robot that wears something else, and for Watch.
+3. **A letter peeks from the slot only on a post box THING** (the IW-002 source), never on the map's `B` tile: the
+   letters request ends with a letter there and would have changed look.
+4. **Compact meters on a wide world** (w > 16: numbers only unless watched) and **inside the tile on the top row** (the
+   world's `overflow: hidden` clipped them — seen in the first 2D shot, fixed, re-driven).
+5. **Rings and meters are DOM in both kits** (the mockup's chips); in 3D the rings are projected ellipses, so a Watch
+   change never rebuilds the scene. The 3D root now always carries `data-picking` and `data-watched` (attributes only).
+6. `aim` (a walk's target tile) is not drawn — optional in the brief, and nothing emits a walk until IW-005 lands.
+
+**Not done, and why — for whoever wires the pages (IW-003 / lane B / the orchestrator):** the pages draw none of this
+yet. `DRAW_WORLD_SCRIPT` (`cg003Scripts.ts`, not this lane's) passes the kit only `tulip / puddle / letter / stone / egg /
+food / bowl (full) / label / rock (left) / sign / note / islander / fence / padlock` with their old fields, and robots
+without `holds`: a job's `site`, `basket`, `store`, `can`, `hen`, `postbox` things and every meter field (`have`, `need`,
+`droop`, `stage`, `count`, `capacity`, `item`, `level`, `max`) are dropped there. Passing the thing through with its
+fields (and `holds` on the robot row) is all the kits need. Watch / Picking are B's to wire (brief §4.4).
+
+**Could not verify:** the tablet (touch has no hover: Picking lifts on `:active` in 2D and on pointer-down in 3D); a
+real GPU; a job on a real page (no request carries one until IW-003, and the page strips the fields — above); the look
+graded by Richard.

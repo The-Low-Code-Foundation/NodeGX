@@ -86,8 +86,9 @@
   // COPIED from library/modules/garden-kit/src/kit.js (the 2D `Garden` node’s world.* helpers), so that this kit
   // stands alone in a project that installs it without garden-kit. When garden-kit IS on the page its own helpers are
   // used instead (see `worldHelpers`), and the kit gate pins these copies to the originals on a shared set of inputs.
-  var DEFAULT_LEGEND = { G: 'grass', P: 'path', W: 'water', T: 'tree', R: 'rock', H: 'house', F: 'bed', B: 'postbox', '.': 'grass', ' ': 'grass' };
-  var KINDS = ['grass', 'path', 'water', 'tree', 'rock', 'house', 'bed', 'postbox'];
+  // P108 IW-002 (lane D): L is the wall tile (WALL_TILE, below; the engine blocks it) — drawn by both kits.
+  var DEFAULT_LEGEND = { G: 'grass', P: 'path', W: 'water', T: 'tree', R: 'rock', H: 'house', F: 'bed', B: 'postbox', L: 'wall', '.': 'grass', ' ': 'grass' };
+  var KINDS = ['grass', 'path', 'water', 'tree', 'rock', 'house', 'bed', 'postbox', 'wall'];
 
   function parseMap(v) {
     var m = v;
@@ -149,7 +150,7 @@
         var d = Math.round(Number(r.d));
         if (!isFinite(d)) d = 0;
         d = ((d % 4) + 4) % 4;
-        return {
+        var o = {
           x: isFinite(Number(r.x)) ? Number(r.x) : 0,
           y: isFinite(Number(r.y)) ? Number(r.y) : 0,
           d: d,
@@ -165,6 +166,10 @@
           // Pip with his can); '' or anything unknown = none.
           accessory: r.accessory === undefined || r.accessory === null ? 'can' : ['can', 'hod', 'satchel', 'bell'].indexOf(r.accessory) !== -1 ? r.accessory : ''
         };
+        // P108 IW-002 (lane D): a robot that holds the can (the engine's `holds: 'can'`) carries it whatever it wears; the
+        // field is there only when it holds it, so a robot row without it parses exactly as before.
+        if (r.holds === 'can') o.holds = 'can';
+        return o;
       });
   }
 
@@ -176,7 +181,147 @@
     return b > (isFinite(a) ? a : 0);
   }
 
-  var LOCAL_WORLD = { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, rose: rose, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS, source: 'local' };
+  // ── P108 IW-002 AC6 (lane D): the job model, drawn ─────────────────────────────────────────────────────────────
+  // COPIES of the ONE table in packages/noodl-mcp/tests/cg002Content.ts (JOB_VOCABULARY, SITE_STAGES, WALL_TILE): the
+  // engine writes these names, both world kits draw them, and ig007Garden3d pins every copy (garden-kit's and
+  // garden-3d-kit's) to the table, and the helpers below to each other. A thing with none of the job fields (every thing
+  // of the 13 requests) is drawn exactly as before; so is a world with Watch empty and Picking off.
+  var WALL_TILE = 'L';
+  var SITE_STAGES = ['dirt', 'gravel', 'cobbles', 'path'];
+  var JOB_VOCABULARY = [
+    { kind: 'tulip', role: 'target', fields: ['have', 'need', 'watered', 'droop'], blocks: true, wear: 'tulip' },
+    { kind: 'site', role: 'target', fields: ['have', 'need', 'item', 'stage', 'walked'], item: 'stone', blocks: false, wear: 'site' },
+    { kind: 'basket', role: 'container', fields: ['count', 'capacity', 'item'], item: 'egg', blocks: true, wear: 'basket' },
+    { kind: 'bowl', role: 'container', fields: ['count', 'capacity', 'item', 'food'], item: 'food', blocks: true, wear: 'bowl' },
+    { kind: 'store', role: 'container', fields: ['count', 'capacity', 'item'], item: 'stone', blocks: true, wear: 'store' },
+    { kind: 'can', role: 'carrier', fields: ['level', 'max'], blocks: true },
+    { kind: 'rock', role: 'source', fields: ['left', 'max'], blocks: true, wear: 'rock' },
+    { kind: 'hen', role: 'source', fields: ['pen', 'capacity'], blocks: true, wear: 'hen' },
+    { kind: 'postbox', role: 'source', fields: [], blocks: true, wear: 'postbox' }
+  ];
+  /** The most pips a meter draws (the mockup's); a bigger need shows its numbers only. */
+  var METER_PIPS_MAX = 8;
+  /** The items a meter has an icon for (the mockup's 💧 🪨 🥚, drawn in CSS); anything else wears a plain dot. */
+  var METER_ICONS = { water: 1, stone: 1, egg: 1, food: 1, letter: 1 };
+
+  function jobRow(kind) {
+    for (var i = 0; i < JOB_VOCABULARY.length; i++) if (JOB_VOCABULARY[i].kind === kind) return JOB_VOCABULARY[i];
+    return null;
+  }
+  /** A whole number ≥ 0, or null when the field is absent or junk (absent is not 0: a thing with no meter keeps its old look). */
+  function wholeOf(v) {
+    if (v === undefined || v === null || v === '' || typeof v === 'boolean') return null;
+    var n = Number(v);
+    return isFinite(n) ? Math.max(0, Math.floor(n)) : null;
+  }
+  /**
+   * A thing's meter as both kits draw it (the mockup's chip over the thing), or null when it carries none:
+   *   tulip with `need` or `have`: drinks have/need (a tulip with neither is the 13 requests' one-pour tulip: no meter);
+   *   site: stones have/need; basket · bowl · store with a `capacity`: count/capacity, the icon its `item` (else the
+   *   table's); can with `level` or `max`: level/max; rock with `max`: left/max.
+   * `full` (drawn green) is a target's or a container's; a carrier and a source are never "done".
+   */
+  function meterOf(t) {
+    if (!t || typeof t !== 'object') return null;
+    var row = jobRow(t.kind);
+    if (!row) return null;
+    var have = 0;
+    var need = 0;
+    var icon = 'dot';
+    if (t.kind === 'tulip') {
+      if (wholeOf(t.need) === null && wholeOf(t.have) === null) return null;
+      need = wholeOf(t.need) || 1;
+      have = wholeOf(t.have);
+      if (have === null) have = t.watered === true ? need : 0;
+      icon = 'water';
+    } else if (t.kind === 'site') {
+      need = wholeOf(t.need) || 1;
+      have = wholeOf(t.have) || 0;
+      icon = String(t.item || row.item);
+    } else if (row.role === 'container') {
+      // Only a job's container has a capacity: a bowl the engine fed carries `count` beside `food` but no capacity
+      // (the bowl requests' bowls, never full) — it keeps its old look, no meter.
+      if (!wholeOf(t.capacity)) return null;
+      need = wholeOf(t.capacity);
+      have = wholeOf(t.count) || 0;
+      icon = String(t.item || row.item);
+    } else if (t.kind === 'can') {
+      if (wholeOf(t.level) === null && wholeOf(t.max) === null) return null;
+      need = wholeOf(t.max) || 0;
+      have = wholeOf(t.level) || 0;
+      icon = 'water';
+    } else if (t.kind === 'rock') {
+      if (!wholeOf(t.max)) return null;
+      need = wholeOf(t.max);
+      have = wholeOf(t.left) || 0;
+      icon = 'stone';
+    } else return null;
+    if (need > 0 && have > need) have = need;
+    return {
+      kind: t.kind,
+      icon: METER_ICONS[icon] ? icon : 'dot',
+      have: have,
+      need: need,
+      pips: need > 0 && need <= METER_PIPS_MAX ? need : 0,
+      text: need > 0 ? have + '/' + need : String(have),
+      full: (row.role === 'target' || row.role === 'container') && need > 0 && have >= need
+    };
+  }
+  /** A path site's look: its `stage` when the engine wrote one, else the engine's own rule by have/need (0 · under half · under full · full). */
+  function siteStage(t) {
+    if (t && SITE_STAGES.indexOf(t.stage) !== -1) return t.stage;
+    var need = (t && wholeOf(t.need)) || 1;
+    var have = (t && wholeOf(t.have)) || 0;
+    return SITE_STAGES[have <= 0 ? 0 : have * 2 < need ? 1 : have < need ? 2 : 3];
+  }
+  /** A hen's pen `[x0, y0, x1, y1]` (corners, inclusive) as { x, y, w, h } in tiles, or null. */
+  function penOf(t) {
+    if (!t || t.kind !== 'hen' || !Array.isArray(t.pen) || t.pen.length !== 4) return null;
+    var p = t.pen.map(Number);
+    for (var i = 0; i < 4; i++) if (!isFinite(p[i])) return null;
+    var x0 = Math.floor(Math.min(p[0], p[2]));
+    var y0 = Math.floor(Math.min(p[1], p[3]));
+    return { x: x0, y: y0, w: Math.floor(Math.max(p[0], p[2])) - x0 + 1, h: Math.floor(Math.max(p[1], p[3])) - y0 + 1 };
+  }
+  /** The Watch port as chip refs { id?, kind, x, y } (a list, one ref, or its JSON; anything without a kind is dropped). */
+  function watchRefs(v) {
+    var list = readJson(v, []);
+    if (list && !Array.isArray(list) && typeof list === 'object') list = [list];
+    if (!Array.isArray(list)) return [];
+    return list.filter(function (r) {
+      return r && typeof r === 'object' && typeof r.kind === 'string' && r.kind !== '';
+    });
+  }
+  /**
+   * What each watched chip rings (brief §4.4, resolved the way the engine resolves a chip): the thing with its `id`, else
+   * the first thing of its kind on its tile, else — a `can` — the robot that holds the can (or, when no robot says
+   * `holds`, the first with a can level), else the tile itself (an "ahead" chip). Indexes into things and robots, and
+   * "x,y" tiles, each once.
+   */
+  function resolveWatch(v, things, robots) {
+    var out = { things: [], robots: [], tiles: [] };
+    var add = function (list, k) {
+      if (list.indexOf(k) === -1) list.push(k);
+    };
+    watchRefs(v).forEach(function (ref) {
+      var i;
+      if (ref.id !== undefined && ref.id !== null && ref.id !== '')
+        for (i = 0; i < things.length; i++)
+          if (things[i].id !== undefined && things[i].id !== null && String(things[i].id) === String(ref.id)) return add(out.things, i);
+      for (i = 0; i < things.length; i++) if (things[i].kind === ref.kind && Number(things[i].x) === Number(ref.x) && Number(things[i].y) === Number(ref.y)) return add(out.things, i);
+      if (ref.kind === 'can') {
+        for (i = 0; i < robots.length; i++) if (robots[i].holds === 'can') return add(out.robots, i);
+        for (i = 0; i < robots.length; i++) if (robots[i].can !== null && robots[i].can !== undefined) return add(out.robots, i);
+      }
+      var x = wholeOf(ref.x);
+      var y = wholeOf(ref.y);
+      if (x !== null && y !== null) add(out.tiles, x + ',' + y);
+    });
+    return out;
+  }
+  var JOB_LOOK = { JOB_VOCABULARY: JOB_VOCABULARY, SITE_STAGES: SITE_STAGES, WALL_TILE: WALL_TILE, METER_PIPS_MAX: METER_PIPS_MAX, meterOf: meterOf, siteStage: siteStage, penOf: penOf, watchRefs: watchRefs, resolveWatch: resolveWatch };
+
+  var LOCAL_WORLD = { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, rose: rose, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS, job: JOB_LOOK, source: 'local' };
 
   /**
    * garden-kit’s `Garden.world` if that kit is on the page. Modules land in `window.__noodl_modules` in load order and
@@ -270,16 +415,29 @@
     cat: 0xf3b76a,
     nose: 0xe06b8a,
     fence: 0xa9773f,
-    gold: 0xffd166
+    gold: 0xffd166,
+    // P108 IW-002 AC6 (lane D): the job model's things, the mockup's colours (island-jobs.html's C table).
+    stoneWall: 0x8e8b9a,
+    stoneWallCap: 0xc9c6d2,
+    dirt: 0x9e7248,
+    gravel: 0xb8ae9c,
+    cobble: 0xa3a0ab,
+    wicker: 0xc98a4b,
+    egg: 0xfff4dc,
+    hen: 0xffffff,
+    comb: 0xe0463a,
+    beak: 0xffb347,
+    straw: 0xf2de9e,
+    crate: 0xc98a4b
   };
 
   /**
    * How tall each tile box is (the mockup's TOP): water lowest, then the bed, the path, grass. Tree, rock and house sit
    * on a grass-height tile; a post box on path.
    */
-  var TILE_HEIGHT = { water: 0.14, path: 0.34, grass: 0.4, bed: 0.3, tree: 0.4, rock: 0.4, house: 0.4, postbox: 0.34 };
+  var TILE_HEIGHT = { water: 0.14, path: 0.34, grass: 0.4, bed: 0.3, tree: 0.4, rock: 0.4, house: 0.4, postbox: 0.34, wall: 0.4 };
   /** The grassy kinds take their shade per tile (a checkerboard), so their material is white and the instance colours it. */
-  var TILE_COLOUR = { water: PALETTE.water, path: PALETTE.path, grass: PALETTE.white, bed: PALETTE.bed, tree: PALETTE.white, rock: PALETTE.white, house: PALETTE.white, postbox: PALETTE.path };
+  var TILE_COLOUR = { water: PALETTE.water, path: PALETTE.path, grass: PALETTE.white, bed: PALETTE.bed, tree: PALETTE.white, rock: PALETTE.white, house: PALETTE.white, postbox: PALETTE.path, wall: PALETTE.white };
   /** Tiles a hair apart so the grid reads on the base under them; water a hair wider so the pond is one sheet. */
   var TILE_SIZE = 0.98;
   var WATER_SIZE = 1.02;
@@ -381,7 +539,7 @@
         im.setMatrixAt(i, dummy.matrix);
         // 🔴 An instance colour MULTIPLIES the material's: a grass-green material under a grass-green instance drew a
         // darker, squared green (s1's shots). The grassy kinds' material is white (TILE_COLOUR).
-        if (kind === 'grass' || kind === 'tree' || kind === 'rock' || kind === 'house') {
+        if (kind === 'grass' || kind === 'tree' || kind === 'rock' || kind === 'house' || kind === 'wall') {
           im.setColorAt(i, new THREE.Color((c.x + c.y) % 2 ? PALETTE.grassAlt : PALETTE.grass));
         }
       }
@@ -416,10 +574,12 @@
     var trees = [];
     var rocks = [];
     var houses = [];
+    var walls = [];
     world.cells.forEach(function (c) {
       if (c.kind === 'tree') trees.push(c);
       else if (c.kind === 'rock') rocks.push(c);
       else if (c.kind === 'house') houses.push(c);
+      else if (c.kind === 'wall') walls.push(c);
     });
     var dummy = new THREE.Object3D();
     var meshes = [];
@@ -485,6 +645,18 @@
       d.rotation.set(0, 0, 0);
       d.scale.set(1, 1, 1);
     });
+    // P108 IW-002: a wall tile (L) is a dry-stone wall across its grass tile — a grey body and a paler cap, two instanced
+    // meshes however many walls; nothing is walked through it (the engine blocks L).
+    instanced(G(THREE, out, 'BoxGeometry', 0.98, 0.34, 0.5), PALETTE.stoneWall, walls, function (d, p) {
+      d.position.set(p.x, top + 0.17, p.z);
+      d.rotation.set(0, 0, 0);
+      d.scale.set(1, 1, 1);
+    });
+    instanced(G(THREE, out, 'BoxGeometry', 1.0, 0.07, 0.58), PALETTE.stoneWallCap, walls, function (d, p) {
+      d.position.set(p.x, top + 0.37, p.z);
+      d.rotation.set(0, 0, 0);
+      d.scale.set(1, 1, 1);
+    });
     return meshes;
   }
 
@@ -511,6 +683,16 @@
       // desaturated, so a dry red and a dry yellow stay apart for Mamie's note). Wet: upright.
       g.rotation.z = wet ? 0 : 0.31;
       g.userData.wet = wet;
+      // P108 IW-002: a tulip with some of its drinks stands half up; a worn one (droop) hangs lower than a dry one.
+      var tm = meterOf(t);
+      if (!wet && t.droop === true) {
+        g.rotation.z = 0.55;
+        g.scale.set(0.9, 0.9, 0.9);
+        g.userData.look = 'droop';
+      } else if (!wet && tm && tm.have > 0) {
+        g.rotation.z = 0.16;
+        g.userData.look = 'part';
+      }
       return g;
     },
     puddle: function (THREE, mat, t, out) {
@@ -532,7 +714,8 @@
       var g = new THREE.Group();
       g.add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.22, 0.15, 0.12, 8), mat(PALETTE.bowl), 0, 0.06, 0));
       out.meshCount += 1;
-      if (t.full) {
+      var bm = meterOf(t);
+      if (t.full || (bm && bm.have > 0)) {
         g.add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.16, 0.16, 0.06, 8), mat(PALETTE.kibble), 0, 0.14, 0));
         out.meshCount += 1;
       }
@@ -558,6 +741,15 @@
       var left = t.left === undefined || t.left === null || t.left === '' || !isFinite(Number(t.left)) ? 4 : Math.floor(Number(t.left));
       var size = left >= 3 ? 'big' : left === 2 ? 'medium' : left === 1 ? 'small' : 'none';
       g.userData.size = size;
+      // P108 IW-002: a rock with a max regrows — used up, it stays as a pale stub where it will grow back.
+      if (size === 'none' && wholeOf(t.max)) {
+        var stub = mesh(THREE, G(THREE, out, 'IcosahedronGeometry', 1, 0), mat(PALETTE.rockLight), 0, 0.05, 0);
+        stub.scale.set(0.16, 0.05, 0.16);
+        g.add(stub);
+        out.meshCount += 1;
+        g.userData.size = 'used';
+        return g;
+      }
       if (size === 'none') return g;
       var r = ROCK_SIZES[size];
       var main = mesh(THREE, G(THREE, out, 'IcosahedronGeometry', 1, 0), mat(PALETTE.rock), 0, r * 0.75, 0);
@@ -721,6 +913,128 @@
       g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.38, 0.06, 0.06), mat(PALETTE.iron), -0.5, 1.54, -0.5));
       out.meshCount += 5;
       return g;
+    },
+    // ── P108 IW-002 AC6 (lane D): the job model's things, the mockup's primitives (island-jobs.html). Their meters are
+    // DOM chips in the overlay (the mockup's), never text on a tile. ──
+    // A path site: a ground patch by stage (dirt → gravel → cobbles → path) and a stone per stone laid until it is path.
+    site: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      var stage = siteStage(t);
+      var colour = stage === 'path' ? PALETTE.path : stage === 'cobbles' ? PALETTE.cobble : stage === 'gravel' ? PALETTE.gravel : PALETTE.dirt;
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.94, 0.05, 0.94), mat(colour), 0, 0.025, 0));
+      out.meshCount += 1;
+      if (stage !== 'path') {
+        var spots = [[-0.2, -0.2], [0.2, -0.2], [-0.2, 0.2], [0.2, 0.2], [0, 0], [0, -0.3], [0, 0.3], [-0.3, 0]];
+        var laid = Math.min((meterOf(t) || { have: 0 }).have, spots.length);
+        for (var i = 0; i < laid; i++) {
+          var st = mesh(THREE, G(THREE, out, 'IcosahedronGeometry', 1, 0), mat(i % 2 ? PALETTE.rock : PALETTE.rockLight), spots[i][0], 0.07, spots[i][1]);
+          st.scale.set(0.15, 0.06, 0.15);
+          st.rotation.y = i * 0.9;
+          g.add(st);
+          out.meshCount += 1;
+        }
+      } else {
+        g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.94, 0.02, 0.06), mat(PALETTE.sand), 0, 0.055, -0.44));
+        g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.94, 0.02, 0.06), mat(PALETTE.sand), 0, 0.055, 0.44));
+        out.meshCount += 2;
+      }
+      g.userData.stage = stage;
+      return g;
+    },
+    // A basket: a wicker tub with a handle; an egg in it per egg counted (up to eight shown).
+    basket: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      g.add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.24, 0.18, 0.2, 10), mat(PALETTE.wicker), 0, 0.1, 0));
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.04, 0.26, 0.04), mat(PALETTE.satchelStrap), -0.2, 0.3, 0));
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.04, 0.26, 0.04), mat(PALETTE.satchelStrap), 0.2, 0.3, 0));
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.44, 0.04, 0.04), mat(PALETTE.satchelStrap), 0, 0.44, 0));
+      out.meshCount += 4;
+      var spots = [[-0.08, -0.07], [0.08, -0.07], [-0.08, 0.08], [0.08, 0.08], [0, 0], [0, -0.14], [0, 0.14], [-0.14, 0]];
+      var n = Math.min((meterOf(t) || { have: 0 }).have, spots.length);
+      for (var i = 0; i < n; i++) {
+        var e = mesh(THREE, G(THREE, out, 'SphereGeometry', 1, 8, 6), mat(PALETTE.egg), spots[i][0], 0.2 + (i >= 4 ? 0.06 : 0), spots[i][1]);
+        e.scale.set(0.065, 0.085, 0.065);
+        g.add(e);
+        out.meshCount += 1;
+      }
+      g.userData.eggs = n;
+      return g;
+    },
+    // A store: a wooden crate; stones heaped on it per stone counted (up to six shown).
+    store: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.56, 0.34, 0.5), mat(PALETTE.crate), 0, 0.17, 0));
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.58, 0.04, 0.52), mat(PALETTE.satchelStrap), 0, 0.2, 0));
+      out.meshCount += 2;
+      var spots = [[-0.14, -0.1], [0.14, -0.1], [-0.14, 0.12], [0.14, 0.12], [0, 0], [0, 0.02]];
+      var n = Math.min((meterOf(t) || { have: 0 }).have, spots.length);
+      for (var i = 0; i < n; i++) {
+        var st = mesh(THREE, G(THREE, out, 'IcosahedronGeometry', 1, 0), mat(i % 2 ? PALETTE.rock : PALETTE.rockLight), spots[i][0], 0.4 + (i >= 4 ? 0.07 : 0), spots[i][1]);
+        st.scale.set(0.12, 0.08, 0.12);
+        g.add(st);
+        out.meshCount += 1;
+      }
+      return g;
+    },
+    // The watering can lying on the map (the mockup's canProp): its body, spout and handle, and its water at level/max.
+    can: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.2, 0.24, 0.2), mat(PALETTE.can), 0, 0.12, 0));
+      var sp = mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.022, 0.034, 0.22, 5), mat(PALETTE.can), 0.16, 0.2, 0);
+      sp.rotation.z = -0.9;
+      g.add(sp);
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.04, 0.12, 0.16), mat(PALETTE.can), -0.02, 0.3, 0));
+      out.meshCount += 3;
+      var m = meterOf(t);
+      var share = m && m.need > 0 ? Math.max(0, Math.min(1, m.have / m.need)) : 0;
+      var level = mesh(THREE, G(THREE, out, 'BoxGeometry', 0.21, 0.24, 0.21), mat(PALETTE.canWater), 0, 0.12 * share, 0);
+      level.name = 'level';
+      level.scale.y = share;
+      level.visible = share > 0;
+      g.add(level);
+      out.meshCount += 1;
+      g.rotation.y = 0.5;
+      return g;
+    },
+    // The hen (the mockup's) and her pen: a straw floor over the pen's tiles and a rail round it, drawn from the hen's
+    // tile (the pen is [x0, y0, x1, y1]), so one hen is one group.
+    hen: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      var bird = new THREE.Group();
+      var add = function (m) {
+        bird.add(m);
+        out.meshCount += 1;
+        return m;
+      };
+      add(mesh(THREE, G(THREE, out, 'SphereGeometry', 0.18, 7, 5), mat(PALETTE.hen), 0, 0.2, 0)).scale.set(1.25, 1, 1);
+      add(mesh(THREE, G(THREE, out, 'SphereGeometry', 0.1, 6, 5), mat(PALETTE.hen), 0.2, 0.36, 0));
+      add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.05, 0.08, 0.1), mat(PALETTE.comb), 0.22, 0.47, 0));
+      add(mesh(THREE, G(THREE, out, 'ConeGeometry', 0.035, 0.08, 4), mat(PALETTE.beak), 0.31, 0.35, 0)).rotation.z = -Math.PI / 2;
+      add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.025, 0.025, 0.02), mat(PALETTE.ink), 0.26, 0.39, 0.07));
+      add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.025, 0.025, 0.02), mat(PALETTE.ink), 0.26, 0.39, -0.07));
+      add(mesh(THREE, G(THREE, out, 'ConeGeometry', 0.08, 0.16, 5), mat(PALETTE.hen), -0.24, 0.3, 0)).rotation.z = 0.8;
+      bird.rotation.y = 0.5;
+      bird.name = 'hen';
+      g.add(bird);
+      var pen = penOf(t);
+      if (pen) {
+        var ox = pen.x - Number(t.x);
+        var oz = pen.y - Number(t.y);
+        var floor = mesh(THREE, G(THREE, out, 'BoxGeometry', 1, 0.02, 1), mat(PALETTE.straw), ox + pen.w / 2 - 0.5, 0.012, oz + pen.h / 2 - 0.5);
+        floor.scale.set(pen.w - 0.04, 1, pen.h - 0.04);
+        floor.name = 'pen';
+        g.add(floor);
+        var rail = function (x, z, sx, sz) {
+          g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', sx, 0.05, sz), mat(PALETTE.fence), x, 0.22, z));
+        };
+        rail(ox + pen.w / 2 - 0.5, oz - 0.5, pen.w, 0.04);
+        rail(ox + pen.w / 2 - 0.5, oz + pen.h - 0.5, pen.w, 0.04);
+        rail(ox - 0.5, oz + pen.h / 2 - 0.5, 0.04, pen.h);
+        rail(ox + pen.w - 0.5, oz + pen.h / 2 - 0.5, 0.04, pen.h);
+        out.meshCount += 5;
+        g.userData.pen = pen;
+      }
+      return g;
     }
   };
 
@@ -850,7 +1164,7 @@
     // The can, on the right: its body, its spout, and the level when there is one. IG-005: only on a robot that carries
     // it — the can is Pip's accessory — or one with a level to show.
     var hasLevel = r.can !== null && r.can !== undefined && isFinite(Number(r.can));
-    if (r.accessory === 'can' || hasLevel) buildCan(THREE, mat, r, out, g);
+    if (r.accessory === 'can' || hasLevel || r.holds === 'can') buildCan(THREE, mat, r, out, g);
     // The load, on the back (+z): the last thing carried.
     var load = loadOf(r);
     if (load) {
@@ -914,7 +1228,9 @@
       (thingsAt[Number(t.x) + ',' + Number(t.y)] = thingsAt[Number(t.x) + ',' + Number(t.y)] || []).push(t);
     });
     var things = [];
-    var placeThing = function (t) {
+    // P108 IW-002: where a meter chip floats over each kind (the mockup's lifts, in world units above the tile top).
+    var METER_LIFT = { tulip: 0.72, site: 0.3, basket: 0.62, bowl: 0.45, store: 0.7, can: 0.62, rock: 0.72, hen: 0.66 };
+    var placeThing = function (t, i) {
       var build = THING_BUILDERS[t.kind];
       if (!build) return;
       var x = Number(t.x);
@@ -923,6 +1239,18 @@
       var p = tileCentre(world.map, x, y);
       var k = kindAt(world.map, x, y);
       g.position.set(p.x, (g.position.y || 0) + tileHeight(k || 'grass'), p.z);
+      // P108 IW-002: a letter the post box THING received stands in its slot (a letter on the map's B tile lies as before).
+      if (t.kind === 'letter' && (thingsAt[x + ',' + y] || []).some(function (o) { return o.kind === 'postbox'; })) {
+        g.position.y += 0.66;
+        g.position.z -= 0.16;
+        g.rotation.x = Math.PI / 2;
+        g.userData.inBox = true;
+      }
+      g.userData.baseY = g.position.y;
+      // The meter, the index a Watch resolves to, and the chip's lift (the overlay draws both).
+      g.userData.meter = meterOf(t);
+      g.userData.index = typeof i === 'number' ? i : -1;
+      g.userData.lift = METER_LIFT[t.kind] || 0.62;
       g.userData.kind = t.kind;
       g.userData.x = x;
       g.userData.y = y;
@@ -941,7 +1269,9 @@
       if (c.kind === 'bed' && !hasTulip) placeThing({ kind: 'tulip', x: c.x, y: c.y, watered: false });
       // A postbox TILE (legend B, IG-001 D9) is a path tile wearing the post box, as the 2D kit draws it.
       if (c.kind === 'postbox') placeThing({ kind: 'postbox', x: c.x, y: c.y });
-      here.forEach(placeThing);
+      here.forEach(function (t) {
+        placeThing(t, world.things.indexOf(t));
+      });
     });
     // Robots, two on one tile drawn smaller and apart (the 2D kit’s robotPlaces: −90%/−10% offsets, scale .78).
     var byTile = {};
@@ -1163,6 +1493,8 @@
   var TULIP_MS = 500;
   var POP_MS = 300;
   var CAMERA_MS = 400;
+  /** P108 IW-002: how far a thing under the pointer rises while Picking (world units). */
+  var PICK_LIFT = 0.14;
   /**
    * The fallback's cue (IG-007 AC4): Frame Ms above `ms` for `forMs` of SAMPLED time after Ready fires Too Slow, once.
    * It is decided here, where the frames are. Sampled time is the intervals between frames of one busy, visible spell:
@@ -1227,6 +1559,10 @@
       frameMs: 0,
       handMoved: false,
       drawCalls: 0,
+      // P108 IW-002 (brief §4.4): the chips Watch rings, whether Picking is on, and the tile under the pointer then.
+      watch: null,
+      picking: false,
+      hover: null,
       destroy: function () {}
     };
     var setAttr = function (name, value) {
@@ -1279,7 +1615,7 @@
     var width = 1;
     var height = 1;
     var anims = { robots: [], camera: null, hop: 0, tulips: {}, pops: {} };
-    var overlayEls = { names: [], labels: [], bubble: null, says: [] };
+    var overlayEls = { names: [], labels: [], bubble: null, says: [], meters: [], rings: [] };
     var stepMs = 380;
     var bubble = null;
     var bubbleUntil = 0;
@@ -1356,10 +1692,85 @@
       e.style.left = sx.toFixed(1) + 'px';
       e.style.top = sy.toFixed(1) + 'px';
     };
+    /** P108 IW-002: a meter chip (the mockup's): its icon, a pip per unit up to METER_PIPS_MAX, the numbers. */
+    var meterChip = function (m, extraClass, attrs) {
+      var e = el('gd3-meter gd3-m-' + m.icon + (m.full ? ' gd3-full' : '') + (extraClass || ''), attrs);
+      if (!e) return null;
+      var part = function (tag, cls, text) {
+        var c = doc.createElement(tag);
+        c.className = cls;
+        if (text !== undefined) c.textContent = text;
+        return c;
+      };
+      e.setAttribute('data-meter', m.text);
+      e.setAttribute('data-kind', m.kind);
+      if (m.full) e.setAttribute('data-full', 'true');
+      e.appendChild(part('i', 'gd3-mi gd3-mi-' + m.icon));
+      if (m.pips) {
+        var pips = part('span', 'gd3-pips');
+        for (var i = 0; i < m.pips; i++) pips.appendChild(part('i', 'gd3-pip' + (i < m.have ? ' gd3-on' : '')));
+        e.appendChild(pips);
+      }
+      e.appendChild(part('span', 'gd3-mt', m.text));
+      return e;
+    };
     var rebuildOverlay = function () {
       if (!o.overlay) return;
       while (o.overlay.firstChild) o.overlay.removeChild(o.overlay.firstChild);
-      overlayEls = { names: [], labels: [], bubble: null, says: [] };
+      overlayEls = { names: [], labels: [], bubble: null, says: [], meters: [], rings: [] };
+      // P108 IW-002: what Watch rings (resolved as the engine resolves a chip), each thing's meter, a held can's level.
+      var seen = resolveWatch(eng.watch, eng.world.things, eng.world.robots);
+      eng.built.things.forEach(function (g) {
+        var watched = g.userData.index !== -1 && seen.things.indexOf(g.userData.index) !== -1;
+        var m = g.userData.meter;
+        if (m) {
+          var e = meterChip(m, watched ? ' gd3-watch' : '', { 'data-x': g.userData.x, 'data-y': g.userData.y });
+          if (e) {
+            if (watched) e.setAttribute('data-watch', 'true');
+            o.overlay.appendChild(e);
+            overlayEls.meters.push({ el: e, g: g });
+          }
+        }
+        if (watched) {
+          var r = el('gd3-ring', { 'data-ring': g.userData.kind, 'data-x': g.userData.x, 'data-y': g.userData.y });
+          if (r) {
+            o.overlay.appendChild(r);
+            overlayEls.rings.push({ el: r, g: g });
+          }
+        }
+      });
+      eng.built.robots.forEach(function (g, i) {
+        var rb = eng.world.robots[i];
+        var watched = seen.robots.indexOf(i) !== -1;
+        if (rb && rb.can !== null && rb.can !== undefined && (rb.holds === 'can' || watched)) {
+          var max = Number(rb.canMax) > 0 ? Math.floor(Number(rb.canMax)) : 3;
+          var have = Math.min(max, Math.max(0, Math.floor(Number(rb.can)) || 0));
+          var e = meterChip({ kind: 'can', icon: 'water', have: have, need: max, pips: max <= METER_PIPS_MAX ? max : 0, text: have + '/' + max, full: false }, ' gd3-meter-bot' + (watched ? ' gd3-watch' : ''), { 'data-robot': i });
+          if (e) {
+            if (watched) e.setAttribute('data-watch', 'true');
+            o.overlay.appendChild(e);
+            overlayEls.meters.push({ el: e, g: g, robot: true });
+          }
+        }
+        if (watched) {
+          var r = el('gd3-ring', { 'data-ring': 'robot', 'data-robot': i });
+          if (r) {
+            o.overlay.appendChild(r);
+            overlayEls.rings.push({ el: r, g: g, robot: true });
+          }
+        }
+      });
+      seen.tiles.forEach(function (k) {
+        var xy = k.split(',').map(Number);
+        if (!eng.world.map.w || xy[0] >= eng.world.map.w || xy[1] >= eng.world.map.h) return;
+        var r = el('gd3-ring', { 'data-ring': 'tile', 'data-x': xy[0], 'data-y': xy[1] });
+        if (!r) return;
+        o.overlay.appendChild(r);
+        overlayEls.rings.push({ el: r, tile: { x: xy[0], y: xy[1] } });
+      });
+      setAttr('data-watched', overlayEls.rings.length);
+      if (o.root && typeof o.root.removeAttribute === 'function') o.root.removeAttribute('data-wide');
+      if (eng.world.map.w > 16 && overlayEls.meters.length) setAttr('data-wide', '1');
       eng.built.robots.forEach(function (g, i) {
         var r = eng.world.robots[i];
         var e = el('gd3-name', { 'data-robot': i, 'data-x': r.x, 'data-y': r.y, 'data-d': r.d });
@@ -1418,6 +1829,31 @@
         var s = screenOf([l.g.position.x, l.g.position.y + 0.95, l.g.position.z]);
         place(l.el, s.sx, s.sy);
       });
+      // P108 IW-002: a meter over its thing (a held can's under its robot's name); a ring round a watched thing's tile,
+      // its robot, or the tile itself — an ellipse sized by the tile as the camera sees it.
+      overlayEls.meters.forEach(function (l) {
+        if (l.robot) {
+          var sb = screenOf([l.g.position.x, l.g.position.y + 0.02, l.g.position.z + 0.3]);
+          place(l.el, sb.sx, sb.sy + 48);
+          return;
+        }
+        var s = screenOf([l.g.position.x, l.g.position.y + l.g.userData.lift, l.g.position.z]);
+        place(l.el, s.sx, s.sy);
+      });
+      overlayEls.rings.forEach(function (l) {
+        var c;
+        if (l.tile) {
+          var tp = tileCentre(eng.world.map, l.tile.x, l.tile.y);
+          c = [tp.x, tileHeight(kindAt(eng.world.map, l.tile.x, l.tile.y) || 'grass'), tp.z];
+        } else c = [l.g.position.x, l.g.position.y + (l.robot ? 0.3 : 0.04), l.g.position.z];
+        var ends = [[c[0] - 0.5, c[1], c[2]], [c[0] + 0.5, c[1], c[2]], [c[0], c[1], c[2] - 0.5], [c[0], c[1], c[2] + 0.5]].map(screenOf);
+        var xs = ends.map(function (p) { return p.sx; });
+        var ys = ends.map(function (p) { return p.sy; });
+        var mid = screenOf(c);
+        place(l.el, mid.sx, mid.sy);
+        l.el.style.width = (Math.max.apply(null, xs) - Math.min.apply(null, xs)).toFixed(1) + 'px';
+        l.el.style.height = (Math.max.apply(null, ys) - Math.min.apply(null, ys)).toFixed(1) + 'px';
+      });
       if (overlayEls.bubble) {
         var g = eng.built.robots[bubble.robot];
         if (g) {
@@ -1446,7 +1882,7 @@
     var lookKey = function (robots) {
       return JSON.stringify(
         (robots || []).map(function (r) {
-          return [r.colour, r.eyes, r.hat, r.name, r.can, r.canMax, r.carry];
+          return [r.colour, r.eyes, r.hat, r.name, r.can, r.canMax, r.carry, r.holds];
         })
       );
     };
@@ -1619,6 +2055,10 @@
           g.scale.set(s, 1, s);
           if (k6 >= 1) delete anims.pops[key];
         }
+        // P108 IW-002 (Picking): the things on the tile under the pointer are lifted while a child picks.
+        var lifted = !!(eng.picking && eng.hover && eng.hover.x === g.userData.x && eng.hover.y === g.userData.y);
+        if (g.userData.baseY !== undefined) g.position.y = g.userData.baseY + (lifted ? PICK_LIFT : 0);
+        g.userData.lifted = lifted;
       });
     };
 
@@ -1727,9 +2167,21 @@
       var r = o.canvas.getBoundingClientRect ? o.canvas.getBoundingClientRect() : { left: 0, top: 0 };
       return { x: ev.clientX - r.left, y: ev.clientY - r.top };
     };
+    /** P108 IW-002 (Picking): the tile under the pointer, the things on it lifted; a frame only when it changes. */
+    var setHover = function (p) {
+      if (!eng.world) return;
+      var hit = p ? eng.pick(p.x, p.y) : null;
+      var was = eng.hover ? eng.hover.x + ',' + eng.hover.y : '';
+      var now = hit ? hit.x + ',' + hit.y : '';
+      if (was === now) return;
+      eng.hover = hit;
+      setAttr('data-hover', now);
+      schedule();
+    };
     var onDown = function (ev) {
       if (ev.button !== undefined && ev.button !== 0 && ev.pointerType === 'mouse') return;
       var p = local(ev);
+      if (eng.picking) setHover(p);
       pointers[ev.pointerId] = p;
       if (count() === 1) {
         press = { x: p.x, y: p.y, moved: 0, id: ev.pointerId };
@@ -1749,7 +2201,10 @@
     };
     var onMove = function (ev) {
       var prev = pointers[ev.pointerId];
-      if (!prev) return;
+      if (!prev) {
+        if (eng.picking) setHover(local(ev));
+        return;
+      }
       var p = local(ev);
       pointers[ev.pointerId] = p;
       if (count() === 1 && press) {
@@ -1811,7 +2266,11 @@
       o.canvas.addEventListener('pointerup', onUp);
       o.canvas.addEventListener('pointercancel', onUp);
       o.canvas.addEventListener('wheel', onWheel, { passive: false });
-      listeners.push([o.canvas, 'pointerdown', onDown], [o.canvas, 'pointermove', onMove], [o.canvas, 'pointerup', onUp], [o.canvas, 'pointercancel', onUp], [o.canvas, 'wheel', onWheel]);
+      var onLeave = function () {
+        if (eng.picking) setHover(null);
+      };
+      o.canvas.addEventListener('pointerleave', onLeave);
+      listeners.push([o.canvas, 'pointerdown', onDown], [o.canvas, 'pointermove', onMove], [o.canvas, 'pointerup', onUp], [o.canvas, 'pointercancel', onUp], [o.canvas, 'wheel', onWheel], [o.canvas, 'pointerleave', onLeave]);
     }
     var ro = null;
     if (typeof ResizeObserver === 'function' && o.root) {
@@ -1864,6 +2323,22 @@
         if (eng.built) rebuildOverlay();
       }, ms) : null;
       if (eng.built) rebuildOverlay();
+      schedule();
+    };
+    /** P108 IW-002 (brief §4.4): the chips to ring. Rings and meters are overlay DOM: no rebuild of the scene. */
+    eng.setWatch = function (v) {
+      eng.watch = v === undefined ? null : v;
+      if (eng.built) rebuildOverlay();
+      schedule();
+    };
+    /** Picking: the root says so (the page's violet frame is CSS); the tile under the pointer lifts its things. */
+    eng.setPicking = function (on) {
+      eng.picking = !!on;
+      setAttr('data-picking', eng.picking ? 'true' : 'false');
+      if (!eng.picking) {
+        eng.hover = null;
+        setAttr('data-hover', '');
+      }
       schedule();
     };
     eng.celebrate = function () {
@@ -1923,7 +2398,26 @@
     '.gd3-bubble small{display:block;font-weight:700;color:#6E6784;font-size:11px}.gd3-bubble.gd3-olive small{color:#6A5AA8}\n' +
     '.gd3-fallback{position:absolute;inset:0;display:grid;place-items:center;color:#6E6784;font-size:13px;font-weight:700}\n' +
     '.gd3-isl-say{position:absolute;transform:translate(-30%,-100%);background:#fff;border-radius:12px;padding:5px 9px;font-weight:800;font-size:12px;box-shadow:0 6px 18px rgba(72,52,20,.12);max-width:180px;color:#2E2A3D;pointer-events:none;z-index:1}\n' +
-    '.gd3-isl-say:after{content:"";position:absolute;left:30%;bottom:-6px;border:6px solid transparent;border-top-color:#fff;border-bottom:0}';
+    '.gd3-isl-say:after{content:"";position:absolute;left:30%;bottom:-6px;border:6px solid transparent;border-top-color:#fff;border-bottom:0}\n' +
+    // P108 IW-002 AC6 (lane D): the mockup's meter chips over a thing (garden-kit's .gd-meter, the same look), a held can's
+    // level under its robot's name (ink, the mockup's robot chip), Watch's rings and large meters, Picking's violet frame.
+    '.gd3-meter{position:absolute;transform:translate(-50%,-100%);display:flex;align-items:center;gap:3px;background:#fff;border-radius:999px;padding:1px 7px;font-size:11px;font-weight:800;line-height:1.35;white-space:nowrap;color:#2E2A3D;box-shadow:0 2px 6px rgba(0,0,0,.18);pointer-events:none;z-index:1}\n' +
+    '.gd3-meter-bot{background:#2E2A3D;color:#fff;z-index:2}\n' +
+    '.gd3-pips{display:inline-flex;gap:2px}.gd3-pip{display:block;width:6px;height:9px;border-radius:3px;background:#E6DCC6}\n' +
+    '.gd3-pip.gd3-on{background:#7CC6F0}.gd3-m-stone .gd3-pip.gd3-on{background:#8E8CA0}.gd3-m-egg .gd3-pip.gd3-on{background:#FFD166}.gd3-m-food .gd3-pip.gd3-on{background:#C79A63}.gd3-m-letter .gd3-pip.gd3-on{background:#E86A5E}\n' +
+    '.gd3-meter.gd3-full{background:#3FA66B;color:#fff}.gd3-meter.gd3-full .gd3-pip{background:rgba(255,255,255,.35)}.gd3-meter.gd3-full .gd3-pip.gd3-on{background:#fff}\n' +
+    '.gd3-mi{display:block;flex:none;box-sizing:border-box;width:8px;height:8px}\n' +
+    '.gd3-mi-water{background:#2B7FC0;border-radius:0 50% 50% 50%;transform:rotate(45deg);margin:2px 1px 0}.gd3-meter-bot .gd3-mi-water{background:#7CC6F0}\n' +
+    '.gd3-mi-stone{background:#8E8B9A;border-radius:45% 55% 40% 50%;width:10px;height:8px}\n' +
+    '.gd3-mi-egg{background:#FFF7E8;border:1.5px solid #C79A63;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;width:8px;height:10px}\n' +
+    '.gd3-mi-food{background:#C79A63;border-radius:50%;width:10px;height:7px}\n' +
+    '.gd3-mi-letter{background:#FFF7E8;border:1.5px solid #E86A5E;border-radius:1px;width:10px;height:7px}\n' +
+    '.gd3-mi-dot{background:#6E6784;border-radius:50%;width:7px;height:7px}\n' +
+    '.gd3-meter.gd3-watch{outline:3px solid #8F6BFF;outline-offset:1px;font-size:15px;gap:5px;padding:2px 11px;z-index:3}\n' +
+    '.gd3-meter.gd3-watch .gd3-pip{width:9px;height:14px;border-radius:4px}.gd3-meter.gd3-watch .gd3-mi{width:11px;height:11px}.gd3-meter.gd3-watch .gd3-mi-egg{width:10px;height:13px}.gd3-meter.gd3-watch .gd3-mi-stone,.gd3-meter.gd3-watch .gd3-mi-food,.gd3-meter.gd3-watch .gd3-mi-letter{width:14px;height:10px}\n' +
+    '.gd3-ring{position:absolute;transform:translate(-50%,-50%);box-sizing:border-box;border:3px solid #8F6BFF;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.9),inset 0 0 0 2px rgba(255,255,255,.9);pointer-events:none}\n' +
+    '.gd3-world[data-wide="1"] .gd3-meter:not(.gd3-watch){font-size:9px;padding:0 4px;gap:2px}.gd3-world[data-wide="1"] .gd3-meter:not(.gd3-watch) .gd3-pips{display:none}\n' +
+    '.gd3-world.gd3-picking{border-color:#8F6BFF;box-shadow:0 0 0 3px #EEE8FF}.gd3-picking .gd3-canvas{cursor:crosshair}';
 
   /** @type {import('./types/node-kit').ReactNodeDefinition} */
   var Garden3D = {
@@ -1944,7 +2438,9 @@
     /** The pure parts, for the kit gate. */
     world: LOCAL_WORLD,
     worldHelpers: worldHelpers,
-    scene: { buildScene: buildScene, buildRobot: buildRobot, THING_BUILDERS: THING_BUILDERS, PALETTE: PALETTE, TILE_HEIGHT: TILE_HEIGHT },
+    scene: { buildScene: buildScene, buildRobot: buildRobot, THING_BUILDERS: THING_BUILDERS, PALETTE: PALETTE, TILE_HEIGHT: TILE_HEIGHT, PICK_LIFT: PICK_LIFT },
+    /** P108 IW-002: the job table's copies and the meter / watch helpers (pinned to garden-kit's and to cg002Content). */
+    job: JOB_LOOK,
     camera: CAMERA_API,
     engine: ENGINE_API,
     css: WORLD_CSS,
@@ -1967,6 +2463,10 @@
         var mapKey = JSON.stringify(grid.rows) + JSON.stringify(grid.legend);
         var thingsKey = JSON.stringify(things);
         var robotsKey = JSON.stringify(robots);
+        // P108 IW-002 (brief §4.4): the two world inputs.
+        var watchList = watchRefs(props.watch);
+        var watchKey = JSON.stringify(watchList);
+        var picking = props.picking === true;
         var supportedState = React.useState(null);
 
         // Mount: decide Supported once, on the real page. Everything browser-only lives here.
@@ -2026,6 +2526,24 @@
           [cameraMode, focusKey, supportedState[0]]
         );
 
+        React.useEffect(
+          function () {
+            var eng = engine.current;
+            if (!eng || !eng.supported) return;
+            eng.setWatch(watchList);
+          },
+          // A new world rebuilds the overlay from eng.watch itself; this is for a new Watch alone.
+          [watchKey, supportedState[0]]
+        );
+        React.useEffect(
+          function () {
+            var eng = engine.current;
+            if (!eng || !eng.supported) return;
+            eng.setPicking(picking);
+          },
+          [picking, supportedState[0]]
+        );
+
         // Celebrate is a signal: a count that rises. The robots hop.
         var cheers = React.useRef(null);
         if (cheers.current === null) cheers.current = { seen: props.celebrate, n: 0 };
@@ -2060,7 +2578,7 @@
           'div',
           {
             ref: root,
-            className: 'gd3-world',
+            className: 'gd3-world' + (picking ? ' gd3-picking' : ''),
             'data-gd3-world': 'true',
             'data-w': String(grid.w),
             'data-h': String(grid.h),
@@ -2088,7 +2606,10 @@
       celebrate: { type: 'signal', displayName: 'Celebrate', group: 'World', description: 'The robots hop for a moment.' },
       label: { type: 'string', displayName: 'Label', group: 'World', default: 'The garden', description: 'What a screen reader calls the world.' },
       camera: { type: { name: 'enum', enums: [{ value: 'plot', label: 'Plot' }, { value: 'island', label: 'Island' }, { value: 'follow', label: 'Follow' }] }, displayName: 'Camera', group: 'Camera', default: 'plot', description: 'plot frames the Focus rectangle (the whole map when Focus is empty); island frames the whole map; follow keeps robot 0 in the middle. A finger can always pan and zoom within the map.' },
-      focus: { type: 'object', displayName: 'Focus', group: 'Camera', description: '{ x, y, w, h } in tiles: the rectangle the plot camera frames.' }
+      focus: { type: 'object', displayName: 'Focus', group: 'Camera', description: '{ x, y, w, h } in tiles: the rectangle the plot camera frames.' },
+      // P108 IW-002 (lane D), the common brief §4.4: garden-kit's two world inputs, the same (the port gate diffs them).
+      watch: { type: 'object', displayName: 'Watch', group: 'World', description: 'The things a program asks about, as a list of chips { id?, kind, x, y } or its JSON (empty: none). Each is ringed and its meter drawn large — the thing with that id, else the first of its kind on its tile, else (a can) the robot holding it, else the tile.' },
+      picking: { type: 'boolean', displayName: 'Picking', group: 'World', default: false, description: 'True while a child picks a thing for a chip: the world is framed in violet and the things under the pointer lift. A tap still reports Tile X, Tile Y and Tile Tapped as always.' }
     },
 
     outputProps: {

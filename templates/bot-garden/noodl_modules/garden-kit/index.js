@@ -832,8 +832,9 @@
   // ═══════════════════════════════════════════════════════════════════════════
 
   /** The mockup’s map characters. A page sends its own legend beside its rows. */
-  var DEFAULT_LEGEND = { G: 'grass', P: 'path', W: 'water', T: 'tree', R: 'rock', H: 'house', F: 'bed', B: 'postbox', '.': 'grass', ' ': 'grass' };
-  var KINDS = ['grass', 'path', 'water', 'tree', 'rock', 'house', 'bed', 'postbox'];
+  // P108 IW-002 (lane D): L is the wall tile (WALL_TILE, below; the engine blocks it) — drawn by both kits.
+  var DEFAULT_LEGEND = { G: 'grass', P: 'path', W: 'water', T: 'tree', R: 'rock', H: 'house', F: 'bed', B: 'postbox', L: 'wall', '.': 'grass', ' ': 'grass' };
+  var KINDS = ['grass', 'path', 'water', 'tree', 'rock', 'house', 'bed', 'postbox', 'wall'];
 
   /**
    * The Map port as a grid: { w, h, rows, legend, cells }. Rows or { rows, legend } or newline-separated text; a
@@ -901,7 +902,7 @@
         var d = Math.round(Number(r.d));
         if (!isFinite(d)) d = 0;
         d = ((d % 4) + 4) % 4;
-        return {
+        var o = {
           x: isFinite(Number(r.x)) ? Number(r.x) : 0,
           y: isFinite(Number(r.y)) ? Number(r.y) : 0,
           d: d,
@@ -917,6 +918,10 @@
           // Pip with his can); '' or anything unknown = none.
           accessory: r.accessory === undefined || r.accessory === null ? 'can' : ['can', 'hod', 'satchel', 'bell'].indexOf(r.accessory) !== -1 ? r.accessory : ''
         };
+        // P108 IW-002 (lane D): a robot that holds the can (the engine's `holds: 'can'`) carries it whatever it wears; the
+        // field is there only when it holds it, so a robot row without it parses exactly as before.
+        if (r.holds === 'can') o.holds = 'can';
+        return o;
       });
   }
 
@@ -974,6 +979,8 @@
       h('path', { key: 'ant', d: 'M32 8V3', stroke: ink, strokeWidth: 2 }),
       h('circle', { key: 'bulb', cx: 32, cy: 2.5, r: 2.5, fill: '#FFD166' }),
       accessorySvg(r.accessory),
+      // P108 IW-002: the can a robot holds (the engine's holds: 'can') is in its hand whatever else it wears.
+      r.holds === 'can' && r.accessory !== 'can' ? h('g', { key: 'held', 'data-holds': 'can' }, accessorySvg('can')) : null,
       hat
     );
   }
@@ -1150,8 +1157,84 @@
       ['rect', { x: 12, y: 28, width: 40, height: 30, rx: 6, fill: '#FFD166', stroke: '#C98A00', strokeWidth: 2 }],
       ['circle', { cx: 32, cy: 40, r: 4, fill: '#2E2A3D' }],
       ['rect', { x: 30, y: 42, width: 4, height: 8, rx: 1, fill: '#2E2A3D' }]
+    ] },
+    // P108 IW-002 AC6 (lane D): the job model's things, in the mockup's palette (island-jobs.html): the wall tile (L) a
+    // dry-stone wall, the hen, the wicker basket (eggs peeking once it holds one), the store crate (stones on top). The
+    // watering can on the map is drawn per thing (canThingEl: its water at level/max).
+    wall: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 58, rx: 31, ry: 4, fill: 'rgba(0,0,0,.14)' }],
+      ['rect', { x: 1, y: 19, width: 62, height: 38, rx: 5, fill: '#8E8B9A' }],
+      ['path', { d: 'M4 23h26v10H4zM33 23h27v10H33zM4 36h13v9H4zM20 36h24v9H20zM47 36h13v9H47zM4 48h26v7H4zM33 48h27v7H33z', fill: '#B3B0BE' }],
+      ['rect', { x: 0, y: 13, width: 64, height: 9, rx: 4.5, fill: '#C9C6D2' }]
+    ] },
+    hen: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 31, cy: 57, rx: 17, ry: 3.5, fill: 'rgba(0,0,0,.14)' }],
+      ['path', { d: 'M27 51v6M34 51v6', stroke: '#FFB347', strokeWidth: 2.5, strokeLinecap: 'round' }],
+      ['path', { d: 'M17 44l-7-16 12 7z', fill: '#EDE7DC', stroke: '#D9D2C4', strokeWidth: 1.5, strokeLinejoin: 'round' }],
+      ['ellipse', { cx: 30, cy: 40, rx: 16, ry: 12.5, fill: '#FFFFFF', stroke: '#D9D2C4', strokeWidth: 1.5 }],
+      ['path', { d: 'M22 39q8 7 15-1', stroke: '#E1D9CB', strokeWidth: 2.5, fill: 'none', strokeLinecap: 'round' }],
+      ['circle', { cx: 44, cy: 25, r: 8, fill: '#FFFFFF', stroke: '#D9D2C4', strokeWidth: 1.5 }],
+      ['path', { d: 'M39 18q1-6 4-2 2-5 4 0 4-3 3 3z', fill: '#E0463A' }],
+      ['path', { d: 'M51 23l7 2.5-7 3z', fill: '#FFB347' }],
+      ['path', { d: 'M49 29q3 4-1 6', stroke: '#E0463A', strokeWidth: 2.5, fill: 'none', strokeLinecap: 'round' }],
+      ['circle', { cx: 46, cy: 23.5, r: 1.7, fill: '#2E2A3D' }]
+    ] },
+    basket: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 56, rx: 22, ry: 3.5, fill: 'rgba(0,0,0,.14)' }],
+      ['path', { d: 'M13 31a19 19 0 0138 0', fill: 'none', stroke: '#8B5A2B', strokeWidth: 3.5, strokeLinecap: 'round' }],
+      ['path', { d: 'M7 31h50l-7 23H14z', fill: '#C98A4B', stroke: '#8B5A2B', strokeWidth: 2, strokeLinejoin: 'round' }],
+      ['path', { d: 'M9 38h46M11.5 46h41M20 31l3 23M32 31v23M44 31l-3 23', stroke: '#A9773F', strokeWidth: 1.6 }]
+    ] },
+    basketEggs: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 56, rx: 22, ry: 3.5, fill: 'rgba(0,0,0,.14)' }],
+      ['path', { d: 'M13 31a19 19 0 0138 0', fill: 'none', stroke: '#8B5A2B', strokeWidth: 3.5, strokeLinecap: 'round' }],
+      ['ellipse', { cx: 23, cy: 29, rx: 6.5, ry: 8, fill: '#FFF7E8', stroke: '#C79A63', strokeWidth: 1.5 }],
+      ['ellipse', { cx: 41, cy: 29, rx: 6.5, ry: 8, fill: '#FFF7E8', stroke: '#C79A63', strokeWidth: 1.5 }],
+      ['ellipse', { cx: 32, cy: 26, rx: 6.5, ry: 8, fill: '#FFFDF6', stroke: '#C79A63', strokeWidth: 1.5 }],
+      ['path', { d: 'M7 31h50l-7 23H14z', fill: '#C98A4B', stroke: '#8B5A2B', strokeWidth: 2, strokeLinejoin: 'round' }],
+      ['path', { d: 'M9 38h46M11.5 46h41M20 31l3 23M32 31v23M44 31l-3 23', stroke: '#A9773F', strokeWidth: 1.6 }]
+    ] },
+    store: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 57, rx: 25, ry: 3.5, fill: 'rgba(0,0,0,.14)' }],
+      ['rect', { x: 8, y: 25, width: 48, height: 31, rx: 3, fill: '#C98A4B', stroke: '#8B5A2B', strokeWidth: 2 }],
+      ['path', { d: 'M8 35.5h48M8 45.5h48M18 25v31M46 25v31', stroke: '#8B5A2B', strokeWidth: 1.8 }]
+    ] },
+    storeFull: { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 57, rx: 25, ry: 3.5, fill: 'rgba(0,0,0,.14)' }],
+      ['path', { d: 'M12 27l4-9 10-4 8 4 2 9z', fill: '#8E8B9A' }],
+      ['path', { d: 'M29 27l5-10 11-3 8 6 1 7z', fill: '#B3B0BE' }],
+      ['rect', { x: 8, y: 25, width: 48, height: 31, rx: 3, fill: '#C98A4B', stroke: '#8B5A2B', strokeWidth: 2 }],
+      ['path', { d: 'M8 35.5h48M8 45.5h48M18 25v31M46 25v31', stroke: '#8B5A2B', strokeWidth: 1.8 }]
     ] }
   };
+  /** P108 IW-002: the watering can lying on the map, its water drawn at level/max inside it (none at 0). */
+  function canThingEl(t, key) {
+    var m = meterOf(t);
+    var share = m && m.need > 0 ? Math.max(0, Math.min(1, m.have / m.need)) : 0;
+    var water = share > 0 ? h('rect', { key: 'w', x: 17, y: 30 + 21 * (1 - share), width: 26, height: 21 * share, rx: 2, fill: '#BFE7FF' }) : null;
+    return h(
+      'svg',
+      { key: key, viewBox: '0 0 64 64', className: 'gd-sprite gd-thing gd-canthing', 'data-sprite': 'wateringCan', 'data-level': m ? m.text : '', 'aria-hidden': 'true' },
+      h('ellipse', { key: 'sh', cx: 30, cy: 56, rx: 19, ry: 3, fill: 'rgba(0,0,0,.14)' }),
+      h('path', { key: 'sp', d: 'M44 36l14-13', stroke: '#2B7FC0', strokeWidth: 5, strokeLinecap: 'round' }),
+      h('path', { key: 'ha', d: 'M20 27a10 9 0 0120 0', fill: 'none', stroke: '#2B7FC0', strokeWidth: 3.5 }),
+      h('rect', { key: 'b', x: 13, y: 26, width: 34, height: 29, rx: 5, fill: '#4FA7DC' }),
+      h('rect', { key: 'in', x: 17, y: 30, width: 26, height: 21, rx: 2, fill: '#2B7FC0', opacity: 0.35 }),
+      water
+    );
+  }
+  /** P108 IW-002: a meter chip (the mockup's): its icon, a pip per unit up to METER_PIPS_MAX, and the numbers. */
+  function meterEl(m, key, watched, top) {
+    var pips = [];
+    for (var i = 0; i < m.pips; i++) pips.push(h('i', { key: i, className: 'gd-pip' + (i < m.have ? ' gd-on' : '') }));
+    return h(
+      'span',
+      { key: key, className: 'gd-meter gd-m-' + m.icon + (m.full ? ' gd-full' : '') + (watched ? ' gd-watch' : '') + (top ? ' gd-meter-top' : ''), 'data-meter': m.text, 'data-kind': m.kind, 'data-full': m.full ? 'true' : undefined, 'data-watch': watched ? 'true' : undefined },
+      h('i', { key: 'ic', className: 'gd-mi gd-mi-' + m.icon }),
+      m.pips ? h('span', { key: 'p', className: 'gd-pips' }, pips) : null,
+      h('span', { key: 't', className: 'gd-mt' }, m.text)
+    );
+  }
   /** IG-004: the islander a thing's `who` names, as its sprite. */
   var ISLANDER_SPRITES = { mamie: 'islMamie', sami: 'islSami', biscuit: 'islBiscuit' };
   /** The thing kinds drawn as a sprite of the same name (a tulip, a puddle, a bowl and a rock have rules of their own). */
@@ -1172,6 +1255,146 @@
     var k = String(carry[carry.length - 1]);
     return LOAD_SPRITES[k] ? k : 'parcel';
   }
+
+  // ── P108 IW-002 AC6 (lane D): the job model, drawn ─────────────────────────────────────────────────────────────
+  // COPIES of the ONE table in packages/noodl-mcp/tests/cg002Content.ts (JOB_VOCABULARY, SITE_STAGES, WALL_TILE): the
+  // engine writes these names, both world kits draw them, and ig007Garden3d pins every copy (garden-kit's and
+  // garden-3d-kit's) to the table, and the helpers below to each other. A thing with none of the job fields (every thing
+  // of the 13 requests) is drawn exactly as before; so is a world with Watch empty and Picking off.
+  var WALL_TILE = 'L';
+  var SITE_STAGES = ['dirt', 'gravel', 'cobbles', 'path'];
+  var JOB_VOCABULARY = [
+    { kind: 'tulip', role: 'target', fields: ['have', 'need', 'watered', 'droop'], blocks: true, wear: 'tulip' },
+    { kind: 'site', role: 'target', fields: ['have', 'need', 'item', 'stage', 'walked'], item: 'stone', blocks: false, wear: 'site' },
+    { kind: 'basket', role: 'container', fields: ['count', 'capacity', 'item'], item: 'egg', blocks: true, wear: 'basket' },
+    { kind: 'bowl', role: 'container', fields: ['count', 'capacity', 'item', 'food'], item: 'food', blocks: true, wear: 'bowl' },
+    { kind: 'store', role: 'container', fields: ['count', 'capacity', 'item'], item: 'stone', blocks: true, wear: 'store' },
+    { kind: 'can', role: 'carrier', fields: ['level', 'max'], blocks: true },
+    { kind: 'rock', role: 'source', fields: ['left', 'max'], blocks: true, wear: 'rock' },
+    { kind: 'hen', role: 'source', fields: ['pen', 'capacity'], blocks: true, wear: 'hen' },
+    { kind: 'postbox', role: 'source', fields: [], blocks: true, wear: 'postbox' }
+  ];
+  /** The most pips a meter draws (the mockup's); a bigger need shows its numbers only. */
+  var METER_PIPS_MAX = 8;
+  /** The items a meter has an icon for (the mockup's 💧 🪨 🥚, drawn in CSS); anything else wears a plain dot. */
+  var METER_ICONS = { water: 1, stone: 1, egg: 1, food: 1, letter: 1 };
+
+  function jobRow(kind) {
+    for (var i = 0; i < JOB_VOCABULARY.length; i++) if (JOB_VOCABULARY[i].kind === kind) return JOB_VOCABULARY[i];
+    return null;
+  }
+  /** A whole number ≥ 0, or null when the field is absent or junk (absent is not 0: a thing with no meter keeps its old look). */
+  function wholeOf(v) {
+    if (v === undefined || v === null || v === '' || typeof v === 'boolean') return null;
+    var n = Number(v);
+    return isFinite(n) ? Math.max(0, Math.floor(n)) : null;
+  }
+  /**
+   * A thing's meter as both kits draw it (the mockup's chip over the thing), or null when it carries none:
+   *   tulip with `need` or `have`: drinks have/need (a tulip with neither is the 13 requests' one-pour tulip: no meter);
+   *   site: stones have/need; basket · bowl · store with a `capacity`: count/capacity, the icon its `item` (else the
+   *   table's); can with `level` or `max`: level/max; rock with `max`: left/max.
+   * `full` (drawn green) is a target's or a container's; a carrier and a source are never "done".
+   */
+  function meterOf(t) {
+    if (!t || typeof t !== 'object') return null;
+    var row = jobRow(t.kind);
+    if (!row) return null;
+    var have = 0;
+    var need = 0;
+    var icon = 'dot';
+    if (t.kind === 'tulip') {
+      if (wholeOf(t.need) === null && wholeOf(t.have) === null) return null;
+      need = wholeOf(t.need) || 1;
+      have = wholeOf(t.have);
+      if (have === null) have = t.watered === true ? need : 0;
+      icon = 'water';
+    } else if (t.kind === 'site') {
+      need = wholeOf(t.need) || 1;
+      have = wholeOf(t.have) || 0;
+      icon = String(t.item || row.item);
+    } else if (row.role === 'container') {
+      // Only a job's container has a capacity: a bowl the engine fed carries `count` beside `food` but no capacity
+      // (the bowl requests' bowls, never full) — it keeps its old look, no meter.
+      if (!wholeOf(t.capacity)) return null;
+      need = wholeOf(t.capacity);
+      have = wholeOf(t.count) || 0;
+      icon = String(t.item || row.item);
+    } else if (t.kind === 'can') {
+      if (wholeOf(t.level) === null && wholeOf(t.max) === null) return null;
+      need = wholeOf(t.max) || 0;
+      have = wholeOf(t.level) || 0;
+      icon = 'water';
+    } else if (t.kind === 'rock') {
+      if (!wholeOf(t.max)) return null;
+      need = wholeOf(t.max);
+      have = wholeOf(t.left) || 0;
+      icon = 'stone';
+    } else return null;
+    if (need > 0 && have > need) have = need;
+    return {
+      kind: t.kind,
+      icon: METER_ICONS[icon] ? icon : 'dot',
+      have: have,
+      need: need,
+      pips: need > 0 && need <= METER_PIPS_MAX ? need : 0,
+      text: need > 0 ? have + '/' + need : String(have),
+      full: (row.role === 'target' || row.role === 'container') && need > 0 && have >= need
+    };
+  }
+  /** A path site's look: its `stage` when the engine wrote one, else the engine's own rule by have/need (0 · under half · under full · full). */
+  function siteStage(t) {
+    if (t && SITE_STAGES.indexOf(t.stage) !== -1) return t.stage;
+    var need = (t && wholeOf(t.need)) || 1;
+    var have = (t && wholeOf(t.have)) || 0;
+    return SITE_STAGES[have <= 0 ? 0 : have * 2 < need ? 1 : have < need ? 2 : 3];
+  }
+  /** A hen's pen `[x0, y0, x1, y1]` (corners, inclusive) as { x, y, w, h } in tiles, or null. */
+  function penOf(t) {
+    if (!t || t.kind !== 'hen' || !Array.isArray(t.pen) || t.pen.length !== 4) return null;
+    var p = t.pen.map(Number);
+    for (var i = 0; i < 4; i++) if (!isFinite(p[i])) return null;
+    var x0 = Math.floor(Math.min(p[0], p[2]));
+    var y0 = Math.floor(Math.min(p[1], p[3]));
+    return { x: x0, y: y0, w: Math.floor(Math.max(p[0], p[2])) - x0 + 1, h: Math.floor(Math.max(p[1], p[3])) - y0 + 1 };
+  }
+  /** The Watch port as chip refs { id?, kind, x, y } (a list, one ref, or its JSON; anything without a kind is dropped). */
+  function watchRefs(v) {
+    var list = readJson(v, []);
+    if (list && !Array.isArray(list) && typeof list === 'object') list = [list];
+    if (!Array.isArray(list)) return [];
+    return list.filter(function (r) {
+      return r && typeof r === 'object' && typeof r.kind === 'string' && r.kind !== '';
+    });
+  }
+  /**
+   * What each watched chip rings (brief §4.4, resolved the way the engine resolves a chip): the thing with its `id`, else
+   * the first thing of its kind on its tile, else — a `can` — the robot that holds the can (or, when no robot says
+   * `holds`, the first with a can level), else the tile itself (an "ahead" chip). Indexes into things and robots, and
+   * "x,y" tiles, each once.
+   */
+  function resolveWatch(v, things, robots) {
+    var out = { things: [], robots: [], tiles: [] };
+    var add = function (list, k) {
+      if (list.indexOf(k) === -1) list.push(k);
+    };
+    watchRefs(v).forEach(function (ref) {
+      var i;
+      if (ref.id !== undefined && ref.id !== null && ref.id !== '')
+        for (i = 0; i < things.length; i++)
+          if (things[i].id !== undefined && things[i].id !== null && String(things[i].id) === String(ref.id)) return add(out.things, i);
+      for (i = 0; i < things.length; i++) if (things[i].kind === ref.kind && Number(things[i].x) === Number(ref.x) && Number(things[i].y) === Number(ref.y)) return add(out.things, i);
+      if (ref.kind === 'can') {
+        for (i = 0; i < robots.length; i++) if (robots[i].holds === 'can') return add(out.robots, i);
+        for (i = 0; i < robots.length; i++) if (robots[i].can !== null && robots[i].can !== undefined) return add(out.robots, i);
+      }
+      var x = wholeOf(ref.x);
+      var y = wholeOf(ref.y);
+      if (x !== null && y !== null) add(out.tiles, x + ',' + y);
+    });
+    return out;
+  }
+  var JOB_LOOK = { JOB_VOCABULARY: JOB_VOCABULARY, SITE_STAGES: SITE_STAGES, WALL_TILE: WALL_TILE, METER_PIPS_MAX: METER_PIPS_MAX, meterOf: meterOf, siteStage: siteStage, penOf: penOf, watchRefs: watchRefs, resolveWatch: resolveWatch };
 
   function spriteEl(name, key, extraClass, extraProps) {
     var s = SPRITES[name];
@@ -1223,6 +1446,45 @@
     '.gd-isl-say:after{content:"";position:absolute;left:30%;bottom:-6px;border:6px solid transparent;border-top-color:#fff;border-bottom:0}\n' +
     '.gd-cell>.gd-padlock{inset:auto;left:-80%;top:-80%;width:160%;height:160%;z-index:3}\n' +
     '.gd-fence{position:absolute;z-index:1;box-sizing:border-box;border:3px dashed #A9773F;border-radius:6px;background:rgba(46,42,61,.10);pointer-events:none}\n' +
+    // P108 IW-002 AC6 (lane D): the job model drawn — the mockup's (island-jobs.html) meter chips over a thing (a pip per
+    // unit, green when a target or a container is full), the wall tile, the path site by stage, the hen's pen, a letter in
+    // the post box, a tulip part-watered or drooping (worn); Watch rings a thing and draws its meter large; Picking
+    // frames the world in violet and lifts the things under the pointer.
+    '.gd-wall{background:linear-gradient(0deg,#BDE6C9,#C8EBD2)}\n' +
+    '.gd-cell>.gd-wallart{inset:4% 0 8% 0;width:100%;height:88%}\n' +
+    '.gd-site{position:absolute;inset:3%;border-radius:6px;pointer-events:none}\n' +
+    '.gd-site-dirt{background:radial-gradient(circle at 28% 34%,#86603A 0 7%,transparent 8%),radial-gradient(circle at 70% 66%,#86603A 0 6%,transparent 7%),#9E7248}\n' +
+    '.gd-site-gravel{background:radial-gradient(circle,#8E8B9A 0 22%,transparent 26%) 0 0/34% 34%,#B8AE9C}\n' +
+    '.gd-site-cobbles{background:radial-gradient(ellipse,#C9C6D2 0 52%,#8E8B9A 56% 64%,transparent 66%) 0 0/50% 50%,#A3A0AB}\n' +
+    '.gd-site-path{background:#F1DFB5;box-shadow:inset 0 4px 0 #E4CD97,inset 0 -4px 0 #E4CD97}\n' +
+    '.gd-cell.gd-in-pen{background:#F2DE9E}.gd-cell.gd-in-pen:nth-child(odd){background:#EBD58F}\n' +
+    '.gd-penfence{position:absolute;z-index:1;box-sizing:border-box;border:3px solid #A9773F;border-radius:4px;pointer-events:none}\n' +
+    '.gd-cell>.gd-letter-in{inset:-8% -4% auto auto;width:52%;height:52%;transform:rotate(-12deg);z-index:1}\n' +
+    '.gd-tulip.gd-part{opacity:.8;transform:rotate(9deg) translateY(3%)}\n' +
+    '.gd-tulip.gd-droop{opacity:.7;transform:rotate(28deg) translateY(10%)}\n' +
+    '.gd-boulder.gd-used{opacity:.4}\n' +
+    '.gd-meter{position:absolute;left:50%;top:0;transform:translate(-50%,-70%);z-index:2;display:flex;align-items:center;gap:3px;background:#fff;border-radius:999px;padding:1px 7px;font-size:11px;font-weight:800;line-height:1.35;white-space:nowrap;color:#2E2A3D;box-shadow:0 2px 6px rgba(0,0,0,.18);pointer-events:none}\n' +
+    '.gd-pips{display:inline-flex;gap:2px}.gd-pip{display:block;width:6px;height:9px;border-radius:3px;background:#E6DCC6}\n' +
+    '.gd-pip.gd-on{background:#7CC6F0}.gd-m-stone .gd-pip.gd-on{background:#8E8CA0}.gd-m-egg .gd-pip.gd-on{background:#FFD166}.gd-m-food .gd-pip.gd-on{background:#C79A63}.gd-m-letter .gd-pip.gd-on{background:#E86A5E}\n' +
+    '.gd-meter.gd-full{background:#3FA66B;color:#fff}.gd-meter.gd-full .gd-pip{background:rgba(255,255,255,.35)}.gd-meter.gd-full .gd-pip.gd-on{background:#fff}\n' +
+    '.gd-mi{display:block;flex:none;box-sizing:border-box;width:8px;height:8px}\n' +
+    '.gd-mi-water{background:#2B7FC0;border-radius:0 50% 50% 50%;transform:rotate(45deg);margin:2px 1px 0}\n' +
+    '.gd-mi-stone{background:#8E8B9A;border-radius:45% 55% 40% 50%;width:10px;height:8px}\n' +
+    '.gd-mi-egg{background:#FFF7E8;border:1.5px solid #C79A63;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;width:8px;height:10px}\n' +
+    '.gd-mi-food{background:#C79A63;border-radius:50%;width:10px;height:7px}\n' +
+    '.gd-mi-letter{background:#FFF7E8;border:1.5px solid #E86A5E;border-radius:1px;width:10px;height:7px}\n' +
+    '.gd-mi-dot{background:#6E6784;border-radius:50%;width:7px;height:7px}\n' +
+    '.gd-meter.gd-watch{outline:3px solid #8F6BFF;outline-offset:1px;font-size:15px;gap:5px;padding:2px 11px;z-index:3;transform:translate(-50%,-85%)}\n' +
+    '.gd-meter.gd-watch .gd-pip{width:9px;height:14px;border-radius:4px}.gd-meter.gd-watch .gd-mi{width:11px;height:11px}.gd-meter.gd-watch .gd-mi-egg{width:10px;height:13px}.gd-meter.gd-watch .gd-mi-stone,.gd-meter.gd-watch .gd-mi-food,.gd-meter.gd-watch .gd-mi-letter{width:14px;height:10px}\n' +
+    '.gd-meter.gd-meter-top{transform:translate(-50%,6%)}.gd-meter.gd-watch.gd-meter-top{transform:translate(-50%,4%)}\n' +
+    '.gd-ring{position:absolute;inset:-4%;box-sizing:border-box;border:3px solid #8F6BFF;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.9),inset 0 0 0 2px rgba(255,255,255,.9);z-index:2;pointer-events:none}\n' +
+    '.gd-bot>.gd-ring{inset:-6%}\n' +
+    '.gd-bot.gd-watch>.gd-can{outline:3px solid #8F6BFF;outline-offset:1px;transform:translateY(-50%) scale(1.4)}\n' +
+    '.gd-world[data-wide="1"] .gd-meter:not(.gd-watch){font-size:9px;padding:0 4px;gap:2px}.gd-world[data-wide="1"] .gd-meter:not(.gd-watch) .gd-pips{display:none}\n' +
+    '.gd-world.gd-picking{border-color:#8F6BFF;box-shadow:0 0 0 3px #EEE8FF;cursor:crosshair}.gd-picking .gd-cell{cursor:crosshair}\n' +
+    '.gd-picking .gd-cell>.gd-thing,.gd-picking .gd-cell>.gd-tulip{transition:transform .15s ease,filter .15s ease}\n' +
+    '.gd-picking .gd-cell:hover,.gd-picking .gd-cell:active{box-shadow:inset 0 0 0 3px rgba(143,107,255,.6)}\n' +
+    '.gd-picking .gd-cell:hover>.gd-thing,.gd-picking .gd-cell:active>.gd-thing,.gd-picking .gd-cell:hover>.gd-tulip,.gd-picking .gd-cell:active>.gd-tulip{transform:translateY(-12%) scale(1.1);filter:drop-shadow(0 5px 3px rgba(46,42,61,.28))}\n' +
     '@media (prefers-reduced-motion: reduce){.gd-puddle{animation:none}.gd-bump{animation:none}.gd-cheer .gd-turn{animation:none}.gd-bot{transition:none}.gd-turn{transition:none}}';
 
   /** A rising count is a new event; a mount, the same value, a fall or junk is not (the Boost-count rule). */
@@ -1273,12 +1535,13 @@
       'bed, postbox), Things on tiles (tulips dry or watered, puddles, letters, bowls, stones, eggs, food, a flag, labels, a rock drawn by the stones left in it, a sign, a note) and one or two Robots that glide ' +
       'to where the graph puts them in Step Ms, turn to face d (0 up, clockwise), bump in place when their bump count ' +
       'rises, and speak a Bubble. Every sprite is inline SVG; nothing is fetched. A tapped tile reports its x and y. ' +
+      'The job model (P108) is drawn from the same Things: a wall tile (L), a tulip’s drinks, a path site by stage, a basket, bowl or store count, the can on the map and in a hand, a rock’s stones, the hen and her pen, a letter in the post box — each with a meter; Watch rings the things a program asks about and draws their meters large; Picking frames the world while a child picks a thing. ' +
       'It draws; the engine decides where a robot may go.',
     ssr: { compat: 'safe' },
     noodlNodeAsProp: true,
 
     /** The pure parts, for the kit gate. */
-    world: { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, robotPlaces: robotPlaces, rose: rose, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS, rockSize: rockSize, loadOf: loadOf },
+    world: { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, robotPlaces: robotPlaces, rose: rose, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS, rockSize: rockSize, loadOf: loadOf, job: JOB_LOOK },
     sprite: { minPx: ROBOT_MIN_PX, svgPct: ROBOT_SVG_PCT, face: { x: FACE_X, y: FACE_Y, w: FACE_W, h: FACE_H }, faceFraction: FACE_FRACTION, robotSvg: robotSvg, sprites: SPRITES },
     css: WORLD_CSS,
 
@@ -1367,20 +1630,59 @@
           (thingsAt[k] = thingsAt[k] || []).push(t);
         });
 
+        // P108 IW-002 AC6 + the two world inputs (brief §4.4): what Watch rings, a hen's pen, whether Picking is on.
+        var watched = resolveWatch(props.watch, things, robots);
+        var watchedThings = watched.things.map(function (i) {
+          return things[i];
+        });
+        var picking = flag(props.picking, false);
+        var pens = [];
+        things.forEach(function (t) {
+          var p = penOf(t);
+          if (p) pens.push(p);
+        });
+        var inPen = function (x, y) {
+          for (var i = 0; i < pens.length; i++) if (x >= pens[i].x && x < pens[i].x + pens[i].w && y >= pens[i].y && y < pens[i].y + pens[i].h) return true;
+          return false;
+        };
+
         var cellEls = grid.cells.map(function (c) {
           var here = thingsAt[c.x + ',' + c.y] || [];
           var kids = [];
           var tulip = null;
           var extras = [];
+          // IW-002: the ground a path site lays (under everything on its tile), the meters and rings (over it).
+          var ground = [];
+          var marks = [];
+          // A letter the post box THING received (IW-002's source) peeks from its slot; a letter on the map's B tile is
+          // drawn as before (the letters request ends with one there).
+          var boxHere = here.some(function (t) {
+            return t.kind === 'postbox';
+          });
           here.forEach(function (t, i) {
+            var m = meterOf(t);
+            var seen = watchedThings.indexOf(t) !== -1;
+            // The world clips at its edge (overflow hidden): on the top row the chip sits just inside its tile.
+            if (m) marks.push(meterEl(m, 'meter-' + i, seen, c.y === 0));
+            if (seen) marks.push(h('span', { key: 'ring-' + i, className: 'gd-ring', 'data-ring': t.kind }));
             if (t.kind === 'tulip') tulip = t;
             else if (t.kind === 'puddle') extras.push(h('div', { key: 'puddle-' + i, className: 'gd-puddle', 'data-puddle': 'true' }));
-            else if (t.kind === 'letter') extras.push(spriteEl('letter', 'letter-' + i, 'gd-thing'));
-            else if (t.kind === 'bowl') extras.push(spriteEl(t.full ? 'bowlFull' : 'bowl', 'bowl-' + i, 'gd-thing gd-bowl' + (t.full ? ' gd-full' : '')));
+            else if (t.kind === 'letter') extras.push(spriteEl('letter', 'letter-' + i, 'gd-thing' + (boxHere ? ' gd-letter-in' : '')));
+            else if (t.kind === 'bowl') {
+              var fed = !!t.full || (m !== null && m.have > 0);
+              extras.push(spriteEl(fed ? 'bowlFull' : 'bowl', 'bowl-' + i, 'gd-thing gd-bowl' + (fed ? ' gd-full' : '')));
+            }
             else if (t.kind === 'rock') {
               var size = rockSize(t.left);
               if (size) extras.push(spriteEl(ROCK_SPRITE[size], 'rock-' + i, 'gd-thing gd-boulder gd-boulder-' + size, { 'data-left': String(t.left === undefined ? '' : t.left) }));
+              // IW-002: a rock with a max is a source that regrows: used up, it stays as a faint stub.
+              else if (m) extras.push(spriteEl('rockSmall', 'rock-' + i, 'gd-thing gd-boulder gd-used', { 'data-left': '0' }));
             }
+            else if (t.kind === 'site') ground.push(h('div', { key: 'site-' + i, className: 'gd-site gd-site-' + siteStage(t), 'data-site': siteStage(t) }));
+            else if (t.kind === 'basket') extras.push(spriteEl(m && m.have > 0 ? 'basketEggs' : 'basket', 'basket-' + i, 'gd-thing gd-basket'));
+            else if (t.kind === 'store') extras.push(spriteEl(m && m.have > 0 ? 'storeFull' : 'store', 'store-' + i, 'gd-thing gd-store'));
+            else if (t.kind === 'can') extras.push(canThingEl(t, 'can-' + i));
+            else if (t.kind === 'hen') extras.push(spriteEl('hen', 'hen-' + i, 'gd-thing gd-hen'));
             else if (THING_SPRITES[t.kind]) extras.push(spriteEl(t.kind, t.kind + '-' + i, 'gd-thing gd-' + t.kind));
             // IG-004: an islander by her plot, her open request as a bubble; the padlock over a locked plot.
             else if (t.kind === 'islander' && ISLANDER_SPRITES[t.who]) {
@@ -1396,15 +1698,21 @@
           if (c.kind === 'rock') kids.push(spriteEl('rock', 'rock'));
           if (c.kind === 'house') kids.push(spriteEl('house', 'house'));
           if (c.kind === 'postbox') kids.push(spriteEl('postbox', 'postbox'));
+          if (c.kind === 'wall') kids.push(spriteEl('wall', 'wall', 'gd-wallart'));
           if (c.kind === 'bed' || tulip) {
             var wet = !!(tulip && (tulip.watered === true || tulip.state === 'watered' || tulip.state === 'wet'));
             var yellow = !!(tulip && tulip.colour === 'yellow');
-            kids.push(spriteEl(yellow ? 'tulipYellow' : 'tulip', 'tulip', 'gd-tulip ' + (wet ? 'gd-wet' : 'gd-dry') + (yellow ? ' gd-yellow' : '')));
+            // IW-002: a tulip with drinks but not all of them stands half up; a worn one (droop) hangs further than dry.
+            var tm = tulip ? meterOf(tulip) : null;
+            var look = !wet && tulip && tulip.droop === true ? ' gd-droop' : !wet && tm && tm.have > 0 ? ' gd-part' : '';
+            kids.push(spriteEl(yellow ? 'tulipYellow' : 'tulip', 'tulip', 'gd-tulip ' + (wet ? 'gd-wet' : 'gd-dry') + (yellow ? ' gd-yellow' : '') + look));
           }
-          kids = kids.concat(extras);
+          kids = ground.concat(kids, extras, marks);
+          // Watch: a chip that names no thing here (the tile ahead) rings the tile itself.
+          if (watched.tiles.indexOf(c.x + ',' + c.y) !== -1) kids.push(h('span', { key: 'ring-tile', className: 'gd-ring gd-ring-tile', 'data-ring': 'tile' }));
           return h(
             'button',
-            { key: c.x + ',' + c.y, type: 'button', className: 'gd-cell gd-' + c.kind, 'data-x': String(c.x), 'data-y': String(c.y), 'data-ch': c.ch, 'aria-label': c.kind + ' ' + c.x + ',' + c.y, onClick: function () { tap(c.x, c.y); } },
+            { key: c.x + ',' + c.y, type: 'button', className: 'gd-cell gd-' + c.kind + (pens.length && inPen(c.x, c.y) ? ' gd-in-pen' : ''), 'data-x': String(c.x), 'data-y': String(c.y), 'data-ch': c.ch, 'aria-label': c.kind + ' ' + c.x + ',' + c.y, onClick: function () { tap(c.x, c.y); } },
             kids
           );
         });
@@ -1430,11 +1738,15 @@
           }
           var load = loadOf(r.carry);
           var loadEl = load ? h('div', { key: 'load', className: 'gd-load gd-load-' + load, 'data-load': load, 'data-carry': String(r.carry.length) }, spriteEl(load, 'load-svg')) : null;
+          // IW-002: Watch on the can a robot holds rings the robot and draws its level large.
+          var botSeen = watched.robots.indexOf(i) !== -1;
           return h(
             'div',
             {
               key: 'robot-' + i,
-              className: 'gd-bot',
+              className: 'gd-bot' + (botSeen ? ' gd-watch' : ''),
+              'data-holds': r.holds || undefined,
+              'data-watch': botSeen ? 'true' : undefined,
               'data-robot': String(i),
               'data-x': String(r.x),
               'data-y': String(r.y),
@@ -1446,7 +1758,8 @@
             h('div', { key: 'turn-' + bumpN, className: 'gd-turn' + (bumpN ? ' gd-bump' : ''), 'data-bump': bumpN ? String(bumpN) : undefined, style: { '--gd-rot': rot } }, robotSvg(r, 'svg')),
             canEl,
             loadEl,
-            r.name ? h('span', { key: 'name', className: 'gd-name' }, r.name) : null
+            r.name ? h('span', { key: 'name', className: 'gd-name' }, r.name) : null,
+            botSeen ? h('span', { key: 'ring', className: 'gd-ring', 'data-ring': 'robot' }) : null
           );
         });
 
@@ -1470,6 +1783,21 @@
               }
             });
           });
+
+        // IW-002: a hen's pen — its tiles are straw (the cells above), a wooden rail round them (one element over the grid).
+        var penEls = pens.map(function (p, i) {
+          return h('div', {
+            key: 'pen-' + i,
+            className: 'gd-penfence',
+            'data-pen': p.x + ',' + p.y + ',' + p.w + ',' + p.h,
+            style: {
+              left: (grid.w ? (p.x * 100) / grid.w : 0).toFixed(4) + '%',
+              top: (grid.h ? (p.y * 100) / grid.h : 0).toFixed(4) + '%',
+              width: (grid.w ? (p.w * 100) / grid.w : 0).toFixed(4) + '%',
+              height: (grid.h ? (p.h * 100) / grid.h : 0).toFixed(4) + '%'
+            }
+          });
+        });
 
         var bubbleEl = null;
         if (shownBubble) {
@@ -1502,10 +1830,13 @@
           'div',
           {
             ref: root,
-            className: 'gd-world' + (cheerState[0] ? ' gd-cheer' : ''),
+            className: 'gd-world' + (cheerState[0] ? ' gd-cheer' : '') + (picking ? ' gd-picking' : ''),
             'data-gd-world': 'true',
             'data-w': String(grid.w),
             'data-h': String(grid.h),
+            // IW-002: a wide world (the island) draws its meters compact — numbers only — unless one is watched.
+            'data-wide': grid.w > 16 && things.some(meterOf) ? '1' : undefined,
+            'data-picking': picking ? 'true' : undefined,
             role: 'group',
             'aria-label': props.label || 'garden',
             style: worldStyle
@@ -1513,6 +1844,7 @@
           h('style', { key: 'css' }, WORLD_CSS),
           cellEls,
           fenceEls,
+          penEls,
           robotEls,
           bubbleEl
         );
@@ -1528,7 +1860,10 @@
       bubble: { type: 'object', displayName: 'Bubble', group: 'World', description: '{ robot, text, style, ms }: a line over a robot for ms (1100 plain, 3200 olive by default). A new object shows a new bubble.' },
       stepMs: { type: 'number', displayName: 'Step Ms', group: 'World', default: 380, description: 'How long a robot takes to glide one tile.' },
       celebrate: { type: 'signal', displayName: 'Celebrate', group: 'World', description: 'The robots hop for a moment.' },
-      label: { type: 'string', displayName: 'Label', group: 'World', default: 'The garden', description: 'What a screen reader calls the world.' }
+      label: { type: 'string', displayName: 'Label', group: 'World', default: 'The garden', description: 'What a screen reader calls the world.' },
+      // P108 IW-002 (lane D), the common brief §4.4: the two world inputs IW-004's Workshop wires (the 3D kit has both, the same).
+      watch: { type: 'object', displayName: 'Watch', group: 'World', description: 'The things a program asks about, as a list of chips { id?, kind, x, y } or its JSON (empty: none). Each is ringed and its meter drawn large — the thing with that id, else the first of its kind on its tile, else (a can) the robot holding it, else the tile.' },
+      picking: { type: 'boolean', displayName: 'Picking', group: 'World', default: false, description: 'True while a child picks a thing for a chip: the world is framed in violet and the things under the pointer lift. A tap still reports Tile X, Tile Y and Tile Tapped as always.' }
     },
 
     outputProps: {

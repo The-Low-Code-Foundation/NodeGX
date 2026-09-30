@@ -24,7 +24,13 @@
     { "id": "vLang", "type": "Variable2", "label": "language", "parameters": { "name": "language" } },
     { "id": "vLocked", "type": "Variable2", "label": "locked", "parameters": { "name": "locked" } },
     { "id": "vProgramOut", "type": "Variable2", "label": "programOut", "parameters": { "name": "programOut" } },
-    { "id": "vSelectedOut", "type": "Variable2", "label": "selectedOut", "parameters": { "name": "selectedOut" } }
+    { "id": "vSelectedOut", "type": "Variable2", "label": "selectedOut", "parameters": { "name": "selectedOut" } },
+    { "id": "vWatch", "type": "Variable2", "label": "watch", "parameters": { "name": "watch" } },
+    { "id": "vPicking", "type": "Variable2", "label": "picking", "parameters": { "name": "picking" } },
+    { "id": "vTileX", "type": "Variable2", "label": "tileX", "parameters": { "name": "tileX" } },
+    { "id": "vTileY", "type": "Variable2", "label": "tileY", "parameters": { "name": "tileY" } },
+    { "id": "tapCounter", "type": "Counter", "label": "taps", "parameters": { "startValue": 0 } },
+    { "id": "vTaps", "type": "Variable2", "label": "taps", "parameters": { "name": "taps" } }
   ],
   "visualRoots": ["page"]
 }

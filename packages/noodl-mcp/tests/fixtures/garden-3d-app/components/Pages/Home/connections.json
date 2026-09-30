@@ -98,6 +98,18 @@
       "fromProperty": "currentCount",
       "toId": "vReady",
       "toProperty": "value"
+    },
+    {
+      "fromId": "vWatch",
+      "fromProperty": "value",
+      "toId": "garden3d",
+      "toProperty": "watch"
+    },
+    {
+      "fromId": "vPicking",
+      "fromProperty": "value",
+      "toId": "garden3d",
+      "toProperty": "picking"
     }
   ]
 }

@@ -320,7 +320,8 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       const b = table(node(), 'inputProps');
       for (const k of Object.keys(a)) expect({ port: k, def: b[k] }).toEqual({ port: k, def: a[k] });
       expect(Object.keys(b).filter((k) => !(k in a))).toEqual(['camera', 'focus']);
-      expect(Object.keys(a)).toEqual(['map', 'things', 'robots', 'bubble', 'stepMs', 'celebrate', 'label']);
+      // P108 IW-002 (brief §4.4): Watch and Picking are the 2D node's too, so they are here by the first line's rule.
+      expect(Object.keys(a)).toEqual(['map', 'things', 'robots', 'bubble', 'stepMs', 'celebrate', 'label', 'watch', 'picking']);
       expect(b.camera.type).toEqual({ name: 'enum', enums: [{ value: 'plot', label: 'Plot' }, { value: 'island', label: 'Island' }, { value: 'follow', label: 'Follow' }] });
       expect(b.camera.default).toBe('plot');
       expect(b.focus.type).toBe('object');
@@ -1157,7 +1158,7 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       // The bridge adds its own inputs to every React node (cssClassName, mounted, styleCss, variant); the kit's are all there.
       const inputs = g3.inputs.map((p) => p.name);
       const outputs = g3.outputs.map((p) => p.name);
-      for (const p of ['bubble', 'camera', 'celebrate', 'focus', 'label', 'map', 'robots', 'stepMs', 'things']) expect({ port: p, present: inputs.includes(p) }).toEqual({ port: p, present: true });
+      for (const p of ['bubble', 'camera', 'celebrate', 'focus', 'label', 'map', 'robots', 'stepMs', 'things', 'watch', 'picking']) expect({ port: p, present: inputs.includes(p) }).toEqual({ port: p, present: true });
       for (const p of ['onFrameMs', 'onReady', 'onSupported', 'onTileTapped', 'onTileX', 'onTileY', 'onTooSlow']) expect({ port: p, present: outputs.includes(p) }).toEqual({ port: p, present: true });
       const g2 = overlay.nodes.find((n) => n.typeName === 'garden-kit.Garden')!;
       expect(g2.inNodePicker).toBe(true);
@@ -1235,6 +1236,195 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       // Each body in its own colour (the first mesh of the robot is its body box).
       const body = (g: any) => { let m: any = null; g.traverse((o: any) => { if (!m && o.type === 'Mesh') m = o; }); return '#' + Number(m.material.color).toString(16).padStart(6, '0'); };
       expect(built.robots.slice(0, 4).map(body)).toEqual(['#ff7a59', '#7a8ca3', '#ffb347', '#8f6bff']);
+    });
+  });
+
+  // ── P108 IW-002 AC6 (lane D): the job model in 3D, the pinned copies of the one table, Watch and Picking ──
+  describe('IW-002 AC6 (P108 s2, lane D) — the job model in 3D from the engine’s names; the table’s copies pinned; Watch and Picking', () => {
+    /* eslint-disable @typescript-eslint/no-var-requires */
+    const { REQUESTS, JOB_VOCABULARY, SITE_STAGES, WALL_TILE } = require('./cg002Content');
+    const { ENGINE, helper } = require('./cg002Scripts');
+    /* eslint-enable @typescript-eslint/no-var-requires */
+    const W = () => node().world;
+    const named = (g: any, name: string) => {
+      let hit: any = null;
+      g.traverse((o: any) => {
+        if (!hit && o.name === name) hit = o;
+      });
+      return hit;
+    };
+    const meshesIn = (g: any) => {
+      let n = 0;
+      g.traverse((o: any) => {
+        if (o.type === 'Mesh' || o.type === 'InstancedMesh') n++;
+      });
+      return n;
+    };
+    const build = (rows: string[], things: unknown[], robots: unknown[] = []) => {
+      const st = threeStub();
+      const built = node().scene.buildScene({ map: W().parseMap({ rows }), things: W().parseThings(things), robots: W().parseRobots(robots) }, st.THREE);
+      return { built, counts: st.counts };
+    };
+    /** A live engine on the fake DOM (the input clause's harness, with a clock and a frame queue). */
+    const live = (world: { rows: string[]; things: unknown[]; robots?: unknown[] }) => {
+      const { THREE } = threeStub();
+      const dom = fakeDom();
+      const frames: Array<() => void> = [];
+      const taps: number[][] = [];
+      const eng = node().engine.create({ THREE, root: dom.root, canvas: dom.canvas, overlay: dom.overlay, doc: dom.doc, now: () => 0, raf: (f: () => void) => (frames.push(f), frames.length), caf: () => {}, onTap: (x: number, y: number) => taps.push([x, y]) });
+      eng.setWorld({ map: W().parseMap({ rows: world.rows }), things: W().parseThings(world.things), robots: W().parseRobots(world.robots || []) });
+      eng.frame();
+      const ev = (type: string, x: number, y: number, id = 1) => dom.handlers[type]({ type, clientX: x, clientY: y, pointerId: id, pointerType: 'mouse', button: 0, preventDefault() {} });
+      const chips = () => dom.overlay.children.filter((c: any) => /gd3-meter/.test(c.className)).map((c: any) => `${c.attrs['data-kind']}:${c.attrs['data-meter']}${/gd3-watch/.test(c.className) ? ':watch' : ''}${/gd3-full/.test(c.className) ? ':full' : ''}`);
+      const rings = () => dom.overlay.children.filter((c: any) => c.className === 'gd3-ring').map((c: any) => `${c.attrs['data-ring']}@${c.attrs['data-x'] ?? 'r' + c.attrs['data-robot']},${c.attrs['data-y'] ?? ''}`);
+      return { eng, dom, ev, taps, chips, rings };
+    };
+
+    it('🔴 the pinned copies: both kits’ JOB_VOCABULARY, SITE_STAGES and WALL_TILE are cg002Content’s ONE table; L is the wall in both legends; the meter and watch helpers give garden-kit’s answers', () => {
+      const one = { JOB_VOCABULARY: JSON.parse(JSON.stringify(JOB_VOCABULARY)), SITE_STAGES: [...SITE_STAGES], WALL_TILE };
+      for (const [name, job] of [['garden-kit', node2d().world.job], ['garden-3d-kit', W().job], ['garden-3d-kit (node)', node().job]] as const)
+        expect({ name, tables: { JOB_VOCABULARY: job.JOB_VOCABULARY, SITE_STAGES: job.SITE_STAGES, WALL_TILE: job.WALL_TILE } }).toEqual({ name, tables: one });
+      for (const w of [node2d().world, W()]) expect([w.DEFAULT_LEGEND[WALL_TILE], w.KINDS.includes('wall')]).toEqual(['wall', true]);
+      const a = node2d().world.job;
+      const b = W().job;
+      const things: unknown[] = [
+        null, 7, {}, { kind: 'tulip' }, { kind: 'tulip', need: 3 }, { kind: 'tulip', have: 2, need: 3 }, { kind: 'tulip', need: '4', watered: true }, { kind: 'tulip', have: 9, need: 3 },
+        { kind: 'site', have: 0, need: 4 }, { kind: 'site', have: 2, need: 4, stage: 'cobbles' }, { kind: 'site', have: 4, need: 4, item: 'brick' }, { kind: 'site', stage: 'nonsense', have: 1, need: 4 },
+        { kind: 'basket', count: 3, capacity: 4 }, { kind: 'basket', count: 4, capacity: 4, item: 'egg' }, { kind: 'bowl', food: 1, count: 1 }, { kind: 'bowl', count: 1, capacity: 2 }, { kind: 'store', count: 0, capacity: 12 },
+        { kind: 'can', level: 2, max: 3 }, { kind: 'can' }, { kind: 'can', level: 'x', max: 3 }, { kind: 'rock', left: 2 }, { kind: 'rock', left: 0, max: 4 }, { kind: 'rock', left: 7, max: 4 },
+        { kind: 'hen', pen: [4, 2, 2, 1] }, { kind: 'hen', pen: [1, 2] }, { kind: 'hen', pen: ['a', 1, 2, 3] }, { kind: 'postbox' }, { kind: 'egg' }, { kind: 'letter' }
+      ];
+      for (const t of things) {
+        expect({ t, meter: b.meterOf(t) }).toEqual({ t, meter: a.meterOf(t) });
+        expect({ t, pen: b.penOf(t) }).toEqual({ t, pen: a.penOf(t) });
+        if (t && (t as any).kind === 'site') expect({ t, stage: b.siteStage(t) }).toEqual({ t, stage: a.siteStage(t) });
+      }
+      const ts = [{ kind: 'tulip', id: 'tu', x: 0, y: 0 }, { kind: 'basket', x: 2, y: 0 }, { kind: 'egg', x: 3, y: 0 }];
+      const rs = [{ x: 1, y: 1, can: 1 }, { x: 2, y: 1, holds: 'can', can: 2 }];
+      for (const v of ['', null, '{bad', 7, { kind: 'egg', x: 3, y: 0 }, '[{"kind":"basket","x":2,"y":0}]', [{ id: 'tu', kind: 'x', x: 9, y: 9 }, { kind: 'can', x: 5, y: 5 }, { kind: 'ahead', x: 3, y: 1 }, { x: 1 }, null, { kind: 'ahead', x: -1, y: 'a' }]]) {
+        expect({ v, refs: b.watchRefs(v) }).toEqual({ v, refs: a.watchRefs(v) });
+        expect({ v, seen: b.resolveWatch(v, ts, rs) }).toEqual({ v, seen: a.resolveWatch(v, ts, rs) });
+      }
+      // Known-firing: the resolution is not empty on the mixed list (by id, the holder of the can, the tile).
+      expect(b.resolveWatch([{ id: 'tu', kind: 'x', x: 9, y: 9 }, { kind: 'can', x: 5, y: 5 }, { kind: 'ahead', x: 3, y: 1 }], ts, rs)).toEqual({ things: [0], robots: [1], tiles: ['3,1'] });
+      // parseRobots carries holds the same in both copies (only when it holds the can).
+      expect(W().parseRobots([{ holds: 'can' }, { holds: 'x' }, {}]).map((r: any) => r.holds)).toEqual(node2d().world.parseRobots([{ holds: 'can' }, { holds: 'x' }, {}]).map((r: any) => r.holds));
+    });
+
+    it('🔴 every new thing builds from primitives, honestly counted: the wall tile, a site by stage with its stones, a basket’s eggs, a store, the can’s level, the hen and her pen, a used rock, a letter in the post box, a part-watered and a drooping tulip', () => {
+      const { built, counts } = build(['GLLG', 'GGGG', 'GGGG', 'GGGG'], [
+        { kind: 'site', x: 0, y: 1, have: 0, need: 4 }, { kind: 'site', x: 1, y: 1, have: 1, need: 4 }, { kind: 'site', x: 2, y: 1, have: 3, need: 4, stage: 'cobbles' }, { kind: 'site', x: 3, y: 1, have: 4, need: 4 },
+        { kind: 'basket', x: 0, y: 2, count: 3, capacity: 4 }, { kind: 'store', x: 1, y: 2, count: 2, capacity: 6 }, { kind: 'can', x: 2, y: 2, level: 1, max: 4 }, { kind: 'rock', x: 3, y: 2, left: 0, max: 4 },
+        { kind: 'hen', x: 0, y: 3, pen: [0, 3, 1, 3] }, { kind: 'postbox', x: 3, y: 3 }, { kind: 'letter', x: 3, y: 3 }, { kind: 'letter', x: 2, y: 3 },
+        { kind: 'tulip', x: 3, y: 0, need: 3, have: 1 }, { kind: 'tulip', x: 0, y: 0, need: 3, have: 2, droop: true }
+      ]);
+      const by = (k: string) => built.things.filter((g: any) => g.userData.kind === k);
+      expect(by('site').map((g: any) => g.userData.stage)).toEqual(['dirt', 'gravel', 'cobbles', 'path']);
+      expect(by('site').map(meshesIn)).toEqual([1, 2, 4, 3]);
+      expect(by('basket')[0].userData.eggs).toBe(3);
+      expect(meshesIn(by('store')[0])).toBe(4);
+      expect(named(by('can')[0], 'level').scale.y).toBeCloseTo(0.25);
+      expect(by('rock')[0].userData.size).toBe('used');
+      expect(meshesIn(by('rock')[0])).toBe(1);
+      expect(by('hen')[0].userData.pen).toEqual({ x: 0, y: 3, w: 2, h: 1 });
+      expect(named(by('hen')[0], 'pen').scale.x).toBeCloseTo(1.96);
+      expect(named(by('hen')[0], 'hen')).not.toBeNull();
+      const letters = by('letter');
+      expect(letters.map((g: any) => !!g.userData.inBox)).toEqual([false, true]);
+      expect(letters[1].position.y).toBeGreaterThan(letters[0].position.y + 0.5);
+      const tulips = by('tulip');
+      expect(tulips.map((g: any) => [g.userData.x, g.userData.look])).toEqual([[0, 'droop'], [3, 'part']]);
+      expect(tulips[0].rotation.z).toBeGreaterThan(0.31);
+      expect(tulips[1].rotation.z).toBeLessThan(0.31);
+      // The wall: its tiles are grass-height and grass-shaded; two instanced parts (body and cap) for both walls.
+      const wallDecor = built.decor.filter((m: any) => m.type === 'InstancedMesh' && m.children !== undefined && m.name !== 'x');
+      expect(built.tiles.map((m: any) => m.name)).toContain('tiles-wall');
+      expect(node().scene.TILE_HEIGHT.wall).toBe(node().scene.TILE_HEIGHT.grass);
+      expect(wallDecor.length).toBe(2);
+      expect(counts.Mesh + (counts.InstancedMesh || 0)).toBe(built.meshCount);
+      // Every thing a job world carries draws something; the 13 requests’ worlds carry no meter and no wall.
+      for (const k of ['site', 'basket', 'store', 'can', 'hen']) expect({ k, drawn: by(k).every((g: any) => meshesIn(g) > 0) && by(k).length > 0 }).toEqual({ k, drawn: true });
+      for (const r of REQUESTS) {
+        const b = build([...r.map], r.things.map((t: any) => ({ ...t }))).built;
+        expect({ id: r.id, meters: b.things.filter((g: any) => g.userData.meter).length, wall: b.tiles.some((m: any) => m.name === 'tiles-wall') }).toEqual({ id: r.id, meters: 0, wall: false });
+      }
+    });
+
+    it('🔴 the meters are the mockup’s chips in the overlay; Watch rings the chip’s thing, a held can’s robot, or the tile, and draws the meter large — without rebuilding the scene', () => {
+      const L = live({
+        rows: ['GGGG', 'GGGG'],
+        things: [{ kind: 'tulip', id: 'tu', x: 0, y: 0, need: 3, have: 3 }, { kind: 'basket', x: 2, y: 0, count: 2, capacity: 4 }, { kind: 'egg', x: 3, y: 0 }, { kind: 'rock', x: 3, y: 1, left: 2, max: 4 }],
+        robots: [{ x: 1, y: 1, d: 1, holds: 'can', can: 1, canMax: 3, name: 'Pip' }]
+      });
+      expect(L.chips()).toEqual(['tulip:3/3:full', 'basket:2/4', 'rock:2/4', 'can:1/3']);
+      expect(L.rings()).toEqual([]);
+      const before = L.eng.built;
+      L.eng.setWatch([{ id: 'tu', kind: 'tulip', x: 9, y: 9 }, { kind: 'basket', x: 2, y: 0 }, { kind: 'can', x: 5, y: 5 }, { kind: 'ahead', x: 3, y: 1 }]);
+      expect(L.eng.built).toBe(before);
+      expect(L.chips()).toEqual(['tulip:3/3:watch:full', 'basket:2/4:watch', 'rock:2/4', 'can:1/3:watch']);
+      expect(L.rings()).toEqual(['tulip@0,0', 'basket@2,0', 'robot@r0,', 'tile@3,1']);
+      expect(L.dom.root.attrs['data-watched']).toBe('4');
+      L.eng.frame();
+      const ring = L.dom.overlay.children.find((c: any) => c.className === 'gd3-ring');
+      expect(parseFloat(ring.style.width)).toBeGreaterThan(10);
+      expect(parseFloat(ring.style.height)).toBeGreaterThan(5);
+      for (const junk of ['', '{bad', 7, [{ x: 1 }], null]) {
+        L.eng.setWatch(junk);
+        expect({ junk, rings: L.rings().length, watched: L.chips().filter((c: string) => c.includes(':watch')).length }).toEqual({ junk, rings: 0, watched: 0 });
+      }
+      L.eng.destroy();
+      const css = node().css as string;
+      expect(css).toMatch(/\.gd3-meter\.gd3-watch\{[^}]*outline:3px solid #8F6BFF[^}]*font-size:15px/);
+      expect(css).toMatch(/\.gd3-ring\{[^}]*border:3px solid #8F6BFF/);
+      // A robot that does not hold the can gets no chip (its level is in the can it wears, as before).
+      const plain = live({ rows: ['GG'], things: [], robots: [{ x: 0, y: 0, can: 2, canMax: 3 }] });
+      expect(plain.chips()).toEqual([]);
+      plain.eng.destroy();
+    });
+
+    it('🔴 Picking: the root says so, the things on the tile under the pointer lift (and only those), a tap still reports its tile, and off puts them down', () => {
+      const L = live({ rows: ['GGGG', 'GGGG', 'GGGG'], things: [{ kind: 'basket', x: 1, y: 1, count: 0, capacity: 4 }, { kind: 'egg', x: 2, y: 1 }] });
+      const basket = L.eng.built.things.find((g: any) => g.userData.kind === 'basket');
+      const egg = L.eng.built.things.find((g: any) => g.userData.kind === 'egg');
+      const y0 = [basket.position.y, egg.position.y];
+      const s = L.eng.screenOfTile(1, 1);
+      L.ev('pointermove', s.sx, s.sy);
+      L.eng.frame();
+      expect(basket.position.y).toBe(y0[0]);
+      L.eng.setPicking(true);
+      expect(L.dom.root.attrs['data-picking']).toBe('true');
+      L.ev('pointermove', s.sx, s.sy);
+      L.eng.frame();
+      expect(L.dom.root.attrs['data-hover']).toBe('1,1');
+      expect(basket.position.y).toBeCloseTo(y0[0] + node().scene.PICK_LIFT);
+      expect(egg.position.y).toBe(y0[1]);
+      L.ev('pointerdown', s.sx, s.sy);
+      L.ev('pointerup', s.sx + 2, s.sy + 1);
+      expect(L.taps).toEqual([[1, 1]]);
+      L.eng.setPicking(false);
+      L.eng.frame();
+      expect([basket.position.y, L.dom.root.attrs['data-picking']]).toEqual([y0[0], 'false']);
+      L.eng.destroy();
+      const html = render({ picking: true });
+      expect(html).toContain('class="gd3-world gd3-picking"');
+      expect(render({})).toContain('class="gd3-world"');
+      expect(node().css as string).toMatch(/\.gd3-world\.gd3-picking\{border-color:#8F6BFF/);
+    });
+
+    it('🔴 AC4 (the 3D kit): Start world’s seeded layout builds the same for the same seed and three layouts for seeds 1, 2, 3 — the wall where the map says, the eggs on their tiles', () => {
+      const req = { seeded: { wallAt: [2, 5], wallRow: 0, eggs: { count: 3, among: [[0, 2], [1, 2], [2, 2], [3, 2], [4, 2], [5, 2], [6, 2], [7, 2]] } } };
+      const laid = (seed: number) => helper(ENGINE, 'seedWorld', { map: ['GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG'], things: [], robots: [{ id: 'pip', x: 0, y: 1, d: 1 }] }, req, seed);
+      const shape = (seed: number) => {
+        const w = laid(seed);
+        const { built } = build(w.map, w.things);
+        const wall = W().parseMap({ rows: w.map }).cells.filter((c: any) => c.kind === 'wall').map((c: any) => c.x);
+        const eggs = built.things.filter((g: any) => g.userData.kind === 'egg').map((g: any) => g.userData.x).sort();
+        return { wall, eggs, walls: built.tiles.filter((m: any) => m.name === 'tiles-wall').length };
+      };
+      const three = [1, 2, 3].map(shape);
+      expect(new Set(three.map((l) => JSON.stringify(l))).size).toBe(3);
+      expect(shape(2)).toEqual(three[1]);
+      for (const l of three) expect([l.wall.length, l.eggs.length, l.walls]).toEqual([1, 3, 1]);
     });
   });
 });
