@@ -306,13 +306,16 @@ ${owlColourRule}
    controls' spare margin; the controls a little tighter, so the French three fit two rows (CG-003 AC4: Play and the owl
    on the first screen, re-measured). */
 @media (max-width: 600px) {
-  .bg-stage:has(> .bg-pad) { display: flex !important; flex-direction: column !important; flex-wrap: nowrap; align-items: stretch; gap: 8px; max-width: 640px; }
+  .bg-stage:has(> .bg-pad) { display: flex !important; flex-direction: column !important; flex-wrap: nowrap; align-items: stretch; gap: 4px; max-width: 640px; }
   .bg-stage:has(> .bg-pad) > :not(.bg-pad):not(.bg-rec) { flex: none; width: 100%; max-width: 640px; }
   .bg-pad { position: relative !important; right: auto !important; bottom: auto !important; width: 100% !important; grid-template-columns: repeat(auto-fill, 48px); grid-template-rows: none; grid-auto-rows: 48px; gap: 6px; justify-content: center; }
   .bg-pad .bg-key { width: 48px !important; height: 48px !important; min-width: 48px; min-height: 48px; grid-column: auto; grid-row: auto; order: 4; }
   .bg-pad .bg-key-left { order: 1; }
   .bg-pad .bg-key-fwd { order: 2; }
   .bg-pad .bg-key-right { order: 3; }
+  /* Seven keys or more (the go keys, free play's every step) stay ONE row that scrolls sideways, as the phone's drawer
+     does: two rows pushed the owl off the first screen in free play (865 of 844, the Olive drive's P-390). */
+  .bg-stage > .bg-pad:has(> .bg-key:nth-child(7)) { grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: 48px; grid-template-rows: 48px; overflow-x: auto; overflow-y: hidden; justify-content: start; padding-bottom: 4px; }
   .bg-marks { display: none !important; }
   .bg-controls { margin-top: 0 !important; }
 }
