@@ -2126,3 +2126,57 @@ describe('P108 IW-001 F8 — the cards seen, saved on the profile (lane A)', () 
     expect([none.changed, 'cardsSeen' in none.model.profiles.find((p: any) => p.id === ada), run(ENCODE_SAVE_SCRIPT, { model: none.model }).code]).toEqual([true, false, code]);
   });
 });
+
+describe('P108 s2 (merge) — Draw world hands the kits the job model as the engine wrote it (IW-002 §6), and the 13 as before', () => {
+  const OLD_KEYS = new Set(['kind', 'x', 'y', 'watered', 'colour', 'full', 'text', 'left', 'who', 'say', 'w', 'h']);
+  const drawOf = (world: unknown) => run(DRAW_WORLD_SCRIPT, { world, words: WORD_ROWS, lang: 'en', botName: 'Pip', stepMs: 380, sayN: 0, run: { runId: 'r1' } });
+
+  it('the known-firing half: every one of the 13 requests is drawn with the keys it had before (no job field on any thing, no `holds`)', () => {
+    const ids = REQ_ROWS.map((r: { id: string }) => r.id);
+    expect(ids.length).toBe(REQUESTS.length);
+    for (const id of ids) {
+      const out = drawOf(run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: id }).world);
+      for (const t of out.things) for (const k of Object.keys(t)) expect([id, k, OLD_KEYS.has(k)]).toEqual([id, k, true]);
+      for (const r of out.robots) expect('holds' in r).toBe(false);
+    }
+  });
+
+  it('🔴 a job world: meters, stages, containers, the can on the map and in hand, the hen’s pen and the post box reach the kits with their ids', () => {
+    const world = {
+      map: ['GGGGGGGG', 'GGGLGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGGGB'],
+      things: [
+        { id: 't1', kind: 'tulip', x: 1, y: 0, have: 2, need: 3, color: 'red' },
+        { id: 't2', kind: 'tulip', x: 2, y: 0, have: 0, need: 3, droop: true, color: 'yellow' },
+        { id: 't3', kind: 'site', x: 4, y: 2, have: 2, need: 4, item: 'stone', stage: 'cobbles', walked: 1 },
+        { id: 't4', kind: 'basket', x: 6, y: 4, count: 3, capacity: 4, item: 'egg' },
+        { kind: 'store', x: 0, y: 5, count: 1, capacity: 8, item: 'stone' },
+        { kind: 'bowl', x: 5, y: 5, food: 1, count: 1, capacity: 3, item: 'food' },
+        { kind: 'can', x: 0, y: 3, level: 2, max: 3 },
+        { kind: 'rock', x: 7, y: 0, left: 2, max: 4 },
+        { kind: 'hen', x: 2, y: 4, pen: [1, 3, 3, 5] },
+        { id: 'egg@1,3', kind: 'egg', x: 1, y: 3 },
+        { kind: 'postbox', x: 7, y: 5 }
+      ],
+      robots: [{ id: 'r1', x: 3, y: 3, d: 1, holds: 'can', can: 2, canMax: 3, carry: [] }]
+    };
+    const out = drawOf(world);
+    const by = (k: string) => out.things.filter((t: { kind: string }) => t.kind === k);
+    expect(by('tulip')).toEqual([
+      { kind: 'tulip', x: 1, y: 0, watered: false, colour: 'red', id: 't1', have: 2, need: 3 },
+      { kind: 'tulip', x: 2, y: 0, watered: false, colour: 'yellow', id: 't2', have: 0, need: 3, droop: true }
+    ]);
+    expect(by('site')).toEqual([{ kind: 'site', x: 4, y: 2, id: 't3', have: 2, need: 4, item: 'stone', stage: 'cobbles', walked: 1 }]);
+    expect(by('basket')).toEqual([{ kind: 'basket', x: 6, y: 4, id: 't4', count: 3, capacity: 4, item: 'egg' }]);
+    expect(by('store')).toEqual([{ kind: 'store', x: 0, y: 5, count: 1, capacity: 8, item: 'stone' }]);
+    expect(by('bowl')).toEqual([{ kind: 'bowl', x: 5, y: 5, full: true, count: 1, capacity: 3, item: 'food' }]);
+    expect(by('can')).toEqual([{ kind: 'can', x: 0, y: 3, level: 2, max: 3 }]);
+    expect(by('rock')).toEqual([{ kind: 'rock', x: 7, y: 0, left: 2, max: 4 }]);
+    expect(by('hen')).toEqual([{ kind: 'hen', x: 2, y: 4, pen: [1, 3, 3, 5] }]);
+    expect(by('egg')).toEqual([{ kind: 'egg', x: 1, y: 3, id: 'egg@1,3' }]);
+    expect(by('postbox')).toEqual([{ kind: 'postbox', x: 7, y: 5 }]);
+    expect(out.map.rows[1]).toBe('GGGLGGGG');
+    expect([out.robots[0].holds, out.robots[0].can, out.robots[0].canMax]).toEqual(['can', 2, 3]);
+    // The pen is a copy: the kit never holds the engine's own array.
+    expect(by('hen')[0].pen).not.toBe(world.things[8].pen);
+  });
+});

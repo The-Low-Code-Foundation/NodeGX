@@ -202,6 +202,15 @@ export const DRAW_WORLD_SCRIPT = `${WORD_HELPER}
 // IG-001 D9 (P106 s1): a stone, an egg, the cat's food and the Predict flag are the kit's own sprites; the post box is the
 // B tile itself (legend B: postbox, drawn on path). No emoji in a white pill any more.
 var SPRITE_THINGS = { stone: 1, egg: 1, food: 1 };
+// P108 s2 (merge): the job model's fields reach the kits as the engine wrote them (IW-002 §6; the kits draw meters, stages,
+// levels, the hen's pen and a watched chip by id). A field is copied only when the engine wrote it, so the 13 requests'
+// things are drawn from exactly what they were before.
+var JOB_FIELDS = ['id', 'have', 'need', 'droop', 'count', 'capacity', 'item', 'level', 'max', 'stage', 'walked', 'pen'];
+var JOB_THINGS = { site: 1, basket: 1, store: 1, can: 1, hen: 1, postbox: 1 };
+function withJob(o, t) {
+  for (var f = 0; f < JOB_FIELDS.length; f++) { var v = t[JOB_FIELDS[f]]; if (v !== undefined && v !== null) o[JOB_FIELDS[f]] = Array.isArray(v) ? v.slice() : v; }
+  return o;
+}
 var world = Inputs.world && typeof Inputs.world === 'object' ? Inputs.world : { map: [], things: [], robots: [] };
 var rows = Array.isArray(world.map) ? world.map.slice() : [];
 var things = [];
@@ -210,17 +219,18 @@ var watered = 0, total = 0;
 for (var i = 0; i < list.length; i++) {
   var t = list[i];
   if (!t) continue;
-  if (t.kind === 'tulip') { total++; if (t.watered) watered++; things.push({ kind: 'tulip', x: t.x, y: t.y, watered: !!t.watered, colour: t.color === 'yellow' ? 'yellow' : 'red' }); }
-  else if (t.kind === 'puddle' || t.kind === 'letter' || SPRITE_THINGS[t.kind]) things.push({ kind: t.kind, x: t.x, y: t.y });
-  else if (t.kind === 'bowl') things.push({ kind: 'bowl', x: t.x, y: t.y, full: (Number(t.food) || 0) > 0 });
+  if (t.kind === 'tulip') { total++; if (t.watered) watered++; things.push(withJob({ kind: 'tulip', x: t.x, y: t.y, watered: !!t.watered, colour: t.color === 'yellow' ? 'yellow' : 'red' }, t)); }
+  else if (t.kind === 'puddle' || t.kind === 'letter' || SPRITE_THINGS[t.kind]) things.push(withJob({ kind: t.kind, x: t.x, y: t.y }, t));
+  else if (t.kind === 'bowl') things.push(withJob({ kind: 'bowl', x: t.x, y: t.y, full: (Number(t.food) || 0) > 0 }, t));
   else if (t.kind === 'label') things.push({ kind: 'label', x: t.x, y: t.y, text: String(t.text || '') });
   // IG-002: a rock drawn at its size by what is left; a sign and a note carry their text (the kit does not draw it).
-  else if (t.kind === 'rock') things.push({ kind: 'rock', x: t.x, y: t.y, left: Math.max(0, Math.floor(Number(t.left)) || 0) });
+  else if (t.kind === 'rock') things.push(withJob({ kind: 'rock', x: t.x, y: t.y, left: Math.max(0, Math.floor(Number(t.left)) || 0) }, t));
   else if (t.kind === 'sign' || t.kind === 'note') things.push({ kind: t.kind, x: t.x, y: t.y, text: String(t.text || '') });
   // P106 IG-004: the island's islanders (her open request's title as her bubble), a locked plot's fence and padlock.
   else if (t.kind === 'islander') things.push({ kind: 'islander', x: t.x, y: t.y, who: String(t.who || ''), say: t.sayKey ? String(wordMap(Inputs.words, langOf(Inputs.lang), nameOf(Inputs.botName))[t.sayKey] || '') : '' });
   else if (t.kind === 'fence') things.push({ kind: 'fence', x: t.x, y: t.y, w: Number(t.w) || 1, h: Number(t.h) || 1 });
   else if (t.kind === 'padlock') things.push({ kind: 'padlock', x: t.x, y: t.y });
+  else if (JOB_THINGS[t.kind]) things.push(withJob({ kind: t.kind, x: t.x, y: t.y }, t));
 }
 if (Inputs.showEnd === true && Inputs.endX !== undefined && Inputs.endX !== null && Number(Inputs.endX) >= 0) things.push({ kind: 'flag', x: Number(Inputs.endX), y: Number(Inputs.endY) });
 // IG-003 (R5): the challenge was right: a tick on the tile the child tapped (the real end).
@@ -234,6 +244,7 @@ var rl = Array.isArray(world.robots) ? world.robots : [];
 for (var r = 0; r < rl.length; r++) {
   var lk = rl[r].look && typeof rl[r].look === 'object' ? rl[r].look : {};
   robots.push({ x: rl[r].x, y: rl[r].y, d: rl[r].d, colour: String(lk.colour || Inputs.color || '#FF7A59'), eyes: String(lk.eyes || Inputs.eye || 'round'), hat: String(lk.hat || Inputs.hat || 'none'), name: nameOf(lk.name || Inputs.botName), bump: bump, can: rl[r].can === undefined || rl[r].can === null ? null : rl[r].can, canMax: Number(rl[r].canMax) > 0 ? Number(rl[r].canMax) : ${CAN_MAX}, carry: Array.isArray(rl[r].carry) ? rl[r].carry.slice() : [], accessory: lk.accessory !== undefined ? String(lk.accessory) : Inputs.accessory !== undefined && Inputs.accessory !== null ? String(Inputs.accessory) : 'can' });
+  if (rl[r].holds === 'can') robots[robots.length - 1].holds = 'can';
 }
 var lang = langOf(Inputs.lang);
 var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
