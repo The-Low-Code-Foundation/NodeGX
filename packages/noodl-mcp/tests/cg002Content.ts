@@ -559,7 +559,9 @@ export const HINTS: Readonly<Record<string, Bi>> = {
   // P108 IW-003 (s3 base): the job hints. A run that tried to fill or water with no can in hand; a run that ended with
   // the job part done ({w} of {t} targets full — every mission is a job now, so this replaces "Not quite yet"). Not voiced.
   iw3NoCan: s('{b} needs the can in hand first. Where is it?', '{b} doit d’abord prendre l’arrosoir. Où est-il ?'),
-  iw3Job: s('{w} of {t} done. What is still waiting?', '{w} sur {t}, c’est fait. Qu’est-ce qui attend encore ?')
+  iw3Job: s('{w} of {t} done. What is still waiting?', '{w} sur {t}, c’est fait. Qu’est-ce qui attend encore ?'),
+  // ── P108 IW-003 (lane B): the job is done but not the way it was asked (the goal wants the mission's block). Not voiced.
+  iw3bTrick: s('The job is done! Now teach {b} the way the card asks — with its own block.', 'Le travail est fait ! Maintenant, apprends à {b} comme la carte le demande — avec son bloc à elle.')
 };
 
 export const HINT_KEYS: ReadonlyArray<string> = Object.keys(HINTS);

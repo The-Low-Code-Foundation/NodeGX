@@ -2078,7 +2078,7 @@ var gardenKitBlocks = (function () {
      * kids' start scale (a short program stays big); and when it fits again (a wider window), it zooms back up. Only on a
      * load and a resize: a child's own zoom (+ − ⤢) between them is hers.
      */
-    function fitProgram() {
+    function fitProgram(shrinkOnly) {
       var s = startBlock();
       if (!s || !ed.ws) return;
       try {
@@ -2090,6 +2090,7 @@ var gardenKitBlocks = (function () {
         // The stack's width and the view's are in workspace units: the stack fits at scale' when wide × scale' ≤ view × scale.
         var wide = r.right - r.left + 2 * FIT_MARGIN;
         var want = Math.max(FIT_MIN, Math.min(start, (view.width * scale) / wide));
+        if (shrinkOnly && want >= scale) return;
         if (Math.abs(want - scale) > 0.01) ed.ws.setScale(want);
       } catch (e) {
         /* hidden, or an older Blockly */
@@ -2155,6 +2156,17 @@ var gardenKitBlocks = (function () {
       refreshFields();
       schedule();
       emit();
+      // P108 IW-003 (lane B): a program grown by a tap or a drop is fitted too — shrink only (her own zoom-in stays until
+      // the program no longer fits beside the drawer).
+      fitSoon();
+    }
+    var fitQueued = null;
+    function fitSoon() {
+      if (fitQueued) clearTimeout(fitQueued);
+      fitQueued = setTimeout(function () {
+        fitQueued = null;
+        fitProgram(true);
+      }, 80);
     }
 
     function onFlyoutEvent(e) {

@@ -1415,6 +1415,9 @@ else if (puddles > 0) key = 'hintWet';
 else if (noCans > 0) key = 'iw3NoCan';
 else if (rung >= 1 && rung <= ${OLIVE_RUNG_MAX}) key = 'oliveRung' + rung;
 else if (freePlay && ran) key = 'hintFree';
+// P108 IW-003 (lane B): every target full and the robot home, yet no win — the goal wants the mission's own block (an if,
+// an until, a when): "3 of 3 done. What is still waiting?" would send her looking for a job that is not there.
+else if (ran && job && job.total > 0 && job.full === job.total) key = 'iw3bTrick';
 else if (ran && job && job.total > 0) { key = 'iw3Job'; vars = { w: job.full, t: job.total }; }
 else if (ran && total > 0) { key = 'hintMissed'; vars = { w: done, t: total }; }
 else if (ran) key = 'hintNotYet';

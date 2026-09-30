@@ -2748,4 +2748,19 @@ describe('IW-003 (P108 s3, lane B) — Biscuit: a real wall with his ball by it,
     // The robot never leaves home: the job is done where it stands.
     expect([end.world.robots[0].x, end.world.robots[0].y, end.world.robots[0].d]).toEqual([1, 3, 1]);
   });
+
+  it('the hint when the job is done but not the way the card asks (no if, no when, no until): iw3bTrick — never "3 of 3 done. What is still waiting?"', () => {
+    const hintOf = (r: GardenRequest, program: Block[], seed: number) => {
+      const { end, goal } = goalOn(r, program, seed);
+      return { met: goal.met, key: runScript(CHOOSE_HINT_SCRIPT, { world: end.world, program, run: end.run, goalMet: goal.met, freePlay: false, allowed: [...r.palette] }).key };
+    };
+    expect(hintOf(byId('bowl-if'), parse('L P P R r3[F F L D R]'), 1)).toEqual({ met: false, key: 'iw3bTrick' });
+    expect(hintOf(byId('meow-when'), parse('L P R D L P R D'), 1)).toEqual({ met: false, key: 'iw3bTrick' });
+    // wall-until: a fixed walk on the seed it fits (the job done, no bump) still lacks the until.
+    const fits = [1, 2, 3, 4, 5, 6].map((seed) => ({ seed, h: hintOf(byId('wall-until'), parse('r4[F] L P L r4[F] D'), seed) })).find((x) => x.h.key === 'iw3bTrick');
+    expect(fits && fits.h.met).toBe(false);
+    // Known-firing: the job part done still says how much (iw3Job), and the words exist in both languages.
+    expect(hintOf(byId('bowl-if'), parse('L P R F F L D R'), 1).key).toBe('iw3Job');
+    expect([HINTS.iw3bTrick.en, HINTS.iw3bTrick.fr].every((l) => /\{b\}/.test(l))).toBe(true);
+  });
 });
