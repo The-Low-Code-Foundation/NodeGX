@@ -55,7 +55,8 @@ const pinned = (program: unknown, robotId: string) => ({ program, robotId, wonAt
 
 /** The same program run alone, the way the Workshop runs it: Start world's world, New run, Step + Apply per tick. */
 function solo(r: GardenRequest, program: unknown, robotId: string, ticks: number) {
-  const start = runScript(START_WORLD_SCRIPT, { requests: [r], requestId: r.id, nonce: 0 }).world;
+  // P108 IW-003 (lane S): a seeded request is laid from the seed the island lays its plot with (its id's djb2).
+  const start = runScript(START_WORLD_SCRIPT, { requests: [r], requestId: r.id, nonce: 0, ...(r.seeded ? { seed: helper<number>(ISLAND_ENGINE, 'islSeedOf', r.id) } : {}) }).world;
   start.robots[0].id = robotId;
   let run = runScript(NEW_RUN_SCRIPT, { program, robotId, lang: 'en', runId: 'solo' }).run;
   let world = start;
@@ -82,7 +83,9 @@ describe('IG-004 — the island as a world', () => {
       const aloneT = solo(req('tulips-three'), ref('tulips-three'), 'r1', 400);
       const aloneS = solo(req('path-stones'), ref('path-stones'), 'r2', 400);
       let state = built.state;
-      const n = Math.min(aloneT.length, aloneS.length);
+      // P108 IW-003 (lane S): path-stones is a job plot now, and the island wears it (a rock regrows every WEAR.rock ticks,
+      // which the Workshop never does): the traces are the same up to the first wear tick.
+      const n = Math.min(aloneT.length, aloneS.length, WEAR.rock - 1);
       for (let t = 0; t < n; t++) {
         const out = bare(ISLAND_TICK_SCRIPT, { state });
         state = out.state;
@@ -194,6 +197,7 @@ describe('IG-004 — the island as a world', () => {
       }
       const ms: number[] = [];
       let laps = 0;
+      const round = new Set<string>();
       for (let t = 0; t < 200; t++) {
         ctx.Inputs = { state };
         ctx.Outputs = {};
@@ -203,6 +207,7 @@ describe('IG-004 — the island as a world', () => {
         state = ctx.Outputs.state;
         expect(ctx.Outputs.world.robots.filter((r: any) => r.plot).length).toBe(3);
         laps = Math.max(laps, ...Object.values(state.live).map((l: any) => l.lap));
+        for (const [id, l] of Object.entries(state.live) as Array<[string, any]>) if (l.phase === 'wait' || l.lap >= 1) round.add(id);
       }
       const sorted = [...ms].sort((a, b) => a - b);
       const mean = ms.reduce((a, b) => a + b, 0) / ms.length;
@@ -211,8 +216,11 @@ describe('IG-004 — the island as a world', () => {
       console.log(`IG-004 AC2 tick: 200 ticks × 3 pinned runs — mean ${mean.toFixed(3)} ms, p95 ${p95.toFixed(3)} ms, max ${sorted[sorted.length - 1].toFixed(3)} ms, laps ${laps}`);
       expect(mean).toBeLessThan(5);
       expect(p95).toBeLessThan(5);
-      // The runs really ran round: the path is 7 ticks long, so in 200 ticks it has reset many times.
-      expect(laps).toBeGreaterThan(5);
+      // The runs really ran round. P108 IW-003 (s3 merge): the missions are jobs now — a job plot finishes, walks home and
+      // WAITS (it is never reset), so "reset many times" no longer measures anything; every pinned plot must have finished
+      // its job (phase wait) or gone round (lap ≥ 1) inside the 200 ticks.
+      expect([...round].sort()).toEqual(['path-postbox', 'path-stones', 'tulips-three']);
+      expect(laps).toBeGreaterThanOrEqual(1);
     });
   });
   describe('AC3 / AC4 / AC5 — the island as the page reads it: a win pins the robot, another plot says where it works, home frees it, a locked plot says why', () => {

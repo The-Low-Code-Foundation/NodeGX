@@ -51,7 +51,28 @@ const SEEDS = [1, 2, 3] as const;
 // [M] Mamie's lane:
 const NAIVE_M: Record<string, Block[]> = {};
 // [S] Sami's stones lane:
-const NAIVE_S: Record<string, Block[]> = {};
+/** A walk as a child records it with the pad: F forward, L left, R right, K pick up, D put down. */
+const walkS = (src: string): Block[] => src.split(' ').map((c, i) => ({ id: i + 1, t: ({ F: 'fwd', L: 'left', R: 'right', K: 'pick', D: 'put' } as Record<string, Block['t']>)[c] }));
+const NAIVE_S: Record<string, Block[]> = {
+  // The path taught on day 1 (seed 1: the rocks at (2,1) and (5,1)), step by step — what go to nearest walked that day.
+  // The next day the rocks lie elsewhere: the first pick reaches for a rock that is not there, and no square fills.
+  'path-stones': walkS('L F K K K K R F R D D D D R R F L K K K K R R F R F D D D D L F L K K K K R R D D D D R R K K K K R F R D D D D'),
+  // The bench by fours: a fixed "pick four" from the nearest rock, twice. On a day the nearest rock holds fewer than
+  // four, the fifth pick finds it used up (a bump) and the bench stays short; on a day of fours it is built.
+  'sami-bench': [
+    {
+      id: 1,
+      t: 'repeat',
+      n: 2,
+      body: [
+        { id: 2, t: 'go_nearest', slots: { kind: 'rock' } },
+        { id: 3, t: 'repeat', n: 4, body: [{ id: 4, t: 'pick' }] },
+        { id: 5, t: 'go_to', slots: { thing: { id: 'bench', kind: 'site', x: 4, y: 2 } } },
+        { id: 6, t: 'repeat', n: 4, body: [{ id: 7, t: 'put' }] }
+      ]
+    }
+  ]
+};
 // [P] the post lane:
 // envelopes: the child who skips Olive and walks the letters to the three doors in a row — the order that happens to be
 // seed 1's deal (Biscuit, Mamie Rose, Sami). On seeds 2 and 3 a door refuses the letter (wrongDoor) and the job stays open.

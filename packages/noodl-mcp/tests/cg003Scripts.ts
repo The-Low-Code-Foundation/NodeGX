@@ -208,6 +208,8 @@ var SPRITE_THINGS = { stone: 1, egg: 1, food: 1 };
 // levels, the hen's pen and a watched chip by id). A field is copied only when the engine wrote it, so the 13 requests'
 // things are drawn from exactly what they were before.
 var JOB_FIELDS = ['id', 'have', 'need', 'droop', 'count', 'capacity', 'item', 'level', 'max', 'stage', 'walked', 'pen'];
+// P108 IW-003 (lane S): a site's build (the bench) reaches the kits, which draw it by stage instead of a path square.
+JOB_FIELDS.push('build');
 var JOB_THINGS = { site: 1, basket: 1, store: 1, can: 1, hen: 1, postbox: 1 };
 // P108 IW-003 (lane P): a door (its letters and its owner's name) reaches the kits too.
 JOB_FIELDS.push('owner');
@@ -603,6 +605,8 @@ for (var k = 0; k < HATS.length; k++) {
 }
 var st = Array.isArray(Inputs.stickers) ? Inputs.stickers : [];
 var STICKER = { 'can+': ['🪣', 'ig5UpCan'], 'basket+': ['🧺', 'ig5UpBasket'], boots: ['🥾', 'ig5UpBoots'], letter: ['✉️', 'stickerLetter'], paw: ['🐾', 'stickerPaw'], tulip: ['🌷', 'stickerTulip'], bell: ['🔔', 'itemBell'], basket: ['🧺', 'itemBasket'], gnome: ['🧙', 'itemGnome'], seeds: ['🌱', 'seeds'], note: ['📝', 'stickerNote'], flower: ['🌹', 'stickerFlower'], thanks: ['💐', 'stickerThanks'], envelope: ['💌', 'iw3pStickerEnvelope'] };
+// P108 IW-003 (lane S): Sami's bench sticker.
+STICKER.bench = ['🪑', 'iw3sStickerBench'];
 for (var s = 0; s < st.length; s++) { var d = STICKER[st[s]] || ['⭐', '']; stickers.push({ id: String(st[s]), label: d[0] + ' ' + (w[d[1]] || String(st[s])) }); }
 Outputs.paints = paints;
 Outputs.eyes = eyes;

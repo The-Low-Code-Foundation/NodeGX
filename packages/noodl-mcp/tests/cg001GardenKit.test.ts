@@ -1178,3 +1178,57 @@ describe('P108 IW-003 (lane B) — garden-kit draws Biscuit’s ball and food, a
     expect(body(draw({ map: Array.from({ length: 6 }, () => 'G'.repeat(8)), things: tulips.map((t, i) => ({ ...t, x: i })), robots: [] }))).not.toContain('data-wide="1"');
   });
 });
+
+// ── P108 IW-003 (lane S): Sami's bench drawn by stage, from the world JSON the engine writes ────────────────────────────
+describe('P108 IW-003 lane S — garden-kit draws Sami’s bench by stage (a site with build: bench), from the engine’s own world', () => {
+  /* eslint-disable @typescript-eslint/no-var-requires */
+  const { NEW_RUN_SCRIPT, STEP_SCRIPT, APPLY_DELTA_SCRIPT, runScript } = require('./cg002Scripts');
+  /* eslint-enable @typescript-eslint/no-var-requires */
+  let kit: KitModule;
+  beforeAll(() => {
+    ({ kit } = loadKit());
+  });
+  const node = () => kit.reactNodes.find((n) => n.name === 'garden-kit.Garden')!;
+  const draw = (w: any) => renderToStaticMarkup(React.createElement(node().getReactComponent(), { map: { rows: w.map }, things: w.things, robots: w.robots }));
+  const cellOf = (html: string, x: number, y: number) => {
+    const at = html.indexOf(`data-x="${x}" data-y="${y}"`);
+    return html.slice(html.lastIndexOf('<button', at), html.indexOf('</button>', at));
+  };
+  /** Cobble facing the bench with n stones in his hod, the bench at have: the engine puts them one by one. */
+  const built = (have: number, puts: number) => {
+    let w: any = { map: ['GGG', 'GGG'], things: [{ kind: 'site', id: 'bench', x: 1, y: 0, have, need: 8, item: 'stone', build: 'bench' }], robots: [{ id: 'pip', x: 1, y: 1, d: 0, carry: Array(puts).fill('stone'), basket: 8 }] };
+    let run = runScript(NEW_RUN_SCRIPT, { program: Array.from({ length: puts }, (_, i) => ({ id: i + 1, t: 'put' })), robotId: 'pip', lang: 'en' }).run;
+    for (let i = 0; i < puts + 1 && !run.done; i++) {
+      const st = runScript(STEP_SCRIPT, { run, world: w, answer: null });
+      w = runScript(APPLY_DELTA_SCRIPT, { world: w, delta: st.delta }).world;
+      run = st.run;
+    }
+    return w;
+  };
+
+  it('🔴 the five stages, each from a world the engine wrote: 0 pegs · 1 a leg · 2 two legs · 3 the seat · 4 built with Sami sitting; the meter counts the stones, green when built', () => {
+    const job = (node() as any).world.job;
+    const seen: Array<[number, string, boolean, string]> = [];
+    for (const puts of [0, 2, 4, 6, 8]) {
+      const w = built(0, puts);
+      expect(w.things[0].have).toBe(puts);
+      const cell = cellOf(draw(w), 1, 0);
+      const stage = (cell.match(/data-bench="(\d)"/) || [])[1];
+      seen.push([puts, stage, /data-sits="bench"/.test(cell), (cell.match(/class="gd-meter([^"]*)" data-meter="([^"]+)"/) || []).slice(1).join('|')]);
+      expect(job.benchStage(w.things[0])).toBe(Number(stage));
+      // A bench is never drawn as a path square, and never as the path's ground.
+      expect(cell).not.toMatch(/gd-site-path|gd-site-cobbles/);
+    }
+    expect(seen).toEqual([
+      [0, '0', false, ' gd-m-stone gd-meter-top|0/8'],
+      [2, '1', false, ' gd-m-stone gd-meter-top|2/8'],
+      [4, '2', false, ' gd-m-stone gd-meter-top|4/8'],
+      [6, '3', false, ' gd-m-stone gd-meter-top|6/8'],
+      [8, '4', true, ' gd-m-stone gd-full gd-meter-top|8/8']
+    ]);
+    // Known-firing beside it: the same site with no build, full, is a path square (the path's own look).
+    const path = { map: ['GGG'], things: [{ kind: 'site', id: 's', x: 1, y: 0, have: 4, need: 4 }], robots: [] };
+    expect(cellOf(draw(path), 1, 0)).toMatch(/gd-site-path/);
+    expect(cellOf(draw(path), 1, 0)).not.toMatch(/data-bench/);
+  });
+});

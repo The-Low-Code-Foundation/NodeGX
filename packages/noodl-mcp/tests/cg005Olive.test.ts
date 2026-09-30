@@ -17,6 +17,8 @@ import * as os from 'os';
 import * as path from 'path';
 import { BAND_PALETTE, HINTS, REQUESTS, WORDS, WORD_KEYS } from './cg002Content';
 import { KIT_PALETTE_SCRIPT } from './cg003Scripts';
+// P108 IW-003 (lane S): Start world's own seed helper, for the requests on the job model.
+import { ENGINE, helper } from './cg002Scripts';
 import { APPLY_DELTA_SCRIPT, DIAL_TEMPERATURE, GOAL_SCRIPT, NEW_RUN_SCRIPT, PALETTE_SCRIPT, STEP_SCRIPT, portsOf, runScript } from './cg002Scripts';
 // P108 IW-003 (lane P): the world a request opens on, laid by the engine's own seedWorld.
 import { ENGINE, helper } from './cg002Scripts';
@@ -666,8 +668,9 @@ describe('CG-005 — Olive in the game', () => {
 
   describe('IG-006 (P106) — Olive reads: three blocks a child can see, wire and doubt', () => {
     const request = (id: string) => REQUESTS.find((r) => r.id === id)!;
-    // P108 IW-003 (lane P): laid as Start world lays it (seed 1): a request with a job carries it onto its world.
-    const worldOf = (r: (typeof REQUESTS)[number]) => helper<any>(ENGINE, 'seedWorld', { map: [...r.map], things: r.things.map((t) => ({ ...t })), robots: [{ id: 'pip', x: r.robotStart.x, y: r.robotStart.y, d: r.robotStart.d, carry: [...(r.robotStart.carry || [])] }] }, JSON.parse(JSON.stringify(r)), 1);
+    // P108 IW-003 (lane S): the world as Start world lays it — the robot's can when the request gives one, the job (and a
+    // seeded layout, seed 1) copied on, so a mission on the job model can reach job_done here too.
+    const worldOf = (r: (typeof REQUESTS)[number]) => helper<any>(ENGINE, 'seedWorld', { map: [...r.map], things: r.things.map((t) => ({ ...t })), robots: [{ id: 'pip', x: r.robotStart.x, y: r.robotStart.y, d: r.robotStart.d, carry: [...(r.robotStart.carry || [])], ...(r.robotStart.can !== undefined ? { can: r.robotStart.can } : {}), ...(r.robotStart.canMax !== undefined ? { canMax: r.robotStart.canMax } : {}) }] }, JSON.parse(JSON.stringify(r)), 1);
     const words = (lang: 'en' | 'fr') => runScript(KIT_PALETTE_SCRIPT, { palette: [], lang, words: WORD_ROWS }); // (a no-op run: keeps the import honest)
 
     it('AC1: at band 10–12 the palette lists exactly read, is it a…?, say under Olive (olive:<rung>, the owl); at 7–9 none; no ask:<rung> id anywhere', () => {

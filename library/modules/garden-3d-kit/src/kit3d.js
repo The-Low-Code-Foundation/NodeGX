@@ -1098,6 +1098,53 @@
     return b;
   }
 
+  // ── P108 IW-003 (lane S): Sami's bench — a site with build 'bench', drawn by stage (the 2D kit's five stages) ────────
+  /** The bench's stage by its stones: 0 pegs and string on dirt · 1 a leg · 2 two legs · 3 the seat · 4 built (the back; Sami sits). */
+  function benchStage(t) {
+    var need = (t && wholeOf(t.need)) || 1;
+    var have = Math.min((t && wholeOf(t.have)) || 0, need);
+    return have >= need ? 4 : Math.min(3, Math.floor((have * 4) / need));
+  }
+  JOB_LOOK.benchStage = benchStage;
+  var pathSiteBuilder = THING_BUILDERS.site;
+  THING_BUILDERS.site = function (THREE, mat, t, out) {
+    if (!t || t.build !== 'bench') return pathSiteBuilder(THREE, mat, t, out);
+    var g = new THREE.Group();
+    var st = benchStage(t);
+    var add = function (m) {
+      g.add(m);
+      out.meshCount += 1;
+      return m;
+    };
+    // The ground: dirt while it is built, gravel once it stands.
+    add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.94, 0.05, 0.94), mat(st === 4 ? PALETTE.gravel : PALETTE.dirt), 0, 0.025, 0));
+    // Stage 0–2: the builder's pegs at the seat's two ends (the plan on the ground).
+    if (st < 3) {
+      add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.05, 0.3, 0.05), mat(PALETTE.fence), -0.42, 0.15, 0));
+      add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.05, 0.3, 0.05), mat(PALETTE.fence), 0.42, 0.15, 0));
+      add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.84, 0.01, 0.01), mat(PALETTE.white), 0, 0.28, 0));
+    }
+    // The legs rise first (one at stage 1, both at 2), then the seat (3), then the back (4).
+    if (st >= 1) add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.14, 0.26, 0.34), mat(PALETTE.rock), -0.28, 0.18, 0)).name = 'leg';
+    if (st >= 2) add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.14, 0.26, 0.34), mat(PALETTE.rock), 0.28, 0.18, 0)).name = 'leg';
+    if (st >= 3) add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.8, 0.08, 0.42), mat(PALETTE.rockLight), 0, 0.35, 0)).name = 'seat';
+    if (st >= 4) {
+      // The back on the north side (−z): the bench faces the path below it, and the camera.
+      add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.76, 0.22, 0.07), mat(PALETTE.cobble), 0, 0.56, -0.18)).name = 'back';
+      // Sami sits on it: the islander (his cap, his satchel), lowered onto the seat and turned to face the path (an
+      // islander faces −z; half a turn faces +z, the path and the camera).
+      var sami = THING_BUILDERS.islander(THREE, mat, { kind: 'islander', who: 'sami' }, out);
+      sami.scale.set(0.8, 0.62, 0.8);
+      sami.rotation.y = Math.PI;
+      sami.position.set(0, 0.39, -0.02);
+      sami.name = 'sami';
+      g.add(sami);
+    }
+    g.userData.stage = 'bench' + st;
+    g.userData.bench = st;
+    return g;
+  };
+
   /**
    * The load a robot shows on its back: the LAST entry of `carry` (brief §4). stone, letter, egg and food are drawn as
    * themselves (as the 2D kit draws them, lane A's IG-002); anything else is the generic parcel.
@@ -1314,6 +1361,8 @@
       g.userData.meter = meterOf(t);
       g.userData.index = typeof i === 'number' ? i : -1;
       g.userData.lift = METER_LIFT[t.kind] || 0.62;
+      // P108 IW-003 (lane S): a bench's chip floats over its back and Sami, not at a path square's height.
+      if (t.kind === 'site' && t.build === 'bench') g.userData.lift = 1.02;
       g.userData.kind = t.kind;
       g.userData.x = x;
       g.userData.y = y;

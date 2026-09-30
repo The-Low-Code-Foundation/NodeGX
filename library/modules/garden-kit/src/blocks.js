@@ -609,7 +609,8 @@ var gardenKitBlocks = (function () {
     if (Array.isArray(list)) {
       for (var i = 0; i < list.length; i++) {
         var r = list[i];
-        if (r && typeof r.key === 'string' && r.key.indexOf('iw4') === 0) out[r.key] = String(r[lang] || r.en || out[r.key] || '');
+        // P108 IW-003 (lane S): + a thing's own name by its id (iw3sK_<id>) and its states' words (iw3sS_<state>_<id>).
+        if (r && typeof r.key === 'string' && (r.key.indexOf('iw4') === 0 || r.key.indexOf('iw3sK_') === 0 || r.key.indexOf('iw3sS_') === 0)) out[r.key] = String(r[lang] || r.en || out[r.key] || '');
       }
     }
     return out;
@@ -741,6 +742,9 @@ var gardenKitBlocks = (function () {
     // The thing's word, and its number when the world named it (tulip 2): never its tile's coordinates.
     // (An id the engine mints for a thing it reserved, kind@x,y, carries no number of its own.)
     var n = typeof ref.id === 'string' && ref.id.indexOf('@') === -1 ? (ref.id.match(/(\d+)$/) || [])[1] : '';
+    // P108 IW-003 (lane S): a thing with a name of its own (Sami's bench is a site, not a path square) wears it.
+    var own = typeof ref.id === 'string' ? ctx.words['iw3sK_' + ref.id] : '';
+    if (own) return own;
     return kindWord(ctx, ref.kind) + (n ? ' ' + n : '');
   }
 
@@ -1101,7 +1105,10 @@ var gardenKitBlocks = (function () {
       s.appendField(new KidPick('', function () {
         var b = this.getSourceBlock();
         var c = ctxOf(b);
-        return statesOf(b && b.kind_).map(function (id) { return [c.words['iw4S_' + id] || id, id]; });
+        // P108 IW-003 (lane S): a thing named by its id says its states in its own words (the bench "is built", not "is path").
+        var chip = b && b.getInputTargetBlock && b.getInputTargetBlock('THING');
+        var cid = chip && chip.ref_ && typeof chip.ref_.id === 'string' ? chip.ref_.id : '';
+        return statesOf(b && b.kind_).map(function (id) { return [(cid && c.words['iw3sS_' + id + '_' + cid]) || c.words['iw4S_' + id] || id, id]; });
       }, 'state'), 'STATE');
       s.appendField(new KidPick('1', function () { return range(0, 9); }, 'n'), 'N');
       s.appendField(new KidPick('', function () { var c = ctxOf(this.getSourceBlock()); return WHAT_KINDS.map(function (k) { return [kindWord(c, k), k]; }); }, 'what'), 'WHAT');

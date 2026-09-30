@@ -687,6 +687,32 @@ withDeployedSite({ dir: DIR, gpu: true, chromeArgs: ['--use-angle=swiftshader', 
       bars.length === 39 && neighbours > 0 && hit.length === 0 && bars.every((b) => b.w <= 12.5 && b.wide === '1'), readings.iw003b.bars);
   }
 
+  // ══ P108 IW-003 (lane S): Sami's bench in 3D, put by put, from worlds the ENGINE wrote ══
+  {
+    await page.setViewport({ width: 1024, height: 800 });
+    await setVar('watch', '');
+    await setVar('picking', false);
+    await setVar('bubble', '');
+    const benchAfter = (puts) =>
+      engineRun(ENG, { map: ['GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPP', 'GGGGGGGG', 'GGGGGGGG'], things: [{ kind: 'site', id: 'bench', x: 4, y: 2, have: 0, need: 8, item: 'stone', build: 'bench' }, { kind: 'site', id: 's1', x: 2, y: 2, have: 4, need: 4, item: 'stone' }], robots: [{ id: 'pip', x: 4, y: 3, d: 0, carry: Array(8).fill('stone'), basket: 8, name: 'Cobble', colour: '#7A8CA3', accessory: 'hod' }] }, Array.from({ length: puts }, (_, i) => ({ id: i + 1, t: 'put' })));
+    const BENCH3 = `(() => { const eng = ${ROOT}.gd3; const sites = eng.built.things.filter((g) => g.userData.kind === 'site'); const bench = sites.find((g) => g.userData.bench !== undefined); const names = []; if (bench) bench.traverse((o) => { if (o.name) names.push(o.name); }); const chip = [...document.querySelectorAll('.gd3-meter')].find((c) => c.getAttribute('data-kind') === 'site' && c.getAttribute('data-meter').endsWith('/8')); return { bench: bench ? bench.userData.bench : null, parts: names.sort().join(' '), path: sites.filter((g) => g.userData.bench === undefined).map((g) => g.userData.stage).join(','), chip: chip ? chip.getAttribute('data-meter') + (chip.classList.contains('gd3-full') ? ':full' : '') : null, meshes: eng.meshCount }; })()`;
+    const benches3 = [];
+    for (const puts of [0, 2, 4, 6, 8]) {
+      const w = benchAfter(puts);
+      await setJson('map', { rows: w.map });
+      await setJson('things', w.things);
+      await setJson('robots', w.robots);
+      await setJson('focus', { x: 0, y: 0, w: 8, h: 6 });
+      await setVar('camera', 'plot');
+      await wait(900);
+      benches3.push({ puts, ...(await evaluate(BENCH3)) });
+      await shot(`iw003s-3d-bench-${puts}`);
+    }
+    readings.iw003s = { benches: benches3 };
+    check('IW-003 lane S (3D): the engine’s bench, put by put — pegs (0/8) · a leg · two legs · the seat · the back with Sami sitting (8/8, green); the full path square beside it stays a path square',
+      JSON.stringify(benches3.map((b) => [b.bench, b.parts, b.chip])) === JSON.stringify([[0, '', '0/8'], [1, 'leg', '2/8'], [2, 'leg leg', '4/8'], [3, 'leg leg seat', '6/8'], [4, 'back leg leg sami seat', '8/8:full']]) && benches3.every((b) => b.path === 'path'), benches3);
+  }
+
   check('0 console errors through the whole drive', page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));
   return { dir: DIR, results, readings, consoleErrors: page.consoleErrors.slice(), networkErrors: page.networkErrors.slice() };
 })

@@ -264,27 +264,40 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     referenceProgram: [blk('repeat', { n: 3, body: b1('fill', 'left', 'left', 'fwd', 'water', 'right', 'fwd', 'right', 'fwd') })]
   },
   {
-    // CG-006 §2 row 2b, rewritten by IG-002 (R3): the basket starts EMPTY and a rock of four stands on the grass beside
-    // the start (2,2). Turn to it, pick four stones, turn back, and lay them from (3,3) to (6,3), towards the post box.
+    // CG-006 §2 row 2b, rewritten by IG-002 (R3), then by P108 IW-003 (lane S) as a JOB: four squares of dirt at (3..6, 3)
+    // between Sami's path and the post box, four stones each (dirt → gravel → cobbles → path); two rocks of eight are the
+    // source, Cobble's hod of four the carrier. Each trip fills one square: go to the nearest rock, pick four, go to the
+    // nearest square that is not path yet, put four — four trips, a repeat. The rocks lie somewhere new each day (seeded):
+    // a walk taught on one day misses the rock the next, go to nearest finds it. The path reaches the post box → Cobble
+    // walks home; the busiest square loses a stone (wear) and Cobble goes back.
     id: 'path-stones',
     islander: 'sami',
     band: 1,
     plot: { x: 10, y: 8 },
     tricks: [2],
     map: ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPGGGGB', 'GWWGGRGG', 'GGGGGTGG'],
-    things: [{ kind: 'rock', x: 2, y: 2, left: 4 }],
-    robotStart: { x: 2, y: 3, d: 1, basket: 4 },
-    goal: [
-      { name: 'thing_at', args: ['stone', 3, 3] },
-      { name: 'thing_at', args: ['stone', 4, 3] },
-      { name: 'thing_at', args: ['stone', 5, 3] },
-      { name: 'thing_at', args: ['stone', 6, 3] }
+    things: [
+      { kind: 'site', id: 's1', x: 3, y: 3, have: 0, need: 4, item: 'stone' },
+      { kind: 'site', id: 's2', x: 4, y: 3, have: 0, need: 4, item: 'stone' },
+      { kind: 'site', id: 's3', x: 5, y: 3, have: 0, need: 4, item: 'stone' },
+      { kind: 'site', id: 's4', x: 6, y: 3, have: 0, need: 4, item: 'stone' },
+      { kind: 'rock', id: 'r1', x: 1, y: 1, left: 8, max: 8 },
+      { kind: 'rock', id: 'r2', x: 5, y: 1, left: 8, max: 8 }
     ],
-    palette: ['fwd', 'left', 'right', 'pick', 'put', 'repeat'],
+    robotStart: { x: 2, y: 3, d: 1, basket: 4 },
+    goal: { name: 'job_done' },
+    palette: ['fwd', 'left', 'right', 'pick', 'put', 'repeat', 'go_nearest'],
     needs: 'cobble',
     reward: { kind: 'seed', id: 'seeds', from: 'sami' },
     copyKeys: { title: 'rqStonesTitle', blurb: 'rqStonesBlurb', line: 'rqStonesLine', reward: 'seeds', gift: 'giftSeeds' },
-    referenceProgram: [blk('left'), blk('repeat', { n: 4, body: b1('pick') }), blk('right'), blk('repeat', { n: 4, body: b1('put', 'fwd') })]
+    job: { targets: ['s1', 's2', 's3', 's4'], home: { x: 2, y: 3, d: 1 } },
+    seeded: { place: [{ thing: 'r1', among: [[1, 1], [2, 1], [0, 2]] }, { thing: 'r2', among: [[5, 1], [6, 2], [4, 5], [6, 1]] }] },
+    referenceProgram: [
+      blk('repeat', {
+        n: 4,
+        body: [blk('go_nearest', { slots: { kind: 'rock' } }), blk('repeat', { n: 4, body: b1('pick') }), blk('go_nearest', { slots: { kind: 'site' } }), blk('repeat', { n: 4, body: b1('put') })]
+      })
+    ]
   },
   {
     // P108 IW-003 (lane B): Biscuit's bowls as a job. The food sack (a store of food, 0,2) is the source, Cobble's hands
@@ -452,6 +465,8 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
       blk('do', { slots: { name: 'row' } })
     ]
   },
+  // ── P108 IW-003 (lane S): Sami's bench — Cobble's first build (a site with build: 'bench', need 8), slot (46, 8) (R6) ──
+  SAMI_BENCH(),
   // ── P106 IG-006 (lane C): three requests that carry Olive's three blocks, band 10–12, Pip (appended; IG-005's Echo later).
   ...IG006_REQUESTS()
 ];
@@ -739,9 +754,9 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   rqDoorTitle: s('Water the tulip by my door', 'Arrose la tulipe près de ma porte'),
   rqDoorBlurb: s('Steps in order', 'Des pas dans l’ordre'),
   rqDoorLine: s('"There is one tulip by my front door, and she is thirsty. Can {b} give her a drink?"', '« Il y a une tulipe près de ma porte, et elle a soif. {b} peut lui donner à boire ? »'),
-  rqStonesTitle: s('Lay four stones on the path', 'Pose quatre pierres sur le chemin'),
+  rqStonesTitle: s('Build the path to the post box', 'Construis le chemin jusqu’à la boîte aux lettres'),
   rqStonesBlurb: s('Repeat', 'Répéter'),
-  rqStonesLine: s('"My path stops too soon. Take four stones from the rock, and lay them all the way to the post box!"', '« Mon chemin s’arrête trop tôt. Prends quatre pierres dans le rocher, et pose-les jusqu’à la boîte aux lettres ! »'),
+  rqStonesLine: s('"Four squares are still dirt. Four stones turn a square into path, and {b}’s hod holds four. The rocks are not always in the same place!"', '« Quatre cases sont encore de la terre. Quatre pierres font d’une case un chemin, et la hotte de {b} en porte quatre. Les rochers ne sont pas toujours au même endroit ! »'),
   // Rewards.
   hatNone: s('None', 'Aucun'),
   hatCap: s('Cap', 'Casquette'),
@@ -913,7 +928,13 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   iw3pStickerEnvelope: s('Envelope sticker', 'Autocollant enveloppe'),
   iw3pGiftEnvelope: s('An envelope sticker, from Mamie Rose', 'Un autocollant enveloppe, offert par Mamie Rose'),
   iw3pPosted: s('Delivered!', 'Livrée !'),
-  iw3pWrongDoor: s('Not this door! Whose name is on the letter?', 'Pas cette porte ! Quel nom est écrit sur la lettre ?')
+  iw3pWrongDoor: s('Not this door! Whose name is on the letter?', 'Pas cette porte ! Quel nom est écrit sur la lettre ?'),
+  // ── P108 IW-003 (lane S): Sami's bench (the first build) — the card, the reward, the gift ──
+  iw3sBenchTitle: s('Build Sami a bench', 'Construis un banc pour Sami'),
+  iw3sBenchBlurb: s('Repeat until', 'Répéter jusqu’à'),
+  iw3sBenchLine: s('"I would love a bench to sit on. It takes eight stones: two full hods. The rocks hold more stones some days and fewer on others, so fill the hod until it is full, and keep going until my bench is built!"', '« J’aimerais tant un banc pour m’asseoir. Il faut huit pierres : deux hottes pleines. Les rochers ont plus de pierres certains jours, moins d’autres jours : remplis la hotte jusqu’à ce qu’elle soit pleine, et continue jusqu’à ce que mon banc soit construit ! »'),
+  iw3sStickerBench: s('Bench sticker', 'Autocollant banc'),
+  iw3sGiftBench: s('A bench sticker, from Sami', 'Un autocollant banc, offert par Sami')
 };
 
 /** The word keys, for the generated translate script and the gate. */
@@ -974,27 +995,35 @@ function IG006_REQUESTS(): GardenRequest[] {
       ]
     },
     {
+      // P108 IW-003 (lane S): as today, with the can — Echo carries an empty can of three (the robot's own, IG-002) and
+      // fills it at the pond below the start before Olive is asked about each thing; the two flowers are the targets
+      // (a drink each, a meter), the rocks are rock sources (a max: they regrow when Cobble mines them one day). Home is
+      // the start: when both flowers have drunk, Echo walks back.
       id: 'rock-flower',
       islander: 'sami',
       band: 2,
       plot: { x: 28, y: 8 },
       tricks: [4],
-      map: ['GGTGGGTH', 'GGGGGGGG', 'GFGFGGGG', 'PPPPPPPP', 'GWWGGGGG', 'GGGGGTGG'],
+      map: ['GGTGGGTH', 'GGGGGGGG', 'GFGFGGGG', 'PPPPPPPP', 'WWWGGGGG', 'GGGGGTGG'],
       things: [
         at('sign', 0, 2, { text: 'The tulips want water today.' }),
-        at('tulip', 1, 2, { watered: false, color: 'red' }),
-        at('rock', 2, 2, { left: 4 }),
-        at('tulip', 3, 2, { watered: false, color: 'red' }),
-        at('rock', 4, 2, { left: 4 })
+        at('tulip', 1, 2, { id: 't1', watered: false, color: 'red', have: 0, need: 1 }),
+        at('rock', 2, 2, { left: 4, max: 4 }),
+        at('tulip', 3, 2, { id: 't2', watered: false, color: 'red', have: 0, need: 1 }),
+        at('rock', 4, 2, { left: 4, max: 4 })
       ],
-      robotStart: { x: 0, y: 3, d: 1 },
-      goal: goal([{ name: 'every_tulip_watered' }, { name: 'no_puddle' }, { name: 'uses', args: ['olive:is-it-a', 1] }, { name: 'senses', args: ['olive_says:yes', 1] }]),
-      palette: ['fwd', 'left', 'right', 'water', 'repeat', 'if'],
+      robotStart: { x: 0, y: 3, d: 1, can: 0, canMax: 3 },
+      goal: goal([{ name: 'job_done' }, { name: 'no_puddle' }, { name: 'uses', args: ['olive:is-it-a', 1] }, { name: 'senses', args: ['olive_says:yes', 1] }]),
+      palette: ['fwd', 'left', 'right', 'water', 'fill', 'repeat', 'if'],
       needs: 'echo',
       rungs: ['is-it-a'],
       reward: { kind: 'sticker', id: 'flower', from: 'sami' },
       copyKeys: { title: 'rqFlowerTitle', blurb: 'rqFlowerBlurb', line: 'rqFlowerLine', reward: 'stickerFlower', gift: 'giftFlower' },
+      job: { targets: ['t1', 't2'], home: { x: 0, y: 3, d: 1 } },
       referenceProgram: [
+        blk('right'),
+        blk('fill'),
+        blk('left'),
         blk('repeat', {
           n: 4,
           body: [blk('fwd'), blk('left'), olive('is-it-a', { kind: 'a flower', times: '3' }), blk('if', { slots: { sensor: 'olive_says:yes' }, body: b1('water') }), blk('right')]
@@ -1073,6 +1102,54 @@ function IG006_REQUESTS(): GardenRequest[] {
       seeded: { shuffle: { things: ['e1', 'e2', 'e3'], field: 'to', values: ['Mamie Rose', 'Sami', 'Biscuit'] } }
     }
   ];
+}
+
+// ── P108 IW-003 (lane S): Sami's bench, appended to REQUESTS above (declared here, hoisted) ──────────────────────
+
+/**
+ * P108 IW-003 (lane S): the first build (IW-003 §4, "a job with a big meter"). Sami wants a bench beside his path: ONE
+ * site with `build: 'bench'` that needs 8 stones — two hods of four — and rises in stages as they land (both kits draw it
+ * by have/need); built, Sami sits on it. The source: three rocks whose stones differ each day (`choose` on `left`, seeded),
+ * so "pick four" runs dry on one day and not on another; the lesson is `until`: fill the hod until it is full (the
+ * nearest rock that still has stones: go to nearest skips a used-up one), take it to the bench, empty it, and keep going
+ * until the bench is built. Band 10–12 (the conditions are things: the hod, the bench); the bench blocks at every stage
+ * (a building is walked round, never over) and a finished one never reads as path.
+ */
+function SAMI_BENCH(): GardenRequest {
+  const bench = { id: 'bench', kind: 'site', x: 4, y: 2 };
+  const is = (thing: Record<string, unknown>, state: string) => ({ op: 'is', thing, state });
+  return {
+    id: 'sami-bench',
+    islander: 'sami',
+    band: 2,
+    plot: { x: 46, y: 8 },
+    tricks: [3],
+    map: ['GGGGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPP', 'GGGGGGGG', 'TGGGGGGT'],
+    things: [
+      { kind: 'site', id: 'bench', x: 4, y: 2, have: 0, need: 8, item: 'stone', build: 'bench' },
+      { kind: 'rock', id: 'r1', x: 2, y: 5, left: 4, max: 6 },
+      { kind: 'rock', id: 'r2', x: 5, y: 5, left: 4, max: 6 },
+      { kind: 'rock', id: 'r3', x: 6, y: 1, left: 4, max: 6 }
+    ],
+    robotStart: { x: 1, y: 3, d: 1, basket: 4 },
+    goal: { name: 'job_done' },
+    palette: ['fwd', 'left', 'right', 'pick', 'put', 'until', 'go_nearest', 'go_to'],
+    needs: 'cobble',
+    reward: { kind: 'sticker', id: 'bench', from: 'sami' },
+    copyKeys: { title: 'iw3sBenchTitle', blurb: 'iw3sBenchBlurb', line: 'iw3sBenchLine', reward: 'iw3sStickerBench', gift: 'iw3sGiftBench' },
+    job: { targets: ['bench'], home: { x: 1, y: 3, d: 1 } },
+    seeded: { choose: [{ thing: 'r1', field: 'left', among: [2, 3, 4] }, { thing: 'r2', field: 'left', among: [2, 4, 6, 3] }, { thing: 'r3', field: 'left', among: [4, 6] }] },
+    referenceProgram: [
+      blk('until', {
+        slots: { cond: is(bench, 'done') },
+        body: [
+          blk('until', { slots: { cond: is({ ref: 'held' }, 'full') }, body: [blk('go_nearest', { slots: { kind: 'rock' } }), blk('pick')] }),
+          blk('go_to', { slots: { thing: bench } }),
+          blk('until', { slots: { cond: is({ ref: 'held' }, 'empty') }, body: b1('put') })
+        ]
+      })
+    ]
+  };
 }
 
 // ── P106 IG-004 (lane E): the island — its size, its base map, free play's plot and the robots' home ─────────────

@@ -1546,3 +1546,45 @@ describe('P108 IW-003 (lane B) — garden-3d-kit builds Biscuit’s ball and foo
     expect(css).toMatch(/\.gd3-meter\.gd3-full:not\(\.gd3-watch\):not\(\.gd3-meter-bot\)\{--c:#3FA66B;--f:100%\}/);
   });
 });
+
+// ── P108 IW-003 (lane S): Sami's bench in 3D, by the same stages as the 2D kit ─────────────────────────────────────────
+describe('P108 IW-003 lane S — garden-3d-kit builds Sami’s bench by stage, the same stages as garden-kit', () => {
+  let kit: KitModule;
+  let kit2d: KitModule;
+  beforeAll(() => {
+    const both = loadKits(BUILT_2D);
+    kit = both.kit;
+    kit2d = both.modules[0];
+  });
+  const node = () => kit.reactNodes.find((n) => n.name === 'garden-3d-kit.Garden3D')! as any;
+  const node2d = () => kit2d.reactNodes.find((n) => n.name === 'garden-kit.Garden')! as any;
+  const bench = (have: number) => ({ kind: 'site', id: 'bench', x: 1, y: 0, have, need: 8, item: 'stone', build: 'bench' });
+  const names = (g: any) => {
+    const out: string[] = [];
+    g.traverse((o: any) => o.name && out.push(o.name));
+    return out.sort();
+  };
+
+  it('🔴 pegs, a leg, two legs, the seat, the back with Sami on it — honestly counted, never the path square’s patch; benchStage pinned to garden-kit’s', () => {
+    const got: unknown[] = [];
+    for (const have of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+      const st = threeStub();
+      const W = node().world;
+      const built = node().scene.buildScene({ map: W.parseMap({ rows: ['GGG', 'GGG'] }), things: W.parseThings([bench(have)]), robots: [] }, st.THREE);
+      const g = built.things[0];
+      expect(st.counts.Mesh + (st.counts.InstancedMesh || 0)).toBe(built.meshCount);
+      expect({ have, stage: node().job.benchStage(bench(have)) }).toEqual({ have, stage: node2d().world.job.benchStage(bench(have)) });
+      got.push([have, g.userData.bench, names(g).join(' ')]);
+      expect(g.userData.stage).not.toBe('path');
+    }
+    expect(got).toEqual([
+      [0, 0, ''], [1, 0, ''], [2, 1, 'leg'], [3, 1, 'leg'], [4, 2, 'leg leg'], [5, 2, 'leg leg'], [6, 3, 'leg leg seat'], [7, 3, 'leg leg seat'],
+      [8, 4, 'back leg leg sami seat'], [9, 4, 'back leg leg sami seat']
+    ]);
+    // Known-firing beside it: a site with no build is still the path square (its stage, its stones).
+    const st = threeStub();
+    const W = node().world;
+    const path = node().scene.buildScene({ map: W.parseMap({ rows: ['GGG'] }), things: W.parseThings([{ kind: 'site', x: 1, y: 0, have: 4, need: 4 }]), robots: [] }, st.THREE).things[0];
+    expect([path.userData.stage, path.userData.bench]).toEqual(['path', undefined]);
+  });
+});

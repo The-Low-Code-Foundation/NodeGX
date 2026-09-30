@@ -193,17 +193,48 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     await wait(900);
     return at === '/island';
   };
+  // P108 IW-003 (lane S): a program built from the drawer as a child taps it — a drawer block's word adds it to the
+  // selected container, a container's word selects it, a repeat's count and a go to nearest's kind come from their pickers.
+  const IW3S_BK = `document.querySelector('.bg-blocks-box .gd-bk')`;
+  const iw3sBlock = (id) => `${IW3S_BK}.__gardenBlocks.workspace().getBlockById(${JSON.stringify(String(id))})`;
+  const iw3sField = (id, field) => `((b) => { const f = b && b.getField(${JSON.stringify(field)}); return f && f.getSvgRoot ? f.getSvgRoot() : null; })(${iw3sBlock(id)})`;
+  const iw3sCardOk = async () => {
+    if (await evaluate(`(() => { const e = document.querySelector('.bg-card-help'); return !!e && e.offsetParent !== null; })()`)) await tap(first('.bg-card-help .bg-card-ok'), 'Got it');
+  };
+  const iw3sBuild = async (list, into = '') => {
+    for (const b of list) {
+      if (into) for (let k = 0; k < 3 && (await evaluate(`((x) => { const r = x && x.getSvgRoot(); return r ? r.getAttribute('data-sel') : ''; })(${iw3sBlock(into)})`)) !== '1'; k++) await tap(iw3sField(into, 'WORD'), `take the repeat ${into}`);
+      await evaluate(`(() => { const r = ${IW3S_BK}; return !!r && !!r.__gardenBlocks && r.__gardenBlocks.reveal(${JSON.stringify(b.t)}); })()`);
+      await wait(150);
+      await tap(first(`.bg-blocks-box .gd-palette [data-pal-head="${b.t}"]`), `palette ${b.t}`);
+      await wait(200);
+      await iw3sCardOk();
+      const id = await evaluate(`(() => { const l = [...document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-t="${b.t}"]')].map((e) => Number(e.getAttribute('data-id'))); return l.length ? String(Math.max(...l)) : ''; })()`);
+      const slots = b.t === 'repeat' ? [['N', String(b.n)]] : b.t === 'go_nearest' ? [['KIND', String(b.slots.kind)]] : [];
+      for (const [field, opt] of slots) {
+        await tap(iw3sField(id, field), `${b.t}: its ${field}`);
+        await wait(200);
+        await tap(first(`.bg-blocks-box .gd-picker .gd-opt[data-opt="${opt}"]`), `${b.t}: ${opt}`);
+      }
+      if (b.body) await iw3sBuild(b.body, id);
+    }
+  };
   /** Win a request from the island the brief's way: its card, Teach, the reference laid out on the pad, Play. */
   const winRequest = async (r, lang, tag) => {
     await tap(byText('.bg-quest', titleOf(lang, r)), `${r.id} (${tag})`);
     const inWs = await until('location.pathname', (p) => p === '/workshop', 5000);
     if (inWs !== '/workshop') return { won: false, why: 'not in the Workshop', card: await evaluate(CARD) };
     await wait(900);
-    await control('rec');
-    await until(`!!document.querySelector('.bg-pad .bg-key-fwd')`, Boolean, 4000);
-    for (const op of layOut(r.referenceProgram)) await key(op);
+    // P108 IW-003 (lane S): a reference that walks with go to nearest (the stones: the rocks lie where the day's seed put
+    // them) has no pad key to Teach it with: it is built from the drawer as a child taps it (iw3sBuild), then Played.
+    if (JSON.stringify(r.referenceProgram).includes('"go_nearest"')) await iw3sBuild(r.referenceProgram);
+    else {
+      await control('rec');
+      await until(`!!document.querySelector('.bg-pad .bg-key-fwd')`, Boolean, 4000);
+      for (const op of layOut(r.referenceProgram)) await key(op);
+    }
     await control('play');
-    const won = await until(`(() => { const e = document.querySelector('.bg-win-card'); return !!e && e.offsetParent !== null; })()`, Boolean, 40000);
+    const won = await until(`(() => { const e = document.querySelector('.bg-win-card'); return !!e && e.offsetParent !== null; })()`, Boolean, 90000);
     const gift = await until(`(() => { const e = document.querySelector('.bg-win-lent'); return e && e.offsetParent !== null ? e.innerText.trim() : ''; })()`, (t) => t.length > 0, 2500);
     return { won, gift };
   };
@@ -301,7 +332,8 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
       await wait(1100);
       const wsBots = await botsIn('.bg-stage');
       const pal = await evaluate(`[...document.querySelectorAll('.bg-blocks-box .gd-palette [data-pal]')].filter((e) => e.offsetParent !== null).map((e) => e.getAttribute('data-pal'))`);
-      const wantPal = STONES.palette.filter((id) => ['fwd', 'left', 'right', ...LENT.palette, 'repeat', 'until', 'if', 'when', 'count_inc', 'trick', 'do'].includes(id));
+      // P108 IW-003 (lane S): every robot walks to a thing (D9's moves: go to nearest, go to).
+      const wantPal = STONES.palette.filter((id) => ['fwd', 'left', 'right', ...LENT.palette, 'go_nearest', 'go_to', 'repeat', 'until', 'if', 'when', 'count_inc', 'trick', 'do'].includes(id));
       readings[`ws-${tag}`] = { wsBots, pal };
       check(`IG-005 ${tag}: the stones open in the Workshop with ${lentName} — his name, his ${LENT.accessory}, his colour`, ws === '/workshop' && wsBots.length === 1 && wsBots[0].name === lentName && wsBots[0].accessory === LENT.accessory && wsBots[0].drawn === LENT.accessory && wsBots[0].colour === LENT.colour, wsBots);
       check(`IG-005 AC1 ${tag}: the palette is band × request × robot (${wantPal.join(' ')})`, JSON.stringify(pal) === JSON.stringify(wantPal), { pal, wantPal });
@@ -312,7 +344,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
       await until('location.pathname', (p) => p === '/island');
       await wait(700);
       const w2 = await winRequest(STONES, lang, tag);
-      check(`IG-005 ${tag}: the stones won by ${lentName} (Teach, the pad, Play)`, w2.won, w2);
+      check(`IG-005 ${tag}: the stones won by ${lentName} (the reference built from the drawer, Play — IW-003: it walks with go to nearest)`, w2.won, w2);
       await toIsland(lang);
       const two = await botsIn('.bg-isle');
       readings[`two-${tag}`] = two;

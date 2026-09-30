@@ -380,6 +380,50 @@ withDeployedSite({ dir: DIR }, async (page) => {
       await until(CARD_UP, (v) => v === false, 2000);
     }
   };
+  // P108 IW-003 (lane S): the stones' reference built from the drawer as a child taps it (drive-iw003-stones.js's own
+  // helpers): a tap on a drawer block adds it to the selected container, a container's word selects it, a slot is set
+  // from its picker — repeat 4 { go to nearest rock, repeat 4 { pick up }, go to nearest site, repeat 4 { put down } }.
+  const iw3sBlock = (id) => `${BK}.__gardenBlocks.workspace().getBlockById(${JSON.stringify(String(id))})`;
+  const iw3sField = (id, field) => `((b) => { const f = b && b.getField(${JSON.stringify(field)}); return f && f.getSvgRoot ? f.getSvgRoot() : null; })(${iw3sBlock(id)})`;
+  const iw3sNewest = (t) => evaluate(`(() => { const l = [...document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-t="${t}"]')].map((e) => Number(e.getAttribute('data-id'))).filter((n) => isFinite(n)); return l.length ? String(Math.max(...l)) : ''; })()`);
+  const iw3sSelect = async (id) => {
+    const sel = () => evaluate(`((b) => { const r = b && b.getSvgRoot(); return r ? r.getAttribute('data-sel') : ''; })(${iw3sBlock(id)})`);
+    for (let k = 0; k < 3 && (await sel()) !== '1'; k++) await tap(iw3sField(id, 'WORD'), `the stones: take the repeat ${id}`);
+  };
+  const iw3sSlot = async (id, field, opt) => {
+    await tap(iw3sField(id, field), `the stones: ${field} of ${id}`);
+    await wait(200);
+    await tap(first(`.bg-blocks-box .gd-picker .gd-opt[data-opt="${opt}"]`), `the stones: ${opt}`);
+  };
+  const iw3sBuildStones = async () => {
+    await palTap('repeat');
+    const r1 = await iw3sNewest('repeat');
+    await iw3sSlot(r1, 'N', '4');
+    await iw3sSelect(r1);
+    await palTap('go_nearest');
+    await iw3sSlot(await iw3sNewest('go_nearest'), 'KIND', 'rock');
+    // A tap on a slot selects that block: the trips' repeat is taken again before the next block goes in.
+    await iw3sSelect(r1);
+    await palTap('repeat');
+    const r2 = await iw3sNewest('repeat');
+    await iw3sSlot(r2, 'N', '4');
+    await iw3sSelect(r2);
+    await palTap('pick');
+    await iw3sSelect(r1);
+    await palTap('go_nearest');
+    await iw3sSlot(await iw3sNewest('go_nearest'), 'KIND', 'site');
+    await iw3sSelect(r1);
+    await palTap('repeat');
+    const r3 = await iw3sNewest('repeat');
+    await iw3sSlot(r3, 'N', '4');
+    await iw3sSelect(r3);
+    await palTap('put');
+    if (await evaluate(CARD_UP)) await tap(first('.bg-card-help .bg-card-ok'), 'Got it (the stones)');
+    return evaluate(`(() => { const p = Noodl.Variables.gardenProgram; return typeof p === 'string' ? JSON.parse(p || '[]') : p || []; })()`);
+  };
+  /** The stones as a child sees them while they play: every square's ground, the rocks' and squares' chips, the load. */
+  const IW3S_SEEN = `(() => ({ sites: [...document.querySelectorAll('.bg-stage .gd-site[data-site]')].map((e) => e.getAttribute('data-site')), chips: [...document.querySelectorAll('.bg-stage .gd-meter')].map((c) => c.getAttribute('data-kind') + ':' + c.getAttribute('data-meter') + (c.classList.contains('gd-full') ? ':full' : '')), load: ((l) => (l ? l.getAttribute('data-load') + ':' + l.getAttribute('data-carry') : null))(document.querySelector('.bg-stage .gd-bot .gd-load')) }))()`;
+  const iw3sCount = (list) => (Array.isArray(list) ? list : []).reduce((n, b) => n + 1 + iw3sCount(b.body), 0);
   /** S3-R5 on the screen as it stands: every text ≥ 4.5:1, and the instrument fires on the mockup's own orange. */
   const contrastClause = async (screen) => {
     const c = await evaluate(CONTRAST_JS);
@@ -636,47 +680,38 @@ withDeployedSite({ dir: DIR }, async (page) => {
         await until(`!document.querySelector('.gd-locked')`, Boolean, 8000);
         await wait(300);
 
-        // The stones: the rock mined, the load on the back, the reference program, Perfect.
+        // The stones: the rock mined, the load on the back, the reference program, Perfect. P108 IW-003 (lane S): the
+        // stones are a job — two rocks of eight lie where the day's seed put them, four squares of dirt take four stones
+        // each. The reference is built from the drawer (go to nearest finds the rocks wherever they are) and Played; what
+        // a child sees is sampled through the run: the rocks' meters go down as they are mined, a stone rides on the
+        // robot's back (1 to 4), each square turns dirt → gravel → cobbles → path, and the reference wins "Perfect!".
         await openRequest('rqStonesTitle', `the stones (IG-002 ${tag})`);
-        const rocks = [await until(rockExpr(2, 2), Boolean, 3000)];
         const noCan = await evaluate(gaugeExpr);
         await control('rec');
         await until(`!!document.querySelector('.bg-pad .bg-key-pick')`, Boolean, 3000);
         const stonesPad = await padOpsNow();
+        await control('rec');
         check(`IG-002 ${tag}: the stones’ pad has pick and put, no water, no fill (${padFor('path-stones').join(' ')}); the robot has no can here (no drops)`, JSON.stringify(stonesPad) === JSON.stringify(padFor('path-stones')) && noCan === null, { stonesPad, noCan });
-        await key('left');
-        const loads = [];
-        for (let k = 0; k < 4; k++) {
-          await key('pick');
-          const want = [3, 2, 1, 0][k];
-          rocks.push(await until(rockExpr(2, 2), (r) => (want >= 1 ? !!r && r.left === String(want) : r === null), 2000));
-          loads.push(await until(loadExpr, (l) => !!l && l.carry === String(k + 1), 2000));
-          if (k === 1 && SHOT_TAGS.includes(tag)) await shot(`ig002-${tag}-rock-mid`);
-        }
-        if (SHOT_TAGS.includes(tag)) await shot(`ig002-${tag}-mined`);
-        check(`IG-002 AC4 ${tag}: the rock shrinks as it is mined — big (4), big (3), medium (2), small (1), then gone`, rocks.map((r) => (r ? r.size : 'gone')).join(',') === 'big,big,mid,small,gone' && rocks[0].left === '4', rocks);
-        check(`IG-002 AC4 ${tag}: after pick a stone is on the robot’s back (an svg, the kit’s class), carrying 1, 2, 3, 4`, loads.every((l, i) => !!l && l.load === 'stone' && l.svg && l.carry === String(i + 1)), loads);
-        await key('right');
-        const puts = [];
-        for (let k = 0; k < 4; k++) {
-          await key('put');
-          puts.push(await until(loadExpr, (l) => (k < 3 ? !!l && l.carry === String(3 - k) : l === null), 2000));
-          await key('fwd');
-        }
-        const laid = await evaluate(`document.querySelectorAll('.bg-stage svg.gd-thing.gd-stone[data-sprite="stone"]').length`);
-        if (SHOT_TAGS.includes(tag)) await shot(`ig002-${tag}-laid`);
-        check(`IG-002 AC4 ${tag}: put by put the load goes down (3, 2, 1) and after the fourth the back is empty; four stone sprites on the path`, puts.slice(0, 3).map((l) => (l ? l.carry : '-')).join(',') === '3,2,1' && puts[3] === null && laid === 4, { puts, laid });
-        for (let f = 0; f < 2; f++) {
-          await until(tidyShown, Boolean, 3000);
-          await tap(first('.bg-tidy .bg-i-tidy'), `Fold it (the stones ${f + 1}, ${tag})`);
-          await wait(300);
-        }
-        const seven = await until(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`, (n) => n === 7, 3000);
+        const s0 = await evaluate(IW3S_SEEN);
+        const built = await iw3sBuildStones();
         await control('play');
-        const perfect = await until(owlExpr, (t) => t.includes(hintIn(lang, 'hintPerfect')), 15000);
-        const won = await until(`(() => { const e = document.querySelector('.bg-win-card'); return !!e && e.offsetParent !== null; })()`, Boolean, 6000);
+        const samples = [s0];
+        let won = false;
+        for (const end = Date.now() + 90000; Date.now() < end && !won; ) {
+          samples.push(await evaluate(IW3S_SEEN));
+          won = await evaluate(`(() => { const e = document.querySelector('.bg-win-card'); return !!e && e.offsetParent !== null; })()`);
+          if (SHOT_TAGS.includes(tag) && samples.length === 40) await shot(`ig002-${tag}-stones-mid`);
+          await wait(250);
+        }
+        const rocksSeen = [...new Set(samples.flatMap((x) => x.chips.filter((c) => c.startsWith('rock:'))))];
+        const loads = [...new Set(samples.map((x) => x.load).filter(Boolean))];
+        const stages = [...new Set(samples.flatMap((x) => x.sites))];
+        const last = samples[samples.length - 1];
+        check(`IG-002 AC4 ${tag}: the rocks start 8/8 and are mined down (${rocksSeen.join(' ')}); a stone rides on the robot’s back, 1 to 4 (${loads.join(' ')})`, s0.chips.filter((c) => c.startsWith('rock:')).join(',') === 'rock:8/8,rock:8/8' && rocksSeen.some((c) => c !== 'rock:8/8') && ['stone:1', 'stone:2', 'stone:3', 'stone:4'].every((l) => loads.includes(l)), { s0, rocksSeen, loads });
+        check(`IG-002 AC4 ${tag}: put by put a square turns dirt → gravel → cobbles → path (${stages.join(' ')}), and all four end path, 4/4 green`, ['dirt', 'gravel', 'cobbles', 'path'].every((k) => stages.includes(k)) && last.sites.join(',') === 'path,path,path,path' && last.chips.filter((c) => c.startsWith('site:')).join(',') === 'site:4/4:full,site:4/4:full,site:4/4:full,site:4/4:full', { stages, last });
+        const perfect = await until(owlExpr, (t) => t.includes(hintIn(lang, 'hintPerfect')), 6000);
         if (SHOT_TAGS.includes(tag)) await shot(`ig002-${tag}-stones-perfect`);
-        check(`IG-002 AC3 ${tag}: path-stones mined, laid, folded twice to the reference (7 blocks) wins with "${hintIn(lang, 'hintPerfect')}"`, seven === 7 && won && perfect.includes(hintIn(lang, 'hintPerfect')), { seven, won, perfect });
+        check(`IG-002 AC3 ${tag}: path-stones’ reference, built from the drawer (${iw3sCount(built)} blocks), wins with "${hintIn(lang, 'hintPerfect')}"`, iw3sCount(built) === 7 && won && perfect.includes(hintIn(lang, 'hintPerfect')), { blocks: iw3sCount(built), won, perfect });
         if (won) await tap(byText('.bg-win-card button', w(lang, 'winStay')), 'Keep tinkering');
         await wait(400);
         check(`IG-002 ${tag}: 0 console errors so far`, page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));
@@ -816,7 +851,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
         STUB.plan.answers['is-it-a'] = [yes, no, yes];
         STUB.plan.counts['is-it-a'] = 0;
         await openReq(lang, 'rock-flower');
-        for (const op of ['fwd', 'left', 'olive:is-it-a']) await palTap(op);
+        // P108 IW-003 (lane S): Echo carries an empty can now — turn to the pond below, fill, turn back, then as before.
+        for (const op of ['right', 'fill', 'left', 'fwd', 'left', 'olive:is-it-a']) await palTap(op);
         const isa = '.bg-blocks-box .gd-prog .gd-blk[data-t="olive:is-it-a"]';
         await slotOn(isa, 'kind', lang === 'fr' ? 'une fleur' : 'a flower', 'is it a…?');
         await slotOn(isa, 'times', '3', 'is it a…?');
@@ -1269,25 +1305,13 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await until(`!!document.querySelector('.bg-pad .bg-key-put')`, Boolean, 3000);
     const padOps = await evaluate(`[...document.querySelectorAll('.bg-pad .bg-key')].filter((e) => e.offsetParent !== null).map((e) => (e.className.match(/bg-key-(fwd|left|right|water|pick|put|fill)/) || [])[1])`);
     check(`IG-001 D10: the stones’ pad shows ${padFor('path-stones').join(' ')} and not water (IG-002: pick, the basket starts empty)`, JSON.stringify(padOps) === JSON.stringify(padFor('path-stones')) && !padOps.includes('water'), padOps);
-    // IG-002: mine the rock beside the start first (turn to it, pick four), turn back, then lay.
-    await key('left');
-    for (let k = 0; k < 4; k++) await key('pick');
-    await key('right');
-    for (let k = 0; k < 4; k++) {
-      await key('put');
-      await key('fwd');
-    }
-    const laid = await until(`document.querySelectorAll('.bg-stage .gd-thing.gd-stone').length`, (n) => n === 4, 3000);
-    await shot('ig001-d9-stones');
-    check('IG-001 D9: four stones laid are four stone sprites (svg, the kit’s class), no pill', laid === 4 && (await evaluate(`document.querySelectorAll('.bg-stage svg.gd-thing.gd-stone[data-sprite="stone"]').length`)) === 4 && (await evaluate(`document.querySelectorAll('.bg-stage .gd-label').length`)) === 0, { laid });
-    // IG-002: two folds — (put, fwd) × 4, then pick × 4 — make the reference program, seven blocks.
-    for (let f = 0; f < 2; f++) {
-      await until(`(() => { const e = document.querySelector('.bg-tidy'); return !!e && e.offsetParent !== null; })()`, Boolean, 3000);
-      await tap(first('.bg-tidy .bg-i-tidy'), `Fold it (the stones, ${f + 1})`);
-      await wait(300);
-    }
-    const three = await until(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`, (n) => n === 7, 3000);
-    // The first step glows the turn; the second glows the first repeat (its ground #FFF0DA).
+    await control('rec');
+    // P108 IW-003 (lane S): the stones are a job — the reference is built from the drawer (drive-iw003-stones.js grades
+    // the build and the run clause by clause); here D5 and D3 on it: One step glows the repeat and then the go to nearest
+    // inside it; Play wins with "Perfect!", and D9's no-pill holds on the path the stones made.
+    const built = await iw3sBuildStones();
+    const three = iw3sCount(built);
+    // The first step glows the trips' repeat; the second the go to nearest inside it (its ground #FFF0DA).
     await control('step');
     await control('step');
     const ringRep = await until(`!!document.querySelector('.gd-prog .gd-rep.gd-run, .gd-prog .gd-rep .gd-blk.gd-run')`, Boolean, 2000) ? await ringOf() : null;
@@ -1295,10 +1319,13 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await shot('ig001-d5-ring-in-repeat');
     check(`IG-001 D5 (IW-004: on Blockly): the running repeat's ring is 4 px, ≥ 3:1 on the workspace, over a white halo (${ringRep && ringRep.ratio}:1)`, three === 7 && ringOk(ringRep) && ringRep.inRep, { three, ringRep });
     await control('play');
-    const perfect = await until(owlExpr, (t) => t.includes(hint('hintPerfect').slice(0, 8)), 12000);
+    const perfect = await until(owlExpr, (t) => t.includes(hint('hintPerfect').slice(0, 8)), 90000);
     const wonStones = await until(`(() => { const e = document.querySelector('.bg-win-card'); return !!e && e.offsetParent !== null; })()`, Boolean, 6000);
     await shot('ig001-d3-perfect');
-    check('IG-001 D3: the reference program (IG-002: left, repeat 4 pick, right, repeat 4 × (put, fwd)) wins with "Perfect!"', wonStones && perfect.includes(hint('hintPerfect').slice(0, 8)), { perfect, wonStones, want: hint('hintPerfect') });
+    const pathDone = await evaluate(`({ path: [...document.querySelectorAll('.bg-stage .gd-site[data-site]')].map((e) => e.getAttribute('data-site')).join(','), labels: document.querySelectorAll('.bg-stage .gd-label').length })`);
+    await shot('ig001-d9-stones');
+    check('IG-001 D9 (IW-003: the path as a job): the four squares the stones made are drawn as path, and no label pill anywhere', pathDone.path === 'path,path,path,path' && pathDone.labels === 0, pathDone);
+    check('IG-001 D3: the reference program (IW-003: repeat 4 { go to nearest rock, repeat 4 pick, go to nearest site, repeat 4 put }) wins with "Perfect!"', wonStones && perfect.includes(hint('hintPerfect').slice(0, 8)), { perfect, wonStones, want: hint('hintPerfect') });
     if (wonStones) await tap(byText('.bg-win-card button', w('en', 'winStay')), 'Keep tinkering');
     // D10: the tulips' pad shows water.
     await tab(0);
