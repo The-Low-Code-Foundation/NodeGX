@@ -560,6 +560,31 @@ withDeployedSite({ dir: DIR }, async (page) => {
       check(`IW-002 METER-PERF (2D, the island's frame gate with meters drawn): p95 ${perf.p95.toFixed(1)} ms ≤ 50 ms at CPU ×4 with ${count.meters} meters on a 46×22 world (${perf.frames} frames, ${perf.moves} robot moves drawn, ${perf.longTasks} long tasks; the same world with no job fields read ${readings.iw002.perfPlain.perf.p95.toFixed(1)} ms)`, loop4 / loop1 > 2.5 && count.meters >= 30 && count.cells === 46 * 22 && count.wide === '1' && perf.frames > 100 && perf.writes >= 40 && perf.moves >= 40 && perf.p95 <= 50 && !perf.hidden, readings.iw002);
   }
 
+  // ══ P108 IW-003 (lane S): Sami's bench rising by the stone, from worlds the ENGINE wrote (Cobble puts 0, 2, 4, 6, 8) ══
+  {
+    await page.setViewport({ width: 1024, height: 800, mobile: false });
+    await setVar('watch', '');
+    await setVar('picking', false);
+    await setVar('bubble', '');
+    const benchAfter = (puts) =>
+      engineRun(ENG, { map: ['GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPP', 'GGGGGGGG', 'GGGGGGGG'], things: [{ kind: 'site', id: 'bench', x: 4, y: 2, have: 0, need: 8, item: 'stone', build: 'bench' }, { kind: 'site', id: 's1', x: 2, y: 2, have: 4, need: 4, item: 'stone' }], robots: [{ id: 'pip', x: 4, y: 3, d: 0, carry: Array(8).fill('stone'), basket: 8, name: 'Cobble', colour: '#7A8CA3', accessory: 'hod' }] }, Array.from({ length: puts }, (_, i) => ({ id: i + 1, t: 'put' })));
+    const BENCH_READ = `(() => { const c = document.querySelector('.gd-cell[data-x="4"][data-y="2"]'); const m = c && c.querySelector('.gd-meter'); const s = document.querySelector('.gd-cell[data-x="2"][data-y="2"] .gd-site'); const art = c && c.querySelector('[data-bench]'); const sami = c && c.querySelector('[data-sits="bench"]'); return { stage: art ? art.getAttribute('data-bench') : null, sprite: art ? art.getAttribute('data-sprite') : null, ground: (c && c.querySelector('.gd-site') || { getAttribute: () => null }).getAttribute('data-site'), sits: !!sami, samiH: sami ? Math.round(sami.getBoundingClientRect().height) : 0, meter: m ? m.getAttribute('data-meter') + (m.classList.contains('gd-full') ? ':full' : '') : null, pathSquare: s ? s.getAttribute('data-site') : null }; })()`;
+    const benches = [];
+    for (const puts of [0, 2, 4, 6, 8]) {
+      const w = benchAfter(puts);
+      await setJson('map', { rows: w.map });
+      await setJson('things', w.things);
+      await setJson('robots', w.robots);
+      await wait(500);
+      const b = await evaluate(BENCH_READ);
+      benches.push({ puts, have: w.things.find((t) => t.id === 'bench').have, ...b });
+      await shot(`iw003s-2d-bench-${puts}`);
+    }
+    readings.iw003s = { benches };
+    check('IW-003 lane S (2D): the engine’s bench, put by put — stage 0 (pegs, 0/8) · 1 a leg (2/8) · 2 two legs (4/8) · 3 the seat (6/8) · 4 built (8/8, green) with Sami sitting on it; never a path square, beside a full path square that is',
+      JSON.stringify(benches.map((b) => [b.have, b.stage, b.meter, b.sits])) === JSON.stringify([[0, '0', '0/8', false], [2, '1', '2/8', false], [4, '2', '4/8', false], [6, '3', '6/8', false], [8, '4', '8/8:full', true]]) && benches.every((b) => b.ground !== 'path' && b.pathSquare === 'path') && benches[4].samiH > 10, benches);
+  }
+
   check('0 console errors through the whole drive', page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));
   return { dir: DIR, results, readings, consoleErrors: page.consoleErrors.slice(), networkErrors: page.networkErrors.slice() };
 })
