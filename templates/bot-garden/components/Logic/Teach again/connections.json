@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0165c2d5-6b27-555b-8795-83452d4f4fd6",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "teachagainIn",
+      "fromProperty": "botName",
+      "toId": "teachagainFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "teachagainIn",
+      "fromProperty": "lang",
+      "toId": "teachagainFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "teachagainIn",
+      "fromProperty": "plots",
+      "toId": "teachagainFn",
+      "toProperty": "in-plots"
+    },
+    {
+      "fromId": "teachagainIn",
+      "fromProperty": "requestId",
+      "toId": "teachagainFn",
+      "toProperty": "in-requestId"
+    },
+    {
+      "fromId": "teachagainIn",
+      "fromProperty": "requests",
+      "toId": "teachagainFn",
+      "toProperty": "in-requests"
+    },
+    {
+      "fromId": "teachagainIn",
+      "fromProperty": "words",
+      "toId": "teachagainFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "teachagainFn",
+      "fromProperty": "out-show",
+      "toId": "teachagainOut",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "teachagainFn",
+      "fromProperty": "out-text",
+      "toId": "teachagainOut",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "teachagainFn",
+      "fromProperty": "success",
+      "toId": "teachagainOut",
+      "toProperty": "ran"
+    }
+  ]
+}

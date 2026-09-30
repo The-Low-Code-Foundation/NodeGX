@@ -108,6 +108,8 @@ function islStepJob(plot, cur) {
 }
 /** One tick of one pinned plot. A finished run holds the plot done, then the plot resets and the run restarts. */
 function islStepPlot(plot, cur) {
+  // P108 IW-003 (lane B): a stale plot (teach again) is not stepped: its robot waits at home, where it started.
+  if (plot.stale) return cur;
   if (plot.job) return islStepJob(plot, cur);
   if (cur.hold > 0) {
     if (cur.hold > 1) return { run: cur.run, things: cur.things, robot: cur.robot, spent: cur.spent, hold: cur.hold - 1, lap: cur.lap };
@@ -151,6 +153,33 @@ function islWorld(s) {
   for (var d = 0; d < s.deco.length; d++) things.push(islClone(s.deco[d]));
   for (var h = 0; h < s.home.length; h++) robots.push(islClone(s.home[h]));
   return { map: s.map, things: things, robots: robots, events: [], schedule: [] };
+}
+// ── P108 IW-003 (lane B): teach again — a pinned program the rewritten job outgrew ──
+/** A request with a job or a seeded layout, laid from its plot's seed (the island's own laying), else null. */
+function islLaidOf(req) {
+  if (!req || (!req.job && !req.seeded)) return null;
+  return worldOf(seedWorld({ map: (Array.isArray(req.map) ? req.map : []).slice(), things: islClone(req.things || []), robots: [] }, req, islSeedOf(req.id)));
+}
+/**
+ * Does a stored program no longer win its (rewritten) job? It is run to its end, the engine's way (no Olive: the written
+ * answer), on the plot as its seed lays it with the robot at its start, and judged by the request's own goal — but only
+ * where the request's OWN reference program wins that start (a job whose source fills later, a hen with no egg yet,
+ * cannot be judged from its start, and is never flagged). Only a request with a job is judged (a stored v4 program is
+ * the engine format: nothing to migrate, IW-004 AC8); an empty program is not a pinned one. A robot on a stale plot waits
+ * at home: it never flails at a job its program cannot do.
+ */
+function islStale(req, program, laid, robot) {
+  if (!req || !req.job || !Array.isArray(program) || !program.length) return false;
+  var lay = laid || islLaidOf(req);
+  if (!lay) return false;
+  var bot = islClone(robot) || islStart(req, 'me').robot;
+  function wins(prog) {
+    var w = { map: lay.map.slice(), things: islClone(lay.things), robots: [islClone(bot)], events: [], schedule: islClone(req.schedule || []), job: islClone(lay.job), seed: lay.seed };
+    var end = runToEnd(prog, w, bot.id, 'en');
+    return end.known && goalMet(end.world, end.run, prog, req.goal).met;
+  }
+  if (!Array.isArray(req.referenceProgram) || !wins(req.referenceProgram)) return false;
+  return !wins(program);
 }
 `;
 
@@ -222,9 +251,12 @@ for (var p = 0; p < list.length; p++) {
   var plot = { id: req.id, x: px, y: py, w: PW, h: PH, map: map.slice(), schedule: islClone(req.schedule || []), status: status, islander: String(req.islander || ''), band: Number(req.band) || 1, robotId: robotId, program: robotId ? islClone(sv.program) : null, start: start };
   // P108 IW-002: a job plot's job (its targets by id) and its seed; its tick is the job tick (islStepJob), never a reset.
   if (laid && laid.job) { plot.job = laid.job; plot.seed = Number(laid.seed) >>> 0; }
+  // P108 IW-003 (lane B): teach again — the pinned program no longer wins this (rewritten) job: flagged, never stepped.
+  if (status === 'working' && laid && laid.job && islStale(req, plot.program, laid, start.robot)) plot.stale = true;
   plots.push(plot);
   cards.push({ id: req.id, x: px, y: py, w: PW, h: PH, status: status, islander: plot.islander, band: plot.band, robotId: robotId, door: null, needs: needs, lock: lock });
-  if (status === 'working') { live[req.id] = { run: islRun(plot, 0), things: islClone(start.things), robot: islClone(start.robot), spent: [], hold: 0, lap: 0 }; if (plot.job) { live[req.id].phase = 'work'; live[req.id].age = 0; live[req.id].seed = plot.seed; } continue; }
+  if (plot.stale) cards[cards.length - 1].stale = true;
+  if (status === 'working') { live[req.id] = { run: islRun(plot, 0), things: islClone(start.things), robot: islClone(start.robot), spent: [], hold: 0, lap: 0 }; if (plot.job) { live[req.id].phase = plot.stale ? 'teach' : 'work'; live[req.id].age = 0; live[req.id].seed = plot.seed; } continue; }
   var shown = status === 'won' ? wonThings(req, laid) : start.things;
   for (var t = 0; t < shown.length; t++) { var th = islClone(shown[t]); th.x = Number(th.x) + px; th.y = Number(th.y) + py; still.push(th); }
   if (status === 'locked') { deco.push({ kind: 'fence', x: px, y: py, w: PW, h: PH }); deco.push({ kind: 'padlock', x: px + Math.floor(PW / 2), y: py + Math.floor(PH / 2) }); }
@@ -364,6 +396,8 @@ else if (status === 'locked' && card && card.lock === 'robot' && spec) {
 }
 else if (status === 'locked') line = fill(w.ig4Locked, { who: who, trick: w[req.copyKeys.blurb] || '' });
 else if (id === 'free') { canOpen = true; line = w.sandP || ''; }
+// P108 IW-003 (lane B): the job changed under a pinned program — the robot waits at home until she teaches it again.
+else if (workingAt && workingAt === id && card && card.stale) { canOpen = true; showHome = true; line = fill(w.iw3bTeachAgain, { b: jobName }); }
 else if (workingAt && workingAt === id) { canOpen = true; showHome = true; line = w.ig4WorksHere || ''; }
 else if (workingAt) { showHome = true; line = fill(w.ig4AtWork, { plot: workTitle }); }
 else if (status === 'won') { canOpen = true; line = w.ig4Won || ''; }
@@ -383,6 +417,7 @@ Outputs.homeText = w.ig4Home || '';
 Outputs.openText = w.ig4Open || '';
 Outputs.robotId = robotId;
 Outputs.needs = needs;
+Outputs.stale = !!(card && card.stale);
 `;
 
 /**

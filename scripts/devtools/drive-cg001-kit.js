@@ -37,6 +37,10 @@
  *   METER-PERF  the island's frame gate with meters drawn: a 46×22 world, 13 plots of job things with meters, three
  *          robots stepping every 380 ms, CPU ×4, 20 s of frames — p95 ≤ 50 ms (IG-004 AC6's bar), beside the same
  *          world with no job fields (a readout of what the meters cost)
+ * P108 IW-003 (lane B), at the end — from the template's own requests and engine:
+ *   BALL   wall-until on seed 1: the wall, the ball in its corner, then on Pip's back, then in Biscuit's basket (shots)
+ *   FOOD   bowl-if's sack and meow-when's jar drawn with biscuits (never stones); the seeded bowls 0/1 · 0/1 · 1/1 (shot)
+ *   BARS   the 46×22 island at 1368: every compact meter a bar no wider than its tile, no two touching (shot)
  * Exits 0 when every clause passed, 1 when any did, 2 on a usage error.
  */
 const fs = require('fs');
@@ -600,6 +604,76 @@ withDeployedSite({ dir: DIR }, async (page) => {
     const a = readings['iw003-after'];
     check('IW-003 (2D, lane P): the street — three doors, each with its owner’s plate (Mamie Rose, Sami, Biscuit) and a 0/1 letter chip; letters in the post box', JSON.stringify(b.slice(0, 3).map((d) => [d.sprite, d.plate, d.plateVisible, d.chip, d.full])) === JSON.stringify([['door', 'Mamie Rose', true, '0/1', false], ['door', 'Sami', true, '0/1', false], ['door', 'Biscuit', true, '0/1', false]]) && b[3].boxLetter, b);
     check('IW-003 (2D, lane P): after the engine’s run (go to the post box, pick, go to Sami’s door, put) Sami’s door shows the letter through it and 1/1 green; the others still 0/1; Biscuit’s letter still in the box', JSON.stringify(a.slice(0, 3).map((d) => [d.sprite, d.chip, d.full])) === JSON.stringify([['door', '0/1', false], ['doorMail', '1/1', true], ['door', '0/1', false]]) && a[3].boxLetter && after.things.find((t) => t.id === 'ds').count === 1, { a, engine: after.things.filter((t) => t.kind === 'door') });
+  }
+
+  // ══ P108 IW-003 (lane B): Biscuit's things from the engine's own worlds, and the island's meters fitting one tile ══
+  {
+    readings.iw003b = {};
+    const reqNodes = JSON.parse(fs.readFileSync(path.join(REPO, 'templates', 'bot-garden', 'components', 'Data', 'Requests', 'nodes.json'), 'utf8'));
+    const REQS = JSON.parse((Array.isArray(reqNodes) ? reqNodes : reqNodes.nodes || Object.values(reqNodes)).find((n) => n.type === 'Static Data').parameters.json);
+    const laid = (id, seed) => {
+      const r = REQS.find((x) => x.id === id);
+      return ENG.worldOf(ENG.seedWorld({ map: r.map.slice(), things: JSON.parse(JSON.stringify(r.things)), robots: [{ id: 'pip', x: r.robotStart.x, y: r.robotStart.y, d: r.robotStart.d, carry: [], name: 'Pip' }] }, JSON.parse(JSON.stringify(r)), seed));
+    };
+    const runFor = (w, program, stop) => {
+      let run = ENG.newRun(program, 'pip', 'en', 'iw003b');
+      for (let i = 0; i < 300 && !run.done && !stop(w); i++) {
+        const st = ENG.step(run, w, null);
+        w = ENG.apply(w, st.delta);
+        run = st.run;
+      }
+      return w;
+    };
+    const wall = REQS.find((x) => x.id === 'wall-until');
+    await page.setViewport({ width: 1368, height: 912, mobile: false });
+    await setVar('watch', '');
+    const SEEN = `(() => { const s = (sel) => [...document.querySelectorAll(sel)].map((e) => e.closest('.gd-cell') ? e.closest('.gd-cell').getAttribute('data-x') + ',' + e.closest('.gd-cell').getAttribute('data-y') : 'bot'); return { ball: s('[data-sprite="ball"]'), basketBall: s('[data-sprite="basketBall"]'), basket: s('[data-sprite="basket"]'), storeFood: s('[data-sprite="storeFood"]'), storeFull: s('[data-sprite="storeFull"]'), wall: s('.gd-cell.gd-wall'), load: [...document.querySelectorAll('[data-load]')].map((e) => e.getAttribute('data-load')), meters: [...document.querySelectorAll('.gd-meter')].map((m) => m.getAttribute('data-kind') + ':' + m.getAttribute('data-meter')) }; })()`;
+    const show = async (w) => {
+      await setJson('map', { rows: w.map });
+      await setJson('things', w.things);
+      await setJson('robots', w.robots);
+      await wait(500);
+      return evaluate(SEEN);
+    };
+    const w0 = laid('wall-until', 1);
+    const ball0 = w0.things.find((t) => t.kind === 'ball');
+    const start = await show(w0);
+    await shot('iw003-2d-wall-until-start');
+    const carrying = await show(runFor(JSON.parse(JSON.stringify(w0)), wall.referenceProgram, (w) => (w.robots[0].carry || []).includes('ball')));
+    await shot('iw003-2d-wall-until-carrying');
+    const end = await show(runFor(JSON.parse(JSON.stringify(w0)), wall.referenceProgram, () => false));
+    await shot('iw003-2d-wall-until-end');
+    readings.iw003b.wall = { start, carrying, end, ball0 };
+    // A ball on a tile (the load on a robot's back wears the same sprite: 'bot').
+    const onGrass = (list) => list.filter((at) => at !== 'bot');
+    check('IW-003 (lane B) BALL (2D): wall-until drawn from the engine — the wall on the path, the ball in its corner by it; then on Pip’s back; then in Biscuit’s basket (1/1), none left on the grass',
+      start.wall.length === 1 && start.ball.join() === `${ball0.x},${ball0.y}` && start.basket.length === 1 && carrying.load.includes('ball') && onGrass(carrying.ball).length === 0 && end.basketBall.length === 1 && onGrass(end.ball).length === 0 && end.meters.includes('basket:1/1'), readings.iw003b.wall);
+    const bowls = await show(laid('bowl-if', 1));
+    await shot('iw003-2d-bowl-if');
+    const meow = await show(laid('meow-when', 1));
+    readings.iw003b.food = { bowls, meow };
+    check('IW-003 (lane B) FOOD (2D): the food sack and the treat jar are crates with biscuits on top, never stones; the bowls read 0/1 · 0/1 · 1/1 (one fed, by the seed)',
+      bowls.storeFood.length === 1 && meow.storeFood.length === 1 && bowls.storeFull.length === 0 && meow.storeFull.length === 0 && bowls.meters.filter((m) => m.startsWith('bowl:')).sort().join() === 'bowl:0/1,bowl:0/1,bowl:1/1', readings.iw003b.food);
+    // BARS: the island world with meters at 1368 — every compact meter a bar inside its own tile's width; no two touch.
+    const isl = islandWorld(true);
+    await setJson('map', { rows: isl.map });
+    await setJson('things', isl.things);
+    await setJson('robots', isl.robots);
+    await wait(900);
+    const bars = await evaluate(`(() => { const out = []; for (const m of document.querySelectorAll('[data-gd-world] .gd-meter')) { const r = m.getBoundingClientRect(); const c = m.closest('.gd-cell').getBoundingClientRect(); out.push({ x: r.left, y: r.top, w: r.width, h: r.height, cell: c.width, at: m.closest('.gd-cell').getAttribute('data-x') + ',' + m.closest('.gd-cell').getAttribute('data-y'), text: getComputedStyle(m.querySelector('.gd-mt')).display, bg: getComputedStyle(m).backgroundImage.slice(0, 40) }); } return out; })()`);
+    await shot('iw003-2d-island-bars');
+    const hit = [];
+    let neighbours = 0;
+    for (let i = 0; i < bars.length; i++)
+      for (let j = i + 1; j < bars.length; j++) {
+        const [ax, ay] = bars[i].at.split(',').map(Number);
+        const [bx, by] = bars[j].at.split(',').map(Number);
+        if (Math.abs(ax - bx) + Math.abs(ay - by) === 1) neighbours++;
+        if (intersects(bars[i], bars[j])) hit.push([bars[i].at, bars[j].at]);
+      }
+    readings.iw003b.bars = { n: bars.length, neighbours, hit, cell: bars[0] && bars[0].cell, sample: bars.slice(0, 4) };
+    check(`IW-003 (lane B) BARS (2D): on the 46×22 island at 1368 (tiles ${bars[0] ? bars[0].cell.toFixed(1) : '?'} px) the ${bars.length} compact meters are bars no wider than their tile, numbers hidden, and none of them touches another — ${neighbours} of them sit on neighbouring tiles`,
+      bars.length >= 30 && neighbours > 0 && hit.length === 0 && bars.every((b) => b.w <= b.cell + 0.5 && b.w <= 12.5 && b.text === 'none' && /gradient/.test(b.bg)), readings.iw003b.bars);
   }
 
   check('0 console errors through the whole drive', page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));

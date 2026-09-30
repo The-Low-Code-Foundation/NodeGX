@@ -131,6 +131,12 @@
     },
     {
       "fromId": "hinttableFn",
+      "fromProperty": "out-iw3bTrick",
+      "toId": "hinttableOut",
+      "toProperty": "iw3bTrick"
+    },
+    {
+      "fromId": "hinttableFn",
       "fromProperty": "out-iw3pRead",
       "toId": "hinttableOut",
       "toProperty": "iw3pRead"

@@ -16,6 +16,9 @@ import { ADD_PROFILE_SCRIPT, APPLY_DELTA_SCRIPT, BRING_HOME_SCRIPT, COMPLETE_REQ
 import { ALL_WORDS_JSON, DRAW_WORLD_SCRIPT, FAMILY_SCRIPT, FREE_PLAY, ISLAND_CHOOSE_SCRIPT, ISLAND_PINS_SCRIPT, ISLAND_ROWS_SCRIPT, ISLAND_WORLD_SCRIPT, START_WORLD_SCRIPT } from './cg003Scripts';
 import { PAGE_WORDS } from './cg003Content';
 import { ISLAND_HOLD_TICKS, ISLAND_TICK_SCRIPT, PLOT_AT_SCRIPT, islandWorldScript } from './ig004Island';
+// P108 IW-003 (lane B): the plot's laid start (a seeded request), and the teach-again rows at the end.
+import { ISLAND_ENGINE } from './ig004Island';
+import { ENGINE, helper } from './cg002Scripts';
 // P108 IW-002 (lane J): the job tick — the wear clock it runs.
 import { WEAR } from './cg002Content';
 
@@ -125,7 +128,10 @@ describe('IG-004 — the island as a world', () => {
     });
 
     it('🔴 an ask on the island takes the fallback (no Olive on the tick), as runToEnd does — the run never parks', () => {
-      const program = [{ id: 1, t: 'olive:say-thanks' }, { id: 2, t: 'fwd' }];
+      // P108 IW-003 (s3 merge): path-postbox is a job now, and a pinned program that cannot win it waits at home (lane
+      // B's teach again) — so the ask comes first in a program that DOES win it (its reference after the ask).
+      const post = REQUESTS.find((r) => r.id === 'path-postbox')!;
+      const program = [{ id: 100, t: 'olive:say-thanks' }, ...JSON.parse(JSON.stringify(post.referenceProgram))];
       let state = island({ 'path-postbox': pinned(program, 'r1') }).state;
       const seen: number[] = [];
       for (let t = 0; t < 4; t++) {
@@ -133,7 +139,7 @@ describe('IG-004 — the island as a world', () => {
         seen.push(state.live['path-postbox'].robot.x);
         expect(state.live['path-postbox'].run.waiting).toBe(false);
       }
-      expect(seen).toEqual([0, 1, 1, 1]);
+      expect(seen).toEqual([0, 1, 2, 2]);
     });
 
     it('🔴 a held state from an OLDER build (a tick’s write landing after a rebuild’s) is dropped for the latest build: a robot brought home stays home', () => {
@@ -327,11 +333,10 @@ describe('IG-004 — the island as a world', () => {
       const is = islandOf(kid(2));
       const things = is.world.world.things;
       for (const r of REQ_ROWS) {
-        // P108 IW-003 (lane P): a field a seeded layout deals (shuffle: the envelopes' names; choose) is the plot's seed's.
-        const dealt = [r.seeded?.shuffle?.field, ...(r.seeded?.choose ?? []).map((c: any) => c.field)].filter(Boolean);
-        const loose = (t: any) => { const o = { ...t }; for (const f of dealt) delete o[f]; return o; };
-        const want = r.things.map((t: any) => loose({ ...t, x: t.x + r.plot.x, y: t.y + r.plot.y }));
-        expect({ id: r.id, things: things.filter((t: any) => inPlot(t, r.plot) && t.kind !== 'islander' && t.kind !== 'fence' && t.kind !== 'padlock').map(loose) }).toEqual({ id: r.id, things: want });
+        // P108 IW-003: a request with a job or a seeded layout stands as its plot's seed laid it (islLaid).
+        const start = r.job || r.seeded ? helper<any>(ENGINE, 'worldOf', helper<any>(ENGINE, 'seedWorld', { map: [...r.map], things: JSON.parse(JSON.stringify(r.things)), robots: [] }, JSON.parse(JSON.stringify(r)), helper<number>(ISLAND_ENGINE, 'islSeedOf', r.id))).things : r.things;
+        const want = start.map((t: any) => ({ ...t, x: t.x + r.plot.x, y: t.y + r.plot.y }));
+        expect({ id: r.id, things: things.filter((t: any) => inPlot(t, r.plot) && t.kind !== 'islander' && t.kind !== 'fence' && t.kind !== 'padlock') }).toEqual({ id: r.id, things: want });
       }
       expect(things.filter((t: any) => inPlot(t, FREE_PLAY_PLOT)).map((t: any) => t.kind)).toEqual(['tulip', 'tulip', 'tulip']);
       const people = things.filter((t: any) => t.kind === 'islander');
@@ -730,5 +735,128 @@ describe('IW-003 (P108 s3, lane P) — the envelopes on the island: Pocket deliv
     }
     cur = state.live.envelopes;
     expect({ phase: cur.phase, doors: doors(cur), lap: cur.lap > 0, at: [cur.robot.x, cur.robot.y] }).toEqual({ phase: 'wait', doors: [['Mamie Rose', 1], ['Sami', 1], ['Biscuit', 1]], lap: true, at: [home.x, home.y] });
+  });
+});
+
+// ── P108 IW-003 (lane B): Biscuit's plots on the island, and "teach again" — a pinned program its rewritten job outgrew ──
+describe('IW-003 (P108 s3, lane B) — Biscuit’s jobs go round on the island; a pinned program the rewritten job outgrew waits at home and asks to be taught again', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { TEACH_AGAIN_SCRIPT } = require('./cg003Scripts');
+  const WORD_ROWS = JSON.parse(ALL_WORDS_JSON);
+  const words = (lang: 'en' | 'fr') => Object.fromEntries(WORD_ROWS.map((r: any) => [r.key, r[lang]]));
+  const SLOT = { x: 10, y: 8 };
+  const built = (reqs: Array<{ plot: { x: number; y: number } }>, plots: Record<string, unknown>) =>
+    bare(SYN_WORLD, { requests: [...SYN_REQUESTS.filter((r) => !reqs.some((q) => q.plot.x === r.plot.x && q.plot.y === r.plot.y)), ...reqs], plots, robots: [{ id: 'r1' }, { id: 'r2', kind: 'cobble' }, { id: 'r3' }], done: Object.keys(plots), band: 2, pins: [] });
+  const at = (r: GardenRequest) => ({ ...JSON.parse(JSON.stringify(r)), plot: SLOT });
+  const pose = (cur: any) => [cur.robot.x, cur.robot.y, cur.robot.d];
+
+  /**
+   * THE FIXTURE OF A REWRITTEN REQUEST (the other lanes' rewrites are not in this worktree, so the proof does not lean on
+   * them): before, two tulips took one pour each and `fwd water right fwd left water` won; rewritten as a job, each needs
+   * two drinks. That stored program is a real v4 program (the engine format — nothing to migrate) that no longer wins.
+   */
+  const BEFORE_PROGRAM = [{ id: 1, t: 'fwd' }, { id: 2, t: 'water' }, { id: 3, t: 'right' }, { id: 4, t: 'fwd' }, { id: 5, t: 'left' }, { id: 6, t: 'water' }];
+  const AFTER_PROGRAM = [{ id: 1, t: 'fwd' }, { id: 2, t: 'water' }, { id: 3, t: 'water' }, { id: 4, t: 'right' }, { id: 5, t: 'fwd' }, { id: 6, t: 'left' }, { id: 7, t: 'water' }, { id: 8, t: 'water' }];
+  const rewritten = (need: number) => ({
+    id: 'job-rewritten',
+    islander: 'mamie',
+    band: 1,
+    plot: SLOT,
+    tricks: [2],
+    map: ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPP', 'GWWGGRGG', 'GGGGGTGG'],
+    things: [{ kind: 'tulip', id: 'ta', x: 3, y: 1, need, have: 0, watered: false }, { kind: 'tulip', id: 'tb', x: 3, y: 2, need, have: 0, watered: false }],
+    robotStart: { x: 1, y: 1, d: 1 },
+    goal: { name: 'job_done' },
+    palette: ['fwd', 'left', 'right', 'water'],
+    reward: { kind: 'hat', id: 'sun', from: 'mamie' },
+    copyKeys: { title: 'rqTulipsTitle', blurb: 'rqTulipsBlurb', line: 'rqTulipsLine', reward: 'hatSun', gift: 'giftSun' },
+    referenceProgram: need === 1 ? BEFORE_PROGRAM : AFTER_PROGRAM,
+    job: { targets: ['ta', 'tb'], home: { x: 1, y: 1, d: 1 } }
+  });
+
+  it('🔴 teach again: the stored program of the request as it was, pinned on the rewritten request, is flagged; its robot waits at home (never a step, nothing touched) for three wears; the plot card says so', () => {
+    const is = built([rewritten(2)], { 'job-rewritten': pinned(BEFORE_PROGRAM, 'r1') });
+    const plot = is.state.plots.find((p: any) => p.id === 'job-rewritten');
+    expect([plot.status, plot.stale, is.cards.find((c: any) => c.id === 'job-rewritten').stale, is.state.live['job-rewritten'].phase]).toEqual(['working', true, true, 'teach']);
+    let state = is.state;
+    const start = JSON.parse(JSON.stringify(state.live['job-rewritten']));
+    for (let t = 0; t < 3 * WEAR.tulip; t++) {
+      const out = bare(ISLAND_TICK_SCRIPT, { state });
+      state = out.state;
+      const cur = state.live['job-rewritten'];
+      expect({ t, at: pose(cur), pc: cur.run.pc, things: cur.things }).toEqual({ t, at: [1, 1, 1], pc: 0, things: start.things });
+      expect(out.world.robots.find((r: any) => r.id === 'r1')).toMatchObject({ x: SLOT.x + 1, y: SLOT.y + 1, plot: 'job-rewritten' });
+    }
+    for (const lang of ['en', 'fr'] as const) {
+      const card = runScript(ISLAND_CHOOSE_SCRIPT, { requestId: 'job-rewritten', cards: is.cards, requests: [rewritten(2)], plots: { 'job-rewritten': pinned(BEFORE_PROGRAM, 'r1') }, robots: [{ id: 'r1', name: 'Pip' }], words: WORD_ROWS, lang, botName: 'Pip' });
+      expect([card.stale, card.canOpen, card.line]).toEqual([true, true, words(lang).iw3bTeachAgain.split('{b}').join('Pip')]);
+    }
+  });
+
+  it('known-firing beside it: the same stored program on the request as it was is not flagged and works; the rewritten request with its new program is not flagged and works; an empty or missing program is never "stale"', () => {
+    for (const [need, program] of [[1, BEFORE_PROGRAM], [2, AFTER_PROGRAM]] as const) {
+      const is = built([rewritten(need)], { 'job-rewritten': pinned(program, 'r1') });
+      expect({ need, stale: !!is.state.plots.find((p: any) => p.id === 'job-rewritten').stale, phase: is.state.live['job-rewritten'].phase }).toEqual({ need, stale: false, phase: 'work' });
+      let state = is.state;
+      for (let t = 0; t < 40 && state.live['job-rewritten'].phase !== 'wait'; t++) state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+      expect({ need, phase: state.live['job-rewritten'].phase, at: pose(state.live['job-rewritten']) }).toEqual({ need, phase: 'wait', at: [1, 1, 1] });
+    }
+    const eng = (name: string, ...args: unknown[]) => helper<any>(ISLAND_ENGINE, name, ...args);
+    expect([eng('islStale', rewritten(2), [], null, null), eng('islStale', rewritten(2), null, null, null), eng('islStale', { ...rewritten(2), job: undefined }, BEFORE_PROGRAM, null, null)]).toEqual([false, false, false]);
+    // A job whose start its own reference cannot win (its source fills later: a hen with no egg yet) is never judged.
+    expect([eng('islStale', { ...rewritten(2), referenceProgram: BEFORE_PROGRAM }, BEFORE_PROGRAM, null, null), eng('islStale', rewritten(2), BEFORE_PROGRAM, null, null)]).toEqual([false, true]);
+  });
+
+  it('🔴 the Workshop says it on that request, in both languages, from her save’s plots — the island’s own judgement; nothing for a program that still wins, another request, or no plot', () => {
+    const plots = { 'job-rewritten': pinned(BEFORE_PROGRAM, 'r1') };
+    for (const lang of ['en', 'fr'] as const) {
+      const out = runScript(TEACH_AGAIN_SCRIPT, { requests: [rewritten(2)], requestId: 'job-rewritten', plots, words: WORD_ROWS, lang, botName: 'Pip' });
+      expect([out.show, out.text]).toEqual([true, words(lang).iw3bTeachAgain.split('{b}').join('Pip')]);
+      expect(out.text).not.toMatch(/[{}]/);
+    }
+    const quiet = (requests: unknown[], requestId: string, p: unknown) => runScript(TEACH_AGAIN_SCRIPT, { requests, requestId, plots: p, words: WORD_ROWS, lang: 'en', botName: 'Pip' });
+    expect([quiet([rewritten(2)], 'job-rewritten', { 'job-rewritten': pinned(AFTER_PROGRAM, 'r1') }).show, quiet([rewritten(1)], 'job-rewritten', plots).show, quiet([rewritten(2)], 'job-rewritten', {}).show, quiet([rewritten(2)], 'free', plots).show]).toEqual([false, false, false, false]);
+  });
+
+  it('🔴 Biscuit’s real missions: the old wall-until program (until the wall, turn left — a v4 plot’s) is flagged on the rewritten mission; the new one is not', () => {
+    const r = req('wall-until');
+    const old = [{ id: 1, t: 'until', slots: { sensor: 'wall_ahead' }, body: [{ id: 2, t: 'fwd' }] }, { id: 3, t: 'left' }];
+    const eng = (name: string, ...args: unknown[]) => helper<any>(ISLAND_ENGINE, name, ...args);
+    expect([eng('islStale', JSON.parse(JSON.stringify(r)), old, null, null), eng('islStale', JSON.parse(JSON.stringify(r)), ref('wall-until'), null, null)]).toEqual([true, false]);
+    // The old bowl-if (two bowls, no sack: the robot carried its food) and the old meow-when (a step towards the bowl) too.
+    const oldBowl = [{ id: 1, t: 'repeat', n: 2, body: [{ id: 2, t: 'fwd' }, { id: 3, t: 'fwd' }, { id: 4, t: 'left' }, { id: 5, t: 'if', slots: { sensor: 'bowl_empty' }, body: [{ id: 6, t: 'put' }] }, { id: 7, t: 'right' }] }];
+    const oldMeow = [{ id: 1, t: 'when', slots: { event: 'meow' }, body: [{ id: 2, t: 'fwd' }] }];
+    expect([eng('islStale', JSON.parse(JSON.stringify(req('bowl-if'))), oldBowl, null, { id: 'r2', x: 0, y: 3, d: 1, carry: [], basket: 4 }), eng('islStale', JSON.parse(JSON.stringify(req('meow-when'))), oldMeow, null, null)]).toEqual([true, true]);
+  });
+
+  it('🔴 wall-until on the island: Pip fetches the ball, walks home and waits; Biscuit takes it out of the basket (WEAR.basket), it rolls back to the wall, and Pip goes for it again', () => {
+    const r = at(req('wall-until'));
+    let state = built([r], { 'wall-until': pinned(ref('wall-until'), 'r1') }).state;
+    const cur0 = state.live['wall-until'];
+    expect([cur0.phase, !!state.plots.find((p: any) => p.id === 'wall-until').stale]).toEqual(['work', false]);
+    const bed = (c: any) => c.things.find((t: any) => t.id === 'bed').count;
+    const balls = (c: any) => c.things.filter((t: any) => t.kind === 'ball').length;
+    let t = 0;
+    for (; t < WEAR.basket && state.live['wall-until'].phase !== 'wait'; t++) state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+    expect({ phase: state.live['wall-until'].phase, bed: bed(state.live['wall-until']), balls: balls(state.live['wall-until']), at: pose(state.live['wall-until']), lap: state.live['wall-until'].lap }).toEqual({ phase: 'wait', bed: 1, balls: 0, at: [1, 3, 1], lap: 0 });
+    for (; state.live['wall-until'].age < WEAR.basket; t++) state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+    const worn = state.live['wall-until'];
+    expect({ bed: bed(worn), balls: balls(worn), phase: worn.phase, lap: worn.lap }).toEqual({ bed: 0, balls: 1, phase: 'work', lap: 1 });
+    for (let k = 0; k < WEAR.basket && state.live['wall-until'].phase !== 'wait'; k++) state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+    expect({ phase: state.live['wall-until'].phase, bed: bed(state.live['wall-until']), at: pose(state.live['wall-until']), bumps: state.live['wall-until'].run.bumps }).toEqual({ phase: 'wait', bed: 1, at: [1, 3, 1], bumps: 0 });
+  });
+
+  it('🔴 bowl-if and meow-when on the island: each job finishes with its robot home, and a bowl Biscuit empties (WEAR.bowl) sends it back to fill it again', () => {
+    for (const [id, robot] of [['bowl-if', 'r2'], ['meow-when', 'r1']] as const) {
+      let state = built([at(req(id))], { [id]: pinned(ref(id), robot) }).state;
+      const full = (c: any) => c.things.filter((x: any) => x.kind === 'bowl').every((b: any) => (b.count ?? b.food) >= b.capacity);
+      for (let t = 0; t < WEAR.bowl && state.live[id].phase !== 'wait'; t++) state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+      const home = state.live[id];
+      expect({ id, phase: home.phase, full: full(home), lap: home.lap, at: [home.robot.x, home.robot.y] }).toEqual({ id, phase: 'wait', full: true, lap: 0, at: [req(id).robotStart.x, req(id).robotStart.y] });
+      for (; state.live[id].age < WEAR.bowl; ) state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+      expect({ id, full: full(state.live[id]), phase: state.live[id].phase, lap: state.live[id].lap }).toEqual({ id, full: false, phase: 'work', lap: 1 });
+      for (let t = 0; t < WEAR.bowl && state.live[id].phase !== 'wait'; t++) state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+      expect({ id, again: state.live[id].phase, full: full(state.live[id]) }).toEqual({ id, again: 'wait', full: true });
+    }
   });
 });

@@ -527,6 +527,54 @@
     },
     {
       "fromId": "plIn",
+      "fromProperty": "requests",
+      "toId": "plAgain",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "requestId",
+      "toId": "plAgain",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "plots",
+      "toId": "plAgain",
+      "toProperty": "plots"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "words",
+      "toId": "plAgain",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "lang",
+      "toId": "plAgain",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "botName",
+      "toId": "plAgain",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "plAgain",
+      "fromProperty": "text",
+      "toId": "plTeachLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plAgain",
+      "fromProperty": "show",
+      "toId": "plTeachLine",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plIn",
       "fromProperty": "band",
       "toId": "plPalette",
       "toProperty": "band"

@@ -2143,8 +2143,8 @@ describe('P108 s2 (merge) — Draw world hands the kits the job model as the eng
     const ids = REQ_ROWS.map((r: { id: string }) => r.id);
     expect(ids.length).toBe(REQUESTS.length);
     for (const id of ids) {
-      // P108 IW-003 (lane P): a mission on the job model draws its job (the row below); the rest as before.
-      const q = REQUESTS.find((r) => r.id === id)!;
+      // P108 IW-003: a request on the job model draws its job fields (the other half, below); the rest exactly as before.
+      const q = REQ_ROWS.find((r: any) => r.id === id);
       if (q.job || q.seeded) continue;
       const out = drawOf(run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: id }).world);
       for (const t of out.things) for (const k of Object.keys(t)) expect([id, k, OLD_KEYS.has(k)]).toEqual([id, k, true]);

@@ -1479,3 +1479,70 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
     });
   });
 });
+
+// ── P108 IW-003 (lane B): Biscuit's things in 3D — the ball (on the grass, on a back, in his basket), a store of food; the island's bar ──
+describe('P108 IW-003 (lane B) — garden-3d-kit builds Biscuit’s ball and food, and the island’s meters fit one tile', () => {
+  /* eslint-disable @typescript-eslint/no-var-requires */
+  const { REQUESTS } = require('./cg002Content');
+  const { ENGINE, helper } = require('./cg002Scripts');
+  /* eslint-enable @typescript-eslint/no-var-requires */
+  const kit = loadKits(BUILT_2D).kit;
+  const node = kit.reactNodes.find((n) => n.name === 'garden-3d-kit.Garden3D')!;
+  const W = node.world;
+  const meshesIn = (g: any) => {
+    let n = 0;
+    g.traverse((o: any) => {
+      if (o.type === 'Mesh' || o.type === 'InstancedMesh') n++;
+    });
+    return n;
+  };
+  const named = (g: any, name: string) => {
+    let hit: any = null;
+    g.traverse((o: any) => {
+      if (!hit && o.name === name) hit = o;
+    });
+    return hit;
+  };
+  const build = (rows: string[], things: unknown[], robots: unknown[] = []) => {
+    const st = threeStub();
+    const built = node.scene.buildScene({ map: W.parseMap({ rows }), things: W.parseThings(things), robots: W.parseRobots(robots) }, st.THREE);
+    return { built, counts: st.counts };
+  };
+
+  it('the ball builds from primitives (a sphere and its seam) on the grass, in Biscuit’s basket once it holds it, and on a robot’s back; the counts are honest', () => {
+    const { built, counts } = build(['GGGG', 'GGGG'], [
+      { kind: 'ball', x: 0, y: 0 },
+      { kind: 'basket', x: 1, y: 0, item: 'ball', count: 1, capacity: 1 },
+      { kind: 'basket', x: 2, y: 0, item: 'ball', count: 0, capacity: 1 },
+      { kind: 'basket', x: 3, y: 0, count: 2, capacity: 4 }
+    ], [{ x: 0, y: 1, d: 1, carry: ['ball'] }]);
+    const by = (k: string) => built.things.filter((g: any) => g.userData.kind === k);
+    expect(meshesIn(by('ball')[0])).toBe(2);
+    const baskets = by('basket');
+    expect([!!named(baskets[0], 'ball'), !!named(baskets[1], 'ball'), baskets[2].userData.eggs]).toEqual([true, false, 2]);
+    const load = named(built.robots[0], 'load');
+    expect([load.userData.load, !!named(load, 'ball')]).toEqual(['ball', true]);
+    expect(counts.Mesh + (counts.InstancedMesh || 0)).toBe(built.meshCount);
+  });
+
+  it('bowl-if’s sack and meow-when’s jar are crates with biscuits on top (never stones), by their count; a store of stones keeps its stones', () => {
+    for (const id of ['bowl-if', 'meow-when']) {
+      const r = REQUESTS.find((x: any) => x.id === id);
+      const w = helper(ENGINE, 'seedWorld', { map: [...r.map], things: JSON.parse(JSON.stringify(r.things)), robots: [] }, JSON.parse(JSON.stringify(r)), 1);
+      const store = build(w.map, w.things).built.things.find((g: any) => g.userData.kind === 'store');
+      expect({ id, food: store.userData.food, meshes: meshesIn(store) }).toEqual({ id, food: 4, meshes: 6 });
+    }
+    const stones = build(['GG'], [{ kind: 'store', x: 0, y: 0, count: 2, capacity: 6 }]).built.things[0];
+    expect([stones.userData.food, meshesIn(stones)]).toEqual([undefined, 4]);
+  });
+
+  it('🔴 the island’s compact meter is a bar 12 px wide (no numbers), its share by data-fill, green when full; a robot’s can chip keeps its numbers', () => {
+    const css = node.css as string;
+    const rule = css.split('\n').find((l: string) => l.startsWith('.gd3-world[data-wide="1"] .gd3-meter:not(.gd3-watch):not(.gd3-meter-bot){'))!;
+    expect(rule).toMatch(/width:12px/);
+    expect(rule).toMatch(/font-size:0/);
+    expect(css).toContain('.gd3-world[data-wide="1"] .gd3-meter:not(.gd3-watch):not(.gd3-meter-bot)>*{display:none}');
+    expect(css).toContain('.gd3-world[data-wide="1"] .gd3-meter[data-fill="5"]{--f:50%}');
+    expect(css).toMatch(/\.gd3-meter\.gd3-full:not\(\.gd3-watch\):not\(\.gd3-meter-bot\)\{--c:#3FA66B;--f:100%\}/);
+  });
+});

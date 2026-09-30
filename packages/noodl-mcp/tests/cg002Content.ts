@@ -100,7 +100,9 @@ export interface Block {
 
 /** A goal predicate: a name and its args. A request's goal is one or a list (all must hold). */
 export interface Goal {
-  name: 'every_tulip_watered' | 'thing_at' | 'bowl_has' | 'robot_at' | 'facing' | 'carrying' | 'uses' | 'handled' | 'said' | 'no_puddle' | 'senses' | 'job_done';
+  name: 'every_tulip_watered' | 'thing_at' | 'bowl_has' | 'robot_at' | 'facing' | 'carrying' | 'uses' | 'handled' | 'said' | 'no_puddle' | 'senses' | 'job_done'
+    // P108 IW-003 (lane B): the run bumped into nothing (Biscuit's wall: a fixed walk that crashes into it loses).
+    | 'no_bump';
   args?: ReadonlyArray<string | number>;
 }
 
@@ -285,6 +287,11 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     referenceProgram: [blk('left'), blk('repeat', { n: 4, body: b1('pick') }), blk('right'), blk('repeat', { n: 4, body: b1('put', 'fwd') })]
   },
   {
+    // P108 IW-003 (lane B): Biscuit's bowls as a job. The food sack (a store of food, 0,2) is the source, Cobble's hands
+    // the carrier, three bowls of one helping each the targets; Biscuit has eaten from two of them (which two: the seed),
+    // so Cobble takes two from the sack and walks the row, putting only where the bowl is empty. On the island a bowl
+    // empties as he eats (WEAR.bowl) and the robot goes back. The if keeps its meaning: a fixed walk that puts in the
+    // bowls that were empty yesterday puts in a full one today (refused: "It's full!"), and the goal asks for the if.
     id: 'bowl-if',
     islander: 'biscuit',
     band: 2,
@@ -292,19 +299,27 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     tricks: [4],
     map: ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPP', 'GWWGGRGG', 'GGGGGTGG'],
     things: [
-      { kind: 'bowl', x: 2, y: 2, food: 1 },
-      { kind: 'bowl', x: 4, y: 2, food: 0 }
+      { kind: 'store', id: 'sack', x: 0, y: 2, item: 'food', count: 99 },
+      { kind: 'bowl', id: 'b1', x: 2, y: 2, food: 0, capacity: 1 },
+      { kind: 'bowl', id: 'b2', x: 4, y: 2, food: 0, capacity: 1 },
+      { kind: 'bowl', id: 'b3', x: 6, y: 2, food: 0, capacity: 1 }
     ],
-    robotStart: { x: 0, y: 3, d: 1, carry: ['food', 'food'] },
-    goal: [{ name: 'bowl_has', args: [4, 2, 1] }, { name: 'bowl_has', args: [2, 2, 1] }, { name: 'uses', args: ['if', 1] }],
-    palette: ['fwd', 'left', 'right', 'put', 'repeat', 'if'],
+    robotStart: { x: 0, y: 3, d: 1 },
+    goal: [{ name: 'job_done' }, { name: 'uses', args: ['if', 1] }],
+    palette: ['fwd', 'left', 'right', 'pick', 'put', 'repeat', 'if'],
     needs: 'cobble',
     rungs: ['is-it-a'],
     reward: { kind: 'hat', id: 'crown', from: 'biscuit' },
     copyKeys: { title: 'rqBowlTitle', blurb: 'rqBowlBlurb', line: 'rqBowlLine', reward: 'hatCrown', gift: 'giftCrown' },
+    job: { targets: ['b1', 'b2', 'b3'], home: { x: 0, y: 3, d: 1 } },
+    seeded: { shuffle: { things: ['b1', 'b2', 'b3'], field: 'food', values: [0, 0, 1] } },
     referenceProgram: [
+      blk('left'),
+      blk('pick'),
+      blk('pick'),
+      blk('right'),
       blk('repeat', {
-        n: 2,
+        n: 3,
         body: [blk('fwd'), blk('fwd'), blk('left'), blk('if', { slots: { sensor: 'bowl_empty' }, body: [blk('put')] }), blk('right')]
       })
     ]
@@ -334,35 +349,58 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     job: { targets: ['door-sami'], home: { x: 0, y: 3, d: 1 } }
   },
   {
+    // P108 IW-003 (lane B): a real wall, and Biscuit's ball. The wall (L) stands on the path at a column the seed picks
+    // (5–7); the ball has rolled into the corner by it (byWall: the tile before the wall, one row up). Pip walks until the
+    // wall is ahead, picks the ball, turns back and walks until his basket (0,3) is ahead, and puts it in. The goal asks
+    // for no bump: a fixed repeat 7 walks into the wall on every seed, a fixed repeat 4 fits one wall of three.
     id: 'wall-until',
     islander: 'biscuit',
     band: 2,
     plot: { x: 10, y: 15 },
     tricks: [3],
     map: ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPP', 'GWWGGRGG', 'GGGGGTGG'],
-    things: [],
-    robotStart: { x: 0, y: 3, d: 1 },
-    goal: [{ name: 'robot_at', args: [7, 3] }, { name: 'facing', args: [0] }, { name: 'uses', args: ['until', 1] }],
-    palette: ['fwd', 'left', 'right', 'until'],
+    things: [
+      { kind: 'basket', id: 'bed', x: 0, y: 3, item: 'ball', count: 0, capacity: 1 },
+      { kind: 'ball', id: 'ball', x: 4, y: 2 }
+    ],
+    robotStart: { x: 1, y: 3, d: 1 },
+    goal: [{ name: 'job_done' }, { name: 'no_bump' }, { name: 'uses', args: ['until', 1] }],
+    palette: ['fwd', 'left', 'right', 'pick', 'put', 'until'],
     reward: { kind: 'sticker', id: 'paw', from: 'biscuit' },
     copyKeys: { title: 'rqWallTitle', blurb: 'rqWallBlurb', line: 'rqWallLine', reward: 'stickerPaw', gift: 'giftPaw' },
-    referenceProgram: [blk('until', { slots: { sensor: 'wall_ahead' }, body: [blk('fwd')] }), blk('left')]
+    job: { targets: ['bed'], home: { x: 1, y: 3, d: 1 } },
+    seeded: { wallAt: [5, 7], byWall: [{ thing: 'ball', dx: -1, dy: -1, spotOn: 'bed' }] },
+    referenceProgram: [
+      blk('until', { slots: { sensor: 'wall_ahead' }, body: [blk('fwd')] }),
+      blk('left'),
+      blk('pick'),
+      blk('left'),
+      blk('until', { slots: { sensor: 'wall_ahead' }, body: [blk('fwd')] }),
+      blk('put')
+    ]
   },
   {
+    // P108 IW-003 (lane B): Biscuit's treats. The treat jar (a store of food, 1,2) is the source, Pip's hands the carrier,
+    // Biscuit's bowl (2,3, two treats) the target. Nobody knows when he meows (the schedule: ticks 1 and 8); each time,
+    // Pip turns to the jar, takes one treat, turns back to the bowl and puts it in. Home is where he stands.
     id: 'meow-when',
     islander: 'biscuit',
     band: 2,
     plot: { x: 19, y: 15 },
     tricks: [5],
     map: ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPP', 'GWWGGRGG', 'GGGGGTGG'],
-    things: [{ kind: 'bowl', x: 3, y: 3, food: 0 }],
-    robotStart: { x: 0, y: 3, d: 1 },
-    schedule: [{ tick: 1, event: 'meow' }, { tick: 4, event: 'meow' }],
-    goal: [{ name: 'handled', args: ['meow', 2] }, { name: 'robot_at', args: [2, 3] }],
-    palette: ['fwd', 'left', 'right', 'when'],
+    things: [
+      { kind: 'store', id: 'jar', x: 1, y: 2, item: 'food', count: 99 },
+      { kind: 'bowl', id: 'bowl', x: 2, y: 3, food: 0, capacity: 2 }
+    ],
+    robotStart: { x: 1, y: 3, d: 1 },
+    schedule: [{ tick: 1, event: 'meow' }, { tick: 8, event: 'meow' }],
+    goal: [{ name: 'job_done' }, { name: 'handled', args: ['meow', 2] }],
+    palette: ['left', 'right', 'pick', 'put', 'when'],
     reward: { kind: 'item', id: 'bell', from: 'biscuit' },
     copyKeys: { title: 'rqMeowTitle', blurb: 'rqMeowBlurb', line: 'rqMeowLine', reward: 'itemBell', gift: 'giftBell' },
-    referenceProgram: [blk('when', { slots: { event: 'meow' }, body: [blk('fwd')] })]
+    job: { targets: ['bowl'], home: { x: 1, y: 3, d: 1 } },
+    referenceProgram: [blk('when', { slots: { event: 'meow' }, body: [blk('left'), blk('pick'), blk('right'), blk('put')] })]
   },
   {
     id: 'eggs-count',
@@ -539,7 +577,10 @@ export const HINTS: Readonly<Record<string, Bi>> = {
   iw3Job: s('{w} of {t} done. What is still waiting?', '{w} sur {t}, c’est fait. Qu’est-ce qui attend encore ?'),
   // ── P108 IW-003 (lane P): Olive read an envelope — oliveRung2's "if Olive read… the right row" would send a child to the
   // if block; the envelopes teach go to [what Olive read]. Not voiced. ──
-  iw3pRead: s('Olive read the name on the envelope. “Go to” what Olive read takes {b} to that door.', 'Olive a lu le nom sur l’enveloppe. « Aller à » ce qu’Olive a lu emmène {b} à cette porte.')
+  iw3pRead: s('Olive read the name on the envelope. “Go to” what Olive read takes {b} to that door.', 'Olive a lu le nom sur l’enveloppe. « Aller à » ce qu’Olive a lu emmène {b} à cette porte.'),
+
+  // ── P108 IW-003 (lane B): the job is done but not the way it was asked (the goal wants the mission's block). Not voiced.
+  iw3bTrick: s('The job is done! Now teach {b} the way the card asks — with its own block.', 'Le travail est fait ! Maintenant, apprends à {b} comme la carte le demande — avec son bloc à elle.')
 };
 
 export const HINT_KEYS: ReadonlyArray<string> = Object.keys(HINTS);
@@ -679,16 +720,16 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   rqTulipsLine: s('"My tulips are thirsty. Fill the can at the pond, and come back!"', '« Mes tulipes ont soif. Remplis l’arrosoir à la mare, et reviens ! »'),
   rqBowlTitle: s('Feed me, but only if my bowl is empty', 'Nourris-moi, mais seulement si ma gamelle est vide'),
   rqBowlBlurb: s('If', 'Si'),
-  rqBowlLine: s('"Two bowls. One is full already. Fill only the empty one, {b}!"', '« Deux gamelles. L’une est déjà pleine. Remplis seulement la vide, {b} ! »'),
+  rqBowlLine: s('"I eat from my three bowls all day. Take food from the sack and fill only the empty ones, {b}!"', '« Je mange dans mes trois gamelles toute la journée. Prends à manger dans le sac et remplis seulement les vides, {b} ! »'),
   rqLetterTitle: s('Deliver a letter and say something kind', 'Livre une lettre et dis quelque chose de gentil'),
   rqLetterBlurb: s('Say', 'Dire'),
   rqLetterLine: s('"There is post for me in the post box! Bring it to my door, and say something nice when you get there."', '« Il y a du courrier pour moi dans la boîte aux lettres ! Apporte-le à ma porte, et dis quelque chose de gentil en arrivant. »'),
-  rqWallTitle: s('Walk to the wall, then turn', 'Va jusqu’au mur, puis tourne'),
+  rqWallTitle: s('Fetch my ball from the wall', 'Rapporte ma balle du mur'),
   rqWallBlurb: s('Repeat until', 'Répéter jusqu’à'),
-  rqWallLine: s('"Keep going until the wall, then turn left. I want to see {b} stop by itself."', '« Continue jusqu’au mur, puis tourne à gauche. Je veux voir {b} s’arrêter tout seul. »'),
-  rqMeowTitle: s('When I meow, come to the bowl', 'Quand je miaule, viens à la gamelle'),
+  rqWallLine: s('"My ball rolled all the way to the wall. Walk until the wall, pick it up and bring it back to my basket — without a bump, {b}!"', '« Ma balle a roulé jusqu’au mur. Avance jusqu’au mur, ramasse-la et rapporte-la dans mon panier — sans te cogner, {b} ! »'),
+  rqMeowTitle: s('When I meow, bring me a treat', 'Quand je miaule, apporte-moi une friandise'),
   rqMeowBlurb: s('When', 'Quand'),
-  rqMeowLine: s('"Every time I meow, {b} takes one step towards my bowl. Miaow!"', '« À chaque miaulement, {b} fait un pas vers ma gamelle. Miaou ! »'),
+  rqMeowLine: s('"Every time I meow, {b} takes one treat from the jar and puts it in my bowl. Miaow!"', '« À chaque miaulement, {b} prend une friandise dans le bocal et la met dans ma gamelle. Miaou ! »'),
   rqEggsTitle: s('Collect four eggs, then stop', 'Ramasse quatre œufs, puis arrête'),
   rqEggsBlurb: s('Counting', 'Compter'),
   rqEggsLine: s('"Four eggs for the cake, not five. Can {b} keep count?"', '« Quatre œufs pour le gâteau, pas cinq. {b} sait compter ? »'),
@@ -1183,6 +1224,12 @@ export interface SeededSpec {
   shuffle?: { things: ReadonlyArray<string>; field: string; values: ReadonlyArray<unknown> };
   /** P108 IW-003 (s3 base): the thing with that id moved to one tile of `among` (a ball, a can on the plot). */
   place?: ReadonlyArray<{ thing: string; among: ReadonlyArray<readonly [number, number]> }>;
+  /**
+   * P108 IW-003 (lane B): the thing with that id laid beside the wall this seed drew (`wallAt`): at the wall's tile plus
+   * (dx, dy); `spotOn` names a container that remembers that tile, so the thing it loses to wear goes back there
+   * (Biscuit's ball rolls back to the wall). Laid after `place`; it draws nothing from the seed.
+   */
+  byWall?: ReadonlyArray<{ thing: string; dx: number; dy: number; spotOn?: string }>;
 }
 
 /** The wall tile (brief §4.2): blocking, drawn by both kits (session 2). The map edge stays blocked too. */

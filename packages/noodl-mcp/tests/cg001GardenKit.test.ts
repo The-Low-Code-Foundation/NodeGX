@@ -1108,3 +1108,73 @@ describe('P108 IW-004 — garden-kit.Blocks: Blockly vendored, pinned, licensed,
     expect(reducedMotionReport(css).unstilled).toEqual([]);
   });
 });
+
+// ── P108 IW-003 (lane B): Biscuit's things drawn in 2D — the ball, the ball in his basket, a store of food; the island's meter a bar ──
+describe('P108 IW-003 (lane B) — garden-kit draws Biscuit’s ball and food, and the island’s meters fit one tile', () => {
+  /* eslint-disable @typescript-eslint/no-var-requires */
+  const { REQUESTS } = require('./cg002Content');
+  const { ENGINE, NEW_RUN_SCRIPT, STEP_SCRIPT, APPLY_DELTA_SCRIPT, helper, runScript } = require('./cg002Scripts');
+  /* eslint-enable @typescript-eslint/no-var-requires */
+  const kit = loadKit().kit;
+  const garden = kit.reactNodes.find((n) => n.name === 'garden-kit.Garden')!;
+  const defaults = Object.fromEntries(Object.entries(garden.inputProps as Record<string, { default?: unknown }>).map(([k, p]) => [k, p.default]));
+  const draw = (w: any) => renderToStaticMarkup(React.createElement(garden.getReactComponent(), { ...defaults, map: { rows: w.map }, things: w.things, robots: w.robots }));
+  const body = (html: string) => html.replace(/<style>[\s\S]*?<\/style>/, '');
+  const laid = (id: string, seed: number) => {
+    const r = REQUESTS.find((x: any) => x.id === id);
+    return helper(ENGINE, 'seedWorld', { map: [...r.map], things: JSON.parse(JSON.stringify(r.things)), robots: [{ id: 'pip', ...r.robotStart, carry: [] }] }, JSON.parse(JSON.stringify(r)), seed);
+  };
+  /** Step the world until the robot carries something (or the cap), the page's way. */
+  const until = (w: any, program: unknown[], stop: (w: any) => boolean, cap = 200) => {
+    let run = runScript(NEW_RUN_SCRIPT, { program, robotId: 'pip', lang: 'en' }).run;
+    for (let i = 0; i < cap && !run.done && !stop(w); i++) {
+      const st = runScript(STEP_SCRIPT, { run, world: w, answer: null });
+      w = runScript(APPLY_DELTA_SCRIPT, { world: w, delta: st.delta }).world;
+      run = st.run;
+    }
+    return w;
+  };
+
+  it('wall-until: the ball on the grass by the wall, then on Pip’s back, then in Biscuit’s basket (the basket’s meter 1/1, green)', () => {
+    const r = REQUESTS.find((x: any) => x.id === 'wall-until');
+    const w0 = laid('wall-until', 1);
+    const ball = w0.things.find((t: any) => t.kind === 'ball');
+    const start = body(draw(w0));
+    expect(start).toContain('data-sprite="ball"');
+    expect(start).toContain('data-sprite="wall"');
+    expect(start).toContain('data-sprite="basket"');
+    expect(start).toMatch(new RegExp(`data-x="${ball.x}" data-y="${ball.y}"[^>]*>(?:(?!</button>).)*data-sprite="ball"`));
+    const carrying = until(JSON.parse(JSON.stringify(w0)), r.referenceProgram, (w) => (w.robots[0].carry || []).includes('ball'));
+    expect(body(draw(carrying))).toContain('data-load="ball"');
+    const end = until(JSON.parse(JSON.stringify(w0)), r.referenceProgram, () => false);
+    const html = body(draw(end));
+    expect([html.includes('data-sprite="basketBall"'), html.includes('data-sprite="ball"'), /data-meter="1\/1" data-kind="basket" data-full="true"/.test(html)]).toEqual([true, false, true]);
+  });
+
+  it('bowl-if and meow-when: the food sack and the treat jar are crates with biscuits on top (never stones); the bowls’ meters 0/1 · 1/1', () => {
+    for (const id of ['bowl-if', 'meow-when']) {
+      const html = body(draw(laid(id, 1)));
+      expect({ id, food: html.includes('data-sprite="storeFood"'), stones: html.includes('data-sprite="storeFull"') }).toEqual({ id, food: true, stones: false });
+    }
+    const bowls = body(draw(laid('bowl-if', 1)));
+    expect([...bowls.matchAll(/data-meter="(\d\/\d)" data-kind="bowl"/g)].map((m) => m[1]).sort()).toEqual(['0/1', '0/1', '1/1']);
+  });
+
+  it('🔴 the island’s meters fit one tile: on a wide world each compact meter is a bar at most 12 px wide carrying its share (data-fill), no numbers shown; a small world keeps the chip', () => {
+    const tulips = Array.from({ length: 6 }, (_, i) => ({ kind: 'tulip', id: 't' + i, x: 10 + i, y: 3, have: i % 4, need: 3 }));
+    const wide = { map: Array.from({ length: 6 }, () => 'G'.repeat(55)), things: tulips, robots: [] };
+    const html = draw(wide);
+    expect(html).toContain('data-wide="1"');
+    const fills = [...body(html).matchAll(/data-meter="(\d)\/3"[^>]*data-fill="(\d+)"/g)].map((m) => [Number(m[1]), Number(m[2])]);
+    expect(fills).toEqual(tulips.map((t) => [Math.min(t.have, 3), Math.round((10 * Math.min(t.have, 3)) / 3)]));
+    const css = html.match(/<style>([\s\S]*?)<\/style>/)![1];
+    const rule = css.split('\n').find((l) => l.startsWith('.gd-world[data-wide="1"] .gd-meter:not(.gd-watch){width:'))!;
+    expect(rule).toMatch(/width:min\(12px,82%\)/);
+    expect(rule).toMatch(/font-size:0/);
+    expect(css).toContain('.gd-world[data-wide="1"] .gd-meter:not(.gd-watch)>*{display:none}');
+    // 12 px on a 14 px island tile: two neighbours' bars leave a gap between them.
+    expect(12).toBeLessThan(14);
+    // A small world (the Workshop's 8 × 6) is not wide: its chips keep their numbers.
+    expect(body(draw({ map: Array.from({ length: 6 }, () => 'G'.repeat(8)), things: tulips.map((t, i) => ({ ...t, x: i })), robots: [] }))).not.toContain('data-wide="1"');
+  });
+});

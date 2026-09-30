@@ -207,6 +207,8 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   iw4B_trick: s('trick', 'astuce'),
   iw4B_do: s('do trick', 'faire l’astuce'),
   iw4VarsH: s('What {b} remembers', 'Ce que {b} retient'),
+  // ── P108 IW-003 (lane B): teach again — a pinned program its rewritten job outgrew (the island's card, the Workshop) ──
+  iw3bTeachAgain: s('Teach {b} again — the job changed. {b} is waiting at home.', 'Réapprends à {b} — le travail a changé. {b} attend à la maison.'),
   ...Object.fromEntries(Object.values(REQUEST_SUBS).map((r) => [r.key, r.words]))
 };
 

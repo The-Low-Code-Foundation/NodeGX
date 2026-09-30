@@ -125,6 +125,12 @@
     },
     {
       "fromId": "islandchooseFn",
+      "fromProperty": "out-stale",
+      "toId": "islandchooseOut",
+      "toProperty": "stale"
+    },
+    {
+      "fromId": "islandchooseFn",
       "fromProperty": "out-status",
       "toId": "islandchooseOut",
       "toProperty": "status"

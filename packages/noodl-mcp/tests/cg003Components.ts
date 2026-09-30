@@ -866,7 +866,7 @@ const PLAY: CgComponent = {
   description: 'The workshop: drive the robot freely (nothing remembered), teach it by driving it again (every press a block), see the steps as blocks, fold the repetition, play, and win. Request Id picks the request (free for free play); the line under the title is that request’s own. Won fires with Bloom, Reward and Won Request set; Island asks for the island; Found says whether the request exists (a reload has none).',
   repeats: { source: 'array', rowFields: ['id', 'cls', 'lit'] },
   nodes: [
-    inputs('plIn', [['requestId', 'string'], ['requests', 'array'], ['hints', 'array'], ['words', 'array'], ['lang', 'string'], ['band', 'number'], ['isOlder', 'boolean'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['stepMs', 'number'], ['robot', 'object'], ['robotKey', 'string'], ['paletteRobot', 'object'], ['giftText', 'string'], ['hasGift', 'boolean'], ['cardsSeen', 'array']]),
+    inputs('plIn', [['requestId', 'string'], ['requests', 'array'], ['hints', 'array'], ['words', 'array'], ['lang', 'string'], ['band', 'number'], ['isOlder', 'boolean'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['stepMs', 'number'], ['robot', 'object'], ['robotKey', 'string'], ['paletteRobot', 'object'], ['giftText', 'string'], ['hasGift', 'boolean'], ['cardsSeen', 'array'], ['plots', 'object']]),
     // ── What the child sees ──
     group('plRoot', 'The workshop', undefined, column({ rowGap: sp(12) }), ['plHead', 'plWs', 'plWin']),
     group('plHead', 'The head', 'plRoot', column({ rowGap: sp(2) }), ['plEyebrow', 'plTitle', 'plSub']),
@@ -874,7 +874,7 @@ const PLAY: CgComponent = {
     text('plTitle', 'The request', 'plHead', '', { ...T_H1, cssClassName: 'bg-ws-title' }),
     text('plSub', 'How it works', 'plHead', '', { ...T_MUTED, maxWidth: px(640), cssClassName: 'bg-ws-sub' }),
     group('plWs', 'World and steps', 'plRoot', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-ws' }, ['plLeft', 'plRight']),
-    group('plLeft', 'The world side', 'plWs', { ...column({ rowGap: sp(12) }), ...PANEL }, ['plTask', 'plStage', 'plVars', 'plModeLine', 'plControls', 'plOwl']),
+    group('plLeft', 'The world side', 'plWs', { ...column({ rowGap: sp(12) }), ...PANEL }, ['plTask', 'plTeachLine', 'plStage', 'plVars', 'plModeLine', 'plControls', 'plOwl']),
     group('plTask', 'The task', 'plLeft', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(14), flexWrap: 'nowrap' }), ['plFace', 'plTaskText', 'plMarks']),
     group('plFace', 'The islander', 'plTask', { sizeMode: 'explicit', width: px(56), height: px(56) }),
     group('plTaskText', 'Who and what', 'plTask', { ...column({ rowGap: sp(2) }), cssClassName: 'bg-grow' }, ['plTaskH', 'plTaskP']),
@@ -901,6 +901,8 @@ const PLAY: CgComponent = {
     place('plPad', C.pad, 'The pad', 'plStage'),
     // P108 IW-004: what the robot remembers (set / change), under the world, while it has anything to show.
     text('plVars', 'What the robot remembers', 'plLeft', '', { ...T_STRONG, cssClassName: 'bg-vars', mounted: false }),
+    // P108 IW-003 (lane B): teach again — the program pinned here no longer wins this rewritten job.
+    text('plTeachLine', 'Teach it again', 'plLeft', '', { ...T_STRONG, cssClassName: 'bg-teach-again', mounted: false }),
     // P106 IG-003: one line under the world saying what the mode does (Drive: nothing is remembered; Teach: back to the start).
     text('plModeLine', 'What this mode does', 'plLeft', '', { ...T_STRONG, cssClassName: 'bg-mode-line', mounted: false }),
     // IG-001 D8: no "Ask Olive" — it only re-chose the hint; the hint now follows every edit by itself (plHintLater).
@@ -1011,6 +1013,7 @@ const PLAY: CgComponent = {
     // ── P108 IW-004: a chip picked on the world; what the robot remembers ──
     logic('plPickThing', L('Pick thing'), 'The thing on the tapped tile, for the chip'),
     logic('plVarMon', L('Var monitor'), 'What the robot remembers, in words'),
+    logic('plAgain', L('Teach again'), 'A pinned program the rewritten job outgrew'),
     // ── Drive, teach, play (P106 IG-003); the islander's challenge; the fold ──
     withStates('plMode', 'Drive, teach or play', ['drive', 'teach', 'play'], {
       mode: { type: 'string', by: { drive: 'drive', teach: 'teach', play: 'play' } },
@@ -1169,6 +1172,10 @@ const PLAY: CgComponent = {
     wire('plIn', 'botName', 'plVarMon', 'botName'),
     wire('plVarMon', 'text', 'plVars', 'text'),
     wire('plVarMon', 'show', 'plVars', 'mounted'),
+    // P108 IW-003 (lane B): teach again, from her save's plots.
+    ...(['requests', 'requestId', 'plots', 'words', 'lang', 'botName'] as const).map((f) => wire('plIn', f, 'plAgain', f)),
+    wire('plAgain', 'text', 'plTeachLine', 'text'),
+    wire('plAgain', 'show', 'plTeachLine', 'mounted'),
     wire('plIn', 'band', 'plPalette', 'band'),
     wire('plStart', 'allowed', 'plPalette', 'allowed'),
     // The request's rungs (band 10-12 requests only, ruling 4) and this computer's exam: a rung it failed is withheld (AC5).
@@ -2571,6 +2578,8 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       wire('wsComplete', 'ran', 'wsStore', 'write'),
       wire('wsPlay', 'island', 'wsGoIsland', 'navigate'),
       wire('wsFam', 'cardsSeen', 'wsPlay', 'cardsSeen'),
+      // P108 IW-003 (lane B): her plots, for teach again.
+      wire('wsFam', 'plots', 'wsPlay', 'plots'),
       wire('wsStore', 'model', 'wsSeen', 'model'),
       wire('wsFam', 'profileId', 'wsSeen', 'profileId'),
       wire('wsPlay', 'cardsSeen', 'wsSeen', 'value'),

@@ -70,7 +70,18 @@ const NAIVE_P: Record<string, Block[]> = {
   ]) as Block[]
 };
 // [B] Biscuit's lane:
-const NAIVE_B: Record<string, Block[]> = {};
+const NAIVE_B: Record<string, Block[]> = {
+  // wall-until: the ball fetched with an until, then the way back counted — four steps home fits a wall at 6, walks into
+  // the basket when the wall is at 5 (a bump) and stops a tile short when it is at 7 (the ball dropped on the path).
+  'wall-until': [
+    { id: 1, t: 'until', slots: { sensor: 'wall_ahead' }, body: [{ id: 2, t: 'fwd' }] },
+    { id: 3, t: 'left' },
+    { id: 4, t: 'pick' },
+    { id: 5, t: 'left' },
+    { id: 6, t: 'repeat', n: 4, body: [{ id: 7, t: 'fwd' }] },
+    { id: 8, t: 'put' }
+  ]
+};
 const NAIVE: Record<string, Block[]> = { ...NAIVE_M, ...NAIVE_S, ...NAIVE_P, ...NAIVE_B };
 
 // ── Harness (the engine gate's own loop: Step, then Apply delta; Olive answered by her written answer) ────────────────

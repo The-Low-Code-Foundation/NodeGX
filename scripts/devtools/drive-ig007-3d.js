@@ -40,6 +40,10 @@
  *   PICK   Picking frames the world violet; the pointer over the basket lifts it (the engine's own reading) and a real
  *          click still reports Tile X / Tile Y / Tile Tapped through the graph's Variables (screenshot)
  *   SEEDS  IW-002 AC4's kit half: seeds 1, 2, 3 build three layouts, each the engine's; seed 2 again builds seed 2's
+ * P108 IW-003 (lane B), at the end:
+ *   BALL   Biscuit's things in 3D from the template's own wall-until and bowl-if worlds: the ball by the wall, on Pip's
+ *          back, in the basket; the food sack with biscuits (shots)
+ *   BARS   a 46×22 world of job things, the island camera: every compact chip is a 12 px bar, no two touching (shot)
  *   0 console errors.
  * Exits 0 when every clause passed, 1 when any did, 2 on a usage error.
  */
@@ -607,6 +611,80 @@ withDeployedSite({ dir: DIR, gpu: true, chromeArgs: ['--use-angle=swiftshader', 
     const owners = (r) => r.plates.map((p) => p.split('@')[0]);
     check('IW-003 (3D, lane P): the street — three doors built, each with its owner’s plate in the overlay (Mamie Rose, Sami, Biscuit) and a 0/1 chip', b.doors.length === 3 && JSON.stringify(owners(b)) === JSON.stringify(['Mamie Rose=Mamie Rose', 'Sami=Sami', 'Biscuit=Biscuit']) && JSON.stringify(b.chips) === JSON.stringify(['0/1', '0/1', '0/1']) && b.doors.every((d) => !d.mail), b);
     check('IW-003 (3D, lane P): after the engine’s run Sami’s door holds the letter (drawn in its slot) and reads 1/1 green; the others 0/1', JSON.stringify(a.doors.map((d) => d.mail)) === JSON.stringify([false, true, false]) && JSON.stringify(a.chips) === JSON.stringify(['0/1', '1/1:full', '0/1']), a);
+  }
+
+  // ══ P108 IW-003 (lane B): Biscuit's things in 3D, from the template's own requests; the island's meters as bars ══
+  {
+    readings.iw003b = {};
+    const reqNodes = JSON.parse(fs.readFileSync(path.join(REPO, 'templates', 'bot-garden', 'components', 'Data', 'Requests', 'nodes.json'), 'utf8'));
+    const REQS = JSON.parse((Array.isArray(reqNodes) ? reqNodes : reqNodes.nodes || Object.values(reqNodes)).find((n) => n.type === 'Static Data').parameters.json);
+    const laid = (id, seed) => {
+      const r = REQS.find((x) => x.id === id);
+      return ENG.worldOf(ENG.seedWorld({ map: r.map.slice(), things: JSON.parse(JSON.stringify(r.things)), robots: [{ id: 'pip', x: r.robotStart.x, y: r.robotStart.y, d: r.robotStart.d, carry: [], name: 'Pip', colour: '#FF7A59' }] }, JSON.parse(JSON.stringify(r)), seed));
+    };
+    const runFor = (w, program, stop) => {
+      let run = ENG.newRun(program, 'pip', 'en', 'iw003b');
+      for (let i = 0; i < 300 && !run.done && !stop(w); i++) {
+        const st = ENG.step(run, w, null);
+        w = ENG.apply(w, st.delta);
+        run = st.run;
+      }
+      return w;
+    };
+    const B3 = `(() => { const eng = ${ROOT}.gd3; const by = (k) => eng.built.things.filter((g) => g.userData.kind === k); const named = (g, n) => { let f = null; g.traverse((o) => { if (!f && o.name === n) f = o; }); return f; };
+      const r = eng.built.robots[0]; const load = r && named(r, 'load');
+      return { balls: by('ball').map((g) => g.userData.x + ',' + g.userData.y), basketBall: by('basket').map((g) => !!g.userData.ball), food: by('store').map((g) => g.userData.food || 0), load: load ? load.userData.load : null, walls: eng.built.tiles.filter((m) => m.name === 'tiles-wall').length }; })()`;
+    const show3 = async (w, name) => {
+      await setJson('map', { rows: w.map });
+      await setJson('things', w.things);
+      await setJson('robots', w.robots);
+      await setJson('focus', { x: 0, y: 0, w: 8, h: 6 });
+      await setVar('camera', 'plot');
+      await wait(900);
+      const got = await evaluate(B3);
+      await shot(name);
+      return got;
+    };
+    await page.setViewport({ width: 1024, height: 800 });
+    const wall = REQS.find((x) => x.id === 'wall-until');
+    const w0 = laid('wall-until', 1);
+    const ball0 = w0.things.find((t) => t.kind === 'ball');
+    const start = await show3(w0, 'iw003-3d-wall-until-start');
+    const carrying = await show3(runFor(JSON.parse(JSON.stringify(w0)), wall.referenceProgram, (w) => (w.robots[0].carry || []).includes('ball')), 'iw003-3d-wall-until-carrying');
+    const end = await show3(runFor(JSON.parse(JSON.stringify(w0)), wall.referenceProgram, () => false), 'iw003-3d-wall-until-end');
+    const sack = await show3(laid('bowl-if', 1), 'iw003-3d-bowl-if');
+    readings.iw003b.ball = { start, carrying, end, sack, ball0 };
+    check('IW-003 (lane B) BALL (3D): the ball by the wall (the engine’s tile), then on Pip’s back, then in Biscuit’s basket and off the grass; the food sack carries biscuits',
+      start.walls === 1 && start.balls.join() === `${ball0.x},${ball0.y}` && carrying.load === 'ball' && end.balls.length === 0 && end.basketBall.includes(true) && sack.food.length === 1 && sack.food[0] > 0, readings.iw003b.ball);
+    // BARS: a 46×22 world with neighbouring tulips and a basket per plot, framed whole.
+    const map = [];
+    for (let y = 0; y < 22; y++) map.push(Array.from({ length: 46 }, () => (y === 7 || y === 14 ? 'P' : 'G')).join(''));
+    const things = [];
+    for (let p = 0; p < 13; p++) {
+      const ox = (p % 5) * 9 + 1;
+      const oy = Math.floor(p / 5) * 7 + 1;
+      things.push({ kind: 'tulip', x: ox, y: oy, need: 3, have: p % 4 }, { kind: 'tulip', x: ox + 1, y: oy, need: 3, have: (p + 1) % 4 }, { kind: 'basket', x: ox + 4, y: oy + 1, count: p % 5, capacity: 4 });
+    }
+    await setJson('map', { rows: map });
+    await setJson('things', things);
+    await setJson('robots', []);
+    await setVar('camera', 'island');
+    await wait(1200);
+    const bars = await evaluate(`[...document.querySelectorAll('.gd3-meter')].map((m) => { const r = m.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height, at: m.getAttribute('data-x') + ',' + m.getAttribute('data-y'), wide: ${ROOT}.getAttribute('data-wide') }; })`);
+    await shot('iw003-3d-island-bars');
+    const hit = [];
+    let neighbours = 0;
+    for (let i = 0; i < bars.length; i++)
+      for (let j = i + 1; j < bars.length; j++) {
+        const [ax, ay] = bars[i].at.split(',').map(Number);
+        const [bx, by] = bars[j].at.split(',').map(Number);
+        if (Math.abs(ax - bx) + Math.abs(ay - by) === 1) neighbours++;
+        const a = bars[i], b = bars[j];
+        if (a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h) hit.push([a.at, b.at]);
+      }
+    readings.iw003b.bars = { n: bars.length, neighbours, hit, sample: bars.slice(0, 4) };
+    check(`IW-003 (lane B) BARS (3D): the island camera on 46×22 — the ${bars.length} compact meters are bars of at most 12 px (80 % of a tile on screen), none touching another (${neighbours} on neighbouring tiles)`,
+      bars.length === 39 && neighbours > 0 && hit.length === 0 && bars.every((b) => b.w <= 12.5 && b.wide === '1'), readings.iw003b.bars);
   }
 
   check('0 console errors through the whole drive', page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));

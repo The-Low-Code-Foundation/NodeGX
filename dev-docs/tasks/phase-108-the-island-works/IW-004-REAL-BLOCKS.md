@@ -256,3 +256,45 @@ shell's build; the manifest loads the files from the app's own folder and the sp
   `Workshop/Play/connections.json`; every merged drive (README §6, session 2) ran on it.
 - **Seen on the merged deploy:** at 1024 × 768 the drawer takes most of the steps column and the program's right edge is cut
   off (`iw004-ac2-1024-built.png`: "forwar", "turn lef" under ▶). A look item for session 3; not graded by any clause.
+
+### Session 3 (2026-09-30, lane B `iw003-biscuit`) — the Workshop's look at 1024 × 768, and teach again (AC8)
+
+**The look.** Measured on the deploy before the fix: at 1024 × 768 the steps column is 440 px, the drawer took 196–248 px
+of it at scale 0.74, and a program built by taps stayed at 0.8 — wall-until's `until [the wall is ahead]` ran from 818
+to 1090 px against a view that ends at 994 (96 px cut), as the s2 merge saw ("forwar", "turn lef"). Built
+(`library/modules/garden-kit/src/blocks.js`, the lane's region): a **snug** workspace (a side drawer under 560 px) gives
+the drawer 0.62 (0.7 at band 7–9) and carries `gd-snug`; **`fitProgram`** zooms the workspace OUT until the start
+stack, with a 36-unit margin each side, fits the view beside (or above) the drawer — never below 0.5, never above the
+kids' start scale — then scrolls it SIDEWAYS only (the view's own top kept) when an edge is out. It runs after a load
+(after the start's own scroll), on a resize (it can zoom back up there), and after every edit (shrink only: a child's
+own zoom-in stays until the program no longer fits). Two findings on the way, each fixed and re-driven: fitting only
+on load/resize missed a program grown by taps; a zoom about the view's middle slid the stack's left edge under the
+drawer (a tap on the if's word hit the drawer), and a 20-unit margin left the right edge 2 px out.
+Reading (`drive-iw003-biscuit.js` LOOK, the final deploy): every block of bowl-if's and wall-until's programs, built from
+the drawer, whole in the view at **1024 × 768** (scale 0.53, the widest until 179 px in a 216 px view), **1368 × 900**
+(0.8, EN and FR, meow-when too) and **390 × 844** (0.8, the strip drawer); screenshots `iw003b-look-*`. On the island the
+compact meters are now bars that fit one tile (both kits; IW-003 §7) — neighbouring tulips' chips no longer overlap.
+**Deviation:** at 1024 the program is whole but small (0.53); the drawer keeps its width (its words at 0.62). Richard
+may prefer a narrower drawer there — a look call, not measured with the children.
+
+**Teach again (AC8, IW-003 §6 trap 1).** No save change (v4 kept: a stored program is the engine format). Built:
+`islStale(req, program, laid, robot)` in `ISLAND_ENGINE` (`ig004Island.ts`) — the stored program run to its end on the
+plot as its seed lays it, judged by the request's own goal, and only where the request's OWN reference program wins
+that start (a job whose source fills later — a hen with no egg yet — is never judged, so never flagged). The island
+build flags such a plot (`plot.stale`, the card's `stale`, live phase `teach`) and the tick never steps it: the robot
+waits at home. `Logic/Island choose` says `iw3bTeachAgain` on its card ("Teach Pip again — the job changed. Pip is
+waiting at home."); the Workshop's new `Logic/Teach again` (`cg003Scripts.ts`, the same `islStale`) shows the line over
+the world on that request (`plTeachLine`, `.bg-teach-again`; Play's new input `plots`, wired from Read family). A win
+pins the new program over the old, and the line goes.
+Proof on a FIXTURE of a rewritten request (the other lanes' rewrites are not in this worktree): two tulips of one pour,
+won by `fwd water right fwd left water`, rewritten to two drinks each — that stored program is flagged, the robot takes
+no step over 3 × WEAR.tulip ticks, the card and the Workshop say so (EN, FR); beside it the same program on the request
+as it was, and the rewritten request with its new program, are not flagged and work; an empty or missing program, a
+request with no job, or one whose reference cannot win its start is never flagged. On Biscuit's real missions the old
+wall-until, bowl-if and meow-when programs are flagged and the new ones are not. Arms: `islStale` always false → 4 rows
+red; the stale plot stepped → the waits-at-home row red; the reference precondition removed → the hen and the lap rows
+red. Driven (`drive-iw003-biscuit.js` TEACH, EN and FR): a v4 save whose wall-until plot holds the old program → Pip at
+home 1,3 facing right, run pc 0 over 10 ticks, the plot card's line, the Workshop's line; taught again (the new program
+won) → the line is gone. Screenshots `iw003b-teach-island-en.png` (the card: "Teach Pip again — the job changed. Pip is
+waiting at home.", Pip home on the plot) and `iw003b-teach-workshop-fr.png` (« Réapprends à Pip — le travail a changé.
+Pip attend à la maison. », coral-edged over the world).
