@@ -196,7 +196,16 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
   outcomes?: readonly Outcome[];
   /** What the editor's hover/inspect shows for an instance — the runtime's `getInspectInfo`. */
   inspect?: (state: Readonly<S>) => string;
+  /**
+   * What of the world this node's behaviour depends on (T2/T3). The runner refuses a spec that
+   * declares any of these until NSP-007 gives it a scripted world — running a clock-dependent
+   * node without a fake clock is flaky, and flaky grades nothing (NSP-003 §4).
+   */
+  needs?: readonly WorldNeed[];
 }
+
+/** The parts of the world NSP-007 scripts. */
+export type WorldNeed = 'clock' | 'random' | 'network' | 'backend';
 
 export interface NodeSpec<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> extends NodeDecl<S, I, O> {
   on: Reducers<S, I, O>;
@@ -250,6 +259,7 @@ export interface AnyNodeSpec {
   outputs: Record<string, ErasedValueOutput | SignalOutputDecl>;
   outcomes?: readonly Outcome[];
   inspect?: (state: never) => string;
+  needs?: readonly WorldNeed[];
   on: Record<string, ErasedReducer | undefined>;
   derived?: {
     inputs: (params: Readonly<Record<string, unknown>>) => Record<string, ValueInputDecl>;

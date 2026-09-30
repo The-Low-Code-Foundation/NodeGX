@@ -3,7 +3,7 @@
 **Scoped:** 2026-09-29, from a conversation with Richard about DHH's Rails World 2026 keynote
 ("pencils down"), Fireship's take on it, and what a world where agents write most code means for
 NodeGX.
-**Status: 🟡 IN PROGRESS — s1 (2026-09-30): NSP-000 the census ✅ ([CENSUS.md](CENSUS.md)); NSP-001 the package ✅ (`packages/nodegx-node-spec`). R1 R2 R3 R5 ruled (a) 2026-09-30. NSP-002 next.**
+**Status: 🟡 IN PROGRESS — s1 (2026-09-30): NSP-000 the census ✅ ([CENSUS.md](CENSUS.md)); NSP-001 the package ✅ (`packages/nodegx-node-spec`). s2 (2026-09-30): NSP-002 traces + the runtime as a target ✅; NSP-003 the runner ✅ (Counter conforms on the runtime, 200 sequences, every mutant killed). R1 R2 R3 R5 ruled (a) 2026-09-30. NSP-004 the pilot five next.**
 **Prefix: `NSP`** (node spec).
 
 > "I think the node level spec thing you talked about could be a great thing to already start and
@@ -115,8 +115,8 @@ Full detail in NSP-001 to NSP-003. The shape:
 |---|---|---|---|
 | [NSP-000](NSP-000-THE-CENSUS.md) ✅ | The census — every picker node, its tier, and every place its behaviour is written today. **Built s1** → [CENSUS.md](CENSUS.md) | — | all |
 | [NSP-001](NSP-001-THE-SPEC-AND-THE-INTERPRETER.md) ✅ | The spec format and the interpreter — a new package. **Built s1** (`defineNode(decl).on(reducers)`, 44 tests) | 000 | T1 |
-| [NSP-002](NSP-002-TRACES-AND-THE-RUNTIME-ADAPTER.md) | Traces, the adapter interface, and the interpreted runtime as a target | 001 | T1 |
-| [NSP-003](NSP-003-THE-RUNNER.md) | The runner — scenarios, generated sequences, shrinking, mutants | 002 | T1 |
+| [NSP-002](NSP-002-TRACES-AND-THE-RUNTIME-ADAPTER.md) ✅ | Traces, the adapter interface, and the interpreted runtime as a target. **Built s2** (schema v1, canonicaliser, `TargetAdapter`, the runtime target in `noodl-runtime/test/helpers`) | 001 | T1 |
+| [NSP-003](NSP-003-THE-RUNNER.md) ✅ | The runner — scenarios, generated sequences, shrinking, mutants. **Built s2** (`runConformance → Report`; a planted off-by-one shrinks to 2 steps) | 002 | T1 |
 | [NSP-004](NSP-004-THE-PILOT-FIVE.md) | 🔴 **The pilot five** — Counter, Switch, And, Condition, String Format. **Go / no-go (R4)** | 003 | T1 |
 | [NSP-005](NSP-005-THE-EXPORT-ADAPTER.md) | The export adapter — run the emitted code for one node, headless | 004 | T1 |
 | [NSP-006](NSP-006-A-STRANGERS-TARGET.md) | 🔴 **A stranger's target** — an agent builds the pilot five in vanilla JS from spec + suite alone | 004 | T1 |

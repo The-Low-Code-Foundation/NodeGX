@@ -23,6 +23,14 @@ run(Counter, { startValue: 5 }, ['settle', { signal: 'increase' }, 'settle']);
   open for graph and app-level traces).
 - `src/interpreter.ts` — `mount / set / signal / settle / trace / run`; C2, C3, C4 of
   `packages/nodegx-core/CONTRACT.md` per node.
+- `src/canonical.ts` — one JSON-safe form for every value (`-0`/`NaN`/`±Infinity` and `Date` tagged, keys sorted);
+  `src/schema.ts` + `schema/trace.schema.json` — the trace format, versioned, validated with the path to the bad field.
+- `src/adapter.ts` — `TargetAdapter`: the one small interface every target implements (`mount / set / signal / settle
+  / trace / dispose`) and `play()`. `src/adapters/interpreter.ts` is the reference target; the interpreted runtime's
+  adapter lives in `packages/noodl-runtime/test/helpers/node-spec-target.ts` (where the runtime compiles).
+- `src/runner/` — `runConformance(spec, adapter, options) → Report`: hand scenarios (`scenarios/<type>.json`), seeded
+  generated sequences (200 in CI, 10,000 locally), shrinking to the shortest failing sequence written as a replay
+  file, and mutants — one per reducer branch the suite reaches — that must all be killed.
 - `src/nodes/` — the specs, one file per node, written **from the runtime source** with line
   citations (R3 (a): the runtime wins by default; a disagreement is a row and a ruling).
 
@@ -36,4 +44,5 @@ npx tsc -p tsconfig.json --noEmit
 ```
 
 Rulings this package assumes (README §7 of the phase): **R1 (a)** — a new package, one file per
-node; **R2 (a)** — specs in TypeScript, scenarios and traces in JSON.
+node; **R2 (a)** — specs in TypeScript, scenarios and traces in JSON; **R3 (a)** — the runtime wins, a divergence
+is a row; **R5 (a)** — 200 generated sequences per node in CI.
