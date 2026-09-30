@@ -1,7 +1,7 @@
 # IW-004 — Real blocks: Blockly, made for children the way Scratch made it
 
 **Opened 2026-09-29** from README §1.2 and ruling R3: *"Yep 'real' blockly, but like Scratch you can modify the blockly
-display and mechanics to make it much easier for kids to use please"*. **Status: ⬜.** Depends on IW-000 (the look,
+display and mechanics to make it much easier for kids to use please"*. **Status: 🟡 s2 (lane B, §6) — the Workshop on Blockly 12: AC1–AC3 and AC5–AC8 ✅; AC4 ✅ on the engine at the merge (`p108s2Join.test.ts`), on a page with IW-003; AC9 ✅ but the tablet (Richard's).** Depends on IW-000 (the look,
 the touch reading) and IW-001 (the bar, the pad). Lane B.
 
 ## 1. The person sentence
@@ -244,3 +244,15 @@ orchestrator regenerates after the merge.
 new ops (lane J's; merged after); the world drawing `watch` / `picking` (lane D's; the wiring is the last commit alone);
 AC4's win on eggs-count (IW-003); a real GPU for the 3D pick (swiftshader); the packaged app loading Blockly offline (the
 shell's build; the manifest loads the files from the app's own folder and the spec pins that nothing is fetched).
+
+### Session 2 merge (orchestrator, 2026-09-30, `p108-s2-merge`)
+
+- **AC4 across the join** (`packages/noodl-mcp/tests/p108s2Join.test.ts`, 4/4): "until [basket] is full" and "until count of 🥚
+  in [basket] = 4", built as Blockly blocks, translated by this node and run on lane J's engine, fill the basket to 4 in EN
+  and FR. Two traps the round-trip gate cannot see because every block carries its engine block as `extraState.src`: the
+  same program with **every memo stripped** (a child's fresh drag) still wins, and a child's **edited field beats the memo**
+  (`= 4` → `= 3` stops at 3; `is full` → `is empty` ends at once).
+- **The watch/picking wiring** (`69105b31b`, source only in lane B's worktree) generated on the merged tree: +24 lines in
+  `Workshop/Play/connections.json`; every merged drive (README §6, session 2) ran on it.
+- **Seen on the merged deploy:** at 1024 × 768 the drawer takes most of the steps column and the program's right edge is cut
+  off (`iw004-ac2-1024-built.png`: "forwar", "turn lef" under ▶). A look item for session 3; not graded by any clause.

@@ -1,6 +1,6 @@
 # IW-002 — The job model: sources, carriers, meters, a finish line, wear
 
-**Opened 2026-09-29** from README §4.1. **Status: 🟡 s1 — the ENGINE half built (lane J, §6); AC6 drawing (lane D) and the page/island drive clauses (once IW-003 gives a request a `job`) owed.** Depends on nothing (engine first). Lanes J (engine) then D (drawing).
+**Opened 2026-09-29** from README §4.1. **Status: 🟡 s2 — the engine (s1, lane J) and the drawing in both kits (s2, lane D: AC6 ✅, AC4's kit half ✅) built, and the page now hands the kits every job field (s2 merge, §6); the page/island DRIVE clauses of AC3 and AC5 are owed once IW-003 gives a request a `job`.** Depends on nothing (engine first). Lanes J (engine) then D (drawing).
 
 ## 1. The person sentence
 
@@ -299,3 +299,12 @@ fields (and `holds` on the robot row) is all the kits need. Watch / Picking are 
 **Could not verify:** the tablet (touch has no hover: Picking lifts on `:active` in 2D and on pointer-down in 3D); a
 real GPU; a job on a real page (no request carries one until IW-003, and the page strips the fields — above); the look
 graded by Richard.
+
+### Session 2 merge (orchestrator, 2026-09-30, `p108-s2-merge`)
+
+Lane D found that the page's `Logic/Draw world` (`DRAW_WORLD_SCRIPT`, `cg003Scripts.ts`) passed only the old thing kinds and
+fields, so no page could show a meter. Fixed at the merge (`5213ab8bf`): every job field the engine wrote (`id have need droop
+count capacity item level max stage walked pen`) is copied onto the thing, the new kinds (`site basket store can hen postbox`)
+pass through, and a robot's `holds: 'can'` reaches the kits. Spec (`cg003Template`, end): a job world reaches the kits with
+every field; beside it, the 13 requests are drawn with exactly the keys they had before. Red on the old script (1 of 2), green
+on the new.

@@ -1,53 +1,69 @@
 # Phase 108 — next session
 
-> ### ⬜ SESSION 2 = IW-004 (lane B) ∥ IW-005 (lane J) ∥ IW-002's drawing (lane D) — START HERE
+> ### ⬜ SESSION 3 = IW-003 the missions as jobs (one lane per islander family) — START HERE
 >
-> **Read first:** [README.md](README.md) §0 (Richard's words), §1 (the readings, file:line), §3 (R1–R4 ruled, D1–D8,
-> **R5 open**), §6 (the board). Then the §6/§7 "Session 1" blocks of IW-000, IW-001, IW-002.
+> **Read first:** [README.md](README.md) §0 (Richard's words), §3 (R1–R4 ruled, D1–D8, **R5 open**, "found in session 2"),
+> §4, §6 (the board), §7 (the gates). Then [IW-003](IW-003-THE-MISSIONS-AS-JOBS.md) whole, and the session-2 Notes of
+> [IW-002](IW-002-THE-JOB-MODEL.md) §6, [IW-004](IW-004-REAL-BLOCKS.md) §6 and [IW-005](IW-005-SEEK-AND-REGROW.md) §5 —
+> they name every field, op, block type and deviation the missions are built from. Session 2's shared contract is
+> `../OpenNoodl-worktrees/p108-COMMON-BRIEF-s2.md` §4 (the program format, the expression contract COND/VAL/REF/STATE,
+> the new ops, `watch`/`picking`): session 3's brief copies §4 forward and adds the missions' vocabulary table BEFORE any
+> lane starts (README §6 "Session 3").
 >
-> **Rulings already given (do not re-ask):** R1 scored play is IN (shells; nothing earned is ever taken away);
-> R2 wear and regrowth only while the game is open, things pause and never die; R3 real Blockly 12, customised
-> Scratch-style for kids; R4 the order is ours (§6). **The mockup is graded:** Richard, 2026-09-29, on
-> https://claude.ai/artifact/FQwh2xGNTKXxau4wtiMuX3 — *"the improvements in the artifact are perfect, exactly what I
-> wanted"*. IW-004 builds THAT design (`dev-docs/tasks/phase-78-the-templates/tpl-012-mockups/island-jobs.html`;
-> the block type names it inherits are in IW-000 §7).
+> **Rulings already given (do not re-ask):** R1 scored play IN (shells; nothing earned is taken away); R2 wear and regrowth
+> only while the game is open, things pause and never die; R3 real Blockly 12, customised Scratch-style; R4 the order is
+> ours. The mockup look is graded ("perfect, exactly what I wanted", 2026-09-29).
 >
-> **Session 1 (2026-09-29/30) — merged on `cline-dev` (regeneration `2e50fc3aa`, then this handoff).** Three lanes in worktrees + a merge worktree
-> (`p108-s1-merge`), brief `../OpenNoodl-worktrees/p108-COMMON-BRIEF-s1.md`. Its §4.2 job vocabulary held: the merge
-> was the exact source union (numstat-proved); only generated files conflicted, then regenerated.
-> - **IW-001 ✅** (lane A): Stop in Play's place, the run cap in the Runner, the first drawer tap places + opens the
->   card, `?` on the drawer, a tap selects never deletes, drawer and program in two boxes, the pad = the drawer's
->   actions, `cardsSeen` on the profile (save stays v4; row 15 written only when non-empty).
-> - **IW-002 🟡** (lane J): the engine half — tile `L`, targets with `have/need`, sites by stage, containers, the can
->   as a thing, sources that refill, `job` + a BFS walk home + `job_done`, `WEAR` on the island tick only, `w.seed` +
->   mulberry32, `Start world`'s `seed` port. The island tick's new loop applies only to a request with a `job` (none
->   yet — IW-003). IW-002 §6 has the WEAR numbers and seven deviations.
-> - **IW-000 🟡** (lane M): published, drive 61/61; the tablet reading and the children still owed.
+> **Session 2 (2026-09-30) — merged on `cline-dev`.** Three lanes in worktrees + a merge worktree (`p108-s2-merge`),
+> merged J → D → B, then `cline-dev` (P107 s1, no shared files).
+> - **IW-004 🟡 (lane B):** the Workshop runs on real Blockly 12.3.1, vendored in `garden-kit` (`src/blocks.js`,
+>   `garden-kit.Blocks` on Block List's ports + its own). **The program format did not change**: the engine program is
+>   stored, saved (v4), taught, folded and run; Blockly JSON never leaves the node (a translator, gated byte-identical,
+>   54/54). Zelos look, drag + tap-to-add, drag-to-drawer delete, `?` on drawer blocks only, brain size 12 (`BRAIN_SIZE`),
+>   a chip picked by tapping the 2D or 3D world, a variable monitor, band-2 value blocks, EN/FR.
+> - **IW-005 🟡 (lane J):** `go_nearest` (BFS by path, cached route, reservation), `go_to` a chip / `{ref:'read'}`,
+>   `evalCond` over the whole expression contract, `set`/`change`/`run.vars`, `if` + `else` — engine and island tick only.
+>   No request offers the new blocks yet (`BAND_PALETTE[2]` is sliced at `ask` so free play is unchanged).
+> - **IW-002 🟡 (lane D + merge):** both kits draw every job thing (wall, meters, site stages, containers, the can on the
+>   map and in hand, rock left/max, the hen's pen, the post box and letter), plus the `watch` and `picking` inputs; the page's
+>   `Draw world` now hands the kits every job field (it stripped them — fixed at the merge, `5213ab8bf`).
+> - **The join (merge):** `p108s2Join.test.ts` — conditions BUILT AS BLOCKLY BLOCKS win the eggs job on the engine; blocks
+>   dragged fresh (no `extraState.src` memo) still win, and a child's edited field beats the memo.
 >
-> **Merged readings:** garden specs **551** (cg002 199, cg003Template 134, cg005 41, cg006 83, ig004Island 21,
-> cg001 35, ig007 38; each exit 0) · `template:garden` exit 0 · page drive **331/331** (`--mockup`) ·
-> IW-001 drive **38/38** · modes **90/90** · island **65/65** (AC6 p95 16.8 ms at CPU ×4) + 3D **5/5** · robots
-> **60/60** + 3D **4/4** · Workshop 3D **24/24** + nogl **8/8** · Olive page **22/22** · shell **91/91** — every exit 0.
+> **Merged readings (`p108-s2-merge` after the `cline-dev` merge; every exit 0):** garden specs **665** across nine files
+> (cg002Engine 226, cg003Template 141, cg005Olive 41, cg006Requests 83, ig004Island 23, cg001GardenKit 50, ig007Garden3d 43,
+> iw004Blocks 54, p108s2Join 4) · `template:garden` exit 0, 0 drift · page drive **331/331** (`--mockup`) · IW-001 **38/38** ·
+> IW-004 **19/19** + 3D **3/3** · modes **90/90** · island **65/65** (`--perf`, AC6 p95 16.8 ms at CPU ×4) + 3D **5/5** ·
+> robots **60/60** + 3D **4/4** · Workshop 3D **24/24** + nogl **8/8** · Olive **22/22** · kit fixtures 2D **38/38**, 3D
+> **25/25** · shell **91/91**. Screenshots looked at: the Workshop on Blockly at 1024 (see the look item below), the picking
+> frame, both kits' job world.
 >
-> **Session 2, three lanes (same recipe; write the shared contract into a NEW brief before launching):**
-> 1. **Lane B — IW-004 real blocks on the kit:** `garden-kit.Blocks` on `BlockList`'s ports, Blockly 12.3.1 vendored
->    as three.js was, the mockup's customisations, thing + state conditions picked on the island, the Blockly ↔
->    engine translator, brain size. IW-001's `?`-on-drawer, tap-adds, Stop and pad carry over; its F5/F6 layout goes.
-> 2. **Lane J — IW-005 seek and regrow in the engine:** `go to nearest` with reservation, `if here/ahead has`,
->    `go to [what Olive read]`, on IW-002's vocabulary (brief s1 §4.2).
-> 3. **Lane D — IW-002's drawing in both kits:** the `L` wall, meters, the can level, site stages, the basket count,
->    the hen, the droop — reading `JOB_VOCABULARY` from `cg002Content.ts`; the pinned-copy gate green; screenshots looked at.
+> **Session 3 = IW-003:** every mission rebuilt on the job model (IW-003 §3) + the envelopes mission + the first build
+> site; seeded layouts where a mission teaches `until`/count/seek, with a `repeat N` that loses on a seed; the palettes that
+> offer `go_nearest`/`go_to`/value blocks; hints per rewritten goal (IW-003 §6); then the owed DRIVE clauses — IW-002 AC3 and
+> AC5 (a job on a page and the island: finish, walk home, wear, go back) and IW-005 AC5 (seek seen in 2D and 3D) and IW-004
+> AC4 on a page (the basket's number changes as the robot puts; `watch` rings it). Two corrections to IW-003's text, from
+> session 2: reference programs stay ENGINE programs (§2.4 "written as Blockly JSON" is superseded — Blockly is a view);
+> "teach again" for a stored program that no longer wins its rewritten mission is IW-003's to build (IW-004 AC8 found no
+> format migration was needed, so nothing flags it yet).
 >
-> **Open for Richard:** **R5** (README §3): the page's run cap is 2000 ticks ≈ 14 min; recommended ~200. The mockup
-> on the tablet (IW-000 AC5: drag from the drawer / into a `repeat` / back to delete, 10 tries each) and the
-> children's first sitting (IW-009 §2). P106's R11, R12 and IG-004 AC7 still stand (AC7 becomes IW-006's v4→v5 drive).
+> **Session 2 findings IW-003 must meet** (README §3 "found in session 2"): Olive's `read` cannot name a door yet (add
+> places to the read rung's options + written answers for the envelopes); `go_nearest rock` finds a used-up rock; `sayNone`
+> needs its per-kind words; a bowl with no `capacity` draws no meter; meter chips overlap on the 14 px island; **at 1024 ×
+> 768 the Blockly drawer crowds the steps column and cuts off the program's right edge** (IW-004 §6 merge note) — fix the
+> look before the missions are shot beside IW-000; the page drive's 390-en fold clauses went red once (not reproduced).
 >
-> **Traps paid for in session 1:** a `For Each` fed twice while it rebuilds keeps BOTH row sets (README §3, "found in
-> session 1"; runtime-owned) — a repeater lane B or D feeds quickly needs lane A's settle latch until it is fixed.
-> The live meters are NOT in the save (v4 = program + robot): after a restart a job plot starts from its request's
-> start until IW-006's v5. The Workshop 3D drive can fail once when Garden 3D falls back to 2D ("Too Slow" under
-> software GL) — rerun before believing a red.
+> **Open for Richard (not blocking session 3):** **R5** (README §3): the Workshop's run cap is 2000 ticks ≈ 14 min;
+> recommended ~200 with Olive's "going round and round" line. The tablet: Blockly by touch on the PRODUCT now as well as
+> the mockup (IW-000 AC5, IW-004 AC9: drag from the drawer / into a `repeat` / back to delete, 10 tries each). The
+> children's first sitting (IW-009 §2). P106's R11, R12 still stand.
 >
-> **Before any heavy job:** one heavy job on the box at a time; check for a peer's suite first.
+> **Traps paid for in session 2:** the Mac rebooted mid-session — a lane's worktree and commits survived; resume a
+> subagent with SendMessage and a measured list. A background Bash run is killed at ~30 minutes: run long drive sets one
+> drive per foreground call. A `sed` repointing a drive script at a worktree renamed the drive file in it too (`iw004-blocks`
+> → the worktree's name). Blockly's highlight (an SVG glow filter) and reloading the workspace per Teach press each tripped
+> Garden 3D's Too Slow under swiftshader — lane B replaced both; watch Frame Ms if the workspace grows.
+>
+> **Before any heavy job:** one heavy job on the box at a time; check `uptime` (< 6) and for a peer's suite first.
 >
 > **End of session:** `/next` — this block rewritten, README §6 from the task FILES, the memory.
