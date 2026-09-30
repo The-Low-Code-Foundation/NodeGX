@@ -173,6 +173,22 @@ function islandWorld(withMeters) {
   return { map, things, robots };
 }
 
+// ── P108 IW-003 (lane P): a street of three doors and a post box; the engine posts Sami's letter ──
+const P_STREET = () => ({
+  map: ['GHGGHGGH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPP', 'GGGGGGGG', 'GTGGGGTG'],
+  things: [
+    { kind: 'door', id: 'dm', x: 1, y: 1, owner: 'Mamie Rose', count: 0, capacity: 1 },
+    { kind: 'door', id: 'ds', x: 4, y: 1, owner: 'Sami', count: 0, capacity: 1 },
+    { kind: 'door', id: 'db', x: 7, y: 1, owner: 'Biscuit', count: 0, capacity: 1 },
+    { kind: 'postbox', id: 'pb', x: 2, y: 2 },
+    { kind: 'letter', id: 'l1', x: 2, y: 2, to: 'Sami' },
+    { kind: 'letter', id: 'l2', x: 2, y: 2, to: 'Biscuit' }
+  ],
+  robots: [{ id: 'pip', x: 3, y: 3, d: 0, name: 'Pocket', colour: '#FFB347', accessory: 'satchel' }]
+});
+/** Pocket takes Sami's letter from the post box to his door: go to [post box], pick, go to [Sami's door], put. */
+const P_POST = [{ id: 1, t: 'go_to', slots: { thing: { id: 'pb', kind: 'postbox', x: 2, y: 2 } } }, { id: 2, t: 'pick' }, { id: 3, t: 'go_to', slots: { thing: { id: 'ds', kind: 'door', x: 4, y: 1 } } }, { id: 4, t: 'put' }];
+
 withDeployedSite({ dir: DIR }, async (page) => {
   const evaluate = (expr) => page.evaluate(expr);
   const setVar = async (name, value) => {
@@ -558,6 +574,32 @@ withDeployedSite({ dir: DIR }, async (page) => {
     console.log(`IW-002 METER-PERF readout (${withMeters ? 'WITH meters' : 'no job fields'}): 46×22, three robots, CPU ×4 (loop ×${(loop4 / loop1).toFixed(1)}): ${JSON.stringify(perf)} ${JSON.stringify(count)}`);
     if (withMeters)
       check(`IW-002 METER-PERF (2D, the island's frame gate with meters drawn): p95 ${perf.p95.toFixed(1)} ms ≤ 50 ms at CPU ×4 with ${count.meters} meters on a 46×22 world (${perf.frames} frames, ${perf.moves} robot moves drawn, ${perf.longTasks} long tasks; the same world with no job fields read ${readings.iw002.perfPlain.perf.p95.toFixed(1)} ms)`, loop4 / loop1 > 2.5 && count.meters >= 30 && count.cells === 46 * 22 && count.wide === '1' && perf.frames > 100 && perf.writes >= 40 && perf.moves >= 40 && perf.p95 <= 50 && !perf.hidden, readings.iw002);
+  }
+
+  // ══ P108 IW-003 (lane P): the doors — the street before and after the ENGINE posts Sami's letter ══
+  {
+    const ENGP = engineApi();
+    await page.setViewport({ width: 1368, height: 912, mobile: false });
+    await setVar('watch', '');
+    await setVar('picking', false);
+    const start = ENGP.worldOf(P_STREET());
+    const after = engineRun(ENGP, JSON.parse(JSON.stringify(start)), P_POST);
+    const DOORS = `(() => { const cell = (x, y) => document.querySelector('.gd-cell[data-x="' + x + '"][data-y="' + y + '"]');
+      return [1, 4, 7].map((x) => { const c = cell(x, 1); const m = c.querySelector('.gd-meter'); const p = c.querySelector('.gd-plate'); const d = c.querySelector('[data-sprite^="door"]');
+        return { sprite: d ? d.getAttribute('data-sprite') : null, plate: p ? p.textContent : null, plateVisible: !!p && getComputedStyle(p).display !== 'none', chip: m ? m.getAttribute('data-meter') : null, full: !!m && m.classList.contains('gd-full') }; })
+        .concat([{ boxLetter: !!cell(2, 2).querySelector('.gd-letter-in') }]); })()`;
+    for (const [when, w] of [['before', start], ['after', after]]) {
+      await setJson('map', { rows: w.map });
+      await setJson('things', w.things);
+      await setJson('robots', w.robots.map((r) => ({ x: r.x, y: r.y, d: r.d, name: 'Pocket', colour: '#FFB347', accessory: 'satchel', carry: r.carry })));
+      await wait(600);
+      readings['iw003-' + when] = await evaluate(DOORS);
+      await shot(`iw003-2d-doors-${when}`);
+    }
+    const b = readings['iw003-before'];
+    const a = readings['iw003-after'];
+    check('IW-003 (2D, lane P): the street — three doors, each with its owner’s plate (Mamie Rose, Sami, Biscuit) and a 0/1 letter chip; letters in the post box', JSON.stringify(b.slice(0, 3).map((d) => [d.sprite, d.plate, d.plateVisible, d.chip, d.full])) === JSON.stringify([['door', 'Mamie Rose', true, '0/1', false], ['door', 'Sami', true, '0/1', false], ['door', 'Biscuit', true, '0/1', false]]) && b[3].boxLetter, b);
+    check('IW-003 (2D, lane P): after the engine’s run (go to the post box, pick, go to Sami’s door, put) Sami’s door shows the letter through it and 1/1 green; the others still 0/1; Biscuit’s letter still in the box', JSON.stringify(a.slice(0, 3).map((d) => [d.sprite, d.chip, d.full])) === JSON.stringify([['door', '0/1', false], ['doorMail', '1/1', true], ['door', '0/1', false]]) && a[3].boxLetter && after.things.find((t) => t.id === 'ds').count === 1, { a, engine: after.things.filter((t) => t.kind === 'door') });
   }
 
   check('0 console errors through the whole drive', page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));

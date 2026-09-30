@@ -408,8 +408,9 @@ withDeployedSite({ dir: DIR }, async (page) => {
   const control = (icon) => tap(first(`.bg-controls .bg-i-${icon}`), `control ${icon}`);
   const key = (op) => tap(first(`.bg-pad .bg-key-${op}`), `key ${op}`);
 
-  /** Everything a person reads, for the language clause: visible text nodes, trimmed. */
-  const words = () => evaluate(`(() => { const out = []; const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n; while ((n = walk.nextNode())) { const t = n.textContent.trim(); const el = n.parentElement; if (t.length > 2 && el && el.offsetParent !== null && !/^[0-9 ×✕+−…•·🌷○]*$/.test(t)) out.push(t); } return out; })()`);
+  /** Everything a person reads, for the language clause: visible text nodes, trimmed. P108 IW-003 (lane P): a meter chip's
+   * numbers ("0/1") are the same in both languages, like a count — the slash joins the language-free characters. */
+  const words = () => evaluate(`(() => { const out = []; const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n; while ((n = walk.nextNode())) { const t = n.textContent.trim(); const el = n.parentElement; if (t.length > 2 && el && el.offsetParent !== null && !/^[0-9 ×✕+−…•·🌷○/]*$/.test(t)) out.push(t); } return out; })()`);
 
   const langClause = async (screen, from, to) => {
     await evaluate('window.__gardenMarker = 42');
@@ -1011,8 +1012,10 @@ withDeployedSite({ dir: DIR }, async (page) => {
   check('S4-PATH: five forwards on Sami’s path (no repeat in its palette) are NOT offered a fold', pathState.blocks === 5 && !pathState.tidy && !pathState.palette.includes('repeat'), pathState);
   await shot('s4-path-no-fold');
   await control('play');
-  const pathOwl = await until(`(document.querySelector('.bg-owl-say') || {}).innerText || ''`, (t) => /Not quite yet|Pas tout à fait/.test(t), 9000);
-  check('S4-PATH: the missed run says "Not quite yet…", never "0 of 0"', /Not quite yet|Pas tout à fait/.test(pathOwl) && !/0 of 0|0 sur 0/.test(pathOwl), pathOwl);
+  // P108 IW-003 (lane P): Sami's path is a job now (the letter to his door): a missed run says how much of the job is done.
+  const jobLine = hintIn('en', 'iw3Job').split('{w}').join('0').split('{t}').join('1');
+  const pathOwl = await until(`(document.querySelector('.bg-owl-say') || {}).innerText || ''`, (t) => t.includes(jobLine), 9000);
+  check(`S4-PATH: the missed run says "${jobLine}" (IW-003: the job's line), never "0 of 0"`, pathOwl.includes(jobLine) && !/0 of 0|0 sur 0/.test(pathOwl), pathOwl);
   await tab(0);
   await until('location.pathname', (p) => p === '/island');
   await wait(900);
