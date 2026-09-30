@@ -60,16 +60,17 @@ export function shapeOf(patch: unknown): string {
   });
 }
 
-/** The reducers a spec has, by name — `derived` for the derived-port reducer. */
+/** The reducers a spec has, by name — `derived` for the derived-port reducer, `afterInputs` for the frame-end one. */
 export function reducerNames(spec: AnyNodeSpec): string[] {
   const names = Object.keys(spec.on).filter((k) => typeof spec.on[k] === 'function');
   if (spec.derived) names.push('derived');
+  if (spec.afterInputs) names.push('afterInputs');
   return names;
 }
 
 /**
  * A copy of the spec whose reducers are wrapped by `wrap(name, original)`. The declaration is
- * shared (it is data); only `on` / `derived.on` are replaced.
+ * shared (it is data); only `on` / `derived.on` / `afterInputs` are replaced.
  */
 export function wrapReducers(spec: AnyNodeSpec, wrap: (name: string, original: ErasedReducer) => ErasedReducer): AnyNodeSpec {
   const on: Record<string, ErasedReducer | undefined> = {};
@@ -77,7 +78,10 @@ export function wrapReducers(spec: AnyNodeSpec, wrap: (name: string, original: E
   const out: AnyNodeSpec = { ...spec, on };
   if (spec.derived) {
     const original = spec.derived.on as unknown as ErasedReducer;
-    out.derived = { inputs: spec.derived.inputs, on: wrap('derived', original) as unknown as typeof spec.derived.on };
+    out.derived = { ...spec.derived, on: wrap('derived', original) as unknown as typeof spec.derived.on };
+  }
+  if (spec.afterInputs) {
+    out.afterInputs = wrap('afterInputs', spec.afterInputs as unknown as ErasedReducer) as unknown as typeof spec.afterInputs;
   }
   return out;
 }

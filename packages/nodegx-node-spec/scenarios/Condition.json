@@ -1,0 +1,244 @@
+[
+  {
+    "name": "no params: the first settle publishes null on both booleans and tests nothing",
+    "because": "condition.ts :132, :142 — null until the first test (NDA-017 §2 constraint 4); connectInput's read of the getters",
+    "params": {},
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "a value arriving tests, pulses one branch signal, reports no outcome",
+    "because": "condition.ts :78-85, :96-98 'only the port mints'; erg-001-longtail 'a condition arriving on its own reports no outcome'",
+    "params": {
+      "condition": true
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "Evaluate reports Done after the branch signal, and a false condition still reports Done",
+    "because": "condition.ts :184-188; erg-001-longtail 'a false condition still reports Done — the test ran'",
+    "params": {
+      "condition": false
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "eval"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two Evaluates in one frame coalesce into one test and still report two Dones",
+    "because": "condition.ts :171-172 (one test), :159-163 + :184-188 (one outcome per token); erg-001-longtail 'two Evaluates coalesced'",
+    "params": {
+      "condition": true
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "eval"
+      },
+      {
+        "signal": "eval"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a value change and an Evaluate in the same frame: one test, one Done",
+    "because": "condition.ts :165-172 — the guard NDA-017 §2 added when Evaluate became additive",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "condition",
+        "value": true
+      },
+      {
+        "signal": "eval"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the same answer arriving twice evaluates once (DEF-046)",
+    "because": "condition.ts :79-84, node.ts :217-219, run-on-value-change.ts :218-220; def046-unchanged-value-reruns.test.ts",
+    "params": {},
+    "steps": [
+      {
+        "set": "condition",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "condition",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the control: a changed answer evaluates",
+    "because": "def046 — the paired control",
+    "params": {},
+    "steps": [
+      {
+        "set": "condition",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "condition",
+        "value": false
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an object arriving twice is always a change",
+    "because": "run-on-value-change.ts :219, :224-227 — primitives only; a mutated array is the same reference",
+    "params": {},
+    "steps": [
+      {
+        "set": "condition",
+        "value": {}
+      },
+      "settle",
+      {
+        "set": "condition",
+        "value": {}
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "null twice is not a change; null after true is",
+    "because": "run-on-value-change.ts :225 — null is comparable",
+    "params": {},
+    "steps": [
+      {
+        "set": "condition",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "condition",
+        "value": null
+      },
+      "settle",
+      {
+        "set": "condition",
+        "value": null
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "unticked: a value arriving is passive; Evaluate still tests",
+    "because": "NDA-017 §2 constraint 1 — Run is additive, the checkbox is the only thing governing auto-run",
+    "params": {
+      "runOnChange-condition": false
+    },
+    "steps": [
+      {
+        "set": "condition",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "eval"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "params apply in the caller's order: the value before the untick is tested",
+    "because": "nodescope.ts Object.keys(parameters); the checkbox read at :83 is the one in force when the value arrives",
+    "params": {
+      "condition": true,
+      "runOnChange-condition": false
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "params apply in the caller's order: the untick before the value is not tested",
+    "because": "the mirror of the previous row",
+    "params": {
+      "runOnChange-condition": false,
+      "condition": true
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "unticking with null leaves the box ticked — only false unticks",
+    "because": "run-on-value-change.ts :137 `value !== false`",
+    "params": {
+      "runOnChange-condition": null
+    },
+    "steps": [
+      {
+        "set": "condition",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the frame's final value is what is tested",
+    "because": "condition.ts :180-181 — getInputValue at the after-inputs callback, not at the setter",
+    "params": {},
+    "steps": [
+      {
+        "set": "condition",
+        "value": true
+      },
+      {
+        "set": "condition",
+        "value": false
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "undefined arriving is a change and tests false",
+    "because": "run-on-value-change.ts :227 — undefined on either side is a change; condition.ts :181 falsy → onfalse",
+    "params": {},
+    "steps": [
+      {
+        "set": "condition"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a passive change moves nothing on the wire: Is True stays what the last test found",
+    "because": "condition.ts :177-178 — the booleans are sent at evaluation only; a value arriving unticked (:83 false) sends nothing. Found by the generated phase (seed 20726, sequence seed 840288232); §6 row C1/C2",
+    "params": {
+      "runOnChange-condition": false,
+      "condition": false
+    },
+    "steps": [
+      {
+        "signal": "eval"
+      },
+      "settle",
+      {
+        "set": "condition",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "eval"
+      },
+      "settle"
+    ]
+  }
+]

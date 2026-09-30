@@ -20,11 +20,11 @@
  */
 
 import type { Step, TargetAdapter } from '../adapter';
-import { play } from '../adapter';
+import { play, PlayError } from '../adapter';
 import { interpreterAdapter } from '../adapters/interpreter';
 import type { AnyNodeSpec } from '../spec';
 import type { TraceEvent } from '../trace';
-import { compareTraces, formatDifference, hasObservation, type Difference } from './compare';
+import { compareTraces, differenceWithThrow, formatDifference, hasObservation, type Difference } from './compare';
 import { generateSequence } from './generate';
 import { discoverBranches, mutantsOf, type Branch, type MutationKind } from './mutants';
 import { loadScenarios, writeReplay, type Scenario } from './scenario';
@@ -45,12 +45,36 @@ export interface ConformanceOptions {
   scenarios?: Scenario[];
   /** Stop after the first divergence in the generated phase. */
   stopAtFirst?: boolean;
+  /**
+   * Divergence classes already written up as §6 rows and awaiting a ruling (R3 (a): no runtime
+   * change rides with a spec). A generated divergence a row `matches` is COUNTED under the row,
+   * not shrunk and not held against conformance — so the suite keeps running past a known row
+   * and still finds the next thing. ⚠️ Keep every predicate narrow (the `index` after the
+   * offending step, the port, the value's type): a predicate wider than its row eats the next
+   * finding, and the report cannot tell.
+   */
+  known?: KnownRow[];
+}
+
+export interface KnownRow {
+  /** Where the row is written, e.g. `NSP-004 §6 C3`. */
+  row: string;
+  matches: (d: Divergence) => boolean;
+}
+
+export interface KnownCount {
+  row: string;
+  count: number;
+  /** The first divergence attributed to the row, unshrunk. */
+  example?: Divergence;
 }
 
 export interface ScenarioResult {
   name: string;
-  status: 'passed' | 'failed' | 'refused';
+  /** `known`: failed, and the scenario names the §6 row it belongs to (`row` in the JSON). */
+  status: 'passed' | 'failed' | 'refused' | 'known';
   reason?: string;
+  row?: string;
   difference?: Difference;
   reference?: TraceEvent[];
   actual?: TraceEvent[];
@@ -83,7 +107,7 @@ export interface Report {
   target: string;
   refused?: string;
   scenarios: ScenarioResult[];
-  generated: { seed: number; requested: number; ran: number; divergences: Divergence[] };
+  generated: { seed: number; requested: number; ran: number; divergences: Divergence[]; known: KnownCount[] };
   mutants?: { total: number; killed: number; survivors: MutantResult[]; unreached: Branch[]; results: MutantResult[] };
   timeMs: number;
   conforms: boolean;
@@ -94,10 +118,24 @@ export function defaultSeed(now = new Date()): number {
   return Math.floor(now.getTime() / 86_400_000) >>> 0;
 }
 
+/**
+ * The target's side of a comparison. A target that THROWS mid-scenario (adapter.ts `PlayError`)
+ * is a divergence at the point it died, with the trace it produced up to there — never a crash
+ * of the run: the runner's job is to report it, shrink it and write the replay.
+ */
+async function playTarget(target: TargetAdapter, type: string, params: Record<string, unknown>, steps: readonly Step[], reference: TraceEvent[]) {
+  try {
+    const actual = await play(target, type, params, steps);
+    return { actual, difference: compareTraces(reference, actual) };
+  } catch (e) {
+    if (!(e instanceof PlayError)) throw e;
+    return { actual: e.trace, difference: differenceWithThrow(reference, e.trace, e.message) };
+  }
+}
+
 async function playBoth(spec: AnyNodeSpec, target: TargetAdapter, params: Record<string, unknown>, steps: readonly Step[]) {
   const reference = await play(interpreterAdapter({ resolve: () => spec }), spec.type, params, steps);
-  const actual = await play(target, spec.type, params, steps);
-  return { reference, actual, difference: compareTraces(reference, actual) };
+  return { reference, ...(await playTarget(target, spec.type, params, steps, reference)) };
 }
 
 export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, options: ConformanceOptions = {}): Promise<Report> {
@@ -109,7 +147,7 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
     version: spec.version,
     target: target.name,
     scenarios: [],
-    generated: { seed, requested, ran: 0, divergences: [] },
+    generated: { seed, requested, ran: 0, divergences: [], known: (options.known ?? []).map((k) => ({ row: k.row, count: 0 })) },
     timeMs: 0,
     conforms: false
   };
@@ -128,9 +166,13 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
       report.scenarios.push({ name: sc.name, status: 'refused', reason: 'the reference trace has no observation event — an arm with no predicate grades nothing' });
       continue;
     }
-    const actual = await play(target, spec.type, sc.params, sc.steps);
-    const difference = compareTraces(reference, actual);
-    report.scenarios.push(difference.index < 0 ? { name: sc.name, status: 'passed' } : { name: sc.name, status: 'failed', difference, reference, actual });
+    const { actual, difference } = await playTarget(target, spec.type, sc.params, sc.steps, reference);
+    if (difference.index < 0) {
+      // a scenario that carries a row and PASSES says the row no longer reproduces on this target
+      report.scenarios.push(sc.row ? { name: sc.name, status: 'passed', row: sc.row, reason: `row ${sc.row} no longer reproduces here — close the row or drop the mark` } : { name: sc.name, status: 'passed' });
+    } else {
+      report.scenarios.push({ name: sc.name, status: sc.row ? 'known' : 'failed', row: sc.row, difference, reference, actual });
+    }
   }
 
   // 2. generated sequences
@@ -140,6 +182,13 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
     report.generated.ran++;
     if (difference.index < 0) continue;
     const div: Divergence = { seed: seq.seed, params: seq.params, steps: seq.steps, shrunk: false, difference, reference, actual };
+    const known = (options.known ?? []).findIndex((k) => k.matches(div));
+    if (known >= 0) {
+      const k = report.generated.known[known];
+      k.count++;
+      if (!k.example) k.example = div;
+      continue;
+    }
     if (options.shrink) {
       const { result, runs } = await shrink({ params: seq.params, steps: seq.steps }, async (c) => (await playBoth(spec, target, c.params, c.steps)).difference.index >= 0);
       const again = await playBoth(spec, target, result.params, result.steps);
@@ -214,7 +263,7 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
   report.timeMs = Date.now() - started;
   report.conforms =
     report.refused === undefined &&
-    report.scenarios.every((s) => s.status === 'passed') &&
+    report.scenarios.every((s) => s.status === 'passed' || s.status === 'known') &&
     report.generated.divergences.length === 0 &&
     (report.mutants === undefined || (report.mutants.survivors.length === 0 && report.mutants.unreached.length === 0));
   return report;
@@ -227,11 +276,19 @@ export function formatReport(report: Report): string {
   if (report.refused) lines.push(`  refused: ${report.refused}`);
   const failed = report.scenarios.filter((s) => s.status !== 'passed');
   lines.push(`  scenarios: ${report.scenarios.length - failed.length} / ${report.scenarios.length} passed`);
-  for (const s of failed) {
-    lines.push(`    ${s.status} ${s.name}${s.reason ? ': ' + s.reason : ''}`);
+  for (const s of report.scenarios) {
+    if (s.status === 'passed' && !s.reason) continue;
+    lines.push(`    ${s.status} ${s.name}${s.row ? ` [row ${s.row}]` : ''}${s.reason ? ': ' + s.reason : ''}`);
     if (s.difference) lines.push('    ' + formatDifference(s.difference, 'interpreter', report.target).replace(/\n/g, '\n    '));
   }
   lines.push(`  generated: ${report.generated.ran} / ${report.generated.requested} ran, ${report.generated.divergences.length} divergence(s)`);
+  for (const k of report.generated.known) {
+    lines.push(`    known: ${k.count} attributed to row ${k.row}`);
+    if (k.example) {
+      lines.push(`      e.g. seed ${k.example.seed}  params ${JSON.stringify(k.example.params)}  steps ${JSON.stringify(k.example.steps)}`);
+      lines.push('      ' + formatDifference(k.example.difference, 'interpreter', report.target).replace(/\n/g, '\n      '));
+    }
+  }
   for (const d of report.generated.divergences) {
     lines.push(`    seed ${d.seed}${d.shrunk ? ` (shrunk to ${d.steps.length} step(s) in ${d.shrinkRuns} runs)` : ''}${d.replayFile ? ' → ' + d.replayFile : ''}`);
     lines.push(`      params ${JSON.stringify(d.params)}  steps ${JSON.stringify(d.steps)}`);

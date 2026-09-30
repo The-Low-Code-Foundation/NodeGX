@@ -63,6 +63,8 @@ Measured 2026-09-29 against the working tree. Read, not run.
 | 11 | No property-testing library in the repo (`fast-check` is absent) | `node_modules/` |
 | 12 | **The census (NSP-000, 2026-09-30):** of the 147, **91** call `beginOutcome`, **68** have dynamic ports, **99** are named as a literal in `plan.ts`, **9** (all cloud-only) are named by no test file at all; tiers T1 46 · T2 11 · T3 39 · T4 27 · T5 19 · T6 5; every node resolves to exactly one declaring source file | [CENSUS.md](CENSUS.md), `census.json`, `scripts/node-spec/census.js` |
 
+| 13 | **The pilot (NSP-004, 2026-09-30):** five specs conform on the runtime at 10,000 sequences, every mutant killed; **2 divergences on the wire + 3 doc-vs-code, none graded by an existing test** — Condition's getters read the live input while its wire carries the tested value (C2); a non-string on String Format's `format` kills the node for good (C3); And's description promises a `false` the node never sends (D1); String Format fills a repeated placeholder every time, not once (D2), and expands `$&`/`$$` in values (D3). Cost: ≈ 2 min per spec with the source open, after ≈ 25 min growing the format (`afterInputs`, `derived.discover`) | [NSP-004 §6](NSP-004-THE-PILOT-FIVE.md) |
+
 So the phase is **generalising five things that already exist in part** (#4–#8), not inventing
 a discipline from nothing.
 
@@ -117,7 +119,7 @@ Full detail in NSP-001 to NSP-003. The shape:
 | [NSP-001](NSP-001-THE-SPEC-AND-THE-INTERPRETER.md) ✅ | The spec format and the interpreter — a new package. **Built s1** (`defineNode(decl).on(reducers)`, 44 tests) | 000 | T1 |
 | [NSP-002](NSP-002-TRACES-AND-THE-RUNTIME-ADAPTER.md) ✅ | Traces, the adapter interface, and the interpreted runtime as a target. **Built s2** (schema v1, canonicaliser, `TargetAdapter`, the runtime target in `noodl-runtime/test/helpers`) | 001 | T1 |
 | [NSP-003](NSP-003-THE-RUNNER.md) ✅ | The runner — scenarios, generated sequences, shrinking, mutants. **Built s2** (`runConformance → Report`; a planted off-by-one shrinks to 2 steps) | 002 | T1 |
-| [NSP-004](NSP-004-THE-PILOT-FIVE.md) | 🔴 **The pilot five** — Counter, Switch, And, Condition, String Format. **Go / no-go (R4)** | 003 | T1 |
+| [NSP-004](NSP-004-THE-PILOT-FIVE.md) ✅ | 🔴 **The pilot five** — Counter, Switch, And, Condition, String Format. **Built s3** (all five conform at 10,000; 2 + 3 findings, 0 previously caught; **R4 asked**, §7) | 003 | T1 |
 | [NSP-005](NSP-005-THE-EXPORT-ADAPTER.md) | The export adapter — run the emitted code for one node, headless | 004 | T1 |
 | [NSP-006](NSP-006-A-STRANGERS-TARGET.md) | 🔴 **A stranger's target** — an agent builds the pilot five in vanilla JS from spec + suite alone | 004 | T1 |
 | [NSP-007](NSP-007-THE-WORLD.md) | The world — fake clock, seeded random, scripted network, scripted backend | 004 | T2, T3 |
@@ -174,7 +176,24 @@ Plain words, the choices, the cost. Recommendation first.
 | **R3** | "When a spec and the runtime disagree, who wins? Recommend the runtime; each disagreement a written row you rule on; a runtime fix ships alone." | **(a) the runtime wins.** *"Probably yeah"* |
 | **R5** | "200 generated sequences per node in CI, 10,000 locally on demand — or 1,000 in CI at ~5× the time?" | **(a) 200.** *"200 sounds more CPU friendly"* |
 
-R4 is still the pilot's go / no-go, asked **by** NSP-004 with its numbers.
+**R4 — asked by NSP-004 with its numbers (s3, 2026-09-30).** Five nodes specced; every one conforms on the runtime
+at 10,000 generated sequences with every mutant killed. Writing the specs found **five things no existing test grades**:
+two on the wire (Condition's getters disagree with its wire, C2; a non-string on String Format's `format` kills the node
+for good, C3) and three where the published description says something the code does not do (And D1, String Format
+D2, D3). Cost: about two minutes per spec once the format could express the node, and the format work (about 25
+minutes, two idioms — the frame-end reducer and ports discovered on write) is done and covers most of T1.
+
+- **(a) Recommended: continue into the batches**, NSP-011 first (13 logic / math / string nodes, most of them the same
+  two idioms), with NSP-005 and NSP-006 in parallel lanes since they answer the other question (swappable targets). §5's
+  reading rule said *≥ 1 new divergence or well under a session per node → continue*; both held.
+- **(b) Narrow to T1 only** and keep the runner as a tool for new nodes. Cheaper, but the findings above came from the
+  smallest nodes in the catalog; the T3/T4 nodes are where the descriptions are longest and the tests fewest (9 named by
+  no test at all).
+- **(c) Stop** and keep the infrastructure as a test tool.
+
+**Also for a ruling, the rows themselves** (NSP-004 §6.2): C2 and C3 are runtime bugs that ship alone as behaviour
+changes; D1–D3 are descriptions to rewrite (or behaviour to change — your call per row). Until ruled, the suite counts
+C3 under its row every run and goes red the day it stops firing.
 
 **R6 — Is the editor a target?** Asked by s1 as *"can we make sure the work in this phase prepares
 for a future where even the editor is exchangeable?"* — Richard's own words, 2026-09-30: **yes,

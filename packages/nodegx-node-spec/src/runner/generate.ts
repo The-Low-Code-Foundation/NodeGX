@@ -9,9 +9,11 @@
  * well as its own boundaries. A target that coerces one of them differently from the spec is a
  * divergence worth a row.
  *
- * Only DECLARED ports are generated. Derived ports (String Format's `{name}` inputs) depend on a
- * parameter the generator would have to invent; a hand scenario is where those are driven, and
- * NSP-004 says so. `enum` ports draw from their declared values plus one that is not declared.
+ * Declared ports are generated from their pools. Derived ports are generated too, since NSP-004:
+ * the ports `derived.inputs(params)` yields for the generated params (String Format's `{name}`
+ * when `format` drew `'Hello, {name}'`), plus the spec's `derived.candidates` — names the target
+ * registers on first write that the generator could not invent (And's `input 0 … input 3`).
+ * `enum` ports draw from their declared values plus one that is not declared.
  */
 
 import type { Step } from '../adapter';
@@ -75,9 +77,27 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
     if (rng.chance(paramChance)) params[name] = rng.pick(poolFor(decl));
   }
 
+  // Derived ports (NSP-004): the ports an editor would draw for these params, plus the names the
+  // spec says the target registers on first write (`candidates`). Only when the spec has any — no
+  // rng draw happens otherwise, so a spec without derived ports generates exactly what it did
+  // before (the pinned digest in tests/runner.test.ts).
+  const drivable: Array<[string, InputDecl]> = [...valuePorts];
+  if (spec.derived) {
+    const derived = spec.derived.inputs(params);
+    for (const [name, decl] of Object.entries(derived)) if (!(name in spec.inputs)) drivable.push([name, decl]);
+    for (const name of spec.derived.candidates ?? []) {
+      if (name in derived || name in spec.inputs) continue;
+      const decl = spec.derived.discover?.(name);
+      if (decl) drivable.push([name, decl]);
+    }
+    for (const [name, decl] of drivable.slice(valuePorts.length)) {
+      if (rng.chance(paramChance)) params[name] = rng.pick(poolFor(decl));
+    }
+  }
+
   const n = minSteps + rng.int(maxSteps - minSteps + 1);
   const steps: Step[] = [];
-  for (let i = 0; i < n; i++) steps.push(oneStep(rng, valuePorts, signalPorts, settleChance));
+  for (let i = 0; i < n; i++) steps.push(oneStep(rng, drivable, signalPorts, settleChance));
   if (steps[steps.length - 1] !== 'settle') steps.push('settle');
   return { seed, params, steps };
 }

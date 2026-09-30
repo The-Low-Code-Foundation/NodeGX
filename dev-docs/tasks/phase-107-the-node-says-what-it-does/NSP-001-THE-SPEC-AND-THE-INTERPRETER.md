@@ -142,7 +142,11 @@ export const Counter = defineNode({
   grouping is a rule of the trace FORMAT so a runtime that pulses synchronously inside a setter still compares equal
   — NSP-002's runtime adapter must group the same way; written into `trace.ts` and NSP-002 §4.
 - **Dynamic ports** designed as `derived: { inputs(params) → decls, on(state, port, value, derivedValues) → patch }`
-  passed as `.on(reducers, derived)`; the interpreter routes a write to a derived port through it and refuses a derived
+  passed as `.on(reducers, derived)` — ~~as `.on(reducers, derived)`~~ **s3 (NSP-004): the second argument is
+  `extras: { derived?, afterInputs? }`**, `derived` grew `discover(port)` (a port the target registers on first
+  write — And's `input <n>`, String Format's any-name) and `candidates` (names the generator may drive), and
+  `afterInputs(state, inputs) → patch` is the frame-end reducer the `scheduleAfterInputsHaveUpdated` families need
+  (Condition first). NSP-004 §5 has the reasons; the interpreter routes a write to a derived port through it and refuses a derived
   port that shadows a declared one. First real use: String Format, NSP-004.
 - **Units (C10):** `type: 'dimension'` ports carry `number | { value, unit }` (`UnitValue`). Nothing uses it yet.
 - **Run-time guards mirror every type rule** (a spec can arrive as data): undeclared `set` key / `emit` name, a

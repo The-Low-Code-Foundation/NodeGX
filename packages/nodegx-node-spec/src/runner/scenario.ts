@@ -27,6 +27,12 @@ export interface Scenario {
   seed?: number;
   /** Free text — why this scenario exists (the docblock line, the divergence row). */
   because?: string;
+  /**
+   * The §6 row this scenario is KNOWN to fail under on the runtime, awaiting a ruling (R3 (a)).
+   * The runner reports the failure as `known`, not `failed`; and reports a PASS as the row
+   * having closed. Remove the mark when the row is ruled and fixed.
+   */
+  row?: string;
 }
 
 /** The package's own scenarios directory. */

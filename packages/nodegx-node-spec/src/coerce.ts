@@ -27,7 +27,8 @@ export type Coercion =
   | 'typed-number'
   | 'typed-string'
   | 'typed-boolean'
-  | 'typed-color';
+  | 'typed-color'
+  | 'not-false';
 
 export interface CoercionRule {
   /** The runtime line(s) the rule was read from. */
@@ -80,6 +81,12 @@ export const COERCIONS: Readonly<Record<Coercion, CoercionRule>> = Object.freeze
       if (HEX3.test(s) || HEX6.test(s) || RGB.test(s)) return s;
       return fallback;
     }
+  },
+  'not-false': {
+    // The `runOnChange-<input>` checkboxes (NDA-017 §2): only an explicit `false` unticks; `null`,
+    // `undefined`, `0` and `""` all leave the box ticked, unlike `js-boolean`.
+    source: 'noodl-runtime/src/run-on-value-change.ts `setRunOnValueChange(this, inputName, value !== false)` in runOnChangeInput',
+    apply: (v) => v !== false
   }
 });
 

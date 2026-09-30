@@ -54,8 +54,22 @@ export interface TargetAdapter<H extends Handle = Handle> {
 export type Step = { set: string; value?: unknown } | { signal: string } | 'settle';
 
 /**
+ * A target threw while a scenario was being played — inside `mount`, `set`, `signal` or `settle`.
+ * Carries the trace up to the throw, so the runner can show WHERE the target died (NSP-004: a
+ * String Format whose `format` is wired a number throws in its after-inputs callback). A throw
+ * is not a behaviour a wire can carry, so it is a divergence from any reference, not an event.
+ */
+export class PlayError extends Error {
+  constructor(message: string, readonly trace: TraceEvent[], readonly cause: unknown) {
+    super(message);
+    this.name = 'PlayError';
+  }
+}
+
+/**
  * Plays one scenario on one target from a fresh mount and returns the trace. Disposes the
- * instance whatever happens.
+ * instance whatever happens. A throw from the target is rethrown as a `PlayError` holding the
+ * trace so far (when the handle exists and can still be read).
  */
 export async function play<H extends Handle>(
   adapter: TargetAdapter<H>,
@@ -63,15 +77,27 @@ export async function play<H extends Handle>(
   params: Record<string, unknown>,
   steps: readonly Step[]
 ): Promise<TraceEvent[]> {
-  const h = adapter.mount(type, params);
+  let h: H | undefined;
   try {
+    h = adapter.mount(type, params);
     for (const step of steps) {
       if (step === 'settle') await adapter.settle();
       else if ('signal' in step) adapter.signal(h, step.signal);
       else adapter.set(h, step.set, step.value);
     }
     return adapter.trace(h);
+  } catch (e) {
+    if (e instanceof PlayError) throw e;
+    let partial: TraceEvent[] = [];
+    if (h) {
+      try {
+        partial = adapter.trace(h);
+      } catch {
+        // a handle the throw left unreadable: the trace so far is unknown
+      }
+    }
+    throw new PlayError(`${adapter.name} threw: ${e instanceof Error ? e.message : String(e)}`, partial, e);
   } finally {
-    adapter.dispose(h);
+    if (h) adapter.dispose(h);
   }
 }

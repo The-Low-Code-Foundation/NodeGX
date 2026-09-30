@@ -6,14 +6,22 @@
  */
 
 import type { AnyNodeSpec } from '../spec';
+import { And } from './and';
+import { Condition } from './condition';
 import { Counter } from './counter';
+import { StringFormat } from './string-format';
+import { Switch } from './switch';
 
 export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
-  [Counter.type]: Counter
+  [Counter.type]: Counter,
+  [Switch.type]: Switch,
+  [And.type]: And,
+  [Condition.type]: Condition,
+  [StringFormat.type]: StringFormat
 });
 
 export function specFor(typeName: string): AnyNodeSpec | undefined {
   return specs[typeName];
 }
 
-export { Counter };
+export { And, Condition, Counter, StringFormat, Switch };

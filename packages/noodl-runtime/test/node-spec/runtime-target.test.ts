@@ -105,7 +105,8 @@ describe('AC1 — mount by type name from the catalog, not a hand list', () => {
     // at mount (user.ts:114), a service the browser viewer installs — a T3 node whose world is
     // NSP-007's and NSP-014's. A node added here needs its reason written in NSP-002 §5; a node
     // leaving is a ratchet the way picker coverage is.
-    expect(failed).toEqual([['net.noodl.user.User', "Cannot read properties of undefined (reading 'forScope')"]]);
+    // (NSP-004: `play` now rethrows a target's throw as a `PlayError` wearing the adapter's name)
+    expect(failed).toEqual([['net.noodl.user.User', "runtime threw: Cannot read properties of undefined (reading 'forScope')"]]);
   });
 
   test('every registered spec names a type the runtime can mount', () => {

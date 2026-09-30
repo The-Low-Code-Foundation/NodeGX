@@ -95,12 +95,32 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}): 
     settles: 0
   };
   // params in the caller's key order — the adapter contract (adapter.ts), and the runtime's own
-  // order. Unknown params are refused before anything is applied.
+  // order. Unknown params are refused before anything is applied; a port `derived.discover`
+  // accepts is not unknown (the runtime's `registerInputIfNeeded` runs before `hasInput`).
   for (const name of Object.keys(params)) {
-    if (!(name in spec.inputs) && !(name in derivedInputs)) throw new SpecError(`${spec.type}: param "${name}" is not an input`);
+    if (!(name in spec.inputs) && !(name in derivedInputs) && !discoverable(inst, name)) {
+      throw new SpecError(`${spec.type}: param "${name}" is not an input`);
+    }
   }
   for (const name of Object.keys(params)) set(inst, name, params[name]);
   return inst;
+}
+
+function discoverable(inst: Instance, port: string): boolean {
+  return !!inst.spec.derived?.discover && inst.spec.derived.discover(port) !== undefined;
+}
+
+/**
+ * A port the target registers on first write (spec.ts `DerivedPorts.discover`). Registered here
+ * into the instance's derived ports, at its declared default, before the write is applied.
+ */
+function discover(inst: Instance, port: string): InputDecl | undefined {
+  const decl = inst.spec.derived?.discover?.(port);
+  if (!decl) return undefined;
+  if (port in inst.spec.inputs) throw new SpecError(`${inst.spec.type}: discovered port "${port}" shadows a declared input`);
+  inst.derivedInputs = deepFreeze({ ...inst.derivedInputs, [port]: decl });
+  inst.derivedValues = deepFreeze({ ...inst.derivedValues, [port]: decl.default });
+  return decl;
 }
 
 export function set(inst: Instance, port: string, value: unknown): void {
@@ -117,7 +137,7 @@ export function set(inst: Instance, port: string, value: unknown): void {
     }
     return;
   }
-  const derived = inst.derivedInputs[port];
+  const derived = inst.derivedInputs[port] ?? discover(inst, port);
   if (derived && !isSignalInput(derived)) {
     inst.trace.push(setEvent(port, value));
     const coerced = coerce(derived.coerce, value, derived.default);
@@ -174,6 +194,11 @@ function apply(inst: Instance, port: string, patchUnknown: unknown, outcomeRequi
 export function settle(inst: Instance): void {
   inst.trace.push({ t: 'settle' });
   inst.settles++;
+  // the frame-end reducer (spec.ts `AfterInputs`): the deferred work of the frame, done once
+  // against the frame's final inputs and state, before the frame's observations are recorded
+  if (inst.spec.afterInputs) {
+    apply(inst, '<afterInputs>', (inst.spec.afterInputs as (s: unknown, i: unknown) => unknown)(inst.state, inst.inputs), false);
+  }
   for (const name of Object.keys(inst.spec.outputs).sort()) {
     const decl = inst.spec.outputs[name];
     if (decl.type === 'signal') continue;

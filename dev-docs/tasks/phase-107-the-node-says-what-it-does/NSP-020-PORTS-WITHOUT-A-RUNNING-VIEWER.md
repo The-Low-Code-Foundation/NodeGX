@@ -23,7 +23,10 @@ Measured 2026-09-30 from the catalog's `dynamicPorts.mechanisms` over the 147 pi
 | `runtime-narrowed` | 2 | the runtime narrows a static list per instance |
 
 So for a third of the picker, a replacement editor cannot even show the node's ports without
-embedding this runtime. NSP-001 designed `derived.inputs(params)` as a pure function for exactly this;
+embedding this runtime. NSP-001 designed `derived.inputs(params)` as a pure function for exactly this (and NSP-004
+built the first two — String Format's placeholders and And's numbered inputs — with `derived.discover` beside it for
+what the runtime registers on first write; the catalog-parity gate now grades `inputs({})` against the catalog's
+`dynamicPorts` block);
 this task makes every mechanism above an instance of it.
 
 ## 3. What to build

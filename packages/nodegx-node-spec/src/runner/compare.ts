@@ -9,6 +9,18 @@ export interface Difference {
   index: number;
   reference?: TraceEvent;
   actual?: TraceEvent;
+  /** The target THREW at this point instead of producing an event (adapter.ts `PlayError`). */
+  threw?: string;
+}
+
+/**
+ * The difference when the target threw after producing `partial`: the first differing event if
+ * there is one before the throw, otherwise the throw itself where the next event should be.
+ */
+export function differenceWithThrow(reference: readonly TraceEvent[], partial: readonly TraceEvent[], threw: string): Difference {
+  const d = compareTraces(reference, partial);
+  if (d.index >= 0 && d.index < partial.length) return { ...d, threw };
+  return { index: partial.length, reference: reference[partial.length], threw };
 }
 
 export function eventKey(e: TraceEvent): string {
@@ -28,7 +40,8 @@ export function compareTraces(reference: readonly TraceEvent[], actual: readonly
 export function formatDifference(d: Difference, referenceName = 'reference', actualName = 'actual'): string {
   if (d.index < 0) return 'traces are equal';
   const show = (e: TraceEvent | undefined) => (e === undefined ? '<end of trace>' : JSON.stringify(e));
-  return `first difference at event ${d.index}:\n  ${referenceName.padEnd(12)} ${show(d.reference)}\n  ${actualName.padEnd(12)} ${show(d.actual)}`;
+  const actual = d.threw !== undefined && d.actual === undefined ? `<threw: ${d.threw}>` : show(d.actual);
+  return `first difference at event ${d.index}:\n  ${referenceName.padEnd(12)} ${show(d.reference)}\n  ${actualName.padEnd(12)} ${actual}`;
 }
 
 /** Whether a trace grades anything: an observation event exists (an arm with no predicate grades nothing). */

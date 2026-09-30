@@ -170,8 +170,44 @@ export type Reducers<S, I, O> = {
 // mount and routes a write to a derived port through `on`.
 
 export interface DerivedPorts<S, O> {
+  /**
+   * The ports an EDITOR draws for these params — R6's `ports(params)`, what the runtime today
+   * computes only inside a live viewer (`sendDynamicPorts`; NSP-020). String Format: one port
+   * per `{placeholder}` in `format`. And: `input 0 … input N+1`, one spare beyond the highest
+   * mentioned, as `collectPorts` (nodedefinition.ts) does.
+   */
   inputs: (params: Readonly<Record<string, unknown>>) => Record<string, ValueInputDecl>;
   on: (state: Readonly<S>, port: string, value: unknown, derived: Readonly<Record<string, unknown>>) => Patch<S, O>;
+  /**
+   * A port the target registers ON FIRST WRITE, whatever the params — the runtime's
+   * `registerInputIfNeeded` (node.ts): And accepts any `input <n>`, String Format any name at
+   * all, and stores the value for a format that may only later mention it. Returns the port's
+   * declaration, or `undefined` for a name the target would refuse. Without this, a spec's
+   * derived ports are fixed at mount, which is not what either runtime mechanism does (NSP-004).
+   */
+  discover?: (port: string) => ValueInputDecl | undefined;
+  /**
+   * Port names the GENERATOR may write to, beyond `inputs(params)`, because `discover` accepts
+   * them. The generator cannot invent `input 3` or a placeholder name; the spec offers a few.
+   */
+  candidates?: readonly string[];
+}
+
+/**
+ * The frame-end reducer — the runtime's `scheduleAfterInputsHaveUpdated` idiom (Condition,
+ * Expression, Function, String Format … the twelve `hasScheduled…` families, NDA-017 §2
+ * constraint 3). A value or signal reducer records that a frame needs work (`set: { scheduled:
+ * true }`); the interpreter calls this ONCE per `settle`, before the frame's observations are
+ * recorded, and the reducer does the work against the frame's FINAL inputs and state. It is
+ * how "two triggers in one frame produce one test" is written without a frame in the spec.
+ * Outcomes are still reported by the invoking reducer (they queue to the same settle).
+ */
+export type AfterInputs<S, I, O> = (state: Readonly<S>, inputs: Inputs<I>) => Patch<S, O>;
+
+/** What `.on()` takes beside the reducers. */
+export interface Extras<S, I, O> {
+  derived?: DerivedPorts<S, O>;
+  afterInputs?: AfterInputs<S, I, O>;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -210,11 +246,12 @@ export type WorldNeed = 'clock' | 'random' | 'network' | 'backend';
 export interface NodeSpec<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> extends NodeDecl<S, I, O> {
   on: Reducers<S, I, O>;
   derived?: DerivedPorts<S, O>;
+  afterInputs?: AfterInputs<S, I, O>;
 }
 
 export interface NodeBuilder<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> {
-  /** The behaviour: one reducer per signal input, optionally one per value input, and derived ports. */
-  on(reducers: Reducers<S, I, O>, derived?: DerivedPorts<S, O>): NodeSpec<S, I, O>;
+  /** The behaviour: one reducer per signal input, optionally one per value input; derived ports and the frame-end reducer in `extras`. */
+  on(reducers: Reducers<S, I, O>, extras?: Extras<S, I, O>): NodeSpec<S, I, O>;
 }
 
 /**
@@ -238,7 +275,12 @@ export function defineNode<S extends object, const I extends InputsDecl, const O
   decl: NodeDecl<S, I, O>
 ): NodeBuilder<S, I, O> {
   return {
-    on: (reducers, derived) => (derived ? { ...decl, on: reducers, derived } : { ...decl, on: reducers })
+    on: (reducers, extras) => {
+      const spec: NodeSpec<S, I, O> = { ...decl, on: reducers };
+      if (extras?.derived) spec.derived = extras.derived;
+      if (extras?.afterInputs) spec.afterInputs = extras.afterInputs;
+      return spec;
+    }
   };
 }
 
@@ -264,7 +306,10 @@ export interface AnyNodeSpec {
   derived?: {
     inputs: (params: Readonly<Record<string, unknown>>) => Record<string, ValueInputDecl>;
     on: (state: never, port: string, value: unknown, derived: Readonly<Record<string, unknown>>) => unknown;
+    discover?: (port: string) => ValueInputDecl | undefined;
+    candidates?: readonly string[];
   };
+  afterInputs?: (state: never, inputs: never) => unknown;
 }
 export interface ErasedValueOutput extends PortMeta {
   type: ValueType;
