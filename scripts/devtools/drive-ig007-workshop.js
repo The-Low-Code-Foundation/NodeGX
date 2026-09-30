@@ -275,8 +275,9 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     check('AC1: a forward — the engine moves Pip one tile and the 3D node glides him there (mid-way it was gliding)', !!fwd && fwd.ok && Math.abs(fwd.after.x - fwd.before.x) + Math.abs(fwd.after.y - fwd.before.y) === 1 && midGlide && midGlide.drawn && midGlide.drawn.gliding === true, { fwd, midGlide });
     const turn = steps.find((x) => x.op === 'left' || x.op === 'right');
     check('AC1: a turn — the engine’s facing changes by a quarter and the 3D node’s does too', !!turn && turn.ok && ((turn.after.d - turn.before.d + 4) % 4 === (turn.op === 'left' ? 3 : 1)), turn);
-    const water = steps.find((x) => x.op === 'water');
-    check('AC1: water — one more tulip wet and one drop less in the can, in the engine and in 3D', !!water && water.ok && water.after.wet === water.before.wet + 1 && water.after.can === water.before.can - 1 && water.drawn.wet === water.after.wet, water);
+    // P108 IW-003 (lane M): a tulip wants three drinks — the pour that fills one (its last drink) makes it wet.
+    const water = steps.find((x) => x.op === 'water' && x.after.wet > x.before.wet);
+    check('AC1: water — the pour that fills a tulip: one more tulip wet and one drop less in the can, in the engine and in 3D', !!water && water.ok && water.after.wet === water.before.wet + 1 && water.after.can === water.before.can - 1 && water.drawn.wet === water.after.wet, water);
     const blocks = await evaluate(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`);
     const last = steps[steps.length - 1] || {};
     check(`AC1: ${PRESSES.length} presses, ${PRESSES.length} blocks; at the end all ${TULIP_COUNT} tulips are wet in both`, blocks === PRESSES.length && last.ok && last.after.wet === TULIP_COUNT && last.drawn.wet === TULIP_COUNT, { blocks, last });
