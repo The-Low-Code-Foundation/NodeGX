@@ -32,7 +32,9 @@ run(Counter, { startValue: 5 }, ['settle', { signal: 'increase' }, 'settle']);
   generated sequences (200 in CI, 10,000 locally), shrinking to the shortest failing sequence written as a replay
   file, and mutants — one per reducer branch the suite reaches — that must all be killed.
 - `src/nodes/` — the specs, one file per node, written **from the runtime source** with line
-  citations (R3 (a): the runtime wins by default; a disagreement is a row and a ruling).
+  citations (R3 (a): the runtime wins by default; a disagreement is a row and a ruling). 18 so far: the pilot five
+  (NSP-004) and the first batch (NSP-011: the four Variables, Boolean To String, Color Blend, Inverter, Log, Number
+  Remapper, Or, String Mapper, Substring, Value Changed).
 
 No dependency on the runtime, the editor or React. Strict TypeScript, `noImplicitReturns`.
 Tests type-check (ts-jest without `isolatedModules`) because `tests/types.test.ts` is graded by

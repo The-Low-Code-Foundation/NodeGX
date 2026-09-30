@@ -1,0 +1,127 @@
+[
+  {
+    "name": "no params: the first settle publishes '#f1f2f4'; '#000' → '#000' + Changed; 'red' is stored as it is",
+    "because": "color.ts :10, :20-22 — the identity cast",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": "#000"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "red"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a number is stored and published on the colour port unchanged (identity cast) — and a first 0 is ignored (§6 row C5)",
+    "because": "color.ts :20-22; variablebase.ts :164-168",
+    "params": {},
+    "steps": [
+      {
+        "set": "value",
+        "value": 0
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 5
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Set before any Value stores the NUMBER 0 on a Color variable — Changed, Done (§6 row C5)",
+    "because": "variablebase.ts :121, :204; color.ts :20-22",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "saveValue"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "null clears to null; Treat empty as = '' clears to ''",
+    "because": "color.ts :23-26",
+    "params": {
+      "value": "#fff"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": null
+      },
+      "settle",
+      {
+        "set": "treatEmptyAs",
+        "value": "empty-string"
+      },
+      {
+        "set": "value",
+        "value": "#abc"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": null
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Set after Value stored → Unchanged; unticked, Set stores the pending value → Done",
+    "because": "variablebase.ts :196-207",
+    "params": {
+      "value": "#123456"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "saveValue"
+      },
+      "settle",
+      {
+        "set": "runOnChange-value",
+        "value": false
+      },
+      {
+        "set": "value",
+        "value": "#654321"
+      },
+      "settle",
+      {
+        "signal": "saveValue"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "undefined abstains: nothing stored, nothing pending; with Value unticked a Set then stores the last real value",
+    "because": "variablebase.ts :154, :255 (EMPTY-VALUE-CONTRACT corollary 4)",
+    "params": {
+      "runOnChange-value": false
+    },
+    "steps": [
+      {
+        "set": "value",
+        "value": "#010203"
+      },
+      "settle",
+      {
+        "set": "value"
+      },
+      "settle",
+      {
+        "signal": "saveValue"
+      },
+      "settle"
+    ]
+  }
+]

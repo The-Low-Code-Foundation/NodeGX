@@ -37,6 +37,10 @@
  *     instance is flushed on each call.
  *   - **runtime errors** raised on a mounted node are kept on its handle (`errors`), outside the
  *     trace: the trace is behaviour on the wire; the error channel is the runner's to read.
+ *   - **log lines** (`net.noodl.Log`, NSP-011): the scope carries a `runContext.log` sink, the one
+ *     the cloud runner attaches (log.ts :175-179), so a Log node's line lands on its handle
+ *     (`logs`) instead of the console — an effect kept beside the trace until NSP-007 routes it
+ *     through the world. Checked, not ignored (NSP-011 §3).
  *   - **the scope**: a node in a graph has a `NodeScope`; five runtime-provided picker nodes read
  *     it at mount (`nodeScope.modelScope || Model` — Variable, Set Variable, Component Object,
  *     User, Query Records). A lone node gets the scope a browser app's root component has: no
@@ -51,12 +55,42 @@ import type { Handle, TargetAdapter, TraceEvent } from '../../../nodegx-node-spe
 import { canonicalise, OUTCOME_PORTS } from '../../../nodegx-node-spec/src';
 
 import NoodlRuntime = require('../../noodl-runtime');
+import NodeDefinition = require('../../src/nodedefinition');
+
+/**
+ * The picker nodes the VIEWER provides (census `providedBy: noodl-viewer-react`) that this phase
+ * has specced (NSP-011: Color, Value Changed, Color Blend). `NoodlRuntime` registers the
+ * runtime's own list; the viewer's `register-nodes.js` adds these on top in the app. The same
+ * definition objects are registered here, loaded from the viewer's source through jest's require
+ * (ts-jest compiles them under this package's config), so a spec of a viewer node is graded
+ * against the code the app runs, and no copy is kept. A viewer node specced later is added here.
+ */
+export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend'] as const;
+
+/** The target with the viewer-provided picker nodes registered as well. */
+export function withViewerNodes(target: RuntimeTarget): RuntimeTarget {
+  for (const file of VIEWER_NODES) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const mod = require('../../../noodl-viewer-react/src/nodes/std-library/' + file) as { default: { node: Parameters<typeof NodeDefinition.defineNode>[0] } };
+    target.context.nodeRegister.register(NodeDefinition.defineNode(mod.default.node));
+  }
+  return target;
+}
 
 export interface RuntimeHandle extends Handle {
   readonly node: RuntimeNode;
   readonly metadata: NodeMetadata;
   /** Everything raised on the runtime error channel by this node, in order. Live. */
   readonly errors: RuntimeErrorEventLike[];
+  /** Every line this node wrote through the scope's log sink, in order. Live. */
+  readonly logs: LogLine[];
+}
+
+/** What `net.noodl.Log` hands the sink (runcontext.ts `RuntimeLogEntry`), minus the node id the handle already knows. */
+export interface LogLine {
+  level: string;
+  message: string;
+  data?: unknown;
 }
 
 export interface RuntimeTarget extends TargetAdapter<RuntimeHandle> {
@@ -202,14 +236,20 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     mount(type, params) {
       if (!context.nodeRegister.hasNode(type)) throw new Error(`runtime: no node type "${type}" is registered`);
       const id = `${type}#${next++}`;
+      const logs: LogLine[] = [];
       const scope = {
         modelScope: undefined,
         componentOwner: { name: `node-spec/${id}`, getInstanceId: () => id },
-        context
+        context,
+        runContext: {
+          log: (entry: { level: string; message: string; data?: unknown }) => {
+            logs.push(entry.data === undefined ? { level: entry.level, message: entry.message } : { level: entry.level, message: entry.message, data: entry.data });
+          }
+        }
       };
       const node = context.nodeRegister.createNode(type, id, scope as never) as unknown as RuntimeNode;
       if (!node.nodeScope) node.nodeScope = scope as never;
-      const h: RuntimeHandle = { id, type, node, metadata: context.nodeRegister.getNodeMetadata(type), errors: [] };
+      const h: RuntimeHandle = { id, type, node, metadata: context.nodeRegister.getNodeMetadata(type), errors: [], logs };
       const s: State = { h, trace: [], frame: newFrame(), lastSent: {}, settles: 0, currentInput: undefined, inOutcome: 0 };
       states.set(id, s);
       byNodeId.set(id, s);

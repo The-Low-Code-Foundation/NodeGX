@@ -16,6 +16,16 @@
  * key to the value it already had produces no `value` event, and the first settle records every
  * output that is not `undefined` (C8, the first update consolidates).
  *
+ * What a frame's value IS (NSP-011, from Inverter): the runtime sends an output at every write
+ * that flags it (`flagOutputDirty` → `sendValue`, node.ts :832-835) and NEVER sends `undefined`
+ * (:820-822, C3). So a wire carries the LAST DEFINED value a frame produced — a node whose state
+ * ends the frame unset (Inverter handed `null` then `undefined`) still shows its last answer
+ * downstream, while a connection made later would read the getter's `undefined`. The spec
+ * models the wire (NSP-002 decision 6): outputs are observed after every step, and at settle the
+ * last defined observation per port is what is recorded — the settle-time value when it is
+ * defined, an intermediate one when it is not. For a spec whose outputs are never undefined
+ * mid-frame this is exactly the settle-time value.
+ *
  * `mount(spec, params)` creates the instance with the spec's initial state and each value input
  * at its declared default, then applies `params` as ordinary writes (recorded as `set` events)
  * in the order of the params object's keys — which is what the runtime does with a node's
@@ -31,7 +41,7 @@
 import type { Step } from './adapter';
 import { canonicalise, canonicalKey } from './canonical';
 import { coerce } from './coerce';
-import type { AnyNodeSpec, Outcome, InputDecl } from './spec';
+import type { AnyNodeSpec, Outcome, InputDecl, ReducerOutcome } from './spec';
 import { isSignalInput } from './spec';
 import type { TraceEvent } from './trace';
 
@@ -43,7 +53,9 @@ export interface Instance {
   derivedInputs: Readonly<Record<string, InputDecl>>;
   derivedValues: Readonly<Record<string, unknown>>;
   readonly trace: TraceEvent[];
-  pending: { signals: string[]; outcomes: Array<{ port: string; outcome: Outcome; error?: string }> };
+  pending: { signals: string[]; outcomes: Array<{ port: string; outcome: ReducerOutcome; error?: string }> };
+  /** The last DEFINED canonical value each output produced this frame (see the frame model above). */
+  frameLast: Record<string, unknown>;
   lastSent: Record<string, string>;
   settles: number;
 }
@@ -91,6 +103,7 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}): 
     derivedValues: deepFreeze(derivedValues),
     trace: [],
     pending: { signals: [], outcomes: [] },
+    frameLast: {},
     lastSent: {},
     settles: 0
   };
@@ -132,9 +145,8 @@ export function set(inst: Instance, port: string, value: unknown): void {
     const coerced = coerce(declared.coerce, value, declared.default);
     inst.inputs = deepFreeze({ ...inst.inputs, [port]: coerced });
     const reducer = spec.on[port];
-    if (typeof reducer === 'function') {
-      apply(inst, port, (reducer as (s: unknown, v: unknown, i: unknown) => unknown)(inst.state, coerced, inst.inputs), false);
-    }
+    const sends = typeof reducer === 'function' ? apply(inst, port, (reducer as (s: unknown, v: unknown, i: unknown) => unknown)(inst.state, coerced, inst.inputs), false) : undefined;
+    observe(inst, sends);
     return;
   }
   const derived = inst.derivedInputs[port] ?? discover(inst, port);
@@ -143,7 +155,7 @@ export function set(inst: Instance, port: string, value: unknown): void {
     const coerced = coerce(derived.coerce, value, derived.default);
     inst.derivedValues = deepFreeze({ ...inst.derivedValues, [port]: coerced });
     if (!spec.derived) throw new SpecError(`${spec.type}: derived port without a derived reducer`);
-    apply(inst, port, spec.derived.on(inst.state as never, port, coerced, inst.derivedValues), false);
+    observe(inst, apply(inst, port, spec.derived.on(inst.state as never, port, coerced, inst.derivedValues), false));
     return;
   }
   throw new SpecError(`${spec.type}: no value input "${port}"`);
@@ -157,15 +169,29 @@ export function signal(inst: Instance, port: string): void {
   const reducer = spec.on[port];
   if (typeof reducer !== 'function') throw new SpecError(`${spec.type}: signal input "${port}" has no reducer`);
   inst.trace.push({ t: 'in', port });
-  apply(inst, port, (reducer as (s: unknown, i: unknown) => unknown)(inst.state, inst.inputs), declared.outcome === true);
+  observe(inst, apply(inst, port, (reducer as (s: unknown, i: unknown) => unknown)(inst.state, inst.inputs), declared.outcome === true));
 }
 
-function apply(inst: Instance, port: string, patchUnknown: unknown, outcomeRequired: boolean): void {
+/**
+ * The frame's observation of the value outputs a step SENDS (spec.ts `Patch.send`; all of them
+ * when the patch names none): a defined value replaces the port's last (C3: undefined is not a send).
+ */
+function observe(inst: Instance, only?: readonly string[]): void {
+  for (const name of only ?? Object.keys(inst.spec.outputs)) {
+    const decl = inst.spec.outputs[name];
+    if (!decl || decl.type === 'signal') continue;
+    const v = canonicalise(decl.from(inst.state as never));
+    if (v !== undefined) inst.frameLast[name] = v;
+  }
+}
+
+/** Applies a reducer's patch; returns the value outputs the write sends (`send`), or undefined for all. */
+function apply(inst: Instance, port: string, patchUnknown: unknown, outcomeRequired: boolean): readonly string[] | undefined {
   const { spec } = inst;
   if (!patchUnknown || typeof patchUnknown !== 'object') {
     throw new SpecError(`${spec.type}.${port}: reducer returned ${String(patchUnknown)}, not a patch`);
   }
-  const patch = patchUnknown as { set?: Record<string, unknown>; emit?: string[]; outcome?: Outcome; error?: string };
+  const patch = patchUnknown as { set?: Record<string, unknown>; emit?: string[]; outcome?: ReducerOutcome; error?: string; send?: readonly string[] };
   if (patch.set) {
     for (const key of Object.keys(patch.set)) {
       if (!(key in spec.state)) throw new SpecError(`${spec.type}.${port}: set names undeclared state key "${key}"`);
@@ -180,8 +206,11 @@ function apply(inst: Instance, port: string, patchUnknown: unknown, outcomeRequi
     }
   }
   if (outcomeRequired) {
-    if (patch.outcome !== 'done' && patch.outcome !== 'unchanged' && patch.outcome !== 'failure') {
+    if (patch.outcome !== 'done' && patch.outcome !== 'unchanged' && patch.outcome !== 'failure' && patch.outcome !== 'deferred') {
       throw new SpecError(`${spec.type}.${port}: outcome input returned no outcome`);
+    }
+    if (patch.outcome === 'deferred' && !spec.afterInputs) {
+      throw new SpecError(`${spec.type}.${port}: deferred an outcome but the spec has no afterInputs to resolve it`);
     }
     inst.pending.outcomes.push(
       patch.error === undefined ? { port, outcome: patch.outcome } : { port, outcome: patch.outcome, error: patch.error }
@@ -189,6 +218,13 @@ function apply(inst: Instance, port: string, patchUnknown: unknown, outcomeRequi
   } else if (patch.outcome !== undefined) {
     throw new SpecError(`${spec.type}.${port}: returned an outcome but the input is not declared outcome: true`);
   }
+  if (patch.send) {
+    for (const name of patch.send) {
+      const out = spec.outputs[name];
+      if (!out || out.type === 'signal') throw new SpecError(`${spec.type}.${port}: send names undeclared value output "${name}"`);
+    }
+  }
+  return patch.send;
 }
 
 export function settle(inst: Instance): void {
@@ -197,23 +233,47 @@ export function settle(inst: Instance): void {
   // the frame-end reducer (spec.ts `AfterInputs`): the deferred work of the frame, done once
   // against the frame's final inputs and state, before the frame's observations are recorded
   if (inst.spec.afterInputs) {
-    apply(inst, '<afterInputs>', (inst.spec.afterInputs as (s: unknown, i: unknown) => unknown)(inst.state, inst.inputs), false);
+    const patch = (inst.spec.afterInputs as (s: unknown, i: unknown) => unknown)(inst.state, inst.inputs);
+    apply(inst, '<afterInputs>', patch, false);
+    resolveDeferred(inst, (patch as { outcomes?: ReadonlyArray<{ port: string; outcome: Outcome; error?: string }> }).outcomes ?? []);
   }
+  const unresolved = inst.pending.outcomes.find((o) => o.outcome === 'deferred');
+  if (unresolved) throw new SpecError(`${inst.spec.type}: "${unresolved.port}" deferred its outcome and afterInputs did not resolve it this frame`);
+  observe(inst); // the settle-time value, when defined, is the frame's last
   for (const name of Object.keys(inst.spec.outputs).sort()) {
-    const decl = inst.spec.outputs[name];
-    if (decl.type === 'signal') continue;
-    const v = canonicalise(decl.from(inst.state as never));
-    if (v === undefined) continue; // C3
+    if (!(name in inst.frameLast)) continue; // C3 — nothing defined was produced this frame
+    const v = inst.frameLast[name];
     const key = JSON.stringify(v);
     if (inst.lastSent[name] === key) continue;
     inst.lastSent[name] = key;
     inst.trace.push({ t: 'value', port: name, value: v });
   }
+  inst.frameLast = {};
   for (const s of inst.pending.signals) inst.trace.push({ t: 'signal', port: s }); // C2, C4
   for (const o of inst.pending.outcomes) {
-    inst.trace.push(o.error === undefined ? { t: 'outcome', port: o.port, value: o.outcome } : { t: 'outcome', port: o.port, value: o.outcome, error: o.error });
+    const value = o.outcome as Outcome; // no `deferred` survives the check above
+    inst.trace.push(o.error === undefined ? { t: 'outcome', port: o.port, value } : { t: 'outcome', port: o.port, value, error: o.error });
   }
   inst.pending = { signals: [], outcomes: [] };
+}
+
+/**
+ * The frame-end reducer's `outcomes` fill the `deferred` slots the invoking reducers left, per
+ * port in invocation order (spec.ts `AfterInputsPatch`). Rule 3, kept at run time: exactly one
+ * outcome per invocation — a resolution with no deferred invocation behind it is a spec error, and
+ * `settle` refuses a slot still `deferred` after this.
+ */
+function resolveDeferred(inst: Instance, outcomes: ReadonlyArray<{ port: string; outcome: Outcome; error?: string }>): void {
+  for (const r of outcomes) {
+    if (r.outcome !== 'done' && r.outcome !== 'unchanged' && r.outcome !== 'failure') {
+      throw new SpecError(`${inst.spec.type}.<afterInputs>: resolved "${r.port}" to ${String(r.outcome)}, not an outcome`);
+    }
+    const slot = inst.pending.outcomes.find((o) => o.port === r.port && o.outcome === 'deferred');
+    if (!slot) throw new SpecError(`${inst.spec.type}.<afterInputs>: resolved an outcome for "${r.port}" that no invocation deferred this frame`);
+    slot.outcome = r.outcome;
+    if (r.error !== undefined) slot.error = r.error;
+    else delete slot.error;
+  }
 }
 
 /** A copy of the trace so far. */

@@ -1,0 +1,46 @@
+[
+  {
+    "name": "defaults: the whole string; Start 1; End 3",
+    "because": "substring.ts :93-99",
+    "params": { "string": "hello" },
+    "steps": ["settle", { "set": "start", "value": 1 }, "settle", { "set": "end", "value": 3 }, "settle"]
+  },
+  {
+    "name": "a negative Start counts back from the end",
+    "because": "substring.ts :94 `substr`",
+    "params": { "string": "hello", "start": -2 },
+    "steps": ["settle"]
+  },
+  {
+    "name": "End 0 yields ''; End before Start yields ''",
+    "because": "substring.ts :96-99 — a negative length",
+    "params": { "string": "hello", "end": 0 },
+    "steps": ["settle", { "set": "start", "value": 3 }, { "set": "end", "value": 1 }, "settle"]
+  },
+  {
+    "name": "End '-1' as text is not -1: it yields '' instead of the rest of the string (§6 row D7)",
+    "because": "substring.ts :93 — `endIndex === -1` is strict on the raw value; `'-1' - 0` is a negative length",
+    "params": { "string": "hello", "end": "-1" },
+    "steps": ["settle"]
+  },
+  {
+    "name": "a number on String is its text; an object Start reads as 0",
+    "because": "substring.ts :77 `toString()`; `substr` converts its arguments",
+    "params": { "string": 12345, "start": 1 },
+    "steps": ["settle", { "set": "start", "value": {} }, "settle"]
+  },
+  {
+    "name": "null on String: the spec keeps the old string, the runtime throws in the setter (§6 row C4)",
+    "because": "substring.ts :77 — `null.toString()`; the description says it 'raises an error'",
+    "params": { "string": "abc" },
+    "steps": ["settle", { "set": "string", "value": null }, "settle"],
+    "row": "NSP-011 §6 C4"
+  },
+  {
+    "name": "undefined on String: the same throw (§6 row C4)",
+    "because": "substring.ts :77 — `undefined.toString()`",
+    "params": { "string": "abc" },
+    "steps": ["settle", { "set": "string" }, "settle"],
+    "row": "NSP-011 §6 C4"
+  }
+]

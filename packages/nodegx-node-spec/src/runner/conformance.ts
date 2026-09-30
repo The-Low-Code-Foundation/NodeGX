@@ -21,6 +21,7 @@
 
 import type { Step, TargetAdapter } from '../adapter';
 import { play, PlayError } from '../adapter';
+import { canonicalise } from '../canonical';
 import { interpreterAdapter } from '../adapters/interpreter';
 import type { AnyNodeSpec } from '../spec';
 import type { TraceEvent } from '../trace';
@@ -269,6 +270,11 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
   return report;
 }
 
+/** Params as text, with an `undefined` param SHOWN (JSON.stringify drops the key — NSP-011 lost an hour to that). */
+export function formatParams(params: Record<string, unknown>): string {
+  return '{' + Object.keys(params).map((k) => `${JSON.stringify(k)}:${params[k] === undefined ? 'undefined' : JSON.stringify(canonicalise(params[k]))}`).join(',') + '}';
+}
+
 /** One screen of text: what conformed, and the first differing line of what did not. */
 export function formatReport(report: Report): string {
   const lines: string[] = [];
@@ -285,13 +291,13 @@ export function formatReport(report: Report): string {
   for (const k of report.generated.known) {
     lines.push(`    known: ${k.count} attributed to row ${k.row}`);
     if (k.example) {
-      lines.push(`      e.g. seed ${k.example.seed}  params ${JSON.stringify(k.example.params)}  steps ${JSON.stringify(k.example.steps)}`);
+      lines.push(`      e.g. seed ${k.example.seed}  params ${formatParams(k.example.params)}  steps ${JSON.stringify(k.example.steps)}`);
       lines.push('      ' + formatDifference(k.example.difference, 'interpreter', report.target).replace(/\n/g, '\n      '));
     }
   }
   for (const d of report.generated.divergences) {
     lines.push(`    seed ${d.seed}${d.shrunk ? ` (shrunk to ${d.steps.length} step(s) in ${d.shrinkRuns} runs)` : ''}${d.replayFile ? ' → ' + d.replayFile : ''}`);
-    lines.push(`      params ${JSON.stringify(d.params)}  steps ${JSON.stringify(d.steps)}`);
+    lines.push(`      params ${formatParams(d.params)}  steps ${JSON.stringify(d.steps)}`);
     lines.push('      ' + formatDifference(d.difference, 'interpreter', report.target).replace(/\n/g, '\n      '));
   }
   if (report.mutants) {

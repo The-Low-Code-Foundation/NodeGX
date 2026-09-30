@@ -63,6 +63,15 @@ export interface UnitValue {
 /** The three terminal outcomes (ERG-001). Exactly one per invocation of an `outcome: true` input. */
 export type Outcome = 'done' | 'unchanged' | 'failure';
 
+/**
+ * What an invoking reducer may report: a terminal outcome, or `deferred` — the outcome is decided
+ * at frame end by `afterInputs` (NSP-011). The Variables' `Set` is the first case: it schedules
+ * `setValueTo(latestValue)` (variablebase.ts :200-206) and only the frame's FINAL value says
+ * whether that was `done` or `unchanged`. Rule 3 still holds at run time: the interpreter refuses
+ * a settle that leaves a deferred outcome unresolved, or resolves one nobody deferred.
+ */
+export type ReducerOutcome = Outcome | 'deferred';
+
 // ------------------------------------------------------------------------------------------------
 // declarations
 
@@ -118,6 +127,7 @@ export type OutputsDecl<S> = Record<string, OutputDecl<S>>;
 // key selectors
 
 type SignalKeys<T> = { [K in keyof T]: T[K] extends { type: 'signal' } ? K : never }[keyof T];
+type ValueOutputKeys<O> = Exclude<keyof O, SignalKeys<O>>;
 type OutcomeKeys<I> = { [K in keyof I]: I[K] extends { type: 'signal'; outcome: true } ? K : never }[keyof I];
 type PlainSignalKeys<I> = Exclude<SignalKeys<I>, OutcomeKeys<I>>;
 type ValueKeys<I> = Exclude<keyof I, SignalKeys<I>>;
@@ -144,13 +154,39 @@ export interface Patch<S, O> {
   set?: Partial<S>;
   /** Signal outputs to pulse, in order. Only declared signal outputs (rule 1). */
   emit?: ReadonlyArray<SignalKeys<O>>;
+  /**
+   * Which value outputs this write SENDS — the runtime's `flagOutputDirty` calls in the setter.
+   * Absent means all of them (a node that flags on every write, or whose outputs are never
+   * `undefined` mid-frame, needs nothing here). It matters in exactly one case, found by
+   * Boolean To String (NSP-011): a wire carries the last DEFINED value a frame sent, so when an
+   * output is `undefined` at frame end, WHICH earlier writes sent decides what the wire holds —
+   * `trueString` is flagged only while it is the selected string (:46-48). Not part of a
+   * branch's shape for the mutants (a `send` difference is unobservable except in that case).
+   */
+  send?: ReadonlyArray<ValueOutputKeys<O>>;
 }
 
 export interface OutcomePatch<S, O> extends Patch<S, O> {
-  /** Required — rule 3. */
-  outcome: Outcome;
+  /** Required — rule 3. `deferred` hands the decision to `afterInputs` (see `ReducerOutcome`). */
+  outcome: ReducerOutcome;
   /** With `outcome: 'failure'`, the error the node reports. */
   error?: string;
+}
+
+/** An outcome `afterInputs` resolves for an invocation that reported `deferred`. */
+export interface ResolvedOutcome<I> {
+  port: OutcomeKeys<I>;
+  outcome: Outcome;
+  error?: string;
+}
+
+/**
+ * What the frame-end reducer returns: an ordinary patch, plus the outcomes it resolves — one per
+ * `deferred` invocation of that port this frame, in invocation order. An invocation the reducer
+ * does not resolve, or a resolution with no invocation behind it, is a spec error at settle.
+ */
+export interface AfterInputsPatch<S, I, O> extends Patch<S, O> {
+  outcomes?: ReadonlyArray<ResolvedOutcome<I>>;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -200,9 +236,11 @@ export interface DerivedPorts<S, O> {
  * true }`); the interpreter calls this ONCE per `settle`, before the frame's observations are
  * recorded, and the reducer does the work against the frame's FINAL inputs and state. It is
  * how "two triggers in one frame produce one test" is written without a frame in the spec.
- * Outcomes are still reported by the invoking reducer (they queue to the same settle).
+ * Outcomes are reported by the invoking reducer (they queue to the same settle) — unless it
+ * reported `deferred`, in which case THIS reducer resolves them (`AfterInputsPatch.outcomes`),
+ * the way a Variable's `Set` learns `done` / `unchanged` only from the frame's final value.
  */
-export type AfterInputs<S, I, O> = (state: Readonly<S>, inputs: Inputs<I>) => Patch<S, O>;
+export type AfterInputs<S, I, O> = (state: Readonly<S>, inputs: Inputs<I>) => AfterInputsPatch<S, I, O>;
 
 /** What `.on()` takes beside the reducers. */
 export interface Extras<S, I, O> {

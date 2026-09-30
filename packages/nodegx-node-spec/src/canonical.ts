@@ -161,3 +161,38 @@ export function findNonCanonical(value: unknown, path = '$'): string | null {
   }
   return null;
 }
+
+/**
+ * The inverse, for scenario files (NSP-011): a scenario on disk is JSON in canonical form, so a
+ * step can say `{ "$num": "NaN" }` or `{ "$num": "-0" }` and the target receives the number,
+ * and a replay the shrinker writes round-trips. Every other shape is returned as it is.
+ */
+export function revive(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(revive);
+  if (value && typeof value === 'object') {
+    const obj = value as Record<string, unknown>;
+    const keys = Object.keys(obj);
+    if (keys.length === 1 && keys[0] === '$num' && (NUM_TAGS as readonly unknown[]).includes(obj.$num)) {
+      switch (obj.$num as NumTag) {
+        case '-0':
+          return -0;
+        case 'NaN':
+          return NaN;
+        case 'Infinity':
+          return Infinity;
+        case '-Infinity':
+          return -Infinity;
+      }
+    }
+    // a local, not `obj.$date` twice: the runtime's jest compiles this file under `strict: false`,
+    // where a narrowed property access does not stay narrowed (NSP-002 §5 trap)
+    const date = obj.$date;
+    if (keys.length === 1 && keys[0] === '$date' && (date === null || typeof date === 'string')) {
+      return date === null ? new Date(NaN) : new Date(date as string);
+    }
+    const out: Record<string, unknown> = {};
+    for (const key of keys) out[key] = revive(obj[key]);
+    return out;
+  }
+  return value;
+}

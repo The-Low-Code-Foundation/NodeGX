@@ -3,7 +3,7 @@
 **Scoped:** 2026-09-29, from a conversation with Richard about DHH's Rails World 2026 keynote
 ("pencils down"), Fireship's take on it, and what a world where agents write most code means for
 NodeGX.
-**Status: 🟡 IN PROGRESS — s1 (2026-09-30): NSP-000 the census ✅ ([CENSUS.md](CENSUS.md)); NSP-001 the package ✅ (`packages/nodegx-node-spec`). s2 (2026-09-30): NSP-002 traces + the runtime as a target ✅; NSP-003 the runner ✅ (Counter conforms on the runtime, 200 sequences, every mutant killed). R1 R2 R3 R5 ruled (a) 2026-09-30. NSP-004 the pilot five next.**
+**Status: 🟡 IN PROGRESS — s1 (2026-09-30): NSP-000 the census ✅ ([CENSUS.md](CENSUS.md)); NSP-001 the package ✅ (`packages/nodegx-node-spec`). s2: NSP-002 traces + the runtime as a target ✅; NSP-003 the runner ✅. s3: NSP-004 the pilot five ✅ (R4 asked). s4 (2026-09-30): NSP-011 the first batch ✅ — **18 of 147 picker nodes conform on the runtime** at 200 with every mutant killed; 3 more runtime-bug rows + 3 doc-vs-code, 0 graded before; **R7 asked** (§7). R1 R2 R3 R5 R6 ruled; R4 taken as (a) from Richard's "continue" (s4) — confirm. NSP-005 / NSP-006 / NSP-012 next.**
 **Prefix: `NSP`** (node spec).
 
 > "I think the node level spec thing you talked about could be a great thing to already start and
@@ -64,6 +64,8 @@ Measured 2026-09-29 against the working tree. Read, not run.
 | 12 | **The census (NSP-000, 2026-09-30):** of the 147, **91** call `beginOutcome`, **68** have dynamic ports, **99** are named as a literal in `plan.ts`, **9** (all cloud-only) are named by no test file at all; tiers T1 46 · T2 11 · T3 39 · T4 27 · T5 19 · T6 5; every node resolves to exactly one declaring source file | [CENSUS.md](CENSUS.md), `census.json`, `scripts/node-spec/census.js` |
 
 | 13 | **The pilot (NSP-004, 2026-09-30):** five specs conform on the runtime at 10,000 sequences, every mutant killed; **2 divergences on the wire + 3 doc-vs-code, none graded by an existing test** — Condition's getters read the live input while its wire carries the tested value (C2); a non-string on String Format's `format` kills the node for good (C3); And's description promises a `false` the node never sends (D1); String Format fills a repeated placeholder every time, not once (D2), and expands `$&`/`$$` in values (D3). Cost: ≈ 2 min per spec with the source open, after ≈ 25 min growing the format (`afterInputs`, `derived.discover`) | [NSP-004 §6](NSP-004-THE-PILOT-FIVE.md) |
+
+| 14 | **The first batch (NSP-011, 2026-09-30):** 13 more specs conform on the runtime at 200, every mutant killed — **18 of 147**; **3 runtime-bug rows + 3 doc-vs-code + 1 edge, 0 graded by an existing test**: four `.toString()` setters throw on `null` (C4, Substring's description even says so); every Variable ignores a first Value of `0` and a Set before any Value stores the seed `0` — `'0'` in a String, the number 0 in a Color (C5); node.ts merges a later primitive into a unit object any `*` port once held, so Value Changed fires on a repeated `2` (C6 → **R7**); Boolean To String's "not true counts as false" is truthiness (D6); Substring's End `'-1'` as text yields `''` (D7); Color Blend renders `'#NaNNaNNaN'` for a non-numeric Blend Value — P79 E2's shape through the other door (D8). Format grew: a deferred outcome resolved at frame end; the wire's value is the last DEFINED value a frame sent | [NSP-011 §6](NSP-011-BATCH-LOGIC-MATH-STRINGS.md) |
 
 So the phase is **generalising five things that already exist in part** (#4–#8), not inventing
 a discipline from nothing.
@@ -126,7 +128,7 @@ Full detail in NSP-001 to NSP-003. The shape:
 | [NSP-008](NSP-008-THE-GRAPH.md) | The graph — CONTRACT C1–C11 as graph scenarios on every target | 005 | T4 |
 | [NSP-009](NSP-009-THE-RATCHET.md) | The ratchet — spec coverage in PR CI; new picker nodes ship specced | 004 | — |
 | [NSP-010](NSP-010-A-CHANGE-IS-A-VERSION.md) | A behaviour change is a version, a trace diff, and a migration answer | 009 | — |
-| [NSP-011](NSP-011-BATCH-LOGIC-MATH-STRINGS.md) | Batch — logic, math, strings, variables, converters (**13**) | 004 | T1 |
+| [NSP-011](NSP-011-BATCH-LOGIC-MATH-STRINGS.md) ✅ | Batch — logic, math, strings, variables, converters (**13**). **Built s4** (13 / 13 conform at 200; rows C4–C6, D6–D9; AC2 waits for NSP-005, the deep run for a quiet box) | 004 | T1 |
 | [NSP-012](NSP-012-BATCH-ARRAYS-OBJECTS-STORES.md) | Batch — arrays, objects, variables, stores, events (**26**: 13 + 13) | 008 | T1, T4 |
 | [NSP-013](NSP-013-BATCH-DATES-PARSERS-UTILITIES.md) | Batch — dates, time, randomness, parsers, animation (**24**: 14 + 10) | 007 | T1, T2 |
 | [NSP-014](NSP-014-BATCH-DATA-AND-CLOUD.md) | Batch — records, users, files, HTTP, streams, cloud-only nodes (**41**: 39 T3, 17 of them cloud-only; Filter Records is T1, Open File Picker T2) | 007 | T3 |
@@ -152,7 +154,9 @@ session or two, each closing on the ledger number.
 npm run spec-ledger            # NSP-009 — ratcheted in PR CI
 ```
 
-> **SPEC COVERAGE: 0 of 147 picker nodes have a conforming spec.** (Scoped 2026-09-29.)
+> **SPEC COVERAGE: 18 of 147 picker nodes conform on the runtime (12.2%); 0 on the export; 0 exempt.** (s4, 2026-09-30,
+> by hand — NSP-009's ledger is not built. T1 18/46 · T2 0/11 · T3 0/39 · T4 0/27 · T5 0/19 · T6 0/5. Ports derivable
+> without a viewer: 5 of the 68 dynamic-port nodes — And, Or, String Format, String Mapper, Color Blend; catalog parity: 18.)
 
 Reported per target: *conforms on the runtime · conforms on the export · exempt with a reason* —
 and, from R6, *ports derivable without a viewer: N of 147* and *catalog parity: N of 147*.
@@ -194,6 +198,29 @@ minutes, two idioms — the frame-end reducer and ports discovered on write) is 
 **Also for a ruling, the rows themselves** (NSP-004 §6.2): C2 and C3 are runtime bugs that ship alone as behaviour
 changes; D1–D3 are descriptions to rewrite (or behaviour to change — your call per row). Until ruled, the suite counts
 C3 under its row every run and goes red the day it stops firing.
+
+**R4, as s4 took it (2026-09-30):** Richard opened the session with *"Let's continue phase 107"*; s4 read that as **(a)**
+and built NSP-011. If that was not a ruling, say so — the batch stands on its own either way.
+
+**R7 — Is the unit merge a port rule or a quirk? Asked by NSP-011 (s4, 2026-09-30), found by the generator on Value
+Changed.** node.ts `setInputValue` (:410-420): once ANY input port has held a `{ value, unit }` object, every later value
+that is not `NaN` is merged into a fresh copy of it — `2` arrives as `{ value: 2, unit: 'px' }`, `null` as
+`{ value: null, unit: 'px' }`, `true` as `{ value: true, unit: 'px' }`. On Value Changed a repeated `2` fires every time (a
+new object each time); Log's Value passes the merged object through. Plain words: *"If a wire ever carries a size with a
+unit into a port, that port turns every later plain value into a size with that unit, for ever. Is that a rule every
+target must copy, or a runtime quirk to narrow to the ports that declare units?"*
+
+- **(a) Recommended: a quirk — narrow it** to inputs whose declared type carries `units` (the `dimension` ports the
+  comment at :410-412 was written for). Then the spec models nothing, the two rows close, and a `*` port behaves like a
+  `*` port. A behaviour change; ships alone, after the ruling.
+- **(b) A port rule** — write it into the adapter contract (NSP-002 §2.2) and the interpreter, so every target (the
+  stranger's included) must implement it. Cost: every spec of a node with a `*` or `number` port inherits a behaviour no
+  author can predict from the node.
+
+Until ruled, the runtime suite counts the rows (C6) every run and goes red the day they stop firing.
+
+**Also for a ruling, the batch's rows** (NSP-011 §6.2): C4 (four `.toString()` setters throw on null), C5 (the Variables'
+seed of 0), D6, D7, D8 — each a proposed answer; C5 and D8 are the ones an author meets first.
 
 **R6 — Is the editor a target?** Asked by s1 as *"can we make sure the work in this phase prepares
 for a future where even the editor is exchangeable?"* — Richard's own words, 2026-09-30: **yes,

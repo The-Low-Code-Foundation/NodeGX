@@ -1,0 +1,44 @@
+[
+  {
+    "name": "no params: the first settle publishes '' (the false string, selector unset)",
+    "because": "booleantostring.ts :33-34, :86",
+    "params": {},
+    "steps": ["settle"]
+  },
+  {
+    "name": "true picks String for true; each flip republishes and pulses Selector Changed",
+    "because": "booleantostring.ts :70-76, :86",
+    "params": { "trueString": "yes", "falseString": "no" },
+    "steps": [{ "set": "input", "value": true }, "settle", { "set": "input", "value": false }, "settle", { "set": "input", "value": true }, "settle"]
+  },
+  {
+    "name": "the same selector twice pulses once",
+    "because": "booleantostring.ts :71 — `===` guard",
+    "params": { "trueString": "yes", "falseString": "no" },
+    "steps": [{ "set": "input", "value": true }, "settle", { "set": "input", "value": true }, "settle"]
+  },
+  {
+    "name": "a truthy non-boolean picks String for true — 'yes', 1, {} — although the description says 'anything that is not true counts as false' (§6 row D6)",
+    "because": "booleantostring.ts :86 — truthiness, not `=== true`",
+    "params": { "trueString": "T", "falseString": "F" },
+    "steps": [{ "set": "input", "value": "yes" }, "settle", { "set": "input", "value": 1 }, "settle", { "set": "input", "value": {} }, "settle", { "set": "input", "value": 0 }, "settle"]
+  },
+  {
+    "name": "NaN after NaN is a change every time (`===` on NaN)",
+    "because": "booleantostring.ts :71",
+    "params": { "trueString": "T", "falseString": "F" },
+    "steps": [{ "set": "input", "value": "abc" }, "settle", { "set": "input", "value": { "$num": "NaN" } }, "settle", { "set": "input", "value": { "$num": "NaN" } }, "settle"]
+  },
+  {
+    "name": "changing the selected string republishes; changing the other one moves nothing on the wire",
+    "because": "booleantostring.ts :46-48, :60-62",
+    "params": { "trueString": "T", "falseString": "F", "input": true },
+    "steps": ["settle", { "set": "trueString", "value": "T2" }, "settle", { "set": "falseString", "value": "F2" }, "settle", { "set": "input", "value": false }, "settle"]
+  },
+  {
+    "name": "the strings are stored raw: a number on String for true is published as a number",
+    "because": "booleantostring.ts :44 — no conversion",
+    "params": { "trueString": 5, "input": true },
+    "steps": ["settle"]
+  }
+]

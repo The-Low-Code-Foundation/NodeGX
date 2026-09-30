@@ -1,0 +1,74 @@
+[
+  {
+    "name": "no params: the first settle publishes the start value, false",
+    "because": "variablebase.ts :120 — `currentValue = startValue`; connectInput's read of the getter",
+    "params": {},
+    "steps": ["settle"]
+  },
+  {
+    "name": "Value writes straight through: true → true + Changed; true again → nothing; false → false + Changed",
+    "because": "variablebase.ts :150-171, :285-292 (DEF-046 at :168)",
+    "params": {},
+    "steps": [{ "set": "value", "value": true }, "settle", { "set": "value", "value": true }, "settle", { "set": "value", "value": false }, "settle"]
+  },
+  {
+    "name": "Set after Value has already stored: Unchanged — the common case the description warns about",
+    "because": "variablebase.ts :16-19, :204-205",
+    "params": {},
+    "steps": [{ "set": "value", "value": true }, "settle", { "signal": "saveValue" }, "settle"]
+  },
+  {
+    "name": "Value unticked under Run On Value Change: nothing stores until Set; then Done and Changed",
+    "because": "variablebase.ts :168, run-on-value-change.ts :186-189",
+    "params": { "runOnChange-value": false },
+    "steps": [{ "set": "value", "value": true }, "settle", { "signal": "saveValue" }, "settle"]
+  },
+  {
+    "name": "a value arriving AFTER Set in the same frame is what Set stores",
+    "because": "variablebase.ts :201-204 — the callback reads latestValue at frame end",
+    "params": { "runOnChange-value": false },
+    "steps": [{ "signal": "saveValue" }, { "set": "value", "value": true }, "settle"]
+  },
+  {
+    "name": "two Sets in one frame: Done, then Unchanged — two invocations, two outcomes",
+    "because": "variablebase.ts :196-207 — one callback per pulse; ERG-001 §4",
+    "params": { "runOnChange-value": false, "value": true },
+    "steps": [{ "signal": "saveValue" }, { "signal": "saveValue" }, "settle"]
+  },
+  {
+    "name": "Set before any Value stores the seed 0 → false, and fires Changed + Done for the value it already showed (§6 row C5)",
+    "because": "variablebase.ts :121 `latestValue = 0`, :285 `!hasBeenSet`",
+    "params": {},
+    "steps": ["settle", { "signal": "saveValue" }, "settle"]
+  },
+  {
+    "name": "a FIRST value of 0 is ignored — it equals the seed — and a later Set then reports Done (§6 row C5)",
+    "because": "variablebase.ts :164-168 — valueDidChange(0, 0) is false",
+    "params": {},
+    "steps": [{ "set": "value", "value": 0 }, "settle", { "signal": "saveValue" }, "settle"]
+  },
+  {
+    "name": "null clears to null (Changed); with Treat empty as = false it clears to false",
+    "because": "variablebase.ts :261-266, boolean.ts :19-22",
+    "params": { "value": true },
+    "steps": ["settle", { "set": "value", "value": null }, "settle", { "set": "treatEmptyAs", "value": "false" }, { "set": "value", "value": true }, "settle", { "set": "value", "value": null }, "settle"]
+  },
+  {
+    "name": "undefined abstains: nothing stored, nothing pending; a Set then finds the last real value",
+    "because": "variablebase.ts :154, :255 (EMPTY-VALUE-CONTRACT corollary 4)",
+    "params": { "value": true },
+    "steps": ["settle", { "set": "value" }, "settle", { "signal": "saveValue" }, "settle"]
+  },
+  {
+    "name": "Treat Unchanged as = Done: a Set that stored nothing new reports Done",
+    "because": "node.ts reportOutcome :1013-1016, outcome.ts :228-262",
+    "params": { "treatUnchangedAs": "done", "value": true },
+    "steps": ["settle", { "signal": "saveValue" }, "settle"]
+  },
+  {
+    "name": "coercion `Boolean(value)`: 'false' → true, '' → false, {} → true, 1 → true",
+    "because": "boolean.ts :16-18",
+    "params": {},
+    "steps": [{ "set": "value", "value": "false" }, "settle", { "set": "value", "value": "" }, "settle", { "set": "value", "value": {} }, "settle", { "set": "value", "value": 1 }, "settle"]
+  }
+]

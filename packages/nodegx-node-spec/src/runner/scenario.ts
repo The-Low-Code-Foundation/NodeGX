@@ -7,12 +7,18 @@
  * docblocks (Counter's *Reset when already at Start Value*), and every divergence ever found —
  * the replay files the shrinker writes are this same shape, so a found divergence becomes a
  * permanent scenario by copying the file in.
+ *
+ * Values on disk are in CANONICAL form (canonical.ts): `{ "$num": "NaN" }` is the number NaN,
+ * `{ "$date": … }` a Date. `loadScenarios` revives them and `writeReplay` canonicalises, so a
+ * shrunk sequence that found a divergence with `-0` or `NaN` is written and read back faithfully
+ * (JSON.stringify would have turned either into `null`).
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
 
 import type { Step } from '../adapter';
+import { canonicalise, revive } from '../canonical';
 import type { TraceEvent } from '../trace';
 
 export interface Scenario {
@@ -50,14 +56,37 @@ export function loadScenarios(type: string, dir = SCENARIOS_DIR): Scenario[] {
   return parsed.map((s, i) => {
     const sc = s as Scenario;
     if (!sc || typeof sc.name !== 'string' || !Array.isArray(sc.steps)) throw new Error(`${file}[${i}]: a scenario needs a name and steps`);
-    return { ...sc, node: sc.node ?? type, params: sc.params ?? {} };
+    return { ...sc, node: sc.node ?? type, params: reviveParams(sc.params ?? {}), steps: sc.steps.map(reviveStep) };
   });
+}
+
+function reviveParams(params: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const key of Object.keys(params)) out[key] = revive(params[key]);
+  return out;
+}
+function reviveStep(step: Step): Step {
+  return step !== 'settle' && 'set' in step && 'value' in step ? { set: step.set, value: revive(step.value) } : step;
+}
+function canonicalParams(params: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const key of Object.keys(params)) {
+    const c = canonicalise(params[key]);
+    if (c !== undefined) out[key] = c;
+  }
+  return out;
+}
+function canonicalStep(step: Step): Step {
+  if (step === 'settle' || !('set' in step)) return step;
+  const c = canonicalise(step.value);
+  return c === undefined ? { set: step.set } : { set: step.set, value: c };
 }
 
 /** Writes a replay scenario file named after the node and the seed; returns its path. */
 export function writeReplay(dir: string, scenario: Scenario): string {
   fs.mkdirSync(dir, { recursive: true });
   const file = path.join(dir, `${scenario.node}-seed-${scenario.seed ?? 'hand'}.json`);
-  fs.writeFileSync(file, JSON.stringify([scenario], null, 2) + '\n');
+  const onDisk: Scenario = { ...scenario, params: canonicalParams(scenario.params), steps: scenario.steps.map(canonicalStep) };
+  fs.writeFileSync(file, JSON.stringify([onDisk], null, 2) + '\n');
   return file;
 }

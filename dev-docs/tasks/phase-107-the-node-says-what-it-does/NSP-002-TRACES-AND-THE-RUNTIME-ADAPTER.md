@@ -151,3 +151,14 @@ values and sorts `value` events by port name.
 **Dependency note:** `ajv` was already a root devDependency (`^8.18.0`); the package declares it too, for its
 schema test only. No install was run (a Mac install drops other platforms' prebuilts); the lockfile row for
 `packages/nodegx-node-spec` gained the one devDependency line.
+
+**Addendum, s4 (NSP-011, 2026-09-30) — what a frame's value IS.** The runtime sends an output at every write that flags it
+(`flagOutputDirty` → `sendValue`, node.ts :832-835, synchronously) and never sends `undefined` (:820-822, C3). So a wire
+carries the **last defined value a frame sent**: an Inverter handed `null` then `undefined` in one frame leaves `true`
+downstream while its getter says `undefined` — the two readers disagree, the C2 shape, and the format models the wire
+(decision 6). The interpreter now observes every value output after each step and records at settle the last defined
+observation per port; `Patch.send` narrows which writes observe, for the one node whose flag is conditional. The runtime
+adapter already did exactly this ("the LAST value sent per output in the frame"). Two more: scenario files are canonical
+JSON both ways (`revive` in canonical.ts; `loadScenarios` / `writeReplay`), and the runtime handle carries Log's line
+(`logs`, through a `runContext.log` sink on the scope) beside `errors`; `withViewerNodes` registers the three
+viewer-provided specced nodes from the viewer's source.

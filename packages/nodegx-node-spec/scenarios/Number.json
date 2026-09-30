@@ -1,0 +1,191 @@
+[
+  {
+    "name": "no params: the first settle publishes 0; 5 → 5 + Changed; '7' → 7; 'abc' → NaN → cleared to null",
+    "because": "number.ts :22-24 `Number(value)`; variablebase.ts :273-275 bans NaN",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": 5
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "7"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "abc"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Treat empty as = 0: 'abc' clears to 0, null clears to 0",
+    "because": "number.ts :25-28",
+    "params": {
+      "treatEmptyAs": "zero",
+      "value": 5
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": "abc"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 9
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": null
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a FIRST value of 0 is ignored — it equals the seed (§6 row C5); 1 then stores",
+    "because": "variablebase.ts :121, :164-168",
+    "params": {},
+    "steps": [
+      {
+        "set": "value",
+        "value": 0
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Set before any Value: stores the seed 0 (no new value on the wire) but fires Changed and reports Done (§6 row C5)",
+    "because": "variablebase.ts :121, :285",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "saveValue"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Set after Value stored → Unchanged; two Sets → Done then Unchanged; Treat Unchanged as = Done",
+    "because": "variablebase.ts :196-207; node.ts :1013-1016",
+    "params": {
+      "value": 3
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "saveValue"
+      },
+      "settle",
+      {
+        "set": "runOnChange-value",
+        "value": false
+      },
+      {
+        "set": "value",
+        "value": 4
+      },
+      {
+        "signal": "saveValue"
+      },
+      {
+        "signal": "saveValue"
+      },
+      "settle",
+      {
+        "set": "treatUnchangedAs",
+        "value": "done"
+      },
+      {
+        "signal": "saveValue"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "null → null; null again is not a change; NaN after null is not a change either (both clear to null)",
+    "because": "variablebase.ts :265-266, :273-275, :285 `!==`",
+    "params": {
+      "value": 1
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": null
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "x"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": null
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "coercion `Number(value)`: true → 1, '' → 0, [] → 0, '1e3' → 1000",
+    "because": "number.ts :22-24",
+    "params": {},
+    "steps": [
+      {
+        "set": "value",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": ""
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": []
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "1e3"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "undefined abstains: nothing stored, nothing pending; with Value unticked a Set then stores the last real value",
+    "because": "variablebase.ts :154, :255 (EMPTY-VALUE-CONTRACT corollary 4)",
+    "params": {
+      "runOnChange-value": false
+    },
+    "steps": [
+      {
+        "set": "value",
+        "value": 5
+      },
+      "settle",
+      {
+        "set": "value"
+      },
+      "settle",
+      {
+        "signal": "saveValue"
+      },
+      "settle"
+    ]
+  }
+]

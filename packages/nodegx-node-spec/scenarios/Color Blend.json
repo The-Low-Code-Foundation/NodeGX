@@ -1,0 +1,62 @@
+[
+  {
+    "name": "no colours: the first settle publishes '#000000', and Blend Value alone moves nothing",
+    "because": "colorblend.ts :78, :147-149",
+    "params": {},
+    "steps": ["settle", { "set": "blendValue", "value": 0.5 }, "settle"]
+  },
+  {
+    "name": "two colours: 0 is Color 0 verbatim, 1 is Color 1, 0.5 is the floor of the midpoint",
+    "because": "colorblend.ts :155-181 — `#000` and `#fff` at 0.5 give 127 per channel",
+    "params": { "color 0": "#000", "color 1": "#fff" },
+    "steps": ["settle", { "set": "blendValue", "value": 1 }, "settle", { "set": "blendValue", "value": 0.5 }, "settle"]
+  },
+  {
+    "name": "Blend Value is clamped to the list: -1 is Color 0, 5 is the last colour",
+    "because": "colorblend.ts :20-22, :155",
+    "params": { "color 0": "#ff0000", "color 1": "#0000ff", "blendValue": -1 },
+    "steps": ["settle", { "set": "blendValue", "value": 5 }, "settle"]
+  },
+  {
+    "name": "an unreadable colour at a whole position is passed through verbatim",
+    "because": "colorblend.ts :159-162 — 'red' and a token work at rest",
+    "params": { "color 0": "red", "color 1": "#fff" },
+    "steps": ["settle"]
+  },
+  {
+    "name": "an unreadable colour mid-blend shows the nearer endpoint unblended: 0.25 → 'red', 0.75 → '#fff'",
+    "because": "colorblend.ts :167-172 (P79 E2)",
+    "params": { "color 0": "red", "color 1": "#fff", "blendValue": 0.25 },
+    "steps": ["settle", { "set": "blendValue", "value": 0.75 }, "settle"]
+  },
+  {
+    "name": "var(--x, #fff) reads through its fallback; var(--x) alone is unreadable without a document",
+    "because": "color-reader.ts :57-64 — `cssVariableValue` is '' headless (:32-33)",
+    "params": { "color 0": "#000", "color 1": "var(--x, #fff)", "blendValue": 0.5 },
+    "steps": ["settle", { "set": "color 1", "value": "var(--x)" }, "settle"]
+  },
+  {
+    "name": "a hole reads as black: color 2 alone, blended from 1.5, is halfway from '#000000'",
+    "because": "colorblend.ts :151-153 `colors[index] ? … : '#000000'`; the sparse length is 3",
+    "params": { "color 2": "#fff", "blendValue": 1.5 },
+    "steps": ["settle"]
+  },
+  {
+    "name": "three-digit hex and rgb() both read; a falsy entry reads as black",
+    "because": "color-reader.ts :66-72, :84-98",
+    "params": { "color 0": "#abc", "color 1": "rgb(0, 0, 0)", "blendValue": 0.5 },
+    "steps": ["settle", { "set": "color 0", "value": "" }, "settle"]
+  },
+  {
+    "name": "a non-numeric Blend Value renders '#NaNNaNNaN' — the P79 E2 failure shape through another door (§6 row D8)",
+    "because": "colorblend.ts :155-158 — clamp(NaN) is NaN, `colors[NaN]` is a hole, and Math.floor(NaN).toString(16) is 'NaN'",
+    "params": { "color 0": "#000", "color 1": "#fff", "blendValue": "abc" },
+    "steps": ["settle"]
+  },
+  {
+    "name": "a number on a colour port at a whole position is passed through as a number",
+    "because": "colorblend.ts :86-91 store raw; :159-162 verbatim",
+    "params": { "color 0": 5, "color 1": "#fff" },
+    "steps": ["settle"]
+  }
+]

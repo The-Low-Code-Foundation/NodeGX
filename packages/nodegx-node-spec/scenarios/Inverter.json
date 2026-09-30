@@ -1,0 +1,20 @@
+[
+  {
+    "name": "nothing before the first value; then true → false, 'x' → false, 0 → true",
+    "because": "inverter.ts :5-9 — the undefined passthrough; :14 `!value`",
+    "params": {},
+    "steps": ["settle", { "set": "value", "value": true }, "settle", { "set": "value", "value": "x" }, "settle", { "set": "value", "value": 0 }, "settle"]
+  },
+  {
+    "name": "null, '' and {} : falsy inverts to true, an object to false",
+    "because": "inverter.ts :14",
+    "params": { "value": null },
+    "steps": ["settle", { "set": "value", "value": "" }, "settle", { "set": "value", "value": {} }, "settle"]
+  },
+  {
+    "name": "the same value twice is published once — the wire dedups, the setter does not",
+    "because": "inverter.ts :41-44 flags on every write",
+    "params": {},
+    "steps": [{ "set": "value", "value": true }, "settle", { "set": "value", "value": true }, "settle"]
+  }
+]

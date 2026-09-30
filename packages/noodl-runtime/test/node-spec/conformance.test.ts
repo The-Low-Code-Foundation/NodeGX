@@ -14,10 +14,13 @@ import * as ts from 'typescript';
 import type { NodeModule } from '@noodl/types';
 
 import { Counter, specs, runConformance, formatReport } from '../../../nodegx-node-spec/src';
-import type { Divergence, KnownRow, Report } from '../../../nodegx-node-spec/src';
-import { runtimeTarget } from '../helpers/node-spec-target';
+import type { Divergence, KnownRow, Report, TraceEvent } from '../../../nodegx-node-spec/src';
+import { runtimeTarget, withViewerNodes, type RuntimeTarget } from '../helpers/node-spec-target';
 
 import NodeDefinition = require('../../src/nodedefinition');
+
+/** The runtime target every spec is graded on: the runtime's own nodes plus the viewer-provided ones this phase specced. */
+const batchTarget = (): RuntimeTarget => withViewerNodes(runtimeTarget());
 
 const COUNTER_FILE = path.join(__dirname, '..', '..', 'src', 'nodes', 'std-library', 'counter.ts');
 
@@ -44,6 +47,36 @@ function copyOfCounterWith(find: string, replace: string): NodeModule {
  * the next finding. When a row is ruled and fixed, its entry here goes, and the `known` count
  * below must read 0 in the same commit.
  */
+const isSet = (e: TraceEvent, port: string, bad: (value: unknown, present: boolean) => boolean) =>
+  e.t === 'set' && e.port === port && bad((e as { value?: unknown }).value, 'value' in e);
+
+/**
+ * NSP-011 §6 C4 — a `.toString()` in a setter: `null` (and, where noted, `undefined`) THROWS inside
+ * `setInputValue`, so the runtime target dies at that step (or in `mount`, when the value is a
+ * parameter — then nothing was recorded and the difference sits at 0). Narrow: the throw's own
+ * message, and the difference no later than the step after the bad set.
+ */
+const throwsOnToString = (ports: readonly string[], values: (v: unknown, present: boolean) => boolean) => (d: Divergence) => {
+  if (d.difference.threw === undefined || !/toString/.test(d.difference.threw)) return false;
+  const bad = d.reference.findIndex((e) => ports.some((p) => isSet(e, p, values)));
+  return bad >= 0 && d.difference.index <= bad + 1;
+};
+const isNull = (v: unknown, present: boolean) => present && v === null;
+const isNullOrUndefined = (v: unknown, present: boolean) => !present || v === null;
+
+/**
+ * NSP-011 §6 C6 / R7 — node.ts `setInputValue` (:410-420) merges a later value into a `{ value,
+ * unit }` object the port once held. Narrow: a unit object set on the port, then a later set on
+ * the SAME port of something that is not one, and the difference after that later set.
+ */
+const unitMerge = (port: string) => (d: Divergence) => {
+  const withUnit = (v: unknown) => !!v && typeof v === 'object' && !Array.isArray(v) && 'unit' in (v as object);
+  const first = d.reference.findIndex((e) => isSet(e, port, (v) => withUnit(v)));
+  if (first < 0) return false;
+  const later = d.reference.findIndex((e, i) => i > first && isSet(e, port, (v) => !withUnit(v)));
+  return later >= 0 && d.difference.index > later;
+};
+
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
   'String Format': [
     {
@@ -53,7 +86,24 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
         return bad >= 0 && d.difference.index > bad;
       }
     }
-  ]
+  ],
+  Substring: [
+    {
+      row: 'NSP-011 §6 C4 — Substring `string`: `value.toString()` (:77) throws on null and undefined; the description says it "raises an error"',
+      matches: throwsOnToString(['string'], isNullOrUndefined)
+    }
+  ],
+  'String Mapper': [
+    {
+      row: 'NSP-011 §6 C4 — String Mapper: `.toString()` on Input String (:70) and on every numbered input (:42, :54) throws on null',
+      matches: (d: Divergence) => {
+        const numbered = d.reference.map((e) => (e.t === 'set' ? (e as { port: string }).port : '')).filter((p) => /^(input|output) \d+$/.test(p));
+        return throwsOnToString(['inputString', ...numbered], isNull)(d);
+      }
+    }
+  ],
+  'Value Changed': [{ row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMerge('value') }],
+  'net.noodl.Log': [{ row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMerge('value') }]
 };
 
 /**
@@ -61,22 +111,22 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
  * the mutants (interpreter-side, cheap). The reports are printed in full so a red run names the
  * node, the scenario or the seed, and the first differing line.
  *
- *   NSP_ONLY="String Format" npx jest test/node-spec/conformance.test.ts     one node
+ *   NSP_ONLY="String Format" npx jest test/node-spec/conformance.test.ts     one node (or a comma-separated list)
  *   NSP_DEEP=10000 NSP_REPLAY_DIR=<dir> npx jest test/node-spec/conformance.test.ts -t deep
  *                                                       the deep run: shrink on, replays written
  */
-describe('NSP-004 — the pilot five on the runtime, 200 sequences each, every mutant', () => {
+describe('NSP-004 / NSP-011 — every registered spec on the runtime, 200 sequences each, every mutant', () => {
   const reports = new Map<string, Report>();
-  const only = process.env.NSP_ONLY;
-  const pilot = Object.values(specs).filter((s) => !only || s.type === only);
+  const only = process.env.NSP_ONLY ? process.env.NSP_ONLY.split(',') : undefined;
+  const pilot = Object.values(specs).filter((s) => !only || only.includes(s.type));
   beforeAll(async () => {
     for (const spec of pilot) {
-      const report = await runConformance(spec, runtimeTarget(), { sequences: 200, mutants: true, known: KNOWN_ROWS[spec.type] });
+      const report = await runConformance(spec, batchTarget(), { sequences: 200, mutants: true, known: KNOWN_ROWS[spec.type] });
       // eslint-disable-next-line no-console
       console.log(formatReport(report));
       reports.set(spec.type, report);
     }
-  }, 180_000);
+  }, 600_000);
 
   for (const type of pilot.map((s) => s.type)) {
     test(`${type} conforms on the runtime (known rows counted, not hidden)`, () => {
@@ -91,9 +141,9 @@ describe('NSP-004 — the pilot five on the runtime, 200 sequences each, every m
     });
   }
 
-  test('the known rows are still open — each still fires; a row that stops firing must be closed in NSP-004 §6', () => {
+  test('the known rows are still open — each still fires; a row that stops firing must be closed in its §6', () => {
     for (const [type, rows] of Object.entries(KNOWN_ROWS)) {
-      if (only && only !== type) continue;
+      if (only && !only.includes(type)) continue;
       const report = reports.get(type)!;
       for (const row of rows) {
         const k = report.generated.known.find((x) => x.row === row.row)!;
@@ -105,12 +155,28 @@ describe('NSP-004 — the pilot five on the runtime, 200 sequences each, every m
   });
 });
 
+describe('NSP-011 — the Log line is an effect the target keeps beside the trace (checked, not ignored)', () => {
+  test('a Log pulse writes one line to the scope sink with the level, the message and the data; the console is not used', async () => {
+    const target = batchTarget();
+    const h = target.mount('net.noodl.Log', { message: 'hello', level: 'warn', data: { a: 1 } });
+    target.signal(h, 'log');
+    target.set(h, 'level', 'loud');
+    target.signal(h, 'log');
+    await target.settle();
+    expect(h.logs).toEqual([
+      { level: 'warn', message: 'hello', data: { a: 1 } },
+      { level: 'info', message: 'hello', data: { a: 1 } }
+    ]);
+    expect(target.trace(h).filter((e) => e.t === 'outcome')).toHaveLength(2);
+  });
+});
+
 const deep = Number(process.env.NSP_DEEP || 0);
-(deep > 0 ? describe : describe.skip)(`NSP-004 deep run — ${deep} sequences, shrink, replays`, () => {
-  const only = process.env.NSP_ONLY;
-  for (const spec of Object.values(specs).filter((s) => !only || s.type === only)) {
+(deep > 0 ? describe : describe.skip)(`NSP-004 / NSP-011 deep run — ${deep} sequences, shrink, replays`, () => {
+  const only = process.env.NSP_ONLY ? process.env.NSP_ONLY.split(',') : undefined;
+  for (const spec of Object.values(specs).filter((s) => !only || only.includes(s.type))) {
     test(`${spec.type} at ${deep}`, async () => {
-      const report = await runConformance(spec, runtimeTarget(), {
+      const report = await runConformance(spec, batchTarget(), {
         sequences: deep,
         shrink: true,
         mutants: true,

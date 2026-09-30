@@ -112,3 +112,9 @@ interpreter alone) and `packages/noodl-runtime/test/node-spec/conformance.test.t
    command-line entry point (`npm run spec-ledger`) belongs, since it needs the runtime compiled.
 
 **Found, not fixed (R3 (a)):** nothing. Counter conforms on the runtime at 200 sequences on two seeds (1 and the day's).
+
+**Addendum, s4 (NSP-011, 2026-09-30):** a branch's shape includes the outcomes an `afterInputs` resolves (which, not how
+many); `discoverBranches` keeps the RICHEST example per branch (a `swap-branch` that sets `undefined` is invisible under C3
+and survived by seed on String Mapper); `formatParams` prints an `undefined` param, which `JSON.stringify` had been hiding;
+`NSP_ONLY` in the runtime suite takes a comma-separated list. Decision 6's "derived ports are not generated" was already
+struck by NSP-004.

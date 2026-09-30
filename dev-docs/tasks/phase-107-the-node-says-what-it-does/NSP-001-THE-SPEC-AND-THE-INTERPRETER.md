@@ -162,3 +162,11 @@ package still depends on nothing in the runtime.
 **Not in this task:** the JSON schema and canonicaliser (NSP-002), the runtime adapter (NSP-002), scenarios as JSON
 files and mutants (NSP-003). `run(spec, params, steps)` already takes a JSON-shaped `Step[]` so NSP-003 can read
 scenarios from disk without a new format.
+
+**Grown in s4 (NSP-011, 2026-09-30) — two things, both in `spec.ts` with their reasons:** an outcome may be
+**`'deferred'`** (`ReducerOutcome`) and the frame-end reducer then returns `outcomes: [{ port, outcome, error? }]`
+(`AfterInputsPatch`) — the Variables' `Set` learns done / unchanged only from the frame's final value; the interpreter keeps
+rule 3 at run time (an unresolved slot, a resolution nobody deferred, or a `deferred` with no `afterInputs` is a
+`SpecError` at settle). And a patch may carry **`send: [<value outputs>]`** — the runtime's `flagOutputDirty` calls, named
+only where they are conditional (Boolean To String), because a wire holds the last DEFINED value a frame sent (NSP-002 §5
+addendum). NSP-011 §6.3 has the derivations.
