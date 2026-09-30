@@ -3,7 +3,7 @@
 **Scoped:** 2026-09-29, from a conversation with Richard about DHH's Rails World 2026 keynote
 ("pencils down"), Fireship's take on it, and what a world where agents write most code means for
 NodeGX.
-**Status: 🟡 IN PROGRESS — s1 (2026-09-30): NSP-000 the census ✅ built ([CENSUS.md](CENSUS.md), `scripts/node-spec/census.js`); NSP-001 next.**
+**Status: 🟡 IN PROGRESS — s1 (2026-09-30): NSP-000 the census ✅ ([CENSUS.md](CENSUS.md)); NSP-001 the package ✅ (`packages/nodegx-node-spec`, built under R1 (a) / R2 (a) — rulings still owed, §7). NSP-002 next.**
 **Prefix: `NSP`** (node spec).
 
 > "I think the node level spec thing you talked about could be a great thing to already start and
@@ -94,7 +94,7 @@ Full detail in NSP-001 to NSP-003. The shape:
 | task | what | depends on | tier |
 |---|---|---|---|
 | [NSP-000](NSP-000-THE-CENSUS.md) ✅ | The census — every picker node, its tier, and every place its behaviour is written today. **Built s1** → [CENSUS.md](CENSUS.md) | — | all |
-| [NSP-001](NSP-001-THE-SPEC-AND-THE-INTERPRETER.md) | The spec format and the interpreter — a new package | 000 | T1 |
+| [NSP-001](NSP-001-THE-SPEC-AND-THE-INTERPRETER.md) ✅ | The spec format and the interpreter — a new package. **Built s1** (`defineNode(decl).on(reducers)`, 44 tests) | 000 | T1 |
 | [NSP-002](NSP-002-TRACES-AND-THE-RUNTIME-ADAPTER.md) | Traces, the adapter interface, and the interpreted runtime as a target | 001 | T1 |
 | [NSP-003](NSP-003-THE-RUNNER.md) | The runner — scenarios, generated sequences, shrinking, mutants | 002 | T1 |
 | [NSP-004](NSP-004-THE-PILOT-FIVE.md) | 🔴 **The pilot five** — Counter, Switch, And, Condition, String Format. **Go / no-go (R4)** | 003 | T1 |
@@ -140,7 +140,9 @@ specs find that the existing tests did not?* That is the go / no-go input for R4
 
 ## 7. Rulings
 
-Plain words, the choices, the cost. Recommendation first. **None ruled yet.**
+Plain words, the choices, the cost. Recommendation first. **None ruled yet.** s1 built NSP-000 and NSP-001 under
+the recommendations for R1 and R2 (a package is a `git mv` away from (b); traces are JSON already); both still
+need Richard's word, and R3 / R5 are needed before NSP-004 / NSP-003.
 
 **R1 — Where do specs live?**
 - **(a) Recommended: a new package, `packages/nodegx-node-spec`, one file per node**, strict TS,

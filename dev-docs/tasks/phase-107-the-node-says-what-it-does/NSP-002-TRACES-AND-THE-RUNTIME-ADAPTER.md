@@ -72,6 +72,16 @@ this). Outcomes are read from the outcome ports `outcome.ts` declares.
 
 ## 4. Watch for
 
+- **From s1 (NSP-001 §5): the interpreter groups events between two settles as values (output declaration
+  order) → signals (emission order) → outcomes (invocation order), and records a value only when it changed
+  (canonical compare). The runtime pulses a signal synchronously inside a setter and delivers the value at frame end,
+  so the runtime adapter must buffer to the same grouping and drop unchanged re-sends — otherwise every trace differs
+  in order and nothing is graded. The type is `TraceEvent` in `packages/nodegx-node-spec/src/trace.ts`.
+- **From s1:** the interpreter's outcome event is one `{ t: 'outcome', port, value }` per invocation; the runtime
+  expresses the same thing as pulses on the `done` / `unchanged` / `failure` signal outputs plus a universal
+  `completed` pulse (`outcome.ts`). The adapter maps the three to outcome events and must decide what to do with
+  `completed` (drop it as implied, or record it) — decide here, once, and write it into the schema.
+
 - **C8, the first update consolidates**: the runtime's first frame behaves differently from later
   ones. The adapter must mount *and settle* before a scenario's first step, and the trace must
   include what the first settle emitted (Counter's `startValue` pulse lives there).
