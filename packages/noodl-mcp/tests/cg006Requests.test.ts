@@ -31,7 +31,7 @@ import fs from 'fs';
 import path from 'path';
 import { BAND_PALETTE, Block, GardenRequest, HINTS, OLIVE_RUNGS, REQUESTS, VOICED_HINT_KEYS, WORDS, WORD_KEYS } from './cg002Content';
 import { UPGRADES } from './cg002Content';
-import { FUNCTION_SCRIPTS, MAX_TICKS, PALETTE_SCRIPT, runScript } from './cg002Scripts';
+import { ENGINE, FUNCTION_SCRIPTS, MAX_TICKS, PALETTE_SCRIPT, helper, runScript } from './cg002Scripts';
 import { OLIVE_LESSON_IDS, OLIVE_SLOTS_SCRIPT, OLIVE_WORDS, PALETTE_RUNG_IDS } from './cg005Olive';
 import { DROPPED_LISTS, DROPPED_RUNGS, Expect, MOMENTS, PROBES, RETIRED_RUNGS, decide, meets, mergeTemplates } from './cg006Probes';
 import { IG006_WORDS } from './cg003Content';
@@ -67,14 +67,16 @@ const WORD_ROWS = WORD_KEYS.map((key) => ({ key, ...WORDS[key] }));
 
 // ── Harness (the page's own loop over the shipped scripts) ──────────────────
 
-function worldOfRequest(r: GardenRequest) {
+/** P108 IW-003 (s3 base): laid from seed 1 the way Start world lays it (a request with no job and no seeded layout is untouched). */
+function worldOfRequest(r: GardenRequest, seed = 1) {
   const robot: Record<string, unknown> = { id: 'pip', x: r.robotStart.x, y: r.robotStart.y, d: r.robotStart.d };
   if (r.robotStart.carry) robot.carry = [...r.robotStart.carry];
   if (r.robotStart.basket) robot.basket = r.robotStart.basket;
   // IG-002: the can, as Start world passes it.
   if (r.robotStart.can !== undefined) robot.can = r.robotStart.can;
   if (r.robotStart.canMax !== undefined) robot.canMax = r.robotStart.canMax;
-  return { map: [...r.map], things: r.things.map((t) => ({ ...t })), robots: [robot], schedule: r.schedule ? r.schedule.map((s) => ({ ...s })) : [] };
+  const world = { map: [...r.map], things: r.things.map((t) => ({ ...t })), robots: [robot], schedule: r.schedule ? r.schedule.map((s) => ({ ...s })) : [] };
+  return helper<any>(ENGINE, 'seedWorld', world, JSON.parse(JSON.stringify(r)), seed);
 }
 
 function runToEnd(program: ReadonlyArray<Block>, world: any, lang = 'en') {

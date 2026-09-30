@@ -26,7 +26,7 @@ import { BAND_PALETTE, Block, BlockType, GardenRequest, HINTS, HINT_KEYS, OLIVE_
 // P106 IG-005: the robot catalogue and the upgrades.
 import { ROBOTS, UPGRADES, needsOf } from './cg002Content';
 // P106 IG-004: the island's content gate (AC4) runs HERE, in the gate the generator runs first.
-import { FREE_PLAY_PLOT, ISLAND_BASE, ISLAND_H, ISLAND_HOME_MAP, ISLAND_HOME_PLOT, ISLAND_W, PLOT_H, PLOT_W } from './cg002Content';
+import { FREE_PLAY_PLOT, ISLAND_BASE, ISLAND_H, ISLAND_HOME_MAP, ISLAND_HOME_PLOT, ISLAND_MEADOW_MAP, ISLAND_W, PLOT_H, PLOT_W } from './cg002Content';
 import { islandProblems } from './ig004Island';
 import { FREE_PLAY, ISLAND_WORLD_SCRIPT } from './cg003Scripts';
 import {
@@ -79,15 +79,20 @@ const HINT_ROWS = HINT_KEYS.map((key) => ({ key, ...HINTS[key] }));
 
 // ── Harness ─────────────────────────────────────────────────────────────────
 
-/** The world a request opens on: its map, its things, one robot at the start. */
-function worldOfRequest(r: GardenRequest, robotId = 'pip') {
+/**
+ * The world a request opens on: its map, its things, one robot at the start. P108 IW-003 (s3 base): laid from a seed the
+ * way Start world lays it (`seedWorld`: the job copied in, the seeded layout laid) — seed 1 unless one is given; a
+ * request with neither `job` nor `seeded` is untouched, exactly as before.
+ */
+function worldOfRequest(r: GardenRequest, robotId = 'pip', seed = 1) {
   const robot: Record<string, unknown> = { id: robotId, x: r.robotStart.x, y: r.robotStart.y, d: r.robotStart.d };
   if (r.robotStart.carry) robot.carry = [...r.robotStart.carry];
   if (r.robotStart.basket) robot.basket = r.robotStart.basket;
   // IG-002: the can, as Start world passes it (a number on a request with a pond; absent = no can, water is free).
   if (r.robotStart.can !== undefined) robot.can = r.robotStart.can;
   if (r.robotStart.canMax !== undefined) robot.canMax = r.robotStart.canMax;
-  return { map: [...r.map], things: r.things.map((t) => ({ ...t })), robots: [robot], schedule: r.schedule ? r.schedule.map((s) => ({ ...s })) : [] };
+  const world = { map: [...r.map], things: r.things.map((t) => ({ ...t })), robots: [robot], schedule: r.schedule ? r.schedule.map((s) => ({ ...s })) : [] };
+  return helper<any>(ENGINE, 'seedWorld', world, JSON.parse(JSON.stringify(r)), seed);
 }
 
 /** One tick the way the page does it: Step, then Apply delta. */
@@ -996,14 +1001,19 @@ describe('CG-002 — the engine', () => {
     it('🔴 every request has a plot inside the island; no two plots (free play and home too) overlap; every slot of the base is exactly one plot', () => {
       expect(problems()).toEqual([]);
       for (const r of REQUESTS) expect({ id: r.id, plot: Number.isInteger(r.plot?.x) && Number.isInteger(r.plot?.y) }).toEqual({ id: r.id, plot: true });
-      // One plot per request (R9), plus free play; home is the one spare slot.
+      // One plot per request (R9), plus free play; home is a spare slot, and (P108 R6) so is every meadow.
       const slots = ISLAND_BASE.join('').split('.').length - 1;
       expect(slots).toBe((REQUESTS.length + 1) * PLOT_W * PLOT_H);
+      const meadows = 6 * 3 - REQUESTS.length - 2;
+      const meadowTiles = ISLAND_MEADOW_MAP.join('');
+      let found = 0;
+      for (let sy = 1; sy + PLOT_H < ISLAND_H; sy += PLOT_H + 1) for (let sx = 1; sx + PLOT_W < ISLAND_W; sx += PLOT_W + 1) if (ISLAND_BASE.slice(sy, sy + PLOT_H).map((r) => r.slice(sx, sx + PLOT_W)).join('') === meadowTiles) found++;
+      expect({ meadows: found }).toEqual({ meadows });
     });
 
-    it('R9: at most 46 × 22 (the ruled 36–46 × 22), each islander’s plots side by side in one row', () => {
-      expect([ISLAND_W, ISLAND_H, ISLAND_W * ISLAND_H]).toEqual([46, 22, 1012]);
-      expect(ISLAND_W).toBeLessThanOrEqual(46);
+    it('R9, widened by P108 R6: 55 × 22 (six columns of three rows), each islander’s plots side by side in one row', () => {
+      expect([ISLAND_W, ISLAND_H, ISLAND_W * ISLAND_H]).toEqual([55, 22, 1210]);
+      expect(ISLAND_W).toBeLessThanOrEqual(55);
       expect(ISLAND_H).toBeLessThanOrEqual(22);
       for (const who of ['mamie', 'sami', 'biscuit']) expect({ who, rows: [...new Set(REQUESTS.filter((r) => r.islander === who).map((r) => r.plot.y))] }).toEqual({ who, rows: [REQUESTS.find((r) => r.islander === who)!.plot.y] });
     });
@@ -1028,7 +1038,7 @@ describe('CG-002 — the engine', () => {
         expect(p.some((x) => /slot tile 1[0-7],1 is under 0 plots/.test(x))).toBe(true);
       });
       it('a plot off the edge → named; free play on home → named; a request with no plot → named', () => {
-        expect(problems(moved('mamie-note', { x: 40, y: 1 }))).toContain('mamie-note’s plot (40, 1) is not inside the 46 × 22 island'.replace('’', "'"));
+        expect(problems(moved('mamie-note', { x: 50, y: 1 }))).toContain('mamie-note’s plot (50, 1) is not inside the 55 × 22 island'.replace('’', "'"));
         expect(problems(REQUESTS, ISLAND_HOME_PLOT)).toContain('free and home overlap');
         expect(problems(moved('bowl-if', undefined))).toContain('bowl-if has no plot');
       });
@@ -1561,8 +1571,9 @@ describe('CG-002 — the engine', () => {
       // Known-firing beside the refusal: the same robot on its own job is not refused; a kind name works as a robot too.
       expect(pal(1, req('path-stones'), 'cobble').refused).toBe(false);
       expect(pal(2, req('tulips-three'), spec('pip')).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'water', 'fill', 'repeat']);
-      // The robot narrows the request: Pip on the stones' list keeps the moves and the repeat, never pick or put.
-      expect(pal(2, req('path-stones'), spec('pip'), { needs: '' }).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'repeat']);
+      // The robot narrows the request. P108 IW-003 (s3 base, D9): every robot has hands now, so Pip on the stones' list
+      // keeps pick and put; the narrowing is shown by Olive's blocks below (and water/fill/say, each a robot's own).
+      expect(pal(2, req('path-stones'), spec('pip'), { needs: '' }).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'pick', 'put', 'repeat']);
       // Echo carries Olive's blocks as a PALETTE choice: Pip (read only) on the flowers loses is it a…?; Echo keeps it.
       const olive = (robot: string) => pal(2, req('rock-flower'), spec(robot), { needs: '' }).palette.map((p: any) => p.id).filter((id: string) => id.startsWith('olive:'));
       expect([olive('pip'), olive('echo')]).toEqual([[], ['olive:is-it-a']]);
@@ -1733,7 +1744,7 @@ describe('CG-002 — the engine', () => {
 
     it('the palette: band 7–9 is seven icon blocks with captions (IG-002: fill); band 10–12 is every block with its word; a request narrows it', () => {
       const b1 = runScript(PALETTE_SCRIPT, { band: 1, words: WORD_ROWS, lang: 'fr' });
-      expect(b1.palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'water', 'fill', 'pick', 'put']);
+      expect(b1.palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'water', 'fill', 'pick', 'put', 'go_nearest', 'go_to']);
       expect(b1.palette.map((p: any) => p.id)).toEqual([...BAND_PALETTE[1]]);
       expect(b1.palette.find((p: any) => p.id === 'fill')).toEqual({ id: 'fill', kind: 'action', label: WORDS.bFill.fr, caption: WORDS.cFill.fr, hasBody: false, hasCount: false, slots: [], band: 1 });
       expect(b1.palette[0]).toEqual({ id: 'fwd', kind: 'motion', label: 'avancer', caption: 'hop', hasBody: false, hasCount: false, slots: [], band: 1 });
@@ -1763,9 +1774,10 @@ describe('IW-002 (P108 s1) — the job model: a target takes exactly its need, a
   };
   const eng = <T = any>(name: string, ...args: unknown[]) => helper<T>(ENGINE, name, ...args);
 
-  it('🔴 the vocabulary is one table: nine kinds by the brief’s names, the engine blocks exactly the kinds the table says, the wall tile L blocks, three new sayKeys in EN and FR', () => {
-    expect(JOB_VOCABULARY.map((k) => k.kind)).toEqual(['tulip', 'site', 'basket', 'bowl', 'store', 'can', 'rock', 'hen', 'postbox']);
-    expect(JOB_KINDS).toEqual({ tulip: 'target', site: 'target', basket: 'container', bowl: 'container', store: 'container', can: 'carrier', rock: 'source', hen: 'source', postbox: 'source' });
+  it('🔴 the vocabulary is one table: ten kinds by the brief’s names (IW-003 s3: + door), the engine blocks exactly the kinds the table says, the wall tile L blocks, three new sayKeys in EN and FR', () => {
+    // P108 IW-003 (s3 base): + door (a container of letters with an owner — the post missions' target).
+    expect(JOB_VOCABULARY.map((k) => k.kind)).toEqual(['tulip', 'site', 'basket', 'bowl', 'store', 'can', 'rock', 'hen', 'postbox', 'door']);
+    expect(JOB_KINDS).toEqual({ tulip: 'target', site: 'target', basket: 'container', bowl: 'container', store: 'container', can: 'carrier', rock: 'source', hen: 'source', postbox: 'source', door: 'container' });
     expect(WALL_TILE).toBe('L');
     expect(SITE_STAGES).toEqual(['dirt', 'gravel', 'cobbles', 'path']);
     for (const k of JOB_VOCABULARY) {
@@ -2125,15 +2137,19 @@ describe('IW-005 (P108 s2) — seek and regrow: go to nearest by path length, re
   /** The walk of one go to nearest / go to: its deltas (the ones that glowed that block). */
   const walkOf = (end: { deltas: any[]; glows: any[] }, id: number) => end.deltas.filter((_d, i) => end.glows[i] === id);
 
-  it('🔴 the vocabulary: four new statements at the END of BLOCK_TYPES and in BLOCK_META; no palette offers them yet (band 10–12 is the sixteen it was); sayNone in EN and FR', () => {
+  it('🔴 the vocabulary: four new statements at the END of BLOCK_TYPES and in BLOCK_META; IW-003 (s3 base) offers them — band 7–9 the two walks, band 10–12 all four, each with its word and caption; sayNone in EN and FR', () => {
     expect(BLOCK_TYPES.slice(-4)).toEqual(['go_nearest', 'go_to', 'set', 'change']);
     expect(BLOCK_TYPES.slice(0, 16)).toEqual(['fwd', 'left', 'right', 'water', 'fill', 'pick', 'put', 'say', 'repeat', 'until', 'if', 'when', 'count_inc', 'trick', 'do', 'ask']);
     for (const t of BLOCK_TYPES) expect({ t, meta: !!BLOCK_META[t] }).toEqual({ t, meta: true });
     expect([BLOCK_META.go_nearest.slots, BLOCK_META.go_to.slots, BLOCK_META.set.slots, BLOCK_META.change.slots]).toEqual([['kind'], ['thing'], ['name', 'value'], ['name', 'by']]);
-    expect(BAND_PALETTE[2]).toEqual(BLOCK_TYPES.slice(0, 16));
+    expect(BAND_PALETTE[2]).toEqual([...BLOCK_TYPES]);
     for (const band of [1, 2]) {
-      const ids = runScript(PALETTE_SCRIPT, { band, words: WORD_ROWS, lang: 'en' }).palette.map((p: any) => p.id);
-      for (const t of ['go_nearest', 'go_to', 'set', 'change']) expect({ band, t, offered: ids.includes(t) }).toEqual({ band, t, offered: false });
+      const pal = runScript(PALETTE_SCRIPT, { band, words: WORD_ROWS, lang: 'en' }).palette;
+      const ids = pal.map((p: any) => p.id);
+      for (const t of ['go_nearest', 'go_to', 'set', 'change']) expect({ band, t, offered: ids.includes(t) }).toEqual({ band, t, offered: band === 2 || t === 'go_nearest' || t === 'go_to' });
+      // Each new block wears its own word and caption (the palette's LABEL names them; never the raw id).
+      const KEY: Record<string, string> = { go_nearest: 'GoNearest', go_to: 'GoTo', set: 'Set', change: 'Change' };
+      for (const p of pal.filter((x: any) => KEY[x.id])) expect({ band, id: p.id, label: p.label, caption: p.caption }).toEqual({ band, id: p.id, label: WORDS['b' + KEY[p.id]].en, caption: WORDS['c' + KEY[p.id]].en });
     }
     expect({ en: !!WORDS.sayNone?.en, fr: !!WORDS.sayNone?.fr, differ: WORDS.sayNone?.en !== WORDS.sayNone?.fr }).toEqual({ en: true, fr: true, differ: true });
     // Every reference program still uses only the sixteen (IW-003 moves the missions).

@@ -35,6 +35,12 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-bChange",
+      "toId": "translatewordsOut",
+      "toProperty": "bChange"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-bCountInc",
       "toId": "translatewordsOut",
       "toProperty": "bCountInc"
@@ -56,6 +62,18 @@
       "fromProperty": "out-bFwd",
       "toId": "translatewordsOut",
       "toProperty": "bFwd"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-bGoNearest",
+      "toId": "translatewordsOut",
+      "toProperty": "bGoNearest"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-bGoTo",
+      "toId": "translatewordsOut",
+      "toProperty": "bGoTo"
     },
     {
       "fromId": "translatewordsFn",
@@ -98,6 +116,12 @@
       "fromProperty": "out-bSay",
       "toId": "translatewordsOut",
       "toProperty": "bSay"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-bSet",
+      "toId": "translatewordsOut",
+      "toProperty": "bSet"
     },
     {
       "fromId": "translatewordsFn",
@@ -167,6 +191,12 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-cChange",
+      "toId": "translatewordsOut",
+      "toProperty": "cChange"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-cCountInc",
       "toId": "translatewordsOut",
       "toProperty": "cCountInc"
@@ -188,6 +218,18 @@
       "fromProperty": "out-cFwd",
       "toId": "translatewordsOut",
       "toProperty": "cFwd"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-cGoNearest",
+      "toId": "translatewordsOut",
+      "toProperty": "cGoNearest"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-cGoTo",
+      "toId": "translatewordsOut",
+      "toProperty": "cGoTo"
     },
     {
       "fromId": "translatewordsFn",
@@ -230,6 +272,12 @@
       "fromProperty": "out-cSay",
       "toId": "translatewordsOut",
       "toProperty": "cSay"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-cSet",
+      "toId": "translatewordsOut",
+      "toProperty": "cSet"
     },
     {
       "fromId": "translatewordsFn",
@@ -281,6 +329,12 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-cdChange",
+      "toId": "translatewordsOut",
+      "toProperty": "cdChange"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-cdCountInc",
       "toId": "translatewordsOut",
       "toProperty": "cdCountInc"
@@ -302,6 +356,18 @@
       "fromProperty": "out-cdFwd",
       "toId": "translatewordsOut",
       "toProperty": "cdFwd"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-cdGoNearest",
+      "toId": "translatewordsOut",
+      "toProperty": "cdGoNearest"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-cdGoTo",
+      "toId": "translatewordsOut",
+      "toProperty": "cdGoTo"
     },
     {
       "fromId": "translatewordsFn",
@@ -356,6 +422,12 @@
       "fromProperty": "out-cdSay",
       "toId": "translatewordsOut",
       "toProperty": "cdSay"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-cdSet",
+      "toId": "translatewordsOut",
+      "toProperty": "cdSet"
     },
     {
       "fromId": "translatewordsFn",

@@ -1067,6 +1067,14 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       // Known-firing: the plot framing clips the island (s3's shot: the bottom-right corner off the stage).
       expect(inside(C.fitRect(map, whole, aspect)).length).toBeGreaterThan(0);
       expect(inside(C.frameRect(map, whole, aspect))).toEqual([]);
+      // P108 R6: the island is 55 × 22 now — the same framing holds every corner of it too.
+      const wide = { w: 55, h: 22 };
+      const corners55: number[][] = [];
+      for (const y of [0, C.CAMERA.objectHeight]) for (const [x, z] of [[-27.5, -11], [27.5, -11], [-27.5, 11], [27.5, 11]]) {
+        const n = C.project(C.frameRect(wide, { x: 0, y: 0, w: 55, h: 22 }, aspect), aspect, [x, y, z]);
+        if (!(n.depth > 0 && Math.abs(n.x) <= 1 && Math.abs(n.y) <= 1)) corners55.push([x, y, z]);
+      }
+      expect(corners55).toEqual([]);
     });
 
     it('🔴 the engine’s island camera is that framing', () => {

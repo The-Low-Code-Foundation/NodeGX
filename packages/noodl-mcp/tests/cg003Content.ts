@@ -309,6 +309,11 @@ export const IG006_WORDS: Readonly<Record<string, Bi>> = {
   cdTrick: s('Give some blocks a name. Then one “do” block runs them all.', 'Donne un nom à des blocs. Ensuite, un seul bloc « faire » les fait tous.'),
   cdDo: s('Runs the trick with that name, all its blocks.', 'Fait l’astuce qui porte ce nom, avec tous ses blocs.'),
   cdAsk: s('Olive answers a question, and her answer can steer the program.', 'Olive répond à une question, et sa réponse peut guider le programme.'),
+  // P108 IW-003 (s3 base): the four statements IW-005 built, now in the drawer.
+  cdGoNearest: s('{b} walks to the nearest one of that thing, the short way round, and stops facing it.', '{b} marche jusqu’au plus proche de ces objets, par le chemin le plus court, et s’arrête devant.'),
+  cdGoTo: s('{b} walks to the thing you picked on the island, and stops facing it.', '{b} marche jusqu’à l’objet que tu as choisi sur l’île, et s’arrête devant.'),
+  cdSet: s('{b} writes a number under a name, to remember it.', '{b} écrit un nombre sous un nom, pour s’en souvenir.'),
+  cdChange: s('{b} adds to the number kept under that name.', '{b} ajoute au nombre gardé sous ce nom.'),
   cdOliveSay: s('Olive writes a thank-you in her own words, and {b} says it. Run it twice: it is never the same.', 'Olive écrit un merci avec ses mots, et {b} le dit. Lance-le deux fois : ce n’est jamais pareil.'),
   cdOliveRead: s('Olive reads the note on the plot and says which thing it means. Then “if Olive read…” chooses what {b} does.', 'Olive lit le mot posé dans le jardin et dit de quelle chose il parle. Ensuite, « si Olive a lu… » choisit ce que fait {b}.'),
   lsRead: s('Only Olive can read what an islander wrote, and her answer is always one of the things on the plot.', 'Seule Olive sait lire ce qu’un habitant a écrit, et sa réponse est toujours une des choses du jardin.'),
@@ -374,6 +379,10 @@ export const BLOCK_CARDS: Readonly<Record<string, { label: string; line: string;
   trick: { label: 'bTrick', line: 'cdTrick', example: [{ t: 'trick', slots: { name: 'row' }, body: [{ t: 'fwd' }, { t: 'water' }] }, { t: 'do', slots: { name: 'row' } }] },
   do: { label: 'bDo', line: 'cdDo', example: [{ t: 'do', slots: { name: 'row' } }] },
   ask: { label: 'bAsk', line: 'cdAsk', example: [{ t: 'ask' }] },
+  go_nearest: { label: 'bGoNearest', line: 'cdGoNearest', example: [{ t: 'go_nearest' }, { t: 'pick' }] },
+  go_to: { label: 'bGoTo', line: 'cdGoTo', example: [{ t: 'go_to' }, { t: 'put' }] },
+  set: { label: 'bSet', line: 'cdSet', example: [{ t: 'set' }] },
+  change: { label: 'bChange', line: 'cdChange', example: [{ t: 'change' }] },
   'olive:say-thanks': { label: 'rungSayThanks', line: 'cdOliveSay', example: [{ t: 'olive:say-thanks', slots: { to: 'Mamie Rose', deed: 'watered her three tulips' } }] },
   'olive:read': { label: 'rungRead', line: 'cdOliveRead', example: [{ t: 'olive:read' }, { t: 'if', slots: { sensor: 'olive_read:red_tulip' }, body: [{ t: 'water' }] }] },
   'olive:is-it-a': { label: 'rungIsItA', line: 'or6Line', example: [{ t: 'olive:is-it-a', slots: { kind: 'a flower', times: '3' } }, { t: 'if', slots: { sensor: 'olive_says:yes' }, body: [{ t: 'water' }] }] }

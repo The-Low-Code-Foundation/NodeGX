@@ -193,14 +193,15 @@
   var SITE_STAGES = ['dirt', 'gravel', 'cobbles', 'path'];
   var JOB_VOCABULARY = [
     { kind: 'tulip', role: 'target', fields: ['have', 'need', 'watered', 'droop'], blocks: true, wear: 'tulip' },
-    { kind: 'site', role: 'target', fields: ['have', 'need', 'item', 'stage', 'walked'], item: 'stone', blocks: false, wear: 'site' },
+    { kind: 'site', role: 'target', fields: ['have', 'need', 'item', 'stage', 'walked', 'build'], item: 'stone', blocks: false, wear: 'site' },
     { kind: 'basket', role: 'container', fields: ['count', 'capacity', 'item'], item: 'egg', blocks: true, wear: 'basket' },
     { kind: 'bowl', role: 'container', fields: ['count', 'capacity', 'item', 'food'], item: 'food', blocks: true, wear: 'bowl' },
     { kind: 'store', role: 'container', fields: ['count', 'capacity', 'item'], item: 'stone', blocks: true, wear: 'store' },
     { kind: 'can', role: 'carrier', fields: ['level', 'max'], blocks: true },
     { kind: 'rock', role: 'source', fields: ['left', 'max'], blocks: true, wear: 'rock' },
     { kind: 'hen', role: 'source', fields: ['pen', 'capacity'], blocks: true, wear: 'hen' },
-    { kind: 'postbox', role: 'source', fields: [], blocks: true, wear: 'postbox' }
+    { kind: 'postbox', role: 'source', fields: [], blocks: true, wear: 'postbox' },
+    { kind: 'door', role: 'container', fields: ['count', 'capacity', 'item', 'owner'], item: 'letter', blocks: true, wear: 'door' }
   ];
   /** The most pips a meter draws (the mockup's); a bigger need shows its numbers only. */
   var METER_PIPS_MAX = 8;

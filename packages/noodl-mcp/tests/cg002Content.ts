@@ -75,8 +75,10 @@ export const EVENTS = ['meow'] as const;
 
 /** The palette a band may use, by block id (CG-001's `Palette` is built from this plus the labels). */
 export const BAND_PALETTE: Readonly<Record<Band, ReadonlyArray<BlockType>>> = {
-  1: ['fwd', 'left', 'right', 'water', 'fill', 'pick', 'put'],
-  2: BLOCK_TYPES.slice(0, BLOCK_TYPES.indexOf('ask') + 1)
+  // P108 IW-003 (s3 base): band 7–9 walks to a thing (README §5's ladder: `go to nearest [tapped thing]` at 7–8); band
+  // 10–12 has every block, the variables too. A request's `palette` still narrows it, and the robot's list (below).
+  1: ['fwd', 'left', 'right', 'water', 'fill', 'pick', 'put', 'go_nearest', 'go_to'],
+  2: [...BLOCK_TYPES]
 };
 
 /**
@@ -110,13 +112,30 @@ export interface Goal {
  * the kit never draws on the tile. The map's `R` tile stays a decorative rock that yields nothing.
  */
 export interface Thing {
-  kind: 'tulip' | 'bowl' | 'letter' | 'egg' | 'stone' | 'food' | 'label' | 'puddle' | 'rock' | 'sign' | 'note';
+  kind:
+    | 'tulip' | 'bowl' | 'letter' | 'egg' | 'stone' | 'food' | 'label' | 'puddle' | 'rock' | 'sign' | 'note'
+    // P108 IW-003 (s3 base): the job kinds (JOB_VOCABULARY) and the ball, so a request states them without a cast.
+    | 'site' | 'basket' | 'store' | 'can' | 'hen' | 'postbox' | 'door' | 'ball';
   x: number;
   y: number;
   watered?: boolean;
   food?: number;
   text?: string;
   left?: number;
+  /** P108 IW-003: the job fields (IW-002 §6) — an id to name it in `job.targets` / `seeded`, meters, containers, owners. */
+  id?: string;
+  have?: number;
+  need?: number;
+  count?: number;
+  capacity?: number;
+  item?: string;
+  level?: number;
+  max?: number;
+  owner?: string;
+  to?: string;
+  color?: string;
+  build?: string;
+  pen?: ReadonlyArray<number>;
 }
 
 /**
@@ -498,7 +517,11 @@ export const HINTS: Readonly<Record<string, Bi>> = {
   oliveResting2: s('Olive is resting, so {b} used her written answer to “read the note”.', 'Olive se repose, alors {b} a pris sa réponse écrite à « lire le mot ».'),
   oliveResting3: s('Olive is resting, so {b} used her written answer to “is it a…?”.', 'Olive se repose, alors {b} a pris sa réponse écrite à « est-ce un… ? ».'),
   // P108 IW-001 (lane A) F2: a played run stopped by the cap (MAX_TICKS). Not voiced.
-  iw1Loop: s('{b} is going round and round — is there a loop that never ends?', '{b} tourne en rond — y a-t-il une boucle qui ne s’arrête jamais ?')
+  iw1Loop: s('{b} is going round and round — is there a loop that never ends?', '{b} tourne en rond — y a-t-il une boucle qui ne s’arrête jamais ?'),
+  // P108 IW-003 (s3 base): the job hints. A run that tried to fill or water with no can in hand; a run that ended with
+  // the job part done ({w} of {t} targets full — every mission is a job now, so this replaces "Not quite yet"). Not voiced.
+  iw3NoCan: s('{b} needs the can in hand first. Where is it?', '{b} doit d’abord prendre l’arrosoir. Où est-il ?'),
+  iw3Job: s('{w} of {t} done. What is still waiting?', '{w} sur {t}, c’est fait. Qu’est-ce qui attend encore ?')
 };
 
 export const HINT_KEYS: ReadonlyArray<string> = Object.keys(HINTS);
@@ -536,6 +559,11 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   bTrick: s('a trick called', 'une astuce nommée'),
   bDo: s('do', 'faire'),
   bAsk: s('ask Olive', 'demander à Olive'),
+  // P108 IW-003 (s3 base): the four statements IW-005 built, named for the palette and the pad.
+  bGoNearest: s('go to the nearest', 'aller au plus proche'),
+  bGoTo: s('go to', 'aller à'),
+  bSet: s('set', 'mettre'),
+  bChange: s('change', 'changer'),
   // Band 7–9 captions.
   cFwd: s('go', 'hop'),
   cLeft: s('left', 'gauche'),
@@ -553,6 +581,10 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   cTrick: s('trick', 'astuce'),
   cDo: s('do', 'fais'),
   cAsk: s('Olive', 'Olive'),
+  cGoNearest: s('find', 'cherche'),
+  cGoTo: s('go to', 'va à'),
+  cSet: s('set', 'mets'),
+  cChange: s('change', 'change'),
   // Sensors and events.
   sWallAhead: s('the wall is ahead', 'le mur est devant'),
   sTulipAhead: s('a tulip is ahead', 'une tulipe est devant'),
@@ -934,8 +966,13 @@ export const PLOT_H = 6;
  * 1 + 3 × 6 + 2 + 1 = 22 tall, 1012 tiles. Thirteen requests + free play take fourteen slots; the fifteenth is home
  * (the house, the pond, the rock field). Each islander's plots are one row: Mamie Rose's on top, Sami's in the middle,
  * Biscuit's below with the garden and home. Fewer columns would need a fourth row (4 × 4 = 37 × 29 = 1073 tiles).
+ *
+ * P108 R6 (ruled 2026-09-30, "Widen to 55×22"): one more column for IW-003's two new missions — six columns, eighteen
+ * slots, 1 + 6 × 8 + 5 + 1 = 55 wide, 1210 tiles. Mamie's envelopes take the new slot on her row (46, 1), Sami's bench
+ * the one on his (46, 8); Biscuit's row keeps (46, 15) empty for IW-007's building. A slot no request, free play or home
+ * sits on is a MEADOW (`ISLAND_MEADOW_MAP`), stamped in the base: the land the island has left.
  */
-export const ISLAND_W = 46;
+export const ISLAND_W = 55;
 export const ISLAND_H = 22;
 /** Free play ("the garden", never pinned) — the brief's FREE_PLAY_PLOT. */
 export const FREE_PLAY_PLOT: { x: number; y: number } = { x: 28, y: 15 };
@@ -945,14 +982,17 @@ export const ISLAND_HOME_PLOT: { x: number; y: number } = { x: 37, y: 15 };
 export const ISLAND_HOME: { x: number; y: number } = { x: 39, y: 17 };
 /** The home slot's own map: the house, the path the robots wait on, the pond, the rock field (R: a rock that yields nothing). */
 export const ISLAND_HOME_MAP: ReadonlyArray<string> = ['GGTGGGWW', 'GHGGGWWW', 'GGPPPGWG', 'GGGGPGGG', 'TGRGGGRG', 'GGGRGGTG'];
+/** P108 R6: an empty slot's map — grass, two trees, a tuft of tulip leaves: land nobody works yet (IW-007 builds on it). */
+export const ISLAND_MEADOW_MAP: ReadonlyArray<string> = ['GGGGGGTG', 'GGGGGGGG', 'GTGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGTGG'];
 /**
  * The island's base map, ISLAND_W × ISLAND_H: the shore (grass, a tree at each corner and along it), the paths between
  * the slots, home stamped in its slot, and `.` where a request's plot (or free play's) is stamped by `Logic/Island
  * world`. The content gate (cg002Engine AC4) checks every `.` is under exactly one plot and no plot sits on anything else.
+ * P108 R6: a slot with no request, free play or home on it is stamped as a meadow here, so it is never an unstamped `.`.
  */
 export const ISLAND_BASE: ReadonlyArray<string> = (() => {
   const rows: string[][] = [];
-  const shoreTrees = new Set(['0,0', '45,0', '0,21', '45,21', '13,0', '31,0', '22,21', '40,21', '0,11', '45,11']);
+  const shoreTrees = new Set(['0,0', '54,0', '0,21', '54,21', '13,0', '31,0', '49,0', '22,21', '40,21', '0,11', '54,11']);
   for (let y = 0; y < ISLAND_H; y++) {
     const row: string[] = [];
     for (let x = 0; x < ISLAND_W; x++) {
@@ -963,6 +1003,11 @@ export const ISLAND_BASE: ReadonlyArray<string> = (() => {
     rows.push(row);
   }
   ISLAND_HOME_MAP.forEach((r, y) => r.split('').forEach((c, x) => (rows[ISLAND_HOME_PLOT.y + y][ISLAND_HOME_PLOT.x + x] = c)));
+  // P108 R6: every slot whose top-left no request, free play or home claims is a meadow.
+  const claimed = new Set([...REQUESTS.map((r) => `${r.plot.x},${r.plot.y}`), `${FREE_PLAY_PLOT.x},${FREE_PLAY_PLOT.y}`, `${ISLAND_HOME_PLOT.x},${ISLAND_HOME_PLOT.y}`]);
+  for (let sy = 1; sy + PLOT_H < ISLAND_H; sy += PLOT_H + 1)
+    for (let sx = 1; sx + PLOT_W < ISLAND_W; sx += PLOT_W + 1)
+      if (!claimed.has(`${sx},${sy}`)) ISLAND_MEADOW_MAP.forEach((r, y) => r.split('').forEach((ch, x) => (rows[sy + y][sx + x] = ch)));
   return rows.map((r) => r.join(''));
 })();
 
@@ -992,10 +1037,13 @@ export interface RobotSpec {
   unlockedBy: string | null;
 }
 
-/** Every robot has these moves: forward and the two turns. */
-export const ROBOT_MOVES: ReadonlyArray<string> = ['fwd', 'left', 'right'];
+/**
+ * Every robot has these moves: forward and the two turns. P108 IW-003 (s3 base, README D9): and hands — every mission is a
+ * job with something to pick up (the can, a letter, the food) — and the walk to a thing (`go to nearest`, `go to`).
+ */
+export const ROBOT_MOVES: ReadonlyArray<string> = ['fwd', 'left', 'right', 'pick', 'put', 'go_nearest', 'go_to'];
 /** And the controls of the band (band 7–9 has none): the palette's band filter still decides which show. */
-export const ROBOT_CONTROLS: ReadonlyArray<string> = ['repeat', 'until', 'if', 'when', 'count_inc', 'trick', 'do'];
+export const ROBOT_CONTROLS: ReadonlyArray<string> = ['repeat', 'until', 'if', 'when', 'count_inc', 'trick', 'do', 'set', 'change'];
 
 /**
  * The catalogue (IG-005 §2). Each request's `needs` is one of these, and every request's reference program uses only
@@ -1008,7 +1056,7 @@ export const ROBOTS: ReadonlyArray<RobotSpec> = [
   { id: 'pip', defaultName: s('Pip', 'Pip'), colour: '#FF7A59', accessory: 'can', palette: ['water', 'fill', 'olive:read'], canMax: 3, basket: 4, upgrade: 'can+', lentBy: null, unlockedBy: null },
   { id: 'cobble', defaultName: s('Cobble', 'Cobble'), colour: '#7A8CA3', accessory: 'hod', palette: ['pick', 'put'], canMax: 3, basket: 4, upgrade: 'basket+', lentBy: 'sami', unlockedBy: 'path-postbox' },
   { id: 'pocket', defaultName: s('Pocket', 'Poche'), colour: '#FFB347', accessory: 'satchel', palette: ['pick', 'put', 'say', 'olive:say-thanks'], canMax: 3, basket: 6, upgrade: 'boots', lentBy: 'biscuit', unlockedBy: 'bowl-if' },
-  { id: 'echo', defaultName: s('Echo', 'Écho'), colour: '#8F6BFF', accessory: 'bell', palette: ['water', 'say', 'olive:read', 'olive:is-it-a', 'olive:say-thanks'], canMax: 3, basket: 4, upgrade: 'can+', lentBy: 'mamie', unlockedBy: 'mamie-note' }
+  { id: 'echo', defaultName: s('Echo', 'Écho'), colour: '#8F6BFF', accessory: 'bell', palette: ['water', 'fill', 'say', 'olive:read', 'olive:is-it-a', 'olive:say-thanks'], canMax: 3, basket: 4, upgrade: 'can+', lentBy: 'mamie', unlockedBy: 'mamie-note' }
 ];
 
 /** One upgrade: who gives it, after which request, which robots it fits, and what it changes. */
@@ -1050,6 +1098,12 @@ export interface SeededSpec {
   wallAt?: readonly [number, number];
   wallRow?: number;
   eggs?: { count: number; among: ReadonlyArray<readonly [number, number]> };
+  /** P108 IW-003 (s3 base): one value of `among` into the field of the thing with that id (today's note, a colour). */
+  choose?: ReadonlyArray<{ thing: string; field: string; among: ReadonlyArray<unknown> }>;
+  /** P108 IW-003 (s3 base): `values` shuffled and dealt one to each thing, in `things` order (the envelopes' names). */
+  shuffle?: { things: ReadonlyArray<string>; field: string; values: ReadonlyArray<unknown> };
+  /** P108 IW-003 (s3 base): the thing with that id moved to one tile of `among` (a ball, a can on the plot). */
+  place?: ReadonlyArray<{ thing: string; among: ReadonlyArray<readonly [number, number]> }>;
 }
 
 /** The wall tile (brief §4.2): blocking, drawn by both kits (session 2). The map edge stays blocked too. */
@@ -1062,7 +1116,7 @@ export const HEN_CAPACITY = 4;
 /** What a job thing is for (README §4.1): a target has a meter, a container counts an item, a carrier is held, a source gives. */
 export type JobRole = 'target' | 'container' | 'carrier' | 'source';
 export interface JobKind {
-  kind: 'tulip' | 'site' | 'basket' | 'bowl' | 'store' | 'can' | 'rock' | 'hen' | 'postbox';
+  kind: 'tulip' | 'site' | 'basket' | 'bowl' | 'store' | 'can' | 'rock' | 'hen' | 'postbox' | 'door';
   role: JobRole;
   /** The fields the engine reads and writes on it (renderers draw from these). */
   fields: ReadonlyArray<string>;
@@ -1084,19 +1138,20 @@ export interface JobKind {
  * faster than the targets they feed so a reopened job never waits on them: the rock regrows a stone every 30 ticks (four
  * in two minutes, one path square's worth), the hen lays every 20 (a pen of four in about a minute), a letter every 90.
  */
-export const WEAR = { tulip: 60, site: 120, bowl: 60, basket: 90, store: 120, rock: 30, hen: 20, postbox: 90 } as const;
+export const WEAR = { tulip: 60, site: 120, bowl: 60, basket: 90, store: 120, rock: 30, hen: 20, postbox: 90, door: 90 } as const;
 
 /** The job vocabulary (brief §4.2) — ONE table the engine, the mockup and both renderers read by these names. */
 export const JOB_VOCABULARY: ReadonlyArray<JobKind> = [
   { kind: 'tulip', role: 'target', fields: ['have', 'need', 'watered', 'droop'], blocks: true, wear: 'tulip' },
-  { kind: 'site', role: 'target', fields: ['have', 'need', 'item', 'stage', 'walked'], item: 'stone', blocks: false, wear: 'site' },
+  { kind: 'site', role: 'target', fields: ['have', 'need', 'item', 'stage', 'walked', 'build'], item: 'stone', blocks: false, wear: 'site' },
   { kind: 'basket', role: 'container', fields: ['count', 'capacity', 'item'], item: 'egg', blocks: true, wear: 'basket' },
   { kind: 'bowl', role: 'container', fields: ['count', 'capacity', 'item', 'food'], item: 'food', blocks: true, wear: 'bowl' },
   { kind: 'store', role: 'container', fields: ['count', 'capacity', 'item'], item: 'stone', blocks: true, wear: 'store' },
   { kind: 'can', role: 'carrier', fields: ['level', 'max'], blocks: true },
   { kind: 'rock', role: 'source', fields: ['left', 'max'], blocks: true, wear: 'rock' },
   { kind: 'hen', role: 'source', fields: ['pen', 'capacity'], blocks: true, wear: 'hen' },
-  { kind: 'postbox', role: 'source', fields: [], blocks: true, wear: 'postbox' }
+  { kind: 'postbox', role: 'source', fields: [], blocks: true, wear: 'postbox' },
+  { kind: 'door', role: 'container', fields: ['count', 'capacity', 'item', 'owner'], item: 'letter', blocks: true, wear: 'door' }
 ];
 /** The kinds by role, for the engine (`JOB_KINDS[kind]` is its role). */
 export const JOB_KINDS: Readonly<Record<string, JobRole>> = Object.fromEntries(JOB_VOCABULARY.map((k) => [k.kind, k.role]));

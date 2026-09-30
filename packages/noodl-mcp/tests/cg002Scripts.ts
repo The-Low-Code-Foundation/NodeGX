@@ -176,6 +176,23 @@ function layOut(w, seeded, rs) {
       w.things.push({ kind: 'egg', x: Math.floor(Number(pk[0])), y: Math.floor(Number(pk[1])) });
     }
   }
+  // P108 IW-003 (s3 base): three more layouts, each over things named by their id, drawn AFTER the wall and the eggs (so
+  // a seed lays those exactly as before). choose: one value of among into a thing's field (today's note, a colour);
+  // shuffle: the values dealt one to each thing (the envelopes' names); place: a thing moved to one tile of among.
+  var byId = function (id) { for (var q = 0; q < (w.things || []).length; q++) if (w.things[q] && String(w.things[q].id) === String(id)) return w.things[q]; return null; };
+  if (Array.isArray(sd.choose)) for (var ci = 0; ci < sd.choose.length; ci++) {
+    var ch = sd.choose[ci], cth = ch && byId(ch.thing);
+    if (cth && ch.field && Array.isArray(ch.among) && ch.among.length) cth[ch.field] = JSON.parse(JSON.stringify(ch.among[Math.floor(rnd() * ch.among.length)]));
+  }
+  if (sd.shuffle && Array.isArray(sd.shuffle.things) && Array.isArray(sd.shuffle.values) && sd.shuffle.field) {
+    var deck = sd.shuffle.values.slice();
+    for (var si = deck.length - 1; si > 0; si--) { var sj = Math.floor(rnd() * (si + 1)), sv = deck[si]; deck[si] = deck[sj]; deck[sj] = sv; }
+    for (var st = 0; st < sd.shuffle.things.length && st < deck.length; st++) { var sth = byId(sd.shuffle.things[st]); if (sth) sth[sd.shuffle.field] = JSON.parse(JSON.stringify(deck[st])); }
+  }
+  if (Array.isArray(sd.place)) for (var pi = 0; pi < sd.place.length; pi++) {
+    var pl = sd.place[pi], pth = pl && byId(pl.thing);
+    if (pth && Array.isArray(pl.among) && pl.among.length) { var pt = pl.among[Math.floor(rnd() * pl.among.length)]; pth.x = Math.floor(Number(pt[0])); pth.y = Math.floor(Number(pt[1])); }
+  }
   return w;
 }
 /** The world a run starts on, given its seed (none: one is picked): the job copied in, the seeded layout laid. A request with neither is untouched. */
@@ -194,7 +211,7 @@ export const ENGINE = `
 var DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0];
 var BLOCKING_TILES = { W: 1, R: 1, T: 1, H: 1, L: 1 };
 // IG-002: a rock (a mineable thing on grass) and a sign block a move like a tulip; a note on the ground does not.
-var BLOCKING_THINGS = { tulip: 1, bowl: 1, rock: 1, sign: 1, basket: 1, store: 1, can: 1, hen: 1, postbox: 1 };
+var BLOCKING_THINGS = { tulip: 1, bowl: 1, rock: 1, sign: 1, basket: 1, store: 1, can: 1, hen: 1, postbox: 1, door: 1 };
 // P108 IW-002: the job model (brief §4.2) — its kinds and their roles, a container's item, the wear clock (island ticks only).
 var JOB_KINDS = ${JSON.stringify(JOB_KINDS)};
 var JOB_ITEMS = ${JSON.stringify(JOB_ITEMS)};
@@ -202,7 +219,7 @@ var WEAR = ${JSON.stringify(WEAR)};
 var HEN_CAPACITY = ${HEN_CAPACITY};
 var SITE_STAGES = ${JSON.stringify(SITE_STAGES)};
 var CAN_MAX = ${CAN_MAX};
-var PICKABLE = { letter: 1, egg: 1, stone: 1, food: 1 };
+var PICKABLE = { letter: 1, egg: 1, stone: 1, food: 1, ball: 1 };
 var UNTIL_GUARD = ${UNTIL_GUARD};
 var MAX_TRICK_DEPTH = ${MAX_TRICK_DEPTH};
 var MAX_TICKS = ${MAX_TICKS};
@@ -1338,6 +1355,8 @@ var bumps = run ? Number(run.bumps) || 0 : 0;
 var puddles = run ? Number(run.puddles) || 0 : 0;
 var dries = run ? Number(run.dries) || 0 : 0;
 var rockGone = run ? Number(run.rockGone) || 0 : 0;
+var noCans = run ? Number(run.noCans) || 0 : 0;
+var job = jobOf(w) ? jobProgress(w) : null;
 var blocks = countBlocks(program);
 var rep = findRepeat(program);
 // IG-003 (P106 s3): a win is a run's. Goal met keeps its last answer until the next run finishes, so after Stop has
@@ -1366,8 +1385,11 @@ else if (rockGone > 0) key = 'hintRockGone';
 else if (dries > 0) key = 'hintDry';
 else if (bumps > 0) key = 'hintBump';
 else if (puddles > 0) key = 'hintWet';
+// P108 IW-003 (s3 base): no can in hand; then (after Olive's line and free play) how much of the job is done.
+else if (noCans > 0) key = 'iw3NoCan';
 else if (rung >= 1 && rung <= ${OLIVE_RUNG_MAX}) key = 'oliveRung' + rung;
 else if (freePlay && ran) key = 'hintFree';
+else if (ran && job && job.total > 0) { key = 'iw3Job'; vars = { w: job.full, t: job.total }; }
 else if (ran && total > 0) { key = 'hintMissed'; vars = { w: done, t: total }; }
 else if (ran) key = 'hintNotYet';
 // P106 s4: a program not run yet, in Drive: Play it or Teach more — the start line ("press Teach and show") is Teach's.
@@ -1401,7 +1423,7 @@ export const PALETTE_SCRIPT = `${OLIVE_HELPERS}
 var BAND1 = ${BAND1};
 var ALL = ${ALL_BLOCKS};
 var META = ${JSON.stringify(BLOCK_META)};
-var LABEL = { fwd: 'Fwd', left: 'Left', right: 'Right', water: 'Water', fill: 'Fill', pick: 'Pick', put: 'Put', say: 'Say', repeat: 'Repeat', until: 'Until', 'if': 'If', when: 'When', count_inc: 'CountInc', trick: 'Trick', 'do': 'Do', ask: 'Ask' };
+var LABEL = { fwd: 'Fwd', left: 'Left', right: 'Right', water: 'Water', fill: 'Fill', pick: 'Pick', put: 'Put', say: 'Say', repeat: 'Repeat', until: 'Until', 'if': 'If', when: 'When', count_inc: 'CountInc', trick: 'Trick', 'do': 'Do', ask: 'Ask', go_nearest: 'GoNearest', go_to: 'GoTo', set: 'Set', change: 'Change' };
 var band = Number(Inputs.band) === 1 ? 1 : 2;
 var allowed = Array.isArray(Inputs.allowed) && Inputs.allowed.length ? Inputs.allowed : null;
 var lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';

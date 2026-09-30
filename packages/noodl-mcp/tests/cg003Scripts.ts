@@ -397,7 +397,7 @@ Outputs.count = out.length;
 
 /** The fold offer's sentence. "Not now" keeps it hidden until the program is a different program. */
 export const TIDY_LINE_SCRIPT = `${WORD_HELPER}
-var LABEL = { fwd: 'bFwd', left: 'bLeft', right: 'bRight', water: 'bWater', fill: 'bFill', pick: 'bPick', put: 'bPut', say: 'bSay', repeat: 'bRepeat', until: 'bUntil', 'if': 'bIf', when: 'bWhen', count_inc: 'bCountInc', trick: 'bTrick', 'do': 'bDo', ask: 'bAsk' };
+var LABEL = { fwd: 'bFwd', left: 'bLeft', right: 'bRight', water: 'bWater', fill: 'bFill', pick: 'bPick', put: 'bPut', say: 'bSay', repeat: 'bRepeat', until: 'bUntil', 'if': 'bIf', when: 'bWhen', count_inc: 'bCountInc', trick: 'bTrick', 'do': 'bDo', ask: 'bAsk', go_nearest: 'bGoNearest', go_to: 'bGoTo', set: 'bSet', change: 'bChange' };
 var lang = langOf(Inputs.lang);
 var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
 var vars = Inputs.vars && typeof Inputs.vars === 'object' ? Inputs.vars : {};

@@ -119,6 +119,18 @@
     },
     {
       "fromId": "hinttableFn",
+      "fromProperty": "out-iw3Job",
+      "toId": "hinttableOut",
+      "toProperty": "iw3Job"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-iw3NoCan",
+      "toId": "hinttableOut",
+      "toProperty": "iw3NoCan"
+    },
+    {
+      "fromId": "hinttableFn",
       "fromProperty": "out-lang",
       "toId": "hinttableOut",
       "toProperty": "lang"
