@@ -38,6 +38,8 @@
  *   - IW-002 AC3: the Island page closed (another page) for longer than a wear period, then reopened — the meters as left.
  * `--part island --mode 3d` (swiftshader): IW-005 AC5 in 3D — Pocket's name chip seen moving into the pen, the basket's
  *   3D meter chip rising.
+ * `--part look3d --mode 3d` (swiftshader): the three graded jobs' Workshop in Garden 3D — the tulips' chips 0/3, the can
+ *   on the grass, the eggs in the pen and the basket's chip; screenshots beside the mockup's 3D shots; the job card.
  *
  * Usage: node scripts/devtools/drive-iw003-mamie.js <deploy-dir> --project <project-dir> [--part workshop|island]
  *        [--mode 2d|3d] [--shots <dir>] [--json <file>]
@@ -60,8 +62,8 @@ const PART = arg('--part') || 'workshop';
 /** --only M1,M5: run just those missions of the workshop part (every one when absent). */
 const ONLY = arg('--only') ? new Set(arg('--only').split(',')) : null;
 const runs = (m) => !ONLY || ONLY.has(m);
-if (!DIR || DIR.startsWith('--') || !PROJECT || !['2d', '3d'].includes(MODE) || !['workshop', 'island'].includes(PART)) {
-  console.error('usage: drive-iw003-mamie.js <deploy-dir> --project <project-dir> [--part workshop|island] [--mode 2d|3d] [--shots <dir>] [--json <file>]');
+if (!DIR || DIR.startsWith('--') || !PROJECT || !['2d', '3d'].includes(MODE) || !['workshop', 'island', 'look3d'].includes(PART) || (PART === 'look3d' && MODE !== '3d')) {
+  console.error('usage: drive-iw003-mamie.js <deploy-dir> --project <project-dir> [--part workshop|island|look3d] [--mode 2d|3d] [--only M1,M3] [--shots <dir>] [--json <file>]  (look3d needs --mode 3d)');
   process.exit(2);
 }
 if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
@@ -325,7 +327,8 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
       check(`M1 ${tag}: taught with the pad (${layOut(r.referenceProgram).join(' ')}) — Pip holds the can and the tulip is full in the Teach world`, taught.robot.holds === 'can' && taught.things.some((t) => t.kind === 'tulip' && t.have === 3), taught);
       // Play from here: a fresh run from the start world (Start over would clear what was taught).
       const played = await playAndWatch(40000);
-      const tulipSeen = played.seenMeters['tulip@7,1'] || [];
+      const tt = r.things.find((t) => t.kind === 'tulip');
+      const tulipSeen = played.seenMeters[`tulip@${tt.x},${tt.y}`] || [];
       const home = homeOf('tulip-door');
       const end = await world();
       check(`M1 ${tag}: played — the tulip's meter showed ${tulipSeen.join(' → ')} (0/3 to 3/3 one drink at a time), Pip walked home to ${home.x},${home.y} and the win card came up`, played.won && JSON.stringify(tulipSeen) === JSON.stringify(['0/3', '1/3', '2/3', '3/3']) && end.robot.x === home.x && end.robot.y === home.y && end.robot.d === home.d && played.path[played.path.length - 1] === `${home.x},${home.y}`, { played, end: end.robot });
@@ -387,6 +390,23 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
       const pad = await evaluate(PAD);
       check(`M3 ${tag}: eggs-count opens on its job — the hen in her pen with ${eggs0.length} eggs, the basket by the door at ${basket.count}/${basket.capacity} drawn "${(m0.find((m) => m.kind === 'basket') || {}).meter}"`, !!basket && basket.capacity === 4 && eggs0.length === 4 && w0.things.some((t) => t.kind === 'hen') && m0.some((m) => m.kind === 'basket' && m.meter === `${basket.count}/4`), { basket, eggs0, m0 });
       check(`M3 ${tag}: the pad walks to things (IW-003 §2.5): "go to the nearest 🥚" and "go to the 🧺" beside pick and put — ${pad.join(' ')}`, pad.includes('go-nearest-egg') && pad.includes('go-to-basket') && pad.includes('pick') && pad.includes('put'), pad);
+      if (lang === 'en') {
+        // The pad's walk, taught: one press records go to the nearest 🥚 and Pocket stands facing an egg; Start over clears it.
+        await control('rec');
+        await until(`!!document.querySelector('.bg-pad .bg-key-go-nearest-egg')`, Boolean, 4000);
+        await key('go-nearest-egg');
+        await wait(700);
+        const taught = await program();
+        const at = await world();
+        const f = { x: at.robot.x + [0, 1, 0, -1][at.robot.d], y: at.robot.y + [-1, 0, 1, 0][at.robot.d] };
+        const faces = at.things.some((t) => t.kind === 'egg' && t.x === f.x && t.y === f.y);
+        await shot(`m3-${tag}-00-pad-go`);
+        check(`M3 ${tag}: in Teach, the pad's "go to the nearest 🥚" records its block (${shape(taught)}) and walks Pocket the whole way — he stands facing an egg (${f.x},${f.y})`, shape(taught) === 'go_nearest egg' && faces, { taught: shape(taught), robot: at.robot, f });
+        await control('reset');
+        await wait(600);
+        await control('drive');
+        await wait(500);
+      }
       // The program, from the drawer: until [ count of 🥚 in [🧺] = 4 ] { go to nearest 🥚, pick up, go to [🧺], put }.
       await palTap('until');
       const untilId = await lastOf('until');
@@ -585,6 +605,59 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     }
   }
 
+  if (PART === 'look3d') {
+    // The Workshop in Garden 3D (swiftshader): the graded jobs' things and chips, and the job card beside them.
+    await page.setViewport({ width: 1368, height: 912, mobile: false });
+    await freshFamily('en');
+    await lend('pocket');
+    await page.navigate('/island');
+    await wait(900);
+    const ROOT = `document.querySelector('.bg-stage [data-gd3-world]')`;
+    const CHIPS = `[...document.querySelectorAll('.bg-stage .gd3-meter')].map((c) => c.getAttribute('data-kind') + ':' + c.getAttribute('data-meter'))`;
+    const JOB = `(() => { const j = document.querySelector('.bg-job'); return j && j.offsetParent !== null ? j.innerText.split(String.fromCharCode(10)).map((x) => x.trim()).filter(Boolean) : null; })()`;
+    for (const [id, want] of [['tulips-three', ['tulip:0/3', 'tulip:0/3', 'tulip:0/3']], ['tulip-door', ['tulip:0/3', 'can:0/3']], ['eggs-count', ['basket:']]]) {
+      await openQuest('en', id);
+      const ready = await until(`(() => { const e = ${ROOT}; return e ? e.getAttribute('data-ready') : null; })()`, (v) => v === 'true', 20000);
+      await wait(2500);
+      const chips = await evaluate(CHIPS);
+      const job = await evaluate(JOB);
+      await shot(`look3d-${id}`);
+      const got = want.every((c) => chips.some((x) => x.startsWith(c)));
+      check(`LOOK 3D ${id}: Garden 3D draws the job with its chips (${chips.join(' ')}) and the job card beside it (${job ? job[0] : 'none'})`, ready === 'true' && got && !!job && job.length >= 6, { ready, chips, job });
+    }
+    // IW-005 AC5 in 3D (the Workshop's 8 × 6 world, where software GL keeps up): taught with the pad — go to the nearest 🥚,
+    // pick up, go to the 🧺, put — and played: Pocket's name chip SEEN walking to the egg tile by tile, the basket's chip up one.
+    // The eggs where the hen laid them this morning (read before Teach, whose own walk picks one in the Teach world).
+    const w0 = await evaluate(`(() => { const W = Noodl.Variables.gardenWorld || {}; return (W.things || []).filter((t) => t.kind === 'egg').map((t) => t.x + ',' + t.y); })()`);
+    await control('rec');
+    await until(`!!document.querySelector('.bg-pad .bg-key-go-nearest-egg')`, Boolean, 4000);
+    for (const k of ['go-nearest-egg', 'pick', 'go-to-basket', 'put']) await key(k);
+    await wait(600);
+    await control('play');
+    const NAME = `(() => { const n = document.querySelector('.bg-stage .gd3-name'); return n ? n.getAttribute('data-x') + ',' + n.getAttribute('data-y') : null; })()`;
+    const path3d = [];
+    const basket3d = [];
+    let fell = false;
+    const endAt = Date.now() + 30000;
+    while (Date.now() < endAt) {
+      const r = await evaluate(`({ n: ${NAME}, b: (${CHIPS}).filter((c) => c.startsWith('basket:')), gl: !!${ROOT}, idle: !document.querySelector('.bg-blocks-box .gd-locked') })`);
+      if (!r.gl) {
+        fell = true;
+        break;
+      }
+      if (r.n && path3d[path3d.length - 1] !== r.n) path3d.push(r.n);
+      if (r.b[0] && basket3d[basket3d.length - 1] !== r.b[0]) basket3d.push(r.b[0]);
+      if (r.idle && path3d.length > 1) break;
+      await wait(150);
+    }
+    await shot('look3d-eggs-played');
+    readings.seekWorkshop3d = { path3d, basket3d, eggs: w0, fellBackToFlat: fell };
+    console.log(`IW-005 AC5 readout (Workshop 3D, swiftshader): ${fell ? 'Garden 3D handed back to the flat world (Too Slow) mid-run' : 'Garden 3D throughout'}; the basket's chip ${basket3d.join(' → ')}`);
+    const adj = (a, b) => { const [ax, ay] = a.split(',').map(Number); const [bx, by] = b.split(',').map(Number); return Math.abs(ax - bx) + Math.abs(ay - by) === 1; };
+    const reached = path3d.some((p) => w0.some((e) => adj(p, e)));
+    check(`IW-005 AC5 (3D, the Workshop, swiftshader): Pocket's name chip SEEN walking tile by tile in Garden 3D (${path3d.join(' → ')}) to stand by an egg where the hen laid it (${w0.join(' ')})`, path3d.length >= 3 && reached, readings.seekWorkshop3d);
+  }
+
   if (PART === 'island') {
     // A family whose Mamie plots are won and pinned, as a win writes it: tulip-door to Pip, eggs-count to Pocket.
     await page.setViewport({ width: 1368, height: 912, mobile: false });
@@ -614,21 +687,39 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     const held = () => evaluate(HELD);
 
     if (MODE === '3d') {
+      // Under software GL the whole island in 3D is slow: its Too Slow rule may put the flat island back after a while
+      // (IG-007). So the seek is read from the first frames: Pocket's name chip into the hen's pen and the basket's chip
+      // rising, while the 3D world is still the one on screen (each read says whether it still is).
       const gl = await until(`!!document.querySelector('.bg-isle [data-gd3-world]') && document.querySelector('.bg-isle [data-gd3-world]').getAttribute('data-ready') === 'true'`, Boolean, 20000);
       const seen = [];
       const chips = [];
-      const end = Date.now() + 70000;
+      let still3d = true;
+      let shot3d = false;
+      const end = Date.now() + 60000;
       while (Date.now() < end) {
         const s = await isle();
+        if (!s.gl) {
+          still3d = false;
+          break;
+        }
         const p = bot(s, 'Pocket');
         if (p && (!seen.length || seen[seen.length - 1].x !== p.x || seen[seen.length - 1].y !== p.y)) seen.push({ x: p.x, y: p.y });
         const bc = s.chips.find((c) => c.kind === 'basket');
         if (bc && chips[chips.length - 1] !== bc.meter) chips.push(bc.meter);
-        if (bc && bc.meter === '4/4' && p && p.x === HOME_OF(EGGS).x && p.y === HOME_OF(EGGS).y) break;
-        await wait(250);
+        if (!shot3d && p && inPen(p)) {
+          await shot('iw003-3d-eggs-seek');
+          shot3d = true;
+        }
+        if (seen.some(inPen) && chips.length >= 2) break;
+        await wait(200);
       }
-      await shot('iw003-3d-eggs-seek');
-      check(`IW-005 AC5 (3D, swiftshader): Pocket SEEN seeking — his name chip walked into the hen's pen (${seen.filter(inPen).length} tiles of ${seen.length} in it), the basket's 3D chip rose ${chips.join(' → ')}, and he came home (${HOME_OF(EGGS).x},${HOME_OF(EGGS).y})`, gl && seen.some(inPen) && chips[chips.length - 1] === '4/4' && chips.length >= 2 && seen[seen.length - 1].x === HOME_OF(EGGS).x && seen[seen.length - 1].y === HOME_OF(EGGS).y, { gl, seen, chips });
+      readings.seek3d = { gl, still3d, seen, chips };
+      if (!shot3d) await shot('iw003-3d-eggs-seek');
+      // A readout, not the gate (the gate is the Workshop's 3D seek, --part look3d): under swiftshader the whole island in 3D
+      // hands back to the flat island within a few ticks (Too Slow), so a lap is not seen through here.
+      console.log(`IW-005 AC5 readout (3D island, swiftshader): ${still3d ? 'still 3D after 60 s' : 'fell back to the flat island'} after ${seen.length} tiles of Pocket's (${seen.map((q) => q.x + ',' + q.y).join(' ')}), basket chip ${chips.join(' → ')}`);
+      const near = (q) => q.x >= PEN.x0 - 1 && q.x <= PEN.x1 + 1 && q.y >= PEN.y0 - 1 && q.y <= PEN.y1 + 1;
+      check(`IW-005 AC5 (3D island, swiftshader): Garden 3D draws the island with Pocket at work — his name chip seen moving toward the hen's pen (${seen.map((q) => q.x + ',' + q.y).join(' → ')}) and the basket's 3D chip (${chips[0]})`, gl && seen.length >= 2 && seen.some(near) && chips.length >= 1, readings.seek3d);
     } else {
       // IW-005 AC5 + IW-002 AC5 (lap 0): Pocket seeks the eggs, fills the basket, walks home; Pip does the tulip and walks home.
       const pocketPath = [];

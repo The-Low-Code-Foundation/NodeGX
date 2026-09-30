@@ -225,7 +225,7 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   iw3mNoneWell: s('I can’t walk to the water from here.', 'Je ne peux pas aller jusqu’à l’eau d’ici.'),
   iw3mNoneRead: s('I don’t know where that is.', 'Je ne sais pas où c’est.'),
   // The job card (IW-000's graded look): its five labels, and each of Mamie's jobs in five lines plus how much is done.
-  iw3mJcSrc: s('Source', 'Source'),
+  iw3mJcSrc: s('Source', 'D’où ça vient'),
   iw3mJcCar: s('Carrier', 'Porteur'),
   iw3mJcTgt: s('Target', 'Cible'),
   iw3mJcFin: s('Finish line', 'Ligne d’arrivée'),

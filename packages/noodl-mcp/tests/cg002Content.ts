@@ -691,7 +691,9 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   rqPathLine: s('"The post box is at the end of the path. Can {b} walk there?"', '« La boîte aux lettres est au bout du chemin. {b} peut y aller ? »'),
   rqTulipsTitle: s('Water my three tulips', 'Arrose mes trois tulipes'),
   rqTulipsBlurb: s('Repeat', 'Répéter'),
-  rqTulipsLine: s('"Three drinks a tulip. Fill the can at the pond, and come back!"', '« Trois gorgées par tulipe. Remplis l’arrosoir, et reviens ! »'),
+  // P108 IW-003 (lane M): the three drinks said in English; the French keeps its line (at 390 × 844 its task card has three
+  // pixels to spare before the owl leaves the screen — the page drive's AC4 — and the job card says "3 tulipes × 3 gorgées").
+  rqTulipsLine: s('"Three drinks a tulip. Fill the can at the pond, and come back!"', '« Mes tulipes ont soif. Remplis l’arrosoir à la mare, et reviens ! »'),
   rqBowlTitle: s('Feed me, but only if my bowl is empty', 'Nourris-moi, mais seulement si ma gamelle est vide'),
   rqBowlBlurb: s('If', 'Si'),
   rqBowlLine: s('"Two bowls. One is full already. Fill only the empty one, {b}!"', '« Deux gamelles. L’une est déjà pleine. Remplis seulement la vide, {b} ! »'),

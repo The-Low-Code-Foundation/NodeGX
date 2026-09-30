@@ -2358,7 +2358,8 @@ describe('P108 IW-003 (lane M) — the pad walks to things; a robot that finds n
     const t = card('tulips-three');
     expect([t.show, t.rows.map((r: any) => r.label), t.sum, t.sumClass]).toEqual([true, ['Source', 'Carrier', 'Target', 'Finish line', 'Wear'], '0/3 tulips full', 'bg-job-sum']);
     expect(t.rows.map((r: any) => r.text)).toEqual([PAGE_WORDS.iw3mTulipsSrc.en, PAGE_WORDS.iw3mTulipsCar.en.split('{b}').join('Pip'), PAGE_WORDS.iw3mTulipsTgt.en, PAGE_WORDS.iw3mTulipsFin.en.split('{b}').join('Pip'), PAGE_WORDS.iw3mTulipsWr.en]);
-    expect(card('tulips-three', 'fr').rows.map((r: any) => r.label)).toEqual(['Source', 'Porteur', 'Cible', 'Ligne d’arrivée', 'Usure']);
+    // (French: every label its own word — the page's language clause reads every string change with the language.)
+    expect(card('tulips-three', 'fr').rows.map((r: any) => r.label)).toEqual(['D’où ça vient', 'Porteur', 'Cible', 'Ligne d’arrivée', 'Usure']);
     // Played to the end: 3/3, the pill turns leaf-green.
     const st = start('tulips-three');
     let r = run(NEW_RUN_SCRIPT, { program: REQUESTS.find((q) => q.id === 'tulips-three')!.referenceProgram, robotId: 'me', lang: 'en' }).run;
