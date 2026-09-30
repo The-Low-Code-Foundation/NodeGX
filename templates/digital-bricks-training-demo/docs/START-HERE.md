@@ -19,7 +19,11 @@ template and regenerate, and the demo follows (TASK-L180).
   moment you open it, and the two months named in prose move with them. What is done is still
   done, what is ahead is still ahead, and the pace tracker is drawn against today.
 - **There is no sign in.** Home's two doors open the learner's course and the coach's people.
-  Nothing writes, nothing is saved, and nothing leaves the browser.
+  Nothing is saved, and nothing leaves the browser.
+- **The two writes keep nothing.** Saving an answer in a lesson shows *✓ Saved*, and *Mark complete*
+  goes to the course, because each answers the way a write that worked answers — but there is no
+  backend, so a reload shows the programme as it was. In the template both are real
+  (TASK-L177, TASK-L178).
 - **Hash URLs** (`#/course`), so a reload works on a static host with no fallback.
 
 To run it with a real backend, magic-link sign-in and the coach's gate, start from the

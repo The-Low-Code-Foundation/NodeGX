@@ -372,7 +372,7 @@
         }
       },
       "metadata": {
-        "comment": "A visitor pressing a button called 'log in' is owed the truth about what happens next. Since TASK-L171 something IS sent: a sign-in link, by email. So the sentence says that, and says what is still true — this version only reads, so nothing anybody does once in changes a programme. Re-read it the day the first write lands."
+        "comment": "A visitor pressing a button called 'log in' is owed the truth about what happens next. Since TASK-L171 something IS sent: a sign-in link, by email. Since TASK-L177 what they do is SAVED — an answer onto the learner's project, a finished step — so the sentence says that, and says how it is undone: `tools/reset-demo.mjs` restores the seed the setup sealed (TASK-L179). The public demo has no backend and says the opposite, in its own copy."
       }
     },
     {

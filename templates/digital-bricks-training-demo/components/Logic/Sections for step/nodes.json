@@ -29,6 +29,21 @@
           "name": "copy",
           "plug": "output",
           "type": "object"
+        },
+        {
+          "name": "conceptId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "facts",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "captured",
+          "plug": "output",
+          "type": "object"
         }
       ]
     },
@@ -39,7 +54,8 @@
       "x": 40,
       "y": 260,
       "parameters": {
-        "functionScript": "function plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst sections = plain(Inputs.sections) || [];\nconst steps = plain(Inputs.steps) || [];\nif (!steps.length || !sections.length) return;\nlet index = steps.findIndex((s) => s.id === Inputs.activeStepId);\nif (index < 0) index = 0;\nconst step = steps[index];\nconst byId = new Map(sections.map((s) => [s.id, s]));\n// THE STRINGS RIDE THE ROW (TASK-L160). A For Each maps an item's properties\n// onto the template component's inputs BY NAME, so `copy` on the row is what\n// fills Section row's Copy input and reaches the kit node. It is one object by\n// reference on every row, never 80 string parameters. Undefined is a supported\n// value: the kit then renders the English it ships (L160 AC1).\nconst copy = plain(Inputs.copy) || undefined;\nconst rows = (step.sectionIds || []).map((id) => {\n  const section = byId.get(id);\n  if (!section) throw new Error('step \"' + step.id + '\" claims section \"' + id + '\", which this lesson does not have');\n  return { id: id, section: section, copy: copy };\n});\nOutputs.rows = rows;\nOutputs.count = rows.length;\n// A built-in Button paints its background and colour INLINE, so a class alone\n// cannot switch the active chip: the two colours ride the row data as tokens.\nOutputs.chips = steps.map((s, i) => ({\n  id: s.id,\n  title: s.title,\n  index: i,\n  active: i === index,\n  className: i === index ? 'lesson-step-chip dbt-chip active' : 'lesson-step-chip dbt-chip',\n  bg: i === index ? 'var(--primary)' : 'var(--surface-raised)',\n  fg: i === index ? 'var(--primary-foreground)' : 'var(--muted-foreground)'\n}));\nOutputs.stepTitle = step.title || '';\nOutputs.stepGoal = step.goal || '';\nOutputs.unlocks = step.unlocks || '';\nconst hasNext = index < steps.length - 1;\nOutputs.hasNext = hasNext;\nOutputs.nextTitle = hasNext ? steps[index + 1].title : '';\nOutputs.nextStepId = hasNext ? steps[index + 1].id : '';\nOutputs.activeIndex = index;\n"
+        "functionScript": "function plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst sections = plain(Inputs.sections) || [];\nconst steps = plain(Inputs.steps) || [];\nif (!steps.length || !sections.length) return;\nlet index = steps.findIndex((s) => s.id === Inputs.activeStepId);\nif (index < 0) index = 0;\nconst step = steps[index];\nconst byId = new Map(sections.map((s) => [s.id, s]));\n// THE STRINGS RIDE THE ROW (TASK-L160). A For Each maps an item's properties\n// onto the template component's inputs BY NAME, so `copy` on the row is what\n// fills Section row's Copy input and reaches the kit node. It is one object by\n// reference on every row, never 80 string parameters. Undefined is a supported\n// value: the kit then renders the English it ships (L160 AC1).\nconst copy = plain(Inputs.copy) || undefined;\n// WHAT A ROW NEEDS TO SAVE (TASK-L177). The concept its lesson is for — a row\n// that carries one writes through the `capture` function; Palette's rows carry\n// none and write nothing — and the learner's facts, so a capture opens showing\n// what they already saved. `captured` is what they saved since this page\n// opened: the page reads their facts once, so without it a step left and come\n// back to would show the words from before the save. It does NOT re-run this\n// (runOnChange off): a save must not remount the rows under somebody still\n// typing in another box. It is read the next time the step changes.\nconst conceptId = String(Inputs.conceptId || '');\nconst facts = Object.assign({}, plain(Inputs.facts) || {}, plain(Inputs.captured) || {});\nconst rows = (step.sectionIds || []).map((id) => {\n  const section = byId.get(id);\n  if (!section) throw new Error('step \"' + step.id + '\" claims section \"' + id + '\", which this lesson does not have');\n  return { id: id, section: section, copy: copy, conceptId: conceptId, facts: facts };\n});\nOutputs.rows = rows;\nOutputs.count = rows.length;\n// A built-in Button paints its background and colour INLINE, so a class alone\n// cannot switch the active chip: the two colours ride the row data as tokens.\nOutputs.chips = steps.map((s, i) => ({\n  id: s.id,\n  title: s.title,\n  index: i,\n  active: i === index,\n  className: i === index ? 'lesson-step-chip dbt-chip active' : 'lesson-step-chip dbt-chip',\n  bg: i === index ? 'var(--primary)' : 'var(--surface-raised)',\n  fg: i === index ? 'var(--primary-foreground)' : 'var(--muted-foreground)'\n}));\nOutputs.stepTitle = step.title || '';\nOutputs.stepGoal = step.goal || '';\nOutputs.unlocks = step.unlocks || '';\nconst hasNext = index < steps.length - 1;\nOutputs.hasNext = hasNext;\nOutputs.nextTitle = hasNext ? steps[index + 1].title : '';\nOutputs.nextStepId = hasNext ? steps[index + 1].id : '';\nOutputs.activeIndex = index;\n",
+        "runOnChange-in-captured": false
       },
       "metadata": {
         "comment": "Every id a step claims must resolve — a missing one THROWS by name rather than rendering the step with a hole (L46's referential-integrity rule). An empty activeStepId means the first step. Nothing here gates: every chip is live."
@@ -71,6 +87,27 @@
           "plug": "input",
           "type": "*",
           "displayName": "copy",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-conceptId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "conceptId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-facts",
+          "plug": "input",
+          "type": "*",
+          "displayName": "facts",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-captured",
+          "plug": "input",
+          "type": "*",
+          "displayName": "captured",
           "group": "Inputs"
         },
         {

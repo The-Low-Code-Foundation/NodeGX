@@ -1,0 +1,104 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b4ee4be5-8f02-5f93-80d1-bcd3a0f2b805",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req",
+      "type": "noodl.cloud.request",
+      "label": "Signed in (security: authenticated)",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "conceptId",
+        "allowNoAuth": false,
+        "ptype-conceptId": "string",
+        "preq-conceptId": true
+      }
+    },
+    {
+      "id": "who",
+      "type": "/#__cloud__/shared/Caller learner",
+      "label": "Their learner",
+      "x": 300,
+      "y": 40,
+      "parameters": {}
+    },
+    {
+      "id": "write",
+      "type": "JavaScriptFunction",
+      "label": "Finish it, open the next — each write only if unchanged",
+      "x": 560,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * FINISH A STEP, AND OPEN THE NEXT ONE (TASK-L178).\n *\n * The product's `completeStep` does two writes in one TRANSACTION: this step\n * `complete`, the next `available`. NodeGX has no transaction a function can\n * reach — HLT-016 (b) is ruled out until a real case needs it — so this is\n * three single-row writes, each guarded on what was read, in an ORDER chosen so\n * that every state a crash between two of them can leave is one the learner's\n * own next action heals (TASK-L178 §3 is the measurement; its Status records\n * every partial state). The order:\n *\n *   1. stamp their progress row — invisible until the step is complete, because\n *      a lesson entry's moment is that row's stamp ONLY on a complete step (L116);\n *   2. open the next step, only if it is still `locked`;\n *   3. complete this step, only if it is still what was read.\n *\n * A crash after 1 changes nothing they can see. A crash after 2 leaves the next\n * step open AND this one still theirs to finish — two open steps, which is what\n * they see on any day they have not finished one yet, and pressing Mark complete\n * again finishes it. The other order (complete, then open) can leave every step\n * done and nothing open.\n *\n * A 409 on a step is READ AGAIN: if the row now holds what this was writing,\n * somebody else got there first (a double press, a second tab) and that is\n * success. Otherwise it is tried again, at most 4 times. Never a 200 while a\n * write is unresolved.\n *\n * `findStepToUnlock` is the product's, ported verbatim: the first locked step\n * whose every earlier step is complete, counting this one as complete. The walk\n * is over LIVE steps only (L113): a removed step is never what a step unlocks\n * into.\n *\n * IDENTITY COMES FROM THE SESSION. The answer is the product's: every live step\n * with its status, in position order.\n */\nif (Inputs.learnerId !== undefined && Inputs.conceptId !== undefined) {\n  (async () => {\n    const refuse = (why) => {\n      Outputs.error = why;\n      console.error('[dbt:finishStep] refused: ' + why + ' learner=' + String(Inputs.learnerId || '-'));\n      Outputs.failed();\n    };\n    try {\n      const q = (c, where, limit) => Noodl.Records.query(c, where, { limit: limit || 1000, plain: true });\n      const learnerId = String(Inputs.learnerId || '');\n      const conceptId = String(Inputs.conceptId || '');\n      if (!learnerId) return refuse('no learner');\n      if (!conceptId) return refuse('no concept');\n\n      const paths = await q('LearningPath', { learnerId: { equalTo: learnerId } });\n      const live = [...paths].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))[0];\n      if (!live) return refuse('no path');\n      const liveSteps = async () =>\n        (await q('PathStep', { pathId: { equalTo: live.pathId } }))\n          .filter((s) => s.removedAt === undefined || s.removedAt === null)\n          .sort((a, b) => a.position - b.position);\n\n      let steps = await liveSteps();\n      const target = steps.find((s) => s.conceptId === conceptId);\n      if (!target || target.status === 'locked') return refuse('step not open');\n\n      /* The product's findStepToUnlock (src/lib/server/delivery/service.ts), verbatim. */\n      function findStepToUnlock(allSteps, justCompletedConceptId) {\n        const completedIds = new Set(\n          allSteps\n            .filter((s) => s.status === 'complete' || s.conceptId === justCompletedConceptId)\n            .map((s) => s.conceptId)\n        );\n        for (const step of allSteps) {\n          if (step.status !== 'locked') continue;\n          const priorSteps = allSteps.filter((s) => s.position < step.position);\n          const allPriorComplete = priorSteps.every((s) => completedIds.has(s.conceptId));\n          if (allPriorComplete) return step.conceptId;\n        }\n        return null;\n      }\n\n      /* One step row to `want`, only if it still holds `from`. A conflict is read\n         again: already `want` is success; anything else is tried again. */\n      async function setStatus(conceptOf, from, want) {\n        for (let attempt = 1; attempt <= 4; attempt++) {\n          const row = (await liveSteps()).find((s) => s.conceptId === conceptOf);\n          if (!row) throw new Error('step vanished: ' + conceptOf);\n          if (row.status === want) return;\n          if (from !== null && row.status !== from) throw new Error('step ' + conceptOf + ' is ' + row.status + ', not ' + from);\n          try {\n            await Noodl.Records.save(row.objectId, { status: want }, { className: 'PathStep', ifMatch: { status: row.status } });\n            return;\n          } catch (e) {\n            if (!e || e.code !== 'precondition-failed') throw e;\n            console.warn('[dbt:finishStep] conflict learner=' + learnerId + ' step=' + conceptOf + ' attempt=' + attempt);\n            await new Promise((r) => setTimeout(r, 5 + Math.floor(Math.random() * 25)));\n          }\n        }\n        throw new Error('still conflicting on ' + conceptOf);\n      }\n\n      // 1. Stamp their progress row. Last writer wins on a timestamp, which is right:\n      //    two presses a second apart finished the step at about the same moment.\n      const now = new Date().toISOString();\n      const progress = await q('Progress', { and: [{ learnerId: { equalTo: learnerId } }, { conceptId: { equalTo: conceptId } }] }, 2);\n      if (progress.length) {\n        await Noodl.Records.save(progress[0].objectId, { completedAt: now }, { className: 'Progress' });\n      } else {\n        try {\n          await Noodl.Records.create('Progress', { learnerId, conceptId, completedAt: now, reachedWowMoment: false });\n        } catch (e) {\n          // (learnerId, conceptId) is unique: a concurrent finish created it first. Stamp that one.\n          const again = await q('Progress', { and: [{ learnerId: { equalTo: learnerId } }, { conceptId: { equalTo: conceptId } }] }, 2);\n          if (!again.length) throw e;\n          await Noodl.Records.save(again[0].objectId, { completedAt: now }, { className: 'Progress' });\n        }\n      }\n\n      // 2. Open the next step, only if it is still locked.\n      const next = findStepToUnlock(steps, conceptId);\n      if (next) await setStatus(next, 'locked', 'available');\n\n      // 3. Complete this one, only if it is still what was read.\n      await setStatus(conceptId, null, 'complete');\n\n      steps = await liveSteps();\n      Outputs.steps = steps.map((s) => ({ conceptId: s.conceptId, status: s.status }));\n      Outputs.done();\n    } catch (e) {\n      refuse(String((e && e.message) || e));\n    }\n  })();\n}\n",
+        "runOnChange-in-learnerId": true,
+        "runOnChange-in-conceptId": true
+      },
+      "ports": [
+        {
+          "name": "in-learnerId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "learnerId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-conceptId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "conceptId",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-steps",
+          "plug": "output",
+          "type": "*",
+          "displayName": "steps",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "plug": "output",
+          "type": "*",
+          "displayName": "error",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "RECORDS CALLS PER FINISH: the path, its steps, the progress row, then one read and one conditional write per step changed, then the steps again. Each conflict adds one read and one write, at most 4 attempts per step (TASK-L178)."
+      }
+    },
+    {
+      "id": "res",
+      "type": "noodl.cloud.response",
+      "label": "steps",
+      "x": 820,
+      "y": 40,
+      "parameters": {
+        "params": "steps"
+      }
+    },
+    {
+      "id": "deny",
+      "type": "noodl.cloud.response",
+      "label": "One refusal, whatever went wrong",
+      "x": 820,
+      "y": 220,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This could not be saved."
+      }
+    }
+  ]
+}

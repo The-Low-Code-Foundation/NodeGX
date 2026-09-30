@@ -9,7 +9,8 @@
  *      (a hand edit, or a template change nobody regenerated for);
  *   2. a file differs from the template's outside CHANGED_COMPONENTS, or a node
  *      differs inside one outside the removed / rewritten / added lists;
- *   3. a CloudFunction2, a net.noodl.user node or a Sign in route survives;
+ *   3. a CloudFunction2, a net.noodl.user node or a Sign in route survives —
+ *      and (3b) the two write stand-ins do more than answer `done`;
  *   4. a responder's embedded fixture is not backend/fixtures/<name>.json;
  *   5. a responder, RUN as the page runs it, answers differently from the
  *      backend it stands in for (Sam's programme / nobody else's; the one
@@ -84,6 +85,17 @@ for (const [rel, content] of files) {
 const project = JSON.parse(String(files.get('nodegx.project.json')));
 check(!project.metadata.cloudservices, '[3] the project still points at a backend (metadata.cloudservices)');
 check(project.settings.navigationPathType === 'hash', '[3] the project is not on hash navigation (nodegx.io has no fallback for a deep path)');
+
+// 3b. The two writes (TASK-L177/L178) are stand-ins that answer `done` and keep
+//     nothing: no Records, no fetch, no Variables — and they are wired to `done`.
+for (const [component, id] of [['Lesson/Section row', 'sr_call'], ['Pages/Lesson', 'ls_finish_call']]) {
+  const node = JSON.parse(String(files.get(`components/${component}/nodes.json`))).nodes.find((n) => n.id === id);
+  const script = (node && node.parameters.functionScript) || '';
+  check(node && node.type === 'JavaScriptFunction' && /Outputs\.done\(\)/.test(script), `[3b] ${component}/${id} is not a stand-in that answers done`);
+  check(!/Records|fetch\(|Variables/.test(script.replace(/\/\*[\s\S]*?\*\//g, '')), `[3b] ${component}/${id} does more than answer — the demo keeps nothing`);
+  const wires = JSON.parse(String(files.get(`components/${component}/connections.json`))).connections;
+  check(wires.some((w) => w.fromId === id && w.fromProperty === 'out-done') && !wires.some((w) => w.fromId === id && w.fromProperty === 'failure'), `[3b] ${component}/${id} is not wired from out-done alone`);
+}
 
 // 4 + 5. The responders hold the fixtures and answer as the backend does.
 const responders = {};

@@ -380,6 +380,17 @@
   color: var(--go);
 }
 
+/* Lifted from the product's globals.css (TASK-L178): the last step's landing,
+   which the template draws inside the close. */
+.lesson-landing {
+  font-family: var(--font-prose);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 0 0 12px;
+  max-width: 34em;
+}
+
 .lesson-step-close-goal {
   font-family: var(--font-prose);
   font-size: 1.0625rem;
@@ -655,6 +666,17 @@
   display: flex;
   gap: 8px;
   align-items: flex-end;
+}
+
+/* TASK-L177: a save the backend refused. Plain ink, a line of its own, no red
+   and no --warm: it is direction ("try again"), not an alarm. The text stays in
+   the box above it. */
+.capture-row { flex-wrap: wrap; }
+.dbt-save-error {
+  flex-basis: 100%;
+  margin: 4px 0 0;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
 }
 
 .capture-input {
