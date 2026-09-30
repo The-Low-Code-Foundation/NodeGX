@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4ed56109-f8e2-5516-8ab8-d41f840feaf8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pickthingIn",
+      "fromProperty": "picking",
+      "toId": "pickthingFn",
+      "toProperty": "in-picking"
+    },
+    {
+      "fromId": "pickthingIn",
+      "fromProperty": "tapX",
+      "toId": "pickthingFn",
+      "toProperty": "in-tapX"
+    },
+    {
+      "fromId": "pickthingIn",
+      "fromProperty": "tapY",
+      "toId": "pickthingFn",
+      "toProperty": "in-tapY"
+    },
+    {
+      "fromId": "pickthingIn",
+      "fromProperty": "world",
+      "toId": "pickthingFn",
+      "toProperty": "in-world"
+    },
+    {
+      "fromId": "pickthingIn",
+      "fromProperty": "go",
+      "toId": "pickthingFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pickthingFn",
+      "fromProperty": "out-found",
+      "toId": "pickthingOut",
+      "toProperty": "found"
+    },
+    {
+      "fromId": "pickthingFn",
+      "fromProperty": "out-pick",
+      "toId": "pickthingOut",
+      "toProperty": "pick"
+    },
+    {
+      "fromId": "pickthingFn",
+      "fromProperty": "success",
+      "toId": "pickthingOut",
+      "toProperty": "ran"
+    }
+  ]
+}

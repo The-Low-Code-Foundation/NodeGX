@@ -865,7 +865,7 @@ var PALETTE = ${JSON.stringify(CARD_PALETTE)};
 var lang = langOf(Inputs.lang), band = Number(Inputs.band) === 1 ? 1 : 2;
 var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
 // A ? chip's row id is help:<block> (a row is a Noodl Object, global by id): the card is the block's.
-var id = String(Inputs.cardOpen || '').replace(/^help:/, '');
+var id = String(Inputs.cardOpen || '').replace(/^help:/, '').replace(/:else$/, '');
 var c = CARDS[id] || null;
 var label = c ? c.label : '';
 if (c && band === 1 && w['c' + label.slice(1)] && label.charAt(0) === 'b') label = 'c' + label.slice(1);
@@ -1225,6 +1225,59 @@ var tick = Math.floor(Number(Inputs.tick)) || 0;
 Outputs.over = tick >= MAX;
 `;
 
+// ── P108 IW-004 (lane B): real blocks — the thing a chip is picked from, what the robot remembers ─────
+
+/**
+ * `Logic/Pick thing` (IW-004 §2, AC3): while the Blocks node is Picking, a tap on a tile of either world (2D or 3D: Tile X,
+ * Tile Y, Tile Tapped) is the thing for the chip. The thing on that tile from the world JSON becomes a chip REF
+ * { id?, kind, x, y } (brief §4.3; an id only when the world has one); a tap on the robot is what it holds (the can, its
+ * load), else what is ahead of it. A tile with nothing on it picks nothing (the chip keeps waiting). Pick is { n, ref }:
+ * a new n each tap, so the same thing tapped twice still arrives.
+ */
+export const PICK_THING_SCRIPT = `
+var SKIP = { label: 1, islander: 1, fence: 1, padlock: 1, flag: 1, tick: 1, puddle: 1 };
+var picking = Inputs.picking === true;
+var x = Math.floor(Number(Inputs.tapX)), y = Math.floor(Number(Inputs.tapY));
+var w = Inputs.world && typeof Inputs.world === 'object' ? Inputs.world : {};
+var ref = null;
+if (picking && isFinite(x) && isFinite(y)) {
+  var things = Array.isArray(w.things) ? w.things : [];
+  for (var i = 0; i < things.length && !ref; i++) {
+    var t = things[i];
+    if (!t || SKIP[t.kind] || Math.floor(Number(t.x)) !== x || Math.floor(Number(t.y)) !== y) continue;
+    ref = {};
+    if (t.id !== undefined && t.id !== null && t.id !== '') ref.id = String(t.id);
+    ref.kind = String(t.kind);
+    ref.x = x;
+    ref.y = y;
+  }
+  var robots = Array.isArray(w.robots) ? w.robots : [];
+  for (var r = 0; r < robots.length && !ref; r++) {
+    var b = robots[r];
+    if (!b || Math.floor(Number(b.x)) !== x || Math.floor(Number(b.y)) !== y) continue;
+    var holds = b.holds === 'can' || (Array.isArray(b.carry) && b.carry.length > 0);
+    ref = { ref: holds ? 'held' : 'ahead' };
+  }
+}
+Outputs.found = !!ref;
+if (ref) Outputs.pick = { n: 'pick:' + x + ':' + y + ':' + Math.random().toString(36).slice(2, 8), ref: ref };
+`;
+
+/**
+ * `Logic/Var monitor` (IW-004 §2, Scratch's variable monitor): what the robot remembers — the run's variables after
+ * set / change (the engine’s run.vars, lane J) — as one line under the world, "eggs = 3 · count = 1".
+ * No variables: no line.
+ */
+export const VAR_MONITOR_SCRIPT = `${WORD_HELPER}
+var run = Inputs.run && typeof Inputs.run === 'object' ? Inputs.run : null;
+var vars = run && run.vars && typeof run.vars === 'object' ? run.vars : {};
+var W = wordMap(Inputs.words, langOf(Inputs.lang), nameOf(Inputs.botName));
+var parts = [];
+for (var k in vars) if (Object.prototype.hasOwnProperty.call(vars, k)) parts.push(fill(W.iw4Monitor || '{name} = {v}', { name: k, v: vars[k] }));
+Outputs.show = parts.length > 0;
+Outputs.text = parts.length ? (W.iw4VarsH ? W.iw4VarsH + ': ' : '') + parts.join(' · ') : '';
+`;
+
 /** The glue, as the generator places it: one `Logic/*` each. */
 export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; seam: string }> = [
   { component: 'Logic/Read program', script: READ_PROGRAM_SCRIPT, seam: 'the program as a list, whatever held it' },
@@ -1276,5 +1329,8 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   // P108 IW-001 (lane A).
   { component: 'Logic/Run cap', script: RUN_CAP_SCRIPT, seam: 'a played run at the engine\u2019s tick cap stops by itself' },
   { component: 'Logic/Pad answer', script: PAD_ANSWER_SCRIPT, seam: 'Olive\u2019s answer to the pad\u2019s read key, spoken over the robot' },
-  { component: 'Logic/Latch', script: LATCH_SCRIPT, seam: 'a value held until Go, then handed on as it stood' }
+  { component: 'Logic/Latch', script: LATCH_SCRIPT, seam: 'a value held until Go, then handed on as it stood' },
+  // P108 IW-004 (lane B).
+  { component: 'Logic/Pick thing', script: PICK_THING_SCRIPT, seam: 'the thing on a tapped tile, for the chip that is picking' },
+  { component: 'Logic/Var monitor', script: VAR_MONITOR_SCRIPT, seam: 'what the robot remembers, as one line under the world' }
 ];

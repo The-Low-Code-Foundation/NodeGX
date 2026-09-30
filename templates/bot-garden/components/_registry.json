@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 481,
+      "connectionCount": 560,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -587,6 +587,22 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
+    "Logic/Pick thing": {
+      "path": "Logic/Pick thing",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 8,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Var monitor": {
+      "path": "Logic/Var monitor",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 7,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
     "Logic/App store": {
       "path": "Logic/App store",
       "type": "visual",
@@ -670,8 +686,8 @@
     "Workshop/Play": {
       "path": "Workshop/Play",
       "type": "visual",
-      "nodeCount": 152,
-      "connectionCount": 403,
+      "nodeCount": 155,
+      "connectionCount": 420,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -885,8 +901,8 @@
     }
   },
   "stats": {
-    "totalComponents": 110,
-    "totalNodes": 892,
-    "totalConnections": 2635
+    "totalComponents": 112,
+    "totalNodes": 901,
+    "totalConnections": 2746
   }
 }

@@ -1,0 +1,123 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4ed56109-f8e2-5516-8ab8-d41f840feaf8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pickthingIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "picking",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "tapX",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "tapY",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "world",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pickthingFn",
+      "type": "JavaScriptFunction",
+      "label": "Pick thing",
+      "parameters": {
+        "functionScript": "\nvar SKIP = { label: 1, islander: 1, fence: 1, padlock: 1, flag: 1, tick: 1, puddle: 1 };\nvar picking = Inputs.picking === true;\nvar x = Math.floor(Number(Inputs.tapX)), y = Math.floor(Number(Inputs.tapY));\nvar w = Inputs.world && typeof Inputs.world === 'object' ? Inputs.world : {};\nvar ref = null;\nif (picking && isFinite(x) && isFinite(y)) {\n  var things = Array.isArray(w.things) ? w.things : [];\n  for (var i = 0; i < things.length && !ref; i++) {\n    var t = things[i];\n    if (!t || SKIP[t.kind] || Math.floor(Number(t.x)) !== x || Math.floor(Number(t.y)) !== y) continue;\n    ref = {};\n    if (t.id !== undefined && t.id !== null && t.id !== '') ref.id = String(t.id);\n    ref.kind = String(t.kind);\n    ref.x = x;\n    ref.y = y;\n  }\n  var robots = Array.isArray(w.robots) ? w.robots : [];\n  for (var r = 0; r < robots.length && !ref; r++) {\n    var b = robots[r];\n    if (!b || Math.floor(Number(b.x)) !== x || Math.floor(Number(b.y)) !== y) continue;\n    var holds = b.holds === 'can' || (Array.isArray(b.carry) && b.carry.length > 0);\n    ref = { ref: holds ? 'held' : 'ahead' };\n  }\n}\nOutputs.found = !!ref;\nif (ref) Outputs.pick = { n: 'pick:' + x + ':' + y + ':' + Math.random().toString(36).slice(2, 8), ref: ref };\n",
+        "runOnChange-in-picking": false,
+        "runOnChange-in-tapX": false,
+        "runOnChange-in-tapY": false,
+        "runOnChange-in-world": false
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-picking",
+          "displayName": "picking",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-tapX",
+          "displayName": "tapX",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-tapY",
+          "displayName": "tapY",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-world",
+          "displayName": "world",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-found",
+          "displayName": "found",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pick",
+          "displayName": "pick",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pickthingOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "found",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "pick",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

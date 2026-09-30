@@ -265,7 +265,9 @@ ${owlColourRule}
 .bg-face { border-radius: 50%; background-color: var(--paper-2); }
 
 /* The workshop: world and steps side by side, one column under 980px (the mockup's .ws). */
-.bg-ws { display: grid !important; grid-template-columns: minmax(0, 1fr) 400px; gap: 16px; align-items: start; }
+/* P108 IW-004: the steps column is the Blockly workspace (the drawer inside it) — IW-000's right half, as Richard graded it:
+   clamp(440px, 50vw, 780px). */
+.bg-ws { display: grid !important; grid-template-columns: minmax(0, 1fr) clamp(440px, 50vw, 780px); gap: 16px; align-items: start; }
 @media (max-width: 980px) { .bg-ws { grid-template-columns: minmax(0, 1fr); } }
 .bg-stage { position: relative !important; width: 100%; max-width: 640px; margin: 0 auto; }
 /* P106 s4 (b): with the pad on (Drive, Teach) the stage is the world and the pad side by side, so no key hides a tile (s3:
@@ -284,7 +286,7 @@ ${owlColourRule}
    the world is blue and still while driving; the steps sit on the paper while driving, never faded (ruling 5). */
 .bg-mode-on { box-shadow: 0 0 0 3px var(--ink), 0 0 0 6px var(--card) !important; }
 .bg-rec-drive::before { background: var(--block-motion); animation: none; }
-.bg-driving .gd-prog { background: var(--paper-2); border-radius: 14px; padding: 8px; }
+.bg-driving .gd-bk .blocklyMainBackground { fill: var(--paper-2); }
 .bg-steps-note { font-weight: 700; }
 /* The pad (the mockup's .pad), beside the world (P106 s4 (b), above), each key 56 px for a finger (AC5). On a phone it sits
    over the world's corner, as it did (the mockup's). */
@@ -323,23 +325,20 @@ ${owlColourRule}
 .bg-proposal { box-shadow: var(--shadow-soft); animation: bg-pop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 .bg-prop-blocks { font-weight: 700; }
 
-/* The steps (the mockup's .script). P108 IW-001 F6: the drawer and the program are TWO boxes, and the program's is the
-   one that scrolls (AC4). Beside the world (over 980 px) the steps panel is a screen tall — never shorter than the world's
-   column (contain: size, so a long program never makes the row, and the page, taller) — with the drawer a strip on the
-   left (Scratch's side) and the program taking all the rest of the height; under 980 px the drawer sits over the program. */
+/* The steps (the mockup's .script). P108 IW-004: the program is ONE Blockly workspace (garden-kit.Blocks) with the drawer
+   inside it on its left edge, always open (Scratch's side), and the program taking the rest; Blockly scrolls and zooms it
+   (the node's + − ⤢). Beside the world (over 980 px) the steps panel is a screen tall — never shorter than the world's
+   column (contain: size, so a long program never makes the row, and the page, taller) — and the workspace takes all its
+   height down to the bar (IW-001 F6's box, now Blockly's); under 980 px it is most of a screen tall under the world. */
 .bg-blocks-box { display: flex !important; flex-direction: column; min-height: 0; }
-.bg-blocks-box > .gd-blocks { display: flex !important; flex-direction: column; flex: 1 1 auto; min-height: 0; }
-.bg-blocks-box .gd-palette { flex: none; margin: 0 0 10px; padding: 10px; background: var(--paper-2); border-radius: 14px; border-bottom: 0; }
-.bg-blocks-box .gd-prog { flex: 1 1 auto; min-height: 120px; max-height: 60vh; overflow-y: auto; overscroll-behavior: contain; padding: 6px; border: 2px dashed var(--paper-2); border-radius: 14px; gap: 3px; }
-.bg-blocks-box .gd-prog .gd-blk { padding-top: 6px; padding-bottom: 6px; max-width: 100%; flex-wrap: wrap; }
+.bg-blocks-box > .gd-bk { flex: 1 1 auto; height: 70vh; min-height: 440px; }
 @media (min-width: 981px) {
   .bg-steps { align-self: stretch !important; contain: size; min-height: calc(100vh - 16px); display: flex !important; flex-direction: column !important; }
   .bg-steps > .bg-blocks-box { flex: 1 1 0 !important; min-height: 0 !important; }
-  .bg-blocks-box > .gd-blocks { display: grid !important; grid-template-columns: minmax(148px, 42%) minmax(0, 1fr); gap: 10px; height: 100%; }
-  .bg-blocks-box .gd-palette { margin: 0; padding: 8px; flex-direction: column; flex-wrap: nowrap; align-items: stretch; overflow-y: auto; overscroll-behavior: contain; min-height: 0; }
-  .bg-blocks-box .gd-palette .gd-pal-item > .gd-blk { flex: 1 1 auto; min-width: 0; }
-  .bg-blocks-box .gd-prog { max-height: none; min-height: 0; }
+  .bg-blocks-box > .gd-bk { height: 100%; min-height: 420px; }
 }
+/* IW-004: what the robot remembers (set / change), one line under the world, the monitor's violet. */
+.bg-vars { color: var(--violet-ink) !important; }
 /* An ask block Olive cannot be asked with yet (CG-005 AC6): the reason, in words, under the block list. */
 .bg-slot-msg::before { content: '!'; display: inline-block; width: 18px; height: 18px; margin-right: 6px; border-radius: 50%; background: var(--coral); color: var(--on-fill); font-size: 12px; line-height: 18px; text-align: center; }
 .bg-tidy { animation: bg-pop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
