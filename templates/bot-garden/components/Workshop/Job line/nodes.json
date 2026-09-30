@@ -24,46 +24,89 @@
           "type": "string"
         }
       ],
-      "x": 350,
-      "y": 160
+      "x": 410,
+      "y": 280
     },
     {
       "id": "jlRow",
       "type": "Group",
       "label": "The line",
       "children": [
-        "jlLabel",
-        "jlText"
+        "jlLeft",
+        "jlRight"
       ],
       "parameters": {
-        "sizeMode": "contentSize",
+        "sizeMode": "contentHeight",
         "flexDirection": "row",
         "alignItems": "flex-start",
         "flexWrap": "nowrap",
         "columnGap": "var(--space-2-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
         "cssClassName": "bg-job-row"
       },
       "x": 40,
       "y": 40
     },
     {
-      "id": "jlLabel",
-      "type": "Text",
-      "label": "What part of the job",
+      "id": "jlLeft",
+      "type": "Group",
+      "label": "The label’s column",
       "parent": "jlRow",
+      "children": [
+        "jlLabel"
+      ],
       "parameters": {
-        "text": "",
         "sizeMode": "contentHeight",
-        "cssClassName": "bg-job-l"
+        "width": {
+          "value": 112,
+          "unit": "px"
+        },
+        "cssClassName": "bg-job-lc"
       },
       "x": 100,
       "y": 160
     },
     {
+      "id": "jlLabel",
+      "type": "Text",
+      "label": "What part of the job",
+      "parent": "jlLeft",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "cssClassName": "bg-job-l"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "jlRight",
+      "type": "Group",
+      "label": "The line’s column",
+      "parent": "jlRow",
+      "children": [
+        "jlText"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "bg-grow"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
       "id": "jlText",
       "type": "Text",
       "label": "The line",
-      "parent": "jlRow",
+      "parent": "jlRight",
       "parameters": {
         "text": "",
         "sizeMode": "contentHeight",
@@ -74,8 +117,8 @@
         "color": "var(--ink)",
         "cssClassName": "bg-job-t"
       },
-      "x": 100,
-      "y": 280
+      "x": 160,
+      "y": 520
     }
   ],
   "visualRoots": [

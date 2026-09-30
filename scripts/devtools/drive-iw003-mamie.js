@@ -767,7 +767,13 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
       const h0 = await until(HELD, (h) => !!h && Object.values(h.live).every((v) => v.phase === 'wait'), 10000);
       await wait(3 * ISLAND_TICK_MS);
       const s2 = await isle();
-      check(`IW-002 AC5 (2D): waiting — the two robots stand at home (3 island ticks later: Pip ${JSON.stringify(bot(s2, 'Pip'))}, Pocket ${JSON.stringify(bot(s2, 'Pocket'))}); the held plots say wait (${Object.entries((h0 && h0.live) || {}).map(([k, v]) => k + ':' + v.phase).join(' ')})`, doneBoth(s2) && !!h0 && Object.values(h0.live).every((v) => v.phase === 'wait'), { s2, h0 });
+      const h1 = await held();
+      // Still waiting: nobody moved. A plot whose target wore in those ticks (its age reached its wear period) may have
+      // started again — that is the wear's clause below, not a robot that could not wait.
+      const WEAR_OF = { [DOOR.id]: WEAR.tulip, [EGGS.id]: WEAR.basket };
+      const waited = !!h1 && Object.entries(h1.live).every(([k, v]) => v.phase === 'wait' || v.age >= WEAR_OF[k]);
+      const stillAll = !!h1 && Object.values(h1.live).every((v) => v.phase === 'wait');
+      check(`IW-002 AC5 (2D): waiting — the held plots say wait (${Object.entries((h0 && h0.live) || {}).map(([k, v]) => k + ':' + v.phase + '@' + v.age).join(' ')}); 3 island ticks later ${stillAll ? 'the two robots still stand at home' : 'only a plot whose wear came has started again'} (Pip ${JSON.stringify(bot(s2, 'Pip'))}, Pocket ${JSON.stringify(bot(s2, 'Pocket'))})`, !!h0 && Object.values(h0.live).every((v) => v.phase === 'wait') && waited && (!stillAll || doneBoth(s2)), { s2, h0, h1 });
 
       // IW-002 AC3: the island page closed for longer than the tulip's wear, then opened — the meters as left. The island
       // held as the page closed (a tick already in flight may land as it closes) is read twice while it is closed: it must

@@ -468,11 +468,12 @@ ${Object.entries(PAD_GO.emoji).map(([k, e]) => `.bg-key-go-${k}::after { content
 /* P108 IW-003 (lane M): the job card under the world (IW-000's): a dashed paper card, the labels small capitals, the sum a
    pill that turns leaf-green when the job is done. */
 .bg-job { border: 2px dashed var(--line); border-radius: 16px; padding: 12px 14px !important; background-color: var(--paper-2) !important; }
-.bg-job-l { flex: none; width: 104px; font-size: 12px !important; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2) !important; }
+.bg-job-l { font-size: 12px !important; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2) !important; padding-top: 2px; }
+.bg-job-lc { flex: none; }
 .bg-job-t { font-size: 15px !important; }
 .bg-job-sum { align-self: flex-start; border-radius: 999px; padding: 4px 12px; background-color: var(--card); color: var(--ink) !important; font-size: 14px !important; }
 .bg-job-sum-full { background-color: var(--leaf) !important; color: var(--card) !important; }
-@media (max-width: 480px) { .bg-job-row { flex-wrap: wrap !important; } .bg-job-l { width: 100%; } }
+@media (max-width: 480px) { .bg-job-row { flex-wrap: wrap !important; } .bg-job-lc { width: 100% !important; } }
 /* P108 IW-003 (lane M): a full meter on the pages wears the page's leaf — the mockup's green darkened for 4.5:1 under its
    white numbers (S3-R5; the kits paint the mockup green, 3.05:1, measured by the page drive once Mamie’s jobs filled their meters). */
 .gd-meter.gd-full, .gd3-meter.gd3-full { background-color: var(--leaf) !important; }

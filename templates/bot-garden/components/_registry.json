@@ -694,7 +694,7 @@
     "Workshop/Job line": {
       "path": "Workshop/Job line",
       "type": "visual",
-      "nodeCount": 4,
+      "nodeCount": 6,
       "connectionCount": 2,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
@@ -918,7 +918,7 @@
   },
   "stats": {
     "totalComponents": 114,
-    "totalNodes": 912,
+    "totalNodes": 914,
     "totalConnections": 2853
   }
 }

@@ -963,7 +963,7 @@
       "parent": "plJob",
       "parameters": {
         "text": "",
-        "sizeMode": "contentHeight",
+        "sizeMode": "contentSize",
         "fontSize": {
           "value": 16,
           "unit": "px"

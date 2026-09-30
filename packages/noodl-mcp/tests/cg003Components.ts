@@ -873,9 +873,11 @@ const JOB_LINE: CgComponent = {
   description: 'One line of the job card under the world (IW-000): what part of the job it is (Source, Carrier, Target, Finish line, Wear) and the line that says it.',
   nodes: [
     inputs('jlIn', [['id', 'string'], ['label', 'string'], ['text', 'string']]),
-    group('jlRow', 'The line', undefined, { ...row({ columnGap: sp(10), flexWrap: 'nowrap', alignItems: 'flex-start' }), cssClassName: 'bg-job-row' }, ['jlLabel', 'jlText']),
-    text('jlLabel', 'What part of the job', 'jlRow', '', { cssClassName: 'bg-job-l' }),
-    text('jlText', 'The line', 'jlRow', '', { ...T_BODY, cssClassName: 'bg-job-t' })
+    group('jlRow', 'The line', undefined, { ...row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(10), flexWrap: 'nowrap', alignItems: 'flex-start' }), cssClassName: 'bg-job-row' }, ['jlLeft', 'jlRight']),
+    group('jlLeft', 'The label’s column', 'jlRow', { sizeMode: 'contentHeight', width: px(112), cssClassName: 'bg-job-lc' }, ['jlLabel']),
+    text('jlLabel', 'What part of the job', 'jlLeft', '', { cssClassName: 'bg-job-l' }),
+    group('jlRight', 'The line’s column', 'jlRow', { ...column(), cssClassName: 'bg-grow' }, ['jlText']),
+    text('jlText', 'The line', 'jlRight', '', { ...T_BODY, cssClassName: 'bg-job-t' })
   ],
   connections: [wire('jlIn', 'label', 'jlLabel', 'text'), wire('jlIn', 'text', 'jlText', 'text')]
 };
@@ -937,7 +939,7 @@ const PLAY: CgComponent = {
     // P108 IW-003 (lane M): the job card (IW-000's graded look) — how much is done, then source · carrier · target ·
     // finish line · wear, one labelled line each (a row per line, Job card's rows); only on a request with a card.
     group('plJob', 'The job, in five lines', 'plLeft', { ...column({ rowGap: sp(6) }), cssClassName: 'bg-job', mounted: false }, ['plJobSum', 'plJobEach']),
-    text('plJobSum', 'How much of the job is done', 'plJob', '', { ...T_STRONG, cssClassName: 'bg-job-sum' }),
+    text('plJobSum', 'How much of the job is done', 'plJob', '', { ...T_STRONG, sizeMode: 'contentSize', cssClassName: 'bg-job-sum' }),
     { ...logic('plJobEach', FOR_EACH_NODE, 'One line per part of the job', { template: C.jobLine, templateType: 'explicit' }), parent: 'plJob' },
     group('plOwlPic', 'Olive', 'plOwl', { sizeMode: 'explicit', width: px(64), height: px(64), cssClassName: 'bg-owl-pic bg-sp-owl' }),
     group('plOwlCol', 'What she says', 'plOwl', column({ rowGap: sp(4) }), ['plOwlSay', 'plOwlThinking', 'plOwlResting', 'plProposal', 'plOwlMeta']),
