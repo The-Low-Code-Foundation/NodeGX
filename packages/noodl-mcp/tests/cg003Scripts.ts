@@ -51,6 +51,8 @@ import { SEED_HELPERS } from './cg002Scripts';
 // P108 IW-008 (lane C): the crew.
 import { CREW_PICK, assignRobotScript, copyProgramScript, crewChipsScript } from './iw008Crew';
 import { BRAIN_SIZE as IW8_BRAIN } from './cg002Content';
+// P108 IW-006 (lane H): the shop's glue (its own file; it imports nothing from here).
+import { IW006_SHOP_SCRIPTS } from './iw006Shop';
 
 /** P106 IG-005 (lane B): the islanders' name keys, for the lock line and the gifts. */
 const ISLANDER_WORDS = Object.fromEntries(Object.entries(ISLANDERS).map(([id, i]) => [id, i.nameKey]));
@@ -1486,5 +1488,7 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   // P108 IW-008 (lane C): the crew.
   { component: 'Logic/Copy program', script: COPY_PROGRAM_SCRIPT, seam: 'one robot\u2019s program copied onto another of hers, or refused with the block it cannot do or its brain too small' },
   { component: 'Logic/Assign robot', script: ASSIGN_ROBOT_SCRIPT, seam: 'a robot of her crew sent to work a plot she won, or to help the one at work there, or home' },
-  { component: 'Logic/Crew chips', script: CREW_CHIPS_SCRIPT, seam: 'the plot card\u2019s crew: her robots of the kind the job needs, the ones here ringed' }
+  { component: 'Logic/Crew chips', script: CREW_CHIPS_SCRIPT, seam: 'the plot card\u2019s crew: her robots of the kind the job needs, the ones here ringed' },
+  // P108 IW-006 (lane H): the shop, its purchase card, Buy, a helper used on a job, the brain the Workshop holds.
+  ...IW006_SHOP_SCRIPTS
 ];

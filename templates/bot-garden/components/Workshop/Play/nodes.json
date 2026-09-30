@@ -477,21 +477,21 @@
         "keys": "renderer"
       },
       "x": 710,
-      "y": 8680
+      "y": 8800
     },
     {
       "id": "plRendRead",
       "type": "/Logic/Renderer",
       "label": "Draw in 3D here?",
       "x": 710,
-      "y": 8800
+      "y": 8920
     },
     {
       "id": "plRendIs3d",
       "type": "Condition",
       "label": "In 3D?",
       "x": 710,
-      "y": 8920
+      "y": 9040
     },
     {
       "id": "plRendOk",
@@ -508,7 +508,7 @@
         "event": "unsupported"
       },
       "x": 710,
-      "y": 9040
+      "y": 9160
     },
     {
       "id": "plRendSlow",
@@ -530,7 +530,7 @@
         "merge": false
       },
       "x": 710,
-      "y": 9160
+      "y": 9280
     },
     {
       "id": "plRec",
@@ -1440,6 +1440,13 @@
       "y": 7120
     },
     {
+      "id": "plBrain",
+      "type": "/Logic/Brain size",
+      "label": "How many blocks this robot’s brain holds",
+      "x": 710,
+      "y": 7120
+    },
+    {
       "id": "plCardBox",
       "type": "Group",
       "label": "The block’s card",
@@ -1765,7 +1772,7 @@
       "type": "/Logic/Hint line",
       "label": "The owl’s line",
       "x": 710,
-      "y": 9280
+      "y": 9400
     },
     {
       "id": "plOwlRow",
@@ -1779,21 +1786,21 @@
       "type": "/Logic/Ask Olive",
       "label": "Ask Olive for a parked run",
       "x": 710,
-      "y": 9400
+      "y": 9520
     },
     {
       "id": "plVoiceHint",
       "type": "/Logic/Voice hint",
       "label": "A new line to voice",
       "x": 710,
-      "y": 9520
+      "y": 9640
     },
     {
       "id": "plAskVoice",
       "type": "/Logic/Ask Olive",
       "label": "Ask Olive to voice the hint",
       "x": 710,
-      "y": 9640
+      "y": 9760
     },
     {
       "id": "plStatus",
@@ -1803,14 +1810,14 @@
         "nonce": 1
       },
       "x": 710,
-      "y": 9760
+      "y": 9880
     },
     {
       "id": "plSlots",
       "type": "/Logic/Olive slots",
       "label": "May this ask be sent?",
       "x": 710,
-      "y": 7840
+      "y": 7960
     },
     {
       "id": "plPropCard",
@@ -1837,7 +1844,7 @@
         "name": "gardenProposalDone"
       },
       "x": 710,
-      "y": 9880
+      "y": 10000
     },
     {
       "id": "plSetPropDone",
@@ -1857,7 +1864,7 @@
         "name": "gardenProgram"
       },
       "x": 710,
-      "y": 10000
+      "y": 10120
     },
     {
       "id": "plStart",
@@ -1884,7 +1891,7 @@
         "name": "gardenWorld"
       },
       "x": 710,
-      "y": 10120
+      "y": 10240
     },
     {
       "id": "plSetWorld",
@@ -1894,7 +1901,7 @@
         "name": "gardenWorld"
       },
       "x": 710,
-      "y": 10240
+      "y": 10360
     },
     {
       "id": "plSetWorldRec",
@@ -1904,7 +1911,7 @@
         "name": "gardenWorld"
       },
       "x": 710,
-      "y": 10360
+      "y": 10480
     },
     {
       "id": "plProgVar",
@@ -1914,14 +1921,14 @@
         "name": "gardenProgram"
       },
       "x": 710,
-      "y": 7120
+      "y": 7240
     },
     {
       "id": "plRead",
       "type": "/Logic/Read program",
       "label": "The program as a list",
       "x": 710,
-      "y": 10480
+      "y": 10600
     },
     {
       "id": "plSetProgKit",
@@ -1931,7 +1938,7 @@
         "name": "gardenProgram"
       },
       "x": 710,
-      "y": 10600
+      "y": 10720
     },
     {
       "id": "plSetProgRec",
@@ -1941,7 +1948,7 @@
         "name": "gardenProgram"
       },
       "x": 710,
-      "y": 10720
+      "y": 10840
     },
     {
       "id": "plSetProgFold",
@@ -1951,7 +1958,7 @@
         "name": "gardenProgram"
       },
       "x": 710,
-      "y": 10840
+      "y": 10960
     },
     {
       "id": "plSetProgClear",
@@ -1963,7 +1970,7 @@
         "value": "[]"
       },
       "x": 710,
-      "y": 10960
+      "y": 11080
     },
     {
       "id": "plTeachBumpsVar",
@@ -1973,7 +1980,7 @@
         "name": "gardenTeachBumps"
       },
       "x": 710,
-      "y": 11080
+      "y": 11200
     },
     {
       "id": "plSetTeachBumps",
@@ -1983,7 +1990,7 @@
         "name": "gardenTeachBumps"
       },
       "x": 710,
-      "y": 11200
+      "y": 11320
     },
     {
       "id": "plClearTeachBumps",
@@ -1995,7 +2002,7 @@
         "value": 0
       },
       "x": 710,
-      "y": 11320
+      "y": 11440
     },
     {
       "id": "plRecord",
@@ -2012,14 +2019,14 @@
         "runOnChange-condition": false
       },
       "x": 710,
-      "y": 11440
+      "y": 11560
     },
     {
       "id": "plPadAsk",
       "type": "/Logic/Ask Olive",
       "label": "Ask Olive for the pad’s read",
       "x": 710,
-      "y": 11560
+      "y": 11680
     },
     {
       "id": "plPadAnswer",
@@ -2033,7 +2040,7 @@
       "type": "/Workshop/Runner",
       "label": "The runner",
       "x": 710,
-      "y": 7240
+      "y": 7360
     },
     {
       "id": "plDraw",
@@ -2054,14 +2061,14 @@
       "type": "/Logic/Kit palette",
       "label": "In the kit’s shape",
       "x": 710,
-      "y": 7360
+      "y": 7480
     },
     {
       "id": "plCardGate",
       "type": "/Logic/Card gate",
       "label": "A first tap places it and opens its card",
       "x": 710,
-      "y": 7480
+      "y": 7600
     },
     {
       "id": "plCardHold",
@@ -2071,7 +2078,7 @@
         "runOnChange-condition": false
       },
       "x": 710,
-      "y": 11680
+      "y": 11800
     },
     {
       "id": "plCardOpenVar",
@@ -2081,7 +2088,7 @@
         "name": "gardenCardOpen"
       },
       "x": 710,
-      "y": 11800
+      "y": 11920
     },
     {
       "id": "plSetCardOpen",
@@ -2091,7 +2098,7 @@
         "name": "gardenCardOpen"
       },
       "x": 710,
-      "y": 11920
+      "y": 12040
     },
     {
       "id": "plClearCardOpen",
@@ -2103,7 +2110,7 @@
         "value": ""
       },
       "x": 710,
-      "y": 12040
+      "y": 12160
     },
     {
       "id": "plSeenAdd",
@@ -2124,7 +2131,7 @@
       "type": "/Logic/Pick thing",
       "label": "The thing on the tapped tile, for the chip",
       "x": 710,
-      "y": 7600
+      "y": 7720
     },
     {
       "id": "plVarMon",
@@ -2206,7 +2213,7 @@
       "type": "/Logic/Teach start",
       "label": "Where the robot stands when Teach begins",
       "x": 710,
-      "y": 12160
+      "y": 12280
     },
     {
       "id": "plSetWorldTeach",
@@ -2216,7 +2223,7 @@
         "name": "gardenWorld"
       },
       "x": 710,
-      "y": 12280
+      "y": 12400
     },
     {
       "id": "plRecGate",
@@ -2226,7 +2233,7 @@
         "runOnChange-condition": false
       },
       "x": 710,
-      "y": 12400
+      "y": 12520
     },
     {
       "id": "plModeWords",
@@ -2250,7 +2257,7 @@
         "name": "gardenChallengeFor"
       },
       "x": 710,
-      "y": 12520
+      "y": 12640
     },
     {
       "id": "plSetAskedFor",
@@ -2272,7 +2279,7 @@
         "value": ""
       },
       "x": 710,
-      "y": 12640
+      "y": 12760
     },
     {
       "id": "plOutcomeVar",
@@ -2282,7 +2289,7 @@
         "name": "gardenChallengeOutcome"
       },
       "x": 710,
-      "y": 12760
+      "y": 12880
     },
     {
       "id": "plSetHit",
@@ -2294,7 +2301,7 @@
         "value": "hit"
       },
       "x": 710,
-      "y": 12880
+      "y": 13000
     },
     {
       "id": "plSetMissed",
@@ -2306,7 +2313,7 @@
         "value": "miss"
       },
       "x": 710,
-      "y": 13000
+      "y": 13120
     },
     {
       "id": "plClearOutcome",
@@ -2338,7 +2345,7 @@
         "name": "gardenWorld"
       },
       "x": 710,
-      "y": 13120
+      "y": 13240
     },
     {
       "id": "plGuessGate",
@@ -2365,7 +2372,7 @@
         "runOnChange-condition": false
       },
       "x": 710,
-      "y": 13240
+      "y": 13360
     },
     {
       "id": "plGuessWait",
@@ -2375,7 +2382,7 @@
         "duration": 700
       },
       "x": 710,
-      "y": 13360
+      "y": 13480
     },
     {
       "id": "plSetCardBlock",
@@ -2385,7 +2392,7 @@
         "name": "gardenCardOpen"
       },
       "x": 710,
-      "y": 7720
+      "y": 7840
     },
     {
       "id": "plMissVar",
@@ -2395,7 +2402,7 @@
         "name": "gardenPredictMiss"
       },
       "x": 710,
-      "y": 13480
+      "y": 13600
     },
     {
       "id": "plSetMiss",
@@ -2407,7 +2414,7 @@
         "value": true
       },
       "x": 710,
-      "y": 13600
+      "y": 13720
     },
     {
       "id": "plClearMiss",
@@ -2426,7 +2433,7 @@
       "type": "/Logic/Find repeat",
       "label": "The same steps, over and over?",
       "x": 710,
-      "y": 13720
+      "y": 13840
     },
     {
       "id": "plTidyLine",
@@ -2443,7 +2450,7 @@
         "name": "gardenTidyNo"
       },
       "x": 710,
-      "y": 13840
+      "y": 13960
     },
     {
       "id": "plSetDismiss",
@@ -2453,21 +2460,21 @@
         "name": "gardenTidyNo"
       },
       "x": 710,
-      "y": 8080
+      "y": 8200
     },
     {
       "id": "plFold",
       "type": "/Logic/Fold",
       "label": "Fold it",
       "x": 710,
-      "y": 7960
+      "y": 8080
     },
     {
       "id": "plChoose",
       "type": "/Logic/Choose hint",
       "label": "Which hint",
       "x": 710,
-      "y": 13960
+      "y": 14080
     },
     {
       "id": "plHintLater",
@@ -2477,21 +2484,21 @@
         "duration": 420
       },
       "x": 710,
-      "y": 14080
+      "y": 14200
     },
     {
       "id": "plPlayed",
       "type": "/Logic/Olive played",
       "label": "The rung this run asked",
       "x": 710,
-      "y": 14200
+      "y": 14320
     },
     {
       "id": "plGoal",
       "type": "/Logic/Goal met",
       "label": "Was the request done?",
       "x": 710,
-      "y": 14320
+      "y": 14440
     },
     {
       "id": "plMetGate",
@@ -2501,7 +2508,7 @@
         "runOnChange-condition": false
       },
       "x": 710,
-      "y": 14440
+      "y": 14560
     },
     {
       "id": "plWonVar",
@@ -2511,7 +2518,7 @@
         "name": "gardenWon"
       },
       "x": 710,
-      "y": 8200
+      "y": 8320
     },
     {
       "id": "plSetWon",
@@ -2523,7 +2530,7 @@
         "value": true
       },
       "x": 710,
-      "y": 14560
+      "y": 14680
     },
     {
       "id": "plClearWon",
@@ -2535,14 +2542,14 @@
         "value": false
       },
       "x": 710,
-      "y": 8320
+      "y": 8440
     },
     {
       "id": "plWinSum",
       "type": "/Logic/Win summary",
       "label": "The win in words",
       "x": 710,
-      "y": 8440
+      "y": 8560
     },
     {
       "id": "plOut",
@@ -2601,7 +2608,7 @@
         }
       ],
       "x": 710,
-      "y": 8560
+      "y": 8680
     }
   ],
   "visualRoots": [

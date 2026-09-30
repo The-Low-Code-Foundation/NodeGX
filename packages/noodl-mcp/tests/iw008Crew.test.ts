@@ -488,7 +488,8 @@ describe('IW-008 — arms: each crew rule mutated, and the row that kills it', (
     m = win(m, 'eggs-count', 'pocket');
     const p2 = buyCopy(m, 'pocket', 'Pocket 2');
     m = assign(m, p2, 'eggs-count').model;
-    const bad = mutate(ISLAND_TICK_SCRIPT, '  if (plot.job && plot.mate) return islWithMate(plot, cur, islStepJob(plot, cur));\n', '');
+    // Merge (s4): the mate line now wraps lane H's islHelped (the helper rides the first robot's step).
+    const bad = mutate(ISLAND_TICK_SCRIPT, '  if (plot.job && plot.mate) return islWithMate(plot, cur, islHelped(plot, cur));\n', '');
     let state = islandOf(m).world.state;
     let picks = 0;
     for (let t = 0; t < 400; t++) {

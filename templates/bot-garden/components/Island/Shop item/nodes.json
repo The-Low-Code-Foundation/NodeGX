@@ -1,0 +1,251 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f5d7b7f5-6a40-5cd4-80d2-6ed9fc86c249",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "siIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "icon",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "price",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "line",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tag",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasTag",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "cls",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "siCard",
+      "type": "Group",
+      "label": "The item",
+      "children": [
+        "siTop",
+        "siName",
+        "siLine",
+        "siTag"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1-5)",
+        "backgroundColor": "var(--card)",
+        "borderRadius": "var(--radius-card)",
+        "cssClassName": "bg-shop-item bg-press",
+        "paddingTop": "var(--space-3-5)",
+        "paddingBottom": "var(--space-3-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "siTop",
+      "type": "Group",
+      "label": "The picture and the price",
+      "parent": "siCard",
+      "children": [
+        "siPic",
+        "siPrice"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "nowrap",
+        "columnGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "justifyContent": "space-between"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "siPic",
+      "type": "Text",
+      "label": "The picture",
+      "parent": "siTop",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 40,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "lineHeight": 1.1,
+        "cssClassName": "bg-shop-pic"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "siPrice",
+      "type": "Text",
+      "label": "The price",
+      "parent": "siTop",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "cssClassName": "bg-shop-price"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "siName",
+      "type": "Text",
+      "label": "Its name",
+      "parent": "siCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2,
+        "cssClassName": "bg-shop-name"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "siLine",
+      "type": "Text",
+      "label": "One line",
+      "parent": "siCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-shop-line"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "siTag",
+      "type": "Text",
+      "label": "Yours, or ready to use",
+      "parent": "siCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 13,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "cssClassName": "bg-shop-tag",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "siHasTag",
+      "type": "Condition",
+      "label": "Hers already, or held?",
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "siTagState",
+      "type": "States",
+      "label": "The tag shown or not",
+      "parameters": {
+        "states": "none,shown",
+        "values": "shown",
+        "useTransitions": false,
+        "type-shown": "boolean",
+        "value-none-shown": false,
+        "value-shown-shown": true
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "siOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "chosen",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "siCard"
+  ]
+}

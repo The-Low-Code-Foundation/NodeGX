@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 664,
+      "connectionCount": 695,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -643,6 +643,46 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
+    "Logic/Shop rows": {
+      "path": "Logic/Shop rows",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 15,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Shop card": {
+      "path": "Logic/Shop card",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 37,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Buy": {
+      "path": "Logic/Buy",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 13,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Use helper": {
+      "path": "Logic/Use helper",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 11,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Brain size": {
+      "path": "Logic/Brain size",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 3,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
     "Logic/App store": {
       "path": "Logic/App store",
       "type": "visual",
@@ -734,8 +774,8 @@
     "Workshop/Play": {
       "path": "Workshop/Play",
       "type": "visual",
-      "nodeCount": 161,
-      "connectionCount": 442,
+      "nodeCount": 162,
+      "connectionCount": 444,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -910,8 +950,8 @@
     "Pages/Island": {
       "path": "Pages/Island",
       "type": "page",
-      "nodeCount": 25,
-      "connectionCount": 70,
+      "nodeCount": 27,
+      "connectionCount": 76,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -946,11 +986,27 @@
       "connectionCount": 36,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Island/Shop item": {
+      "path": "Island/Shop item",
+      "type": "visual",
+      "nodeCount": 11,
+      "connectionCount": 12,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Island/Shop": {
+      "path": "Island/Shop",
+      "type": "visual",
+      "nodeCount": 67,
+      "connectionCount": 99,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
     }
   },
   "stats": {
-    "totalComponents": 118,
-    "totalNodes": 951,
-    "totalConnections": 3016
+    "totalComponents": 125,
+    "totalNodes": 1047,
+    "totalConnections": 3245
   }
 }

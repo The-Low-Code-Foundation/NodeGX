@@ -1662,11 +1662,19 @@ describe('CG-002 — the engine', () => {
       expect([helper<string>(SAVE_HELPERS, 'jobRobotId', en.model.profiles[0], 'cobble'), helper<string>(SAVE_HELPERS, 'jobRobotId', en.model.profiles[0], 'pocket')]).toEqual(['cobble', '']);
     });
 
+    // P108 IW-006 (lane H): the upgrades moved to the shop — Mamie's first win on the rows no longer gives the can; it is
+    // bought (buyItem, the purchase card's rule) once that request is done, and works exactly as the gift did.
+    const bought = (model: any, ...ids: string[]) => {
+      const p = model.profiles.find((x: any) => x.id === model.island.activeId);
+      helper(SAVE_HELPERS, 'earnShells', p, 100);
+      for (const id of ids) expect(helper<any>(SAVE_HELPERS, 'buyItem', p, id).ok).toBe(true);
+      return model;
+    };
     it('🔴 AC3: can+ on Pip makes fill give 6 — six tulips on one fill after the upgrade, three before', () => {
       const won = win(kid(), 'rows-trick');
-      expect(won.upgraded).toEqual(['can+']);
+      expect(won.upgraded).toEqual([]);
       const before = rows(kid())[0];
-      const after = rows(won.model)[0];
+      const after = rows(bought(won.model, 'can+'))[0];
       expect([before.kind, before.canMax, before.upgraded, after.canMax, after.upgraded]).toEqual(['pip', 3, false, 6, true]);
       // Six tulips in a row below the path, the pond at its start: fill once, then water, step, water… six times.
       const world = (canMax: number) => ({ map: ['WGGGGGGG', 'GFFFFFFG'], things: [1, 2, 3, 4, 5, 6].map((x) => ({ kind: 'tulip', x, y: 1, watered: false })), robots: [{ id: 'pip', x: 1, y: 0, d: 3, can: 0, canMax }] });
@@ -1674,7 +1682,7 @@ describe('CG-002 — the engine', () => {
       const wet = (canMax: number) => runToEnd(prog, world(canMax)).world.things.filter((t: any) => t.watered).length;
       expect([wet(before.canMax), wet(after.canMax)]).toEqual([3, 6]);
       // The can+ is Pip's and Echo's slot; Cobble keeps his, and Sami's basket+ makes his basket 8, Biscuit's boots Pocket's steps × 0.7.
-      let m = win(win(win(win(kid(), 'path-postbox').model, 'bowl-if').model, 'path-stones').model, 'wall-until').model;
+      let m = bought(win(win(win(win(kid(), 'path-postbox').model, 'bowl-if').model, 'path-stones').model, 'wall-until').model, 'basket+', 'boots');
       const byKind = Object.fromEntries(rows(m).map((r: any) => [r.kind, r]));
       expect([byKind.cobble.basket, byKind.cobble.upgraded, byKind.pocket.stepFactor, byKind.pocket.upgraded, byKind.pip.canMax]).toEqual([8, true, 0.7, true, 3]);
     });

@@ -580,7 +580,8 @@ describe('IW-002 (P108 s1) — the job tick: a job plot is never reset; its robo
   });
 
   it('arm: the tick ignores the job (a job plot held and reset like any other) → the never-reset row fails', () => {
-    const anchor = '  if (plot.job) return islStepJob(plot, cur);\n';
+    // P108 IW-006 (lane H): the job branch steps through islHelped (a shop helper riding on the job) — the same branch.
+    const anchor = '  if (plot.job) return islHelped(plot, cur);\n';
     expect(ISLAND_TICK_SCRIPT.split(anchor)).toHaveLength(2);
     const m = ISLAND_TICK_SCRIPT.replace(anchor, '');
     let state = built([jobReq('job-bed', JOB_PLOT)], { 'job-bed': pinned(BED_PROGRAM, 'r1') }).state;

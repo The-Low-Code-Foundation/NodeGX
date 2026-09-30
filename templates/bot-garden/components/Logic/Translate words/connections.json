@@ -2057,6 +2057,192 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hBalance",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hBalance"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hBought",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hBought"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hBrainOf",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hBrainOf"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hBtn",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hBtn"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hBuy",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hBuy"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hCost",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hCost"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hFull",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hFull"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hHave",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hHave"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hHeld",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hHeld"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hLaterAnimals",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hLaterAnimals"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hLaterBuild",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hLaterBuild"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hLeft",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hLeft"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hNameL",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hNameL"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hNoBrain",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hNoBrain"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hNoJob",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hNoJob"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hNotNow",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hNotNow"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hPrice",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hPrice"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hShort",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hShort"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hShort1",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hShort1"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hTabAnimals",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hTabAnimals"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hTabBuild",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hTabBuild"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hTabHelpers",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hTabHelpers"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hTabRobots",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hTabRobots"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hTabUpgrades",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hTabUpgrades"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hTitle",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hTitle"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hUse",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hUse"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hUseOn",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hUseOn"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hUsed",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hUsed"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hWhich",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hWhich"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hYours",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hYours"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6hYoursLine",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6hYoursLine"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-iw8cBrainL",
       "toId": "translatewordsOut",
       "toProperty": "iw8cBrainL"

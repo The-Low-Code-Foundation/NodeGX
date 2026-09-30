@@ -1,0 +1,229 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4ef414a8-37c1-54f2-8c2b-80be25075236",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "shopcardIn",
+      "fromProperty": "bought",
+      "toId": "shopcardFn",
+      "toProperty": "in-bought"
+    },
+    {
+      "fromId": "shopcardIn",
+      "fromProperty": "itemId",
+      "toId": "shopcardFn",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "shopcardIn",
+      "fromProperty": "lang",
+      "toId": "shopcardFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "shopcardIn",
+      "fromProperty": "model",
+      "toId": "shopcardFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "shopcardIn",
+      "fromProperty": "plotId",
+      "toId": "shopcardFn",
+      "toProperty": "in-plotId"
+    },
+    {
+      "fromId": "shopcardIn",
+      "fromProperty": "requests",
+      "toId": "shopcardFn",
+      "toProperty": "in-requests"
+    },
+    {
+      "fromId": "shopcardIn",
+      "fromProperty": "robotId",
+      "toId": "shopcardFn",
+      "toProperty": "in-robotId"
+    },
+    {
+      "fromId": "shopcardIn",
+      "fromProperty": "state",
+      "toId": "shopcardFn",
+      "toProperty": "in-state"
+    },
+    {
+      "fromId": "shopcardIn",
+      "fromProperty": "used",
+      "toId": "shopcardFn",
+      "toProperty": "in-used"
+    },
+    {
+      "fromId": "shopcardIn",
+      "fromProperty": "words",
+      "toId": "shopcardFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-canBuy",
+      "toId": "shopcardOut",
+      "toProperty": "canBuy"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-canUse",
+      "toId": "shopcardOut",
+      "toProperty": "canUse"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-cost",
+      "toId": "shopcardOut",
+      "toProperty": "cost"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-done",
+      "toId": "shopcardOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-have",
+      "toId": "shopcardOut",
+      "toProperty": "have"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-icon",
+      "toId": "shopcardOut",
+      "toProperty": "icon"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-itemId",
+      "toId": "shopcardOut",
+      "toProperty": "itemId"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-left",
+      "toId": "shopcardOut",
+      "toProperty": "left"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-line",
+      "toId": "shopcardOut",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-name",
+      "toId": "shopcardOut",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-namePlaceholder",
+      "toId": "shopcardOut",
+      "toProperty": "namePlaceholder"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-none",
+      "toId": "shopcardOut",
+      "toProperty": "none"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-plotId",
+      "toId": "shopcardOut",
+      "toProperty": "plotId"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-plots",
+      "toId": "shopcardOut",
+      "toProperty": "plots"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-robotId",
+      "toId": "shopcardOut",
+      "toProperty": "robotId"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-robots",
+      "toId": "shopcardOut",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-short",
+      "toId": "shopcardOut",
+      "toProperty": "short"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-showCard",
+      "toId": "shopcardOut",
+      "toProperty": "showCard"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-showDone",
+      "toId": "shopcardOut",
+      "toProperty": "showDone"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-showFigures",
+      "toId": "shopcardOut",
+      "toProperty": "showFigures"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-showLeft",
+      "toId": "shopcardOut",
+      "toProperty": "showLeft"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-showName",
+      "toId": "shopcardOut",
+      "toProperty": "showName"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-showNone",
+      "toId": "shopcardOut",
+      "toProperty": "showNone"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-showRobots",
+      "toId": "shopcardOut",
+      "toProperty": "showRobots"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-showShort",
+      "toId": "shopcardOut",
+      "toProperty": "showShort"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "out-showUse",
+      "toId": "shopcardOut",
+      "toProperty": "showUse"
+    },
+    {
+      "fromId": "shopcardFn",
+      "fromProperty": "success",
+      "toId": "shopcardOut",
+      "toProperty": "ran"
+    }
+  ]
+}

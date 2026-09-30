@@ -24,7 +24,7 @@
       "parent": "isPage",
       "children": [
         "isBar",
-        "isHead",
+        "isTop",
         "isGrid"
       ],
       "parameters": {
@@ -82,7 +82,7 @@
         "name": "gardenLang"
       },
       "x": 590,
-      "y": 1480
+      "y": 1720
     },
     {
       "id": "isWords",
@@ -106,15 +106,47 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 1600
+      "y": 1840
+    },
+    {
+      "id": "isTop",
+      "type": "Group",
+      "label": "The head and the shop",
+      "parent": "isWrap",
+      "children": [
+        "isHead",
+        "isShop"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "flexWrap": "nowrap",
+        "columnGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "cssClassName": "bg-island-top"
+      },
+      "x": 160,
+      "y": 400
     },
     {
       "id": "isHead",
       "type": "/Garden/Page head",
       "label": "The head",
-      "parent": "isWrap",
-      "x": 160,
-      "y": 400
+      "parent": "isTop",
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "isShop",
+      "type": "/Island/Shop",
+      "label": "The shop",
+      "parent": "isTop",
+      "x": 220,
+      "y": 640
     },
     {
       "id": "isGrid",
@@ -134,7 +166,7 @@
         "cssClassName": "bg-island"
       },
       "x": 160,
-      "y": 520
+      "y": 760
     },
     {
       "id": "isWorld",
@@ -142,7 +174,7 @@
       "label": "Her island",
       "parent": "isGrid",
       "x": 220,
-      "y": 640
+      "y": 880
     },
     {
       "id": "isQuests",
@@ -165,7 +197,7 @@
         "rowGap": "var(--space-2-5)"
       },
       "x": 220,
-      "y": 760
+      "y": 1000
     },
     {
       "id": "isReqL",
@@ -184,7 +216,7 @@
         "cssClassName": "bg-eyebrow"
       },
       "x": 280,
-      "y": 880
+      "y": 1120
     },
     {
       "id": "isList",
@@ -204,7 +236,7 @@
         "rowGap": "var(--space-2-5)"
       },
       "x": 280,
-      "y": 1000
+      "y": 1240
     },
     {
       "id": "isEach",
@@ -216,7 +248,7 @@
         "templateType": "explicit"
       },
       "x": 340,
-      "y": 1120
+      "y": 1360
     },
     {
       "id": "isFreeL",
@@ -236,7 +268,7 @@
         "marginTop": "var(--space-2)"
       },
       "x": 280,
-      "y": 1240
+      "y": 1480
     },
     {
       "id": "isFree",
@@ -252,28 +284,28 @@
         "doneWord": ""
       },
       "x": 280,
-      "y": 1360
+      "y": 1600
     },
     {
       "id": "isRequests",
       "type": "/Data/Requests",
       "label": "The requests",
       "x": 590,
-      "y": 760
+      "y": 880
     },
     {
       "id": "isRows",
       "type": "/Logic/Island rows",
       "label": "Who needs a hand",
       "x": 590,
-      "y": 1120
+      "y": 1360
     },
     {
       "id": "isPins",
       "type": "/Logic/Island pins",
       "label": "Each islander’s next request",
       "x": 590,
-      "y": 880
+      "y": 1000
     },
     {
       "id": "isBlocked",
@@ -283,7 +315,7 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 1000
+      "y": 1120
     },
     {
       "id": "isSetReq",
@@ -293,7 +325,7 @@
         "name": "gardenRequestId"
       },
       "x": 590,
-      "y": 1240
+      "y": 1480
     },
     {
       "id": "isSetFree",
@@ -305,7 +337,7 @@
         "value": "free"
       },
       "x": 590,
-      "y": 1360
+      "y": 1600
     },
     {
       "id": "isGoWorkshop",
@@ -316,7 +348,7 @@
         "target": "/Pages/Workshop"
       },
       "x": 590,
-      "y": 1720
+      "y": 1960
     }
   ],
   "visualRoots": [

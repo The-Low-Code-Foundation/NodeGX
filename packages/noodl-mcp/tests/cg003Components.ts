@@ -34,6 +34,8 @@ import { ALL_WORDS_JSON, GLUE_SCRIPTS, TRANSLATE_ALL_SCRIPT } from './cg003Scrip
 import { DISPLAY_FONT, GARDEN_CSS } from './cg007Look';
 // P108 IW-004 (lane B): the robot's brain, the Blocks node's cap.
 import { BRAIN_SIZE } from './cg002Content';
+// P108 IW-006 (lane H): the shop's component paths (its own file).
+import { SHOP_PATHS } from './iw006Shop';
 
 export const ROUTER = 'Main';
 export const STORE_NAME = 'garden';
@@ -333,7 +335,10 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
   'Logic/Pick thing': 'go',
   // P108 IW-008 (lane C): the crew.
   'Logic/Copy program': 'go',
-  'Logic/Assign robot': 'go'
+  'Logic/Assign robot': 'go',
+  // P108 IW-006 (lane H): the purchase card's Buy and a helper's Use it.
+  'Logic/Buy': 'go',
+  'Logic/Use helper': 'go'
 };
 
 /**
@@ -344,7 +349,9 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
 const QUIET: Readonly<Record<string, ReadonlyArray<string>>> = {
   'Logic/Start world': ['robot'],
   // P108 IW-003 (lane M): the island state held — read when the island is built, never a reason to build it again.
-  'Logic/Island world': ['kept']
+  'Logic/Island world': ['kept'],
+  // P108 IW-006 (lane H): the island as it runs — read when the card is asked, never a reason to draw it every tick.
+  'Logic/Shop card': ['state']
 };
 
 /** Port types by name; anything else is `*` (the engine passes objects, arrays and text through the same names). */
@@ -973,6 +980,8 @@ const PLAY: CgComponent = {
     // workspace on its left, a tap or a drag adds, a drag back to the drawer throws away, the ? on the drawer only, the
     // brain holds BRAIN_SIZE blocks. Program in and out is still the engine program.
     place('plBlocks', KIT_BLOCKLY, 'The blocks', 'plBlocksBox', { ...BLOCK_COLOURS, showHelp: true, brainSize: BRAIN_SIZE }),
+    // P108 IW-006 (lane H): the job robot's brain (its row's: 12, or 16 / 20 bought in the shop) is what Blocks holds.
+    logic('plBrain', L('Brain size'), 'How many blocks this robot’s brain holds'),
     // P106 IG-006 AC5, P108 IW-001 F3: a block's card. The first tap on a palette block PLACES it and opens its card here;
     // "Got it" closes it and the block stays. The example is drawn by a second Block List, locked, with no palette.
     group('plCardBox', 'The block’s card', 'plRight', { ...column({ rowGap: sp(8) }), backgroundColor: 'var(--violet-2)', borderRadius: px(16), ...pad(12), cssClassName: 'bg-card-help', mounted: false }, ['plCardTitle', 'plCardLine', 'plCardEgWord', 'plCardEgBox', 'plCardOk']),
@@ -1181,6 +1190,9 @@ const PLAY: CgComponent = {
     // P108 IW-004: the node's words (the iw4 keys) and the robot's name in them ("Pip's steps", the brain line).
     wire('plIn', 'words', 'plBlocks', 'words'),
     wire('plIn', 'botName', 'plBlocks', 'botName'),
+    // P108 IW-006 (lane H): the job robot's brain size (Job robot's row → Brain size → Blocks).
+    wire('plIn', 'robot', 'plBrain', 'robot'),
+    wire('plBrain', 'size', 'plBlocks', 'brainSize'),
     // IW-004 AC3: a chip is picked on the world — 2D or 3D, the same wires: while Picking, the tapped tile's thing.
     wire('plBlocks', 'onPicking', 'plPickThing', 'picking'),
     wire('plWorldVar', 'value', 'plPickThing', 'world'),
@@ -2559,14 +2571,18 @@ const PAGE_PROFILES: CgComponent = (() => {
 })();
 
 const PAGE_ISLAND: CgComponent = (() => {
-  const base = pageCommon('is', 'Island', 'island', 'island', ['isHead', 'isGrid']);
+  // P108 IW-006 (lane H): the head and the shop's button (the balance on it) side by side: isTop.
+  const base = pageCommon('is', 'Island', 'island', 'island', ['isTop', 'isGrid']);
   return {
     path: 'Pages/Island',
     description: 'Her island (one per kid, ruling 8), as ONE world (IG-004, R1 + R9): every request a plot of it, the robots she taught still working on theirs, the islanders by their next plot, a fenced plot her band cannot do yet — the 3D island, or the flat one by the renderer rule. A tap on a plot opens its card; beside the island the islanders’ requests tagged with the trick they teach, then free play. A request her robot cannot take now (it works another plot) opens the card instead. Nothing is timed; nothing is counted.',
     repeats: { source: 'array', rowFields: ['id', 'who', 'title', 'trick', 'faceClass', 'tagClass', 'isDone', 'doneWord', 'blocked'] },
     nodes: [
       ...base.nodes,
-      place('isHead', C.head, 'The head', 'isWrap'),
+      // P108 IW-006 (lane H): the head beside the shop (its button; the shop opens over the island).
+      group('isTop', 'The head and the shop', 'isWrap', { ...row({ width: pct(100), sizeMode: 'contentHeight', flexWrap: 'nowrap', alignItems: 'flex-start', columnGap: sp(12) }), cssClassName: 'bg-island-top' }, ['isHead', 'isShop']),
+      place('isHead', C.head, 'The head', 'isTop'),
+      place('isShop', SHOP_PATHS.shop, 'The shop', 'isTop'),
       group('isGrid', 'The island and the requests', 'isWrap', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-island' }, ['isWorld', 'isQuests']),
       place('isWorld', C.isleWorld, 'Her island', 'isGrid'),
       group('isQuests', 'The requests', 'isGrid', column({ rowGap: sp(10) }), ['isReqL', 'isList', 'isFreeL', 'isFree']),
@@ -2623,7 +2639,14 @@ const PAGE_ISLAND: CgComponent = (() => {
       wire('isWorld', 'open', 'isSetReq', 'do'),
       wire('isSetReq', 'done', 'isGoWorkshop', 'navigate'),
       wire('isFree', 'chosen', 'isSetFree', 'do'),
-      wire('isSetFree', 'done', 'isGoWorkshop', 'navigate')
+      wire('isSetFree', 'done', 'isGoWorkshop', 'navigate'),
+      // P108 IW-006 (lane H): the shop reads her family and writes it through the page's store, as every writer does.
+      wire('isStore', 'model', 'isShop', 'model'),
+      wire('isWords', 'words', 'isShop', 'words'),
+      wire('isFam', 'lang', 'isShop', 'lang'),
+      wire('isRequests', 'requests', 'isShop', 'requests'),
+      wire('isShop', 'model', 'isStore', 'model'),
+      wire('isShop', 'write', 'isStore', 'write')
     ]
   };
 })();
@@ -2971,6 +2994,225 @@ const PAGE_GROWN: CgComponent = (() => {
   };
 })();
 
+// ── P108 IW-006 (lane H): the shop ────────────────────────────────────────────────────────────────────────────────
+
+/** One thing the shop sells: its picture, its price, its name, one line, and Yours / Ready to use. */
+const SHOP_ITEM: CgComponent = {
+  path: SHOP_PATHS.item.slice(1),
+  description: 'One thing the shop sells (IW-006): its picture, its price in shells, its name, one line, and a tag when it is hers already (Yours) or held (Ready to use). Publishes Chosen with the Id.',
+  nodes: [
+    inputs('siIn', [['id', 'string'], ['icon', 'string'], ['name', 'string'], ['price', 'string'], ['line', 'string'], ['tag', 'string'], ['hasTag', 'boolean'], ['cls', 'string']]),
+    group('siCard', 'The item', undefined, { ...column({ rowGap: sp(6) }), ...PANEL, cssClassName: 'bg-shop-item bg-press' }, ['siTop', 'siName', 'siLine', 'siTag']),
+    group('siTop', 'The picture and the price', 'siCard', { ...row({ width: pct(100), sizeMode: 'contentHeight', flexWrap: 'nowrap', justifyContent: 'space-between' }) }, ['siPic', 'siPrice']),
+    text('siPic', 'The picture', 'siTop', '', { sizeMode: 'contentSize', fontSize: px(40), color: 'var(--ink)', lineHeight: 1.1, cssClassName: 'bg-shop-pic' }),
+    text('siPrice', 'The price', 'siTop', '', { ...T_STRONG, sizeMode: 'contentSize', cssClassName: 'bg-shop-price' }),
+    text('siName', 'Its name', 'siCard', '', { ...T_H3, cssClassName: 'bg-shop-name' }),
+    text('siLine', 'One line', 'siCard', '', { ...T_SMALL, cssClassName: 'bg-shop-line' }),
+    text('siTag', 'Yours, or ready to use', 'siCard', '', { ...T_STRONG, sizeMode: 'contentSize', fontSize: px(13), cssClassName: 'bg-shop-tag', mounted: false }),
+    logic('siHasTag', CONDITION_NODE, 'Hers already, or held?'),
+    withStates('siTagState', 'The tag shown or not', ['none', 'shown'], { shown: { type: 'boolean', by: { none: false, shown: true } } }),
+    outputs('siOut', [['chosen', 'signal'], ['id', 'string']])
+  ],
+  connections: [
+    wire('siIn', 'icon', 'siPic', 'text'),
+    wire('siIn', 'price', 'siPrice', 'text'),
+    wire('siIn', 'name', 'siName', 'text'),
+    wire('siIn', 'line', 'siLine', 'text'),
+    wire('siIn', 'tag', 'siTag', 'text'),
+    wire('siIn', 'cls', 'siCard', 'cssClassName'),
+    wire('siIn', 'hasTag', 'siHasTag', 'condition'),
+    wire('siHasTag', 'ontrue', 'siTagState', 'to-shown'),
+    wire('siHasTag', 'onfalse', 'siTagState', 'to-none'),
+    wire('siTagState', 'shown', 'siTag', 'mounted'),
+    wire('siCard', 'onClick', 'siOut', 'chosen'),
+    wire('siIn', 'id', 'siOut', 'id')
+  ]
+};
+
+/**
+ * The shop on the Island page (IW-006 AC3): a button with her balance on it ("🐚 32 · Shop"); pressed, the shop opens over
+ * the island — the five tabs as chips (Build and Animals say they come later), the open tab's items (a picture, a price,
+ * one line), and the purchase card of the one she taps: what she has, the cost, what is left (or how many more shells,
+ * and no Buy); a copy's name; the robot a brain is for; a held helper's jobs and Use it; Buy / Not now. Every pick is a
+ * button (a Select inside a Modal closes it, P92). Buy is Logic/Buy (the one purchase rule); Use it is Logic/Use helper,
+ * the island's running state written back beside the family. Model and Write go to the page's store.
+ */
+const SHOP_NODE_TEXT = { ...T_STRONG, sizeMode: 'contentSize', cssClassName: 'bg-shop-fig' };
+const SHOP_COMP: CgComponent = {
+  path: SHOP_PATHS.shop.slice(1),
+  description: 'The shop (IW-006): the balance on its button; five tabs; each item a picture, a price and one line; the purchase card (you have, it costs, left after — or how many more shells), a copy’s name, a brain’s robot, a held helper’s job; Buy / Use it / Not now. Publishes Model and Write for the page’s store.',
+  nodes: [
+    inputs('shIn', [['model', 'object'], ['words', 'array'], ['lang', 'string'], ['requests', 'array']]),
+    group('shRoot', 'The shop', undefined, { sizeMode: 'contentSize', cssClassName: 'bg-shop-root' }, ['shOpen', 'shSheet']),
+    place('shOpen', BUTTON_NODE, 'Open the shop (the balance on it)', 'shRoot', { ...btn('plain', '', { cssClassName: 'bg-shop-open' }), label: '🐚 0 · Shop' }),
+    group('shSheet', 'The shop, over the island', 'shRoot', { sizeMode: 'contentSize', cssClassName: 'bg-shop', mounted: false }, ['shPanel']),
+    group('shPanel', 'The shop’s sheet', 'shSheet', { ...column({ rowGap: sp(12) }), ...PANEL, cssClassName: 'bg-panel bg-shop-panel' }, ['shTop', 'shTabs', 'shLater', 'shItems', 'shCard']),
+    group('shTop', 'The title, the balance, close', 'shPanel', row({ width: pct(100), sizeMode: 'contentHeight', flexWrap: 'nowrap', columnGap: sp(10) }), ['shTitle', 'shBal', 'shClose']),
+    text('shTitle', 'The shop', 'shTop', '', { ...T_H2, cssClassName: 'bg-grow' }),
+    text('shBal', 'Her shells', 'shTop', '', { ...T_STRONG, sizeMode: 'contentSize', cssClassName: 'bg-shop-bal' }),
+    place('shClose', BUTTON_NODE, 'Close the shop', 'shTop', { ...btn('quiet', '', { cssClassName: 'bg-shop-close' }), label: '✕' }),
+    group('shTabs', 'The five tabs', 'shPanel', { ...column({ rowGap: sp(8) }), cssClassName: 'bg-shop-tabs' }, ['shTabEach']),
+    { ...logic('shTabEach', FOR_EACH_NODE, 'One chip per tab', { template: C.chip, templateType: 'explicit' }), parent: 'shTabs' },
+    text('shLater', 'What comes later', 'shPanel', '', { ...T_MUTED, cssClassName: 'bg-shop-later', mounted: false }),
+    group('shItems', 'What this tab sells', 'shPanel', { ...column({ rowGap: sp(12) }), cssClassName: 'bg-shop-items' }, ['shItemEach']),
+    { ...logic('shItemEach', FOR_EACH_NODE, 'One card per item', { template: SHOP_PATHS.item, templateType: 'explicit' }), parent: 'shItems' },
+    // ── The purchase card ──
+    group('shCard', 'The purchase card', 'shPanel', { ...column({ rowGap: sp(10) }), ...PANEL, cssClassName: 'bg-panel bg-shop-card', mounted: false }, ['shCHead', 'shFigs', 'shShort', 'shDone', 'shNone', 'shNameL', 'shName', 'shWhichL', 'shBots', 'shUseL', 'shPlots', 'shBtns']),
+    group('shCHead', 'The picture, the name, the line', 'shCard', row({ width: pct(100), sizeMode: 'contentHeight', flexWrap: 'nowrap', columnGap: sp(12) }), ['shCPic', 'shCText']),
+    text('shCPic', 'The picture', 'shCHead', '', { sizeMode: 'contentSize', fontSize: px(48), color: 'var(--ink)', lineHeight: 1.1, cssClassName: 'bg-shop-pic' }),
+    group('shCText', 'The name and the line', 'shCHead', { ...column({ rowGap: sp(2) }), cssClassName: 'bg-grow' }, ['shCName', 'shCLine']),
+    text('shCName', 'Its name', 'shCText', '', { ...T_H3, cssClassName: 'bg-shop-card-name' }),
+    text('shCLine', 'One line', 'shCText', '', T_SMALL),
+    group('shFigs', 'You have · it costs · left after', 'shCard', { ...column({ rowGap: sp(6) }), cssClassName: 'bg-shop-figs', mounted: false }, ['shHave', 'shCost', 'shLeft']),
+    text('shHave', 'What she has', 'shFigs', '', SHOP_NODE_TEXT),
+    text('shCost', 'What it costs', 'shFigs', '', SHOP_NODE_TEXT),
+    text('shLeft', 'What is left after', 'shFigs', '', { ...SHOP_NODE_TEXT, cssClassName: 'bg-shop-fig bg-shop-left', mounted: false }),
+    text('shShort', 'How many more shells', 'shCard', '', { ...T_STRONG, sizeMode: 'contentSize', cssClassName: 'bg-shop-short', mounted: false }),
+    text('shDone', 'It is hers', 'shCard', '', { ...T_STRONG, sizeMode: 'contentSize', cssClassName: 'bg-shop-done', mounted: false }),
+    text('shNone', 'Why not now', 'shCard', '', { ...T_MUTED, cssClassName: 'bg-shop-none', mounted: false }),
+    text('shNameL', 'Its name', 'shCard', '', { ...T_H3, fontSize: px(16), mounted: false }),
+    place('shName', TEXT_INPUT_NODE, 'The new robot’s name', 'shCard', { sizeMode: 'contentHeight', width: pct(100), maxWidth: px(320), fontSize: px(20), fontWeight: '800', color: 'var(--ink)', backgroundColor: 'var(--card)', borderStyle: 'solid', borderWidth: px(2), borderColor: 'var(--line)', borderRadius: px(14), ...pad(10, 14), maxLength: ROBOT_NAME_MAX, cssClassName: 'bg-shop-name-box', mounted: false }),
+    text('shWhichL', 'Which robot', 'shCard', '', { ...T_H3, fontSize: px(16), mounted: false }),
+    group('shBots', 'Her robots a brain fits', 'shCard', { ...column({ rowGap: sp(8) }), cssClassName: 'bg-shop-chips', mounted: false }, ['shBotEach']),
+    { ...logic('shBotEach', FOR_EACH_NODE, 'One chip per robot', { template: C.chip, templateType: 'explicit' }), parent: 'shBots' },
+    text('shUseL', 'Use it on a job', 'shCard', '', { ...T_H3, fontSize: px(16), mounted: false }),
+    group('shPlots', 'The jobs it helps now', 'shCard', { ...column({ rowGap: sp(8) }), cssClassName: 'bg-shop-chips', mounted: false }, ['shPlotEach']),
+    { ...logic('shPlotEach', FOR_EACH_NODE, 'One chip per job', { template: C.chip, templateType: 'explicit' }), parent: 'shPlots' },
+    group('shBtns', 'Buy, use, or not now', 'shCard', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(10) }), ['shBuy', 'shUse', 'shNotNow']),
+    place('shBuy', BUTTON_NODE, 'Buy it', 'shBtns', { ...btn('primary', '', { cssClassName: 'bg-shop-buy' }), label: 'Buy it', mounted: false }),
+    place('shUse', BUTTON_NODE, 'Use it', 'shBtns', { ...btn('primary', '', { cssClassName: 'bg-shop-use' }), label: 'Use it', mounted: false }),
+    place('shNotNow', BUTTON_NODE, 'Not now', 'shBtns', { ...btn('quiet', '', { cssClassName: 'bg-shop-no' }), label: 'Not now' }),
+    // ── What it knows ──
+    logic('shT', L('Translate words'), 'In her language'),
+    logic('shRows', L('Shop rows'), 'The balance, the tabs, the items'),
+    logic('shCardFn', L('Shop card'), 'The purchase card'),
+    logic('shBuyFn', L('Buy'), 'Buy it'),
+    logic('shUseFn', L('Use helper'), 'Use the helper on that job'),
+    withStates('shOpenState', 'The shop open or not', ['closed', 'open'], { open: { type: 'boolean', by: { closed: false, open: true } } }),
+    gate('shBuyOk', 'Was it bought?'),
+    gate('shUseOk', 'Was the helper used?'),
+    variable('shTabVar', 'gardenShopTab', 'The tab open'),
+    variable('shItemVar', 'gardenShopItem', 'The item tapped'),
+    variable('shBotVar', 'gardenShopRobot', 'The robot chosen for a brain'),
+    variable('shPlotVar', 'gardenShopPlot', 'The job chosen for a helper'),
+    variable('shBoughtVar', 'gardenShopBought', 'What was just bought'),
+    variable('shUsedVar', 'gardenShopUsed', 'What was just used, and where'),
+    variable('shIsleVar', 'gardenIsland', 'The island, running'),
+    setVariable('shSetTab', 'gardenShopTab', 'Open this tab'),
+    setVariable('shSetItem', 'gardenShopItem', 'Open this item’s card'),
+    setVariable('shClearItem', 'gardenShopItem', 'No card', { setWith: 'string', value: 'none' }),
+    setVariable('shSetBot', 'gardenShopRobot', 'This robot'),
+    setVariable('shClearBot', 'gardenShopRobot', 'No robot chosen', { setWith: 'string', value: 'none' }),
+    setVariable('shSetPlot', 'gardenShopPlot', 'This job'),
+    setVariable('shClearPlot', 'gardenShopPlot', 'No job chosen', { setWith: 'string', value: 'none' }),
+    setVariable('shSetBought', 'gardenShopBought', 'What was just bought'),
+    setVariable('shClearBought', 'gardenShopBought', 'Nothing just bought', { setWith: 'string', value: 'none' }),
+    setVariable('shSetUsed', 'gardenShopUsed', 'What was just used'),
+    setVariable('shClearUsed', 'gardenShopUsed', 'Nothing just used', { setWith: 'string', value: 'none' }),
+    setVariable('shSetIsle', 'gardenIsland', 'The island with the helper at work'),
+    outputs('shOut', [['model', 'object'], ['write', 'signal']])
+  ],
+  connections: [
+    // Words.
+    wire('shIn', 'words', 'shT', 'words'),
+    wire('shIn', 'lang', 'shT', 'lang'),
+    wire('shT', 'iw6hTitle', 'shTitle', 'text'),
+    wire('shT', 'iw6hNameL', 'shNameL', 'text'),
+    wire('shT', 'iw6hWhich', 'shWhichL', 'text'),
+    wire('shT', 'iw6hUseOn', 'shUseL', 'text'),
+    wire('shT', 'iw6hBuy', 'shBuy', 'label'),
+    wire('shT', 'iw6hUse', 'shUse', 'label'),
+    wire('shT', 'iw6hNotNow', 'shNotNow', 'label'),
+    // The button, the tabs, the items.
+    ...(['model', 'words', 'lang'] as const).map((f) => wire('shIn', f, 'shRows', f)),
+    wire('shTabVar', 'value', 'shRows', 'tab'),
+    wire('shRows', 'btnText', 'shOpen', 'label'),
+    wire('shRows', 'balText', 'shBal', 'text'),
+    wire('shRows', 'tabs', 'shTabEach', 'items'),
+    wire('shRows', 'items', 'shItemEach', 'items'),
+    wire('shRows', 'showItems', 'shItems', 'mounted'),
+    wire('shRows', 'later', 'shLater', 'text'),
+    wire('shRows', 'showLater', 'shLater', 'mounted'),
+    // Open, close, a tab, an item: a new card starts with nothing chosen and nothing just done.
+    wire('shOpen', 'onClick', 'shOpenState', 'to-open'),
+    wire('shOpen', 'onClick', 'shClearItem', 'do'),
+    wire('shClose', 'onClick', 'shOpenState', 'to-closed'),
+    wire('shOpenState', 'open', 'shSheet', 'mounted'),
+    wire('shTabEach', 'itemOutput-id', 'shSetTab', 'value'),
+    wire('shTabEach', 'itemOutputSignal-picked', 'shSetTab', 'do'),
+    wire('shTabEach', 'itemOutputSignal-picked', 'shClearItem', 'do'),
+    wire('shItemEach', 'itemOutput-id', 'shSetItem', 'value'),
+    wire('shItemEach', 'itemOutputSignal-chosen', 'shSetItem', 'do'),
+    ...(['shClearBot', 'shClearPlot', 'shClearBought', 'shClearUsed'] as const).map((n) => wire('shItemEach', 'itemOutputSignal-chosen', n, 'do')),
+    wire('shItemEach', 'itemOutputSignal-chosen', 'shName', 'clear'),
+    wire('shNotNow', 'onClick', 'shClearItem', 'do'),
+    // The purchase card.
+    ...(['model', 'words', 'lang', 'requests'] as const).map((f) => wire('shIn', f, 'shCardFn', f)),
+    wire('shItemVar', 'value', 'shCardFn', 'itemId'),
+    wire('shBotVar', 'value', 'shCardFn', 'robotId'),
+    wire('shPlotVar', 'value', 'shCardFn', 'plotId'),
+    wire('shBoughtVar', 'value', 'shCardFn', 'bought'),
+    wire('shUsedVar', 'value', 'shCardFn', 'used'),
+    wire('shIsleVar', 'value', 'shCardFn', 'state'),
+    wire('shCardFn', 'showCard', 'shCard', 'mounted'),
+    wire('shCardFn', 'icon', 'shCPic', 'text'),
+    wire('shCardFn', 'name', 'shCName', 'text'),
+    wire('shCardFn', 'line', 'shCLine', 'text'),
+    wire('shCardFn', 'showFigures', 'shFigs', 'mounted'),
+    wire('shCardFn', 'have', 'shHave', 'text'),
+    wire('shCardFn', 'cost', 'shCost', 'text'),
+    wire('shCardFn', 'left', 'shLeft', 'text'),
+    wire('shCardFn', 'showLeft', 'shLeft', 'mounted'),
+    wire('shCardFn', 'short', 'shShort', 'text'),
+    wire('shCardFn', 'showShort', 'shShort', 'mounted'),
+    wire('shCardFn', 'done', 'shDone', 'text'),
+    wire('shCardFn', 'showDone', 'shDone', 'mounted'),
+    wire('shCardFn', 'none', 'shNone', 'text'),
+    wire('shCardFn', 'showNone', 'shNone', 'mounted'),
+    wire('shCardFn', 'showName', 'shNameL', 'mounted'),
+    wire('shCardFn', 'showName', 'shName', 'mounted'),
+    wire('shCardFn', 'namePlaceholder', 'shName', 'placeholder'),
+    wire('shCardFn', 'showRobots', 'shWhichL', 'mounted'),
+    wire('shCardFn', 'showRobots', 'shBots', 'mounted'),
+    wire('shCardFn', 'robots', 'shBotEach', 'items'),
+    wire('shBotEach', 'itemOutput-id', 'shSetBot', 'value'),
+    wire('shBotEach', 'itemOutputSignal-picked', 'shSetBot', 'do'),
+    wire('shCardFn', 'showUse', 'shUseL', 'mounted'),
+    wire('shCardFn', 'showUse', 'shPlots', 'mounted'),
+    wire('shCardFn', 'plots', 'shPlotEach', 'items'),
+    wire('shPlotEach', 'itemOutput-id', 'shSetPlot', 'value'),
+    wire('shPlotEach', 'itemOutputSignal-picked', 'shSetPlot', 'do'),
+    wire('shCardFn', 'canBuy', 'shBuy', 'mounted'),
+    wire('shCardFn', 'canUse', 'shUse', 'mounted'),
+    // Buy: the one purchase rule on her profile; the family written only when it bought.
+    wire('shIn', 'model', 'shBuyFn', 'model'),
+    wire('shCardFn', 'itemId', 'shBuyFn', 'itemId'),
+    wire('shCardFn', 'robotId', 'shBuyFn', 'robotId'),
+    wire('shName', 'onTextChanged', 'shBuyFn', 'name'),
+    wire('shBuy', 'onClick', 'shBuyFn', 'go'),
+    wire('shBuyFn', 'bought', 'shSetBought', 'value'),
+    wire('shBuyFn', 'ran', 'shSetBought', 'do'),
+    wire('shBuyFn', 'model', 'shOut', 'model'),
+    wire('shBuyFn', 'ok', 'shBuyOk', 'condition'),
+    wire('shBuyFn', 'ran', 'shBuyOk', 'eval'),
+    wire('shBuyOk', 'ontrue', 'shOut', 'write'),
+    // Use it: the helper on that job — the island's running state first, then the family.
+    wire('shIn', 'model', 'shUseFn', 'model'),
+    wire('shCardFn', 'itemId', 'shUseFn', 'itemId'),
+    wire('shCardFn', 'plotId', 'shUseFn', 'plotId'),
+    wire('shIsleVar', 'value', 'shUseFn', 'state'),
+    wire('shUse', 'onClick', 'shUseFn', 'go'),
+    wire('shUseFn', 'used', 'shSetUsed', 'value'),
+    wire('shUseFn', 'ran', 'shSetUsed', 'do'),
+    wire('shUseFn', 'state', 'shSetIsle', 'value'),
+    wire('shUseFn', 'ok', 'shUseOk', 'condition'),
+    wire('shUseFn', 'ran', 'shUseOk', 'eval'),
+    wire('shUseOk', 'ontrue', 'shSetIsle', 'do'),
+    wire('shUseFn', 'model', 'shOut', 'model'),
+    wire('shSetIsle', 'done', 'shOut', 'write')
+  ]
+};
+
 export const CG003_COMPONENTS: ReadonlyArray<CgComponent> = [
   ...DATA_COMPONENTS,
   ...LOGIC_COMPONENTS,
@@ -3013,7 +3255,10 @@ export const CG003_COMPONENTS: ReadonlyArray<CgComponent> = [
   PAGE_WORKSHOP,
   PAGE_ROBOT,
   PAGE_SKILLS,
-  PAGE_GROWN
+  PAGE_GROWN,
+  // P108 IW-006 (lane H): the shop.
+  SHOP_ITEM,
+  SHOP_COMP
 ];
 
 export const REQUIRED_MODULES = ['garden-kit', 'game-kit', 'garden-3d-kit'] as const;
