@@ -1345,7 +1345,9 @@ var gardenKitBlocks = (function () {
 
   var BLOCKS_CSS =
     '.gd-bk{position:relative;display:block;width:100%;height:100%;min-height:420px;font-family:inherit;color:#2E2A3D;-webkit-tap-highlight-color:transparent;touch-action:none}\n' +
-    '.gd-bk-host{position:absolute;inset:0;border-radius:14px;overflow:hidden}\n' +
+    // Its own layer, its own paint: the world beside it animates every frame (Garden 3D on a software renderer measured
+    // its frame rule tripping while the workspace repainted with it).
+    '.gd-bk-host{position:absolute;inset:0;border-radius:14px;overflow:hidden;contain:strict;will-change:transform}\n' +
     '.gd-bk .blocklyMainBackground{stroke:none}\n' +
     '.gd-bk .blocklyText{font-weight:700}\n' +
     '.gd-bk .blocklyFlyoutBackground{fill-opacity:1}\n' +
@@ -1934,6 +1936,76 @@ var gardenKitBlocks = (function () {
       call('onWatch', JSON.stringify(refsIn(text)));
     }
 
+    /**
+     * Teach's case, cheaply: the program that came in is the one on show with ONE block added at the end of a list (the
+     * top, or a container's body) — that block is appended, nothing else is rebuilt. Measured: a full reload per pad
+     * press, 27 presses, made the page janky enough that Garden 3D's frame rule gave up on 3D under software GL.
+     */
+    function appendOne(nowText, nextText) {
+      var a = readJson(nowText, []);
+      var b = readJson(nextText, []);
+      var path = [];
+      var added = null;
+      (function find(x, y) {
+        if (!Array.isArray(x) || !Array.isArray(y)) return;
+        if (y.length === x.length + 1 && JSON.stringify(y.slice(0, x.length)) === JSON.stringify(x)) {
+          added = y[x.length];
+          return;
+        }
+        if (y.length !== x.length) return;
+        var at = -1;
+        for (var i = 0; i < x.length; i++) {
+          if (JSON.stringify(x[i]) === JSON.stringify(y[i])) continue;
+          if (at !== -1) return;
+          at = i;
+        }
+        if (at === -1 || !isObj(x[at]) || !isObj(y[at]) || x[at].id !== y[at].id) return;
+        var xa = clone(x[at]);
+        var yb = clone(y[at]);
+        delete xa.body;
+        delete yb.body;
+        if (JSON.stringify(xa) !== JSON.stringify(yb)) return;
+        path.push(x[at].id);
+        find(x[at].body, y[at].body);
+      })(a, b);
+      if (!isObj(added)) return false;
+      var host = path.length ? ed.ws.getBlockById(String(path[path.length - 1])) : startBlock();
+      if (!host) return false;
+      var json = blockOf(added);
+      if (!json) return false;
+      ed.loading = true;
+      Bk.Events.disable();
+      try {
+        var nb = Bk.serialization.blocks.append(json, ed.ws);
+        var conn;
+        if (path.length) {
+          var first = host.getInputTargetBlock('DO');
+          conn = first ? lastInChain(first).nextConnection : host.getInput('DO') && host.getInput('DO').connection;
+        } else conn = lastInChain(host).nextConnection;
+        if (!conn || !nb.previousConnection) throw new Error('no place for it');
+        conn.connect(nb.previousConnection);
+      } catch (e) {
+        Bk.Events.enable();
+        ed.loading = false;
+        return false;
+      }
+      Bk.Events.enable();
+      ed.loading = false;
+      if (current() !== nextText) return false;
+      ed.lastEmitted = nextText;
+      refreshFields();
+      highlight();
+      try {
+        var fly = ed.ws.getFlyout();
+        if (fly && fly.filterForCapacity) fly.filterForCapacity();
+      } catch (e) {
+        /* the drawer greys on the next edit */
+      }
+      schedule();
+      call('onBlocks', countStatements(b));
+      return true;
+    }
+
     function load(text) {
       if (!ed.ws) return;
       ed.loading = true;
@@ -2119,9 +2191,15 @@ var gardenKitBlocks = (function () {
     /** Props in: the view is rebuilt only for what Blockly cannot change in place (band, language, palette, colours). */
     function update() {
       var p = props();
-      var next = makeCtx();
-      var key = [isNarrow(), next.band, next.lang, JSON.stringify(next.paletteList), next.showHelp, JSON.stringify(next.words), next.botName, p.motionColor, p.actionColor, p.controlColor, p.askColor].join('|');
       if (!ed.ws) return;
+      // The view's inputs, by identity first: a render that changed none of them (a glow, a lock) costs nothing here.
+      var refs = [isNarrow(), p.palette, p.words, p.band, p.language, p.showHelp, p.botName, p.motionColor, p.actionColor, p.controlColor, p.askColor, p.brainSize];
+      var same = !!ed.refs && refs.length === ed.refs.length && refs.every(function (r, i) {
+        return r === ed.refs[i];
+      });
+      ed.refs = refs;
+      var next = same ? null : makeCtx();
+      var key = same ? ed.key : [refs[0], next.band, next.lang, JSON.stringify(next.paletteList), next.showHelp, JSON.stringify(next.words), next.botName, p.motionColor, p.actionColor, p.controlColor, p.askColor].join('|');
       if (key !== ed.key) {
         var keep = current();
         destroyWs();
@@ -2133,13 +2211,16 @@ var gardenKitBlocks = (function () {
         ed.runningId = '';
         root.classList.remove('gd-locked');
       }
-      ed.ctx.brain = next.brain;
+      if (next) ed.ctx.brain = next.brain;
       // Program in: only a NEW value from the graph counts (a render with the same, older prop must not undo an edit the
       // graph has not echoed back yet — Block List's useEffect on [program]); and never the node's own text back.
       var text = programText(p.program);
       if (text !== ed.lastIncoming) {
         ed.lastIncoming = text;
-        if (text !== ed.lastEmitted && text !== current()) load(text);
+        if (text !== ed.lastEmitted) {
+          var now = current();
+          if (text !== now && !appendOne(now, text)) load(text);
+        }
       }
       var locked = flag(p.locked, false);
       if (locked !== ed.locked) {

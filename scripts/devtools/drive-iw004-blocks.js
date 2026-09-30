@@ -341,6 +341,8 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
   /** A drag takes a drawer block by its icon, at its left edge (where its top connection is), as a finger holds it. */
   const drawerGrip = (id) => `POINT:(() => { const b = document.querySelector('.bg-blocks-box .gd-palette [data-pal="${id}"]'); const i = b && b.querySelector('.gd-icon'); if (!i) return { found: false }; const c = i.getBoundingClientRect(); const x = c.left + c.width / 2, y = c.top + c.height / 2; const at = document.elementFromPoint(x, y); return { found: true, x, y, hit: !!at && b.contains(at) }; })()`;
   const headOfId = (id) => `document.querySelector('.bg-blocks-box .gd-prog [data-head="${id}"]')`;
+  /** A placed block held by its icon (its left, where a finger takes it; its word can sit past a narrow workspace's edge). */
+  const blockGrip = (id) => `POINT:(() => { const b = document.querySelector('.bg-blocks-box .gd-prog .gd-blk[data-id="${id}"]'); const i = b && b.querySelector('.gd-icon'); if (!i) return { found: false }; const c = i.getBoundingClientRect(); const x = c.left + c.width / 2, y = c.top + c.height / 2; const at = document.elementFromPoint(x, y); return { found: true, x, y, hit: !!at && b.contains(at) }; })()`;
   const lastOf = (t) => evaluate(`(() => { const b = [...document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-t="${t}"]')].pop(); return b ? b.getAttribute('data-id') : ''; })()`);
   const pickerOpts = () => evaluate(`[...document.querySelectorAll('.bg-blocks-box .gd-picker .gd-opt')].map((o) => o.getAttribute('data-opt'))`);
   const closePicker = async () => {
@@ -390,7 +392,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     check('AC2 1024 (mouse): a repeat dragged in under turn left, and water dropped into its mouth, is its body — [forward, turn left, repeat 3 { water }]', shape(a3) === 'fwd, left, repeat 3 { water }', shape(a3));
     await shot('iw004-ac2-1024-built');
     const waterId = await lastOf('water');
-    await dragTo(headOfId(waterId), `document.querySelector('.bg-blocks-box .gd-palette')`, 'water back onto the drawer');
+    await dragTo(blockGrip(waterId), `document.querySelector('.bg-blocks-box .gd-palette')`, 'water back onto the drawer');
     const a4 = await program();
     check('AC2 1024 (mouse): the block dragged back onto the drawer is gone — [forward, turn left, repeat 3 { }]', shape(a4) === 'fwd, left, repeat 3 {  }', shape(a4));
     await shot('iw004-ac2-1024-deleted');
@@ -421,7 +423,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     check('AC2 390 (touch): turn left dropped by a finger into the repeat’s mouth is its body — [forward, repeat 3 { turn left }]', shape(t3) === 'fwd, repeat 3 { left }', shape(t3));
     await shot('iw004-ac2-390-touch-built');
     const l2 = await lastOf('left');
-    await dragTo(headOfId(l2), `document.querySelector('.bg-blocks-box .gd-palette')`, 'turn left by touch back onto the drawer', true);
+    await dragTo(blockGrip(l2), `document.querySelector('.bg-blocks-box .gd-palette')`, 'turn left by touch back onto the drawer', true);
     const t4 = await program();
     check('AC2 390 (touch): a block dragged by a finger back onto the drawer is gone — [forward, repeat 3 { }]', shape(t4) === 'fwd, repeat 3 {  }', shape(t4));
     await shot('iw004-ac2-390-touch-deleted');
