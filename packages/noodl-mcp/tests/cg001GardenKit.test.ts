@@ -795,4 +795,203 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       expect(/\.gd-isl-say\{[^}]*max-width:min\(170px,700%\)/.test(css)).toBe(true);
     });
   });
+
+  // ── P108 IW-002 AC6 (lane D): the job model drawn from the world JSON the ENGINE writes, and the two world inputs ──
+  describe('IW-002 AC6 (P108 s2, lane D) — the job model drawn from the engine’s own world JSON; Watch and Picking; the 13 requests unchanged', () => {
+    /* eslint-disable @typescript-eslint/no-var-requires */
+    const { REQUESTS, JOB_VOCABULARY, SITE_STAGES, WALL_TILE } = require('./cg002Content');
+    const { ENGINE, NEW_RUN_SCRIPT, STEP_SCRIPT, APPLY_DELTA_SCRIPT, helper, runScript } = require('./cg002Scripts');
+    /* eslint-enable @typescript-eslint/no-var-requires */
+    const W = () => node('garden-kit.Garden').world as Record<string, any>;
+    /** Run a program on a world the way the page does (Step, then Apply delta), an Olive ask answered by the fallback. */
+    const play = (world: any, program: unknown[], cap = 400) => {
+      let run = runScript(NEW_RUN_SCRIPT, { program, robotId: 'pip', lang: 'en' }).run;
+      let w = world;
+      for (let i = 0; i < cap && !run.done; i++) {
+        let st = runScript(STEP_SCRIPT, { run, world: w, answer: null });
+        if (st.waiting) st = runScript(STEP_SCRIPT, { run: st.run, world: w, answer: { seq: st.request.seq, ok: false, fallback: true } });
+        w = runScript(APPLY_DELTA_SCRIPT, { world: w, delta: st.delta }).world;
+        run = st.run;
+      }
+      return w;
+    };
+    const apply = (world: any, delta: unknown) => runScript(APPLY_DELTA_SCRIPT, { world, delta }).world;
+    let nid = 1;
+    const prog = (...ts: string[]) => ts.map((t) => ({ id: nid++, t }));
+    const rep = (n: number, t: string) => [{ id: nid++, t: 'repeat', n, body: prog(t) }];
+    /** The world JSON as the kit's ports take it: the engine's rows as the Map, its things and robots as they are. */
+    const draw = (w: any, extra: Record<string, unknown> = {}) => render('garden-kit.Garden', { map: { rows: w.map }, things: w.things, robots: w.robots, ...extra });
+    const cellOf = (html: string, x: number, y: number) => {
+      const at = html.indexOf(`data-x="${x}" data-y="${y}"`);
+      return html.slice(html.lastIndexOf('<button', at), html.indexOf('</button>', at));
+    };
+    /** The markup without its stylesheet (the CSS names every class; a marker counts only where it is drawn). */
+    const body = (html: string) => html.replace(/<style>[\s\S]*?<\/style>/, '');
+    const meters = (html: string) => [...html.matchAll(/class="gd-meter[^"]*" data-meter="([^"]+)" data-kind="(\w+)"/g)].map((m) => `${m[2]}:${m[1]}`);
+    /** Every marker this lane added: none may appear on a world with no job field, Watch empty and Picking off. */
+    const NEW_MARKERS = ['gd-meter', 'gd-ring', 'gd-site', 'gd-in-pen', 'gd-penfence', 'gd-picking', 'data-picking', 'data-wide', 'gd-part', 'gd-droop', 'gd-letter-in', 'gd-used', 'data-holds', 'data-watch', 'gd-wallart', 'gd-canthing', 'data-sprite="hen"', 'data-sprite="basket', 'data-sprite="store'];
+
+    it('🔴 the kit’s copies of the job table are the ONE table (cg002Content): JOB_VOCABULARY, SITE_STAGES, WALL_TILE, and L is the wall in the legend', () => {
+      const job = W().job;
+      expect(job.JOB_VOCABULARY).toEqual(JSON.parse(JSON.stringify(JOB_VOCABULARY)));
+      expect(job.SITE_STAGES).toEqual([...SITE_STAGES]);
+      expect(job.WALL_TILE).toBe(WALL_TILE);
+      expect([W().DEFAULT_LEGEND[WALL_TILE], W().KINDS.includes('wall')]).toEqual(['wall', true]);
+    });
+
+    it('🔴 the 13 requests draw exactly as before: every start world AND the world each reference program leaves carries no meter, and Watch empty / Picking off change not one byte', () => {
+      expect(REQUESTS).toHaveLength(13);
+      for (const r of REQUESTS) {
+        const start = { map: [...r.map], things: r.things.map((t: any) => ({ ...t })), robots: [{ id: 'pip', ...r.robotStart, carry: [...(r.robotStart.carry || [])] }] };
+        const end = play(JSON.parse(JSON.stringify(start)), r.referenceProgram);
+        for (const [when, w] of [['start', start], ['end', end]] as const) {
+          const plain = draw(w);
+          const drawn = body(plain);
+          expect({ id: r.id, when, same: draw(w, { watch: '', picking: false }) === plain && draw(w, { watch: [], picking: false }) === plain }).toEqual({ id: r.id, when, same: true });
+          expect({ id: r.id, when, found: NEW_MARKERS.filter((m) => drawn.includes(m)) }).toEqual({ id: r.id, when, found: [] });
+          expect({ id: r.id, when, meters: w.things.map(W().job.meterOf).filter(Boolean) }).toEqual({ id: r.id, when, meters: [] });
+        }
+      }
+      // Known-firing beside it: the same tulip given a need wears a meter; the fed bowl (count, no capacity) does not.
+      expect(meters(draw({ map: ['GG'], things: [{ kind: 'tulip', x: 0, y: 0, need: 3, have: 1 }, { kind: 'bowl', x: 1, y: 0, food: 1, count: 1 }], robots: [] }))).toEqual(['tulip:1/3']);
+    });
+
+    it('🔴 a tulip’s drinks, poured by the engine: 2 of 3 half up with a 2/3 meter, 3 of 3 wet and green; worn by wearOf’s delta, it droops', () => {
+      const world = { map: ['GGG'], things: [{ kind: 'tulip', id: 'tu', x: 1, y: 0, need: 3, have: 0, watered: false }], robots: [{ id: 'pip', x: 0, y: 0, d: 1 }] };
+      const two = play(JSON.parse(JSON.stringify(world)), rep(2, 'water'));
+      const three = play(JSON.parse(JSON.stringify(world)), rep(3, 'water'));
+      expect([two.things[0].have, three.things[0].have, three.things[0].watered]).toEqual([2, 3, true]);
+      const h2 = cellOf(draw(two), 1, 0);
+      const h3 = cellOf(draw(three), 1, 0);
+      expect(h2).toContain('gd-tulip gd-dry gd-part');
+      // On the top row the chip sits just inside its tile (the world clips at its edge); below it, over the tile's top edge.
+      expect(h2).toMatch(/class="gd-meter gd-m-water gd-meter-top" data-meter="2\/3" data-kind="tulip"/);
+      expect(cellOf(draw({ ...two, map: ['GGG', 'GGG'], things: [{ ...two.things[0], y: 1 }] }), 1, 1)).toMatch(/class="gd-meter gd-m-water" data-meter="2\/3"/);
+      expect((h2.match(/gd-pip gd-on/g) || []).length).toBe(2);
+      expect((h2.match(/class="gd-pip"/g) || []).length).toBe(1);
+      expect(h3).toContain('gd-tulip gd-wet');
+      expect(h3).toMatch(/class="gd-meter gd-m-water gd-full gd-meter-top" data-meter="3\/3"/);
+      const worn = apply(three, { wear: { id: 'tu', kind: 'tulip', x: 1, y: 0, have: 2 } });
+      expect([worn.things[0].droop, worn.things[0].have]).toEqual([true, 2]);
+      const hw = cellOf(draw(worn), 1, 0);
+      expect(hw).toContain('gd-tulip gd-dry gd-droop');
+      expect(hw).toContain('data-meter="2/3"');
+      const css = node('garden-kit.Garden').css as string;
+      expect(css).toMatch(/\.gd-tulip\.gd-droop\{[^}]*rotate\(28deg\)/);
+      expect(css).toMatch(/\.gd-tulip\.gd-part\{[^}]*rotate\(9deg\)/);
+    });
+
+    it('🔴 a path site laid by the engine, stone by stone: dirt · gravel · cobbles · cobbles · path, each with its stones of 4; full it is path and green', () => {
+      const world = { map: ['GGG'], things: [{ kind: 'site', id: 's1', x: 1, y: 0, need: 4, have: 0, item: 'stone' }], robots: [{ id: 'pip', x: 0, y: 0, d: 1, carry: ['stone', 'stone', 'stone', 'stone'], basket: 6 }] };
+      const seen = [0, 1, 2, 3, 4].map((n) => {
+        const w = n ? play(JSON.parse(JSON.stringify(world)), rep(n, 'put')) : helper(ENGINE, 'worldOf', JSON.parse(JSON.stringify(world)));
+        const c = cellOf(draw(w), 1, 0);
+        return [w.things[0].stage, (/class="gd-site gd-site-(\w+)" data-site="(\w+)"/.exec(c) || []).slice(1).join('='), (/data-meter="([^"]+)" data-kind="site"/.exec(c) || [])[1], c.includes('gd-full')];
+      });
+      expect(seen).toEqual([
+        ['dirt', 'dirt=dirt', '0/4', false],
+        ['gravel', 'gravel=gravel', '1/4', false],
+        ['cobbles', 'cobbles=cobbles', '2/4', false],
+        ['cobbles', 'cobbles=cobbles', '3/4', false],
+        ['path', 'path=path', '4/4', true]
+      ]);
+      // With no stage written, the kit reads the engine's rule off have/need (the one table's SITE_STAGES).
+      expect(SITE_STAGES.map((_: string, i: number) => W().job.siteStage({ kind: 'site', need: 4, have: [0, 1, 3, 4][i] }))).toEqual(['dirt', 'gravel', 'cobbles', 'path']);
+    });
+
+    it('🔴 a basket the engine fills: empty, then eggs peeking and 3/4, then 4/4 green; a store and a bowl with a capacity count too', () => {
+      const world = { map: ['GGGG'], things: [{ kind: 'basket', id: 'b1', x: 1, y: 0, count: 0, capacity: 4, item: 'egg' }], robots: [{ id: 'pip', x: 0, y: 0, d: 1, carry: ['egg', 'egg', 'egg', 'egg'], basket: 6 }] };
+      const cells = [0, 3, 4].map((n) => cellOf(draw(n ? play(JSON.parse(JSON.stringify(world)), rep(n, 'put')) : world), 1, 0));
+      expect(cells.map((c) => [(/data-sprite="(basket\w*)"/.exec(c) || [])[1], (/data-meter="([^"]+)"/.exec(c) || [])[1], c.includes('gd-full'), c.includes('gd-mi-egg')])).toEqual([
+        ['basket', '0/4', false, true],
+        ['basketEggs', '3/4', false, true],
+        ['basketEggs', '4/4', true, true]
+      ]);
+      const html = draw({ map: ['GGG'], things: [{ kind: 'store', x: 0, y: 0, count: 2, capacity: 6 }, { kind: 'bowl', x: 1, y: 0, count: 1, food: 1, capacity: 2 }, { kind: 'store', x: 2, y: 0, count: 0, capacity: 12 }], robots: [] });
+      expect(meters(html)).toEqual(['store:2/6', 'bowl:1/2', 'store:0/12']);
+      expect(cellOf(html, 0, 0)).toContain('data-sprite="storeFull"');
+      expect(cellOf(html, 1, 0)).toContain('data-sprite="bowlFull"');
+      // A need past the pips' limit shows its numbers only; the item's icon is the table's when the thing names none.
+      expect(cellOf(html, 2, 0)).not.toContain('gd-pip');
+      expect(cellOf(html, 0, 0)).toContain('gd-mi-stone');
+      expect(cellOf(html, 1, 0)).toContain('gd-mi-food');
+    });
+
+    it('🔴 the can: on the map with its water at level/max; picked by the engine it leaves the map and its level is in the robot’s hand — whatever the robot wears', () => {
+      const world = { map: ['GGG'], things: [{ kind: 'can', x: 1, y: 0, level: 2, max: 3 }], robots: [{ id: 'pip', x: 0, y: 0, d: 1 }] };
+      const before = draw(world, { robots: [{ ...world.robots[0], accessory: 'hod' }] });
+      expect(cellOf(before, 1, 0)).toMatch(/data-sprite="wateringCan" data-level="2\/3"/);
+      expect(cellOf(before, 1, 0)).toContain('data-meter="2/3" data-kind="can"');
+      const held = play(JSON.parse(JSON.stringify(world)), prog('pick'));
+      expect([held.robots[0].holds, held.robots[0].can, held.robots[0].canMax, held.things.length]).toEqual(['can', 2, 3, 0]);
+      const after = draw(held, { robots: [{ ...held.robots[0], accessory: 'hod' }] });
+      expect(after).toContain('class="gd-can" data-can="2" data-can-max="3"');
+      expect(after).toContain('data-holds="can"');
+      expect(after).toMatch(/class="gd-acc gd-acc-hod"[\s\S]*data-holds="can"><g class="gd-acc gd-acc-can"/);
+      expect(W().parseRobots([{ holds: 'can' }, { holds: 'rock' }, {}]).map((r: any) => r.holds)).toEqual(['can', undefined, undefined]);
+    });
+
+    it('🔴 a rock with a max: its stones as a meter; mined to 0 by the engine it stays as a faint stub (it regrows); the hen, her straw pen with its rail, and the eggs she lays; a letter in the post box', () => {
+      const world = { map: ['GGGGG', 'GGGGG', 'GGGGG'], things: [{ kind: 'rock', x: 1, y: 0, left: 1, max: 4 }, { kind: 'hen', x: 3, y: 1, pen: [2, 1, 4, 2] }, { kind: 'postbox', x: 0, y: 2 }], robots: [{ id: 'pip', x: 0, y: 0, d: 1 }] };
+      const mined = play(JSON.parse(JSON.stringify(world)), prog('pick'));
+      expect(mined.things.find((t: any) => t.kind === 'rock')).toMatchObject({ left: 0, max: 4 });
+      const laid = apply(apply(mined, { lay: { x: 2, y: 2 } }), { letter: { x: 0, y: 2 } });
+      const html = draw(laid);
+      expect(cellOf(html, 1, 0)).toContain('gd-boulder gd-used');
+      expect(cellOf(html, 1, 0)).toContain('data-meter="0/4" data-kind="rock"');
+      expect(cellOf(html, 3, 1)).toContain('data-sprite="hen"');
+      expect(html).toMatch(/class="gd-penfence" data-pen="2,1,3,2"/);
+      expect([cellOf(html, 2, 1), cellOf(html, 4, 2), cellOf(html, 1, 1)].map((c) => c.includes('gd-in-pen'))).toEqual([true, true, false]);
+      expect(cellOf(html, 2, 2)).toContain('data-sprite="egg"');
+      expect(cellOf(html, 0, 2)).toMatch(/class="gd-sprite gd-thing gd-letter-in" data-sprite="letter"/);
+      // A letter on the map's B tile (the letters request) is drawn as before, not in a slot.
+      expect(body(draw({ map: ['B'], things: [{ kind: 'letter', x: 0, y: 0 }], robots: [] }))).not.toContain('gd-letter-in');
+    });
+
+    it('🔴 AC4 (the 2D kit): Start world’s seeded layout — the wall tile and the eggs — draws the same for the same seed and differently for seeds 1, 2 and 3', () => {
+      const req = { seeded: { wallAt: [2, 5], wallRow: 0, eggs: { count: 3, among: [[0, 2], [1, 2], [2, 2], [3, 2], [4, 2], [5, 2], [6, 2], [7, 2]] } } };
+      const laid = (seed: number) => helper(ENGINE, 'seedWorld', { map: ['GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG'], things: [], robots: [{ id: 'pip', x: 0, y: 1, d: 1 }] }, req, seed);
+      const shape = (html: string) => `${(/data-x="(\d+)" data-y="0" data-ch="L"/.exec(html) || [])[1]}|${[...html.matchAll(/data-x="(\d+)" data-y="2"[^>]*>(?:(?!<\/button>)[\s\S])*?data-sprite="egg"/g)].map((m) => m[1]).join(',')}`;
+      const layouts = [1, 2, 3].map((seed) => shape(draw(laid(seed))));
+      expect(new Set(layouts).size).toBe(3);
+      expect(shape(draw(laid(2)))).toBe(layouts[1]);
+      for (const l of layouts) expect(l).toMatch(/^[2-5]\|\d,\d,\d$/);
+      const html = draw(laid(1));
+      expect(html).toMatch(/class="gd-cell gd-wall" data-x="\d" data-y="0" data-ch="L" aria-label="wall \d,0"[^>]*><svg viewBox="0 0 64 64" class="gd-sprite gd-wallart" data-sprite="wall"/);
+    });
+
+    it('🔴 Watch rings each chip’s thing and draws its meter large — by id, by kind on its tile, a held can on its robot, else the tile; junk and empty ring nothing', () => {
+      const w = { map: ['GGGG', 'GGGG'], things: [{ kind: 'tulip', id: 'tu', x: 0, y: 0, need: 3, have: 1 }, { kind: 'basket', x: 2, y: 0, count: 2, capacity: 4 }, { kind: 'egg', x: 3, y: 0 }], robots: [{ x: 1, y: 1, d: 1, holds: 'can', can: 1, canMax: 3 }] };
+      const html = draw(w, { watch: JSON.stringify([{ id: 'tu', kind: 'tulip', x: 9, y: 9 }, { kind: 'basket', x: 2, y: 0 }, { kind: 'can', x: 5, y: 5 }, { kind: 'ahead', x: 3, y: 1 }]) });
+      expect(cellOf(html, 0, 0)).toMatch(/class="gd-meter gd-m-water gd-watch gd-meter-top" data-meter="1\/3"[^>]*data-watch="true"/);
+      expect(cellOf(html, 0, 0)).toContain('class="gd-ring" data-ring="tulip"');
+      expect(cellOf(html, 2, 0)).toMatch(/gd-meter gd-m-egg gd-watch gd-meter-top" data-meter="2\/4"/);
+      expect(cellOf(html, 3, 1)).toContain('class="gd-ring gd-ring-tile" data-ring="tile"');
+      expect(cellOf(html, 3, 0)).not.toContain('gd-ring');
+      expect(html).toMatch(/class="gd-bot gd-watch" data-holds="can" data-watch="true"/);
+      expect(html).toContain('class="gd-ring" data-ring="robot"');
+      expect((body(html).match(/class="gd-ring/g) || []).length).toBe(4);
+      // The helper the 3D kit copies (pinned in ig007): the same resolution as indexes.
+      expect(W().job.resolveWatch([{ id: 'tu', kind: 'tulip', x: 9, y: 9 }, { kind: 'basket', x: 2, y: 0 }, { kind: 'can', x: 5, y: 5 }, { kind: 'ahead', x: 3, y: 1 }], W().parseThings(w.things), W().parseRobots(w.robots))).toEqual({ things: [0, 1], robots: [0], tiles: ['3,1'] });
+      for (const junk of ['', '[]', '{bad', 7, [{ x: 1, y: 1 }], [null]]) expect({ junk, rings: (body(draw(w, { watch: junk })).match(/gd-ring|gd-watch/g) || []).length }).toEqual({ junk, rings: 0 });
+      const css = node('garden-kit.Garden').css as string;
+      expect(css).toMatch(/\.gd-meter\.gd-watch\{[^}]*outline:3px solid #8F6BFF[^}]*font-size:15px/);
+      expect(css).toMatch(/\.gd-ring\{[^}]*border:3px solid #8F6BFF/);
+    });
+
+    it('🔴 Picking frames the world in violet and lifts the things under the pointer; the tiles stay the same buttons that report Tile X / Tile Y', () => {
+      const w = { map: ['GGG'], things: [{ kind: 'basket', x: 1, y: 0, count: 0, capacity: 4 }], robots: [] };
+      const off = draw(w);
+      const on = draw(w, { picking: true });
+      expect(on).toMatch(/class="gd-world gd-picking" data-gd-world="true"[^>]*data-picking="true"/);
+      const cells = (html: string) => html.slice(html.indexOf('<button'), html.lastIndexOf('</button>'));
+      expect(cells(on)).toBe(cells(off));
+      const css = node('garden-kit.Garden').css as string;
+      expect(css).toMatch(/\.gd-world\.gd-picking\{border-color:#8F6BFF/);
+      expect(css).toMatch(/\.gd-picking \.gd-cell:hover>\.gd-thing[^{]*\{transform:translateY\(-12%\) scale\(1\.1\)/);
+      const port = (node('garden-kit.Garden').inputProps as Record<string, any>).picking;
+      expect([port.type, port.default, port.displayName]).toEqual(['boolean', false, 'Picking']);
+      expect((node('garden-kit.Garden').inputProps as Record<string, any>).watch.displayName).toBe('Watch');
+    });
+  });
 });
