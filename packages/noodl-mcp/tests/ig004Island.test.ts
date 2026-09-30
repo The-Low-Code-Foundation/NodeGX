@@ -773,6 +773,24 @@ describe('P108 IW-003 (lane M) — Mamie’s missions on the island: each pinned
     expect({ lap: state.live['eggs-count'].lap, phase: state.live['eggs-count'].phase, walked: lap1Walk > 0 }).toEqual({ lap: 1, phase: 'wait', walked: true });
   });
 
+  it('🔴 IW-002 AC3 (the page’s half): the Island page built again on the SAME island goes on from the state it left (kept) — meters, robots, laps and the wear’s age; a different island (a save that changed) builds fresh', () => {
+    let state = one('tulip-door');
+    for (let t = 0; t < 40; t++) state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+    const left = state.live['tulip-door'];
+    expect({ phase: left.phase, age: left.age > 0, have: left.things.find((x: any) => x.kind === 'tulip').have }).toEqual({ phase: 'wait', age: true, have: 3 });
+    const r = { ...JSON.parse(JSON.stringify(req('tulip-door'))), plot: { x: 10, y: 8 } };
+    const inputs = { requests: [...SYN_REQUESTS.filter((q) => q.id !== 'tulip-door' && (q.plot.x !== 10 || q.plot.y !== 8)), r], plots: { 'tulip-door': pinned(ref('tulip-door'), 'r1') }, robots: [{ id: 'r1', kind: 'pip' }], done: ['tulip-door'], band: 2, pins: [] };
+    const again = bare(SYN_WORLD, { ...inputs, kept: state }).state;
+    expect({ build: again.build === state.build, live: JSON.stringify(again.live) === JSON.stringify(state.live) }).toEqual({ build: true, live: true });
+    // Known-firing: without the kept state the same build starts again (lap 0, the tulip dry).
+    const fresh = bare(SYN_WORLD, inputs).state;
+    expect({ phase: fresh.live['tulip-door'].phase, have: fresh.live['tulip-door'].things.find((x: any) => x.kind === 'tulip').have }).toEqual({ phase: 'work', have: 0 });
+    // A kept state from another island (another build) is not taken.
+    const other = bare(SYN_WORLD, { ...inputs, band: 1, kept: state }).state;
+    expect(other.build === state.build).toBe(false);
+    expect(JSON.stringify(other.live) === JSON.stringify(state.live)).toBe(false);
+  });
+
   it('arm: the island’s ask without Olive’s written answer → Mamie’s note on the island never finishes (the robot goes home and back, lap after lap)', () => {
     const mutated = ISLAND_TICK_SCRIPT.replace('if (r.waiting && r.request) r = step(r.run, w, islAnswer(r.request));', 'if (r.waiting && r.request) r = step(r.run, w, { seq: r.request.seq, ok: false, fallback: true });');
     expect(mutated).not.toBe(ISLAND_TICK_SCRIPT);

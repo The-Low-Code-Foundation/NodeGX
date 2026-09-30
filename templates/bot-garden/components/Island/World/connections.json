@@ -46,6 +46,12 @@
       "toProperty": "value"
     },
     {
+      "fromId": "iwVar",
+      "fromProperty": "value",
+      "toId": "iwWorld",
+      "toProperty": "kept"
+    },
+    {
       "fromId": "iwWorld",
       "fromProperty": "ran",
       "toId": "iwSetBuilt",

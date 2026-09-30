@@ -216,16 +216,17 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
   {
     // CG-006 §2 row 1b: steps in order. P108 IW-003 (lane M): a job, and the watering can folded in (IW-003 §4, "the
     // watering can"): the can lies on the plot beside Pip, EMPTY; Pip picks it up, turns to the well (3,2) and fills it,
-    // turns to the path and walks to the tulip by Mamie's door (7,1), which wants three drinks (a meter, 0/3). The tulip
-    // full is the finish line: Pip walks home to where he started. Source the well, carrier the can, target the tulip.
+    // turns and walks to the tulip under Mamie's door (6,1; her house at 6,0 — off the plot's edge, so its meter is
+    // whole), which wants three drinks (a meter, 0/3). The tulip full is the finish line: Pip walks home to where he
+    // started. Source the well, carrier the can, target the tulip.
     id: 'tulip-door',
     islander: 'mamie',
     band: 1,
     plot: { x: 1, y: 1 },
     tricks: [1],
-    map: ['GGTGGGTH', 'GGGGGGGF', 'GGGWGGGG', 'PPPPPPPP', 'GGGGGRGG', 'GGGGGTGG'],
+    map: ['GGTGGGHT', 'GGGGGGFG', 'GGGWGGGG', 'PPPPPPPP', 'GGGGGRGG', 'GGGGGTGG'],
     things: [
-      { kind: 'tulip', id: 'tulip', x: 7, y: 1, watered: false, have: 0, need: 3 },
+      { kind: 'tulip', id: 'tulip', x: 6, y: 1, watered: false, have: 0, need: 3 },
       { kind: 'can', id: 'can', x: 2, y: 1, level: 0, max: 3 }
     ],
     robotStart: { x: 3, y: 1, d: 3 },
@@ -233,7 +234,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     palette: ['fwd', 'left', 'right', 'pick', 'fill', 'water'],
     reward: { kind: 'sticker', id: 'tulip', from: 'mamie' },
     copyKeys: { title: 'rqDoorTitle', blurb: 'rqDoorBlurb', line: 'rqDoorLine', reward: 'stickerTulip', gift: 'giftTulip' },
-    referenceProgram: b1('pick', 'left', 'fill', 'left', 'fwd', 'fwd', 'fwd', 'water', 'water', 'water'),
+    referenceProgram: b1('pick', 'left', 'fill', 'left', 'fwd', 'fwd', 'water', 'water', 'water'),
     job: { targets: ['tulip'], home: { x: 3, y: 1, d: 3 } }
   },
   {
@@ -362,7 +363,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
   },
   {
     // P108 IW-003 (lane M): the eggs as a job. The hen lays in her pen (x 0..3, y 0..2; she sits at 0,0) on four tiles
-    // the day's seed picks; Pocket carries one egg at a time to Mamie's basket by her door (7,1), which holds four. The
+    // the day's seed picks; Pocket carries one egg at a time to Mamie's basket under her door (6,1), which holds four. The
     // basket already has an egg or two from yesterday (the seed chooses 0, 1 or 2), so the count is the lesson: a fixed
     // `repeat 2` fits one morning and not the next, and `until [count of eggs in the basket] = 4` fits every one (IW-004
     // AC4's program). The basket full is the finish line: Pocket walks home. Wear: Mamie takes an egg for breakfast.
@@ -371,10 +372,10 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     band: 2,
     plot: { x: 19, y: 1 },
     tricks: [6],
-    map: ['GGGGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPP', 'GWWGGRGG', 'GGGGGTGG'],
+    map: ['GGGGGGHT', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPP', 'GWWGGRGG', 'GGGGGTGG'],
     things: [
       { kind: 'hen', id: 'hen', x: 0, y: 0, pen: [0, 0, 3, 2] },
-      { kind: 'basket', id: 'basket', x: 7, y: 1, count: 0, capacity: 4, item: 'egg' }
+      { kind: 'basket', id: 'basket', x: 6, y: 1, count: 0, capacity: 4, item: 'egg' }
     ],
     robotStart: { x: 5, y: 1, d: 3, basket: 6 },
     // The basket full and Pocket home is the whole win: a `repeat N` that fits the day wins that day (the lesson is that
@@ -386,8 +387,8 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     copyKeys: { title: 'rqEggsTitle', blurb: 'rqEggsBlurb', line: 'rqEggsLine', reward: 'itemBasket', gift: 'giftBasket' },
     referenceProgram: [
       blk('until', {
-        slots: { cond: { op: 'cmp', cmp: 'eq', a: { op: 'count', what: 'egg', thing: { id: 'basket', kind: 'basket', x: 7, y: 1 } }, b: { op: 'num', n: 4 } } },
-        body: [blk('go_nearest', { slots: { kind: 'egg' } }), blk('pick'), blk('go_to', { slots: { thing: { id: 'basket', kind: 'basket', x: 7, y: 1 } } }), blk('put')]
+        slots: { cond: { op: 'cmp', cmp: 'eq', a: { op: 'count', what: 'egg', thing: { id: 'basket', kind: 'basket', x: 6, y: 1 } }, b: { op: 'num', n: 4 } } },
+        body: [blk('go_nearest', { slots: { kind: 'egg' } }), blk('pick'), blk('go_to', { slots: { thing: { id: 'basket', kind: 'basket', x: 6, y: 1 } } }), blk('put')]
       })
     ],
     job: { targets: ['basket'], home: { x: 5, y: 1, d: 3 } },
@@ -690,7 +691,7 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   rqPathLine: s('"The post box is at the end of the path. Can {b} walk there?"', '« La boîte aux lettres est au bout du chemin. {b} peut y aller ? »'),
   rqTulipsTitle: s('Water my three tulips', 'Arrose mes trois tulipes'),
   rqTulipsBlurb: s('Repeat', 'Répéter'),
-  rqTulipsLine: s('"Each of my tulips wants three drinks, and the can holds three. Fill it at the pond, give one tulip all three, and come back for more!"', '« Chacune de mes tulipes veut trois gorgées, et l’arrosoir en contient trois. Remplis-le à la mare, donne les trois à une tulipe, et reviens en chercher ! »'),
+  rqTulipsLine: s('"Three drinks a tulip. Fill the can at the pond, and come back!"', '« Trois gorgées par tulipe. Remplis l’arrosoir, et reviens ! »'),
   rqBowlTitle: s('Feed me, but only if my bowl is empty', 'Nourris-moi, mais seulement si ma gamelle est vide'),
   rqBowlBlurb: s('If', 'Si'),
   rqBowlLine: s('"Two bowls. One is full already. Fill only the empty one, {b}!"', '« Deux gamelles. L’une est déjà pleine. Remplis seulement la vide, {b} ! »'),

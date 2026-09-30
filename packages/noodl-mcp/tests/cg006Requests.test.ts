@@ -219,7 +219,7 @@ describe('CG-006 — the requests', () => {
       const wrong: Record<string, Block[]> = {
         'path-postbox': prog('fwd', 'fwd', 'fwd', 'fwd', 'fwd', 'fwd'),
         // P108 IW-003 (lane M): the can picked and filled, and the pours made one tile short of the tulip.
-        'tulip-door': prog('pick', 'left', 'fill', 'left', 'fwd', 'fwd', 'water', 'water', 'water'),
+        'tulip-door': prog('pick', 'left', 'fill', 'left', 'fwd', 'water', 'water', 'water'),
         // IW-003 (lane M): yesterday's dance — one drink a tulip, so each is 1 of 3 and the job is not done.
         'tulips-three': [{ id: 1, t: 'repeat', n: 3, body: prog('fill', 'left', 'left', 'fwd', 'water', 'right', 'fwd', 'right', 'fwd') }],
         'path-stones': [{ id: 1, t: 'left' }, { id: 2, t: 'repeat', n: 4, body: prog('pick') }, { id: 9, t: 'right' }, { id: 10, t: 'repeat', n: 4, body: prog('fwd', 'put') }],
@@ -268,8 +268,8 @@ describe('CG-006 — the requests', () => {
       const r = byId('tulip-door');
       const { end } = goalOf(r, r.referenceProgram);
       // IW-003 (lane M): three drinks from the can Pip picked up (the can is in his hand, not on the plot).
-      expect(end.world.things).toEqual([{ kind: 'tulip', id: 'tulip', x: 7, y: 1, watered: true, have: 3, need: 3 }]);
-      expect(end.deltas.filter((d) => d.water).map((d) => d.water)).toEqual([{ x: 7, y: 1 }, { x: 7, y: 1 }, { x: 7, y: 1 }]);
+      expect(end.world.things).toEqual([{ kind: 'tulip', id: 'tulip', x: 6, y: 1, watered: true, have: 3, need: 3 }]);
+      expect(end.deltas.filter((d) => d.water).map((d) => d.water)).toEqual([{ x: 6, y: 1 }, { x: 6, y: 1 }, { x: 6, y: 1 }]);
     });
   });
 

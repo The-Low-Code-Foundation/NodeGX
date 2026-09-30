@@ -73,8 +73,11 @@ const TULIPS = loadTulips();
 const layOut = (blocks) => blocks.flatMap((b) => (b.t === 'repeat' ? Array.from({ length: Number(b.n) || 0 }, () => layOut(b.body || [])).flat() : [b.t]));
 const PRESSES = layOut(TULIPS.referenceProgram);
 const FIRST_REPEAT = TULIPS.referenceProgram.find((b) => b.t === 'repeat');
-/** Blocks drawn once the fold is taken: the blocks outside the repeat, the repeat, and its body. */
-const FOLDED = TULIPS.referenceProgram.length + (FIRST_REPEAT ? FIRST_REPEAT.body.length : 0);
+/**
+ * Blocks drawn once the fold is taken: the blocks outside the repeat, the repeat, and its body. P108 IW-003 (lane M): the
+ * body as recorded — flat (the pass holds its three pours; the first fold is the pass ×3, the pours fold after).
+ */
+const FOLDED = TULIPS.referenceProgram.length + (FIRST_REPEAT ? layOut(FIRST_REPEAT.body).length : 0);
 const START = TULIPS.robotStart;
 const TULIP_COUNT = TULIPS.things.filter((t) => t.kind === 'tulip').length;
 
@@ -282,7 +285,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     const tidy = await until(`(() => { const e = document.querySelector('.bg-tidy'); return e && e.offsetParent !== null ? e.innerText : ''; })()`, Boolean);
     await tap(first('.bg-tidy .bg-i-tidy'), 'Fold it');
     const folded = await until(`(() => { const r = document.querySelector('.gd-prog .gd-blk[data-t="repeat"]'); return r ? document.querySelectorAll('.gd-prog .gd-blk[data-id]').length : 0; })()`, (n) => n === FOLDED);
-    check(`AC1: the fold is offered and taken — the reference program's shape (${FOLDED} blocks: a repeat holding ${FIRST_REPEAT.body.length})`, !!tidy && folded === FOLDED, { tidy, folded });
+    check(`AC1: the fold is offered and taken — the reference program's pass ×3 (${FOLDED} blocks: a repeat holding ${layOut(FIRST_REPEAT.body).length})`, !!tidy && folded === FOLDED, { tidy, folded });
     // Play: the world is reset to its start, then the program runs; sample the pair while it plays.
     await control('play');
     const samples = [];

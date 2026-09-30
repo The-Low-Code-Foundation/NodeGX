@@ -1169,6 +1169,108 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mDoorCar",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mDoorCar"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mDoorFin",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mDoorFin"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mDoorSrc",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mDoorSrc"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mDoorSum",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mDoorSum"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mDoorTgt",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mDoorTgt"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mDoorWr",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mDoorWr"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mEggsCar",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mEggsCar"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mEggsFin",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mEggsFin"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mEggsSrc",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mEggsSrc"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mEggsSum",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mEggsSum"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mEggsTgt",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mEggsTgt"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mEggsWr",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mEggsWr"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mJcCar",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mJcCar"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mJcFin",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mJcFin"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mJcSrc",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mJcSrc"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mJcTgt",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mJcTgt"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mJcWr",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mJcWr"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-iw3mNoneBall",
       "toId": "translatewordsOut",
       "toProperty": "iw3mNoneBall"
@@ -1262,6 +1364,114 @@
       "fromProperty": "out-iw3mNoneWell",
       "toId": "translatewordsOut",
       "toProperty": "iw3mNoneWell"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mNoteCar",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mNoteCar"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mNoteFin",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mNoteFin"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mNoteSrc",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mNoteSrc"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mNoteSum",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mNoteSum"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mNoteTgt",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mNoteTgt"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mNoteWr",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mNoteWr"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mRowsCar",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mRowsCar"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mRowsFin",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mRowsFin"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mRowsSrc",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mRowsSrc"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mRowsSum",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mRowsSum"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mRowsTgt",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mRowsTgt"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mRowsWr",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mRowsWr"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mTulipsCar",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mTulipsCar"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mTulipsFin",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mTulipsFin"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mTulipsSrc",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mTulipsSrc"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mTulipsSum",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mTulipsSum"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mTulipsTgt",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mTulipsTgt"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3mTulipsWr",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3mTulipsWr"
     },
     {
       "fromId": "translatewordsFn",

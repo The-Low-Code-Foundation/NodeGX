@@ -102,6 +102,8 @@ export const C = {
   // P106 IG-004: the island as one world (the sea with pins, Island/Pin and Island/Map, went with R1).
   isleWorld: '/Island/World',
   mark: '/Workshop/Mark',
+  // P108 IW-003 (lane M): one line of the job card.
+  jobLine: '/Workshop/Job line',
   swatch: '/Robot/Swatch',
   chip: '/Robot/Chip',
   sticker: '/Robot/Sticker',
@@ -337,7 +339,9 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
  * kind and look as text) is what re-runs it, and the row is read as it stands when it does.
  */
 const QUIET: Readonly<Record<string, ReadonlyArray<string>>> = {
-  'Logic/Start world': ['robot']
+  'Logic/Start world': ['robot'],
+  // P108 IW-003 (lane M): the island state held — read when the island is built, never a reason to build it again.
+  'Logic/Island world': ['kept']
 };
 
 /** Port types by name; anything else is `*` (the engine passes objects, arrays and text through the same names). */
@@ -863,6 +867,19 @@ const MARK: CgComponent = {
  * the controls, the owl, the steps with the fold offer, and the win card. Everything that changes lives here; the page
  * hands in the request, the family's looks and the words, and stores what Won hands back.
  */
+/** P108 IW-003 (lane M): one line of the job card — its label in small capitals, then the line (IW-000's card). */
+const JOB_LINE: CgComponent = {
+  path: 'Workshop/Job line',
+  description: 'One line of the job card under the world (IW-000): what part of the job it is (Source, Carrier, Target, Finish line, Wear) and the line that says it.',
+  nodes: [
+    inputs('jlIn', [['id', 'string'], ['label', 'string'], ['text', 'string']]),
+    group('jlRow', 'The line', undefined, { ...row({ columnGap: sp(10), flexWrap: 'nowrap', alignItems: 'flex-start' }), cssClassName: 'bg-job-row' }, ['jlLabel', 'jlText']),
+    text('jlLabel', 'What part of the job', 'jlRow', '', { cssClassName: 'bg-job-l' }),
+    text('jlText', 'The line', 'jlRow', '', { ...T_BODY, cssClassName: 'bg-job-t' })
+  ],
+  connections: [wire('jlIn', 'label', 'jlLabel', 'text'), wire('jlIn', 'text', 'jlText', 'text')]
+};
+
 const PLAY: CgComponent = {
   path: 'Workshop/Play',
   description: 'The workshop: drive the robot freely (nothing remembered), teach it by driving it again (every press a block), see the steps as blocks, fold the repetition, play, and win. Request Id picks the request (free for free play); the line under the title is that request’s own. Won fires with Bloom, Reward and Won Request set; Island asks for the island; Found says whether the request exists (a reload has none).',
@@ -876,7 +893,7 @@ const PLAY: CgComponent = {
     text('plTitle', 'The request', 'plHead', '', { ...T_H1, cssClassName: 'bg-ws-title' }),
     text('plSub', 'How it works', 'plHead', '', { ...T_MUTED, maxWidth: px(640), cssClassName: 'bg-ws-sub' }),
     group('plWs', 'World and steps', 'plRoot', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-ws' }, ['plLeft', 'plRight']),
-    group('plLeft', 'The world side', 'plWs', { ...column({ rowGap: sp(12) }), ...PANEL }, ['plTask', 'plStage', 'plVars', 'plModeLine', 'plControls', 'plOwl']),
+    group('plLeft', 'The world side', 'plWs', { ...column({ rowGap: sp(12) }), ...PANEL }, ['plTask', 'plStage', 'plVars', 'plModeLine', 'plControls', 'plOwl', 'plJob']),
     group('plTask', 'The task', 'plLeft', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(14), flexWrap: 'nowrap' }), ['plFace', 'plTaskText', 'plMarks']),
     group('plFace', 'The islander', 'plTask', { sizeMode: 'explicit', width: px(56), height: px(56) }),
     group('plTaskText', 'Who and what', 'plTask', { ...column({ rowGap: sp(2) }), cssClassName: 'bg-grow' }, ['plTaskH', 'plTaskP']),
@@ -917,6 +934,11 @@ const PLAY: CgComponent = {
     place('plStep', BUTTON_NODE, 'One step', 'plControls', { ...btn('plain', 'step'), label: 'One step' }),
     place('plReset', BUTTON_NODE, 'Start over', 'plControls', { ...btn('plain', 'reset'), label: 'Start over' }),
     group('plOwl', 'The owl', 'plLeft', { width: pct(100), sizeMode: 'contentHeight', backgroundColor: 'var(--violet-2)', borderRadius: px(16), ...pad(12), cssClassName: 'bg-owl' }, ['plOwlPic', 'plOwlCol']),
+    // P108 IW-003 (lane M): the job card (IW-000's graded look) — how much is done, then source · carrier · target ·
+    // finish line · wear, one labelled line each (a row per line, Job card's rows); only on a request with a card.
+    group('plJob', 'The job, in five lines', 'plLeft', { ...column({ rowGap: sp(6) }), cssClassName: 'bg-job', mounted: false }, ['plJobSum', 'plJobEach']),
+    text('plJobSum', 'How much of the job is done', 'plJob', '', { ...T_STRONG, cssClassName: 'bg-job-sum' }),
+    { ...logic('plJobEach', FOR_EACH_NODE, 'One line per part of the job', { template: C.jobLine, templateType: 'explicit' }), parent: 'plJob' },
     group('plOwlPic', 'Olive', 'plOwl', { sizeMode: 'explicit', width: px(64), height: px(64), cssClassName: 'bg-owl-pic bg-sp-owl' }),
     group('plOwlCol', 'What she says', 'plOwl', column({ rowGap: sp(4) }), ['plOwlSay', 'plOwlThinking', 'plOwlResting', 'plProposal', 'plOwlMeta']),
     text('plOwlSay', 'The hint', 'plOwlCol', '', { ...T_BODY, fontWeight: '700', cssClassName: 'bg-owl-say' }),
@@ -1013,6 +1035,8 @@ const PLAY: CgComponent = {
     // ── P108 IW-004: a chip picked on the world; what the robot remembers ──
     logic('plPickThing', L('Pick thing'), 'The thing on the tapped tile, for the chip'),
     logic('plVarMon', L('Var monitor'), 'What the robot remembers, in words'),
+    // P108 IW-003 (lane M): the job card's lines, and how much of the job the world shows done.
+    logic('plJobCard', L('Job card'), 'The job in five lines, and how much is done'),
     // ── Drive, teach, play (P106 IG-003); the islander's challenge; the fold ──
     withStates('plMode', 'Drive, teach or play', ['drive', 'teach', 'play'], {
       mode: { type: 'string', by: { drive: 'drive', teach: 'teach', play: 'play' } },
@@ -1171,6 +1195,16 @@ const PLAY: CgComponent = {
     wire('plIn', 'botName', 'plVarMon', 'botName'),
     wire('plVarMon', 'text', 'plVars', 'text'),
     wire('plVarMon', 'show', 'plVars', 'mounted'),
+    // P108 IW-003 (lane M): the job card — the request and the live world in, its lines and its sum out.
+    wire('plStart', 'request', 'plJobCard', 'request'),
+    wire('plWorldVar', 'value', 'plJobCard', 'world'),
+    wire('plIn', 'words', 'plJobCard', 'words'),
+    wire('plIn', 'lang', 'plJobCard', 'lang'),
+    wire('plIn', 'botName', 'plJobCard', 'botName'),
+    wire('plJobCard', 'show', 'plJob', 'mounted'),
+    wire('plJobCard', 'sum', 'plJobSum', 'text'),
+    wire('plJobCard', 'sumClass', 'plJobSum', 'cssClassName'),
+    wire('plJobCard', 'rows', 'plJobEach', 'items'),
     wire('plIn', 'band', 'plPalette', 'band'),
     wire('plStart', 'allowed', 'plPalette', 'allowed'),
     // The request's rungs (band 10-12 requests only, ruling 4) and this computer's exam: a rung it failed is withheld (AC5).
@@ -1665,6 +1699,8 @@ const ISLE_WORLD: CgComponent = {
     // Her island, built from her save whenever it changes; the tick starts once it is held.
     ...(['requests', 'plots', 'robots', 'done', 'band', 'pins'] as const).map((f) => wire('iwIn', f, 'iwWorld', f)),
     wire('iwWorld', 'state', 'iwSetBuilt', 'value'),
+    // P108 IW-003 (lane M, IW-002 AC3): the island held (quiet) — the page opened again goes on from it on the same build.
+    wire('iwVar', 'value', 'iwWorld', 'kept'),
     wire('iwWorld', 'ran', 'iwSetBuilt', 'do'),
     wire('iwSetBuilt', 'done', 'iwTimer', 'start'),
     // The tick: one step of every pinned run, the state held again, the next wait.
@@ -2842,6 +2878,8 @@ export const CG003_COMPONENTS: ReadonlyArray<CgComponent> = [
   RUNNER,
   WIN,
   MARK,
+  // P108 IW-003 (lane M).
+  JOB_LINE,
   PLAY,
   QUEST,
   ISLE_WORLD,

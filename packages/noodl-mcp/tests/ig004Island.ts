@@ -278,6 +278,11 @@ for (var m = 0; m < mine.length; m++) {
 // the rebuild's) starts again from this one — so a robot brought home never walks back to its plot.
 var build = islHash(JSON.stringify([saved, done, band, mine, pins.map(function (x) { return x ? [x.id, x.requestId, x.isOpen] : null; }), list.map(function (r) { return [r.id, r.plot, r.band]; })]));
 var state = { v: 1, build: build, w: W, h: H, map: rows.map(function (r) { return r.join(''); }), plots: plots, still: still, deco: deco, home: home, live: live, tick: 0 };
+// P108 IW-003 (lane M, IW-002 AC3): the Island page opened again on the SAME island (nothing she saved changed: the same
+// build) goes on from the island it left — each plot's live state as the last tick left it (meters, robots, laps, the
+// wear's age) — never from a fresh build. Kept is the state held (quiet: it never makes the island build again).
+var kept = Inputs.kept && typeof Inputs.kept === 'object' && !Array.isArray(Inputs.kept) ? Inputs.kept : null;
+if (kept && kept.build === build && kept.live && typeof kept.live === 'object') { state.live = kept.live; state.tick = Number(kept.tick) || 0; }
 // Find my robots: the rectangle around every plot with a robot at work and the robots at home.
 var fx0 = 1e9, fy0 = 1e9, fx1 = -1, fy1 = -1;
 for (var f = 0; f < plots.length; f++) if (plots[f].status === 'working') { fx0 = Math.min(fx0, plots[f].x); fy0 = Math.min(fy0, plots[f].y); fx1 = Math.max(fx1, plots[f].x + PW); fy1 = Math.max(fy1, plots[f].y + PH); }

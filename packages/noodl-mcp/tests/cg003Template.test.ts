@@ -64,6 +64,8 @@ import {
 } from './cg003Scripts';
 // P108 IW-001 (lane A): the Workshop fixes.
 import { PAD_ANSWER_SCRIPT, RUN_CAP_SCRIPT } from './cg003Scripts';
+// P108 IW-003 (lane M): the job card.
+import { JOB_CARD_SCRIPT } from './cg003Scripts';
 import { DECODE_SAVE_SCRIPT, ENCODE_SAVE_SCRIPT, MAX_TICKS } from './cg002Scripts';
 import { AuthoredGarden, buildGardenTemplateProject, prepareGardenArtefact, START_HERE_FILE, TEMPLATE_ID } from './cg003Template';
 import { ROBOT_NAME_MAX } from './cg002Scripts';
@@ -2306,9 +2308,9 @@ describe('P108 IW-003 (lane M) — the pad walks to things; a robot that finds n
     // Then pick, then the basket key: a chip of the basket (its id), and Pocket faces the basket.
     const picked = run(RECORD_STEP_SCRIPT, { op: 'pick', program: go.program, world: go.world, selected: '', lang: 'en', bumps: 0, record: 'yes', words: WORD_ROWS });
     const to = run(RECORD_STEP_SCRIPT, { op: 'go_to:basket', program: picked.program, world: picked.world, selected: '', lang: 'en', bumps: 0, record: 'yes', words: WORD_ROWS });
-    expect(JSON.parse(to.program)[2]).toEqual({ id: 3, t: 'go_to', slots: { thing: { id: 'basket', kind: 'basket', x: 7, y: 1 } } });
+    expect(JSON.parse(to.program)[2]).toEqual({ id: 3, t: 'go_to', slots: { thing: { id: 'basket', kind: 'basket', x: 6, y: 1 } } });
     const rb = to.world.robots[0];
-    expect({ x: rb.x + [0, 1, 0, -1][rb.d], y: rb.y + [-1, 0, 1, 0][rb.d] }).toEqual({ x: 7, y: 1 });
+    expect({ x: rb.x + [0, 1, 0, -1][rb.d], y: rb.y + [-1, 0, 1, 0][rb.d] }).toEqual({ x: 6, y: 1 });
     // Drive records nothing and still walks.
     const drive = run(RECORD_STEP_SCRIPT, { op: 'go_nearest:egg', program: '[]', world: st.world, lang: 'en', record: 'no', words: WORD_ROWS });
     expect([drive.recorded, drive.program, JSON.stringify(drive.world.robots[0]) !== JSON.stringify(st.world.robots[0])]).toEqual([false, '[]', true]);
@@ -2346,6 +2348,34 @@ describe('P108 IW-003 (lane M) — the pad walks to things; a robot that finds n
     const noGo = PAD_KEYS_SCRIPT.replace("if (allowed.indexOf('go_nearest') !== -1)", 'if (false)');
     expect(noGo).not.toBe(PAD_KEYS_SCRIPT);
     expect((run(noGo, { palette: drawer('eggs-count', 'pocket'), allowed: [], words: WORD_ROWS, lang: 'en', world: start('eggs-count').world }).keys as Array<{ op: string }>).map((k) => k.op)).not.toContain('go_nearest:egg');
+  });
+
+  it('🔴 the job card (IW-000’s look): five labelled lines for each of Mamie’s jobs, EN and FR, and how much is done — one target by its meter, more by how many are full; no card where a request has none', () => {
+    const card = (id: string, lang = 'en', world?: unknown, seed = 1) => {
+      const st = start(id, seed);
+      return run(JOB_CARD_SCRIPT, { request: st.request, world: world ?? st.world, words: WORD_ROWS, lang, botName: 'Pip' });
+    };
+    const t = card('tulips-three');
+    expect([t.show, t.rows.map((r: any) => r.label), t.sum, t.sumClass]).toEqual([true, ['Source', 'Carrier', 'Target', 'Finish line', 'Wear'], '0/3 tulips full', 'bg-job-sum']);
+    expect(t.rows.map((r: any) => r.text)).toEqual([PAGE_WORDS.iw3mTulipsSrc.en, PAGE_WORDS.iw3mTulipsCar.en.split('{b}').join('Pip'), PAGE_WORDS.iw3mTulipsTgt.en, PAGE_WORDS.iw3mTulipsFin.en.split('{b}').join('Pip'), PAGE_WORDS.iw3mTulipsWr.en]);
+    expect(card('tulips-three', 'fr').rows.map((r: any) => r.label)).toEqual(['Source', 'Porteur', 'Cible', 'Ligne d’arrivée', 'Usure']);
+    // Played to the end: 3/3, the pill turns leaf-green.
+    const st = start('tulips-three');
+    let r = run(NEW_RUN_SCRIPT, { program: REQUESTS.find((q) => q.id === 'tulips-three')!.referenceProgram, robotId: 'me', lang: 'en' }).run;
+    let w = st.world;
+    for (let k = 0; k < 200; k++) { const x = run(STEP_SCRIPT, { run: r, world: w }); r = x.run; w = run(APPLY_DELTA_SCRIPT, { world: w, delta: x.delta }).world; if (x.done) break; }
+    expect([card('tulips-three', 'en', w).sum, card('tulips-three', 'en', w).sumClass]).toEqual(['3/3 tulips full', 'bg-job-sum bg-job-sum-full']);
+    // One target: its meter — the tulip by the door's drinks; the eggs in the basket (seed 1: two from yesterday).
+    expect(card('tulip-door').sum).toBe('0/3 drinks');
+    expect([card('eggs-count').sum, card('eggs-count', 'fr').sum]).toEqual(['2/4 eggs in the basket', '2/4 œufs dans le panier']);
+    // No card where a request has none (free play; another lane's mission until it adds its row).
+    expect([card('free').show, card('free').rows, card('free').sum]).toEqual([false, [], '']);
+    // The graph: the request and the LIVE world in (the sum moves as the robot works), a row per line to the repeater.
+    const play = CG003_COMPONENTS.find((c) => c.path === 'Workshop/Play')!;
+    const into = (id: string) => play.connections.filter((c: any) => c.toId === id).map((c: any) => `${c.fromId}.${c.fromProperty}>${c.toProperty}`).sort();
+    expect(into('plJobCard')).toEqual(['plIn.botName>botName', 'plIn.lang>lang', 'plIn.words>words', 'plStart.request>request', 'plWorldVar.value>world']);
+    expect([...into('plJobEach'), ...into('plJob'), ...into('plJobSum')]).toEqual(['plJobCard.rows>items', 'plJobCard.show>mounted', 'plJobCard.sum>text', 'plJobCard.sumClass>cssClassName']);
+    expect(CG003_COMPONENTS.some((c) => c.path === 'Workshop/Job line')).toBe(true);
   });
 
   it('the graph: the pad is handed the world the request opened on (its kinds are the go keys), never the live one', () => {

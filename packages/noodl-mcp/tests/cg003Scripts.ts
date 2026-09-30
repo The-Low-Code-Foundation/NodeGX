@@ -37,8 +37,8 @@ import { BLOCK_META, CAN_MAX, ENGINE, FOLD_HELPERS, MANY_BLOCKS, ROBOT_NAME_MAX,
 // P108 IW-001 F2: the run cap the page's Runner applies to a played run (the engine's own constant, imported).
 import { MAX_TICKS } from './cg002Scripts';
 import { BLOCK_CARDS, CardBlock, EYES, HATS, IG006_WORDS, IG006_WORD_KEYS, ISLANDERS, ISLAND_PINS, PAD_KEYS, PAGE_WORDS, PAGE_WORD_KEYS, REQUEST_SUBS, SKILL_BLOCKS } from './cg003Content';
-// P108 IW-003 (lane M): the pad's go keys.
-import { PAD_GO } from './cg003Content';
+// P108 IW-003 (lane M): the pad's go keys; the job card.
+import { JOB_CARDS, PAD_GO } from './cg003Content';
 import { ROBOT_PAINTS } from './cg007Look';
 import { FREE_PLAY_PLOT, ISLAND_BASE, ISLAND_HOME, PLOT_H, PLOT_W } from './cg002Content';
 import { FIND_ROBOTS_SCRIPT, ISLAND_TICK_SCRIPT, PLOT_AT_SCRIPT, islandChooseScript, islandWorldScript } from './ig004Island';
@@ -1331,6 +1331,39 @@ Outputs.text = parts.length ? (W.iw4VarsH ? W.iw4VarsH + ': ' : '') + parts.join
 `;
 
 /** The glue, as the generator places it: one `Logic/*` each. */
+/**
+ * P108 IW-003 (lane M): the job card (IW-000's graded look) — the request's five lines (source, carrier, target, finish
+ * line, wear) in the child's language, and how much of the job the world shows done: one target, its meter (the tulip's
+ * drinks, the eggs in the basket); more, how many are full. No row in JOB_CARDS: no card.
+ */
+export const JOB_CARD_SCRIPT = `${ENGINE}${WORD_HELPER}
+var CARDS = ${JSON.stringify(JOB_CARDS)};
+var req = Inputs.request && typeof Inputs.request === 'object' ? Inputs.request : null;
+var card = req && CARDS[String(req.id)] ? CARDS[String(req.id)] : null;
+var W = wordMap(Inputs.words, langOf(Inputs.lang), nameOf(Inputs.botName));
+Outputs.show = !!card;
+Outputs.srcLabel = W.iw3mJcSrc || '';
+Outputs.carLabel = W.iw3mJcCar || '';
+Outputs.tgtLabel = W.iw3mJcTgt || '';
+Outputs.finLabel = W.iw3mJcFin || '';
+Outputs.wrLabel = W.iw3mJcWr || '';
+Outputs.src = card ? W[card.src] || '' : '';
+Outputs.car = card ? W[card.car] || '' : '';
+Outputs.tgt = card ? W[card.tgt] || '' : '';
+Outputs.fin = card ? W[card.fin] || '' : '';
+Outputs.wr = card ? W[card.wr] || '' : '';
+// One row per line for the card's repeater (a stable id each: a row is a Noodl Object, global by id).
+var PARTS = [['src', 'iw3mJcSrc'], ['car', 'iw3mJcCar'], ['tgt', 'iw3mJcTgt'], ['fin', 'iw3mJcFin'], ['wr', 'iw3mJcWr']], rows = [];
+if (card) for (var pi = 0; pi < PARTS.length; pi++) rows.push({ id: 'jobline-' + PARTS[pi][0], label: W[PARTS[pi][1]] || '', text: W[card[PARTS[pi][0]]] || '' });
+Outputs.rows = rows;
+var jw = worldOf(Inputs.world), jj = jobOf(jw), jn = 0, jt = 0;
+if (jj && jj.targets.length === 1) { var one = thingById(jw, jj.targets[0]), m1 = one ? meterOf(one) : { have: 0, need: 0 }; jn = m1.have; jt = isFinite(m1.need) ? m1.need : 0; }
+else if (jj) { var jp = jobProgress(jw); jn = jp.full; jt = jp.total; }
+Outputs.sum = card && jt > 0 ? fill(W[card.sum] || '', { n: jn, t: jt }) : '';
+Outputs.full = jt > 0 && jn >= jt;
+Outputs.sumClass = 'bg-job-sum' + (jt > 0 && jn >= jt ? ' bg-job-sum-full' : '');
+`;
+
 export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; seam: string }> = [
   { component: 'Logic/Read program', script: READ_PROGRAM_SCRIPT, seam: 'the program as a list, whatever held it' },
   { component: 'Logic/Start world', script: START_WORLD_SCRIPT, seam: 'the world a request starts from, and the request' },
@@ -1384,5 +1417,7 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Latch', script: LATCH_SCRIPT, seam: 'a value held until Go, then handed on as it stood' },
   // P108 IW-004 (lane B).
   { component: 'Logic/Pick thing', script: PICK_THING_SCRIPT, seam: 'the thing on a tapped tile, for the chip that is picking' },
-  { component: 'Logic/Var monitor', script: VAR_MONITOR_SCRIPT, seam: 'what the robot remembers, as one line under the world' }
+  { component: 'Logic/Var monitor', script: VAR_MONITOR_SCRIPT, seam: 'what the robot remembers, as one line under the world' },
+  // P108 IW-003 (lane M).
+  { component: 'Logic/Job card', script: JOB_CARD_SCRIPT, seam: 'the job in five lines, and how much of it is done' }
 ];

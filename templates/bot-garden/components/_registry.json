@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 589,
+      "connectionCount": 624,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -495,7 +495,7 @@
       "path": "Logic/Island world",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 13,
+      "connectionCount": 14,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -603,6 +603,14 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
+    "Logic/Job card": {
+      "path": "Logic/Job card",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 21,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
     "Logic/App store": {
       "path": "Logic/App store",
       "type": "visual",
@@ -683,11 +691,19 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
+    "Workshop/Job line": {
+      "path": "Workshop/Job line",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 2,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
     "Workshop/Play": {
       "path": "Workshop/Play",
       "type": "visual",
-      "nodeCount": 155,
-      "connectionCount": 425,
+      "nodeCount": 159,
+      "connectionCount": 434,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -703,7 +719,7 @@
       "path": "Island/World",
       "type": "visual",
       "nodeCount": 45,
-      "connectionCount": 98,
+      "connectionCount": 99,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -901,8 +917,8 @@
     }
   },
   "stats": {
-    "totalComponents": 112,
-    "totalNodes": 901,
-    "totalConnections": 2784
+    "totalComponents": 114,
+    "totalNodes": 912,
+    "totalConnections": 2853
   }
 }

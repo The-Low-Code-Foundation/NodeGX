@@ -110,8 +110,16 @@ const hintIn = (lang, key, name = 'Pip') => String((HINT_ROWS.find((r) => r.key 
 // P108 IW-001 F7: the pad's order now carries say and Olive's read (a request's palette never lists read: its rungs do).
 const PAD_ORDER = ['fwd', 'left', 'water', 'right', 'fill', 'pick', 'put', 'say', 'olive:read'];
 const padFor = (id) => PAD_ORDER.filter((op) => ((REQUESTS.find((r) => r.id === id) || { palette: [] }).palette || []).includes(op));
-/** IG-002: the tulips' fetch-and-return dance, one pass (fill, turn round, walk, water, step down a row, walk back). */
-const TULIP_DANCE = ['fill', 'left', 'left', 'fwd', 'water', 'right', 'fwd', 'right', 'fwd'];
+/**
+ * IG-002: the tulips' fetch-and-return dance, one pass (fill, turn round, walk, water, step down a row, walk back).
+ * P108 IW-003 (lane M): the request's own pass, laid out — three pours a tulip now (eleven presses); its reference is
+ * the pass ×3 with the pours ×3 inside (two folds).
+ */
+const flatOf = (blocks) => blocks.flatMap((b) => (b.t === 'repeat' ? Array.from({ length: Number(b.n) || 0 }, () => flatOf(b.body || [])).flat() : [b.t]));
+const blockCount = (blocks) => blocks.reduce((n, b) => n + 1 + blockCount(b.body || []), 0);
+const TULIP_REF = (REQUESTS.find((r) => r.id === 'tulips-three') || { referenceProgram: [] }).referenceProgram;
+const TULIP_DANCE = flatOf(((TULIP_REF[0] || {}).body) || []);
+const TULIP_REF_COUNT = blockCount(TULIP_REF);
 
 /**
  * S3-R5: every text a person reads, on the ground under it, from getComputedStyle. For each visible text node: its
@@ -409,7 +417,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
   const key = (op) => tap(first(`.bg-pad .bg-key-${op}`), `key ${op}`);
 
   /** Everything a person reads, for the language clause: visible text nodes, trimmed. */
-  const words = () => evaluate(`(() => { const out = []; const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n; while ((n = walk.nextNode())) { const t = n.textContent.trim(); const el = n.parentElement; if (t.length > 2 && el && el.offsetParent !== null && !/^[0-9 ×✕+−…•·🌷○]*$/.test(t)) out.push(t); } return out; })()`);
+  // P108 IW-003 (lane M): a job's meter ("2/3" on a tulip, "0/4" on the basket) is numbers in both languages, like a count.
+  const words = () => evaluate(`(() => { const out = []; const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n; while ((n = walk.nextNode())) { const t = n.textContent.trim(); const el = n.parentElement; if (t.length > 2 && el && el.offsetParent !== null && !/^[0-9 ×✕+−…•·🌷○/]*$/.test(t)) out.push(t); } return out; })()`);
 
   const langClause = async (screen, from, to) => {
     await evaluate('window.__gardenMarker = 42');
@@ -515,10 +524,15 @@ withDeployedSite({ dir: DIR }, async (page) => {
       await tap(first('.bg-tidy .bg-i-tidy'), 'Fold it');
       const folded = await until(`(() => { const r = document.querySelector('.gd-prog .gd-blk[data-t="repeat"]'); return r ? document.querySelectorAll('.gd-prog .gd-blk[data-id]').length : 0; })()`, (n) => n === taught.length + 1);
       check(`AC3 ${tag}: folded to one repeat holding the ${taught.length}-block dance (${taught.length + 1} blocks drawn)`, folded === taught.length + 1, folded);
+      // P108 IW-003 (lane M): the fold is offered again — the three pours inside the pass — and taken: the reference.
+      const tidy2 = await until(`(() => { const e = document.querySelector('.bg-tidy'); return e && e.offsetParent !== null ? e.innerText : ''; })()`, Boolean, 4000);
+      await tap(first('.bg-tidy .bg-i-tidy'), 'Fold it (the pours)');
+      const folded2 = await until(`document.querySelectorAll('.gd-prog .gd-blk[data-id]').length`, (n) => n === TULIP_REF_COUNT, 4000);
+      check(`AC3 ${tag} (IW-003): folded again — the pours ×3 inside the pass (${TULIP_REF_COUNT} blocks drawn, the reference)`, !!tidy2 && folded2 === TULIP_REF_COUNT, { tidy2, folded2 });
       await shot(`ac3-${tag}-05-folded`);
       // Play to the win.
       await control('play');
-      const won = await until(`(() => { const e = document.querySelector('.bg-win-card'); return !!e && e.offsetParent !== null; })()`, Boolean, 20000);
+      const won = await until(`(() => { const e = document.querySelector('.bg-win-card'); return !!e && e.offsetParent !== null; })()`, Boolean, 40000);
       check(`AC3 ${tag}: play waters the three tulips and the win card shows`, won, won);
       if (won) {
         const card = await evaluate(`(() => { const r = document.querySelector('.bg-win-card').getBoundingClientRect(); return { cx: r.left + r.width / 2, cy: r.top + r.height / 2, vw: innerWidth, vh: innerHeight, text: document.querySelector('.bg-win-card').innerText, pos: getComputedStyle(document.querySelector('.bg-win')).position }; })()`);
@@ -526,7 +540,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
         check(`AC3 ${tag}: the hat is on the win card`, card.text.includes(w(lang, 'hatSun')), card.text);
         // IG-002 AC3: the tulips' reference program (ten blocks, over MANY_BLOCKS) is "Perfect!", and the card says Neat.
         const owlNow = await until(`(document.querySelector('.bg-owl-say') || {}).innerText || ''`, (t) => t.includes(hintIn(lang, 'hintPerfect')), 4000);
-        const neat = w(lang, 'winFew').split('{k}').join(String(taught.length + 1));
+        const neat = w(lang, 'winFew').split('{k}').join(String(TULIP_REF_COUNT));
         check(`IG-002 AC3 ${tag}: the tulips won with their reference program say "${hintIn(lang, 'hintPerfect')}" and the card "${neat}"`, owlNow.includes(hintIn(lang, 'hintPerfect')) && card.text.includes(neat), { owlNow, card: card.text });
         // AC7: fixed and centred, even with the block list scrolled.
         await evaluate(`(() => { const b = document.querySelector('.bg-blocks-box'); if (b) b.scrollTop = b.scrollHeight; window.scrollTo(0, document.scrollingElement.scrollHeight); })()`);
@@ -783,28 +797,33 @@ withDeployedSite({ dir: DIR }, async (page) => {
         await tap(first('.bg-card-help .bg-card-ok'), 'Got it (forward)');
         await until(CARD_UP, (v) => v === false, 2000);
 
-        // AC2 — Mamie's note: read; forward twice; if Olive read the red tulip { left, water, right }; if the yellow { right,
-        // water, left }. The stub says "red tulip": the red one is watered, the yellow one not; the bubble says what she read.
-        STUB.plan.answers.read = lang === 'fr' ? 'tulipe rouge' : 'red tulip';
+        // AC2 — Mamie's note. P108 IW-003 (lane M): the note changes with the day (the page lays it from its seed) and Pip
+        // starts facing the well: read; fill; if Olive read the red tulip { left }; if the yellow { right }; forward, left,
+        // water — the first tulip of the day's row. The stub reads the note the page laid: that row's first tulip drinks,
+        // the other row's does not; the bubble says what she read.
         await openReq(lang, 'mamie-note');
+        const day = await evaluate(`(() => { const W = Noodl.Variables.gardenWorld || {}; const n = (W.things || []).find((t) => t.kind === 'note'); return n && /^The yellow/.test(String(n.text)) ? 'yellow' : 'red'; })()`);
+        STUB.plan.answers.read = lang === 'fr' ? (day === 'yellow' ? 'tulipe jaune' : 'tulipe rouge') : day === 'yellow' ? 'yellow tulip' : 'red tulip';
         const note = await evaluate(`({ things: document.querySelectorAll('.bg-stage .gd-thing').length, tulips: document.querySelectorAll('.bg-stage .gd-tulip').length })`);
-        readings[`ig006-note-world-${vp.name}-${lang}`] = note;
+        readings[`ig006-note-world-${vp.name}-${lang}`] = { ...note, day };
         // The merge (IG-006 × IG-002): the rows the note names are the colours a child sees, and the note itself is drawn.
-        const colours = await evaluate(`(() => { const s = (x, y) => { const e = document.querySelector('.bg-stage .gd-cell[data-x="' + x + '"][data-y="' + y + '"] .gd-tulip'); return e ? e.getAttribute('data-sprite') : null; }; return { red: [s(2, 2), s(4, 2), s(6, 2)], yellow: [s(2, 4), s(4, 4), s(6, 4)], note: document.querySelectorAll('.bg-stage svg[data-sprite="note"]').length }; })()`);
+        const colours = await evaluate(`(() => { const s = (x, y) => { const e = document.querySelector('.bg-stage .gd-cell[data-x="' + x + '"][data-y="' + y + '"] .gd-tulip'); return e ? e.getAttribute('data-sprite') : null; }; return { red: [s(3, 4), s(2, 4), s(1, 4)], yellow: [s(5, 2), s(6, 2), s(7, 2)], note: document.querySelectorAll('.bg-stage svg[data-sprite="note"]').length }; })()`);
         check(`${tag} merge: the red row draws red and the yellow row yellow, and the note is drawn on the plot`, colours.red.every((v) => v === 'tulip') && colours.yellow.every((v) => v === 'tulipYellow') && colours.note === 1, colours);
-        for (const op of ['olive:read', 'fwd', 'fwd']) await palTap(op);
-        await ifInto('olive_read:red_tulip', ['left', 'water', 'right'], 'if red');
-        await ifInto('olive_read:yellow_tulip', ['right', 'water', 'left'], 'if yellow');
+        for (const op of ['olive:read', 'fill']) await palTap(op);
+        await ifInto('olive_read:red_tulip', ['left'], 'if red');
+        await ifInto('olive_read:yellow_tulip', ['right'], 'if yellow');
+        for (const op of ['fwd', 'left', 'water']) await palTap(op);
         const prog = await evaluate(`[...document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk[data-id]')].map((b) => b.getAttribute('data-t')).join(' ')`);
         const readsBefore = stubCalls.filter((c) => c.body && c.body.rung === 'read').length;
         const readBubble = await bubbleAfterPlay(w(lang, 'oliveReadSay').replace('{x}', STUB.plan.answers.read));
         const readCall = stubCalls.filter((c) => c.body && c.body.rung === 'read').slice(readsBefore);
-        const rows = { red: await cellTulip(2, 2), yellow: await cellTulip(2, 4) };
+        const rows = { red: await cellTulip(3, 4), yellow: await cellTulip(5, 2) };
         if (shots) await shot(`ig006-ac2-note-${vp.name}-${lang}`);
-        check(`${tag} AC2: the program is built through the kit (read, forward ×2, two ifs)`, prog === 'olive:read fwd fwd if left water right if right water left', prog);
-        check(`${tag} AC2: read sends the note on the plot, in the language, with the plot’s two tulips as the choices — once`, readCall.length === 1 && readCall[0].body.slots.note === (lang === 'fr' ? 'Les rouges, pas les jaunes.' : 'The red ones, not the yellow.') && JSON.stringify(readCall[0].body.options) === JSON.stringify(lang === 'fr' ? ['tulipe rouge', 'tulipe jaune'] : ['red tulip', 'yellow tulip']), readCall.map((c) => c.body));
+        const NOTES = { red: { en: 'The red ones, not the yellow.', fr: 'Les rouges, pas les jaunes.' }, yellow: { en: 'The yellow ones, not the red.', fr: 'Les jaunes, pas les rouges.' } };
+        check(`${tag} AC2: the program is built through the kit (read, fill, two ifs, forward, left, water)`, prog === 'olive:read fill if left if right fwd left water', prog);
+        check(`${tag} AC2: read sends the day's note on the plot (the ${day} ones), in the language, with the plot’s two tulips as the choices — once`, readCall.length === 1 && readCall[0].body.slots.note === NOTES[day][lang] && JSON.stringify(readCall[0].body.options) === JSON.stringify(lang === 'fr' ? ['tulipe rouge', 'tulipe jaune'] : ['red tulip', 'yellow tulip']), readCall.map((c) => c.body));
         check(`${tag} AC2: the bubble says “${w(lang, 'oliveReadSay').replace('{x}', STUB.plan.answers.read)}”`, readBubble.includes(w(lang, 'oliveReadSay').replace('{x}', STUB.plan.answers.read)), readBubble);
-        check(`${tag} AC2: “if Olive read the red tulip” — the red row is watered and the yellow one is not`, rows.red === 'wet' && rows.yellow === 'dry', rows);
+        check(`${tag} AC2: “if Olive read the ${day} tulip” — the ${day} row's first tulip is watered and the other row's is not`, day === 'red' ? rows.red === 'wet' && rows.yellow === 'dry' : rows.yellow === 'wet' && rows.red === 'dry', { day, rows });
         const noteLine = await owlSay();
         check(`${tag} AC7: after the run the owl names the block asked (read the note)`, noteLine.includes(lang === 'fr' ? 'Olive a lu le mot' : 'Olive read the note'), noteLine);
         delete STUB.plan.answers.read;
@@ -1329,8 +1348,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await until('location.pathname', (x) => x === '/workshop');
   await wait(900);
   await control('rec');
-  // IG-002: fill at the pond, turn round, step, water the first tulip.
-  for (const op of ['fill', 'left', 'left', 'fwd', 'water']) await key(op);
+  // IG-002: fill at the pond, turn round, step, water the first tulip — P108 IW-003 (lane M): all its drinks (three).
+  for (const op of TULIP_DANCE.slice(0, TULIP_DANCE.lastIndexOf('water') + 1)) await key(op);
   const still = await evaluate(`(() => { const all = [...document.querySelectorAll('*')].filter((e) => { const s = getComputedStyle(e); return s.animationName !== 'none' && s.animationPlayState === 'running' && parseFloat(s.animationDuration) > 0.01; }).map((e) => e.className && e.className.baseVal !== undefined ? e.className.baseVal : e.className); const wet = document.querySelector('.gd-wet'), dry = document.querySelector('.gd-dry'); return { animated: all.slice(0, 8), wet: wet && getComputedStyle(wet).opacity, dry: dry && getComputedStyle(dry).opacity }; })()`);
   check('CG-007 AC7: under reduced motion nothing animates', still.animated.length === 0, still);
   check('CG-007 AC7: … and a watered tulip still reads apart from a dry one', still.wet !== null && still.dry !== null && still.wet !== still.dry, still);

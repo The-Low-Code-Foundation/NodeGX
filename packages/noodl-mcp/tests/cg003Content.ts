@@ -21,14 +21,14 @@ const s = (en: string, fr: string): Bi => ({ en, fr });
  */
 export const REQUEST_SUBS: Readonly<Record<string, { key: string; words: Bi }>> = {
   'path-postbox': { key: 'subPathPostbox', words: s('Drive {b} along the path, one step at a time. Every step you take becomes a block.', 'Conduis {b} sur le chemin, un pas à la fois. Chaque pas devient un bloc.') },
-  'tulip-door': { key: 'subTulipDoor', words: s('One thirsty tulip. Walk {b} to her, turn, and water: three kinds of step, in the right order.', 'Une tulipe qui a soif. Emmène {b} jusqu’à elle, tourne, et arrose : trois sortes de pas, dans le bon ordre.') },
+  'tulip-door': { key: 'subTulipDoor', words: s('The can first: pick it up and fill it at the well, then walk {b} to the tulip and water. Steps in the right order.', 'D’abord l’arrosoir : prends-le et remplis-le au puits, puis emmène {b} jusqu’à la tulipe et arrose. Des pas dans le bon ordre.') },
   'tulips-three': { key: 'subTulipsThree', words: s('Drive {b} yourself first. {b} remembers every step as a block, and then you can tidy the steps up.', 'Conduis {b} toi-même d’abord. {b} retient chaque pas comme un bloc, et ensuite tu peux ranger les pas.') },
   'path-stones': { key: 'subPathStones', words: s('Put a stone down, step, and again. When the same steps come back, fold them into a repeat.', 'Pose une pierre, avance, et encore. Quand les mêmes pas reviennent, range-les dans un « répéter ».') },
   'bowl-if': { key: 'subBowlIf', words: s('Only the empty bowl gets food. Teach {b} to look first: if the bowl is empty, then fill it.', 'Seul le bol vide reçoit à manger. Apprends à {b} à regarder d’abord : si le bol est vide, alors remplis-le.') },
   'letter-say': { key: 'subLetterSay', words: s('Carry the letter to the post box, then give {b} something kind to say when it gets there.', 'Porte la lettre jusqu’à la boîte aux lettres, puis donne à {b} quelque chose de gentil à dire en arrivant.') },
   'wall-until': { key: 'subWallUntil', words: s('No need to count the steps. {b} can keep going until the wall, then stop by itself.', 'Pas besoin de compter les pas. {b} peut avancer jusqu’au mur, puis s’arrêter tout seul.') },
   'meow-when': { key: 'subMeowWhen', words: s('Nobody knows when Biscuit will meow. Teach {b} what to do whenever it happens.', 'Personne ne sait quand Biscuit va miauler. Apprends à {b} quoi faire chaque fois que ça arrive.') },
-  'eggs-count': { key: 'subEggsCount', words: s('Four eggs, not five. {b} can count while picking, and stop when the count is right.', 'Quatre œufs, pas cinq. {b} peut compter en ramassant, et s’arrêter quand le compte est bon.') },
+  'eggs-count': { key: 'subEggsCount', words: s('Count the eggs in the basket: {b} fetches eggs until it holds four, however many were in it this morning.', 'Compte les œufs du panier : {b} va chercher des œufs jusqu’à ce qu’il en tienne quatre, peu importe combien il y en avait ce matin.') },
   'rows-trick': { key: 'subRowsTrick', words: s('Two rows, the same job. Teach {b} the job once, as a trick with a name, then use it twice.', 'Deux rangées, le même travail. Apprends le travail une fois à {b}, comme une astuce avec un nom, puis utilise-la deux fois.') },
   // P106 IG-006 (lane C): Olive's three requests.
   'mamie-note': { key: 'subMamieNote', words: s('A program cannot read Mamie’s note, but Olive can. Ask her, then let “if Olive read…” choose the row.', 'Un programme ne sait pas lire le mot de Mamie, Olive si. Demande-lui, puis laisse « si Olive a lu… » choisir la rangée.') },
@@ -223,7 +223,43 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   iw3mNoneHen: s('I can’t find the hen.', 'Je ne trouve pas la poule.'),
   iw3mNonePostbox: s('I can’t find the post box.', 'Je ne trouve pas la boîte aux lettres.'),
   iw3mNoneWell: s('I can’t walk to the water from here.', 'Je ne peux pas aller jusqu’à l’eau d’ici.'),
-  iw3mNoneRead: s('I don’t know where that is.', 'Je ne sais pas où c’est.')
+  iw3mNoneRead: s('I don’t know where that is.', 'Je ne sais pas où c’est.'),
+  // The job card (IW-000's graded look): its five labels, and each of Mamie's jobs in five lines plus how much is done.
+  iw3mJcSrc: s('Source', 'Source'),
+  iw3mJcCar: s('Carrier', 'Porteur'),
+  iw3mJcTgt: s('Target', 'Cible'),
+  iw3mJcFin: s('Finish line', 'Ligne d’arrivée'),
+  iw3mJcWr: s('Wear', 'Usure'),
+  iw3mDoorSrc: s('⛲ the well, which never runs dry', '⛲ le puits, qui ne tarit jamais'),
+  iw3mDoorCar: s('🪣 the can on the grass, holds 3', '🪣 l’arrosoir dans l’herbe, 3 gorgées'),
+  iw3mDoorTgt: s('🌷 the tulip by the door × 3 drinks', '🌷 la tulipe près de la porte × 3 gorgées'),
+  iw3mDoorFin: s('the tulip full → {b} walks home', 'la tulipe pleine → {b} rentre'),
+  iw3mDoorWr: s('the tulip gets thirsty again', 'la tulipe a de nouveau soif'),
+  iw3mDoorSum: s('{n}/{t} drinks', '{n}/{t} gorgées'),
+  iw3mTulipsSrc: s('⛲ the pond, which never runs dry', '⛲ la mare, qui ne tarit jamais'),
+  iw3mTulipsCar: s('🪣 the can in {b}’s hand, holds 3', '🪣 l’arrosoir de {b}, 3 gorgées'),
+  iw3mTulipsTgt: s('🌷 3 tulips × 3 drinks', '🌷 3 tulipes × 3 gorgées'),
+  iw3mTulipsFin: s('every tulip full → {b} walks home', 'toutes les tulipes pleines → {b} rentre'),
+  iw3mTulipsWr: s('a tulip gets thirsty again', 'une tulipe a de nouveau soif'),
+  iw3mTulipsSum: s('{n}/{t} tulips full', '{n}/{t} tulipes pleines'),
+  iw3mEggsSrc: s('🐔 the hen lays in her pen, never twice in the same place', '🐔 la poule pond dans son enclos, jamais deux fois au même endroit'),
+  iw3mEggsCar: s('✋ {b}’s hands, one egg at a time', '✋ les mains de {b}, un œuf à la fois'),
+  iw3mEggsTgt: s('🧺 the basket by Mamie’s door, 4 eggs', '🧺 le panier devant la porte de Mamie, 4 œufs'),
+  iw3mEggsFin: s('the basket full → {b} walks home', 'le panier plein → {b} rentre'),
+  iw3mEggsWr: s('Mamie takes an egg for breakfast; the hen lays again', 'Mamie prend un œuf pour le petit-déjeuner ; la poule pond à nouveau'),
+  iw3mEggsSum: s('{n}/{t} eggs in the basket', '{n}/{t} œufs dans le panier'),
+  iw3mRowsSrc: s('⛲ two ponds, one at each end of the path', '⛲ deux mares, une à chaque bout du chemin'),
+  iw3mRowsCar: s('🪣 the can in {b}’s hand, holds 3', '🪣 l’arrosoir de {b}, 3 gorgées'),
+  iw3mRowsTgt: s('🌷 2 rows × 3 little tulips, one drink each', '🌷 2 rangées × 3 petites tulipes, une gorgée chacune'),
+  iw3mRowsFin: s('both rows watered → {b} is home', 'les deux rangées arrosées → {b} est rentré'),
+  iw3mRowsWr: s('a tulip gets thirsty again', 'une tulipe a de nouveau soif'),
+  iw3mRowsSum: s('{n}/{t} tulips watered', '{n}/{t} tulipes arrosées'),
+  iw3mNoteSrc: s('⛲ the well, which never runs dry', '⛲ le puits, qui ne tarit jamais'),
+  iw3mNoteCar: s('🪣 the can in {b}’s hand, holds 3', '🪣 l’arrosoir de {b}, 3 gorgées'),
+  iw3mNoteTgt: s('🌷 the row Mamie’s note asks for: 3 tulips, one drink each', '🌷 la rangée que demande le mot de Mamie : 3 tulipes, une gorgée chacune'),
+  iw3mNoteFin: s('that row watered → {b} walks home', 'cette rangée arrosée → {b} rentre'),
+  iw3mNoteWr: s('a tulip gets thirsty again', 'une tulipe a de nouveau soif'),
+  iw3mNoteSum: s('{n}/{t} tulips of the note', '{n}/{t} tulipes du mot')
 };
 
 export const PAGE_WORD_KEYS: ReadonlyArray<string> = Object.keys(PAGE_WORDS);
@@ -284,6 +320,29 @@ export const PAD_GO: { nearest: ReadonlyArray<string>; to: ReadonlyArray<string>
   nearest: ['egg', 'letter', 'stone', 'food', 'ball', 'rock', 'can'],
   to: ['basket', 'bowl', 'store', 'door', 'site', 'postbox'],
   emoji: { egg: '🥚', letter: '✉️', stone: '🪨', food: '🍖', ball: '⚽', rock: '⛰️', can: '🪣', basket: '🧺', bowl: '🥣', store: '📦', door: '🚪', site: '🟫', postbox: '📮' }
+};
+
+/**
+ * P108 IW-003 (lane M): the job card under the Workshop's world (IW-000's graded look: SOURCE · CARRIER · TARGET · FINISH
+ * LINE · WEAR, README §4.1), one row per request that has one, by its word keys in PAGE_WORDS; `sum` says how much is done
+ * with `{n}` of `{t}` (one target: its meter — drinks, eggs in the basket; more: how many are full). A request with no
+ * row shows no card. Another lane adds its missions' rows at the END.
+ */
+export interface JobCard {
+  src: string;
+  car: string;
+  tgt: string;
+  fin: string;
+  wr: string;
+  sum: string;
+}
+const card = (k: string): JobCard => ({ src: `iw3m${k}Src`, car: `iw3m${k}Car`, tgt: `iw3m${k}Tgt`, fin: `iw3m${k}Fin`, wr: `iw3m${k}Wr`, sum: `iw3m${k}Sum` });
+export const JOB_CARDS: Readonly<Record<string, JobCard>> = {
+  'tulip-door': card('Door'),
+  'tulips-three': card('Tulips'),
+  'eggs-count': card('Eggs'),
+  'rows-trick': card('Rows'),
+  'mamie-note': card('Note')
 };
 
 /** The eyes and hats the robot can wear (the mockup's `#eyes` and `#hats`). A hat other than none/cap is a gift. */

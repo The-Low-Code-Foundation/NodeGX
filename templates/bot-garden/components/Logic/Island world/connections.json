@@ -17,6 +17,12 @@
     },
     {
       "fromId": "islandworldIn",
+      "fromProperty": "kept",
+      "toId": "islandworldFn",
+      "toProperty": "in-kept"
+    },
+    {
+      "fromId": "islandworldIn",
       "fromProperty": "pins",
       "toId": "islandworldFn",
       "toProperty": "in-pins"
