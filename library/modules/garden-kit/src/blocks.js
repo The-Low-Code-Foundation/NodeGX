@@ -271,9 +271,11 @@ var gardenKitBlocks = (function () {
 
   /** The start hat's place in the workspace (right of the drawer the flyout leaves; the node scrolls it into sight). */
   var START_AT = { x: 24, y: 24 };
-  /** P108 IW-003 (lane B): fitProgram's margin each side (workspace units) and its smallest scale (the zoom's minScale is 0.45). */
-  var FIT_MARGIN = 20;
+  /** P108 IW-003 (lane B): fitProgram's margin each side (workspace units: measured, 20 left the right edge 2 px short at 1024) and its smallest scale (the zoom's minScale is 0.45). */
+  var FIT_MARGIN = 36;
   var FIT_MIN = 0.5;
+  /** P108 IW-003 (lane B): the room left of the stack when fitProgram scrolls it sideways into view (workspace units). */
+  var FIT_PAD = 12;
 
   /** The engine program → a Blockly workspace state: the ▶ hat with the program chained under it. */
   function toBlockly(program) {
@@ -2062,12 +2064,13 @@ var gardenKitBlocks = (function () {
     function showStart() {
       var s = startBlock();
       if (!s || !ed.ws) return;
-      fitProgram();
       try {
         ed.ws.scrollBoundsIntoView(s.getBoundingRectangleWithoutChildren ? s.getBoundingRectangleWithoutChildren() : s.getBoundingRectangle(), 24);
       } catch (e) {
         /* an older Blockly */
       }
+      // P108 IW-003 (lane B): then the whole stack, fitted and scrolled sideways into view.
+      fitProgram();
     }
     /**
      * P108 IW-003 (lane B): the program whole in view. When the start stack is wider than the workspace beside the drawer
@@ -2087,8 +2090,12 @@ var gardenKitBlocks = (function () {
         // The stack's width and the view's are in workspace units: the stack fits at scale' when wide × scale' ≤ view × scale.
         var wide = r.right - r.left + 2 * FIT_MARGIN;
         var want = Math.max(FIT_MIN, Math.min(start, (view.width * scale) / wide));
-        if (shrinkOnly && want >= scale) return;
-        if (Math.abs(want - scale) > 0.01) ed.ws.setScale(want);
+        if (!(shrinkOnly && want >= scale) && Math.abs(want - scale) > 0.01) ed.ws.setScale(want);
+        // A zoom is about the view's middle, and a tap-add can grow a stack sideways: when the stack's left or right edge
+        // is out of the view, scroll SIDEWAYS only (the view's own top and bottom kept) until it is whole.
+        var v = ed.ws.getMetricsManager().getViewMetrics(true);
+        var b = s.getBoundingRectangle();
+        if (b.left < v.left || b.right > v.left + v.width) ed.ws.scrollBoundsIntoView(new Bk.utils.Rect(v.top + 1, v.top + 2, b.left, b.right), FIT_PAD);
       } catch (e) {
         /* hidden, or an older Blockly */
       }
