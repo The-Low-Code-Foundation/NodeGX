@@ -141,12 +141,19 @@ Paths are shortened: **C** = `packages/noodl-mcp/tests/cg002Content.ts`, **E** =
 | D6 | Supersedes **P106 R10** (`go to [what Olive read]`): `go to` is built (IW-005) and the envelope mission makes it winnable | R10's recommendation was "drop it" because no mission could win with it; IW-003 adds that mission. |
 | D7 | No real-time clocks: wear and regrowth count **island ticks while a page is open** | R2; one of the children dislikes time pressure (§5). |
 | D8 | No leaderboards, no sibling comparison, shells private to each profile | rkt-010 §1.3–1.4. |
+| D9 | **Every robot has hands and walks to things** (session 3 base): `pick`, `put`, `go_nearest`, `go_to` join the moves every robot has; `set`/`change` join the controls; Echo gains `fill`. Band 7–9's drawer gains the two walks; band 10–12's has every block. A request's `palette` still offers only what its mission needs | Every mission is now a job with something to pick up (the can, a letter, the food); a Pip who cannot pick up his own can makes no sense. Robots still differ by water / fill / say / Olive, capacity and upgrade. |
 
 **Open, asked after session 1 (2026-09-30):**
 
 | # | Question | Options |
 |---|---|---|
 | R5 | **The run cap is 14 minutes long.** A run that never ends (`repeat 9 { until the wall is ahead { turn left } }`) stops by itself only at the engine's `MAX_TICKS` = 2000 ticks — at 420 ms a tick, about 14 minutes; that very program ends earlier, by the `until` guard, after 742 ticks (~5 min). Stop (built) is what gets a child out. Should the Workshop also give up sooner? The longest reference run today is 41 ticks (`rows-trick`, IW-002 §6), so a cap of 200 leaves five times that. | **a page cap of ~200 ticks (≈1½ min) with Olive's "going round and round" line (recommended)** / stop at the first `until` guard hit / keep 2000 (IW-001 §6 deviation 1) |
+
+**Ruled in session 3 (2026-09-30):**
+
+| # | Question | Answer |
+|---|---|---|
+| R6 | The island is full (13 missions + free play + home = 15 plots of R9's 46 × 22). Where do the envelopes and Sami's bench go? | *"Widen to 55×22"* — **ruled: six columns of three rows, 18 plots.** The envelopes on Mamie's row (46, 1), the bench on Sami's (46, 8), (46, 15) a meadow kept for IW-007. A slot no request claims is a meadow (`ISLAND_MEADOW_MAP`). Supersedes P106 R9's 46-wide cap. Base `2e1035bfa`: page drive 331/331, island 2D 65/65 (p95 16.7 ms at CPU ×4), 3D 5/5. |
 
 **Found in session 2 (each is IW-003's to meet, not a ruling):** Olive's `read` answers only from `plot_objects`, so no model
 can name a door yet — the envelope mission must add places to the read rung's options and written answers (IW-005 §5 dev. 6);
