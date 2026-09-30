@@ -180,6 +180,22 @@
       "parameters": {
         "name": "ready"
       }
+    },
+    {
+      "id": "vWatch",
+      "type": "Variable2",
+      "label": "watch",
+      "parameters": {
+        "name": "watch"
+      }
+    },
+    {
+      "id": "vPicking",
+      "type": "Variable2",
+      "label": "picking",
+      "parameters": {
+        "name": "picking"
+      }
     }
   ],
   "visualRoots": [
