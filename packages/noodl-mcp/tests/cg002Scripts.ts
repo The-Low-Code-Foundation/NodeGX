@@ -114,7 +114,7 @@ export const TRICK_KEYS = ['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7'] as const;
 
 /** The band-1 palette, for the scripts. */
 const BAND1 = JSON.stringify(BAND_PALETTE[1]);
-const ALL_BLOCKS = JSON.stringify(BLOCK_TYPES);
+const ALL_BLOCKS = JSON.stringify(BAND_PALETTE[2]);
 
 /** Which drawing class the kit gives each block (the mockup's `BLK` table), and which take a body or a count. */
 export const BLOCK_META: Readonly<Record<string, { kind: 'motion' | 'action' | 'control' | 'ask'; body: boolean; count: boolean; slots: ReadonlyArray<string> }>> = {
@@ -133,7 +133,12 @@ export const BLOCK_META: Readonly<Record<string, { kind: 'motion' | 'action' | '
   count_inc: { kind: 'control', body: false, count: false, slots: [] },
   trick: { kind: 'ask', body: true, count: false, slots: ['name'] },
   do: { kind: 'ask', body: false, count: false, slots: ['name'] },
-  ask: { kind: 'ask', body: false, count: false, slots: ['rung', 'args', 'shape', 'dial'] }
+  ask: { kind: 'ask', body: false, count: false, slots: ['rung', 'args', 'shape', 'dial'] },
+  // P108 IW-005 (lane J): go to nearest [kind] · go to [thing chip | what Olive read] · set [name] to [value] · change [name] by [by].
+  go_nearest: { kind: 'motion', body: false, count: false, slots: ['kind'] },
+  go_to: { kind: 'motion', body: false, count: false, slots: ['thing'] },
+  set: { kind: 'control', body: false, count: false, slots: ['name', 'value'] },
+  change: { kind: 'control', body: false, count: false, slots: ['name', 'by'] }
 };
 
 // ── P108 IW-002: the seed — mulberry32 over the world's own seed, and the layouts a request lays from it ──────
@@ -443,22 +448,290 @@ function sense(w, run, name, arg) {
   if (name.indexOf('olive_read:') === 0) return !!run.lastAnswer && run.lastAnswer.object === name.slice(11);
   return false;
 }
+// ── P108 IW-005 (lane J): conditions and values (brief 4.3), seek (go to nearest, go to), reservation ──────────
+/** An expression nested deeper than this is malformed: the whole of it reads as false / 0 (it never throws out, never hangs). */
+var EXPR_DEPTH = 32;
+function exprText(v) { return String(v === undefined || v === null ? '' : v).trim().toLowerCase(); }
+function exprNum(v) { if (typeof v === 'number') return isFinite(v) ? v : null; if (typeof v === 'string' && v.trim() !== '' && isFinite(Number(v))) return Number(v); return null; }
+function isSet(v) { return v !== undefined && v !== null && v !== ''; }
+function reservedOf(w) { return w && w.reserved && typeof w.reserved === 'object' && !Array.isArray(w.reserved) ? w.reserved : {}; }
+/** A thing's id for a reservation: its own, else one minted from its kind and tile (kind@x,y, then #2, #3 when taken). */
+function mintId(w, t) {
+  if (isSet(t.id)) return String(t.id);
+  var base = String(t.kind) + '@' + t.x + ',' + t.y, id = base, n = 1;
+  while (thingById(w, id)) id = base + '#' + (++n);
+  return id;
+}
+/**
+ * The thing Olive's last read names: the first thing whose id, name or owner is her object (or whose read-object id is,
+ * so red_tulip finds the red tulip); then, when her word is no object id (a name: "Mamie"), the first whose id, name or
+ * owner is that word. null when she read nothing.
+ */
+function readThing(w, run) {
+  var a = run && run.lastAnswer;
+  if (!a || typeof a !== 'object') return null;
+  var obj = exprText(a.object), said = a.value !== undefined && a.value !== null ? a.value : a.text;
+  var word = Array.isArray(said) || typeof said === 'object' ? '' : exprText(said);
+  var keys = [obj, word];
+  for (var p = 0; p < keys.length; p++) {
+    if (!keys[p]) continue;
+    for (var i = 0; i < w.things.length; i++) {
+      var t = w.things[i];
+      if (!t) continue;
+      if (exprText(t.id) === keys[p] || exprText(t.name) === keys[p] || exprText(t.owner) === keys[p] || (p === 0 && oliveObjectOf(t) === keys[p])) return t;
+    }
+  }
+  return null;
+}
+/**
+ * A REF resolved against the world: { kind, x, y } plus thing (a thing on the map), tile (ahead / here), held (what the
+ * robot carries: kind can when it holds the can, else kind held = its carry list) or robot. null = not found.
+ */
+function refOf(w, run, r, ref) {
+  if (!ref || typeof ref !== 'object' || Array.isArray(ref) || !r) return null;
+  var which = ref.ref;
+  if (which === 'ahead' || which === 'here') { var p = which === 'ahead' ? front(r) : { x: r.x, y: r.y }; return { kind: which, tile: true, x: p.x, y: p.y }; }
+  if (which === 'held') return { kind: r.holds === 'can' ? 'can' : 'held', held: true, x: r.x, y: r.y };
+  if (which === 'robot') return { kind: 'robot', robot: true, x: r.x, y: r.y };
+  if (which === 'read') { var rt = readThing(w, run); return rt ? { kind: String(rt.kind), thing: rt, x: rt.x, y: rt.y } : null; }
+  if (isSet(which)) return null;
+  // A chip picked on the world: by its id, else the first thing of its kind on its tile, else (a can) the can the robot holds.
+  var byId = isSet(ref.id) ? thingById(w, ref.id) : null;
+  if (byId) return { kind: String(byId.kind), thing: byId, x: byId.x, y: byId.y };
+  var k = String(ref.kind || ''), x = Math.floor(Number(ref.x)), y = Math.floor(Number(ref.y));
+  for (var i = 0; i < w.things.length; i++) { var t = w.things[i]; if (t && t.kind === k && t.x === x && t.y === y) return { kind: k, thing: t, x: t.x, y: t.y }; }
+  if (k === 'can' && r.holds === 'can') return { kind: 'can', held: true, x: r.x, y: r.y };
+  return null;
+}
+function carried(r, what) { var n = 0; for (var i = 0; i < r.carry.length; i++) if (String(r.carry[i]) === what) n++; return n; }
+/** How many of what the thing holds (VAL count): a container's count of its own item; what the robot carries; the things on a tile; a hen's eggs in her pen. */
+function countIn(w, r, it, what) {
+  if (!it) return 0;
+  if (it.tile) return thingsAt(w, it.x, it.y, what).length;
+  if (it.robot || it.held) return carried(r, what);
+  var t = it.thing;
+  if (JOB_KINDS[t.kind] === 'container') return itemOf(t) === what ? meterOf(t).have : 0;
+  if (t.kind === 'hen' && what === 'egg' && Array.isArray(t.pen) && t.pen.length === 4) {
+    var n = 0, x0 = Math.min(t.pen[0], t.pen[2]), x1 = Math.max(t.pen[0], t.pen[2]), y0 = Math.min(t.pen[1], t.pen[3]), y1 = Math.max(t.pen[1], t.pen[3]);
+    for (var py = y0; py <= y1; py++) for (var px = x0; px <= x1; px++) n += thingsAt(w, px, py, 'egg').length;
+    return n;
+  }
+  return 0;
+}
+/** A thing's level (VAL level): a can's water (held or on the map), a container's count, a target's have, a rock's stones; held with no can, or the robot: how many it carries. */
+function levelIn(w, r, it) {
+  if (!it || it.tile) return 0;
+  if (it.robot) return r.carry.length;
+  if (it.held) return it.kind === 'can' ? canOf(r) || 0 : r.carry.length;
+  var t = it.thing;
+  if (t.kind === 'can') return Math.max(0, Math.floor(Number(t.level)) || 0);
+  if (t.kind === 'rock') return Math.max(0, Math.floor(Number(t.left)) || 0);
+  if (t.kind === 'tulip' || t.kind === 'site' || JOB_KINDS[t.kind] === 'container') return meterOf(t).have;
+  return 0;
+}
+/** Is the thing in that state (COND is; the states by kind, brief 4.3). Unknown state or thing: false. */
+function stateOf(w, r, it, state, n, what) {
+  if (!it) return false;
+  var need = isSet(n) && isFinite(Number(n)) ? Number(n) : 1;
+  if (state === 'front') { var f = front(r); return !it.held && !it.robot && it.x === f.x && it.y === f.y; }
+  if (it.tile) {
+    if (state === 'wall') return blocked(w, it.x, it.y);
+    var on = thingsAt(w, it.x, it.y), real = [];
+    for (var i = 0; i < on.length; i++) if (on[i].kind !== 'puddle') real.push(on[i]);
+    if (state === 'nothing') return !real.length && !blocked(w, it.x, it.y);
+    if (state === 'has') { if (!isSet(what)) return real.length > 0; for (var j = 0; j < real.length; j++) if (real[j].kind === String(what)) return true; return false; }
+    return false;
+  }
+  if ((it.held && it.kind === 'held') || it.robot) {
+    if (state === 'empty') return r.carry.length === 0;
+    if (state === 'full') return r.carry.length >= basketOf(r);
+    if (state === 'has') return (isSet(what) ? carried(r, String(what)) : r.carry.length) >= need;
+    return false;
+  }
+  var lv = null, mx = 0;
+  if (it.held) { lv = canOf(r) || 0; mx = canMaxOf(r); }
+  else if (it.thing.kind === 'can') { lv = Math.max(0, Math.floor(Number(it.thing.level)) || 0); mx = Number(it.thing.max) > 0 ? Math.floor(Number(it.thing.max)) : CAN_MAX; }
+  if (lv !== null) { if (state === 'empty') return lv <= 0; if (state === 'full') return lv >= mx; if (state === 'has') return lv >= need; return false; }
+  var t = it.thing, m = meterOf(t);
+  if (JOB_KINDS[t.kind] === 'container') { if (state === 'empty') return m.have <= 0; if (state === 'full') return isFinite(m.need) && m.have >= m.need; if (state === 'has') return m.have >= need; return false; }
+  if (t.kind === 'tulip') { if (state === 'drunk') return isFull(t); if (state === 'thirsty') return !isFull(t); return false; }
+  if (t.kind === 'site') { if (state === 'done') return isFull(t); if (state === 'dirt') return m.have <= 0; return false; }
+  if (t.kind === 'rock') { var left = Math.floor(Number(t.left)) || 0; if (state === 'stones') return left > 0; if (state === 'used') return left <= 0; return false; }
+  return false;
+}
+function valOf(w, run, r, v, depth) {
+  if (depth > EXPR_DEPTH) throw new Error('deep');
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return 0;
+  if (v.op === 'num') { var n = Number(v.n); return isFinite(n) ? n : 0; }
+  if (v.op === 'text') return isSet(v.s) && typeof v.s !== 'object' ? String(v.s) : '';
+  if (v.op === 'var') { var vs = run.vars && typeof run.vars === 'object' ? run.vars : {}, k = String(v.name); var x = Object.prototype.hasOwnProperty.call(vs, k) ? vs[k] : 0; return typeof x === 'number' || typeof x === 'string' ? x : 0; }
+  if (v.op === 'read') { var a = run.lastAnswer; if (!a || typeof a !== 'object') return ''; if (isSet(a.object)) return String(a.object); var said = a.value !== undefined && a.value !== null ? a.value : a.text; return isSet(said) && typeof said !== 'object' ? String(said) : ''; }
+  if (v.op === 'count') return countIn(w, r, refOf(w, run, r, v.thing), String(v.what || ''));
+  if (v.op === 'level') return levelIn(w, r, refOf(w, run, r, v.thing));
+  return 0;
+}
+function condOf(w, run, r, c, depth) {
+  if (depth > EXPR_DEPTH) throw new Error('deep');
+  if (!c || typeof c !== 'object' || Array.isArray(c)) return false;
+  var subA = !!c.a && typeof c.a === 'object', subB = !!c.b && typeof c.b === 'object';
+  if (c.op === 'and') return subA && subB && condOf(w, run, r, c.a, depth + 1) && condOf(w, run, r, c.b, depth + 1);
+  if (c.op === 'or') return subA && subB && (condOf(w, run, r, c.a, depth + 1) || condOf(w, run, r, c.b, depth + 1));
+  if (c.op === 'not') return subA && !condOf(w, run, r, c.a, depth + 1);
+  if (c.op === 'sensor') return sense(w, run, String(c.sensor || ''), c.arg);
+  if (c.op === 'cmp') {
+    if (!subA || !subB) return false;
+    var a = valOf(w, run, r, c.a, depth + 1), b = valOf(w, run, r, c.b, depth + 1), na = exprNum(a), nb = exprNum(b);
+    if (na !== null && nb !== null) return c.cmp === 'eq' ? na === nb : c.cmp === 'lt' ? na < nb : c.cmp === 'gt' ? na > nb : false;
+    return c.cmp === 'eq' && typeof a === 'string' && typeof b === 'string' ? exprText(a) === exprText(b) : false;
+  }
+  if (c.op === 'is') return stateOf(w, r, refOf(w, run, r, c.thing), String(c.state || ''), c.n, c.what);
+  return false;
+}
+/** A COND on the world and the run: never throws — a malformed expression, an unknown state, a thing not found: false. */
+function evalCond(w, run, c) { try { var r = robotOf(w, run && run.robotId); return !!r && condOf(w, run || {}, r, c, 0); } catch (e) { return false; } }
+/** A VAL on the world and the run: a number or a text; never throws (0). */
+function evalVal(w, run, v) { try { var r = robotOf(w, run && run.robotId); return r ? valOf(w, run || {}, r, v, 0) : 0; } catch (e) { return 0; } }
+/** The sensor names a COND reads (its sensor leaves), for the senses goal. */
+function condSensors(c, out, depth) {
+  if (!c || typeof c !== 'object' || depth > EXPR_DEPTH) return out;
+  if (c.op === 'sensor' && isSet(c.sensor)) out.push(String(c.sensor));
+  condSensors(c.a, out, depth + 1); condSensors(c.b, out, depth + 1);
+  return out;
+}
+/** An until / if step's condition: its cond when it has one (the sensor and arg ignored), else its sensor as before. */
+function checkOf(w, run, s) { return s.cond !== undefined ? evalCond(w, run, s.cond) : sense(w, run, s.sensor, s.arg); }
+/**
+ * Every tile's path length from a tile over tiles that do not block, and the tile each was reached from (breadth first:
+ * up, right, down, left). The world IS the robot's plot (the island steps each plot on its own map): off the map blocks, so a search never leaves the plot.
+ */
+function pathsFrom(w, fx, fy) {
+  var dist = {}, from = {}, q = [[fx, fy]], head = 0;
+  dist[fx + ',' + fy] = 0; from[fx + ',' + fy] = '';
+  while (head < q.length) {
+    var c = q[head++], dc = dist[c[0] + ',' + c[1]];
+    for (var d = 0; d < 4; d++) {
+      var nx = c[0] + DX[d], ny = c[1] + DY[d], k = nx + ',' + ny;
+      if (dist[k] !== undefined || blocked(w, nx, ny)) continue;
+      dist[k] = dc + 1; from[k] = c[0] + ',' + c[1];
+      q.push([nx, ny]);
+    }
+  }
+  return { dist: dist, from: from };
+}
+/** The tile to face a thing from: of its four neighbours (up, right, down, left of it) the one the robot reaches soonest (the first on a tie). */
+function standFor(ps, t) {
+  var best = null;
+  for (var d = 0; d < 4; d++) { var sx = t.x + DX[d], sy = t.y + DY[d], n = ps.dist[sx + ',' + sy]; if (n !== undefined && (!best || n < best.n)) best = { x: sx, y: sy, d: (d + 2) % 4, n: n }; }
+  return best;
+}
+/** The tiles from the robot to a stand tile, first step first. */
+function routeTo(ps, st) {
+  var out = [], cur = st.x + ',' + st.y;
+  while (ps.from[cur]) { var p = cur.split(','); out.unshift([Number(p[0]), Number(p[1])]); cur = ps.from[cur]; }
+  return out;
+}
+/**
+ * go to nearest: of the things of that kind not reserved by another robot, the one the robot reaches in the fewest
+ * steps; a tie goes to the upper one, then the left one (then the first in the world). null = none reachable.
+ */
+function nearestOf(w, r, kind, ps) {
+  var res = reservedOf(w), best = null;
+  for (var i = 0; i < w.things.length; i++) {
+    var t = w.things[i];
+    if (!t || t.kind !== kind) continue;
+    if (isSet(t.id) && res[String(t.id)] && res[String(t.id)] !== r.id) continue;
+    var st = standFor(ps, t);
+    if (!st) continue;
+    if (!best || st.n < best.st.n || (st.n === best.st.n && (t.y < best.t.y || (t.y === best.t.y && t.x < best.t.x)))) best = { t: t, st: st };
+  }
+  return best;
+}
+/** Does this robot hold a reservation (a run that ends releases them). */
+function heldBy(w, id) { var res = reservedOf(w); for (var k in res) if (res[k] === id) return true; return false; }
+/**
+ * One tick of go to nearest (op seek) or go to (op goto): one move or one quarter turn toward the tile facing the thing,
+ * the block ending on the tick the robot stands there facing it. The route is searched once and kept on the step until
+ * the thing moves or goes, or its next tile blocks (then searched again; s.searches and run.searches count the searches).
+ * Nothing to reach: the none event and sayNone, and the block ends.
+ */
+function seekStep(w, run, s, delta) {
+  var r = robotOf(w, run.robotId);
+  delta.op = s.op === 'goto' ? 'go_to' : 'go_nearest';
+  if (!r) { delta.nothing = true; run.pc++; return; }
+  s.guard = (Number(s.guard) || 0) + 1;
+  var t = null, kind = s.op === 'goto' ? String((s.ref && (s.ref.kind || s.ref.ref)) || '') : String(s.kind || '');
+  // The target the step already walks to: still there, on the same tile, and (seek) still this robot's.
+  if (s.target) {
+    t = isSet(s.target.id) ? thingById(w, s.target.id) : null;
+    if (!t && s.op === 'goto') { var again = refOf(w, run, r, s.ref); t = again && again.thing ? again.thing : null; }
+    var res = reservedOf(w);
+    if (!t || t.x !== s.target.x || t.y !== s.target.y || (s.op === 'seek' && isSet(t.id) && res[String(t.id)] && res[String(t.id)] !== r.id)) { t = null; s.route = null; }
+  }
+  if (s.route && s.route.length) { var nx = s.route[0]; if (blocked(w, nx[0], nx[1]) || Math.abs(nx[0] - r.x) + Math.abs(nx[1] - r.y) !== 1) s.route = null; }
+  if (!t || !s.route) {
+    var ps = pathsFrom(w, r.x, r.y), st = null, old = s.target ? s.target.id : '';
+    s.searches = (Number(s.searches) || 0) + 1;
+    run.searches = (Number(run.searches) || 0) + 1;
+    if (s.op === 'seek') {
+      var found = t ? { t: t, st: standFor(ps, t) } : null;
+      if (!found || !found.st) found = nearestOf(w, r, kind, ps);
+      if (found) { t = found.t; st = found.st; } else t = null;
+    } else {
+      var it = t ? { thing: t } : refOf(w, run, r, s.ref);
+      if (it && (it.held || (it.tile && it.kind === 'ahead'))) { delta.nothing = true; run.pc++; return; }
+      if (it && it.thing) { t = it.thing; st = standFor(ps, t); } else t = null;
+    }
+    if (!t || !st || s.guard > (w.w * w.h + 4) * 3) {
+      if (s.op === 'seek' && isSet(old) && reservedOf(w)[String(old)] === r.id) delta.release = { robot: r.id, thing: String(old) };
+      delta.none = { id: r.id, kind: kind }; delta.sayKey = 'sayNone'; run.pc++; return;
+    }
+    var tid = mintId(w, t);
+    if (s.op === 'seek' && reservedOf(w)[tid] !== r.id) {
+      if (isSet(old) && String(old) !== tid && reservedOf(w)[String(old)] === r.id) delta.release = { robot: r.id, thing: String(old) };
+      delta.reserve = { thing: tid, robot: r.id, kind: String(t.kind), x: t.x, y: t.y };
+    }
+    s.target = { id: tid, kind: String(t.kind), x: t.x, y: t.y };
+    s.stand = { x: st.x, y: st.y, d: st.d };
+    s.route = routeTo(ps, st);
+    delta.aim = { id: r.id, x: st.x, y: st.y };
+  }
+  var want = r.d, x = r.x, y = r.y;
+  if (s.route.length) {
+    var nt = s.route[0];
+    for (var d = 0; d < 4; d++) if (r.x + DX[d] === nt[0] && r.y + DY[d] === nt[1]) want = d;
+    if (want === r.d) { delta.move = { id: r.id, x: nt[0], y: nt[1] }; s.route.shift(); x = nt[0]; y = nt[1]; }
+    else delta.turn = { id: r.id, d: (want - r.d + 4) % 4 === 3 ? (r.d + 3) % 4 : (r.d + 1) % 4 };
+  } else if (r.d !== s.stand.d) delta.turn = { id: r.id, d: (s.stand.d - r.d + 4) % 4 === 3 ? (r.d + 3) % 4 : (r.d + 1) % 4 };
+  var nd = delta.turn ? delta.turn.d : r.d;
+  if (!s.route.length && x === s.stand.x && y === s.stand.y && nd === s.stand.d) run.pc++;
+}
+/** set and change (brief 4.3): run.vars[name] = value, or += by (default 1); the delta's vars are every var after it. */
+function varStep(w, run, s, delta) {
+  delta.op = s.op;
+  var name = isSet(s.name) ? String(s.name) : '';
+  run.pc++;
+  if (!name) { delta.nothing = true; return; }
+  if (!run.vars || typeof run.vars !== 'object' || Array.isArray(run.vars)) run.vars = {};
+  if (s.op === 'set') run.vars[name] = evalVal(w, run, s.value);
+  else { var by = s.by === undefined || s.by === null ? 1 : exprNum(evalVal(w, run, s.by)); run.vars[name] = (exprNum(run.vars[name]) || 0) + (by === null ? 0 : by); }
+  delta.vars = clone(run.vars);
+}
 function slotsOf(b) { return b && b.slots && typeof b.slots === 'object' ? b.slots : {}; }
 function bodyOf(b) { return b && Array.isArray(b.body) ? b.body : []; }
 function collectTricks(list, out) {
-  for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (b.t === 'trick') out[String(slotsOf(b).name || '')] = bodyOf(b); if (b.body) collectTricks(bodyOf(b), out); }
+  for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (b.t === 'trick') out[String(slotsOf(b).name || '')] = bodyOf(b); if (b.body) collectTricks(bodyOf(b), out); if (Array.isArray(b.else)) collectTricks(b.else, out); }
   return out;
 }
 function collectHandlers(list, out) {
-  for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (b.t === 'when') out.push({ id: b.id, event: String(slotsOf(b).event || 'meow'), body: bodyOf(b) }); else if (b.body) collectHandlers(bodyOf(b), out); }
+  for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (b.t === 'when') out.push({ id: b.id, event: String(slotsOf(b).event || 'meow'), body: bodyOf(b) }); else { if (b.body) collectHandlers(bodyOf(b), out); if (Array.isArray(b.else)) collectHandlers(b.else, out); } }
   return out;
 }
 function countUses(list, type) {
   var n = 0;
-  for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (b.t === type) n++; if (b.body) n += countUses(bodyOf(b), type); }
+  for (var i = 0; i < list.length; i++) { var b = list[i]; if (!b) continue; if (b.t === type) n++; if (b.body) n += countUses(bodyOf(b), type); if (Array.isArray(b.else)) n += countUses(b.else, type); }
   return n;
 }
-function countBlocks(list) { var n = 0; for (var i = 0; i < list.length; i++) { if (!list[i]) continue; n++; if (list[i].body) n += countBlocks(bodyOf(list[i])); } return n; }
+function countBlocks(list) { var n = 0; for (var i = 0; i < list.length; i++) { if (!list[i]) continue; n++; if (list[i].body) n += countBlocks(bodyOf(list[i])); if (Array.isArray(list[i].else)) n += countBlocks(list[i].else); } return n; }
 function hasContainer(list) { for (var i = 0; i < list.length; i++) if (list[i] && list[i].body) return true; return false; }
 function isAsk(b) { return b.t === 'ask' || String(b.t).indexOf('olive:') === 0; }
 /**
@@ -489,8 +762,18 @@ function flatten(list, tricks, out, depth) {
       if (slots.n === 'olive') { out.push({ id: b.id, op: 'repeat_olive', body: body }); continue; }
       var n = Math.max(0, Math.min(99, Math.floor(Number(b.n) || 0)));
       for (var k = 0; k < n; k++) { out.push({ id: b.id, op: 'noop' }); flatten(body, tricks, out, depth); }
-    } else if (b.t === 'until') out.push({ id: b.id, op: 'until', sensor: String(slots.sensor || 'wall_ahead'), arg: slots.arg, body: body, guard: 0 });
-    else if (b.t === 'if') out.push({ id: b.id, op: 'if', sensor: String(slots.sensor || 'tulip_ahead'), arg: slots.arg, body: body });
+    } else if (b.t === 'until') { var us = { id: b.id, op: 'until', sensor: String(slots.sensor || 'wall_ahead'), arg: slots.arg, body: body, guard: 0 }; if (isSet(slots.cond)) us.cond = slots.cond; out.push(us); }
+    else if (b.t === 'if') {
+      // P108 IW-005: a cond (brief 4.3) is evaluated instead of the sensor; an else list runs when the check is false.
+      var fs = { id: b.id, op: 'if', sensor: String(slots.sensor || 'tulip_ahead'), arg: slots.arg, body: body };
+      if (isSet(slots.cond)) fs.cond = slots.cond;
+      if (Array.isArray(b.else)) fs.alt = b.else;
+      out.push(fs);
+    }
+    else if (b.t === 'go_nearest') out.push({ id: b.id, op: 'seek', kind: String(slots.kind || ''), guard: 0 });
+    else if (b.t === 'go_to') out.push({ id: b.id, op: 'goto', ref: slots.thing && typeof slots.thing === 'object' ? clone(slots.thing) : null, guard: 0 });
+    else if (b.t === 'set') out.push({ id: b.id, op: 'set', name: slots.name, value: slots.value === undefined ? null : clone(slots.value) });
+    else if (b.t === 'change') out.push({ id: b.id, op: 'change', name: slots.name, by: slots.by === undefined ? null : clone(slots.by) });
     else if (b.t === 'when' || b.t === 'trick') continue;
     else if (b.t === 'do') { var tr = tricks[String(slots.name || '')]; out.push({ id: b.id, op: 'noop' }); if (tr && depth < MAX_TRICK_DEPTH) flatten(tr, tricks, out, depth + 1); }
     else if (isAsk(b)) out.push(askStep(b, slots));
@@ -627,6 +910,9 @@ function step(runIn, worldIn, answer) {
     run.tick++;
     if (pending) return { run: run, delta: delta, glowId: null, done: false, waiting: false, request: null };
     run.done = true;
+    // P108 IW-005: a run that ends releases what its go to nearest reserved.
+    var ender = robotOf(w, run.robotId);
+    if (ender && heldBy(w, ender.id)) delta.release = { robot: ender.id };
     return { run: run, delta: delta, glowId: null, done: true, waiting: false, request: null };
   }
   var s = run.steps[run.pc];
@@ -680,21 +966,26 @@ function step(runIn, worldIn, answer) {
   if (s.op === 'until' || s.op === 'if') {
     // What the program READ (for a goal like "count to 4 and check it": CG-006's eggs, the senses predicate).
     if (!run.sensed || typeof run.sensed !== 'object') run.sensed = {};
-    run.sensed[s.sensor] = (run.sensed[s.sensor] || 0) + 1;
+    // P108 IW-005: a cond counts as read 'cond', and each legacy sensor inside it as itself.
+    var reads = s.cond !== undefined ? ['cond'].concat(condSensors(s.cond, [], 0)) : [s.sensor];
+    for (var rd = 0; rd < reads.length; rd++) run.sensed[reads[rd]] = (run.sensed[reads[rd]] || 0) + 1;
   }
   if (s.op === 'until') {
-    if (sense(w, run, s.sensor, s.arg) || s.guard >= UNTIL_GUARD) { if (s.guard >= UNTIL_GUARD) run.guardHits++; run.pc++; }
+    var met = checkOf(w, run, s);
+    if (met || s.guard >= UNTIL_GUARD) { if (s.guard >= UNTIL_GUARD) run.guardHits++; run.pc++; }
     else {
       var again = clone(s); again.guard = s.guard + 1;
       var loop = flatten(s.body, run.tricks).concat([again]);
       run.steps.splice.apply(run.steps, [run.pc + 1, 0].concat(loop));
       run.pc++;
     }
-    delta.check = { sensor: s.sensor, on: true };
+    delta.check = s.cond !== undefined ? { sensor: 'cond', on: true, cond: true, value: met } : { sensor: s.sensor, on: true };
   } else if (s.op === 'if') {
-    if (sense(w, run, s.sensor, s.arg)) run.steps.splice.apply(run.steps, [run.pc + 1, 0].concat(flatten(s.body, run.tricks)));
+    var yes = checkOf(w, run, s);
+    if (yes) run.steps.splice.apply(run.steps, [run.pc + 1, 0].concat(flatten(s.body, run.tricks)));
+    else if (Array.isArray(s.alt)) run.steps.splice.apply(run.steps, [run.pc + 1, 0].concat(flatten(s.alt, run.tricks)));
     run.pc++;
-    delta.check = { sensor: s.sensor, on: true };
+    delta.check = s.cond !== undefined ? { sensor: 'cond', on: true, cond: true, value: yes } : { sensor: s.sensor, on: true };
   } else if (s.op === 'repeat_olive') {
     var la = run.lastAnswer, n = la ? Math.max(0, Math.min(9, Math.floor(Number(la.value)) || 0)) : 0;
     var body = [];
@@ -704,6 +995,10 @@ function step(runIn, worldIn, answer) {
     delta.repeat = n;
   } else if (s.op === 'home') {
     homeStep(w, run, s, delta);
+  } else if (s.op === 'seek' || s.op === 'goto') {
+    seekStep(w, run, s, delta);
+  } else if (s.op === 'set' || s.op === 'change') {
+    varStep(w, run, s, delta);
   } else if (s.op === 'noop') {
     run.pc++;
     delta.noop = true;
@@ -744,7 +1039,7 @@ function apply(worldIn, delta) {
         break;
       }
     } else if (d.pick.box) { var bx = thingOf(w, { id: d.pick.from, x: d.pick.x, y: d.pick.y }, { basket: 1, bowl: 1, store: 1 }); if (bx) setMeter(bx, meterOf(bx).have - 1); }
-    else for (var j = 0; j < w.things.length; j++) if (w.things[j].x === d.pick.x && w.things[j].y === d.pick.y && w.things[j].kind === d.pick.kind) { w.things.splice(j, 1); break; }
+    else for (var j = 0; j < w.things.length; j++) if (w.things[j].x === d.pick.x && w.things[j].y === d.pick.y && w.things[j].kind === d.pick.kind) { if (isSet(w.things[j].id) && w.reserved && typeof w.reserved === 'object') delete w.reserved[String(w.things[j].id)]; w.things.splice(j, 1); break; }
     if (rp) rp.carry.push(d.pick.kind);
   }
   if (d.can) { var rc = robotOf(w, d.can.id) || r; if (rc) rc.can = Math.max(0, Math.floor(Number(d.can.can)) || 0); }
@@ -764,6 +1059,16 @@ function apply(worldIn, delta) {
   if (d.lay) w.things.push({ kind: 'egg', x: d.lay.x, y: d.lay.y });
   if (d.letter) w.things.push({ kind: 'letter', x: d.letter.x, y: d.letter.y });
   if (d.seed !== undefined && d.seed !== null && isFinite(Number(d.seed))) w.seed = Number(d.seed) >>> 0;
+  // ── P108 IW-005: reservations — a found thing is its robot's until picked (above) or the run ends (release) ──
+  if (d.release) { var rl = reservedOf(w); for (var rk2 in rl) if (rl[rk2] === String(d.release.robot) && (!isSet(d.release.thing) || rk2 === String(d.release.thing))) delete rl[rk2]; }
+  if (d.reserve) {
+    var rv = thingOf(w, { id: d.reserve.thing, x: d.reserve.x, y: d.reserve.y, kind: d.reserve.kind });
+    if (rv) {
+      if (!isSet(rv.id)) rv.id = String(d.reserve.thing);
+      if (!w.reserved || typeof w.reserved !== 'object' || Array.isArray(w.reserved)) w.reserved = {};
+      w.reserved[String(rv.id)] = String(d.reserve.robot);
+    }
+  }
   return w;
 }
 /** Run a program to its end with no Olive (every ask takes the fallback). For Predict and the gate. */

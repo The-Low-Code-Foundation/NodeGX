@@ -585,3 +585,96 @@ describe('IW-002 (P108 s1) — the job tick: a job plot is never reset; its robo
     expect(state.live['job-bed'].lap).toBeGreaterThanOrEqual(3);
   });
 });
+
+// ── P108 IW-005 (lane J) ────────────────────────────────────────────────────
+
+describe('IW-005 (P108 s2) — seek on the island: a pinned robot goes to the nearest egg wherever the hen laid it, inside its own plot; the reservation rides the tick', () => {
+  /** An open plot: the hen at 6,1 lays in her pen (4..7 × 2..5); Mamie's basket (2 eggs) at 0,1; the robot lives at 1,1 facing it. No egg at the start. */
+  const HEN_MAP = ['GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG'];
+  const BK = { id: 'bk', kind: 'basket', x: 0, y: 1 };
+  const SEEK = [{ id: 1, t: 'repeat', n: 2, body: [{ id: 2, t: 'go_nearest', slots: { kind: 'egg' } }, { id: 3, t: 'pick' }, { id: 4, t: 'go_to', slots: { thing: BK } }, { id: 5, t: 'put' }] }];
+  const henReq = (id: string, plot: { x: number; y: number }) => ({
+    id,
+    islander: 'mamie',
+    band: 2,
+    plot,
+    tricks: [2],
+    map: HEN_MAP,
+    things: [{ kind: 'hen', id: 'hn', x: 6, y: 1, pen: [4, 2, 7, 5] }, { kind: 'basket', id: 'bk', x: 0, y: 1, count: 0, capacity: 2, item: 'egg' }],
+    robotStart: { x: 1, y: 1, d: 3 },
+    goal: { name: 'job_done' },
+    palette: ['fwd', 'left', 'right', 'pick', 'put', 'repeat'],
+    reward: { kind: 'hat', id: 'sun', from: 'mamie' },
+    copyKeys: { title: 'rqTulipsTitle', blurb: 'rqTulipsBlurb', line: 'rqTulipsLine', reward: 'hatSun', gift: 'giftSun' },
+    referenceProgram: SEEK,
+    job: { targets: ['bk'], home: { x: 1, y: 1, d: 3 } }
+  });
+  const HEN_PLOT = { x: 10, y: 8 };
+  const built = (reqs: Array<{ plot: { x: number; y: number } }>, plots: Record<string, unknown>) => bare(SYN_WORLD, { requests: [...SYN_REQUESTS.filter((r) => !reqs.some((q) => q.plot.x === r.plot.x && q.plot.y === r.plot.y)), ...reqs], plots, robots: [{ id: 'r1' }, { id: 'r2', kind: 'cobble' }, { id: 'r3' }], done: Object.keys(plots), band: 2, pins: [] });
+
+  it('🔴 no egg yet: go to nearest says none; the hen lays on ticks; the robot then walks to each egg where it was laid, picks it once, fills the basket, walks home and waits — never outside its plot', () => {
+    let state = built([henReq('hen-plot', HEN_PLOT)], { 'hen-plot': pinned(SEEK, 'r1') }).state;
+    const laid: string[] = [];
+    const picked: string[] = [];
+    let nones = 0;
+    let firstLay = -1;
+    let noneBeforeLay = 0;
+    let heldWhileWalking = 0;
+    let doneAt = -1;
+    for (let t = 0; t < 8 * WEAR.hen && doneAt < 0; t++) {
+      const out = bare(ISLAND_TICK_SCRIPT, { state });
+      state = out.state;
+      const cur = state.live['hen-plot'];
+      for (const d of cur.worn || []) if (d.lay) { laid.push(`${d.lay.x},${d.lay.y}`); if (firstLay < 0) firstLay = t; }
+      const d = cur.delta || {};
+      if (d.none) { nones++; if (firstLay < 0) noneBeforeLay++; expect(d).toMatchObject({ none: { id: 'r1', kind: 'egg' }, sayKey: 'sayNone' }); }
+      // (A pick facing the basket after a none takes one back out: the program's own doing, IW-002's container rule — not a seek.)
+      if (d.pick && !d.pick.box) picked.push(`${d.pick.x},${d.pick.y}`);
+      // The robot walking to an egg holds it reserved in the plot's live state (the tick carries it from tick to tick).
+      const s = cur.run.steps[cur.run.pc];
+      if (s && s.op === 'seek' && s.target) { expect((cur.reserved || {})[s.target.id]).toBe('r1'); heldWhileWalking++; }
+      // Never outside the plot: its tiles in island coordinates.
+      const rb = out.world.robots.find((r: any) => r.id === 'r1');
+      expect(rb.x >= HEN_PLOT.x && rb.x < HEN_PLOT.x + 8 && rb.y >= HEN_PLOT.y && rb.y < HEN_PLOT.y + 6).toBe(true);
+      if (cur.phase === 'wait') doneAt = t;
+    }
+    const cur = state.live['hen-plot'];
+    // The first lay is at WEAR.hen; before it, every go to nearest found nothing and said so.
+    expect([firstLay, noneBeforeLay > 0, nones >= noneBeforeLay]).toEqual([WEAR.hen - 1, true, true]);
+    // Each egg picked from the ground where the hen laid it, and each once; the job done, home, waiting.
+    expect(picked.length).toBeGreaterThanOrEqual(2);
+    for (const p of picked) expect(laid).toContain(p);
+    expect(new Set(picked).size).toBe(picked.length);
+    expect(heldWhileWalking).toBeGreaterThan(0);
+    expect({ phase: cur.phase, count: cur.things.find((x: any) => x.id === 'bk').count, at: [cur.robot.x, cur.robot.y, cur.robot.d], lap: cur.lap > 0, reserved: cur.reserved || {} }).toEqual({ phase: 'wait', count: 2, at: [1, 1, 3], lap: true, reserved: {} });
+  });
+
+  it(`🔴 the tick with two seek plots and a hold-and-reset plot stays under 5 ms (p95), 300 ticks — a search per walk, not per tick`, () => {
+    let state = built([henReq('hen-a', HEN_PLOT), henReq('hen-b', { x: 1, y: 8 })], { 'hen-a': pinned(SEEK, 'r1'), 'hen-b': pinned(SEEK, 'r2'), 'tulips-three': pinned(ref('tulips-three'), 'r3') }).state;
+    const script = new vm.Script(`(function (Inputs, Outputs) {\n${ISLAND_TICK_SCRIPT}\n})(Inputs, Outputs);`);
+    const ctx = vm.createContext({ Inputs: {}, Outputs: {} });
+    const ms: number[] = [];
+    let moves = 0;
+    let searches = 0;
+    for (let t = 0; t < 300; t++) {
+      ctx.Inputs = { state };
+      ctx.Outputs = {};
+      const t0 = process.hrtime.bigint();
+      script.runInContext(ctx);
+      ms.push(Number(process.hrtime.bigint() - t0) / 1e6);
+      state = JSON.parse(JSON.stringify(ctx.Outputs.state));
+      for (const id of ['hen-a', 'hen-b']) {
+        const c = state.live[id];
+        if (c.delta && c.delta.move && (c.delta.op === 'go_nearest' || c.delta.op === 'go_to')) moves++;
+        if (c.delta && c.delta.aim) searches++;
+      }
+    }
+    const sorted = [...ms].sort((a, b) => a - b);
+    const p95 = sorted[Math.floor(ms.length * 0.95)];
+    // eslint-disable-next-line no-console
+    console.log(`IW-005 seek tick: 300 ticks × (2 seek plots + 1 reset plot) — p95 ${p95.toFixed(3)} ms, max ${sorted[sorted.length - 1].toFixed(3)} ms, walk moves ${moves}, searches that found ${searches}`);
+    expect(p95).toBeLessThan(5);
+    // A search per walk: far fewer searches than walking steps.
+    expect(moves).toBeGreaterThan(searches);
+  });
+});

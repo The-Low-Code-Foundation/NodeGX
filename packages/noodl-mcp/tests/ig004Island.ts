@@ -72,8 +72,12 @@ function islView(plot, live) {
   if (live.spent && live.spent.length) w.spent = live.spent.slice();
   // P108 IW-002: a job plot carries its job and its seed (the wear's draws go on from it).
   if (plot.job) { w.job = islClone(plot.job); w.seed = Number(live.seed) >>> 0; }
+  // P108 IW-005: what its go to nearest reserved rides the tick (released when picked or the run ends).
+  if (live.reserved && typeof live.reserved === 'object') w.reserved = islClone(live.reserved);
   return w;
 }
+/** IW-005: the plot's reservations after a tick, only on a plot that has had one (a plot that never seeks keeps its shape). */
+function islKeep(out, w) { if (w.reserved && typeof w.reserved === 'object') out.reserved = w.reserved; return out; }
 function islRun(plot, lap) { return newRun(plot.program, plot.robotId, 'en', 'island-' + plot.id + '-' + lap); }
 /** P108 IW-002: a plot's seed, from its request's name (djb2): the island lays a plot the same way every build. */
 function islSeedOf(id) { var h = 5381, t = String(id); for (var i = 0; i < t.length; i++) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0; return h; }
@@ -100,7 +104,7 @@ function islStepJob(plot, cur) {
       else { phase = 'return'; run = islHomeRun(plot, lap); }
     }
   }
-  return { run: run, things: w.things, robot: w.robots[0], spent: Array.isArray(w.spent) ? w.spent : [], hold: 0, lap: lap, phase: phase, age: age, seed: Number(w.seed) >>> 0, worn: worn, delta: delta };
+  return islKeep({ run: run, things: w.things, robot: w.robots[0], spent: Array.isArray(w.spent) ? w.spent : [], hold: 0, lap: lap, phase: phase, age: age, seed: Number(w.seed) >>> 0, worn: worn, delta: delta }, w);
 }
 /** One tick of one pinned plot. A finished run holds the plot done, then the plot resets and the run restarts. */
 function islStepPlot(plot, cur) {
@@ -115,7 +119,7 @@ function islStepPlot(plot, cur) {
   // No Olive on the island: an ask takes the fallback, as runToEnd does.
   if (r.waiting && r.request) r = step(r.run, view, { seq: r.request.seq, ok: false, fallback: true });
   var w = apply(view, r.delta);
-  return { run: r.run, things: w.things, robot: w.robots[0], spent: Array.isArray(w.spent) ? w.spent : [], hold: r.done ? ISLAND_HOLD : 0, lap: cur.lap };
+  return islKeep({ run: r.run, things: w.things, robot: w.robots[0], spent: Array.isArray(w.spent) ? w.spent : [], hold: r.done ? ISLAND_HOLD : 0, lap: cur.lap }, w);
 }
 /** The island after one tick: each pinned plot stepped in turn, in plot order. Only the live parts are new objects. */
 function islTick(s) {

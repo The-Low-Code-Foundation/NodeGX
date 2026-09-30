@@ -60,7 +60,9 @@ const s = (en: string, fr: string): Bi => ({ en, fr });
  */
 export const BLOCK_TYPES = [
   'fwd', 'left', 'right', 'water', 'fill', 'pick', 'put',
-  'say', 'repeat', 'until', 'if', 'when', 'count_inc', 'trick', 'do', 'ask'
+  'say', 'repeat', 'until', 'if', 'when', 'count_inc', 'trick', 'do', 'ask',
+  // P108 IW-005 (lane J): the engine's new statements. No palette offers them yet (IW-003 does): band 10-12 stops at ask.
+  'go_nearest', 'go_to', 'set', 'change'
 ] as const;
 export type BlockType = (typeof BLOCK_TYPES)[number];
 
@@ -74,7 +76,7 @@ export const EVENTS = ['meow'] as const;
 /** The palette a band may use, by block id (CG-001's `Palette` is built from this plus the labels). */
 export const BAND_PALETTE: Readonly<Record<Band, ReadonlyArray<BlockType>>> = {
   1: ['fwd', 'left', 'right', 'water', 'fill', 'pick', 'put'],
-  2: [...BLOCK_TYPES]
+  2: BLOCK_TYPES.slice(0, BLOCK_TYPES.indexOf('ask') + 1)
 };
 
 /**
@@ -810,7 +812,9 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   // ── P108 IW-002 (lane J): what the robot says at a job's new moments (the sayKeys of brief §4.2) ──
   sayFull: s('It’s full!', 'C’est plein !'),
   sayNoCan: s('I need the can.', 'Il me faut l’arrosoir.'),
-  sayHome: s('Home! All done.', 'À la maison ! Tout est fait.')
+  sayHome: s('Home! All done.', 'À la maison ! Tout est fait.'),
+  // ── P108 IW-005 (lane J): go to nearest / go to found nothing to reach (the none event) ──
+  sayNone: s('There’s none left to find.', 'Il n’y en a plus à trouver.')
 };
 
 /** The word keys, for the generated translate script and the gate. */

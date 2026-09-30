@@ -2417,6 +2417,12 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-sayNone",
+      "toId": "translatewordsOut",
+      "toProperty": "sayNone"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-sayPick",
       "toId": "translatewordsOut",
       "toProperty": "sayPick"
