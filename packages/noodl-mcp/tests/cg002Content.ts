@@ -1484,3 +1484,36 @@ export const SHOP: ReadonlyArray<ShopItem> = [
   { id: 'barrow', tab: 'helpers', price: 10, kind: 'helper', helper: 'barrow', icon: '🛒', name: s('A wheelbarrow', 'Une brouette'), line: s('Carries eight, for one job.', 'Porte huit choses, pour un travail.') }
 ];
 export const SHOP_JSON = JSON.stringify(SHOP);
+
+// ── P108 IW-006 (lane E): earning — what a run pays (D2, D3) ─────────────────────────────────────────────────────────
+
+/**
+ * The most shells a run pays for its steps (D2): 1 shell per target step it filled, never more than this in one run —
+ * the Workshop's win, or one lap of a pinned robot on the island. The bonus (below) comes on top. Measured 2026-09-30:
+ * every job but one has 9 steps or fewer (tulips-three's 9 pays whole); only Cobble's path (path-stones, 16) is capped.
+ */
+export const SHELLS_RUN_CAP = 10;
+
+/**
+ * The islander's bonus when a job crosses its finish line (D2), 5–10 by mission: a sequence 5, a loop 6–7, a condition, a
+ * count or a build 8–9, a named trick or Olive's reading 10. A win in the Workshop pays it whole; an island lap that
+ * finished only part of the job (wear took one drink) gets its share: the bonus times the steps it filled over the job's
+ * steps, rounded (`iw6Pay`, tests/iw006Earn.ts).
+ */
+export const JOB_BONUS: Readonly<Record<string, number>> = {
+  'path-postbox': 5,
+  'tulip-door': 5,
+  'tulips-three': 6,
+  'path-stones': 7,
+  'bowl-if': 8,
+  'letter-say': 6,
+  'wall-until': 8,
+  'meow-when': 8,
+  'eggs-count': 9,
+  'rows-trick': 10,
+  'sami-bench': 9,
+  'mamie-note': 10,
+  'rock-flower': 9,
+  'sami-thanks': 7,
+  envelopes: 10
+};

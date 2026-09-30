@@ -2620,6 +2620,18 @@
       "toProperty": "hasLent"
     },
     {
+      "fromId": "plIn",
+      "fromProperty": "payText",
+      "toId": "plWin",
+      "toProperty": "payText"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "hasPay",
+      "toId": "plWin",
+      "toProperty": "hasPay"
+    },
+    {
       "fromId": "plWinSum",
       "fromProperty": "bloom",
       "toId": "plOut",

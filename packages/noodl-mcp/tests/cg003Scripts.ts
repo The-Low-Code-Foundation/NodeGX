@@ -48,6 +48,8 @@ import { ISLAND_ENGINE } from './ig004Island';
 import { ROBOTS_JSON, UPGRADES_JSON } from './cg002Content';
 // P108 IW-002 (lane J): Start world's seed line lays a request's seeded layout with the engine's own helpers.
 import { SEED_HELPERS } from './cg002Scripts';
+// P108 IW-006 (lane E): earning — the win's pay (over the island engine) and the island's live jobs and shells kept.
+import { ISLAND_KEEP_SCRIPT, winPayScript } from './iw006Earn';
 
 /** P106 IG-005 (lane B): the islanders' name keys, for the lock line and the gifts. */
 const ISLANDER_WORDS = Object.fromEntries(Object.entries(ISLANDERS).map(([id, i]) => [id, i.nameKey]));
@@ -1396,6 +1398,9 @@ Outputs.full = jt > 0 && jn >= jt;
 Outputs.sumClass = 'bg-job-sum' + (jt > 0 && jn >= jt ? ' bg-job-sum-full' : '');
 `;
 
+/** P108 IW-006 (lane E): `Logic/Win pay` — the shells a Workshop win earns (none for a job done and not worn), before Complete request records it. */
+export const WIN_PAY_SCRIPT = winPayScript(ISLAND_ENGINE);
+
 export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; seam: string }> = [
   { component: 'Logic/Read program', script: READ_PROGRAM_SCRIPT, seam: 'the program as a list, whatever held it' },
   { component: 'Logic/Start world', script: START_WORLD_SCRIPT, seam: 'the world a request starts from, and the request' },
@@ -1453,5 +1458,8 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   // P108 IW-003 (lane B).
   { component: 'Logic/Teach again', script: TEACH_AGAIN_SCRIPT, seam: 'a program pinned on this request that its rewritten job outgrew: the line that asks her to teach it again' },
   // P108 IW-003 (lane M).
-  { component: 'Logic/Job card', script: JOB_CARD_SCRIPT, seam: 'the job in five lines, and how much of it is done' }
+  { component: 'Logic/Job card', script: JOB_CARD_SCRIPT, seam: 'the job in five lines, and how much of it is done' },
+  // P108 IW-006 (lane E): earning.
+  { component: 'Logic/Win pay', script: WIN_PAY_SCRIPT, seam: 'the shells a win in the Workshop earns, and the plot as a done job' },
+  { component: 'Logic/Island keep', script: ISLAND_KEEP_SCRIPT, seam: 'the island\u2019s live jobs and what its laps earned, written into her save at the moments that matter' }
 ];

@@ -323,9 +323,75 @@
     },
     {
       "fromId": "wsPlay",
+      "fromProperty": "wonRequest",
+      "toId": "wsPay",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "wsRequests",
+      "fromProperty": "requests",
+      "toId": "wsPay",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "plots",
+      "toId": "wsPay",
+      "toProperty": "plots"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "done",
+      "toId": "wsPay",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "lang",
+      "toId": "wsPay",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "wsWords",
+      "fromProperty": "words",
+      "toId": "wsPay",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "wsPlay",
       "fromProperty": "won",
+      "toId": "wsPay",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "wsPay",
+      "fromProperty": "pay",
+      "toId": "wsComplete",
+      "toProperty": "pay"
+    },
+    {
+      "fromId": "wsPay",
+      "fromProperty": "jobLive",
+      "toId": "wsComplete",
+      "toProperty": "jobLive"
+    },
+    {
+      "fromId": "wsPay",
+      "fromProperty": "ran",
       "toId": "wsComplete",
       "toProperty": "go"
+    },
+    {
+      "fromId": "wsPay",
+      "fromProperty": "text",
+      "toId": "wsPlay",
+      "toProperty": "payText"
+    },
+    {
+      "fromId": "wsPay",
+      "fromProperty": "has",
+      "toId": "wsPlay",
+      "toProperty": "hasPay"
     },
     {
       "fromId": "wsComplete",

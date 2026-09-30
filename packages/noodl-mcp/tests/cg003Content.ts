@@ -270,7 +270,10 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   iw3mNoteTgt: s('🌷 the row Mamie’s note asks for: 3 tulips, one drink each', '🌷 la rangée que demande le mot de Mamie : 3 tulipes, une gorgée chacune'),
   iw3mNoteFin: s('that row watered → {b} walks home', 'cette rangée arrosée → {b} rentre'),
   iw3mNoteWr: s('a tulip gets thirsty again', 'une tulipe a de nouveau soif'),
-  iw3mNoteSum: s('{n}/{t} tulips of the note', '{n}/{t} tulipes du mot')
+  iw3mNoteSum: s('{n}/{t} tulips of the note', '{n}/{t} tulipes du mot'),
+  // P108 IW-006 (lane E): the shells a job earned — under the win card's thanks (smaller), and on the island after a lap.
+  iw6eWinPay: s('+{n} 🐚 shells for the job', '+{n} 🐚 coquillages pour le travail'),
+  iw6eIslePay: s('{r} +{n} 🐚', '{r} +{n} 🐚')
 };
 
 export const PAGE_WORD_KEYS: ReadonlyArray<string> = Object.keys(PAGE_WORDS);

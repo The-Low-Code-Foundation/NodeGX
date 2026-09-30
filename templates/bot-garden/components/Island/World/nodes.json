@@ -125,7 +125,8 @@
       "children": [
         "iwScroll",
         "iwFind",
-        "iwTap"
+        "iwTap",
+        "iwPay"
       ],
       "parameters": {
         "width": {
@@ -273,7 +274,7 @@
         "mounted": false
       },
       "x": 100,
-      "y": 880
+      "y": 1000
     },
     {
       "id": "iwCardFace",
@@ -292,7 +293,7 @@
         }
       },
       "x": 160,
-      "y": 1000
+      "y": 1120
     },
     {
       "id": "iwCardText",
@@ -315,7 +316,7 @@
         "rowGap": "var(--space-1-5)"
       },
       "x": 160,
-      "y": 1120
+      "y": 1240
     },
     {
       "id": "iwCardWho",
@@ -337,7 +338,7 @@
         "cssClassName": "bg-plot-who"
       },
       "x": 220,
-      "y": 1240
+      "y": 1360
     },
     {
       "id": "iwCardTitle",
@@ -356,7 +357,7 @@
         "cssClassName": "bg-plot-title"
       },
       "x": 220,
-      "y": 1360
+      "y": 1480
     },
     {
       "id": "iwCardLine",
@@ -374,7 +375,7 @@
         "cssClassName": "bg-plot-line"
       },
       "x": 220,
-      "y": 1480
+      "y": 1600
     },
     {
       "id": "iwCardBtns",
@@ -395,7 +396,7 @@
         "rowGap": "var(--space-2)"
       },
       "x": 220,
-      "y": 1600
+      "y": 1720
     },
     {
       "id": "iwOpen",
@@ -438,7 +439,7 @@
         "mounted": false
       },
       "x": 280,
-      "y": 1720
+      "y": 1840
     },
     {
       "id": "iwHomeBtn",
@@ -481,7 +482,7 @@
         "mounted": false
       },
       "x": 280,
-      "y": 1840
+      "y": 1960
     },
     {
       "id": "iwClose",
@@ -523,7 +524,7 @@
         "label": "✕"
       },
       "x": 280,
-      "y": 1960
+      "y": 2080
     },
     {
       "id": "iwCardState",
@@ -538,7 +539,7 @@
         "value-shown-shown": true
       },
       "x": 530,
-      "y": 1600
+      "y": 1840
     },
     {
       "id": "iwFound",
@@ -548,7 +549,7 @@
         "runOnChange-condition": false
       },
       "x": 530,
-      "y": 2080
+      "y": 2320
     },
     {
       "id": "iwWorld",
@@ -562,7 +563,7 @@
       "type": "/Logic/Island tick",
       "label": "One tick of the island",
       "x": 530,
-      "y": 2200
+      "y": 2440
     },
     {
       "id": "iwVar",
@@ -572,7 +573,7 @@
         "name": "gardenIsland"
       },
       "x": 530,
-      "y": 2320
+      "y": 2560
     },
     {
       "id": "iwSetBuilt",
@@ -582,7 +583,7 @@
         "name": "gardenIsland"
       },
       "x": 530,
-      "y": 2440
+      "y": 2680
     },
     {
       "id": "iwSetTick",
@@ -592,7 +593,7 @@
         "name": "gardenIsland"
       },
       "x": 530,
-      "y": 2560
+      "y": 2800
     },
     {
       "id": "iwTimer",
@@ -602,7 +603,7 @@
         "duration": 760
       },
       "x": 530,
-      "y": 2680
+      "y": 2920
     },
     {
       "id": "iwDraw",
@@ -626,14 +627,14 @@
       "type": "/Logic/Island choose",
       "label": "The plot card",
       "x": 530,
-      "y": 1720
+      "y": 1960
     },
     {
       "id": "iwHome",
       "type": "/Logic/Bring home",
       "label": "Bring the robot home",
       "x": 530,
-      "y": 1960
+      "y": 2200
     },
     {
       "id": "iwAgain",
@@ -643,7 +644,7 @@
         "duration": 400
       },
       "x": 530,
-      "y": 2800
+      "y": 3040
     },
     {
       "id": "iwRevealWait",
@@ -653,7 +654,7 @@
         "duration": 80
       },
       "x": 530,
-      "y": 2920
+      "y": 3160
     },
     {
       "id": "iwReveal",
@@ -663,7 +664,7 @@
         "what": "card"
       },
       "x": 530,
-      "y": 3040
+      "y": 3280
     },
     {
       "id": "iwFindFn",
@@ -730,21 +731,21 @@
         "keys": "renderer"
       },
       "x": 530,
-      "y": 3160
+      "y": 3400
     },
     {
       "id": "iwRendRead",
       "type": "/Logic/Renderer",
       "label": "Draw in 3D here?",
       "x": 530,
-      "y": 3280
+      "y": 3520
     },
     {
       "id": "iwRendIs3d",
       "type": "Condition",
       "label": "In 3D?",
       "x": 530,
-      "y": 3400
+      "y": 3640
     },
     {
       "id": "iwRendOk",
@@ -761,7 +762,7 @@
         "event": "unsupported"
       },
       "x": 530,
-      "y": 3520
+      "y": 3760
     },
     {
       "id": "iwRendSlow",
@@ -783,7 +784,79 @@
         "merge": false
       },
       "x": 530,
-      "y": 3640
+      "y": 3880
+    },
+    {
+      "id": "iwKeep",
+      "type": "/Logic/Island keep",
+      "label": "The island’s jobs and shells, into her save",
+      "x": 530,
+      "y": 1600
+    },
+    {
+      "id": "iwKeepDue",
+      "type": "Condition",
+      "label": "A lap ended or a job reopened: write it",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 530,
+      "y": 4000
+    },
+    {
+      "id": "iwPay",
+      "type": "Text",
+      "label": "What the robots earned",
+      "parent": "iwIsle",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "cssClassName": "bg-isle-pay",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "iwPayState",
+      "type": "States",
+      "label": "The shells line shown a moment",
+      "parameters": {
+        "states": "hidden,shown",
+        "values": "shown",
+        "useTransitions": false,
+        "type-shown": "boolean",
+        "value-hidden-shown": false,
+        "value-shown-shown": true
+      },
+      "x": 530,
+      "y": 1720
+    },
+    {
+      "id": "iwPayIs",
+      "type": "Condition",
+      "label": "Did a lap earn shells?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 530,
+      "y": 4120
+    },
+    {
+      "id": "iwPayWait",
+      "type": "Timer",
+      "label": "The shells line stays a moment",
+      "parameters": {
+        "duration": 4000
+      },
+      "x": 530,
+      "y": 4240
     },
     {
       "id": "iwOut",
@@ -812,7 +885,7 @@
         }
       ],
       "x": 530,
-      "y": 1840
+      "y": 2080
     }
   ],
   "visualRoots": [

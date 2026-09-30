@@ -2057,6 +2057,18 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6eIslePay",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6eIslePay"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6eWinPay",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6eWinPay"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-lang",
       "toId": "translatewordsOut",
       "toProperty": "lang"

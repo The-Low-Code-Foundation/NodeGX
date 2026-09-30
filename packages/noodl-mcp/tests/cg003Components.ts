@@ -330,7 +330,10 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
   'Logic/Pad answer': 'go',
   'Logic/Latch': 'go',
   // P108 IW-004 (lane B).
-  'Logic/Pick thing': 'go'
+  'Logic/Pick thing': 'go',
+  // P108 IW-006 (lane E).
+  'Logic/Win pay': 'go',
+  'Logic/Island keep': 'go'
 };
 
 /**
@@ -804,9 +807,10 @@ const WIN: CgComponent = {
   path: 'Workshop/Win card',
   description: 'The win card (the mockup’s .win): fixed and centred, so it meets the child wherever the block list is scrolled. Publishes Island (back to the island) or Stay (keep tinkering).',
   nodes: [
-    inputs('wnIn', [['show', 'boolean'], ['faceClass', 'string'], ['thanks', 'string'], ['line', 'string'], ['rewardText', 'string'], ['hasReward', 'boolean'], ['learnText', 'string'], ['hasLearn', 'boolean'], ['islandWord', 'string'], ['stayWord', 'string'], ['lentText', 'string'], ['hasLent', 'boolean']]),
+    // P108 IW-006 (lane E): payText / hasPay — the "+N 🐚" line under the thanks.
+    inputs('wnIn', [['show', 'boolean'], ['faceClass', 'string'], ['thanks', 'string'], ['line', 'string'], ['rewardText', 'string'], ['hasReward', 'boolean'], ['learnText', 'string'], ['hasLearn', 'boolean'], ['islandWord', 'string'], ['stayWord', 'string'], ['lentText', 'string'], ['hasLent', 'boolean'], ['payText', 'string'], ['hasPay', 'boolean']]),
     group('wnScrim', 'Over the page', undefined, { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-win', mounted: false }, ['wnCard']),
-    group('wnCard', 'The card', 'wnScrim', { ...column({ alignItems: 'center', rowGap: sp(8) }), backgroundColor: 'var(--card)', borderRadius: 'var(--radius-bar)', ...pad(22, 26), maxWidth: px(380), cssClassName: 'bg-win-card' }, ['wnFace', 'wnThanks', 'wnLine', 'wnRewards', 'wnLent', 'wnButtons']),
+    group('wnCard', 'The card', 'wnScrim', { ...column({ alignItems: 'center', rowGap: sp(8) }), backgroundColor: 'var(--card)', borderRadius: 'var(--radius-bar)', ...pad(22, 26), maxWidth: px(380), cssClassName: 'bg-win-card' }, ['wnFace', 'wnThanks', 'wnLine', 'wnRewards', 'wnLent', 'wnPay', 'wnButtons']),
     group('wnFace', 'The islander', 'wnCard', { sizeMode: 'explicit', width: px(72), height: px(72) }),
     text('wnThanks', 'Thank you', 'wnCard', '', { ...T_H3, fontSize: px(26), textAlignX: 'center' }),
     text('wnLine', 'How many blocks', 'wnCard', '', { ...T_MUTED, fontWeight: '700', textAlignX: 'center' }),
@@ -817,6 +821,8 @@ const WIN: CgComponent = {
     text('wnLearnText', 'The trick', 'wnLearn', '', { sizeMode: 'contentSize', ...T_STRONG }),
     // P106 IG-005: the robot an islander lends after this win, the upgrade she gives (Gift line).
     text('wnLent', 'A robot lent, an upgrade given', 'wnCard', '', { ...T_STRONG, textAlignX: 'center', color: 'var(--violet-ink)', cssClassName: 'bg-win-lent', mounted: false }),
+    // P108 IW-006 (lane E): the shells the job earned — after the thanks and the gifts, smaller than the thanks (principle 2).
+    text('wnPay', 'The shells earned', 'wnCard', '', { ...T_SMALL, fontWeight: '700', textAlignX: 'center', cssClassName: 'bg-win-pay', mounted: false }),
     group('wnButtons', 'The two ways on', 'wnCard', row({ justifyContent: 'center' }), ['wnIsland', 'wnStay']),
     place('wnIsland', BUTTON_NODE, 'Back to the island', 'wnButtons', { ...btn('primary'), label: 'Back to the island' }),
     place('wnStay', BUTTON_NODE, 'Keep tinkering', 'wnButtons', { ...btn('plain'), label: 'Keep tinkering' }),
@@ -833,6 +839,9 @@ const WIN: CgComponent = {
     wire('wnIn', 'hasLearn', 'wnLearn', 'mounted'),
     wire('wnIn', 'lentText', 'wnLent', 'text'),
     wire('wnIn', 'hasLent', 'wnLent', 'mounted'),
+    // P108 IW-006 (lane E).
+    wire('wnIn', 'payText', 'wnPay', 'text'),
+    wire('wnIn', 'hasPay', 'wnPay', 'mounted'),
     wire('wnIn', 'islandWord', 'wnIsland', 'label'),
     wire('wnIn', 'stayWord', 'wnStay', 'label'),
     wire('wnIsland', 'onClick', 'wnOut', 'island'),
@@ -887,7 +896,7 @@ const PLAY: CgComponent = {
   description: 'The workshop: drive the robot freely (nothing remembered), teach it by driving it again (every press a block), see the steps as blocks, fold the repetition, play, and win. Request Id picks the request (free for free play); the line under the title is that request’s own. Won fires with Bloom, Reward and Won Request set; Island asks for the island; Found says whether the request exists (a reload has none).',
   repeats: { source: 'array', rowFields: ['id', 'cls', 'lit'] },
   nodes: [
-    inputs('plIn', [['requestId', 'string'], ['requests', 'array'], ['hints', 'array'], ['words', 'array'], ['lang', 'string'], ['band', 'number'], ['isOlder', 'boolean'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['stepMs', 'number'], ['robot', 'object'], ['robotKey', 'string'], ['paletteRobot', 'object'], ['giftText', 'string'], ['hasGift', 'boolean'], ['cardsSeen', 'array'], ['plots', 'object']]),
+    inputs('plIn', [['requestId', 'string'], ['requests', 'array'], ['hints', 'array'], ['words', 'array'], ['lang', 'string'], ['band', 'number'], ['isOlder', 'boolean'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['stepMs', 'number'], ['robot', 'object'], ['robotKey', 'string'], ['paletteRobot', 'object'], ['giftText', 'string'], ['hasGift', 'boolean'], ['cardsSeen', 'array'], ['plots', 'object'], ['payText', 'string'], ['hasPay', 'boolean']]),
     // ── What the child sees ──
     group('plRoot', 'The workshop', undefined, column({ rowGap: sp(12) }), ['plHead', 'plWs', 'plWin']),
     group('plHead', 'The head', 'plRoot', column({ rowGap: sp(2) }), ['plEyebrow', 'plTitle', 'plSub']),
@@ -1582,6 +1591,9 @@ const PLAY: CgComponent = {
     wire('plWinSum', 'hasLearn', 'plWin', 'hasLearn'),
     wire('plIn', 'giftText', 'plWin', 'lentText'),
     wire('plIn', 'hasGift', 'plWin', 'hasLent'),
+    // P108 IW-006 (lane E): the win's "+N 🐚" (Pages/Workshop's Win pay), onto the win card.
+    wire('plIn', 'payText', 'plWin', 'payText'),
+    wire('plIn', 'hasPay', 'plWin', 'hasPay'),
     wire('plWinSum', 'bloom', 'plOut', 'bloom'),
     wire('plWinSum', 'reward', 'plOut', 'reward'),
     wire('plWinSum', 'requestId', 'plOut', 'wonRequest'),
@@ -1655,7 +1667,8 @@ const ISLE_WORLD: CgComponent = {
     inputs('iwIn', [['requests', 'array'], ['words', 'array'], ['lang', 'string'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['band', 'number'], ['done', 'array'], ['plots', 'object'], ['robots', 'array'], ['pins', 'array'], ['model', 'object'], ['findText', 'string'], ['tapText', 'string'], ['pickId', 'string'], ['pick', 'signal']]),
     // ── What the child sees ──
     group('iwRoot', 'The island and its card', undefined, column({ rowGap: sp(12) }), ['iwIsle', 'iwCard']),
-    group('iwIsle', 'The island on the sea', 'iwRoot', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-isle' }, ['iwScroll', 'iwFind', 'iwTap']),
+    // P108 IW-006 (lane E): the island's "+N 🐚" line (iwPay) after a lap pays.
+    group('iwIsle', 'The island on the sea', 'iwRoot', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-isle' }, ['iwScroll', 'iwFind', 'iwTap', 'iwPay']),
     group('iwScroll', 'The island (a phone scrolls it sideways)', 'iwIsle', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-isle-scroll' }, ['iwGarden', 'iwGarden3d']),
     place('iwGarden', KIT_GARDEN, 'The island, flat', 'iwScroll', { stepMs: STEP_MS, label: 'The island' }),
     // IG-007's rule on the island too: the 3D node on EXACTLY the flat one's wires, one of the two mounted.
@@ -1704,6 +1717,13 @@ const ISLE_WORLD: CgComponent = {
     logic('iwRendNoGl', L('Renderer choice'), 'No 3D here: the flat island', { event: 'unsupported' }),
     logic('iwRendSlow', L('Renderer choice'), 'Too slow here: the flat island', { event: 'slow' }),
     logic('iwRendWrite', STORE_SET_NODE, 'Keep the choice on this computer', { storeName: STORE_NAME, key: 'renderer', merge: false }),
+    // ── P108 IW-006 (lane E): what the laps earn, and the live jobs kept in her save (a lap's end, wear reopening a job) ──
+    logic('iwKeep', L('Island keep'), 'The island’s jobs and shells, into her save'),
+    gate('iwKeepDue', 'A lap ended or a job reopened: write it'),
+    text('iwPay', 'What the robots earned', 'iwIsle', '', { ...T_STRONG, sizeMode: 'contentSize', cssClassName: 'bg-isle-pay', mounted: false }),
+    withStates('iwPayState', 'The shells line shown a moment', ['hidden', 'shown'], { shown: { type: 'boolean', by: { hidden: false, shown: true } } }),
+    gate('iwPayIs', 'Did a lap earn shells?'),
+    logic('iwPayWait', TIMER_NODE, 'The shells line stays a moment', { duration: 4000 }),
     outputs('iwOut', [['requestId', 'string'], ['open', 'signal'], ['model', 'object'], ['write', 'signal']])
   ],
   connections: [
@@ -1792,7 +1812,24 @@ const ISLE_WORLD: CgComponent = {
     wire('iwRendNoGl', 'renderer', 'iwRendWrite', 'value'),
     wire('iwRendSlow', 'renderer', 'iwRendWrite', 'value'),
     wire('iwRendNoGl', 'ran', 'iwRendWrite', 'set'),
-    wire('iwRendSlow', 'ran', 'iwRendWrite', 'set')
+    wire('iwRendSlow', 'ran', 'iwRendWrite', 'set'),
+    // ── P108 IW-006 (lane E): after every tick, Island keep reads it; a moment writes her save (as Bring home does) ──
+    wire('iwTick', 'state', 'iwKeep', 'state'),
+    wire('iwIn', 'model', 'iwKeep', 'model'),
+    ...(['robots', 'words', 'lang'] as const).map((f) => wire('iwIn', f, 'iwKeep', f)),
+    wire('iwTick', 'ran', 'iwKeep', 'go'),
+    wire('iwKeep', 'model', 'iwOut', 'model'),
+    wire('iwKeep', 'due', 'iwKeepDue', 'condition'),
+    wire('iwKeep', 'ran', 'iwKeepDue', 'eval'),
+    wire('iwKeepDue', 'ontrue', 'iwOut', 'write'),
+    // The "+N 🐚" line, after the meter the lap filled (principle 2: the meter first, the shells after, smaller), a moment.
+    wire('iwKeep', 'text', 'iwPay', 'text'),
+    wire('iwKeep', 'has', 'iwPayIs', 'condition'),
+    wire('iwKeep', 'ran', 'iwPayIs', 'eval'),
+    wire('iwPayIs', 'ontrue', 'iwPayState', 'to-shown'),
+    wire('iwPayIs', 'ontrue', 'iwPayWait', 'start'),
+    wire('iwPayWait', 'timerFinished', 'iwPayState', 'to-hidden'),
+    wire('iwPayState', 'shown', 'iwPay', 'mounted')
   ]
 };
 
@@ -2576,6 +2613,8 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       logic('wsRequests', C.requests, 'The requests'),
       logic('wsHints', C.hints, 'The hints'),
       logic('wsComplete', L('Complete request'), 'Done: the island, the tricks, the reward'),
+      // P108 IW-006 (lane E): what the win earns, read from her island BEFORE Complete request records it.
+      logic('wsPay', L('Win pay'), 'The shells this win earns'),
       // P106 IG-004: the program that won stays on the plot, the robot pinned to it (Complete request writes both).
       variable('wsProgVar', 'gardenProgram', 'The program that won'),
       // P106 IG-005: the robot this request needs (hers of that kind), and what a win lent and gave, for the card.
@@ -2617,7 +2656,17 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       wire('wsPlay', 'bloom', 'wsComplete', 'tricks'),
       wire('wsPlay', 'reward', 'wsComplete', 'reward'),
       wire('wsProgVar', 'value', 'wsComplete', 'program'),
-      wire('wsPlay', 'won', 'wsComplete', 'go'),
+      // P108 IW-006 (lane E): a win → Win pay (her island as it stood) → Complete request (the pay and the plot's done job).
+      wire('wsPlay', 'wonRequest', 'wsPay', 'requestId'),
+      wire('wsRequests', 'requests', 'wsPay', 'requests'),
+      ...(['plots', 'done', 'lang'] as const).map((f) => wire('wsFam', f, 'wsPay', f)),
+      wire('wsWords', 'words', 'wsPay', 'words'),
+      wire('wsPlay', 'won', 'wsPay', 'go'),
+      wire('wsPay', 'pay', 'wsComplete', 'pay'),
+      wire('wsPay', 'jobLive', 'wsComplete', 'jobLive'),
+      wire('wsPay', 'ran', 'wsComplete', 'go'),
+      wire('wsPay', 'text', 'wsPlay', 'payText'),
+      wire('wsPay', 'has', 'wsPlay', 'hasPay'),
       wire('wsComplete', 'model', 'wsStore', 'model'),
       wire('wsComplete', 'ran', 'wsStore', 'write'),
       wire('wsPlay', 'island', 'wsGoIsland', 'navigate'),

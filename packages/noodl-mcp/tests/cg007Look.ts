@@ -479,6 +479,11 @@ ${Object.entries(PAD_GO.emoji).map(([k, e]) => `.bg-key-go-${k}::after { content
 /* P108 IW-003 (lane M): a full meter on the pages wears the page's leaf — the mockup's green darkened for 4.5:1 under its
    white numbers (S3-R5; the kits paint the mockup green, 3.05:1, measured by the page drive once Mamie’s jobs filled their meters). */
 .gd-meter.gd-full, .gd3-meter.gd3-full { background-color: var(--leaf) !important; }
+/* P108 IW-006 (lane E): the shells a job earned — small, after the meter and the thanks (research principle 2): under the
+   win card's thanks a quiet line; on the island a chip at the island's foot for a moment after a lap pays. */
+.bg-win-pay { color: var(--ink-2) !important; }
+.bg-isle-pay { position: absolute !important; left: 20px !important; bottom: 20px !important; z-index: 7; background: var(--card); border-radius: 999px; padding: 4px 12px; box-shadow: var(--shadow-soft); pointer-events: none; font-size: 15px !important; }
+@media (max-width: 600px) { .bg-isle-pay { position: static !important; margin-top: 8px; align-self: flex-start; } }
 
 /* Reduced motion: the mockup's own rule. Every animation and transition stops; the tulip still reads by opacity and pose. */
 @media (prefers-reduced-motion: reduce) {

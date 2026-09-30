@@ -2043,7 +2043,12 @@ if (p) {
     for (var other in p.island.plots) if (other !== requestId && p.island.plots[other].robotId === robotId) p.island.plots[other].robotId = '';
     p.island.plots[requestId] = { program: program, robotId: robotId, wonAt: Number(Inputs.now) > 0 ? Number(Inputs.now) : Date.now() };
     pinned = robotId;
+    // P108 IW-006 (lane E): the plot starts done — the live job Win pay laid (its robot waits at home until wear reopens it).
+    var jobLive = liveOf(Inputs.jobLive);
+    if (jobLive) p.island.plots[requestId].live = jobLive;
   }
+  // P108 IW-006 (lane E): the win's shells (Win pay said how many: none for a job done and not worn since).
+  earnShells(p, Inputs.pay);
 }
 Outputs.model = model;
 Outputs.newlyDone = newlyDone;
