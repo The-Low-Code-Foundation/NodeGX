@@ -3,7 +3,7 @@
 **Scoped:** 2026-09-29, from a conversation with Richard about DHH's Rails World 2026 keynote
 ("pencils down"), Fireship's take on it, and what a world where agents write most code means for
 NodeGX.
-**Status: 🟡 IN PROGRESS — s1 (2026-09-30): NSP-000 the census ✅ ([CENSUS.md](CENSUS.md)); NSP-001 the package ✅ (`packages/nodegx-node-spec`, built under R1 (a) / R2 (a) — rulings still owed, §7). NSP-002 next.**
+**Status: 🟡 IN PROGRESS — s1 (2026-09-30): NSP-000 the census ✅ ([CENSUS.md](CENSUS.md)); NSP-001 the package ✅ (`packages/nodegx-node-spec`). R1 R2 R3 R5 ruled (a) 2026-09-30. NSP-002 next.**
 **Prefix: `NSP`** (node spec).
 
 > "I think the node level spec thing you talked about could be a great thing to already start and
@@ -140,11 +140,20 @@ specs find that the existing tests did not?* That is the go / no-go input for R4
 
 ## 7. Rulings
 
-Plain words, the choices, the cost. Recommendation first. **None ruled yet.** s1 built NSP-000 and NSP-001 under
-the recommendations for R1 and R2 (a package is a `git mv` away from (b); traces are JSON already); both still
-need Richard's word, and R3 / R5 are needed before NSP-004 / NSP-003.
+Plain words, the choices, the cost. Recommendation first.
 
-**R1 — Where do specs live?**
+**Ruled by Richard, 2026-09-30 (end of s1), asked as four plain questions:**
+
+| ruling | question asked | answer |
+|---|---|---|
+| **R1** | "Where node specs live — a new package nothing depends on, or a file beside each runtime node?" | **(a) the new package.** *"New package then"* |
+| **R2** | "Specs in TypeScript because they run; scenarios and traces in JSON so a non-TS target reads them?" | **(a).** *"Sure"* |
+| **R3** | "When a spec and the runtime disagree, who wins? Recommend the runtime; each disagreement a written row you rule on; a runtime fix ships alone." | **(a) the runtime wins.** *"Probably yeah"* |
+| **R5** | "200 generated sequences per node in CI, 10,000 locally on demand — or 1,000 in CI at ~5× the time?" | **(a) 200.** *"200 sounds more CPU friendly"* |
+
+R4 is still the pilot's go / no-go, asked **by** NSP-004 with its numbers.
+
+**R1 — Where do specs live?** ✅ ruled (a)
 - **(a) Recommended: a new package, `packages/nodegx-node-spec`, one file per node**, strict TS,
   no dependencies on the runtime or the editor. Everything that needs a spec imports it: the
   runtime tests, the exporter, the MCP server, the editor, and later a target in another language
@@ -156,12 +165,12 @@ need Richard's word, and R3 / R5 are needed before NSP-004 / NSP-003.
   editor would all import across the runtime package to reach them — the shape
   `nodegx-backend-contract`'s README warns "produces the next god-file".
 
-**R2 — What format are scenarios and traces in?**
+**R2 — What format are scenarios and traces in?** ✅ ruled (a)
 - **(a) Recommended: specs in TypeScript (they are executable reducers); scenarios and traces in
   JSON.** A future target in Rust, Swift or Kotlin reads the JSON without a TypeScript toolchain.
 - **(b) Everything in TypeScript.** Simpler now; every non-JS target later needs a converter.
 
-**R3 — When the spec and the runtime disagree, who wins?**
+**R3 — When the spec and the runtime disagree, who wins?** ✅ ruled (a)
 - **(a) Recommended: the runtime wins by default**, because it is what every shipped app does
   today. The spec is written from the runtime's code, citing lines, the way `CONTRACT.md` was.
   Each divergence becomes a row with three possible answers — *spec was wrong* (fix the spec),
@@ -175,7 +184,7 @@ need Richard's word, and R3 / R5 are needed before NSP-004 / NSP-003.
 **R4 — Go / no-go after the pilot** (NSP-004 asks it, with the numbers). Continue into the batches,
 narrow to T1 only, or stop and keep the infrastructure as a test tool.
 
-**R5 — How much generated testing runs in PR CI?**
+**R5 — How much generated testing runs in PR CI?** ✅ ruled (a)
 - **(a) Recommended: 200 generated sequences per node in PR CI, fixed seed rotation; 10,000 on
   demand locally** (`npm run spec-ledger -- --deep`). Keeps the CI minutes small and the shared
   box quiet.

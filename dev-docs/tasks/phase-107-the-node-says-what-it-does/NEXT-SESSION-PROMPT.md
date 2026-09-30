@@ -50,12 +50,10 @@ Built-but-undriven: 0 (nothing here is driven in the app until NSP-019).
 - `node_modules/@nodegx/node-spec` is a symlink s1 made by hand (no `npm install` — a Mac install drops other
   platforms' prebuilts). A fresh clone gets it from the lockfile rows s1 added.
 
-## Rulings owed by Richard (ask in plain words — README §7 has the choices and costs)
+## Rulings — all four ruled (a) by Richard at the end of s1 (README §7 has the words)
 
-- **R1** where specs live — s1 built (a), the new package. A move to (b) is a `git mv`.
-- **R2** formats — s1 built (a): specs TS, traces JSON (`Step[]` and `TraceEvent[]` are already JSON-shaped).
-- **R3** who wins a disagreement — needed before NSP-004 writes its first §6 row. Recommended (a): the runtime.
-- **R5** CI budget for generated sequences — needed before NSP-003. Recommended (a): 200 per node in CI.
+R1 new package · R2 TS specs, JSON traces · R3 the runtime wins, a divergence is a row · R5 200 sequences per
+node in CI, 10,000 locally. Only **R4** (go / no-go after the pilot) remains, asked by NSP-004.
 
 ## What s2 does
 
@@ -65,7 +63,7 @@ Built-but-undriven: 0 (nothing here is driven in the app until NSP-019).
    (§4), Counter's trace equal to the interpreter's. Where the runtime adapter lives (in `noodl-runtime/test`, or in
    the spec package with the runtime as a devDependency) is a small decision — the spec package must NOT depend on
    the runtime in `src/`.
-2. If R5 is ruled: **NSP-003** the runner — scenarios as JSON files, the in-house seeded generator (no `fast-check`),
+2. **NSP-003** the runner — scenarios as JSON files, the in-house seeded generator (no `fast-check`),
    shrinking, mutants per reducer branch following `nodegx-backend-contract/conformance/mutants.ts`.
 3. Do not touch `noodl-runtime/src/nodes/` (R3 (a)); a divergence is a row.
 
