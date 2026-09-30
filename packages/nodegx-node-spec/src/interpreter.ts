@@ -11,21 +11,25 @@
  *
  * Frame model: `set` and `signal` run their reducer at once and QUEUE what the reducer emitted;
  * `settle()` then records, in the format's canonical order, the values that changed since the
- * last settle, the queued signals, and the queued outcomes. A value is recorded when it changed
- * (compared canonically) — so a reducer that sets a state key to the value it already had
- * produces no `value` event, and the first settle records every output that is not `undefined`
- * (C8, the first update consolidates).
+ * last settle (sorted by port name), the queued signals, and the queued outcomes. A value is
+ * recorded when it changed (compared canonically, canonical.ts) — so a reducer that sets a state
+ * key to the value it already had produces no `value` event, and the first settle records every
+ * output that is not `undefined` (C8, the first update consolidates).
  *
  * `mount(spec, params)` creates the instance with the spec's initial state and each value input
  * at its declared default, then applies `params` as ordinary writes (recorded as `set` events)
- * in the spec's input declaration order — which is what the runtime does with a node's
- * parameters before its first frame. Mount does NOT settle; the scenario's first `settle` is where
- * the first frame's events land (NSP-002 §4, C8).
+ * in the order of the params object's keys — which is what the runtime does with a node's
+ * parameters before its first frame (`Object.keys(parameters)`, nodescope.ts), and what every
+ * adapter does (adapter.ts). s1 normalised this to declaration order for trace stability; NSP-002
+ * reversed it so the interpreter and the runtime are driven identically. Mount does NOT settle;
+ * the scenario's first `settle` is where the first frame's events land (NSP-002 §4, C8).
  *
  * Deterministic by construction: no clock, no randomness, no I/O — two runs of one sequence are
  * byte-identical (AC3).
  */
 
+import type { Step } from './adapter';
+import { canonicalise, canonicalKey } from './canonical';
 import { coerce } from './coerce';
 import type { AnyNodeSpec, Outcome, InputDecl } from './spec';
 import { isSignalInput } from './spec';
@@ -51,17 +55,13 @@ export class SpecError extends Error {
   }
 }
 
-/** Canonical comparison key for "did this value change" — NSP-002 owns the full canonicaliser. */
-export function valueKey(v: unknown): string {
-  if (typeof v === 'number') return Object.is(v, -0) ? 'n:-0' : `n:${v}`;
-  if (v instanceof Date) return `d:${v.toISOString()}`;
-  if (v === undefined) return 'u';
-  return `j:${JSON.stringify(v, (_k, x: unknown) => (x && typeof x === 'object' && !Array.isArray(x) ? sortKeys(x as Record<string, unknown>) : x))}`;
-}
-function sortKeys(o: Record<string, unknown>): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  for (const k of Object.keys(o).sort()) out[k] = o[k];
-  return out;
+/** Canonical comparison key for "did this value change" — the canonicaliser's (canonical.ts). */
+export const valueKey = canonicalKey;
+
+/** A `set` event, with `value` omitted when undefined was written (schema: `set` may omit it). */
+function setEvent(port: string, value: unknown): TraceEvent {
+  const c = canonicalise(value);
+  return c === undefined ? { t: 'set', port } : { t: 'set', port, value: c };
 }
 
 const deepFreeze = <T>(o: T): Readonly<T> => {
@@ -94,15 +94,12 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}): 
     lastSent: {},
     settles: 0
   };
-  // params, in declaration order (declared inputs first, then derived), so a trace is stable
-  // whatever order the caller's object literal had.
-  const order = [...Object.keys(spec.inputs), ...Object.keys(derivedInputs)];
-  for (const name of order) {
-    if (Object.prototype.hasOwnProperty.call(params, name)) set(inst, name, params[name]);
-  }
+  // params in the caller's key order — the adapter contract (adapter.ts), and the runtime's own
+  // order. Unknown params are refused before anything is applied.
   for (const name of Object.keys(params)) {
-    if (!order.includes(name)) throw new SpecError(`${spec.type}: param "${name}" is not an input`);
+    if (!(name in spec.inputs) && !(name in derivedInputs)) throw new SpecError(`${spec.type}: param "${name}" is not an input`);
   }
+  for (const name of Object.keys(params)) set(inst, name, params[name]);
   return inst;
 }
 
@@ -111,7 +108,7 @@ export function set(inst: Instance, port: string, value: unknown): void {
   const declared = spec.inputs[port];
   if (declared) {
     if (isSignalInput(declared)) throw new SpecError(`${spec.type}: "${port}" is a signal input — use signal()`);
-    inst.trace.push({ t: 'set', port, value });
+    inst.trace.push(setEvent(port, value));
     const coerced = coerce(declared.coerce, value, declared.default);
     inst.inputs = deepFreeze({ ...inst.inputs, [port]: coerced });
     const reducer = spec.on[port];
@@ -122,7 +119,7 @@ export function set(inst: Instance, port: string, value: unknown): void {
   }
   const derived = inst.derivedInputs[port];
   if (derived && !isSignalInput(derived)) {
-    inst.trace.push({ t: 'set', port, value });
+    inst.trace.push(setEvent(port, value));
     const coerced = coerce(derived.coerce, value, derived.default);
     inst.derivedValues = deepFreeze({ ...inst.derivedValues, [port]: coerced });
     if (!spec.derived) throw new SpecError(`${spec.type}: derived port without a derived reducer`);
@@ -177,11 +174,12 @@ function apply(inst: Instance, port: string, patchUnknown: unknown, outcomeRequi
 export function settle(inst: Instance): void {
   inst.trace.push({ t: 'settle' });
   inst.settles++;
-  for (const [name, decl] of Object.entries(inst.spec.outputs)) {
+  for (const name of Object.keys(inst.spec.outputs).sort()) {
+    const decl = inst.spec.outputs[name];
     if (decl.type === 'signal') continue;
-    const v = decl.from(inst.state as never);
+    const v = canonicalise(decl.from(inst.state as never));
     if (v === undefined) continue; // C3
-    const key = valueKey(v);
+    const key = JSON.stringify(v);
     if (inst.lastSent[name] === key) continue;
     inst.lastSent[name] = key;
     inst.trace.push({ t: 'value', port: name, value: v });
@@ -197,9 +195,6 @@ export function settle(inst: Instance): void {
 export function trace(inst: Instance): TraceEvent[] {
   return inst.trace.map((e) => ({ ...e }));
 }
-
-/** One scripted step of a scenario (NSP-003 reads these from JSON). */
-export type Step = { set: string; value: unknown } | { signal: string } | 'settle';
 
 /** Runs a scripted sequence from a fresh mount and returns its trace. */
 export function run(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[]): TraceEvent[] {

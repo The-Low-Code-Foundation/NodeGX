@@ -96,9 +96,12 @@ describe('Counter through the interpreter', () => {
     const a = JSON.stringify(run(Counter, { startValue: 5, limitsEnabled: true, limitsMax: 7 }, script));
     const b = JSON.stringify(run(Counter, { startValue: 5, limitsEnabled: true, limitsMax: 7 }, script));
     expect(a).toBe(b);
-    // and param order in the caller's literal does not change the trace
-    const c = JSON.stringify(run(Counter, { limitsMax: 7, limitsEnabled: true, startValue: 5 }, script));
-    expect(c).toBe(a);
+    // param order is the caller's (NSP-002: the adapter contract, and the runtime's own order —
+    // s1 normalised it to declaration order, NSP-002 reversed that): the `set` events follow the
+    // literal, and for Counter the observations are the same whichever order the params land in
+    const c = run(Counter, { limitsMax: 7, limitsEnabled: true, startValue: 5 }, script);
+    expect(c.slice(0, 3).map((e) => (e.t === 'set' ? e.port : e.t))).toEqual(['limitsMax', 'limitsEnabled', 'startValue']);
+    expect(c.filter((e) => e.t !== 'set')).toEqual(JSON.parse(a).filter((e: TraceEvent) => e.t !== 'set'));
   });
 
   test('a reducer cannot mutate state or inputs (they are frozen)', () => {

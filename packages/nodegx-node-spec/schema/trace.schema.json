@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nodegx.io/schemas/node-spec/trace/v1.json",
+  "title": "NodeGX node trace, format version 1",
+  "description": "What a node did, in one form whichever implementation did it (phase 107, NSP-002). An ordered stream of stimulus events (set, in, settle) and observation events (value, signal, outcome). Between two settles the observation events are grouped canonically: `value` events sorted by port name, then `signal` events in emission order, then `outcome` events in invocation order; a `value` is recorded only when it changed since the last settle. Every event MAY carry a `subject` (what it happened to): omitted in a one-node trace, a node id in a graph trace, and left open for app-level subjects such as `app:click`. `completed` is never recorded: every `outcome` event implies it. A `failure` outcome carries the implementation's error CODE in `error`, never its message. Values are in the canonical form src/canonical.ts defines (tagged `$num` / `$date` objects for what JSON cannot say, keys sorted).",
+  "type": "array",
+  "items": { "$ref": "#/definitions/event" },
+  "definitions": {
+    "port": { "type": "string", "minLength": 1 },
+    "subject": { "type": "string", "minLength": 1 },
+    "canonical": {
+      "description": "A canonical value: JSON, plus `{ \"$num\": tag }` for -0 / NaN / ±Infinity and `{ \"$date\": iso | null }` for a Date. Key order is not expressible in JSON Schema; the TypeScript validator checks it.",
+      "anyOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "type": "number" },
+        { "type": "string" },
+        { "type": "array", "items": { "$ref": "#/definitions/canonical" } },
+        {
+          "type": "object",
+          "required": ["$num"],
+          "additionalProperties": false,
+          "properties": { "$num": { "enum": ["-0", "NaN", "Infinity", "-Infinity"] } }
+        },
+        {
+          "type": "object",
+          "required": ["$date"],
+          "additionalProperties": false,
+          "properties": { "$date": { "type": ["string", "null"] } }
+        },
+        {
+          "type": "object",
+          "propertyNames": { "not": { "enum": ["$num", "$date"] } },
+          "additionalProperties": { "$ref": "#/definitions/canonical" }
+        }
+      ]
+    },
+    "event": {
+      "type": "object",
+      "required": ["t"],
+      "oneOf": [
+        {
+          "description": "stimulus: a value written to an input port. `value` absent means undefined was written.",
+          "properties": { "t": { "const": "set" }, "port": { "$ref": "#/definitions/port" }, "value": { "$ref": "#/definitions/canonical" }, "subject": { "$ref": "#/definitions/subject" } },
+          "required": ["t", "port"],
+          "additionalProperties": false
+        },
+        {
+          "description": "stimulus: a signal input pulsed.",
+          "properties": { "t": { "const": "in" }, "port": { "$ref": "#/definitions/port" }, "subject": { "$ref": "#/definitions/subject" } },
+          "required": ["t", "port"],
+          "additionalProperties": false
+        },
+        {
+          "description": "stimulus: the target drained its frame; the observations that follow belong to it.",
+          "properties": { "t": { "const": "settle" }, "subject": { "$ref": "#/definitions/subject" } },
+          "required": ["t"],
+          "additionalProperties": false
+        },
+        {
+          "description": "observation: an output value changed (never undefined — C3).",
+          "properties": { "t": { "const": "value" }, "port": { "$ref": "#/definitions/port" }, "value": { "$ref": "#/definitions/canonical" }, "subject": { "$ref": "#/definitions/subject" } },
+          "required": ["t", "port", "value"],
+          "additionalProperties": false
+        },
+        {
+          "description": "observation: a signal output pulsed.",
+          "properties": { "t": { "const": "signal" }, "port": { "$ref": "#/definitions/port" }, "subject": { "$ref": "#/definitions/subject" } },
+          "required": ["t", "port"],
+          "additionalProperties": false
+        },
+        {
+          "description": "observation: an outcome-reporting input finished (ERG-001) — `port` is the INPUT that was invoked.",
+          "properties": {
+            "t": { "const": "outcome" },
+            "port": { "$ref": "#/definitions/port" },
+            "value": { "enum": ["done", "unchanged", "failure"] },
+            "error": { "type": "string", "minLength": 1 },
+            "subject": { "$ref": "#/definitions/subject" }
+          },
+          "required": ["t", "port", "value"],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

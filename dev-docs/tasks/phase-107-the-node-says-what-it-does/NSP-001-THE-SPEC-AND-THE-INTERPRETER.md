@@ -103,7 +103,7 @@ interpreter's erased call sites, explained in `AnyNodeSpec`'s docblock).
 |---|---|
 | 1 types | `tsc -p packages/nodegx-node-spec --noEmit` exit 0. `tests/types.test.ts` holds **six** `@ts-expect-error` lines (undeclared `emit`, undeclared `set` key, missing outcome, a branch falling off the end under `noImplicitReturns`, a signal input with no reducer, an outcome returned by a non-outcome input). **Proven graded both ways**: removing the rule-1 directive → the suite fails on `TS2322 '"nope"' is not assignable to '"fired"'`; planting a directive over a correct line → fails on `TS2578 Unused '@ts-expect-error'`. That works because ts-jest here type-checks (no `isolatedModules`) — `jest.config.js` says so and why |
 | 2 Counter runs | `tests/counter.test.ts`: a 10-step script from `{ startValue: 5 }` produces the 24-event trace written out in full (seed pulse on the first settle; increase+decrease in one frame → no value event but both pulses and both outcomes; reset → done; reset at start → unchanged with Count Changed silent, FH-022) |
-| 3 determinism | two runs byte-identical (`JSON.stringify`); the caller's param literal order does not change the trace (mount applies params in declaration order) |
+| 3 determinism | two runs byte-identical (`JSON.stringify`); ~~the caller's param literal order does not change the trace (mount applies params in declaration order)~~ **reversed in s2 (NSP-002 §5 decision 5): params apply in the caller's key order, the runtime's own; the test now asserts the `set` order follows the literal and the observations are unchanged** |
 | 4 gates | `npx jest` **44/44**, `lerna run test --scope @nodegx/node-spec` exit 0; the `--scope` entry and `typecheck:node-spec` / `spec-census` / `spec-census:check` scripts added to the root `package.json` and the two lockfile rows added — **committed through the index from HEAD** (`git show HEAD:package.json` + edits, `hash-object` / `update-index --cacheinfo`) because the working-tree root `package.json` is a peer's stray Nightbook manifest since 2026-09-28 (see the NEXT-SESSION-PROMPT). `test:main`: see the handoff for the reading |
 
 **The format, as built (differs from §2.1's sketch in one place, for a measured reason):**
@@ -137,7 +137,8 @@ export const Counter = defineNode({
 - **Signal reducers are required, value reducers optional** (rule 4, enforced by the type of `on`); a value input
   without a reducer just stores.
 - **Frame model:** reducers run at once and *queue* emits/outcomes; `settle` records values that changed (canonical
-  compare; `undefined` never sent, C3) in output declaration order, then signals (C2, C4), then outcomes. That
+  compare; `undefined` never sent, C3) ~~in output declaration order~~ **sorted by port name (changed in NSP-002 §5
+  decision 4, s2)**, then signals (C2, C4), then outcomes. That
   grouping is a rule of the trace FORMAT so a runtime that pulses synchronously inside a setter still compares equal
   — NSP-002's runtime adapter must group the same way; written into `trace.ts` and NSP-002 §4.
 - **Dynamic ports** designed as `derived: { inputs(params) → decls, on(state, port, value, derivedValues) → patch }`
